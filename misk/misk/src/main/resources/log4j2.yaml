@@ -1,0 +1,17 @@
+Configuration:
+  appenders:
+    Console:
+      name: STDOUT
+      PatternLayout:
+        Pattern: "%d %highlight{%-5p} [%-25t] %c{1.}: %m%n"
+
+  Loggers:
+    logger:
+      -
+        name: misk
+        level: debug
+
+    Root:
+      level: info
+      AppenderRef:
+        ref: STDOUT
