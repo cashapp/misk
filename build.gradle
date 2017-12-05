@@ -1,0 +1,45 @@
+ext {
+  kotlinVersion = '1.1.51'
+
+  dep = [
+          kotlinStdLib: "org.jetbrains.kotlin:kotlin-stdlib-jre8:$kotlinVersion",
+          kotlinReflect: "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion",
+          kotlinGradlePlugin: "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion",
+          kotlinReflection: "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion",
+          junit: 'junit:junit:4.12',
+          truth: 'com.google.truth:truth:0.30',
+          guava: 'com.google.guava:guava:23.3-jre',
+          guice: 'com.google.inject:guice:4.1.0',
+          guiceMultibindings: 'com.google.inject.extensions:guice-multibindings:4.1.0',
+          guiceServlet: 'com.google.inject.extensions:guice-servlet:4.1.0',
+          jettyServer: 'org.eclipse.jetty:jetty-server:9.4.7.v20170914',
+          jettyServlet: 'org.eclipse.jetty:jetty-servlet:9.4.7.v20170914',
+          okHttp: 'com.squareup.okhttp3:okhttp:3.9.0',
+          moshi: 'com.squareup.moshi:moshi-kotlin:1.5.0',
+          loggingApi: 'io.github.microutils:kotlin-logging:1.4.6',
+          wireRuntime: 'com.squareup.wire:wire-runtime:2.2.0',
+          loggingImpl: 'org.apache.logging.log4j:log4j-slf4j-impl:2.9.1',
+          jacksonDatabind: 'com.fasterxml.jackson.core:jackson-databind:2.9.2',
+          jacksonDataformatYaml: 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.9.2',
+          jacksonKotlin: 'com.fasterxml.jackson.module:jackson-module-kotlin:2.9.2'
+  ]
+
+  isCi = "true".equals(System.getenv('CI'))
+}
+
+subprojects {
+  buildscript {
+    repositories {
+      mavenCentral()
+      jcenter()
+    }
+
+    dependencies {
+      classpath dep.kotlinGradlePlugin
+    }
+  }
+  repositories {
+    mavenCentral()
+    jcenter()
+  }
+}
