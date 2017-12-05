@@ -1,0 +1,39 @@
+apply plugin: 'kotlin'
+
+compileKotlin {
+  kotlinOptions {
+    jvmTarget = "1.8"
+  }
+}
+compileTestKotlin {
+  kotlinOptions {
+    jvmTarget = "1.8"
+  }
+}
+
+sourceSets {
+  main.java.srcDirs += 'src/main/kotlin/'
+  test.java.srcDirs += 'src/test/kotlin/'
+}
+
+dependencies {
+  compile dep.kotlinStdLib
+  compile dep.guava
+  compile dep.guice
+  compile dep.guiceMultibindings
+  compile dep.okHttp
+  compile dep.kotlinReflection
+  compile dep.moshi
+  compile dep.junit
+  compile dep.jettyServer
+  compile dep.jettyServlet
+  compile dep.wireRuntime
+  compile dep.loggingApi
+  compile dep.loggingImpl
+  compile dep.jacksonDatabind
+  compile dep.jacksonDataformatYaml
+  compile dep.jacksonKotlin
+
+  testCompile dep.junit
+  testCompile dep.truth
+}
