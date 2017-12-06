@@ -2,6 +2,8 @@ package com.squareup.exemplar
 
 import misk.MiskApplication
 import misk.MiskModule
+import misk.environment.Environment
+import misk.environment.EnvironmentModule
 import misk.hibernate.HibernateModule
 import misk.moshi.MoshiModule
 import misk.web.WebActionsModule
@@ -17,6 +19,7 @@ fun main(args: Array<String>) {
       HibernateModule(),
       ExemplarModule(),
       ExemplarConfigModule(),
-      MoshiModule()
+      MoshiModule(),
+      EnvironmentModule(Environment.DEVELOPMENT)
   ).startAndAwaitStopped()
 }
