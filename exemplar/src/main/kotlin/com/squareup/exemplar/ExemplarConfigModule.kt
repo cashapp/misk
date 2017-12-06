@@ -5,6 +5,6 @@ import misk.config.ConfigModule
 
 class ExemplarConfigModule : AbstractModule() {
   override fun configure() {
-    install(ConfigModule.create<ExemplarConfig>("exemplar.yaml"))
+    install(ConfigModule.create<ExemplarConfig>("exemplar"))
   }
 }
