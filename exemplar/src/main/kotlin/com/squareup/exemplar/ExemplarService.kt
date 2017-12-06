@@ -20,6 +20,6 @@ fun main(args: Array<String>) {
       ExemplarModule(),
       ExemplarConfigModule(),
       MoshiModule(),
-      EnvironmentModule(Environment.DEVELOPMENT)
+      EnvironmentModule.fromEnvironmentVariable()
   ).startAndAwaitStopped()
 }
