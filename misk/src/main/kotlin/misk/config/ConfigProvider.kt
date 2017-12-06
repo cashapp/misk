@@ -6,9 +6,9 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.google.common.collect.Lists
 import misk.environment.Environment
-import java.io.File
+import java.io.BufferedReader
+import java.io.InputStreamReader
 import java.net.URL
-import java.nio.file.Files
 import javax.inject.Inject
 import javax.inject.Provider
 
@@ -24,7 +24,7 @@ internal class ConfigProvider<T : Config>(
 
         var jsonNode: JsonNode? = null
         for (url in getConfigFileUrls()) {
-            Files.newBufferedReader(File(url.file).toPath()).use {
+            open(url).use {
                 val objectReader = if (jsonNode == null) {
                     mapper.readerFor(JsonNode::class.java)
                 } else {
@@ -55,6 +55,10 @@ internal class ConfigProvider<T : Config>(
         return postfixes.mapNotNull {
             configClass.classLoader.getResource("$appName-$it.yaml")
         }
+    }
+
+    private fun open(url: URL): BufferedReader {
+        return BufferedReader(InputStreamReader(url.openStream()))
     }
 }
 
