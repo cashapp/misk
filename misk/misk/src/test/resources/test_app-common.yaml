@@ -1,5 +1,3 @@
-app_name: "test-app"
-
 web_config:
   port: 1234
   idle_timeout: 30000
@@ -8,4 +6,5 @@ consumer_a:
   max_items: 1
 
 consumer_b:
+  min_items: 1
   max_items: 2
