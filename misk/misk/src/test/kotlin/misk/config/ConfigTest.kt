@@ -1,7 +1,6 @@
 package misk.config
 
 import com.google.common.truth.Truth.assertThat
-import misk.environment.Environment
 import misk.environment.Environment.TESTING
 import misk.environment.EnvironmentModule
 import misk.testing.MiskTestRule
