@@ -5,6 +5,6 @@ import misk.config.ConfigModule;
 
 public class ExemplarJavaConfigModule extends AbstractModule {
   @Override protected void configure() {
-    install(new ConfigModule(ExemplarJavaConfig.class, "exemplar-common.yaml"));
+    install(new ConfigModule(ExemplarJavaConfig.class, "exemplar"));
   }
 }

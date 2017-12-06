@@ -2,6 +2,7 @@ package com.squareup.exemplar;
 
 import misk.MiskApplication;
 import misk.MiskModule;
+import misk.environment.EnvironmentModule;
 import misk.hibernate.HibernateModule;
 import misk.moshi.MoshiModule;
 import misk.web.WebActionsModule;
@@ -19,7 +20,8 @@ public class ExemplarJavaApp {
 
         new ExemplarJavaModule(),
         new ExemplarJavaConfigModule(),
-        new MoshiModule()
+        new MoshiModule(),
+        EnvironmentModule.fromEnvironmentVariable()
     ).startAndAwaitStopped();
   }
 }
