@@ -1,5 +1,5 @@
 ext {
-  kotlinVersion = '1.1.51'
+  kotlinVersion = '1.2.0'
 
   dep = [
           kotlinStdLib: "org.jetbrains.kotlin:kotlin-stdlib-jre8:$kotlinVersion",
