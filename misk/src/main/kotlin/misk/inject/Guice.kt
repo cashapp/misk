@@ -13,7 +13,7 @@ import javax.inject.Singleton
 internal inline fun <reified T : Any> LinkedBindingBuilder<in T>.to() = to(T::class.java)
 
 @Suppress("UNCHECKED_CAST")
-internal inline fun <reified T : Any> Binder.newMultibinder(): LinkedBindingBuilder<T> {
+internal inline fun <reified T : Any> Binder.addMultibinderBinding(): LinkedBindingBuilder<T> {
     val typeLiteral = TypeLiteral.get(Types.newParameterizedType(List::class.java, Types.subtypeOf(T::class.java))) as TypeLiteral<List<T>>
     bind(typeLiteral).toProvider(TypeLiteral.get(Types.newParameterizedType(ListProvider::class.java, T::class.java)) as TypeLiteral<Provider<List<T>>>)
 
