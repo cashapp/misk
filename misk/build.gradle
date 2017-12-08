@@ -33,7 +33,10 @@ dependencies {
   compile dep.jacksonDatabind
   compile dep.jacksonDataformatYaml
   compile dep.jacksonKotlin
+  compile dep.metricsCore
+  compile dep.metricsParent
 
   testCompile dep.junit
   testCompile dep.truth
 }
+
