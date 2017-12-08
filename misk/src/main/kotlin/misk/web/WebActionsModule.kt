@@ -11,6 +11,7 @@ import misk.web.extractors.PathPatternParameterExtractor
 import misk.web.interceptors.BoxResponseInterceptorFactory
 import misk.web.interceptors.InternalErrorInterceptorFactory
 import misk.web.interceptors.JsonInterceptorFactory
+import misk.web.interceptors.MetricsInterceptor
 import misk.web.interceptors.PlaintextInterceptorFactory
 import misk.web.interceptors.RequestLoggingInterceptor
 
@@ -20,6 +21,7 @@ class WebActionsModule : AbstractModule() {
         binder().newMultibinder<Interceptor.Factory>().to<RequestLoggingInterceptor.Factory>()
         binder().newMultibinder<Interceptor.Factory>().to<JsonInterceptorFactory>()
         binder().newMultibinder<Interceptor.Factory>().toInstance(PlaintextInterceptorFactory)
+        binder().newMultibinder<Interceptor.Factory>().to<MetricsInterceptor.Factory>()
         binder().newMultibinder<Interceptor.Factory>().to<BoxResponseInterceptorFactory>()
         binder().newMultibinder<ParameterExtractor.Factory>().toInstance(PathPatternParameterExtractor)
         binder().newMultibinder<ParameterExtractor.Factory>().to<JsonBodyParameterExtractorFactory>()

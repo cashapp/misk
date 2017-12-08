@@ -1,8 +1,8 @@
 package misk.config
 
-import com.google.inject.BindingAnnotation
+import javax.inject.Qualifier
 
-@BindingAnnotation
+@Qualifier
 @Target(
         AnnotationTarget.FIELD,
         AnnotationTarget.PROPERTY,
