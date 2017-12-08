@@ -15,6 +15,7 @@ dependencies {
   compile dep.kotlinStdLib
   compile dep.guava
   compile dep.guice
+  compile dep.loggingImpl
 
   compile project(':misk')
 

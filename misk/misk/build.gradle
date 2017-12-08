@@ -29,7 +29,6 @@ dependencies {
   compile dep.jettyServlet
   compile dep.wireRuntime
   compile dep.loggingApi
-  compile dep.loggingImpl
   compile dep.jacksonDatabind
   compile dep.jacksonDataformatYaml
   compile dep.jacksonKotlin
@@ -38,5 +37,6 @@ dependencies {
 
   testCompile dep.junit
   testCompile dep.truth
+  testCompile dep.loggingImpl
 }
 
