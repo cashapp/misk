@@ -2,7 +2,7 @@ package misk.web
 
 import com.google.inject.AbstractModule
 import misk.Interceptor
-import misk.inject.newMultibinder
+import misk.inject.addMultibinderBinding
 import misk.inject.to
 import misk.web.extractors.HeadersParameterExtractorFactory
 import misk.web.extractors.JsonBodyParameterExtractorFactory
@@ -17,14 +17,14 @@ import misk.web.interceptors.RequestLoggingInterceptor
 
 class WebActionsModule : AbstractModule() {
     override fun configure() {
-        binder().newMultibinder<Interceptor.Factory>().to<InternalErrorInterceptorFactory>()
-        binder().newMultibinder<Interceptor.Factory>().to<RequestLoggingInterceptor.Factory>()
-        binder().newMultibinder<Interceptor.Factory>().to<JsonInterceptorFactory>()
-        binder().newMultibinder<Interceptor.Factory>().toInstance(PlaintextInterceptorFactory)
-        binder().newMultibinder<Interceptor.Factory>().to<MetricsInterceptor.Factory>()
-        binder().newMultibinder<Interceptor.Factory>().to<BoxResponseInterceptorFactory>()
-        binder().newMultibinder<ParameterExtractor.Factory>().toInstance(PathPatternParameterExtractor)
-        binder().newMultibinder<ParameterExtractor.Factory>().to<JsonBodyParameterExtractorFactory>()
-        binder().newMultibinder<ParameterExtractor.Factory>().toInstance(HeadersParameterExtractorFactory)
+        binder().addMultibinderBinding<Interceptor.Factory>().to<InternalErrorInterceptorFactory>()
+        binder().addMultibinderBinding<Interceptor.Factory>().to<RequestLoggingInterceptor.Factory>()
+        binder().addMultibinderBinding<Interceptor.Factory>().to<JsonInterceptorFactory>()
+        binder().addMultibinderBinding<Interceptor.Factory>().toInstance(PlaintextInterceptorFactory)
+        binder().addMultibinderBinding<Interceptor.Factory>().to<MetricsInterceptor.Factory>()
+        binder().addMultibinderBinding<Interceptor.Factory>().to<BoxResponseInterceptorFactory>()
+        binder().addMultibinderBinding<ParameterExtractor.Factory>().toInstance(PathPatternParameterExtractor)
+        binder().addMultibinderBinding<ParameterExtractor.Factory>().to<JsonBodyParameterExtractorFactory>()
+        binder().addMultibinderBinding<ParameterExtractor.Factory>().toInstance(HeadersParameterExtractorFactory)
     }
 }
