@@ -2,7 +2,9 @@ package com.squareup.exemplar
 
 import com.google.inject.AbstractModule
 import misk.web.WebActionModule
+import misk.web.actions.ReadinessCheckAction
 import misk.web.actions.InternalErrorAction
+import misk.web.actions.LivenessCheckAction
 import misk.web.actions.NotFoundAction
 
 class ExemplarModule : AbstractModule() {
@@ -10,6 +12,8 @@ class ExemplarModule : AbstractModule() {
         install(WebActionModule.create<HelloWebAction>())
         install(WebActionModule.create<HelloWebPostAction>())
         install(WebActionModule.create<InternalErrorAction>())
+        install(WebActionModule.create<ReadinessCheckAction>())
+        install(WebActionModule.create<LivenessCheckAction>())
         install(WebActionModule.create<NotFoundAction>())
     }
 }
