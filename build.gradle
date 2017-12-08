@@ -21,7 +21,9 @@ ext {
           loggingImpl: 'org.apache.logging.log4j:log4j-slf4j-impl:2.9.1',
           jacksonDatabind: 'com.fasterxml.jackson.core:jackson-databind:2.9.2',
           jacksonDataformatYaml: 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.9.2',
-          jacksonKotlin: 'com.fasterxml.jackson.module:jackson-module-kotlin:2.9.2'
+          jacksonKotlin: 'com.fasterxml.jackson.module:jackson-module-kotlin:2.9.2',
+          metricsParent: 'io.dropwizard.metrics:metrics-parent:3.1.0',
+          metricsCore: 'io.dropwizard.metrics:metrics-core:3.1.0',
   ]
 
   isCi = "true".equals(System.getenv('CI'))
