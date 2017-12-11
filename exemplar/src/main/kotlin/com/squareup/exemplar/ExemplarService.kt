@@ -2,7 +2,6 @@ package com.squareup.exemplar
 
 import misk.MiskApplication
 import misk.MiskModule
-import misk.environment.Environment
 import misk.environment.EnvironmentModule
 import misk.hibernate.HibernateModule
 import misk.moshi.MoshiModule
