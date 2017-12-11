@@ -9,7 +9,7 @@ import javax.inject.Singleton
 /** Retrieves instance metadata for applications running on AWS */
 class AwsInstanceMetadataModule : AbstractModule() {
   companion object {
-    @JvmStatic internal val AWS_INSTANCE_METADATA_URL = "http://169.254.169.254/latest/meta-data"
+    private val AWS_INSTANCE_METADATA_URL = "http://169.254.169.254/latest/meta-data"
   }
 
   override fun configure() {}

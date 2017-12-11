@@ -9,7 +9,7 @@ import javax.inject.Singleton
 /** Retrieves instance metadata for applications running on GCP */
 class GcpInstanceMetadataModule : AbstractModule() {
   companion object {
-    @JvmStatic internal val GCP_INSTANCE_METADATA_URL = "http://metadata.google.internal/computeMetadata/v1"
+    private val GCP_INSTANCE_METADATA_URL = "http://metadata.google.internal/computeMetadata/v1"
   }
 
   override fun configure() {}
