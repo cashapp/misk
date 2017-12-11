@@ -8,7 +8,11 @@ import java.util.regex.Matcher
 import kotlin.reflect.KParameter
 import kotlin.reflect.full.findAnnotation
 
-val HeadersParameterExtractorFactory = object : ParameterExtractor.Factory {
+/**
+ * Creates a [ParameterExtractor] that returns [Request.headers] from a [Request] if the parameter
+ * is annotated with [RequestHeaders].
+ */
+object HeadersParameterExtractorFactory : ParameterExtractor.Factory {
     private val extractor = object : ParameterExtractor {
         override fun extract(webAction: WebAction, request: Request, pathMatcher: Matcher): Any? {
             return request.headers
