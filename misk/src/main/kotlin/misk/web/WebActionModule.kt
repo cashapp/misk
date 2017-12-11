@@ -3,11 +3,12 @@ package misk.web
 import com.google.inject.AbstractModule
 import com.google.inject.TypeLiteral
 import com.google.inject.multibindings.Multibinder
+import com.squareup.moshi.Types
 import misk.Interceptor
+import misk.MiskDefault
 import misk.asAction
 import misk.web.actions.WebAction
 import misk.web.extractors.ParameterExtractor
-import com.squareup.moshi.Types
 import org.eclipse.jetty.http.HttpMethod
 import javax.inject.Inject
 import javax.inject.Provider
@@ -26,7 +27,11 @@ class WebActionModule<A : WebAction> private constructor(
         val provider = getProvider(webActionClass.java)
         @Suppress("UNCHECKED_CAST")
         val binder: Multibinder<BoundAction<A, *>> = Multibinder.newSetBinder(
-                binder(), TypeLiteral.get(Types.newParameterizedType(BoundAction::class.java, Types.subtypeOf(WebAction::class.java), Types.subtypeOf(Object::class.java)))) as Multibinder<BoundAction<A, *>>
+                binder(),
+                TypeLiteral.get(Types.newParameterizedType(BoundAction::class.java,
+                        Types.subtypeOf(WebAction::class.java),
+                        Types.subtypeOf(Object::class.java)))
+        ) as Multibinder<BoundAction<A, *>>
         binder.addBinding().toProvider(BoundActionProvider(provider, member, pathPattern, httpMethod))
     }
 
@@ -67,14 +72,17 @@ internal class BoundActionProvider<A : WebAction, R>(
     val httpMethod: HttpMethod
 ) : Provider<BoundAction<A, *>> {
 
-    @Inject lateinit var interceptorFactories: List<Interceptor.Factory>
+    @Inject lateinit var userProvidedInterceptorFactories: List<Interceptor.Factory>
+    @Inject lateinit var miskInterceptorFactories: @MiskDefault List<Interceptor.Factory>
     @Inject lateinit var parameterExtractorFactories: List<ParameterExtractor.Factory>
 
     override fun get(): BoundAction<A, *> {
         val action = function.asAction()
 
         val interceptors = ArrayList<Interceptor>()
-        interceptorFactories.mapNotNullTo(interceptors) { it.create(action) }
+        // Ensure that default interceptors are called before any user provided interceptors
+        miskInterceptorFactories.mapNotNullTo(interceptors) { it.create(action) }
+        userProvidedInterceptorFactories.mapNotNullTo(interceptors) { it.create(action) }
 
         return BoundAction(provider, interceptors, parameterExtractorFactories, function,
                 PathPattern.parse(pathPattern), httpMethod)
