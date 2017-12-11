@@ -7,7 +7,7 @@ import misk.inject.to
 import misk.web.extractors.HeadersParameterExtractorFactory
 import misk.web.extractors.JsonBodyParameterExtractorFactory
 import misk.web.extractors.ParameterExtractor
-import misk.web.extractors.PathPatternParameterExtractor
+import misk.web.extractors.PathPatternParameterExtractorFactory
 import misk.web.interceptors.BoxResponseInterceptorFactory
 import misk.web.interceptors.InternalErrorInterceptorFactory
 import misk.web.interceptors.JsonInterceptorFactory
@@ -23,7 +23,7 @@ class WebActionsModule : AbstractModule() {
         binder().addMultibinderBinding<Interceptor.Factory>().toInstance(PlaintextInterceptorFactory)
         binder().addMultibinderBinding<Interceptor.Factory>().to<MetricsInterceptor.Factory>()
         binder().addMultibinderBinding<Interceptor.Factory>().to<BoxResponseInterceptorFactory>()
-        binder().addMultibinderBinding<ParameterExtractor.Factory>().toInstance(PathPatternParameterExtractor)
+        binder().addMultibinderBinding<ParameterExtractor.Factory>().toInstance(PathPatternParameterExtractorFactory)
         binder().addMultibinderBinding<ParameterExtractor.Factory>().to<JsonBodyParameterExtractorFactory>()
         binder().addMultibinderBinding<ParameterExtractor.Factory>().toInstance(HeadersParameterExtractorFactory)
     }
