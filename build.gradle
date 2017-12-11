@@ -24,6 +24,8 @@ ext {
           jacksonKotlin: 'com.fasterxml.jackson.module:jackson-module-kotlin:2.9.2',
           metricsParent: 'io.dropwizard.metrics:metrics-parent:3.1.0',
           metricsCore: 'io.dropwizard.metrics:metrics-core:3.1.0',
+          metricsGraphite: 'io.dropwizard.metrics:metrics-graphite:3.1.0',
+          metricsStackDriver: 'com.google.apis:google-api-services-monitoring:v3-rev425-1.23.0',
   ]
 
   isCi = "true".equals(System.getenv('CI'))
