@@ -34,6 +34,8 @@ dependencies {
   compile dep.jacksonKotlin
   compile dep.metricsCore
   compile dep.metricsParent
+  compile dep.metricsGraphite
+  compile dep.metricsStackDriver
 
   testCompile dep.junit
   testCompile dep.truth
