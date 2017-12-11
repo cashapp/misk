@@ -11,12 +11,11 @@ import misk.logging.getLogger
 import javax.inject.Inject
 
 internal class StackDriverBatchedSender @Inject internal constructor(
-        val monitoring: Monitoring,
-        val config: StackDriverBackendConfig
+    val monitoring: Monitoring,
+    val config: StackDriverBackendConfig
 ) : StackDriverSender {
     companion object {
-        @JvmStatic
-        val log = getLogger<StackDriverSender>()
+        val logger = getLogger<StackDriverSender>()
     }
 
     val timeSeriesApi = monitoring.projects().timeSeries()
@@ -35,14 +34,14 @@ internal class StackDriverBatchedSender @Inject internal constructor(
             val request = CreateTimeSeriesRequest().setTimeSeries(timeSeries)
             val create = timeSeriesApi.create(config.project_id, request).execute()
             if (!create.isEmpty()) {
-                log.warn(create.toPrettyString())
+                logger.warn(create.toPrettyString())
             }
         }
     }
 
     class ResponseCallback : JsonBatchCallback<Empty>() {
         override fun onFailure(e: GoogleJsonError?, responseHeaders: HttpHeaders?) {
-            log.warn("failed to send timeseries to stack driver ${e?.toPrettyString()}")
+            logger.warn("failed to send timeseries to stack driver ${e?.toPrettyString()}")
         }
 
         override fun onSuccess(t: Empty?, responseHeaders: HttpHeaders?) {}
