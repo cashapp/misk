@@ -24,10 +24,8 @@ class StackDriverBackendModule : KAbstractModule() {
   @Provides
   @Singleton
   fun monitoring(@AppName appName: String, config: StackDriverBackendConfig): Monitoring =
-    Monitoring.Builder(GoogleNetHttpTransport.newTrustedTransport(), JacksonFactory(), null)
-        .setApplicationName(appName)
-        .setServicePath(config.service_path)
-        .setRootUrl(config.root_url)
-        .build()
+      Monitoring.Builder(GoogleNetHttpTransport.newTrustedTransport(), JacksonFactory(), null)
+          .setApplicationName(appName)
+          .build()
 
 }

@@ -1,15 +1,16 @@
-package misk.environment
+package misk.cloud.aws.environment
 
 import com.google.inject.AbstractModule
 import com.google.inject.Provides
+import misk.environment.InstanceMetadata
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import javax.inject.Singleton
 
-/** Retrieves instance metadata for applications running on GCP */
-class GcpInstanceMetadataModule : AbstractModule() {
+/** Retrieves instance metadata for applications running on AWS */
+class AwsInstanceMetadataModule : AbstractModule() {
   companion object {
-    private val GCP_INSTANCE_METADATA_URL = "http://metadata.google.internal/computeMetadata/v1"
+    private val AWS_INSTANCE_METADATA_URL = "http://169.254.169.254/latest/meta-data"
   }
 
   override fun configure() {}
@@ -17,12 +18,8 @@ class GcpInstanceMetadataModule : AbstractModule() {
   @Provides
   @Singleton
   fun providesInstanceMetadata(): InstanceMetadata {
-    var instanceName = get("name")
-    if (instanceName.isBlank()) {
-      instanceName = get("id")
-    }
-
-    val zone = get("zone")
+    val instanceName = get("instance-id")
+    val zone = get("placement/availability-zone")
     return InstanceMetadata(instanceName, zone)
   }
 
@@ -30,7 +27,7 @@ class GcpInstanceMetadataModule : AbstractModule() {
     val httpClient = OkHttpClient()
     val request = Request.Builder()
         .get()
-        .url("${GCP_INSTANCE_METADATA_URL}/$metadataCategory")
+        .url("$AWS_INSTANCE_METADATA_URL/$metadataCategory")
         .build()
 
     val response = httpClient.newCall(request).execute().body()
