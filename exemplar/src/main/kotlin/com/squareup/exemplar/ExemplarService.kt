@@ -4,21 +4,17 @@ import misk.MiskApplication
 import misk.MiskModule
 import misk.environment.EnvironmentModule
 import misk.hibernate.HibernateModule
-import misk.moshi.MoshiModule
-import misk.web.WebActionsModule
-import misk.web.jetty.JettyModule
+import misk.web.WebModule
 
 fun main(args: Array<String>) {
     MiskApplication(
             MiskModule(),
-            WebActionsModule(),
 
-            JettyModule(),
+            WebModule(),
 
             HibernateModule(),
             ExemplarModule(),
             ExemplarConfigModule(),
-            MoshiModule(),
             EnvironmentModule.fromEnvironmentVariable()
     ).startAndAwaitStopped()
 }

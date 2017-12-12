@@ -5,16 +5,14 @@ import misk.MiskModule;
 import misk.environment.EnvironmentModule;
 import misk.hibernate.HibernateModule;
 import misk.moshi.MoshiModule;
-import misk.web.WebActionsModule;
-import misk.web.jetty.JettyModule;
+import misk.web.WebModule;
 
 public class ExemplarJavaApp {
   public static void main(String[] args) {
     new MiskApplication(
         new MiskModule(),
-        new WebActionsModule(),
 
-        new JettyModule(),
+        new WebModule(),
 
         new HibernateModule(),
 

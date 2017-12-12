@@ -12,12 +12,19 @@ import javax.inject.Singleton
 
 internal inline fun <reified T : Any> LinkedBindingBuilder<in T>.to() = to(T::class.java)
 
+internal inline fun <reified T : Any, reified A : Annotation> Binder.addMultibinderBindingWithAnnotation() = addMultibinderBinding<T>(A::class.java)
+
 @Suppress("UNCHECKED_CAST")
-internal inline fun <reified T : Any> Binder.addMultibinderBinding(): LinkedBindingBuilder<T> {
+internal inline fun <reified T : Any> Binder.addMultibinderBinding(
+    annotation: Class<out Annotation>? = null
+): LinkedBindingBuilder<T> {
     val typeLiteral = TypeLiteral.get(Types.newParameterizedType(List::class.java, Types.subtypeOf(T::class.java))) as TypeLiteral<List<T>>
     bind(typeLiteral).toProvider(TypeLiteral.get(Types.newParameterizedType(ListProvider::class.java, T::class.java)) as TypeLiteral<Provider<List<T>>>)
 
-    return Multibinder.newSetBinder(this, T::class.java).addBinding()
+    return when (annotation) {
+        null -> Multibinder.newSetBinder(this, T::class.java).addBinding()
+        else -> Multibinder.newSetBinder(this, T::class.java, annotation).addBinding()
+    }
 }
 
 internal fun ScopedBindingBuilder.asSingleton() {
