@@ -1,10 +1,10 @@
 package misk.environment
 
-import com.google.inject.AbstractModule
+import misk.inject.KAbstractModule
 
 /** Provides a hard-coded set of instance metadata */
-class StaticInstanceMetadataModule(val metadata: InstanceMetadata) : AbstractModule() {
+class StaticInstanceMetadataModule(val metadata: InstanceMetadata) : KAbstractModule() {
   override fun configure() {
-    bind(InstanceMetadata::class.java).toInstance(metadata)
+    bind<InstanceMetadata>().toInstance(metadata)
   }
 }

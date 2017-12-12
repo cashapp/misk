@@ -18,7 +18,6 @@ public class ExemplarJavaApp {
 
         new ExemplarJavaModule(),
         new ExemplarJavaConfigModule(),
-        new MoshiModule(),
         EnvironmentModule.fromEnvironmentVariable()
     ).startAndAwaitStopped();
   }

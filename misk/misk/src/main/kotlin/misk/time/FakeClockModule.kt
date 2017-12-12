@@ -1,11 +1,11 @@
 package misk.time
 
-import com.google.inject.AbstractModule
+import misk.inject.KAbstractModule
 import java.time.Clock
 
-class FakeClockModule : AbstractModule() {
+class FakeClockModule : KAbstractModule() {
   override fun configure() {
-    bind(Clock::class.java).to(FakeClock::class.java)
-    bind(FakeClock::class.java).asEagerSingleton()
+    bind<Clock>().to<FakeClock>()
+    bind<FakeClock>().asEagerSingleton()
   }
 }

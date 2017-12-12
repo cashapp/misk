@@ -1,10 +1,10 @@
 package misk.time
 
-import com.google.inject.AbstractModule
+import misk.inject.KAbstractModule
 import java.time.Clock
 
-class ClockModule : AbstractModule() {
+class ClockModule : KAbstractModule() {
   override fun configure() {
-    bind(Clock::class.java).toInstance(Clock.systemUTC())
+    bind<Clock>().toInstance(Clock.systemUTC())
   }
 }
