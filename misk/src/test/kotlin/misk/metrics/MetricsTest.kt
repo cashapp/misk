@@ -2,6 +2,7 @@ package misk.metrics
 
 import com.google.common.truth.Truth.assertThat
 import com.google.inject.Guice
+import misk.inject.getInstance
 import org.junit.Test
 import java.time.Duration
 import java.util.concurrent.TimeUnit
@@ -73,7 +74,6 @@ class MetricsTest {
     }
 
     fun buildMetrics(): Metrics {
-        val injector = Guice.createInjector(MetricsModule())
-        return injector.getInstance(Metrics::class.java)
+        return Guice.createInjector(MetricsModule()).getInstance()
     }
 }

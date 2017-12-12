@@ -1,10 +1,10 @@
 package misk.config
 
-import com.google.inject.AbstractModule
 import com.google.inject.TypeLiteral
 import com.google.inject.name.Names
+import misk.inject.KAbstractModule
 import misk.inject.asSingleton
-import misk.web.typeLiteral
+import misk.inject.typeLiteral
 import javax.inject.Provider
 import kotlin.reflect.KProperty1
 import kotlin.reflect.full.createType
@@ -15,10 +15,10 @@ import kotlin.reflect.jvm.javaType
 class ConfigModule(
     private val configClass: Class<out Config>,
     private val appName: String
-) : AbstractModule() {
+) : KAbstractModule() {
     @Suppress("UNCHECKED_CAST")
     override fun configure() {
-        bind(String::class.java).annotatedWith(AppName::class.java).toInstance(appName)
+        bind<String>().annotatedWith<AppName>().toInstance(appName)
         bind(configClass).toProvider(ConfigProvider(configClass, appName)).asSingleton()
         bindConfigClassRecursively(configClass)
     }
@@ -29,7 +29,7 @@ class ConfigModule(
             if (!property.returnType.isSubtypeOf(Config::class.createType())) {
                 continue
             }
-            bindConfigClassRecursively(property.returnType.typeLiteral.rawType as Class<out Config>)
+            bindConfigClassRecursively(property.returnType.typeLiteral().rawType as Class<out Config>)
             val subConfigProvider = SubConfigProvider(getProvider(configClass), property as KProperty1<Config, Any?>)
             val subConfigTypeLiteral = TypeLiteral.get(property.returnType.javaType) as TypeLiteral<Any?>
 

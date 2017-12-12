@@ -3,13 +3,12 @@ package misk
 import com.google.common.util.concurrent.ServiceManager
 import com.google.inject.Guice
 import com.google.inject.Module
+import misk.inject.getInstance
 
 class MiskApplication(private vararg val modules: Module) {
     fun startAndAwaitStopped() {
-        val injector = Guice.createInjector(
-               modules.asList()
-        )
-        val serviceManager = injector.getInstance(ServiceManager::class.java)
+        val injector = Guice.createInjector(*modules)
+        val serviceManager = injector.getInstance<ServiceManager>()
 
         Runtime.getRuntime().addShutdownHook(object : Thread() {
             override fun run() {

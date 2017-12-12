@@ -1,9 +1,8 @@
 package misk.web
 
-import com.google.inject.AbstractModule
-import com.google.inject.multibindings.Multibinder
 import misk.Interceptor
 import misk.MiskDefault
+import misk.inject.KAbstractModule
 import misk.inject.addMultibinderBinding
 import misk.inject.addMultibinderBindingWithAnnotation
 import misk.inject.to
@@ -19,12 +18,12 @@ import misk.web.interceptors.PlaintextInterceptorFactory
 import misk.web.interceptors.RequestLoggingInterceptor
 import misk.web.jetty.JettyModule
 
-class WebModule : AbstractModule() {
+class WebModule : KAbstractModule() {
     override fun configure() {
         install(JettyModule())
 
         // Create an empty set binder of interceptor factories that can be added to by users.
-        Multibinder.newSetBinder(binder(), Interceptor.Factory::class.java)
+        newSetBinder<Interceptor.Factory>()
 
         binder().addMultibinderBindingWithAnnotation<Interceptor.Factory, MiskDefault>().to<InternalErrorInterceptorFactory>()
         binder().addMultibinderBindingWithAnnotation<Interceptor.Factory, MiskDefault>().to<RequestLoggingInterceptor.Factory>()
