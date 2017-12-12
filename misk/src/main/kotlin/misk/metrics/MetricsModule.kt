@@ -1,11 +1,11 @@
 package misk.metrics
 
 import com.codahale.metrics.MetricRegistry
-import com.google.inject.AbstractModule
+import misk.inject.KAbstractModule
 
-class MetricsModule : AbstractModule() {
+class MetricsModule : KAbstractModule() {
   override fun configure() {
-    bind(Metrics::class.java).asEagerSingleton()
-    bind(MetricRegistry::class.java).asEagerSingleton()
+    bind<Metrics>().asEagerSingleton()
+    bind<MetricRegistry>().asEagerSingleton()
   }
 }
