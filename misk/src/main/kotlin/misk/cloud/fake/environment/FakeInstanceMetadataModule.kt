@@ -1,9 +1,10 @@
-package misk.environment
+package misk.cloud.fake.environment
 
 import misk.inject.KAbstractModule
+import misk.environment.InstanceMetadata
 
 /** Provides a hard-coded set of instance metadata */
-class StaticInstanceMetadataModule(val metadata: InstanceMetadata) : KAbstractModule() {
+class FakeInstanceMetadataModule(val metadata: InstanceMetadata) : KAbstractModule() {
     override fun configure() {
         bind<InstanceMetadata>().toInstance(metadata)
     }

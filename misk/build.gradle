@@ -37,6 +37,7 @@ dependencies {
   compile dep.metricsGraphite
   compile dep.metricsStackDriver
   compile dep.gcpDatastore
+  compile dep.gcpKms
 
   testCompile dep.junit
   testCompile dep.truth
