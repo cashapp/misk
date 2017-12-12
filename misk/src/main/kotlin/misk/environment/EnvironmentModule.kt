@@ -1,13 +1,13 @@
 package misk.environment
 
-import com.google.inject.AbstractModule
+import misk.inject.KAbstractModule
 import misk.logging.getLogger
 
 private val logger = getLogger<EnvironmentModule>()
 
-class EnvironmentModule(val environment: Environment) : AbstractModule() {
+class EnvironmentModule(val environment: Environment) : KAbstractModule() {
     override fun configure() {
-        bind(Environment::class.java).toInstance(environment)
+        bind<Environment>().toInstance(environment)
     }
 
     companion object {

@@ -1,13 +1,12 @@
 package misk.healthchecks
 
-import com.google.inject.AbstractModule
-import com.google.inject.multibindings.Multibinder
+import misk.inject.KAbstractModule
 
 class HealthChecksModule(
     private vararg val healthCheckClasses: Class<out HealthCheck>
-) : AbstractModule() {
+) : KAbstractModule() {
     override fun configure() {
-        val setBinder = Multibinder.newSetBinder(binder(), HealthCheck::class.java)
+        val setBinder = newSetBinder<HealthCheck>()
         for (healthCheckClass in healthCheckClasses) {
             setBinder.addBinding().to(healthCheckClass)
         }
