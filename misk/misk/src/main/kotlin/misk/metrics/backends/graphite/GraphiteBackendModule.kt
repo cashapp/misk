@@ -23,15 +23,16 @@ class GraphiteBackendModule : AbstractModule() {
   @Provides
   @Singleton
   fun graphiteSender(config: GraphiteBackendConfig): GraphiteSender =
-      Graphite(config.host, config.port)
+    Graphite(config.host, config.port)
 
   @Provides
   @Singleton
   fun graphiteReporter(
-      @AppName appName: String,
-      instanceMetadata: InstanceMetadata,
-      metricRegistry: MetricRegistry,
-      sender: GraphiteSender): GraphiteReporter {
+    @AppName appName: String,
+    instanceMetadata: InstanceMetadata,
+    metricRegistry: MetricRegistry,
+    sender: GraphiteSender
+  ): GraphiteReporter {
 
     val instanceName = Metrics.sanitize(instanceMetadata.instanceName)
     val zone = Metrics.sanitize(instanceMetadata.zone)

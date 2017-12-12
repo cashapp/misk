@@ -1,15 +1,14 @@
 package misk.moshi
 
-import com.google.inject.AbstractModule
 import com.google.inject.Provides
-import com.google.inject.multibindings.Multibinder
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.Moshi
+import misk.inject.KAbstractModule
 import javax.inject.Singleton
 
-class MoshiModule : AbstractModule() {
+class MoshiModule : KAbstractModule() {
   override fun configure() {
-    Multibinder.newSetBinder(binder(), JsonAdapter.Factory::class.java)
+    newSetBinder<JsonAdapter.Factory>()
   }
 
   @Provides

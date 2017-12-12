@@ -1,12 +1,13 @@
 package misk.web
 
 import com.google.inject.AbstractModule
-import com.google.inject.TypeLiteral
 import com.google.inject.multibindings.Multibinder
-import com.squareup.moshi.Types
 import misk.Interceptor
 import misk.MiskDefault
 import misk.asAction
+import misk.inject.parameterizedType
+import misk.inject.subtypeOf
+import misk.inject.typeLiteral
 import misk.web.actions.WebAction
 import misk.web.extractors.ParameterExtractor
 import org.eclipse.jetty.http.HttpMethod
@@ -14,8 +15,6 @@ import javax.inject.Inject
 import javax.inject.Provider
 import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
-import kotlin.reflect.KType
-import kotlin.reflect.jvm.javaType
 
 class WebActionModule<A : WebAction> private constructor(
   val webActionClass: KClass<A>,
@@ -28,9 +27,7 @@ class WebActionModule<A : WebAction> private constructor(
     @Suppress("UNCHECKED_CAST")
     val binder: Multibinder<BoundAction<A, *>> = Multibinder.newSetBinder(
         binder(),
-        TypeLiteral.get(Types.newParameterizedType(BoundAction::class.java,
-            Types.subtypeOf(WebAction::class.java),
-            Types.subtypeOf(Object::class.java)))
+        parameterizedType<BoundAction<*, *>>(subtypeOf<WebAction>(), subtypeOf<Any>()).typeLiteral()
     ) as Multibinder<BoundAction<A, *>>
     binder.addBinding().toProvider(BoundActionProvider(provider, member, pathPattern, httpMethod))
   }
@@ -88,7 +85,3 @@ internal class BoundActionProvider<A : WebAction, R>(
         PathPattern.parse(pathPattern), httpMethod)
   }
 }
-
-val KType.typeLiteral: TypeLiteral<*>
-  get() = TypeLiteral.get(javaType)
-
