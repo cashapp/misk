@@ -38,6 +38,7 @@ dependencies {
   compile dep.metricsStackDriver
   compile dep.gcpDatastore
   compile dep.gcpKms
+  compile dep.jinjava
 
   testCompile project(':misk/testing')
 }

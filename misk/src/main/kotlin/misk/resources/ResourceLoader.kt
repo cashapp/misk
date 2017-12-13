@@ -4,6 +4,7 @@ import com.google.common.reflect.ClassPath
 import com.google.common.reflect.ClassPath.ResourceInfo
 import okio.BufferedSource
 import okio.Okio
+import java.io.File
 
 /**
  * Load resources from the classpath and filesystem.
@@ -24,6 +25,12 @@ object ResourceLoader {
     fun open(path: String): BufferedSource? {
         val resource = resourcesByPath[path] ?: return null
         return Okio.buffer(Okio.source(resource.asByteSource().openStream()))
+    }
+
+    /** Return a [File] for `path`, or null if no such resource exists. */
+    fun openAsFile(path: String): File? {
+        val resource = resourcesByPath[path] ?: return null
+        return File(resource.url().toURI())
     }
 
     /**
