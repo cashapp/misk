@@ -1,17 +1,13 @@
 package misk.web.actions
 
 import com.google.common.truth.Truth.assertThat
-import misk.testing.MiskTestRule
+import misk.testing.MiskTest
 import misk.web.Response
-import org.junit.Rule
-import org.junit.Test
+import org.junit.jupiter.api.Test
 import javax.inject.Inject
 
+@MiskTest
 class NotFoundActionTest {
-    @Rule
-    @JvmField
-    val testRule = MiskTestRule()
-
     @Inject lateinit var notFoundAction: NotFoundAction
 
     @Test

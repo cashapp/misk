@@ -6,20 +6,12 @@ import misk.MiskModule
 import misk.healthchecks.FakeHealthCheck
 import misk.healthchecks.FakeHealthCheckModule
 import misk.services.FakeServiceModule
-import misk.testing.MiskTestRule
-import org.junit.Rule
-import org.junit.Test
+import misk.testing.MiskTest
+import org.junit.jupiter.api.Test
 import javax.inject.Inject
 
+@MiskTest(MiskModule::class, FakeServiceModule::class, FakeHealthCheckModule::class)
 class ReadinessCheckActionTest {
-    @Rule
-    @JvmField
-    val testRule = MiskTestRule(
-            MiskModule(),
-            FakeServiceModule(),
-            FakeHealthCheckModule()
-    )
-
     @Inject lateinit var readinessCheckAction: ReadinessCheckAction
     @Inject lateinit var serviceManager: ServiceManager
     @Inject lateinit var healthCheck: FakeHealthCheck

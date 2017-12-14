@@ -19,8 +19,7 @@ dependencies {
 
   compile project(':misk')
 
-  testCompile dep.junit
-  testCompile dep.truth
+  testCompile project(':misk/testing')
 }
 
 sourceSets {
