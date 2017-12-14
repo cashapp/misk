@@ -1,3 +1,4 @@
+include ':misk/testing'
 include ':exemplar'
 include ':misk'
 

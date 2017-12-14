@@ -10,17 +10,17 @@ import misk.config.AppName
 import misk.environment.InstanceMetadata
 import misk.metrics.Metrics
 import misk.metrics.MetricsModule
-import misk.testing.MiskTestRule
+import misk.testing.MiskTest
 import misk.time.FakeClock
 import misk.time.FakeClockModule
-import org.junit.Rule
-import org.junit.Test
+import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
 
+@MiskTest(MetricsModule::class, FakeClockModule::class, StackDriverReporterTest.TestModule::class)
 internal class StackDriverReporterTest {
     companion object {
         val APP_NAME = "my_app"
@@ -54,9 +54,6 @@ internal class StackDriverReporterTest {
             assertThat(timeSeries.points[0].interval.endTime).isEqualTo(NOW.toStringRfc3339())
         }
     }
-
-    @get:Rule
-    val miskTestRule = MiskTestRule(MetricsModule(), FakeClockModule(), TestModule())
 
     @Inject internal lateinit var metrics: Metrics
     @Inject internal lateinit var clock: FakeClock

@@ -24,7 +24,6 @@ dependencies {
   compile dep.okHttp
   compile dep.kotlinReflection
   compile dep.moshi
-  compile dep.junit
   compile dep.jettyServer
   compile dep.jettyServlet
   compile dep.wireRuntime
@@ -39,8 +38,6 @@ dependencies {
   compile dep.gcpDatastore
   compile dep.gcpKms
 
-  testCompile dep.junit
-  testCompile dep.truth
-  testCompile dep.loggingImpl
+  testCompile project(':misk/testing')
 }
 

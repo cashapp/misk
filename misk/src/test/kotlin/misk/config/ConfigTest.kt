@@ -1,21 +1,23 @@
 package misk.config
 
 import com.google.common.truth.Truth.assertThat
+import com.google.inject.Module
 import misk.environment.Environment.TESTING
 import misk.environment.EnvironmentModule
-import misk.testing.MiskTestRule
+import misk.testing.MiskTest
 import misk.web.WebConfig
-import org.junit.Rule
-import org.junit.Test
+import org.junit.jupiter.api.Test
 import javax.inject.Inject
 import javax.inject.Named
 
+@MiskTest(moduleProvider = ConfigTest.ModuleProvider::class)
 class ConfigTest {
-    @get:Rule
-    val miskTestRule = MiskTestRule(
-            ConfigModule.create<TestConfig>("test_app"),
-            EnvironmentModule(TESTING)
-    )
+    class ModuleProvider: misk.testing.ModuleProvider {
+        override fun modules(): Array<out Module> {
+            return arrayOf(ConfigModule.create<TestConfig>("test_app"), EnvironmentModule(TESTING))
+        }
+
+    }
 
     @Inject lateinit var test_config: TestConfig
 
