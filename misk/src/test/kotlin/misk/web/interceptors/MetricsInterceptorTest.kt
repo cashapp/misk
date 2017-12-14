@@ -4,25 +4,26 @@ import com.google.common.truth.Truth.assertThat
 import misk.asAction
 import misk.metrics.Metrics
 import misk.metrics.MetricsModule
-import misk.testing.InjectionTestRule
+import misk.testing.MiskTest
+import misk.testing.ModuleProvider
+import misk.testing.Modules
 import misk.web.Get
 import misk.web.Response
 import misk.web.actions.WebAction
 import misk.web.actions.asChain
-import org.junit.Before
-import org.junit.Rule
-import org.junit.Test
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import javax.inject.Inject
 
+@MiskTest
 class MetricsInterceptorTest {
-    @get:Rule
-    val miskTestRule = InjectionTestRule(MetricsModule())
+    @Modules val modules = ModuleProvider(MetricsModule::class)
 
     @Inject internal lateinit var metricsInterceptorFactory: MetricsInterceptor.Factory
     @Inject internal lateinit var testAction: TestAction
     @Inject internal lateinit var metrics: Metrics
 
-    @Before
+    @BeforeEach
     fun sendRequests() {
         assertThat(invoke(200).statusCode).isEqualTo(200)
         assertThat(invoke(200).statusCode).isEqualTo(200)

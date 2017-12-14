@@ -7,8 +7,8 @@ import com.google.api.client.testing.http.MockHttpContent
 import com.google.common.truth.Truth.assertThat
 import misk.cloud.gcp.testing.FakeHttpRouter.Companion.respondWithError
 import misk.cloud.gcp.testing.FakeHttpRouter.Companion.respondWithText
-import org.junit.Assert.fail
-import org.junit.Test
+import org.junit.jupiter.api.Assertions.fail
+import org.junit.jupiter.api.Test
 import java.io.ByteArrayInputStream
 
 internal class FakeHttpRouterTest {
@@ -44,7 +44,7 @@ internal class FakeHttpRouterTest {
                     .setContent(MockHttpContent().setContent(
                             JacksonFactory().toByteArray(Body("UNKNOWN"))))
                     .execute()
-            fail("allowed failing request")
+            fail<Any>("allowed failing request")
         } catch (e: HttpResponseException) {
             assertThat(e.statusCode).isEqualTo(401)
         }

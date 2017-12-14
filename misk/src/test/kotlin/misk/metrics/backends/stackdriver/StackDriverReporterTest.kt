@@ -10,17 +10,19 @@ import misk.config.AppName
 import misk.environment.InstanceMetadata
 import misk.metrics.Metrics
 import misk.metrics.MetricsModule
-import misk.testing.InjectionTestRule
+import misk.testing.MiskTest
+import misk.testing.ModuleProvider
+import misk.testing.Modules
 import misk.time.FakeClock
 import misk.time.FakeClockModule
-import org.junit.Rule
-import org.junit.Test
+import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
 
+@MiskTest
 internal class StackDriverReporterTest {
     companion object {
         val APP_NAME = "my_app"
@@ -55,8 +57,8 @@ internal class StackDriverReporterTest {
         }
     }
 
-    @get:Rule
-    val miskTestRule = InjectionTestRule(MetricsModule(), FakeClockModule(), TestModule())
+    @Modules
+    val modules = ModuleProvider(MetricsModule::class, FakeClockModule::class, TestModule::class)
 
     @Inject internal lateinit var metrics: Metrics
     @Inject internal lateinit var clock: FakeClock

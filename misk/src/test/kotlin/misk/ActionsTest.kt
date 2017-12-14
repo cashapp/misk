@@ -1,7 +1,8 @@
 package misk
 
 import com.google.common.truth.Truth.assertThat
-import org.junit.Test
+import org.junit.jupiter.api.Assertions.assertThrows
+import org.junit.jupiter.api.Test
 
 internal class ActionsTest {
     @Test
@@ -13,15 +14,19 @@ internal class ActionsTest {
         assertThat(action.returnType.type).isEqualTo(String::class.java)
     }
 
-    @Test(expected = IllegalArgumentException::class)
+    @Test
     fun methodReferenceNotAllowedAsAction() {
-        val t = TestAction()
-        t::myActionMethod.asAction()
+        assertThrows(IllegalArgumentException::class.java) {
+            val t = TestAction()
+            t::myActionMethod.asAction()
+        }
     }
 
-    @Test(expected = IllegalArgumentException::class)
+    @Test
     fun freeStandingFunctionNotAllowedAsAction() {
-        ::myActionHandler.asAction()
+        assertThrows(IllegalArgumentException::class.java) {
+            ::myActionHandler.asAction()
+        }
     }
 
     class TestAction {

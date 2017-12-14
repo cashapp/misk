@@ -4,18 +4,15 @@ import com.google.common.truth.Truth.assertThat
 import com.google.common.util.concurrent.ServiceManager
 import misk.MiskModule
 import misk.services.FakeServiceModule
-import misk.testing.InjectionTestRule
-import org.junit.Rule
-import org.junit.Test
+import misk.testing.MiskTest
+import misk.testing.ModuleProvider
+import misk.testing.Modules
+import org.junit.jupiter.api.Test
 import javax.inject.Inject
 
+@MiskTest
 class LivenessCheckActionTest {
-    @Rule
-    @JvmField
-    val testRule = InjectionTestRule(
-            MiskModule(),
-            FakeServiceModule()
-    )
+    @Modules val modules = ModuleProvider(MiskModule::class, FakeServiceModule::class)
 
     @Inject lateinit var livenessCheckAction: LivenessCheckAction
     @Inject lateinit var serviceManager: ServiceManager
