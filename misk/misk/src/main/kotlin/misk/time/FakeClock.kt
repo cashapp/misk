@@ -7,20 +7,17 @@ import java.time.ZoneId
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicLong
 
-class FakeClock(private val zone: ZoneId = ZoneId.of("UTC")) : Clock() {
-  val millis = AtomicLong()
+class FakeClock(epochMillis: Long = 0, private val zone: ZoneId = ZoneId.of("UTC")) : Clock() {
 
-  override fun getZone(): ZoneId {
-    return zone
-  }
+  private val millis: AtomicLong = AtomicLong(epochMillis)
 
-  override fun withZone(zone: ZoneId?): Clock {
-    // TODO(mmihic): Adjust for time zone
-    throw UnsupportedOperationException("nope")
-  }
+  override fun getZone(): ZoneId = zone
 
-  override fun instant(): Instant = Instant.ofEpochMilli(millis.get())
+  override fun withZone(zone: ZoneId): Clock = FakeClock(millis.get(), zone)
+
+  override fun instant(): Instant = Instant.ofEpochMilli(millis.get()).atZone(zone).toInstant()
 
   fun add(d: Duration) = millis.addAndGet(d.toMillis())
+
   fun add(n: Long, unit: TimeUnit) = millis.addAndGet(TimeUnit.MILLISECONDS.convert(n, unit))
 }
