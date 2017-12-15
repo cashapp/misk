@@ -5,6 +5,7 @@ import com.google.inject.binder.AnnotatedBindingBuilder
 import com.google.inject.binder.LinkedBindingBuilder
 import com.google.inject.binder.ScopedBindingBuilder
 import com.google.inject.multibindings.Multibinder
+import javax.inject.Provider
 
 /**
  * A class that provides helper methods for working with Kotlin and Guice, allowing implementing
@@ -23,7 +24,7 @@ import com.google.inject.multibindings.Multibinder
  */
 abstract class KAbstractModule : AbstractModule() {
     protected class KotlinAnnotatedBindingBuilder<X>(
-        private val annotatedBuilder: AnnotatedBindingBuilder<X>
+            private val annotatedBuilder: AnnotatedBindingBuilder<X>
     ) : AnnotatedBindingBuilder<X> by annotatedBuilder {
         inline fun <reified T : Annotation> annotatedWith(): LinkedBindingBuilder<X> {
             return annotatedWith(T::class.java)
