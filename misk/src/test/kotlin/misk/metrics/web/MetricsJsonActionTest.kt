@@ -12,7 +12,9 @@ import javax.inject.Inject
 
 @MiskTest
 internal class MetricsJsonActionTest {
-    @Modules val modules = ModuleProvider(MetricsModule::class)
+    @Modules val modules = ModuleProvider(
+            MetricsModule()
+    )
 
     @Inject internal lateinit var metrics: Metrics
     @Inject internal lateinit var metricsAction: MetricsJsonAction

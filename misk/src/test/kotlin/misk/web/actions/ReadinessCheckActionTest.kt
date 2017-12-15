@@ -14,7 +14,11 @@ import javax.inject.Inject
 
 @MiskTest
 class ReadinessCheckActionTest {
-    @Modules val modules = ModuleProvider(MiskModule::class, FakeServiceModule::class, FakeHealthCheckModule::class)
+    @Modules val modules = ModuleProvider(
+            MiskModule(),
+            FakeServiceModule(),
+            FakeHealthCheckModule()
+    )
 
     @Inject lateinit var readinessCheckAction: ReadinessCheckAction
     @Inject lateinit var serviceManager: ServiceManager

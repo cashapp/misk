@@ -57,8 +57,11 @@ internal class StackDriverReporterTest {
         }
     }
 
-    @Modules
-    val modules = ModuleProvider(MetricsModule::class, FakeClockModule::class, TestModule::class)
+    @Modules val modules = ModuleProvider(
+            MetricsModule(),
+            FakeClockModule(),
+            TestModule()
+    )
 
     @Inject internal lateinit var metrics: Metrics
     @Inject internal lateinit var clock: FakeClock

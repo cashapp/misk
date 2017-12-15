@@ -12,7 +12,10 @@ import javax.inject.Inject
 
 @MiskTest
 class LivenessCheckActionTest {
-    @Modules val modules = ModuleProvider(MiskModule::class, FakeServiceModule::class)
+    @Modules val modules = ModuleProvider(
+            MiskModule(),
+            FakeServiceModule()
+    )
 
     @Inject lateinit var livenessCheckAction: LivenessCheckAction
     @Inject lateinit var serviceManager: ServiceManager

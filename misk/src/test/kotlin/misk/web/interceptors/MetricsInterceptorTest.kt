@@ -17,7 +17,9 @@ import javax.inject.Inject
 
 @MiskTest
 class MetricsInterceptorTest {
-    @Modules val modules = ModuleProvider(MetricsModule::class)
+    @Modules val modules = ModuleProvider(
+            MetricsModule()
+    )
 
     @Inject internal lateinit var metricsInterceptorFactory: MetricsInterceptor.Factory
     @Inject internal lateinit var testAction: TestAction

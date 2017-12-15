@@ -13,7 +13,10 @@ import javax.inject.Named
 
 @MiskTest
 class ConfigTest {
-    @Modules val modules = ModuleProvider(ConfigModule.create<TestConfig>("test_app"), EnvironmentModule(TESTING))
+    @Modules val modules = ModuleProvider(
+            ConfigModule.create<TestConfig>("test_app"),
+            EnvironmentModule(TESTING)
+    )
 
     @Inject lateinit var test_config: TestConfig
 

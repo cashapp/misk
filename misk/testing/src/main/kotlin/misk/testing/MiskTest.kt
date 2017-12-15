@@ -2,7 +2,6 @@ package misk.testing
 
 import com.google.inject.Module
 import org.junit.jupiter.api.extension.ExtendWith
-import kotlin.reflect.KClass
 
 @Target(AnnotationTarget.CLASS)
 @ExtendWith(MiskTestExtension::class)
@@ -16,8 +15,6 @@ annotation class MiskTest
 @Target(AnnotationTarget.FIELD)
 annotation class Modules
 
-data class ModuleProvider(val moduleList: List<Module> = ArrayList(), val moduleClassList: List<KClass<out Module>> = ArrayList()) {
-    constructor(vararg modules: Module) : this(moduleList = modules.toList())
-
-    constructor(vararg modules: KClass<out Module>) : this(moduleClassList = modules.toList())
+data class ModuleProvider(val modules: List<Module>) {
+    constructor(vararg modules: Module) : this(modules.toList())
 }
