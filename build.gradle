@@ -28,6 +28,7 @@ ext {
           metricsStackDriver: 'com.google.apis:google-api-services-monitoring:v3-rev425-1.23.0',
           gcpDatastore: 'com.google.cloud:google-cloud-datastore:1.12.0',
           gcpKms: 'com.google.apis:google-api-services-cloudkms:v1-rev26-1.23.0',
+          okHttpMockWebServer: 'com.squareup.okhttp3:mockwebserver:3.9.0',
   ]
 
   isCi = "true".equals(System.getenv('CI'))
