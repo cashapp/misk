@@ -1,7 +1,7 @@
 package misk
 
-import com.google.inject.BindingAnnotation
 import misk.web.interceptors.JsonInterceptorFactory
+import javax.inject.Qualifier
 import kotlin.annotation.AnnotationRetention.RUNTIME
 
 /**
@@ -9,7 +9,11 @@ import kotlin.annotation.AnnotationRetention.RUNTIME
  * For example, the [JsonInterceptorFactory] is bound with [MiskDefault] and is automatically
  * installed.
  */
-@BindingAnnotation
+@Qualifier
 @Retention(RUNTIME)
-@Target(AnnotationTarget.CLASS, AnnotationTarget.VALUE_PARAMETER, AnnotationTarget.TYPE)
+@Target(
+    AnnotationTarget.CLASS,
+    AnnotationTarget.VALUE_PARAMETER,
+    AnnotationTarget.FIELD,
+    AnnotationTarget.TYPE)
 internal annotation class MiskDefault

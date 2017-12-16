@@ -3,7 +3,7 @@ package misk.config
 import com.google.common.truth.Truth.assertThat
 import misk.environment.Environment.TESTING
 import misk.environment.EnvironmentModule
-import misk.testing.MiskTestRule
+import misk.testing.InjectionTestRule
 import misk.web.WebConfig
 import org.junit.Rule
 import org.junit.Test
@@ -12,7 +12,7 @@ import javax.inject.Named
 
 class ConfigTest {
   @get:Rule
-  val miskTestRule = MiskTestRule(
+  val miskTestRule = InjectionTestRule(
       ConfigModule.create<TestConfig>("test_app"),
       EnvironmentModule(TESTING)
   )

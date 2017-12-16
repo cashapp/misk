@@ -4,7 +4,7 @@ import com.google.common.truth.Truth.assertThat
 import misk.asAction
 import misk.metrics.Metrics
 import misk.metrics.MetricsModule
-import misk.testing.MiskTestRule
+import misk.testing.InjectionTestRule
 import misk.web.Get
 import misk.web.Response
 import misk.web.actions.WebAction
@@ -16,7 +16,7 @@ import javax.inject.Inject
 
 class MetricsInterceptorTest {
   @get:Rule
-  val miskTestRule = MiskTestRule(MetricsModule())
+  val miskTestRule = InjectionTestRule(MetricsModule())
 
   @Inject internal lateinit var metricsInterceptorFactory: MetricsInterceptor.Factory
   @Inject internal lateinit var testAction: TestAction

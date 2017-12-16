@@ -1,7 +1,7 @@
 package misk.web.actions
 
 import com.google.common.truth.Truth.assertThat
-import misk.testing.MiskTestRule
+import misk.testing.InjectionTestRule
 import misk.web.Response
 import org.junit.Rule
 import org.junit.Test
@@ -10,7 +10,7 @@ import javax.inject.Inject
 class NotFoundActionTest {
   @Rule
   @JvmField
-  val testRule = MiskTestRule()
+  val testRule = InjectionTestRule()
 
   @Inject lateinit var notFoundAction: NotFoundAction
 

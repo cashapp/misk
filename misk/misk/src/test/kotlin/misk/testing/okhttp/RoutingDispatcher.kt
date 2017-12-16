@@ -1,4 +1,4 @@
-package misk.testing.http
+package misk.testing.okhttp
 
 import okhttp3.mockwebserver.Dispatcher
 import okhttp3.mockwebserver.MockResponse
