@@ -6,7 +6,7 @@ import misk.MiskModule
 import misk.healthchecks.FakeHealthCheck
 import misk.healthchecks.FakeHealthCheckModule
 import misk.services.FakeServiceModule
-import misk.testing.MiskTestRule
+import misk.testing.InjectionTestRule
 import org.junit.Rule
 import org.junit.Test
 import javax.inject.Inject
@@ -14,7 +14,7 @@ import javax.inject.Inject
 class ReadinessCheckActionTest {
     @Rule
     @JvmField
-    val testRule = MiskTestRule(
+    val testRule = InjectionTestRule(
             MiskModule(),
             FakeServiceModule(),
             FakeHealthCheckModule()

@@ -2,8 +2,8 @@ package misk.cloud.aws.environment
 
 import com.google.common.truth.Truth
 import misk.cloud.aws.environment.AwsInstanceMetadataProvider.Companion.AWS_INSTANCE_METADATA_PATH
-import misk.testing.http.RoutingDispatcher
-import misk.testing.http.path
+import misk.testing.okhttp.RoutingDispatcher
+import misk.testing.okhttp.path
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.Test

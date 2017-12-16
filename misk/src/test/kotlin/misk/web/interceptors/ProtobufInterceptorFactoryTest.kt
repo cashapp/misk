@@ -3,7 +3,7 @@ package misk.web.interceptors
 import com.google.common.truth.Truth.assertThat
 import helpers.protos.Dinosaur
 import misk.asAction
-import misk.testing.MiskTestRule
+import misk.testing.InjectionTestRule
 import misk.web.Get
 import misk.web.ProtobufResponseBody
 import misk.web.Response
@@ -18,7 +18,7 @@ import javax.inject.Inject
 
 class ProtobufInterceptorFactoryTest {
     @get:Rule
-    val miskTestRule = MiskTestRule()
+    val miskTestRule = InjectionTestRule()
 
     @Inject internal lateinit var protobufAction: ProtobufAction
     @Inject internal lateinit var protobufInterceptorFactory: ProtobufInterceptorFactory<*, *>
