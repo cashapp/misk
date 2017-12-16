@@ -1,4 +1,4 @@
-package misk.testing.http
+package misk.testing.okhttp
 
 import com.google.common.base.Joiner
 import okhttp3.HttpUrl
