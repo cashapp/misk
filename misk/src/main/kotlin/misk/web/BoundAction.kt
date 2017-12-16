@@ -125,7 +125,7 @@ private fun HttpServletRequest.httpMethod() = HttpMethod.valueOf(method)
 
 private fun HttpServletRequest.bufferedSource() = Okio.buffer(Okio.source(inputStream))
 
-private fun HttpServletRequest.asRequest() = Request(
+internal fun HttpServletRequest.asRequest() = Request(
         httpUrl(),
         httpMethod(),
         headers(),
