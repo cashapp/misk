@@ -3,8 +3,8 @@ package misk.concurrent
 import com.google.common.truth.Truth.assertThat
 import com.google.common.util.concurrent.ListeningExecutorService
 import com.google.common.util.concurrent.MoreExecutors
-import org.junit.Before
-import org.junit.Test
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import java.util.concurrent.Callable
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.Executors
@@ -27,7 +27,7 @@ internal class WrappingListeningExecutorServiceTest {
     override fun delegate(): ListeningExecutorService = wrapped
   }
 
-  @Before
+  @BeforeEach
   fun clearWrapped() {
     wrapCounter.set(0)
   }

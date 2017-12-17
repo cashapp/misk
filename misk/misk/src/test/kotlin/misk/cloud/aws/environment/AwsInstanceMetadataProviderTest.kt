@@ -6,7 +6,7 @@ import misk.testing.okhttp.RoutingDispatcher
 import misk.testing.okhttp.path
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 internal class AwsInstanceMetadataProviderTest {
   @Test

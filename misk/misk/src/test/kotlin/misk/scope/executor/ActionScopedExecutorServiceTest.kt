@@ -11,7 +11,8 @@ import misk.inject.keyOf
 import misk.scope.ActionScope
 import misk.scope.ActionScoped
 import misk.scope.TestActionScopedProviderModule
-import org.junit.Test
+import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Test
 import java.util.concurrent.Callable
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
@@ -46,16 +47,18 @@ internal class ActionScopedExecutorServiceTest {
     assertThat(future.get()).isEqualTo("my seed data and bar and foo!")
   }
 
-  @Test(expected = IllegalStateException::class)
+  @Test
   fun doesNotPropagateScopeIfNotInScope() {
-    val injector = Guice.createInjector(
-        TestActionScopedProviderModule(),
-        ActionScopedExecutorServiceModule())
+    Assertions.assertThrows(IllegalStateException::class.java) {
+      val injector = Guice.createInjector(
+          TestActionScopedProviderModule(),
+          ActionScopedExecutorServiceModule())
 
-    val tester = injector.getInstance(Tester::class.java)
-    val executor = injector.getInstance(ExecutorService::class.java)
+      val tester = injector.getInstance(Tester::class.java)
+      val executor = injector.getInstance(ExecutorService::class.java)
 
-    executor.submit( Callable { tester.fooValue() })
+      executor.submit(Callable { tester.fooValue() })
+    }
   }
 
   class ActionScopedExecutorServiceModule : KAbstractModule() {

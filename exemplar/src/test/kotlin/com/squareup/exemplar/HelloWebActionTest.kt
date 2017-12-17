@@ -1,17 +1,13 @@
 package com.squareup.exemplar
 
 import com.google.common.truth.Truth.assertThat
-import misk.testing.InjectionTestRule
+import misk.testing.ActionTest
 import okhttp3.Headers
-import org.junit.Rule
-import org.junit.Test
+import org.junit.jupiter.api.Test
 import javax.inject.Inject
 
+@ActionTest
 class HelloWebActionTest {
-  @Rule
-  @JvmField
-  val miskTestRule = InjectionTestRule()
-
   @Inject lateinit var helloWebAction: HelloWebAction
 
   @Test

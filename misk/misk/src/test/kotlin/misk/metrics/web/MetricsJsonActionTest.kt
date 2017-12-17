@@ -3,15 +3,16 @@ package misk.metrics.web
 import com.google.common.truth.Truth.assertThat
 import misk.metrics.Metrics
 import misk.metrics.MetricsModule
-import misk.testing.InjectionTestRule
-import org.junit.Rule
-import org.junit.Test
+import misk.testing.ActionTest
+import misk.testing.ActionTestModule
+import org.junit.jupiter.api.Test
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
+@ActionTest
 internal class MetricsJsonActionTest {
-  @get:Rule
-  val miskTestRule = InjectionTestRule(MetricsModule())
+  @ActionTestModule
+  val module = MetricsModule()
 
   @Inject internal lateinit var metrics: Metrics
   @Inject internal lateinit var metricsAction: MetricsJsonAction
