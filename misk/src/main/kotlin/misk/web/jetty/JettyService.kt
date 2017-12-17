@@ -4,6 +4,7 @@ import com.google.common.base.Stopwatch
 import com.google.common.util.concurrent.AbstractIdleService
 import misk.logging.getLogger
 import misk.web.WebConfig
+import okhttp3.HttpUrl
 import org.eclipse.jetty.server.Server
 import org.eclipse.jetty.server.ServerConnector
 import org.eclipse.jetty.servlet.ServletHandler
@@ -14,12 +15,21 @@ import javax.inject.Singleton
 private val logger = getLogger<JettyService>()
 
 @Singleton
-internal class JettyService @Inject constructor(
-    private val webActionsServlet: WebActionsServlet,
-    private val webConfig: WebConfig
+class JettyService @Inject internal constructor(
+        private val webActionsServlet: WebActionsServlet,
+        private val webConfig: WebConfig
 ) : AbstractIdleService() {
 
     private val server = Server()
+
+    val serverUrl: HttpUrl
+        get() {
+            return HttpUrl.Builder()
+                    .scheme(server.uri.scheme)
+                    .host(server.uri.host)
+                    .port(server.uri.port)
+                    .build()
+        }
 
     override fun startUp() {
         val stopwatch = Stopwatch.createStarted()
