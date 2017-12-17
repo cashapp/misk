@@ -70,7 +70,7 @@ internal class BoundActionProvider<A : WebAction, R>(
 ) : Provider<BoundAction<A, *>> {
 
   @Inject lateinit var userProvidedInterceptorFactories: List<Interceptor.Factory>
-  @Inject lateinit var miskInterceptorFactories: @MiskDefault List<Interceptor.Factory>
+  @Inject @JvmSuppressWildcards @MiskDefault lateinit var miskInterceptorFactories: Set<Interceptor.Factory>
   @Inject lateinit var parameterExtractorFactories: List<ParameterExtractor.Factory>
 
   override fun get(): BoundAction<A, *> {
