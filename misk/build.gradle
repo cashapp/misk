@@ -42,5 +42,6 @@ dependencies {
   testCompile dep.junit
   testCompile dep.truth
   testCompile dep.loggingImpl
+  testCompile dep.okHttpMockWebServer
 }
 
