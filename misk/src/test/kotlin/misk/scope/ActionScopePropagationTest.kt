@@ -6,7 +6,7 @@ import com.google.inject.Key
 import com.google.inject.name.Named
 import com.google.inject.name.Names
 import misk.inject.keyOf
-import org.junit.Test
+import org.junit.jupiter.api.Test
 import java.util.concurrent.Callable
 import java.util.concurrent.Executors
 import javax.inject.Inject

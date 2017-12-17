@@ -2,7 +2,7 @@ package misk.cloud.fake.security.keys
 
 import com.google.common.truth.Truth.assertThat
 import okio.ByteString
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 class FakeKeyServiceTest {
     @Test

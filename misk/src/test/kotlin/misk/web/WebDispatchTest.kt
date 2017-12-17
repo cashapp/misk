@@ -1,27 +1,34 @@
 package misk.web
 
 import com.google.common.truth.Truth.assertThat
+import com.google.inject.util.Modules
 import com.squareup.moshi.Moshi
+import misk.MiskModule
 import misk.inject.KAbstractModule
+import misk.testing.ActionTest
+import misk.testing.ActionTestModule
+import misk.testing.TestWebModule
 import misk.web.actions.WebAction
-import okhttp3.MediaType
-import okhttp3.OkHttpClient
+import misk.web.jetty.JettyService
+import okhttp3.*
 import okhttp3.Request
-import okhttp3.RequestBody
-import org.junit.Rule
-import org.junit.Test
+import org.junit.jupiter.api.Test
 import javax.inject.Inject
 
+@ActionTest(startService = true)
 internal class WebDispatchTest {
+    @ActionTestModule
+    val module = Modules.combine(
+            MiskModule(),
+            WebModule(),
+            TestWebModule(),
+            TestModule())
     data class HelloBye(val message: String)
 
     val jsonMediaType = MediaType.parse("application/json")
 
-    @Rule
-    @JvmField
-    val misk = MiskTestRule(TestModule())
-
     @Inject lateinit var moshi: Moshi
+    @Inject lateinit var jettyService: JettyService
     private val helloByeJsonAdapter get() = moshi.adapter(HelloBye::class.java)
 
     @Test
@@ -30,7 +37,7 @@ internal class WebDispatchTest {
         val httpClient = OkHttpClient()
         val request = Request.Builder()
                 .post(RequestBody.create(jsonMediaType, requestContent))
-                .url(misk.serverUrl().encodedPath("/hello").build())
+                .url(serverUrlBuilder().encodedPath("/hello").build())
                 .build()
 
         val response = httpClient.newCall(request).execute()
@@ -45,7 +52,7 @@ internal class WebDispatchTest {
         val httpClient = OkHttpClient()
         val request = Request.Builder()
                 .get()
-                .url(misk.serverUrl().encodedPath("/hello/my_friend").build())
+                .url(serverUrlBuilder().encodedPath("/hello/my_friend").build())
                 .build()
 
         val response = httpClient.newCall(request).execute()
@@ -93,4 +100,7 @@ internal class WebDispatchTest {
                 HelloBye("get bye $message")
     }
 
+    private fun serverUrlBuilder(): HttpUrl.Builder {
+        return jettyService.serverUrl.newBuilder()
+    }
 }

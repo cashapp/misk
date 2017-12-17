@@ -5,12 +5,12 @@ import com.google.api.services.cloudkms.v1.CloudKMS
 import com.google.api.services.cloudkms.v1.model.DecryptResponse
 import com.google.api.services.cloudkms.v1.model.EncryptResponse
 import com.google.common.truth.Truth.assertThat
-import misk.cloud.gcp.testing.FakeHttpResponse
 import misk.cloud.gcp.testing.FakeHttpRouter
 import misk.cloud.gcp.testing.FakeHttpRouter.Companion.respondWithError
 import misk.cloud.gcp.testing.FakeHttpRouter.Companion.respondWithJson
 import okio.ByteString
-import org.junit.Test
+import org.junit.jupiter.api.Assertions.assertThrows
+import org.junit.jupiter.api.Test
 
 internal class GcpKeyServiceTest {
     private val config = GcpKmsConfig(
@@ -46,13 +46,17 @@ internal class GcpKeyServiceTest {
         assertThat(plainText.utf8()).isEqualTo("decrypted")
     }
 
-    @Test(expected = IllegalArgumentException::class)
+    @Test
     fun invalidEncryptKey() {
-        keyManager.encrypt("unknown_key", ByteString.encodeUtf8("should fail"))
+        assertThrows(IllegalArgumentException::class.java) {
+            keyManager.encrypt("unknown_key", ByteString.encodeUtf8("should fail"))
+        }
     }
 
-    @Test(expected = IllegalArgumentException::class)
+    @Test
     fun invalidDecryptKey() {
-        keyManager.decrypt("unknown_key", ByteString.encodeUtf8("should fail"))
+        assertThrows(IllegalArgumentException::class.java) {
+            keyManager.decrypt("unknown_key", ByteString.encodeUtf8("should fail"))
+        }
     }
 }
