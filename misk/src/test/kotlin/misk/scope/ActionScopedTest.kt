@@ -7,8 +7,9 @@ import com.google.inject.name.Named
 import com.google.inject.name.Names
 import misk.inject.keyOf
 import misk.inject.uninject
-import org.junit.Before
-import org.junit.Test
+import org.junit.jupiter.api.Assertions.assertThrows
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import javax.inject.Inject
 
 class ActionScopedTest {
@@ -17,7 +18,7 @@ class ActionScopedTest {
 
   @Inject private lateinit var scope: ActionScope
 
-  @Before
+  @BeforeEach
   fun clearInjections() {
     uninject(this)
   }
@@ -36,32 +37,36 @@ class ActionScopedTest {
     }
   }
 
-  @Test(expected = IllegalStateException::class)
+  @Test
   fun doubleEnterScopeFails() {
-    val injector = Guice.createInjector(TestActionScopedProviderModule())
-    injector.injectMembers(this)
+    assertThrows(IllegalStateException::class.java) {
+      val injector = Guice.createInjector(TestActionScopedProviderModule())
+      injector.injectMembers(this)
 
-    scope.enter(mapOf()).use {
-      scope.enter(mapOf()).use { }
+      scope.enter(mapOf()).use {
+        scope.enter(mapOf()).use { }
+      }
     }
-
   }
 
-  @Test(expected = IllegalStateException::class)
+  @Test
   fun resolveOutsideOfScopeFails() {
-    val injector = Guice.createInjector(TestActionScopedProviderModule())
-    injector.injectMembers(this)
+    assertThrows(IllegalStateException::class.java) {
+      val injector = Guice.createInjector(TestActionScopedProviderModule())
+      injector.injectMembers(this)
 
-    foo.get()
+      foo.get()
+    }
   }
 
-  @Test(expected = IllegalStateException::class)
+  @Test
   fun seedDataNotFoundFails() {
-    val injector = Guice.createInjector(TestActionScopedProviderModule())
-    injector.injectMembers(this)
+    assertThrows(IllegalStateException::class.java) {
+      val injector = Guice.createInjector(TestActionScopedProviderModule())
+      injector.injectMembers(this)
 
-    // NB(mmihic): Seed data not specified
-    scope.enter(mapOf()).use { foo.get() }
+      // NB(mmihic): Seed data not specified
+      scope.enter(mapOf()).use { foo.get() }
+    }
   }
-
 }

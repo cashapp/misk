@@ -3,7 +3,7 @@ package misk.metrics
 import com.google.common.truth.Truth.assertThat
 import com.google.inject.Guice
 import misk.inject.getInstance
-import org.junit.Test
+import org.junit.jupiter.api.Test
 import java.time.Duration
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicLong

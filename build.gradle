@@ -6,7 +6,6 @@ ext {
           kotlinReflect: "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion",
           kotlinGradlePlugin: "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion",
           kotlinReflection: "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion",
-          junit: 'junit:junit:4.12',
           truth: 'com.google.truth:truth:0.30',
           guava: 'com.google.guava:guava:23.3-jre',
           guice: 'com.google.inject:guice:4.1.0',
@@ -29,6 +28,9 @@ ext {
           gcpDatastore: 'com.google.cloud:google-cloud-datastore:1.12.0',
           gcpKms: 'com.google.apis:google-api-services-cloudkms:v1-rev26-1.23.0',
           okHttpMockWebServer: 'com.squareup.okhttp3:mockwebserver:3.9.0',
+          junitApi: 'org.junit.jupiter:junit-jupiter-api:5.0.2',
+          junitParams: 'org.junit.jupiter:junit-jupiter-params:5.0.2',
+          junitEngine: 'org.junit.jupiter:junit-jupiter-engine:5.0.2',
   ]
 
   isCi = "true".equals(System.getenv('CI'))
@@ -43,6 +45,8 @@ subprojects {
 
     dependencies {
       classpath dep.kotlinGradlePlugin
+      classpath 'org.junit.platform:junit-platform-gradle-plugin:1.0.1'
+
     }
   }
   repositories {

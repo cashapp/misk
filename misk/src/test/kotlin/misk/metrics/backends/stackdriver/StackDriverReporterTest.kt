@@ -6,21 +6,23 @@ import com.google.api.services.monitoring.v3.model.TimeSeries
 import com.google.common.truth.Truth.assertThat
 import com.google.inject.AbstractModule
 import com.google.inject.Provides
+import com.google.inject.util.Modules
 import misk.config.AppName
 import misk.environment.InstanceMetadata
 import misk.metrics.Metrics
 import misk.metrics.MetricsModule
-import misk.testing.InjectionTestRule
+import misk.testing.ActionTest
+import misk.testing.ActionTestModule
 import misk.time.FakeClock
 import misk.time.FakeClockModule
-import org.junit.Rule
-import org.junit.Test
+import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
 
+@ActionTest
 internal class StackDriverReporterTest {
   companion object {
     val APP_NAME = "my_app"
@@ -55,8 +57,12 @@ internal class StackDriverReporterTest {
     }
   }
 
-  @get:Rule
-  val miskTestRule = InjectionTestRule(MetricsModule(), FakeClockModule(), TestModule())
+  @ActionTestModule
+  val module = Modules.combine(
+      MetricsModule(),
+      FakeClockModule(),
+      TestModule()
+  )
 
   @Inject internal lateinit var metrics: Metrics
   @Inject internal lateinit var clock: FakeClock

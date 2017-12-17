@@ -1,7 +1,7 @@
 package misk.logging
 
 import com.google.common.truth.Truth.assertThat
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 class LoggingTest {
   private val logger = getLogger<LoggingTest>()
