@@ -4,7 +4,7 @@ import com.google.common.truth.Truth.assertThat
 import com.google.common.util.concurrent.ServiceManager
 import misk.MiskModule
 import misk.services.FakeServiceModule
-import misk.testing.MiskTestRule
+import misk.testing.InjectionTestRule
 import org.junit.Rule
 import org.junit.Test
 import javax.inject.Inject
@@ -12,7 +12,7 @@ import javax.inject.Inject
 class LivenessCheckActionTest {
     @Rule
     @JvmField
-    val testRule = MiskTestRule(
+    val testRule = InjectionTestRule(
             MiskModule(),
             FakeServiceModule()
     )

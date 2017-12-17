@@ -2,8 +2,8 @@ package misk.cloud.gcp.environment
 
 import com.google.common.truth.Truth.assertThat
 import misk.cloud.gcp.environment.GcpInstanceMetadataProvider.Companion.GCP_INSTANCE_METADATA_PATH
-import misk.testing.http.RoutingDispatcher
-import misk.testing.http.path
+import misk.testing.okhttp.RoutingDispatcher
+import misk.testing.okhttp.path
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.Test

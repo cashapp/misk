@@ -1,6 +1,5 @@
 package misk.web
 
-
 @Target(AnnotationTarget.FUNCTION)
 annotation class Get(val pathPattern: String)
 

@@ -1,7 +1,7 @@
 package com.squareup.exemplar
 
 import com.google.common.truth.Truth.assertThat
-import misk.testing.MiskTestRule
+import misk.testing.InjectionTestRule
 import okhttp3.Headers
 import org.junit.Rule
 import org.junit.Test
@@ -10,7 +10,7 @@ import javax.inject.Inject
 class HelloWebActionTest {
     @Rule
     @JvmField
-    val miskTestRule = MiskTestRule()
+    val miskTestRule = InjectionTestRule()
 
     @Inject lateinit var helloWebAction: HelloWebAction
 
