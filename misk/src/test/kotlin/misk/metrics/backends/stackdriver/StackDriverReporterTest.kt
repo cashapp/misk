@@ -10,7 +10,7 @@ import misk.config.AppName
 import misk.environment.InstanceMetadata
 import misk.metrics.Metrics
 import misk.metrics.MetricsModule
-import misk.testing.MiskTestRule
+import misk.testing.InjectionTestRule
 import misk.time.FakeClock
 import misk.time.FakeClockModule
 import org.junit.Rule
@@ -56,7 +56,7 @@ internal class StackDriverReporterTest {
   }
 
   @get:Rule
-  val miskTestRule = MiskTestRule(MetricsModule(), FakeClockModule(), TestModule())
+  val miskTestRule = InjectionTestRule(MetricsModule(), FakeClockModule(), TestModule())
 
   @Inject internal lateinit var metrics: Metrics
   @Inject internal lateinit var clock: FakeClock
