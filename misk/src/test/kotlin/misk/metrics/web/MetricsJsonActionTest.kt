@@ -3,18 +3,16 @@ package misk.metrics.web
 import com.google.common.truth.Truth.assertThat
 import misk.metrics.Metrics
 import misk.metrics.MetricsModule
-import misk.testing.MiskTest
-import misk.testing.ModuleProvider
-import misk.testing.Modules
+import misk.testing.ActionTest
+import misk.testing.ActionTestModule
 import org.junit.jupiter.api.Test
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
-@MiskTest
+@ActionTest
 internal class MetricsJsonActionTest {
-    @Modules val modules = ModuleProvider(
-            MetricsModule()
-    )
+    @ActionTestModule
+    val module = MetricsModule()
 
     @Inject internal lateinit var metrics: Metrics
     @Inject internal lateinit var metricsAction: MetricsJsonAction

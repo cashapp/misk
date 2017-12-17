@@ -4,9 +4,8 @@ import com.google.common.truth.Truth.assertThat
 import misk.asAction
 import misk.metrics.Metrics
 import misk.metrics.MetricsModule
-import misk.testing.MiskTest
-import misk.testing.ModuleProvider
-import misk.testing.Modules
+import misk.testing.ActionTest
+import misk.testing.ActionTestModule
 import misk.web.Get
 import misk.web.Response
 import misk.web.actions.WebAction
@@ -15,11 +14,10 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import javax.inject.Inject
 
-@MiskTest
+@ActionTest
 class MetricsInterceptorTest {
-    @Modules val modules = ModuleProvider(
-            MetricsModule()
-    )
+    @ActionTestModule
+    val module = MetricsModule()
 
     @Inject internal lateinit var metricsInterceptorFactory: MetricsInterceptor.Factory
     @Inject internal lateinit var testAction: TestAction

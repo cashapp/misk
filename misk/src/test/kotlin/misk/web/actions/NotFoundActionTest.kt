@@ -1,12 +1,12 @@
 package misk.web.actions
 
 import com.google.common.truth.Truth.assertThat
-import misk.testing.MiskTest
+import misk.testing.ActionTest
 import misk.web.Response
 import org.junit.jupiter.api.Test
 import javax.inject.Inject
 
-@MiskTest
+@ActionTest
 class NotFoundActionTest {
     @Inject lateinit var notFoundAction: NotFoundAction
 

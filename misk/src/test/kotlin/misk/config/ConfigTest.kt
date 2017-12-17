@@ -1,19 +1,20 @@
 package misk.config
 
 import com.google.common.truth.Truth.assertThat
+import com.google.inject.util.Modules
 import misk.environment.Environment.TESTING
 import misk.environment.EnvironmentModule
-import misk.testing.MiskTest
-import misk.testing.ModuleProvider
-import misk.testing.Modules
+import misk.testing.ActionTest
+import misk.testing.ActionTestModule
 import misk.web.WebConfig
 import org.junit.jupiter.api.Test
 import javax.inject.Inject
 import javax.inject.Named
 
-@MiskTest
+@ActionTest
 class ConfigTest {
-    @Modules val modules = ModuleProvider(
+    @ActionTestModule
+    val module = Modules.combine(
             ConfigModule.create<TestConfig>("test_app"),
             EnvironmentModule(TESTING)
     )

@@ -6,13 +6,13 @@ import com.google.api.services.monitoring.v3.model.TimeSeries
 import com.google.common.truth.Truth.assertThat
 import com.google.inject.AbstractModule
 import com.google.inject.Provides
+import com.google.inject.util.Modules
 import misk.config.AppName
 import misk.environment.InstanceMetadata
 import misk.metrics.Metrics
 import misk.metrics.MetricsModule
-import misk.testing.MiskTest
-import misk.testing.ModuleProvider
-import misk.testing.Modules
+import misk.testing.ActionTest
+import misk.testing.ActionTestModule
 import misk.time.FakeClock
 import misk.time.FakeClockModule
 import org.junit.jupiter.api.Test
@@ -22,7 +22,7 @@ import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
 
-@MiskTest
+@ActionTest
 internal class StackDriverReporterTest {
     companion object {
         val APP_NAME = "my_app"
@@ -57,7 +57,8 @@ internal class StackDriverReporterTest {
         }
     }
 
-    @Modules val modules = ModuleProvider(
+    @ActionTestModule
+    val module = Modules.combine(
             MetricsModule(),
             FakeClockModule(),
             TestModule()

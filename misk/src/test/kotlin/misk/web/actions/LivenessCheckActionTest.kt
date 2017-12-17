@@ -2,17 +2,18 @@ package misk.web.actions
 
 import com.google.common.truth.Truth.assertThat
 import com.google.common.util.concurrent.ServiceManager
+import com.google.inject.util.Modules
 import misk.MiskModule
 import misk.services.FakeServiceModule
-import misk.testing.MiskTest
-import misk.testing.ModuleProvider
-import misk.testing.Modules
+import misk.testing.ActionTest
+import misk.testing.ActionTestModule
 import org.junit.jupiter.api.Test
 import javax.inject.Inject
 
-@MiskTest
+@ActionTest
 class LivenessCheckActionTest {
-    @Modules val modules = ModuleProvider(
+    @ActionTestModule
+    val module = Modules.combine(
             MiskModule(),
             FakeServiceModule()
     )

@@ -3,7 +3,7 @@ package misk.web.interceptors
 import com.google.common.truth.Truth.assertThat
 import helpers.protos.Dinosaur
 import misk.asAction
-import misk.testing.MiskTest
+import misk.testing.ActionTest
 import misk.web.Get
 import misk.web.ProtobufResponseBody
 import misk.web.Response
@@ -15,7 +15,7 @@ import okio.Pipe
 import org.junit.jupiter.api.Test
 import javax.inject.Inject
 
-@MiskTest
+@ActionTest
 class ProtobufInterceptorFactoryTest {
     @Inject internal lateinit var protobufAction: ProtobufAction
     @Inject internal lateinit var protobufInterceptorFactory: ProtobufInterceptorFactory<*, *>
