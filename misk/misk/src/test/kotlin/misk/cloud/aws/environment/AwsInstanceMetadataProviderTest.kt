@@ -1,11 +1,11 @@
 package misk.cloud.aws.environment
 
-import com.google.common.truth.Truth
 import misk.cloud.aws.environment.AwsInstanceMetadataProvider.Companion.AWS_INSTANCE_METADATA_PATH
 import misk.testing.okhttp.RoutingDispatcher
 import misk.testing.okhttp.path
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
 internal class AwsInstanceMetadataProviderTest {
@@ -29,8 +29,8 @@ internal class AwsInstanceMetadataProviderTest {
 
     try {
       val instanceMetadata = provider.get()
-      Truth.assertThat(instanceMetadata.instanceName).isEqualTo("i-1234567890abcdef0")
-      Truth.assertThat(instanceMetadata.zone).isEqualTo("us-west-2c")
+      assertThat(instanceMetadata.instanceName).isEqualTo("i-1234567890abcdef0")
+      assertThat(instanceMetadata.zone).isEqualTo("us-west-2c")
     } finally {
       server.shutdown()
     }

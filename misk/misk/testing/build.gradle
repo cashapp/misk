@@ -23,7 +23,7 @@ dependencies {
   compile dep.junitApi
   compile dep.junitParams
   compile dep.junitEngine
-  compile dep.truth
+  compile dep.assertj
   compile dep.loggingImpl
   compile dep.okHttpMockWebServer
 }
