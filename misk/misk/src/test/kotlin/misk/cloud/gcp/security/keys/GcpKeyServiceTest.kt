@@ -4,7 +4,7 @@ import com.google.api.client.json.jackson2.JacksonFactory
 import com.google.api.services.cloudkms.v1.CloudKMS
 import com.google.api.services.cloudkms.v1.model.DecryptResponse
 import com.google.api.services.cloudkms.v1.model.EncryptResponse
-import com.google.common.truth.Truth.assertThat
+import org.assertj.core.api.Assertions.assertThat
 import misk.cloud.gcp.testing.FakeHttpRouter
 import misk.cloud.gcp.testing.FakeHttpRouter.Companion.respondWithError
 import misk.cloud.gcp.testing.FakeHttpRouter.Companion.respondWithJson
