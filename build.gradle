@@ -6,7 +6,7 @@ ext {
           kotlinReflect: "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion",
           kotlinGradlePlugin: "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion",
           kotlinReflection: "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion",
-          truth: 'com.google.truth:truth:0.30',
+          assertj: "org.assertj:assertj-core:3.8.0",
           guava: 'com.google.guava:guava:23.3-jre',
           guice: 'com.google.inject:guice:4.1.0',
           guiceMultibindings: 'com.google.inject.extensions:guice-multibindings:4.1.0',

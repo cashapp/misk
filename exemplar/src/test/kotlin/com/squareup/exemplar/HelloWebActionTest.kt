@@ -1,6 +1,6 @@
 package com.squareup.exemplar
 
-import com.google.common.truth.Truth.assertThat
+import org.assertj.core.api.Assertions.assertThat
 import misk.testing.ActionTest
 import okhttp3.Headers
 import org.junit.jupiter.api.Test

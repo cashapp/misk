@@ -1,6 +1,6 @@
 package misk.web
 
-import com.google.common.truth.Truth.assertThat
+import org.assertj.core.api.Assertions.assertThat
 import com.google.inject.util.Modules
 import com.squareup.moshi.Moshi
 import misk.MiskModule

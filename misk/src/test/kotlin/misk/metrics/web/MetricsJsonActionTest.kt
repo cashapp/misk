@@ -1,10 +1,10 @@
 package misk.metrics.web
 
-import com.google.common.truth.Truth.assertThat
 import misk.metrics.Metrics
 import misk.metrics.MetricsModule
 import misk.testing.ActionTest
 import misk.testing.ActionTestModule
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
@@ -32,9 +32,9 @@ internal class MetricsJsonActionTest {
         metrics.gauge("g3", { "howdy pardner" })
 
         val json = metricsAction.getMetrics()
-        assertThat(json.counters.keys).containsExactly("myfav", "banana", "joist")
+        assertThat(json.counters.keys).containsExactlyInAnyOrder("myfav", "banana", "joist")
         assertThat(json.timers.keys).containsExactly("slow")
         assertThat(json.histograms.keys).containsExactly("mork")
-        assertThat(json.gauges.keys).containsExactly("g1", "g2", "g3")
+        assertThat(json.gauges.keys).containsExactlyInAnyOrder("g1", "g2", "g3")
     }
 }

@@ -1,6 +1,6 @@
 package misk.web.interceptors
 
-import com.google.common.truth.Truth.assertThat
+import org.assertj.core.api.Assertions.assertThat
 import helpers.protos.Dinosaur
 import misk.asAction
 import misk.testing.ActionTest
