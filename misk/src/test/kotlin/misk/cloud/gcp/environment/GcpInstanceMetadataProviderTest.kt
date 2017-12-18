@@ -1,6 +1,6 @@
 package misk.cloud.gcp.environment
 
-import com.google.common.truth.Truth.assertThat
+import org.assertj.core.api.Assertions.assertThat
 import misk.cloud.gcp.environment.GcpInstanceMetadataProvider.Companion.GCP_INSTANCE_METADATA_PATH
 import misk.testing.okhttp.RoutingDispatcher
 import misk.testing.okhttp.path

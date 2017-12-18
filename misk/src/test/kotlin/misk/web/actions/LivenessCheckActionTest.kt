@@ -1,6 +1,6 @@
 package misk.web.actions
 
-import com.google.common.truth.Truth.assertThat
+import org.assertj.core.api.Assertions.assertThat
 import com.google.common.util.concurrent.ServiceManager
 import com.google.inject.util.Modules
 import misk.MiskModule
