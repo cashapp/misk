@@ -1,6 +1,6 @@
 package misk.config
 
-import com.google.common.truth.Truth.assertThat
+import org.assertj.core.api.Assertions.assertThat
 import com.google.inject.util.Modules
 import misk.environment.Environment.TESTING
 import misk.environment.EnvironmentModule

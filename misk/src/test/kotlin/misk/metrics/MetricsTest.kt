@@ -1,8 +1,8 @@
 package misk.metrics
 
-import com.google.common.truth.Truth.assertThat
 import com.google.inject.Guice
 import misk.inject.getInstance
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.time.Duration
 import java.util.concurrent.TimeUnit
@@ -36,9 +36,9 @@ class MetricsTest {
 
         metrics.gauge("my_gauge", { n.get() })
         assertThat(metrics.gauges).containsKey("my_gauge")
-        assertThat(metrics.gauges["my_gauge"]!!.value).isEqualTo(0)
+        assertThat(metrics.gauges["my_gauge"]!!.value).isEqualTo(0L)
         n.set(254)
-        assertThat(metrics.gauges["my_gauge"]!!.value).isEqualTo(254)
+        assertThat(metrics.gauges["my_gauge"]!!.value).isEqualTo(254L)
     }
 
     @Test
@@ -47,9 +47,9 @@ class MetricsTest {
         val gauge = metrics.settableGauge("my_gauge")
 
         assertThat(metrics.gauges).containsKey("my_gauge")
-        assertThat(metrics.gauges["my_gauge"]!!.value).isEqualTo(0)
+        assertThat(metrics.gauges["my_gauge"]!!.value).isEqualTo(0L)
         gauge.value.set(254)
-        assertThat(metrics.gauges["my_gauge"]!!.value).isEqualTo(254)
+        assertThat(metrics.gauges["my_gauge"]!!.value).isEqualTo(254L)
     }
 
     @Test
@@ -59,11 +59,11 @@ class MetricsTest {
 
         metrics.cachedGauge("my_gauge", Duration.ofMillis(100), n::get)
         assertThat(metrics.gauges).containsKey("my_gauge")
-        assertThat(metrics.gauges["my_gauge"]!!.value).isEqualTo(0)
+        assertThat(metrics.gauges["my_gauge"]!!.value).isEqualTo(0L)
         n.set(254)
-        assertThat(metrics.gauges["my_gauge"]!!.value).isEqualTo(0)
+        assertThat(metrics.gauges["my_gauge"]!!.value).isEqualTo(0L)
         Thread.sleep(120)
-        assertThat(metrics.gauges["my_gauge"]!!.value).isEqualTo(254)
+        assertThat(metrics.gauges["my_gauge"]!!.value).isEqualTo(254L)
     }
 
     @Test

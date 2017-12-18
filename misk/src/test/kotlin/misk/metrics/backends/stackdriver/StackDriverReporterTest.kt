@@ -3,7 +3,6 @@ package misk.metrics.backends.stackdriver
 import com.codahale.metrics.Gauge
 import com.google.api.client.util.DateTime
 import com.google.api.services.monitoring.v3.model.TimeSeries
-import com.google.common.truth.Truth.assertThat
 import com.google.inject.AbstractModule
 import com.google.inject.Provides
 import com.google.inject.util.Modules
@@ -15,6 +14,8 @@ import misk.testing.ActionTest
 import misk.testing.ActionTestModule
 import misk.time.FakeClock
 import misk.time.FakeClockModule
+import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.data.Percentage
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 import java.math.BigInteger
@@ -34,7 +35,7 @@ internal class StackDriverReporterTest {
         fun assertGauge(timeSeries: TimeSeries, expected: Double) {
             assertThat(timeSeries.metricKind).isEqualTo("GAUGE")
             assertThat(timeSeries.points).hasSize(1)
-            assertThat(timeSeries.points[0].value.doubleValue).isWithin(0.001).of(expected)
+            assertThat(timeSeries.points[0].value.doubleValue).isCloseTo(expected, Percentage.withPercentage(0.1))
             assertThat(timeSeries.points[0].interval.startTime).isNull()
             assertThat(timeSeries.points[0].interval.endTime).isEqualTo(NOW.toStringRfc3339())
         }
