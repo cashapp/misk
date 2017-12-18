@@ -11,8 +11,22 @@ data class MediaRange(
     val qualityFactor: Double = 1.0,
     val parameters: Map<String, String> = mapOf(),
     val extensions: Map<String, String> = mapOf()
-) {
-  val wildcardCount: Int = computeWildcardCount(type, subtype)
+) : Comparable<MediaRange>{
+  override fun compareTo(other: MediaRange): Int {
+    if (type == WILDCARD && other.type != WILDCARD) return 1
+    if (type != WILDCARD && other.type == WILDCARD) return -1
+
+    if (subtype == WILDCARD && other.subtype != WILDCARD) return 1
+    if (subtype != WILDCARD && other.subtype == WILDCARD) return -1
+
+    val parameterDiff = other.parameters.size - parameters.size
+    if (parameterDiff != 0) return parameterDiff
+
+    val extensionDiff = other.extensions.size - extensions.size
+    if (extensionDiff != 0) return extensionDiff
+
+    return 0
+  }
 
   fun matches(mediaType: MediaType) = matcher(mediaType) != null
 
@@ -38,6 +52,9 @@ data class MediaRange(
   }
 
   data class Matcher(val mediaRange: MediaRange, val matchesCharset: Boolean = false)
+    : Comparable<Matcher> {
+    override fun compareTo(other: Matcher) = mediaRange.compareTo(other.mediaRange)
+  }
 
   companion object {
     const val WILDCARD = "*"
