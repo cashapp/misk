@@ -65,7 +65,7 @@ abstract class ActionScopedProviderModule : KAbstractModule() {
   }
 
   /** Binds an annotation qualified [ActionScoped] along with its provider */
-  fun <T : Any, A : Annotation> bindProvider(
+  fun <T : Any> bindProvider(
       kclass: KClass<T>,
       a: KClass<Annotation>,
       providerClass: KClass<out ActionScopedProvider<T>>) {
@@ -83,7 +83,10 @@ abstract class ActionScopedProviderModule : KAbstractModule() {
     MapBinder.newMapBinder(binder(), KEY_TYPE, ACTION_SCOPED_PROVIDER_TYPE)
         .addBinding(key)
         .toProvider(providerProvider)
-    bind(actionScopedKey).toProvider(RealActionScopedProvider(key)).asSingleton()
+    bind(actionScopedKey).toProvider(object : Provider<ActionScoped<T>> {
+      @Inject lateinit var scope: ActionScope
+      override fun get() = RealActionScoped(key, scope)
+    }).asSingleton()
   }
 
   companion object {
@@ -95,17 +98,11 @@ abstract class ActionScopedProviderModule : KAbstractModule() {
     private val KEY_TYPE = object : TypeLiteral<Key<*>>() {}
     private val ACTION_SCOPED_PROVIDER_TYPE = object : TypeLiteral<ActionScopedProvider<*>>() {}
 
-    private class SeedDataActionScopedProvider<T>(private val key: Key<T>) :
+    private class SeedDataActionScopedProvider<out T>(private val key: Key<T>) :
         ActionScopedProvider<T> {
       override fun get(): T {
         throw IllegalStateException("$key can only be provided as seed data")
       }
-    }
-
-    private class RealActionScopedProvider<T>(private val key: Key<T>) : Provider<ActionScoped<T>> {
-      @Inject lateinit var scope: ActionScope
-
-      override fun get(): ActionScoped<T> = RealActionScoped(key, scope)
     }
   }
 
