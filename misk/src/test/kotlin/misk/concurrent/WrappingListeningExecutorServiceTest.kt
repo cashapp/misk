@@ -1,6 +1,6 @@
 package misk.concurrent
 
-import com.google.common.truth.Truth.assertThat
+import org.assertj.core.api.Assertions.assertThat
 import com.google.common.util.concurrent.ListeningExecutorService
 import com.google.common.util.concurrent.MoreExecutors
 import org.junit.jupiter.api.BeforeEach

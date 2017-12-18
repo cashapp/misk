@@ -1,6 +1,6 @@
 package misk.resources
 
-import com.google.common.truth.Truth.assertThat
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
 class ResourceLoaderTest {

@@ -1,6 +1,6 @@
 package misk.web.actions
 
-import com.google.common.truth.Truth.assertThat
+import org.assertj.core.api.Assertions.assertThat
 import misk.testing.ActionTest
 import misk.web.Response
 import org.junit.jupiter.api.Test
