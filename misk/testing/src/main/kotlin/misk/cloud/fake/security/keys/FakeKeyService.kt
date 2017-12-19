@@ -7,7 +7,7 @@ import java.security.Key
 import javax.crypto.Cipher
 import javax.crypto.spec.SecretKeySpec
 
-internal class FakeKeyService : KeyService {
+class FakeKeyService : KeyService {
     override fun encrypt(keyAlias: String, plainText: ByteString): ByteString {
         val key = newSymmetricKey(keyAlias)
         val cipher = Cipher.getInstance("AES")

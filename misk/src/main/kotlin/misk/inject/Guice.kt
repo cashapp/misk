@@ -38,7 +38,7 @@ internal inline fun <reified T : Any> Binder.addMultibinderBinding(
     }
 }
 
-internal fun ScopedBindingBuilder.asSingleton() {
+fun ScopedBindingBuilder.asSingleton() {
     `in`(Singleton::class.java)
 }
 
