@@ -17,8 +17,8 @@ private val logger = getLogger<WebActionsServlet>()
 
 @Singleton
 internal class WebActionsServlet @Inject constructor(
-        private val boundActions: MutableSet<BoundAction<out WebAction, *>>,
-        private val scope: ActionScope
+    private val boundActions: MutableSet<BoundAction<out WebAction, *>>,
+    private val scope: ActionScope
 ) : HttpServlet() {
     override fun doGet(request: HttpServletRequest, response: HttpServletResponse) {
         handleCall(request, response)
@@ -34,8 +34,11 @@ internal class WebActionsServlet @Inject constructor(
                 keyOf<Request>() to request.asRequest())
 
         scope.enter(seedData).use {
-            if (boundActions.any { it.tryHandle(request, response) }) {
-                logger.debug("Request handled by WebActionServlet")
+            for (action in boundActions) {
+                if (action.tryHandle(request, response)) {
+                    logger.debug("Request handled by WebActionServlet")
+                    return
+                }
             }
         }
     }

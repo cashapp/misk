@@ -2,11 +2,13 @@ package misk.web
 
 import misk.Interceptor
 import misk.MiskDefault
+import misk.admin.interceptors.AdminDisabledInterceptorFactory
 import misk.inject.KAbstractModule
 import misk.inject.addMultibinderBinding
 import misk.inject.addMultibinderBindingWithAnnotation
 import misk.inject.to
 import misk.scope.ActionScopedProviderModule
+import misk.templating.TemplatingModule
 import misk.web.extractors.HeadersParameterExtractorFactory
 import misk.web.extractors.JsonBodyParameterExtractorFactory
 import misk.web.extractors.ParameterExtractor
@@ -23,12 +25,13 @@ import javax.servlet.http.HttpServletRequest
 class WebModule : KAbstractModule() {
     override fun configure() {
         install(JettyModule())
-        install(object: ActionScopedProviderModule() {
+        install(object : ActionScopedProviderModule() {
             override fun configureProviders() {
                 bindSeedData(Request::class)
                 bindSeedData(HttpServletRequest::class)
             }
         })
+        install(TemplatingModule())
 
         // Create an empty set binder of interceptor factories that can be added to by users.
         newSetBinder<Interceptor.Factory>()
@@ -38,6 +41,7 @@ class WebModule : KAbstractModule() {
         binder().addMultibinderBindingWithAnnotation<Interceptor.Factory, MiskDefault>().to<JsonInterceptorFactory>()
         binder().addMultibinderBindingWithAnnotation<Interceptor.Factory, MiskDefault>().toInstance(PlaintextInterceptorFactory)
         binder().addMultibinderBindingWithAnnotation<Interceptor.Factory, MiskDefault>().to<MetricsInterceptor.Factory>()
+        binder().addMultibinderBindingWithAnnotation<Interceptor.Factory, MiskDefault>().to<AdminDisabledInterceptorFactory>()
         binder().addMultibinderBindingWithAnnotation<Interceptor.Factory, MiskDefault>().to<BoxResponseInterceptorFactory>()
 
         binder().addMultibinderBinding<ParameterExtractor.Factory>().toInstance(PathPatternParameterExtractorFactory)

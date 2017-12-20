@@ -8,13 +8,14 @@ import misk.web.WebModule
 
 fun main(args: Array<String>) {
     MiskApplication(
+            ExemplarConfigModule(),
+
             MiskModule(),
 
             WebModule(),
 
             HibernateModule(),
             ExemplarModule(),
-            ExemplarConfigModule(),
             EnvironmentModule.fromEnvironmentVariable()
     ).startAndAwaitStopped()
 }

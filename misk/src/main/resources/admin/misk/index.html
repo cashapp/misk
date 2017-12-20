@@ -1,0 +1,9 @@
+{% extends "misk/base.html" %}
+
+{% block content %}
+<ul class="list-group">
+  {% for serviceInfo in servicesLink %}
+  <li>{{ serviceInfo.title }} - {{ serviceInfo.description }} <a href="{{serviceInfo.path}}">Link</a></li>
+  {% endfor %}
+</ul>
+{% endblock %}

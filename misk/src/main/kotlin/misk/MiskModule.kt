@@ -8,6 +8,7 @@ import misk.healthchecks.HealthChecksModule
 import misk.metrics.MetricsModule
 import misk.moshi.MoshiModule
 import misk.time.ClockModule
+import misk.web.admin.AdminModule
 import javax.inject.Singleton
 
 class MiskModule : AbstractModule() {
@@ -16,6 +17,7 @@ class MiskModule : AbstractModule() {
         install(MetricsModule())
         install(ClockModule())
         install(MoshiModule())
+        install(AdminModule())
     }
 
     @Provides
