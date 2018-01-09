@@ -1,12 +1,11 @@
 package misk
 
-import misk.web.interceptors.JsonInterceptorFactory
 import javax.inject.Qualifier
 import kotlin.annotation.AnnotationRetention.RUNTIME
 
 /**
  * Denotes a target as a Misk provided default, which will be automatically installed.
- * For example, the [JsonInterceptorFactory] is bound with [MiskDefault] and is automatically
+ * For example, the [MarshallerInterceptor] is bound with [MiskDefault] and is automatically
  * installed.
  */
 @Qualifier
