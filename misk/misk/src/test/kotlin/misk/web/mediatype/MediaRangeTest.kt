@@ -6,6 +6,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.data.Offset
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Test
+import java.util.Collections.shuffle
 
 internal class MediaRangeTest {
   @Test
@@ -17,7 +18,6 @@ internal class MediaRangeTest {
     assertThat(mediaRange.extensions).isEmpty()
     assertThat(mediaRange.parameters).isEmpty()
     assertThat(mediaRange.qualityFactor).isCloseTo(1.0, Offset.offset(0.01))
-    assertThat(mediaRange.wildcardCount).isEqualTo(2)
   }
 
   @Test
@@ -29,7 +29,6 @@ internal class MediaRangeTest {
     assertThat(mediaRange.extensions).isEmpty()
     assertThat(mediaRange.parameters).isEmpty()
     assertThat(mediaRange.qualityFactor).isCloseTo(1.0, Offset.offset(0.01))
-    assertThat(mediaRange.wildcardCount).isEqualTo(1)
   }
 
   @Test
@@ -41,7 +40,6 @@ internal class MediaRangeTest {
     assertThat(mediaRange.extensions).isEmpty()
     assertThat(mediaRange.parameters).isEmpty()
     assertThat(mediaRange.qualityFactor).isCloseTo(1.0, Offset.offset(0.01))
-    assertThat(mediaRange.wildcardCount).isEqualTo(0)
   }
 
   @Test
@@ -53,7 +51,6 @@ internal class MediaRangeTest {
     assertThat(mediaRange.extensions).isEmpty()
     assertThat(mediaRange.parameters).containsExactly("level" to "1", "strict" to "true")
     assertThat(mediaRange.qualityFactor).isCloseTo(1.0, Offset.offset(0.01))
-    assertThat(mediaRange.wildcardCount).isEqualTo(0)
   }
 
   @Test
@@ -65,7 +62,6 @@ internal class MediaRangeTest {
     assertThat(mediaRange.extensions).isEmpty()
     assertThat(mediaRange.parameters).containsExactly("level" to "1", "strict" to "true")
     assertThat(mediaRange.qualityFactor).isCloseTo(1.0, Offset.offset(0.01))
-    assertThat(mediaRange.wildcardCount).isEqualTo(0)
   }
 
   @Test
@@ -78,7 +74,6 @@ internal class MediaRangeTest {
     assertThat(mediaRange.extensions).isEmpty()
     assertThat(mediaRange.parameters).containsExactly("level" to "1", "strict" to "true")
     assertThat(mediaRange.qualityFactor).isCloseTo(0.45, Offset.offset(0.01))
-    assertThat(mediaRange.wildcardCount).isEqualTo(0)
   }
 
   @Test
@@ -91,7 +86,6 @@ internal class MediaRangeTest {
     assertThat(mediaRange.extensions).containsExactly("ext1" to "79", "ext2" to "blerp")
     assertThat(mediaRange.parameters).containsExactly("level" to "1", "strict" to "true")
     assertThat(mediaRange.qualityFactor).isCloseTo(0.45, Offset.offset(0.01))
-    assertThat(mediaRange.wildcardCount).isEqualTo(0)
   }
 
   @Test
@@ -211,5 +205,21 @@ internal class MediaRangeTest {
 
     assertThat(matcher).isNotNull()
     assertThat(matcher!!.matchesCharset).isTrue()
+  }
+
+  @Test
+  fun compareTo() {
+    val r1 = MediaRange.parse("*/*")
+    val r2 = MediaRange.parse("text/*")
+    val r3 = MediaRange.parse("text/html")
+    val r4 = MediaRange.parse("text/html;charset=utf-8;level=1")
+    val r5 = MediaRange.parse("text/html;charset=utf-8;level=1;q=0.5;ext1=one")
+    val r6 = MediaRange.parse("text/html;charset=utf-8;level=1;f=zed")
+
+    val unsorted = mutableListOf(r1, r2, r3, r4, r5, r6)
+    shuffle(unsorted)
+
+    val sorted = unsorted.sorted()
+    assertThat(sorted).containsExactly(r6, r5, r4, r3, r2, r1)
   }
 }
