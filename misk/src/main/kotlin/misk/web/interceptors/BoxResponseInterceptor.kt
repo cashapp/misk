@@ -3,6 +3,7 @@ package misk.web.interceptors
 import misk.Action
 import misk.Chain
 import misk.Interceptor
+import misk.inject.typeLiteral
 import misk.web.Response
 import javax.inject.Singleton
 
@@ -18,7 +19,7 @@ class BoxResponseInterceptorFactory : Interceptor.Factory {
 
     override fun create(action: Action): Interceptor? {
         return when {
-            action.returnType.rawType == Response::class.java -> null
+            action.returnType.typeLiteral().rawType == Response::class.java -> null
             else -> interceptor
         }
     }

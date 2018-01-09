@@ -4,8 +4,10 @@ import misk.Interceptor
 import misk.web.actions.WebAction
 import misk.web.actions.asChain
 import misk.web.extractors.ParameterExtractor
+import misk.web.mediatype.MediaRange
 import okhttp3.Headers
 import okhttp3.HttpUrl
+import okhttp3.MediaType
 import okio.Okio
 import org.eclipse.jetty.http.HttpMethod
 import java.util.regex.Matcher
@@ -20,12 +22,14 @@ import kotlin.reflect.KParameter
  * response.
  */
 internal class BoundAction<A : WebAction, R>(
-    val webActionProvider: Provider<A>,
-    val interceptors: MutableList<Interceptor>,
-    parameterExtractorFactories: List<ParameterExtractor.Factory>,
-    val function: KFunction<R>,
-    val pathPattern: PathPattern,
-    val httpMethod: HttpMethod
+        val webActionProvider: Provider<A>,
+        val interceptors: MutableList<Interceptor>,
+        parameterExtractorFactories: List<ParameterExtractor.Factory>,
+        val function: KFunction<R>,
+        val pathPattern: PathPattern,
+        val httpMethod: HttpMethod,
+        val acceptedContentTypes: List<MediaRange>,
+        val responseContentType: MediaType?
 ) {
     val parameterExtractors = ArrayList<ParameterExtractor>()
 
@@ -41,14 +45,15 @@ internal class BoundAction<A : WebAction, R>(
     }
 
     private fun findParameterExtractor(
-        parameterExtractorFactories: List<ParameterExtractor.Factory>,
-        parameter: KParameter
+            parameterExtractorFactories: List<ParameterExtractor.Factory>,
+            parameter: KParameter
     ): ParameterExtractor {
         var result: ParameterExtractor? = null
         for (factory in parameterExtractorFactories) {
-            val parameterExtractor = factory.create(parameter, pathPattern) ?: continue
+            val parameterExtractor = factory.create(function, parameter, pathPattern) ?: continue
             if (result != null) {
-                throw IllegalArgumentException("multiple ways to extract $parameter: $result and $parameterExtractor")
+                throw IllegalArgumentException(
+                        "multiple ways to extract $parameter: $result and $parameterExtractor")
             }
             result = parameterExtractor
         }
@@ -60,22 +65,30 @@ internal class BoundAction<A : WebAction, R>(
 
     /** Returns true if this bound action handled the request. */
     fun tryHandle(
-        jettyRequest: HttpServletRequest,
-        jettyResponse: HttpServletResponse
+            jettyRequest: HttpServletRequest,
+            jettyResponse: HttpServletResponse
     ): Boolean {
         val pathMatcher = matcher(jettyRequest.httpUrl()) ?: return false
-
         if (jettyRequest.method != httpMethod.name) return false
+
+        val requestContentType = jettyRequest.contentType?.let { MediaType.parse(it) }
+        if (requestContentType != null) {
+            if (acceptedContentTypes.none { it.matches(requestContentType) }) return false
+        }
+
+        if (responseContentType != null) {
+            val acceptedResponseContentTypes = jettyRequest.accepts()
+            if (acceptedResponseContentTypes.none { it.matches(responseContentType) }) return false
+        }
 
         val result = handle(jettyRequest.asRequest(), pathMatcher)
         result.writeToJettyResponse(jettyResponse)
-
         return true
     }
 
     private fun handle(
-        request: Request,
-        pathMather: Matcher
+            request: Request,
+            pathMather: Matcher
     ): Response<ResponseBody> {
         // Find values for all the parameters.
         val webAction = webActionProvider.get()
@@ -99,6 +112,19 @@ internal class BoundAction<A : WebAction, R>(
     private fun matcher(requestUrl: HttpUrl): Matcher? {
         val matcher = pathPattern.pattern.matcher(requestUrl.encodedPath())
         return if (matcher.matches()) matcher else null
+    }
+}
+
+private fun HttpServletRequest.accepts(): List<MediaRange> {
+    // TODO(mmihic): Don't blow up if one of the accept headers can't be parsed
+    val accepts = getHeaders("Accept")?.toList()?.map {
+        MediaRange.parse(it)
+    }
+
+    return if (accepts == null || accepts.isEmpty()) {
+        listOf(MediaRange.ALL_MEDIA)
+    } else {
+        accepts
     }
 }
 
