@@ -42,3 +42,4 @@ dependencies {
   testCompile project(':misk/testing')
 }
 
+apply from: rootProject.file('gradle/gradle-mvn-push.gradle')
