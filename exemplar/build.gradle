@@ -38,3 +38,5 @@ jar {
   // files or particular types at will
   from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
 }
+
+apply from: rootProject.file('gradle/gradle-mvn-push.gradle')
