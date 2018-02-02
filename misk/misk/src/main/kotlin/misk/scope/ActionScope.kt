@@ -3,6 +3,9 @@ package misk.scope
 import com.google.inject.Key
 import com.google.inject.Provider
 import java.util.concurrent.Callable
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.ConcurrentMap
+import java.util.concurrent.ConcurrentSkipListMap
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.reflect.KFunction
