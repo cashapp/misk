@@ -6,6 +6,7 @@ import misk.Interceptor
 import misk.metrics.Metrics
 import misk.metrics.MetricsScope
 import misk.web.Response
+import java.util.concurrent.Callable
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -19,7 +20,7 @@ internal class MetricsInterceptor internal constructor(val scope: MetricsScope) 
 
     override fun intercept(chain: Chain): Any? {
         scope.counter("requests").inc()
-        val result = scope.timer("timing").time { chain.proceed(chain.args) }
+        val result = scope.timer("timing").time(Callable { chain.proceed(chain.args) })
         if (result is Response<*>) {
             scope.counter("responses.${result.statusCode / 100}xx").inc()
             scope.counter("responses.${result.statusCode}").inc()

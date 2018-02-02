@@ -34,7 +34,10 @@ internal class WebActionsServlet @Inject constructor(
                 keyOf<Request>() to request.asRequest())
 
         scope.enter(seedData).use {
-            if (boundActions.any { it.tryHandle(request, response) }) {
+            val candidateActions = boundActions.mapNotNull { it.match(request) }
+            val bestAction = candidateActions.sorted().firstOrNull()
+            if (bestAction != null) {
+                bestAction.handle(request, response)
                 logger.debug("Request handled by WebActionServlet")
             }
         }

@@ -52,8 +52,8 @@ internal inline fun <reified T : Any> subtypeOf(): WildcardType {
     return Types.subtypeOf(T::class.java)
 }
 
-internal inline fun <reified T : Any> parameterizedType(
-        vararg typeParameters: Type): ParameterizedType {
+internal inline fun <reified T : Any> parameterizedType(vararg typeParameters: Type)
+        : ParameterizedType {
     return Types.newParameterizedType(T::class.java, *typeParameters)
 }
 

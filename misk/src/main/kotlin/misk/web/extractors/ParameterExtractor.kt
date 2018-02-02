@@ -4,6 +4,7 @@ import misk.web.PathPattern
 import misk.web.Request
 import misk.web.actions.WebAction
 import java.util.regex.Matcher
+import kotlin.reflect.KFunction
 import kotlin.reflect.KParameter
 
 interface ParameterExtractor {
@@ -17,9 +18,13 @@ interface ParameterExtractor {
          * Returns an instance of a [ParameterExtractor] that extracts the value for [parameter],
          * or null if the extractor does not apply to [parameter].
          *
-         * See [HeadersParameterExtractorFactory] and [JsonBodyParameterExtractorFactory] for
+         * See [HeadersParameterExtractorFactory] and [RequestBodyParameterExtractor] for
          * examples.
          */
-        fun create(parameter: KParameter, pathPattern: PathPattern): ParameterExtractor?
+        fun create(
+                function: KFunction<*>,
+                parameter: KParameter,
+                pathPattern: PathPattern
+        ): ParameterExtractor?
     }
 }

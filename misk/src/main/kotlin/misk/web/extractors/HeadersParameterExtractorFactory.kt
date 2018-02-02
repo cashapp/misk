@@ -5,6 +5,7 @@ import misk.web.Request
 import misk.web.RequestHeaders
 import misk.web.actions.WebAction
 import java.util.regex.Matcher
+import kotlin.reflect.KFunction
 import kotlin.reflect.KParameter
 import kotlin.reflect.full.findAnnotation
 
@@ -19,7 +20,11 @@ object HeadersParameterExtractorFactory : ParameterExtractor.Factory {
         }
     }
 
-    override fun create(parameter: KParameter, pathPattern: PathPattern): ParameterExtractor? {
+    override fun create(
+            function: KFunction<*>,
+            parameter: KParameter,
+            pathPattern: PathPattern
+    ): ParameterExtractor? {
         if (parameter.findAnnotation<RequestHeaders>() == null) return null
 
         return extractor
