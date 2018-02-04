@@ -27,3 +27,5 @@ dependencies {
   compile dep.loggingImpl
   compile dep.okHttpMockWebServer
 }
+
+apply from: rootProject.file('gradle/gradle-mvn-push.gradle')
