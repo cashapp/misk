@@ -10,8 +10,8 @@ import misk.config.AppName
 import misk.environment.InstanceMetadata
 import misk.metrics.Metrics
 import misk.metrics.MetricsModule
-import misk.testing.ActionTest
-import misk.testing.ActionTestModule
+import misk.testing.MiskTest
+import misk.testing.MiskTestModule
 import misk.time.FakeClock
 import misk.time.FakeClockModule
 import org.assertj.core.api.Assertions.assertThat
@@ -23,7 +23,7 @@ import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
 
-@ActionTest
+@MiskTest
 internal class StackDriverReporterTest {
     companion object {
         val APP_NAME = "my_app"
@@ -58,7 +58,7 @@ internal class StackDriverReporterTest {
         }
     }
 
-    @ActionTestModule
+    @MiskTestModule
     val module = Modules.combine(
             MetricsModule(),
             FakeClockModule(),
