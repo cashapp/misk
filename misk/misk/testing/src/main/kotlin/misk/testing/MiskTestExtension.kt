@@ -86,7 +86,7 @@ private fun ExtensionContext.startService(): Boolean {
   val namespace = ExtensionContext.Namespace.create(requiredTestClass)
   // First check the context cache
   return getStore(namespace).getOrComputeIfAbsent("startService",
-      { requiredTestClass.getAnnotationsByType(ActionTest::class.java)[0].startService },
+      { requiredTestClass.getAnnotationsByType(MiskTest::class.java)[0].startService },
       Boolean::class.java)
 }
 
@@ -100,7 +100,7 @@ private fun ExtensionContext.getActionTestModules(): Iterable<Module> {
 
 private fun ExtensionContext.modulesViaReflection(): Iterable<Module> {
   return requiredTestClass.declaredFields
-      .filter { it.isAnnotationPresent(ActionTestModule::class.java) }
+      .filter { it.isAnnotationPresent(MiskTestModule::class.java) }
       .map {
         it.isAccessible = true
         it.get(requiredTestInstance) as Module

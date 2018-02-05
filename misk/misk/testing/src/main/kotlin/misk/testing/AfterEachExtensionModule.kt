@@ -7,7 +7,7 @@ import org.junit.jupiter.api.extension.AfterEachCallback
 import org.junit.jupiter.api.extension.BeforeEachCallback
 import kotlin.reflect.KClass
 
-/** Module registering a callback that fires before each test */
+/** Module registering a callback that fires after each test */
 class AfterEachExtensionModule<T : AfterEachCallback> constructor(
     private val kclass: KClass<T>
 ) : KAbstractModule() {
