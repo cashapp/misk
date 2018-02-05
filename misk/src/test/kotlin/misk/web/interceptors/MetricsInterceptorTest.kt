@@ -4,8 +4,8 @@ import org.assertj.core.api.Assertions.assertThat
 import misk.asAction
 import misk.metrics.Metrics
 import misk.metrics.MetricsModule
-import misk.testing.ActionTest
-import misk.testing.ActionTestModule
+import misk.testing.MiskTest
+import misk.testing.MiskTestModule
 import misk.web.Get
 import misk.web.Response
 import misk.web.actions.WebAction
@@ -14,9 +14,9 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import javax.inject.Inject
 
-@ActionTest
+@MiskTest
 class MetricsInterceptorTest {
-  @ActionTestModule
+  @MiskTestModule
   val module = MetricsModule()
 
   @Inject internal lateinit var metricsInterceptorFactory: MetricsInterceptor.Factory
