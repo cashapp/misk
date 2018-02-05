@@ -2,16 +2,16 @@ package misk.metrics.web
 
 import misk.metrics.Metrics
 import misk.metrics.MetricsModule
-import misk.testing.ActionTest
-import misk.testing.ActionTestModule
+import misk.testing.MiskTest
+import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
-@ActionTest
+@MiskTest
 internal class MetricsJsonActionTest {
-    @ActionTestModule
+    @MiskTestModule
     val module = MetricsModule()
 
     @Inject internal lateinit var metrics: Metrics
