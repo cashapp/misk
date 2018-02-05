@@ -1,2 +1,2 @@
-web_config:
+web:
   port: 5678

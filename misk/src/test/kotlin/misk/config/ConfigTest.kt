@@ -19,32 +19,33 @@ class ConfigTest {
             EnvironmentModule(TESTING)
     )
 
-    @Inject lateinit var test_config: TestConfig
+    @Inject
+    private lateinit var testConfig: TestConfig
 
-    @field:[Inject Named("consumer_a")] lateinit var consumer_a_config: ConsumerConfig
+    @field:[Inject Named("consumer_a")] lateinit var consumerA: ConsumerConfig
 
-    @field:[Inject Named("consumer_b")] lateinit var consumer_b_config: ConsumerConfig
+    @field:[Inject Named("consumer_b")] lateinit var consumerB: ConsumerConfig
 
     @Test
     fun testConfigIsProperlyParsed() {
-        assertThat(test_config.web_config).isEqualTo(WebConfig(5678, 30_000))
-        assertThat(test_config.consumer_a).isEqualTo(ConsumerConfig(0, 1))
-        assertThat(test_config.consumer_b).isEqualTo(ConsumerConfig(1, 2))
+        assertThat(testConfig.web).isEqualTo(WebConfig(5678, 30_000))
+        assertThat(testConfig.consumer_a).isEqualTo(ConsumerConfig(0, 1))
+        assertThat(testConfig.consumer_b).isEqualTo(ConsumerConfig(1, 2))
     }
 
     @Test
     fun subConfigsAreNamedProperly() {
-        assertThat(consumer_a_config).isEqualTo(ConsumerConfig(0, 1))
-        assertThat(consumer_b_config).isEqualTo(ConsumerConfig(1, 2))
+        assertThat(consumerA).isEqualTo(ConsumerConfig(0, 1))
+        assertThat(consumerB).isEqualTo(ConsumerConfig(1, 2))
     }
 
     @Test
     fun environmentConfigOverridesCommon() {
-        assertThat(test_config.web_config.port).isEqualTo(5678)
+        assertThat(testConfig.web.port).isEqualTo(5678)
     }
 
     @Test
     fun defaultValuesAreUsed() {
-        assertThat(test_config.consumer_a.min_items).isEqualTo(0)
+        assertThat(testConfig.consumer_a.min_items).isEqualTo(0)
     }
 }

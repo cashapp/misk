@@ -3,7 +3,7 @@ package misk.config
 import misk.web.WebConfig
 
 data class TestConfig(
-    val web_config: WebConfig,
+    val web: WebConfig,
     val consumer_a: ConsumerConfig,
     val consumer_b: ConsumerConfig
 ) : Config

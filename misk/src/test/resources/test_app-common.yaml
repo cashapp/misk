@@ -1,4 +1,4 @@
-web_config:
+web:
   port: 1234
   idle_timeout: 30000
 
