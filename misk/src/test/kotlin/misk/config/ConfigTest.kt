@@ -4,16 +4,16 @@ import org.assertj.core.api.Assertions.assertThat
 import com.google.inject.util.Modules
 import misk.environment.Environment.TESTING
 import misk.environment.EnvironmentModule
-import misk.testing.ActionTest
-import misk.testing.ActionTestModule
+import misk.testing.MiskTest
+import misk.testing.MiskTestModule
 import misk.web.WebConfig
 import org.junit.jupiter.api.Test
 import javax.inject.Inject
 import javax.inject.Named
 
-@ActionTest
+@MiskTest
 class ConfigTest {
-    @ActionTestModule
+    @MiskTestModule
     val module = Modules.combine(
             ConfigModule.create<TestConfig>("test_app"),
             EnvironmentModule(TESTING)
