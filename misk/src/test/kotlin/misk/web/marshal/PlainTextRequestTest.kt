@@ -3,8 +3,8 @@ package misk.web.marshal
 import com.google.inject.util.Modules
 import misk.MiskModule
 import misk.inject.KAbstractModule
-import misk.testing.ActionTest
-import misk.testing.ActionTestModule
+import misk.testing.MiskTest
+import misk.testing.MiskTestModule
 import misk.testing.TestWebModule
 import misk.web.Post
 import misk.web.RequestBody
@@ -22,9 +22,9 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import javax.inject.Inject
 
-@ActionTest(startService = true)
+@MiskTest(startService = true)
 internal class PlainTextRequestTest {
-  @ActionTestModule
+  @MiskTestModule
   val module = Modules.combine(
       MiskModule(),
       WebModule(),

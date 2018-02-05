@@ -5,8 +5,8 @@ import com.google.inject.util.Modules
 import com.squareup.moshi.Moshi
 import misk.MiskModule
 import misk.inject.KAbstractModule
-import misk.testing.ActionTest
-import misk.testing.ActionTestModule
+import misk.testing.MiskTest
+import misk.testing.MiskTestModule
 import misk.testing.TestWebModule
 import misk.web.actions.WebAction
 import misk.web.jetty.JettyService
@@ -17,9 +17,9 @@ import okhttp3.Request
 import org.junit.jupiter.api.Test
 import javax.inject.Inject
 
-@ActionTest(startService = true)
+@MiskTest(startService = true)
 internal class WebDispatchTest {
-  @ActionTestModule
+  @MiskTestModule
   val module = Modules.combine(
       MiskModule(),
       WebModule(),
