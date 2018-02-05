@@ -5,14 +5,14 @@ import com.google.common.util.concurrent.ServiceManager
 import com.google.inject.util.Modules
 import misk.MiskModule
 import misk.services.FakeServiceModule
-import misk.testing.ActionTest
-import misk.testing.ActionTestModule
+import misk.testing.MiskTest
+import misk.testing.MiskTestModule
 import org.junit.jupiter.api.Test
 import javax.inject.Inject
 
-@ActionTest
+@MiskTest
 class LivenessCheckActionTest {
-  @ActionTestModule
+  @MiskTestModule
   val module = Modules.combine(
       MiskModule(),
       FakeServiceModule()

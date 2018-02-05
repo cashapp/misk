@@ -1,12 +1,12 @@
 package com.squareup.exemplar
 
 import org.assertj.core.api.Assertions.assertThat
-import misk.testing.ActionTest
+import misk.testing.MiskTest
 import okhttp3.Headers
 import org.junit.jupiter.api.Test
 import javax.inject.Inject
 
-@ActionTest
+@MiskTest
 class HelloWebActionTest {
   @Inject lateinit var helloWebAction: HelloWebAction
 

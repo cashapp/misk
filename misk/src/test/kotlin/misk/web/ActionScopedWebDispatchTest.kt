@@ -6,8 +6,8 @@ import misk.inject.KAbstractModule
 import misk.scope.ActionScoped
 import misk.scope.ActionScopedProvider
 import misk.scope.ActionScopedProviderModule
-import misk.testing.ActionTest
-import misk.testing.ActionTestModule
+import misk.testing.MiskTest
+import misk.testing.MiskTestModule
 import misk.testing.TestWebModule
 import misk.web.actions.WebAction
 import misk.web.jetty.JettyService
@@ -19,9 +19,9 @@ import java.security.Principal
 import javax.inject.Inject
 import javax.inject.Singleton
 
-@ActionTest(startService = true)
+@MiskTest(startService = true)
 internal class ActionScopedWebDispatchTest {
-  @ActionTestModule
+  @MiskTestModule
   val module = Modules.combine(
       MiskModule(),
       WebModule(),

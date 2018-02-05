@@ -7,14 +7,14 @@ import misk.MiskModule
 import misk.healthchecks.FakeHealthCheck
 import misk.healthchecks.FakeHealthCheckModule
 import misk.services.FakeServiceModule
-import misk.testing.ActionTest
-import misk.testing.ActionTestModule
+import misk.testing.MiskTest
+import misk.testing.MiskTestModule
 import org.junit.jupiter.api.Test
 import javax.inject.Inject
 
-@ActionTest
+@MiskTest
 class ReadinessCheckActionTest {
-  @ActionTestModule
+  @MiskTestModule
   val module = Modules.combine(
       MiskModule(),
       FakeServiceModule(),
