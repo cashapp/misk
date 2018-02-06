@@ -1,6 +1,6 @@
 package misk.web.mediatype
 
-import misk.containsExactly
+import org.assertj.core.api.containsExactly
 import okhttp3.MediaType
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.data.Offset
