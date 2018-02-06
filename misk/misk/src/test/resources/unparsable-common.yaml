@@ -1,0 +1,10 @@
+w eb:
+  port: 1234
+  idle_timeout: 30000
+
+consu mer_a: {
+  max_ items: 1
+
+consumer_b:
+  min_items: 1
+  max_items: 2
