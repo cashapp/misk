@@ -30,8 +30,10 @@ internal class WebDispatchTest {
 
   @Inject
   lateinit var moshi: Moshi
+
   @Inject
   lateinit var jettyService: JettyService
+
   private val helloByeJsonAdapter get() = moshi.adapter(HelloBye::class.java)
 
   @Test
