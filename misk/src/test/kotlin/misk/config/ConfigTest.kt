@@ -26,21 +26,30 @@ class ConfigTest {
   @Inject
   private lateinit var testConfig: TestConfig
 
+
   @field:[Inject Named("consumer_a")]
   lateinit var consumerA: ConsumerConfig
 
   @field:[Inject Named("consumer_b")]
   lateinit var consumerB: ConsumerConfig
 
+  @field:[Inject]
+  lateinit var webConfig: WebConfig
+
   @Test
-  fun testConfigIsProperlyParsed() {
+  fun configIsProperlyParsed() {
     assertThat(testConfig.web).isEqualTo(WebConfig(5678, 30_000))
     assertThat(testConfig.consumer_a).isEqualTo(ConsumerConfig(0, 1))
     assertThat(testConfig.consumer_b).isEqualTo(ConsumerConfig(1, 2))
   }
 
   @Test
-  fun subConfigsAreNamedProperly() {
+  fun subConfigsWithDefaultNamesAreBoundUnqualified() {
+    assertThat(webConfig).isEqualTo(WebConfig(5678, 30_000))
+  }
+
+  @Test
+  fun subConfigsWithCustomNamesAreBoundWithNamedQualifiers() {
     assertThat(consumerA).isEqualTo(ConsumerConfig(0, 1))
     assertThat(consumerB).isEqualTo(ConsumerConfig(1, 2))
   }
