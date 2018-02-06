@@ -4,22 +4,23 @@ import com.google.inject.Provides
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.Moshi
 import misk.inject.KAbstractModule
+import misk.inject.addMultibinderBinding
+import misk.inject.to
+import misk.moshi.okio.ByteStringAdapter
+import misk.moshi.wire.WireMessageAdapter
 import javax.inject.Singleton
 
 class MoshiModule : KAbstractModule() {
   override fun configure() {
-    newSetBinder<JsonAdapter.Factory>()
+    binder().addMultibinderBinding<JsonAdapter.Factory>().to<WireMessageAdapter.Factory>()
+    binder().addMultibinderBinding<JsonAdapter.Factory>().to<ByteStringAdapter.Factory>()
   }
 
   @Provides
   @Singleton
-  fun provideMoshi(
-    jsonAdapterFactories: MutableSet<JsonAdapter.Factory>
-  ): Moshi {
+  fun provideMoshi(jsonAdapterFactories: List<JsonAdapter.Factory>): Moshi {
     val builder = Moshi.Builder()
-    for (jsonAdapterFactory in jsonAdapterFactories) {
-      builder.add(jsonAdapterFactory)
-    }
+    jsonAdapterFactories.forEach { builder.add(it) }
     return builder.build()
   }
 }
