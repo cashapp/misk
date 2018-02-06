@@ -1,12 +1,16 @@
 package misk.config
 
-import org.assertj.core.api.Assertions.assertThat
+import com.google.inject.Guice
+import com.google.inject.ProvisionException
 import com.google.inject.util.Modules
 import misk.environment.Environment.TESTING
 import misk.environment.EnvironmentModule
+import misk.inject.getInstance
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.web.WebConfig
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Test
 import javax.inject.Inject
 import javax.inject.Named
@@ -19,32 +23,95 @@ class ConfigTest {
             EnvironmentModule(TESTING)
     )
 
-    @Inject lateinit var test_config: TestConfig
+    @Inject
+    private lateinit var testConfig: TestConfig
 
-    @field:[Inject Named("consumer_a")] lateinit var consumer_a_config: ConsumerConfig
 
-    @field:[Inject Named("consumer_b")] lateinit var consumer_b_config: ConsumerConfig
+    @field:[Inject Named("consumer_a")]
+    lateinit var consumerA: ConsumerConfig
+
+    @field:[Inject Named("consumer_b")]
+    lateinit var consumerB: ConsumerConfig
+
+    @field:[Inject]
+    lateinit var webConfig: WebConfig
 
     @Test
-    fun testConfigIsProperlyParsed() {
-        assertThat(test_config.web_config).isEqualTo(WebConfig(5678, 30_000))
-        assertThat(test_config.consumer_a).isEqualTo(ConsumerConfig(0, 1))
-        assertThat(test_config.consumer_b).isEqualTo(ConsumerConfig(1, 2))
+    fun configIsProperlyParsed() {
+        assertThat(testConfig.web).isEqualTo(WebConfig(5678, 30_000))
+        assertThat(testConfig.consumer_a).isEqualTo(ConsumerConfig(0, 1))
+        assertThat(testConfig.consumer_b).isEqualTo(ConsumerConfig(1, 2))
     }
 
     @Test
-    fun subConfigsAreNamedProperly() {
-        assertThat(consumer_a_config).isEqualTo(ConsumerConfig(0, 1))
-        assertThat(consumer_b_config).isEqualTo(ConsumerConfig(1, 2))
+    fun subConfigsWithDefaultNamesAreBoundUnqualified() {
+        assertThat(webConfig).isEqualTo(WebConfig(5678, 30_000))
+    }
+
+    @Test
+    fun subConfigsWithCustomNamesAreBoundWithNamedQualifiers() {
+        assertThat(consumerA).isEqualTo(ConsumerConfig(0, 1))
+        assertThat(consumerB).isEqualTo(ConsumerConfig(1, 2))
     }
 
     @Test
     fun environmentConfigOverridesCommon() {
-        assertThat(test_config.web_config.port).isEqualTo(5678)
+        assertThat(testConfig.web.port).isEqualTo(5678)
     }
 
     @Test
     fun defaultValuesAreUsed() {
-        assertThat(test_config.consumer_a.min_items).isEqualTo(0)
+        assertThat(testConfig.consumer_a.min_items).isEqualTo(0)
     }
+
+    @Test
+    fun friendlyErrorMessagesWhenFilesNotFound() {
+        val module = Modules.combine(
+                ConfigModule.create<TestConfig>("missing"),
+                EnvironmentModule(TESTING)
+        )
+
+        val exception = assertThrows(ProvisionException::class.java) {
+            Guice.createInjector(module).getInstance<TestConfig>()
+        }
+
+        assertThat(exception.errorMessages.map { it.message }).anySatisfy {
+            assertThat(it).contains(
+                    "could not find configuration files - checked [missing-common.yaml, missing-testing.yaml]"
+            )
+        }
+    }
+
+    @Test
+    fun friendlyErrorMessageWhenConfigPropertyMissing() {
+        val module = Modules.combine(
+                ConfigModule.create<TestConfig>("partial_test_app"),
+                EnvironmentModule(TESTING)
+        )
+
+        val exception  = assertThrows(ProvisionException::class.java) {
+            Guice.createInjector(module).getInstance<TestConfig>()
+        }
+
+        assertThat(exception.errorMessages.map { it.message }).anySatisfy {
+            assertThat(it).contains("could not find configuration for consumer_a")
+        }
+    }
+
+    @Test
+    fun friendlyErrorMessagesWhenFileUnparseable() {
+        val module = Modules.combine(
+                ConfigModule.create<TestConfig>("unparsable"),
+                EnvironmentModule(TESTING)
+        )
+
+        val exception = assertThrows(ProvisionException::class.java) {
+            Guice.createInjector(module).getInstance<TestConfig>()
+        }
+
+        assertThat(exception.errorMessages.map { it.message }).anySatisfy {
+            assertThat(it).contains("could not parse unparsable-common.yaml")
+        }
+    }
+
 }

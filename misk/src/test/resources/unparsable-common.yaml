@@ -1,9 +1,9 @@
-web:
+w eb:
   port: 1234
   idle_timeout: 30000
 
-consumer_a:
-  max_items: 1
+consu mer_a: {
+  max_ items: 1
 
 consumer_b:
   min_items: 1
