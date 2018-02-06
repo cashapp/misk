@@ -1,5 +1,7 @@
 package misk.config
 
+import com.google.common.base.CaseFormat.LOWER_UNDERSCORE
+import com.google.common.base.CaseFormat.UPPER_CAMEL
 import com.google.inject.TypeLiteral
 import com.google.inject.name.Names
 import misk.inject.KAbstractModule
@@ -36,8 +38,10 @@ class ConfigModule(
             val subConfigTypeLiteral = TypeLiteral.get(
                     property.returnType.javaType) as TypeLiteral<Any?>
 
-            val subConfigTypeName = subConfigTypeLiteral.rawType.simpleName.toLowerCase()
-            if (property.name == subConfigTypeName.substringBefore("config")) {
+            val subConfigTypeName = subConfigTypeLiteral.rawType.simpleName
+            val defaultSubConfigFieldName = UPPER_CAMEL.to(LOWER_UNDERSCORE, subConfigTypeName)
+
+            if (property.name == defaultSubConfigFieldName.substringBefore("_config")) {
                 // The property is the name of the config type, without the unnecessary Config suffix.
                 // This is the default binding for the config type, so bind it without requiring
                 // a name annotation
