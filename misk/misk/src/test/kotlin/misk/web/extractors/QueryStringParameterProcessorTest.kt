@@ -124,6 +124,54 @@ internal class QueryStringParameterProcessorTest {
     assertThat(extractedResult).isEqualTo(42L)
   }
 
+  @Test
+  fun simpleEnum() {
+    val queryStringProcessor = QueryStringParameterProcessor(TestMemberStore.enumParameter())
+    val extractedResult = queryStringProcessor.extractFunctionArgumentValue(listOf("ONE"))
+    assertThat(extractedResult).isNotNull()
+    assertThat(extractedResult).isEqualTo(TestEnum.ONE)
+  }
+
+  @Test
+  fun optionalEnumPresent() {
+    val queryStringProcessor = QueryStringParameterProcessor(
+      TestMemberStore.optionalEnumParameter())
+    val extractedResult = queryStringProcessor.extractFunctionArgumentValue(listOf("ONE"))
+    assertThat(extractedResult).isNotNull()
+    assertThat(extractedResult).isEqualTo(TestEnum.ONE)
+  }
+
+  @Test
+  fun optionalEnumNotPresent() {
+    val queryStringProcessor = QueryStringParameterProcessor(
+      TestMemberStore.optionalEnumParameter())
+    val extractedResult = queryStringProcessor.extractFunctionArgumentValue(listOf())
+    assertThat(extractedResult).isNull()
+  }
+
+  @Test
+  fun defaultEnumPresent() {
+    val queryStringProcessor = QueryStringParameterProcessor(
+      TestMemberStore.defaultEnumParameter())
+    val extractedResult = queryStringProcessor.extractFunctionArgumentValue(listOf())
+    assertThat(extractedResult).isNull()
+  }
+
+  @Test
+  fun unsupportedClass() {
+    try {
+      QueryStringParameterProcessor(TestMemberStore.unsupportedParameter())
+      assert(false)
+    } catch(e: IllegalArgumentException) {
+      // should be thrown
+    }
+  }
+
+  enum class TestEnum {
+    ONE,
+    TWO
+  }
+
   @Suppress("UNUSED_PARAMETER")
   internal class TestMemberStore {
     fun strTest(str: String, optStr: String?, listStr: List<String>, optListStr: List<String>?) {
@@ -133,6 +181,12 @@ internal class QueryStringParameterProcessorTest {
     }
 
     fun longTest(long: Long) {
+    }
+
+    fun enumTest(anEnum: TestEnum, optEnum: TestEnum?, defaultEnum: TestEnum = TestEnum.ONE) {
+    }
+
+    fun unsupportedTest(hashMap: Map<String, String>) {
     }
 
     companion object {
@@ -146,6 +200,10 @@ internal class QueryStringParameterProcessorTest {
       fun intListParameter(): KParameter = TestMemberStore::intTest.parameters.get(3)
       fun optionalIntListParameter(): KParameter = TestMemberStore::intTest.parameters.get(4)
       fun longParameter(): KParameter = TestMemberStore::longTest.parameters.get(1)
+      fun enumParameter(): KParameter = TestMemberStore::enumTest.parameters.get(1)
+      fun optionalEnumParameter(): KParameter = TestMemberStore::enumTest.parameters.get(2)
+      fun defaultEnumParameter(): KParameter = TestMemberStore::enumTest.parameters.get(3)
+      fun unsupportedParameter(): KParameter = TestMemberStore::unsupportedTest.parameters.get(1)
     }
   }
 }
