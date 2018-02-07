@@ -13,6 +13,9 @@ annotation class RequestHeaders
 annotation class PathParam(val value: String = "")
 
 @Target(AnnotationTarget.VALUE_PARAMETER)
+annotation class QueryParam(val value: String = "")
+
+@Target(AnnotationTarget.VALUE_PARAMETER)
 annotation class RequestBody
 
 @Target(AnnotationTarget.FUNCTION)
