@@ -2,35 +2,36 @@ ext {
   kotlinVersion = '1.2.10'
 
   dep = [
-          kotlinStdLib: "org.jetbrains.kotlin:kotlin-stdlib-jre8:$kotlinVersion",
-          kotlinReflect: "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion",
-          kotlinGradlePlugin: "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion",
-          kotlinReflection: "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion",
-          assertj: "org.assertj:assertj-core:3.9.0",
-          guava: 'com.google.guava:guava:23.6-jre',
-          guice: 'com.google.inject:guice:4.1.0',
-          guiceMultibindings: 'com.google.inject.extensions:guice-multibindings:4.1.0',
-          guiceServlet: 'com.google.inject.extensions:guice-servlet:4.1.0',
-          jettyServer: 'org.eclipse.jetty:jetty-server:9.4.8.v20171121',
-          jettyServlet: 'org.eclipse.jetty:jetty-servlet:9.4.8.v20171121',
-          okHttp: 'com.squareup.okhttp3:okhttp:3.9.1',
-          moshi: 'com.squareup.moshi:moshi-kotlin:1.5.0',
-          loggingApi: 'io.github.microutils:kotlin-logging:1.4.9',
-          wireRuntime: 'com.squareup.wire:wire-runtime:2.3.0-RC1',
-          loggingImpl: 'org.apache.logging.log4j:log4j-slf4j-impl:2.10.0',
-          jacksonDatabind: 'com.fasterxml.jackson.core:jackson-databind:2.9.3',
+          kotlinStdLib         : "org.jetbrains.kotlin:kotlin-stdlib-jre8:$kotlinVersion",
+          kotlinReflect        : "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion",
+          kotlinGradlePlugin   : "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion",
+          kotlinReflection     : "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion",
+          assertj              : "org.assertj:assertj-core:3.9.0",
+          guava                : 'com.google.guava:guava:23.6-jre',
+          guice                : 'com.google.inject:guice:4.1.0',
+          guiceMultibindings   : 'com.google.inject.extensions:guice-multibindings:4.1.0',
+          guiceServlet         : 'com.google.inject.extensions:guice-servlet:4.1.0',
+          jettyServer          : 'org.eclipse.jetty:jetty-server:9.4.8.v20171121',
+          jettyServlet         : 'org.eclipse.jetty:jetty-servlet:9.4.8.v20171121',
+          okHttp               : 'com.squareup.okhttp3:okhttp:3.9.1',
+          moshi                : 'com.squareup.moshi:moshi-kotlin:1.5.0',
+          loggingApi           : 'io.github.microutils:kotlin-logging:1.4.9',
+          wireRuntime          : 'com.squareup.wire:wire-runtime:2.3.0-RC1',
+          loggingImpl          : 'org.apache.logging.log4j:log4j-slf4j-impl:2.10.0',
+          jacksonDatabind      : 'com.fasterxml.jackson.core:jackson-databind:2.9.3',
           jacksonDataformatYaml: 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.9.3',
-          jacksonKotlin: 'com.fasterxml.jackson.module:jackson-module-kotlin:2.9.3',
-          metricsParent: 'io.dropwizard.metrics:metrics-parent:4.0.1',
-          metricsCore: 'io.dropwizard.metrics:metrics-core:4.0.1',
-          metricsGraphite: 'io.dropwizard.metrics:metrics-graphite:4.0.1',
-          metricsStackDriver: 'com.google.apis:google-api-services-monitoring:v3-rev428-1.23.0',
-          gcpDatastore: 'com.google.cloud:google-cloud-datastore:1.14.0',
-          gcpKms: 'com.google.apis:google-api-services-cloudkms:v1-rev30-1.23.0',
-          okHttpMockWebServer: 'com.squareup.okhttp3:mockwebserver:3.9.1',
-          junitApi: 'org.junit.jupiter:junit-jupiter-api:5.0.2',
-          junitParams: 'org.junit.jupiter:junit-jupiter-params:5.0.2',
-          junitEngine: 'org.junit.jupiter:junit-jupiter-engine:5.0.2',
+          jacksonKotlin        : 'com.fasterxml.jackson.module:jackson-module-kotlin:2.9.3',
+          metricsParent        : 'io.dropwizard.metrics:metrics-parent:4.0.1',
+          metricsCore          : 'io.dropwizard.metrics:metrics-core:4.0.1',
+          metricsGraphite      : 'io.dropwizard.metrics:metrics-graphite:4.0.1',
+          metricsStackDriver   : 'com.google.apis:google-api-services-monitoring:v3-rev428-1.23.0',
+          gcpDatastore         : 'com.google.cloud:google-cloud-datastore:1.14.0',
+          gcpKms               : 'com.google.apis:google-api-services-cloudkms:v1-rev30-1.23.0',
+          okHttpMockWebServer  : 'com.squareup.okhttp3:mockwebserver:3.9.1',
+          junitApi             : 'org.junit.jupiter:junit-jupiter-api:5.0.2',
+          junitParams          : 'org.junit.jupiter:junit-jupiter-params:5.0.2',
+          junitEngine          : 'org.junit.jupiter:junit-jupiter-engine:5.0.2',
+          gcpCloudStorage      : 'com.google.cloud:google-cloud-storage:1.15.0',
   ]
 
   isCi = "true".equals(System.getenv('CI'))
@@ -46,7 +47,6 @@ subprojects {
     dependencies {
       classpath dep.kotlinGradlePlugin
       classpath 'org.junit.platform:junit-platform-gradle-plugin:1.0.2'
-
     }
   }
   repositories {
