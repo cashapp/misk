@@ -54,9 +54,9 @@ internal class BoundAction<A : WebAction, out R>(
     return result
   }
 
-  fun match(jettyRequest: HttpServletRequest): RequestMatch? {
+  fun match(jettyRequest: HttpServletRequest, url: HttpUrl): RequestMatch? {
     // Confirm the path and method matches
-    val pathMatcher = pathMatcher(jettyRequest.httpUrl()) ?: return null
+    val pathMatcher = pathMatcher(url) ?: return null
     if (jettyRequest.method != httpMethod.name) return null
 
     // Confirm the request content type matches the types we accept, and pick the most specific
@@ -72,7 +72,7 @@ internal class BoundAction<A : WebAction, out R>(
         responseContentType?.closestMediaRangeMatch(jettyRequest.accepts())
     if (responseContentType != null && responseContentTypeMatch == null) return null
 
-    return RequestMatch(this, pathMatcher, requestContentTypeMatch, responseContentTypeMatch)
+    return RequestMatch(this, pathMatcher, responseContentTypeMatch)
   }
 
   internal fun handle(request: Request, pathMather: Matcher): Response<ResponseBody> {
@@ -103,8 +103,8 @@ internal class BoundAction<A : WebAction, out R>(
 
 private fun HttpServletRequest.accepts(): List<MediaRange> {
   // TODO(mmihic): Don't blow up if one of the accept headers can't be parsed
-  val accepts = getHeaders("Accept")?.toList()?.map {
-    MediaRange.parse(it)
+  val accepts = getHeaders("Accept")?.toList()?.flatMap {
+    MediaRange.parseRanges(it)
   }
 
   return if (accepts == null || accepts.isEmpty()) {
@@ -117,51 +117,27 @@ private fun HttpServletRequest.accepts(): List<MediaRange> {
 /** Matches a request to an action. Can be sorted to pick the most specific match amongst a set of candidates */
 internal class RequestMatch(
     val action: BoundAction<*, *>,
-    val pathMatcher: Matcher,
-    val requestContentTypeMatch: MediaRange.Matcher?,
-    val responseContentTypeMatch: MediaRange.Matcher?
+    private val pathMatcher: Matcher,
+    private val responseContentTypeMatch: MediaRange.Matcher?
 ) : Comparable<RequestMatch> {
   override fun compareTo(other: RequestMatch): Int {
     val patternDiff = action.pathPattern.compareTo(other.action.pathPattern)
     if (patternDiff != 0) return patternDiff
+
+    if (responseContentTypeMatch != null && other.responseContentTypeMatch == null) return -1
+    if (responseContentTypeMatch == null && other.responseContentTypeMatch != null) return 1
+    if (responseContentTypeMatch != null && other.responseContentTypeMatch != null) {
+      return responseContentTypeMatch.compareTo(other.responseContentTypeMatch)
+    }
+
     return 0
   }
 
-  fun handle(jettyRequest: HttpServletRequest, jettyResponse: HttpServletResponse) {
-    val result = action.handle(jettyRequest.asRequest(), pathMatcher)
+  fun handle(request: Request, jettyResponse: HttpServletResponse) {
+    val result = action.handle(request, pathMatcher)
     result.writeToJettyResponse(jettyResponse)
   }
 }
 
 private fun MediaType.closestMediaRangeMatch(ranges: List<MediaRange>) =
     ranges.mapNotNull { it.matcher(this) }.sorted().firstOrNull()
-
-private fun HttpServletRequest.headers(): Headers {
-  val headersBuilder = Headers.Builder()
-  val headerNames = headerNames
-  for (headerName in headerNames) {
-    val headerValues = getHeaders(headerName)
-    for (headerValue in headerValues) {
-      headersBuilder.add(headerName, headerValue)
-    }
-  }
-  return headersBuilder.build()
-}
-
-private fun HttpServletRequest.httpUrl(): HttpUrl {
-  val urlString = requestURL.toString() +
-      if (queryString != null) "?" + queryString
-      else ""
-  return HttpUrl.parse(urlString)!!
-}
-
-private fun HttpServletRequest.httpMethod() = HttpMethod.valueOf(method)
-
-private fun HttpServletRequest.bufferedSource() = Okio.buffer(Okio.source(inputStream))
-
-internal fun HttpServletRequest.asRequest() = Request(
-    httpUrl(),
-    httpMethod(),
-    headers(),
-    bufferedSource()
-)

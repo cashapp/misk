@@ -82,8 +82,8 @@ class WebActionModule<A : WebAction> private constructor(
 }
 
 private val KFunction<*>.acceptedContentTypes: List<MediaRange>
-  get() = findAnnotation<RequestContentType>()?.value?.map {
-    MediaRange.parse(it)
+  get() = findAnnotation<RequestContentType>()?.value?.flatMap {
+    MediaRange.parseRanges(it)
   }?.toList() ?: listOf(MediaRange.ALL_MEDIA)
 
 private val KFunction<*>.responseContentType: MediaType?

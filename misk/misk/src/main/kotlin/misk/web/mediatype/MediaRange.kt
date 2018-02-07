@@ -11,7 +11,7 @@ data class MediaRange(
     val qualityFactor: Double = 1.0,
     val parameters: Map<String, String> = mapOf(),
     val extensions: Map<String, String> = mapOf()
-) : Comparable<MediaRange>{
+) : Comparable<MediaRange> {
   override fun compareTo(other: MediaRange): Int {
     if (type == WILDCARD && other.type != WILDCARD) return 1
     if (type != WILDCARD && other.type == WILDCARD) return -1
@@ -27,8 +27,6 @@ data class MediaRange(
 
     return 0
   }
-
-  fun matches(mediaType: MediaType) = matcher(mediaType) != null
 
   fun matcher(mediaType: MediaType): Matcher? {
     val typeMatches = type == mediaType.type() || type == WILDCARD
@@ -51,14 +49,26 @@ data class MediaRange(
     return Matcher(this, true)
   }
 
-  data class Matcher(val mediaRange: MediaRange, val matchesCharset: Boolean = false)
+  data class Matcher(private val mediaRange: MediaRange, val matchesCharset: Boolean = false)
     : Comparable<Matcher> {
-    override fun compareTo(other: Matcher) = mediaRange.compareTo(other.mediaRange)
+    override fun compareTo(other: Matcher): Int {
+      val mediaRangeComparison = mediaRange.compareTo(other.mediaRange)
+      if (mediaRangeComparison != 0) return mediaRangeComparison
+
+      if (matchesCharset && !other.matchesCharset) return -1
+      if (!matchesCharset && other.matchesCharset) return 1
+
+      return 0
+    }
   }
 
   companion object {
     const val WILDCARD = "*"
     val ALL_MEDIA = MediaRange(WILDCARD, WILDCARD)
+
+    fun parseRanges(s: String): List<MediaRange> {
+      return s.split(',').map { parse(it) }
+    }
 
     fun parse(s: String): MediaRange {
       val typeParametersAndExtensions = s.split(';')
@@ -124,13 +134,6 @@ data class MediaRange(
       require(!name.isEmpty()) { "$s is not a valid name/value pair" }
       require(!value.isEmpty()) { "$s is not a valid name/value pair" }
       return name to value
-    }
-
-    private fun computeWildcardCount(type: String, subtype: String): Int {
-      var count = 0
-      if (type == Companion.WILDCARD) count++
-      if (subtype == Companion.WILDCARD) count++
-      return count
     }
   }
 }
