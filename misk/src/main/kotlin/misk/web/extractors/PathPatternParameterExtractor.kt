@@ -1,11 +1,9 @@
 package misk.web.extractors
 
-import misk.enums.RawEnums
 import misk.web.PathParam
 import misk.web.PathPattern
 import misk.web.Request
 import misk.web.actions.WebAction
-import java.lang.reflect.Type
 import java.util.regex.Matcher
 import kotlin.reflect.KFunction
 import kotlin.reflect.KParameter
@@ -30,10 +28,10 @@ object PathPatternParameterExtractorFactory : ParameterExtractor.Factory {
         val patternIndex = pathPattern.variableNames.indexOf(parameterName)
         if (patternIndex == -1) return null
 
-        val parameterType = parameter.type.javaType
+        val parameterType = parameter.type
         val converter = converterFor(parameterType)
                 ?: throw IllegalArgumentException(
-                        "cannot convert path parameters to ${parameterType.typeName}"
+                        "cannot convert path parameters to ${parameterType.javaType.typeName}"
                 )
         return object : ParameterExtractor {
             override fun extract(
@@ -45,23 +43,5 @@ object PathPatternParameterExtractorFactory : ParameterExtractor.Factory {
                 return converter(pathParam)
             }
         }
-    }
-}
-
-// TODO(mmihic): Pull this into a separate area where it can be used by QueryParam etc
-private typealias StringConverter = (String) -> Any
-
-private fun converterFor(type: Type): StringConverter? {
-    if (type is Class<*> && type.isEnum) {
-        return { param -> RawEnums.valueOf(type, param) }
-    }
-
-    return when (type) {
-        String::class.java -> { param -> param }
-        Int::class.java -> { param -> param.toInt() }
-        Long::class.java -> { param -> param.toLong() }
-        Double::class.java -> { param -> param.toDouble() }
-        Float::class.java -> { param -> param.toFloat() }
-        else -> null
     }
 }
