@@ -34,8 +34,8 @@ internal class QueryStringRequestTest {
 
     @Test
     fun basicParams() {
-        assertThat(get("/basic-params", "str=foo&something=stuff&int=12").message)
-                .isEqualTo("foo stuff 12 basic-params")
+        assertThat(get("/basic-params", "str=foo&something=stuff&int=12&testEnum=ONE").message)
+                .isEqualTo("foo stuff 12 ONE basic-params")
     }
 
     @Test
@@ -51,13 +51,13 @@ internal class QueryStringRequestTest {
 
     @Test
     fun defaultParamsPresent() {
-        assertThat(get("/default-params", "str=foo&int=12").message)
-                .isEqualTo("foo 12 default-params")
+        assertThat(get("/default-params", "str=foo&int=12&testEnum=ONE").message)
+                .isEqualTo("foo 12 ONE default-params")
     }
 
     @Test
     fun defaultParamsNotPresent() {
-        assertThat(get("/default-params", "").message).isEqualTo("square 23 default-params")
+        assertThat(get("/default-params", "").message).isEqualTo("square 23 TWO default-params")
     }
 
     @Test
@@ -66,14 +66,20 @@ internal class QueryStringRequestTest {
                 .isEqualTo("foo bar baz 12 42 list-params")
     }
 
+    enum class TestEnum {
+        ONE,
+        TWO
+    }
+
     class BasicParamsAction : WebAction {
         @Get("/basic-params")
         @ResponseContentType(MediaTypes.APPLICATION_JSON)
         fun call(
                 @QueryParam str: String,
                 @QueryParam("something") other: String,
-                @QueryParam int: Int
-        ) = Packet("${str} ${other} ${int} basic-params")
+                @QueryParam int: Int,
+                @QueryParam testEnum: TestEnum
+        ) = Packet("${str} ${other} ${int} ${testEnum} basic-params")
     }
 
     class OptionalParamsAction : WebAction {
@@ -86,8 +92,11 @@ internal class QueryStringRequestTest {
     class DefaultParamsAction : WebAction {
         @Get("/default-params")
         @ResponseContentType(MediaTypes.APPLICATION_JSON)
-        fun call(@QueryParam str: String = "square", @QueryParam int: Int = 23)
-                = Packet("${str} ${int} default-params")
+        fun call(
+            @QueryParam str: String = "square",
+            @QueryParam int: Int = 23,
+            @QueryParam testEnum: TestEnum = TestEnum.TWO)
+                = Packet("${str} ${int} ${testEnum} default-params")
     }
 
     class ListParamsAction : WebAction {
