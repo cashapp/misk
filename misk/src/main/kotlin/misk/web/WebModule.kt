@@ -13,6 +13,7 @@ import misk.web.exceptions.ExceptionMapperModule
 import misk.web.extractors.HeadersParameterExtractorFactory
 import misk.web.extractors.ParameterExtractor
 import misk.web.extractors.PathPatternParameterExtractorFactory
+import misk.web.extractors.QueryStringParameterExtractorFactory
 import misk.web.extractors.RequestBodyParameterExtractor
 import misk.web.interceptors.BoxResponseInterceptorFactory
 import misk.web.interceptors.InternalErrorInterceptorFactory
@@ -73,6 +74,8 @@ class WebModule : KAbstractModule() {
         // Register built-in parameter extractors
         binder().addMultibinderBinding<ParameterExtractor.Factory>()
                 .toInstance(PathPatternParameterExtractorFactory)
+        binder().addMultibinderBinding<ParameterExtractor.Factory>()
+                .toInstance(QueryStringParameterExtractorFactory)
         binder().addMultibinderBinding<ParameterExtractor.Factory>()
                 .toInstance(HeadersParameterExtractorFactory)
         binder().addMultibinderBinding<ParameterExtractor.Factory>()

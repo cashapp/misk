@@ -8,10 +8,11 @@ import javax.inject.Inject
 
 @MiskTest
 class HelloWebActionTest {
-    @Inject lateinit var helloWebAction: HelloWebAction
+  @Inject lateinit var helloWebAction: HelloWebAction
 
-    @Test
-    fun test() {
-        assertThat(helloWebAction.hello("sandy", Headers.of())).isEqualTo(HelloResponse("YO", "SANDY"))
-    }
+  @Test
+  fun test() {
+    assertThat(helloWebAction.hello("sandy", Headers.of(), null, null))
+        .isEqualTo(HelloResponse("YO", "SANDY"))
+  }
 }
