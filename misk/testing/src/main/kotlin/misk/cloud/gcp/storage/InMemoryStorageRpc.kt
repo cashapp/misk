@@ -1,16 +1,8 @@
 package misk.cloud.gcp.storage
 
-import com.google.api.services.storage.model.Bucket
-import com.google.api.services.storage.model.BucketAccessControl
-import com.google.api.services.storage.model.Notification
-import com.google.api.services.storage.model.ObjectAccessControl
-import com.google.api.services.storage.model.Policy
-import com.google.api.services.storage.model.ServiceAccount
 import com.google.api.services.storage.model.StorageObject
-import com.google.api.services.storage.model.TestIamPermissionsResponse
 import com.google.cloud.Tuple
 import com.google.cloud.storage.StorageException
-import com.google.cloud.storage.spi.v1.RpcBatch
 import com.google.cloud.storage.spi.v1.StorageRpc
 import com.google.common.io.ByteStreams.toByteArray
 import java.io.InputStream
@@ -20,19 +12,15 @@ import java.util.concurrent.locks.ReentrantReadWriteLock
 import kotlin.concurrent.read
 import kotlin.concurrent.write
 
-internal class InMemoryStorageRpc : StorageRpc {
+/**
+ * Implementation of [StorageRpc] that keeps all of its data purely in-memory, useful primarily
+ * for tests. This implementation is fully thread safe.
+ */
+class InMemoryStorageRpc : BaseCustomStorageRpc() {
     private val content = mutableMapOf<String, ByteArray>()
     private val metadata = mutableMapOf<String, StorageObject>()
     private val pendingContent = mutableMapOf<String, ByteArray>()
     private val lock = ReentrantReadWriteLock()
-
-    fun reset() {
-        lock.write {
-            content.clear()
-            metadata.clear()
-            pendingContent.clear()
-        }
-    }
 
     override fun create(
             obj: StorageObject,
@@ -79,17 +67,11 @@ internal class InMemoryStorageRpc : StorageRpc {
                     StorageObject()
                             .setName(obj.name.substring(0, subFolderEnd))
                             .setBucket(obj.bucket)
-                            .setGeneration(obj.generation)
-                            .setMetageneration(obj.metageneration)
                             .setOwner(obj.owner)
                 } else obj
             } ?: obj
         }.distinctBy { it.name }
         return Tuple.of(null, results)
-    }
-
-    override fun get(bucket: Bucket, options: Map<StorageRpc.Option, *>): Bucket? {
-        throw UnsupportedOperationException()
     }
 
     override fun get(obj: StorageObject, options: Map<StorageRpc.Option, *>): StorageObject? =
@@ -100,22 +82,15 @@ internal class InMemoryStorageRpc : StorageRpc {
                 toReturn.setSize(BigInteger.valueOf(content[obj.path]?.size?.toLong() ?: 0L))
             }
 
-    override fun patch(bucket: Bucket, options: Map<StorageRpc.Option, *>): Bucket? {
-        throw UnsupportedOperationException()
-    }
-
-    override fun patch(obj: StorageObject, options: Map<StorageRpc.Option, *>): StorageObject? {
-        throw UnsupportedOperationException()
-    }
-
-    override fun delete(bucket: Bucket, options: Map<StorageRpc.Option, *>): Boolean {
-        throw UnsupportedOperationException()
-    }
-
     override fun delete(obj: StorageObject, options: Map<StorageRpc.Option, *>): Boolean =
             lock.write {
-                content.remove(obj.path)
-                metadata.remove(obj.path) != null
+                try {
+                    options.check(metadata[obj.path])
+                    content.remove(obj.path)
+                    metadata.remove(obj.path) != null
+                } catch (e: StorageException) {
+                    false
+                }
             }
 
     override fun load(obj: StorageObject, options: Map<StorageRpc.Option, *>): ByteArray =
@@ -213,140 +188,6 @@ internal class InMemoryStorageRpc : StorageRpc {
                         "token",
                         sourceData.size.toLong())
             }
-
-    // Unsupported operations
-    override fun create(bucket: Bucket, options: Map<StorageRpc.Option, *>): Bucket {
-        throw UnsupportedOperationException()
-    }
-
-    override fun list(options: Map<StorageRpc.Option, *>?): Tuple<String, Iterable<Bucket>> {
-        throw UnsupportedOperationException()
-    }
-
-    override fun createAcl(acl: BucketAccessControl?, options: Map<StorageRpc.Option, *>?)
-            : BucketAccessControl {
-        throw UnsupportedOperationException()
-    }
-
-    override fun createAcl(acl: ObjectAccessControl?): ObjectAccessControl {
-        throw UnsupportedOperationException()
-    }
-
-    override fun getIamPolicy(bucket: String?, options: Map<StorageRpc.Option, *>?): Policy {
-        throw UnsupportedOperationException()
-    }
-
-    override fun patchAcl(acl: BucketAccessControl?, options: Map<StorageRpc.Option, *>?)
-            : BucketAccessControl {
-        throw UnsupportedOperationException()
-    }
-
-    override fun patchAcl(acl: ObjectAccessControl?): ObjectAccessControl {
-        throw UnsupportedOperationException()
-    }
-
-    override fun getServiceAccount(projectId: String?): ServiceAccount {
-        throw UnsupportedOperationException()
-    }
-
-    override fun getAcl(
-            bucket: String?,
-            entity: String?,
-            options: Map<StorageRpc.Option, *>?
-    ): BucketAccessControl {
-        throw UnsupportedOperationException()
-    }
-
-    override fun getAcl(
-            bucket: String?,
-            obj: String?,
-            generation: Long?,
-            entity: String?
-    ): ObjectAccessControl {
-        throw UnsupportedOperationException()
-    }
-
-    override fun listDefaultAcls(bucket: String?): MutableList<ObjectAccessControl> {
-        throw UnsupportedOperationException()
-    }
-
-    override fun testIamPermissions(
-            bucket: String,
-            permissions: List<String>,
-            options: Map<StorageRpc.Option, *>
-    ): TestIamPermissionsResponse {
-        throw UnsupportedOperationException()
-    }
-
-    override fun continueRewrite(previousResponse: StorageRpc.RewriteResponse)
-            : StorageRpc.RewriteResponse {
-        throw UnsupportedOperationException()
-    }
-
-    override fun createBatch(): RpcBatch {
-        throw UnsupportedOperationException()
-    }
-
-    override fun createNotification(bucket: String?, notification: Notification?): Notification {
-        throw UnsupportedOperationException()
-    }
-
-    override fun listAcls(bucket: String?,
-            options: Map<StorageRpc.Option, *>?): List<BucketAccessControl> {
-        throw UnsupportedOperationException()
-    }
-
-    override fun listAcls(
-            bucket: String?,
-            obj: String?,
-            generation: Long?
-    ): List<ObjectAccessControl> {
-        throw UnsupportedOperationException()
-    }
-
-    override fun getDefaultAcl(bucket: String?, entity: String?): ObjectAccessControl {
-        throw UnsupportedOperationException()
-    }
-
-    override fun deleteAcl(bucket: String?, entity: String?,
-            options: Map<StorageRpc.Option, *>?): Boolean {
-        throw UnsupportedOperationException()
-    }
-
-    override fun deleteAcl(bucket: String?, `object`: String?, generation: Long?,
-            entity: String?): Boolean {
-        throw UnsupportedOperationException()
-    }
-
-    override fun compose(sources: Iterable<StorageObject>?, target: StorageObject?,
-            targetOptions: Map<StorageRpc.Option, *>?): StorageObject {
-        throw UnsupportedOperationException()
-    }
-
-    override fun setIamPolicy(bucket: String?, policy: Policy?,
-            options: Map<StorageRpc.Option, *>?): Policy {
-        throw UnsupportedOperationException()
-    }
-
-    override fun deleteDefaultAcl(bucket: String?, entity: String?): Boolean {
-        throw UnsupportedOperationException()
-    }
-
-    override fun patchDefaultAcl(acl: ObjectAccessControl?): ObjectAccessControl {
-        throw UnsupportedOperationException()
-    }
-
-    override fun createDefaultAcl(acl: ObjectAccessControl?): ObjectAccessControl {
-        throw UnsupportedOperationException()
-    }
-
-    override fun listNotifications(bucket: String?): List<Notification> {
-        throw UnsupportedOperationException()
-    }
-
-    override fun deleteNotification(bucket: String?, notification: String?): Boolean {
-        throw UnsupportedOperationException()
-    }
 }
 
 fun Map<StorageRpc.Option, *>.check(obj: StorageObject?): StorageObject? {
@@ -367,7 +208,6 @@ fun Map<StorageRpc.Option, *>.check(obj: StorageObject?): StorageObject? {
 
     return obj
 }
-
 
 private fun checkMatch(value: Any?, objValue: Long?) {
     val longValue = (value as? Number)?.toLong() ?: 0L
