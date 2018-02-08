@@ -222,4 +222,22 @@ internal class MediaRangeTest {
         val sorted = unsorted.sorted()
         assertThat(sorted).containsExactly(r6, r5, r4, r3, r2, r1)
     }
+
+    // From https://developer.mozilla.org/en-US/docs/Web/HTTP/Content_negotiation/List_of_default_Accept_values
+    @Test
+    fun parsesDefaultBrowserValues() {
+        MediaRange.parseRanges("text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
+
+        MediaRange.parseRanges(
+                "application/xml,application/xhtml+xml,text/html;q=0.9, text/plain;q=0.8,image/png,*/*;q=0.5"
+        )
+        MediaRange.parseRanges("text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
+        MediaRange.parseRanges(
+                "image/jpeg, application/x-ms-application, image/gif, application/xaml+xml, image/pjpeg, application/x-ms-xbap, application/x-shockwave-flash, application/msword, */*"
+        )
+        MediaRange.parseRanges("text/html, application/xhtml+xml, image/jxr, */*")
+        MediaRange.parseRanges(
+                "text/html, application/xml;q=0.9, application/xhtml+xml, image/png, image/webp, image/jpeg, image/gif, image/x-xbitmap, */*;q=0.1"
+        )
+    }
 }

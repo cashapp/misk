@@ -8,6 +8,7 @@ import java.util.regex.Matcher
 import kotlin.reflect.KFunction
 import kotlin.reflect.KParameter
 import kotlin.reflect.full.findAnnotation
+import kotlin.reflect.jvm.javaType
 
 /**
  * Creates a [ParameterExtractor] that extracts the URL parameter with the same name as [parameter]
@@ -27,10 +28,19 @@ object PathPatternParameterExtractorFactory : ParameterExtractor.Factory {
         val patternIndex = pathPattern.variableNames.indexOf(parameterName)
         if (patternIndex == -1) return null
 
+        val parameterType = parameter.type
+        val converter = converterFor(parameterType)
+                ?: throw IllegalArgumentException(
+                        "cannot convert path parameters to ${parameterType.javaType.typeName}"
+                )
         return object : ParameterExtractor {
-            override fun extract(webAction: WebAction, request: Request,
-                    pathMatcher: Matcher): Any? {
-                return pathMatcher.group(patternIndex + 1)
+            override fun extract(
+                    webAction: WebAction,
+                    request: Request,
+                    pathMatcher: Matcher
+            ): Any? {
+                val pathParam = pathMatcher.group(patternIndex + 1)
+                return converter(pathParam)
             }
         }
     }
