@@ -32,11 +32,21 @@ jar {
   manifest {
     attributes 'Main-Class': 'com.squareup.exemplar.ExemplarServiceKt'
   }
-
-  // This line of code recursively collects and copies all of a project's files
-  // and adds them to the JAR itself. One can extend this task, to skip certain
-  // files or particular types at will
-  from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+  classifier = 'unshaded'
 }
 
 apply from: rootProject.file('gradle/gradle-mvn-push.gradle')
+apply plugin: 'com.github.johnrengelman.shadow'
+
+task shadedJar(type: com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar) {
+  classifier = null
+  manifest.attributes 'Main-Class': 'com.squareup.exemplar.ExemplarServiceKt'
+
+  from(project.convention.getPlugin(JavaPluginConvention).sourceSets.main.output)
+  configurations = [project.configurations.runtime]
+  exclude('META-INF/INDEX.LIST', 'META-INF/*.SF', 'META-INF/*.DSA', 'META-INF/*.RSA')
+}
+
+artifacts {
+  archives shadedJar
+}
