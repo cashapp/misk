@@ -3,9 +3,6 @@ package misk.scope
 import com.google.inject.Key
 import com.google.inject.Provider
 import java.util.concurrent.Callable
-import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.ConcurrentMap
-import java.util.concurrent.ConcurrentSkipListMap
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.reflect.KFunction
@@ -88,8 +85,21 @@ class ActionScope @Inject internal constructor(
     fun <T> get(key: Key<T>): T {
         check(tls.get() != null) { "not running within an ActionScope" }
 
+        // NB(mmihic): We don't use computeIfAbsent because computing the value of this
+        // key might require computing the values of keys on which we depend, which would
+        // cause recursive calls to computeIfAbsent which is unsupported (and explicitly
+        // detected in JDK 9+)
+        val threadState = tls.get()
+        val cachedValue = threadState[key]
+        if (cachedValue != null) {
+            @Suppress("UNCHECKED_CAST")
+            return cachedValue as T
+        }
+
         @Suppress("UNCHECKED_CAST")
-        return tls.get().computeIfAbsent(key) { providerFor(key as Key<Any>).get() as Any } as T
+        val value = providerFor(key as Key<Any>).get() as T
+        threadState[key] = value as Any
+        return value
     }
 
     @Suppress("UNCHECKED_CAST")
@@ -105,12 +115,12 @@ class ActionScope @Inject internal constructor(
             val wrapped: KFunction<T>
     ) : KFunction<T> {
         override fun call(vararg args: Any?): T = scope.enter(seedData).use {
-            wrapped.call(*args)
-        }
+                    wrapped.call(*args)
+                }
 
         override fun callBy(args: Map<KParameter, Any?>): T = scope.enter(seedData).use {
-            wrapped.callBy(args)
-        }
+                    wrapped.callBy(args)
+                }
 
         override val annotations: List<Annotation> = wrapped.annotations
         override val isAbstract: Boolean = wrapped.isAbstract
