@@ -43,4 +43,8 @@ open class ResourceUnavailableException(message: String = "", cause: Throwable? 
 open class BadRequestException(message: String = "", cause: Throwable? = null) :
         ActionException(StatusCode.BAD_REQUEST, message, cause)
 
+/** Similar to [kotlin.require], but throws [BadRequestException] if the check fails */
+inline fun requireRequest(check: Boolean, lazyMessage: () -> String) {
+    if (!check) throw BadRequestException(lazyMessage())
+}
 
