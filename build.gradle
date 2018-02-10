@@ -32,6 +32,7 @@ ext {
           junitParams          : 'org.junit.jupiter:junit-jupiter-params:5.0.2',
           junitEngine          : 'org.junit.jupiter:junit-jupiter-engine:5.0.2',
           gcpCloudStorage      : 'com.google.cloud:google-cloud-storage:1.15.0',
+          jCommander           : 'com.beust:jcommander:1.72',
   ]
 
   isCi = "true".equals(System.getenv('CI'))
