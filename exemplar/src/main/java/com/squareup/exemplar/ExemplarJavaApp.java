@@ -19,6 +19,6 @@ public class ExemplarJavaApp {
         new ExemplarJavaModule(),
         new ExemplarJavaConfigModule(),
         EnvironmentModule.fromEnvironmentVariable()
-    ).startAndAwaitStopped();
+    ).run(args);
   }
 }

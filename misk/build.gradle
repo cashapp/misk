@@ -39,6 +39,7 @@ dependencies {
   compile dep.gcpDatastore
   compile dep.gcpKms
   compile dep.gcpCloudStorage
+  compile dep.jCommander
 
   testCompile project(':misk/testing')
 }
