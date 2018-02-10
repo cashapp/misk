@@ -6,7 +6,7 @@ of this repository.
 Build exemplar:
 
 ```
-  $ ./gradlew clean jar
+  $ ./gradlew clean assemble
 ```  
 
 ## Docker
