@@ -16,5 +16,5 @@ fun main(args: Array<String>) {
             ExemplarModule(),
             ExemplarConfigModule(),
             EnvironmentModule.fromEnvironmentVariable()
-    ).startAndAwaitStopped()
+    ).run(args)
 }
