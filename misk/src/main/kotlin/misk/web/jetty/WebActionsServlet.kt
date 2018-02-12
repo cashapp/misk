@@ -10,9 +10,10 @@ import okhttp3.Headers
 import okhttp3.HttpUrl
 import okio.Okio
 import org.eclipse.jetty.http.HttpMethod
+import org.eclipse.jetty.websocket.servlet.WebSocketServlet
+import org.eclipse.jetty.websocket.servlet.WebSocketServletFactory
 import javax.inject.Inject
 import javax.inject.Singleton
-import javax.servlet.http.HttpServlet
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
@@ -21,8 +22,9 @@ private val logger = getLogger<WebActionsServlet>()
 @Singleton
 internal class WebActionsServlet @Inject constructor(
         private val boundActions: MutableSet<BoundAction<out WebAction, *>>,
-        private val scope: ActionScope
-) : HttpServlet() {
+        private val scope: ActionScope,
+        private val socketCreator: SocketCreator
+) : WebSocketServlet() {
     override fun doGet(request: HttpServletRequest, response: HttpServletResponse) {
         handleCall(request, response)
     }
@@ -41,8 +43,12 @@ internal class WebActionsServlet @Inject constructor(
             val candidateActions = boundActions.mapNotNull { it.match(request, asRequest.url) }
             val bestAction = candidateActions.sorted().firstOrNull()
             bestAction?.handle(asRequest, response)
-            logger.debug {"Request handled by WebActionServlet" }
+            logger.debug { "Request handled by WebActionServlet" }
         }
+    }
+
+    override fun configure(factory: WebSocketServletFactory?) {
+        factory?.creator = socketCreator
     }
 }
 

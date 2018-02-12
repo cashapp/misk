@@ -1,4 +1,4 @@
-package com.squareup.exemplar
+package com.squareup.exemplar.actions
 
 import misk.web.Get
 import misk.web.PathParam
@@ -22,7 +22,8 @@ class HelloWebAction : WebAction {
     ): HelloResponse {
         return HelloResponse(
                 greetings?.joinToString(separator = " ") ?: "YO",
-                nickName?.toUpperCase() ?: name.toUpperCase())
+                nickName?.toUpperCase() ?: name.toUpperCase()
+        )
     }
 }
 

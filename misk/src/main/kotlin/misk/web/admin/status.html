@@ -1,0 +1,87 @@
+<html>
+<head>
+  <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+  <style>
+    .unhealthy {
+      background: red;
+    }
+
+    .healthy {
+      background: green;
+    }
+  </style>
+</head>
+<body>
+<h1>Status</h1>
+
+<div id="app">
+  <div v-if="loading">
+    I am currently loading!
+  </div>
+
+  <div v-if="!loading">
+    <div v-for="healthCheck in state.healthChecks">
+      <h2 v-bind:class="{ 'healthy' : healthCheck.isHealthy, 'unhealthy': !healthCheck.isHealthy }">
+        {{ healthCheck.name }}
+      </h2>
+      <li v-for="msg in healthCheck.messages">
+        {{ msg }}
+      </li>
+    </div>
+  </div>
+</div>
+
+<script>
+  const ws_url = `ws://${window.location.host}${window.location.pathname}`;
+  var ws = new WebSocket(ws_url);
+
+  const app = new Vue({
+    el: '#app',
+    data: {
+      loading: true,
+      state: {
+        healthChecks: [],
+      },
+    },
+    methods: {
+      handleMsg: function(msg) {
+        const json = JSON.parse(msg.data);
+        const state = Object.assign({}, this.state);
+        for (i = 0; i < state.healthChecks.length; i++) {
+          if (state.healthChecks[i].name == json.name) {
+            state.healthChecks[i] = json;
+          }
+        }
+
+        this.state = state;
+      },
+
+      handleInitialState: function(state) {
+        const json = JSON.parse(state);
+        this.state = json;
+        this.loading = false;
+      },
+    }
+  });
+
+  ws.onmessage = function(msg) {
+    app.handleMsg(msg);
+  };
+
+  const current_data = httpGetAsync(`http://${window.location.host}/api${window.location.pathname}`, function(state) {
+     app.handleInitialState(state);
+  });
+
+  function httpGetAsync(theUrl, callback) {
+      var xmlHttp = new XMLHttpRequest();
+      xmlHttp.onreadystatechange = function() {
+          if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
+              callback(xmlHttp.responseText);
+          }
+      }
+      xmlHttp.open("GET", theUrl, true);
+      xmlHttp.send(null);
+  };
+</script>
+</body>
+</html>

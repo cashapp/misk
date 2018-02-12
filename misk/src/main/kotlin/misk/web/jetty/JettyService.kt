@@ -7,7 +7,7 @@ import misk.web.WebConfig
 import okhttp3.HttpUrl
 import org.eclipse.jetty.server.Server
 import org.eclipse.jetty.server.ServerConnector
-import org.eclipse.jetty.servlet.ServletHandler
+import org.eclipse.jetty.servlet.ServletContextHandler
 import org.eclipse.jetty.servlet.ServletHolder
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -38,13 +38,12 @@ class JettyService @Inject internal constructor(
         val serverConnector = ServerConnector(server)
         serverConnector.port = webConfig.port
         serverConnector.idleTimeout = webConfig.idle_timeout
-        val servletHandler = ServletHandler()
-        servletHandler.addServletWithMapping(ServletHolder(webActionsServlet), "/*")
-
         server.addConnector(serverConnector)
-        server.addManaged(servletHandler)
 
-        server.handler = servletHandler
+        val context = ServletContextHandler(ServletContextHandler.SESSIONS)
+        context.contextPath = "/"
+        context.addServlet(ServletHolder(webActionsServlet), "/*")
+        server.handler = context
 
         server.start()
 
