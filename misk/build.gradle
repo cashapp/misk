@@ -32,9 +32,11 @@ dependencies {
   compile dep.jacksonDatabind
   compile dep.jacksonDataformatYaml
   compile dep.jacksonKotlin
+  compile dep.jacksonJsr310
   compile dep.metricsCore
   compile dep.metricsParent
   compile dep.metricsGraphite
+  compile dep.metricsSignalFx
   compile dep.metricsStackDriver
   compile dep.gcpDatastore
   compile dep.gcpKms
