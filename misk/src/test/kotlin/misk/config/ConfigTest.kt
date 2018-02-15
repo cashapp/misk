@@ -12,6 +12,7 @@ import misk.web.WebConfig
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Test
+import java.time.Duration
 import javax.inject.Inject
 import javax.inject.Named
 
@@ -41,6 +42,7 @@ class ConfigTest {
     assertThat(testConfig.web).isEqualTo(WebConfig(5678, 30_000))
     assertThat(testConfig.consumer_a).isEqualTo(ConsumerConfig(0, 1))
     assertThat(testConfig.consumer_b).isEqualTo(ConsumerConfig(1, 2))
+    assertThat(testConfig.duration).isEqualTo(DurationConfig(Duration.parse("PT1S")))
   }
 
   @Test

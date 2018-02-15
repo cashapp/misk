@@ -3,6 +3,7 @@ package misk.config
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.kotlin.MissingKotlinParameterException
 import misk.environment.Environment
@@ -22,6 +23,7 @@ internal class ConfigProvider<T : Config>(
   override fun get(): T {
     val mapper = ObjectMapper(YAMLFactory())
     mapper.registerModule(KotlinModule())
+    mapper.registerModule(JavaTimeModule())
 
     var jsonNode: JsonNode? = null
     val missingConfigFiles = mutableListOf<String>()
