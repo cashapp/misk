@@ -34,8 +34,8 @@ internal class ContentBasedDispatchTest {
     private val plainTextMediaType = MediaTypes.TEXT_PLAIN_UTF8.asMediaType()
     private val weirdTextMediaType = "text/weird".asMediaType()
 
-    private @Inject lateinit var moshi: Moshi
-    private @Inject lateinit var jettyService: JettyService
+    @Inject lateinit var moshi: Moshi
+    @Inject lateinit var jettyService: JettyService
     private val packetJsonAdapter get() = moshi.adapter(Packet::class.java)
 
     @Test
