@@ -11,6 +11,7 @@ import misk.web.Response
 import misk.web.marshal.StringResponseBody
 import misk.web.mediatype.MediaTypes
 import okhttp3.Headers
+import org.slf4j.event.Level
 import java.lang.reflect.InvocationTargetException
 import java.util.concurrent.ExecutionException
 import javax.inject.Inject
@@ -24,7 +25,7 @@ import javax.inject.Inject
  */
 class ExceptionHandlingInterceptor(
     private val actionName: String,
-    private val mappers: Set<ExceptionMapper<*>>
+    private val mapperResolver: ExceptionMapperResolver
 ) : Interceptor {
 
   override fun intercept(chain: Chain): Any? = try {
@@ -37,16 +38,11 @@ class ExceptionHandlingInterceptor(
     is ExecutionException -> toResponse(th.cause!!)
     is InvocationTargetException -> toResponse(th.targetException)
     is UncheckedExecutionException -> toResponse(th.cause!!)
-    else -> mapperFor(th)?.let {
+    else -> mapperResolver.mapperFor(th)?.let {
       log.log(it.loggingLevel(th), th) { "exception dispatching to $actionName" }
       it.toResponse(th)
     } ?: toInternalServerError(th)
   }
-
-  @Suppress("UNCHECKED_CAST")
-  private fun mapperFor(th: Throwable): ExceptionMapper<Throwable>? = mappers.firstOrNull {
-    it.canHandle(th)
-  } as ExceptionMapper<Throwable>?
 
   private fun toInternalServerError(th: Throwable): Response<*> {
     log.error(th) { "unexpected error dispatching to $actionName" }
@@ -54,9 +50,9 @@ class ExceptionHandlingInterceptor(
   }
 
   class Factory @Inject internal constructor(
-      private val mappers: MutableSet<ExceptionMapper<*>>
+    private val mapperResolver: ExceptionMapperResolver
   ) : Interceptor.Factory {
-    override fun create(action: Action) = ExceptionHandlingInterceptor(action.name, mappers)
+    override fun create(action: Action) = ExceptionHandlingInterceptor(action.name, mapperResolver)
   }
 
   private companion object {
