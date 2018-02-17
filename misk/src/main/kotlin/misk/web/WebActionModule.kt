@@ -20,24 +20,78 @@ import kotlin.reflect.KFunction
 import kotlin.reflect.full.findAnnotation
 
 class WebActionModule<A : WebAction> private constructor(
-  val webActionClass: KClass<A>,
-  val member: KFunction<*>,
-  val pathPattern: String,
-  val httpMethod: HttpMethod,
-  val acceptedContentTypes: List<MediaRange>,
-  val responseContentType: MediaType?
+  val webActionClass: KClass<A>
 ) : AbstractModule() {
   override fun configure() {
-    val provider = getProvider(webActionClass.java)
     @Suppress("UNCHECKED_CAST")
     val binder: Multibinder<BoundAction<A, *>> = Multibinder.newSetBinder(
         binder(),
         parameterizedType<BoundAction<*, *>>(subtypeOf<WebAction>(),
             subtypeOf<Any>()).typeLiteral()
     ) as Multibinder<BoundAction<A, *>>
-    binder.addBinding().toProvider(
-        BoundActionProvider(provider, member, pathPattern, httpMethod,
-            acceptedContentTypes, responseContentType))
+
+    // Find the function with Get or Post annotations. Only one such function is
+    // allow, but may have both Get and Post annotations if the action can handle
+    // both forms of HTTP method
+    val actionFunctions = webActionClass.members.mapNotNull {
+      if (it.findAnnotation<Get>() != null ||
+          it.findAnnotation<Post>() != null ||
+          it.findAnnotation<ConnectWebSocket>() != null) {
+        it as? KFunction<*>
+            ?: throw IllegalArgumentException("expected $it to be a function")
+      } else null
+    }
+
+    require(actionFunctions.isNotEmpty()) {
+      "no Get or Post annotations on ${webActionClass.simpleName}"
+    }
+
+    require(actionFunctions.size == 1) {
+      val actionFunctionNames = actionFunctions.joinToString(", ") { it.name }
+      "multiple annotated methods on ${webActionClass.simpleName}: $actionFunctionNames"
+    }
+
+    // Bind providers for each supported HTTP method
+    val actionFunction = actionFunctions.first()
+    val get = actionFunction.findAnnotation<Get>()
+    if (get != null) {
+      val getProvider = buildProvider(actionFunction, HttpMethod.GET, get.pathPattern)
+      binder.addBinding().toProvider(getProvider)
+    }
+
+    // Only one of ConnectWebSocket and Get may be specified
+    val connectWebSocket = actionFunction.findAnnotation<ConnectWebSocket>()
+    require(connectWebSocket == null || get == null) {
+      "only one of Get or ConnectWebSocket may be specified for the same path on ${webActionClass.simpleName}"
+    }
+    if (connectWebSocket != null) {
+      val connectWebSocketProvider =
+          buildProvider(actionFunction, HttpMethod.GET, connectWebSocket.pathPattern)
+      binder.addBinding().toProvider(connectWebSocketProvider)
+    }
+
+    val post = actionFunction.findAnnotation<Post>()
+    if (post != null) {
+      val postProvider = buildProvider(actionFunction, HttpMethod.POST, post.pathPattern)
+      binder.addBinding().toProvider(postProvider)
+    }
+  }
+
+  private fun buildProvider(function: KFunction<*>, httpMethod: HttpMethod, pathPattern: String):
+      BoundActionProvider<A, *> {
+    // NB(mmihic): The response media type may be ommitted; in this case only
+    // generic return types (String, ByteString, ResponseBody, etc) are supported
+    val responseContentType = function.responseContentType
+    val acceptedContentTypes = function.acceptedContentTypes
+    val provider = getProvider(webActionClass.java)
+    return BoundActionProvider(
+        provider,
+        function,
+        pathPattern,
+        httpMethod,
+        acceptedContentTypes,
+        responseContentType
+    )
   }
 
   companion object {
@@ -49,37 +103,7 @@ class WebActionModule<A : WebAction> private constructor(
     }
 
     fun <A : WebAction> create(webActionClass: KClass<A>): WebActionModule<A> {
-      var result: WebActionModule<A>? = null
-
-      for (member in webActionClass.members) {
-        for (annotation in member.annotations) {
-          if (annotation !is Get && annotation !is Post && annotation !is ConnectWebSocket) continue
-          if (member !is KFunction<*>) throw IllegalArgumentException(
-              "expected $member to be a function")
-          if (result != null) throw IllegalArgumentException(
-              "multiple annotated methods in $webActionClass")
-
-          // NB(mmihic): The response media type may be ommitted; in this case only
-          // generic return types (String, ByteString, ResponseBody, etc) are supported
-          val responseContentType = member.responseContentType
-          val acceptedContentTypes = member.acceptedContentTypes
-
-          result = when (annotation) {
-            is Get -> WebActionModule(webActionClass, member, annotation.pathPattern,
-                HttpMethod.GET, acceptedContentTypes, responseContentType)
-            is Post -> WebActionModule(webActionClass, member, annotation.pathPattern,
-                HttpMethod.POST, acceptedContentTypes, responseContentType)
-            is ConnectWebSocket -> WebActionModule(webActionClass, member,
-                annotation.pathPattern, HttpMethod.GET, acceptedContentTypes,
-                responseContentType)
-            else -> throw AssertionError()
-          }
-        }
-      }
-      if (result == null) {
-        throw IllegalArgumentException("no annotated methods in $webActionClass")
-      }
-      return result
+      return WebActionModule(webActionClass)
     }
   }
 }
@@ -97,20 +121,22 @@ private val KFunction<*>.responseContentType: MediaType?
 internal class BoundActionProvider<A : WebAction, R>(
   val provider: Provider<A>,
   val function: KFunction<R>,
-  val pathPattern: String,
-  val httpMethod: HttpMethod,
-  val acceptedContentTypes: List<MediaRange>,
-  val responseContentType: MediaType?
+  private val pathPattern: String,
+  private val httpMethod: HttpMethod,
+  private val acceptedContentTypes: List<MediaRange>,
+  private val responseContentType: MediaType?
 ) : Provider<BoundAction<A, *>> {
 
   @Inject
-  lateinit var userProvidedInterceptorFactories: List<Interceptor.Factory>
+  private lateinit var userProvidedInterceptorFactories: List<Interceptor.Factory>
+
   @Inject
   @JvmSuppressWildcards
   @MiskDefault
-  lateinit var miskInterceptorFactories: Set<Interceptor.Factory>
+  private lateinit var miskInterceptorFactories: Set<Interceptor.Factory>
+
   @Inject
-  lateinit var parameterExtractorFactories: List<ParameterExtractor.Factory>
+  private lateinit var parameterExtractorFactories: List<ParameterExtractor.Factory>
 
   override fun get(): BoundAction<A, *> {
     val action = function.asAction()
