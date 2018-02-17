@@ -13,19 +13,20 @@ import misk.inject.asSingleton
 import misk.inject.to
 
 class StackDriverBackendModule : KAbstractModule() {
-    override fun configure() {
-        bind<StackDriverSender>()
-                .to<StackDriverBatchedSender>()
-                .asSingleton()
+  override fun configure() {
+    bind<StackDriverSender>()
+        .to<StackDriverBatchedSender>()
+        .asSingleton()
 
-        binder().addMultibinderBinding<Service>().to<StackDriverReporterService>()
-    }
+    binder().addMultibinderBinding<Service>()
+        .to<StackDriverReporterService>()
+  }
 
-    @Provides
-    @Singleton
-    fun monitoring(@AppName appName: String, config: StackDriverBackendConfig): Monitoring =
-            Monitoring.Builder(GoogleNetHttpTransport.newTrustedTransport(), JacksonFactory(), null)
-                    .setApplicationName(appName)
-                    .build()
+  @Provides
+  @Singleton
+  fun monitoring(@AppName appName: String, config: StackDriverBackendConfig): Monitoring =
+      Monitoring.Builder(GoogleNetHttpTransport.newTrustedTransport(), JacksonFactory(), null)
+          .setApplicationName(appName)
+          .build()
 
 }

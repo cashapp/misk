@@ -11,7 +11,7 @@ import javax.inject.Singleton
 /** Exposes metrics as JSON over HTTP */
 @Singleton
 class MetricsJsonAction @Inject internal constructor(val metrics: Metrics) : WebAction {
-    @Get("/_metrics")
-    @ResponseContentType(MediaTypes.APPLICATION_JSON)
-    fun getMetrics(): JsonMetrics = JsonMetrics(metrics)
+  @Get("/_metrics")
+  @ResponseContentType(MediaTypes.APPLICATION_JSON)
+  fun getMetrics(): JsonMetrics = JsonMetrics(metrics)
 }

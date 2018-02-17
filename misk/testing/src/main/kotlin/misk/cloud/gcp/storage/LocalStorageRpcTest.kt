@@ -9,11 +9,11 @@ import javax.inject.Inject
 
 @MiskTest(startService = false)
 internal class LocalStorageRpcTest : CustomStorageRpcTestCases<LocalStorageRpc>() {
-    @MiskTestModule
-    val module = TemporaryFolderModule()
+  @MiskTestModule
+  val module = TemporaryFolderModule()
 
-    @Inject
-    private lateinit var tempFolder: TemporaryFolder
+  @Inject
+  private lateinit var tempFolder: TemporaryFolder
 
-    override fun newStorageRpc() = LocalStorageRpc(tempFolder.newFolder(), Moshi.Builder().build())
+  override fun newStorageRpc() = LocalStorageRpc(tempFolder.newFolder(), Moshi.Builder().build())
 }

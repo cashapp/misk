@@ -13,21 +13,21 @@ data class Response<out T>(
 )
 
 interface ResponseBody {
-    fun writeTo(sink: BufferedSink)
+  fun writeTo(sink: BufferedSink)
 }
 
 fun Response<ResponseBody>.writeToJettyResponse(jettyResponse: HttpServletResponse) {
-    jettyResponse.status = statusCode
+  jettyResponse.status = statusCode
 
-    for ((key, values) in headers.toMultimap()) {
-        for (value in values) {
-            jettyResponse.addHeader(key, value)
-        }
+  for ((key, values) in headers.toMultimap()) {
+    for (value in values) {
+      jettyResponse.addHeader(key, value)
     }
+  }
 
-    val sink = jettyResponse.bufferedSink()
-    body.writeTo(sink)
-    sink.emit()
+  val sink = jettyResponse.bufferedSink()
+  body.writeTo(sink)
+  sink.emit()
 }
 
 private fun HttpServletResponse.bufferedSink() = Okio.buffer(Okio.sink(outputStream))

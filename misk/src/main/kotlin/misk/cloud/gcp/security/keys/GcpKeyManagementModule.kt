@@ -11,15 +11,16 @@ import misk.security.keys.KeyService
 import javax.inject.Singleton
 
 class GcpKeyManagementModule : KAbstractModule() {
-    override fun configure() {
-        bind<KeyService>().to<GcpKeyService>().asSingleton()
-    }
+  override fun configure() {
+    bind<KeyService>().to<GcpKeyService>()
+        .asSingleton()
+  }
 
-    @Provides
-    @Singleton
-    fun providesKms(@AppName appName: String): CloudKMS =
-            CloudKMS.Builder(newTrustedTransport(), JacksonFactory(), null)
-                    .setApplicationName(appName)
-                    .build()
+  @Provides
+  @Singleton
+  fun providesKms(@AppName appName: String): CloudKMS =
+      CloudKMS.Builder(newTrustedTransport(), JacksonFactory(), null)
+          .setApplicationName(appName)
+          .build()
 
 }

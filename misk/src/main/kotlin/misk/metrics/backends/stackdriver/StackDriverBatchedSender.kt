@@ -14,37 +14,47 @@ internal class StackDriverBatchedSender @Inject internal constructor(
     val monitoring: Monitoring,
     val config: StackDriverBackendConfig
 ) : StackDriverSender {
-    companion object {
-        val logger = getLogger<StackDriverSender>()
+  companion object {
+    val logger = getLogger<StackDriverSender>()
+  }
+
+  val timeSeriesApi = monitoring.projects()
+      .timeSeries()
+
+  override fun send(timeSeries: List<TimeSeries>) {
+    if (timeSeries.size > config.batch_size) {
+      val batch = monitoring.batch()
+      timeSeries
+          .chunked(config.batch_size)
+          .map { CreateTimeSeriesRequest().setTimeSeries(it) }
+          .forEach {
+            timeSeriesApi.create(config.project_id, it)
+                .queue(batch, ResponseCallback())
+          }
+      batch.execute()
+    } else {
+      val request = CreateTimeSeriesRequest().setTimeSeries(timeSeries)
+      val create = timeSeriesApi.create(config.project_id, request)
+          .execute()
+      if (!create.isEmpty()) {
+        logger.warn(create.toPrettyString())
+      }
+    }
+  }
+
+  class ResponseCallback : JsonBatchCallback<Empty>() {
+    override fun onFailure(
+        e: GoogleJsonError?,
+        responseHeaders: HttpHeaders?
+    ) {
+      logger.warn("failed to send timeseries to stack driver ${e?.toPrettyString()}")
     }
 
-    val timeSeriesApi = monitoring.projects().timeSeries()
-
-    override fun send(timeSeries: List<TimeSeries>) {
-        if (timeSeries.size > config.batch_size) {
-            val batch = monitoring.batch()
-            timeSeries
-                    .chunked(config.batch_size)
-                    .map { CreateTimeSeriesRequest().setTimeSeries(it) }
-                    .forEach {
-                        timeSeriesApi.create(config.project_id, it).queue(batch, ResponseCallback())
-                    }
-            batch.execute()
-        } else {
-            val request = CreateTimeSeriesRequest().setTimeSeries(timeSeries)
-            val create = timeSeriesApi.create(config.project_id, request).execute()
-            if (!create.isEmpty()) {
-                logger.warn(create.toPrettyString())
-            }
-        }
+    override fun onSuccess(
+        t: Empty?,
+        responseHeaders: HttpHeaders?
+    ) {
     }
-
-    class ResponseCallback : JsonBatchCallback<Empty>() {
-        override fun onFailure(e: GoogleJsonError?, responseHeaders: HttpHeaders?) {
-            logger.warn("failed to send timeseries to stack driver ${e?.toPrettyString()}")
-        }
-
-        override fun onSuccess(t: Empty?, responseHeaders: HttpHeaders?) {}
-    }
+  }
 
 }

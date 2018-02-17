@@ -5,136 +5,140 @@ import java.nio.charset.Charset
 
 /** An RFC-2616 media range */
 data class MediaRange(
-        val type: String,
-        val subtype: String,
-        val charset: Charset? = null,
-        val qualityFactor: Double = 1.0,
-        val parameters: Map<String, String> = mapOf(),
-        val extensions: Map<String, String> = mapOf()
+    val type: String,
+    val subtype: String,
+    val charset: Charset? = null,
+    val qualityFactor: Double = 1.0,
+    val parameters: Map<String, String> = mapOf(),
+    val extensions: Map<String, String> = mapOf()
 ) : Comparable<MediaRange> {
-    override fun compareTo(other: MediaRange): Int {
-        if (type == WILDCARD && other.type != WILDCARD) return 1
-        if (type != WILDCARD && other.type == WILDCARD) return -1
+  override fun compareTo(other: MediaRange): Int {
+    if (type == WILDCARD && other.type != WILDCARD) return 1
+    if (type != WILDCARD && other.type == WILDCARD) return -1
 
-        if (subtype == WILDCARD && other.subtype != WILDCARD) return 1
-        if (subtype != WILDCARD && other.subtype == WILDCARD) return -1
+    if (subtype == WILDCARD && other.subtype != WILDCARD) return 1
+    if (subtype != WILDCARD && other.subtype == WILDCARD) return -1
 
-        val parameterDiff = other.parameters.size - parameters.size
-        if (parameterDiff != 0) return parameterDiff
+    val parameterDiff = other.parameters.size - parameters.size
+    if (parameterDiff != 0) return parameterDiff
 
-        val extensionDiff = other.extensions.size - extensions.size
-        if (extensionDiff != 0) return extensionDiff
+    val extensionDiff = other.extensions.size - extensions.size
+    if (extensionDiff != 0) return extensionDiff
 
-        return 0
+    return 0
+  }
+
+  fun matcher(mediaType: MediaType): Matcher? {
+    val typeMatches = type == mediaType.type() || type == WILDCARD
+    val subtypeMatches = subtype == mediaType.subtype() || subtype == WILDCARD
+    if (!typeMatches || !subtypeMatches) {
+      return null
     }
 
-    fun matcher(mediaType: MediaType): Matcher? {
-        val typeMatches = type == mediaType.type() || type == WILDCARD
-        val subtypeMatches = subtype == mediaType.subtype() || subtype == WILDCARD
-        if (!typeMatches || !subtypeMatches) {
-            return null
-        }
-
-        if (charset == null || mediaType.charset() == null) {
-            // The media type matches, but we can't compare charsets because either the range
-            // or the media type lacks a specified charset
-            return Matcher(this)
-        }
-
-        if (charset != mediaType.charset()) {
-            // Both specify a charset but they don't match, so we don't match
-            return null
-        }
-
-        return Matcher(this, true)
+    if (charset == null || mediaType.charset() == null) {
+      // The media type matches, but we can't compare charsets because either the range
+      // or the media type lacks a specified charset
+      return Matcher(this)
     }
 
-    data class Matcher(private val mediaRange: MediaRange, val matchesCharset: Boolean = false)
-        : Comparable<Matcher> {
-        override fun compareTo(other: Matcher): Int {
-            val mediaRangeComparison = mediaRange.compareTo(other.mediaRange)
-            if (mediaRangeComparison != 0) return mediaRangeComparison
-
-            if (matchesCharset && !other.matchesCharset) return -1
-            if (!matchesCharset && other.matchesCharset) return 1
-
-            return 0
-        }
+    if (charset != mediaType.charset()) {
+      // Both specify a charset but they don't match, so we don't match
+      return null
     }
 
-    companion object {
-        const val WILDCARD = "*"
-        val ALL_MEDIA = MediaRange(WILDCARD, WILDCARD)
+    return Matcher(this, true)
+  }
 
-        fun parseRanges(s: String): List<MediaRange> {
-            return s.split(',').map { parse(it) }
-        }
+  data class Matcher(
+      private val mediaRange: MediaRange,
+      val matchesCharset: Boolean = false
+  ) : Comparable<Matcher> {
+    override fun compareTo(other: Matcher): Int {
+      val mediaRangeComparison = mediaRange.compareTo(other.mediaRange)
+      if (mediaRangeComparison != 0) return mediaRangeComparison
 
-        fun parse(s: String): MediaRange {
-            val typeParametersAndExtensions = s.split(';')
-            val typeParts = typeParametersAndExtensions[0].split('/')
-            require(typeParts.size == 2) { "$s is not a valid media range" }
+      if (matchesCharset && !other.matchesCharset) return -1
+      if (!matchesCharset && other.matchesCharset) return 1
 
-            val type = typeParts[0].trim()
-            val subtype = typeParts[1].trim()
-            require(!type.isEmpty()) { "$s is not a valid media range" }
-            require(!subtype.isEmpty()) { "$s is not a valid media range" }
-            require(type != WILDCARD || subtype == WILDCARD) { "$s is not a valid media range" }
+      return 0
+    }
+  }
 
-            if (typeParametersAndExtensions.size == 1) {
-                return MediaRange(type, subtype)
+  companion object {
+    const val WILDCARD = "*"
+    val ALL_MEDIA = MediaRange(WILDCARD, WILDCARD)
+
+    fun parseRanges(s: String): List<MediaRange> {
+      return s.split(',')
+          .map { parse(it) }
+    }
+
+    fun parse(s: String): MediaRange {
+      val typeParametersAndExtensions = s.split(';')
+      val typeParts = typeParametersAndExtensions[0].split('/')
+      require(typeParts.size == 2) { "$s is not a valid media range" }
+
+      val type = typeParts[0].trim()
+      val subtype = typeParts[1].trim()
+      require(!type.isEmpty()) { "$s is not a valid media range" }
+      require(!subtype.isEmpty()) { "$s is not a valid media range" }
+      require(type != WILDCARD || subtype == WILDCARD) { "$s is not a valid media range" }
+
+      if (typeParametersAndExtensions.size == 1) {
+        return MediaRange(type, subtype)
+      }
+
+      val parametersAndExtensions = typeParametersAndExtensions.drop(1)
+          .map {
+            parseNameValue(it)
+          }
+      val parameters = LinkedHashMap<String, String>()
+      val extensions = LinkedHashMap<String, String>()
+      var charset: Charset? = null
+      var qualityFactor = 1.0
+      var inParameters = true
+
+      for (p in parametersAndExtensions) {
+        when {
+          p.first == "q" -> {
+            require(inParameters) {
+              "$s is not a valid media range; quality factor specified multiple times"
             }
 
-            val parametersAndExtensions = typeParametersAndExtensions.drop(1).map {
-                parseNameValue(it)
-            }
-            val parameters = LinkedHashMap<String, String>()
-            val extensions = LinkedHashMap<String, String>()
-            var charset: Charset? = null
-            var qualityFactor = 1.0
-            var inParameters = true
-
-            for (p in parametersAndExtensions) {
-                when {
-                    p.first == "q" -> {
-                        require(inParameters) {
-                            "$s is not a valid media range; quality factor specified multiple times"
-                        }
-
-                        qualityFactor = p.second.toDouble()
-                        inParameters = false
-                    }
-                    p.first == "charset" -> {
-                        require(inParameters) {
-                            "$s is not a valid media range; encountered charset parameter in extensions"
-                        }
-
-                        charset = Charset.forName(p.second.toUpperCase())
-                    }
-                    inParameters -> parameters.put(p.first, p.second)
-                    else -> extensions.put(p.first, p.second)
-                }
+            qualityFactor = p.second.toDouble()
+            inParameters = false
+          }
+          p.first == "charset" -> {
+            require(inParameters) {
+              "$s is not a valid media range; encountered charset parameter in extensions"
             }
 
-            return MediaRange(
-                    type,
-                    subtype,
-                    charset,
-                    qualityFactor,
-                    parameters.toMap(),
-                    extensions.toMap()
-            )
+            charset = Charset.forName(p.second.toUpperCase())
+          }
+          inParameters -> parameters.put(p.first, p.second)
+          else -> extensions.put(p.first, p.second)
         }
+      }
 
-        private fun parseNameValue(s: String): Pair<String, String> {
-            val parts = s.split('=')
-            require(parts.size == 2) { "$s is not a valid name/value pair" }
-            val name = parts[0].trim()
-            val value = parts[1].trim()
-            require(!name.isEmpty()) { "$s is not a valid name/value pair" }
-            require(!value.isEmpty()) { "$s is not a valid name/value pair" }
-            return name to value
-        }
+      return MediaRange(
+          type,
+          subtype,
+          charset,
+          qualityFactor,
+          parameters.toMap(),
+          extensions.toMap()
+      )
     }
+
+    private fun parseNameValue(s: String): Pair<String, String> {
+      val parts = s.split('=')
+      require(parts.size == 2) { "$s is not a valid name/value pair" }
+      val name = parts[0].trim()
+      val value = parts[1].trim()
+      require(!name.isEmpty()) { "$s is not a valid name/value pair" }
+      require(!value.isEmpty()) { "$s is not a valid name/value pair" }
+      return name to value
+    }
+  }
 }
 

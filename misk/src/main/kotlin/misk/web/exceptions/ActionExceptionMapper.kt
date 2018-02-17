@@ -16,21 +16,21 @@ import org.slf4j.event.Level
  * implementation details and possible vulnerabilities
  */
 internal class ActionExceptionMapper : ExceptionMapper<ActionException> {
-    override fun toResponse(th: ActionException): Response<ResponseBody> {
-        val message = if (th.statusCode.isClientError) th.message ?: th.statusCode.name
-        else th.statusCode.name
-        return Response(StringResponseBody(message), HEADERS, statusCode = th.statusCode.code)
-    }
+  override fun toResponse(th: ActionException): Response<ResponseBody> {
+    val message = if (th.statusCode.isClientError) th.message ?: th.statusCode.name
+    else th.statusCode.name
+    return Response(StringResponseBody(message), HEADERS, statusCode = th.statusCode.code)
+  }
 
-    override fun canHandle(th: Throwable): Boolean = th is ActionException
+  override fun canHandle(th: Throwable): Boolean = th is ActionException
 
-    override fun loggingLevel(th: ActionException) =
-            if (th.statusCode.isClientError) Level.WARN
-            else Level.ERROR
+  override fun loggingLevel(th: ActionException) =
+      if (th.statusCode.isClientError) Level.WARN
+      else Level.ERROR
 
-    private companion object {
-        val HEADERS: Headers =
-                Headers.of(listOf("Content-Type" to MediaTypes.TEXT_PLAIN_UTF8).toMap())
-    }
+  private companion object {
+    val HEADERS: Headers =
+        Headers.of(listOf("Content-Type" to MediaTypes.TEXT_PLAIN_UTF8).toMap())
+  }
 }
 

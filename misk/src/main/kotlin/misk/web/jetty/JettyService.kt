@@ -16,47 +16,47 @@ private val logger = getLogger<JettyService>()
 
 @Singleton
 class JettyService @Inject internal constructor(
-        private val webActionsServlet: WebActionsServlet,
-        private val webConfig: WebConfig
+    private val webActionsServlet: WebActionsServlet,
+    private val webConfig: WebConfig
 ) : AbstractIdleService() {
 
-    private val server = Server()
+  private val server = Server()
 
-    val serverUrl: HttpUrl
-        get() {
-            return HttpUrl.Builder()
-                    .scheme(server.uri.scheme)
-                    .host(server.uri.host)
-                    .port(server.uri.port)
-                    .build()
-        }
-
-    override fun startUp() {
-        val stopwatch = Stopwatch.createStarted()
-        logger.info("Starting up Jetty")
-
-        val serverConnector = ServerConnector(server)
-        serverConnector.port = webConfig.port
-        serverConnector.idleTimeout = webConfig.idle_timeout
-        val servletHandler = ServletHandler()
-        servletHandler.addServletWithMapping(ServletHolder(webActionsServlet), "/*")
-
-        server.addConnector(serverConnector)
-        server.addManaged(servletHandler)
-
-        server.handler = servletHandler
-
-        server.start()
-
-        logger.info { "Started Jetty in $stopwatch on port ${webConfig.port}" }
+  val serverUrl: HttpUrl
+    get() {
+      return HttpUrl.Builder()
+          .scheme(server.uri.scheme)
+          .host(server.uri.host)
+          .port(server.uri.port)
+          .build()
     }
 
-    override fun shutDown() {
-        val stopwatch = Stopwatch.createStarted()
-        logger.info("Stopping Jetty")
+  override fun startUp() {
+    val stopwatch = Stopwatch.createStarted()
+    logger.info("Starting up Jetty")
 
-        server.stop()
+    val serverConnector = ServerConnector(server)
+    serverConnector.port = webConfig.port
+    serverConnector.idleTimeout = webConfig.idle_timeout
+    val servletHandler = ServletHandler()
+    servletHandler.addServletWithMapping(ServletHolder(webActionsServlet), "/*")
 
-        logger.info { "Stopped Jetty in $stopwatch" }
-    }
+    server.addConnector(serverConnector)
+    server.addManaged(servletHandler)
+
+    server.handler = servletHandler
+
+    server.start()
+
+    logger.info { "Started Jetty in $stopwatch on port ${webConfig.port}" }
+  }
+
+  override fun shutDown() {
+    val stopwatch = Stopwatch.createStarted()
+    logger.info("Stopping Jetty")
+
+    server.stop()
+
+    logger.info { "Stopped Jetty in $stopwatch" }
+  }
 }

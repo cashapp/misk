@@ -13,7 +13,8 @@ import static com.squareup.wire.internal.Internal.immutableCopyOf;
 import static com.squareup.wire.internal.Internal.newMutableList;
 
 public final class Dinosaur extends Message<Dinosaur, Dinosaur.Builder> {
-  public static final ProtoAdapter<Dinosaur> ADAPTER = ProtoAdapter.newMessageAdapter(Dinosaur.class);
+  public static final ProtoAdapter<Dinosaur> ADAPTER =
+      ProtoAdapter.newMessageAdapter(Dinosaur.class);
 
   private static final long serialVersionUID = 0L;
 

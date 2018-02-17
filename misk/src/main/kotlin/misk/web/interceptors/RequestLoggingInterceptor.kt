@@ -14,18 +14,18 @@ private val logger = getLogger<RequestLoggingInterceptor>()
  * client.
  */
 internal class RequestLoggingInterceptor : Interceptor {
-    @Singleton
-    class Factory : Interceptor.Factory {
-        override fun create(action: Action): Interceptor? {
-            // TODO: return null if we don't want to log the request
-            return RequestLoggingInterceptor()
-        }
+  @Singleton
+  class Factory : Interceptor.Factory {
+    override fun create(action: Action): Interceptor? {
+      // TODO: return null if we don't want to log the request
+      return RequestLoggingInterceptor()
     }
+  }
 
-    override fun intercept(chain: Chain): Any? {
-        val stopwatch = Stopwatch.createStarted()
-        val result = chain.proceed(chain.args)
-        logger.debug { "action ${chain.action} took $stopwatch" }
-        return result
-    }
+  override fun intercept(chain: Chain): Any? {
+    val stopwatch = Stopwatch.createStarted()
+    val result = chain.proceed(chain.args)
+    logger.debug { "action ${chain.action} took $stopwatch" }
+    return result
+  }
 }

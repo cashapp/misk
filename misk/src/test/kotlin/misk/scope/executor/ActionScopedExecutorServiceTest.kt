@@ -1,6 +1,5 @@
 package misk.scope.executor
 
-import org.assertj.core.api.Assertions.assertThat
 import com.google.inject.Guice
 import com.google.inject.Key
 import com.google.inject.Provides
@@ -11,6 +10,7 @@ import misk.inject.keyOf
 import misk.scope.ActionScope
 import misk.scope.ActionScoped
 import misk.scope.TestActionScopedProviderModule
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.util.concurrent.Callable
@@ -20,54 +20,58 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 internal class ActionScopedExecutorServiceTest {
-    class Tester {
-        @Inject
-        @Named("foo") lateinit var foo: ActionScoped<String>
+  class Tester {
+    @Inject
+    @Named("foo") lateinit var foo: ActionScoped<String>
 
-        fun fooValue() = foo.get()
-    }
+    fun fooValue() = foo.get()
+  }
 
-    @Test
-    fun propagatesScopeIfInScope() {
-        val injector = Guice.createInjector(
-                TestActionScopedProviderModule(),
-                ActionScopedExecutorServiceModule())
+  @Test
+  fun propagatesScopeIfInScope() {
+    val injector = Guice.createInjector(
+        TestActionScopedProviderModule(),
+        ActionScopedExecutorServiceModule()
+    )
 
-        val tester = injector.getInstance(Tester::class.java)
-        val executor = injector.getInstance(ExecutorService::class.java)
-        val scope = injector.getInstance(ActionScope::class.java)
+    val tester = injector.getInstance(Tester::class.java)
+    val executor = injector.getInstance(ExecutorService::class.java)
+    val scope = injector.getInstance(ActionScope::class.java)
 
-        val seedData: Map<Key<*>, Any> = mapOf(
-                keyOf<String>(Names.named("from-seed")) to "my seed data")
+    val seedData: Map<Key<*>, Any> = mapOf(
+        keyOf<String>(Names.named("from-seed")) to "my seed data"
+    )
 
-        val future = scope.enter(seedData).use {
-            executor.submit( Callable { tester.fooValue() })
+    val future = scope.enter(seedData)
+        .use {
+          executor.submit(Callable { tester.fooValue() })
         }
 
-        assertThat(future.get()).isEqualTo("my seed data and bar and foo!")
+    assertThat(future.get()).isEqualTo("my seed data and bar and foo!")
+  }
+
+  @Test
+  fun doesNotPropagateScopeIfNotInScope() {
+    Assertions.assertThrows(IllegalStateException::class.java) {
+      val injector = Guice.createInjector(
+          TestActionScopedProviderModule(),
+          ActionScopedExecutorServiceModule()
+      )
+
+      val tester = injector.getInstance(Tester::class.java)
+      val executor = injector.getInstance(ExecutorService::class.java)
+
+      executor.submit(Callable { tester.fooValue() })
     }
+  }
 
-    @Test
-    fun doesNotPropagateScopeIfNotInScope() {
-        Assertions.assertThrows(IllegalStateException::class.java) {
-            val injector = Guice.createInjector(
-                    TestActionScopedProviderModule(),
-                    ActionScopedExecutorServiceModule())
+  class ActionScopedExecutorServiceModule : KAbstractModule() {
+    override fun configure() {}
 
-            val tester = injector.getInstance(Tester::class.java)
-            val executor = injector.getInstance(ExecutorService::class.java)
-
-            executor.submit(Callable { tester.fooValue() })
-        }
+    @Provides
+    @Singleton
+    fun provideExecutorService(scope: ActionScope): ExecutorService {
+      return ActionScopedExecutorService(Executors.newSingleThreadExecutor(), scope)
     }
-
-    class ActionScopedExecutorServiceModule : KAbstractModule() {
-        override fun configure() {}
-
-        @Provides
-        @Singleton
-        fun provideExecutorService(scope: ActionScope): ExecutorService {
-            return ActionScopedExecutorService(Executors.newSingleThreadExecutor(), scope)
-        }
-    }
+  }
 }

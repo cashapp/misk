@@ -1,3 +1,7 @@
 package misk.environment
 
-enum class Environment { TESTING, DEVELOPMENT, STAGING, PRODUCTION }
+enum class Environment { TESTING,
+  DEVELOPMENT,
+  STAGING,
+  PRODUCTION
+}

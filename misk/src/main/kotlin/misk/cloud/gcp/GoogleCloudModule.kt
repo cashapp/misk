@@ -25,77 +25,88 @@ import javax.inject.Inject
 
 /** Installs support for talking to real GCP services, either direct or via emulator */
 class GoogleCloudModule : KAbstractModule() {
-    override fun configure() {
-        binder().addMultibinderBinding<Service>().to<GoogleCloud>()
+  override fun configure() {
+    binder().addMultibinderBinding<Service>()
+        .to<GoogleCloud>()
+  }
+
+  @Provides
+  @Singleton
+  fun provideServiceCredentials(env: Environment): Credentials =
+      if (env == Environment.DEVELOPMENT) NoCredentials.getInstance()
+      else ServiceAccountCredentials.getApplicationDefault()
+
+  @Provides
+  @Singleton
+  fun provideCloudDatastore(
+      credentials: Credentials,
+      config: DatastoreConfig
+  ): Datastore =
+      DatastoreOptions.newBuilder()
+          .setCredentials(credentials)
+          .setHost(config.transport.host)
+          .setTransportOptions(
+              HttpTransportOptions.newBuilder()
+                  .setConnectTimeout(config.transport.connect_timeout_ms)
+                  .setReadTimeout(config.transport.read_timeout_ms)
+                  .build()
+          )
+          .build()
+          .service
+
+  @Provides
+  @Singleton
+  fun provideCloudStorage(
+      credentials: Credentials,
+      config: StorageConfig
+  ): Storage {
+    if (config.use_local_storage) {
+      val localStorageConfig = config.local_storage
+          ?: throw IllegalArgumentException(
+              "if use_local_storage is true, local_storage.data_dir must be set"
+          )
+
+      val dataDir = localStorageConfig.data_dir
+      require(dataDir.isNotBlank()) {
+        "if use_local_storage is true, local_storage.data_dir must be set"
+      }
+
+      val localStorageRpc = LocalStorageRpc(Paths.get(dataDir))
+      return StorageOptions.newBuilder()
+          .setCredentials(NoCredentials.getInstance())
+          .setServiceRpcFactory { _ -> localStorageRpc }
+          .build()
+          .service
+    } else {
+      return StorageOptions.newBuilder()
+          .setCredentials(credentials)
+          .setHost(config.transport.host)
+          .setTransportOptions(
+              HttpTransportOptions.newBuilder()
+                  .setConnectTimeout(config.transport.connect_timeout_ms)
+                  .setReadTimeout(config.transport.read_timeout_ms)
+                  .build()
+          )
+          .build()
+          .service
     }
-
-    @Provides
-    @Singleton
-    fun provideServiceCredentials(env: Environment): Credentials =
-            if (env == Environment.DEVELOPMENT) NoCredentials.getInstance()
-            else ServiceAccountCredentials.getApplicationDefault()
-
-    @Provides
-    @Singleton
-    fun provideCloudDatastore(credentials: Credentials, config: DatastoreConfig): Datastore =
-            DatastoreOptions.newBuilder()
-                    .setCredentials(credentials)
-                    .setHost(config.transport.host)
-                    .setTransportOptions(HttpTransportOptions.newBuilder()
-                            .setConnectTimeout(config.transport.connect_timeout_ms)
-                            .setReadTimeout(config.transport.read_timeout_ms)
-                            .build())
-                    .build()
-                    .service
-
-    @Provides
-    @Singleton
-    fun provideCloudStorage(credentials: Credentials, config: StorageConfig): Storage {
-        if (config.use_local_storage) {
-            val localStorageConfig = config.local_storage
-                    ?: throw IllegalArgumentException(
-                            "if use_local_storage is true, local_storage.data_dir must be set"
-                    )
-
-            val dataDir = localStorageConfig.data_dir
-            require(dataDir.isNotBlank()) {
-                "if use_local_storage is true, local_storage.data_dir must be set"
-            }
-
-            val localStorageRpc = LocalStorageRpc(Paths.get(dataDir))
-            return StorageOptions.newBuilder()
-                    .setCredentials(NoCredentials.getInstance())
-                    .setServiceRpcFactory { _ -> localStorageRpc }
-                    .build()
-                    .service
-        } else {
-            return StorageOptions.newBuilder()
-                    .setCredentials(credentials)
-                    .setHost(config.transport.host)
-                    .setTransportOptions(HttpTransportOptions.newBuilder()
-                            .setConnectTimeout(config.transport.connect_timeout_ms)
-                            .setReadTimeout(config.transport.read_timeout_ms)
-                            .build())
-                    .build()
-                    .service
-        }
-    }
+  }
 }
 
 /** Logs cloud configuration on startup */
 private class GoogleCloud @Inject internal constructor(
-        private val datastore: Datastore,
-        private val storage: Storage
+    private val datastore: Datastore,
+    private val storage: Storage
 ) : AbstractIdleService() {
-    override fun startUp() {
-        log.info { "running as project ${datastore.options.projectId}" }
-        log.info { "connected to datastore on ${datastore.options.host}" }
-        log.info { "connected to GCS as ${storage.options.rpc.javaClass.simpleName} on ${storage.options.host}" }
-    }
+  override fun startUp() {
+    log.info { "running as project ${datastore.options.projectId}" }
+    log.info { "connected to datastore on ${datastore.options.host}" }
+    log.info { "connected to GCS as ${storage.options.rpc.javaClass.simpleName} on ${storage.options.host}" }
+  }
 
-    override fun shutDown() {}
+  override fun shutDown() {}
 
-    companion object {
-        private val log = getLogger<GoogleCloud>()
-    }
+  companion object {
+    private val log = getLogger<GoogleCloud>()
+  }
 }

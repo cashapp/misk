@@ -7,19 +7,19 @@ import misk.inject.KAbstractModule
 import javax.inject.Singleton
 
 class MoshiModule : KAbstractModule() {
-    override fun configure() {
-        newSetBinder<JsonAdapter.Factory>()
-    }
+  override fun configure() {
+    newSetBinder<JsonAdapter.Factory>()
+  }
 
-    @Provides
-    @Singleton
-    fun provideMoshi(
-        jsonAdapterFactories: MutableSet<JsonAdapter.Factory>
-    ): Moshi {
-        val builder = Moshi.Builder()
-        for (jsonAdapterFactory in jsonAdapterFactories) {
-            builder.add(jsonAdapterFactory)
-        }
-        return builder.build()
+  @Provides
+  @Singleton
+  fun provideMoshi(
+      jsonAdapterFactories: MutableSet<JsonAdapter.Factory>
+  ): Moshi {
+    val builder = Moshi.Builder()
+    for (jsonAdapterFactory in jsonAdapterFactories) {
+      builder.add(jsonAdapterFactory)
     }
+    return builder.build()
+  }
 }

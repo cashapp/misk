@@ -4,7 +4,6 @@ import misk.MiskApplication;
 import misk.MiskModule;
 import misk.environment.EnvironmentModule;
 import misk.hibernate.HibernateModule;
-import misk.moshi.MoshiModule;
 import misk.web.WebModule;
 
 public class ExemplarJavaApp {

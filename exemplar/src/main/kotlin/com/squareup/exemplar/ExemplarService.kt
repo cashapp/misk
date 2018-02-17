@@ -7,14 +7,14 @@ import misk.hibernate.HibernateModule
 import misk.web.WebModule
 
 fun main(args: Array<String>) {
-    MiskApplication(
-            MiskModule(),
+  MiskApplication(
+      MiskModule(),
 
-            WebModule(),
+      WebModule(),
 
-            HibernateModule(),
-            ExemplarModule(),
-            ExemplarConfigModule(),
-            EnvironmentModule.fromEnvironmentVariable()
-    ).run(args)
+      HibernateModule(),
+      ExemplarModule(),
+      ExemplarConfigModule(),
+      EnvironmentModule.fromEnvironmentVariable()
+  ).run(args)
 }

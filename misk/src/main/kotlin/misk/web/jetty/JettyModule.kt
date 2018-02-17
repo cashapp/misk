@@ -6,7 +6,8 @@ import misk.inject.addMultibinderBinding
 import misk.inject.to
 
 class JettyModule : AbstractModule() {
-    override fun configure() {
-        binder().addMultibinderBinding<Service>().to<JettyService>()
-    }
+  override fun configure() {
+    binder().addMultibinderBinding<Service>()
+        .to<JettyService>()
+  }
 }

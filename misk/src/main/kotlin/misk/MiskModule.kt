@@ -12,20 +12,20 @@ import misk.time.ClockModule
 import javax.inject.Singleton
 
 class MiskModule : AbstractModule() {
-    override fun configure() {
-        install(HealthChecksModule())
-        install(MetricsModule())
-        install(ClockModule())
-        install(MoshiModule())
+  override fun configure() {
+    install(HealthChecksModule())
+    install(MetricsModule())
+    install(ClockModule())
+    install(MoshiModule())
 
-        // Always make sure List<Service> is bound, even if there
-        // are no services registered (mostly for testing)
-        binder().newMultibinder<Service>()
-    }
+    // Always make sure List<Service> is bound, even if there
+    // are no services registered (mostly for testing)
+    binder().newMultibinder<Service>()
+  }
 
-    @Provides
-    @Singleton
-    fun provideServiceManager(services: List<Service>): ServiceManager {
-        return ServiceManager(services)
-    }
+  @Provides
+  @Singleton
+  fun provideServiceManager(services: List<Service>): ServiceManager {
+    return ServiceManager(services)
+  }
 }

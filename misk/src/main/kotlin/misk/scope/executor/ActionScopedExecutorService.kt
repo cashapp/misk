@@ -12,13 +12,13 @@ import java.util.concurrent.ExecutorService
  * submitted by the current thread
  */
 class ActionScopedExecutorService(
-        target: ExecutorService,
-        private val scope: ActionScope
+    target: ExecutorService,
+    private val scope: ActionScope
 ) : WrappingListeningExecutorService() {
 
-    private val target = MoreExecutors.listeningDecorator(target)
+  private val target = MoreExecutors.listeningDecorator(target)
 
-    override fun <T> wrap(callable: Callable<T>): Callable<T> = scope.propagate(callable)
+  override fun <T> wrap(callable: Callable<T>): Callable<T> = scope.propagate(callable)
 
-    override fun delegate(): ListeningExecutorService = target
+  override fun delegate(): ListeningExecutorService = target
 }
