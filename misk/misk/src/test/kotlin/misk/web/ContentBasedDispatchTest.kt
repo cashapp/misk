@@ -26,58 +26,91 @@ internal class ContentBasedDispatchTest {
       MiskModule(),
       WebModule(),
       TestWebModule(),
-      TestModule())
+      TestModule()
+  )
+
+  val httpClient = OkHttpClient()
 
   data class Packet(val message: String)
 
   private val jsonMediaType = MediaTypes.APPLICATION_JSON.asMediaType()
   private val plainTextMediaType = MediaTypes.TEXT_PLAIN_UTF8.asMediaType()
   private val weirdTextMediaType = "text/weird".asMediaType()
+  private val weirdMediaType = "weird/weird".asMediaType()
 
-  @Inject lateinit var moshi: Moshi
-  @Inject lateinit var jettyService: JettyService
+  private @Inject
+  lateinit var moshi: Moshi
+
+  private @Inject
+  lateinit var jettyService: JettyService
+
   private val packetJsonAdapter get() = moshi.adapter(Packet::class.java)
 
   @Test
   fun postJsonExpectJson() {
     val requestContent = packetJsonAdapter.toJson(Packet("my friend"))
-    val responseContent = post(jsonMediaType, requestContent, jsonMediaType).source()
+    val responseContent = postHello(jsonMediaType, requestContent, jsonMediaType).source()
     assertThat(packetJsonAdapter.fromJson(responseContent)!!.message)
         .isEqualTo("json->json my friend")
   }
 
   @Test
-  fun postJsonExpectText() {
+  fun postJsonExpectPlainText() {
     val requestContent = packetJsonAdapter.toJson(Packet("my friend"))
-    val responseContent = post(jsonMediaType, requestContent, plainTextMediaType).source()
+    val responseContent = postHello(jsonMediaType, requestContent, plainTextMediaType).source()
     assertThat(responseContent.readUtf8()).isEqualTo("json->text my friend")
   }
 
   @Test
-  fun postTextExpectJson() {
-    val responseContent = post(plainTextMediaType, "my friend", jsonMediaType).source()
+  fun postPlainTextExpectJson() {
+    val responseContent = postHello(plainTextMediaType, "my friend", jsonMediaType).source()
     assertThat(packetJsonAdapter.fromJson(responseContent)!!.message)
         .isEqualTo("text->json my friend")
   }
 
   @Test
+  fun postPlainTextExpectPlainText() {
+    val responseContent = postHello(plainTextMediaType, "my friend", plainTextMediaType).source()
+    assertThat(responseContent.readUtf8()).isEqualTo("text->text my friend")
+  }
+
+  @Test
+  fun postWeirdTextExpectPlainText() {
+    val responseContent = postHello(weirdTextMediaType, "my friend", plainTextMediaType).source()
+    assertThat(responseContent.readUtf8()).isEqualTo("text*->text my friend")
+  }
+
+  @Test
+  fun postPlainTextExpectWeirdText() {
+    val responseContent = postHello(plainTextMediaType, "my friend", weirdTextMediaType).source()
+    assertThat(responseContent.readUtf8()).isEqualTo("text->text* my friend")
+  }
+
+  @Test
   fun postArbitraryExpectJson() {
-    val responseContent = post(weirdTextMediaType, "my friend", jsonMediaType).source()
+    val responseContent = postHello(weirdMediaType, "my friend", jsonMediaType).source()
     assertThat(packetJsonAdapter.fromJson(responseContent)!!.message)
         .isEqualTo("*->json my friend")
   }
 
   @Test
   fun postArbitraryExpectArbitrary() {
-    val responseContent = post(weirdTextMediaType, "my friend", weirdTextMediaType).source()
+    val responseContent = postHello(
+        weirdMediaType,
+        "my friend",
+        weirdMediaType
+    ).source()
     assertThat(responseContent.readUtf8()).isEqualTo("*->* my friend")
   }
 
   class TestModule : KAbstractModule() {
     override fun configure() {
+      install(WebActionModule.create<PostPlainTextReturnAnyText>())
+      install(WebActionModule.create<PostAnyTextReturnPlainText>())
+      install(WebActionModule.create<PostPlainTextReturnPlainText>())
       install(WebActionModule.create<PostJsonReturnJson>())
-      install(WebActionModule.create<PostTextReturnJson>())
-      install(WebActionModule.create<PostJsonReturnText>())
+      install(WebActionModule.create<PostPlainTextReturnJson>())
+      install(WebActionModule.create<PostJsonReturnPlainText>())
       install(WebActionModule.create<PostAnythingReturnJson>())
       install(WebActionModule.create<PostAnythingReturnAnything>())
     }
@@ -90,14 +123,35 @@ internal class ContentBasedDispatchTest {
     fun hello(@misk.web.RequestBody request: Packet) = Packet("json->json ${request.message}")
   }
 
-  class PostTextReturnJson : WebAction {
+  class PostPlainTextReturnJson : WebAction {
     @Post("/hello")
     @RequestContentType("text/plain")
     @ResponseContentType("application/json")
     fun hello(@misk.web.RequestBody message: String) = Packet("text->json $message")
   }
 
-  class PostJsonReturnText : WebAction {
+  class PostPlainTextReturnPlainText : WebAction {
+    @Post("/hello")
+    @RequestContentType("text/plain")
+    @ResponseContentType("text/plain")
+    fun hello(@misk.web.RequestBody message: String) = "text->text $message"
+  }
+
+  class PostAnyTextReturnPlainText : WebAction {
+    @Post("/hello")
+    @RequestContentType("text/*")
+    @ResponseContentType("text/plain")
+    fun hello(@misk.web.RequestBody message: String) = "text*->text $message"
+  }
+
+  class PostPlainTextReturnAnyText : WebAction {
+    @Post("/hello")
+    @RequestContentType("text/plain")
+    @ResponseContentType("text/*")
+    fun hello(@misk.web.RequestBody message: String) = "text->text* $message"
+  }
+
+  class PostJsonReturnPlainText : WebAction {
     @Post("/hello")
     @RequestContentType("application/json")
     @ResponseContentType("text/plain")
@@ -115,21 +169,32 @@ internal class ContentBasedDispatchTest {
     fun hello(@misk.web.RequestBody message: String) = "*->* $message"
   }
 
-  private fun post(
-    contentType: MediaType, content: String,
-    acceptedMediaType: MediaType? = null
+  private fun postHello(
+      contentType: MediaType,
+      content: String,
+      acceptedMediaType: MediaType? = null
   ): okhttp3.ResponseBody {
-    val httpClient = OkHttpClient()
+    val request = newRequest("/hello", contentType, content, acceptedMediaType)
+    val response = httpClient.newCall(request)
+        .execute()
+    assertThat(response.code()).isEqualTo(200)
+    return response.body()!!
+  }
+
+  private fun newRequest(
+      path: String,
+      contentType: MediaType,
+      content: String,
+      acceptedMediaType: MediaType? = null
+  ): Request {
     val request = Request.Builder()
         .post(RequestBody.create(contentType, content))
-        .url(jettyService.httpServerUrl.newBuilder().encodedPath("/hello").build())
+        .url(jettyService.httpServerUrl.newBuilder().encodedPath(path).build())
 
     if (acceptedMediaType != null) {
       request.header("Accept", acceptedMediaType.toString())
     }
 
-    val response = httpClient.newCall(request.build()).execute()
-    assertThat(response.code()).isEqualTo(200)
-    return response.body()!!
+    return request.build()
   }
 }
