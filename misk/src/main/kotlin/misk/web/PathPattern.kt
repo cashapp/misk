@@ -8,13 +8,23 @@ import java.util.regex.Pattern
  * like this: `{username:[a-z]+}`. If no regex is specified the variable is a sequence of non-'/'
  * characters.
  */
-data class PathPattern(
-        val pattern: Pattern,
+class PathPattern(
+        val pattern: String,
+        val regex: Pattern,
         val variableNames: List<String>,
         val numRegexVariables: Int,
         val numSegments: Int,
         val matchesWildcardPath: Boolean
 ) : Comparable<PathPattern> {
+
+    override fun hashCode(): Int = pattern.hashCode()
+
+    override fun equals(other: Any?): Boolean {
+        val otherPath = other as? PathPattern ?: return false
+        return otherPath.pattern == pattern
+    }
+
+    override fun toString() = pattern
 
     /** Compares path patterns by specificity, with the more specific pattern ordered first */
     override fun compareTo(other: PathPattern): Int {
@@ -36,6 +46,7 @@ data class PathPattern(
         // more specific match
         return other.numRegexVariables - numRegexVariables
     }
+
     companion object {
         fun parse(pattern: String): PathPattern {
             val variableNames = ArrayList<String>()
@@ -51,8 +62,8 @@ data class PathPattern(
                 when (pattern[pos]) {
                     '{' -> {
                         // Variables must start on path boundaries
-                        require(pos == 0 || pattern[pos-1] == '/') {
-                            "invalid path pattern $pattern; variables must start on path boundaries"
+                        require(pos == 0 || pattern[pos - 1] == '/') {
+                            "invalid path regex $pattern; variables must start on path boundaries"
                         }
 
                         val variableNameEnd = pattern.indexOfAny(charArrayOf('}', ':'), pos + 1)
@@ -78,7 +89,7 @@ data class PathPattern(
 
                         // Variables must end on path boundaries
                         require(pos == pattern.length || pattern[pos] == '/') {
-                            "invalid path pattern $pattern; variables must end on path boundaries"
+                            "invalid path regex $pattern; variables must end on path boundaries"
                         }
                     }
 
@@ -96,23 +107,18 @@ data class PathPattern(
                             pos++
                         }
                         result.append("\\E")
-
-                        /*
-                        var nextMetacharacterStart = pattern.indexOfAny(charArrayOf('\\', '{'), pos)
-                        if (nextMetacharacterStart == -1) {
-                            nextMetacharacterStart = pattern.length
-                        }
-                        result.append("\\Q")
-                        result.append(pattern, pos, nextMetacharacterStart)
-                        result.append("\\E")
-                        pos = nextMetacharacterStart
-                        */
                     }
                 }
             }
 
-            return PathPattern(Pattern.compile(result.toString()), variableNames, numRegexVariables,
-                    numSegments, lastVariableIsWildcardMatch)
+            return PathPattern(
+                    pattern,
+                    Pattern.compile(result.toString()),
+                    variableNames,
+                    numRegexVariables,
+                    numSegments,
+                    lastVariableIsWildcardMatch
+            )
         }
     }
 }

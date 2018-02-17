@@ -15,3 +15,12 @@ object MediaTypes {
 
 fun String.asMediaType() = MediaType.parse(this)!!
 fun String.asMediaRange() = MediaRange.parse(this)
+
+internal val MediaType.wildcardCount
+    get() = when {
+        type() == "*" -> 2
+        subtype() == "*" -> 1
+        else -> 0
+    }
+
+fun MediaType.compareTo(other: MediaType) = wildcardCount - other.wildcardCount

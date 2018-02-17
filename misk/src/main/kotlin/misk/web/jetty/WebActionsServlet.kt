@@ -1,7 +1,6 @@
 package misk.web.jetty
 
 import misk.inject.keyOf
-import misk.logging.getLogger
 import misk.scope.ActionScope
 import misk.web.BoundAction
 import misk.web.Request
@@ -15,8 +14,6 @@ import javax.inject.Singleton
 import javax.servlet.http.HttpServlet
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
-
-private val logger = getLogger<WebActionsServlet>()
 
 @Singleton
 internal class WebActionsServlet @Inject constructor(
@@ -37,11 +34,13 @@ internal class WebActionsServlet @Inject constructor(
                 keyOf<HttpServletRequest>() to request,
                 keyOf<Request>() to asRequest)
 
-        scope.enter(seedData).use {
-            val candidateActions = boundActions.mapNotNull { it.match(request, asRequest.url) }
-            val bestAction = candidateActions.sorted().firstOrNull()
-            bestAction?.handle(asRequest, response)
-            logger.debug {"Request handled by WebActionServlet" }
+        val newScope = scope.enter(seedData)
+        newScope.use {
+            val candidateActions = boundActions.mapNotNull {
+                it.match(request, asRequest.url)
+            }.sorted()
+
+            candidateActions.firstOrNull()?.handle(asRequest, response)
         }
     }
 }

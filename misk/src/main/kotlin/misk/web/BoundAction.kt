@@ -5,10 +5,10 @@ import misk.web.actions.WebAction
 import misk.web.actions.asChain
 import misk.web.extractors.ParameterExtractor
 import misk.web.mediatype.MediaRange
-import okhttp3.Headers
+import misk.web.mediatype.MediaTypes
+import misk.web.mediatype.compareTo
 import okhttp3.HttpUrl
 import okhttp3.MediaType
-import okio.Okio
 import org.eclipse.jetty.http.HttpMethod
 import java.util.regex.Matcher
 import javax.inject.Provider
@@ -54,7 +54,7 @@ internal class BoundAction<A : WebAction, out R>(
         return result
     }
 
-    fun match(jettyRequest: HttpServletRequest, url: HttpUrl): RequestMatch? {
+    fun match(jettyRequest: HttpServletRequest, url: HttpUrl): BoundActionMatch? {
         // Confirm the path and method matches
         val pathMatcher = pathMatcher(url) ?: return null
         if (jettyRequest.method != httpMethod.name) return null
@@ -72,7 +72,14 @@ internal class BoundAction<A : WebAction, out R>(
                 responseContentType?.closestMediaRangeMatch(jettyRequest.accepts())
         if (responseContentType != null && responseContentTypeMatch == null) return null
 
-        return RequestMatch(this, pathMatcher, responseContentTypeMatch)
+        val acceptedMediaRange = requestContentTypeMatch?.mediaRange ?: MediaRange.ALL_MEDIA
+        val requestCharsetMatch = requestContentTypeMatch?.matchesCharset ?: false
+
+        return BoundActionMatch(this,
+                pathMatcher,
+                acceptedMediaRange,
+                requestCharsetMatch,
+                responseContentType ?: MediaTypes.ALL_MEDIA_TYPE)
     }
 
     internal fun handle(request: Request, pathMather: Matcher): Response<ResponseBody> {
@@ -96,7 +103,7 @@ internal class BoundAction<A : WebAction, out R>(
 
     /** Returns a Matcher if requestUrl can be matched, else null */
     private fun pathMatcher(requestUrl: HttpUrl): Matcher? {
-        val matcher = pathPattern.pattern.matcher(requestUrl.encodedPath())
+        val matcher = pathPattern.regex.matcher(requestUrl.encodedPath())
         return if (matcher.matches()) matcher else null
     }
 }
@@ -114,25 +121,47 @@ private fun HttpServletRequest.accepts(): List<MediaRange> {
     }
 }
 
-/** Matches a request to an action. Can be sorted to pick the most specific match amongst a set of candidates */
-internal class RequestMatch(
-        val action: BoundAction<*, *>,
-        private val pathMatcher: Matcher,
-        private val responseContentTypeMatch: MediaRange.Matcher?
+/** Matches a request . Can be sorted to pick the most specific match amongst a set of candidates */
+internal open class RequestMatch(
+        private val pathPattern: PathPattern,
+        private val acceptedMediaRange: MediaRange,
+        private val requestCharsetMatch: Boolean,
+        private val responseContentType: MediaType
 ) : Comparable<RequestMatch> {
+
     override fun compareTo(other: RequestMatch): Int {
-        val patternDiff = action.pathPattern.compareTo(other.action.pathPattern)
+        val patternDiff = pathPattern.compareTo(other.pathPattern)
         if (patternDiff != 0) return patternDiff
 
-        if (responseContentTypeMatch != null && other.responseContentTypeMatch == null) return -1
-        if (responseContentTypeMatch == null && other.responseContentTypeMatch != null) return 1
-        if (responseContentTypeMatch != null && other.responseContentTypeMatch != null) {
-            return responseContentTypeMatch.compareTo(other.responseContentTypeMatch)
-        }
+        val requestContentTypeDiff = acceptedMediaRange.compareTo(other.acceptedMediaRange)
+        if (requestContentTypeDiff != 0) return requestContentTypeDiff
+
+        val responseContentTypeDiff = responseContentType.compareTo(other.responseContentType)
+        if (responseContentTypeDiff != 0) return responseContentTypeDiff
+
+        // Only after we have compared both the accepted and emitted content types should we
+        // bother clarifying with the charset; we'd rather match a (text/*, text/plain)
+        // with no charset over a (text/*, text/*) with charset
+        if (requestCharsetMatch && !other.requestCharsetMatch) return -1
+        if (!requestCharsetMatch && other.requestCharsetMatch) return 1
 
         return 0
     }
 
+    override fun toString(): String =
+            "path: $pathPattern, accepts: $acceptedMediaRange, emits: $responseContentType"
+}
+
+/** A [RequestMatch] associated with the action that matched */
+internal class BoundActionMatch(
+        val action: BoundAction<*, *>,
+        private val pathMatcher: Matcher,
+        acceptedMediaRange: MediaRange,
+        requestCharsetMatch: Boolean,
+        responseContentType: MediaType
+) : RequestMatch(action.pathPattern, acceptedMediaRange, requestCharsetMatch, responseContentType) {
+
+    /** Handles the request by handing it off to the action */
     fun handle(request: Request, jettyResponse: HttpServletResponse) {
         val result = action.handle(request, pathMatcher)
         result.writeToJettyResponse(jettyResponse)
@@ -141,3 +170,4 @@ internal class RequestMatch(
 
 private fun MediaType.closestMediaRangeMatch(ranges: List<MediaRange>) =
         ranges.mapNotNull { it.matcher(this) }.sorted().firstOrNull()
+
