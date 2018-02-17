@@ -10,14 +10,12 @@ data class MediaRange(
   val charset: Charset? = null,
   val qualityFactor: Double = 1.0,
   val parameters: Map<String, String> = mapOf(),
-  val extensions: Map<String, String> = mapOf()
+  val extensions: Map<String, String> = mapOf(),
+  private val rawText: String
 ) : Comparable<MediaRange> {
   override fun compareTo(other: MediaRange): Int {
-    if (type == WILDCARD && other.type != WILDCARD) return 1
-    if (type != WILDCARD && other.type == WILDCARD) return -1
-
-    if (subtype == WILDCARD && other.subtype != WILDCARD) return 1
-    if (subtype != WILDCARD && other.subtype == WILDCARD) return -1
+    val wildcardDiff = wildcardCount - other.wildcardCount
+    if (wildcardDiff != 0) return wildcardDiff
 
     val parameterDiff = other.parameters.size - parameters.size
     if (parameterDiff != 0) return parameterDiff
@@ -28,9 +26,18 @@ data class MediaRange(
     return 0
   }
 
+  override fun toString() = rawText
+
+  private val wildcardCount = when {
+    type == WILDCARD -> 2
+    subtype == WILDCARD -> 1
+    else -> 0
+  }
+
   fun matcher(mediaType: MediaType): Matcher? {
-    val typeMatches = type == mediaType.type() || type == WILDCARD
-    val subtypeMatches = subtype == mediaType.subtype() || subtype == WILDCARD
+    val typeMatches = type == mediaType.type() || type == WILDCARD || mediaType.type() == WILDCARD
+    val subtypeMatches =
+        subtype == mediaType.subtype() || subtype == WILDCARD || mediaType.subtype() == WILDCARD
     if (!typeMatches || !subtypeMatches) {
       return null
     }
@@ -49,8 +56,10 @@ data class MediaRange(
     return Matcher(this, true)
   }
 
-  data class Matcher(private val mediaRange: MediaRange, val matchesCharset: Boolean = false) :
-      Comparable<Matcher> {
+  class Matcher(
+    val mediaRange: MediaRange,
+    val matchesCharset: Boolean = false
+  ) : Comparable<Matcher> {
     override fun compareTo(other: Matcher): Int {
       val mediaRangeComparison = mediaRange.compareTo(other.mediaRange)
       if (mediaRangeComparison != 0) return mediaRangeComparison
@@ -60,11 +69,13 @@ data class MediaRange(
 
       return 0
     }
+
+    override fun toString() = "$mediaRange; charset-match $matchesCharset"
   }
 
   companion object {
     const val WILDCARD = "*"
-    val ALL_MEDIA = MediaRange(WILDCARD, WILDCARD)
+    val ALL_MEDIA = MediaRange(WILDCARD, WILDCARD, rawText = "*/*")
 
     fun parseRanges(s: String): List<MediaRange> {
       return s.split(',').map { parse(it) }
@@ -82,7 +93,7 @@ data class MediaRange(
       require(type != WILDCARD || subtype == WILDCARD) { "$s is not a valid media range" }
 
       if (typeParametersAndExtensions.size == 1) {
-        return MediaRange(type, subtype)
+        return MediaRange(type, subtype, rawText = s)
       }
 
       val parametersAndExtensions = typeParametersAndExtensions.drop(1).map {
@@ -122,7 +133,8 @@ data class MediaRange(
           charset,
           qualityFactor,
           parameters.toMap(),
-          extensions.toMap()
+          extensions.toMap(),
+          s
       )
     }
 
