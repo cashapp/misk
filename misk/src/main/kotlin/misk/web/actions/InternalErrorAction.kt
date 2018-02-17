@@ -5,8 +5,8 @@ import javax.inject.Singleton
 
 @Singleton
 class InternalErrorAction : WebAction {
-    @Get("/error")
-    fun error(): Nothing {
-        throw UnsupportedOperationException()
-    }
+  @Get("/error")
+  fun error(): Nothing {
+    throw UnsupportedOperationException()
+  }
 }

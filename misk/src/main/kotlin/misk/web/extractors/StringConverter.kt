@@ -37,7 +37,7 @@ private fun numberConversionWrapper(wrappedFunc: StringConverter): StringConvert
   return {
     try {
       wrappedFunc(it)
-    } catch(e: NumberFormatException) {
+    } catch (e: NumberFormatException) {
       throw IllegalArgumentException("Invalid parameter format: $it", e)
     }
   }
@@ -51,8 +51,8 @@ private fun createFromValueOf(type: KType): StringConverter? {
     if (valueOfMethod != null) {
       return { param -> valueOfMethod(null, param) }
     }
-  } catch(e: ClassCastException) {
-  } catch(e: NoSuchMethodException) {
+  } catch (e: ClassCastException) {
+  } catch (e: NoSuchMethodException) {
   }
   return null
 }

@@ -15,57 +15,65 @@ import kotlin.reflect.full.isSubtypeOf
 import kotlin.reflect.jvm.javaType
 
 class ConfigModule(
-        private val configClass: Class<out Config>,
-        private val appName: String
+    private val configClass: Class<out Config>,
+    private val appName: String
 ) : KAbstractModule() {
-    @Suppress("UNCHECKED_CAST")
-    override fun configure() {
-        bind<String>().annotatedWith<AppName>().toInstance(appName)
-        bind(configClass).toProvider(ConfigProvider(configClass, appName)).asSingleton()
-        bindConfigClassRecursively(configClass)
+  @Suppress("UNCHECKED_CAST")
+  override fun configure() {
+    bind<String>().annotatedWith<AppName>()
+        .toInstance(appName)
+    bind(configClass).toProvider(ConfigProvider(configClass, appName))
+        .asSingleton()
+    bindConfigClassRecursively(configClass)
+  }
+
+  @Suppress("UNCHECKED_CAST")
+  private fun bindConfigClassRecursively(configClass: Class<out Config>) {
+    for (property in configClass.kotlin.declaredMemberProperties) {
+      if (!property.returnType.isSubtypeOf(Config::class.createType())) {
+        continue
+      }
+      bindConfigClassRecursively(
+          property.returnType.typeLiteral().rawType as Class<out Config>
+      )
+      val subConfigProvider = SubConfigProvider(
+          getProvider(configClass),
+          property as KProperty1<Config, Any?>
+      )
+      val subConfigTypeLiteral = TypeLiteral.get(
+          property.returnType.javaType
+      ) as TypeLiteral<Any?>
+
+      val subConfigTypeName = subConfigTypeLiteral.rawType.simpleName
+      val defaultSubConfigFieldName = UPPER_CAMEL.to(LOWER_UNDERSCORE, subConfigTypeName)
+
+      if (property.name == defaultSubConfigFieldName.substringBefore("_config")) {
+        // The property is the name of the config type, without the unnecessary Config suffix.
+        // This is the default binding for the config type, so bind it without requiring
+        // a name annotation
+        bind(subConfigTypeLiteral).toProvider(subConfigProvider)
+            .asSingleton()
+      } else {
+        // The property differs from the name of the config type, so it is being explicitly
+        // qualified.
+        bind(subConfigTypeLiteral).annotatedWith(Names.named(property.name))
+            .toProvider(subConfigProvider)
+            .asSingleton()
+      }
     }
+  }
 
-    @Suppress("UNCHECKED_CAST")
-    private fun bindConfigClassRecursively(configClass: Class<out Config>) {
-        for (property in configClass.kotlin.declaredMemberProperties) {
-            if (!property.returnType.isSubtypeOf(Config::class.createType())) {
-                continue
-            }
-            bindConfigClassRecursively(
-                    property.returnType.typeLiteral().rawType as Class<out Config>)
-            val subConfigProvider = SubConfigProvider(getProvider(configClass),
-                    property as KProperty1<Config, Any?>)
-            val subConfigTypeLiteral = TypeLiteral.get(
-                    property.returnType.javaType) as TypeLiteral<Any?>
-
-            val subConfigTypeName = subConfigTypeLiteral.rawType.simpleName
-            val defaultSubConfigFieldName = UPPER_CAMEL.to(LOWER_UNDERSCORE, subConfigTypeName)
-
-            if (property.name == defaultSubConfigFieldName.substringBefore("_config")) {
-                // The property is the name of the config type, without the unnecessary Config suffix.
-                // This is the default binding for the config type, so bind it without requiring
-                // a name annotation
-                bind(subConfigTypeLiteral).toProvider(subConfigProvider).asSingleton()
-            } else {
-                // The property differs from the name of the config type, so it is being explicitly
-                // qualified.
-                bind(subConfigTypeLiteral).annotatedWith(Names.named(property.name))
-                        .toProvider(subConfigProvider).asSingleton()
-            }
-        }
+  internal class SubConfigProvider(
+      private val configProvider: Provider<out Config>,
+      private val subconfigGetter: KProperty1<Config, Any?>
+  ) : Provider<Any?> {
+    override fun get(): Any? {
+      return subconfigGetter.get(configProvider.get())
     }
+  }
 
-    internal class SubConfigProvider(
-            private val configProvider: Provider<out Config>,
-            private val subconfigGetter: KProperty1<Config, Any?>
-    ) : Provider<Any?> {
-        override fun get(): Any? {
-            return subconfigGetter.get(configProvider.get())
-        }
-    }
-
-    companion object {
-        inline fun <reified T : Config> create(appName: String) =
-                ConfigModule(T::class.java, appName)
-    }
+  companion object {
+    inline fun <reified T : Config> create(appName: String) =
+        ConfigModule(T::class.java, appName)
+  }
 }

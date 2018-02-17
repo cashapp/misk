@@ -11,31 +11,31 @@ import javax.inject.Singleton
 
 @Singleton
 class InternalErrorInterceptorFactory : Interceptor.Factory {
-    override fun create(action: Action): Interceptor? {
-        return INTERCEPTOR
+  override fun create(action: Action): Interceptor? {
+    return INTERCEPTOR
+  }
+
+  private companion object {
+    val HEADERS: Headers = Headers.Builder()
+        .set("Content-Type", "text/plain; charset=utf-8")
+        .build()
+
+    const val STATUS_CODE = 500
+
+    val BODY = object : ResponseBody {
+      override fun writeTo(sink: BufferedSink) {
+        sink.writeUtf8("Internal server error")
+      }
     }
 
-    private companion object {
-        val HEADERS: Headers = Headers.Builder()
-                .set("Content-Type", "text/plain; charset=utf-8")
-                .build()
-
-        const val STATUS_CODE = 500
-
-        val BODY = object : ResponseBody {
-            override fun writeTo(sink: BufferedSink) {
-                sink.writeUtf8("Internal server error")
-            }
+    val INTERCEPTOR = object : Interceptor {
+      override fun intercept(chain: Chain): Any? {
+        return try {
+          chain.proceed(chain.args)
+        } catch (_: Throwable) {
+          Response(BODY, HEADERS, STATUS_CODE)
         }
-
-        val INTERCEPTOR = object : Interceptor {
-            override fun intercept(chain: Chain): Any? {
-                return try {
-                    chain.proceed(chain.args)
-                } catch (_: Throwable) {
-                    Response(BODY, HEADERS, STATUS_CODE)
-                }
-            }
-        }
+      }
     }
+  }
 }

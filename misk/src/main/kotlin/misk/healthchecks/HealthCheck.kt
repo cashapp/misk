@@ -7,20 +7,20 @@ import misk.web.actions.ReadinessCheckAction
  * readiness check in [ReadinessCheckAction], indicating that the app should not accept traffic.
  */
 interface HealthCheck {
-    /**
-     * Computes whether a component of an application is healthy. For example, an implementing class
-     * can check database connectivity.
-     */
-    fun status(): HealthStatus
+  /**
+   * Computes whether a component of an application is healthy. For example, an implementing class
+   * can check database connectivity.
+   */
+  fun status(): HealthStatus
 }
 
 data class HealthStatus(
     val isHealthy: Boolean,
     val messages: List<String>
 ) {
-    companion object {
-        fun healthy() = HealthStatus(true, listOf())
+  companion object {
+    fun healthy() = HealthStatus(true, listOf())
 
-        fun unhealthy(vararg messages: String) = HealthStatus(false, messages.asList())
-    }
+    fun unhealthy(vararg messages: String) = HealthStatus(false, messages.asList())
+  }
 }

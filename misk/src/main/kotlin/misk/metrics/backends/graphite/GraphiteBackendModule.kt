@@ -16,33 +16,34 @@ import misk.metrics.Metrics
 import java.util.concurrent.TimeUnit
 
 class GraphiteBackendModule : AbstractModule() {
-    override fun configure() {
-        binder().addMultibinderBinding<Service>().to<GraphiteReporterService>()
-    }
+  override fun configure() {
+    binder().addMultibinderBinding<Service>()
+        .to<GraphiteReporterService>()
+  }
 
-    @Provides
-    @Singleton
-    fun graphiteSender(config: GraphiteBackendConfig): GraphiteSender =
-        Graphite(config.host, config.port)
+  @Provides
+  @Singleton
+  fun graphiteSender(config: GraphiteBackendConfig): GraphiteSender =
+      Graphite(config.host, config.port)
 
-    @Provides
-    @Singleton
-    fun graphiteReporter(
-        @AppName appName: String,
-        instanceMetadata: InstanceMetadata,
-        metricRegistry: MetricRegistry,
-        sender: GraphiteSender
-    ): GraphiteReporter {
+  @Provides
+  @Singleton
+  fun graphiteReporter(
+      @AppName appName: String,
+      instanceMetadata: InstanceMetadata,
+      metricRegistry: MetricRegistry,
+      sender: GraphiteSender
+  ): GraphiteReporter {
 
-        val instanceName = Metrics.sanitize(instanceMetadata.instanceName)
-        val zone = Metrics.sanitize(instanceMetadata.zone)
-        val prefix = "$appName.$zone.$instanceName"
+    val instanceName = Metrics.sanitize(instanceMetadata.instanceName)
+    val zone = Metrics.sanitize(instanceMetadata.zone)
+    val prefix = "$appName.$zone.$instanceName"
 
-        return GraphiteReporter.forRegistry(metricRegistry)
-                .prefixedWith(prefix)
-                .convertDurationsTo(TimeUnit.MILLISECONDS)
-                .convertRatesTo(TimeUnit.MILLISECONDS)
-                .build(sender)
-    }
+    return GraphiteReporter.forRegistry(metricRegistry)
+        .prefixedWith(prefix)
+        .convertDurationsTo(TimeUnit.MILLISECONDS)
+        .convertRatesTo(TimeUnit.MILLISECONDS)
+        .build(sender)
+  }
 
 }

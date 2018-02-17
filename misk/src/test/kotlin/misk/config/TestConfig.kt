@@ -10,5 +10,9 @@ data class TestConfig(
     val duration: DurationConfig
 ) : Config
 
-data class ConsumerConfig(val min_items: Int = 0, val max_items: Int) : Config
+data class ConsumerConfig(
+    val min_items: Int = 0,
+    val max_items: Int
+) : Config
+
 data class DurationConfig(val interval: Duration) : Config

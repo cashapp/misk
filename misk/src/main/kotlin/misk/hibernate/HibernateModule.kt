@@ -6,7 +6,8 @@ import misk.inject.addMultibinderBinding
 import misk.inject.to
 
 class HibernateModule : AbstractModule() {
-    override fun configure() {
-        binder().addMultibinderBinding<Service>().to<HibernateService>()
-    }
+  override fun configure() {
+    binder().addMultibinderBinding<Service>()
+        .to<HibernateService>()
+  }
 }

@@ -24,72 +24,74 @@ import javax.inject.Inject
 
 @MiskTest(startService = true)
 internal class PathParamDispatchTest {
-    @MiskTestModule
-    val module = Modules.combine(
-            MiskModule(),
-            WebModule(),
-            TestWebModule(),
-            TestModule())
+  @MiskTestModule
+  val module = Modules.combine(
+      MiskModule(),
+      WebModule(),
+      TestWebModule(),
+      TestModule()
+  )
 
-    @Inject
-    lateinit var moshi: Moshi
+  @Inject
+  lateinit var moshi: Moshi
 
-    @Inject
-    lateinit var jettyService: JettyService
+  @Inject
+  lateinit var jettyService: JettyService
 
-    enum class ObjectType {
-        USER,
-        FILE,
-        FOLDER
+  enum class ObjectType {
+    USER,
+    FILE,
+    FOLDER
+  }
+
+  @Test
+  fun pathParamsConvertToProperTypes() {
+    val response = get("/objects/FILE/defaults/245")
+    assertThat(response.code()).isEqualTo(200)
+    assertThat(response.body()?.string()).isEqualTo("(type=FILE,name=defaults,version=245)")
+  }
+
+  @Test
+  fun pathParamsSupportExplicitPathNames() {
+    val response = get("/custom-named-route")
+    assertThat(response.code()).isEqualTo(200)
+    assertThat(response.body()?.string()).isEqualTo("routing to custom-named-route")
+  }
+
+  class TestModule : KAbstractModule() {
+    override fun configure() {
+      install(WebActionModule.create<GetObjectDetails>())
+      install(WebActionModule.create<CustomPathParamName>())
     }
+  }
 
-    @Test
-    fun pathParamsConvertToProperTypes() {
-        val response = get("/objects/FILE/defaults/245")
-        assertThat(response.code()).isEqualTo(200)
-        assertThat(response.body()?.string()).isEqualTo("(type=FILE,name=defaults,version=245)")
-    }
+  class GetObjectDetails : WebAction {
+    @Get("/objects/{objectType}/{name}/{version}")
+    @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
+    fun getObjectDetails(
+        @PathParam objectType: ObjectType,
+        @PathParam name: String,
+        @PathParam version: Long
+    ): String = "(type=$objectType,name=$name,version=$version)"
+  }
 
-    @Test
-    fun pathParamsSupportExplicitPathNames() {
-        val response = get("/custom-named-route")
-        assertThat(response.code()).isEqualTo(200)
-        assertThat(response.body()?.string()).isEqualTo("routing to custom-named-route")
-    }
+  class CustomPathParamName : WebAction {
+    @Get("/{router}")
+    @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
+    fun router(@PathParam("router") routeName: String) = "routing to ${routeName}"
+  }
 
-    class TestModule : KAbstractModule() {
-        override fun configure() {
-            install(WebActionModule.create<GetObjectDetails>())
-            install(WebActionModule.create<CustomPathParamName>())
-        }
-    }
+  fun get(path: String): okhttp3.Response {
+    val httpClient = OkHttpClient()
+    val request = Request.Builder()
+        .get()
+        .url(serverUrlBuilder().encodedPath(path).build())
+        .build()
+    return httpClient.newCall(request)
+        .execute()
+  }
 
-    class GetObjectDetails : WebAction {
-        @Get("/objects/{objectType}/{name}/{version}")
-        @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
-        fun getObjectDetails(
-                @PathParam objectType: ObjectType,
-                @PathParam name: String,
-                @PathParam version: Long
-        ): String = "(type=$objectType,name=$name,version=$version)"
-    }
-
-    class CustomPathParamName : WebAction {
-        @Get("/{router}")
-        @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
-        fun router(@PathParam("router") routeName: String) = "routing to ${routeName}"
-    }
-
-    fun get(path: String) : okhttp3.Response {
-        val httpClient = OkHttpClient()
-        val request = Request.Builder()
-                .get()
-                .url(serverUrlBuilder().encodedPath(path).build())
-                .build()
-        return httpClient.newCall(request).execute()
-    }
-
-    private fun serverUrlBuilder(): HttpUrl.Builder {
-        return jettyService.serverUrl.newBuilder()
-    }
+  private fun serverUrlBuilder(): HttpUrl.Builder {
+    return jettyService.serverUrl.newBuilder()
+  }
 }

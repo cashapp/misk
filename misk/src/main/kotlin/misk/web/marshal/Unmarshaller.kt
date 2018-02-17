@@ -6,9 +6,12 @@ import kotlin.reflect.KType
 
 /** Unmarshalls a typed object from an incoming source */
 interface Unmarshaller {
-    fun unmarshal(source: BufferedSource): Any?
+  fun unmarshal(source: BufferedSource): Any?
 
-    interface Factory {
-        fun create(mediaType: MediaType, type: KType): Unmarshaller?
-    }
+  interface Factory {
+    fun create(
+        mediaType: MediaType,
+        type: KType
+    ): Unmarshaller?
+  }
 }

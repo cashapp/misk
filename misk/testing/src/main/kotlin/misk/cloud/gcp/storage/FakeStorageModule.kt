@@ -9,13 +9,13 @@ import misk.inject.KAbstractModule
 
 /** Installs an embeddable version of [Storage] that works in-memory */
 class FakeStorageModule : KAbstractModule() {
-    override fun configure() {}
+  override fun configure() {}
 
-    @Provides
-    @Singleton
-    fun provideStorage(): Storage = StorageOptions.newBuilder()
-            .setCredentials(NoCredentials.getInstance())
-            .setServiceRpcFactory({ _ -> InMemoryStorageRpc() })
-            .build()
-            .service
+  @Provides
+  @Singleton
+  fun provideStorage(): Storage = StorageOptions.newBuilder()
+      .setCredentials(NoCredentials.getInstance())
+      .setServiceRpcFactory({ _ -> InMemoryStorageRpc() })
+      .build()
+      .service
 }

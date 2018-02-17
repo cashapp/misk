@@ -13,38 +13,44 @@ import kotlin.reflect.KType
 import kotlin.reflect.jvm.javaType
 
 class JsonMarshaller<T>(val adapter: JsonAdapter<T>) : Marshaller<T> {
-    override fun contentType() = MediaTypes.APPLICATION_JSON_MEDIA_TYPE
+  override fun contentType() = MediaTypes.APPLICATION_JSON_MEDIA_TYPE
 
-    override fun responseBody(o: T) = object : ResponseBody {
-        override fun writeTo(sink: BufferedSink) {
-            adapter.toJson(sink, o)
-        }
+  override fun responseBody(o: T) = object : ResponseBody {
+    override fun writeTo(sink: BufferedSink) {
+      adapter.toJson(sink, o)
     }
+  }
 
-    class Factory @Inject internal constructor(val moshi: Moshi) : Marshaller.Factory {
-        override fun create(mediaType: MediaType, type: KType): Marshaller<Any>? {
-            if (mediaType.type() != MediaTypes.APPLICATION_JSON_MEDIA_TYPE.type() ||
-                    mediaType.subtype() != MediaTypes.APPLICATION_JSON_MEDIA_TYPE.subtype()) {
-                return null
-            }
+  class Factory @Inject internal constructor(val moshi: Moshi) : Marshaller.Factory {
+    override fun create(
+        mediaType: MediaType,
+        type: KType
+    ): Marshaller<Any>? {
+      if (mediaType.type() != MediaTypes.APPLICATION_JSON_MEDIA_TYPE.type() ||
+          mediaType.subtype() != MediaTypes.APPLICATION_JSON_MEDIA_TYPE.subtype()) {
+        return null
+      }
 
-            val responseType = actualResponseType(type)
-            if (GenericMarshallers.canHandle(responseType)) return null
-            return JsonMarshaller<Any>(moshi.adapter<Any>(responseType))
-        }
+      val responseType = actualResponseType(type)
+      if (GenericMarshallers.canHandle(responseType)) return null
+      return JsonMarshaller<Any>(moshi.adapter<Any>(responseType))
     }
+  }
 }
 
 class JsonUnmarshaller(val adapter: JsonAdapter<Any>) : Unmarshaller {
-    override fun unmarshal(source: BufferedSource) = adapter.fromJson(source)
+  override fun unmarshal(source: BufferedSource) = adapter.fromJson(source)
 
-    class Factory @Inject internal constructor(val moshi: Moshi) : Unmarshaller.Factory {
-        override fun create(mediaType: MediaType, type: KType): Unmarshaller? {
-            if (mediaType.type() != MediaTypes.APPLICATION_JSON_MEDIA_TYPE.type() ||
-                    mediaType.subtype() != MediaTypes.APPLICATION_JSON_MEDIA_TYPE.subtype()) return null
+  class Factory @Inject internal constructor(val moshi: Moshi) : Unmarshaller.Factory {
+    override fun create(
+        mediaType: MediaType,
+        type: KType
+    ): Unmarshaller? {
+      if (mediaType.type() != MediaTypes.APPLICATION_JSON_MEDIA_TYPE.type() ||
+          mediaType.subtype() != MediaTypes.APPLICATION_JSON_MEDIA_TYPE.subtype()) return null
 
-            if (GenericUnmarshallers.canHandle(type)) return null
-            return JsonUnmarshaller(moshi.adapter<Any>(type.javaType))
-        }
+      if (GenericUnmarshallers.canHandle(type)) return null
+      return JsonUnmarshaller(moshi.adapter<Any>(type.javaType))
     }
+  }
 }

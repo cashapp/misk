@@ -14,19 +14,23 @@ import kotlin.reflect.full.findAnnotation
  * is annotated with [RequestHeaders].
  */
 object HeadersParameterExtractorFactory : ParameterExtractor.Factory {
-    private val extractor = object : ParameterExtractor {
-        override fun extract(webAction: WebAction, request: Request, pathMatcher: Matcher): Any? {
-            return request.headers
-        }
+  private val extractor = object : ParameterExtractor {
+    override fun extract(
+        webAction: WebAction,
+        request: Request,
+        pathMatcher: Matcher
+    ): Any? {
+      return request.headers
     }
+  }
 
-    override fun create(
-            function: KFunction<*>,
-            parameter: KParameter,
-            pathPattern: PathPattern
-    ): ParameterExtractor? {
-        if (parameter.findAnnotation<RequestHeaders>() == null) return null
+  override fun create(
+      function: KFunction<*>,
+      parameter: KParameter,
+      pathPattern: PathPattern
+  ): ParameterExtractor? {
+    if (parameter.findAnnotation<RequestHeaders>() == null) return null
 
-        return extractor
-    }
+    return extractor
+  }
 }

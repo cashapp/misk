@@ -12,21 +12,21 @@ fun WebAction.asChain(
     args: List<Any?>,
     vararg _interceptors: Interceptor
 ): Chain {
-    val interceptors = Lists.newArrayList(_interceptors.iterator())
-    interceptors.add(object : Interceptor {
-        override fun intercept(chain: Chain): Any? {
-            val parameterMap = LinkedHashMap<KParameter, Any?>()
-            parameterMap.put(function.parameters.first(), chain.action)
-            for (i in 1 until function.parameters.size) {
-                val param = function.parameters.get(i)
-                val arg = chain.args.get(i - 1)
-                if (param.isOptional && arg == null) {
-                    continue
-                }
-                parameterMap.put(param, arg)
-            }
-            return function.callBy(parameterMap)
+  val interceptors = Lists.newArrayList(_interceptors.iterator())
+  interceptors.add(object : Interceptor {
+    override fun intercept(chain: Chain): Any? {
+      val parameterMap = LinkedHashMap<KParameter, Any?>()
+      parameterMap.put(function.parameters.first(), chain.action)
+      for (i in 1 until function.parameters.size) {
+        val param = function.parameters.get(i)
+        val arg = chain.args.get(i - 1)
+        if (param.isOptional && arg == null) {
+          continue
         }
-    })
-    return RealChain(this, args, interceptors, function, 0)
+        parameterMap.put(param, arg)
+      }
+      return function.callBy(parameterMap)
+    }
+  })
+  return RealChain(this, args, interceptors, function, 0)
 }

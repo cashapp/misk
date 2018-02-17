@@ -5,5 +5,5 @@ import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.RecordedRequest
 
 class RoutingDispatcher(val routes: (RecordedRequest) -> MockResponse) : Dispatcher() {
-    override fun dispatch(request: RecordedRequest): MockResponse = routes.invoke(request)
+  override fun dispatch(request: RecordedRequest): MockResponse = routes.invoke(request)
 }

@@ -10,18 +10,18 @@ import javax.inject.Singleton
 /** Wraps the method's result `T` as a `Response<T>` if necessary. */
 @Singleton
 class BoxResponseInterceptorFactory : Interceptor.Factory {
-    val interceptor = object : Interceptor {
-        override fun intercept(chain: Chain): Any? {
-            val result = chain.proceed(chain.args)
-            return Response(result)
-        }
+  val interceptor = object : Interceptor {
+    override fun intercept(chain: Chain): Any? {
+      val result = chain.proceed(chain.args)
+      return Response(result)
     }
+  }
 
-    override fun create(action: Action): Interceptor? {
-        return when {
-            action.returnType.typeLiteral().rawType == Response::class.java -> null
-            else -> interceptor
-        }
+  override fun create(action: Action): Interceptor? {
+    return when {
+      action.returnType.typeLiteral().rawType == Response::class.java -> null
+      else -> interceptor
     }
+  }
 }
 

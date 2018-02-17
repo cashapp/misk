@@ -4,7 +4,7 @@ import com.codahale.metrics.Gauge
 import java.util.concurrent.atomic.AtomicLong
 
 class SettableGauge : Gauge<Long> {
-    val value = AtomicLong()
+  val value = AtomicLong()
 
-    override fun getValue(): Long = value.get()
+  override fun getValue(): Long = value.get()
 }

@@ -24,57 +24,64 @@ import javax.inject.Inject
 
 @MiskTest(startService = true)
 internal class PlainTextRequestTest {
-    @MiskTestModule
-    val module = Modules.combine(
-            MiskModule(),
-            WebModule(),
-            TestWebModule(),
-            TestModule())
+  @MiskTestModule
+  val module = Modules.combine(
+      MiskModule(),
+      WebModule(),
+      TestWebModule(),
+      TestModule()
+  )
 
-    private @Inject lateinit var jettyService: JettyService
+  private @Inject lateinit var jettyService: JettyService
 
-    @Test
-    fun passAsString() {
-        assertThat(post("/as-string", "foo")).isEqualTo("foo as-string")
+  @Test
+  fun passAsString() {
+    assertThat(post("/as-string", "foo")).isEqualTo("foo as-string")
+  }
+
+  @Test
+  fun passAsByteString() {
+    assertThat(post("/as-byte-string", "foo")).isEqualTo("foo as-byte-string")
+  }
+
+  class PassAsString : WebAction {
+    @Post("/as-string")
+    @RequestContentType(MediaTypes.TEXT_PLAIN_UTF8)
+    @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
+    fun call(@RequestBody message: String): String = "$message as-string"
+  }
+
+  class PassAsByteString : WebAction {
+    @Post("/as-byte-string")
+    @RequestContentType(MediaTypes.TEXT_PLAIN_UTF8)
+    @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
+    fun call(@RequestBody messageBytes: ByteString): String = "${messageBytes.utf8()} as-byte-string"
+  }
+
+  class TestModule : KAbstractModule() {
+    override fun configure() {
+      install(WebActionModule.create<PassAsString>())
+      install(WebActionModule.create<PassAsByteString>())
     }
+  }
 
-    @Test
-    fun passAsByteString() {
-        assertThat(post("/as-byte-string", "foo")).isEqualTo("foo as-byte-string")
-    }
+  private fun post(
+      path: String,
+      message: String
+  ): String = call(
+      Request.Builder()
+          .url(jettyService.serverUrl.newBuilder().encodedPath(path).build())
+          .post(okhttp3.RequestBody.create(MediaTypes.TEXT_PLAIN_UTF8_MEDIA_TYPE, message))
+  )
 
-    class PassAsString : WebAction {
-        @Post("/as-string")
-        @RequestContentType(MediaTypes.TEXT_PLAIN_UTF8)
-        @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
-        fun call(@RequestBody message: String): String = "$message as-string"
-    }
+  private fun call(request: Request.Builder): String {
+    request.header("Accept", MediaTypes.TEXT_PLAIN_UTF8)
 
-    class PassAsByteString : WebAction {
-        @Post("/as-byte-string")
-        @RequestContentType(MediaTypes.TEXT_PLAIN_UTF8)
-        @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
-        fun call(@RequestBody messageBytes: ByteString): String  = "${messageBytes.utf8()} as-byte-string"
-    }
-
-    class TestModule : KAbstractModule() {
-        override fun configure() {
-            install(WebActionModule.create<PassAsString>())
-            install(WebActionModule.create<PassAsByteString>())
-        }
-    }
-
-    private fun post(path: String, message: String): String = call(Request.Builder()
-            .url(jettyService.serverUrl.newBuilder().encodedPath(path).build())
-            .post(okhttp3.RequestBody.create(MediaTypes.TEXT_PLAIN_UTF8_MEDIA_TYPE, message)))
-
-    private fun call(request: Request.Builder): String {
-        request.header("Accept", MediaTypes.TEXT_PLAIN_UTF8)
-
-        val httpClient = OkHttpClient()
-        val response = httpClient.newCall(request.build()).execute()
-        assertThat(response.code()).isEqualTo(200)
-        assertThat(response.header("Content-Type")).isEqualTo(MediaTypes.TEXT_PLAIN_UTF8)
-        return response.body()?.string()!!
-    }
+    val httpClient = OkHttpClient()
+    val response = httpClient.newCall(request.build())
+        .execute()
+    assertThat(response.code()).isEqualTo(200)
+    assertThat(response.header("Content-Type")).isEqualTo(MediaTypes.TEXT_PLAIN_UTF8)
+    return response.body()?.string()!!
+  }
 }

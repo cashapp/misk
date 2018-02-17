@@ -29,56 +29,62 @@ import misk.web.marshal.UnmarshallerModule
 import javax.servlet.http.HttpServletRequest
 
 class WebModule : KAbstractModule() {
-    override fun configure() {
-        install(JettyModule())
-        install(object: ActionScopedProviderModule() {
-            override fun configureProviders() {
-                bindSeedData(Request::class)
-                bindSeedData(HttpServletRequest::class)
-            }
-        })
+  override fun configure() {
+    install(JettyModule())
+    install(object : ActionScopedProviderModule() {
+      override fun configureProviders() {
+        bindSeedData(Request::class)
+        bindSeedData(HttpServletRequest::class)
+      }
+    })
 
-        // Register built-in marshallers and unmarshallers
-        install(MarshallerModule.create<PlainTextMarshaller.Factory>())
-        install(MarshallerModule.create<JsonMarshaller.Factory>())
-        install(UnmarshallerModule.create<JsonUnmarshaller.Factory>())
+    // Register built-in marshallers and unmarshallers
+    install(MarshallerModule.create<PlainTextMarshaller.Factory>())
+    install(MarshallerModule.create<JsonMarshaller.Factory>())
+    install(UnmarshallerModule.create<JsonUnmarshaller.Factory>())
 
-        // Create an empty set binder of interceptor factories that can be added to by users.
-        newSetBinder<Interceptor.Factory>()
+    // Create an empty set binder of interceptor factories that can be added to by users.
+    newSetBinder<Interceptor.Factory>()
 
-        // Register built-in interceptors. Interceptors run in the order in which they are
-        // installed, and the order of these interceptors is critical.
+    // Register built-in interceptors. Interceptors run in the order in which they are
+    // installed, and the order of these interceptors is critical.
 
-        // Handle all unexpected errors that occur during dispatch
-        binder().addMultibinderBindingWithAnnotation<Interceptor.Factory, MiskDefault>().to<InternalErrorInterceptorFactory>()
+    // Handle all unexpected errors that occur during dispatch
+    binder().addMultibinderBindingWithAnnotation<Interceptor.Factory, MiskDefault>()
+        .to<InternalErrorInterceptorFactory>()
 
-        // Optionally log request and response details
-        binder().addMultibinderBindingWithAnnotation<Interceptor.Factory, MiskDefault>().to<RequestLoggingInterceptor.Factory>()
+    // Optionally log request and response details
+    binder().addMultibinderBindingWithAnnotation<Interceptor.Factory, MiskDefault>()
+        .to<RequestLoggingInterceptor.Factory>()
 
-        // Collect metrics on the status of results and response times of requests
-        binder().addMultibinderBindingWithAnnotation<Interceptor.Factory, MiskDefault>().to<MetricsInterceptor.Factory>()
+    // Collect metrics on the status of results and response times of requests
+    binder().addMultibinderBindingWithAnnotation<Interceptor.Factory, MiskDefault>()
+        .to<MetricsInterceptor.Factory>()
 
-        // Convert and log application level exceptions into their appropriate response format
-        binder().addMultibinderBindingWithAnnotation<Interceptor.Factory, MiskDefault>().to<ExceptionHandlingInterceptor.Factory>()
+    // Convert and log application level exceptions into their appropriate response format
+    binder().addMultibinderBindingWithAnnotation<Interceptor.Factory, MiskDefault>()
+        .to<ExceptionHandlingInterceptor.Factory>()
 
-        // Convert typed responses into a ResponseBody that can marshal the response according to
-        // the client's requested content-typ
-        binder().addMultibinderBindingWithAnnotation<Interceptor.Factory, MiskDefault>().to<MarshallerInterceptor.Factory>()
+    // Convert typed responses into a ResponseBody that can marshal the response according to
+    // the client's requested content-typ
+    binder().addMultibinderBindingWithAnnotation<Interceptor.Factory, MiskDefault>()
+        .to<MarshallerInterceptor.Factory>()
 
-        // Wrap "raw" responses with a Response object
-        binder().addMultibinderBindingWithAnnotation<Interceptor.Factory, MiskDefault>().to<BoxResponseInterceptorFactory>()
+    // Wrap "raw" responses with a Response object
+    binder().addMultibinderBindingWithAnnotation<Interceptor.Factory, MiskDefault>()
+        .to<BoxResponseInterceptorFactory>()
 
-        // Register build-in exception mappers
-        install(ExceptionMapperModule.create<ActionExceptionMapper>())
+    // Register build-in exception mappers
+    install(ExceptionMapperModule.create<ActionExceptionMapper>())
 
-        // Register built-in parameter extractors
-        binder().addMultibinderBinding<ParameterExtractor.Factory>()
-                .toInstance(PathPatternParameterExtractorFactory)
-        binder().addMultibinderBinding<ParameterExtractor.Factory>()
-                .toInstance(QueryStringParameterExtractorFactory)
-        binder().addMultibinderBinding<ParameterExtractor.Factory>()
-                .toInstance(HeadersParameterExtractorFactory)
-        binder().addMultibinderBinding<ParameterExtractor.Factory>()
-                .to<RequestBodyParameterExtractor.Factory>()
-    }
+    // Register built-in parameter extractors
+    binder().addMultibinderBinding<ParameterExtractor.Factory>()
+        .toInstance(PathPatternParameterExtractorFactory)
+    binder().addMultibinderBinding<ParameterExtractor.Factory>()
+        .toInstance(QueryStringParameterExtractorFactory)
+    binder().addMultibinderBinding<ParameterExtractor.Factory>()
+        .toInstance(HeadersParameterExtractorFactory)
+    binder().addMultibinderBinding<ParameterExtractor.Factory>()
+        .to<RequestBodyParameterExtractor.Factory>()
+  }
 }

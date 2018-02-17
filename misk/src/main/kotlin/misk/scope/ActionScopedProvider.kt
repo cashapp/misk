@@ -5,5 +5,5 @@ package misk.scope
  * provide contextual information based on an incoming request, job data, etc.
  */
 interface ActionScopedProvider<out T> {
-    fun get(): T
+  fun get(): T
 }

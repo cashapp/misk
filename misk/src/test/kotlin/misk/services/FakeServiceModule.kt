@@ -6,7 +6,8 @@ import misk.inject.addMultibinderBinding
 import misk.inject.to
 
 class FakeServiceModule : AbstractModule() {
-    override fun configure() {
-        binder().addMultibinderBinding<Service>().to<FakeService>()
-    }
+  override fun configure() {
+    binder().addMultibinderBinding<Service>()
+        .to<FakeService>()
+  }
 }

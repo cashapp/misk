@@ -8,26 +8,32 @@ import javax.crypto.Cipher
 import javax.crypto.spec.SecretKeySpec
 
 class FakeKeyService : KeyService {
-    override fun encrypt(keyAlias: String, plainText: ByteString): ByteString {
-        val key = newSymmetricKey(keyAlias)
-        val cipher = Cipher.getInstance("AES")
-        cipher.init(Cipher.ENCRYPT_MODE, key)
-        return ByteString.of(ByteBuffer.wrap(cipher.doFinal(plainText.toByteArray())))
-    }
+  override fun encrypt(
+      keyAlias: String,
+      plainText: ByteString
+  ): ByteString {
+    val key = newSymmetricKey(keyAlias)
+    val cipher = Cipher.getInstance("AES")
+    cipher.init(Cipher.ENCRYPT_MODE, key)
+    return ByteString.of(ByteBuffer.wrap(cipher.doFinal(plainText.toByteArray())))
+  }
 
-    override fun decrypt(keyAlias: String, cipherText: ByteString): ByteString {
-        val key = newSymmetricKey(keyAlias)
-        val cipher = Cipher.getInstance("AES")
-        cipher.init(Cipher.DECRYPT_MODE, key)
-        return ByteString.of(ByteBuffer.wrap(cipher.doFinal(cipherText.toByteArray())))
-    }
+  override fun decrypt(
+      keyAlias: String,
+      cipherText: ByteString
+  ): ByteString {
+    val key = newSymmetricKey(keyAlias)
+    val cipher = Cipher.getInstance("AES")
+    cipher.init(Cipher.DECRYPT_MODE, key)
+    return ByteString.of(ByteBuffer.wrap(cipher.doFinal(cipherText.toByteArray())))
+  }
 
-    private fun newSymmetricKey(keyText: String): Key {
-        val keyInput = when (keyText.length) {
-            in 1..31 -> keyText + " ".repeat(32 - keyText.length)
-            32 -> keyText
-            else -> keyText.take(32)
-        }
-        return SecretKeySpec(keyInput.toByteArray(Charsets.US_ASCII), "AES");
+  private fun newSymmetricKey(keyText: String): Key {
+    val keyInput = when (keyText.length) {
+      in 1..31 -> keyText + " ".repeat(32 - keyText.length)
+      32 -> keyText
+      else -> keyText.take(32)
     }
+    return SecretKeySpec(keyInput.toByteArray(Charsets.US_ASCII), "AES");
+  }
 }

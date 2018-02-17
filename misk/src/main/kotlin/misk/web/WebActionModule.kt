@@ -20,105 +20,119 @@ import kotlin.reflect.KFunction
 import kotlin.reflect.full.findAnnotation
 
 class WebActionModule<A : WebAction> private constructor(
-        val webActionClass: KClass<A>,
-        val member: KFunction<*>,
-        val pathPattern: String,
-        val httpMethod: HttpMethod,
-        val acceptedContentTypes: List<MediaRange>,
-        val responseContentType: MediaType?
+    val webActionClass: KClass<A>,
+    val member: KFunction<*>,
+    val pathPattern: String,
+    val httpMethod: HttpMethod,
+    val acceptedContentTypes: List<MediaRange>,
+    val responseContentType: MediaType?
 ) : AbstractModule() {
-    override fun configure() {
-        val provider = getProvider(webActionClass.java)
-        @Suppress("UNCHECKED_CAST")
-        val binder: Multibinder<BoundAction<A, *>> = Multibinder.newSetBinder(
-                binder(),
-                parameterizedType<BoundAction<*, *>>(subtypeOf<WebAction>(),
-                        subtypeOf<Any>()).typeLiteral()
-        ) as Multibinder<BoundAction<A, *>>
-        binder.addBinding().toProvider(
-                        BoundActionProvider(provider, member, pathPattern, httpMethod,
-                                acceptedContentTypes, responseContentType))
+  override fun configure() {
+    val provider = getProvider(webActionClass.java)
+    @Suppress("UNCHECKED_CAST")
+    val binder: Multibinder<BoundAction<A, *>> = Multibinder.newSetBinder(
+        binder(),
+        parameterizedType<BoundAction<*, *>>(
+            subtypeOf<WebAction>(),
+            subtypeOf<Any>()
+        ).typeLiteral()
+    ) as Multibinder<BoundAction<A, *>>
+    binder.addBinding()
+        .toProvider(
+            BoundActionProvider(
+                provider, member, pathPattern, httpMethod,
+                acceptedContentTypes, responseContentType
+            )
+        )
+  }
+
+  companion object {
+    inline fun <reified A : WebAction> create(): WebActionModule<A> = create(A::class)
+
+    @JvmStatic
+    fun <A : WebAction> create(webActionClass: Class<A>): WebActionModule<A> {
+      return create(webActionClass.kotlin)
     }
 
-    companion object {
-        inline fun <reified A : WebAction> create(): WebActionModule<A> = create(A::class)
+    fun <A : WebAction> create(webActionClass: KClass<A>): WebActionModule<A> {
+      var result: WebActionModule<A>? = null
 
-        @JvmStatic
-        fun <A : WebAction> create(webActionClass: Class<A>): WebActionModule<A> {
-            return create(webActionClass.kotlin)
+      for (member in webActionClass.members) {
+        for (annotation in member.annotations) {
+          if (annotation !is Get && annotation !is Post) continue
+          if (member !is KFunction<*>) throw IllegalArgumentException(
+              "expected $member to be a function"
+          )
+          if (result != null) throw IllegalArgumentException(
+              "multiple annotated methods in $webActionClass"
+          )
+
+          // NB(mmihic): The response media type may be ommitted; in this case only
+          // generic return types (String, ByteString, ResponseBody, etc) are supported
+          val responseContentType = member.responseContentType
+          val acceptedContentTypes = member.acceptedContentTypes
+
+          result = when (annotation) {
+            is Get -> WebActionModule(
+                webActionClass, member, annotation.pathPattern,
+                HttpMethod.GET, acceptedContentTypes, responseContentType
+            )
+            is Post -> WebActionModule(
+                webActionClass, member, annotation.pathPattern,
+                HttpMethod.POST, acceptedContentTypes, responseContentType
+            )
+            else -> throw AssertionError()
+          }
         }
-
-        fun <A : WebAction> create(webActionClass: KClass<A>): WebActionModule<A> {
-            var result: WebActionModule<A>? = null
-
-            for (member in webActionClass.members) {
-                for (annotation in member.annotations) {
-                    if (annotation !is Get && annotation !is Post) continue
-                    if (member !is KFunction<*>) throw IllegalArgumentException(
-                            "expected $member to be a function")
-                    if (result != null) throw IllegalArgumentException(
-                            "multiple annotated methods in $webActionClass")
-
-                    // NB(mmihic): The response media type may be ommitted; in this case only
-                    // generic return types (String, ByteString, ResponseBody, etc) are supported
-                    val responseContentType = member.responseContentType
-                    val acceptedContentTypes = member.acceptedContentTypes
-
-                    result = when (annotation) {
-                        is Get -> WebActionModule(webActionClass, member, annotation.pathPattern,
-                                HttpMethod.GET, acceptedContentTypes, responseContentType)
-                        is Post -> WebActionModule(webActionClass, member, annotation.pathPattern,
-                                HttpMethod.POST, acceptedContentTypes, responseContentType)
-                        else -> throw AssertionError()
-                    }
-                }
-            }
-            if (result == null) {
-                throw IllegalArgumentException("no annotated methods in $webActionClass")
-            }
-            return result
-        }
+      }
+      if (result == null) {
+        throw IllegalArgumentException("no annotated methods in $webActionClass")
+      }
+      return result
     }
+  }
 }
 
 private val KFunction<*>.acceptedContentTypes: List<MediaRange>
-    get() = findAnnotation<RequestContentType>()?.value?.flatMap {
-        MediaRange.parseRanges(it)
-    }?.toList() ?: listOf(MediaRange.ALL_MEDIA)
+  get() = findAnnotation<RequestContentType>()?.value?.flatMap {
+    MediaRange.parseRanges(it)
+  }?.toList() ?: listOf(MediaRange.ALL_MEDIA)
 
 private val KFunction<*>.responseContentType: MediaType?
-    get() = findAnnotation<ResponseContentType>()?.value?.let {
-        MediaType.parse(it)
-    }
+  get() = findAnnotation<ResponseContentType>()?.value?.let {
+    MediaType.parse(it)
+  }
 
 internal class BoundActionProvider<A : WebAction, R>(
-        val provider: Provider<A>,
-        val function: KFunction<R>,
-        val pathPattern: String,
-        val httpMethod: HttpMethod,
-        val acceptedContentTypes: List<MediaRange>,
-        val responseContentType: MediaType?
+    val provider: Provider<A>,
+    val function: KFunction<R>,
+    val pathPattern: String,
+    val httpMethod: HttpMethod,
+    val acceptedContentTypes: List<MediaRange>,
+    val responseContentType: MediaType?
 ) : Provider<BoundAction<A, *>> {
 
-    @Inject
-    lateinit var userProvidedInterceptorFactories: List<Interceptor.Factory>
-    @Inject
-    @JvmSuppressWildcards
-    @MiskDefault
-    lateinit var miskInterceptorFactories: Set<Interceptor.Factory>
-    @Inject
-    lateinit var parameterExtractorFactories: List<ParameterExtractor.Factory>
+  @Inject
+  lateinit var userProvidedInterceptorFactories: List<Interceptor.Factory>
+  @Inject
+  @JvmSuppressWildcards
+  @MiskDefault
+  lateinit var miskInterceptorFactories: Set<Interceptor.Factory>
+  @Inject
+  lateinit var parameterExtractorFactories: List<ParameterExtractor.Factory>
 
-    override fun get(): BoundAction<A, *> {
-        val action = function.asAction()
+  override fun get(): BoundAction<A, *> {
+    val action = function.asAction()
 
-        val interceptors = ArrayList<Interceptor>()
-        // Ensure that default interceptors are called before any user provided interceptors
-        miskInterceptorFactories.mapNotNullTo(interceptors) { it.create(action) }
-        userProvidedInterceptorFactories.mapNotNullTo(interceptors) { it.create(action) }
+    val interceptors = ArrayList<Interceptor>()
+    // Ensure that default interceptors are called before any user provided interceptors
+    miskInterceptorFactories.mapNotNullTo(interceptors) { it.create(action) }
+    userProvidedInterceptorFactories.mapNotNullTo(interceptors) { it.create(action) }
 
-        return BoundAction(provider, interceptors, parameterExtractorFactories, function,
-                PathPattern.parse(pathPattern), httpMethod, acceptedContentTypes,
-                responseContentType)
-    }
+    return BoundAction(
+        provider, interceptors, parameterExtractorFactories, function,
+        PathPattern.parse(pathPattern), httpMethod, acceptedContentTypes,
+        responseContentType
+    )
+  }
 }
