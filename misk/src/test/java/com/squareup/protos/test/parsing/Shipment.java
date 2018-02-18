@@ -102,13 +102,6 @@ public final class Shipment extends Message<Shipment, Shipment.Builder> {
   public final ByteString destination_signature;
 
   @WireField(
-      tag = 11,
-      adapter = "com.squareup.protos.test.parsing.Warehouse#ADAPTER",
-      label = WireField.Label.REPEATED
-  )
-  public final List<Warehouse> nested_shipments;
-
-  @WireField(
       tag = 12,
       adapter = "com.squareup.wire.ProtoAdapter#STRING",
       label = WireField.Label.REPEATED
@@ -135,15 +128,15 @@ public final class Shipment extends Message<Shipment, Shipment.Builder> {
 
   public Shipment(Long shipment_id, String shipment_token, Warehouse source, Warehouse destination,
       State status, Double load_ratio, Boolean deleted, ByteString source_signature,
-      ByteString destination_signature, List<Warehouse> nested_shipments, List<String> notes,
-      String account_token, String card_token, String transfer_id) {
-    this(shipment_id, shipment_token, source, destination, status, load_ratio, deleted, source_signature, destination_signature, nested_shipments, notes, account_token, card_token, transfer_id, ByteString.EMPTY);
+      ByteString destination_signature, List<String> notes, String account_token, String card_token,
+      String transfer_id) {
+    this(shipment_id, shipment_token, source, destination, status, load_ratio, deleted, source_signature, destination_signature, notes, account_token, card_token, transfer_id, ByteString.EMPTY);
   }
 
   public Shipment(Long shipment_id, String shipment_token, Warehouse source, Warehouse destination,
       State status, Double load_ratio, Boolean deleted, ByteString source_signature,
-      ByteString destination_signature, List<Warehouse> nested_shipments, List<String> notes,
-      String account_token, String card_token, String transfer_id, ByteString unknownFields) {
+      ByteString destination_signature, List<String> notes, String account_token, String card_token,
+      String transfer_id, ByteString unknownFields) {
     super(ADAPTER, unknownFields);
     if (Internal.countNonNull(account_token, card_token, transfer_id) > 1) {
       throw new IllegalArgumentException("at most one of account_token, card_token, transfer_id may be non-null");
@@ -157,7 +150,6 @@ public final class Shipment extends Message<Shipment, Shipment.Builder> {
     this.deleted = deleted;
     this.source_signature = source_signature;
     this.destination_signature = destination_signature;
-    this.nested_shipments = Internal.immutableCopyOf("nested_shipments", nested_shipments);
     this.notes = Internal.immutableCopyOf("notes", notes);
     this.account_token = account_token;
     this.card_token = card_token;
@@ -176,7 +168,6 @@ public final class Shipment extends Message<Shipment, Shipment.Builder> {
     builder.deleted = deleted;
     builder.source_signature = source_signature;
     builder.destination_signature = destination_signature;
-    builder.nested_shipments = Internal.copyOf("nested_shipments", nested_shipments);
     builder.notes = Internal.copyOf("notes", notes);
     builder.account_token = account_token;
     builder.card_token = card_token;
@@ -200,7 +191,6 @@ public final class Shipment extends Message<Shipment, Shipment.Builder> {
         && Internal.equals(deleted, o.deleted)
         && Internal.equals(source_signature, o.source_signature)
         && Internal.equals(destination_signature, o.destination_signature)
-        && nested_shipments.equals(o.nested_shipments)
         && notes.equals(o.notes)
         && Internal.equals(account_token, o.account_token)
         && Internal.equals(card_token, o.card_token)
@@ -221,7 +211,6 @@ public final class Shipment extends Message<Shipment, Shipment.Builder> {
       result = result * 37 + (deleted != null ? deleted.hashCode() : 0);
       result = result * 37 + (source_signature != null ? source_signature.hashCode() : 0);
       result = result * 37 + (destination_signature != null ? destination_signature.hashCode() : 0);
-      result = result * 37 + nested_shipments.hashCode();
       result = result * 37 + notes.hashCode();
       result = result * 37 + (account_token != null ? account_token.hashCode() : 0);
       result = result * 37 + (card_token != null ? card_token.hashCode() : 0);
@@ -243,7 +232,6 @@ public final class Shipment extends Message<Shipment, Shipment.Builder> {
     if (deleted != null) builder.append(", deleted=").append(deleted);
     if (source_signature != null) builder.append(", source_signature=").append(source_signature);
     if (destination_signature != null) builder.append(", destination_signature=").append(destination_signature);
-    if (!nested_shipments.isEmpty()) builder.append(", nested_shipments=").append(nested_shipments);
     if (!notes.isEmpty()) builder.append(", notes=").append(notes);
     if (account_token != null) builder.append(", account_token=").append(account_token);
     if (card_token != null) builder.append(", card_token=").append(card_token);
@@ -270,8 +258,6 @@ public final class Shipment extends Message<Shipment, Shipment.Builder> {
 
     public ByteString destination_signature;
 
-    public List<Warehouse> nested_shipments;
-
     public List<String> notes;
 
     public String account_token;
@@ -281,7 +267,6 @@ public final class Shipment extends Message<Shipment, Shipment.Builder> {
     public String transfer_id;
 
     public Builder() {
-      nested_shipments = Internal.newMutableList();
       notes = Internal.newMutableList();
     }
 
@@ -330,12 +315,6 @@ public final class Shipment extends Message<Shipment, Shipment.Builder> {
       return this;
     }
 
-    public Builder nested_shipments(List<Warehouse> nested_shipments) {
-      Internal.checkElementsNotNull(nested_shipments);
-      this.nested_shipments = nested_shipments;
-      return this;
-    }
-
     public Builder notes(List<String> notes) {
       Internal.checkElementsNotNull(notes);
       this.notes = notes;
@@ -365,7 +344,7 @@ public final class Shipment extends Message<Shipment, Shipment.Builder> {
 
     @Override
     public Shipment build() {
-      return new Shipment(shipment_id, shipment_token, source, destination, status, load_ratio, deleted, source_signature, destination_signature, nested_shipments, notes, account_token, card_token, transfer_id, super.buildUnknownFields());
+      return new Shipment(shipment_id, shipment_token, source, destination, status, load_ratio, deleted, source_signature, destination_signature, notes, account_token, card_token, transfer_id, super.buildUnknownFields());
     }
   }
 
@@ -432,7 +411,6 @@ public final class Shipment extends Message<Shipment, Shipment.Builder> {
           + ProtoAdapter.BOOL.encodedSizeWithTag(8, value.deleted)
           + ProtoAdapter.BYTES.encodedSizeWithTag(9, value.source_signature)
           + ProtoAdapter.BYTES.encodedSizeWithTag(10, value.destination_signature)
-          + Warehouse.ADAPTER.asRepeated().encodedSizeWithTag(11, value.nested_shipments)
           + ProtoAdapter.STRING.asRepeated().encodedSizeWithTag(12, value.notes)
           + ProtoAdapter.STRING.encodedSizeWithTag(13, value.account_token)
           + ProtoAdapter.STRING.encodedSizeWithTag(14, value.card_token)
@@ -451,7 +429,6 @@ public final class Shipment extends Message<Shipment, Shipment.Builder> {
       ProtoAdapter.BOOL.encodeWithTag(writer, 8, value.deleted);
       ProtoAdapter.BYTES.encodeWithTag(writer, 9, value.source_signature);
       ProtoAdapter.BYTES.encodeWithTag(writer, 10, value.destination_signature);
-      Warehouse.ADAPTER.asRepeated().encodeWithTag(writer, 11, value.nested_shipments);
       ProtoAdapter.STRING.asRepeated().encodeWithTag(writer, 12, value.notes);
       ProtoAdapter.STRING.encodeWithTag(writer, 13, value.account_token);
       ProtoAdapter.STRING.encodeWithTag(writer, 14, value.card_token);
@@ -481,7 +458,6 @@ public final class Shipment extends Message<Shipment, Shipment.Builder> {
           case 8: builder.deleted(ProtoAdapter.BOOL.decode(reader)); break;
           case 9: builder.source_signature(ProtoAdapter.BYTES.decode(reader)); break;
           case 10: builder.destination_signature(ProtoAdapter.BYTES.decode(reader)); break;
-          case 11: builder.nested_shipments.add(Warehouse.ADAPTER.decode(reader)); break;
           case 12: builder.notes.add(ProtoAdapter.STRING.decode(reader)); break;
           case 13: builder.account_token(ProtoAdapter.STRING.decode(reader)); break;
           case 14: builder.card_token(ProtoAdapter.STRING.decode(reader)); break;
@@ -502,7 +478,6 @@ public final class Shipment extends Message<Shipment, Shipment.Builder> {
       Builder builder = value.newBuilder();
       if (builder.source != null) builder.source = Warehouse.ADAPTER.redact(builder.source);
       if (builder.destination != null) builder.destination = Warehouse.ADAPTER.redact(builder.destination);
-      Internal.redactElements(builder.nested_shipments, Warehouse.ADAPTER);
       builder.clearUnknownFields();
       return builder.build();
     }

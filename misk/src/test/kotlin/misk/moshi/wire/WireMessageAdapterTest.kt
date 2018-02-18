@@ -2,6 +2,7 @@ package misk.moshi.wire
 
 import com.google.inject.util.Modules
 import com.squareup.moshi.Moshi
+import com.squareup.protos.test.parsing.Robot
 import com.squareup.protos.test.parsing.Shipment
 import com.squareup.protos.test.parsing.Warehouse
 import org.assertj.core.api.isEqualToAsJson
@@ -88,6 +89,38 @@ internal class WireMessageAdapterTest {
     }
 
     @Test
+    fun nestedRepeatingMessages() {
+        val warehouseAdapter = moshi.adapter(Warehouse::class.java)
+        val warehouse = Warehouse.Builder()
+                .alternates(listOf(
+                        Warehouse.Builder()
+                                .warehouse_id(755L)
+                                .warehouse_token("W_AXAA")
+                                .build(),
+                        Warehouse.Builder()
+                                .warehouse_id(500L)
+                                .warehouse_token("W_THTHT")
+                                .build()))
+                .build()
+        val json = warehouseAdapter.indent(" ").toJson(warehouse)
+        assertThat(json).isEqualToAsJson("""
+{
+  "alternates": [
+    {
+      "warehouse_id": 755,
+      "warehouse_token": "W_AXAA"
+    },
+    {
+      "warehouse_id": 500,
+      "warehouse_token": "W_THTHT"
+    }
+  ]
+}
+""")
+        assertThat(warehouseAdapter.fromJson(json)).isEqualTo(warehouse)
+    }
+
+    @Test
     fun missingListFieldsMapToEmptyLists() {
         val shipmentAdapter = moshi.adapter(Shipment::class.java)
         val parsed = shipmentAdapter.fromJson("""
@@ -107,7 +140,6 @@ internal class WireMessageAdapterTest {
 
         assertThat(parsed).isEqualTo(expected)
         assertThat(parsed.notes).isNotNull
-        assertThat(parsed.nested_shipments).isNotNull
     }
 
     @Test
@@ -134,6 +166,43 @@ internal class WireMessageAdapterTest {
  }
 }""")
         assertThat(warehouseAdapter.fromJson(json)).isEqualTo(warehouse)
+    }
+
+    @Test
+    fun mapsOfMessages() {
+        val warehouseAdapter = moshi.adapter(Warehouse::class.java)
+        val warehouse = Warehouse.Builder()
+                .warehouse_id(1976)
+                .warehouse_token("W_ACDFD")
+                .robots(mapOf(
+                        34 to Robot.Builder()
+                                .robot_id(34)
+                                .robot_token("R_93498")
+                                .build(),
+                        56 to Robot.Builder()
+                                .robot_id(56)
+                                .robot_token("R_DFGDD")
+                                .build()))
+                .build()
+        val json = warehouseAdapter.indent(" ").toJson(warehouse)
+        assertThat(json).isEqualToAsJson("""
+{
+  "warehouse_id": 1976,
+  "warehouse_token": "W_ACDFD",
+  "robots": {
+    "34": {
+      "robot_id": 34,
+      "robot_token": "R_93498"
+    },
+    "56": {
+      "robot_id": 56,
+      "robot_token": "R_DFGDD"
+    }
+  }
+}
+""")
+        assertThat(warehouseAdapter.fromJson(json)).isEqualTo(warehouse)
+
     }
 
     @Test
