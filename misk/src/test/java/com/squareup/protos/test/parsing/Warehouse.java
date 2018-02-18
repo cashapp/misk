@@ -10,6 +10,7 @@ import com.squareup.wire.ProtoWriter;
 import com.squareup.wire.WireField;
 import com.squareup.wire.internal.Internal;
 import java.io.IOException;
+import java.lang.Integer;
 import java.lang.Long;
 import java.lang.Object;
 import java.lang.Override;
@@ -60,19 +61,28 @@ public final class Warehouse extends Message<Warehouse, Warehouse.Builder> {
   )
   public final Map<String, String> dropoff_points;
 
+  @WireField(
+      tag = 7,
+      keyAdapter = "com.squareup.wire.ProtoAdapter#INT32",
+      adapter = "com.squareup.protos.test.parsing.Robot#ADAPTER"
+  )
+  public final Map<Integer, Robot> robots;
+
   public Warehouse(Long warehouse_id, String warehouse_token, Warehouse central_repo,
-      List<Warehouse> alternates, Map<String, String> dropoff_points) {
-    this(warehouse_id, warehouse_token, central_repo, alternates, dropoff_points, ByteString.EMPTY);
+      List<Warehouse> alternates, Map<String, String> dropoff_points, Map<Integer, Robot> robots) {
+    this(warehouse_id, warehouse_token, central_repo, alternates, dropoff_points, robots, ByteString.EMPTY);
   }
 
   public Warehouse(Long warehouse_id, String warehouse_token, Warehouse central_repo,
-      List<Warehouse> alternates, Map<String, String> dropoff_points, ByteString unknownFields) {
+      List<Warehouse> alternates, Map<String, String> dropoff_points, Map<Integer, Robot> robots,
+      ByteString unknownFields) {
     super(ADAPTER, unknownFields);
     this.warehouse_id = warehouse_id;
     this.warehouse_token = warehouse_token;
     this.central_repo = central_repo;
     this.alternates = Internal.immutableCopyOf("alternates", alternates);
     this.dropoff_points = Internal.immutableCopyOf("dropoff_points", dropoff_points);
+    this.robots = Internal.immutableCopyOf("robots", robots);
   }
 
   @Override
@@ -83,6 +93,7 @@ public final class Warehouse extends Message<Warehouse, Warehouse.Builder> {
     builder.central_repo = central_repo;
     builder.alternates = Internal.copyOf("alternates", alternates);
     builder.dropoff_points = Internal.copyOf("dropoff_points", dropoff_points);
+    builder.robots = Internal.copyOf("robots", robots);
     builder.addUnknownFields(unknownFields());
     return builder;
   }
@@ -97,7 +108,8 @@ public final class Warehouse extends Message<Warehouse, Warehouse.Builder> {
         && Internal.equals(warehouse_token, o.warehouse_token)
         && Internal.equals(central_repo, o.central_repo)
         && alternates.equals(o.alternates)
-        && dropoff_points.equals(o.dropoff_points);
+        && dropoff_points.equals(o.dropoff_points)
+        && robots.equals(o.robots);
   }
 
   @Override
@@ -110,6 +122,7 @@ public final class Warehouse extends Message<Warehouse, Warehouse.Builder> {
       result = result * 37 + (central_repo != null ? central_repo.hashCode() : 0);
       result = result * 37 + alternates.hashCode();
       result = result * 37 + dropoff_points.hashCode();
+      result = result * 37 + robots.hashCode();
       super.hashCode = result;
     }
     return result;
@@ -123,6 +136,7 @@ public final class Warehouse extends Message<Warehouse, Warehouse.Builder> {
     if (central_repo != null) builder.append(", central_repo=").append(central_repo);
     if (!alternates.isEmpty()) builder.append(", alternates=").append(alternates);
     if (!dropoff_points.isEmpty()) builder.append(", dropoff_points=").append(dropoff_points);
+    if (!robots.isEmpty()) builder.append(", robots=").append(robots);
     return builder.replace(0, 2, "Warehouse{").append('}').toString();
   }
 
@@ -137,9 +151,12 @@ public final class Warehouse extends Message<Warehouse, Warehouse.Builder> {
 
     public Map<String, String> dropoff_points;
 
+    public Map<Integer, Robot> robots;
+
     public Builder() {
       alternates = Internal.newMutableList();
       dropoff_points = Internal.newMutableMap();
+      robots = Internal.newMutableMap();
     }
 
     public Builder warehouse_id(Long warehouse_id) {
@@ -169,14 +186,22 @@ public final class Warehouse extends Message<Warehouse, Warehouse.Builder> {
       return this;
     }
 
+    public Builder robots(Map<Integer, Robot> robots) {
+      Internal.checkElementsNotNull(robots);
+      this.robots = robots;
+      return this;
+    }
+
     @Override
     public Warehouse build() {
-      return new Warehouse(warehouse_id, warehouse_token, central_repo, alternates, dropoff_points, super.buildUnknownFields());
+      return new Warehouse(warehouse_id, warehouse_token, central_repo, alternates, dropoff_points, robots, super.buildUnknownFields());
     }
   }
 
   private static final class ProtoAdapter_Warehouse extends ProtoAdapter<Warehouse> {
     private final ProtoAdapter<Map<String, String>> dropoff_points = ProtoAdapter.newMapAdapter(ProtoAdapter.STRING, ProtoAdapter.STRING);
+
+    private final ProtoAdapter<Map<Integer, Robot>> robots = ProtoAdapter.newMapAdapter(ProtoAdapter.INT32, Robot.ADAPTER);
 
     public ProtoAdapter_Warehouse() {
       super(FieldEncoding.LENGTH_DELIMITED, Warehouse.class);
@@ -189,6 +214,7 @@ public final class Warehouse extends Message<Warehouse, Warehouse.Builder> {
           + Warehouse.ADAPTER.encodedSizeWithTag(3, value.central_repo)
           + Warehouse.ADAPTER.asRepeated().encodedSizeWithTag(4, value.alternates)
           + dropoff_points.encodedSizeWithTag(6, value.dropoff_points)
+          + robots.encodedSizeWithTag(7, value.robots)
           + value.unknownFields().size();
     }
 
@@ -199,6 +225,7 @@ public final class Warehouse extends Message<Warehouse, Warehouse.Builder> {
       Warehouse.ADAPTER.encodeWithTag(writer, 3, value.central_repo);
       Warehouse.ADAPTER.asRepeated().encodeWithTag(writer, 4, value.alternates);
       dropoff_points.encodeWithTag(writer, 6, value.dropoff_points);
+      robots.encodeWithTag(writer, 7, value.robots);
       writer.writeBytes(value.unknownFields());
     }
 
@@ -213,6 +240,7 @@ public final class Warehouse extends Message<Warehouse, Warehouse.Builder> {
           case 3: builder.central_repo(Warehouse.ADAPTER.decode(reader)); break;
           case 4: builder.alternates.add(Warehouse.ADAPTER.decode(reader)); break;
           case 6: builder.dropoff_points.putAll(dropoff_points.decode(reader)); break;
+          case 7: builder.robots.putAll(robots.decode(reader)); break;
           default: {
             FieldEncoding fieldEncoding = reader.peekFieldEncoding();
             Object value = fieldEncoding.rawProtoAdapter().decode(reader);
@@ -229,6 +257,7 @@ public final class Warehouse extends Message<Warehouse, Warehouse.Builder> {
       Builder builder = value.newBuilder();
       if (builder.central_repo != null) builder.central_repo = Warehouse.ADAPTER.redact(builder.central_repo);
       Internal.redactElements(builder.alternates, Warehouse.ADAPTER);
+      Internal.redactElements(builder.robots, Robot.ADAPTER);
       builder.clearUnknownFields();
       return builder.build();
     }
