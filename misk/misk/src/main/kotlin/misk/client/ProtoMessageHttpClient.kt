@@ -10,7 +10,8 @@ import okhttp3.RequestBody
 import javax.inject.Inject
 
 /**
- * This helper class is for making HTTP requests to an endpoint that handles protobuf Message claases.
+ * This helper class is for making HTTP requests to an endpoint that handles protobuf Message
+ * classes.
  */
 class ProtoMessageHttpClient @Inject constructor(var moshi: Moshi) {
 
@@ -33,8 +34,7 @@ class ProtoMessageHttpClient @Inject constructor(var moshi: Moshi) {
     .build()
   val response = okHttp.newCall(request).execute()
   if (response.code() != 200) {
-   throw RuntimeException("request failed (${response.code()} ${response.body()?.string()}"
-   )
+   throw RuntimeException("request failed (${response.code()} ${response.body()?.string()}")
   }
 
   return response.body()?.string()?.let { moshi.adapter(responseType).fromJson(it) }
