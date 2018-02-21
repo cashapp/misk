@@ -10,6 +10,7 @@ import misk.scope.ActionScopedProviderModule
 import misk.web.exceptions.ActionExceptionMapper
 import misk.web.exceptions.ExceptionHandlingInterceptor
 import misk.web.exceptions.ExceptionMapperModule
+import misk.web.extractors.FormValueParameterExtractorFactory
 import misk.web.extractors.HeadersParameterExtractorFactory
 import misk.web.extractors.ParameterExtractor
 import misk.web.extractors.PathPatternParameterExtractorFactory
@@ -76,6 +77,8 @@ class WebModule : KAbstractModule() {
                 .toInstance(PathPatternParameterExtractorFactory)
         binder().addMultibinderBinding<ParameterExtractor.Factory>()
                 .toInstance(QueryStringParameterExtractorFactory)
+        binder().addMultibinderBinding<ParameterExtractor.Factory>()
+                .toInstance(FormValueParameterExtractorFactory)
         binder().addMultibinderBinding<ParameterExtractor.Factory>()
                 .toInstance(HeadersParameterExtractorFactory)
         binder().addMultibinderBinding<ParameterExtractor.Factory>()

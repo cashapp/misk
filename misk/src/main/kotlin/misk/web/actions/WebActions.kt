@@ -16,14 +16,14 @@ fun WebAction.asChain(
     interceptors.add(object : Interceptor {
         override fun intercept(chain: Chain): Any? {
             val parameterMap = LinkedHashMap<KParameter, Any?>()
-            parameterMap.put(function.parameters.first(), chain.action)
+            parameterMap[function.parameters.first()] = chain.action
             for (i in 1 until function.parameters.size) {
-                val param = function.parameters.get(i)
-                val arg = chain.args.get(i - 1)
+                val param = function.parameters[i]
+                val arg = chain.args[i - 1]
                 if (param.isOptional && arg == null) {
                     continue
                 }
-                parameterMap.put(param, arg)
+                parameterMap[param] = arg
             }
             return function.callBy(parameterMap)
         }
