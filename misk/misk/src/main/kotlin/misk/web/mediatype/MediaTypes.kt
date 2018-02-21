@@ -6,6 +6,8 @@ object MediaTypes {
   const val APPLICATION_JSON = "application/json;charset=utf-8"
   val APPLICATION_JSON_MEDIA_TYPE = APPLICATION_JSON.asMediaType()
 
+  const val APPLICATION_FORM_URLENCODED = "application/x-www-form-urlencoded;charset=utf-8"
+
   const val TEXT_PLAIN_UTF8 = "text/plain;charset=utf-8"
   val TEXT_PLAIN_UTF8_MEDIA_TYPE = TEXT_PLAIN_UTF8.asMediaType()
 
