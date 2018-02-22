@@ -1,7 +1,11 @@
 package misk.web.marshal
 
+import com.google.common.cache.CacheBuilder
+import com.google.common.cache.CacheLoader
 import misk.inject.typeLiteral
 import misk.web.ResponseBody
+import misk.web.StringConverter
+import misk.web.converterFor
 import misk.web.marshal.Marshaller.Companion.actualResponseType
 import okhttp3.MediaType
 import okio.BufferedSink
@@ -23,16 +27,40 @@ object GenericUnmarshallers {
       ByteString::class.java
   )
 
+  // This generic handler can potentially be called millions of times, each time returning what's
+  // effectively the same object over and over. Remember the results in this map to avoid
+  // polluting the GC, and also to avoid making the call at all when no conversion is possible.
+  private val stringConvertableCache = CacheBuilder.newBuilder()
+      .maximumSize(1000)
+      .build(
+          object: CacheLoader<KType, Unmarshaller>() {
+            override fun load(key: KType): Unmarshaller {
+              val stringConverter = converterFor(key)
+              return if (stringConverter == null) ToNothing()
+              else ToStringConvertable(stringConverter)
+            }
+          }
+      )
+
   private object ToString : Unmarshaller {
-    override fun unmarshal(source: BufferedSource): Any? = source.readUtf8()
+    override fun unmarshal(source: BufferedSource): String = source.readUtf8()
   }
 
   private object ToBufferedSource : Unmarshaller {
-    override fun unmarshal(source: BufferedSource): Any? = source
+    override fun unmarshal(source: BufferedSource): BufferedSource = source
   }
 
   private object ToByteString : Unmarshaller {
-    override fun unmarshal(source: BufferedSource): Any? = source.readByteString()
+    override fun unmarshal(source: BufferedSource): ByteString = source.readByteString()
+  }
+
+  private class ToStringConvertable(val stringConverter: StringConverter) : Unmarshaller {
+    override fun unmarshal(source: BufferedSource): Any? = stringConverter(source.readUtf8())
+  }
+
+  private class ToNothing : Unmarshaller {
+    override fun unmarshal(source: BufferedSource): Nothing
+        = throw IllegalStateException("Attempt to unmarshall nothing")
   }
 
   fun into(parameter: KParameter): Unmarshaller? {
@@ -41,7 +69,10 @@ object GenericUnmarshallers {
       String::class.java -> ToString
       BufferedSource::class.java -> ToBufferedSource
       ByteString::class.java -> ToByteString
-      else -> null
+      else -> {
+        val unmarshaller = stringConvertableCache[paramType]
+        return if (unmarshaller is ToNothing) null else unmarshaller
+      }
     }
   }
 }

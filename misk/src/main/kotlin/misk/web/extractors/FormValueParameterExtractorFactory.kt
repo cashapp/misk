@@ -7,8 +7,9 @@ import misk.web.FormField
 import misk.web.FormValue
 import misk.web.PathPattern
 import misk.web.Request
+import misk.web.StringConverter
 import misk.web.actions.WebAction
-import misk.web.actions.WebSocket
+import misk.web.converterFor
 import okio.BufferedSource
 import java.net.URLDecoder
 import java.util.regex.Matcher
@@ -39,12 +40,12 @@ object FormValueParameterExtractorFactory : ParameterExtractor.Factory {
       val name = annotation?.name?.toLowerCase() ?: it.name?.toLowerCase()
 
       val isList = it.type.classifier?.equals(List::class) ?: false
-      ConstructorParameter(
-          it,
-          name,
-          it.isOptional,
-          it.type.isMarkedNullable,
-          isList,
+          ConstructorParameter(
+              it,
+              name,
+              it.isOptional,
+              it.type.isMarkedNullable,
+              isList,
           converterFor(if (isList) it.type.arguments.first().type!! else it.type)
       )
     }
