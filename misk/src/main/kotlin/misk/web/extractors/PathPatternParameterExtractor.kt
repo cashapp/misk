@@ -4,6 +4,7 @@ import misk.web.PathParam
 import misk.web.PathPattern
 import misk.web.Request
 import misk.web.actions.WebAction
+import misk.web.converterFor
 import java.util.regex.Matcher
 import kotlin.reflect.KFunction
 import kotlin.reflect.KParameter

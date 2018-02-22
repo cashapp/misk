@@ -1,4 +1,4 @@
-package misk.web.extractors
+package misk.web
 
 import kotlin.reflect.KType
 import kotlin.reflect.full.createType

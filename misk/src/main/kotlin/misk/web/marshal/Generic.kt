@@ -1,7 +1,11 @@
 package misk.web.marshal
 
+import com.google.common.cache.CacheBuilder
+import com.google.common.cache.CacheLoader
 import misk.inject.typeLiteral
 import misk.web.ResponseBody
+import misk.web.StringConverter
+import misk.web.converterFor
 import misk.web.marshal.Marshaller.Companion.actualResponseType
 import okhttp3.MediaType
 import okio.BufferedSink
@@ -23,6 +27,21 @@ object GenericUnmarshallers {
             ByteString::class.java
     )
 
+    // This generic handler can potentially be called millions of times, each time returning what's
+    // effectively the same object over and over. Remember the results in this map to avoid
+    // polluting the GC, and also to avoid making the call at all when no conversion is possible.
+    private val stringConvertableCache = CacheBuilder.newBuilder()
+        .maximumSize(1000)
+        .build(
+            object: CacheLoader<KType, ToStringConvertable?>() {
+                override fun load(key: KType?): ToStringConvertable? {
+                    val stringConverter = converterFor(key!!)
+                    return if (stringConverter == null) null
+                        else ToStringConvertable(stringConverter)
+                }
+            }
+        )
+
     private object ToString : Unmarshaller {
         override fun unmarshal(source: BufferedSource): Any? = source.readUtf8()
     }
@@ -35,13 +54,17 @@ object GenericUnmarshallers {
         override fun unmarshal(source: BufferedSource): Any? = source.readByteString()
     }
 
+    private class ToStringConvertable(val stringConverter: StringConverter) : Unmarshaller {
+        override fun unmarshal(source: BufferedSource): Any? = stringConverter(source.readUtf8())
+    }
+
     fun into(parameter: KParameter): Unmarshaller? {
         val paramType = parameter.type
         return when (paramType.typeLiteral().rawType) {
             String::class.java -> ToString
             BufferedSource::class.java -> ToBufferedSource
             ByteString::class.java -> ToByteString
-            else -> null
+            else -> stringConvertableCache[paramType]
         }
     }
 }

@@ -20,7 +20,7 @@ internal class RequestBodyParameterExtractor(
     override fun extract(webAction: WebAction, request: Request, pathMatcher: Matcher): Any? {
         val mediaType = request.headers["Content-Type"]?.let { MediaType.parse(it) }
         val unmarshaller = mediaType?.let { type ->
-            unmarshallerFactories.map { it.create(type, parameter.type) }.firstOrNull()
+            unmarshallerFactories.mapNotNull { it.create(type, parameter.type) }.firstOrNull()
         } ?: GenericUnmarshallers.into(parameter)
         ?: throw IllegalArgumentException("no generic unmarshaller for ${parameter.type}")
 
