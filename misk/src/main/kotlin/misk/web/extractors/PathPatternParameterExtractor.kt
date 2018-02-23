@@ -10,11 +10,11 @@ import kotlin.reflect.KParameter
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.jvm.javaType
 
-/**
- * Creates a [ParameterExtractor] that extracts the URL parameter with the same name as [parameter]
- * and returns it as a [String]. If the parameter name doesn't occur in [pathPattern], returns null.
- */
 object PathPatternParameterExtractorFactory : ParameterExtractor.Factory {
+    /**
+     * Creates a [ParameterExtractor] that extracts the URL parameter with the same name as [parameter]
+     * and returns it as a [String]. If the parameter name doesn't occur in [pathPattern], returns null.
+     */
     override fun create(
             function: KFunction<*>,
             parameter: KParameter,
