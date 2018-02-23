@@ -42,6 +42,8 @@ dependencies {
   compile dep.gcpKms
   compile dep.gcpCloudStorage
   compile dep.jCommander
+  compile dep.openTracing
+  compile dep.tracingJaeger
 
   testCompile project(':misk/testing')
 }
