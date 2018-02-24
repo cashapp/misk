@@ -26,17 +26,17 @@ internal class FieldBinding(
   private val builderMethod = getBuilderMethod(builderType, name, messageField.type)
 
   @Suppress("UNCHECKED_CAST")
-  val adapter: JsonAdapter<Any> = when {
+  val adapter: JsonAdapter<Any?> = when {
     isList -> {
-      val elementAdapter = jsonAdapter(moshi, wireField.adapter) as JsonAdapter<Any>
-      ListAdapter(elementAdapter) as JsonAdapter<Any>
+      val elementAdapter = jsonAdapter(moshi, wireField.adapter) as JsonAdapter<Any?>
+      ListAdapter(elementAdapter) as JsonAdapter<Any?>
     }
     isMap -> {
       val keyConverter = fromString(wireField.keyAdapter)
-      val valueAdapter = jsonAdapter(moshi, wireField.adapter) as JsonAdapter<Any>
-      MapAdapter(keyConverter, valueAdapter) as JsonAdapter<Any>
+      val valueAdapter = jsonAdapter(moshi, wireField.adapter) as JsonAdapter<Any?>
+      MapAdapter(keyConverter, valueAdapter) as JsonAdapter<Any?>
     }
-    else -> moshi.adapter(messageField.type) as JsonAdapter<Any>
+    else -> moshi.adapter(messageField.type) as JsonAdapter<Any?>
   }
 
   @Suppress("UNCHECKED_CAST")
