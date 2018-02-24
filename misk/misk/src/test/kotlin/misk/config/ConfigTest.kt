@@ -67,23 +67,30 @@ class ConfigTest {
 
   @Test
   fun friendlyErrorMessagesWhenFilesNotFound() {
-    assertThrows(IllegalStateException::class.java, {
+    val exception = assertThrows(IllegalStateException::class.java, {
       MiskConfig.load<TestConfig>(TestConfig::class.java, "missing", defaultEnv)
-    }, "could not find configuration files - checked [missing-common.yaml, missing-testing.yaml]")
+    })
+
+    assertThat(exception.localizedMessage).contains("could not find configuration files -" +
+      " checked [missing-common.yaml, missing-testing.yaml]")
   }
 
   @Test
   fun friendlyErrorMessageWhenConfigPropertyMissing() {
-    assertThrows(IllegalStateException::class.java, {
+    val exception = assertThrows(IllegalStateException::class.java, {
       MiskConfig.load<TestConfig>(TestConfig::class.java, "partial_test_app", defaultEnv)
-    }, "could not find configuration for consumer_a")
+    })
+
+    assertThat(exception.localizedMessage).contains("could not find configuration for consumer_a")
   }
 
   @Test
   fun friendlyErrorMessagesWhenFileUnparseable() {
-    assertThrows(IllegalStateException::class.java, {
+    val exception = assertThrows(IllegalStateException::class.java, {
       MiskConfig.load<TestConfig>(TestConfig::class.java, "unparsable", defaultEnv)
-    }, "could not parse unparsable-common.yaml")
+    })
+
+    assertThat(exception.localizedMessage).contains("could not parse unparsable-common.yaml")
   }
 
 }

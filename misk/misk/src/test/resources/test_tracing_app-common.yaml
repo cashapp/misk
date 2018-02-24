@@ -1,0 +1,8 @@
+tracing:
+  tracer: jaeger
+  backends:
+    jaeger:
+      reporter:
+        agent_host: localhost
+        agent_port: 12345
+
