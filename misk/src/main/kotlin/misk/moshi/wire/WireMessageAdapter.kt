@@ -12,7 +12,7 @@ import java.lang.reflect.Type
 internal class WireMessageAdapter(
     messageType: Class<Message<*, *>>,
     private val moshi: Moshi
-) : JsonAdapter<Any>() {
+) : JsonAdapter<Any?>() {
   @Suppress("UNCHECKED_CAST")
   private val builderType = try {
     Class.forName("${messageType.name}\$Builder")
@@ -72,7 +72,7 @@ internal class WireMessageAdapter(
   class Factory : JsonAdapter.Factory {
     override fun create(
         type: Type,
-        annotations: MutableSet<out Annotation>,
+        annotations: Set<Annotation>,
         moshi: Moshi
     ): JsonAdapter<*>? {
       return if (type is Class<*> && type.superclass == Message::class.java) {
