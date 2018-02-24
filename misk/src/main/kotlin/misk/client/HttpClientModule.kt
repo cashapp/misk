@@ -27,9 +27,9 @@ class HttpClientModule constructor(
 
   private class HttpClientProvider(private val name: String) : Provider<OkHttpClient> {
     @Inject
-    lateinit var httpClientConfig: HttpClientConfig
+    lateinit var httpClientsConfig: HttpClientsConfig
 
-    override fun get() = httpClientConfig.newHttpClient(name)
+    override fun get() = httpClientsConfig.newHttpClient(name)
   }
 
   private class ProtoMessageHttpClientProvider(
@@ -40,10 +40,10 @@ class HttpClientModule constructor(
     lateinit var moshi: Moshi
 
     @Inject
-    lateinit var httpClientConfig: HttpClientConfig
+    lateinit var httpClientsConfig: HttpClientsConfig
 
     override fun get(): ProtoMessageHttpClient {
-      val endpointConfig = httpClientConfig.endpoints[name] ?: throw IllegalArgumentException(
+      val endpointConfig = httpClientsConfig.endpoints[name] ?: throw IllegalArgumentException(
           "no client configuration for endpoint $name")
       val httpClient = httpClientProvider.get()
       return ProtoMessageHttpClient(endpointConfig.url, moshi, httpClient)
