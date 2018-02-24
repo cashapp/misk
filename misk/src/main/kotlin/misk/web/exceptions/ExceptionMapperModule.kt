@@ -26,21 +26,21 @@ import kotlin.reflect.KClass
  * maps to the ActionExceptionMapper since uses the binding of the closest bound superclass.
  */
 class ExceptionMapperModule<M : ExceptionMapper<T>, in T : Throwable>(
-  private val exceptionClass: KClass<T>,
-  private val mapperClass: KClass<M>
+    private val exceptionClass: KClass<T>,
+    private val mapperClass: KClass<M>
 ) : KAbstractModule() {
   override fun configure() {
-   MapBinder.newMapBinder(binder(), exceptionTypeLiteral, exceptionMapperTypeLiteral)
-     .addBinding(exceptionClass)
-     .to(mapperClass.java)
+    MapBinder.newMapBinder(binder(), exceptionTypeLiteral, exceptionMapperTypeLiteral)
+        .addBinding(exceptionClass)
+        .to(mapperClass.java)
   }
 
   companion object {
-   inline fun <reified T : Throwable, reified M : ExceptionMapper<T>> create() = ExceptionMapperModule(
-     T::class, M::class
-   )
+    inline fun <reified T : Throwable, reified M : ExceptionMapper<T>> create() = ExceptionMapperModule(
+        T::class, M::class
+    )
 
-   private val exceptionMapperTypeLiteral = object : TypeLiteral<ExceptionMapper<*>>() {}
-   private val exceptionTypeLiteral = object : TypeLiteral<KClass<*>>() {}
+    private val exceptionMapperTypeLiteral = object : TypeLiteral<ExceptionMapper<*>>() {}
+    private val exceptionTypeLiteral = object : TypeLiteral<KClass<*>>() {}
   }
 }

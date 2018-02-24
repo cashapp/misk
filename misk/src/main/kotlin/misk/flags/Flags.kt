@@ -40,8 +40,8 @@ open class Flags internal constructor(val name: String, val context: Context) {
       return Property(flag, default)
     }
 
-    private class Property(val flag: misk.flags.Flag<String>, val default: String)
-      : ReadOnlyProperty<Flags, String> {
+    private class Property(val flag: misk.flags.Flag<String>, val default: String) :
+        ReadOnlyProperty<Flags, String> {
       override fun getValue(thisRef: Flags, property: KProperty<*>): String =
           flag.get() ?: default
     }
@@ -59,8 +59,10 @@ open class Flags internal constructor(val name: String, val context: Context) {
       return Property(flag, default)
     }
 
-    private class Property(val flag: misk.flags.Flag<Int>, val default: Int)
-      : ReadOnlyProperty<Flags, Int> {
+    private class Property(
+        val flag: misk.flags.Flag<Int>,
+        val default: Int
+    ) : ReadOnlyProperty<Flags, Int> {
       override fun getValue(thisRef: Flags, property: KProperty<*>): Int =
           flag.get() ?: default
     }
@@ -78,8 +80,8 @@ open class Flags internal constructor(val name: String, val context: Context) {
       return Property(flag, default)
     }
 
-    private class Property(val flag: misk.flags.Flag<Boolean>, val default: Boolean)
-      : ReadOnlyProperty<Flags, Boolean> {
+    private class Property(val flag: misk.flags.Flag<Boolean>, val default: Boolean) :
+        ReadOnlyProperty<Flags, Boolean> {
       override fun getValue(thisRef: Flags, property: KProperty<*>): Boolean =
           flag.get() ?: default
     }
@@ -97,8 +99,8 @@ open class Flags internal constructor(val name: String, val context: Context) {
       return Property(flag, default)
     }
 
-    private class Property(val flag: misk.flags.Flag<Double>, val default: Double)
-      : ReadOnlyProperty<Flags, Double> {
+    private class Property(val flag: misk.flags.Flag<Double>, val default: Double) :
+        ReadOnlyProperty<Flags, Double> {
       override fun getValue(thisRef: Flags, property: KProperty<*>): Double =
           flag.get() ?: default
     }

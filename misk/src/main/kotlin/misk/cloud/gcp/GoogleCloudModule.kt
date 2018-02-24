@@ -41,10 +41,11 @@ class GoogleCloudModule : KAbstractModule() {
       DatastoreOptions.newBuilder()
           .setCredentials(credentials)
           .setHost(config.transport.host)
-          .setTransportOptions(HttpTransportOptions.newBuilder()
-              .setConnectTimeout(config.transport.connect_timeout_ms)
-              .setReadTimeout(config.transport.read_timeout_ms)
-              .build())
+          .setTransportOptions(
+              HttpTransportOptions.newBuilder()
+                  .setConnectTimeout(config.transport.connect_timeout_ms)
+                  .setReadTimeout(config.transport.read_timeout_ms)
+                  .build())
           .build()
           .service
 
@@ -72,10 +73,11 @@ class GoogleCloudModule : KAbstractModule() {
       return StorageOptions.newBuilder()
           .setCredentials(credentials)
           .setHost(config.transport.host)
-          .setTransportOptions(HttpTransportOptions.newBuilder()
-              .setConnectTimeout(config.transport.connect_timeout_ms)
-              .setReadTimeout(config.transport.read_timeout_ms)
-              .build())
+          .setTransportOptions(
+              HttpTransportOptions.newBuilder()
+                  .setConnectTimeout(config.transport.connect_timeout_ms)
+                  .setReadTimeout(config.transport.read_timeout_ms)
+                  .build())
           .build()
           .service
     }

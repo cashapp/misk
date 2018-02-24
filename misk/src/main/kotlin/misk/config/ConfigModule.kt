@@ -34,7 +34,8 @@ class ConfigModule<T : Config>(
       }
       bindConfigClassRecursively(
           property.returnType.typeLiteral().rawType as Class<out Config>)
-      val subConfigProvider = SubConfigProvider(config,
+      val subConfigProvider = SubConfigProvider(
+          config,
           property as KProperty1<Config, Any?>)
       val subConfigTypeLiteral = TypeLiteral.get(
           property.returnType.javaType) as TypeLiteral<Any?>

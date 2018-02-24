@@ -22,5 +22,6 @@ data class WebSslConfig(
     REQUIRED,
     DESIRED
   }
+
   fun createSSLContext() = SslContextFactory.create(keystore, truststore)
 }

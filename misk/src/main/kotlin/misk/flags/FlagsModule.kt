@@ -35,7 +35,8 @@ abstract class FlagsModule : KAbstractModule() {
       name: String,
       description: String,
       type: KClass<T>,
-      qualifier: Annotation = Names.named(name)) {
+      qualifier: Annotation = Names.named(name)
+  ) {
     bind(flagTypeLiteral(type))
         .annotatedWith(qualifier)
         .toProvider(FlagProvider(type, name, description))

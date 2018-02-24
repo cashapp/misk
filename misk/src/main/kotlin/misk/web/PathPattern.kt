@@ -36,6 +36,7 @@ data class PathPattern(
     // more specific match
     return other.numRegexVariables - numRegexVariables
   }
+
   companion object {
     fun parse(pattern: String): PathPattern {
       val variableNames = ArrayList<String>()
@@ -51,7 +52,7 @@ data class PathPattern(
         when (pattern[pos]) {
           '{' -> {
             // Variables must start on path boundaries
-            require(pos == 0 || pattern[pos-1] == '/') {
+            require(pos == 0 || pattern[pos - 1] == '/') {
               "invalid path pattern $pattern; variables must start on path boundaries"
             }
 
@@ -111,7 +112,8 @@ data class PathPattern(
         }
       }
 
-      return PathPattern(Pattern.compile(result.toString()), variableNames, numRegexVariables,
+      return PathPattern(
+          Pattern.compile(result.toString()), variableNames, numRegexVariables,
           numSegments, lastVariableIsWildcardMatch)
     }
   }

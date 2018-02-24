@@ -115,12 +115,12 @@ class ActionScope @Inject internal constructor(
       val wrapped: KFunction<T>
   ) : KFunction<T> {
     override fun call(vararg args: Any?): T = scope.enter(seedData).use {
-          wrapped.call(*args)
-        }
+      wrapped.call(*args)
+    }
 
     override fun callBy(args: Map<KParameter, Any?>): T = scope.enter(seedData).use {
-          wrapped.callBy(args)
-        }
+      wrapped.callBy(args)
+    }
 
     override val annotations: List<Annotation> = wrapped.annotations
     override val isAbstract: Boolean = wrapped.isAbstract

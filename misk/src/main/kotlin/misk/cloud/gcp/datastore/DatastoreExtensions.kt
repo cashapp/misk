@@ -15,7 +15,7 @@ fun Entity.getByteString(name: String) = getBlob(name).toByteString()
 fun <T> Entity.getProto(name: String, protoAdapter: ProtoAdapter<T>): T =
     protoAdapter.decode(getByteString(name))
 
-fun Entity.Builder.set(name: String, bytes: ByteString) : Entity.Builder =
+fun Entity.Builder.set(name: String, bytes: ByteString): Entity.Builder =
     set(name, Blob.copyFrom(bytes.asByteBuffer()))
 
 fun <T> QueryResults<T>.asList(): List<T> = asSequence().toList()

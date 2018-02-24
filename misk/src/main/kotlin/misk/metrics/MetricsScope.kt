@@ -23,7 +23,8 @@ open class MetricsScope internal constructor(
   }
 
   fun <T> cachedGauge(name: String, duration: Duration, f: () -> T): Gauge<T> {
-    val supplier = Suppliers.memoizeWithExpiration({ f.invoke() }, duration.toMillis(),
+    val supplier = Suppliers.memoizeWithExpiration(
+        { f.invoke() }, duration.toMillis(),
         TimeUnit.MILLISECONDS)
     return metricRegistry.register(scopedName(name), Gauge<T> { supplier.get() })
   }

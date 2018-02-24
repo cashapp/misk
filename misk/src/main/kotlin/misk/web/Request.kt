@@ -6,8 +6,8 @@ import okio.BufferedSource
 import org.eclipse.jetty.http.HttpMethod
 
 data class Request(
-  val url: HttpUrl,
-  val method: HttpMethod,
-  val headers: Headers = Headers.of(),
-  val body: BufferedSource
+    val url: HttpUrl,
+    val method: HttpMethod,
+    val headers: Headers = Headers.of(),
+    val body: BufferedSource
 )

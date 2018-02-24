@@ -11,8 +11,8 @@ import misk.logging.getLogger
 import javax.inject.Inject
 
 internal class StackDriverBatchedSender @Inject internal constructor(
-  val monitoring: Monitoring,
-  val config: StackDriverBackendConfig
+    val monitoring: Monitoring,
+    val config: StackDriverBackendConfig
 ) : StackDriverSender {
   companion object {
     val logger = getLogger<StackDriverSender>()

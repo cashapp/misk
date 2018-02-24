@@ -5,10 +5,8 @@ import misk.web.actions.WebAction
 import misk.web.actions.asChain
 import misk.web.extractors.ParameterExtractor
 import misk.web.mediatype.MediaRange
-import okhttp3.Headers
 import okhttp3.HttpUrl
 import okhttp3.MediaType
-import okio.Okio
 import org.eclipse.jetty.http.HttpMethod
 import java.util.regex.Matcher
 import javax.inject.Provider

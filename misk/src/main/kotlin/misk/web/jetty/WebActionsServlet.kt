@@ -41,7 +41,7 @@ internal class WebActionsServlet @Inject constructor(
       val candidateActions = boundActions.mapNotNull { it.match(request, asRequest.url) }
       val bestAction = candidateActions.sorted().firstOrNull()
       bestAction?.handle(asRequest, response)
-      logger.debug {"Request handled by WebActionServlet" }
+      logger.debug { "Request handled by WebActionServlet" }
     }
   }
 }

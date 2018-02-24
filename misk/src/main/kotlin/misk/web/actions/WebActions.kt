@@ -8,9 +8,9 @@ import kotlin.reflect.KFunction
 import kotlin.reflect.KParameter
 
 fun WebAction.asChain(
-  function: KFunction<*>,
-  args: List<Any?>,
-  vararg _interceptors: Interceptor
+    function: KFunction<*>,
+    args: List<Any?>,
+    vararg _interceptors: Interceptor
 ): Chain {
   val interceptors = Lists.newArrayList(_interceptors.iterator())
   interceptors.add(object : Interceptor {

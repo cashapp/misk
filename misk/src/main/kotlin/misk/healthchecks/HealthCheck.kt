@@ -15,8 +15,8 @@ interface HealthCheck {
 }
 
 data class HealthStatus(
-  val isHealthy: Boolean,
-  val messages: List<String>
+    val isHealthy: Boolean,
+    val messages: List<String>
 ) {
   companion object {
     fun healthy() = HealthStatus(true, listOf())
