@@ -35,6 +35,10 @@ ext {
           junitEngine          : 'org.junit.jupiter:junit-jupiter-engine:5.0.2',
           gcpCloudStorage      : 'com.google.cloud:google-cloud-storage:1.15.0',
           jCommander           : 'com.beust:jcommander:1.72',
+          openTracing          : 'io.opentracing:opentracing-api:0.31.0',
+          tracingJaeger        : 'com.uber.jaeger:jaeger-core:0.24.0',
+          retrofit             : 'com.squareup.retrofit2:retrofit:2.3.0',
+          retrofitMoshi        : 'com.squareup.retrofit2:converter-moshi:2.3.0',
   ]
 
   isCi = "true".equals(System.getenv('CI'))

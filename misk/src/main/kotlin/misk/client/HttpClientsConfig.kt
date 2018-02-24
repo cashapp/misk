@@ -9,7 +9,7 @@ import java.time.Duration
 import java.util.concurrent.TimeUnit
 import javax.net.ssl.X509TrustManager
 
-data class HttpClientConfig(
+data class HttpClientsConfig(
         private val defaultConnectTimeout: Duration? = null,
         private val defaultWriteTimeout: Duration? = null,
         private val defaultReadTimeout: Duration? = null,
