@@ -1,7 +1,6 @@
 package misk.web.extractors
 
 import com.google.inject.util.Modules
-import com.squareup.moshi.Moshi
 import misk.MiskModule
 import misk.inject.KAbstractModule
 import misk.testing.MiskTest
@@ -102,7 +101,7 @@ internal class QueryStringRequestTest {
   }
 
   private fun get(path: String, query: String): String = call(Request.Builder()
-      .url(jettyService.serverUrl.newBuilder().encodedPath(path).query(query).build())
+      .url(jettyService.httpServerUrl.newBuilder().encodedPath(path).query(query).build())
       .get())
 
   private fun call(request: Request.Builder): String {

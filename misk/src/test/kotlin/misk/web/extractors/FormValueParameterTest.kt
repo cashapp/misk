@@ -171,7 +171,7 @@ internal class FormValueParameterTest {
       path: String,
       body: List<Pair<String, String>>
   ): String {
-    val url = jettyService.serverUrl.newBuilder()
+    val url = jettyService.httpServerUrl.newBuilder()
         .encodedPath(path)
         .build()
 
