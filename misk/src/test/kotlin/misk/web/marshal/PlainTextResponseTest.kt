@@ -140,7 +140,7 @@ internal class PlainTextResponseTest {
     }
 
     fun get(path: String): String = call(Request.Builder()
-            .url(jettyService.serverUrl.newBuilder().encodedPath(path).build())
+            .url(jettyService.httpServerUrl.newBuilder().encodedPath(path).build())
             .get())
 
     class MessageWrapper(private val message: String) {

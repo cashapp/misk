@@ -120,7 +120,7 @@ internal class ContentBasedDispatchTest {
         val httpClient = OkHttpClient()
         val request = Request.Builder()
                 .post(RequestBody.create(contentType, content))
-                .url(jettyService.serverUrl.newBuilder().encodedPath("/hello").build())
+                .url(jettyService.httpServerUrl.newBuilder().encodedPath("/hello").build())
 
         if (acceptedMediaType != null) {
             request.header("Accept", acceptedMediaType.toString())
