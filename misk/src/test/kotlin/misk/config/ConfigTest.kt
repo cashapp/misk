@@ -1,11 +1,8 @@
 package misk.config
 
-import com.google.inject.Guice
-import com.google.inject.ProvisionException
 import com.google.inject.util.Modules
-import misk.environment.Environment.TESTING
+import misk.environment.Environment
 import misk.environment.EnvironmentModule
-import misk.inject.getInstance
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.web.WebConfig
@@ -18,10 +15,12 @@ import javax.inject.Named
 
 @MiskTest
 class ConfigTest {
+    val defaultEnv = Environment.TESTING
+    val config = MiskConfig.load<TestConfig>("test_app", defaultEnv)
     @MiskTestModule
     val module = Modules.combine(
-            ConfigModule.create<TestConfig>("test_app"),
-            EnvironmentModule(TESTING)
+            ConfigModule.create<TestConfig>("test_app", config),
+            EnvironmentModule(defaultEnv)
     )
 
     @Inject
@@ -68,52 +67,30 @@ class ConfigTest {
 
     @Test
     fun friendlyErrorMessagesWhenFilesNotFound() {
-        val module = Modules.combine(
-                ConfigModule.create<TestConfig>("missing"),
-                EnvironmentModule(TESTING)
-        )
+        val exception = assertThrows(IllegalStateException::class.java, {
+            MiskConfig.load<TestConfig>(TestConfig::class.java, "missing", defaultEnv)
+        })
 
-        val exception = assertThrows(ProvisionException::class.java) {
-            Guice.createInjector(module).getInstance<TestConfig>()
-        }
-
-        assertThat(exception.errorMessages.map { it.message }).anySatisfy {
-            assertThat(it).contains(
-                    "could not find configuration files - checked [missing-common.yaml, missing-testing.yaml]"
-            )
-        }
+        assertThat(exception.localizedMessage).contains("could not find configuration files -" +
+            " checked [missing-common.yaml, missing-testing.yaml]")
     }
 
     @Test
     fun friendlyErrorMessageWhenConfigPropertyMissing() {
-        val module = Modules.combine(
-                ConfigModule.create<TestConfig>("partial_test_app"),
-                EnvironmentModule(TESTING)
-        )
+        val exception = assertThrows(IllegalStateException::class.java, {
+            MiskConfig.load<TestConfig>(TestConfig::class.java, "partial_test_app", defaultEnv)
+        })
 
-        val exception  = assertThrows(ProvisionException::class.java) {
-            Guice.createInjector(module).getInstance<TestConfig>()
-        }
-
-        assertThat(exception.errorMessages.map { it.message }).anySatisfy {
-            assertThat(it).contains("could not find configuration for consumer_a")
-        }
+        assertThat(exception.localizedMessage).contains("could not find configuration for consumer_a")
     }
 
     @Test
     fun friendlyErrorMessagesWhenFileUnparseable() {
-        val module = Modules.combine(
-                ConfigModule.create<TestConfig>("unparsable"),
-                EnvironmentModule(TESTING)
-        )
+        val exception = assertThrows(IllegalStateException::class.java, {
+            MiskConfig.load<TestConfig>(TestConfig::class.java, "unparsable", defaultEnv)
+        })
 
-        val exception = assertThrows(ProvisionException::class.java) {
-            Guice.createInjector(module).getInstance<TestConfig>()
-        }
-
-        assertThat(exception.errorMessages.map { it.message }).anySatisfy {
-            assertThat(it).contains("could not parse unparsable-common.yaml")
-        }
+        assertThat(exception.localizedMessage).contains("could not parse unparsable-common.yaml")
     }
 
 }
