@@ -42,6 +42,8 @@ dependencies {
   compile dep.gcpKms
   compile dep.gcpCloudStorage
   compile dep.jCommander
+  compile dep.retrofit
+  compile dep.retrofitMoshi
 
   testCompile project(':misk/testing')
 }

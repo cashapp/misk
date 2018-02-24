@@ -2,7 +2,6 @@ package misk.client
 
 import com.google.inject.Guice
 import com.google.inject.Provides
-import com.google.inject.name.Names
 import com.google.inject.util.Modules
 import helpers.protos.Dinosaur
 import misk.MiskModule
@@ -24,11 +23,14 @@ import misk.web.mediatype.MediaTypes
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import retrofit2.Call
+import retrofit2.http.Body
+import retrofit2.http.POST
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @MiskTest(startService = true)
-class ProtoMessageHttpClientTest {
+internal class TypedHttpClientTest {
   @MiskTestModule
   val module = Modules.combine(
       MiskModule(),
@@ -40,51 +42,44 @@ class ProtoMessageHttpClientTest {
   @Inject
   private lateinit var jetty: JettyService
 
-  private lateinit var httpClient: ProtoMessageHttpClient
+  private lateinit var client: ReturnADinosaur
 
   @BeforeEach
   fun createClient() {
     val clientInjector = Guice.createInjector(MoshiModule(), ClientModule(jetty))
-    httpClient = clientInjector.getInstance(Names.named("dinosaur"))
+    client = clientInjector.getInstance()
   }
 
   @Test
-  fun protoMessageHttpCall() {
-    val dinoMessage = Dinosaur.Builder()
-        .name("stegosaurus")
-        .picture_urls(listOf(
-            "https://cdn.dinopics.com/stego.jpg",
-            "https://cdn.dinopics.com/stego2.png"
-        ))
-        .build()
-
-    val response = httpClient.post<Dinosaur>("/cooldinos", dinoMessage)
-    assertThat(response.name).isEqualTo("supersaurus")
-    assertThat(response.picture_urls).isEqualTo(listOf(
-        "https://cdn.dinopics.com/stego.jpg",
-        "https://cdn.dinopics.com/stego2.png"
-    ))
+  fun useTypedClient() {
+    val response = client.getDinosaur(Dinosaur.Builder().name("trex").build()).execute()
+    assertThat(response.code()).isEqualTo(200)
+    assertThat(response.body()).isNotNull()
+    assertThat(response.body()?.name!!).isEqualTo("supertrex")
   }
 
-  class ReturnADinosaur : WebAction {
+  interface ReturnADinosaur {
+    @POST("/cooldinos")
+    fun getDinosaur(@Body request: Dinosaur): Call<Dinosaur>
+  }
+
+  class ReturnADinosaurAction : WebAction {
     @Post("/cooldinos")
     @RequestContentType(MediaTypes.APPLICATION_JSON)
     @ResponseContentType(MediaTypes.APPLICATION_JSON)
-    fun getDinosaur(@RequestBody requestBody: Dinosaur):
-        Dinosaur = requestBody.newBuilder().name("supersaurus").build()
+    fun getDinosaur(@RequestBody request: Dinosaur):
+        Dinosaur = request.newBuilder().name("super${request.name}").build()
   }
 
   class TestModule : KAbstractModule() {
     override fun configure() {
-      install(WebActionModule.create<ReturnADinosaur>())
+      install(WebActionModule.create<ReturnADinosaurAction>())
     }
   }
 
-  // NB(mmihic): The server doesn't get a port until after it starts, so we
-  // need to create the client module _after_ we start the services
   class ClientModule(val jetty: JettyService) : KAbstractModule() {
     override fun configure() {
-      install(HttpClientModule("dinosaur", Names.named("dinosaur")))
+      install(TypedHttpClientModule.create<ReturnADinosaur>("dinosaur"))
     }
 
     @Provides
@@ -97,4 +92,5 @@ class ProtoMessageHttpClientTest {
     }
 
   }
+
 }

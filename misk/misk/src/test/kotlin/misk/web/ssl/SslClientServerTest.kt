@@ -6,7 +6,7 @@ import com.google.inject.name.Names
 import com.google.inject.util.Modules
 import helpers.protos.Dinosaur
 import misk.MiskModule
-import misk.client.HttpClientConfig
+import misk.client.HttpClientsConfig
 import misk.client.HttpClientEndpointConfig
 import misk.client.HttpClientModule
 import misk.client.HttpClientSSLConfig
@@ -118,8 +118,8 @@ internal class SslClientServerTest {
 
     @Provides
     @Singleton
-    fun provideHttpClientConfig(): HttpClientConfig {
-      return HttpClientConfig(
+    fun provideHttpClientConfig(): HttpClientsConfig {
+      return HttpClientsConfig(
           endpoints = mapOf(
               "cert-and-trust" to HttpClientEndpointConfig(
                   jetty.httpsServerUrl!!.toString(),
