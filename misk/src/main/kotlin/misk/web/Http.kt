@@ -16,6 +16,12 @@ annotation class PathParam(val value: String = "")
 annotation class QueryParam(val value: String = "")
 
 @Target(AnnotationTarget.VALUE_PARAMETER)
+annotation class FormValue
+
+@Target(AnnotationTarget.VALUE_PARAMETER)
+annotation class FormField(val name: String)
+
+@Target(AnnotationTarget.VALUE_PARAMETER)
 annotation class RequestBody
 
 @Target(AnnotationTarget.FUNCTION)
@@ -23,4 +29,3 @@ annotation class RequestContentType(vararg val value: String)
 
 @Target(AnnotationTarget.FUNCTION)
 annotation class ResponseContentType(val value: String)
-

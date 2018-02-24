@@ -36,8 +36,8 @@ internal class JsonRequestTest {
             TestWebModule(),
             TestModule())
 
-    private @Inject lateinit var moshi: Moshi
-    private @Inject lateinit var jettyService: JettyService
+    @Inject lateinit var moshi: Moshi
+    @Inject lateinit var jettyService: JettyService
     private val packetJsonAdapter get() = moshi.adapter(Packet::class.java)
 
     @Test
@@ -98,7 +98,7 @@ internal class JsonRequestTest {
     }
 
     private fun post(path: String, packet: Packet): Packet = call(Request.Builder()
-            .url(jettyService.serverUrl.newBuilder().encodedPath(path).build())
+            .url(jettyService.httpServerUrl.newBuilder().encodedPath(path).build())
             .post(okhttp3.RequestBody.create(MediaTypes.APPLICATION_JSON_MEDIA_TYPE,
                     packetJsonAdapter.toJson(packet))))
 

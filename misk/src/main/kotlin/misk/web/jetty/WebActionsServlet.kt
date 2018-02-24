@@ -58,6 +58,7 @@ internal fun HttpServletRequest.asRequest(): Request {
             headersBuilder.add(headerName, headerValue)
         }
     }
+
     return Request(
             HttpUrl.parse(urlString)!!,
             HttpMethod.valueOf(method),

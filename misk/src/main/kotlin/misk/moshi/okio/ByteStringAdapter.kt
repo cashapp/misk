@@ -8,7 +8,7 @@ import okio.ByteString
 import java.lang.reflect.Type
 
 /** JSON adapter converting [ByteString]s as base64 encoded strings */
-internal class ByteStringAdapter : JsonAdapter<ByteString>() {
+internal class ByteStringAdapter : JsonAdapter<ByteString?>() {
     override fun toJson(writer: JsonWriter, value: ByteString?) {
         if (value != null) {
             writer.value(value.base64Url())
@@ -29,10 +29,10 @@ internal class ByteStringAdapter : JsonAdapter<ByteString>() {
     class Factory : JsonAdapter.Factory {
         override fun create(
                 type: Type,
-                annotations: MutableSet<out Annotation>,
+                annotations: Set<Annotation>,
                 moshi: Moshi
         ): JsonAdapter<*>? {
-            return if (type is Class<*> && type == ByteString::class.java) {
+            return if (type == ByteString::class.java) {
                 ByteStringAdapter()
             } else null
         }

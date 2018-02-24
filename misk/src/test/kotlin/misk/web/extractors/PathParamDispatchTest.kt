@@ -1,7 +1,6 @@
 package misk.web.extractors
 
 import com.google.inject.util.Modules
-import com.squareup.moshi.Moshi
 import misk.MiskModule
 import misk.inject.KAbstractModule
 import misk.testing.MiskTest
@@ -31,11 +30,7 @@ internal class PathParamDispatchTest {
             TestWebModule(),
             TestModule())
 
-    @Inject
-    lateinit var moshi: Moshi
-
-    @Inject
-    lateinit var jettyService: JettyService
+    @Inject lateinit var jettyService: JettyService
 
     enum class ObjectType {
         USER,
@@ -77,7 +72,7 @@ internal class PathParamDispatchTest {
     class CustomPathParamName : WebAction {
         @Get("/{router}")
         @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
-        fun router(@PathParam("router") routeName: String) = "routing to ${routeName}"
+        fun router(@PathParam("router") routeName: String) = "routing to $routeName"
     }
 
     fun get(path: String) : okhttp3.Response {
@@ -90,6 +85,6 @@ internal class PathParamDispatchTest {
     }
 
     private fun serverUrlBuilder(): HttpUrl.Builder {
-        return jettyService.serverUrl.newBuilder()
+        return jettyService.httpServerUrl.newBuilder()
     }
 }

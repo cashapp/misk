@@ -145,7 +145,7 @@ internal class JsonResponseTest {
     }
 
     private fun get(path: String): Packet = call(Request.Builder()
-            .url(jettyService.serverUrl.newBuilder().encodedPath(path).build())
+            .url(jettyService.httpServerUrl.newBuilder().encodedPath(path).build())
             .get())
 
     private fun call(request: Request.Builder): Packet {

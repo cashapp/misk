@@ -20,7 +20,7 @@ interface ExceptionMapper<in T : Throwable> {
 
     /**
      * @return the level at which the given exception should be logged. defaults to ERROR but can
-     * be overriden by the mapper for the given exception
+     * be overridden by the mapper for the given exception
      */
     fun loggingLevel(th: T): Level = Level.ERROR
 
