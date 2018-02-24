@@ -11,7 +11,7 @@ import misk.inject.addMultibinderBinding
 import misk.inject.to
 import javax.inject.Singleton
 
-class SignalFxBackendModule : KAbstractModule(){
+class SignalFxBackendModule : KAbstractModule() {
   override fun configure() {
     binder().addMultibinderBinding<Service>().to<SignalFxReporterService>()
   }

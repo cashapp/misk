@@ -3,7 +3,7 @@ package misk.healthchecks
 import misk.inject.KAbstractModule
 
 class HealthChecksModule(
-  private vararg val healthCheckClasses: Class<out HealthCheck>
+    private vararg val healthCheckClasses: Class<out HealthCheck>
 ) : KAbstractModule() {
   override fun configure() {
     val setBinder = newSetBinder<HealthCheck>()

@@ -109,8 +109,10 @@ abstract class BaseCustomStorageRpc : StorageRpc {
     throw UnsupportedOperationException()
   }
 
-  override fun listAcls(bucket: String?,
-      options: Map<StorageRpc.Option, *>?): List<BucketAccessControl> {
+  override fun listAcls(
+      bucket: String?,
+      options: Map<StorageRpc.Option, *>?
+  ): List<BucketAccessControl> {
     throw UnsupportedOperationException()
   }
 
@@ -126,23 +128,31 @@ abstract class BaseCustomStorageRpc : StorageRpc {
     throw UnsupportedOperationException()
   }
 
-  override fun deleteAcl(bucket: String?, entity: String?,
-      options: Map<StorageRpc.Option, *>?): Boolean {
+  override fun deleteAcl(
+      bucket: String?, entity: String?,
+      options: Map<StorageRpc.Option, *>?
+  ): Boolean {
     throw UnsupportedOperationException()
   }
 
-  override fun deleteAcl(bucket: String?, `object`: String?, generation: Long?,
-      entity: String?): Boolean {
+  override fun deleteAcl(
+      bucket: String?, `object`: String?, generation: Long?,
+      entity: String?
+  ): Boolean {
     throw UnsupportedOperationException()
   }
 
-  override fun compose(sources: Iterable<StorageObject>?, target: StorageObject?,
-      targetOptions: Map<StorageRpc.Option, *>?): StorageObject {
+  override fun compose(
+      sources: Iterable<StorageObject>?, target: StorageObject?,
+      targetOptions: Map<StorageRpc.Option, *>?
+  ): StorageObject {
     throw UnsupportedOperationException()
   }
 
-  override fun setIamPolicy(bucket: String?, policy: Policy?,
-      options: Map<StorageRpc.Option, *>?): Policy {
+  override fun setIamPolicy(
+      bucket: String?, policy: Policy?,
+      options: Map<StorageRpc.Option, *>?
+  ): Policy {
     throw UnsupportedOperationException()
   }
 

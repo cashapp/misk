@@ -26,8 +26,9 @@ inline fun <reified T : Any> Binder.newMultibinder(
 ): Multibinder<T> {
   val typeLiteral =
       parameterizedType<List<*>>(subtypeOf<T>()).typeLiteral() as TypeLiteral<List<T>>
-  bind(typeLiteral).toProvider(parameterizedType<ListProvider<*>>(
-      T::class.java).typeLiteral() as TypeLiteral<Provider<List<T>>>)
+  bind(typeLiteral).toProvider(
+      parameterizedType<ListProvider<*>>(
+          T::class.java).typeLiteral() as TypeLiteral<Provider<List<T>>>)
 
   return when (annotation) {
     null -> Multibinder.newSetBinder(this, T::class.java)

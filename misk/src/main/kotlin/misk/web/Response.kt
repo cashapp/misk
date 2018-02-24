@@ -7,9 +7,9 @@ import javax.servlet.http.HttpServletResponse
 
 /** An HTTP response body, headers, and status code. */
 data class Response<out T>(
-  val body: T,
-  val headers: Headers = Headers.of(),
-  val statusCode: Int = 200
+    val body: T,
+    val headers: Headers = Headers.of(),
+    val statusCode: Int = 200
 )
 
 interface ResponseBody {

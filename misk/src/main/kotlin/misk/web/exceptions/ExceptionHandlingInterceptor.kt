@@ -11,7 +11,6 @@ import misk.web.Response
 import misk.web.marshal.StringResponseBody
 import misk.web.mediatype.MediaTypes
 import okhttp3.Headers
-import org.slf4j.event.Level
 import java.lang.reflect.InvocationTargetException
 import java.util.concurrent.ExecutionException
 import javax.inject.Inject
@@ -50,7 +49,7 @@ class ExceptionHandlingInterceptor(
   }
 
   class Factory @Inject internal constructor(
-    private val mapperResolver: ExceptionMapperResolver
+      private val mapperResolver: ExceptionMapperResolver
   ) : Interceptor.Factory {
     override fun create(action: Action) = ExceptionHandlingInterceptor(action.name, mapperResolver)
   }
@@ -58,7 +57,8 @@ class ExceptionHandlingInterceptor(
   private companion object {
     val log = getLogger<ExceptionHandlingInterceptor>()
 
-    val INTERNAL_SERVER_ERROR_RESPONSE = Response(StringResponseBody("internal server error"),
+    val INTERNAL_SERVER_ERROR_RESPONSE = Response(
+        StringResponseBody("internal server error"),
         Headers.of(listOf("Content-Type" to MediaTypes.TEXT_PLAIN_UTF8).toMap()),
         StatusCode.INTERNAL_SERVER_ERROR.code
     )

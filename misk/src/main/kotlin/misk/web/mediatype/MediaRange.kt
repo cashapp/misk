@@ -49,8 +49,8 @@ data class MediaRange(
     return Matcher(this, true)
   }
 
-  data class Matcher(private val mediaRange: MediaRange, val matchesCharset: Boolean = false)
-    : Comparable<Matcher> {
+  data class Matcher(private val mediaRange: MediaRange, val matchesCharset: Boolean = false) :
+      Comparable<Matcher> {
     override fun compareTo(other: Matcher): Int {
       val mediaRangeComparison = mediaRange.compareTo(other.mediaRange)
       if (mediaRangeComparison != 0) return mediaRangeComparison

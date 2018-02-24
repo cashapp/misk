@@ -6,11 +6,11 @@ import misk.web.actions.WebAction
 import kotlin.reflect.KFunction
 
 internal class RealChain(
-  private val _action: WebAction,
-  private val _args: List<Any?>,
-  private val interceptors: List<Interceptor>,
-  private val _function: KFunction<*>,
-  private val index: Int = 0
+    private val _action: WebAction,
+    private val _args: List<Any?>,
+    private val interceptors: List<Interceptor>,
+    private val _function: KFunction<*>,
+    private val index: Int = 0
 ) : Chain {
 
   override val action: WebAction

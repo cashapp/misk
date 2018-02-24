@@ -32,12 +32,14 @@ class WebActionModule<A : WebAction> private constructor(
     @Suppress("UNCHECKED_CAST")
     val binder: Multibinder<BoundAction<A, *>> = Multibinder.newSetBinder(
         binder(),
-        parameterizedType<BoundAction<*, *>>(subtypeOf<WebAction>(),
+        parameterizedType<BoundAction<*, *>>(
+            subtypeOf<WebAction>(),
             subtypeOf<Any>()).typeLiteral()
     ) as Multibinder<BoundAction<A, *>>
     binder.addBinding().toProvider(
-            BoundActionProvider(provider, member, pathPattern, httpMethod,
-                acceptedContentTypes, responseContentType))
+        BoundActionProvider(
+            provider, member, pathPattern, httpMethod,
+            acceptedContentTypes, responseContentType))
   }
 
   companion object {
@@ -65,9 +67,11 @@ class WebActionModule<A : WebAction> private constructor(
           val acceptedContentTypes = member.acceptedContentTypes
 
           result = when (annotation) {
-            is Get -> WebActionModule(webActionClass, member, annotation.pathPattern,
+            is Get -> WebActionModule(
+                webActionClass, member, annotation.pathPattern,
                 HttpMethod.GET, acceptedContentTypes, responseContentType)
-            is Post -> WebActionModule(webActionClass, member, annotation.pathPattern,
+            is Post -> WebActionModule(
+                webActionClass, member, annotation.pathPattern,
                 HttpMethod.POST, acceptedContentTypes, responseContentType)
             else -> throw AssertionError()
           }
@@ -117,7 +121,8 @@ internal class BoundActionProvider<A : WebAction, R>(
     miskInterceptorFactories.mapNotNullTo(interceptors) { it.create(action) }
     userProvidedInterceptorFactories.mapNotNullTo(interceptors) { it.create(action) }
 
-    return BoundAction(provider, interceptors, parameterExtractorFactories, function,
+    return BoundAction(
+        provider, interceptors, parameterExtractorFactories, function,
         PathPattern.parse(pathPattern), httpMethod, acceptedContentTypes,
         responseContentType)
   }

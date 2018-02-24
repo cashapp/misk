@@ -27,7 +27,8 @@ fun KeyStore.getCertificateAndKey(alias: String, passphrase: CharArray): Certifi
 }
 
 /** @return the one and only [CertificateAndKey] in the keystore */
-fun KeyStore.getCertificateAndKey(passphrase: CharArray) = getCertificateAndKey(onlyAlias,
+fun KeyStore.getCertificateAndKey(passphrase: CharArray) = getCertificateAndKey(
+    onlyAlias,
     passphrase)
 
 /** @return the only alias in the keystore, if the keystore only has a single entry */

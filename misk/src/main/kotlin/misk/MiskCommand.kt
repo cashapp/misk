@@ -12,7 +12,10 @@ import javax.inject.Inject
  * pick the appropriate command based on the name, create an injector based on that
  * command's modules, use the injector to initialize the command, and then run the command.
  */
-abstract class MiskCommand(internal val name: String, internal val modules: List<Module>) : Runnable {
+abstract class MiskCommand(
+    internal val name: String,
+    internal val modules: List<Module>
+) : Runnable {
   constructor(name: String, vararg modules: Module) : this(name, modules.toList())
 
   @Inject

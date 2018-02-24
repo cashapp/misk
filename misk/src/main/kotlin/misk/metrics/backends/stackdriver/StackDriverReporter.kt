@@ -29,7 +29,8 @@ internal class StackDriverReporter @Inject internal constructor(
     val instanceMetadata: InstanceMetadata,
     val sender: StackDriverSender,
     metricRegistry: com.codahale.metrics.MetricRegistry
-) : ScheduledReporter(metricRegistry, "stack-driver", null,
+) : ScheduledReporter(
+    metricRegistry, "stack-driver", null,
     TimeUnit.MILLISECONDS, TimeUnit.MILLISECONDS) {
   private val startTime = DateTime(clock.millis())
 
@@ -38,8 +39,10 @@ internal class StackDriverReporter @Inject internal constructor(
       counters: SortedMap<String, Counter>?,
       histograms: SortedMap<String, Histogram>?,
       meters: SortedMap<String, Meter>?,
-      timers: SortedMap<String, Timer>?) {
-    val timeSeries = toTimeSeries(gauges, counters, histograms, meters,
+      timers: SortedMap<String, Timer>?
+  ) {
+    val timeSeries = toTimeSeries(
+        gauges, counters, histograms, meters,
         timers, startTime, DateTime(clock.millis()))
     if (timeSeries.isEmpty()) {
       return
@@ -66,7 +69,8 @@ internal class StackDriverReporter @Inject internal constructor(
       meters: SortedMap<String, Meter>?,
       timers: SortedMap<String, Timer>?,
       startTime: DateTime,
-      now: DateTime): List<TimeSeries> {
+      now: DateTime
+  ): List<TimeSeries> {
     val timeSeries = ArrayList<TimeSeries>()
     gauges?.forEach { timeSeries.addAll(toTimeSeries(it.key, it.value, startTime, now)) }
     counters?.forEach { timeSeries.addAll(toTimeSeries(it.key, it.value, startTime, now)) }
@@ -100,25 +104,35 @@ internal class StackDriverReporter @Inject internal constructor(
   ): Array<TimeSeries> {
     val snapshot = timer.snapshot
     return arrayOf(
-        timeSeries(name, convertDuration(snapshot.max.toDouble()), startTime, now, "max",
+        timeSeries(
+            name, convertDuration(snapshot.max.toDouble()), startTime, now, "max",
             MetricKind.GAUGE),
-        timeSeries(name, convertDuration(snapshot.min.toDouble()), startTime, now, "min",
+        timeSeries(
+            name, convertDuration(snapshot.min.toDouble()), startTime, now, "min",
             MetricKind.GAUGE),
-        timeSeries(name, convertDuration(snapshot.mean), startTime, now, "mean",
+        timeSeries(
+            name, convertDuration(snapshot.mean), startTime, now, "mean",
             MetricKind.GAUGE),
-        timeSeries(name, convertDuration(snapshot.stdDev), startTime, now, "stdDev",
+        timeSeries(
+            name, convertDuration(snapshot.stdDev), startTime, now, "stdDev",
             MetricKind.GAUGE),
-        timeSeries(name, convertDuration(snapshot.median), startTime, now, "p50",
+        timeSeries(
+            name, convertDuration(snapshot.median), startTime, now, "p50",
             MetricKind.GAUGE),
-        timeSeries(name, convertDuration(snapshot.get75thPercentile()), startTime, now,
+        timeSeries(
+            name, convertDuration(snapshot.get75thPercentile()), startTime, now,
             "p75", MetricKind.GAUGE),
-        timeSeries(name, convertDuration(snapshot.get95thPercentile()), startTime, now,
+        timeSeries(
+            name, convertDuration(snapshot.get95thPercentile()), startTime, now,
             "p95", MetricKind.GAUGE),
-        timeSeries(name, convertDuration(snapshot.get98thPercentile()), startTime, now,
+        timeSeries(
+            name, convertDuration(snapshot.get98thPercentile()), startTime, now,
             "p98", MetricKind.GAUGE),
-        timeSeries(name, convertDuration(snapshot.get99thPercentile()), startTime, now,
+        timeSeries(
+            name, convertDuration(snapshot.get99thPercentile()), startTime, now,
             "p99", MetricKind.GAUGE),
-        timeSeries(name, convertDuration(snapshot.get999thPercentile()), startTime, now,
+        timeSeries(
+            name, convertDuration(snapshot.get999thPercentile()), startTime, now,
             "p999", MetricKind.GAUGE),
         *toTimeSeries(name, timer as Metered, startTime, now))
   }
@@ -137,15 +151,20 @@ internal class StackDriverReporter @Inject internal constructor(
         timeSeries(name, snapshot.mean, startTime, now, "mean", MetricKind.GAUGE),
         timeSeries(name, snapshot.stdDev, startTime, now, "stdDev", MetricKind.GAUGE),
         timeSeries(name, snapshot.median, startTime, now, "p50", MetricKind.GAUGE),
-        timeSeries(name, snapshot.get75thPercentile(), startTime, now, "p75",
+        timeSeries(
+            name, snapshot.get75thPercentile(), startTime, now, "p75",
             MetricKind.GAUGE),
-        timeSeries(name, snapshot.get95thPercentile(), startTime, now, "p95",
+        timeSeries(
+            name, snapshot.get95thPercentile(), startTime, now, "p95",
             MetricKind.GAUGE),
-        timeSeries(name, snapshot.get98thPercentile(), startTime, now, "p98",
+        timeSeries(
+            name, snapshot.get98thPercentile(), startTime, now, "p98",
             MetricKind.GAUGE),
-        timeSeries(name, snapshot.get99thPercentile(), startTime, now, "p99",
+        timeSeries(
+            name, snapshot.get99thPercentile(), startTime, now, "p99",
             MetricKind.GAUGE),
-        timeSeries(name, snapshot.get999thPercentile(), startTime, now, "p999",
+        timeSeries(
+            name, snapshot.get999thPercentile(), startTime, now, "p999",
             MetricKind.GAUGE))
   }
 
@@ -156,13 +175,17 @@ internal class StackDriverReporter @Inject internal constructor(
       now: DateTime
   ): Array<TimeSeries> = arrayOf(
       timeSeries(name, metered.count, startTime, now, "count", MetricKind.CUMULATIVE),
-      timeSeries(name, convertRate(metered.oneMinuteRate), startTime, now, "m1_rate",
+      timeSeries(
+          name, convertRate(metered.oneMinuteRate), startTime, now, "m1_rate",
           MetricKind.GAUGE),
-      timeSeries(name, convertRate(metered.meanRate), startTime, now, "mean_rate",
+      timeSeries(
+          name, convertRate(metered.meanRate), startTime, now, "mean_rate",
           MetricKind.GAUGE),
-      timeSeries(name, convertRate(metered.fiveMinuteRate), startTime, now, "m5_rate",
+      timeSeries(
+          name, convertRate(metered.fiveMinuteRate), startTime, now, "m5_rate",
           MetricKind.GAUGE),
-      timeSeries(name, convertRate(metered.fifteenMinuteRate), startTime, now, "m15_rate",
+      timeSeries(
+          name, convertRate(metered.fifteenMinuteRate), startTime, now, "m15_rate",
           MetricKind.GAUGE))
 
   private fun timeSeries(
@@ -198,7 +221,8 @@ internal class StackDriverReporter @Inject internal constructor(
   }
 
   private fun type(root: String, vararg others: String) =
-      pathJoiner.join(CUSTOM_METRICS_PREFIX,
+      pathJoiner.join(
+          CUSTOM_METRICS_PREFIX,
           appName, instanceMetadata.zone, instanceMetadata.instanceName,
           root, *others)
 

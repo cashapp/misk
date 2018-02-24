@@ -367,7 +367,8 @@ class LocalStorageRpc(root: Path, moshi: Moshi = Moshi.Builder().build()) : Base
         it != 0L && existingMetadata == null ->
           throw StorageException(404, "${blobId.fullName} does not exist")
         it != 0L && existingMetadata != null && it != existingMetadata.generation ->
-          throw StorageException(401,
+          throw StorageException(
+              401,
               "generation mismatch: ${existingMetadata.generation} != $it")
         else -> {
         }

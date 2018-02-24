@@ -46,7 +46,8 @@ abstract class ActionScopedProviderModule : KAbstractModule() {
   /** Binds an unqualified [ActionScoped] along with its provider */
   fun <T : Any> bindProvider(
       kclass: KClass<T>,
-      providerClass: KClass<out ActionScopedProvider<T>>) {
+      providerClass: KClass<out ActionScopedProvider<T>>
+  ) {
     bindProvider(
         Key.get(kclass.java),
         Key.get(actionScopedType(kclass)),
@@ -57,7 +58,8 @@ abstract class ActionScopedProviderModule : KAbstractModule() {
   fun <T : Any> bindProvider(
       kclass: KClass<T>,
       a: Annotation,
-      providerClass: KClass<out ActionScopedProvider<T>>) {
+      providerClass: KClass<out ActionScopedProvider<T>>
+  ) {
     bindProvider(
         Key.get(kclass.java, a),
         Key.get(actionScopedType(kclass), a),
@@ -68,7 +70,8 @@ abstract class ActionScopedProviderModule : KAbstractModule() {
   fun <T : Any> bindProvider(
       kclass: KClass<T>,
       a: KClass<Annotation>,
-      providerClass: KClass<out ActionScopedProvider<T>>) {
+      providerClass: KClass<out ActionScopedProvider<T>>
+  ) {
     bindProvider(
         Key.get(kclass.java, a.java),
         Key.get(actionScopedType(kclass), a.java),
