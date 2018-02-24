@@ -27,6 +27,8 @@ dependencies {
   compile dep.moshi
   compile dep.jettyServer
   compile dep.jettyServlet
+  compile dep.jettyWebsocketServlet
+  compile dep.jettyWebsocketServer
   compile dep.wireRuntime
   compile dep.loggingApi
   compile dep.jacksonDatabind

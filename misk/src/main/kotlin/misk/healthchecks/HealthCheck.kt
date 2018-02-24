@@ -19,7 +19,7 @@ data class HealthStatus(
   val messages: List<String>
 ) {
   companion object {
-    fun healthy() = HealthStatus(true, listOf())
+    fun healthy(vararg messages: String) = HealthStatus(true, messages.asList())
 
     fun unhealthy(vararg messages: String) = HealthStatus(false, messages.asList())
   }
