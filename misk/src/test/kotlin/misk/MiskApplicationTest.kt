@@ -98,16 +98,15 @@ internal class MiskApplicationTest {
     }
 
     // Error message should be specific to the command
-    assertThat(exception.message).isEqualTo(
-"""
-Expected a value after parameter -f
-
-Usage: with-required-args [options]
- Options:
- * -f, --file
-
-"""
-    )
+    assertThat(exception.message).isEqualTo("""
+        |
+        |Expected a value after parameter -f
+        |
+        |Usage: with-required-args [options]
+        |  Options:
+        |  * -f, --file
+        |
+        |""".trimMargin())
   }
 
   @Test
@@ -118,31 +117,30 @@ Usage: with-required-args [options]
     }
 
     // Error message should include the entire usage
-    assertThat(exception.message).isEqualTo(
-"""
-Expected a command, got unknown
-
-Usage: <main class> [command] [command options]
- Commands:
-  with-required-args      null
-   Usage: with-required-args [options]
-    Options:
-    * -f, --file
-
-
-  with-preconditions      null
-   Usage: with-preconditions [options]
-    Options:
-     -d, --dir
-
-     -f, --file
-
-
-  with-module      null
-   Usage: with-module
-
-"""
-    )
+    assertThat(exception.message).isEqualTo("""
+        |
+        |Expected a command, got unknown
+        |
+        |Usage: <main class> [command] [command options]
+        |  Commands:
+        |    with-required-args      null
+        |      Usage: with-required-args [options]
+        |        Options:
+        |        * -f, --file
+        |
+        |
+        |    with-preconditions      null
+        |      Usage: with-preconditions [options]
+        |        Options:
+        |          -d, --dir
+        |
+        |          -f, --file
+        |
+        |
+        |    with-module      null
+        |      Usage: with-module
+        |
+        |""".trimMargin())
   }
 
   @Test
@@ -153,18 +151,16 @@ Usage: <main class> [command] [command options]
     }
 
     // Error message should be specific to the command
-    assertThat(exception.message).isEqualTo(
-"""
-one of -f or -d must be specified
-
-Usage: with-preconditions [options]
- Options:
-  -d, --dir
-
-  -f, --file
-
-"""
-    )
-
+    assertThat(exception.message).isEqualTo("""
+        |
+        |one of -f or -d must be specified
+        |
+        |Usage: with-preconditions [options]
+        |  Options:
+        |    -d, --dir
+        |
+        |    -f, --file
+        |
+        |""".trimMargin())
   }
 }

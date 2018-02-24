@@ -12,8 +12,8 @@ internal class QueryStringParameterProcessor constructor(parameter: KParameter) 
   private val name: String? = parameter.name ?: parameter.type.javaType.typeName
   private val isList: Boolean = parameter.type.classifier?.equals(List::class) ?: false
   private val stringConverter = converterFor(
-    if (isList) parameter.type.arguments.first().type!!
-    else parameter.type
+      if (isList) parameter.type.arguments.first().type!!
+      else parameter.type
   ) ?: throw IllegalArgumentException("Unable to create converter for ${parameter.name}")
 
   fun extractFunctionArgumentValue(parameterStrings: List<String>): Any? {
@@ -23,8 +23,8 @@ internal class QueryStringParameterProcessor constructor(parameter: KParameter) 
 
     try {
       return if (isList) parameterStrings.map { stringConverter(it) }
-       else stringConverter(parameterStrings.first())
-    } catch(e: IllegalArgumentException) {
+      else stringConverter(parameterStrings.first())
+    } catch (e: IllegalArgumentException) {
       throw IllegalArgumentException("Invalid format for parameter: $name", e)
     }
   }

@@ -3,8 +3,8 @@ package misk.cloud.gcp.security.keys
 import misk.config.Config
 
 data class GcpKmsConfig(
-    val project_id: String,
-    val key_locations: Map<String, GcpKeyLocation>
+  val project_id: String,
+  val key_locations: Map<String, GcpKeyLocation>
 ) : Config
 
 data class GcpKeyLocation(val location: String, val key_ring: String, val key_name: String) {

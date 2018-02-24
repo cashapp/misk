@@ -1,6 +1,5 @@
 package misk.okio
 
-import okio.Buffer
 import okio.BufferedSource
 
 fun BufferedSource.forEachBlock(buffer: ByteArray, f: (buffer: ByteArray, bytesRead: Int) -> Unit) {

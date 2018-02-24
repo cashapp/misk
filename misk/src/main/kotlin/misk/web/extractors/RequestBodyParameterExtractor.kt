@@ -14,8 +14,8 @@ import kotlin.reflect.KParameter
 import kotlin.reflect.full.findAnnotation
 
 internal class RequestBodyParameterExtractor(
-    private val parameter: KParameter,
-    private val unmarshallerFactories: List<Unmarshaller.Factory>
+  private val parameter: KParameter,
+  private val unmarshallerFactories: List<Unmarshaller.Factory>
 ) : ParameterExtractor {
   override fun extract(webAction: WebAction, request: Request, pathMatcher: Matcher): Any? {
     val mediaType = request.headers["Content-Type"]?.let { MediaType.parse(it) }
@@ -28,12 +28,12 @@ internal class RequestBodyParameterExtractor(
   }
 
   class Factory @Inject internal constructor(
-      @JvmSuppressWildcards private val unmarshallerFactories: List<Unmarshaller.Factory>
+    @JvmSuppressWildcards private val unmarshallerFactories: List<Unmarshaller.Factory>
   ) : ParameterExtractor.Factory {
     override fun create(
-        function: KFunction<*>,
-        parameter: KParameter,
-        pathPattern: PathPattern
+      function: KFunction<*>,
+      parameter: KParameter,
+      pathPattern: PathPattern
     ): ParameterExtractor? {
       if (parameter.findAnnotation<RequestBody>() == null) return null
       return RequestBodyParameterExtractor(parameter, unmarshallerFactories)

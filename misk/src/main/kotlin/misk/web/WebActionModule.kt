@@ -20,12 +20,12 @@ import kotlin.reflect.KFunction
 import kotlin.reflect.full.findAnnotation
 
 class WebActionModule<A : WebAction> private constructor(
-    val webActionClass: KClass<A>,
-    val member: KFunction<*>,
-    val pathPattern: String,
-    val httpMethod: HttpMethod,
-    val acceptedContentTypes: List<MediaRange>,
-    val responseContentType: MediaType?
+  val webActionClass: KClass<A>,
+  val member: KFunction<*>,
+  val pathPattern: String,
+  val httpMethod: HttpMethod,
+  val acceptedContentTypes: List<MediaRange>,
+  val responseContentType: MediaType?
 ) : AbstractModule() {
   override fun configure() {
     val provider = getProvider(webActionClass.java)
@@ -36,8 +36,8 @@ class WebActionModule<A : WebAction> private constructor(
             subtypeOf<Any>()).typeLiteral()
     ) as Multibinder<BoundAction<A, *>>
     binder.addBinding().toProvider(
-            BoundActionProvider(provider, member, pathPattern, httpMethod,
-                acceptedContentTypes, responseContentType))
+        BoundActionProvider(provider, member, pathPattern, httpMethod,
+            acceptedContentTypes, responseContentType))
   }
 
   companion object {
@@ -92,12 +92,12 @@ private val KFunction<*>.responseContentType: MediaType?
   }
 
 internal class BoundActionProvider<A : WebAction, R>(
-    val provider: Provider<A>,
-    val function: KFunction<R>,
-    val pathPattern: String,
-    val httpMethod: HttpMethod,
-    val acceptedContentTypes: List<MediaRange>,
-    val responseContentType: MediaType?
+  val provider: Provider<A>,
+  val function: KFunction<R>,
+  val pathPattern: String,
+  val httpMethod: HttpMethod,
+  val acceptedContentTypes: List<MediaRange>,
+  val responseContentType: MediaType?
 ) : Provider<BoundAction<A, *>> {
 
   @Inject

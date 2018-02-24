@@ -15,9 +15,9 @@ import kotlin.reflect.full.isSubtypeOf
 import kotlin.reflect.jvm.javaType
 
 class ConfigModule<T : Config>(
-    private val configClass: Class<T>,
-    private val appName: String,
-    private val config: T
+  private val configClass: Class<T>,
+  private val appName: String,
+  private val config: T
 ) : KAbstractModule() {
   @Suppress("UNCHECKED_CAST")
   override fun configure() {
@@ -57,8 +57,8 @@ class ConfigModule<T : Config>(
   }
 
   internal class SubConfigProvider<T : Config>(
-      private val config: T,
-      private val subconfigGetter: KProperty1<Config, Any?>
+    private val config: T,
+    private val subconfigGetter: KProperty1<Config, Any?>
   ) : Provider<Any?> {
     override fun get(): Any? {
       return subconfigGetter.get(config)

@@ -11,9 +11,9 @@ import kotlin.reflect.KClass
 
 /** Creates a retrofit-backed typed client given an API interface and an HTTP configuration */
 class TypedHttpClientModule<T : Any>(
-    private val kclass: KClass<T>,
-    private val name: String,
-    private val annotation: Annotation? = null
+  private val kclass: KClass<T>,
+  private val name: String,
+  private val annotation: Annotation? = null
 ) : KAbstractModule() {
   override fun configure() {
     install(HttpClientModule(name, annotation))
@@ -24,16 +24,16 @@ class TypedHttpClientModule<T : Any>(
 
   companion object {
     inline fun <reified T : Any> create(
-        name: String,
-        annotation: Annotation? = null
+      name: String,
+      annotation: Annotation? = null
     ): TypedHttpClientModule<T> {
       return TypedHttpClientModule(T::class, name, annotation)
     }
   }
 
   private class TypedClientProvider<T : Any>(
-      val kclass: KClass<T>,
-      val name: String
+    val kclass: KClass<T>,
+    val name: String
   ) : Provider<T> {
     @Inject
     private lateinit var httpClientsConfig: HttpClientsConfig

@@ -20,39 +20,39 @@ private val booleanTypeNullable: KType = Boolean::class.createType(nullable = tr
 internal typealias StringConverter = (String) -> Any?
 
 internal fun converterFor(type: KType): StringConverter? = when (type) {
- stringType -> { it -> it }
- stringTypeNullable -> { it -> it }
- intType -> numberConversionWrapper { it.toInt() }
- intTypeNullable -> numberConversionWrapper { it.toInt() }
- longType -> numberConversionWrapper { it.toLong() }
- longTypeNullable -> numberConversionWrapper { it.toLong() }
- doubleType -> numberConversionWrapper { it.toDouble() }
- doubleTypeNullable -> numberConversionWrapper { it.toDouble() }
- booleanType -> numberConversionWrapper { it.toBoolean() }
- booleanTypeNullable -> numberConversionWrapper { it.toBoolean() }
- else -> createFromValueOf(type)
+  stringType -> { it -> it }
+  stringTypeNullable -> { it -> it }
+  intType -> numberConversionWrapper { it.toInt() }
+  intTypeNullable -> numberConversionWrapper { it.toInt() }
+  longType -> numberConversionWrapper { it.toLong() }
+  longTypeNullable -> numberConversionWrapper { it.toLong() }
+  doubleType -> numberConversionWrapper { it.toDouble() }
+  doubleTypeNullable -> numberConversionWrapper { it.toDouble() }
+  booleanType -> numberConversionWrapper { it.toBoolean() }
+  booleanTypeNullable -> numberConversionWrapper { it.toBoolean() }
+  else -> createFromValueOf(type)
 }
 
 private fun numberConversionWrapper(wrappedFunc: StringConverter): StringConverter {
- return {
-  try {
-   wrappedFunc(it)
-  } catch(e: NumberFormatException) {
-   throw IllegalArgumentException("Invalid parameter format: $it", e)
+  return {
+    try {
+      wrappedFunc(it)
+    } catch (e: NumberFormatException) {
+      throw IllegalArgumentException("Invalid parameter format: $it", e)
+    }
   }
- }
 }
 
 private fun createFromValueOf(type: KType): StringConverter? {
- try {
-  @Suppress("UNCHECKED_CAST")
-  val javaClass = type.javaType as Class<Any>?
-  val valueOfMethod = javaClass?.getMethod("valueOf", String::class.java)
-  if (valueOfMethod != null) {
-   return { param -> valueOfMethod(null, param) }
+  try {
+    @Suppress("UNCHECKED_CAST")
+    val javaClass = type.javaType as Class<Any>?
+    val valueOfMethod = javaClass?.getMethod("valueOf", String::class.java)
+    if (valueOfMethod != null) {
+      return { param -> valueOfMethod(null, param) }
+    }
+  } catch (e: ClassCastException) {
+  } catch (e: NoSuchMethodException) {
   }
- } catch(e: ClassCastException) {
- } catch(e: NoSuchMethodException) {
- }
- return null
+  return null
 }

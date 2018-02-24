@@ -17,7 +17,7 @@ class ActionScope @Inject internal constructor(
     // on ActionScopedProviders, which might depend on other ActionScopeds. We break
     // this circular dependency by injecting a map of Provider<ActionScopedProvider>
     // rather than the map of ActionScopedProvider directly
-    private val providers: @JvmSuppressWildcards Map<Key<*>, Provider<ActionScopedProvider<*>>>
+  private val providers: @JvmSuppressWildcards Map<Key<*>, Provider<ActionScopedProvider<*>>>
 ) : AutoCloseable {
   companion object {
     private val tls = ThreadLocal<LinkedHashMap<Key<*>, Any>>()
@@ -110,17 +110,17 @@ class ActionScope @Inject internal constructor(
   }
 
   private class WrappedKFunction<T>(
-      val seedData: Map<Key<*>, Any>,
-      val scope: ActionScope,
-      val wrapped: KFunction<T>
+    val seedData: Map<Key<*>, Any>,
+    val scope: ActionScope,
+    val wrapped: KFunction<T>
   ) : KFunction<T> {
     override fun call(vararg args: Any?): T = scope.enter(seedData).use {
-          wrapped.call(*args)
-        }
+      wrapped.call(*args)
+    }
 
     override fun callBy(args: Map<KParameter, Any?>): T = scope.enter(seedData).use {
-          wrapped.callBy(args)
-        }
+      wrapped.callBy(args)
+    }
 
     override val annotations: List<Annotation> = wrapped.annotations
     override val isAbstract: Boolean = wrapped.isAbstract

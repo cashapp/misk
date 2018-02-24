@@ -28,8 +28,8 @@ private val logger = getLogger<JettyService>()
 
 @Singleton
 class JettyService @Inject internal constructor(
-    private val webActionsServlet: WebActionsServlet,
-    private val webConfig: WebConfig
+  private val webActionsServlet: WebActionsServlet,
+  private val webConfig: WebConfig
 ) : AbstractIdleService() {
   private val server = Server()
 

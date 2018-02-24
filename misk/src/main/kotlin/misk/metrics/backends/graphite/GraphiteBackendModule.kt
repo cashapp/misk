@@ -23,7 +23,7 @@ class GraphiteBackendModule : AbstractModule() {
   @Provides
   @Singleton
   fun graphiteSender(config: GraphiteBackendConfig): GraphiteSender =
-    Graphite(config.host, config.port)
+      Graphite(config.host, config.port)
 
   @Provides
   @Singleton

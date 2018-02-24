@@ -10,12 +10,6 @@ import com.squareup.wire.ProtoWriter;
 import com.squareup.wire.WireField;
 import com.squareup.wire.internal.Internal;
 import java.io.IOException;
-import java.lang.Integer;
-import java.lang.Long;
-import java.lang.Object;
-import java.lang.Override;
-import java.lang.String;
-import java.lang.StringBuilder;
 import java.util.List;
 import java.util.Map;
 import okio.ByteString;
@@ -70,7 +64,8 @@ public final class Warehouse extends Message<Warehouse, Warehouse.Builder> {
 
   public Warehouse(Long warehouse_id, String warehouse_token, Warehouse central_repo,
       List<Warehouse> alternates, Map<String, String> dropoff_points, Map<Integer, Robot> robots) {
-    this(warehouse_id, warehouse_token, central_repo, alternates, dropoff_points, robots, ByteString.EMPTY);
+    this(warehouse_id, warehouse_token, central_repo, alternates, dropoff_points, robots,
+        ByteString.EMPTY);
   }
 
   public Warehouse(Long warehouse_id, String warehouse_token, Warehouse central_repo,
@@ -194,14 +189,17 @@ public final class Warehouse extends Message<Warehouse, Warehouse.Builder> {
 
     @Override
     public Warehouse build() {
-      return new Warehouse(warehouse_id, warehouse_token, central_repo, alternates, dropoff_points, robots, super.buildUnknownFields());
+      return new Warehouse(warehouse_id, warehouse_token, central_repo, alternates, dropoff_points,
+          robots, super.buildUnknownFields());
     }
   }
 
   private static final class ProtoAdapter_Warehouse extends ProtoAdapter<Warehouse> {
-    private final ProtoAdapter<Map<String, String>> dropoff_points = ProtoAdapter.newMapAdapter(ProtoAdapter.STRING, ProtoAdapter.STRING);
+    private final ProtoAdapter<Map<String, String>> dropoff_points =
+        ProtoAdapter.newMapAdapter(ProtoAdapter.STRING, ProtoAdapter.STRING);
 
-    private final ProtoAdapter<Map<Integer, Robot>> robots = ProtoAdapter.newMapAdapter(ProtoAdapter.INT32, Robot.ADAPTER);
+    private final ProtoAdapter<Map<Integer, Robot>> robots =
+        ProtoAdapter.newMapAdapter(ProtoAdapter.INT32, Robot.ADAPTER);
 
     public ProtoAdapter_Warehouse() {
       super(FieldEncoding.LENGTH_DELIMITED, Warehouse.class);
@@ -233,14 +231,26 @@ public final class Warehouse extends Message<Warehouse, Warehouse.Builder> {
     public Warehouse decode(ProtoReader reader) throws IOException {
       Builder builder = new Builder();
       long token = reader.beginMessage();
-      for (int tag; (tag = reader.nextTag()) != -1;) {
+      for (int tag; (tag = reader.nextTag()) != -1; ) {
         switch (tag) {
-          case 1: builder.warehouse_id(ProtoAdapter.INT64.decode(reader)); break;
-          case 2: builder.warehouse_token(ProtoAdapter.STRING.decode(reader)); break;
-          case 3: builder.central_repo(Warehouse.ADAPTER.decode(reader)); break;
-          case 4: builder.alternates.add(Warehouse.ADAPTER.decode(reader)); break;
-          case 6: builder.dropoff_points.putAll(dropoff_points.decode(reader)); break;
-          case 7: builder.robots.putAll(robots.decode(reader)); break;
+          case 1:
+            builder.warehouse_id(ProtoAdapter.INT64.decode(reader));
+            break;
+          case 2:
+            builder.warehouse_token(ProtoAdapter.STRING.decode(reader));
+            break;
+          case 3:
+            builder.central_repo(Warehouse.ADAPTER.decode(reader));
+            break;
+          case 4:
+            builder.alternates.add(Warehouse.ADAPTER.decode(reader));
+            break;
+          case 6:
+            builder.dropoff_points.putAll(dropoff_points.decode(reader));
+            break;
+          case 7:
+            builder.robots.putAll(robots.decode(reader));
+            break;
           default: {
             FieldEncoding fieldEncoding = reader.peekFieldEncoding();
             Object value = fieldEncoding.rawProtoAdapter().decode(reader);
@@ -255,7 +265,9 @@ public final class Warehouse extends Message<Warehouse, Warehouse.Builder> {
     @Override
     public Warehouse redact(Warehouse value) {
       Builder builder = value.newBuilder();
-      if (builder.central_repo != null) builder.central_repo = Warehouse.ADAPTER.redact(builder.central_repo);
+      if (builder.central_repo != null) {
+        builder.central_repo = Warehouse.ADAPTER.redact(builder.central_repo);
+      }
       Internal.redactElements(builder.alternates, Warehouse.ADAPTER);
       Internal.redactElements(builder.robots, Robot.ADAPTER);
       builder.clearUnknownFields();

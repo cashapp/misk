@@ -103,9 +103,9 @@ class LocalStorageRpc(root: Path, moshi: Moshi = Moshi.Builder().build()) : Base
   private val uploads = mutableMapOf<String, Upload>()
 
   override fun create(
-      obj: StorageObject,
-      content: InputStream,
-      options: Map<StorageRpc.Option, *>
+    obj: StorageObject,
+    content: InputStream,
+    options: Map<StorageRpc.Option, *>
   ): StorageObject? {
     try {
       val upload = beginUpload(obj, options)
@@ -124,8 +124,8 @@ class LocalStorageRpc(root: Path, moshi: Moshi = Moshi.Builder().build()) : Base
   }
 
   override fun list(
-      bucket: String,
-      options: Map<StorageRpc.Option, *>
+    bucket: String,
+    options: Map<StorageRpc.Option, *>
   ): Tuple<String, Iterable<StorageObject>> {
     try {
       val delimiter = options[StorageRpc.Option.DELIMITER]?.toString()
@@ -222,10 +222,10 @@ class LocalStorageRpc(root: Path, moshi: Moshi = Moshi.Builder().build()) : Base
   }
 
   override fun read(
-      from: StorageObject,
-      options: Map<StorageRpc.Option, *>,
-      zposition: Long,
-      zbytes: Int
+    from: StorageObject,
+    options: Map<StorageRpc.Option, *>,
+    zposition: Long,
+    zbytes: Int
   ): Tuple<String, ByteArray> = try {
     withReadLock(from.blobId) {
       val metadata = getMetadataForReading(from.blobId, options)
@@ -251,12 +251,12 @@ class LocalStorageRpc(root: Path, moshi: Moshi = Moshi.Builder().build()) : Base
       beginUpload(obj, options).id
 
   override fun write(
-      uploadId: String,
-      toWrite: ByteArray,
-      toWriteOffset: Int,
-      destOffset: Long,
-      length: Int,
-      last: Boolean
+    uploadId: String,
+    toWrite: ByteArray,
+    toWriteOffset: Int,
+    destOffset: Long,
+    length: Int,
+    last: Boolean
   ) {
     try {
       val upload = continueUpload(uploadId, toWrite, toWriteOffset, destOffset, length)
@@ -356,8 +356,8 @@ class LocalStorageRpc(root: Path, moshi: Moshi = Moshi.Builder().build()) : Base
   }
 
   private fun getMetadataForWriting(
-      blobId: BlobId,
-      options: Map<StorageRpc.Option, *>
+    blobId: BlobId,
+    options: Map<StorageRpc.Option, *>
   ): BlobMetadata? {
     val existingMetadata = readMetadata(blobId)
     options.generationMatch?.let {
@@ -378,8 +378,8 @@ class LocalStorageRpc(root: Path, moshi: Moshi = Moshi.Builder().build()) : Base
   }
 
   private fun getMetadataForReading(
-      blobId: BlobId,
-      options: Map<StorageRpc.Option, *>
+    blobId: BlobId,
+    options: Map<StorageRpc.Option, *>
   ): BlobMetadata? {
     val metadata = readMetadata(blobId) ?: return null
     options.generationMatch?.let {
@@ -422,11 +422,11 @@ class LocalStorageRpc(root: Path, moshi: Moshi = Moshi.Builder().build()) : Base
   }
 
   private fun continueUpload(
-      uploadId: String,
-      toWrite: ByteArray,
-      toWriteOffset: Int,
-      destOffset: Long,
-      length: Int
+    uploadId: String,
+    toWrite: ByteArray,
+    toWriteOffset: Int,
+    destOffset: Long,
+    length: Int
   ): Upload = try {
     // Copy bytes into the temporary file for this upload
     internalLock.read {
@@ -510,11 +510,11 @@ class LocalStorageRpc(root: Path, moshi: Moshi = Moshi.Builder().build()) : Base
   }
 
   private class BlobMetadata(
-      val generation: Long,
-      val metageneration: Long,
-      val userProperties: Map<String, String>,
-      val contentType: String?,
-      val contentEncoding: String?
+    val generation: Long,
+    val metageneration: Long,
+    val userProperties: Map<String, String>,
+    val contentType: String?,
+    val contentEncoding: String?
   ) {
     fun toStorageObject(blobId: BlobId, size: Long = 0): StorageObject =
         StorageObject()
@@ -532,10 +532,10 @@ class LocalStorageRpc(root: Path, moshi: Moshi = Moshi.Builder().build()) : Base
   }
 
   private class Upload(
-      val id: String,
-      val blobId: BlobId,
-      val tempFile: Path,
-      val targetMetadata: BlobMetadata
+    val id: String,
+    val blobId: BlobId,
+    val tempFile: Path,
+    val targetMetadata: BlobMetadata
   )
 
   /** @return a new version of the given metadata, updated based on the storage object */

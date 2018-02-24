@@ -80,11 +80,11 @@ class MiskApplication(private val modules: List<Module>, commands: List<MiskComm
     val injector = Guice.createInjector(modules)
     val serviceManager = injector.getInstance<ServiceManager>()
     Runtime.getRuntime().addShutdownHook(object : Thread() {
-          override fun run() {
-            serviceManager.stopAsync()
-            serviceManager.awaitStopped()
-          }
-        })
+      override fun run() {
+        serviceManager.stopAsync()
+        serviceManager.awaitStopped()
+      }
+    })
 
     serviceManager.startAsync()
     serviceManager.awaitHealthy()

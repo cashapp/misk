@@ -12,13 +12,6 @@ import com.squareup.wire.WireEnum;
 import com.squareup.wire.WireField;
 import com.squareup.wire.internal.Internal;
 import java.io.IOException;
-import java.lang.Boolean;
-import java.lang.Double;
-import java.lang.Long;
-import java.lang.Object;
-import java.lang.Override;
-import java.lang.String;
-import java.lang.StringBuilder;
 import java.util.List;
 import okio.ByteString;
 
@@ -130,7 +123,9 @@ public final class Shipment extends Message<Shipment, Shipment.Builder> {
       State status, Double load_ratio, Boolean deleted, ByteString source_signature,
       ByteString destination_signature, List<String> notes, String account_token, String card_token,
       String transfer_id) {
-    this(shipment_id, shipment_token, source, destination, status, load_ratio, deleted, source_signature, destination_signature, notes, account_token, card_token, transfer_id, ByteString.EMPTY);
+    this(shipment_id, shipment_token, source, destination, status, load_ratio, deleted,
+        source_signature, destination_signature, notes, account_token, card_token, transfer_id,
+        ByteString.EMPTY);
   }
 
   public Shipment(Long shipment_id, String shipment_token, Warehouse source, Warehouse destination,
@@ -139,7 +134,8 @@ public final class Shipment extends Message<Shipment, Shipment.Builder> {
       String transfer_id, ByteString unknownFields) {
     super(ADAPTER, unknownFields);
     if (Internal.countNonNull(account_token, card_token, transfer_id) > 1) {
-      throw new IllegalArgumentException("at most one of account_token, card_token, transfer_id may be non-null");
+      throw new IllegalArgumentException(
+          "at most one of account_token, card_token, transfer_id may be non-null");
     }
     this.shipment_id = shipment_id;
     this.shipment_token = shipment_token;
@@ -231,7 +227,9 @@ public final class Shipment extends Message<Shipment, Shipment.Builder> {
     if (load_ratio != null) builder.append(", load_ratio=").append(load_ratio);
     if (deleted != null) builder.append(", deleted=").append(deleted);
     if (source_signature != null) builder.append(", source_signature=").append(source_signature);
-    if (destination_signature != null) builder.append(", destination_signature=").append(destination_signature);
+    if (destination_signature != null) {
+      builder.append(", destination_signature=").append(destination_signature);
+    }
     if (!notes.isEmpty()) builder.append(", notes=").append(notes);
     if (account_token != null) builder.append(", account_token=").append(account_token);
     if (card_token != null) builder.append(", card_token=").append(card_token);
@@ -344,7 +342,9 @@ public final class Shipment extends Message<Shipment, Shipment.Builder> {
 
     @Override
     public Shipment build() {
-      return new Shipment(shipment_id, shipment_token, source, destination, status, load_ratio, deleted, source_signature, destination_signature, notes, account_token, card_token, transfer_id, super.buildUnknownFields());
+      return new Shipment(shipment_id, shipment_token, source, destination, status, load_ratio,
+          deleted, source_signature, destination_signature, notes, account_token, card_token,
+          transfer_id, super.buildUnknownFields());
     }
   }
 
@@ -370,11 +370,16 @@ public final class Shipment extends Message<Shipment, Shipment.Builder> {
      */
     public static State fromValue(int value) {
       switch (value) {
-        case 0: return VALIDATING;
-        case 1: return PICKING_UP;
-        case 2: return DELIVERING;
-        case 4: return CONSUMING;
-        default: return null;
+        case 0:
+          return VALIDATING;
+        case 1:
+          return PICKING_UP;
+        case 2:
+          return DELIVERING;
+        case 4:
+          return CONSUMING;
+        default:
+          return null;
       }
     }
 
@@ -440,12 +445,20 @@ public final class Shipment extends Message<Shipment, Shipment.Builder> {
     public Shipment decode(ProtoReader reader) throws IOException {
       Builder builder = new Builder();
       long token = reader.beginMessage();
-      for (int tag; (tag = reader.nextTag()) != -1;) {
+      for (int tag; (tag = reader.nextTag()) != -1; ) {
         switch (tag) {
-          case 1: builder.shipment_id(ProtoAdapter.INT64.decode(reader)); break;
-          case 2: builder.shipment_token(ProtoAdapter.STRING.decode(reader)); break;
-          case 4: builder.source(Warehouse.ADAPTER.decode(reader)); break;
-          case 5: builder.destination(Warehouse.ADAPTER.decode(reader)); break;
+          case 1:
+            builder.shipment_id(ProtoAdapter.INT64.decode(reader));
+            break;
+          case 2:
+            builder.shipment_token(ProtoAdapter.STRING.decode(reader));
+            break;
+          case 4:
+            builder.source(Warehouse.ADAPTER.decode(reader));
+            break;
+          case 5:
+            builder.destination(Warehouse.ADAPTER.decode(reader));
+            break;
           case 6: {
             try {
               builder.status(State.ADAPTER.decode(reader));
@@ -454,14 +467,30 @@ public final class Shipment extends Message<Shipment, Shipment.Builder> {
             }
             break;
           }
-          case 7: builder.load_ratio(ProtoAdapter.DOUBLE.decode(reader)); break;
-          case 8: builder.deleted(ProtoAdapter.BOOL.decode(reader)); break;
-          case 9: builder.source_signature(ProtoAdapter.BYTES.decode(reader)); break;
-          case 10: builder.destination_signature(ProtoAdapter.BYTES.decode(reader)); break;
-          case 12: builder.notes.add(ProtoAdapter.STRING.decode(reader)); break;
-          case 13: builder.account_token(ProtoAdapter.STRING.decode(reader)); break;
-          case 14: builder.card_token(ProtoAdapter.STRING.decode(reader)); break;
-          case 15: builder.transfer_id(ProtoAdapter.STRING.decode(reader)); break;
+          case 7:
+            builder.load_ratio(ProtoAdapter.DOUBLE.decode(reader));
+            break;
+          case 8:
+            builder.deleted(ProtoAdapter.BOOL.decode(reader));
+            break;
+          case 9:
+            builder.source_signature(ProtoAdapter.BYTES.decode(reader));
+            break;
+          case 10:
+            builder.destination_signature(ProtoAdapter.BYTES.decode(reader));
+            break;
+          case 12:
+            builder.notes.add(ProtoAdapter.STRING.decode(reader));
+            break;
+          case 13:
+            builder.account_token(ProtoAdapter.STRING.decode(reader));
+            break;
+          case 14:
+            builder.card_token(ProtoAdapter.STRING.decode(reader));
+            break;
+          case 15:
+            builder.transfer_id(ProtoAdapter.STRING.decode(reader));
+            break;
           default: {
             FieldEncoding fieldEncoding = reader.peekFieldEncoding();
             Object value = fieldEncoding.rawProtoAdapter().decode(reader);
@@ -477,7 +506,9 @@ public final class Shipment extends Message<Shipment, Shipment.Builder> {
     public Shipment redact(Shipment value) {
       Builder builder = value.newBuilder();
       if (builder.source != null) builder.source = Warehouse.ADAPTER.redact(builder.source);
-      if (builder.destination != null) builder.destination = Warehouse.ADAPTER.redact(builder.destination);
+      if (builder.destination != null) {
+        builder.destination = Warehouse.ADAPTER.redact(builder.destination);
+      }
       builder.clearUnknownFields();
       return builder.build();
     }

@@ -24,21 +24,22 @@ import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 internal class StackDriverReporter @Inject internal constructor(
-    val clock: Clock,
-    @AppName val appName: String,
-    val instanceMetadata: InstanceMetadata,
-    val sender: StackDriverSender,
-    metricRegistry: com.codahale.metrics.MetricRegistry
+  val clock: Clock,
+  @AppName val appName: String,
+  val instanceMetadata: InstanceMetadata,
+  val sender: StackDriverSender,
+  metricRegistry: com.codahale.metrics.MetricRegistry
 ) : ScheduledReporter(metricRegistry, "stack-driver", null,
     TimeUnit.MILLISECONDS, TimeUnit.MILLISECONDS) {
   private val startTime = DateTime(clock.millis())
 
   override fun report(
-      gauges: SortedMap<String, Gauge<Any>>?,
-      counters: SortedMap<String, Counter>?,
-      histograms: SortedMap<String, Histogram>?,
-      meters: SortedMap<String, Meter>?,
-      timers: SortedMap<String, Timer>?) {
+    gauges: SortedMap<String, Gauge<Any>>?,
+    counters: SortedMap<String, Counter>?,
+    histograms: SortedMap<String, Histogram>?,
+    meters: SortedMap<String, Meter>?,
+    timers: SortedMap<String, Timer>?
+  ) {
     val timeSeries = toTimeSeries(gauges, counters, histograms, meters,
         timers, startTime, DateTime(clock.millis()))
     if (timeSeries.isEmpty()) {
@@ -60,13 +61,14 @@ internal class StackDriverReporter @Inject internal constructor(
   }
 
   fun toTimeSeries(
-      gauges: SortedMap<String, Gauge<Any>>?,
-      counters: SortedMap<String, Counter>?,
-      histograms: SortedMap<String, Histogram>?,
-      meters: SortedMap<String, Meter>?,
-      timers: SortedMap<String, Timer>?,
-      startTime: DateTime,
-      now: DateTime): List<TimeSeries> {
+    gauges: SortedMap<String, Gauge<Any>>?,
+    counters: SortedMap<String, Counter>?,
+    histograms: SortedMap<String, Histogram>?,
+    meters: SortedMap<String, Meter>?,
+    timers: SortedMap<String, Timer>?,
+    startTime: DateTime,
+    now: DateTime
+  ): List<TimeSeries> {
     val timeSeries = ArrayList<TimeSeries>()
     gauges?.forEach { timeSeries.addAll(toTimeSeries(it.key, it.value, startTime, now)) }
     counters?.forEach { timeSeries.addAll(toTimeSeries(it.key, it.value, startTime, now)) }
@@ -77,26 +79,26 @@ internal class StackDriverReporter @Inject internal constructor(
   }
 
   fun toTimeSeries(
-      name: String,
-      gauge: Gauge<Any>,
-      startTime: DateTime,
-      now: DateTime
+    name: String,
+    gauge: Gauge<Any>,
+    startTime: DateTime,
+    now: DateTime
   ): Array<TimeSeries> = arrayOf(
       timeSeries(name, gauge.value, startTime, now, "value", MetricKind.GAUGE))
 
   fun toTimeSeries(
-      name: String,
-      counter: Counter,
-      startTime: DateTime,
-      now: DateTime
+    name: String,
+    counter: Counter,
+    startTime: DateTime,
+    now: DateTime
   ): Array<TimeSeries> = arrayOf(
       timeSeries(name, counter.count, startTime, now, "count", MetricKind.CUMULATIVE))
 
   fun toTimeSeries(
-      name: String,
-      timer: Timer,
-      startTime: DateTime,
-      now: DateTime
+    name: String,
+    timer: Timer,
+    startTime: DateTime,
+    now: DateTime
   ): Array<TimeSeries> {
     val snapshot = timer.snapshot
     return arrayOf(
@@ -124,10 +126,10 @@ internal class StackDriverReporter @Inject internal constructor(
   }
 
   fun toTimeSeries(
-      name: String,
-      hist: Histogram,
-      startTime: DateTime,
-      now: DateTime
+    name: String,
+    hist: Histogram,
+    startTime: DateTime,
+    now: DateTime
   ): Array<TimeSeries> {
     val snapshot = hist.snapshot
     return arrayOf(
@@ -150,10 +152,10 @@ internal class StackDriverReporter @Inject internal constructor(
   }
 
   fun toTimeSeries(
-      name: String,
-      metered: Metered,
-      startTime: DateTime,
-      now: DateTime
+    name: String,
+    metered: Metered,
+    startTime: DateTime,
+    now: DateTime
   ): Array<TimeSeries> = arrayOf(
       timeSeries(name, metered.count, startTime, now, "count", MetricKind.CUMULATIVE),
       timeSeries(name, convertRate(metered.oneMinuteRate), startTime, now, "m1_rate",
@@ -166,30 +168,30 @@ internal class StackDriverReporter @Inject internal constructor(
           MetricKind.GAUGE))
 
   private fun timeSeries(
-      name: String,
-      pointValue: Any,
-      startTime: DateTime,
-      now: DateTime,
-      subType: String,
-      metricKind: MetricKind
+    name: String,
+    pointValue: Any,
+    startTime: DateTime,
+    now: DateTime,
+    subType: String,
+    metricKind: MetricKind
   ): TimeSeries = TimeSeries()
       .setMetricKind(metricKind.name)
       .setMetric(metric(type(name, subType)))
       .setPoints(listOf(point(metricKind, startTime, now, typedValue(pointValue))))
 
   private fun point(
-      metricKind: MetricKind,
-      startTime: DateTime,
-      now: DateTime,
-      value: TypedValue
+    metricKind: MetricKind,
+    startTime: DateTime,
+    now: DateTime,
+    value: TypedValue
   ): Point = Point()
       .setInterval(timeInterval(startTime, now, metricKind))
       .setValue(value)
 
   private fun timeInterval(
-      startTime: DateTime,
-      now: DateTime,
-      metricKind: MetricKind
+    startTime: DateTime,
+    now: DateTime,
+    metricKind: MetricKind
   ): TimeInterval = when (metricKind) {
     MetricKind.CUMULATIVE -> TimeInterval()
         .setStartTime(startTime.toStringRfc3339())

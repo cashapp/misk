@@ -9,8 +9,8 @@ import java.nio.ByteBuffer
 import javax.inject.Inject
 
 internal class GcpKeyService @Inject internal constructor(
-    kms: CloudKMS,
-    val config: GcpKmsConfig
+  kms: CloudKMS,
+  val config: GcpKmsConfig
 ) : KeyService {
   val cryptoKeys = kms.projects().locations().keyRings().cryptoKeys()
 

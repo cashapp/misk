@@ -5,12 +5,12 @@ import java.nio.charset.Charset
 
 /** An RFC-2616 media range */
 data class MediaRange(
-    val type: String,
-    val subtype: String,
-    val charset: Charset? = null,
-    val qualityFactor: Double = 1.0,
-    val parameters: Map<String, String> = mapOf(),
-    val extensions: Map<String, String> = mapOf()
+  val type: String,
+  val subtype: String,
+  val charset: Charset? = null,
+  val qualityFactor: Double = 1.0,
+  val parameters: Map<String, String> = mapOf(),
+  val extensions: Map<String, String> = mapOf()
 ) : Comparable<MediaRange> {
   override fun compareTo(other: MediaRange): Int {
     if (type == WILDCARD && other.type != WILDCARD) return 1
@@ -49,8 +49,8 @@ data class MediaRange(
     return Matcher(this, true)
   }
 
-  data class Matcher(private val mediaRange: MediaRange, val matchesCharset: Boolean = false)
-    : Comparable<Matcher> {
+  data class Matcher(private val mediaRange: MediaRange, val matchesCharset: Boolean = false) :
+      Comparable<Matcher> {
     override fun compareTo(other: Matcher): Int {
       val mediaRangeComparison = mediaRange.compareTo(other.mediaRange)
       if (mediaRangeComparison != 0) return mediaRangeComparison

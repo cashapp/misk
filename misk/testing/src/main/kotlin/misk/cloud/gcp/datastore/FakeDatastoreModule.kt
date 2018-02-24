@@ -28,7 +28,7 @@ class FakeDatastoreModule : KAbstractModule() {
 
   @Singleton
   class FakeDatastoreService @Inject constructor(
-      private val datastoreHelper: LocalDatastoreHelper
+    private val datastoreHelper: LocalDatastoreHelper
   ) : AbstractIdleService() {
 
     override fun startUp() {

@@ -28,14 +28,16 @@ internal class StackDriverReporterTest {
   companion object {
     val APP_NAME = "my_app"
     val INSTANCE_METADATA = InstanceMetadata("165.33.45.25", "us-west2")
-    val METRIC_PREFIX = "custom.googleapis.com/dw/$APP_NAME/${INSTANCE_METADATA.zone}/${INSTANCE_METADATA.instanceName}"
+    val METRIC_PREFIX =
+        "custom.googleapis.com/dw/$APP_NAME/${INSTANCE_METADATA.zone}/${INSTANCE_METADATA.instanceName}"
     val START_TIME = DateTime("2017-11-23T16:46:32Z")
     val NOW = DateTime("2017-11-24T21:56:30Z")
 
     fun assertGauge(timeSeries: TimeSeries, expected: Double) {
       assertThat(timeSeries.metricKind).isEqualTo("GAUGE")
       assertThat(timeSeries.points).hasSize(1)
-      assertThat(timeSeries.points[0].value.doubleValue).isCloseTo(expected, Percentage.withPercentage(0.1))
+      assertThat(timeSeries.points[0].value.doubleValue).isCloseTo(expected,
+          Percentage.withPercentage(0.1))
       assertThat(timeSeries.points[0].interval.startTime).isNull()
       assertThat(timeSeries.points[0].interval.endTime).isEqualTo(NOW.toStringRfc3339())
     }

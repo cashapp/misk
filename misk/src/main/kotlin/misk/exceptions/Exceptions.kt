@@ -18,9 +18,9 @@ enum class StatusCode(val code: Int) {
 
 /** Base class for exceptions thrown by actions, translated into responses */
 open class ActionException(
-    val statusCode: StatusCode,
-    message: String = statusCode.name,
-    cause: Throwable? = null
+  val statusCode: StatusCode,
+  message: String = statusCode.name,
+  cause: Throwable? = null
 ) : Exception(message, cause)
 
 /** Base exception for when resources are not found */

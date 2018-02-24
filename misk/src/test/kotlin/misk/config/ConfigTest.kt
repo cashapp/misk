@@ -26,7 +26,6 @@ class ConfigTest {
   @Inject
   private lateinit var testConfig: TestConfig
 
-
   @field:[Inject Named("consumer_a")]
   lateinit var consumerA: ConsumerConfig
 
@@ -72,7 +71,7 @@ class ConfigTest {
     })
 
     assertThat(exception.localizedMessage).contains("could not find configuration files -" +
-      " checked [missing-common.yaml, missing-testing.yaml]")
+        " checked [missing-common.yaml, missing-testing.yaml]")
   }
 
   @Test

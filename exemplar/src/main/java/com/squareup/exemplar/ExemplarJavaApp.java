@@ -7,7 +7,6 @@ import misk.config.MiskConfig;
 import misk.environment.Environment;
 import misk.environment.EnvironmentModule;
 import misk.hibernate.HibernateModule;
-import misk.moshi.MoshiModule;
 import misk.web.WebModule;
 
 public class ExemplarJavaApp {

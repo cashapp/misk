@@ -4,9 +4,9 @@ import com.google.api.client.http.GenericUrl
 import com.google.api.client.http.HttpResponseException
 import com.google.api.client.json.jackson2.JacksonFactory
 import com.google.api.client.testing.http.MockHttpContent
-import org.assertj.core.api.Assertions.assertThat
 import misk.cloud.gcp.testing.FakeHttpRouter.Companion.respondWithError
 import misk.cloud.gcp.testing.FakeHttpRouter.Companion.respondWithText
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.Test
 import java.io.ByteArrayInputStream

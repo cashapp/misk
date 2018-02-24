@@ -22,9 +22,9 @@ interface ParameterExtractor {
      * examples.
      */
     fun create(
-        function: KFunction<*>,
-        parameter: KParameter,
-        pathPattern: PathPattern
+      function: KFunction<*>,
+      parameter: KParameter,
+      pathPattern: PathPattern
     ): ParameterExtractor?
   }
 }

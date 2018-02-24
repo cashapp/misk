@@ -11,7 +11,6 @@ import misk.web.Response
 import misk.web.marshal.StringResponseBody
 import misk.web.mediatype.MediaTypes
 import okhttp3.Headers
-import org.slf4j.event.Level
 import java.lang.reflect.InvocationTargetException
 import java.util.concurrent.ExecutionException
 import javax.inject.Inject
@@ -24,8 +23,8 @@ import javax.inject.Inject
  * mapped by installing [ExceptionMapper] via the [ExceptionMapperModule]
  */
 class ExceptionHandlingInterceptor(
-    private val actionName: String,
-    private val mapperResolver: ExceptionMapperResolver
+  private val actionName: String,
+  private val mapperResolver: ExceptionMapperResolver
 ) : Interceptor {
 
   override fun intercept(chain: Chain): Any? = try {

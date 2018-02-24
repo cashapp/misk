@@ -24,18 +24,19 @@ abstract class FlagsModule : KAbstractModule() {
   protected abstract fun configureFlags()
 
   inline fun <reified T : Any> bindFlag(
-      name: String,
-      description: String,
-      qualifier: Annotation = Names.named(name)
+    name: String,
+    description: String,
+    qualifier: Annotation = Names.named(name)
   ) {
     bindFlag(name, description, T::class, qualifier)
   }
 
   fun <T : Any> bindFlag(
-      name: String,
-      description: String,
-      type: KClass<T>,
-      qualifier: Annotation = Names.named(name)) {
+    name: String,
+    description: String,
+    type: KClass<T>,
+    qualifier: Annotation = Names.named(name)
+  ) {
     bind(flagTypeLiteral(type))
         .annotatedWith(qualifier)
         .toProvider(FlagProvider(type, name, description))
@@ -46,9 +47,9 @@ abstract class FlagsModule : KAbstractModule() {
       bindFlags(T::class, prefix, qualifier)
 
   fun <T : Flags> bindFlags(
-      type: KClass<T>,
-      prefix: String = "",
-      qualifier: Annotation? = null
+    type: KClass<T>,
+    prefix: String = "",
+    qualifier: Annotation? = null
   ) {
     val actualQualifier = qualifier ?: if (!prefix.isEmpty()) Names.named(prefix) else null
     val constructor = type.constructors.firstOrNull {
@@ -70,16 +71,16 @@ abstract class FlagsModule : KAbstractModule() {
   }
 
   inline fun <reified T : Any> bindJsonFlag(
-      name: String,
-      description: String,
-      qualifier: Annotation = Names.named(name)
+    name: String,
+    description: String,
+    qualifier: Annotation = Names.named(name)
   ) = bindJsonFlag(T::class, name, description, qualifier)
 
   fun <T : Any> bindJsonFlag(
-      type: KClass<T>,
-      name: String,
-      description: String,
-      a: Annotation = Names.named(name)
+    type: KClass<T>,
+    name: String,
+    description: String,
+    a: Annotation = Names.named(name)
   ) {
     val flagType = parameterizedType<JsonFlag<T>>(type.java)
 
@@ -92,9 +93,9 @@ abstract class FlagsModule : KAbstractModule() {
   }
 
   private class FlagProvider<T : Any>(
-      val type: KClass<T>,
-      val name: String,
-      val description: String
+    val type: KClass<T>,
+    val name: String,
+    val description: String
   ) : Provider<Flag<T>> {
     @Inject
     lateinit var flagStore: FlagStore
@@ -105,9 +106,9 @@ abstract class FlagsModule : KAbstractModule() {
   }
 
   private class JsonFlagProvider<T : Any>(
-      val type: KClass<T>,
-      val name: String,
-      val description: String
+    val type: KClass<T>,
+    val name: String,
+    val description: String
   ) : Provider<JsonFlag<T>> {
     @Inject
     lateinit var flagStore: FlagStore
@@ -123,8 +124,8 @@ abstract class FlagsModule : KAbstractModule() {
   }
 
   private class FlagsProvider<T : Any>(
-      val constructor: KFunction<T>,
-      val prefix: String
+    val constructor: KFunction<T>,
+    val prefix: String
   ) : Provider<T> {
     @Inject
     lateinit var flagStore: FlagStore

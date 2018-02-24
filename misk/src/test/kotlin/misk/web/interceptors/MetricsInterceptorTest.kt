@@ -1,6 +1,5 @@
 package misk.web.interceptors
 
-import org.assertj.core.api.Assertions.assertThat
 import misk.asAction
 import misk.metrics.Metrics
 import misk.metrics.MetricsModule
@@ -10,6 +9,7 @@ import misk.web.Get
 import misk.web.Response
 import misk.web.actions.WebAction
 import misk.web.actions.asChain
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import javax.inject.Inject

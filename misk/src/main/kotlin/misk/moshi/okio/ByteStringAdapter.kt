@@ -28,9 +28,9 @@ internal class ByteStringAdapter : JsonAdapter<ByteString?>() {
 
   class Factory : JsonAdapter.Factory {
     override fun create(
-        type: Type,
-        annotations: Set<Annotation>,
-        moshi: Moshi
+      type: Type,
+      annotations: Set<Annotation>,
+      moshi: Moshi
     ): JsonAdapter<*>? {
       return if (type == ByteString::class.java) {
         ByteStringAdapter()
