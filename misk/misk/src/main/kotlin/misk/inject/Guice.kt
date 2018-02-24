@@ -69,8 +69,9 @@ fun KType.typeLiteral(): TypeLiteral<*> {
   return TypeLiteral.get(javaType)
 }
 
-inline fun <reified T : Any> Injector.getInstance(): T {
-  return getInstance(T::class.java)
+inline fun <reified T : Any> Injector.getInstance(annotation: Annotation? = null): T {
+  val key = annotation?.let { Key.get(T::class.java, it) } ?: Key.get(T::class.java)
+  return getInstance(key)
 }
 
 inline fun <reified T : Any> keyOf(): Key<T> = Key.get(T::class.java)

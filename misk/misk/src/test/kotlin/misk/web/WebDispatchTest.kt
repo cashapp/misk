@@ -133,6 +133,6 @@ internal class WebDispatchTest {
   }
 
   private fun serverUrlBuilder(): HttpUrl.Builder {
-    return jettyService.serverUrl.newBuilder()
+    return jettyService.httpServerUrl.newBuilder()
   }
 }

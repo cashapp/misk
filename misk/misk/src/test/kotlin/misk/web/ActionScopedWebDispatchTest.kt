@@ -34,7 +34,7 @@ internal class ActionScopedWebDispatchTest {
   fun exposesActionScopedInInterceptors() {
     val httpClient = OkHttpClient()
     val response = httpClient.newCall(okhttp3.Request.Builder()
-        .url(jettyService.serverUrl.newBuilder().encodedPath("/hello").build())
+        .url(jettyService.httpServerUrl.newBuilder().encodedPath("/hello").build())
         .addHeader("Security-ID", "Thor")
         .build())
         .execute()

@@ -1,7 +1,6 @@
 package misk.web.extractors
 
 import com.google.inject.util.Modules
-import com.squareup.moshi.Moshi
 import misk.MiskModule
 import misk.inject.KAbstractModule
 import misk.testing.MiskTest
@@ -86,6 +85,6 @@ internal class PathParamDispatchTest {
   }
 
   private fun serverUrlBuilder(): HttpUrl.Builder {
-    return jettyService.serverUrl.newBuilder()
+    return jettyService.httpServerUrl.newBuilder()
   }
 }

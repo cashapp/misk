@@ -65,7 +65,7 @@ internal class PlainTextRequestTest {
   }
 
   private fun post(path: String, message: String): String = call(Request.Builder()
-      .url(jettyService.serverUrl.newBuilder().encodedPath(path).build())
+      .url(jettyService.httpServerUrl.newBuilder().encodedPath(path).build())
       .post(okhttp3.RequestBody.create(MediaTypes.TEXT_PLAIN_UTF8_MEDIA_TYPE, message)))
 
   private fun call(request: Request.Builder): String {

@@ -98,7 +98,7 @@ internal class JsonRequestTest {
   }
 
   private fun post(path: String, packet: Packet): Packet = call(Request.Builder()
-      .url(jettyService.serverUrl.newBuilder().encodedPath(path).build())
+      .url(jettyService.httpServerUrl.newBuilder().encodedPath(path).build())
       .post(okhttp3.RequestBody.create(MediaTypes.APPLICATION_JSON_MEDIA_TYPE,
           packetJsonAdapter.toJson(packet))))
 
