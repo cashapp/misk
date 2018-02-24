@@ -41,7 +41,7 @@ internal class ExceptionMapperTest {
     lateinit var jettyService: JettyService
 
     private fun serverUrlBuilder(): HttpUrl.Builder {
-        return jettyService.serverUrl.newBuilder()
+        return jettyService.httpServerUrl.newBuilder()
     }
 
     @Test
