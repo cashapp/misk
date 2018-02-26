@@ -4,6 +4,7 @@ import misk.web.PathPattern
 import misk.web.Request
 import misk.web.RequestHeaders
 import misk.web.actions.WebAction
+import misk.web.actions.WebSocket
 import java.util.regex.Matcher
 import kotlin.reflect.KFunction
 import kotlin.reflect.KParameter
@@ -15,7 +16,11 @@ import kotlin.reflect.full.findAnnotation
  */
 object HeadersParameterExtractorFactory : ParameterExtractor.Factory {
   private val extractor = object : ParameterExtractor {
-    override fun extract(webAction: WebAction, request: Request, pathMatcher: Matcher): Any? {
+    override fun extract(
+      webAction: WebAction,
+      request: Request,
+      pathMatcher: Matcher
+    ): Any? {
       return request.headers
     }
   }

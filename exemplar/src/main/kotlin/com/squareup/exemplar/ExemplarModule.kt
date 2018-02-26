@@ -1,6 +1,7 @@
 package com.squareup.exemplar
 
 import com.google.inject.AbstractModule
+import com.squareup.exemplar.actions.ChatWebSocketAction
 import com.squareup.exemplar.actions.EchoFormAction
 import com.squareup.exemplar.actions.HelloWebAction
 import com.squareup.exemplar.actions.HelloWebPostAction
@@ -16,6 +17,7 @@ class ExemplarModule : AbstractModule() {
     install(WebActionModule.create<HelloWebAction>())
     install(WebActionModule.create<HelloWebPostAction>())
     install(WebActionModule.create<EchoFormAction>())
+    install(WebActionModule.create<ChatWebSocketAction>())
     install(WebActionModule.create<MetricsJsonAction>())
     install(WebActionModule.create<InternalErrorAction>())
     install(WebActionModule.create<ReadinessCheckAction>())

@@ -6,13 +6,18 @@ import misk.scope.ActionScope
 import misk.web.BoundAction
 import misk.web.Request
 import misk.web.actions.WebAction
+import misk.web.mediatype.MediaRange
 import okhttp3.Headers
 import okhttp3.HttpUrl
+import okhttp3.MediaType
+import okio.Buffer
 import okio.Okio
 import org.eclipse.jetty.http.HttpMethod
+import org.eclipse.jetty.websocket.servlet.WebSocketCreator
+import org.eclipse.jetty.websocket.servlet.WebSocketServlet
+import org.eclipse.jetty.websocket.servlet.WebSocketServletFactory
 import javax.inject.Inject
 import javax.inject.Singleton
-import javax.servlet.http.HttpServlet
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
@@ -22,7 +27,7 @@ private val logger = getLogger<WebActionsServlet>()
 internal class WebActionsServlet @Inject constructor(
   private val boundActions: MutableSet<BoundAction<out WebAction, *>>,
   private val scope: ActionScope
-) : HttpServlet() {
+) : WebSocketServlet() {
   override fun doGet(request: HttpServletRequest, response: HttpServletResponse) {
     handleCall(request, response)
   }
@@ -38,19 +43,50 @@ internal class WebActionsServlet @Inject constructor(
         keyOf<Request>() to asRequest)
 
     scope.enter(seedData).use {
-      val candidateActions = boundActions.mapNotNull { it.match(request, asRequest.url) }
+      val candidateActions = boundActions.mapNotNull {
+        it.match(
+            request.method,
+            request.contentType?.let { MediaType.parse(it) },
+            request.accepts(),
+            asRequest.url
+        )
+      }
       val bestAction = candidateActions.sorted().firstOrNull()
       bestAction?.handle(asRequest, response)
       logger.debug { "Request handled by WebActionServlet" }
     }
   }
+
+  override fun configure(factory: WebSocketServletFactory) {
+    factory.creator = WebSocketCreator { servletUpgradeRequest, _ ->
+      val realWebSocket = RealWebSocket()
+      val request = servletUpgradeRequest.httpServletRequest
+      val asRequest = Request(
+          request.urlString()!!,
+          HttpMethod.valueOf(request.method),
+          request.headers(),
+          Buffer(), // empty body
+          realWebSocket
+      )
+
+      val candidateActions = boundActions.mapNotNull {
+        it.match(
+            request.method,
+            null,
+            listOf(),
+            asRequest.url
+        )
+      }
+
+      val bestAction = candidateActions.sorted().firstOrNull() ?: return@WebSocketCreator null
+      val webSocketListener = bestAction.handleWebSocket(asRequest)
+      realWebSocket.listener = webSocketListener
+      realWebSocket.adapter
+    }
+  }
 }
 
-internal fun HttpServletRequest.asRequest(): Request {
-  val urlString = requestURL.toString() +
-      if (queryString != null) "?" + queryString
-      else ""
-
+internal fun HttpServletRequest.headers(): Headers {
   val headersBuilder = Headers.Builder()
   val headerNames = headerNames
   for (headerName in headerNames) {
@@ -59,11 +95,33 @@ internal fun HttpServletRequest.asRequest(): Request {
       headersBuilder.add(headerName, headerValue)
     }
   }
+  return headersBuilder.build()
+}
 
+private fun HttpServletRequest.urlString(): HttpUrl? {
+  return if (queryString == null)
+    HttpUrl.parse(requestURL.toString()) else
+    HttpUrl.parse(requestURL.toString() + "?" + queryString)
+}
+
+internal fun HttpServletRequest.asRequest(): Request {
   return Request(
-      HttpUrl.parse(urlString)!!,
+      urlString()!!,
       HttpMethod.valueOf(method),
-      headersBuilder.build(),
+      headers(),
       Okio.buffer(Okio.source(inputStream))
   )
+}
+
+private fun HttpServletRequest.accepts(): List<MediaRange> {
+  // TODO(mmihic): Don't blow up if one of the accept headers can't be parsed
+  val accepts = getHeaders("Accept")?.toList()?.flatMap {
+    MediaRange.parseRanges(it)
+  }
+
+  return if (accepts == null || accepts.isEmpty()) {
+    listOf(MediaRange.ALL_MEDIA)
+  } else {
+    accepts
+  }
 }
