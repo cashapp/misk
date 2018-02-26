@@ -26,6 +26,7 @@ dependencies {
   compile dep.assertj
   compile dep.loggingImpl
   compile dep.okHttpMockWebServer
+  compile dep.openTracingMock
 }
 
 apply from: rootProject.file('gradle/gradle-mvn-push.gradle')
