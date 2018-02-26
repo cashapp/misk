@@ -17,6 +17,7 @@ import misk.web.extractors.ParameterExtractor
 import misk.web.extractors.PathPatternParameterExtractorFactory
 import misk.web.extractors.QueryStringParameterExtractorFactory
 import misk.web.extractors.RequestBodyParameterExtractor
+import misk.web.extractors.WebSocketParameterExtractorFactory
 import misk.web.interceptors.BoxResponseInterceptorFactory
 import misk.web.interceptors.InternalErrorInterceptorFactory
 import misk.web.interceptors.MarshallerInterceptor
@@ -69,7 +70,7 @@ class WebModule : KAbstractModule() {
         .to<ExceptionHandlingInterceptor.Factory>()
 
     // Convert typed responses into a ResponseBody that can marshal the response according to
-    // the client's requested content-typ
+    // the client's requested content-type
     binder().addMultibinderBindingWithAnnotation<Interceptor.Factory, MiskDefault>()
         .to<MarshallerInterceptor.Factory>()
 
@@ -93,6 +94,8 @@ class WebModule : KAbstractModule() {
         .toInstance(FormValueParameterExtractorFactory)
     binder().addMultibinderBinding<ParameterExtractor.Factory>()
         .toInstance(HeadersParameterExtractorFactory)
+    binder().addMultibinderBinding<ParameterExtractor.Factory>()
+        .toInstance(WebSocketParameterExtractorFactory)
     binder().addMultibinderBinding<ParameterExtractor.Factory>()
         .to<RequestBodyParameterExtractor.Factory>()
   }

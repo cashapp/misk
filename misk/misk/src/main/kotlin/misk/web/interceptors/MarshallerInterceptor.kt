@@ -5,6 +5,7 @@ import misk.Chain
 import misk.Interceptor
 import misk.web.Response
 import misk.web.ResponseContentType
+import misk.web.actions.WebSocketListener
 import misk.web.marshal.GenericMarshallers
 import misk.web.marshal.Marshaller
 import misk.web.mediatype.MediaTypes
@@ -35,6 +36,9 @@ internal class MarshallerInterceptor constructor(private val marshaller: Marshal
     @JvmSuppressWildcards private val marshallerFactories: List<Marshaller.Factory>
   ) : Interceptor.Factory {
     override fun create(action: Action): Interceptor? {
+      if (action.returnType.classifier == WebSocketListener::class) {
+        return null
+      }
       return findMarshaller(action)?.let { MarshallerInterceptor(it) }
     }
 

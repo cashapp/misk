@@ -53,7 +53,7 @@ class WebActionModule<A : WebAction> private constructor(
 
       for (member in webActionClass.members) {
         for (annotation in member.annotations) {
-          if (annotation !is Get && annotation !is Post) continue
+          if (annotation !is Get && annotation !is Post && annotation !is ConnectWebSocket) continue
           if (member !is KFunction<*>) throw IllegalArgumentException(
               "expected $member to be a function")
           if (result != null) throw IllegalArgumentException(
@@ -69,6 +69,9 @@ class WebActionModule<A : WebAction> private constructor(
                 HttpMethod.GET, acceptedContentTypes, responseContentType)
             is Post -> WebActionModule(webActionClass, member, annotation.pathPattern,
                 HttpMethod.POST, acceptedContentTypes, responseContentType)
+            is ConnectWebSocket -> WebActionModule(webActionClass, member,
+                annotation.pathPattern, HttpMethod.GET, acceptedContentTypes,
+                responseContentType)
             else -> throw AssertionError()
           }
         }

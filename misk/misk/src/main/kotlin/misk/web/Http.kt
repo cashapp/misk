@@ -6,6 +6,9 @@ annotation class Get(val pathPattern: String)
 @Target(AnnotationTarget.FUNCTION)
 annotation class Post(val pathPattern: String)
 
+@Target(AnnotationTarget.FUNCTION)
+annotation class ConnectWebSocket(val pathPattern: String)
+
 @Target(AnnotationTarget.VALUE_PARAMETER)
 annotation class RequestHeaders
 
