@@ -1,12 +1,12 @@
 package misk.scope
 
-import org.assertj.core.api.Assertions.assertThat
 import com.google.inject.Guice
 import com.google.inject.Key
 import com.google.inject.name.Named
 import com.google.inject.name.Names
 import misk.inject.keyOf
 import misk.inject.uninject
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -14,7 +14,7 @@ import javax.inject.Inject
 
 class ActionScopedTest {
   @Inject @Named("foo")
-  private lateinit var foo : ActionScoped<String>
+  private lateinit var foo: ActionScoped<String>
 
   @Inject private lateinit var scope: ActionScope
 

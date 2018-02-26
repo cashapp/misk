@@ -54,7 +54,7 @@ internal class PlainTextRequestTest {
     @Post("/as-byte-string")
     @RequestContentType(MediaTypes.TEXT_PLAIN_UTF8)
     @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
-    fun call(@RequestBody messageBytes: ByteString): String  = "${messageBytes.utf8()} as-byte-string"
+    fun call(@RequestBody messageBytes: ByteString): String = "${messageBytes.utf8()} as-byte-string"
   }
 
   class TestModule : KAbstractModule() {

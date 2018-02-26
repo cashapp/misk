@@ -36,7 +36,8 @@ internal class AssertExtensionsTest {
   "my_value"     : "another value"
 }
 """)
-    }).hasMessage("""expected:<"{ "my_structure[]" : [ "this" , 45, "...> but was:<"{ "my_structure[2]" : [ "this" , 45, "...>""")
+    }).hasMessage(
+        """expected:<"{ "my_structure[]" : [ "this" , 45, "...> but was:<"{ "my_structure[2]" : [ "this" , 45, "...>""")
   }
 
   @Test
@@ -53,7 +54,8 @@ internal class AssertExtensionsTest {
   "my_value"     : "another value"
 }
 """)
-    }).hasMessage("""expected:<...structure" : [ "this[]" , 45, "zip" ], "my...> but was:<...structure" : [ "this[isit]" , 45, "zip" ], "my...>""")
+    }).hasMessage(
+        """expected:<...structure" : [ "this[]" , 45, "zip" ], "my...> but was:<...structure" : [ "this[isit]" , 45, "zip" ], "my...>""")
   }
 
   @Test
@@ -70,6 +72,7 @@ internal class AssertExtensionsTest {
   "my_value"     : "another value"
 }
 """)
-    }).hasMessage("""expected:<..._structure" : [ "thi[  ]s" , 45, "zip" ], "m...> but was:<..._structure" : [ "thi[]s" , 45, "zip" ], "m...>""")
+    }).hasMessage(
+        """expected:<..._structure" : [ "thi[  ]s" , 45, "zip" ], "m...> but was:<..._structure" : [ "thi[]s" , 45, "zip" ], "m...>""")
   }
 }

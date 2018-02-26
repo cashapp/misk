@@ -16,9 +16,9 @@ object PathPatternParameterExtractorFactory : ParameterExtractor.Factory {
    * and returns it as a [String]. If the parameter name doesn't occur in [pathPattern], returns null.
    */
   override fun create(
-      function: KFunction<*>,
-      parameter: KParameter,
-      pathPattern: PathPattern
+    function: KFunction<*>,
+    parameter: KParameter,
+    pathPattern: PathPattern
   ): ParameterExtractor? {
     val pathParamAnnotation = parameter.findAnnotation<PathParam>() ?: return null
     val parameterName =
@@ -35,9 +35,9 @@ object PathPatternParameterExtractorFactory : ParameterExtractor.Factory {
         )
     return object : ParameterExtractor {
       override fun extract(
-          webAction: WebAction,
-          request: Request,
-          pathMatcher: Matcher
+        webAction: WebAction,
+        request: Request,
+        pathMatcher: Matcher
       ): Any? {
         val pathParam = pathMatcher.group(patternIndex + 1)
         return converter(pathParam)

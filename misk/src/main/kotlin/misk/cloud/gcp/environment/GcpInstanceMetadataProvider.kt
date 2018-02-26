@@ -7,7 +7,7 @@ import javax.inject.Inject
 import javax.inject.Provider
 
 internal class GcpInstanceMetadataProvider @Inject internal constructor(
-    val serverUrl: String = GCP_INSTANCE_METADATA_SERVER
+  val serverUrl: String = GCP_INSTANCE_METADATA_SERVER
 ) : Provider<InstanceMetadata> {
 
   companion object {

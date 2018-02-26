@@ -15,10 +15,10 @@ class HelloWebAction : WebAction {
   @Get("/hello/{name}")
   @ResponseContentType(MediaTypes.APPLICATION_JSON)
   fun hello(
-      @PathParam name: String,
-      @RequestHeaders headers: Headers,
-      @QueryParam nickName: String?,
-      @QueryParam greetings: List<String>?
+    @PathParam name: String,
+    @RequestHeaders headers: Headers,
+    @QueryParam nickName: String?,
+    @QueryParam greetings: List<String>?
   ): HelloResponse {
     return HelloResponse(
         greetings?.joinToString(separator = " ") ?: "YO",

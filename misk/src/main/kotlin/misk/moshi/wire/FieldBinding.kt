@@ -12,10 +12,10 @@ import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Method
 
 internal class FieldBinding(
-    wireField: WireField,
-    builderType: Class<Message.Builder<*, *>>,
-    private val messageField: Field,
-    moshi: Moshi
+  wireField: WireField,
+  builderType: Class<Message.Builder<*, *>>,
+  private val messageField: Field,
+  moshi: Moshi
 ) {
   val name: String = messageField.name
 
@@ -86,8 +86,8 @@ internal class FieldBinding(
 
   companion object {
     private fun getBuilderField(
-        builderType: Class<Message.Builder<*, *>>,
-        name: String
+      builderType: Class<Message.Builder<*, *>>,
+      name: String
     ): Field {
       try {
         return builderType.getField(name)
@@ -97,9 +97,9 @@ internal class FieldBinding(
     }
 
     private fun getBuilderMethod(
-        builderType: Class<Message.Builder<*, *>>,
-        name: String,
-        type: Class<*>
+      builderType: Class<Message.Builder<*, *>>,
+      name: String,
+      type: Class<*>
     ): Method {
       try {
         return builderType.getMethod(name, type)

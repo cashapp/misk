@@ -17,12 +17,12 @@ data class JsonGauge<T>(val value: T) {
 }
 
 data class JsonTimer(
-    val count: Long,
-    val oneMinuteRate: Double,
-    val fiveMinuteRate: Double,
-    val fifteenMinuteRate: Double,
-    val meanRate: Double,
-    val snapshot: JsonHistogramSnapshot
+  val count: Long,
+  val oneMinuteRate: Double,
+  val fiveMinuteRate: Double,
+  val fifteenMinuteRate: Double,
+  val meanRate: Double,
+  val snapshot: JsonHistogramSnapshot
 ) {
   constructor(timer: Timer) : this(
       timer.count,
@@ -35,16 +35,16 @@ data class JsonTimer(
 }
 
 data class JsonHistogramSnapshot(
-    val min: Double,
-    val max: Double,
-    val mean: Double,
-    val stdDev: Double,
-    val p50: Double,
-    val p75: Double,
-    val p95: Double,
-    val p98: Double,
-    val p99: Double,
-    val p999: Double
+  val min: Double,
+  val max: Double,
+  val mean: Double,
+  val stdDev: Double,
+  val p50: Double,
+  val p75: Double,
+  val p95: Double,
+  val p98: Double,
+  val p99: Double,
+  val p999: Double
 ) {
   constructor(snapshot: Snapshot, conversionFactor: Double = 1.0) : this(
       min = snapshot.min.toDouble() * conversionFactor,
@@ -64,10 +64,10 @@ data class JsonHistogram(val count: Long, val snapshot: JsonHistogramSnapshot) {
 }
 
 data class JsonMetrics(
-    val counters: Map<String, JsonCounter>,
-    val timers: Map<String, JsonTimer>,
-    val histograms: Map<String, JsonHistogram>,
-    val gauges: Map<String, JsonGauge<Any>>
+  val counters: Map<String, JsonCounter>,
+  val timers: Map<String, JsonTimer>,
+  val histograms: Map<String, JsonHistogram>,
+  val gauges: Map<String, JsonGauge<Any>>
 ) {
   constructor(metrics: Metrics) : this(
       metrics.counters.map { it.key to JsonCounter(it.value) }.toMap(),

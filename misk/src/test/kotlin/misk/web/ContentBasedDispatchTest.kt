@@ -115,8 +115,10 @@ internal class ContentBasedDispatchTest {
     fun hello(@misk.web.RequestBody message: String) = "*->* $message"
   }
 
-  private fun post(contentType: MediaType, content: String,
-      acceptedMediaType: MediaType? = null): okhttp3.ResponseBody {
+  private fun post(
+    contentType: MediaType, content: String,
+    acceptedMediaType: MediaType? = null
+  ): okhttp3.ResponseBody {
     val httpClient = OkHttpClient()
     val request = Request.Builder()
         .post(RequestBody.create(contentType, content))

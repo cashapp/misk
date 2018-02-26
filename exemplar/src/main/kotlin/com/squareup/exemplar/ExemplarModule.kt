@@ -6,10 +6,10 @@ import com.squareup.exemplar.actions.HelloWebAction
 import com.squareup.exemplar.actions.HelloWebPostAction
 import misk.metrics.web.MetricsJsonAction
 import misk.web.WebActionModule
-import misk.web.actions.ReadinessCheckAction
 import misk.web.actions.InternalErrorAction
 import misk.web.actions.LivenessCheckAction
 import misk.web.actions.NotFoundAction
+import misk.web.actions.ReadinessCheckAction
 
 class ExemplarModule : AbstractModule() {
   override fun configure() {

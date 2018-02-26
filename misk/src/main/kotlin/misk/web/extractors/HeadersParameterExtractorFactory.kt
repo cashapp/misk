@@ -21,9 +21,9 @@ object HeadersParameterExtractorFactory : ParameterExtractor.Factory {
   }
 
   override fun create(
-      function: KFunction<*>,
-      parameter: KParameter,
-      pathPattern: PathPattern
+    function: KFunction<*>,
+    parameter: KParameter,
+    pathPattern: PathPattern
   ): ParameterExtractor? {
     if (parameter.findAnnotation<RequestHeaders>() == null) return null
 

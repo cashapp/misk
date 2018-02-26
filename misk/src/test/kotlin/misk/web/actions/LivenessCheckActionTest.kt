@@ -1,12 +1,12 @@
 package misk.web.actions
 
-import org.assertj.core.api.Assertions.assertThat
 import com.google.common.util.concurrent.ServiceManager
 import com.google.inject.util.Modules
 import misk.MiskModule
 import misk.services.FakeServiceModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import javax.inject.Inject
 

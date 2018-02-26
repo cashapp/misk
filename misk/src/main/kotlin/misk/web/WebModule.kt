@@ -33,7 +33,7 @@ import javax.servlet.http.HttpServletRequest
 class WebModule : KAbstractModule() {
   override fun configure() {
     install(JettyModule())
-    install(object: ActionScopedProviderModule() {
+    install(object : ActionScopedProviderModule() {
       override fun configureProviders() {
         bindSeedData(Request::class)
         bindSeedData(HttpServletRequest::class)
@@ -52,23 +52,29 @@ class WebModule : KAbstractModule() {
     // installed, and the order of these interceptors is critical.
 
     // Handle all unexpected errors that occur during dispatch
-    binder().addMultibinderBindingWithAnnotation<Interceptor.Factory, MiskDefault>().to<InternalErrorInterceptorFactory>()
+    binder().addMultibinderBindingWithAnnotation<Interceptor.Factory, MiskDefault>()
+        .to<InternalErrorInterceptorFactory>()
 
     // Optionally log request and response details
-    binder().addMultibinderBindingWithAnnotation<Interceptor.Factory, MiskDefault>().to<RequestLoggingInterceptor.Factory>()
+    binder().addMultibinderBindingWithAnnotation<Interceptor.Factory, MiskDefault>()
+        .to<RequestLoggingInterceptor.Factory>()
 
     // Collect metrics on the status of results and response times of requests
-    binder().addMultibinderBindingWithAnnotation<Interceptor.Factory, MiskDefault>().to<MetricsInterceptor.Factory>()
+    binder().addMultibinderBindingWithAnnotation<Interceptor.Factory, MiskDefault>()
+        .to<MetricsInterceptor.Factory>()
 
     // Convert and log application level exceptions into their appropriate response format
-    binder().addMultibinderBindingWithAnnotation<Interceptor.Factory, MiskDefault>().to<ExceptionHandlingInterceptor.Factory>()
+    binder().addMultibinderBindingWithAnnotation<Interceptor.Factory, MiskDefault>()
+        .to<ExceptionHandlingInterceptor.Factory>()
 
     // Convert typed responses into a ResponseBody that can marshal the response according to
     // the client's requested content-typ
-    binder().addMultibinderBindingWithAnnotation<Interceptor.Factory, MiskDefault>().to<MarshallerInterceptor.Factory>()
+    binder().addMultibinderBindingWithAnnotation<Interceptor.Factory, MiskDefault>()
+        .to<MarshallerInterceptor.Factory>()
 
     // Wrap "raw" responses with a Response object
-    binder().addMultibinderBindingWithAnnotation<Interceptor.Factory, MiskDefault>().to<BoxResponseInterceptorFactory>()
+    binder().addMultibinderBindingWithAnnotation<Interceptor.Factory, MiskDefault>()
+        .to<BoxResponseInterceptorFactory>()
 
     // Register build-in exception mappers
     install(ExceptionMapperModule.create<ActionException, ActionExceptionMapper>())

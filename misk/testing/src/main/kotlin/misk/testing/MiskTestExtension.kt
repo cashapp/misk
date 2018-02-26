@@ -7,8 +7,6 @@ import com.google.inject.Module
 import com.google.inject.util.Modules
 import misk.inject.getInstance
 import misk.inject.uninject
-import misk.testing.store
-import misk.testing.retrieve
 import org.junit.jupiter.api.extension.AfterEachCallback
 import org.junit.jupiter.api.extension.BeforeEachCallback
 import org.junit.jupiter.api.extension.ExtensionContext
@@ -70,7 +68,7 @@ internal class MiskTestExtension : BeforeEachCallback, AfterEachCallback {
 
     @Inject
     @JvmSuppressWildcards
-    lateinit var afterEachCallbacks : Set<AfterEachCallback>
+    lateinit var afterEachCallbacks: Set<AfterEachCallback>
 
     override fun afterEach(context: ExtensionContext) {
       afterEachCallbacks.forEach { it.afterEach(context) }

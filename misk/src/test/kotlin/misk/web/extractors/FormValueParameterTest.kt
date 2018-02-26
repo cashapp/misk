@@ -110,10 +110,10 @@ internal class FormValueParameterTest {
     fun call(@FormValue basicForm: BasicForm) = "$basicForm"
 
     data class BasicForm(
-        val str: String,
-        val other: String,
-        val int: Int,
-        val testEnum: TestEnum
+      val str: String,
+      val other: String,
+      val int: Int,
+      val testEnum: TestEnum
     )
   }
 
@@ -122,8 +122,8 @@ internal class FormValueParameterTest {
     fun call(@FormValue optionalForm: OptionalForm) = "$optionalForm"
 
     data class OptionalForm(
-        val str: String?,
-        val int: Int?
+      val str: String?,
+      val int: Int?
     )
   }
 
@@ -132,9 +132,9 @@ internal class FormValueParameterTest {
     fun call(@FormValue defaultForm: DefaultForm) = "$defaultForm"
 
     data class DefaultForm(
-        val str: String = "square",
-        val int: Int = 23,
-        val testEnum: TestEnum = TestEnum.TWO
+      val str: String = "square",
+      val int: Int = 23,
+      val testEnum: TestEnum = TestEnum.TWO
     )
   }
 
@@ -143,8 +143,8 @@ internal class FormValueParameterTest {
     fun call(@FormValue listForm: ListForm) = "$listForm"
 
     data class ListForm(
-        val strs: List<String>,
-        val ints: List<Int>
+      val strs: List<String>,
+      val ints: List<Int>
     )
   }
 
@@ -168,8 +168,8 @@ internal class FormValueParameterTest {
   }
 
   private fun post(
-      path: String,
-      body: List<Pair<String, String>>
+    path: String,
+    body: List<Pair<String, String>>
   ): String {
     val url = jettyService.httpServerUrl.newBuilder()
         .encodedPath(path)

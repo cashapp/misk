@@ -10,8 +10,8 @@ import javax.inject.Inject
 /** Provides an [OkHttpClient] and [ProtoMessageHttpClient] for a peer service */
 // TODO(mmihic): Replace with something that binds a typed client via retrofit
 class HttpClientModule constructor(
-    private val name: String,
-    private val annotation: Annotation? = null
+  private val name: String,
+  private val annotation: Annotation? = null
 ) : KAbstractModule() {
   override fun configure() {
     val httpClientKey =
@@ -33,8 +33,8 @@ class HttpClientModule constructor(
   }
 
   private class ProtoMessageHttpClientProvider(
-      private val name: String,
-      private val httpClientProvider: Provider<OkHttpClient>
+    private val name: String,
+    private val httpClientProvider: Provider<OkHttpClient>
   ) : Provider<ProtoMessageHttpClient> {
     @Inject
     lateinit var moshi: Moshi

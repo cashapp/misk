@@ -24,9 +24,9 @@ object FormValueParameterExtractorFactory : ParameterExtractor.Factory {
    * parameter doesn't occur in the request, or can't be parsed into the correct type.
    */
   override fun create(
-      function: KFunction<*>,
-      parameter: KParameter,
-      pathPattern: PathPattern
+    function: KFunction<*>,
+    parameter: KParameter,
+    pathPattern: PathPattern
   ): ParameterExtractor? {
     parameter.findAnnotation<FormValue>() ?: return null
     if (parameter.type.classifier !is KClass<*>) return null
@@ -50,9 +50,9 @@ object FormValueParameterExtractorFactory : ParameterExtractor.Factory {
 
     return object : ParameterExtractor {
       override fun extract(
-          webAction: WebAction,
-          request: Request,
-          pathMatcher: Matcher
+        webAction: WebAction,
+        request: Request,
+        pathMatcher: Matcher
       ): Any? {
         val formValueMapping = parseBody(request.body)
         val parameterMap = LinkedHashMap<KParameter, Any?>()
@@ -71,8 +71,8 @@ object FormValueParameterExtractorFactory : ParameterExtractor.Factory {
   }
 
   private fun getParameterValue(
-      p: ConstructorParameter,
-      value: Collection<String>?
+    p: ConstructorParameter,
+    value: Collection<String>?
   ): Any? {
     if (p.isList) {
       return value?.map { p.converter?.invoke(it) }?.toList()
@@ -107,11 +107,11 @@ object FormValueParameterExtractorFactory : ParameterExtractor.Factory {
   private fun String.urlDecode(): String = URLDecoder.decode(this, "utf-8")
 
   private data class ConstructorParameter(
-      val kParameter: KParameter,
-      val name: String?,
-      val optional: Boolean,
-      val nullable: Boolean,
-      val isList: Boolean,
-      val converter: StringConverter?
+    val kParameter: KParameter,
+    val name: String?,
+    val optional: Boolean,
+    val nullable: Boolean,
+    val isList: Boolean,
+    val converter: StringConverter?
   )
 }

@@ -19,9 +19,9 @@ class InMemoryFlagStore : FlagStore {
 
   @Suppress("UNCHECKED_CAST")
   override fun <T : Any> registerFlag(
-      name: String,
-      description: String,
-      type: KClass<T>
+    name: String,
+    description: String,
+    type: KClass<T>
   ): InMemoryFlag<T> {
     return when (type) {
       Int::class -> registerFlag(InMemoryIntFlag(name, description)) as InMemoryFlag<T>

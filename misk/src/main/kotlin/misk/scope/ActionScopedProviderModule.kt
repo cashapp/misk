@@ -45,8 +45,9 @@ abstract class ActionScopedProviderModule : KAbstractModule() {
 
   /** Binds an unqualified [ActionScoped] along with its provider */
   fun <T : Any> bindProvider(
-      kclass: KClass<T>,
-      providerClass: KClass<out ActionScopedProvider<T>>) {
+    kclass: KClass<T>,
+    providerClass: KClass<out ActionScopedProvider<T>>
+  ) {
     bindProvider(
         Key.get(kclass.java),
         Key.get(actionScopedType(kclass)),
@@ -55,9 +56,10 @@ abstract class ActionScopedProviderModule : KAbstractModule() {
 
   /** Binds an annotation qualified [ActionScoped] along with its provider */
   fun <T : Any> bindProvider(
-      kclass: KClass<T>,
-      a: Annotation,
-      providerClass: KClass<out ActionScopedProvider<T>>) {
+    kclass: KClass<T>,
+    a: Annotation,
+    providerClass: KClass<out ActionScopedProvider<T>>
+  ) {
     bindProvider(
         Key.get(kclass.java, a),
         Key.get(actionScopedType(kclass), a),
@@ -66,9 +68,10 @@ abstract class ActionScopedProviderModule : KAbstractModule() {
 
   /** Binds an annotation qualified [ActionScoped] along with its provider */
   fun <T : Any> bindProvider(
-      kclass: KClass<T>,
-      a: KClass<Annotation>,
-      providerClass: KClass<out ActionScopedProvider<T>>) {
+    kclass: KClass<T>,
+    a: KClass<Annotation>,
+    providerClass: KClass<out ActionScopedProvider<T>>
+  ) {
     bindProvider(
         Key.get(kclass.java, a.java),
         Key.get(actionScopedType(kclass), a.java),
@@ -76,9 +79,9 @@ abstract class ActionScopedProviderModule : KAbstractModule() {
   }
 
   private fun <T : Any> bindProvider(
-      key: Key<T>,
-      actionScopedKey: Key<ActionScoped<T>>,
-      providerProvider: Provider<out ActionScopedProvider<T>>
+    key: Key<T>,
+    actionScopedKey: Key<ActionScoped<T>>,
+    providerProvider: Provider<out ActionScopedProvider<T>>
   ) {
     MapBinder.newMapBinder(binder(), KEY_TYPE, ACTION_SCOPED_PROVIDER_TYPE)
         .addBinding(key)

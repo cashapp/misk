@@ -22,7 +22,7 @@ inline fun <reified T : Any> LinkedBindingBuilder<in T>.to() = to(T::class.java)
 
 @Suppress("UNCHECKED_CAST")
 inline fun <reified T : Any> Binder.newMultibinder(
-    annotation: Class<out Annotation>? = null
+  annotation: Class<out Annotation>? = null
 ): Multibinder<T> {
   val typeLiteral =
       parameterizedType<List<*>>(subtypeOf<T>()).typeLiteral() as TypeLiteral<List<T>>
@@ -40,7 +40,7 @@ inline fun <reified T : Any, reified A : Annotation> Binder.addMultibinderBindin
 
 @Suppress("UNCHECKED_CAST")
 inline fun <reified T : Any> Binder.addMultibinderBinding(
-    annotation: Class<out Annotation>? = null
+  annotation: Class<out Annotation>? = null
 ): LinkedBindingBuilder<T> = newMultibinder<T>(annotation).addBinding()
 
 fun ScopedBindingBuilder.asSingleton() {

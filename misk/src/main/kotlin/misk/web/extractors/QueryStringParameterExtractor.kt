@@ -16,9 +16,9 @@ object QueryStringParameterExtractorFactory : ParameterExtractor.Factory {
    * parameter doesn't occur in the request, or can't be parsed into the correct type.
    */
   override fun create(
-      function: KFunction<*>,
-      parameter: KParameter,
-      pathPattern: PathPattern
+    function: KFunction<*>,
+    parameter: KParameter,
+    pathPattern: PathPattern
   ): ParameterExtractor? {
     val queryParamAnnotation = parameter.findAnnotation<QueryParam>() ?: return null
     val parameterName =
@@ -28,9 +28,9 @@ object QueryStringParameterExtractorFactory : ParameterExtractor.Factory {
 
     return object : ParameterExtractor {
       override fun extract(
-          webAction: WebAction,
-          request: Request,
-          pathMatcher: Matcher
+        webAction: WebAction,
+        request: Request,
+        pathMatcher: Matcher
       ): Any? {
         val parameterValues: List<String> = request.url.queryParameterValues(parameterName)
         return queryParamProcessor.extractFunctionArgumentValue(parameterValues)

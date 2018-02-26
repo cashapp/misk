@@ -1,6 +1,5 @@
 package misk.scope.executor
 
-import org.assertj.core.api.Assertions.assertThat
 import com.google.inject.Guice
 import com.google.inject.Key
 import com.google.inject.Provides
@@ -11,6 +10,7 @@ import misk.inject.keyOf
 import misk.scope.ActionScope
 import misk.scope.ActionScoped
 import misk.scope.TestActionScopedProviderModule
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.util.concurrent.Callable
@@ -41,7 +41,7 @@ internal class ActionScopedExecutorServiceTest {
         keyOf<String>(Names.named("from-seed")) to "my seed data")
 
     val future = scope.enter(seedData).use {
-      executor.submit( Callable { tester.fooValue() })
+      executor.submit(Callable { tester.fooValue() })
     }
 
     assertThat(future.get()).isEqualTo("my seed data and bar and foo!")

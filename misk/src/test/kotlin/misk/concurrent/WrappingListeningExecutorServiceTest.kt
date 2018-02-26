@@ -1,8 +1,8 @@
 package misk.concurrent
 
-import org.assertj.core.api.Assertions.assertThat
 import com.google.common.util.concurrent.ListeningExecutorService
 import com.google.common.util.concurrent.MoreExecutors
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.concurrent.Callable
@@ -42,7 +42,7 @@ internal class WrappingListeningExecutorServiceTest {
   @Test
   fun submitRunnable() {
     val executed = AtomicBoolean()
-    executor.submit({ executed.set(true)}).get()
+    executor.submit({ executed.set(true) }).get()
     assertThat(executed.get()).isTrue()
     assertThat(wrapCounter.get()).isEqualTo(1)
   }
@@ -71,7 +71,7 @@ internal class WrappingListeningExecutorServiceTest {
   @Test
   fun execute() {
     val latch = CountDownLatch(1)
-    executor.execute( { latch.countDown() })
+    executor.execute({ latch.countDown() })
     latch.await()
     assertThat(wrapCounter.get()).isEqualTo(1)
   }

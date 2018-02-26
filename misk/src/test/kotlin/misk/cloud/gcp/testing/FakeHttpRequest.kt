@@ -6,9 +6,9 @@ import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 
 class FakeHttpRequest constructor(
-    val method: String,
-    val url: String,
-    private val router: (FakeHttpRequest) -> FakeHttpResponse
+  val method: String,
+  val url: String,
+  private val router: (FakeHttpRequest) -> FakeHttpResponse
 ) : LowLevelHttpRequest() {
   private val headers = LinkedHashMap<String, String>()
   private var contentBytes: ByteArray? = null

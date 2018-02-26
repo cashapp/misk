@@ -6,7 +6,11 @@ import misk.inject.KAbstractModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.testing.TestWebModule
-import misk.web.*
+import misk.web.Get
+import misk.web.QueryParam
+import misk.web.ResponseContentType
+import misk.web.WebActionModule
+import misk.web.WebModule
 import misk.web.actions.WebAction
 import misk.web.jetty.JettyService
 import misk.web.mediatype.MediaTypes
@@ -63,10 +67,10 @@ internal class QueryStringRequestTest {
   class BasicParamsAction : WebAction {
     @Get("/basic-params")
     fun call(
-        @QueryParam str: String,
-        @QueryParam("something") other: String,
-        @QueryParam int: Int,
-        @QueryParam testEnum: TestEnum
+      @QueryParam str: String,
+      @QueryParam("something") other: String,
+      @QueryParam int: Int,
+      @QueryParam testEnum: TestEnum
     ) = "$str $other $int $testEnum basic-params"
   }
 
@@ -80,15 +84,16 @@ internal class QueryStringRequestTest {
     fun call(
       @QueryParam str: String = "square",
       @QueryParam int: Int = 23,
-      @QueryParam testEnum: TestEnum = TestEnum.TWO) = "$str $int $testEnum default-params"
+      @QueryParam testEnum: TestEnum = TestEnum.TWO
+    ) = "$str $int $testEnum default-params"
   }
 
   class ListParamsAction : WebAction {
     @Get("/list-params")
     @ResponseContentType(MediaTypes.APPLICATION_JSON)
-    fun call(@QueryParam strs: List<String>, @QueryParam ints: List<Int>)
-        = "${strs.joinToString(separator = " ")} " +
-            "${ints.joinToString(separator = " ")} list-params"
+    fun call(@QueryParam strs: List<String>, @QueryParam ints: List<Int>) = "${strs.joinToString(
+        separator = " ")} " +
+        "${ints.joinToString(separator = " ")} list-params"
   }
 
   class TestModule : KAbstractModule() {
