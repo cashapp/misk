@@ -1,5 +1,4 @@
 tracing:
-  tracer: jaeger
   backends:
     jaeger:
       reporter:

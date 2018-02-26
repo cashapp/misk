@@ -1,3 +1,2 @@
 tracing:
-  tracer: missing_tracer
   backends: {}
