@@ -28,19 +28,15 @@ class TracingConfigTest {
   )
 
   @Inject
-  private lateinit var tracingTestConfig: TestTracingConfig
-
-  @Inject
   private lateinit var tracer: Tracer
 
   @Test
   fun tracerProperlyInjected() {
-    assertThat(config.tracing.tracer).isEqualTo(tracingTestConfig.tracing.tracer)
     assertThat(tracer).isInstanceOf(com.uber.jaeger.Tracer::class.java)
   }
 
   @Test
-  fun failsIfTracerNotFound() {
+  fun failsIfInstalledWithNoBackendConfigured() {
     val badConfig = MiskConfig.load<TestTracingConfig>(TestTracingConfig::class.java,
         "test_tracing_app-missing", defaultEnv)
     val module = Modules.combine(
@@ -52,6 +48,6 @@ class TracingConfigTest {
       Guice.createInjector(module).getInstance<Tracer>()
     })
 
-    assertThat(exception.localizedMessage).contains("No backend for 'missing_tracer' tracer")
+    assertThat(exception.localizedMessage).contains("No backends configured for tracing.")
   }
 }
