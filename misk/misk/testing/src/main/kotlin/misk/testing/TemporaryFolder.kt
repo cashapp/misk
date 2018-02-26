@@ -3,17 +3,11 @@ package misk.testing
 import com.google.inject.Provides
 import misk.inject.KAbstractModule
 import org.junit.jupiter.api.extension.AfterEachCallback
-import org.junit.jupiter.api.extension.BeforeEachCallback
-import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.api.extension.ExtensionContext
 import java.nio.file.Files
 import java.nio.file.Path
 import javax.inject.Inject
 import javax.inject.Singleton
-import kotlin.reflect.KMutableProperty
-import kotlin.reflect.full.createType
-import kotlin.reflect.full.isSubtypeOf
-import kotlin.reflect.full.memberProperties
 
 /** A temporary folder for use by a given test */
 class TemporaryFolder(val root: Path) {
@@ -42,7 +36,7 @@ class TemporaryFolderModule : KAbstractModule() {
 
   @Provides
   @Singleton
-  fun provideTemporaryFolder() : TemporaryFolder {
+  fun provideTemporaryFolder(): TemporaryFolder {
     val tempDir = Files.createTempDirectory("test-")
     tempDir.toFile().deleteOnExit()
 

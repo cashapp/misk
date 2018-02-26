@@ -6,10 +6,10 @@ import com.google.inject.name.Names
 import com.google.inject.util.Modules
 import helpers.protos.Dinosaur
 import misk.MiskModule
-import misk.client.HttpClientsConfig
 import misk.client.HttpClientEndpointConfig
 import misk.client.HttpClientModule
 import misk.client.HttpClientSSLConfig
+import misk.client.HttpClientsConfig
 import misk.client.ProtoMessageHttpClient
 import misk.inject.KAbstractModule
 import misk.inject.getInstance

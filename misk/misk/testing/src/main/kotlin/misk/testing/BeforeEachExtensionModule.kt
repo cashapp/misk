@@ -8,15 +8,15 @@ import kotlin.reflect.KClass
 
 /** Module registering a callback that fires before each test */
 class BeforeEachExtensionModule<T : BeforeEachCallback> constructor(
-    private val kclass: KClass<T>
+  private val kclass: KClass<T>
 ) : KAbstractModule() {
 
   override fun configure() {
     binder().addMultibinderBinding<BeforeEachCallback>().to(kclass.java)
   }
 
-  companion object{
-    inline fun <reified T: BeforeEachCallback> create() : Module =
+  companion object {
+    inline fun <reified T : BeforeEachCallback> create(): Module =
         BeforeEachExtensionModule(T::class)
   }
 }

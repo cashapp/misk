@@ -151,11 +151,11 @@ internal abstract class CustomStorageRpcTestCases<T : StorageRpc> {
 
     val upload = "This is my text".repeat(1024 * 256)
     blob.writer().use {
-          // Use the minimum chunk size, which is smaller than the buffer size, to
-          // ensure that we are sending multiple chunks
-          it.setChunkSize(256 * 1024)
-          it.write(ByteBuffer.wrap(upload.toByteArray()))
-        }
+      // Use the minimum chunk size, which is smaller than the buffer size, to
+      // ensure that we are sending multiple chunks
+      it.setChunkSize(256 * 1024)
+      it.write(ByteBuffer.wrap(upload.toByteArray()))
+    }
 
     val download = blob.getContent()
     assertThat(String(download)).isEqualTo(upload)
@@ -282,10 +282,10 @@ internal abstract class CustomStorageRpcTestCases<T : StorageRpc> {
 
     // Read in smaller chunks
     blob.reader().use {
-          // Use the minimum chunk size, which is smaller than the buffer size, to
-          // ensure that we are retrieving multiple chunks
-          it.forEachChunk(256 * 1024) { buffer, _ -> download.put(buffer) }
-        }
+      // Use the minimum chunk size, which is smaller than the buffer size, to
+      // ensure that we are retrieving multiple chunks
+      it.forEachChunk(256 * 1024) { buffer, _ -> download.put(buffer) }
+    }
 
     download.position(0)
     assertThat(String(download.array())).isEqualTo(upload)

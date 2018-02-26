@@ -9,11 +9,11 @@ import java.util.regex.Pattern
  * characters.
  */
 data class PathPattern(
-    val pattern: Pattern,
-    val variableNames: List<String>,
-    val numRegexVariables: Int,
-    val numSegments: Int,
-    val matchesWildcardPath: Boolean
+  val pattern: Pattern,
+  val variableNames: List<String>,
+  val numRegexVariables: Int,
+  val numSegments: Int,
+  val matchesWildcardPath: Boolean
 ) : Comparable<PathPattern> {
 
   /** Compares path patterns by specificity, with the more specific pattern ordered first */
@@ -36,6 +36,7 @@ data class PathPattern(
     // more specific match
     return other.numRegexVariables - numRegexVariables
   }
+
   companion object {
     fun parse(pattern: String): PathPattern {
       val variableNames = ArrayList<String>()
@@ -51,7 +52,7 @@ data class PathPattern(
         when (pattern[pos]) {
           '{' -> {
             // Variables must start on path boundaries
-            require(pos == 0 || pattern[pos-1] == '/') {
+            require(pos == 0 || pattern[pos - 1] == '/') {
               "invalid path pattern $pattern; variables must start on path boundaries"
             }
 

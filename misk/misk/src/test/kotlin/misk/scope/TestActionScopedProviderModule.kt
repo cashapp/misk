@@ -12,13 +12,13 @@ class TestActionScopedProviderModule : ActionScopedProviderModule() {
   }
 
   class BarProvider @Inject internal constructor(
-      @Named("from-seed") val seedData: ActionScoped<String>
+    @Named("from-seed") val seedData: ActionScoped<String>
   ) : ActionScopedProvider<String> {
     override fun get(): String = "${seedData.get()} and bar"
   }
 
   class FooProvider @Inject internal constructor(
-      @Named("bar") val bar: ActionScoped<String>
+    @Named("bar") val bar: ActionScoped<String>
   ) : ActionScopedProvider<String> {
     override fun get(): String = "${bar.get()} and foo!"
   }

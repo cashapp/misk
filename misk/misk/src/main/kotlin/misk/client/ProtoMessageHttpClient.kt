@@ -13,9 +13,9 @@ import okhttp3.RequestBody
  * classes.
  */
 class ProtoMessageHttpClient constructor(
-    baseUrl: String,
-    private val moshi: Moshi,
-    private val okHttp: OkHttpClient
+  baseUrl: String,
+  private val moshi: Moshi,
+  private val okHttp: OkHttpClient
 ) {
   private val httpUrl = HttpUrl.parse(baseUrl) ?: throw IllegalArgumentException(
       "could not parse $baseUrl")

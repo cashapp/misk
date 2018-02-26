@@ -20,8 +20,8 @@ private val logger = getLogger<WebActionsServlet>()
 
 @Singleton
 internal class WebActionsServlet @Inject constructor(
-    private val boundActions: MutableSet<BoundAction<out WebAction, *>>,
-    private val scope: ActionScope
+  private val boundActions: MutableSet<BoundAction<out WebAction, *>>,
+  private val scope: ActionScope
 ) : HttpServlet() {
   override fun doGet(request: HttpServletRequest, response: HttpServletResponse) {
     handleCall(request, response)
@@ -41,7 +41,7 @@ internal class WebActionsServlet @Inject constructor(
       val candidateActions = boundActions.mapNotNull { it.match(request, asRequest.url) }
       val bestAction = candidateActions.sorted().firstOrNull()
       bestAction?.handle(asRequest, response)
-      logger.debug {"Request handled by WebActionServlet" }
+      logger.debug { "Request handled by WebActionServlet" }
     }
   }
 }

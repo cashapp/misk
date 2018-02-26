@@ -63,9 +63,9 @@ internal class PathParamDispatchTest {
     @Get("/objects/{objectType}/{name}/{version}")
     @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
     fun getObjectDetails(
-        @PathParam objectType: ObjectType,
-        @PathParam name: String,
-        @PathParam version: Long
+      @PathParam objectType: ObjectType,
+      @PathParam name: String,
+      @PathParam version: Long
     ): String = "(type=$objectType,name=$name,version=$version)"
   }
 
@@ -75,7 +75,7 @@ internal class PathParamDispatchTest {
     fun router(@PathParam("router") routeName: String) = "routing to $routeName"
   }
 
-  fun get(path: String) : okhttp3.Response {
+  fun get(path: String): okhttp3.Response {
     val httpClient = OkHttpClient()
     val request = Request.Builder()
         .get()

@@ -44,7 +44,7 @@ internal class ActionScopedWebDispatchTest {
 
   @Singleton
   class FakeIdentityActionScopedProvider @Inject internal constructor(
-      private val request: ActionScoped<Request>
+    private val request: ActionScoped<Request>
   ) : ActionScopedProvider<Principal> {
     override fun get(): Principal = Principal {
       request.get().headers["Security-Id"] ?: ""
@@ -53,7 +53,7 @@ internal class ActionScopedWebDispatchTest {
 
   @Singleton
   class Hello @Inject internal constructor(
-      private val principal: @JvmSuppressWildcards ActionScoped<Principal>
+    private val principal: @JvmSuppressWildcards ActionScoped<Principal>
   ) : WebAction {
     @Get("/hello")
     @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)

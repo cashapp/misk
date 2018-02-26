@@ -13,22 +13,22 @@ import javax.net.ssl.X509ExtendedKeyManager
  * for periodically reloading from disk if needed
  */
 internal class KeyStoreX509KeyManager(
-    private val passphrase: CharArray,
-    private val lazyKeyStore: () -> KeyStore
+  private val passphrase: CharArray,
+  private val lazyKeyStore: () -> KeyStore
 ) : X509ExtendedKeyManager() {
 
   constructor(passphrase: CharArray, keyStore: KeyStore) : this(passphrase, { keyStore })
 
   override fun chooseServerAlias(
-      keyType: String,
-      issuers: Array<out Principal>,
-      socket: Socket
+    keyType: String,
+    issuers: Array<out Principal>,
+    socket: Socket
   ) = getPrivateKeyAlias()
 
   override fun chooseClientAlias(
-      keyTypes: Array<out String>,
-      issuers: Array<out Principal>,
-      socket: Socket
+    keyTypes: Array<out String>,
+    issuers: Array<out Principal>,
+    socket: Socket
   ) = getPrivateKeyAlias()
 
   override fun getClientAliases(keyType: String, issuers: Array<out Principal>): Array<String> {

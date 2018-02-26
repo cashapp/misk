@@ -1,7 +1,7 @@
 package misk.cloud.fake.security.keys
 
-import org.assertj.core.api.Assertions.assertThat
 import okio.ByteString
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
 class FakeKeyServiceTest {

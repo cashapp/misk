@@ -84,8 +84,8 @@ class GoogleCloudModule : KAbstractModule() {
 
 /** Logs cloud configuration on startup */
 private class GoogleCloud @Inject internal constructor(
-    private val datastore: Datastore,
-    private val storage: Storage
+  private val datastore: Datastore,
+  private val storage: Storage
 ) : AbstractIdleService() {
   override fun startUp() {
     log.info { "running as project ${datastore.options.projectId}" }

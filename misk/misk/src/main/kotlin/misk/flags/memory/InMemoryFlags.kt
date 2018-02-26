@@ -12,8 +12,8 @@ interface InMemoryFlag<T> : Flag<T> {
 }
 
 class InMemoryBooleanFlag internal constructor(
-    override val name: String,
-    override val description: String
+  override val name: String,
+  override val description: String
 ) : InMemoryFlag<Boolean> {
 
   private val set = AtomicBoolean()
@@ -28,8 +28,8 @@ class InMemoryBooleanFlag internal constructor(
 }
 
 class InMemoryIntFlag internal constructor(
-    override val name: String,
-    override val description: String
+  override val name: String,
+  override val description: String
 ) : InMemoryFlag<Int> {
 
   private val set = AtomicBoolean()
@@ -44,8 +44,8 @@ class InMemoryIntFlag internal constructor(
 }
 
 class InMemoryDoubleFlag internal constructor(
-    override val name: String,
-    override val description: String
+  override val name: String,
+  override val description: String
 ) : InMemoryFlag<Double> {
 
   private val set = AtomicBoolean()
@@ -60,8 +60,8 @@ class InMemoryDoubleFlag internal constructor(
 }
 
 class InMemoryStringFlag internal constructor(
-    override val name: String,
-    override val description: String
+  override val name: String,
+  override val description: String
 ) : InMemoryFlag<String> {
 
   private val value = AtomicReference<String>()

@@ -5,10 +5,8 @@ import misk.web.actions.WebAction
 import misk.web.actions.asChain
 import misk.web.extractors.ParameterExtractor
 import misk.web.mediatype.MediaRange
-import okhttp3.Headers
 import okhttp3.HttpUrl
 import okhttp3.MediaType
-import okio.Okio
 import org.eclipse.jetty.http.HttpMethod
 import java.util.regex.Matcher
 import javax.inject.Provider
@@ -22,22 +20,22 @@ import kotlin.reflect.KParameter
  * response.
  */
 internal class BoundAction<A : WebAction, out R>(
-    private val webActionProvider: Provider<A>,
-    val interceptors: MutableList<Interceptor>,
-    parameterExtractorFactories: List<ParameterExtractor.Factory>,
-    val function: KFunction<R>,
-    val pathPattern: PathPattern,
-    private val httpMethod: HttpMethod,
-    private val acceptedContentTypes: List<MediaRange>,
-    private val responseContentType: MediaType?
+  private val webActionProvider: Provider<A>,
+  val interceptors: MutableList<Interceptor>,
+  parameterExtractorFactories: List<ParameterExtractor.Factory>,
+  val function: KFunction<R>,
+  val pathPattern: PathPattern,
+  private val httpMethod: HttpMethod,
+  private val acceptedContentTypes: List<MediaRange>,
+  private val responseContentType: MediaType?
 ) {
   private val parameterExtractors = function.parameters
       .drop(1) // the first parameter is always _this_
       .map { findParameterExtractor(parameterExtractorFactories, it) }
 
   private fun findParameterExtractor(
-      parameterExtractorFactories: List<ParameterExtractor.Factory>,
-      parameter: KParameter
+    parameterExtractorFactories: List<ParameterExtractor.Factory>,
+    parameter: KParameter
   ): ParameterExtractor {
     var result: ParameterExtractor? = null
     for (factory in parameterExtractorFactories) {
@@ -116,9 +114,9 @@ private fun HttpServletRequest.accepts(): List<MediaRange> {
 
 /** Matches a request to an action. Can be sorted to pick the most specific match amongst a set of candidates */
 internal class RequestMatch(
-    val action: BoundAction<*, *>,
-    private val pathMatcher: Matcher,
-    private val responseContentTypeMatch: MediaRange.Matcher?
+  val action: BoundAction<*, *>,
+  private val pathMatcher: Matcher,
+  private val responseContentTypeMatch: MediaRange.Matcher?
 ) : Comparable<RequestMatch> {
   override fun compareTo(other: RequestMatch): Int {
     val patternDiff = action.pathPattern.compareTo(other.action.pathPattern)

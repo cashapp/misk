@@ -1,11 +1,11 @@
 package misk.cloud.gcp.environment
 
-import org.assertj.core.api.Assertions.assertThat
 import misk.cloud.gcp.environment.GcpInstanceMetadataProvider.Companion.GCP_INSTANCE_METADATA_PATH
 import misk.testing.okhttp.RoutingDispatcher
 import misk.testing.okhttp.path
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
 internal class GcpInstanceMetadataProviderTest {

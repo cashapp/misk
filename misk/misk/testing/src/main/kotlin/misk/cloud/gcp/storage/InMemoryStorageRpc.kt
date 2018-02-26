@@ -23,9 +23,9 @@ class InMemoryStorageRpc : BaseCustomStorageRpc() {
   private val lock = ReentrantReadWriteLock()
 
   override fun create(
-      obj: StorageObject,
-      content: InputStream,
-      options: Map<StorageRpc.Option, *>
+    obj: StorageObject,
+    content: InputStream,
+    options: Map<StorageRpc.Option, *>
   ): StorageObject? = lock.write {
     val existing = options.check(metadata[obj.path])
     val newGeneration = (existing?.generation ?: 0) + 1
@@ -48,8 +48,8 @@ class InMemoryStorageRpc : BaseCustomStorageRpc() {
   }
 
   override fun list(
-      bucket: String,
-      options: Map<StorageRpc.Option, *>
+    bucket: String,
+    options: Map<StorageRpc.Option, *>
   ): Tuple<String, Iterable<StorageObject>> = lock.read {
     val prefix = options[StorageRpc.Option.PREFIX]?.toString()?.trimStart('/') ?: ""
 
@@ -101,10 +101,10 @@ class InMemoryStorageRpc : BaseCustomStorageRpc() {
       }
 
   override fun read(
-      from: StorageObject,
-      options: Map<StorageRpc.Option, *>,
-      zposition: Long,
-      zbytes: Int
+    from: StorageObject,
+    options: Map<StorageRpc.Option, *>,
+    zposition: Long,
+    zbytes: Int
   ): Tuple<String, ByteArray> = lock.read {
     options.check(metadata[from.path])
     val bytes = content[from.path]
@@ -128,12 +128,12 @@ class InMemoryStorageRpc : BaseCustomStorageRpc() {
   }
 
   override fun write(
-      uploadId: String,
-      toWrite: ByteArray,
-      toWriteOffset: Int,
-      destOffset: Long,
-      length: Int,
-      last: Boolean
+    uploadId: String,
+    toWrite: ByteArray,
+    toWriteOffset: Int,
+    destOffset: Long,
+    length: Int,
+    last: Boolean
   ) {
     lock.write {
       val destBytes = pendingContent[uploadId]?.let { currentBytes ->

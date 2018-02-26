@@ -15,7 +15,8 @@ internal class QueryStringParameterProcessorTest {
 
   @Test
   fun optionalStringPresent() {
-    val queryStringProcessor = QueryStringParameterProcessor(TestMemberStore.optionalStringParameter())
+    val queryStringProcessor =
+        QueryStringParameterProcessor(TestMemberStore.optionalStringParameter())
     val extractedResult = queryStringProcessor.extractFunctionArgumentValue(listOf("foo"))
     assertThat(extractedResult).isNotNull()
     assertThat(extractedResult).isEqualTo("foo")
@@ -23,7 +24,8 @@ internal class QueryStringParameterProcessorTest {
 
   @Test
   fun optionalStringNotPresent() {
-    val queryStringProcessor = QueryStringParameterProcessor(TestMemberStore.optionalStringParameter())
+    val queryStringProcessor =
+        QueryStringParameterProcessor(TestMemberStore.optionalStringParameter())
     val extractedResult = queryStringProcessor.extractFunctionArgumentValue(listOf())
     assertThat(extractedResult).isNull()
   }
@@ -70,7 +72,7 @@ internal class QueryStringParameterProcessorTest {
     try {
       queryStringProcessor.extractFunctionArgumentValue(listOf("forty two"))
       assert(false)
-    } catch(e: IllegalArgumentException) {
+    } catch (e: IllegalArgumentException) {
       // expected
     }
   }
@@ -135,7 +137,7 @@ internal class QueryStringParameterProcessorTest {
   @Test
   fun optionalEnumPresent() {
     val queryStringProcessor = QueryStringParameterProcessor(
-      TestMemberStore.optionalEnumParameter())
+        TestMemberStore.optionalEnumParameter())
     val extractedResult = queryStringProcessor.extractFunctionArgumentValue(listOf("ONE"))
     assertThat(extractedResult).isNotNull()
     assertThat(extractedResult).isEqualTo(TestEnum.ONE)
@@ -144,7 +146,7 @@ internal class QueryStringParameterProcessorTest {
   @Test
   fun optionalEnumNotPresent() {
     val queryStringProcessor = QueryStringParameterProcessor(
-      TestMemberStore.optionalEnumParameter())
+        TestMemberStore.optionalEnumParameter())
     val extractedResult = queryStringProcessor.extractFunctionArgumentValue(listOf())
     assertThat(extractedResult).isNull()
   }
@@ -152,7 +154,7 @@ internal class QueryStringParameterProcessorTest {
   @Test
   fun defaultEnumPresent() {
     val queryStringProcessor = QueryStringParameterProcessor(
-      TestMemberStore.defaultEnumParameter())
+        TestMemberStore.defaultEnumParameter())
     val extractedResult = queryStringProcessor.extractFunctionArgumentValue(listOf())
     assertThat(extractedResult).isNull()
   }
@@ -162,7 +164,7 @@ internal class QueryStringParameterProcessorTest {
     try {
       QueryStringParameterProcessor(TestMemberStore.unsupportedParameter())
       assert(false)
-    } catch(e: IllegalArgumentException) {
+    } catch (e: IllegalArgumentException) {
       // should be thrown
     }
   }
@@ -193,8 +195,7 @@ internal class QueryStringParameterProcessorTest {
       fun stringParameter(): KParameter = TestMemberStore::strTest.parameters.get(1)
       fun optionalStringParameter(): KParameter = TestMemberStore::strTest.parameters.get(2)
       fun stringListParameter(): KParameter = TestMemberStore::strTest.parameters.get(3)
-      fun optionalStringListParameter(): KParameter
-          = TestMemberStore::strTest.parameters.get(4)
+      fun optionalStringListParameter(): KParameter = TestMemberStore::strTest.parameters.get(4)
       fun intParameter(): KParameter = TestMemberStore::intTest.parameters.get(1)
       fun optionalIntParameter(): KParameter = TestMemberStore::intTest.parameters.get(2)
       fun intListParameter(): KParameter = TestMemberStore::intTest.parameters.get(3)

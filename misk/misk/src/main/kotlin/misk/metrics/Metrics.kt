@@ -9,7 +9,7 @@ import java.util.SortedMap
 import javax.inject.Inject
 
 class Metrics @Inject internal constructor(
-    metricRegistry: MetricRegistry
+  metricRegistry: MetricRegistry
 ) : MetricsScope("", metricRegistry) {
   val timers: SortedMap<String, Timer> get() = metricRegistry.timers
   val counters: SortedMap<String, Counter> get() = metricRegistry.counters

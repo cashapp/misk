@@ -10,11 +10,11 @@ import java.util.concurrent.TimeUnit
 import javax.net.ssl.X509TrustManager
 
 data class HttpClientsConfig(
-    private val defaultConnectTimeout: Duration? = null,
-    private val defaultWriteTimeout: Duration? = null,
-    private val defaultReadTimeout: Duration? = null,
-    private val ssl: HttpClientSSLConfig? = null,
-    val endpoints: Map<String, HttpClientEndpointConfig> = mapOf()
+  private val defaultConnectTimeout: Duration? = null,
+  private val defaultWriteTimeout: Duration? = null,
+  private val defaultReadTimeout: Duration? = null,
+  private val ssl: HttpClientSSLConfig? = null,
+  val endpoints: Map<String, HttpClientEndpointConfig> = mapOf()
 ) : Config {
   /** @return a client built from this configuration */
   fun newHttpClient(clientName: String): OkHttpClient {
@@ -46,16 +46,16 @@ data class HttpClientsConfig(
 }
 
 data class HttpClientSSLConfig(
-    val keystore: KeystoreConfig?,
-    val truststore: KeystoreConfig
+  val keystore: KeystoreConfig?,
+  val truststore: KeystoreConfig
 ) {
   fun createSSLContext() = SslContextFactory.create(keystore, truststore)
 }
 
 data class HttpClientEndpointConfig(
-    val url: String,
-    val connectTimeout: Duration? = null,
-    val writeTimeout: Duration? = null,
-    val readTimeout: Duration? = null,
-    val ssl: HttpClientSSLConfig? = null
+  val url: String,
+  val connectTimeout: Duration? = null,
+  val writeTimeout: Duration? = null,
+  val readTimeout: Duration? = null,
+  val ssl: HttpClientSSLConfig? = null
 )

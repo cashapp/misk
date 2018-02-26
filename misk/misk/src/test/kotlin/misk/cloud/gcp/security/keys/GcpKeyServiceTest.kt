@@ -4,11 +4,11 @@ import com.google.api.client.json.jackson2.JacksonFactory
 import com.google.api.services.cloudkms.v1.CloudKMS
 import com.google.api.services.cloudkms.v1.model.DecryptResponse
 import com.google.api.services.cloudkms.v1.model.EncryptResponse
-import org.assertj.core.api.Assertions.assertThat
 import misk.cloud.gcp.testing.FakeHttpRouter
 import misk.cloud.gcp.testing.FakeHttpRouter.Companion.respondWithError
 import misk.cloud.gcp.testing.FakeHttpRouter.Companion.respondWithJson
 import okio.ByteString
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Test
 
@@ -19,7 +19,8 @@ internal class GcpKeyServiceTest {
           "bar" to GcpKeyLocation("system", "other_ring", "key2"),
           "zed" to GcpKeyLocation("system", "main_ring", "key5")))
 
-  private val TARGET_RESOURCE_URL = "https://cloudkms.googleapis.com/v1/projects/my_project/locations/system/keyRings/main_ring/cryptoKeys/key1"
+  private val TARGET_RESOURCE_URL =
+      "https://cloudkms.googleapis.com/v1/projects/my_project/locations/system/keyRings/main_ring/cryptoKeys/key1"
 
   private val transport = FakeHttpRouter {
     when (it.url) {

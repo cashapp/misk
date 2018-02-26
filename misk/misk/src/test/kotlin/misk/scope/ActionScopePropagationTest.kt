@@ -1,11 +1,11 @@
 package misk.scope
 
-import org.assertj.core.api.Assertions.assertThat
 import com.google.inject.Guice
 import com.google.inject.Key
 import com.google.inject.name.Named
 import com.google.inject.name.Names
 import misk.inject.keyOf
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.util.concurrent.Callable
 import java.util.concurrent.Executors
@@ -50,7 +50,7 @@ internal class ActionScopePropagationTest {
         keyOf<String>(Names.named("from-seed")) to "my seed data")
 
     // Propagate on the the KCallable directly
-    val f : KFunction<String> = tester::fooValue
+    val f: KFunction<String> = tester::fooValue
     val callable = scope.enter(seedData).use {
       scope.propagate(f)
     }
@@ -73,7 +73,7 @@ internal class ActionScopePropagationTest {
 
     // Propagate on a lambda directly
     val function = scope.enter(seedData).use {
-      scope.propagate( { tester.fooValue() })
+      scope.propagate({ tester.fooValue() })
     }
 
     // Submit to other thread after we've exited the scope

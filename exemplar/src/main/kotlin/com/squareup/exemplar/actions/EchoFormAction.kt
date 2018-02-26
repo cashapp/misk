@@ -19,10 +19,10 @@ class EchoFormAction : WebAction {
   }
 
   data class Form(
-      val string: String,
-      val int: Int,
-      val nullable: String?,
-      val optional: String = "optional",
-      @FormField("list-of-strings") val list: List<String>
+    val string: String,
+    val int: Int,
+    val nullable: String?,
+    val optional: String = "optional",
+    @FormField("list-of-strings") val list: List<String>
   )
 }

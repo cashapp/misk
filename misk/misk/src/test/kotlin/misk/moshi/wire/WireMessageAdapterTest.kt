@@ -5,12 +5,12 @@ import com.squareup.moshi.Moshi
 import com.squareup.protos.test.parsing.Robot
 import com.squareup.protos.test.parsing.Shipment
 import com.squareup.protos.test.parsing.Warehouse
-import org.assertj.core.api.isEqualToAsJson
 import misk.moshi.MoshiModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import okio.ByteString
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.isEqualToAsJson
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Test
 import javax.inject.Inject

@@ -11,8 +11,8 @@ import java.time.Duration
 import java.util.concurrent.TimeUnit
 
 open class MetricsScope internal constructor(
-    internal val root: String,
-    internal val metricRegistry: MetricRegistry
+  internal val root: String,
+  internal val metricRegistry: MetricRegistry
 ) {
   fun counter(name: String): Counter {
     return metricRegistry.counter(scopedName(name))

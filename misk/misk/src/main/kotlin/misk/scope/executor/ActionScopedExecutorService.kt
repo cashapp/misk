@@ -12,8 +12,8 @@ import java.util.concurrent.ExecutorService
  * submitted by the current thread
  */
 class ActionScopedExecutorService(
-    target: ExecutorService,
-    private val scope: ActionScope
+  target: ExecutorService,
+  private val scope: ActionScope
 ) : WrappingListeningExecutorService() {
 
   private val target = MoreExecutors.listeningDecorator(target)

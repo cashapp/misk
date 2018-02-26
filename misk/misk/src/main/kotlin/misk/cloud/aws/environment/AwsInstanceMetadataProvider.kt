@@ -6,7 +6,7 @@ import okhttp3.Request
 import javax.inject.Provider
 
 internal class AwsInstanceMetadataProvider(
-    val serverUrl: String = AWS_INSTANCE_METADATA_SERVER
+  val serverUrl: String = AWS_INSTANCE_METADATA_SERVER
 ) : Provider<InstanceMetadata> {
 
   companion object {
