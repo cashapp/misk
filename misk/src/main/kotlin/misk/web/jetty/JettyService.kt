@@ -17,7 +17,7 @@ import org.eclipse.jetty.server.Server
 import org.eclipse.jetty.server.ServerConnector
 import org.eclipse.jetty.server.SslConnectionFactory
 import org.eclipse.jetty.server.handler.ContextHandler
-import org.eclipse.jetty.servlet.ServletHandler
+import org.eclipse.jetty.servlet.ServletContextHandler
 import org.eclipse.jetty.servlet.ServletHolder
 import org.eclipse.jetty.util.ssl.SslContextFactory
 import java.net.InetAddress
@@ -87,11 +87,10 @@ class JettyService @Inject internal constructor(
     }
 
     // TODO(mmihic): Force security handler?
-    val servletHandler = ServletHandler()
-    servletHandler.addServletWithMapping(ServletHolder(webActionsServlet), "/*")
-    server.addManaged(servletHandler)
-
-    server.handler = servletHandler
+    val servletContextHandler = ServletContextHandler()
+    servletContextHandler.addServlet(ServletHolder(webActionsServlet), "/*")
+    server.addManaged(servletContextHandler)
+    server.handler = servletContextHandler
 
     server.start()
 

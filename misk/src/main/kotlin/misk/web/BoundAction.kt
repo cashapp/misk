@@ -2,15 +2,16 @@ package misk.web
 
 import misk.Interceptor
 import misk.web.actions.WebAction
+import misk.web.actions.WebSocketListener
 import misk.web.actions.asChain
 import misk.web.extractors.ParameterExtractor
+import misk.web.jetty.RealWebSocket
 import misk.web.mediatype.MediaRange
 import okhttp3.HttpUrl
 import okhttp3.MediaType
 import org.eclipse.jetty.http.HttpMethod
 import java.util.regex.Matcher
 import javax.inject.Provider
-import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 import kotlin.reflect.KFunction
 import kotlin.reflect.KParameter
@@ -52,14 +53,18 @@ internal class BoundAction<A : WebAction, out R>(
     return result
   }
 
-  fun match(jettyRequest: HttpServletRequest, url: HttpUrl): RequestMatch? {
+  fun match(
+    requestMethod: String,
+    requestContentType: MediaType?,
+    requestAcceptedTypes: List<MediaRange>,
+    url: HttpUrl
+  ): RequestMatch? {
     // Confirm the path and method matches
     val pathMatcher = pathMatcher(url) ?: return null
-    if (jettyRequest.method != httpMethod.name) return null
+    if (requestMethod != httpMethod.name) return null
 
     // Confirm the request content type matches the types we accept, and pick the most specific
     // content type match
-    val requestContentType = jettyRequest.contentType?.let { MediaType.parse(it) }
     val requestContentTypeMatch =
         requestContentType?.closestMediaRangeMatch(acceptedContentTypes)
     if (requestContentType != null && requestContentTypeMatch == null) return null
@@ -67,7 +72,7 @@ internal class BoundAction<A : WebAction, out R>(
     // Confirm we can generate a response content type matching the set accepted by the request,
     // and pick the most specific response content type match
     val responseContentTypeMatch =
-        responseContentType?.closestMediaRangeMatch(jettyRequest.accepts())
+        responseContentType?.closestMediaRangeMatch(requestAcceptedTypes)
     if (responseContentType != null && responseContentTypeMatch == null) return null
 
     return RequestMatch(this, pathMatcher, responseContentTypeMatch)
@@ -92,23 +97,23 @@ internal class BoundAction<A : WebAction, out R>(
     return response as Response<ResponseBody>
   }
 
+  internal fun handleWebSocket(
+    request: Request,
+    pathMatcher: Matcher
+  ): WebSocketListener {
+    val webAction = webActionProvider.get()
+    val parameters = parameterExtractors.map {
+      it.extract(webAction, request, pathMatcher)
+    }
+
+    val chain = webAction.asChain(function, parameters)
+    return chain.proceed(chain.args) as WebSocketListener
+  }
+
   /** Returns a Matcher if requestUrl can be matched, else null */
   private fun pathMatcher(requestUrl: HttpUrl): Matcher? {
     val matcher = pathPattern.pattern.matcher(requestUrl.encodedPath())
     return if (matcher.matches()) matcher else null
-  }
-}
-
-private fun HttpServletRequest.accepts(): List<MediaRange> {
-  // TODO(mmihic): Don't blow up if one of the accept headers can't be parsed
-  val accepts = getHeaders("Accept")?.toList()?.flatMap {
-    MediaRange.parseRanges(it)
-  }
-
-  return if (accepts == null || accepts.isEmpty()) {
-    listOf(MediaRange.ALL_MEDIA)
-  } else {
-    accepts
   }
 }
 
@@ -134,6 +139,10 @@ internal class RequestMatch(
   fun handle(request: Request, jettyResponse: HttpServletResponse) {
     val result = action.handle(request, pathMatcher)
     result.writeToJettyResponse(jettyResponse)
+  }
+
+  fun handleWebSocket(request: Request): WebSocketListener {
+    return action.handleWebSocket(request, pathMatcher)
   }
 }
 
