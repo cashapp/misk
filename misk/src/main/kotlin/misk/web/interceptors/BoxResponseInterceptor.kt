@@ -13,6 +13,9 @@ class BoxResponseInterceptorFactory : Interceptor.Factory {
   val interceptor = object : Interceptor {
     override fun intercept(chain: Chain): Any? {
       val result = chain.proceed(chain.args)
+      // NB(young): Something down the chain could have returned a Response, so avoid double
+      // wrapping it.
+      return if (result is Response<*>) result else Response(result)
       return Response(result)
     }
   }
