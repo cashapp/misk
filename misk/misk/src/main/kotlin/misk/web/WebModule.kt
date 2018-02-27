@@ -22,6 +22,7 @@ import misk.web.interceptors.InternalErrorInterceptorFactory
 import misk.web.interceptors.MarshallerInterceptor
 import misk.web.interceptors.MetricsInterceptor
 import misk.web.interceptors.RequestLoggingInterceptor
+import misk.web.interceptors.TracingInterceptor
 import misk.web.jetty.JettyModule
 import misk.web.marshal.JsonMarshaller
 import misk.web.marshal.JsonUnmarshaller
@@ -75,6 +76,10 @@ class WebModule : KAbstractModule() {
     // Wrap "raw" responses with a Response object
     binder().addMultibinderBindingWithAnnotation<Interceptor.Factory, MiskDefault>()
         .to<BoxResponseInterceptorFactory>()
+
+    // Traces requests as they work their way through the system.
+    binder().addMultibinderBindingWithAnnotation<Interceptor.Factory, MiskDefault>()
+        .to<TracingInterceptor.Factory>()
 
     // Register build-in exception mappers
     install(ExceptionMapperModule.create<ActionException, ActionExceptionMapper>())
