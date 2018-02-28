@@ -4,9 +4,10 @@ import com.google.inject.Guice
 import io.opentracing.Tracer
 import io.opentracing.mock.MockTracer
 import misk.asAction
-import misk.inject.KAbstractModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
+import misk.testing.MockTracingBackendModule
+import misk.tracing.backends.noop.NoopTracerBackendModule
 import misk.web.Get
 import misk.web.Response
 import misk.web.actions.WebAction
@@ -53,12 +54,3 @@ internal class TracingTestAction : WebAction {
   }
 }
 
-class MockTracingBackendModule : KAbstractModule() {
-  override fun configure() {
-    bind(Tracer::class.java).to(MockTracer::class.java).asEagerSingleton()
-  }
-}
-
-class NoopModule : KAbstractModule() {
-  override fun configure() {}
-}
