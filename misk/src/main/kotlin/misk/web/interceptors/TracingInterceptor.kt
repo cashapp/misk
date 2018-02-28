@@ -29,17 +29,8 @@ internal class TracingInterceptor internal constructor(private val tracer: Trace
 
   override fun intercept(chain: Chain): Any? {
     var result: Any? = null
-    var scope: Scope? = null
 
-    try {
-      scope = tracer.buildSpan("${chain.action}").startActive(true)
-      result = chain.proceed(chain.args)
-    } catch (exception: Exception) {
-      logger.warn("failed attempting to trace request", exception)
-      if (scope != null) Tags.ERROR.set(scope.span(), true)
-    } finally {
-      if (scope != null) scope.close()
-    }
+    tracer.buildSpan("${chain.action}").startActive(true).use { result = chain.proceed(chain.args) }
 
     return result
   }
