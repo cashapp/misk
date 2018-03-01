@@ -11,3 +11,6 @@ consumer_b:
 
 duration:
   interval: "PT1S"
+
+action_exception_log_level:
+  client_error_level: INFO
