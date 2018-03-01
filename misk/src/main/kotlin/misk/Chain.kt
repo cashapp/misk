@@ -7,5 +7,5 @@ interface Chain {
   val action: WebAction
   val args: List<Any?>
   val function: KFunction<*>
-  fun proceed(args: List<Any?>): Any?
+  fun proceed(args: List<Any?>): Any
 }

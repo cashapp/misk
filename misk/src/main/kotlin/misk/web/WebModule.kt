@@ -1,11 +1,15 @@
 package misk.web
 
-import misk.Interceptor
+import misk.Action
+import misk.ApplicationInterceptor
+import misk.Chain
 import misk.MiskDefault
+import misk.NetworkInterceptor
 import misk.exceptions.ActionException
 import misk.inject.KAbstractModule
 import misk.inject.addMultibinderBinding
 import misk.inject.addMultibinderBindingWithAnnotation
+import misk.inject.newMultibinder
 import misk.inject.to
 import misk.scope.ActionScopedProviderModule
 import misk.web.exceptions.ActionExceptionMapper
@@ -18,7 +22,6 @@ import misk.web.extractors.PathPatternParameterExtractorFactory
 import misk.web.extractors.QueryStringParameterExtractorFactory
 import misk.web.extractors.RequestBodyParameterExtractor
 import misk.web.extractors.WebSocketParameterExtractorFactory
-import misk.web.interceptors.BoxResponseInterceptorFactory
 import misk.web.interceptors.InternalErrorInterceptorFactory
 import misk.web.interceptors.MarshallerInterceptor
 import misk.web.interceptors.MetricsInterceptor
@@ -47,42 +50,39 @@ class WebModule : KAbstractModule() {
     install(MarshallerModule.create<JsonMarshaller.Factory>())
     install(UnmarshallerModule.create<JsonUnmarshaller.Factory>())
 
-    // Create an empty set binder of interceptor factories that can be added to by users.
-    newSetBinder<Interceptor.Factory>()
+    // Create empty set binders of interceptor factories that can be added to by users.
+    binder().newMultibinder<NetworkInterceptor.Factory>()
+    binder().newMultibinder<ApplicationInterceptor.Factory>()
 
     // Register built-in interceptors. Interceptors run in the order in which they are
     // installed, and the order of these interceptors is critical.
 
     // Handle all unexpected errors that occur during dispatch
-    binder().addMultibinderBindingWithAnnotation<Interceptor.Factory, MiskDefault>()
+    binder().addMultibinderBindingWithAnnotation<NetworkInterceptor.Factory, MiskDefault>()
         .to<InternalErrorInterceptorFactory>()
 
     // Optionally log request and response details
-    binder().addMultibinderBindingWithAnnotation<Interceptor.Factory, MiskDefault>()
+    binder().addMultibinderBindingWithAnnotation<NetworkInterceptor.Factory, MiskDefault>()
         .to<RequestLoggingInterceptor.Factory>()
 
     // Collect metrics on the status of results and response times of requests
-    binder().addMultibinderBindingWithAnnotation<Interceptor.Factory, MiskDefault>()
+    binder().addMultibinderBindingWithAnnotation<NetworkInterceptor.Factory, MiskDefault>()
         .to<MetricsInterceptor.Factory>()
 
     // Convert and log application level exceptions into their appropriate response format
-    binder().addMultibinderBindingWithAnnotation<Interceptor.Factory, MiskDefault>()
+    binder().addMultibinderBindingWithAnnotation<NetworkInterceptor.Factory, MiskDefault>()
         .to<ExceptionHandlingInterceptor.Factory>()
 
     // Convert typed responses into a ResponseBody that can marshal the response according to
     // the client's requested content-type
-    binder().addMultibinderBindingWithAnnotation<Interceptor.Factory, MiskDefault>()
+    binder().addMultibinderBindingWithAnnotation<NetworkInterceptor.Factory, MiskDefault>()
         .to<MarshallerInterceptor.Factory>()
 
-    // Wrap "raw" responses with a Response object
-    binder().addMultibinderBindingWithAnnotation<Interceptor.Factory, MiskDefault>()
-        .to<BoxResponseInterceptorFactory>()
-
     // Traces requests as they work their way through the system.
-    binder().addMultibinderBindingWithAnnotation<Interceptor.Factory, MiskDefault>()
+    binder().addMultibinderBindingWithAnnotation<NetworkInterceptor.Factory, MiskDefault>()
         .to<TracingInterceptor.Factory>()
 
-    // Register build-in exception mappers
+    // Register built-in exception mappers
     install(ExceptionMapperModule.create<ActionException, ActionExceptionMapper>())
 
     // Register built-in parameter extractors
