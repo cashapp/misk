@@ -169,6 +169,15 @@ internal class MediaRangeTest {
   }
 
   @Test
+  fun matchWildcardsOnMediaType() {
+    val mediaRange = MediaRange.parse("text/html")
+    assertThat(mediaRange.matcher(MediaType.parse("*/*")!!)).isNotNull()
+    assertThat(mediaRange.matcher(MediaType.parse("text/*")!!)).isNotNull()
+    assertThat(mediaRange.matcher(MediaType.parse("application/*")!!)).isNull()
+    assertThat(mediaRange.matcher(MediaType.parse("application/json")!!)).isNull()
+  }
+
+  @Test
   fun matchNoCharsetInMediaType() {
     val mediaRange = MediaRange.parse("text/html;charset=utf-8")
     val mediaType = MediaType.parse("text/html")!!
