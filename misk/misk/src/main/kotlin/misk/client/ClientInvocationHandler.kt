@@ -1,0 +1,162 @@
+package misk.client
+
+import com.google.common.util.concurrent.SettableFuture
+import okhttp3.Interceptor
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+import retrofit2.Retrofit
+import retrofit2.http.DELETE
+import retrofit2.http.GET
+import retrofit2.http.HEAD
+import retrofit2.http.HTTP
+import retrofit2.http.OPTIONS
+import retrofit2.http.PATCH
+import retrofit2.http.POST
+import retrofit2.http.PUT
+import java.lang.reflect.InvocationHandler
+import java.lang.reflect.Method
+import kotlin.reflect.KClass
+import kotlin.reflect.KFunction
+import kotlin.reflect.full.functions
+
+internal class ClientInvocationHandler(
+  private val interfaceType: KClass<*>,
+  private val clientName: String,
+  retrofit: Retrofit,
+  okHttpTemplate: OkHttpClient,
+  networkInterceptorFactories: List<ClientNetworkInterceptor.Factory>,
+  applicationInterceptorFactories: List<ClientApplicationInterceptor.Factory>
+) : InvocationHandler {
+
+  private val actionsByMethod = interfaceType.functions
+      .mapNotNull { it as? KFunction<*> }
+      .filter { it.isRetrofitMethod }
+      .map { ClientAction(clientName, it) }
+      .map { it.function.name to it }
+      .toMap()
+
+  private val interceptorsByMethod = actionsByMethod.map { (methodName, action) ->
+    methodName to applicationInterceptorFactories.mapNotNull { it.create(action) }
+  }.toMap()
+
+  // Each method might have a different set of network interceptors, so sadly we potentially
+  // need to create a separate OkHttpClient and retrofit proxy per method
+  private val proxiesByMethod: Map<String, Any> = actionsByMethod.map { (methodName, action) ->
+    val networkInterceptors = networkInterceptorFactories.mapNotNull { it.create(action) }
+    val actionSpecificClient =
+        if (networkInterceptors.isEmpty()) okHttpTemplate
+        else {
+          val clientBuilder = okHttpTemplate.newBuilder()
+          networkInterceptors.forEach {
+            clientBuilder.addNetworkInterceptor(NetworkInterceptorWrapper(action, it))
+          }
+          clientBuilder.build()
+        }
+
+    methodName to retrofit.newBuilder()
+        .client(actionSpecificClient)
+        .build()
+        .create(interfaceType.java)
+  }.toMap()
+
+  override fun invoke(proxy: Any, method: Method, args: Array<out Any>): Any {
+    val action = actionsByMethod[method.name] ?: throw IllegalStateException(
+        "no action corresponding to ${interfaceType.qualifiedName}#${method.name}"
+    )
+
+    val retrofitProxy = proxiesByMethod[method.name] ?: throw IllegalStateException(
+        "no action corresponding to ${interfaceType.qualifiedName}#${method.name}"
+    )
+    val interceptors = (interceptorsByMethod[method.name] ?: listOf())
+
+    val beginCallInterceptors = interceptors +  RetrofitCallInterceptor(retrofitProxy, method)
+    val beginCallChain = RealBeginClientCallChain(action, args.toList(), beginCallInterceptors)
+    val wrappedCall = beginCallChain.proceed(beginCallChain.args)
+
+    val requestInterceptors = interceptors + RetrofitRequestInterceptor(wrappedCall)
+    return InterceptedCall(action, requestInterceptors, args.toList(), wrappedCall)
+  }
+
+  /** Wraps a retrofit [Call] to invoke interceptors before handing off to Retrofit */
+  private class InterceptedCall(
+    private val action: ClientAction,
+    private val interceptors: List<ClientApplicationInterceptor>,
+    private val args: List<*>,
+    private val wrapped: Call<Any>
+  ) : Call<Any> {
+    override fun enqueue(callback: Callback<Any>) {
+      val allInterceptors = interceptors + RetrofitRequestInterceptor(wrapped)
+      RealClientChain(action, args, wrapped, callback, allInterceptors).proceed(args, callback)
+    }
+
+    override fun execute(): Response<Any> {
+      val future = SettableFuture.create<Response<Any>>()
+      enqueue(SyncCallback(future))
+      return future.get()
+    }
+
+    override fun isCanceled() = wrapped.isCanceled
+    override fun isExecuted() = wrapped.isExecuted
+    override fun clone() = InterceptedCall(action, interceptors, args, wrapped.clone())
+    override fun cancel() = wrapped.cancel()
+    override fun request(): Request = wrapped.request()
+  }
+
+  /** Interceptor that builds the call through Retrofit */
+  private class RetrofitCallInterceptor(
+    private val retrofitProxy: Any,
+    private val method: Method
+  ) : ClientApplicationInterceptor {
+    override fun interceptBeginCall(chain: BeginClientCallChain): Call<Any> {
+      @Suppress("UNCHECKED_CAST")
+      return method.invoke(retrofitProxy, *chain.args.toTypedArray()) as Call<Any>
+    }
+
+    override fun intercept(chain: ClientChain) {
+      throw IllegalStateException("RetrofitCallInterceptor should never be called during intercept")
+    }
+  }
+
+  /** Interceptor that hands the request off to Retrofit */
+  private class RetrofitRequestInterceptor(val call: Call<Any>) : ClientApplicationInterceptor {
+    override fun interceptBeginCall(chain: BeginClientCallChain): Call<Any> {
+      throw IllegalStateException(
+          "RetrofitRequestInterceptor should never be called during interceptBeginCall"
+      )
+    }
+
+    override fun intercept(chain: ClientChain) = call.enqueue(chain.callback)
+  }
+
+  /** Retrofit callback that triggers a synchronous future on completion */
+  private class SyncCallback<T>(private val future: SettableFuture<Response<T>>) : Callback<T> {
+    override fun onFailure(call: Call<T>, t: Throwable) {
+      future.setException(t)
+    }
+
+    override fun onResponse(call: Call<T>, response: Response<T>) {
+      future.set(response)
+    }
+  }
+}
+
+private class NetworkInterceptorWrapper(
+  val action: ClientAction,
+  val interceptor: ClientNetworkInterceptor
+) : okhttp3.Interceptor {
+  override fun intercept(chain: Interceptor.Chain): okhttp3.Response {
+    return interceptor.intercept(RealClientNetworkChain(chain, action))
+  }
+}
+
+private val KFunction<*>.isRetrofitMethod: Boolean
+  get() {
+    return annotations.any {
+      it is GET || it is POST || it is HEAD || it is PUT || it is PATCH || it is OPTIONS ||
+          it is DELETE || it is HTTP
+    }
+  }
+
