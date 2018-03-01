@@ -1,8 +1,8 @@
 package misk.web.interceptors
 
 import misk.Action
-import misk.Chain
-import misk.Interceptor
+import misk.NetworkChain
+import misk.NetworkInterceptor
 import misk.web.Response
 import misk.web.ResponseBody
 import okhttp3.Headers
@@ -10,8 +10,8 @@ import okio.BufferedSink
 import javax.inject.Singleton
 
 @Singleton
-class InternalErrorInterceptorFactory : Interceptor.Factory {
-  override fun create(action: Action): Interceptor? {
+class InternalErrorInterceptorFactory : NetworkInterceptor.Factory {
+  override fun create(action: Action): NetworkInterceptor? {
     return INTERCEPTOR
   }
 
@@ -28,10 +28,10 @@ class InternalErrorInterceptorFactory : Interceptor.Factory {
       }
     }
 
-    val INTERCEPTOR = object : Interceptor {
-      override fun intercept(chain: Chain): Any? {
+    val INTERCEPTOR = object : NetworkInterceptor {
+      override fun intercept(chain: NetworkChain): Response<*> {
         return try {
-          chain.proceed(chain.args)
+          chain.proceed(chain.request)
         } catch (_: Throwable) {
           Response(BODY, HEADERS, STATUS_CODE)
         }
