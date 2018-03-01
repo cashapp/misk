@@ -6,8 +6,8 @@ import javax.inject.Singleton
 class FakeHealthCheck : HealthCheck {
   var status = HealthStatus.healthy()
 
-  fun setHealthy() {
-    status = HealthStatus.healthy()
+  fun setHealthy(vararg messages: String) {
+    status = HealthStatus.healthy(*messages)
   }
 
   fun setUnhealthy(vararg messages: String) {
