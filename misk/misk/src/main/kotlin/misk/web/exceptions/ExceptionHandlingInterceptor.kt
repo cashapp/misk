@@ -2,8 +2,8 @@ package misk.web.exceptions
 
 import com.google.common.util.concurrent.UncheckedExecutionException
 import misk.Action
-import misk.Chain
-import misk.Interceptor
+import misk.NetworkChain
+import misk.NetworkInterceptor
 import misk.exceptions.StatusCode
 import misk.logging.getLogger
 import misk.logging.log
@@ -25,10 +25,10 @@ import javax.inject.Inject
 class ExceptionHandlingInterceptor(
   private val actionName: String,
   private val mapperResolver: ExceptionMapperResolver
-) : Interceptor {
+) : NetworkInterceptor {
 
-  override fun intercept(chain: Chain): Any? = try {
-    chain.proceed(chain.args)
+  override fun intercept(chain: NetworkChain): Response<*> = try {
+    chain.proceed(chain.request)
   } catch (th: Throwable) {
     toResponse(th)
   }
@@ -50,7 +50,7 @@ class ExceptionHandlingInterceptor(
 
   class Factory @Inject internal constructor(
     private val mapperResolver: ExceptionMapperResolver
-  ) : Interceptor.Factory {
+  ) : NetworkInterceptor.Factory {
     override fun create(action: Action) = ExceptionHandlingInterceptor(action.name, mapperResolver)
   }
 

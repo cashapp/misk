@@ -3,8 +3,10 @@ package misk.web.interceptors
 import com.google.inject.util.Modules
 import misk.Action
 import misk.Chain
-import misk.Interceptor
+import misk.ApplicationInterceptor
 import misk.MiskModule
+import misk.NetworkChain
+import misk.NetworkInterceptor
 import misk.inject.KAbstractModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
@@ -41,7 +43,7 @@ class UserInterceptorTest {
     val response = get("/call/textResponse")
     assertThat(response.code()).isEqualTo(418)
     assertThat(response.header("Content-Type")).isEqualTo(MediaTypes.TEXT_PLAIN_UTF8)
-    assertThat(response.body()!!.source()!!.readUtf8()).isEqualTo("text response")
+    assertThat(response.body()?.string()).isEqualTo("text response")
   }
 
   @Test
@@ -49,18 +51,54 @@ class UserInterceptorTest {
     val response = get("/call/text")
     assertThat(response.code()).isEqualTo(200)
     assertThat(response.header("Content-Type")).isEqualTo(MediaTypes.TEXT_PLAIN_UTF8)
-    assertThat(response.body()!!.source()!!.readUtf8()).isEqualTo("text")
+    assertThat(response.body()?.string()).isEqualTo("text")
   }
 
-  internal class UserCreatedInterceptor: Interceptor {
-    override fun intercept(chain: Chain): Any? = when (chain.args.firstOrNull()) {
+  @Test
+  fun throwResponse() {
+    val response = get("/call/throw")
+    assertThat(response.code()).isEqualTo(500)
+    assertThat(response.body()?.string()).isEqualTo("internal server error")
+  }
+
+  @Test
+  fun stringNetworkResponse() {
+    val response = get("/call/textResponse", "text")
+    assertThat(response.code()).isEqualTo(410)
+    assertThat(response.header("Content-Type")).isEqualTo(MediaTypes.TEXT_PLAIN_UTF8)
+    assertThat(response.body()?.string()).isEqualTo("net text response")
+  }
+
+  @Test
+  fun throwNetworkResponse() {
+    val response = get("/call/textResponse", "throw")
+    assertThat(response.code()).isEqualTo(500)
+    assertThat(response.body()?.string()).isEqualTo("internal server error")
+  }
+
+  internal class UserCreatedNetworkInterceptor : NetworkInterceptor {
+    override fun intercept(chain: NetworkChain): Response<*> = when (chain.request.headers.get(
+        "mode")) {
+      "text" -> Response("net text response", UserInterceptorTest.TEXT_HEADERS, 410)
+      "throw" -> throw Exception("Don't throw exceptions like this")
+      else -> chain.proceed(chain.request)
+    }
+
+    class Factory : NetworkInterceptor.Factory {
+      override fun create(action: Action): NetworkInterceptor? = UserCreatedNetworkInterceptor()
+    }
+  }
+
+  internal class UserCreatedInterceptor: ApplicationInterceptor {
+    override fun intercept(chain: Chain): Any = when (chain.args.firstOrNull()) {
       "text" -> "text"
       "textResponse" -> Response("text response", TEXT_HEADERS, 418)
+      "throw" -> throw Exception("Don't throw exceptions like this")
       else -> chain.proceed(chain.args)
     }
 
-    class Factory: Interceptor.Factory {
-      override fun create(action: Action): Interceptor? = UserCreatedInterceptor()
+    class Factory: ApplicationInterceptor.Factory {
+      override fun create(action: Action): ApplicationInterceptor? = UserCreatedInterceptor()
     }
   }
 
@@ -74,7 +112,8 @@ class UserInterceptorTest {
 
   internal data class TestActionResponse(val text: String)
 
-  private fun get(path: String): okhttp3.Response = call(Request.Builder()
+  private fun get(path: String, mode: String = "normal"): okhttp3.Response = call(Request.Builder()
+      .addHeader("mode", mode)
       .url(jettyService.httpServerUrl.newBuilder().encodedPath(path).build())
       .get())
 
@@ -86,7 +125,9 @@ class UserInterceptorTest {
 
   internal class TestModule : KAbstractModule() {
     override fun configure() {
-      newSetBinder<Interceptor.Factory>().addBinding()
+      newSetBinder<NetworkInterceptor.Factory>().addBinding()
+          .toInstance(UserCreatedNetworkInterceptor.Factory())
+      newSetBinder<ApplicationInterceptor.Factory>().addBinding()
           .toInstance(UserCreatedInterceptor.Factory())
 
       install(WebActionModule.create<TestAction>())
