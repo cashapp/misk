@@ -32,7 +32,7 @@ internal class PathParamDispatchTest {
 
   @Inject lateinit var jettyService: JettyService
 
-  enum class ObjectType {
+  enum class ResourceType {
     USER,
     FILE,
     FOLDER
@@ -60,13 +60,13 @@ internal class PathParamDispatchTest {
   }
 
   class GetObjectDetails : WebAction {
-    @Get("/objects/{objectType}/{name}/{version}")
+    @Get("/objects/{resourceType}/{name}/{version}")
     @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
     fun getObjectDetails(
-      @PathParam objectType: ObjectType,
+      @PathParam resourceType: ResourceType,
       @PathParam name: String,
       @PathParam version: Long
-    ): String = "(type=$objectType,name=$name,version=$version)"
+    ): String = "(type=$resourceType,name=$name,version=$version)"
   }
 
   class CustomPathParamName : WebAction {

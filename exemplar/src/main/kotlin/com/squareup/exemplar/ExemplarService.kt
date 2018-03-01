@@ -18,7 +18,7 @@ fun main(args: Array<String>) {
       WebModule(),
       HibernateModule(),
       ExemplarModule(),
-      ConfigModule.create<ExemplarConfig>("exemplar", config),
+      ConfigModule.create("exemplar", config),
       EnvironmentModule(environment)
   ).run(args)
 }

@@ -12,14 +12,14 @@ import misk.web.WebModule;
 public class ExemplarJavaApp {
   public static void main(String[] args) {
     Environment environment = Environment.fromEnvironmentVariable();
-    ExemplarConfig config = MiskConfig.load(ExemplarConfig.class, "exemplar", environment);
+    ExemplarJavaConfig config = MiskConfig.load(ExemplarJavaConfig.class, "exemplar", environment);
 
     new MiskApplication(
         new MiskModule(),
         new WebModule(),
         new HibernateModule(),
         new ExemplarJavaModule(),
-        new ConfigModule(ExemplarJavaConfig.class, "exemplar", config),
+        new ConfigModule<>(ExemplarJavaConfig.class, "exemplar", config),
         new EnvironmentModule(environment)
     ).run(args);
   }
