@@ -10,8 +10,9 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class LivenessCheckAction : WebAction {
-  @Inject private lateinit var services: MutableSet<Service>
+class LivenessCheckAction @Inject internal constructor(
+  private val services: List<Service>
+) : WebAction {
 
   @Get("/_liveness")
   @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
@@ -19,10 +20,8 @@ class LivenessCheckAction : WebAction {
     val isAlive = services.all {
       it.state() != State.FAILED && it.state() != State.TERMINATED
     }
+
     // TODO(jgulbronson) - Should return an empty body
-    return Response(
-        "",
-        statusCode = if (isAlive) 200 else 503
-    )
+    return Response("", statusCode = if (isAlive) 200 else 503)
   }
 }
