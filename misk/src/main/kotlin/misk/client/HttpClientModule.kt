@@ -8,7 +8,6 @@ import okhttp3.OkHttpClient
 import javax.inject.Inject
 
 /** Provides an [OkHttpClient] and [ProtoMessageHttpClient] for a peer service */
-// TODO(mmihic): Replace with something that binds a typed client via retrofit
 class HttpClientModule constructor(
   private val name: String,
   private val annotation: Annotation? = null
@@ -29,7 +28,7 @@ class HttpClientModule constructor(
     @Inject
     lateinit var httpClientsConfig: HttpClientsConfig
 
-    override fun get() = httpClientsConfig.newHttpClient(name)
+    override fun get() = httpClientsConfig[name].newHttpClient()
   }
 
   private class ProtoMessageHttpClientProvider(
@@ -43,8 +42,7 @@ class HttpClientModule constructor(
     lateinit var httpClientsConfig: HttpClientsConfig
 
     override fun get(): ProtoMessageHttpClient {
-      val endpointConfig = httpClientsConfig.endpoints[name] ?: throw IllegalArgumentException(
-          "no client configuration for endpoint $name")
+      val endpointConfig = httpClientsConfig[name]
       val httpClient = httpClientProvider.get()
       return ProtoMessageHttpClient(endpointConfig.url, moshi, httpClient)
     }
