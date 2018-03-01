@@ -10,9 +10,10 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class ReadinessCheckAction : WebAction {
-  @Inject lateinit var services: MutableSet<Service>
-  @Inject lateinit var healthChecks: MutableSet<HealthCheck>
+class ReadinessCheckAction @Inject internal constructor(
+  private val services: List<Service>,
+  private @JvmSuppressWildcards val healthChecks: List<HealthCheck>
+) : WebAction {
 
   @Get("/_readiness")
   @ResponseContentType(MediaTypes.APPLICATION_JSON)
