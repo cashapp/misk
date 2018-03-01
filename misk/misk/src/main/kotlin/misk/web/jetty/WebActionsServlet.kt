@@ -1,7 +1,6 @@
 package misk.web.jetty
 
 import misk.inject.keyOf
-import misk.logging.getLogger
 import misk.scope.ActionScope
 import misk.web.BoundAction
 import misk.web.Request
@@ -20,8 +19,6 @@ import javax.inject.Inject
 import javax.inject.Singleton
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
-
-private val logger = getLogger<WebActionsServlet>()
 
 @Singleton
 internal class WebActionsServlet @Inject constructor(
@@ -43,18 +40,17 @@ internal class WebActionsServlet @Inject constructor(
         keyOf<Request>() to asRequest)
 
     scope.enter(seedData).use {
-      val candidateActions = boundActions.mapNotNull {
-        it.match(
-            request.method,
-            request.contentType?.let { MediaType.parse(it) },
-            request.accepts(),
-            asRequest.url
-        )
-      }
-      val bestAction = candidateActions.sorted().firstOrNull()
-      bestAction?.handle(asRequest, response)
-      logger.debug { "Request handled by WebActionServlet" }
-    }
+          val candidateActions = boundActions.mapNotNull {
+            it.match(
+                request.method,
+                request.contentType?.let { MediaType.parse(it) },
+                request.accepts(),
+                asRequest.url
+            )
+          }
+          val bestAction = candidateActions.sorted().firstOrNull()
+          bestAction?.handle(asRequest, response)
+        }
   }
 
   override fun configure(factory: WebSocketServletFactory) {
@@ -104,7 +100,7 @@ private fun HttpServletRequest.urlString(): HttpUrl? {
     HttpUrl.parse(requestURL.toString() + "?" + queryString)
 }
 
-internal fun HttpServletRequest.asRequest(): Request {
+private fun HttpServletRequest.asRequest(): Request {
   return Request(
       urlString()!!,
       HttpMethod.valueOf(method),
