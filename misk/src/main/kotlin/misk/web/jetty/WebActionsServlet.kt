@@ -1,11 +1,13 @@
 package misk.web.jetty
 
+import misk.exceptions.StatusCode
 import misk.inject.keyOf
 import misk.scope.ActionScope
 import misk.web.BoundAction
 import misk.web.Request
 import misk.web.actions.WebAction
 import misk.web.mediatype.MediaRange
+import misk.web.mediatype.MediaTypes
 import okhttp3.Headers
 import okhttp3.HttpUrl
 import okhttp3.MediaType
@@ -47,9 +49,17 @@ internal class WebActionsServlet @Inject constructor(
                 request.accepts(),
                 asRequest.url
             )
+          }.sorted()
+
+          val bestAction = candidateActions.firstOrNull()
+          if (bestAction != null) {
+            bestAction.handle(asRequest, response)
+          } else {
+            response.status = StatusCode.NOT_FOUND.code
+            response.addHeader("Content-Type", MediaTypes.TEXT_PLAIN_UTF8)
+            response.writer.print("Nothing found at /${asRequest.url.encodedPath()}")
+            response.writer.close()
           }
-          val bestAction = candidateActions.sorted().firstOrNull()
-          bestAction?.handle(asRequest, response)
         }
   }
 
