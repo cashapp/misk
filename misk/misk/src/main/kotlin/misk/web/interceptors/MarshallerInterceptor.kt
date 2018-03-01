@@ -1,8 +1,8 @@
 package misk.web.interceptors
 
 import misk.Action
-import misk.Chain
-import misk.Interceptor
+import misk.NetworkChain
+import misk.NetworkInterceptor
 import misk.web.Response
 import misk.web.ResponseContentType
 import misk.web.actions.WebSocketListener
@@ -17,10 +17,10 @@ import kotlin.reflect.full.findAnnotation
 
 @Singleton
 internal class MarshallerInterceptor constructor(private val marshaller: Marshaller<Any>) :
-    Interceptor {
-  override fun intercept(chain: Chain): Response<Any> {
+    NetworkInterceptor {
+  override fun intercept(chain: NetworkChain): Response<*> {
     @Suppress("UNCHECKED_CAST")
-    val response = chain.proceed(chain.args) as Response<Any>
+    val response = chain.proceed(chain.request) as Response<Any>
 
     val headers = marshaller.contentType()?.let {
       response.headers.newBuilder()
@@ -34,8 +34,8 @@ internal class MarshallerInterceptor constructor(private val marshaller: Marshal
 
   class Factory @Inject internal constructor(
     @JvmSuppressWildcards private val marshallerFactories: List<Marshaller.Factory>
-  ) : Interceptor.Factory {
-    override fun create(action: Action): Interceptor? {
+  ) : NetworkInterceptor.Factory {
+    override fun create(action: Action): NetworkInterceptor? {
       if (action.returnType.classifier == WebSocketListener::class) {
         return null
       }

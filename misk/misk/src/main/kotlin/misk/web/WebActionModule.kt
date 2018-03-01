@@ -2,8 +2,9 @@ package misk.web
 
 import com.google.inject.AbstractModule
 import com.google.inject.multibindings.Multibinder
-import misk.Interceptor
+import misk.ApplicationInterceptor
 import misk.MiskDefault
+import misk.NetworkInterceptor
 import misk.asAction
 import misk.inject.parameterizedType
 import misk.inject.subtypeOf
@@ -128,12 +129,15 @@ internal class BoundActionProvider<A : WebAction, R>(
 ) : Provider<BoundAction<A, *>> {
 
   @Inject
-  private lateinit var userProvidedInterceptorFactories: List<Interceptor.Factory>
+  private lateinit var userProvidedApplicationInterceptorFactories: List<ApplicationInterceptor.Factory>
+
+  @Inject
+  private lateinit var userProvidedNetworkInterceptorFactories: List<NetworkInterceptor.Factory>
 
   @Inject
   @JvmSuppressWildcards
   @MiskDefault
-  private lateinit var miskInterceptorFactories: Set<Interceptor.Factory>
+  private lateinit var miskInterceptorFactories: Set<NetworkInterceptor.Factory>
 
   @Inject
   private lateinit var parameterExtractorFactories: List<ParameterExtractor.Factory>
@@ -141,12 +145,15 @@ internal class BoundActionProvider<A : WebAction, R>(
   override fun get(): BoundAction<A, *> {
     val action = function.asAction()
 
-    val interceptors = ArrayList<Interceptor>()
+    val networkInterceptors = ArrayList<NetworkInterceptor>()
     // Ensure that default interceptors are called before any user provided interceptors
-    miskInterceptorFactories.mapNotNullTo(interceptors) { it.create(action) }
-    userProvidedInterceptorFactories.mapNotNullTo(interceptors) { it.create(action) }
+    miskInterceptorFactories.mapNotNullTo(networkInterceptors) { it.create(action) }
+    userProvidedNetworkInterceptorFactories.mapNotNullTo(networkInterceptors) { it.create(action) }
 
-    return BoundAction(provider, interceptors, parameterExtractorFactories, function,
+    val applicationInterceptors = ArrayList<ApplicationInterceptor>()
+    userProvidedApplicationInterceptorFactories.mapNotNullTo(applicationInterceptors) { it.create(action) }
+
+    return BoundAction(provider, networkInterceptors, applicationInterceptors, parameterExtractorFactories, function,
         PathPattern.parse(pathPattern), httpMethod, acceptedContentTypes,
         responseContentType)
   }

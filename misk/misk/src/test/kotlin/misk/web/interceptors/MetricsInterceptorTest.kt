@@ -1,15 +1,21 @@
 package misk.web.interceptors
 
+import misk.NetworkChain
+import misk.NetworkInterceptor
 import misk.asAction
 import misk.metrics.Metrics
 import misk.metrics.MetricsModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.web.Get
+import misk.web.Request
 import misk.web.Response
 import misk.web.actions.WebAction
-import misk.web.actions.asChain
+import misk.web.actions.asNetworkChain
+import okhttp3.HttpUrl
+import okio.Buffer
 import org.assertj.core.api.Assertions.assertThat
+import org.eclipse.jetty.http.HttpMethod
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import javax.inject.Inject
@@ -54,18 +60,27 @@ class MetricsInterceptorTest {
   }
 
   fun invoke(desiredStatusCode: Int): Response<String> {
+    val request = Request(
+        HttpUrl.parse("http://foo.bar/")!!,
+        HttpMethod.GET,
+        body = Buffer()
+    )
     val metricsInterceptor = metricsInterceptorFactory.create(TestAction::call.asAction())!!
-    val chain = testAction.asChain(TestAction::call, listOf(desiredStatusCode),
-        metricsInterceptor)
+    val chain = testAction.asNetworkChain(TestAction::call, request, metricsInterceptor,
+        TerminalInterceptor(desiredStatusCode))
 
     @Suppress("UNCHECKED_CAST")
-    return chain.proceed(chain.args) as Response<String>
+    return chain.proceed(chain.request) as Response<String>
   }
-}
 
-internal class TestAction : WebAction {
-  @Get("/call/{result}")
-  fun call(desiredStatusCode: Int): Response<String> {
-    return Response("foo", statusCode = desiredStatusCode)
+  internal class TestAction : WebAction {
+    @Get("/call/{result}")
+    fun call(desiredStatusCode: Int): Response<String> {
+      return Response("foo", statusCode = desiredStatusCode)
+    }
+  }
+
+  internal class TerminalInterceptor(val status: Int) : NetworkInterceptor {
+    override fun intercept(chain: NetworkChain): Response<*> = Response("foo", statusCode = status)
   }
 }

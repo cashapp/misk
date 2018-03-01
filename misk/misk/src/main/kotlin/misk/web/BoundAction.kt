@@ -1,9 +1,12 @@
 package misk.web
 
-import misk.Interceptor
+import misk.ApplicationInterceptor
+import misk.NetworkChain
+import misk.NetworkInterceptor
 import misk.web.actions.WebAction
 import misk.web.actions.WebSocketListener
 import misk.web.actions.asChain
+import misk.web.actions.asNetworkChain
 import misk.web.extractors.ParameterExtractor
 import misk.web.mediatype.MediaRange
 import misk.web.mediatype.MediaTypes
@@ -23,7 +26,8 @@ import kotlin.reflect.KParameter
  */
 internal class BoundAction<A : WebAction, out R>(
   private val webActionProvider: Provider<A>,
-  val interceptors: MutableList<Interceptor>,
+  val networkInterceptors: MutableList<NetworkInterceptor>,
+  val applicationInterceptors: MutableList<ApplicationInterceptor>,
   parameterExtractorFactories: List<ParameterExtractor.Factory>,
   val function: KFunction<R>,
   val pathPattern: PathPattern,
@@ -90,17 +94,18 @@ internal class BoundAction<A : WebAction, out R>(
 
   internal fun handle(
     request: Request,
-    pathMather: Matcher
+    pathMatcher: Matcher
   ): Response<ResponseBody> {
     // Find values for all the parameters.
     val webAction = webActionProvider.get()
-    val parameters = parameterExtractors.map {
-      it.extract(webAction, request, pathMather)
-    }
 
-    val chain = webAction.asChain(function, parameters, *interceptors.toTypedArray())
+    // RequestBridgeInterceptor necessarily needs to be the last NetworkInterceptor run.
+    val interceptors = networkInterceptors.toMutableList()
+    interceptors.add(RequestBridgeInterceptor(parameterExtractors, applicationInterceptors,
+        pathMatcher))
 
-    val response = chain.proceed(chain.args) as Response<*>
+    val chain = webAction.asNetworkChain(function, request, *interceptors.toTypedArray())
+    val response = chain.proceed(chain.request)
 
     if (response.body !is ResponseBody) {
       throw IllegalStateException("expected a ResponseBody for $webAction")
@@ -184,3 +189,28 @@ internal class BoundActionMatch(
 private fun MediaType.closestMediaRangeMatch(ranges: List<MediaRange>) =
     ranges.mapNotNull { it.matcher(this) }.sorted().firstOrNull()
 
+/**
+ *  Acts as the bridge between network interceptors and application interceptors.
+ *  The contract is that whatever comes back from the Application chain will be passed back up
+ *  as a Response, with extra care given to what happens if the Application chain produces
+ *  a Response.
+ */
+private class RequestBridgeInterceptor(
+  val parameterExtractors: List<ParameterExtractor>,
+  val applicationInterceptors: List<ApplicationInterceptor>,
+  val pathMatcher: Matcher
+) : NetworkInterceptor {
+  override fun intercept(chain: NetworkChain): Response<*> {
+    val parameters = parameterExtractors.map {
+      it.extract(chain.action, chain.request, pathMatcher)
+    }
+
+    val applicationChain =
+        chain.action.asChain(chain.function, parameters, *applicationInterceptors.toTypedArray())
+
+    val result = applicationChain.proceed(applicationChain.args)
+    // NB(young): Something down the chain could have returned a Response, so avoid double
+    // wrapping it.
+    return if (result is Response<*>) result else Response(result)
+  }
+}
