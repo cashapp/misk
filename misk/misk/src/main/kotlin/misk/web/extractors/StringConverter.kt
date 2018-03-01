@@ -2,6 +2,7 @@ package misk.web.extractors
 
 import kotlin.reflect.KType
 import kotlin.reflect.full.createType
+import kotlin.reflect.full.isSubtypeOf
 import kotlin.reflect.jvm.javaType
 
 // Pre-generate these specific handled KTypes so we don't need to regenerate them for every
@@ -19,18 +20,21 @@ private val booleanTypeNullable: KType = Boolean::class.createType(nullable = tr
 
 internal typealias StringConverter = (String) -> Any?
 
-internal fun converterFor(type: KType): StringConverter? = when (type) {
-  stringType -> { it -> it }
-  stringTypeNullable -> { it -> it }
-  intType -> numberConversionWrapper { it.toInt() }
-  intTypeNullable -> numberConversionWrapper { it.toInt() }
-  longType -> numberConversionWrapper { it.toLong() }
-  longTypeNullable -> numberConversionWrapper { it.toLong() }
-  doubleType -> numberConversionWrapper { it.toDouble() }
-  doubleTypeNullable -> numberConversionWrapper { it.toDouble() }
-  booleanType -> numberConversionWrapper { it.toBoolean() }
-  booleanTypeNullable -> numberConversionWrapper { it.toBoolean() }
-  else -> createFromValueOf(type)
+internal fun converterFor(type: KType): StringConverter? {
+
+  return when {
+    type.isSubtypeOf(stringType) -> { it -> it }
+    type == stringTypeNullable -> { it -> it }
+    type.isSubtypeOf(intType) -> numberConversionWrapper { it.toInt() }
+    type == intTypeNullable -> numberConversionWrapper { it.toInt() }
+    type.isSubtypeOf(longType) -> numberConversionWrapper { it.toLong() }
+    type == longTypeNullable -> numberConversionWrapper { it.toLong() }
+    type.isSubtypeOf(doubleType) -> numberConversionWrapper { it.toDouble() }
+    type == doubleTypeNullable -> numberConversionWrapper { it.toDouble() }
+    type.isSubtypeOf(booleanType) -> numberConversionWrapper { it.toBoolean() }
+    type == booleanTypeNullable -> numberConversionWrapper { it.toBoolean() }
+    else -> createFromValueOf(type)
+  }
 }
 
 private fun numberConversionWrapper(wrappedFunc: StringConverter): StringConverter {
