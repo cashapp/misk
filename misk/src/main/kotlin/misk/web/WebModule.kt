@@ -69,6 +69,10 @@ class WebModule : KAbstractModule() {
     binder().addMultibinderBindingWithAnnotation<NetworkInterceptor.Factory, MiskDefault>()
         .to<MetricsInterceptor.Factory>()
 
+    // Traces requests as they work their way through the system.
+    binder().addMultibinderBindingWithAnnotation<NetworkInterceptor.Factory, MiskDefault>()
+        .to<TracingInterceptor.Factory>()
+
     // Convert and log application level exceptions into their appropriate response format
     binder().addMultibinderBindingWithAnnotation<NetworkInterceptor.Factory, MiskDefault>()
         .to<ExceptionHandlingInterceptor.Factory>()
@@ -78,11 +82,6 @@ class WebModule : KAbstractModule() {
     binder().addMultibinderBindingWithAnnotation<NetworkInterceptor.Factory, MiskDefault>()
         .to<MarshallerInterceptor.Factory>()
 
-    // Traces requests as they work their way through the system.
-    binder().addMultibinderBindingWithAnnotation<NetworkInterceptor.Factory, MiskDefault>()
-        .to<TracingInterceptor.Factory>()
-
-    // Register built-in exception mappers
     install(ExceptionMapperModule.create<ActionException, ActionExceptionMapper>())
 
     // Register built-in parameter extractors
