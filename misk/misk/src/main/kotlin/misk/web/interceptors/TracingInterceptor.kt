@@ -3,6 +3,7 @@ package misk.web.interceptors
 import com.google.inject.Inject
 import com.google.inject.Singleton
 import io.opentracing.Tracer
+import io.opentracing.tag.Tags
 import misk.Action
 import misk.NetworkChain
 import misk.NetworkInterceptor
@@ -28,9 +29,19 @@ internal class TracingInterceptor internal constructor(private val tracer: Trace
   }
 
   override fun intercept(chain: NetworkChain): Response<*> {
-    var result: Response<*>? = null
-    tracer.buildSpan("${chain.action}")
-        .startActive(true).use { result = chain.proceed(chain.request) }
-    return result?: throw IllegalStateException("Null result in TracingInterceptor")
+    val scope = tracer.buildSpan("${chain.action}").startActive(true)
+    return scope.use {
+      try {
+        val result = chain.proceed(chain.request)
+        Tags.HTTP_STATUS.set(scope.span(), result.statusCode)
+        if (result.statusCode > 399) {
+          Tags.ERROR.set(scope.span(), true)
+        }
+        result
+      } catch (exception: Exception) {
+        Tags.ERROR.set(scope.span(), true)
+        throw exception
+      }
+    }
   }
 }
