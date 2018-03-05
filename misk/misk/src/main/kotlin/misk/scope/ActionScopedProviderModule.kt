@@ -9,6 +9,7 @@ import misk.inject.KAbstractModule
 import misk.inject.asSingleton
 import misk.inject.parameterizedType
 import misk.inject.typeLiteral
+import java.lang.reflect.Type
 import javax.inject.Inject
 import kotlin.reflect.KClass
 
@@ -43,42 +44,67 @@ abstract class ActionScopedProviderModule : KAbstractModule() {
     })
   }
 
-  /** Binds an unqualified [ActionScoped] along with its provider */
-  fun <T : Any> bindProvider(
-    kclass: KClass<T>,
-    providerClass: KClass<out ActionScopedProvider<T>>
-  ) {
-    bindProvider(
-        Key.get(kclass.java),
-        Key.get(actionScopedType(kclass)),
-        binder().getProvider(providerClass.java))
-  }
-
   /** Binds an annotation qualified [ActionScoped] along with its provider */
   fun <T : Any> bindProvider(
     kclass: KClass<T>,
-    a: Annotation,
-    providerClass: KClass<out ActionScopedProvider<T>>
+    providerType: KClass<out ActionScopedProvider<T>>,
+    annotatedBy: Annotation? = null
   ) {
-    bindProvider(
-        Key.get(kclass.java, a),
-        Key.get(actionScopedType(kclass), a),
-        binder().getProvider(providerClass.java))
+    val typeKey =
+        if (annotatedBy == null) Key.get(kclass.java)
+        else Key.get(kclass.java, annotatedBy)
+
+    val actionScopedType = actionScopedType(kclass.java)
+    val actionScopedKey =
+        if (annotatedBy == null) Key.get(actionScopedType)
+        else Key.get(actionScopedType, annotatedBy)
+
+    bindProvider(typeKey, actionScopedKey, binder().getProvider(providerType.java))
   }
 
   /** Binds an annotation qualified [ActionScoped] along with its provider */
-  fun <T : Any> bindProvider(
-    kclass: KClass<T>,
-    a: KClass<Annotation>,
-    providerClass: KClass<out ActionScopedProvider<T>>
+  fun <T, A : Annotation> bindProvider(
+    type: TypeLiteral<T>,
+    providerType: KClass<out ActionScopedProvider<T>>,
+    annotatedBy: Annotation? = null
   ) {
-    bindProvider(
-        Key.get(kclass.java, a.java),
-        Key.get(actionScopedType(kclass), a.java),
-        binder().getProvider(providerClass.java))
+    val typeKey =
+        if (annotatedBy == null) Key.get(type)
+        else Key.get(type, annotatedBy)
+
+    val actionScopedType = actionScopedType(type.type) as TypeLiteral<ActionScoped<T>>
+    val actionScopedKey =
+        if (annotatedBy == null) Key.get(actionScopedType)
+        else Key.get(actionScopedType, annotatedBy)
+
+    bindProvider(typeKey, actionScopedKey, binder().getProvider(providerType.java))
   }
 
-  private fun <T : Any> bindProvider(
+  /** Binds an annotation qualified [ActionScoped] along with its provider */
+  fun <T : Any, A : Annotation> bindProvider(
+    kclass: KClass<T>,
+    providerType: KClass<out ActionScopedProvider<T>>,
+    annotatedBy: Class<A>
+  ) {
+    val typeKey = Key.get(kclass.java, annotatedBy)
+    val actionScopedType = actionScopedType(kclass.java)
+    val actionScopedKey = Key.get(actionScopedType, annotatedBy)
+    bindProvider(typeKey, actionScopedKey, binder().getProvider(providerType.java))
+  }
+
+  /** Binds an annotation qualified [ActionScoped] along with its provider */
+  fun <T, A : Annotation> bindProvider(
+    type: TypeLiteral<T>,
+    providerType: KClass<out ActionScopedProvider<T>>,
+    annotatedBy: Class<A>
+  ) {
+    val typeKey = Key.get(type, annotatedBy)
+    val actionScopedType = actionScopedType(type.type) as TypeLiteral<ActionScoped<T>>
+    val actionScopedKey = Key.get(actionScopedType, annotatedBy)
+    bindProvider(typeKey, actionScopedKey, binder().getProvider(providerType.java))
+  }
+
+  private fun <T> bindProvider(
     key: Key<T>,
     actionScopedKey: Key<ActionScoped<T>>,
     providerProvider: Provider<out ActionScopedProvider<T>>
@@ -94,9 +120,15 @@ abstract class ActionScopedProviderModule : KAbstractModule() {
 
   companion object {
     @Suppress("UNCHECKED_CAST")
-    private fun <T : Any> actionScopedType(kclass: KClass<T>) =
-        parameterizedType<ActionScoped<T>>(kclass.java).typeLiteral()
-            as TypeLiteral<ActionScoped<T>>
+    private fun <T : Any> actionScopedType(kclass: KClass<T>) = actionScopedType(kclass.java)
+
+    @Suppress("UNCHECKED_CAST")
+    private fun <T : Any> actionScopedType(clazz: Class<T>) =
+        parameterizedType<ActionScoped<T>>(clazz).typeLiteral() as TypeLiteral<ActionScoped<T>>
+
+    @Suppress("UNCHECKED_CAST")
+    private fun actionScopedType(type: Type) =
+        parameterizedType<ActionScoped<Any>>(type).typeLiteral() as TypeLiteral<ActionScoped<Any>>
 
     private val KEY_TYPE = object : TypeLiteral<Key<*>>() {}
     private val ACTION_SCOPED_PROVIDER_TYPE = object : TypeLiteral<ActionScopedProvider<*>>() {}
