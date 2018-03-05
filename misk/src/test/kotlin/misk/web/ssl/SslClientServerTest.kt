@@ -14,8 +14,11 @@ import misk.client.ProtoMessageHttpClient
 import misk.inject.KAbstractModule
 import misk.inject.getInstance
 import misk.moshi.MoshiModule
+import misk.scope.ActionScoped
+import misk.security.ssl.ClientCertSubject
 import misk.security.ssl.KeystoreConfig
 import misk.security.ssl.Keystores
+import misk.security.x509.X500Name
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.testing.TestWebModule
@@ -74,7 +77,7 @@ internal class SslClientServerTest {
   @Test
   fun usesSsl() {
     val dinosaur = certClient.post<Dinosaur>("/hello", Dinosaur.Builder().name("trex").build())
-    assertThat(dinosaur.name).isEqualTo("hello trex")
+    assertThat(dinosaur.name).isEqualTo("hello trex from misk-client")
   }
 
   @Test
@@ -94,11 +97,14 @@ internal class SslClientServerTest {
   }
 
   class HelloAction : WebAction {
+    @Inject @ClientCertSubject private lateinit var clientCertSubjectDN: ActionScoped<X500Name?>
+
     @Post("/hello")
     @RequestContentType(MediaTypes.APPLICATION_JSON)
     @ResponseContentType(MediaTypes.APPLICATION_JSON)
     fun sayHello(@RequestBody request: Dinosaur):
-        Dinosaur = request.newBuilder().name("hello ${request.name}").build()
+        Dinosaur = request.newBuilder()
+        .name("hello ${request.name} from ${clientCertSubjectDN.get()?.commonName}").build()
   }
 
   class TestModule : KAbstractModule() {

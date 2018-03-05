@@ -7,8 +7,8 @@ import javax.inject.Inject
 class TestActionScopedProviderModule : ActionScopedProviderModule() {
   override fun configureProviders() {
     bindSeedData(String::class, Names.named("from-seed"))
-    bindProvider(String::class, Names.named("foo"), FooProvider::class)
-    bindProvider(String::class, Names.named("bar"), BarProvider::class)
+    bindProvider(String::class, FooProvider::class, Names.named("foo"))
+    bindProvider(String::class, BarProvider::class, Names.named("bar"))
   }
 
   class BarProvider @Inject internal constructor(
