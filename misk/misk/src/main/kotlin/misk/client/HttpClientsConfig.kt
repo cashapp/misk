@@ -14,35 +14,22 @@ data class HttpClientsConfig(
   private val defaultWriteTimeout: Duration? = null,
   private val defaultReadTimeout: Duration? = null,
   private val ssl: HttpClientSSLConfig? = null,
-  val endpoints: Map<String, HttpClientEndpointConfig> = mapOf()
+  private val endpoints: Map<String, HttpClientEndpointConfig> = mapOf()
 ) : Config {
-  /** @return a client built from this configuration */
-  fun newHttpClient(clientName: String): OkHttpClient {
+  /** @return The [HttpClientEndpointConfig] for the given client, populated with defaults as needed */
+  operator fun get(clientName: String): HttpClientEndpointConfig {
     // TODO(mmihic): Cache, proxy, etc
     val endpointConfig = endpoints[clientName] ?: throw IllegalArgumentException(
         "no client configuration for endpoint $clientName")
 
-    val builder = unconfiguredClient.newBuilder()
-
-    (endpointConfig.connectTimeout ?: defaultConnectTimeout)
-        ?.let { builder.connectTimeout(it.toMillis(), TimeUnit.MILLISECONDS) }
-    (endpointConfig.writeTimeout ?: defaultWriteTimeout)
-        ?.let { builder.writeTimeout(it.toMillis(), TimeUnit.MILLISECONDS) }
-    (endpointConfig.readTimeout ?: defaultReadTimeout)
-        ?.let { builder.readTimeout(it.toMillis(), TimeUnit.MILLISECONDS) }
-    (endpointConfig.ssl ?: ssl)
-        ?.let {
-          val trustManagers = SslContextFactory.loadTrustManagers(it.truststore.load())
-          val x509TrustManager = trustManagers.mapNotNull { it as? X509TrustManager }.firstOrNull()
-              ?: throw IllegalStateException(
-                  "no x509 trust manager in ${it.truststore.path}")
-          builder.sslSocketFactory(it.createSSLContext().socketFactory, x509TrustManager)
-        }
-    builder.proxy(Proxy.NO_PROXY)
-    return builder.build()
+    return HttpClientEndpointConfig(
+        endpointConfig.url,
+        connectTimeout = endpointConfig.connectTimeout ?: defaultConnectTimeout,
+        writeTimeout = endpointConfig.writeTimeout ?: defaultWriteTimeout,
+        readTimeout = endpointConfig.readTimeout ?: defaultReadTimeout,
+        ssl = endpointConfig.ssl ?: ssl
+    )
   }
-
-  private val unconfiguredClient = OkHttpClient()
 }
 
 data class HttpClientSSLConfig(
@@ -58,4 +45,26 @@ data class HttpClientEndpointConfig(
   val writeTimeout: Duration? = null,
   val readTimeout: Duration? = null,
   val ssl: HttpClientSSLConfig? = null
-)
+) {
+  /** @return a client builder initialized based on this configuration */
+  fun newHttpClient(): OkHttpClient {
+    // TODO(mmihic): Cache, proxy, etc
+    val builder = unconfiguredClient.newBuilder()
+    connectTimeout?.let { builder.connectTimeout(it.toMillis(), TimeUnit.MILLISECONDS) }
+    readTimeout?.let { builder.readTimeout(it.toMillis(), TimeUnit.MILLISECONDS) }
+    writeTimeout?.let { builder.writeTimeout(it.toMillis(), TimeUnit.MILLISECONDS) }
+    ssl?.let {
+      val trustManagers = SslContextFactory.loadTrustManagers(it.truststore.load())
+      val x509TrustManager = trustManagers.mapNotNull { it as? X509TrustManager }.firstOrNull()
+          ?: throw IllegalStateException(
+              "no x509 trust manager in ${it.truststore.path}")
+      builder.sslSocketFactory(it.createSSLContext().socketFactory, x509TrustManager)
+    }
+    builder.proxy(Proxy.NO_PROXY)
+    return builder.build()
+  }
+
+  companion object {
+    private val unconfiguredClient = OkHttpClient()
+  }
+}

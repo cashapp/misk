@@ -90,7 +90,5 @@ internal class TypedHttpClientTest {
               "dinosaur" to HttpClientEndpointConfig(jetty.httpServerUrl.toString())
           ))
     }
-
   }
-
 }
