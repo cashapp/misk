@@ -11,5 +11,5 @@ data class Request(
   val method: HttpMethod,
   val headers: Headers = Headers.of(),
   val body: BufferedSource,
-  val websocket: WebSocket? = null
+  var websocket: WebSocket<Any>? = null
 )

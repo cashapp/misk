@@ -34,7 +34,7 @@ import okio.ByteString
  * incoming messages. But it does not guarantee that the other peer will successfully receive all of
  * its incoming messages.
  */
-interface WebSocket {
+interface WebSocket<in T> {
   /**
    * Returns the size in bytes of all messages enqueued to be transmitted to the server. This
    * doesn't include framing overhead. It also doesn't include any bytes buffered by the operating
@@ -45,8 +45,8 @@ interface WebSocket {
   fun queueSize(): Long
 
   /**
-   * Attempts to enqueue {@code text} to be UTF-8 encoded and sent as a the data of a text (type
-   * {@code 0x1}) message.
+   * Attempts to enqueue {@code content} to be UTF-8 encoded and sent as a the marshaled form of the
+   * content.
    *
    * <p>This method returns true if the message was enqueued. Messages that would overflow the
    * outgoing message buffer will be rejected and trigger a {@linkplain #close graceful shutdown} of
@@ -55,20 +55,7 @@ interface WebSocket {
    *
    * <p>This method returns immediately.
    */
-  fun send(bytes: ByteString): Boolean
-
-  /**
-   * Attempts to enqueue {@code bytes} to be sent as a the data of a binary (type {@code 0x2})
-   * message.
-   *
-   * <p>This method returns true if the message was enqueued. Messages that would overflow the
-   * outgoing message buffer will be rejected and trigger a {@linkplain #close graceful shutdown} of
-   * this web socket. This method returns false in that case, and in any other case where this
-   * web socket is closing, closed, or canceled.
-   *
-   * <p>This method returns immediately.
-   */
-  fun send(text: String): Boolean
+  fun send(content: T): Boolean
 
   /**
    * Attempts to initiate a graceful shutdown of this web socket. Any already-enqueued messages will

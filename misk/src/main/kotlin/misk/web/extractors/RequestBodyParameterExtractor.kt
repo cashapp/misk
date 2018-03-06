@@ -25,8 +25,8 @@ internal class RequestBodyParameterExtractor(
   ): Any? {
     val mediaType = request.headers["Content-Type"]?.let { MediaType.parse(it) }
     val unmarshaller = mediaType?.let { type ->
-      unmarshallerFactories.map { it.create(type, parameter.type) }.firstOrNull()
-    } ?: GenericUnmarshallers.into(parameter)
+      unmarshallerFactories.map { it.create<Any>(type, parameter.type) }.firstOrNull()
+    } ?: GenericUnmarshallers.into(parameter.type)
     ?: throw IllegalArgumentException("no generic unmarshaller for ${parameter.type}")
 
     return unmarshaller.unmarshal(request.body)

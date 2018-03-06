@@ -14,6 +14,7 @@ data class Response<out T>(
 
 interface ResponseBody {
   fun writeTo(sink: BufferedSink)
+  fun get(): Any = Unit
 }
 
 fun Response<ResponseBody>.writeToJettyResponse(jettyResponse: HttpServletResponse) {

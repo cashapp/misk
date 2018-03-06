@@ -8,7 +8,6 @@ import okio.BufferedSink
 import okio.BufferedSource
 import okio.ByteString
 import java.lang.reflect.Type
-import kotlin.reflect.KParameter
 import kotlin.reflect.KType
 import kotlin.reflect.jvm.javaType
 
@@ -23,21 +22,20 @@ object GenericUnmarshallers {
       ByteString::class.java
   )
 
-  private object ToString : Unmarshaller {
+  private object ToString : Unmarshaller<Any> {
     override fun unmarshal(source: BufferedSource): Any? = source.readUtf8()
   }
 
-  private object ToBufferedSource : Unmarshaller {
+  private object ToBufferedSource : Unmarshaller<Any> {
     override fun unmarshal(source: BufferedSource): Any? = source
   }
 
-  private object ToByteString : Unmarshaller {
+  private object ToByteString : Unmarshaller<Any> {
     override fun unmarshal(source: BufferedSource): Any? = source.readByteString()
   }
 
-  fun into(parameter: KParameter): Unmarshaller? {
-    val paramType = parameter.type
-    return when (paramType.typeLiteral().rawType) {
+  fun into(type: KType): Unmarshaller<Any>? {
+    return when (type.typeLiteral().rawType) {
       String::class.java -> ToString
       BufferedSource::class.java -> ToBufferedSource
       ByteString::class.java -> ToByteString
