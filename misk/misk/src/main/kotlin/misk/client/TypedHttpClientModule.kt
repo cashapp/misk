@@ -1,15 +1,16 @@
 package misk.client
 
+import com.google.inject.Inject
 import com.google.inject.Key
 import com.google.inject.Provider
 import com.squareup.moshi.Moshi
+import io.opentracing.Tracer
 import misk.inject.KAbstractModule
 import misk.inject.newMultibinder
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 import java.lang.reflect.Proxy
-import javax.inject.Inject
 import kotlin.reflect.KClass
 
 /** Creates a retrofit-backed typed client given an API interface and an HTTP configuration */
@@ -61,6 +62,9 @@ class TypedHttpClientModule<T : Any>(
     @Inject
     private lateinit var moshi: Moshi
 
+    @Inject(optional=true)
+    private val tracer: Tracer? = null
+
     override fun get(): T {
       val okhttp = httpClientProvider.get()
 
@@ -75,7 +79,8 @@ class TypedHttpClientModule<T : Any>(
           retrofit,
           okhttp,
           clientNetworkInterceptorFactories,
-          clientApplicationInterceptorFactories)
+          clientApplicationInterceptorFactories,
+          tracer)
 
       @Suppress("UNCHECKED_CAST")
       return Proxy.newProxyInstance(
