@@ -1,6 +1,8 @@
 package misk.client
 
 import com.google.common.util.concurrent.SettableFuture
+import io.opentracing.Tracer
+import io.opentracing.contrib.okhttp3.TracingCallFactory
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -28,7 +30,8 @@ internal class ClientInvocationHandler(
   retrofit: Retrofit,
   okHttpTemplate: OkHttpClient,
   networkInterceptorFactories: List<ClientNetworkInterceptor.Factory>,
-  applicationInterceptorFactories: List<ClientApplicationInterceptor.Factory>
+  applicationInterceptorFactories: List<ClientApplicationInterceptor.Factory>,
+  tracer: Tracer?
 ) : InvocationHandler {
 
   private val actionsByMethod = interfaceType.functions
@@ -56,8 +59,12 @@ internal class ClientInvocationHandler(
           clientBuilder.build()
         }
 
-    methodName to retrofit.newBuilder()
+    val retrofitBuilder = retrofit.newBuilder()
         .client(actionSpecificClient)
+
+    if (tracer != null) retrofitBuilder.callFactory(TracingCallFactory(actionSpecificClient, tracer))
+
+    methodName to retrofitBuilder
         .build()
         .create(interfaceType.java)
   }.toMap()
