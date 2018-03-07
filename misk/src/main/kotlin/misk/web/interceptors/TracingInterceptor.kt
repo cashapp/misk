@@ -2,12 +2,15 @@ package misk.web.interceptors
 
 import com.google.inject.Inject
 import com.google.inject.Singleton
+import io.opentracing.SpanContext
 import io.opentracing.Tracer
+import io.opentracing.propagation.Format
 import io.opentracing.tag.Tags
 import misk.Action
 import misk.NetworkChain
 import misk.NetworkInterceptor
 import misk.logging.getLogger
+import misk.tracing.interceptors.TextMultimapExtractAdapter
 import misk.web.Response
 
 private val logger = getLogger<TracingInterceptor>()
@@ -29,7 +32,21 @@ internal class TracingInterceptor internal constructor(private val tracer: Trace
   }
 
   override fun intercept(chain: NetworkChain): Response<*> {
-    val scope = tracer.buildSpan("${chain.action}").startActive(true)
+    val parentContext: SpanContext? = try {
+      tracer.extract(Format.Builtin.HTTP_HEADERS,
+          TextMultimapExtractAdapter(chain.request.headers.toMultimap()))
+    } catch (e: Exception) {
+      logger.warn("Failure attempting to extract span context. Existing context, if any," +
+          " will be ignored in creation of span", e)
+      null
+    }
+
+    val scopeBuilder = tracer.buildSpan("${chain.action}")
+    if (parentContext != null) {
+      scopeBuilder.asChildOf(parentContext)
+    }
+
+    val scope = scopeBuilder.startActive(true)
     return scope.use {
       try {
         val result = chain.proceed(chain.request)
@@ -38,9 +55,9 @@ internal class TracingInterceptor internal constructor(private val tracer: Trace
           Tags.ERROR.set(scope.span(), true)
         }
         result
-      } catch (exception: Exception) {
+      } catch (e: Exception) {
         Tags.ERROR.set(scope.span(), true)
-        throw exception
+        throw e
       }
     }
   }

@@ -24,6 +24,7 @@ import misk.web.WebModule
 import misk.web.actions.WebAction
 import misk.web.actions.asNetworkChain
 import misk.web.jetty.JettyService
+import okhttp3.Headers
 import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
 import okio.Buffer
@@ -62,6 +63,26 @@ class TracingInterceptorTest {
 
     val mockTracer = tracer as MockTracer
     assertThat(mockTracer.finishedSpans().size).isEqualTo(1)
+    assertThat(mockTracer.finishedSpans().first().parentId()).isEqualTo(0)
+  }
+
+  @Test
+  fun looksForParentContext() {
+    val tracingInterceptor = tracingInterceptorFactory.create(TracingTestAction::call.asAction())!!
+    val request = Request(
+        HttpUrl.parse("http://foo.bar/")!!,
+        HttpMethod.GET,
+        Headers.Builder().add("spanid", "1").add("traceid", "2").build(),
+        body = Buffer()
+    )
+    val chain = tracingTestAction.asNetworkChain(TracingTestAction::call, request,
+        tracingInterceptor, TerminalInterceptor(200))
+
+    chain.proceed(chain.request)
+
+    val mockTracer = tracer as MockTracer
+    assertThat(mockTracer.finishedSpans().size).isEqualTo(1)
+    assertThat(mockTracer.finishedSpans().first().parentId()).isEqualTo(1)
   }
 
   @Test
