@@ -45,6 +45,7 @@ dependencies {
   compile dep.gcpCloudStorage
   compile dep.jCommander
   compile dep.openTracing
+  compile dep.openTracingOkHttp
   compile dep.tracingJaeger
   compile dep.retrofit
   compile dep.retrofitMoshi
