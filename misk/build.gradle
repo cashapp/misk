@@ -47,6 +47,9 @@ dependencies {
   compile dep.openTracing
   compile dep.openTracingOkHttp
   compile dep.tracingJaeger
+  compile dep.tracingZipkin
+  compile dep.zipkinReporter
+  compile dep.zipkinBrave
   compile dep.retrofit
   compile dep.retrofitMoshi
 
