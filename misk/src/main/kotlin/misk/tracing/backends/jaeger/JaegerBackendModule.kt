@@ -12,9 +12,7 @@ import misk.inject.to
 import misk.tracing.TracingService
 
 class JaegerBackendModule(val config: JaegerBackendConfig?) : KAbstractModule() {
-  override fun configure() {
-    binder().addMultibinderBinding<Service>().to<TracingService>()
-  }
+  override fun configure() {}
 
   @Provides
   @Singleton
