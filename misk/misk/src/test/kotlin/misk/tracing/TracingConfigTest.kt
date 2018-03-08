@@ -1,5 +1,7 @@
 package misk.tracing
 
+import com.google.inject.CreationException
+import com.google.inject.Guice
 import com.google.inject.util.Modules
 import io.opentracing.Tracer
 import misk.config.ConfigModule
@@ -9,6 +11,7 @@ import misk.environment.EnvironmentModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Test
 import javax.inject.Inject
 
@@ -29,5 +32,20 @@ class TracingConfigTest {
   @Test
   fun tracerProperlyInjected() {
     assertThat(tracer).isInstanceOf(com.uber.jaeger.Tracer::class.java)
+  }
+
+  @Test
+  fun multipleTracerConfigs() {
+    val config = MiskConfig.load<TestTracingConfig>(
+        TestTracingConfig::class.java, "multiple-tracers", defaultEnv)
+
+    val exception = assertThrows(CreationException::class.java, {
+      Guice.createInjector(ConfigModule.create<TestTracingConfig>("test_app", config),
+          TracingModule(config.tracing))
+    })
+
+    assertThat(exception.cause).isInstanceOf(IllegalStateException::class.java)
+    assertThat(exception.localizedMessage).contains("More than one tracer has been configured." +
+        " Please remove one.")
   }
 }
