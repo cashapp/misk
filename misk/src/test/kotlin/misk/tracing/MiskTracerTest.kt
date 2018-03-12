@@ -1,5 +1,6 @@
 package misk.tracing
 
+import io.opentracing.Span
 import io.opentracing.Tracer
 import io.opentracing.mock.MockTracer
 import io.opentracing.tag.Tags
@@ -28,8 +29,9 @@ class MiskTracerTest {
     val mockTracer = tracer as MockTracer
 
     assertThat(mockTracer.finishedSpans().size).isEqualTo(0)
-    miskTracer.trace("traceMe", ::traceMe)
+    val spanUsed = miskTracer.trace("traceMe", ::traceMe)
     assertThat(mockTracer.finishedSpans().size).isEqualTo(1)
+    assertThat(spanUsed).isEqualTo(mockTracer.finishedSpans().first())
   }
 
   @Test
@@ -42,9 +44,11 @@ class MiskTracerTest {
     assertThat(mockTracer.finishedSpans().get(0).tags().get(Tags.ERROR.key)).isEqualTo(true)
   }
 
-  fun traceMe(){}
+  fun traceMe(span: Span) : Span {
+    return span
+  }
 
-  fun failedTrace() {
+  fun failedTrace(span: Span) {
     throw ActionException(StatusCode.BAD_REQUEST, "sadness")
   }
 }
