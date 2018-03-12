@@ -1,5 +1,6 @@
 package misk.tracing
 
+import io.opentracing.Span
 import io.opentracing.Tracer
 import io.opentracing.tag.Tags
 import javax.inject.Inject
@@ -14,11 +15,11 @@ class MiskTracer @Inject internal constructor(
    * @param spanName name to be used for the span. Usually, should be a string representation
    * of the method you plan to trace
    */
-  fun <R> trace(spanName: String, method: () -> R) : R {
+  fun <R> trace(spanName: String, method: (span: Span) -> R) : R {
     val scope = tracer.buildSpan(spanName).startActive(true)
     return scope.use {
       try {
-        method()
+        method(scope.span())
       } catch (exception: Exception) {
         Tags.ERROR.set(scope.span(), true)
         throw exception

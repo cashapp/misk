@@ -6,6 +6,7 @@ import io.opentracing.SpanContext
 import io.opentracing.Tracer
 import io.opentracing.propagation.Format
 import io.opentracing.tag.Tags
+import io.opentracing.tag.Tags.SPAN_KIND_SERVER
 import misk.Action
 import misk.NetworkChain
 import misk.NetworkInterceptor
@@ -41,7 +42,11 @@ internal class TracingInterceptor internal constructor(private val tracer: Trace
       null
     }
 
-    val scopeBuilder = tracer.buildSpan("${chain.action}")
+    val scopeBuilder = tracer.buildSpan(chain.action.javaClass.name)
+        .withTag(Tags.HTTP_METHOD.key, chain.request.method.toString())
+        .withTag(Tags.HTTP_URL.key, chain.request.url.toString())
+        .withTag(Tags.SPAN_KIND.key, SPAN_KIND_SERVER)
+
     if (parentContext != null) {
       scopeBuilder.asChildOf(parentContext)
     }
