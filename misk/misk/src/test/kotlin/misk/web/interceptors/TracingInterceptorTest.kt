@@ -64,6 +64,13 @@ class TracingInterceptorTest {
     val mockTracer = tracer as MockTracer
     assertThat(mockTracer.finishedSpans().size).isEqualTo(1)
     assertThat(mockTracer.finishedSpans().first().parentId()).isEqualTo(0)
+    val span = mockTracer.finishedSpans().first()
+    assertThat(span.parentId()).isEqualTo(0)
+    assertThat(span.tags()).isEqualTo(mapOf(
+        "http.method" to "GET",
+        "http.status_code" to 200,
+        "http.url" to "http://foo.bar/",
+        "span.kind" to "server"))
   }
 
   @Test
