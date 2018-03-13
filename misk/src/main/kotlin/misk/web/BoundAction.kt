@@ -118,14 +118,22 @@ internal class BoundAction<A : WebAction, out R>(
   internal fun handleWebSocket(
     request: Request,
     pathMatcher: Matcher
-  ): WebSocketListener {
+  ): WebSocketListener<Any> {
     val webAction = webActionProvider.get()
-    val parameters = parameterExtractors.map {
-      it.extract(webAction, request, pathMatcher)
+
+    val interceptors = networkInterceptors.toMutableList()
+    interceptors.add(RequestBridgeInterceptor(parameterExtractors, applicationInterceptors,
+        pathMatcher))
+
+    val chain = webAction.asNetworkChain(function, request, *interceptors.toTypedArray())
+
+    val response = chain.proceed(chain.request)
+    if (response.body !is ResponseBody) {
+      throw IllegalStateException("expected a ResponseBody for $webAction")
     }
 
-    val chain = webAction.asChain(function, parameters)
-    return chain.proceed(chain.args) as WebSocketListener
+    @Suppress("UNCHECKED_CAST")
+    return response.body.get() as WebSocketListener<Any>
   }
 
   /** Returns a Matcher if requestUrl can be matched, else null */
@@ -181,7 +189,7 @@ internal class BoundActionMatch(
     result.writeToJettyResponse(jettyResponse)
   }
 
-  fun handleWebSocket(request: Request): WebSocketListener {
+  fun handleWebSocket(request: Request): WebSocketListener<Any> {
     return action.handleWebSocket(request, pathMatcher)
   }
 }

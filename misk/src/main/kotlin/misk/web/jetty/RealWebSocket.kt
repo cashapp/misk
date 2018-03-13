@@ -2,7 +2,6 @@ package misk.web.jetty
 
 import misk.web.actions.WebSocket
 import misk.web.actions.WebSocketListener
-import okio.ByteString
 import okio.Utf8
 import org.eclipse.jetty.websocket.api.Session
 import org.eclipse.jetty.websocket.api.WebSocketAdapter
@@ -11,7 +10,7 @@ import java.util.ArrayDeque
 
 private const val MAX_QUEUE_SIZE = 16 * 1024 * 1024
 
-class RealWebSocket : WebSocket {
+class RealWebSocket : WebSocket<String> {
 
   /** Total size of messages enqueued and not yet transmitted by Jetty. */
   private var outgoingQueueSize = 0L
@@ -20,31 +19,27 @@ class RealWebSocket : WebSocket {
   private var queue = ArrayDeque<String>()
 
   /** Application's listener to notify of incoming messages from the client. */
-  lateinit var listener: WebSocketListener
+  lateinit var listener: WebSocketListener<Any>
+  lateinit var socket: WebSocket<Any>
 
   val adapter = object : WebSocketAdapter() {
-    override fun onWebSocketConnect(sess: Session?) {
-      super.onWebSocketConnect(sess)
+    override fun onWebSocketConnect(session: Session?) {
+      super.onWebSocketConnect(session)
       sendQueue()
     }
 
     override fun onWebSocketClose(statusCode: Int, reason: String?) {
       super.onWebSocketClose(statusCode, reason)
-      listener.onClosed(this@RealWebSocket, statusCode, reason!!)
+      listener.onClosed(socket, statusCode, reason!!)
     }
 
     override fun onWebSocketError(cause: Throwable?) {
-      listener.onFailure(this@RealWebSocket, cause!!)
+      listener.onFailure(socket, cause!!)
     }
 
     override fun onWebSocketText(message: String?) {
       super.onWebSocketText(message)
-      listener.onMessage(this@RealWebSocket, message!!)
-    }
-
-    override fun onWebSocketBinary(payload: ByteArray?, offset: Int, len: Int) {
-      super.onWebSocketBinary(payload, offset, len)
-      listener.onMessage(this@RealWebSocket, ByteString.of(payload!!, offset, len))
+      listener.onMessage(socket, message!!)
     }
   }
 
@@ -52,15 +47,15 @@ class RealWebSocket : WebSocket {
     return outgoingQueueSize
   }
 
-  override fun send(text: String): Boolean {
-    val byteCount = Utf8.size(text)
+  override fun send(content: String): Boolean {
+    val byteCount = Utf8.size(content)
     if (outgoingQueueSize + byteCount > MAX_QUEUE_SIZE) {
       close(1001, null)
       return false
     }
 
     outgoingQueueSize += byteCount
-    queue.add(text)
+    queue.add(content)
     sendQueue()
 
     return true
@@ -81,10 +76,6 @@ class RealWebSocket : WebSocket {
         }
       })
     }
-  }
-
-  override fun send(bytes: ByteString): Boolean {
-    TODO()
   }
 
   override fun close(code: Int, reason: String?): Boolean {

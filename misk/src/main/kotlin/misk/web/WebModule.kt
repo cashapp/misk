@@ -1,8 +1,6 @@
 package misk.web
 
-import misk.Action
 import misk.ApplicationInterceptor
-import misk.Chain
 import misk.MiskDefault
 import misk.NetworkInterceptor
 import misk.exceptions.ActionException
@@ -21,7 +19,7 @@ import misk.web.extractors.ParameterExtractor
 import misk.web.extractors.PathPatternParameterExtractorFactory
 import misk.web.extractors.QueryStringParameterExtractorFactory
 import misk.web.extractors.RequestBodyParameterExtractor
-import misk.web.extractors.WebSocketParameterExtractorFactory
+import misk.web.extractors.WebSocketParameterExtractor
 import misk.web.interceptors.InternalErrorInterceptorFactory
 import misk.web.interceptors.MarshallerInterceptor
 import misk.web.interceptors.MetricsInterceptor
@@ -33,6 +31,7 @@ import misk.web.marshal.JsonUnmarshaller
 import misk.web.marshal.MarshallerModule
 import misk.web.marshal.PlainTextMarshaller
 import misk.web.marshal.UnmarshallerModule
+import misk.web.marshal.WebSocketMarshaller
 import javax.servlet.http.HttpServletRequest
 
 class WebModule : KAbstractModule() {
@@ -48,6 +47,7 @@ class WebModule : KAbstractModule() {
     // Register built-in marshallers and unmarshallers
     install(MarshallerModule.create<PlainTextMarshaller.Factory>())
     install(MarshallerModule.create<JsonMarshaller.Factory>())
+    install(MarshallerModule.create<WebSocketMarshaller.Factory>())
     install(UnmarshallerModule.create<JsonUnmarshaller.Factory>())
 
     // Create empty set binders of interceptor factories that can be added to by users.
@@ -94,7 +94,7 @@ class WebModule : KAbstractModule() {
     binder().addMultibinderBinding<ParameterExtractor.Factory>()
         .toInstance(HeadersParameterExtractorFactory)
     binder().addMultibinderBinding<ParameterExtractor.Factory>()
-        .toInstance(WebSocketParameterExtractorFactory)
+        .to<WebSocketParameterExtractor.Factory>()
     binder().addMultibinderBinding<ParameterExtractor.Factory>()
         .to<RequestBodyParameterExtractor.Factory>()
   }

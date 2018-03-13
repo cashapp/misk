@@ -5,10 +5,10 @@ import okio.BufferedSource
 import kotlin.reflect.KType
 
 /** Unmarshalls a typed object from an incoming source */
-interface Unmarshaller {
-  fun unmarshal(source: BufferedSource): Any?
+interface Unmarshaller<out T> {
+  fun unmarshal(source: BufferedSource): T?
 
   interface Factory {
-    fun create(mediaType: MediaType, type: KType): Unmarshaller?
+    fun <T> create(mediaType: MediaType, type: KType): Unmarshaller<T>?
   }
 }

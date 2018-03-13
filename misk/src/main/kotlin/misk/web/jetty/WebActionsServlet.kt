@@ -6,8 +6,12 @@ import misk.scope.ActionScope
 import misk.web.BoundAction
 import misk.web.Request
 import misk.web.actions.WebAction
+import misk.web.actions.WebSocket
+import misk.web.interceptors.MarshallerInterceptor
 import misk.web.mediatype.MediaRange
 import misk.web.mediatype.MediaTypes
+import misk.web.mediatype.asMediaRange
+import misk.web.mediatype.asMediaType
 import okhttp3.Headers
 import okhttp3.HttpUrl
 import okhttp3.MediaType
@@ -72,14 +76,14 @@ internal class WebActionsServlet @Inject constructor(
           HttpMethod.valueOf(request.method),
           request.headers(),
           Buffer(), // empty body
-          realWebSocket
+          realWebSocket as WebSocket<Any>
       )
 
       val candidateActions = boundActions.mapNotNull {
         it.match(
             request.method,
-            null,
-            listOf(),
+            MediaTypes.ALL.asMediaType(),
+            listOf(MediaTypes.ALL.asMediaRange()),
             asRequest.url
         )
       }
@@ -87,6 +91,7 @@ internal class WebActionsServlet @Inject constructor(
       val bestAction = candidateActions.sorted().firstOrNull() ?: return@WebSocketCreator null
       val webSocketListener = bestAction.handleWebSocket(asRequest)
       realWebSocket.listener = webSocketListener
+      realWebSocket.socket = asRequest.websocket!!
       realWebSocket.adapter
     }
   }

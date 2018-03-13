@@ -17,7 +17,7 @@ interface Marshaller<in T> {
   fun responseBody(o: T): ResponseBody
 
   interface Factory {
-    fun create(mediaType: MediaType, type: KType): Marshaller<Any>?
+    fun create(mediaType: MediaType, type: KType, factories: List<Marshaller.Factory>): Marshaller<Any>?
   }
 
   companion object {

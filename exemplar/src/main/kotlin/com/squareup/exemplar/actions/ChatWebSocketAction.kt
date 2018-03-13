@@ -2,9 +2,12 @@ package com.squareup.exemplar.actions
 
 import misk.web.ConnectWebSocket
 import misk.web.PathParam
+import misk.web.RequestContentType
+import misk.web.ResponseContentType
 import misk.web.actions.WebAction
 import misk.web.actions.WebSocket
 import misk.web.actions.WebSocketListener
+import misk.web.mediatype.MediaTypes
 import java.util.concurrent.CopyOnWriteArrayList
 import javax.inject.Singleton
 
@@ -17,7 +20,9 @@ class ChatWebSocketAction : WebAction {
   private val rooms = mutableMapOf<String, Room>()
 
   @ConnectWebSocket("/room/{name}")
-  fun chat(@PathParam name: String, webSocket: WebSocket): WebSocketListener {
+  @RequestContentType(MediaTypes.APPLICATION_JSON)
+  @ResponseContentType(MediaTypes.APPLICATION_JSON)
+  fun chat(@PathParam name: String, webSocket: WebSocket<Message>): WebSocketListener<Message> {
     val room = rooms.getOrDefault(name, Room(name))
     room.join(webSocket)
     rooms[name] = room
@@ -25,27 +30,32 @@ class ChatWebSocketAction : WebAction {
   }
 }
 
-private class Room(private val name: String) : WebSocketListener() {
-  private val history = CopyOnWriteArrayList<String>()
-  private val sockets = CopyOnWriteArrayList<WebSocket>()
+data class Message(
+  val user: String,
+  val message: String
+)
 
-  fun join(webSocket: WebSocket) {
-    webSocket.send("Welcome to $name!")
+private class Room(private val name: String) : WebSocketListener<Message>() {
+  private val history = CopyOnWriteArrayList<Message>()
+  private val sockets = CopyOnWriteArrayList<WebSocket<Message>>()
+
+  fun join(webSocket: WebSocket<Message>) {
+    webSocket.send(Message("admin", "Welcome to $name!"))
 
     history.forEach { webSocket.send(it) }
     sockets.add(webSocket)
   }
 
-  override fun onMessage(webSocket: WebSocket, text: String) {
-    history.add(text)
-    sockets.forEach { it.send(text) }
+  override fun onMessage(webSocket: WebSocket<Message>, content: Message) {
+    history.add(content)
+    sockets.forEach { it.send(content) }
   }
 
-  override fun onClosing(webSocket: WebSocket, code: Int, reason: String?) {
+  override fun onClosing(webSocket: WebSocket<Message>, code: Int, reason: String?) {
     sockets.remove(webSocket)
   }
 
-  override fun onFailure(webSocket: WebSocket, t: Throwable) {
+  override fun onFailure(webSocket: WebSocket<Message>, t: Throwable) {
     sockets.remove(webSocket)
   }
 }
