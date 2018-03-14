@@ -1,4 +1,4 @@
-package com.squareup.exemplar.actions
+package com.squareup.chat
 
 import misk.web.ConnectWebSocket
 import misk.web.PathParam
@@ -9,8 +9,8 @@ import java.util.concurrent.CopyOnWriteArrayList
 import javax.inject.Singleton
 
 /**
- * ChatWebSocketAction is a basic chat program which supports multiple chat
- * rooms and their histories through web socket connections.
+ * ChatWebSocketAction is a basic chat program which supports multiple chat rooms and their
+ * histories through web socket connections.
  */
 @Singleton
 class ChatWebSocketAction : WebAction {
