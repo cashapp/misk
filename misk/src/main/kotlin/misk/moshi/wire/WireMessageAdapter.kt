@@ -11,7 +11,7 @@ import java.lang.reflect.Type
 /** Json marshaling for Wire messages, correctly using Builders to construct properly formed type */
 internal class WireMessageAdapter(
   messageType: Class<Message<*, *>>,
-  private val moshi: Moshi
+  moshi: Moshi
 ) : JsonAdapter<Any?>() {
   @Suppress("UNCHECKED_CAST")
   private val builderType = try {
