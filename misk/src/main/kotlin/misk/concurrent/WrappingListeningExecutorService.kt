@@ -10,7 +10,7 @@ import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
 
 /** [ListeningExecutorService] which wraps all calls */
-abstract class WrappingListeningExecutorService() : ForwardingListeningExecutorService() {
+abstract class WrappingListeningExecutorService : ForwardingListeningExecutorService() {
   /** Wraps the specified callable and returns the new wrapped one. */
   protected abstract fun <T> wrap(callable: Callable<T>): Callable<T>
 
