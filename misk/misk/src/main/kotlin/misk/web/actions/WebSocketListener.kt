@@ -19,7 +19,7 @@ open class WebSocketListener {
    * Invoked when both peers have indicated that no more messages will be transmitted and the
    * connection has been successfully released. No further calls to this listener will be made.
    */
-  open fun onClosed(webSocket: WebSocket, code: Int, reason: String) = Unit
+  open fun onClosed(webSocket: WebSocket, code: Int, reason: String?) = Unit
 
   /**
    * Invoked when a web socket has been closed due to an error reading from or writing to the
