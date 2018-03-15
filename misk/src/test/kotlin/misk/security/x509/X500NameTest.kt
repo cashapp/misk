@@ -1,0 +1,81 @@
+package misk.security.x509
+
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Assertions.assertThrows
+import org.junit.jupiter.api.Test
+
+internal class X500NameTest {
+  @Test fun parse() {
+    val name = X500Name.parse(
+        "CN=Marshall T. Rose, O=Dover Beach Consulting Ltd., L=Santa Clara, ST=California, OU=Sales, C=US\n")
+    assertThat(name.asMap()).isEqualTo(mapOf(
+        "CN" to "Marshall T. Rose",
+        "OU" to "Sales",
+        "O" to "Dover Beach Consulting Ltd.",
+        "L" to "Santa Clara",
+        "ST" to "California",
+        "C" to "US"
+    ))
+  }
+
+  @Test fun parseWithEscaping() {
+    val name = X500Name.parse(
+        """CN=Marshall T. Rose\, Esq., O="Dover Beach Consulting, Ltd."; L = Santa Clara; OU=Sales, ST=California, C=US""")
+    assertThat(name.asMap()).isEqualTo(mapOf(
+        "CN" to "Marshall T. Rose, Esq.",
+        "OU" to "Sales",
+        "O" to "Dover Beach Consulting, Ltd.",
+        "L" to "Santa Clara",
+        "ST" to "California",
+        "C" to "US"
+    ))
+  }
+
+  @Test fun handlesTrailingWhitespace() {
+    val name = X500Name.parse("CN=Marshall T. Rose\n  \t")
+    assertThat(name.asMap()).isEqualTo(mapOf(
+        "CN" to "Marshall T. Rose"
+    ))
+  }
+
+  @Test fun endsInAttributeName() {
+    val e = assertThrows(IllegalArgumentException::class.java) {
+      X500Name.parse("CN")
+    }
+
+    assertThat(e).hasMessage("invalid X.500 name 'CN'; unfinished attribute CN")
+  }
+
+  @Test fun noAttributes() {
+    val e = assertThrows(IllegalArgumentException::class.java) {
+      X500Name.parse("    \n")
+    }
+
+    assertThat(e).hasMessage("invalid X.500 name '    \n'; no attributes")
+  }
+
+  @Test fun blankAttributeName() {
+    val e = assertThrows(IllegalArgumentException::class.java) {
+      X500Name.parse("=Marshall T. Rose")
+    }
+
+    assertThat(e).hasMessage("invalid X.500 name '=Marshall T. Rose'; attribute name is blank")
+  }
+
+  @Test fun nakedAttributeName() {
+    val e = assertThrows(IllegalArgumentException::class.java) {
+      X500Name.parse("CN,")
+    }
+
+    assertThat(e).hasMessage("invalid X.500 name 'CN,'; no attribute value for CN")
+  }
+
+  @Test fun unescapedEqualsInAttributeValue() {
+    val e = assertThrows(IllegalArgumentException::class.java) {
+      X500Name.parse("CN=Marshall = ")
+    }
+
+    assertThat(e).hasMessage(
+            "invalid X.500 name 'CN=Marshall = '; illegal character '=' in attribute value CN")
+  }
+}
