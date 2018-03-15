@@ -12,6 +12,7 @@ import misk.inject.addMultibinderBindingWithAnnotation
 import misk.inject.newMultibinder
 import misk.inject.to
 import misk.scope.ActionScopedProviderModule
+import misk.security.ssl.CertificatesModule
 import misk.web.exceptions.ActionExceptionMapper
 import misk.web.exceptions.ExceptionHandlingInterceptor
 import misk.web.exceptions.ExceptionMapperModule
@@ -97,5 +98,8 @@ class WebModule : KAbstractModule() {
         .toInstance(WebSocketParameterExtractorFactory)
     binder().addMultibinderBinding<ParameterExtractor.Factory>()
         .to<RequestBodyParameterExtractor.Factory>()
+
+    // Install infrastructure support
+    install(CertificatesModule())
   }
 }
