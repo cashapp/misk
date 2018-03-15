@@ -14,7 +14,7 @@ import javax.inject.Inject
 
 internal class RealEventRouter : EventRouter {
   @Inject lateinit var eventChannel: ClusterConnector
-  @Inject lateinit var eventJsonAdapter : JsonAdapter<SocketEvent>
+  @Inject lateinit var eventJsonAdapter: JsonAdapter<SocketEvent>
   @Inject @ForEventRouterSubscribers lateinit var executor: ExecutorService
 
   lateinit var clusterSnapshot: ClusterSnapshot
@@ -34,21 +34,18 @@ internal class RealEventRouter : EventRouter {
   val webSocketListener = object : WebSocketListener() {
     override fun onMessage(webSocket: WebSocket, text: String) {
       val event = eventJsonAdapter.fromJson(text)!!
-      val (topic, message) = event
-      if (message == "subscribe") {
-        remoteSubscribers.put(topic, webSocket)
-        return
-      }
+      when (event) {
+        is SocketEvent.Subscribe -> remoteSubscribers.put(event.topic, webSocket)
 
-      // TODO: unsubscribe
-      // TODO: type safety or something for the string "subscribe"
+        is SocketEvent.Event -> {
+          localSubscribers.get(event.topic).forEach {
+            it.enqueue(executor, LocalSubscription.Action.Event(event.message))
+          }
 
-      localSubscribers.get(topic).forEach {
-        it.enqueue(executor, LocalSubscription.Action.Event(message))
-      }
-
-      remoteSubscribers.get(topic).forEach {
-        it.send(eventJsonAdapter.toJson(event))
+          remoteSubscribers.get(event.topic).forEach {
+            it.send(eventJsonAdapter.toJson(event))
+          }
+        }
       }
     }
   }
@@ -106,7 +103,7 @@ internal class RealEventRouter : EventRouter {
 
     val topicOwner = clusterSnapshot.topicToHost(topic)
 
-    val e = SocketEvent(topic, event.toString())
+    val e = SocketEvent.Event(topic, event.toString())
     hostToSockets[topicOwner].send(eventJsonAdapter.toJson(e))
   }
 
@@ -125,7 +122,7 @@ internal class RealEventRouter : EventRouter {
     localSubscribers.put(topic.name, localSubscription)
 
     if (clusterSnapshot.peerToHost(topicPeer) != topicOwner) {
-      socket.send(eventJsonAdapter.toJson(SocketEvent(topic.name, "subscribe")))
+      socket.send(eventJsonAdapter.toJson(SocketEvent.Subscribe(topic.name)))
     }
     localSubscription.enqueue(executor, LocalSubscription.Action.Open)
     return localSubscription
@@ -184,9 +181,4 @@ internal data class QueuedSubscribe<T : Any>(
 internal data class QueuedPublish(
   val topic: String,
   val event: Any
-)
-
-internal data class SocketEvent(
-  val topic: String,
-  val message: String
 )
