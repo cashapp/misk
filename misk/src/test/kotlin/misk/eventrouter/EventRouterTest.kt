@@ -56,6 +56,23 @@ internal class EventRouterTest {
     assertThat(listener.events).containsExactly("chat: open", "chat: hello from Jesse!")
   }
 
+  @Test fun cancellingSubscription() {
+    val listener = RecordingListener()
+    machineA.joinCluster()
+    machineB.joinCluster()
+
+    val subscription = machineA.getTopic<String>("chat").subscribe(listener)
+    machineB.getTopic<String>("chat").publish("message 1")
+    // Ensure that the message goes through before cancelling.
+    processEverything()
+
+    subscription.cancel()
+    machineB.getTopic<String>("chat").publish("message 2")
+    processEverything()
+
+    assertThat(listener.events).containsExactly("chat: open", "chat: message 1", "chat: close")
+  }
+
   private fun processEverything() {
     do {
       var total = 0
