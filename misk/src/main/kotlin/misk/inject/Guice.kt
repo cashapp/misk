@@ -24,10 +24,11 @@ inline fun <reified T : Any> LinkedBindingBuilder<in T>.to() = to(T::class.java)
 inline fun <reified T : Any> Binder.newMultibinder(
   annotation: Class<out Annotation>? = null
 ): Multibinder<T> {
-  val typeLiteral =
-      parameterizedType<List<*>>(subtypeOf<T>()).typeLiteral() as TypeLiteral<List<T>>
-  bind(typeLiteral).toProvider(parameterizedType<ListProvider<*>>(
-      T::class.java).typeLiteral() as TypeLiteral<Provider<List<T>>>)
+  val setOfT = parameterizedType<Set<*>>(T::class.java).typeLiteral() as TypeLiteral<Set<T>>
+  val mutableSetOfTKey = setOfT.toKey(annotation) as Key<MutableSet<T>>
+  val listOfOutT = parameterizedType<List<*>>(subtypeOf<T>()).typeLiteral() as TypeLiteral<List<T>>
+  val listOfOutTKey = listOfOutT.toKey(annotation)
+  bind(listOfOutTKey).toProvider(ListProvider(mutableSetOfTKey, getProvider(mutableSetOfTKey)))
 
   return when (annotation) {
     null -> Multibinder.newSetBinder(this, T::class.java)
@@ -47,11 +48,20 @@ fun ScopedBindingBuilder.asSingleton() {
   `in`(Singleton::class.java)
 }
 
-class ListProvider<T> : Provider<List<T>> {
-  @Inject
-  lateinit var set: MutableSet<T>
+/** Given a Set<T>, provide a List<T>. */
+class ListProvider<T>(
+  private val setKey: Key<MutableSet<T>>,
+  private val setProvider: Provider<MutableSet<T>>
+) : Provider<List<T>> {
+  override fun get(): List<T> = ArrayList(setProvider.get())
 
-  override fun get(): List<T> = ArrayList(set)
+  override fun equals(other: Any?): Boolean {
+    return other is ListProvider<*> && other.setKey == setKey
+  }
+
+  override fun hashCode(): Int {
+    return setKey.hashCode()
+  }
 }
 
 inline fun <reified T : Any> subtypeOf(): WildcardType {
@@ -78,6 +88,13 @@ inline fun <reified T : Any> keyOf(): Key<T> = Key.get(T::class.java)
 inline fun <reified T : Any> keyOf(a: Annotation): Key<T> = Key.get(T::class.java, a)
 inline fun <reified T : Any, A : Annotation> keyOf(a: KClass<A>): Key<T> =
     Key.get(T::class.java, a.java)
+
+fun <T : Any> TypeLiteral<T>.toKey(annotation: Class<out Annotation>? = null): Key<T> {
+  return when (annotation) {
+    null -> Key.get(this)
+    else -> Key.get(this, annotation)
+  }
+}
 
 fun uninject(target: Any) {
   try {
