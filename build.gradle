@@ -46,6 +46,7 @@ ext {
           zipkinBrave          : 'io.zipkin.brave:brave:4.17.2',
           retrofit             : 'com.squareup.retrofit2:retrofit:2.3.0',
           retrofitMoshi        : 'com.squareup.retrofit2:converter-moshi:2.3.0',
+          gcpLogback           : 'com.google.cloud:google-cloud-logging-logback:0.39.0-alpha',
   ]
 
   isCi = "true".equals(System.getenv('CI'))
