@@ -52,6 +52,7 @@ dependencies {
   compile dep.zipkinBrave
   compile dep.retrofit
   compile dep.retrofitMoshi
+  compile dep.gcpLogback
 
   testCompile project(':misk/testing')
 }
