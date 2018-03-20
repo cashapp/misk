@@ -27,7 +27,8 @@ class RealEventRouterModule : KAbstractModule() {
 }
 
 /**
- * Annotates an executor service that'll be used to notify subscribers.
+ * Annotates an executor service that'll be used to notify subscribers. This executor service must
+ * not run multiple enqueued tasks concurrently! Instead it should have exactly 1 thread always.
  */
 @Qualifier
 @Retention(AnnotationRetention.RUNTIME)
