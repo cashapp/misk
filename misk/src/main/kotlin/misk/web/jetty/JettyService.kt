@@ -55,9 +55,9 @@ class JettyService @Inject internal constructor(
 
     if (webConfig.ssl != null) {
       val sslContextFactory = SslContextFactory()
-      sslContextFactory.keyStore = webConfig.ssl.keystore.load()
-      sslContextFactory.setKeyStorePassword(webConfig.ssl.keystore.passphrase)
-      sslContextFactory.trustStore = webConfig.ssl.truststore?.load()
+      sslContextFactory.keyStore = webConfig.ssl.buildCertStore().keyStore
+      sslContextFactory.setKeyStorePassword(webConfig.ssl.cert_store.passphrase)
+      sslContextFactory.trustStore = webConfig.ssl.buildTrustStore()?.keyStore
       when (webConfig.ssl.mutual_auth) {
         WebSslConfig.MutualAuth.REQUIRED -> sslContextFactory.needClientAuth = true
         WebSslConfig.MutualAuth.DESIRED -> sslContextFactory.wantClientAuth = true
