@@ -9,11 +9,14 @@ internal interface ClusterConnector {
   fun connectSocket(hostname: String, listener: WebSocketListener): WebSocket
 }
 
-internal interface ClusterSnapshot {
-  val version: Long
-  val hosts: List<String>
-  fun topicToHost(topic: String): String
-  fun peerToHost(peer: TopicPeer): String
+data class ClusterSnapshot(
+  val version: Long,
+  val hosts: List<String>,
+  val self: String
+)
+
+internal interface ClusterMapper {
+  fun topicToHost(clusterSnapshot: ClusterSnapshot, topic: String): String
 }
 
 internal interface TopicPeer {

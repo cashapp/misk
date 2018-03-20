@@ -12,6 +12,7 @@ internal class EventRouterTestingModule : KAbstractModule() {
   override fun configure() {
     bind<EventRouter>().to<RealEventRouter>()
     bind<ClusterConnector>().to<FakeClusterConnector>()
+    bind<ClusterMapper>().to<AlphabeticalMapper>()
     bind<ExecutorService>()
         .annotatedWith<ForEventRouterSubscribers>()
         .to(QueueingExecutorService::class.java)

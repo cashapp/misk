@@ -9,9 +9,9 @@ import javax.inject.Singleton
 
 @Singleton
 internal class FakeClusterConnector : ClusterConnector {
-  var nextClusterVersion = 1L
-  var nextHostId = 1
   val queue = LinkedBlockingQueue<Action>()
+  private var nextClusterVersion = 1L
+  private var nextHostId = 1
   private val peers = mutableMapOf<String, TopicPeer>()
 
   /** Returns the number of actions that were executed. */
@@ -74,28 +74,12 @@ internal class FakeClusterConnector : ClusterConnector {
     val hosts = peers.keys.toList()
     val clusterVersion = nextClusterVersion++
 
-    val clusterSnapshot = object : ClusterSnapshot {
-      override fun peerToHost(peer: TopicPeer): String {
-        for ((host, p) in peers) {
-          if (p == peer) return host
-        }
-
-        return "Unknown"
-      }
-
-      override val version: Long
-        get() = clusterVersion
-
-      override val hosts: List<String>
-        get() = hosts
-
-      override fun topicToHost(topic: String): String {
-        return hosts[0] // TODO(jwilson): sprinkle donut algorithm
-      }
-    }
-
-    for (peer in peers.values) {
-      peer.clusterChanged(clusterSnapshot)
+    for ((hostname, peer) in peers) {
+      peer.clusterChanged(ClusterSnapshot(
+          clusterVersion,
+          hosts,
+          hostname
+      ))
     }
   }
 
