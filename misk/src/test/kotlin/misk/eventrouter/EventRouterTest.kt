@@ -38,7 +38,7 @@ internal class EventRouterTest {
   }
 
   @Test fun subscriberPublisherAndTopicAreThreeHosts() {
-    // The topic owner. (Currently hardcoded to the first machine to join the cluster.)
+    // The topic owner.
     machineA.joinCluster()
 
     // The subscriber.
@@ -73,6 +73,39 @@ internal class EventRouterTest {
     assertThat(listener.events).containsExactly("chat: open", "chat: message 1", "chat: close")
   }
 
+  @Test fun leavingCluster() {
+    val listener = RecordingListener()
+    // Machine A is the topic owner
+    machineA.joinCluster()
+    machineB.joinCluster()
+
+    // Ensure the machine B knows about A
+    processEverything()
+
+    machineB.getTopic<String>("chat").subscribe(listener)
+    // Ensure that we get an ack for our subscription
+    processEverything()
+    machineA.leaveCluster()
+
+    processEverything()
+
+    assertThat(listener.events).containsExactly("chat: open", "chat: close")
+  }
+
+  @Test fun clusterChangeWithTopicOwnerRemainingTheSame() {
+    val listener = RecordingListener()
+    // Machine A is the topic owner
+    machineA.joinCluster()
+    machineB.joinCluster()
+
+    machineA.getTopic<String>("chat").subscribe(listener)
+    machineB.leaveCluster()
+
+    processEverything()
+
+    assertThat(listener.events).containsExactly("chat: open")
+  }
+
   private fun processEverything() {
     do {
       var total = 0
@@ -97,4 +130,3 @@ internal class EventRouterTest {
     }
   }
 }
-
