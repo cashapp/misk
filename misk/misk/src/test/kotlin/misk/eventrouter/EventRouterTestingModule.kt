@@ -14,7 +14,7 @@ internal class EventRouterTestingModule : KAbstractModule() {
     bind<ClusterConnector>().to<FakeClusterConnector>()
     bind<ClusterMapper>().to<AlphabeticalMapper>()
     bind<ExecutorService>()
-        .annotatedWith<ForEventRouterSubscribers>()
+        .annotatedWith<ForEventRouterActions>()
         .to(QueueingExecutorService::class.java)
     install(MoshiAdapterModule(SocketEventJsonAdapter))
   }

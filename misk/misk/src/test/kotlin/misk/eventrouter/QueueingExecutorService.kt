@@ -12,16 +12,27 @@ import javax.inject.Singleton
 @Singleton
 class QueueingExecutorService : AbstractExecutorService() {
   private val queue = LinkedBlockingQueue<Runnable>()
+  private var processing = false
 
   /** Returns the number of runnables that were run. */
   fun processEverything(): Int {
-    var result = 0
-    while (true) {
-      val runnable = queue.poll() ?: return result
-      result++
-      runnable.run()
+    check(!processing) { "already processing: recursive call?" }
+
+    processing = true
+    try {
+      var result = 0
+      while (true) {
+        val runnable = queue.poll() ?: return result
+        result++
+        runnable.run()
+      }
+    } finally {
+      processing = false
     }
   }
+
+  /** Returns true if this processor is currently processing. */
+  fun isProcessing() = processing
 
   override fun isTerminated(): Boolean = false
 
