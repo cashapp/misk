@@ -4,11 +4,11 @@ import com.squareup.moshi.FromJson
 import com.squareup.moshi.ToJson
 
 sealed class SocketEvent {
-  data class Event(val topic: String, val message: String) : SocketEvent()
-  data class Subscribe(val topic: String) : SocketEvent()
-  data class Unsubscribe(val topic: String) : SocketEvent()
-  data class Ack(val topic: String) : SocketEvent()
-  class UnknownItem : SocketEvent()
+  class Event(val topic: String, val message: String) : SocketEvent()
+  class Subscribe(val topic: String) : SocketEvent()
+  class Unsubscribe(val topic: String) : SocketEvent()
+  class Ack(val topic: String) : SocketEvent()
+  object UnknownItem : SocketEvent()
 }
 
 object SocketEventJsonAdapter {
@@ -22,9 +22,9 @@ object SocketEventJsonAdapter {
     return when (json.type) {
       "event" -> SocketEvent.Event(json.topic!!, json.message!!)
       "subscribe" -> SocketEvent.Subscribe(json.topic!!)
-      "ack" -> SocketEvent.Ack(json.topic!!)
       "unsubscribe" -> SocketEvent.Unsubscribe(json.topic!!)
-      else -> SocketEvent.UnknownItem()
+      "ack" -> SocketEvent.Ack(json.topic!!)
+      else -> SocketEvent.UnknownItem
     }
   }
 
@@ -32,8 +32,8 @@ object SocketEventJsonAdapter {
     return when (item) {
       is SocketEvent.Event -> SocketEventJson("event", item.topic, item.message)
       is SocketEvent.Subscribe -> SocketEventJson("subscribe", item.topic, null)
-      is SocketEvent.Ack -> SocketEventJson("ack", item.topic, null)
       is SocketEvent.Unsubscribe -> SocketEventJson("unsubscribe", item.topic, null)
+      is SocketEvent.Ack -> SocketEventJson("ack", item.topic, null)
       else -> SocketEventJson("unknown", null, null)
     }
   }
