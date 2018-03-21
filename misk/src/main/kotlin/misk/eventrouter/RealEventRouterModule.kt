@@ -18,9 +18,9 @@ class RealEventRouterModule : KAbstractModule() {
     install(MoshiAdapterModule(SocketEventJsonAdapter))
   }
 
-  @Provides @Singleton @ForEventRouterSubscribers
+  @Provides @Singleton @ForEventRouterActions
   fun provideExecutor(): ExecutorService =
-      ThreadPoolExecutor(5, 5, 1, TimeUnit.MINUTES, LinkedBlockingQueue())
+      ThreadPoolExecutor(1, 1, 1, TimeUnit.MINUTES, LinkedBlockingQueue())
 
   @Provides @Singleton
   internal fun provideEventJsonAdapter(moshi: Moshi) = moshi.adapter<SocketEvent>()
@@ -33,4 +33,4 @@ class RealEventRouterModule : KAbstractModule() {
 @Qualifier
 @Retention(AnnotationRetention.RUNTIME)
 @Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION)
-internal annotation class ForEventRouterSubscribers
+internal annotation class ForEventRouterActions

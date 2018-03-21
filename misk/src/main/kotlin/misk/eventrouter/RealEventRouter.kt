@@ -18,7 +18,7 @@ internal class RealEventRouter : EventRouter {
   @Inject lateinit var clusterConnector: ClusterConnector
   @Inject lateinit var eventJsonAdapter: JsonAdapter<SocketEvent>
   @Inject lateinit var clusterMapper: ClusterMapper
-  @Inject @ForEventRouterSubscribers lateinit var executor: ExecutorService
+  @Inject @ForEventRouterActions lateinit var executor: ExecutorService
 
   internal lateinit var clusterSnapshot: ClusterSnapshot
   private val actionQueue = LinkedBlockingQueue<Action>()
@@ -61,7 +61,7 @@ internal class RealEventRouter : EventRouter {
       if (hasClusterSnapshot.compareAndSet(false, true)) {
         this@RealEventRouter.clusterSnapshot = clusterSnapshot
         logger.debug { "[${clusterSnapshot.self}]: cluster changed: $clusterSnapshot" }
-        executor.submit({ drainQueue() })
+        executor.execute({ drainQueue() })
       } else {
         enqueue(Action.ClusterChanged(clusterSnapshot))
       }
@@ -207,7 +207,7 @@ internal class RealEventRouter : EventRouter {
 
   internal fun enqueue(action: Action) {
     actionQueue.add(action)
-    executor.submit({ drainQueue() })
+    executor.execute({ drainQueue() })
   }
 }
 
