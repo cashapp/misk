@@ -18,7 +18,8 @@ internal class RealEventRouter : EventRouter {
   @Inject lateinit var clusterConnector: ClusterConnector
   @Inject lateinit var eventJsonAdapter: JsonAdapter<SocketEvent>
   @Inject lateinit var clusterMapper: ClusterMapper
-  @Inject @ForEventRouterActions lateinit var executor: ExecutorService
+  @Inject @ForEventRouterActions lateinit var actionExecutor: ExecutorService
+  @Inject @ForEventRouterSubscribers lateinit var subscriberExecutor: ExecutorService
 
   internal lateinit var clusterSnapshot: ClusterSnapshot
   private val actionQueue = LinkedBlockingQueue<Action>()
@@ -61,7 +62,7 @@ internal class RealEventRouter : EventRouter {
       if (hasClusterSnapshot.compareAndSet(false, true)) {
         this@RealEventRouter.clusterSnapshot = clusterSnapshot
         logger.debug { "[${clusterSnapshot.self}]: cluster changed: $clusterSnapshot" }
-        executor.execute({ drainQueue() })
+        actionExecutor.execute({ drainQueue() })
       } else {
         enqueue(Action.ClusterChanged(clusterSnapshot))
       }
@@ -81,6 +82,8 @@ internal class RealEventRouter : EventRouter {
         is Action.LeaveCluster -> clusterConnector.leaveCluster(topicPeer)
 
         is Action.ClusterChanged -> {
+          if (clusterSnapshot.version > action.newSnapshot.version) TODO("ignore this update")
+
           if (action.newSnapshot.version - clusterSnapshot.version > 1) {
             TODO("We've missed a cluster version and now everything is terrible")
           }
@@ -92,9 +95,11 @@ internal class RealEventRouter : EventRouter {
 
             if (clusterMapper.topicToHost(clusterSnapshot, topic) !=
                 clusterMapper.topicToHost(action.newSnapshot, topic)) {
-              localSubscribers.forEach {
-                it.onClose()
-                localSubscribers.remove(it)
+
+              val iterator = localSubscribers.iterator()
+              while (iterator.hasNext()) {
+                iterator.next().onClose()
+                iterator.remove()
               }
               websockets.forEach {
                 it.send(eventJsonAdapter.toJson(SocketEvent.Unsubscribe(topic)))
@@ -110,8 +115,7 @@ internal class RealEventRouter : EventRouter {
           when (socketEvent) {
             is SocketEvent.Event -> {
               localSubscribers.get(socketEvent.topic).forEach {
-                (it.listener as Listener<String>).onEvent(it as Subscription<String>,
-                    socketEvent.message)
+                it.onEvent(socketEvent.message)
               }
 
               remoteSubscribers.get(socketEvent.topic).forEach {
@@ -157,9 +161,8 @@ internal class RealEventRouter : EventRouter {
           if (topicOwner != clusterSnapshot.self) {
             hostToSocket[topicOwner].send(eventJson)
           } else {
-            remoteSubscribers.get(action.topic).forEach {
-              it.send(eventJson)
-            }
+            remoteSubscribers.get(action.topic).forEach { it.send(eventJson) }
+            localSubscribers.get(action.topic).forEach { it.onEvent(socketEvent.message) }
           }
         }
 
@@ -198,7 +201,8 @@ internal class RealEventRouter : EventRouter {
       }
 
       override fun subscribe(listener: Listener<T>): Subscription<T> {
-        val localSubscription = LocalSubscription(listener, this@RealEventRouter, this)
+        val localSubscription =
+            LocalSubscription(listener, this@RealEventRouter, subscriberExecutor, this)
         enqueue(Action.Subscribe(localSubscription))
         return localSubscription
       }
@@ -207,22 +211,32 @@ internal class RealEventRouter : EventRouter {
 
   internal fun enqueue(action: Action) {
     actionQueue.add(action)
-    executor.execute({ drainQueue() })
+    actionExecutor.execute({ drainQueue() })
   }
 }
 
-// TODO(tso): Make onOpen, onClose, onEvent async
 internal data class LocalSubscription<T : Any>(
-  val listener: Listener<T>,
+  private val listener: Listener<T>,
   private val realEventRouter: RealEventRouter,
+  private val executorService: ExecutorService,
   override val topic: Topic<T>
 ) : Subscription<T> {
   fun onOpen() {
-    this.listener.onOpen(this)
+    executorService.execute({
+      this.listener.onOpen(this)
+    })
+  }
+
+  fun onEvent(message: String) {
+    executorService.execute({
+      (listener as Listener<String>).onEvent(this as Subscription<String>, message)
+    })
   }
 
   fun onClose() {
-    this.listener.onClose(this)
+    executorService.execute({
+      this.listener.onClose(this)
+    })
   }
 
   override fun cancel() {
