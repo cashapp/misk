@@ -9,7 +9,6 @@ import javax.inject.Singleton
  * An executor service that holds enqueued work until explicitly executed. Useful for making tests
  * deterministic.
  */
-@Singleton
 class QueueingExecutorService : AbstractExecutorService() {
   private val queue = LinkedBlockingQueue<Runnable>()
   private var processing = false

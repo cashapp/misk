@@ -9,14 +9,34 @@ import java.util.concurrent.ExecutorService
 import javax.inject.Singleton
 
 internal class EventRouterTestingModule : KAbstractModule() {
+  private val actionExecutor = QueueingExecutorService()
+  private val subscriberExecutor = QueueingExecutorService()
+
   override fun configure() {
     bind<EventRouter>().to<RealEventRouter>()
     bind<ClusterConnector>().to<FakeClusterConnector>()
     bind<ClusterMapper>().to<AlphabeticalMapper>()
-    bind<ExecutorService>()
-        .annotatedWith<ForEventRouterActions>()
-        .to(QueueingExecutorService::class.java)
     install(MoshiAdapterModule(SocketEventJsonAdapter))
+  }
+
+  @Provides @Singleton @ForEventRouterActions
+  fun actionQueueExecutor(): QueueingExecutorService {
+    return actionExecutor
+  }
+
+  @Provides @Singleton @ForEventRouterActions
+  fun actionExecutor(): ExecutorService {
+    return actionExecutor
+  }
+
+  @Provides @Singleton @ForEventRouterSubscribers
+  fun subscriberQueueExecutor(): QueueingExecutorService {
+    return subscriberExecutor
+  }
+
+  @Provides @Singleton @ForEventRouterSubscribers
+  fun subscriberExecutor(): ExecutorService {
+    return subscriberExecutor
   }
 
   @Provides @Singleton

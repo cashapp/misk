@@ -19,7 +19,13 @@ class RealEventRouterModule : KAbstractModule() {
   }
 
   @Provides @Singleton @ForEventRouterActions
-  fun provideExecutor(): ExecutorService =
+  fun actionExecutor(): ExecutorService =
+      ThreadPoolExecutor(1, 1, 1, TimeUnit.MINUTES, LinkedBlockingQueue())
+
+  // TODO(tso): make this single threaded _per subscriber_ rather than single threaded
+  // for everyone.
+  @Provides @Singleton @ForEventRouterSubscribers
+  fun subscriberExecutor(): ExecutorService =
       ThreadPoolExecutor(1, 1, 1, TimeUnit.MINUTES, LinkedBlockingQueue())
 
   @Provides @Singleton
@@ -27,10 +33,19 @@ class RealEventRouterModule : KAbstractModule() {
 }
 
 /**
- * Annotates an executor service that'll be used to notify subscribers. This executor service must
+ * Annotates an executor service that'll be used to process actions. This executor service must
  * not run multiple enqueued tasks concurrently! Instead it should have exactly 1 thread always.
  */
 @Qualifier
 @Retention(AnnotationRetention.RUNTIME)
 @Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION)
 internal annotation class ForEventRouterActions
+
+/**
+ * Annotates an executor service that'll be used to run subscriber notifications (onOpen, onEvent,
+ * onClose).
+ */
+@Qualifier
+@Retention(AnnotationRetention.RUNTIME)
+@Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION)
+internal annotation class ForEventRouterSubscribers
