@@ -7,6 +7,7 @@ ext {
           kotlinGradlePlugin   : "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion",
           kotlinReflection     : "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion",
           assertj              : "org.assertj:assertj-core:3.9.0",
+          bouncycastle         : "org.bouncycastle:bcprov-jdk15on:1.55",
           guava                : 'com.google.guava:guava:23.6-jre',
           guice                : 'com.google.inject:guice:4.1.0',
           guiceMultibindings   : 'com.google.inject.extensions:guice-multibindings:4.1.0',

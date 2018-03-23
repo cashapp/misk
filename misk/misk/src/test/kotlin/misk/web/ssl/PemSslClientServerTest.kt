@@ -15,9 +15,10 @@ import misk.inject.KAbstractModule
 import misk.inject.getInstance
 import misk.moshi.MoshiModule
 import misk.scope.ActionScoped
+import misk.security.ssl.CertStoreConfig
 import misk.security.ssl.ClientCertSubject
-import misk.security.ssl.KeystoreConfig
 import misk.security.ssl.Keystores
+import misk.security.ssl.TrustStoreConfig
 import misk.security.x509.X500Name
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
@@ -41,22 +42,24 @@ import javax.inject.Singleton
 import javax.net.ssl.SSLHandshakeException
 
 @MiskTest(startService = true)
-internal class SslClientServerTest {
+internal class PemSslClientServerTest {
   @MiskTestModule
   val module = Modules.combine(
       MiskModule(),
       WebModule(),
       TestWebModule(
           ssl = WebSslConfig(0,
-              keystore = KeystoreConfig(
-                  path = "src/test/resources/ssl/server_keystore.jceks",
-                  passphrase = "serverpassword"
+              cert_store = CertStoreConfig(
+                  path = "src/test/resources/ssl/server_cert_key_combo.pem",
+                  passphrase = "serverpassword",
+                  type = Keystores.TYPE_PEM
               ),
-              truststore = KeystoreConfig(
+              trust_store = TrustStoreConfig(
                   path = "src/test/resources/ssl/client_cert.pem",
                   type = Keystores.TYPE_PEM
               ),
-              mutual_auth = WebSslConfig.MutualAuth.REQUIRED)),
+              mutual_auth = WebSslConfig.MutualAuth.REQUIRED)
+      ),
       TestModule())
 
   @Inject
@@ -130,11 +133,12 @@ internal class SslClientServerTest {
               "cert-and-trust" to HttpClientEndpointConfig(
                   jetty.httpsServerUrl!!.toString(),
                   ssl = HttpClientSSLConfig(
-                      keystore = KeystoreConfig(
-                          path = "src/test/resources/ssl/client_keystore.jceks",
-                          passphrase = "clientpassword"
+                      cert_store = CertStoreConfig(
+                          path = "src/test/resources/ssl/client_cert_key_combo.pem",
+                          passphrase = "clientpassword",
+                          type = Keystores.TYPE_PEM
                       ),
-                      truststore = KeystoreConfig(
+                      trust_store = TrustStoreConfig(
                           path = "src/test/resources/ssl/server_cert.pem",
                           type = Keystores.TYPE_PEM
                       )
@@ -142,8 +146,8 @@ internal class SslClientServerTest {
               "no-cert" to HttpClientEndpointConfig(
                   jetty.httpsServerUrl!!.toString(),
                   ssl = HttpClientSSLConfig(
-                      keystore = null,
-                      truststore = KeystoreConfig(
+                      cert_store = null,
+                      trust_store = TrustStoreConfig(
                           path = "src/test/resources/ssl/server_cert.pem",
                           type = Keystores.TYPE_PEM
                       )
@@ -151,11 +155,12 @@ internal class SslClientServerTest {
               "no-trust" to HttpClientEndpointConfig(
                   jetty.httpsServerUrl!!.toString(),
                   ssl = HttpClientSSLConfig(
-                      keystore = KeystoreConfig(
-                          path = "src/test/resources/ssl/client_keystore.jceks",
-                          passphrase = "clientpassword"
+                      cert_store = CertStoreConfig(
+                          path = "src/test/resources/ssl/client_cert_key_combo.pem",
+                          passphrase = "clientpassword",
+                          type = Keystores.TYPE_PEM
                       ),
-                      truststore = KeystoreConfig(
+                      trust_store = TrustStoreConfig(
                           path = "src/test/resources/ssl/client_cert.pem",
                           type = Keystores.TYPE_PEM
                       )

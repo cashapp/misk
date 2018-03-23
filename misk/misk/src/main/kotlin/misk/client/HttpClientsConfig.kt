@@ -1,8 +1,9 @@
 package misk.client
 
 import misk.config.Config
-import misk.security.ssl.KeystoreConfig
+import misk.security.ssl.CertStoreConfig
 import misk.security.ssl.SslContextFactory
+import misk.security.ssl.TrustStoreConfig
 import okhttp3.OkHttpClient
 import java.net.Proxy
 import java.time.Duration
@@ -33,10 +34,10 @@ data class HttpClientsConfig(
 }
 
 data class HttpClientSSLConfig(
-  val keystore: KeystoreConfig?,
-  val truststore: KeystoreConfig
+  val cert_store: CertStoreConfig?,
+  val trust_store: TrustStoreConfig
 ) {
-  fun createSSLContext() = SslContextFactory.create(keystore, truststore)
+  fun createSSLContext() = SslContextFactory.create(cert_store, trust_store)
 }
 
 data class HttpClientEndpointConfig(
@@ -54,10 +55,9 @@ data class HttpClientEndpointConfig(
     readTimeout?.let { builder.readTimeout(it.toMillis(), TimeUnit.MILLISECONDS) }
     writeTimeout?.let { builder.writeTimeout(it.toMillis(), TimeUnit.MILLISECONDS) }
     ssl?.let {
-      val trustManagers = SslContextFactory.loadTrustManagers(it.truststore.load())
+      val trustManagers = SslContextFactory.loadTrustManagers(it.trust_store.load()!!.keyStore)
       val x509TrustManager = trustManagers.mapNotNull { it as? X509TrustManager }.firstOrNull()
-          ?: throw IllegalStateException(
-              "no x509 trust manager in ${it.truststore.path}")
+          ?: throw IllegalStateException("no x509 trust manager in ${it.trust_store}")
       builder.sslSocketFactory(it.createSSLContext().socketFactory, x509TrustManager)
     }
     builder.proxy(Proxy.NO_PROXY)
