@@ -4,10 +4,10 @@ import com.squareup.moshi.FromJson
 import com.squareup.moshi.ToJson
 
 sealed class SocketEvent {
-  class Event(val topic: String, val message: String) : SocketEvent()
-  class Subscribe(val topic: String) : SocketEvent()
-  class Unsubscribe(val topic: String) : SocketEvent()
-  class Ack(val topic: String) : SocketEvent()
+  data class Event(val topic: String, val message: String) : SocketEvent()
+  data class Subscribe(val topic: String) : SocketEvent()
+  data class Unsubscribe(val topic: String) : SocketEvent()
+  data class Ack(val topic: String) : SocketEvent()
   object UnknownItem : SocketEvent()
 }
 

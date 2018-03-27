@@ -10,7 +10,6 @@ import javax.inject.Singleton
 @Singleton
 internal class FakeClusterConnector : ClusterConnector {
   val queue = LinkedBlockingQueue<Action>()
-  private var nextClusterVersion = 1L
   private var nextHostId = 1
   private val peers = mutableMapOf<String, TopicPeer>()
 
@@ -72,11 +71,9 @@ internal class FakeClusterConnector : ClusterConnector {
 
   private fun peersChanged() {
     val hosts = peers.keys.toList()
-    val clusterVersion = nextClusterVersion++
 
     for ((hostname, peer) in peers) {
       peer.clusterChanged(ClusterSnapshot(
-          clusterVersion,
           hosts,
           hostname
       ))
@@ -85,7 +82,7 @@ internal class FakeClusterConnector : ClusterConnector {
 
   override fun joinCluster(topicPeer: TopicPeer) {
     val hostname = "host_$nextHostId"
-    nextHostId += 3
+    nextHostId += 1
     queue.add(Action.JoinCluster(topicPeer, hostname))
   }
 
