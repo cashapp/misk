@@ -1,10 +1,14 @@
 package misk.eventrouter
 
+import com.google.common.util.concurrent.Service
 import com.google.inject.Provides
 import com.squareup.moshi.Moshi
 import misk.inject.KAbstractModule
+import misk.inject.addMultibinderBinding
+import misk.inject.to
 import misk.moshi.MoshiAdapterModule
 import misk.moshi.adapter
+import misk.web.WebActionModule
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.ThreadPoolExecutor
@@ -15,7 +19,12 @@ import javax.inject.Singleton
 class RealEventRouterModule : KAbstractModule() {
   override fun configure() {
     bind<EventRouter>().to<RealEventRouter>().`in`(Singleton::class.java)
+    bind<RealEventRouter>().`in`(Singleton::class.java)
+    binder().addMultibinderBinding<Service>().to<EventRouterService>()
+    bind<ClusterConnector>().to<KubernetesClusterConnector>()
+    bind<ClusterMapper>().to<ConsistentHashing>()
     install(MoshiAdapterModule(SocketEventJsonAdapter))
+    install(WebActionModule.create<EventRouterConnectionAction>())
   }
 
   @Provides @Singleton @ForEventRouterActions
@@ -26,6 +35,10 @@ class RealEventRouterModule : KAbstractModule() {
   // for everyone.
   @Provides @Singleton @ForEventRouterSubscribers
   fun subscriberExecutor(): ExecutorService =
+      ThreadPoolExecutor(1, 1, 1, TimeUnit.MINUTES, LinkedBlockingQueue())
+
+  @Provides @Singleton @ForKubernetesWatching
+  fun kubernetesExecutor(): ExecutorService =
       ThreadPoolExecutor(1, 1, 1, TimeUnit.MINUTES, LinkedBlockingQueue())
 
   @Provides @Singleton
@@ -49,3 +62,8 @@ internal annotation class ForEventRouterActions
 @Retention(AnnotationRetention.RUNTIME)
 @Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION)
 internal annotation class ForEventRouterSubscribers
+
+@Qualifier
+@Retention(AnnotationRetention.RUNTIME)
+@Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION)
+internal annotation class ForKubernetesWatching

@@ -22,36 +22,45 @@ internal class RealEventRouter : EventRouter {
   @Inject @ForEventRouterSubscribers lateinit var subscriberExecutor: ExecutorService
 
   internal lateinit var clusterSnapshot: ClusterSnapshot
-  private val actionQueue = LinkedBlockingQueue<Action>()
-  private val localSubscribers = LinkedHashMultimap.create<String, LocalSubscription<*>>()
+  internal val hasClusterSnapshot = AtomicBoolean()
+  private val localSubscribers = LinkedHashMultimap.create<String, LocalSubscriber<*>>()
   private val remoteSubscribers = LinkedHashMultimap.create<String, WebSocket>()
-  private val hasClusterSnapshot = AtomicBoolean()
+  private val actionQueue = LinkedBlockingQueue<Action>()
+  private var hasJoinedCluster = AtomicBoolean()
 
-  // TODO(tso): Change this to LinkedHashMap and use computeIfAbsent
   private val hostToSocket = CacheBuilder.newBuilder()
       .build<String, WebSocket>(object : CacheLoader<String, WebSocket>() {
         override fun load(hostname: String): WebSocket {
-          logger.debug { "[${clusterSnapshot.self}]: connecting to $hostname" }
+          logger.info { "connecting to ${shortName(hostname)}" }
           return clusterConnector.connectSocket(hostname, webSocketListener)
         }
       })
 
   sealed class Action {
-    class OnMessage(val webSocket: WebSocket, val text: String) : Action()
-    class ClusterChanged(val newSnapshot: ClusterSnapshot) : Action()
-    class Publish(val topic: String, val event: Any) : Action()
-    class Subscribe(val localSubscription: LocalSubscription<*>) : Action()
-    class CancelSubscription(val localSubscription: LocalSubscription<*>) : Action()
+    data class OnMessage(val webSocket: WebSocket, val text: String) : Action()
+    data class ClusterChanged(val newSnapshot: ClusterSnapshot) : Action()
+    data class Publish(val topic: String, val event: Any) : Action()
+    data class Subscribe(val localSubscription: LocalSubscriber<*>) : Action()
+    data class CancelSubscription(val localSubscription: LocalSubscriber<*>) : Action()
+    data class ClosedWebSocket(val webSocket: WebSocket) : Action()
     object LeaveCluster : Action()
   }
 
-  private val webSocketListener = object : WebSocketListener() {
+  internal val webSocketListener = object : WebSocketListener() {
     override fun onMessage(webSocket: WebSocket, text: String) {
       enqueue(Action.OnMessage(webSocket, text))
     }
 
+    override fun onClosing(webSocket: WebSocket, code: Int, reason: String?) {
+      enqueue(Action.ClosedWebSocket(webSocket))
+    }
+
     override fun onClosed(webSocket: WebSocket, code: Int, reason: String?) {
-      TODO("Enqueue Close")
+      enqueue(Action.ClosedWebSocket(webSocket))
+    }
+
+    override fun onFailure(webSocket: WebSocket, t: Throwable) {
+      enqueue(Action.ClosedWebSocket(webSocket))
     }
   }
 
@@ -61,7 +70,7 @@ internal class RealEventRouter : EventRouter {
     override fun clusterChanged(clusterSnapshot: ClusterSnapshot) {
       if (hasClusterSnapshot.compareAndSet(false, true)) {
         this@RealEventRouter.clusterSnapshot = clusterSnapshot
-        logger.debug { "[${clusterSnapshot.self}]: cluster changed: $clusterSnapshot" }
+        logger.info { "cluster changed: $clusterSnapshot" }
         actionExecutor.execute({ drainQueue() })
       } else {
         enqueue(Action.ClusterChanged(clusterSnapshot))
@@ -77,118 +86,171 @@ internal class RealEventRouter : EventRouter {
     while (true) {
       val action = actionQueue.poll() ?: return
 
-      logger.debug { "[${clusterSnapshot.self}]: processing action: $action" }
       when (action) {
-        is Action.LeaveCluster -> clusterConnector.leaveCluster(topicPeer)
+        is Action.LeaveCluster -> handleLeaveCluster()
+        is Action.ClusterChanged -> handleClusterChanged(action)
+        is Action.OnMessage -> handleOnMessage(action)
+        is Action.Subscribe -> handleSubscribe(action)
+        is Action.Publish -> handlePublish(action)
+        is Action.CancelSubscription -> handleCancelSubscription(action)
+        is Action.ClosedWebSocket -> handleClosedWebSocket(action)
+      }
 
-        is Action.ClusterChanged -> {
-          if (clusterSnapshot.version > action.newSnapshot.version) TODO("ignore this update")
+      logger.info { "current state:[localSubscribers=$localSubscribers] [remoteSubscribers=$remoteSubscribers] [hostToSocket=${hostToSocket.asMap().keys}]" }
+    }
+  }
 
-          if (action.newSnapshot.version - clusterSnapshot.version > 1) {
-            TODO("We've missed a cluster version and now everything is terrible")
-          }
+  private fun handleCancelSubscription(action: Action.CancelSubscription) {
+    logger.info { "cancel subscription: ${action.localSubscription}" }
 
-          val topics = remoteSubscribers.keySet().plus(localSubscribers.keySet())
-          for (topic in topics) {
-            val localSubscribers = localSubscribers.get(topic)
-            val websockets = remoteSubscribers.get(topic)
+    val topicName = action.localSubscription.topic.name
+    val localTopicSubscribers = localSubscribers.get(topicName)
+    localTopicSubscribers.remove(action.localSubscription)
+    if (localTopicSubscribers.isEmpty()) {
+      val topicOwner = clusterMapper.topicToHost(clusterSnapshot, topicName)
+      if (topicOwner != clusterSnapshot.self) {
+        val unsubscribeEvent = eventJsonAdapter.toJson(SocketEvent.Unsubscribe(topicName))
+        hostToSocket[topicOwner].send(unsubscribeEvent)
+      }
+    }
+    action.localSubscription.onClose()
+  }
 
-            if (clusterMapper.topicToHost(clusterSnapshot, topic) !=
-                clusterMapper.topicToHost(action.newSnapshot, topic)) {
+  private fun handlePublish(action: Action.Publish) {
+    logger.info { "onPublish: ${action.event}" }
 
-              val iterator = localSubscribers.iterator()
-              while (iterator.hasNext()) {
-                iterator.next().onClose()
-                iterator.remove()
-              }
-              websockets.forEach {
-                it.send(eventJsonAdapter.toJson(SocketEvent.Unsubscribe(topic)))
-              }
-            }
-          }
+    val topicOwner = clusterMapper.topicToHost(clusterSnapshot, action.topic)
+    val socketEvent = SocketEvent.Event(action.topic, action.event.toString())
+    val eventJson = eventJsonAdapter.toJson(socketEvent)
 
-          clusterSnapshot = action.newSnapshot
+    if (topicOwner != clusterSnapshot.self) {
+      hostToSocket[topicOwner].send(eventJson)
+    } else {
+      remoteSubscribers.get(action.topic).forEach { it.send(eventJson) }
+      localSubscribers.get(action.topic).forEach { it.onEvent(socketEvent.message) }
+    }
+  }
+
+  private fun handleSubscribe(action: Action.Subscribe) {
+    logger.info { "onSubscribe: ${action.localSubscription}" }
+
+    val topicName = action.localSubscription.topic.name
+    val topicOwner = clusterMapper.topicToHost(clusterSnapshot, topicName)
+    if (topicOwner != clusterSnapshot.self) {
+      val subscribeEvent = eventJsonAdapter.toJson(SocketEvent.Subscribe(topicName))
+      hostToSocket[topicOwner].send(subscribeEvent)
+    } else {
+      action.localSubscription.onOpen()
+    }
+
+    localSubscribers.put(topicName, action.localSubscription)
+  }
+
+  private fun handleOnMessage(action: Action.OnMessage) {
+    logger.info { "onMessage: ${action.text}" }
+
+    val socketEvent = eventJsonAdapter.fromJson(action.text)!!
+    when (socketEvent) {
+      is SocketEvent.Event -> {
+        localSubscribers.get(socketEvent.topic).forEach {
+          it.onEvent(socketEvent.message)
         }
 
-        is Action.OnMessage -> {
-          val socketEvent = eventJsonAdapter.fromJson(action.text)!!
-          when (socketEvent) {
-            is SocketEvent.Event -> {
-              localSubscribers.get(socketEvent.topic).forEach {
-                it.onEvent(socketEvent.message)
-              }
+        remoteSubscribers.get(socketEvent.topic).forEach {
+          it.send(action.text)
+        }
+      }
 
-              remoteSubscribers.get(socketEvent.topic).forEach {
-                it.send(action.text)
-              }
-            }
+      is SocketEvent.Subscribe -> {
+        remoteSubscribers.put(socketEvent.topic, action.webSocket)
+        action.webSocket.send(eventJsonAdapter.toJson(SocketEvent.Ack(socketEvent.topic)))
+      }
 
-            is SocketEvent.Subscribe -> {
-              remoteSubscribers.put(socketEvent.topic, action.webSocket)
-              action.webSocket.send(eventJsonAdapter.toJson(SocketEvent.Ack(socketEvent.topic)))
-            }
+      is SocketEvent.Ack -> {
+        localSubscribers.get(socketEvent.topic).forEach {
+          it.onOpen()
+        }
+      }
 
-            is SocketEvent.Ack -> {
-              localSubscribers.get(socketEvent.topic).forEach {
-                it.onOpen()
-              }
-            }
+      is SocketEvent.Unsubscribe -> {
+        remoteSubscribers.get(socketEvent.topic).remove(action.webSocket)
+      }
+    }
+  }
 
-            is SocketEvent.Unsubscribe -> {
-              remoteSubscribers.get(socketEvent.topic).remove(action.webSocket)
-            }
-          }
+  private fun handleClusterChanged(action: Action.ClusterChanged) {
+    // TODO(tso): missed cluster changes? out of order cluster changes? figure
+    // out kubernetes watch behavior
+
+    logger.info { "handleClusterChanged: ${action.newSnapshot}" }
+
+    val topics = remoteSubscribers.keySet().plus(localSubscribers.keySet())
+    for (topic in topics) {
+      val localSubscribers = localSubscribers.get(topic)
+      val websockets = remoteSubscribers.get(topic)
+
+      if (clusterMapper.topicToHost(clusterSnapshot, topic) !=
+          clusterMapper.topicToHost(action.newSnapshot, topic)) {
+
+        val iterator = localSubscribers.iterator()
+        while (iterator.hasNext()) {
+          val localSubscription = iterator.next()
+          localSubscription.cancel()
+          iterator.remove()
         }
 
-        is Action.Subscribe -> {
-          val topicName = action.localSubscription.topic.name
-          val topicOwner = clusterMapper.topicToHost(clusterSnapshot, topicName)
-          if (topicOwner != clusterSnapshot.self) {
-            val subscribeEvent = eventJsonAdapter.toJson(SocketEvent.Subscribe(topicName))
-            hostToSocket[topicOwner].send(subscribeEvent)
-          } else {
-            action.localSubscription.onOpen()
-          }
-
-          localSubscribers.put(topicName, action.localSubscription)
+        val wsIter = websockets.iterator()
+        while (wsIter.hasNext()) {
+          val next = wsIter.next()
+          next.close(1000, "the topic owner has changed")
+          wsIter.remove()
         }
+      }
+    }
 
-        is Action.Publish -> {
-          val topicOwner = clusterMapper.topicToHost(clusterSnapshot, action.topic)
-          val socketEvent = SocketEvent.Event(action.topic, action.event.toString())
-          val eventJson = eventJsonAdapter.toJson(socketEvent)
+    clusterSnapshot = action.newSnapshot
+  }
 
-          if (topicOwner != clusterSnapshot.self) {
-            hostToSocket[topicOwner].send(eventJson)
-          } else {
-            remoteSubscribers.get(action.topic).forEach { it.send(eventJson) }
-            localSubscribers.get(action.topic).forEach { it.onEvent(socketEvent.message) }
-          }
-        }
+  private fun handleClosedWebSocket(action: Action.ClosedWebSocket) {
+    logger.info { "web socket closed: ${action.webSocket}" }
 
-        is Action.CancelSubscription -> {
-          val topicName = action.localSubscription.topic.name
-          val localTopicSubscribers = localSubscribers.get(topicName)
-          localTopicSubscribers.remove(action.localSubscription)
-          if (localTopicSubscribers.isEmpty()) {
-            val topicOwner = clusterMapper.topicToHost(clusterSnapshot, topicName)
-            if (topicOwner != clusterSnapshot.self) {
-              val unsubscribeEvent = eventJsonAdapter.toJson(SocketEvent.Unsubscribe(topicName))
-              hostToSocket[topicOwner].send(unsubscribeEvent)
-            }
-          }
-          action.localSubscription.onClose()
+    // TODO(tso): handle this more efficiently?
+    // this looks a lot like cluster changed. Maybe share code?
+    val hostname =
+        hostToSocket.asMap().entries.firstOrNull { it.value == action.webSocket }?.key ?: return
+    hostToSocket.invalidate(hostname)
+
+    val topics = localSubscribers.keySet()
+    for (topic in topics) {
+      val localSubscribers = localSubscribers.get(topic)
+
+      if (clusterMapper.topicToHost(clusterSnapshot, topic) == hostname) {
+        val iterator = localSubscribers.iterator()
+        while (iterator.hasNext()) {
+          val localSubscription = iterator.next()
+          localSubscription.onClose()
+          iterator.remove()
         }
       }
     }
   }
 
+  private fun handleLeaveCluster() {
+    logger.info { "handleLeaveCluster" }
+    clusterConnector.leaveCluster(topicPeer)
+    localSubscribers.forEach { _, subscriber -> subscriber.onClose() }
+  }
+
   fun joinCluster() {
-    clusterConnector.joinCluster(topicPeer)
+    if (hasJoinedCluster.compareAndSet(false, true)) {
+      clusterConnector.joinCluster(topicPeer)
+    }
   }
 
   fun leaveCluster() {
-    enqueue(Action.LeaveCluster)
+    if (hasJoinedCluster.compareAndSet(true, false)) {
+      enqueue(Action.LeaveCluster)
+    }
   }
 
   override fun <T : Any> getTopic(name: String): Topic<T> {
@@ -202,7 +264,7 @@ internal class RealEventRouter : EventRouter {
 
       override fun subscribe(listener: Listener<T>): Subscription<T> {
         val localSubscription =
-            LocalSubscription(listener, this@RealEventRouter, subscriberExecutor, this)
+            LocalSubscriber(listener, this@RealEventRouter, subscriberExecutor, this)
         enqueue(Action.Subscribe(localSubscription))
         return localSubscription
       }
@@ -215,7 +277,12 @@ internal class RealEventRouter : EventRouter {
   }
 }
 
-internal data class LocalSubscription<T : Any>(
+// TODO(tso): add 3 subscriber types:
+// - RemotePublisher (someone I'm subscribed to)
+// - A local subscriber
+// - A remote subscriber
+
+internal data class LocalSubscriber<T : Any>(
   private val listener: Listener<T>,
   private val realEventRouter: RealEventRouter,
   private val executorService: ExecutorService,
@@ -241,5 +308,9 @@ internal data class LocalSubscription<T : Any>(
 
   override fun cancel() {
     realEventRouter.enqueue(RealEventRouter.Action.CancelSubscription(this))
+  }
+
+  override fun toString(): String {
+    return "LocalSubscription[$listener]"
   }
 }
