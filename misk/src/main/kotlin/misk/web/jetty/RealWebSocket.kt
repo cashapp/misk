@@ -88,7 +88,10 @@ class RealWebSocket : WebSocket {
   }
 
   override fun close(code: Int, reason: String?): Boolean {
-    adapter.session.close(code, reason)
+    if (adapter.isConnected) {
+      adapter.session.close(code, reason)
+      return true
+    }
     return false
   }
 

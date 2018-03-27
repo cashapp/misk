@@ -10,10 +10,25 @@ internal interface ClusterConnector {
 }
 
 data class ClusterSnapshot(
-  val version: Long,
   val hosts: List<String>,
   val self: String
-)
+) {
+
+  override fun toString(): String {
+    val result = StringBuilder()
+    result.append("[")
+    for ((index, host) in hosts.withIndex()) {
+      if (index > 0) result.append(",")
+      if (host == self) {
+        result.append("**").append(shortName(host)).append("**")
+      } else {
+        result.append(shortName(host))
+      }
+    }
+    result.append("]")
+    return result.toString()
+  }
+}
 
 internal interface ClusterMapper {
   fun topicToHost(clusterSnapshot: ClusterSnapshot, topic: String): String
@@ -22,4 +37,9 @@ internal interface ClusterMapper {
 internal interface TopicPeer {
   fun acceptWebSocket(webSocket: WebSocket): WebSocketListener
   fun clusterChanged(clusterSnapshot: ClusterSnapshot)
+}
+
+fun shortName(host: String): String {
+  val lastDash = host.lastIndexOf("-")
+  return if (lastDash != -1) host.substring(lastDash + 1) else host
 }
