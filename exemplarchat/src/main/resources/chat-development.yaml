@@ -1,0 +1,3 @@
+kubernetes:
+  my_pod_namespace: none
+  my_pod_name: none

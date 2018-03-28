@@ -36,11 +36,8 @@ class NotFoundActionTest {
   private val plainTextMediaType = MediaTypes.TEXT_PLAIN_UTF8.asMediaType()
   private val weirdMediaType = "application/weird".asMediaType()
 
-  private @Inject
-  lateinit var moshi: Moshi
-
-  private @Inject
-  lateinit var jettyService: JettyService
+  @Inject private lateinit var moshi: Moshi
+  @Inject private lateinit var jettyService: JettyService
 
   private val packetJsonAdapter get() = moshi.adapter(Packet::class.java)
 
