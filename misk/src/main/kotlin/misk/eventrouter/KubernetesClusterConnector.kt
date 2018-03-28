@@ -21,12 +21,9 @@ private val logger = getLogger<KubernetesClusterConnector>()
 @Singleton
 internal class KubernetesClusterConnector : ClusterConnector {
   @Inject @ForKubernetesWatching lateinit var executor: ExecutorService
+  @Inject lateinit var config: KubernetesConfig
 
   private lateinit var api: CoreV1Api
-  private val myPodNameSpace: String = System.getenv("MY_POD_NAMESPACE")
-      ?: throw IllegalStateException("MY_POD_NAMESPACE must be set")
-  private val myPodName: String = System.getenv("MY_POD_NAME")
-      ?: throw IllegalStateException("MY_POD_NAME must be set")
   private val hostMapping = mutableMapOf<String, String>()
 
   override fun joinCluster(topicPeer: TopicPeer) {
@@ -37,7 +34,8 @@ internal class KubernetesClusterConnector : ClusterConnector {
     executor.execute({
       val watch = Watch.createWatch<V1Pod>(
           client,
-          api.listNamespacedPodCall(myPodNameSpace, null, null, null, null, null, true, null, null),
+          api.listNamespacedPodCall(config.my_pod_namespace, null, null, null, null, null, true,
+              null, null),
           object : TypeToken<Watch.Response<V1Pod>>() {}.type)
 
       for (item in watch) {
@@ -58,7 +56,7 @@ internal class KubernetesClusterConnector : ClusterConnector {
           }
         }
 
-        topicPeer.clusterChanged(ClusterSnapshot(hostMapping.keys.toList(), myPodName))
+        topicPeer.clusterChanged(ClusterSnapshot(hostMapping.keys.toList(), config.my_pod_name))
       }
     })
   }

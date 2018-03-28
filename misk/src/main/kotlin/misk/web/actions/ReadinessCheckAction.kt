@@ -12,7 +12,7 @@ import javax.inject.Singleton
 @Singleton
 class ReadinessCheckAction @Inject internal constructor(
   private val services: List<Service>,
-  private @JvmSuppressWildcards val healthChecks: List<HealthCheck>
+  @JvmSuppressWildcards private val healthChecks: List<HealthCheck>
 ) : WebAction {
 
   @Get("/_readiness")

@@ -3,7 +3,7 @@ package misk.eventrouter
 import javax.inject.Singleton
 
 @Singleton
-class FakeClusterMapper : ClusterMapper {
+internal class FakeClusterMapper : ClusterMapper {
   private val mapping = mutableMapOf<List<String>, String>()
 
   fun setOwnerForHostList(hosts: List<String>, host: String) {
