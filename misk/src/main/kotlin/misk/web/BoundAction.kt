@@ -26,14 +26,15 @@ import kotlin.reflect.KParameter
  */
 internal class BoundAction<A : WebAction, out R>(
   private val webActionProvider: Provider<A>,
-  val networkInterceptors: MutableList<NetworkInterceptor>,
-  val applicationInterceptors: MutableList<ApplicationInterceptor>,
+  private val networkInterceptors: MutableList<NetworkInterceptor>,
+  private val applicationInterceptors: MutableList<ApplicationInterceptor>,
   parameterExtractorFactories: List<ParameterExtractor.Factory>,
   val function: KFunction<R>,
   val pathPattern: PathPattern,
   private val httpMethod: HttpMethod,
   private val acceptedContentTypes: List<MediaRange>,
-  private val responseContentType: MediaType?
+  private val responseContentType: MediaType?,
+  private val isConnectWebSocketAction: Boolean
 ) {
   private val parameterExtractors = function.parameters
       .drop(1) // the first parameter is always _this_
@@ -62,11 +63,13 @@ internal class BoundAction<A : WebAction, out R>(
     requestMethod: String,
     requestContentType: MediaType?,
     requestAcceptedTypes: List<MediaRange>,
-    url: HttpUrl
+    url: HttpUrl,
+    isWebSocketRequest: Boolean
   ): BoundActionMatch? {
     // Confirm the path and method matches
     val pathMatcher = pathMatcher(url) ?: return null
     if (requestMethod != httpMethod.name) return null
+    if (isConnectWebSocketAction != isWebSocketRequest) return null
 
     // Confirm the request content type matches the types we accept, and pick the most specific
     // content type match

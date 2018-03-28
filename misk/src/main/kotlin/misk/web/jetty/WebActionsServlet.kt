@@ -42,25 +42,26 @@ internal class WebActionsServlet @Inject constructor(
         keyOf<Request>() to asRequest)
 
     scope.enter(seedData).use {
-          val candidateActions = boundActions.mapNotNull {
-            it.match(
-                request.method,
-                request.contentType?.let { MediaType.parse(it) },
-                request.accepts(),
-                asRequest.url
-            )
-          }.sorted()
+      val candidateActions = boundActions.mapNotNull {
+        it.match(
+            request.method,
+            request.contentType?.let { MediaType.parse(it) },
+            request.accepts(),
+            asRequest.url,
+            false
+        )
+      }
 
-          val bestAction = candidateActions.firstOrNull()
-          if (bestAction != null) {
-            bestAction.handle(asRequest, response)
-          } else {
-            response.status = StatusCode.NOT_FOUND.code
-            response.addHeader("Content-Type", MediaTypes.TEXT_PLAIN_UTF8)
-            response.writer.print("Nothing found at /${asRequest.url.encodedPath()}")
-            response.writer.close()
-          }
-        }
+      val bestAction = candidateActions.sorted().firstOrNull()
+      if (bestAction != null) {
+        bestAction.handle(asRequest, response)
+      } else {
+        response.status = StatusCode.NOT_FOUND.code
+        response.addHeader("Content-Type", MediaTypes.TEXT_PLAIN_UTF8)
+        response.writer.print("Nothing found at /${asRequest.url.encodedPath()}")
+        response.writer.close()
+      }
+    }
   }
 
   override fun configure(factory: WebSocketServletFactory) {
@@ -80,7 +81,8 @@ internal class WebActionsServlet @Inject constructor(
             request.method,
             null,
             listOf(),
-            asRequest.url
+            asRequest.url,
+            true
         )
       }
 

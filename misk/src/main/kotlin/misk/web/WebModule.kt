@@ -1,8 +1,6 @@
 package misk.web
 
-import misk.Action
 import misk.ApplicationInterceptor
-import misk.Chain
 import misk.MiskDefault
 import misk.NetworkInterceptor
 import misk.exceptions.ActionException
@@ -82,6 +80,10 @@ class WebModule : KAbstractModule() {
     // the client's requested content-type
     binder().addMultibinderBindingWithAnnotation<NetworkInterceptor.Factory, MiskDefault>()
         .to<MarshallerInterceptor.Factory>()
+
+    binder().addMultibinderBindingWithAnnotation<NetworkInterceptor.Factory, MiskDefault>()
+        .to<StaticResourceInterceptor.Factory>()
+    binder().newMultibinder<StaticResourceMapper.Entry>()
 
     install(ExceptionMapperModule.create<ActionException, ActionExceptionMapper>())
 

@@ -12,12 +12,17 @@ import okio.Okio
  * while the process is running, and because scanning the classpath isn't necessarily very fast!
  */
 object ResourceLoader {
-  val resourcesByPath: Map<String, ResourceInfo>
+  private val resourcesByPath: Map<String, ResourceInfo>
 
   init {
     val classLoader = ResourceLoader::class.java.classLoader
     val classPath = ClassPath.from(classLoader)
     resourcesByPath = classPath.resources.associateBy { r -> r.resourceName }
+  }
+
+  /** Returns true if a resource at `path` exists. */
+  fun exists(path: String): Boolean {
+    return resourcesByPath[path] != null
   }
 
   /** Return a buffered source for `path`, or null if no such resource exists. */

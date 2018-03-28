@@ -1,7 +1,7 @@
 package misk.eventrouter
 
 import com.google.inject.util.Modules
-import misk.moshi.MoshiModule
+import misk.MiskModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
@@ -11,24 +11,20 @@ import javax.inject.Inject
 @MiskTest(startService = false)
 internal class EventRouterTest {
   @MiskTestModule
-  val module = Modules.combine(
-      EventRouterTestingModule(),
-      MoshiModule()
-  )
+  val module = Modules.combine(MiskModule(), EventRouterTestingModule(distributed = true))
 
   @Inject lateinit var machineA: RealEventRouter
   @Inject lateinit var machineB: RealEventRouter
   @Inject lateinit var machineC: RealEventRouter
-  @Inject lateinit var clusterConnector: FakeClusterConnector
   @Inject lateinit var clusterMapper: FakeClusterMapper
+  @Inject lateinit var fakeEventRouterProcessor: EventRouterTester
   @Inject @ForEventRouterActions lateinit var actionExecutor: QueueingExecutorService
-  @Inject @ForEventRouterSubscribers lateinit var subscriberExecutor: QueueingExecutorService
 
   @Test fun helloWorld() {
     clusterMapper.setOwnerForHostList(listOf("host_1", "host_2"), "host_1")
     machineA.joinCluster()
     machineB.joinCluster()
-    processEverything()
+    fakeEventRouterProcessor.processEverything()
 
     val machineAChatroom = machineA.getTopic<String>("chat")
     val machineAListener = RecordingListener()
@@ -37,7 +33,7 @@ internal class EventRouterTest {
     val machineBChatroom = machineB.getTopic<String>("chat")
     machineBChatroom.publish("hello from Jesse!")
 
-    processEverything()
+    fakeEventRouterProcessor.processEverything()
 
     assertThat(machineAListener.events).containsExactly("chat: open", "chat: hello from Jesse!")
   }
@@ -47,13 +43,13 @@ internal class EventRouterTest {
     machineA.joinCluster()
     machineB.joinCluster()
     machineC.joinCluster()
-    processEverything()
+    fakeEventRouterProcessor.processEverything()
 
     val listener = RecordingListener()
     machineB.getTopic<String>("chat").subscribe(listener)
     machineC.getTopic<String>("chat").publish("hello from Jesse!")
 
-    processEverything()
+    fakeEventRouterProcessor.processEverything()
 
     assertThat(listener.events).containsExactly("chat: open", "chat: hello from Jesse!")
   }
@@ -62,17 +58,17 @@ internal class EventRouterTest {
     clusterMapper.setOwnerForHostList(listOf("host_1", "host_2"), "host_1")
     machineA.joinCluster()
     machineB.joinCluster()
-    processEverything()
+    fakeEventRouterProcessor.processEverything()
 
     val listener = RecordingListener()
     val subscription = machineA.getTopic<String>("chat").subscribe(listener)
     machineB.getTopic<String>("chat").publish("message 1")
     // Ensure that the message goes through before cancelling.
-    processEverything()
+    fakeEventRouterProcessor.processEverything()
 
     subscription.cancel()
     machineB.getTopic<String>("chat").publish("message 2")
-    processEverything()
+    fakeEventRouterProcessor.processEverything()
 
     assertThat(listener.events).containsExactly("chat: open", "chat: message 1", "chat: close")
   }
@@ -82,15 +78,15 @@ internal class EventRouterTest {
     clusterMapper.setOwnerForHostList(listOf("host_2"), "host_2")
     machineA.joinCluster()
     machineB.joinCluster()
-    processEverything()
+    fakeEventRouterProcessor.processEverything()
 
     val listener = RecordingListener()
     machineB.getTopic<String>("chat").subscribe(listener)
     // Ensure that we get an ack for our subscription
-    processEverything()
+    fakeEventRouterProcessor.processEverything()
     machineA.leaveCluster()
 
-    processEverything()
+    fakeEventRouterProcessor.processEverything()
 
     assertThat(listener.events).containsExactly("chat: open", "chat: close")
   }
@@ -99,14 +95,14 @@ internal class EventRouterTest {
     clusterMapper.setOwnerForHostList(listOf("host_1", "host_2"), "host_1")
     machineA.joinCluster()
     machineB.joinCluster()
-    processEverything()
+    fakeEventRouterProcessor.processEverything()
 
     val listener = RecordingListener()
     machineA.getTopic<String>("chat").subscribe(listener)
     clusterMapper.setOwnerForHostList(listOf("host_1"), "host_1")
     machineB.leaveCluster()
 
-    processEverything()
+    fakeEventRouterProcessor.processEverything()
 
     assertThat(listener.events).containsExactly("chat: open")
   }
@@ -115,14 +111,14 @@ internal class EventRouterTest {
     clusterMapper.setOwnerForHostList(listOf("host_1", "host_2"), "host_1")
     machineA.joinCluster()
     machineB.joinCluster()
-    processEverything()
+    fakeEventRouterProcessor.processEverything()
 
     val listener = RecordingListener()
     machineB.getTopic<String>("chat").subscribe(listener)
-    processEverything()
+    fakeEventRouterProcessor.processEverything()
 
     machineB.getTopic<String>("chat").publish("message 1")
-    processEverything()
+    fakeEventRouterProcessor.processEverything()
 
     assertThat(listener.events).containsExactly("chat: open", "chat: message 1")
   }
@@ -130,14 +126,14 @@ internal class EventRouterTest {
   @Test fun singleMachine() {
     clusterMapper.setOwnerForHostList(listOf("host_1"), "host_1")
     machineA.joinCluster()
-    processEverything()
+    fakeEventRouterProcessor.processEverything()
 
     val listener = RecordingListener()
     machineA.getTopic<String>("chat").subscribe(listener)
-    processEverything()
+    fakeEventRouterProcessor.processEverything()
 
     machineA.getTopic<String>("chat").publish("message 1")
-    processEverything()
+    fakeEventRouterProcessor.processEverything()
 
     assertThat(listener.events).containsExactly("chat: open", "chat: message 1")
   }
@@ -164,16 +160,16 @@ internal class EventRouterTest {
     clusterMapper.setOwnerForHostList(listOf("host_1", "host_2"), "host_1")
     machineA.joinCluster()
     machineB.joinCluster()
-    processEverything()
+    fakeEventRouterProcessor.processEverything()
 
     val subscription = machineB.getTopic<String>("chat").subscribe(listener)
-    processEverything()
+    fakeEventRouterProcessor.processEverything()
 
     machineA.getTopic<String>("chat").publish("message 1")
-    processEverything()
+    fakeEventRouterProcessor.processEverything()
 
     subscription.cancel()
-    processEverything()
+    fakeEventRouterProcessor.processEverything()
 
     assertThat(events).containsExactly("onOpen", "onEvent", "onClose")
   }
@@ -183,7 +179,7 @@ internal class EventRouterTest {
     machineA.joinCluster()
     machineB.joinCluster()
     machineC.joinCluster()
-    processEverything()
+    fakeEventRouterProcessor.processEverything()
 
     val listenerA = RecordingListener()
     val listenerB = RecordingListener()
@@ -195,16 +191,16 @@ internal class EventRouterTest {
     topicA.subscribe(listenerA)
     topicB.subscribe(listenerB)
     topicC.subscribe(listenerC)
-    processEverything()
+    fakeEventRouterProcessor.processEverything()
 
     topicA.publish("a")
     topicB.publish("b")
     topicC.publish("c")
-    processEverything()
+    fakeEventRouterProcessor.processEverything()
 
     clusterMapper.setOwnerForHostList(listOf("host_2", "host_3"), "host_2")
     machineA.leaveCluster()
-    processEverything()
+    fakeEventRouterProcessor.processEverything()
 
     assertThat(listenerA.events).containsExactly("chat: open", "chat: a", "chat: b", "chat: c",
         "chat: close")
@@ -215,11 +211,11 @@ internal class EventRouterTest {
 
     topicB.subscribe(listenerB)
     topicC.subscribe(listenerC)
-    processEverything()
+    fakeEventRouterProcessor.processEverything()
 
     topicB.publish("b2")
 
-    processEverything()
+    fakeEventRouterProcessor.processEverything()
 
     assertThat(listenerA.events).containsExactly("chat: open", "chat: a", "chat: b", "chat: c",
         "chat: close")
@@ -227,15 +223,6 @@ internal class EventRouterTest {
         "chat: close", "chat: open", "chat: b2")
     assertThat(listenerC.events).containsExactly("chat: open", "chat: a", "chat: b", "chat: c",
         "chat: close", "chat: open", "chat: b2")
-  }
-
-  private fun processEverything() {
-    do {
-      var total = 0
-      total += clusterConnector.processEverything()
-      total += actionExecutor.processEverything()
-      total += subscriberExecutor.processEverything()
-    } while (total > 0)
   }
 
   class RecordingListener : Listener<String> {

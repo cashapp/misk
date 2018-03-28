@@ -45,6 +45,9 @@ task shadedJar(type: com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar)
   from(project.convention.getPlugin(JavaPluginConvention).sourceSets.main.output)
   configurations = [project.configurations.runtime]
   exclude('META-INF/INDEX.LIST', 'META-INF/*.SF', 'META-INF/*.DSA', 'META-INF/*.RSA')
+  into("web/exemplarchat") {
+    from("web/build")
+  }
 }
 
 artifacts {
