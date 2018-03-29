@@ -5,6 +5,6 @@ import misk.tracing.backends.jaeger.JaegerBackendConfig
 import misk.tracing.backends.zipkin.ZipkinBackendConfig
 
 data class TracingBackendConfig(
-  val jaeger: JaegerBackendConfig?,
-  val zipkin: ZipkinBackendConfig?
+  val jaeger: JaegerBackendConfig? = null,
+  val zipkin: ZipkinBackendConfig? = null
 ) : Config

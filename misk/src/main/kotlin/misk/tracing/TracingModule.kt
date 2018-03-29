@@ -19,7 +19,7 @@ class TracingModule(val config: TracingConfig) : KAbstractModule() {
 
     val configuredTracers = TracingBackendConfig::class.memberProperties.mapNotNull { it.get(config.backends) }
 
-    check(configuredTracers.size == 1) { "More than one tracer has been configured. Please remove one." }
+    check(configuredTracers.size < 2) { "More than one tracer has been configured. Please remove one." }
 
     when {
       config.backends.jaeger != null -> install(JaegerBackendModule(config.backends.jaeger))
