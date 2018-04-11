@@ -32,7 +32,7 @@ internal class RealEventRouter : EventRouter {
   private val hostToSocket = CacheBuilder.newBuilder()
       .build<String, WebSocket>(object : CacheLoader<String, WebSocket>() {
         override fun load(hostname: String): WebSocket {
-          logger.info { "connecting to $hostname" }
+          logger.debug { "connecting to $hostname" }
           return clusterConnector.connectSocket(hostname, webSocketListener)
         }
       })
@@ -71,7 +71,7 @@ internal class RealEventRouter : EventRouter {
     override fun clusterChanged(clusterSnapshot: ClusterSnapshot) {
       if (hasClusterSnapshot.compareAndSet(false, true)) {
         this@RealEventRouter.clusterSnapshot = clusterSnapshot
-        logger.info { "cluster changed: $clusterSnapshot" }
+        logger.debug { "cluster changed: $clusterSnapshot" }
         actionExecutor.execute({ drainQueue() })
       } else {
         enqueue(Action.ClusterChanged(clusterSnapshot))
@@ -97,12 +97,13 @@ internal class RealEventRouter : EventRouter {
         is Action.ClosedWebSocket -> handleClosedWebSocket(action)
       }
 
-      logger.info { "current state:[localSubscribers=$localSubscribers] [remoteSubscribers=$remoteSubscribers] [hostToSocket=${hostToSocket.asMap().keys}]" }
+      logger.debug { "current state:[localSubscribers=$localSubscribers] " +
+          "[remoteSubscribers=$remoteSubscribers] [hostToSocket=${hostToSocket.asMap().keys}]" }
     }
   }
 
   private fun handleCancelSubscription(action: Action.CancelSubscription) {
-    logger.info { "cancel subscription: ${action.localSubscription}" }
+    logger.debug { "cancel subscription: ${action.localSubscription}" }
 
     val topicName = action.localSubscription.topic.name
     val localTopicSubscribers = localSubscribers.get(topicName)
@@ -118,7 +119,7 @@ internal class RealEventRouter : EventRouter {
   }
 
   private fun handlePublish(action: Action.Publish) {
-    logger.info { "onPublish: ${action.event}" }
+    logger.debug { "onPublish: ${action.event}" }
 
     val topicOwner = clusterMapper.topicToHost(clusterSnapshot, action.topic)
     val socketEvent = SocketEvent.Event(action.topic, action.event.toString())
@@ -133,7 +134,7 @@ internal class RealEventRouter : EventRouter {
   }
 
   private fun handleSubscribe(action: Action.Subscribe) {
-    logger.info { "onSubscribe: ${action.localSubscription}" }
+    logger.debug { "onSubscribe: ${action.localSubscription}" }
 
     val topicName = action.localSubscription.topic.name
     val topicOwner = clusterMapper.topicToHost(clusterSnapshot, topicName)
@@ -148,7 +149,7 @@ internal class RealEventRouter : EventRouter {
   }
 
   private fun handleOnMessage(action: Action.OnMessage) {
-    logger.info { "onMessage: ${action.text}" }
+    logger.debug { "onMessage: ${action.text}" }
 
     val socketEvent = eventJsonAdapter.fromJson(action.text)!!
     when (socketEvent) {
@@ -183,7 +184,7 @@ internal class RealEventRouter : EventRouter {
     // TODO(tso): missed cluster changes? out of order cluster changes? figure
     // out kubernetes watch behavior
 
-    logger.info { "handleClusterChanged: ${action.newSnapshot}" }
+    logger.debug { "handleClusterChanged: ${action.newSnapshot}" }
 
     val topics = remoteSubscribers.keySet().plus(localSubscribers.keySet())
     for (topic in topics) {
@@ -213,7 +214,7 @@ internal class RealEventRouter : EventRouter {
   }
 
   private fun handleClosedWebSocket(action: Action.ClosedWebSocket) {
-    logger.info { "web socket closed: ${action.webSocket}" }
+    logger.debug { "web socket closed: ${action.webSocket}" }
 
     // TODO(tso): handle this more efficiently?
     // this looks a lot like cluster changed. Maybe share code?
@@ -237,7 +238,7 @@ internal class RealEventRouter : EventRouter {
   }
 
   private fun handleLeaveCluster() {
-    logger.info { "handleLeaveCluster" }
+    logger.debug { "handleLeaveCluster" }
     clusterConnector.leaveCluster(topicPeer)
     for (localSubscriber in localSubscribers.values()) {
       localSubscriber.onClose()
