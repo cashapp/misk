@@ -58,4 +58,10 @@ dependencies {
   testCompile project(':misk/testing')
 }
 
+jar {
+  into("web/admin") {
+    from("web/admin/build")
+  }
+}
+
 apply from: rootProject.file('gradle/gradle-mvn-push.gradle')
