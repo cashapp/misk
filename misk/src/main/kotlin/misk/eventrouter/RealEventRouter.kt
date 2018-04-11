@@ -28,10 +28,11 @@ internal class RealEventRouter : EventRouter {
   private val actionQueue = LinkedBlockingQueue<Action>()
   private var hasJoinedCluster = AtomicBoolean()
 
+  // TODO: replcae with a normal map. No need for concurrency
   private val hostToSocket = CacheBuilder.newBuilder()
       .build<String, WebSocket>(object : CacheLoader<String, WebSocket>() {
         override fun load(hostname: String): WebSocket {
-          logger.info { "connecting to ${shortName(hostname)}" }
+          logger.info { "connecting to $hostname" }
           return clusterConnector.connectSocket(hostname, webSocketListener)
         }
       })
@@ -238,7 +239,9 @@ internal class RealEventRouter : EventRouter {
   private fun handleLeaveCluster() {
     logger.info { "handleLeaveCluster" }
     clusterConnector.leaveCluster(topicPeer)
-    localSubscribers.forEach { _, subscriber -> subscriber.onClose() }
+    for (localSubscriber in localSubscribers.values()) {
+      localSubscriber.onClose()
+    }
   }
 
   fun joinCluster() {
