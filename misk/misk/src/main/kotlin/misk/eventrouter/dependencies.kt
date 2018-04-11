@@ -13,16 +13,15 @@ data class ClusterSnapshot(
   val hosts: List<String>,
   val self: String
 ) {
-
   override fun toString(): String {
     val result = StringBuilder()
     result.append("[")
     for ((index, host) in hosts.withIndex()) {
       if (index > 0) result.append(",")
       if (host == self) {
-        result.append("**").append(shortName(host)).append("**")
+        result.append("**").append(host).append("**")
       } else {
-        result.append(shortName(host))
+        result.append(host)
       }
     }
     result.append("]")
@@ -37,9 +36,4 @@ internal interface ClusterMapper {
 internal interface TopicPeer {
   fun acceptWebSocket(webSocket: WebSocket): WebSocketListener
   fun clusterChanged(clusterSnapshot: ClusterSnapshot)
-}
-
-fun shortName(host: String): String {
-  val lastDash = host.lastIndexOf("-")
-  return if (lastDash != -1) host.substring(lastDash + 1) else host
 }

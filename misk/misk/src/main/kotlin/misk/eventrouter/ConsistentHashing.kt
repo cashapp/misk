@@ -1,13 +1,16 @@
 package misk.eventrouter
 
+import com.google.common.hash.HashFunction
 import com.google.common.hash.Hashing
+import javax.inject.Singleton
 
-class ConsistentHashing : ClusterMapper {
-  private val hashFunction = Hashing.murmur3_128()
-  private val mod = 65536L
-  private val virtualPoints = 16
-
-  // TODO(tso): cache for each clusterSnapshot
+@Singleton
+class ConsistentHashing(
+  private val hashFunction: HashFunction = Hashing.murmur3_32(),
+  private val mod: Long = 65536L,
+  private val virtualPoints: Int = 16
+) : ClusterMapper {
+  // TODO(tso): make this more efficient
   override fun topicToHost(clusterSnapshot: ClusterSnapshot, topic: String): String {
     val hosts = clusterSnapshot.hosts.sorted()
 
@@ -16,7 +19,7 @@ class ConsistentHashing : ClusterMapper {
     var bestHost: String? = null
 
     for (host in hosts) {
-      for (i in 0..virtualPoints) {
+      for (i in 0 until virtualPoints) {
         val hostHash =
             Math.floorMod(hashFunction.hashString("$host $i", Charsets.UTF_8).padToLong(), mod)
         val distanceClockwiseTo = distanceClockwiseTo(hostHash, topicHash)

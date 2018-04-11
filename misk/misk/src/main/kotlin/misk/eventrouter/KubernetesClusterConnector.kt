@@ -6,6 +6,7 @@ import io.kubernetes.client.models.V1Pod
 import io.kubernetes.client.util.Config
 import io.kubernetes.client.util.Watch
 import misk.logging.getLogger
+import misk.web.WebConfig
 import misk.web.actions.WebSocket
 import misk.web.actions.WebSocketListener
 import okhttp3.OkHttpClient
@@ -22,9 +23,10 @@ private val logger = getLogger<KubernetesClusterConnector>()
 internal class KubernetesClusterConnector : ClusterConnector {
   @Inject @ForKubernetesWatching lateinit var executor: ExecutorService
   @Inject lateinit var config: KubernetesConfig
+  @Inject lateinit var webConfig: WebConfig
 
   private lateinit var api: CoreV1Api
-  private val hostMapping = mutableMapOf<String, String>()
+  private var hostMapping: Map<String, String> = mapOf()
 
   override fun joinCluster(topicPeer: TopicPeer) {
     val client = Config.defaultClient()
@@ -40,20 +42,17 @@ internal class KubernetesClusterConnector : ClusterConnector {
 
       for (item in watch) {
         val name = item.`object`.metadata.name
-        val podIP = item.`object`.status.podIP ?: ""
-        when (item.type) {
-          "ADDED" -> hostMapping[name] = podIP
-          "MODIFIED" -> hostMapping[name] = podIP
-          "DELETED" -> hostMapping.remove(name)
-          "ERROR" -> logger.warn { item }
-        }
-
-        val iterator = hostMapping.keys.iterator()
-        while (iterator.hasNext()) {
-          val key = iterator.next()
-          if (hostMapping[key].isNullOrBlank()) {
-            iterator.remove()
+        val podIP = item.`object`.status.podIP
+        hostMapping = when (item.type) {
+          "ADDED", "MODIFIED" -> {
+            if (item.`object`.status.containerStatuses.first().isReady && !podIP.isNullOrBlank()) {
+              hostMapping.plus(Pair(name, podIP))
+            } else {
+              hostMapping.minus(name)
+            }
           }
+          "DELETED" -> hostMapping.minus(name)
+          else -> hostMapping
         }
 
         topicPeer.clusterChanged(ClusterSnapshot(hostMapping.keys.toList(), config.my_pod_name))
@@ -62,18 +61,18 @@ internal class KubernetesClusterConnector : ClusterConnector {
   }
 
   override fun leaveCluster(topicPeer: TopicPeer) {
+    executor.shutdownNow()
   }
 
   override fun connectSocket(hostname: String, listener: WebSocketListener): WebSocket {
     val client = OkHttpClient.Builder()
         .build()
 
-    // TODO(tso): less hard coded? specifically port
     val request = okhttp3.Request.Builder()
-        .url("ws://${hostMapping[hostname]}:8080/eventrouter")
+        .url("ws://${hostMapping[hostname]}:${webConfig.port}/eventrouter")
         .build()
 
-    val thingy = object : okhttp3.WebSocketListener() {
+    val webSocketListener = object : okhttp3.WebSocketListener() {
       lateinit var miskWebSocket: WebSocket
 
       override fun onMessage(webSocket: okhttp3.WebSocket, text: String) {
@@ -97,7 +96,7 @@ internal class KubernetesClusterConnector : ClusterConnector {
       }
     }
 
-    val okHttpWebSocket = client.newWebSocket(request, thingy)
+    val okHttpWebSocket = client.newWebSocket(request, webSocketListener)
     val miskWebSocket = object : WebSocket {
       override fun queueSize(): Long {
         return okHttpWebSocket.queueSize()
@@ -119,7 +118,7 @@ internal class KubernetesClusterConnector : ClusterConnector {
         okHttpWebSocket.cancel()
       }
     }
-    thingy.miskWebSocket = miskWebSocket
+    webSocketListener.miskWebSocket = miskWebSocket
     return miskWebSocket
   }
 }
