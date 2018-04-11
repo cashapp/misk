@@ -30,7 +30,7 @@ class RealWebSocket : WebSocket {
 
     override fun onWebSocketClose(statusCode: Int, reason: String?) {
       super.onWebSocketClose(statusCode, reason)
-      listener.onClosed(this@RealWebSocket, statusCode, reason!!)
+      listener.onClosed(this@RealWebSocket, statusCode, reason)
     }
 
     override fun onWebSocketError(cause: Throwable?) {
@@ -38,12 +38,10 @@ class RealWebSocket : WebSocket {
     }
 
     override fun onWebSocketText(message: String?) {
-      super.onWebSocketText(message)
       listener.onMessage(this@RealWebSocket, message!!)
     }
 
     override fun onWebSocketBinary(payload: ByteArray?, offset: Int, len: Int) {
-      super.onWebSocketBinary(payload, offset, len)
       listener.onMessage(this@RealWebSocket, ByteString.of(payload!!, offset, len))
     }
   }

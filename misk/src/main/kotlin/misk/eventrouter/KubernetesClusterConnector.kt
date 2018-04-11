@@ -45,7 +45,8 @@ internal class KubernetesClusterConnector : ClusterConnector {
         val podIP = item.`object`.status.podIP
         hostMapping = when (item.type) {
           "ADDED", "MODIFIED" -> {
-            if (item.`object`.status.containerStatuses.first().isReady && !podIP.isNullOrBlank()) {
+            val isReady = item.`object`.status.containerStatuses?.first()?.isReady ?: false
+            if (isReady && !podIP.isNullOrBlank()) {
               hostMapping.plus(Pair(name, podIP))
             } else {
               hostMapping.minus(name)
@@ -55,7 +56,9 @@ internal class KubernetesClusterConnector : ClusterConnector {
           else -> hostMapping
         }
 
-        topicPeer.clusterChanged(ClusterSnapshot(hostMapping.keys.toList(), config.my_pod_name))
+        if (hostMapping.isNotEmpty()) {
+          topicPeer.clusterChanged(ClusterSnapshot(hostMapping.keys.toList(), config.my_pod_name))
+        }
       }
     })
   }

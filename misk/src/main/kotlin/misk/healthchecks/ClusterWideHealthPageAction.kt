@@ -1,7 +1,6 @@
-package com.squareup.chat.actions
+package misk.healthchecks
 
 import misk.web.Get
-import misk.web.PathParam
 import misk.web.Response
 import misk.web.ResponseBody
 import misk.web.StaticResourceMapper
@@ -10,11 +9,12 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class ChatPage : WebAction {
+class ClusterWideHealthPageAction : WebAction {
   @Inject lateinit var staticResourceMapper: StaticResourceMapper
 
-  @Get("/room/{name}")
-  fun index(@PathParam name: String): Response<ResponseBody> {
-    return staticResourceMapper.getResponse("/index.html")!!
+  // TODO(tso): should this just be for all of misk? do react routing? probably
+  @Get("/health")
+  fun health(): Response<ResponseBody> {
+    return staticResourceMapper.getResponse("/admin/index.html")!!
   }
 }
