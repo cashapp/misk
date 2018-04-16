@@ -81,7 +81,11 @@ class ClusterWideHealthService : AbstractIdleService(), WebAction {
       val json = healthEventJsonAdapter.toJson(
           HealthEvent(
               kubernetesConfig.my_pod_name,
-              healthChecks.all { it.status().isHealthy }
+              healthChecks.map {
+                val status = it.status()
+                val name = it::class.java.canonicalName
+                HealthStatusWithName(name, status.isHealthy, status.messages)
+              }
           )
       )
       eventRouter.getTopic<String>(TOPIC).publish(json)
@@ -132,6 +136,12 @@ class ClusterWideHealthService : AbstractIdleService(), WebAction {
 
   data class HealthEvent(
     val hostname: String,
-    val isHealthy: Boolean
+    val healthStatuses: List<HealthStatusWithName>
+  )
+
+  data class HealthStatusWithName(
+    val name: String,
+    val isHealthy: Boolean,
+    val messages: List<String>
   )
 }
