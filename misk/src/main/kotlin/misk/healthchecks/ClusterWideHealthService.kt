@@ -123,7 +123,9 @@ class ClusterWideHealthService : AbstractIdleService(), WebAction {
 
       override fun onClose(subscription: Subscription<String>) {
         // Delay 3 seconds (arbitrary) before trying to reconnect
-        scheduledExecutorService.schedule({ subscribe() }, 3, TimeUnit.SECONDS)
+        if (!scheduledExecutorService.isShutdown) {
+          scheduledExecutorService.schedule({ subscribe() }, 3, TimeUnit.SECONDS)
+        }
       }
     }
     subscription = topic.subscribe(listener)
