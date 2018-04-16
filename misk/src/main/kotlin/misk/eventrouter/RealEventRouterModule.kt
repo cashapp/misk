@@ -4,6 +4,7 @@ import com.google.common.util.concurrent.Service
 import com.google.inject.Provides
 import com.squareup.moshi.Moshi
 import misk.healthchecks.HealthCheck
+import misk.environment.Environment
 import misk.inject.KAbstractModule
 import misk.inject.addMultibinderBinding
 import misk.inject.to
@@ -17,13 +18,17 @@ import java.util.concurrent.TimeUnit
 import javax.inject.Qualifier
 import javax.inject.Singleton
 
-class RealEventRouterModule : KAbstractModule() {
+class RealEventRouterModule(val environment: Environment) : KAbstractModule() {
   override fun configure() {
     bind<EventRouter>().to<RealEventRouter>().`in`(Singleton::class.java)
     bind<RealEventRouter>().`in`(Singleton::class.java)
     binder().addMultibinderBinding<Service>().to<EventRouterService>()
-    bind<ClusterConnector>().to<KubernetesClusterConnector>()
     binder().addMultibinderBinding<HealthCheck>().to<KubernetesHealthCheck>()
+    if (environment == Environment.DEVELOPMENT) {
+      bind<ClusterConnector>().to<LocalClusterConnector>()
+    } else {
+      bind<ClusterConnector>().to<KubernetesClusterConnector>()
+    }
     bind<ClusterMapper>().to<ConsistentHashing>()
     install(MoshiAdapterModule(SocketEventJsonAdapter))
     install(WebActionModule.create<EventRouterConnectionAction>())
