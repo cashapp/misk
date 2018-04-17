@@ -1,7 +1,5 @@
 package misk.eventrouter
 
-import com.google.common.cache.CacheBuilder
-import com.google.common.cache.CacheLoader
 import com.google.common.collect.LinkedHashMultimap
 import com.squareup.moshi.JsonAdapter
 import misk.logging.getLogger
@@ -27,15 +25,7 @@ internal class RealEventRouter : EventRouter {
   private val remoteSubscribers = LinkedHashMultimap.create<String, WebSocket>()
   private val actionQueue = LinkedBlockingQueue<Action>()
   private var hasJoinedCluster = AtomicBoolean()
-
-  // TODO: replcae with a normal map. No need for concurrency
-  private val hostToSocket = CacheBuilder.newBuilder()
-      .build<String, WebSocket>(object : CacheLoader<String, WebSocket>() {
-        override fun load(hostname: String): WebSocket {
-          logger.debug { "connecting to $hostname" }
-          return clusterConnector.connectSocket(hostname, webSocketListener)
-        }
-      })
+  private var hostsToSockets = mapOf<String, WebSocket>()
 
   sealed class Action {
     data class OnMessage(val webSocket: WebSocket, val text: String) : Action()
@@ -97,8 +87,10 @@ internal class RealEventRouter : EventRouter {
         is Action.ClosedWebSocket -> handleClosedWebSocket(action)
       }
 
-      logger.debug { "current state:[localSubscribers=$localSubscribers] " +
-          "[remoteSubscribers=$remoteSubscribers] [hostToSocket=${hostToSocket.asMap().keys}]" }
+      logger.debug {
+        "current state:[localSubscribers=$localSubscribers] " +
+            "[remoteSubscribers=$remoteSubscribers] [hostToSocket=${hostsToSockets.keys}]"
+      }
     }
   }
 
@@ -112,7 +104,7 @@ internal class RealEventRouter : EventRouter {
       val topicOwner = clusterMapper.topicToHost(clusterSnapshot, topicName)
       if (topicOwner != clusterSnapshot.self) {
         val unsubscribeEvent = eventJsonAdapter.toJson(SocketEvent.Unsubscribe(topicName))
-        hostToSocket[topicOwner].send(unsubscribeEvent)
+        hostToSocket(topicOwner).send(unsubscribeEvent)
       }
     }
     action.localSubscription.onClose()
@@ -126,7 +118,7 @@ internal class RealEventRouter : EventRouter {
     val eventJson = eventJsonAdapter.toJson(socketEvent)
 
     if (topicOwner != clusterSnapshot.self) {
-      hostToSocket[topicOwner].send(eventJson)
+      hostToSocket(topicOwner).send(eventJson)
     } else {
       remoteSubscribers.get(action.topic).forEach { it.send(eventJson) }
       localSubscribers.get(action.topic).forEach { it.onEvent(socketEvent.message) }
@@ -140,7 +132,7 @@ internal class RealEventRouter : EventRouter {
     val topicOwner = clusterMapper.topicToHost(clusterSnapshot, topicName)
     if (topicOwner != clusterSnapshot.self) {
       val subscribeEvent = eventJsonAdapter.toJson(SocketEvent.Subscribe(topicName))
-      hostToSocket[topicOwner].send(subscribeEvent)
+      hostToSocket(topicOwner).send(subscribeEvent)
     } else {
       action.localSubscription.onOpen()
     }
@@ -181,9 +173,6 @@ internal class RealEventRouter : EventRouter {
   }
 
   private fun handleClusterChanged(action: Action.ClusterChanged) {
-    // TODO(tso): missed cluster changes? out of order cluster changes? figure
-    // out kubernetes watch behavior
-
     logger.debug { "handleClusterChanged: ${action.newSnapshot}" }
 
     val topics = remoteSubscribers.keySet().plus(localSubscribers.keySet())
@@ -219,8 +208,8 @@ internal class RealEventRouter : EventRouter {
     // TODO(tso): handle this more efficiently?
     // this looks a lot like cluster changed. Maybe share code?
     val hostname =
-        hostToSocket.asMap().entries.firstOrNull { it.value == action.webSocket }?.key ?: return
-    hostToSocket.invalidate(hostname)
+        hostsToSockets.entries.firstOrNull { it.value == action.webSocket }?.key ?: return
+    hostsToSockets = hostsToSockets.minus(hostname)
 
     val topics = localSubscribers.keySet()
     for (topic in topics) {
@@ -243,6 +232,16 @@ internal class RealEventRouter : EventRouter {
     for (localSubscriber in localSubscribers.values()) {
       localSubscriber.onClose()
     }
+  }
+
+  private fun hostToSocket(hostname: String): WebSocket {
+    logger.debug { "connecting to $hostname" }
+    val ws = hostsToSockets[hostname]
+    if (ws == null) {
+      hostsToSockets = hostsToSockets.plus(
+          Pair(hostname, clusterConnector.connectSocket(hostname, webSocketListener)))
+    }
+    return hostsToSockets[hostname]!!
   }
 
   fun joinCluster() {
