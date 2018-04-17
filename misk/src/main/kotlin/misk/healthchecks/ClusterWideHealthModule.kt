@@ -18,7 +18,7 @@ class ClusterWideHealthModule : KAbstractModule() {
     install(WebActionModule.create<ClusterWideHealthService>())
     binder().addMultibinderBinding<Service>().to<ClusterWideHealthService>()
     binder().addMultibinderBinding<StaticResourceMapper.Entry>()
-        .toInstance(StaticResourceMapper.Entry("/admin/", "web/admin", "misk/web/build"))
+        .toInstance(StaticResourceMapper.Entry("/admin/", "web/admin", "misk/web/admin/build"))
   }
 
   @Provides @Singleton @ForClusterWideHealthService
