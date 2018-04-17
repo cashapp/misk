@@ -42,7 +42,15 @@ class Health extends Component {
                 return (
                   <tr key={key}>
                     <td>{key}</td>
-                    <td>{this.state.clusterHealth[key].isHealthy ? 'Healthy' : 'Unhealthy'}</td>
+                    <td>
+                      {
+                        this.state.clusterHealth[key].healthStatuses.map(item => {
+                          return (
+                            <p>{item.name} ({item.isHealthy ? "Healthy" : "Unhealthy"})</p>
+                          )
+                        })
+                      }
+                     </td>
                   </tr>
                 )
               })
