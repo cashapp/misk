@@ -1,6 +1,23 @@
 Change Log
 ==========
 
+Version 0.2.3 *(2018-04-27)*
+----------------------------
+
+New:
+* Add kubernetes java client so that hosts can know their peers
+* Use EventRouter for exemplarchat. Add a static resource mapper
+* Create a cluster wide admin healthcheck page
+* Change CacheBuilder to be mapOf since no concurrency
+* Adds a healthcheck for the kubernetes client
+* Adds a local cluster connector so that development functions
+
+Fix:
+* Don't treat assembly as a release when running in CI
+* Fix tracing startup when none is configured
+* Various event router fixes and refactorings
+
+
 Version 0.2.1 *(2018-03-26)*
 ----------------------------
 
