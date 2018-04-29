@@ -27,6 +27,7 @@ dependencies {
   compile dep.loggingImpl
   compile dep.okHttpMockWebServer
   compile dep.openTracingMock
+  compile dep.hsqldb
 }
 
 apply from: rootProject.file('gradle/gradle-mvn-push.gradle')

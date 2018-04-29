@@ -89,6 +89,8 @@ inline fun <reified T : Any> keyOf(a: Annotation): Key<T> = Key.get(T::class.jav
 inline fun <reified T : Any, A : Annotation> keyOf(a: KClass<A>): Key<T> =
     Key.get(T::class.java, a.java)
 
+fun <T : Any, A : Annotation> keyOf(t: KClass<T>, a: KClass<A>): Key<T> = Key.get(t.java, a.java)
+
 fun <T : Any> TypeLiteral<T>.toKey(annotation: Class<out Annotation>? = null): Key<T> {
   return when (annotation) {
     null -> Key.get(this)
