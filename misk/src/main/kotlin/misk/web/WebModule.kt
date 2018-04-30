@@ -2,7 +2,6 @@ package misk.web
 
 import misk.ApplicationInterceptor
 import misk.MiskDefault
-import misk.NetworkInterceptor
 import misk.exceptions.ActionException
 import misk.inject.KAbstractModule
 import misk.inject.addMultibinderBinding

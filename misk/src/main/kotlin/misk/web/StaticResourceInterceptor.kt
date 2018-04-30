@@ -1,8 +1,6 @@
 package misk.web
 
 import misk.Action
-import misk.NetworkChain
-import misk.NetworkInterceptor
 import javax.inject.Inject
 import javax.inject.Singleton
 

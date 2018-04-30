@@ -8,8 +8,8 @@ import io.opentracing.propagation.Format
 import io.opentracing.tag.Tags
 import io.opentracing.tag.Tags.SPAN_KIND_SERVER
 import misk.Action
-import misk.NetworkChain
-import misk.NetworkInterceptor
+import misk.web.NetworkChain
+import misk.web.NetworkInterceptor
 import misk.logging.getLogger
 import misk.tracing.interceptors.TextMultimapExtractAdapter
 import misk.web.Response
