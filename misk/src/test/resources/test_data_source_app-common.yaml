@@ -1,0 +1,7 @@
+data_sources:
+  databases:
+    exemplar:
+      type: HSQLDB
+      username: snork
+      password: florp
+      database: lorfil
