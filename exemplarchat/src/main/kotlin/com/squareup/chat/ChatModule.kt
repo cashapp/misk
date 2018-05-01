@@ -9,7 +9,7 @@ import misk.healthchecks.HealthCheck
 import misk.inject.KAbstractModule
 import misk.inject.addMultibinderBinding
 import misk.inject.to
-import misk.web.StaticResourceMapper
+import misk.web.resources.StaticResourceMapper
 import misk.web.WebActionModule
 import misk.web.actions.DefaultActionsModule
 
