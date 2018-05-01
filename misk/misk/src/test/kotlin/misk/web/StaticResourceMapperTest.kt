@@ -10,6 +10,7 @@ import misk.testing.TestWebModule
 import misk.web.actions.NotFoundAction
 import misk.web.actions.WebAction
 import misk.web.jetty.JettyService
+import misk.web.resources.StaticResourceMapper
 import okhttp3.OkHttpClient
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test

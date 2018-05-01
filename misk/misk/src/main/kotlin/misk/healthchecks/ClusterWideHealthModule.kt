@@ -5,7 +5,7 @@ import com.google.inject.Provides
 import misk.inject.KAbstractModule
 import misk.inject.addMultibinderBinding
 import misk.inject.to
-import misk.web.StaticResourceMapper
+import misk.web.resources.StaticResourceMapper
 import misk.web.WebActionModule
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
