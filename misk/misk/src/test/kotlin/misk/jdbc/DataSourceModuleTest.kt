@@ -13,6 +13,7 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.sql.SQLInvalidAuthorizationSpecException
 import javax.inject.Qualifier
 import javax.sql.DataSource
 
@@ -87,51 +88,35 @@ internal class DataSourceModuleTest {
   }
 
   @Test fun usesProperUsername() {
-    assertThrows(CreationException::class.java) {
+    val exception = assertThrows(CreationException::class.java) {
       Guice.createInjector(
-          DataSourceModule.create("exemplar"),
-          ConfigModule.create("my-app", RootConfig(
-              DataSourcesConfig(mapOf(
-                  "exemplar" to DataSourceConfig(
-                      DataSourceType.HSQLDB,
-                      database = dbname,
-                      username = username + "INCORRECT",
-                      password = password
-                  )))))
+          DataSourceModule.create("exemplar-incorrect-username"),
+          ConfigModule.create("my-app", rootConfig)
       )
     }
+    assertThat(exception.cause!!.cause).isInstanceOf(SQLInvalidAuthorizationSpecException::class.java)
+    assertThat(exception.cause!!.cause!!.localizedMessage).contains("not found: INCORRECT_USERNAME")
   }
 
   @Test fun usesProperPassword() {
-    assertThrows(CreationException::class.java) {
+    val exception = assertThrows(CreationException::class.java) {
       Guice.createInjector(
-          DataSourceModule.create("exemplar"),
-          ConfigModule.create("my-app", RootConfig(
-              DataSourcesConfig(mapOf(
-                  "exemplar" to DataSourceConfig(
-                      DataSourceType.HSQLDB,
-                      database = dbname,
-                      username = username,
-                      password = password + "INCORRECT"
-                  )))))
+          DataSourceModule.create("exemplar-incorrect-password"),
+          ConfigModule.create("my-app", rootConfig)
       )
     }
+    assertThat(exception.cause!!.cause).isInstanceOf(SQLInvalidAuthorizationSpecException::class.java)
   }
 
   @Test fun failsIfDataSourceNotFound() {
-    assertThrows(CreationException::class.java) {
+    val exception = assertThrows(CreationException::class.java) {
       Guice.createInjector(
           DataSourceModule.create("NOT_EXEMPLAR", ForWrites::class),
-          ConfigModule.create("my-app", RootConfig(
-              DataSourcesConfig(mapOf(
-                  "exemplar" to DataSourceConfig(
-                      DataSourceType.HSQLDB,
-                      database = dbname,
-                      username = username,
-                      password = password
-                  )))))
+          ConfigModule.create("my-app", rootConfig)
       )
     }
+    assertThat(exception.cause).isInstanceOf(IllegalStateException::class.java)
+    assertThat(exception.localizedMessage).contains("no datasource named NOT_EXEMPLAR")
   }
 
   class PeopleDatabase(private val datasource: DataSource) {
