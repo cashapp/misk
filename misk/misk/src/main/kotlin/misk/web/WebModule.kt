@@ -2,7 +2,6 @@ package misk.web
 
 import misk.ApplicationInterceptor
 import misk.MiskDefault
-import misk.NetworkInterceptor
 import misk.exceptions.ActionException
 import misk.inject.KAbstractModule
 import misk.inject.addMultibinderBinding
@@ -32,6 +31,8 @@ import misk.web.marshal.JsonUnmarshaller
 import misk.web.marshal.MarshallerModule
 import misk.web.marshal.PlainTextMarshaller
 import misk.web.marshal.UnmarshallerModule
+import misk.web.resources.StaticResourceInterceptor
+import misk.web.resources.StaticResourceMapper
 import javax.servlet.http.HttpServletRequest
 
 class WebModule : KAbstractModule() {

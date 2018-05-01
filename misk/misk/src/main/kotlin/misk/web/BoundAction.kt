@@ -1,8 +1,6 @@
 package misk.web
 
 import misk.ApplicationInterceptor
-import misk.NetworkChain
-import misk.NetworkInterceptor
 import misk.web.actions.WebAction
 import misk.web.actions.WebSocketListener
 import misk.web.actions.asChain

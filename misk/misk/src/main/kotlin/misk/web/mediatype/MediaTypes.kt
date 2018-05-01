@@ -13,6 +13,31 @@ object MediaTypes {
 
   const val ALL = "*/*"
   val ALL_MEDIA_TYPE = ALL.asMediaType()
+
+  const val APPLICATION_JAVASCRIPT = "application/javascript"
+  val APPLICATION_JAVASCRIPT_MEDIA_TYPE = APPLICATION_JAVASCRIPT.asMediaType()
+
+  const val APPLICATION_OCTETSTREAM = "application/octetstream"
+  val APPLICATION_OCTETSTREAM_MEDIA_TYPE = APPLICATION_OCTETSTREAM.asMediaType()
+
+  const val TEXT_CSS = "text/css"
+  val TEXT_CSS_MEDIA_TYPE = TEXT_CSS.asMediaType()
+
+  const val TEXT_HTML = "text/html"
+  val TEXT_HTML_MEDIA_TYPE = TEXT_HTML.asMediaType()
+
+  const val IMAGE_PNG = "image/png"
+  val IMAGE_PNG_MEDIA_TYPE = IMAGE_PNG.asMediaType()
+
+  fun fromFileExtension(ext: String) : MediaType? {
+    return when (ext) {
+      "css" -> TEXT_CSS_MEDIA_TYPE
+      "html", "htm" -> TEXT_HTML_MEDIA_TYPE
+      "js" -> APPLICATION_JAVASCRIPT_MEDIA_TYPE
+      "png" -> IMAGE_PNG_MEDIA_TYPE
+      else -> null
+    }
+  }
 }
 
 fun String.asMediaType() = MediaType.parse(this)!!

@@ -1,20 +1,22 @@
-package misk.web
+package misk.web.resources
 
 import misk.resources.ResourceLoader
+import misk.web.Response
+import misk.web.ResponseBody
+import misk.web.mediatype.MediaTypes
 import okhttp3.Headers
 import okhttp3.MediaType
 import okio.BufferedSink
 import okio.BufferedSource
 import okio.Okio
 import java.io.File
-import java.util.List
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class StaticResourceMapper {
-  @Inject lateinit var entries: List<out Entry>
-
+class StaticResourceMapper @Inject internal constructor(
+  private val entries: MutableList<out Entry>
+) {
   /** Returns true if the mapped path exists on either the resource path or file system. */
   private fun exists(urlPath: String): Boolean {
     val staticResource = staticResource(urlPath) ?: return false
@@ -30,8 +32,7 @@ class StaticResourceMapper {
     val responseBodyFile = File(staticResource.filesystemPath(urlPath))
 
     return when {
-      ResourceLoader.exists(resourcePath) -> ResourceLoader.open(
-          resourcePath)!!
+      ResourceLoader.exists(resourcePath) -> ResourceLoader.open(resourcePath)!!
       responseBodyFile.exists() -> Okio.buffer(Okio.source(responseBodyFile))
       else -> null
     }
@@ -57,19 +58,11 @@ class StaticResourceMapper {
 
   private fun mimeType(path: String): MediaType {
     val extension = path.substring(path.lastIndexOf('.') + 1)
-    return when (extension) {
-      "html" -> MediaType.parse("text/html")!!
-      "css" -> MediaType.parse("text/css")!!
-      "js" -> MediaType.parse("application/javascript")!!
-      else -> MediaType.parse("application/octet-stream")!!
-    }
+    return MediaTypes.fromFileExtension(extension) ?: MediaTypes.APPLICATION_OCTETSTREAM_MEDIA_TYPE
   }
 
   private fun staticResource(urlPath: String): Entry? {
-    for (staticResource in entries) {
-      if (urlPath.startsWith(staticResource.urlPrefix)) return staticResource
-    }
-    return null
+    return entries.firstOrNull { urlPath.startsWith(it.urlPrefix) }
   }
 
   data class Entry(

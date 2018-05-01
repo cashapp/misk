@@ -6,8 +6,8 @@ import io.opentracing.Tracer
 import io.opentracing.mock.MockTracer
 import io.opentracing.tag.Tags
 import misk.MiskModule
-import misk.NetworkChain
-import misk.NetworkInterceptor
+import misk.web.NetworkChain
+import misk.web.NetworkInterceptor
 import misk.asAction
 import misk.exceptions.ActionException
 import misk.exceptions.StatusCode

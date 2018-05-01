@@ -4,7 +4,6 @@ import com.google.inject.AbstractModule
 import com.google.inject.multibindings.Multibinder
 import misk.ApplicationInterceptor
 import misk.MiskDefault
-import misk.NetworkInterceptor
 import misk.asAction
 import misk.inject.parameterizedType
 import misk.inject.subtypeOf

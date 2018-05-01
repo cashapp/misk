@@ -6,8 +6,8 @@ import com.google.inject.util.Modules
 import helpers.protos.Dinosaur
 import misk.Action
 import misk.MiskModule
-import misk.NetworkChain
-import misk.NetworkInterceptor
+import misk.web.NetworkChain
+import misk.web.NetworkInterceptor
 import misk.inject.KAbstractModule
 import misk.inject.addMultibinderBinding
 import misk.inject.getInstance

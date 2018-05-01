@@ -1,6 +1,6 @@
-package misk
+package misk.web
 
-import misk.web.Response
+import misk.Action
 
 interface NetworkInterceptor {
   fun intercept(chain: NetworkChain): Response<*>
