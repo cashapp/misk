@@ -5,6 +5,8 @@ import com.google.inject.Guice
 import com.google.inject.name.Names
 import misk.config.Config
 import misk.config.ConfigModule
+import misk.config.MiskConfig
+import misk.environment.Environment
 import misk.inject.keyOf
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
@@ -15,17 +17,11 @@ import javax.inject.Qualifier
 import javax.sql.DataSource
 
 internal class DataSourceModuleTest {
+  val defaultEnv = Environment.TESTING
   val username = "snork"
   val password = "florp"
   val dbname = "lorfil"
-  val rootConfig = RootConfig(
-      DataSourcesConfig(mapOf(
-          "exemplar" to DataSourceConfig(
-              DataSourceType.HSQLDB,
-              database = dbname,
-              username = username,
-              password = password
-          ))))
+  val rootConfig = MiskConfig.load<RootConfig>("test_data_source_app", defaultEnv)
 
   lateinit var baseDataSource: DataSource
 
