@@ -1,7 +1,5 @@
 package misk.web
 
-import misk.NetworkChain
-import misk.NetworkInterceptor
 import misk.web.actions.WebAction
 import kotlin.reflect.KFunction
 

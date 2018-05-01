@@ -1,4 +1,4 @@
-package misk
+package misk.web
 
 import misk.web.Request
 import misk.web.Response

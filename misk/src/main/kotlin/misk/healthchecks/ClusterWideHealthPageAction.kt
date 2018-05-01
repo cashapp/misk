@@ -3,7 +3,7 @@ package misk.healthchecks
 import misk.web.Get
 import misk.web.Response
 import misk.web.ResponseBody
-import misk.web.StaticResourceMapper
+import misk.web.resources.StaticResourceMapper
 import misk.web.actions.WebAction
 import javax.inject.Inject
 import javax.inject.Singleton

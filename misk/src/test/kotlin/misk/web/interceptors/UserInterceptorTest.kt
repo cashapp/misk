@@ -5,8 +5,8 @@ import misk.Action
 import misk.Chain
 import misk.ApplicationInterceptor
 import misk.MiskModule
-import misk.NetworkChain
-import misk.NetworkInterceptor
+import misk.web.NetworkChain
+import misk.web.NetworkInterceptor
 import misk.inject.KAbstractModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule

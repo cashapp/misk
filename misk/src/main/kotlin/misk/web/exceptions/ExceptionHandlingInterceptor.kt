@@ -2,8 +2,8 @@ package misk.web.exceptions
 
 import com.google.common.util.concurrent.UncheckedExecutionException
 import misk.Action
-import misk.NetworkChain
-import misk.NetworkInterceptor
+import misk.web.NetworkChain
+import misk.web.NetworkInterceptor
 import misk.exceptions.StatusCode
 import misk.logging.getLogger
 import misk.logging.log

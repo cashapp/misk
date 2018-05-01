@@ -2,8 +2,8 @@ package misk.web.interceptors
 
 import com.google.common.base.Stopwatch
 import misk.Action
-import misk.NetworkChain
-import misk.NetworkInterceptor
+import misk.web.NetworkChain
+import misk.web.NetworkInterceptor
 import misk.logging.getLogger
 import misk.web.Response
 import javax.inject.Singleton
