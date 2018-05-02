@@ -36,4 +36,7 @@ data class DataSourceConfig(
 )
 
 /** Top-level configuration element for all databases */
-data class DataSourcesConfig(val databases: Map<String, DataSourceConfig>) : Config
+class DataSourcesConfig : LinkedHashMap<String, DataSourceConfig>, Config {
+  constructor() : super()
+  constructor(m : Map<String, DataSourceConfig>) : super(m)
+}
