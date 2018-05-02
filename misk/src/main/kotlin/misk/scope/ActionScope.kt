@@ -20,11 +20,11 @@ class ActionScope @Inject internal constructor(
   private val providers: @JvmSuppressWildcards Map<Key<*>, Provider<ActionScopedProvider<*>>>
 ) : AutoCloseable {
   companion object {
-    private val tls = ThreadLocal<LinkedHashMap<Key<*>, Any>>()
+    private val tls = ThreadLocal<LinkedHashMap<Key<*>, Any?>>()
   }
 
   /** Starts the scope on a thread with the provided seed data */
-  fun enter(seedData: Map<Key<*>, Any>): ActionScope {
+  fun enter(seedData: Map<Key<*>, Any?>): ActionScope {
     check(tls.get() == null) {
       "cannot begin an ActionScope on a thread that is already running in an action scope"
     }
@@ -96,10 +96,11 @@ class ActionScope @Inject internal constructor(
       return cachedValue as T
     }
 
+    val value = providerFor(key as Key<*>).get()
+    threadState[key] = value
+
     @Suppress("UNCHECKED_CAST")
-    val value = providerFor(key as Key<Any>).get() as T
-    threadState[key] = value as Any
-    return value
+    return value as T
   }
 
   @Suppress("UNCHECKED_CAST")
@@ -110,7 +111,7 @@ class ActionScope @Inject internal constructor(
   }
 
   private class WrappedKFunction<T>(
-    val seedData: Map<Key<*>, Any>,
+    val seedData: Map<Key<*>, Any?>,
     val scope: ActionScope,
     val wrapped: KFunction<T>
   ) : KFunction<T> {

@@ -63,7 +63,7 @@ abstract class ActionScopedProviderModule : KAbstractModule() {
   }
 
   /** Binds an annotation qualified [ActionScoped] along with its provider */
-  fun <T, A : Annotation> bindProvider(
+  fun <T> bindProvider(
     type: TypeLiteral<T>,
     providerType: KClass<out ActionScopedProvider<T>>,
     annotatedBy: Annotation? = null
