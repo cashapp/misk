@@ -38,7 +38,7 @@ class DataSourceModule constructor(
     @Inject lateinit var datasourcesConfig: DataSourcesConfig
 
     override fun get(): DataSource {
-      val config = datasourcesConfig.databases[datasourceName]
+      val config = datasourcesConfig[datasourceName]
           ?: throw IllegalStateException("no datasource named $datasourceName")
 
       val hikariConfig = HikariConfig()
