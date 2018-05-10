@@ -20,7 +20,7 @@ public class ExemplarJavaApp {
         new HibernateModule(),
         new ExemplarJavaModule(),
         new ConfigModule<>(ExemplarJavaConfig.class, "exemplar", config),
-        new EnvironmentModule(environment)
+        new EnvironmentModule(environment, null)
     ).run(args);
   }
 }
