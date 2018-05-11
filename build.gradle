@@ -46,8 +46,9 @@ ext {
           tracingZipkin        : 'io.opentracing.brave:brave-opentracing:0.29.0',
           zipkinReporter       : 'io.zipkin.reporter2:zipkin-sender-okhttp3:2.4.1',
           zipkinBrave          : 'io.zipkin.brave:brave:4.17.2',
-          retrofit             : 'com.squareup.retrofit2:retrofit:2.3.0',
-          retrofitMoshi        : 'com.squareup.retrofit2:converter-moshi:2.3.0',
+          retrofit             : 'com.squareup.retrofit2:retrofit:2.4.0',
+          retrofitMoshi        : 'com.squareup.retrofit2:converter-moshi:2.4.0',
+          retrofitWire         : 'com.squareup.retrofit2:converter-wire:2.4.0',
           hikariCp             : 'com.zaxxer:HikariCP:3.1.0',
           hsqldb               : 'org.hsqldb:hsqldb:2.4.0',
   ]

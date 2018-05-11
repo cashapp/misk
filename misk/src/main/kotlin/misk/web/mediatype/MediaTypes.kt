@@ -20,6 +20,9 @@ object MediaTypes {
   const val APPLICATION_OCTETSTREAM = "application/octetstream"
   val APPLICATION_OCTETSTREAM_MEDIA_TYPE = APPLICATION_OCTETSTREAM.asMediaType()
 
+  const val APPLICATION_PROTOBUF = "application/x-protobuf"
+  val APPLICATION_PROTOBUF_MEDIA_TYPE = APPLICATION_PROTOBUF.asMediaType()
+
   const val TEXT_CSS = "text/css"
   val TEXT_CSS_MEDIA_TYPE = TEXT_CSS.asMediaType()
 

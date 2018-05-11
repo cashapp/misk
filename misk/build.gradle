@@ -54,6 +54,7 @@ dependencies {
   compile dep.zipkinBrave
   compile dep.retrofit
   compile dep.retrofitMoshi
+  compile dep.retrofitWire
   compile dep.hikariCp
 
   testCompile project(':misk/testing')
