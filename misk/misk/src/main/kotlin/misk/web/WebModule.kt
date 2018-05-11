@@ -30,6 +30,8 @@ import misk.web.marshal.JsonMarshaller
 import misk.web.marshal.JsonUnmarshaller
 import misk.web.marshal.MarshallerModule
 import misk.web.marshal.PlainTextMarshaller
+import misk.web.marshal.ProtobufMarshaller
+import misk.web.marshal.ProtobufUnmarshaller
 import misk.web.marshal.UnmarshallerModule
 import misk.web.resources.StaticResourceInterceptor
 import misk.web.resources.StaticResourceMapper
@@ -48,7 +50,9 @@ class WebModule : KAbstractModule() {
     // Register built-in marshallers and unmarshallers
     install(MarshallerModule.create<PlainTextMarshaller.Factory>())
     install(MarshallerModule.create<JsonMarshaller.Factory>())
+    install(MarshallerModule.create<ProtobufMarshaller.Factory>())
     install(UnmarshallerModule.create<JsonUnmarshaller.Factory>())
+    install(UnmarshallerModule.create<ProtobufUnmarshaller.Factory>())
 
     // Create empty set binders of interceptor factories that can be added to by users.
     binder().newMultibinder<NetworkInterceptor.Factory>()

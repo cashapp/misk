@@ -1,8 +1,10 @@
 package misk.client
 
 import com.google.common.util.concurrent.SettableFuture
+import com.squareup.moshi.Moshi
 import io.opentracing.Tracer
 import io.opentracing.contrib.okhttp3.TracingCallFactory
+import misk.web.mediatype.MediaTypes
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -10,10 +12,13 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import retrofit2.Retrofit
+import retrofit2.converter.moshi.MoshiConverterFactory
+import retrofit2.converter.wire.WireConverterFactory
 import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.HEAD
 import retrofit2.http.HTTP
+import retrofit2.http.Headers
 import retrofit2.http.OPTIONS
 import retrofit2.http.PATCH
 import retrofit2.http.POST
@@ -22,7 +27,9 @@ import java.lang.reflect.InvocationHandler
 import java.lang.reflect.Method
 import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
+import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.functions
+import kotlin.reflect.full.memberFunctions
 
 internal class ClientInvocationHandler(
   private val interfaceType: KClass<*>,
@@ -31,7 +38,8 @@ internal class ClientInvocationHandler(
   okHttpTemplate: OkHttpClient,
   networkInterceptorFactories: List<ClientNetworkInterceptor.Factory>,
   applicationInterceptorFactories: List<ClientApplicationInterceptor.Factory>,
-  tracer: Tracer?
+  tracer: Tracer?,
+  moshi: Moshi
 ) : InvocationHandler {
 
   private val actionsByMethod = interfaceType.functions
@@ -64,10 +72,33 @@ internal class ClientInvocationHandler(
 
     if (tracer != null) retrofitBuilder.callFactory(TracingCallFactory(actionSpecificClient, tracer))
 
+    val mediaTypes = getEndpointMediaTypes(methodName)
+    if (mediaTypes.contains(MediaTypes.APPLICATION_PROTOBUF)) {
+      retrofitBuilder.addConverterFactory(WireConverterFactory.create())
+    }
+    // Always add JSON as default. Ensure it's added last so that other converters get a chance since
+    // JSON converter will accept any object.
+    retrofitBuilder.addConverterFactory(MoshiConverterFactory.create(moshi))
+
     methodName to retrofitBuilder
         .build()
         .create(interfaceType.java)
   }.toMap()
+
+  private fun getEndpointMediaTypes(methodName: String): List<String> {
+    val headers =
+        interfaceType.memberFunctions.find { it.name == methodName }?.findAnnotation<Headers>()
+            ?: return emptyList()
+
+    return headers.value.mapNotNull {
+      val (headerKey, headerValue) = it.split(":").map { it.trim() }
+      if (headerKey.equals("Accept", true) || headerKey.equals("Content-type", true)) {
+        headerValue.toLowerCase()
+      } else {
+        null
+      }
+    }.filterNot { it == MediaTypes.APPLICATION_JSON }
+  }
 
   override fun invoke(proxy: Any, method: Method, args: Array<out Any>): Any {
     val action = actionsByMethod[method.name] ?: throw IllegalStateException(
@@ -79,7 +110,7 @@ internal class ClientInvocationHandler(
     )
     val interceptors = (interceptorsByMethod[method.name] ?: listOf())
 
-    val beginCallInterceptors = interceptors +  RetrofitCallInterceptor(retrofitProxy, method)
+    val beginCallInterceptors = interceptors + RetrofitCallInterceptor(retrofitProxy, method)
     val beginCallChain = RealBeginClientCallChain(action, args.toList(), beginCallInterceptors)
     val wrappedCall = beginCallChain.proceed(beginCallChain.args)
 
