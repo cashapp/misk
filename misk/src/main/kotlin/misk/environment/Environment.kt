@@ -2,8 +2,8 @@ package misk.environment
 
 import misk.logging.getLogger
 
-private val logger = getLogger<Environment>()
 
+/** The environment in which the application is running */
 enum class Environment {
   TESTING,
   DEVELOPMENT,
@@ -11,17 +11,17 @@ enum class Environment {
   PRODUCTION;
 
   companion object {
-    private val environmentKey = "ENVIRONMENT"
+    private val logger = getLogger<Environment>()
+    private const val ENV_ENVIRONMENT = "ENVIRONMENT"
 
     @JvmStatic
     fun fromEnvironmentVariable(): Environment {
-      val environmentName = System.getenv(environmentKey)
-      val environment = if (environmentName != null) {
-        Environment.valueOf(environmentName)
-      } else {
-        logger.warn { "No environment variable with key $environmentKey found, running in DEVELOPMENT" }
+      val environmentName = System.getenv(ENV_ENVIRONMENT)
+      val environment = environmentName?.let { Environment.valueOf(it) } ?: {
+        logger.warn { "No environment variable with key $ENV_ENVIRONMENT found, running in DEVELOPMENT" }
         Environment.DEVELOPMENT
-      }
+      }()
+
       logger.info { "Running with environment ${environment.name}" }
       return environment
     }

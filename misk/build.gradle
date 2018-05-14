@@ -55,8 +55,14 @@ dependencies {
   compile dep.retrofit
   compile dep.retrofitMoshi
   compile dep.retrofitWire
+  compile dep.gcpLogback
   compile dep.hikariCp
+  compile dep.awsApi
+  compile dep.awsLogging
+  compile dep.logbackClassic
+  compile dep.slf4jApi
 
+  testCompile dep.mockitoCore
   testCompile project(':misk/testing')
 }
 
