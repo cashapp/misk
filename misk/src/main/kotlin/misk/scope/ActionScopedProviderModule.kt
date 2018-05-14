@@ -72,6 +72,7 @@ abstract class ActionScopedProviderModule : KAbstractModule() {
         if (annotatedBy == null) Key.get(type)
         else Key.get(type, annotatedBy)
 
+    @Suppress("UNCHECKED_CAST")
     val actionScopedType = actionScopedType(type.type) as TypeLiteral<ActionScoped<T>>
     val actionScopedKey =
         if (annotatedBy == null) Key.get(actionScopedType)
