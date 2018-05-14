@@ -1,10 +1,7 @@
 package misk.web
 
-import misk.Action
 import misk.ApplicationInterceptor
-import misk.Chain
 import misk.MiskDefault
-import misk.NetworkInterceptor
 import misk.exceptions.ActionException
 import misk.inject.KAbstractModule
 import misk.inject.addMultibinderBinding
@@ -34,6 +31,8 @@ import misk.web.marshal.JsonUnmarshaller
 import misk.web.marshal.MarshallerModule
 import misk.web.marshal.PlainTextMarshaller
 import misk.web.marshal.UnmarshallerModule
+import misk.web.resources.StaticResourceInterceptor
+import misk.web.resources.StaticResourceMapper
 import javax.servlet.http.HttpServletRequest
 
 class WebModule : KAbstractModule() {
@@ -82,6 +81,10 @@ class WebModule : KAbstractModule() {
     // the client's requested content-type
     binder().addMultibinderBindingWithAnnotation<NetworkInterceptor.Factory, MiskDefault>()
         .to<MarshallerInterceptor.Factory>()
+
+    binder().addMultibinderBindingWithAnnotation<NetworkInterceptor.Factory, MiskDefault>()
+        .to<StaticResourceInterceptor.Factory>()
+    binder().newMultibinder<StaticResourceMapper.Entry>()
 
     install(ExceptionMapperModule.create<ActionException, ActionExceptionMapper>())
 

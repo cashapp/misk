@@ -1,8 +1,8 @@
 package misk.web.interceptors
 
 import misk.Action
-import misk.NetworkChain
-import misk.NetworkInterceptor
+import misk.web.NetworkChain
+import misk.web.NetworkInterceptor
 import misk.web.Response
 import misk.web.ResponseBody
 import okhttp3.Headers

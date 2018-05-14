@@ -63,7 +63,7 @@ abstract class ActionScopedProviderModule : KAbstractModule() {
   }
 
   /** Binds an annotation qualified [ActionScoped] along with its provider */
-  fun <T, A : Annotation> bindProvider(
+  fun <T> bindProvider(
     type: TypeLiteral<T>,
     providerType: KClass<out ActionScopedProvider<T>>,
     annotatedBy: Annotation? = null
@@ -72,6 +72,7 @@ abstract class ActionScopedProviderModule : KAbstractModule() {
         if (annotatedBy == null) Key.get(type)
         else Key.get(type, annotatedBy)
 
+    @Suppress("UNCHECKED_CAST")
     val actionScopedType = actionScopedType(type.type) as TypeLiteral<ActionScoped<T>>
     val actionScopedKey =
         if (annotatedBy == null) Key.get(actionScopedType)

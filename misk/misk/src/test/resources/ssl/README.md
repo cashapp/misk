@@ -28,4 +28,15 @@ keytool -genkeypair -alias 1 -keyalg RSA -keystore client_keystore.jceks \
  keytool -exportcert -rfc -keystore client_keystore.jceks \
   -alias 1 -storepass clientpassword \
   -file client_cert.pem
+``` 
+ 
+Dump the private keys in `client_keystore.jceks` and `server_keystore.jceks` using a tool such as
+ KeyStore Explorer into `client.pem` and `server.pem` then run:
+
+```bash
+ openssl rsa -in client.pem -out client_rsa.pem
+ 
+ cat server.pem server_cert.pem > server_cert_key_combo.pem
+ cat client.pem client_cert.pem > client_cert_key_combo.pem
+ cat client_rsa.pem client_cert.pem > client_rsa_cert_key_combo.pem
 ```

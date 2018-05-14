@@ -23,9 +23,7 @@ object MiskConfig {
     appName: String,
     environment: Environment
   ): T {
-    val mapper = ObjectMapper(YAMLFactory())
-    mapper.registerModule(KotlinModule())
-    mapper.registerModule(JavaTimeModule())
+    val mapper = ObjectMapper(YAMLFactory()).registerModules(KotlinModule(), JavaTimeModule())
 
     var jsonNode: JsonNode? = null
     val missingConfigFiles = mutableListOf<String>()

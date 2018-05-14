@@ -1,58 +1,36 @@
 package com.squareup.chat
 
+import com.google.inject.util.Modules
+import com.squareup.chat.actions.ChatWebSocketAction
+import misk.MiskModule
+import misk.eventrouter.EventRouterTester
+import misk.eventrouter.EventRouterTestingModule
 import misk.testing.MiskTest
-import misk.web.actions.WebSocket
-import okio.ByteString
+import misk.testing.MiskTestModule
+import misk.web.actions.FakeWebSocket
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import javax.inject.Inject
 
-@MiskTest
+@MiskTest(startService = true)
 class ChatWebSocketActionTest {
+  @MiskTestModule
+  val module = Modules.combine(MiskModule(), EventRouterTestingModule())
+
   @Inject lateinit var chatWebSocketAction: ChatWebSocketAction
+  @Inject lateinit var eventRouterTester: EventRouterTester
 
   @Test fun test() {
     val sandyWebSocket = FakeWebSocket()
-    val sandyListener = chatWebSocketAction.chat("discuss", sandyWebSocket)
-
     val randyWebSocket = FakeWebSocket()
+    val sandyListener = chatWebSocketAction.chat("discuss", sandyWebSocket)
     chatWebSocketAction.chat("discuss", randyWebSocket)
+
     assertThat(randyWebSocket.takeLog()).containsExactly("send: Welcome to discuss!")
+    assertThat(sandyWebSocket.takeLog()).containsExactly("send: Welcome to discuss!")
+    sandyListener.onMessage(sandyWebSocket, "hello from sandy")
 
-    sandyListener.onMessage(sandyWebSocket, "hello world")
-    assertThat(randyWebSocket.takeLog()).containsExactly("send: hello world")
-  }
-
-  class FakeWebSocket : WebSocket {
-    val log = mutableListOf<String>()
-
-    override fun queueSize(): Long {
-      return 0L
-    }
-
-    override fun send(bytes: ByteString): Boolean {
-      log.add("send: ${bytes.hex()}")
-      return true
-    }
-
-    override fun send(text: String): Boolean {
-      log.add("send: $text")
-      return true
-    }
-
-    override fun close(code: Int, reason: String?): Boolean {
-      log.add("close")
-      return true
-    }
-
-    override fun cancel() {
-      log.add("cancel")
-    }
-
-    fun takeLog(): List<String> {
-      val result = log.toList()
-      log.clear()
-      return result
-    }
+    eventRouterTester.processEverything()
+    assertThat(randyWebSocket.takeLog()).containsExactly("send: hello from sandy")
   }
 }
