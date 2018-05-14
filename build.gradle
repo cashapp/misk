@@ -1,5 +1,6 @@
 ext {
   kotlinVersion = '1.2.10'
+  awsVersion = '1.11.143'
 
   dep = [
           kotlinStdLib         : "org.jetbrains.kotlin:kotlin-stdlib-jre8:$kotlinVersion",
@@ -7,6 +8,7 @@ ext {
           kotlinGradlePlugin   : "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion",
           kotlinReflection     : "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion",
           assertj              : "org.assertj:assertj-core:3.9.0",
+          bouncycastle         : "org.bouncycastle:bcprov-jdk15on:1.55",
           guava                : 'com.google.guava:guava:23.6-jre',
           guice                : 'com.google.inject:guice:4.1.0',
           guiceMultibindings   : 'com.google.inject.extensions:guice-multibindings:4.1.0',
@@ -15,6 +17,7 @@ ext {
           jettyServlet         : 'org.eclipse.jetty:jetty-servlet:9.4.8.v20171121',
           jettyWebsocketServlet: 'org.eclipse.jetty.websocket:websocket-servlet:9.4.8.v20171121',
           jettyWebsocketServer : 'org.eclipse.jetty.websocket:websocket-server:9.4.8.v20171121',
+          kubernetesClient     : 'io.kubernetes:client-java:0.2',
           okHttp               : 'com.squareup.okhttp3:okhttp:3.9.1',
           moshi                : 'com.squareup.moshi:moshi-kotlin:1.5.0',
           loggingApi           : 'io.github.microutils:kotlin-logging:1.4.9',
@@ -47,6 +50,14 @@ ext {
           retrofit             : 'com.squareup.retrofit2:retrofit:2.3.0',
           retrofitMoshi        : 'com.squareup.retrofit2:converter-moshi:2.3.0',
           gcpLogback           : 'com.google.cloud:google-cloud-logging-logback:0.39.0-alpha',
+          hikariCp             : 'com.zaxxer:HikariCP:3.1.0',
+          hsqldb               : 'org.hsqldb:hsqldb:2.4.0',
+          awsApi               : "com.amazonaws:aws-java-sdk-bom:$awsVersion",
+          awsLogging           : "com.amazonaws:aws-java-sdk-logs:$awsVersion",
+          logbackClassic       : 'ch.qos.logback:logback-classic:1.2.3',
+          logbackJsonCore      : 'ch.qos.logback.contrib:logback-json-core:0.1.5',
+          slf4jApi             : 'org.slf4j:slf4j-api:1.7.25',
+          mockitoCore          : 'org.mockito:mockito-core:2.8.9',
   ]
 
   isCi = "true".equals(System.getenv('CI'))

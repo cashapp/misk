@@ -1,8 +1,10 @@
 package misk.web
 
 import misk.config.Config
-import misk.security.ssl.KeystoreConfig
-import misk.security.ssl.SslContextFactory
+import misk.security.ssl.CertStore
+import misk.security.ssl.CertStoreConfig
+import misk.security.ssl.TrustStore
+import misk.security.ssl.TrustStoreConfig
 
 data class WebConfig(
   val port: Int,
@@ -13,8 +15,8 @@ data class WebConfig(
 
 data class WebSslConfig(
   val port: Int,
-  val keystore: KeystoreConfig,
-  val truststore: KeystoreConfig? = null,
+  val cert_store: CertStoreConfig,
+  val trust_store: TrustStoreConfig? = null,
   val mutual_auth: MutualAuth = MutualAuth.REQUIRED
 ) {
   enum class MutualAuth {
@@ -23,5 +25,6 @@ data class WebSslConfig(
     DESIRED
   }
 
-  fun createSSLContext() = SslContextFactory.create(keystore, truststore)
+  fun buildCertStore(): CertStore = cert_store.load()!!
+  fun buildTrustStore(): TrustStore? = trust_store?.load()
 }

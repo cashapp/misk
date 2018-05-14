@@ -3,8 +3,8 @@ package misk.web.actions
 import com.google.common.collect.Lists
 import misk.Chain
 import misk.ApplicationInterceptor
-import misk.NetworkChain
-import misk.NetworkInterceptor
+import misk.web.NetworkChain
+import misk.web.NetworkInterceptor
 import misk.web.RealChain
 import misk.web.RealNetworkChain
 import misk.web.Request

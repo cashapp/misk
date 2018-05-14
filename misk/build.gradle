@@ -19,6 +19,7 @@ sourceSets {
 
 dependencies {
   compile dep.kotlinStdLib
+  compile dep.bouncycastle
   compile dep.guava
   compile dep.guice
   compile dep.guiceMultibindings
@@ -29,6 +30,7 @@ dependencies {
   compile dep.jettyServlet
   compile dep.jettyWebsocketServlet
   compile dep.jettyWebsocketServer
+  compile dep.kubernetesClient
   compile dep.wireRuntime
   compile dep.loggingApi
   compile dep.jacksonDatabind
@@ -53,8 +55,20 @@ dependencies {
   compile dep.retrofit
   compile dep.retrofitMoshi
   compile dep.gcpLogback
+  compile dep.hikariCp
+  compile dep.awsApi
+  compile dep.awsLogging
+  compile dep.logbackClassic
+  compile dep.slf4jApi
 
+  testCompile dep.mockitoCore
   testCompile project(':misk/testing')
+}
+
+jar {
+  into("web/admin") {
+    from("web/admin/build")
+  }
 }
 
 apply from: rootProject.file('gradle/gradle-mvn-push.gradle')

@@ -6,18 +6,18 @@ import javax.net.ssl.TrustManager
 import javax.net.ssl.TrustManagerFactory
 
 object SslContextFactory {
-  /** @return A new [SSLContext] for the given keystore and optional truststore config */
-  fun create(keystore: KeystoreConfig?, truststore: KeystoreConfig? = null) =
-      create(keystore?.load(), keystore?.passphrase?.toCharArray(), truststore?.load())
+  /** @return A new [SSLContext] for the given certstore and optional truststore config */
+  fun create(certStore: CertStoreConfig? = null, trustStore: TrustStoreConfig? = null) =
+      create(certStore?.load(), certStore?.passphrase?.toCharArray(), trustStore?.load())
 
-  /** @return A new [SSLContext] for the given keystore and optional truststore config */
-  fun create(keystore: KeyStore?, pin: CharArray?, truststore: KeyStore? = null): SSLContext {
+  /** @return A new [SSLContext] for the given certstore and optional truststore config */
+  fun create(certStore: CertStore?, pin: CharArray?, trustStore: TrustStore? = null): SSLContext {
     val sslContext = SSLContext.getInstance("TLS", "SunJSSE")
-    val trustManagers = truststore
+    val trustManagers = trustStore?.keyStore
         ?.let {
           SslContextFactory.loadTrustManagers(it)
         } ?: arrayOf()
-    val keyManagers = keystore
+    val keyManagers = certStore?.keyStore
         ?.let {
           arrayOf(KeyStoreX509KeyManager(pin!!, it))
         } ?: arrayOf()

@@ -1,8 +1,8 @@
 package misk.web.interceptors
 
 import misk.Action
-import misk.NetworkChain
-import misk.NetworkInterceptor
+import misk.web.NetworkChain
+import misk.web.NetworkInterceptor
 import misk.web.Response
 import misk.web.ResponseContentType
 import misk.web.actions.WebSocketListener
@@ -22,11 +22,12 @@ internal class MarshallerInterceptor constructor(private val marshaller: Marshal
     @Suppress("UNCHECKED_CAST")
     val response = chain.proceed(chain.request) as Response<Any>
 
-    val headers = marshaller.contentType()?.let {
-      response.headers.newBuilder()
-          .set("Content-Type", it.toString())
+    var headers = response.headers
+    if (response.headers.get("Content-Type") == null && marshaller.contentType() != null) {
+      headers = response.headers.newBuilder()
+          .set("Content-Type", marshaller.contentType().toString())
           .build()
-    } ?: response.headers
+    }
 
     val body = marshaller.responseBody(response.body)
     return Response(body, headers, response.statusCode)

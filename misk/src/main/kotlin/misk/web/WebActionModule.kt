@@ -4,7 +4,6 @@ import com.google.inject.AbstractModule
 import com.google.inject.multibindings.Multibinder
 import misk.ApplicationInterceptor
 import misk.MiskDefault
-import misk.NetworkInterceptor
 import misk.asAction
 import misk.inject.parameterizedType
 import misk.inject.subtypeOf
@@ -56,7 +55,7 @@ class WebActionModule<A : WebAction> private constructor(
     val actionFunction = actionFunctions.first()
     val get = actionFunction.findAnnotation<Get>()
     if (get != null) {
-      val getProvider = buildProvider(actionFunction, HttpMethod.GET, get.pathPattern)
+      val getProvider = buildProvider(actionFunction, HttpMethod.GET, get.pathPattern, false)
       binder.addBinding().toProvider(getProvider)
     }
 
@@ -67,18 +66,23 @@ class WebActionModule<A : WebAction> private constructor(
     }
     if (connectWebSocket != null) {
       val connectWebSocketProvider =
-          buildProvider(actionFunction, HttpMethod.GET, connectWebSocket.pathPattern)
+          buildProvider(actionFunction, HttpMethod.GET, connectWebSocket.pathPattern, true)
       binder.addBinding().toProvider(connectWebSocketProvider)
     }
 
     val post = actionFunction.findAnnotation<Post>()
     if (post != null) {
-      val postProvider = buildProvider(actionFunction, HttpMethod.POST, post.pathPattern)
+      val postProvider = buildProvider(actionFunction, HttpMethod.POST, post.pathPattern, false)
       binder.addBinding().toProvider(postProvider)
     }
   }
 
-  private fun buildProvider(function: KFunction<*>, httpMethod: HttpMethod, pathPattern: String):
+  private fun buildProvider(
+    function: KFunction<*>,
+    httpMethod: HttpMethod,
+    pathPattern: String,
+    isConnectWebSocketAction: Boolean
+  ):
       BoundActionProvider<A, *> {
     // NB(mmihic): The response media type may be ommitted; in this case only
     // generic return types (String, ByteString, ResponseBody, etc) are supported
@@ -91,7 +95,8 @@ class WebActionModule<A : WebAction> private constructor(
         pathPattern,
         httpMethod,
         acceptedContentTypes,
-        responseContentType
+        responseContentType,
+        isConnectWebSocketAction
     )
   }
 
@@ -125,7 +130,8 @@ internal class BoundActionProvider<A : WebAction, R>(
   private val pathPattern: String,
   private val httpMethod: HttpMethod,
   private val acceptedContentTypes: List<MediaRange>,
-  private val responseContentType: MediaType?
+  private val responseContentType: MediaType?,
+  private val isConnectWebSocketAction: Boolean
 ) : Provider<BoundAction<A, *>> {
 
   @Inject
@@ -151,10 +157,12 @@ internal class BoundActionProvider<A : WebAction, R>(
     userProvidedNetworkInterceptorFactories.mapNotNullTo(networkInterceptors) { it.create(action) }
 
     val applicationInterceptors = ArrayList<ApplicationInterceptor>()
-    userProvidedApplicationInterceptorFactories.mapNotNullTo(applicationInterceptors) { it.create(action) }
+    userProvidedApplicationInterceptorFactories.mapNotNullTo(applicationInterceptors) {
+      it.create(action)
+    }
 
-    return BoundAction(provider, networkInterceptors, applicationInterceptors, parameterExtractorFactories, function,
-        PathPattern.parse(pathPattern), httpMethod, acceptedContentTypes,
-        responseContentType)
+    return BoundAction(provider, networkInterceptors, applicationInterceptors,
+        parameterExtractorFactories, function, PathPattern.parse(pathPattern), httpMethod,
+        acceptedContentTypes, responseContentType, isConnectWebSocketAction)
   }
 }

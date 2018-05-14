@@ -1,8 +1,8 @@
 package misk.web.interceptors
 
 import misk.Action
-import misk.NetworkChain
-import misk.NetworkInterceptor
+import misk.web.NetworkChain
+import misk.web.NetworkInterceptor
 import misk.metrics.Metrics
 import misk.metrics.MetricsScope
 import misk.web.Response
