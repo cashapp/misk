@@ -1,7 +1,9 @@
 package misk.client
 
 import com.google.inject.Guice
+import com.google.inject.Injector
 import com.google.inject.Provides
+import com.google.inject.name.Names
 import com.google.inject.util.Modules
 import helpers.protos.Dinosaur
 import misk.MiskModule
@@ -25,6 +27,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import retrofit2.Call
 import retrofit2.http.Body
+import retrofit2.http.Headers
 import retrofit2.http.POST
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -42,16 +45,25 @@ internal class TypedHttpClientTest {
   @Inject
   private lateinit var jetty: JettyService
 
-  private lateinit var client: ReturnADinosaur
+  private lateinit var clientInjector: Injector
 
   @BeforeEach
   fun createClient() {
-    val clientInjector = Guice.createInjector(MoshiModule(), ClientModule(jetty))
-    client = clientInjector.getInstance()
+    clientInjector = Guice.createInjector(MoshiModule(), ClientModule(jetty))
   }
 
   @Test
   fun useTypedClient() {
+    val client: ReturnADinosaur = clientInjector.getInstance(Names.named("dinosaur"))
+    val response = client.getDinosaur(Dinosaur.Builder().name("trex").build()).execute()
+    assertThat(response.code()).isEqualTo(200)
+    assertThat(response.body()).isNotNull()
+    assertThat(response.body()?.name!!).isEqualTo("supertrex")
+  }
+
+  @Test
+  fun useTypedClientWithWire() {
+    val client: ReturnAProtoDinosaur = clientInjector.getInstance(Names.named("protoDino"))
     val response = client.getDinosaur(Dinosaur.Builder().name("trex").build()).execute()
     assertThat(response.code()).isEqualTo(200)
     assertThat(response.body()).isNotNull()
@@ -71,15 +83,33 @@ internal class TypedHttpClientTest {
         Dinosaur = request.newBuilder().name("super${request.name}").build()
   }
 
+  interface ReturnAProtoDinosaur {
+    @POST("/protodinos")
+    @Headers(
+        "Accept: " + MediaTypes.APPLICATION_PROTOBUF,
+        "Content-type: " + MediaTypes.APPLICATION_PROTOBUF)
+    fun getDinosaur(@Body request: Dinosaur): Call<Dinosaur>
+  }
+
+  class ReturnAProtoDinosaurAction : WebAction {
+    @Post("/protodinos")
+    @RequestContentType(MediaTypes.APPLICATION_PROTOBUF)
+    @ResponseContentType(MediaTypes.APPLICATION_PROTOBUF)
+    fun getDinosaur(@RequestBody request: Dinosaur):
+        Dinosaur = request.newBuilder().name("super${request.name}").build()
+  }
+
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(WebActionModule.create<ReturnADinosaurAction>())
+      install(WebActionModule.create<ReturnAProtoDinosaurAction>())
     }
   }
 
   class ClientModule(val jetty: JettyService) : KAbstractModule() {
     override fun configure() {
-      install(TypedHttpClientModule.create<ReturnADinosaur>("dinosaur"))
+      install(TypedHttpClientModule.create<ReturnADinosaur>("dinosaur", Names.named("dinosaur")))
+      install(TypedHttpClientModule.create<ReturnAProtoDinosaur>("protoDino", Names.named("protoDino")))
     }
 
     @Provides
@@ -87,7 +117,8 @@ internal class TypedHttpClientTest {
     fun provideHttpClientConfig(): HttpClientsConfig {
       return HttpClientsConfig(
           endpoints = mapOf(
-              "dinosaur" to HttpClientEndpointConfig(jetty.httpServerUrl.toString())
+              "dinosaur" to HttpClientEndpointConfig(jetty.httpServerUrl.toString()),
+              "protoDino" to HttpClientEndpointConfig(jetty.httpServerUrl.toString())
           ))
     }
   }

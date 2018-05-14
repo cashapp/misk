@@ -5,6 +5,7 @@ import misk.security.ssl.CertStoreConfig
 import misk.security.ssl.SslContextFactory
 import misk.security.ssl.TrustStoreConfig
 import okhttp3.OkHttpClient
+import retrofit2.Converter
 import java.net.Proxy
 import java.time.Duration
 import java.util.concurrent.TimeUnit
