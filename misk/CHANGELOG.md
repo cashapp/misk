@@ -1,6 +1,23 @@
 Change Log
 ==========
 
+Version 0.2.4 *(2018-05-14)*
+----------------------------
+
+New:
+* Add support for protobuf over HTTP
+* Cloudwatch Trail logging support
+* Add retry() helper
+* Add Backoff/ExponentialBackoff
+* MiskCaller and authz support
+* Adds a DataSourceModule
+* Add support for logging to StackDriver
+
+Fix:
+* Move static resources from web root into resources
+* Move web-specific NetworkInterceptor into web
+* Remove use of instance metadata endpoints
+
 Version 0.2.3 *(2018-04-27)*
 ----------------------------
 
@@ -16,7 +33,6 @@ Fix:
 * Don't treat assembly as a release when running in CI
 * Fix tracing startup when none is configured
 * Various event router fixes and refactorings
-
 
 Version 0.2.1 *(2018-03-26)*
 ----------------------------
