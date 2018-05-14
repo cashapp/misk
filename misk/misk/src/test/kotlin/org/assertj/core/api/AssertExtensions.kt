@@ -3,10 +3,10 @@ package org.assertj.core.api
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.data.MapEntry
 
-fun <KEY, VALUE> MapAssert<KEY, VALUE>.containsExactly(
+inline fun <reified KEY, VALUE> MapAssert<KEY, VALUE>.containsExactly(
   vararg p: Pair<KEY, VALUE>
 ): MapAssert<KEY, VALUE> {
-  return containsExactly(*p.map { MapEntry.entry(it.first, it.second) }.toTypedArray())
+  return isEqualTo(mapOf(*p))
 }
 
 fun <ACTUAL : CharSequence> AbstractCharSequenceAssert<*, ACTUAL>.isEqualToAsJson(

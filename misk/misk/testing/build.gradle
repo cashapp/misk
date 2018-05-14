@@ -28,6 +28,7 @@ dependencies {
   compile dep.okHttpMockWebServer
   compile dep.openTracingMock
   compile dep.hsqldb
+  compile dep.mockitoCore
 }
 
 apply from: rootProject.file('gradle/gradle-mvn-push.gradle')
