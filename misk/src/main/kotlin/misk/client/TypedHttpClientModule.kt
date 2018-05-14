@@ -8,8 +8,10 @@ import io.opentracing.Tracer
 import misk.inject.KAbstractModule
 import misk.inject.newMultibinder
 import okhttp3.OkHttpClient
+import retrofit2.Converter
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
+import retrofit2.converter.wire.WireConverterFactory
 import java.lang.reflect.Proxy
 import kotlin.reflect.KClass
 
@@ -67,10 +69,9 @@ class TypedHttpClientModule<T : Any>(
 
     override fun get(): T {
       val okhttp = httpClientProvider.get()
-
+      val endpointConfig = httpClientsConfig[name]
       val retrofit = Retrofit.Builder()
-          .baseUrl(httpClientsConfig[name].url)
-          .addConverterFactory(MoshiConverterFactory.create(moshi))
+          .baseUrl(endpointConfig.url)
           .build()
 
       val invocationHandler = ClientInvocationHandler(
@@ -80,7 +81,8 @@ class TypedHttpClientModule<T : Any>(
           okhttp,
           clientNetworkInterceptorFactories,
           clientApplicationInterceptorFactories,
-          tracer)
+          tracer,
+          moshi)
 
       @Suppress("UNCHECKED_CAST")
       return Proxy.newProxyInstance(
