@@ -10,6 +10,7 @@ import misk.environment.Environment
 import misk.inject.keyOf
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.Assertions.assertSame
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -59,10 +60,13 @@ internal class DataSourceModuleTest {
         DataSourceModule.create("exemplar"),
         ConfigModule.create("my-app", rootConfig))
 
-    val datasource = injector.getInstance(keyOf<DataSource>())
-    val db = PeopleDatabase(datasource)
+    val dataSourceCluster = injector.getInstance(keyOf<DataSourceCluster>())
+    val db = PeopleDatabase(dataSourceCluster)
     val results = db.listPeople()
     assertThat(results).containsExactly(100 to "Mary", 101 to "Phil")
+
+    val dataSource = injector.getInstance(keyOf<DataSource>())
+    assertSame(dataSource, dataSourceCluster.writer)
   }
 
   @Test fun bindsDataSourceWithAnnotationInstance() {
@@ -70,21 +74,27 @@ internal class DataSourceModuleTest {
         DataSourceModule.create("exemplar", Names.named("exemplar")),
         ConfigModule.create("my-app", rootConfig))
 
-    val datasource = injector.getInstance(keyOf<DataSource>(Names.named("exemplar")))
-    val db = PeopleDatabase(datasource)
+    val dataSourceCluster = injector.getInstance(keyOf<DataSourceCluster>(Names.named("exemplar")))
+    val db = PeopleDatabase(dataSourceCluster)
     val results = db.listPeople()
     assertThat(results).containsExactly(100 to "Mary", 101 to "Phil")
+
+    val dataSource = injector.getInstance(keyOf<DataSource>(Names.named("exemplar")))
+    assertSame(dataSource, dataSourceCluster.writer)
   }
 
   @Test fun bindsDataSourceWithAnnotation() {
     val injector = Guice.createInjector(
-        DataSourceModule.create("exemplar", ForWrites::class),
+        DataSourceModule.create("exemplar", Exemplar::class),
         ConfigModule.create("my-app", rootConfig))
 
-    val datasource = injector.getInstance(keyOf(DataSource::class, ForWrites::class))
-    val db = PeopleDatabase(datasource)
+    val dataSourceCluster = injector.getInstance(keyOf(DataSourceCluster::class, Exemplar::class))
+    val db = PeopleDatabase(dataSourceCluster)
     val results = db.listPeople()
     assertThat(results).containsExactly(100 to "Mary", 101 to "Phil")
+
+    val dataSource = injector.getInstance(keyOf(DataSource::class, Exemplar::class))
+    assertSame(dataSource, dataSourceCluster.writer)
   }
 
   @Test fun usesProperUsername() {
@@ -94,8 +104,9 @@ internal class DataSourceModuleTest {
           ConfigModule.create("my-app", rootConfig)
       )
     }
-    assertThat(exception.cause!!.cause).isInstanceOf(SQLInvalidAuthorizationSpecException::class.java)
-    assertThat(exception.cause!!.cause!!.localizedMessage).contains("not found: INCORRECT_USERNAME")
+    val error = exception.errorMessages.first().cause!!
+    assertThat(error.cause).isInstanceOf(SQLInvalidAuthorizationSpecException::class.java)
+    assertThat(error.message).contains("not found: INCORRECT_USERNAME")
   }
 
   @Test fun usesProperPassword() {
@@ -105,23 +116,27 @@ internal class DataSourceModuleTest {
           ConfigModule.create("my-app", rootConfig)
       )
     }
-    assertThat(exception.cause!!.cause).isInstanceOf(SQLInvalidAuthorizationSpecException::class.java)
+    val error = exception.errorMessages.first().cause!!
+    assertThat(error.cause).isInstanceOf(SQLInvalidAuthorizationSpecException::class.java)
   }
 
   @Test fun failsIfDataSourceNotFound() {
     val exception = assertThrows(CreationException::class.java) {
       Guice.createInjector(
-          DataSourceModule.create("NOT_EXEMPLAR", ForWrites::class),
+          DataSourceModule.create("NOT_EXEMPLAR", Exemplar::class),
           ConfigModule.create("my-app", rootConfig)
       )
     }
-    assertThat(exception.cause).isInstanceOf(IllegalStateException::class.java)
-    assertThat(exception.localizedMessage).contains("no datasource named NOT_EXEMPLAR")
+    val errorMessage = exception.errorMessages.first()
+    assertThat(errorMessage.cause).isInstanceOf(IllegalStateException::class.java)
+    assertThat(errorMessage.message).contains("no datasource cluster named NOT_EXEMPLAR")
   }
 
-  class PeopleDatabase(private val datasource: DataSource) {
+  class PeopleDatabase(private val dataSourceCluster: DataSourceCluster) {
+    constructor(dataSource: DataSource) : this(DataSourceCluster(dataSource, dataSource))
+
     fun init() {
-      datasource.connection.use { conn ->
+      dataSourceCluster.writer.connection.use { conn ->
         conn.createStatement().use { stmt ->
               stmt.execute("CREATE TABLE people(id INT NOT NULL, name VARCHAR(256) NOT NULL)")
             }
@@ -129,7 +144,7 @@ internal class DataSourceModuleTest {
     }
 
     fun addPerson(id: Int, name: String) {
-      datasource.connection.use { conn ->
+      dataSourceCluster.writer.connection.use { conn ->
         conn.prepareStatement("INSERT INTO people(id, name) VALUES(?, ?)").use { stmt ->
               stmt.setInt(1, id)
               stmt.setString(2, name)
@@ -140,7 +155,7 @@ internal class DataSourceModuleTest {
     }
 
     fun listPeople(): List<Pair<Int, String>> {
-      return datasource.connection.use { conn ->
+      return dataSourceCluster.reader.connection.use { conn ->
         conn.createStatement().use { stmt ->
               stmt.executeQuery("SELECT id, name FROM people ORDER BY id ASC").use { rs ->
                     val results = mutableListOf<Pair<Int, String>>()
@@ -157,7 +172,7 @@ internal class DataSourceModuleTest {
   }
 
   @Qualifier
-  annotation class ForWrites
+  annotation class Exemplar
 
-  data class RootConfig(val data_sources: DataSourcesConfig) : Config
+  data class RootConfig(val data_source_clusters: DataSourceClustersConfig) : Config
 }

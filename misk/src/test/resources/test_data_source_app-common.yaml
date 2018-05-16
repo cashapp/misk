@@ -1,24 +1,33 @@
-data_sources:
+data_source_clusters:
   exemplar:
-    type: HSQLDB
-    username: snork
-    password: florp
-    database: lorfil
+    writer:
+      type: HSQLDB
+      username: snork
+      password: florp
+      database: lorfil
+    reader:
+      type: HSQLDB
+      username: snork
+      password: florp
+      database: lorfil
 
   exemplar-incorrect-username:
-    type: HSQLDB
-    username: INCORRECT_USERNAME
-    password: florp
-    database: lorfil
+    writer:
+      type: HSQLDB
+      username: INCORRECT_USERNAME
+      password: florp
+      database: lorfil
 
   exemplar-incorrect-password:
-    type: HSQLDB
-    username: snork
-    password: INCORRECT_PASSWORD
-    database: lorfil
+    writer:
+      type: HSQLDB
+      username: snork
+      password: INCORRECT_PASSWORD
+      database: lorfil
 
   exemplar-mysql:
-    type: MYSQL
-    username: snork
-    password: florp
-    database: lorfil
+    writer:
+      type: MYSQL
+      username: snork
+      password: florp
+      database: lorfil

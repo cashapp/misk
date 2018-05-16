@@ -31,12 +31,17 @@ data class DataSourceConfig(
   val connection_properties: Map<String, String> = mapOf(),
   val fixed_pool_size: Int = 10,
   val connection_timeout: Duration = Duration.ofSeconds(30),
-  val connection_max_lifetime: Duration = Duration.ofMinutes(30),
-  val read_only: Boolean = false
+  val connection_max_lifetime: Duration = Duration.ofMinutes(30)
 )
 
-/** Top-level configuration element for all databases */
-class DataSourcesConfig : LinkedHashMap<String, DataSourceConfig>, Config {
+/** Configuration element for a cluster of DataSources */
+data class DataSourceClusterConfig(
+  val writer: DataSourceConfig,
+  val reader: DataSourceConfig?
+)
+
+/** Top-level configuration element for all datasource clusters */
+class DataSourceClustersConfig : LinkedHashMap<String, DataSourceClusterConfig>, Config {
   constructor() : super()
-  constructor(m : Map<String, DataSourceConfig>) : super(m)
+  constructor(m : Map<String, DataSourceClusterConfig>) : super(m)
 }
