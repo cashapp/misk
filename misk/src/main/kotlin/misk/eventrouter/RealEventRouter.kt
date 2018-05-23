@@ -24,8 +24,8 @@ internal class RealEventRouter : EventRouter {
   private val localSubscribers = LinkedHashMultimap.create<String, LocalSubscriber<*>>()
   private val remoteSubscribers = LinkedHashMultimap.create<String, WebSocket>()
   private val actionQueue = LinkedBlockingQueue<Action>()
+  private val hostsToSockets = mutableMapOf<String, WebSocket>()
   private var hasJoinedCluster = AtomicBoolean()
-  private var hostsToSockets = mapOf<String, WebSocket>()
 
   sealed class Action {
     data class OnMessage(val webSocket: WebSocket, val text: String) : Action()
@@ -209,7 +209,7 @@ internal class RealEventRouter : EventRouter {
     // this looks a lot like cluster changed. Maybe share code?
     val hostname =
         hostsToSockets.entries.firstOrNull { it.value == action.webSocket }?.key ?: return
-    hostsToSockets = hostsToSockets.minus(hostname)
+    hostsToSockets.remove(hostname)
 
     val topics = localSubscribers.keySet()
     for (topic in topics) {
@@ -236,12 +236,8 @@ internal class RealEventRouter : EventRouter {
 
   private fun hostToSocket(hostname: String): WebSocket {
     logger.debug { "connecting to $hostname" }
-    val ws = hostsToSockets[hostname]
-    if (ws == null) {
-      hostsToSockets = hostsToSockets.plus(
-          Pair(hostname, clusterConnector.connectSocket(hostname, webSocketListener)))
-    }
-    return hostsToSockets[hostname]!!
+    return hostsToSockets.computeIfAbsent(hostname,
+        { clusterConnector.connectSocket(hostname, webSocketListener) })
   }
 
   fun joinCluster() {
