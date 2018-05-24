@@ -84,10 +84,21 @@ inline fun <reified T : Any> Injector.getInstance(annotation: Annotation? = null
   return getInstance(key)
 }
 
+@Suppress("UNCHECKED_CAST")
+fun <T : Any> Injector.getSetOf(
+  type: KClass<T>,
+  annotation: KClass<out Annotation>? = null
+) : Set<T> = getInstance(parameterizedKeyOf<Set<*>>(type, annotation)) as Set<T>
+
 inline fun <reified T : Any> keyOf(): Key<T> = Key.get(T::class.java)
 inline fun <reified T : Any> keyOf(a: Annotation): Key<T> = Key.get(T::class.java, a)
 inline fun <reified T : Any, A : Annotation> keyOf(a: KClass<A>): Key<T> =
     Key.get(T::class.java, a.java)
+
+inline fun <reified T : Any> parameterizedKeyOf(
+  type: KClass<*>,
+  annotation: KClass<out Annotation>? = null
+) = parameterizedType<T>(type.java).typeLiteral().toKey(annotation?.java)
 
 fun <T : Any, A : Annotation> keyOf(t: KClass<T>, a: KClass<A>): Key<T> = Key.get(t.java, a.java)
 
