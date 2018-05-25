@@ -11,10 +11,10 @@ import javax.inject.Singleton
 
 class MoshiModule : KAbstractModule() {
   override fun configure() {
-    val factoryBinder = binder().newMultibinder<JsonAdapter.Factory>(MoshiJsonAdapter::class.java)
+    val factoryBinder = binder().newMultibinder<JsonAdapter.Factory>(MoshiJsonAdapter::class)
     factoryBinder.addBinding().to(WireMessageAdapter.Factory::class.java)
 
-    val adapterBinder = binder().newMultibinder<Any>(MoshiJsonAdapter::class.java)
+    val adapterBinder = binder().newMultibinder<Any>(MoshiJsonAdapter::class)
     adapterBinder.addBinding().toInstance(ByteStringAdapter)
   }
 
