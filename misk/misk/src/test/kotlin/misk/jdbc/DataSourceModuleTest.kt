@@ -1,57 +1,52 @@
 package misk.jdbc
 
+import com.google.common.util.concurrent.Service
 import com.google.inject.CreationException
 import com.google.inject.Guice
 import com.google.inject.name.Names
+import misk.MiskModule
 import misk.config.Config
 import misk.config.ConfigModule
 import misk.config.MiskConfig
 import misk.environment.Environment
+import misk.inject.KAbstractModule
+import misk.inject.addMultibinderBinding
 import misk.inject.keyOf
+import misk.testing.MiskTest
+import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.AfterEach
+import org.hsqldb.jdbc.JDBCDataSource
 import org.junit.jupiter.api.Assertions.assertSame
 import org.junit.jupiter.api.Assertions.assertThrows
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.sql.SQLInvalidAuthorizationSpecException
+import javax.inject.Provider
 import javax.inject.Qualifier
 import javax.sql.DataSource
 
+@MiskTest(startService = true)
 internal class DataSourceModuleTest {
   val defaultEnv = Environment.TESTING
-  val username = "snork"
-  val password = "florp"
-  val dbname = "lorfil"
   val rootConfig = MiskConfig.load<RootConfig>("test_data_source_app", defaultEnv)
 
-  lateinit var baseDataSource: DataSource
+  @MiskTestModule
+  val testModule = object : KAbstractModule() {
+    override fun configure() {
+      install(MiskModule())
 
-  @BeforeEach
-  fun initDatabase() {
-    // Create the datasource by hand
-    Class.forName(DataSourceType.HSQLDB.driverClassName)
-
-    val datasource = org.hsqldb.jdbc.JDBCDataSource()
-    datasource.setURL("jdbc:hsqldb:mem:$dbname")
-    datasource.setUser(username)
-    datasource.setPassword(password)
-    baseDataSource = datasource
-
-    // Add some people that can be retrieved in tests
-    val db = PeopleDatabase(baseDataSource)
-    db.init()
-    db.addPerson(100, "Mary")
-    db.addPerson(101, "Phil")
-  }
-
-  @AfterEach
-  fun destroyDatabase() {
-    baseDataSource.connection.use { conn ->
-      conn.createStatement().use { stmt ->
-            stmt.execute("DROP TABLE people")
-          }
-      conn.commit()
+      val config: DataSourceConfig = rootConfig.data_source_clusters["exemplar"]!!.writer
+      val hsqlService = InMemoryHsqlService(config,
+          setUpStatements = listOf(
+              PeopleDatabase.CREATE_TABLE_PEOPLE,
+              "INSERT INTO people(id, name) VALUES(100, 'Mary')",
+              "INSERT INTO people(id, name) VALUES(101, 'Phil')"
+          ),
+          tearDownStatements = listOf(
+              PeopleDatabase.DROP_TABLE_PEOPLE
+          )
+      )
+      binder().addMultibinderBinding<Service>().toInstance(hsqlService)
+      bind<JDBCDataSource>().toProvider(Provider<JDBCDataSource> { hsqlService.datasource })
     }
   }
 
@@ -133,41 +128,33 @@ internal class DataSourceModuleTest {
   }
 
   class PeopleDatabase(private val dataSourceCluster: DataSourceCluster) {
-    constructor(dataSource: DataSource) : this(DataSourceCluster(dataSource, dataSource))
-
-    fun init() {
-      dataSourceCluster.writer.connection.use { conn ->
-        conn.createStatement().use { stmt ->
-              stmt.execute("CREATE TABLE people(id INT NOT NULL, name VARCHAR(256) NOT NULL)")
-            }
-      }
-    }
-
-    fun addPerson(id: Int, name: String) {
-      dataSourceCluster.writer.connection.use { conn ->
-        conn.prepareStatement("INSERT INTO people(id, name) VALUES(?, ?)").use { stmt ->
-              stmt.setInt(1, id)
-              stmt.setString(2, name)
-              stmt.execute()
-            }
-        conn.commit()
-      }
-    }
-
     fun listPeople(): List<Pair<Int, String>> {
       return dataSourceCluster.reader.connection.use { conn ->
         conn.createStatement().use { stmt ->
-              stmt.executeQuery("SELECT id, name FROM people ORDER BY id ASC").use { rs ->
-                    val results = mutableListOf<Pair<Int, String>>()
-                    while (rs.next()) {
-                      val id = rs.getInt(1)
-                      val name = rs.getString(2)
-                      results.add(id to name)
-                    }
-                    results.toList()
-                  }
+          stmt.executeQuery("SELECT id, name FROM people ORDER BY id ASC").use { rs ->
+            val results = mutableListOf<Pair<Int, String>>()
+            while (rs.next()) {
+              val id = rs.getInt(1)
+              val name = rs.getString(2)
+              results.add(id to name)
             }
+            results.toList()
+          }
+        }
       }
+    }
+
+    companion object {
+      val CREATE_TABLE_PEOPLE = """
+        |CREATE TABLE people(
+        |  id bigint(20) NOT NULL AUTO_INCREMENT,
+        |  name varchar(255) NOT NULL
+        |)
+        |""".trimMargin()
+
+      val DROP_TABLE_PEOPLE = """
+        |DROP TABLE people
+        |""".trimMargin()
     }
   }
 

@@ -5,7 +5,7 @@ import misk.exceptions.NotFoundException
 import misk.web.Response
 import misk.web.ResponseBody
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.Test
+import org.junit.jupiter.api.Test
 import kotlin.reflect.KClass
 
 internal class ExceptionMapperResolverTest {

@@ -3,7 +3,7 @@ package misk.jdbc
 import com.google.inject.Guice
 import misk.inject.getSetOf
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.Test
+import org.junit.jupiter.api.Test
 import javax.inject.Qualifier
 import kotlin.reflect.KClass
 
