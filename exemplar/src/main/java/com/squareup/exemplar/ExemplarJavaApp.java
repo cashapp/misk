@@ -6,7 +6,6 @@ import misk.config.ConfigModule;
 import misk.config.MiskConfig;
 import misk.environment.Environment;
 import misk.environment.EnvironmentModule;
-import misk.hibernate.HibernateModule;
 import misk.web.WebModule;
 
 public class ExemplarJavaApp {
@@ -17,7 +16,6 @@ public class ExemplarJavaApp {
     new MiskApplication(
         new MiskModule(),
         new WebModule(),
-        new HibernateModule(),
         new ExemplarJavaModule(),
         new ConfigModule<>(ExemplarJavaConfig.class, "exemplar", config),
         new EnvironmentModule(environment, null)
