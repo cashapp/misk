@@ -40,7 +40,7 @@ internal class MiskTestExtension : BeforeEachCallback, AfterEachCallback {
     override fun beforeEach(context: ExtensionContext) {
       if (context.startService()) {
         serviceManager.startAsync()
-        serviceManager.awaitHealthy(5, TimeUnit.SECONDS)
+        serviceManager.awaitHealthy(10, TimeUnit.SECONDS)
       }
     }
   }

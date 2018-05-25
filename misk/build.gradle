@@ -1,3 +1,5 @@
+import org.junit.platform.console.options.Details
+
 apply plugin: 'kotlin'
 apply plugin: 'org.junit.platform.gradle.plugin'
 
@@ -17,6 +19,10 @@ sourceSets {
   test.java.srcDirs += 'src/test/kotlin/'
 }
 
+junitPlatform {
+  details Details.VERBOSE
+}
+
 dependencies {
   compile dep.kotlinStdLib
   compile dep.bouncycastle
@@ -30,6 +36,7 @@ dependencies {
   compile dep.jettyServlet
   compile dep.jettyWebsocketServlet
   compile dep.jettyWebsocketServer
+  compile dep.hibernateCore
   compile dep.kubernetesClient
   compile dep.wireRuntime
   compile dep.loggingApi
@@ -61,6 +68,7 @@ dependencies {
   compile dep.awsLogging
   compile dep.logbackClassic
   compile dep.slf4jApi
+  compile dep.jaxbApi
 
   testCompile dep.mockitoCore
   testCompile project(':misk/testing')

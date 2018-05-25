@@ -6,7 +6,6 @@ import misk.config.ConfigModule
 import misk.config.MiskConfig
 import misk.environment.Environment
 import misk.environment.EnvironmentModule
-import misk.hibernate.HibernateModule
 import misk.web.WebModule
 
 fun main(args: Array<String>) {
@@ -16,7 +15,6 @@ fun main(args: Array<String>) {
   MiskApplication(
       MiskModule(),
       WebModule(),
-      HibernateModule(),
       ExemplarModule(),
       ConfigModule.create("exemplar", config),
       EnvironmentModule(environment)

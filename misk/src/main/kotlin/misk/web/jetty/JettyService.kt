@@ -38,7 +38,7 @@ class JettyService @Inject internal constructor(
 
   override fun startUp() {
     val stopwatch = Stopwatch.createStarted()
-    logger.info("Starting up Jetty")
+    logger.info("Starting Jetty")
 
     val httpConfig = HttpConfiguration()
     httpConfig.sendServerVersion = false

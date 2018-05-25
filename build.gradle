@@ -27,6 +27,7 @@ ext {
           jacksonDataformatYaml: 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.9.3',
           jacksonKotlin        : 'com.fasterxml.jackson.module:jackson-module-kotlin:2.9.3',
           jacksonJsr310        : 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.9.4',
+          hibernateCore        : 'org.hibernate:hibernate-core:5.3.0.Final',
           metricsParent        : 'io.dropwizard.metrics:metrics-parent:4.0.1',
           metricsCore          : 'io.dropwizard.metrics:metrics-core:4.0.1',
           metricsGraphite      : 'io.dropwizard.metrics:metrics-graphite:4.0.1',
@@ -59,6 +60,7 @@ ext {
           logbackJsonCore      : 'ch.qos.logback.contrib:logback-json-core:0.1.5',
           slf4jApi             : 'org.slf4j:slf4j-api:1.7.25',
           mockitoCore          : 'org.mockito:mockito-core:2.8.9',
+          jaxbApi              : 'javax.xml.bind:jaxb-api:2.3.0',
   ]
 
   isCi = "true".equals(System.getenv('CI'))
