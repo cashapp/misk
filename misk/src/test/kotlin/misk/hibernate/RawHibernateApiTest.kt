@@ -31,7 +31,8 @@ class RawHibernateApiTest {
       val config: DataSourceConfig = rootConfig.data_source_clusters["exemplar"]!!.writer
       binder().addMultibinderBinding<Service>().toInstance(
           InMemoryHsqlService(config, setUpStatements = listOf(DbMovie.CREATE_TABLE_MOVIES)))
-      install(HibernateModule(Movies::class, config, setOf(DbMovie::class)))
+      install(HibernateModule(Movies::class, config))
+      install(HibernateEntityModule(Movies::class, setOf(DbMovie::class)))
     }
   }
 
