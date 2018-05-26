@@ -22,7 +22,7 @@ inline fun <reified T : Any> LinkedBindingBuilder<in T>.to() = to(T::class.java)
 
 @Suppress("UNCHECKED_CAST")
 inline fun <reified T : Any> Binder.newMultibinder(
-  annotation: Class<out Annotation>? = null
+  annotation: KClass<out Annotation>? = null
 ): Multibinder<T> {
   val setOfT = parameterizedType<Set<*>>(T::class.java).typeLiteral() as TypeLiteral<Set<T>>
   val mutableSetOfTKey = setOfT.toKey(annotation) as Key<MutableSet<T>>
@@ -32,16 +32,16 @@ inline fun <reified T : Any> Binder.newMultibinder(
 
   return when (annotation) {
     null -> Multibinder.newSetBinder(this, T::class.java)
-    else -> Multibinder.newSetBinder(this, T::class.java, annotation)
+    else -> Multibinder.newSetBinder(this, T::class.java, annotation.java)
   }
 }
 
 inline fun <reified T : Any, reified A : Annotation> Binder.addMultibinderBindingWithAnnotation() =
-    addMultibinderBinding<T>(A::class.java)
+    addMultibinderBinding<T>(A::class)
 
 @Suppress("UNCHECKED_CAST")
 inline fun <reified T : Any> Binder.addMultibinderBinding(
-  annotation: Class<out Annotation>? = null
+  annotation: KClass<out Annotation>? = null
 ): LinkedBindingBuilder<T> = newMultibinder<T>(annotation).addBinding()
 
 fun ScopedBindingBuilder.asSingleton() {
@@ -73,11 +73,17 @@ inline fun <reified T : Any> parameterizedType(vararg typeParameters: Type)
   return Types.newParameterizedType(T::class.java, *typeParameters)
 }
 
-fun ParameterizedType.typeLiteral() = TypeLiteral.get(this)
+fun Type.typeLiteral() = TypeLiteral.get(this)!!
 
-fun KType.typeLiteral(): TypeLiteral<*> {
-  return TypeLiteral.get(javaType)
-}
+fun KType.typeLiteral(): TypeLiteral<*> = TypeLiteral.get(javaType)
+
+fun <T : Any> KClass<T>.typeLiteral(): TypeLiteral<T> = TypeLiteral.get(java)
+
+@Suppress("UNCHECKED_CAST") // The type system isn't aware of constructed types.
+fun <T> setOfType(elementType: TypeLiteral<T>): TypeLiteral<Set<T>> = TypeLiteral.get(
+    Types.setOf(elementType.type)) as TypeLiteral<Set<T>>
+
+fun <T : Any> setOfType(elementType: KClass<T>) = setOfType(elementType.typeLiteral())
 
 inline fun <reified T : Any> Injector.getInstance(annotation: Annotation? = null): T {
   val key = annotation?.let { Key.get(T::class.java, it) } ?: Key.get(T::class.java)
@@ -88,26 +94,22 @@ inline fun <reified T : Any> Injector.getInstance(annotation: Annotation? = null
 fun <T : Any> Injector.getSetOf(
   type: KClass<T>,
   annotation: KClass<out Annotation>? = null
-) : Set<T> = getInstance(parameterizedKeyOf<Set<*>>(type, annotation)) as Set<T>
+): Set<T> = getInstance(setOfType(type).toKey(annotation))
 
 inline fun <reified T : Any> keyOf(): Key<T> = Key.get(T::class.java)
 inline fun <reified T : Any> keyOf(a: Annotation): Key<T> = Key.get(T::class.java, a)
-inline fun <reified T : Any, A : Annotation> keyOf(a: KClass<A>): Key<T> =
-    Key.get(T::class.java, a.java)
-
-inline fun <reified T : Any> parameterizedKeyOf(
-  type: KClass<*>,
-  annotation: KClass<out Annotation>? = null
-) = parameterizedType<T>(type.java).typeLiteral().toKey(annotation?.java)
 
 fun <T : Any, A : Annotation> keyOf(t: KClass<T>, a: KClass<A>): Key<T> = Key.get(t.java, a.java)
 
-fun <T : Any> TypeLiteral<T>.toKey(annotation: Class<out Annotation>? = null): Key<T> {
+fun <T : Any> TypeLiteral<T>.toKey(annotation: KClass<out Annotation>? = null): Key<T> {
   return when (annotation) {
     null -> Key.get(this)
-    else -> Key.get(this, annotation)
+    else -> Key.get(this, annotation.java)
   }
 }
+
+fun <T : Any> KClass<T>.toKey(qualifier: KClass<out Annotation>? = null): Key<T> =
+    typeLiteral().toKey(qualifier)
 
 fun uninject(target: Any) {
   try {
