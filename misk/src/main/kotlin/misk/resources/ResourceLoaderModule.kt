@@ -4,6 +4,6 @@ import misk.inject.KAbstractModule
 
 class ResourceLoaderModule : KAbstractModule() {
   override fun configure() {
-    bind<ResourceLoader>().toInstance(ResourceLoader)
+    bind<ResourceLoader>().toInstance(ClasspathResourceLoader)
   }
 }
