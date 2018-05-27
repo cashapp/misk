@@ -15,13 +15,14 @@ import javax.inject.Singleton
 
 @Singleton
 class StaticResourceMapper @Inject internal constructor(
+  private val resourceLoader: ResourceLoader,
   private val entries: MutableList<out Entry>
 ) {
   /** Returns true if the mapped path exists on either the resource path or file system. */
   private fun exists(urlPath: String): Boolean {
     val staticResource = staticResource(urlPath) ?: return false
     val file = File(staticResource.filesystemPath(urlPath))
-    return ResourceLoader.exists(staticResource.resourcePath(urlPath))
+    return resourceLoader.exists(staticResource.resourcePath(urlPath))
         || (!file.isDirectory && file.exists())
   }
 
@@ -32,7 +33,7 @@ class StaticResourceMapper @Inject internal constructor(
     val responseBodyFile = File(staticResource.filesystemPath(urlPath))
 
     return when {
-      ResourceLoader.exists(resourcePath) -> ResourceLoader.open(resourcePath)!!
+      resourceLoader.exists(resourcePath) -> resourceLoader.open(resourcePath)!!
       responseBodyFile.exists() -> Okio.buffer(Okio.source(responseBodyFile))
       else -> null
     }
