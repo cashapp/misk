@@ -3,10 +3,8 @@ package misk.jdbc
 import com.google.common.util.concurrent.Service
 import com.google.inject.CreationException
 import com.google.inject.Guice
-import com.google.inject.name.Names
 import misk.MiskModule
 import misk.config.Config
-import misk.config.ConfigModule
 import misk.config.MiskConfig
 import misk.environment.Environment
 import misk.inject.KAbstractModule
@@ -26,11 +24,11 @@ import javax.sql.DataSource
 
 @MiskTest(startService = true)
 internal class DataSourceModuleTest {
-  val defaultEnv = Environment.TESTING
-  val rootConfig = MiskConfig.load<RootConfig>("test_data_source_app", defaultEnv)
+  private val defaultEnv = Environment.TESTING
+  private val rootConfig = MiskConfig.load<RootConfig>("test_data_source_app", defaultEnv)
 
   @MiskTestModule
-  val testModule = object : KAbstractModule() {
+  val module = object : KAbstractModule() {
     override fun configure() {
       install(MiskModule())
 
@@ -51,38 +49,9 @@ internal class DataSourceModuleTest {
     }
   }
 
-  @Test fun bindsDataSourceWithoutAnnotation() {
-    val injector = Guice.createInjector(
-        DataSourceModule.create("exemplar"),
-        ConfigModule.create("my-app", rootConfig))
-
-    val dataSourceCluster = injector.getInstance(keyOf<DataSourceCluster>())
-    val db = PeopleDatabase(dataSourceCluster)
-    val results = db.listPeople()
-    assertThat(results).containsExactly(100 to "Mary", 101 to "Phil")
-
-    val dataSource = injector.getInstance(keyOf<DataSource>())
-    assertSame(dataSource, dataSourceCluster.writer)
-  }
-
-  @Test fun bindsDataSourceWithAnnotationInstance() {
-    val injector = Guice.createInjector(
-        DataSourceModule.create("exemplar", Names.named("exemplar")),
-        ConfigModule.create("my-app", rootConfig))
-
-    val dataSourceCluster = injector.getInstance(keyOf<DataSourceCluster>(Names.named("exemplar")))
-    val db = PeopleDatabase(dataSourceCluster)
-    val results = db.listPeople()
-    assertThat(results).containsExactly(100 to "Mary", 101 to "Phil")
-
-    val dataSource = injector.getInstance(keyOf<DataSource>(Names.named("exemplar")))
-    assertSame(dataSource, dataSourceCluster.writer)
-  }
-
-  @Test fun bindsDataSourceWithAnnotation() {
-    val injector = Guice.createInjector(
-        DataSourceModule.create("exemplar", Exemplar::class),
-        ConfigModule.create("my-app", rootConfig))
+  @Test fun bindsDataSource() {
+    val config = rootConfig.data_source_clusters["exemplar"]!!
+    val injector = Guice.createInjector(DataSourceModule(config, Exemplar::class))
 
     val dataSourceCluster = injector.getInstance(keyOf(DataSourceCluster::class, Exemplar::class))
     val db = PeopleDatabase(dataSourceCluster)
@@ -94,11 +63,9 @@ internal class DataSourceModuleTest {
   }
 
   @Test fun usesProperUsername() {
+    val config = rootConfig.data_source_clusters["exemplar-incorrect-username"]!!
     val exception = assertThrows(CreationException::class.java) {
-      Guice.createInjector(
-          DataSourceModule.create("exemplar-incorrect-username"),
-          ConfigModule.create("my-app", rootConfig)
-      )
+      Guice.createInjector(DataSourceModule(config, Exemplar::class))
     }
     val error = exception.errorMessages.first().cause!!
     assertThat(error.cause).isInstanceOf(SQLInvalidAuthorizationSpecException::class.java)
@@ -106,26 +73,12 @@ internal class DataSourceModuleTest {
   }
 
   @Test fun usesProperPassword() {
+    val config = rootConfig.data_source_clusters["exemplar-incorrect-password"]!!
     val exception = assertThrows(CreationException::class.java) {
-      Guice.createInjector(
-          DataSourceModule.create("exemplar-incorrect-password"),
-          ConfigModule.create("my-app", rootConfig)
-      )
+      Guice.createInjector(DataSourceModule(config, Exemplar::class))
     }
     val error = exception.errorMessages.first().cause!!
     assertThat(error.cause).isInstanceOf(SQLInvalidAuthorizationSpecException::class.java)
-  }
-
-  @Test fun failsIfDataSourceNotFound() {
-    val exception = assertThrows(CreationException::class.java) {
-      Guice.createInjector(
-          DataSourceModule.create("NOT_EXEMPLAR", Exemplar::class),
-          ConfigModule.create("my-app", rootConfig)
-      )
-    }
-    val errorMessage = exception.errorMessages.first()
-    assertThat(errorMessage.cause).isInstanceOf(IllegalStateException::class.java)
-    assertThat(errorMessage.message).contains("no datasource cluster named NOT_EXEMPLAR")
   }
 
   class PeopleDatabase(private val dataSourceCluster: DataSourceCluster) {

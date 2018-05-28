@@ -1,10 +1,9 @@
 package misk.jdbc
 
-import com.google.inject.Key
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import misk.inject.KAbstractModule
-import javax.inject.Inject
+import misk.inject.toKey
 import javax.inject.Provider
 import javax.sql.DataSource
 import kotlin.reflect.KClass
@@ -16,61 +15,27 @@ import kotlin.reflect.KClass
  * N.B. If a [reader] config is not provided the [writer] config will be used for the [reader].
  */
 class DataSourceModule constructor(
-  private val datasourceName: String,
-  private val clusterKey: Key<DataSourceCluster>,
-  private val dataSourceKey: Key<DataSource>
+  private val config: DataSourceClusterConfig,
+  private val qualifier: KClass<out Annotation>
 ) : KAbstractModule() {
 
   override fun configure() {
-    bind(clusterKey)
-      .toProvider(DataSourceClusterProvider(datasourceName))
-      .asEagerSingleton()
+    val clusterKey = DataSourceCluster::class.toKey(qualifier)
     val clusterProvider = getProvider(clusterKey)
 
-    bind(dataSourceKey)
-      .toProvider(Provider<DataSource> { clusterProvider.get().writer })
-      .asEagerSingleton()
-  }
+    bind(clusterKey)
+        .toProvider(DataSourceClusterProvider(config))
+        .asEagerSingleton()
 
-  companion object {
-    fun create(datasourceName: String) =
-      DataSourceModule(
-        datasourceName,
-        Key.get(DataSourceCluster::class.java),
-        Key.get(DataSource::class.java)
-      )
-
-    fun create(datasourceName: String, annotatedBy: Annotation) =
-      DataSourceModule(
-        datasourceName,
-        Key.get(DataSourceCluster::class.java, annotatedBy),
-        Key.get(DataSource::class.java, annotatedBy)
-      )
-
-    fun <A : Annotation> create(datasourceName: String, annotatedBy: Class<A>) =
-      DataSourceModule(
-        datasourceName,
-        Key.get(DataSourceCluster::class.java, annotatedBy),
-        Key.get(DataSource::class.java, annotatedBy)
-      )
-
-    fun <A : Annotation> create(datasourceName: String, annotatedBy: KClass<A>) =
-      DataSourceModule(
-        datasourceName,
-        Key.get(DataSourceCluster::class.java, annotatedBy.java),
-        Key.get(DataSource::class.java, annotatedBy.java)
-      )
+    bind(DataSource::class.toKey(qualifier))
+        .toProvider(Provider<DataSource> { clusterProvider.get().writer })
+        .asEagerSingleton()
   }
 
   private class DataSourceClusterProvider(
-    private val datasourceName: String
+    private val config: DataSourceClusterConfig
   ) : Provider<DataSourceCluster> {
-    @Inject lateinit var dataSourceClustersConfig: DataSourceClustersConfig
-
     override fun get(): DataSourceCluster {
-      val config = dataSourceClustersConfig[datasourceName]
-          ?: throw IllegalStateException("no datasource cluster named $datasourceName")
-
       val writer = HikariDataSource(toHikariConfig(config.writer, readOnly = false))
       val reader = HikariDataSource(toHikariConfig(config.reader ?: config.writer, readOnly = true))
       return DataSourceCluster(writer, reader)
