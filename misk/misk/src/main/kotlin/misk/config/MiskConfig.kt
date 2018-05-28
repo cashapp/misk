@@ -59,9 +59,10 @@ object MiskConfig {
     try {
       return mapper.readValue(jsonNode.toString(), configClass) as T
     } catch (e: MissingKotlinParameterException) {
-      throw IllegalStateException("could not find configuration for ${e.parameter.name}", e)
+      throw IllegalStateException(
+          "could not find $appName $environment configuration for ${e.parameter.name}", e)
     } catch (e: Exception) {
-      throw IllegalStateException(e)
+      throw IllegalStateException("failed to load configuration for $appName $environment", e)
     }
   }
 
