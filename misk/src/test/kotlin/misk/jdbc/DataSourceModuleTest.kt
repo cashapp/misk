@@ -37,6 +37,7 @@ internal class DataSourceModuleTest {
       val config: DataSourceConfig = rootConfig.data_source_clusters["exemplar"]!!.writer
       val hsqlService = InMemoryHsqlService(config,
           setUpStatements = listOf(
+              PeopleDatabase.DROP_TABLE_PEOPLE,
               PeopleDatabase.CREATE_TABLE_PEOPLE,
               "INSERT INTO people(id, name) VALUES(100, 'Mary')",
               "INSERT INTO people(id, name) VALUES(101, 'Phil')"
@@ -153,7 +154,7 @@ internal class DataSourceModuleTest {
         |""".trimMargin()
 
       val DROP_TABLE_PEOPLE = """
-        |DROP TABLE people
+        |DROP TABLE IF EXISTS people
         |""".trimMargin()
     }
   }
