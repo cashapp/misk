@@ -85,7 +85,8 @@ class ConfigTest {
       MiskConfig.load<TestConfig>(TestConfig::class.java, "partial_test_app", defaultEnv)
     })
 
-    assertThat(exception.localizedMessage).contains("could not find configuration for consumer_a")
+    assertThat(exception.localizedMessage)
+        .contains("could not find partial_test_app TESTING configuration for consumer_a")
   }
 
   @Test

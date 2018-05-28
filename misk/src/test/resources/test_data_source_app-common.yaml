@@ -5,11 +5,13 @@ data_source_clusters:
       username: snork
       password: florp
       database: lorfil
+      migrations_path: ""
     reader:
       type: HSQLDB
       username: snork
       password: florp
       database: lorfil
+      migrations_path: ""
 
   exemplar-incorrect-username:
     writer:
@@ -17,6 +19,7 @@ data_source_clusters:
       username: INCORRECT_USERNAME
       password: florp
       database: lorfil
+      migrations_path: ""
 
   exemplar-incorrect-password:
     writer:
@@ -24,6 +27,7 @@ data_source_clusters:
       username: snork
       password: INCORRECT_PASSWORD
       database: lorfil
+      migrations_path: ""
 
   exemplar-mysql:
     writer:
@@ -31,3 +35,4 @@ data_source_clusters:
       username: snork
       password: florp
       database: lorfil
+      migrations_path: ""
