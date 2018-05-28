@@ -12,7 +12,7 @@ internal object ClasspathResourceLoader : ResourceLoader() {
   init {
     val classLoader = ResourceLoader::class.java.classLoader
     val classPath = ClassPath.from(classLoader)
-    resourcesByPath = TreeMap(classPath.resources.associateBy { r -> r.resourceName })
+    resourcesByPath = TreeMap(classPath.resources.associateBy { it.resourceName })
   }
 
   override fun all() = resourcesByPath.keys

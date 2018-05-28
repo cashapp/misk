@@ -39,7 +39,8 @@ data class DataSourceConfig(
   val connection_properties: Map<String, String> = mapOf(),
   val fixed_pool_size: Int = 10,
   val connection_timeout: Duration = Duration.ofSeconds(30),
-  val connection_max_lifetime: Duration = Duration.ofMinutes(30)
+  val connection_max_lifetime: Duration = Duration.ofMinutes(30),
+  val migrations_path: String
 )
 
 /** Configuration element for a cluster of DataSources */
