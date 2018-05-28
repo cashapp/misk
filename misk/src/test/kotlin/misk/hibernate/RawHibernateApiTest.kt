@@ -10,6 +10,7 @@ import misk.inject.addMultibinderBinding
 import misk.jdbc.DataSourceClustersConfig
 import misk.jdbc.DataSourceConfig
 import misk.jdbc.InMemoryHsqlService
+import misk.resources.ResourceLoaderModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
@@ -23,14 +24,15 @@ import javax.inject.Provider
 @MiskTest(startService = true)
 class RawHibernateApiTest {
   @MiskTestModule
-  val testModule = object : KAbstractModule() {
+  val module = object : KAbstractModule() {
     override fun configure() {
+      bind(Environment::class.java).toInstance(Environment.TESTING)
+      install(ResourceLoaderModule())
       install(MiskModule())
 
-      val rootConfig = MiskConfig.load<RootConfig>("test_data_source_app", Environment.TESTING)
+      val rootConfig = MiskConfig.load<RootConfig>("test_hibernate_app", Environment.TESTING)
       val config: DataSourceConfig = rootConfig.data_source_clusters["exemplar"]!!.writer
-      binder().addMultibinderBinding<Service>().toInstance(
-          InMemoryHsqlService(config, setUpStatements = listOf(DbMovie.CREATE_TABLE_MOVIES)))
+      binder().addMultibinderBinding<Service>().toInstance(InMemoryHsqlService(config))
       install(HibernateModule(Movies::class, config))
       install(HibernateEntityModule(Movies::class, setOf(DbMovie::class)))
     }
