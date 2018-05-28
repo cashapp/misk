@@ -4,6 +4,8 @@ import com.google.inject.util.Modules
 import misk.MiskModule
 import misk.inject.KAbstractModule
 import misk.inject.addMultibinderBinding
+import misk.resources.FakeResourceLoader
+import misk.resources.FakeResourceLoaderModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.testing.TestWebModule
@@ -13,6 +15,7 @@ import misk.web.jetty.JettyService
 import misk.web.resources.StaticResourceMapper
 import okhttp3.OkHttpClient
 import org.assertj.core.api.Assertions
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -21,12 +24,33 @@ import javax.inject.Singleton
 class StaticResourceMapperTest {
   @MiskTestModule
   val module = Modules.combine(
+      FakeResourceLoaderModule(),
       MiskModule(),
       WebModule(),
       TestWebModule(),
       TestModule())
 
   @Inject private lateinit var jettyService: JettyService
+  @Inject private lateinit var resourceLoader: FakeResourceLoader
+
+  @BeforeEach
+  internal fun setUp() {
+    resourceLoader.put("web/app.js", """
+        |alert("hello world");
+        |""".trimMargin())
+    resourceLoader.put("web/index.html", """
+        |<html>
+        |  <body>
+        |    <p>Hello world</p>
+        |  </body>
+        |</html>
+        |""".trimMargin())
+    resourceLoader.put("web/main.css", """
+        |hello > world {
+        |  color: blue;
+        |}
+        |""".trimMargin())
+  }
 
   @Test fun action() {
     val response = request("/hello")
@@ -85,7 +109,7 @@ class StaticResourceMapperTest {
       install(WebActionModule.create<Hello>())
       install(WebActionModule.create<NotFoundAction>())
       binder().addMultibinderBinding<StaticResourceMapper.Entry>()
-          .toInstance(StaticResourceMapper.Entry("/", "???", "src/test/resources/web"))
+          .toInstance(StaticResourceMapper.Entry("/", "web", "???"))
     }
   }
 

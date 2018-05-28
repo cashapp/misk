@@ -2,12 +2,15 @@ package misk.testing
 
 import com.google.inject.Provides
 import misk.inject.KAbstractModule
+import misk.resources.FakeResourceLoaderModule
 import misk.web.WebConfig
 import misk.web.WebSslConfig
 import javax.inject.Singleton
 
 class TestWebModule(private val ssl: WebSslConfig? = null) : KAbstractModule() {
-  override fun configure() {}
+  override fun configure() {
+    install(FakeResourceLoaderModule())
+  }
 
   @Provides
   @Singleton
