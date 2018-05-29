@@ -1,5 +1,5 @@
 include ':misk/testing'
-include ':exemplar'
-include ':exemplarchat'
+include ':samples:exemplar'
+include ':samples:exemplarchat'
 include ':misk'
 
