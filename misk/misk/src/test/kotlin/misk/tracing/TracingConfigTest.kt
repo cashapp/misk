@@ -21,7 +21,7 @@ class TracingConfigTest {
   val config = MiskConfig.load<TestTracingConfig>("test_tracing_app", defaultEnv)
   @MiskTestModule
   val module = Modules.combine(
-      ConfigModule.create<TestTracingConfig>("test_tracing_app", config),
+      ConfigModule.create("test_tracing_app", config),
       TracingModule(config.tracing),
       EnvironmentModule(defaultEnv)
   )
@@ -40,8 +40,7 @@ class TracingConfigTest {
         TestTracingConfig::class.java, "multiple-tracers", defaultEnv)
 
     val exception = assertThrows(CreationException::class.java, {
-      Guice.createInjector(ConfigModule.create<TestTracingConfig>("test_app", config),
-          TracingModule(config.tracing))
+      Guice.createInjector(ConfigModule.create("test_app", config), TracingModule(config.tracing))
     })
 
     assertThat(exception.cause).isInstanceOf(IllegalStateException::class.java)

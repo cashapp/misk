@@ -30,7 +30,6 @@ private val logger = getLogger<SchemaMigrator>()
  * be applied either by [SchemaMigrator.applyAll] or manually. When you applying schema changes
  * manually you must add a row to the `schema_version` table to record which version was applied.
  */
-
 internal class SchemaMigrator(
   private val resourceLoader: ResourceLoader,
   private val sessionFactory: SessionFactory,

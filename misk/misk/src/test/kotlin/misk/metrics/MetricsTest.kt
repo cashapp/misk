@@ -1,17 +1,23 @@
 package misk.metrics
 
-import com.google.inject.Guice
-import misk.inject.getInstance
+import misk.testing.MiskTest
+import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.time.Duration
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicLong
+import javax.inject.Inject
 
+@MiskTest
 class MetricsTest {
+  @MiskTestModule
+  val module = MetricsModule()
+
+  @Inject lateinit var metrics: Metrics
+
   @Test
   fun counters() {
-    val metrics = buildMetrics()
     metrics.counter("my_counter").inc(100)
     assertThat(metrics.counters).containsKey("my_counter")
     assertThat(metrics.counters["my_counter"]!!.count).isEqualTo(100)
@@ -21,7 +27,6 @@ class MetricsTest {
 
   @Test
   fun timers() {
-    val metrics = buildMetrics()
     metrics.timer("my_timer").update(10, TimeUnit.SECONDS)
     assertThat(metrics.timers).containsKey("my_timer")
     assertThat(metrics.timers["my_timer"]!!.count).isEqualTo(1)
@@ -31,7 +36,6 @@ class MetricsTest {
 
   @Test
   fun gauges() {
-    val metrics = buildMetrics()
     val n = AtomicLong()
 
     metrics.gauge("my_gauge", { n.get() })
@@ -43,7 +47,6 @@ class MetricsTest {
 
   @Test
   fun settableGauges() {
-    val metrics = buildMetrics()
     val gauge = metrics.settableGauge("my_gauge")
 
     assertThat(metrics.gauges).containsKey("my_gauge")
@@ -54,7 +57,6 @@ class MetricsTest {
 
   @Test
   fun cacheableGauges() {
-    val metrics = buildMetrics()
     val n = AtomicLong()
 
     metrics.cachedGauge("my_gauge", Duration.ofMillis(100), n::get)
@@ -68,12 +70,7 @@ class MetricsTest {
 
   @Test
   fun scoping() {
-    val metrics = buildMetrics()
     metrics.scope("   \t", "foo_zed", "", "bar_zed").counter("my_counter").inc(100)
     assertThat(metrics.counters).containsKey("foo_zed.bar_zed.my_counter")
-  }
-
-  fun buildMetrics(): Metrics {
-    return Guice.createInjector(MetricsModule()).getInstance()
   }
 }
