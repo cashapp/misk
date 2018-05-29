@@ -11,7 +11,7 @@ import misk.scope.ActionScope
 import misk.scope.ActionScoped
 import misk.scope.TestActionScopedProviderModule
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Test
 import java.util.concurrent.Callable
 import java.util.concurrent.ExecutorService
@@ -49,7 +49,7 @@ internal class ActionScopedExecutorServiceTest {
 
   @Test
   fun doesNotPropagateScopeIfNotInScope() {
-    Assertions.assertThrows(IllegalStateException::class.java) {
+    assertThrows(IllegalStateException::class.java) {
       val injector = Guice.createInjector(
           TestActionScopedProviderModule(),
           ActionScopedExecutorServiceModule())

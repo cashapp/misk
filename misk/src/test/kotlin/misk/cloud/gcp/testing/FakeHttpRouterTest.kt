@@ -7,7 +7,7 @@ import com.google.api.client.testing.http.MockHttpContent
 import misk.cloud.gcp.testing.FakeHttpRouter.Companion.respondWithError
 import misk.cloud.gcp.testing.FakeHttpRouter.Companion.respondWithText
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Assertions.fail
+import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Test
 import java.io.ByteArrayInputStream
 
@@ -38,27 +38,22 @@ internal class FakeHttpRouterTest {
 
   @Test
   fun matchOnUrl() {
-    try {
+    assertThat(assertThrows(HttpResponseException::class.java) {
       transport.createRequestFactory()
           .buildGetRequest(GenericUrl("https://something.com/second"))
           .setContent(MockHttpContent().setContent(
               JacksonFactory().toByteArray(Body("UNKNOWN"))))
           .execute()
-      fail<Any>("allowed failing request")
-    } catch (e: HttpResponseException) {
-      assertThat(e.statusCode).isEqualTo(401)
-    }
+    }.statusCode).isEqualTo(401)
   }
 
   @Test
   fun noMatch() {
-    try {
+    assertThat(assertThrows(HttpResponseException::class.java) {
       transport.createRequestFactory()
           .buildGetRequest(GenericUrl("https://something.com/unknown"))
           .execute()
-    } catch (e: HttpResponseException) {
-      assertThat(e.statusCode).isEqualTo(404)
-    }
+    }.statusCode).isEqualTo(404)
   }
 
   @Test

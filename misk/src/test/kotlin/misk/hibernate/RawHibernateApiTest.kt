@@ -1,16 +1,5 @@
 package misk.hibernate
 
-import com.google.common.util.concurrent.Service
-import misk.MiskModule
-import misk.config.Config
-import misk.config.MiskConfig
-import misk.environment.Environment
-import misk.inject.KAbstractModule
-import misk.inject.addMultibinderBinding
-import misk.jdbc.DataSourceClustersConfig
-import misk.jdbc.DataSourceConfig
-import misk.jdbc.InMemoryHsqlService
-import misk.resources.ResourceLoaderModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
@@ -23,19 +12,7 @@ import javax.inject.Inject
 @MiskTest(startService = true)
 class RawHibernateApiTest {
   @MiskTestModule
-  val module = object : KAbstractModule() {
-    override fun configure() {
-      bind(Environment::class.java).toInstance(Environment.TESTING)
-      install(ResourceLoaderModule())
-      install(MiskModule())
-
-      val rootConfig = MiskConfig.load<RootConfig>("test_hibernate_app", Environment.TESTING)
-      val config: DataSourceConfig = rootConfig.data_source_clusters["exemplar"]!!.writer
-      binder().addMultibinderBinding<Service>().toInstance(InMemoryHsqlService(config))
-      install(HibernateModule(Movies::class, config))
-      install(HibernateEntityModule(Movies::class, setOf(DbMovie::class)))
-    }
-  }
+  val module = HibernateTestModule()
 
   @Inject @Movies lateinit var sessionFactory: SessionFactory
 
@@ -59,6 +36,4 @@ class RawHibernateApiTest {
       assertThat(resultList.map { it.name }).containsExactly("Jurassic Park")
     }
   }
-
-  data class RootConfig(val data_source_clusters: DataSourceClustersConfig) : Config
 }

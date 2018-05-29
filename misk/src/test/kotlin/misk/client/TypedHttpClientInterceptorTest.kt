@@ -173,5 +173,4 @@ internal class TypedHttpClientInterceptorTest {
           ))
     }
   }
-
 }

@@ -17,7 +17,7 @@ import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
 import org.hibernate.SessionFactory
-import org.junit.Assert.fail
+import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Test
 import javax.inject.Inject
 import javax.persistence.PersistenceException
@@ -76,10 +76,8 @@ internal class SchemaMigratorTest {
     assertThat(tableExists("table_2")).isFalse()
     assertThat(tableExists("table_3")).isFalse()
     assertThat(tableExists("table_4")).isFalse()
-    try {
+    assertThrows(PersistenceException::class.java) {
       schemaMigrator.appliedMigrations()
-      fail()
-    } catch (expected: PersistenceException) {
     }
 
     // Once we initialize, that table is present but empty.
@@ -129,15 +127,12 @@ internal class SchemaMigratorTest {
         |CREATE TABLE table_1 (name varchar(255))
         |""".trimMargin())
 
-    try {
+    assertThat(assertThrows(IllegalStateException::class.java) {
       schemaMigrator.requireAll()
-      fail()
-    } catch (expected: IllegalStateException) {
-      assertThat(expected).hasMessage("""
+    }).hasMessage("""
           |lorfil is missing migrations:
           |  ${config.migrations_path}/v1001__foo.sql
           |  ${config.migrations_path}/v1002__foo.sql""".trimMargin())
-    }
   }
 
   @Test fun resourceVersionParsing() {

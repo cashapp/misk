@@ -39,9 +39,7 @@ internal class MiskApplicationTest {
   }
 
   class WithModule : MiskCommand("with-module", AppNameModule()) {
-    @Inject
-    lateinit
-    var injectedValue: MyInjectedValue
+    @Inject lateinit var injectedValue: MyInjectedValue
 
     var run: Boolean = false
 

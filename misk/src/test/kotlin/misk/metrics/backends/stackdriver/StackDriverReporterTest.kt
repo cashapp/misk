@@ -12,7 +12,6 @@ import misk.metrics.Metrics
 import misk.metrics.MetricsModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
-import misk.time.FakeClock
 import misk.time.FakeClockModule
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.data.Percentage
@@ -68,7 +67,6 @@ internal class StackDriverReporterTest {
   )
 
   @Inject internal lateinit var metrics: Metrics
-  @Inject internal lateinit var clock: FakeClock
   @Inject internal lateinit var reporter: StackDriverReporter
 
   @Test
