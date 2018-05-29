@@ -12,7 +12,7 @@ internal class EventRouterConnectionAction : WebAction {
   @Inject lateinit var realEventRouter: RealEventRouter
 
   @ConnectWebSocket("/eventrouter")
-  fun eventRouter(webSocket: WebSocket): WebSocketListener {
+  fun eventRouter(@Suppress("UNUSED_PARAMETER") webSocket: WebSocket): WebSocketListener {
     return realEventRouter.webSocketListener
   }
 }

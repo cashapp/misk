@@ -105,7 +105,7 @@ class UserInterceptorTest {
   internal class TestAction : WebAction {
     @Get("/call/{responseType}")
     @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
-    fun call(@PathParam responseType: String): TestActionResponse {
+    fun call(@Suppress("UNUSED_PARAMETER") @PathParam responseType: String): TestActionResponse {
       return TestActionResponse("foo")
     }
   }

@@ -3,7 +3,7 @@ package misk.security.ssl
 import javax.inject.Qualifier
 import misk.scope.ActionScoped
 import misk.security.x509.X500Name
-import javax.security.cert.X509Certificate
+import java.security.cert.X509Certificate
 
 /**
  * Qualifier annotation for an [ActionScoped] array of [X509Certificate]s containing the

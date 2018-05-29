@@ -14,7 +14,7 @@ class ChatPageAction : WebAction {
   @Inject lateinit var staticResourceMapper: StaticResourceMapper
 
   @Get("/room/{name}")
-  fun index(@PathParam name: String): Response<ResponseBody> {
+  fun index(@Suppress("UNUSED_PARAMETER") @PathParam name: String): Response<ResponseBody> {
     return staticResourceMapper.getResponse("/index.html")!!
   }
 }
