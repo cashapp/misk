@@ -20,7 +20,6 @@ import org.hibernate.SessionFactory
 import org.junit.Assert.fail
 import org.junit.jupiter.api.Test
 import javax.inject.Inject
-import javax.inject.Provider
 import javax.persistence.PersistenceException
 
 @MiskTest(startService = true)
@@ -59,10 +58,10 @@ internal class SchemaMigratorTest {
   }
 
   @Inject lateinit var resourceLoader: FakeResourceLoader
-  @Inject lateinit var sessionFactoryProvider: Provider<SessionFactory>
+  @Inject lateinit var sessionFactory: SessionFactory
 
   @Test fun initializeAndMigrate() {
-    val schemaMigrator = SchemaMigrator(resourceLoader, sessionFactoryProvider.get(), config)
+    val schemaMigrator = SchemaMigrator(resourceLoader, sessionFactory, config)
 
     resourceLoader.put("${config.migrations_path}/v1001__movies.sql", """
         |CREATE TABLE table_1 (name varchar(255))
@@ -120,7 +119,7 @@ internal class SchemaMigratorTest {
   }
 
   @Test fun requireAllWithMissingMigrations() {
-    val schemaMigrator = SchemaMigrator(resourceLoader, sessionFactoryProvider.get(), config)
+    val schemaMigrator = SchemaMigrator(resourceLoader, sessionFactory, config)
     schemaMigrator.initialize()
 
     resourceLoader.put("${config.migrations_path}/v1001__foo.sql", """
@@ -142,7 +141,7 @@ internal class SchemaMigratorTest {
   }
 
   @Test fun resourceVersionParsing() {
-    val sm = SchemaMigrator(resourceLoader, sessionFactoryProvider.get(), config)
+    val sm = SchemaMigrator(resourceLoader, sessionFactory, config)
 
     assertThat(sm.resourceVersionOrNull("foo/migrations/v100__bar.sql")).isEqualTo(100)
     assertThat(sm.resourceVersionOrNull("foo/migrations/v100__v200.sql")).isEqualTo(100)
@@ -159,7 +158,7 @@ internal class SchemaMigratorTest {
 
   fun tableExists(table: String): Boolean {
     try {
-      sessionFactoryProvider.get().openSession().use { session ->
+      sessionFactory.openSession().use { session ->
         session.createNativeQuery("SELECT * FROM $table LIMIT 1").list()
       }
       return true
