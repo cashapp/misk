@@ -299,6 +299,7 @@ internal data class LocalSubscriber<T : Any>(
 
   fun onEvent(message: String) {
     executorService.execute({
+      @Suppress("UNCHECKED_CAST")
       (listener as Listener<String>).onEvent(this as Subscription<String>, message)
     })
   }

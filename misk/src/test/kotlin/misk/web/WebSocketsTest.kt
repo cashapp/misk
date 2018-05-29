@@ -54,7 +54,7 @@ internal class WebSocketsTest {
   @Singleton
   class EchoWebSocket : WebAction {
     @ConnectWebSocket("/echo")
-    fun echo(webSocket: WebSocket): WebSocketListener {
+    fun echo(@Suppress("UNUSED_PARAMETER") webSocket: WebSocket): WebSocketListener {
       return object : WebSocketListener() {
         override fun onMessage(webSocket: WebSocket, text: String) {
           webSocket.send(text)

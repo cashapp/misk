@@ -48,7 +48,7 @@ class MiskTracerTest {
     return span
   }
 
-  fun failedTrace(span: Span) {
+  fun failedTrace(@Suppress("UNUSED_PARAMETER") span: Span) {
     throw ActionException(StatusCode.BAD_REQUEST, "sadness")
   }
 }
