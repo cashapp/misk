@@ -100,6 +100,7 @@ abstract class ActionScopedProviderModule : KAbstractModule() {
     annotatedBy: Class<A>
   ) {
     val typeKey = Key.get(type, annotatedBy)
+    @Suppress("UNCHECKED_CAST")
     val actionScopedType = actionScopedType(type.type) as TypeLiteral<ActionScoped<T>>
     val actionScopedKey = Key.get(actionScopedType, annotatedBy)
     bindProvider(typeKey, actionScopedKey, binder().getProvider(providerType.java))

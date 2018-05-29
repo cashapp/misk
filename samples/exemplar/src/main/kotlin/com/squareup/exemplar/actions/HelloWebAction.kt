@@ -16,6 +16,7 @@ class HelloWebAction : WebAction {
   @ResponseContentType(MediaTypes.APPLICATION_JSON)
   fun hello(
     @PathParam name: String,
+    @Suppress("UNUSED_PARAMETER")
     @RequestHeaders headers: Headers,
     @QueryParam nickName: String?,
     @QueryParam greetings: List<String>?

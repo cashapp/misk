@@ -8,7 +8,7 @@ import java.util.concurrent.atomic.AtomicReference
 
 /** In-memory representation of flags, allowing the flag to be programmatically changed by tests */
 interface InMemoryFlag<T> : Flag<T> {
-  fun set(t: T)
+  fun set(v: T)
 }
 
 class InMemoryBooleanFlag internal constructor(
@@ -21,8 +21,8 @@ class InMemoryBooleanFlag internal constructor(
 
   override fun get(): Boolean? = if (set.get()) value.get() else null
 
-  override fun set(b: Boolean) {
-    value.set(b)
+  override fun set(v: Boolean) {
+    value.set(v)
     set.set(true)
   }
 }
@@ -37,8 +37,8 @@ class InMemoryIntFlag internal constructor(
 
   override fun get(): Int? = if (set.get()) value.get() else null
 
-  override fun set(n: Int) {
-    value.set(n)
+  override fun set(v: Int) {
+    value.set(v)
     set.set(true)
   }
 }
@@ -53,8 +53,8 @@ class InMemoryDoubleFlag internal constructor(
 
   override fun get(): Double? = if (set.get()) Double.fromBits(value.get()) else null
 
-  override fun set(n: Double) {
-    value.set(n.toBits())
+  override fun set(v: Double) {
+    value.set(v.toBits())
     set.set(true)
   }
 }
@@ -68,7 +68,7 @@ class InMemoryStringFlag internal constructor(
 
   override fun get(): String? = value.get()
 
-  override fun set(s: String) {
-    value.set(s)
+  override fun set(v: String) {
+    value.set(v)
   }
 }

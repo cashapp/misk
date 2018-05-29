@@ -36,7 +36,9 @@ object FormValueParameterExtractorFactory : ParameterExtractor.Factory {
     val constructor = kClass.primaryConstructor ?: return null
     val constructorParameters = constructor.parameters.map {
       val annotation = it.findAnnotation<FormField>()
-      val name = annotation?.name?.toLowerCase() ?: it.name?.toLowerCase()
+      val name = annotation?.name?.toLowerCase()
+          ?: it.name?.toLowerCase()
+          ?: throw IllegalStateException("cannot introspect parameter name")
 
       val isList = it.type.classifier?.equals(List::class) ?: false
       ConstructorParameter(
@@ -109,7 +111,7 @@ object FormValueParameterExtractorFactory : ParameterExtractor.Factory {
 
   private data class ConstructorParameter(
     val kParameter: KParameter,
-    val name: String?,
+    val name: String,
     val optional: Boolean,
     val nullable: Boolean,
     val isList: Boolean,
