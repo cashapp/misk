@@ -12,15 +12,20 @@ import org.junit.jupiter.api.extension.BeforeEachCallback
 import org.junit.jupiter.api.extension.ExtensionContext
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
+import javax.inject.Singleton
 
 internal class MiskTestExtension : BeforeEachCallback, AfterEachCallback {
   override fun beforeEach(context: ExtensionContext) {
     val testModules = context.getActionTestModules().asSequence().toList().toTypedArray()
     val callbackModules = if (context.startService()) serviceManagementModules else arrayOf()
-    val modules = Modules.combine(MiskTestingModule(), *callbackModules, *testModules)
+    val modules = Modules.combine(
+        MiskTestingModule(),
+        *callbackModules,
+        *testModules,
+        BeforeEachExtensionModule.create<InjectUninject>(),
+        AfterEachExtensionModule.create<InjectUninject>())
 
     val injector = Guice.createInjector(modules)
-    injector.injectMembers(context.requiredTestInstance)
     context.store("injector", injector)
 
     injector.getInstance<Callbacks>().beforeEach(context)
@@ -53,6 +58,19 @@ internal class MiskTestExtension : BeforeEachCallback, AfterEachCallback {
       if (context.startService()) {
         serviceManager.stopAsync()
       }
+    }
+  }
+
+  /** We inject after starting services and uninject after stopping services. */
+  @Singleton
+  class InjectUninject : BeforeEachCallback, AfterEachCallback {
+    override fun beforeEach(context: ExtensionContext) {
+      val injector = context.retrieve<Injector>("injector")
+      injector.injectMembers(context.requiredTestInstance)
+    }
+
+    override fun afterEach(context: ExtensionContext) {
+      uninject(context.requiredTestInstance)
     }
   }
 
