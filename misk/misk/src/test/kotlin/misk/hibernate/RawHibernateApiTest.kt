@@ -18,7 +18,6 @@ import org.hibernate.SessionFactory
 import org.junit.jupiter.api.Test
 import java.util.Date
 import javax.inject.Inject
-import javax.inject.Provider
 
 /** Test that we can access Hibernate's SessionFactory directly. */
 @MiskTest(startService = true)
@@ -38,13 +37,12 @@ class RawHibernateApiTest {
     }
   }
 
-  // TODO(jwilson): Inject the SessionFactory directly.
-  @Inject @Movies lateinit var sessionFactoryProvider: Provider<SessionFactory>
+  @Inject @Movies lateinit var sessionFactory: SessionFactory
 
   @Test
   fun test() {
     // Insert some movies in a transaction.
-    sessionFactoryProvider.get().openSession().use { session ->
+    sessionFactory.openSession().use { session ->
       val transaction = session.beginTransaction()
       session.save(DbMovie("Jurassic Park", Date()))
       session.save(DbMovie("Star Wars", Date()))
@@ -52,7 +50,7 @@ class RawHibernateApiTest {
     }
 
     // Query those movies without a transaction.
-    sessionFactoryProvider.get().openSession().use { session ->
+    sessionFactory.openSession().use { session ->
       val criteriaBuilder = session.entityManagerFactory.criteriaBuilder
       val criteria = criteriaBuilder.createQuery(DbMovie::class.java)
       val queryRoot = criteria.from(DbMovie::class.java)
