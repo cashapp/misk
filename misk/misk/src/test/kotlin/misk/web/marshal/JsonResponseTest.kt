@@ -35,8 +35,8 @@ internal class JsonResponseTest {
       TestWebModule(),
       TestModule())
 
-  private @Inject lateinit var jettyService: JettyService
-  private @Inject lateinit var moshi: Moshi
+  @Inject private lateinit var jettyService: JettyService
+  @Inject private lateinit var moshi: Moshi
   private val packetJsonAdapter get() = moshi.adapter(Packet::class.java)
 
   @Test

@@ -39,19 +39,11 @@ class FlagPropertiesTest {
     }
   }
 
-  @Inject
-  private
-  lateinit
-  @Named("unique-prefix")
-  var prefixedFlags: MyFlags
+  @Inject @Named("unique-prefix") private lateinit var prefixedFlags: MyFlags
 
-  @Inject
-  private
-  lateinit var nakedFlags: MyFlags
+  @Inject private lateinit var nakedFlags: MyFlags
 
-  @Inject
-  private
-  lateinit var flagStore: InMemoryFlagStore
+  @Inject private lateinit var flagStore: InMemoryFlagStore
 
   @Test
   fun flagPropertiesRegisterCorrectFlags() {

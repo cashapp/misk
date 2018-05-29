@@ -16,7 +16,7 @@ import misk.web.jetty.JettyService
 import okhttp3.FormBody
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import javax.inject.Inject
 
@@ -37,29 +37,29 @@ internal class FormValueParameterTest {
         Pair("str", "foo"), Pair("other", "stuff"), Pair("int", "12"),
         Pair("testEnum", "ONE")
     )
-    Assertions.assertThat(post("/basic-params", list))
+    assertThat(post("/basic-params", list))
         .isEqualTo("BasicForm(str=foo, other=stuff, int=12, testEnum=ONE)")
   }
 
   @Test fun optionalParamsPresent() {
     val list = listOf(Pair("str", "foo"), Pair("int", "12"))
-    Assertions.assertThat(post("/optional-params", list))
+    assertThat(post("/optional-params", list))
         .isEqualTo("OptionalForm(str=foo, int=12)")
   }
 
   @Test fun optionalParamsNotPresent() {
-    Assertions.assertThat(post("/optional-params", listOf()))
+    assertThat(post("/optional-params", listOf()))
         .isEqualTo("OptionalForm(str=null, int=null)")
   }
 
   @Test fun defaultParamsPresent() {
     val list = listOf(Pair("str", "foo"), Pair("int", "12"), Pair("testEnum", "ONE"))
-    Assertions.assertThat(post("/default-params", list))
+    assertThat(post("/default-params", list))
         .isEqualTo("DefaultForm(str=foo, int=12, testEnum=ONE)")
   }
 
   @Test fun defaultParamsNotPresent() {
-    Assertions.assertThat(post("/default-params", listOf()))
+    assertThat(post("/default-params", listOf()))
         .isEqualTo("DefaultForm(str=square, int=23, testEnum=TWO)")
   }
 
@@ -69,7 +69,7 @@ internal class FormValueParameterTest {
         Pair("strs", "baz")
     )
 
-    Assertions.assertThat(post("/list-params", list))
+    assertThat(post("/list-params", list))
         .isEqualTo("ListForm(strs=[foo, bar, baz], ints=[12, 42])")
   }
 
@@ -79,7 +79,7 @@ internal class FormValueParameterTest {
         Pair("testEnum", "ONE"), Pair("not present", "value")
     )
 
-    Assertions.assertThat(post("/basic-params", list))
+    assertThat(post("/basic-params", list))
         .isEqualTo("BasicForm(str=foo, other=stuff, int=12, testEnum=ONE)")
   }
 
@@ -89,14 +89,14 @@ internal class FormValueParameterTest {
         Pair("tEsTeNuM", "ONE")
     )
 
-    Assertions.assertThat(post("/basic-params", list))
+    assertThat(post("/basic-params", list))
         .isEqualTo("BasicForm(str=foo, other=stuff, int=12, testEnum=ONE)")
   }
 
   @Test fun formValueAnnotation() {
     val list = listOf(Pair("user-name", "user123"))
 
-    Assertions.assertThat(post("/form-value-annotation", list))
+    assertThat(post("/form-value-annotation", list))
         .isEqualTo("AnnotationForm(username=user123)")
   }
 
@@ -189,7 +189,7 @@ internal class FormValueParameterTest {
     val httpClient = OkHttpClient()
     val response = httpClient.newCall(request.build())
         .execute()
-    Assertions.assertThat(response.code())
+    assertThat(response.code())
         .isEqualTo(200)
     return response.body()!!.source()
         .readUtf8()

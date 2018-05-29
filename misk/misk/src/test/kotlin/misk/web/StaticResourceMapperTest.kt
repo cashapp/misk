@@ -14,7 +14,7 @@ import misk.web.actions.WebAction
 import misk.web.jetty.JettyService
 import misk.web.resources.StaticResourceMapper
 import okhttp3.OkHttpClient
-import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import javax.inject.Inject
@@ -54,44 +54,44 @@ class StaticResourceMapperTest {
 
   @Test fun action() {
     val response = request("/hello")
-    Assertions.assertThat(response.code()).isEqualTo(200)
-    Assertions.assertThat(response.body()!!.string()).contains("<p>Hello world</p>")
-    Assertions.assertThat(response.header("Content-Type")).isEqualTo("text/html")
+    assertThat(response.code()).isEqualTo(200)
+    assertThat(response.body()!!.string()).contains("<p>Hello world</p>")
+    assertThat(response.header("Content-Type")).isEqualTo("text/html")
   }
 
   @Test fun html() {
     val response = request("/index.html")
-    Assertions.assertThat(response.code()).isEqualTo(200)
-    Assertions.assertThat(response.body()!!.string()).contains("<p>Hello world</p>")
-    Assertions.assertThat(response.header("Content-Type")).isEqualTo("text/html")
+    assertThat(response.code()).isEqualTo(200)
+    assertThat(response.body()!!.string()).contains("<p>Hello world</p>")
+    assertThat(response.header("Content-Type")).isEqualTo("text/html")
   }
 
   @Test fun css() {
     val response = request("/main.css")
-    Assertions.assertThat(response.code()).isEqualTo(200)
-    Assertions.assertThat(response.body()!!.string()).contains("hello > world")
-    Assertions.assertThat(response.header("Content-Type")).isEqualTo("text/css")
+    assertThat(response.code()).isEqualTo(200)
+    assertThat(response.body()!!.string()).contains("hello > world")
+    assertThat(response.header("Content-Type")).isEqualTo("text/css")
   }
 
   @Test fun js() {
     val response = request("/app.js")
-    Assertions.assertThat(response.code()).isEqualTo(200)
-    Assertions.assertThat(response.body()!!.string()).contains("alert(\"hello world\")")
-    Assertions.assertThat(response.header("Content-Type")).isEqualTo("application/javascript")
+    assertThat(response.code()).isEqualTo(200)
+    assertThat(response.body()!!.string()).contains("alert(\"hello world\")")
+    assertThat(response.header("Content-Type")).isEqualTo("application/javascript")
   }
 
   @Test fun rootUrl() {
     val response = request("/")
-    Assertions.assertThat(response.code()).isEqualTo(404)
-    Assertions.assertThat(response.body()!!.string()).contains("Nothing found at /")
-    Assertions.assertThat(response.header("Content-Type")).isEqualTo("text/plain;charset=utf-8")
+    assertThat(response.code()).isEqualTo(404)
+    assertThat(response.body()!!.string()).contains("Nothing found at /")
+    assertThat(response.header("Content-Type")).isEqualTo("text/plain;charset=utf-8")
   }
 
   @Test fun notFound() {
     val response = request("/not/found")
-    Assertions.assertThat(response.code()).isEqualTo(404)
-    Assertions.assertThat(response.body()!!.string()).contains("Nothing found at /")
-    Assertions.assertThat(response.header("Content-Type")).isEqualTo("text/plain;charset=utf-8")
+    assertThat(response.code()).isEqualTo(404)
+    assertThat(response.body()!!.string()).contains("Nothing found at /")
+    assertThat(response.header("Content-Type")).isEqualTo("text/plain;charset=utf-8")
   }
 
   @Singleton
