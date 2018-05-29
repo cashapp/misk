@@ -32,7 +32,7 @@ internal class PlainTextResponseTest {
       TestWebModule(),
       TestModule())
 
-  private @Inject lateinit var jettyService: JettyService
+  @Inject private lateinit var jettyService: JettyService
 
   @Test
   fun returnAsObject() {

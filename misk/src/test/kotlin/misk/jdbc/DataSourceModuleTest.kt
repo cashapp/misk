@@ -100,15 +100,15 @@ internal class DataSourceModuleTest {
 
     companion object {
       val CREATE_TABLE_PEOPLE = """
-        |CREATE TABLE people(
-        |  id bigint(20) NOT NULL AUTO_INCREMENT,
-        |  name varchar(255) NOT NULL
-        |)
-        |""".trimMargin()
+          |CREATE TABLE people(
+          |  id bigint(20) NOT NULL AUTO_INCREMENT,
+          |  name varchar(255) NOT NULL
+          |)
+          |""".trimMargin()
 
       val DROP_TABLE_PEOPLE = """
-        |DROP TABLE IF EXISTS people
-        |""".trimMargin()
+          |DROP TABLE IF EXISTS people
+          |""".trimMargin()
     }
   }
 

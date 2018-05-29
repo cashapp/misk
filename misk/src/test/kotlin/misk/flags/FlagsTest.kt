@@ -40,59 +40,27 @@ class FlagsTest {
     }
   }
 
-  @Inject
-  private lateinit
-  @Named("my-bool")
-  var boolean: Flag<Boolean>
+  @Inject @Named("my-bool") private lateinit var boolean: Flag<Boolean>
 
-  @Inject
-  private lateinit
-  @Named("my-string")
-  var string: Flag<String>
+  @Inject @Named("my-string") private lateinit var string: Flag<String>
 
-  @Inject
-  private lateinit
-  @Named("my-int")
-  var int: Flag<Int>
+  @Inject @Named("my-int") private lateinit var int: Flag<Int>
 
-  @Inject
-  private lateinit
-  @Named("my-double")
-  var double: Flag<Double>
+  @Inject @Named("my-double") private lateinit var double: Flag<Double>
 
-  @Inject
-  private lateinit
-  @Named("my-json")
-  var json: JsonFlag<JsonData>
+  @Inject @Named("my-json") private lateinit var json: JsonFlag<JsonData>
 
-  @Inject
-  private lateinit
-  @Named("my-other-bool")
-  var otherBoolean: Flag<Boolean>
+  @Inject @Named("my-other-bool") private lateinit var otherBoolean: Flag<Boolean>
 
-  @Inject
-  private lateinit
-  @Named("my-other-string")
-  var otherString: Flag<String>
+  @Inject @Named("my-other-string") private lateinit var otherString: Flag<String>
 
-  @Inject
-  private lateinit
-  @Named("my-other-int")
-  var otherInt: Flag<Int>
+  @Inject @Named("my-other-int") private lateinit var otherInt: Flag<Int>
 
-  @Inject
-  private lateinit
-  @Named("my-other-double")
-  var otherDouble: Flag<Double>
+  @Inject @Named("my-other-double") private lateinit var otherDouble: Flag<Double>
 
-  @Inject
-  private lateinit
-  @Named("my-other-json")
-  var otherJson: JsonFlag<JsonData>
+  @Inject @Named("my-other-json") private lateinit var otherJson: JsonFlag<JsonData>
 
-  @Inject
-  private lateinit
-  var flagStore: InMemoryFlagStore
+  @Inject private lateinit var flagStore: InMemoryFlagStore
 
   @Test
   fun flagsRegistered() {

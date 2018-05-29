@@ -34,10 +34,11 @@ internal class WireMessageAdapterTest {
 
     val json = warehouseAdapter.indent(" ").toJson(warehouse)
     assertThat(json).isEqualToAsJson("""
-{
- "warehouse_id": 1014,
- "warehouse_token": "AAAA"
-}""")
+        |{
+        | "warehouse_id": 1014,
+        | "warehouse_token": "AAAA"
+        |}
+        |""".trimMargin())
 
     assertThat(warehouseAdapter.fromJson(json)).isEqualTo(warehouse)
   }
@@ -65,26 +66,27 @@ internal class WireMessageAdapterTest {
 
     val json = shipmentAdapter.indent(" ").toJson(shipment)
     assertThat(json).isEqualToAsJson("""
-{
- "shipment_id": 100075,
- "shipment_token": "P_AAAAA",
- "source": {
- "warehouse_id": 9999,
- "warehouse_token": "C_RANDY"
- },
- "destination": {
- "warehouse_id": 7777,
- "warehouse_token": "C_CATHY"
- },
- "status": "DELIVERING",
- "load_ratio": 0.75,
- "deleted": true,
- "notes": [
- "Note A",
- "Note B",
- "Note C"
- ]
-}""")
+        |{
+        | "shipment_id": 100075,
+        | "shipment_token": "P_AAAAA",
+        | "source": {
+        | "warehouse_id": 9999,
+        | "warehouse_token": "C_RANDY"
+        | },
+        | "destination": {
+        | "warehouse_id": 7777,
+        | "warehouse_token": "C_CATHY"
+        | },
+        | "status": "DELIVERING",
+        | "load_ratio": 0.75,
+        | "deleted": true,
+        | "notes": [
+        | "Note A",
+        | "Note B",
+        | "Note C"
+        | ]
+        |}
+        |""".trimMargin())
     assertThat(shipmentAdapter.fromJson(json)).isEqualTo(shipment)
   }
 
@@ -104,19 +106,19 @@ internal class WireMessageAdapterTest {
         .build()
     val json = warehouseAdapter.indent(" ").toJson(warehouse)
     assertThat(json).isEqualToAsJson("""
-{
- "alternates": [
-  {
-   "warehouse_id": 755,
-   "warehouse_token": "W_AXAA"
-  },
-  {
-   "warehouse_id": 500,
-   "warehouse_token": "W_THTHT"
-  }
- ]
-}
-""")
+        |{
+        | "alternates": [
+        |  {
+        |   "warehouse_id": 755,
+        |   "warehouse_token": "W_AXAA"
+        |  },
+        |  {
+        |   "warehouse_id": 500,
+        |   "warehouse_token": "W_THTHT"
+        |  }
+        | ]
+        |}
+        |""".trimMargin())
     assertThat(warehouseAdapter.fromJson(json)).isEqualTo(warehouse)
   }
 
@@ -124,12 +126,12 @@ internal class WireMessageAdapterTest {
   fun missingListFieldsMapToEmptyLists() {
     val shipmentAdapter = moshi.adapter(Shipment::class.java)
     val parsed = shipmentAdapter.fromJson("""
-{
- "shipment_id": 100075,
- "shipment_token": "P_AAAAA",
- "load_ratio": 0.75,
- "deleted": true
-}""") ?: throw IllegalArgumentException("could not parse")
+        |{
+        | "shipment_id": 100075,
+        | "shipment_token": "P_AAAAA",
+        | "load_ratio": 0.75,
+        | "deleted": true
+        |}""".trimMargin())!!
 
     val expected = Shipment.Builder()
         .shipment_id(100075)
@@ -156,15 +158,15 @@ internal class WireMessageAdapterTest {
         .build()
     val json = warehouseAdapter.indent(" ").toJson(warehouse)
     assertThat(json).isEqualToAsJson("""
-{
- "warehouse_id": 1976,
- "warehouse_token": "W_ACDFD",
- "dropoff_points": {
- "station-1": "left of north door A",
- "station-2": "right of office",
- "station-3": "left of center"
- }
-}""")
+        |{
+        | "warehouse_id": 1976,
+        | "warehouse_token": "W_ACDFD",
+        | "dropoff_points": {
+        | "station-1": "left of north door A",
+        | "station-2": "right of office",
+        | "station-3": "left of center"
+        | }
+        |}""".trimMargin())
     assertThat(warehouseAdapter.fromJson(json)).isEqualTo(warehouse)
   }
 
@@ -186,21 +188,21 @@ internal class WireMessageAdapterTest {
         .build()
     val json = warehouseAdapter.indent(" ").toJson(warehouse)
     assertThat(json).isEqualToAsJson("""
-{
- "warehouse_id": 1976,
- "warehouse_token": "W_ACDFD",
- "robots": {
-  "34": {
-   "robot_id": 34,
-   "robot_token": "R_93498"
-  },
-  "56": {
-   "robot_id": 56,
-   "robot_token": "R_DFGDD"
-  }
- }
-}
-""")
+        |{
+        | "warehouse_id": 1976,
+        | "warehouse_token": "W_ACDFD",
+        | "robots": {
+        |  "34": {
+        |   "robot_id": 34,
+        |   "robot_token": "R_93498"
+        |  },
+        |  "56": {
+        |   "robot_id": 56,
+        |   "robot_token": "R_DFGDD"
+        |  }
+        | }
+        |}
+        |""".trimMargin())
     assertThat(warehouseAdapter.fromJson(json)).isEqualTo(warehouse)
 
   }
@@ -210,14 +212,15 @@ internal class WireMessageAdapterTest {
     val shipmentAdapter = moshi.adapter(Shipment::class.java)
     assertThat(assertThrows(IllegalArgumentException::class.java) {
       shipmentAdapter.fromJson("""
-{
- "shipment_id": 100075,
- "shipment_token": "P_AAAAA",
- "load_ratio": 0.75,
- "deleted": true,
- "account_token": "AC_5765",
- "card_token": "CC_34531"
-}""")
+        |{
+        | "shipment_id": 100075,
+        | "shipment_token": "P_AAAAA",
+        | "load_ratio": 0.75,
+        | "deleted": true,
+        | "account_token": "AC_5765",
+        | "card_token": "CC_34531"
+        |}
+        |""".trimMargin())
     }).hasMessage("at most one of account_token, card_token, transfer_id may be non-null")
   }
 
@@ -244,24 +247,25 @@ internal class WireMessageAdapterTest {
 
     val json = warehouseAdapter.indent(" ").toJson(warehouse)
     assertThat(json).isEqualToAsJson("""
-{
- "warehouse_id": 755,
- "warehouse_token": "CDCDC",
- "central_repo": {
- "warehouse_id": 1,
- "warehouse_token": "AAAAA"
- },
- "alternates": [
- {
-  "warehouse_id": 756,
-  "warehouse_token": "CDCDB"
- },
- {
-  "warehouse_id": 757,
-  "warehouse_token": "CDCDA"
- }
- ]
-}""")
+        |{
+        | "warehouse_id": 755,
+        | "warehouse_token": "CDCDC",
+        | "central_repo": {
+        | "warehouse_id": 1,
+        | "warehouse_token": "AAAAA"
+        | },
+        | "alternates": [
+        | {
+        |  "warehouse_id": 756,
+        |  "warehouse_token": "CDCDB"
+        | },
+        | {
+        |  "warehouse_id": 757,
+        |  "warehouse_token": "CDCDA"
+        | }
+        | ]
+        |}
+        |""".trimMargin())
   }
 
   @Test
@@ -275,12 +279,11 @@ internal class WireMessageAdapterTest {
         .build()
     val jsonText = shipmentAdapter.indent(" ").toJson(shipment)
     assertThat(jsonText).isEqualToAsJson("""
-{
- "shipment_id": 100075,
- "shipment_token": "P_AAAAA",
- "source_signature": "OTggMzR2NTk4MjN3aDt0aWVqcw=="
-}
-      """)
-
+        |{
+        | "shipment_id": 100075,
+        | "shipment_token": "P_AAAAA",
+        | "source_signature": "OTggMzR2NTk4MjN3aDt0aWVqcw=="
+        |}
+        |""".trimMargin())
   }
 }

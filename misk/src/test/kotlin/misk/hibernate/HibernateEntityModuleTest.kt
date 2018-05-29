@@ -24,14 +24,10 @@ internal class HibernateEntityModuleTest {
 
   @Test fun multipleModulesSameDataSource() {
     val injector = Guice.createInjector(
-        HibernateEntityModule(Dinosaurs::class,
-            setOf(Triceratops::class)),
-        HibernateEntityModule(Dinosaurs::class,
-            setOf(Stegosaurus::class)),
-        HibernateEntityModule(Shapes::class,
-            setOf(Square::class)),
-        HibernateEntityModule(Shapes::class,
-            setOf(Circle::class))
+        HibernateEntityModule(Dinosaurs::class, setOf(Triceratops::class)),
+        HibernateEntityModule(Dinosaurs::class, setOf(Stegosaurus::class)),
+        HibernateEntityModule(Shapes::class, setOf(Square::class)),
+        HibernateEntityModule(Shapes::class, setOf(Circle::class))
     )
 
     assertThat(injector.getSetOf(HibernateEntity::class, Dinosaurs::class).unwrap())
