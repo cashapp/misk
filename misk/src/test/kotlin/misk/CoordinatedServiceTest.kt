@@ -137,6 +137,26 @@ class CoordinatedServiceTest {
         |  dependency cycle: Service A -> Service D -> Service C -> Service A""".trimMargin())
   }
 
+  @Test fun failuresPropagate() {
+    val target = StringBuilder()
+
+    val a = object : AbstractService(), DependentService {
+      override val consumedKeys: Set<Key<*>> = setOf()
+      override val producedKeys: Set<Key<*>> = setOf(nameToKey("a"))
+      override fun doStart() = throw Exception("boom!")
+      override fun doStop() = Unit
+      override fun toString() = "FailingService"
+    }
+
+    val b = AppendingService(target, "Service B", consumed = setOf("a"))
+
+    val serviceManager = CoordinatedService.coordinate(listOf(a, b))
+    serviceManager.startAsync()
+    assertThat(assertThrows(IllegalStateException::class.java) {
+      serviceManager.awaitHealthy()
+    })
+  }
+
   /** Appends messages to `target` on start up and shut down. */
   class AppendingService(
     val target: StringBuilder,

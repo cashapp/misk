@@ -4,5 +4,5 @@ data_source_clusters:
       type: HSQLDB
       username: snork
       password: florp
-      database: movies
+      database: schemamigrator
       migrations_path: misk/hibernate/migrations
