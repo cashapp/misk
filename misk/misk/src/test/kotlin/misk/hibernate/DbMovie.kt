@@ -3,15 +3,14 @@ package misk.hibernate
 import java.util.Date
 import javax.persistence.Entity
 import javax.persistence.GeneratedValue
-import javax.persistence.Id
 import javax.persistence.Table
 
 @Entity
 @Table(name = "movies")
-class DbMovie() {
-  @Id
+class DbMovie() : DbEntity<DbMovie> {
+  @javax.persistence.Id
   @GeneratedValue
-  var id: Long? = null
+  override lateinit var id: Id<DbMovie>
 
   var name: String? = null
 
