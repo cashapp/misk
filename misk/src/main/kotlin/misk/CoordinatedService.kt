@@ -118,11 +118,46 @@ internal class CoordinatedService(val service: Service) : AbstractService() {
         }
       }
 
+      val validityMap = mutableMapOf<CoordinatedService, CycleValidity>()
+      for (service in coordinatedServices) {
+        val cycle = service.findCycle(validityMap)
+        if (cycle != null) {
+          errors.add("dependency cycle: ${cycle.joinToString(separator = " -> ")}")
+          break
+        }
+      }
+
       require(errors.isEmpty()) {
         "Service dependency graph has problems:\n  ${errors.joinToString(separator = "\n  ")}"
       }
 
       return ServiceManager(coordinatedServices)
+    }
+
+    /** Returns the elements of a cycle, or null if there are no cycles originating at `node`. */
+    fun CoordinatedService.findCycle(
+      validityMap: MutableMap<CoordinatedService, CycleValidity>
+    ): MutableList<CoordinatedService>? {
+      when (validityMap[this]) {
+        CycleValidity.NO_CYCLES -> return null // We checked this node already.
+        CycleValidity.CHECKING_FOR_CYCLES -> return mutableListOf(this) // We found a cycle!
+        else -> {
+          validityMap[this] = CycleValidity.CHECKING_FOR_CYCLES
+          for (service in downstream) {
+            val cycle = service.findCycle(validityMap)
+            if (cycle != null) {
+              cycle.add(this)
+              return cycle
+            }
+          }
+          validityMap[this] = CycleValidity.NO_CYCLES
+          return null
+        }
+      }
+    }
+
+    enum class CycleValidity {
+      UNKNOWN, CHECKING_FOR_CYCLES, NO_CYCLES,
     }
   }
 }
