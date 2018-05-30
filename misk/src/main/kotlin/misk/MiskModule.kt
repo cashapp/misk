@@ -26,6 +26,6 @@ class MiskModule : AbstractModule() {
   @Provides
   @Singleton
   fun provideServiceManager(services: List<Service>): ServiceManager {
-    return ServiceManager(services)
+    return CoordinatedService.coordinate(services)
   }
 }
