@@ -3,7 +3,7 @@ ext {
   awsVersion = '1.11.143'
 
   dep = [
-          kotlinStdLib         : "org.jetbrains.kotlin:kotlin-stdlib-jre8:$kotlinVersion",
+          kotlinStdLib         : "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion",
           kotlinReflect        : "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion",
           kotlinGradlePlugin   : "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion",
           kotlinReflection     : "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion",
