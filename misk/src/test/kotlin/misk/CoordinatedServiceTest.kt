@@ -122,6 +122,21 @@ class CoordinatedServiceTest {
         |  multiple services produce ${nameToKey("a")}: Service A and Service B""".trimMargin())
   }
 
+  @Test fun dependencyCycle() {
+    val target = StringBuilder()
+
+    val a = AppendingService(target, "Service A", produced = setOf("a"), consumed = setOf("d"))
+    val b = AppendingService(target, "Service B", produced = setOf("b"), consumed = setOf("c"))
+    val c = AppendingService(target, "Service C", produced = setOf("c"), consumed = setOf("a"))
+    val d = AppendingService(target, "Service D", produced = setOf("d"), consumed = setOf("c"))
+
+    assertThat(assertThrows(IllegalArgumentException::class.java) {
+      CoordinatedService.coordinate(listOf(a, b, c, d))
+    }).hasMessage("""
+        |Service dependency graph has problems:
+        |  dependency cycle: Service A -> Service D -> Service C -> Service A""".trimMargin())
+  }
+
   /** Appends messages to `target` on start up and shut down. */
   class AppendingService(
     val target: StringBuilder,
