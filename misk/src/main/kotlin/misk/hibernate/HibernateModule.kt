@@ -25,7 +25,6 @@ import kotlin.reflect.KClass
  * This also binds internal types annotated with the qualifier:
  *
  *  * [SchemaMigrator]
- *  * [HibernateConnector]
  */
 class HibernateModule(
   private val qualifier: KClass<out Annotation>,
@@ -40,19 +39,20 @@ class HibernateModule(
     val sessionFactoryKey = SessionFactory::class.toKey(qualifier)
     val sessionFactoryProvider = getProvider(sessionFactoryKey)
 
-    val connectorKey = HibernateConnector::class.toKey(qualifier)
-    val connectorProvider = getProvider(connectorKey)
+    val sessionFactoryServiceKey = SessionFactoryService::class.toKey(qualifier)
 
     val schemaMigratorKey = SchemaMigrator::class.toKey(qualifier)
     val schemaMigratorProvider = getProvider(schemaMigratorKey)
 
+    val transacterKey = Transacter::class.toKey(qualifier)
+
     bind(configKey).toInstance(config)
 
-    bind(sessionFactoryKey).toProvider(connectorKey).asSingleton()
-
-    bind(connectorKey).toProvider(Provider<HibernateConnector> {
-      HibernateConnector(qualifier, config, entitiesProvider.get())
+    bind(sessionFactoryKey).toProvider(sessionFactoryServiceKey).asSingleton()
+    bind(sessionFactoryServiceKey).toProvider(Provider<SessionFactoryService> {
+      SessionFactoryService(qualifier, config, entitiesProvider.get())
     }).asSingleton()
+    binder().addMultibinderBinding<Service>().to(sessionFactoryServiceKey)
 
     bind(schemaMigratorKey).toProvider(object : Provider<SchemaMigrator> {
       @Inject lateinit var resourceLoader: ResourceLoader
@@ -60,10 +60,14 @@ class HibernateModule(
           sessionFactoryProvider.get(), config)
     }).asSingleton()
 
-    binder().addMultibinderBinding<Service>().toProvider(object : Provider<HibernateService> {
+    bind(transacterKey).toProvider(Provider<Transacter> {
+      RealTransacter(sessionFactoryProvider.get())
+    }).asSingleton()
+
+    binder().addMultibinderBinding<Service>().toProvider(object : Provider<SchemaMigratorService> {
       @Inject lateinit var environment: Environment
-      override fun get(): HibernateService = HibernateService(environment, qualifier,
-          connectorProvider.get(), schemaMigratorProvider)
+      override fun get(): SchemaMigratorService = SchemaMigratorService(
+          environment, qualifier, schemaMigratorProvider)
     }).asSingleton()
   }
 }

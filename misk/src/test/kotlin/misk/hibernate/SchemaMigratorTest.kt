@@ -1,6 +1,5 @@
 package misk.hibernate
 
-import com.google.common.util.concurrent.AbstractIdleService
 import com.google.common.util.concurrent.Service
 import misk.MiskModule
 import misk.config.Config
@@ -25,7 +24,7 @@ import javax.persistence.PersistenceException
 @MiskTest(startService = true)
 internal class SchemaMigratorTest {
   val defaultEnv = Environment.TESTING
-  val rootConfig = MiskConfig.load<RootConfig>("test_hibernate_app", defaultEnv)
+  val rootConfig = MiskConfig.load<RootConfig>("test_schemamigrator_app", defaultEnv)
   val config: DataSourceConfig = rootConfig.data_source_clusters["exemplar"]!!.writer
 
   @MiskTestModule
@@ -47,13 +46,9 @@ internal class SchemaMigratorTest {
           )
       )
 
-      val hibernateConnector = HibernateConnector(Movies::class, config, setOf())
-      binder().addMultibinderBinding<Service>().toInstance(object : AbstractIdleService() {
-        override fun startUp() = hibernateConnector.connect()
-        override fun shutDown() = hibernateConnector.disconnect()
-      })
-
-      bind(SessionFactory::class.java).toProvider(hibernateConnector)
+      val sessionFactoryService = SessionFactoryService(Movies::class, config, setOf())
+      binder().addMultibinderBinding<Service>().toInstance(sessionFactoryService)
+      bind(SessionFactory::class.java).toProvider(sessionFactoryService)
     }
   }
 
@@ -130,7 +125,7 @@ internal class SchemaMigratorTest {
     assertThat(assertThrows(IllegalStateException::class.java) {
       schemaMigrator.requireAll()
     }).hasMessage("""
-          |lorfil is missing migrations:
+          |schemamigrator is missing migrations:
           |  ${config.migrations_path}/v1001__foo.sql
           |  ${config.migrations_path}/v1002__foo.sql""".trimMargin())
   }

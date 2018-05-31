@@ -3,6 +3,7 @@ package misk
 import com.google.common.util.concurrent.AbstractService
 import com.google.common.util.concurrent.MoreExecutors
 import com.google.common.util.concurrent.Service
+import com.google.common.util.concurrent.Service.State
 import com.google.common.util.concurrent.ServiceManager
 import com.google.inject.Key
 
@@ -13,18 +14,9 @@ import com.google.inject.Key
  * starts up. Symmetrically it stalls in `STOPPING` until all downstream services are `TERMINATED`,
  * then it actually shuts down.
  */
-internal class CoordinatedService(val service: Service) : AbstractService() {
-  val producedKeys: Set<Key<*>>
-    get() {
-      service as? DependentService ?: return setOf()
-      return service.producedKeys
-    }
-
-  val consumedKeys: Set<Key<*>>
-    get() {
-      service as? DependentService ?: return setOf()
-      return service.consumedKeys
-    }
+internal class CoordinatedService(val service: Service) : AbstractService(), DependentService {
+  override val producedKeys = (service as? DependentService)?.producedKeys ?: setOf()
+  override val consumedKeys = (service as? DependentService)?.consumedKeys ?: setOf()
 
   val upstream = mutableSetOf<CoordinatedService>()
   val downstream = mutableSetOf<CoordinatedService>()
@@ -48,6 +40,10 @@ internal class CoordinatedService(val service: Service) : AbstractService() {
           service.stopIfReady()
         }
       }
+
+      override fun failed(from: Service.State, failure: Throwable) {
+        notifyFailed(failure)
+      }
     }, MoreExecutors.directExecutor())
   }
 
@@ -57,11 +53,11 @@ internal class CoordinatedService(val service: Service) : AbstractService() {
 
   fun startIfReady() {
     synchronized(this) {
-      if (state() != Service.State.STARTING) return
+      if (state() != State.STARTING || service.state() != State.NEW) return
 
       // Make sure upstream is ready for us to start.
       for (value in upstream) {
-        if (value.state() != Service.State.RUNNING) return
+        if (value.state() != State.RUNNING) return
       }
 
       // Actually start.
@@ -75,11 +71,11 @@ internal class CoordinatedService(val service: Service) : AbstractService() {
 
   fun stopIfReady() {
     synchronized(this) {
-      if (state() != Service.State.STOPPING) return
+      if (state() != State.STOPPING || service.state() != State.RUNNING) return
 
       // Make sure downstream is ready for us to stop.
       for (value in downstream) {
-        if (value.state() != Service.State.TERMINATED) return
+        if (value.state() != State.TERMINATED) return
       }
 
       // Actually stop.
