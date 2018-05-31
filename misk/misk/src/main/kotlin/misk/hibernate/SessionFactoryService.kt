@@ -1,8 +1,14 @@
 package misk.hibernate
 
+import com.google.common.base.Stopwatch
+import com.google.common.util.concurrent.AbstractIdleService
+import com.google.inject.Key
 import com.zaxxer.hikari.hibernate.HikariConnectionProvider
+import misk.DependentService
+import misk.inject.toKey
 import misk.jdbc.DataSourceConfig
 import misk.jdbc.DataSourceType
+import misk.logging.getLogger
 import org.hibernate.SessionFactory
 import org.hibernate.boot.MetadataSources
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder
@@ -10,17 +16,25 @@ import org.hibernate.cfg.AvailableSettings
 import javax.inject.Provider
 import kotlin.reflect.KClass
 
+private val logger = getLogger<SessionFactoryService>()
+
 /**
  * Builds a bare connection to a Hibernate database. Doesn't do any schema migration or validation.
  */
-internal class HibernateConnector(
+internal class SessionFactoryService(
   private val qualifier: KClass<out Annotation>,
   private val config: DataSourceConfig,
   private val entityClasses: Set<HibernateEntity>
-) : Provider<SessionFactory> {
+) : AbstractIdleService(), DependentService, Provider<SessionFactory> {
   private var sessionFactory: SessionFactory? = null
 
-  fun connect() {
+  override val consumedKeys = setOf<Key<*>>()
+  override val producedKeys = setOf<Key<*>>(SessionFactoryService::class.toKey(qualifier))
+
+  override fun startUp() {
+    val stopwatch = Stopwatch.createStarted()
+    logger.info("Starting @${qualifier.simpleName} Hibernate")
+
     require(sessionFactory == null)
 
     val registryBuilder = StandardServiceRegistryBuilder()
@@ -63,13 +77,22 @@ internal class HibernateConnector(
     for (entityClass in entityClasses) {
       metadataSources.addAnnotatedClass(entityClass.entity.java)
     }
-    val metadata = metadataSources.buildMetadata()
+    val metadataBuilder = metadataSources.metadataBuilder
+    metadataBuilder.applyBasicType(IdType, Id::class.qualifiedName)
+    val metadata = metadataBuilder.build()
     sessionFactory = metadata.buildSessionFactory()
+
+    logger.info("Started @${qualifier.simpleName} Hibernate in $stopwatch")
   }
 
-  fun disconnect() {
+  override fun shutDown() {
+    val stopwatch = Stopwatch.createStarted()
+    logger.info("Stopping @${qualifier.simpleName} Hibernate")
+
     require(sessionFactory != null)
     sessionFactory!!.close()
+
+    logger.info("Stopped @${qualifier.simpleName} Hibernate in $stopwatch")
   }
 
   override fun get(): SessionFactory {
