@@ -1,11 +1,11 @@
 package misk.hibernate
 
-import org.hibernate.query.Query
-import javax.persistence.criteria.CriteriaBuilder
-import javax.persistence.criteria.CriteriaQuery
+import kotlin.reflect.KClass
 
 interface Session {
-  fun <T : DbEntity<T>> save(entity: T)
-  fun newCriteriaBuilder(): CriteriaBuilder
-  fun <T : DbEntity<T>> query(criteria: CriteriaQuery<T>): Query<T>
+  val hibernateSession: org.hibernate.Session
+  fun <T : DbEntity<T>> save(entity: T): Id<T>
+  fun <T : DbEntity<T>> load(id: Id<T>, type: KClass<T>): T
 }
+
+inline fun <reified T : DbEntity<T>> Session.load(id: Id<T>): T = load(id, T::class)

@@ -1,7 +1,7 @@
 package misk.hibernate
 
 import org.hibernate.SessionFactory
-import javax.persistence.criteria.CriteriaQuery
+import kotlin.reflect.KClass
 
 internal class RealTransacter(
   private val sessionFactory: SessionFactory
@@ -20,14 +20,15 @@ internal class RealTransacter(
   internal class RealSession(
     val session: org.hibernate.Session
   ) : Session {
-    override fun <T : DbEntity<T>> save(entity: T) {
-      session.save(entity)
+    override val hibernateSession = session
+
+    override fun <T : DbEntity<T>> save(entity: T): Id<T> {
+      @Suppress("UNCHECKED_CAST") // Entities always use Id<T> as their ID type.
+      return session.save(entity) as Id<T>
     }
 
-    // TODO(jwilson): replace with a typesafe criteria builder.
-    override fun newCriteriaBuilder() = session.entityManagerFactory.criteriaBuilder
-
-    // TODO(jwilson): this should be method on the typesafe criteria builder.
-    override fun <T : DbEntity<T>> query(criteria: CriteriaQuery<T>) = session.createQuery(criteria)
+    override fun <T : DbEntity<T>> load(id: Id<T>, type: KClass<T>): T {
+      return session.get(type.java, id)
+    }
   }
 }
