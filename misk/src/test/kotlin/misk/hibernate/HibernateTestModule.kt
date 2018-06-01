@@ -12,7 +12,6 @@ import misk.jdbc.DataSourceClustersConfig
 import misk.jdbc.DataSourceConfig
 import misk.resources.ResourceLoaderModule
 import org.hibernate.SessionFactory
-import javax.persistence.criteria.Path
 
 /** This module supports our Hibernate tests. */
 class HibernateTestModule : KAbstractModule() {
@@ -30,8 +29,6 @@ class HibernateTestModule : KAbstractModule() {
     install(HibernateModule(Movies::class, config))
     install(HibernateEntityModule(Movies::class,
         setOf(DbMovie::class, DbActor::class, DbCharacter::class)))
-
-    bind(Query.Factory::class.java).to(ManualCharacterQuery.Factory::class.java)
   }
 
   data class RootConfig(val data_source_clusters: DataSourceClustersConfig) : Config

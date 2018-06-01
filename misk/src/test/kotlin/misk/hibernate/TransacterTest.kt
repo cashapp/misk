@@ -61,23 +61,14 @@ class TransacterTest {
     }
   }
 
-  annotation class Constraint(
-    val path: String,
-    val operator: String = "="
-  )
-
-  annotation class Property(
-    val value: String
-  )
-
   interface CharacterQuery : Query<DbCharacter> {
-    @Constraint("movie.release_date")
+    @Constraint("name")
     fun name(name: String): CharacterQuery
 
-    @Constraint("movie.release_date")
+    @Constraint("actor.name")
     fun actorName(name: String): CharacterQuery
 
-    @Constraint("movie.release_date")
+    @Constraint("movie.name")
     fun movieName(name: String): CharacterQuery
 
     @Constraint(path = "movie.release_date", operator = "<")

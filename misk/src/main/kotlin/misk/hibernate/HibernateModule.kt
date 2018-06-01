@@ -15,16 +15,15 @@ import javax.inject.Provider
 import kotlin.reflect.KClass
 
 /**
- * Binds database connectivity for a qualified datasource. This binds the following public types,
- * both annotated with the qualifier:
+ * Binds database connectivity for a qualified datasource. This binds the following public types:
  *
- *  * [DataSourceConfig]
- *  * [SessionFactory]
- *  * [Service], in a multibinder, that connects at start up and disconnects at shut down.
+ *  * @Qualifier [DataSourceConfig]
+ *  * @Qualifier [SessionFactory]
+ *  * @Qualifier [Transacter]
+ *  * [Query.Factory] (with no qualifier)
  *
- * This also binds internal types annotated with the qualifier:
- *
- *  * [SchemaMigrator]
+ * It also registers services to connect to the database ([SessionFactoryService]) and to verify
+ * that the schema is up-to-date ([SchemaMigratorService]).
  */
 class HibernateModule(
   private val qualifier: KClass<out Annotation>,
@@ -69,5 +68,7 @@ class HibernateModule(
       override fun get(): SchemaMigratorService = SchemaMigratorService(
           environment, qualifier, schemaMigratorProvider)
     }).asSingleton()
+
+    bind(Query.Factory::class.java).to(ReflectionQuery.Factory::class.java)
   }
 }
