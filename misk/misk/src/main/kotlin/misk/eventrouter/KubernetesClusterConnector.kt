@@ -35,13 +35,16 @@ internal class KubernetesClusterConnector : ClusterConnector {
   private var lastReceivedMessage: Instant? = null
 
   fun healthStatus(): HealthStatus {
-    if (lastReceivedMessage == null) return HealthStatus.unhealthy("I've never received a message")
+    if (lastReceivedMessage == null) {
+      return HealthStatus.unhealthy("k8s: I've never received a message")
+    }
     val sinceLastReceived = Duration.between(lastReceivedMessage, clock.instant()).seconds
     if (sinceLastReceived > config.kubernetes_read_timeout + config.kubernetes_connect_timeout) {
       return HealthStatus.unhealthy(
-          "I haven't received an update in $sinceLastReceived seconds.")
+          "k8s: I haven't received an update in $sinceLastReceived seconds.")
     }
-    return HealthStatus.healthy("I received a message $sinceLastReceived seconds ago.")
+    return HealthStatus.healthy(
+        "k8s: I received a message $sinceLastReceived seconds ago.")
   }
 
   private fun subscribeToKubernetes(client: ApiClient, api: CoreV1Api, topicPeer: TopicPeer) {
