@@ -3,8 +3,8 @@ package misk.eventrouter
 import com.google.common.util.concurrent.Service
 import com.google.inject.Provides
 import com.squareup.moshi.Moshi
-import misk.healthchecks.HealthCheck
 import misk.environment.Environment
+import misk.healthchecks.HealthCheck
 import misk.inject.KAbstractModule
 import misk.inject.addMultibinderBinding
 import misk.inject.to
@@ -23,10 +23,10 @@ class RealEventRouterModule(val environment: Environment) : KAbstractModule() {
     bind<EventRouter>().to<RealEventRouter>().`in`(Singleton::class.java)
     bind<RealEventRouter>().`in`(Singleton::class.java)
     binder().addMultibinderBinding<Service>().to<EventRouterService>()
-    binder().addMultibinderBinding<HealthCheck>().to<KubernetesHealthCheck>()
     if (environment == Environment.DEVELOPMENT) {
       bind<ClusterConnector>().to<LocalClusterConnector>()
     } else {
+      binder().addMultibinderBinding<HealthCheck>().to<KubernetesHealthCheck>()
       bind<ClusterConnector>().to<KubernetesClusterConnector>()
     }
     bind<ClusterMapper>().to<ConsistentHashing>()
