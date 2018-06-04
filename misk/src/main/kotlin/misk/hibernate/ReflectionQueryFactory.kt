@@ -4,6 +4,7 @@ import com.google.common.cache.CacheBuilder
 import com.google.common.cache.CacheLoader
 import misk.inject.typeLiteral
 import java.lang.reflect.InvocationHandler
+import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Method
 import java.lang.reflect.ParameterizedType
 import java.lang.reflect.Proxy
@@ -71,19 +72,23 @@ internal class ReflectionQuery<T : DbEntity<T>>(
     return rows.map { projectionHandler.toValue(it) }
   }
 
-  override fun invoke(proxy: Any, method: Method, args: Array<out Any>): Any? {
+  override fun invoke(proxy: Any, method: Method, args: Array<out Any>?): Any? {
     val constraintHandler = queryMethodHandlers[method]
 
     return when {
       constraintHandler != null -> {
-        constraintHandler.invoke(this, args)
+        constraintHandler.invoke(this, args ?: arrayOf())
         proxy
       }
-      method.declaringClass == Query::class.java -> {
-        val result = method.invoke(this, *args)
-        if (result == this) proxy else result
+      method.declaringClass == Query::class.java || method.declaringClass == Any::class.java -> {
+        try {
+          val result = method.invoke(this, *(args ?: arrayOf()))
+          if (result == this) proxy else result
+        } catch (e: InvocationTargetException) {
+          throw e.cause!!
+        }
       }
-      else -> throw UnsupportedOperationException("TODO")
+      else -> throw UnsupportedOperationException("unexpected call to $method")
     }
   }
 
@@ -99,7 +104,7 @@ internal class ReflectionQuery<T : DbEntity<T>>(
         })
 
     override fun <T : Query<*>> newQuery(queryClass: KClass<T>): T {
-      val queryMethodHandlers = queryMethodHandlersCache.get(queryClass)
+      val queryMethodHandlers = queryMethodHandlersCache[queryClass]
       val queryType = queryClass.typeLiteral().getSupertype(Query::class.java)
 
       @Suppress("UNCHECKED_CAST") // Hack because we don't have a parameter for the runtime type.
@@ -115,16 +120,24 @@ internal class ReflectionQuery<T : DbEntity<T>>(
       ) as T
     }
 
-    private fun queryMethodHandlers(queryClass: KClass<*>): Map<Method, QueryMethodHandler> {
+    private fun queryMethodHandlers(
+      queryClass: KClass<*>
+    ): Map<Method, QueryMethodHandler> {
+      val errors = mutableListOf<String>()
       val result = mutableMapOf<Method, QueryMethodHandler>()
       for (function in queryClass.declaredMemberFunctions) {
-        QueryMethodHandler.create(function, result)
+        QueryMethodHandler.create(errors, function, result)
       }
       for (supertype in queryClass.allSupertypes) {
+        if (supertype.classifier == Query::class || supertype.classifier == Any::class) continue
         val classifier = supertype.classifier as? KClass<*> ?: continue
         for (function in classifier.declaredMemberFunctions) {
-          QueryMethodHandler.create(function, result)
+          QueryMethodHandler.create(errors, function, result)
         }
+      }
+      require(errors.isEmpty()) {
+        "Query class ${queryClass.java.name} has problems:" +
+            "\n  ${errors.joinToString(separator = "\n  ")}"
       }
       return result
     }
@@ -144,19 +157,39 @@ internal class ReflectionQuery<T : DbEntity<T>>(
 
     companion object {
       fun <P : Projection> create(projectionClass: KClass<P>): ProjectionHandler<P> {
+        val errors = mutableListOf<String>()
+        val constructor = projectionClass.primaryConstructor
 
-        // TODO(jwilson): validate & test validation more aggressively:
-        //  * all parameters should be annotated @Property
-        //  * the paths should be well-formed
-        //  * there should be a primary constructor
-
-        val constructor = projectionClass.primaryConstructor ?: throw IllegalArgumentException()
-        val properties = mutableListOf<List<String>>()
-        for (parameter in constructor.parameters) {
-          val property = parameter.findAnnotation<Property>() ?: throw IllegalArgumentException()
-          properties.add(property.value.split('.'))
+        val parameters = if (constructor != null) {
+          constructor.parameters
+        } else {
+          errors.add("this type has no primary constructor")
+          listOf()
         }
-        return ProjectionHandler(constructor, properties)
+
+        val properties = mutableListOf<List<String>>()
+        for (parameter in parameters) {
+          val property = parameter.findAnnotation<Property>()
+          if (property == null) {
+            errors.add("parameter ${parameter.index} is missing a @Property annotation")
+            continue
+          }
+
+          if (!property.value.matches(PATH_PATTERN)) {
+            errors.add("parameter ${parameter.index} path is not valid: '${property.value}'")
+            continue
+          }
+          val path = property.value.split('.')
+
+          properties.add(path)
+        }
+
+        require(errors.isEmpty()) {
+          "Projection class ${projectionClass.java.name} has problems:" +
+              "\n  ${errors.joinToString(separator = "\n  ")}"
+        }
+
+        return ProjectionHandler(constructor!!, properties)
       }
     }
   }
@@ -166,32 +199,53 @@ internal class ReflectionQuery<T : DbEntity<T>>(
     fun invoke(query: ReflectionQuery<*>, args: Array<out Any>)
 
     companion object {
-      fun create(function: KFunction<*>, result: MutableMap<Method, QueryMethodHandler>) {
-        val constraint = function.findAnnotation<Constraint>() ?: return
-        val javaMethod = function.javaMethod ?: return
+      fun create(
+        errors: MutableList<String>,
+        function: KFunction<*>,
+        result: MutableMap<Method, QueryMethodHandler>
+      ) {
+        val constraint = function.findAnnotation<Constraint>()
+        if (constraint == null) {
+          errors.add("${function.name}() is missing a @Constraint annotation")
+          return
+        }
 
-        // TODO(jwilson): validate & test validation more aggressively:
-        //  * the return type must be 'this'
-        //  * there should be the required number of parameters
-        //  * there should be a @Constraint annotation
-        //  * there should be a Java method
-        //  * the operator should be known
-
+        if (!constraint.path.matches(PATH_PATTERN)) {
+          errors.add("${function.name}() path is not valid: '${constraint.path}'")
+          return
+        }
         val path = constraint.path.split('.')
-        val handler = when {
-          constraint.operator == "=" -> object : QueryMethodHandler {
+
+        val javaMethod = function.javaMethod ?: throw UnsupportedOperationException()
+        if (javaMethod.returnType != javaMethod.declaringClass) {
+          errors.add("${function.name}() returns ${javaMethod.returnType.name} but " +
+              "@Constraint methods must return this (${javaMethod.declaringClass.name})")
+          return
+        }
+
+        // 2 because functions accept 'this' plus the actual parameters.
+        if (function.parameters.size != 2) {
+          errors.add("${function.name}() declares ${function.parameters.size - 1} " +
+              "parameters but must accept 1 parameter")
+          return
+        }
+
+        val handler = when (constraint.operator) {
+          "=" -> object : QueryMethodHandler {
             override fun invoke(query: ReflectionQuery<*>, args: Array<out Any>) {
               query.addConstraint(path, PredicateSpec.Eq(args[0]))
             }
           }
-          constraint.operator == "<" -> object : QueryMethodHandler {
+          "<" -> object : QueryMethodHandler {
             override fun invoke(query: ReflectionQuery<*>, args: Array<out Any>) {
               @Suppress("UNCHECKED_CAST") // The caller must provide Comparable types.
               query.addConstraint(path, PredicateSpec.Lt(args[0] as Comparable<Comparable<*>>))
             }
           }
-          else -> throw IllegalArgumentException(
-              "unexpected operator: ${constraint.operator} on $function")
+          else -> {
+            errors.add("${function.name}() has an unknown operator: '${constraint.operator}'")
+            return
+          }
         }
 
         result[javaMethod] = handler
@@ -243,12 +297,14 @@ internal class ReflectionQuery<T : DbEntity<T>>(
   }
 }
 
+private val PATH_PATTERN = Regex("""\w+(\.\w+)*""")
+
 /** This placeholder exists so we can create an Id<*>() without a type parameter. */
 private class DbPlaceholder : DbEntity<DbPlaceholder> {
   override val id: Id<DbPlaceholder> get() = throw IllegalStateException("unreachable")
 }
 
-fun Path<*>.traverse(chain: List<String>): Path<*> {
+private fun Path<*>.traverse(chain: List<String>): Path<*> {
   var result = this
   for (segment in chain) {
     result = result.get<Any>(segment)
