@@ -1,5 +1,6 @@
 include ':misk/testing'
 include ':samples:exemplar'
 include ':samples:exemplarchat'
+include ':samples:urlshortener'
 include ':misk'
 
