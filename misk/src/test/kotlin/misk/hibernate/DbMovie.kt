@@ -17,7 +17,7 @@ class DbMovie() : DbEntity<DbMovie> {
   @Column(nullable = false)
   lateinit var name: String
 
-  @Column(nullable = false)
+  @Column(nullable = true)
   var release_date: LocalDate? = null
 
   @Column(nullable = false)

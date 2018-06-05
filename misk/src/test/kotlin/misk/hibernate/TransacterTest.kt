@@ -71,7 +71,7 @@ class TransacterTest {
     @Constraint("movie.name")
     fun movieName(name: String): CharacterQuery
 
-    @Constraint(path = "movie.release_date", operator = "<")
+    @Constraint(path = "movie.release_date", operator = Operator.LT)
     fun movieReleaseDateBefore(upperBound: LocalDate): CharacterQuery
   }
 

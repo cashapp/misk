@@ -36,7 +36,7 @@ class ReflectionQueryFactoryValidationTest {
       queryFactory.newQuery<ParameterCountMustMatchOperator>()
     }.cause).hasMessage("""
         |Query class ${ParameterCountMustMatchOperator::class.java.name} has problems:
-        |  name() declares 0 parameters but must accept 1 parameter""".trimMargin())
+        |  name() declares 0 parameters but must accept 1 parameters""".trimMargin())
   }
 
   interface ParameterCountMustMatchOperator : Query<DbCharacter> {
@@ -69,20 +69,6 @@ class ReflectionQueryFactoryValidationTest {
   interface MalformedPathOnQuery : Query<DbCharacter> {
     @Constraint(".name")
     fun name(name: String): ConstraintAnnotationRequiredOnQuery
-  }
-
-  @Test
-  fun operatorMustBeKnown() {
-    assertThat(assertThrows(UncheckedExecutionException::class.java) {
-      queryFactory.newQuery<OperatorMustBeKnown>()
-    }.cause).hasMessage("""
-        |Query class ${OperatorMustBeKnown::class.java.name} has problems:
-        |  name() has an unknown operator: '~'""".trimMargin())
-  }
-
-  interface OperatorMustBeKnown : Query<DbCharacter> {
-    @Constraint(path = "name", operator = "~")
-    fun name(name: String): OperatorMustBeKnown
   }
 
   @Test
