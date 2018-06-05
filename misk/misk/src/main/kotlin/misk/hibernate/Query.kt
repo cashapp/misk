@@ -29,8 +29,34 @@ inline fun <reified T : Query<*>> Query.Factory.newQuery(): T = newQuery(T::clas
  */
 annotation class Constraint(
   val path: String,
-  val operator: String = "="
+  val operator: Operator = Operator.EQ
 )
+
+enum class Operator {
+  /** `a < b` */
+  LT,
+
+  /** `a <= b` */
+  LE,
+
+  /** `a = b` */
+  EQ,
+
+  /** `a >= b` */
+  GE,
+
+  /** `a > b` */
+  GT,
+
+  /** `a != b` */
+  NE,
+
+  /** `a IS NOT NULL` */
+  IS_NOT_NULL,
+
+  /** `a IS NULL` */
+  IS_NULL
+}
 
 /**
  * Annotations a parameter of a data class [Projection] to indicate which column (or path of
