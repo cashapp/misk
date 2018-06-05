@@ -30,7 +30,7 @@ internal class ReflectionQuery<T : DbEntity<T>>(
   private val rootEntityType: KClass<T>,
   private val queryMethodHandlers: Map<Method, QueryMethodHandler>
 ) : Query<T>, InvocationHandler {
-  private val constraints = mutableListOf<ConstraintSpec>()
+  private val constraints = mutableListOf<PredicateFactory>()
 
   override fun uniqueResult(session: Session): T? {
     // TODO(jwilson): max results = 2
@@ -60,7 +60,7 @@ internal class ReflectionQuery<T : DbEntity<T>>(
 
   override fun <P : Projection> listAs(session: Session, projection: KClass<P>): List<P> {
     val criteriaBuilder = session.hibernateSession.criteriaBuilder
-    val query = criteriaBuilder.createQuery(Array<Any>::class.java)
+    val query = criteriaBuilder.createQuery(Any::class.java)
     val root: Root<*> = query.from(rootEntityType.java)
 
     @Suppress("UNCHECKED_CAST") // The cache always returns matching types.
@@ -151,9 +151,15 @@ internal class ReflectionQuery<T : DbEntity<T>>(
     fun select(
       criteriaBuilder: CriteriaBuilder,
       queryRoot: Root<*>
-    ) = criteriaBuilder.array(*properties.map { queryRoot.traverse(it) }.toTypedArray())
+    ) = criteriaBuilder.array(*properties.map { queryRoot.traverse<Any?>(it) }.toTypedArray())
 
-    fun toValue(row: Array<Any>): P = constructor.call(*row)
+    fun toValue(row: Any): P {
+      return if (properties.size == 1) {
+        constructor.call(row)
+      } else {
+        constructor.call(*(row as Array<*>))
+      }
+    }
 
     companion object {
       fun <P : Projection> create(projectionClass: KClass<P>): ProjectionHandler<P> {
@@ -204,7 +210,7 @@ internal class ReflectionQuery<T : DbEntity<T>>(
         function: KFunction<*>,
         result: MutableMap<Method, QueryMethodHandler>
       ) {
-        val constraint = function.findAnnotation<Constraint>()
+        val constraint = function.findAnnotation<misk.hibernate.Constraint>()
         if (constraint == null) {
           errors.add("${function.name}() is missing a @Constraint annotation")
           return
@@ -223,28 +229,83 @@ internal class ReflectionQuery<T : DbEntity<T>>(
           return
         }
 
-        // 2 because functions accept 'this' plus the actual parameters.
-        if (function.parameters.size != 2) {
-          errors.add("${function.name}() declares ${function.parameters.size - 1} " +
-              "parameters but must accept 1 parameter")
+        // Functions accept 'this' as the first parameter.
+        val actualParameterCount = function.parameters.size - 1
+        val expectedParameterCount = when (constraint.operator) {
+          Operator.IS_NOT_NULL -> 0
+          Operator.IS_NULL -> 0
+          else -> 1
+        }
+        if (actualParameterCount != expectedParameterCount) {
+          errors.add("${function.name}() declares $actualParameterCount " +
+              "parameters but must accept $expectedParameterCount parameters")
           return
         }
 
         val handler = when (constraint.operator) {
-          "=" -> object : QueryMethodHandler {
+          Operator.EQ -> object : QueryMethodHandler {
             override fun invoke(query: ReflectionQuery<*>, args: Array<out Any>) {
-              query.addConstraint(path, PredicateSpec.Eq(args[0]))
+              query.addConstraint { root, builder ->
+                builder.equal(root.traverse<Any?>(path), args[0])
+              }
             }
           }
-          "<" -> object : QueryMethodHandler {
+          Operator.NE -> object : QueryMethodHandler {
             override fun invoke(query: ReflectionQuery<*>, args: Array<out Any>) {
-              @Suppress("UNCHECKED_CAST") // The caller must provide Comparable types.
-              query.addConstraint(path, PredicateSpec.Lt(args[0] as Comparable<Comparable<*>>))
+              query.addConstraint { root, builder ->
+                builder.notEqual(root.traverse<Any?>(path), args[0])
+              }
             }
           }
-          else -> {
-            errors.add("${function.name}() has an unknown operator: '${constraint.operator}'")
-            return
+          Operator.LT -> object : QueryMethodHandler {
+            override fun invoke(query: ReflectionQuery<*>, args: Array<out Any>) {
+              @Suppress("UNCHECKED_CAST") // Comparison operands must be comparable!
+              val arg = args[0] as Comparable<Comparable<*>?>?
+              query.addConstraint { root, builder ->
+                builder.lessThan(root.traverse(path), arg)
+              }
+            }
+          }
+          Operator.LE -> object : QueryMethodHandler {
+            override fun invoke(query: ReflectionQuery<*>, args: Array<out Any>) {
+              @Suppress("UNCHECKED_CAST") // Comparison operands must be comparable!
+              val arg = args[0] as Comparable<Comparable<*>?>?
+              query.addConstraint { root, builder ->
+                builder.lessThanOrEqualTo(root.traverse(path), arg)
+              }
+            }
+          }
+          Operator.GE -> object : QueryMethodHandler {
+            override fun invoke(query: ReflectionQuery<*>, args: Array<out Any>) {
+              query.addConstraint { root, builder ->
+                @Suppress("UNCHECKED_CAST") // Comparison operands must be comparable!
+                val arg = args[0] as Comparable<Comparable<*>?>?
+                builder.greaterThanOrEqualTo(root.traverse(path), arg)
+              }
+            }
+          }
+          Operator.GT -> object : QueryMethodHandler {
+            override fun invoke(query: ReflectionQuery<*>, args: Array<out Any>) {
+              query.addConstraint { root, builder ->
+                @Suppress("UNCHECKED_CAST") // Comparison operands must be comparable!
+                val arg = args[0] as Comparable<Comparable<*>?>?
+                builder.greaterThan(root.traverse(path), arg)
+              }
+            }
+          }
+          Operator.IS_NOT_NULL -> object : QueryMethodHandler {
+            override fun invoke(query: ReflectionQuery<*>, args: Array<out Any>) {
+              query.addConstraint { root, builder ->
+                builder.isNotNull(root.traverse<Comparable<Comparable<*>>>(path))
+              }
+            }
+          }
+          Operator.IS_NULL -> object : QueryMethodHandler {
+            override fun invoke(query: ReflectionQuery<*>, args: Array<out Any>) {
+              query.addConstraint { root, builder ->
+                builder.isNull(root.traverse<Comparable<Comparable<*>>>(path))
+              }
+            }
           }
         }
 
@@ -253,41 +314,12 @@ internal class ReflectionQuery<T : DbEntity<T>>(
     }
   }
 
-  /** A constraint that isn't attached to a session. */
-  data class ConstraintSpec(
-    val path: List<String>,
-    val predicate: PredicateSpec
-  )
-
-  /** A predicate that isn't attached to a session. */
-  sealed class PredicateSpec {
-    data class Eq<T>(var value: T) : PredicateSpec() {
-      override fun toHibernate(
-        criteriaBuilder: CriteriaBuilder,
-        path: Path<*>
-      ) = criteriaBuilder.equal(path, value)!!
-    }
-
-    data class Lt<T : Comparable<T>>(var value: T) : PredicateSpec() {
-      @Suppress("UNCHECKED_CAST") // Callers must pass paths whose types match.
-      override fun toHibernate(
-        criteriaBuilder: CriteriaBuilder,
-        path: Path<*>
-      ) = criteriaBuilder.lessThan(path as Path<T>, value)!!
-    }
-
-    abstract fun toHibernate(criteriaBuilder: CriteriaBuilder, path: Path<*>): Predicate
-  }
-
-  internal fun addConstraint(path: List<String>, predicate: PredicateSpec) {
-    constraints.add(ConstraintSpec(path, predicate))
+  internal fun addConstraint(predicateFactory: PredicateFactory) {
+    constraints.add(predicateFactory)
   }
 
   private fun buildWherePredicate(root: Root<*>, criteriaBuilder: CriteriaBuilder): Predicate? {
-    val predicates = constraints.map {
-      val path = root.traverse(it.path)
-      it.predicate.toHibernate(criteriaBuilder, path)
-    }
+    val predicates = constraints.map { it(root, criteriaBuilder) }
 
     return if (predicates.size == 1) {
       predicates[0]
@@ -297,6 +329,9 @@ internal class ReflectionQuery<T : DbEntity<T>>(
   }
 }
 
+/** Creates a predicate. This allows us to defer attaching the predicate to the session. */
+private typealias PredicateFactory = (root: Root<*>, criteriaBuilder: CriteriaBuilder) -> Predicate
+
 private val PATH_PATTERN = Regex("""\w+(\.\w+)*""")
 
 /** This placeholder exists so we can create an Id<*>() without a type parameter. */
@@ -304,10 +339,11 @@ private class DbPlaceholder : DbEntity<DbPlaceholder> {
   override val id: Id<DbPlaceholder> get() = throw IllegalStateException("unreachable")
 }
 
-private fun Path<*>.traverse(chain: List<String>): Path<*> {
+private fun <T> Path<*>.traverse(chain: List<String>): Path<T> {
   var result = this
   for (segment in chain) {
     result = result.get<Any>(segment)
   }
-  return result
+  @Suppress("UNCHECKED_CAST") // We don't have a mechanism to typecheck paths.
+  return result as Path<T>
 }
