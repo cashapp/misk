@@ -7,14 +7,18 @@ import org.junit.jupiter.api.Test
 import javax.inject.Qualifier
 
 internal class HibernateEntityModuleTest {
-
   @Test fun multipleDataSources() {
     val injector = Guice.createInjector(
-        HibernateEntityModule(Dinosaurs::class,
-            setOf(Triceratops::class, Stegosaurus::class)),
-        HibernateEntityModule(Shapes::class,
-            setOf(Square::class, Circle::class))
-    )
+        object: HibernateEntityModule(Dinosaurs::class) {
+          override fun configureHibernate() {
+            addEntities(Triceratops::class, Stegosaurus::class)
+          }
+        },
+        object: HibernateEntityModule(Shapes::class) {
+          override fun configureHibernate() {
+            addEntities(Square::class, Circle::class)
+          }
+        })
 
     assertThat(injector.getSetOf(HibernateEntity::class, Dinosaurs::class).unwrap())
         .containsExactly(Triceratops::class, Stegosaurus::class)
@@ -24,10 +28,26 @@ internal class HibernateEntityModuleTest {
 
   @Test fun multipleModulesSameDataSource() {
     val injector = Guice.createInjector(
-        HibernateEntityModule(Dinosaurs::class, setOf(Triceratops::class)),
-        HibernateEntityModule(Dinosaurs::class, setOf(Stegosaurus::class)),
-        HibernateEntityModule(Shapes::class, setOf(Square::class)),
-        HibernateEntityModule(Shapes::class, setOf(Circle::class))
+        object: HibernateEntityModule(Dinosaurs::class) {
+          override fun configureHibernate() {
+            addEntities(Triceratops::class)
+          }
+        },
+        object: HibernateEntityModule(Dinosaurs::class) {
+          override fun configureHibernate() {
+            addEntities(Stegosaurus::class)
+          }
+        },
+        object: HibernateEntityModule(Shapes::class) {
+          override fun configureHibernate() {
+            addEntities(Square::class)
+          }
+        },
+        object: HibernateEntityModule(Shapes::class) {
+          override fun configureHibernate() {
+            addEntities(Circle::class)
+          }
+        }
     )
 
     assertThat(injector.getSetOf(HibernateEntity::class, Dinosaurs::class).unwrap())
@@ -45,8 +65,8 @@ annotation class Dinosaurs
 @Qualifier
 annotation class Shapes
 
-class Square
-class Circle
+abstract class Square : DbEntity<Square>
+abstract class Circle : DbEntity<Circle>
 
-class Triceratops
-class Stegosaurus
+abstract class Triceratops : DbEntity<Triceratops>
+abstract class Stegosaurus : DbEntity<Stegosaurus>
