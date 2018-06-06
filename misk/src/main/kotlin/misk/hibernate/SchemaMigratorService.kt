@@ -8,9 +8,9 @@ import misk.inject.toKey
 import javax.inject.Provider
 import kotlin.reflect.KClass
 
-internal class SchemaMigratorService(
-  private val environment: Environment,
+class SchemaMigratorService internal constructor(
   qualifier: KClass<out Annotation>,
+  private val environment: Environment,
   private val schemaMigratorProvider: Provider<SchemaMigrator> // Lazy!
 ) : AbstractIdleService(), DependentService {
 
