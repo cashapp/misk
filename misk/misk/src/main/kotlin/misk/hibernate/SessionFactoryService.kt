@@ -10,9 +10,15 @@ import misk.jdbc.DataSourceConfig
 import misk.jdbc.DataSourceType
 import misk.logging.getLogger
 import org.hibernate.SessionFactory
+import org.hibernate.boot.Metadata
 import org.hibernate.boot.MetadataSources
+import org.hibernate.boot.registry.BootstrapServiceRegistryBuilder
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder
 import org.hibernate.cfg.AvailableSettings
+import org.hibernate.engine.spi.SessionFactoryImplementor
+import org.hibernate.event.service.spi.EventListenerRegistry
+import org.hibernate.integrator.spi.Integrator
+import org.hibernate.service.spi.SessionFactoryServiceRegistry
 import javax.inject.Provider
 import kotlin.reflect.KClass
 
@@ -24,7 +30,8 @@ private val logger = getLogger<SessionFactoryService>()
 internal class SessionFactoryService(
   private val qualifier: KClass<out Annotation>,
   private val config: DataSourceConfig,
-  private val entityClasses: Set<HibernateEntity>
+  private val entityClasses: Set<HibernateEntity> = setOf(),
+  private val eventListeners: Set<HibernateEventListener> = setOf()
 ) : AbstractIdleService(), DependentService, Provider<SessionFactory> {
   private var sessionFactory: SessionFactory? = null
 
@@ -37,7 +44,31 @@ internal class SessionFactoryService(
 
     require(sessionFactory == null)
 
-    val registryBuilder = StandardServiceRegistryBuilder()
+    // Register event listeners.
+    val integrator = object : Integrator {
+      override fun integrate(
+        metadata: Metadata,
+        sessionFactory: SessionFactoryImplementor,
+        serviceRegistry: SessionFactoryServiceRegistry
+      ) {
+        val eventListenerRegistry = serviceRegistry.getService(EventListenerRegistry::class.java)
+        for (eventListener in eventListeners) {
+          eventListener.register(eventListenerRegistry)
+        }
+      }
+
+      override fun disintegrate(
+        sessionFactory: SessionFactoryImplementor,
+        serviceRegistry: SessionFactoryServiceRegistry
+      ) {
+      }
+    }
+
+    val bootstrapRegistryBuilder = BootstrapServiceRegistryBuilder()
+        .applyIntegrator(integrator)
+        .build()
+
+    val registryBuilder = StandardServiceRegistryBuilder(bootstrapRegistryBuilder)
     registryBuilder.run {
       applySetting(AvailableSettings.DRIVER, config.type.driverClassName)
       applySetting(AvailableSettings.URL, config.type.buildJdbcUrl(config))

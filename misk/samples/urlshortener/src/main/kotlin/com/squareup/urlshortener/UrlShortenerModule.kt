@@ -22,7 +22,11 @@ class UrlShortenerModule(val environment: Environment) : KAbstractModule() {
 
     bind(UrlStore::class.java).to(RealUrlStore::class.java)
 
-    install(HibernateEntityModule(UrlShortener::class, listOf(DbShortenedUrl::class)))
     install(HibernateModule(UrlShortener::class, config.data_source_cluster.writer))
+    install(object : HibernateEntityModule(UrlShortener::class) {
+      override fun configureHibernate() {
+        addEntities(DbShortenedUrl::class)
+      }
+    })
   }
 }

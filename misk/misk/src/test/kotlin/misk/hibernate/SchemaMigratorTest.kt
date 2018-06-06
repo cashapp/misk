@@ -46,7 +46,7 @@ internal class SchemaMigratorTest {
           )
       )
 
-      val sessionFactoryService = SessionFactoryService(Movies::class, config, setOf())
+      val sessionFactoryService = SessionFactoryService(Movies::class, config)
       binder().addMultibinderBinding<Service>().toInstance(sessionFactoryService)
       bind(SessionFactory::class.java).toProvider(sessionFactoryService)
     }
