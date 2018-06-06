@@ -69,7 +69,7 @@ class HibernateModule(
     binder().addMultibinderBinding<Service>().toProvider(object : Provider<SchemaMigratorService> {
       @Inject lateinit var environment: Environment
       override fun get(): SchemaMigratorService = SchemaMigratorService(
-          environment, qualifier, schemaMigratorProvider)
+          qualifier, environment, schemaMigratorProvider)
     }).asSingleton()
 
     bind(Query.Factory::class.java).to(ReflectionQuery.Factory::class.java)

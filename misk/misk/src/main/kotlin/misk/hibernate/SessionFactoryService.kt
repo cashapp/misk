@@ -128,6 +128,6 @@ internal class SessionFactoryService(
 
   override fun get(): SessionFactory {
     return sessionFactory ?: throw IllegalStateException(
-        "@$qualifier Hibernate not connected: did you forget to start the service?")
+        "@${qualifier.simpleName} Hibernate not connected: did you forget to start the service?")
   }
 }

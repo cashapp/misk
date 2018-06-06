@@ -146,7 +146,7 @@ internal class SchemaMigratorTest {
     assertThat(sm.resourceVersionOrNull("foo/migrations/v100__.sql")).isNull()
   }
 
-  fun tableExists(table: String): Boolean {
+  private fun tableExists(table: String): Boolean {
     try {
       sessionFactory.openSession().use { session ->
         session.createNativeQuery("SELECT * FROM $table LIMIT 1").list()
