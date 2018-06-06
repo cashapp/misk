@@ -1,0 +1,6 @@
+data_source:
+  type: HSQLDB
+  username: truncatetables
+  password: truncatetables
+  database: truncatetables
+  migrations_path: misk/hibernate/truncatetables-migrations
