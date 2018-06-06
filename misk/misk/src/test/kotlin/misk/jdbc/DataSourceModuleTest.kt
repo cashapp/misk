@@ -7,6 +7,7 @@ import misk.MiskModule
 import misk.config.Config
 import misk.config.MiskConfig
 import misk.environment.Environment
+import misk.environment.EnvironmentModule
 import misk.inject.KAbstractModule
 import misk.inject.addMultibinderBinding
 import misk.inject.keyOf
@@ -17,7 +18,6 @@ import org.hsqldb.jdbc.JDBCDataSource
 import org.junit.jupiter.api.Assertions.assertSame
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Test
-import java.sql.SQLInvalidAuthorizationSpecException
 import javax.inject.Provider
 import javax.inject.Qualifier
 import javax.sql.DataSource
@@ -34,6 +34,7 @@ internal class DataSourceModuleTest {
 
       val config: DataSourceConfig = rootConfig.data_source_clusters["exemplar"]!!.writer
       val hsqlService = InMemoryHsqlService(config,
+          environment = defaultEnv,
           setUpStatements = listOf(
               PeopleDatabase.DROP_TABLE_PEOPLE,
               PeopleDatabase.CREATE_TABLE_PEOPLE,
@@ -51,7 +52,9 @@ internal class DataSourceModuleTest {
 
   @Test fun bindsDataSource() {
     val config = rootConfig.data_source_clusters["exemplar"]!!
-    val injector = Guice.createInjector(DataSourceModule(config, Exemplar::class))
+    val injector = Guice.createInjector(
+        DataSourceModule(config, Exemplar::class),
+        EnvironmentModule(Environment.TESTING))
 
     val dataSourceCluster = injector.getInstance(keyOf(DataSourceCluster::class, Exemplar::class))
     val db = PeopleDatabase(dataSourceCluster)
@@ -65,20 +68,23 @@ internal class DataSourceModuleTest {
   @Test fun usesProperUsername() {
     val config = rootConfig.data_source_clusters["exemplar-incorrect-username"]!!
     val exception = assertThrows(CreationException::class.java) {
-      Guice.createInjector(DataSourceModule(config, Exemplar::class))
+      Guice.createInjector(
+          DataSourceModule(config, Exemplar::class),
+          EnvironmentModule(Environment.TESTING))
     }
     val error = exception.errorMessages.first().cause!!
-    assertThat(error.cause).isInstanceOf(SQLInvalidAuthorizationSpecException::class.java)
     assertThat(error.message).contains("not found: INCORRECT_USERNAME")
   }
 
   @Test fun usesProperPassword() {
     val config = rootConfig.data_source_clusters["exemplar-incorrect-password"]!!
     val exception = assertThrows(CreationException::class.java) {
-      Guice.createInjector(DataSourceModule(config, Exemplar::class))
+      Guice.createInjector(
+          DataSourceModule(config, Exemplar::class),
+          EnvironmentModule(Environment.TESTING))
     }
     val error = exception.errorMessages.first().cause!!
-    assertThat(error.cause).isInstanceOf(SQLInvalidAuthorizationSpecException::class.java)
+    assertThat(error.message).contains("invalid authorization specification")
   }
 
   class PeopleDatabase(private val dataSourceCluster: DataSourceCluster) {

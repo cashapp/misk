@@ -61,6 +61,7 @@ ext {
           slf4jApi             : 'org.slf4j:slf4j-api:1.7.25',
           mockitoCore          : 'org.mockito:mockito-core:2.8.9',
           jaxbApi              : 'javax.xml.bind:jaxb-api:2.3.0',
+          mysql                : 'mysql:mysql-connector-java:5.1.16',
   ]
 
   isCi = "true".equals(System.getenv('CI'))
