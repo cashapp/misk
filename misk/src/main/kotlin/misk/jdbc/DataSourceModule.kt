@@ -2,6 +2,7 @@ package misk.jdbc
 
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
+import misk.environment.Environment
 import misk.inject.KAbstractModule
 import misk.inject.toKey
 import javax.inject.Provider
@@ -23,8 +24,13 @@ class DataSourceModule constructor(
     val clusterKey = DataSourceCluster::class.toKey(qualifier)
     val clusterProvider = getProvider(clusterKey)
 
+    val environmentKey = Environment::class.toKey()
+    val environmentProvider = getProvider(environmentKey)
+
     bind(clusterKey)
-        .toProvider(DataSourceClusterProvider(config))
+        .toProvider(Provider<DataSourceCluster> {
+          DataSourceClusterProvider(config, environmentProvider.get()).get()
+        })
         .asEagerSingleton()
 
     bind(DataSource::class.toKey(qualifier))
@@ -33,7 +39,7 @@ class DataSourceModule constructor(
   }
 
   private class DataSourceClusterProvider(
-    private val config: DataSourceClusterConfig
+    private val config: DataSourceClusterConfig, private val environment: Environment
   ) : Provider<DataSourceCluster> {
     override fun get(): DataSourceCluster {
       val writer = HikariDataSource(toHikariConfig(config.writer, readOnly = false))
@@ -44,7 +50,7 @@ class DataSourceModule constructor(
     private fun toHikariConfig(config: DataSourceConfig, readOnly: Boolean): HikariConfig {
       val hikariConfig = HikariConfig()
       hikariConfig.driverClassName = config.type.driverClassName
-      hikariConfig.jdbcUrl = config.type.buildJdbcUrl(config)
+      hikariConfig.jdbcUrl = config.type.buildJdbcUrl(config, environment)
       hikariConfig.isReadOnly = readOnly
       config.username?.let { hikariConfig.username = it }
       config.password?.let { hikariConfig.password = it }

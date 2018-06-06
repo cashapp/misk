@@ -16,3 +16,5 @@ cache:
     - $HOME/.gradle/caches/
     - $HOME/.gradle/wrapper/
 
+services:
+  - mysql

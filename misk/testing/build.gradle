@@ -31,6 +31,7 @@ dependencies {
   compile dep.openTracingMock
   compile dep.hsqldb
   compile dep.mockitoCore
+  compile dep.mysql
 }
 
 apply from: rootProject.file('gradle/gradle-mvn-push.gradle')
