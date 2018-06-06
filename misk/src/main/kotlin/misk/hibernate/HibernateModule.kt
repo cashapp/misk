@@ -22,7 +22,7 @@ import kotlin.reflect.KClass
  *  * @Qualifier [Transacter]
  *  * [Query.Factory] (with no qualifier)
  *
- * It also registers services to connect to the database ([SessionFactoryService]) and to verify
+ * This also registers services to connect to the database ([SessionFactoryService]) and to verify
  * that the schema is up-to-date ([SchemaMigratorService]).
  */
 class HibernateModule(
@@ -34,6 +34,9 @@ class HibernateModule(
 
     val entitiesKey = setOfType(HibernateEntity::class).toKey(qualifier)
     val entitiesProvider = getProvider(entitiesKey)
+
+    val eventListenersKey = setOfType(HibernateEventListener::class).toKey(qualifier)
+    val eventListenersProvider = getProvider(eventListenersKey)
 
     val sessionFactoryKey = SessionFactory::class.toKey(qualifier)
     val sessionFactoryProvider = getProvider(sessionFactoryKey)
@@ -49,7 +52,7 @@ class HibernateModule(
 
     bind(sessionFactoryKey).toProvider(sessionFactoryServiceKey).asSingleton()
     bind(sessionFactoryServiceKey).toProvider(Provider<SessionFactoryService> {
-      SessionFactoryService(qualifier, config, entitiesProvider.get())
+      SessionFactoryService(qualifier, config, entitiesProvider.get(), eventListenersProvider.get())
     }).asSingleton()
     binder().addMultibinderBinding<Service>().to(sessionFactoryServiceKey)
 

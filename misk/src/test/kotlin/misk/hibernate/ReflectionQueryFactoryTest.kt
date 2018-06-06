@@ -36,32 +36,32 @@ class ReflectionQueryFactoryTest {
       session.save(DbMovie(m98.name, m98.releaseDate, clock.instant()))
       session.save(DbMovie(m99.name, m99.releaseDate, clock.instant()))
 
-      assertThat(queryFactory.newQuery<MovieQuery>()
+      assertThat(queryFactory.newQuery<OperatorsMovieQuery>()
           .releaseDateLessThan(m3.releaseDate)
           .listAs<NameAndReleaseDate>(session))
           .containsExactly(m1, m2)
 
-      assertThat(queryFactory.newQuery<MovieQuery>()
+      assertThat(queryFactory.newQuery<OperatorsMovieQuery>()
           .releaseDateLessThanOrEqualTo(m3.releaseDate)
           .listAs<NameAndReleaseDate>(session))
           .containsExactly(m1, m2, m3)
 
-      assertThat(queryFactory.newQuery<MovieQuery>()
+      assertThat(queryFactory.newQuery<OperatorsMovieQuery>()
           .releaseDateEqualTo(m3.releaseDate)
           .listAs<NameAndReleaseDate>(session))
           .containsExactly(m3)
 
-      assertThat(queryFactory.newQuery<MovieQuery>()
+      assertThat(queryFactory.newQuery<OperatorsMovieQuery>()
           .releaseDateGreaterThanOrEqualTo(m3.releaseDate)
           .listAs<NameAndReleaseDate>(session))
           .containsExactly(m3, m4, m5)
 
-      assertThat(queryFactory.newQuery<MovieQuery>()
+      assertThat(queryFactory.newQuery<OperatorsMovieQuery>()
           .releaseDateGreaterThan(m3.releaseDate)
           .listAs<NameAndReleaseDate>(session))
           .containsExactly(m4, m5)
 
-      assertThat(queryFactory.newQuery<MovieQuery>()
+      assertThat(queryFactory.newQuery<OperatorsMovieQuery>()
           .releaseDateNotEqualTo(m3.releaseDate)
           .listAs<NameAndReleaseDate>(session))
           .containsExactly(m1, m2, m4, m5)
@@ -88,32 +88,32 @@ class ReflectionQueryFactoryTest {
       session.save(DbMovie(m98.name, m98.releaseDate, clock.instant()))
       session.save(DbMovie(m99.name, m99.releaseDate, clock.instant()))
 
-      assertThat(queryFactory.newQuery<MovieQuery>()
+      assertThat(queryFactory.newQuery<OperatorsMovieQuery>()
           .releaseDateLessThan(null)
           .listAs<NameAndReleaseDate>(session))
           .isEmpty()
 
-      assertThat(queryFactory.newQuery<MovieQuery>()
+      assertThat(queryFactory.newQuery<OperatorsMovieQuery>()
           .releaseDateLessThanOrEqualTo(null)
           .listAs<NameAndReleaseDate>(session))
           .isEmpty()
 
-      assertThat(queryFactory.newQuery<MovieQuery>()
+      assertThat(queryFactory.newQuery<OperatorsMovieQuery>()
           .releaseDateEqualTo(null)
           .listAs<NameAndReleaseDate>(session))
           .isEmpty()
 
-      assertThat(queryFactory.newQuery<MovieQuery>()
+      assertThat(queryFactory.newQuery<OperatorsMovieQuery>()
           .releaseDateGreaterThanOrEqualTo(null)
           .listAs<NameAndReleaseDate>(session))
           .isEmpty()
 
-      assertThat(queryFactory.newQuery<MovieQuery>()
+      assertThat(queryFactory.newQuery<OperatorsMovieQuery>()
           .releaseDateGreaterThan(null)
           .listAs<NameAndReleaseDate>(session))
           .isEmpty()
 
-      assertThat(queryFactory.newQuery<MovieQuery>()
+      assertThat(queryFactory.newQuery<OperatorsMovieQuery>()
           .releaseDateNotEqualTo(null)
           .listAs<NameAndReleaseDate>(session))
           .isEmpty()
@@ -133,42 +133,42 @@ class ReflectionQueryFactoryTest {
       session.save(DbMovie(m98.name, m98.releaseDate, clock.instant()))
       session.save(DbMovie(m99.name, m99.releaseDate, clock.instant()))
 
-      assertThat(queryFactory.newQuery<MovieQuery>()
+      assertThat(queryFactory.newQuery<OperatorsMovieQuery>()
           .releaseDateIsNull()
           .listAs<NameAndReleaseDate>(session))
           .containsExactly(m98, m99)
 
-      assertThat(queryFactory.newQuery<MovieQuery>()
+      assertThat(queryFactory.newQuery<OperatorsMovieQuery>()
           .releaseDateIsNotNull()
           .listAs<NameAndReleaseDate>(session))
           .containsExactly(m1, m2)
     }
   }
 
-  interface MovieQuery : Query<DbMovie> {
+  interface OperatorsMovieQuery : Query<DbMovie> {
     @Constraint(path = "release_date", operator = Operator.LT)
-    fun releaseDateLessThan(upperBound: LocalDate?): MovieQuery
+    fun releaseDateLessThan(upperBound: LocalDate?): OperatorsMovieQuery
 
     @Constraint(path = "release_date", operator = Operator.LE)
-    fun releaseDateLessThanOrEqualTo(upperBound: LocalDate?): MovieQuery
+    fun releaseDateLessThanOrEqualTo(upperBound: LocalDate?): OperatorsMovieQuery
 
     @Constraint(path = "release_date", operator = Operator.EQ)
-    fun releaseDateEqualTo(upperBound: LocalDate?): MovieQuery
+    fun releaseDateEqualTo(upperBound: LocalDate?): OperatorsMovieQuery
 
     @Constraint(path = "release_date", operator = Operator.GE)
-    fun releaseDateGreaterThanOrEqualTo(upperBound: LocalDate?): MovieQuery
+    fun releaseDateGreaterThanOrEqualTo(upperBound: LocalDate?): OperatorsMovieQuery
 
     @Constraint(path = "release_date", operator = Operator.GT)
-    fun releaseDateGreaterThan(upperBound: LocalDate?): MovieQuery
+    fun releaseDateGreaterThan(upperBound: LocalDate?): OperatorsMovieQuery
 
     @Constraint(path = "release_date", operator = Operator.NE)
-    fun releaseDateNotEqualTo(upperBound: LocalDate?): MovieQuery
+    fun releaseDateNotEqualTo(upperBound: LocalDate?): OperatorsMovieQuery
 
     @Constraint(path = "release_date", operator = Operator.IS_NOT_NULL)
-    fun releaseDateIsNotNull(): MovieQuery
+    fun releaseDateIsNotNull(): OperatorsMovieQuery
 
     @Constraint(path = "release_date", operator = Operator.IS_NULL)
-    fun releaseDateIsNull(): MovieQuery
+    fun releaseDateIsNull(): OperatorsMovieQuery
   }
 
   data class NameAndReleaseDate(

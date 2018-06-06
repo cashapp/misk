@@ -27,8 +27,11 @@ class HibernateTestModule : KAbstractModule() {
         sessionFactoryProvider = getProvider(SessionFactory::class.toKey(Movies::class)),
         startUpStatements = listOf("DELETE FROM movies")))
     install(HibernateModule(Movies::class, config))
-    install(HibernateEntityModule(Movies::class,
-        setOf(DbMovie::class, DbActor::class, DbCharacter::class)))
+    install(object : HibernateEntityModule(Movies::class) {
+      override fun configureHibernate() {
+        addEntities(DbMovie::class, DbActor::class, DbCharacter::class)
+      }
+    })
   }
 
   data class RootConfig(val data_source_clusters: DataSourceClustersConfig) : Config
