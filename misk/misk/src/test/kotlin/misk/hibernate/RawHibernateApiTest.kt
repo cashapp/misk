@@ -5,7 +5,6 @@ import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
 import org.hibernate.SessionFactory
 import org.junit.jupiter.api.Test
-import java.time.Clock
 import java.time.LocalDate
 import javax.inject.Inject
 
@@ -16,15 +15,14 @@ class RawHibernateApiTest {
   val module = MoviesTestModule()
 
   @Inject @Movies lateinit var sessionFactory: SessionFactory
-  @Inject lateinit var clock: Clock
 
   @Test
   fun test() {
     // Insert some movies in a transaction.
     sessionFactory.openSession().use { session ->
       val transaction = session.beginTransaction()
-      session.save(DbMovie("Jurassic Park", LocalDate.of(1993, 6, 9), clock.instant()))
-      session.save(DbMovie("Star Wars", LocalDate.of(1977, 5, 25), clock.instant()))
+      session.save(DbMovie("Jurassic Park", LocalDate.of(1993, 6, 9)))
+      session.save(DbMovie("Star Wars", LocalDate.of(1977, 5, 25)))
       transaction.commit()
     }
 

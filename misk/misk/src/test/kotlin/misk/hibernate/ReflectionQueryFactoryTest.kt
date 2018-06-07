@@ -4,7 +4,6 @@ import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import java.time.Clock
 import java.time.LocalDate
 import javax.inject.Inject
 
@@ -15,7 +14,6 @@ class ReflectionQueryFactoryTest {
 
   @Inject @Movies lateinit var transacter: Transacter
   @Inject lateinit var queryFactory: Query.Factory
-  @Inject lateinit var clock: Clock
 
   @Test
   fun comparisonOperators() {
@@ -28,13 +26,13 @@ class ReflectionQueryFactoryTest {
     val m99 = NameAndReleaseDate("Rocky 99", null)
 
     transacter.transaction { session ->
-      session.save(DbMovie(m1.name, m1.releaseDate, clock.instant()))
-      session.save(DbMovie(m2.name, m2.releaseDate, clock.instant()))
-      session.save(DbMovie(m3.name, m3.releaseDate, clock.instant()))
-      session.save(DbMovie(m4.name, m4.releaseDate, clock.instant()))
-      session.save(DbMovie(m5.name, m5.releaseDate, clock.instant()))
-      session.save(DbMovie(m98.name, m98.releaseDate, clock.instant()))
-      session.save(DbMovie(m99.name, m99.releaseDate, clock.instant()))
+      session.save(DbMovie(m1.name, m1.releaseDate))
+      session.save(DbMovie(m2.name, m2.releaseDate))
+      session.save(DbMovie(m3.name, m3.releaseDate))
+      session.save(DbMovie(m4.name, m4.releaseDate))
+      session.save(DbMovie(m5.name, m5.releaseDate))
+      session.save(DbMovie(m98.name, m98.releaseDate))
+      session.save(DbMovie(m99.name, m99.releaseDate))
 
       assertThat(queryFactory.newQuery<OperatorsMovieQuery>()
           .releaseDateLessThan(m3.releaseDate)
@@ -80,13 +78,13 @@ class ReflectionQueryFactoryTest {
     val m99 = NameAndReleaseDate("Rocky 99", null)
 
     transacter.transaction { session ->
-      session.save(DbMovie(m1.name, m1.releaseDate, clock.instant()))
-      session.save(DbMovie(m2.name, m2.releaseDate, clock.instant()))
-      session.save(DbMovie(m3.name, m3.releaseDate, clock.instant()))
-      session.save(DbMovie(m4.name, m4.releaseDate, clock.instant()))
-      session.save(DbMovie(m5.name, m5.releaseDate, clock.instant()))
-      session.save(DbMovie(m98.name, m98.releaseDate, clock.instant()))
-      session.save(DbMovie(m99.name, m99.releaseDate, clock.instant()))
+      session.save(DbMovie(m1.name, m1.releaseDate))
+      session.save(DbMovie(m2.name, m2.releaseDate))
+      session.save(DbMovie(m3.name, m3.releaseDate))
+      session.save(DbMovie(m4.name, m4.releaseDate))
+      session.save(DbMovie(m5.name, m5.releaseDate))
+      session.save(DbMovie(m98.name, m98.releaseDate))
+      session.save(DbMovie(m99.name, m99.releaseDate))
 
       assertThat(queryFactory.newQuery<OperatorsMovieQuery>()
           .releaseDateLessThan(null)
@@ -128,10 +126,10 @@ class ReflectionQueryFactoryTest {
     val m99 = NameAndReleaseDate("Rocky 99", null)
 
     transacter.transaction { session ->
-      session.save(DbMovie(m1.name, m1.releaseDate, clock.instant()))
-      session.save(DbMovie(m2.name, m2.releaseDate, clock.instant()))
-      session.save(DbMovie(m98.name, m98.releaseDate, clock.instant()))
-      session.save(DbMovie(m99.name, m99.releaseDate, clock.instant()))
+      session.save(DbMovie(m1.name, m1.releaseDate))
+      session.save(DbMovie(m2.name, m2.releaseDate))
+      session.save(DbMovie(m98.name, m98.releaseDate))
+      session.save(DbMovie(m99.name, m99.releaseDate))
 
       assertThat(queryFactory.newQuery<OperatorsMovieQuery>()
           .releaseDateIsNull()
