@@ -13,7 +13,7 @@ import javax.inject.Inject
 @MiskTest(startService = true)
 class RawHibernateApiTest {
   @MiskTestModule
-  val module = HibernateTestModule()
+  val module = MoviesTestModule()
 
   @Inject @Movies lateinit var sessionFactory: SessionFactory
   @Inject lateinit var clock: Clock

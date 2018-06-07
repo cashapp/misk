@@ -55,18 +55,18 @@ internal class HibernateEntityModuleTest {
     assertThat(injector.getSetOf(HibernateEntity::class, Shapes::class).unwrap())
         .containsExactly(Square::class, Circle::class)
   }
+
+  private fun Set<HibernateEntity>.unwrap() = map { it.entity }
+
+  @Qualifier
+  annotation class Dinosaurs
+
+  @Qualifier
+  annotation class Shapes
+
+  abstract class Square : DbEntity<Square>
+  abstract class Circle : DbEntity<Circle>
+
+  abstract class Triceratops : DbEntity<Triceratops>
+  abstract class Stegosaurus : DbEntity<Stegosaurus>
 }
-
-private fun Set<HibernateEntity>.unwrap() = map { it.entity }
-
-@Qualifier
-annotation class Dinosaurs
-
-@Qualifier
-annotation class Shapes
-
-abstract class Square : DbEntity<Square>
-abstract class Circle : DbEntity<Circle>
-
-abstract class Triceratops : DbEntity<Triceratops>
-abstract class Stegosaurus : DbEntity<Stegosaurus>
