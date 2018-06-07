@@ -10,6 +10,7 @@ import misk.inject.toKey
 import misk.jdbc.DataSourceConfig
 import misk.jdbc.DataSourceType
 import misk.logging.getLogger
+import okio.ByteString
 import org.hibernate.SessionFactory
 import org.hibernate.boot.Metadata
 import org.hibernate.boot.MetadataSources
@@ -112,6 +113,7 @@ internal class SessionFactoryService(
     }
     val metadataBuilder = metadataSources.metadataBuilder
     metadataBuilder.applyBasicType(IdType, Id::class.qualifiedName)
+    metadataBuilder.applyBasicType(ByteStringType, ByteString::class.qualifiedName)
     val metadata = metadataBuilder.build()
     sessionFactory = metadata.buildSessionFactory()
 

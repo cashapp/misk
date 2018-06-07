@@ -1,0 +1,6 @@
+data_source:
+  type: MYSQL
+  username: root
+  password: ""
+  database: movies
+  migrations_path: misk/hibernate/moviestestmodule-migrations
