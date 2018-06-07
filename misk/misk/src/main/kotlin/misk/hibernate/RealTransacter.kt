@@ -7,13 +7,24 @@ internal class RealTransacter(
   private val sessionFactory: SessionFactory
 ) : Transacter {
   override fun <T> transaction(lambda: (session: Session) -> T): T {
-    // TODO(jwilson): rollback on exception
     sessionFactory.openSession().use { session ->
-      val transaction = session.beginTransaction()
+      val transaction = session.beginTransaction()!!
       val realSession = RealSession(session)
-      val result = lambda(realSession)
-      transaction.commit()
-      return result
+      val result: T
+      try {
+        result = lambda(realSession)
+        transaction.commit()
+        return result
+      } catch (e: Throwable) {
+        if (transaction.isActive) {
+          try {
+            transaction.rollback()
+          } catch (suppressed: Exception) {
+            e.addSuppressed(suppressed)
+          }
+        }
+        throw e
+      }
     }
   }
 
