@@ -36,6 +36,7 @@ internal class SchemaMigratorTest {
       binder().addMultibinderBinding<Service>().toInstance(
           InMemoryHsqlService(
               config = config,
+              environment = defaultEnv,
               setUpStatements = listOf(
                   "DROP TABLE IF EXISTS schema_version",
                   "DROP TABLE IF EXISTS table_1",
@@ -46,7 +47,7 @@ internal class SchemaMigratorTest {
           )
       )
 
-      val sessionFactoryService = SessionFactoryService(Movies::class, config)
+      val sessionFactoryService = SessionFactoryService(Movies::class, config, defaultEnv)
       binder().addMultibinderBinding<Service>().toInstance(sessionFactoryService)
       bind(SessionFactory::class.java).toProvider(sessionFactoryService)
     }

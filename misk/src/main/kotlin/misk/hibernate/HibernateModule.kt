@@ -35,6 +35,9 @@ class HibernateModule(
     val entitiesKey = setOfType(HibernateEntity::class).toKey(qualifier)
     val entitiesProvider = getProvider(entitiesKey)
 
+    val environmentKey = Environment::class.toKey()
+    val environmentProvider = getProvider(environmentKey)
+
     val eventListenersKey = setOfType(HibernateEventListener::class).toKey(qualifier)
     val eventListenersProvider = getProvider(eventListenersKey)
 
@@ -52,7 +55,8 @@ class HibernateModule(
 
     bind(sessionFactoryKey).toProvider(sessionFactoryServiceKey).asSingleton()
     bind(sessionFactoryServiceKey).toProvider(Provider<SessionFactoryService> {
-      SessionFactoryService(qualifier, config, entitiesProvider.get(), eventListenersProvider.get())
+      SessionFactoryService(qualifier, config, environmentProvider.get(), entitiesProvider.get(),
+          eventListenersProvider.get())
     }).asSingleton()
     binder().addMultibinderBinding<Service>().to(sessionFactoryServiceKey)
 

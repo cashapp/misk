@@ -1,10 +1,12 @@
 package misk.jdbc
 
 import com.google.common.util.concurrent.AbstractIdleService
+import misk.environment.Environment
 import org.hsqldb.jdbc.JDBCDataSource
 
 class InMemoryHsqlService(
   val config: DataSourceConfig,
+  val environment: Environment,
   val setUpStatements: List<String> = listOf(),
   val tearDownStatements: List<String> = listOf()
 ) : AbstractIdleService() {
@@ -14,7 +16,7 @@ class InMemoryHsqlService(
     Class.forName(DataSourceType.HSQLDB.driverClassName)
 
     datasource = JDBCDataSource()
-    datasource.setURL(config.type.buildJdbcUrl(config))
+    datasource.setURL(config.type.buildJdbcUrl(config, environment))
     datasource.setUser(config.username)
     datasource.setPassword(config.password)
 

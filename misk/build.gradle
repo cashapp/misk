@@ -71,6 +71,7 @@ dependencies {
   compile dep.logbackClassic
   compile dep.slf4jApi
   compile dep.jaxbApi
+  compile dep.mysql
 
   testCompile dep.mockitoCore
   testCompile project(':misk/testing')
