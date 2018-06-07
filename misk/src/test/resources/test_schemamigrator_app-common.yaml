@@ -1,8 +1,6 @@
-data_source_clusters:
-  exemplar:
-    writer:
-      type: HSQLDB
-      username: snork
-      password: florp
-      database: schemamigrator
-      migrations_path: misk/hibernate/migrations
+data_source:
+  type: MYSQL
+  username: root
+  password: ""
+  database: schemamigrator
+  migrations_path: misk/hibernate/schemamigrator-migrations
