@@ -1,15 +1,17 @@
 package misk.hibernate
 
+import com.google.common.util.concurrent.AbstractIdleService
 import com.google.common.util.concurrent.Service
+import com.google.inject.Key
+import misk.DependentService
 import misk.MiskModule
 import misk.config.Config
 import misk.config.MiskConfig
 import misk.environment.Environment
 import misk.inject.KAbstractModule
 import misk.inject.addMultibinderBinding
-import misk.jdbc.DataSourceClustersConfig
+import misk.inject.toKey
 import misk.jdbc.DataSourceConfig
-import misk.jdbc.InMemoryHsqlService
 import misk.resources.FakeResourceLoader
 import misk.resources.FakeResourceLoaderModule
 import misk.testing.MiskTest
@@ -19,13 +21,13 @@ import org.hibernate.SessionFactory
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Test
 import javax.inject.Inject
+import javax.inject.Provider
 import javax.persistence.PersistenceException
 
 @MiskTest(startService = true)
 internal class SchemaMigratorTest {
   val defaultEnv = Environment.TESTING
-  val rootConfig = MiskConfig.load<RootConfig>("test_schemamigrator_app", defaultEnv)
-  val config: DataSourceConfig = rootConfig.data_source_clusters["exemplar"]!!.writer
+  val config = MiskConfig.load<RootConfig>("test_schemamigrator_app", defaultEnv)
 
   @MiskTestModule
   val module = object : KAbstractModule() {
@@ -33,36 +35,50 @@ internal class SchemaMigratorTest {
       install(MiskModule())
       install(FakeResourceLoaderModule())
 
-      binder().addMultibinderBinding<Service>().toInstance(
-          InMemoryHsqlService(
-              config = config,
-              environment = defaultEnv,
-              setUpStatements = listOf(
-                  "DROP TABLE IF EXISTS schema_version",
-                  "DROP TABLE IF EXISTS table_1",
-                  "DROP TABLE IF EXISTS table_2",
-                  "DROP TABLE IF EXISTS table_3",
-                  "DROP TABLE IF EXISTS table_4"
-              )
-          )
-      )
+      val dropTablesService = object : AbstractIdleService(), DependentService {
+        @Inject @Movies lateinit var sessionFactoryProvider: Provider<SessionFactory>
 
-      val sessionFactoryService = SessionFactoryService(Movies::class, config, defaultEnv)
+        override val consumedKeys = setOf<Key<*>>(SessionFactoryService::class.toKey(Movies::class))
+        override val producedKeys = setOf<Key<*>>()
+
+        override fun startUp() {
+          sessionFactoryProvider.get().openSession().use { session ->
+            session.doReturningWork { connection ->
+              val statement = connection.createStatement()
+              statement.addBatch("DROP TABLE IF EXISTS schema_version")
+              statement.addBatch("DROP TABLE IF EXISTS table_1")
+              statement.addBatch("DROP TABLE IF EXISTS table_2")
+              statement.addBatch("DROP TABLE IF EXISTS table_3")
+              statement.addBatch("DROP TABLE IF EXISTS table_4")
+              statement.executeBatch()
+            }
+          }
+        }
+
+        override fun shutDown() {
+        }
+      }
+
+      val sessionFactoryService =
+          SessionFactoryService(Movies::class, config.data_source, defaultEnv)
       binder().addMultibinderBinding<Service>().toInstance(sessionFactoryService)
-      bind(SessionFactory::class.java).toProvider(sessionFactoryService)
+      binder().addMultibinderBinding<Service>().toInstance(dropTablesService)
+      bind(SessionFactory::class.java)
+          .annotatedWith(Movies::class.java)
+          .toProvider(sessionFactoryService)
     }
   }
 
   @Inject lateinit var resourceLoader: FakeResourceLoader
-  @Inject lateinit var sessionFactory: SessionFactory
+  @Inject @Movies lateinit var sessionFactory: SessionFactory
 
   @Test fun initializeAndMigrate() {
-    val schemaMigrator = SchemaMigrator(resourceLoader, sessionFactory, config)
+    val schemaMigrator = SchemaMigrator(resourceLoader, sessionFactory, config.data_source)
 
-    resourceLoader.put("${config.migrations_path}/v1001__movies.sql", """
+    resourceLoader.put("${config.data_source.migrations_path}/v1001__movies.sql", """
         |CREATE TABLE table_1 (name varchar(255))
         |""".trimMargin())
-    resourceLoader.put("${config.migrations_path}/v1002__movies.sql", """
+    resourceLoader.put("${config.data_source.migrations_path}/v1002__movies.sql", """
         |CREATE TABLE table_2 (name varchar(255))
         |""".trimMargin())
 
@@ -96,10 +112,10 @@ internal class SchemaMigratorTest {
     schemaMigrator.requireAll()
 
     // When new migrations are added they can be applied.
-    resourceLoader.put("${config.migrations_path}/v1003__movies.sql", """
+    resourceLoader.put("${config.data_source.migrations_path}/v1003__movies.sql", """
         |CREATE TABLE table_3 (name varchar(255))
         |""".trimMargin())
-    resourceLoader.put("${config.migrations_path}/v1004__movies.sql", """
+    resourceLoader.put("${config.data_source.migrations_path}/v1004__movies.sql", """
         |CREATE TABLE table_4 (name varchar(255))
         |""".trimMargin())
     schemaMigrator.applyAll("SchemaMigratorTest", setOf(1001, 1002))
@@ -113,13 +129,13 @@ internal class SchemaMigratorTest {
   }
 
   @Test fun requireAllWithMissingMigrations() {
-    val schemaMigrator = SchemaMigrator(resourceLoader, sessionFactory, config)
+    val schemaMigrator = SchemaMigrator(resourceLoader, sessionFactory, config.data_source)
     schemaMigrator.initialize()
 
-    resourceLoader.put("${config.migrations_path}/v1001__foo.sql", """
+    resourceLoader.put("${config.data_source.migrations_path}/v1001__foo.sql", """
         |CREATE TABLE table_1 (name varchar(255))
         |""".trimMargin())
-    resourceLoader.put("${config.migrations_path}/v1002__foo.sql", """
+    resourceLoader.put("${config.data_source.migrations_path}/v1002__foo.sql", """
         |CREATE TABLE table_1 (name varchar(255))
         |""".trimMargin())
 
@@ -127,12 +143,12 @@ internal class SchemaMigratorTest {
       schemaMigrator.requireAll()
     }).hasMessage("""
           |schemamigrator is missing migrations:
-          |  ${config.migrations_path}/v1001__foo.sql
-          |  ${config.migrations_path}/v1002__foo.sql""".trimMargin())
+          |  ${config.data_source.migrations_path}/v1001__foo.sql
+          |  ${config.data_source.migrations_path}/v1002__foo.sql""".trimMargin())
   }
 
   @Test fun resourceVersionParsing() {
-    val sm = SchemaMigrator(resourceLoader, sessionFactory, config)
+    val sm = SchemaMigrator(resourceLoader, sessionFactory, config.data_source)
 
     assertThat(sm.resourceVersionOrNull("foo/migrations/v100__bar.sql")).isEqualTo(100)
     assertThat(sm.resourceVersionOrNull("foo/migrations/v100__v200.sql")).isEqualTo(100)
@@ -166,5 +182,5 @@ internal class SchemaMigratorTest {
     }
   }
 
-  data class RootConfig(val data_source_clusters: DataSourceClustersConfig) : Config
+  data class RootConfig(val data_source: DataSourceConfig) : Config
 }
