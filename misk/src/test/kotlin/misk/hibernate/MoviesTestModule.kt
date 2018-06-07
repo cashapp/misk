@@ -4,22 +4,21 @@ import misk.MiskModule
 import misk.config.Config
 import misk.config.MiskConfig
 import misk.environment.Environment
+import misk.environment.EnvironmentModule
 import misk.inject.KAbstractModule
-import misk.jdbc.DataSourceClustersConfig
 import misk.jdbc.DataSourceConfig
 import misk.resources.ResourceLoaderModule
 
-/** This module supports our Hibernate tests. */
-class HibernateTestModule : KAbstractModule() {
+/** This module creates movies, actors, and characters tables for several Hibernate tests. */
+class MoviesTestModule : KAbstractModule() {
   override fun configure() {
-    bind(Environment::class.java).toInstance(Environment.TESTING)
     install(ResourceLoaderModule())
     install(MiskModule())
+    install(EnvironmentModule(Environment.TESTING))
 
-    val rootConfig = MiskConfig.load<RootConfig>("test_hibernate_app", Environment.TESTING)
-    val config: DataSourceConfig = rootConfig.data_source_clusters["exemplar"]!!.writer
+    val config = MiskConfig.load<MoviesConfig>("moviestestmodule", Environment.TESTING)
     install(HibernateTestingModule(Movies::class))
-    install(HibernateModule(Movies::class, config))
+    install(HibernateModule(Movies::class, config.data_source))
     install(object : HibernateEntityModule(Movies::class) {
       override fun configureHibernate() {
         addEntities(DbMovie::class, DbActor::class, DbCharacter::class)
@@ -27,5 +26,5 @@ class HibernateTestModule : KAbstractModule() {
     })
   }
 
-  data class RootConfig(val data_source_clusters: DataSourceClustersConfig) : Config
+  data class MoviesConfig(val data_source: DataSourceConfig) : Config
 }

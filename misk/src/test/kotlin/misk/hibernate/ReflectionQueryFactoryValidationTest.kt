@@ -11,7 +11,7 @@ import javax.inject.Inject
 @MiskTest(startService = true)
 class ReflectionQueryFactoryValidationTest {
   @MiskTestModule
-  val module = HibernateTestModule()
+  val module = MoviesTestModule()
 
   @Inject @Movies lateinit var transacter: Transacter
   @Inject lateinit var queryFactory: Query.Factory
