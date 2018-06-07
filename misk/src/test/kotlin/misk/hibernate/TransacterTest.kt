@@ -1,8 +1,11 @@
 package misk.hibernate
 
+import misk.exceptions.UnauthorizedException
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
+import org.hibernate.exception.ConstraintViolationException
+import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Test
 import java.time.Clock
 import java.time.LocalDate
@@ -58,6 +61,36 @@ class TransacterTest {
       assertThat(actorsInOldMovies).containsExactly(
           ActorAndReleaseDate("Laura Dern", LocalDate.of(1977, 5, 25)),
           ActorAndReleaseDate("Carrie Fisher", LocalDate.of(1977, 5, 25)))
+    }
+  }
+
+  @Test
+  fun exceptionCausesTransactionToRollback() {
+    assertThrows(UnauthorizedException::class.java) {
+      transacter.transaction { session ->
+        session.save(DbMovie("Star Wars", LocalDate.of(1977, 5, 25), clock.instant()))
+        assertThat(queryFactory.newQuery<MovieQuery>().list(session)).isNotEmpty()
+        throw UnauthorizedException("boom!")
+      }
+    }
+    transacter.transaction { session ->
+      assertThat(queryFactory.newQuery<MovieQuery>().list(session)).isEmpty()
+    }
+  }
+
+  @Test
+  fun constraintViolationCausesTransactionToRollback() {
+    transacter.transaction { session ->
+      session.save(DbMovie("Cinderella", LocalDate.of(1950, 3, 4), clock.instant()))
+    }
+    assertThrows(ConstraintViolationException::class.java) {
+      transacter.transaction { session ->
+        session.save(DbMovie("Beauty and the Beast", LocalDate.of(1991, 11, 22), clock.instant()))
+        session.save(DbMovie("Cinderella", LocalDate.of(2015, 3, 13), clock.instant()))
+      }
+    }
+    transacter.transaction { session ->
+      assertThat(queryFactory.newQuery<MovieQuery>().list(session)).hasSize(1)
     }
   }
 
