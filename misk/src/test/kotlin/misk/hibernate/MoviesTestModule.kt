@@ -1,5 +1,6 @@
 package misk.hibernate
 
+import com.google.inject.util.Modules
 import misk.MiskModule
 import misk.config.Config
 import misk.config.MiskConfig
@@ -8,12 +9,13 @@ import misk.environment.EnvironmentModule
 import misk.inject.KAbstractModule
 import misk.jdbc.DataSourceConfig
 import misk.resources.ResourceLoaderModule
+import misk.time.FakeClockModule
 
 /** This module creates movies, actors, and characters tables for several Hibernate tests. */
 class MoviesTestModule : KAbstractModule() {
   override fun configure() {
     install(ResourceLoaderModule())
-    install(MiskModule())
+    install(Modules.override(MiskModule()).with(FakeClockModule()))
     install(EnvironmentModule(Environment.TESTING))
 
     val config = MiskConfig.load<MoviesConfig>("moviestestmodule", Environment.TESTING)

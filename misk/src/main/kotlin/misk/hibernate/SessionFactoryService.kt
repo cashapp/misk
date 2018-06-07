@@ -34,7 +34,7 @@ internal class SessionFactoryService(
   private val config: DataSourceConfig,
   private val environment: Environment,
   private val entityClasses: Set<HibernateEntity> = setOf(),
-  private val eventListeners: Set<HibernateEventListener> = setOf()
+  private val listenerRegistrations: Set<ListenerRegistration> = setOf()
 ) : AbstractIdleService(), DependentService, Provider<SessionFactory> {
   private var sessionFactory: SessionFactory? = null
 
@@ -55,9 +55,8 @@ internal class SessionFactoryService(
         serviceRegistry: SessionFactoryServiceRegistry
       ) {
         val eventListenerRegistry = serviceRegistry.getService(EventListenerRegistry::class.java)
-        for (eventListener in eventListeners) {
-          eventListener.register(eventListenerRegistry)
-        }
+        val aggregateListener = AggregateListener(listenerRegistrations)
+        aggregateListener.registerAll(eventListenerRegistry)
       }
 
       override fun disintegrate(
