@@ -46,8 +46,8 @@ internal class TruncateTablesServiceTest {
     // Insert some data.
     sessionFactory.openSession().doWork { connection ->
       connection.createStatement().use { statement ->
-        statement.execute("INSERT INTO MOVIES (name) VALUES ('Star Wars')")
-        statement.execute("INSERT INTO MOVIES (name) VALUES ('Jurassic Park')")
+        statement.execute("INSERT INTO movies (name) VALUES ('Star Wars')")
+        statement.execute("INSERT INTO movies (name) VALUES ('Jurassic Park')")
       }
     }
     assertThat(rowCount("schema_version")).isGreaterThan(0)
@@ -67,7 +67,7 @@ internal class TruncateTablesServiceTest {
         TestDatasource::class,
         config,
         Providers.of(sessionFactory),
-        startUpStatements = listOf("INSERT INTO MOVIES (name) VALUES ('Star Wars')"))
+        startUpStatements = listOf("INSERT INTO movies (name) VALUES ('Star Wars')"))
 
     assertThat(rowCount("movies")).isEqualTo(0)
     service.startAsync()
@@ -81,7 +81,7 @@ internal class TruncateTablesServiceTest {
         TestDatasource::class,
         config,
         Providers.of(sessionFactory),
-        shutDownStatements = listOf("INSERT INTO MOVIES (name) VALUES ('Star Wars')"))
+        shutDownStatements = listOf("INSERT INTO movies (name) VALUES ('Star Wars')"))
 
     service.startAsync()
     service.awaitRunning()
