@@ -52,7 +52,7 @@ internal class TruncateTablesService(
     val truncatedTableNames = sessionFactoryProvider.get().openSession().use { session ->
       val tableNamesQuery = when (config.type) {
         DataSourceType.MYSQL -> {
-          TODO()
+          "SELECT table_name FROM information_schema.tables where table_schema='${config.database}'"
         }
         DataSourceType.HSQLDB -> {
           "SELECT TABLE_NAME FROM INFORMATION_SCHEMA.SYSTEM_TABLES WHERE TABLE_TYPE='TABLE'"

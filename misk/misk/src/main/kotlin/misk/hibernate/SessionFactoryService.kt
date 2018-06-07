@@ -5,6 +5,7 @@ import com.google.common.util.concurrent.AbstractIdleService
 import com.google.inject.Key
 import com.zaxxer.hikari.hibernate.HikariConnectionProvider
 import misk.DependentService
+import misk.environment.Environment
 import misk.inject.toKey
 import misk.jdbc.DataSourceConfig
 import misk.jdbc.DataSourceType
@@ -30,6 +31,7 @@ private val logger = getLogger<SessionFactoryService>()
 internal class SessionFactoryService(
   private val qualifier: KClass<out Annotation>,
   private val config: DataSourceConfig,
+  private val environment: Environment,
   private val entityClasses: Set<HibernateEntity> = setOf(),
   private val eventListeners: Set<HibernateEventListener> = setOf()
 ) : AbstractIdleService(), DependentService, Provider<SessionFactory> {
@@ -71,7 +73,7 @@ internal class SessionFactoryService(
     val registryBuilder = StandardServiceRegistryBuilder(bootstrapRegistryBuilder)
     registryBuilder.run {
       applySetting(AvailableSettings.DRIVER, config.type.driverClassName)
-      applySetting(AvailableSettings.URL, config.type.buildJdbcUrl(config))
+      applySetting(AvailableSettings.URL, config.type.buildJdbcUrl(config, environment))
       applySetting(AvailableSettings.USER, config.username)
       applySetting(AvailableSettings.PASS, config.password)
       applySetting(AvailableSettings.POOL_SIZE, config.fixed_pool_size.toString())

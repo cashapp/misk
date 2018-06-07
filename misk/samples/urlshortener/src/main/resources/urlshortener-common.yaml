@@ -4,9 +4,9 @@ web:
 
 data_source_cluster:
   writer:
-    type: HSQLDB
-    username: snork
-    password: florp
+    type: MYSQL
+    username: root
+    password: ""
     database: urls
     migrations_path: migrations
 
