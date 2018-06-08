@@ -5,13 +5,22 @@ import org.junit.jupiter.api.Test
 import java.time.Duration
 import java.time.Instant
 import java.time.ZoneId
+import java.time.ZonedDateTime
 import java.util.concurrent.TimeUnit
 
 internal class FakeClockTest {
 
   @Test
-  fun adjustTime() {
+  fun defaultTimestamp() {
     val clock = FakeClock()
+    val utc = ZoneId.of("UTC")
+    val zonedDateTime = clock.instant().atZone(utc)
+    assertThat(zonedDateTime).isEqualTo(ZonedDateTime.of(2018, 1, 1, 0, 0, 0, 0, utc))
+  }
+
+  @Test
+  fun adjustTime() {
+    val clock = FakeClock(epochMillis = 0L)
     assertThat(clock.millis()).isEqualTo(0L)
 
     clock.add(Duration.ofSeconds(20))
@@ -23,7 +32,7 @@ internal class FakeClockTest {
 
   @Test
   fun differentTimeZones() {
-    val clock = FakeClock(zone = ZoneId.of("America/Los_Angeles"))
+    val clock = FakeClock(epochMillis = 0L, zone = ZoneId.of("America/Los_Angeles"))
     assertThat(clock.zone.id).isEqualTo("America/Los_Angeles")
 
     clock.add(45, TimeUnit.HOURS)

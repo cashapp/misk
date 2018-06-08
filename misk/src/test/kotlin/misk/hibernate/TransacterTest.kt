@@ -7,7 +7,6 @@ import org.assertj.core.api.Assertions.assertThat
 import org.hibernate.exception.ConstraintViolationException
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Test
-import java.time.Clock
 import java.time.LocalDate
 import javax.inject.Inject
 
@@ -18,14 +17,13 @@ class TransacterTest {
 
   @Inject @Movies lateinit var transacter: Transacter
   @Inject lateinit var queryFactory: Query.Factory
-  @Inject lateinit var clock: Clock
 
   @Test
   fun test() {
     // Insert some movies, characters and actors.
     transacter.transaction { session ->
-      val jp = session.save(DbMovie("Jurassic Park", LocalDate.of(1993, 6, 9), clock.instant()))
-      val sw = session.save(DbMovie("Star Wars", LocalDate.of(1977, 5, 25), clock.instant()))
+      val jp = session.save(DbMovie("Jurassic Park", LocalDate.of(1993, 6, 9)))
+      val sw = session.save(DbMovie("Star Wars", LocalDate.of(1977, 5, 25)))
       assertThat(setOf(jp, sw)).hasSize(2) // Uniqueness check.
 
       val ld = session.save(DbActor("Laura Dern", LocalDate.of(1967, 2, 10)))
@@ -68,7 +66,7 @@ class TransacterTest {
   fun exceptionCausesTransactionToRollback() {
     assertThrows(UnauthorizedException::class.java) {
       transacter.transaction { session ->
-        session.save(DbMovie("Star Wars", LocalDate.of(1977, 5, 25), clock.instant()))
+        session.save(DbMovie("Star Wars", LocalDate.of(1977, 5, 25)))
         assertThat(queryFactory.newQuery<MovieQuery>().list(session)).isNotEmpty()
         throw UnauthorizedException("boom!")
       }
@@ -81,12 +79,12 @@ class TransacterTest {
   @Test
   fun constraintViolationCausesTransactionToRollback() {
     transacter.transaction { session ->
-      session.save(DbMovie("Cinderella", LocalDate.of(1950, 3, 4), clock.instant()))
+      session.save(DbMovie("Cinderella", LocalDate.of(1950, 3, 4)))
     }
     assertThrows(ConstraintViolationException::class.java) {
       transacter.transaction { session ->
-        session.save(DbMovie("Beauty and the Beast", LocalDate.of(1991, 11, 22), clock.instant()))
-        session.save(DbMovie("Cinderella", LocalDate.of(2015, 3, 13), clock.instant()))
+        session.save(DbMovie("Beauty and the Beast", LocalDate.of(1991, 11, 22)))
+        session.save(DbMovie("Cinderella", LocalDate.of(2015, 3, 13)))
       }
     }
     transacter.transaction { session ->

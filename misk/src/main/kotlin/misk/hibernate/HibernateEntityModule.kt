@@ -22,7 +22,7 @@ abstract class HibernateEntityModule(
   override fun configure() {
     // Initialize empty sets for our multibindings.
     binder().newMultibinder<HibernateEntity>(qualifier)
-    binder().newMultibinder<HibernateEventListener>(qualifier)
+    binder().newMultibinder<ListenerRegistration>(qualifier)
 
     configureHibernate()
   }
@@ -42,10 +42,10 @@ abstract class HibernateEntityModule(
         Names.named("HibernateEventListener@${nextHibernateEventListener.getAndIncrement()}")
     )
 
-    // Create a multibinding for a HibernateEventListener that uses the above key.
-    binder().newMultibinder<HibernateEventListener>(qualifier)
+    // Create a multibinding for a ListenerRegistration that uses the above key.
+    binder().newMultibinder<ListenerRegistration>(qualifier)
         .addBinding()
-        .toInstance(HibernateEventListener(type, getProvider(key)))
+        .toInstance(ListenerRegistration(type, getProvider(key)))
 
     // Start the binding.
     return bind(key)

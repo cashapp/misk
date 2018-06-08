@@ -94,12 +94,16 @@ internal class SchemaMigrator(
       val stopwatch = Stopwatch.createStarted()
 
       sessionFactory.doWork {
-        val statement = createStatement()
-        statement.addBatch(migrationSql)
-        statement.addBatch("""
-            |INSERT INTO schema_version (version, installed_by) VALUES ($version, '$author');
+        val migration = createStatement()
+        migration.addBatch(migrationSql)
+        migration.executeBatch()
+
+        val schemaVersion = prepareStatement("""
+            |INSERT INTO schema_version (version, installed_by) VALUES (?, ?);
             |""".trimMargin())
-        statement.executeBatch()
+        schemaVersion.setInt(1, version)
+        schemaVersion.setString(2, author)
+        schemaVersion.executeUpdate()
       }
 
       logger.info { "${config.database} applied $path in $stopwatch" }

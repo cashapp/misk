@@ -6,7 +6,6 @@ import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
 import org.hibernate.event.spi.EventType
 import org.junit.jupiter.api.Test
-import java.time.Clock
 import java.time.LocalDate
 import javax.inject.Inject
 
@@ -27,12 +26,11 @@ class EventListenersTest {
   @Inject @Movies lateinit var transacter: Transacter
   @Inject lateinit var queryFactory: Query.Factory
   @Inject lateinit var eventListener: FakeEventListener
-  @Inject lateinit var clock: Clock
 
   @Test
   fun test() {
     transacter.transaction { session ->
-      val movie = DbMovie("Star Wars", LocalDate.of(1977, 5, 25), clock.instant())
+      val movie = DbMovie("Star Wars", LocalDate.of(1977, 5, 25))
       session.save(movie)
       assertThat(eventListener.takeEvents()).containsExactly("preinsert")
 

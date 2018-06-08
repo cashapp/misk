@@ -9,10 +9,16 @@ import javax.persistence.Table
 
 @Entity
 @Table(name = "movies")
-class DbMovie() : DbEntity<DbMovie> {
+class DbMovie() : DbEntity<DbMovie>, DbTimestampedEntity {
   @javax.persistence.Id
   @GeneratedValue
   override lateinit var id: Id<DbMovie>
+
+  @Column
+  override lateinit var updated_at: Instant
+
+  @Column
+  override lateinit var created_at: Instant
 
   @Column(nullable = false)
   lateinit var name: String
@@ -20,12 +26,8 @@ class DbMovie() : DbEntity<DbMovie> {
   @Column(nullable = true)
   var release_date: LocalDate? = null
 
-  @Column(nullable = false)
-  lateinit var created_at: Instant
-
-  constructor(name: String, releaseDate: LocalDate?, createdAt: Instant) : this() {
+  constructor(name: String, releaseDate: LocalDate?) : this() {
     this.name = name
     this.release_date = releaseDate
-    this.created_at = createdAt
   }
 }
