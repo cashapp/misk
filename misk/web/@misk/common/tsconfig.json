@@ -1,0 +1,26 @@
+{
+    "compileOnSave": true,
+    "compilerOptions": {
+        "allowSyntheticDefaultImports": true,
+        "alwaysStrict": true,
+        "declaration": true,
+        "esModuleInterop": true,
+        "jsx": "react",
+        "module": "commonjs",
+        "noEmit": true,
+        "noEmitOnError": true,
+        "noImplicitAny": true,
+        "noImplicitThis": true,
+        "outDir": "./build/",
+        "skipLibCheck": true,
+        "sourceMap": true,
+        // "strict": true,
+        "target": "es6",
+    },
+    "include": [
+        "./src/**/*"
+    ],
+    "exclude": [
+        "node_modules/**"
+    ]
+}

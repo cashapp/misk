@@ -1,9 +1,3 @@
-.gradle
-**/out/
-build
-.idea
-*.iml
-
 .DS_Store
 .git
 build
