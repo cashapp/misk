@@ -10,6 +10,7 @@ import misk.inject.toKey
 import misk.jdbc.DataSourceConfig
 import misk.resources.ResourceLoader
 import org.hibernate.SessionFactory
+import org.hibernate.event.spi.EventType
 import javax.inject.Inject
 import javax.inject.Provider
 import kotlin.reflect.KClass
@@ -38,7 +39,7 @@ class HibernateModule(
     val environmentKey = Environment::class.toKey()
     val environmentProvider = getProvider(environmentKey)
 
-    val eventListenersKey = setOfType(HibernateEventListener::class).toKey(qualifier)
+    val eventListenersKey = setOfType(ListenerRegistration::class).toKey(qualifier)
     val eventListenersProvider = getProvider(eventListenersKey)
 
     val sessionFactoryKey = SessionFactory::class.toKey(qualifier)
@@ -77,5 +78,12 @@ class HibernateModule(
     }).asSingleton()
 
     bind(Query.Factory::class.java).to(ReflectionQuery.Factory::class.java)
+
+    install(object : HibernateEntityModule(qualifier) {
+      override fun configureHibernate() {
+        bindListener(EventType.PRE_INSERT).to(TimestampListener::class.java)
+        bindListener(EventType.PRE_UPDATE).to(TimestampListener::class.java)
+      }
+    })
   }
 }

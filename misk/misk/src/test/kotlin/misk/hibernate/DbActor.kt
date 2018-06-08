@@ -1,5 +1,6 @@
 package misk.hibernate
 
+import java.time.Instant
 import java.time.LocalDate
 import javax.persistence.Column
 import javax.persistence.Entity
@@ -8,10 +9,16 @@ import javax.persistence.Table
 
 @Entity
 @Table(name = "actors")
-class DbActor() : DbEntity<DbActor> {
+class DbActor() : DbEntity<DbActor>, DbTimestampedEntity {
   @javax.persistence.Id
   @GeneratedValue
   override lateinit var id: Id<DbActor>
+
+  @Column
+  override lateinit var updated_at: Instant
+
+  @Column
+  override lateinit var created_at: Instant
 
   @Column(nullable = false)
   lateinit var name: String
