@@ -11,7 +11,7 @@
         "noEmitOnError": true,
         "noImplicitAny": true,
         "noImplicitThis": true,
-        "outDir": "./build/",
+        "outDir": "./lib/",
         "skipLibCheck": true,
         "sourceMap": true,
         // "strict": true,

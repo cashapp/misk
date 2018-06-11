@@ -4,7 +4,8 @@
   "description": "Misk Admin Module Log4j",
   "main": "index.js",
   "scripts": {
-    "build": "webpack"
+    "build": "webpack --production --config webpack.production.config.js",
+    "start": "webpack --config webpack.development.config.js"
   },
   "author": "Square/Misk Authors (https://github.com/square/misk/graphs/contributors)",
   "dependencies": {

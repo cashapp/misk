@@ -1,10 +1,10 @@
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const ScriptExtHtmlWebpackPlugin = require('script-ext-html-webpack-plugin');
-const config = require('frint-config');
-const miskConfig = require('../misk-lib');
+const miskCommon = require('../@misk/common/lib');
 const path = require('path');
 
 module.exports = {
+  mode: 'development',
   entry: {
     core: path.resolve(__dirname, 'src/core/index.ts'),
   },
@@ -20,7 +20,7 @@ module.exports = {
     inline: true,
     port: 3000,
     historyApiFallback: true,
-    compress: true,
+    compress: false,
     open: true
   },
   module: {
@@ -58,10 +58,5 @@ module.exports = {
       defaultAttribute: 'async',
     })
   ],
-  externals: []
-    .concat(config.lodashExternals)
-    .concat(config.rxjsExternals)
-    .concat(config.thirdPartyExternals)
-    .concat(config.frintExternals)
-    .concat(miskConfig.miskExternals)
+  externals: miskCommon.externals,
 };

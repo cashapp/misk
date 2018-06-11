@@ -1,10 +1,12 @@
 const path = require('path');
 
 module.exports = {
+  mode: 'production',
   entry: {
-    miskConfig: path.resolve(__dirname, 'src/index.ts'),
+    index: path.resolve(__dirname, 'src/index.ts'),
+    externals: path.resolve(__dirname, 'src/index.ts'),
     styles: path.resolve(__dirname, 'src/styles.ts'),
-    vendor: path.resolve(__dirname, 'src/vendor.ts')
+    vendors: path.resolve(__dirname, 'src/vendors.ts')
   },
   devtool: 'source-map',
   output: {

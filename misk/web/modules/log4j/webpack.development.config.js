@@ -1,16 +1,13 @@
-const HtmlWebpackPlugin = require('html-webpack-plugin');
-const ScriptExtHtmlWebpackPlugin = require('script-ext-html-webpack-plugin');
-const config = require('frint-config');
-const miskConfig = require('../../misk-lib');
+const miskCommon = require('../../@misk/common/lib');
 const path = require('path');
 
 module.exports = {
+  mode: 'development',
   entry: {
     'log4j': path.resolve(__dirname, 'src/core/index.ts'),
     'log4jMenu': path.resolve(__dirname, 'src/mainMenu/index.ts'),
-
   },
-  devtool: 'source-map',
+  devtool: 'cheap-module-eval-source-map',
   output: {
     path: path.resolve(__dirname, '../../main/build/js'),
     filename: '[name].js',
@@ -42,10 +39,5 @@ module.exports = {
   resolve: {
     extensions: [".ts", ".tsx", ".js", ".jsx", ".json"]
   },
-  externals: []
-    .concat(config.lodashExternals)
-    .concat(config.rxjsExternals)
-    .concat(config.thirdPartyExternals)
-    .concat(config.frintExternals)
-    .concat(miskConfig.miskExternals)
+  externals: miskCommon.externals
 };

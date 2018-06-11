@@ -1,6 +1,0 @@
-.DS_Store
-.git
-build
-node_modules
-*.log
-frint-config/
