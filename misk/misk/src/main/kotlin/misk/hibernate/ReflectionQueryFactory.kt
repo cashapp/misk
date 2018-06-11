@@ -15,6 +15,7 @@ import javax.persistence.criteria.Predicate
 import javax.persistence.criteria.Root
 import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
+import kotlin.reflect.KParameter
 import kotlin.reflect.full.allSupertypes
 import kotlin.reflect.full.declaredMemberFunctions
 import kotlin.reflect.full.findAnnotation
@@ -293,6 +294,37 @@ internal class ReflectionQuery<T : DbEntity<T>>(
               }
             }
           }
+          Operator.IN -> {
+            val parameter = function.parameters[1]
+
+            val argToCollection: (Any) -> Collection<Any?> = when {
+              parameter.isVararg -> { arg -> (arg as Array<*>).toList() }
+              parameter.isAssignableTo(Collection::class) -> { arg -> (arg as Collection<*>) }
+              else -> {
+                errors.add("${function.name}() parameter must be a vararg or a collection")
+                return
+              }
+            }
+
+            object : QueryMethodHandler {
+              override fun invoke(query: ReflectionQuery<*>, args: Array<out Any>) {
+                query.addConstraint { root, builder ->
+                  val collection = argToCollection(args[0])
+                  if (collection.isEmpty()) {
+                    // The JDBC API forbids empty IN clauses so we use `WHERE 1 = 0` instead to
+                    // achieve the same result.
+                    builder.equal(builder.literal(1), 0)
+                  } else {
+                    builder.`in`<Any>(root.traverse(path)).apply {
+                      for (option in collection) {
+                        value(option)
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
           Operator.IS_NOT_NULL -> object : QueryMethodHandler {
             override fun invoke(query: ReflectionQuery<*>, args: Array<out Any>) {
               query.addConstraint { root, builder ->
@@ -347,3 +379,6 @@ private fun <T> Path<*>.traverse(chain: List<String>): Path<T> {
   @Suppress("UNCHECKED_CAST") // We don't have a mechanism to typecheck paths.
   return result as Path<T>
 }
+
+private fun KParameter.isAssignableTo(supertype: KClass<*>) =
+    supertype.java.isAssignableFrom(type.typeLiteral().rawType)

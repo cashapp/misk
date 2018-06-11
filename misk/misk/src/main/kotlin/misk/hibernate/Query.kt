@@ -51,6 +51,9 @@ enum class Operator {
   /** `a != b` */
   NE,
 
+  /** `a IN (b1, b2, b3, ...)` */
+  IN,
+
   /** `a IS NOT NULL` */
   IS_NOT_NULL,
 
