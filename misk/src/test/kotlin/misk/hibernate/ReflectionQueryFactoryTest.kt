@@ -143,6 +143,69 @@ class ReflectionQueryFactoryTest {
     }
   }
 
+  @Test
+  fun inOperator() {
+    val m1 = NameAndReleaseDate("Rocky 1", LocalDate.of(2018, 1, 1))
+    val m2 = NameAndReleaseDate("Rocky 2", LocalDate.of(2018, 1, 2))
+    val m3 = NameAndReleaseDate("Rocky 3", LocalDate.of(2018, 1, 3))
+
+    transacter.transaction { session ->
+      session.save(DbMovie(m1.name, m1.releaseDate))
+      session.save(DbMovie(m2.name, m2.releaseDate))
+      session.save(DbMovie(m3.name, m3.releaseDate))
+
+      assertThat(queryFactory.newQuery<OperatorsMovieQuery>()
+          .releaseDateInVararg(m1.releaseDate, m3.releaseDate)
+          .listAs<NameAndReleaseDate>(session))
+          .containsExactly(m1, m3)
+
+      assertThat(queryFactory.newQuery<OperatorsMovieQuery>()
+          .releaseDateInCollection(listOf(m1.releaseDate, m3.releaseDate))
+          .listAs<NameAndReleaseDate>(session))
+          .containsExactly(m1, m3)
+    }
+  }
+
+  @Test
+  fun inOperatorWithNull() {
+    val m1 = NameAndReleaseDate("Rocky 1", LocalDate.of(2018, 1, 1))
+    val m2 = NameAndReleaseDate("Rocky 2", null)
+
+    transacter.transaction { session ->
+      session.save(DbMovie(m1.name, m1.releaseDate))
+      session.save(DbMovie(m2.name, m2.releaseDate))
+
+      assertThat(queryFactory.newQuery<OperatorsMovieQuery>()
+          .releaseDateInVararg(m1.releaseDate, null)
+          .listAs<NameAndReleaseDate>(session))
+          .containsExactly(m1)
+
+      assertThat(queryFactory.newQuery<OperatorsMovieQuery>()
+          .releaseDateInCollection(listOf(m1.releaseDate, null))
+          .listAs<NameAndReleaseDate>(session))
+          .containsExactly(m1)
+    }
+  }
+
+  @Test
+  fun inOperatorWithEmptyList() {
+    val m1 = NameAndReleaseDate("Rocky 1", LocalDate.of(2018, 1, 1))
+
+    transacter.transaction { session ->
+      session.save(DbMovie(m1.name, m1.releaseDate))
+
+      assertThat(queryFactory.newQuery<OperatorsMovieQuery>()
+          .releaseDateInVararg()
+          .listAs<NameAndReleaseDate>(session))
+          .isEmpty()
+
+      assertThat(queryFactory.newQuery<OperatorsMovieQuery>()
+          .releaseDateInCollection(listOf())
+          .listAs<NameAndReleaseDate>(session))
+          .isEmpty()
+    }
+  }
+
   interface OperatorsMovieQuery : Query<DbMovie> {
     @Constraint(path = "release_date", operator = Operator.LT)
     fun releaseDateLessThan(upperBound: LocalDate?): OperatorsMovieQuery
@@ -161,6 +224,12 @@ class ReflectionQueryFactoryTest {
 
     @Constraint(path = "release_date", operator = Operator.NE)
     fun releaseDateNotEqualTo(upperBound: LocalDate?): OperatorsMovieQuery
+
+    @Constraint(path = "release_date", operator = Operator.IN)
+    fun releaseDateInVararg(vararg upperBounds: LocalDate?): OperatorsMovieQuery
+
+    @Constraint(path = "release_date", operator = Operator.IN)
+    fun releaseDateInCollection(upperBounds: Collection<LocalDate?>): OperatorsMovieQuery
 
     @Constraint(path = "release_date", operator = Operator.IS_NOT_NULL)
     fun releaseDateIsNotNull(): OperatorsMovieQuery

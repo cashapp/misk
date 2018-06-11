@@ -113,6 +113,20 @@ class ReflectionQueryFactoryValidationTest {
   ) : Projection
 
   @Test
+  fun inParameterIsNotVarargOrCollection() {
+    assertThat(assertThrows(UncheckedExecutionException::class.java) {
+      queryFactory.newQuery<InParameterIsNotVarargOrCollection>()
+    }.cause).hasMessage("""
+        |Query class ${InParameterIsNotVarargOrCollection::class.java.name} has problems:
+        |  nameIn() parameter must be a vararg or a collection""".trimMargin())
+  }
+
+  interface InParameterIsNotVarargOrCollection : Query<DbCharacter> {
+    @Constraint("name", Operator.IN)
+    fun nameIn(name: String): InParameterIsNotVarargOrCollection
+  }
+
+  @Test
   fun objectMethods() {
     val query = queryFactory.newQuery<EmptyQuery>()
     assertThat(query.hashCode()).isEqualTo(query.hashCode())
