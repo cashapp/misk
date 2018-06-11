@@ -1,6 +1,45 @@
 Change Log
 ==========
 
+Version 0.2.5 *(2018-06-11)*
+----------------------------
+
+New:
+* Cluster interface and DataSourceCluster bindings
+* Add a JPAEntityModule for binding entities for a DataSource
+* Hook up raw Hibernate APIs
+* Use JPA entity types in HibernateModule.
+* Introduce FakeResourceLoader
+* SchemaMigrator for running and tracking schema migrations.
+* Update Misk version in Dockerfiles to 0.2.5
+* Drop support for unqualified datasources.
+* move exemplars into sample directory in preparation for more of them
+* Make all Kotlin warnings build errors
+* Allow services to specify dependencies on other services.
+* Fast fail on dependency cycles.
+* jre8 was deprecated for kotlin 1.2
+* Early types for the Transacter APIs
+* Queries in the Misk Hibernate API.
+* Implement Query with dynamic proxies and reflection
+* Offer strict validation and nice errors in ReflectionQueryFactory
+* Log the reasons why liveness/readiness checks fail
+* URL shortener sample
+* Support more operators in Query
+* Wire up Hibernate event listeners through Guice.
+* HibernateTestingModule.
+* Switch tests to MySQL
+* Rollback transactions on exceptions
+* Delete DataSourceModule. It's redundant with HibernateModule.
+* Support ByteString columns
+* Misk containers should not run as root
+* DbTimestampedEntity
+
+Fix:
+* Don't inject until after services are started.
+* Tidy up some test cases.
+* Fix a missing dependency in exemplar
+* Don't use KubernetesHealthCheck with LocalClusterConnector
+
 Version 0.2.4 *(2018-05-14)*
 ----------------------------
 
