@@ -5,9 +5,9 @@ interface Projection {
 }
 
 /**
- * Annotates a parameter of a data class [Projection] to indicate which column (or path of
- * columns) to populate the parameter with.
+ * Annotates a parameter of a [Projection] data class to indicate which column (or path of columns)
+ * to populate the parameter with.
  */
 annotation class Property(
-  val value: String
+  val path: String
 )
