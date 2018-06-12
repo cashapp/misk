@@ -18,14 +18,14 @@ export default class RootContainer extends React.Component {
             <NavbarHeading>Misk Admin</NavbarHeading>
             <NavbarDivider />
             {menu.map(({ title, icon="document", className="pt-minimal", url } : menuItem) => (
-              <Link to={url}><Button className={className} icon={icon} text={title} /></Link>
+              <Link key={url} to={url}><Button key={url} className={className} icon={icon} text={title} /></Link>
             ))}
           </NavbarGroup>
         </Navbar>
         <div className="misk-menu">
           <Menu>
             {menu.map(({ title, icon="document", className="pt-minimal", url } : menuItem) => (
-              <Link to={url}><MenuItem className={className} icon={icon} text={title} /></Link>
+              <Link key={url} to={url}><MenuItem key={url} className={className} icon={icon} text={title} /></Link>
             ))}
             <Region name="mainMenu" />
           </Menu>
