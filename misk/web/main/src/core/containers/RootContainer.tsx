@@ -6,6 +6,7 @@ import { Alignment, Button, Navbar, NavbarGroup, NavbarHeading, NavbarDivider, M
 import menu, { menuItem } from '../menu';
 import routes from '../routes';
 
+// https://stackoverflow.com/questions/49962495/integrate-react-router-active-navlink-with-child-component
 // declare namespace MenuItemExt {
 //   declare 
 // }

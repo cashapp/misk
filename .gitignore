@@ -4,7 +4,6 @@ build
 .idea
 *.iml
 
-//web
 .DS_Store
 .git
 build
@@ -13,3 +12,4 @@ node_modules
 *.log
 **/menu_*.js*
 **/module_*.js*
+old_modules

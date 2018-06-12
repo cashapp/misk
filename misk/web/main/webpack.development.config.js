@@ -1,5 +1,6 @@
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const ScriptExtHtmlWebpackPlugin = require('script-ext-html-webpack-plugin');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
 const miskCommon = require('../@misk/common/lib');
 const path = require('path');
 
@@ -56,7 +57,10 @@ module.exports = {
     }),
     new ScriptExtHtmlWebpackPlugin({
       defaultAttribute: 'async',
-    })
+    }),
+    new CopyWebpackPlugin(
+      [{ from: './public', to: '../' }], { debug: 'info', copyUnmodified: true }
+    )
   ],
   externals: miskCommon.externals,
 };

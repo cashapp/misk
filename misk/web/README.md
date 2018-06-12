@@ -44,6 +44,8 @@ $ yarn start
 - [x] Move code to `src`
 - [x] Move all code into main Misk repo, create PR
 - [ ] Publish `@misk/common` NPM package so it can be accessed by all modules (and they don't need to `require` the path name)
+- [x] Add `copy-webpack-plugin` to copy static assets (`favicon.ico`, ...) into build
+- [ ] Move `original-web` code into heartbeat / status tab
 - [ ] Wire up admin within Kotlin, specifically for the URL shortener app
   - [ ] Flesh out URL shortener so the admin tabs load live data (ie. config, threads...)
   - [ ] Create easy front end for URL shortener (form that enters long url, shows short url below)
@@ -51,11 +53,12 @@ $ yarn start
   - [ ] @todo: React doesn't resolve js scripts not in `core.js` nicely. Current work around is copying the compiled module code into `src/core/components` at compile time so that modules correctly load when links are gone to. This work around is not needed if the long term initial loading mechanism is not through React Router but through an endpoint that calls `import(./path/to/module.js)`. Calling this in browser JS console works without the hacky fix described above (ie. `import(./module_config.js)`).
 - [x] Move repos to Typescript
 - [x] Move Redux flows to Typescript [Resource](https://rjzaworski.com/2016/08/getting-started-with-redux-and-typescript)
-- [ ] Frint-Router (try AllowJS ts flag), otherwise add typings for the package
+- [x] Frint-Router (try AllowJS ts flag), otherwise add typings for the package. Soln: `const Router = require('frint-router')` which bypasses Typescript
 - [x] Create sidebar UI
 - [ ] Have module registration also add button to sidebar
 - [x] Have sidebar buttons trigger the Import of modules
 - [ ] Dynamically extensible router. Each module gets a namespace and handles all routes within it
+- [ ] Add reasonable linting and syntax enforcement with `eslint` or `tslint`
 - [ ] Exemplar module UI
 
 ## Typescript Nuances

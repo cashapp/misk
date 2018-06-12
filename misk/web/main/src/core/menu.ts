@@ -19,14 +19,6 @@ const menu =  [
     text: "Config",
     icon: "properties",
     url: "/config",
-},  {
-    text: "Log4j",
-    icon: "annotation",
-    url: "/log4j",
-},  {
-    text: "Threads",
-    icon: "comparison",
-    url: "/threads"
 }
 ]
 
