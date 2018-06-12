@@ -4,11 +4,12 @@ build
 .idea
 *.iml
 
+//web
 .DS_Store
 .git
 build
 lib
 node_modules
 *.log
-main/src/core/app/components/*.js
-main/src/core/app/components/*.js.map
+**/m_*.js*
+**/t_*.js*

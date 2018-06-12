@@ -46,7 +46,7 @@ $ yarn start
   - [ ] Flesh out URL shortener so the admin tabs load live data (ie. config, threads...)
   - [ ] Create easy front end for URL shortener (form that enters long url, shows short url below)
   - [ ] Create admin tab for urlshortner that shows all URLs in a table and allows paging of the database
-  - [ ] @todo: React doesn't resolve js scripts not in `core.js` nicely...
+  - [ ] @todo: React doesn't resolve js scripts not in `core.js` nicely. Current work around is copying the compiled module code into `src/core/components` at compile time so that modules correctly load when links are gone to. This work around is not needed if the long term initial loading mechanism is not through React Router but through an endpoint that calls `import(./path/to/module.js)`. Calling this in browser JS console works without the hacky fix described above (ie. `import(./t_config.js)`).
 - [x] Move repos to Typescript
 - [x] Move Redux flows to Typescript [Resource](https://rjzaworski.com/2016/08/getting-started-with-redux-and-typescript)
 - [ ] Frint-Router (try AllowJS ts flag), otherwise add typings for the package

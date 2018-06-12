@@ -4,10 +4,10 @@ const path = require('path');
 module.exports = {
   mode: 'development',
   entry: {
-    'threads': path.resolve(__dirname, 'src/core/index.ts'),
-    'threadsMenu': path.resolve(__dirname, 'src/mainMenu/index.ts'),
+    't_threads': path.resolve(__dirname, 'src/core/index.ts'),
+    'm_threads': path.resolve(__dirname, 'src/mainMenu/index.ts'),
   },
-  devtool: 'cheap-module-eval-source-map',
+  devtool: 'source-map',
   output: {
     path: path.resolve(__dirname, '../../main/build/js'),
     filename: '[name].js',

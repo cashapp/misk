@@ -1,29 +1,30 @@
 import { IconName as BlueprintjsIconName } from '@blueprintjs/icons'
 
 export type menuItem = {
-    title: string,
+    text: string,
     icon: BlueprintjsIconName,
     className: string,
-    url: string
+    url: string,
+    activeOnlyWhenExact: boolean
 }
 
 // default icon: applications
 
 const menu =  [
     {
-    title: "Home",
+    text: "Home",
     icon: "home",
     url: "/",
 },  {
-    title: "Config",
+    text: "Config",
     icon: "properties",
     url: "/config",
 },  {
-    title: "Log4j",
+    text: "Log4j",
     icon: "annotation",
     url: "/log4j",
 },  {
-    title: "Threads",
+    text: "Threads",
     icon: "comparison",
     url: "/threads"
 }

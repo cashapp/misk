@@ -4,8 +4,8 @@ const path = require('path');
 module.exports = {
   mode: 'production',
   entry: {
-    'log4j': path.resolve(__dirname, 'src/core/index.ts'),
-    'log4jMenu': path.resolve(__dirname, 'src/mainMenu/index.ts'),
+    't_log4j': path.resolve(__dirname, 'src/core/index.ts'),
+    'm_log4j': path.resolve(__dirname, 'src/mainMenu/index.ts'),
   },
   devtool: 'source-map',
   output: {

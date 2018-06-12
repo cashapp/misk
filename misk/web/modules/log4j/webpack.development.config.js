@@ -4,10 +4,10 @@ const path = require('path');
 module.exports = {
   mode: 'development',
   entry: {
-    'log4j': path.resolve(__dirname, 'src/core/index.ts'),
-    'log4jMenu': path.resolve(__dirname, 'src/mainMenu/index.ts'),
+    't_log4j': path.resolve(__dirname, 'src/core/index.ts'),
+    'm_log4j': path.resolve(__dirname, 'src/mainMenu/index.ts'),
   },
-  devtool: 'cheap-module-eval-source-map',
+  devtool: 'source-map',
   output: {
     path: path.resolve(__dirname, '../../main/build/js'),
     filename: '[name].js',
