@@ -2,6 +2,7 @@ package misk.hibernate
 
 import com.google.common.cache.CacheBuilder
 import com.google.common.cache.CacheLoader
+import com.google.inject.TypeLiteral
 import misk.inject.typeLiteral
 import java.lang.reflect.InvocationHandler
 import java.lang.reflect.InvocationTargetException
@@ -16,6 +17,7 @@ import javax.persistence.criteria.Root
 import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
 import kotlin.reflect.KParameter
+import kotlin.reflect.KType
 import kotlin.reflect.full.allSupertypes
 import kotlin.reflect.full.declaredMemberFunctions
 import kotlin.reflect.full.findAnnotation
@@ -27,7 +29,6 @@ import kotlin.reflect.jvm.javaMethod
  * reflection to call the primary constructor.
  */
 internal class ReflectionQuery<T : DbEntity<T>>(
-  private val factory: Factory,
   private val rootEntityType: KClass<T>,
   private val queryMethodHandlers: Map<Method, QueryMethodHandler>
 ) : Query<T>, InvocationHandler {
@@ -36,13 +37,6 @@ internal class ReflectionQuery<T : DbEntity<T>>(
   override fun uniqueResult(session: Session): T? {
     // TODO(jwilson): max results = 2
     val list = list(session)
-    require(list.size <= 1) { "expected at most 1 result but was $list" }
-    return list.firstOrNull()
-  }
-
-  override fun <P : Projection> uniqueResultAs(session: Session, projection: KClass<P>): P? {
-    // TODO(jwilson): max results = 2
-    val list = listAs(session, projection)
     require(list.size <= 1) { "expected at most 1 result but was $list" }
     return list.firstOrNull()
   }
@@ -59,27 +53,13 @@ internal class ReflectionQuery<T : DbEntity<T>>(
     return typedQuery.list()
   }
 
-  override fun <P : Projection> listAs(session: Session, projection: KClass<P>): List<P> {
-    val criteriaBuilder = session.hibernateSession.criteriaBuilder
-    val query = criteriaBuilder.createQuery(Any::class.java)
-    val root: Root<*> = query.from(rootEntityType.java)
-
-    @Suppress("UNCHECKED_CAST") // The cache always returns matching types.
-    val projectionHandler = factory.projectionCache[projection] as ProjectionHandler<P>
-
-    query.select(projectionHandler.select(criteriaBuilder, root))
-    query.where(buildWherePredicate(root, criteriaBuilder))
-    val rows = session.hibernateSession.createQuery(query).list()
-    return rows.map { projectionHandler.toValue(it) }
-  }
-
   override fun invoke(proxy: Any, method: Method, args: Array<out Any>?): Any? {
-    val constraintHandler = queryMethodHandlers[method]
+    val handler = queryMethodHandlers[method]
 
     return when {
-      constraintHandler != null -> {
-        constraintHandler.invoke(this, args ?: arrayOf())
-        proxy
+      handler != null -> {
+        val result = handler.invoke(this, args ?: arrayOf())
+        if (result == this) proxy else result
       }
       method.declaringClass == Query::class.java || method.declaringClass == Any::class.java -> {
         try {
@@ -95,13 +75,9 @@ internal class ReflectionQuery<T : DbEntity<T>>(
 
   @Singleton
   internal class Factory : Query.Factory {
-    val queryMethodHandlersCache = CacheBuilder.newBuilder()
+    private val queryMethodHandlersCache = CacheBuilder.newBuilder()
         .build(object : CacheLoader<KClass<*>, Map<Method, QueryMethodHandler>>() {
           override fun load(key: KClass<*>) = queryMethodHandlers(key)
-        })
-    val projectionCache = CacheBuilder.newBuilder()
-        .build(object : CacheLoader<KClass<out Projection>, ProjectionHandler<*>>() {
-          override fun load(key: KClass<out Projection>) = ProjectionHandler.create(key)
         })
 
     override fun <T : Query<*>> newQuery(queryClass: KClass<T>): T {
@@ -117,7 +93,7 @@ internal class ReflectionQuery<T : DbEntity<T>>(
       return Proxy.newProxyInstance(
           classLoader,
           arrayOf<Class<*>>(queryClass.java),
-          ReflectionQuery(this, entityType.kotlin, queryMethodHandlers)
+          ReflectionQuery(entityType.kotlin, queryMethodHandlers)
       ) as T
     }
 
@@ -144,66 +120,47 @@ internal class ReflectionQuery<T : DbEntity<T>>(
     }
   }
 
-  /** Queries for a data class. */
-  class ProjectionHandler<P : Projection>(
-    val constructor: KFunction<P>,
-    val properties: List<List<String>>
-  ) {
-    fun select(
+  class SelectMethodHandler(
+    private val returnList: Boolean,
+    private val constructor: KFunction<*>?,
+    private val properties: List<List<String>>
+  ) : QueryMethodHandler {
+
+    override fun invoke(reflectionQuery: ReflectionQuery<*>, args: Array<out Any>): Any? {
+      val session = args[0] as Session
+
+      val criteriaBuilder = session.hibernateSession.criteriaBuilder
+      val query = criteriaBuilder.createQuery(Any::class.java)
+      val root: Root<*> = query.from(reflectionQuery.rootEntityType.java)
+
+      query.select(select(criteriaBuilder, root))
+      query.where(reflectionQuery.buildWherePredicate(root, criteriaBuilder))
+      val rows = session.hibernateSession.createQuery(query).list()
+      val list = rows.map { toValue(it) }
+
+      if (returnList) return list
+
+      require(list.size <= 1) { "expected at most 1 result but was $list" }
+      return list.firstOrNull()
+    }
+
+    private fun select(
       criteriaBuilder: CriteriaBuilder,
       queryRoot: Root<*>
     ) = criteriaBuilder.array(*properties.map { queryRoot.traverse<Any?>(it) }.toTypedArray())
 
-    fun toValue(row: Any): P {
-      return if (properties.size == 1) {
-        constructor.call(row)
-      } else {
-        constructor.call(*(row as Array<*>))
-      }
-    }
-
-    companion object {
-      fun <P : Projection> create(projectionClass: KClass<P>): ProjectionHandler<P> {
-        val errors = mutableListOf<String>()
-        val constructor = projectionClass.primaryConstructor
-
-        val parameters = if (constructor != null) {
-          constructor.parameters
-        } else {
-          errors.add("this type has no primary constructor")
-          listOf()
-        }
-
-        val properties = mutableListOf<List<String>>()
-        for (parameter in parameters) {
-          val property = parameter.findAnnotation<Property>()
-          if (property == null) {
-            errors.add("parameter ${parameter.index} is missing a @Property annotation")
-            continue
-          }
-
-          if (!property.value.matches(PATH_PATTERN)) {
-            errors.add("parameter ${parameter.index} path is not valid: '${property.value}'")
-            continue
-          }
-          val path = property.value.split('.')
-
-          properties.add(path)
-        }
-
-        require(errors.isEmpty()) {
-          "Projection class ${projectionClass.java.name} has problems:" +
-              "\n  ${errors.joinToString(separator = "\n  ")}"
-        }
-
-        return ProjectionHandler(constructor!!, properties)
+    private fun toValue(row: Any): Any? {
+      return when {
+        constructor == null -> row
+        properties.size == 1 -> constructor.call(row)
+        else -> constructor.call(*(row as Array<*>))
       }
     }
   }
 
   /** Handles a query method call. Most implementations add constraints to the method. */
   interface QueryMethodHandler {
-    fun invoke(query: ReflectionQuery<*>, args: Array<out Any>)
+    fun invoke(reflectionQuery: ReflectionQuery<*>, args: Array<out Any>): Any?
 
     companion object {
       fun create(
@@ -211,12 +168,33 @@ internal class ReflectionQuery<T : DbEntity<T>>(
         function: KFunction<*>,
         result: MutableMap<Method, QueryMethodHandler>
       ) {
-        val constraint = function.findAnnotation<misk.hibernate.Constraint>()
-        if (constraint == null) {
-          errors.add("${function.name}() is missing a @Constraint annotation")
+        val constraint = function.findAnnotation<Constraint>()
+        val select = function.findAnnotation<Select>()
+
+        if (constraint != null && select != null) {
+          errors.add("${function.name}() has too many annotations")
           return
         }
 
+        if (constraint != null) {
+          createConstraint(errors, function, result, constraint)
+          return
+        }
+
+        if (select != null) {
+          createSelect(errors, function, result, select)
+          return
+        }
+
+        errors.add("${function.name}() must be annotated @Constraint or @Select")
+      }
+
+      private fun createConstraint(
+        errors: MutableList<String>,
+        function: KFunction<*>,
+        result: MutableMap<Method, QueryMethodHandler>,
+        constraint: Constraint
+      ) {
         if (!constraint.path.matches(PATH_PATTERN)) {
           errors.add("${function.name}() path is not valid: '${constraint.path}'")
           return
@@ -245,40 +223,40 @@ internal class ReflectionQuery<T : DbEntity<T>>(
 
         val handler = when (constraint.operator) {
           Operator.EQ -> object : QueryMethodHandler {
-            override fun invoke(query: ReflectionQuery<*>, args: Array<out Any>) {
-              query.addConstraint { root, builder ->
+            override fun invoke(reflectionQuery: ReflectionQuery<*>, args: Array<out Any>): Any? {
+              return reflectionQuery.addConstraint { root, builder ->
                 builder.equal(root.traverse<Any?>(path), args[0])
               }
             }
           }
           Operator.NE -> object : QueryMethodHandler {
-            override fun invoke(query: ReflectionQuery<*>, args: Array<out Any>) {
-              query.addConstraint { root, builder ->
+            override fun invoke(reflectionQuery: ReflectionQuery<*>, args: Array<out Any>): Any? {
+              return reflectionQuery.addConstraint { root, builder ->
                 builder.notEqual(root.traverse<Any?>(path), args[0])
               }
             }
           }
           Operator.LT -> object : QueryMethodHandler {
-            override fun invoke(query: ReflectionQuery<*>, args: Array<out Any>) {
+            override fun invoke(reflectionQuery: ReflectionQuery<*>, args: Array<out Any>): Any? {
               @Suppress("UNCHECKED_CAST") // Comparison operands must be comparable!
               val arg = args[0] as Comparable<Comparable<*>?>?
-              query.addConstraint { root, builder ->
+              return reflectionQuery.addConstraint { root, builder ->
                 builder.lessThan(root.traverse(path), arg)
               }
             }
           }
           Operator.LE -> object : QueryMethodHandler {
-            override fun invoke(query: ReflectionQuery<*>, args: Array<out Any>) {
+            override fun invoke(reflectionQuery: ReflectionQuery<*>, args: Array<out Any>): Any? {
               @Suppress("UNCHECKED_CAST") // Comparison operands must be comparable!
               val arg = args[0] as Comparable<Comparable<*>?>?
-              query.addConstraint { root, builder ->
+              return reflectionQuery.addConstraint { root, builder ->
                 builder.lessThanOrEqualTo(root.traverse(path), arg)
               }
             }
           }
           Operator.GE -> object : QueryMethodHandler {
-            override fun invoke(query: ReflectionQuery<*>, args: Array<out Any>) {
-              query.addConstraint { root, builder ->
+            override fun invoke(reflectionQuery: ReflectionQuery<*>, args: Array<out Any>): Any? {
+              return reflectionQuery.addConstraint { root, builder ->
                 @Suppress("UNCHECKED_CAST") // Comparison operands must be comparable!
                 val arg = args[0] as Comparable<Comparable<*>?>?
                 builder.greaterThanOrEqualTo(root.traverse(path), arg)
@@ -286,8 +264,8 @@ internal class ReflectionQuery<T : DbEntity<T>>(
             }
           }
           Operator.GT -> object : QueryMethodHandler {
-            override fun invoke(query: ReflectionQuery<*>, args: Array<out Any>) {
-              query.addConstraint { root, builder ->
+            override fun invoke(reflectionQuery: ReflectionQuery<*>, args: Array<out Any>): Any? {
+              return reflectionQuery.addConstraint { root, builder ->
                 @Suppress("UNCHECKED_CAST") // Comparison operands must be comparable!
                 val arg = args[0] as Comparable<Comparable<*>?>?
                 builder.greaterThan(root.traverse(path), arg)
@@ -307,8 +285,8 @@ internal class ReflectionQuery<T : DbEntity<T>>(
             }
 
             object : QueryMethodHandler {
-              override fun invoke(query: ReflectionQuery<*>, args: Array<out Any>) {
-                query.addConstraint { root, builder ->
+              override fun invoke(reflectionQuery: ReflectionQuery<*>, args: Array<out Any>): Any? {
+                return reflectionQuery.addConstraint { root, builder ->
                   val collection = argToCollection(args[0])
                   if (collection.isEmpty()) {
                     // The JDBC API forbids empty IN clauses so we use `WHERE 1 = 0` instead to
@@ -326,15 +304,15 @@ internal class ReflectionQuery<T : DbEntity<T>>(
             }
           }
           Operator.IS_NOT_NULL -> object : QueryMethodHandler {
-            override fun invoke(query: ReflectionQuery<*>, args: Array<out Any>) {
-              query.addConstraint { root, builder ->
+            override fun invoke(reflectionQuery: ReflectionQuery<*>, args: Array<out Any>): Any? {
+              return reflectionQuery.addConstraint { root, builder ->
                 builder.isNotNull(root.traverse<Comparable<Comparable<*>>>(path))
               }
             }
           }
           Operator.IS_NULL -> object : QueryMethodHandler {
-            override fun invoke(query: ReflectionQuery<*>, args: Array<out Any>) {
-              query.addConstraint { root, builder ->
+            override fun invoke(reflectionQuery: ReflectionQuery<*>, args: Array<out Any>): Any? {
+              return reflectionQuery.addConstraint { root, builder ->
                 builder.isNull(root.traverse<Comparable<Comparable<*>>>(path))
               }
             }
@@ -343,11 +321,86 @@ internal class ReflectionQuery<T : DbEntity<T>>(
 
         result[javaMethod] = handler
       }
+
+      private fun createSelect(
+        errors: MutableList<String>,
+        function: KFunction<*>,
+        result: MutableMap<Method, QueryMethodHandler>,
+        select: Select
+      ) {
+        if (function.parameters.size != 2
+            || function.parameters[1].type.classifier != Session::class) {
+          errors.add("${function.name}() must accept a single Session parameter")
+          return
+        }
+
+        val returnType = function.returnType.typeLiteral()
+        val isList = List::class.java.isAssignableFrom(returnType.rawType)
+        val elementType: TypeLiteral<*> = if (isList) {
+          val listType = returnType.getSupertype(List::class.java)
+          (listType.type as ParameterizedType).actualTypeArguments[0].typeLiteral()
+        } else {
+          returnType
+        }
+
+        if (isList == function.returnType.isMarkedNullable) {
+          errors.add("${function.name}() return type must be a non-null List or a nullable value")
+          return
+        }
+
+        val isProjection = Projection::class.java.isAssignableFrom(elementType.rawType)
+
+        if (!select.path.matches(PATH_PATTERN) && (select.path.isNotEmpty() || !isProjection)) {
+          errors.add("${function.name}() path is not valid: '${select.path}'")
+          return
+        }
+
+        val selectMethodHandler: SelectMethodHandler
+        if (isProjection) {
+          @Suppress("UNCHECKED_CAST") // The line above confirms that this cast is safe.
+          val projectionClass = (elementType.rawType as Class<out Projection>).kotlin
+          val constructor = projectionClass.primaryConstructor
+          val parameters = if (constructor != null) {
+            constructor.parameters
+          } else {
+            errors.add("${projectionClass.java.name} has no primary constructor")
+            return
+          }
+
+          val pathPrefix = if (select.path.isEmpty()) "" else "${select.path}."
+          val properties = mutableListOf<List<String>>()
+          for (parameter in parameters) {
+            val property = parameter.findAnnotation<Property>()
+            if (property == null) {
+              errors.add("${projectionClass.java.name} parameter ${parameter.index} " +
+                  "is missing a @Property annotation")
+              continue
+            }
+
+            if (!property.path.matches(PATH_PATTERN)) {
+              errors.add("${projectionClass.java.name} parameter ${parameter.index} " +
+                  "path is not valid: '${property.path}'")
+              continue
+            }
+
+            val path = (pathPrefix + property.path).split('.')
+            properties.add(path)
+          }
+          selectMethodHandler = SelectMethodHandler(isList, constructor, properties)
+        } else {
+          val onlyPath = select.path.split('.')
+          selectMethodHandler = SelectMethodHandler(isList, null, listOf(onlyPath))
+        }
+
+        val javaMethod = function.javaMethod ?: throw UnsupportedOperationException()
+        result[javaMethod] = selectMethodHandler
+      }
     }
   }
 
-  internal fun addConstraint(predicateFactory: PredicateFactory) {
+  internal fun addConstraint(predicateFactory: PredicateFactory): ReflectionQuery<T> {
     constraints.add(predicateFactory)
+    return this
   }
 
   private fun buildWherePredicate(root: Root<*>, criteriaBuilder: CriteriaBuilder): Predicate? {
@@ -380,5 +433,7 @@ private fun <T> Path<*>.traverse(chain: List<String>): Path<T> {
   return result as Path<T>
 }
 
-private fun KParameter.isAssignableTo(supertype: KClass<*>) =
-    supertype.java.isAssignableFrom(type.typeLiteral().rawType)
+private fun KParameter.isAssignableTo(supertype: KClass<*>) = type.isAssignableTo(supertype)
+
+private fun KType.isAssignableTo(supertype: KClass<*>) =
+    supertype.java.isAssignableFrom(typeLiteral().rawType)

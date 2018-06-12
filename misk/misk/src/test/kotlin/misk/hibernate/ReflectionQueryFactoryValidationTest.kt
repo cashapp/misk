@@ -45,16 +45,16 @@ class ReflectionQueryFactoryValidationTest {
   }
 
   @Test
-  fun constraintAnnotationRequiredOnQuery() {
+  fun annotationRequiredOnQuery() {
     assertThat(assertThrows(UncheckedExecutionException::class.java) {
-      queryFactory.newQuery<ConstraintAnnotationRequiredOnQuery>()
+      queryFactory.newQuery<AnnotationRequiredOnQuery>()
     }.cause).hasMessage("""
-        |Query class ${ConstraintAnnotationRequiredOnQuery::class.java.name} has problems:
-        |  name() is missing a @Constraint annotation""".trimMargin())
+        |Query class ${AnnotationRequiredOnQuery::class.java.name} has problems:
+        |  name() must be annotated @Constraint or @Select""".trimMargin())
   }
 
-  interface ConstraintAnnotationRequiredOnQuery : Query<DbCharacter> {
-    fun name(name: String): ConstraintAnnotationRequiredOnQuery
+  interface AnnotationRequiredOnQuery : Query<DbCharacter> {
+    fun name(name: String): AnnotationRequiredOnQuery
   }
 
   @Test
@@ -68,18 +68,23 @@ class ReflectionQueryFactoryValidationTest {
 
   interface MalformedPathOnQuery : Query<DbCharacter> {
     @Constraint(".name")
-    fun name(name: String): ConstraintAnnotationRequiredOnQuery
+    fun name(name: String): AnnotationRequiredOnQuery
   }
 
   @Test
   fun parameterAnnotationRequiredOnProjection() {
     assertThat(assertThrows(UncheckedExecutionException::class.java) {
-      transacter.transaction { session ->
-        queryFactory.newQuery<EmptyQuery>().listAs<ParameterAnnotationRequiredOnProjection>(session)
+      transacter.transaction {
+        queryFactory.newQuery<ParameterAnnotationRequiredOnProjectionQuery>()
       }
     }.cause).hasMessage("""
-        |Projection class ${ParameterAnnotationRequiredOnProjection::class.java.name} has problems:
-        |  parameter 0 is missing a @Property annotation""".trimMargin())
+        |Query class ${ParameterAnnotationRequiredOnProjectionQuery::class.java.name} has problems:
+        |  ${ParameterAnnotationRequiredOnProjection::class.java.name} parameter 0 is missing a @Property annotation""".trimMargin())
+  }
+
+  interface ParameterAnnotationRequiredOnProjectionQuery : Query<DbCharacter> {
+    @Select
+    fun listAsProjection(session: Session): List<ParameterAnnotationRequiredOnProjection>
   }
 
   data class ParameterAnnotationRequiredOnProjection(var name: String) : Projection
@@ -87,12 +92,17 @@ class ReflectionQueryFactoryValidationTest {
   @Test
   fun missingPrimaryConstructor() {
     assertThat(assertThrows(UncheckedExecutionException::class.java) {
-      transacter.transaction { session ->
-        queryFactory.newQuery<EmptyQuery>().listAs<MissingPrimaryConstructor>(session)
+      transacter.transaction {
+        queryFactory.newQuery<MissingPrimaryConstructorQuery>()
       }
     }.cause).hasMessage("""
-        |Projection class ${MissingPrimaryConstructor::class.java.name} has problems:
-        |  this type has no primary constructor""".trimMargin())
+        |Query class ${MissingPrimaryConstructorQuery::class.java.name} has problems:
+        |  ${MissingPrimaryConstructor::class.java.name} has no primary constructor""".trimMargin())
+  }
+
+  interface MissingPrimaryConstructorQuery : Query<DbCharacter> {
+    @Select
+    fun listAsProjection(session: Session): List<MissingPrimaryConstructor>
   }
 
   interface MissingPrimaryConstructor : Projection
@@ -100,16 +110,21 @@ class ReflectionQueryFactoryValidationTest {
   @Test
   fun malformedPathOnParameter() {
     assertThat(assertThrows(UncheckedExecutionException::class.java) {
-      transacter.transaction { session ->
-        queryFactory.newQuery<EmptyQuery>().listAs<MalformedPathOnParameter>(session)
+      transacter.transaction {
+        queryFactory.newQuery<MalformedPathOnParameterQuery>()
       }
     }.cause).hasMessage("""
-        |Projection class ${MalformedPathOnParameter::class.java.name} has problems:
-        |  parameter 0 path is not valid: '.name'""".trimMargin())
+        |Query class ${MalformedPathOnParameterQuery::class.java.name} has problems:
+        |  ${MalformedPathOnParameter::class.java.name} parameter 0 path is not valid: '.name'""".trimMargin())
+  }
+
+  interface MalformedPathOnParameterQuery : Query<DbCharacter> {
+    @Select
+    fun listAsProjection(session: Session): List<MalformedPathOnParameter>
   }
 
   data class MalformedPathOnParameter(
-    @Property(".name") var name: String
+    @Property(path = ".name") var name: String
   ) : Projection
 
   @Test
@@ -124,6 +139,75 @@ class ReflectionQueryFactoryValidationTest {
   interface InParameterIsNotVarargOrCollection : Query<DbCharacter> {
     @Constraint("name", Operator.IN)
     fun nameIn(name: String): InParameterIsNotVarargOrCollection
+  }
+
+  @Test
+  fun selectDoesNotAcceptSession() {
+    assertThat(assertThrows(UncheckedExecutionException::class.java) {
+      transacter.transaction {
+        queryFactory.newQuery<SelectDoesNotAcceptSessionQuery>()
+      }
+    }.cause).hasMessage("""
+        |Query class ${SelectDoesNotAcceptSessionQuery::class.java.name} has problems:
+        |  listAsProjection() must accept a single Session parameter""".trimMargin())
+  }
+
+  interface SelectDoesNotAcceptSessionQuery : Query<DbCharacter> {
+    @Select
+    fun listAsProjection(): List<MalformedPathOnParameter>
+  }
+
+  @Test
+  fun selectNonProjectionPathIsEmpty() {
+    assertThat(assertThrows(UncheckedExecutionException::class.java) {
+      transacter.transaction {
+        queryFactory.newQuery<SelectNonProjectionPathIsEmpty>()
+      }
+    }.cause).hasMessage("""
+        |Query class ${SelectNonProjectionPathIsEmpty::class.java.name} has problems:
+        |  listAsProjection() path is not valid: ''""".trimMargin())
+  }
+
+  interface SelectNonProjectionPathIsEmpty : Query<DbCharacter> {
+    @Select
+    fun listAsProjection(session: Session): List<String>
+  }
+
+  @Test
+  fun selectUniqueReturnTypeNullability() {
+    assertThat(assertThrows(UncheckedExecutionException::class.java) {
+      transacter.transaction {
+        queryFactory.newQuery<SelectUniqueReturnTypeNullability>()
+      }
+    }.cause).hasMessage("""
+        |Query class ${SelectUniqueReturnTypeNullability::class.java.name} has problems:
+        |  listNames() return type must be a non-null List or a nullable value
+        |  uniqueName() return type must be a non-null List or a nullable value""".trimMargin())
+  }
+
+  interface SelectUniqueReturnTypeNullability : Query<DbCharacter> {
+    @Select("name")
+    fun uniqueName(session: Session): String
+
+    @Select("name")
+    fun listNames(session: Session): List<String>?
+  }
+
+  @Test
+  fun tooManyAnnotations() {
+    assertThat(assertThrows(UncheckedExecutionException::class.java) {
+      transacter.transaction {
+        queryFactory.newQuery<TooManyAnnotations>()
+      }
+    }.cause).hasMessage("""
+        |Query class ${TooManyAnnotations::class.java.name} has problems:
+        |  selectOrConstraint() has too many annotations""".trimMargin())
+  }
+
+  interface TooManyAnnotations : Query<DbCharacter> {
+    @Select("name")
+    @Constraint("name")
+    fun selectOrConstraint(session: Session): TooManyAnnotations
   }
 
   @Test
