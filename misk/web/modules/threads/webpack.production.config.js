@@ -4,8 +4,8 @@ const path = require('path');
 module.exports = {
   mode: 'production',
   entry: {
-    't_threads': path.resolve(__dirname, 'src/core/index.ts'),
-    'm_threads': path.resolve(__dirname, 'src/mainMenu/index.ts'),
+    'module_threads': path.resolve(__dirname, 'src/core/index.ts'),
+    'menu_threads': path.resolve(__dirname, 'src/mainMenu/index.ts'),
   },
   devtool: 'source-map',
   output: {

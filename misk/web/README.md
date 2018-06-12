@@ -5,7 +5,10 @@ Misk Admin
 - `main`: core UI for `_admin/` dashboard
 - `@misk`: all npm packages
   - `@misk/common`: common libraries and files that `modules` and `main` have access to
-- `modules`: all dashboard tabs written as "child apps" that can be hot loaded into main at runtime
+- `modules`: all dashboard tabs written as "child apps" that can be hot loaded into main at runtime. The tabs below will be similar to the current dashboard tabs:
+  - `config`
+  - `log4j`
+  - `threads`
 - `original-web`: heartbeat code, will be moved into modules and deleted
 
 ## Framework and Languages
@@ -15,8 +18,7 @@ Misk Admin
   - All child apps (`modules`) register to a "Region" React component declared in Root App (`main`)
   - Common store in Root App for state. Common store is accessible and extensible in child apps
   - Common router in Root App. Common router is accessible and extensible in child apps
-- [Blueprintjs](http://blueprintjs.com/) for UI elements
-- [FontAwesome](https://fontawesome.com/) for Icons
+- [Blueprintjs](http://blueprintjs.com/) for UI elements + Typescript compatible Icons
 - [Skeleton](http://getskeleton.com/) for very simple responsive boilerplate styling
 
 ## Getting Started
@@ -46,7 +48,7 @@ $ yarn start
   - [ ] Flesh out URL shortener so the admin tabs load live data (ie. config, threads...)
   - [ ] Create easy front end for URL shortener (form that enters long url, shows short url below)
   - [ ] Create admin tab for urlshortner that shows all URLs in a table and allows paging of the database
-  - [ ] @todo: React doesn't resolve js scripts not in `core.js` nicely. Current work around is copying the compiled module code into `src/core/components` at compile time so that modules correctly load when links are gone to. This work around is not needed if the long term initial loading mechanism is not through React Router but through an endpoint that calls `import(./path/to/module.js)`. Calling this in browser JS console works without the hacky fix described above (ie. `import(./t_config.js)`).
+  - [ ] @todo: React doesn't resolve js scripts not in `core.js` nicely. Current work around is copying the compiled module code into `src/core/components` at compile time so that modules correctly load when links are gone to. This work around is not needed if the long term initial loading mechanism is not through React Router but through an endpoint that calls `import(./path/to/module.js)`. Calling this in browser JS console works without the hacky fix described above (ie. `import(./module_config.js)`).
 - [x] Move repos to Typescript
 - [x] Move Redux flows to Typescript [Resource](https://rjzaworski.com/2016/08/getting-started-with-redux-and-typescript)
 - [ ] Frint-Router (try AllowJS ts flag), otherwise add typings for the package

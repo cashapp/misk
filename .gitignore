@@ -11,5 +11,5 @@ build
 lib
 node_modules
 *.log
-**/m_*.js*
-**/t_*.js*
+**/menu_*.js*
+**/module_*.js*

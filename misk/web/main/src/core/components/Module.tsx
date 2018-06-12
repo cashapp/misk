@@ -21,7 +21,7 @@ export default class Module extends React.Component<Module.Props> {
   }
 
   async loadModule (moduleID : string) : Promise<any> {
-    return import(`./t_${this.props.match.params.moduleID}.js`)
+    return import(`./module_${this.props.match.params.moduleID}.js`)
   }
 
   render() {

@@ -4,8 +4,8 @@ const path = require('path');
 module.exports = {
   mode: 'development',
   entry: {
-    't_config': path.resolve(__dirname, 'src/core/index.ts'),
-    'm_config': path.resolve(__dirname, 'src/mainMenu/index.ts'),
+    'module_config': path.resolve(__dirname, 'src/core/index.ts'),
+    'menu_config': path.resolve(__dirname, 'src/mainMenu/index.ts'),
   },
   devtool: 'source-map',
   output: {
