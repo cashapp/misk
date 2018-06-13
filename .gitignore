@@ -4,3 +4,12 @@ build
 .idea
 *.iml
 
+.DS_Store
+.git
+build
+lib
+node_modules
+*.log
+**/menu_*.js*
+**/module_*.js*
+old_modules
