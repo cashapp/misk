@@ -7,9 +7,7 @@ Misk Admin
   - `@misk/common`: common libraries and files that `modules` and `main` have access to
 - `modules`: all dashboard tabs written as "child apps" that can be hot loaded into main at runtime. The tabs below will be similar to the current dashboard tabs:
   - `config`
-  - `log4j`
-  - `threads`
-- `original-web`: heartbeat code, will be moved into modules and deleted
+  - `healthcheck`
 
 ## Framework and Languages
 - Typescript + ReactJS
@@ -29,6 +27,13 @@ $ yarn run reinstall
 $ yarn start
 ```
 
+## Creating a new Module
+
+- Duplicate exemplar module into `modules`
+- Change name for `module_{name}` and `menu_{name}` in `webpack.{development | production}.config.js` -> `entry: {}`
+- Add to `main/src/routes.ts` and `main/src/menu.ts`
+
+
 ## Progress
 
 - [x] FrintJS Multiple-App Exemplar refactored for Misk testing
@@ -43,7 +48,8 @@ $ yarn start
 
 - [x] Move code to `src`
 - [x] Move all code into main Misk repo, create PR
-- [ ] Publish `@misk/common` NPM package so it can be accessed by all modules (and they don't need to `require` the path name)
+- [ ] Publish `@misk/common` NPM package so it can be accessed by all modules (and they don't need to `require` the path name). 
+  - [ ] Update install instructions in `@misk/common/README.md`.
 - [x] Add `copy-webpack-plugin` to copy static assets (`favicon.ico`, ...) into build
 - [ ] Move `original-web` code into heartbeat / status tab
 - [ ] Wire up admin within Kotlin, specifically for the URL shortener app
@@ -58,7 +64,11 @@ $ yarn start
 - [ ] Have module registration also add button to sidebar
 - [x] Have sidebar buttons trigger the Import of modules
 - [ ] Dynamically extensible router. Each module gets a namespace and handles all routes within it
+- [ ] Remove `const BrowserRouterService = require('frint-router/BrowserRouterService')` when `Frint-Router` includes typings
+- [ ] Patch up `app/index.ts` in main and modules once Frint typings and `createApp private class` error fixed
+- [ ] Fix `yarn dist` not working because of bug with `react-dom.production.min.js`
 - [ ] Add reasonable linting and syntax enforcement with `eslint` or `tslint`
+- [ ] Get repo working with tsconfig.json `strict: true`
 - [ ] Exemplar module UI
 
 ## Typescript Nuances

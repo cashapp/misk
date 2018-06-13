@@ -1,5 +1,5 @@
 const ColorComponent = {
-    "type": "unfinished"
-  }
+  "type": "unfinished"
+}
   
-  export default ColorComponent
+export default ColorComponent

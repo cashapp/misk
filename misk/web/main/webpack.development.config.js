@@ -32,18 +32,17 @@ module.exports = {
         loader: 'babel-loader',
       }, { 
         test: /\.tsx?$/, 
-        loader: "awesome-typescript-loader" 
+        loader: 'awesome-typescript-loader'
       }, { 
-        enforce: "pre", 
+        enforce: 'pre', 
         test: /\.js$/, 
-        loader: "source-map-loader" 
+        loader: 'source-map-loader'
       }, {
         test: /\.(scss|sass|css)$/,
-        loader: ['style-loader', 'css-loader', 'sass-loader']
-      },
-      {
+        loader: ['style-loader', 'css-loader?minimize=true', 'sass-loader']
+      }, {
         test: /\.(png|jpg|gif|svg)$/,
-        loader: ['file-loader']
+        loader: 'file-loader'
       }
     ]
   },
@@ -59,7 +58,9 @@ module.exports = {
       defaultAttribute: 'async',
     }),
     new CopyWebpackPlugin(
-      [{ from: './public', to: '../' }], { debug: 'info', copyUnmodified: true }
+      [{ from: './src/public', to: '../' },
+      { from: './node_modules/@misk/common/lib' }], 
+      { debug: 'info', copyUnmodified: true }
     )
   ],
   externals: miskCommon.externals,

@@ -1,5 +1,4 @@
-export const externals = [
-{
+export const externals = [{
   'lodash': {
     root: '_',
     commonjs: 'lodash',
@@ -90,16 +89,6 @@ export const externals = [
     commonjs2: 'react-transition-group',
     amd: 'react-transition-group'
   }
-}
-];
-
-// concat(config.lodashExternals)
-// .concat(config.rxjsExternals)
-// .concat(config.thirdPartyExternals)
-// .concat(config.frintExternals)
-// .concat(miskConfig.miskExternals)
-
-// add frint-config as req to this so it exports complete externals list and then frint-config not required in main/modules
-// also create @misk/dev ||OR|| add to this repo all core dev dependencies
+}];
 
 export default externals;

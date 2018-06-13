@@ -2,6 +2,9 @@ import { combineReducers } from 'frint-store';
 
 import color from './color';
 
-export default combineReducers({
+const rootReducer = combineReducers({
   color
 });
+
+export default rootReducer
+export { rootReducer }

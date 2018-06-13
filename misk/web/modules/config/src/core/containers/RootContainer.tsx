@@ -1,5 +1,4 @@
 import React from 'react';
-// import { observe, streamProps } from 'frint-react';
 import { Button, Collapse } from '@blueprintjs/core';
 
 export namespace RootContainer {

@@ -1,9 +1,9 @@
 import { createApp } from 'frint';
 import { createStore } from 'frint-store';
-const BrowserRouterService = require('frint-router/BrowserRouterService'); //require has to be used until it has typings
+const BrowserRouterService = require('frint-router/BrowserRouterService');
 
 import { RootContainer } from '../containers';
-import rootReducer from '../reducers';
+import { rootReducer } from '../reducers';
 import { COLORS } from '../constants';
 
 export default createApp({

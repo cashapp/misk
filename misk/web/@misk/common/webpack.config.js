@@ -1,25 +1,26 @@
 const path = require('path');
 
 module.exports = {
-  mode: 'development',
+  mode: 'production',
   entry: {
+    index: path.resolve(__dirname, 'src/index.ts'),
+    externals: path.resolve(__dirname, 'src/index.ts'),
     styles: path.resolve(__dirname, 'src/styles.ts'),
     vendors: path.resolve(__dirname, 'src/vendors.ts')
   },
-  devtool: 'cheap-module-eval-source-map',
+  devtool: 'source-map',
   output: {
-    path: path.resolve(__dirname, '../../main/build/js'),
+    path: path.resolve(__dirname, './lib'),
     filename: '[name].js'
   },
   module: {
     rules: [
       { 
         test: /\.tsx?$/, 
-        loader: "awesome-typescript-loader" 
-      },
-      {
+        loader: 'awesome-typescript-loader'
+      }, {
         test: /\.(scss|sass|css)$/,
-        loader: ['style-loader', 'css-loader', 'sass-loader']
+        loader: ['style-loader', 'css-loader?minimize=true', 'sass-loader']
       }
     ]
   },

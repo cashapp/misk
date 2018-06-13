@@ -1,5 +1,6 @@
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const ScriptExtHtmlWebpackPlugin = require('script-ext-html-webpack-plugin');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
 const miskCommon = require('../@misk/common/lib');
 const path = require('path');
 
@@ -31,18 +32,17 @@ module.exports = {
         loader: 'babel-loader',
       }, { 
         test: /\.tsx?$/, 
-        loader: "awesome-typescript-loader" 
+        loader: 'awesome-typescript-loader'
       }, { 
-        enforce: "pre", 
+        enforce: 'pre', 
         test: /\.js$/, 
-        loader: "source-map-loader" 
+        loader: 'source-map-loader'
       }, {
         test: /\.(scss|sass|css)$/,
-        loader: ['style-loader', 'css-loader', 'sass-loader']
-      },
-      {
+        loader: ['style-loader', 'css-loader?minimize=true', 'sass-loader']
+      }, {
         test: /\.(png|jpg|gif|svg)$/,
-        loader: ['file-loader']
+        loader: 'file-loader'
       }
     ]
   },
@@ -56,7 +56,12 @@ module.exports = {
     }),
     new ScriptExtHtmlWebpackPlugin({
       defaultAttribute: 'async',
-    })
+    }),
+    new CopyWebpackPlugin(
+      [{ from: './src/public', to: '../' },
+      { from: './node_modules/@misk/common/lib' }], 
+      { debug: 'info', copyUnmodified: true }
+    )
   ],
   externals: miskCommon.externals,
 };

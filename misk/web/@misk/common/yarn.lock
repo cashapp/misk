@@ -3617,6 +3617,10 @@ signal-exit@^3.0.0, signal-exit@^3.0.2:
   version "3.0.2"
   resolved "https://npm.vip.global.square/signal-exit/-/signal-exit-3.0.2.tgz#b5fdc08f1287ea1178628e415e25132b73646c6d"
 
+skeleton-css@^2.0.4:
+  version "2.0.4"
+  resolved "https://npm.vip.global.square/skeleton-css/-/skeleton-css-2.0.4.tgz#d70db2f01fe8209ac79f2f4eee83fae8a40591b8"
+
 snapdragon-node@^2.0.1:
   version "2.1.1"
   resolved "https://npm.vip.global.square/snapdragon-node/-/snapdragon-node-2.1.1.tgz#6c175f86ff14bdb0724563e8f3c1b021a286853b"

@@ -1,5 +1,5 @@
 {
-  "name": "misk-admin-module-config",
+  "name": "misk-admin-module-healthcheck",
   "version": "0.0.1",
   "author": "Square/Misk Authors (https://github.com/square/misk/graphs/contributors)",
   "scripts": {

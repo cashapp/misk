@@ -1,11 +1,14 @@
 {
   "name": "@misk/common",
   "version": "0.0.1",
-  "description": "Microservice Kontainer Common Libraries & Styles",
+  "description": "Microservice Kontainer Common Libraries, Externals, Styles",
   "author": "Square/Misk Authors (https://github.com/square/misk/graphs/contributors)",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:square/misk.git"
+  },
   "scripts": {
-    "dev": "webpack --config webpack.development.config.js",
-    "lib": "webpack --production --config webpack.production.config.js",
+    "lib": "webpack",
     "build:lib": "npm run lib",
     "build": "npm run lib",
     "dist": "npm run lib",
@@ -27,7 +30,8 @@
     "react": "^16.4.0",
     "react-dom": "^16.4.0",
     "react-transition-group": "^2.3.1",
-    "rxjs": "^6.2.0"
+    "rxjs": "^6.2.0",
+    "skeleton-css": "^2.0.4"
   },
   "devDependencies": {
     "@types/node": "^10.3.0",
@@ -39,18 +43,5 @@
     "typescript": "^2.9.1",
     "webpack": "^4.10.2",
     "webpack-cli": "^3.0.3"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git@github.com:square/misk.git"
-  },
-  "keywords": [
-    "square",
-    "misk",
-    "container",
-    "components",
-    "styles",
-    "theme",
-    "ui"
-  ]
+  }
 }

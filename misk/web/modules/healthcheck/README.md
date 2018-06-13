@@ -11,8 +11,6 @@ Example demonstating:
 Run:
 
 ```
-$ yarn install
-$ yarn run install:lib
-$ yarn run install:modules
-$ yarn start
+$ npm install
+$ npm start
 ```

@@ -16,12 +16,10 @@ export namespace Module {
 export default class Module extends React.Component<Module.Props> {
   constructor(props: Module.Props) {
     super(props)
-
-    console.log(this.props)
   }
 
-  async loadModule (moduleID : string) : Promise<any> {
-    return import(`./module_${this.props.match.params.moduleID}.js`)
+  async loadModule(moduleID: string): Promise<any> {
+    return import(`./module_${moduleID}.js`)
   }
 
   render() {
@@ -29,7 +27,7 @@ export default class Module extends React.Component<Module.Props> {
     return (
       <div>
         <h1>Module: {this.props.match.params.moduleID}</h1>
-        <Region name="main" />
+        <Region name="main"/>
       </div>
     );
   }
