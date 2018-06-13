@@ -1,0 +1,50 @@
+{
+  "name": "misk-admin-module-healthcheck",
+  "version": "0.0.1",
+  "author": "Square/Misk Authors (https://github.com/square/misk/graphs/contributors)",
+  "scripts": {
+    "build": "webpack --production --config webpack.production.config.js",
+    "start": "webpack --config webpack.development.config.js"
+  },
+  "dependencies": {
+    "@blueprintjs/core": "^2.3.1",
+    "@types/history": "^4.6.2",
+    "@types/react": "^16.3.16",
+    "@types/react-dom": "^16.0.5",
+    "frint": "^5.4.4",
+    "frint-react": "^5.4.4",
+    "frint-router": "^5.4.4",
+    "frint-router-react": "^5.4.4",
+    "frint-store": "^5.4.4",
+    "lodash": "^4.17.10",
+    "prop-types": "^15.6.1",
+    "react": "^16.4.0",
+    "react-dom": "^16.4.0",
+    "react-transition-group": "^2.3.1",
+    "rxjs": "^6.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "^10.3.0",
+    "awesome-typescript-loader": "^5.0.0",
+    "babel-cli": "^6.26.0",
+    "babel-core": "^6.26.3",
+    "babel-eslint": "^8.2.3",
+    "babel-loader": "^7.1.4",
+    "babel-preset-travix": "^1.2.0",
+    "babel-register": "^6.26.0",
+    "css-loader": "^0.28.11",
+    "file-loader": "^1.1.11",
+    "frint-cli": "^5.4.4",
+    "frint-config": "^5.4.4",
+    "html-webpack-plugin": "^3.2.0",
+    "live-server": "^1.2.0",
+    "sass-loader": "^7.0.1",
+    "script-ext-html-webpack-plugin": "^2.0.1",
+    "source-map-loader": "^0.2.3",
+    "style-loader": "^0.21.0",
+    "typescript": "^2.9.1",
+    "webpack": "^4.10.2",
+    "webpack-cli": "^2.1.5",
+    "webpack-dev-server": "^3.1.4"
+  }
+}
