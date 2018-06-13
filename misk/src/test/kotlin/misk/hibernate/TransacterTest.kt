@@ -48,14 +48,14 @@ class TransacterTest {
 
       val lauraDernMovies = queryFactory.newQuery<CharacterQuery>()
           .actorName("Laura Dern")
-          .listAs<MovieNameAndReleaseDate>(session)
+          .listAsMovieNameAndReleaseDate(session)
       assertThat(lauraDernMovies).containsExactly(
-          MovieNameAndReleaseDate("Star Wars", LocalDate.of(1977, 5, 25)),
-          MovieNameAndReleaseDate("Jurassic Park", LocalDate.of(1993, 6, 9)))
+          NameAndReleaseDate("Star Wars", LocalDate.of(1977, 5, 25)),
+          NameAndReleaseDate("Jurassic Park", LocalDate.of(1993, 6, 9)))
 
       val actorsInOldMovies = queryFactory.newQuery<CharacterQuery>()
           .movieReleaseDateBefore(LocalDate.of(1980, 1, 1))
-          .listAs<ActorAndReleaseDate>(session)
+          .listAsActorAndReleaseDate(session)
       assertThat(actorsInOldMovies).containsExactly(
           ActorAndReleaseDate("Laura Dern", LocalDate.of(1977, 5, 25)),
           ActorAndReleaseDate("Carrie Fisher", LocalDate.of(1977, 5, 25)))
@@ -99,16 +99,19 @@ class TransacterTest {
     @Constraint("actor.name")
     fun actorName(name: String): CharacterQuery
 
-    @Constraint("movie.name")
-    fun movieName(name: String): CharacterQuery
-
     @Constraint(path = "movie.release_date", operator = Operator.LT)
     fun movieReleaseDateBefore(upperBound: LocalDate): CharacterQuery
+
+    @Select("movie")
+    fun listAsMovieNameAndReleaseDate(session: Session): List<NameAndReleaseDate>
+
+    @Select
+    fun listAsActorAndReleaseDate(session: Session): List<ActorAndReleaseDate>
   }
 
-  data class MovieNameAndReleaseDate(
-    @Property("movie.name") var movieName: String,
-    @Property("movie.release_date") var movieReleaseDate: LocalDate?
+  data class NameAndReleaseDate(
+    @Property("name") var movieName: String,
+    @Property("release_date") var movieReleaseDate: LocalDate?
   ) : Projection
 
   data class ActorAndReleaseDate(

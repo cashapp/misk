@@ -60,25 +60,25 @@ class ByteStringColumnTest {
     }
 
     transacter.transaction { session ->
-      assertThat(queryFactory.newQuery(TextHashQuery::class)
+      assertThat(queryFactory.newQuery<TextHashQuery>()
           .hashLessThan(v1.hash)
-          .listAs<TextAndHash>(session))
+          .listAsTextAndHash(session))
           .isEmpty()
-      assertThat(queryFactory.newQuery(TextHashQuery::class)
+      assertThat(queryFactory.newQuery<TextHashQuery>()
           .hashLessThan(v2.hash)
-          .listAs<TextAndHash>(session))
+          .listAsTextAndHash(session))
           .containsExactly(v1)
-      assertThat(queryFactory.newQuery(TextHashQuery::class)
+      assertThat(queryFactory.newQuery<TextHashQuery>()
           .hashLessThan(v3.hash)
-          .listAs<TextAndHash>(session))
+          .listAsTextAndHash(session))
           .containsExactly(v1, v2)
-      assertThat(queryFactory.newQuery(TextHashQuery::class)
+      assertThat(queryFactory.newQuery<TextHashQuery>()
           .hashLessThan(v4.hash)
-          .listAs<TextAndHash>(session))
+          .listAsTextAndHash(session))
           .containsExactly(v1, v2, v3)
-      assertThat(queryFactory.newQuery(TextHashQuery::class)
+      assertThat(queryFactory.newQuery<TextHashQuery>()
           .hashLessThan(ByteString.decodeHex("ff00"))
-          .listAs<TextAndHash>(session))
+          .listAsTextAndHash(session))
           .containsExactly(v1, v2, v3, v4)
     }
   }
@@ -136,5 +136,8 @@ class ByteStringColumnTest {
 
     @Constraint(path = "hash", operator = Operator.LT)
     fun hashLessThan(hash: ByteString): TextHashQuery
+
+    @Select
+    fun listAsTextAndHash(session: Session): List<TextAndHash>
   }
 }
