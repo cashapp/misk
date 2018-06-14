@@ -32,7 +32,7 @@ dependencies {
   compile dep.junitParams
   compile dep.junitEngine
   compile dep.assertj
-  compile dep.loggingImpl
+  compile dep.logbackClassic
   compile dep.okHttpMockWebServer
   compile dep.openTracingMock
   compile dep.hsqldb
