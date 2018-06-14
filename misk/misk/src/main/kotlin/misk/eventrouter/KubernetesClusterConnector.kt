@@ -50,8 +50,20 @@ internal class KubernetesClusterConnector : ClusterConnector {
   private fun subscribeToKubernetes(client: ApiClient, api: CoreV1Api, topicPeer: TopicPeer) {
     val watch = Watch.createWatch<V1Pod>(
         client,
-        api.listNamespacedPodCall(config.my_pod_namespace, null, null, null, null, null, true,
-            null, null),
+        api.listNamespacedPodCall(
+            config.my_pod_namespace, // namespace
+            null, // pretty
+            null, // _continue
+            null, // fieldSelector
+            false, // includeUninitialized
+            null, // labelSelector
+            null, // limit
+            null, // resourceVersion
+            null, // timeoutSeconds
+            true, // watch
+            null, // progressListener
+            null  // progressRequestListener
+        ),
         object : TypeToken<Watch.Response<V1Pod>>() {}.type)
 
     for (item in watch) {
