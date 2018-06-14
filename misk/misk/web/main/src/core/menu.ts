@@ -16,6 +16,10 @@ const menu =  [{
   text: "Config",
   icon: "properties",
   url: "/config",
+}, {
+  text: "Healthcheck",
+  icon: "heart-broken",
+  url: "/healthcheck",
 }]
 
 export default menu
