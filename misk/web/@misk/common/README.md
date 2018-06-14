@@ -56,7 +56,7 @@ $ yarn install --save @misk/common
 - Use `@misk/common` externals to keep Webpack from bundling duplicate libraries and styles into your Misk module. Add the following to your `webpack.config.js`
   
   ```Typescript
-  const miskCommon = require('@misk/common/lib');
+  const miskCommon = require('@misk/common');
   ...
 
   module.exports = {

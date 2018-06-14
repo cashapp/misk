@@ -1,10 +1,10 @@
 import { createApp } from 'frint';
-const BrowserRouterService = require('frint-router/BrowserRouterService'); //require has to be used until it has typings
+const BrowserRouterService = require('frint-router/BrowserRouterService');
 
 import { RootContainer } from '../containers';
 
 export default createApp({
-  name: 'MiskApp',
+  name: 'MiskMain',
   providers: [
     {
       name: 'component',

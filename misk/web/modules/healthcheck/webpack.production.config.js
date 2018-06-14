@@ -1,11 +1,11 @@
-const miskCommon = require('@misk/common/lib');
+const miskCommon = require('@misk/common');
 const path = require('path');
 
 module.exports = {
   mode: 'production',
   entry: {
-    'module_config': path.resolve(__dirname, 'src/core/index.ts'),
-    'menu_config': path.resolve(__dirname, 'src/mainMenu/index.ts'),
+    'module_healthcheck': path.resolve(__dirname, 'src/core/index.ts'),
+    'menu_healthcheck': path.resolve(__dirname, 'src/mainMenu/index.ts'),
   },
   devtool: 'source-map',
   output: {

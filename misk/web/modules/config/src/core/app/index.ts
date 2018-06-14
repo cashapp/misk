@@ -7,7 +7,7 @@ import { rootReducer } from '../reducers';
 import { COLORS } from '../constants';
 
 export default createApp({
-  name: 'ConfigApp',
+  name: 'MiskModuleConfig',
   providers: [
     {
       name: 'component',
