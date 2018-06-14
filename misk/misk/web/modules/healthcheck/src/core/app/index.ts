@@ -2,22 +2,29 @@ import { createApp } from 'frint';
 import { createStore } from 'frint-store';
 const BrowserRouterService = require('frint-router/BrowserRouterService');
 
-import { MenuComponent } from '../components';
+import { RootContainer } from '../containers';
+import { rootReducer } from '../reducers';
+import { COLORS } from '../constants';
 
 export default createApp({
-  name: 'MiskMenuConfig',
+  name: 'MiskModuleHealthcheck',
   providers: [
     {
       name: 'component',
-      useValue: MenuComponent,
+      useValue: RootContainer,
     },
     {
       name: 'store',
       useFactory: function ({ app }) {
         const Store = createStore({
           initialState: {
+            color: {
+              value: COLORS.DEFAULT,
+            },
           },
+          reducer: rootReducer,
         });
+
         return new Store();
       },
       deps: ['app'],

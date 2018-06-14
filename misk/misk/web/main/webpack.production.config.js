@@ -1,7 +1,7 @@
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const ScriptExtHtmlWebpackPlugin = require('script-ext-html-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
-const miskCommon = require('../@misk/common/lib');
+const miskCommon = require('../@misk/common');
 const path = require('path');
 
 module.exports = {

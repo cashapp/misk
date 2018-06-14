@@ -31,7 +31,9 @@ $ yarn start
 
 - Duplicate exemplar module into `modules`
 - Change name for `module_{name}` and `menu_{name}` in `webpack.{development | production}.config.js` -> `entry: {}`
-- Add to `main/src/routes.ts` and `main/src/menu.ts`
+- Update app name in `src/core/app/index.ts` to `MiskModule{name}`
+- Update app menu name in `src/mainMenu/app/index.ts` to `MiskMenu{name}`
+- Add to `main/src/menu.ts` with optional matching icon from [Blueprintjs Icons](http://blueprintjs.com/docs/v2/#icons)
 
 
 ## Progress
@@ -48,8 +50,10 @@ $ yarn start
 
 - [x] Move code to `src`
 - [x] Move all code into main Misk repo, create PR
-- [ ] Publish `@misk/common` NPM package so it can be accessed by all modules (and they don't need to `require` the path name). 
-  - [ ] Update install instructions in `@misk/common/README.md`.
+- [ ] Publish `@misk/common` NPM package so it can be accessed by all modules (and they don't need to `require` the path name). Alt: fixed `main/package.json` so it manually copies `@misk/common` into all main/module `node_modules/` directories so it appears as if it was installed.
+  - [x] Update install instructions in `@misk/common/README.md`.
+  - [ ] Remove `@misk/common` dependencies from main/modules `package.json` for cleaner look
+  - [ ] Maybe create `@misk/build` that has all devDependencies so each module has very simple `package.json` with `@misk/common` as dependency and `@misk/build` as devDependency.
 - [x] Add `copy-webpack-plugin` to copy static assets (`favicon.ico`, ...) into build
 - [ ] Move `original-web` code into heartbeat / status tab
 - [ ] Wire up admin within Kotlin, specifically for the URL shortener app
