@@ -22,7 +22,6 @@ ext {
           moshi                : 'com.squareup.moshi:moshi-kotlin:1.5.0',
           loggingApi           : 'io.github.microutils:kotlin-logging:1.4.9',
           wireRuntime          : 'com.squareup.wire:wire-runtime:2.3.0-RC1',
-          loggingImpl          : 'org.apache.logging.log4j:log4j-slf4j-impl:2.10.0',
           jacksonDatabind      : 'com.fasterxml.jackson.core:jackson-databind:2.9.3',
           jacksonDataformatYaml: 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.9.3',
           jacksonKotlin        : 'com.fasterxml.jackson.module:jackson-module-kotlin:2.9.3',
