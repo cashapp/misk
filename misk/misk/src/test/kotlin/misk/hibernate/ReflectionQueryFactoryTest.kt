@@ -1,8 +1,12 @@
 package misk.hibernate
 
+import ch.qos.logback.classic.Level
+import com.google.common.collect.Iterables.getOnlyElement
+import misk.logging.LogCollector
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import javax.inject.Inject
@@ -14,6 +18,7 @@ class ReflectionQueryFactoryTest {
 
   @Inject @Movies lateinit var transacter: Transacter
   @Inject lateinit var queryFactory: Query.Factory
+  @Inject lateinit var logCollector: LogCollector
 
   @Test
   fun comparisonOperators() {
@@ -240,6 +245,144 @@ class ReflectionQueryFactoryTest {
           .listAsNames(session))
           .isEmpty()
     }
+  }
+
+  /**
+   * This should be multiple tests but it takes a few seconds to insert many rows so we bundle them
+   * all into one big test.
+   */
+  @Test
+  fun rowResultCountWarning() {
+    // 1900 rows is too small for the warning threshold (2000).
+    transacter.transaction { session ->
+      for (i in 1..1900) {
+        session.save(DbMovie("Rocky $i", null))
+      }
+    }
+    transacter.transaction { session ->
+      assertThat(queryFactory.newQuery<OperatorsMovieQuery>().list(session)).hasSize(1900)
+    }
+    assertThat(logCollector.takeMessages(loggerClass = ReflectionQuery::class)).isEmpty()
+
+    // 2100 rows logs a warning.
+    transacter.transaction { session ->
+      for (i in 1901..2100) {
+        session.save(DbMovie("Rocky $i", null))
+      }
+    }
+    transacter.transaction { session ->
+      assertThat(queryFactory.newQuery<OperatorsMovieQuery>().list(session)).hasSize(2100)
+    }
+    assertThat(getOnlyElement(
+        logCollector.takeMessages(loggerClass = ReflectionQuery::class, minLevel = Level.WARN))
+    ).startsWith("Unbounded query returned 2100 rows.")
+
+    // 3100 rows logs an error.
+    transacter.transaction { session ->
+      for (i in 2101..3100) {
+        session.save(DbMovie("Rocky $i", null))
+      }
+    }
+    transacter.transaction { session ->
+      assertThat(queryFactory.newQuery<OperatorsMovieQuery>().list(session)).hasSize(3100)
+    }
+    assertThat(getOnlyElement(
+        logCollector.takeMessages(loggerClass = ReflectionQuery::class, minLevel = Level.ERROR))
+    ).startsWith("Unbounded query returned 3100 rows.")
+
+    // An explicit max row count suppresses the warning.
+    transacter.transaction { session ->
+      assertThat(queryFactory.newQuery<OperatorsMovieQuery>()
+          .apply { maxRows = 3200 }
+          .list(session))
+          .hasSize(3100)
+    }
+    assertThat(logCollector.takeMessages(loggerClass = ReflectionQuery::class)).isEmpty()
+
+    // More than 10000 rows throws an exception.
+    transacter.transaction { session ->
+      for (i in 3101..10100) {
+        session.save(DbMovie("Rocky $i", null))
+      }
+    }
+    assertThat(assertThrows(IllegalStateException::class.java) {
+      transacter.transaction { session ->
+        queryFactory.newQuery<OperatorsMovieQuery>().list(session)
+      }
+    }).hasMessage("query truncated at 10001 rows")
+  }
+
+  @Test
+  fun maxRowCountNotExceeded() {
+    transacter.transaction { session ->
+      session.save(DbMovie("Rocky 1", null))
+      session.save(DbMovie("Rocky 2", null))
+      session.save(DbMovie("Rocky 3", null))
+    }
+
+    transacter.transaction { session ->
+      assertThat(queryFactory.newQuery<OperatorsMovieQuery>()
+          .apply { maxRows = 4 }
+          .listAsNames(session))
+          .containsExactly("Rocky 1", "Rocky 2", "Rocky 3")
+    }
+  }
+
+  @Test
+  fun maxMaxRowCountEnforced() {
+    val query = queryFactory.newQuery<OperatorsMovieQuery>()
+    assertThat(assertThrows(IllegalArgumentException::class.java) {
+      query.maxRows = 10_001
+    }).hasMessage("out of range: 10001")
+  }
+
+  @Test
+  fun maxRowCountTruncates() {
+    transacter.transaction { session ->
+      session.save(DbMovie("Rocky 1", null))
+      session.save(DbMovie("Rocky 2", null))
+      session.save(DbMovie("Rocky 3", null))
+    }
+
+    // List.
+    transacter.transaction { session ->
+      assertThat(queryFactory.newQuery<OperatorsMovieQuery>()
+          .apply { maxRows = 2 }
+          .list(session)
+          .map { it.name })
+          .containsExactly("Rocky 1", "Rocky 2")
+    }
+
+    // List projection.
+    transacter.transaction { session ->
+      assertThat(queryFactory.newQuery<OperatorsMovieQuery>()
+          .apply { maxRows = 2 }
+          .listAsNames(session))
+          .containsExactly("Rocky 1", "Rocky 2")
+    }
+  }
+
+  @Test
+  fun uniqueResultFailsOnTooManyResults() {
+    transacter.transaction { session ->
+      session.save(DbMovie("Rocky 1", null))
+      session.save(DbMovie("Rocky 2", null))
+      session.save(DbMovie("Rocky 3", null))
+    }
+
+    // Unique result.
+    assertThat(assertThrows(IllegalStateException::class.java) {
+      transacter.transaction { session ->
+        queryFactory.newQuery<OperatorsMovieQuery>().uniqueResult(session)
+      }
+    }).hasMessageContaining("query expected a unique result but was")
+
+    // Unique result projection.
+    assertThat(assertThrows(IllegalStateException::class.java) {
+      transacter.transaction { session ->
+        queryFactory.newQuery<OperatorsMovieQuery>().uniqueName(session)
+      }
+    }).hasMessageContaining("query expected a unique result but was")
   }
 
   interface OperatorsMovieQuery : Query<DbMovie> {
