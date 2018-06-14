@@ -4,6 +4,7 @@ import com.google.common.cache.CacheBuilder
 import com.google.common.cache.CacheLoader
 import com.google.inject.TypeLiteral
 import misk.inject.typeLiteral
+import misk.logging.getLogger
 import java.lang.reflect.InvocationHandler
 import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Method
@@ -24,6 +25,11 @@ import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.primaryConstructor
 import kotlin.reflect.jvm.javaMethod
 
+private val logger = getLogger<ReflectionQuery<*>>()
+private const val MAX_MAX_ROWS = 10_000
+private const val ROW_COUNT_ERROR_LIMIT = 3000
+private const val ROW_COUNT_WARNING_LIMIT = 2000
+
 /**
  * Implements the [Query] @[Constraint] methods using a dynamic proxy, and projections using
  * reflection to call the primary constructor.
@@ -32,16 +38,24 @@ internal class ReflectionQuery<T : DbEntity<T>>(
   private val rootEntityType: KClass<T>,
   private val queryMethodHandlers: Map<Method, QueryMethodHandler>
 ) : Query<T>, InvocationHandler {
+  override var maxRows = -1
+    set(value) {
+      require(value == -1 || (value in 1..MAX_MAX_ROWS)) { "out of range: $value" }
+      field = value
+    }
+
   private val constraints = mutableListOf<PredicateFactory>()
 
   override fun uniqueResult(session: Session): T? {
-    // TODO(jwilson): max results = 2
-    val list = list(session)
-    require(list.size <= 1) { "expected at most 1 result but was $list" }
+    val list = select(false, session)
     return list.firstOrNull()
   }
 
   override fun list(session: Session): List<T> {
+    return select(true, session)
+  }
+
+  private fun select(returnList: Boolean, session: Session): List<T> {
     val criteriaBuilder = session.hibernateSession.criteriaBuilder
     val query = criteriaBuilder.createQuery(rootEntityType.java)
     val queryRoot = query.from(rootEntityType.java)
@@ -50,7 +64,34 @@ internal class ReflectionQuery<T : DbEntity<T>>(
     query.where(predicate)
 
     val typedQuery = session.hibernateSession.createQuery(query)
-    return typedQuery.list()
+    typedQuery.maxResults = effectiveMaxRows(returnList)
+    val rows = typedQuery.list()
+    checkRowCount(returnList, rows.size)
+    return rows
+  }
+
+  private fun effectiveMaxRows(returnList: Boolean): Int {
+    return when {
+      !returnList -> 2 // Detect if the result wasn't actually unique.
+      (maxRows != -1) -> maxRows
+      else -> MAX_MAX_ROWS + 1 // Detect if the result was truncated.
+    }
+  }
+
+  private fun checkRowCount(returnList: Boolean, rowCount: Int) {
+    if (!returnList) {
+      check(rowCount <= 1) { "query expected a unique result but was $rowCount" }
+    } else if (maxRows == -1) {
+      if (rowCount > MAX_MAX_ROWS) {
+        throw IllegalStateException("query truncated at $rowCount rows")
+      } else if (rowCount > ROW_COUNT_ERROR_LIMIT) {
+        logger.error("Unbounded query returned $rowCount rows. " +
+            "(Specify maxRows to suppress this error)")
+      } else if (rowCount > ROW_COUNT_WARNING_LIMIT) {
+        logger.warn("Unbounded query returned $rowCount rows. " +
+            "(Specify maxRows to suppress this warning)")
+      }
+    }
   }
 
   override fun invoke(proxy: Any, method: Method, args: Array<out Any>?): Any? {
@@ -135,13 +176,12 @@ internal class ReflectionQuery<T : DbEntity<T>>(
 
       query.select(select(criteriaBuilder, root))
       query.where(reflectionQuery.buildWherePredicate(root, criteriaBuilder))
-      val rows = session.hibernateSession.createQuery(query).list()
+      val typedQuery = session.hibernateSession.createQuery(query)
+      typedQuery.maxResults = reflectionQuery.effectiveMaxRows(returnList)
+      val rows = typedQuery.list()
+      reflectionQuery.checkRowCount(returnList, rows.size)
       val list = rows.map { toValue(it) }
-
-      if (returnList) return list
-
-      require(list.size <= 1) { "expected at most 1 result but was $list" }
-      return list.firstOrNull()
+      return if (returnList) list else list.firstOrNull()
     }
 
     private fun select(

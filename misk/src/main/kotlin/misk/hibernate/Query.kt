@@ -4,6 +4,9 @@ import kotlin.reflect.KClass
 
 /** Base class for SQL queries. */
 interface Query<T> {
+  /** How many rows to return. Must be -1 or in range 1..10_000. */
+  var maxRows: Int
+
   fun uniqueResult(session: Session): T?
 
   fun list(session: Session): List<T>
