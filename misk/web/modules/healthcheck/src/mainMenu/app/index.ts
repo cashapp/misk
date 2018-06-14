@@ -5,7 +5,7 @@ const BrowserRouterService = require('frint-router/BrowserRouterService');
 import { MenuComponent } from '../components';
 
 export default createApp({
-  name: 'MiskMenuConfig',
+  name: 'MiskMenuHealthcheck',
   providers: [
     {
       name: 'component',
