@@ -85,5 +85,7 @@ class HibernateModule(
         bindListener(EventType.PRE_UPDATE).to(TimestampListener::class.java)
       }
     })
+
+    install(HibernateHealthCheckModule(sessionFactoryProvider, config))
   }
 }
