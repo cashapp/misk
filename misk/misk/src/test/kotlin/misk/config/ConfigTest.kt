@@ -19,9 +19,10 @@ import javax.inject.Named
 class ConfigTest {
   val defaultEnv = Environment.TESTING
   val config = MiskConfig.load<TestConfig>("test_app", defaultEnv)
+
   @MiskTestModule
   val module = Modules.combine(
-      ConfigModule.create<TestConfig>("test_app", config),
+      ConfigModule.create("test_app", config),
       EnvironmentModule(defaultEnv)
   )
 
@@ -71,31 +72,39 @@ class ConfigTest {
 
   @Test
   fun friendlyErrorMessagesWhenFilesNotFound() {
-    val exception = assertThrows(IllegalStateException::class.java, {
+    val exception = assertThrows(IllegalStateException::class.java) {
       MiskConfig.load<TestConfig>(TestConfig::class.java, "missing", defaultEnv)
-    })
+    }
 
-    assertThat(exception.localizedMessage).contains("could not find configuration files -" +
+    assertThat(exception).hasMessageContaining("could not find configuration files -" +
         " checked [missing-common.yaml, missing-testing.yaml]")
   }
 
   @Test
   fun friendlyErrorMessageWhenConfigPropertyMissing() {
-    val exception = assertThrows(IllegalStateException::class.java, {
+    val exception = assertThrows(IllegalStateException::class.java) {
       MiskConfig.load<TestConfig>(TestConfig::class.java, "partial_test_app", defaultEnv)
-    })
+    }
 
-    assertThat(exception.localizedMessage)
-        .contains("could not find partial_test_app TESTING configuration for consumer_a")
+    assertThat(exception).hasMessageContaining(
+        "could not find partial_test_app TESTING configuration for consumer_a")
   }
 
   @Test
   fun friendlyErrorMessagesWhenFileUnparseable() {
-    val exception = assertThrows(IllegalStateException::class.java, {
+    val exception = assertThrows(IllegalStateException::class.java) {
       MiskConfig.load<TestConfig>(TestConfig::class.java, "unparsable", defaultEnv)
-    })
+    }
 
-    assertThat(exception.localizedMessage).contains("could not parse unparsable-common.yaml")
+    assertThat(exception).hasMessageContaining("could not parse unparsable-common.yaml")
   }
 
+  @Test
+  fun friendlyErrorMessagesWhenPropertiesNotFound() {
+    val exception = assertThrows(IllegalStateException::class.java) {
+      MiskConfig.load<TestConfig>(TestConfig::class.java, "unknownproperty", defaultEnv)
+    }
+
+    assertThat(exception.cause).hasMessageContaining("Unrecognized field \"blue_items\"")
+  }
 }
