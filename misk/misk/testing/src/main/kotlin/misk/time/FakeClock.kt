@@ -22,4 +22,6 @@ class FakeClock(
   fun add(d: Duration) = millis.addAndGet(d.toMillis())
 
   fun add(n: Long, unit: TimeUnit) = millis.addAndGet(TimeUnit.MILLISECONDS.convert(n, unit))
+
+  fun setNow(instant: Instant) = millis.set(instant.toEpochMilli())
 }
