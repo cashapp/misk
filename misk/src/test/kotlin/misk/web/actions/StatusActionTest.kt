@@ -31,34 +31,35 @@ class StatusActionTest {
   fun readinessDependsOnServiceStateAndHealthChecksPassing() {
     serviceManager.startAsync()
     serviceManager.awaitHealthy()
-    assertThat(statusAction.getStatus()).isEqualTo(
-        StatusAction.ServerStatus(
-            mapOf("FakeService" to Service.State.RUNNING),
-            mapOf("FakeHealthCheck" to HealthStatus(isHealthy = true, messages = listOf()))))
+
+    var status = statusAction.getStatus()
+    assertThat(status.serviceStatus).containsEntry("FakeService", Service.State.RUNNING)
+    assertThat(status.healthCheckStatus).containsEntry(
+      "FakeHealthCheck", HealthStatus(isHealthy = true, messages = listOf()))
 
     healthCheck.setUnhealthy("things are failing", "this is not good")
-    assertThat(statusAction.getStatus()).isEqualTo(
-        StatusAction.ServerStatus(
-            mapOf("FakeService" to Service.State.RUNNING),
-            mapOf("FakeHealthCheck" to HealthStatus(
-                isHealthy = false,
-                messages = listOf("things are failing", "this is not good")))))
+    status = statusAction.getStatus()
+    assertThat(status.serviceStatus).containsEntry("FakeService", Service.State.RUNNING)
+    assertThat(status.healthCheckStatus).containsEntry(
+      "FakeHealthCheck", HealthStatus(
+        isHealthy = false,
+        messages = listOf("things are failing", "this is not good")))
 
     healthCheck.setHealthy("everything is fine now")
-    assertThat(statusAction.getStatus()).isEqualTo(
-        StatusAction.ServerStatus(
-            mapOf("FakeService" to Service.State.RUNNING),
-            mapOf("FakeHealthCheck" to HealthStatus(
-                isHealthy = true,
-                messages = listOf("everything is fine now")))))
+    status = statusAction.getStatus()
+    assertThat(status.serviceStatus).containsEntry("FakeService", Service.State.RUNNING)
+    assertThat(status.healthCheckStatus).containsEntry(
+      "FakeHealthCheck", HealthStatus(
+        isHealthy = true,
+        messages = listOf("everything is fine now")))
 
     serviceManager.stopAsync()
     serviceManager.awaitStopped()
-    assertThat(statusAction.getStatus()).isEqualTo(
-        StatusAction.ServerStatus(
-            mapOf("FakeService" to Service.State.TERMINATED),
-            mapOf("FakeHealthCheck" to HealthStatus(
-                isHealthy = true,
-                messages = listOf("everything is fine now")))))
+    status = statusAction.getStatus()
+    assertThat(status.serviceStatus).containsEntry("FakeService", Service.State.TERMINATED)
+    assertThat(status.healthCheckStatus).containsEntry(
+      "FakeHealthCheck", HealthStatus(
+        isHealthy = true,
+        messages = listOf("everything is fine now")))
   }
 }
