@@ -3,8 +3,8 @@ package misk
 import com.google.common.util.concurrent.AbstractService
 import com.google.inject.Key
 import com.google.inject.name.Names
+import misk.testing.assertThrows
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Test
 
 class CoordinatedServiceTest {
@@ -101,7 +101,7 @@ class CoordinatedServiceTest {
     val a = AppendingService(target, "Service A", produced = setOf("a"))
     val c = AppendingService(target, "Service C", consumed = setOf("a", "b"))
 
-    assertThat(assertThrows(IllegalArgumentException::class.java) {
+    assertThat(assertThrows<IllegalArgumentException> {
       CoordinatedService.coordinate(listOf(a, c))
     }).hasMessage("""
         |Service dependency graph has problems:
@@ -115,7 +115,7 @@ class CoordinatedServiceTest {
     val c = AppendingService(target, "Service C", consumed = setOf("a"))
     val b = AppendingService(target, "Service B", produced = setOf("a"))
 
-    assertThat(assertThrows(IllegalArgumentException::class.java) {
+    assertThat(assertThrows<IllegalArgumentException> {
       CoordinatedService.coordinate(listOf(a, b, c))
     }).hasMessage("""
         |Service dependency graph has problems:
@@ -130,7 +130,7 @@ class CoordinatedServiceTest {
     val c = AppendingService(target, "Service C", produced = setOf("c"), consumed = setOf("a"))
     val d = AppendingService(target, "Service D", produced = setOf("d"), consumed = setOf("c"))
 
-    assertThat(assertThrows(IllegalArgumentException::class.java) {
+    assertThat(assertThrows<IllegalArgumentException> {
       CoordinatedService.coordinate(listOf(a, b, c, d))
     }).hasMessage("""
         |Service dependency graph has problems:
@@ -152,9 +152,9 @@ class CoordinatedServiceTest {
 
     val serviceManager = CoordinatedService.coordinate(listOf(a, b))
     serviceManager.startAsync()
-    assertThat(assertThrows(IllegalStateException::class.java) {
+    assertThrows<IllegalStateException> {
       serviceManager.awaitHealthy()
-    })
+    }
   }
 
   /** Appends messages to `target` on start up and shut down. */

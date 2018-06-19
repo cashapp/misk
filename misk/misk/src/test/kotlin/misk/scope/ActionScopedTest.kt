@@ -7,8 +7,8 @@ import com.google.inject.name.Names
 import misk.exceptions.UnauthenticatedException
 import misk.inject.keyOf
 import misk.inject.uninject
+import misk.testing.assertThrows
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import javax.inject.Inject
@@ -47,7 +47,7 @@ class ActionScopedTest {
 
   @Test
   fun doubleEnterScopeFails() {
-    assertThrows(IllegalStateException::class.java) {
+    assertThrows<IllegalStateException> {
       val injector = Guice.createInjector(TestActionScopedProviderModule())
       injector.injectMembers(this)
 
@@ -57,7 +57,7 @@ class ActionScopedTest {
 
   @Test
   fun resolveOutsideOfScopeFails() {
-    assertThrows(IllegalStateException::class.java) {
+    assertThrows<IllegalStateException> {
       val injector = Guice.createInjector(TestActionScopedProviderModule())
       injector.injectMembers(this)
 
@@ -67,7 +67,7 @@ class ActionScopedTest {
 
   @Test
   fun seedDataNotFoundFails() {
-    assertThrows(IllegalStateException::class.java) {
+    assertThrows<IllegalStateException> {
       val injector = Guice.createInjector(TestActionScopedProviderModule())
       injector.injectMembers(this)
 
@@ -98,7 +98,7 @@ class ActionScopedTest {
 
   @Test
   fun providerExceptionsPropagate() {
-    assertThrows(UnauthenticatedException::class.java) {
+    assertThrows<UnauthenticatedException> {
       val injector = Guice.createInjector(TestActionScopedProviderModule())
       injector.injectMembers(this)
 

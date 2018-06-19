@@ -1,7 +1,7 @@
 package org.assertj.core.api
 
+import misk.testing.assertThrows
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Test
 
 internal class AssertExtensionsTest {
@@ -24,7 +24,7 @@ internal class AssertExtensionsTest {
 
   @Test
   fun assertAsJsonMismatchedFieldName() {
-    assertThat(assertThrows(AssertionError::class.java) {
+    assertThat(assertThrows<AssertionError> {
       assertThat("""
 {
   "my_structure2"   : ["this", 45, "zip" ],
@@ -42,7 +42,7 @@ internal class AssertExtensionsTest {
 
   @Test
   fun assertAsJsonMismatchedFieldValue() {
-    assertThat(assertThrows(AssertionError::class.java) {
+    assertThat(assertThrows<AssertionError> {
       assertThat("""
 {
   "my_structure"    : ["thisisit", 45, "zip" ],
@@ -60,7 +60,7 @@ internal class AssertExtensionsTest {
 
   @Test
   fun assertAsJsonMismatchedWhitespaceInStringFieldValue() {
-    assertThat(assertThrows(AssertionError::class.java) {
+    assertThat(assertThrows<AssertionError> {
       assertThat("""
 {
   "my_structure"    : ["this", 45, "zip" ],

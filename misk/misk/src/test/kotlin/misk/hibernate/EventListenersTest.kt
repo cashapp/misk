@@ -1,6 +1,7 @@
 package misk.hibernate
 
 import com.google.inject.util.Modules
+import misk.inject.to
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
@@ -16,10 +17,10 @@ class EventListenersTest {
       MoviesTestModule(),
       object : HibernateEntityModule(Movies::class) {
         override fun configureHibernate() {
-          bindListener(EventType.PRE_LOAD).to(FakeEventListener::class.java)
-          bindListener(EventType.PRE_INSERT).to(FakeEventListener::class.java)
-          bindListener(EventType.PRE_UPDATE).to(FakeEventListener::class.java)
-          bindListener(EventType.PRE_DELETE).to(FakeEventListener::class.java)
+          bindListener(EventType.PRE_LOAD).to<FakeEventListener>()
+          bindListener(EventType.PRE_INSERT).to<FakeEventListener>()
+          bindListener(EventType.PRE_UPDATE).to<FakeEventListener>()
+          bindListener(EventType.PRE_DELETE).to<FakeEventListener>()
         }
       })
 
