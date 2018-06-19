@@ -89,6 +89,13 @@ export const externals = [{
     commonjs2: 'react-transition-group',
     amd: 'react-transition-group'
   }
+}, {
+    'axios': {
+        root: 'Axios',
+        commonjs: 'axios',
+        commonjs2: 'axios',
+        amd: 'axios'
+    },
 }];
 
 export default externals;

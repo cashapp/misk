@@ -1,5 +1,6 @@
 import React from 'react';
 import { Button, Collapse } from '@blueprintjs/core';
+import axios from 'axios';
 
 export namespace RootContainer {
   export interface Props {
@@ -10,14 +11,40 @@ export namespace RootContainer {
 
 class RootContainer extends React.Component<RootContainer.Props> {
   public state = {
-    isOpen: false,
+    isOpen: false
   };
 
   private handleClick = () => {
     this.setState({ isOpen: !this.state.isOpen });
   };
 
+  componentDidMount() {
+    axios
+      .get("http://0.0.0.0:8080/_admin/config")
+      .then(response => {
+        // const newState = Object.assign({}, this.state, {
+        //   config: { response }
+        // })
+      console.log(response)
+      // console.log(this.state.config)
+      // this.setState(newState)
+      });
+    // console.log(this.state.config)
+  }
+
   render() {
+      axios
+        .get("/_admin/config/all")
+        .then(response => {
+          // const newState = Object.assign({}, this.state, {
+          //   config: { response }
+          // })
+          console.log(response)
+          // console.log(this.state.config)
+          // this.setState(newState)
+        });
+      // console.log(this.state.config)
+
     return (
       <div>
         <h5>App: Config</h5>
@@ -31,11 +58,11 @@ class RootContainer extends React.Component<RootContainer.Props> {
           <pre><code>
             _p2_restart: Restarted by mgersh at Wed, 16 May 2018 22:46:29 GMT
             app:
-              badgingEnabled: true
-              pushEnabled: true
+            badgingEnabled: true
+            pushEnabled: true
             appVerifier:
-              enableConfirmationViaPaymentToken: true
-              paymentTokenUrlPrefix: 
+            enableConfirmationViaPaymentToken: true
+            paymentTokenUrlPrefix:
             app_session_token_hmac_key: !secret ['/data/pods/franklin/secrets/app_session_token_hmac_key']
             backfiller:
           </code></pre>
