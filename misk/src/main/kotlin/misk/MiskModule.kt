@@ -13,6 +13,8 @@ import javax.inject.Singleton
 
 class MiskModule : AbstractModule() {
   override fun configure() {
+    binder().disableCircularProxies()
+    binder().requireExactBindingAnnotations()
     install(HealthChecksModule())
     install(MetricsModule())
     install(ClockModule())

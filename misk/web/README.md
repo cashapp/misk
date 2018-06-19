@@ -29,6 +29,7 @@ $ yarn start
 
 ## Creating a new Module
 
+- Install IntelliJ Ultimate and [Setup Typescript Support](https://www.jetbrains.com/help/idea/2017.1/typescript-support.html). Typescript errors will now appear as you type. 
 - Duplicate exemplar module into `modules`
 - Change name for `module_{name}` and `menu_{name}` in `webpack.{development | production}.config.js` -> `entry: {}`
 - Update app name in `src/core/app/index.ts` to `MiskModule{name}`
@@ -67,6 +68,8 @@ $ yarn start
 - [x] Create sidebar UI
 - [ ] Have module registration also add button to sidebar
 - [x] Have sidebar buttons trigger the Import of modules
+- [ ] Use [React-Loadable](https://github.com/jamiebuilds/react-loadable) instead of raw `import(./module.js)` statement in `ModuleComponent.tsx`. Further reading: [Author: How to blog](https://jamie.build/react-loadable.html), [Example app](https://github.com/jamiebuilds/react-loadable-example)
+- [x] Consider Parcel.js instead of Webpack. Tried: our config requirements may make this not as suitable for Parcel which boasts of zero-config and is still in early days.
 - [ ] Dynamically extensible router. Each module gets a namespace and handles all routes within it
 - [ ] Remove `const BrowserRouterService = require('frint-router/BrowserRouterService')` when `Frint-Router` includes typings
 - [ ] Patch up `app/index.ts` in main and modules once Frint typings and `createApp private class` error fixed
@@ -74,6 +77,8 @@ $ yarn start
 - [ ] Add reasonable linting and syntax enforcement with `eslint` or `tslint`
 - [ ] Get repo working with tsconfig.json `strict: true`
 - [ ] Exemplar module UI
+- [ ] Find out how to access .env files in JS
+- [ ] Add CSP to prevent malicious takeover of admin dashboard [Terril CSP Cash.me](https://medium.com/square-corner-blog/content-security-policy-for-single-page-web-apps-78f2b2cf1757)
 
 ## Typescript Nuances
 - Some NPM packages are written in Typescript, these are very easy to import and use without issue.
