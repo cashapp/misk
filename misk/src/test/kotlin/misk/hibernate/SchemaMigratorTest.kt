@@ -16,9 +16,9 @@ import misk.resources.FakeResourceLoader
 import misk.resources.FakeResourceLoaderModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
+import misk.testing.assertThrows
 import org.assertj.core.api.Assertions.assertThat
 import org.hibernate.SessionFactory
-import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Test
 import javax.inject.Inject
 import javax.inject.Provider
@@ -63,9 +63,7 @@ internal class SchemaMigratorTest {
           SessionFactoryService(Movies::class, config.data_source, defaultEnv)
       binder().addMultibinderBinding<Service>().toInstance(sessionFactoryService)
       binder().addMultibinderBinding<Service>().toInstance(dropTablesService)
-      bind(SessionFactory::class.java)
-          .annotatedWith(Movies::class.java)
-          .toProvider(sessionFactoryService)
+      bind<SessionFactory>().annotatedWith<Movies>().toProvider(sessionFactoryService)
     }
   }
 
@@ -88,7 +86,7 @@ internal class SchemaMigratorTest {
     assertThat(tableExists("table_2")).isFalse()
     assertThat(tableExists("table_3")).isFalse()
     assertThat(tableExists("table_4")).isFalse()
-    assertThrows(PersistenceException::class.java) {
+    assertThrows<PersistenceException> {
       schemaMigrator.appliedMigrations()
     }
 
@@ -139,7 +137,7 @@ internal class SchemaMigratorTest {
         |CREATE TABLE table_1 (name varchar(255))
         |""".trimMargin())
 
-    assertThat(assertThrows(IllegalStateException::class.java) {
+    assertThat(assertThrows<IllegalStateException> {
       schemaMigrator.requireAll()
     }).hasMessage("""
           |schemamigrator is missing migrations:
