@@ -11,3 +11,4 @@
 (<any>window).FrintRouterBrowserRouterService = require('frint-router/BrowserRouterService');
 (<any>window).BlueprintjsCore = require('@blueprintjs/core');
 (<any>window).ReactTransitionGroup = require('react-transition-group');
+(<any>window).Axios = require('axios');
