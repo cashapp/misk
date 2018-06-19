@@ -92,6 +92,27 @@ class TransacterTest {
     }
   }
 
+  @Test
+  fun inTransaction() {
+    assertThat(transacter.inTransaction).isFalse()
+
+    transacter.transaction {
+      assertThat(transacter.inTransaction).isTrue()
+    }
+
+    assertThat(transacter.inTransaction).isFalse()
+  }
+
+  @Test
+  fun nestedTransactionUnsupported() {
+    val exception = assertThrows(IllegalStateException::class.java) {
+      transacter.transaction {
+        transacter.transaction {}
+      }
+    }
+    assertThat(exception).hasMessage("Attempted to start a nested session")
+  }
+
   interface CharacterQuery : Query<DbCharacter> {
     @Constraint("name")
     fun name(name: String): CharacterQuery

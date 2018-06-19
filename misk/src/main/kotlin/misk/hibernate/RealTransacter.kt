@@ -6,15 +6,20 @@ import kotlin.reflect.KClass
 internal class RealTransacter(
   private val sessionFactory: SessionFactory
 ) : Transacter {
+
+  private val TLS = ThreadLocal<Session>()
+
+  override val inTransaction: Boolean
+    get() = TLS.get() != null
+
   override fun <T> transaction(lambda: (session: Session) -> T): T {
-    sessionFactory.openSession().use { session ->
-      val transaction = session.beginTransaction()!!
-      val realSession = RealSession(session)
+    return withSession { session ->
+      val transaction = session.hibernateSession.beginTransaction()!!
       val result: T
       try {
-        result = lambda(realSession)
+        result = lambda(session)
         transaction.commit()
-        return result
+        return@withSession result
       } catch (e: Throwable) {
         if (transaction.isActive) {
           try {
@@ -25,6 +30,27 @@ internal class RealTransacter(
         }
         throw e
       }
+    }
+  }
+
+  private fun <T> withSession(lambda: (session: Session) -> T): T {
+    check(TLS.get() == null) { "Attempted to start a nested session" }
+
+    val realSession = RealSession(sessionFactory.openSession())
+    TLS.set(realSession)
+
+    try {
+      return lambda(realSession)
+    } finally {
+      closeSession()
+    }
+  }
+
+  private fun closeSession() {
+    try {
+      TLS.get().hibernateSession.close()
+    } finally {
+      TLS.remove()
     }
   }
 
