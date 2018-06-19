@@ -7,6 +7,7 @@ import com.google.inject.name.Names
 import misk.inject.KAbstractModule
 import misk.inject.asSingleton
 import misk.inject.typeLiteral
+import misk.web.WebActionModule
 import javax.inject.Provider
 import kotlin.reflect.KProperty1
 import kotlin.reflect.full.createType
@@ -24,6 +25,7 @@ class ConfigModule<T : Config>(
     bind<String>().annotatedWith<AppName>().toInstance(appName)
     bind(configClass).toInstance(config)
     bindConfigClassRecursively(configClass)
+    install(WebActionModule.create<ConfigAdminAction>())
   }
 
   @Suppress("UNCHECKED_CAST")
