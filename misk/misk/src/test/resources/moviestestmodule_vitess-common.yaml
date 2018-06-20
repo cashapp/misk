@@ -1,0 +1,4 @@
+data_source:
+  type: VITESS
+  username: vt_app
+  password: whatever

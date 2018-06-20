@@ -49,14 +49,14 @@ class TransacterTest {
       val lauraDernMovies = queryFactory.newQuery<CharacterQuery>()
           .actorName("Laura Dern")
           .listAsMovieNameAndReleaseDate(session)
-      assertThat(lauraDernMovies).containsExactly(
+      assertThat(lauraDernMovies).containsExactlyInAnyOrder(
           NameAndReleaseDate("Star Wars", LocalDate.of(1977, 5, 25)),
           NameAndReleaseDate("Jurassic Park", LocalDate.of(1993, 6, 9)))
 
       val actorsInOldMovies = queryFactory.newQuery<CharacterQuery>()
           .movieReleaseDateBefore(LocalDate.of(1980, 1, 1))
           .listAsActorAndReleaseDate(session)
-      assertThat(actorsInOldMovies).containsExactly(
+      assertThat(actorsInOldMovies).containsExactlyInAnyOrder(
           ActorAndReleaseDate("Laura Dern", LocalDate.of(1977, 5, 25)),
           ActorAndReleaseDate("Carrie Fisher", LocalDate.of(1977, 5, 25)))
     }

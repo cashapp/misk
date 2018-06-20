@@ -37,12 +37,18 @@ internal class SchemaMigrator(
 ) {
   /** Returns a map from version to path. */
   fun availableMigrations(): NavigableMap<Int, String> {
+    if (config.migrations_path == null) {
+      return TreeMap()
+    }
     val resources = resourceLoader.list(config.migrations_path)
     return TreeMap(resources.associateBy { resourceVersion(it) })
   }
 
   /** Creates the `schema_version` table if it does not exist. Returns the applied migrations. */
   fun initialize(): NavigableSet<Int> {
+    if (config.migrations_path == null) {
+      return TreeSet()
+    }
     try {
       val result = appliedMigrations()
       logger.info {
