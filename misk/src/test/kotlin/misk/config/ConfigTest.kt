@@ -1,12 +1,15 @@
 package misk.config
 
 import com.google.inject.util.Modules
+import misk.MiskModule
 import misk.environment.Environment
 import misk.environment.EnvironmentModule
+import misk.resources.ResourceLoaderModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.testing.assertThrows
 import misk.web.WebConfig
+import misk.web.WebModule
 import misk.web.exceptions.ActionExceptionLogLevelConfig
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -23,7 +26,11 @@ class ConfigTest {
   @MiskTestModule
   val module = Modules.combine(
       ConfigModule.create("test_app", config),
-      EnvironmentModule(defaultEnv)
+      EnvironmentModule(defaultEnv),
+//    @TODO(jwilson) https://github.com/square/misk/issues/272
+      ResourceLoaderModule(),
+      WebModule(),
+      MiskModule()
   )
 
   @Inject
