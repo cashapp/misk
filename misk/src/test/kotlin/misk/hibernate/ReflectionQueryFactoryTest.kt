@@ -5,8 +5,8 @@ import com.google.common.collect.Iterables.getOnlyElement
 import misk.logging.LogCollector
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
+import misk.testing.assertThrows
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import javax.inject.Inject
@@ -305,7 +305,7 @@ class ReflectionQueryFactoryTest {
         session.save(DbMovie("Rocky $i", null))
       }
     }
-    assertThat(assertThrows(IllegalStateException::class.java) {
+    assertThat(assertThrows<IllegalStateException> {
       transacter.transaction { session ->
         queryFactory.newQuery<OperatorsMovieQuery>().list(session)
       }
@@ -331,7 +331,7 @@ class ReflectionQueryFactoryTest {
   @Test
   fun maxMaxRowCountEnforced() {
     val query = queryFactory.newQuery<OperatorsMovieQuery>()
-    assertThat(assertThrows(IllegalArgumentException::class.java) {
+    assertThat(assertThrows<IllegalArgumentException> {
       query.maxRows = 10_001
     }).hasMessage("out of range: 10001")
   }
@@ -371,14 +371,14 @@ class ReflectionQueryFactoryTest {
     }
 
     // Unique result.
-    assertThat(assertThrows(IllegalStateException::class.java) {
+    assertThat(assertThrows<IllegalStateException> {
       transacter.transaction { session ->
         queryFactory.newQuery<OperatorsMovieQuery>().uniqueResult(session)
       }
     }).hasMessageContaining("query expected a unique result but was")
 
     // Unique result projection.
-    assertThat(assertThrows(IllegalStateException::class.java) {
+    assertThat(assertThrows<IllegalStateException> {
       transacter.transaction { session ->
         queryFactory.newQuery<OperatorsMovieQuery>().uniqueName(session)
       }

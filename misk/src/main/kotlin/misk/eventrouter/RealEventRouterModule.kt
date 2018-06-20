@@ -7,6 +7,7 @@ import misk.environment.Environment
 import misk.healthchecks.HealthCheck
 import misk.inject.KAbstractModule
 import misk.inject.addMultibinderBinding
+import misk.inject.asSingleton
 import misk.inject.to
 import misk.moshi.MoshiAdapterModule
 import misk.moshi.adapter
@@ -20,8 +21,8 @@ import javax.inject.Singleton
 
 class RealEventRouterModule(val environment: Environment) : KAbstractModule() {
   override fun configure() {
-    bind<EventRouter>().to<RealEventRouter>().`in`(Singleton::class.java)
-    bind<RealEventRouter>().`in`(Singleton::class.java)
+    bind<EventRouter>().to<RealEventRouter>().asSingleton()
+    bind<RealEventRouter>().asSingleton()
     binder().addMultibinderBinding<Service>().to<EventRouterService>()
     if (environment == Environment.DEVELOPMENT) {
       bind<ClusterConnector>().to<LocalClusterConnector>()

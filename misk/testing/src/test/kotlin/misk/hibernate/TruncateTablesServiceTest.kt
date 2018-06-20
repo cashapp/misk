@@ -103,7 +103,7 @@ internal class TruncateTablesServiceTest {
 
   class TestModule : KAbstractModule() {
     override fun configure() {
-      bind(Environment::class.java).toInstance(Environment.TESTING)
+      bind<Environment>().toInstance(Environment.TESTING)
       install(ResourceLoaderModule())
       install(MiskModule())
 

@@ -6,6 +6,7 @@ import com.google.inject.Provides
 import com.squareup.moshi.Moshi
 import misk.inject.KAbstractModule
 import misk.inject.addMultibinderBinding
+import misk.inject.asSingleton
 import misk.moshi.MoshiAdapterModule
 import misk.moshi.adapter
 import java.util.concurrent.ExecutorService
@@ -26,8 +27,8 @@ class EventRouterTestingModule internal constructor(val distributed: Boolean) : 
     if (distributed) {
       bind<EventRouter>().to<RealEventRouter>()
     } else {
-      bind<EventRouter>().to<RealEventRouter>().`in`(Singleton::class.java)
-      bind<RealEventRouter>().`in`(Singleton::class.java)
+      bind<EventRouter>().to<RealEventRouter>().asSingleton()
+      bind<RealEventRouter>().asSingleton()
       binder().addMultibinderBinding<Service>().toInstance(object: AbstractIdleService() {
         @Inject private lateinit var eventRouter: RealEventRouter
         @Inject private lateinit var eventRouterTester: EventRouterTester

@@ -23,6 +23,7 @@ import misk.security.x509.X500Name
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.testing.TestWebModule
+import misk.testing.assertThrows
 import misk.web.Post
 import misk.web.RequestBody
 import misk.web.RequestContentType
@@ -34,7 +35,6 @@ import misk.web.actions.WebAction
 import misk.web.jetty.JettyService
 import misk.web.mediatype.MediaTypes
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import javax.inject.Inject
@@ -85,14 +85,14 @@ internal class JceksSslClientServerTest {
   fun failsIfNoCertIsPresented() {
     // In this case the server just hangs up, which might result in a handshake exception
     // or a socket exception depending on the state of things at the time of hangup
-    assertThrows(Throwable::class.java) {
+    assertThrows<Throwable> {
       noCertClient.post<Dinosaur>("/hello", Dinosaur.Builder().name("trex").build())
     }
   }
 
   @Test
   fun failsIfServerIsUntrusted() {
-    assertThrows(SSLHandshakeException::class.java) {
+    assertThrows<SSLHandshakeException> {
       noTrustClient.post<Dinosaur>("/hello", Dinosaur.Builder().name("trex").build())
     }
   }

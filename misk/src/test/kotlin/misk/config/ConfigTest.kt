@@ -5,10 +5,10 @@ import misk.environment.Environment
 import misk.environment.EnvironmentModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
+import misk.testing.assertThrows
 import misk.web.WebConfig
 import misk.web.exceptions.ActionExceptionLogLevelConfig
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Test
 import org.slf4j.event.Level
 import java.time.Duration
@@ -72,7 +72,7 @@ class ConfigTest {
 
   @Test
   fun friendlyErrorMessagesWhenFilesNotFound() {
-    val exception = assertThrows(IllegalStateException::class.java) {
+    val exception = assertThrows<IllegalStateException> {
       MiskConfig.load<TestConfig>(TestConfig::class.java, "missing", defaultEnv)
     }
 
@@ -82,7 +82,7 @@ class ConfigTest {
 
   @Test
   fun friendlyErrorMessageWhenConfigPropertyMissing() {
-    val exception = assertThrows(IllegalStateException::class.java) {
+    val exception = assertThrows<IllegalStateException> {
       MiskConfig.load<TestConfig>(TestConfig::class.java, "partial_test_app", defaultEnv)
     }
 
@@ -92,7 +92,7 @@ class ConfigTest {
 
   @Test
   fun friendlyErrorMessagesWhenFileUnparseable() {
-    val exception = assertThrows(IllegalStateException::class.java) {
+    val exception = assertThrows<IllegalStateException> {
       MiskConfig.load<TestConfig>(TestConfig::class.java, "unparsable", defaultEnv)
     }
 
@@ -101,7 +101,7 @@ class ConfigTest {
 
   @Test
   fun friendlyErrorMessagesWhenPropertiesNotFound() {
-    val exception = assertThrows(IllegalStateException::class.java) {
+    val exception = assertThrows<IllegalStateException> {
       MiskConfig.load<TestConfig>(TestConfig::class.java, "unknownproperty", defaultEnv)
     }
 
