@@ -4,13 +4,16 @@ import com.google.inject.CreationException
 import com.google.inject.Guice
 import com.google.inject.util.Modules
 import io.opentracing.Tracer
+import misk.MiskModule
 import misk.config.ConfigModule
 import misk.config.MiskConfig
 import misk.environment.Environment
 import misk.environment.EnvironmentModule
+import misk.resources.ResourceLoaderModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.testing.assertThrows
+import misk.web.WebModule
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import javax.inject.Inject
@@ -23,7 +26,12 @@ class TracingConfigTest {
   val module = Modules.combine(
       ConfigModule.create("test_tracing_app", config),
       TracingModule(config.tracing),
-      EnvironmentModule(defaultEnv)
+      EnvironmentModule(defaultEnv),
+//    @TODO(jwilson swankjesse) https://github.com/square/misk/issues/272
+      ResourceLoaderModule(),
+      WebModule(),
+      MiskModule()
+
   )
 
   @Inject
