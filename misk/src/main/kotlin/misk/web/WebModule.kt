@@ -111,6 +111,6 @@ class WebModule : KAbstractModule() {
 
     // Bind _admin static resources to web
     binder().addMultibinderBinding<StaticResourceMapper.Entry>()
-        .toInstance(StaticResourceMapper.Entry("/_admin", "web/_admin", "misk/web/_admin/build"))
+        .toInstance(StaticResourceMapper.Entry("/_admin/", "web/_admin", "misk/web/_admin/build"))
   }
 }
