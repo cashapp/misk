@@ -46,13 +46,6 @@ object MiskConfig {
     }
   }
 
-//  @TODO: load (): not flatten
-//  @TODO: takes loaded map and produces flattened json node. ordered map, flattening needs to happen in order that the map is written into
-//  @TODO: main load() calls two above mthods in sequence and then mapper.readValue(flattened)
-
-//  @TODO: two methods: gimme config yamls as strings (not flatten)
-//  @TODO: flattening
-
   /** @return order of map precedence taken into account */
   fun flattenYamlMap(configYamls: Map<String, String?>): JsonNode {
     val mapper = ObjectMapper(YAMLFactory()).registerModules(KotlinModule(), JavaTimeModule())

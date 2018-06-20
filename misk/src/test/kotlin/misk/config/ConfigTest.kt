@@ -27,7 +27,7 @@ class ConfigTest {
   val module = Modules.combine(
       ConfigModule.create("test_app", config),
       EnvironmentModule(defaultEnv),
-//    @TODO(jwilson) https://github.com/square/misk/issues/272
+//    @TODO(jwilson swankjesse) https://github.com/square/misk/issues/272
       ResourceLoaderModule(),
       WebModule(),
       MiskModule()
