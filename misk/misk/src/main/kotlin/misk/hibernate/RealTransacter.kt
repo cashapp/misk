@@ -13,10 +13,10 @@ internal class RealTransacter(
   private val config: DataSourceConfig
 ) : Transacter {
 
-  private val TLS = ThreadLocal<Session>()
+  private val threadLocalSession = ThreadLocal<Session>()
 
   override val inTransaction: Boolean
-    get() = TLS.get() != null
+    get() = threadLocalSession.get() != null
 
   override fun <T> transaction(lambda: (session: Session) -> T): T {
     return withSession { session ->
@@ -40,10 +40,10 @@ internal class RealTransacter(
   }
 
   private fun <T> withSession(lambda: (session: Session) -> T): T {
-    check(TLS.get() == null) { "Attempted to start a nested session" }
+    check(threadLocalSession.get() == null) { "Attempted to start a nested session" }
 
     val realSession = RealSession(sessionFactory.openSession(), config)
-    TLS.set(realSession)
+    threadLocalSession.set(realSession)
 
     try {
       return lambda(realSession)
@@ -54,9 +54,9 @@ internal class RealTransacter(
 
   private fun closeSession() {
     try {
-      TLS.get().hibernateSession.close()
+      threadLocalSession.get().hibernateSession.close()
     } finally {
-      TLS.remove()
+      threadLocalSession.remove()
     }
   }
 

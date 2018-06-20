@@ -5,19 +5,15 @@ package misk.hibernate
  */
 interface Transacter {
   /**
-   * @returns [true] if the calling thread is currently within a transaction block.
+   * Returns true if the calling thread is currently within a transaction block.
    */
   val inTransaction: Boolean
 
   /**
-   * Executes [lambda] in a transaction. The transaction will be committed once [lambda] completes.
-   * If [lambda] raises an exception the transaction will be rolled back.
+   * Starts a transaction on the current thread, executes lambda, and commits the transaction.
+   * If lambda raises an exception the transaction will be rolled back instead of committed.
    *
-   * @param lambda a function to execute in a transaction.
-   * @return the result of [lambda] function.
-   *
-   * @throws IllegalStateException if attempting a nested transaction, which is unsupported.
-   * @throws Throwable for various other runtime exceptions.
+   * It is an error to start a transaction if another transaction is already in progress.
    */
   fun <T> transaction(lambda: (session: Session) -> T): T
 }
