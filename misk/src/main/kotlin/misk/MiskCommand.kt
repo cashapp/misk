@@ -23,8 +23,8 @@ abstract class MiskCommand(
 
   /**
    * Confirms that the given precondition is true, otherwise throws a [ParameterException]
-   * with the supplied message
-   * */
+   * with the supplied message.
+   */
   fun requireCli(value: Boolean, lazyMessage: () -> String) {
     if (!value) {
       val exception = ParameterException(lazyMessage())

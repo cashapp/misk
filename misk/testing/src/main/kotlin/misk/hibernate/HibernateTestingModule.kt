@@ -2,10 +2,8 @@ package misk.hibernate
 
 import com.google.common.util.concurrent.Service
 import misk.inject.KAbstractModule
-import misk.inject.addMultibinderBinding
 import misk.inject.toKey
 import misk.jdbc.DataSourceConfig
-import org.hibernate.SessionFactory
 import javax.inject.Provider
 import kotlin.reflect.KClass
 
@@ -28,7 +26,7 @@ class HibernateTestingModule(
     val transacterKey = Transacter::class.toKey(qualifier)
     val transacterProvider = getProvider(transacterKey)
 
-    binder().addMultibinderBinding<Service>().to(truncateTablesServiceKey)
+    multibind<Service>().to(truncateTablesServiceKey)
 
     bind(truncateTablesServiceKey).toProvider(Provider<TruncateTablesService> {
       TruncateTablesService(

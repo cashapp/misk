@@ -1,12 +1,10 @@
 package misk.web.jetty
 
 import com.google.common.util.concurrent.Service
-import com.google.inject.AbstractModule
-import misk.inject.addMultibinderBinding
-import misk.inject.to
+import misk.inject.KAbstractModule
 
-class JettyModule : AbstractModule() {
+class JettyModule : KAbstractModule() {
   override fun configure() {
-    binder().addMultibinderBinding<Service>().to<JettyService>()
+    multibind<Service>().to<JettyService>()
   }
 }

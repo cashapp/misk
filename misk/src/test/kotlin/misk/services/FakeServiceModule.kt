@@ -1,12 +1,10 @@
 package misk.services
 
 import com.google.common.util.concurrent.Service
-import com.google.inject.AbstractModule
-import misk.inject.addMultibinderBinding
-import misk.inject.to
+import misk.inject.KAbstractModule
 
-class FakeServiceModule : AbstractModule() {
+class FakeServiceModule : KAbstractModule() {
   override fun configure() {
-    binder().addMultibinderBinding<Service>().to<FakeService>()
+    multibind<Service>().to<FakeService>()
   }
 }

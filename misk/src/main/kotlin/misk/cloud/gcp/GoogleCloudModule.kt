@@ -17,8 +17,6 @@ import misk.cloud.gcp.storage.LocalStorageRpc
 import misk.cloud.gcp.storage.StorageConfig
 import misk.environment.Environment
 import misk.inject.KAbstractModule
-import misk.inject.addMultibinderBinding
-import misk.inject.to
 import misk.logging.getLogger
 import java.nio.file.Paths
 import javax.inject.Inject
@@ -26,7 +24,7 @@ import javax.inject.Inject
 /** Installs support for talking to real GCP services, either direct or via emulator */
 class GoogleCloudModule : KAbstractModule() {
   override fun configure() {
-    binder().addMultibinderBinding<Service>().to<GoogleCloud>()
+    multibind<Service>().to<GoogleCloud>()
   }
 
   @Provides

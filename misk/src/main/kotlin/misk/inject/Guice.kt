@@ -1,12 +1,9 @@
 package misk.inject
 
-import com.google.inject.Binder
 import com.google.inject.Injector
 import com.google.inject.Key
 import com.google.inject.TypeLiteral
-import com.google.inject.binder.LinkedBindingBuilder
 import com.google.inject.binder.ScopedBindingBuilder
-import com.google.inject.multibindings.Multibinder
 import com.google.inject.util.Types
 import java.lang.reflect.ParameterizedType
 import java.lang.reflect.Type
@@ -18,38 +15,12 @@ import kotlin.reflect.KClass
 import kotlin.reflect.KType
 import kotlin.reflect.jvm.javaType
 
-inline fun <reified T : Any> LinkedBindingBuilder<in T>.to() = to(T::class.java)
-
-@Suppress("UNCHECKED_CAST")
-inline fun <reified T : Any> Binder.newMultibinder(
-  annotation: KClass<out Annotation>? = null
-): Multibinder<T> {
-  val setOfT = parameterizedType<Set<*>>(T::class.java).typeLiteral() as TypeLiteral<Set<T>>
-  val mutableSetOfTKey = setOfT.toKey(annotation) as Key<MutableSet<T>>
-  val listOfOutT = parameterizedType<List<*>>(subtypeOf<T>()).typeLiteral() as TypeLiteral<List<T>>
-  val listOfOutTKey = listOfOutT.toKey(annotation)
-  bind(listOfOutTKey).toProvider(ListProvider(mutableSetOfTKey, getProvider(mutableSetOfTKey)))
-
-  return when (annotation) {
-    null -> Multibinder.newSetBinder(this, T::class.java)
-    else -> Multibinder.newSetBinder(this, T::class.java, annotation.java)
-  }
-}
-
-inline fun <reified T : Any, reified A : Annotation> Binder.addMultibinderBindingWithAnnotation() =
-    addMultibinderBinding<T>(A::class)
-
-@Suppress("UNCHECKED_CAST")
-inline fun <reified T : Any> Binder.addMultibinderBinding(
-  annotation: KClass<out Annotation>? = null
-): LinkedBindingBuilder<T> = newMultibinder<T>(annotation).addBinding()
-
 fun ScopedBindingBuilder.asSingleton() {
   `in`(Singleton::class.java)
 }
 
 /** Given a Set<T>, provide a List<T>. */
-class ListProvider<T>(
+internal class ListProvider<T>(
   private val setKey: Key<MutableSet<T>>,
   private val setProvider: Provider<MutableSet<T>>
 ) : Provider<List<T>> {
@@ -99,8 +70,6 @@ fun <T : Any> Injector.getSetOf(
 inline fun <reified T : Any> keyOf(): Key<T> = Key.get(T::class.java)
 inline fun <reified T : Any> keyOf(a: Annotation): Key<T> = Key.get(T::class.java, a)
 
-fun <T : Any, A : Annotation> keyOf(t: KClass<T>, a: KClass<A>): Key<T> = Key.get(t.java, a.java)
-
 fun <T : Any> TypeLiteral<T>.toKey(annotation: KClass<out Annotation>? = null): Key<T> {
   return when (annotation) {
     null -> Key.get(this)
@@ -129,5 +98,4 @@ fun uninject(target: Any) {
   } catch (e: IllegalAccessException) {
     throw AssertionError(e)
   }
-
 }

@@ -6,12 +6,8 @@ import com.google.inject.Provider
 import com.squareup.moshi.Moshi
 import io.opentracing.Tracer
 import misk.inject.KAbstractModule
-import misk.inject.newMultibinder
 import okhttp3.OkHttpClient
-import retrofit2.Converter
 import retrofit2.Retrofit
-import retrofit2.converter.moshi.MoshiConverterFactory
-import retrofit2.converter.wire.WireConverterFactory
 import java.lang.reflect.Proxy
 import kotlin.reflect.KClass
 
@@ -24,8 +20,8 @@ class TypedHttpClientModule<T : Any>(
   override fun configure() {
     // Always initialize the network and application interceptor list, even if
     // we don't have any interceptors
-    binder().newMultibinder<ClientNetworkInterceptor.Factory>()
-    binder().newMultibinder<ClientApplicationInterceptor.Factory>()
+    newMultibinder<ClientNetworkInterceptor.Factory>()
+    newMultibinder<ClientApplicationInterceptor.Factory>()
 
     // Install raw HTTP client support
     install(HttpClientModule(name, annotation))

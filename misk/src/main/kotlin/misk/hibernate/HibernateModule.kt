@@ -3,10 +3,8 @@ package misk.hibernate
 import com.google.common.util.concurrent.Service
 import misk.environment.Environment
 import misk.inject.KAbstractModule
-import misk.inject.addMultibinderBinding
 import misk.inject.asSingleton
 import misk.inject.setOfType
-import misk.inject.to
 import misk.inject.toKey
 import misk.jdbc.DataSourceConfig
 import misk.resources.ResourceLoader
@@ -60,7 +58,7 @@ class HibernateModule(
       SessionFactoryService(qualifier, config, environmentProvider.get(), entitiesProvider.get(),
           eventListenersProvider.get())
     }).asSingleton()
-    binder().addMultibinderBinding<Service>().to(sessionFactoryServiceKey)
+    multibind<Service>().to(sessionFactoryServiceKey)
 
     bind(schemaMigratorKey).toProvider(object : Provider<SchemaMigrator> {
       @Inject lateinit var resourceLoader: ResourceLoader
@@ -72,7 +70,7 @@ class HibernateModule(
       RealTransacter(sessionFactoryProvider.get(), config)
     }).asSingleton()
 
-    binder().addMultibinderBinding<Service>().toProvider(object : Provider<SchemaMigratorService> {
+    multibind<Service>().toProvider(object : Provider<SchemaMigratorService> {
       @Inject lateinit var environment: Environment
       override fun get(): SchemaMigratorService = SchemaMigratorService(
           qualifier, environment, schemaMigratorProvider)
