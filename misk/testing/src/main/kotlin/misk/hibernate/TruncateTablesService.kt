@@ -8,7 +8,6 @@ import misk.inject.toKey
 import misk.jdbc.DataSourceConfig
 import misk.jdbc.DataSourceType
 import misk.logging.getLogger
-import org.hibernate.SessionFactory
 import org.hibernate.query.Query
 import java.util.Locale
 import javax.inject.Provider
@@ -28,7 +27,7 @@ private val logger = getLogger<TruncateTablesService>()
 internal class TruncateTablesService(
   private val qualifier: KClass<out Annotation>,
   private val config: DataSourceConfig,
-  private val sessionFactoryProvider: Provider<SessionFactory>,
+  private val transacterProvider: Provider<Transacter>,
   private val startUpStatements: List<String> = listOf(),
   private val shutDownStatements: List<String> = listOf()
 ) : AbstractIdleService(), DependentService {
@@ -49,33 +48,39 @@ internal class TruncateTablesService(
   private fun truncateUserTables() {
     val stopwatch = Stopwatch.createStarted()
 
-    val truncatedTableNames = sessionFactoryProvider.get().openSession().use { session ->
-      val tableNamesQuery = when (config.type) {
-        DataSourceType.MYSQL -> {
-          "SELECT table_name FROM information_schema.tables where table_schema='${config.database}'"
+    val truncatedTableNames = transacterProvider.get().shards().flatMap { shard ->
+      transacterProvider.get().transaction(shard) { session ->
+        val tableNamesQuery = when (config.type) {
+          DataSourceType.MYSQL -> {
+            "SELECT table_name FROM information_schema.tables where table_schema='${config.database}'"
+          }
+          DataSourceType.HSQLDB -> {
+            "SELECT TABLE_NAME FROM INFORMATION_SCHEMA.SYSTEM_TABLES WHERE TABLE_TYPE='TABLE'"
+          }
+          DataSourceType.VITESS -> {
+            "SHOW VSCHEMA_TABLES"
+          }
         }
-        DataSourceType.HSQLDB -> {
-          "SELECT TABLE_NAME FROM INFORMATION_SCHEMA.SYSTEM_TABLES WHERE TABLE_TYPE='TABLE'"
+
+        @Suppress("UNCHECKED_CAST") // createNativeQuery returns a raw Query.
+        val query = session.hibernateSession.createNativeQuery(tableNamesQuery) as Query<String>
+        val allTableNames = query.list()
+
+        val truncatedTableNames = mutableListOf<String>()
+        session.useConnection { connection ->
+          val statement = connection.createStatement()
+          for (tableName in allTableNames) {
+            if (persistentTables.contains(tableName.toLowerCase(Locale.ROOT))) continue
+            if (tableName.endsWith("_seq") || tableName.equals("dual")) continue
+
+            statement.addBatch("DELETE FROM $tableName")
+            truncatedTableNames += tableName
+          }
+          statement.executeBatch()
         }
+
+        return@transaction truncatedTableNames
       }
-
-      @Suppress("UNCHECKED_CAST") // createNativeQuery returns a raw Query.
-      val query = session.createNativeQuery(tableNamesQuery) as Query<String>
-      val allTableNames = query.list()
-
-      val truncatedTableNames = mutableListOf<String>()
-      session.doReturningWork { connection ->
-        val statement = connection.createStatement()
-        for (tableName in allTableNames) {
-          if (persistentTables.contains(tableName.toLowerCase(Locale.ROOT))) continue
-
-          statement.addBatch("DELETE FROM $tableName")
-          truncatedTableNames += tableName
-        }
-        statement.executeBatch()
-      }
-
-      return@use truncatedTableNames
     }
 
     if (truncatedTableNames.isNotEmpty()) {
@@ -89,10 +94,12 @@ internal class TruncateTablesService(
   private fun executeStatements(statements: List<String>, name: String) {
     val stopwatch = Stopwatch.createStarted()
 
-    sessionFactoryProvider.get().openSession().doWork { connection ->
-      for (s in statements) {
-        connection.createStatement().use { statement ->
-          statement.execute(s)
+    transacterProvider.get().transaction {
+      it.useConnection { connection ->
+        for (s in statements) {
+          connection.createStatement().use { statement ->
+            statement.execute(s)
+          }
         }
       }
     }
