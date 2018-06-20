@@ -2,6 +2,7 @@ package com.squareup.urlshortener
 
 import misk.MiskModule
 import misk.config.ConfigModule
+import misk.config.ConfigWebModule
 import misk.config.MiskConfig
 import misk.environment.Environment
 import misk.environment.EnvironmentModule
@@ -15,6 +16,7 @@ class UrlShortenerModule(val environment: Environment) : KAbstractModule() {
   override fun configure() {
     val config = MiskConfig.load<UrlShortenerConfig>("urlshortener", environment)
     install(ConfigModule.create("urlshortener", config))
+    install(ConfigWebModule())
 
     install(MiskModule())
     install(ResourceLoaderModule())
