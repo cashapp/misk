@@ -26,11 +26,8 @@ class TracingConfigTest {
   val module = Modules.combine(
       ConfigModule.create("test_tracing_app", config),
       TracingModule(config.tracing),
-      EnvironmentModule(defaultEnv),
-//    @TODO(jwilson swankjesse) https://github.com/square/misk/issues/272
-      ResourceLoaderModule(),
-      WebModule(),
-      MiskModule()
+      EnvironmentModule(defaultEnv)
+//    @TODO(jwilson swankjesse) https://github.com/square/misk/issues/272 this also had issues with config
 
   )
 
