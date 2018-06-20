@@ -37,5 +37,13 @@ private fun HttpServletResponse.bufferedSink() = Okio.buffer(Okio.sink(outputStr
 fun Response.toMisk() : misk.web.Response<*> {
 //  val okType = this.body()!!.contentType()
 
-  return misk.web.Response(this.body(), this.headers(), this.code())
+  val okBody = this.body()
+  val miskBody : ResponseBody = object: ResponseBody {
+    override fun writeTo(sink: BufferedSink) {
+      TODO(
+          "not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+  }
+  return misk.web.Response(okBody, this.headers(), this.code())
 }
