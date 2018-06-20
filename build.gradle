@@ -1,5 +1,5 @@
 ext {
-  kotlinVersion = '1.2.10'
+  kotlinVersion = '1.2.50'
   awsVersion = '1.11.143'
 
   dep = [
