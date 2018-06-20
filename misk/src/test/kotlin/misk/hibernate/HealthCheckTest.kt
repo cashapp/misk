@@ -2,10 +2,13 @@ package misk.hibernate
 
 import misk.healthchecks.HealthCheck
 import misk.jdbc.DataSourceConfig
+import misk.mockito.Mockito.mock
+import misk.mockito.Mockito.whenever
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.time.FakeClock
 import org.assertj.core.api.Assertions.assertThat
+import org.hibernate.HibernateException
 import org.hibernate.SessionFactory
 import org.junit.jupiter.api.Test
 import java.time.Instant
@@ -31,10 +34,10 @@ class HealthCheckTest {
 
   @Test
   fun databaseConnectivityFailure() {
-    // Close the SessionFactory so the health check query fails.
-    sessionFactory.close()
+    val mockSessionFactory: SessionFactory = mock()
+    whenever(mockSessionFactory.openSession()).thenThrow(HibernateException("Cannot open session"))
 
-    val status = HibernateHealthCheck(sessionFactory, config, fakeClock).status()
+    val status = HibernateHealthCheck(mockSessionFactory, config, fakeClock).status()
     assertThat(status.isHealthy).isFalse()
     assertThat(status.messages).contains("Hibernate: failed to query movies database")
   }
