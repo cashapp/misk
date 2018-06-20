@@ -28,7 +28,17 @@ enum class DataSourceType(
       buildJdbcUrl = { config, _ ->
         "jdbc:hsqldb:mem:${config.database!!};sql.syntax_mys=true"
       }
-  )
+  ),
+  VITESS(
+      driverClassName = "com.mysql.jdbc.Driver",
+      hibernateDialect = "org.hibernate.dialect.MySQL57Dialect",
+      buildJdbcUrl = { config, _ ->
+        val port = config.port ?: 27003
+        val host = config.host ?: "127.0.0.1"
+        val database = config.database ?: ""
+        "jdbc:mysql://$host:$port/$database?useUnicode=true&useLegacyDatetimeCode=false"
+      }
+  ),
 }
 
 /** Configuration element for an individual datasource */
@@ -43,7 +53,7 @@ data class DataSourceConfig(
   val fixed_pool_size: Int = 10,
   val connection_timeout: Duration = Duration.ofSeconds(30),
   val connection_max_lifetime: Duration = Duration.ofMinutes(30),
-  val migrations_path: String
+  val migrations_path: String?
 )
 
 /** Configuration element for a cluster of DataSources */

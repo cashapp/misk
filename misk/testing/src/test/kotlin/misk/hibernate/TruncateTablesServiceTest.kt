@@ -25,6 +25,7 @@ internal class TruncateTablesServiceTest {
 
   @Inject @TestDatasource lateinit var config: DataSourceConfig
   @Inject @TestDatasource lateinit var sessionFactory: SessionFactory
+  @Inject @TestDatasource lateinit var transacter: Transacter
 
   @BeforeEach
   internal fun setUp() {
@@ -54,7 +55,7 @@ internal class TruncateTablesServiceTest {
     assertThat(rowCount("movies")).isGreaterThan(0)
 
     // Start up TruncateTablesService. The inserted data should be truncated.
-    val service = TruncateTablesService(TestDatasource::class, config, Providers.of(sessionFactory))
+    val service = TruncateTablesService(TestDatasource::class, config, Providers.of(transacter))
     service.startAsync()
     service.awaitRunning()
     assertThat(rowCount("schema_version")).isGreaterThan(0)
@@ -66,7 +67,7 @@ internal class TruncateTablesServiceTest {
     val service = TruncateTablesService(
         TestDatasource::class,
         config,
-        Providers.of(sessionFactory),
+        Providers.of(transacter),
         startUpStatements = listOf("INSERT INTO movies (name) VALUES ('Star Wars')"))
 
     assertThat(rowCount("movies")).isEqualTo(0)
@@ -80,7 +81,7 @@ internal class TruncateTablesServiceTest {
     val service = TruncateTablesService(
         TestDatasource::class,
         config,
-        Providers.of(sessionFactory),
+        Providers.of(transacter),
         shutDownStatements = listOf("INSERT INTO movies (name) VALUES ('Star Wars')"))
 
     service.startAsync()

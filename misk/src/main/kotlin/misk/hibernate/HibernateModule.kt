@@ -68,7 +68,7 @@ class HibernateModule(
     }).asSingleton()
 
     bind(transacterKey).toProvider(Provider<Transacter> {
-      RealTransacter(sessionFactoryProvider.get())
+      RealTransacter(sessionFactoryProvider.get(), config)
     }).asSingleton()
 
     binder().addMultibinderBinding<Service>().toProvider(object : Provider<SchemaMigratorService> {
@@ -76,6 +76,7 @@ class HibernateModule(
       override fun get(): SchemaMigratorService = SchemaMigratorService(
           qualifier, environment, schemaMigratorProvider)
     }).asSingleton()
+
 
     bind(Query.Factory::class.java).to(ReflectionQuery.Factory::class.java)
 

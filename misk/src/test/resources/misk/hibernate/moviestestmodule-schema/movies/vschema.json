@@ -1,0 +1,34 @@
+{
+  "sharded": true,
+  "vindexes": {
+    "hash": {
+      "type": "hash"
+    }
+  },
+  "tables": {
+    "movies": {
+      "column_vindexes": [
+        {
+          "column": "id",
+          "name": "hash"
+        }
+      ],
+      "auto_increment": {
+        "column": "id",
+        "sequence": "actors.movies_seq"
+      }
+    },
+    "characters": {
+      "column_vindexes": [
+        {
+          "column": "movie_id",
+          "name": "hash"
+        }
+      ],
+      "auto_increment": {
+        "column": "id",
+        "sequence": "actors.characters_seq"
+      }
+    }
+  }
+}

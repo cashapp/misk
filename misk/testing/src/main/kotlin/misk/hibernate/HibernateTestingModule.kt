@@ -25,8 +25,8 @@ class HibernateTestingModule(
     val configKey = DataSourceConfig::class.toKey(qualifier)
     val configProvider = getProvider(configKey)
 
-    val sessionFactoryKey = SessionFactory::class.toKey(qualifier)
-    val sessionFactoryProvider = getProvider(sessionFactoryKey)
+    val transacterKey = Transacter::class.toKey(qualifier)
+    val transacterProvider = getProvider(transacterKey)
 
     binder().addMultibinderBinding<Service>().to(truncateTablesServiceKey)
 
@@ -34,7 +34,7 @@ class HibernateTestingModule(
       TruncateTablesService(
           qualifier = qualifier,
           config = configProvider.get(),
-          sessionFactoryProvider = sessionFactoryProvider,
+          transacterProvider = transacterProvider,
           startUpStatements = startUpStatements,
           shutDownStatements = shutDownStatements)
     })
