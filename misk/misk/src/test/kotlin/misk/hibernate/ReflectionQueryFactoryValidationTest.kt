@@ -3,8 +3,8 @@ package misk.hibernate
 import com.google.common.util.concurrent.UncheckedExecutionException
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
+import misk.testing.assertThrows
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Test
 import javax.inject.Inject
 
@@ -18,7 +18,7 @@ class ReflectionQueryFactoryValidationTest {
 
   @Test
   fun returnTypeMustBeThis() {
-    assertThat(assertThrows(UncheckedExecutionException::class.java) {
+    assertThat(assertThrows<UncheckedExecutionException> {
       queryFactory.newQuery<ReturnTypeMustBeThis>()
     }.cause).hasMessage("""
         |Query class ${ReturnTypeMustBeThis::class.java.name} has problems:
@@ -32,7 +32,7 @@ class ReflectionQueryFactoryValidationTest {
 
   @Test
   fun parameterCountMustMatchOperator() {
-    assertThat(assertThrows(UncheckedExecutionException::class.java) {
+    assertThat(assertThrows<UncheckedExecutionException> {
       queryFactory.newQuery<ParameterCountMustMatchOperator>()
     }.cause).hasMessage("""
         |Query class ${ParameterCountMustMatchOperator::class.java.name} has problems:
@@ -46,7 +46,7 @@ class ReflectionQueryFactoryValidationTest {
 
   @Test
   fun annotationRequiredOnQuery() {
-    assertThat(assertThrows(UncheckedExecutionException::class.java) {
+    assertThat(assertThrows<UncheckedExecutionException> {
       queryFactory.newQuery<AnnotationRequiredOnQuery>()
     }.cause).hasMessage("""
         |Query class ${AnnotationRequiredOnQuery::class.java.name} has problems:
@@ -59,7 +59,7 @@ class ReflectionQueryFactoryValidationTest {
 
   @Test
   fun malformedPathOnQuery() {
-    assertThat(assertThrows(UncheckedExecutionException::class.java) {
+    assertThat(assertThrows<UncheckedExecutionException> {
       queryFactory.newQuery<MalformedPathOnQuery>()
     }.cause).hasMessage("""
         |Query class ${MalformedPathOnQuery::class.java.name} has problems:
@@ -73,7 +73,7 @@ class ReflectionQueryFactoryValidationTest {
 
   @Test
   fun parameterAnnotationRequiredOnProjection() {
-    assertThat(assertThrows(UncheckedExecutionException::class.java) {
+    assertThat(assertThrows<UncheckedExecutionException> {
       transacter.transaction {
         queryFactory.newQuery<ParameterAnnotationRequiredOnProjectionQuery>()
       }
@@ -91,7 +91,7 @@ class ReflectionQueryFactoryValidationTest {
 
   @Test
   fun missingPrimaryConstructor() {
-    assertThat(assertThrows(UncheckedExecutionException::class.java) {
+    assertThat(assertThrows<UncheckedExecutionException> {
       transacter.transaction {
         queryFactory.newQuery<MissingPrimaryConstructorQuery>()
       }
@@ -109,7 +109,7 @@ class ReflectionQueryFactoryValidationTest {
 
   @Test
   fun malformedPathOnParameter() {
-    assertThat(assertThrows(UncheckedExecutionException::class.java) {
+    assertThat(assertThrows<UncheckedExecutionException> {
       transacter.transaction {
         queryFactory.newQuery<MalformedPathOnParameterQuery>()
       }
@@ -129,7 +129,7 @@ class ReflectionQueryFactoryValidationTest {
 
   @Test
   fun inParameterIsNotVarargOrCollection() {
-    assertThat(assertThrows(UncheckedExecutionException::class.java) {
+    assertThat(assertThrows<UncheckedExecutionException> {
       queryFactory.newQuery<InParameterIsNotVarargOrCollection>()
     }.cause).hasMessage("""
         |Query class ${InParameterIsNotVarargOrCollection::class.java.name} has problems:
@@ -143,7 +143,7 @@ class ReflectionQueryFactoryValidationTest {
 
   @Test
   fun selectDoesNotAcceptSession() {
-    assertThat(assertThrows(UncheckedExecutionException::class.java) {
+    assertThat(assertThrows<UncheckedExecutionException> {
       transacter.transaction {
         queryFactory.newQuery<SelectDoesNotAcceptSessionQuery>()
       }
@@ -159,7 +159,7 @@ class ReflectionQueryFactoryValidationTest {
 
   @Test
   fun selectNonProjectionPathIsEmpty() {
-    assertThat(assertThrows(UncheckedExecutionException::class.java) {
+    assertThat(assertThrows<UncheckedExecutionException> {
       transacter.transaction {
         queryFactory.newQuery<SelectNonProjectionPathIsEmpty>()
       }
@@ -175,7 +175,7 @@ class ReflectionQueryFactoryValidationTest {
 
   @Test
   fun selectUniqueReturnTypeNullability() {
-    assertThat(assertThrows(UncheckedExecutionException::class.java) {
+    assertThat(assertThrows<UncheckedExecutionException> {
       transacter.transaction {
         queryFactory.newQuery<SelectUniqueReturnTypeNullability>()
       }
@@ -195,7 +195,7 @@ class ReflectionQueryFactoryValidationTest {
 
   @Test
   fun tooManyAnnotations() {
-    assertThat(assertThrows(UncheckedExecutionException::class.java) {
+    assertThat(assertThrows<UncheckedExecutionException> {
       transacter.transaction {
         queryFactory.newQuery<TooManyAnnotations>()
       }

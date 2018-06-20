@@ -10,8 +10,8 @@ import misk.environment.Environment
 import misk.environment.EnvironmentModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
+import misk.testing.assertThrows
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Test
 import javax.inject.Inject
 
@@ -39,9 +39,9 @@ class TracingConfigTest {
     val config = MiskConfig.load<TestTracingConfig>(
         TestTracingConfig::class.java, "multiple-tracers", defaultEnv)
 
-    val exception = assertThrows(CreationException::class.java, {
+    val exception = assertThrows<CreationException> {
       Guice.createInjector(ConfigModule.create("test_app", config), TracingModule(config.tracing))
-    })
+    }
 
     assertThat(exception.cause).isInstanceOf(IllegalStateException::class.java)
     assertThat(exception.localizedMessage).contains("More than one tracer has been configured." +

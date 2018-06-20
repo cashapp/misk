@@ -4,11 +4,11 @@ import misk.exceptions.BadRequestException
 import misk.exceptions.NotFoundException
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
+import misk.testing.assertThrows
 import misk.web.ResponseBody
 import okhttp3.HttpUrl
 import okio.Buffer
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Test
 import javax.inject.Inject
 
@@ -39,14 +39,14 @@ class ShortenUrlWebActionTest {
   @Test
   fun malformedLongUrl() {
     val longUrl = ""
-    assertThrows(BadRequestException::class.java) {
+    assertThrows<BadRequestException> {
       createShortUrlWebAction.createShortUrl(CreateShortUrlWebAction.Request(longUrl))
     }
   }
 
   @Test
   fun unknownToken() {
-    assertThrows(NotFoundException::class.java) {
+    assertThrows<NotFoundException> {
       shortUrlWebAction.follow("unknown")
     }
   }

@@ -4,6 +4,6 @@ import misk.inject.KAbstractModule
 
 class FakeResourceLoaderModule : KAbstractModule() {
   override fun configure() {
-    bind<ResourceLoader>().to(FakeResourceLoader::class.java)
+    bind<ResourceLoader>().to<FakeResourceLoader>()
   }
 }
