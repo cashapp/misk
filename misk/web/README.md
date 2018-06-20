@@ -70,6 +70,7 @@ $ yarn start
 - [x] Have sidebar buttons trigger the Import of modules
 - [ ] Use [React-Loadable](https://github.com/jamiebuilds/react-loadable) instead of raw `import(./module.js)` statement in `ModuleComponent.tsx`. Further reading: [Author: How to blog](https://jamie.build/react-loadable.html), [Example app](https://github.com/jamiebuilds/react-loadable-example)
 - [x] Consider Parcel.js instead of Webpack. Tried: our config requirements may make this not as suitable for Parcel which boasts of zero-config and is still in early days.
+- [ ] Use axios to handle getting data from misk requests [link](https://www.andreasreiterer.at/web-development/connect-react-app-rest-api/)
 - [ ] Dynamically extensible router. Each module gets a namespace and handles all routes within it
 - [ ] Remove `const BrowserRouterService = require('frint-router/BrowserRouterService')` when `Frint-Router` includes typings
 - [ ] Patch up `app/index.ts` in main and modules once Frint typings and `createApp private class` error fixed
@@ -100,6 +101,15 @@ Kotlin Desired Flow
 
 - need to save modules in state so they can render without loading the file each time. in module.tsx have if (!in state) import and save to state; else load from state.
 - Maybe have a `misk.lock` file that modules can add themselves to a list that has their name/url so that they can be added to the top menu which seems to work for the live loading
+
+
+Development
+---
+- Loop request while working on server
+```bash
+while (true) do; curl http://0.0.0.0:8080/_admin/config/all; success "/_admin/config/all"; sleep 5; done
+
+```
 
 
 Resources
