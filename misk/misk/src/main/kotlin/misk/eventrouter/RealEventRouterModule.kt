@@ -6,9 +6,7 @@ import com.squareup.moshi.Moshi
 import misk.environment.Environment
 import misk.healthchecks.HealthCheck
 import misk.inject.KAbstractModule
-import misk.inject.addMultibinderBinding
 import misk.inject.asSingleton
-import misk.inject.to
 import misk.moshi.MoshiAdapterModule
 import misk.moshi.adapter
 import misk.web.WebActionModule
@@ -23,11 +21,11 @@ class RealEventRouterModule(val environment: Environment) : KAbstractModule() {
   override fun configure() {
     bind<EventRouter>().to<RealEventRouter>().asSingleton()
     bind<RealEventRouter>().asSingleton()
-    binder().addMultibinderBinding<Service>().to<EventRouterService>()
+    multibind<Service>().to<EventRouterService>()
     if (environment == Environment.DEVELOPMENT) {
       bind<ClusterConnector>().to<LocalClusterConnector>()
     } else {
-      binder().addMultibinderBinding<HealthCheck>().to<KubernetesHealthCheck>()
+      multibind<HealthCheck>().to<KubernetesHealthCheck>()
       bind<ClusterConnector>().to<KubernetesClusterConnector>()
     }
     bind<ClusterMapper>().to<ConsistentHashing>()

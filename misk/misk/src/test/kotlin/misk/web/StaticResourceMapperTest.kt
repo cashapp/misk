@@ -3,7 +3,6 @@ package misk.web
 import com.google.inject.util.Modules
 import misk.MiskModule
 import misk.inject.KAbstractModule
-import misk.inject.addMultibinderBinding
 import misk.resources.FakeResourceLoader
 import misk.resources.FakeResourceLoaderModule
 import misk.testing.MiskTest
@@ -108,7 +107,7 @@ class StaticResourceMapperTest {
     override fun configure() {
       install(WebActionModule.create<Hello>())
       install(WebActionModule.create<NotFoundAction>())
-      binder().addMultibinderBinding<StaticResourceMapper.Entry>()
+      multibind<StaticResourceMapper.Entry>()
           .toInstance(StaticResourceMapper.Entry("/", "web", "???"))
     }
   }

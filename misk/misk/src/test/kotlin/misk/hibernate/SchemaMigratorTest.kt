@@ -9,7 +9,6 @@ import misk.config.Config
 import misk.config.MiskConfig
 import misk.environment.Environment
 import misk.inject.KAbstractModule
-import misk.inject.addMultibinderBinding
 import misk.inject.toKey
 import misk.jdbc.DataSourceConfig
 import misk.resources.FakeResourceLoader
@@ -61,8 +60,8 @@ internal class SchemaMigratorTest {
 
       val sessionFactoryService =
           SessionFactoryService(Movies::class, config.data_source, defaultEnv)
-      binder().addMultibinderBinding<Service>().toInstance(sessionFactoryService)
-      binder().addMultibinderBinding<Service>().toInstance(dropTablesService)
+      multibind<Service>().toInstance(sessionFactoryService)
+      multibind<Service>().toInstance(dropTablesService)
       bind<SessionFactory>().annotatedWith<Movies>().toProvider(sessionFactoryService)
     }
   }

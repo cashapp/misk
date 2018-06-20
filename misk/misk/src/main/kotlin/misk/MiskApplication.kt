@@ -16,7 +16,7 @@ class MiskApplication(private val modules: List<Module>, commands: List<MiskComm
   constructor(vararg modules: Module) : this(modules.toList())
   constructor(vararg commands: MiskCommand) : this(listOf(), commands.toList())
 
-  private val commands = commands.map { it.name to it }.toMap()
+  private val commands = commands.associateBy { it.name }
   private val jc: JCommander
 
   init {
@@ -41,9 +41,9 @@ class MiskApplication(private val modules: List<Module>, commands: List<MiskComm
   /**
    * Runs the application, raising a [CliException] if an error occurs. used for testing,
    * to ensure that properly friendly error message are printed when command line parsing
-   * fails or when command preconditions (required arguments etc) are not met
+   * fails or when command preconditions (required arguments etc) are not met.
    *
-   * If no command line arguments are specified, the service starts and blocks until terminated
+   * If no command line arguments are specified, the service starts and blocks until terminated.
    */
   @VisibleForTesting
   internal fun doRun(args: Array<String>) {

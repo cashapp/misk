@@ -4,10 +4,6 @@ import misk.ApplicationInterceptor
 import misk.MiskDefault
 import misk.exceptions.ActionException
 import misk.inject.KAbstractModule
-import misk.inject.addMultibinderBinding
-import misk.inject.addMultibinderBindingWithAnnotation
-import misk.inject.newMultibinder
-import misk.inject.to
 import misk.scope.ActionScopedProviderModule
 import misk.security.ssl.CertificatesModule
 import misk.web.exceptions.ActionExceptionMapper
@@ -55,55 +51,55 @@ class WebModule : KAbstractModule() {
     install(UnmarshallerModule.create<ProtobufUnmarshaller.Factory>())
 
     // Create empty set binders of interceptor factories that can be added to by users.
-    binder().newMultibinder<NetworkInterceptor.Factory>()
-    binder().newMultibinder<ApplicationInterceptor.Factory>()
+    newMultibinder<NetworkInterceptor.Factory>()
+    newMultibinder<ApplicationInterceptor.Factory>()
 
     // Register built-in interceptors. Interceptors run in the order in which they are
     // installed, and the order of these interceptors is critical.
 
     // Handle all unexpected errors that occur during dispatch
-    binder().addMultibinderBindingWithAnnotation<NetworkInterceptor.Factory, MiskDefault>()
+    multibind<NetworkInterceptor.Factory>(MiskDefault::class)
         .to<InternalErrorInterceptorFactory>()
 
     // Optionally log request and response details
-    binder().addMultibinderBindingWithAnnotation<NetworkInterceptor.Factory, MiskDefault>()
+    multibind<NetworkInterceptor.Factory>(MiskDefault::class)
         .to<RequestLoggingInterceptor.Factory>()
 
     // Collect metrics on the status of results and response times of requests
-    binder().addMultibinderBindingWithAnnotation<NetworkInterceptor.Factory, MiskDefault>()
+    multibind<NetworkInterceptor.Factory>(MiskDefault::class)
         .to<MetricsInterceptor.Factory>()
 
     // Traces requests as they work their way through the system.
-    binder().addMultibinderBindingWithAnnotation<NetworkInterceptor.Factory, MiskDefault>()
+    multibind<NetworkInterceptor.Factory>(MiskDefault::class)
         .to<TracingInterceptor.Factory>()
 
     // Convert and log application level exceptions into their appropriate response format
-    binder().addMultibinderBindingWithAnnotation<NetworkInterceptor.Factory, MiskDefault>()
+    multibind<NetworkInterceptor.Factory>(MiskDefault::class)
         .to<ExceptionHandlingInterceptor.Factory>()
 
     // Convert typed responses into a ResponseBody that can marshal the response according to
     // the client's requested content-type
-    binder().addMultibinderBindingWithAnnotation<NetworkInterceptor.Factory, MiskDefault>()
+    multibind<NetworkInterceptor.Factory>(MiskDefault::class)
         .to<MarshallerInterceptor.Factory>()
 
-    binder().addMultibinderBindingWithAnnotation<NetworkInterceptor.Factory, MiskDefault>()
+    multibind<NetworkInterceptor.Factory>(MiskDefault::class)
         .to<StaticResourceInterceptor.Factory>()
-    binder().newMultibinder<StaticResourceMapper.Entry>()
+    newMultibinder<StaticResourceMapper.Entry>()
 
     install(ExceptionMapperModule.create<ActionException, ActionExceptionMapper>())
 
     // Register built-in parameter extractors
-    binder().addMultibinderBinding<ParameterExtractor.Factory>()
+    multibind<ParameterExtractor.Factory>()
         .toInstance(PathPatternParameterExtractorFactory)
-    binder().addMultibinderBinding<ParameterExtractor.Factory>()
+    multibind<ParameterExtractor.Factory>()
         .toInstance(QueryStringParameterExtractorFactory)
-    binder().addMultibinderBinding<ParameterExtractor.Factory>()
+    multibind<ParameterExtractor.Factory>()
         .toInstance(FormValueParameterExtractorFactory)
-    binder().addMultibinderBinding<ParameterExtractor.Factory>()
+    multibind<ParameterExtractor.Factory>()
         .toInstance(HeadersParameterExtractorFactory)
-    binder().addMultibinderBinding<ParameterExtractor.Factory>()
+    multibind<ParameterExtractor.Factory>()
         .toInstance(WebSocketParameterExtractorFactory)
-    binder().addMultibinderBinding<ParameterExtractor.Factory>()
+    multibind<ParameterExtractor.Factory>()
         .to<RequestBodyParameterExtractor.Factory>()
 
     // Install infrastructure support

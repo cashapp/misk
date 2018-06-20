@@ -7,13 +7,11 @@ import com.signalfx.codahale.reporter.SignalFxReporter
 import com.signalfx.metrics.auth.StaticAuthToken
 import misk.config.AppName
 import misk.inject.KAbstractModule
-import misk.inject.addMultibinderBinding
-import misk.inject.to
 import javax.inject.Singleton
 
 class SignalFxBackendModule : KAbstractModule() {
   override fun configure() {
-    binder().addMultibinderBinding<Service>().to<SignalFxReporterService>()
+    multibind<Service>().to<SignalFxReporterService>()
   }
 
   @Provides

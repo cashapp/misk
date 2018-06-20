@@ -6,16 +6,14 @@ import com.google.inject.util.Modules
 import helpers.protos.Dinosaur
 import misk.Action
 import misk.MiskModule
-import misk.web.NetworkChain
-import misk.web.NetworkInterceptor
 import misk.inject.KAbstractModule
-import misk.inject.addMultibinderBinding
 import misk.inject.getInstance
-import misk.inject.to
 import misk.moshi.MoshiModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.testing.TestWebModule
+import misk.web.NetworkChain
+import misk.web.NetworkInterceptor
 import misk.web.Post
 import misk.web.RequestBody
 import misk.web.RequestContentType
@@ -152,8 +150,7 @@ internal class TypedHttpClientInterceptorTest {
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(WebActionModule.create<ReturnADinosaurAction>())
-      binder().addMultibinderBinding<NetworkInterceptor.Factory>()
-          .to<ServerHeaderInterceptor.Factory>()
+      multibind<NetworkInterceptor.Factory>().to<ServerHeaderInterceptor.Factory>()
     }
   }
 

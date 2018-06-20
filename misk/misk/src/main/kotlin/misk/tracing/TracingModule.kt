@@ -2,8 +2,6 @@ package misk.tracing
 
 import com.google.common.util.concurrent.Service
 import misk.inject.KAbstractModule
-import misk.inject.addMultibinderBinding
-import misk.inject.to
 import misk.logging.getLogger
 import misk.tracing.backends.TracingBackendConfig
 import misk.tracing.backends.jaeger.JaegerBackendModule
@@ -15,7 +13,7 @@ private val logger = getLogger<TracingModule>()
 
 class TracingModule(val config: TracingConfig) : KAbstractModule() {
   override fun configure() {
-    binder().addMultibinderBinding<Service>().to<TracingService>()
+    multibind<Service>().to<TracingService>()
 
     val configuredTracers = TracingBackendConfig::class.memberProperties.mapNotNull { it.get(config.backends) }
 

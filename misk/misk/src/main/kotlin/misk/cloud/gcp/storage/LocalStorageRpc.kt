@@ -10,7 +10,6 @@ import com.google.cloud.storage.spi.v1.StorageRpc.Option.IF_GENERATION_NOT_MATCH
 import com.squareup.moshi.Moshi
 import misk.io.listRecursively
 import misk.moshi.adapter
-import misk.nio.withLock
 import misk.okio.forEachBlock
 import okio.Okio
 import java.io.FileNotFoundException
@@ -578,3 +577,6 @@ private val BlobId.fullName get() = "$bucket:$name"
 
 private fun Path.toBlobId(childPath: Path): BlobId =
     BlobId.of(fileName.toString(), relativize(childPath).joinToString("/"))
+
+fun <T> FileChannel.withLock(shared: Boolean, action: () -> T) =
+    lock(0, Long.MAX_VALUE, shared).use { action() }
