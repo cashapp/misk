@@ -26,11 +26,8 @@ class ConfigTest {
   @MiskTestModule
   val module = Modules.combine(
       ConfigModule.create("test_app", config),
-      EnvironmentModule(defaultEnv),
+      EnvironmentModule(defaultEnv)
 //    @TODO(jwilson swankjesse) https://github.com/square/misk/issues/272
-      ResourceLoaderModule(),
-      WebModule(),
-      MiskModule()
   )
 
   @Inject
