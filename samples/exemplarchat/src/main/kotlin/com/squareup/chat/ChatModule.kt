@@ -7,11 +7,9 @@ import com.squareup.chat.healthchecks.ManualHealthCheck
 import misk.healthchecks.ClusterWideHealthModule
 import misk.healthchecks.HealthCheck
 import misk.inject.KAbstractModule
-import misk.inject.addMultibinderBinding
-import misk.inject.to
-import misk.web.resources.StaticResourceMapper
 import misk.web.WebActionModule
 import misk.web.actions.DefaultActionsModule
+import misk.web.resources.StaticResourceMapper
 
 class ChatModule : KAbstractModule() {
   override fun configure() {
@@ -20,8 +18,8 @@ class ChatModule : KAbstractModule() {
     install(WebActionModule.create<ToggleManualHealthCheckAction>())
     install(DefaultActionsModule())
     install(ClusterWideHealthModule())
-    binder().addMultibinderBinding<HealthCheck>().to<ManualHealthCheck>()
-    binder().addMultibinderBinding<StaticResourceMapper.Entry>()
+    multibind<HealthCheck>().to<ManualHealthCheck>()
+    multibind<StaticResourceMapper.Entry>()
         .toInstance(StaticResourceMapper.Entry("/", "web/exemplarchat", "exemplarchat/web/build"))
   }
 }

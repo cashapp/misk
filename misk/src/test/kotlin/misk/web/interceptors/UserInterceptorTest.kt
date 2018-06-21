@@ -2,16 +2,16 @@ package misk.web.interceptors
 
 import com.google.inject.util.Modules
 import misk.Action
-import misk.Chain
 import misk.ApplicationInterceptor
+import misk.Chain
 import misk.MiskModule
-import misk.web.NetworkChain
-import misk.web.NetworkInterceptor
 import misk.inject.KAbstractModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.testing.TestWebModule
 import misk.web.Get
+import misk.web.NetworkChain
+import misk.web.NetworkInterceptor
 import misk.web.PathParam
 import misk.web.Response
 import misk.web.ResponseContentType
@@ -125,9 +125,9 @@ class UserInterceptorTest {
 
   internal class TestModule : KAbstractModule() {
     override fun configure() {
-      newSetBinder<NetworkInterceptor.Factory>().addBinding()
+      multibind<NetworkInterceptor.Factory>()
           .toInstance(UserCreatedNetworkInterceptor.Factory())
-      newSetBinder<ApplicationInterceptor.Factory>().addBinding()
+      multibind<ApplicationInterceptor.Factory>()
           .toInstance(UserCreatedInterceptor.Factory())
 
       install(WebActionModule.create<TestAction>())

@@ -2,14 +2,10 @@ package misk.tracing.backends.zipkin
 
 import brave.Tracing
 import brave.opentracing.BraveTracer
-import com.google.common.util.concurrent.Service
 import com.google.inject.Provides
 import io.opentracing.Tracer
 import misk.config.AppName
 import misk.inject.KAbstractModule
-import misk.inject.addMultibinderBinding
-import misk.inject.to
-import misk.tracing.TracingService
 import zipkin2.reporter.AsyncReporter
 import zipkin2.reporter.okhttp3.OkHttpSender
 import java.util.concurrent.TimeUnit

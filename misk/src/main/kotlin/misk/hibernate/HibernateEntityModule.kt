@@ -4,7 +4,6 @@ import com.google.inject.Key
 import com.google.inject.binder.LinkedBindingBuilder
 import com.google.inject.name.Names
 import misk.inject.KAbstractModule
-import misk.inject.newMultibinder
 import org.hibernate.event.spi.EventType
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.reflect.KClass
@@ -21,16 +20,15 @@ abstract class HibernateEntityModule(
 
   override fun configure() {
     // Initialize empty sets for our multibindings.
-    binder().newMultibinder<HibernateEntity>(qualifier)
-    binder().newMultibinder<ListenerRegistration>(qualifier)
+    newMultibinder<HibernateEntity>(qualifier)
+    newMultibinder<ListenerRegistration>(qualifier)
 
     configureHibernate()
   }
 
   protected fun addEntities(vararg entities: KClass<out DbEntity<*>>) {
     for (entity in entities) {
-      binder().newMultibinder<HibernateEntity>(qualifier)
-          .addBinding()
+      multibind<HibernateEntity>(qualifier)
           .toInstance(HibernateEntity(entity))
     }
   }
@@ -43,8 +41,7 @@ abstract class HibernateEntityModule(
     )
 
     // Create a multibinding for a ListenerRegistration that uses the above key.
-    binder().newMultibinder<ListenerRegistration>(qualifier)
-        .addBinding()
+    multibind<ListenerRegistration>(qualifier)
         .toInstance(ListenerRegistration(type, getProvider(key)))
 
     // Start the binding.

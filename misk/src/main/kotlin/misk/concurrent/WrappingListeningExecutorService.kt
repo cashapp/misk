@@ -20,7 +20,7 @@ abstract class WrappingListeningExecutorService : ForwardingListeningExecutorSer
   }
 
   override fun <T> submit(runnable: Runnable, result: T): ListenableFuture<T> {
-    return submit<T>({ runnable.run(); result })
+    return submit<T> { runnable.run(); result }
   }
 
   override fun submit(runnable: Runnable): ListenableFuture<*> {
