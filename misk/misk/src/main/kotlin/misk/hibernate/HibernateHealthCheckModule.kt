@@ -2,7 +2,6 @@ package misk.hibernate
 
 import misk.healthchecks.HealthCheck
 import misk.inject.KAbstractModule
-import misk.inject.addMultibinderBinding
 import misk.inject.asSingleton
 import misk.jdbc.DataSourceConfig
 import org.hibernate.SessionFactory
@@ -19,7 +18,7 @@ class HibernateHealthCheckModule(
 ) : KAbstractModule() {
 
   override fun configure() {
-    binder().addMultibinderBinding<HealthCheck>()
+    multibind<HealthCheck>()
       .toProvider(object : Provider<HibernateHealthCheck> {
         @Inject lateinit var clock: Clock
 

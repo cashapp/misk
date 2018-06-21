@@ -5,19 +5,17 @@ import com.codahale.metrics.graphite.Graphite
 import com.codahale.metrics.graphite.GraphiteReporter
 import com.codahale.metrics.graphite.GraphiteSender
 import com.google.common.util.concurrent.Service
-import com.google.inject.AbstractModule
 import com.google.inject.Provides
 import com.google.inject.Singleton
 import misk.config.AppName
 import misk.environment.InstanceMetadata
-import misk.inject.addMultibinderBinding
-import misk.inject.to
+import misk.inject.KAbstractModule
 import misk.metrics.Metrics
 import java.util.concurrent.TimeUnit
 
-class GraphiteBackendModule : AbstractModule() {
+class GraphiteBackendModule : KAbstractModule() {
   override fun configure() {
-    binder().addMultibinderBinding<Service>().to<GraphiteReporterService>()
+    multibind<Service>().to<GraphiteReporterService>()
   }
 
   @Provides

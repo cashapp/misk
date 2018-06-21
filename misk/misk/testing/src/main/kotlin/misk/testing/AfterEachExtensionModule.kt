@@ -2,7 +2,6 @@ package misk.testing
 
 import com.google.inject.Module
 import misk.inject.KAbstractModule
-import misk.inject.addMultibinderBinding
 import org.junit.jupiter.api.extension.AfterEachCallback
 import kotlin.reflect.KClass
 
@@ -12,7 +11,7 @@ class AfterEachExtensionModule<T : AfterEachCallback> constructor(
 ) : KAbstractModule() {
 
   override fun configure() {
-    binder().addMultibinderBinding<AfterEachCallback>().to(kclass.java)
+    multibind<AfterEachCallback>().to(kclass.java)
   }
 
   companion object {

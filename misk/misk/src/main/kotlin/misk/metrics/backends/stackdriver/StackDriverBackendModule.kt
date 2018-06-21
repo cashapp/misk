@@ -8,9 +8,7 @@ import com.google.inject.Provides
 import com.google.inject.Singleton
 import misk.config.AppName
 import misk.inject.KAbstractModule
-import misk.inject.addMultibinderBinding
 import misk.inject.asSingleton
-import misk.inject.to
 
 class StackDriverBackendModule : KAbstractModule() {
   override fun configure() {
@@ -18,7 +16,7 @@ class StackDriverBackendModule : KAbstractModule() {
         .to<StackDriverBatchedSender>()
         .asSingleton()
 
-    binder().addMultibinderBinding<Service>().to<StackDriverReporterService>()
+    multibind<Service>().to<StackDriverReporterService>()
   }
 
   @Provides

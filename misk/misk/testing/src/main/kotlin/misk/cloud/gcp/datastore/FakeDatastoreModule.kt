@@ -7,14 +7,12 @@ import com.google.common.util.concurrent.Service
 import com.google.inject.Provides
 import com.google.inject.Singleton
 import misk.inject.KAbstractModule
-import misk.inject.addMultibinderBinding
-import misk.inject.to
 import javax.inject.Inject
 
 /** Installs a version of the [Datastore] that works off an in-memory local store */
 class FakeDatastoreModule : KAbstractModule() {
   override fun configure() {
-    binder().addMultibinderBinding<Service>().to<FakeDatastoreService>()
+    multibind<Service>().to<FakeDatastoreService>()
   }
 
   @Provides

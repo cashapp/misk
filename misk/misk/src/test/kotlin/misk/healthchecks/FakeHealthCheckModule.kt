@@ -1,11 +1,9 @@
 package misk.healthchecks
 
-import com.google.inject.AbstractModule
-import misk.inject.addMultibinderBinding
-import misk.inject.to
+import misk.inject.KAbstractModule
 
-class FakeHealthCheckModule : AbstractModule() {
+class FakeHealthCheckModule : KAbstractModule() {
   override fun configure() {
-    binder().addMultibinderBinding<HealthCheck>().to<FakeHealthCheck>()
+    multibind<HealthCheck>().to<FakeHealthCheck>()
   }
 }

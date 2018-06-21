@@ -3,9 +3,6 @@ package misk.security.authz
 import com.google.inject.TypeLiteral
 import misk.ApplicationInterceptor
 import misk.MiskCaller
-import misk.inject.addMultibinderBinding
-import misk.inject.newMultibinder
-import misk.inject.to
 import misk.scope.ActionScoped
 import misk.scope.ActionScopedProvider
 import misk.scope.ActionScopedProviderModule
@@ -25,11 +22,11 @@ class AccessControlModule(
 
   override fun configureProviders() {
     bindProvider(miskCallerType, MiskCallerProvider::class)
-    binder().newMultibinder<MiskCallerAuthenticator>() // In case no authenticators are registered
+    newMultibinder<MiskCallerAuthenticator>() // In case no authenticators are registered
     authenticators.forEach { authenticator ->
-      binder().newMultibinder<MiskCallerAuthenticator>().addBinding().to(authenticator.java)
+      multibind<MiskCallerAuthenticator>().to(authenticator.java)
     }
-    binder().addMultibinderBinding<ApplicationInterceptor.Factory>().to<AccessInterceptor.Factory>()
+    multibind<ApplicationInterceptor.Factory>().to<AccessInterceptor.Factory>()
   }
 
   class MiskCallerProvider : ActionScopedProvider<MiskCaller?> {
