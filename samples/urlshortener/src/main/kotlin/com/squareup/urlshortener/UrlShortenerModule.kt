@@ -16,7 +16,6 @@ class UrlShortenerModule(val environment: Environment) : KAbstractModule() {
   override fun configure() {
     val config = MiskConfig.load<UrlShortenerConfig>("urlshortener", environment)
     install(ConfigModule.create("urlshortener", config))
-    install(ConfigWebModule())
 
     install(MiskModule())
     install(ResourceLoaderModule())
