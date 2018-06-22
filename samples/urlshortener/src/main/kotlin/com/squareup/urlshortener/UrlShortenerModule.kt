@@ -2,6 +2,7 @@ package com.squareup.urlshortener
 
 import misk.MiskModule
 import misk.config.ConfigModule
+import misk.config.ConfigWebModule
 import misk.config.MiskConfig
 import misk.environment.Environment
 import misk.environment.EnvironmentModule

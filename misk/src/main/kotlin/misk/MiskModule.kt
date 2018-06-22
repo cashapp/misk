@@ -12,6 +12,8 @@ import javax.inject.Singleton
 
 class MiskModule : KAbstractModule() {
   override fun configure() {
+    binder().disableCircularProxies()
+    binder().requireExactBindingAnnotations()
     install(HealthChecksModule())
     install(MetricsModule())
     install(ClockModule())

@@ -104,5 +104,9 @@ class WebModule : KAbstractModule() {
 
     // Install infrastructure support
     install(CertificatesModule())
+
+    // Bind _admin static resources to web
+    binder().addMultibinderBinding<StaticResourceMapper.Entry>()
+        .toInstance(StaticResourceMapper.Entry("/_admin/", "web/_admin", "misk/web/_admin/build"))
   }
 }

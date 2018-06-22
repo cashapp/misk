@@ -2,10 +2,11 @@ package misk.config
 
 import javax.inject.Qualifier
 
+//@TODO(jwilson swankjesse) make sure same targets everywhere
+
 @Qualifier
 @Target(
     AnnotationTarget.FIELD,
-    AnnotationTarget.PROPERTY,
     AnnotationTarget.FUNCTION,
     AnnotationTarget.VALUE_PARAMETER
 )
