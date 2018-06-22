@@ -1,6 +1,7 @@
 package com.squareup.urlshortener
 
 import com.google.inject.AbstractModule
+import misk.config.ConfigWebModule
 import misk.environment.Environment
 import misk.web.WebActionModule
 import misk.web.WebModule
@@ -11,6 +12,7 @@ class UrlShortenerServiceModule : AbstractModule() {
   override fun configure() {
     val environment = Environment.fromEnvironmentVariable()
     install(UrlShortenerModule(environment))
+    install(ConfigWebModule())
 
     install(WebModule())
     install(WebActionModule.create<CreateShortUrlWebAction>())
