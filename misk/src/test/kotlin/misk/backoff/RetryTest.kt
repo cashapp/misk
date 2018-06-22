@@ -23,6 +23,22 @@ internal class RetryTest {
     assertThrows<IllegalStateException> {
       retry(3, backoff) { throw IllegalStateException("this failed") }
     }
+
+    assertThrows<RetryableException> {
+      retry(3, backoff, { it is RetryableException }) { throw RetryableException() }
+    }
+  }
+
+  @Test fun failsImmediatelyIfNotRetryable() {
+    val backoff = ExponentialBackoff(Duration.ofMillis(10), Duration.ofMillis(100))
+
+    val exception = assertThrows<IllegalStateException> {
+      retry(3, backoff, { it is RetryableException }) { retry ->
+        if (retry < 1) throw RetryableException()
+        throw IllegalStateException("failed on retry $retry")
+      }
+    }
+    assertThat(exception.message).isEqualTo("failed on retry 1")
   }
 
   @Test fun honorsBackoff() {
@@ -65,3 +81,5 @@ internal class RetryTest {
     assertThat(backoff.nextRetry()).isEqualTo(Duration.ofMillis(10))
   }
 }
+
+private class RetryableException : Exception()
