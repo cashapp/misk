@@ -11,7 +11,7 @@ class UpstreamResourceInterceptor(
 ) : NetworkInterceptor {
   @Suppress("UNUSED_PARAMETER")
   override fun intercept(chain: NetworkChain): Response<*> {
-    var matchedMapping: Mapping = findMappingMatch(chain) ?: return chain.proceed(chain.request)
+    var matchedMapping = findMappingMatch(chain) ?: return chain.proceed(chain.request)
     val proxyUrl = HttpUrl.parse(
         matchedMapping.upstreamBaseUrl.toString() + chain.request.url.encodedPath().removePrefix(
             matchedMapping.localPathPrefix))!!
