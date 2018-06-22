@@ -29,7 +29,7 @@ object MiskConfig {
 
     val configYamls = loadConfigYamlMap(appName, environment)
 
-    check(!configYamls.values.all { it == null }) {
+    check(configYamls.values.any { it != null }) {
       "could not find configuration files - checked ${configYamls.keys}"
     }
 
@@ -46,7 +46,10 @@ object MiskConfig {
     }
   }
 
-  /** @return order of map precedence taken into account */
+  /**
+   * Returns a JsonNode that combines the YAMLs in `configYamls`. If two nodes define the
+   * same value the last one wins.
+   */
   fun flattenYamlMap(configYamls: Map<String, String?>): JsonNode {
     val mapper = ObjectMapper(YAMLFactory()).registerModules(KotlinModule(), JavaTimeModule())
     var result = mapper.createObjectNode()
@@ -63,8 +66,9 @@ object MiskConfig {
   }
 
   /**
-   * @return map contains null values if file not found but expected,
-   *  ordered in increasing precedence
+   * Returns a map whose keys are the names of the source Yaml files to load, and
+   * whose values are the contents of those files. If a file is absent the map’s value
+   * will be null.
    */
   fun loadConfigYamlMap(
     appName: String,

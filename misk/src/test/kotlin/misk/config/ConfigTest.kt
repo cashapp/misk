@@ -24,7 +24,7 @@ class ConfigTest {
   val module = Modules.combine(
       ConfigModule.create("test_app", config),
       EnvironmentModule(defaultEnv)
-//    @TODO(jwilson swankjesse) https://github.com/square/misk/issues/272 breaks here
+      // @TODO(jwilson) https://github.com/square/misk/issues/272
   )
 
   @Inject
