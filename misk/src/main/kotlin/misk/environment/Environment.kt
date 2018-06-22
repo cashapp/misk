@@ -11,7 +11,7 @@ enum class Environment {
   PRODUCTION;
 
   companion object {
-    private val logger = getLogger<Environment>()
+    internal val logger = getLogger<Environment>()
     private const val ENV_ENVIRONMENT = "ENVIRONMENT"
 
     @JvmStatic

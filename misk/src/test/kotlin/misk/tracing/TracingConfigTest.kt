@@ -24,6 +24,7 @@ class TracingConfigTest {
       ConfigModule.create("test_tracing_app", config),
       TracingModule(config.tracing),
       EnvironmentModule(defaultEnv)
+      // @TODO(jwilson) https://github.com/square/misk/issues/272
   )
 
   @Inject

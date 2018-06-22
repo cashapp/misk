@@ -2,7 +2,9 @@ package misk.web.actions
 
 import misk.inject.KAbstractModule
 import misk.metrics.web.MetricsJsonAction
+import misk.web.NetworkInterceptor
 import misk.web.WebActionModule
+import misk.web.WideOpenDevelopmentInterceptorFactory
 
 /**
  * Installs default actions for handling errors, providing status and readiness, and handling
@@ -16,5 +18,9 @@ class DefaultActionsModule : KAbstractModule() {
     install(WebActionModule.create<ReadinessCheckAction>())
     install(WebActionModule.create<LivenessCheckAction>())
     install(WebActionModule.create<NotFoundAction>())
+
+
+    multibind<NetworkInterceptor.Factory>()
+        .to(WideOpenDevelopmentInterceptorFactory::class.java)
   }
 }
