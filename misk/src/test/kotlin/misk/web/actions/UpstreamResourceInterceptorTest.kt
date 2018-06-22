@@ -21,8 +21,7 @@ internal class UpstreamResourceInterceptorTest {
   lateinit var mapping: UpstreamResourceInterceptor.Mapping
   lateinit var interceptor: UpstreamResourceInterceptor
 
-  // TODO: probably discourage path rewritin
-  // g
+  // TODO: probably discourage path rewriting
   // ie. dev and production ending paths are the same
   // localhost:3001/_admin/config -> prod.misk/_admin/config
 
