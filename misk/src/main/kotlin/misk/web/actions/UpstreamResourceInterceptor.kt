@@ -15,38 +15,6 @@ class UpstreamResourceInterceptor(
 
   @Suppress("UNUSED_PARAMETER")
   override fun intercept(chain: NetworkChain): Response<*> {
-    // TODO: call the configured upstream (ie. webpack) server
-    // if it 404s, call chain.proceed()
-    // otherwise return the upstream's response
-
-// request has path, find mapping that satisfies
-//    if mapping found, make http request to target server
-//    for that request, do fancy stuff to create new url
-//    ie. drop everything below localprefix path, append to new
-//    Then. make okhttp request with that path, same headers, same method, body
-//    execute request, take response, route response back
-
-//  if no mapping found, call chain.proceed()
-
-
-//    methods misk request -> okhttp requst / misk response -> okhjttp response will be shared
-//    put them in misk request/response. misk request.toOkHttp3 and okhttp3 response.toMiskResponse
-
-
-//    bodies aren't the same. build sink from source by writing source to the sink
-//    ignore web socket completely
-
-// how to make adding mapping easy with new modules
-//    Injection will do wiring
-//    but... is rule going to be that when new service is built that redirection automatically happens on set paths
-
-//    Extra challenge: deploying in production, bundle JS in JAR. In dev, JS served by webpack dev server
-//    new service (ie. url shorteneer) consumes misk package as binary.
-
-
-//    will have to inject/create okhttp3 client
-
-
     val requestSegments = chain.request.url.pathSegments()
     var matchedMapping: Mapping? = null
 
@@ -69,12 +37,7 @@ class UpstreamResourceInterceptor(
         .addPathSegments(upstreamPlusRequestSegments.joinToString("/"))
         .build()
 
-    logger.info { requestSegments.toString() }
-    logger.info { matchedMapping.toString() }
-    logger.info { proxyUrl.toString() }
-
-    val proxyResponse = chain.request.toOkHttp3(proxyUrl)
-    return proxyResponse.toMisk()
+    return chain.request.toOkHttp3(proxyUrl).toMisk()
   }
 
   private fun pathSegmentsMatch(
