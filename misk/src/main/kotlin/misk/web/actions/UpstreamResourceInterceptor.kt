@@ -4,8 +4,9 @@ import misk.logging.getLogger
 import misk.web.NetworkChain
 import misk.web.NetworkInterceptor
 import misk.web.Response
+import misk.web.toMisk
+import misk.web.toOkHttp3
 import okhttp3.HttpUrl
-import java.io.File.separator
 
 class UpstreamResourceInterceptor(
   private val mappings: MutableList<out Mapping>
@@ -46,50 +47,45 @@ class UpstreamResourceInterceptor(
 //    will have to inject/create okhttp3 client
 
 
-
-
-
-//    val incomingScheme = HttpUrl.parse(chain.request.url.toString())!!.scheme()
-//    val incomingHost = HttpUrl.parse(chain.request.url.toString())!!.host()
-//    val incomingPort = HttpUrl.parse(chain.request.url.toString())!!.port()
-    val incomingPathSegments = HttpUrl.parse(chain.request.url.toString())!!.pathSegments()
+    val requestSegments = chain.request.url.pathSegments()
+    var matchedMapping: Mapping? = null
 
     for (mapping in this.mappings) {
-//      val a = incomingPathSegments.joinToString("/").contains(mapping.localPathPrefix)
-//      val c = incomingPathSegments.joinToString("/")
-//      val d = mapping.localPathPrefix
-
-      val localPathSegments = mapping.localPathPrefix.drop(1).dropLast(1).split('/')
-
-      var match = true
-      for ((i, localPathSegment) in localPathSegments.withIndex()) {
-        if (i > incomingPathSegments.size-1) break
-        if (incomingPathSegments[i] != localPathSegment) match = false
-      }
-
-      logger.info { match.toString()  }
-
-      if (match) {
-        val upstreamScheme = HttpUrl.parse(mapping.upstreamBaseUrl.toString())!!.scheme()
-        val upstreamHost = HttpUrl.parse(mapping.upstreamBaseUrl.toString())!!.host()
-        val upstreamPort = HttpUrl.parse(mapping.upstreamBaseUrl.toString())!!.port()
-        val upstreamPathSegments = HttpUrl.parse(mapping.upstreamBaseUrl.toString())!!.pathSegments()
-
-        val newUrl = HttpUrl.Builder()
-            .scheme(upstreamScheme)
-            .host(upstreamHost)
-            .port(upstreamPort)
-            .addPathSegments(upstreamPathSegments.joinToString("/"))
-
-        val newUrl2 = newUrl
-        logger.info { newUrl2 }
-      }
-
-      val a = match
-      logger.info { a }
+      if (!pathSegmentsMatch(mapping.localPathPrefix.drop(1).dropLast(1).split('/'), requestSegments)) continue
+      if (matchedMapping == null || mapping.localPathPrefix.count { ch -> ch == '/' } > matchedMapping.localPathPrefix.count { ch -> ch == '/' }) matchedMapping = mapping
     }
 
-    return chain.proceed(chain.request)
+    if (matchedMapping == null) return chain.proceed(chain.request)
+
+    val upstreamUrl = matchedMapping.upstreamBaseUrl
+    val upstreamSegments = upstreamUrl.pathSegments()
+    val upstreamPlusRequestSegments = upstreamSegments.subList(0, upstreamSegments.size - 1) + requestSegments.subList(
+        upstreamSegments.size, requestSegments.size)
+
+    val proxyUrl = HttpUrl.Builder()
+        .scheme(upstreamUrl.scheme())
+        .host(upstreamUrl.host())
+        .port(upstreamUrl.port())
+        .addPathSegments(upstreamPlusRequestSegments.joinToString("/"))
+        .build()
+
+    logger.info { requestSegments.toString() }
+    logger.info { matchedMapping.toString() }
+    logger.info { proxyUrl.toString() }
+
+    val proxyResponse = chain.request.toOkHttp3(proxyUrl)
+    return proxyResponse.toMisk()
+  }
+
+  private fun pathSegmentsMatch(
+    localPathSegments: List<String>,
+    requestSegments: MutableList<String>
+  ) : Boolean {
+    for ((i, localPathSegment) in localPathSegments.withIndex()) {
+      if (i > requestSegments.size - 1) break
+      if (requestSegments[i] != localPathSegment) return false
+    }
+    return true
   }
 
   /**
