@@ -1,6 +1,5 @@
 package misk.web.actions
 
-import misk.logging.getLogger
 import misk.web.NetworkChain
 import misk.web.NetworkInterceptor
 import misk.web.Response
@@ -11,8 +10,6 @@ import okhttp3.HttpUrl
 class UpstreamResourceInterceptor(
   private val mappings: MutableList<out Mapping>
 ) : NetworkInterceptor {
-  internal val logger = getLogger<UpstreamResourceInterceptor>()
-
   @Suppress("UNUSED_PARAMETER")
   override fun intercept(chain: NetworkChain): Response<*> {
     val requestSegments = chain.request.url.pathSegments()
