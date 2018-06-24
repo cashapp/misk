@@ -1,16 +1,13 @@
 package misk.web.extractors
 
-import com.google.inject.util.Modules
-import misk.MiskModule
 import misk.inject.KAbstractModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
-import misk.testing.TestWebModule
 import misk.web.FormField
 import misk.web.FormValue
 import misk.web.Post
+import misk.web.WebTestingModule
 import misk.web.WebActionModule
-import misk.web.WebModule
 import misk.web.actions.WebAction
 import misk.web.jetty.JettyService
 import okhttp3.FormBody
@@ -23,12 +20,7 @@ import javax.inject.Inject
 @MiskTest(startService = true)
 internal class FormValueParameterTest {
   @MiskTestModule
-  val module = Modules.combine(
-      MiskModule(),
-      WebModule(),
-      TestWebModule(),
-      TestModule()
-  )
+  val module = TestModule()
 
   @Inject lateinit var jettyService: JettyService
 
@@ -159,6 +151,7 @@ internal class FormValueParameterTest {
 
   class TestModule : KAbstractModule() {
     override fun configure() {
+      install(WebTestingModule())
       install(WebActionModule.create<BasicParamsAction>())
       install(WebActionModule.create<OptionalParamsAction>())
       install(WebActionModule.create<DefaultParamsAction>())

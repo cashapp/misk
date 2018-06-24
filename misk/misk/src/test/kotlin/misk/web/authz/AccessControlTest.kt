@@ -4,7 +4,6 @@ import com.google.inject.Guice
 import com.google.inject.Provides
 import com.google.inject.name.Names
 import misk.MiskCaller
-import misk.MiskModule
 import misk.client.HttpClientEndpointConfig
 import misk.client.HttpClientModule
 import misk.client.HttpClientSSLConfig
@@ -23,10 +22,9 @@ import misk.security.ssl.Keystores
 import misk.security.ssl.TrustStoreConfig
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
-import misk.testing.TestWebModule
 import misk.web.Get
+import misk.web.WebTestingModule
 import misk.web.WebActionModule
-import misk.web.WebModule
 import misk.web.WebSslConfig
 import misk.web.actions.WebAction
 import misk.web.jetty.JettyService
@@ -41,7 +39,7 @@ import javax.inject.Singleton
 @MiskTest(startService = true)
 internal class AccessControlTest {
   @MiskTestModule
-  private val module = ServerModule()
+  private val module = TestModule()
 
   @Inject
   private lateinit var jetty: JettyService
@@ -232,16 +230,14 @@ internal class AccessControlTest {
     }
   }
 
-  class ServerModule : KAbstractModule() {
+  class TestModule : KAbstractModule() {
     override fun configure() {
-      install(MiskModule())
-      install(WebModule())
       install(AccessControlModule(PeerServiceClientCertAuthenticator::class, ProxyUserAuthenticator::class))
       install(WebActionModule.create<UnauthenticatedAction>())
       install(WebActionModule.create<ClientServiceOnlyAction>())
       install(WebActionModule.create<OtherServiceOnlyAction>())
       install(WebActionModule.create<AdminOnlyAction>())
-      install(TestWebModule(
+      install(WebTestingModule(
           ssl = WebSslConfig(0,
               cert_store = CertStoreConfig(
                   path = "src/test/resources/ssl/server_cert_key_combo.pem",
@@ -256,5 +252,4 @@ internal class AccessControlTest {
       ))
     }
   }
-
 }

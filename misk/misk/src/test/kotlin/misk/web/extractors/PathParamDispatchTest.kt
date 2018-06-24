@@ -1,16 +1,13 @@
 package misk.web.extractors
 
-import com.google.inject.util.Modules
-import misk.MiskModule
 import misk.inject.KAbstractModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
-import misk.testing.TestWebModule
 import misk.web.Get
 import misk.web.PathParam
 import misk.web.ResponseContentType
+import misk.web.WebTestingModule
 import misk.web.WebActionModule
-import misk.web.WebModule
 import misk.web.actions.WebAction
 import misk.web.jetty.JettyService
 import misk.web.mediatype.MediaTypes
@@ -24,11 +21,7 @@ import javax.inject.Inject
 @MiskTest(startService = true)
 internal class PathParamDispatchTest {
   @MiskTestModule
-  val module = Modules.combine(
-      MiskModule(),
-      WebModule(),
-      TestWebModule(),
-      TestModule())
+  val module = TestModule()
 
   @Inject lateinit var jettyService: JettyService
 
@@ -54,6 +47,7 @@ internal class PathParamDispatchTest {
 
   class TestModule : KAbstractModule() {
     override fun configure() {
+      install(WebTestingModule())
       install(WebActionModule.create<GetObjectDetails>())
       install(WebActionModule.create<CustomPathParamName>())
     }
