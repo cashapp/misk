@@ -3,21 +3,18 @@ package misk.client
 import com.google.inject.Guice
 import com.google.inject.Provides
 import com.google.inject.name.Names
-import com.google.inject.util.Modules
 import helpers.protos.Dinosaur
-import misk.MiskModule
 import misk.inject.KAbstractModule
 import misk.inject.getInstance
 import misk.moshi.MoshiModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
-import misk.testing.TestWebModule
 import misk.web.Post
 import misk.web.RequestBody
 import misk.web.RequestContentType
 import misk.web.ResponseContentType
+import misk.web.WebTestingModule
 import misk.web.WebActionModule
-import misk.web.WebModule
 import misk.web.actions.WebAction
 import misk.web.jetty.JettyService
 import misk.web.mediatype.MediaTypes
@@ -30,12 +27,7 @@ import javax.inject.Singleton
 @MiskTest(startService = true)
 class ProtoMessageHttpClientTest {
   @MiskTestModule
-  val module = Modules.combine(
-      MiskModule(),
-      WebModule(),
-      TestWebModule(),
-      TestModule()
-  )
+  val module = TestModule()
 
   @Inject
   private lateinit var jetty: JettyService
@@ -76,6 +68,7 @@ class ProtoMessageHttpClientTest {
 
   class TestModule : KAbstractModule() {
     override fun configure() {
+      install(WebTestingModule())
       install(WebActionModule.create<ReturnADinosaur>())
     }
   }

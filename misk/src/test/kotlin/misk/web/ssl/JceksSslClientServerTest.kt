@@ -3,9 +3,7 @@ package misk.web.ssl
 import com.google.inject.Guice
 import com.google.inject.Provides
 import com.google.inject.name.Names
-import com.google.inject.util.Modules
 import helpers.protos.Dinosaur
-import misk.MiskModule
 import misk.client.HttpClientEndpointConfig
 import misk.client.HttpClientModule
 import misk.client.HttpClientSSLConfig
@@ -22,14 +20,13 @@ import misk.security.ssl.TrustStoreConfig
 import misk.security.x509.X500Name
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
-import misk.testing.TestWebModule
 import misk.testing.assertThrows
 import misk.web.Post
 import misk.web.RequestBody
 import misk.web.RequestContentType
 import misk.web.ResponseContentType
+import misk.web.WebTestingModule
 import misk.web.WebActionModule
-import misk.web.WebModule
 import misk.web.WebSslConfig
 import misk.web.actions.WebAction
 import misk.web.jetty.JettyService
@@ -44,21 +41,7 @@ import javax.net.ssl.SSLHandshakeException
 @MiskTest(startService = true)
 internal class JceksSslClientServerTest {
   @MiskTestModule
-  val module = Modules.combine(
-      MiskModule(),
-      WebModule(),
-      TestWebModule(
-          ssl = WebSslConfig(0,
-              cert_store = CertStoreConfig(
-                  path = "src/test/resources/ssl/server_keystore.jceks",
-                  passphrase = "serverpassword"
-              ),
-              trust_store = TrustStoreConfig(
-                  path = "src/test/resources/ssl/client_cert.pem",
-                  type = Keystores.TYPE_PEM
-              ),
-              mutual_auth = WebSslConfig.MutualAuth.REQUIRED)),
-      TestModule())
+  val module = TestModule()
 
   @Inject
   private lateinit var jetty: JettyService
@@ -111,6 +94,17 @@ internal class JceksSslClientServerTest {
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(WebActionModule.create<HelloAction>())
+      install(WebTestingModule(
+          ssl = WebSslConfig(0,
+              cert_store = CertStoreConfig(
+                  path = "src/test/resources/ssl/server_keystore.jceks",
+                  passphrase = "serverpassword"
+              ),
+              trust_store = TrustStoreConfig(
+                  path = "src/test/resources/ssl/client_cert.pem",
+                  type = Keystores.TYPE_PEM
+              ),
+              mutual_auth = WebSslConfig.MutualAuth.REQUIRED)))
     }
   }
 

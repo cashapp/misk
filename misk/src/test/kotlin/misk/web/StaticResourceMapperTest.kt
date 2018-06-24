@@ -1,13 +1,9 @@
 package misk.web
 
-import com.google.inject.util.Modules
-import misk.MiskModule
 import misk.inject.KAbstractModule
 import misk.resources.FakeResourceLoader
-import misk.resources.FakeResourceLoaderModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
-import misk.testing.TestWebModule
 import misk.web.actions.NotFoundAction
 import misk.web.actions.WebAction
 import misk.web.jetty.JettyService
@@ -22,12 +18,7 @@ import javax.inject.Singleton
 @MiskTest(startService = true)
 class StaticResourceMapperTest {
   @MiskTestModule
-  val module = Modules.combine(
-      FakeResourceLoaderModule(),
-      MiskModule(),
-      WebModule(),
-      TestWebModule(),
-      TestModule())
+  val module = TestModule()
 
   @Inject private lateinit var jettyService: JettyService
   @Inject private lateinit var resourceLoader: FakeResourceLoader
@@ -105,6 +96,7 @@ class StaticResourceMapperTest {
 
   class TestModule : KAbstractModule() {
     override fun configure() {
+      install(WebTestingModule())
       install(WebActionModule.create<Hello>())
       install(WebActionModule.create<NotFoundAction>())
       multibind<StaticResourceMapper.Entry>()
