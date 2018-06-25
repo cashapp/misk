@@ -5,16 +5,15 @@ import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.web.Get
 import misk.web.Response
-import misk.web.ResponseBody
 import misk.web.ResponseContentType
 import misk.web.WebTestingModule
 import misk.web.WebActionModule
 import misk.web.actions.WebAction
 import misk.web.jetty.JettyService
 import misk.web.mediatype.MediaTypes
+import misk.web.toResponseBody
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import okio.BufferedSink
 import okio.ByteString
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -88,11 +87,7 @@ internal class PlainTextResponseTest {
   class ReturnAsResponseBody : WebAction {
     @Get("/response/as-response-body")
     @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
-    fun call(): ResponseBody = object : ResponseBody {
-      override fun writeTo(sink: BufferedSink) {
-        sink.writeUtf8("as-response-body")
-      }
-    }
+    fun call() = "as-response-body".toResponseBody()
   }
 
   class ReturnAsObjectResponse : WebAction {
