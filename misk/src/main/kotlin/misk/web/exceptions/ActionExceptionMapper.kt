@@ -4,8 +4,8 @@ import misk.config.Config
 import misk.exceptions.ActionException
 import misk.web.Response
 import misk.web.ResponseBody
-import misk.web.marshal.StringResponseBody
 import misk.web.mediatype.MediaTypes
+import misk.web.toResponseBody
 import okhttp3.Headers
 import org.slf4j.event.Level
 import javax.inject.Inject
@@ -23,7 +23,7 @@ internal class ActionExceptionMapper @Inject internal constructor(
   override fun toResponse(th: ActionException): Response<ResponseBody> {
     val message = if (th.statusCode.isClientError) th.message ?: th.statusCode.name
     else th.statusCode.name
-    return Response(StringResponseBody(message), HEADERS, statusCode = th.statusCode.code)
+    return Response(message.toResponseBody(), HEADERS, statusCode = th.statusCode.code)
   }
 
   override fun canHandle(th: Throwable): Boolean = th is ActionException

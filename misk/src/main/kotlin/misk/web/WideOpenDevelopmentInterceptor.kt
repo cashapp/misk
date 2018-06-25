@@ -9,7 +9,7 @@ internal class WideOpenDevelopmentInterceptor : NetworkInterceptor {
     val response = chain.proceed(chain.request)
     return response.copy(
         headers = response.headers.newBuilder()
-            .add("Access-Control-Allow-Origin", "x*")
+            .add("Access-Control-Allow-Origin", "*")
             .build()
     )
   }

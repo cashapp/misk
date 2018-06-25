@@ -1,7 +1,5 @@
 package misk.web
 
-import misk.web.Request
-import misk.web.Response
 import misk.web.actions.WebAction
 import kotlin.reflect.KFunction
 
