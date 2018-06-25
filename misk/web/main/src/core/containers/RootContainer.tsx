@@ -58,8 +58,6 @@ export default class RootContainer extends React.Component {
                   <Route key={path} path={path} exact={exact} component={C}/>
                 ))}
               </Switch>
-              <h3>All Modules</h3>
-              <Region name="main"/>
             </div>
           </div>
         </div>

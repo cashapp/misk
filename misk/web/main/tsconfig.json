@@ -11,7 +11,7 @@
         "noEmitOnError": true,
         "noImplicitAny": true,
         "noImplicitThis": true,
-        "outDir": "./build/",
+        "outDir": "../build/",
         "skipLibCheck": true,
         "sourceMap": true,
         "target": "es6",

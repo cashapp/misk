@@ -11,12 +11,12 @@ module.exports = {
   },
   devtool: 'source-map',
   output: {
-    path: path.resolve(__dirname, './build/js'),
+    path: path.resolve(__dirname, '../build/js'),
     filename: '[name].js',
     libraryTarget: 'umd'
   },
   devServer: {
-    contentBase: path.resolve(__dirname, './build'),
+    contentBase: path.resolve(__dirname, '../build'),
     hot: true,
     inline: true,
     port: 3000,
@@ -52,7 +52,7 @@ module.exports = {
   plugins: [
     new HtmlWebpackPlugin({
       template: path.resolve(__dirname, 'src/layouts/index.ejs'),
-      filename: path.resolve(__dirname, './build/index.html'),
+      filename: path.resolve(__dirname, '../build/index.html'),
     }),
     new ScriptExtHtmlWebpackPlugin({
       defaultAttribute: 'async',
@@ -63,5 +63,5 @@ module.exports = {
       { debug: 'info', copyUnmodified: true }
     )
   ],
-  externals: miskCommon.externals,
+  externals: miskCommon.externals
 };

@@ -20,7 +20,7 @@ class RootContainer extends React.Component<RootContainer.Props> {
 
   componentDidMount() {
     axios
-      .get("http://0.0.0.0:8080/_admin/config")
+      .get("http://0.0.0.0:8080/_admin/config/all")
       .then(response => {
         // const newState = Object.assign({}, this.state, {
         //   config: { response }
