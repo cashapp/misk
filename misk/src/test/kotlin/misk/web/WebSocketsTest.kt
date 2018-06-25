@@ -1,11 +1,8 @@
 package misk.web
 
-import com.google.inject.util.Modules
-import misk.MiskModule
 import misk.inject.KAbstractModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
-import misk.testing.TestWebModule
 import misk.web.actions.WebAction
 import misk.web.actions.WebSocket
 import misk.web.actions.WebSocketListener
@@ -21,11 +18,7 @@ import javax.inject.Singleton
 @MiskTest(startService = true)
 internal class WebSocketsTest {
   @MiskTestModule
-  val module = Modules.combine(
-      MiskModule(),
-      WebModule(),
-      TestWebModule(),
-      TestModule())
+  val module = TestModule()
 
   @Inject lateinit var jettyService: JettyService
 
@@ -65,6 +58,7 @@ internal class WebSocketsTest {
 
   class TestModule : KAbstractModule() {
     override fun configure() {
+      install(WebTestingModule())
       install(WebActionModule.create<EchoWebSocket>())
     }
   }

@@ -1,18 +1,15 @@
 package misk.web.marshal
 
-import com.google.inject.util.Modules
 import com.squareup.moshi.Moshi
-import misk.MiskModule
 import misk.inject.KAbstractModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
-import misk.testing.TestWebModule
 import misk.web.Get
 import misk.web.Response
 import misk.web.ResponseBody
 import misk.web.ResponseContentType
+import misk.web.WebTestingModule
 import misk.web.WebActionModule
-import misk.web.WebModule
 import misk.web.actions.WebAction
 import misk.web.jetty.JettyService
 import misk.web.mediatype.MediaTypes
@@ -29,11 +26,7 @@ internal class JsonResponseTest {
   data class Packet(val message: String)
 
   @MiskTestModule
-  val module = Modules.combine(
-      MiskModule(),
-      WebModule(),
-      TestWebModule(),
-      TestModule())
+  val module = TestModule()
 
   @Inject private lateinit var jettyService: JettyService
   @Inject private lateinit var moshi: Moshi
@@ -133,6 +126,7 @@ internal class JsonResponseTest {
 
   class TestModule : KAbstractModule() {
     override fun configure() {
+      install(WebTestingModule())
       install(WebActionModule.create<ReturnAsObject>())
       install(WebActionModule.create<ReturnAsString>())
       install(WebActionModule.create<ReturnAsByteString>())
