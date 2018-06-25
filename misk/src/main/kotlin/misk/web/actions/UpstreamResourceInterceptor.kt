@@ -1,5 +1,6 @@
 package misk.web.actions
 
+import misk.Action
 import misk.web.NetworkChain
 import misk.web.NetworkInterceptor
 import misk.web.Request
@@ -11,6 +12,7 @@ import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
 import java.io.IOException
 import java.net.HttpURLConnection
+import javax.inject.Inject
 
 class UpstreamResourceInterceptor(
   private val client: OkHttpClient,
@@ -27,7 +29,7 @@ class UpstreamResourceInterceptor(
 
   private fun findMappingMatch(chain: NetworkChain): Mapping? {
     for (mapping in mappings) {
-      if (!chain.request.url.encodedPath().startsWith(mapping.localPathPrefix)) continue
+      if (!chain.request.url.encodedPath().startsWith(mapping.localPathPrefix.dropLast(1))) continue
       return mapping
     }
     return null
@@ -70,6 +72,14 @@ class UpstreamResourceInterceptor(
       require(localPathPrefix.endsWith("/") &&
           localPathPrefix.startsWith("/") &&
           upstreamBaseUrl.encodedPath().endsWith("/"))
+    }
+  }
+
+  class Factory @Inject internal constructor() : NetworkInterceptor.Factory {
+    override fun create(action: Action): NetworkInterceptor? {
+      return UpstreamResourceInterceptor(okhttp3.OkHttpClient(), mutableListOf<Mapping>(UpstreamResourceInterceptor.Mapping(
+          "/_admin/",
+          HttpUrl.parse("http://localhost:3000/")!!)))
     }
   }
 }
