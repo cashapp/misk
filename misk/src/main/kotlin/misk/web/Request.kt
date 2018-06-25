@@ -24,6 +24,7 @@ data class Request(
 )
 
 fun okhttp3.Request.exec(): okhttp3.Response {
+  //  TODO(adrw) inject the client
   val client = OkHttpClient()
   return try {
     client.newCall(this).execute()
@@ -40,7 +41,7 @@ fun okhttp3.Request.exec(): okhttp3.Response {
 }
 
 fun Request.forwardRequestTo(proxyUrl: HttpUrl): misk.web.Response<*> {
-  return this.toOkHttp3().setUrl(proxyUrl).exec().toMisk()
+  return toOkHttp3().setUrl(proxyUrl).exec().toMisk()
 }
 
 fun okhttp3.Request.setUrl(newUrl: HttpUrl): okhttp3.Request {
@@ -53,15 +54,14 @@ fun okhttp3.Request.setUrl(newUrl: HttpUrl): okhttp3.Request {
 
 fun Request.toOkHttp3(): okhttp3.Request {
   // @TODO(adrw) https://github.com/square/misk/issues/279
-  val okRequestBody = if (this.method == HttpMethod.GET) null
-  else {
-    object : RequestBody() {
-      override fun contentType(): MediaType? = null
-      override fun writeTo(sink: BufferedSink) {
-        sink.writeAll(body)
-      }
-    }
-  }
+  val okRequestBody =
+      if (this.method == HttpMethod.GET) null
+      else object : RequestBody() {
+          override fun contentType(): MediaType? = null
+          override fun writeTo(sink: BufferedSink) {
+            sink.writeAll(body)
+          }
+        }
 
   return okhttp3.Request.Builder()
       .url(url)

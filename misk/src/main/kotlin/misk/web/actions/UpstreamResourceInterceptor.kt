@@ -9,9 +9,8 @@ import okhttp3.HttpUrl
 class UpstreamResourceInterceptor(
   private val mappings: MutableList<out Mapping>
 ) : NetworkInterceptor {
-  @Suppress("UNUSED_PARAMETER")
   override fun intercept(chain: NetworkChain): Response<*> {
-    var matchedMapping = findMappingMatch(chain) ?: return chain.proceed(chain.request)
+    val matchedMapping = findMappingMatch(chain) ?: return chain.proceed(chain.request)
     val proxyUrl = HttpUrl.parse(
         matchedMapping.upstreamBaseUrl.toString() + chain.request.url.encodedPath().removePrefix(
             matchedMapping.localPathPrefix))!!
@@ -22,19 +21,24 @@ class UpstreamResourceInterceptor(
     var matchedMapping: Mapping? = null
     for (mapping in mappings) {
       if (!chain.request.url.encodedPath().startsWith(mapping.localPathPrefix)) continue
-      if (matchedMapping == null || mapping.localPathPrefix.count { ch -> ch == '/' } > matchedMapping.localPathPrefix.count { ch -> ch == '/' }) matchedMapping =
-          mapping
+      // TODO(adrw) remove maximal matching if we're doing non-overlapping first prefix match forwarding
+      if (matchedMapping == null ||
+          mapping.localPathPrefix.count { ch -> ch == '/' } >
+          matchedMapping.localPathPrefix.count { ch -> ch == '/' }) {
+            matchedMapping = mapping
+          }
     }
     return matchedMapping
   }
 
+//  TODO(adrw) fix this documentation if forwarding rewrites are restricted or other conditions in place
   /**
-   * Imagine that we had the following Mapping:
+   * Maps URLs requested against this server to URLs of servers to delegate to
    *
    * localPathPrefix: `/_admin/`
    * upstreamBaseUrl: `http://localhost:3000/`
    *
-   * An incoming request for `/_admin/config.js` would route to `http://localhost:3000/config.js`.
+   * An incoming request then for `/_admin/config.js` would route to `http://localhost:3000/config.js`.
    */
   data class Mapping(
     val localPathPrefix: String,
