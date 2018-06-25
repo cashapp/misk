@@ -1,13 +1,9 @@
 package misk.web.interceptors
 
 import com.google.inject.Guice
-import com.google.inject.util.Modules
 import io.opentracing.Tracer
 import io.opentracing.mock.MockTracer
 import io.opentracing.tag.Tags
-import misk.MiskModule
-import misk.web.NetworkChain
-import misk.web.NetworkInterceptor
 import misk.asAction
 import misk.exceptions.ActionException
 import misk.exceptions.StatusCode
@@ -15,12 +11,13 @@ import misk.inject.KAbstractModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.testing.MockTracingBackendModule
-import misk.testing.TestWebModule
 import misk.web.Get
+import misk.web.NetworkChain
+import misk.web.NetworkInterceptor
 import misk.web.Request
 import misk.web.Response
+import misk.web.WebTestingModule
 import misk.web.WebActionModule
-import misk.web.WebModule
 import misk.web.actions.WebAction
 import misk.web.actions.asNetworkChain
 import misk.web.jetty.JettyService
@@ -36,12 +33,7 @@ import javax.inject.Inject
 @MiskTest(startService = true)
 class TracingInterceptorTest {
   @MiskTestModule
-  val module = Modules.combine(
-      MockTracingBackendModule(),
-      MiskModule(),
-      WebModule(),
-      TestWebModule(),
-      TestModule())
+  val module = TestModule()
 
   @Inject private lateinit var tracingInterceptorFactory: TracingInterceptor.Factory
   @Inject private lateinit var tracingTestAction: TracingTestAction
@@ -162,6 +154,8 @@ class TracingInterceptorTest {
 
   class TestModule : KAbstractModule() {
     override fun configure() {
+      install(WebTestingModule())
+      install(MockTracingBackendModule())
       install(WebActionModule.create<FailedTracingTestAction>())
       install(WebActionModule.create<ExceptionThrowingTracingTestAction>())
     }

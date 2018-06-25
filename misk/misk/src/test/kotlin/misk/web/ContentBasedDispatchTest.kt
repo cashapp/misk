@@ -1,12 +1,9 @@
 package misk.web
 
-import com.google.inject.util.Modules
 import com.squareup.moshi.Moshi
-import misk.MiskModule
 import misk.inject.KAbstractModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
-import misk.testing.TestWebModule
 import misk.web.actions.WebAction
 import misk.web.jetty.JettyService
 import misk.web.mediatype.MediaTypes
@@ -22,12 +19,7 @@ import javax.inject.Inject
 @MiskTest(startService = true)
 internal class ContentBasedDispatchTest {
   @MiskTestModule
-  val module = Modules.combine(
-      MiskModule(),
-      WebModule(),
-      TestWebModule(),
-      TestModule()
-  )
+  val module = TestModule()
 
   val httpClient = OkHttpClient()
 
@@ -103,6 +95,7 @@ internal class ContentBasedDispatchTest {
 
   class TestModule : KAbstractModule() {
     override fun configure() {
+      install(WebTestingModule())
       install(WebActionModule.create<PostPlainTextReturnAnyText>())
       install(WebActionModule.create<PostAnyTextReturnPlainText>())
       install(WebActionModule.create<PostPlainTextReturnPlainText>())

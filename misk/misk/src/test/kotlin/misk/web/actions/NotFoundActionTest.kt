@@ -1,13 +1,11 @@
 package misk.web.actions
 
-import com.google.inject.util.Modules
 import com.squareup.moshi.Moshi
-import misk.MiskModule
+import misk.inject.KAbstractModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
-import misk.testing.TestWebModule
+import misk.web.WebTestingModule
 import misk.web.WebActionModule
-import misk.web.WebModule
 import misk.web.jetty.JettyService
 import misk.web.mediatype.MediaTypes
 import misk.web.mediatype.asMediaType
@@ -22,11 +20,7 @@ import javax.inject.Inject
 @MiskTest(startService = true)
 class NotFoundActionTest {
   @MiskTestModule
-  val module = Modules.combine(
-      MiskModule(),
-      WebModule(),
-      TestWebModule(),
-      WebActionModule.create<NotFoundAction>())
+  val module = TestModule()
 
   val httpClient = OkHttpClient()
 
@@ -118,5 +112,12 @@ class NotFoundActionTest {
         .url(jettyService.httpServerUrl.newBuilder().encodedPath(path).build())
         .header("Accept", acceptedMediaType.toString())
         .build()
+  }
+
+  class TestModule : KAbstractModule() {
+    override fun configure() {
+      install(WebTestingModule())
+      install(WebActionModule.create<NotFoundAction>())
+    }
   }
 }

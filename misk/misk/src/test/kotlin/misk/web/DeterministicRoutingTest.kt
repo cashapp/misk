@@ -1,11 +1,8 @@
 package misk.web
 
-import com.google.inject.util.Modules
-import misk.MiskModule
 import misk.inject.KAbstractModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
-import misk.testing.TestWebModule
 import misk.web.actions.WebAction
 import misk.web.jetty.JettyService
 import misk.web.mediatype.MediaTypes
@@ -19,11 +16,7 @@ import javax.inject.Inject
 @MiskTest(startService = true)
 internal class DeterministicRoutingTest {
   @MiskTestModule
-  val module = Modules.combine(
-      MiskModule(),
-      WebModule(),
-      TestWebModule(),
-      TestModule())
+  val module = TestModule()
 
   @Inject private lateinit var jettyService: JettyService
 
@@ -68,6 +61,7 @@ internal class DeterministicRoutingTest {
 
   class TestModule : KAbstractModule() {
     override fun configure() {
+      install(WebTestingModule())
       val webActionModules = mutableListOf(
           WebActionModule.create<WholePathAction>(),
           WebActionModule.create<RemainderPathAction>(),

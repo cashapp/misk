@@ -1,22 +1,19 @@
 package misk.web.interceptors
 
-import com.google.inject.util.Modules
 import misk.Action
 import misk.ApplicationInterceptor
 import misk.Chain
-import misk.MiskModule
 import misk.inject.KAbstractModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
-import misk.testing.TestWebModule
 import misk.web.Get
 import misk.web.NetworkChain
 import misk.web.NetworkInterceptor
 import misk.web.PathParam
 import misk.web.Response
 import misk.web.ResponseContentType
+import misk.web.WebTestingModule
 import misk.web.WebActionModule
-import misk.web.WebModule
 import misk.web.actions.WebAction
 import misk.web.jetty.JettyService
 import misk.web.mediatype.MediaTypes
@@ -30,11 +27,7 @@ import javax.inject.Inject
 @MiskTest(startService = true)
 class UserInterceptorTest {
   @MiskTestModule
-  val module = Modules.combine(
-      MiskModule(),
-      WebModule(),
-      TestWebModule(),
-      TestModule())
+  val module = TestModule()
 
   @Inject internal lateinit var jettyService: JettyService
 
@@ -123,8 +116,9 @@ class UserInterceptorTest {
     return response
   }
 
-  internal class TestModule : KAbstractModule() {
+  class TestModule : KAbstractModule() {
     override fun configure() {
+      install(WebTestingModule())
       multibind<NetworkInterceptor.Factory>()
           .toInstance(UserCreatedNetworkInterceptor.Factory())
       multibind<ApplicationInterceptor.Factory>()
