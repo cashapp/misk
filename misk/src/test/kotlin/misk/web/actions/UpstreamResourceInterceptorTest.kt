@@ -4,8 +4,9 @@ import misk.web.NetworkChain
 import misk.web.Request
 import misk.web.Response
 import misk.web.ResponseBody
-import misk.web.marshal.StringResponseBody
+import misk.web.toResponseBody
 import okhttp3.HttpUrl
+import okhttp3.OkHttpClient
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import okio.Buffer
@@ -33,8 +34,7 @@ internal class UpstreamResourceInterceptorTest {
         "/local/prefix/",
         upstreamServer.url("/upstreamprefix/"))
 
-    interceptor = UpstreamResourceInterceptor(mutableListOf(mapping))
-
+    interceptor = UpstreamResourceInterceptor(OkHttpClient(), mutableListOf(mapping))
   }
 
   @AfterEach
@@ -110,7 +110,7 @@ internal class UpstreamResourceInterceptorTest {
       get() = throw AssertionError()
 
     override fun proceed(request: Request): Response<*> {
-      return Response(StringResponseBody("I am not intercepted"))
+      return Response("I am not intercepted".toResponseBody())
     }
   }
 }

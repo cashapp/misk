@@ -2,14 +2,14 @@ package misk.web.exceptions
 
 import com.google.common.util.concurrent.UncheckedExecutionException
 import misk.Action
-import misk.web.NetworkChain
-import misk.web.NetworkInterceptor
 import misk.exceptions.StatusCode
 import misk.logging.getLogger
 import misk.logging.log
+import misk.web.NetworkChain
+import misk.web.NetworkInterceptor
 import misk.web.Response
-import misk.web.marshal.StringResponseBody
 import misk.web.mediatype.MediaTypes
+import misk.web.toResponseBody
 import okhttp3.Headers
 import java.lang.reflect.InvocationTargetException
 import java.util.concurrent.ExecutionException
@@ -57,7 +57,7 @@ class ExceptionHandlingInterceptor(
   private companion object {
     val log = getLogger<ExceptionHandlingInterceptor>()
 
-    val INTERNAL_SERVER_ERROR_RESPONSE = Response(StringResponseBody("internal server error"),
+    val INTERNAL_SERVER_ERROR_RESPONSE = Response("internal server error".toResponseBody(),
         Headers.of(listOf("Content-Type" to MediaTypes.TEXT_PLAIN_UTF8).toMap()),
         StatusCode.INTERNAL_SERVER_ERROR.code
     )

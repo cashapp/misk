@@ -4,9 +4,8 @@ import misk.Action
 import misk.web.NetworkChain
 import misk.web.NetworkInterceptor
 import misk.web.Response
-import misk.web.ResponseBody
+import misk.web.toResponseBody
 import okhttp3.Headers
-import okio.BufferedSink
 import javax.inject.Singleton
 
 @Singleton
@@ -22,11 +21,7 @@ class InternalErrorInterceptorFactory : NetworkInterceptor.Factory {
 
     const val STATUS_CODE = 500
 
-    val BODY = object : ResponseBody {
-      override fun writeTo(sink: BufferedSink) {
-        sink.writeUtf8("Internal server error")
-      }
-    }
+    val BODY = "Internal server error".toResponseBody()
 
     val INTERCEPTOR = object : NetworkInterceptor {
       override fun intercept(chain: NetworkChain): Response<*> {
