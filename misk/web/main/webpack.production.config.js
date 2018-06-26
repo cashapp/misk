@@ -15,15 +15,6 @@ module.exports = {
     filename: '[name].js',
     libraryTarget: 'umd'
   },
-  devServer: {
-    contentBase: path.resolve(__dirname, '../build'),
-    hot: true,
-    inline: true,
-    port: 3000,
-    historyApiFallback: true,
-    compress: true,
-    open: true
-  },
   module: {
     rules: [
       {

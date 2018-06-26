@@ -11,15 +11,15 @@ export type menuItem = {
 const menu =  [{
   text: "Home",
   icon: "home",
-  url: "/",
+  url: "/_admin/",
 }, {
   text: "Config",
   icon: "properties",
-  url: "/config",
+  url: "/_admin/config",
 }, {
   text: "Healthcheck",
   icon: "heart-broken",
-  url: "/healthcheck",
+  url: "/_admin/healthcheck",
 }]
 
 export default menu

@@ -1,13 +1,13 @@
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const ScriptExtHtmlWebpackPlugin = require('script-ext-html-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
-const miskCommon = require('../@misk/common');
+const miskCommon = require('@misk/common');
 const path = require('path');
 
 module.exports = {
   mode: 'development',
   entry: {
-    core: path.resolve(__dirname, 'src/core/index.ts'),
+    core: path.resolve(__dirname, 'src/core/index.ts')
   },
   devtool: 'source-map',
   output: {
@@ -20,7 +20,7 @@ module.exports = {
     hot: true,
     inline: true,
     port: 3000,
-    historyApiFallback: true,
+    historyApiFallback: false,
     compress: false,
     open: true
   },

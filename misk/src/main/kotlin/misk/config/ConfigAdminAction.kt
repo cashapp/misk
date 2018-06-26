@@ -14,12 +14,13 @@ class ConfigAdminAction : WebAction {
   @Inject @AppName lateinit var appName: String
   @Inject lateinit var environment: Environment
 
-  @Get("/_admin/config/all")
+  @Get("/_admin/api/config/all")
   @RequestContentType(MediaTypes.APPLICATION_JSON)
   @ResponseContentType(MediaTypes.APPLICATION_JSON)
   fun getAll(): Response {
     val yamlFiles = MiskConfig.loadConfigYamlMap(appName, environment)
     val effectiveYaml = MiskConfig.flattenYamlMap(yamlFiles).toString()
+
     return Response(effective_config = effectiveYaml, yaml_files = yamlFiles)
   }
 

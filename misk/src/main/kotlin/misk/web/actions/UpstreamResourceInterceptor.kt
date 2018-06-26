@@ -3,7 +3,6 @@ package misk.web.actions
 import misk.Action
 import misk.web.NetworkChain
 import misk.web.NetworkInterceptor
-import misk.web.Request
 import misk.web.Response
 import misk.web.toMisk
 import misk.web.toResponseBody
@@ -23,8 +22,8 @@ class UpstreamResourceInterceptor(
     val matchedMapping = findMappingMatch(chain) ?: return chain.proceed(chain.request)
     val proxyUrl = HttpUrl.parse(
         matchedMapping.upstreamBaseUrl.toString() + chain.request.url.encodedPath().removePrefix(
-            matchedMapping.localPathPrefix))!!
-    return forwardRequestTo(chain.request, proxyUrl)
+            matchedMapping.localPathPrefix.dropLast(1)))!!
+    return forwardRequestTo(chain, proxyUrl)
   }
 
   private fun findMappingMatch(chain: NetworkChain): Mapping? {
@@ -35,11 +34,16 @@ class UpstreamResourceInterceptor(
     return null
   }
 
-  fun forwardRequestTo(request: Request, proxyUrl: HttpUrl): Response<*> {
-    val clientRequest = request.toOkHttp3().withUrl(proxyUrl)
+  fun forwardRequestTo(chain: NetworkChain, proxyUrl: HttpUrl): Response<*> {
+    val clientRequest = chain.request.toOkHttp3().withUrl(proxyUrl)
     return try {
       val clientResponse = client.newCall(clientRequest).execute()
-      clientResponse.toMisk()
+      if (clientResponse.code() == HttpURLConnection.HTTP_NOT_FOUND) {
+        clientResponse.close()
+        chain.proceed(chain.request)
+      } else {
+        clientResponse.toMisk()
+      }
     } catch (e: IOException) {
       Response(
           "Failed to fetch upstream URL ${clientRequest.url()}".toResponseBody(),
@@ -77,9 +81,11 @@ class UpstreamResourceInterceptor(
 
   class Factory @Inject internal constructor() : NetworkInterceptor.Factory {
     override fun create(action: Action): NetworkInterceptor? {
-      return UpstreamResourceInterceptor(okhttp3.OkHttpClient(), mutableListOf<Mapping>(UpstreamResourceInterceptor.Mapping(
-          "/_admin/",
-          HttpUrl.parse("http://localhost:3000/")!!)))
+      return UpstreamResourceInterceptor(okhttp3.OkHttpClient(), mutableListOf(
+          Mapping("/_admin/tab/config/", HttpUrl.parse("http://localhost:8000/_admin/tab/config/")!!),
+          Mapping("/_admin/tab/healthcheck/", HttpUrl.parse("http://localhost:3000/_admin/tab/healthcheck/")!!),
+          Mapping("/_admin/tab/hibernate/", HttpUrl.parse("http://localhost:3001/_admin/tab/hibernate/")!!)
+      ))
     }
   }
 }
