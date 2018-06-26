@@ -22,13 +22,13 @@ class UpstreamResourceInterceptor(
     val matchedMapping = findMappingMatch(chain) ?: return chain.proceed(chain.request)
     val proxyUrl = HttpUrl.parse(
         matchedMapping.upstreamBaseUrl.toString() + chain.request.url.encodedPath().removePrefix(
-            matchedMapping.localPathPrefix.dropLast(1)))!!
+            matchedMapping.localPathPrefix))!!
     return forwardRequestTo(chain, proxyUrl)
   }
 
   private fun findMappingMatch(chain: NetworkChain): Mapping? {
     for (mapping in mappings) {
-      if (!chain.request.url.encodedPath().startsWith(mapping.localPathPrefix.dropLast(1))) continue
+      if (!chain.request.url.encodedPath().startsWith(mapping.localPathPrefix)) continue
       return mapping
     }
     return null
