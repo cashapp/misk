@@ -22,8 +22,9 @@ class RootContainer extends React.Component {
         name: ""
       }]
     },
-    status: "Offline",
-    isOpen: false
+    isOpen: false,
+    lastOnline: "",
+    status: "Loading..."
   }
 
   sleep(ms: number) {
@@ -50,7 +51,9 @@ class RootContainer extends React.Component {
         console.log(files)
         const newState = {...this.state, 
           config: { data, files },
-          status: "Online"}
+          lastOnline: dayjs().format("YYYY-MM-DD HH:mm:ss:SSS"),
+          status: `Online as of: ${dayjs().format("YYYY-MM-DD HH:mm:ss:SSS")}`
+        }
         console.log(response)
         this.setState(newState)
         // console.log(this.state)
@@ -59,10 +62,11 @@ class RootContainer extends React.Component {
         const files: any = [{name: "error: server offline, failed to retrieve config yamls", file: this.toYaml(JSON.stringify(err))}]
         const newState = {...this.state, 
           config: { files },
-          status: "Offline"}
+          status: `Offline since ${this.state.lastOnline}. Last ping ${dayjs().format("YYYY-MM-DD HH:mm:ss:SSS")}`
+        }
         this.setState(newState)
       })
-      await this.sleep(1000)
+      await this.sleep(10)
     }
 
     
@@ -72,7 +76,7 @@ class RootContainer extends React.Component {
     return (
       <Layouts>
         <h1>App: Config</h1>
-        <p>{this.state.status} as of: {dayjs().format("YYYY-MM-DD HH:mm:ss")}</p>
+        <p>{this.state.status}</p>
 
         {this.state.config.files.map(f => (
           <div>
