@@ -32,7 +32,8 @@ class RootContainer extends React.Component {
   }
 
   toYaml(json: string) {
-    return json.split(":{").join(":\n\t").split(",").join("\n").split("}").join("").split("{").join("").split('\"').join("")
+    // tslint:disable-next-line:quotemark
+    return json.split(":{").join(":\n\ \ ").split(",").join("\n").split("}").join("").split("{").join("").split('"').join("")
   }
 
   async componentDidMount() {
@@ -82,8 +83,6 @@ class RootContainer extends React.Component {
               {f.file}
             </pre></code>
           </div>))}
-
-
 
         {/* {for x in x.keys this.state.config.data.yaml_files.keys (({yaml_name="yaml_name", yaml_payload="payload"} : any) => (
           <h5>{yaml_name}</h5>
