@@ -2790,6 +2790,10 @@ date-now@^0.1.4:
   version "0.1.4"
   resolved "https://registry.yarnpkg.com/date-now/-/date-now-0.1.4.tgz#eaf439fd4d4848ad74e5cc7dbef200672b9e345b"
 
+dayjs@^1.6.10:
+  version "1.6.10"
+  resolved "https://npm.vip.global.square/dayjs/-/dayjs-1.6.10.tgz#8725191b9a7a5f8c2bf42d0cb6e8df1a041d3274"
+
 death@^1.0.0:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/death/-/death-1.1.0.tgz#01aa9c401edd92750514470b8266390c66c67318"

@@ -1,7 +1,7 @@
 web:
   port: 8080
   idle_timeout: 30000
-  host: http://localhost:8080/
+#  host: what this isn't working?
 
 data_source_cluster:
   writer:

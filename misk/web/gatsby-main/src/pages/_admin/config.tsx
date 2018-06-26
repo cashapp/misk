@@ -1,5 +1,7 @@
 import { Button, Collapse } from "@blueprintjs/core"
 import axios from "axios"
+// tslint:disable-next-line:no-var-requires
+const dayjs = require("dayjs")
 import React from "react"
 import ReactJson from "react-json-view"
 import Layouts from "../../layouts"
@@ -20,11 +22,16 @@ class RootContainer extends React.Component {
         name: ""
       }]
     },
+    status: "Offline",
     isOpen: false
   }
 
   sleep(ms: number) {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise(resolve => setTimeout(resolve, ms))
+  }
+
+  toYaml(json: string) {
+    return json.split(":{").join(":\n\t").split(",").join("\n").split("}").join("").split("{").join("")
   }
 
   async componentDidMount() {
@@ -34,7 +41,7 @@ class RootContainer extends React.Component {
       .then(response => {
         const data = response.data
         const files: any = []
-        files.push({name: "live-config.yaml", file: data.effective_config.split(":{").join(":\n\t").split(",").join("\n").split("}").join("").split("{").join("")})
+        files.push({name: "live-config.yaml", file: this.toYaml(data.effective_config)})
         Object.entries(data.yaml_files).forEach(([key,value]) => {
           console.log(key)
           console.log(value)
@@ -42,10 +49,18 @@ class RootContainer extends React.Component {
         })
         console.log(files)
         const newState = {...this.state, 
-          config: { data, files }}
+          config: { data, files },
+          status: "Online"}
         console.log(response)
         this.setState(newState)
         // console.log(this.state)
+      })
+      .catch(err => {
+        const files: any = [{name: "error: server offline, failed to retrieve config yamls", file: this.toYaml(JSON.stringify(err))}]
+        const newState = {...this.state, 
+          config: { files },
+          status: "Offline"}
+        this.setState(newState)
       })
       await this.sleep(1000)
     }
@@ -57,6 +72,7 @@ class RootContainer extends React.Component {
     return (
       <Layouts>
         <h1>App: Config</h1>
+        <p>{this.state.status} as of: {dayjs().format("YYYY-MM-DD HH:mm:ss")}</p>
 
         {this.state.config.files.map(f => (
           <div>
