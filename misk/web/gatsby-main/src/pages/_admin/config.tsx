@@ -23,8 +23,13 @@ class RootContainer extends React.Component {
     isOpen: false
   }
 
-  componentDidMount() {
-    axios
+  sleep(ms: number) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  async componentDidMount() {
+    for (;;) {
+      axios
       .get("http://localhost:8080/_admin/api/config/all")
       .then(response => {
         const data = response.data
@@ -42,6 +47,10 @@ class RootContainer extends React.Component {
         this.setState(newState)
         // console.log(this.state)
       })
+      await this.sleep(1000)
+    }
+
+    
   }
 
   render() {
