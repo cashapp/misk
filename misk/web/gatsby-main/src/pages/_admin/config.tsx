@@ -18,8 +18,8 @@ class RootContainer extends React.Component {
         }
       },
       files: [{
-        file: "",
-        name: ""
+        file: "Server offline...",
+        name: "config.yaml waiting to update"
       }]
     },
     isOpen: false,
@@ -55,15 +55,21 @@ class RootContainer extends React.Component {
         this.setState(newState)
         // console.log(this.state)
       })
+      // .catch(err => {
+      //   const files: any = [{name: "error: server offline, failed to retrieve config yamls", file: this.toYaml(JSON.stringify(err))}]
+      //   const newState = {...this.state,
+      //     config: { files },
+      //     status: `Offline since ${this.state.lastOnline}. Last ping ${dayjs().format("YYYY-MM-DD HH:mm:ss")}`
+      //   }
+      //   this.setState(newState)
+      // })
       .catch(err => {
-        const files: any = [{name: "error: server offline, failed to retrieve config yamls", file: this.toYaml(JSON.stringify(err))}]
-        const newState = {...this.state, 
-          config: { files },
-          status: `Offline since ${this.state.lastOnline}. Last ping ${dayjs().format("YYYY-MM-DD HH:mm:ss")}`
+        const newState = {...this.state,
+          status: `Offline since ${this.state.lastOnline}. Last attemped update ${dayjs().format("YYYY-MM-DD HH:mm:ss")}`
         }
         this.setState(newState)
       })
-      await this.sleep(1000)
+      await this.sleep(2000)
     }
 
     
@@ -83,23 +89,7 @@ class RootContainer extends React.Component {
               {f.file}
             </pre></code>
           </div>))}
-
-        {/* {for x in x.keys this.state.config.data.yaml_files.keys (({yaml_name="yaml_name", yaml_payload="payload"} : any) => (
-          <h5>{yaml_name}</h5>
-          <Button onClick={this.handleClick}>
-            {this.state.isOpen ? "Hide" : "Show"} build logs
-          </Button>
-          <Collapse isOpen={this.state.isOpen}>
-            <pre><code>
-                {JSON.stringify(yaml_payload, null, 2)}
-            </code></pre>
-          </Collapse>  
-        ))} */}
-
-        {/* <h5>Resolved Datasource JDBC URLs</h5>
-        <h5>P2 Datasource Config</h5>
-        <h5>P2 Config (overlayed into App Config)</h5>
-        <h5>Environment</h5> */}
+          
       </Layouts>
     )
   }
