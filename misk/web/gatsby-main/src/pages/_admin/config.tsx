@@ -44,17 +44,13 @@ class RootContainer extends React.Component {
         const files: any = []
         files.push({name: "live-config.yaml", file: this.toYaml(data.effective_config)})
         Object.entries(data.yaml_files).forEach(([key,value]) => {
-          console.log(key)
-          console.log(value)
           files.push({name: key, file: value})
         })
-        console.log(files)
         const newState = {...this.state, 
           config: { data, files },
           lastOnline: dayjs().format("YYYY-MM-DD HH:mm:ss:SSS"),
           status: `Online as of: ${dayjs().format("YYYY-MM-DD HH:mm:ss:SSS")}`
         }
-        console.log(response)
         this.setState(newState)
         // console.log(this.state)
       })
