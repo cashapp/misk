@@ -32,7 +32,7 @@ class RootContainer extends React.Component {
   }
 
   toYaml(json: string) {
-    return json.split(":{").join(":\n\t").split(",").join("\n").split("}").join("").split("{").join("")
+    return json.split(":{").join(":\n\t").split(",").join("\n").split("}").join("").split("{").join("").split('\"').join("")
   }
 
   async componentDidMount() {
@@ -49,7 +49,7 @@ class RootContainer extends React.Component {
         const newState = {...this.state, 
           config: { data, files },
           lastOnline: dayjs().format("YYYY-MM-DD HH:mm:ss:SSS"),
-          status: `Online as of: ${dayjs().format("YYYY-MM-DD HH:mm:ss:SSS")}`
+          status: `Online as of: ${dayjs().format("YYYY-MM-DD HH:mm:ss")}`
         }
         this.setState(newState)
         // console.log(this.state)
@@ -58,11 +58,11 @@ class RootContainer extends React.Component {
         const files: any = [{name: "error: server offline, failed to retrieve config yamls", file: this.toYaml(JSON.stringify(err))}]
         const newState = {...this.state, 
           config: { files },
-          status: `Offline since ${this.state.lastOnline}. Last ping ${dayjs().format("YYYY-MM-DD HH:mm:ss:SSS")}`
+          status: `Offline since ${this.state.lastOnline}. Last ping ${dayjs().format("YYYY-MM-DD HH:mm:ss")}`
         }
         this.setState(newState)
       })
-      await this.sleep(10)
+      await this.sleep(1000)
     }
 
     
