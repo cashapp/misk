@@ -82,9 +82,9 @@ class UpstreamResourceInterceptor(
   class Factory @Inject internal constructor() : NetworkInterceptor.Factory {
     override fun create(action: Action): NetworkInterceptor? {
       return UpstreamResourceInterceptor(okhttp3.OkHttpClient(), mutableListOf(
-          Mapping("/_admin/tab/config/", HttpUrl.parse("http://localhost:8000/_admin/tab/config/")!!),
-          Mapping("/_admin/tab/healthcheck/", HttpUrl.parse("http://localhost:3000/_admin/tab/healthcheck/")!!),
-          Mapping("/_admin/tab/hibernate/", HttpUrl.parse("http://localhost:3001/_admin/tab/hibernate/")!!)
+          Mapping("/_admin/config/", HttpUrl.parse("http://localhost:3000/_admin/config/")!!),
+          Mapping("/_admin/healthcheck/", HttpUrl.parse("http://localhost:3000/_admin/healthcheck/")!!),
+          Mapping("/_admin/hibernate/", HttpUrl.parse("http://localhost:3001/_admin/hibernate/")!!)
       ))
     }
   }
