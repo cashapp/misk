@@ -11,7 +11,7 @@ This sample service demonstrates Misk web actions and SQL persistence.
 ## Run the Service
 
 ```
-  $ java -jar samples/urlshortener/build/libs/urlshortener-0.2.5-SNAPSHOT.jar
+  $ java -jar samples/urlshortener/build/libs/urlshortener-0.4.0-SNAPSHOT-all.jar
 ```
 
 ## Use the URL shortener

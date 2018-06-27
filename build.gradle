@@ -77,6 +77,7 @@ subprojects {
       classpath dep.kotlinGradlePlugin
       classpath 'org.junit.platform:junit-platform-gradle-plugin:1.0.2'
       classpath 'com.github.jengelman.gradle.plugins:shadow:2.0.2'
+      classpath 'com.vanniktech:gradle-maven-publish-plugin:0.1.0'
     }
   }
   repositories {
