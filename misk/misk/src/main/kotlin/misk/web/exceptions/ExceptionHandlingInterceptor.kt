@@ -3,6 +3,8 @@ package misk.web.exceptions
 import com.google.common.util.concurrent.UncheckedExecutionException
 import misk.Action
 import misk.exceptions.StatusCode
+import misk.exceptions.UnauthenticatedException
+import misk.exceptions.UnauthorizedException
 import misk.logging.getLogger
 import misk.logging.log
 import misk.web.NetworkChain
@@ -34,6 +36,8 @@ class ExceptionHandlingInterceptor(
   }
 
   private fun toResponse(th: Throwable): Response<*> = when (th) {
+    is UnauthenticatedException -> UNAUTHENTICATED_RESPONSE
+    is UnauthorizedException -> UNAUTHORIZED_RESPONSE
     is ExecutionException -> toResponse(th.cause!!)
     is InvocationTargetException -> toResponse(th.targetException)
     is UncheckedExecutionException -> toResponse(th.cause!!)
@@ -60,6 +64,16 @@ class ExceptionHandlingInterceptor(
     val INTERNAL_SERVER_ERROR_RESPONSE = Response("internal server error".toResponseBody(),
         Headers.of(listOf("Content-Type" to MediaTypes.TEXT_PLAIN_UTF8).toMap()),
         StatusCode.INTERNAL_SERVER_ERROR.code
+    )
+
+    val UNAUTHENTICATED_RESPONSE = Response("unauthenticated".toResponseBody(),
+        Headers.of(listOf("Content-Type" to MediaTypes.TEXT_PLAIN_UTF8).toMap()),
+        StatusCode.UNAUTHENTICATED.code
+    )
+
+    val UNAUTHORIZED_RESPONSE = Response("unauthorized".toResponseBody(),
+        Headers.of(listOf("Content-Type" to MediaTypes.TEXT_PLAIN_UTF8).toMap()),
+        StatusCode.FORBIDDEN.code
     )
   }
 }
