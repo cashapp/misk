@@ -1,11 +1,11 @@
 import { HomePage, Module } from './components'
 
 const routes =  [{
-  path: '/',
+  path: '/_admin',
   exact: true,
   component: HomePage,
 }, {
-  path: '/:moduleID',
+  path: '/_admin/:moduleID',
   exact: true,
   component: Module
 }]

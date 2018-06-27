@@ -9,7 +9,7 @@ module.exports = {
   },
   devtool: 'source-map',
   output: {
-    path: path.resolve(__dirname, '../../main/build/js'),
+    path: path.resolve(__dirname, '../../build/js'),
     filename: '[name].js',
     libraryTarget: 'umd'
   },

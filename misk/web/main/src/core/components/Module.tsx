@@ -18,6 +18,11 @@ export default class Module extends React.Component<Module.Props> {
     super(props)
   }
 
+  state = {
+    
+  }
+
+  
   async loadModule(moduleID: string): Promise<any> {
     return import(`./module_${moduleID}.js`)
   }

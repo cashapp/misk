@@ -1,8 +1,8 @@
 package misk.web.actions
 
+import misk.Action
 import misk.web.NetworkChain
 import misk.web.NetworkInterceptor
-import misk.web.Request
 import misk.web.Response
 import misk.web.toMisk
 import misk.web.toResponseBody
@@ -11,6 +11,7 @@ import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
 import java.io.IOException
 import java.net.HttpURLConnection
+import javax.inject.Inject
 
 class UpstreamResourceInterceptor(
   private val client: OkHttpClient,
@@ -22,7 +23,7 @@ class UpstreamResourceInterceptor(
     val proxyUrl = HttpUrl.parse(
         matchedMapping.upstreamBaseUrl.toString() + chain.request.url.encodedPath().removePrefix(
             matchedMapping.localPathPrefix))!!
-    return forwardRequestTo(chain.request, proxyUrl)
+    return forwardRequestTo(chain, proxyUrl)
   }
 
   private fun findMappingMatch(chain: NetworkChain): Mapping? {
@@ -33,11 +34,16 @@ class UpstreamResourceInterceptor(
     return null
   }
 
-  fun forwardRequestTo(request: Request, proxyUrl: HttpUrl): Response<*> {
-    val clientRequest = request.toOkHttp3().withUrl(proxyUrl)
+  fun forwardRequestTo(chain: NetworkChain, proxyUrl: HttpUrl): Response<*> {
+    val clientRequest = chain.request.toOkHttp3().withUrl(proxyUrl)
     return try {
       val clientResponse = client.newCall(clientRequest).execute()
-      clientResponse.toMisk()
+      if (clientResponse.code() == HttpURLConnection.HTTP_NOT_FOUND) {
+        clientResponse.close()
+        chain.proceed(chain.request)
+      } else {
+        clientResponse.toMisk()
+      }
     } catch (e: IOException) {
       Response(
           "Failed to fetch upstream URL ${clientRequest.url()}".toResponseBody(),
@@ -70,6 +76,16 @@ class UpstreamResourceInterceptor(
       require(localPathPrefix.endsWith("/") &&
           localPathPrefix.startsWith("/") &&
           upstreamBaseUrl.encodedPath().endsWith("/"))
+    }
+  }
+
+  class Factory @Inject internal constructor() : NetworkInterceptor.Factory {
+    override fun create(action: Action): NetworkInterceptor? {
+      return UpstreamResourceInterceptor(okhttp3.OkHttpClient(), mutableListOf(
+          Mapping("/_admin/config/", HttpUrl.parse("http://localhost:3000/_admin/config/")!!),
+          Mapping("/_admin/healthcheck/", HttpUrl.parse("http://localhost:3000/_admin/healthcheck/")!!),
+          Mapping("/_admin/hibernate/", HttpUrl.parse("http://localhost:3001/_admin/hibernate/")!!)
+      ))
     }
   }
 }

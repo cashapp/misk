@@ -5,6 +5,7 @@ export default class HomePage extends React.Component {
     return (
       <div className="homepage">
         <h1>Homepage</h1>
+        <p>This is test text added.</p>
       </div>
     );
   }

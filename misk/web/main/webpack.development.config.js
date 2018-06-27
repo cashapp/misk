@@ -1,26 +1,26 @@
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const ScriptExtHtmlWebpackPlugin = require('script-ext-html-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
-const miskCommon = require('../@misk/common');
+const miskCommon = require('@misk/common');
 const path = require('path');
 
 module.exports = {
   mode: 'development',
   entry: {
-    core: path.resolve(__dirname, 'src/core/index.ts'),
+    core: path.resolve(__dirname, 'src/core/index.ts')
   },
   devtool: 'source-map',
   output: {
-    path: path.resolve(__dirname, './build/js'),
+    path: path.resolve(__dirname, '../build/js'),
     filename: '[name].js',
     libraryTarget: 'umd'
   },
   devServer: {
-    contentBase: path.resolve(__dirname, './build'),
+    contentBase: path.resolve(__dirname, '../build'),
     hot: true,
     inline: true,
     port: 3000,
-    historyApiFallback: true,
+    historyApiFallback: false,
     compress: false,
     open: true
   },
@@ -52,7 +52,7 @@ module.exports = {
   plugins: [
     new HtmlWebpackPlugin({
       template: path.resolve(__dirname, 'src/layouts/index.ejs'),
-      filename: path.resolve(__dirname, './build/index.html'),
+      filename: path.resolve(__dirname, '../build/index.html'),
     }),
     new ScriptExtHtmlWebpackPlugin({
       defaultAttribute: 'async',
@@ -63,5 +63,5 @@ module.exports = {
       { debug: 'info', copyUnmodified: true }
     )
   ],
-  externals: miskCommon.externals,
+  externals: miskCommon.externals
 };
