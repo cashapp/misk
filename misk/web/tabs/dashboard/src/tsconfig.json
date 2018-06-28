@@ -4,8 +4,9 @@
       "sourceMap": true,
       "noImplicitAny": true,
       "module": "commonjs",
-      "target": "es5",
-      "jsx": "react"
+      "jsx": "react",
+      "target": "esnext",
+      "lib": ["es5", "es6", "dom", "es2017"]
   },
   "include": [
       "*"

@@ -12,7 +12,9 @@
   "devDependencies": {
     "@types/react": "^16.4.4",
     "@types/react-dom": "^16.0.6",
+    "@types/react-loadable": "^5.4.0",
     "awesome-typescript-loader": "^5.2.0",
+    "axios": "^0.18.0",
     "babel-eslint": "^8.2.5",
     "connected-react-router": "^4.3.0",
     "cross-env": "^5.2.0",
@@ -26,6 +28,8 @@
     "react": "^16.4.1",
     "react-dom": "^16.4.1",
     "react-hot-loader": "^4.3.3",
+    "react-load-script": "^0.0.6",
+    "react-loadable": "^5.4.0",
     "react-router": "^4.3.1",
     "react-router-dom": "^4.3.1",
     "sass-loader": "^7.0.3",
