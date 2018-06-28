@@ -21,9 +21,13 @@ class UpstreamResourceInterceptor(
 //  TODO(adrw) enforce no prefix overlapping
   override fun intercept(chain: NetworkChain): Response<*> {
     val matchedMapping = findMappingMatch(chain) ?: return chain.proceed(chain.request)
+    var proxyEndPath =
+        chain.request.url.encodedPath().drop(1).removePrefix(matchedMapping.localPathPrefix)
+    if (!chain.request.url.encodedPath().endsWith('/') && !chain.request.url.pathSegments().last().contains('.')) {
+        proxyEndPath += '/'
+    }
     val proxyUrl = HttpUrl.parse(
-        matchedMapping.upstreamBaseUrl.toString() + chain.request.url.encodedPath().removePrefix(
-            matchedMapping.localPathPrefix))!!
+        matchedMapping.upstreamBaseUrl.toString() + proxyEndPath)!!
     return forwardRequestTo(chain.request, proxyUrl)
   }
 
@@ -77,9 +81,11 @@ class UpstreamResourceInterceptor(
 
   class Factory @Inject internal constructor() : NetworkInterceptor.Factory {
     override fun create(action: Action): NetworkInterceptor? {
-      return UpstreamResourceInterceptor(okhttp3.OkHttpClient(), mutableListOf<Mapping>(UpstreamResourceInterceptor.Mapping(
-          "/_admin/",
-          HttpUrl.parse("http://localhost:3000/")!!)))
+      return UpstreamResourceInterceptor(okhttp3.OkHttpClient(), mutableListOf<Mapping>(
+          UpstreamResourceInterceptor.Mapping("/_admin/test/", HttpUrl.parse("http://localhost:8000/")!!),
+          UpstreamResourceInterceptor.Mapping("/_admin/dashboard/", HttpUrl.parse("http://localhost:3100/")!!),
+          UpstreamResourceInterceptor.Mapping("/_admin/config/", HttpUrl.parse("http://localhost:3200/")!!)
+      ))
     }
   }
 }
