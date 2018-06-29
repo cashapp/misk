@@ -1,6 +1,7 @@
 package misk.metrics.web
 
 import misk.metrics.Metrics
+import misk.security.authz.Unauthenticated
 import misk.web.Get
 import misk.web.ResponseContentType
 import misk.web.actions.WebAction
@@ -13,5 +14,6 @@ import javax.inject.Singleton
 class MetricsJsonAction @Inject internal constructor(val metrics: Metrics) : WebAction {
   @Get("/_metrics")
   @ResponseContentType(MediaTypes.APPLICATION_JSON)
+  @Unauthenticated
   fun getMetrics(): JsonMetrics = JsonMetrics(metrics)
 }

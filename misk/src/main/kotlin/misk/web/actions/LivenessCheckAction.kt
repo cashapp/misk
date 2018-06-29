@@ -3,6 +3,7 @@ package misk.web.actions
 import com.google.common.util.concurrent.Service
 import com.google.common.util.concurrent.Service.State
 import misk.logging.getLogger
+import misk.security.authz.Unauthenticated
 import misk.web.Get
 import misk.web.Response
 import misk.web.ResponseContentType
@@ -20,6 +21,7 @@ class LivenessCheckAction @Inject internal constructor(
 
   @Get("/_liveness")
   @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
+  @Unauthenticated
   fun livenessCheck(): Response<String> {
     val failedServices = services.filter {
       failedServiceStates.contains(it.state())
