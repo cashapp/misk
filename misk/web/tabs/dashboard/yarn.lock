@@ -4463,7 +4463,7 @@ promise@^7.1.1:
   dependencies:
     asap "~2.0.3"
 
-prop-types@^15.5.0, prop-types@^15.6.0, prop-types@^15.6.1, prop-types@^15.6.2:
+prop-types@^15.6.0, prop-types@^15.6.1, prop-types@^15.6.2:
   version "15.6.2"
   resolved "https://npm.vip.global.square/prop-types/-/prop-types-15.6.2.tgz#05d5ca77b4453e985d60fc7ff8c859094a497102"
   dependencies:
@@ -4619,12 +4619,6 @@ react-lifecycles-compat@^3.0.4:
 react-load-script@^0.0.6:
   version "0.0.6"
   resolved "https://npm.vip.global.square/react-load-script/-/react-load-script-0.0.6.tgz#db6851236aaa25bb622677a2eb51dad4f8d2c258"
-
-react-loadable@^5.4.0:
-  version "5.4.0"
-  resolved "https://npm.vip.global.square/react-loadable/-/react-loadable-5.4.0.tgz#3b6b7d51121a7868fd155be848a36e02084742c9"
-  dependencies:
-    prop-types "^15.5.0"
 
 react-router-dom@^4.3.1:
   version "4.3.1"

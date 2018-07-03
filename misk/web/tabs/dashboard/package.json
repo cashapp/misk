@@ -5,8 +5,10 @@
   "repository": "git@github.com:square/misk.git",
   "author": "Square/Misk Authors (https://github.com/square/misk/graphs/contributors)",
   "scripts": {
-    "start": "cross-env NODE_ENV=development webpack-dev-server",
     "build": "cross-env NODE_ENV=production webpack",
+    "clean": "rm -rf dist node_modules",
+    "reinstall": "yarn clean && yarn install",
+    "start": "cross-env NODE_ENV=development webpack-dev-server",
     "test": "jest --coverage"
   },
   "devDependencies": {
@@ -29,7 +31,6 @@
     "react-dom": "^16.4.1",
     "react-hot-loader": "^4.3.3",
     "react-load-script": "^0.0.6",
-    "react-loadable": "^5.4.0",
     "react-router": "^4.3.1",
     "react-router-dom": "^4.3.1",
     "sass-loader": "^7.0.3",
