@@ -20,7 +20,7 @@ class ChatWebSocketActionTest {
   @Inject lateinit var chatWebSocketAction: ChatWebSocketAction
   @Inject lateinit var eventRouterTester: EventRouterTester
 
-  @Test fun test() {
+  @Test fun happyPath() {
     val sandyWebSocket = FakeWebSocket()
     val randyWebSocket = FakeWebSocket()
     val sandyListener = chatWebSocketAction.chat("discuss", sandyWebSocket)

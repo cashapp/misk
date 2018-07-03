@@ -14,13 +14,13 @@ internal object IdType : UserType, ResultSetIdentifierConsumer {
 
   override fun deepCopy(value: Any) = value
 
-  override fun replace(original: Any, target: Any, owner: Any) = original
+  override fun replace(original: Any, target: Any, owner: Any?) = original
 
   override fun equals(x: Any, y: Any) = (x as Id<*>) == (y as Id<*>)
 
   override fun returnedClass() = Id::class.java
 
-  override fun assemble(cached: Serializable, owner: Any): Any = Id<DbPlaceholder>(cached as Long)
+  override fun assemble(cached: Serializable, owner: Any?): Any = Id<DbPlaceholder>(cached as Long)
 
   override fun disassemble(value: Any?) = (value as Id<*>).id
 
