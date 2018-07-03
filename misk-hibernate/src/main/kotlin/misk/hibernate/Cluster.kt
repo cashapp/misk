@@ -1,4 +1,4 @@
-package misk.jdbc
+package misk.hibernate
 
 /**
  * [Cluster] provides a consistent abstraction for

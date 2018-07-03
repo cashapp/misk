@@ -1,7 +1,6 @@
 package misk.hibernate
 
 import com.google.common.base.Stopwatch
-import misk.jdbc.DataSourceConfig
 import misk.logging.getLogger
 import misk.resources.ResourceLoader
 import org.hibernate.SessionFactory
@@ -37,10 +36,7 @@ internal class SchemaMigrator(
 ) {
   /** Returns a map from version to path. */
   fun availableMigrations(): NavigableMap<Int, String> {
-    if (config.migrations_path == null) {
-      return TreeMap()
-    }
-    val resources = resourceLoader.list(config.migrations_path)
+    val resources = config.migrations_path?.let { resourceLoader.list(it) } ?: listOf()
     return TreeMap(resources.associateBy { resourceVersion(it) })
   }
 

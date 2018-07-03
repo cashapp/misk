@@ -1,8 +1,6 @@
 package misk.hibernate
 
 import com.google.common.collect.ImmutableSet
-import misk.jdbc.DataSourceConfig
-import misk.jdbc.DataSourceType
 import org.hibernate.SessionFactory
 import java.sql.Connection
 import java.sql.ResultSet
