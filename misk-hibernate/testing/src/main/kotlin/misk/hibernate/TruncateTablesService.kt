@@ -5,8 +5,6 @@ import com.google.common.util.concurrent.AbstractIdleService
 import com.google.inject.Key
 import misk.DependentService
 import misk.inject.toKey
-import misk.jdbc.DataSourceConfig
-import misk.jdbc.DataSourceType
 import misk.logging.getLogger
 import org.hibernate.query.Query
 import java.util.Locale

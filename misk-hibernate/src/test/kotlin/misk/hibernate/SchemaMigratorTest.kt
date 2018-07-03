@@ -10,7 +10,6 @@ import misk.config.MiskConfig
 import misk.environment.Environment
 import misk.inject.KAbstractModule
 import misk.inject.toKey
-import misk.jdbc.DataSourceConfig
 import misk.resources.FakeResourceLoader
 import misk.resources.FakeResourceLoaderModule
 import misk.testing.MiskTest

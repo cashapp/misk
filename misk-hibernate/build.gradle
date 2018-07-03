@@ -26,16 +26,14 @@ junitPlatform {
 }
 
 dependencies {
+  compile dep.hibernateCore
+  compile dep.mysql
+  compile dep.hsqldb
+
   compile project(':misk')
 
-  compile dep.junitApi
-  compile dep.junitParams
-  compile dep.junitEngine
-  compile dep.assertj
-  compile dep.logbackClassic
-  compile dep.okHttpMockWebServer
-  compile dep.openTracingMock
-  compile dep.mockitoCore
+  testCompile project(':misk/testing')
+  testCompile project(':misk-hibernate:testing')
 }
 
 apply from: rootProject.file('gradle/gradle-mvn-push.gradle')

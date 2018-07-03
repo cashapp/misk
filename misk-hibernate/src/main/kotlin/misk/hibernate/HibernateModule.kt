@@ -6,7 +6,6 @@ import misk.inject.KAbstractModule
 import misk.inject.asSingleton
 import misk.inject.setOfType
 import misk.inject.toKey
-import misk.jdbc.DataSourceConfig
 import misk.resources.ResourceLoader
 import org.hibernate.SessionFactory
 import org.hibernate.event.spi.EventType

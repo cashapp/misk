@@ -2,7 +2,6 @@ package misk.hibernate
 
 import misk.healthchecks.HealthCheck
 import misk.healthchecks.HealthStatus
-import misk.jdbc.DataSourceConfig
 import misk.logging.getLogger
 import org.hibernate.SessionFactory
 import java.sql.Timestamp

@@ -21,9 +21,9 @@ dependencies {
   compile dep.guava
   compile dep.guice
   compile dep.logbackClassic
-  compile dep.hsqldb
 
   compile project(':misk')
+  compile project(':misk-hibernate')
 
   testCompile project(':misk/testing')
 }

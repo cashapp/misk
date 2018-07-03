@@ -7,7 +7,6 @@ import misk.config.MiskConfig
 import misk.environment.Environment
 import misk.environment.EnvironmentModule
 import misk.inject.KAbstractModule
-import misk.jdbc.DataSourceConfig
 import misk.logging.LogCollectorModule
 import misk.resources.ResourceLoaderModule
 import misk.time.FakeClockModule
