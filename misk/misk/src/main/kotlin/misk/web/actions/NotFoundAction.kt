@@ -1,5 +1,6 @@
 package misk.web.actions
 
+import misk.security.authz.Unauthenticated
 import misk.web.Get
 import misk.web.PathParam
 import misk.web.Post
@@ -18,6 +19,7 @@ class NotFoundAction : WebAction {
   @Post("/{path:.*}")
   @RequestContentType(MediaTypes.ALL)
   @ResponseContentType(MediaTypes.ALL)
+  @Unauthenticated
   fun notFound(@PathParam path: String): Response<ResponseBody> {
     return Response(
         body = "Nothing found at /$path".toResponseBody(),

@@ -3,6 +3,7 @@ package misk.web.actions
 import com.google.common.util.concurrent.Service
 import misk.healthchecks.HealthCheck
 import misk.logging.getLogger
+import misk.security.authz.Unauthenticated
 import misk.web.Get
 import misk.web.Response
 import misk.web.ResponseContentType
@@ -20,6 +21,7 @@ class ReadinessCheckAction @Inject internal constructor(
 
   @Get("/_readiness")
   @ResponseContentType(MediaTypes.APPLICATION_JSON)
+  @Unauthenticated
   fun readinessCheck(): Response<String> {
     val servicesNotRunning = services.filter { !it.isRunning }
     val failedHealthChecks = healthChecks
