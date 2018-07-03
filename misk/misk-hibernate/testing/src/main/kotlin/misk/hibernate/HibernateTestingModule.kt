@@ -3,7 +3,6 @@ package misk.hibernate
 import com.google.common.util.concurrent.Service
 import misk.inject.KAbstractModule
 import misk.inject.toKey
-import misk.jdbc.DataSourceConfig
 import javax.inject.Provider
 import kotlin.reflect.KClass
 
