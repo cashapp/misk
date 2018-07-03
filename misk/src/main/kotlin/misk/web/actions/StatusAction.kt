@@ -3,6 +3,7 @@ package misk.web.actions
 import com.google.common.util.concurrent.Service
 import misk.healthchecks.HealthCheck
 import misk.healthchecks.HealthStatus
+import misk.security.authz.Unauthenticated
 import misk.web.Get
 import misk.web.ResponseContentType
 import misk.web.mediatype.MediaTypes
@@ -21,6 +22,7 @@ class StatusAction @Inject internal constructor(
 
   @Get("/_status")
   @ResponseContentType(MediaTypes.APPLICATION_JSON)
+  @Unauthenticated
   fun getStatus(): ServerStatus {
     val serviceStatus = services.map { it.javaClass.simpleName to it.state() }.toMap()
     val healthCheckStatus = healthChecks.map { it.javaClass.simpleName to it.status() }.toMap()
