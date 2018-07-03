@@ -7,8 +7,6 @@ import com.zaxxer.hikari.hibernate.HikariConnectionProvider
 import misk.DependentService
 import misk.environment.Environment
 import misk.inject.toKey
-import misk.jdbc.DataSourceConfig
-import misk.jdbc.DataSourceType
 import misk.logging.getLogger
 import okio.ByteString
 import org.hibernate.SessionFactory

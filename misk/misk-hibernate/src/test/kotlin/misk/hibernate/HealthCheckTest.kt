@@ -1,7 +1,6 @@
 package misk.hibernate
 
 import misk.healthchecks.HealthCheck
-import misk.jdbc.DataSourceConfig
 import misk.mockito.Mockito.mock
 import misk.mockito.Mockito.whenever
 import misk.testing.MiskTest

@@ -1,7 +1,7 @@
 package com.squareup.urlshortener
 
 import misk.config.Config
-import misk.jdbc.DataSourceClusterConfig
+import misk.hibernate.DataSourceClusterConfig
 import misk.web.WebConfig
 
 data class UrlShortenerConfig(

@@ -1,4 +1,4 @@
-package misk.jdbc
+package misk.hibernate
 
 import javax.sql.DataSource
 
