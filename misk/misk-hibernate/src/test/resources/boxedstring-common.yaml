@@ -1,0 +1,6 @@
+data_source:
+  type: MYSQL
+  username: root
+  password: ""
+  database: boxedstring
+  migrations_path: misk/hibernate/boxedstring-migrations

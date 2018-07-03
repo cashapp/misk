@@ -17,7 +17,7 @@ class RawHibernateApiTest {
   @Inject @Movies lateinit var sessionFactory: SessionFactory
 
   @Test
-  fun test() {
+  fun happyPath() {
     // Insert some movies in a transaction.
     sessionFactory.openSession().use { session ->
       val transaction = session.beginTransaction()

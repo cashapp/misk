@@ -14,7 +14,7 @@ class FakeResourceLoaderTest {
   @Inject lateinit var resourceLoader: FakeResourceLoader
 
   @Test
-  fun test() {
+  fun happyPath() {
     val data1 = "misk/resources/data1.txt"
     val data2 = "misk/resources/data2.txt"
     resourceLoader.put(data1, "foo")

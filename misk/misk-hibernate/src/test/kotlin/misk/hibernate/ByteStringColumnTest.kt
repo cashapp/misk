@@ -28,7 +28,7 @@ class ByteStringColumnTest {
   @Inject lateinit var queryFactory: Query.Factory
 
   @Test
-  fun test() {
+  fun happyPath() {
     val abcHash = ByteString.encodeUtf8("abc").sha256()
     val defHash = ByteString.encodeUtf8("def").sha256()
     transacter.transaction { session ->

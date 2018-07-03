@@ -13,7 +13,7 @@ class HelloWebActionTest {
   @Inject lateinit var helloWebAction: HelloWebAction
 
   @Test
-  fun test() {
+  fun happyPath() {
     assertThat(helloWebAction.hello("sandy", Headers.of(), null, null))
         .isEqualTo(HelloResponse("YO", "SANDY"))
   }

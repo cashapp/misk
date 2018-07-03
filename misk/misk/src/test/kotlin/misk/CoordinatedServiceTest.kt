@@ -8,7 +8,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
 class CoordinatedServiceTest {
-  @Test fun test() {
+  @Test fun happyPath() {
     val target = StringBuilder()
 
     val a = AppendingService(target, "Service A", produced = setOf("a"))
