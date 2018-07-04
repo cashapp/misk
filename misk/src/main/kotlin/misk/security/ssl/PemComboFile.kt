@@ -77,6 +77,9 @@ data class PemComboFile(
             privateKeys += decodeBase64Until(lines,
                 Regex("-+END PRIVATE KEY-+"))
           }
+          line.isBlank() -> {
+            // This is ok, just keep going
+          }
           else -> throw IOException("unexpected line: $line in $cert_key_combo")
         }
       }
