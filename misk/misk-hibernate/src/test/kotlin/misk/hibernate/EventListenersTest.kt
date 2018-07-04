@@ -28,7 +28,7 @@ class EventListenersTest {
   @Inject lateinit var eventListener: FakeEventListener
 
   @Test
-  fun test() {
+  fun happyPath() {
     transacter.transaction { session ->
       val movie = DbMovie("Star Wars", LocalDate.of(1977, 5, 25))
       session.save(movie)

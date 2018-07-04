@@ -14,13 +14,19 @@ import org.hibernate.boot.Metadata
 import org.hibernate.boot.MetadataSources
 import org.hibernate.boot.registry.BootstrapServiceRegistryBuilder
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder
+import org.hibernate.boot.spi.MetadataImplementor
 import org.hibernate.cfg.AvailableSettings
 import org.hibernate.engine.spi.SessionFactoryImplementor
 import org.hibernate.event.service.spi.EventListenerRegistry
 import org.hibernate.integrator.spi.Integrator
+import org.hibernate.mapping.PersistentClass
+import org.hibernate.mapping.Property
+import org.hibernate.mapping.SimpleValue
 import org.hibernate.service.spi.SessionFactoryServiceRegistry
+import org.hibernate.usertype.UserType
 import javax.inject.Provider
 import kotlin.reflect.KClass
+import kotlin.reflect.jvm.jvmName
 
 private val logger = getLogger<SessionFactoryService>()
 
@@ -104,17 +110,72 @@ internal class SessionFactoryService(
 
     val registry = registryBuilder.build()
 
+    // Register entity types.
     val metadataSources = MetadataSources(registry)
     for (entityClass in entityClasses) {
       metadataSources.addAnnotatedClass(entityClass.entity.java)
     }
+
+    // NB: MetadataSources.getMetadataBuilder() returns a different instance each call!
     val metadataBuilder = metadataSources.metadataBuilder
-    metadataBuilder.applyBasicType(IdType, Id::class.qualifiedName)
-    metadataBuilder.applyBasicType(ByteStringType, ByteString::class.qualifiedName)
-    val metadata = metadataBuilder.build()
+    val metadata = metadataBuilder.build() as MetadataImplementor
+
+    // Register custom type adapters so we can have columns for ByteString, Id, etc. This needs to
+    // happen after we know what all of the property classes are, but before Hibernate validates
+    // that their adapters exist.
+    val allPropertyTypes = metadata.allSimpleValuePropertyKClasses()
+    for (propertyType in allPropertyTypes) {
+      val userType = findUserType(propertyType)
+      if (userType != null) {
+        @Suppress("DEPRECATION") // TypeResolver's replacement isn't yet specified.
+        metadata.typeConfiguration.typeResolver.registerTypeOverride(
+            userType, arrayOf(propertyType.jvmName))
+      }
+    }
+
     sessionFactory = metadata.buildSessionFactory()
 
     logger.info("Started @${qualifier.simpleName} Hibernate in $stopwatch")
+  }
+
+  /** Returns all simple value properties of all entities in this metadata. */
+  private fun Metadata.allSimpleValuePropertyKClasses(): Set<KClass<*>> {
+    val result = mutableSetOf<KClass<*>>()
+    for (entityBinding in entityBindings) {
+      for (property in entityBinding.allProperties()) {
+        val value = property.value
+        if (value is SimpleValue) {
+          result.add(Class.forName(value.typeName).kotlin)
+        }
+      }
+    }
+    return result
+  }
+
+  /** Returns all properties (IDs, joined columns, regular columns) of this persistent class. */
+  private fun PersistentClass.allProperties(): List<Property> {
+    val result = mutableListOf<Property>()
+
+    identifierProperty?.let {
+      result.add(it)
+    }
+
+    @Suppress("UNCHECKED_CAST") // This Hibernate method returns raw types!
+    val i = propertyIterator as MutableIterator<Property>
+    while (i.hasNext()) {
+      result.add(i.next())
+    }
+
+    return result
+  }
+
+  /** Returns a custom user type for `propertyType`, or null if the user type should be built-in. */
+  private fun findUserType(propertyType: KClass<*>): UserType? {
+    return when (propertyType) {
+      Id::class -> IdType
+      ByteString::class -> ByteStringType
+      else -> BoxedStringType.create(propertyType)
+    }
   }
 
   override fun shutDown() {
