@@ -20,7 +20,7 @@ class ShortUrlWebAction : WebAction {
   @Get("/{token}")
   @ResponseContentType(MediaTypes.APPLICATION_JSON)
   fun follow(@PathParam token: String): Response<ResponseBody> {
-    val longUrl = urlStore.tokenToUrl(token) ?: throw NotFoundException()
+    val longUrl = urlStore.tokenToUrl(UrlToken(token)) ?: throw NotFoundException()
 
     val emptyBody = object : ResponseBody {
       override fun writeTo(sink: BufferedSink) {

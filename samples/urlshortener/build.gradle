@@ -26,6 +26,7 @@ dependencies {
   compile project(':misk-hibernate')
 
   testCompile project(':misk-testing')
+  testCompile project(':misk-hibernate-testing')
 }
 
 sourceSets {
