@@ -19,7 +19,7 @@ class TransacterTest {
   @Inject lateinit var queryFactory: Query.Factory
 
   @Test
-  fun test() {
+  fun happyPath() {
     // Insert some movies, characters and actors.
     transacter.transaction { session ->
       val jp = session.save(DbMovie("Jurassic Park", LocalDate.of(1993, 6, 9)))

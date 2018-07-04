@@ -18,7 +18,7 @@ import java.time.Instant
  *   created_at timestamp(3) NOT NULL DEFAULT NOW(3),
  *   updated_at timestamp(3) NOT NULL DEFAULT NOW(3) ON UPDATE NOW(3),
  *   ...
- *   KEY `idx_updated_at` (`updated_at`),
+ *   KEY `idx_updated_at` (`updated_at`)
  * );
  * ```
  *

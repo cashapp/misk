@@ -14,13 +14,13 @@ internal object ByteStringType : UserType {
 
   override fun deepCopy(value: Any) = value
 
-  override fun replace(original: Any, target: Any, owner: Any) = original
+  override fun replace(original: Any, target: Any, owner: Any?) = original
 
   override fun equals(x: Any, y: Any) = x == y
 
   override fun returnedClass() = ByteString::class.java
 
-  override fun assemble(cached: Serializable, owner: Any) = cached as ByteString
+  override fun assemble(cached: Serializable, owner: Any?) = cached as ByteString
 
   override fun disassemble(value: Any) = value as ByteString
 
