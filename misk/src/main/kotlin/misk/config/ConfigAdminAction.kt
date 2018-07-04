@@ -18,7 +18,8 @@ class ConfigAdminAction : WebAction {
   @RequestContentType(MediaTypes.APPLICATION_JSON)
   @ResponseContentType(MediaTypes.APPLICATION_JSON)
   fun getAll(): Response {
-    val yamlFiles = MiskConfig.loadConfigYamlMap(appName, environment)
+    // TODO(mmihic): Need to figure out how to get the overrides.
+    val yamlFiles = MiskConfig.loadConfigYamlMap(appName, environment, listOf())
     val effectiveYaml = MiskConfig.flattenYamlMap(yamlFiles).toString()
     return Response(effective_config = effectiveYaml, yaml_files = yamlFiles)
   }

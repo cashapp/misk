@@ -1,5 +1,6 @@
 package com.squareup.exemplar;
 
+import com.google.common.collect.ImmutableList;
 import misk.MiskApplication;
 import misk.MiskModule;
 import misk.config.ConfigModule;
@@ -11,7 +12,8 @@ import misk.web.WebModule;
 public class ExemplarJavaApp {
   public static void main(String[] args) {
     Environment environment = Environment.fromEnvironmentVariable();
-    ExemplarJavaConfig config = MiskConfig.load(ExemplarJavaConfig.class, "exemplar", environment);
+    ExemplarJavaConfig config = MiskConfig.load(ExemplarJavaConfig.class, "exemplar",
+        environment, ImmutableList.of());
 
     new MiskApplication(
         new MiskModule(),

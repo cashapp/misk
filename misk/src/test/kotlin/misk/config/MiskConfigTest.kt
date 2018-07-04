@@ -11,12 +11,13 @@ import misk.web.exceptions.ActionExceptionLogLevelConfig
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.slf4j.event.Level
+import java.io.File
 import java.time.Duration
 import javax.inject.Inject
 import javax.inject.Named
 
 @MiskTest
-class ConfigTest {
+class MiskConfigTest {
   val defaultEnv = Environment.TESTING
   val config = MiskConfig.load<TestConfig>("test_app", defaultEnv)
 
@@ -107,5 +108,28 @@ class ConfigTest {
     }
 
     assertThat(exception.cause).hasMessageContaining("Unrecognized field \"blue_items\"")
+  }
+
+  @Test
+  fun mergesExternalFiles() {
+    val overrides = listOf(
+        MiskConfigTest::class.java.getResource("/overrides/override-test-app1.yaml"),
+        MiskConfigTest::class.java.getResource("/overrides/override-test-app2.yaml"))
+        .map { File(it.file) }
+
+    val config = MiskConfig.load<TestConfig>("test_app", defaultEnv, overrides)
+    assertThat(config.consumer_a).isEqualTo(ConsumerConfig(14, 1))
+    assertThat(config.consumer_b).isEqualTo(ConsumerConfig(34, 79))
+  }
+
+  @Test
+  fun findsFilesInDir() {
+    val dir = MiskConfigTest::class.java.getResource("/overrides").file
+    val filesInDir = MiskConfig.filesInDir(dir).map { it.absolutePath }
+    assertThat(filesInDir).hasSize(2)
+
+    // NB(mmihic): These are absolute paths, so we can only look at the end which is consistent
+    assertThat(filesInDir[0]).endsWith("/overrides/override-test-app1.yaml")
+    assertThat(filesInDir[1]).endsWith("/overrides/override-test-app2.yaml")
   }
 }
