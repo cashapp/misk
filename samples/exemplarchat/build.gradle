@@ -24,7 +24,7 @@ dependencies {
 
   compile project(':misk')
 
-  testCompile project(':misk/testing')
+  testCompile project(':misk-testing')
 }
 
 sourceSets {

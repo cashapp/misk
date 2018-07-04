@@ -72,7 +72,7 @@ dependencies {
   compile dep.jaxbApi
 
   testCompile dep.mockitoCore
-  testCompile project(':misk/testing')
+  testCompile project(':misk-testing')
 }
 
 jar {

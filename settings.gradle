@@ -1,6 +1,6 @@
-include ':misk/testing'
+include ':misk-testing'
 include ':misk-hibernate'
-include ':misk-hibernate:testing'
+include ':misk-hibernate-testing'
 include ':samples:exemplar'
 include ':samples:exemplarchat'
 include ':samples:urlshortener'
