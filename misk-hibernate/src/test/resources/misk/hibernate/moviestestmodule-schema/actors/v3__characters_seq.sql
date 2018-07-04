@@ -1,7 +1,7 @@
 CREATE TABLE `characters_seq` (
   `id` int(11) NOT NULL DEFAULT '0',
-  `next_id` bigint(20) DEFAULT NULL,
-  `cache` bigint(20) DEFAULT NULL,
+  `next_id` bigint DEFAULT NULL,
+  `cache` bigint DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='vitess_sequence';
 
