@@ -9,25 +9,31 @@ import com.fasterxml.jackson.module.kotlin.MissingKotlinParameterException
 import misk.environment.Environment
 import misk.logging.getLogger
 import okio.Okio
+import java.io.File
+import java.io.FilenameFilter
 import java.net.URL
 
 object MiskConfig {
   internal val logger = getLogger<Config>()
 
   @JvmStatic
-  inline fun <reified T : Config> load(appName: String, environment: Environment): T {
-    return load(T::class.java, appName, environment)
+  inline fun <reified T : Config> load(
+    appName: String,
+    environment: Environment,
+    overrideFiles: List<File> = listOf()
+  ): T {
+    return load(T::class.java, appName, environment, overrideFiles)
   }
 
   @JvmStatic
   fun <T : Config> load(
     configClass: Class<out Config>,
     appName: String,
-    environment: Environment
+    environment: Environment,
+    overrideFiles: List<File> = listOf()
   ): T {
     val mapper = ObjectMapper(YAMLFactory()).registerModules(KotlinModule(), JavaTimeModule())
-
-    val configYamls = loadConfigYamlMap(appName, environment)
+    val configYamls = loadConfigYamlMap(appName, environment, overrideFiles)
 
     check(configYamls.values.any { it != null }) {
       "could not find configuration files - checked ${configYamls.keys}"
@@ -44,6 +50,17 @@ object MiskConfig {
     } catch (e: Exception) {
       throw IllegalStateException("failed to load configuration for $appName $environment", e)
     }
+  }
+
+  @JvmStatic
+  fun filesInDir(
+    dir: String,
+    filter: FilenameFilter = FilenameFilter { _, filename -> filename.endsWith(".yaml") }
+  ): List<File> {
+    val path = File(dir)
+
+    check(path.exists() && path.isDirectory) { "$dir is not a valid directory" }
+    return path.listFiles(filter).sorted()
   }
 
   /**
@@ -72,15 +89,20 @@ object MiskConfig {
    */
   fun loadConfigYamlMap(
     appName: String,
-    environment: Environment
+    environment: Environment,
+    overrideFiles: List<File>
   ): Map<String, String?> {
-    val result = mutableMapOf<String, String?>()
+    // Load from jar files first, starting with the common config and then env specific config
+    val embeddedConfigUrls = embeddedConfigFileNames(appName, environment)
+        .map { it to Config::class.java.classLoader.getResource(it) }
 
-    for (configFileName in configFileNames(appName, environment)) {
-      val url = getResource(Config::class.java, configFileName)
-      result[configFileName] = url?.readUtf8()
-    }
-    return result
+    // Load from override files second, in the order specified, only if they exist
+    val overrideFileUrls = overrideFiles
+        .filter { it.exists() }
+        .map { it.name to it.toURI().toURL() }
+
+    // Produce a combined map of all of the results
+    return (embeddedConfigUrls + overrideFileUrls).map { it.first to it.second?.readUtf8() }.toMap()
   }
 
   private fun URL.readUtf8(): String {
@@ -90,11 +112,6 @@ object MiskConfig {
   }
 
   /** @return the list of config file names in the order they should be read */
-  private fun configFileNames(appName: String, environment: Environment): List<String> =
+  private fun embeddedConfigFileNames(appName: String, environment: Environment) =
       listOf("common", environment.name.toLowerCase()).map { "$appName-$it.yaml" }
-
-  private fun getResource(
-    configClass: Class<out Config>,
-    fileName: String
-  ): URL? = configClass.classLoader.getResource(fileName)
 }
