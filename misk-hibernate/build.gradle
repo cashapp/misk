@@ -32,8 +32,8 @@ dependencies {
 
   compile project(':misk')
 
-  testCompile project(':misk/testing')
-  testCompile project(':misk-hibernate:testing')
+  testCompile project(':misk-testing')
+  testCompile project(':misk-hibernate-testing')
 }
 
 apply from: rootProject.file('gradle/gradle-mvn-push.gradle')
