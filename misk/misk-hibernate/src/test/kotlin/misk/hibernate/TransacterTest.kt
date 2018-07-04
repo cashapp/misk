@@ -8,6 +8,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.hibernate.exception.ConstraintViolationException
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
+import java.util.concurrent.atomic.AtomicInteger
 import javax.inject.Inject
 
 @MiskTest(startService = true)
@@ -114,6 +115,67 @@ class TransacterTest {
     assertThat(exception).hasMessage("Attempted to start a nested session")
   }
 
+  @Test
+  fun nestedTransactionUnsupportedWithDerivativeTransacter() {
+    val exception = assertThrows<IllegalStateException> {
+      transacter.transaction {
+        transacter.noRetries().transaction {
+        }
+      }
+    }
+    assertThat(exception).hasMessage("Attempted to start a nested session")
+  }
+
+  @Test
+  fun transactionSucceedsImmediately() {
+    val callCount = AtomicInteger()
+    val result = transacter.transaction {
+      callCount.getAndIncrement()
+      "success"
+    }
+    assertThat(callCount.get()).isEqualTo(1)
+    assertThat(result).isEqualTo("success")
+  }
+
+  @Test
+  fun transactionSucceedsAfterRetry() {
+    val callCount = AtomicInteger()
+    transacter.transaction { session ->
+      session.save(DbMovie("Star Wars", LocalDate.of(1977, 5, 25)))
+      assertThat(queryFactory.newQuery<MovieQuery>().list(session)).isNotEmpty()
+
+      if (callCount.getAndIncrement() == 0) throw RetryTransactionException()
+    }
+    assertThat(callCount.get()).isEqualTo(2)
+    transacter.transaction { session ->
+      assertThat(queryFactory.newQuery<MovieQuery>().list(session)).hasSize(1)
+    }
+  }
+
+  @Test
+  fun nonRetryableExceptionsNotRetried() {
+    val callCount = AtomicInteger()
+    assertThrows<NonRetryableException> {
+      transacter.transaction {
+        callCount.getAndIncrement()
+        throw NonRetryableException()
+      }
+    }
+    assertThat(callCount.get()).isEqualTo(1)
+  }
+
+  @Test
+  fun noRetriesFailsImmediately() {
+    val callCount = AtomicInteger()
+    assertThrows<RetryTransactionException> {
+      transacter.noRetries().transaction {
+        callCount.getAndIncrement()
+        throw RetryTransactionException()
+      }
+    }
+    assertThat(callCount.get()).isEqualTo(1)
+  }
+
   interface CharacterQuery : Query<DbCharacter> {
     @Constraint("name")
     fun name(name: String): CharacterQuery
@@ -140,4 +202,6 @@ class TransacterTest {
     @Property("actor.name") var actorName: String,
     @Property("movie.release_date") var movieReleaseDate: LocalDate?
   ) : Projection
+
+  class NonRetryableException : Exception()
 }
