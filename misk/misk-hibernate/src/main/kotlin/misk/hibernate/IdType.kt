@@ -8,7 +8,7 @@ import java.sql.PreparedStatement
 import java.sql.ResultSet
 import java.sql.Types
 
-/** Binds Id<*> in the DB to a bigint(20) in MySQL. */
+/** Binds Id<*> in the DB to a bigint in MySQL. */
 internal object IdType : UserType, ResultSetIdentifierConsumer {
   override fun hashCode(x: Any?) = (x as Id<*>).hashCode()
 
