@@ -1,8 +1,8 @@
 package org.assertj.core.api
 
-import misk.testing.assertThrows
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import kotlin.test.assertFailsWith
 
 internal class AssertExtensionsTest {
   @Test
@@ -24,7 +24,7 @@ internal class AssertExtensionsTest {
 
   @Test
   fun assertAsJsonMismatchedFieldName() {
-    assertThat(assertThrows<AssertionError> {
+    assertThat(assertFailsWith<AssertionError> {
       assertThat("""
 {
   "my_structure2"   : ["this", 45, "zip" ],
@@ -42,7 +42,7 @@ internal class AssertExtensionsTest {
 
   @Test
   fun assertAsJsonMismatchedFieldValue() {
-    assertThat(assertThrows<AssertionError> {
+    assertThat(assertFailsWith<AssertionError> {
       assertThat("""
 {
   "my_structure"    : ["thisisit", 45, "zip" ],
@@ -60,7 +60,7 @@ internal class AssertExtensionsTest {
 
   @Test
   fun assertAsJsonMismatchedWhitespaceInStringFieldValue() {
-    assertThat(assertThrows<AssertionError> {
+    assertThat(assertFailsWith<AssertionError> {
       assertThat("""
 {
   "my_structure"    : ["this", 45, "zip" ],

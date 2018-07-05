@@ -1,9 +1,9 @@
 package misk.backoff
 
-import misk.testing.assertThrows
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.time.Duration
+import kotlin.test.assertFailsWith
 
 internal class RetryTest {
   @Test fun retries() {
@@ -20,7 +20,7 @@ internal class RetryTest {
   @Test fun failsIfExceedsMaxRetries() {
     val backoff = ExponentialBackoff(Duration.ofMillis(10), Duration.ofMillis(100))
 
-    assertThrows<IllegalStateException> {
+    assertFailsWith<IllegalStateException> {
       retry(3, backoff) { throw IllegalStateException("this failed") }
     }
   }
@@ -28,7 +28,7 @@ internal class RetryTest {
   @Test fun honorsBackoff() {
     val backoff = ExponentialBackoff(Duration.ofMillis(10), Duration.ofMillis(100))
 
-    assertThrows<IllegalStateException> {
+    assertFailsWith<IllegalStateException> {
       retry(3, backoff) { throw IllegalStateException("this failed") }
     }
 
@@ -44,7 +44,7 @@ internal class RetryTest {
     backoff.nextRetry()
     backoff.nextRetry()
 
-    assertThrows<IllegalStateException> {
+    assertFailsWith<IllegalStateException> {
       retry(3, backoff) { throw IllegalStateException("this failed") }
     }
 

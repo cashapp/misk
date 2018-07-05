@@ -2,11 +2,11 @@ package misk.tokens
 
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
-import misk.testing.assertThrows
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.util.concurrent.atomic.AtomicLong
 import javax.inject.Inject
+import kotlin.test.assertFailsWith
 
 @MiskTest
 class FakeTokenGeneratorTest {
@@ -88,10 +88,10 @@ class FakeTokenGeneratorTest {
 
   @Test
   fun lengthOutOfBounds() {
-    assertThrows<IllegalArgumentException> {
+    assertFailsWith<IllegalArgumentException> {
       tokenGenerator.generate(length = 3)
     }
-    assertThrows<IllegalArgumentException> {
+    assertFailsWith<IllegalArgumentException> {
       tokenGenerator.generate(length = 26)
     }
   }

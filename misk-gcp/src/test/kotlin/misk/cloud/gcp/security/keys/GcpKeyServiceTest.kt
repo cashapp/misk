@@ -7,10 +7,10 @@ import com.google.api.services.cloudkms.v1.model.EncryptResponse
 import misk.cloud.gcp.testing.FakeHttpRouter
 import misk.cloud.gcp.testing.FakeHttpRouter.Companion.respondWithError
 import misk.cloud.gcp.testing.FakeHttpRouter.Companion.respondWithJson
-import misk.testing.assertThrows
 import okio.ByteString
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import kotlin.test.assertFailsWith
 
 internal class GcpKeyServiceTest {
   private val config = GcpKmsConfig(
@@ -49,14 +49,14 @@ internal class GcpKeyServiceTest {
 
   @Test
   fun invalidEncryptKey() {
-    assertThrows<IllegalArgumentException> {
+    assertFailsWith<IllegalArgumentException> {
       keyManager.encrypt("unknown_key", ByteString.encodeUtf8("should fail"))
     }
   }
 
   @Test
   fun invalidDecryptKey() {
-    assertThrows<IllegalArgumentException> {
+    assertFailsWith<IllegalArgumentException> {
       keyManager.decrypt("unknown_key", ByteString.encodeUtf8("should fail"))
     }
   }
