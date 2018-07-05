@@ -29,7 +29,6 @@ dependencies {
   compile dep.hibernateCore
   compile dep.mysql
   compile dep.hsqldb
-
   compile project(':misk')
 
   testCompile project(':misk-testing')
