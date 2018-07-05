@@ -71,7 +71,7 @@ internal class UpstreamResourceInterceptorTest {
   @Test
   internal fun requestForwardedToUpstreamServerIfPathMatchesWithTrailingSlash() {
     upstreamServer.enqueue(MockResponse()
-        .setResponseCode(404)
+        .setResponseCode(418)
         .addHeader("UpstreamHeader", "UpstreamHeaderValue")
         .setBody("I am an intercepted response!"))
 
@@ -82,7 +82,7 @@ internal class UpstreamResourceInterceptorTest {
 
     val response = interceptor.intercept(FakeNetworkChain(request))
 
-    assertThat(response.statusCode).isEqualTo(404)
+    assertThat(response.statusCode).isEqualTo(418)
     assertThat(response.headers["UpstreamHeader"]).isEqualTo("UpstreamHeaderValue")
     assertThat(response.readUtf8()).isEqualTo("I am an intercepted response!")
 
@@ -93,7 +93,7 @@ internal class UpstreamResourceInterceptorTest {
   @Test
   internal fun requestForwardedToUpstreamServerIfPathMatchesWithoutTrailingSlash() {
     upstreamServer.enqueue(MockResponse()
-        .setResponseCode(404)
+        .setResponseCode(418)
         .addHeader("UpstreamHeader", "UpstreamHeaderValue")
         .setBody("I am an intercepted response!"))
 
@@ -104,7 +104,7 @@ internal class UpstreamResourceInterceptorTest {
 
     val response = interceptor.intercept(FakeNetworkChain(request))
 
-    assertThat(response.statusCode).isEqualTo(404)
+    assertThat(response.statusCode).isEqualTo(418)
     assertThat(response.headers["UpstreamHeader"]).isEqualTo("UpstreamHeaderValue")
     assertThat(response.readUtf8()).isEqualTo("I am an intercepted response!")
 
