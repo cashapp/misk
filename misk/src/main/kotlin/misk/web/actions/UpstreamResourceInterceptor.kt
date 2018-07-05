@@ -20,11 +20,14 @@ import javax.inject.Inject
  * Rules
  * - No overlapping mapping prefixes
  *    "_admin/config/" and "_admin/config/subtab/" will not resolve consistently
- *
  * - All upstreamBaseUrl ends with "/"
  * - All local prefix mappings end with "/"
  *
- *
+ * Expected Functionality
+ * - Mappings following above rules are used to initialize interceptor
+ * - Interceptor attempts to match incoming request paths against mappings
+ * - If match found, incoming request path is appended to host + port of mapping.upstreamBaseUrl
+ * - Else, request proceeds
  */
 
 
@@ -76,7 +79,7 @@ class UpstreamResourceInterceptor(
    * localPathPrefix: `/_admin/`
    * upstreamBaseUrl: `http://localhost:3000/`
    *
-   * An incoming request then for `/_admin/config.js` would route to `http://localhost:3000/config.js`.
+   * An incoming request then for `/_admin/config.js` would route to `http://localhost:3000/_admin/config.js`.
    */
   data class Mapping(
     val localPathPrefix: String,
