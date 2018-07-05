@@ -8,25 +8,33 @@ interface ISidebarProps {
   menuItems: IMenuItem[]
 }
 
-const thoseMenuItems = {
-  this.props.menuItems.map(
-    ({ text, icon="document", className="pt-minimal", url } : any) => (
-      <Link key={url} to={url}>
-        <MenuItem key={url} to={url} className={className} icon={icon} text={text}/>
-      </Link>)
-    )
-}
+
 
 export class SidebarComponent extends React.Component<ISidebarProps, {}> {
+  // const renderedMenuItems = {
+  //   this.props.menuItems.map(
+  //     ({ text, icon="document", className="pt-minimal", url } : any) => (
+  //       <Link key={url} to={url}>
+  //         <MenuItem key={url} to={url} className={className} icon={icon} text={text}/>
+  //       </Link>)
+  //     )
+  // }
+  private renderedMenuItems: any
+
   constructor(props: ISidebarProps) {
     super(props)
+    this.renderedMenuItems = this.props.menuItems.map(
+      ({ text, icon="document", className="pt-minimal", url } : any) => (
+          <MenuItem key={url} href={url} className={className} icon={icon} text={text}/>
+        )
+      )
   }
 
   render() {
     return (
       <div style={{position: `absolute`,}}>
         <Menu>
-          {thoseMenuItems}
+          {this.renderedMenuItems}
         </Menu>
       </div>
     )
