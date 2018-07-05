@@ -1,5 +1,6 @@
 package misk.web.actions
 
+import misk.testing.assertThrows
 import misk.web.NetworkChain
 import misk.web.Request
 import misk.web.Response
@@ -23,7 +24,6 @@ internal class UpstreamResourceInterceptorTest {
   lateinit var mapping: UpstreamResourceInterceptor.Mapping
   lateinit var mappingTestMapping: UpstreamResourceInterceptor.Mapping
   lateinit var interceptor: UpstreamResourceInterceptor
-  lateinit var mappingTestInterceptor: UpstreamResourceInterceptor
 
   @BeforeEach
   internal fun setUp() {
@@ -43,47 +43,29 @@ internal class UpstreamResourceInterceptorTest {
 
   @Test
   internal fun mappingFailsIfLocalWithoutLeadingSlash() {
-    var failed = false
-
-    try {
+    assertThrows<IllegalArgumentException> {
       mappingTestMapping = UpstreamResourceInterceptor.Mapping(
           "local/prefix/",
           upstreamServer.url("/"))
-    } catch (e: IllegalArgumentException) {
-      failed = true
     }
-
-    assertThat(failed).isTrue()
   }
 
   @Test
   internal fun mappingFailsIfLocalWithoutTrailingSlash() {
-    var failed = false
-
-    try {
+    assertThrows<IllegalArgumentException> {
       mappingTestMapping = UpstreamResourceInterceptor.Mapping(
           "/local/prefix",
           upstreamServer.url("/"))
-    } catch (e: IllegalArgumentException) {
-      failed = true
     }
-
-    assertThat(failed).isTrue()
   }
 
   @Test
   internal fun mappingFailsIfUpstreamHasPathSegments() {
-    var failed = false
-
-    try {
+    assertThrows<IllegalArgumentException> {
       mappingTestMapping = UpstreamResourceInterceptor.Mapping(
           "/local/prefix/",
           upstreamServer.url("/upstream/prefix/"))
-    } catch (e: IllegalArgumentException) {
-      failed = true
     }
-
-    assertThat(failed).isTrue()
   }
 
   @Test
