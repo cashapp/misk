@@ -27,8 +27,9 @@ junitPlatform {
 
 dependencies {
   compile dep.hibernateCore
-  compile dep.mysql
+  compile dep.hikariCp
   compile dep.hsqldb
+  compile dep.mysql
   compile project(':misk')
 
   testCompile project(':misk-testing')

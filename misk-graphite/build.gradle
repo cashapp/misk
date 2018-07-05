@@ -26,21 +26,14 @@ junitPlatform {
 }
 
 dependencies {
-  compile dep.gcpCloudStorage
-  compile(dep.gcpDatastore) {
-    exclude group: 'com.google.protobuf'
-    exclude group: 'com.google.api.grpc'
-    exclude group: 'io.grpc'
-  }
-  compile dep.gcpKms
-  compile dep.gcpLogback
-  compile dep.metricsStackDriver
+  compile dep.metricsGraphite
   compile project(':misk')
-  compile project(':misk-jaeger')
-  compile project(':misk-zipkin')
 
+  testCompile dep.assertj
+  testCompile dep.junitApi
+  testCompile dep.junitEngine
+  testCompile dep.junitParams
   testCompile project(':misk-testing')
-  testCompile project(':misk-gcp-testing')
 }
 
 apply from: rootProject.file('gradle/gradle-mvn-push.gradle')
