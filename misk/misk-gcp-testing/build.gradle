@@ -1,0 +1,36 @@
+import org.junit.platform.console.options.Details
+
+apply plugin: 'kotlin'
+apply plugin: 'org.junit.platform.gradle.plugin'
+
+compileKotlin {
+  kotlinOptions {
+    jvmTarget = "1.8"
+    allWarningsAsErrors = true
+  }
+}
+compileTestKotlin {
+  kotlinOptions {
+    jvmTarget = "1.8"
+    allWarningsAsErrors = true
+  }
+}
+
+sourceSets {
+  main.java.srcDirs += 'src/main/kotlin/'
+  test.java.srcDirs += 'src/test/kotlin/'
+}
+
+junitPlatform {
+  details Details.VERBOSE
+}
+
+dependencies {
+  compile dep.assertj
+  compile dep.junitApi
+  compile project(':misk')
+  compile project(':misk-gcp')
+  compile project(':misk-testing')
+}
+
+apply from: rootProject.file('gradle/gradle-mvn-push.gradle')
