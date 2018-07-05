@@ -20,14 +20,13 @@ import misk.security.ssl.TrustStoreConfig
 import misk.security.x509.X500Name
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
-import misk.testing.assertThrows
 import misk.web.Post
 import misk.web.RequestBody
 import misk.web.RequestContentType
 import misk.web.ResponseContentType
-import misk.web.WebTestingModule
 import misk.web.WebActionModule
 import misk.web.WebSslConfig
+import misk.web.WebTestingModule
 import misk.web.actions.WebAction
 import misk.web.jetty.JettyService
 import misk.web.mediatype.MediaTypes
@@ -37,6 +36,7 @@ import org.junit.jupiter.api.Test
 import javax.inject.Inject
 import javax.inject.Singleton
 import javax.net.ssl.SSLHandshakeException
+import kotlin.test.assertFailsWith
 
 @MiskTest(startService = true)
 internal class PemSslClientServerTest {
@@ -68,14 +68,14 @@ internal class PemSslClientServerTest {
   fun failsIfNoCertIsPresented() {
     // In this case the server just hangs up, which might result in a handshake exception
     // or a socket exception depending on the state of things at the time of hangup
-    assertThrows<Throwable> {
+    assertFailsWith<Throwable> {
       noCertClient.post<Dinosaur>("/hello", Dinosaur.Builder().name("trex").build())
     }
   }
 
   @Test
   fun failsIfServerIsUntrusted() {
-    assertThrows<SSLHandshakeException> {
+    assertFailsWith<SSLHandshakeException> {
       noTrustClient.post<Dinosaur>("/hello", Dinosaur.Builder().name("trex").build())
     }
   }

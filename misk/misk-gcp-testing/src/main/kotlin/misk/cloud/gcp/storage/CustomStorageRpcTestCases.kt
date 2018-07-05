@@ -10,11 +10,11 @@ import com.google.cloud.storage.Storage.BlobListOption.prefix
 import com.google.cloud.storage.StorageException
 import com.google.cloud.storage.StorageOptions
 import com.google.cloud.storage.spi.v1.StorageRpc
-import misk.testing.assertThrows
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.nio.ByteBuffer
+import kotlin.test.assertFailsWith
 
 /** Test cases covering custom storage RPC implementations, used for testing local and in-memory storage */
 internal abstract class CustomStorageRpcTestCases<T : StorageRpc> {
@@ -74,7 +74,7 @@ internal abstract class CustomStorageRpcTestCases<T : StorageRpc> {
     assertThat(result.contentType).isEqualTo("text/plain")
     assertThat(String(result.getContent())).isEqualTo("This is my text")
 
-    assertThrows<StorageException> {
+    assertFailsWith<StorageException> {
       val contents2 = "This is my text"
       storage.create(BlobInfo.newBuilder(blobId)
           .setContentType("text/plain")
@@ -108,7 +108,7 @@ internal abstract class CustomStorageRpcTestCases<T : StorageRpc> {
     assertThat(result2.contentType).isEqualTo("text/plain")
     assertThat(String(result.getContent())).isEqualTo("This is another text")
 
-    assertThrows<StorageException> {
+    assertFailsWith<StorageException> {
       val contents3 = "This is the third text"
       storage.create(BlobInfo.newBuilder(blobId2) // Old generation
           .setContentType("text/plain")
@@ -203,7 +203,7 @@ internal abstract class CustomStorageRpcTestCases<T : StorageRpc> {
     assertThat(blob1.size).isEqualTo(contents1.length.toLong())
     assertThat(blob1.exists()).isTrue()
     assertThat(String(blob1.getContent())).isEqualTo(contents2)
-    assertThrows<StorageException> {
+    assertFailsWith<StorageException> {
       blob1.getContent(BlobSourceOption.generationMatch())
     }
 

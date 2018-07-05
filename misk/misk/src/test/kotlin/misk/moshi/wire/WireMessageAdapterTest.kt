@@ -8,12 +8,12 @@ import com.squareup.protos.test.parsing.Warehouse
 import misk.moshi.MoshiModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
-import misk.testing.assertThrows
 import okio.ByteString
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.isEqualToAsJson
 import org.junit.jupiter.api.Test
 import javax.inject.Inject
+import kotlin.test.assertFailsWith
 
 @MiskTest(startService = false)
 internal class WireMessageAdapterTest {
@@ -210,7 +210,7 @@ internal class WireMessageAdapterTest {
   @Test
   fun detectsAndFailsOnMultipleOneOfs() {
     val shipmentAdapter = moshi.adapter(Shipment::class.java)
-    assertThat(assertThrows<IllegalArgumentException> {
+    assertThat(assertFailsWith<IllegalArgumentException> {
       shipmentAdapter.fromJson("""
         |{
         | "shipment_id": 100075,

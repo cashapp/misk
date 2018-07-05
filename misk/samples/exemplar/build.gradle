@@ -18,6 +18,7 @@ compileTestKotlin {
 
 dependencies {
   compile dep.kotlinStdLib
+  compile dep.kotlinTest
   compile dep.guava
   compile dep.guice
   compile dep.logbackClassic

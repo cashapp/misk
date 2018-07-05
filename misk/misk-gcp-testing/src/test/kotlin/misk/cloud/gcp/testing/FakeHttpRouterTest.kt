@@ -6,10 +6,10 @@ import com.google.api.client.json.jackson2.JacksonFactory
 import com.google.api.client.testing.http.MockHttpContent
 import misk.cloud.gcp.testing.FakeHttpRouter.Companion.respondWithError
 import misk.cloud.gcp.testing.FakeHttpRouter.Companion.respondWithText
-import misk.testing.assertThrows
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.io.ByteArrayInputStream
+import kotlin.test.assertFailsWith
 
 internal class FakeHttpRouterTest {
   private val transport = FakeHttpRouter {
@@ -38,7 +38,7 @@ internal class FakeHttpRouterTest {
 
   @Test
   fun matchOnUrl() {
-    assertThat(assertThrows<HttpResponseException> {
+    assertThat(assertFailsWith<HttpResponseException> {
       transport.createRequestFactory()
           .buildGetRequest(GenericUrl("https://something.com/second"))
           .setContent(MockHttpContent().setContent(
@@ -49,7 +49,7 @@ internal class FakeHttpRouterTest {
 
   @Test
   fun noMatch() {
-    assertThat(assertThrows<HttpResponseException> {
+    assertThat(assertFailsWith<HttpResponseException> {
       transport.createRequestFactory()
           .buildGetRequest(GenericUrl("https://something.com/unknown"))
           .execute()

@@ -1,12 +1,12 @@
 package misk.web.mediatype
 
-import misk.testing.assertThrows
 import okhttp3.MediaType
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.containsExactly
 import org.assertj.core.data.Offset
 import org.junit.jupiter.api.Test
 import java.util.Collections.shuffle
+import kotlin.test.assertFailsWith
 
 internal class MediaRangeTest {
   @Test
@@ -90,56 +90,56 @@ internal class MediaRangeTest {
 
   @Test
   fun wildcardTypeWithSpecificSubType() {
-    assertThrows<IllegalArgumentException> {
+    assertFailsWith<IllegalArgumentException> {
       MediaRange.parse("*/html")
     }
   }
 
   @Test
   fun blankType() {
-    assertThrows<IllegalArgumentException> {
+    assertFailsWith<IllegalArgumentException> {
       MediaRange.parse("/html")
     }
   }
 
   @Test
   fun blankSubType() {
-    assertThrows<IllegalArgumentException> {
+    assertFailsWith<IllegalArgumentException> {
       MediaRange.parse("text/")
     }
   }
 
   @Test
   fun noTypeSubType() {
-    assertThrows<IllegalArgumentException> {
+    assertFailsWith<IllegalArgumentException> {
       MediaRange.parse("*")
     }
   }
 
   @Test
   fun blankNameToken() {
-    assertThrows<IllegalArgumentException> {
+    assertFailsWith<IllegalArgumentException> {
       MediaRange.parse("text/html;=foo")
     }
   }
 
   @Test
   fun blankValueToken() {
-    assertThrows<IllegalArgumentException> {
+    assertFailsWith<IllegalArgumentException> {
       MediaRange.parse("text/html;bar=")
     }
   }
 
   @Test
   fun multipleQualityFactors() {
-    assertThrows<IllegalArgumentException> {
+    assertFailsWith<IllegalArgumentException> {
       MediaRange.parse("text/html;q=0.4;q=0.56")
     }
   }
 
   @Test
   fun charsetInExtensions() {
-    assertThrows<IllegalArgumentException> {
+    assertFailsWith<IllegalArgumentException> {
       MediaRange.parse("text/html;q=0.4;charset=utf-8")
     }
   }

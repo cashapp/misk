@@ -1,9 +1,9 @@
 package misk.web.extractors
 
-import misk.testing.assertThrows
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import kotlin.reflect.KParameter
+import kotlin.test.assertFailsWith
 
 internal class QueryStringParameterProcessorTest {
   @Test
@@ -70,7 +70,7 @@ internal class QueryStringParameterProcessorTest {
   @Test
   fun invalidInt() {
     val queryStringProcessor = QueryStringParameterProcessor(TestMemberStore.intParameter())
-    assertThrows<IllegalArgumentException> {
+    assertFailsWith<IllegalArgumentException> {
       queryStringProcessor.extractFunctionArgumentValue(listOf("forty two"))
     }
   }
@@ -159,7 +159,7 @@ internal class QueryStringParameterProcessorTest {
 
   @Test
   fun unsupportedClass() {
-    assertThrows<IllegalArgumentException> {
+    assertFailsWith<IllegalArgumentException> {
       QueryStringParameterProcessor(TestMemberStore.unsupportedParameter())
     }
   }

@@ -27,6 +27,7 @@ junitPlatform {
 
 dependencies {
   compile dep.kotlinStdLib
+  compile dep.kotlinTest
   compile dep.bouncycastle
   compile dep.guava
   compile dep.guice

@@ -10,7 +10,6 @@ import misk.inject.keyOf
 import misk.scope.ActionScope
 import misk.scope.ActionScoped
 import misk.scope.TestActionScopedProviderModule
-import misk.testing.assertThrows
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.util.concurrent.Callable
@@ -18,6 +17,7 @@ import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.test.assertFailsWith
 
 internal class ActionScopedExecutorServiceTest {
   class Tester {
@@ -49,7 +49,7 @@ internal class ActionScopedExecutorServiceTest {
 
   @Test
   fun doesNotPropagateScopeIfNotInScope() {
-    assertThrows<IllegalStateException> {
+    assertFailsWith<IllegalStateException> {
       val injector = Guice.createInjector(
           TestActionScopedProviderModule(),
           ActionScopedExecutorServiceModule())

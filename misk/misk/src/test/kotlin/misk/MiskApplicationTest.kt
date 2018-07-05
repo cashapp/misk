@@ -2,10 +2,10 @@ package misk
 
 import com.beust.jcommander.Parameter
 import misk.inject.KAbstractModule
-import misk.testing.assertThrows
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import javax.inject.Inject
+import kotlin.test.assertFailsWith
 
 internal class MiskApplicationTest {
   class WithRequiredArguments : MiskCommand("with-required-args") {
@@ -90,7 +90,7 @@ internal class MiskApplicationTest {
 
   @Test
   fun missingRequiredArgument() {
-    val exception = assertThrows<MiskApplication.CliException> {
+    val exception = assertFailsWith<MiskApplication.CliException> {
       val commands = Commands()
       MiskApplication(*commands.all).doRun(arrayOf("with-required-args", "-f"))
     }
@@ -109,7 +109,7 @@ internal class MiskApplicationTest {
 
   @Test
   fun unknownCommand() {
-    val exception = assertThrows<MiskApplication.CliException> {
+    val exception = assertFailsWith<MiskApplication.CliException> {
       val commands = Commands()
       MiskApplication(*commands.all).doRun(arrayOf("unknown"))
     }
@@ -143,7 +143,7 @@ internal class MiskApplicationTest {
 
   @Test
   fun commandPreconditionsNotMet() {
-    val exception = assertThrows<MiskApplication.CliException> {
+    val exception = assertFailsWith<MiskApplication.CliException> {
       val commands = Commands()
       MiskApplication(*commands.all).doRun(arrayOf("with-preconditions"))
     }
