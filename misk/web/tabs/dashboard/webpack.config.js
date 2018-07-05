@@ -1,6 +1,7 @@
 const path = require('path')
 const webpack = require('webpack')
 const HTMLWebpackPlugin = require('html-webpack-plugin')
+const miskCommon = require('@misk/common');
 
 const dev = process.env.NODE_ENV !== 'production'
 
@@ -64,5 +65,6 @@ module.exports = {
       HTMLWebpackPluginConfig,
       new webpack.HotModuleReplacementPlugin()
     ]
-    : [HTMLWebpackPluginConfig, DefinePluginConfig]
+    : [HTMLWebpackPluginConfig, DefinePluginConfig],
+  externals: miskCommon.externals
 }

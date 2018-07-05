@@ -11,15 +11,15 @@ export interface IMenuItem {
 const menuItems: IMenuItem[] =  [{
   icon: "home",
   text: "Home",
-  url: "/_admin/",
+  url: "/_admin/dashboard/",
 }, {
   icon: "properties",
   text: "Config",
-  url: "/_admin/config",
+  url: "/_admin/config/",
 }, {
   icon: "heart-broken",
   text: "Healthcheck",
-  url: "/_admin/healthcheck",
+  url: "/_admin/healthcheck/",
 }]
 
 export default menuItems

@@ -14,17 +14,16 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.lang.IllegalArgumentException
 import java.net.HttpURLConnection
 import kotlin.reflect.KFunction
 
 internal class UpstreamResourceInterceptorTest {
   val upstreamServer = MockWebServer()
   lateinit var mapping: UpstreamResourceInterceptor.Mapping
+  lateinit var mappingTestMapping: UpstreamResourceInterceptor.Mapping
   lateinit var interceptor: UpstreamResourceInterceptor
-
-  // TODO: probably discourage path rewriting
-  // ie. dev and production ending paths are the same
-  // localhost:3001/_admin/config -> prod.misk/_admin/config
+  lateinit var mappingTestInterceptor: UpstreamResourceInterceptor
 
   @BeforeEach
   internal fun setUp() {
@@ -32,7 +31,7 @@ internal class UpstreamResourceInterceptorTest {
 
     mapping = UpstreamResourceInterceptor.Mapping(
         "/local/prefix/",
-        upstreamServer.url("/upstreamprefix/"))
+        upstreamServer.url("/"))
 
     interceptor = UpstreamResourceInterceptor(OkHttpClient(), mutableListOf(mapping))
   }
@@ -43,7 +42,74 @@ internal class UpstreamResourceInterceptorTest {
   }
 
   @Test
-  internal fun requestForwardedToUpstreamServerIfPathMatches() {
+  internal fun mappingFailsIfLocalWithoutLeadingSlash() {
+    var failed = false
+
+    try {
+      mappingTestMapping = UpstreamResourceInterceptor.Mapping(
+          "local/prefix/",
+          upstreamServer.url("/"))
+    } catch (e: IllegalArgumentException) {
+      failed = true
+    }
+
+    assertThat(failed).isTrue()
+  }
+
+  @Test
+  internal fun mappingFailsIfLocalWithoutTrailingSlash() {
+    var failed = false
+
+    try {
+      mappingTestMapping = UpstreamResourceInterceptor.Mapping(
+          "/local/prefix",
+          upstreamServer.url("/"))
+    } catch (e: IllegalArgumentException) {
+      failed = true
+    }
+
+    assertThat(failed).isTrue()
+  }
+
+  @Test
+  internal fun mappingFailsIfUpstreamHasPathSegments() {
+    var failed = false
+
+    try {
+      mappingTestMapping = UpstreamResourceInterceptor.Mapping(
+          "/local/prefix/",
+          upstreamServer.url("/upstream/prefix/"))
+    } catch (e: IllegalArgumentException) {
+      failed = true
+    }
+
+    assertThat(failed).isTrue()
+  }
+
+  @Test
+  internal fun requestForwardedToUpstreamServerIfPathMatchesWithTrailingSlash() {
+    upstreamServer.enqueue(MockResponse()
+        .setResponseCode(404)
+        .addHeader("UpstreamHeader", "UpstreamHeaderValue")
+        .setBody("I am an intercepted response!"))
+
+    val request = Request(
+        HttpUrl.parse("http://localpost/local/prefix/tacos/")!!,
+        body = Buffer()
+    )
+
+    val response = interceptor.intercept(FakeNetworkChain(request))
+
+    assertThat(response.statusCode).isEqualTo(404)
+    assertThat(response.headers["UpstreamHeader"]).isEqualTo("UpstreamHeaderValue")
+    assertThat(response.readUtf8()).isEqualTo("I am an intercepted response!")
+
+    val recordedRequest = upstreamServer.takeRequest()
+    assertThat(recordedRequest.path).isEqualTo("/local/prefix/tacos/")
+  }
+
+  @Test
+  internal fun requestForwardedToUpstreamServerIfPathMatchesWithoutTrailingSlash() {
     upstreamServer.enqueue(MockResponse()
         .setResponseCode(404)
         .addHeader("UpstreamHeader", "UpstreamHeaderValue")
@@ -61,7 +127,7 @@ internal class UpstreamResourceInterceptorTest {
     assertThat(response.readUtf8()).isEqualTo("I am an intercepted response!")
 
     val recordedRequest = upstreamServer.takeRequest()
-    assertThat(recordedRequest.path).isEqualTo("/upstreamprefix/tacos")
+    assertThat(recordedRequest.path).isEqualTo("/local/prefix/tacos")
   }
 
   @Test
@@ -79,7 +145,7 @@ internal class UpstreamResourceInterceptorTest {
 
   @Test
   internal fun returnsServerNotReachable() {
-    val urlThatFailed = upstreamServer.url("/upstreamprefix/tacos")
+    val urlThatFailed = upstreamServer.url("/local/prefix/tacos")
     upstreamServer.shutdown()
 
     val request = Request(

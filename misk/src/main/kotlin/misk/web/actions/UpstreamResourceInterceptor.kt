@@ -14,26 +14,36 @@ import java.io.IOException
 import java.net.HttpURLConnection
 import javax.inject.Inject
 
+/**
+ * UpstreamResourceInterceptor
+ *
+ * Rules
+ * - No overlapping mapping prefixes
+ *    "_admin/config/" and "_admin/config/subtab/" will not resolve consistently
+ *
+ * - All upstreamBaseUrl ends with "/"
+ * - All local prefix mappings end with "/"
+ *
+ *
+ */
+
+
 class UpstreamResourceInterceptor(
   private val client: OkHttpClient,
   private val mappings: List<Mapping>
 ) : NetworkInterceptor {
-//  TODO(adrw) enforce no prefix overlapping
+//  TODO(adrw) enforce no prefix overlapping https://github.com/square/misk/issues/303
   override fun intercept(chain: NetworkChain): Response<*> {
     val matchedMapping = findMappingMatch(chain) ?: return chain.proceed(chain.request)
-    var proxyEndPath =
-        chain.request.url.encodedPath().drop(1).removePrefix(matchedMapping.localPathPrefix)
-    if (!chain.request.url.encodedPath().endsWith('/') && !chain.request.url.pathSegments().last().contains('.')) {
-        proxyEndPath += '/'
-    }
     val proxyUrl = HttpUrl.parse(
-        matchedMapping.upstreamBaseUrl.toString() + proxyEndPath)!!
+        matchedMapping.upstreamBaseUrl.toString().dropLast(1)
+            + chain.request.url.encodedPath())!!
     return forwardRequestTo(chain.request, proxyUrl)
   }
 
   private fun findMappingMatch(chain: NetworkChain): Mapping? {
     for (mapping in mappings) {
-      if (!chain.request.url.encodedPath().startsWith(mapping.localPathPrefix.dropLast(1))) continue
+      if (!chain.request.url.encodedPath().startsWith(mapping.localPathPrefix)) continue
       return mapping
     }
     return null
@@ -75,7 +85,8 @@ class UpstreamResourceInterceptor(
     init {
       require(localPathPrefix.endsWith("/") &&
           localPathPrefix.startsWith("/") &&
-          upstreamBaseUrl.encodedPath().endsWith("/"))
+          upstreamBaseUrl.encodedPath().endsWith("/") &&
+          upstreamBaseUrl.pathSegments().size == 1)
     }
   }
 
