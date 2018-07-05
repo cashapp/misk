@@ -6,7 +6,7 @@ const rootReducer = combineReducers({
   // count: counterReducer,
 })
 
-export interface State {
+export interface IState {
   count: number
   router: RouterState
 }

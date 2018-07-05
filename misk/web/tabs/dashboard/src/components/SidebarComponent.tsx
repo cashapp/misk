@@ -8,11 +8,11 @@ interface ISidebarProps {
   menuItems: IMenuItem[]
 }
 
-const renderedMenuItems = {
+const thoseMenuItems = {
   this.props.menuItems.map(
     ({ text, icon="document", className="pt-minimal", url } : any) => (
       <Link key={url} to={url}>
-        <MenuItem key={url} href={url} className={className} icon={icon} text={text}/>
+        <MenuItem key={url} to={url} className={className} icon={icon} text={text}/>
       </Link>)
     )
 }
@@ -26,7 +26,7 @@ export class SidebarComponent extends React.Component<ISidebarProps, {}> {
     return (
       <div style={{position: `absolute`,}}>
         <Menu>
-          {renderedMenuItems}
+          {thoseMenuItems}
         </Menu>
       </div>
     )
