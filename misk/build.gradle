@@ -31,6 +31,7 @@ dependencies {
   compile dep.guava
   compile dep.guice
   compile dep.guiceMultibindings
+  compile dep.javaxInject
   compile dep.okHttp
   compile dep.kotlinReflection
   compile dep.moshi
@@ -49,10 +50,6 @@ dependencies {
   compile dep.metricsParent
   compile dep.metricsGraphite
   compile dep.metricsSignalFx
-  compile dep.metricsStackDriver
-  compile dep.gcpDatastore
-  compile dep.gcpKms
-  compile dep.gcpCloudStorage
   compile dep.jCommander
   compile dep.openTracing
   compile dep.openTracingOkHttp
