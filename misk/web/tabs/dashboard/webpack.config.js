@@ -23,12 +23,8 @@ module.exports = {
     publicPath: "/_admin/dashboard/"
   },
   devServer: {
-    // host: 'localhost',
     port: '3100',
     hot: true,
-    // headers: {
-    //   'Access-Control-Allow-Origin': '*'
-    // },
     historyApiFallback: true
   },
   module: {

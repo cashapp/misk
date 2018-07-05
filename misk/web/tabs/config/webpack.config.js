@@ -23,12 +23,8 @@ module.exports = {
     publicPath: "/_admin/config/"
   },
   devServer: {
-    // host: 'localhost',
     port: '3200',
     hot: true,
-    // headers: {
-    //   'Access-Control-Allow-Origin': '*'
-    // },
     historyApiFallback: true
   },
   module: {
