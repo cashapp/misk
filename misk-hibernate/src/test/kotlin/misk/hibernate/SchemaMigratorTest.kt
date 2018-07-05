@@ -14,13 +14,13 @@ import misk.resources.FakeResourceLoader
 import misk.resources.FakeResourceLoaderModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
-import misk.testing.assertThrows
 import org.assertj.core.api.Assertions.assertThat
 import org.hibernate.SessionFactory
 import org.junit.jupiter.api.Test
 import javax.inject.Inject
 import javax.inject.Provider
 import javax.persistence.PersistenceException
+import kotlin.test.assertFailsWith
 
 @MiskTest(startService = true)
 internal class SchemaMigratorTest {
@@ -84,7 +84,7 @@ internal class SchemaMigratorTest {
     assertThat(tableExists("table_2")).isFalse()
     assertThat(tableExists("table_3")).isFalse()
     assertThat(tableExists("table_4")).isFalse()
-    assertThrows<PersistenceException> {
+    assertFailsWith<PersistenceException> {
       schemaMigrator.appliedMigrations()
     }
 
@@ -135,7 +135,7 @@ internal class SchemaMigratorTest {
         |CREATE TABLE table_1 (name varchar(255))
         |""".trimMargin())
 
-    assertThat(assertThrows<IllegalStateException> {
+    assertThat(assertFailsWith<IllegalStateException> {
       schemaMigrator.requireAll()
     }).hasMessage("""
           |schemamigrator is missing migrations:

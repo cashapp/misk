@@ -9,10 +9,10 @@ import misk.exceptions.StatusCode
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.testing.MockTracingBackendModule
-import misk.testing.assertThrows
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import javax.inject.Inject
+import kotlin.test.assertFailsWith
 
 @MiskTest
 class MiskTracerTest {
@@ -37,7 +37,7 @@ class MiskTracerTest {
     val mockTracer = tracer as MockTracer
 
     assertThat(mockTracer.finishedSpans().size).isEqualTo(0)
-    assertThrows<ActionException> { miskTracer.trace("failedTrace", ::failedTrace) }
+    assertFailsWith<ActionException> { miskTracer.trace("failedTrace", ::failedTrace) }
     assertThat(mockTracer.finishedSpans().size).isEqualTo(1)
     assertThat(mockTracer.finishedSpans().get(0).tags().get(Tags.ERROR.key)).isEqualTo(true)
   }

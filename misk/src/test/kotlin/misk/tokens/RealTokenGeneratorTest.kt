@@ -2,10 +2,10 @@ package misk.tokens
 
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
-import misk.testing.assertThrows
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import javax.inject.Inject
+import kotlin.test.assertFailsWith
 
 @MiskTest
 class RealTokenGeneratorTest {
@@ -37,10 +37,10 @@ class RealTokenGeneratorTest {
 
   @Test
   fun lengthOutOfBounds() {
-    assertThrows<IllegalArgumentException> {
+    assertFailsWith<IllegalArgumentException> {
       tokenGenerator.generate(length = 3)
     }
-    assertThrows<IllegalArgumentException> {
+    assertFailsWith<IllegalArgumentException> {
       tokenGenerator.generate(length = 26)
     }
   }
@@ -54,23 +54,23 @@ class RealTokenGeneratorTest {
 
   @Test
   fun canonicalizeUnexpectedCharacters() {
-    assertThrows<IllegalArgumentException> {
+    assertFailsWith<IllegalArgumentException> {
       TokenGenerator.canonicalize("Dinosaur") // u.
     }
-    assertThrows<IllegalArgumentException> {
+    assertFailsWith<IllegalArgumentException> {
       TokenGenerator.canonicalize("Veloci_Raptor") // _.
     }
-    assertThrows<IllegalArgumentException> {
+    assertFailsWith<IllegalArgumentException> {
       TokenGenerator.canonicalize("Velociräptor") // ä.
     }
   }
 
   @Test
   fun canonicalizeUnexpectedLength() {
-    assertThrows<IllegalArgumentException> {
+    assertFailsWith<IllegalArgumentException> {
       TokenGenerator.canonicalize("a b c") // 3 characters after stripping spaces.
     }
-    assertThrows<IllegalArgumentException> {
+    assertFailsWith<IllegalArgumentException> {
       TokenGenerator.canonicalize("12345678901234567890123456") // 26 characters.
     }
   }

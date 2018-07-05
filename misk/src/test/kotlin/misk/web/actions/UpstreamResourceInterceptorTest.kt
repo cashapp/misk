@@ -1,6 +1,5 @@
 package misk.web.actions
 
-import misk.testing.assertThrows
 import misk.web.NetworkChain
 import misk.web.Request
 import misk.web.Response
@@ -18,6 +17,7 @@ import org.junit.jupiter.api.Test
 import java.lang.IllegalArgumentException
 import java.net.HttpURLConnection
 import kotlin.reflect.KFunction
+import kotlin.test.assertFailsWith
 
 internal class UpstreamResourceInterceptorTest {
   val upstreamServer = MockWebServer()
@@ -43,7 +43,7 @@ internal class UpstreamResourceInterceptorTest {
 
   @Test
   internal fun mappingFailsIfLocalWithoutLeadingSlash() {
-    assertThrows<IllegalArgumentException> {
+    assertFailsWith<IllegalArgumentException> {
       mappingTestMapping = UpstreamResourceInterceptor.Mapping(
           "local/prefix/",
           upstreamServer.url("/"))
@@ -52,7 +52,7 @@ internal class UpstreamResourceInterceptorTest {
 
   @Test
   internal fun mappingFailsIfLocalWithoutTrailingSlash() {
-    assertThrows<IllegalArgumentException> {
+    assertFailsWith<IllegalArgumentException> {
       mappingTestMapping = UpstreamResourceInterceptor.Mapping(
           "/local/prefix",
           upstreamServer.url("/"))
@@ -61,7 +61,7 @@ internal class UpstreamResourceInterceptorTest {
 
   @Test
   internal fun mappingFailsIfUpstreamHasPathSegments() {
-    assertThrows<IllegalArgumentException> {
+    assertFailsWith<IllegalArgumentException> {
       mappingTestMapping = UpstreamResourceInterceptor.Mapping(
           "/local/prefix/",
           upstreamServer.url("/upstream/prefix/"))

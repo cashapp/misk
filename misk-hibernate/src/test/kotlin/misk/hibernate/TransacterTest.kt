@@ -3,12 +3,12 @@ package misk.hibernate
 import misk.exceptions.UnauthorizedException
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
-import misk.testing.assertThrows
 import org.assertj.core.api.Assertions.assertThat
 import org.hibernate.exception.ConstraintViolationException
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import javax.inject.Inject
+import kotlin.test.assertFailsWith
 
 @MiskTest(startService = true)
 class TransacterTest {
@@ -64,7 +64,7 @@ class TransacterTest {
 
   @Test
   fun exceptionCausesTransactionToRollback() {
-    assertThrows<UnauthorizedException> {
+    assertFailsWith<UnauthorizedException> {
       transacter.transaction { session ->
         session.save(DbMovie("Star Wars", LocalDate.of(1977, 5, 25)))
         assertThat(queryFactory.newQuery<MovieQuery>().list(session)).isNotEmpty()
@@ -81,7 +81,7 @@ class TransacterTest {
     transacter.transaction { session ->
       session.save(DbMovie("Cinderella", LocalDate.of(1950, 3, 4)))
     }
-    assertThrows<ConstraintViolationException> {
+    assertFailsWith<ConstraintViolationException> {
       transacter.transaction { session ->
         session.save(DbMovie("Beauty and the Beast", LocalDate.of(1991, 11, 22)))
         session.save(DbMovie("Cinderella", LocalDate.of(2015, 3, 13)))
@@ -105,7 +105,7 @@ class TransacterTest {
 
   @Test
   fun nestedTransactionUnsupported() {
-    val exception = assertThrows<IllegalStateException> {
+    val exception = assertFailsWith<IllegalStateException> {
       transacter.transaction {
         transacter.transaction {
         }

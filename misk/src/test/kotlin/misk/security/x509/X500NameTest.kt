@@ -1,8 +1,8 @@
 package misk.security.x509
 
-import misk.testing.assertThrows
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import kotlin.test.assertFailsWith
 
 internal class X500NameTest {
   @Test fun parse() {
@@ -39,7 +39,7 @@ internal class X500NameTest {
   }
 
   @Test fun endsInAttributeName() {
-    val e = assertThrows<IllegalArgumentException> {
+    val e = assertFailsWith<IllegalArgumentException> {
       X500Name.parse("CN")
     }
 
@@ -47,7 +47,7 @@ internal class X500NameTest {
   }
 
   @Test fun noAttributes() {
-    val e = assertThrows<IllegalArgumentException> {
+    val e = assertFailsWith<IllegalArgumentException> {
       X500Name.parse("    \n")
     }
 
@@ -55,7 +55,7 @@ internal class X500NameTest {
   }
 
   @Test fun blankAttributeName() {
-    val e = assertThrows<IllegalArgumentException> {
+    val e = assertFailsWith<IllegalArgumentException> {
       X500Name.parse("=Marshall T. Rose")
     }
 
@@ -63,7 +63,7 @@ internal class X500NameTest {
   }
 
   @Test fun nakedAttributeName() {
-    val e = assertThrows<IllegalArgumentException> {
+    val e = assertFailsWith<IllegalArgumentException> {
       X500Name.parse("CN,")
     }
 
@@ -71,7 +71,7 @@ internal class X500NameTest {
   }
 
   @Test fun unescapedEqualsInAttributeValue() {
-    val e = assertThrows<IllegalArgumentException> {
+    val e = assertFailsWith<IllegalArgumentException> {
       X500Name.parse("CN=Marshall = ")
     }
 

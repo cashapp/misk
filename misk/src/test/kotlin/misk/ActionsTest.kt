@@ -1,9 +1,9 @@
 package misk
 
-import misk.testing.assertThrows
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import kotlin.reflect.full.createType
+import kotlin.test.assertFailsWith
 
 internal class ActionsTest {
   @Test
@@ -17,7 +17,7 @@ internal class ActionsTest {
 
   @Test
   fun methodReferenceNotAllowedAsAction() {
-    assertThrows<IllegalArgumentException> {
+    assertFailsWith<IllegalArgumentException> {
       val t = TestAction()
       t::myActionMethod.asAction()
     }
@@ -25,7 +25,7 @@ internal class ActionsTest {
 
   @Test
   fun freeStandingFunctionNotAllowedAsAction() {
-    assertThrows<IllegalArgumentException> {
+    assertFailsWith<IllegalArgumentException> {
       ::myActionHandler.asAction()
     }
   }
