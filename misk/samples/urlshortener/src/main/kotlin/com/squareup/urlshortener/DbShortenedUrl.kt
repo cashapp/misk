@@ -18,9 +18,9 @@ class DbShortenedUrl() : DbEntity<DbShortenedUrl> {
   lateinit var long_url: String
 
   @Column(nullable = false)
-  lateinit var token: String
+  lateinit var token: UrlToken
 
-  constructor(long_url: String, token: String) : this() {
+  constructor(long_url: String, token: UrlToken) : this() {
     this.long_url = long_url
     this.token = token
   }

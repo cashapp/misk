@@ -26,7 +26,7 @@ class CreateShortUrlWebAction : WebAction {
     val token = urlStore.urlToToken(longUrl)
 
     val shortUrl = baseUrl.newBuilder()
-        .addPathSegment(token)
+        .addPathSegment(token.token)
         .build()
 
     return Response(shortUrl.toString())

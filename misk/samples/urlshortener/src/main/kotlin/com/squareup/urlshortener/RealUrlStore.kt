@@ -4,21 +4,19 @@ import misk.hibernate.Constraint
 import misk.hibernate.Query
 import misk.hibernate.Transacter
 import misk.hibernate.newQuery
+import misk.tokens.TokenGenerator
 import okhttp3.HttpUrl
-import okio.ByteString
-import java.security.SecureRandom
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class RealUrlStore : UrlStore {
   @Inject @UrlShortener lateinit var transacter: Transacter
+  @Inject lateinit var tokenGenerator: TokenGenerator
   @Inject lateinit var queryFactory: Query.Factory
 
-  val random = SecureRandom()
-
-  override fun urlToToken(longUrl: HttpUrl): String {
-    val token = generateRandomToken()
+  override fun urlToToken(longUrl: HttpUrl): UrlToken {
+    val token = UrlToken(tokenGenerator.generate(label = "url", length = 6))
 
     // TODO(jwilson): recover from collision with persisted tokens.
     transacter.transaction { session ->
@@ -28,7 +26,7 @@ class RealUrlStore : UrlStore {
     return token
   }
 
-  override fun tokenToUrl(token: String): HttpUrl? {
+  override fun tokenToUrl(token: UrlToken): HttpUrl? {
     return transacter.transaction { session ->
       val shortenedUrl = queryFactory.newQuery<ShortenedUrlQuery>()
           .token(token)
@@ -40,15 +38,8 @@ class RealUrlStore : UrlStore {
     }
   }
 
-  // TODO(jwilson): misk should provide a token generator.
-  fun generateRandomToken(): String {
-    val bytes = ByteArray(6)
-    random.nextBytes(bytes)
-    return ByteString.of(*bytes).base64Url()
-  }
-
   interface ShortenedUrlQuery : Query<DbShortenedUrl> {
     @Constraint("token")
-    fun token(name: String): ShortenedUrlQuery
+    fun token(token: UrlToken): ShortenedUrlQuery
   }
 }
