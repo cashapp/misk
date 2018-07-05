@@ -1,5 +1,5 @@
 import * as React from 'react'
-const Script = require('react-load-script')
+// const Script = require('react-load-script')
 import * as ReactDOM from 'react-dom'
 import axios from 'axios'
 
@@ -33,7 +33,7 @@ export class HelloComponent extends React.Component<HelloProps, {}> {
                     console.log('static import');
                 </script> */}
                 {/* <Script url="/_admin/dashboard/tab_dashboard.js" /> */}
-                <Script url="/_admin/test/import_test.js" />
+                {/* <Script url="/_admin/test/import_test.js" /> */}
             </div>
         )
     }

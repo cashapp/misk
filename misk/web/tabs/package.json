@@ -1,9 +1,0 @@
-{
-  "name": "misk-tabs",
-  "version": "0.0.1",
-  "scripts": {
-    "build": "for d in ./*/; do (cd ${d%*/} && echo 'clean' $(pwd) && yarn build); done",
-    "clean": "for d in ./*/; do (cd ${d%*/} && echo 'clean' $(pwd) && yarn clean); done",
-    "reinstall": "for d in ./*/; do (cd ${d%*/} && echo 'reinstall' $(pwd) && yarn reinstall); done"
-  }
-}
