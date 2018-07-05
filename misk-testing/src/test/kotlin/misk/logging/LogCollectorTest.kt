@@ -45,12 +45,12 @@ class LogCollectorTest {
   @Test
   fun filterByLogger() {
     val testLogger = getLogger<LogCollectorTest>()
-    val realLogger = getLogger<RealLogCollector>()
+    val moduleLogger = getLogger<LogCollectorModule>()
 
     testLogger.info("this is from the test logger")
-    realLogger.info("this is from the real logger")
-    assertThat(logCollector.takeMessages(loggerClass = RealLogCollector::class))
-        .containsExactly("this is from the real logger")
+    moduleLogger.info("this is from the module logger")
+    assertThat(logCollector.takeMessages(loggerClass = LogCollectorModule::class))
+        .containsExactly("this is from the module logger")
   }
 
   @Test

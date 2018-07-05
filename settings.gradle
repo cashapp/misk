@@ -1,8 +1,9 @@
-include ':misk-testing'
+include ':misk'
+include ':misk-gcp'
+include ':misk-gcp-testing'
 include ':misk-hibernate'
 include ':misk-hibernate-testing'
+include ':misk-testing'
 include ':samples:exemplar'
 include ':samples:exemplarchat'
 include ':samples:urlshortener'
-include ':misk'
-
