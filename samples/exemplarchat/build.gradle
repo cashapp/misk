@@ -21,7 +21,6 @@ dependencies {
   compile dep.guava
   compile dep.guice
   compile dep.logbackClassic
-
   compile project(':misk')
 
   testCompile project(':misk-testing')
