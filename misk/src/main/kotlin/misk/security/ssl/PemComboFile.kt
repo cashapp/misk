@@ -4,6 +4,7 @@ import okio.Buffer
 import okio.BufferedSource
 import okio.ByteString
 import okio.Okio
+import org.bouncycastle.asn1.ASN1Sequence
 import org.bouncycastle.asn1.pkcs.RSAPrivateKey
 import java.io.File
 import java.io.IOException
@@ -12,19 +13,6 @@ import java.security.cert.Certificate
 import java.security.cert.CertificateFactory
 import java.security.spec.KeySpec
 import java.security.spec.RSAPrivateCrtKeySpec
-import java.security.GeneralSecurityException
-import org.bouncycastle.util.io.pem.PemObject
-import com.google.api.client.http.UrlEncodedContent.getContent
-import org.bouncycastle.asn1.ASN1Object
-import org.bouncycastle.asn1.ASN1Sequence
-import org.bouncycastle.asn1.DERNull
-import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers
-import org.bouncycastle.asn1.x509.AlgorithmIdentifier
-import org.bouncycastle.asn1.pkcs.PrivateKeyInfo
-
-
-
-
 
 /**
  * A file containing a mix of PEM-encoded certificates and PEM-encoded private

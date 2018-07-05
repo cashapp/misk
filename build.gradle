@@ -42,6 +42,7 @@ ext {
           gcpCloudStorage      : 'com.google.cloud:google-cloud-storage:1.15.0',
           jCommander           : 'com.beust:jcommander:1.72',
           openTracing          : 'io.opentracing:opentracing-api:0.31.0',
+          openTracingUtil      : 'io.opentracing:opentracing-util:0.31.0',
           openTracingMock      : 'io.opentracing:opentracing-mock:0.31.0',
           openTracingOkHttp    : 'io.opentracing.contrib:opentracing-okhttp3:0.1.0',
           tracingJaeger        : 'com.uber.jaeger:jaeger-core:0.24.0',

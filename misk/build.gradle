@@ -48,22 +48,13 @@ dependencies {
   compile dep.jacksonJsr310
   compile dep.metricsCore
   compile dep.metricsParent
-  compile dep.metricsGraphite
-  compile dep.metricsSignalFx
   compile dep.jCommander
   compile dep.openTracing
+  compile dep.openTracingUtil
   compile dep.openTracingOkHttp
-  compile dep.tracingJaeger
-  compile dep.tracingZipkin
-  compile dep.zipkinReporter
-  compile dep.zipkinBrave
   compile dep.retrofit
   compile dep.retrofitMoshi
   compile dep.retrofitWire
-  compile dep.gcpLogback
-  compile dep.hikariCp
-  compile dep.awsApi
-  compile dep.awsLogging
   compile dep.logbackClassic
   compile dep.slf4jApi
   compile dep.jaxbApi
