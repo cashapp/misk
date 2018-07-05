@@ -1,5 +1,6 @@
 package misk.web.actions
 
+import misk.Action
 import misk.web.NetworkChain
 import misk.web.NetworkInterceptor
 import misk.web.Request
@@ -11,17 +12,36 @@ import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
 import java.io.IOException
 import java.net.HttpURLConnection
+import javax.inject.Inject
+
+/**
+ * UpstreamResourceInterceptor
+ *
+ * Rules
+ * - No overlapping mapping prefixes
+ *    "/_admin/config/" and "/_admin/config/subtab/" will not resolve consistently
+ * - All upstreamBaseUrl ends with "/"
+ * - All local prefix mappings end with "/"
+ *
+ * Expected Functionality
+ * - Mappings following above rules are used to initialize interceptor
+ * - Interceptor attempts to match incoming request paths against mappings
+ * - If match found, incoming request path is appended to host + port of mapping.upstreamBaseUrl
+ * - Else, request proceeds
+ */
+
 
 class UpstreamResourceInterceptor(
   private val client: OkHttpClient,
   private val mappings: List<Mapping>
 ) : NetworkInterceptor {
-//  TODO(adrw) enforce no prefix overlapping
+//  TODO(adrw) enforce no prefix overlapping https://github.com/square/misk/issues/303
   override fun intercept(chain: NetworkChain): Response<*> {
     val matchedMapping = findMappingMatch(chain) ?: return chain.proceed(chain.request)
-    val proxyUrl = HttpUrl.parse(
-        matchedMapping.upstreamBaseUrl.toString() + chain.request.url.encodedPath().removePrefix(
-            matchedMapping.localPathPrefix))!!
+    val proxyUrl = matchedMapping.upstreamBaseUrl.newBuilder()
+        .encodedPath(chain.request.url.encodedPath())
+        .query(chain.request.url.query())
+        .build()
     return forwardRequestTo(chain.request, proxyUrl)
   }
 
@@ -60,7 +80,7 @@ class UpstreamResourceInterceptor(
    * localPathPrefix: `/_admin/`
    * upstreamBaseUrl: `http://localhost:3000/`
    *
-   * An incoming request then for `/_admin/config.js` would route to `http://localhost:3000/config.js`.
+   * An incoming request then for `/_admin/config.js` would route to `http://localhost:3000/_admin/config.js`.
    */
   data class Mapping(
     val localPathPrefix: String,
@@ -69,7 +89,18 @@ class UpstreamResourceInterceptor(
     init {
       require(localPathPrefix.endsWith("/") &&
           localPathPrefix.startsWith("/") &&
-          upstreamBaseUrl.encodedPath().endsWith("/"))
+          upstreamBaseUrl.encodedPath().endsWith("/") &&
+          upstreamBaseUrl.pathSegments().size == 1)
+    }
+  }
+
+  class Factory @Inject internal constructor() : NetworkInterceptor.Factory {
+    override fun create(action: Action): NetworkInterceptor? {
+      return UpstreamResourceInterceptor(okhttp3.OkHttpClient(), mutableListOf<Mapping>(
+          UpstreamResourceInterceptor.Mapping("/_admin/test/", HttpUrl.parse("http://localhost:8000/")!!),
+          UpstreamResourceInterceptor.Mapping("/_admin/dashboard/", HttpUrl.parse("http://localhost:3100/")!!),
+          UpstreamResourceInterceptor.Mapping("/_admin/config/", HttpUrl.parse("http://localhost:3200/")!!)
+      ))
     }
   }
 }
