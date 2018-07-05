@@ -1,5 +1,6 @@
 package misk.web.actions
 
+import misk.testing.assertThrows
 import misk.web.NetworkChain
 import misk.web.Request
 import misk.web.Response
@@ -14,17 +15,15 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.lang.IllegalArgumentException
 import java.net.HttpURLConnection
 import kotlin.reflect.KFunction
 
 internal class UpstreamResourceInterceptorTest {
   val upstreamServer = MockWebServer()
   lateinit var mapping: UpstreamResourceInterceptor.Mapping
+  lateinit var mappingTestMapping: UpstreamResourceInterceptor.Mapping
   lateinit var interceptor: UpstreamResourceInterceptor
-
-  // TODO: probably discourage path rewriting
-  // ie. dev and production ending paths are the same
-  // localhost:3001/_admin/config -> prod.misk/_admin/config
 
   @BeforeEach
   internal fun setUp() {
@@ -32,7 +31,7 @@ internal class UpstreamResourceInterceptorTest {
 
     mapping = UpstreamResourceInterceptor.Mapping(
         "/local/prefix/",
-        upstreamServer.url("/upstreamprefix/"))
+        upstreamServer.url("/"))
 
     interceptor = UpstreamResourceInterceptor(OkHttpClient(), mutableListOf(mapping))
   }
@@ -43,9 +42,58 @@ internal class UpstreamResourceInterceptorTest {
   }
 
   @Test
-  internal fun requestForwardedToUpstreamServerIfPathMatches() {
+  internal fun mappingFailsIfLocalWithoutLeadingSlash() {
+    assertThrows<IllegalArgumentException> {
+      mappingTestMapping = UpstreamResourceInterceptor.Mapping(
+          "local/prefix/",
+          upstreamServer.url("/"))
+    }
+  }
+
+  @Test
+  internal fun mappingFailsIfLocalWithoutTrailingSlash() {
+    assertThrows<IllegalArgumentException> {
+      mappingTestMapping = UpstreamResourceInterceptor.Mapping(
+          "/local/prefix",
+          upstreamServer.url("/"))
+    }
+  }
+
+  @Test
+  internal fun mappingFailsIfUpstreamHasPathSegments() {
+    assertThrows<IllegalArgumentException> {
+      mappingTestMapping = UpstreamResourceInterceptor.Mapping(
+          "/local/prefix/",
+          upstreamServer.url("/upstream/prefix/"))
+    }
+  }
+
+  @Test
+  internal fun requestForwardedToUpstreamServerIfPathMatchesWithTrailingSlash() {
     upstreamServer.enqueue(MockResponse()
-        .setResponseCode(404)
+        .setResponseCode(418)
+        .addHeader("UpstreamHeader", "UpstreamHeaderValue")
+        .setBody("I am an intercepted response!"))
+
+    val request = Request(
+        HttpUrl.parse("http://localpost/local/prefix/tacos/")!!,
+        body = Buffer()
+    )
+
+    val response = interceptor.intercept(FakeNetworkChain(request))
+
+    assertThat(response.statusCode).isEqualTo(418)
+    assertThat(response.headers["UpstreamHeader"]).isEqualTo("UpstreamHeaderValue")
+    assertThat(response.readUtf8()).isEqualTo("I am an intercepted response!")
+
+    val recordedRequest = upstreamServer.takeRequest()
+    assertThat(recordedRequest.path).isEqualTo("/local/prefix/tacos/")
+  }
+
+  @Test
+  internal fun requestForwardedToUpstreamServerIfPathMatchesWithoutTrailingSlash() {
+    upstreamServer.enqueue(MockResponse()
+        .setResponseCode(418)
         .addHeader("UpstreamHeader", "UpstreamHeaderValue")
         .setBody("I am an intercepted response!"))
 
@@ -56,12 +104,12 @@ internal class UpstreamResourceInterceptorTest {
 
     val response = interceptor.intercept(FakeNetworkChain(request))
 
-    assertThat(response.statusCode).isEqualTo(404)
+    assertThat(response.statusCode).isEqualTo(418)
     assertThat(response.headers["UpstreamHeader"]).isEqualTo("UpstreamHeaderValue")
     assertThat(response.readUtf8()).isEqualTo("I am an intercepted response!")
 
     val recordedRequest = upstreamServer.takeRequest()
-    assertThat(recordedRequest.path).isEqualTo("/upstreamprefix/tacos")
+    assertThat(recordedRequest.path).isEqualTo("/local/prefix/tacos")
   }
 
   @Test
@@ -79,7 +127,7 @@ internal class UpstreamResourceInterceptorTest {
 
   @Test
   internal fun returnsServerNotReachable() {
-    val urlThatFailed = upstreamServer.url("/upstreamprefix/tacos")
+    val urlThatFailed = upstreamServer.url("/local/prefix/tacos")
     upstreamServer.shutdown()
 
     val request = Request(
