@@ -19,7 +19,7 @@ import javax.inject.Inject
  *
  * Rules
  * - No overlapping mapping prefixes
- *    "_admin/config/" and "_admin/config/subtab/" will not resolve consistently
+ *    "/_admin/config/" and "/_admin/config/subtab/" will not resolve consistently
  * - All upstreamBaseUrl ends with "/"
  * - All local prefix mappings end with "/"
  *
@@ -38,9 +38,10 @@ class UpstreamResourceInterceptor(
 //  TODO(adrw) enforce no prefix overlapping https://github.com/square/misk/issues/303
   override fun intercept(chain: NetworkChain): Response<*> {
     val matchedMapping = findMappingMatch(chain) ?: return chain.proceed(chain.request)
-    val proxyUrl = HttpUrl.parse(
-        matchedMapping.upstreamBaseUrl.toString().dropLast(1)
-            + chain.request.url.encodedPath())!!
+    val proxyUrl = matchedMapping.upstreamBaseUrl.newBuilder()
+        .encodedPath(chain.request.url.encodedPath())
+        .query(chain.request.url.query())
+        .build()
     return forwardRequestTo(chain.request, proxyUrl)
   }
 
