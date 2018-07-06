@@ -14,13 +14,10 @@
     "build:lib": "npm run lib",
     "dist": "npm run lib",
     "lib": "yarn install && yarn pre && webpack",
-    "pre": "touch ../common/node_modules/_.tmp && rm -rf ../common/node_modules && cp -r ../common node_modules/@misk/common",
+    "pre": "mkdir -p ../common/node_modules && rm -rf ../common/node_modules && mkdir -p node_modules/@misk/common && cp -r ../common node_modules/@misk",
     "reinstall": "rm -rf node_modules/; yarn install"
   },
   "dependencies": {
-    
-  },
-  "devDependencies": {
     "@types/node": "^10.3.0",
     "@blueprintjs/core": "^2.3.1",
     "@blueprintjs/icons": "^2.2.1",
@@ -36,7 +33,9 @@
     "react-router-dom": "^4.3.1",
     "redux": "^4.0.0",
     "styled-components": "^3.3.3",
-    "skeleton-css": "^2.0.4",
+    "skeleton-css": "^2.0.4"
+  },
+  "devDependencies": {
     "@types/react": "^16.3.16",
     "@types/react-dom": "^16.0.5",
     "awesome-typescript-loader": "^5.0.0",
