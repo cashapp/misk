@@ -47,8 +47,7 @@ class UpstreamResourceInterceptor(
 
   private fun findMappingMatch(chain: NetworkChain): Mapping? {
     for (mapping in mappings) {
-      if (!chain.request.url.encodedPath().startsWith(mapping.localPathPrefix)) continue
-      return mapping
+      if (chain.request.url.encodedPath().startsWith(mapping.localPathPrefix)) return mapping
     }
     return null
   }

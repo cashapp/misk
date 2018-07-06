@@ -1,24 +1,17 @@
 import { Menu, MenuItem } from "@blueprintjs/core"
 import * as React from "react"
-import { Helmet } from "react-helmet"
-import { Link } from "react-router-dom"
-import { IMenuItem } from "../utils/menu";
+import styled from "styled-components" 
+import { IMenuItem } from "../utils/menu"
 
 interface ISidebarProps {
   menuItems: IMenuItem[]
 }
 
-
+const Sidebar = styled.div`
+  position: absolute;
+`
 
 export class SidebarComponent extends React.Component<ISidebarProps, {}> {
-  // const renderedMenuItems = {
-  //   this.props.menuItems.map(
-  //     ({ text, icon="document", className="pt-minimal", url } : any) => (
-  //       <Link key={url} to={url}>
-  //         <MenuItem key={url} to={url} className={className} icon={icon} text={text}/>
-  //       </Link>)
-  //     )
-  // }
   private renderedMenuItems: any
 
   constructor(props: ISidebarProps) {
@@ -32,11 +25,11 @@ export class SidebarComponent extends React.Component<ISidebarProps, {}> {
 
   render() {
     return (
-      <div style={{position: `absolute`,}}>
+      <Sidebar>
         <Menu>
           {this.renderedMenuItems}
         </Menu>
-      </div>
+      </Sidebar>
     )
   }
 }

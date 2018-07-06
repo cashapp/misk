@@ -5,11 +5,12 @@
   "repository": "git@github.com:square/misk.git",
   "author": "Square/Misk Authors (https://github.com/square/misk/graphs/contributors)",
   "scripts": {
-    "build": "cross-env NODE_ENV=production webpack",
+    "build": "yarn pre && cross-env NODE_ENV=production webpack",
     "clean": "rm -rf dist node_modules",
-    "install:misknpm": "cp -r ../../@misk node_modules",
+    "install:misknpm": "rm -rf ../../@misk/common/node_modules && cp -r ../../@misk node_modules",
+    "pre": "yarn install:misknpm",
     "reinstall": "yarn clean && yarn install && yarn install:misknpm",
-    "start": "cross-env NODE_ENV=development webpack-dev-server",
+    "start": "yarn pre && cross-env NODE_ENV=development webpack-dev-server",
     "test": "jest --coverage"
   },
   "dependencies": {
@@ -24,13 +25,13 @@
     "react-redux": "^5.0.7",
     "react-router": "^4.3.1",
     "react-router-dom": "^4.3.1",
-    "redux": "^4.0.0"
+    "redux": "^4.0.0",
+    "styled-components": "^3.3.3"
   },
   "devDependencies": {
     "@types/react": "^16.4.4",
     "@types/react-dom": "^16.0.6",
     "@types/react-helmet": "^5.0.6",
-    "@types/react-loadable": "^5.4.0",
     "@types/react-hot-loader": "^4.1.0",
     "@types/react-redux": "^6.0.3",
     "@types/react-router": "^4.0.28",

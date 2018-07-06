@@ -1,5 +1,5 @@
 {
-  "name": "misk-tab-admin-dashboard",
+  "name": "misk-tab-admin-config",
   "version": "0.0.2",
   "main": "src/index.ts",
   "repository": "git@github.com:square/misk.git",
@@ -32,6 +32,7 @@
     "@types/react": "^16.4.4",
     "@types/react-dom": "^16.0.6",
     "@types/react-helmet": "^5.0.6",
+    "@types/react-loadable": "^5.4.0",
     "@types/react-hot-loader": "^4.1.0",
     "@types/react-redux": "^6.0.3",
     "@types/react-router": "^4.0.28",

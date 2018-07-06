@@ -23,7 +23,7 @@ module.exports = {
     publicPath: "/_admin/config/"
   },
   devServer: {
-    port: '3200',
+    port: '3210',
     hot: true,
     historyApiFallback: true
   },
@@ -62,5 +62,5 @@ module.exports = {
       new webpack.HotModuleReplacementPlugin()
     ]
     : [HTMLWebpackPluginConfig, DefinePluginConfig],
-  externals: miskCommon.externals
+    externals: miskCommon.externals
 }
