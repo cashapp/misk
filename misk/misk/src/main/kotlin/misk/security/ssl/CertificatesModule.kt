@@ -4,7 +4,7 @@ import com.google.inject.TypeLiteral
 import misk.scope.ActionScoped
 import misk.scope.ActionScopedProvider
 import misk.scope.ActionScopedProviderModule
-import misk.security.x509.X500Name
+import misk.security.cert.X500Name
 import java.security.cert.X509Certificate
 import javax.inject.Inject
 import javax.servlet.http.HttpServletRequest
@@ -27,7 +27,7 @@ internal class CertificatesModule : ActionScopedProviderModule() {
   }
 
   private class ClientCertProvider : ActionScopedProvider<Array<X509Certificate>?> {
-    @Inject lateinit @JvmSuppressWildcards var request: ActionScoped<HttpServletRequest>
+    @Inject @JvmSuppressWildcards lateinit var request: ActionScoped<HttpServletRequest>
 
     override fun get(): Array<X509Certificate>? {
       @Suppress("UNCHECKED_CAST")
