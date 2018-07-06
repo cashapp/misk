@@ -1,4 +1,4 @@
-package misk.security.x509
+package misk.security.cert
 
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test

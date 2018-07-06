@@ -2,7 +2,7 @@ package misk.security.ssl
 
 import javax.inject.Qualifier
 import misk.scope.ActionScoped
-import misk.security.x509.X500Name
+import misk.security.cert.X500Name
 import java.security.cert.X509Certificate
 
 /**

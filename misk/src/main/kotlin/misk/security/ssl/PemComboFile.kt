@@ -42,12 +42,11 @@ data class PemComboFile(
   }
 
   companion object {
-    fun load(cert_key_combo: String, passphrase: String? = null): PemComboFile {
+    fun parse(certKeyComboSource: BufferedSource, passphrase: String? = null): PemComboFile {
       val certificates = mutableListOf<ByteString>()
       val privateRsaKeys = mutableListOf<ByteString>()
       val privateKeys = mutableListOf<ByteString>()
 
-      val certKeyComboSource = Okio.buffer(Okio.source(File(cert_key_combo)))
       val lines = certKeyComboSource.lines().iterator()
       while (lines.hasNext()) {
         val line = lines.next()
@@ -68,13 +67,16 @@ data class PemComboFile(
           line.isBlank() -> {
             // This is ok, just keep going
           }
-          else -> throw IOException("unexpected line: $line in $cert_key_combo")
+          else -> throw IOException("unexpected line: $line")
         }
       }
 
       return PemComboFile(certificates, privateRsaKeys, privateKeys,
           passphrase ?: "password")
     }
+
+    fun load(cert_key_combo: String, passphrase: String? = null) =
+        parse(Okio.buffer(Okio.source(File(cert_key_combo))), passphrase)
 
     fun convertPKCS1toPKCS8(pkcs1Key: ByteString): KeySpec {
       val keyObject = ASN1Sequence.fromByteArray(pkcs1Key.toByteArray())

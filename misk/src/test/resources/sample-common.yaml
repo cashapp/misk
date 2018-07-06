@@ -1,0 +1,11 @@
+web:
+  port: 1234
+  idle_timeout: 30000
+
+datasources:
+  evently_1:
+    port: 2929
+  evently_2:
+    port: 3101
+  evently_3:
+    port: 4056
