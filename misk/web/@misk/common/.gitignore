@@ -1,6 +1,0 @@
-build
-dist
-lib
-node_modules
-.npmrc
-.DS_Store
