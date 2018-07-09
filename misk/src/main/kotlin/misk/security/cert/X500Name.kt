@@ -1,4 +1,4 @@
-package misk.security.x509
+package misk.security.cert
 
 class X500Name(private val components: Map<String, String>) {
   val commonName = get("CN")
