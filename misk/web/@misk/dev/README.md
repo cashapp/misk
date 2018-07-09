@@ -48,8 +48,3 @@ Included Libraries
     "webpack-cli": "^3.0.8",
     "webpack-dev-server": "^3.1.4"
 ```
-
-Authors
----
-- Square ([@square](https://github.com/square/))
-- Andrew Paradi ([@adrw](https://github.com/adrw/))

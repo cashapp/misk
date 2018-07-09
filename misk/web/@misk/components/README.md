@@ -15,8 +15,3 @@ $ yarn add @misk/components
 Components
 ---
 - PathDebugComponent: outputs values passed in by props for `hash`, `pathname`, and `search` in React-Router instance
-
-Authors
----
-- Square ([@square](https://github.com/square/))
-- Andrew Paradi ([@adrw](https://github.com/adrw/))
