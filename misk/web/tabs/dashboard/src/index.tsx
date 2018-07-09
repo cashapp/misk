@@ -8,6 +8,18 @@ import { applyMiddleware, compose, createStore } from "redux"
 import App from "./App"
 import rootReducer from "./reducers"
 
+export interface IAppState {
+  count: number,
+  router: {
+    location: {
+      pathname: string,
+      search: string,
+      hash: string
+    },
+    action: string
+  }
+}
+
 const history = createBrowserHistory()
 
 const composeEnhancer: typeof compose = (window as any).__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose

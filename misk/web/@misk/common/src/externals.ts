@@ -1,17 +1,31 @@
 export const externals = [{
-  'lodash': {
-    root: '_',
-    commonjs: 'lodash',
-    commonjs2: 'lodash',
-    amd: 'lodash',
-  },
+  '@blueprintjs/core': {
+    root: 'BlueprintjsCore',
+    commonjs: '@blueprintjs/core',
+    commonjs2: '@blueprintjs/core',
+    amd: '@blueprintjs/core'
+  }
 }, {
-  'rxjs': {
-    root: 'Rx',
-    commonjs: 'rxjs',
-    commonjs2: 'rxjs',
-    amd: 'rxjs',
-  },
+  '@blueprintjs/icons': {
+    root: 'BlueprintjsIcons',
+    commonjs: '@blueprintjs/icons',
+    commonjs2: '@blueprintjs/icons',
+    amd: '@blueprintjs/icons'
+  }
+}, {
+  'axios': {
+    root: 'Axios',
+    commonjs: 'axios',
+    commonjs2: 'axios',
+    amd: 'axios'
+    },
+}, {
+  'history': {
+    root: 'History',
+    commonjs: 'history',
+    commonjs2: 'history',
+    amd: 'history'
+    },
 }, {
   'react': {
     root: 'React',
@@ -27,74 +41,53 @@ export const externals = [{
     amd: 'react-dom'
   }
 }, {
-  'prop-types': {
-    root: 'PropTypes',
-    commonjs: 'prop-types',
-    commonjs2: 'prop-types',
-    amd: 'prop-types',
-  }
+  'react-helmet': {
+    root: 'ReactHelmet',
+    commonjs: 'react-helmet',
+    commonjs2: 'react-helmet',
+    amd: 'react-helmet'
+    },
 }, {
-  'frint': {
-    root: 'Frint',
-    commonjs: 'frint',
-    commonjs2: 'frint',
-    amd: 'frint'
-  },
+  'react-hot-loader': {
+    root: 'ReactHotLoader',
+    commonjs: 'react-hot-loader',
+    commonjs2: 'react-hot-loader',
+    amd: 'react-hot-loader'
+    },
 }, {
-  'frint-store': {
-    root: 'FrintStore',
-    commonjs: 'frint-store',
-    commonjs2: 'frint-store',
-    amd: 'frint-store'
-  },
+  'react-redux': {
+    root: 'ReactRedux',
+    commonjs: 'react-redux',
+    commonjs2: 'react-redux',
+    amd: 'react-redux'
+    },
 }, {
-  'frint-react': {
-    root: 'FrintReact',
-    commonjs: 'frint-react',
-    commonjs2: 'frint-react',
-    amd: 'frint-react'
-  },
+  'react-router': {
+    root: 'ReactRouter',
+    commonjs: 'react-router',
+    commonjs2: 'react-router',
+    amd: 'react-router'
+    },
 }, {
-  'frint-router': {
-    root: 'FrintRouter',
-    commonjs: 'frint-router',
-    commonjs2: 'frint-router',
-    amd: 'frint-router'
-  },
+  'react-router-dom': {
+    root: 'ReactRouterDom',
+    commonjs: 'react-router-dom',
+    commonjs2: 'react-router-dom',
+    amd: 'react-router-dom'
+    },
 }, {
-  'frint-router-react': {
-    root: 'FrintRouterReact',
-    commonjs: 'frint-router-react',
-    commonjs2: 'frint-router-react',
-    amd: 'frint-router-react'
-  }
+  'redux': {
+    root: 'Redux',
+    commonjs: 'redux',
+    commonjs2: 'redux',
+    amd: 'redux'
+    },
 }, {
-  'frint-router/BrowserRouterService': {
-    root: 'FrintRouterBrowserRouterService',
-    commonjs: 'frint-router/BrowserRouterService',
-    commonjs2: 'frint-router/BrowserRouterService',
-    amd: 'frint-router/BrowserRouterService'
-  }
-}, {
-  '@blueprintjs/core': {
-    root: 'BlueprintjsCore',
-    commonjs: '@blueprintjs/core',
-    commonjs2: '@blueprintjs/core',
-    amd: '@blueprintjs/core'
-  }
-}, {
-  'react-transition-group': {
-    root: 'ReactTransitionGroup',
-    commonjs: 'react-transition-group',
-    commonjs2: 'react-transition-group',
-    amd: 'react-transition-group'
-  }
-}, {
-    'axios': {
-        root: 'Axios',
-        commonjs: 'axios',
-        commonjs2: 'axios',
-        amd: 'axios'
+  'styled-components': {
+    root: 'StyledComponents',
+    commonjs: 'styled-components',
+    commonjs2: 'styled-components',
+    amd: 'styled-components'
     },
 }];
 

@@ -62,5 +62,5 @@ module.exports = {
       new webpack.HotModuleReplacementPlugin()
     ]
     : [HTMLWebpackPluginConfig, DefinePluginConfig],
-    externals: miskCommon.externals
+  externals: miskCommon.externals
 }

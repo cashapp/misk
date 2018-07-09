@@ -71,25 +71,7 @@ $ yarn install --save @misk/common
 Included Libraries
 ---
 
-```JSON
-  "@blueprintjs/core": "^2.3.1",
-  "@types/history": "^4.6.2",
-  "@types/react": "^16.3.16",
-  "@types/react-dom": "^16.0.5",
-  "frint": "^5.4.4",
-  "frint-config": "^5.4.4",
-  "frint-react": "^5.4.4",
-  "frint-router": "^5.4.4",
-  "frint-router-react": "^5.4.4",
-  "frint-store": "^5.4.4",
-  "lodash": "^4.17.10",
-  "prop-types": "^15.6.1",
-  "react": "^16.4.0",
-  "react-dom": "^16.4.0",
-  "react-transition-group": "^2.3.1",
-  "rxjs": "^6.2.0",
-  "skeleton-css": "^2.0.4"
-```
+- Check in `src/externals.ts`
 
 Included Styles
 ---

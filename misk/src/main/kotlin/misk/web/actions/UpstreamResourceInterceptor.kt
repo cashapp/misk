@@ -47,8 +47,7 @@ class UpstreamResourceInterceptor(
 
   private fun findMappingMatch(chain: NetworkChain): Mapping? {
     for (mapping in mappings) {
-      if (!chain.request.url.encodedPath().startsWith(mapping.localPathPrefix)) continue
-      return mapping
+      if (chain.request.url.encodedPath().startsWith(mapping.localPathPrefix)) return mapping
     }
     return null
   }
@@ -97,6 +96,7 @@ class UpstreamResourceInterceptor(
   class Factory @Inject internal constructor() : NetworkInterceptor.Factory {
     override fun create(action: Action): NetworkInterceptor? {
       return UpstreamResourceInterceptor(okhttp3.OkHttpClient(), mutableListOf<Mapping>(
+          UpstreamResourceInterceptor.Mapping("/@misk/", HttpUrl.parse("http://localhost:9100/")!!),
           UpstreamResourceInterceptor.Mapping("/_admin/test/", HttpUrl.parse("http://localhost:8000/")!!),
           UpstreamResourceInterceptor.Mapping("/_admin/dashboard/", HttpUrl.parse("http://localhost:3100/")!!),
           UpstreamResourceInterceptor.Mapping("/_admin/config/", HttpUrl.parse("http://localhost:3200/")!!)

@@ -117,7 +117,7 @@ class TransacterTest {
 
   @Test
   fun nestedTransactionUnsupportedWithDerivativeTransacter() {
-    val exception = assertThrows<IllegalStateException> {
+    val exception = assertFailsWith<IllegalStateException> {
       transacter.transaction {
         transacter.noRetries().transaction {
         }
@@ -155,7 +155,7 @@ class TransacterTest {
   @Test
   fun nonRetryableExceptionsNotRetried() {
     val callCount = AtomicInteger()
-    assertThrows<NonRetryableException> {
+    assertFailsWith<NonRetryableException> {
       transacter.transaction {
         callCount.getAndIncrement()
         throw NonRetryableException()
@@ -167,7 +167,7 @@ class TransacterTest {
   @Test
   fun noRetriesFailsImmediately() {
     val callCount = AtomicInteger()
-    assertThrows<RetryTransactionException> {
+    assertFailsWith<RetryTransactionException> {
       transacter.noRetries().transaction {
         callCount.getAndIncrement()
         throw RetryTransactionException()
