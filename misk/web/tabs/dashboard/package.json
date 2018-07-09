@@ -7,15 +7,17 @@
   "scripts": {
     "build": "cross-env NODE_ENV=production webpack",
     "clean": "rm -rf dist node_modules",
-    "pre": "yarn install:misknpm",
     "reinstall": "yarn clean && yarn install",
     "start": "cross-env NODE_ENV=development webpack-dev-server",
     "test": "jest --coverage"
   },
   "dependencies": {
-    "@misk/common": "latest"
+    "@misk/common": "latest",
+    "@misk/components": "latest"
   },
   "devDependencies": {
-    "@misk/dev": "latest"
+    "@misk/dev": "latest",
+    "webpack-bundle-analyzer": "^2.13.1",
+    "webpack-node-externals": "^1.7.2"
   }
 }

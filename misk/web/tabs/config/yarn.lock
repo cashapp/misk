@@ -39,6 +39,30 @@
     reflect-metadata "^0.1.12"
     tslib "^1.8.1"
 
+<<<<<<< HEAD
+=======
+"@misk/common@^0.0.2":
+  version "0.0.2"
+  resolved "https://registry.yarnpkg.com/@misk/common/-/common-0.0.2.tgz#b66999c6fc46b1485f61c5867d80062d76beabde"
+  dependencies:
+    "@blueprintjs/core" "^2.3.1"
+    "@blueprintjs/icons" "^2.2.1"
+    "@types/node" "^10.3.0"
+    axios "^0.18.0"
+    connected-react-router "^4.3.0"
+    history "^4.7.2"
+    react "^16.4.1"
+    react-dom "^16.4.1"
+    react-helmet "^5.2.0"
+    react-hot-loader "^4.3.3"
+    react-redux "^5.0.7"
+    react-router "^4.3.1"
+    react-router-dom "^4.3.1"
+    redux "^4.0.0"
+    skeleton-css "^2.0.4"
+    styled-components "^3.3.3"
+
+>>>>>>> a1fe6ba... Cleanup. Hardcode miskCommonExternals in tab webpack because not exporting correctly from npm ts module
 "@misk/common@latest":
   version "0.0.5"
   resolved "https://registry.yarnpkg.com/@misk/common/-/common-0.0.5.tgz#2fafb02c0c0b839e7e717fa733a15950884abc1f"
@@ -60,6 +84,15 @@
     skeleton-css "^2.0.4"
     styled-components "^3.3.3"
 
+<<<<<<< HEAD
+=======
+"@misk/components@latest":
+  version "0.0.5"
+  resolved "https://registry.yarnpkg.com/@misk/components/-/components-0.0.5.tgz#aaf88d671ad677b16a8f621c58098ef16ffe3b12"
+  dependencies:
+    "@misk/common" "^0.0.2"
+
+>>>>>>> a1fe6ba... Cleanup. Hardcode miskCommonExternals in tab webpack because not exporting correctly from npm ts module
 "@misk/dev@latest":
   version "0.0.5"
   resolved "https://registry.yarnpkg.com/@misk/dev/-/dev-0.0.5.tgz#a5b9c78e7d9bd1f582e7924492297e6cf5234df7"
@@ -107,6 +140,10 @@
 "@types/node@*":
   version "10.5.0"
   resolved "https://npm.vip.global.square/@types%2fnode/-/node-10.5.0.tgz#f5b61395c09b47ac46aaa1452750c9a72b3d3673"
+
+"@types/node@^10.3.0":
+  version "10.5.2"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-10.5.2.tgz#f19f05314d5421fe37e74153254201a7bf00a707"
 
 "@types/react-dom@^16.0.6":
   version "16.0.6"
