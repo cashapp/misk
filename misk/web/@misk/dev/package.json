@@ -7,9 +7,6 @@
     "type": "git",
     "url": "git@github.com:square/misk.git"
   },
-  "peerDependencies": {
-    "@misk/common": "^0.0.2"
-  },
   "dependencies": {
     "@types/react": "^16.4.4",
     "@types/react-dom": "^16.0.6",
