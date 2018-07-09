@@ -1,27 +1,36 @@
 {
   "name": "@misk/common",
-  "version": "0.0.2",
+  "version": "0.0.5",
   "description": "Microservice Kontainer Common Libraries, Externals, Styles",
   "author": "Square/Misk Authors (https://github.com/square/misk/graphs/contributors)",
   "main": "lib/index.js",
+  "module": "lib/index.js",
+  "engines": {
+    "node": ">=7.8.0"
+  },
+  "files": [
+    "lib"
+  ],
   "style": "lib/styles.js",
   "repository": {
     "type": "git",
     "url": "git@github.com:square/misk.git"
   },
   "scripts": {
-    "lib": "yarn install && webpack",
     "build:lib": "npm run lib",
     "build": "npm run lib",
     "dist": "npm run lib",
-    "reinstall": "rm -rf node_modules/; yarn install"
+    "lib": "webpack",
+    "lint": "echo no lint",
+    "prepare": "yarn run lint && yarn run test && yarn run lib",
+    "reinstall": "rm -rf node_modules/; yarn install",
+    "test": "echo no tests"
   },
   "dependencies": {
-    "@types/node": "^10.3.0",
     "@blueprintjs/core": "^2.3.1",
     "@blueprintjs/icons": "^2.2.1",
-    "connected-react-router": "^4.3.0",
     "axios": "^0.18.0",
+    "connected-react-router": "^4.3.0",
     "history": "^4.7.2",
     "react": "^16.4.1",
     "react-dom": "^16.4.1",
@@ -30,30 +39,12 @@
     "react-redux": "^5.0.7",
     "react-router": "^4.3.1",
     "react-router-dom": "^4.3.1",
+    "react-transition-group": "^2.2.1",
     "redux": "^4.0.0",
-    "styled-components": "^3.3.3",
-    "skeleton-css": "^2.0.4"
+    "skeleton-css": "^2.0.4",
+    "styled-components": "^3.3.3"
   },
   "devDependencies": {
-    "@types/react": "^16.3.16",
-    "@types/react-dom": "^16.0.5",
-    "awesome-typescript-loader": "^5.0.0",
-    "css-loader": "^0.28.11",
-    "node-sass": "^4.9.0",
-    "react-transition-group": "^2.3.1",
-    "sass-loader": "^7.0.1",
-    "style-loader": "^0.21.0",
-    "tslint": "^5.10.0",
-    "tslint-blueprint": "^0.1.0",
-    "tslint-clean-code": "^0.2.7",
-    "tslint-config-prettier": "^1.13.0",
-    "tslint-consistent-codestyle": "^1.13.1",
-    "tslint-eslint-rules": "^5.3.1",
-    "tslint-immutable": "^4.6.0",
-    "tslint-react": "^3.6.0",
-    "tslint-sonarts": "^1.7.0",
-    "typescript": "^2.9.1",
-    "webpack": "^4.10.2",
-    "webpack-cli": "^3.0.3"
+    "@misk/dev": "^0.0.5"
   }
 }
