@@ -1,7 +1,7 @@
 {
-  "name": "@misk/components",
+  "name": "misk-common",
   "version": "0.0.2",
-  "description": "Microservice Kontainer Common Components",
+  "description": "Microservice Kontainer Common Libraries, Externals, Styles",
   "author": "Square/Misk Authors (https://github.com/square/misk/graphs/contributors)",
   "main": "lib/index.js",
   "module": "lib/index.js",
@@ -17,12 +17,11 @@
     "url": "git@github.com:square/misk.git"
   },
   "scripts": {
-    "build": "npm run lib",
     "build:lib": "npm run lib",
+    "build": "npm run lib",
     "dist": "npm run lib",
-    "lib": "yarn pre && webpack",
+    "lib": "webpack",
     "lint": "echo no lint",
-    "pre": "mkdir -p ../common/node_modules && rm -rf ../common/node_modules && mkdir -p node_modules/@misk/common && cp -r ../common node_modules/@misk",
     "prepare": "yarn run lint && yarn run test && yarn run lib",
     "reinstall": "rm -rf node_modules/; yarn install",
     "test": "echo no tests"

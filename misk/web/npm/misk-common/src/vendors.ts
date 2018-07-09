@@ -1,0 +1,12 @@
+(<any>window).BlueprintjsCore = require('@blueprintjs/core');
+(<any>window).BlueprintjsIcons = require('@blueprintjs/icons');
+(<any>window).Axios = require('axios');
+(<any>window).React = require('react');
+(<any>window).ReactDOM = require('react-dom');
+(<any>window).ReactHelmet = require('react-helmet');
+(<any>window).ReactHotLoader = require('react-hot-loader');
+(<any>window).ReactRedux = require('react-redux');
+(<any>window).ReactRouter = require('react-router');
+(<any>window).ReactRouterDom = require('react-router-dom');
+(<any>window).Redux = require('redux');
+(<any>window).StyledComponents = require('styled-components');
