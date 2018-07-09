@@ -3,7 +3,7 @@ import { Helmet } from "react-helmet"
 import { connect } from "react-redux"
 import styled from "styled-components" 
 import { IAppState } from "../"
-import { PathDebugComponent } from "../components";
+import { PathDebugComponent } from "../components"
 
 interface ITabProps {
   children: any,
@@ -31,7 +31,8 @@ class TabContainer extends React.Component<ITabProps, {children : any}> {
         </Helmet>
         <div id={this.props.slug}/>
         {this.props.children}
-        <PathDebugComponent hash={this.props.hash} pathname={this.props.pathname} search={this.props.search}/>        
+        <PathDebugComponent hash={this.props.hash} pathname={this.props.pathname} search={this.props.search}/>
+        <h1>Testing</h1>
       </Container>
     )
   }
