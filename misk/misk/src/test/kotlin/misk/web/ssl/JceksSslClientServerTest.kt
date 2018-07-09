@@ -17,7 +17,7 @@ import misk.security.ssl.CertStoreConfig
 import misk.security.ssl.ClientCertSubject
 import misk.security.ssl.Keystores
 import misk.security.ssl.TrustStoreConfig
-import misk.security.x509.X500Name
+import misk.security.cert.X500Name
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.web.Post
