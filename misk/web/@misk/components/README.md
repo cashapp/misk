@@ -6,8 +6,12 @@
 Getting Started
 ---
 
-- Install `@misk/components`???
+- Install `@misk/components`
 
 ```bash
-$ yarn install --save @misk/components
+$ yarn add @misk/components
 ```
+
+Components
+---
+- PathDebugComponent: outputs values passed in by props for `hash`, `pathname`, and `search` in React-Router instance
