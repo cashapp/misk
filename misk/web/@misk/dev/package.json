@@ -1,20 +1,16 @@
 {
-  "name": "misk-tab-admin-config",
+  "name": "@misk/dev",
   "version": "0.0.2",
-  "main": "src/index.ts",
-  "repository": "git@github.com:square/misk.git",
+  "description": "Microservice Kontainer Development Libraries",
   "author": "Square/Misk Authors (https://github.com/square/misk/graphs/contributors)",
-  "scripts": {
-    "build": "cross-env NODE_ENV=production webpack",
-    "clean": "rm -rf dist node_modules",
-    "reinstall": "yarn clean && yarn install",
-    "start": "cross-env NODE_ENV=development webpack-dev-server",
-    "test": "jest --coverage"
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:square/misk.git"
   },
-  "dependencies": {
+  "peerDependencies": {
     "@misk/common": "^0.0.2"
   },
-  "devDependencies": {
+  "dependencies": {
     "@types/react": "^16.4.4",
     "@types/react-dom": "^16.0.6",
     "@types/react-helmet": "^5.0.6",

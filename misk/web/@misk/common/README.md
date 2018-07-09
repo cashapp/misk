@@ -9,7 +9,7 @@ Getting Started
 - Install `@misk/common`???
 
 ```bash
-$ yarn install --save @misk/common
+$ yarn add @misk/common
 ```
 
 - Using the common vendors libraries and styles. We use [`copy-webpack-plugin`](https://github.com/webpack-contrib/copy-webpack-plugin) to copy the compiled `vendor.js` file into build folder. 

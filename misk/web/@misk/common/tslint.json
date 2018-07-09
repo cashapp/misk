@@ -18,7 +18,8 @@
     "member-access": [false],
     "ordered-imports": [true],
     "no-console": [false],
-    // "no-var-requires": true,
+    "no-var-requires": true,
+    "no-implicit-dependencies": false,
     "quotemark": [true, "double", "jsx-double"]
   },
   "rulesDirectory": []

@@ -6,8 +6,8 @@
 Getting Started
 ---
 
-- Install `@misk/components`???
+- Install `@misk/components`
 
 ```bash
-$ yarn install --save @misk/components
+$ yarn add @misk/components
 ```
