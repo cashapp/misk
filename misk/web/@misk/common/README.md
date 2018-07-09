@@ -81,3 +81,8 @@ Included Styles
   import '../node_modules/normalize.css/normalize.css'
   import '../node_modules/skeleton-css/css/skeleton.css'
 ```
+
+Authors
+---
+- Square (@square[https://github.com/square/])
+- Andrew Paradi (@adrw[https://github.com/adrw/])
