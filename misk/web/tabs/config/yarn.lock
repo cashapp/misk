@@ -39,13 +39,12 @@
     reflect-metadata "^0.1.12"
     tslib "^1.8.1"
 
-"@misk/common@^0.0.2":
-  version "0.0.2"
-  resolved "https://registry.yarnpkg.com/@misk/common/-/common-0.0.2.tgz#b66999c6fc46b1485f61c5867d80062d76beabde"
+"@misk/common@latest":
+  version "0.0.5"
+  resolved "https://registry.yarnpkg.com/@misk/common/-/common-0.0.5.tgz#2fafb02c0c0b839e7e717fa733a15950884abc1f"
   dependencies:
     "@blueprintjs/core" "^2.3.1"
     "@blueprintjs/icons" "^2.2.1"
-    "@types/node" "^10.3.0"
     axios "^0.18.0"
     connected-react-router "^4.3.0"
     history "^4.7.2"
@@ -56,9 +55,46 @@
     react-redux "^5.0.7"
     react-router "^4.3.1"
     react-router-dom "^4.3.1"
+    react-transition-group "^2.2.1"
     redux "^4.0.0"
     skeleton-css "^2.0.4"
     styled-components "^3.3.3"
+
+"@misk/dev@latest":
+  version "0.0.5"
+  resolved "https://registry.yarnpkg.com/@misk/dev/-/dev-0.0.5.tgz#a5b9c78e7d9bd1f582e7924492297e6cf5234df7"
+  dependencies:
+    "@types/react" "^16.4.4"
+    "@types/react-dom" "^16.0.6"
+    "@types/react-helmet" "^5.0.6"
+    "@types/react-hot-loader" "^4.1.0"
+    "@types/react-redux" "^6.0.3"
+    "@types/react-router" "^4.0.28"
+    "@types/react-router-dom" "^4.2.7"
+    "@types/webpack-env" "^1.13.6"
+    awesome-typescript-loader "^5.2.0"
+    cross-env "^5.2.0"
+    css-loader "^0.28.11"
+    file-loader "^1.1.11"
+    html-webpack-plugin "^3.2.0"
+    node-sass "^4.9.2"
+    sass-loader "^7.0.3"
+    source-map-loader "^0.2.3"
+    style-loader "^0.21.0"
+    tslint "^5.10.0"
+    tslint-blueprint "^0.1.0"
+    tslint-clean-code "^0.2.7"
+    tslint-config-prettier "^1.13.0"
+    tslint-consistent-codestyle "^1.13.1"
+    tslint-eslint-rules "^5.3.1"
+    tslint-immutable "^4.6.0"
+    tslint-react "^3.6.0"
+    tslint-sonarts "^1.7.0"
+    typescript "^2.9.2"
+    url-loader "^1.0.1"
+    webpack "^4.13.0"
+    webpack-cli "^3.0.8"
+    webpack-dev-server "^3.1.4"
 
 "@types/dom4@^2.0.0":
   version "2.0.0"
@@ -71,10 +107,6 @@
 "@types/node@*":
   version "10.5.0"
   resolved "https://npm.vip.global.square/@types%2fnode/-/node-10.5.0.tgz#f5b61395c09b47ac46aaa1452750c9a72b3d3673"
-
-"@types/node@^10.3.0":
-  version "10.5.2"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-10.5.2.tgz#f19f05314d5421fe37e74153254201a7bf00a707"
 
 "@types/react-dom@^16.0.6":
   version "16.0.6"
@@ -1484,6 +1516,10 @@ dom-converter@~0.1:
   resolved "https://npm.vip.global.square/dom-converter/-/dom-converter-0.1.4.tgz#a45ef5727b890c9bffe6d7c876e7b19cb0e17f3b"
   dependencies:
     utila "~0.3"
+
+dom-helpers@^3.3.1:
+  version "3.3.1"
+  resolved "https://registry.yarnpkg.com/dom-helpers/-/dom-helpers-3.3.1.tgz#fc1a4e15ffdf60ddde03a480a9c0fece821dd4a6"
 
 dom-serializer@0:
   version "0.1.0"
@@ -4021,7 +4057,7 @@ promise@^7.1.1:
   dependencies:
     asap "~2.0.3"
 
-prop-types@^15.5.4, prop-types@^15.6.0, prop-types@^15.6.1:
+prop-types@^15.5.4, prop-types@^15.6.0, prop-types@^15.6.1, prop-types@^15.6.2:
   version "15.6.2"
   resolved "https://npm.vip.global.square/prop-types/-/prop-types-15.6.2.tgz#05d5ca77b4453e985d60fc7ff8c859094a497102"
   dependencies:
@@ -4234,6 +4270,15 @@ react-side-effect@^1.1.0:
   dependencies:
     exenv "^1.2.1"
     shallowequal "^1.0.1"
+
+react-transition-group@^2.2.1:
+  version "2.4.0"
+  resolved "https://registry.yarnpkg.com/react-transition-group/-/react-transition-group-2.4.0.tgz#1d9391fabfd82e016f26fabd1eec329dbd922b5a"
+  dependencies:
+    dom-helpers "^3.3.1"
+    loose-envify "^1.3.1"
+    prop-types "^15.6.2"
+    react-lifecycles-compat "^3.0.4"
 
 react@^16.4.1:
   version "16.4.1"

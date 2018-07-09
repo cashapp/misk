@@ -20,17 +20,16 @@
     "build": "npm run lib",
     "build:lib": "npm run lib",
     "dist": "npm run lib",
-    "lib": "yarn pre && webpack",
+    "lib": "webpack",
     "lint": "echo no lint",
-    "pre": "mkdir -p ../common/node_modules && rm -rf ../common/node_modules && mkdir -p node_modules/@misk/common && cp -r ../common node_modules/@misk",
     "prepare": "yarn run lint && yarn run test && yarn run lib",
     "reinstall": "rm -rf node_modules/; yarn install",
     "test": "echo no tests"
   },
   "dependencies": {
-    "@misk/common": "^0.0.2"
+    "@misk/common": "^0.0.5"
   },
   "devDependencies": {
-    "@misk/dev": "^0.0.2"
+    "@misk/dev": "^0.0.5"
   }
 }

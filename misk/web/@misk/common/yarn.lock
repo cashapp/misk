@@ -39,9 +39,9 @@
     reflect-metadata "^0.1.12"
     tslib "^1.8.1"
 
-"@misk/dev@^0.0.2":
-  version "0.0.2"
-  resolved "https://registry.yarnpkg.com/@misk/dev/-/dev-0.0.2.tgz#d54637d5c05cb2ef42b308afc71982a7c2e6b0f4"
+"@misk/dev@^0.0.5":
+  version "0.0.5"
+  resolved "https://registry.yarnpkg.com/@misk/dev/-/dev-0.0.5.tgz#a5b9c78e7d9bd1f582e7924492297e6cf5234df7"
   dependencies:
     "@types/react" "^16.4.4"
     "@types/react-dom" "^16.0.6"

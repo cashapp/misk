@@ -6,7 +6,7 @@
 Getting Started
 ---
 
-- Install `@misk/common`???
+- Install `@misk/common`
 
 ```bash
 $ yarn add @misk/common
@@ -71,7 +71,24 @@ $ yarn add @misk/common
 Included Libraries
 ---
 
-- Check in `src/externals.ts`
+```JSON
+  "@blueprintjs/core": "^2.3.1",
+  "@blueprintjs/icons": "^2.2.1",
+  "axios": "^0.18.0",
+  "connected-react-router": "^4.3.0",
+  "history": "^4.7.2",
+  "react": "^16.4.1",
+  "react-dom": "^16.4.1",
+  "react-helmet": "^5.2.0",
+  "react-hot-loader": "^4.3.3",
+  "react-redux": "^5.0.7",
+  "react-router": "^4.3.1",
+  "react-router-dom": "^4.3.1",
+  "react-transition-group": "^2.2.1",
+  "redux": "^4.0.0",
+  "skeleton-css": "^2.0.4",
+  "styled-components": "^3.3.3"
+```
 
 Included Styles
 ---
@@ -84,5 +101,5 @@ Included Styles
 
 Authors
 ---
-- Square (@square[https://github.com/square/])
-- Andrew Paradi (@adrw[https://github.com/adrw/])
+- Square ([@square](https://github.com/square/))
+- Andrew Paradi ([@adrw](https://github.com/adrw/))
