@@ -2,6 +2,7 @@ import org.junit.platform.console.options.Details
 
 apply plugin: 'kotlin'
 apply plugin: 'org.junit.platform.gradle.plugin'
+apply plugin: "com.vanniktech.maven.publish"
 
 compileKotlin {
   kotlinOptions {
@@ -42,5 +43,3 @@ dependencies {
   testCompile project(':misk-testing')
   testCompile project(':misk-gcp-testing')
 }
-
-apply from: rootProject.file('gradle/gradle-mvn-push.gradle')
