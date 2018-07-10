@@ -9,6 +9,7 @@ import okhttp3.MediaType
 import okio.BufferedSink
 import okio.BufferedSource
 import javax.inject.Inject
+import javax.inject.Singleton
 import kotlin.reflect.KType
 import kotlin.reflect.jvm.javaType
 
@@ -21,6 +22,7 @@ class JsonMarshaller<T>(val adapter: JsonAdapter<T>) : Marshaller<T> {
     }
   }
 
+  @Singleton
   class Factory @Inject internal constructor(val moshi: Moshi) : Marshaller.Factory {
     override fun create(mediaType: MediaType, type: KType): Marshaller<Any>? {
       if (mediaType.type() != MediaTypes.APPLICATION_JSON_MEDIA_TYPE.type() ||
@@ -38,6 +40,7 @@ class JsonMarshaller<T>(val adapter: JsonAdapter<T>) : Marshaller<T> {
 class JsonUnmarshaller(val adapter: JsonAdapter<Any>) : Unmarshaller {
   override fun unmarshal(source: BufferedSource) = adapter.fromJson(source)
 
+  @Singleton
   class Factory @Inject internal constructor(val moshi: Moshi) : Unmarshaller.Factory {
     override fun create(mediaType: MediaType, type: KType): Unmarshaller? {
       if (mediaType.type() != MediaTypes.APPLICATION_JSON_MEDIA_TYPE.type() ||
