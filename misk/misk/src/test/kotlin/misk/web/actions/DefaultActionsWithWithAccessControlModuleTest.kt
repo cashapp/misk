@@ -1,9 +1,8 @@
 package misk.web.actions
 
-import com.google.inject.util.Modules
 import misk.MiskCaller
 import misk.MiskModule
-import misk.security.authz.AccessControlModule
+import misk.inject.KAbstractModule
 import misk.security.authz.MiskCallerAuthenticator
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
@@ -12,10 +11,12 @@ import org.junit.jupiter.api.Test
 @MiskTest(startService = true)
 internal class DefaultActionsWorkWithAccessControlModuleTest {
   @MiskTestModule
-  val module = Modules.combine(
-      MiskModule(),
-      AccessControlModule(ExampleAuthenticator::class)
-  )
+  val module = object : KAbstractModule() {
+    override fun configure() {
+      install(MiskModule())
+      multibind<MiskCallerAuthenticator>().to<ExampleAuthenticator>()
+    }
+  }
 
   @Test fun confirmCanCreateService() {
     // NB(mmihic): Nothing to do, the test is just to make sure that all

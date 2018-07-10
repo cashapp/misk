@@ -7,31 +7,22 @@ import misk.scope.ActionScoped
 import misk.scope.ActionScopedProvider
 import misk.scope.ActionScopedProviderModule
 import javax.inject.Inject
-import kotlin.reflect.KClass
 
 /**
  * Installs a binding for the [ActionScoped] [MiskCaller]?, along with support for
  * perform access control checks for actions based on the incoming caller
  */
-class AccessControlModule(
-  private val authenticators: List<KClass<out MiskCallerAuthenticator>>
-) : ActionScopedProviderModule() {
-
-  constructor(vararg authenticators: KClass<out MiskCallerAuthenticator>) :
-      this(authenticators.toList())
-
+class AccessControlModule : ActionScopedProviderModule() {
   override fun configureProviders() {
     bindProvider(miskCallerType, MiskCallerProvider::class)
-    newMultibinder<MiskCallerAuthenticator>() // In case no authenticators are registered
-    authenticators.forEach { authenticator ->
-      multibind<MiskCallerAuthenticator>().to(authenticator.java)
-    }
     multibind<ApplicationInterceptor.Factory>().to<AccessInterceptor.Factory>()
+
+    // Initialize empty sets for our multibindings.
+    newMultibinder<MiskCallerAuthenticator>()
   }
 
   class MiskCallerProvider : ActionScopedProvider<MiskCaller?> {
-    @Inject lateinit
-    var authenticators: @JvmSuppressWildcards MutableList<out MiskCallerAuthenticator>
+    @Inject lateinit var authenticators: List<MiskCallerAuthenticator>
 
     override fun get(): MiskCaller? {
       return authenticators.mapNotNull {

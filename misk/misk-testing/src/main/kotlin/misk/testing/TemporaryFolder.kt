@@ -31,7 +31,7 @@ class TemporaryFolder(val root: Path) {
 
 class TemporaryFolderModule : KAbstractModule() {
   override fun configure() {
-    install(AfterEachExtensionModule.create<DeleteTempFolder>())
+    multibind<AfterEachCallback>().to<DeleteTempFolder>()
   }
 
   @Provides

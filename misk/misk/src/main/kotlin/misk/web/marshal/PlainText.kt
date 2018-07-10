@@ -6,12 +6,14 @@ import misk.web.toResponseBody
 import okhttp3.MediaType
 import okio.BufferedSource
 import okio.ByteString
+import javax.inject.Singleton
 import kotlin.reflect.KType
 
 object PlainTextMarshaller : Marshaller<Any> {
   override fun contentType() = MediaTypes.TEXT_PLAIN_UTF8_MEDIA_TYPE
   override fun responseBody(o: Any) = o.toString().toResponseBody()
 
+  @Singleton
   class Factory : Marshaller.Factory {
     override fun create(mediaType: MediaType, type: KType): Marshaller<Any>? {
       if (mediaType.type() != MediaTypes.TEXT_PLAIN_UTF8_MEDIA_TYPE.type() ||

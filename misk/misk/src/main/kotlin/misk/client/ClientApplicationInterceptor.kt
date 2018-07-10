@@ -16,6 +16,14 @@ interface ClientApplicationInterceptor {
    */
   fun intercept(chain: ClientChain)
 
+  /**
+   * This interface is used with Guice multibindings. Register instances by calling `multibind()`
+   * in a `KAbstractModule`:
+   *
+   * ```
+   * multibind<ClientApplicationInterceptor.Factory>().to<MyFactory>()
+   * ```
+   */
   interface Factory {
     fun create(action: ClientAction): ClientApplicationInterceptor?
   }
