@@ -9,6 +9,14 @@ import okhttp3.Response
 interface ClientNetworkInterceptor {
   fun intercept(chain: ClientNetworkChain) : Response
 
+  /**
+   * This interface is used with Guice multibindings. Register instances by calling `multibind()`
+   * in a `KAbstractModule`:
+   *
+   * ```
+   * multibind<ClientNetworkInterceptor.Factory>().to<MyFactory>()
+   * ```
+   */
   interface Factory {
     fun create(action: ClientAction) : ClientNetworkInterceptor?
   }

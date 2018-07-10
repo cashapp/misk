@@ -24,11 +24,11 @@ import misk.web.interceptors.TracingInterceptor
 import misk.web.jetty.JettyModule
 import misk.web.marshal.JsonMarshaller
 import misk.web.marshal.JsonUnmarshaller
-import misk.web.marshal.MarshallerModule
+import misk.web.marshal.Marshaller
 import misk.web.marshal.PlainTextMarshaller
 import misk.web.marshal.ProtobufMarshaller
 import misk.web.marshal.ProtobufUnmarshaller
-import misk.web.marshal.UnmarshallerModule
+import misk.web.marshal.Unmarshaller
 import misk.web.resources.StaticResourceInterceptor
 import misk.web.resources.StaticResourceMapper
 import javax.servlet.http.HttpServletRequest
@@ -44,15 +44,16 @@ class WebModule : KAbstractModule() {
     })
 
     // Register built-in marshallers and unmarshallers
-    install(MarshallerModule.create<PlainTextMarshaller.Factory>())
-    install(MarshallerModule.create<JsonMarshaller.Factory>())
-    install(MarshallerModule.create<ProtobufMarshaller.Factory>())
-    install(UnmarshallerModule.create<JsonUnmarshaller.Factory>())
-    install(UnmarshallerModule.create<ProtobufUnmarshaller.Factory>())
+    multibind<Marshaller.Factory>().to<PlainTextMarshaller.Factory>()
+    multibind<Marshaller.Factory>().to<JsonMarshaller.Factory>()
+    multibind<Marshaller.Factory>().to<ProtobufMarshaller.Factory>()
+    multibind<Unmarshaller.Factory>().to<JsonUnmarshaller.Factory>()
+    multibind<Unmarshaller.Factory>().to<ProtobufUnmarshaller.Factory>()
 
-    // Create empty set binders of interceptor factories that can be added to by users.
+    // Initialize empty sets for our multibindings.
     newMultibinder<NetworkInterceptor.Factory>()
     newMultibinder<ApplicationInterceptor.Factory>()
+    newMultibinder<StaticResourceMapper.Entry>()
 
     // Register built-in interceptors. Interceptors run in the order in which they are
     // installed, and the order of these interceptors is critical.
@@ -84,7 +85,6 @@ class WebModule : KAbstractModule() {
 
     multibind<NetworkInterceptor.Factory>(MiskDefault::class)
         .to<StaticResourceInterceptor.Factory>()
-    newMultibinder<StaticResourceMapper.Entry>()
 
     install(ExceptionMapperModule.create<ActionException, ActionExceptionMapper>())
 

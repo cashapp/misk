@@ -66,6 +66,14 @@ class StaticResourceMapper @Inject internal constructor(
     return entries.firstOrNull { urlPath.startsWith(it.urlPrefix) }
   }
 
+  /**
+   * This data class is used with Guice multibindings. Register instances by calling `multibind()`
+   * in a `KAbstractModule`:
+   *
+   * ```
+   * multibind<StaticResourceMapper.Entry>().toInstance(StaticResourceMapper.Entry(...))
+   * ```
+   */
   data class Entry(
     val urlPrefix: String,
     private val resourcePath: String,
