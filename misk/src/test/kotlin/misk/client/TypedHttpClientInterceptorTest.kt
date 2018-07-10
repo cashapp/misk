@@ -15,8 +15,8 @@ import misk.web.Post
 import misk.web.RequestBody
 import misk.web.RequestContentType
 import misk.web.ResponseContentType
-import misk.web.WebTestingModule
 import misk.web.WebActionModule
+import misk.web.WebTestingModule
 import misk.web.actions.WebAction
 import misk.web.jetty.JettyService
 import misk.web.mediatype.MediaTypes
@@ -150,8 +150,8 @@ internal class TypedHttpClientInterceptorTest {
   class ClientModule(val jetty: JettyService) : KAbstractModule() {
     override fun configure() {
       install(TypedHttpClientModule.create<ReturnADinosaur>("dinosaur"))
-      install(ClientNetworkInterceptorModule.create<ClientHeaderInterceptor.Factory>())
-      install(ClientApplicationInterceptorModule.create<ClientNameInterceptor.Factory>())
+      multibind<ClientNetworkInterceptor.Factory>().to<ClientHeaderInterceptor.Factory>()
+      multibind<ClientApplicationInterceptor.Factory>().to<ClientNameInterceptor.Factory>()
     }
 
     @Provides

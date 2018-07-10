@@ -18,8 +18,7 @@ class TypedHttpClientModule<T : Any>(
   private val annotation: Annotation? = null
 ) : KAbstractModule() {
   override fun configure() {
-    // Always initialize the network and application interceptor list, even if
-    // we don't have any interceptors
+    // Initialize empty sets for our multibindings.
     newMultibinder<ClientNetworkInterceptor.Factory>()
     newMultibinder<ClientApplicationInterceptor.Factory>()
 

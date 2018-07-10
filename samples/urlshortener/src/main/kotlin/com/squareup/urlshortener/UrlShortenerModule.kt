@@ -31,7 +31,6 @@ class UrlShortenerModule(val environment: Environment) : KAbstractModule() {
       }
     })
 
-    multibind<NetworkInterceptor.Factory>()
-        .to<UpstreamResourceInterceptor.Factory>()
+    multibind<NetworkInterceptor.Factory>().to<UpstreamResourceInterceptor.Factory>()
   }
 }

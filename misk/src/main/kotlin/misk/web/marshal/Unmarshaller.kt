@@ -8,6 +8,14 @@ import kotlin.reflect.KType
 interface Unmarshaller {
   fun unmarshal(source: BufferedSource): Any?
 
+  /**
+   * This interface is used with Guice multibindings. Register instances by calling `multibind()`
+   * in a `KAbstractModule`:
+   *
+   * ```
+   * multibind<Unmarshaller.Factory>().to<MyFactory>()
+   * ```
+   */
   interface Factory {
     fun create(mediaType: MediaType, type: KType): Unmarshaller?
   }

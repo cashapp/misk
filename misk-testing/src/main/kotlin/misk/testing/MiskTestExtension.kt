@@ -4,7 +4,7 @@ import com.google.common.util.concurrent.ServiceManager
 import com.google.inject.Guice
 import com.google.inject.Injector
 import com.google.inject.Module
-import com.google.inject.util.Modules
+import misk.inject.KAbstractModule
 import misk.inject.getInstance
 import misk.inject.uninject
 import org.junit.jupiter.api.extension.AfterEachCallback
@@ -16,16 +16,25 @@ import javax.inject.Singleton
 
 internal class MiskTestExtension : BeforeEachCallback, AfterEachCallback {
   override fun beforeEach(context: ExtensionContext) {
-    val testModules = context.getActionTestModules().asSequence().toList().toTypedArray()
-    val callbackModules = if (context.startService()) serviceManagementModules else arrayOf()
-    val modules = Modules.combine(
-        MiskTestingModule(),
-        *callbackModules,
-        *testModules,
-        BeforeEachExtensionModule.create<InjectUninject>(),
-        AfterEachExtensionModule.create<InjectUninject>())
+    val module = object : KAbstractModule() {
+      override fun configure() {
+        if (context.startService()) {
+          multibind<BeforeEachCallback>().to<StartServicesBeforeEach>()
+          multibind<AfterEachCallback>().to<StopServicesAfterEach>()
+        }
+        for (module in context.getActionTestModules()) {
+          install(module)
+        }
+        multibind<BeforeEachCallback>().to<InjectUninject>()
+        multibind<AfterEachCallback>().to<InjectUninject>()
 
-    val injector = Guice.createInjector(modules)
+        // Initialize empty sets for our multibindings.
+        newMultibinder<BeforeEachCallback>()
+        newMultibinder<AfterEachCallback>()
+      }
+    }
+
+    val injector = Guice.createInjector(module)
     context.store("injector", injector)
 
     injector.getInstance<Callbacks>().beforeEach(context)
@@ -73,11 +82,6 @@ internal class MiskTestExtension : BeforeEachCallback, AfterEachCallback {
       uninject(context.requiredTestInstance)
     }
   }
-
-  private val serviceManagementModules = arrayOf(
-      BeforeEachExtensionModule.create<StartServicesBeforeEach>(),
-      AfterEachExtensionModule.create<StopServicesAfterEach>()
-  )
 
   class Callbacks : BeforeEachCallback, AfterEachCallback {
     @Inject

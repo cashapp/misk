@@ -16,6 +16,14 @@ interface Marshaller<in T> {
   /** @return The object marshalled into a [ResponseBody] */
   fun responseBody(o: T): ResponseBody
 
+  /**
+   * This interface is used with Guice multibindings. Register instances by calling `multibind()`
+   * in a `KAbstractModule`:
+   *
+   * ```
+   * multibind<Marshaller.Factory>().to<MyFactory>()
+   * ```
+   */
   interface Factory {
     fun create(mediaType: MediaType, type: KType): Marshaller<Any>?
   }

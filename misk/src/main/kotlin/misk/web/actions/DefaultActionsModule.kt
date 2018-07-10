@@ -20,7 +20,6 @@ class DefaultActionsModule : KAbstractModule() {
     install(WebActionModule.create<NotFoundAction>())
 
 
-    multibind<NetworkInterceptor.Factory>()
-        .to(WideOpenDevelopmentInterceptorFactory::class.java)
+    multibind<NetworkInterceptor.Factory>().to<WideOpenDevelopmentInterceptorFactory>()
   }
 }

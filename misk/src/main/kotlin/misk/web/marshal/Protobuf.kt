@@ -7,6 +7,7 @@ import misk.web.mediatype.MediaTypes
 import okhttp3.MediaType
 import okio.BufferedSink
 import okio.BufferedSource
+import javax.inject.Singleton
 import kotlin.reflect.KType
 import kotlin.reflect.jvm.javaType
 
@@ -19,6 +20,7 @@ class ProtobufMarshaller<T>(val adapter: ProtoAdapter<T>) : Marshaller<T> {
     }
   }
 
+  @Singleton
   class Factory : Marshaller.Factory {
     override fun create(mediaType: MediaType, type: KType): Marshaller<Any>? {
       if (mediaType.type() != MediaTypes.APPLICATION_PROTOBUF_MEDIA_TYPE.type() ||
@@ -37,6 +39,7 @@ class ProtobufMarshaller<T>(val adapter: ProtoAdapter<T>) : Marshaller<T> {
 class ProtobufUnmarshaller(val adapter: ProtoAdapter<Any>) : Unmarshaller {
   override fun unmarshal(source: BufferedSource) = adapter.decode(source)
 
+  @Singleton
   class Factory : Unmarshaller.Factory {
     override fun create(mediaType: MediaType, type: KType): Unmarshaller? {
       if (mediaType.type() != MediaTypes.APPLICATION_PROTOBUF_MEDIA_TYPE.type() ||
