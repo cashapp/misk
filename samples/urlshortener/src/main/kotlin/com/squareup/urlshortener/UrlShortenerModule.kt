@@ -30,7 +30,5 @@ class UrlShortenerModule(val environment: Environment) : KAbstractModule() {
         addEntities(DbShortenedUrl::class)
       }
     })
-
-    multibind<NetworkInterceptor.Factory>().to<UpstreamResourceInterceptor.Factory>()
   }
 }

@@ -4,6 +4,7 @@ import com.google.inject.Provides
 import misk.MiskModule
 import misk.inject.KAbstractModule
 import misk.resources.FakeResourceLoaderModule
+import misk.web.actions.UpstreamResourceInterceptor
 import javax.inject.Singleton
 
 class WebTestingModule(private val ssl: WebSslConfig? = null) : KAbstractModule() {
@@ -11,6 +12,8 @@ class WebTestingModule(private val ssl: WebSslConfig? = null) : KAbstractModule(
     install(MiskModule())
     install(WebModule())
     install(FakeResourceLoaderModule())
+    multibind<NetworkInterceptor.Factory>()
+        .to<UpstreamResourceInterceptor.Factory>()
   }
 
   @Provides

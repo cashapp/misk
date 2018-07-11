@@ -19,7 +19,7 @@ class DefaultActionsModule : KAbstractModule() {
     install(WebActionModule.create<ReadinessCheckAction>())
     install(WebActionModule.create<LivenessCheckAction>())
     install(WebActionModule.create<NotFoundAction>())
-    
+
     multibind<NetworkInterceptor.Factory>().to<WideOpenDevelopmentInterceptorFactory>()
   }
 }

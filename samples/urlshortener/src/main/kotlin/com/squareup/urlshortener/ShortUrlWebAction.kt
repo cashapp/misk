@@ -17,10 +17,10 @@ import javax.inject.Singleton
 class ShortUrlWebAction : WebAction {
   @Inject lateinit var urlStore: UrlStore
 
-  @Get("/{token}")
+  @Get("/{token:[^/]+}")
   @ResponseContentType(MediaTypes.APPLICATION_JSON)
   fun follow(@PathParam token: String): Response<ResponseBody> {
-    val longUrl = urlStore.tokenToUrl(UrlToken(token)) ?: throw NotFoundException()
+    val longUrl = urlStore.tokenToUrl(UrlToken(token)) ?: throw NotFoundException(token)
 
     val emptyBody = object : ResponseBody {
       override fun writeTo(sink: BufferedSink) {

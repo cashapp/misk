@@ -1,49 +1,32 @@
 package misk.web
 
 import misk.inject.KAbstractModule
-import misk.web.actions.RegisteredTab
-import okhttp3.HttpUrl
+import misk.web.actions.AdminTab
 
 class AdminTabModule : KAbstractModule() {
   override fun configure() {
     // only bind tabs here that do not consume any endpoint
     // otherwise put the binding with where those endpoints are
     // ie. config tab uses data from endpoint within config, therefore binding is in ConfigWebModule
-    multibind<RegisteredTab>().toInstance(RegisteredTab(
-        "/_admin/dashboard/",
-        HttpUrl.parse("http://localhost:3110/")!!,
+    multibind<AdminTab>().toInstance(AdminTab(
         "Dashboard",
         "dashboard",
-        "",
-        "/web/tabs/dashboard/"
-      )
-    )
-    multibind<RegisteredTab>().toInstance(RegisteredTab(
-        "/_admin/@misk/",
-        HttpUrl.parse("http://localhost:9100/")!!,
+        "/_admin/dashboard/"
+    ))
+    multibind<AdminTab>().toInstance(AdminTab(
         "Misk NPM",
         "@misk",
-        "",
-
-        "/web/tabs/@misk/"
-      )
-    )
-    multibind<RegisteredTab>().toInstance(RegisteredTab(
-        "/_admin/",
-        HttpUrl.parse("http://localhost:3100/")!!,"Loader",
+        "/_admin/@misk/"
+    ))
+    multibind<AdminTab>().toInstance(AdminTab(
+        "Loader",
         "loader",
-        "",
-        "/web/tabs/loader/"
-      )
-    )
-    multibind<RegisteredTab>().toInstance(RegisteredTab(
-        "/_admin/test/",
-        HttpUrl.parse("http://localhost:8000/")!!,
+        "/_admin/"
+    ))
+    multibind<AdminTab>().toInstance(AdminTab(
         "Temp Test",
         "test",
-        "",
-        "/web/tabs/test/"
-      )
-    )
+        "/_admin/test/"
+    ))
   }
 }
