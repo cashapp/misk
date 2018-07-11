@@ -139,7 +139,7 @@ module.exports = {
     publicPath: "/_admin/dashboard/"
 },
   devServer: {
-    port: '3100',
+    port: '3110',
     inline: true,
     hot: true,
     historyApiFallback: true
