@@ -13,6 +13,7 @@ import okhttp3.OkHttpClient
 import java.io.IOException
 import java.net.HttpURLConnection
 import javax.inject.Inject
+import javax.inject.Singleton
 
 /**
  * UpstreamResourceInterceptor
@@ -30,12 +31,24 @@ import javax.inject.Inject
  * - Else, request proceeds
  */
 
-
+@Singleton
 class UpstreamResourceInterceptor(
   private val client: OkHttpClient,
-  private val mappings: List<Mapping>
+  private val otherMappings: List<Mapping> = listOf()
 ) : NetworkInterceptor {
-//  TODO(adrw) enforce no prefix overlapping https://github.com/square/misk/issues/303
+  @Inject var registeredTabs: List<Mapping> = listOf()
+
+  private val tabMappings: List<Mapping> by lazy {
+    registeredTabs.map { tab ->
+      UpstreamResourceInterceptor.Mapping(tab.urlPathPrefix, tab.upstreamBaseUrl)
+    }.toList()
+  }
+
+  private val mappings: List<Mapping> by lazy {
+    tabMappings + otherMappings
+  }
+
+  //  TODO(adrw) enforce no prefix overlapping https://github.com/square/misk/issues/303
   override fun intercept(chain: NetworkChain): Response<*> {
     val matchedMapping = findMappingMatch(chain) ?: return chain.proceed(chain.request)
     val proxyUrl = matchedMapping.upstreamBaseUrl.newBuilder()
@@ -46,8 +59,10 @@ class UpstreamResourceInterceptor(
   }
 
   private fun findMappingMatch(chain: NetworkChain): Mapping? {
+    // TODO(adrw) check if there is a predictability if there are overlapping mappings ie. last mapping is fall through
+    // main case: /_admin/ should not pick up all sub paths but should still return index
     for (mapping in mappings) {
-      if (chain.request.url.encodedPath().startsWith(mapping.localPathPrefix)) return mapping
+      if (chain.request.url.encodedPath().startsWith(mapping.urlPathPrefix)) return mapping
     }
     return null
   }
@@ -76,31 +91,36 @@ class UpstreamResourceInterceptor(
   /**
    * Maps URLs requested against this server to URLs of servers to delegate to
    *
-   * localPathPrefix: `/_admin/`
+   * urlPathPrefix: `/_admin/`
    * upstreamBaseUrl: `http://localhost:3000/`
    *
    * An incoming request then for `/_admin/config.js` would route to `http://localhost:3000/_admin/config.js`.
    */
+
+  // Make register tab a subclass of mapping
+//  interface Mapping {
+//    val urlPathPrefix: String,
+//    val upstreamBaseUrl: HttpUrl
+//  }
+
   data class Mapping(
-    val localPathPrefix: String,
+    val urlPathPrefix: String,
     val upstreamBaseUrl: HttpUrl
   ) {
     init {
-      require(localPathPrefix.endsWith("/") &&
-          localPathPrefix.startsWith("/") &&
+      require(urlPathPrefix.startsWith("/") &&
+          (urlPathPrefix.endsWith("/") ||
+              urlPathPrefix.endsWith("*")) &&
           upstreamBaseUrl.encodedPath().endsWith("/") &&
           upstreamBaseUrl.pathSegments().size == 1)
     }
   }
 
-  class Factory @Inject internal constructor() : NetworkInterceptor.Factory {
+  class Factory @Inject internal constructor(
+    private val otherMappings: List<Mapping> = listOf()
+  ) : NetworkInterceptor.Factory {
     override fun create(action: Action): NetworkInterceptor? {
-      return UpstreamResourceInterceptor(okhttp3.OkHttpClient(), mutableListOf<Mapping>(
-          UpstreamResourceInterceptor.Mapping("/@misk/", HttpUrl.parse("http://localhost:9100/")!!),
-          UpstreamResourceInterceptor.Mapping("/_admin/test/", HttpUrl.parse("http://localhost:8000/")!!),
-          UpstreamResourceInterceptor.Mapping("/_admin/dashboard/", HttpUrl.parse("http://localhost:3100/")!!),
-          UpstreamResourceInterceptor.Mapping("/_admin/config/", HttpUrl.parse("http://localhost:3200/")!!)
-      ))
+      return UpstreamResourceInterceptor(okhttp3.OkHttpClient(), otherMappings)
     }
   }
 }

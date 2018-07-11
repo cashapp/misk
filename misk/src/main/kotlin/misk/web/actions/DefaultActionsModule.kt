@@ -12,14 +12,14 @@ import misk.web.WideOpenDevelopmentInterceptorFactory
  */
 class DefaultActionsModule : KAbstractModule() {
   override fun configure() {
+    install(WebActionModule.create<AdminTabAction>())
     install(WebActionModule.create<MetricsJsonAction>())
     install(WebActionModule.create<InternalErrorAction>())
     install(WebActionModule.create<StatusAction>())
     install(WebActionModule.create<ReadinessCheckAction>())
     install(WebActionModule.create<LivenessCheckAction>())
     install(WebActionModule.create<NotFoundAction>())
-
-
+    
     multibind<NetworkInterceptor.Factory>().to<WideOpenDevelopmentInterceptorFactory>()
   }
 }

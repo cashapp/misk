@@ -14,7 +14,7 @@ class ConfigAdminAction : WebAction {
   @Inject @AppName lateinit var appName: String
   @Inject lateinit var environment: Environment
 
-  @Get("/_admin/api/config/all")
+  @Get("/api/_admin/config/all")
   @RequestContentType(MediaTypes.APPLICATION_JSON)
   @ResponseContentType(MediaTypes.APPLICATION_JSON)
   fun getAll(): Response {
