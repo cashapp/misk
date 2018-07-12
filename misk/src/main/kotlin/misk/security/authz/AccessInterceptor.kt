@@ -8,9 +8,10 @@ import misk.exceptions.UnauthenticatedException
 import misk.exceptions.UnauthorizedException
 import misk.scope.ActionScoped
 import javax.inject.Inject
+import kotlin.reflect.KClass
 import kotlin.reflect.full.findAnnotation
 
-class AccessInterceptor private constructor(
+internal class AccessInterceptor private constructor(
   private val allowedServices: Set<String>,
   private val allowedRoles: Set<String>,
   private val caller: ActionScoped<MiskCaller?>
@@ -36,21 +37,44 @@ class AccessInterceptor private constructor(
     return caller.roles.any { allowedRoles.contains(it) }
   }
 
-  class Factory @Inject internal constructor(
-    private val caller: @JvmSuppressWildcards ActionScoped<MiskCaller?>
+  internal class Factory @Inject internal constructor(
+    private val caller: @JvmSuppressWildcards ActionScoped<MiskCaller?>,
+    @Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN") private val accessAnnotations: java.util.List<out AccessAnnotation>
   ) : ApplicationInterceptor.Factory {
     override fun create(action: Action): ApplicationInterceptor? {
+      // Gather all of the access annotations on this action.
+      val actionAnnotations = mutableListOf<AccessAnnotation>()
       val authenticated = action.function.findAnnotation<Authenticated>()
-      if (authenticated == null) {
-        // One of Authenticated or Unauthenticated must be specified
-        check(action.function.findAnnotation<Unauthenticated>() != null) {
-          "invalid action ${action.name}: one of @Authenticated or @Unauthenticated must be provided"
-        }
+      if (authenticated != null) {
+        actionAnnotations += authenticated.toAccessAnnotation()
+      }
+      actionAnnotations += accessAnnotations.filter { action.hasAnnotation(it.annotation) }
+
+      // This action is explicitly marked @Authenticated or with a custom annotation.
+      if (actionAnnotations.size == 1) {
+        return AccessInterceptor(actionAnnotations[0].services.toSet(),
+            actionAnnotations[0].roles.toSet(), caller)
+      }
+
+      // This action is explicitly marked as unauthenticated.
+      if (actionAnnotations.isEmpty() && action.hasAnnotation(Unauthenticated::class)) {
         return null
       }
 
-      return AccessInterceptor(authenticated.services.toSet(), authenticated.roles.toSet(), caller)
+      // Not exactly one access annotation. Fail with a useful message.
+      val requiredAnnotations = mutableListOf<KClass<out Annotation>>()
+      requiredAnnotations += Authenticated::class
+      requiredAnnotations += Unauthenticated::class
+      requiredAnnotations += accessAnnotations.map { it.annotation }
+      throw IllegalStateException(
+          "action ${action.name} must have one of the following annotations: $requiredAnnotations")
     }
+
+    private fun Authenticated.toAccessAnnotation() = AccessAnnotation(
+        Authenticated::class, services.toList(), roles.toList())
+
+    private fun Action.hasAnnotation(annotationClass: KClass<out Annotation>) =
+        function.annotations.any { it.annotationClass == annotationClass }
   }
 }
 
