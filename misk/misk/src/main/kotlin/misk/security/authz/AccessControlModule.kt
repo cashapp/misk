@@ -9,8 +9,8 @@ import misk.scope.ActionScopedProviderModule
 import javax.inject.Inject
 
 /**
- * Installs a binding for the [ActionScoped] [MiskCaller]?, along with support for
- * perform access control checks for actions based on the incoming caller
+ * Installs a binding for the [ActionScoped] [MiskCaller]?, along with support for performing access
+ * control checks for actions based on the incoming caller.
  */
 class AccessControlModule : ActionScopedProviderModule() {
   override fun configureProviders() {
@@ -19,6 +19,7 @@ class AccessControlModule : ActionScopedProviderModule() {
 
     // Initialize empty sets for our multibindings.
     newMultibinder<MiskCallerAuthenticator>()
+    newMultibinder<AccessAnnotation>()
   }
 
   class MiskCallerProvider : ActionScopedProvider<MiskCaller?> {
