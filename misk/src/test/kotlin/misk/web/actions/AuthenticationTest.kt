@@ -1,11 +1,9 @@
 package misk.web.actions
 
 import misk.MiskCaller
-import misk.MiskModule
 import misk.client.HttpClientEndpointConfig
 import misk.client.HttpClientFactory
 import misk.inject.KAbstractModule
-import misk.resources.FakeResourceLoaderModule
 import misk.scope.ActionScoped
 import misk.security.authz.AccessAnnotation
 import misk.security.authz.AccessControlModule
@@ -15,8 +13,7 @@ import misk.testing.MiskTestModule
 import misk.web.Get
 import misk.web.ResponseContentType
 import misk.web.WebActionModule
-import misk.web.WebConfig
-import misk.web.WebModule
+import misk.web.WebTestingModule
 import misk.web.jetty.JettyService
 import misk.web.mediatype.MediaTypes
 import misk.web.toResponseBody
@@ -99,15 +96,8 @@ class AuthenticationTest {
 
   class TestModule : KAbstractModule() {
     override fun configure() {
-      install(MiskModule())
-      install(WebModule())
-      install(FakeResourceLoaderModule())
+      install(WebTestingModule())
       install(AccessControlModule())
-
-      bind<WebConfig>().toInstance(WebConfig(
-          port = 0,
-          idle_timeout = 500_000L,
-          host = "127.0.0.1"))
 
       install(WebActionModule.create<CustomServiceAccessAction>())
       install(WebActionModule.create<CustomRoleAccessAction>())

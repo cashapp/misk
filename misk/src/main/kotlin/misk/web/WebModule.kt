@@ -1,11 +1,19 @@
 package misk.web
 
+import com.google.common.util.concurrent.Service
 import misk.ApplicationInterceptor
 import misk.MiskDefault
 import misk.exceptions.ActionException
 import misk.inject.KAbstractModule
+import misk.metrics.web.MetricsJsonAction
 import misk.scope.ActionScopedProviderModule
 import misk.security.ssl.CertificatesModule
+import misk.web.actions.AdminTabAction
+import misk.web.actions.InternalErrorAction
+import misk.web.actions.LivenessCheckAction
+import misk.web.actions.NotFoundAction
+import misk.web.actions.ReadinessCheckAction
+import misk.web.actions.StatusAction
 import misk.web.exceptions.ActionExceptionMapper
 import misk.web.exceptions.ExceptionHandlingInterceptor
 import misk.web.exceptions.ExceptionMapperModule
@@ -21,7 +29,7 @@ import misk.web.interceptors.MarshallerInterceptor
 import misk.web.interceptors.MetricsInterceptor
 import misk.web.interceptors.RequestLoggingInterceptor
 import misk.web.interceptors.TracingInterceptor
-import misk.web.jetty.JettyModule
+import misk.web.jetty.JettyService
 import misk.web.marshal.JsonMarshaller
 import misk.web.marshal.JsonUnmarshaller
 import misk.web.marshal.Marshaller
@@ -35,7 +43,8 @@ import javax.servlet.http.HttpServletRequest
 
 class WebModule : KAbstractModule() {
   override fun configure() {
-    install(JettyModule())
+    multibind<Service>().to<JettyService>()
+
     install(object : ActionScopedProviderModule() {
       override fun configureProviders() {
         bindSeedData(Request::class)
@@ -111,5 +120,18 @@ class WebModule : KAbstractModule() {
     // Bind _admin static resources to web
     multibind<StaticResourceMapper.Entry>()
         .toInstance(StaticResourceMapper.Entry("/_admin/", "web/_admin", "misk/web/_admin/build"))
+
+    // Bind build-in actions.
+    install(WebActionModule.create<AdminTabAction>())
+    install(WebActionModule.create<MetricsJsonAction>())
+    install(WebActionModule.create<InternalErrorAction>())
+    install(WebActionModule.create<StatusAction>())
+    install(WebActionModule.create<ReadinessCheckAction>())
+    install(WebActionModule.create<LivenessCheckAction>())
+    install(WebActionModule.create<NotFoundAction>())
+
+    // Make CORS wide-open.
+    // TODO(adrw): this is not suitable for production. lock this down.
+    multibind<NetworkInterceptor.Factory>().to<WideOpenDevelopmentInterceptorFactory>()
   }
 }

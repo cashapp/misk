@@ -1,13 +1,13 @@
 package misk.web.interceptors
 
-import misk.web.NetworkChain
-import misk.web.NetworkInterceptor
+import misk.MiskModule
 import misk.asAction
 import misk.metrics.Metrics
-import misk.metrics.MetricsModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.web.Get
+import misk.web.NetworkChain
+import misk.web.NetworkInterceptor
 import misk.web.Request
 import misk.web.Response
 import misk.web.actions.WebAction
@@ -23,7 +23,7 @@ import javax.inject.Inject
 @MiskTest
 class MetricsInterceptorTest {
   @MiskTestModule
-  val module = MetricsModule()
+  val module = MiskModule()
 
   @Inject internal lateinit var metricsInterceptorFactory: MetricsInterceptor.Factory
   @Inject internal lateinit var testAction: TestAction
