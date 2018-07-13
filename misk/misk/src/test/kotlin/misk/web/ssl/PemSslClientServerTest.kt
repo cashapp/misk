@@ -15,7 +15,7 @@ import misk.moshi.MoshiModule
 import misk.scope.ActionScoped
 import misk.security.ssl.CertStoreConfig
 import misk.security.ssl.ClientCertSubject
-import misk.security.ssl.Keystores
+import misk.security.ssl.SslLoader
 import misk.security.ssl.TrustStoreConfig
 import misk.security.cert.X500Name
 import misk.testing.MiskTest
@@ -98,11 +98,11 @@ internal class PemSslClientServerTest {
               cert_store = CertStoreConfig(
                   path = "src/test/resources/ssl/server_cert_key_combo.pem",
                   passphrase = "serverpassword",
-                  type = Keystores.TYPE_PEM
+                  format = SslLoader.FORMAT_PEM
               ),
               trust_store = TrustStoreConfig(
                   path = "src/test/resources/ssl/client_cert.pem",
-                  type = Keystores.TYPE_PEM
+                  format = SslLoader.FORMAT_PEM
               ),
               mutual_auth = WebSslConfig.MutualAuth.REQUIRED)
       ))
@@ -130,11 +130,11 @@ internal class PemSslClientServerTest {
                       cert_store = CertStoreConfig(
                           path = "src/test/resources/ssl/client_cert_key_combo.pem",
                           passphrase = "clientpassword",
-                          type = Keystores.TYPE_PEM
+                          format = SslLoader.FORMAT_PEM
                       ),
                       trust_store = TrustStoreConfig(
                           path = "src/test/resources/ssl/server_cert.pem",
-                          type = Keystores.TYPE_PEM
+                          format = SslLoader.FORMAT_PEM
                       )
                   )),
               "no-cert" to HttpClientEndpointConfig(
@@ -143,7 +143,7 @@ internal class PemSslClientServerTest {
                       cert_store = null,
                       trust_store = TrustStoreConfig(
                           path = "src/test/resources/ssl/server_cert.pem",
-                          type = Keystores.TYPE_PEM
+                          format = SslLoader.FORMAT_PEM
                       )
                   )),
               "no-trust" to HttpClientEndpointConfig(
@@ -152,11 +152,11 @@ internal class PemSslClientServerTest {
                       cert_store = CertStoreConfig(
                           path = "src/test/resources/ssl/client_cert_key_combo.pem",
                           passphrase = "clientpassword",
-                          type = Keystores.TYPE_PEM
+                          format = SslLoader.FORMAT_PEM
                       ),
                       trust_store = TrustStoreConfig(
                           path = "src/test/resources/ssl/client_cert.pem",
-                          type = Keystores.TYPE_PEM
+                          format = SslLoader.FORMAT_PEM
                       )
                   ))
           ))

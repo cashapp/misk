@@ -4,6 +4,7 @@ import com.google.common.base.Stopwatch
 import com.google.common.util.concurrent.AbstractIdleService
 import misk.logging.getLogger
 import misk.security.ssl.CipherSuites
+import misk.security.ssl.SslLoader
 import misk.security.ssl.TlsProtocols
 import misk.web.WebConfig
 import misk.web.WebSslConfig
@@ -28,6 +29,7 @@ private val logger = getLogger<JettyService>()
 
 @Singleton
 class JettyService @Inject internal constructor(
+  private val sslLoader: SslLoader,
   private val webActionsServlet: WebActionsServlet,
   private val webConfig: WebConfig
 ) : AbstractIdleService() {
@@ -55,9 +57,9 @@ class JettyService @Inject internal constructor(
 
     if (webConfig.ssl != null) {
       val sslContextFactory = SslContextFactory()
-      sslContextFactory.keyStore = webConfig.ssl.buildCertStore().keyStore
+      sslContextFactory.keyStore = sslLoader.loadCertStore(webConfig.ssl.cert_store)!!.keyStore
       sslContextFactory.setKeyStorePassword(webConfig.ssl.cert_store.passphrase)
-      sslContextFactory.trustStore = webConfig.ssl.buildTrustStore()?.keyStore
+      sslContextFactory.trustStore = sslLoader.loadTrustStore(webConfig.ssl.trust_store!!)?.keyStore
       when (webConfig.ssl.mutual_auth) {
         WebSslConfig.MutualAuth.REQUIRED -> sslContextFactory.needClientAuth = true
         WebSslConfig.MutualAuth.DESIRED -> sslContextFactory.wantClientAuth = true

@@ -3,6 +3,7 @@ package misk.web.actions
 import misk.MiskCaller
 import misk.MiskModule
 import misk.client.HttpClientEndpointConfig
+import misk.client.HttpClientFactory
 import misk.inject.KAbstractModule
 import misk.resources.FakeResourceLoaderModule
 import misk.scope.ActionScoped
@@ -30,8 +31,8 @@ class AuthenticationTest {
   @MiskTestModule
   val module = TestModule()
 
-  @Inject
-  private lateinit var jetty: JettyService
+  @Inject private lateinit var jetty: JettyService
+  @Inject private lateinit var httpClientFactory: HttpClientFactory
 
   @Test fun customServiceAccess_unauthenticated() {
     assertThat(executeRequest(path = "/custom_service_access"))
@@ -93,7 +94,7 @@ class AuthenticationTest {
 
   private fun createOkHttpClient(): OkHttpClient {
     val config = HttpClientEndpointConfig(jetty.httpServerUrl.toString())
-    return config.newHttpClient()
+    return httpClientFactory.create(config)
   }
 
   class TestModule : KAbstractModule() {

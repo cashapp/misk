@@ -25,10 +25,10 @@ class HttpClientModule constructor(
   }
 
   private class HttpClientProvider(private val name: String) : Provider<OkHttpClient> {
-    @Inject
-    lateinit var httpClientsConfig: HttpClientsConfig
+    @Inject lateinit var httpClientsConfig: HttpClientsConfig
+    @Inject lateinit var httpClientFactory: HttpClientFactory
 
-    override fun get() = httpClientsConfig[name].newHttpClient()
+    override fun get() = httpClientFactory.create(httpClientsConfig[name])
   }
 
   private class ProtoMessageHttpClientProvider(
