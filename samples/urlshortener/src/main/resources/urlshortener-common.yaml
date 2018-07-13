@@ -14,8 +14,6 @@ endpoint:
   base_url: http://localhost:8080/
 
 http_clients:
-  defaultWriteTimeout: 87654
   endpoints:
-    for_shortened_urls:
-      url: https://localhost/
-      readTimeout: 54321
+    web_proxy_interceptor:
+      url: http://localhost/
