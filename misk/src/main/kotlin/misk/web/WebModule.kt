@@ -1,18 +1,11 @@
 package misk.web
 
-import com.google.inject.name.Names
 import misk.ApplicationInterceptor
 import misk.MiskDefault
-import misk.client.HttpClientEndpointConfig
-import misk.client.HttpClientModule
-import misk.client.HttpClientsConfig
-import misk.config.ConfigModule
 import misk.exceptions.ActionException
 import misk.inject.KAbstractModule
-import misk.moshi.MoshiModule
 import misk.scope.ActionScopedProviderModule
 import misk.security.ssl.CertificatesModule
-import misk.web.resources.WebProxyInterceptor
 import misk.web.exceptions.ActionExceptionMapper
 import misk.web.exceptions.ExceptionHandlingInterceptor
 import misk.web.exceptions.ExceptionMapperModule
@@ -114,10 +107,6 @@ class WebModule : KAbstractModule() {
 
     // Add _admin installed tabs / forwarding mappings that don't have endpoints
     install(AdminTabModule())
-    // Intercept web requests and route to webpack dev servers
-    install(HttpClientModule("web_proxy_interceptor", Names.named("web_proxy_interceptor")))
-    multibind<NetworkInterceptor.Factory>()
-        .to<WebProxyInterceptor.Factory>()
 
     // Bind _admin static resources to web
     multibind<StaticResourceMapper.Entry>()

@@ -11,6 +11,7 @@ import misk.moshi.MoshiModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.web.Request
+import misk.web.WebProxyInterceptorModule
 import misk.web.readUtf8
 import okhttp3.HttpUrl
 import okhttp3.mockwebserver.MockResponse
@@ -59,6 +60,7 @@ class WebProxyInterceptorTest {
 //      install(WebTestingModule())
       install(HttpClientModule("web_proxy_interceptor", Names.named("web_proxy_interceptor")))
       install(MoshiModule())
+      install(WebProxyInterceptorModule())
 
       multibind<WebProxyInterceptor.Mapping>().toProvider(object: Provider<WebProxyInterceptor.Mapping> {
         override fun get(): WebProxyInterceptor.Mapping {

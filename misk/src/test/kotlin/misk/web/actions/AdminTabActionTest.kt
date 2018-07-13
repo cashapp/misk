@@ -2,6 +2,7 @@ package misk.web.actions
 
 import misk.inject.KAbstractModule
 import misk.logging.getLogger
+import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.web.AdminTabModule
 import misk.web.StaticResourceMapperTest
@@ -14,6 +15,7 @@ import javax.inject.Inject
 import kotlin.test.assert
 import kotlin.test.assertFailsWith
 
+@MiskTest
 internal class AdminTabActionTest {
   @MiskTestModule
   val module = TestModule()
@@ -41,13 +43,6 @@ internal class AdminTabActionTest {
   @Test
   internal fun tabGoodName() {
     AdminTab("Good Name", "slug", "/a/path/")
-  }
-
-  @Test
-  internal fun tabNameLower() {
-    assertFailsWith<IllegalArgumentException> {
-      AdminTab("badName", "slug", "/a/path/")
-    }
   }
 
   @Test

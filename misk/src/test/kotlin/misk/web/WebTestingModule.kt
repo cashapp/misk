@@ -12,8 +12,6 @@ class WebTestingModule(private val ssl: WebSslConfig? = null) : KAbstractModule(
     install(MiskModule())
     install(WebModule())
     install(FakeResourceLoaderModule())
-    multibind<NetworkInterceptor.Factory>()
-        .to<WebProxyInterceptor.Factory>()
   }
 
   @Provides
