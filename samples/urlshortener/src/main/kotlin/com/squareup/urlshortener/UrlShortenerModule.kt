@@ -1,6 +1,8 @@
 package com.squareup.urlshortener
 
+import com.google.inject.name.Names
 import misk.MiskModule
+import misk.client.HttpClientModule
 import misk.config.ConfigModule
 import misk.config.MiskConfig
 import misk.environment.Environment
@@ -19,6 +21,7 @@ class UrlShortenerModule(val environment: Environment) : KAbstractModule() {
     install(MiskModule())
     install(ResourceLoaderModule())
     install(EnvironmentModule(environment))
+    install(HttpClientModule("for_shortened_urls", Names.named("for_shortened_urls")))
 
     bind<UrlStore>().to<RealUrlStore>()
 

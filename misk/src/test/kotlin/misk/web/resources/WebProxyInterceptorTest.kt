@@ -1,12 +1,18 @@
 package misk.web.resources
 
+import com.google.inject.name.Names
+import misk.asAction
+import misk.client.HttpClientEndpointConfig
+import misk.client.HttpClientModule
+import misk.client.HttpClientsConfig
+import misk.config.ConfigModule
 import misk.inject.KAbstractModule
+import misk.moshi.MoshiModule
+import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.web.Request
-import misk.web.WebTestingModule
 import misk.web.readUtf8
 import okhttp3.HttpUrl
-import okhttp3.OkHttpClient
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import okio.Buffer
@@ -17,24 +23,30 @@ import org.junit.jupiter.api.Test
 import java.lang.IllegalArgumentException
 import java.net.HttpURLConnection
 import javax.inject.Inject
+import javax.inject.Provider
+import kotlin.reflect.full.functions
 import kotlin.test.assertFailsWith
 
-internal class WebProxyInterceptorTest {
-  @MiskTestModule
-  val module = TestModule()
+@MiskTest
+class WebProxyInterceptorTest {
+  @Inject lateinit var interceptorFactoryProvider: Provider<WebProxyInterceptor.Factory>
+  @Inject lateinit var mappingBindingsProvider: Provider<List<WebProxyInterceptor.Mapping>>
 
-  private val upstreamServer = MockWebServer()
   private lateinit var interceptor: WebProxyInterceptor
+  private val upstreamServer = MockWebServer()
 
-  @Inject private lateinit var mappingBindings: List<WebProxyInterceptor.Mapping>
+  @MiskTestModule
+  val module = TestModule(upstreamServer)
 
   @BeforeEach
   internal fun setUp() {
     upstreamServer.start()
+    val hello = WebProxyInterceptorTest::class.functions.iterator().next()
+    interceptor = interceptorFactoryProvider.get().create(hello.asAction()) as WebProxyInterceptor
+  }
 
-    interceptor = WebProxyInterceptor(OkHttpClient(), mutableListOf(
-        WebProxyInterceptor.Mapping("/local/prefix/",
-            upstreamServer.url("/"))))
+  fun theFunction(): String {
+    return "hello"
   }
 
   @AfterEach
@@ -42,24 +54,37 @@ internal class WebProxyInterceptorTest {
     upstreamServer.shutdown()
   }
 
-  class TestModule : KAbstractModule() {
+  class TestModule(val upstreamServer: MockWebServer) : KAbstractModule() {
     override fun configure() {
-      install(WebTestingModule())
-      multibind<WebProxyInterceptor.Mapping>().toInstance(
-          WebProxyInterceptor.Mapping(
-          "/local/prefix/",
-          HttpUrl.parse("http://localhost:418")!!
-      ))
+//      install(WebTestingModule())
+      install(HttpClientModule("web_proxy_interceptor", Names.named("web_proxy_interceptor")))
+      install(MoshiModule())
+
+      multibind<WebProxyInterceptor.Mapping>().toProvider(object: Provider<WebProxyInterceptor.Mapping> {
+        override fun get(): WebProxyInterceptor.Mapping {
+          return WebProxyInterceptor.Mapping(
+              "/local/prefix/",
+              upstreamServer.url("/")
+          )
+        }
+      })
+
+      install(ConfigModule.create<HttpClientsConfig>("http_clients", HttpClientsConfig(
+          endpoints = mapOf(
+              "web_proxy_interceptor" to HttpClientEndpointConfig("http://localhost")
+          ))))
     }
   }
 
   @Test
   internal fun testBindings() {
+    val mappingBindings = mappingBindingsProvider.get()
+    println(mappingBindings.first().toString())
     assertThat(mappingBindings.size == 1)
   }
 
   @Test
-  internal fun mappingLocalWithoutLeadingSlash() {
+  fun mappingLocalWithoutLeadingSlash() {
     assertFailsWith<IllegalArgumentException> {
       WebProxyInterceptor.Mapping("local/prefix/",
           upstreamServer.url("/"))
@@ -174,6 +199,5 @@ internal class WebProxyInterceptorTest {
     assertThat(response.statusCode).isEqualTo(HttpURLConnection.HTTP_UNAVAILABLE)
     assertThat(response.headers["Content-Type"]).isEqualTo("text/plain; charset=utf-8")
   }
-
 
 }

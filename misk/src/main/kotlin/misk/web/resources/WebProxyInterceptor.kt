@@ -13,7 +13,9 @@ import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
 import java.io.IOException
 import java.net.HttpURLConnection
+import java.time.Clock
 import javax.inject.Inject
+import javax.inject.Named
 import javax.inject.Singleton
 
 /**
@@ -33,20 +35,22 @@ import javax.inject.Singleton
  */
 
 @Singleton
-class WebProxyInterceptor(
+class WebProxyInterceptor private constructor(
   private val client: OkHttpClient,
   private val mappings: List<Mapping> = listOf()
 ) : NetworkInterceptor {
 
   //  TODO(adrw) enforce no prefix overlapping https://github.com/square/misk/issues/303
   override fun intercept(chain: NetworkChain): Response<*> {
-    val matchedMapping = ResourceInterceptorCommon.findMappingFromUrl(mappings, chain.request.url) as Mapping? ?: return chain.proceed(chain.request)
+    val matchedMapping =
+        ResourceInterceptorCommon.findMappingFromUrl(mappings, chain.request.url) as Mapping?
+            ?: return chain.proceed(chain.request)
     val proxyUrl = matchedMapping.web_proxy_url.newBuilder()
         .encodedPath(chain.request.url.encodedPath())
         .query(chain.request.url.query())
         .build()
     return forwardRequestTo(chain.request, proxyUrl)
-    }
+  }
 
   fun forwardRequestTo(request: Request, proxyUrl: HttpUrl): Response<*> {
     val clientRequest = request.toOkHttp3().withUrl(proxyUrl)
@@ -102,10 +106,13 @@ class WebProxyInterceptor(
     }
   }
 
-  class Factory @Inject internal constructor() : NetworkInterceptor.Factory {
-    @Inject private lateinit var mappings: List<Mapping>
+  class Factory @Inject internal constructor(
+    @Named("web_proxy_interceptor") val httpClient: OkHttpClient,
+    var mappings: List<Mapping>
+  ) : NetworkInterceptor.Factory {
     override fun create(action: Action): NetworkInterceptor? {
-      return WebProxyInterceptor(OkHttpClient(), mappings)
+      // TODO(adrw) jk above. transition webproxyinterceptor -> webproxyactions / resourceinterceptor+staticresourceinterceptor -> resourceactions
+      return WebProxyInterceptor(httpClient, mappings)
     }
   }
 }
