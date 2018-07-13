@@ -116,10 +116,6 @@ class WebModule : KAbstractModule() {
     install(AdminTabModule())
     // Intercept web requests and route to webpack dev servers
     install(HttpClientModule("web_proxy_interceptor", Names.named("web_proxy_interceptor")))
-//    install(ConfigModule.create<HttpClientsConfig>("http_clients", HttpClientsConfig(
-//        endpoints = mapOf(
-//            "web_proxy_interceptor" to HttpClientEndpointConfig("http://localhost")
-//        ))))
     multibind<NetworkInterceptor.Factory>()
         .to<WebProxyInterceptor.Factory>()
 
