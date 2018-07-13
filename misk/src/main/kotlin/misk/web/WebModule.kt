@@ -6,7 +6,7 @@ import misk.exceptions.ActionException
 import misk.inject.KAbstractModule
 import misk.scope.ActionScopedProviderModule
 import misk.security.ssl.CertificatesModule
-import misk.web.actions.UpstreamResourceInterceptor
+import misk.web.resources.WebProxyInterceptor
 import misk.web.exceptions.ActionExceptionMapper
 import misk.web.exceptions.ExceptionHandlingInterceptor
 import misk.web.exceptions.ExceptionMapperModule
@@ -108,8 +108,9 @@ class WebModule : KAbstractModule() {
 
     // Add _admin installed tabs / forwarding mappings that don't have endpoints
     install(AdminTabModule())
+    // Intercept web requests and route to webpack dev servers
     multibind<NetworkInterceptor.Factory>()
-        .to<UpstreamResourceInterceptor.Factory>()
+        .to<WebProxyInterceptor.Factory>()
 
     // Bind _admin static resources to web
     multibind<StaticResourceMapper.Entry>()

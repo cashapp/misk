@@ -3,11 +3,17 @@ package misk.web
 import misk.inject.KAbstractModule
 import misk.web.actions.AdminTab
 
+/**
+ * AdminTabModule
+ *
+ * Binds the admin UI framework. Individual tabs should be bound with their other code.
+ *
+ * Example
+ * Config tab is tightly coupled to the config module. Thus binding should be in ConfigWebModule
+ */
+
 class AdminTabModule : KAbstractModule() {
   override fun configure() {
-    // only bind tabs here that do not consume any endpoint
-    // otherwise put the binding with where those endpoints are
-    // ie. config tab uses data from endpoint within config, therefore binding is in ConfigWebModule
     multibind<AdminTab>().toInstance(AdminTab(
         "Dashboard",
         "dashboard",

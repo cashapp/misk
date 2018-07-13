@@ -9,8 +9,6 @@ import misk.hibernate.HibernateEntityModule
 import misk.hibernate.HibernateModule
 import misk.inject.KAbstractModule
 import misk.resources.ResourceLoaderModule
-import misk.web.NetworkInterceptor
-import misk.web.actions.UpstreamResourceInterceptor
 
 /** Binds dependencies for all environments. */
 class UrlShortenerModule(val environment: Environment) : KAbstractModule() {

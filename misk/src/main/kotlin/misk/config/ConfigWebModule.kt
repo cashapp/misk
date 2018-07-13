@@ -3,7 +3,7 @@ package misk.config
 import misk.inject.KAbstractModule
 import misk.web.WebActionModule
 import misk.web.actions.AdminTab
-import misk.web.actions.UpstreamResourceInterceptor
+import misk.web.resources.WebProxyInterceptor
 import okhttp3.HttpUrl
 
 class ConfigWebModule : KAbstractModule() {
@@ -14,11 +14,11 @@ class ConfigWebModule : KAbstractModule() {
         "config",
         "/_admin/config/"
     ))
-    multibind<UpstreamResourceInterceptor.Mapping>().toInstance(UpstreamResourceInterceptor.Mapping(
+    // TODO(adrw) only add web proxy during development, otherwise add ResourceInterceptor (Jar)
+    multibind<WebProxyInterceptor.Mapping>().toInstance(
+        WebProxyInterceptor.Mapping(
         "/_admin/config/",
-        HttpUrl.parse("http://localhost:3200/")!!,
-        "/web/tabs/config/",
-        UpstreamResourceInterceptor.Mode.SERVER
+        HttpUrl.parse("http://localhost:3200/")!!
     ))
   }
 }
