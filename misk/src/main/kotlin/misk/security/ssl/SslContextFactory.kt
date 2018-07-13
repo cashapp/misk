@@ -1,26 +1,30 @@
 package misk.security.ssl
 
 import java.security.KeyStore
+import javax.inject.Inject
 import javax.net.ssl.SSLContext
 import javax.net.ssl.TrustManager
 import javax.net.ssl.TrustManagerFactory
 
-object SslContextFactory {
+class SslContextFactory {
+  @Inject lateinit var sslLoader: SslLoader
+
   /** @return A new [SSLContext] for the given certstore and optional truststore config */
-  fun create(certStore: CertStoreConfig? = null, trustStore: TrustStoreConfig? = null) =
-      create(certStore?.load(), certStore?.passphrase?.toCharArray(), trustStore?.load())
+  fun create(certStore: CertStoreConfig? = null, trustStore: TrustStoreConfig? = null): SSLContext {
+    val loadedCertStore = certStore?.let { sslLoader.loadCertStore(certStore) }
+    val loadedTrustStore = trustStore?.let { sslLoader.loadTrustStore(trustStore) }
+    return create(loadedCertStore, certStore?.passphrase?.toCharArray(), loadedTrustStore)
+  }
 
   /** @return A new [SSLContext] for the given certstore and optional truststore config */
   fun create(certStore: CertStore?, pin: CharArray?, trustStore: TrustStore? = null): SSLContext {
     val sslContext = SSLContext.getInstance("TLS", "SunJSSE")
-    val trustManagers = trustStore?.keyStore
-        ?.let {
-          SslContextFactory.loadTrustManagers(it)
-        } ?: arrayOf()
-    val keyManagers = certStore?.keyStore
-        ?.let {
-          arrayOf(KeyStoreX509KeyManager(pin!!, it))
-        } ?: arrayOf()
+    val trustManagers = trustStore?.keyStore?.let {
+      loadTrustManagers(it)
+    } ?: arrayOf()
+    val keyManagers = certStore?.keyStore?.let {
+      arrayOf(KeyStoreX509KeyManager(pin!!, it))
+    } ?: arrayOf()
     sslContext.init(keyManagers, trustManagers, null)
     return sslContext
   }

@@ -1,9 +1,9 @@
 package misk.security.ssl
 
+import misk.security.ssl.SslLoader.Companion.FORMAT_JCEKS
+
 data class TrustStoreConfig(
   val path: String,
   val passphrase: String? = null,
-  val type: String = Keystores.TYPE_JCEKS
-) {
-  fun load() = Keystores.loadTrustStore(path, type, passphrase)
-}
+  val format: String = FORMAT_JCEKS
+)

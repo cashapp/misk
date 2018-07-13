@@ -1,16 +1,26 @@
 package misk.security.ssl
 
+import misk.resources.FakeResourceLoaderModule
+import misk.testing.MiskTest
+import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import javax.inject.Inject
 
+@MiskTest
 internal class PemComboFileTest {
+  @MiskTestModule
+  val module = FakeResourceLoaderModule()
+
   val clientComboPemPath = "src/test/resources/ssl/client_cert_key_combo.pem"
   val clientRsaComboPemPath = "src/test/resources/ssl/client_rsa_cert_key_combo.pem"
   val clientCertPemPath = "src/test/resources/ssl/client_cert.pem"
 
+  @Inject lateinit var sslLoader: SslLoader
+
   @Test
   fun loadTruststoreFromPEM() {
-    val keystore = TrustStore.load(clientCertPemPath)!!.keyStore
+    val keystore = sslLoader.loadTrustStore(clientCertPemPath)!!.keyStore
     assertThat(keystore.aliases().toList()).containsExactly("0")
     assertThat((keystore.getX509Certificate()).issuerX500Principal.name)
         .isEqualTo("CN=misk-client,OU=Client,O=Misk,L=San Francisco,ST=CA,C=US")
@@ -20,7 +30,7 @@ internal class PemComboFileTest {
 
   @Test
   fun loadRsaCertStoreFromPEM() {
-    val keystore = CertStore.load(clientRsaComboPemPath)!!.keyStore
+    val keystore = sslLoader.loadCertStore(clientRsaComboPemPath)!!.keyStore
     assertThat(keystore.aliases().toList()).containsExactly("key")
     assertThat((keystore.getX509Certificate()).issuerX500Principal.name)
         .isEqualTo("CN=misk-client,OU=Client,O=Misk,L=San Francisco,ST=CA,C=US")
@@ -30,7 +40,7 @@ internal class PemComboFileTest {
 
   @Test
   fun loadCertStoreFromPEM() {
-    val keystore = CertStore.load(clientComboPemPath)!!.keyStore
+    val keystore = sslLoader.loadCertStore(clientComboPemPath)!!.keyStore
     assertThat(keystore.aliases().toList()).containsExactly("key")
     assertThat((keystore.getX509Certificate()).issuerX500Principal.name)
         .isEqualTo("CN=misk-client,OU=Client,O=Misk,L=San Francisco,ST=CA,C=US")

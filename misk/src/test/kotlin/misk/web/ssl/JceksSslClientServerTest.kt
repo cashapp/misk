@@ -15,7 +15,7 @@ import misk.moshi.MoshiModule
 import misk.scope.ActionScoped
 import misk.security.ssl.CertStoreConfig
 import misk.security.ssl.ClientCertSubject
-import misk.security.ssl.Keystores
+import misk.security.ssl.SslLoader
 import misk.security.ssl.TrustStoreConfig
 import misk.security.cert.X500Name
 import misk.testing.MiskTest
@@ -102,7 +102,7 @@ internal class JceksSslClientServerTest {
               ),
               trust_store = TrustStoreConfig(
                   path = "src/test/resources/ssl/client_cert.pem",
-                  type = Keystores.TYPE_PEM
+                  format = SslLoader.FORMAT_PEM
               ),
               mutual_auth = WebSslConfig.MutualAuth.REQUIRED)))
     }
@@ -131,7 +131,7 @@ internal class JceksSslClientServerTest {
                       ),
                       trust_store = TrustStoreConfig(
                           path = "src/test/resources/ssl/server_cert.pem",
-                          type = Keystores.TYPE_PEM
+                          format = SslLoader.FORMAT_PEM
                       )
                   )),
               "no-cert" to HttpClientEndpointConfig(
@@ -140,7 +140,7 @@ internal class JceksSslClientServerTest {
                       cert_store = null,
                       trust_store = TrustStoreConfig(
                           path = "src/test/resources/ssl/server_cert.pem",
-                          type = Keystores.TYPE_PEM
+                          format = SslLoader.FORMAT_PEM
                       )
                   )),
               "no-trust" to HttpClientEndpointConfig(
@@ -152,7 +152,7 @@ internal class JceksSslClientServerTest {
                       ),
                       trust_store = TrustStoreConfig(
                           path = "src/test/resources/ssl/client_cert.pem",
-                          type = Keystores.TYPE_PEM
+                          format = SslLoader.FORMAT_PEM
                       )
                   ))
           ))
