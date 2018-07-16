@@ -1,6 +1,7 @@
 package misk.web
 
 import okhttp3.Headers
+import okio.Buffer
 import okio.BufferedSink
 import okio.Okio
 import javax.servlet.http.HttpServletResponse
@@ -23,6 +24,12 @@ fun String.toResponseBody(): ResponseBody {
       sink.writeUtf8(this@toResponseBody)
     }
   }
+}
+
+fun Response<*>.readUtf8(): String {
+  val buffer = Buffer()
+  (body as ResponseBody).writeTo(buffer)
+  return buffer.readUtf8()
 }
 
 fun Response<ResponseBody>.writeToJettyResponse(jettyResponse: HttpServletResponse) {

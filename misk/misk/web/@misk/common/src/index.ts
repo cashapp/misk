@@ -1,2 +1,2 @@
-import externals from './externals'
+import externals from "./externals"
 export default externals

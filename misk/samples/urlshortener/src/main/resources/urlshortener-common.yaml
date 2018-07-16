@@ -13,3 +13,9 @@ data_source_cluster:
 endpoint:
   base_url: http://localhost:8080/
 
+http_clients:
+  endpoints:
+    for_shortened_urls:
+      url: https://localhost/
+    web_proxy_interceptor:
+      url: http://localhost/

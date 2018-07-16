@@ -9,7 +9,7 @@ interface IPathProps {
 
 const PathDebug = styled.div``
 
-export class PathDebugComponent extends React.Component<IPathProps, {children : any}> {
+export class PathDebugComponent extends React.Component<IPathProps> {
   constructor(props: IPathProps) {
     super(props)
   }

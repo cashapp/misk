@@ -57,10 +57,13 @@ abstract class KAbstractModule : AbstractModule() {
   ): Multibinder<T> {
     val setOfT = parameterizedType<Set<*>>(type.java).typeLiteral() as TypeLiteral<Set<T>>
     val mutableSetOfTKey = setOfT.toKey(annotation) as Key<MutableSet<T>>
+    val listOfT = parameterizedType<List<*>>(type.java).typeLiteral() as TypeLiteral<List<T>>
     val listOfOutT =
         parameterizedType<List<*>>(Types.subtypeOf(type.java)).typeLiteral() as TypeLiteral<List<T>>
     val listOfOutTKey = listOfOutT.toKey(annotation)
+    val listOfTKey = listOfT.toKey(annotation)
     bind(listOfOutTKey).toProvider(ListProvider(mutableSetOfTKey, getProvider(mutableSetOfTKey)))
+    bind(listOfTKey).to(listOfOutTKey)
 
     return when (annotation) {
       null -> Multibinder.newSetBinder(binder(), type.java)
