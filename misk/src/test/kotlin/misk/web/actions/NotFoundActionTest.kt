@@ -4,8 +4,8 @@ import com.squareup.moshi.Moshi
 import misk.inject.KAbstractModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
-import misk.web.WebTestingModule
 import misk.web.WebActionModule
+import misk.web.WebTestingModule
 import misk.web.jetty.JettyService
 import misk.web.mediatype.MediaTypes
 import misk.web.mediatype.asMediaType

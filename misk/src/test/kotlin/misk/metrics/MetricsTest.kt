@@ -1,5 +1,6 @@
 package misk.metrics
 
+import misk.MiskModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
@@ -12,7 +13,7 @@ import javax.inject.Inject
 @MiskTest
 class MetricsTest {
   @MiskTestModule
-  val module = MetricsModule()
+  val module = MiskModule()
 
   @Inject lateinit var metrics: Metrics
 

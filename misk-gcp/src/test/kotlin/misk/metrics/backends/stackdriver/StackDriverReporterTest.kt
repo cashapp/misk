@@ -6,10 +6,10 @@ import com.google.api.services.monitoring.v3.model.TimeSeries
 import com.google.inject.AbstractModule
 import com.google.inject.Provides
 import com.google.inject.util.Modules
+import misk.MiskModule
 import misk.config.AppName
 import misk.environment.InstanceMetadata
 import misk.metrics.Metrics
-import misk.metrics.MetricsModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.time.FakeClockModule
@@ -60,11 +60,7 @@ internal class StackDriverReporterTest {
   }
 
   @MiskTestModule
-  val module = Modules.combine(
-      MetricsModule(),
-      FakeClockModule(),
-      TestModule()
-  )
+  val module = TestModule()
 
   @Inject internal lateinit var metrics: Metrics
   @Inject internal lateinit var reporter: StackDriverReporter
@@ -267,6 +263,7 @@ internal class StackDriverReporterTest {
 
   class TestModule : AbstractModule() {
     override fun configure() {
+      install(Modules.override(MiskModule()).with(FakeClockModule()))
     }
 
     @Provides
