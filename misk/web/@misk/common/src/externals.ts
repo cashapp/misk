@@ -1,93 +1,115 @@
-export const externals = [{
-  '@blueprintjs/core': {
-    root: 'BlueprintjsCore',
-    commonjs: '@blueprintjs/core',
-    commonjs2: '@blueprintjs/core',
-    amd: '@blueprintjs/core'
+// tslint:disable:no-duplicate-string
+const externals = [{
+  "@blueprintjs/core": {
+    amd: "@blueprintjs/core",
+    commonjs: "@blueprintjs/core",
+    commonjs2: "@blueprintjs/core",
+    root: "window.BlueprintjsCore",
   }
 }, {
-  '@blueprintjs/icons': {
-    root: 'BlueprintjsIcons',
-    commonjs: '@blueprintjs/icons',
-    commonjs2: '@blueprintjs/icons',
-    amd: '@blueprintjs/icons'
+  "@blueprintjs/icons": {
+    amd: "@blueprintjs/icons",
+    commonjs: "@blueprintjs/icons",
+    commonjs2: "@blueprintjs/icons",
+    root: "window.BlueprintjsIcons",
   }
 }, {
-  'axios': {
-    root: 'Axios',
-    commonjs: 'axios',
-    commonjs2: 'axios',
-    amd: 'axios'
+  "axios": {
+    amd: "axios",
+    commonjs: "axios",
+    commonjs2: "axios",
+    root: "window.Axios",
     },
 }, {
-  'history': {
-    root: 'History',
-    commonjs: 'history',
-    commonjs2: 'history',
-    amd: 'history'
+  "history": {
+    amd: "history",
+    commonjs: "history",
+    commonjs2: "history",
+    root: "window.History",
     },
 }, {
-  'react': {
-    root: 'React',
-    commonjs: 'react',
-    commonjs2: 'react',
-    amd: 'react',
+  "@misk/common": {
+    amd: "@misk/common",
+    commonjs: "@misk/common",
+    commonjs2: "@misk/common",
+    root: "window.MiskCommon",
+    },
+}, {
+  "@misk/components": {
+    amd: "@misk/components",
+    commonjs: "@misk/components",
+    commonjs2: "@misk/components",
+    root: "window.MiskComponents",
+    },
+}, {
+  "@misk/dev": {
+    amd: "@misk/dev",
+    commonjs: "@misk/dev",
+    commonjs2: "@misk/dev",
+    root: "window.MiskDev",
+    },
+}, {
+  "react": {
+    amd: "react",
+    commonjs: "react",
+    commonjs2: "react",
+    root: "window.React",
   },
 }, {
-  'react-dom': {
-    root: 'ReactDOM',
-    commonjs: 'react-dom',
-    commonjs2: 'react-dom',
-    amd: 'react-dom'
+  "react-dom": {
+    amd: "react-dom",
+    commonjs: "react-dom",
+    commonjs2: "react-dom",
+    root: "window.ReactDOM",
   }
 }, {
-  'react-helmet': {
-    root: 'ReactHelmet',
-    commonjs: 'react-helmet',
-    commonjs2: 'react-helmet',
-    amd: 'react-helmet'
+  "react-helmet": {
+    amd: "react-helmet",
+    commonjs: "react-helmet",
+    commonjs2: "react-helmet",
+    root: "window.ReactHelmet",
+  },
+}, {
+  "react-hot-loader": {
+    amd: "react-hot-loader",
+    commonjs: "react-hot-loader",
+    commonjs2: "react-hot-loader",
+    root: "window.ReactHotLoader",
     },
 }, {
-  'react-hot-loader': {
-    root: 'ReactHotLoader',
-    commonjs: 'react-hot-loader',
-    commonjs2: 'react-hot-loader',
-    amd: 'react-hot-loader'
+  "react-redux": {
+    amd: "react-redux",
+    commonjs: "react-redux",
+    commonjs2: "react-redux",
+    root: "window.ReactRedux",
     },
 }, {
-  'react-redux': {
-    root: 'ReactRedux',
-    commonjs: 'react-redux',
-    commonjs2: 'react-redux',
-    amd: 'react-redux'
+  "react-router": {
+    amd: "react-router",
+    commonjs: "react-router",
+    commonjs2: "react-router",
+    root: "ReactRouter",
     },
 }, {
-  'react-router': {
-    root: 'ReactRouter',
-    commonjs: 'react-router',
-    commonjs2: 'react-router',
-    amd: 'react-router'
+  "react-router-dom": {
+    amd: "react-router-dom",
+    commonjs: "react-router-dom",
+    commonjs2: "react-router-dom",
+    root: "window.ReactRouterDom",
     },
 }, {
-  'react-router-dom': {
-    root: 'ReactRouterDom',
-    commonjs: 'react-router-dom',
-    commonjs2: 'react-router-dom',
-    amd: 'react-router-dom'
+  "redux": {
+    amd: "redux",
+    commonjs: "redux",
+    commonjs2: "redux",
+    root: "window.Redux",
     },
 }, {
-  'redux': {
-    root: 'Redux',
-    commonjs: 'redux',
-    commonjs2: 'redux',
-    amd: 'redux'
-    },
-}, {
-  'styled-components': {
-    root: 'StyledComponents',
-    commonjs: 'styled-components',
-    commonjs2: 'styled-components',
-    amd: 'styled-components'
+  "styled-components": {
+    amd: "styled-components",
+    commonjs: "styled-components",
+    commonjs2: "styled-components",
+    root: "window.StyledComponents",
     },
 }];
 

@@ -105,6 +105,9 @@ class WebModule : KAbstractModule() {
     // Install infrastructure support
     install(CertificatesModule())
 
+    // Add _admin installed tabs / forwarding mappings that don't have endpoints
+    install(AdminTabModule())
+
     // Bind _admin static resources to web
     multibind<StaticResourceMapper.Entry>()
         .toInstance(StaticResourceMapper.Entry("/_admin/", "web/_admin", "misk/web/_admin/build"))

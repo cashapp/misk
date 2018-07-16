@@ -4,6 +4,7 @@ import com.google.inject.Provides
 import misk.MiskModule
 import misk.inject.KAbstractModule
 import misk.resources.FakeResourceLoaderModule
+import misk.web.resources.WebProxyInterceptor
 import javax.inject.Singleton
 
 class WebTestingModule(private val ssl: WebSslConfig? = null) : KAbstractModule() {

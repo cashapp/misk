@@ -1,6 +1,8 @@
 package com.squareup.urlshortener
 
+import com.google.inject.name.Names
 import misk.MiskModule
+import misk.client.HttpClientModule
 import misk.config.ConfigModule
 import misk.config.MiskConfig
 import misk.environment.Environment
@@ -9,8 +11,6 @@ import misk.hibernate.HibernateEntityModule
 import misk.hibernate.HibernateModule
 import misk.inject.KAbstractModule
 import misk.resources.ResourceLoaderModule
-import misk.web.NetworkInterceptor
-import misk.web.actions.UpstreamResourceInterceptor
 
 /** Binds dependencies for all environments. */
 class UrlShortenerModule(val environment: Environment) : KAbstractModule() {
@@ -21,6 +21,7 @@ class UrlShortenerModule(val environment: Environment) : KAbstractModule() {
     install(MiskModule())
     install(ResourceLoaderModule())
     install(EnvironmentModule(environment))
+    install(HttpClientModule("for_shortened_urls", Names.named("for_shortened_urls")))
 
     bind<UrlStore>().to<RealUrlStore>()
 
@@ -30,7 +31,5 @@ class UrlShortenerModule(val environment: Environment) : KAbstractModule() {
         addEntities(DbShortenedUrl::class)
       }
     })
-
-    multibind<NetworkInterceptor.Factory>().to<UpstreamResourceInterceptor.Factory>()
   }
 }

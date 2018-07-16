@@ -1,12 +1,19 @@
-package misk.web.actions
+package misk.web.resources
 
-import misk.web.NetworkChain
+import com.google.inject.name.Names
+import misk.asAction
+import misk.client.HttpClientEndpointConfig
+import misk.client.HttpClientModule
+import misk.client.HttpClientsConfig
+import misk.config.ConfigModule
+import misk.inject.KAbstractModule
+import misk.moshi.MoshiModule
+import misk.testing.MiskTest
+import misk.testing.MiskTestModule
 import misk.web.Request
-import misk.web.Response
-import misk.web.ResponseBody
-import misk.web.toResponseBody
+import misk.web.WebProxyInterceptorModule
+import misk.web.readUtf8
 import okhttp3.HttpUrl
-import okhttp3.OkHttpClient
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import okio.Buffer
@@ -16,24 +23,31 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.lang.IllegalArgumentException
 import java.net.HttpURLConnection
-import kotlin.reflect.KFunction
+import javax.inject.Inject
+import javax.inject.Provider
+import kotlin.reflect.full.functions
 import kotlin.test.assertFailsWith
 
-internal class UpstreamResourceInterceptorTest {
-  val upstreamServer = MockWebServer()
-  lateinit var mapping: UpstreamResourceInterceptor.Mapping
-  lateinit var mappingTestMapping: UpstreamResourceInterceptor.Mapping
-  lateinit var interceptor: UpstreamResourceInterceptor
+@MiskTest
+class WebProxyInterceptorTest {
+  @Inject lateinit var interceptorFactoryProvider: Provider<WebProxyInterceptor.Factory>
+  @Inject lateinit var mappingBindingsProvider: Provider<List<WebProxyInterceptor.Mapping>>
+
+  private lateinit var interceptor: WebProxyInterceptor
+  private val upstreamServer = MockWebServer()
+
+  @MiskTestModule
+  val module = TestModule(upstreamServer)
 
   @BeforeEach
   internal fun setUp() {
     upstreamServer.start()
+    val hello = WebProxyInterceptorTest::class.functions.iterator().next()
+    interceptor = interceptorFactoryProvider.get().create(hello.asAction()) as WebProxyInterceptor
+  }
 
-    mapping = UpstreamResourceInterceptor.Mapping(
-        "/local/prefix/",
-        upstreamServer.url("/"))
-
-    interceptor = UpstreamResourceInterceptor(OkHttpClient(), mutableListOf(mapping))
+  fun theFunction(): String {
+    return "hello"
   }
 
   @AfterEach
@@ -41,29 +55,69 @@ internal class UpstreamResourceInterceptorTest {
     upstreamServer.shutdown()
   }
 
+  class TestModule(val upstreamServer: MockWebServer) : KAbstractModule() {
+    override fun configure() {
+      install(MoshiModule())
+      install(WebProxyInterceptorModule())
+      install(ConfigModule.create<HttpClientsConfig>("http_clients", HttpClientsConfig(
+          endpoints = mapOf(
+              "web_proxy_interceptor" to HttpClientEndpointConfig("http://localhost")
+          ))))
+
+      multibind<WebProxyInterceptor.Mapping>().toProvider(object: Provider<WebProxyInterceptor.Mapping> {
+        override fun get(): WebProxyInterceptor.Mapping {
+          return WebProxyInterceptor.Mapping(
+              "/local/prefix/",
+              upstreamServer.url("/")
+          )
+        }
+      })
+    }
+  }
+
   @Test
-  internal fun mappingFailsIfLocalWithoutLeadingSlash() {
+  internal fun testBindings() {
+    val mappingBindings = mappingBindingsProvider.get()
+    println(mappingBindings.first().toString())
+    assertThat(mappingBindings.size == 1)
+  }
+
+  @Test
+  fun mappingLocalWithoutLeadingSlash() {
     assertFailsWith<IllegalArgumentException> {
-      mappingTestMapping = UpstreamResourceInterceptor.Mapping(
-          "local/prefix/",
+      WebProxyInterceptor.Mapping("local/prefix/",
           upstreamServer.url("/"))
     }
   }
 
   @Test
-  internal fun mappingFailsIfLocalWithoutTrailingSlash() {
+  internal fun mappingLocalWithoutTrailingSlash() {
     assertFailsWith<IllegalArgumentException> {
-      mappingTestMapping = UpstreamResourceInterceptor.Mapping(
-          "/local/prefix",
+      WebProxyInterceptor.Mapping("/local/prefix",
           upstreamServer.url("/"))
     }
   }
 
   @Test
-  internal fun mappingFailsIfUpstreamHasPathSegments() {
+  internal fun mappingToApiPrefix() {
     assertFailsWith<IllegalArgumentException> {
-      mappingTestMapping = UpstreamResourceInterceptor.Mapping(
-          "/local/prefix/",
+      WebProxyInterceptor.Mapping("/api/test/prefix/",
+          upstreamServer.url("/"))
+    }
+  }
+
+  @Test
+  internal fun mappingUpstreamUrlToFile() {
+    assertFailsWith<IllegalArgumentException> {
+      WebProxyInterceptor.Mapping("/local/prefix/",
+          upstreamServer.url("/test.js"))
+    }
+  }
+
+  @Test
+  internal fun mappingUpstreamUrlWithPathSegments() {
+    assertFailsWith<IllegalArgumentException> {
+      WebProxyInterceptor.Mapping("/local/prefix/",
           upstreamServer.url("/upstream/prefix/"))
     }
   }
@@ -80,7 +134,8 @@ internal class UpstreamResourceInterceptorTest {
         body = Buffer()
     )
 
-    val response = interceptor.intercept(FakeNetworkChain(request))
+    val response = interceptor.intercept(
+        ResourceInterceptorCommon.FakeNetworkChain(request))
 
     assertThat(response.statusCode).isEqualTo(418)
     assertThat(response.headers["UpstreamHeader"]).isEqualTo("UpstreamHeaderValue")
@@ -102,7 +157,8 @@ internal class UpstreamResourceInterceptorTest {
         body = Buffer()
     )
 
-    val response = interceptor.intercept(FakeNetworkChain(request))
+    val response = interceptor.intercept(
+        ResourceInterceptorCommon.FakeNetworkChain(request))
 
     assertThat(response.statusCode).isEqualTo(418)
     assertThat(response.headers["UpstreamHeader"]).isEqualTo("UpstreamHeaderValue")
@@ -119,7 +175,7 @@ internal class UpstreamResourceInterceptorTest {
         body = Buffer()
     )
 
-    val response = interceptor.intercept(FakeNetworkChain(fakeRequest))
+    val response = interceptor.intercept(ResourceInterceptorCommon.FakeNetworkChain(fakeRequest))
     assertThat(response.readUtf8()).isEqualTo("I am not intercepted")
 
     assertThat(upstreamServer.requestCount).isZero()
@@ -135,30 +191,12 @@ internal class UpstreamResourceInterceptorTest {
         body = Buffer()
     )
 
-    val response = interceptor.intercept(FakeNetworkChain(request))
+    val response = interceptor.intercept(
+        ResourceInterceptorCommon.FakeNetworkChain(request))
 
     assertThat(response.readUtf8()).isEqualTo("Failed to fetch upstream URL $urlThatFailed")
     assertThat(response.statusCode).isEqualTo(HttpURLConnection.HTTP_UNAVAILABLE)
     assertThat(response.headers["Content-Type"]).isEqualTo("text/plain; charset=utf-8")
   }
 
-  private fun Response<*>.readUtf8(): String {
-    val buffer = Buffer()
-    (body as ResponseBody).writeTo(buffer)
-    return buffer.readUtf8()
-  }
-
-  class FakeNetworkChain(
-    override val request: Request
-  ) : NetworkChain {
-    override val action: WebAction
-      get() = throw AssertionError()
-
-    override val function: KFunction<*>
-      get() = throw AssertionError()
-
-    override fun proceed(request: Request): Response<*> {
-      return Response("I am not intercepted".toResponseBody())
-    }
-  }
 }
