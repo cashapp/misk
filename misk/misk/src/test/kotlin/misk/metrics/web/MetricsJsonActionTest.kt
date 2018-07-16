@@ -1,7 +1,7 @@
 package misk.metrics.web
 
+import misk.MiskModule
 import misk.metrics.Metrics
-import misk.metrics.MetricsModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
@@ -12,7 +12,7 @@ import javax.inject.Inject
 @MiskTest
 internal class MetricsJsonActionTest {
   @MiskTestModule
-  val module = MetricsModule()
+  val module = MiskModule()
 
   @Inject internal lateinit var metrics: Metrics
   @Inject internal lateinit var metricsAction: MetricsJsonAction

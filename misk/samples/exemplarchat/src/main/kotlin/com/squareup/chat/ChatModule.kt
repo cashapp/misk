@@ -8,7 +8,6 @@ import misk.healthchecks.ClusterWideHealthModule
 import misk.healthchecks.HealthCheck
 import misk.inject.KAbstractModule
 import misk.web.WebActionModule
-import misk.web.actions.DefaultActionsModule
 import misk.web.resources.StaticResourceMapper
 
 class ChatModule : KAbstractModule() {
@@ -16,7 +15,6 @@ class ChatModule : KAbstractModule() {
     install(WebActionModule.create<ChatPageAction>())
     install(WebActionModule.create<ChatWebSocketAction>())
     install(WebActionModule.create<ToggleManualHealthCheckAction>())
-    install(DefaultActionsModule())
     install(ClusterWideHealthModule())
     multibind<HealthCheck>().to<ManualHealthCheck>()
     multibind<StaticResourceMapper.Entry>()

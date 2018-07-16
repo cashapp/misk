@@ -7,7 +7,6 @@ import misk.tokens.TokenGeneratorModule
 import misk.web.WebActionModule
 import misk.web.WebModule
 import misk.web.WebProxyInterceptorModule
-import misk.web.actions.DefaultActionsModule
 
 /** Binds all service dependencies including service-specific dependencies. */
 class UrlShortenerServiceModule : AbstractModule() {
@@ -21,6 +20,5 @@ class UrlShortenerServiceModule : AbstractModule() {
     install(WebProxyInterceptorModule())
     install(WebActionModule.create<CreateShortUrlWebAction>())
     install(WebActionModule.create<ShortUrlWebAction>())
-    install(DefaultActionsModule())
   }
 }
