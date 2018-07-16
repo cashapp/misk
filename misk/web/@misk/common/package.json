@@ -1,6 +1,6 @@
 {
   "name": "@misk/common",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "Microservice Kontainer Common Libraries, Externals, Styles",
   "author": "Square/Misk Authors (https://github.com/square/misk/graphs/contributors)",
   "main": "lib/index.js",
@@ -27,8 +27,8 @@
     "test": "echo no tests"
   },
   "dependencies": {
-    "@blueprintjs/core": "^2.3.1",
-    "@blueprintjs/icons": "^2.2.1",
+    "@blueprintjs/core": "^3.0.1",
+    "@blueprintjs/icons": "^3.0.0",
     "axios": "^0.18.0",
     "connected-react-router": "^4.3.0",
     "history": "^4.7.2",

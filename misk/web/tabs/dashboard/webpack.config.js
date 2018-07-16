@@ -2,8 +2,6 @@ var BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlug
 const path = require('path')
 const webpack = require('webpack')
 const HTMLWebpackPlugin = require('html-webpack-plugin')
-const miskCommon = require('@misk/common');
-const nodeExternals = require('webpack-node-externals');
 
 const miskCommonExternals = [{
   '@blueprintjs/core': {
@@ -182,5 +180,5 @@ module.exports = {
       }),
     ]
     : [HTMLWebpackPluginConfig, DefinePluginConfig],
-  externals: miskCommonExternals
+  // externals: miskCommonExternals
 }
