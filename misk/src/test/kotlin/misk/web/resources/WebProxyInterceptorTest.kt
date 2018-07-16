@@ -57,10 +57,12 @@ class WebProxyInterceptorTest {
 
   class TestModule(val upstreamServer: MockWebServer) : KAbstractModule() {
     override fun configure() {
-//      install(WebTestingModule())
-      install(HttpClientModule("web_proxy_interceptor", Names.named("web_proxy_interceptor")))
       install(MoshiModule())
       install(WebProxyInterceptorModule())
+      install(ConfigModule.create<HttpClientsConfig>("http_clients", HttpClientsConfig(
+          endpoints = mapOf(
+              "web_proxy_interceptor" to HttpClientEndpointConfig("http://localhost")
+          ))))
 
       multibind<WebProxyInterceptor.Mapping>().toProvider(object: Provider<WebProxyInterceptor.Mapping> {
         override fun get(): WebProxyInterceptor.Mapping {
@@ -70,11 +72,6 @@ class WebProxyInterceptorTest {
           )
         }
       })
-
-      install(ConfigModule.create<HttpClientsConfig>("http_clients", HttpClientsConfig(
-          endpoints = mapOf(
-              "web_proxy_interceptor" to HttpClientEndpointConfig("http://localhost")
-          ))))
     }
   }
 
