@@ -37,7 +37,11 @@ dependencies {
   compile dep.okHttp
   compile dep.kotlinReflection
   compile dep.moshi
+  compile dep.conscrypt
+  compile dep.jettyAlpnConscypt
+  compile dep.jettyHttp2
   compile dep.jettyServer
+  compile dep.servletApi
   compile dep.jettyServlet
   compile dep.jettyWebsocketServlet
   compile dep.jettyWebsocketServer
