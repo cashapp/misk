@@ -1,10 +1,13 @@
 import { Menu, MenuItem } from "@blueprintjs/core"
 import * as React from "react"
 import styled from "styled-components" 
-import { IMenuItem } from "../utils/menu"
 
 interface ISidebarProps {
   menuItems: IMenuItem[]
+}
+
+interface IMenuItem {
+  
 }
 
 const Sidebar = styled.div`

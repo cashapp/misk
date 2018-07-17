@@ -17,7 +17,7 @@
     resize-observer-polyfill "^1.5.0"
     tslib "^1.9.0"
 
-"@blueprintjs/icons@^3.0.0", "@blueprintjs/icons@^3.0.1":
+"@blueprintjs/icons@^3.0.0":
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/@blueprintjs/icons/-/icons-3.0.0.tgz#2eed041dd52c9feed2758ca526f4505911813a31"
   dependencies:
@@ -88,6 +88,10 @@
 "@types/node@*":
   version "10.3.2"
   resolved "https://npm.vip.global.square/@types%2fnode/-/node-10.3.2.tgz#3840ec6c12556fdda6e0e6d036df853101d732a4"
+
+"@types/node@^10.5.2":
+  version "10.5.2"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-10.5.2.tgz#f19f05314d5421fe37e74153254201a7bf00a707"
 
 "@types/react-dom@^16.0.6":
   version "16.0.6"

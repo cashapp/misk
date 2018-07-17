@@ -16,7 +16,6 @@
     "@misk/components": "latest"
   },
   "devDependencies": {
-    "@misk/dev": "latest",
-    "webpack-bundle-analyzer": "^2.13.1"
+    "@misk/dev": "latest"
   }
 }

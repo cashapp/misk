@@ -1,4 +1,3 @@
-var BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 const path = require('path')
 const webpack = require('webpack')
 const HTMLWebpackPlugin = require('html-webpack-plugin')
@@ -62,9 +61,6 @@ module.exports = {
     ? [
       HTMLWebpackPluginConfig,
       new webpack.HotModuleReplacementPlugin(),
-      new BundleAnalyzerPlugin({
-        analyzerMode: 'static'
-      }),
     ]
     : [HTMLWebpackPluginConfig, DefinePluginConfig],
   externals: [nodeExternals()]

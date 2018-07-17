@@ -16,7 +16,6 @@
   },
   "devDependencies": {
     "@misk/dev": "latest",
-    "webpack-bundle-analyzer": "^2.13.1",
     "webpack-node-externals": "^1.7.2"
   }
 }
