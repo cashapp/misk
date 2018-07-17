@@ -14,24 +14,25 @@ interface IInExternal {
 export default makeExternals({
   "@blueprintjs/core": ["Blueprint", "Core"],
   "@blueprintjs/icons": ["Blueprint", "Icons"],
-  "axios": "axios",
-  "history": "history", 
+  "axios": "Axios",
+  "history": "HistoryNPM", 
   "@misk/common": ["Misk", "Common"],
   "@misk/components": ["Misk", "Components"],
   "@misk/dev": ["Misk", "Dev"],
-  "react": "React",
+  "react": "React", // has to be kept locally because of react-hot-loader bug
   "react-dom": "ReactDom",
   "react-helmet": "ReactHelmet",
   "react-hot-loader": "ReactHotLoader",
-  "react-redux": "ReactRedux",
+  "react-redux": "ReactRedux", // has to be kept locally because of connected-react-router bug
+  "react-router": "ReactRouter",
   "react-router-dom": "ReactRouterDom",
-  "redux": "Redux",
-  "styled-components": "StyledComponents"
+  "redux": "Redux", // has to be kept locally because of index CombineReducers bug
+  "styled-components": "StyledComponents" // has to be kept locally because of PathDebugComponent bug
 })
 
 function makeExternals(inExternals: IInExternal) : IExternal {
   const outExternals: IExternal = {}
-  Object.keys(inExternals).forEach((name, external) => {
+  Object.keys(inExternals).forEach((name, index) => {
     outExternals[name] = {
       amd: name,
       commonjs: name,
@@ -39,16 +40,5 @@ function makeExternals(inExternals: IInExternal) : IExternal {
       root: inExternals.hasOwnProperty(name) ? inExternals[name] : name
     }
   })
-
-
-
-  // for (const packageName in inExternals) {
-  //   outExternals[packageName] = {
-  //     amd: packageName,
-  //     commonjs: packageName,
-  //     commonjs2: packageName,
-  //     root: inExternals.hasOwnProperty(packageName) ? inExternals[packageName] : packageName
-  //   }
-  // }
   return outExternals
 }

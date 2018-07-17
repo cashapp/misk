@@ -13,7 +13,8 @@
   },
   "dependencies": {
     "@misk/common": "latest",
-    "@misk/components": "latest"
+    "@misk/components": "latest",
+    "react": "^16.4.1"
   },
   "devDependencies": {
     "@misk/dev": "latest"

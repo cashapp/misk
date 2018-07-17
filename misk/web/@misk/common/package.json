@@ -1,6 +1,6 @@
 {
   "name": "@misk/common",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "Microservice Kontainer Common Libraries, Externals, Styles",
   "author": "Square/Misk Authors (https://github.com/square/misk/graphs/contributors)",
   "main": "lib/index.js",

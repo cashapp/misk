@@ -10,8 +10,9 @@ module.exports = {
   output: {
     path: path.resolve(__dirname, './lib'),
     filename: '[name].js',
-    library: '@misk/components',
-    libraryTarget: 'umd'
+    library: ['misk', 'components'],
+    libraryTarget: 'umd',
+    globalObject: 'typeof self !== \'undefined\' ? self : this'
   },
   module: {
     rules: [

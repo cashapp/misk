@@ -14,7 +14,7 @@ module.exports = {
     filename: '[name].js',
     library: ['misk', 'common'],
     libraryTarget: 'umd',
-    globalObject: 'typeof self !== \'undefined\' ? self : this'
+    globalObject: 'typeof window !== \'undefined\' ? window : this'
   },
   module: {
     rules: [

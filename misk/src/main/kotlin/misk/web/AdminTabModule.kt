@@ -31,6 +31,11 @@ class AdminTabModule : KAbstractModule() {
         "@misk",
         "/_admin/@misk/"
     ))
+    multibind<WebProxyInterceptor.Mapping>().toInstance(
+        WebProxyInterceptor.Mapping(
+            "/_admin/@misk/",
+            HttpUrl.parse("http://localhost:9100/")!!
+        ))
     multibind<AdminTab>().toInstance(AdminTab(
         "Loader",
         "loader",

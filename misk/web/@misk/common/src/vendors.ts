@@ -1,12 +1,15 @@
-const BlueprintjsCore = require('@blueprintjs/core');
-const BlueprintjsIcons = require('@blueprintjs/icons');
-const Axios = require('axios');
-const React = require('react');
-const ReactDOM = require('react-dom');
-const ReactHelmet = require('react-helmet');
-const ReactHotLoader = require('react-hot-loader');
-const ReactRedux = require('react-redux');
-const ReactRouter = require('react-router');
-const ReactRouterDom = require('react-router-dom');
-const Redux = require('redux');
-const StyledComponents = require('styled-components');
+import { externals } from "./index"
+
+(<any>window).Blueprint.Core = require('@blueprintjs/core')
+(<any>window).Blueprint.Icons = require('@blueprintjs/icons')
+(<any>window).Axios = require('axios');
+(<any>window).HistoryNPM = require('history');
+(<any>window).React = require('react');
+(<any>window).ReactDOM = require('react-dom');
+(<any>window).ReactHelmet = require('react-helmet');
+(<any>window).ReactHotLoader = require('react-hot-loader');
+(<any>window).ReactRedux = require('react-redux');
+(<any>window).ReactRouter = require('react-router');
+(<any>window).ReactRouterDom = require('react-router-dom');
+(<any>window).Redux = require('redux');
+(<any>window).StyledComponents = require('styled-components');
