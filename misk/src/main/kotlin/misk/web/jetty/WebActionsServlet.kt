@@ -5,6 +5,8 @@ import misk.inject.keyOf
 import misk.scope.ActionScope
 import misk.web.BoundAction
 import misk.web.Request
+import misk.web.WebActionEntry
+import misk.web.WebActionFactory
 import misk.web.actions.WebAction
 import misk.web.mediatype.MediaRange
 import misk.web.mediatype.MediaTypes
@@ -24,9 +26,19 @@ import javax.servlet.http.HttpServletResponse
 
 @Singleton
 internal class WebActionsServlet @Inject constructor(
-  private val boundActions: MutableSet<BoundAction<out WebAction, *>>,
+  webActionFactory: WebActionFactory,
+  webActionEntries: List<WebActionEntry>,
   private val scope: ActionScope
 ) : WebSocketServlet() {
+
+  private val boundActions: MutableSet<BoundAction<out WebAction, *>> = mutableSetOf()
+
+  init {
+    for (entry in webActionEntries) {
+      boundActions += webActionFactory.newBoundAction(entry.actionClass, entry.pathPrefix)
+    }
+  }
+
   override fun doGet(request: HttpServletRequest, response: HttpServletResponse) {
     handleCall(request, response)
   }
