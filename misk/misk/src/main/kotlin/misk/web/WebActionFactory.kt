@@ -29,20 +29,13 @@ internal class WebActionFactory {
 
   @Inject lateinit var parameterExtractorFactories: List<ParameterExtractor.Factory>
 
-  /**
-   * newBoundAction
-   *
-   * Transforms WebActionEntry into BoundAction
-   *
-   * @param entry: WebActionEntry
-   */
+  /** Returns the bound actions for `webActionClass`. */
   fun <A : WebAction> newBoundAction(
     webActionClass: KClass<A>,
     pathPrefix: String = ""
   ): List<BoundAction<A, *>> {
-    // Find the function with Get or Post annotations. Only one such function is
-    // allow, but may have both Get and Post annotations if the action can handle
-    // both forms of HTTP method
+    // Find the function with Get, Post, or ConnectWebSocket annotation. Only one such function is
+    // allowed.
     val actionFunctions = webActionClass.members.mapNotNull {
       if (it.findAnnotation<Get>() != null ||
           it.findAnnotation<Post>() != null ||
@@ -61,11 +54,10 @@ internal class WebActionFactory {
       "multiple annotated methods on ${webActionClass.simpleName}: $actionFunctionNames"
     }
 
-    // Bind providers for each supported HTTP method
+    // Bind providers for each supported HTTP method.
     val actionFunction = actionFunctions.first()
     val get = actionFunction.findAnnotation<Get>()
 
-    // Only one of ConnectWebSocket and Get may be specified
     val connectWebSocket = actionFunction.findAnnotation<ConnectWebSocket>()
     val post = actionFunction.findAnnotation<Post>()
 

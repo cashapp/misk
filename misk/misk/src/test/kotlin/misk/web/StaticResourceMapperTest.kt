@@ -97,8 +97,8 @@ class StaticResourceMapperTest {
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(WebTestingModule())
-      install(WebActionModule.create<Hello>())
-      install(WebActionModule.create<NotFoundAction>())
+      multibind<WebActionEntry>().toInstance(WebActionEntry(Hello::class))
+      multibind<WebActionEntry>().toInstance(WebActionEntry(NotFoundAction::class))
       multibind<StaticResourceMapper.Entry>()
           .toInstance(StaticResourceMapper.Entry("/", "web", "???"))
     }
