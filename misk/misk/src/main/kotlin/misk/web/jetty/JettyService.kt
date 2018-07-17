@@ -2,14 +2,19 @@ package misk.web.jetty
 
 import com.google.common.base.Stopwatch
 import com.google.common.util.concurrent.AbstractIdleService
+import com.google.inject.Key
+import misk.DependentService
+import misk.inject.toKey
 import misk.logging.getLogger
 import misk.security.ssl.CipherSuites
 import misk.security.ssl.SslLoader
 import misk.security.ssl.TlsProtocols
+import misk.web.ForConscrypt
 import misk.web.WebConfig
 import misk.web.WebSslConfig
 import okhttp3.HttpUrl
-import org.eclipse.jetty.http.HttpVersion
+import org.eclipse.jetty.alpn.server.ALPNServerConnectionFactory
+import org.eclipse.jetty.http2.server.HTTP2ServerConnectionFactory
 import org.eclipse.jetty.server.HttpConfiguration
 import org.eclipse.jetty.server.HttpConnectionFactory
 import org.eclipse.jetty.server.NetworkConnector
@@ -23,7 +28,9 @@ import org.eclipse.jetty.servlet.ServletHolder
 import org.eclipse.jetty.util.ssl.SslContextFactory
 import java.net.InetAddress
 import javax.inject.Inject
+import javax.inject.Provider
 import javax.inject.Singleton
+import java.security.Provider as SecurityProvider
 
 private val logger = getLogger<JettyService>()
 
@@ -31,12 +38,16 @@ private val logger = getLogger<JettyService>()
 class JettyService @Inject internal constructor(
   private val sslLoader: SslLoader,
   private val webActionsServlet: WebActionsServlet,
-  private val webConfig: WebConfig
-) : AbstractIdleService() {
+  private val webConfig: WebConfig,
+  @ForConscrypt private val conscryptProvider: Provider<SecurityProvider>
+) : AbstractIdleService(), DependentService {
   private val server = Server()
 
   val httpServerUrl: HttpUrl get() = server.httpUrl!!
   val httpsServerUrl: HttpUrl? get() = server.httpsUrl
+
+  override val consumedKeys = setOf<Key<*>>(SecurityProvider::class.toKey(ForConscrypt::class))
+  override val producedKeys = setOf<Key<*>>()
 
   override fun startUp() {
     val stopwatch = Stopwatch.createStarted()
@@ -52,14 +63,18 @@ class JettyService @Inject internal constructor(
     val httpConnector = ServerConnector(server, HttpConnectionFactory(httpConfig))
     httpConnector.port = webConfig.port
     httpConnector.idleTimeout = webConfig.idle_timeout
+    httpConnector.reuseAddress = true
     webConfig.host?.let { httpConnector.host = it }
     server.addConnector(httpConnector)
 
     if (webConfig.ssl != null) {
       val sslContextFactory = SslContextFactory()
+      sslContextFactory.provider = conscryptProvider.get().name
       sslContextFactory.keyStore = sslLoader.loadCertStore(webConfig.ssl.cert_store)!!.keyStore
       sslContextFactory.setKeyStorePassword(webConfig.ssl.cert_store.passphrase)
-      sslContextFactory.trustStore = sslLoader.loadTrustStore(webConfig.ssl.trust_store!!)?.keyStore
+      webConfig.ssl.trust_store?.let {
+        sslContextFactory.trustStore = sslLoader.loadTrustStore(it)!!.keyStore
+      }
       when (webConfig.ssl.mutual_auth) {
         WebSslConfig.MutualAuth.REQUIRED -> sslContextFactory.needClientAuth = true
         WebSslConfig.MutualAuth.DESIRED -> sslContextFactory.wantClientAuth = true
@@ -77,13 +92,15 @@ class JettyService @Inject internal constructor(
       val httpsConfig = HttpConfiguration(httpConfig)
       httpsConfig.addCustomizer(SecureRequestCustomizer())
 
-      val httpsConnector = ServerConnector(
-          server,
-          SslConnectionFactory(sslContextFactory, HttpVersion.HTTP_1_1.toString()),
-          HttpConnectionFactory(httpsConfig)
-      )
+      val alpn = ALPNServerConnectionFactory("h2", "http/1.1")
+      alpn.defaultProtocol = "http/1.1"
+      val ssl = SslConnectionFactory(sslContextFactory, alpn.protocol)
+      val http2 = HTTP2ServerConnectionFactory(httpsConfig)
+      val http1 = HttpConnectionFactory(httpsConfig)
+      val httpsConnector = ServerConnector(server, ssl, alpn, http2, http1)
       httpsConnector.port = webConfig.ssl.port
       httpsConnector.idleTimeout = webConfig.idle_timeout
+      httpsConnector.reuseAddress = true
       webConfig.host?.let { httpsConnector.host = it }
       server.addConnector(httpsConnector)
     }
