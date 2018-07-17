@@ -13,6 +13,7 @@ import okhttp3.Request
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import javax.inject.Inject
+import kotlin.test.assertFailsWith
 
 @MiskTest(startService = true)
 internal class WebDispatchTest {
@@ -64,6 +65,22 @@ internal class WebDispatchTest {
   }
 
   @Test
+  fun getWithPathPrefix() {
+    val httpClient = OkHttpClient()
+    val request = Request.Builder()
+        .get()
+        .url(serverUrlBuilder().encodedPath("/path/prefix/hello/my_friend").build())
+        .build()
+
+    val response = httpClient.newCall(request).execute()
+    assertThat(response.code()).isEqualTo(200)
+
+    val responseContent = response.body()!!.source().readString(Charsets.UTF_8)
+    assertThat(helloByeJsonAdapter.fromJson(responseContent)!!.message)
+        .isEqualTo("get hello my_friend")
+  }
+
+  @Test
   fun getNothing() {
     val httpClient = OkHttpClient()
     val request = Request.Builder()
@@ -78,14 +95,34 @@ internal class WebDispatchTest {
     assertThat(response.code()).isEqualTo(500)
   }
 
+  @Test
+  fun entryWithSingleSegment() {
+    WebActionEntry(GetHello::class, "/good")
+  }
+
+  @Test
+  fun entryFailsWithTrailingSlash() {
+    assertFailsWith<IllegalArgumentException> {
+      WebActionEntry(GetHello::class, "/bad/path/")
+    }
+  }
+
+  @Test
+  fun entryFailsWithEmptyPathSegments() {
+    assertFailsWith<IllegalArgumentException> {
+      WebActionEntry(GetHello::class, "///")
+    }
+  }
+
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(WebTestingModule())
-      install(WebActionModule.create<PostHello>())
-      install(WebActionModule.create<GetHello>())
-      install(WebActionModule.create<PostBye>())
-      install(WebActionModule.create<GetBye>())
-      install(WebActionModule.create<GetNothing>())
+      multibind<WebActionEntry>().toInstance(WebActionEntry(PostHello::class))
+      multibind<WebActionEntry>().toInstance(WebActionEntry(GetHello::class))
+      multibind<WebActionEntry>().toInstance(WebActionEntry(PostBye::class))
+      multibind<WebActionEntry>().toInstance(WebActionEntry(GetBye::class))
+      multibind<WebActionEntry>().toInstance(WebActionEntry(GetNothing::class))
+      multibind<WebActionEntry>().toInstance(WebActionEntry(GetHello::class, "/path/prefix"))
     }
   }
 
