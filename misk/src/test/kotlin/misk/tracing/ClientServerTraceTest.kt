@@ -22,8 +22,8 @@ import misk.web.Post
 import misk.web.RequestBody
 import misk.web.RequestContentType
 import misk.web.ResponseContentType
+import misk.web.WebActionEntry
 import misk.web.WebTestingModule
-import misk.web.WebActionModule
 import misk.web.actions.WebAction
 import misk.web.jetty.JettyService
 import misk.web.mediatype.MediaTypes
@@ -60,7 +60,7 @@ internal class ClientServerTraceTest {
         Guice.createInjector(MockTracingBackendModule(), MoshiModule(), ClientModule(jetty))
   }
 
- @Test
+  @Test
   fun embedsTrace() {
     val client = clientInjector.getInstance<ReturnADinosaur>(Names.named("dinosaur"))
     client.getDinosaur(dinosaurRequest).execute()
@@ -111,7 +111,7 @@ internal class ClientServerTraceTest {
     val spanIds = serverTracer.finishedSpans().map { it.context().spanId() }.toSet()
     val traceId = serverTracer.finishedSpans().first().context().traceId()
 
-    var initialServerSpan : MockSpan? = null
+    var initialServerSpan: MockSpan? = null
     serverTracer.finishedSpans().forEach {
       // Parent ID of 0 means there is no parent span
       assertThat(it.parentId()).isGreaterThan(0)
@@ -129,7 +129,8 @@ internal class ClientServerTraceTest {
     // level.
     assertThat(clientTracer.finishedSpans().size).isEqualTo(2)
     val clientSpan =
-        clientTracer.finishedSpans().find { it.context().spanId() == initialServerSpan!!.parentId() }
+        clientTracer.finishedSpans()
+            .find { it.context().spanId() == initialServerSpan!!.parentId() }
 
     assertThat(clientSpan).isNotNull()
   }
@@ -171,8 +172,8 @@ internal class ClientServerTraceTest {
     override fun configure() {
       install(MockTracingBackendModule())
       install(WebTestingModule())
-      install(WebActionModule.create<ReturnADinosaurAction>())
-      install(WebActionModule.create<RoarLikeDinosaurAction>())
+      multibind<WebActionEntry>().toInstance(WebActionEntry(ReturnADinosaurAction::class))
+      multibind<WebActionEntry>().toInstance(WebActionEntry(RoarLikeDinosaurAction::class))
     }
   }
 

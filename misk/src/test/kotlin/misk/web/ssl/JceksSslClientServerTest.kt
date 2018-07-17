@@ -13,18 +13,18 @@ import misk.inject.KAbstractModule
 import misk.inject.getInstance
 import misk.moshi.MoshiModule
 import misk.scope.ActionScoped
+import misk.security.cert.X500Name
 import misk.security.ssl.CertStoreConfig
 import misk.security.ssl.ClientCertSubject
 import misk.security.ssl.SslLoader
 import misk.security.ssl.TrustStoreConfig
-import misk.security.cert.X500Name
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.web.Post
 import misk.web.RequestBody
 import misk.web.RequestContentType
 import misk.web.ResponseContentType
-import misk.web.WebActionModule
+import misk.web.WebActionEntry
 import misk.web.WebSslConfig
 import misk.web.WebTestingModule
 import misk.web.actions.WebAction
@@ -93,7 +93,7 @@ internal class JceksSslClientServerTest {
 
   class TestModule : KAbstractModule() {
     override fun configure() {
-      install(WebActionModule.create<HelloAction>())
+      multibind<WebActionEntry>().toInstance(WebActionEntry(HelloAction::class))
       install(WebTestingModule(
           ssl = WebSslConfig(0,
               cert_store = CertStoreConfig(

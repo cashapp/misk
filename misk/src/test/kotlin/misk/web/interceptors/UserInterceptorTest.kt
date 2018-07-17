@@ -12,8 +12,8 @@ import misk.web.NetworkInterceptor
 import misk.web.PathParam
 import misk.web.Response
 import misk.web.ResponseContentType
+import misk.web.WebActionEntry
 import misk.web.WebTestingModule
-import misk.web.WebActionModule
 import misk.web.actions.WebAction
 import misk.web.jetty.JettyService
 import misk.web.mediatype.MediaTypes
@@ -82,7 +82,7 @@ class UserInterceptorTest {
     }
   }
 
-  internal class UserCreatedInterceptor: ApplicationInterceptor {
+  internal class UserCreatedInterceptor : ApplicationInterceptor {
     override fun intercept(chain: Chain): Any = when (chain.args.firstOrNull()) {
       "text" -> "text"
       "textResponse" -> Response("text response", TEXT_HEADERS, 418)
@@ -90,7 +90,7 @@ class UserInterceptorTest {
       else -> chain.proceed(chain.args)
     }
 
-    class Factory: ApplicationInterceptor.Factory {
+    class Factory : ApplicationInterceptor.Factory {
       override fun create(action: Action): ApplicationInterceptor? = UserCreatedInterceptor()
     }
   }
@@ -124,7 +124,7 @@ class UserInterceptorTest {
       multibind<ApplicationInterceptor.Factory>()
           .toInstance(UserCreatedInterceptor.Factory())
 
-      install(WebActionModule.create<TestAction>())
+      multibind<WebActionEntry>().toInstance(WebActionEntry(TestAction::class))
     }
   }
 

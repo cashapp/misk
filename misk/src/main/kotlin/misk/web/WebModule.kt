@@ -127,13 +127,13 @@ class WebModule : KAbstractModule() {
         .toInstance(StaticResourceMapper.Entry("/_admin/", "web/_admin", "misk/web/_admin/build"))
 
     // Bind build-in actions.
-    install(WebActionModule.create<AdminTabAction>())
-    install(WebActionModule.create<MetricsJsonAction>())
-    install(WebActionModule.create<InternalErrorAction>())
-    install(WebActionModule.create<StatusAction>())
-    install(WebActionModule.create<ReadinessCheckAction>())
-    install(WebActionModule.create<LivenessCheckAction>())
-    install(WebActionModule.create<NotFoundAction>())
+    multibind<WebActionEntry>().toInstance(WebActionEntry(AdminTabAction::class))
+    multibind<WebActionEntry>().toInstance(WebActionEntry(MetricsJsonAction::class))
+    multibind<WebActionEntry>().toInstance(WebActionEntry(InternalErrorAction::class))
+    multibind<WebActionEntry>().toInstance(WebActionEntry(StatusAction::class))
+    multibind<WebActionEntry>().toInstance(WebActionEntry(ReadinessCheckAction::class))
+    multibind<WebActionEntry>().toInstance(WebActionEntry(LivenessCheckAction::class))
+    multibind<WebActionEntry>().toInstance(WebActionEntry(NotFoundAction::class))
 
     // Make CORS wide-open.
     // TODO(adrw): this is not suitable for production. lock this down.
