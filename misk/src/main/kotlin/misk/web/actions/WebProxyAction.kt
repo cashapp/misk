@@ -1,11 +1,13 @@
-package misk.web.resources
+package misk.web.actions
 
 import misk.Action
+import misk.web.Get
 import misk.web.NetworkChain
 import misk.web.NetworkInterceptor
 import misk.web.Request
 import misk.web.Response
 import misk.web.ResponseBody
+import misk.web.resources.ResourceInterceptorCommon
 import misk.web.toMisk
 import misk.web.toResponseBody
 import okhttp3.Headers
@@ -13,13 +15,12 @@ import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
 import java.io.IOException
 import java.net.HttpURLConnection
-import java.time.Clock
 import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Singleton
 
 /**
- * WebProxyInterceptor
+ * WebProxyAction
  *
  * Guidelines
  * - No overlapping mapping prefixes
@@ -35,15 +36,26 @@ import javax.inject.Singleton
  */
 
 @Singleton
-class WebProxyInterceptor private constructor(
-  private val client: OkHttpClient,
-  private val mappings: List<Mapping> = listOf()
-) : NetworkInterceptor {
+class WebProxyAction (
+  private val mapping: Mapping
+) : WebAction {
+  @Named("web_proxy_interceptor") private lateinit var client: OkHttpClient
+
+  @Get(mapping.url_path_prefix)
+
+
+
+
+
+
+
+
 
   //  TODO(adrw) enforce no prefix overlapping https://github.com/square/misk/issues/303
   override fun intercept(chain: NetworkChain): Response<*> {
     val matchedMapping =
-        ResourceInterceptorCommon.findMappingFromUrl(mappings, chain.request.url) as Mapping?
+        ResourceInterceptorCommon.findMappingFromUrl(mappings,
+            chain.request.url) as Mapping?
             ?: return chain.proceed(chain.request)
     val proxyUrl = matchedMapping.web_proxy_url.newBuilder()
         .encodedPath(chain.request.url.encodedPath())
@@ -90,7 +102,7 @@ class WebProxyInterceptor private constructor(
    * in a `KAbstractModule`:
    *
    * ```
-   * multibind<WebProxyInterceptor.Mapping>().toInstance(WebProxyInterceptor.Mapping(...))
+   * multibind<WebProxyAction.Mapping>().toInstance(WebProxyAction.Mapping(...))
    * ```
    */
   data class Mapping(
@@ -112,7 +124,7 @@ class WebProxyInterceptor private constructor(
   ) : NetworkInterceptor.Factory {
     override fun create(action: Action): NetworkInterceptor? {
       // TODO(adrw) jk above. transition webproxyinterceptor -> webproxyactions / resourceinterceptor+staticresourceinterceptor -> resourceactions
-      return WebProxyInterceptor(httpClient, mappings)
+      return WebProxyAction(httpClient, mappings)
     }
   }
 }

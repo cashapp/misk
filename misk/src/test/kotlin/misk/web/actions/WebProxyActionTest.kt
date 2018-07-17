@@ -1,4 +1,4 @@
-package misk.web.resources
+package misk.web.actions
 
 import misk.MiskServiceModule
 import misk.asAction
@@ -9,8 +9,9 @@ import misk.inject.KAbstractModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.web.Request
-import misk.web.WebProxyInterceptorModule
+import misk.web.WebProxyActionModule
 import misk.web.readUtf8
+import misk.web.resources.ResourceInterceptorCommon
 import okhttp3.HttpUrl
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
@@ -27,11 +28,11 @@ import kotlin.reflect.full.functions
 import kotlin.test.assertFailsWith
 
 @MiskTest
-class WebProxyInterceptorTest {
-  @Inject lateinit var interceptorFactoryProvider: Provider<WebProxyInterceptor.Factory>
-  @Inject lateinit var mappingBindingsProvider: Provider<List<WebProxyInterceptor.Mapping>>
+class WebProxyActionTest {
+  @Inject lateinit var interceptorFactoryProvider: Provider<WebProxyAction.Factory>
+  @Inject lateinit var mappingBindingsProvider: Provider<List<WebProxyAction.Mapping>>
 
-  private lateinit var interceptor: WebProxyInterceptor
+  private lateinit var interceptor: WebProxyAction
   private val upstreamServer = MockWebServer()
 
   @MiskTestModule
@@ -40,8 +41,8 @@ class WebProxyInterceptorTest {
   @BeforeEach
   internal fun setUp() {
     upstreamServer.start()
-    val hello = WebProxyInterceptorTest::class.functions.iterator().next()
-    interceptor = interceptorFactoryProvider.get().create(hello.asAction()) as WebProxyInterceptor
+    val hello = WebProxyActionTest::class.functions.iterator().next()
+    interceptor = interceptorFactoryProvider.get().create(hello.asAction()) as WebProxyAction
   }
 
   fun theFunction(): String {
@@ -56,15 +57,15 @@ class WebProxyInterceptorTest {
   class TestModule(val upstreamServer: MockWebServer) : KAbstractModule() {
     override fun configure() {
       install(MiskServiceModule())
-      install(WebProxyInterceptorModule())
+      install(WebProxyActionModule())
       install(ConfigModule.create<HttpClientsConfig>("http_clients", HttpClientsConfig(
           endpoints = mapOf(
               "web_proxy_interceptor" to HttpClientEndpointConfig("http://localhost")
           ))))
 
-      multibind<WebProxyInterceptor.Mapping>().toProvider(object: Provider<WebProxyInterceptor.Mapping> {
-        override fun get(): WebProxyInterceptor.Mapping {
-          return WebProxyInterceptor.Mapping(
+      multibind<WebProxyAction.Mapping>().toProvider(object: Provider<WebProxyAction.Mapping> {
+        override fun get(): WebProxyAction.Mapping {
+          return WebProxyAction.Mapping(
               "/local/prefix/",
               upstreamServer.url("/")
           )
@@ -83,7 +84,7 @@ class WebProxyInterceptorTest {
   @Test
   fun mappingLocalWithoutLeadingSlash() {
     assertFailsWith<IllegalArgumentException> {
-      WebProxyInterceptor.Mapping("local/prefix/",
+      WebProxyAction.Mapping("local/prefix/",
           upstreamServer.url("/"))
     }
   }
@@ -91,7 +92,7 @@ class WebProxyInterceptorTest {
   @Test
   internal fun mappingLocalWithoutTrailingSlash() {
     assertFailsWith<IllegalArgumentException> {
-      WebProxyInterceptor.Mapping("/local/prefix",
+      WebProxyAction.Mapping("/local/prefix",
           upstreamServer.url("/"))
     }
   }
@@ -99,7 +100,7 @@ class WebProxyInterceptorTest {
   @Test
   internal fun mappingToApiPrefix() {
     assertFailsWith<IllegalArgumentException> {
-      WebProxyInterceptor.Mapping("/api/test/prefix/",
+      WebProxyAction.Mapping("/api/test/prefix/",
           upstreamServer.url("/"))
     }
   }
@@ -107,7 +108,7 @@ class WebProxyInterceptorTest {
   @Test
   internal fun mappingUpstreamUrlToFile() {
     assertFailsWith<IllegalArgumentException> {
-      WebProxyInterceptor.Mapping("/local/prefix/",
+      WebProxyAction.Mapping("/local/prefix/",
           upstreamServer.url("/test.js"))
     }
   }
@@ -115,7 +116,7 @@ class WebProxyInterceptorTest {
   @Test
   internal fun mappingUpstreamUrlWithPathSegments() {
     assertFailsWith<IllegalArgumentException> {
-      WebProxyInterceptor.Mapping("/local/prefix/",
+      WebProxyAction.Mapping("/local/prefix/",
           upstreamServer.url("/upstream/prefix/"))
     }
   }
@@ -173,7 +174,8 @@ class WebProxyInterceptorTest {
         body = Buffer()
     )
 
-    val response = interceptor.intercept(ResourceInterceptorCommon.FakeNetworkChain(fakeRequest))
+    val response = interceptor.intercept(
+        ResourceInterceptorCommon.FakeNetworkChain(fakeRequest))
     assertThat(response.readUtf8()).isEqualTo("I am not intercepted")
 
     assertThat(upstreamServer.requestCount).isZero()

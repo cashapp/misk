@@ -5,7 +5,7 @@ import misk.environment.Environment
 import misk.inject.KAbstractModule
 import misk.web.MiskWebModule
 import misk.web.WebActionEntry
-import misk.web.WebProxyInterceptorModule
+import misk.web.WebProxyActionModule
 
 /** Binds all service dependencies including service-specific dependencies. */
 class UrlShortenerServiceModule : KAbstractModule() {
@@ -15,7 +15,7 @@ class UrlShortenerServiceModule : KAbstractModule() {
     install(ConfigWebModule())
 
     install(MiskWebModule())
-    install(WebProxyInterceptorModule())
+    install(WebProxyActionModule())
     multibind<WebActionEntry>().toInstance(WebActionEntry(CreateShortUrlWebAction::class))
     multibind<WebActionEntry>().toInstance(WebActionEntry(ShortUrlWebAction::class))
   }
