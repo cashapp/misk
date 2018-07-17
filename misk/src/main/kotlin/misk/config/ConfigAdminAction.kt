@@ -17,6 +17,8 @@ class ConfigAdminAction : WebAction {
   @Get("/api/config/all")
   @RequestContentType(MediaTypes.APPLICATION_JSON)
   @ResponseContentType(MediaTypes.APPLICATION_JSON)
+  // TODO(adrw) create new @AdminDashboard annotation because this will fail since there is no @Access
+  // @AdminDashboard will then be able to be picked up by misq
   fun getAll(): Response {
     // TODO(mmihic): Need to figure out how to get the overrides.
     val yamlFiles = MiskConfig.loadConfigYamlMap(appName, environment, listOf())

@@ -1,6 +1,7 @@
 package misk.web
 
 import com.google.inject.Injector
+import com.google.inject.util.Providers
 import misk.ApplicationInterceptor
 import misk.MiskDefault
 import misk.asAction
@@ -61,6 +62,8 @@ internal class WebActionFactory {
     val connectWebSocket = actionFunction.findAnnotation<ConnectWebSocket>()
     val post = actionFunction.findAnnotation<Post>()
 
+    // TODO(adrw) fix this using first provider below so that WebAction::class or WebAction can be passed in
+    val provider = Providers.of(theInstance)
     val provider = injector.getProvider(webActionClass.java)
 
     val result: MutableList<BoundAction<A, *>> = mutableListOf()

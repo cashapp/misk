@@ -41,7 +41,10 @@ class WebProxyAction (
 ) : WebAction {
   @Named("web_proxy_interceptor") private lateinit var client: OkHttpClient
 
-  @Get(mapping.url_path_prefix)
+  @Get("/*")
+  fun foo(): {
+
+  }
 
 
 
