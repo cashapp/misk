@@ -40,10 +40,15 @@ import misk.web.marshal.Unmarshaller
 import misk.web.resources.StaticResourceInterceptor
 import misk.web.resources.StaticResourceMapper
 import javax.servlet.http.HttpServletRequest
+import java.security.Provider as SecurityProvider
 
 class WebModule : KAbstractModule() {
   override fun configure() {
     multibind<Service>().to<JettyService>()
+    multibind<Service>().to<ConscryptService>()
+    bind<SecurityProvider>()
+        .annotatedWith(ForConscrypt::class.java)
+        .toProvider(ConscryptService::class.java)
 
     install(object : ActionScopedProviderModule() {
       override fun configureProviders() {
