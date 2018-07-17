@@ -3,7 +3,7 @@ package misk.healthchecks
 import com.google.common.util.concurrent.Service
 import com.google.inject.Provides
 import misk.inject.KAbstractModule
-import misk.web.WebActionModule
+import misk.web.WebActionEntry
 import misk.web.resources.StaticResourceMapper
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
@@ -12,8 +12,8 @@ import javax.inject.Singleton
 
 class ClusterWideHealthModule : KAbstractModule() {
   override fun configure() {
-    install(WebActionModule.create<ClusterWideHealthPageAction>())
-    install(WebActionModule.create<ClusterWideHealthService>())
+    multibind<WebActionEntry>().toInstance(WebActionEntry(ClusterWideHealthPageAction::class))
+    multibind<WebActionEntry>().toInstance(WebActionEntry(ClusterWideHealthService::class))
     multibind<Service>().to<ClusterWideHealthService>()
     multibind<StaticResourceMapper.Entry>()
         .toInstance(StaticResourceMapper.Entry("/admin/", "web/admin", "misk/web/admin/build"))
