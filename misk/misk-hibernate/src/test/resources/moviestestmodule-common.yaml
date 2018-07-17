@@ -3,4 +3,4 @@ data_source:
   username: root
   password: ""
   database: movies
-  migrations_path: misk/hibernate/moviestestmodule-migrations
+  migrations_path: /resources/misk/hibernate/moviestestmodule-migrations

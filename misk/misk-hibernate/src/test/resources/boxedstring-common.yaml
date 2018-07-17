@@ -3,4 +3,4 @@ data_source:
   username: root
   password: ""
   database: boxedstring
-  migrations_path: misk/hibernate/boxedstring-migrations
+  migrations_path: /resources/misk/hibernate/boxedstring-migrations

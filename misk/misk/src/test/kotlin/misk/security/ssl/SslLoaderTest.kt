@@ -1,6 +1,6 @@
 package misk.security.ssl
 
-import misk.resources.FakeResourceLoaderModule
+import misk.resources.ResourceLoaderModule
 import misk.security.ssl.SslLoader.Companion.FORMAT_JCEKS
 import misk.security.ssl.SslLoader.Companion.FORMAT_PEM
 import misk.testing.MiskTest
@@ -13,7 +13,7 @@ import javax.inject.Inject
 @MiskTest
 internal class SslLoaderTest {
   @MiskTestModule
-  val module = FakeResourceLoaderModule()
+  val module = ResourceLoaderModule()
 
   val clientComboPemPath = "src/test/resources/ssl/client_cert_key_combo.pem"
   val clientTrustPemPath = "src/test/resources/ssl/client_cert.pem"
