@@ -9,8 +9,8 @@ import misk.testing.MiskTestModule
 import misk.web.Get
 import misk.web.PathParam
 import misk.web.ResponseContentType
+import misk.web.WebActionEntry
 import misk.web.WebTestingModule
-import misk.web.WebActionModule
 import misk.web.actions.WebAction
 import misk.web.jetty.JettyService
 import misk.web.mediatype.MediaTypes
@@ -86,8 +86,8 @@ internal class ExceptionMapperTest {
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(WebTestingModule())
-      install(WebActionModule.create<ThrowsActionException>())
-      install(WebActionModule.create<ThrowsUnmappedError>())
+      multibind<WebActionEntry>().toInstance(WebActionEntry(ThrowsActionException::class))
+      multibind<WebActionEntry>().toInstance(WebActionEntry(ThrowsUnmappedError::class))
     }
   }
 }

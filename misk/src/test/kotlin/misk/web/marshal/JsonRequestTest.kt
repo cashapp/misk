@@ -8,8 +8,8 @@ import misk.web.Post
 import misk.web.RequestBody
 import misk.web.RequestContentType
 import misk.web.ResponseContentType
+import misk.web.WebActionEntry
 import misk.web.WebTestingModule
-import misk.web.WebActionModule
 import misk.web.actions.WebAction
 import misk.web.jetty.JettyService
 import misk.web.mediatype.MediaTypes
@@ -85,9 +85,9 @@ internal class JsonRequestTest {
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(WebTestingModule())
-      install(WebActionModule.create<PassAsObject>())
-      install(WebActionModule.create<PassAsString>())
-      install(WebActionModule.create<PassAsByteString>())
+      multibind<WebActionEntry>().toInstance(WebActionEntry(PassAsObject::class))
+      multibind<WebActionEntry>().toInstance(WebActionEntry(PassAsString::class))
+      multibind<WebActionEntry>().toInstance(WebActionEntry(PassAsByteString::class))
     }
   }
 

@@ -7,14 +7,14 @@ import com.squareup.chat.healthchecks.ManualHealthCheck
 import misk.healthchecks.ClusterWideHealthModule
 import misk.healthchecks.HealthCheck
 import misk.inject.KAbstractModule
-import misk.web.WebActionModule
+import misk.web.WebActionEntry
 import misk.web.resources.StaticResourceMapper
 
 class ChatModule : KAbstractModule() {
   override fun configure() {
-    install(WebActionModule.create<ChatPageAction>())
-    install(WebActionModule.create<ChatWebSocketAction>())
-    install(WebActionModule.create<ToggleManualHealthCheckAction>())
+    multibind<WebActionEntry>().toInstance(WebActionEntry(ChatPageAction::class))
+    multibind<WebActionEntry>().toInstance(WebActionEntry(ChatWebSocketAction::class))
+    multibind<WebActionEntry>().toInstance(WebActionEntry(ToggleManualHealthCheckAction::class))
     install(ClusterWideHealthModule())
     multibind<HealthCheck>().to<ManualHealthCheck>()
     multibind<StaticResourceMapper.Entry>()
