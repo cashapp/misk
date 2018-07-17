@@ -3,4 +3,4 @@ data_source:
   username: root
   password: ""
   database: schemamigrator
-  migrations_path: misk/hibernate/schemamigrator-migrations
+  migrations_path: /memory/migrations
