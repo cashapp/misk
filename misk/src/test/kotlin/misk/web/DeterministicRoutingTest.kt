@@ -62,15 +62,17 @@ internal class DeterministicRoutingTest {
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(WebTestingModule())
-      val webActionModules = mutableListOf(
-          WebActionModule.create<WholePathAction>(),
-          WebActionModule.create<RemainderPathAction>(),
-          WebActionModule.create<SectionAction>(),
-          WebActionModule.create<SubsectionAction>(),
-          WebActionModule.create<SpecificPathAction>()
+      val webActions = mutableListOf(
+          WholePathAction::class,
+          RemainderPathAction::class,
+          SectionAction::class,
+          SubsectionAction::class,
+          SpecificPathAction::class
       )
-      shuffle(webActionModules)
-      webActionModules.forEach { install(it) }
+      shuffle(webActions)
+      for (webAction in webActions) {
+        multibind<WebActionEntry>().toInstance(WebActionEntry(webAction))
+      }
     }
   }
 

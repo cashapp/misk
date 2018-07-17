@@ -15,6 +15,7 @@ import misk.web.Post
 import misk.web.RequestBody
 import misk.web.RequestContentType
 import misk.web.ResponseContentType
+import misk.web.WebActionEntry
 import misk.web.WebActionModule
 import misk.web.WebTestingModule
 import misk.web.actions.WebAction
@@ -142,7 +143,7 @@ internal class TypedHttpClientInterceptorTest {
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(WebTestingModule())
-      install(WebActionModule.create<ReturnADinosaurAction>())
+      multibind<WebActionEntry>().toInstance(WebActionEntry(ReturnADinosaurAction::class))
       multibind<NetworkInterceptor.Factory>().to<ServerHeaderInterceptor.Factory>()
     }
   }

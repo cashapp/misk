@@ -1,14 +1,14 @@
 package misk.config
 
 import misk.inject.KAbstractModule
-import misk.web.WebActionModule
+import misk.web.WebActionEntry
 import misk.web.actions.AdminTab
 import misk.web.resources.WebProxyInterceptor
 import okhttp3.HttpUrl
 
 class ConfigWebModule : KAbstractModule() {
   override fun configure() {
-    install(WebActionModule.create<ConfigAdminAction>())
+    multibind<WebActionEntry>().toInstance(WebActionEntry(ConfigAdminAction::class))
     multibind<AdminTab>().toInstance(AdminTab(
         "Config",
         "config",

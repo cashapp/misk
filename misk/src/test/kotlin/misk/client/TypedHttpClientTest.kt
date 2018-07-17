@@ -14,7 +14,7 @@ import misk.web.Post
 import misk.web.RequestBody
 import misk.web.RequestContentType
 import misk.web.ResponseContentType
-import misk.web.WebActionModule
+import misk.web.WebActionEntry
 import misk.web.WebTestingModule
 import misk.web.actions.WebAction
 import misk.web.jetty.JettyService
@@ -94,15 +94,16 @@ internal class TypedHttpClientTest {
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(WebTestingModule())
-      install(WebActionModule.create<ReturnADinosaurAction>())
-      install(WebActionModule.create<ReturnAProtoDinosaurAction>())
+      multibind<WebActionEntry>().toInstance(WebActionEntry(ReturnADinosaurAction::class))
+      multibind<WebActionEntry>().toInstance(WebActionEntry(ReturnAProtoDinosaurAction::class))
     }
   }
 
   class ClientModule(val jetty: JettyService) : KAbstractModule() {
     override fun configure() {
       install(TypedHttpClientModule.create<ReturnADinosaur>("dinosaur", Names.named("dinosaur")))
-      install(TypedHttpClientModule.create<ReturnAProtoDinosaur>("protoDino", Names.named("protoDino")))
+      install(
+          TypedHttpClientModule.create<ReturnAProtoDinosaur>("protoDino", Names.named("protoDino")))
     }
 
     @Provides

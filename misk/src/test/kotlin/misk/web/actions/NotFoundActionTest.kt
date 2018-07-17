@@ -4,7 +4,7 @@ import com.squareup.moshi.Moshi
 import misk.inject.KAbstractModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
-import misk.web.WebActionModule
+import misk.web.WebActionEntry
 import misk.web.WebTestingModule
 import misk.web.jetty.JettyService
 import misk.web.mediatype.MediaTypes
@@ -117,7 +117,7 @@ class NotFoundActionTest {
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(WebTestingModule())
-      install(WebActionModule.create<NotFoundAction>())
+      multibind<WebActionEntry>().toInstance(WebActionEntry(NotFoundAction::class))
     }
   }
 }

@@ -12,7 +12,7 @@ import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.web.Get
 import misk.web.ResponseContentType
-import misk.web.WebActionModule
+import misk.web.WebActionEntry
 import misk.web.WebTestingModule
 import misk.web.jetty.JettyService
 import misk.web.mediatype.MediaTypes
@@ -99,8 +99,8 @@ class AuthenticationTest {
       install(WebTestingModule())
       install(AccessControlModule())
 
-      install(WebActionModule.create<CustomServiceAccessAction>())
-      install(WebActionModule.create<CustomRoleAccessAction>())
+      multibind<WebActionEntry>().toInstance(WebActionEntry(CustomServiceAccessAction::class))
+      multibind<WebActionEntry>().toInstance(WebActionEntry(CustomRoleAccessAction::class))
 
       multibind<AccessAnnotation>().toInstance(
           AccessAnnotation(CustomServiceAccess::class, services = listOf("payments")))

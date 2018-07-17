@@ -96,14 +96,14 @@ internal class ContentBasedDispatchTest {
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(WebTestingModule())
-      install(WebActionModule.create<PostPlainTextReturnAnyText>())
-      install(WebActionModule.create<PostAnyTextReturnPlainText>())
-      install(WebActionModule.create<PostPlainTextReturnPlainText>())
-      install(WebActionModule.create<PostJsonReturnJson>())
-      install(WebActionModule.create<PostPlainTextReturnJson>())
-      install(WebActionModule.create<PostJsonReturnPlainText>())
-      install(WebActionModule.create<PostAnythingReturnJson>())
-      install(WebActionModule.create<PostAnythingReturnAnything>())
+      multibind<WebActionEntry>().toInstance(WebActionEntry(PostPlainTextReturnAnyText::class))
+      multibind<WebActionEntry>().toInstance(WebActionEntry(PostAnyTextReturnPlainText::class))
+      multibind<WebActionEntry>().toInstance(WebActionEntry(PostPlainTextReturnPlainText::class))
+      multibind<WebActionEntry>().toInstance(WebActionEntry(PostJsonReturnJson::class))
+      multibind<WebActionEntry>().toInstance(WebActionEntry(PostPlainTextReturnJson::class))
+      multibind<WebActionEntry>().toInstance(WebActionEntry(PostJsonReturnPlainText::class))
+      multibind<WebActionEntry>().toInstance(WebActionEntry(PostAnythingReturnJson::class))
+      multibind<WebActionEntry>().toInstance(WebActionEntry(PostAnythingReturnAnything::class))
     }
   }
 
@@ -161,9 +161,9 @@ internal class ContentBasedDispatchTest {
   }
 
   private fun postHello(
-      contentType: MediaType,
-      content: String,
-      acceptedMediaType: MediaType? = null
+    contentType: MediaType,
+    content: String,
+    acceptedMediaType: MediaType? = null
   ): okhttp3.ResponseBody {
     val request = newRequest("/hello", contentType, content, acceptedMediaType)
     val response = httpClient.newCall(request)
@@ -173,10 +173,10 @@ internal class ContentBasedDispatchTest {
   }
 
   private fun newRequest(
-      path: String,
-      contentType: MediaType,
-      content: String,
-      acceptedMediaType: MediaType? = null
+    path: String,
+    contentType: MediaType,
+    content: String,
+    acceptedMediaType: MediaType? = null
   ): Request {
     val request = Request.Builder()
         .post(RequestBody.create(contentType, content))

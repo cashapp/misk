@@ -16,7 +16,7 @@ import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.web.Get
 import misk.web.ResponseContentType
-import misk.web.WebActionModule
+import misk.web.WebActionEntry
 import misk.web.WebSslConfig
 import misk.web.WebTestingModule
 import misk.web.actions.WebAction
@@ -95,7 +95,7 @@ class Http2ConnectivityTest {
    * From Java 9 forward Runtime.Version tells us what we need to know. On earlier releases we just
    * probe the presence or absence of that class.
    */
-  private fun isJava9OrNewer() : Boolean {
+  private fun isJava9OrNewer(): Boolean {
     try {
       Class.forName("java.lang.Runtime\$Version")
       return true
@@ -121,7 +121,7 @@ class Http2ConnectivityTest {
               ),
               mutual_auth = WebSslConfig.MutualAuth.NONE)
       ))
-      install(WebActionModule.create<HelloAction>())
+      multibind<WebActionEntry>().toInstance(WebActionEntry(HelloAction::class))
     }
   }
 

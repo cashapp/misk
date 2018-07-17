@@ -7,8 +7,8 @@ import misk.testing.MiskTestModule
 import misk.web.Get
 import misk.web.Response
 import misk.web.ResponseContentType
+import misk.web.WebActionEntry
 import misk.web.WebTestingModule
-import misk.web.WebActionModule
 import misk.web.actions.WebAction
 import misk.web.jetty.JettyService
 import misk.web.mediatype.MediaTypes
@@ -122,14 +122,14 @@ internal class JsonResponseTest {
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(WebTestingModule())
-      install(WebActionModule.create<ReturnAsObject>())
-      install(WebActionModule.create<ReturnAsString>())
-      install(WebActionModule.create<ReturnAsByteString>())
-      install(WebActionModule.create<ReturnAsResponseBody>())
-      install(WebActionModule.create<ReturnAsObjectResponse>())
-      install(WebActionModule.create<ReturnAsStringResponse>())
-      install(WebActionModule.create<ReturnAsByteStringResponse>())
-      install(WebActionModule.create<ReturnAsResponseBodyResponse>())
+      multibind<WebActionEntry>().toInstance(WebActionEntry(ReturnAsObject::class))
+      multibind<WebActionEntry>().toInstance(WebActionEntry(ReturnAsString::class))
+      multibind<WebActionEntry>().toInstance(WebActionEntry(ReturnAsByteString::class))
+      multibind<WebActionEntry>().toInstance(WebActionEntry(ReturnAsResponseBody::class))
+      multibind<WebActionEntry>().toInstance(WebActionEntry(ReturnAsObjectResponse::class))
+      multibind<WebActionEntry>().toInstance(WebActionEntry(ReturnAsStringResponse::class))
+      multibind<WebActionEntry>().toInstance(WebActionEntry(ReturnAsByteStringResponse::class))
+      multibind<WebActionEntry>().toInstance(WebActionEntry(ReturnAsResponseBodyResponse::class))
     }
   }
 
