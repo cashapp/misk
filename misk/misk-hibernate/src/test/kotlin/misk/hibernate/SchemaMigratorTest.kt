@@ -10,8 +10,8 @@ import misk.config.MiskConfig
 import misk.environment.Environment
 import misk.inject.KAbstractModule
 import misk.inject.toKey
-import misk.resources.FakeResourceLoader
-import misk.resources.FakeResourceLoaderModule
+import misk.resources.ResourceLoader
+import misk.resources.ResourceLoaderModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
@@ -31,7 +31,7 @@ internal class SchemaMigratorTest {
   val module = object : KAbstractModule() {
     override fun configure() {
       install(MiskModule())
-      install(FakeResourceLoaderModule())
+      install(ResourceLoaderModule())
 
       val dropTablesService = object : AbstractIdleService(), DependentService {
         @Inject @Movies lateinit var sessionFactoryProvider: Provider<SessionFactory>
@@ -65,7 +65,7 @@ internal class SchemaMigratorTest {
     }
   }
 
-  @Inject lateinit var resourceLoader: FakeResourceLoader
+  @Inject lateinit var resourceLoader: ResourceLoader
   @Inject @Movies lateinit var sessionFactory: SessionFactory
 
   @Test fun initializeAndMigrate() {

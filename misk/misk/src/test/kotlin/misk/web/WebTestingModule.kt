@@ -5,8 +5,7 @@ import misk.MiskModule
 import misk.environment.Environment
 import misk.environment.EnvironmentModule
 import misk.inject.KAbstractModule
-import misk.resources.FakeResourceLoaderModule
-import misk.web.resources.WebProxyInterceptor
+import misk.resources.ResourceLoaderModule
 import javax.inject.Singleton
 
 class WebTestingModule(private val ssl: WebSslConfig? = null) : KAbstractModule() {
@@ -14,7 +13,7 @@ class WebTestingModule(private val ssl: WebSslConfig? = null) : KAbstractModule(
     install(EnvironmentModule(Environment.TESTING))
     install(MiskModule())
     install(WebModule())
-    install(FakeResourceLoaderModule())
+    install(ResourceLoaderModule())
   }
 
   @Provides
