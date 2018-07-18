@@ -8,7 +8,7 @@ module.exports = {
   },
   devtool: 'source-map',
   output: {
-    path: path.resolve(__dirname, './lib/static'),
+    path: path.resolve(__dirname, './lib'),
     filename: '[name].js',
     library: ['misk', 'common'],
     libraryTarget: 'umd',

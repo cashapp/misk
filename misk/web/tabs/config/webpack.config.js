@@ -1,7 +1,8 @@
 const path = require('path')
 const webpack = require('webpack')
+const CopyWebpackPlugin = require('copy-webpack-plugin')
 const HTMLWebpackPlugin = require('html-webpack-plugin')
-const miskCommon = require('@misk/common');
+const MiskCommon = require('@misk/common')
 
 const dev = process.env.NODE_ENV !== 'production'
 
@@ -15,6 +16,11 @@ const DefinePluginConfig = new webpack.DefinePlugin({
   'process.env.NODE_ENV': JSON.stringify('production')
 })
 
+const CopyWebpackPluginConfig = new CopyWebpackPlugin(
+  [{ from: './node_modules/@misk/common/lib', to: '@misk/common/lib'}], 
+  { debug: 'info', copyUnmodified: true }
+)
+
 module.exports = {
   entry: ['react-hot-loader/patch', path.join(__dirname, '/src/index.tsx')],
   output: {
@@ -24,6 +30,7 @@ module.exports = {
   },
   devServer: {
     port: '3200',
+    inline: true,
     hot: true,
     historyApiFallback: true
   },
@@ -58,9 +65,10 @@ module.exports = {
   mode: dev ? 'development' : 'production',
   plugins: dev
     ? [
-      HTMLWebpackPluginConfig,
+      HTMLWebpackPluginConfig, CopyWebpackPluginConfig,
       new webpack.HotModuleReplacementPlugin()
     ]
-    : [HTMLWebpackPluginConfig, DefinePluginConfig],
-  externals: miskCommon.Externals
+    : [HTMLWebpackPluginConfig, CopyWebpackPluginConfig, 
+      DefinePluginConfig],
+  externals: MiskCommon.Externals
 }

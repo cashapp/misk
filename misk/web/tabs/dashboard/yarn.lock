@@ -41,13 +41,14 @@
     reflect-metadata "^0.1.12"
     tslib "^1.8.1"
 
-"@misk/common@^0.0.9":
-  version "0.0.9"
-  resolved "https://registry.yarnpkg.com/@misk/common/-/common-0.0.9.tgz#a11d9e4ff8d24a60d01a2ae85aa5357913f3378f"
+"@misk/common@^0.0.10":
+  version "0.0.10"
+  resolved "https://registry.yarnpkg.com/@misk/common/-/common-0.0.10.tgz#0aeeb627e928c3481a439f3036a831a3235fd3be"
   dependencies:
     "@blueprintjs/core" "^3.0.1"
     "@blueprintjs/icons" "^3.0.0"
     axios "^0.18.0"
+    connected-react-router "^4.3.0"
     history "^4.7.2"
     react "^16.4.1"
     react-dom "^16.4.1"
@@ -62,10 +63,11 @@
     skeleton-css "^2.0.4"
     styled-components "^3.3.3"
 
-"@misk/dev@latest":
-  version "0.0.5"
-  resolved "https://registry.yarnpkg.com/@misk/dev/-/dev-0.0.5.tgz#a5b9c78e7d9bd1f582e7924492297e6cf5234df7"
+"@misk/dev@^0.0.6":
+  version "0.0.6"
+  resolved "https://registry.yarnpkg.com/@misk/dev/-/dev-0.0.6.tgz#fc7843a8e3957d9b53254137836e093495b0d0cc"
   dependencies:
+    "@types/node" "^10.5.2"
     "@types/react" "^16.4.4"
     "@types/react-dom" "^16.0.6"
     "@types/react-helmet" "^5.0.6"
@@ -73,8 +75,10 @@
     "@types/react-redux" "^6.0.3"
     "@types/react-router" "^4.0.28"
     "@types/react-router-dom" "^4.2.7"
+    "@types/react-router-redux" "^5.0.15"
     "@types/webpack-env" "^1.13.6"
     awesome-typescript-loader "^5.2.0"
+    copy-webpack-plugin "^4.5.2"
     cross-env "^5.2.0"
     css-loader "^0.28.11"
     file-loader "^1.1.11"
@@ -94,7 +98,7 @@
     tslint-sonarts "^1.7.0"
     typescript "^2.9.2"
     url-loader "^1.0.1"
-    webpack "^4.13.0"
+    webpack "^4.16.1"
     webpack-cli "^3.0.8"
     webpack-dev-server "^3.1.4"
 
@@ -106,7 +110,7 @@
   version "4.6.2"
   resolved "https://registry.yarnpkg.com/@types/history/-/history-4.6.2.tgz#12cfaba693ba20f114ed5765467ff25fdf67ddb0"
 
-"@types/node@*":
+"@types/node@*", "@types/node@^10.5.2":
   version "10.5.2"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-10.5.2.tgz#f19f05314d5421fe37e74153254201a7bf00a707"
 
@@ -348,7 +352,7 @@ ajv@^5.1.0:
     fast-json-stable-stringify "^2.0.0"
     json-schema-traverse "^0.3.0"
 
-ajv@^6.1.0, ajv@^6.1.1:
+ajv@^6.1.0:
   version "6.5.2"
   resolved "https://registry.yarnpkg.com/ajv/-/ajv-6.5.2.tgz#678495f9b82f7cca6be248dd92f59bff5e1f4360"
   dependencies:
@@ -1166,7 +1170,7 @@ copy-descriptor@^0.1.0:
   version "0.1.1"
   resolved "https://registry.yarnpkg.com/copy-descriptor/-/copy-descriptor-0.1.1.tgz#676f6eb3c39997c2ee1ac3a924fd6124748f578d"
 
-copy-webpack-plugin@^4.4.1, copy-webpack-plugin@^4.5.2:
+copy-webpack-plugin@^4.5.2:
   version "4.5.2"
   resolved "https://registry.yarnpkg.com/copy-webpack-plugin/-/copy-webpack-plugin-4.5.2.tgz#d53444a8fea2912d806e78937390ddd7e632ee5c"
   dependencies:
@@ -2409,22 +2413,6 @@ html-minifier@^3.2.3:
     param-case "2.1.x"
     relateurl "0.2.x"
     uglify-js "3.4.x"
-
-html-webpack-externals-plugin@^3.8.0:
-  version "3.8.0"
-  resolved "https://registry.yarnpkg.com/html-webpack-externals-plugin/-/html-webpack-externals-plugin-3.8.0.tgz#e3f38419c67b7599e69afab0966a2164d2a3d838"
-  dependencies:
-    ajv "^6.1.1"
-    copy-webpack-plugin "^4.4.1"
-    html-webpack-include-assets-plugin "^1.0.2"
-
-html-webpack-include-assets-plugin@^1.0.2:
-  version "1.0.4"
-  resolved "https://registry.yarnpkg.com/html-webpack-include-assets-plugin/-/html-webpack-include-assets-plugin-1.0.4.tgz#279cfdf001301f5a945b2525f7f6394d48a3a157"
-  dependencies:
-    glob "^7.1.2"
-    minimatch "^3.0.4"
-    slash "^1.0.0"
 
 html-webpack-plugin@^3.2.0:
   version "3.2.0"
@@ -5741,7 +5729,7 @@ webpack-sources@^1.0.1, webpack-sources@^1.1.0:
     source-list-map "^2.0.0"
     source-map "~0.6.1"
 
-webpack@^4.13.0:
+webpack@^4.16.1:
   version "4.16.1"
   resolved "https://registry.yarnpkg.com/webpack/-/webpack-4.16.1.tgz#2c4b89ea648125c3e67bcca6adf49ce2c14b2d31"
   dependencies:
