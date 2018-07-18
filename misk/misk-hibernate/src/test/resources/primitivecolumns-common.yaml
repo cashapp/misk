@@ -1,0 +1,6 @@
+data_source:
+  type: MYSQL
+  username: root
+  password: ""
+  database: primitivecolumns
+  migrations_path: /resources/misk/hibernate/primitivecolumns-migrations
