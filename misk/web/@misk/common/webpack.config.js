@@ -1,12 +1,11 @@
 const path = require('path');
 
 module.exports = {
+  name: "library",
   mode: 'production',
   entry: {
     index: path.resolve(__dirname, 'src/index.ts'),
-    externals: path.resolve(__dirname, 'src/index.ts'),
-    styles: path.resolve(__dirname, 'src/styles.ts'),
-    vendors: path.resolve(__dirname, 'src/vendors.ts')
+    externals: path.resolve(__dirname, 'src/index.ts')
   },
   devtool: 'source-map',
   output: {
@@ -19,15 +18,12 @@ module.exports = {
   module: {
     rules: [
       { 
-        test: /\.tsx?$/, 
+        test: /\.(ts|tsx)?$/, 
         loader: 'awesome-typescript-loader'
-      }, {
-        test: /\.(scss|sass|css)$/,
-        loader: ['css-loader?minimize=true', 'sass-loader']
       }
     ]
   },
   resolve: {
-    extensions: [".ts", ".tsx", ".js", ".jsx", ".json"]
+    extensions: [".ts", ".tsx"]
   },
 };

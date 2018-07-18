@@ -1,10 +1,6 @@
+// raw exxternals
 export interface IExternal {
-  [key: string]: {
-    amd: string,
-    commonjs: string,
-    commonjs2: string,
-    root: string|string[]
-  }
+  [key: string]: string|string[]
 }
 
 interface IInExternal {
@@ -14,31 +10,72 @@ interface IInExternal {
 export default makeExternals({
   "@blueprintjs/core": ["Blueprint", "Core"],
   "@blueprintjs/icons": ["Blueprint", "Icons"],
-  "axios": "Axios",
-  "history": "HistoryNPM", 
   "@misk/common": ["Misk", "Common"],
   "@misk/components": ["Misk", "Components"],
   "@misk/dev": ["Misk", "Dev"],
-  "react": "React", // has to be kept locally because of react-hot-loader bug
+  "axios": "Axios",
+  "connected-react-router": "ConnectedReactRouter",
+  "history": "HistoryNPM", 
+  "react": "React",
   "react-dom": "ReactDom",
   "react-helmet": "ReactHelmet",
   "react-hot-loader": "ReactHotLoader",
-  "react-redux": "ReactRedux", // has to be kept locally because of connected-react-router bug
+  "react-redux": "ReactRedux",
   "react-router": "ReactRouter",
   "react-router-dom": "ReactRouterDom",
-  "redux": "Redux", // has to be kept locally because of index CombineReducers bug
-  "styled-components": "StyledComponents" // has to be kept locally because of PathDebugComponent bug
+  "react-router-redux": "ReactRouterRedux",
+  "redux": "Redux",
+  "styled-components": "StyledComponents"
 })
 
 function makeExternals(inExternals: IInExternal) : IExternal {
   const outExternals: IExternal = {}
   Object.keys(inExternals).forEach((name, index) => {
-    outExternals[name] = {
-      amd: name,
-      commonjs: name,
-      commonjs2: name,
-      root: inExternals.hasOwnProperty(name) ? inExternals[name] : name
-    }
+    outExternals[name] = inExternals.hasOwnProperty(name) ? (Array.isArray(inExternals[name]) ? (inExternals[name] as string[]).join("") : inExternals[name]) : name
   })
   return outExternals
 }
+
+// // html-webpack-externals-plugin
+// export interface IExternal {
+//   module: string,
+//   entry: string,
+//   global: string|string[],
+// }
+
+// interface IInExternal {
+//   [key: string]: string|string[]
+// }
+
+// export default makeExternals({
+//   "@blueprintjs/core": ["Blueprint", "Core"],
+//   "@blueprintjs/icons": ["Blueprint", "Icons"],
+//   "@misk/common": ["Misk", "Common"],
+//   "@misk/components": ["Misk", "Components"],
+//   "@misk/dev": ["Misk", "Dev"],
+//   "axios": "Axios",
+//   "connected-react-router": "ConnectedReactRouter",
+//   "history": "HistoryNPM", 
+//   "react": "React",
+//   "react-dom": "ReactDom",
+//   "react-helmet": "ReactHelmet",
+//   "react-hot-loader": "ReactHotLoader",
+//   "react-redux": "ReactRedux",
+//   "react-router": "ReactRouter",
+//   "react-router-dom": "ReactRouterDom",
+//   "react-router-redux": "ReactRouterRedux",
+//   "redux": "Redux",
+//   "styled-components": "StyledComponents"
+// })
+
+// function makeExternals(inExternals: IInExternal) : IExternal[] {
+//   const outExternals: IExternal[] = []
+//   Object.keys(inExternals).forEach((name, index) => {
+//     outExternals.push({
+//       entry: name.startsWith("@") ? "../../@misk/common/lib/static/vendors.js" : "../@misk/common/lib/static/vendors.js",
+//       global: inExternals.hasOwnProperty(name) ? (Array.isArray(inExternals[name]) ? (inExternals[name] as string[]).join("") : inExternals[name]) : name,
+//       module: name
+//     }) 
+//   })
+//   return outExternals
+// }
