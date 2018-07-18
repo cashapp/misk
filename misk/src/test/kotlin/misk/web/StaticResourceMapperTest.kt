@@ -1,7 +1,7 @@
 package misk.web
 
 import misk.inject.KAbstractModule
-import misk.resources.FakeResourceLoader
+import misk.resources.ResourceLoader
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.web.actions.NotFoundAction
@@ -21,21 +21,21 @@ class StaticResourceMapperTest {
   val module = TestModule()
 
   @Inject private lateinit var jettyService: JettyService
-  @Inject private lateinit var resourceLoader: FakeResourceLoader
+  @Inject private lateinit var resourceLoader: ResourceLoader
 
   @BeforeEach
   internal fun setUp() {
-    resourceLoader.put("web/app.js", """
+    resourceLoader.put("/memory/web/app.js", """
         |alert("hello world");
         |""".trimMargin())
-    resourceLoader.put("web/index.html", """
+    resourceLoader.put("/memory/web/index.html", """
         |<html>
         |  <body>
         |    <p>Hello world</p>
         |  </body>
         |</html>
         |""".trimMargin())
-    resourceLoader.put("web/main.css", """
+    resourceLoader.put("/memory/web/main.css", """
         |hello > world {
         |  color: blue;
         |}
@@ -100,7 +100,7 @@ class StaticResourceMapperTest {
       multibind<WebActionEntry>().toInstance(WebActionEntry(Hello::class))
       multibind<WebActionEntry>().toInstance(WebActionEntry(NotFoundAction::class))
       multibind<StaticResourceMapper.Entry>()
-          .toInstance(StaticResourceMapper.Entry("/", "web", "???"))
+          .toInstance(StaticResourceMapper.Entry("/", "/memory/web", "???"))
     }
   }
 
