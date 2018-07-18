@@ -15,6 +15,7 @@ import misk.inject.KAbstractModule
 import misk.inject.getInstance
 import misk.inject.keyOf
 import misk.moshi.MoshiModule
+import misk.resources.ResourceLoaderModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.testing.MockTracingBackendModule
@@ -56,8 +57,8 @@ internal class ClientServerTraceTest {
 
   @BeforeEach
   fun createClient() {
-    clientInjector =
-        Guice.createInjector(MockTracingBackendModule(), MoshiModule(), ClientModule(jetty))
+    clientInjector = Guice.createInjector(
+        MockTracingBackendModule(), MoshiModule(), ResourceLoaderModule(), ClientModule(jetty))
   }
 
   @Test
@@ -84,7 +85,8 @@ internal class ClientServerTraceTest {
 
   @Test
   fun noTracerNoTracesOrFailures() {
-    val clientInjector = Guice.createInjector(MoshiModule(), ClientModule(jetty))
+    val clientInjector = Guice.createInjector(
+        MoshiModule(), ResourceLoaderModule(), ClientModule(jetty))
     val client = clientInjector.getInstance<ReturnADinosaur>(Names.named("dinosaur"))
 
     client.getDinosaur(dinosaurRequest).execute()
