@@ -9,6 +9,7 @@ import misk.client.HttpClientsConfig
 import misk.inject.KAbstractModule
 import misk.inject.getInstance
 import misk.moshi.MoshiModule
+import misk.resources.ResourceLoaderModule
 import misk.security.ssl.CertStoreConfig
 import misk.security.ssl.SslLoader
 import misk.security.ssl.TrustStoreConfig
@@ -115,7 +116,7 @@ class Http2ConnectivityTest {
       install(WebTestingModule(
           ssl = WebSslConfig(0,
               cert_store = CertStoreConfig(
-                  path = "src/test/resources/ssl/server_cert_key_combo.pem",
+                  path = "/resources/ssl/server_cert_key_combo.pem",
                   passphrase = "serverpassword",
                   format = SslLoader.FORMAT_PEM
               ),
@@ -129,6 +130,7 @@ class Http2ConnectivityTest {
   // _after_ we start the services
   class ClientModule(val jetty: JettyService) : KAbstractModule() {
     override fun configure() {
+      install(ResourceLoaderModule())
       install(MoshiModule())
       install(HttpClientModule("default"))
     }
@@ -143,7 +145,7 @@ class Http2ConnectivityTest {
                   ssl = HttpClientSSLConfig(
                       cert_store = null,
                       trust_store = TrustStoreConfig(
-                          path = "src/test/resources/ssl/server_cert.pem",
+                          path = "/resources/ssl/server_cert.pem",
                           format = SslLoader.FORMAT_PEM
                       )
                   )
