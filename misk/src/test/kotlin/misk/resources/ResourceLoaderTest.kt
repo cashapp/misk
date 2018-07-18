@@ -1,18 +1,24 @@
 package misk.resources
 
+import com.google.inject.util.Modules
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
+import misk.testing.TemporaryFolder
+import misk.testing.TemporaryFolderModule
+import okio.Okio
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import java.io.File
 import javax.inject.Inject
 import kotlin.test.assertFailsWith
 
 @MiskTest
 class ResourceLoaderTest {
   @MiskTestModule
-  val module = ResourceLoaderModule()
+  val module = Modules.combine(ResourceLoaderModule(), TemporaryFolderModule())
 
   @Inject lateinit var resourceLoader: ResourceLoader
+  @Inject lateinit var tempFolder: TemporaryFolder
 
   @Test
   fun loadResource() {
@@ -59,6 +65,37 @@ class ResourceLoaderTest {
     assertThat(resourceLoader.list("/memory/misk/resources/")).containsExactly(data1, data2)
     assertThat(resourceLoader.list("/memory/misk")).containsExactly("/memory/misk/resources")
     assertThat(resourceLoader.list("/memory/misk/")).containsExactly("/memory/misk/resources")
+  }
+
+  @Test
+  fun filesystemResources() {
+    val tempRoot = tempFolder.root.toAbsolutePath().toFile()
+    assertThat(tempRoot.toString()).startsWith("/") // Tests below require this.
+
+    val resource1 = "/filesystem$tempRoot/data1.txt"
+    Okio.buffer(Okio.sink(File(tempRoot, "data1.txt"))).use {
+      it.writeUtf8("foo")
+    }
+
+    val resource2 = "/filesystem$tempRoot/data2.txt"
+    Okio.buffer(Okio.sink(File(tempRoot, "data2.txt"))).use {
+      it.writeUtf8("bar")
+    }
+
+    val resource3 = "/filesystem$tempRoot/data3.txt"
+
+    assertThat(resourceLoader.exists(resource1)).isTrue()
+    assertThat(resourceLoader.exists(resource2)).isTrue()
+    assertThat(resourceLoader.exists(resource3)).isFalse()
+
+    resourceLoader.open(resource1)!!.use {
+      assertThat(it.readUtf8()).isEqualTo("foo")
+    }
+    assertThat(resourceLoader.utf8(resource2)).isEqualTo("bar")
+
+    assertFailsWith<UnsupportedOperationException> {
+      resourceLoader.list("/filesystem$tempRoot")
+    }
   }
 
   @Test
