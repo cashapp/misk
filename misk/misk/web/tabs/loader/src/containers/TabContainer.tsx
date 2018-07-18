@@ -1,10 +1,10 @@
 // import { PathDebugComponent } from "@misk/components"
+import { PathDebugComponent } from "../components"
 import * as React from "react"
 import { Helmet } from "react-helmet"
 import { connect } from "react-redux"
 import styled from "styled-components" 
 import { IAppState } from "../"
-import { PathDebugComponent } from "../components"
 
 interface ITabProps {
   children: any,

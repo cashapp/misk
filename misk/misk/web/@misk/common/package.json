@@ -1,6 +1,6 @@
 {
   "name": "@misk/common",
-  "version": "0.0.5",
+  "version": "0.0.10",
   "description": "Microservice Kontainer Common Libraries, Externals, Styles",
   "author": "Square/Misk Authors (https://github.com/square/misk/graphs/contributors)",
   "main": "lib/index.js",
@@ -20,15 +20,15 @@
     "build:lib": "npm run lib",
     "build": "npm run lib",
     "dist": "npm run lib",
-    "lib": "webpack",
+    "lib": "webpack --config webpack.config.js && webpack --config webpack.static.config.js && webpack --config webpack.vendors.config.js",
     "lint": "echo no lint",
     "prepare": "yarn run lint && yarn run test && yarn run lib",
     "reinstall": "rm -rf node_modules/; yarn install",
     "test": "echo no tests"
   },
   "dependencies": {
-    "@blueprintjs/core": "^2.3.1",
-    "@blueprintjs/icons": "^2.2.1",
+    "@blueprintjs/core": "^3.0.1",
+    "@blueprintjs/icons": "^3.0.0",
     "axios": "^0.18.0",
     "connected-react-router": "^4.3.0",
     "history": "^4.7.2",
@@ -39,12 +39,13 @@
     "react-redux": "^5.0.7",
     "react-router": "^4.3.1",
     "react-router-dom": "^4.3.1",
+    "react-router-redux": "^5.0.0-alpha.9",
     "react-transition-group": "^2.2.1",
     "redux": "^4.0.0",
     "skeleton-css": "^2.0.4",
     "styled-components": "^3.3.3"
   },
   "devDependencies": {
-    "@misk/dev": "^0.0.5"
+    "@misk/dev": "^0.0.6"
   }
 }

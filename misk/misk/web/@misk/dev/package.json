@@ -1,6 +1,6 @@
 {
   "name": "@misk/dev",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "Microservice Kontainer Development Libraries",
   "author": "Square/Misk Authors (https://github.com/square/misk/graphs/contributors)",
   "repository": {
@@ -8,6 +8,7 @@
     "url": "git@github.com:square/misk.git"
   },
   "dependencies": {
+    "@types/node": "^10.5.2",
     "@types/react": "^16.4.4",
     "@types/react-dom": "^16.0.6",
     "@types/react-helmet": "^5.0.6",
@@ -15,8 +16,10 @@
     "@types/react-redux": "^6.0.3",
     "@types/react-router": "^4.0.28",
     "@types/react-router-dom": "^4.2.7",
+    "@types/react-router-redux": "^5.0.15",
     "@types/webpack-env": "^1.13.6",
     "awesome-typescript-loader": "^5.2.0",
+    "copy-webpack-plugin": "^4.5.2",
     "cross-env": "^5.2.0",
     "css-loader": "^0.28.11",
     "file-loader": "^1.1.11",
@@ -36,7 +39,7 @@
     "tslint-sonarts": "^1.7.0",
     "typescript": "^2.9.2",
     "url-loader": "^1.0.1",
-    "webpack": "^4.13.0",
+    "webpack": "^4.16.1",
     "webpack-cli": "^3.0.8",
     "webpack-dev-server": "^3.1.4"
   }

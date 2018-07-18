@@ -9,7 +9,10 @@ module.exports = {
   devtool: 'source-map',
   output: {
     path: path.resolve(__dirname, './lib'),
-    filename: '[name].js'
+    filename: '[name].js',
+    library: ['misk', 'components'],
+    libraryTarget: 'umd',
+    globalObject: 'typeof self !== \'undefined\' ? self : this'
   },
   module: {
     rules: [

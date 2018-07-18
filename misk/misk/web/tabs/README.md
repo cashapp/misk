@@ -1,5 +1,4 @@
-Take 2
+How to make a new tab
 ---
 
-- [ ] Make sure import works
-- [ ] Use React-Router / Connected-React-Router
+Coming soon...

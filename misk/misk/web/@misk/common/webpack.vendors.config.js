@@ -1,11 +1,10 @@
 const path = require('path');
 
 module.exports = {
-  name: "library",
+  name: "static",
   mode: 'production',
   entry: {
-    index: path.resolve(__dirname, 'src/index.ts'),
-    externals: path.resolve(__dirname, 'src/index.ts')
+    vendors: path.resolve(__dirname, 'src/vendors.js')
   },
   devtool: 'source-map',
   output: {
@@ -14,16 +13,5 @@ module.exports = {
     library: ['misk', 'common'],
     libraryTarget: 'umd',
     globalObject: 'typeof window !== \'undefined\' ? window : this'
-  },
-  module: {
-    rules: [
-      { 
-        test: /\.(ts|tsx)?$/, 
-        loader: 'awesome-typescript-loader'
-      }
-    ]
-  },
-  resolve: {
-    extensions: [".ts", ".tsx"]
   },
 };

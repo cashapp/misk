@@ -1,3 +1,4 @@
+import externals from "@misk/common"
 import * as React from "react"
 import styled from "styled-components" 
 
@@ -7,8 +8,7 @@ interface IPathProps {
   search: string
 }
 
-const PathDebug = styled.div`
-`
+const PathDebug = styled.div``
 
 export class PathDebugComponent extends React.Component<IPathProps> {
   constructor(props: IPathProps) {
@@ -18,6 +18,7 @@ export class PathDebugComponent extends React.Component<IPathProps> {
   render() {
     return (
       <PathDebug>
+        {externals}
         <p>hash: {this.props.hash}</p>
         <p>pathname: {this.props.pathname}</p>
         <p>search: {this.props.search}</p>

@@ -24,12 +24,12 @@ const CopyWebpackPluginConfig = new CopyWebpackPlugin(
 module.exports = {
   entry: ['react-hot-loader/patch', path.join(__dirname, '/src/index.tsx')],
   output: {
-    filename: 'tab_config.js',
-    path: path.join(__dirname, 'dist/_admin/config'),
-    publicPath: "/_admin/config/"
-  },
+    filename: 'tab_loader.js',
+    path: path.join(__dirname, 'dist/_admin'),
+    publicPath: "/_admin/"
+},
   devServer: {
-    port: '3200',
+    port: '3100',
     inline: true,
     hot: true,
     historyApiFallback: true
@@ -66,9 +66,9 @@ module.exports = {
   plugins: dev
     ? [
       HTMLWebpackPluginConfig, CopyWebpackPluginConfig,
-      new webpack.HotModuleReplacementPlugin()
+      new webpack.HotModuleReplacementPlugin(),
     ]
-    : [HTMLWebpackPluginConfig, CopyWebpackPluginConfig, 
+    : [HTMLWebpackPluginConfig, CopyWebpackPluginConfig,
       DefinePluginConfig],
-  externals: MiskCommon.Externals
+  externals: MiskCommon.externals
 }
