@@ -1,5 +1,5 @@
 {
-  "name": "misk-tab-admin-config",
+  "name": "misk-tab-admin-wrapper",
   "version": "0.0.2",
   "main": "src/index.ts",
   "repository": "git@github.com:square/misk.git",

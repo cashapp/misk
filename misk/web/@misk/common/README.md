@@ -12,7 +12,7 @@ Getting Started
 $ yarn add @misk/common
 ```
 
-- Using the common vendors libraries and styles. We use [`copy-webpack-plugin`](https://github.com/webpack-contrib/copy-webpack-plugin) to copy the compiled `vendor.js` file into build folder. 
+- Using the common vendors libraries and styles. We use [`copy-webpack-plugin`](https://github.com/webpack-contrib/copy-webpack-plugin) to copy the compiled `vendor.js` and `styles.js` files into build folder.
   - Install [`copy-webpack-plugin`](https://github.com/webpack-contrib/copy-webpack-plugin)
     
     ```bash
@@ -53,17 +53,18 @@ $ yarn add @misk/common
     </body>
     ```
 
-- Use `@misk/common` externals to keep Webpack from bundling duplicate libraries and styles into your Misk module. Add the following to your `webpack.config.js`
+- Use `@misk/common` externals to keep Webpack from bundling duplicate libraries and styles into your Misk module. Add the following to your `webpack.config.js`. ]
   
   ```Typescript
-  const miskCommon = require('@misk/common');
+  const MiskCommon = require('@misk/common')
+
   ...
 
   module.exports = {
     mode
     entry
     ...
-    externals: miskCommon.externals,
+    externals: MiskCommon.externals,
   }
 
   ```
@@ -71,9 +72,11 @@ $ yarn add @misk/common
 Included Libraries
 ---
 
+From `package.json`:
+
 ```JSON
-  "@blueprintjs/core": "^2.3.1",
-  "@blueprintjs/icons": "^2.2.1",
+  "@blueprintjs/core": "^3.0.1",
+  "@blueprintjs/icons": "^3.0.0",
   "axios": "^0.18.0",
   "connected-react-router": "^4.3.0",
   "history": "^4.7.2",
@@ -84,6 +87,7 @@ Included Libraries
   "react-redux": "^5.0.7",
   "react-router": "^4.3.1",
   "react-router-dom": "^4.3.1",
+  "react-router-redux": "^5.0.0-alpha.9",
   "react-transition-group": "^2.2.1",
   "redux": "^4.0.0",
   "skeleton-css": "^2.0.4",
@@ -93,8 +97,8 @@ Included Libraries
 Included Styles
 ---
 ```Typescript
-  import './styles/misk-common.css'
   import '../node_modules/@blueprintjs/core/lib/css/blueprint.css'
   import '../node_modules/normalize.css/normalize.css'
   import '../node_modules/skeleton-css/css/skeleton.css'
+  import './styles/misk-common.css'
 ```
