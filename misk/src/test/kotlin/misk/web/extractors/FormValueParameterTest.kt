@@ -7,7 +7,6 @@ import misk.web.FormField
 import misk.web.FormValue
 import misk.web.Post
 import misk.web.WebActionEntry
-import misk.web.WebActionModule
 import misk.web.WebTestingModule
 import misk.web.actions.WebAction
 import misk.web.jetty.JettyService
