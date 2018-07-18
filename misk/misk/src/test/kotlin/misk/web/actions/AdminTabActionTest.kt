@@ -4,15 +4,8 @@ import misk.inject.KAbstractModule
 import misk.logging.getLogger
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
-import misk.web.AdminTabModule
-import misk.web.StaticResourceMapperTest
-import misk.web.WebActionModule
-import misk.web.WebTestingModule
-import misk.web.resources.StaticResourceMapper
 import org.junit.jupiter.api.Test
-import java.util.logging.Logger
 import javax.inject.Inject
-import kotlin.test.assert
 import kotlin.test.assertFailsWith
 
 @MiskTest

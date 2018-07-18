@@ -145,7 +145,7 @@ internal class SessionFactoryService(
       for (property in entityBinding.allProperties()) {
         val value = property.value
         if (value is SimpleValue) {
-          result.add(Class.forName(value.typeName).kotlin)
+          result.add(kClassForName(value.typeName))
         }
       }
     }
@@ -175,6 +175,20 @@ internal class SessionFactoryService(
       Id::class -> IdType
       ByteString::class -> ByteStringType
       else -> BoxedStringType.create(propertyType)
+    }
+  }
+
+  private fun kClassForName(name: String): KClass<out Any> {
+    return when (name) {
+      "boolean" -> Boolean::class
+      "byte" -> Byte::class
+      "short" -> Short::class
+      "int" -> Int::class
+      "long" -> Long::class
+      "char" -> Char::class
+      "float" -> Float::class
+      "double" -> Double::class
+      else -> Class.forName(name).kotlin
     }
   }
 
