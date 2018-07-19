@@ -42,7 +42,7 @@ class SslLoader @Inject internal constructor(
     }
   }
 
-  fun loadTrustStore(config: TrustStoreConfig) = loadTrustStore(config.path, config.format,
+  fun loadTrustStore(config: TrustStoreConfig) = loadTrustStore(config.resource, config.format,
       config.passphrase)
 
   private fun PemComboFile.toTrustStore(): TrustStore? {
@@ -76,7 +76,7 @@ class SslLoader @Inject internal constructor(
   }
 
   fun loadCertStore(config: CertStoreConfig) =
-      loadCertStore(config.path, config.format, config.passphrase)
+      loadCertStore(config.resource, config.format, config.passphrase)
 
   private fun PemComboFile.toCertStore(): CertStore? {
     if (certificates.isEmpty() || privateRsaKeys.size + privateKeys.size != 1) return null

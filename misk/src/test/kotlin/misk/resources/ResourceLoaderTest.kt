@@ -22,49 +22,49 @@ class ResourceLoaderTest {
 
   @Test
   fun loadResource() {
-    val resource = resourceLoader.utf8("/resources/misk/resources/ResourceLoaderTest.txt")!!
+    val resource = resourceLoader.utf8("resources:/misk/resources/ResourceLoaderTest.txt")!!
     assertThat(resource).isEqualTo("69e0753934d2838d1953602ca7722444\n")
   }
 
   @Test
   fun absentResource() {
-    assertThat(resourceLoader.utf8("/resources/misk/resources/NoSuchResource.txt")).isNull()
+    assertThat(resourceLoader.utf8("resources:/misk/resources/NoSuchResource.txt")).isNull()
   }
 
   @Test
   fun listContainsImmediateChild() {
-    assertThat(resourceLoader.list("/resources/misk/resources/"))
-        .contains("/resources/misk/resources/ResourceLoaderTest.txt")
+    assertThat(resourceLoader.list("resources:/misk/resources/"))
+        .contains("resources:/misk/resources/ResourceLoaderTest.txt")
   }
 
   @Test
   fun listDoesNotContainChildOfChild() {
-    assertThat(resourceLoader.list("/resources/misk/"))
-        .doesNotContain("/resources/misk/resources/ResourceLoaderTest.txt")
+    assertThat(resourceLoader.list("resources:/misk/"))
+        .doesNotContain("resources:/misk/resources/ResourceLoaderTest.txt")
   }
 
   @Test
   fun memoryResources() {
-    val data1 = "/memory/misk/resources/data1.txt"
-    val data2 = "/memory/misk/resources/data2.txt"
+    val data1 = "memory:/misk/resources/data1.txt"
+    val data2 = "memory:/misk/resources/data2.txt"
     resourceLoader.put(data1, "foo")
     resourceLoader.put(data2, "bar")
 
     assertThat(resourceLoader.exists(data1)).isTrue()
     assertThat(resourceLoader.exists(data2)).isTrue()
-    assertThat(resourceLoader.exists("/memory/misk/resources/data3.txt")).isFalse()
+    assertThat(resourceLoader.exists("memory:/misk/resources/data3.txt")).isFalse()
 
     assertThat(resourceLoader.open(data1)!!.readUtf8()).isEqualTo("foo")
     assertThat(resourceLoader.utf8(data1)).isEqualTo("foo")
 
     assertThat(resourceLoader.list(data1)).isEmpty()
-    assertThat(resourceLoader.list("/memory/misk/resources/data1.txt/")).isEmpty()
-    assertThat(resourceLoader.list("/memory/misk/res")).isEmpty()
+    assertThat(resourceLoader.list("memory:/misk/resources/data1.txt/")).isEmpty()
+    assertThat(resourceLoader.list("memory:/misk/res")).isEmpty()
 
-    assertThat(resourceLoader.list("/memory/misk/resources")).containsExactly(data1, data2)
-    assertThat(resourceLoader.list("/memory/misk/resources/")).containsExactly(data1, data2)
-    assertThat(resourceLoader.list("/memory/misk")).containsExactly("/memory/misk/resources")
-    assertThat(resourceLoader.list("/memory/misk/")).containsExactly("/memory/misk/resources")
+    assertThat(resourceLoader.list("memory:/misk/resources")).containsExactly(data1, data2)
+    assertThat(resourceLoader.list("memory:/misk/resources/")).containsExactly(data1, data2)
+    assertThat(resourceLoader.list("memory:/misk")).containsExactly("memory:/misk/resources")
+    assertThat(resourceLoader.list("memory:/misk/")).containsExactly("memory:/misk/resources")
   }
 
   @Test
@@ -72,17 +72,17 @@ class ResourceLoaderTest {
     val tempRoot = tempFolder.root.toAbsolutePath().toFile()
     assertThat(tempRoot.toString()).startsWith("/") // Tests below require this.
 
-    val resource1 = "/filesystem$tempRoot/data1.txt"
+    val resource1 = "filesystem:$tempRoot/data1.txt"
     Okio.buffer(Okio.sink(File(tempRoot, "data1.txt"))).use {
       it.writeUtf8("foo")
     }
 
-    val resource2 = "/filesystem$tempRoot/data2.txt"
+    val resource2 = "filesystem:$tempRoot/data2.txt"
     Okio.buffer(Okio.sink(File(tempRoot, "data2.txt"))).use {
       it.writeUtf8("bar")
     }
 
-    val resource3 = "/filesystem$tempRoot/data3.txt"
+    val resource3 = "filesystem:$tempRoot/data3.txt"
 
     assertThat(resourceLoader.exists(resource1)).isTrue()
     assertThat(resourceLoader.exists(resource2)).isTrue()
@@ -94,26 +94,32 @@ class ResourceLoaderTest {
     assertThat(resourceLoader.utf8(resource2)).isEqualTo("bar")
 
     assertFailsWith<UnsupportedOperationException> {
-      resourceLoader.list("/filesystem$tempRoot")
+      resourceLoader.list("filesystem:$tempRoot")
     }
   }
 
   @Test
-  fun pathValidation() {
+  fun addressValidation() {
+    assertFailsWith<IllegalArgumentException> {
+      resourceLoader.open(":")
+    }
     assertFailsWith<IllegalArgumentException> {
       resourceLoader.open("")
     }
     assertFailsWith<IllegalArgumentException> {
-      resourceLoader.open("//")
+      resourceLoader.open(":/")
     }
     assertFailsWith<IllegalArgumentException> {
-      resourceLoader.open("/a//")
+      resourceLoader.open("a:/")
+    }
+    assertFailsWith<IllegalArgumentException> {
+      resourceLoader.open("a://")
     }
   }
 
   @Test
   fun unknownBackend() {
-    assertThat(resourceLoader.utf8("/unknown/misk/resources/ResourceLoaderTest.txt")).isNull()
-    assertThat(resourceLoader.list("/unknown/misk/resources/")).isEmpty()
+    assertThat(resourceLoader.utf8("unknown:/misk/resources/ResourceLoaderTest.txt")).isNull()
+    assertThat(resourceLoader.list("unknown:/misk/resources/")).isEmpty()
   }
 }

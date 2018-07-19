@@ -8,7 +8,7 @@ import java.util.TreeMap
 /**
  * Read-only resources that are fetched from either the deployed .jar file or the local filesystem.
  *
- * This is mounted at `/resources`.
+ * This uses the scheme `resources:`.
  */
 internal object ClasspathResourceLoaderBackend : ResourceLoader.Backend() {
   private val resourcesByPath: Map<String, ClassPath.ResourceInfo>
