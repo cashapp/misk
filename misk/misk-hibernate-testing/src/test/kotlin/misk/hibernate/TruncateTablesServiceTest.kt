@@ -1,12 +1,11 @@
 package misk.hibernate
 
 import com.google.inject.util.Providers
-import misk.MiskModule
+import misk.MiskServiceModule
 import misk.config.Config
 import misk.config.MiskConfig
 import misk.environment.Environment
 import misk.inject.KAbstractModule
-import misk.resources.ResourceLoaderModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
@@ -103,8 +102,7 @@ internal class TruncateTablesServiceTest {
   class TestModule : KAbstractModule() {
     override fun configure() {
       bind<Environment>().toInstance(Environment.TESTING)
-      install(ResourceLoaderModule())
-      install(MiskModule())
+      install(MiskServiceModule())
 
       val config = MiskConfig.load<TestConfig>("test_truncatetables_app", Environment.TESTING)
       install(HibernateModule(TestDatasource::class, config.data_source))

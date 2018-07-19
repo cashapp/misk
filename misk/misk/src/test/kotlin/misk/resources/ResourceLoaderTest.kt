@@ -1,6 +1,7 @@
 package misk.resources
 
 import com.google.inject.util.Modules
+import misk.MiskServiceModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.testing.TemporaryFolder
@@ -15,7 +16,7 @@ import kotlin.test.assertFailsWith
 @MiskTest
 class ResourceLoaderTest {
   @MiskTestModule
-  val module = Modules.combine(ResourceLoaderModule(), TemporaryFolderModule())
+  val module = Modules.combine(MiskServiceModule(), TemporaryFolderModule())
 
   @Inject lateinit var resourceLoader: ResourceLoader
   @Inject lateinit var tempFolder: TemporaryFolder

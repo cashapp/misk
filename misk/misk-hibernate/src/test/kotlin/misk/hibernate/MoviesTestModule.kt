@@ -1,22 +1,20 @@
 package misk.hibernate
 
 import com.google.inject.util.Modules
-import misk.MiskModule
+import misk.MiskServiceModule
 import misk.config.Config
 import misk.config.MiskConfig
 import misk.environment.Environment
 import misk.environment.EnvironmentModule
 import misk.inject.KAbstractModule
 import misk.logging.LogCollectorModule
-import misk.resources.ResourceLoaderModule
 import misk.time.FakeClockModule
 
 /** This module creates movies, actors, and characters tables for several Hibernate tests. */
 class MoviesTestModule : KAbstractModule() {
   override fun configure() {
     install(LogCollectorModule())
-    install(ResourceLoaderModule())
-    install(Modules.override(MiskModule()).with(FakeClockModule()))
+    install(Modules.override(MiskServiceModule()).with(FakeClockModule()))
     install(EnvironmentModule(Environment.TESTING))
 
     val config = MiskConfig.load<MoviesConfig>("moviestestmodule", Environment.TESTING)

@@ -4,14 +4,13 @@ import com.google.common.util.concurrent.AbstractIdleService
 import com.google.common.util.concurrent.Service
 import com.google.inject.Key
 import misk.DependentService
-import misk.MiskModule
+import misk.MiskServiceModule
 import misk.config.Config
 import misk.config.MiskConfig
 import misk.environment.Environment
 import misk.inject.KAbstractModule
 import misk.inject.toKey
 import misk.resources.ResourceLoader
-import misk.resources.ResourceLoaderModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
@@ -30,8 +29,7 @@ internal class SchemaMigratorTest {
   @MiskTestModule
   val module = object : KAbstractModule() {
     override fun configure() {
-      install(MiskModule())
-      install(ResourceLoaderModule())
+      install(MiskServiceModule())
 
       val dropTablesService = object : AbstractIdleService(), DependentService {
         @Inject @Movies lateinit var sessionFactoryProvider: Provider<SessionFactory>

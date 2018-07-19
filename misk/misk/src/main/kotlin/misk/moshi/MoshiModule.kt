@@ -8,7 +8,7 @@ import misk.moshi.okio.ByteStringAdapter
 import misk.moshi.wire.WireMessageAdapter
 import javax.inject.Singleton
 
-class MoshiModule : KAbstractModule() {
+internal class MoshiModule : KAbstractModule() {
   override fun configure() {
     multibind<JsonAdapter.Factory>(MoshiJsonAdapter::class)
         .to<WireMessageAdapter.Factory>()

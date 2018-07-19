@@ -1,19 +1,17 @@
 package misk.web
 
 import com.google.inject.Provides
-import misk.MiskModule
+import misk.MiskServiceModule
 import misk.environment.Environment
 import misk.environment.EnvironmentModule
 import misk.inject.KAbstractModule
-import misk.resources.ResourceLoaderModule
 import javax.inject.Singleton
 
 class WebTestingModule(private val ssl: WebSslConfig? = null) : KAbstractModule() {
   override fun configure() {
     install(EnvironmentModule(Environment.TESTING))
-    install(MiskModule())
-    install(WebModule())
-    install(ResourceLoaderModule())
+    install(MiskServiceModule())
+    install(MiskWebModule())
   }
 
   @Provides

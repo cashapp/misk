@@ -1,7 +1,7 @@
 package misk.moshi
 
-import com.google.inject.util.Modules
 import com.squareup.moshi.Moshi
+import misk.MiskServiceModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import okio.ByteString
@@ -12,7 +12,7 @@ import javax.inject.Inject
 @MiskTest(startService = false)
 internal class ByteStringAdapterTest {
   @MiskTestModule
-  val module = Modules.combine(MoshiModule())
+  val module = MiskServiceModule()
 
   @Inject
   lateinit var moshi: Moshi

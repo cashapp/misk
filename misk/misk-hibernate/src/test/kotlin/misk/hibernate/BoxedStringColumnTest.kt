@@ -1,12 +1,11 @@
 package misk.hibernate
 
-import misk.MiskModule
+import misk.MiskServiceModule
 import misk.config.Config
 import misk.config.MiskConfig
 import misk.environment.Environment
 import misk.environment.EnvironmentModule
 import misk.inject.KAbstractModule
-import misk.resources.ResourceLoaderModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
@@ -83,8 +82,7 @@ class BoxedStringColumnTest {
 
   class TestModule : KAbstractModule() {
     override fun configure() {
-      install(ResourceLoaderModule())
-      install(MiskModule())
+      install(MiskServiceModule())
       install(EnvironmentModule(Environment.TESTING))
 
       val config = MiskConfig.load<RootConfig>("boxedstring", Environment.TESTING)

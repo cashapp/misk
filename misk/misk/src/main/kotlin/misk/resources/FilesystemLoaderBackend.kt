@@ -12,7 +12,7 @@ import javax.inject.Singleton
  * This uses the scheme `filesystem:`.
  */
 @Singleton
-object FilesystemLoaderBackend : ResourceLoader.Backend() {
+internal object FilesystemLoaderBackend : ResourceLoader.Backend() {
   override fun open(path: String): BufferedSource? {
     val file = File(path)
     try {

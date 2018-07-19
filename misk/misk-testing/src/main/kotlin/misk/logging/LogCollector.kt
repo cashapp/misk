@@ -18,7 +18,7 @@ import kotlin.reflect.KClass
  * class MyTest {
  *   @MiskTestModule
  *   val module = Modules.combine(
- *       MiskModule(),
+ *       MiskServiceModule(),
  *       LogCollectorModule(),
  *       ...
  *   )
