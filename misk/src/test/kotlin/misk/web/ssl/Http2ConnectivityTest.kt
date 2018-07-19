@@ -2,14 +2,13 @@ package misk.web.ssl
 
 import com.google.inject.Guice
 import com.google.inject.Provides
+import misk.MiskServiceModule
 import misk.client.HttpClientEndpointConfig
 import misk.client.HttpClientModule
 import misk.client.HttpClientSSLConfig
 import misk.client.HttpClientsConfig
 import misk.inject.KAbstractModule
 import misk.inject.getInstance
-import misk.moshi.MoshiModule
-import misk.resources.ResourceLoaderModule
 import misk.security.ssl.CertStoreConfig
 import misk.security.ssl.SslLoader
 import misk.security.ssl.TrustStoreConfig
@@ -130,8 +129,7 @@ class Http2ConnectivityTest {
   // _after_ we start the services
   class ClientModule(val jetty: JettyService) : KAbstractModule() {
     override fun configure() {
-      install(ResourceLoaderModule())
-      install(MoshiModule())
+      install(MiskServiceModule())
       install(HttpClientModule("default"))
     }
 
