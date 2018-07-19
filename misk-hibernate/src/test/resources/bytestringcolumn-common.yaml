@@ -3,4 +3,4 @@ data_source:
   username: root
   password: ""
   database: bytestringcolumn
-  migrations_resource: resources:/misk/hibernate/bytestringcolumn-migrations
+  migrations_resource: classpath:/misk/hibernate/bytestringcolumn-migrations

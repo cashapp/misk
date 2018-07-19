@@ -3,4 +3,4 @@ data_source:
   username: root
   password: ""
   database: primitivecolumns
-  migrations_resource: resources:/misk/hibernate/primitivecolumns-migrations
+  migrations_resource: classpath:/misk/hibernate/primitivecolumns-migrations

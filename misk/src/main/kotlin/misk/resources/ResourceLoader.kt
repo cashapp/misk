@@ -12,10 +12,10 @@ import javax.inject.Singleton
  * from memory, or from another [Backend] source.
  *
  * Resource addresses have a scheme name, a colon, and an absolute filesystem-like path:
- * `resources:/migrations/v1.sql`. Schemes identify backends `resources:` or `memory:`. Paths start
+ * `classpath:/migrations/v1.sql`. Schemes identify backends `classpath:` or `memory:`. Paths start
  * with a slash and have any number of segments.
  *
- * **Classpath resources** use the scheme `resources:`. The backend reads data from the
+ * **Classpath resources** use the scheme `classpath:`. The backend reads data from the
  * `src/main/resources` of the project's modules and the contents of all library `.jar` files.
  * Classpath resources are read-only.
  *
@@ -26,7 +26,7 @@ import javax.inject.Singleton
  * to [put].
  *
  * Other backends are permitted. They should be registered with a `MapBinder` with the backend
- * scheme like `resources:` as the key.
+ * scheme like `classpath:` as the key.
  */
 @Singleton
 class ResourceLoader @Inject constructor(
@@ -95,7 +95,7 @@ class ResourceLoader @Inject constructor(
   }
 
   /**
-   * Decodes an address like `resources:/migrations/v1.sql` into a backend scheme like `resources:`
+   * Decodes an address like `classpath:/migrations/v1.sql` into a backend scheme like `classpath:`
    * and a backend-specific path like `/migrations/v1.sql`.
    */
   private fun parseAddress(path: String): Address {

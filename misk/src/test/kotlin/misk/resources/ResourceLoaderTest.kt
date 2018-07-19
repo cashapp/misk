@@ -22,25 +22,25 @@ class ResourceLoaderTest {
 
   @Test
   fun loadResource() {
-    val resource = resourceLoader.utf8("resources:/misk/resources/ResourceLoaderTest.txt")!!
+    val resource = resourceLoader.utf8("classpath:/misk/resources/ResourceLoaderTest.txt")!!
     assertThat(resource).isEqualTo("69e0753934d2838d1953602ca7722444\n")
   }
 
   @Test
   fun absentResource() {
-    assertThat(resourceLoader.utf8("resources:/misk/resources/NoSuchResource.txt")).isNull()
+    assertThat(resourceLoader.utf8("classpath:/misk/resources/NoSuchResource.txt")).isNull()
   }
 
   @Test
   fun listContainsImmediateChild() {
-    assertThat(resourceLoader.list("resources:/misk/resources/"))
-        .contains("resources:/misk/resources/ResourceLoaderTest.txt")
+    assertThat(resourceLoader.list("classpath:/misk/resources/"))
+        .contains("classpath:/misk/resources/ResourceLoaderTest.txt")
   }
 
   @Test
   fun listDoesNotContainChildOfChild() {
-    assertThat(resourceLoader.list("resources:/misk/"))
-        .doesNotContain("resources:/misk/resources/ResourceLoaderTest.txt")
+    assertThat(resourceLoader.list("classpath:/misk/"))
+        .doesNotContain("classpath:/misk/resources/ResourceLoaderTest.txt")
   }
 
   @Test

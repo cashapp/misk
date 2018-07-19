@@ -99,11 +99,11 @@ internal class JceksSslClientServerTest {
       install(WebTestingModule(
           ssl = WebSslConfig(0,
               cert_store = CertStoreConfig(
-                  resource = "resources:/ssl/server_keystore.jceks",
+                  resource = "classpath:/ssl/server_keystore.jceks",
                   passphrase = "serverpassword"
               ),
               trust_store = TrustStoreConfig(
-                  resource = "resources:/ssl/client_cert.pem",
+                  resource = "classpath:/ssl/client_cert.pem",
                   format = SslLoader.FORMAT_PEM
               ),
               mutual_auth = WebSslConfig.MutualAuth.REQUIRED)))
@@ -130,11 +130,11 @@ internal class JceksSslClientServerTest {
                   jetty.httpsServerUrl!!.toString(),
                   ssl = HttpClientSSLConfig(
                       cert_store = CertStoreConfig(
-                          resource = "resources:/ssl/client_keystore.jceks",
+                          resource = "classpath:/ssl/client_keystore.jceks",
                           passphrase = "clientpassword"
                       ),
                       trust_store = TrustStoreConfig(
-                          resource = "resources:/ssl/server_cert.pem",
+                          resource = "classpath:/ssl/server_cert.pem",
                           format = SslLoader.FORMAT_PEM
                       )
                   )),
@@ -143,7 +143,7 @@ internal class JceksSslClientServerTest {
                   ssl = HttpClientSSLConfig(
                       cert_store = null,
                       trust_store = TrustStoreConfig(
-                          resource = "resources:/ssl/server_cert.pem",
+                          resource = "classpath:/ssl/server_cert.pem",
                           format = SslLoader.FORMAT_PEM
                       )
                   )),
@@ -151,11 +151,11 @@ internal class JceksSslClientServerTest {
                   jetty.httpsServerUrl!!.toString(),
                   ssl = HttpClientSSLConfig(
                       cert_store = CertStoreConfig(
-                          resource = "resources:/ssl/client_keystore.jceks",
+                          resource = "classpath:/ssl/client_keystore.jceks",
                           passphrase = "clientpassword"
                       ),
                       trust_store = TrustStoreConfig(
-                          resource = "resources:/ssl/client_cert.pem",
+                          resource = "classpath:/ssl/client_cert.pem",
                           format = SslLoader.FORMAT_PEM
                       )
                   ))
