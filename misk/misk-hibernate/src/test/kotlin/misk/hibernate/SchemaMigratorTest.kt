@@ -71,10 +71,10 @@ internal class SchemaMigratorTest {
   @Test fun initializeAndMigrate() {
     val schemaMigrator = SchemaMigrator(resourceLoader, sessionFactory, config.data_source)
 
-    resourceLoader.put("${config.data_source.migrations_path}/v1001__movies.sql", """
+    resourceLoader.put("${config.data_source.migrations_resource}/v1001__movies.sql", """
         |CREATE TABLE table_1 (name varchar(255))
         |""".trimMargin())
-    resourceLoader.put("${config.data_source.migrations_path}/v1002__movies.sql", """
+    resourceLoader.put("${config.data_source.migrations_resource}/v1002__movies.sql", """
         |CREATE TABLE table_2 (name varchar(255))
         |""".trimMargin())
 
@@ -108,10 +108,10 @@ internal class SchemaMigratorTest {
     schemaMigrator.requireAll()
 
     // When new migrations are added they can be applied.
-    resourceLoader.put("${config.data_source.migrations_path}/v1003__movies.sql", """
+    resourceLoader.put("${config.data_source.migrations_resource}/v1003__movies.sql", """
         |CREATE TABLE table_3 (name varchar(255))
         |""".trimMargin())
-    resourceLoader.put("${config.data_source.migrations_path}/v1004__movies.sql", """
+    resourceLoader.put("${config.data_source.migrations_resource}/v1004__movies.sql", """
         |CREATE TABLE table_4 (name varchar(255))
         |""".trimMargin())
     schemaMigrator.applyAll("SchemaMigratorTest", setOf(1001, 1002))
@@ -128,10 +128,10 @@ internal class SchemaMigratorTest {
     val schemaMigrator = SchemaMigrator(resourceLoader, sessionFactory, config.data_source)
     schemaMigrator.initialize()
 
-    resourceLoader.put("${config.data_source.migrations_path}/v1001__foo.sql", """
+    resourceLoader.put("${config.data_source.migrations_resource}/v1001__foo.sql", """
         |CREATE TABLE table_1 (name varchar(255))
         |""".trimMargin())
-    resourceLoader.put("${config.data_source.migrations_path}/v1002__foo.sql", """
+    resourceLoader.put("${config.data_source.migrations_resource}/v1002__foo.sql", """
         |CREATE TABLE table_1 (name varchar(255))
         |""".trimMargin())
 
@@ -139,8 +139,8 @@ internal class SchemaMigratorTest {
       schemaMigrator.requireAll()
     }).hasMessage("""
           |schemamigrator is missing migrations:
-          |  ${config.data_source.migrations_path}/v1001__foo.sql
-          |  ${config.data_source.migrations_path}/v1002__foo.sql""".trimMargin())
+          |  ${config.data_source.migrations_resource}/v1001__foo.sql
+          |  ${config.data_source.migrations_resource}/v1002__foo.sql""".trimMargin())
   }
 
   @Test fun resourceVersionParsing() {

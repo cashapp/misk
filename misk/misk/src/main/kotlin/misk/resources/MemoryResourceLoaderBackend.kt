@@ -10,7 +10,7 @@ import javax.inject.Singleton
  * Read-write resources stored only in memory. Most useful for testing. It is possible to have
  * multiple instances of this backend.
  *
- * This is mounted at `/memory`.
+ * This uses the scheme `memory:`.
  */
 @Singleton
 internal class MemoryResourceLoaderBackend : ResourceLoader.Backend() {

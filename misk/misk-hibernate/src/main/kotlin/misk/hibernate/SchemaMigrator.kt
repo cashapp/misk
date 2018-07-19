@@ -19,8 +19,8 @@ private val logger = getLogger<SchemaMigrator>()
 /**
  * Manages **available** and **applied** schema migrations.
  *
- * Available schema migrations are SQL files in the datasource's `migrations_path` directory. Each
- * file should contain SQL statements terminated by a `;`. The files should be named like
+ * Available schema migrations are SQL files in the datasource's `migrations_resource` directory.
+ * Each file should contain SQL statements terminated by a `;`. The files should be named like
  * `v100__exemplar.sql` with a `v`, an integer version, two underscores, a description, and the
  * `.sql` suffix. The integer identifier is the migration version. Versions do not need to be
  * sequential. They are applied in increasing order.
@@ -36,13 +36,13 @@ internal class SchemaMigrator(
 ) {
   /** Returns a map from version to path. */
   fun availableMigrations(): NavigableMap<Int, String> {
-    val resources = config.migrations_path?.let { resourceLoader.list(it) } ?: listOf()
+    val resources = config.migrations_resource?.let { resourceLoader.list(it) } ?: listOf()
     return TreeMap(resources.associateBy { resourceVersion(it) })
   }
 
   /** Creates the `schema_version` table if it does not exist. Returns the applied migrations. */
   fun initialize(): NavigableSet<Int> {
-    if (config.migrations_path == null) {
+    if (config.migrations_resource == null) {
       return TreeSet()
     }
     try {
