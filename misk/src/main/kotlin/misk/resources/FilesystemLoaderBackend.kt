@@ -9,7 +9,7 @@ import javax.inject.Singleton
 /**
  * Read-only resources that are fetched from the local filesystem using absolute paths.
  *
- * This is mounted at `/filesystem`.
+ * This uses the scheme `filesystem:`.
  */
 @Singleton
 object FilesystemLoaderBackend : ResourceLoader.Backend() {

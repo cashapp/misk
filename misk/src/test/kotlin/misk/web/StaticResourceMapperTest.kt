@@ -25,17 +25,17 @@ class StaticResourceMapperTest {
 
   @BeforeEach
   internal fun setUp() {
-    resourceLoader.put("/memory/web/app.js", """
+    resourceLoader.put("memory:/web/app.js", """
         |alert("hello world");
         |""".trimMargin())
-    resourceLoader.put("/memory/web/index.html", """
+    resourceLoader.put("memory:/web/index.html", """
         |<html>
         |  <body>
         |    <p>Hello world</p>
         |  </body>
         |</html>
         |""".trimMargin())
-    resourceLoader.put("/memory/web/main.css", """
+    resourceLoader.put("memory:/web/main.css", """
         |hello > world {
         |  color: blue;
         |}
@@ -100,7 +100,7 @@ class StaticResourceMapperTest {
       multibind<WebActionEntry>().toInstance(WebActionEntry(Hello::class))
       multibind<WebActionEntry>().toInstance(WebActionEntry(NotFoundAction::class))
       multibind<StaticResourceMapper.Entry>()
-          .toInstance(StaticResourceMapper.Entry("/", "/memory/web", "???"))
+          .toInstance(StaticResourceMapper.Entry("/", "memory:/web", "???"))
     }
   }
 
