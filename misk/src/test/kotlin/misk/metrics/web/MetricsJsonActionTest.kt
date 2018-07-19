@@ -1,6 +1,6 @@
 package misk.metrics.web
 
-import misk.MiskModule
+import misk.MiskServiceModule
 import misk.metrics.Metrics
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
@@ -12,7 +12,7 @@ import javax.inject.Inject
 @MiskTest
 internal class MetricsJsonActionTest {
   @MiskTestModule
-  val module = MiskModule()
+  val module = MiskServiceModule()
 
   @Inject internal lateinit var metrics: Metrics
   @Inject internal lateinit var metricsAction: MetricsJsonAction

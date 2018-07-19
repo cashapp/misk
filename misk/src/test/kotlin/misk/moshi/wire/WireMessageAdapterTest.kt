@@ -1,11 +1,10 @@
 package misk.moshi.wire
 
-import com.google.inject.util.Modules
 import com.squareup.moshi.Moshi
 import com.squareup.protos.test.parsing.Robot
 import com.squareup.protos.test.parsing.Shipment
 import com.squareup.protos.test.parsing.Warehouse
-import misk.moshi.MoshiModule
+import misk.MiskServiceModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import okio.ByteString
@@ -18,7 +17,7 @@ import kotlin.test.assertFailsWith
 @MiskTest(startService = false)
 internal class WireMessageAdapterTest {
   @MiskTestModule
-  val module = Modules.combine(MoshiModule())
+  val module = MiskServiceModule()
 
   @Inject
   lateinit var moshi: Moshi

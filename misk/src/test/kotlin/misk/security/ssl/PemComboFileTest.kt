@@ -1,6 +1,6 @@
 package misk.security.ssl
 
-import misk.resources.ResourceLoaderModule
+import misk.MiskServiceModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
@@ -10,7 +10,7 @@ import javax.inject.Inject
 @MiskTest
 internal class PemComboFileTest {
   @MiskTestModule
-  val module = ResourceLoaderModule()
+  val module = MiskServiceModule()
 
   val clientComboPemPath = "classpath:/ssl/client_cert_key_combo.pem"
   val clientRsaComboPemPath = "classpath:/ssl/client_rsa_cert_key_combo.pem"

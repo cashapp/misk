@@ -42,7 +42,7 @@ import misk.web.resources.StaticResourceMapper
 import javax.servlet.http.HttpServletRequest
 import java.security.Provider as SecurityProvider
 
-class WebModule : KAbstractModule() {
+class MiskWebModule : KAbstractModule() {
   override fun configure() {
     multibind<Service>().to<JettyService>()
     multibind<Service>().to<ConscryptService>()

@@ -1,10 +1,10 @@
 package misk.flags
 
 import com.google.inject.name.Named
+import misk.MiskServiceModule
 import misk.flags.memory.InMemoryFlagStore
 import misk.flags.memory.InMemoryFlagStoreModule
 import misk.inject.KAbstractModule
-import misk.moshi.MoshiModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
@@ -28,7 +28,7 @@ class FlagPropertiesTest {
   @MiskTestModule
   val testModule = object : KAbstractModule() {
     override fun configure() {
-      install(MoshiModule())
+      install(MiskServiceModule())
       install(InMemoryFlagStoreModule())
       install(object : FlagsModule() {
         override fun configureFlags() {

@@ -2,7 +2,7 @@ package misk.logging
 
 import ch.qos.logback.classic.Level
 import com.google.inject.util.Modules
-import misk.MiskModule
+import misk.MiskServiceModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
@@ -13,7 +13,7 @@ import javax.inject.Inject
 class LogCollectorTest {
   @MiskTestModule
   val module = Modules.combine(
-      MiskModule(),
+      MiskServiceModule(),
       LogCollectorModule()
   )
 
