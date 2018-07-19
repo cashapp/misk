@@ -116,7 +116,7 @@ class Http2ConnectivityTest {
       install(WebTestingModule(
           ssl = WebSslConfig(0,
               cert_store = CertStoreConfig(
-                  resource = "resources:/ssl/server_cert_key_combo.pem",
+                  resource = "classpath:/ssl/server_cert_key_combo.pem",
                   passphrase = "serverpassword",
                   format = SslLoader.FORMAT_PEM
               ),
@@ -145,7 +145,7 @@ class Http2ConnectivityTest {
                   ssl = HttpClientSSLConfig(
                       cert_store = null,
                       trust_store = TrustStoreConfig(
-                          resource = "resources:/ssl/server_cert.pem",
+                          resource = "classpath:/ssl/server_cert.pem",
                           format = SslLoader.FORMAT_PEM
                       )
                   )
