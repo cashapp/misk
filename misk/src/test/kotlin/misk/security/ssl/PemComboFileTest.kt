@@ -12,9 +12,9 @@ internal class PemComboFileTest {
   @MiskTestModule
   val module = ResourceLoaderModule()
 
-  val clientComboPemPath = "src/test/resources/ssl/client_cert_key_combo.pem"
-  val clientRsaComboPemPath = "src/test/resources/ssl/client_rsa_cert_key_combo.pem"
-  val clientCertPemPath = "src/test/resources/ssl/client_cert.pem"
+  val clientComboPemPath = "/resources/ssl/client_cert_key_combo.pem"
+  val clientRsaComboPemPath = "/resources/ssl/client_rsa_cert_key_combo.pem"
+  val clientCertPemPath = "/resources/ssl/client_cert.pem"
 
   @Inject lateinit var sslLoader: SslLoader
 

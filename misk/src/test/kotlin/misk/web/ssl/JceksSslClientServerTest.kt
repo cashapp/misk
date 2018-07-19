@@ -12,6 +12,7 @@ import misk.client.ProtoMessageHttpClient
 import misk.inject.KAbstractModule
 import misk.inject.getInstance
 import misk.moshi.MoshiModule
+import misk.resources.ResourceLoaderModule
 import misk.scope.ActionScoped
 import misk.security.cert.X500Name
 import misk.security.ssl.CertStoreConfig
@@ -52,7 +53,7 @@ internal class JceksSslClientServerTest {
 
   @BeforeEach
   fun createClient() {
-    val clientInjector = Guice.createInjector(MoshiModule(), ClientModule(jetty))
+    val clientInjector = Guice.createInjector(ClientModule(jetty))
     certClient = clientInjector.getInstance(Names.named("cert-and-trust"))
     noCertClient = clientInjector.getInstance(Names.named("no-cert"))
     noTrustClient = clientInjector.getInstance(Names.named("no-trust"))
@@ -93,15 +94,16 @@ internal class JceksSslClientServerTest {
 
   class TestModule : KAbstractModule() {
     override fun configure() {
+      install(ResourceLoaderModule())
       multibind<WebActionEntry>().toInstance(WebActionEntry(HelloAction::class))
       install(WebTestingModule(
           ssl = WebSslConfig(0,
               cert_store = CertStoreConfig(
-                  path = "src/test/resources/ssl/server_keystore.jceks",
+                  path = "/resources/ssl/server_keystore.jceks",
                   passphrase = "serverpassword"
               ),
               trust_store = TrustStoreConfig(
-                  path = "src/test/resources/ssl/client_cert.pem",
+                  path = "/resources/ssl/client_cert.pem",
                   format = SslLoader.FORMAT_PEM
               ),
               mutual_auth = WebSslConfig.MutualAuth.REQUIRED)))
@@ -112,6 +114,8 @@ internal class JceksSslClientServerTest {
   // need to create the client module _after_ we start the services
   class ClientModule(val jetty: JettyService) : KAbstractModule() {
     override fun configure() {
+      install(MoshiModule())
+      install(ResourceLoaderModule())
       install(HttpClientModule("cert-and-trust", Names.named("cert-and-trust")))
       install(HttpClientModule("no-cert", Names.named("no-cert")))
       install(HttpClientModule("no-trust", Names.named("no-trust")))
@@ -126,11 +130,11 @@ internal class JceksSslClientServerTest {
                   jetty.httpsServerUrl!!.toString(),
                   ssl = HttpClientSSLConfig(
                       cert_store = CertStoreConfig(
-                          path = "src/test/resources/ssl/client_keystore.jceks",
+                          path = "/resources/ssl/client_keystore.jceks",
                           passphrase = "clientpassword"
                       ),
                       trust_store = TrustStoreConfig(
-                          path = "src/test/resources/ssl/server_cert.pem",
+                          path = "/resources/ssl/server_cert.pem",
                           format = SslLoader.FORMAT_PEM
                       )
                   )),
@@ -139,7 +143,7 @@ internal class JceksSslClientServerTest {
                   ssl = HttpClientSSLConfig(
                       cert_store = null,
                       trust_store = TrustStoreConfig(
-                          path = "src/test/resources/ssl/server_cert.pem",
+                          path = "/resources/ssl/server_cert.pem",
                           format = SslLoader.FORMAT_PEM
                       )
                   )),
@@ -147,11 +151,11 @@ internal class JceksSslClientServerTest {
                   jetty.httpsServerUrl!!.toString(),
                   ssl = HttpClientSSLConfig(
                       cert_store = CertStoreConfig(
-                          path = "src/test/resources/ssl/client_keystore.jceks",
+                          path = "/resources/ssl/client_keystore.jceks",
                           passphrase = "clientpassword"
                       ),
                       trust_store = TrustStoreConfig(
-                          path = "src/test/resources/ssl/client_cert.pem",
+                          path = "/resources/ssl/client_cert.pem",
                           format = SslLoader.FORMAT_PEM
                       )
                   ))

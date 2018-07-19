@@ -3,10 +3,8 @@ package misk.security.ssl
 import okio.Buffer
 import okio.BufferedSource
 import okio.ByteString
-import okio.Okio
 import org.bouncycastle.asn1.ASN1Sequence
 import org.bouncycastle.asn1.pkcs.RSAPrivateKey
-import java.io.File
 import java.io.IOException
 import java.security.KeyStore
 import java.security.cert.Certificate
@@ -74,9 +72,6 @@ data class PemComboFile(
       return PemComboFile(certificates, privateRsaKeys, privateKeys,
           passphrase ?: "password")
     }
-
-    fun load(cert_key_combo: String, passphrase: String? = null) =
-        parse(Okio.buffer(Okio.source(File(cert_key_combo))), passphrase)
 
     fun convertPKCS1toPKCS8(pkcs1Key: ByteString): KeySpec {
       val keyObject = ASN1Sequence.fromByteArray(pkcs1Key.toByteArray())
