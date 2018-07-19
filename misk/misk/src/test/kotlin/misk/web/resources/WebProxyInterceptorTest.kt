@@ -1,12 +1,11 @@
 package misk.web.resources
 
+import misk.MiskServiceModule
 import misk.asAction
 import misk.client.HttpClientEndpointConfig
 import misk.client.HttpClientsConfig
 import misk.config.ConfigModule
 import misk.inject.KAbstractModule
-import misk.moshi.MoshiModule
-import misk.resources.ResourceLoaderModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.web.Request
@@ -56,8 +55,7 @@ class WebProxyInterceptorTest {
 
   class TestModule(val upstreamServer: MockWebServer) : KAbstractModule() {
     override fun configure() {
-      install(MoshiModule())
-      install(ResourceLoaderModule())
+      install(MiskServiceModule())
       install(WebProxyInterceptorModule())
       install(ConfigModule.create<HttpClientsConfig>("http_clients", HttpClientsConfig(
           endpoints = mapOf(

@@ -6,7 +6,7 @@ import com.google.api.services.monitoring.v3.model.TimeSeries
 import com.google.inject.AbstractModule
 import com.google.inject.Provides
 import com.google.inject.util.Modules
-import misk.MiskModule
+import misk.MiskServiceModule
 import misk.config.AppName
 import misk.environment.InstanceMetadata
 import misk.metrics.Metrics
@@ -263,7 +263,7 @@ internal class StackDriverReporterTest {
 
   class TestModule : AbstractModule() {
     override fun configure() {
-      install(Modules.override(MiskModule()).with(FakeClockModule()))
+      install(Modules.override(MiskServiceModule()).with(FakeClockModule()))
     }
 
     @Provides

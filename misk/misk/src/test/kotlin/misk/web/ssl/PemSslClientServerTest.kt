@@ -4,6 +4,7 @@ import com.google.inject.Guice
 import com.google.inject.Provides
 import com.google.inject.name.Names
 import helpers.protos.Dinosaur
+import misk.MiskServiceModule
 import misk.client.HttpClientEndpointConfig
 import misk.client.HttpClientModule
 import misk.client.HttpClientSSLConfig
@@ -11,8 +12,6 @@ import misk.client.HttpClientsConfig
 import misk.client.ProtoMessageHttpClient
 import misk.inject.KAbstractModule
 import misk.inject.getInstance
-import misk.moshi.MoshiModule
-import misk.resources.ResourceLoaderModule
 import misk.scope.ActionScoped
 import misk.security.cert.X500Name
 import misk.security.ssl.CertStoreConfig
@@ -94,7 +93,6 @@ internal class PemSslClientServerTest {
 
   class TestModule : KAbstractModule() {
     override fun configure() {
-      install(ResourceLoaderModule())
       install(WebTestingModule(
           ssl = WebSslConfig(0,
               cert_store = CertStoreConfig(
@@ -116,8 +114,7 @@ internal class PemSslClientServerTest {
   // need to create the client module _after_ we start the services
   class ClientModule(val jetty: JettyService) : KAbstractModule() {
     override fun configure() {
-      install(MoshiModule())
-      install(ResourceLoaderModule())
+      install(MiskServiceModule())
       install(HttpClientModule("cert-and-trust", Names.named("cert-and-trust")))
       install(HttpClientModule("no-cert", Names.named("no-cert")))
       install(HttpClientModule("no-trust", Names.named("no-trust")))

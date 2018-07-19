@@ -4,10 +4,9 @@ import com.google.inject.Guice
 import com.google.inject.Provides
 import com.google.inject.name.Names
 import helpers.protos.Dinosaur
+import misk.MiskServiceModule
 import misk.inject.KAbstractModule
 import misk.inject.getInstance
-import misk.moshi.MoshiModule
-import misk.resources.ResourceLoaderModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.web.Post
@@ -78,8 +77,7 @@ class ProtoMessageHttpClientTest {
   // need to create the client module _after_ we start the services
   class ClientModule(val jetty: JettyService) : KAbstractModule() {
     override fun configure() {
-      install(MoshiModule())
-      install(ResourceLoaderModule())
+      install(MiskServiceModule())
       install(HttpClientModule("dinosaur", Names.named("dinosaur")))
     }
 

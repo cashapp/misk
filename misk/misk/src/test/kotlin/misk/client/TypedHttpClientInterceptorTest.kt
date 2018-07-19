@@ -4,10 +4,9 @@ import com.google.inject.Guice
 import com.google.inject.Provides
 import helpers.protos.Dinosaur
 import misk.Action
+import misk.MiskServiceModule
 import misk.inject.KAbstractModule
 import misk.inject.getInstance
-import misk.moshi.MoshiModule
-import misk.resources.ResourceLoaderModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.web.NetworkChain
@@ -150,8 +149,7 @@ internal class TypedHttpClientInterceptorTest {
 
   class ClientModule(val jetty: JettyService) : KAbstractModule() {
     override fun configure() {
-      install(MoshiModule())
-      install(ResourceLoaderModule())
+      install(MiskServiceModule())
       install(TypedHttpClientModule.create<ReturnADinosaur>("dinosaur"))
       multibind<ClientNetworkInterceptor.Factory>().to<ClientHeaderInterceptor.Factory>()
       multibind<ClientApplicationInterceptor.Factory>().to<ClientNameInterceptor.Factory>()
