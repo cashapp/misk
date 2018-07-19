@@ -98,12 +98,12 @@ internal class PemSslClientServerTest {
       install(WebTestingModule(
           ssl = WebSslConfig(0,
               cert_store = CertStoreConfig(
-                  resource = "resources:/ssl/server_cert_key_combo.pem",
+                  resource = "classpath:/ssl/server_cert_key_combo.pem",
                   passphrase = "serverpassword",
                   format = SslLoader.FORMAT_PEM
               ),
               trust_store = TrustStoreConfig(
-                  resource = "resources:/ssl/client_cert.pem",
+                  resource = "classpath:/ssl/client_cert.pem",
                   format = SslLoader.FORMAT_PEM
               ),
               mutual_auth = WebSslConfig.MutualAuth.REQUIRED)
@@ -132,12 +132,12 @@ internal class PemSslClientServerTest {
                   jetty.httpsServerUrl!!.toString(),
                   ssl = HttpClientSSLConfig(
                       cert_store = CertStoreConfig(
-                          resource = "resources:/ssl/client_cert_key_combo.pem",
+                          resource = "classpath:/ssl/client_cert_key_combo.pem",
                           passphrase = "clientpassword",
                           format = SslLoader.FORMAT_PEM
                       ),
                       trust_store = TrustStoreConfig(
-                          resource = "resources:/ssl/server_cert.pem",
+                          resource = "classpath:/ssl/server_cert.pem",
                           format = SslLoader.FORMAT_PEM
                       )
                   )),
@@ -146,7 +146,7 @@ internal class PemSslClientServerTest {
                   ssl = HttpClientSSLConfig(
                       cert_store = null,
                       trust_store = TrustStoreConfig(
-                          resource = "resources:/ssl/server_cert.pem",
+                          resource = "classpath:/ssl/server_cert.pem",
                           format = SslLoader.FORMAT_PEM
                       )
                   )),
@@ -154,12 +154,12 @@ internal class PemSslClientServerTest {
                   jetty.httpsServerUrl!!.toString(),
                   ssl = HttpClientSSLConfig(
                       cert_store = CertStoreConfig(
-                          resource = "resources:/ssl/client_cert_key_combo.pem",
+                          resource = "classpath:/ssl/client_cert_key_combo.pem",
                           passphrase = "clientpassword",
                           format = SslLoader.FORMAT_PEM
                       ),
                       trust_store = TrustStoreConfig(
-                          resource = "resources:/ssl/client_cert.pem",
+                          resource = "classpath:/ssl/client_cert.pem",
                           format = SslLoader.FORMAT_PEM
                       )
                   ))

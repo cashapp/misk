@@ -8,7 +8,7 @@ data_source_cluster:
     username: root
     password: ""
     database: urls
-    migrations_resource: resources:/migrations
+    migrations_resource: classpath:/migrations
 
 endpoint:
   base_url: http://localhost:8080/
