@@ -8,6 +8,7 @@ class ResourceLoaderModule : KAbstractModule() {
     val mapBinder = MapBinder.newMapBinder(
         binder(), String::class.java, ResourceLoader.Backend::class.java)
     mapBinder.addBinding("/resources").toInstance(ClasspathResourceLoaderBackend)
+    mapBinder.addBinding("/filesystem").toInstance(FilesystemLoaderBackend)
     mapBinder.addBinding("/memory").to<MemoryResourceLoaderBackend>()
   }
 }
