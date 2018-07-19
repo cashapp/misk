@@ -8,16 +8,19 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * ResourceLoader is a testable API for loading resources from the classpath, from memory, or from
- * another [Backend] source.
+ * ResourceLoader is a testable API for loading resources from the classpath, from the filesystem,
+ * from memory, or from another [Backend] source.
  *
- * Resource paths look like UNIX file system paths: `/resources/migrations/v1.sql`. Paths always
+ * Resource paths look like UNIX filesystem paths: `/resources/migrations/v1.sql`. Paths always
  * start with a backend name like `/resources` or `/memory` and are followed by a path that is
  * backend-specific. This path may have any number of segments.
  *
  * **Classpath resources** have paths prefixed with `/resources`. The backend reads data from the
  * `src/main/resources` of the project's modules and the contents of all library `.jar` files.
  * Classpath resources are read-only.
+ *
+ * **Filesystem resources** have paths prefixed with `/filesystem`. The backend reads data from the
+ * host machine's local filesystem. It is read-only and does not support [list].
  *
  * **Memory resources** have paths prefixed with `/memory`. The backend starts empty and is
  * populated by calls to [put].
