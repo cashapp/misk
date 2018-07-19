@@ -15,9 +15,9 @@ internal class SslLoaderTest {
   @MiskTestModule
   val module = ResourceLoaderModule()
 
-  val clientComboPemPath = "/resources/ssl/client_cert_key_combo.pem"
-  val clientTrustPemPath = "/resources/ssl/client_cert.pem"
-  val serverKeystoreJceksPath = "/resources/ssl/server_keystore.jceks"
+  val clientComboPemPath = "resources:/ssl/client_cert_key_combo.pem"
+  val clientTrustPemPath = "resources:/ssl/client_cert.pem"
+  val serverKeystoreJceksPath = "resources:/ssl/server_keystore.jceks"
 
   @Inject lateinit var sslLoader: SslLoader
 
