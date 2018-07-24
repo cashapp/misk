@@ -30,13 +30,15 @@ enum class DataSourceType(
       }
   ),
   VITESS(
-      driverClassName = "com.mysql.jdbc.Driver",
+      // TODO: Switch back to mysql protocol when this issue is fixed: https://github.com/vitessio/vitess/issues/4100
+      // Find the correct buildJdbcUrl and port in the git history
+      driverClassName = "io.vitess.jdbc.VitessDriver",
       hibernateDialect = "org.hibernate.dialect.MySQL57Dialect",
       buildJdbcUrl = { config, _ ->
-        val port = config.port ?: 27003
+        val port = config.port ?: 27001
         val host = config.host ?: "127.0.0.1"
         val database = config.database ?: ""
-        "jdbc:mysql://$host:$port/$database?useUnicode=true&useLegacyDatetimeCode=false"
+        "jdbc:vitess://$host:$port/$database"
       }
   ),
 }

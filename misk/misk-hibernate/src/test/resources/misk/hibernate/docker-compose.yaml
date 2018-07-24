@@ -11,11 +11,9 @@ services:
       "-mysql_bind_host=0.0.0.0",
       "-schema_dir=schema",
       "-keyspaces=movies,actors",
-      "--num_shards=2,1",
+      "-num_shards=2,1",
     ]
     ports:
-      - "27000:27000"
-      - "27002:27002"
-      - "27003:27003"
+      - "27000-27003:27000-27003"
     volumes:
       - ./moviestestmodule-schema:/vt/src/vitess.io/vitess/schema

@@ -7,7 +7,6 @@ import org.hibernate.SessionFactory
 import org.hibernate.StaleObjectStateException
 import org.hibernate.exception.LockAcquisitionException
 import java.sql.Connection
-import java.sql.ResultSet
 import java.time.Duration
 import javax.persistence.OptimisticLockException
 import kotlin.reflect.KClass
@@ -15,14 +14,15 @@ import kotlin.reflect.KClass
 private val logger = getLogger<RealTransacter>()
 
 internal class RealTransacter private constructor(
+  private val qualifier: KClass<out Annotation>,
   private val sessionFactory: SessionFactory,
   private val config: DataSourceConfig,
   private val threadLocalSession: ThreadLocal<Session>,
   private val options: TransacterOptions
 ) : Transacter {
 
-  constructor(sessionFactory: SessionFactory, config: DataSourceConfig) :
-      this(sessionFactory, config, ThreadLocal(), TransacterOptions())
+  constructor(qualifier: KClass<out Annotation>, sessionFactory: SessionFactory, config: DataSourceConfig) :
+      this(qualifier, sessionFactory, config, ThreadLocal(), TransacterOptions())
 
   override val inTransaction: Boolean
     get() = threadLocalSession.get() != null
@@ -45,11 +45,11 @@ internal class RealTransacter private constructor(
         if (!isRetryable(e)) throw e
 
         if (attempt >= options.maxAttempts) {
-          logger.info(e) { "${config.database} recoverable transaction exception (attempt: $attempt), max attempts exceeded" }
+          logger.info(e) { "${qualifier.simpleName} recoverable transaction exception (attempt: $attempt), max attempts exceeded" }
           throw e
         }
 
-        logger.info(e) { "${config.database} recoverable transaction exception (attempt: $attempt), retrying" }
+        logger.info(e) { "${qualifier.simpleName} recoverable transaction exception (attempt: $attempt), retrying" }
         val sleepDuration = backoff.nextRetry()
         if (!sleepDuration.isZero) {
           try {
@@ -88,7 +88,7 @@ internal class RealTransacter private constructor(
   override fun noRetries(): Transacter = withOptions(options.copy(maxAttempts = 1))
 
   private fun withOptions(options: TransacterOptions): Transacter =
-    RealTransacter(sessionFactory, config, threadLocalSession, options)
+    RealTransacter(qualifier, sessionFactory, config, threadLocalSession, options)
 
   private fun <T> withSession(lambda: (session: Session) -> T): T {
     check(threadLocalSession.get() == null) { "Attempted to start a nested session" }
@@ -166,12 +166,16 @@ internal class RealTransacter private constructor(
     override fun <T> target(shard: Shard, function: () -> T): T {
       if (config.type == DataSourceType.VITESS) {
         return useConnection { connection ->
-          val previousTarget = connection.createStatement().use { statement ->
-            val rs = statement.executeQuery("SELECT database()")
-            check(rs.next())
-            val previousTarget = rs.getString(1)
+          // This broke on master Vitess so we temporarily disable it.
+          val previousTarget =
+              if (true) "" else {
+                // TODO re-enable this when it's working again: https://github.com/vitessio/vitess/pull/3962
+                connection.createStatement().use { statement ->
+                  statement.executeQuery("SHOW vitess_target").uniqueResult { it.getString(1) }!!
+                }
+              }
+          connection.createStatement().use { statement ->
             statement.execute("USE `$shard`")
-            previousTarget
           }
           try {
             function()
@@ -201,10 +205,3 @@ internal class RealTransacter private constructor(
   }
 }
 
-private fun <T> ResultSet.map(function: (ResultSet) -> T): List<T> {
-  val result = mutableListOf<T>()
-  while (this.next()) {
-    result.add(function(this))
-  }
-  return result
-}

@@ -55,6 +55,7 @@ internal class SchemaMigratorTest {
         }
       }
 
+      multibind<Service>().toInstance(PingDatabaseService(Movies::class, config.data_source, defaultEnv))
       val sessionFactoryService =
           SessionFactoryService(Movies::class, config.data_source, defaultEnv)
       multibind<Service>().toInstance(sessionFactoryService)
@@ -67,7 +68,7 @@ internal class SchemaMigratorTest {
   @Inject @Movies lateinit var sessionFactory: SessionFactory
 
   @Test fun initializeAndMigrate() {
-    val schemaMigrator = SchemaMigrator(resourceLoader, sessionFactory, config.data_source)
+    val schemaMigrator = SchemaMigrator(Movies::class, resourceLoader, sessionFactory, config.data_source)
 
     resourceLoader.put("${config.data_source.migrations_resource}/v1001__movies.sql", """
         |CREATE TABLE table_1 (name varchar(255))
@@ -123,7 +124,7 @@ internal class SchemaMigratorTest {
   }
 
   @Test fun requireAllWithMissingMigrations() {
-    val schemaMigrator = SchemaMigrator(resourceLoader, sessionFactory, config.data_source)
+    val schemaMigrator = SchemaMigrator(Movies::class, resourceLoader, sessionFactory, config.data_source)
     schemaMigrator.initialize()
 
     resourceLoader.put("${config.data_source.migrations_resource}/v1001__foo.sql", """
@@ -136,13 +137,13 @@ internal class SchemaMigratorTest {
     assertThat(assertFailsWith<IllegalStateException> {
       schemaMigrator.requireAll()
     }).hasMessage("""
-          |schemamigrator is missing migrations:
+          |Movies is missing migrations:
           |  ${config.data_source.migrations_resource}/v1001__foo.sql
           |  ${config.data_source.migrations_resource}/v1002__foo.sql""".trimMargin())
   }
 
   @Test fun resourceVersionParsing() {
-    val sm = SchemaMigrator(resourceLoader, sessionFactory, config.data_source)
+    val sm = SchemaMigrator(Movies::class, resourceLoader, sessionFactory, config.data_source)
 
     assertThat(sm.resourceVersionOrNull("foo/migrations/v100__bar.sql")).isEqualTo(100)
     assertThat(sm.resourceVersionOrNull("foo/migrations/v100__v200.sql")).isEqualTo(100)

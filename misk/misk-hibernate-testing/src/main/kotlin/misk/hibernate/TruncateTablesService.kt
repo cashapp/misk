@@ -6,8 +6,7 @@ import com.google.inject.Key
 import misk.DependentService
 import misk.inject.toKey
 import misk.logging.getLogger
-import org.hibernate.query.Query
-import java.util.Locale
+import java.util.*
 import javax.inject.Provider
 import kotlin.reflect.KClass
 
@@ -61,8 +60,11 @@ internal class TruncateTablesService(
         }
 
         @Suppress("UNCHECKED_CAST") // createNativeQuery returns a raw Query.
-        val query = session.hibernateSession.createNativeQuery(tableNamesQuery) as Query<String>
-        val allTableNames = query.list()
+        val allTableNames = session.useConnection { c ->
+          c.createStatement().use { s ->
+            s.executeQuery(tableNamesQuery).map { rs -> rs.getString(1) }
+          }
+        }
 
         val truncatedTableNames = mutableListOf<String>()
         session.useConnection { connection ->

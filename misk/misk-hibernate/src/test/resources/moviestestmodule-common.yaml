@@ -1,6 +1,4 @@
 data_source:
-  type: MYSQL
-  username: root
-  password: ""
-  database: movies
-  migrations_resource: classpath:/misk/hibernate/moviestestmodule-migrations
+  type: VITESS
+  username: vt_app
+  password: whatever

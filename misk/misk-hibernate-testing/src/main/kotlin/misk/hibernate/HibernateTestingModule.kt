@@ -2,6 +2,7 @@ package misk.hibernate
 
 import com.google.common.util.concurrent.Service
 import misk.inject.KAbstractModule
+import misk.inject.asSingleton
 import misk.inject.toKey
 import javax.inject.Provider
 import kotlin.reflect.KClass
