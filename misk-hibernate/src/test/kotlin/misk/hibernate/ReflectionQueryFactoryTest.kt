@@ -42,12 +42,12 @@ class ReflectionQueryFactoryTest {
       assertThat(queryFactory.newQuery<OperatorsMovieQuery>()
           .releaseDateLessThan(m3.releaseDate)
           .listAsNameAndReleaseDate(session))
-          .containsExactly(m1, m2)
+          .containsExactlyInAnyOrder(m1, m2)
 
       assertThat(queryFactory.newQuery<OperatorsMovieQuery>()
           .releaseDateLessThanOrEqualTo(m3.releaseDate)
           .listAsNameAndReleaseDate(session))
-          .containsExactly(m1, m2, m3)
+          .containsExactlyInAnyOrder(m1, m2, m3)
 
       assertThat(queryFactory.newQuery<OperatorsMovieQuery>()
           .releaseDateEqualTo(m3.releaseDate)
@@ -57,17 +57,17 @@ class ReflectionQueryFactoryTest {
       assertThat(queryFactory.newQuery<OperatorsMovieQuery>()
           .releaseDateGreaterThanOrEqualTo(m3.releaseDate)
           .listAsNameAndReleaseDate(session))
-          .containsExactly(m3, m4, m5)
+          .containsExactlyInAnyOrder(m3, m4, m5)
 
       assertThat(queryFactory.newQuery<OperatorsMovieQuery>()
           .releaseDateGreaterThan(m3.releaseDate)
           .listAsNameAndReleaseDate(session))
-          .containsExactly(m4, m5)
+          .containsExactlyInAnyOrder(m4, m5)
 
       assertThat(queryFactory.newQuery<OperatorsMovieQuery>()
           .releaseDateNotEqualTo(m3.releaseDate)
           .listAsNameAndReleaseDate(session))
-          .containsExactly(m1, m2, m4, m5)
+          .containsExactlyInAnyOrder(m1, m2, m4, m5)
     }
   }
 
@@ -139,12 +139,12 @@ class ReflectionQueryFactoryTest {
       assertThat(queryFactory.newQuery<OperatorsMovieQuery>()
           .releaseDateIsNull()
           .listAsNameAndReleaseDate(session))
-          .containsExactly(m98, m99)
+          .containsExactlyInAnyOrder(m98, m99)
 
       assertThat(queryFactory.newQuery<OperatorsMovieQuery>()
           .releaseDateIsNotNull()
           .listAsNameAndReleaseDate(session))
-          .containsExactly(m1, m2)
+          .containsExactlyInAnyOrder(m1, m2)
     }
   }
 
@@ -162,12 +162,12 @@ class ReflectionQueryFactoryTest {
       assertThat(queryFactory.newQuery<OperatorsMovieQuery>()
           .releaseDateInVararg(m1.releaseDate, m3.releaseDate)
           .listAsNameAndReleaseDate(session))
-          .containsExactly(m1, m3)
+          .containsExactlyInAnyOrder(m1, m3)
 
       assertThat(queryFactory.newQuery<OperatorsMovieQuery>()
           .releaseDateInCollection(listOf(m1.releaseDate, m3.releaseDate))
           .listAsNameAndReleaseDate(session))
-          .containsExactly(m1, m3)
+          .containsExactlyInAnyOrder(m1, m3)
     }
   }
 
@@ -230,7 +230,7 @@ class ReflectionQueryFactoryTest {
       assertThat(queryFactory.newQuery<OperatorsMovieQuery>()
           .releaseDateLessThanOrEqualTo(m2.releaseDate)
           .listAsNames(session))
-          .containsExactly(m1.name, m2.name)
+          .containsExactlyInAnyOrder(m1.name, m2.name)
     }
   }
 
@@ -324,7 +324,7 @@ class ReflectionQueryFactoryTest {
       assertThat(queryFactory.newQuery<OperatorsMovieQuery>()
           .apply { maxRows = 4 }
           .listAsNames(session))
-          .containsExactly("Rocky 1", "Rocky 2", "Rocky 3")
+          .hasSize(3)
     }
   }
 
@@ -350,7 +350,7 @@ class ReflectionQueryFactoryTest {
           .apply { maxRows = 2 }
           .list(session)
           .map { it.name })
-          .containsExactly("Rocky 1", "Rocky 2")
+          .hasSize(2)
     }
 
     // List projection.
@@ -358,7 +358,7 @@ class ReflectionQueryFactoryTest {
       assertThat(queryFactory.newQuery<OperatorsMovieQuery>()
           .apply { maxRows = 2 }
           .listAsNames(session))
-          .containsExactly("Rocky 1", "Rocky 2")
+          .hasSize(2)
     }
   }
 

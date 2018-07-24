@@ -6,13 +6,10 @@ import misk.resources.ResourceLoader
 import org.hibernate.SessionFactory
 import org.hibernate.query.Query
 import java.sql.Connection
-import java.util.Collections
-import java.util.NavigableMap
-import java.util.NavigableSet
-import java.util.TreeMap
-import java.util.TreeSet
+import java.util.*
 import java.util.regex.Pattern
 import javax.persistence.PersistenceException
+import kotlin.reflect.KClass
 
 private val logger = getLogger<SchemaMigrator>()
 
@@ -30,6 +27,7 @@ private val logger = getLogger<SchemaMigrator>()
  * manually you must add a row to the `schema_version` table to record which version was applied.
  */
 internal class SchemaMigrator(
+  private val qualifier: KClass<out Annotation>,
   private val resourceLoader: ResourceLoader,
   private val sessionFactory: SessionFactory,
   private val config: DataSourceConfig
@@ -48,7 +46,7 @@ internal class SchemaMigrator(
     try {
       val result = appliedMigrations()
       logger.info {
-        "${config.database} has ${result.size} migrations applied;" +
+        "${qualifier.simpleName} has ${result.size} migrations applied;" +
             " latest is ${result.lastOrNull()}"
       }
       return result
@@ -65,7 +63,7 @@ internal class SchemaMigrator(
         statement.executeBatch()
       }
       logger.info {
-        "${config.database} has no migrations applied; created the schema_version table"
+        "${qualifier.simpleName} has no migrations applied; created the schema_version table"
       }
       return Collections.emptyNavigableSet()
     }
@@ -108,7 +106,7 @@ internal class SchemaMigrator(
         schemaVersion.executeUpdate()
       }
 
-      logger.info { "${config.database} applied $path in $stopwatch" }
+      logger.info { "${qualifier.simpleName} applied $path in $stopwatch" }
     }
   }
 
@@ -126,10 +124,10 @@ internal class SchemaMigrator(
       }
 
       check(missing.isEmpty()) {
-        "${config.database} is missing migrations:\n  " + missing.joinToString(separator = "\n  ")
+        "${qualifier.simpleName} is missing migrations:\n  " + missing.joinToString(separator = "\n  ")
       }
     } catch (e: PersistenceException) {
-      throw IllegalStateException("${config.database} is not ready", e)
+      throw IllegalStateException("${qualifier.simpleName} is not ready", e)
     }
   }
 

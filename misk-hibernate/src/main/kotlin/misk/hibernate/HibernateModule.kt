@@ -50,7 +50,14 @@ class HibernateModule(
 
     val transacterKey = Transacter::class.toKey(qualifier)
 
+    val pingDatabaseServiceKey = PingDatabaseService::class.toKey(qualifier)
+
     bind(configKey).toInstance(config)
+
+    bind(pingDatabaseServiceKey).toProvider(Provider<PingDatabaseService> {
+      PingDatabaseService(qualifier, config, environmentProvider.get())
+    }).asSingleton()
+    multibind<Service>().to(pingDatabaseServiceKey)
 
     bind(sessionFactoryKey).toProvider(sessionFactoryServiceKey).asSingleton()
     bind(sessionFactoryServiceKey).toProvider(Provider<SessionFactoryService> {
@@ -61,12 +68,12 @@ class HibernateModule(
 
     bind(schemaMigratorKey).toProvider(object : Provider<SchemaMigrator> {
       @Inject lateinit var resourceLoader: ResourceLoader
-      override fun get(): SchemaMigrator = SchemaMigrator(resourceLoader,
+      override fun get(): SchemaMigrator = SchemaMigrator(qualifier, resourceLoader,
           sessionFactoryProvider.get(), config)
     }).asSingleton()
 
     bind(transacterKey).toProvider(Provider<Transacter> {
-      RealTransacter(sessionFactoryProvider.get(), config)
+      RealTransacter(qualifier, sessionFactoryProvider.get(), config)
     }).asSingleton()
 
     multibind<Service>().toProvider(object : Provider<SchemaMigratorService> {
@@ -84,6 +91,6 @@ class HibernateModule(
       }
     })
 
-    install(HibernateHealthCheckModule(sessionFactoryProvider, config))
+    install(HibernateHealthCheckModule(qualifier, sessionFactoryProvider, config))
   }
 }
