@@ -42,7 +42,7 @@ internal class SessionFactoryService(
 ) : AbstractIdleService(), DependentService, Provider<SessionFactory> {
   private var sessionFactory: SessionFactory? = null
 
-  override val consumedKeys = setOf<Key<*>>()
+  override val consumedKeys = setOf<Key<*>>(PingDatabaseService::class.toKey(qualifier))
   override val producedKeys = setOf<Key<*>>(SessionFactoryService::class.toKey(qualifier))
 
   override fun startUp() {
@@ -77,6 +77,7 @@ internal class SessionFactoryService(
     val registryBuilder = StandardServiceRegistryBuilder(bootstrapRegistryBuilder)
     registryBuilder.run {
       applySetting(AvailableSettings.DRIVER, config.type.driverClassName)
+      applySetting("hibernate.hikari.driverClassName", config.type.driverClassName)
       applySetting(AvailableSettings.URL, config.type.buildJdbcUrl(config, environment))
       applySetting(AvailableSettings.USER, config.username)
       applySetting(AvailableSettings.PASS, config.password)
@@ -89,10 +90,11 @@ internal class SessionFactoryService(
       applySetting(AvailableSettings.USE_NEW_ID_GENERATOR_MAPPINGS, "false")
       applySetting("hibernate.hikari.poolName", qualifier.simpleName)
 
-      if (config.type == DataSourceType.MYSQL) {
+      if (config.type == DataSourceType.MYSQL || config.type == DataSourceType.VITESS) {
         applySetting("hibernate.hikari.minimumIdle", "5")
-        applySetting("hibernate.hikari.driverClassName", "com.mysql.jdbc.Driver")
-        applySetting("hibernate.hikari.connectionInitSql", "SET time_zone = '+00:00'")
+        if (config.type == DataSourceType.MYSQL) {
+          applySetting("hibernate.hikari.connectionInitSql", "SET time_zone = '+00:00'")
+        }
 
         // https://github.com/brettwooldridge/HikariCP/wiki/MySQL-Configuration
         applySetting("hibernate.hikari.dataSource.cachePrepStmts", "true")

@@ -7,11 +7,13 @@ import org.hibernate.SessionFactory
 import java.time.Clock
 import javax.inject.Inject
 import javax.inject.Provider
+import kotlin.reflect.KClass
 
 /**
  * Binds a HealthCheck for Hibernate.
  */
 class HibernateHealthCheckModule(
+  private val qualifier: KClass<out Annotation>,
   private val sessionFactoryProvider: Provider<SessionFactory>,
   private val config: DataSourceConfig
 ) : KAbstractModule() {
@@ -22,7 +24,7 @@ class HibernateHealthCheckModule(
         @Inject lateinit var clock: Clock
 
         override fun get(): HibernateHealthCheck =
-          HibernateHealthCheck(sessionFactoryProvider.get(), config, clock)
+          HibernateHealthCheck(qualifier, sessionFactoryProvider.get(), config, clock)
       }).asSingleton()
   }
 }

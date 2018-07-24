@@ -1,5 +1,5 @@
 ext {
-  kotlinVersion = '1.2.50'
+  kotlinVersion = '1.2.51'
   awsVersion = '1.11.143'
   jettyVersion = '9.4.11.v20180605'
 
@@ -69,6 +69,7 @@ ext {
           mockitoCore          : 'org.mockito:mockito-core:2.8.9',
           jaxbApi              : 'javax.xml.bind:jaxb-api:2.3.0',
           mysql                : 'mysql:mysql-connector-java:5.1.16',
+          vitess               : 'io.vitess:vitess-jdbc:2.2.0'
   ]
 
   isCi = "true".equals(System.getenv('CI'))
