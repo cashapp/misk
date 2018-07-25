@@ -11,6 +11,7 @@ ext {
           kotlinTest           : "org.jetbrains.kotlin:kotlin-test:$kotlinVersion",
           assertj              : "org.assertj:assertj-core:3.9.0",
           bouncycastle         : "org.bouncycastle:bcprov-jdk15on:1.55",
+          docker               : "com.github.docker-java:docker-java:3.0.14",
           guava                : 'com.google.guava:guava:23.6-jre',
           guice                : 'com.google.inject:guice:4.1.0',
           guiceMultibindings   : 'com.google.inject.extensions:guice-multibindings:4.1.0',

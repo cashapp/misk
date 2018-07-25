@@ -4,12 +4,6 @@ jdk:
   - oraclejdk8
   - oraclejdk9
 
-before_script:
-  - docker pull vitess/base
-  - pushd misk-hibernate/src/test/resources/misk/hibernate
-  - docker-compose up -d
-  - popd
-
 script:
   - ./gradlew test
 

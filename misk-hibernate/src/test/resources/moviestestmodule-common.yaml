@@ -2,3 +2,4 @@ data_source:
   type: VITESS
   username: vt_app
   password: whatever
+  vitess_schema_dir: src/test/resources/misk/hibernate/moviestestmodule-schema

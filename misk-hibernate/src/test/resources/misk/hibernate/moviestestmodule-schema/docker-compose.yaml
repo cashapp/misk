@@ -16,4 +16,4 @@ services:
     ports:
       - "27000-27003:27000-27003"
     volumes:
-      - ./moviestestmodule-schema:/vt/src/vitess.io/vitess/schema
+      - .:/vt/src/vitess.io/vitess/schema
