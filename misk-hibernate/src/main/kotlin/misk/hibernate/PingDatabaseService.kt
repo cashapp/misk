@@ -31,14 +31,10 @@ class PingDatabaseService @Inject constructor(
     val dataSource = DriverDataSource(
         jdbcUrl, config.type.driverClassName, Properties(), config.username, config.password)
     retry(10, ExponentialBackoff(Duration.ofMillis(20), Duration.ofMillis(1000))) {
-      try {
-        dataSource.connection.use { c ->
-          val result =
-              c.createStatement().executeQuery("SELECT 1 FROM dual").uniqueResult { it.getInt(1) }
-          check(result == 1)
-        }
-      } catch (e: Exception) {
-        e.printStackTrace()
+      dataSource.connection.use { c ->
+        val result =
+            c.createStatement().executeQuery("SELECT 1 FROM dual").uniqueResult { it.getInt(1) }
+        check(result == 1)
       }
     }
   }
