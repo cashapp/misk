@@ -32,7 +32,7 @@ internal class DockerVitessCluster(
 
     val schemaDir = Paths.get(config.vitess_schema_dir)
     check(Files.isDirectory(schemaDir)) {
-      "can't find directory $config.vitess_schema_dir"
+      "can't find directory ${config.vitess_schema_dir}"
     }
     val keyspaceDirs = Files.list(schemaDir).toList().filter { Files.isDirectory(it) }
     val keyspaces =
