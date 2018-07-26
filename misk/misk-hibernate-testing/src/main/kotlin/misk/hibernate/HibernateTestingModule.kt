@@ -19,12 +19,19 @@ class HibernateTestingModule(
 ) : KAbstractModule() {
   override fun configure() {
     val truncateTablesServiceKey = TruncateTablesService::class.toKey(qualifier)
+    val startVitessServiceKey = StartVitessService::class.toKey(qualifier)
 
     val configKey = DataSourceConfig::class.toKey(qualifier)
     val configProvider = getProvider(configKey)
 
     val transacterKey = Transacter::class.toKey(qualifier)
     val transacterProvider = getProvider(transacterKey)
+
+    multibind<Service>().to(startVitessServiceKey)
+
+    bind(startVitessServiceKey).toProvider(Provider<StartVitessService> {
+      StartVitessService(config = configProvider.get())
+    })
 
     multibind<Service>().to(truncateTablesServiceKey)
 

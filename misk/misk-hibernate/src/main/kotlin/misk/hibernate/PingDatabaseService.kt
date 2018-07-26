@@ -18,7 +18,7 @@ import kotlin.reflect.KClass
  * Vitess cluster as part of the test run.
  */
 class PingDatabaseService @Inject constructor(
-  private val qualifier: KClass<out Annotation>,
+  qualifier: KClass<out Annotation>,
   private val config: DataSourceConfig,
   private val environment: Environment
 ) : AbstractIdleService(), DependentService {
@@ -32,9 +32,21 @@ class PingDatabaseService @Inject constructor(
         jdbcUrl, config.type.driverClassName, Properties(), config.username, config.password)
     retry(10, ExponentialBackoff(Duration.ofMillis(20), Duration.ofMillis(1000))) {
       dataSource.connection.use { c ->
-        val result =
-            c.createStatement().executeQuery("SELECT 1 FROM dual").uniqueResult { it.getInt(1) }
-        check(result == 1)
+        try {
+          val result =
+              c.createStatement().executeQuery("SELECT 1 FROM dual").uniqueResult { it.getInt(1) }
+          check(result == 1)
+        } catch (e: Exception) {
+          val message = e.message
+          if (message != null && message.contains("table dual not found")) {
+            throw RuntimeException(
+                "Something is wrong with your vschema and unfortunately vtcombo does not " +
+                    "currently have good error reporting on this. Please do an ocular inspection.")
+          } else {
+            e.printStackTrace()
+          }
+          throw e;
+        }
       }
     }
   }

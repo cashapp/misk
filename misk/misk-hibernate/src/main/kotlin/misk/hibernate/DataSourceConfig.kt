@@ -55,7 +55,8 @@ data class DataSourceConfig(
   val fixed_pool_size: Int = 10,
   val connection_timeout: Duration = Duration.ofSeconds(30),
   val connection_max_lifetime: Duration = Duration.ofMinutes(30),
-  val migrations_resource: String?
+  val migrations_resource: String?,
+  val vitess_schema_dir: String?
 )
 
 /** Configuration element for a cluster of DataSources */
