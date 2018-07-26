@@ -74,3 +74,7 @@ jar {
     from("web/admin/build")
   }
 }
+
+if (rootProject.file("hooks.gradle").exists()) {
+  apply from: rootProject.file("hooks.gradle")
+}
