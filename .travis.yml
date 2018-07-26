@@ -5,7 +5,7 @@ jdk:
   - oraclejdk9
 
 before_script:
-  - docker pull vitess/base
+  - docker pull vitess/lite:v2.2
 
 script:
   - ./gradlew test

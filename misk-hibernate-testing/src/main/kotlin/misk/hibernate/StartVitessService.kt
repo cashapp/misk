@@ -65,8 +65,10 @@ internal class DockerVitessCluster(
         "-num_shards=$shardCounts"
     )
 
+    val container = "vitess/lite:v2.2"
+
     StartVitessService.logger.info("Starting Vitess cluster with command: ${cmd.joinToString(" ")}")
-    containerId = docker.createContainerCmd("vitess/base")
+    containerId = docker.createContainerCmd(container)
         .withCmd(cmd.toList())
         .withVolumes(schemaVolume)
         .withBinds(Bind(schemaDir.toAbsolutePath().toString(), schemaVolume))
