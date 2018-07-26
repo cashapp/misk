@@ -36,3 +36,7 @@ dependencies {
   testCompile dep.junitParams
   testCompile project(':misk-testing')
 }
+
+if (rootProject.file("hooks.gradle").exists()) {
+  apply from: rootProject.file("hooks.gradle")
+}

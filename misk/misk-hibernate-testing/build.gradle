@@ -33,3 +33,7 @@ dependencies {
   compile project(':misk-testing')
   compile project(':misk-hibernate')
 }
+
+if (rootProject.file("hooks.gradle").exists()) {
+  apply from: rootProject.file("hooks.gradle")
+}
