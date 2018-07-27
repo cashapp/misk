@@ -13,3 +13,4 @@ node_modules
 **/menu_*.js*
 **/module_*.js*
 old_modules
+hooks.gradle

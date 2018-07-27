@@ -38,3 +38,7 @@ dependencies {
   testCompile dep.junitParams
   testCompile project(':misk-testing')
 }
+
+if (rootProject.file("../upload.gradle").exists()) {
+  apply from: rootProject.file("../upload.gradle")
+}
