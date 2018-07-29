@@ -87,8 +87,8 @@ internal class TypedHttpClientTest {
     @Post("/protodinos")
     @RequestContentType(MediaTypes.APPLICATION_PROTOBUF)
     @ResponseContentType(MediaTypes.APPLICATION_PROTOBUF)
-    fun getDinosaur(@RequestBody request: Dinosaur):
-        Dinosaur = request.newBuilder().name("super${request.name}").build()
+    fun getDinosaur(@RequestBody request: Dinosaur): Dinosaur =
+        request.newBuilder().name("super${request.name}").build()
   }
 
   class TestModule : KAbstractModule() {

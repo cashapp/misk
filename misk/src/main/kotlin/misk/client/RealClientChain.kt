@@ -14,6 +14,6 @@ internal class RealClientChain(
   override fun proceed(args: List<*>, callback: Callback<Any>) {
     check(index < interceptors.size) { "final interceptor must be terminal" }
     val next = RealClientChain(action, args, call, callback, interceptors, index + 1)
-    return interceptors[index].intercept(next)
+    interceptors[index].intercept(next)
   }
 }
