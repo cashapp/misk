@@ -14,7 +14,7 @@ internal class MetricsInterceptor internal constructor(val scope: MetricsScope) 
     NetworkInterceptor {
 
   @Singleton
-  class Factory @Inject constructor(val m: Metrics) : NetworkInterceptor.Factory {
+  class Factory @Inject constructor(private val m: Metrics) : NetworkInterceptor.Factory {
     override fun create(action: Action): NetworkInterceptor? =
         MetricsInterceptor(m.scope("web.${action.name}"))
   }
