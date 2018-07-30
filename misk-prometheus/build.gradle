@@ -27,7 +27,7 @@ junitPlatform {
 }
 
 dependencies {
-  compile dep.metricsGraphite
+  compile dep.prometheusHttpserver
   compile project(':misk')
 
   testCompile dep.assertj
@@ -35,6 +35,7 @@ dependencies {
   testCompile dep.junitEngine
   testCompile dep.junitParams
   testCompile project(':misk-testing')
+  testCompile project(':misk-gcp-testing')
 }
 
 if (rootProject.file("hooks.gradle").exists()) {

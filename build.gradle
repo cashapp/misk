@@ -2,6 +2,7 @@ ext {
   kotlinVersion = '1.2.51'
   awsVersion = '1.11.143'
   jettyVersion = '9.4.11.v20180605'
+  prometheusVersion = '0.4.0'
 
   dep = [
           kotlinStdLib         : "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion",
@@ -34,11 +35,6 @@ ext {
           jacksonKotlin        : 'com.fasterxml.jackson.module:jackson-module-kotlin:2.9.3',
           jacksonJsr310        : 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.9.4',
           hibernateCore        : 'org.hibernate:hibernate-core:5.3.0.Final',
-          metricsParent        : 'io.dropwizard.metrics:metrics-parent:4.0.1',
-          metricsCore          : 'io.dropwizard.metrics:metrics-core:4.0.1',
-          metricsGraphite      : 'io.dropwizard.metrics:metrics-graphite:4.0.1',
-          metricsSignalFx      : 'com.signalfx.public:signalfx-codahale:0.0.41',
-          metricsStackDriver   : 'com.google.apis:google-api-services-monitoring:v3-rev428-1.23.0',
           gcpDatastore         : 'com.google.cloud:google-cloud-datastore:1.26.0',
           gcpKms               : 'com.google.apis:google-api-services-cloudkms:v1-rev30-1.23.0',
           okHttp               : 'com.squareup.okhttp3:okhttp:3.11.0',
@@ -70,7 +66,10 @@ ext {
           mockitoCore          : 'org.mockito:mockito-core:2.8.9',
           jaxbApi              : 'javax.xml.bind:jaxb-api:2.3.0',
           mysql                : 'mysql:mysql-connector-java:5.1.16',
-          vitess               : 'io.vitess:vitess-jdbc:2.2.0'
+          vitess               : 'io.vitess:vitess-jdbc:2.2.0',
+          prometheusClient     : "io.prometheus:simpleclient:$prometheusVersion",
+          prometheusHotspot    : "io.prometheus:simpleclient_hotspot:$prometheusVersion",
+          prometheusHttpserver : "io.prometheus:simpleclient_httpserver:$prometheusVersion",
   ]
 
   isCi = "true".equals(System.getenv('CI'))
