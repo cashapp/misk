@@ -10,6 +10,7 @@ import misk.environment.EnvironmentModule
 import misk.hibernate.HibernateEntityModule
 import misk.hibernate.HibernateModule
 import misk.inject.KAbstractModule
+import misk.metrics.backends.prometheus.PrometheusMetricsModule
 
 /** Binds dependencies for all environments. */
 class UrlShortenerModule(val environment: Environment) : KAbstractModule() {
@@ -20,6 +21,7 @@ class UrlShortenerModule(val environment: Environment) : KAbstractModule() {
     install(MiskServiceModule())
     install(EnvironmentModule(environment))
     install(HttpClientModule("for_shortened_urls", Names.named("for_shortened_urls")))
+    install(PrometheusMetricsModule())
 
     bind<UrlStore>().to<RealUrlStore>()
 
