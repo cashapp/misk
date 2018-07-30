@@ -52,8 +52,6 @@ dependencies {
   compile dep.jacksonDataformatYaml
   compile dep.jacksonKotlin
   compile dep.jacksonJsr310
-  compile dep.metricsCore
-  compile dep.metricsParent
   compile dep.jCommander
   compile dep.openTracing
   compile dep.openTracingUtil
@@ -64,6 +62,8 @@ dependencies {
   compile dep.logbackClassic
   compile dep.slf4jApi
   compile dep.jaxbApi
+  compile dep.prometheusClient
+  compile dep.prometheusHotspot
 
   testCompile dep.mockitoCore
   testCompile project(':misk-testing')

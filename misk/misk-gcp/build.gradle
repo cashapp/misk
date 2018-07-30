@@ -35,7 +35,6 @@ dependencies {
   }
   compile dep.gcpKms
   compile dep.gcpLogback
-  compile dep.metricsStackDriver
   compile project(':misk')
   compile project(':misk-jaeger')
   compile project(':misk-zipkin')
