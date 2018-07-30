@@ -166,11 +166,10 @@ internal class RealTransacter private constructor(
     override fun <T> target(shard: Shard, function: () -> T): T {
       if (config.type == DataSourceType.VITESS) {
         return useConnection { connection ->
-          // This broke on master Vitess so we temporarily disable it.
           val previousTarget =
-            connection.createStatement().use { statement ->
-              statement.executeQuery("SHOW VITESS_TARGET").uniqueResult { it.getString(1) }!!
-            }
+              connection.createStatement().use { statement ->
+                statement.executeQuery("SHOW VITESS_TARGET").uniqueResult { it.getString(1) }!!
+              }
           connection.createStatement().use { statement ->
             statement.execute("USE `$shard`")
           }
