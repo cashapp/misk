@@ -10,6 +10,9 @@ data_source_cluster:
     database: urls
     migrations_resource: classpath:/migrations
 
+prometheus:
+  http_port: 8081
+
 endpoint:
   base_url: http://localhost:8080/
 

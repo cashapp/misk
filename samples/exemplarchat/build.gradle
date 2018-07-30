@@ -23,6 +23,7 @@ dependencies {
   compile dep.guice
   compile dep.logbackClassic
   compile project(':misk')
+  compile project(':misk-prometheus')
 
   testCompile project(':misk-testing')
 }
