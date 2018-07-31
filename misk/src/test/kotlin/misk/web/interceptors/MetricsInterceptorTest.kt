@@ -2,7 +2,7 @@ package misk.web.interceptors
 
 import misk.MiskServiceModule
 import misk.asAction
-import misk.metrics.Metrics
+import misk.metrics.count
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.web.Get
@@ -27,7 +27,6 @@ class MetricsInterceptorTest {
 
   @Inject internal lateinit var metricsInterceptorFactory: MetricsInterceptor.Factory
   @Inject internal lateinit var testAction: TestAction
-  @Inject internal lateinit var metrics: Metrics
 
   @BeforeEach
   fun sendRequests() {
@@ -40,23 +39,15 @@ class MetricsInterceptorTest {
   }
 
   @Test
-  fun requests() {
-    assertThat(metrics.counters["web.TestAction.requests"]!!.count).isEqualTo(6)
-  }
-
-  @Test
   fun responseCodes() {
-    assertThat(metrics.counters["web.TestAction.responses.2xx"]!!.count).isEqualTo(3)
-    assertThat(metrics.counters["web.TestAction.responses.200"]!!.count).isEqualTo(2)
-    assertThat(metrics.counters["web.TestAction.responses.202"]!!.count).isEqualTo(1)
-    assertThat(metrics.counters["web.TestAction.responses.4xx"]!!.count).isEqualTo(3)
-    assertThat(metrics.counters["web.TestAction.responses.404"]!!.count).isEqualTo(1)
-    assertThat(metrics.counters["web.TestAction.responses.403"]!!.count).isEqualTo(2)
-  }
-
-  @Test
-  fun timing() {
-    assertThat(metrics.timers["web.TestAction.timing"]!!.count).isEqualTo(6)
+    val requestDuration = metricsInterceptorFactory.requestDuration
+    assertThat(requestDuration.labels("TestAction", "all").get().count).isEqualTo(6)
+    assertThat(requestDuration.labels("TestAction", "2xx").get().count).isEqualTo(3)
+    assertThat(requestDuration.labels("TestAction", "200").get().count).isEqualTo(2)
+    assertThat(requestDuration.labels("TestAction", "202").get().count).isEqualTo(1)
+    assertThat(requestDuration.labels("TestAction", "4xx").get().count).isEqualTo(3)
+    assertThat(requestDuration.labels("TestAction", "404").get().count).isEqualTo(1)
+    assertThat(requestDuration.labels("TestAction", "403").get().count).isEqualTo(2)
   }
 
   fun invoke(desiredStatusCode: Int): Response<String> {
@@ -65,7 +56,7 @@ class MetricsInterceptorTest {
         HttpMethod.GET,
         body = Buffer()
     )
-    val metricsInterceptor = metricsInterceptorFactory.create(TestAction::call.asAction())!!
+    val metricsInterceptor = metricsInterceptorFactory.create(TestAction::call.asAction())
     val chain = testAction.asNetworkChain(TestAction::call, request, metricsInterceptor,
         TerminalInterceptor(desiredStatusCode))
 

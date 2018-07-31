@@ -4,10 +4,12 @@ import com.google.inject.Guice
 import com.google.inject.Injector
 import com.google.inject.Provides
 import com.google.inject.name.Names
+import io.prometheus.client.Histogram
 import misk.MiskServiceModule
 import misk.inject.KAbstractModule
 import misk.inject.getInstance
 import misk.metrics.Metrics
+import misk.metrics.count
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.web.Post
@@ -39,6 +41,7 @@ internal class ClientMetricsInterceptorTest {
   val module = TestModule()
 
   @Inject private lateinit var jetty: JettyService
+  private lateinit var requestDuration: Histogram
   private lateinit var clientMetrics: Metrics
   private lateinit var clientInjector: Injector
 
@@ -46,6 +49,9 @@ internal class ClientMetricsInterceptorTest {
   fun createClient() {
     clientInjector = Guice.createInjector(ClientModule(jetty))
     clientMetrics = clientInjector.getInstance()
+    requestDuration =
+        clientInjector.getInstance(ClientMetricsInterceptor.Factory::class.java).requestDuration
+
     val client: Pinger = clientInjector.getInstance(Names.named("pinger"))
     assertThat(client.ping(AppRequest(200)).execute().code()).isEqualTo(200)
     assertThat(client.ping(AppRequest(200)).execute().code()).isEqualTo(200)
@@ -56,26 +62,16 @@ internal class ClientMetricsInterceptorTest {
   }
 
   @Test
-  fun requests() {
-    assertThat(clientMetrics.counters["clients.http.pinger.ping.requests"]!!.count).isEqualTo(6)
-  }
-
-  @Test
   fun responseCodes() {
-    assertThat(clientMetrics.counters["clients.http.pinger.ping.responses.2xx"]!!.count).isEqualTo(3)
-    assertThat(clientMetrics.counters["clients.http.pinger.ping.responses.200"]!!.count).isEqualTo(2)
-    assertThat(clientMetrics.counters["clients.http.pinger.ping.responses.202"]!!.count).isEqualTo(1)
-    assertThat(clientMetrics.counters["clients.http.pinger.ping.responses.4xx"]!!.count).isEqualTo(2)
-    assertThat(clientMetrics.counters["clients.http.pinger.ping.responses.404"]!!.count).isEqualTo(1)
-    assertThat(clientMetrics.counters["clients.http.pinger.ping.responses.403"]!!.count).isEqualTo(1)
-    assertThat(clientMetrics.counters["clients.http.pinger.ping.responses.5xx"]!!.count).isEqualTo(1)
-    assertThat(clientMetrics.counters["clients.http.pinger.ping.responses.503"]!!.count).isEqualTo(1)
+    assertThat(requestDuration.labels("pinger.ping", "all").get().count).isEqualTo(6)
+    assertThat(requestDuration.labels("pinger.ping", "202").get().count).isEqualTo(1)
+    assertThat(requestDuration.labels("pinger.ping", "4xx").get().count).isEqualTo(2)
+    assertThat(requestDuration.labels("pinger.ping", "404").get().count).isEqualTo(1)
+    assertThat(requestDuration.labels("pinger.ping", "403").get().count).isEqualTo(1)
+    assertThat(requestDuration.labels("pinger.ping", "5xx").get().count).isEqualTo(1)
+    assertThat(requestDuration.labels("pinger.ping", "503").get().count).isEqualTo(1)
   }
 
-  @Test
-  fun timing() {
-    assertThat(clientMetrics.timers["clients.http.pinger.ping.timing"]!!.count).isEqualTo(6)
-  }
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(WebTestingModule())
@@ -95,7 +91,7 @@ internal class ClientMetricsInterceptorTest {
     @Post("/ping")
     @RequestContentType(MediaTypes.APPLICATION_JSON)
     @ResponseContentType(MediaTypes.APPLICATION_JSON)
-    fun ping(@RequestBody request: AppRequest) : Response<AppResponse> {
+    fun ping(@RequestBody request: AppRequest): Response<AppResponse> {
       return Response(AppResponse("foo"), statusCode = request.desiredStatusCode)
     }
   }

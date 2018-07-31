@@ -5,7 +5,6 @@ import misk.ApplicationInterceptor
 import misk.MiskDefault
 import misk.exceptions.ActionException
 import misk.inject.KAbstractModule
-import misk.metrics.web.MetricsJsonAction
 import misk.scope.ActionScopedProviderModule
 import misk.security.ssl.CertificatesModule
 import misk.web.actions.AdminTabAction
@@ -128,7 +127,6 @@ class MiskWebModule : KAbstractModule() {
 
     // Bind build-in actions.
     multibind<WebActionEntry>().toInstance(WebActionEntry(AdminTabAction::class))
-    multibind<WebActionEntry>().toInstance(WebActionEntry(MetricsJsonAction::class))
     multibind<WebActionEntry>().toInstance(WebActionEntry(InternalErrorAction::class))
     multibind<WebActionEntry>().toInstance(WebActionEntry(StatusAction::class))
     multibind<WebActionEntry>().toInstance(WebActionEntry(ReadinessCheckAction::class))

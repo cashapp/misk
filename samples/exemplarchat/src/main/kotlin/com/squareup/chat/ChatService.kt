@@ -7,6 +7,7 @@ import misk.config.MiskConfig
 import misk.environment.Environment
 import misk.environment.EnvironmentModule
 import misk.eventrouter.RealEventRouterModule
+import misk.metrics.backends.prometheus.PrometheusMetricsModule
 import misk.web.MiskWebModule
 
 fun main(args: Array<String>) {
@@ -19,6 +20,7 @@ fun main(args: Array<String>) {
       RealEventRouterModule(environment),
       ChatModule(),
       ConfigModule.create("chat", config),
-      EnvironmentModule(environment)
+      EnvironmentModule(environment),
+      PrometheusMetricsModule()
   ).run(args)
 }
