@@ -82,7 +82,7 @@ internal class DockerVitessCluster(
       return
     }
 
-    docker.removeContainerCmd(containerId!!).exec()
+    docker.removeContainerCmd(containerId!!).withForce(true).exec()
     StartVitessService.logger.info("Killed Vitess cluster with container id $containerId")
   }
 }
