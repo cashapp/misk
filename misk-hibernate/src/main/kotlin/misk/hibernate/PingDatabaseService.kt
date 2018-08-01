@@ -11,12 +11,14 @@ import misk.inject.toKey
 import java.time.Duration
 import java.util.*
 import javax.inject.Inject
+import javax.inject.Singleton
 import kotlin.reflect.KClass
 
 /**
  * Service that waits for the database to become healthy. This is needed if we're booting up a
  * Vitess cluster as part of the test run.
  */
+@Singleton
 class PingDatabaseService @Inject constructor(
   qualifier: KClass<out Annotation>,
   private val config: DataSourceConfig,

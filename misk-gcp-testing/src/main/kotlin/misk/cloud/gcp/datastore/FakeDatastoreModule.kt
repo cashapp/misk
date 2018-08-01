@@ -10,6 +10,7 @@ import misk.inject.KAbstractModule
 import javax.inject.Inject
 
 /** Installs a version of the [Datastore] that works off an in-memory local store */
+@javax.inject.Singleton
 class FakeDatastoreModule : KAbstractModule() {
   override fun configure() {
     multibind<Service>().to<FakeDatastoreService>()

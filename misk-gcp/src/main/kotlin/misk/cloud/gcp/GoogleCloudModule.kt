@@ -81,6 +81,7 @@ class GoogleCloudModule : KAbstractModule() {
 }
 
 /** Logs cloud configuration on startup */
+@javax.inject.Singleton
 private class GoogleCloud @Inject internal constructor(
   private val datastore: Datastore,
   private val storage: Storage

@@ -25,6 +25,7 @@ import org.hibernate.mapping.SimpleValue
 import org.hibernate.service.spi.SessionFactoryServiceRegistry
 import org.hibernate.usertype.UserType
 import javax.inject.Provider
+import javax.inject.Singleton
 import kotlin.reflect.KClass
 import kotlin.reflect.jvm.jvmName
 
@@ -33,6 +34,7 @@ private val logger = getLogger<SessionFactoryService>()
 /**
  * Builds a bare connection to a Hibernate database. Doesn't do any schema migration or validation.
  */
+@Singleton
 internal class SessionFactoryService(
   private val qualifier: KClass<out Annotation>,
   private val config: DataSourceConfig,
