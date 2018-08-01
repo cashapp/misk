@@ -13,7 +13,9 @@ import java.time.Clock
 import java.time.Duration
 import java.util.concurrent.BlockingQueue
 import java.util.concurrent.atomic.AtomicBoolean
+import javax.inject.Singleton
 
+@Singleton
 internal class CloudwatchLogService(
   private val events: BlockingQueue<CloudwatchLogEvent>,
   moshi: Moshi,

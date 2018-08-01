@@ -13,6 +13,7 @@ import mu.KotlinLogging
 import java.io.FileReader
 import java.nio.file.Files
 import java.nio.file.Paths
+import javax.inject.Singleton
 import kotlin.concurrent.thread
 import kotlin.streams.toList
 
@@ -87,6 +88,7 @@ internal class DockerVitessCluster(
   }
 }
 
+@Singleton
 internal class StartVitessService(val config: DataSourceConfig) : AbstractIdleService() {
   override fun startUp() {
     if (config.type != DataSourceType.VITESS) {

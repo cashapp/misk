@@ -6,8 +6,10 @@ import misk.DependentService
 import misk.environment.Environment
 import misk.inject.toKey
 import javax.inject.Provider
+import javax.inject.Singleton
 import kotlin.reflect.KClass
 
+@Singleton
 class SchemaMigratorService internal constructor(
   qualifier: KClass<out Annotation>,
   private val environment: Environment,

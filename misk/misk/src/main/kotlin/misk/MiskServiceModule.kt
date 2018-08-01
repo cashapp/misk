@@ -30,6 +30,18 @@ class MiskServiceModule : KAbstractModule() {
   @Provides
   @Singleton
   fun provideServiceManager(services: List<Service>): ServiceManager {
+    // Confirm all services have been registered as singleton. If they aren't singletons,
+    // _readiness checks will fail
+    val invalidServices = services.map { it.javaClass }.filter { !isSingleton(it) }.map { it.name }
+    check(invalidServices.isEmpty()) {
+      "the following services are not marked as @Singleton: ${invalidServices.sorted().joinToString(
+          ", ")}"
+    }
+
     return CoordinatedService.coordinate(services)
   }
+
+  private fun isSingleton(clazz: Class<*>) =
+      clazz.getAnnotation(com.google.inject.Singleton::class.java) != null ||
+          clazz.getAnnotation(javax.inject.Singleton::class.java) != null
 }
