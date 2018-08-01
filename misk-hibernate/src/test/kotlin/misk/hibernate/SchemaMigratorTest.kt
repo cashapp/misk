@@ -18,6 +18,7 @@ import org.hibernate.SessionFactory
 import org.junit.jupiter.api.Test
 import javax.inject.Inject
 import javax.inject.Provider
+import javax.inject.Singleton
 import javax.persistence.PersistenceException
 import kotlin.test.assertFailsWith
 
@@ -26,40 +27,40 @@ internal class SchemaMigratorTest {
   val defaultEnv = Environment.TESTING
   val config = MiskConfig.load<RootConfig>("test_schemamigrator_app", defaultEnv)
 
+  @Singleton
+  class DropTablesService : AbstractIdleService(), DependentService {
+    @Inject @Movies lateinit var sessionFactoryProvider: Provider<SessionFactory>
+
+    override val consumedKeys = setOf<Key<*>>(SessionFactoryService::class.toKey(Movies::class))
+    override val producedKeys = setOf<Key<*>>()
+
+    override fun startUp() {
+      sessionFactoryProvider.get().openSession().use { session ->
+        session.doReturningWork { connection ->
+          val statement = connection.createStatement()
+          statement.addBatch("DROP TABLE IF EXISTS schema_version")
+          statement.addBatch("DROP TABLE IF EXISTS table_1")
+          statement.addBatch("DROP TABLE IF EXISTS table_2")
+          statement.addBatch("DROP TABLE IF EXISTS table_3")
+          statement.addBatch("DROP TABLE IF EXISTS table_4")
+          statement.executeBatch()
+        }
+      }
+    }
+
+    override fun shutDown() {}
+  }
+
   @MiskTestModule
   val module = object : KAbstractModule() {
     override fun configure() {
       install(MiskServiceModule())
-
-      val dropTablesService = object : AbstractIdleService(), DependentService {
-        @Inject @Movies lateinit var sessionFactoryProvider: Provider<SessionFactory>
-
-        override val consumedKeys = setOf<Key<*>>(SessionFactoryService::class.toKey(Movies::class))
-        override val producedKeys = setOf<Key<*>>()
-
-        override fun startUp() {
-          sessionFactoryProvider.get().openSession().use { session ->
-            session.doReturningWork { connection ->
-              val statement = connection.createStatement()
-              statement.addBatch("DROP TABLE IF EXISTS schema_version")
-              statement.addBatch("DROP TABLE IF EXISTS table_1")
-              statement.addBatch("DROP TABLE IF EXISTS table_2")
-              statement.addBatch("DROP TABLE IF EXISTS table_3")
-              statement.addBatch("DROP TABLE IF EXISTS table_4")
-              statement.executeBatch()
-            }
-          }
-        }
-
-        override fun shutDown() {
-        }
-      }
-
-      multibind<Service>().toInstance(PingDatabaseService(Movies::class, config.data_source, defaultEnv))
+      multibind<Service>().to<DropTablesService>()
+      multibind<Service>().toInstance(
+          PingDatabaseService(Movies::class, config.data_source, defaultEnv))
       val sessionFactoryService =
           SessionFactoryService(Movies::class, config.data_source, defaultEnv)
       multibind<Service>().toInstance(sessionFactoryService)
-      multibind<Service>().toInstance(dropTablesService)
       bind<SessionFactory>().annotatedWith<Movies>().toProvider(sessionFactoryService)
     }
   }
@@ -68,7 +69,8 @@ internal class SchemaMigratorTest {
   @Inject @Movies lateinit var sessionFactory: SessionFactory
 
   @Test fun initializeAndMigrate() {
-    val schemaMigrator = SchemaMigrator(Movies::class, resourceLoader, sessionFactory, config.data_source)
+    val schemaMigrator =
+        SchemaMigrator(Movies::class, resourceLoader, sessionFactory, config.data_source)
 
     resourceLoader.put("${config.data_source.migrations_resource}/v1001__movies.sql", """
         |CREATE TABLE table_1 (name varchar(255))
@@ -124,7 +126,8 @@ internal class SchemaMigratorTest {
   }
 
   @Test fun requireAllWithMissingMigrations() {
-    val schemaMigrator = SchemaMigrator(Movies::class, resourceLoader, sessionFactory, config.data_source)
+    val schemaMigrator =
+        SchemaMigrator(Movies::class, resourceLoader, sessionFactory, config.data_source)
     schemaMigrator.initialize()
 
     resourceLoader.put("${config.data_source.migrations_resource}/v1001__foo.sql", """
