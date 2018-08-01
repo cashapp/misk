@@ -22,27 +22,29 @@ class EventRouterTestingModule internal constructor(val distributed: Boolean) : 
   private val actionExecutor = QueueingExecutorService()
   private val subscriberExecutor = QueueingExecutorService()
 
+  @Singleton
+  private class TestingService : AbstractIdleService() {
+    @Inject private lateinit var eventRouter: RealEventRouter
+    @Inject private lateinit var eventRouterTester: EventRouterTester
+    @Inject private lateinit var clusterMapper: FakeClusterMapper
+    override fun startUp() {
+      clusterMapper.setOwnerForHostList(listOf("host_1"), "host_1")
+      eventRouter.joinCluster()
+      eventRouterTester.processEverything()
+    }
+
+    override fun shutDown() {
+      eventRouter.leaveCluster()
+    }
+  }
+
   override fun configure() {
     if (distributed) {
       bind<EventRouter>().to<RealEventRouter>()
     } else {
       bind<EventRouter>().to<RealEventRouter>().asSingleton()
       bind<RealEventRouter>().asSingleton()
-      multibind<Service>().toInstance(object: AbstractIdleService() {
-        @Inject private lateinit var eventRouter: RealEventRouter
-        @Inject private lateinit var eventRouterTester: EventRouterTester
-        @Inject private lateinit var clusterMapper: FakeClusterMapper
-
-        override fun startUp() {
-          clusterMapper.setOwnerForHostList(listOf("host_1"), "host_1")
-          eventRouter.joinCluster()
-          eventRouterTester.processEverything()
-        }
-
-        override fun shutDown() {
-          eventRouter.leaveCluster()
-        }
-      })
+      multibind<Service>().to<TestingService>()
     }
 
     bind<ClusterConnector>().to<FakeClusterConnector>()

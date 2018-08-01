@@ -51,10 +51,20 @@ fun KType.typeLiteral(): TypeLiteral<*> = TypeLiteral.get(javaType)
 fun <T : Any> KClass<T>.typeLiteral(): TypeLiteral<T> = TypeLiteral.get(java)
 
 @Suppress("UNCHECKED_CAST") // The type system isn't aware of constructed types.
+fun <T> listOfType(elementType: TypeLiteral<T>): TypeLiteral<List<T>> = TypeLiteral.get(
+    Types.listOf(elementType.type)) as TypeLiteral<List<T>>
+
+fun <T : Any> listOfType(elementType: KClass<T>) = listOfType(elementType.typeLiteral())
+
+inline fun <reified T: Any> listOfType() = listOfType(T::class)
+
+@Suppress("UNCHECKED_CAST") // The type system isn't aware of constructed types.
 fun <T> setOfType(elementType: TypeLiteral<T>): TypeLiteral<Set<T>> = TypeLiteral.get(
     Types.setOf(elementType.type)) as TypeLiteral<Set<T>>
 
 fun <T : Any> setOfType(elementType: KClass<T>) = setOfType(elementType.typeLiteral())
+
+inline fun <reified T : Any> setOfType() = setOfType(T::class)
 
 inline fun <reified T : Any> Injector.getInstance(annotation: Annotation? = null): T {
   val key = annotation?.let { Key.get(T::class.java, it) } ?: Key.get(T::class.java)
