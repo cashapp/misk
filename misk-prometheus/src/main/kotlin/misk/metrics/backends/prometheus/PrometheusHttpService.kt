@@ -6,7 +6,9 @@ import io.prometheus.client.exporter.HTTPServer
 import misk.logging.getLogger
 import java.net.InetSocketAddress
 import javax.inject.Inject
+import javax.inject.Singleton
 
+@Singleton
 internal class PrometheusHttpService @Inject internal constructor(
   private val config: PrometheusConfig,
   private val registry: CollectorRegistry
