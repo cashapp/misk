@@ -1,12 +1,19 @@
 package misk.web.actions
 
 import misk.Action
+import misk.security.authz.Unauthenticated
 import misk.web.Get
 import misk.web.NetworkChain
 import misk.web.NetworkInterceptor
+import misk.web.PathParam
+import misk.web.Post
 import misk.web.Request
+import misk.web.RequestContentType
 import misk.web.Response
 import misk.web.ResponseBody
+import misk.web.ResponseContentType
+import misk.web.WebActionEntry
+import misk.web.mediatype.MediaTypes
 import misk.web.resources.ResourceInterceptorCommon
 import misk.web.toMisk
 import misk.web.toResponseBody
@@ -18,6 +25,7 @@ import java.net.HttpURLConnection
 import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Singleton
+import kotlin.reflect.KClass
 
 /**
  * WebProxyAction
@@ -36,23 +44,23 @@ import javax.inject.Singleton
  */
 
 @Singleton
-class WebProxyAction (
+class WebProxyAction(
   private val mapping: Mapping
 ) : WebAction {
   @Named("web_proxy_interceptor") private lateinit var client: OkHttpClient
 
-  @Get("/*")
-  fun foo(): {
-
+  @Get("/{path:.*}")
+  @Post("/{path:.*}")
+  @RequestContentType(MediaTypes.ALL)
+  @ResponseContentType(MediaTypes.ALL)
+  @Unauthenticated
+  fun action(@PathParam path: String): Response<ResponseBody> {
+    return Response(
+        body = "Nothing found at /$path".toResponseBody(),
+        headers = Headers.of("Content-Type", MediaTypes.TEXT_PLAIN_UTF8),
+        statusCode = 404
+    )
   }
-
-
-
-
-
-
-
-
 
   //  TODO(adrw) enforce no prefix overlapping https://github.com/square/misk/issues/303
   override fun intercept(chain: NetworkChain): Response<*> {
@@ -128,6 +136,17 @@ class WebProxyAction (
     override fun create(action: Action): NetworkInterceptor? {
       // TODO(adrw) jk above. transition webproxyinterceptor -> webproxyactions / resourceinterceptor+staticresourceinterceptor -> resourceactions
       return WebProxyAction(httpClient, mappings)
+    }
+  }
+
+  companion object {
+    fun toEntry(
+      url_path_prefix: String,
+      web_proxy_url_string: String
+    ): WebActionEntry {
+      return WebActionEntry(
+          WebProxyAction(Mapping(url_path_prefix, HttpUrl.parse(web_proxy_url_string)!!))::class,
+          url_path_prefix)
     }
   }
 }

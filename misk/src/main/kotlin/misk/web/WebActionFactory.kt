@@ -1,7 +1,7 @@
 package misk.web
 
 import com.google.inject.Injector
-import com.google.inject.util.Providers
+import com.google.inject.Provider
 import misk.ApplicationInterceptor
 import misk.MiskDefault
 import misk.asAction
@@ -11,7 +11,6 @@ import misk.web.mediatype.MediaRange
 import okhttp3.MediaType
 import org.eclipse.jetty.http.HttpMethod
 import javax.inject.Inject
-import javax.inject.Provider
 import javax.inject.Singleton
 import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
@@ -63,7 +62,8 @@ internal class WebActionFactory {
     val post = actionFunction.findAnnotation<Post>()
 
     // TODO(adrw) fix this using first provider below so that WebAction::class or WebAction can be passed in
-    val provider = Providers.of(theInstance)
+//    val provider = Providers.of(theInstance)
+
     val provider = injector.getProvider(webActionClass.java)
 
     val result: MutableList<BoundAction<A, *>> = mutableListOf()

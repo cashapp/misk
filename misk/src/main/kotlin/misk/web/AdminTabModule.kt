@@ -2,7 +2,7 @@ package misk.web
 
 import misk.inject.KAbstractModule
 import misk.web.actions.AdminTab
-import misk.web.resources.WebProxyInterceptor
+import misk.web.actions.WebProxyAction
 import okhttp3.HttpUrl
 
 /**
@@ -21,21 +21,23 @@ class AdminTabModule : KAbstractModule() {
         "dashboard",
         "/_admin/dashboard/"
     ))
-    multibind<WebProxyInterceptor.Mapping>().toInstance(
-        WebProxyInterceptor.Mapping(
+    multibind<WebActionEntry>().toInstance(WebActionEntry(
+        WebProxyAction(WebProxyAction.Mapping(
             "/_admin/dashboard/",
             HttpUrl.parse("http://localhost:3110/")!!
-        ))
+        ))::class, "/_admin/dashboard/"
+    ))
     multibind<AdminTab>().toInstance(AdminTab(
         "Misk NPM",
         "@misk",
         "/_admin/@misk/"
     ))
-    multibind<WebProxyInterceptor.Mapping>().toInstance(
-        WebProxyInterceptor.Mapping(
+    multibind<WebActionEntry>().toInstance(WebActionEntry(
+        WebProxyAction(WebProxyAction.Mapping(
             "/_admin/@misk/",
             HttpUrl.parse("http://localhost:9100/")!!
-        ))
+        ))::class, "/_admin/@misk/"
+    ))
     multibind<AdminTab>().toInstance(AdminTab(
         "Loader",
         "loader",

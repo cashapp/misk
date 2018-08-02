@@ -23,3 +23,9 @@ data class WebActionEntry(
     }
   }
 }
+
+inline fun <reified T : WebAction>WebActionEntry(
+  pathPrefix: String = ""
+): WebActionEntry {
+  return WebActionEntry(T::class, pathPrefix)
+}
