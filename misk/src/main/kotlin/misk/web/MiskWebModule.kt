@@ -19,6 +19,7 @@ import misk.web.actions.LivenessCheckAction
 import misk.web.actions.NotFoundAction
 import misk.web.actions.ReadinessCheckAction
 import misk.web.actions.StatusAction
+import misk.web.actions.WebProxyAction
 import misk.web.exceptions.ActionExceptionMapper
 import misk.web.exceptions.ExceptionHandlingInterceptor
 import misk.web.exceptions.ExceptionMapperModule
@@ -128,16 +129,18 @@ class MiskWebModule : KAbstractModule() {
     install(AdminTabModule())
 
     // Bind _admin static resources to web
-    multibind<StaticResourceMapper.Entry>()
-        .toInstance(StaticResourceMapper.Entry("/_admin/", "web/_admin", "misk/web/_admin/build"))
+    // TODO(adrw) need to only use StaticResourceMapper in production
+//    multibind<StaticResourceMapper.Entry>()
+//        .toInstance(StaticResourceMapper.Entry("/_admin/", "web/_admin", "misk/web/_admin/build"))
 
     // Bind build-in actions.
-    multibind<WebActionEntry>().toInstance(WebActionEntry(AdminTabAction::class))
-    multibind<WebActionEntry>().toInstance(WebActionEntry(InternalErrorAction::class))
-    multibind<WebActionEntry>().toInstance(WebActionEntry(StatusAction::class))
-    multibind<WebActionEntry>().toInstance(WebActionEntry(ReadinessCheckAction::class))
-    multibind<WebActionEntry>().toInstance(WebActionEntry(LivenessCheckAction::class))
-    multibind<WebActionEntry>().toInstance(WebActionEntry(NotFoundAction::class))
+    multibind<WebActionEntry>().toInstance(WebActionEntry<AdminTabAction>())
+    multibind<WebActionEntry>().toInstance(WebActionEntry<InternalErrorAction>())
+    multibind<WebActionEntry>().toInstance(WebActionEntry<StatusAction>())
+    multibind<WebActionEntry>().toInstance(WebActionEntry<ReadinessCheckAction>())
+    multibind<WebActionEntry>().toInstance(WebActionEntry<LivenessCheckAction>())
+//    multibind<WebActionEntry>().toInstance(WebActionEntry<WebProxyAction>())
+    multibind<WebActionEntry>().toInstance(WebActionEntry<NotFoundAction>())
 
     // Make CORS wide-open.
     // TODO(adrw): this is not suitable for production. lock this down.

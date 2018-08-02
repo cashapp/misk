@@ -9,6 +9,7 @@ import misk.testing.MiskTestModule;
 import misk.web.Get;
 import misk.web.PathParam;
 import misk.web.ResponseContentType;
+import misk.web.WebActionEntry;
 import misk.web.WebActionModule;
 import misk.web.WebTestingModule;
 import misk.web.actions.WebAction;

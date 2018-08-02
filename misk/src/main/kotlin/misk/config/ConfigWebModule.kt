@@ -4,6 +4,8 @@ import misk.inject.KAbstractModule
 import misk.web.WebActionEntry
 import misk.web.actions.AdminTab
 import misk.web.actions.WebProxyAction
+import misk.web.actions.WebProxyEntry
+import okhttp3.HttpUrl
 
 class ConfigWebModule : KAbstractModule() {
   override fun configure() {
@@ -15,7 +17,8 @@ class ConfigWebModule : KAbstractModule() {
         "/_admin/config/"
     ))
     // TODO(adrw) only add web proxy during development, otherwise add ResourceInterceptor (Jar)
-    multibind<WebActionEntry>().toInstance(WebProxyAction.toEntry("/_admin/config/",
+    multibind<WebProxyEntry>().toInstance(WebProxyEntry("/_admin/config",
         "http://localhost:3200/"))
+    multibind<WebActionEntry>().toInstance(WebActionEntry<WebProxyAction>("/_admin/config"))
   }
 }

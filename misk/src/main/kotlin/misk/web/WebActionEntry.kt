@@ -18,13 +18,13 @@ data class WebActionEntry(
   val pathPrefix: String = ""
 ) {
   init {
-    require(pathPrefix.matches(Regex("(/[^/]+)*"))) {
+    require(pathPrefix.matches(Regex("(/[^/]+)*")) && !pathPrefix.startsWith("/api")) {
       "unexpected path prefix: $pathPrefix"
     }
   }
 }
 
-inline fun <reified T : WebAction>WebActionEntry(
+inline fun <reified T : WebAction> WebActionEntry(
   pathPrefix: String = ""
 ): WebActionEntry {
   return WebActionEntry(T::class, pathPrefix)
