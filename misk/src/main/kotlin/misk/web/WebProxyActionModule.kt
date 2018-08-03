@@ -10,9 +10,7 @@ class WebProxyActionModule : KAbstractModule() {
   override fun configure() {
     newMultibinder<WebProxyEntry>()
     newMultibinder<WebActionEntry>()
-    install(HttpClientModule("web_proxy_interceptor",
-        Names.named("web_proxy_interceptor")))
-//    multibind<NetworkInterceptor.Factory>()
-//        .to<WebProxyAction.Factory>()
+    install(HttpClientModule("web_proxy_action",
+        Names.named("web_proxy_action")))
   }
 }
