@@ -7,7 +7,8 @@ import misk.inject.KAbstractModule
 import misk.scope.ActionScoped
 import misk.security.authz.AccessAnnotation
 import misk.security.authz.AccessControlModule
-import misk.security.authz.MiskCallerAuthenticator
+import misk.security.authz.fake.FakeCallerAuthenticator
+import misk.security.authz.fake.FakeCallerAuthenticatorModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.web.Get
@@ -76,13 +77,13 @@ class AuthenticationTest {
     val requestBuilder = Request.Builder()
         .url(baseUrl.resolve(path)!!)
     service?.let {
-      requestBuilder.header(SERVICE_HEADER, service)
+      requestBuilder.header(FakeCallerAuthenticator.SERVICE_HEADER, service)
     }
     user?.let {
-      requestBuilder.header(USER_HEADER, user)
+      requestBuilder.header(FakeCallerAuthenticator.USER_HEADER, user)
     }
     roles?.let {
-      requestBuilder.header(ROLES_HEADER, roles)
+      requestBuilder.header(FakeCallerAuthenticator.ROLES_HEADER, roles)
     }
     val call = client.newCall(requestBuilder.build())
     val response = call.execute()
@@ -106,7 +107,7 @@ class AuthenticationTest {
           AccessAnnotation(CustomServiceAccess::class, services = listOf("payments")))
       multibind<AccessAnnotation>().toInstance(
           AccessAnnotation(CustomRoleAccess::class, roles = listOf("admin")))
-      multibind<MiskCallerAuthenticator>().to<FakeCallerAuthenticator>()
+      install(FakeCallerAuthenticatorModule())
     }
   }
 
