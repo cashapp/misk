@@ -19,7 +19,6 @@ import misk.web.actions.LivenessCheckAction
 import misk.web.actions.NotFoundAction
 import misk.web.actions.ReadinessCheckAction
 import misk.web.actions.StatusAction
-import misk.web.actions.WebProxyAction
 import misk.web.exceptions.ActionExceptionMapper
 import misk.web.exceptions.ExceptionHandlingInterceptor
 import misk.web.exceptions.ExceptionMapperModule
@@ -125,16 +124,12 @@ class MiskWebModule : KAbstractModule() {
     // Install infrastructure support
     install(CertificatesModule())
 
-    // Add _admin installed tabs / forwarding mappings that don't have endpoints
-    install(AdminTabModule())
-
     // Bind _admin static resources to web
     // TODO(adrw) need to only use StaticResourceMapper in production
 //    multibind<StaticResourceMapper.Entry>()
 //        .toInstance(StaticResourceMapper.Entry("/_admin/", "web/_admin", "misk/web/_admin/build"))
 
     // Bind build-in actions.
-    multibind<WebActionEntry>().toInstance(WebActionEntry<AdminTabAction>())
     multibind<WebActionEntry>().toInstance(WebActionEntry<InternalErrorAction>())
     multibind<WebActionEntry>().toInstance(WebActionEntry<StatusAction>())
     multibind<WebActionEntry>().toInstance(WebActionEntry<ReadinessCheckAction>())
