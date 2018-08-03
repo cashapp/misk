@@ -1,17 +1,23 @@
 package misk.web.actions
 
+import misk.scope.ActionScoped
 import misk.security.authz.Unauthenticated
 import misk.web.Get
-import misk.web.PathParam
 import misk.web.Post
+import misk.web.Request
 import misk.web.RequestContentType
 import misk.web.Response
 import misk.web.ResponseBody
 import misk.web.ResponseContentType
 import misk.web.mediatype.MediaTypes
+import misk.web.resources.ResourceInterceptorCommon
+import misk.web.toMisk
 import misk.web.toResponseBody
 import okhttp3.Headers
+import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
+import java.io.IOException
+import java.net.HttpURLConnection
 import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Singleton
@@ -33,8 +39,9 @@ import javax.inject.Singleton
  */
 
 @Singleton
-class WebProxyAction() : WebAction {
-  @Inject lateinit var entries: List<WebProxyEntry>
+class WebProxyAction : WebAction {
+  @Inject private lateinit var entries: List<WebProxyEntry>
+  @Inject @JvmSuppressWildcards private lateinit var request: ActionScoped<Request>
   @Named("web_proxy_interceptor") private lateinit var client: OkHttpClient
 
   @Get("/{path:.*}")
@@ -42,12 +49,16 @@ class WebProxyAction() : WebAction {
   @RequestContentType(MediaTypes.ALL)
   @ResponseContentType(MediaTypes.ALL)
   @Unauthenticated
-  fun action(@PathParam path: String): Response<ResponseBody> {
-    return Response(
-        body = "Forwarded request terminated at WebProxyAction for /$path".toResponseBody(),
-        headers = Headers.of("Content-Type", MediaTypes.TEXT_PLAIN_UTF8),
-        statusCode = 404
-    )
+  fun action(): Response<ResponseBody> {
+//    find matching entry
+    val matchedEntry = ResourceInterceptorCommon.findEntryFromUrl(entries,
+        request.get().url) as WebProxyEntry?
+        ?: return noEntryMatchResponse(request.get())
+    val proxyUrl = matchedEntry.web_proxy_url.newBuilder()
+        .encodedPath(request.get().url.encodedPath())
+        .query(request.get().url.query())
+        .build()
+    return forwardRequestTo(request.get(), proxyUrl)
   }
 
   //  TODO(adrw) enforce no prefix overlapping https://github.com/square/misk/issues/303
@@ -63,38 +74,36 @@ class WebProxyAction() : WebAction {
 //    return forwardRequestTo(chain.request, proxyUrl)
 //  }
 //
-//  fun forwardRequestTo(request: Request, proxyUrl: HttpUrl): Response<*> {
-//    val clientRequest = request.toOkHttp3().withUrl(proxyUrl)
-//    return try {
-//      val clientResponse = client.newCall(clientRequest).execute()
-//      clientResponse.toMisk()
-//    } catch (e: IOException) {
-//      fetchFailResponse(clientRequest)
-//    }
-//  }
-//
-//  private fun fetchFailResponse(clientRequest: okhttp3.Request): Response<ResponseBody> {
-//    return Response(
-//        "Failed to fetch upstream URL ${clientRequest.url()}".toResponseBody(),
-//        Headers.of("Content-Type", "text/plain; charset=utf-8"),
-//        HttpURLConnection.HTTP_UNAVAILABLE
-//    )
-//  }
-//
-//  fun okhttp3.Request.withUrl(newUrl: HttpUrl): okhttp3.Request {
-//    return newBuilder()
-//        .url(newUrl)
-//        .build()
-//  }
+  private fun forwardRequestTo(request: Request, proxyUrl: HttpUrl): Response<ResponseBody> {
+    val clientRequest = request.toOkHttp3().withUrl(proxyUrl)
+    return try {
+      val clientResponse = client.newCall(clientRequest).execute()
+      clientResponse.toMisk()
+    } catch (e: IOException) {
+      fetchFailResponse(clientRequest)
+    }
+  }
 
-//  class Factory @Inject internal constructor(
-//    @Named("web_proxy_interceptor") val httpClient: OkHttpClient,
-//    var entries: List<Entry>
-//  ) : NetworkInterceptor.Factory {
-//    override fun create(action: Action): NetworkInterceptor? {
-//      // TODO(adrw) jk above. transition webproxyinterceptor -> webproxyactions / resourceinterceptor+staticresourceinterceptor -> resourceactions
-//      return WebProxyAction(entries)
-//    }
-//  }
+  private fun noEntryMatchResponse(clientRequest: Request): Response<ResponseBody> {
+    return Response(
+        "No matching WebProxyEntry to forward upstream URL ${clientRequest.url}".toResponseBody(),
+        Headers.of("Content-Type", "text/plain; charset=utf-8"),
+        HttpURLConnection.HTTP_UNAVAILABLE
+    )
+  }
+
+  private fun fetchFailResponse(clientRequest: okhttp3.Request): Response<ResponseBody> {
+    return Response(
+        "Failed to fetch upstream URL ${clientRequest.url()}".toResponseBody(),
+        Headers.of("Content-Type", "text/plain; charset=utf-8"),
+        HttpURLConnection.HTTP_UNAVAILABLE
+    )
+  }
+
+  private fun okhttp3.Request.withUrl(newUrl: HttpUrl): okhttp3.Request {
+    return newBuilder()
+        .url(newUrl)
+        .build()
+  }
 }
 

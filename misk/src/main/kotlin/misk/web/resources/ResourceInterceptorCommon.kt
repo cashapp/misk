@@ -18,14 +18,14 @@ object ResourceInterceptorCommon {
    * main case: /_admin/ should not pick up all sub paths but should still return index
    * else build out (*) REGEX mapping
    */
-  fun findMappingFromUrl(mappings: List<Mapping>, url: HttpUrl): Mapping? {
-    for (mapping in mappings) {
-      if (url.encodedPath().startsWith(mapping.url_path_prefix)) return mapping
+  fun findEntryFromUrl(entries: List<Entry>, url: HttpUrl): Entry? {
+    for (entry in entries) {
+      if (url.encodedPath().startsWith(entry.url_path_prefix)) return entry
     }
     return null
   }
 
-  interface Mapping {
+  interface Entry {
     val url_path_prefix: String
   }
 

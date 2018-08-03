@@ -25,7 +25,7 @@ import okhttp3.HttpUrl
 data class WebProxyEntry(
   override val url_path_prefix: String,
   val web_proxy_url: HttpUrl
-) : ResourceInterceptorCommon.Mapping {
+) : ResourceInterceptorCommon.Entry {
   init {
     require(url_path_prefix.matches(Regex("(/[^/]+)*")) &&
         !url_path_prefix.startsWith("/api") &&

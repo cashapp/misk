@@ -48,7 +48,7 @@ fun Response<ResponseBody>.writeToJettyResponse(jettyResponse: HttpServletRespon
 
 private fun HttpServletResponse.bufferedSink() = Okio.buffer(Okio.sink(outputStream))
 
-fun okhttp3.Response.toMisk() : Response<*> {
+fun okhttp3.Response.toMisk() : Response<ResponseBody> {
   val miskBody = object: ResponseBody {
     override fun writeTo(sink: BufferedSink) {
       body()!!.use {

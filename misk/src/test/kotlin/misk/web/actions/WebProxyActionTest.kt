@@ -29,7 +29,7 @@ import kotlin.test.assertFailsWith
 
 @MiskTest
 class WebProxyActionTest {
-//  @Inject lateinit var mappingBindingsProvider: Provider<List<WebProxyAction.Mapping>>
+//  @Inject lateinit var mappingBindingsProvider: Provider<List<WebProxyAction.Entry>>
 //
 //  private val upstreamServer = MockWebServer()
 //
@@ -61,9 +61,9 @@ class WebProxyActionTest {
 //              "web_proxy_interceptor" to HttpClientEndpointConfig("http://localhost")
 //          ))))
 //
-//      multibind<WebProxyAction.Mapping>().toProvider(object: Provider<WebProxyAction.Mapping> {
-//        override fun get(): WebProxyAction.Mapping {
-//          return WebProxyAction.Mapping(
+//      multibind<WebProxyAction.Entry>().toProvider(object: Provider<WebProxyAction.Entry> {
+//        override fun get(): WebProxyAction.Entry {
+//          return WebProxyAction.Entry(
 //              "/local/prefix/",
 //              upstreamServer.url("/")
 //          )
@@ -82,7 +82,7 @@ class WebProxyActionTest {
 //  @Test
 //  fun mappingLocalWithoutLeadingSlash() {
 //    assertFailsWith<IllegalArgumentException> {
-//      WebProxyAction.Mapping("local/prefix/",
+//      WebProxyAction.Entry("local/prefix/",
 //          upstreamServer.url("/"))
 //    }
 //  }
@@ -90,7 +90,7 @@ class WebProxyActionTest {
 //  @Test
 //  internal fun mappingLocalWithoutTrailingSlash() {
 //    assertFailsWith<IllegalArgumentException> {
-//      WebProxyAction.Mapping("/local/prefix",
+//      WebProxyAction.Entry("/local/prefix",
 //          upstreamServer.url("/"))
 //    }
 //  }
@@ -98,7 +98,7 @@ class WebProxyActionTest {
 //  @Test
 //  internal fun mappingToApiPrefix() {
 //    assertFailsWith<IllegalArgumentException> {
-//      WebProxyAction.Mapping("/api/test/prefix/",
+//      WebProxyAction.Entry("/api/test/prefix/",
 //          upstreamServer.url("/"))
 //    }
 //  }
@@ -106,7 +106,7 @@ class WebProxyActionTest {
 //  @Test
 //  internal fun mappingUpstreamUrlToFile() {
 //    assertFailsWith<IllegalArgumentException> {
-//      WebProxyAction.Mapping("/local/prefix/",
+//      WebProxyAction.Entry("/local/prefix/",
 //          upstreamServer.url("/test.js"))
 //    }
 //  }
@@ -114,7 +114,7 @@ class WebProxyActionTest {
 //  @Test
 //  internal fun mappingUpstreamUrlWithPathSegments() {
 //    assertFailsWith<IllegalArgumentException> {
-//      WebProxyAction.Mapping("/local/prefix/",
+//      WebProxyAction.Entry("/local/prefix/",
 //          upstreamServer.url("/upstream/prefix/"))
 //    }
 //  }

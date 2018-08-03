@@ -139,7 +139,6 @@ class MiskWebModule : KAbstractModule() {
     multibind<WebActionEntry>().toInstance(WebActionEntry<StatusAction>())
     multibind<WebActionEntry>().toInstance(WebActionEntry<ReadinessCheckAction>())
     multibind<WebActionEntry>().toInstance(WebActionEntry<LivenessCheckAction>())
-//    multibind<WebActionEntry>().toInstance(WebActionEntry<WebProxyAction>())
     multibind<WebActionEntry>().toInstance(WebActionEntry<NotFoundAction>())
 
     // Make CORS wide-open.

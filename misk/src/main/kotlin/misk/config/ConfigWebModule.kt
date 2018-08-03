@@ -5,7 +5,6 @@ import misk.web.WebActionEntry
 import misk.web.actions.AdminTab
 import misk.web.actions.WebProxyAction
 import misk.web.actions.WebProxyEntry
-import okhttp3.HttpUrl
 
 class ConfigWebModule : KAbstractModule() {
   override fun configure() {
