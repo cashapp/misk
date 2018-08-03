@@ -1,11 +1,17 @@
 package misk.web
 
 import com.google.common.util.concurrent.Service
+import com.google.inject.TypeLiteral
 import misk.ApplicationInterceptor
+import misk.MiskCaller
 import misk.MiskDefault
 import misk.exceptions.ActionException
 import misk.inject.KAbstractModule
+import misk.scope.ActionScoped
+import misk.scope.ActionScopedProvider
 import misk.scope.ActionScopedProviderModule
+import misk.security.authz.AccessControlModule
+import misk.security.authz.MiskCallerAuthenticator
 import misk.security.ssl.CertificatesModule
 import misk.web.actions.AdminTabAction
 import misk.web.actions.InternalErrorAction
@@ -38,6 +44,7 @@ import misk.web.marshal.ProtobufUnmarshaller
 import misk.web.marshal.Unmarshaller
 import misk.web.resources.StaticResourceInterceptor
 import misk.web.resources.StaticResourceMapper
+import javax.inject.Inject
 import javax.servlet.http.HttpServletRequest
 import java.security.Provider as SecurityProvider
 
@@ -45,10 +52,13 @@ class MiskWebModule : KAbstractModule() {
   override fun configure() {
     multibind<Service>().to<JettyService>()
 
+    // Install support for accessing the current request and caller as ActionScoped types
     install(object : ActionScopedProviderModule() {
       override fun configureProviders() {
         bindSeedData(Request::class)
         bindSeedData(HttpServletRequest::class)
+        bindProvider(miskCallerType, MiskCallerProvider::class)
+        newMultibinder<MiskCallerAuthenticator>()
       }
     })
 
@@ -132,5 +142,19 @@ class MiskWebModule : KAbstractModule() {
     // Make CORS wide-open.
     // TODO(adrw): this is not suitable for production. lock this down.
     multibind<NetworkInterceptor.Factory>().to<WideOpenDevelopmentInterceptorFactory>()
+  }
+
+  class MiskCallerProvider : ActionScopedProvider<MiskCaller?> {
+    @Inject lateinit var authenticators: List<MiskCallerAuthenticator>
+
+    override fun get(): MiskCaller? {
+      return authenticators.mapNotNull {
+        it.getAuthenticatedCaller()
+      }.firstOrNull()
+    }
+  }
+
+  private companion object {
+    val miskCallerType = object : TypeLiteral<MiskCaller?>() {}
   }
 }
