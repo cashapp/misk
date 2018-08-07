@@ -21,6 +21,7 @@ import java.net.HttpURLConnection
 import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Singleton
+import javax.servlet.http.HttpServletRequest
 
 /**
  * WebProxyAction
@@ -36,16 +37,16 @@ import javax.inject.Singleton
  *
  * Expected Functionality
  * - Entries following above rules are injected into action
- * - Action attempts to findEntryFromUrl incoming request paths against entries
- * - If findEntryFromUrl found, incoming request path is appended to host + port of Entry.server_url
+ * - Action attempts to findEntryFromUrl incoming clientRequest paths against entries
+ * - If findEntryFromUrl found, incoming clientRequest path is appended to host + port of Entry.server_url
  * - Else, 404
  */
 
 @Singleton
 class WebProxyAction : WebAction {
-  @Inject @Named("web_proxy_action") private lateinit var client: OkHttpClient
+  @Inject @Named("web_proxy_action") private lateinit var proxyClient: OkHttpClient
   @Inject private lateinit var entries: List<WebProxyEntry>
-  @Inject @JvmSuppressWildcards private lateinit var request: ActionScoped<Request>
+  @Inject @JvmSuppressWildcards private lateinit var clientRequest: ActionScoped<Request>
 
   private val plainTextMediaType = MediaTypes.TEXT_PLAIN_UTF8.asMediaType()
 
@@ -56,44 +57,51 @@ class WebProxyAction : WebAction {
   @Unauthenticated
   fun action(): Response<ResponseBody> {
     //  TODO(adrw) enforce no prefix overlapping https://github.com/square/misk/issues/303
+    val request = clientRequest.get()
     val matchedEntry = WebEntryCommon.findEntryFromUrl(entries,
-        request.get().url) as WebProxyEntry?
-        ?: return noEntryMatchResponse(request.get())
+        request.url) as WebProxyEntry?
+        ?: return noEntryMatchResponse(request.url)
     val proxyUrl = matchedEntry.web_proxy_url.newBuilder()
-        .encodedPath(request.get().url.encodedPath())
-        .query(request.get().url.query())
+        .encodedPath(request.url.encodedPath())
+        .query(request.url.query())
         .build()
-    return forwardRequestTo(request.get(), proxyUrl)
+    return forwardRequestTo(proxyUrl)
   }
 
-  private fun forwardRequestTo(request: Request, proxyUrl: HttpUrl): Response<ResponseBody> {
-    val clientRequest = request.toOkHttp3().withUrl(proxyUrl)
+  private fun forwardRequestTo(proxyUrl: HttpUrl): Response<ResponseBody> {
+    val request = clientRequest.get()
+    val proxyRequest = request.toOkHttp3().forwardedWithUrl(proxyUrl)
     return try {
-      val clientResponse = client.newCall(clientRequest).execute()
-      clientResponse.toMisk()
+      val proxyResponse = proxyClient.newCall(proxyRequest).execute()
+      proxyResponse.toMisk()
     } catch (e: IOException) {
-      fetchFailResponse(clientRequest)
+      fetchFailResponse(proxyRequest.url())
     }
   }
 
-  private fun noEntryMatchResponse(clientRequest: Request): Response<ResponseBody> {
+  private fun noEntryMatchResponse(clientRequestUrl: HttpUrl): Response<ResponseBody> {
     return Response(
-        "WebProxyAction: No matching WebProxyEntry to forward upstream URL ${clientRequest.url}".toResponseBody(),
+        "WebProxyAction: No matching WebProxyEntry to forward upstream URL $clientRequestUrl".toResponseBody(),
         Headers.of("Content-Type", plainTextMediaType.toString()),
         HttpURLConnection.HTTP_NOT_FOUND
     )
   }
 
-  private fun fetchFailResponse(clientRequest: okhttp3.Request): Response<ResponseBody> {
+  private fun fetchFailResponse(clientRequestUrl: HttpUrl): Response<ResponseBody> {
     return Response(
-        "WebProxyAction: Failed to fetch upstream URL ${clientRequest.url()}".toResponseBody(),
+        "WebProxyAction: Failed to fetch upstream URL $clientRequestUrl".toResponseBody(),
         Headers.of("Content-Type", plainTextMediaType.toString()),
         HttpURLConnection.HTTP_UNAVAILABLE
     )
   }
 
-  private fun okhttp3.Request.withUrl(newUrl: HttpUrl): okhttp3.Request {
+  private fun okhttp3.Request.forwardedWithUrl(newUrl: HttpUrl): okhttp3.Request {
+    // TODO(adrw) include the client URL/IP as the for= field for Forwarded
     return newBuilder()
+        .addHeader("Forwarded", "for=; by=${HttpUrl.Builder()
+            .scheme(this.url().scheme())
+            .host(this.url().host())
+            .port(this.url().port())}")
         .url(newUrl)
         .build()
   }
