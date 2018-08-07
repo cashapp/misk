@@ -30,12 +30,13 @@ import javax.inject.Singleton
  * Guidelines
  * - No overlapping entry prefixes
  *    "/_admin/config/" and "/_admin/config/subtab/" will not resolve consistently
- * - url_path_prefix starts and ends with "/"
+ * - url_path_prefix starts with "/"
+ * - url_path_prefix does not end with "/"
  * - web_proxy_url ends with "/" and doesn't contain any path segments
  *
  * Expected Functionality
- * - Entries following above rules are used to initialize interceptor
- * - Interceptor attempts to findEntryFromUrl incoming request paths against entries
+ * - Entries following above rules are injected into action
+ * - Action attempts to findEntryFromUrl incoming request paths against entries
  * - If findEntryFromUrl found, incoming request path is appended to host + port of Entry.server_url
  * - Else, request proceeds
  */
