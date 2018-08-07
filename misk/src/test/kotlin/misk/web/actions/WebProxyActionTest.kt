@@ -5,7 +5,6 @@ import misk.client.HttpClientModule
 import misk.inject.KAbstractModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
-import misk.web.WebActionEntry
 import misk.web.WebTestingModule
 import misk.web.jetty.JettyService
 import misk.web.mediatype.MediaTypes
@@ -247,7 +246,8 @@ class WebProxyActionTest {
   class TestModule(private val upstreamServer: MockWebServer) : KAbstractModule() {
     override fun configure() {
       install(HttpClientModule("web_proxy_action_test", Names.named("web_proxy_action_test")))
-      multibind<WebActionEntry>().toInstance(WebActionEntry<WebProxyAction>("/local/prefix"))
+      multibind<WebActionEntry>().toInstance(
+          WebActionEntry<WebProxyAction>("/local/prefix"))
       multibind<WebProxyEntry>().toProvider(
           Provider<WebProxyEntry> {
             WebProxyEntry("/local/prefix", upstreamServer.url("/").toString())

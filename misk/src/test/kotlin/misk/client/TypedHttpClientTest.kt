@@ -14,7 +14,7 @@ import misk.web.Post
 import misk.web.RequestBody
 import misk.web.RequestContentType
 import misk.web.ResponseContentType
-import misk.web.WebActionEntry
+import misk.web.actions.WebActionEntry
 import misk.web.WebTestingModule
 import misk.web.actions.WebAction
 import misk.web.jetty.JettyService
@@ -94,8 +94,10 @@ internal class TypedHttpClientTest {
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(WebTestingModule())
-      multibind<WebActionEntry>().toInstance(WebActionEntry<ReturnADinosaurAction>())
-      multibind<WebActionEntry>().toInstance(WebActionEntry<ReturnAProtoDinosaurAction>())
+      multibind<WebActionEntry>().toInstance(
+          WebActionEntry<ReturnADinosaurAction>())
+      multibind<WebActionEntry>().toInstance(
+          WebActionEntry<ReturnAProtoDinosaurAction>())
     }
   }
 

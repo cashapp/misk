@@ -4,6 +4,7 @@ import misk.Action
 import misk.web.NetworkChain
 import misk.web.NetworkInterceptor
 import misk.web.Response
+import misk.web.actions.WebEntryCommon
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -18,7 +19,7 @@ class ResourceInterceptor(
   private val mappings: List<Entry> = listOf()
 ) : NetworkInterceptor {
   override fun intercept(chain: NetworkChain): Response<*> {
-//    val matchedMapping = ResourceInterceptorCommon.findMappingFromUrl(mappings, chain.request.url) as Entry? ?: return chain.proceed(chain.request)
+//    val matchedMapping = WebEntryCommon.findMappingFromUrl(mappings, chain.request.url) as Entry? ?: return chain.proceed(chain.request)
     // TODO(adrw) finish building out Jar resource forwarding
     return chain.proceed(chain.request)
   }
@@ -43,7 +44,7 @@ class ResourceInterceptor(
   data class Entry(
     override val url_path_prefix: String,
     val jar_path: String
-  ) : ResourceInterceptorCommon.Entry {
+  ) : WebEntryCommon.Entry {
     init {
       require(url_path_prefix.startsWith("/") &&
           url_path_prefix.startsWith("/") &&

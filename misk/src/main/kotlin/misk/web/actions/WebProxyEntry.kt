@@ -1,6 +1,5 @@
 package misk.web.actions
 
-import misk.web.resources.ResourceInterceptorCommon
 import okhttp3.HttpUrl
 
 //  TODO(adrw) fix this documentation if forwarding rewrites are restricted or other conditions in place
@@ -25,7 +24,7 @@ import okhttp3.HttpUrl
 data class WebProxyEntry(
   override val url_path_prefix: String,
   val web_proxy_url: HttpUrl
-) : ResourceInterceptorCommon.Entry {
+) : WebEntryCommon.Entry {
   init {
     require(url_path_prefix.matches(Regex("(/[^/]+)*")) &&
         !url_path_prefix.startsWith("/api") &&

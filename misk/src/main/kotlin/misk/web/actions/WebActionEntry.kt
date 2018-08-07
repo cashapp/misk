@@ -1,6 +1,5 @@
-package misk.web
+package misk.web.actions
 
-import misk.web.actions.WebAction
 import kotlin.reflect.KClass
 
 /**

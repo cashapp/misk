@@ -2,6 +2,7 @@ package misk.web
 
 import misk.inject.KAbstractModule
 import misk.web.actions.WebAction
+import misk.web.actions.WebActionEntry
 import kotlin.reflect.KClass
 
 @Suppress("DEPRECATION")
@@ -9,7 +10,8 @@ class WebActionModule<A : WebAction> private constructor(
   val webActionClass: KClass<A>
 ) : KAbstractModule() {
   override fun configure() {
-    multibind<WebActionEntry>().toInstance(WebActionEntry(webActionClass))
+    multibind<WebActionEntry>().toInstance(
+        WebActionEntry(webActionClass))
   }
 
   companion object {

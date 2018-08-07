@@ -1,11 +1,18 @@
-package misk.web
+package misk.web.actions
 
 import com.google.inject.Injector
 import com.google.inject.Provider
 import misk.ApplicationInterceptor
 import misk.MiskDefault
 import misk.asAction
-import misk.web.actions.WebAction
+import misk.web.BoundAction
+import misk.web.ConnectWebSocket
+import misk.web.Get
+import misk.web.NetworkInterceptor
+import misk.web.PathPattern
+import misk.web.Post
+import misk.web.RequestContentType
+import misk.web.ResponseContentType
 import misk.web.extractors.ParameterExtractor
 import misk.web.mediatype.MediaRange
 import okhttp3.MediaType
@@ -109,7 +116,8 @@ internal class WebActionFactory {
     }
 
     return BoundAction(provider, networkInterceptors, applicationInterceptors,
-        parameterExtractorFactories, function, PathPattern.parse(pathPattern), httpMethod,
+        parameterExtractorFactories, function, PathPattern.parse(pathPattern),
+        httpMethod,
         acceptedContentTypes, responseContentType, isConnectWebSocketAction)
   }
 }

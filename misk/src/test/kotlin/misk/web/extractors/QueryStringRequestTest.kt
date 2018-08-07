@@ -6,7 +6,7 @@ import misk.testing.MiskTestModule
 import misk.web.Get
 import misk.web.QueryParam
 import misk.web.ResponseContentType
-import misk.web.WebActionEntry
+import misk.web.actions.WebActionEntry
 import misk.web.WebTestingModule
 import misk.web.actions.WebAction
 import misk.web.jetty.JettyService
@@ -92,10 +92,14 @@ internal class QueryStringRequestTest {
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(WebTestingModule())
-      multibind<WebActionEntry>().toInstance(WebActionEntry<BasicParamsAction>())
-      multibind<WebActionEntry>().toInstance(WebActionEntry<OptionalParamsAction>())
-      multibind<WebActionEntry>().toInstance(WebActionEntry<DefaultParamsAction>())
-      multibind<WebActionEntry>().toInstance(WebActionEntry<ListParamsAction>())
+      multibind<WebActionEntry>().toInstance(
+          WebActionEntry<BasicParamsAction>())
+      multibind<WebActionEntry>().toInstance(
+          WebActionEntry<OptionalParamsAction>())
+      multibind<WebActionEntry>().toInstance(
+          WebActionEntry<DefaultParamsAction>())
+      multibind<WebActionEntry>().toInstance(
+          WebActionEntry<ListParamsAction>())
     }
   }
 

@@ -1,14 +1,15 @@
 package misk.config
 
 import misk.inject.KAbstractModule
-import misk.web.WebActionEntry
+import misk.web.actions.WebActionEntry
 import misk.web.actions.AdminTab
 import misk.web.actions.WebProxyAction
 import misk.web.actions.WebProxyEntry
 
 class ConfigWebModule : KAbstractModule() {
   override fun configure() {
-    multibind<WebActionEntry>().toInstance(WebActionEntry<ConfigAdminAction>())
+    multibind<WebActionEntry>().toInstance(
+        WebActionEntry<ConfigAdminAction>())
 
     multibind<AdminTab>().toInstance(AdminTab(
         "Config",
@@ -18,6 +19,7 @@ class ConfigWebModule : KAbstractModule() {
     // TODO(adrw) only add web proxy during development, otherwise add ResourceInterceptor (Jar)
     multibind<WebProxyEntry>().toInstance(WebProxyEntry("/_admin/config",
         "http://localhost:3200/"))
-    multibind<WebActionEntry>().toInstance(WebActionEntry<WebProxyAction>("/_admin/config"))
+    multibind<WebActionEntry>().toInstance(
+        WebActionEntry<WebProxyAction>("/_admin/config"))
   }
 }

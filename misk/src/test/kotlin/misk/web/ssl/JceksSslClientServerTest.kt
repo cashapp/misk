@@ -24,7 +24,7 @@ import misk.web.Post
 import misk.web.RequestBody
 import misk.web.RequestContentType
 import misk.web.ResponseContentType
-import misk.web.WebActionEntry
+import misk.web.actions.WebActionEntry
 import misk.web.WebSslConfig
 import misk.web.WebTestingModule
 import misk.web.actions.WebAction
@@ -93,7 +93,8 @@ internal class JceksSslClientServerTest {
 
   class TestModule : KAbstractModule() {
     override fun configure() {
-      multibind<WebActionEntry>().toInstance(WebActionEntry<HelloAction>())
+      multibind<WebActionEntry>().toInstance(
+          WebActionEntry<HelloAction>())
       install(WebTestingModule(
           ssl = WebSslConfig(0,
               cert_store = CertStoreConfig(

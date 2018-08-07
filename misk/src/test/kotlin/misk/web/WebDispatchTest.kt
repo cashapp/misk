@@ -5,6 +5,7 @@ import misk.inject.KAbstractModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.web.actions.WebAction
+import misk.web.actions.WebActionEntry
 import misk.web.jetty.JettyService
 import misk.web.mediatype.MediaTypes
 import okhttp3.HttpUrl
@@ -117,12 +118,18 @@ internal class WebDispatchTest {
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(WebTestingModule())
-      multibind<WebActionEntry>().toInstance(WebActionEntry<PostHello>())
-      multibind<WebActionEntry>().toInstance(WebActionEntry<GetHello>())
-      multibind<WebActionEntry>().toInstance(WebActionEntry<PostBye>())
-      multibind<WebActionEntry>().toInstance(WebActionEntry<GetBye>())
-      multibind<WebActionEntry>().toInstance(WebActionEntry<GetNothing>())
-      multibind<WebActionEntry>().toInstance(WebActionEntry<GetHello>("/path/prefix"))
+      multibind<WebActionEntry>().toInstance(
+          WebActionEntry<PostHello>())
+      multibind<WebActionEntry>().toInstance(
+          WebActionEntry<GetHello>())
+      multibind<WebActionEntry>().toInstance(
+          WebActionEntry<PostBye>())
+      multibind<WebActionEntry>().toInstance(
+          WebActionEntry<GetBye>())
+      multibind<WebActionEntry>().toInstance(
+          WebActionEntry<GetNothing>())
+      multibind<WebActionEntry>().toInstance(
+          WebActionEntry<GetHello>("/path/prefix"))
     }
   }
 

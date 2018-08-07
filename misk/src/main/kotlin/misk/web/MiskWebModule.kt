@@ -7,18 +7,16 @@ import misk.MiskCaller
 import misk.MiskDefault
 import misk.exceptions.ActionException
 import misk.inject.KAbstractModule
-import misk.scope.ActionScoped
 import misk.scope.ActionScopedProvider
 import misk.scope.ActionScopedProviderModule
-import misk.security.authz.AccessControlModule
 import misk.security.authz.MiskCallerAuthenticator
 import misk.security.ssl.CertificatesModule
-import misk.web.actions.AdminTabAction
 import misk.web.actions.InternalErrorAction
 import misk.web.actions.LivenessCheckAction
 import misk.web.actions.NotFoundAction
 import misk.web.actions.ReadinessCheckAction
 import misk.web.actions.StatusAction
+import misk.web.actions.WebActionEntry
 import misk.web.exceptions.ActionExceptionMapper
 import misk.web.exceptions.ExceptionHandlingInterceptor
 import misk.web.exceptions.ExceptionMapperModule
@@ -130,11 +128,16 @@ class MiskWebModule : KAbstractModule() {
 //        .toInstance(StaticResourceMapper.Entry("/_admin/", "web/_admin", "misk/web/_admin/build"))
 
     // Bind build-in actions.
-    multibind<WebActionEntry>().toInstance(WebActionEntry<InternalErrorAction>())
-    multibind<WebActionEntry>().toInstance(WebActionEntry<StatusAction>())
-    multibind<WebActionEntry>().toInstance(WebActionEntry<ReadinessCheckAction>())
-    multibind<WebActionEntry>().toInstance(WebActionEntry<LivenessCheckAction>())
-    multibind<WebActionEntry>().toInstance(WebActionEntry<NotFoundAction>())
+    multibind<WebActionEntry>().toInstance(
+        WebActionEntry<InternalErrorAction>())
+    multibind<WebActionEntry>().toInstance(
+        WebActionEntry<StatusAction>())
+    multibind<WebActionEntry>().toInstance(
+        WebActionEntry<ReadinessCheckAction>())
+    multibind<WebActionEntry>().toInstance(
+        WebActionEntry<LivenessCheckAction>())
+    multibind<WebActionEntry>().toInstance(
+        WebActionEntry<NotFoundAction>())
 
     // Make CORS wide-open.
     // TODO(adrw): this is not suitable for production. lock this down.

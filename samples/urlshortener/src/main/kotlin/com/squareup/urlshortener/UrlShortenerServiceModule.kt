@@ -5,7 +5,7 @@ import misk.environment.Environment
 import misk.inject.KAbstractModule
 import misk.web.AdminTabModule
 import misk.web.MiskWebModule
-import misk.web.WebActionEntry
+import misk.web.actions.WebActionEntry
 import misk.web.WebProxyActionModule
 import misk.web.actions.AdminTabAction
 
@@ -19,9 +19,12 @@ class UrlShortenerServiceModule : KAbstractModule() {
     install(MiskWebModule())
     // Add _admin installed tabs / forwarding mappings that don't have endpoints
     install(AdminTabModule())
-    multibind<WebActionEntry>().toInstance(WebActionEntry<AdminTabAction>())
+    multibind<WebActionEntry>().toInstance(
+        WebActionEntry<AdminTabAction>())
     install(WebProxyActionModule())
-    multibind<WebActionEntry>().toInstance(WebActionEntry<CreateShortUrlWebAction>())
-    multibind<WebActionEntry>().toInstance(WebActionEntry<ShortUrlWebAction>())
+    multibind<WebActionEntry>().toInstance(
+        WebActionEntry<CreateShortUrlWebAction>())
+    multibind<WebActionEntry>().toInstance(
+        WebActionEntry<ShortUrlWebAction>())
   }
 }

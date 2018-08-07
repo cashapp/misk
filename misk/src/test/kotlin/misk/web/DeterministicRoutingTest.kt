@@ -4,6 +4,7 @@ import misk.inject.KAbstractModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.web.actions.WebAction
+import misk.web.actions.WebActionEntry
 import misk.web.jetty.JettyService
 import misk.web.mediatype.MediaTypes
 import okhttp3.OkHttpClient
@@ -71,7 +72,8 @@ internal class DeterministicRoutingTest {
       )
       shuffle(webActions)
       for (webAction in webActions) {
-        multibind<WebActionEntry>().toInstance(WebActionEntry(webAction))
+        multibind<WebActionEntry>().toInstance(
+            WebActionEntry(webAction))
       }
     }
   }

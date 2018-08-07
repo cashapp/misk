@@ -1,6 +1,5 @@
 package misk.web.actions
 
-import misk.logging.getLogger
 import misk.scope.ActionScoped
 import misk.security.authz.Unauthenticated
 import misk.web.Get
@@ -12,7 +11,6 @@ import misk.web.ResponseBody
 import misk.web.ResponseContentType
 import misk.web.mediatype.MediaTypes
 import misk.web.mediatype.asMediaType
-import misk.web.resources.ResourceInterceptorCommon
 import misk.web.toMisk
 import misk.web.toResponseBody
 import okhttp3.Headers
@@ -28,8 +26,10 @@ import javax.inject.Singleton
  * WebProxyAction
  *
  * Guidelines
- * - No overlapping entry prefixes
- *    "/_admin/config/" and "/_admin/config/subtab/" will not resolve consistently
+ * - Overlapping entry prefixes will resolve to the longest match
+ *     Example
+ *     Entries: `/_admin/config`, `/_admin/config/subtab`
+ *     Request: `/_admin/config/subtab/app.js` will resolve to the `/_admin/config/subtab` entry
  * - url_path_prefix starts with "/"
  * - url_path_prefix does not end with "/"
  * - web_proxy_url ends with "/" and doesn't contain any path segments
@@ -38,7 +38,7 @@ import javax.inject.Singleton
  * - Entries following above rules are injected into action
  * - Action attempts to findEntryFromUrl incoming request paths against entries
  * - If findEntryFromUrl found, incoming request path is appended to host + port of Entry.server_url
- * - Else, request proceeds
+ * - Else, 404
  */
 
 @Singleton
@@ -56,7 +56,7 @@ class WebProxyAction : WebAction {
   @Unauthenticated
   fun action(): Response<ResponseBody> {
     //  TODO(adrw) enforce no prefix overlapping https://github.com/square/misk/issues/303
-    val matchedEntry = ResourceInterceptorCommon.findEntryFromUrl(entries,
+    val matchedEntry = WebEntryCommon.findEntryFromUrl(entries,
         request.get().url) as WebProxyEntry?
         ?: return noEntryMatchResponse(request.get())
     val proxyUrl = matchedEntry.web_proxy_url.newBuilder()
