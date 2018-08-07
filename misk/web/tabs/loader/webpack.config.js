@@ -25,8 +25,8 @@ module.exports = {
   entry: ['react-hot-loader/patch', path.join(__dirname, '/src/index.tsx')],
   output: {
     filename: 'tab_loader.js',
-    path: path.join(__dirname, 'dist/_admin/loader'),
-    publicPath: "/_admin/loader/"
+    path: path.join(__dirname, 'dist/_admin'),
+    publicPath: "/_admin/"
 },
   devServer: {
     port: '3100',
@@ -68,6 +68,7 @@ module.exports = {
       HTMLWebpackPluginConfig, CopyWebpackPluginConfig,
       new webpack.HotModuleReplacementPlugin(),
     ]
-    : [HTMLWebpackPluginConfig, DefinePluginConfig],
+    : [HTMLWebpackPluginConfig, CopyWebpackPluginConfig,
+      DefinePluginConfig],
   externals: MiskCommon.externals
 }
