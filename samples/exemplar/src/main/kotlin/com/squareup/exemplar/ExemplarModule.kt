@@ -8,8 +8,8 @@ import misk.web.WebActionEntry
 
 class ExemplarModule : KAbstractModule() {
   override fun configure() {
-    multibind<WebActionEntry>().toInstance(WebActionEntry(HelloWebAction::class))
-    multibind<WebActionEntry>().toInstance(WebActionEntry(HelloWebPostAction::class))
-    multibind<WebActionEntry>().toInstance(WebActionEntry(EchoFormAction::class))
+    multibind<WebActionEntry>().toInstance(WebActionEntry<HelloWebAction>())
+    multibind<WebActionEntry>().toInstance(WebActionEntry<HelloWebPostAction>())
+    multibind<WebActionEntry>().toInstance(WebActionEntry<EchoFormAction>())
   }
 }

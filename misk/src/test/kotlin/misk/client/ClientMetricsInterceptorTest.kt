@@ -75,7 +75,7 @@ internal class ClientMetricsInterceptorTest {
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(WebTestingModule())
-      multibind<WebActionEntry>().toInstance(WebActionEntry(PingAction::class))
+      multibind<WebActionEntry>().toInstance(WebActionEntry<PingAction>())
     }
   }
 

@@ -21,7 +21,7 @@ class UrlShortenerServiceModule : KAbstractModule() {
     install(AdminTabModule())
     multibind<WebActionEntry>().toInstance(WebActionEntry<AdminTabAction>())
     install(WebProxyActionModule())
-    multibind<WebActionEntry>().toInstance(WebActionEntry(CreateShortUrlWebAction::class))
-    multibind<WebActionEntry>().toInstance(WebActionEntry(ShortUrlWebAction::class))
+    multibind<WebActionEntry>().toInstance(WebActionEntry<CreateShortUrlWebAction>()))
+    multibind<WebActionEntry>().toInstance(WebActionEntry<ShortUrlWebAction>()))
   }
 }

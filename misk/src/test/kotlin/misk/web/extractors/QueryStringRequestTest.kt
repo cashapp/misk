@@ -92,10 +92,10 @@ internal class QueryStringRequestTest {
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(WebTestingModule())
-      multibind<WebActionEntry>().toInstance(WebActionEntry(BasicParamsAction::class))
-      multibind<WebActionEntry>().toInstance(WebActionEntry(OptionalParamsAction::class))
-      multibind<WebActionEntry>().toInstance(WebActionEntry(DefaultParamsAction::class))
-      multibind<WebActionEntry>().toInstance(WebActionEntry(ListParamsAction::class))
+      multibind<WebActionEntry>().toInstance(WebActionEntry<BasicParamsAction>())
+      multibind<WebActionEntry>().toInstance(WebActionEntry<OptionalParamsAction>())
+      multibind<WebActionEntry>().toInstance(WebActionEntry<DefaultParamsAction>())
+      multibind<WebActionEntry>().toInstance(WebActionEntry<ListParamsAction>())
     }
   }
 

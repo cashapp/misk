@@ -156,8 +156,8 @@ class TracingInterceptorTest {
     override fun configure() {
       install(WebTestingModule())
       install(MockTracingBackendModule())
-      multibind<WebActionEntry>().toInstance(WebActionEntry(FailedTracingTestAction::class))
-      multibind<WebActionEntry>().toInstance(WebActionEntry(ExceptionThrowingTracingTestAction::class))
+      multibind<WebActionEntry>().toInstance(WebActionEntry<FailedTracingTestAction>())
+      multibind<WebActionEntry>().toInstance(WebActionEntry<ExceptionThrowingTracingTestAction>())
     }
   }
 }

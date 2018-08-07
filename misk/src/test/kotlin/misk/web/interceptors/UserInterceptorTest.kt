@@ -124,7 +124,7 @@ class UserInterceptorTest {
       multibind<ApplicationInterceptor.Factory>()
           .toInstance(UserCreatedInterceptor.Factory())
 
-      multibind<WebActionEntry>().toInstance(WebActionEntry(TestAction::class))
+      multibind<WebActionEntry>().toInstance(WebActionEntry<TestAction>())
     }
   }
 

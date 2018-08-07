@@ -85,7 +85,7 @@ class MetricsInterceptorTest {
       install(AccessControlModule())
       install(WebTestingModule())
       install(FakeCallerAuthenticatorModule())
-      multibind<WebActionEntry>().toInstance(WebActionEntry(TestAction::class))
+      multibind<WebActionEntry>().toInstance(WebActionEntry<TestAction>())
     }
   }
 

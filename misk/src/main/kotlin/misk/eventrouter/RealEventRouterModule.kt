@@ -30,7 +30,7 @@ class RealEventRouterModule(val environment: Environment) : KAbstractModule() {
     }
     bind<ClusterMapper>().to<ConsistentHashing>()
     install(MoshiAdapterModule(SocketEventJsonAdapter))
-    multibind<WebActionEntry>().toInstance(WebActionEntry(EventRouterConnectionAction::class))
+    multibind<WebActionEntry>().toInstance(WebActionEntry<EventRouterConnectionAction>())
   }
 
   @Provides @Singleton @ForEventRouterActions

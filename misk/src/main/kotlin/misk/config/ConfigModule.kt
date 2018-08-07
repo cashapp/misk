@@ -26,7 +26,7 @@ class ConfigModule<T : Config>(
     bind(configClass).toInstance(config)
     bindConfigClassRecursively(configClass)
 
-    multibind<WebActionEntry>().toInstance(WebActionEntry(ConfigAdminAction::class))
+    multibind<WebActionEntry>().toInstance(WebActionEntry<ConfigAdminAction>())
   }
 
   @Suppress("UNCHECKED_CAST")
