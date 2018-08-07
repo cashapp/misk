@@ -1,12 +1,11 @@
 package misk.web.actions
 
-import com.squareup.moshi.Moshi
+import com.google.inject.name.Names
+import misk.client.HttpClientModule
 import misk.inject.KAbstractModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
-import misk.web.Request
 import misk.web.WebActionEntry
-import misk.web.WebProxyActionModule
 import misk.web.WebTestingModule
 import misk.web.jetty.JettyService
 import misk.web.mediatype.MediaTypes
@@ -18,7 +17,6 @@ import okhttp3.OkHttpClient
 import okhttp3.RequestBody
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
-import okio.Buffer
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -37,19 +35,14 @@ class WebProxyActionTest {
   @MiskTestModule
   val module = TestModule(upstreamServer)
 
-  @Inject @Named("web_proxy_action") private lateinit var httpClient: OkHttpClient
+  @Inject @Named("web_proxy_action_test") private lateinit var httpClient: OkHttpClient
 
-  data class Packet(val message: String)
-
-  private val jsonMediaType = MediaTypes.APPLICATION_JSON.asMediaType()
   private val plainTextMediaType = MediaTypes.TEXT_PLAIN_UTF8.asMediaType()
   private val weirdMediaType = "application/weird".asMediaType()
 
-  @Inject private lateinit var moshi: Moshi
   @Inject private lateinit var jettyService: JettyService
-  @Inject lateinit var entriesProvider: Provider<List<WebProxyEntry>>
-
-  private val packetJsonAdapter get() = moshi.adapter(Packet::class.java)
+  @Inject lateinit var actionEntriesProvider: Provider<List<WebActionEntry>>
+  @Inject lateinit var proxyEntriesProvider: Provider<List<WebProxyEntry>>
 
   @BeforeEach
   internal fun setUp() {
@@ -62,14 +55,18 @@ class WebProxyActionTest {
   }
 
   @Test
-  internal fun testBindings() {
-    val mappingBindings = entriesProvider.get()
-    println(mappingBindings.first().toString())
-    assertThat(mappingBindings.size == 1)
+  internal fun entriesInjected() {
+    val actionEntries = actionEntriesProvider.get()
+    actionEntries.forEach { println(it) }
+    assertThat(actionEntries.size == 1)
+
+    val proxyEntries = proxyEntriesProvider.get()
+    println(proxyEntries.first().toString())
+    assertThat(proxyEntries.size == 1)
   }
 
   @Test
-  internal fun mappingLocalWithoutLeadingSlash() {
+  internal fun entryLocalWithoutLeadingSlash() {
     assertFailsWith<IllegalArgumentException> {
       WebProxyEntry("local/prefix",
           upstreamServer.url("/"))
@@ -77,7 +74,7 @@ class WebProxyActionTest {
   }
 
   @Test
-  internal fun mappingLocalWithTrailingSlash() {
+  internal fun entryLocalWithTrailingSlash() {
     assertFailsWith<IllegalArgumentException> {
       WebProxyEntry("/local/prefix/",
           upstreamServer.url("/"))
@@ -85,7 +82,7 @@ class WebProxyActionTest {
   }
 
   @Test
-  internal fun mappingToApiPrefix() {
+  internal fun entryToApiPrefix() {
     assertFailsWith<IllegalArgumentException> {
       WebProxyEntry("/api/test/prefix/",
           upstreamServer.url("/"))
@@ -93,7 +90,7 @@ class WebProxyActionTest {
   }
 
   @Test
-  internal fun mappingUpstreamUrlToFile() {
+  internal fun entryUpstreamUrlToFile() {
     assertFailsWith<IllegalArgumentException> {
       WebProxyEntry("/local/prefix/",
           upstreamServer.url("/test.js"))
@@ -101,7 +98,7 @@ class WebProxyActionTest {
   }
 
   @Test
-  internal fun mappingUpstreamUrlWithPathSegments() {
+  internal fun entryUpstreamUrlWithPathSegments() {
     assertFailsWith<IllegalArgumentException> {
       WebProxyEntry("/local/prefix/",
           upstreamServer.url("/upstream/prefix/"))
@@ -109,19 +106,16 @@ class WebProxyActionTest {
   }
 
   @Test
-  internal fun requestForwardedToUpstreamServerIfPathMatchesWithTrailingSlash() {
+  internal fun getForwardedPathMatchTrailingSlash() {
     upstreamServer.enqueue(MockResponse()
         .setResponseCode(418)
         .addHeader("UpstreamHeader", "UpstreamHeaderValue")
         .setBody("I am an intercepted response!"))
 
-    val request = Request(
-        upstreamServer.url("/local/prefix/tacos/"),
-        body = Buffer()
-    )
+    val request = get("/local/prefix/tacos/", weirdMediaType)
+    val response = httpClient.newCall(request).execute().toMisk()
 
-    val response = httpClient.newCall(request.toOkHttp3()).execute().toMisk()
-
+    assertThat(upstreamServer.requestCount).isNotZero()
     assertThat(response.statusCode).isEqualTo(418)
     assertThat(response.headers["UpstreamHeader"]).isEqualTo("UpstreamHeaderValue")
     assertThat(response.readUtf8()).isEqualTo("I am an intercepted response!")
@@ -131,19 +125,16 @@ class WebProxyActionTest {
   }
 
   @Test
-  internal fun requestForwardedToUpstreamServerIfPathMatchesWithoutTrailingSlash() {
+  internal fun getForwardedPathMatchNoTrailingSlash() {
     upstreamServer.enqueue(MockResponse()
         .setResponseCode(418)
         .addHeader("UpstreamHeader", "UpstreamHeaderValue")
         .setBody("I am an intercepted response!"))
 
-    val request = Request(
-        upstreamServer.url("/local/prefix/tacos"),
-        body = Buffer()
-    )
+    val request = get("/local/prefix/tacos", weirdMediaType)
+    val response = httpClient.newCall(request).execute().toMisk()
 
-    val response = httpClient.newCall(request.toOkHttp3()).execute().toMisk()
-
+    assertThat(upstreamServer.requestCount).isNotZero()
     assertThat(response.statusCode).isEqualTo(418)
     assertThat(response.headers["UpstreamHeader"]).isEqualTo("UpstreamHeaderValue")
     assertThat(response.readUtf8()).isEqualTo("I am an intercepted response!")
@@ -153,14 +144,56 @@ class WebProxyActionTest {
   }
 
   @Test
-  internal fun requestNotForwardedToUpstreamServerIfPathDoesNotMatch() {
-    val request = get("/local/notredirectedprefix/tacos", plainTextMediaType)
+  internal fun getNotForwardedPathNoMatch() {
+    val request = get("/local/notredirectedprefix/tacos", weirdMediaType)
+    val response = httpClient.newCall(request).execute().toMisk()
+    assertThat(response.readUtf8()).isEqualTo("Nothing found at /local/notredirectedprefix/tacos")
 
-//    val request = Request(
-//        HttpUrl.parse("http://local/notredirectedprefix/tacos")!!,
-//        body = Buffer()
-//    )
+    assertThat(upstreamServer.requestCount).isZero()
+  }
 
+  @Test
+  internal fun postForwardedPathMatchTrailingSlash() {
+    upstreamServer.enqueue(MockResponse()
+        .setResponseCode(418)
+        .addHeader("UpstreamHeader", "UpstreamHeaderValue")
+        .setBody("I am an intercepted response!"))
+
+    val request = post("/local/prefix/tacos/", weirdMediaType, "my taco", weirdMediaType)
+    val response = httpClient.newCall(request).execute().toMisk()
+
+    assertThat(upstreamServer.requestCount).isNotZero()
+    assertThat(response.statusCode).isEqualTo(418)
+    assertThat(response.headers["UpstreamHeader"]).isEqualTo("UpstreamHeaderValue")
+    assertThat(response.readUtf8()).isEqualTo("I am an intercepted response!")
+
+    val recordedRequest = upstreamServer.takeRequest()
+    assertThat(recordedRequest.path).isEqualTo("/local/prefix/tacos/")
+  }
+
+  @Test
+  internal fun postForwardedPathMatchNoTrailingSlash() {
+    upstreamServer.enqueue(MockResponse()
+        .setResponseCode(418)
+        .addHeader("UpstreamHeader", "UpstreamHeaderValue")
+        .setBody("I am an intercepted response!"))
+
+    val request = post("/local/prefix/tacos", weirdMediaType, "my taco", weirdMediaType)
+    val response = httpClient.newCall(request).execute().toMisk()
+
+    assertThat(upstreamServer.requestCount).isNotZero()
+    assertThat(response.statusCode).isEqualTo(418)
+    assertThat(response.headers["UpstreamHeader"]).isEqualTo("UpstreamHeaderValue")
+    assertThat(response.readUtf8()).isEqualTo("I am an intercepted response!")
+
+    val recordedRequest = upstreamServer.takeRequest()
+    assertThat(recordedRequest.path).isEqualTo("/local/prefix/tacos")
+  }
+
+  @Test
+  internal fun postNotForwardedPathNoMatch() {
+    val request =
+        post("/local/notredirectedprefix/tacos", weirdMediaType, "my taco", weirdMediaType)
     val response = httpClient.newCall(request).execute().toMisk()
     assertThat(response.readUtf8()).isEqualTo("Nothing found at /local/notredirectedprefix/tacos")
 
@@ -171,22 +204,15 @@ class WebProxyActionTest {
   internal fun returnsServerNotReachable() {
     val urlThatFailed = upstreamServer.url("/local/prefix/tacos")
 
-
-//    val request = Request(
-//        upstreamServer.url("/local/prefix/tacos"),
-//        body = Buffer()
-//    )
-
     upstreamServer.shutdown()
 
     val request = get("/local/prefix/tacos", plainTextMediaType)
-
-
     val response = httpClient.newCall(request).execute().toMisk()
 
-    assertThat(response.readUtf8()).isEqualTo("Failed to fetch upstream URL $urlThatFailed")
+    assertThat(response.readUtf8()).isEqualTo(
+        "WebProxyAction: Failed to fetch upstream URL $urlThatFailed")
     assertThat(response.statusCode).isEqualTo(HttpURLConnection.HTTP_UNAVAILABLE)
-    assertThat(response.headers["Content-Type"]).isEqualTo("text/plain; charset=utf-8")
+    assertThat(response.headers["Content-Type"]).isEqualTo(plainTextMediaType.toString())
   }
 
 //  @Test
@@ -238,12 +264,7 @@ class WebProxyActionTest {
 //    val response = httpClient.newCall(request).execute()
 //    assertThat(response.code()).isEqualTo(404)
 //  }
-//
-//  @Test
-//  internal fun entryBinding() {
-//    assertThat(entriesProvider.get().size).isEqualTo(1)
-//  }
-//
+
   private fun head(path: String, acceptedMediaType: MediaType? = null): okhttp3.Request {
     return okhttp3.Request.Builder()
         .head()
@@ -275,18 +296,18 @@ class WebProxyActionTest {
 
   class TestModule(private val upstreamServer: MockWebServer) : KAbstractModule() {
     override fun configure() {
+//      install(WebProxyActionModule())
+      install(HttpClientModule("web_proxy_action_test", Names.named("web_proxy_action_test")))
+      multibind<WebActionEntry>().toInstance(WebActionEntry<WebProxyAction>("/local/prefix"))
+      multibind<WebProxyEntry>().toProvider(
+          Provider<WebProxyEntry> {
+            WebProxyEntry("/local/prefix", upstreamServer.url("/").toString())
+          })
       install(WebTestingModule())
-      install(WebProxyActionModule())
-      multibind<WebActionEntry>().toInstance(WebActionEntry<WebProxyAction>())
-      multibind<WebProxyEntry>().toProvider(object : Provider<WebProxyEntry> {
-        override fun get(): WebProxyEntry {
-          return WebProxyEntry("/local/prefix", upstreamServer.url("/").toString())
-        }
-      })
     }
   }
 
-//  @Inject lateinit var entriesProvider: Provider<List<WebProxyEntry>>
+//  @Inject lateinit var proxyEntriesProvider: Provider<List<WebProxyEntry>>
 //
 //  private val upstreamServer = MockWebServer()
 //
@@ -327,5 +348,83 @@ class WebProxyActionTest {
 //        }
 //      })
 //    }
+//  }
+
+//  @Test
+//  internal fun requestForwardedToUpstreamServerIfPathMatchesWithTrailingSlash() {
+//    upstreamServer.enqueue(MockResponse()
+//        .setResponseCode(418)
+//        .addHeader("UpstreamHeader", "UpstreamHeaderValue")
+//        .setBody("I am an intercepted response!"))
+//
+//    val request = Request(
+//        HttpUrl.parse("http://localpost/local/prefix/tacos/")!!,
+//        body = Buffer()
+//    )
+//
+//    val response = interceptor.intercept(
+//        ResourceInterceptorCommon.FakeNetworkChain(request))
+//
+//    assertThat(response.statusCode).isEqualTo(418)
+//    assertThat(response.headers["UpstreamHeader"]).isEqualTo("UpstreamHeaderValue")
+//    assertThat(response.readUtf8()).isEqualTo("I am an intercepted response!")
+//
+//    val recordedRequest = upstreamServer.takeRequest()
+//    assertThat(recordedRequest.path).isEqualTo("/local/prefix/tacos/")
+//  }
+//
+//  @Test
+//  internal fun requestForwardedToUpstreamServerIfPathMatchesWithoutTrailingSlash() {
+//    upstreamServer.enqueue(MockResponse()
+//        .setResponseCode(418)
+//        .addHeader("UpstreamHeader", "UpstreamHeaderValue")
+//        .setBody("I am an intercepted response!"))
+//
+//    val request = Request(
+//        HttpUrl.parse("http://localpost/local/prefix/tacos")!!,
+//        body = Buffer()
+//    )
+//
+//    val response = interceptor.intercept(
+//        ResourceInterceptorCommon.FakeNetworkChain(request))
+//
+//    assertThat(response.statusCode).isEqualTo(418)
+//    assertThat(response.headers["UpstreamHeader"]).isEqualTo("UpstreamHeaderValue")
+//    assertThat(response.readUtf8()).isEqualTo("I am an intercepted response!")
+//
+//    val recordedRequest = upstreamServer.takeRequest()
+//    assertThat(recordedRequest.path).isEqualTo("/local/prefix/tacos")
+//  }
+//
+//  @Test
+//  internal fun requestNotForwardedToUpstreamServerIfPathDoesNotMatch() {
+//    val fakeRequest = Request(
+//        HttpUrl.parse("http://local/notredirectedprefix/tacos")!!,
+//        body = Buffer()
+//    )
+//
+//    val response = interceptor.intercept(
+//        ResourceInterceptorCommon.FakeNetworkChain(fakeRequest))
+//    assertThat(response.readUtf8()).isEqualTo("I am not intercepted")
+//
+//    assertThat(upstreamServer.requestCount).isZero()
+//  }
+//
+//  @Test
+//  internal fun returnsServerNotReachable() {
+//    val urlThatFailed = upstreamServer.url("/local/prefix/tacos")
+//    upstreamServer.shutdown()
+//
+//    val request = Request(
+//        HttpUrl.parse("http://localpost/local/prefix/tacos")!!,
+//        body = Buffer()
+//    )
+//
+//    val response = interceptor.intercept(
+//        ResourceInterceptorCommon.FakeNetworkChain(request))
+//
+//    assertThat(response.readUtf8()).isEqualTo("Failed to fetch upstream URL $urlThatFailed")
+//    assertThat(response.statusCode).isEqualTo(HttpURLConnection.HTTP_UNAVAILABLE)
+//    assertThat(response.headers["Content-Type"]).isEqualTo("text/plain; charset=utf-8")
 //  }
 }

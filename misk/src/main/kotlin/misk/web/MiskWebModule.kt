@@ -138,7 +138,7 @@ class MiskWebModule : KAbstractModule() {
 
     // Make CORS wide-open.
     // TODO(adrw): this is not suitable for production. lock this down.
-    multibind<NetworkInterceptor.Factory>().to<WideOpenDevelopmentInterceptorFactory>()
+//    multibind<NetworkInterceptor.Factory>().to<WideOpenDevelopmentInterceptorFactory>()
   }
 
   class MiskCallerProvider : ActionScopedProvider<MiskCaller?> {

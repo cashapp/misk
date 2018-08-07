@@ -1,5 +1,6 @@
 package misk.web.actions
 
+import misk.logging.getLogger
 import misk.scope.ActionScoped
 import misk.security.authz.Unauthenticated
 import misk.web.Get
@@ -10,6 +11,7 @@ import misk.web.Response
 import misk.web.ResponseBody
 import misk.web.ResponseContentType
 import misk.web.mediatype.MediaTypes
+import misk.web.mediatype.asMediaType
 import misk.web.resources.ResourceInterceptorCommon
 import misk.web.toMisk
 import misk.web.toResponseBody
@@ -44,6 +46,8 @@ class WebProxyAction : WebAction {
   @Inject private lateinit var entries: List<WebProxyEntry>
   @Inject @JvmSuppressWildcards private lateinit var request: ActionScoped<Request>
 
+  private val plainTextMediaType = MediaTypes.TEXT_PLAIN_UTF8.asMediaType()
+
   @Get("/{path:.*}")
   @Post("/{path:.*}")
   @RequestContentType(MediaTypes.ALL)
@@ -74,15 +78,15 @@ class WebProxyAction : WebAction {
   private fun noEntryMatchResponse(clientRequest: Request): Response<ResponseBody> {
     return Response(
         "WebProxyAction: No matching WebProxyEntry to forward upstream URL ${clientRequest.url}".toResponseBody(),
-        Headers.of("Content-Type", "text/plain; charset=utf-8"),
-        HttpURLConnection.HTTP_UNAVAILABLE
+        Headers.of("Content-Type", plainTextMediaType.toString()),
+        HttpURLConnection.HTTP_NOT_FOUND
     )
   }
 
   private fun fetchFailResponse(clientRequest: okhttp3.Request): Response<ResponseBody> {
     return Response(
         "WebProxyAction: Failed to fetch upstream URL ${clientRequest.url()}".toResponseBody(),
-        Headers.of("Content-Type", "text/plain; charset=utf-8"),
+        Headers.of("Content-Type", plainTextMediaType.toString()),
         HttpURLConnection.HTTP_UNAVAILABLE
     )
   }
