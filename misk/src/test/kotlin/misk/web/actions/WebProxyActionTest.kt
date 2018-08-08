@@ -1,16 +1,21 @@
 package misk.web.actions
 
 import com.google.inject.name.Names
+import kotlinx.coroutines.experimental.async
+import kotlinx.coroutines.experimental.runBlocking
 import misk.client.HttpClientModule
 import misk.inject.KAbstractModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
+import misk.web.Response
 import misk.web.WebTestingModule
 import misk.web.jetty.JettyService
 import misk.web.mediatype.MediaTypes
 import misk.web.mediatype.asMediaType
 import misk.web.readUtf8
 import misk.web.toMisk
+import misk.web.toResponseBody
+import okhttp3.Headers
 import okhttp3.MediaType
 import okhttp3.OkHttpClient
 import okhttp3.RequestBody
@@ -22,6 +27,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.lang.IllegalArgumentException
 import java.net.HttpURLConnection
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Provider
@@ -42,6 +48,12 @@ class WebProxyActionTest {
   @Inject private lateinit var jettyService: JettyService
   @Inject lateinit var actionEntriesProvider: Provider<List<WebActionEntry>>
   @Inject lateinit var proxyEntriesProvider: Provider<List<WebProxyEntry>>
+
+  @Volatile private var threadResponse: Response<*> = Response(
+      "Uninitialized".toResponseBody(),
+      Headers.of("Content-Type", plainTextMediaType.toString()),
+      HttpURLConnection.HTTP_INTERNAL_ERROR
+  )
 
   @BeforeEach
   internal fun setUp() {
@@ -111,16 +123,23 @@ class WebProxyActionTest {
         .addHeader("UpstreamHeader", "UpstreamHeaderValue")
         .setBody("I am an intercepted response!"))
 
-    val request = get("/local/prefix/tacos/", weirdMediaType)
-    val response = httpClient.newCall(request).execute().toMisk()
+    val responseAsync = async {
+      httpClient.newCall(
+          get("/local/prefix/tacos/", weirdMediaType)).execute().toMisk()
+    }
 
+    val upstreamReceivedRequest = upstreamServer.takeRequest(200, TimeUnit.MILLISECONDS)
+    assertThat(
+        upstreamReceivedRequest.getHeader("Forwarded")).isEqualTo(
+        "for=; by=${jettyService.httpServerUrl.newBuilder().encodedPath("/")}")
     assertThat(upstreamServer.requestCount).isNotZero()
-    assertThat(response.statusCode).isEqualTo(418)
-    assertThat(response.headers["UpstreamHeader"]).isEqualTo("UpstreamHeaderValue")
-    assertThat(response.readUtf8()).isEqualTo("I am an intercepted response!")
+    assertThat(upstreamReceivedRequest.path).isEqualTo("/local/prefix/tacos/")
 
-    val recordedRequest = upstreamServer.takeRequest()
-    assertThat(recordedRequest.path).isEqualTo("/local/prefix/tacos/")
+    runBlocking {
+      assertThat(responseAsync.await().statusCode).isEqualTo(418)
+      assertThat(responseAsync.await().headers["UpstreamHeader"]).isEqualTo("UpstreamHeaderValue")
+      assertThat(responseAsync.await().readUtf8()).isEqualTo("I am an intercepted response!")
+    }
   }
 
   @Test
@@ -130,16 +149,21 @@ class WebProxyActionTest {
         .addHeader("UpstreamHeader", "UpstreamHeaderValue")
         .setBody("I am an intercepted response!"))
 
-    val request = get("/local/prefix/tacos", weirdMediaType)
-    val response = httpClient.newCall(request).execute().toMisk()
+    val responseAsync =
+        async { httpClient.newCall(get("/local/prefix/tacos", weirdMediaType)).execute().toMisk() }
 
+    val upstreamReceivedRequest = upstreamServer.takeRequest(200, TimeUnit.MILLISECONDS)
+    assertThat(
+        upstreamReceivedRequest.getHeader("Forwarded")).isEqualTo(
+        "for=; by=${jettyService.httpServerUrl.newBuilder().encodedPath("/")}")
     assertThat(upstreamServer.requestCount).isNotZero()
-    assertThat(response.statusCode).isEqualTo(418)
-    assertThat(response.headers["UpstreamHeader"]).isEqualTo("UpstreamHeaderValue")
-    assertThat(response.readUtf8()).isEqualTo("I am an intercepted response!")
+    assertThat(upstreamReceivedRequest.path).isEqualTo("/local/prefix/tacos")
 
-    val recordedRequest = upstreamServer.takeRequest()
-    assertThat(recordedRequest.path).isEqualTo("/local/prefix/tacos")
+    runBlocking {
+      assertThat(responseAsync.await().statusCode).isEqualTo(418)
+      assertThat(responseAsync.await().headers["UpstreamHeader"]).isEqualTo("UpstreamHeaderValue")
+      assertThat(responseAsync.await().readUtf8()).isEqualTo("I am an intercepted response!")
+    }
   }
 
   @Test
@@ -158,16 +182,24 @@ class WebProxyActionTest {
         .addHeader("UpstreamHeader", "UpstreamHeaderValue")
         .setBody("I am an intercepted response!"))
 
-    val request = post("/local/prefix/tacos/", weirdMediaType, "my taco", weirdMediaType)
-    val response = httpClient.newCall(request).execute().toMisk()
+    val response = async {
+      httpClient.newCall(
+          post("/local/prefix/tacos/", weirdMediaType, "my taco", weirdMediaType)).execute()
+          .toMisk()
+    }
 
+    val upstreamReceivedRequest = upstreamServer.takeRequest(200, TimeUnit.MILLISECONDS)
+    assertThat(
+        upstreamReceivedRequest.getHeader("Forwarded")).isEqualTo(
+        "for=; by=${jettyService.httpServerUrl.newBuilder().encodedPath("/")}")
     assertThat(upstreamServer.requestCount).isNotZero()
-    assertThat(response.statusCode).isEqualTo(418)
-    assertThat(response.headers["UpstreamHeader"]).isEqualTo("UpstreamHeaderValue")
-    assertThat(response.readUtf8()).isEqualTo("I am an intercepted response!")
+    assertThat(upstreamReceivedRequest.path).isEqualTo("/local/prefix/tacos/")
 
-    val recordedRequest = upstreamServer.takeRequest()
-    assertThat(recordedRequest.path).isEqualTo("/local/prefix/tacos/")
+    runBlocking {
+      assertThat(response.await().statusCode).isEqualTo(418)
+      assertThat(response.await().headers["UpstreamHeader"]).isEqualTo("UpstreamHeaderValue")
+      assertThat(response.await().readUtf8()).isEqualTo("I am an intercepted response!")
+    }
   }
 
   @Test
@@ -177,16 +209,23 @@ class WebProxyActionTest {
         .addHeader("UpstreamHeader", "UpstreamHeaderValue")
         .setBody("I am an intercepted response!"))
 
-    val request = post("/local/prefix/tacos", weirdMediaType, "my taco", weirdMediaType)
-    val response = httpClient.newCall(request).execute().toMisk()
+    val response = async {
+      httpClient.newCall(
+          post("/local/prefix/tacos", weirdMediaType, "my taco", weirdMediaType)).execute().toMisk()
+    }
 
+    val upstreamReceivedRequest = upstreamServer.takeRequest(200, TimeUnit.MILLISECONDS)
+    assertThat(
+        upstreamReceivedRequest.getHeader("Forwarded")).isEqualTo(
+        "for=; by=${jettyService.httpServerUrl.newBuilder().encodedPath("/")}")
     assertThat(upstreamServer.requestCount).isNotZero()
-    assertThat(response.statusCode).isEqualTo(418)
-    assertThat(response.headers["UpstreamHeader"]).isEqualTo("UpstreamHeaderValue")
-    assertThat(response.readUtf8()).isEqualTo("I am an intercepted response!")
+    assertThat(upstreamReceivedRequest.path).isEqualTo("/local/prefix/tacos")
 
-    val recordedRequest = upstreamServer.takeRequest()
-    assertThat(recordedRequest.path).isEqualTo("/local/prefix/tacos")
+    runBlocking {
+      assertThat(response.await().statusCode).isEqualTo(418)
+      assertThat(response.await().headers["UpstreamHeader"]).isEqualTo("UpstreamHeaderValue")
+      assertThat(response.await().readUtf8()).isEqualTo("I am an intercepted response!")
+    }
   }
 
   @Test
