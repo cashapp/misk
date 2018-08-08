@@ -3,6 +3,7 @@ package misk.web
 import misk.web.actions.WebSocket
 import okhttp3.Headers
 import okhttp3.HttpUrl
+import okhttp3.MediaType
 import okhttp3.RequestBody
 import okio.BufferedSink
 import okio.BufferedSource
@@ -17,11 +18,14 @@ data class Request(
 ) {
   fun toOkHttp3(): okhttp3.Request {
     // TODO(adrw) https://github.com/square/misk/issues/279
-    val okRequestBody = if (this.method == HttpMethod.GET) {
-      null
-    } else {
-      object : RequestBody() {
-        override fun contentType() = null
+    val okRequestBody = when {
+      this.method == HttpMethod.CONNECT -> null
+      this.method == HttpMethod.GET -> null
+      this.method == HttpMethod.HEAD -> null
+      this.method == HttpMethod.OPTIONS -> null
+      this.method == HttpMethod.TRACE -> null
+      else -> object : RequestBody() {
+        override fun contentType(): MediaType? = null
         override fun writeTo(sink: BufferedSink) {
           sink.writeAll(body)
         }
