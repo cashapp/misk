@@ -253,14 +253,6 @@ class WebProxyActionTest {
     assertThat(response.headers["Content-Type"]).isEqualTo(plainTextMediaType.toString())
   }
 
-  private fun head(path: String, acceptedMediaType: MediaType? = null): okhttp3.Request {
-    return okhttp3.Request.Builder()
-        .head()
-        .url(jettyService.httpServerUrl.newBuilder().encodedPath(path).build())
-        .header("Accept", acceptedMediaType.toString())
-        .build()
-  }
-
   private fun get(path: String, acceptedMediaType: MediaType? = null): okhttp3.Request {
     return okhttp3.Request.Builder()
         .get()
