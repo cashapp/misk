@@ -21,7 +21,6 @@ import java.net.HttpURLConnection
 import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Singleton
-import javax.servlet.http.HttpServletRequest
 
 /**
  * WebProxyAction
