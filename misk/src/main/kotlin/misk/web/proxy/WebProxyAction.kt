@@ -1,4 +1,4 @@
-package misk.web.actions
+package misk.web.proxy
 
 import misk.scope.ActionScoped
 import misk.security.authz.Unauthenticated
@@ -9,6 +9,8 @@ import misk.web.RequestContentType
 import misk.web.Response
 import misk.web.ResponseBody
 import misk.web.ResponseContentType
+import misk.web.actions.WebAction
+import misk.web.actions.WebEntryCommon
 import misk.web.mediatype.MediaTypes
 import misk.web.mediatype.asMediaType
 import misk.web.toMisk

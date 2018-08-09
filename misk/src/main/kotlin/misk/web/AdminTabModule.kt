@@ -3,8 +3,8 @@ package misk.web
 import misk.inject.KAbstractModule
 import misk.web.actions.AdminTab
 import misk.web.actions.WebActionEntry
-import misk.web.actions.WebProxyAction
-import misk.web.actions.WebProxyEntry
+import misk.web.proxy.WebProxyAction
+import misk.web.proxy.WebProxyEntry
 
 /**
  * AdminTabModule
@@ -32,11 +32,13 @@ class AdminTabModule : KAbstractModule() {
         "@misk",
         "/_admin/@misk/"
     ))
-    multibind<WebProxyEntry>().toInstance(WebProxyEntry("/_admin/@misk", "http://localhost:9100/"))
+    multibind<WebProxyEntry>().toInstance(
+        WebProxyEntry("/_admin/@misk", "http://localhost:9100/"))
     multibind<WebActionEntry>().toInstance(
         WebActionEntry<WebProxyAction>("/_admin/@misk"))
 
-    multibind<WebProxyEntry>().toInstance(WebProxyEntry("/_admin", "http://localhost:3100/"))
+    multibind<WebProxyEntry>().toInstance(
+        WebProxyEntry("/_admin", "http://localhost:3100/"))
     multibind<WebActionEntry>().toInstance(
         WebActionEntry<WebProxyAction>("/_admin"))
 

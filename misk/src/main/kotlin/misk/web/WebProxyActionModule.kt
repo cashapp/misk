@@ -4,7 +4,7 @@ import com.google.inject.name.Names
 import misk.client.HttpClientModule
 import misk.inject.KAbstractModule
 import misk.web.actions.WebActionEntry
-import misk.web.actions.WebProxyEntry
+import misk.web.proxy.WebProxyEntry
 
 /** Intercept web requests and route to webpack dev servers */
 class WebProxyActionModule : KAbstractModule() {

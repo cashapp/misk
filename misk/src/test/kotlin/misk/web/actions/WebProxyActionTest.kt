@@ -12,6 +12,8 @@ import misk.web.WebTestingModule
 import misk.web.jetty.JettyService
 import misk.web.mediatype.MediaTypes
 import misk.web.mediatype.asMediaType
+import misk.web.proxy.WebProxyAction
+import misk.web.proxy.WebProxyEntry
 import misk.web.readUtf8
 import misk.web.toMisk
 import misk.web.toResponseBody
@@ -19,7 +21,6 @@ import okhttp3.Headers
 import okhttp3.MediaType
 import okhttp3.OkHttpClient
 import okhttp3.RequestBody
-import okhttp3.ResponseBody
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.assertj.core.api.Assertions.assertThat

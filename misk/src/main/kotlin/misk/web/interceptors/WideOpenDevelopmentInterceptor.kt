@@ -1,9 +1,11 @@
-package misk.web
+package misk.web.interceptors
 
 import misk.Action
 import misk.environment.Environment
+import misk.web.NetworkChain
+import misk.web.NetworkInterceptor
+import misk.web.Response
 import javax.inject.Inject
-
 internal class WideOpenDevelopmentInterceptor : NetworkInterceptor {
   override fun intercept(chain: NetworkChain): Response<*> {
     val response = chain.proceed(chain.request)
@@ -26,4 +28,3 @@ internal class WideOpenDevelopmentInterceptorFactory : NetworkInterceptor.Factor
     return null
   }
 }
-

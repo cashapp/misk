@@ -1,5 +1,6 @@
-package misk.web.actions
+package misk.web.proxy
 
+import misk.web.actions.WebEntryCommon
 import okhttp3.HttpUrl
 
 //  TODO(adrw) fix this documentation if forwarding rewrites are restricted or other conditions in place
