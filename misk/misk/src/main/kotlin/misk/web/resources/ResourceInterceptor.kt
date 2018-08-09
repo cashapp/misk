@@ -4,6 +4,7 @@ import misk.Action
 import misk.web.NetworkChain
 import misk.web.NetworkInterceptor
 import misk.web.Response
+import misk.web.actions.WebEntryCommon
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -15,10 +16,10 @@ import javax.inject.Singleton
 
 @Singleton
 class ResourceInterceptor(
-  private val mappings: List<Mapping> = listOf()
+  private val mappings: List<Entry> = listOf()
 ) : NetworkInterceptor {
   override fun intercept(chain: NetworkChain): Response<*> {
-//    val matchedMapping = ResourceInterceptorCommon.findMappingFromUrl(mappings, chain.request.url) as Mapping? ?: return chain.proceed(chain.request)
+//    val matchedMapping = WebEntryCommon.findMappingFromUrl(mappings, chain.request.url) as Entry? ?: return chain.proceed(chain.request)
     // TODO(adrw) finish building out Jar resource forwarding
     return chain.proceed(chain.request)
   }
@@ -37,13 +38,13 @@ class ResourceInterceptor(
    * in a `KAbstractModule`:
    *
    * ```
-   * multibind<ResourceInterceptor.Mapping>().toInstance(ResourceInterceptor.Mapping(...))
+   * multibind<ResourceInterceptor.Entry>().toInstance(ResourceInterceptor.Entry(...))
    * ```
    */
-  data class Mapping(
+  data class Entry(
     override val url_path_prefix: String,
     val jar_path: String
-  ) : ResourceInterceptorCommon.Mapping {
+  ) : WebEntryCommon.Entry {
     init {
       require(url_path_prefix.startsWith("/") &&
           url_path_prefix.startsWith("/") &&
@@ -53,8 +54,8 @@ class ResourceInterceptor(
     }
   }
 
-  class Factor @Inject internal constructor() : NetworkInterceptor.Factory {
-    @Inject private lateinit var mappings: List<Mapping>
+  class Factory @Inject internal constructor() : NetworkInterceptor.Factory {
+    @Inject private lateinit var mappings: List<Entry>
     override fun create(action: Action): NetworkInterceptor? {
       return ResourceInterceptor(mappings)
     }

@@ -16,7 +16,7 @@ import misk.web.NetworkChain
 import misk.web.NetworkInterceptor
 import misk.web.Request
 import misk.web.Response
-import misk.web.WebActionEntry
+import misk.web.actions.WebActionEntry
 import misk.web.WebTestingModule
 import misk.web.actions.WebAction
 import misk.web.actions.asNetworkChain
@@ -156,8 +156,8 @@ class TracingInterceptorTest {
     override fun configure() {
       install(WebTestingModule())
       install(MockTracingBackendModule())
-      multibind<WebActionEntry>().toInstance(WebActionEntry(FailedTracingTestAction::class))
-      multibind<WebActionEntry>().toInstance(WebActionEntry(ExceptionThrowingTracingTestAction::class))
+      multibind<WebActionEntry>().toInstance(WebActionEntry<FailedTracingTestAction>())
+      multibind<WebActionEntry>().toInstance(WebActionEntry<ExceptionThrowingTracingTestAction>())
     }
   }
 }

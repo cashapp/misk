@@ -2,8 +2,9 @@ package misk.web
 
 import misk.inject.KAbstractModule
 import misk.web.actions.AdminTab
-import misk.web.resources.WebProxyInterceptor
-import okhttp3.HttpUrl
+import misk.web.actions.WebActionEntry
+import misk.web.proxy.WebProxyAction
+import misk.web.proxy.WebProxyEntry
 
 /**
  * AdminTabModule
@@ -21,26 +22,26 @@ class AdminTabModule : KAbstractModule() {
         "dashboard",
         "/_admin/dashboard/"
     ))
-    multibind<WebProxyInterceptor.Mapping>().toInstance(
-        WebProxyInterceptor.Mapping(
-            "/_admin/dashboard/",
-            HttpUrl.parse("http://localhost:3110/")!!
-        ))
+    multibind<WebProxyEntry>().toInstance(
+        WebProxyEntry("/_admin/dashboard", "http://localhost:3110/"))
+    multibind<WebActionEntry>().toInstance(
+        WebActionEntry<WebProxyAction>("/_admin/dashboard"))
+    
     multibind<AdminTab>().toInstance(AdminTab(
         "Misk NPM",
         "@misk",
         "/_admin/@misk/"
     ))
-    multibind<WebProxyInterceptor.Mapping>().toInstance(
-        WebProxyInterceptor.Mapping(
-            "/_admin/@misk/",
-            HttpUrl.parse("http://localhost:9100/")!!
-        ))
-    multibind<AdminTab>().toInstance(AdminTab(
-        "Loader",
-        "loader",
-        "/_admin/"
-    ))
+    multibind<WebProxyEntry>().toInstance(
+        WebProxyEntry("/_admin/@misk", "http://localhost:9100/"))
+    multibind<WebActionEntry>().toInstance(
+        WebActionEntry<WebProxyAction>("/_admin/@misk"))
+
+    multibind<WebProxyEntry>().toInstance(
+        WebProxyEntry("/_admin", "http://localhost:3100/"))
+    multibind<WebActionEntry>().toInstance(
+        WebActionEntry<WebProxyAction>("/_admin"))
+
     multibind<AdminTab>().toInstance(AdminTab(
         "Temp Test",
         "test",

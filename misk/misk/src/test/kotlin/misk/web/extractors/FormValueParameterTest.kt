@@ -6,7 +6,7 @@ import misk.testing.MiskTestModule
 import misk.web.FormField
 import misk.web.FormValue
 import misk.web.Post
-import misk.web.WebActionEntry
+import misk.web.actions.WebActionEntry
 import misk.web.WebTestingModule
 import misk.web.actions.WebAction
 import misk.web.jetty.JettyService
@@ -152,11 +152,11 @@ internal class FormValueParameterTest {
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(WebTestingModule())
-      multibind<WebActionEntry>().toInstance(WebActionEntry(BasicParamsAction::class))
-      multibind<WebActionEntry>().toInstance(WebActionEntry(OptionalParamsAction::class))
-      multibind<WebActionEntry>().toInstance(WebActionEntry(DefaultParamsAction::class))
-      multibind<WebActionEntry>().toInstance(WebActionEntry(ListParamsAction::class))
-      multibind<WebActionEntry>().toInstance(WebActionEntry(FormValueAnnotationAction::class))
+      multibind<WebActionEntry>().toInstance(WebActionEntry<BasicParamsAction>())
+      multibind<WebActionEntry>().toInstance(WebActionEntry<OptionalParamsAction>())
+      multibind<WebActionEntry>().toInstance(WebActionEntry<DefaultParamsAction>())
+      multibind<WebActionEntry>().toInstance(WebActionEntry<ListParamsAction>())
+      multibind<WebActionEntry>().toInstance(WebActionEntry<FormValueAnnotationAction>())
     }
   }
 

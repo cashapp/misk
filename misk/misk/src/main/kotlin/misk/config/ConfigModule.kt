@@ -7,6 +7,7 @@ import com.google.inject.name.Names
 import misk.inject.KAbstractModule
 import misk.inject.asSingleton
 import misk.inject.typeLiteral
+import misk.web.actions.WebActionEntry
 import javax.inject.Provider
 import kotlin.reflect.KProperty1
 import kotlin.reflect.full.createType

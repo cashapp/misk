@@ -20,5 +20,5 @@ http_clients:
   endpoints:
     for_shortened_urls:
       url: https://localhost/
-    web_proxy_interceptor:
+    web_proxy_action:
       url: http://localhost/

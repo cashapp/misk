@@ -2,6 +2,7 @@ package misk.web
 
 import misk.inject.KAbstractModule
 import misk.web.actions.WebAction
+import misk.web.actions.WebActionEntry
 import kotlin.reflect.KClass
 
 @Suppress("DEPRECATION")

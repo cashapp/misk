@@ -6,7 +6,7 @@ import misk.testing.MiskTestModule
 import misk.web.Get
 import misk.web.PathParam
 import misk.web.ResponseContentType
-import misk.web.WebActionEntry
+import misk.web.actions.WebActionEntry
 import misk.web.WebTestingModule
 import misk.web.actions.WebAction
 import misk.web.jetty.JettyService
@@ -48,8 +48,8 @@ internal class PathParamDispatchTest {
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(WebTestingModule())
-      multibind<WebActionEntry>().toInstance(WebActionEntry(GetObjectDetails::class))
-      multibind<WebActionEntry>().toInstance(WebActionEntry(CustomPathParamName::class))
+      multibind<WebActionEntry>().toInstance(WebActionEntry<GetObjectDetails>())
+      multibind<WebActionEntry>().toInstance(WebActionEntry<CustomPathParamName>())
     }
   }
 

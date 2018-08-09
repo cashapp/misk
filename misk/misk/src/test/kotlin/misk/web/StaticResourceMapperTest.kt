@@ -6,6 +6,7 @@ import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.web.actions.NotFoundAction
 import misk.web.actions.WebAction
+import misk.web.actions.WebActionEntry
 import misk.web.jetty.JettyService
 import misk.web.resources.StaticResourceMapper
 import okhttp3.OkHttpClient
@@ -97,8 +98,8 @@ class StaticResourceMapperTest {
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(WebTestingModule())
-      multibind<WebActionEntry>().toInstance(WebActionEntry(Hello::class))
-      multibind<WebActionEntry>().toInstance(WebActionEntry(NotFoundAction::class))
+      multibind<WebActionEntry>().toInstance(WebActionEntry<Hello>())
+      multibind<WebActionEntry>().toInstance(WebActionEntry<NotFoundAction>())
       multibind<StaticResourceMapper.Entry>()
           .toInstance(StaticResourceMapper.Entry("/", "memory:/web", "???"))
     }
