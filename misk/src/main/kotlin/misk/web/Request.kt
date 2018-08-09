@@ -18,12 +18,8 @@ data class Request(
 ) {
   fun toOkHttp3(): okhttp3.Request {
     // TODO(adrw) https://github.com/square/misk/issues/279
-    val okRequestBody = when {
-      this.method == HttpMethod.CONNECT -> null
-      this.method == HttpMethod.GET -> null
-      this.method == HttpMethod.HEAD -> null
-      this.method == HttpMethod.OPTIONS -> null
-      this.method == HttpMethod.TRACE -> null
+    val okRequestBody = when (this.method) {
+      HttpMethod.CONNECT, HttpMethod.GET, HttpMethod.HEAD, HttpMethod.OPTIONS, HttpMethod.TRACE -> null
       else -> object : RequestBody() {
         override fun contentType(): MediaType? = null
         override fun writeTo(sink: BufferedSink) {

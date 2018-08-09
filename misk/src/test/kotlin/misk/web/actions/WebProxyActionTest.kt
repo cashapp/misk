@@ -19,6 +19,7 @@ import okhttp3.Headers
 import okhttp3.MediaType
 import okhttp3.OkHttpClient
 import okhttp3.RequestBody
+import okhttp3.ResponseBody
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.assertj.core.api.Assertions.assertThat

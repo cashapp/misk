@@ -1,13 +1,6 @@
 import org.junit.platform.console.options.Details
 
 apply plugin: 'kotlin'
-
-kotlin {
-  experimental {
-    coroutines 'enable'
-  }
-}
-
 apply plugin: 'org.junit.platform.gradle.plugin'
 apply plugin: "com.vanniktech.maven.publish"
 
@@ -36,7 +29,6 @@ junitPlatform {
 dependencies {
   compile dep.kotlinStdLib
   compile dep.kotlinTest
-  compile dep.kotlinxCoroutines
   compile dep.bouncycastle
   compile dep.guava
   compile dep.guice
@@ -70,6 +62,7 @@ dependencies {
   compile dep.prometheusClient
   compile dep.prometheusHotspot
 
+  testCompile dep.kotlinxCoroutines
   testCompile dep.mockitoCore
   testCompile project(':misk-testing')
 }

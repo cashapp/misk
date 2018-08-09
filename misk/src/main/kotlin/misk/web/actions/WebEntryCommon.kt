@@ -6,8 +6,7 @@ object WebEntryCommon {
   /**
    * findEntryFromUrl
    *
-   * returns entry with longest match on `url_path_prefix` of incoming request
-   *
+   * @return entry whose url_path_prefix most closely matches given url; longest match wins
    */
   fun findEntryFromUrl(entries: List<Entry>, url: HttpUrl): Entry? {
     var matched : List<Entry> = listOf()

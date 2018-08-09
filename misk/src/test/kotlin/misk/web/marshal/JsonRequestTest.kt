@@ -85,9 +85,9 @@ internal class JsonRequestTest {
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(WebTestingModule())
-      multibind<WebActionEntry>().toInstance(WebActionEntry<PassAsObject>()))
-      multibind<WebActionEntry>().toInstance(WebActionEntry<PassAsString>()))
-      multibind<WebActionEntry>().toInstance(WebActionEntry<PassAsByteString>()))
+      multibind<WebActionEntry>().toInstance(WebActionEntry<PassAsObject>())
+      multibind<WebActionEntry>().toInstance(WebActionEntry<PassAsString>())
+      multibind<WebActionEntry>().toInstance(WebActionEntry<PassAsByteString>())
     }
   }
 

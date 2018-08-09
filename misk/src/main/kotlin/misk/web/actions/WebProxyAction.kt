@@ -71,8 +71,7 @@ class WebProxyAction : WebAction {
     val request = clientRequest.get()
     val proxyRequest = request.toOkHttp3().forwardedWithUrl(proxyUrl)
     return try {
-      val proxyResponse = proxyClient.newCall(proxyRequest).execute()
-      proxyResponse.toMisk()
+      proxyClient.newCall(proxyRequest).execute().toMisk()
     } catch (e: IOException) {
       fetchFailResponse(proxyRequest.url())
     }
