@@ -122,22 +122,14 @@ internal class JsonResponseTest {
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(WebTestingModule())
-      multibind<WebActionEntry>().toInstance(
-          WebActionEntry(ReturnAsObject::class))
-      multibind<WebActionEntry>().toInstance(
-          WebActionEntry(ReturnAsString::class))
-      multibind<WebActionEntry>().toInstance(
-          WebActionEntry(ReturnAsByteString::class))
-      multibind<WebActionEntry>().toInstance(
-          WebActionEntry(ReturnAsResponseBody::class))
-      multibind<WebActionEntry>().toInstance(
-          WebActionEntry(ReturnAsObjectResponse::class))
-      multibind<WebActionEntry>().toInstance(
-          WebActionEntry(ReturnAsStringResponse::class))
-      multibind<WebActionEntry>().toInstance(
-          WebActionEntry(ReturnAsByteStringResponse::class))
-      multibind<WebActionEntry>().toInstance(
-          WebActionEntry(ReturnAsResponseBodyResponse::class))
+      multibind<WebActionEntry>().toInstance(WebActionEntry<ReturnAsObject>())
+      multibind<WebActionEntry>().toInstance(WebActionEntry<ReturnAsString>())
+      multibind<WebActionEntry>().toInstance(WebActionEntry<ReturnAsByteString>())
+      multibind<WebActionEntry>().toInstance(WebActionEntry<ReturnAsResponseBody>())
+      multibind<WebActionEntry>().toInstance(WebActionEntry<ReturnAsObjectResponse>())
+      multibind<WebActionEntry>().toInstance(WebActionEntry<ReturnAsStringResponse>())
+      multibind<WebActionEntry>().toInstance(WebActionEntry<ReturnAsByteStringResponse>())
+      multibind<WebActionEntry>().toInstance(WebActionEntry<ReturnAsResponseBodyResponse>())
     }
   }
 

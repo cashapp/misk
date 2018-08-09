@@ -69,8 +69,7 @@ class ProtoMessageHttpClientTest {
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(WebTestingModule())
-      multibind<WebActionEntry>().toInstance(
-          WebActionEntry(ReturnADinosaur::class))
+      multibind<WebActionEntry>().toInstance(WebActionEntry<ReturnADinosaur>())
     }
   }
 

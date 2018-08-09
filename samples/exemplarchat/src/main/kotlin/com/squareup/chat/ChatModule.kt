@@ -12,12 +12,9 @@ import misk.web.resources.StaticResourceMapper
 
 class ChatModule : KAbstractModule() {
   override fun configure() {
-    multibind<WebActionEntry>().toInstance(
-        WebActionEntry<ChatPageAction>())
-    multibind<WebActionEntry>().toInstance(
-        WebActionEntry<ChatWebSocketAction>())
-    multibind<WebActionEntry>().toInstance(
-        WebActionEntry<ToggleManualHealthCheckAction>())
+    multibind<WebActionEntry>().toInstance(WebActionEntry<ChatPageAction>())
+    multibind<WebActionEntry>().toInstance(WebActionEntry<ChatWebSocketAction>())
+    multibind<WebActionEntry>().toInstance(WebActionEntry<ToggleManualHealthCheckAction>())
     install(ClusterWideHealthModule())
     multibind<HealthCheck>().to<ManualHealthCheck>()
     multibind<StaticResourceMapper.Entry>()

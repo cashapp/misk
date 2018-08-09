@@ -12,13 +12,11 @@ import javax.inject.Singleton
 
 class ClusterWideHealthModule : KAbstractModule() {
   override fun configure() {
-    multibind<WebActionEntry>().toInstance(
-        WebActionEntry<ClusterWideHealthPageAction>())
-    multibind<WebActionEntry>().toInstance(
-        WebActionEntry<ClusterWideHealthService>())
+    multibind<WebActionEntry>().toInstance(WebActionEntry<ClusterWideHealthPageAction>())
+    multibind<WebActionEntry>().toInstance(WebActionEntry<ClusterWideHealthService>())
     multibind<Service>().to<ClusterWideHealthService>()
-    multibind<StaticResourceMapper.Entry>()
-        .toInstance(StaticResourceMapper.Entry("/admin/", "web/admin", "misk/web/admin/build"))
+    multibind<StaticResourceMapper.Entry>().toInstance(
+        StaticResourceMapper.Entry("/admin/", "web/admin", "misk/web/admin/build"))
   }
 
   @Provides @Singleton @ForClusterWideHealthService

@@ -86,10 +86,8 @@ internal class ExceptionMapperTest {
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(WebTestingModule())
-      multibind<WebActionEntry>().toInstance(
-          WebActionEntry(ThrowsActionException::class))
-      multibind<WebActionEntry>().toInstance(
-          WebActionEntry(ThrowsUnmappedError::class))
+      multibind<WebActionEntry>().toInstance(WebActionEntry<ThrowsActionException>())
+      multibind<WebActionEntry>().toInstance(WebActionEntry<ThrowsUnmappedError>())
     }
   }
 }

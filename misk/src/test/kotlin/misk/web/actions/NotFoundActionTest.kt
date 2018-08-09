@@ -116,8 +116,7 @@ class NotFoundActionTest {
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(WebTestingModule())
-      multibind<WebActionEntry>().toInstance(
-          WebActionEntry<NotFoundAction>())
+      multibind<WebActionEntry>().toInstance(WebActionEntry<NotFoundAction>())
     }
   }
 }

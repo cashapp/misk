@@ -106,8 +106,7 @@ internal class PemSslClientServerTest {
               ),
               mutual_auth = WebSslConfig.MutualAuth.REQUIRED)
       ))
-      multibind<WebActionEntry>().toInstance(
-          WebActionEntry<HelloAction>())
+      multibind<WebActionEntry>().toInstance(WebActionEntry<HelloAction>())
     }
   }
 

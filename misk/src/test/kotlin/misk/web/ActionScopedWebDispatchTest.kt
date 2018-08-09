@@ -57,8 +57,7 @@ internal class ActionScopedWebDispatchTest {
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(WebTestingModule())
-      multibind<WebActionEntry>().toInstance(
-          WebActionEntry(Hello::class))
+      multibind<WebActionEntry>().toInstance(WebActionEntry<Hello>())
       install(object : ActionScopedProviderModule() {
         override fun configureProviders() {
           bindProvider(Principal::class, FakeIdentityActionScopedProvider::class)

@@ -152,16 +152,11 @@ internal class FormValueParameterTest {
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(WebTestingModule())
-      multibind<WebActionEntry>().toInstance(
-          WebActionEntry<BasicParamsAction>())
-      multibind<WebActionEntry>().toInstance(
-          WebActionEntry<OptionalParamsAction>())
-      multibind<WebActionEntry>().toInstance(
-          WebActionEntry<DefaultParamsAction>())
-      multibind<WebActionEntry>().toInstance(
-          WebActionEntry<ListParamsAction>())
-      multibind<WebActionEntry>().toInstance(
-          WebActionEntry<FormValueAnnotationAction>())
+      multibind<WebActionEntry>().toInstance(WebActionEntry<BasicParamsAction>())
+      multibind<WebActionEntry>().toInstance(WebActionEntry<OptionalParamsAction>())
+      multibind<WebActionEntry>().toInstance(WebActionEntry<DefaultParamsAction>())
+      multibind<WebActionEntry>().toInstance(WebActionEntry<ListParamsAction>())
+      multibind<WebActionEntry>().toInstance(WebActionEntry<FormValueAnnotationAction>())
     }
   }
 

@@ -119,13 +119,10 @@ class UserInterceptorTest {
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(WebTestingModule())
-      multibind<NetworkInterceptor.Factory>()
-          .toInstance(UserCreatedNetworkInterceptor.Factory())
-      multibind<ApplicationInterceptor.Factory>()
-          .toInstance(UserCreatedInterceptor.Factory())
+      multibind<NetworkInterceptor.Factory>().toInstance(UserCreatedNetworkInterceptor.Factory())
+      multibind<ApplicationInterceptor.Factory>().toInstance(UserCreatedInterceptor.Factory())
 
-      multibind<WebActionEntry>().toInstance(
-          WebActionEntry<TestAction>())
+      multibind<WebActionEntry>().toInstance(WebActionEntry<TestAction>())
     }
   }
 

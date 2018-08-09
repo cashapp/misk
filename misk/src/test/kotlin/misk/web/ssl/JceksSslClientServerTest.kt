@@ -93,8 +93,7 @@ internal class JceksSslClientServerTest {
 
   class TestModule : KAbstractModule() {
     override fun configure() {
-      multibind<WebActionEntry>().toInstance(
-          WebActionEntry<HelloAction>())
+      multibind<WebActionEntry>().toInstance(WebActionEntry<HelloAction>())
       install(WebTestingModule(
           ssl = WebSslConfig(0,
               cert_store = CertStoreConfig(

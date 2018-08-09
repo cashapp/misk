@@ -25,9 +25,6 @@ class ConfigModule<T : Config>(
     bind<String>().annotatedWith<AppName>().toInstance(appName)
     bind(configClass).toInstance(config)
     bindConfigClassRecursively(configClass)
-
-    multibind<WebActionEntry>().toInstance(
-        WebActionEntry<ConfigAdminAction>())
   }
 
   @Suppress("UNCHECKED_CAST")

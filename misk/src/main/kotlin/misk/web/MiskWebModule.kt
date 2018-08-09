@@ -106,18 +106,12 @@ class MiskWebModule : KAbstractModule() {
     install(ExceptionMapperModule.create<ActionException, ActionExceptionMapper>())
 
     // Register built-in parameter extractors
-    multibind<ParameterExtractor.Factory>()
-        .toInstance(PathPatternParameterExtractorFactory)
-    multibind<ParameterExtractor.Factory>()
-        .toInstance(QueryStringParameterExtractorFactory)
-    multibind<ParameterExtractor.Factory>()
-        .toInstance(FormValueParameterExtractorFactory)
-    multibind<ParameterExtractor.Factory>()
-        .toInstance(HeadersParameterExtractorFactory)
-    multibind<ParameterExtractor.Factory>()
-        .toInstance(WebSocketParameterExtractorFactory)
-    multibind<ParameterExtractor.Factory>()
-        .to<RequestBodyParameterExtractor.Factory>()
+    multibind<ParameterExtractor.Factory>().toInstance(PathPatternParameterExtractorFactory)
+    multibind<ParameterExtractor.Factory>().toInstance(QueryStringParameterExtractorFactory)
+    multibind<ParameterExtractor.Factory>().toInstance(FormValueParameterExtractorFactory)
+    multibind<ParameterExtractor.Factory>().toInstance(HeadersParameterExtractorFactory)
+    multibind<ParameterExtractor.Factory>().toInstance(WebSocketParameterExtractorFactory)
+    multibind<ParameterExtractor.Factory>().to<RequestBodyParameterExtractor.Factory>()
 
     // Install infrastructure support
     install(CertificatesModule())
@@ -128,16 +122,11 @@ class MiskWebModule : KAbstractModule() {
 //        .toInstance(StaticResourceMapper.Entry("/_admin/", "web/_admin", "misk/web/_admin/build"))
 
     // Bind build-in actions.
-    multibind<WebActionEntry>().toInstance(
-        WebActionEntry<InternalErrorAction>())
-    multibind<WebActionEntry>().toInstance(
-        WebActionEntry<StatusAction>())
-    multibind<WebActionEntry>().toInstance(
-        WebActionEntry<ReadinessCheckAction>())
-    multibind<WebActionEntry>().toInstance(
-        WebActionEntry<LivenessCheckAction>())
-    multibind<WebActionEntry>().toInstance(
-        WebActionEntry<NotFoundAction>())
+    multibind<WebActionEntry>().toInstance(WebActionEntry<InternalErrorAction>())
+    multibind<WebActionEntry>().toInstance(WebActionEntry<StatusAction>())
+    multibind<WebActionEntry>().toInstance(WebActionEntry<ReadinessCheckAction>())
+    multibind<WebActionEntry>().toInstance(WebActionEntry<LivenessCheckAction>())
+    multibind<WebActionEntry>().toInstance(WebActionEntry<NotFoundAction>())
   }
 
   class MiskCallerProvider : ActionScopedProvider<MiskCaller?> {

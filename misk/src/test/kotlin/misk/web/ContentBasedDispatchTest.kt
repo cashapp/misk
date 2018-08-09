@@ -97,22 +97,14 @@ internal class ContentBasedDispatchTest {
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(WebTestingModule())
-      multibind<WebActionEntry>().toInstance(
-          WebActionEntry(PostPlainTextReturnAnyText::class))
-      multibind<WebActionEntry>().toInstance(
-          WebActionEntry(PostAnyTextReturnPlainText::class))
-      multibind<WebActionEntry>().toInstance(
-          WebActionEntry(PostPlainTextReturnPlainText::class))
-      multibind<WebActionEntry>().toInstance(
-          WebActionEntry(PostJsonReturnJson::class))
-      multibind<WebActionEntry>().toInstance(
-          WebActionEntry(PostPlainTextReturnJson::class))
-      multibind<WebActionEntry>().toInstance(
-          WebActionEntry(PostJsonReturnPlainText::class))
-      multibind<WebActionEntry>().toInstance(
-          WebActionEntry(PostAnythingReturnJson::class))
-      multibind<WebActionEntry>().toInstance(
-          WebActionEntry(PostAnythingReturnAnything::class))
+      multibind<WebActionEntry>().toInstance(WebActionEntry<PostPlainTextReturnAnyText>())
+      multibind<WebActionEntry>().toInstance(WebActionEntry<PostAnyTextReturnPlainText>())
+      multibind<WebActionEntry>().toInstance(WebActionEntry<PostPlainTextReturnPlainText>())
+      multibind<WebActionEntry>().toInstance(WebActionEntry<PostJsonReturnJson>())
+      multibind<WebActionEntry>().toInstance(WebActionEntry<PostPlainTextReturnJson>())
+      multibind<WebActionEntry>().toInstance(WebActionEntry<PostJsonReturnPlainText>())
+      multibind<WebActionEntry>().toInstance(WebActionEntry<PostAnythingReturnJson>())
+      multibind<WebActionEntry>().toInstance(WebActionEntry<PostAnythingReturnAnything>())
     }
   }
 

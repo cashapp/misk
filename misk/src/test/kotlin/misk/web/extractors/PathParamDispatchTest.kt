@@ -48,10 +48,8 @@ internal class PathParamDispatchTest {
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(WebTestingModule())
-      multibind<WebActionEntry>().toInstance(
-          WebActionEntry(GetObjectDetails::class))
-      multibind<WebActionEntry>().toInstance(
-          WebActionEntry(CustomPathParamName::class))
+      multibind<WebActionEntry>().toInstance(WebActionEntry<GetObjectDetails>())
+      multibind<WebActionEntry>().toInstance(WebActionEntry<CustomPathParamName>())
     }
   }
 

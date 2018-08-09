@@ -60,8 +60,7 @@ internal class WebSocketsTest {
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(WebTestingModule())
-      multibind<WebActionEntry>().toInstance(
-          WebActionEntry(EchoWebSocket::class))
+      multibind<WebActionEntry>().toInstance(WebActionEntry<EchoWebSocket>())
     }
   }
 }
