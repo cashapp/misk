@@ -1,6 +1,11 @@
 import org.junit.platform.console.options.Details
 
 apply plugin: 'kotlin'
+kotlin {
+  experimental {
+    coroutines 'enable'
+  }
+}
 apply plugin: 'org.junit.platform.gradle.plugin'
 apply plugin: "com.vanniktech.maven.publish"
 
