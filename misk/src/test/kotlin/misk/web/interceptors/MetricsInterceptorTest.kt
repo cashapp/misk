@@ -11,7 +11,7 @@ import misk.testing.MiskTestModule
 import misk.web.Get
 import misk.web.PathParam
 import misk.web.Response
-import misk.web.WebActionEntry
+import misk.web.actions.WebActionEntry
 import misk.web.WebTestingModule
 import misk.web.actions.WebAction
 import misk.web.jetty.JettyService
@@ -85,7 +85,7 @@ class MetricsInterceptorTest {
       install(AccessControlModule())
       install(WebTestingModule())
       install(FakeCallerAuthenticatorModule())
-      multibind<WebActionEntry>().toInstance(WebActionEntry(TestAction::class))
+      multibind<WebActionEntry>().toInstance(WebActionEntry<TestAction>())
     }
   }
 

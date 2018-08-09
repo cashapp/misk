@@ -12,7 +12,7 @@ import misk.web.NetworkInterceptor
 import misk.web.PathParam
 import misk.web.Response
 import misk.web.ResponseContentType
-import misk.web.WebActionEntry
+import misk.web.actions.WebActionEntry
 import misk.web.WebTestingModule
 import misk.web.actions.WebAction
 import misk.web.jetty.JettyService
@@ -119,12 +119,10 @@ class UserInterceptorTest {
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(WebTestingModule())
-      multibind<NetworkInterceptor.Factory>()
-          .toInstance(UserCreatedNetworkInterceptor.Factory())
-      multibind<ApplicationInterceptor.Factory>()
-          .toInstance(UserCreatedInterceptor.Factory())
+      multibind<NetworkInterceptor.Factory>().toInstance(UserCreatedNetworkInterceptor.Factory())
+      multibind<ApplicationInterceptor.Factory>().toInstance(UserCreatedInterceptor.Factory())
 
-      multibind<WebActionEntry>().toInstance(WebActionEntry(TestAction::class))
+      multibind<WebActionEntry>().toInstance(WebActionEntry<TestAction>())
     }
   }
 

@@ -1,6 +1,5 @@
-package misk.web
+package misk.web.actions
 
-import misk.web.actions.WebAction
 import kotlin.reflect.KClass
 
 /**
@@ -22,4 +21,10 @@ data class WebActionEntry(
       "unexpected path prefix: $pathPrefix"
     }
   }
+}
+
+inline fun <reified T : WebAction> WebActionEntry(
+  pathPrefix: String = ""
+): WebActionEntry {
+  return WebActionEntry(T::class, pathPrefix)
 }

@@ -1,16 +1,23 @@
-package misk.web
+package misk.web.actions
 
 import com.google.inject.Injector
+import com.google.inject.Provider
 import misk.ApplicationInterceptor
 import misk.MiskDefault
 import misk.asAction
-import misk.web.actions.WebAction
+import misk.web.BoundAction
+import misk.web.ConnectWebSocket
+import misk.web.Get
+import misk.web.NetworkInterceptor
+import misk.web.PathPattern
+import misk.web.Post
+import misk.web.RequestContentType
+import misk.web.ResponseContentType
 import misk.web.extractors.ParameterExtractor
 import misk.web.mediatype.MediaRange
 import okhttp3.MediaType
 import org.eclipse.jetty.http.HttpMethod
 import javax.inject.Inject
-import javax.inject.Provider
 import javax.inject.Singleton
 import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
@@ -61,6 +68,9 @@ internal class WebActionFactory {
     val connectWebSocket = actionFunction.findAnnotation<ConnectWebSocket>()
     val post = actionFunction.findAnnotation<Post>()
 
+    // TODO(adrw) fix this using first provider below so that WebAction::class or WebAction can be passed in
+//    val provider = Providers.of(theInstance)
+
     val provider = injector.getProvider(webActionClass.java)
 
     val result: MutableList<BoundAction<A, *>> = mutableListOf()
@@ -106,7 +116,8 @@ internal class WebActionFactory {
     }
 
     return BoundAction(provider, networkInterceptors, applicationInterceptors,
-        parameterExtractorFactories, function, PathPattern.parse(pathPattern), httpMethod,
+        parameterExtractorFactories, function, PathPattern.parse(pathPattern),
+        httpMethod,
         acceptedContentTypes, responseContentType, isConnectWebSocketAction)
   }
 }

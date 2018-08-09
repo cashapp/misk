@@ -5,8 +5,8 @@ import misk.inject.keyOf
 import misk.scope.ActionScope
 import misk.web.BoundAction
 import misk.web.Request
-import misk.web.WebActionEntry
-import misk.web.WebActionFactory
+import misk.web.actions.WebActionEntry
+import misk.web.actions.WebActionFactory
 import misk.web.actions.WebAction
 import misk.web.mediatype.MediaRange
 import misk.web.mediatype.MediaTypes

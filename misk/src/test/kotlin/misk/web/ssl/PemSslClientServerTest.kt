@@ -24,7 +24,7 @@ import misk.web.Post
 import misk.web.RequestBody
 import misk.web.RequestContentType
 import misk.web.ResponseContentType
-import misk.web.WebActionEntry
+import misk.web.actions.WebActionEntry
 import misk.web.WebSslConfig
 import misk.web.WebTestingModule
 import misk.web.actions.WebAction
@@ -106,7 +106,7 @@ internal class PemSslClientServerTest {
               ),
               mutual_auth = WebSslConfig.MutualAuth.REQUIRED)
       ))
-      multibind<WebActionEntry>().toInstance(WebActionEntry(HelloAction::class))
+      multibind<WebActionEntry>().toInstance(WebActionEntry<HelloAction>())
     }
   }
 

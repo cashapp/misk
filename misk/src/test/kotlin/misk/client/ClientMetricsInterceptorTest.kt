@@ -17,7 +17,7 @@ import misk.web.RequestBody
 import misk.web.RequestContentType
 import misk.web.Response
 import misk.web.ResponseContentType
-import misk.web.WebActionEntry
+import misk.web.actions.WebActionEntry
 import misk.web.WebTestingModule
 import misk.web.actions.WebAction
 import misk.web.jetty.JettyService
@@ -75,7 +75,7 @@ internal class ClientMetricsInterceptorTest {
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(WebTestingModule())
-      multibind<WebActionEntry>().toInstance(WebActionEntry(PingAction::class))
+      multibind<WebActionEntry>().toInstance(WebActionEntry<PingAction>())
     }
   }
 

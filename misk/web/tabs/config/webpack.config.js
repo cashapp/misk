@@ -68,7 +68,7 @@ module.exports = {
       HTMLWebpackPluginConfig, CopyWebpackPluginConfig,
       new webpack.HotModuleReplacementPlugin()
     ]
-    : [HTMLWebpackPluginConfig, CopyWebpackPluginConfig, 
+    : [HTMLWebpackPluginConfig, CopyWebpackPluginConfig,
       DefinePluginConfig],
   externals: MiskCommon.Externals
 }

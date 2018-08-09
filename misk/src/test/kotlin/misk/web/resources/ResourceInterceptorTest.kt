@@ -23,7 +23,7 @@ class ResourceInterceptorTest {
     upstreamServer.start()
 
     interceptor = ResourceInterceptor(mutableListOf(
-        ResourceInterceptor.Mapping("/local/prefix/", "/web/local/")
+        ResourceInterceptor.Entry("/local/prefix/", "/web/local/")
     ))
   }
 
