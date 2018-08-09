@@ -17,7 +17,7 @@ import javax.inject.Singleton
 class ShortUrlWebAction : WebAction {
   @Inject lateinit var urlStore: UrlStore
 
-  @Get("/{token:[^/]+}")
+  @Get("/{token:[^/_]+}")
   @ResponseContentType(MediaTypes.APPLICATION_JSON)
   fun follow(@PathParam token: String): Response<ResponseBody> {
     val longUrl = urlStore.tokenToUrl(UrlToken(token)) ?: throw NotFoundException(token)

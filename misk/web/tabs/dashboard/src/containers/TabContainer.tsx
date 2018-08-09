@@ -28,11 +28,9 @@ class TabContainer extends React.Component<ITabProps, {children : any}> {
     return (
       <Container>
         <Helmet>
-          <script src={this.props.pathname + "tab_test.js"} type="text/javascript" />
+          <script src={`/_admin/${this.props.slug}/tab_${this.props.slug}.js`} type="text/javascript" />
         </Helmet>
         <div id={this.props.slug}/>
-        {this.props.children}
-        <PathDebugComponent hash={this.props.hash} pathname={this.props.pathname} search={this.props.search}/>        
       </Container>
     )
   }

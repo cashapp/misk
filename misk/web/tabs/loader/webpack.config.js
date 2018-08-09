@@ -26,7 +26,7 @@ module.exports = {
   output: {
     filename: 'tab_loader.js',
     path: path.join(__dirname, 'dist/_admin'),
-    publicPath: "/_admin/"
+    publicPath: "/_admin"
 },
   devServer: {
     port: '3100',

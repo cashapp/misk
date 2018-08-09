@@ -4,7 +4,7 @@ import * as React from "react"
 import routes from "./routes"
 
 interface IAppProps {
-  history: History;
+  history: History
 }
 
 const App = ({ history }: IAppProps) => {

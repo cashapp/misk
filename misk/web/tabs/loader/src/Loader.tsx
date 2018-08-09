@@ -1,10 +1,9 @@
-// import { PathDebugComponent } from "@misk/components"
-import { PathDebugComponent } from "../components"
+import axios from "axios"
 import * as React from "react"
 import { Helmet } from "react-helmet"
 import { connect } from "react-redux"
 import styled from "styled-components" 
-import { IAppState } from "../"
+import { IAppState } from "./"
 
 interface ITabProps {
   children: any,
@@ -19,20 +18,27 @@ const Container = styled.div`
   margin-top: 20px;
 `
 
-class TabContainer extends React.Component<ITabProps, {children : any}> {
+class Loader extends React.Component<ITabProps, {children : any}> {
   constructor(props: ITabProps) {
     super(props)
+  }
+
+  async componentDidMount() {
+    // axios
+    // .get("http://localhost:8080/api/admintab/all")
+    // .then(response => {
+
+    // })
   }
 
   render() {
     return (
       <Container>
         <Helmet>
-          <script src={this.props.pathname + "tab_test.js"} type="text/javascript" />
+          <script src={`/_admin/${this.props.slug}/tab_${this.props.slug}.js`} type="text/javascript" />
         </Helmet>
         <div id={this.props.slug}/>
         {this.props.children}
-        <PathDebugComponent hash={this.props.hash} pathname={this.props.pathname} search={this.props.search}/>        
       </Container>
     )
   }
@@ -44,4 +50,4 @@ const mapStateToProps = (state: IAppState) => ({
   search: state.router.location.search,
 })
 
-export default connect(mapStateToProps)(TabContainer)
+export default connect(mapStateToProps)(Loader)

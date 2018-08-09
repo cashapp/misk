@@ -20,22 +20,23 @@ class AdminTabModule : KAbstractModule() {
     multibind<AdminTab>().toInstance(AdminTab(
         "Dashboard",
         "dashboard",
-        "/_admin/dashboard/"
+        "/_admin/dashboard",
+        "control"
     ))
     multibind<WebProxyEntry>().toInstance(
         WebProxyEntry("/_admin/dashboard", "http://localhost:3110/"))
     multibind<WebActionEntry>().toInstance(
         WebActionEntry<WebProxyAction>("/_admin/dashboard"))
-    
-    multibind<AdminTab>().toInstance(AdminTab(
-        "Misk NPM",
-        "@misk",
-        "/_admin/@misk/"
-    ))
-    multibind<WebProxyEntry>().toInstance(
-        WebProxyEntry("/_admin/@misk", "http://localhost:9100/"))
-    multibind<WebActionEntry>().toInstance(
-        WebActionEntry<WebProxyAction>("/_admin/@misk"))
+
+//    Uncomment while using simple python server during @misk/ package development
+//    multibind<AdminTab>().toInstance(AdminTab(
+//        "Misk NPM",
+//        "@misk",
+//        "/_admin/@misk"
+//    ))
+//    multibind<WebProxyEntry>().toInstance(WebProxyEntry("/_admin/@misk", "http://localhost:9100/"))
+//    multibind<WebActionEntry>().toInstance(
+//        WebActionEntry<WebProxyAction>("/_admin/@misk"))
 
     multibind<WebProxyEntry>().toInstance(
         WebProxyEntry("/_admin", "http://localhost:3100/"))
@@ -45,7 +46,7 @@ class AdminTabModule : KAbstractModule() {
     multibind<AdminTab>().toInstance(AdminTab(
         "Temp Test",
         "test",
-        "/_admin/test/"
+        "/_admin/test"
     ))
   }
 }

@@ -14,7 +14,7 @@
   "jsRules": {},
   "rules": {
     // "interface-name": false,
-    // "semicolon": [true, "never"],
+    "semicolon": [true, "never"],
     "member-access": [false],
     "ordered-imports": [true],
     "no-console": [false],

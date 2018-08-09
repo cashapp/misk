@@ -1,6 +1,5 @@
 package misk.web.actions
 
-import misk.security.authz.Unauthenticated
 import misk.web.Get
 import misk.web.RequestContentType
 import misk.web.ResponseContentType
@@ -29,7 +28,6 @@ class AdminTabAction : WebAction {
   @Get("/api/admintab/all")
   @RequestContentType(MediaTypes.APPLICATION_JSON)
   @ResponseContentType(MediaTypes.APPLICATION_JSON)
-  @Unauthenticated
   fun getAll(): Response {
     return Response(tabs = registeredTabs.map { tab -> tab.slug to tab }.toMap())
   }
@@ -44,11 +42,15 @@ data class AdminTab(
   val icon: String = "widget-button"
 ) {
   init {
-    require(slug.filter { char -> !char.isUpperCase()
-            && !char.isWhitespace() }.length.equals(slug.length) &&
-        icon.filter { char -> !char.isUpperCase()
-            && !char.isWhitespace() }.length.equals(icon.length) &&
-        url_path_prefix.startsWith("/") &&
-        url_path_prefix.endsWith("/"))
+    require(slug.filter { char ->
+      !char.isUpperCase()
+          && !char.isWhitespace()
+    }.length.equals(slug.length) &&
+        icon.filter { char ->
+          !char.isUpperCase()
+              && !char.isWhitespace()
+        }.length.equals(icon.length) &&
+        url_path_prefix.matches(Regex("(/[^/]+)*")) &&
+        !url_path_prefix.startsWith("/api"))
   }
 }
