@@ -1,4 +1,4 @@
-package misk.web.actions
+package misk.web.proxy
 
 import com.google.inject.name.Names
 import kotlinx.coroutines.experimental.async
@@ -9,11 +9,10 @@ import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.web.Response
 import misk.web.WebTestingModule
+import misk.web.actions.WebActionEntry
 import misk.web.jetty.JettyService
 import misk.web.mediatype.MediaTypes
 import misk.web.mediatype.asMediaType
-import misk.web.proxy.WebProxyAction
-import misk.web.proxy.WebProxyEntry
 import misk.web.readUtf8
 import misk.web.toMisk
 import misk.web.toResponseBody
