@@ -1,5 +1,6 @@
 package misk.web.actions
 
+import misk.security.authz.Unauthenticated
 import misk.web.Get
 import misk.web.RequestContentType
 import misk.web.ResponseContentType
@@ -28,11 +29,12 @@ class AdminTabAction : WebAction {
   @Get("/api/admintab/all")
   @RequestContentType(MediaTypes.APPLICATION_JSON)
   @ResponseContentType(MediaTypes.APPLICATION_JSON)
+  @Unauthenticated
   fun getAll(): Response {
-    return Response(tabs = registeredTabs.map { tab -> tab.slug to tab }.toMap())
+    return Response(adminTabs = registeredTabs.map { tab -> tab.slug to tab }.toMap())
   }
 
-  data class Response(val tabs: Map<String, AdminTab>)
+  data class Response(val adminTabs: Map<String, AdminTab>)
 }
 
 data class AdminTab(

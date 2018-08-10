@@ -35,8 +35,7 @@ class AdminTabModule : KAbstractModule() {
 //        "/_admin/@misk"
 //    ))
 //    multibind<WebProxyEntry>().toInstance(WebProxyEntry("/_admin/@misk", "http://localhost:9100/"))
-//    multibind<WebActionEntry>().toInstance(
-//        WebActionEntry<WebProxyAction>("/_admin/@misk"))
+//    multibind<WebActionEntry>().toInstance(WebActionEntry<WebProxyAction>("/_admin/@misk"))
 
     multibind<WebProxyEntry>().toInstance(
         WebProxyEntry("/_admin", "http://localhost:3100/"))

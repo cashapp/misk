@@ -32,6 +32,7 @@ import misk.web.interceptors.MarshallerInterceptor
 import misk.web.interceptors.MetricsInterceptor
 import misk.web.interceptors.RequestLoggingInterceptor
 import misk.web.interceptors.TracingInterceptor
+import misk.web.interceptors.WideOpenDevelopmentInterceptorFactory
 import misk.web.jetty.JettyService
 import misk.web.marshal.JsonMarshaller
 import misk.web.marshal.JsonUnmarshaller
@@ -127,6 +128,9 @@ class MiskWebModule : KAbstractModule() {
     multibind<WebActionEntry>().toInstance(WebActionEntry<ReadinessCheckAction>())
     multibind<WebActionEntry>().toInstance(WebActionEntry<LivenessCheckAction>())
     multibind<WebActionEntry>().toInstance(WebActionEntry<NotFoundAction>())
+
+    // Adds open CORS headers in development to allow through API calls from webpack servers
+    multibind<NetworkInterceptor.Factory>().to<WideOpenDevelopmentInterceptorFactory>()
   }
 
   class MiskCallerProvider : ActionScopedProvider<MiskCaller?> {

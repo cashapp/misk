@@ -1,3 +1,4 @@
+import { IconNames } from "@blueprintjs/icons";
 import { connectRouter, routerMiddleware } from "connected-react-router"
 import { createBrowserHistory } from "history"
 import * as React from "react"
@@ -6,18 +7,44 @@ import { AppContainer } from "react-hot-loader"
 import { Provider } from "react-redux"
 import { applyMiddleware, compose, createStore } from "redux"
 import App from "./App"
+import { ILoaderState } from "./Loader"
 import rootReducer from "./reducers"
 
 export interface IAppState {
-  count: number,
-  router: {
-    location: {
-      pathname: string,
-      search: string,
-      hash: string
-    },
-    action: string
+  count: number
+  loader: ILoaderState
+  router: IRouterState
+}
+
+export interface IRouterState {
+  location: {
+    pathname: string
+    search: string
+    hash: string
   }
+  action: string
+}
+
+export const initialState: IAppState = {
+  count: 0,
+  loader: {
+    adminTabs: {
+      tabname: {
+        icon: IconNames.WIDGET_BUTTON,
+        name: "name",
+        slug: "slug",
+        url_path_prefix: "url_path_prefix",
+      },
+    },
+  },
+  router: {
+    action: "action",
+    location: {
+      hash: "hash",
+      pathname: "pathname",
+      search: "search"
+    },
+  },
 }
 
 const history = createBrowserHistory()
@@ -25,6 +52,7 @@ const history = createBrowserHistory()
 const composeEnhancer: typeof compose = (window as any).__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose
 const store = createStore(
   connectRouter(history)(rootReducer),
+  initialState,
   composeEnhancer(
     applyMiddleware(
       routerMiddleware(history),
@@ -39,7 +67,7 @@ const render = () => {
         <App history={history} />
       </Provider>
     </AppContainer>,
-    document.getElementById("dashboard")
+    document.getElementById("loader")
   )
 }
 

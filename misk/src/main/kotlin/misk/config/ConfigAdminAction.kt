@@ -1,6 +1,7 @@
 package misk.config
 
 import misk.environment.Environment
+import misk.security.authz.Unauthenticated
 import misk.web.Get
 import misk.web.RequestContentType
 import misk.web.ResponseContentType
@@ -19,6 +20,7 @@ class ConfigAdminAction : WebAction {
   @ResponseContentType(MediaTypes.APPLICATION_JSON)
   // TODO(adrw) create new @AdminDashboard annotation because this will fail since there is no @Access
   // @AdminDashboard will then be able to be picked up by misq
+  @Unauthenticated
   fun getAll(): Response {
     // TODO(mmihic): Need to figure out how to get the overrides.
     val yamlFiles = MiskConfig.loadConfigYamlMap(appName, environment, listOf())
