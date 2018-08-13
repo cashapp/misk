@@ -1,6 +1,6 @@
 import { RouterState } from "connected-react-router"
 import { combineReducers } from "redux"
-import { IAdminTabs } from "../Loader"
+import { IAdminTabs } from "../LoaderContainer"
 import adminTabsReducer from "./adminTabs"
 import itemReducer from "./item"
 

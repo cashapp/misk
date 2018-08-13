@@ -13,7 +13,6 @@ interface ITabProps {
   slug?: string
   hash: string
   adminTabs: IAdminTabs
-  loader: ILoaderState
   pathname: string
   search: string
   loading: boolean
@@ -27,6 +26,7 @@ export interface ILoaderState {
 
 export interface IAdminTabs {
   [key:string]: IAdminTab
+  toJS: any
 }
 
 export interface IAdminTab {
@@ -38,57 +38,33 @@ export interface IAdminTab {
 
 const Container = styled.div``
 
-class Loader extends React.Component<ITabProps> {
-  // public state: ILoaderState = {
-  //   adminTabs: {
-  //     tabname: {
-  //       icon: IconNames.WIDGET_BUTTON,
-  //       name: "name",
-  //       slug: "slug",
-  //       url_path_prefix: "url_path_prefix",
-  //     },
-  //   }
-  // } 
-
-  constructor(props: ITabProps) {
-    super(props)
-  }
-
+class LoaderContainer extends React.Component<ITabProps> {
   componentDidMount() {
-    // axios
-    // .get("http://localhost:8080/api/admintab/all")
-    // .then(response => {
-    //   const adminTabs: { [key:string]: IAdminTab } = response.data
-    //   console.log(adminTabs)
-    // })
     this.props.getTabs()
   }
 
   render() {
     const { adminTabs } = this.props.adminTabs
-    console.log(adminTabs)
     if (adminTabs) {
+      const tabComponents = Object.entries(adminTabs).map((tab) => <ScriptComponent key={tab[0]} tab={tab[1]}/>)
       return (
         <Container>
-          <h1>Loader Test</h1>
-          {/* {Object.entries(this.state.adminTabs).forEach(([key,tab]) => <ScriptComponent tab={tab}/>)} */}
-          {Object.entries(adminTabs).forEach(([key,tab]) => <p> {tab.name} {tab.icon} {tab.slug} {tab.url_path_prefix}</p>)}
+          {tabComponents}
         </Container>
       )
     } else {
       return (
         <Container>
-          <h1>Loader Test...</h1>
+          <h1>Loading Tabs...</h1>
         </Container>
       )
     }
   }
 }
 
-const mapStateToProps = (state: any) => ({
+const mapStateToProps = (state: IAppState) => ({
   adminTabs: state.adminTabs.toJS().data,
   hash: state.router.location.hash,
-  loader: state.loader,
   pathname: state.router.location.pathname,
   search: state.router.location.search,
 })
@@ -97,4 +73,4 @@ const mapDispatchToProps = {
   getTabs: loader.getAdminTabs
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(Loader)
+export default connect(mapStateToProps, mapDispatchToProps)(LoaderContainer)

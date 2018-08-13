@@ -1,13 +1,13 @@
 import * as React from "react"
 import { Route, Switch } from "react-router"
-import Loader from "./Loader"
+import LoaderContainer from "./LoaderContainer"
+import { NoMatchComponent } from "./NoMatchComponent"
 
 const routes = (
-  <div>
-    <Switch>
-      <Route component={Loader}/>
-    </Switch>
-  </div>
+  <Switch>
+    <Route exact path="/_admin/" component={LoaderContainer}/>
+    <Route component={NoMatchComponent}/>
+  </Switch>
 )
 
 export default routes
