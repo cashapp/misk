@@ -10,7 +10,9 @@ export default makeExternals({
   "@misk/dev": ["Misk", "Dev"],
   "axios": "Axios",
   "connected-react-router": "ConnectedReactRouter",
-  "history": "HistoryNPM", 
+  "dayjs": "Dayjs",
+  "history": "HistoryNPM",
+  "immutable": "Immutable",
   "react": "React",
   "react-dom": "ReactDom",
   "react-helmet": "ReactHelmet",
@@ -20,6 +22,7 @@ export default makeExternals({
   "react-router-dom": "ReactRouterDom",
   "react-router-redux": "ReactRouterRedux",
   "redux": "Redux",
+  "redux-saga": "ReduxSaga",
   "styled-components": "StyledComponents"
 })
 
