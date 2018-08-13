@@ -2,7 +2,7 @@ import * as React from "react"
 
 const NoMatchComponent = () => (
   <div>
-    No Match
+    Config: No Match
   </div>
 )
 

@@ -1,12 +1,11 @@
 import { IconName, IconNames } from "@blueprintjs/icons"
-import axios from "axios"
 import * as React from "react"
-import { Helmet } from "react-helmet"
 import { connect } from "react-redux"
-import styled from "styled-components" 
-import { IAppState } from "."
-import { loader } from "./actions"
-import { ScriptComponent } from "./ScriptComponent"
+import { Route, Switch } from "react-router"
+import styled from "styled-components"
+import { IAppState } from ".."
+import { loader } from "../actions"
+import { NoMatchComponent, ScriptComponent } from "../components"
 
 interface ITabProps {
   children: any
@@ -46,16 +45,19 @@ class LoaderContainer extends React.Component<ITabProps> {
   render() {
     const { adminTabs } = this.props.adminTabs
     if (adminTabs) {
-      const tabComponents = Object.entries(adminTabs).map((tab) => <ScriptComponent key={tab[0]} tab={tab[1]}/>)
+      const tabRouteComponents = Object.entries(adminTabs).map((tab) => <Route key={tab[0]} path={`/_admin/test/${tab[1].slug}`} render={() => <ScriptComponent key={tab[0]} tab={tab[1]}/>}/>)
       return (
         <Container>
-          {tabComponents}
+          <Switch>
+            {tabRouteComponents}
+            <Route component={NoMatchComponent}/>
+          </Switch>
         </Container>
       )
     } else {
       return (
         <Container>
-          <h1>Loading Tabs...</h1>
+          <p>Loading Tabs...</p>
         </Container>
       )
     }

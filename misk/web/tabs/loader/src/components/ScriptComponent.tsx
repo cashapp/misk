@@ -2,7 +2,7 @@ import { Icon } from "@blueprintjs/core"
 import * as React from "react"
 import Helmet from "react-helmet"
 import styled from "styled-components" 
-import { IAdminTab } from "./LoaderContainer"
+import { IAdminTab } from "../containers/LoaderContainer"
 
 interface IScriptProps {
   tab: IAdminTab,

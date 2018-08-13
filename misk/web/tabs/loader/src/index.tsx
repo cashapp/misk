@@ -8,7 +8,7 @@ import { Provider } from "react-redux"
 import { applyMiddleware, compose, createStore } from "redux"
 import createSagaMiddleware from "redux-saga"
 import App from "./App"
-import { IAdminTabs, ILoaderState } from "./LoaderContainer"
+import { IAdminTabs, ILoaderState } from "./containers/LoaderContainer"
 import rootReducer from "./reducers"
 import rootSaga from "./sagas";
 
