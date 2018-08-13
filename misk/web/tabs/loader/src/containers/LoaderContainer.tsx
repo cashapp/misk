@@ -4,7 +4,7 @@ import { connect } from "react-redux"
 import { Route, Switch } from "react-router"
 import styled from "styled-components"
 import { IAppState } from ".."
-import { loader } from "../actions"
+import { dispatchAdminTabs } from "../actions"
 import { NoMatchComponent, ScriptComponent } from "../components"
 
 interface ITabProps {
@@ -64,7 +64,7 @@ const mapStateToProps = (state: IAppState) => ({
 })
 
 const mapDispatchToProps = {
-  getTabs: loader.getAdminTabs
+   getTabs: dispatchAdminTabs.getAll
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(LoaderContainer)

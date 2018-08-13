@@ -1,9 +1,9 @@
 import {
-  IActionType, ITEM, LOADER
+  ADMINTABS, IActionType, ITEM
 } from "./types"
 import { createAction, IAction } from "./utils"
 
-export const item = {
+export const dispatchItem = {
   delete: (id: number) => createAction(ITEM.DELETE, { id, loading: true, success: false, error: null }),
   failure: (error: any) => createAction(ITEM.FAILURE, { ...error, loading: false, success: false }),
   patch: (id: number, data: any) => createAction(ITEM.PATCH, { id, ...data, loading: true, success: false, error: null }),
@@ -14,10 +14,10 @@ export const item = {
   success: (data: any) => createAction(ITEM.SUCCESS, { ...data, loading: false, success: true, error: null }),
 }
 
-export const loader = {
-  failure: (error: any) => createAction(LOADER.FAILURE, { ...error, loading: false, success: false }),
-  getAdminTabs: () => createAction(LOADER.GET_ADMINTABS, { loading: true, success: false, error: null }),
-  success: (data: any) => createAction(LOADER.SUCCESS, { ...data, loading: false, success: true, error: null }),
+export const dispatchAdminTabs = {
+  failure: (error: any) => createAction(ADMINTABS.FAILURE, { ...error, loading: false, success: false }),
+  getAll: () => createAction(ADMINTABS.GET_ALL, { loading: true, success: false, error: null }),
+  success: (data: any) => createAction(ADMINTABS.SUCCESS, { ...data, loading: false, success: true, error: null }),
 }
 
-export { IAction, IActionType, ITEM, LOADER }
+export { ADMINTABS, IAction, IActionType, ITEM }

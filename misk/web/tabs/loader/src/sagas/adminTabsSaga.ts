@@ -10,21 +10,21 @@ import axios from "axios"
 import { all, call, put, takeLatest } from "redux-saga/effects"
 
 import {
-  IAction, IActionType, LOADER, loader
+  ADMINTABS, dispatchAdminTabs
 } from "../actions"
 
-function * handleGetAdminTabs () {
+function * handleGetAll () {
   try {
     const { data } = yield call(axios.get, "http://0.0.0.0:8080/api/admintab/all")
-    yield put(loader.success({ data }))
+    yield put(dispatchAdminTabs.success({ data }))
   } catch (e) {
-    yield put(loader.failure({ error: { ...e } }))
+    yield put(dispatchAdminTabs.failure({ error: { ...e } }))
   }
 }
 
 function * watchAdminTabsSagas () {
   yield all([
-    takeLatest(LOADER.GET_ADMINTABS, handleGetAdminTabs),
+    takeLatest(ADMINTABS.GET_ALL, handleGetAll),
   ])
 }
 

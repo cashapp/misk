@@ -10,15 +10,15 @@ import axios from "axios"
 import { all, call, put, takeLatest } from "redux-saga/effects"
 
 import {
-  IAction, IActionType, ITEM, item
+  IAction, IActionType, ITEM, dispatchItem
 } from "../actions"
 
 function * handleGet () {
   try {
     const { data } = yield call(axios.get, "https://jsonplaceholder.typicode.com/posts/")
-    yield put(item.success({ data }))
+    yield put(dispatchItem.success({ data }))
   } catch (e) {
-    yield put(item.failure({ error: { ...e } }))
+    yield put(dispatchItem.failure({ error: { ...e } }))
   }
 }
 
@@ -26,9 +26,9 @@ function * handleGetOne (action: IAction<IActionType, {id: number}>) {
   try {
     const { id } = action.payload
     const { data } = yield call(axios.get, `https://jsonplaceholder.typicode.com/posts/${id}`)
-    yield put(item.success({ data }))
+    yield put(dispatchItem.success({ data }))
   } catch (e) {
-    yield put(item.failure({ error: { ...e } }))
+    yield put(dispatchItem.failure({ error: { ...e } }))
   }
 }
 
@@ -36,9 +36,9 @@ function * handlePost (action: IAction<IActionType, {saveData: string}>) {
   try {
     const { saveData } = action.payload
     const { data } = yield call(axios.post, "https://jsonplaceholder.typicode.com/posts/", { saveData })
-    yield put(item.success({ data }))
+    yield put(dispatchItem.success({ data }))
   } catch (e) {
-    yield put(item.failure({ error: { ...e } }))
+    yield put(dispatchItem.failure({ error: { ...e } }))
   }
 }
 
@@ -46,9 +46,9 @@ function * handlePut (action: IAction<IActionType, {id: number, updateData: stri
   try {
     const { id, updateData } = action.payload
     const { data } = yield call(axios.put, `https://jsonplaceholder.typicode.com/posts/${id}`, { updateData })
-    yield put(item.success({ data }))
+    yield put(dispatchItem.success({ data }))
   } catch (e) {
-    yield put(item.failure({ error: { ...e } }))
+    yield put(dispatchItem.failure({ error: { ...e } }))
   }
 }
 
@@ -56,9 +56,9 @@ function * handlePatch (action: IAction<IActionType, {id: number, updateData: st
   try {
     const { id, updateData } = action.payload
     const { data } = yield call(axios.patch, `https://jsonplaceholder.typicode.com/posts/${id}`, { updateData })
-    yield put(item.success({ data }))
+    yield put(dispatchItem.success({ data }))
   } catch (e) {
-    yield put(item.failure({ error: { ...e } }))
+    yield put(dispatchItem.failure({ error: { ...e } }))
   }
 }
 
@@ -66,9 +66,9 @@ function * handleDelete (action: IAction<IActionType, {id: number}>) {
   try {
     const { id } = action.payload
     const { data } = yield call(axios.delete, `https://jsonplaceholder.typicode.com/posts/${id}`)
-    yield put(item.success({ data }))
+    yield put(dispatchItem.success({ data }))
   } catch (e) {
-    yield put(item.failure({ error: { ...e } }))
+    yield put(dispatchItem.failure({ error: { ...e } }))
   }
 }
 
