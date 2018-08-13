@@ -1,22 +1,18 @@
-import { fromJS, List } from 'immutable'
-import { ITEM } from '@/actions/types'
+import { fromJS, List } from "immutable"
+import { IAction, LOADER } from "../actions"
 
 const initialState = fromJS({
-  data: new List([]),
+  data: List([]),
+  error: null,
   loading: false,
   success: false,
-  error: null
 })
 
-export default function exampleReducer (state = initialState, action) {
+export default function adminTabsReducer (state = initialState, action: IAction<string, {}>) {
   switch (action.type) {
-    case ITEM.GET:
-    case ITEM.GET_ONE:
-    case ITEM.SAVE:
-    case ITEM.UPDATE:
-    case ITEM.DELETE:
-    case ITEM.SUCCESS:
-    case ITEM.FAILURE:
+    case LOADER.FAILURE:
+    case LOADER.SUCCESS:
+    case LOADER.GET_ADMINTABS:
       return state.merge(action.payload)
     default:
       return state

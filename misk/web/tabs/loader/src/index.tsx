@@ -6,12 +6,14 @@ import * as ReactDOM from "react-dom"
 import { AppContainer } from "react-hot-loader"
 import { Provider } from "react-redux"
 import { applyMiddleware, compose, createStore } from "redux"
+import createSagaMiddleware from "redux-saga"
 import App from "./App"
-import { ILoaderState } from "./Loader"
+import { IAdminTab, IAdminTabs, ILoaderState } from "./Loader"
 import rootReducer from "./reducers"
+import rootSaga from "./sagas";
 
 export interface IAppState {
-  count: number
+  adminTabs: IAdminTabs
   loader: ILoaderState
   router: IRouterState
 }
@@ -25,40 +27,21 @@ export interface IRouterState {
   action: string
 }
 
-export const initialState: IAppState = {
-  count: 0,
-  loader: {
-    adminTabs: {
-      tabname: {
-        icon: IconNames.WIDGET_BUTTON,
-        name: "name",
-        slug: "slug",
-        url_path_prefix: "url_path_prefix",
-      },
-    },
-  },
-  router: {
-    action: "action",
-    location: {
-      hash: "hash",
-      pathname: "pathname",
-      search: "search"
-    },
-  },
-}
-
 const history = createBrowserHistory()
+const sagaMiddleware = createSagaMiddleware()
 
 const composeEnhancer: typeof compose = (window as any).__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose
 const store = createStore(
   connectRouter(history)(rootReducer),
-  initialState,
   composeEnhancer(
     applyMiddleware(
+      sagaMiddleware,
       routerMiddleware(history),
     ),
   ),
 )
+
+sagaMiddleware.run(rootSaga)
 
 const render = () => {
   ReactDOM.render(

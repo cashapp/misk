@@ -14,7 +14,9 @@
   "dependencies": {
     "@misk/common": "^0.0.10",
     "@types/immutable": "^3.8.7",
-    "immutable": "^3.8.2"
+    "immutable": "^3.8.2",
+    "redux-saga": "^0.16.0",
+    "reselect": "^3.0.1"
   },
   "devDependencies": {
     "@misk/dev": "^0.0.6"

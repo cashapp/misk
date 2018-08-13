@@ -1,6 +1,6 @@
 import { createActionTypes } from "./utils"
 
-export interface ITypes {
+export interface IActionType {
   [base:string]: string
 }
 
@@ -18,4 +18,5 @@ export const ITEM = createActionTypes("ITEM", [
 export const LOADER = createActionTypes("LOADER", [
   "FAILURE",
   "GET_ADMINTABS",
+  "SUCCESS"
 ])

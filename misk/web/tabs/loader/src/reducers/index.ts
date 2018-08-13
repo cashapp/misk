@@ -1,13 +1,17 @@
 import { RouterState } from "connected-react-router"
 import { combineReducers } from "redux"
-import counterReducer from "./counter"
+import { IAdminTabs } from "../Loader"
+import adminTabsReducer from "./adminTabs"
+import itemReducer from "./item"
 
 const rootReducer = combineReducers({
-  count: counterReducer,
+  adminTabs: adminTabsReducer,
+  item: itemReducer
 })
 
 export interface IState {
-  count: number
+  adminTabs: IAdminTabs
+  item: any
   router: RouterState
 }
 

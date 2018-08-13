@@ -4,22 +4,29 @@ import * as React from "react"
 import { Helmet } from "react-helmet"
 import { connect } from "react-redux"
 import styled from "styled-components" 
-import { IAppState, initialState } from "./"
+import { IAppState } from "."
+import { loader } from "./actions"
 import { ScriptComponent } from "./ScriptComponent"
 
 interface ITabProps {
   children: any
   slug?: string
   hash: string
+  adminTabs: IAdminTabs
   loader: ILoaderState
   pathname: string
   search: string
+  loading: boolean
+  error: any
+  getTabs: any
 }
 
 export interface ILoaderState {
-  adminTabs: {
-    [key:string]: IAdminTab
-  }
+  adminTabs: IAdminTabs
+}
+
+export interface IAdminTabs {
+  [key:string]: IAdminTab
 }
 
 export interface IAdminTab {
@@ -47,45 +54,47 @@ class Loader extends React.Component<ITabProps> {
     super(props)
   }
 
-  sleep(ms: number) {
-    return new Promise(resolve => setTimeout(resolve, ms))
-  }
-
-  async componentDidMount() {
-    axios
-    .get("http://localhost:8080/api/admintab/all")
-    .then(response => {
-      const adminTabs: { [key:string]: IAdminTab } = response.data
-      console.log(adminTabs)
-    })
+  componentDidMount() {
+    // axios
+    // .get("http://localhost:8080/api/admintab/all")
+    // .then(response => {
+    //   const adminTabs: { [key:string]: IAdminTab } = response.data
+    //   console.log(adminTabs)
+    // })
+    this.props.getTabs()
   }
 
   render() {
-    if (this.props.loader.adminTabs.tabname) {
+    const { adminTabs } = this.props.adminTabs
+    console.log(adminTabs)
+    if (adminTabs) {
       return (
         <Container>
           <h1>Loader Test</h1>
-          
+          {/* {Object.entries(this.state.adminTabs).forEach(([key,tab]) => <ScriptComponent tab={tab}/>)} */}
+          {Object.entries(adminTabs).forEach(([key,tab]) => <p> {tab.name} {tab.icon} {tab.slug} {tab.url_path_prefix}</p>)}
         </Container>
       )
     } else {
       return (
         <Container>
-          <h1>Loader Test</h1>
-          <ScriptComponent tab={this.props.loader.adminTabs.config}/>
-          {/* {Object.entries(this.state.adminTabs).forEach(([key,tab]) => <ScriptComponent tab={tab}/>)} */}
-          {Object.entries(this.props.loader.adminTabs).forEach(([key,tab]) => <p> {tab.name} {tab.icon} {tab.slug} {tab.url_path_prefix}</p>)}
+          <h1>Loader Test...</h1>
         </Container>
       )
     }
   }
 }
 
-const mapStateToProps = (state: IAppState) => ({
+const mapStateToProps = (state: any) => ({
+  adminTabs: state.adminTabs.toJS().data,
   hash: state.router.location.hash,
   loader: state.loader,
   pathname: state.router.location.pathname,
   search: state.router.location.search,
 })
 
-export default connect(mapStateToProps)(Loader)
+const mapDispatchToProps = {
+  getTabs: loader.getAdminTabs
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(Loader)
