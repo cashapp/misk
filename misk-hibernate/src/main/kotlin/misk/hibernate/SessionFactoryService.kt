@@ -19,10 +19,13 @@ import org.hibernate.cfg.AvailableSettings
 import org.hibernate.engine.spi.SessionFactoryImplementor
 import org.hibernate.event.service.spi.EventListenerRegistry
 import org.hibernate.integrator.spi.Integrator
+import org.hibernate.mapping.Component
 import org.hibernate.mapping.PersistentClass
 import org.hibernate.mapping.Property
 import org.hibernate.mapping.SimpleValue
+import org.hibernate.mapping.ToOne
 import org.hibernate.service.spi.SessionFactoryServiceRegistry
+import org.hibernate.type.StandardBasicTypes
 import org.hibernate.usertype.UserType
 import javax.inject.Provider
 import javax.inject.Singleton
@@ -166,8 +169,10 @@ internal class SessionFactoryService(
     for (entityBinding in entityBindings) {
       for (property in entityBinding.allProperties()) {
         val value = property.value
-        if (value is SimpleValue) {
-          result.add(kClassForName(value.typeName))
+        when (value) {
+          is ToOne -> {}
+          is Component -> {}
+          is SimpleValue -> result.add(kClassForName(value.typeName))
         }
       }
     }
@@ -210,6 +215,7 @@ internal class SessionFactoryService(
       "char" -> Char::class
       "float" -> Float::class
       "double" -> Double::class
+      StandardBasicTypes.MATERIALIZED_CLOB.name -> String::class
       else -> Class.forName(name).kotlin
     }
   }

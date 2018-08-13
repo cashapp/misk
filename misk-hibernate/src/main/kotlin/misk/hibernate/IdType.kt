@@ -16,7 +16,7 @@ internal object IdType : UserType, ResultSetIdentifierConsumer {
 
   override fun replace(original: Any, target: Any, owner: Any?) = original
 
-  override fun equals(x: Any, y: Any) = (x as Id<*>) == (y as Id<*>)
+  override fun equals(x: Any?, y: Any?): Boolean = (x as? Id<*>) == (y as? Id<*>)
 
   override fun returnedClass() = Id::class.java
 
