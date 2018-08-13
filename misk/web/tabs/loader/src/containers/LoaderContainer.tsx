@@ -8,12 +8,7 @@ import { loader } from "../actions"
 import { NoMatchComponent, ScriptComponent } from "../components"
 
 interface ITabProps {
-  children: any
-  slug?: string
-  hash: string
   adminTabs: IAdminTabs
-  pathname: string
-  search: string
   loading: boolean
   error: any
   getTabs: any
@@ -65,10 +60,7 @@ class LoaderContainer extends React.Component<ITabProps> {
 }
 
 const mapStateToProps = (state: IAppState) => ({
-  adminTabs: state.adminTabs.toJS().data,
-  hash: state.router.location.hash,
-  pathname: state.router.location.pathname,
-  search: state.router.location.search,
+  adminTabs: state.adminTabs.toJS().data
 })
 
 const mapDispatchToProps = {
