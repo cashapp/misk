@@ -13,7 +13,7 @@
   ],
   "jsRules": {},
   "rules": {
-    // "interface-name": false,
+    "interface-name": [true, "always-prefix"],
     "semicolon": [true, "never"],
     "member-access": [false],
     "ordered-imports": [true],
