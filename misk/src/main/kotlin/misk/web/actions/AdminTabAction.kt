@@ -16,7 +16,7 @@ import javax.inject.Singleton
  * Guidelines
  * - name should start with a capital letter unless it is a proper noun (ie. iOS)
  * - slug must be valid slug (lowercase and no white space)
- * - icon must be valid slug (lowercase and no white space).
+ * - icon must be valid slug (lowercase and no white space)
  *      - Not enforced in Misk but icon must also be a valid slug in BlueprintJS/Icons
  * - url_path_prefix must start and end with "/"
  *
@@ -31,10 +31,10 @@ class AdminTabAction : WebAction {
   @ResponseContentType(MediaTypes.APPLICATION_JSON)
   @Unauthenticated
   fun getAll(): Response {
-    return Response(tabs = registeredTabs.map { tab -> tab.slug to tab }.toMap())
+    return Response(adminTabs = registeredTabs.map { tab -> tab.slug to tab }.toMap())
   }
 
-  data class Response(val tabs: Map<String, AdminTab>)
+  data class Response(val adminTabs: Map<String, AdminTab>)
 }
 
 data class AdminTab(
@@ -44,11 +44,12 @@ data class AdminTab(
   val icon: String = "widget-button"
 ) {
   init {
-    require(slug.filter { char -> !char.isUpperCase()
-            && !char.isWhitespace() }.length.equals(slug.length) &&
-        icon.filter { char -> !char.isUpperCase()
-            && !char.isWhitespace() }.length.equals(icon.length) &&
-        url_path_prefix.startsWith("/") &&
-        url_path_prefix.endsWith("/"))
+    // Requirements enforce the guidelines outlined at top of the file
+    // TODO(adrw) see if there's a more readable way to do these requirements
+    require(
+        slug.filter { char -> !char.isUpperCase() && !char.isWhitespace() }.length == slug.length &&
+            icon.filter { char -> !char.isUpperCase() && !char.isWhitespace() }.length == icon.length &&
+            url_path_prefix.matches(Regex("(/[^/]+)*")) &&
+            !url_path_prefix.startsWith("/api"))
   }
 }

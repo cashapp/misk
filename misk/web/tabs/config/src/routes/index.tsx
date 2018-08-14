@@ -13,11 +13,3 @@ const routes = (
 )
 
 export default routes
-
-// const routes =  [{
-//   exact: true,
-//   path: "/_admin",
-// }, {
-//   exact: true,
-//   path: "/_admin/:moduleID",
-// }]

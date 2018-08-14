@@ -26,7 +26,7 @@ module.exports = {
   output: {
     filename: 'tab_dashboard.js',
     path: path.join(__dirname, 'dist/_admin/dashboard'),
-    publicPath: "/_admin/dashboard/"
+    publicPath: "/_admin/dashboard"
   },
   devServer: {
     port: '3110',

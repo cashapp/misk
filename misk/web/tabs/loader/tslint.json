@@ -13,12 +13,13 @@
   ],
   "jsRules": {},
   "rules": {
-    // "interface-name": false,
-    // "semicolon": [true, "never"],
+    "interface-name": [true, "always-prefix"],
+    "semicolon": [true, "never"],
     "member-access": [false],
     "ordered-imports": [true],
     "no-console": [false],
-    // "no-var-requires": true,
+    "no-var-requires": true,
+    "no-implicit-dependencies": false,
     "quotemark": [true, "double", "jsx-double"]
   },
   "rulesDirectory": []

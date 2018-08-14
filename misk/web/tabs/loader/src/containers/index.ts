@@ -1,3 +1,1 @@
-import { NavContainer } from "./NavContainer"
-import TabContainer from "./TabContainer"
-export { NavContainer, TabContainer }
+export { default as LoaderContainer} from "./LoaderContainer"
