@@ -2,6 +2,19 @@
 # yarn lockfile v1
 
 
+"@blueprintjs/core@^2.3.1":
+  version "2.3.1"
+  resolved "https://registry.yarnpkg.com/@blueprintjs/core/-/core-2.3.1.tgz#c998f8d22b02bfc9990b66b201f1ea095fb15450"
+  dependencies:
+    "@blueprintjs/icons" "^2.2.1"
+    "@types/dom4" "^2.0.0"
+    classnames "^2.2"
+    dom4 "^2.0.1"
+    normalize.css "^8.0.0"
+    popper.js "^1.14.1"
+    react-popper "^0.8.2"
+    tslib "^1.9.0"
+
 "@blueprintjs/core@^3.0.1":
   version "3.0.1"
   resolved "https://registry.yarnpkg.com/@blueprintjs/core/-/core-3.0.1.tgz#65d4d8b0e97cf12ff1ddc4bda073ccd02622505f"
@@ -15,6 +28,13 @@
     react-popper "^1.0.0"
     react-transition-group "^2.2.1"
     resize-observer-polyfill "^1.5.0"
+    tslib "^1.9.0"
+
+"@blueprintjs/icons@^2.2.1":
+  version "2.2.1"
+  resolved "https://registry.yarnpkg.com/@blueprintjs/icons/-/icons-2.2.1.tgz#1b4275fc67467218a8ffec6403c87c7af24532a5"
+  dependencies:
+    classnames "^2.2"
     tslib "^1.9.0"
 
 "@blueprintjs/icons@^3.0.0":
@@ -62,6 +82,33 @@
     redux "^4.0.0"
     skeleton-css "^2.0.4"
     styled-components "^3.3.3"
+
+"@misk/common@^0.0.2":
+  version "0.0.2"
+  resolved "https://registry.yarnpkg.com/@misk/common/-/common-0.0.2.tgz#b66999c6fc46b1485f61c5867d80062d76beabde"
+  dependencies:
+    "@blueprintjs/core" "^2.3.1"
+    "@blueprintjs/icons" "^2.2.1"
+    "@types/node" "^10.3.0"
+    axios "^0.18.0"
+    connected-react-router "^4.3.0"
+    history "^4.7.2"
+    react "^16.4.1"
+    react-dom "^16.4.1"
+    react-helmet "^5.2.0"
+    react-hot-loader "^4.3.3"
+    react-redux "^5.0.7"
+    react-router "^4.3.1"
+    react-router-dom "^4.3.1"
+    redux "^4.0.0"
+    skeleton-css "^2.0.4"
+    styled-components "^3.3.3"
+
+"@misk/components@^0.0.5":
+  version "0.0.5"
+  resolved "https://registry.yarnpkg.com/@misk/components/-/components-0.0.5.tgz#aaf88d671ad677b16a8f621c58098ef16ffe3b12"
+  dependencies:
+    "@misk/common" "^0.0.2"
 
 "@misk/dev@^0.0.6":
   version "0.0.6"
@@ -113,6 +160,10 @@
 "@types/node@*", "@types/node@^10.5.2":
   version "10.5.2"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-10.5.2.tgz#f19f05314d5421fe37e74153254201a7bf00a707"
+
+"@types/node@^10.3.0":
+  version "10.5.8"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-10.5.8.tgz#6f14ccecad1d19332f063a6a764f8907801fece0"
 
 "@types/react-dom@^16.0.6":
   version "16.0.6"
@@ -3846,6 +3897,10 @@ pkg-dir@^2.0.0:
   dependencies:
     find-up "^2.1.0"
 
+popper.js@^1.12.9:
+  version "1.14.4"
+  resolved "https://registry.yarnpkg.com/popper.js/-/popper.js-1.14.4.tgz#8eec1d8ff02a5a3a152dd43414a15c7b79fd69b6"
+
 popper.js@^1.14.1:
   version "1.14.3"
   resolved "https://registry.yarnpkg.com/popper.js/-/popper.js-1.14.3.tgz#1438f98d046acf7b4d78cd502bf418ac64d4f095"
@@ -4305,6 +4360,13 @@ react-is@^16.3.1:
 react-lifecycles-compat@^3.0.4:
   version "3.0.4"
   resolved "https://registry.yarnpkg.com/react-lifecycles-compat/-/react-lifecycles-compat-3.0.4.tgz#4f1a273afdfc8f3488a8c516bfda78f872352362"
+
+react-popper@^0.8.2:
+  version "0.8.3"
+  resolved "https://registry.yarnpkg.com/react-popper/-/react-popper-0.8.3.tgz#0f73333137c9fb0af6ec4074d2d0585a0a0461e1"
+  dependencies:
+    popper.js "^1.12.9"
+    prop-types "^15.6.0"
 
 react-popper@^1.0.0:
   version "1.0.0"

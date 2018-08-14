@@ -1,10 +1,10 @@
-// import { PathDebugComponent } from "@misk/components"
+import { PathDebugComponent } from "@misk/components"
 import * as React from "react"
 import { Helmet } from "react-helmet"
 import { connect } from "react-redux"
 import styled from "styled-components" 
 import { IAppState } from "../"
-import { PathDebugComponent } from "../components"
+// import { PathDebugComponent } from "../components"
 
 interface ITabProps {
   children: any,
@@ -31,6 +31,7 @@ class TabContainer extends React.Component<ITabProps, {children : any}> {
           <script src={`/_admin/${this.props.slug}/tab_${this.props.slug}.js`} type="text/javascript" />
         </Helmet>
         <div id={this.props.slug}/>
+        <PathDebugComponent hash={this.props.hash} pathname={this.props.pathname} search={this.props.search}/>
       </Container>
     )
   }

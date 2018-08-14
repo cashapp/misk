@@ -1,4 +1,4 @@
-import { Action } from "redux";
+import { Action } from "redux"
 
 const counterReducer = (state = 0, action: Action) => {
   switch (action.type) {
