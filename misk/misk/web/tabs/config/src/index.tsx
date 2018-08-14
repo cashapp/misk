@@ -39,7 +39,7 @@ const render = () => {
         <App history={history} />
       </Provider>
     </AppContainer>,
-    document.getElementById("dashboard")
+    document.getElementById("config")
   )
 }
 

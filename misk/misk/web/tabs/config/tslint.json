@@ -13,8 +13,8 @@
   ],
   "jsRules": {},
   "rules": {
-    // "interface-name": false,
-    // "semicolon": [true, "never"],
+    "interface-name": [true, "always-prefix"],
+    "semicolon": [true, "never"],
     "member-access": [false],
     "ordered-imports": [true],
     "no-console": [false],

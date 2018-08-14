@@ -17,35 +17,14 @@ import misk.web.proxy.WebProxyEntry
 
 class AdminTabModule : KAbstractModule() {
   override fun configure() {
-    multibind<AdminTab>().toInstance(AdminTab(
-        "Dashboard",
-        "dashboard",
-        "/_admin/dashboard/"
-    ))
     multibind<WebProxyEntry>().toInstance(
         WebProxyEntry("/_admin/dashboard", "http://localhost:3110/"))
     multibind<WebActionEntry>().toInstance(
         WebActionEntry<WebProxyAction>("/_admin/dashboard"))
-    
-    multibind<AdminTab>().toInstance(AdminTab(
-        "Misk NPM",
-        "@misk",
-        "/_admin/@misk/"
-    ))
-    multibind<WebProxyEntry>().toInstance(
-        WebProxyEntry("/_admin/@misk", "http://localhost:9100/"))
-    multibind<WebActionEntry>().toInstance(
-        WebActionEntry<WebProxyAction>("/_admin/@misk"))
 
     multibind<WebProxyEntry>().toInstance(
         WebProxyEntry("/_admin", "http://localhost:3100/"))
     multibind<WebActionEntry>().toInstance(
         WebActionEntry<WebProxyAction>("/_admin"))
-
-    multibind<AdminTab>().toInstance(AdminTab(
-        "Temp Test",
-        "test",
-        "/_admin/test/"
-    ))
   }
 }

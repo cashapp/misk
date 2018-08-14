@@ -17,16 +17,16 @@ const DefinePluginConfig = new webpack.DefinePlugin({
 })
 
 const CopyWebpackPluginConfig = new CopyWebpackPlugin(
-  [{ from: './node_modules/@misk/common/lib', to: '@misk/common/lib'}], 
+  [{ from: './node_modules/@misk/common/lib', to: '_admin/@misk/'}], 
   { debug: 'info', copyUnmodified: true }
 )
 
 module.exports = {
   entry: ['react-hot-loader/patch', path.join(__dirname, '/src/index.tsx')],
   output: {
-    filename: 'tab_loader.js',
-    path: path.join(__dirname, 'dist/_admin'),
-    publicPath: "/_admin/"
+    filename: '_admin/tab_loader.js',
+    path: path.join(__dirname, 'dist'),
+    publicPath: "/"
 },
   devServer: {
     port: '3100',

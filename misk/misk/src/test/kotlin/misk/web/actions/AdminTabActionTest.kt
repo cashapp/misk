@@ -23,7 +23,7 @@ internal class AdminTabActionTest {
       multibind<AdminTab>().toInstance(AdminTab(
           "Dashboard",
           "dashboard",
-          "/_admin/dashboard/"
+          "/_admin/dashboard"
       ))
     }
   }
@@ -34,64 +34,52 @@ internal class AdminTabActionTest {
   }
 
   @Test
-  internal fun tabGoodName() {
-    AdminTab("Good Name", "slug", "/a/path/")
-  }
-
-  @Test
   internal fun tabGoodSlug() {
-    AdminTab("Name", "@good-slug_test", "/a/path/")
+    AdminTab("Name", "@good-slug_test", "/a/path")
   }
 
   @Test
   internal fun tabSlugWithSpace() {
     assertFailsWith<IllegalArgumentException> {
-      AdminTab("Name", "bad slug", "/a/path/")
+      AdminTab("Name", "bad slug", "/a/path")
     }
   }
 
   @Test
   internal fun tabSlugWithUpperCase() {
     assertFailsWith<IllegalArgumentException> {
-      AdminTab("Name", "BadSlug", "/a/path/")
+      AdminTab("Name", "BadSlug", "/a/path")
     }
   }
 
   @Test
   internal fun tabGoodIcon() {
-    AdminTab("Name", "slug", "/a/path/", "@tea-pot_418")
+    AdminTab("Name", "slug", "/a/path", "@tea-pot_418")
   }
 
   @Test
   internal fun tabIconWithSpace() {
     assertFailsWith<IllegalArgumentException> {
-      AdminTab("Name", "bad slug", "/a/path/", "bad icon")
+      AdminTab("Name", "bad slug", "/a/path", "bad icon")
     }
   }
 
   @Test
   internal fun tabIconWithUpperCase() {
     assertFailsWith<IllegalArgumentException> {
-      AdminTab("Name", "BadSlug", "/a/path/", "Bad-Icon")
+      AdminTab("Name", "BadSlug", "/a/path", "Bad-Icon")
     }
   }
 
   @Test
   internal fun tabGoodPath() {
-    AdminTab("Name", "slug", "/a/path/")
+    AdminTab("Name", "slug", "/a/path")
   }
 
   @Test
   internal fun tabPathWithoutLeadingSlash() {
     assertFailsWith<IllegalArgumentException> {
-      AdminTab("Name", "slug", "a/path/")
-    }
-  }
-
-  @Test
-  internal fun tabPathWithoutTrailingSlash() {
-    assertFailsWith<IllegalArgumentException> {
-      AdminTab("Name", "slug", "/a/path")
+      AdminTab("Name", "slug", "a/path")
     }
   }
 

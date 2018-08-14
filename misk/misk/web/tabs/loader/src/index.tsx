@@ -1,3 +1,4 @@
+import { IconNames } from "@blueprintjs/icons";
 import { connectRouter, routerMiddleware } from "connected-react-router"
 import { createBrowserHistory } from "history"
 import * as React from "react"
@@ -5,32 +6,45 @@ import * as ReactDOM from "react-dom"
 import { AppContainer } from "react-hot-loader"
 import { Provider } from "react-redux"
 import { applyMiddleware, compose, createStore } from "redux"
+import createSagaMiddleware from "redux-saga"
 import App from "./App"
+import { IAdminTabs, ILoaderState } from "./containers/LoaderContainer"
 import rootReducer from "./reducers"
+import rootSaga from "./sagas";
 
 export interface IAppState {
-  count: number,
-  router: {
-    location: {
-      pathname: string,
-      search: string,
-      hash: string
-    },
-    action: string
+  adminTabs: IAdminTabs
+  loader: ILoaderState
+  router: IRouterState
+}
+
+export interface IRouterState {
+  location: {
+    pathname: string
+    search: string
+    hash: string
   }
+  action: string
 }
 
 const history = createBrowserHistory()
+const sagaMiddleware = createSagaMiddleware()
 
 const composeEnhancer: typeof compose = (window as any).__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose
 const store = createStore(
   connectRouter(history)(rootReducer),
   composeEnhancer(
     applyMiddleware(
+      sagaMiddleware,
       routerMiddleware(history),
     ),
   ),
 )
+
+/**
+ * Starts the rootSaga which forks off instances of all sagas used to receive and process actions as they are dispatched (./sagas/index.ts)
+ */
+sagaMiddleware.run(rootSaga)
 
 const render = () => {
   ReactDOM.render(
@@ -39,7 +53,7 @@ const render = () => {
         <App history={history} />
       </Provider>
     </AppContainer>,
-    document.getElementById("dashboard")
+    document.getElementById("loader")
   )
 }
 

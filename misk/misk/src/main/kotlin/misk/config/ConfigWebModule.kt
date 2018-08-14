@@ -13,7 +13,8 @@ class ConfigWebModule : KAbstractModule() {
     multibind<AdminTab>().toInstance(AdminTab(
         "Config",
         "config",
-        "/_admin/config/"
+        "/_admin/config",
+        "cog"
     ))
     // TODO(adrw) only add web proxy during development, otherwise add ResourceInterceptor (Jar)
     multibind<WebProxyEntry>().toInstance(

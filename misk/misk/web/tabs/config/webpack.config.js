@@ -26,7 +26,7 @@ module.exports = {
   output: {
     filename: 'tab_config.js',
     path: path.join(__dirname, 'dist/_admin/config'),
-    publicPath: "/_admin/config/"
+    publicPath: "/_admin/config"
   },
   devServer: {
     port: '3200',
