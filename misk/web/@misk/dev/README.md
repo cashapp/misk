@@ -1,20 +1,18 @@
-@misk/dev
+@Misk/Dev
 ---
-
-`@misk/dev` provides shared devDependencies used to provide a common development environment across Misk tab repos.
+![](https://raw.githubusercontent.com/square/misk/master/misk.png)
+`@Misk/Dev` provides shared devDependencies used to provide a common development environment across Misk tab repos.
 
 Getting Started
 ---
-
-- Install `@misk/dev`
+- Install `@Misk/Dev`
 
 ```bash
-$ yarn add @misk/dev
+$ yarn add @Misk/Dev
 ```
 
 Included Libraries
 ---
-
 ```JSON
   "@types/react": "^16.4.4",
     "@types/react-dom": "^16.0.6",

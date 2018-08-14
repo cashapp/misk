@@ -11,7 +11,7 @@ module.exports = {
   output: {
     path: path.resolve(__dirname, './lib'),
     filename: '[name].js',
-    library: ['misk', 'common'],
+    library: ['Misk', 'Common'],
     libraryTarget: 'umd',
     globalObject: 'typeof window !== \'undefined\' ? window : this'
   },

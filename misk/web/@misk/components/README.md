@@ -1,15 +1,14 @@
-@misk/components
+@Misk/Components
 ---
-
-`@misk/components` provides shared, styled React components between `@misk` modules.
+![](https://raw.githubusercontent.com/square/misk/master/misk.png)
+`@Misk/Components` provides shared, styled React components between Misk tab repos.
 
 Getting Started
 ---
-
-- Install `@misk/components`
+- Install `@Misk/Components`
 
 ```bash
-$ yarn add @misk/components
+$ yarn add @Misk/Components
 ```
 
 Components

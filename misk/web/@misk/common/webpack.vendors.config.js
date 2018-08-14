@@ -1,7 +1,7 @@
 const path = require('path');
 
 module.exports = {
-  name: "static",
+  name: "vendors",
   mode: 'production',
   entry: {
     vendors: path.resolve(__dirname, 'src/vendors.js')
@@ -10,7 +10,7 @@ module.exports = {
   output: {
     path: path.resolve(__dirname, './lib'),
     filename: '[name].js',
-    library: ['misk', 'common'],
+    library: ['Misk', 'Common'],
     libraryTarget: 'umd',
     globalObject: 'typeof window !== \'undefined\' ? window : this'
   },

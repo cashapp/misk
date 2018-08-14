@@ -4,7 +4,7 @@ const miskCommon = require('@misk/common');
 module.exports = {
   mode: 'production',
   entry: {
-    index: path.resolve(__dirname, 'src/index.ts')
+    components: path.resolve(__dirname, 'src/index.ts')
   },
   devtool: 'source-map',
   output: {
