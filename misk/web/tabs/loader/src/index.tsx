@@ -41,6 +41,9 @@ const store = createStore(
   ),
 )
 
+/**
+ * Starts the rootSaga which forks off instances of all sagas used to receive and process actions as they are dispatched (./sagas/index.ts)
+ */
 sagaMiddleware.run(rootSaga)
 
 const render = () => {
