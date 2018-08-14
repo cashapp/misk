@@ -34,11 +34,6 @@ internal class AdminTabActionTest {
   }
 
   @Test
-  internal fun tabGoodName() {
-    AdminTab("Good Name", "slug", "/a/path")
-  }
-
-  @Test
   internal fun tabGoodSlug() {
     AdminTab("Name", "@good-slug_test", "/a/path")
   }
