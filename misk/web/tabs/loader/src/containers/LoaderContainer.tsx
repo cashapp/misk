@@ -1,8 +1,7 @@
-import { IconName, IconNames } from "@blueprintjs/icons"
+import { IconName } from "@blueprintjs/icons"
 import * as React from "react"
 import { connect } from "react-redux"
 import { Route, Switch } from "react-router"
-import styled from "styled-components"
 import { IAppState } from ".."
 import { dispatchAdminTabs } from "../actions"
 import { NoMatchComponent, ScriptComponent } from "../components"
@@ -30,8 +29,6 @@ export interface IAdminTab {
   url_path_prefix: string
 }
 
-const Container = styled.div``
-
 class LoaderContainer extends React.Component<ITabProps> {
   componentDidMount() {
     this.props.getTabs()
@@ -51,18 +48,18 @@ class LoaderContainer extends React.Component<ITabProps> {
     if (adminTabs) {
       const tabRouteComponents = Object.entries(adminTabs).map((tab) => this.buildTabRouteComponent(tab))
       return (
-        <Container>
+        <div>
           <Switch>
             {tabRouteComponents}
             <Route component={NoMatchComponent}/>
           </Switch>
-        </Container>
+        </div>
       )
     } else {
       return (
-        <Container>
+        <div>
           <p>Loading Tabs...</p>
-        </Container>
+        </div>
       )
     }
   }

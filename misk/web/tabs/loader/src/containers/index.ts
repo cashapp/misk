@@ -1,2 +1,1 @@
-import LoaderContainer from "./LoaderContainer"
-export { LoaderContainer }
+export { default as LoaderContainer} from "./LoaderContainer"
