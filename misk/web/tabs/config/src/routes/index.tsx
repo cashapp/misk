@@ -1,6 +1,5 @@
 import * as React from "react"
 import { Route, Switch } from "react-router"
-import { NoMatchComponent } from "../components"
 import { DashboardContainer, TabContainer } from "../containers"
 
 const routes = (

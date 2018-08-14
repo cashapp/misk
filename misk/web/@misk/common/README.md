@@ -118,3 +118,6 @@ Webpack Configs
 - `webpack.static.config.js`: Exports common styles file
 - `webpack.vendor.config.js`: Exports common vendors library file
 - `webpack.basetab.config.js`: Base config used for each tab
+
+[Releasing](../RELEASING.md)
+---

@@ -1,6 +1,6 @@
+import { NoMatchComponent } from "@misk/components"
 import * as React from "react"
 import { Route, Switch } from "react-router"
-import { NoMatchComponent } from "../components"
 import { NavContainer, TabContainer } from "../containers"
 
 const routes = (

@@ -17,7 +17,8 @@ const DefinePluginConfig = new webpack.DefinePlugin({
 })
 
 const CopyWebpackPluginConfig = new CopyWebpackPlugin(
-  [{ from: './node_modules/@misk/common/lib', to: '_admin/@misk/'}], 
+  [{ from: './node_modules/@misk/common/lib', to: '_admin/@misk/'},
+  { from: './node_modules/@misk/components/lib', to: '_admin/@misk/'}], 
   { debug: 'info', copyUnmodified: true }
 )
 
