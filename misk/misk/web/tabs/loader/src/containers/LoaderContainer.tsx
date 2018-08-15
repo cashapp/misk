@@ -5,6 +5,7 @@ import { Route, Switch } from "react-router"
 import { IAppState } from ".."
 import { dispatchAdminTabs } from "../actions"
 import { NoMatchComponent, ScriptComponent } from "../components"
+import { Link } from "react-router-dom";
 
 interface ITabProps {
   adminTabs: IAdminTabs
@@ -47,8 +48,11 @@ class LoaderContainer extends React.Component<ITabProps> {
     const { adminTabs } = this.props.adminTabs
     if (adminTabs) {
       const tabRouteComponents = Object.entries(adminTabs).map((tab) => this.buildTabRouteComponent(tab))
+      const tabLinks = Object.entries(adminTabs).map((tab) => <Link key={tab[0]} to={`/_admin/test/${tab[1].slug}`}>{tab[1].name}</Link>)
       return (
         <div>
+          <Link to="/_admin/">Home</Link><br/>
+          {tabLinks}
           <Switch>
             {tabRouteComponents}
             <Route component={NoMatchComponent}/>
