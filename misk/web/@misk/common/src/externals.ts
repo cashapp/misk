@@ -5,8 +5,6 @@ export interface IExternal {
 export default makeExternals({
   "@blueprintjs/core": ["Blueprint", "Core"],
   "@blueprintjs/icons": ["Blueprint", "Icons"],
-  "@misk/common": ["Misk", "Common"],
-  "@misk/components": ["Misk", "Components"],
   "axios": "Axios",
   "connected-react-router": "ConnectedReactRouter",
   "dayjs": "Dayjs",
@@ -29,10 +27,9 @@ function makeExternals(inExternals: IExternal) : IExternal {
   const outExternals: IExternal = {}
   Object.keys(inExternals).forEach((name, index) => {
     outExternals[name] = inExternals.hasOwnProperty(name) ? 
-      // (Array.isArray(inExternals[name]) ? 
-        // (inExternals[name] as string[]).join("") : inExternals[name]
-      // ) : name
-      inExternals[name] : name
+      (Array.isArray(inExternals[name]) ? 
+        (inExternals[name] as string[]).join("") : inExternals[name]
+      ) : name
     })
   return outExternals
 }
