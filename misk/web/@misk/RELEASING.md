@@ -35,7 +35,7 @@ Example Release Flow
 - Update all minor versions of `@Misk/` packages in `package.json`
 - Publish new version 0.0.7 for `@Misk/Dev`
 - Update `package.json` in `@Misk/Common` and `@Misk/Components` to bump `@Misk/Dev` to version 0.0.7
-- Run `
+- Run ``
 - Publish new version 0.0.13 for `@Misk/Common`
 - Update `package.json` in `@Misk/Components` to bump `@Misk/Common` to version 0.0.13
 - Publish new version 0.0.3 for `@Misk/Components`
