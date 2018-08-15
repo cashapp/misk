@@ -4,7 +4,7 @@ Misk Admin
 ## Organization
 - `@misk`: all npm packages
   - `@misk/common`: common dependencies
-  - `@misk/components`: reusable React components (not working yet)
+  - `@misk/components`: reusable React components
   - `@misk/dev`: common devDependencies
 - `tabs`: all modular parts of the dashboard
   - `config`: config tab

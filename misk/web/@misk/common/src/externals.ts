@@ -7,7 +7,6 @@ export default makeExternals({
   "@blueprintjs/icons": ["Blueprint", "Icons"],
   "@misk/common": ["Misk", "Common"],
   "@misk/components": ["Misk", "Components"],
-  "@misk/dev": ["Misk", "Dev"],
   "axios": "Axios",
   "connected-react-router": "ConnectedReactRouter",
   "dayjs": "Dayjs",

@@ -1,8 +1,6 @@
 window.Blueprint = {}
 window.Blueprint.Core = require('@blueprintjs/core')
 window.Blueprint.Icons = require('@blueprintjs/icons')
-window.BlueprintCore = require('@blueprintjs/core')
-window.BlueprintIcons = require('@blueprintjs/icons')
 window.Axios = require('axios');
 window.ConnectedReactRouter = require('connected-react-router');
 window.Dayjs = require('dayjs');

@@ -4,13 +4,13 @@ const miskCommon = require('@misk/common');
 module.exports = {
   mode: 'production',
   entry: {
-    index: path.resolve(__dirname, 'src/index.ts')
+    components: path.resolve(__dirname, 'src/index.ts')
   },
   devtool: 'source-map',
   output: {
     path: path.resolve(__dirname, './lib'),
     filename: '[name].js',
-    library: ['misk', 'components'],
+    library: ['Misk', 'Components'],
     libraryTarget: 'umd',
     globalObject: 'typeof self !== \'undefined\' ? self : this'
   },

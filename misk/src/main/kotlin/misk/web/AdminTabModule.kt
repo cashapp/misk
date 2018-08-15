@@ -18,13 +18,20 @@ import misk.web.proxy.WebProxyEntry
 class AdminTabModule : KAbstractModule() {
   override fun configure() {
     multibind<WebProxyEntry>().toInstance(
+        WebProxyEntry("/_admin", "http://localhost:3100/"))
+    multibind<WebActionEntry>().toInstance(
+        WebActionEntry<WebProxyAction>("/_admin"))
+
+    multibind<WebProxyEntry>().toInstance(
         WebProxyEntry("/_admin/dashboard", "http://localhost:3110/"))
     multibind<WebActionEntry>().toInstance(
         WebActionEntry<WebProxyAction>("/_admin/dashboard"))
 
     multibind<WebProxyEntry>().toInstance(
-        WebProxyEntry("/_admin", "http://localhost:3100/"))
+        WebProxyEntry("/@misk", "http://localhost:9100/"))
     multibind<WebActionEntry>().toInstance(
-        WebActionEntry<WebProxyAction>("/_admin"))
+        WebActionEntry<WebProxyAction>("/@misk"))
+
+
   }
 }
