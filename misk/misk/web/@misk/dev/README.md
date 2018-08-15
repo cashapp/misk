@@ -1,14 +1,12 @@
-@Misk/Dev
+Misk Dev
 ---
 ![](https://raw.githubusercontent.com/square/misk/master/misk.png)
-`@Misk/Dev` provides shared devDependencies used to provide a common development environment across Misk tab repos.
+This package provides shared devDependencies used to provide a common development environment across Misk tab repos.
 
 Getting Started
 ---
-- Install `@Misk/Dev`
-
 ```bash
-$ yarn add @Misk/Dev
+$ yarn add @misk/dev
 ```
 
 Included Libraries
@@ -50,5 +48,5 @@ Included Libraries
     "webpack-dev-server": "^3.1.5"
 ```
 
-[Releasing](../RELEASING.md)
+[Releasing](https://github.com/square/misk/blob/master/misk/web/%40misk/RELEASING.md)
 ---
