@@ -35,8 +35,9 @@ Example Release Flow
 - Update all minor versions of `@Misk/` packages in `package.json`
 - Publish new version 0.0.7 for `@Misk/Dev`
 - Update `package.json` in `@Misk/Common` and `@Misk/Components` to bump `@Misk/Dev` to version 0.0.7
-- Run ``
+- Reinstall node modules and test that they work with the new `@Misk/Dev` package version `rm -rf node_modules/; yarn install`
 - Publish new version 0.0.13 for `@Misk/Common`
 - Update `package.json` in `@Misk/Components` to bump `@Misk/Common` to version 0.0.13
+- Reinstall node modules and test that they work with the new `@Misk/Dev` and `@Misk/Common` package version `rm -rf node_modules/; yarn install`
 - Publish new version 0.0.3 for `@Misk/Components`
 - Update all related tabs to the newest `@Misk/` packages

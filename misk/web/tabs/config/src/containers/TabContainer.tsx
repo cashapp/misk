@@ -1,4 +1,4 @@
-import { PathDebugComponent } from "@misk/components"
+import { NoMatchComponent, PathDebugComponent } from "@misk/components"
 import * as React from "react"
 import { connect } from "react-redux"
 import styled from "styled-components" 
@@ -28,7 +28,7 @@ class TabContainer extends React.Component<ITabProps, {children : any}> {
         <div id={this.props.slug}/>
         {this.props.children}
         <PathDebugComponent hash={this.props.hash} pathname={this.props.pathname} search={this.props.search}/>
-        {/* <NoMatchComponent prefix="Config"/> */}
+        <NoMatchComponent prefix="Config"/>
         <h1>Config</h1>
       </Container>
     )
