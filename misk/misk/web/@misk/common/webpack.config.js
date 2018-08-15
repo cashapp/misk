@@ -4,14 +4,14 @@ module.exports = {
   name: "library",
   mode: 'production',
   entry: {
-    index: path.resolve(__dirname, 'src/index.ts'),
+    common: path.resolve(__dirname, 'src/index.ts'),
     externals: path.resolve(__dirname, 'src/index.ts')
   },
   devtool: 'source-map',
   output: {
     path: path.resolve(__dirname, './lib'),
     filename: '[name].js',
-    library: ['misk', 'common'],
+    library: ['Misk', 'Common'],
     libraryTarget: 'umd',
     globalObject: 'typeof window !== \'undefined\' ? window : this'
   },

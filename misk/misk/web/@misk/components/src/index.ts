@@ -1,2 +1,2 @@
-import { PathDebugComponent } from "./PathDebugComponent"
-export { PathDebugComponent }
+export * from "./NoMatchComponent"
+export * from "./PathDebugComponent"

@@ -1,17 +1,18 @@
 {
   "name": "@misk/common",
-  "version": "0.0.10",
+  "version": "0.0.12",
   "description": "Microservice Kontainer Common Libraries, Externals, Styles",
   "author": "Square/Misk Authors (https://github.com/square/misk/graphs/contributors)",
-  "main": "lib/index.js",
-  "module": "lib/index.js",
+  "main": "lib/common.js",
+  "module": "lib/common.js",
+  "typings": "lib/index.d.ts",
+  "style": "lib/styles.js",
   "engines": {
     "node": ">=7.8.0"
   },
   "files": [
     "lib"
   ],
-  "style": "lib/styles.js",
   "repository": {
     "type": "git",
     "url": "git@github.com:square/misk.git"
@@ -23,32 +24,32 @@
     "lib": "webpack --config webpack.config.js && webpack --config webpack.static.config.js && webpack --config webpack.vendors.config.js",
     "lint": "echo no lint",
     "prepare": "yarn run lint && yarn run test && yarn run lib",
-    "reinstall": "rm -rf node_modules/; yarn install",
+    "reinstall": "rm -rf node_modules/ && yarn install",
     "test": "echo no tests"
   },
   "dependencies": {
-    "@blueprintjs/core": "^3.0.1",
+    "@blueprintjs/core": "^3.3.0",
     "@blueprintjs/icons": "^3.0.0",
     "axios": "^0.18.0",
-    "connected-react-router": "^4.3.0",
-    "dayjs": "^1.7.4",
+    "connected-react-router": "^4.4.1",
+    "dayjs": "^1.7.5",
     "history": "^4.7.2",
     "immutable": "^3.8.2",
-    "react": "^16.4.1",
-    "react-dom": "^16.4.1",
+    "react": "^16.4.2",
+    "react-dom": "^16.4.2",
     "react-helmet": "^5.2.0",
-    "react-hot-loader": "^4.3.3",
+    "react-hot-loader": "^4.3.4",
     "react-redux": "^5.0.7",
     "react-router": "^4.3.1",
     "react-router-dom": "^4.3.1",
     "react-router-redux": "^5.0.0-alpha.9",
-    "react-transition-group": "^2.2.1",
+    "react-transition-group": "^2.4.0",
     "redux": "^4.0.0",
     "redux-saga": "^0.16.0",
     "skeleton-css": "^2.0.4",
-    "styled-components": "^3.3.3"
+    "styled-components": "^3.4.2"
   },
   "devDependencies": {
-    "@misk/dev": "^0.0.6"
+    "@misk/dev": "^0.0.8"
   }
 }
