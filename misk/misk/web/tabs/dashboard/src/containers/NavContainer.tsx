@@ -1,13 +1,16 @@
+import { IMiskAdminTabs } from "@misk/common"
 import * as React from "react"
-import { SidebarComponent, TopbarComponent } from "../components";
+import { SidebarComponent, TopbarComponent } from "../components"
 
-export class NavContainer extends React.Component {
-  render() {
-    return (
-      <div>
-        <TopbarComponent name="Misk Admin"/>
-        {/* <SidebarComponent menuItems={}/> */}
-      </div>
-    )
-  }
+interface INavProps {
+  adminTabs: IMiskAdminTabs
 }
+
+const NavContainer = (props: INavProps) => (
+  <div>
+    <TopbarComponent name="Misk Admin"/>
+    <SidebarComponent adminTabs={props.adminTabs}/>
+  </div>
+)
+
+export { NavContainer }

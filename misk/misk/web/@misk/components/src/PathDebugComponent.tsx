@@ -6,7 +6,7 @@ export interface IPathDebugProps {
   search: string
 }
 
-const PathDebugComponent = (props: IPathDebugProps) => {
+export const PathDebugComponent = (props: IPathDebugProps) => {
   return (
     <div>
       <p>hash: {props.hash}</p>
@@ -15,5 +15,3 @@ const PathDebugComponent = (props: IPathDebugProps) => {
     </div>
   )
 }
-
-export { PathDebugComponent }

@@ -1,6 +1,5 @@
 import { PathDebugComponent } from "@misk/components"
 import * as React from "react"
-import { Helmet } from "react-helmet"
 import { connect } from "react-redux"
 import styled from "styled-components" 
 import { IAppState } from "../"
@@ -18,7 +17,7 @@ const Container = styled.div`
   margin-top: 20px;
 `
 
-class TabContainer extends React.Component<ITabProps, {children : any}> {
+class TabContainerClass extends React.Component<ITabProps, {children : any}> {
   constructor(props: ITabProps) {
     super(props)
   }
@@ -26,9 +25,6 @@ class TabContainer extends React.Component<ITabProps, {children : any}> {
   render() {
     return (
       <Container>
-        <Helmet>
-          <script src={`/_admin/${this.props.slug}/tab_${this.props.slug}.js`} type="text/javascript" />
-        </Helmet>
         <div id={this.props.slug}/>
         <PathDebugComponent hash={this.props.hash} pathname={this.props.pathname} search={this.props.search}/>
       </Container>
@@ -42,4 +38,4 @@ const mapStateToProps = (state: IAppState) => ({
   search: state.router.location.search,
 })
 
-export default connect(mapStateToProps)(TabContainer)
+export const TabContainer = connect(mapStateToProps)(TabContainerClass)

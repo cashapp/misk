@@ -8,6 +8,9 @@ import { applyMiddleware, compose, createStore } from "redux"
 import App from "./App"
 import rootReducer from "./reducers"
 
+export * from "./containers"
+export * from "./components"
+
 export interface IAppState {
   count: number,
   router: {

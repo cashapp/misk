@@ -1,4 +1,4 @@
-import { IconNames } from "@blueprintjs/icons";
+import { IMiskAdminTabs } from "@misk/common"
 import { connectRouter, routerMiddleware } from "connected-react-router"
 import { createBrowserHistory } from "history"
 import * as React from "react"
@@ -8,12 +8,12 @@ import { Provider } from "react-redux"
 import { applyMiddleware, compose, createStore } from "redux"
 import createSagaMiddleware from "redux-saga"
 import App from "./App"
-import { IAdminTabs, ILoaderState } from "./containers/LoaderContainer"
+import { ILoaderState } from "./containers/LoaderContainer"
 import rootReducer from "./reducers"
-import rootSaga from "./sagas";
+import rootSaga from "./sagas"
 
 export interface IAppState {
-  adminTabs: IAdminTabs
+  adminTabs: IMiskAdminTabs
   loader: ILoaderState
   router: IRouterState
 }
