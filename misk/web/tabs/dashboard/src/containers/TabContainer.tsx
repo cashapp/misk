@@ -1,6 +1,7 @@
 import { PathDebugComponent } from "@misk/components"
 import * as React from "react"
 import { connect } from "react-redux"
+import { Link } from "react-router-dom"
 import styled from "styled-components" 
 import { IAppState } from "../"
 
@@ -17,6 +18,14 @@ const Container = styled.div`
   margin-top: 20px;
 `
 
+const testLinks = (
+  <div>
+    <Link to="/_admin/dashboard/test1/1/test1">Test1</Link><br/>
+    <Link to="/_admin/dashboard/test2/2/test2">Test2</Link><br/>
+    <Link to="/_admin/dashboard/test3/3/test3">Test2</Link><br/>
+  </div>
+)
+
 class TabContainerClass extends React.Component<ITabProps, {children : any}> {
   constructor(props: ITabProps) {
     super(props)
@@ -26,7 +35,9 @@ class TabContainerClass extends React.Component<ITabProps, {children : any}> {
     return (
       <Container>
         <div id={this.props.slug}/>
+        {testLinks}
         <PathDebugComponent hash={this.props.hash} pathname={this.props.pathname} search={this.props.search}/>
+        {this.props.children}
       </Container>
     )
   }

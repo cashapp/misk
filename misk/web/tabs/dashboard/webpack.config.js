@@ -18,8 +18,8 @@ const DefinePluginConfig = new webpack.DefinePlugin({
 
 const CopyWebpackPluginConfig = new CopyWebpackPlugin(
   [
-    { from: './node_modules/@misk/common/lib', to: '@misk/'},
-    { from: './node_modules/@misk/components/lib', to: '@misk/'}
+    { from: './node_modules/@misk/common/lib', to: '_admin/dashboard/@misk/'},
+    { from: './node_modules/@misk/components/lib', to: '_admin/dashboard/@misk/'}
   ], 
   { debug: 'info', copyUnmodified: true }
 )
@@ -27,9 +27,9 @@ const CopyWebpackPluginConfig = new CopyWebpackPlugin(
 module.exports = {
   entry: ['react-hot-loader/patch', path.join(__dirname, '/src/index.tsx')],
   output: {
-    filename: 'tab_dashboard.js',
-    path: path.join(__dirname, 'dist/_admin/dashboard'),
-    publicPath: "/_admin/dashboard"
+    filename: '_admin/dashboard/tab_dashboard.js',
+    path: path.join(__dirname, 'dist'),
+    publicPath: "/"
   },
   devServer: {
     port: '3110',
