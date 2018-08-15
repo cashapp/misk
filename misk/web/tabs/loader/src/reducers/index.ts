@@ -1,6 +1,6 @@
+import { IMiskAdminTabs } from "@misk/common"
 import { RouterState } from "connected-react-router"
 import { combineReducers } from "redux"
-import { IAdminTabs } from "../containers/LoaderContainer"
 import adminTabsReducer from "./adminTabs"
 import itemReducer from "./item"
 
@@ -10,7 +10,7 @@ const rootReducer = combineReducers({
 })
 
 export interface IState {
-  adminTabs: IAdminTabs
+  adminTabs: IMiskAdminTabs
   item: any
   router: RouterState
 }
