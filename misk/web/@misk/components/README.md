@@ -1,19 +1,18 @@
-@Misk/Components
+Misk Components
 ---
 ![](https://raw.githubusercontent.com/square/misk/master/misk.png)
-`@Misk/Components` provides shared, styled React components between Misk tab repos.
+This package provides shared, styled React components across Misk tab repos.
 
 Getting Started
 ---
-- Install `@Misk/Components`
-
 ```bash
-$ yarn add @Misk/Components
+$ yarn add @misk/components
 ```
 
 Components
 ---
+- NoMatchComponent: very basic component for route 404s
 - PathDebugComponent: outputs values passed in by props for `hash`, `pathname`, and `search` in React-Router instance
 
-[Releasing](../RELEASING.md)
+[Releasing](https://github.com/square/misk/blob/master/misk/web/%40misk/RELEASING.md)
 ---

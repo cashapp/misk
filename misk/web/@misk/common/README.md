@@ -1,12 +1,10 @@
-@misk/common
+Misk Common
 ---
 ![](https://raw.githubusercontent.com/square/misk/master/misk.png)
-`@misk/common` provides shared libraries, externals, and styles between `@misk` modules.
+This package provides shared libraries, externals, and styles across Misk tab repos.
 
 Getting Started
 ---
-- Install `@misk/common`
-
 ```bash
 $ yarn add @misk/common
 ```
@@ -119,5 +117,5 @@ Webpack Configs
 - `webpack.vendor.config.js`: Exports common vendors library file
 - `webpack.basetab.config.js`: Base config used for each tab
 
-[Releasing](../RELEASING.md)
+[Releasing](https://github.com/square/misk/blob/master/misk/web/%40misk/RELEASING.md)
 ---
