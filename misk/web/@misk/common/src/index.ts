@@ -1,3 +1,1 @@
-import externals from "./externals"
-export { externals }
-export default externals
+export { default as externals } from "./externals"
