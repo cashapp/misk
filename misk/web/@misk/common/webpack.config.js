@@ -5,7 +5,8 @@ module.exports = {
   mode: 'production',
   entry: {
     common: path.resolve(__dirname, 'src/index.ts'),
-    externals: path.resolve(__dirname, 'src/index.ts')
+    externals: path.resolve(__dirname, 'src/externals.ts'),
+    interfaces: path.resolve(__dirname, 'src/interfaces.ts')
   },
   devtool: 'source-map',
   output: {

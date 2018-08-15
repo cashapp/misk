@@ -1,3 +1,2 @@
-import { SidebarComponent } from "./SidebarComponent"
-import { TopbarComponent } from "./TopbarComponent"
-export { SidebarComponent, TopbarComponent }
+export * from "./SidebarComponent"
+export * from "./TopbarComponent"

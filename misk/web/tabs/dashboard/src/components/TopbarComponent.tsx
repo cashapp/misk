@@ -5,19 +5,11 @@ export interface ITopbarProps {
   name: string
 }
 
-export class TopbarComponent extends React.Component<ITopbarProps, {}> {
-  constructor(props: ITopbarProps) {
-    super(props)
-  }
-
-  render() {
-    return (
-      <Navbar>
-        <NavbarGroup align={Alignment.LEFT}>
-          <NavbarHeading>{this.props.name}</NavbarHeading>
-          <NavbarDivider/>
-        </NavbarGroup>
-      </Navbar>
-    )
-  }
-}
+export const TopbarComponent = (props: ITopbarProps) => (
+  <Navbar>
+    <NavbarGroup align={Alignment.LEFT}>
+      <NavbarHeading>{props.name}</NavbarHeading>
+      <NavbarDivider/>
+    </NavbarGroup>
+  </Navbar>
+)

@@ -1,33 +1,21 @@
-import { IconName } from "@blueprintjs/icons"
+import { IMiskAdminTab, IMiskAdminTabs } from "@misk/common"
 import * as React from "react"
 import { connect } from "react-redux"
 import { Route, Switch } from "react-router"
+import { Link } from "react-router-dom"
 import { IAppState } from ".."
 import { dispatchAdminTabs } from "../actions"
 import { NoMatchComponent, ScriptComponent } from "../components"
-import { Link } from "react-router-dom";
 
 interface ITabProps {
-  adminTabs: IAdminTabs
+  adminTabs: IMiskAdminTabs
   loading: boolean
   error: any
   getTabs: any
 }
 
 export interface ILoaderState {
-  adminTabs: IAdminTabs
-}
-
-export interface IAdminTabs {
-  [key:string]: IAdminTab
-  toJS: any
-}
-
-export interface IAdminTab {
-  icon: IconName
-  name: string
-  slug: string
-  url_path_prefix: string
+  adminTabs: IMiskAdminTabs
 }
 
 class LoaderContainer extends React.Component<ITabProps> {
@@ -37,10 +25,10 @@ class LoaderContainer extends React.Component<ITabProps> {
 
   /**
    * 
-   * @param tab [tabname: string, IAdminTab]
+   * @param tab [tabname: string, IMiskAdminTab]
    * @returns React Router subroute for the tab that renders a ScriptComponent with the tab passed in as props
    */
-  buildTabRouteComponent(tab: [string, IAdminTab]) {
+  buildTabRouteComponent(tab: [string, IMiskAdminTab]) {
     return(<Route key={tab[0]} path={`/_admin/test/${tab[1].slug}`} render={() => <ScriptComponent key={tab[0]} tab={tab[1]}/>}/>)
   }
 

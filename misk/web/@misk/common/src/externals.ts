@@ -2,7 +2,7 @@ export interface IExternal {
   [key: string]: string|string[]
 }
 
-export default makeExternals({
+export const externals = makeExternals({
   "@blueprintjs/core": ["Blueprint", "Core"],
   "@blueprintjs/icons": ["Blueprint", "Icons"],
   "axios": "Axios",

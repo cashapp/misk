@@ -1,35 +1,24 @@
 import { Menu, MenuItem } from "@blueprintjs/core"
+import { IMiskAdminTabs } from "@misk/common"
 import * as React from "react"
 import styled from "styled-components" 
-import { IMenuItem } from "../utils/menu"
 
 interface ISidebarProps {
-  menuItems: IMenuItem[]
+  adminTabs: IMiskAdminTabs
 }
 
 const Sidebar = styled.div`
   position: absolute;
 `
 
-export class SidebarComponent extends React.Component<ISidebarProps, {}> {
-  private renderedMenuItems: any
+const buildMenuItems = (adminTabs: IMiskAdminTabs) => (
+  Object.entries(adminTabs).map((tab) => <MenuItem key={tab[0]} href={tab[1].url_path_prefix} className="" icon={tab[1].icon} text={tab[1].name}/>)
+)
 
-  constructor(props: ISidebarProps) {
-    super(props)
-    this.renderedMenuItems = this.props.menuItems.map(
-      ({ text, icon="document", className="pt-minimal", url } : any) => (
-          <MenuItem key={url} href={url} className={className} icon={icon} text={text}/>
-        )
-      )
-  }
-
-  render() {
-    return (
-      <Sidebar>
-        <Menu>
-          {this.renderedMenuItems}
-        </Menu>
-      </Sidebar>
-    )
-  }
-}
+export const SidebarComponent = (props: ISidebarProps) => (
+  <Sidebar>
+    <Menu>
+      {buildMenuItems(props.adminTabs)}
+    </Menu>
+  </Sidebar>
+)
