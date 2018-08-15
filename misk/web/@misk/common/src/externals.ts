@@ -28,7 +28,11 @@ export default makeExternals({
 function makeExternals(inExternals: IExternal) : IExternal {
   const outExternals: IExternal = {}
   Object.keys(inExternals).forEach((name, index) => {
-    outExternals[name] = inExternals.hasOwnProperty(name) ? (Array.isArray(inExternals[name]) ? (inExternals[name] as string[]).join("") : inExternals[name]) : name
-  })
+    outExternals[name] = inExternals.hasOwnProperty(name) ? 
+      // (Array.isArray(inExternals[name]) ? 
+        // (inExternals[name] as string[]).join("") : inExternals[name]
+      // ) : name
+      inExternals[name] : name
+    })
   return outExternals
 }
