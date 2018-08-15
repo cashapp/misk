@@ -23,6 +23,16 @@ export const externals = makeExternals({
   "styled-components": "StyledComponents"
 })
 
+/**
+ * 
+ * @param inExternals : IExternal
+ * 
+ * Create Webpack compatible externals object with following modifications
+ * - Concatenate scoped package arrays into single strings
+ * 
+ * Todo
+ * - Provide distinct package strings for amd, commonjs, commonjs2, root if necessary
+ */
 function makeExternals(inExternals: IExternal) : IExternal {
   const outExternals: IExternal = {}
   Object.keys(inExternals).forEach((name, index) => {

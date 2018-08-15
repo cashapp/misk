@@ -12,7 +12,7 @@ const Sidebar = styled.div`
 `
 
 const buildMenuItems = (adminTabs: IMiskAdminTabs) => (
-  Object.entries(adminTabs).map((tab) => <MenuItem key={tab[0]} href={tab[1].url_path_prefix} className="" icon={tab[1].icon} text={tab[1].name}/>)
+  Object.entries(adminTabs).map(([key, tab]) => <MenuItem key={key} href={tab.url_path_prefix} className="" icon={tab.icon} text={tab.name}/>)
 )
 
 export const SidebarComponent = (props: ISidebarProps) => (

@@ -28,15 +28,15 @@ class LoaderContainer extends React.Component<ITabProps> {
    * @param tab [tabname: string, IMiskAdminTab]
    * @returns React Router subroute for the tab that renders a ScriptComponent with the tab passed in as props
    */
-  buildTabRouteComponent(tab: [string, IMiskAdminTab]) {
-    return(<Route key={tab[0]} path={`/_admin/test/${tab[1].slug}`} render={() => <ScriptComponent key={tab[0]} tab={tab[1]}/>}/>)
+  buildTabRouteComponent(tab: IMiskAdminTab) {
+    return(<Route key={tab.slug} path={`/_admin/test/${tab.slug}`} render={() => <ScriptComponent key={tab.slug} tab={tab}/>}/>)
   }
 
   render() {
     const { adminTabs } = this.props.adminTabs
     if (adminTabs) {
-      const tabRouteComponents = Object.entries(adminTabs).map((tab) => this.buildTabRouteComponent(tab))
-      const tabLinks = Object.entries(adminTabs).map((tab) => <Link key={tab[0]} to={`/_admin/test/${tab[1].slug}`}>{tab[1].name}</Link>)
+      const tabRouteComponents = Object.entries(adminTabs).map(([key,tab]) => this.buildTabRouteComponent(tab))
+      const tabLinks = Object.entries(adminTabs).map(([key,tab]) => <Link key={key} to={`/_admin/test/${tab.slug}`}>{tab.name}</Link>)
       return (
         <div>
           <Link to="/_admin/">Home</Link><br/>
