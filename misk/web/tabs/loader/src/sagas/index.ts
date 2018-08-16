@@ -1,12 +1,10 @@
 import { all, fork } from "redux-saga/effects"
-import watchAdminTabsSagas from "./adminTabsSaga"
 import watchItemSagas from "./itemSaga"
-import watchLoadTabSagas from "./loadTabSaga"
+import watchLoaderSagas from "./loaderSaga"
 
 export default function * rootSaga () {
   yield all([
-    fork(watchAdminTabsSagas),
     fork(watchItemSagas),
-    fork(watchLoadTabSagas)
+    fork(watchLoaderSagas)
   ])
 }

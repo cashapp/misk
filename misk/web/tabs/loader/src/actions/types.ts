@@ -15,14 +15,11 @@ export const ITEM = createActionTypes("ITEM", [
   "FAILURE"
 ])
 
-export const ADMINTABS = createActionTypes("ADMINTABS", [
+export const LOADER = createActionTypes("LOADER", [
   "FAILURE",
-  "GET_ALL",
-  "SUCCESS"
-])
-
-export const LOADTAB = createActionTypes("LOADTAB", [
-  "FAILURE",
-  "GET_ONE",
+  "GET_ALL_AND_TABS",
+  "GET_ALL_COMPONENTS",
+  "GET_ALL_TABS",
+  "GET_ONE_COMPONENT",
   "SUCCESS"
 ])

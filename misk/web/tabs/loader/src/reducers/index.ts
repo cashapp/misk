@@ -14,15 +14,13 @@ export const defaultInitialState = fromJS({
 })
 
 const rootReducer = combineReducers({
-  adminTabs: AdminTabsReducer,
   item: ItemReducer,
-  loadTab: LoadTabReducer
+  loader: LoadTabReducer
 })
 
 export interface IState {
-  adminTabs: IMiskAdminTabs
   item: any
-  loadTab: any
+  loader: any
   router: RouterState
 }
 
