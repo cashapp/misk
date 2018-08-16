@@ -29,7 +29,10 @@ module.exports = {
   output: {
     filename: '_admin/dashboard/tab_dashboard.js',
     path: path.join(__dirname, 'dist'),
-    publicPath: "/"
+    publicPath: "/",
+    library: ['Tabs', 'Dashboard'],
+    libraryTarget: 'umd',
+    globalObject: 'typeof self !== \'undefined\' ? self : this'
   },
   devServer: {
     port: '3110',
