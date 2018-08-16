@@ -32,6 +32,11 @@ class AdminTabModule : KAbstractModule() {
     multibind<WebActionEntry>().toInstance(
         WebActionEntry<WebProxyAction>("/@misk"))
 
+    multibind<AdminTab>().toInstance(AdminTab(
+        "Dashboard",
+        "dashboard",
+        "/_admin/dashboard"
+    ))
 
   }
 }

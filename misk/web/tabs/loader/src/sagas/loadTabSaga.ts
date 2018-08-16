@@ -8,7 +8,7 @@
 
 import { IMiskAdminTab } from "@misk/common"
 import axios from "axios"
-import { all, call, put, takeLatest } from "redux-saga/effects"
+import { all, call, put, takeEvery } from "redux-saga/effects"
 
 import {
   dispatchLoadTab, IAction, IActionType, LOADTAB
@@ -19,7 +19,7 @@ function * handleGetOne (action: IAction<IActionType, {tab: IMiskAdminTab}>) {
     const { tab } = action.payload
     const url = `${tab.url_path_prefix}/tab_${tab.slug}.js`
     const { data } = yield call(axios.get, url)
-    yield put(dispatchLoadTab.success({ data }))
+    yield put(dispatchLoadTab.success({ data: { [tab.slug]: data } }))
   } catch (e) {
     yield put(dispatchLoadTab.failure({ error: { ...e } }))
   }
@@ -27,7 +27,7 @@ function * handleGetOne (action: IAction<IActionType, {tab: IMiskAdminTab}>) {
 
 function * watchLoadTabSagas () {
   yield all([
-    takeLatest(LOADTAB.GET_ONE, handleGetOne),
+    takeEvery(LOADTAB.GET_ONE, handleGetOne),
   ])
 }
 

@@ -1,5 +1,12 @@
+import { fromJS, Map } from "immutable"
 import { ADMINTABS, IAction } from "../actions"
-import { initialState } from "../reducers"
+
+const initialState = fromJS({
+  data: Map,
+  error: null,
+  loading: false,
+  success: false,
+})
 
 export default function AdminTabsReducer (state = initialState, action: IAction<string, {}>) {
   switch (action.type) {

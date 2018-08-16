@@ -16,7 +16,9 @@ import {
 function * handleGetAll () {
   try {
     const { data } = yield call(axios.get, "http://0.0.0.0:8080/api/admintab/all")
-    yield put(dispatchAdminTabs.success({ data }))
+    const { adminTabs } = data
+    // yield put(dispatchAdminTabs.success({ tabs: adminTabs }))
+    yield put(dispatchAdminTabs.success({ adminTabs }))
   } catch (e) {
     yield put(dispatchAdminTabs.failure({ error: { ...e } }))
   }

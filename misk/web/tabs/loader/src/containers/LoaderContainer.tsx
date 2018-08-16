@@ -9,7 +9,7 @@ import { IState } from "../reducers"
 
 interface ITabProps {
   adminTabs: IMiskAdminTabs
-  loadTab: any
+  tabComponents: any
   loadableTabs: any
   loading: boolean
   error: any
@@ -22,9 +22,19 @@ export interface ILoaderState {
 }
 
 class LoaderContainer extends React.Component<ITabProps> {
+  private counter = 0
+
   constructor(props: ITabProps) {
     super(props)
     this.props.getTabs()
+  }
+
+  async getTabComponents() {
+    const { adminTabs } = this.props.adminTabs
+    if (this.counter === 0) {
+      Object.entries(adminTabs).map(([key,tab]) => this.props.getComponent(tab))
+    }
+    this.counter += 1
   }
 
   /**
@@ -38,10 +48,12 @@ class LoaderContainer extends React.Component<ITabProps> {
 
   render() {
     const { adminTabs } = this.props.adminTabs
-    const { loadTab } = this.props.loadTab
+    const tabComponents = this.props.tabComponents
     if (adminTabs) {
       const tabRouteComponents = Object.entries(adminTabs).map(([key,tab]) => this.buildTabRouteComponent(tab))
-      const tabLinks = Object.entries(adminTabs).map(([key,tab]) => <Link key={key} to={`/_admin/test/${tab.slug}`}>{tab.name}</Link>)
+      const tabLinks = Object.entries(adminTabs).map(([key,tab]) => <Link key={key} to={`/_admin/test/${tab.slug}`}>{tab.name}<br/></Link>)
+      this.getTabComponents()
+      console.log(tabComponents)
       return (
         <div>
           <Link to="/_admin/">Home</Link><br/>
@@ -63,8 +75,8 @@ class LoaderContainer extends React.Component<ITabProps> {
 }
 
 const mapStateToProps = (state: IState) => ({
-  adminTabs: state.adminTabs.toJS().data,
-  loadTab: state.loadTab.toJS().data,
+  adminTabs: state.adminTabs.toJS(),
+  tabComponents: state.loadTab.toJS().data,
 })
 
 const mapDispatchToProps = {

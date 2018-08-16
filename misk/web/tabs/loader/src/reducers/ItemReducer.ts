@@ -1,7 +1,7 @@
 import { IAction, ITEM } from "../actions"
-import { initialState } from "../reducers"
+import { defaultInitialState } from "../reducers"
 
-export default function ItemReducer (state = initialState, action: IAction<string, {}>) {
+export default function ItemReducer (state = defaultInitialState, action: IAction<string, {}>) {
   switch (action.type) {
     case ITEM.GET:
     case ITEM.GET_ONE:

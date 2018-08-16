@@ -6,7 +6,7 @@ import AdminTabsReducer from "./AdminTabsReducer"
 import ItemReducer from "./ItemReducer"
 import LoadTabReducer from "./LoadTabReducer"
 
-export const initialState = fromJS({
+export const defaultInitialState = fromJS({
   data: List([]),
   error: null,
   loading: false,
@@ -23,7 +23,6 @@ export interface IState {
   adminTabs: IMiskAdminTabs
   item: any
   loadTab: any
-  // loadableTabs: any
   router: RouterState
 }
 
