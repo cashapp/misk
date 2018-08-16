@@ -30,7 +30,7 @@ module.exports = {
     filename: '_admin/config/tab_config.js',
     path: path.join(__dirname, 'dist'),
     publicPath: "/",
-    library: ['Tabs', 'Dashboard'],
+    library: ['Tabs', 'Config'],
     libraryTarget: 'umd',
     globalObject: 'typeof self !== \'undefined\' ? self : this'
   },
