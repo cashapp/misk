@@ -3,14 +3,17 @@ import * as React from "react"
 import { connect } from "react-redux"
 import { Route, Switch } from "react-router"
 import { Link } from "react-router-dom"
-import { IAppState } from ".."
-import { dispatchAdminTabs } from "../actions"
+import { dispatchAdminTabs, dispatchLoadTab } from "../actions"
 import { NoMatchComponent, ScriptComponent } from "../components"
+import { IState } from "../reducers"
 
 interface ITabProps {
   adminTabs: IMiskAdminTabs
+  loadTab: any
+  loadableTabs: any
   loading: boolean
   error: any
+  getComponent: any
   getTabs: any
 }
 
@@ -19,7 +22,8 @@ export interface ILoaderState {
 }
 
 class LoaderContainer extends React.Component<ITabProps> {
-  componentDidMount() {
+  constructor(props: ITabProps) {
+    super(props)
     this.props.getTabs()
   }
 
@@ -34,6 +38,7 @@ class LoaderContainer extends React.Component<ITabProps> {
 
   render() {
     const { adminTabs } = this.props.adminTabs
+    const { loadTab } = this.props.loadTab
     if (adminTabs) {
       const tabRouteComponents = Object.entries(adminTabs).map(([key,tab]) => this.buildTabRouteComponent(tab))
       const tabLinks = Object.entries(adminTabs).map(([key,tab]) => <Link key={key} to={`/_admin/test/${tab.slug}`}>{tab.name}</Link>)
@@ -57,12 +62,14 @@ class LoaderContainer extends React.Component<ITabProps> {
   }
 }
 
-const mapStateToProps = (state: IAppState) => ({
-  adminTabs: state.adminTabs.toJS().data
+const mapStateToProps = (state: IState) => ({
+  adminTabs: state.adminTabs.toJS().data,
+  loadTab: state.loadTab.toJS().data,
 })
 
 const mapDispatchToProps = {
-   getTabs: dispatchAdminTabs.getAll
+  getComponent: dispatchLoadTab.getOne,
+  getTabs: dispatchAdminTabs.getAll,
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(LoaderContainer)

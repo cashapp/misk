@@ -1,14 +1,7 @@
-import { fromJS, List } from "immutable"
 import { ADMINTABS, IAction } from "../actions"
+import { initialState } from "../reducers"
 
-const initialState = fromJS({
-  data: List([]),
-  error: null,
-  loading: false,
-  success: false,
-})
-
-export default function adminTabsReducer (state = initialState, action: IAction<string, {}>) {
+export default function AdminTabsReducer (state = initialState, action: IAction<string, {}>) {
   switch (action.type) {
     case ADMINTABS.FAILURE:
     case ADMINTABS.SUCCESS:
