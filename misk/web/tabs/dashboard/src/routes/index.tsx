@@ -8,7 +8,7 @@ const routes = (
     <NavContainer adminTabs={{}}/>
     <TabContainer>
       <Switch>
-        <Route path="/_admin/dashboard/" component={NoMatchComponent}/>
+        <Route component={NoMatchComponent}/>
       </Switch>
     </TabContainer>
   </div>
