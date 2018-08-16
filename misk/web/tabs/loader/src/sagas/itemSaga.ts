@@ -10,7 +10,7 @@ import axios from "axios"
 import { all, call, put, takeLatest } from "redux-saga/effects"
 
 import {
-  IAction, IActionType, ITEM, dispatchItem
+  dispatchItem, IAction, IActionType, ITEM
 } from "../actions"
 
 function * handleGet () {

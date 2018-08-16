@@ -20,3 +20,9 @@ export const ADMINTABS = createActionTypes("ADMINTABS", [
   "GET_ALL",
   "SUCCESS"
 ])
+
+export const LOADTAB = createActionTypes("LOADTAB", [
+  "FAILURE",
+  "GET_ONE",
+  "SUCCESS"
+])
