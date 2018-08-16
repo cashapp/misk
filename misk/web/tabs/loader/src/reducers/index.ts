@@ -2,7 +2,6 @@ import { IMiskAdminTabs } from "@misk/common"
 import { RouterState } from "connected-react-router"
 import { fromJS, List } from "immutable"
 import { combineReducers } from "redux"
-import AdminTabsReducer from "./AdminTabsReducer"
 import ItemReducer from "./ItemReducer"
 import LoadTabReducer from "./LoadTabReducer"
 
