@@ -17,7 +17,7 @@ export const dispatchItem = {
 
 export const dispatchLoader = {
   failure: (error: any) => createAction(LOADER.FAILURE, { ...error, loading: false, success: false }),
-  getAllComponents: () => createAction(LOADER.GET_ALL_COMPONENTS, { loading: true, success: false, error: null }),  
+  getAllComponentsAndTabs: () => createAction(LOADER.GET_ALL_COMPONENTS_AND_TABS, { loading: true, success: false, error: null }),  
   getAllTabs: () => createAction(LOADER.GET_ALL_TABS, { loading: true, success: false, error: null }),
   getOneComponent: (tab: IMiskAdminTab) => createAction(LOADER.GET_ONE_COMPONENTS, { tab, loading: true, success: false, error: null }),  
   success: (data: any) => createAction(LOADER.SUCCESS, { ...data, loading: false, success: true, error: null }),

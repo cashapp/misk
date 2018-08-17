@@ -73,7 +73,7 @@ const mapStateToProps = (state: IState) => ({
 
 const mapDispatchToProps = {
   getComponent: dispatchLoader.getOneComponent,
-  getComponents: dispatchLoader.getAllComponents,
+  getComponents: dispatchLoader.getAllComponentsAndTabs,
   getTabs: dispatchLoader.getAllTabs,
 }
 
