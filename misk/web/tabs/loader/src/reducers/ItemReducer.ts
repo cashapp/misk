@@ -6,7 +6,6 @@ export default function ItemReducer (state = defaultInitialState, action: IActio
     case ITEM.GET:
     case ITEM.GET_ONE:
     case ITEM.SAVE:
-    case ITEM.UPDATE:
     case ITEM.DELETE:
     case ITEM.SUCCESS:
     case ITEM.FAILURE:
