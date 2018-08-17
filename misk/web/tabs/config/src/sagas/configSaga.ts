@@ -16,8 +16,18 @@ import {
 
 function * handleGetAll () {
   const files: any = []
+  let data: any = {}
   try {
-    const { data } = yield call(axios.get, "http://localhost:8080/api/config/all")
+    const response = yield call(axios.get, "http://localhost:8080/api/config/all")
+    data = response.data
+  } catch (e) {
+    yield put(dispatchConfig.failure({ 
+      error: { ...e },
+      status: `Offline. Last attemped update ${dayjs().format("YYYY-MM-DD HH:mm:ss")}`
+     }))
+  }
+
+  try {
     files.push({name: "live-config.yaml", file: data.effective_config})
     Object.entries(data.yaml_files).forEach(([key,value]) => {
       files.push({name: key, file: value})
@@ -27,13 +37,18 @@ function * handleGetAll () {
       files,
       lastOnline: dayjs().format("YYYY-MM-DD HH:mm:ss:SSS"),
       status: `Online as of: ${dayjs().format("YYYY-MM-DD HH:mm:ss")}`
-     }))
+      }))
   } catch (e) {
     yield put(dispatchConfig.failure({ 
-      error: { ...e },
-      status: `Offline. Last attemped update ${dayjs().format("YYYY-MM-DD HH:mm:ss")}`
-     }))
+      data,
+      error: { ...e, msg: "config yaml parse error" },
+      files,
+      lastOnline: dayjs().format("YYYY-MM-DD HH:mm:ss:SSS"),
+      status: `Online as of: ${dayjs().format("YYYY-MM-DD HH:mm:ss")}`
+      }))
   }
+  
+  
 }
 
 function * watchConfigSagas () {
