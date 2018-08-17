@@ -22,7 +22,8 @@ const testLinks = (
   <div>
     <Link to="/_admin/dashboard/test1/1/test1">Test1</Link><br/>
     <Link to="/_admin/dashboard/test2/2/test2">Test2</Link><br/>
-    <Link to="/_admin/dashboard/test3/3/test3">Test2</Link><br/>
+    <Link to="/_admin/dashboard/test3/3/test3">Test3</Link><br/>
+    <Link to="/_admin/test3/3/test3">Home - Test2</Link><br/>
   </div>
 )
 
@@ -37,6 +38,7 @@ class TabContainerClass extends React.Component<ITabProps, {children : any}> {
         <div id={this.props.slug}/>
         {testLinks}
         <PathDebugComponent hash={this.props.hash} pathname={this.props.pathname} search={this.props.search}/>
+        <hr/>
         {this.props.children}
       </Container>
     )

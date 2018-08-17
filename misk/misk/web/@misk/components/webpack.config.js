@@ -1,5 +1,5 @@
 const path = require('path');
-const miskCommon = require('@misk/common');
+const MiskCommon = require('@misk/common');
 
 module.exports = {
   mode: 'production',
@@ -28,5 +28,5 @@ module.exports = {
   resolve: {
     extensions: [".ts", ".tsx", ".js", ".jsx", ".json"]
   },
-  externals: miskCommon.externals
+  externals: MiskCommon.externals
 };
