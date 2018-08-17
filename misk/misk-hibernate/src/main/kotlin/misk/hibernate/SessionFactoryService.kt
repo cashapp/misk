@@ -110,6 +110,24 @@ internal class SessionFactoryService(
         applySetting("hibernate.hikari.dataSource.elideSetAutoCommits", "true")
         applySetting("hibernate.hikari.dataSource.maintainTimeStats", "false")
       }
+
+      // https://dev.mysql.com/doc/connector-j/8.0/en/connector-j-reference-using-ssl.html
+      if (!config.trust_certificate_key_store_url.isNullOrBlank()) {
+        require(!config.trust_certificate_key_store_password.isNullOrBlank()) {
+          "must provide a trust_certificate_key_store_password"
+        }
+        applySetting(
+            "hibernate.hikari.dataSource.trustCertificateKeyStoreUrl",
+            "${config.trust_certificate_key_store_url}"
+        )
+        applySetting(
+            "hibernate.hikari.dataSource.trustCertificateKeyStorePassword",
+            config.trust_certificate_key_store_password
+        )
+        applySetting("hibernate.hikari.dataSource.verifyServerCertificate", "true")
+        applySetting("hibernate.hikari.dataSource.useSSL", "true")
+        applySetting("hibernate.hikari.dataSource.requireSSL", "true")
+      }
     }
 
     val registry = registryBuilder.build()
