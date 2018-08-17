@@ -16,7 +16,7 @@ import {
 
 function * handleGetAllTabs () {
   try {
-    const { data } = yield call(axios.get, "http://0.0.0.0:8080/api/admintab/all")
+    const { data } = yield call(axios.get, "/api/admintab/all")
     const { adminTabs } = data
     yield put(dispatchLoader.success({ adminTabs }))
   } catch (e) {
@@ -28,7 +28,7 @@ function * handleGetAllAndTabs (action: IAction<IActionType, {}>) {
   let adminTabs: any = {}
   try {
     yield put(dispatchLoader.getAllTabs())
-    const { data } = yield call(axios.get, "http://0.0.0.0:8080/api/admintab/all")
+    const { data } = yield call(axios.get, "/api/admintab/all")
     adminTabs = data.adminTabs
     yield put(dispatchLoader.success({ adminTabs }))
     if (Object.entries(adminTabs).length === 0) {
@@ -41,7 +41,7 @@ function * handleGetAllAndTabs (action: IAction<IActionType, {}>) {
   for (const key in adminTabs) {
     if (adminTabs.hasOwnProperty(key)) {
       const tab = adminTabs[key]
-      const url = `http://0.0.0.0:8080/_tab/${tab.slug}/tab_${tab.slug}.js`
+      const url = `/_tab/${tab.slug}/tab_${tab.slug}.js`
       try {
         const { data } = yield call(axios.get, url)
         yield put(dispatchLoader.success({ adminTabComponents: { [tab.slug]: data } }))
@@ -54,7 +54,7 @@ function * handleGetAllAndTabs (action: IAction<IActionType, {}>) {
 
 function * handleGetOneComponent (action: IAction<IActionType, { tab: IMiskAdminTab }>) {
   const { tab } = action.payload
-  const url = `http://0.0.0.0:8080/_tab/${tab.slug}/tab_${tab.slug}.js`
+  const url = `/_tab/${tab.slug}/tab_${tab.slug}.js`
   try {
     const { data } = yield call(axios.get, url)
     yield put(dispatchLoader.success({ adminTabComponents: { [tab.slug]: data } }))
