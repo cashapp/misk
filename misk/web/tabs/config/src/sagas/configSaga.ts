@@ -17,12 +17,13 @@ import {
 function * handleGetAll () {
   const files: any = []
   try {
-    const { data } = yield call(axios.get, "http://localhost:8080/_admin/api/config/all")
-    files.push({name: "live-config.yaml", file: this.toYaml(data.effective_config)})
+    const { data } = yield call(axios.get, "http://localhost:8080/api/config/all")
+    files.push({name: "live-config.yaml", file: data.effective_config})
     Object.entries(data.yaml_files).forEach(([key,value]) => {
       files.push({name: key, file: value})
     })
     yield put(dispatchConfig.success({ 
+      data,
       files,
       lastOnline: dayjs().format("YYYY-MM-DD HH:mm:ss:SSS"),
       status: `Online as of: ${dayjs().format("YYYY-MM-DD HH:mm:ss")}`
@@ -37,7 +38,7 @@ function * handleGetAll () {
 
 function * watchConfigSagas () {
   yield all([
-    takeLatest(CONFIG.GET_ALL, handleGetAll),
+    takeLatest(CONFIG.GET_ALL, handleGetAll)
   ])
 }
 

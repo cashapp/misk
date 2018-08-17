@@ -36,13 +36,13 @@ class TabContainer extends React.Component<ITabProps, {children : any}> {
   render() {
     const { files } = this.props.config
     const { status } = this.props.config
-    if (files) {
+    if (status) {
       return (
         <Container>
           <h1>App: Config</h1>
           <p>{status}</p>
   
-          {files.map(f => (
+          {files && files.map(f => (
             <div>
               <br/>
               <h5>{f.name}</h5>
