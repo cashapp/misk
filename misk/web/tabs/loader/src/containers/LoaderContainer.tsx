@@ -5,27 +5,22 @@ import { connect } from "react-redux"
 import { Route, Switch } from "react-router"
 import { Link } from "react-router-dom"
 import { dispatchLoader } from "../actions"
-import { MountingDivComponent, ScriptComponent } from "../components"
+import { MountingDivComponent, NavSidebarComponent, NavTopbarComponent, ScriptComponent } from "../components"
 import { IState } from "../reducers"
 
-interface ITabProps {
-  adminTabComponents: any
-  adminTabs: IMiskAdminTabs
-  loadableTabs: any
-  loading: boolean
-  error: any
+export interface ILoaderProps {
+  loader: {
+    adminTabComponents: any
+    adminTabs: IMiskAdminTabs
+  }
   getComponent: any
-  getComponents: any
+  getComponentsAndTabs: any
   getTabs: any
 }
 
-export interface ILoaderState {
-  adminTabs: IMiskAdminTabs
-}
-
-class LoaderContainer extends React.Component<ITabProps> {
+class LoaderContainer extends React.Component<ILoaderProps> {
   componentDidMount() {
-    this.props.getComponents()
+    this.props.getComponentsAndTabs()
   }
 
   buildTabRouteMountingDiv(key: any, tab: IMiskAdminTab) {
@@ -33,15 +28,16 @@ class LoaderContainer extends React.Component<ITabProps> {
   }
 
   render() {
-    const { adminTabs } = this.props.adminTabs
-    const { adminTabComponents } = this.props.adminTabComponents
+    const { adminTabs } = this.props.loader
+    const { adminTabComponents } = this.props.loader
     if (adminTabs) {
       const tabRouteDivs = Object.entries(adminTabs).map(([key,tab]) => this.buildTabRouteMountingDiv(key, tab))
-      const tabLinks = Object.entries(adminTabs).map(([key,tab]) => <Link key={key} to={`/_admin/test/${tab.slug}`}>{tab.name}<br/></Link>)
+      const tabLinks = Object.entries(adminTabs).map(([key,tab]) => <Link key={key} to={`/_admin/${tab.slug}`}>{tab.name}<br/></Link>)
       console.log(adminTabs, adminTabComponents)
-      console.log(tabRouteDivs)
       return (
         <div>
+          <NavTopbarComponent name="Misk Admin Loader" />
+          <NavSidebarComponent adminTabs={adminTabs} />
           {Object.entries(adminTabs).map(([key,tab]) => (<ScriptComponent tab={tab}/>))}
           <Switch>
             {Object.entries(adminTabs).map(([key,tab]) => this.buildTabRouteMountingDiv(key, tab))}
@@ -51,7 +47,12 @@ class LoaderContainer extends React.Component<ITabProps> {
           <h1>Loader Debug</h1>
           <Link to="/_admin/">Home</Link><br/>
           {tabLinks}
+          <Link to="/_admin/asdf/asdf/asdf/asdf/">Bad Link</Link><br/>
+          <p>Revert NavSideBar so it uses Link instead of A Href</p>
+          <p>Next test that config actually keeps running with an updating timer from the last config</p>
+          <p>Turn off their routing, maybe with the hack redirect javscript set it to hide when not on matching route?</p>
         </div>
+        
       )
     } else {
       return (
@@ -64,13 +65,12 @@ class LoaderContainer extends React.Component<ITabProps> {
 }
 
 const mapStateToProps = (state: IState) => ({
-  adminTabComponents: state.loader.toJS(),
-  adminTabs: state.loader.toJS(),
+  loader: state.loader.toJS(),
 })
 
 const mapDispatchToProps = {
   getComponent: dispatchLoader.getOneComponent,
-  getComponents: dispatchLoader.getAllComponentsAndTabs,
+  getComponentsAndTabs: dispatchLoader.getAllComponentsAndTabs,
   getTabs: dispatchLoader.getAllTabs,
 }
 

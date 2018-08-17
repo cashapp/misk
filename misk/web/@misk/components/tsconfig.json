@@ -6,6 +6,7 @@
         "declaration": true,
         "esModuleInterop": true,
         "jsx": "react",
+        "lib": ["es5", "es6", "dom", "es2017"],
         "module": "commonjs",
         "noEmit": true,
         "noEmitOnError": true,
