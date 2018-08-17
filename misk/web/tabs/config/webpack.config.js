@@ -18,8 +18,8 @@ const DefinePluginConfig = new webpack.DefinePlugin({
 
 const CopyWebpackPluginConfig = new CopyWebpackPlugin(
   [
-    { from: './node_modules/@misk/common/lib', to: '@misk/'},
-    { from: './node_modules/@misk/components/lib', to: '@misk/'}
+    { from: './node_modules/@misk/common/lib', to: '_admin/config/@misk/'},
+    { from: './node_modules/@misk/components/lib', to: '_admin/config/@misk/'}
   ], 
   { debug: 'info', copyUnmodified: true }
 )
@@ -27,9 +27,12 @@ const CopyWebpackPluginConfig = new CopyWebpackPlugin(
 module.exports = {
   entry: ['react-hot-loader/patch', path.join(__dirname, '/src/index.tsx')],
   output: {
-    filename: 'tab_config.js',
-    path: path.join(__dirname, 'dist/_admin/config'),
-    publicPath: "/_admin/config"
+    filename: '_admin/config/tab_config.js',
+    path: path.join(__dirname, 'dist'),
+    publicPath: "/",
+    library: ['Tabs', 'Config'],
+    libraryTarget: 'umd',
+    globalObject: 'typeof self !== \'undefined\' ? self : this'
   },
   devServer: {
     port: '3200',

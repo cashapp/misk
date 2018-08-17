@@ -7,9 +7,9 @@ const routes = (
   <div>
     <NavContainer adminTabs={{}}/>
     <TabContainer>
-      <Switch>
+      {/* <Switch>
         <Route component={NoMatchComponent}/>
-      </Switch>
+      </Switch> */}
     </TabContainer>
   </div>
 )

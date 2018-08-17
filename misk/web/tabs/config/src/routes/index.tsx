@@ -6,7 +6,7 @@ const routes = (
   <div>
     <DashboardContainer/>
     <Switch>
-      <Route path="/_admin/config/" component={TabContainer}/>
+      <Route component={TabContainer}/>
     </Switch>
   </div>
 )
