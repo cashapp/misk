@@ -53,9 +53,9 @@ function * handleGetAllAndTabs (action: IAction<IActionType, {}>) {
 }
 
 function * handleGetOneComponent (action: IAction<IActionType, { tab: IMiskAdminTab }>) {
+  const { tab } = action.payload
+  const url = `${tab.url_path_prefix}/tab_${tab.slug}.js`
   try {
-    const { tab } = action.payload
-    const url = `${tab.url_path_prefix}/tab_${tab.slug}.js`
     const { data } = yield call(axios.get, url)
     yield put(dispatchLoader.success({ adminTabComponents: { [tab.slug]: data } }))
   } catch (e) {
