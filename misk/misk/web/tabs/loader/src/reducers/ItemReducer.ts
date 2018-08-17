@@ -1,14 +1,7 @@
-import { fromJS, List } from "immutable"
 import { IAction, ITEM } from "../actions"
+import { defaultInitialState } from "../reducers"
 
-const initialState = fromJS({
-  data: List([]),
-  error: null,
-  loading: false,
-  success: false,
-})
-
-export default function itemReducer (state = initialState, action: IAction<string, {}>) {
+export default function ItemReducer (state = defaultInitialState, action: IAction<string, {}>) {
   switch (action.type) {
     case ITEM.GET:
     case ITEM.GET_ONE:
