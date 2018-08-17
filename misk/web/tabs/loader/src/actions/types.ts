@@ -1,24 +1,23 @@
-import { createActionTypes } from "./utils"
-
 export interface IActionType {
-  [base:string]: string
+  ITEM: ITEM
+  LOADER: LOADER
 }
 
-export const ITEM = createActionTypes("ITEM", [
-  "GET",
-  "GET_ONE",
-  "SAVE",
-  "PUT",
-  "PATCH",
-  "DELETE",
-  "SUCCESS",
-  "FAILURE"
-])
+export enum ITEM {
+  GET = "ITEM_GET",
+  GET_ONE = "ITEM_GET_ONE",
+  SAVE = "ITEM_SAVE",
+  PUT = "ITEM_PUT",
+  PATCH = "ITEM_PATCH",
+  DELETE = "ITEM_DELETE",
+  SUCCESS = "ITEM_SUCCESS",
+  FAILURE = "ITEM_FAILURE"
+}
 
-export const LOADER = createActionTypes("LOADER", [
-  "FAILURE",
-  "GET_ALL_COMPONENTS_AND_TABS",
-  "GET_ALL_TABS",
-  "GET_ONE_COMPONENT",
-  "SUCCESS"
-])
+export enum LOADER {
+  FAILURE = "LOADER_FAILURE",
+  GET_ALL_COMPONENTS_AND_TABS = "LOADER_GET_ALL_COMPONENTS_AND_TABS",
+  GET_ALL_TABS = "LOADER_GET_ALL_TABS",
+  GET_ONE_COMPONENT = "LOADER_GET_ONE_COMPONENT",
+  SUCCESS = "LOADER_SUCCESS"
+}
