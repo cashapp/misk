@@ -16,19 +16,19 @@ Releasing
 ---
 - Each `@Misk/` scoped package in this repo has built in scripts that will clean, run tests, and compile to minimized distributable code
 - Increase the package version in `package.json`. Each package increases versions independent of the others (ie. there is no set goal to always have the same version number for every `@Misk/` package)
-- Publich the package with `$ npm publish`
+- Publish the package with `$ npm publish --access=public`
 
 Package Release Order
 ---
 - Release packages in the following order given that each are dependent or peer dependent differently on each other:
   - `@Misk/Dev`
   - `@Misk/Common`
-  - `@Misk/Components`
+  - `@Misk/Components`, `@Misk/Tabs`
 - Update the `package.json` for each further package with the newest version of the immedietely previous updated package
 
 Example Release Flow
 ---
-- Assume following starting versions for the `@Misk/` packages
+- Assume following starting versions for the `@Misk/` packages and consider equivalent in order any package listed above alongside `@Misk/Components`
   - `@Misk/Dev`: 0.0.6
   - `@Misk/Common`: 0.0.12
   - `@Misk/Components`: 0.0.2

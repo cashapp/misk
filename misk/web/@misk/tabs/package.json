@@ -1,10 +1,10 @@
 {
-  "name": "@misk/components",
-  "version": "0.0.16",
-  "description": "Microservice Kontainer Common Components",
+  "name": "@misk/tabs",
+  "version": "0.0.1",
+  "description": "Microservice Kontainer Tabs",
   "author": "Square/Misk Authors (https://github.com/square/misk/graphs/contributors)",
-  "main": "lib/components.js",
-  "module": "lib/components.js",
+  "main": "lib/tabs.js",
+  "module": "lib/tabs.js",
   "typings": "lib/index.d.ts",
   "engines": {
     "node": ">=7.8.0"
@@ -17,8 +17,8 @@
     "url": "git@github.com:square/misk.git"
   },
   "scripts": {
-    "build": "npm run lib",
     "build:lib": "npm run lib",
+    "build": "npm run lib",
     "dist": "npm run lib",
     "lib": "webpack",
     "lint": "echo no lint",
