@@ -15,8 +15,10 @@ export const ITEM = createActionTypes("ITEM", [
   "FAILURE"
 ])
 
-export const ADMINTABS = createActionTypes("ADMINTABS", [
+export const LOADER = createActionTypes("LOADER", [
   "FAILURE",
-  "GET_ALL",
+  "GET_ALL_COMPONENTS_AND_TABS",
+  "GET_ALL_TABS",
+  "GET_ONE_COMPONENT",
   "SUCCESS"
 ])

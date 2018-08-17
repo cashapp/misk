@@ -8,24 +8,8 @@ import { Provider } from "react-redux"
 import { applyMiddleware, compose, createStore } from "redux"
 import createSagaMiddleware from "redux-saga"
 import App from "./App"
-import { ILoaderState } from "./containers/LoaderContainer"
 import rootReducer from "./reducers"
 import rootSaga from "./sagas"
-
-export interface IAppState {
-  adminTabs: IMiskAdminTabs
-  loader: ILoaderState
-  router: IRouterState
-}
-
-export interface IRouterState {
-  location: {
-    pathname: string
-    search: string
-    hash: string
-  }
-  action: string
-}
 
 const history = createBrowserHistory()
 const sagaMiddleware = createSagaMiddleware()

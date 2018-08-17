@@ -1,5 +1,6 @@
+import { IMiskAdminTab, IMiskAdminTabs } from "@misk/common"
 import {
-  ADMINTABS, IActionType, ITEM
+  IActionType, ITEM, LOADER
 } from "./types"
 import { createAction, IAction } from "./utils"
 
@@ -14,10 +15,12 @@ export const dispatchItem = {
   success: (data: any) => createAction(ITEM.SUCCESS, { ...data, loading: false, success: true, error: null }),
 }
 
-export const dispatchAdminTabs = {
-  failure: (error: any) => createAction(ADMINTABS.FAILURE, { ...error, loading: false, success: false }),
-  getAll: () => createAction(ADMINTABS.GET_ALL, { loading: true, success: false, error: null }),
-  success: (data: any) => createAction(ADMINTABS.SUCCESS, { ...data, loading: false, success: true, error: null }),
+export const dispatchLoader = {
+  failure: (error: any) => createAction(LOADER.FAILURE, { ...error, loading: false, success: false }),
+  getAllComponentsAndTabs: () => createAction(LOADER.GET_ALL_COMPONENTS_AND_TABS, { loading: true, success: false, error: null }),  
+  getAllTabs: () => createAction(LOADER.GET_ALL_TABS, { loading: true, success: false, error: null }),
+  getOneComponent: (tab: IMiskAdminTab) => createAction(LOADER.GET_ONE_COMPONENTS, { tab, loading: true, success: false, error: null }),  
+  success: (data: any) => createAction(LOADER.SUCCESS, { ...data, loading: false, success: true, error: null }),
 }
 
-export { ADMINTABS, IAction, IActionType, ITEM }
+export { IAction, IActionType, ITEM, LOADER }
