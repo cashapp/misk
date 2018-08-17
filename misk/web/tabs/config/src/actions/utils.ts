@@ -1,15 +1,6 @@
-import { IActionType } from "./types"
-
 export interface IAction<T, P> {
   readonly type: T
   readonly payload?: P
-}
-
-export function createActionTypes (base: string, actions: string[] = []): IActionType {
-  return actions.reduce((acc: IActionType, type: string) => {
-    acc[type] = `${base}_${type}`
-    return acc
-  }, {})
 }
 
 export function createAction<T extends string, P>(type: T, payload: P): IAction<T,P> {

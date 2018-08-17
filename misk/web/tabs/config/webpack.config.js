@@ -81,5 +81,5 @@ module.exports = {
     ]
     : [HTMLWebpackPluginConfig, CopyWebpackPluginConfig,
       DefinePluginConfig],
-  externals: MiskCommon.externals
+  externals: MiskCommon.externals,
 }

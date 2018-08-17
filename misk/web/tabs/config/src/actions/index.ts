@@ -1,4 +1,3 @@
-import { IMiskAdminTab, IMiskAdminTabs } from "@misk/common"
 import {
   CONFIG, IActionType
 } from "./types"
