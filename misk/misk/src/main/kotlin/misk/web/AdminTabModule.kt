@@ -23,20 +23,21 @@ class AdminTabModule : KAbstractModule() {
         WebActionEntry<WebProxyAction>("/_admin"))
 
     multibind<WebProxyEntry>().toInstance(
-        WebProxyEntry("/_admin/dashboard", "http://localhost:3110/"))
+        WebProxyEntry("/_tab/dashboard", "http://localhost:3110/"))
     multibind<WebActionEntry>().toInstance(
-        WebActionEntry<WebProxyAction>("/_admin/dashboard"))
+        WebActionEntry<WebProxyAction>("/_tab/dashboard"))
 
     multibind<WebProxyEntry>().toInstance(
         WebProxyEntry("/@misk", "http://localhost:9100/"))
     multibind<WebActionEntry>().toInstance(
         WebActionEntry<WebProxyAction>("/@misk"))
 
-    multibind<AdminTab>().toInstance(AdminTab(
-        "Dashboard",
-        "dashboard",
-        "/_admin/dashboard"
-    ))
+//    Testing
+//    multibind<AdminTab>().toInstance(AdminTab(
+//        "Dashboard",
+//        "dashboard",
+//        "/_admin/dashboard"
+//    ))
 
   }
 }

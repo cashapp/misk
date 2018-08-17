@@ -4,9 +4,11 @@ import { Route, Switch } from "react-router"
 import { LoaderContainer } from "./containers"
 
 const routes = (
-  <Switch>
-    <Route component={LoaderContainer}/>
-  </Switch>
+  <div>
+    <Switch>
+      <Route path="/_admin" component={LoaderContainer}/>
+    </Switch>
+  </div>
 )
 
 export default routes

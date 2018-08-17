@@ -36,9 +36,9 @@ class TabContainerClass extends React.Component<ITabProps, {children : any}> {
     return (
       <Container>
         <div id={this.props.slug}/>
-        {testLinks}
-        <PathDebugComponent hash={this.props.hash} pathname={this.props.pathname} search={this.props.search}/>
-        <hr/>
+        {/* {testLinks} */}
+        {/* <PathDebugComponent hash={this.props.hash} pathname={this.props.pathname} search={this.props.search}/> */}
+        {/* <hr/> */}
         {this.props.children}
       </Container>
     )

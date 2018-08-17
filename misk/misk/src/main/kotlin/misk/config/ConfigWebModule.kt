@@ -18,7 +18,7 @@ class ConfigWebModule : KAbstractModule() {
     ))
     // TODO(adrw) only add web proxy during development, otherwise add ResourceInterceptor (Jar)
     multibind<WebProxyEntry>().toInstance(
-        WebProxyEntry("/_admin/config", "http://localhost:3200/"))
-    multibind<WebActionEntry>().toInstance(WebActionEntry<WebProxyAction>("/_admin/config"))
+        WebProxyEntry("/_tab/config", "http://localhost:3200/"))
+    multibind<WebActionEntry>().toInstance(WebActionEntry<WebProxyAction>("/_tab/config"))
   }
 }
