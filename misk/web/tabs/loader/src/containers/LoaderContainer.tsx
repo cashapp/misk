@@ -5,7 +5,7 @@ import { connect } from "react-redux"
 import { Route, Switch } from "react-router"
 import { Link } from "react-router-dom"
 import { dispatchLoader } from "../actions"
-import { AllScriptsComponent, MountingDivComponent, ScriptComponent } from "../components"
+import { MountingDivComponent, ScriptComponent } from "../components"
 import { IState } from "../reducers"
 
 interface ITabProps {
@@ -32,10 +32,6 @@ class LoaderContainer extends React.Component<ITabProps> {
     return(<Route key={key} path={`/_admin/test/${tab.slug}`} render={() => <MountingDivComponent key={key} tab={tab}/>}/>)
   }
 
-  buildTabScripts(key: any, tab: IMiskAdminTab) {
-    return(<Route key={key} path={`/_admin/test/${tab.slug}`} render={() => <MountingDivComponent key={key} tab={tab}/>}/>)
-  }
-
   render() {
     const { adminTabs } = this.props.adminTabs
     const { adminTabComponents } = this.props.adminTabComponents
@@ -46,8 +42,8 @@ class LoaderContainer extends React.Component<ITabProps> {
       console.log(tabRouteDivs)
       return (
         <div>
+          {Object.entries(adminTabs).map(([key,tab]) => (<ScriptComponent tab={tab}/>))}
           <Switch>
-          {/* <AllScriptsComponent tabs={adminTabs}/> */}
             {Object.entries(adminTabs).map(([key,tab]) => this.buildTabRouteMountingDiv(key, tab))}
             <Route component={NoMatchComponent}/>
           </Switch>

@@ -7,6 +7,6 @@ export interface IMountingDivProps {
 
 export const MountingDivComponent = (props: IMountingDivProps) => (
   <div id={props.tab.slug}>
-    <span>{props.tab.name} is loading...</span>
+    {/* <span>{props.tab.name} is loading...</span> */}
   </div>
 )
