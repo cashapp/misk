@@ -32,6 +32,11 @@ module.exports = {
     publicPath: "/",
     library: ['Tabs', 'Config'],
     libraryTarget: 'umd',
+    /**
+     * library will try to bind to browser `window` variable
+     * without below globalObject: library binding to browser `window` 
+     *    fails when run in Node or other non-browser
+     */
     globalObject: 'typeof self !== \'undefined\' ? self : this'
   },
   devServer: {
