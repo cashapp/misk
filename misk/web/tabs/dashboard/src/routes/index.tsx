@@ -6,11 +6,11 @@ import { NavContainer, TabContainer } from "../containers"
 const routes = (
   <div>
     <NavContainer adminTabs={{}}/>
-    <TabContainer>
+    {/* <TabContainer/> */}
       {/* <Switch>
         <Route component={NoMatchComponent}/>
       </Switch> */}
-    </TabContainer>
+    {/* </TabContainer> */}
   </div>
 )
 

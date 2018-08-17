@@ -1,12 +1,15 @@
+import { NoMatchComponent } from "@misk/components"
 import * as React from "react"
 import { Route, Switch } from "react-router"
 import { DashboardContainer, TabContainer } from "../containers"
 
 const routes = (
   <div>
-    <DashboardContainer/>
+    {/* <DashboardContainer/> */}
     <Switch>
-      <Route component={TabContainer}/>
+      <Route path="/_admin/config" component={TabContainer}/>
+      <Route path="/_tab/config" component={TabContainer}/>
+      <Route component={NoMatchComponent}/>
     </Switch>
   </div>
 )

@@ -11,8 +11,7 @@ export const ScriptComponent = (props: IScriptProps) => {
   return (
     <div>
       <Helmet>
-        <title>Test Title</title>
-        <script async={true} src={`${props.tab.url_path_prefix}/tab_${props.tab.slug}.js`}/>
+        <script async={true} src={`http://0.0.0.0:8080/_tab/${props.tab.slug}/tab_${props.tab.slug}.js`}/>
       </Helmet>
       <MountingDivComponent tab={props.tab}/>
     </div>
