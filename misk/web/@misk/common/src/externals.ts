@@ -1,5 +1,33 @@
-export interface IExternal {
+export interface IInExternal {
   [key: string]: string|string[]
+}
+
+export interface IOutExternal {
+  [key: string]: {
+    amd: string
+    commonjs: string
+    commonjs2: string
+    root: string|string[]
+  }
+}
+
+/**
+ * 
+ * @param inExternals : IExternal
+ * 
+ * Create Webpack compatible externals object with compatible entries for amd, commonjs, commonjs2, root
+ */
+export const makeExternals = (inExternals: IInExternal) : IOutExternal => {
+  const outExternals: IOutExternal = {}
+  Object.keys(inExternals).map((pkg, index) => {
+    outExternals[pkg] = {
+      commonjs: pkg,
+      commonjs2: pkg,
+      amd: pkg,
+      root: inExternals[pkg],
+    }
+  })
+  return outExternals
 }
 
 export const externals = makeExternals({
@@ -22,24 +50,3 @@ export const externals = makeExternals({
   "redux-saga": "ReduxSaga",
   "styled-components": "StyledComponents"
 })
-
-/**
- * 
- * @param inExternals : IExternal
- * 
- * Create Webpack compatible externals object with following modifications
- * - Concatenate scoped package arrays into single strings
- * 
- * Todo
- * - Provide distinct package strings for amd, commonjs, commonjs2, root if necessary
- */
-function makeExternals(inExternals: IExternal) : IExternal {
-  const outExternals: IExternal = {}
-  Object.keys(inExternals).forEach((name, index) => {
-    outExternals[name] = inExternals.hasOwnProperty(name) ? 
-      (Array.isArray(inExternals[name]) ? 
-        (inExternals[name] as string[]).join("") : inExternals[name]
-      ) : name
-    })
-  return outExternals
-}

@@ -5,7 +5,7 @@ import { NavContainer, TabContainer } from "../containers"
 
 const routes = (
   <div>
-    <NavContainer adminTabs={{}}/>
+    <NavContainer/>
     {/* <TabContainer/> */}
       {/* <Switch>
         <Route component={NoMatchComponent}/>

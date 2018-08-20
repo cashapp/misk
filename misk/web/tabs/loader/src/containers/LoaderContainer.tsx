@@ -1,11 +1,11 @@
 import { IMiskAdminTab, IMiskAdminTabs } from "@misk/common"
-import { NoMatchComponent } from "@misk/components"
+import { NavSidebarComponent, NavTopbarComponent, NoMatchComponent } from "@misk/components"
 import * as React from "react"
 import { connect } from "react-redux"
 import { Route, Switch } from "react-router"
 import { Link } from "react-router-dom"
 import { dispatchLoader } from "../actions"
-import { MountingDivComponent, NavSidebarComponent, NavTopbarComponent, ScriptComponent } from "../components"
+import { MountingDivComponent, ScriptComponent } from "../components"
 import { IState } from "../reducers"
 
 export interface ILoaderProps {

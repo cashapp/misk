@@ -1,14 +1,6 @@
-import { createActionTypes } from "./utils"
-
 export interface IActionType {
-  [base:string]: string
+  CONFIG: CONFIG
 }
-
-// export const CONFIG = createActionTypes("CONFIG", [
-//   "FAILURE",
-//   "GET_All",
-//   "SUCCESS"
-// ])
 
 export enum CONFIG {
   FAILURE = "CONFIG_FAILURE",

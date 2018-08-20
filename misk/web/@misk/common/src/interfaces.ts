@@ -9,5 +9,4 @@ export interface IMiskAdminTab {
 
 export interface IMiskAdminTabs {
   [key:string]: IMiskAdminTab
-  toJS?: any
 }
