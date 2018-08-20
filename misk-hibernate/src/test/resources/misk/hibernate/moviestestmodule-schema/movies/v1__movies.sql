@@ -4,5 +4,6 @@ CREATE TABLE movies(
   updated_at timestamp(3) NOT NULL DEFAULT NOW(3) ON UPDATE NOW(3),
   name varchar(191) NOT NULL,
   release_date date NULL,
+  synopsis LONGTEXT NULL,
   UNIQUE KEY `unq_name` (`name`)
 );
