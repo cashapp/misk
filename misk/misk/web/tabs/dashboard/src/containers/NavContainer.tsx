@@ -3,7 +3,7 @@ import * as React from "react"
 import { SidebarComponent, TopbarComponent } from "../components"
 
 interface INavProps {
-  adminTabs: IMiskAdminTabs
+  adminTabs?: IMiskAdminTabs
 }
 
 const NavContainer = (props: INavProps) => (
