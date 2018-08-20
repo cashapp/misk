@@ -34,16 +34,16 @@ class DbCharacter() : DbEntity<DbCharacter>, DbTimestampedEntity {
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "actor_id", updatable = false, insertable = false)
-  lateinit var actor: DbActor
+  var actor: DbActor? = null
 
   @Column
-  lateinit var actor_id: Id<DbActor>
+  var actor_id: Id<DbActor>? = null
 
-  constructor(name: String, movie: DbMovie, actor: DbActor) : this() {
+  constructor(name: String, movie: DbMovie, actor: DbActor?) : this() {
     this.name = name
     this.movie = movie
     this.movie_id = movie.id
     this.actor = actor
-    this.actor_id = actor.id
+    this.actor_id = actor?.id
   }
 }

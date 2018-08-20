@@ -27,6 +27,7 @@ class TransacterTest {
     transacter.transaction { session ->
       val jp = session.save(DbMovie("Jurassic Park", LocalDate.of(1993, 6, 9)))
       val sw = session.save(DbMovie("Star Wars", LocalDate.of(1977, 5, 25)))
+      val lx = session.save(DbMovie("Luxo Jr.", LocalDate.of(1986, 8, 17)))
       assertThat(setOf(jp, sw)).hasSize(2) // Uniqueness check.
 
       val ld = session.save(DbActor("Laura Dern", LocalDate.of(1967, 2, 10)))
@@ -38,7 +39,8 @@ class TransacterTest {
       val es = session.save(DbCharacter("Ellie Sattler", session.load(jp), session.load(ld)))
       val im = session.save(DbCharacter("Ian Malcolm", session.load(jp), session.load(jg)))
       val lo = session.save(DbCharacter("Leia Organa", session.load(sw), session.load(cf)))
-      assertThat(setOf(ah, es, im, lo)).hasSize(4) // Uniqueness check.
+      val lj = session.save(DbCharacter("Luxo Jr.", session.load(lx), null))
+      assertThat(setOf(ah, es, im, lo, lj)).hasSize(5) // Uniqueness check.
     }
 
     // Query that data.
@@ -46,7 +48,7 @@ class TransacterTest {
       val ianMalcolm = queryFactory.newQuery<CharacterQuery>()
           .name("Ian Malcolm")
           .uniqueResult(session)!!
-      assertThat(ianMalcolm.actor.name).isEqualTo("Jeff Goldblum")
+      assertThat(ianMalcolm.actor?.name).isEqualTo("Jeff Goldblum")
       assertThat(ianMalcolm.movie.name).isEqualTo("Jurassic Park")
 
       val lauraDernMovies = queryFactory.newQuery<CharacterQuery>()
