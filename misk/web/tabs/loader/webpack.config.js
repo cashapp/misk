@@ -30,7 +30,15 @@ module.exports = {
   output: {
     filename: '_admin/tab_loader.js',
     path: path.join(__dirname, 'dist'),
-    publicPath: "/"
+    publicPath: "/",
+    library: ['MiskTabs', 'Loader'],
+    libraryTarget: 'umd',
+    /**
+     * library will try to bind to browser `window` variable
+     * without below globalObject: library binding to browser `window` 
+     *    fails when run in Node or other non-browser
+     */
+    globalObject: 'typeof self !== \'undefined\' ? self : this'
 },
   devServer: {
     port: '3100',
