@@ -5,6 +5,7 @@ import java.time.LocalDate
 import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.GeneratedValue
+import javax.persistence.Lob
 import javax.persistence.Table
 
 @Entity
@@ -25,6 +26,9 @@ class DbMovie() : DbEntity<DbMovie>, DbTimestampedEntity {
 
   @Column(nullable = true)
   var release_date: LocalDate? = null
+
+  @Column @Lob
+  var synopsis: String? = null
 
   constructor(name: String, releaseDate: LocalDate?) : this() {
     this.name = name
