@@ -18,7 +18,26 @@ enum class DataSourceType(
         val host = config.host ?: "127.0.0.1"
         val database = config.database ?: ""
         val testing = env == Environment.TESTING || env == Environment.DEVELOPMENT
-        val queryParams = if (testing) "?createDatabaseIfNotExist=true" else ""
+        var queryParams = if (testing) "?createDatabaseIfNotExist=true" else ""
+        // TODO(rhall): share this with DataSource config in SessionFactoryService.
+        // https://github.com/square/misk/issues/397
+        // Explicitly not updating VITESS below since this is a temporary hack until the above
+        // issue is resolved.
+        if (!config.trust_certificate_key_store_url.isNullOrBlank()) {
+          require(!config.trust_certificate_key_store_password.isNullOrBlank()) {
+            "must provide a trust_certificate_key_store_password"
+          }
+          if (!testing) {
+            queryParams += "?"
+          } else {
+            queryParams += "&"
+          }
+          queryParams += "trustCertificateKeyStoreUrl=${config.trust_certificate_key_store_url}"
+          queryParams += "&trustCertificateKeyStorePassword=${config.trust_certificate_key_store_password}"
+          queryParams += "&verifyServerCertificate=true"
+          queryParams += "&useSSL=true"
+          queryParams += "&requireSSL=true"
+        }
         "jdbc:mysql://$host:$port/$database$queryParams"
       }
   ),
