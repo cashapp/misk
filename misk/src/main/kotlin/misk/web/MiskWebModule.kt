@@ -50,6 +50,10 @@ import java.security.Provider as SecurityProvider
 class MiskWebModule : KAbstractModule() {
   override fun configure() {
     multibind<Service>().to<JettyService>()
+    multibind<Service>().to<ConscryptService>()
+    bind<SecurityProvider>()
+        .annotatedWith(ForConscrypt::class.java)
+        .toProvider(ConscryptService::class.java)
 
     // Install support for accessing the current request and caller as ActionScoped types
     install(object : ActionScopedProviderModule() {

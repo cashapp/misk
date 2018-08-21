@@ -1,7 +1,7 @@
 ext {
   kotlinVersion = '1.2.51'
   awsVersion = '1.11.143'
-  jettyVersion = '9.4.8.v20171121'
+  jettyVersion = '9.4.11.v20180605'
   prometheusVersion = '0.4.0'
 
   dep = [
@@ -19,6 +19,9 @@ ext {
           guiceMultibindings   : 'com.google.inject.extensions:guice-multibindings:4.1.0',
           guiceServlet         : 'com.google.inject.extensions:guice-servlet:4.1.0',
           javaxInject          : 'javax.inject:javax.inject:1',
+          conscrypt            : 'org.conscrypt:conscrypt-openjdk-uber:1.1.4',
+          jettyAlpnConscypt    : "org.eclipse.jetty:jetty-alpn-conscrypt-server:$jettyVersion",
+          jettyHttp2           : "org.eclipse.jetty.http2:http2-server:$jettyVersion",
           jettyServer          : "org.eclipse.jetty:jetty-server:$jettyVersion",
           jettyServlet         : "org.eclipse.jetty:jetty-servlet:$jettyVersion",
           jettyWebsocketServer : "org.eclipse.jetty.websocket:websocket-server:$jettyVersion",
