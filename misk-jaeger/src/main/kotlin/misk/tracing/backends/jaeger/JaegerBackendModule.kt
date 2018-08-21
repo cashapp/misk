@@ -28,6 +28,9 @@ class JaegerBackendModule(val config: JaegerBackendConfig?) : KAbstractModule() 
         else Configuration.SamplerConfiguration(
             config.sampler.type, config.sampler.param, config.sampler.manager_host_port)
 
-    return Configuration(appName, sampler, reporter).tracer
+    return Configuration(appName, sampler, reporter)
+        .tracerBuilder
+        .withScopeManager(MDCScopeManager())
+        .build()
   }
 }
