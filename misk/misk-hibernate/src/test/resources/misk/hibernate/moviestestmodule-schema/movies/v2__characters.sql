@@ -4,5 +4,5 @@ CREATE TABLE characters(
   updated_at timestamp(3) NOT NULL DEFAULT NOW(3) ON UPDATE NOW(3),
   name varchar(255) NOT NULL,
   movie_id bigint NOT NULL,
-  actor_id bigint NOT NULL
+  actor_id bigint NULL
 );
