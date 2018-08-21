@@ -1,4 +1,3 @@
-import { IMiskAdminTabs } from "@misk/common"
 import { connectRouter, routerMiddleware } from "connected-react-router"
 import { createBrowserHistory } from "history"
 import * as React from "react"
@@ -10,6 +9,7 @@ import createSagaMiddleware from "redux-saga"
 import App from "./App"
 import rootReducer from "./reducers"
 import rootSaga from "./sagas"
+import { binders, multibind } from "./utils/binder"
 
 const history = createBrowserHistory()
 const sagaMiddleware = createSagaMiddleware()
@@ -55,3 +55,6 @@ if (module.hot) {
     store.replaceReducer(connectRouter(history)(rootReducer))
   })
 }
+
+export { binders, multibind }
+(window as any).Misk.Binder = { binders, multibind }

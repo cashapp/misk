@@ -5,8 +5,8 @@
       "noImplicitAny": true,
       "module": "commonjs",
       "jsx": "react",
-    //   "target": "esnext",
-      "lib": ["es5", "es6", "dom", "es2017"],
+      "target": "esnext",
+      "lib": ["es5", "es6", "dom", "es2017"]
   },
   "include": [
       "./src/**/*"

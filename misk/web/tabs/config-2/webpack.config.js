@@ -3,7 +3,6 @@ const webpack = require('webpack')
 const CopyWebpackPlugin = require('copy-webpack-plugin')
 const HTMLWebpackPlugin = require('html-webpack-plugin')
 const MiskCommon = require('@misk/common')
-const MiskTabs = require('@misk/tabs')
 
 const dev = process.env.NODE_ENV !== 'production'
 
@@ -82,5 +81,5 @@ module.exports = {
     ]
     : [HTMLWebpackPluginConfig, CopyWebpackPluginConfig,
       DefinePluginConfig],
-  externals: { ...MiskCommon.externals, ...MiskTabs.externals }
+  externals: { ...MiskCommon.externals }
 }
