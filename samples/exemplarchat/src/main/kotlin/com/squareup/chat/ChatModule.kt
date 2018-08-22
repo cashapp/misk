@@ -18,6 +18,6 @@ class ChatModule : KAbstractModule() {
     install(ClusterWideHealthModule())
     multibind<HealthCheck>().to<ManualHealthCheck>()
     multibind<StaticResourceMapper.Entry>()
-        .toInstance(StaticResourceMapper.Entry("/", "web/exemplarchat", "exemplarchat/web/build"))
+        .toInstance(StaticResourceMapper.Entry("/", "web/exemplarchat"))
   }
 }

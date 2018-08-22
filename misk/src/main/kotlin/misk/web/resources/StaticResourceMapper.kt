@@ -3,14 +3,16 @@ package misk.web.resources
 import misk.resources.ResourceLoader
 import misk.web.Response
 import misk.web.ResponseBody
+import misk.web.actions.WebEntryCommon
+import misk.web.actions.WebEntryCommon.findEntryFromUrl
 import misk.web.mediatype.MediaTypes
+import misk.web.toResponseBody
 import okhttp3.Headers
+import okhttp3.HttpUrl
 import okhttp3.MediaType
 import okio.BufferedSink
 import okio.BufferedSource
-import okio.buffer
-import okio.source
-import java.io.File
+import java.net.HttpURLConnection
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -20,42 +22,92 @@ class StaticResourceMapper @Inject internal constructor(
   private val entries: MutableList<out Entry>
 ) {
   /** Returns true if the mapped path exists on either the resource path or file system. */
-  private fun exists(urlPath: String): Boolean {
-    val staticResource = staticResource(urlPath) ?: return false
-    val file = File(staticResource.filesystemPath(urlPath))
-    return resourceLoader.exists(staticResource.resourcePath(urlPath))
-        || (!file.isDirectory && file.exists())
+  private fun exists(urlPath: String): Kind {
+    val staticResource = staticResource(urlPath) ?: return Kind.NO_MATCH
+    val resourcePath = staticResource.resourcePath(urlPath)
+    if (resourceLoader.exists(resourcePath)) return Kind.RESOURCE
+    if (resourceLoader.list(resourcePath).isNotEmpty()) return Kind.RESOURCE_DIRECTORY
+    return Kind.NO_MATCH
+  }
+
+  enum class Kind {
+    NO_MATCH, RESOURCE, RESOURCE_DIRECTORY,
   }
 
   /** Returns a source to the mapped path, or null if it doesn't exist. */
   fun open(urlPath: String): BufferedSource? {
     val staticResource = staticResource(urlPath) ?: return null
     val resourcePath = staticResource.resourcePath(urlPath)
-    val responseBodyFile = File(staticResource.filesystemPath(urlPath))
 
     return when {
       resourceLoader.exists(resourcePath) -> resourceLoader.open(resourcePath)!!
-      responseBodyFile.exists() -> responseBodyFile.source().buffer()
       else -> null
     }
   }
 
   fun getResponse(urlPath: String): Response<ResponseBody>? {
-    if (!exists(urlPath)) {
-      return null
-    }
+    return getResponse(HttpUrl.get(urlPath))
+  }
 
-    val responseBody = object : ResponseBody {
-      override fun writeTo(sink: BufferedSink) {
-        open(urlPath)!!.use {
-          sink.writeAll(it)
+  fun getResponse(url: HttpUrl): Response<ResponseBody>? {
+    val urlPath = url.encodedPath()
+    val matchedEntry = findEntryFromUrl(entries, url) as Entry?
+    return when (exists(normalizePath(urlPath))) {
+      StaticResourceMapper.Kind.NO_MATCH -> when {
+        !urlPath.startsWith("/api") && !urlPath.contains(".") && !urlPath.endsWith("/") -> redirectResponse(normalizePathWithQuery(url))
+        // actually return the resource, don't redirect. Path must stay the same since this will be handled by React router
+        !urlPath.startsWith("/api") && !urlPath.contains(".") && urlPath.endsWith("/") -> {
+
+          resourceResponse(normalizePath(matchedEntry?.url_path_prefix ?: urlPath))
+        }
+        else -> null
+      }
+      StaticResourceMapper.Kind.RESOURCE -> resourceResponse(normalizePath(urlPath))
+      StaticResourceMapper.Kind.RESOURCE_DIRECTORY -> redirectResponse(normalizePathWithQuery(url))
+    }
+  }
+
+  private fun normalizePath(urlPath: String): String {
+    return when {
+      //    /_admin/ -> /_admin/index.html
+      urlPath.endsWith("/") -> "${urlPath}index.html"
+      //    /_admin/config -> /_admin/config/
+      !urlPath.startsWith("/api") && !urlPath.contains(".") && !urlPath.endsWith("/") -> "$urlPath/"
+      // /_admin/index.html -> /_admin/index.html
+      else -> urlPath
+    }
+  }
+
+  private fun normalizePathWithQuery(url: HttpUrl): String {
+    return if (url.encodedQuery().isNullOrEmpty()) {
+      normalizePath(url.encodedPath())
+    } else {
+      normalizePath(url.encodedPath()) + "?" + url.encodedQuery()
+    }
+  }
+
+  private fun resourceResponse(resourcePath: String): Response<ResponseBody>? {
+    return if (exists(resourcePath) == Kind.RESOURCE) {
+      val responseBody = object : ResponseBody {
+        override fun writeTo(sink: BufferedSink) {
+          open(resourcePath)!!.use {
+            sink.writeAll(it)
+          }
         }
       }
+      Response(
+          body = responseBody,
+          headers = Headers.of("Content-Type", mimeType(resourcePath).toString()))
+    } else {
+      null
     }
+  }
 
+  private fun redirectResponse(urlPath: String): Response<ResponseBody> {
     return Response(
-        body = responseBody,
-        headers = Headers.of("Content-Type", mimeType(urlPath).toString()))
+        body = "".toResponseBody(),
+        statusCode = HttpURLConnection.HTTP_MOVED_TEMP,
+        headers = Headers.of("Location", "$urlPath"))
   }
 
   private fun mimeType(path: String): MediaType {
@@ -64,7 +116,7 @@ class StaticResourceMapper @Inject internal constructor(
   }
 
   private fun staticResource(urlPath: String): Entry? {
-    return entries.firstOrNull { urlPath.startsWith(it.urlPrefix) }
+    return entries.firstOrNull { urlPath.startsWith(it.url_path_prefix) }
   }
 
   /**
@@ -76,22 +128,16 @@ class StaticResourceMapper @Inject internal constructor(
    * ```
    */
   data class Entry(
-    val urlPrefix: String,
-    private val resourcePath: String,
-    private val filesystemPath: String
-  ) {
+    override val url_path_prefix: String,
+    private val resourcePath: String
+  ) : WebEntryCommon.Entry {
     init {
-      require(urlPrefix.endsWith("/"))
-      require(urlPrefix.startsWith("/"))
+      require(url_path_prefix.endsWith("/"))
+      require(url_path_prefix.startsWith("/"))
     }
 
     fun resourcePath(urlPath: String): String {
-      return resourcePath + urlPath.substring(urlPrefix.length - 1)
-    }
-
-    fun filesystemPath(urlPath: String): String {
-      // TODO: .. in path
-      return filesystemPath + urlPath.substring(urlPrefix.length - 1)
+      return resourcePath + urlPath.substring(url_path_prefix.length)
     }
   }
 }

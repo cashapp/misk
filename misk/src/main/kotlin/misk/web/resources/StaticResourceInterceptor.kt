@@ -9,8 +9,9 @@ import javax.inject.Singleton
 
 class StaticResourceInterceptor(val factory: Factory) : NetworkInterceptor {
   override fun intercept(chain: NetworkChain): Response<*> {
-    val urlPath = chain.request.url.encodedPath()
-    return factory.staticResourceMapper.getResponse(urlPath) ?: return chain.proceed(chain.request)
+
+
+    return factory.staticResourceMapper.getResponse(chain.request.url) ?: return chain.proceed(chain.request)
   }
 
   @Singleton

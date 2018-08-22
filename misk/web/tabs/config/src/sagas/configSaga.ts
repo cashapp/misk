@@ -20,7 +20,7 @@ function * handleGetAll () {
   const files: any = []
   let data: any = {}
   try {
-    const response = yield call(axios.get, "http://localhost:8080/api/config/all")
+    const response = yield call(axios.get, "/api/config/all")
     data = response.data
   } catch (e) {
     yield put(dispatchConfig.failure({ 

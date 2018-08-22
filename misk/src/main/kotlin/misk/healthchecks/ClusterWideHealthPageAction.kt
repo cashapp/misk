@@ -5,6 +5,7 @@ import misk.web.Response
 import misk.web.ResponseBody
 import misk.web.resources.StaticResourceMapper
 import misk.web.actions.WebAction
+import okhttp3.HttpUrl
 import javax.inject.Inject
 import javax.inject.Singleton
 

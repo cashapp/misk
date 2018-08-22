@@ -101,7 +101,7 @@ class StaticResourceMapperTest {
       multibind<WebActionEntry>().toInstance(WebActionEntry<Hello>())
       multibind<WebActionEntry>().toInstance(WebActionEntry<NotFoundAction>())
       multibind<StaticResourceMapper.Entry>()
-          .toInstance(StaticResourceMapper.Entry("/", "memory:/web", "???"))
+          .toInstance(StaticResourceMapper.Entry("/", "memory:/web"))
     }
   }
 

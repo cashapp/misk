@@ -8,7 +8,7 @@ const dev = process.env.NODE_ENV !== 'production'
 
 const HTMLWebpackPluginConfig = new HTMLWebpackPlugin({
   template: path.join(__dirname, '/src/index.html'),
-  filename: 'index.html',
+  filename: '_tab/config/index.html',
   inject: 'body'
 })
 
