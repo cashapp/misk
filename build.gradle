@@ -46,6 +46,7 @@ ext {
           openTracingUtil      : 'io.opentracing:opentracing-util:0.31.0',
           openTracingMock      : 'io.opentracing:opentracing-mock:0.31.0',
           openTracingOkHttp    : 'io.opentracing.contrib:opentracing-okhttp3:0.1.0',
+          openTracingJdbc      : "io.opentracing.contrib:opentracing-jdbc:0.0.7",
           tracingJaeger        : 'com.uber.jaeger:jaeger-core:0.24.0',
           tracingZipkin        : 'io.opentracing.brave:brave-opentracing:0.29.0',
           zipkinReporter       : 'io.zipkin.reporter2:zipkin-sender-okhttp3:2.4.1',
