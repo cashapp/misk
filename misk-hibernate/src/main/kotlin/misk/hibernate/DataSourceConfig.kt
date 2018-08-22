@@ -11,7 +11,7 @@ enum class DataSourceType(
   val buildJdbcUrl: (DataSourceConfig, Environment) -> String
 ) {
   MYSQL(
-      driverClassName = "com.mysql.jdbc.Driver",
+      driverClassName = "io.opentracing.contrib.jdbc.TracingDriver",
       hibernateDialect = "org.hibernate.dialect.MySQL57Dialect",
       buildJdbcUrl = { config, env ->
         val port = config.port ?: 3306
@@ -38,7 +38,7 @@ enum class DataSourceType(
           queryParams += "&useSSL=true"
           queryParams += "&requireSSL=true"
         }
-        "jdbc:mysql://$host:$port/$database$queryParams"
+        "jdbc:tracing:mysql://$host:$port/$database$queryParams"
       }
   ),
   HSQLDB(
