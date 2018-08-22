@@ -43,6 +43,7 @@ jar {
 
 shadowJar {
   exclude('module-info.class') // https://github.com/johnrengelman/shadow/issues/352
+  mergeServiceFiles()
 }
 
 artifacts {
