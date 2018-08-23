@@ -18,14 +18,16 @@ import misk.web.resources.StaticResourceMapper
 
 class AdminTabModule(val environment: Environment) : KAbstractModule() {
   override fun configure() {
-    multibind<WebActionEntry>().toInstance(
-        WebActionEntry<WebProxyAction>("/_admin"))
-    multibind<WebActionEntry>().toInstance(
-        WebActionEntry<WebProxyAction>("/_tab/dashboard"))
+
+
+    if (environment == Environment.DEVELOPMENT) {
+      multibind<WebActionEntry>().toInstance(
+          WebActionEntry<WebProxyAction>("/_admin"))
+      multibind<WebActionEntry>().toInstance(
+          WebActionEntry<WebProxyAction>("/_tab/dashboard"))
 //    multibind<WebActionEntry>().toInstance(
 //        WebActionEntry<WebProxyAction>("/@misk"))
 
-    if (environment == Environment.DEVELOPMENT) {
       multibind<WebProxyEntry>().toInstance(
           WebProxyEntry("/_admin", "http://localhost:3100/"))
 

@@ -38,7 +38,6 @@ class StaticResourceMapper @Inject internal constructor(
   fun open(urlPath: String): BufferedSource? {
     val staticResource = staticResource(urlPath) ?: return null
     val resourcePath = staticResource.resourcePath(urlPath)
-
     return when {
       resourceLoader.exists(resourcePath) -> resourceLoader.open(resourcePath)!!
       else -> null
@@ -79,11 +78,7 @@ class StaticResourceMapper @Inject internal constructor(
   }
 
   private fun normalizePathWithQuery(url: HttpUrl): String {
-    return if (url.encodedQuery().isNullOrEmpty()) {
-      normalizePath(url.encodedPath())
-    } else {
-      normalizePath(url.encodedPath()) + "?" + url.encodedQuery()
-    }
+    return if (url.encodedQuery().isNullOrEmpty()) normalizePath(url.encodedPath()) else normalizePath(url.encodedPath()) + "?" + url.encodedQuery()
   }
 
   private fun resourceResponse(resourcePath: String): Response<ResponseBody>? {
@@ -116,7 +111,7 @@ class StaticResourceMapper @Inject internal constructor(
   }
 
   private fun staticResource(urlPath: String): Entry? {
-    return entries.firstOrNull { urlPath.startsWith(it.url_path_prefix) }
+    return WebEntryCommon.findEntryFromUrl(entries, urlPath) as Entry?
   }
 
   /**
@@ -132,12 +127,14 @@ class StaticResourceMapper @Inject internal constructor(
     private val resourcePath: String
   ) : WebEntryCommon.Entry {
     init {
-      require(url_path_prefix.endsWith("/"))
-      require(url_path_prefix.startsWith("/"))
+      require(url_path_prefix.endsWith("/") &&
+      url_path_prefix.startsWith("/") &&
+          // don't allow anyone to multibind entry prefix to "/" since NotFound and other actions will never be reached
+      url_path_prefix.length > 1)
     }
 
     fun resourcePath(urlPath: String): String {
-      return resourcePath + urlPath.substring(url_path_prefix.length)
+      return if (resourcePath.endsWith("/")) resourcePath + urlPath.removePrefix(url_path_prefix) else resourcePath + "/" + urlPath.removePrefix(url_path_prefix)
     }
   }
 }
