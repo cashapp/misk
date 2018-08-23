@@ -1,11 +1,15 @@
 package misk.hibernate
 
+import io.opentracing.mock.MockTracer
+import io.opentracing.tag.Tags
 import misk.exceptions.UnauthorizedException
+import misk.hibernate.RealTransacter.Companion.APPLICATION_TRANSACTION_SPAN_NAME
+import misk.hibernate.RealTransacter.Companion.DB_TRANSACTION_SPAN_NAME
+import misk.hibernate.RealTransacter.Companion.TRANSACTER_SPAN_TAG
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
 import org.hibernate.exception.ConstraintViolationException
-import org.junit.Ignore
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -20,6 +24,7 @@ class TransacterTest {
 
   @Inject @Movies lateinit var transacter: Transacter
   @Inject lateinit var queryFactory: Query.Factory
+  @Inject lateinit var tracer: MockTracer
 
   @Test
   fun happyPath() {
@@ -55,8 +60,8 @@ class TransacterTest {
           .actorName("Laura Dern")
           .listAsMovieNameAndReleaseDate(session)
       assertThat(lauraDernMovies).containsExactlyInAnyOrder(
-          NameAndReleaseDate("Star Wars", LocalDate.of(1977, 5, 25)),
-          NameAndReleaseDate("Jurassic Park", LocalDate.of(1993, 6, 9)))
+          ReflectionQueryFactoryTest.NameAndReleaseDate("Star Wars", LocalDate.of(1977, 5, 25)),
+          ReflectionQueryFactoryTest.NameAndReleaseDate("Jurassic Park", LocalDate.of(1993, 6, 9)))
 
       val actorsInOldMovies = queryFactory.newQuery<CharacterQuery>()
           .movieReleaseDateBefore(LocalDate.of(1980, 1, 1))
@@ -181,6 +186,46 @@ class TransacterTest {
     assertThat(callCount.get()).isEqualTo(1)
   }
 
+  @Test
+  fun committedTransactionsTraceSuccess() {
+    tracer.reset()
+
+    transacter.transaction {
+      // No need to do anything
+    }
+
+    tracingAssertions()
+  }
+
+  @Test
+  fun rolledbackTransactionsTraceError() {
+    tracer.reset()
+
+    assertFailsWith<NonRetryableException> {
+      transacter.transaction {
+        throw NonRetryableException()
+      }
+    }
+
+    tracingAssertions()
+  }
+
+  fun tracingAssertions() {
+    // Assert on span, implicitly asserting that it's complete by looking at finished spans
+    assertThat(tracer.finishedSpans()).hasSize(2)
+    assertThat(tracer.finishedSpans().get(0).operationName())
+        .isEqualTo(DB_TRANSACTION_SPAN_NAME)
+    assertThat(tracer.finishedSpans().get(0).tags())
+        .containsEntry(Tags.COMPONENT.getKey(), TRANSACTER_SPAN_TAG)
+    assertThat(tracer.finishedSpans().get(1).operationName())
+        .isEqualTo(APPLICATION_TRANSACTION_SPAN_NAME)
+    assertThat(tracer.finishedSpans().get(1).tags())
+        .containsEntry(Tags.COMPONENT.getKey(), TRANSACTER_SPAN_TAG)
+
+    // There should be no on-going span
+    assertThat(tracer.activeSpan()).isNull()
+  }
+
   interface CharacterQuery : Query<DbCharacter> {
     @Constraint("name")
     fun name(name: String): CharacterQuery
@@ -192,7 +237,7 @@ class TransacterTest {
     fun movieReleaseDateBefore(upperBound: LocalDate): CharacterQuery
 
     @Select("movie")
-    fun listAsMovieNameAndReleaseDate(session: Session): List<NameAndReleaseDate>
+    fun listAsMovieNameAndReleaseDate(session: Session): List<ReflectionQueryFactoryTest.NameAndReleaseDate>
 
     @Select
     fun listAsActorAndReleaseDate(session: Session): List<ActorAndReleaseDate>

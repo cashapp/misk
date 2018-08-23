@@ -9,12 +9,13 @@ import misk.environment.EnvironmentModule
 import misk.inject.KAbstractModule
 import misk.logging.LogCollectorModule
 import misk.time.FakeClockModule
+import misk.tracing.MockTracingModule
 
 /** This module creates movies, actors, and characters tables for several Hibernate tests. */
 class MoviesTestModule : KAbstractModule() {
   override fun configure() {
     install(LogCollectorModule())
-    install(Modules.override(MiskServiceModule()).with(FakeClockModule()))
+    install(Modules.override(MiskServiceModule()).with(FakeClockModule(), MockTracingModule()))
     install(EnvironmentModule(Environment.TESTING))
 
     val config = MiskConfig.load<MoviesConfig>("moviestestmodule", Environment.TESTING)
