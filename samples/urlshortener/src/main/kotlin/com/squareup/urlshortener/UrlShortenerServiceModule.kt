@@ -6,7 +6,7 @@ import misk.inject.KAbstractModule
 import misk.web.AdminTabModule
 import misk.web.MiskWebModule
 import misk.web.actions.WebActionEntry
-import misk.web.WebProxyActionModule
+import misk.web.proxy.WebProxyActionModule
 import misk.web.actions.AdminTabAction
 
 /** Binds all service dependencies including service-specific dependencies. */

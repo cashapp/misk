@@ -1,26 +1,30 @@
-package misk.web
+package misk.web.resource
 
+import com.google.inject.name.Names
+import misk.client.HttpClientModule
 import misk.inject.KAbstractModule
 import misk.resources.ResourceLoader
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
+import misk.web.WebTestingModule
 import misk.web.actions.NotFoundAction
-import misk.web.actions.WebAction
 import misk.web.actions.WebActionEntry
 import misk.web.jetty.JettyService
-import misk.web.proxy.WebProxyAction
-import misk.web.resources.StaticResourceMapper
+import misk.web.resources.StaticResourceAction
+import misk.web.resources.StaticResourceEntry
 import okhttp3.OkHttpClient
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import javax.inject.Inject
-import javax.inject.Singleton
+import javax.inject.Named
 
 @MiskTest(startService = true)
-class StaticResourceMapperTest {
+class StaticResourceActionTest {
   @MiskTestModule
   val module = TestModule()
+
+  @Inject @Named("web_proxy_action_test") private lateinit var httpClient: OkHttpClient
 
   @Inject private lateinit var jettyService: JettyService
   @Inject private lateinit var resourceLoader: ResourceLoader
@@ -108,44 +112,25 @@ class StaticResourceMapperTest {
     assertThat(response.header("Content-Type")).isEqualTo("text/html")
   }
 
-  @Singleton
-  class Hello : WebAction {
-    @Inject lateinit var staticResourceMapper: StaticResourceMapper
-
-    @Get("/hello/")
-    fun hello(): Response<ResponseBody> {
-      return staticResourceMapper.getResponse("/hi")!!
-    }
-  }
-
-  @Singleton
-  class ProxyLugnut : WebAction {
-    @Inject lateinit var staticResourceMapper: StaticResourceMapper
-
-    @Get("/_admin/{path:.*}")
-    @Post("/_admin/{path:.*}")
-    fun get(@PathParam path: String): Response<ResponseBody> {
-      return staticResourceMapper.getResponse("/_admin/$path")!!
-    }
-  }
-
   class TestModule : KAbstractModule() {
     override fun configure() {
-      install(WebTestingModule())
-      multibind<WebActionEntry>().toInstance(WebActionEntry<Hello>())
+      install(HttpClientModule("static_resource_action_test",
+          Names.named("static_resource_action_test")))
       multibind<WebActionEntry>().toInstance(WebActionEntry<NotFoundAction>())
 
-      multibind<StaticResourceMapper.Entry>()
-          .toInstance(StaticResourceMapper.Entry("/hi/", "memory:/web/hi"))
+      multibind<WebActionEntry>().toInstance(WebActionEntry<StaticResourceAction>("/hi"))
+      multibind<StaticResourceEntry>()
+          .toInstance(StaticResourceEntry("/hi", "memory:/web/hi"))
 
-      multibind<WebActionEntry>().toInstance(WebActionEntry<ProxyLugnut>("/_admin/lugnut"))
-      multibind<StaticResourceMapper.Entry>()
-          .toInstance(StaticResourceMapper.Entry("/_admin/lugnut/", "memory:/web/_admin/lugnut/"))
+      multibind<WebActionEntry>().toInstance(WebActionEntry<StaticResourceAction>("/_admin/lugnut"))
+      multibind<StaticResourceEntry>()
+          .toInstance(StaticResourceEntry("/_admin/lugnut", "memory:/web/_admin/lugnut/"))
+
+      install(WebTestingModule())
     }
   }
 
   private fun request(path: String): okhttp3.Response {
-    val httpClient = OkHttpClient()
     return httpClient.newCall(okhttp3.Request.Builder()
         .url(jettyService.httpServerUrl.newBuilder().encodedPath(path).build())
         .build())

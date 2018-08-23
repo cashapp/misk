@@ -10,7 +10,7 @@ import kotlin.reflect.KClass
  * @param pathPrefix: defaults to "" empty string. If not empty, must match pattern requirements:
  *   - must begin with "/"
  *   - any number of non-whitespace characters (including additional path segments or "/")
- *   - must terminate with a non-"/"
+ *   - must terminate with a non-"/" because rest of path will start with "/"
  */
 data class WebActionEntry(
   val actionClass: KClass<out WebAction>,

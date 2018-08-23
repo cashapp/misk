@@ -21,10 +21,16 @@ class NotFoundAction : WebAction {
   @ResponseContentType(MediaTypes.ALL)
   @Unauthenticated
   fun notFound(@PathParam path: String): Response<ResponseBody> {
-    return Response(
-        body = "Nothing found at /$path".toResponseBody(),
-        headers = Headers.of("Content-Type", MediaTypes.TEXT_PLAIN_UTF8),
-        statusCode = 404
-    )
+    return response(path)
+  }
+
+  companion object {
+    fun response(path: String): Response<ResponseBody> {
+      return Response(
+          body = "Nothing found at /$path".toResponseBody(),
+          headers = Headers.of("Content-Type", MediaTypes.TEXT_PLAIN_UTF8),
+          statusCode = 404
+      )
+    }
   }
 }

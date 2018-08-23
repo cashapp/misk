@@ -249,7 +249,7 @@ class WebProxyActionTest {
     val response = httpClient.newCall(request).execute().toMisk()
 
     assertThat(response.readUtf8()).isEqualTo(
-        "WebProxyAction: Failed to fetch upstream URL $urlThatFailed")
+        "Failed to fetch upstream URL $urlThatFailed")
     assertThat(response.statusCode).isEqualTo(HttpURLConnection.HTTP_UNAVAILABLE)
     assertThat(response.headers["Content-Type"]).isEqualTo(plainTextMediaType.toString())
   }

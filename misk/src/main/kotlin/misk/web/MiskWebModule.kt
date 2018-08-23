@@ -42,8 +42,7 @@ import misk.web.marshal.PlainTextMarshaller
 import misk.web.marshal.ProtobufMarshaller
 import misk.web.marshal.ProtobufUnmarshaller
 import misk.web.marshal.Unmarshaller
-import misk.web.resources.StaticResourceInterceptor
-import misk.web.resources.StaticResourceMapper
+import misk.web.resources.StaticResourceEntry
 import javax.inject.Inject
 import javax.servlet.http.HttpServletRequest
 import java.security.Provider as SecurityProvider
@@ -76,7 +75,7 @@ class MiskWebModule : KAbstractModule() {
     // Initialize empty sets for our multibindings.
     newMultibinder<NetworkInterceptor.Factory>()
     newMultibinder<ApplicationInterceptor.Factory>()
-    newMultibinder<StaticResourceMapper.Entry>()
+    newMultibinder<StaticResourceEntry>()
 
     // Register built-in interceptors. Interceptors run in the order in which they are
     // installed, and the order of these interceptors is critical.
@@ -109,9 +108,6 @@ class MiskWebModule : KAbstractModule() {
     // the client's requested content-type
     multibind<NetworkInterceptor.Factory>(MiskDefault::class)
         .to<MarshallerInterceptor.Factory>()
-
-    multibind<NetworkInterceptor.Factory>(MiskDefault::class)
-        .to<StaticResourceInterceptor.Factory>()
 
     install(ExceptionMapperModule.create<ActionException, ActionExceptionMapper>())
 

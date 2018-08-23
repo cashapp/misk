@@ -5,7 +5,8 @@ import misk.inject.KAbstractModule
 import misk.web.actions.WebActionEntry
 import misk.web.proxy.WebProxyAction
 import misk.web.proxy.WebProxyEntry
-import misk.web.resources.StaticResourceMapper
+import misk.web.resources.StaticResourceAction
+import misk.web.resources.StaticResourceEntry
 
 /**
  * AdminTabModule
@@ -30,21 +31,22 @@ class AdminTabModule(val environment: Environment) : KAbstractModule() {
 
       multibind<WebProxyEntry>().toInstance(
           WebProxyEntry("/_admin", "http://localhost:3100/"))
-
       multibind<WebProxyEntry>().toInstance(
           WebProxyEntry("/_tab/dashboard", "http://localhost:3110/"))
-
 //      multibind<WebProxyEntry>().toInstance(
 //          WebProxyEntry("/@misk", "http://localhost:9100/"))
     } else {
-      // Bind _admin static resources to web
-      // TODO(adrw) need to only use StaticResourceMapper in production
-      multibind<StaticResourceMapper.Entry>()
-          .toInstance(StaticResourceMapper.Entry("/_admin/", "classpath:/web/_admin/"))
-      multibind<StaticResourceMapper.Entry>()
-          .toInstance(StaticResourceMapper.Entry("/_tab/dashboard/", "classpath:/web/_tab/dashboard/"))
-      multibind<StaticResourceMapper.Entry>()
-          .toInstance(StaticResourceMapper.Entry("/_tab/loader/", "classpath:/web/_tab/loader/"))
+      multibind<WebActionEntry>().toInstance(
+          WebActionEntry<StaticResourceAction>("/_admin"))
+      multibind<WebActionEntry>().toInstance(
+          WebActionEntry<StaticResourceAction>("/_tab/dashboard"))
+
+      multibind<StaticResourceEntry>()
+          .toInstance(StaticResourceEntry("/_admin", "classpath:/web/_admin/"))
+      multibind<StaticResourceEntry>()
+          .toInstance(StaticResourceEntry("/_tab/dashboard", "classpath:/web/_tab/dashboard/"))
+//      multibind<StaticResourceEntry>()
+//          .toInstance(StaticResourceEntry("/_tab/loader/", "classpath:/web/_tab/loader/"))
     }
 
 //    Testing
