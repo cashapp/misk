@@ -1,8 +1,8 @@
 package misk.hibernate
 
 import com.google.common.collect.ImmutableSet
+import io.opentracing.Tracer
 import io.opentracing.tag.Tags
-import io.opentracing.util.GlobalTracer
 import misk.backoff.ExponentialBackoff
 import misk.logging.getLogger
 import misk.tracing.traceWithSpan
@@ -21,20 +21,24 @@ internal class RealTransacter private constructor(
   private val sessionFactory: SessionFactory,
   private val config: DataSourceConfig,
   private val threadLocalSession: ThreadLocal<Session>,
-  private val options: TransacterOptions
+  private val options: TransacterOptions,
+  private val tracer: Tracer?
 ) : Transacter {
 
-  constructor(qualifier: KClass<out Annotation>, sessionFactory: SessionFactory, config: DataSourceConfig) :
-      this(qualifier, sessionFactory, config, ThreadLocal(), TransacterOptions())
+  constructor(qualifier: KClass<out Annotation>, sessionFactory: SessionFactory, config: DataSourceConfig, tracer: Tracer?) :
+      this(qualifier, sessionFactory, config, ThreadLocal(), TransacterOptions(), tracer)
 
   override val inTransaction: Boolean
     get() = threadLocalSession.get() != null
 
   override fun <T> transaction(lambda: (session: Session) -> T): T {
-    return GlobalTracer.get().traceWithSpan(APPLICATION_TRANSACTION_SPAN_NAME) { span ->
-      Tags.COMPONENT.set(span, TRANSACTER_SPAN_TAG)
-      transactionWithRetriesInternal(lambda)
+    if (tracer != null) {
+      return tracer.traceWithSpan(APPLICATION_TRANSACTION_SPAN_NAME) { span ->
+        Tags.COMPONENT.set(span, TRANSACTER_SPAN_TAG)
+        transactionWithRetriesInternal(lambda)
+      }
     }
+    return transactionWithRetriesInternal(lambda)
   }
 
   private fun <T> transactionWithRetriesInternal(lambda: (session: Session) -> T): T {
@@ -73,36 +77,41 @@ internal class RealTransacter private constructor(
   }
 
   private fun <T> transactionInternal(lambda: (session: Session) -> T): T {
-    return GlobalTracer.get().traceWithSpan(DB_TRANSACTION_SPAN_NAME) { span ->
-      Tags.COMPONENT.set(span, TRANSACTER_SPAN_TAG)
+    if (tracer != null) {
+      return tracer.traceWithSpan(DB_TRANSACTION_SPAN_NAME) { span ->
+        Tags.COMPONENT.set(span, TRANSACTER_SPAN_TAG)
+        transactionInternalSession(lambda)
+      }
+    }
+    return transactionInternalSession(lambda)
+  }
 
-      withSession { session ->
-        val transaction = session.hibernateSession.beginTransaction()!!
-        val result: T
-        try {
-          result = lambda(session)
-          transaction.commit()
-          return@withSession result
-        } catch (e: Throwable) {
-          if (transaction.isActive) {
-            try {
-              transaction.rollback()
-            } catch (suppressed: Exception) {
-              e.addSuppressed(suppressed)
-            }
+  private fun <T> transactionInternalSession(lambda: (session: Session) -> T): T {
+    return withSession { session ->
+      val transaction = session.hibernateSession.beginTransaction()!!
+      val result: T
+      try {
+        result = lambda(session)
+        transaction.commit()
+        return@withSession result
+      } catch (e: Throwable) {
+        if (transaction.isActive) {
+          try {
+            transaction.rollback()
+          } catch (suppressed: Exception) {
+            e.addSuppressed(suppressed)
           }
-          throw e
         }
+        throw e
       }
     }
   }
-
   override fun retries(): Transacter = withOptions(options.copy(maxAttempts = 2))
 
   override fun noRetries(): Transacter = withOptions(options.copy(maxAttempts = 1))
 
   private fun withOptions(options: TransacterOptions): Transacter =
-    RealTransacter(qualifier, sessionFactory, config, threadLocalSession, options)
+    RealTransacter(qualifier, sessionFactory, config, threadLocalSession, options, tracer)
 
   private fun <T> withSession(lambda: (session: Session) -> T): T {
     check(threadLocalSession.get() == null) { "Attempted to start a nested session" }

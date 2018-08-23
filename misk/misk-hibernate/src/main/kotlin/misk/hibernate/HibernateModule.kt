@@ -1,6 +1,7 @@
 package misk.hibernate
 
 import com.google.common.util.concurrent.Service
+import io.opentracing.Tracer
 import misk.environment.Environment
 import misk.inject.KAbstractModule
 import misk.inject.asSingleton
@@ -72,8 +73,10 @@ class HibernateModule(
           sessionFactoryProvider.get(), config)
     }).asSingleton()
 
-    bind(transacterKey).toProvider(Provider<Transacter> {
-      RealTransacter(qualifier, sessionFactoryProvider.get(), config)
+    bind(transacterKey).toProvider(object : Provider<Transacter> {
+      @com.google.inject.Inject(optional=true) val tracer: Tracer? = null
+      override fun get(): RealTransacter = RealTransacter(
+          qualifier, sessionFactoryProvider.get(), config, tracer)
     }).asSingleton()
 
     multibind<Service>().toProvider(object : Provider<SchemaMigratorService> {
