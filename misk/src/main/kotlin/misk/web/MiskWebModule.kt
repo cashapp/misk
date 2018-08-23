@@ -30,6 +30,7 @@ import misk.web.extractors.WebSocketParameterExtractorFactory
 import misk.web.interceptors.InternalErrorInterceptorFactory
 import misk.web.interceptors.MarshallerInterceptor
 import misk.web.interceptors.MetricsInterceptor
+import misk.web.interceptors.RequestLogContextInterceptor
 import misk.web.interceptors.RequestLoggingInterceptor
 import misk.web.interceptors.TracingInterceptor
 import misk.web.interceptors.WideOpenDevelopmentInterceptorFactory
@@ -83,6 +84,10 @@ class MiskWebModule : KAbstractModule() {
     // Handle all unexpected errors that occur during dispatch
     multibind<NetworkInterceptor.Factory>(MiskDefault::class)
         .to<InternalErrorInterceptorFactory>()
+
+    // Add request related fields to MDC for logging
+    multibind<NetworkInterceptor.Factory>(MiskDefault::class)
+        .to<RequestLogContextInterceptor.Factory>()
 
     // Optionally log request and response details
     multibind<NetworkInterceptor.Factory>(MiskDefault::class)
