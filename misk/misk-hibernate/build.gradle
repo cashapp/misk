@@ -31,6 +31,8 @@ dependencies {
   compile dep.hikariCp
   compile dep.hsqldb
   compile dep.mysql
+  compile dep.openTracing
+  compile dep.openTracingUtil
   compile dep.openTracingJdbc
   compile dep.vitess
   compile project(':misk')
