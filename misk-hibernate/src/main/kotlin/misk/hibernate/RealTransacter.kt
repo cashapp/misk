@@ -1,8 +1,11 @@
 package misk.hibernate
 
 import com.google.common.collect.ImmutableSet
+import io.opentracing.tag.Tags
+import io.opentracing.util.GlobalTracer
 import misk.backoff.ExponentialBackoff
 import misk.logging.getLogger
+import misk.tracing.traceWithSpan
 import org.hibernate.SessionFactory
 import org.hibernate.StaleObjectStateException
 import org.hibernate.exception.LockAcquisitionException
@@ -28,6 +31,13 @@ internal class RealTransacter private constructor(
     get() = threadLocalSession.get() != null
 
   override fun <T> transaction(lambda: (session: Session) -> T): T {
+    return GlobalTracer.get().traceWithSpan(APPLICATION_TRANSACTION_SPAN_NAME) { span ->
+      Tags.COMPONENT.set(span, TRANSACTER_SPAN_TAG)
+      transactionWithRetriesInternal(lambda)
+    }
+  }
+
+  private fun <T> transactionWithRetriesInternal(lambda: (session: Session) -> T): T {
     assert(options.maxAttempts > 0)
 
     val backoff = ExponentialBackoff(
@@ -63,22 +73,26 @@ internal class RealTransacter private constructor(
   }
 
   private fun <T> transactionInternal(lambda: (session: Session) -> T): T {
-    return withSession { session ->
-      val transaction = session.hibernateSession.beginTransaction()!!
-      val result: T
-      try {
-        result = lambda(session)
-        transaction.commit()
-        return@withSession result
-      } catch (e: Throwable) {
-        if (transaction.isActive) {
-          try {
-            transaction.rollback()
-          } catch (suppressed: Exception) {
-            e.addSuppressed(suppressed)
+    return GlobalTracer.get().traceWithSpan(DB_TRANSACTION_SPAN_NAME) { span ->
+      Tags.COMPONENT.set(span, TRANSACTER_SPAN_TAG)
+
+      withSession { session ->
+        val transaction = session.hibernateSession.beginTransaction()!!
+        val result: T
+        try {
+          result = lambda(session)
+          transaction.commit()
+          return@withSession result
+        } catch (e: Throwable) {
+          if (transaction.isActive) {
+            try {
+              transaction.rollback()
+            } catch (suppressed: Exception) {
+              e.addSuppressed(suppressed)
+            }
           }
+          throw e
         }
-        throw e
       }
     }
   }
@@ -128,6 +142,12 @@ internal class RealTransacter private constructor(
     val maxRetryDelayMillis: Long = 100,
     val retryJitterMillis: Long = 400
   )
+
+  companion object {
+    val APPLICATION_TRANSACTION_SPAN_NAME = "app-db-transaction"
+    val DB_TRANSACTION_SPAN_NAME = "db-session"
+    val TRANSACTER_SPAN_TAG = "hibernate-transacter"
+  }
 
   internal class RealSession(
     val session: org.hibernate.Session,
