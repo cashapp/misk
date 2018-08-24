@@ -8,10 +8,10 @@ import io.opentracing.propagation.Format
 import io.opentracing.tag.Tags
 import io.opentracing.tag.Tags.SPAN_KIND_SERVER
 import misk.Action
-import misk.web.NetworkChain
-import misk.web.NetworkInterceptor
 import misk.logging.getLogger
 import misk.tracing.interceptors.TextMultimapExtractAdapter
+import misk.web.NetworkChain
+import misk.web.NetworkInterceptor
 import misk.web.Response
 
 private val logger = getLogger<TracingInterceptor>()
@@ -25,11 +25,9 @@ internal class TracingInterceptor internal constructor(private val tracer: Trace
   class Factory : NetworkInterceptor.Factory {
     @Inject(optional=true) var tracer: Tracer? = null
 
-    override fun create(action: Action): NetworkInterceptor? {
-      // NOTE(nb): returning null ensures interceptor is filtered out when generating interceptors to
-      // apply for a specific action. See WebActionModule for implementation details
-      return if (tracer != null) TracingInterceptor(tracer!!) else null
-    }
+    // NOTE(nb): returning null ensures interceptor is filtered out when generating interceptors to
+    // apply for a specific action. See WebActionModule for implementation details
+    override fun create(action: Action) = tracer?.let { TracingInterceptor(it) }
   }
 
   override fun intercept(chain: NetworkChain): Response<*> {
