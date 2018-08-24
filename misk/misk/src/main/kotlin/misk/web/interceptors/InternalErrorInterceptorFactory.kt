@@ -1,12 +1,15 @@
 package misk.web.interceptors
 
 import misk.Action
+import misk.logging.getLogger
 import misk.web.NetworkChain
 import misk.web.NetworkInterceptor
 import misk.web.Response
 import misk.web.toResponseBody
 import okhttp3.Headers
 import javax.inject.Singleton
+
+private val logger = getLogger<InternalErrorInterceptorFactory>()
 
 @Singleton
 class InternalErrorInterceptorFactory : NetworkInterceptor.Factory {
@@ -27,7 +30,8 @@ class InternalErrorInterceptorFactory : NetworkInterceptor.Factory {
       override fun intercept(chain: NetworkChain): Response<*> {
         return try {
           chain.proceed(chain.request)
-        } catch (_: Throwable) {
+        } catch (throwable: Throwable) {
+          logger.error(throwable) { "${chain.request.url} failed; returning an HTTP 500 error" }
           Response(BODY, HEADERS, STATUS_CODE)
         }
       }
