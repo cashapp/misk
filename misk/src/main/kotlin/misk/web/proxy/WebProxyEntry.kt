@@ -23,7 +23,7 @@ import okhttp3.HttpUrl
  * ```
  */
 data class WebProxyEntry(
-  override val url_path_prefix: String,
+  override val url_path_prefix: String = "/",
   val web_proxy_url: HttpUrl
 ) : ResourceEntryCommon.Entry {
   init {
@@ -34,7 +34,7 @@ data class WebProxyEntry(
 }
 
 fun WebProxyEntry(
-  url_path_prefix: String,
+  url_path_prefix: String = "/",
   web_proxy_url: String
 ) : WebProxyEntry {
 //  TODO(adrw) update all HTTPUrl.parse -> get (no bang bang required) https://github.com/square/misk/issues/419

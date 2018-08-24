@@ -21,13 +21,13 @@ class ConfigWebModule(val environment: Environment): KAbstractModule() {
     ))
     // TODO(adrw) only add web proxy during development, otherwise add ResourceInterceptor (Jar)
     if (environment == Environment.DEVELOPMENT) {
-      multibind<WebActionEntry>().toInstance(WebActionEntry<WebProxyAction>("/_tab/config"))
+      multibind<WebActionEntry>().toInstance(WebActionEntry<WebProxyAction>("/_tab/config/"))
       multibind<WebProxyEntry>().toInstance(
-          WebProxyEntry("/_tab/config", "http://localhost:3200/"))
+          WebProxyEntry("/_tab/config/", "http://localhost:3200/"))
     } else {
-      multibind<WebActionEntry>().toInstance(WebActionEntry<StaticResourceAction>("/_tab/config"))
+      multibind<WebActionEntry>().toInstance(WebActionEntry<StaticResourceAction>("/_tab/config/"))
       multibind<StaticResourceEntry>()
-          .toInstance(StaticResourceEntry("/_tab/config", "classpath:/web/_tab/config/"))
+          .toInstance(StaticResourceEntry("/_tab/config/", "classpath:/web/_tab/config/"))
     }
   }
 }

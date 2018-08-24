@@ -36,7 +36,7 @@ internal class WebActionsServlet @Inject constructor(
 
   init {
     for (entry in webActionEntries) {
-      boundActions += webActionFactory.newBoundAction(entry.actionClass, entry.pathPrefix)
+      boundActions += webActionFactory.newBoundAction(entry.actionClass, entry.url_path_prefix)
     }
   }
 

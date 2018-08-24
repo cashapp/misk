@@ -86,9 +86,9 @@ class WebProxyActionTest {
   }
 
   @Test
-  internal fun entryLocalWithTrailingSlash() {
+  internal fun entryLocalWithoutTrailingSlash() {
     assertFailsWith<IllegalArgumentException> {
-      WebProxyEntry("/local/prefix/",
+      WebProxyEntry("/local/prefix",
           upstreamServer.url("/"))
     }
   }
@@ -279,10 +279,10 @@ class WebProxyActionTest {
     override fun configure() {
       install(HttpClientModule("web_proxy_action_test", Names.named("web_proxy_action_test")))
       multibind<WebActionEntry>().toInstance(
-          WebActionEntry<WebProxyAction>("/local/prefix"))
+          WebActionEntry<WebProxyAction>("/local/prefix/"))
       multibind<WebProxyEntry>().toProvider(
           Provider<WebProxyEntry> {
-            WebProxyEntry("/local/prefix", upstreamServer.url("/").toString())
+            WebProxyEntry("/local/prefix/", upstreamServer.url("/").toString())
           })
       install(WebTestingModule())
     }

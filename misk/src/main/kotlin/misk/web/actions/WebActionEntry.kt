@@ -1,5 +1,6 @@
 package misk.web.actions
 
+import misk.web.resources.ResourceEntryCommon
 import kotlin.reflect.KClass
 
 /**
@@ -7,24 +8,22 @@ import kotlin.reflect.KClass
  *
  * A registration of a web action with optional configuration to customize.
  * @param actionClass: WebAction to multibind to WebServlet
- * @param pathPrefix: defaults to "" empty string. If not empty, must match pattern requirements:
+ * @param url_path_prefix: defaults to "" empty string. If not empty, must match pattern requirements:
  *   - must begin with "/"
  *   - any number of non-whitespace characters (including additional path segments or "/")
  *   - must terminate with a non-"/" because rest of path will start with "/"
  */
 data class WebActionEntry(
   val actionClass: KClass<out WebAction>,
-  val pathPrefix: String = ""
+  val url_path_prefix: String = "/"
 ) {
   init {
-    require(pathPrefix.matches(Regex("(/[^/]+)*"))) {
-      "unexpected path prefix: $pathPrefix"
-    }
+    ResourceEntryCommon.requireValidUrlPathPrefix(url_path_prefix)
   }
 }
 
 inline fun <reified T : WebAction> WebActionEntry(
-  pathPrefix: String = ""
+  url_path_prefix: String = "/"
 ): WebActionEntry {
-  return WebActionEntry(T::class, pathPrefix)
+  return WebActionEntry(T::class, url_path_prefix)
 }

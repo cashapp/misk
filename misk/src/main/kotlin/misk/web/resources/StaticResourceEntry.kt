@@ -9,7 +9,7 @@ package misk.web.resources
  * ```
  */
 data class StaticResourceEntry(
-  override val url_path_prefix: String,
+  override val url_path_prefix: String = "/",
   private val resourcePath: String
 ) : ResourceEntryCommon.Entry {
   init {
@@ -17,7 +17,8 @@ data class StaticResourceEntry(
   }
 
   fun resourcePath(urlPath: String): String {
-    return resourcePath + urlPath.removePrefix(url_path_prefix)
-//    return if (resourcePath.endsWith("/")) resourcePath + urlPath.removePrefix(url_path_prefix) else resourcePath + "/" + urlPath.removePrefix(url_path_prefix)
+    val normalizedResourcePath = if (resourcePath.endsWith("/")) resourcePath.dropLast(1) else resourcePath
+    val normalizedUrlPath = if (urlPath.removePrefix(url_path_prefix).length <= 1) "/" else urlPath.removePrefix(url_path_prefix)
+    return normalizedResourcePath + normalizedUrlPath
   }
 }

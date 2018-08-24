@@ -14,9 +14,9 @@ import javax.inject.Singleton
 class ClusterWideHealthModule : KAbstractModule() {
   override fun configure() {
     // TODO(adrw) finish testing this with the new StaticResourceAction
-    multibind<WebActionEntry>().toInstance(WebActionEntry<StaticResourceAction>("/health"))
+    multibind<WebActionEntry>().toInstance(WebActionEntry<StaticResourceAction>("/health/"))
     multibind<StaticResourceEntry>().toInstance(
-        StaticResourceEntry("/health", "classpath:/admin/index.html"))
+        StaticResourceEntry("/health/", "classpath:/admin/index.html"))
 
     multibind<WebActionEntry>().toInstance(WebActionEntry<ClusterWideHealthService>())
     multibind<Service>().to<ClusterWideHealthService>()

@@ -23,28 +23,28 @@ class AdminTabModule(val environment: Environment) : KAbstractModule() {
 
     if (environment == Environment.DEVELOPMENT) {
       multibind<WebActionEntry>().toInstance(
-          WebActionEntry<WebProxyAction>("/_admin"))
+          WebActionEntry<WebProxyAction>("/_admin/"))
       multibind<WebActionEntry>().toInstance(
-          WebActionEntry<WebProxyAction>("/_tab/dashboard"))
+          WebActionEntry<WebProxyAction>("/_tab/dashboard/"))
 //    multibind<WebActionEntry>().toInstance(
-//        WebActionEntry<WebProxyAction>("/@misk"))
+//        WebActionEntry<WebProxyAction>("/@misk/"))
 
       multibind<WebProxyEntry>().toInstance(
-          WebProxyEntry("/_admin", "http://localhost:3100/"))
+          WebProxyEntry("/_admin/", "http://localhost:3100/"))
       multibind<WebProxyEntry>().toInstance(
-          WebProxyEntry("/_tab/dashboard", "http://localhost:3110/"))
+          WebProxyEntry("/_tab/dashboard/", "http://localhost:3110/"))
 //      multibind<WebProxyEntry>().toInstance(
-//          WebProxyEntry("/@misk", "http://localhost:9100/"))
+//          WebProxyEntry("/@misk/", "http://localhost:9100/"))
     } else {
       multibind<WebActionEntry>().toInstance(
-          WebActionEntry<StaticResourceAction>("/_admin"))
+          WebActionEntry<StaticResourceAction>("/_admin/"))
       multibind<WebActionEntry>().toInstance(
-          WebActionEntry<StaticResourceAction>("/_tab/dashboard"))
+          WebActionEntry<StaticResourceAction>("/_tab/dashboard/"))
 
       multibind<StaticResourceEntry>()
-          .toInstance(StaticResourceEntry("/_admin", "classpath:/web/_admin/"))
+          .toInstance(StaticResourceEntry("/_admin/", "classpath:/web/_admin/"))
       multibind<StaticResourceEntry>()
-          .toInstance(StaticResourceEntry("/_tab/dashboard", "classpath:/web/_tab/dashboard/"))
+          .toInstance(StaticResourceEntry("/_tab/dashboard/", "classpath:/web/_tab/dashboard/"))
 //      multibind<StaticResourceEntry>()
 //          .toInstance(StaticResourceEntry("/_tab/loader/", "classpath:/web/_tab/loader/"))
     }

@@ -64,7 +64,7 @@ class StaticResourceActionTest {
   }
 
   @Test fun basicAction() {
-    val response = request("/hello")
+    val response = request("/hi/")
     assertThat(response.code()).isEqualTo(200)
     assertThat(response.body()!!.string()).contains("<p>Hello world</p>")
     assertThat(response.header("Content-Type")).isEqualTo("text/html")
@@ -106,6 +106,13 @@ class StaticResourceActionTest {
   }
 
   @Test fun action() {
+    val response = request("/_admin/lugnut/")
+    assertThat(response.code()).isEqualTo(200)
+    assertThat(response.body()!!.string()).contains("<p>Hello lugnut</p>")
+    assertThat(response.header("Content-Type")).isEqualTo("text/html")
+  }
+
+  @Test fun actionNoSlash() {
     val response = request("/_admin/lugnut")
     assertThat(response.code()).isEqualTo(200)
     assertThat(response.body()!!.string()).contains("<p>Hello lugnut</p>")
@@ -116,15 +123,15 @@ class StaticResourceActionTest {
     override fun configure() {
       install(HttpClientModule("static_resource_action_test",
           Names.named("static_resource_action_test")))
-      multibind<WebActionEntry>().toInstance(WebActionEntry<NotFoundAction>())
+      multibind<WebActionEntry>().toInstance(WebActionEntry<NotFoundAction>( ))
 
-      multibind<WebActionEntry>().toInstance(WebActionEntry<StaticResourceAction>("/hi"))
+      multibind<WebActionEntry>().toInstance(WebActionEntry<StaticResourceAction>("/hi/"))
       multibind<StaticResourceEntry>()
-          .toInstance(StaticResourceEntry("/hi", "memory:/web/hi"))
+          .toInstance(StaticResourceEntry("/hi/", "memory:/web/hi"))
 
-      multibind<WebActionEntry>().toInstance(WebActionEntry<StaticResourceAction>("/_admin/lugnut"))
+      multibind<WebActionEntry>().toInstance(WebActionEntry<StaticResourceAction>("/_admin/lugnut/"))
       multibind<StaticResourceEntry>()
-          .toInstance(StaticResourceEntry("/_admin/lugnut", "memory:/web/_admin/lugnut/"))
+          .toInstance(StaticResourceEntry("/_admin/lugnut/", "memory:/web/_admin/lugnut/"))
 
       install(WebTestingModule())
     }
