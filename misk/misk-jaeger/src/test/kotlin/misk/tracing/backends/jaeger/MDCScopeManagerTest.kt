@@ -17,27 +17,27 @@ internal class MDCScopeManagerTest {
     tracer.traceWithSpan("my-sample") { span1 ->
       // Should set on entry to span
       val context1 = span1.context() as com.uber.jaeger.SpanContext
-      assertThat(MDC.get("trace-id")).isEqualTo(String.format("%x", context1.traceId))
-      assertThat(MDC.get("span-id")).isEqualTo(String.format("%x", context1.spanId))
-      assertThat(MDC.get("parent-id")).isEqualTo("0")
+      assertThat(MDC.get(MDCScopeManager.MDC_TRACE_ID)).isEqualTo(String.format("%x", context1.traceId))
+      assertThat(MDC.get(MDCScopeManager.MDC_SPAN_ID)).isEqualTo(String.format("%x", context1.spanId))
+      assertThat(MDC.get(MDCScopeManager.MDC_PARENT_ID)).isEqualTo("0")
 
       tracer.traceWithSpan("nested-span") { span2 ->
         val context2 = span2.context() as com.uber.jaeger.SpanContext
-        assertThat(MDC.get("trace-id")).isEqualTo(String.format("%x", context2.traceId))
-        assertThat(MDC.get("span-id")).isEqualTo(String.format("%x", context2.spanId))
-        assertThat(MDC.get("parent-id")).isEqualTo(String.format("%x", context1.spanId))
+        assertThat(MDC.get(MDCScopeManager.MDC_TRACE_ID)).isEqualTo(String.format("%x", context2.traceId))
+        assertThat(MDC.get(MDCScopeManager.MDC_SPAN_ID)).isEqualTo(String.format("%x", context2.spanId))
+        assertThat(MDC.get(MDCScopeManager.MDC_PARENT_ID)).isEqualTo(String.format("%x", context1.spanId))
       }
 
       // Should restore when done
-      assertThat(MDC.get("trace-id")).isEqualTo(String.format("%x", context1.traceId))
-      assertThat(MDC.get("span-id")).isEqualTo(String.format("%x", context1.spanId))
-      assertThat(MDC.get("parent-id")).isEqualTo("0")
+      assertThat(MDC.get(MDCScopeManager.MDC_TRACE_ID)).isEqualTo(String.format("%x", context1.traceId))
+      assertThat(MDC.get(MDCScopeManager.MDC_SPAN_ID)).isEqualTo(String.format("%x", context1.spanId))
+      assertThat(MDC.get(MDCScopeManager.MDC_PARENT_ID)).isEqualTo("0")
     }
 
     // Should clear when done with top level span
-    assertThat(MDC.get("trace-id")).isNull()
-    assertThat(MDC.get("span-id")).isNull()
-    assertThat(MDC.get("parent-id")).isNull()
+    assertThat(MDC.get(MDCScopeManager.MDC_TRACE_ID)).isNull()
+    assertThat(MDC.get(MDCScopeManager.MDC_SPAN_ID)).isNull()
+    assertThat(MDC.get(MDCScopeManager.MDC_PARENT_ID)).isNull()
   }
 
   private fun newTracer(): Tracer {

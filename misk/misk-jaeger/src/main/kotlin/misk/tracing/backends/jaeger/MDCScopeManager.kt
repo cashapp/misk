@@ -26,9 +26,7 @@ internal class MDCScopeManager : ScopeManager {
   private fun close(scope: MDCScope) {
     val parentScope = scope.parentScope
     if (parentScope == null) {
-      MDC.remove("trace-id")
-      MDC.remove("span-id")
-      MDC.remove("parent-id")
+      allContextNames.forEach { MDC.remove(it) }
       threadLocalStorage.remove()
     } else {
       putToMDC(parentScope.span())
@@ -38,9 +36,9 @@ internal class MDCScopeManager : ScopeManager {
 
   private fun putToMDC(span: Span) {
     (span as? com.uber.jaeger.Span)?.let {
-      MDC.put("trace-id", String.format("%x", it.context().traceId))
-      MDC.put("span-id", String.format("%x", it.context().spanId))
-      MDC.put("parent-id", String.format("%x", it.context().parentId))
+      MDC.put(MDC_TRACE_ID, String.format("%x", it.context().traceId))
+      MDC.put(MDC_SPAN_ID, String.format("%x", it.context().spanId))
+      MDC.put(MDC_PARENT_ID, String.format("%x", it.context().parentId))
     }
   }
 
@@ -56,6 +54,14 @@ internal class MDCScopeManager : ScopeManager {
       scopeManager.close(this)
       if (finishSpanOnClose) span.finish()
     }
+  }
+
+  internal companion object {
+    const val MDC_TRACE_ID = "trace_id"
+    const val MDC_SPAN_ID = "span_id"
+    const val MDC_PARENT_ID = "parent_id"
+
+    val allContextNames = listOf(MDC_TRACE_ID, MDC_SPAN_ID, MDC_PARENT_ID)
   }
 }
 
