@@ -112,11 +112,11 @@ class StaticResourceActionTest {
     assertThat(response.header("Content-Type")).isEqualTo("text/html")
   }
 
-  @Test fun actionNoSlash() {
+  @Test fun failActionNoSlash() {
     val response = request("/_admin/lugnut")
-    assertThat(response.code()).isEqualTo(200)
-    assertThat(response.body()!!.string()).contains("<p>Hello lugnut</p>")
-    assertThat(response.header("Content-Type")).isEqualTo("text/html")
+    assertThat(response.code()).isEqualTo(404)
+    assertThat(response.body()!!.string()).contains("Nothing found at /_admin/lugnut")
+    assertThat(response.header("Content-Type")).isEqualTo("text/plain;charset=utf-8")
   }
 
   class TestModule : KAbstractModule() {

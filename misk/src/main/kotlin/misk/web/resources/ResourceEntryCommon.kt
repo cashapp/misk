@@ -1,7 +1,6 @@
 package misk.web.resources
 
 import okhttp3.HttpUrl
-import sun.jvm.hotspot.opto.Block
 
 object ResourceEntryCommon {
   private fun findEntryFromUrlString(entries: List<Entry>, urlPath: String): Entry? {
@@ -21,6 +20,7 @@ object ResourceEntryCommon {
   fun findEntryFromUrl(entries: List<Entry>, url: HttpUrl): Entry? {
     return (findEntryFromUrlString(entries, url.encodedPath()))
   }
+
   fun findEntryFromUrl(entries: List<Entry>, url: String): Entry? {
     return (findEntryFromUrlString(entries, url))
   }
