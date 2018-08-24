@@ -98,13 +98,13 @@ internal class WebDispatchTest {
 
   @Test
   fun entryWithSingleSegment() {
-    WebActionEntry(GetHello::class, "/good")
+    WebActionEntry(GetHello::class, "/good/")
   }
 
   @Test
-  fun entryFailsWithTrailingSlash() {
+  fun entryFailsWithoutTrailingSlash() {
     assertFailsWith<IllegalArgumentException> {
-      WebActionEntry(GetHello::class, "/bad/path/")
+      WebActionEntry(GetHello::class, "/bad/path")
     }
   }
 
