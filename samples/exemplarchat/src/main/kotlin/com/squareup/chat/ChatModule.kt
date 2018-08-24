@@ -3,7 +3,6 @@ package com.squareup.chat
 import com.squareup.chat.actions.ChatWebSocketAction
 import com.squareup.chat.actions.ToggleManualHealthCheckAction
 import com.squareup.chat.healthchecks.ManualHealthCheck
-import misk.healthchecks.ClusterWideHealthModule
 import misk.healthchecks.HealthCheck
 import misk.inject.KAbstractModule
 import misk.web.actions.WebActionEntry
@@ -19,7 +18,6 @@ class ChatModule : KAbstractModule() {
 
     multibind<WebActionEntry>().toInstance(WebActionEntry<ChatWebSocketAction>())
     multibind<WebActionEntry>().toInstance(WebActionEntry<ToggleManualHealthCheckAction>())
-    install(ClusterWideHealthModule())
     multibind<HealthCheck>().to<ManualHealthCheck>()
   }
 }
