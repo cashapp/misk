@@ -18,6 +18,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import javax.inject.Inject
 import javax.inject.Named
+import kotlin.test.assertFailsWith
 
 @MiskTest(startService = true)
 class StaticResourceActionTest {
@@ -46,92 +47,157 @@ class StaticResourceActionTest {
         |  color: blue;
         |}
         |""".trimMargin())
-    resourceLoader.put("memory:/web/_admin/lugnut/tab_lugnut.js", """
-        |alert("hello world");
-        |""".trimMargin())
-    resourceLoader.put("memory:/web/_admin/lugnut/index.html", """
+    resourceLoader.put("memory:/web/nasa/command/index.html", """
         |<html>
         |  <body>
-        |    <p>Hello lugnut</p>
+        |    <p>Welcome to NASA Space Command Dashboard</p>
         |  </body>
         |</html>
         |""".trimMargin())
-    resourceLoader.put("memory:/web/_admin/lugnut/tab_lugnut.css", """
-        |hello > world {
+    resourceLoader.put("memory:/web/nasa/tabs/o2fuel/tab_o2fuel.js", """
+        |alert("nasa world");
+        |""".trimMargin())
+    resourceLoader.put("memory:/web/nasa/tabs/o2fuel/index.html", """
+        |<html>
+        |  <body>
+        |    <p>Your o2fuel gauge reads: this</p>
+        |  </body>
+        |</html>
+        |""".trimMargin())
+    resourceLoader.put("memory:/web/nasa/tabs/o2fuel/tab_o2fuel.css", """
+        |nasa > world {
         |  color: blue;
         |}
         |""".trimMargin())
   }
 
-  @Test fun basicAction() {
+  @Test fun hiRoot() {
     val response = request("/hi/")
     assertThat(response.code()).isEqualTo(200)
     assertThat(response.body()!!.string()).contains("<p>Hello world</p>")
     assertThat(response.header("Content-Type")).isEqualTo("text/html")
   }
 
-  @Test fun basicHtml() {
+  @Test fun hiHtml() {
     val response = request("/hi/index.html")
     assertThat(response.code()).isEqualTo(200)
     assertThat(response.body()!!.string()).contains("<p>Hello world</p>")
     assertThat(response.header("Content-Type")).isEqualTo("text/html")
   }
 
-  @Test fun basicCss() {
+  @Test fun hiCss() {
     val response = request("/hi/main.css")
     assertThat(response.code()).isEqualTo(200)
     assertThat(response.body()!!.string()).contains("hello > world")
     assertThat(response.header("Content-Type")).isEqualTo("text/css")
   }
 
-  @Test fun basicJs() {
+  @Test fun hiJs() {
     val response = request("/hi/app.js")
     assertThat(response.code()).isEqualTo(200)
     assertThat(response.body()!!.string()).contains("alert(\"hello world\")")
     assertThat(response.header("Content-Type")).isEqualTo("application/javascript")
   }
 
-  @Test fun basicRootUrl() {
+  @Test fun rootUrl() {
     val response = request("/")
     assertThat(response.code()).isEqualTo(404)
     assertThat(response.body()!!.string()).contains("Nothing found at /")
     assertThat(response.header("Content-Type")).isEqualTo("text/plain;charset=utf-8")
   }
 
-  @Test fun basicNotFound() {
+  @Test fun noPathMatch() {
     val response = request("/not/found")
     assertThat(response.code()).isEqualTo(404)
     assertThat(response.body()!!.string()).contains("Nothing found at /")
     assertThat(response.header("Content-Type")).isEqualTo("text/plain;charset=utf-8")
   }
 
-  @Test fun action() {
-    val response = request("/_admin/lugnut/")
+  @Test fun nasaCommandRoot() {
+    val response = request("/nasa/command/")
     assertThat(response.code()).isEqualTo(200)
-    assertThat(response.body()!!.string()).contains("<p>Hello lugnut</p>")
+    assertThat(response.body()!!.string()).contains(
+        "<p>Welcome to NASA Space Command Dashboard</p>")
     assertThat(response.header("Content-Type")).isEqualTo("text/html")
   }
 
-  @Test fun failActionNoSlash() {
-    val response = request("/_admin/lugnut")
-    assertThat(response.code()).isEqualTo(404)
-    assertThat(response.body()!!.string()).contains("Nothing found at /_admin/lugnut")
-    assertThat(response.header("Content-Type")).isEqualTo("text/plain;charset=utf-8")
+  @Test fun nasaCommandHtml() {
+    val response = request("/nasa/command/index.html")
+    assertThat(response.code()).isEqualTo(200)
+    assertThat(response.body()!!.string()).contains(
+        "<p>Welcome to NASA Space Command Dashboard</p>")
+    assertThat(response.header("Content-Type")).isEqualTo("text/html")
+  }
+
+  @Test fun nasaFuelRoot() {
+    val response = request("/nasa/tabs/o2fuel/")
+    assertThat(response.code()).isEqualTo(200)
+    assertThat(response.body()!!.string()).contains(
+        "<p>Your o2fuel gauge reads: this</p>")
+    assertThat(response.header("Content-Type")).isEqualTo("text/html")
+  }
+
+  @Test fun nasaFuelHtml() {
+    val response = request("/nasa/tabs/o2fuel/index.html")
+    assertThat(response.code()).isEqualTo(200)
+    assertThat(response.body()!!.string()).contains(
+        "<p>Your o2fuel gauge reads: this</p>")
+    assertThat(response.header("Content-Type")).isEqualTo("text/html")
+  }
+
+  @Test fun nasaCss() {
+    val response = request("/nasa/tabs/o2fuel/tab_o2fuel.css")
+    assertThat(response.code()).isEqualTo(200)
+    assertThat(response.body()!!.string()).contains("nasa > world")
+    assertThat(response.header("Content-Type")).isEqualTo("text/css")
+  }
+
+  @Test fun nasaJs() {
+    val response = request("/nasa/tabs/o2fuel/tab_o2fuel.js")
+    assertThat(response.code()).isEqualTo(200)
+    assertThat(response.body()!!.string()).contains("alert(\"nasa world\")")
+    assertThat(response.header("Content-Type")).isEqualTo("application/javascript")
+  }
+
+  @Test fun nasaCommandBadPathRedirectsToPrefixIndex() {
+    val response = request("/nasa/command/another/link/here/for/anti/brevity?with=query")
+    assertThat(response.code()).isEqualTo(200)
+    assertThat(response.body()!!.string()).contains(
+        "<p>Welcome to NASA Space Command Dashboard</p>")
+    assertThat(response.header("Content-Type")).isEqualTo("text/html")
+  }
+
+  @Test fun nasaFuelBadPathRedirectsToPrefixIndex() {
+    val response = request("/nasa/tabs/o2fuel/another/link/here/for/anti/brevity?with=query")
+    assertThat(response.code()).isEqualTo(200)
+    assertThat(response.body()!!.string()).contains(
+        "<p>Your o2fuel gauge reads: this</p>")
+    assertThat(response.header("Content-Type")).isEqualTo("text/html")
+  }
+
+  @Test fun blockedPrefixEntryFails() {
+    assertFailsWith<IllegalArgumentException> {
+      StaticResourceEntry("/api/", "memory:/web/api/")
+    }
   }
 
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(HttpClientModule("static_resource_action_test",
           Names.named("static_resource_action_test")))
-      multibind<WebActionEntry>().toInstance(WebActionEntry<NotFoundAction>( ))
+      multibind<WebActionEntry>().toInstance(WebActionEntry<NotFoundAction>())
 
       multibind<WebActionEntry>().toInstance(WebActionEntry<StaticResourceAction>("/hi/"))
       multibind<StaticResourceEntry>()
           .toInstance(StaticResourceEntry("/hi/", "memory:/web/hi"))
 
-      multibind<WebActionEntry>().toInstance(WebActionEntry<StaticResourceAction>("/_admin/lugnut/"))
+      multibind<WebActionEntry>().toInstance(WebActionEntry<StaticResourceAction>("/nasa/command/"))
       multibind<StaticResourceEntry>()
-          .toInstance(StaticResourceEntry("/_admin/lugnut/", "memory:/web/_admin/lugnut/"))
+          .toInstance(StaticResourceEntry("/nasa/command/", "memory:/web/nasa/command/"))
+      multibind<WebActionEntry>().toInstance(
+          WebActionEntry<StaticResourceAction>("/nasa/tabs/o2fuel/"))
+      multibind<StaticResourceEntry>()
+          .toInstance(StaticResourceEntry("/nasa/tabs/o2fuel/", "memory:/web/nasa/tabs/o2fuel/"))
 
       install(WebTestingModule())
     }

@@ -56,10 +56,10 @@ class StaticResourceAction : WebAction {
         ResourceEntryCommon.findEntryFromUrl(entries, request.url) as StaticResourceEntry?
     return when (exists(normalizePath(urlPath))) {
       Kind.NO_MATCH -> when {
-        !urlPath.startsWith("/api") && !urlPath.contains(".") && !urlPath.endsWith("/") ->
+        !urlPath.contains(".") && !urlPath.endsWith("/") ->
           redirectResponse(normalizePathWithQuery(request.url))
       // actually return the resource, don't redirect. Path must stay the same since this will be handled by React router
-        !urlPath.startsWith("/api") && !urlPath.contains(".") && urlPath.endsWith("/") ->
+        !urlPath.contains(".") && urlPath.endsWith("/") ->
           resourceResponse(normalizePath(matchedEntry?.url_path_prefix ?: urlPath))
         else -> null
       }
@@ -99,18 +99,15 @@ class StaticResourceAction : WebAction {
 
   private fun normalizePath(urlPath: String): String {
     return when {
-    //    /_admin/ -> /_admin/index.html
       urlPath.endsWith("/") -> "${urlPath}index.html"
-    //    /_admin/config -> /_admin/config/
-      !urlPath.startsWith("/api") && !urlPath.contains(".") && !urlPath.endsWith("/") -> "$urlPath/"
-    //    /_admin/index.html -> /_admin/index.html
+      !urlPath.contains(".") && !urlPath.endsWith("/") -> "$urlPath/"
       else -> urlPath
     }
   }
 
   private fun normalizePathWithQuery(url: HttpUrl): String {
-    return if (url.encodedQuery().isNullOrEmpty()) normalizePath(
-        url.encodedPath()) else normalizePath(url.encodedPath()) + "?" + url.encodedQuery()
+    return if (url.encodedQuery().isNullOrEmpty()) normalizePath(url.encodedPath())
+    else normalizePath(url.encodedPath()) + "?" + url.encodedQuery()
   }
 
   private fun resourceResponse(resourcePath: String): Response<ResponseBody>? {
