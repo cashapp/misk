@@ -27,29 +27,42 @@ export default class ConfigComponent extends React.PureComponent<IConfigProps> {
     // tslint:disable-next-line:quotemark
     let final = ""
     let level = 0
-    for (let i = 0; i > json.length; i++) {
-      const c = json[i]
+    for (let i = 0; i < json.length; i++) {
+    const c = json[i]
       switch (c) {
         case "{": 
           level++
           break
         case "}":
           level--
+          final += "\n" + this.indent(level)
+          break
         case ",": 
           final += c + "\n" + this.indent(level)
+          break
+        case ":":
+          // write parser for string
+          final += ": "
+          break
+        case "\"":
+          break
+        case "\,":
+          break
         default:
           final += c
       }
     }
-    return final
-    // json.split(":{").join(":\n \ \ ").split(",").join("").split("}").join("\n").split("{").join("").split('"').join("")
-    // return final
+    return(final)
+  }
+
+  oldToYaml(json: string) {
+    return(json.split(":{").join(":\n \ \ ").split(",").join("\n").split("}").join("\n").split("{").join("").split('"').join(""))
   }
 
   formattedFile(file: IConfigFile) {
     if (file.name === "live-config.yaml") {
       console.log("toYaml:", this.toYaml(file.file))
-      return this.toYaml(file.file)
+          return this.toYaml(file.file)
     } else {
       return file.file
     }
