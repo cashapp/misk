@@ -33,6 +33,7 @@ dependencies {
   compile dep.assertj
   compile dep.logbackClassic
   compile dep.okHttpMockWebServer
+  compile dep.okio
   compile dep.openTracingMock
   compile dep.mockitoCore
   compile project(':misk')

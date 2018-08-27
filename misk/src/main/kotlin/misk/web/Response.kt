@@ -3,7 +3,8 @@ package misk.web
 import okhttp3.Headers
 import okio.Buffer
 import okio.BufferedSink
-import okio.Okio
+import okio.buffer
+import okio.sink
 import javax.servlet.http.HttpServletResponse
 
 /** An HTTP response body, headers, and status code. */
@@ -46,7 +47,7 @@ fun Response<ResponseBody>.writeToJettyResponse(jettyResponse: HttpServletRespon
   sink.emit()
 }
 
-private fun HttpServletResponse.bufferedSink() = Okio.buffer(Okio.sink(outputStream))
+private fun HttpServletResponse.bufferedSink() = outputStream.sink().buffer()
 
 fun okhttp3.Response.toMisk() : Response<ResponseBody> {
   val miskBody = if (body() is okhttp3.ResponseBody) { object: ResponseBody {

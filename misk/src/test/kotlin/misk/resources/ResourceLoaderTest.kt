@@ -6,7 +6,8 @@ import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.testing.TemporaryFolder
 import misk.testing.TemporaryFolderModule
-import okio.Okio
+import okio.buffer
+import okio.sink
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.io.File
@@ -74,12 +75,12 @@ class ResourceLoaderTest {
     assertThat(tempRoot.toString()).startsWith("/") // Tests below require this.
 
     val resource1 = "filesystem:$tempRoot/data1.txt"
-    Okio.buffer(Okio.sink(File(tempRoot, "data1.txt"))).use {
+    File(tempRoot, "data1.txt").sink().buffer().use {
       it.writeUtf8("foo")
     }
 
     val resource2 = "filesystem:$tempRoot/data2.txt"
-    Okio.buffer(Okio.sink(File(tempRoot, "data2.txt"))).use {
+    File(tempRoot, "data2.txt").sink().buffer().use {
       it.writeUtf8("bar")
     }
 

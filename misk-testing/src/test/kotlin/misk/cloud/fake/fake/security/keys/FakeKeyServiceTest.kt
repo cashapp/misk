@@ -1,6 +1,7 @@
 package misk.cloud.fake.security.keys
 
 import okio.ByteString
+import okio.ByteString.Companion.encodeUtf8
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
@@ -9,7 +10,7 @@ class FakeKeyServiceTest {
   fun encryptDecryptSmallKeys() {
     val keyManager = FakeKeyService()
     val keyAlias = "my-small-key"
-    val plainText = ByteString.encodeUtf8("encrypt me!")
+    val plainText = "encrypt me!".encodeUtf8()
     val cipherText = keyManager.encrypt(keyAlias, plainText)
     assertThat(cipherText).isNotEqualTo(plainText)
 
@@ -21,7 +22,7 @@ class FakeKeyServiceTest {
   fun encryptDecyptLargeKeys() {
     val keyManager = FakeKeyService()
     val keyAlias = "my-very-long-key-which-exceeds-256-bytes-and-therefore-is-truncated"
-    val plainText = ByteString.encodeUtf8("encrypt me!")
+    val plainText = "encrypt me!".encodeUtf8()
     val cipherText = keyManager.encrypt(keyAlias, plainText)
     assertThat(cipherText).isNotEqualTo(plainText)
 
