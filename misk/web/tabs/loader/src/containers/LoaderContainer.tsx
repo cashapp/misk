@@ -1,6 +1,7 @@
 import { IMiskAdminTab, IMiskAdminTabs } from "@misk/common"
 import { NavSidebarComponent, NavTopbarComponent, NoMatchComponent } from "@misk/components"
 import { externals as MiskTabCommon } from "@misk/tabs" 
+import { RouterState } from "connected-react-router"
 import * as React from "react"
 import { connect } from "react-redux"
 import { Route, Switch } from "react-router"
@@ -17,6 +18,7 @@ interface IMiskTabs {
 
 export interface ILoaderProps {
   loader: ILoaderState
+  router: RouterState
   cacheTabEntries: (MiskBinder: IMultibinder) => any
   getComponentsAndTabs: () => any
   getTabs: () => any
@@ -28,6 +30,8 @@ class LoaderContainer extends React.Component<ILoaderProps> {
   async componentDidMount() {
     this.props.getTabs()
     setTimeout(this.props.cacheTabEntries, 1000, (window as any).MiskBinder)
+    console.log("Router: ", this.props.router.location)
+    // dispatchEvent(new CustomEvent<RouterState>("misk:router:update", this.props.router ))
   }
 
   buildTabRouteMountingDiv(key: any, tab: IMiskAdminTab) {
@@ -38,7 +42,7 @@ class LoaderContainer extends React.Component<ILoaderProps> {
     const { adminTabs, adminTabComponents, staleTabCache } = this.props.loader
     if (adminTabs) {
       const tabRouteDivs = Object.entries(adminTabs).map(([key,tab]) => this.buildTabRouteMountingDiv(key, tab))
-      const tabLinks = Object.entries(adminTabs).map(([key,tab]) => <Link key={key} to={`/_admin/${tab.slug}`}>{tab.name}<br/></Link>)
+      const tabLinks = Object.entries(adminTabs).map(([key,tab]) => <Link key={key} to={`/_admin/${tab.slug}/`}>{tab.name}<br/></Link>)
       console.log(staleTabCache, (window as any).MiskBinders, adminTabs, adminTabComponents)
       return (
         <div>
@@ -73,6 +77,7 @@ class LoaderContainer extends React.Component<ILoaderProps> {
 
 const mapStateToProps = (state: IState) => ({
   loader: state.loader.toJS(),
+  router: state.router
 })
 
 const mapDispatchToProps = {

@@ -10,10 +10,10 @@ import App from "./App"
 import rootReducer from "./reducers"
 import rootSaga from "./sagas"
 
-// export * from "./components"
 export * from "./containers"
 
-const history = createBrowserHistory()
+(window as any).Misk.History = (window as any).Misk.History || createBrowserHistory()
+const history = (window as any).Misk.History
 const sagaMiddleware = createSagaMiddleware()
 
 const composeEnhancer: typeof compose = (window as any).__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose

@@ -11,7 +11,11 @@ import rootReducer from "./reducers"
 import rootSaga from "./sagas"
 import { binders, multibind } from "./utils/binder"
 
-const history = createBrowserHistory()
+console.log("Loader Index");
+
+(window as any).Misk.History = (window as any).Misk.History || createBrowserHistory()
+const history = (window as any).Misk.History
+
 const sagaMiddleware = createSagaMiddleware()
 
 const composeEnhancer: typeof compose = (window as any).__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose
