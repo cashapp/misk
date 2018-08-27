@@ -35,7 +35,7 @@ class LoaderContainer extends React.Component<ILoaderProps> {
   }
 
   buildTabRouteMountingDiv(key: any, tab: IMiskAdminTab) {
-    return(<Route key={key} path={`/_admin/${tab.slug}`} render={() => <MountingDivComponent key={key} tab={tab}/>}/>)
+    return(<Route key={key} path={`/_admin/${tab.slug}/`} render={() => <MountingDivComponent key={key} tab={tab}/>}/>)
   }
 
   render() {
@@ -50,9 +50,6 @@ class LoaderContainer extends React.Component<ILoaderProps> {
           <NavSidebarComponent adminTabs={adminTabs} />
           {Object.entries(adminTabs).map(([key,tab]) => (<ScriptComponent tab={tab}/>))}
           <Switch>
-            {/* {Object.entries(adminTabs).map(([key,tab]) => this.buildTabRouteMountingDiv(key, tab))} */}
-            {/* {Object.entries(adminTabs).map(([key,tab]) => this.buildTabRouteComponent(key, tab))} */}
-            {/* {(window as any).MiskTabs && Object.entries(((window as any).MiskTabs as { [key:string]: { default: React.StatelessComponent }})).map(([key,Component]) => <Component key={key}/>)} */}
             <Route component={NoMatchComponent}/>
           </Switch>
           <hr/>

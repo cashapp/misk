@@ -3,6 +3,7 @@ import * as React from "react"
 import { connect } from "react-redux"
 import styled from "styled-components" 
 import { dispatchConfig } from "../actions"
+import { ConfigComponent } from "../components"
 import { IState } from "../reducers"
 
 interface ITabProps {
@@ -18,7 +19,7 @@ interface ITabProps {
   getConfigs: any
 }
 
-interface IConfigFile {
+export interface IConfigFile {
   name: string
   file: string
 }
@@ -31,24 +32,14 @@ const Container = styled.div`
 class TabContainer extends React.Component<ITabProps, {children : any}> {
   componentDidMount() {
     this.props.getConfigs()
+    // const intervalId = setInterval(this.props.getConfigs(), 1000)
   }
 
   render() {
     const { files, status } = this.props.config
-    if (status && window.location.pathname === "/_admin/config/") {
+    if (status) {
       return (
-        <Container>
-          <h1>App: Config</h1>
-          <p>{status}</p>
-          {files && files.map(f => (
-            <div>
-              <br/>
-              <h5>{f.name}</h5>
-              <code><pre>
-                {f.file}
-              </pre></code>
-            </div>))}
-        </Container>
+        <ConfigComponent files={files} status={status}/>
       )
     } else {
       return (

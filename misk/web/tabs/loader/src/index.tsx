@@ -10,15 +10,24 @@ import App from "./App"
 import rootReducer from "./reducers"
 import rootSaga from "./sagas"
 import { binders, multibind } from "./utils/binder"
+export { binders, multibind }
 
-console.log("Loader Index");
+export interface IWindow extends Window {
+  __REDUX_DEVTOOLS_EXTENSION_COMPOSE__: any
+  Misk: {
+    Binder: any
+    History: any
+  }
+}
+const Window = window as IWindow
 
-(window as any).Misk.History = (window as any).Misk.History || createBrowserHistory()
-const history = (window as any).Misk.History
+Window.Misk.Binder = { binders, multibind }
+Window.Misk.History = Window.Misk.History || createBrowserHistory()
+const history = Window.Misk.History
 
 const sagaMiddleware = createSagaMiddleware()
 
-const composeEnhancer: typeof compose = (window as any).__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose
+const composeEnhancer: typeof compose = Window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose
 const store = createStore(
   connectRouter(history)(rootReducer),
   composeEnhancer(
@@ -59,6 +68,3 @@ if (module.hot) {
     store.replaceReducer(connectRouter(history)(rootReducer))
   })
 }
-
-export { binders, multibind }
-(window as any).Misk.Binder = { binders, multibind }

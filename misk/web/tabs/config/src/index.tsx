@@ -10,6 +10,7 @@ import App from "./App"
 import rootReducer from "./reducers"
 import rootSaga from "./sagas"
 
+export * from "./components"
 export * from "./containers"
 
 (window as any).Misk.History = (window as any).Misk.History || createBrowserHistory()
