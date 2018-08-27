@@ -8,6 +8,7 @@ import misk.MiskServiceModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import okio.ByteString
+import okio.ByteString.Companion.encodeUtf8
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.isEqualToAsJson
 import org.junit.jupiter.api.Test
@@ -274,7 +275,7 @@ internal class WireMessageAdapterTest {
     val shipment = Shipment.Builder()
         .shipment_id(100075)
         .shipment_token("P_AAAAA")
-        .source_signature(ByteString.encodeUtf8("98 34v59823wh;tiejs"))
+        .source_signature("98 34v59823wh;tiejs".encodeUtf8())
         .build()
     val jsonText = shipmentAdapter.indent(" ").toJson(shipment)
     assertThat(jsonText).isEqualToAsJson("""

@@ -2,6 +2,8 @@ package misk.security.cert
 
 import misk.security.ssl.PemComboFile
 import okio.Okio
+import okio.buffer
+import okio.source
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 import java.security.cert.X509Certificate
@@ -21,8 +23,8 @@ internal class X509CertificateExtensionsTest {
   }
 
   private fun loadPem(name: String): X509Certificate {
-    val source = Okio.source(X509CertificateExtensionsTest::class.java.getResourceAsStream(name))
-    return PemComboFile.parse(Okio.buffer(source)).decodeCertificates().map {
+    val source = X509CertificateExtensionsTest::class.java.getResourceAsStream(name).source()
+    return PemComboFile.parse(source.buffer()).decodeCertificates().map {
       it as X509Certificate
     }.first()
   }

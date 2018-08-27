@@ -5,16 +5,17 @@ import misk.inject.keyOf
 import misk.scope.ActionScope
 import misk.web.BoundAction
 import misk.web.Request
+import misk.web.actions.WebAction
 import misk.web.actions.WebActionEntry
 import misk.web.actions.WebActionFactory
-import misk.web.actions.WebAction
 import misk.web.mediatype.MediaRange
 import misk.web.mediatype.MediaTypes
 import okhttp3.Headers
 import okhttp3.HttpUrl
 import okhttp3.MediaType
 import okio.Buffer
-import okio.Okio
+import okio.buffer
+import okio.source
 import org.eclipse.jetty.http.HttpMethod
 import org.eclipse.jetty.websocket.servlet.WebSocketCreator
 import org.eclipse.jetty.websocket.servlet.WebSocketServlet
@@ -129,7 +130,7 @@ private fun HttpServletRequest.asRequest(): Request {
       urlString()!!,
       HttpMethod.valueOf(method),
       headers(),
-      Okio.buffer(Okio.source(inputStream))
+      inputStream.source().buffer()
   )
 }
 

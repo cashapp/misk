@@ -15,6 +15,7 @@ import misk.web.toResponseBody
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okio.ByteString
+import okio.ByteString.Companion.encodeUtf8
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import javax.inject.Inject
@@ -81,7 +82,7 @@ internal class PlainTextResponseTest {
   class ReturnAsByteString : WebAction {
     @Get("/response/as-byte-string")
     @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
-    fun call(): ByteString = ByteString.encodeUtf8("as-byte-string")
+    fun call(): ByteString = "as-byte-string".encodeUtf8()
   }
 
   class ReturnAsResponseBody : WebAction {
@@ -105,13 +106,13 @@ internal class PlainTextResponseTest {
   class ReturnAsByteStringResponse : WebAction {
     @Get("/response/as-wrapped-byte-string")
     @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
-    fun call() = Response(ByteString.encodeUtf8("as-byte-string"))
+    fun call() = Response("as-byte-string".encodeUtf8())
   }
 
   class ReturnAsResponseBodyResponse : WebAction {
     @Get("/response/as-wrapped-response-body")
     @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
-    fun call() = Response(ByteString.encodeUtf8("as-response-body"))
+    fun call() = Response("as-response-body".encodeUtf8())
   }
 
   class TestModule : KAbstractModule() {

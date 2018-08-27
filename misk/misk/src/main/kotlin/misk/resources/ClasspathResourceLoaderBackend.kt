@@ -2,7 +2,8 @@ package misk.resources
 
 import com.google.common.reflect.ClassPath
 import okio.BufferedSource
-import okio.Okio
+import okio.buffer
+import okio.source
 import java.util.TreeMap
 
 /**
@@ -21,7 +22,7 @@ internal object ClasspathResourceLoaderBackend : ResourceLoader.Backend() {
 
   override fun open(path: String): BufferedSource? {
     val resource = resourcesByPath[path] ?: return null
-    return Okio.buffer(Okio.source(resource.asByteSource().openStream()))
+    return resource.asByteSource().openStream().source().buffer()
   }
 
   override fun exists(path: String) = resourcesByPath[path] != null
