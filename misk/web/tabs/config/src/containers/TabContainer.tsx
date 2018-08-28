@@ -32,7 +32,6 @@ const Container = styled.div`
 class TabContainer extends React.Component<ITabProps, {children : any}> {
   componentDidMount() {
     this.props.getConfigs()
-    // const intervalId = setInterval(this.props.getConfigs(), 1000)
   }
 
   render() {

@@ -10,7 +10,6 @@ import { dispatchLoader } from "../actions"
 import { MountingDivComponent, ScriptComponent } from "../components"
 import { ILoaderState, IState } from "../reducers"
 import { IMultibinder } from "../utils/binder"
-const Config = (window as any).MiskTabs.Config
 
 interface IMiskTabs {
   [app:string]: any
@@ -29,9 +28,6 @@ export interface ILoaderProps {
 class LoaderContainer extends React.Component<ILoaderProps> {
   async componentDidMount() {
     this.props.getTabs()
-    setTimeout(this.props.cacheTabEntries, 1000, (window as any).MiskBinder)
-    console.log("Router: ", this.props.router.location)
-    // dispatchEvent(new CustomEvent<RouterState>("misk:router:update", this.props.router ))
   }
 
   buildTabRouteMountingDiv(key: any, tab: IMiskAdminTab) {
@@ -57,9 +53,6 @@ class LoaderContainer extends React.Component<ILoaderProps> {
           <Link to="/_admin/">Home</Link><br/>
           {tabLinks}
           <Link to="/_admin/asdf/asdf/asdf/asdf/">Bad Link</Link><br/>
-          <p>Revert NavSideBar so it uses Link instead of A Href</p>
-          <p>Next test that config actually keeps running with an updating timer from the last config</p>
-          <p>Turn off their routing, maybe with the hack redirect javscript set it to hide when not on matching route?</p>
         </div>
       )
     } else {

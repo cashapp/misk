@@ -23,17 +23,6 @@ function * handleCacheTabEntries (action: IAction<IActionType, { MiskBinder: IMu
   } else {
     yield put(dispatchLoader.failure({ staleTabCache: true }))
   }
-  // const tabEntries = MiskBinder.TabEntry
-  // try {
-  //   for (const name in tabEntries) {
-  //     if (tabEntries.hasOwnProperty(name)) {
-  //       const Component = tabEntries[name]
-  //       yield put(dispatchLoader.registerComponent(name, Component))
-  //     }
-  //   }
-  // } catch (e) {
-  //   yield put(dispatchLoader.failure({ error: { ...e }, staleTabCache: true }))
-  // }
 }
 
 function * handleGetAllTabs () {

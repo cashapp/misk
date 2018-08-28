@@ -54,7 +54,7 @@ export default class ConfigComponent extends React.PureComponent<IConfigProps> {
   }
 
   oldToYaml(json: string) {
-    return(json.split(":{").join(":\n \ \ ").split(",").join("\n").split("}").join("\n").split("{").join("").split('"').join(""))
+    return(json.split(":{").join(":\n \ \ ").split(",").join("\n").split("}").join("\n").split("{").join("").split("\"").join(""))
   }
 
   formattedFile(file: IConfigFile) {
