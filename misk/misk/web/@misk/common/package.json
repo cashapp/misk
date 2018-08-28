@@ -21,7 +21,7 @@
     "build:lib": "npm run lib",
     "build": "npm run lib",
     "dist": "npm run lib",
-    "lib": "webpack --config webpack.config.js && webpack --config webpack.static.config.js && webpack --config webpack.vendors.config.js",
+    "lib": "webpack --config webpack.config.js && webpack --config webpack.config.static.js && webpack --config webpack.config.vendors.js",
     "lint": "echo no lint",
     "prepare": "yarn run lint && yarn run test && yarn run lib",
     "reinstall": "rm -rf node_modules/ && yarn install",
