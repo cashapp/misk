@@ -8,12 +8,10 @@ export enum binders {
 
 export const multibind = (binder: binders, name: string, Component: any) => {
   const Window = (window as any)
-  console.log("register call:", name)
-  console.log(Component)
   Window.MiskBinders = Window.MiskBinders || {}
   Window.MiskBinders[binder] = Window.MiskBinders[binder] || []
   if (name in Window.MiskBinders[binder]) {
-    console.log("tab registered already")
+    console.warn("tab registered already")
   } else {
     Window.MiskBinders[binder].push({name, Component})
   }

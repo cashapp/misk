@@ -56,7 +56,6 @@ class WebProxyAction : WebAction {
   @RequestContentType(MediaTypes.ALL)
   @ResponseContentType(MediaTypes.ALL)
   @Unauthenticated
-
   fun action(): Response<ResponseBody> {
     //  TODO(adrw) enforce no prefix overlapping https://github.com/square/misk/issues/303
     val request = clientRequest.get()

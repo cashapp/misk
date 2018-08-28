@@ -24,11 +24,9 @@ export default class ConfigComponent extends React.PureComponent<IConfigProps> {
   }
 
   toYaml(json: string) {
-    // tslint:disable-next-line:quotemark
     let final = ""
     let level = 0
-    for (let i = 0; i < json.length; i++) {
-    const c = json[i]
+    for (const c of json) {
       switch (c) {
         case "{": 
           level++
@@ -38,7 +36,7 @@ export default class ConfigComponent extends React.PureComponent<IConfigProps> {
           final += "\n" + this.indent(level)
           break
         case ",": 
-          final += c + "\n" + this.indent(level)
+          final += "\n" + this.indent(level)
           break
         case ":":
           // write parser for string

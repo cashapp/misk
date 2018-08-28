@@ -17,7 +17,6 @@
     "@misk/tabs": "^0.0.1"
   },
   "devDependencies": {
-    "@misk/dev": "^0.0.8",
-    "script-loader": "^0.7.2"
+    "@misk/dev": "^0.0.8"
   }
 }

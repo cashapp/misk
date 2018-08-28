@@ -68,23 +68,21 @@ module.exports = {
         options: {
           limit: 10000
         },
-      },
-      {
-        test: /\.tab*\.js$/,
-        use: [ 'script-loader' ]
       }
     ]
   },
   resolve: {
-    extensions: ['.js', '.jsx', '.ts', '.tsx', '.json'],
+    extensions: ['.js', '.jsx', '.ts', '.tsx', '.json']
   },
   mode: dev ? 'development' : 'production',
   plugins: dev
     ? [
-      HTMLWebpackPluginConfig, CopyWebpackPluginConfig,
+      HTMLWebpackPluginConfig, 
+      CopyWebpackPluginConfig,
       new webpack.HotModuleReplacementPlugin(),
-    ]
-    : [HTMLWebpackPluginConfig, CopyWebpackPluginConfig,
+    ] : [
+      HTMLWebpackPluginConfig, 
+      CopyWebpackPluginConfig,
       DefinePluginConfig
     ],
   externals: { ...MiskCommon.externals, ...MiskTabs.externals }

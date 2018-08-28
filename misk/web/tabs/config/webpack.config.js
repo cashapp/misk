@@ -30,7 +30,7 @@ module.exports = {
     filename: '_tab/config/tab_config.js',
     path: path.join(__dirname, 'dist'),
     publicPath: "/",
-    library: ['Misktabs', 'Config'],
+    library: ['MiskTabs', 'Config'],
     libraryTarget: 'umd',
     /**
      * library will try to bind to browser `window` variable
