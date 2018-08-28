@@ -29,4 +29,4 @@ class ConfigAdminAction : WebAction {
   }
 
   data class Response(val effective_config: String, val yaml_files: Map<String, String?>)
-}wp
+}
