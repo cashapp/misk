@@ -66,9 +66,9 @@
     skeleton-css "^2.0.4"
     styled-components "^3.4.2"
 
-"@misk/common@^0.0.16":
-  version "0.0.16"
-  resolved "https://registry.yarnpkg.com/@misk/common/-/common-0.0.16.tgz#b67715f82776401bf2c5c078fcbe203cc3a9d5b3"
+"@misk/common@^0.0.17":
+  version "0.0.17"
+  resolved "https://registry.yarnpkg.com/@misk/common/-/common-0.0.17.tgz#48ff238164c2644b1823869259dc5f906cffff3d"
   dependencies:
     "@blueprintjs/core" "^3.3.0"
     "@blueprintjs/icons" "^3.0.0"

@@ -1,4 +1,4 @@
-import { IMiskAdminTab, IMiskAdminTabs } from "@misk/common"
+import { IMiskAdminTab } from "@misk/common"
 import { IMultibinder } from "../utils/binder"
 import { IActionType, ITEM, LOADER } from "./types"
 import { createAction, IAction } from "./utils"

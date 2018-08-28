@@ -3,8 +3,7 @@ const path = require('path');
 
 const CopyWebpackPluginConfig = new CopyWebpackPlugin(
   [
-    { from: './tsconfig.json'},
-    { from: './tslint.json'},
+    { from: './src/base/'},
   ], 
   { debug: 'info', copyUnmodified: true }
 )
