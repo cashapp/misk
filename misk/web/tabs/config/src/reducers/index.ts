@@ -1,4 +1,3 @@
-import { IMiskAdminTabs } from "@misk/common"
 import { RouterState } from "connected-react-router"
 import { fromJS, List } from "immutable"
 import { combineReducers } from "redux"

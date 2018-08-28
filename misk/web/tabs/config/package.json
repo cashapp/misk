@@ -20,6 +20,7 @@
     "json2yaml": "^1.1.0"
   },
   "devDependencies": {
-    "@misk/dev": "^0.0.8"
+    "@misk/dev": "^0.0.8",
+    "@types/webpack-env":"^1.13.6"
   }
 }
