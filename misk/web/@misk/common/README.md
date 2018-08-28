@@ -115,7 +115,12 @@ Webpack Configs
 - `webpack.config.js`: Exports common variables including `MiskCommon.Externals`
 - `webpack.static.config.js`: Exports common styles file
 - `webpack.vendor.config.js`: Exports common vendors library file
-- `webpack.basetab.config.js`: Base config used for each tab
+
+Base Configs: `src/config`
+---
+- `webpack.base.config.js`: Base config for webpack builds
+- `tsconfig.base.js`: Base Typescript compiler options
+- `tslint.base.js`: Base TSLint options
 
 [Releasing](https://github.com/square/misk/blob/master/misk/web/%40misk/RELEASING.md)
 ---

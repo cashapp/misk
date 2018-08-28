@@ -3,7 +3,7 @@ const path = require('path');
 
 const CopyWebpackPluginConfig = new CopyWebpackPlugin(
   [
-    { from: './src/base/'},
+    { from: './src/config/'},
   ], 
   { debug: 'info', copyUnmodified: true }
 )
