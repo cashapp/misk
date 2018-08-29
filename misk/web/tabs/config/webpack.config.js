@@ -1,85 +1,51 @@
+const MiskWebpackConfig = require("./webpack.config.base")
 const path = require('path')
-const webpack = require('webpack')
 const CopyWebpackPlugin = require('copy-webpack-plugin')
-const HTMLWebpackPlugin = require('html-webpack-plugin')
-const MiskCommon = require('@misk/common')
 
-const dev = process.env.NODE_ENV !== 'production'
+/**
+ * Webpack Config
+ * 
+ * Requires the following metadata be added to the project's package.json 
+  "miskTabWebpack": {
+    "name": "Config",
+    "slug": "config",
+    "relative_path_prefix": "_tab/config/",
+    "port": "3200"
+  }
+ *
+ * Assumes following project structure
+ *  dist/ – output for Webpack builds
+ *  src/
+ *     index.tsx – entry point for Webpack compilation
+ *     index.html – entry for HTML browser
+ *  package.json
+ *  webpack.config.js – this file
+ */
+const validConfig = (config) => {
+  return true
 
-const HTMLWebpackPluginConfig = new HTMLWebpackPlugin({
-  template: path.join(__dirname, '/src/index.html'),
-  filename: '_tab/config/index.html',
-  inject: 'body'
-})
+}
 
-const DefinePluginConfig = new webpack.DefinePlugin({
-  'process.env.NODE_ENV': JSON.stringify('production')
-})
+const MiskTabConfig = require(path.join(process.cwd(), "package.json")).miskTabWebpack
+const RELATIVE_PATH = MiskTabConfig.relative_path_prefix
 
 const CopyWebpackPluginConfig = new CopyWebpackPlugin(
   [
-    { from: './node_modules/@misk/common/lib', to: '_tab/config/@misk/'},
-    { from: './node_modules/@misk/components/lib', to: '_tab/config/@misk/'}
+    { from: './node_modules/@misk/common/lib', to: `${RELATIVE_PATH}@misk/`},
+    { from: './node_modules/@misk/components/lib', to: `${RELATIVE_PATH}@misk/`}
   ], 
   { debug: 'info', copyUnmodified: true }
 )
 
-module.exports = {
-  entry: ['react-hot-loader/patch', path.join(__dirname, '/src/index.tsx')],
-  output: {
-    filename: '_tab/config/tab_config.js',
-    path: path.join(__dirname, 'dist'),
-    publicPath: "/",
-    library: ['MiskTabs', 'Config'],
-    libraryTarget: 'umd',
-    /**
-     * library will try to bind to browser `window` variable
-     * without below globalObject: library binding to browser `window` 
-     *    fails when run in Node or other non-browser
-     */
-    globalObject: 'typeof self !== \'undefined\' ? self : this'
+module.exports = {...MiskWebpackConfig,
+  output: { ...MiskWebpackConfig.output,
+    filename: `${RELATIVE_PATH}/tab_${MiskTabConfig.slug}.js`,
+    library: ['MiskTabs', `${MiskTabConfig.name}`],
   },
-  devServer: {
-    port: '3200',
-    inline: true,
-    hot: true,
-    historyApiFallback: true
+  devServer: { ...MiskWebpackConfig.devServer,
+    port: MiskTabConfig.port
   },
-  module: {
-    rules: [
-      {
-        test: /\.(tsx|ts)$/,
-        exclude: /node_modules/,
-        loaders: 'awesome-typescript-loader'
-      },
-      {
-        enforce: 'pre',
-        test: /\.js$/,
-        loader: 'source-map-loader'
-      },
-      {
-        test: /\.scss$/,
-        loader: 'style-loader!css-loader!sass-loader'
-      },
-      {
-        test: /\.(jpe?g|png|gif|svg)$/i,
-        loader: 'url-loader',
-        options: {
-          limit: 10000
-        }
-      }
-    ]
-  },
-  resolve: {
-    extensions: ['.js', '.jsx', '.ts', '.tsx', '.json']
-  },
-  mode: dev ? 'development' : 'production',
-  plugins: dev
-    ? [
-      HTMLWebpackPluginConfig, CopyWebpackPluginConfig,
-      new webpack.HotModuleReplacementPlugin()
-    ]
-    : [HTMLWebpackPluginConfig, CopyWebpackPluginConfig,
-      DefinePluginConfig],
-  externals: { ...MiskCommon.externals }
+  plugins: []
+    .concat(MiskWebpackConfig.plugins)
+    .concat([CopyWebpackPluginConfig])
 }

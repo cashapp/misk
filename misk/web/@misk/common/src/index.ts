@@ -1,4 +1,5 @@
 export * from "./externals"
+const webpackBaseConfig = require("./config/webpack.base.config")
 
 /**
  * Common Interfaces
@@ -29,4 +30,11 @@ interface IMiskWindow extends Window {
   }
 }
 
-export { IMiskAdminTab, IMiskAdminTabs, IMiskWindow }
+interface IMiskWebpackContext {
+  miskLibraryPath: string
+  outputFileName: string
+  libraryName: string
+  devServerPort: number
+}
+
+export { IMiskAdminTab, IMiskAdminTabs, IMiskWebpackContext, IMiskWindow, webpackBaseConfig }
