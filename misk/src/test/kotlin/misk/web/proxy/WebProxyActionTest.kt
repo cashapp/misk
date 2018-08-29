@@ -288,6 +288,58 @@ class WebProxyActionTest {
     }
   }
 
+  @Test
+  internal fun getForwardedSlashesOnSlashes() {
+    upstreamServer.enqueue(MockResponse()
+        .setResponseCode(418)
+        .addHeader("UpstreamHeader", "UpstreamHeaderValue")
+        .setBody("I am an intercepted response!"))
+
+    val responseAsync = async {
+      httpClient.newCall(
+          get("/local/prefix/tacos////see/if/forwards/", weirdMediaType)).execute().toMisk()
+    }
+
+    val upstreamReceivedRequest = upstreamServer.takeRequest(200, TimeUnit.MILLISECONDS)
+    assertThat(
+        upstreamReceivedRequest.getHeader("Forwarded")).isEqualTo(
+        "for=; by=${jettyService.httpServerUrl.newBuilder().encodedPath("/")}")
+    assertThat(upstreamServer.requestCount).isNotZero()
+    assertThat(upstreamReceivedRequest.path).isEqualTo("/local/prefix/tacos////see/if/forwards/")
+
+    runBlocking {
+      assertThat(responseAsync.await().statusCode).isEqualTo(418)
+      assertThat(responseAsync.await().headers["UpstreamHeader"]).isEqualTo("UpstreamHeaderValue")
+      assertThat(responseAsync.await().readUtf8()).isEqualTo("I am an intercepted response!")
+    }
+  }
+
+  @Test
+  internal fun getForwardedDotDirectory() {
+    upstreamServer.enqueue(MockResponse()
+        .setResponseCode(418)
+        .addHeader("UpstreamHeader", "UpstreamHeaderValue")
+        .setBody("I am an intercepted response!"))
+
+    val responseAsync = async {
+      httpClient.newCall(
+          get("/local/prefix/tacos/.test/.config/.ssh/see/if/forwards/", weirdMediaType)).execute().toMisk()
+    }
+
+    val upstreamReceivedRequest = upstreamServer.takeRequest(200, TimeUnit.MILLISECONDS)
+    assertThat(
+        upstreamReceivedRequest.getHeader("Forwarded")).isEqualTo(
+        "for=; by=${jettyService.httpServerUrl.newBuilder().encodedPath("/")}")
+    assertThat(upstreamServer.requestCount).isNotZero()
+    assertThat(upstreamReceivedRequest.path).isEqualTo("/local/prefix/tacos/.test/.config/.ssh/see/if/forwards/")
+
+    runBlocking {
+      assertThat(responseAsync.await().statusCode).isEqualTo(418)
+      assertThat(responseAsync.await().headers["UpstreamHeader"]).isEqualTo("UpstreamHeaderValue")
+      assertThat(responseAsync.await().readUtf8()).isEqualTo("I am an intercepted response!")
+    }
+  }
+
   private fun post(
     path: String,
     contentType: MediaType,

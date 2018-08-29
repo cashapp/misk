@@ -26,6 +26,7 @@ class AdminTabModule(val environment: Environment) : KAbstractModule() {
           WebActionEntry<WebProxyAction>("/_admin/"))
       multibind<WebActionEntry>().toInstance(
           WebActionEntry<WebProxyAction>("/_tab/dashboard/"))
+
       if (false) {
         multibind<WebActionEntry>().toInstance(
             WebActionEntry<WebProxyAction>("/@misk/"))
@@ -35,9 +36,10 @@ class AdminTabModule(val environment: Environment) : KAbstractModule() {
           WebProxyEntry("/_admin/", "http://localhost:3100/"))
       multibind<WebProxyEntry>().toInstance(
           WebProxyEntry("/_tab/dashboard/", "http://localhost:3110/"))
+
       if (false) {
         multibind<WebProxyEntry>().toInstance(
-            WebProxyEntry("/@misk/", "httpconf://localhost:9100/"))
+            WebProxyEntry("/@misk/", "http://localhost:9100/"))
       }
     } else {
       multibind<WebActionEntry>().toInstance(
@@ -49,6 +51,7 @@ class AdminTabModule(val environment: Environment) : KAbstractModule() {
           .toInstance(StaticResourceEntry("/_admin/", "classpath:/web/_admin/"))
       multibind<StaticResourceEntry>()
           .toInstance(StaticResourceEntry("/_tab/dashboard/", "classpath:/web/_tab/dashboard/"))
+
       if (false) {
         multibind<StaticResourceEntry>()
             .toInstance(StaticResourceEntry("/_tab/loader/", "classpath:/web/_tab/loader/"))
