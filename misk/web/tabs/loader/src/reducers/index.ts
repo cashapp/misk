@@ -17,9 +17,18 @@ const rootReducer = combineReducers({
   loader: LoadTabReducer
 })
 
+export interface ILoaderState {
+  adminTabComponents: {
+    [tab:string]: string
+  }
+  adminTabs: IMiskAdminTabs
+  staleTabCache: boolean
+  toJS: () => any
+}
+
 export interface IState {
   item: any
-  loader: any
+  loader: ILoaderState
   router: RouterState
 }
 

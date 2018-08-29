@@ -6,7 +6,7 @@ import { LoaderContainer } from "./containers"
 const routes = (
   <div>
     <Switch>
-      <Route path="/_admin" component={LoaderContainer}/>
+      <Route component={LoaderContainer}/>
     </Switch>
   </div>
 )

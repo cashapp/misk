@@ -1,8 +1,9 @@
-import { NoMatchComponent, PathDebugComponent } from "@misk/components"
+import { PathDebugComponent } from "@misk/components"
 import * as React from "react"
 import { connect } from "react-redux"
 import styled from "styled-components" 
 import { dispatchConfig } from "../actions"
+import { ConfigComponent } from "../components"
 import { IState } from "../reducers"
 
 interface ITabProps {
@@ -18,7 +19,7 @@ interface ITabProps {
   getConfigs: any
 }
 
-interface IConfigFile {
+export interface IConfigFile {
   name: string
   file: string
 }
@@ -34,14 +35,12 @@ class TabContainer extends React.Component<ITabProps, {children : any}> {
   }
 
   render() {
-    const { files } = this.props.config
-    const { status } = this.props.config
-    if (status) {
+    const { files, status } = this.props.config
+    if (status && window.location.pathname === "/_admin/config/") {
       return (
         <Container>
           <h1>App: Config</h1>
           <p>{status}</p>
-  
           {files && files.map(f => (
             <div>
               <br/>

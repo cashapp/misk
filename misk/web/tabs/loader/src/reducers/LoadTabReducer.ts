@@ -10,11 +10,13 @@ const initialState = fromJS({
 
 export default function loadTabReducer (state = initialState, action: IAction<string, {}>) {
   switch (action.type) {
+    case LOADER.FAILURE:
+    case LOADER.CACHE_TAB_ENTRIES:
     case LOADER.GET_ONE_COMPONENT:
     case LOADER.GET_ALL_COMPONENTS_AND_TABS:
     case LOADER.GET_ALL_TABS:
+    case LOADER.REGISTER_COMPONENT:
     case LOADER.SUCCESS:
-    case LOADER.FAILURE:
       return state.mergeDeep(action.payload)
     default:
       return state

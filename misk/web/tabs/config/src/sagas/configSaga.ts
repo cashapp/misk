@@ -14,6 +14,8 @@ import {
   CONFIG, dispatchConfig, IAction, IActionType
 } from "../actions"
 
+const dateFormat = "YYYY-MM-DD HH:mm:ss"
+
 function * handleGetAll () {
   const files: any = []
   let data: any = {}
@@ -23,7 +25,7 @@ function * handleGetAll () {
   } catch (e) {
     yield put(dispatchConfig.failure({ 
       error: { ...e },
-      status: `Offline. Last attemped update ${dayjs().format("YYYY-MM-DD HH:mm:ss")}`
+      status: `Offline. Last attemped update ${dayjs().format(dateFormat)}`
      }))
   }
 
@@ -35,16 +37,16 @@ function * handleGetAll () {
     yield put(dispatchConfig.success({ 
       data,
       files,
-      lastOnline: dayjs().format("YYYY-MM-DD HH:mm:ss:SSS"),
-      status: `Online as of: ${dayjs().format("YYYY-MM-DD HH:mm:ss")}`
+      lastOnline: dayjs().format(dateFormat),
+      status: `Online as of: ${dayjs().format(dateFormat)}`
       }))
   } catch (e) {
     yield put(dispatchConfig.failure({ 
       data,
       error: { ...e, msg: "config yaml parse error" },
       files,
-      lastOnline: dayjs().format("YYYY-MM-DD HH:mm:ss:SSS"),
-      status: `Online as of: ${dayjs().format("YYYY-MM-DD HH:mm:ss")}`
+      lastOnline: dayjs().format(dateFormat),
+      status: `Online as of: ${dayjs().format(dateFormat)}`
       }))
   }
   
