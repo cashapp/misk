@@ -19,10 +19,10 @@ function * handleCacheTabEntries (action: IAction<IActionType, { MiskBinder: IMu
   const { MiskBinder } = action.payload
     yield put(dispatchLoader.success({ adminTabComponents: { blah: "blah"} , staleTabCache: false }))
     if (MiskBinder) {
-    yield put(dispatchLoader.success({ adminTabComponents: MiskBinder.TabEntry, staleTabCache: false }))
-  } else {
-    yield put(dispatchLoader.failure({ staleTabCache: true }))
-  }
+      yield put(dispatchLoader.success({ adminTabComponents: MiskBinder.TabEntry, staleTabCache: false }))
+    } else {
+      yield put(dispatchLoader.failure({ staleTabCache: true }))
+    }
 }
 
 function * handleGetAllTabs () {
@@ -77,8 +77,6 @@ function * handleGetOneComponent (action: IAction<IActionType, { tab: IMiskAdmin
 function * handleRegisterComponent (action: IAction<IActionType, { name: string, Component: any }>) {
   const { name } = action.payload
   const { Component } = action.payload
-  console.log("saga")
-  console.log(Component)
   yield put(dispatchLoader.success({ adminTabComponents: { [name]: Component } }))
 }
 

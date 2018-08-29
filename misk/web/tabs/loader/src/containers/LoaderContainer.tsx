@@ -39,7 +39,6 @@ class LoaderContainer extends React.Component<ILoaderProps> {
     if (adminTabs) {
       const tabRouteDivs = Object.entries(adminTabs).map(([key,tab]) => this.buildTabRouteMountingDiv(key, tab))
       const tabLinks = Object.entries(adminTabs).map(([key,tab]) => <Link key={key} to={`/_admin/${tab.slug}/`}>{tab.name}<br/></Link>)
-      console.log(staleTabCache, (window as any).MiskBinders, adminTabs, adminTabComponents)
       return (
         <div>
           <NavTopbarComponent name="Misk Admin Loader" />

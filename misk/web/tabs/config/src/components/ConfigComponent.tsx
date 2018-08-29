@@ -16,15 +16,15 @@ const Container = styled.div`
 
 export default class ConfigComponent extends React.PureComponent<IConfigProps> {
   indent(spaces: number) {
-    let final = ""
+    let result = ""
     for (let i = 0; i < spaces; i++) {
-      final += "\ "
+      result += "\ "
     }
-    return final
+    return result
   }
 
   toYaml(json: string) {
-    let final = ""
+    let result = ""
     let level = 0
     for (const c of json) {
       switch (c) {
@@ -33,24 +33,24 @@ export default class ConfigComponent extends React.PureComponent<IConfigProps> {
           break
         case "}":
           level--
-          final += "\n" + this.indent(level)
+          result += "\n" + this.indent(level)
           break
         case ",": 
-          final += "\n" + this.indent(level)
+          result += "\n" + this.indent(level)
           break
         case ":":
           // write parser for string
-          final += ": "
+          result += ": "
           break
         case "\"":
           break
         case "\,":
           break
         default:
-          final += c
+          result += c
       }
     }
-    return(final)
+    return(result)
   }
 
   oldToYaml(json: string) {
@@ -59,8 +59,7 @@ export default class ConfigComponent extends React.PureComponent<IConfigProps> {
 
   formattedFile(file: IConfigFile) {
     if (file.name === "live-config.yaml") {
-      console.log("toYaml:", this.toYaml(file.file))
-          return this.toYaml(file.file)
+      return this.toYaml(file.file)
     } else {
       return file.file
     }
@@ -77,10 +76,11 @@ export default class ConfigComponent extends React.PureComponent<IConfigProps> {
             <br/>
             <h5>{f.name}</h5>
             <code><pre>
-              {this.formattedFile(f)}
+            {this.formattedFile(f)}
             </pre></code>
-          </div>))}
-        </Container>
+          </div>))
+        }
+      </Container>
     )
   }
 }
