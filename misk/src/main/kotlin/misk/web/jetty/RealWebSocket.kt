@@ -3,7 +3,8 @@ package misk.web.jetty
 import misk.web.actions.WebSocket
 import misk.web.actions.WebSocketListener
 import okio.ByteString
-import okio.Utf8
+import okio.ByteString.Companion.toByteString
+import okio.utf8Size
 import org.eclipse.jetty.websocket.api.Session
 import org.eclipse.jetty.websocket.api.WebSocketAdapter
 import org.eclipse.jetty.websocket.api.WriteCallback
@@ -42,7 +43,7 @@ class RealWebSocket : WebSocket {
     }
 
     override fun onWebSocketBinary(payload: ByteArray?, offset: Int, len: Int) {
-      listener.onMessage(this@RealWebSocket, ByteString.of(payload!!, offset, len))
+      listener.onMessage(this@RealWebSocket, payload!!.toByteString(offset, len))
     }
   }
 
@@ -51,7 +52,7 @@ class RealWebSocket : WebSocket {
   }
 
   override fun send(text: String): Boolean {
-    val byteCount = Utf8.size(text)
+    val byteCount = text.utf8Size()
     if (outgoingQueueSize + byteCount > MAX_QUEUE_SIZE) {
       close(1001, null)
       return false
@@ -67,7 +68,7 @@ class RealWebSocket : WebSocket {
   private fun sendQueue() {
     while (adapter.isConnected && queue.isNotEmpty()) {
       val text = queue.pop()
-      val byteCount = Utf8.size(text)
+      val byteCount = text.utf8Size()
 
       adapter.remote.sendString(text, object : WriteCallback {
         override fun writeSuccess() {

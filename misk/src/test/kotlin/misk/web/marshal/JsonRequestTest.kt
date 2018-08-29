@@ -17,6 +17,8 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okio.ByteString
 import okio.Okio
+import okio.buffer
+import okio.source
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.io.ByteArrayInputStream
@@ -76,7 +78,7 @@ internal class JsonRequestTest {
     @RequestContentType(MediaTypes.APPLICATION_JSON)
     @ResponseContentType(MediaTypes.APPLICATION_JSON)
     fun call(@RequestBody encodedPacket: ByteString): Packet {
-      val source = Okio.buffer(Okio.source(ByteArrayInputStream(encodedPacket.toByteArray())))
+      val source = ByteArrayInputStream(encodedPacket.toByteArray()).source().buffer()
       val incomingPacket = packetJsonAdapter.fromJson(source)
       return Packet("${incomingPacket?.message} as-byte-string")
     }

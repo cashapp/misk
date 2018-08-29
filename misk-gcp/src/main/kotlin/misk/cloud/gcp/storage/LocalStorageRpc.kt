@@ -12,6 +12,8 @@ import misk.io.listRecursively
 import misk.moshi.adapter
 import misk.okio.forEachBlock
 import okio.Okio
+import okio.buffer
+import okio.source
 import java.io.FileNotFoundException
 import java.io.IOException
 import java.io.InputStream
@@ -109,7 +111,7 @@ class LocalStorageRpc(root: Path, moshi: Moshi = Moshi.Builder().build()) : Base
     try {
       val upload = beginUpload(obj, options)
       var destOffset: Long = 0
-      val source = Okio.buffer(Okio.source(content))
+      val source = content.source().buffer()
       source.forEachBlock(1024) { buffer, bytesRead ->
         write(upload.id, buffer, 0, destOffset, bytesRead, false)
         destOffset += bytesRead

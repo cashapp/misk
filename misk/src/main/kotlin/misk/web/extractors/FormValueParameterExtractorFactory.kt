@@ -8,7 +8,6 @@ import misk.web.FormValue
 import misk.web.PathPattern
 import misk.web.Request
 import misk.web.actions.WebAction
-import misk.web.actions.WebSocket
 import okio.BufferedSource
 import java.net.URLDecoder
 import java.util.regex.Matcher
@@ -90,7 +89,7 @@ object FormValueParameterExtractorFactory : ParameterExtractor.Factory {
 
     while (!source.exhausted()) {
       var keyValueEnd = source.indexOf('&'.toByte())
-      if (keyValueEnd == -1L) keyValueEnd = source.buffer().size()
+      if (keyValueEnd == -1L) keyValueEnd = source.buffer().size
 
       val keyEnd = source.indexOf('='.toByte(), 0, keyValueEnd)
       requireRequest(keyEnd != 1L) { "invalid form encoding" }

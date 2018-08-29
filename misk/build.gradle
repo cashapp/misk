@@ -40,6 +40,7 @@ dependencies {
   compile dep.guiceMultibindings
   compile dep.javaxInject
   compile dep.okHttp
+  compile dep.okio
   compile dep.kotlinReflection
   compile dep.moshi
   compile dep.conscrypt

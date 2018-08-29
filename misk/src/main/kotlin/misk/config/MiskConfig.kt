@@ -9,6 +9,8 @@ import com.fasterxml.jackson.module.kotlin.MissingKotlinParameterException
 import misk.environment.Environment
 import misk.logging.getLogger
 import okio.Okio
+import okio.buffer
+import okio.source
 import java.io.File
 import java.io.FilenameFilter
 import java.net.URL
@@ -107,7 +109,7 @@ object MiskConfig {
 
   private fun URL.readUtf8(): String {
     return openStream().use {
-      Okio.buffer(Okio.source(it)).readUtf8()
+      it.source().buffer().readUtf8()
     }
   }
 
