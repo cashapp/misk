@@ -77,10 +77,13 @@ module.exports = {
   mode: dev ? 'development' : 'production',
   plugins: dev
     ? [
-      HTMLWebpackPluginConfig, CopyWebpackPluginConfig,
+      HTMLWebpackPluginConfig, 
+      CopyWebpackPluginConfig,
       new webpack.HotModuleReplacementPlugin(),
-    ]
-    : [HTMLWebpackPluginConfig, CopyWebpackPluginConfig,
-      DefinePluginConfig],
+    ] : [
+      HTMLWebpackPluginConfig, 
+      CopyWebpackPluginConfig,
+      DefinePluginConfig
+    ],
   externals: { ...MiskCommon.externals, ...MiskTabs.externals }
 }
