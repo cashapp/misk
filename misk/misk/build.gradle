@@ -77,8 +77,10 @@ dependencies {
 }
 
 jar {
-  into("web/admin") {
-    from("web/admin/build")
+  into("web/") {
+    from("./web/tabs/config/dist/")
+    from("./web/tabs/dashboard/dist/")
+    from("./web/tabs/loader/dist/")
   }
 }
 

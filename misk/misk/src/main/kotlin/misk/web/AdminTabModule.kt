@@ -1,10 +1,12 @@
 package misk.web
 
+import misk.environment.Environment
 import misk.inject.KAbstractModule
-import misk.web.actions.AdminTab
 import misk.web.actions.WebActionEntry
 import misk.web.proxy.WebProxyAction
 import misk.web.proxy.WebProxyEntry
+import misk.web.resources.StaticResourceAction
+import misk.web.resources.StaticResourceEntry
 
 /**
  * AdminTabModule
@@ -15,29 +17,45 @@ import misk.web.proxy.WebProxyEntry
  * Config tab is tightly coupled to the config module. Thus binding should be in ConfigWebModule
  */
 
-class AdminTabModule : KAbstractModule() {
+class AdminTabModule(val environment: Environment) : KAbstractModule() {
   override fun configure() {
-    multibind<WebProxyEntry>().toInstance(
-        WebProxyEntry("/_admin", "http://localhost:3100/"))
-    multibind<WebActionEntry>().toInstance(
-        WebActionEntry<WebProxyAction>("/_admin"))
 
-    multibind<WebProxyEntry>().toInstance(
-        WebProxyEntry("/_tab/dashboard", "http://localhost:3110/"))
-    multibind<WebActionEntry>().toInstance(
-        WebActionEntry<WebProxyAction>("/_tab/dashboard"))
 
-    multibind<WebProxyEntry>().toInstance(
-        WebProxyEntry("/@misk", "http://localhost:9100/"))
-    multibind<WebActionEntry>().toInstance(
-        WebActionEntry<WebProxyAction>("/@misk"))
+    if (environment == Environment.DEVELOPMENT) {
+      multibind<WebActionEntry>().toInstance(
+          WebActionEntry<WebProxyAction>("/_admin/"))
+      multibind<WebActionEntry>().toInstance(
+          WebActionEntry<WebProxyAction>("/_tab/dashboard/"))
 
-//    Testing
-//    multibind<AdminTab>().toInstance(AdminTab(
-//        "Dashboard",
-//        "dashboard",
-//        "/_admin/dashboard"
-//    ))
+      if (false) {
+        multibind<WebActionEntry>().toInstance(
+            WebActionEntry<WebProxyAction>("/@misk/"))
+      }
 
+      multibind<WebProxyEntry>().toInstance(
+          WebProxyEntry("/_admin/", "http://localhost:3100/"))
+      multibind<WebProxyEntry>().toInstance(
+          WebProxyEntry("/_tab/dashboard/", "http://localhost:3110/"))
+
+      if (false) {
+        multibind<WebProxyEntry>().toInstance(
+            WebProxyEntry("/@misk/", "http://localhost:9100/"))
+      }
+    } else {
+      multibind<WebActionEntry>().toInstance(
+          WebActionEntry<StaticResourceAction>("/_admin/"))
+      multibind<WebActionEntry>().toInstance(
+          WebActionEntry<StaticResourceAction>("/_tab/dashboard/"))
+
+      multibind<StaticResourceEntry>()
+          .toInstance(StaticResourceEntry("/_admin/", "classpath:/web/_admin/"))
+      multibind<StaticResourceEntry>()
+          .toInstance(StaticResourceEntry("/_tab/dashboard/", "classpath:/web/_tab/dashboard/"))
+
+      if (false) {
+        multibind<StaticResourceEntry>()
+            .toInstance(StaticResourceEntry("/_tab/loader/", "classpath:/web/_tab/loader/"))
+      }
+    }
   }
 }
