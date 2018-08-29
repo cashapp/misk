@@ -1,6 +1,6 @@
 package misk.web.proxy
 
-import misk.web.actions.WebEntryCommon
+import misk.web.resources.ResourceEntryCommon
 import okhttp3.HttpUrl
 
 //  TODO(adrw) fix this documentation if forwarding rewrites are restricted or other conditions in place
@@ -23,19 +23,18 @@ import okhttp3.HttpUrl
  * ```
  */
 data class WebProxyEntry(
-  override val url_path_prefix: String,
+  override val url_path_prefix: String = "/",
   val web_proxy_url: HttpUrl
-) : WebEntryCommon.Entry {
+) : ResourceEntryCommon.Entry {
   init {
-    require(url_path_prefix.matches(Regex("(/[^/]+)*")) &&
-        !url_path_prefix.startsWith("/api") &&
-        web_proxy_url.encodedPath().endsWith("/") &&
+    ResourceEntryCommon.requireValidUrlPathPrefix(url_path_prefix)
+    require(web_proxy_url.encodedPath().endsWith("/") &&
         web_proxy_url.pathSegments().size == 1)
   }
 }
 
 fun WebProxyEntry(
-  url_path_prefix: String,
+  url_path_prefix: String = "/",
   web_proxy_url: String
 ) : WebProxyEntry {
 //  TODO(adrw) update all HTTPUrl.parse -> get (no bang bang required) https://github.com/square/misk/issues/419

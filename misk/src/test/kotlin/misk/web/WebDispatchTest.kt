@@ -98,13 +98,13 @@ internal class WebDispatchTest {
 
   @Test
   fun entryWithSingleSegment() {
-    WebActionEntry(GetHello::class, "/good")
+    WebActionEntry(GetHello::class, "/good/")
   }
 
   @Test
-  fun entryFailsWithTrailingSlash() {
+  fun entryFailsWithoutTrailingSlash() {
     assertFailsWith<IllegalArgumentException> {
-      WebActionEntry(GetHello::class, "/bad/path/")
+      WebActionEntry(GetHello::class, "/bad/path")
     }
   }
 
@@ -123,7 +123,7 @@ internal class WebDispatchTest {
       multibind<WebActionEntry>().toInstance(WebActionEntry<PostBye>())
       multibind<WebActionEntry>().toInstance(WebActionEntry<GetBye>())
       multibind<WebActionEntry>().toInstance(WebActionEntry<GetNothing>())
-      multibind<WebActionEntry>().toInstance(WebActionEntry<GetHello>("/path/prefix"))
+      multibind<WebActionEntry>().toInstance(WebActionEntry<GetHello>("/path/prefix/"))
     }
   }
 

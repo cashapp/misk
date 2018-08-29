@@ -39,7 +39,7 @@ internal class WebActionFactory {
   /** Returns the bound actions for `webActionClass`. */
   fun <A : WebAction> newBoundAction(
     webActionClass: KClass<A>,
-    pathPrefix: String = ""
+    pathPrefix: String = "/"
   ): List<BoundAction<A, *>> {
     // Find the function with Get, Post, or ConnectWebSocket annotation. Only one such function is
     // allowed.
@@ -75,17 +75,21 @@ internal class WebActionFactory {
 
     val result: MutableList<BoundAction<A, *>> = mutableListOf()
 
+    require(pathPrefix.last() == '/')
     if (get != null) {
       result += newBoundAction(provider, actionFunction, HttpMethod.GET,
-          pathPrefix + get.pathPattern, false)
+          pathPrefix.dropLast(1) + get.pathPattern, false)
     }
+
     if (connectWebSocket != null) {
       result += newBoundAction(provider, actionFunction, HttpMethod.GET,
           connectWebSocket.pathPattern, true)
     }
+
+    require(pathPrefix.last() == '/')
     if (post != null) {
       result += newBoundAction(provider, actionFunction, HttpMethod.POST,
-          pathPrefix + post.pathPattern, false)
+          pathPrefix.dropLast(1) + post.pathPattern, false)
     }
 
     return result

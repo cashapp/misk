@@ -86,9 +86,9 @@ class WebProxyActionTest {
   }
 
   @Test
-  internal fun entryLocalWithTrailingSlash() {
+  internal fun entryLocalWithoutTrailingSlash() {
     assertFailsWith<IllegalArgumentException> {
-      WebProxyEntry("/local/prefix/",
+      WebProxyEntry("/local/prefix",
           upstreamServer.url("/"))
     }
   }
@@ -249,7 +249,7 @@ class WebProxyActionTest {
     val response = httpClient.newCall(request).execute().toMisk()
 
     assertThat(response.readUtf8()).isEqualTo(
-        "WebProxyAction: Failed to fetch upstream URL $urlThatFailed")
+        "Failed to fetch upstream URL $urlThatFailed")
     assertThat(response.statusCode).isEqualTo(HttpURLConnection.HTTP_UNAVAILABLE)
     assertThat(response.headers["Content-Type"]).isEqualTo(plainTextMediaType.toString())
   }
@@ -260,6 +260,84 @@ class WebProxyActionTest {
         .url(jettyService.httpServerUrl.newBuilder().encodedPath(path).build())
         .header("Accept", acceptedMediaType.toString())
         .build()
+  }
+
+  @Test
+  internal fun getForwardedLongPathMatchTrailingSlash() {
+    upstreamServer.enqueue(MockResponse()
+        .setResponseCode(418)
+        .addHeader("UpstreamHeader", "UpstreamHeaderValue")
+        .setBody("I am an intercepted response!"))
+
+    val responseAsync = async {
+      httpClient.newCall(
+          get("/local/prefix/tacos/another/long/prefix/see/if/forwards/", weirdMediaType)).execute().toMisk()
+    }
+
+    val upstreamReceivedRequest = upstreamServer.takeRequest(200, TimeUnit.MILLISECONDS)
+    assertThat(
+        upstreamReceivedRequest.getHeader("Forwarded")).isEqualTo(
+        "for=; by=${jettyService.httpServerUrl.newBuilder().encodedPath("/")}")
+    assertThat(upstreamServer.requestCount).isNotZero()
+    assertThat(upstreamReceivedRequest.path).isEqualTo("/local/prefix/tacos/another/long/prefix/see/if/forwards/")
+
+    runBlocking {
+      assertThat(responseAsync.await().statusCode).isEqualTo(418)
+      assertThat(responseAsync.await().headers["UpstreamHeader"]).isEqualTo("UpstreamHeaderValue")
+      assertThat(responseAsync.await().readUtf8()).isEqualTo("I am an intercepted response!")
+    }
+  }
+
+  @Test
+  internal fun getForwardedSlashesOnSlashes() {
+    upstreamServer.enqueue(MockResponse()
+        .setResponseCode(418)
+        .addHeader("UpstreamHeader", "UpstreamHeaderValue")
+        .setBody("I am an intercepted response!"))
+
+    val responseAsync = async {
+      httpClient.newCall(
+          get("/local/prefix/tacos////see/if/forwards/", weirdMediaType)).execute().toMisk()
+    }
+
+    val upstreamReceivedRequest = upstreamServer.takeRequest(200, TimeUnit.MILLISECONDS)
+    assertThat(
+        upstreamReceivedRequest.getHeader("Forwarded")).isEqualTo(
+        "for=; by=${jettyService.httpServerUrl.newBuilder().encodedPath("/")}")
+    assertThat(upstreamServer.requestCount).isNotZero()
+    assertThat(upstreamReceivedRequest.path).isEqualTo("/local/prefix/tacos////see/if/forwards/")
+
+    runBlocking {
+      assertThat(responseAsync.await().statusCode).isEqualTo(418)
+      assertThat(responseAsync.await().headers["UpstreamHeader"]).isEqualTo("UpstreamHeaderValue")
+      assertThat(responseAsync.await().readUtf8()).isEqualTo("I am an intercepted response!")
+    }
+  }
+
+  @Test
+  internal fun getForwardedDotDirectory() {
+    upstreamServer.enqueue(MockResponse()
+        .setResponseCode(418)
+        .addHeader("UpstreamHeader", "UpstreamHeaderValue")
+        .setBody("I am an intercepted response!"))
+
+    val responseAsync = async {
+      httpClient.newCall(
+          get("/local/prefix/tacos/.test/.config/.ssh/see/if/forwards/", weirdMediaType)).execute().toMisk()
+    }
+
+    val upstreamReceivedRequest = upstreamServer.takeRequest(200, TimeUnit.MILLISECONDS)
+    assertThat(
+        upstreamReceivedRequest.getHeader("Forwarded")).isEqualTo(
+        "for=; by=${jettyService.httpServerUrl.newBuilder().encodedPath("/")}")
+    assertThat(upstreamServer.requestCount).isNotZero()
+    assertThat(upstreamReceivedRequest.path).isEqualTo("/local/prefix/tacos/.test/.config/.ssh/see/if/forwards/")
+
+    runBlocking {
+      assertThat(responseAsync.await().statusCode).isEqualTo(418)
+      assertThat(responseAsync.await().headers["UpstreamHeader"]).isEqualTo("UpstreamHeaderValue")
+      assertThat(responseAsync.await().readUtf8()).isEqualTo("I am an intercepted response!")
+    }
   }
 
   private fun post(
@@ -279,10 +357,10 @@ class WebProxyActionTest {
     override fun configure() {
       install(HttpClientModule("web_proxy_action_test", Names.named("web_proxy_action_test")))
       multibind<WebActionEntry>().toInstance(
-          WebActionEntry<WebProxyAction>("/local/prefix"))
+          WebActionEntry<WebProxyAction>("/local/prefix/"))
       multibind<WebProxyEntry>().toProvider(
           Provider<WebProxyEntry> {
-            WebProxyEntry("/local/prefix", upstreamServer.url("/").toString())
+            WebProxyEntry("/local/prefix/", upstreamServer.url("/").toString())
           })
       install(WebTestingModule())
     }
