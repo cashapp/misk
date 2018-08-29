@@ -8,21 +8,20 @@ object ResourceEntryCommon {
         .filter { urlPath.startsWith(it.url_path_prefix) }
         .sortedByDescending { it.url_path_prefix.length }
     // Error if there are overlapping identical matched prefixes https://github.com/square/misk/issues/303
-    if (results.size > 1) require(results[0].url_path_prefix != results[1].url_path_prefix)
+    require(results.size <= 1 || results[0].url_path_prefix != results[1].url_path_prefix)
     return results.firstOrNull()
   }
 
   /**
    * findEntryFromUrl
-   *
    * @return entry whose url_path_prefix most closely matches given url; longest match wins
    */
   fun findEntryFromUrl(entries: List<Entry>, url: HttpUrl): Entry? {
-    return (findEntryFromUrlString(entries, url.encodedPath()))
+    return findEntryFromUrlString(entries, url.encodedPath())
   }
 
   fun findEntryFromUrl(entries: List<Entry>, url: String): Entry? {
-    return (findEntryFromUrlString(entries, url))
+    return findEntryFromUrlString(entries, url)
   }
 
   private val BlockedUrlPathPrefixes = listOf("/api/")

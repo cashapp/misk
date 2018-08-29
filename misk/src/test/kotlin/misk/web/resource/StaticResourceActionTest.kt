@@ -175,6 +175,30 @@ class StaticResourceActionTest {
     assertThat(response.header("Content-Type")).isEqualTo("text/html")
   }
 
+  @Test fun nasaFuelSlashesOnSlashesRedirectsToPrefixIndex() {
+    val response = request("/nasa/tabs/o2fuel/////anti/brevity?with=query")
+    assertThat(response.code()).isEqualTo(200)
+    assertThat(response.body()!!.string()).contains(
+        "<p>Your o2fuel gauge reads: this</p>")
+    assertThat(response.header("Content-Type")).isEqualTo("text/html")
+  }
+
+  @Test fun nasaFuelSlashesOnSlashesQueryRedirectsToPrefixIndex() {
+    val response = request("/nasa/tabs/o2fuel/////anti/brevity?with=query")
+    assertThat(response.code()).isEqualTo(200)
+    assertThat(response.body()!!.string()).contains(
+        "<p>Your o2fuel gauge reads: this</p>")
+    assertThat(response.header("Content-Type")).isEqualTo("text/html")
+  }
+
+  @Test fun nasaFuelDotDirectoryRedirectsToPrefixIndex() {
+    val response = request("/nasa/tabs/o2fuel/.test/.config/.ssh/anti/brevity?with=query")
+    assertThat(response.code()).isEqualTo(200)
+    assertThat(response.body()!!.string()).contains(
+        "<p>Your o2fuel gauge reads: this</p>")
+    assertThat(response.header("Content-Type")).isEqualTo("text/html")
+  }
+
   @Test fun blockedPrefixEntryFails() {
     assertFailsWith<IllegalArgumentException> {
       StaticResourceEntry("/api/", "memory:/web/api/")

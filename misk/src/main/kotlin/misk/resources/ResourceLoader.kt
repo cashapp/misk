@@ -65,7 +65,11 @@ class ResourceLoader @Inject constructor(
 
   /** Returns true if a resource at `address` exists. */
   fun exists(address: String): Boolean {
-    checkAddress(address)
+    try {
+      checkAddress(address)
+    } catch(e: IllegalArgumentException) {
+      return false
+    }
 
     val (scheme, path) = parseAddress(address)
     val backend = backends[scheme] ?: return false
@@ -74,7 +78,11 @@ class ResourceLoader @Inject constructor(
 
   /** Returns the full path of the resources that are immediate children of `address`. */
   fun list(address: String): List<String> {
-    checkAddress(address)
+    try {
+      checkAddress(address)
+    } catch(e: IllegalArgumentException) {
+      return listOf()
+    }
 
     val (scheme, path) = parseAddress(address)
     val backend = backends[scheme] ?: return listOf()

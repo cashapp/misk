@@ -17,7 +17,7 @@ data class StaticResourceEntry(
   }
 
   fun resourcePath(urlPath: String): String {
-    val normalizedResourcePath = if (resourcePath.endsWith("/")) resourcePath.dropLast(1) else resourcePath
-    return normalizedResourcePath + "/" + urlPath.removePrefix(url_path_prefix)
+    val normalizedResourcePath = if (!resourcePath.endsWith("/")) "$resourcePath/" else resourcePath
+    return normalizedResourcePath + urlPath.removePrefix(url_path_prefix)
   }
 }

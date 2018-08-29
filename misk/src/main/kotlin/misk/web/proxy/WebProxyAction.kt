@@ -34,7 +34,7 @@ import javax.inject.Singleton
  *     Entries: `/_admin/config/`, `/_admin/config/subtab/`
  *     Request: `/_admin/config/subtab/app.js` will resolve to the `/_admin/config/subtab/` entry
  * - url_path_prefix starts with "/"
- * - url_path_prefix does not end with "/"
+ * - url_path_prefix ends with "/"
  * - web_proxy_url ends with "/" and doesn't contain any path segments
  *
  * Expected Functionality
@@ -54,7 +54,7 @@ class WebProxyAction : WebAction {
   @Post("/{path:.*}")
   @RequestContentType(MediaTypes.ALL)
   @ResponseContentType(MediaTypes.ALL)
-  @Unauthenticated  // TODO(adrw) should this be unauthenticated?
+  @Unauthenticated
   fun action(): Response<ResponseBody> {
     val request = clientRequest.get()
     val matchedEntry = ResourceEntryCommon.findEntryFromUrl(entries,

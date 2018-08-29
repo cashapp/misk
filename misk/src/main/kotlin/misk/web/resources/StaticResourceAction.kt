@@ -16,7 +16,6 @@ import misk.web.mediatype.MediaTypes
 import misk.web.toResponseBody
 import okhttp3.Headers
 import okhttp3.HttpUrl
-import okhttp3.MediaType
 import okio.BufferedSink
 import okio.BufferedSource
 import java.net.HttpURLConnection
@@ -25,10 +24,8 @@ import javax.inject.Singleton
 
 /**
  * StaticResourceAction
- *
  * This data class is used with Guice multibindings. Register instances by calling `multibind()`
  * in a `KAbstractModule`:
- *
  * ```
  * multibind<StaticResourceEntry>().toInstance(StaticResourceEntry(...))
  * ```
@@ -44,7 +41,7 @@ class StaticResourceAction : WebAction {
   @Post("/{path:.*}")
   @RequestContentType(MediaTypes.ALL)
   @ResponseContentType(MediaTypes.ALL)
-  @Unauthenticated  // TODO(adrw) should this be unauthenticated?
+  @Unauthenticated  // TODO(adrw) https://github.com/square/misk/issues/429
   fun action(): Response<ResponseBody> {
     val request = clientRequest.get()
     return getResponse(request)
@@ -54,16 +51,14 @@ class StaticResourceAction : WebAction {
     val urlPath = request.url.encodedPath()
     val matchedEntry =
         ResourceEntryCommon.findEntryFromUrl(entries, request.url) as StaticResourceEntry?
-    return when (exists(normalizePath(urlPath))) {
+    return when (exists(urlPath)) {
       Kind.NO_MATCH -> when {
-        !urlPath.contains(".") && !urlPath.endsWith("/") ->
-          redirectResponse(normalizePathWithQuery(request.url))
-      // actually return the resource, don't redirect. Path must stay the same since this will be handled by React router
-        !urlPath.contains(".") && urlPath.endsWith("/") ->
-          resourceResponse(normalizePath(matchedEntry?.url_path_prefix ?: urlPath))
+        !urlPath.endsWith("/") -> redirectResponse(normalizePathWithQuery(request.url))
+        // actually return the resource, don't redirect. Path must stay the same since this will be handled by React router
+        urlPath.endsWith("/") -> resourceResponse(normalizePath(matchedEntry?.url_path_prefix ?: urlPath))
         else -> null
       }
-      Kind.RESOURCE -> resourceResponse(normalizePath(urlPath))
+      Kind.RESOURCE -> resourceResponse(urlPath)
       Kind.RESOURCE_DIRECTORY -> redirectResponse(normalizePathWithQuery(request.url))
     } ?: NotFoundAction.response(request.url.toString())
   }
@@ -100,7 +95,7 @@ class StaticResourceAction : WebAction {
   private fun normalizePath(urlPath: String): String {
     return when {
       urlPath.endsWith("/") -> "${urlPath}index.html"
-      !urlPath.contains(".") && !urlPath.endsWith("/") -> "$urlPath/"
+      !urlPath.endsWith("/") -> "$urlPath/"
       else -> urlPath
     }
   }
@@ -121,7 +116,8 @@ class StaticResourceAction : WebAction {
       }
       Response(
           body = responseBody,
-          headers = Headers.of("Content-Type", mimeType(resourcePath).toString()))
+          headers = Headers.of("Content-Type", MediaTypes.fromFileExtension(
+              resourcePath.substring(resourcePath.lastIndexOf('.') + 1)).toString()))
     } else {
       null
     }
@@ -132,11 +128,6 @@ class StaticResourceAction : WebAction {
         body = "".toResponseBody(),
         statusCode = HttpURLConnection.HTTP_MOVED_TEMP,
         headers = Headers.of("Location", "$urlPath"))
-  }
-
-  private fun mimeType(path: String): MediaType {
-    val extension = path.substring(path.lastIndexOf('.') + 1)
-    return MediaTypes.fromFileExtension(extension) ?: MediaTypes.APPLICATION_OCTETSTREAM_MEDIA_TYPE
   }
 }
 

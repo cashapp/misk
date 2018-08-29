@@ -19,7 +19,6 @@ class ConfigWebModule(val environment: Environment): KAbstractModule() {
         "/_admin/config",
         "cog"
     ))
-    // TODO(adrw) only add web proxy during development, otherwise add ResourceInterceptor (Jar)
     if (environment == Environment.DEVELOPMENT) {
       multibind<WebActionEntry>().toInstance(WebActionEntry<WebProxyAction>("/_tab/config/"))
       multibind<WebProxyEntry>().toInstance(

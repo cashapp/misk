@@ -32,13 +32,13 @@ object MediaTypes {
   const val IMAGE_PNG = "image/png"
   val IMAGE_PNG_MEDIA_TYPE = IMAGE_PNG.asMediaType()
 
-  fun fromFileExtension(ext: String) : MediaType? {
+  fun fromFileExtension(ext: String) : MediaType {
     return when (ext) {
       "css" -> TEXT_CSS_MEDIA_TYPE
       "html", "htm" -> TEXT_HTML_MEDIA_TYPE
       "js" -> APPLICATION_JAVASCRIPT_MEDIA_TYPE
       "png" -> IMAGE_PNG_MEDIA_TYPE
-      else -> null
+      else -> APPLICATION_OCTETSTREAM_MEDIA_TYPE
     }
   }
 }
