@@ -16,7 +16,7 @@ class ConfigWebModule(val environment: Environment): KAbstractModule() {
     multibind<AdminTab>().toInstance(AdminTab(
         "Config",
         "config",
-        "/_admin/config",
+        "/_admin/config/",
         "cog"
     ))
     if (environment == Environment.DEVELOPMENT) {
