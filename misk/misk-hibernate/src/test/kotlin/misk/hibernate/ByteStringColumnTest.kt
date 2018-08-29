@@ -9,6 +9,8 @@ import misk.inject.KAbstractModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import okio.ByteString
+import okio.ByteString.Companion.decodeHex
+import okio.ByteString.Companion.encodeUtf8
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import javax.inject.Inject
@@ -28,8 +30,8 @@ class ByteStringColumnTest {
 
   @Test
   fun happyPath() {
-    val abcHash = ByteString.encodeUtf8("abc").sha256()
-    val defHash = ByteString.encodeUtf8("def").sha256()
+    val abcHash = "abc".encodeUtf8().sha256()
+    val defHash = "def".encodeUtf8().sha256()
     transacter.transaction { session ->
       session.save(DbTextHash("abc", abcHash))
       session.save(DbTextHash("def", defHash))
@@ -45,10 +47,10 @@ class ByteStringColumnTest {
 
   @Test
   fun sorting() {
-    val v1 = TextAndHash("00", ByteString.decodeHex("00"))
-    val v2 = TextAndHash("99", ByteString.decodeHex("99"))
-    val v3 = TextAndHash("a0", ByteString.decodeHex("a0"))
-    val v4 = TextAndHash("ff", ByteString.decodeHex("ff"))
+    val v1 = TextAndHash("00", "00".decodeHex())
+    val v2 = TextAndHash("99", "99".decodeHex())
+    val v3 = TextAndHash("a0", "a0".decodeHex())
+    val v4 = TextAndHash("ff", "ff".decodeHex())
 
     transacter.transaction { session ->
       session.save(DbTextHash(v1.text, v1.hash))
@@ -75,7 +77,7 @@ class ByteStringColumnTest {
           .listAsTextAndHash(session))
           .containsExactly(v1, v2, v3)
       assertThat(queryFactory.newQuery<TextHashQuery>()
-          .hashLessThan(ByteString.decodeHex("ff00"))
+          .hashLessThan("ff00".decodeHex())
           .listAsTextAndHash(session))
           .containsExactly(v1, v2, v3, v4)
     }

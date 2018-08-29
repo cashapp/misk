@@ -7,8 +7,9 @@ import com.google.cloud.datastore.Key
 import com.google.cloud.datastore.QueryResults
 import com.squareup.wire.ProtoAdapter
 import okio.ByteString
+import okio.ByteString.Companion.toByteString
 
-fun Blob.toByteString(): ByteString = ByteString.of(asReadOnlyByteBuffer())
+fun Blob.toByteString(): ByteString = asReadOnlyByteBuffer().toByteString()
 
 fun Entity.getByteString(name: String) = getBlob(name).toByteString()
 

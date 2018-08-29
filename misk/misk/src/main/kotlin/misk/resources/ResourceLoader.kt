@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableSet
 import misk.resources.ResourceLoader.Backend
 import okio.BufferedSource
 import okio.ByteString
+import okio.ByteString.Companion.encodeUtf8
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -50,7 +51,7 @@ class ResourceLoader @Inject constructor(
 
   /** Writes a resource as UTF-8. Throws if the backend is readonly. */
   fun put(address: String, utf8: String) {
-    put(address, ByteString.encodeUtf8(utf8))
+    put(address, utf8.encodeUtf8())
   }
 
   /** Writes a resource. Throws if the backend is readonly. */

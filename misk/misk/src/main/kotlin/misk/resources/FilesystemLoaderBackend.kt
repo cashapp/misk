@@ -1,7 +1,8 @@
 package misk.resources
 
 import okio.BufferedSource
-import okio.Okio
+import okio.buffer
+import okio.source
 import java.io.File
 import java.io.FileNotFoundException
 import javax.inject.Singleton
@@ -16,7 +17,7 @@ internal object FilesystemLoaderBackend : ResourceLoader.Backend() {
   override fun open(path: String): BufferedSource? {
     val file = File(path)
     try {
-      return Okio.buffer(Okio.source(file))
+      return file.source().buffer()
     } catch (e: FileNotFoundException) {
       return null
     }

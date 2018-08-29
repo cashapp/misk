@@ -7,6 +7,7 @@ import com.squareup.wire.ProtoAdapter
 import com.squareup.wire.WireField
 import misk.moshi.adapter
 import okio.ByteString
+import okio.ByteString.Companion.decodeBase64
 import java.lang.reflect.Field
 import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Method
@@ -125,7 +126,7 @@ internal class FieldBinding(
         "DOUBLE" -> toNumber { it.toDouble() }
         "STRING" -> { s -> s }
         "BYTES" -> { s ->
-          ByteString.decodeBase64(s)
+          s.decodeBase64()
               ?: throw IllegalArgumentException("could not parse $s as base 64")
         }
         else -> throw IllegalStateException("unknown type $adapterFieldName")

@@ -5,6 +5,7 @@ import misk.MiskServiceModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import okio.ByteString
+import okio.ByteString.Companion.decodeHex
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import javax.inject.Inject
@@ -25,7 +26,7 @@ internal class ByteStringAdapterTest {
         |  "b": "_wA="
         |}
         |""".trimMargin()
-    val value = ByteStringPair(ByteString.decodeHex("00ff"), ByteString.decodeHex("ff00"))
+    val value = ByteStringPair("00ff".decodeHex(), "ff00".decodeHex())
     val jsonAdapter = moshi.adapter<ByteStringPair>().indent("  ")
     assertThat(jsonAdapter.toJson(value)).isEqualTo(json.trimMargin())
     assertThat(jsonAdapter.fromJson(json)).isEqualTo(value)

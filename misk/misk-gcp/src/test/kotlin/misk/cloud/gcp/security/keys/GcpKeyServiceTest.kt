@@ -8,6 +8,7 @@ import misk.cloud.gcp.testing.FakeHttpRouter
 import misk.cloud.gcp.testing.FakeHttpRouter.Companion.respondWithError
 import misk.cloud.gcp.testing.FakeHttpRouter.Companion.respondWithJson
 import okio.ByteString
+import okio.ByteString.Companion.encodeUtf8
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import kotlin.test.assertFailsWith
@@ -37,27 +38,27 @@ internal class GcpKeyServiceTest {
 
   @Test
   fun encrypt() {
-    val cipherText = keyManager.encrypt("foo", ByteString.encodeUtf8("encrypt me!"))
+    val cipherText = keyManager.encrypt("foo", "encrypt me!".encodeUtf8())
     assertThat(cipherText.utf8()).isEqualTo("encrypted")
   }
 
   @Test
   fun decrypt() {
-    val plainText = keyManager.decrypt("foo", ByteString.encodeUtf8("decrypt me!"))
+    val plainText = keyManager.decrypt("foo", "decrypt me!".encodeUtf8())
     assertThat(plainText.utf8()).isEqualTo("decrypted")
   }
 
   @Test
   fun invalidEncryptKey() {
     assertFailsWith<IllegalArgumentException> {
-      keyManager.encrypt("unknown_key", ByteString.encodeUtf8("should fail"))
+      keyManager.encrypt("unknown_key", "should fail".encodeUtf8())
     }
   }
 
   @Test
   fun invalidDecryptKey() {
     assertFailsWith<IllegalArgumentException> {
-      keyManager.decrypt("unknown_key", ByteString.encodeUtf8("should fail"))
+      keyManager.decrypt("unknown_key", "should fail".encodeUtf8())
     }
   }
 }

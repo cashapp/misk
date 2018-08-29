@@ -3,6 +3,7 @@ package misk.security.ssl
 import okio.Buffer
 import okio.BufferedSource
 import okio.ByteString
+import okio.ByteString.Companion.decodeBase64
 import org.bouncycastle.asn1.ASN1Sequence
 import org.bouncycastle.asn1.pkcs.RSAPrivateKey
 import java.io.IOException
@@ -112,7 +113,7 @@ data class PemComboFile(
         result.writeUtf8(line)
       }
 
-      return ByteString.decodeBase64(result.readUtf8()) ?: throw IOException("malformed base64")
+      return result.readUtf8().decodeBase64() ?: throw IOException("malformed base64")
     }
   }
 }

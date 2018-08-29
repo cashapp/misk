@@ -8,7 +8,8 @@ import okhttp3.Headers
 import okhttp3.MediaType
 import okio.BufferedSink
 import okio.BufferedSource
-import okio.Okio
+import okio.buffer
+import okio.source
 import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -34,7 +35,7 @@ class StaticResourceMapper @Inject internal constructor(
 
     return when {
       resourceLoader.exists(resourcePath) -> resourceLoader.open(resourcePath)!!
-      responseBodyFile.exists() -> Okio.buffer(Okio.source(responseBodyFile))
+      responseBodyFile.exists() -> responseBodyFile.source().buffer()
       else -> null
     }
   }
