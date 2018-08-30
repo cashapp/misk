@@ -12,6 +12,7 @@
     "test": "jest --coverage"
   },
   "dependencies": {
+    "@blueprintjs/webpack-build-scripts": "^0.6.0",
     "@misk/common": "^0.0.24",
     "@misk/components": "^0.0.16",
     "@misk/tabs": "^0.0.1",
@@ -20,7 +21,8 @@
     "json2yaml": "^1.1.0"
   },
   "devDependencies": {
-    "@misk/dev": "^0.0.10"
+    "@misk/dev": "^0.0.10",
+    "@misk/webpack": "^0.0.6"
   },
   "miskTabWebpack": {
     "name": "Config",

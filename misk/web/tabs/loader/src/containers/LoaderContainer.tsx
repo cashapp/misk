@@ -30,7 +30,7 @@ class LoaderContainer extends React.Component<ILoaderProps> {
   }
 
   render() {
-    const { adminTabs, adminTabComponents, staleTabCache } = this.props.loader
+    const { adminTabs } = this.props.loader
     if (adminTabs) {
       const tabLinks = Object.entries(adminTabs).map(([,tab]) => <Link key={tab.slug} to={`/_admin/${tab.slug}/`}>{tab.name}<br/></Link>)
       return (
