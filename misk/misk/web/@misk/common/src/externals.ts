@@ -19,11 +19,11 @@ export interface IOutExternal {
  */
 export const makeExternals = (inExternals: IInExternal) : IOutExternal => {
   const outExternals: IOutExternal = {}
-  Object.keys(inExternals).map((pkg, index) => {
+  Object.keys(inExternals).map((pkg) => {
     outExternals[pkg] = {
+      amd: pkg,
       commonjs: pkg,
       commonjs2: pkg,
-      amd: pkg,
       root: inExternals[pkg],
     }
   })
