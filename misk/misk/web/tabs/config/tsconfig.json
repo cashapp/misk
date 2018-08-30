@@ -1,14 +1,6 @@
 {
-  "compilerOptions": {
-      "outDir": "./dist",
-      "sourceMap": true,
-      "noImplicitAny": true,
-      "module": "commonjs",
-      "jsx": "react",
-      "target": "esnext",
-      "lib": ["es5", "es6", "dom", "es2017"]
-  },
-  "include": [
-      "./src/**/*"
-  ]
-}
+    "extends": "./node_modules/@misk/common/lib/tsconfig.base",
+    "compilerOptions": {
+        "outDir": "./dist"
+    }
+  }

@@ -1,27 +1,6 @@
 {
-    "compileOnSave": true,
+    "extends": "./src/base/tsconfig.base",
     "compilerOptions": {
-        "allowSyntheticDefaultImports": true,
-        "alwaysStrict": true,
-        "declaration": true,
-        "esModuleInterop": true,
-        "jsx": "react",
-        "lib": ["es5", "es6", "dom", "es2017"],
-        "module": "commonjs",
-        "noEmit": true,
-        "noEmitOnError": true,
-        "noImplicitAny": true,
-        "noImplicitThis": true,
-        "outDir": "./lib/",
-        "skipLibCheck": true,
-        "sourceMap": true,
-        "strict": true,
-        "target": "es6",
-    },
-    "include": [
-        "./src/**/*"
-    ],
-    "exclude": [
-        "node_modules/**"
-    ]
+        "outDir": "./lib",
+    }
 }

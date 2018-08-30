@@ -6,7 +6,7 @@
 // import { push } from react-router-redux and then
 // yield put(push('/next-page'))
 
-import { IMiskAdminTab, IMiskAdminTabs } from "@misk/common"
+import { IMiskAdminTab } from "@misk/common"
 import axios from "axios"
 import { all, call, put, takeEvery, takeLatest } from "redux-saga/effects"
 
@@ -35,7 +35,7 @@ function * handleGetAllTabs () {
   }
 }
 
-function * handleGetAllAndTabs (action: IAction<IActionType, {}>) {
+function * handleGetAllAndTabs () {
   let adminTabs: any = {}
   try {
     yield put(dispatchLoader.getAllTabs())

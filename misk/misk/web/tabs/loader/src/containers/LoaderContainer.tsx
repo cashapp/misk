@@ -1,6 +1,5 @@
-import { IMiskAdminTab, IMiskAdminTabs } from "@misk/common"
+import { IMiskAdminTab } from "@misk/common"
 import { NavSidebarComponent, NavTopbarComponent, NoMatchComponent } from "@misk/components"
-import { externals as MiskTabCommon } from "@misk/tabs" 
 import { RouterState } from "connected-react-router"
 import * as React from "react"
 import { connect } from "react-redux"
@@ -10,10 +9,6 @@ import { dispatchLoader } from "../actions"
 import { MountingDivComponent, ScriptComponent } from "../components"
 import { ILoaderState, IState } from "../reducers"
 import { IMultibinder } from "../utils/binder"
-
-interface IMiskTabs {
-  [app:string]: any
-}
 
 export interface ILoaderProps {
   loader: ILoaderState
@@ -30,20 +25,19 @@ class LoaderContainer extends React.Component<ILoaderProps> {
     this.props.getTabs()
   }
 
-  buildTabRouteMountingDiv(key: any, tab: IMiskAdminTab) {
-    return(<Route key={key} path={`/_admin/${tab.slug}/`} render={() => <MountingDivComponent key={key} tab={tab}/>}/>)
+  buildTabRouteMountingDiv(tab: IMiskAdminTab) {
+    return(<Route path={`/_admin/${tab.slug}/`} render={() => <MountingDivComponent tab={tab}/>}/>)
   }
 
   render() {
     const { adminTabs, adminTabComponents, staleTabCache } = this.props.loader
     if (adminTabs) {
-      const tabRouteDivs = Object.entries(adminTabs).map(([key,tab]) => this.buildTabRouteMountingDiv(key, tab))
-      const tabLinks = Object.entries(adminTabs).map(([key,tab]) => <Link key={key} to={`/_admin/${tab.slug}/`}>{tab.name}<br/></Link>)
+      const tabLinks = Object.entries(adminTabs).map(([,tab]) => <Link key={tab.slug} to={`/_admin/${tab.slug}/`}>{tab.name}<br/></Link>)
       return (
         <div>
           <NavTopbarComponent name="Misk Admin Loader" />
           <NavSidebarComponent adminTabs={adminTabs} />
-          {Object.entries(adminTabs).map(([key,tab]) => (<ScriptComponent tab={tab}/>))}
+          {Object.entries(adminTabs).map(([key,tab]) => (<ScriptComponent key={key} tab={tab}/>))}
           <Switch>
             <Route component={NoMatchComponent}/>
           </Switch>

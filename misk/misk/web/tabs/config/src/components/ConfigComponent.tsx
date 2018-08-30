@@ -1,5 +1,5 @@
 // tslint:disable-next-line:no-var-requires
-const YAML = require("json2yaml")
+// const YAML = require("json2yaml")
 import * as React from "react"
 import styled from "styled-components"
 import { IConfigFile } from "../containers/TabContainer"
