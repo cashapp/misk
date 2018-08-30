@@ -11,7 +11,7 @@ import { all, call, put, takeLatest } from "redux-saga/effects"
 const dayjs = require("dayjs")
 
 import {
-  CONFIG, dispatchConfig, IAction, IActionType
+  CONFIG, dispatchConfig
 } from "../actions"
 
 const dateFormat = "YYYY-MM-DD HH:mm:ss"

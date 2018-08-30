@@ -1,3 +1,4 @@
+///<reference types="webpack-env" />
 import { IMiskWindow } from "@misk/common"
 import { connectRouter, routerMiddleware } from "connected-react-router"
 import { createBrowserHistory } from "history"
