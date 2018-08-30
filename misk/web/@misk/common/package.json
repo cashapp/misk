@@ -1,9 +1,9 @@
 {
   "name": "@misk/common",
-  "version": "0.0.19",
+  "version": "0.0.23",
   "description": "Microservice Kontainer Common Libraries, Externals, Styles",
   "author": "Square/Misk Authors (https://github.com/square/misk/graphs/contributors)",
-  "main": "lib/common.js",
+  "main": "lib/tslint.base.json",
   "module": "lib/common.js",
   "typings": "lib/index.d.ts",
   "style": "lib/styles.js",
