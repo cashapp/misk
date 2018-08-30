@@ -1,27 +1,18 @@
-const path = require('path')
 const webpack = require('webpack')
-const HTMLWebpackPlugin = require('html-webpack-plugin')
-const MiskCommon = require('@misk/common')
 
 const dev = process.env.NODE_ENV !== 'production'
-
-const HTMLWebpackPluginConfig = new HTMLWebpackPlugin({
-  template: path.join(__dirname, '/src/index.html'),
-  filename: 'index.html',
-  inject: 'body'
-})
 
 const DefinePluginConfig = new webpack.DefinePlugin({
   'process.env.NODE_ENV': JSON.stringify('production')
 })
 
 module.exports = {
-  entry: ['react-hot-loader/patch', path.join(__dirname, '/src/index.tsx')],
+  // entry: { defined in child webpack config }
   output: {
-    // filename: { defined in webpack config built on base }
-    path: path.join(__dirname, 'dist'),
+    // filename: { defined in child webpack config }
+    // path: { defined in child webpack config }
     publicPath: "/",
-    // library: { defined in webpack config built on base }
+    // library: { defined in child webpack config }
     libraryTarget: 'umd',
     /**
      * library will try to bind to browser `window` variable
@@ -31,7 +22,7 @@ module.exports = {
     globalObject: 'typeof self !== \'undefined\' ? self : this'
   },
   devServer: {
-    // port:  { defined in webpack config built on base }
+    // port:  { defined in child webpack config }
     inline: true,
     hot: true,
     historyApiFallback: true
@@ -66,11 +57,7 @@ module.exports = {
   },
   mode: dev ? 'development' : 'production',
   plugins: dev
-    ? [
-      HTMLWebpackPluginConfig,
-      new webpack.HotModuleReplacementPlugin()
-    ]
-    : [HTMLWebpackPluginConfig,
-      DefinePluginConfig],
-  externals: { ...MiskCommon.externals }
+    ? [new webpack.HotModuleReplacementPlugin()]
+    : [DefinePluginConfig]
+  // externals: { defined in child webpack config }
 }
