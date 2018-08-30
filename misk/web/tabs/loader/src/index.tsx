@@ -1,3 +1,4 @@
+import { IMiskWindow } from "@misk/common"
 import { connectRouter, routerMiddleware } from "connected-react-router"
 import { createBrowserHistory } from "history"
 import * as React from "react"
@@ -12,14 +13,7 @@ import rootSaga from "./sagas"
 import { binders, multibind } from "./utils/binder"
 export { binders, multibind }
 
-export interface IWindow extends Window {
-  __REDUX_DEVTOOLS_EXTENSION_COMPOSE__: any
-  Misk: {
-    Binder: any
-    History: any
-  }
-}
-const Window = window as IWindow
+const Window = window as IMiskWindow
 
 Window.Misk.Binder = { binders, multibind }
 Window.Misk.History = Window.Misk.History || createBrowserHistory()
