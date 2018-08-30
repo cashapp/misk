@@ -66,34 +66,9 @@
     skeleton-css "^2.0.4"
     styled-components "^3.4.2"
 
-"@misk/common@^0.0.23":
-  version "0.0.23"
-  resolved "https://registry.yarnpkg.com/@misk/common/-/common-0.0.23.tgz#7fcda7598b871420a94001e5a04c1c3c98bbfd65"
-  dependencies:
-    "@blueprintjs/core" "^3.3.0"
-    "@blueprintjs/icons" "^3.0.0"
-    axios "^0.18.0"
-    connected-react-router "^4.4.1"
-    dayjs "^1.7.5"
-    history "^4.7.2"
-    immutable "^3.8.2"
-    react "^16.4.2"
-    react-dom "^16.4.2"
-    react-helmet "^5.2.0"
-    react-hot-loader "^4.3.4"
-    react-redux "^5.0.7"
-    react-router "^4.3.1"
-    react-router-dom "^4.3.1"
-    react-router-redux "^5.0.0-alpha.9"
-    react-transition-group "^2.4.0"
-    redux "^4.0.0"
-    redux-saga "^0.16.0"
-    skeleton-css "^2.0.4"
-    styled-components "^3.4.2"
-
-"@misk/common@^0.0.24":
-  version "0.0.24"
-  resolved "https://registry.yarnpkg.com/@misk/common/-/common-0.0.24.tgz#c4a77ae3bc63055abd5f8935beabf2f6a100a77e"
+"@misk/common@^0.0.25":
+  version "0.0.25"
+  resolved "https://registry.yarnpkg.com/@misk/common/-/common-0.0.25.tgz#a3e7e69895df625bec3d6813d768f12791ab6161"
   dependencies:
     "@blueprintjs/core" "^3.3.0"
     "@blueprintjs/icons" "^3.0.0"
@@ -122,9 +97,9 @@
   dependencies:
     "@misk/common" "^0.0.14"
 
-"@misk/dev@^0.0.10":
-  version "0.0.10"
-  resolved "https://registry.yarnpkg.com/@misk/dev/-/dev-0.0.10.tgz#7ec29a6d148785b756b5e642b0ab5184d0242638"
+"@misk/dev@^0.0.11":
+  version "0.0.11"
+  resolved "https://registry.yarnpkg.com/@misk/dev/-/dev-0.0.11.tgz#12770596fe5606e56ba80929e33a53ee20e25853"
   dependencies:
     "@types/node" "^10.7.0"
     "@types/react" "^16.4.10"
@@ -136,16 +111,7 @@
     "@types/react-router-dom" "^4.3.0"
     "@types/react-router-redux" "^5.0.15"
     "@types/webpack-env" "^1.13.6"
-    awesome-typescript-loader "^5.2.0"
-    copy-webpack-plugin "^4.5.2"
     cross-env "^5.2.0"
-    css-loader "^1.0.0"
-    file-loader "^1.1.11"
-    html-webpack-plugin "^3.2.0"
-    node-sass "^4.9.3"
-    sass-loader "^7.1.0"
-    source-map-loader "^0.2.4"
-    style-loader "^0.22.1"
     tslint "^5.11.0"
     tslint-blueprint "^0.1.0"
     tslint-clean-code "^0.2.7"
@@ -156,10 +122,6 @@
     tslint-react "^3.6.0"
     tslint-sonarts "^1.7.0"
     typescript "^3.0.1"
-    url-loader "^1.1.0"
-    webpack "^4.16.5"
-    webpack-cli "^3.1.0"
-    webpack-dev-server "^3.1.5"
 
 "@misk/tabs@^0.0.1":
   version "0.0.1"
@@ -167,11 +129,10 @@
   dependencies:
     "@misk/common" "^0.0.14"
 
-"@misk/webpack@^0.0.6":
-  version "0.0.6"
-  resolved "https://registry.yarnpkg.com/@misk/webpack/-/webpack-0.0.6.tgz#81b567634df0bbda0c7bfc4a9f02cb52b97d4120"
+"@misk/webpack@^0.0.7":
+  version "0.0.7"
+  resolved "https://registry.yarnpkg.com/@misk/webpack/-/webpack-0.0.7.tgz#18fb0442a1fa5cbc7c1287a73e66f6225054a174"
   dependencies:
-    "@misk/common" "^0.0.24"
     awesome-typescript-loader "^5.2.0"
     copy-webpack-plugin "^4.5.2"
     css-loader "^1.0.0"
@@ -438,10 +399,6 @@ acorn-dynamic-import@^3.0.0:
 acorn@^5.0.0, acorn@^5.6.2:
   version "5.7.1"
   resolved "https://npm.vip.global.square/acorn/-/acorn-5.7.1.tgz#f095829297706a7c9776958c0afc8930a9b9d9d8"
-
-ajv-errors@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/ajv-errors/-/ajv-errors-1.0.0.tgz#ecf021fa108fd17dfb5e6b383f2dd233e31ffc59"
 
 ajv-keywords@^3.1.0:
   version "3.2.0"
@@ -3105,7 +3062,7 @@ mime@1.4.1:
   version "1.4.1"
   resolved "https://npm.vip.global.square/mime/-/mime-1.4.1.tgz#121f9ebc49e3766f311a76e1fa1c8003c4b03aa6"
 
-mime@^2.0.3, mime@^2.1.0:
+mime@^2.1.0:
   version "2.3.1"
   resolved "https://npm.vip.global.square/mime/-/mime-2.3.1.tgz#b1621c54d63b97c47d3cfe7f7215f7d64517c369"
 
@@ -4356,14 +4313,6 @@ sax@^1.2.4:
   version "1.2.4"
   resolved "https://npm.vip.global.square/sax/-/sax-1.2.4.tgz#2816234e2378bddc4e5354fab5caa895df7100d9"
 
-schema-utils@1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/schema-utils/-/schema-utils-1.0.0.tgz#0b79a93204d7b600d4b2850d1f66c2a34951c770"
-  dependencies:
-    ajv "^6.1.0"
-    ajv-errors "^1.0.0"
-    ajv-keywords "^3.1.0"
-
 schema-utils@^0.4.4, schema-utils@^0.4.5:
   version "0.4.5"
   resolved "https://npm.vip.global.square/schema-utils/-/schema-utils-0.4.5.tgz#21836f0608aac17b78f9e3e24daff14a5ca13a3e"
@@ -5157,14 +5106,6 @@ urix@^0.1.0:
 url-join@^4.0.0:
   version "4.0.0"
   resolved "https://npm.vip.global.square/url-join/-/url-join-4.0.0.tgz#4d3340e807d3773bda9991f8305acdcc2a665d2a"
-
-url-loader@^1.1.0:
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/url-loader/-/url-loader-1.1.0.tgz#64dd296626d935c68d72ed9d9c69cf3c6ff933ac"
-  dependencies:
-    loader-utils "^1.1.0"
-    mime "^2.0.3"
-    schema-utils "1.0.0"
 
 url-parse@^1.1.8, url-parse@~1.4.0:
   version "1.4.1"

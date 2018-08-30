@@ -118,7 +118,6 @@ Webpack Configs
 
 Base Configs: `src/config`
 ---
-- `webpack.base.config.js`: Base config for webpack builds
 - `tsconfig.base.js`: Base Typescript compiler options
 - `tslint.base.js`: Base TSLint options
 
