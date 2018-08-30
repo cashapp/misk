@@ -72,7 +72,7 @@ export default class ConfigComponent extends React.PureComponent<IConfigProps> {
         <h1>App: Config</h1>
         <p>{status}</p>
         {files && files.map(f => (
-          <div>
+          <div key={f.name}>
             <br/>
             <h5>{f.name}</h5>
             <code><pre>
