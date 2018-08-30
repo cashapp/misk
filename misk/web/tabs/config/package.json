@@ -24,6 +24,7 @@
   },
   "devDependencies": {
     "@misk/dev": "^0.0.11",
+    "@misk/typescript": "^0.0.1",
     "@misk/webpack": "^0.0.7"
   },
   "miskTabWebpack": {

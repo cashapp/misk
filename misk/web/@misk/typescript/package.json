@@ -1,0 +1,11 @@
+{
+  "name": "@misk/typescript",
+  "version": "0.0.1",
+  "description": "Microservice Kontainer Typescript Build Environment",
+  "author": "Square/Misk Authors (https://github.com/square/misk/graphs/contributors)",
+  "main": "tslint.base.json",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:square/misk.git"
+  }
+}

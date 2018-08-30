@@ -81,6 +81,10 @@
     webpack-cli "^3.1.0"
     webpack-dev-server "^3.1.5"
 
+"@misk/typescript@^0.0.1":
+  version "0.0.1"
+  resolved "https://registry.yarnpkg.com/@misk/typescript/-/typescript-0.0.1.tgz#0e84a955c0596086e32917dd374466e5ec0b583b"
+
 "@misk/webpack@^0.0.7":
   version "0.0.7"
   resolved "https://registry.yarnpkg.com/@misk/webpack/-/webpack-0.0.7.tgz#18fb0442a1fa5cbc7c1287a73e66f6225054a174"

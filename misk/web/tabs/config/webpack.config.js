@@ -49,7 +49,7 @@ const CopyWebpackPluginConfig = new CopyWebpackPlugin(
 module.exports = {...MiskWebpackConfigBase,
   entry: ['react-hot-loader/patch', path.join(__dirname, '/src/index.tsx')],
   output: { ...MiskWebpackConfigBase.output,
-    filename: `${RELATIVE_PATH}/tab_${MiskTabConfig.slug}.js`,
+    filename: `${RELATIVE_PATH}tab_${MiskTabConfig.slug}.js`,
     path: path.join(__dirname, 'dist'),
     library: ['MiskTabs', `${MiskTabConfig.name}`],
   },
@@ -61,3 +61,6 @@ module.exports = {...MiskWebpackConfigBase,
     .concat([CopyWebpackPluginConfig, HTMLWebpackPluginConfig]),
   externals: { ...MiskCommon.externals }
 }
+
+console.log("*****************************")
+console.log(module.exports.externals)
