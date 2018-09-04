@@ -1,8 +1,9 @@
 {
   "name": "@misk/dev",
-  "version": "0.0.10",
+  "version": "0.0.14",
   "description": "Microservice Kontainer Development Libraries",
   "author": "Square/Misk Authors (https://github.com/square/misk/graphs/contributors)",
+  "main": "tslint.base.json",
   "repository": {
     "type": "git",
     "url": "git@github.com:square/misk.git"
@@ -18,7 +19,6 @@
     "@types/react-router-dom": "^4.3.0",
     "@types/react-router-redux": "^5.0.15",
     "@types/webpack-env": "^1.13.6",
-    "cross-env": "^5.2.0",
     "tslint": "^5.11.0",
     "tslint-blueprint": "^0.1.0",
     "tslint-clean-code": "^0.2.7",
