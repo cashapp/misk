@@ -1,3 +1,3 @@
 {
-  "extends": "@misk/typescript"
+  "extends": "@misk/dev"
 }

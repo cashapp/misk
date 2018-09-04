@@ -1,6 +1,6 @@
 {
   "name": "@misk/webpack",
-  "version": "0.0.6",
+  "version": "0.0.8",
   "description": "Microservice Kontainer Webpack Build Configs",
   "author": "Square/Misk Authors (https://github.com/square/misk/graphs/contributors)",
   "repository": {
@@ -18,9 +18,9 @@
     "test": "echo no tests"
   },
   "dependencies": {
-    "@misk/common": "^0.0.24",
     "awesome-typescript-loader": "^5.2.0",
     "copy-webpack-plugin": "^4.5.2",
+    "cross-env": "^5.2.0",
     "css-loader": "^1.0.0",
     "file-loader": "^1.1.11",
     "html-webpack-plugin": "^3.2.0",
