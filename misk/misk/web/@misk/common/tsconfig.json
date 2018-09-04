@@ -1,5 +1,5 @@
 {
-    "extends": "./src/config/tsconfig.base",
+    "extends": "./node_modules/@misk/dev/tsconfig.base",
     "compilerOptions": {
         "outDir": "./lib",
     }
