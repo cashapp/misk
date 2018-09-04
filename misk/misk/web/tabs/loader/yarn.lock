@@ -66,9 +66,9 @@
     skeleton-css "^2.0.4"
     styled-components "^3.4.2"
 
-"@misk/common@^0.0.23":
-  version "0.0.23"
-  resolved "https://registry.yarnpkg.com/@misk/common/-/common-0.0.23.tgz#7fcda7598b871420a94001e5a04c1c3c98bbfd65"
+"@misk/common@^0.0.24":
+  version "0.0.24"
+  resolved "https://registry.yarnpkg.com/@misk/common/-/common-0.0.24.tgz#c4a77ae3bc63055abd5f8935beabf2f6a100a77e"
   dependencies:
     "@blueprintjs/core" "^3.3.0"
     "@blueprintjs/icons" "^3.0.0"
@@ -91,9 +91,9 @@
     skeleton-css "^2.0.4"
     styled-components "^3.4.2"
 
-"@misk/common@^0.0.24":
-  version "0.0.24"
-  resolved "https://registry.yarnpkg.com/@misk/common/-/common-0.0.24.tgz#c4a77ae3bc63055abd5f8935beabf2f6a100a77e"
+"@misk/common@^0.0.26":
+  version "0.0.26"
+  resolved "https://registry.yarnpkg.com/@misk/common/-/common-0.0.26.tgz#88eeadfd81e4efe0ab9d421e21593a587cc8ccac"
   dependencies:
     "@blueprintjs/core" "^3.3.0"
     "@blueprintjs/icons" "^3.0.0"
