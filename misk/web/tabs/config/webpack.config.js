@@ -26,6 +26,7 @@ const MiskCommon = require('@misk/common')
 const { MiskWebpackConfigBase } = require("@misk/webpack")
 
 const path = require('path')
+const merge = require('webpack-merge')
 const CopyWebpackPlugin = require('copy-webpack-plugin')
 const HTMLWebpackPlugin = require('html-webpack-plugin')
 
@@ -46,18 +47,16 @@ const CopyWebpackPluginConfig = new CopyWebpackPlugin(
   { debug: 'info', copyUnmodified: true }
 )
 
-module.exports = {...MiskWebpackConfigBase,
+module.exports = merge(MiskWebpackConfigBase, {
   entry: ['react-hot-loader/patch', path.join(__dirname, '/src/index.tsx')],
-  output: { ...MiskWebpackConfigBase.output,
+  output: {
     filename: `${RELATIVE_PATH}tab_${MiskTabConfig.slug}.js`,
     path: path.join(__dirname, 'dist'),
     library: ['MiskTabs', `${MiskTabConfig.name}`],
   },
-  devServer: { ...MiskWebpackConfigBase.devServer,
+  devServer: {
     port: MiskTabConfig.port
   },
-  plugins: []
-    .concat(MiskWebpackConfigBase.plugins)
-    .concat([CopyWebpackPluginConfig, HTMLWebpackPluginConfig]),
-  externals: { ...MiskCommon.externals }
-}
+  plugins: [CopyWebpackPluginConfig, HTMLWebpackPluginConfig],
+  externals: MiskCommon.externals
+})

@@ -41,11 +41,10 @@
     reflect-metadata "^0.1.12"
     tslib "^1.8.1"
 
-"@misk/dev@^0.0.8":
-  version "0.0.8"
-  resolved "https://registry.yarnpkg.com/@misk/dev/-/dev-0.0.8.tgz#b89f4eee8e4185fcb472569fa498ebae74271af1"
+"@misk/dev@^0.0.14":
+  version "0.0.14"
+  resolved "https://registry.yarnpkg.com/@misk/dev/-/dev-0.0.14.tgz#b3ccccfeb88a50f6eb10682a65720988e6f990b8"
   dependencies:
-    "@types/immutable" "^3.8.7"
     "@types/node" "^10.7.0"
     "@types/react" "^16.4.10"
     "@types/react-dom" "^16.0.7"
@@ -56,16 +55,6 @@
     "@types/react-router-dom" "^4.3.0"
     "@types/react-router-redux" "^5.0.15"
     "@types/webpack-env" "^1.13.6"
-    awesome-typescript-loader "^5.2.0"
-    copy-webpack-plugin "^4.5.2"
-    cross-env "^5.2.0"
-    css-loader "^1.0.0"
-    file-loader "^1.1.11"
-    html-webpack-plugin "^3.2.0"
-    node-sass "^4.9.3"
-    sass-loader "^7.1.0"
-    source-map-loader "^0.2.4"
-    style-loader "^0.22.1"
     tslint "^5.11.0"
     tslint-blueprint "^0.1.0"
     tslint-clean-code "^0.2.7"
@@ -76,10 +65,25 @@
     tslint-react "^3.6.0"
     tslint-sonarts "^1.7.0"
     typescript "^3.0.1"
-    url-loader "^1.1.0"
+
+"@misk/webpack@^0.0.9":
+  version "0.0.9"
+  resolved "https://registry.yarnpkg.com/@misk/webpack/-/webpack-0.0.9.tgz#68ec8280fd28e20b8f20df77942c7cf8c76c56ff"
+  dependencies:
+    awesome-typescript-loader "^5.2.0"
+    copy-webpack-plugin "^4.5.2"
+    cross-env "^5.2.0"
+    css-loader "^1.0.0"
+    file-loader "^1.1.11"
+    html-webpack-plugin "^3.2.0"
+    node-sass "^4.9.3"
+    sass-loader "^7.1.0"
+    source-map-loader "^0.2.4"
+    style-loader "^0.22.1"
     webpack "^4.16.5"
     webpack-cli "^3.1.0"
     webpack-dev-server "^3.1.5"
+    webpack-merge "^4.1.4"
 
 "@types/dom4@^2.0.0":
   version "2.0.0"
@@ -88,12 +92,6 @@
 "@types/history@*":
   version "4.6.2"
   resolved "https://registry.yarnpkg.com/@types/history/-/history-4.6.2.tgz#12cfaba693ba20f114ed5765467ff25fdf67ddb0"
-
-"@types/immutable@^3.8.7":
-  version "3.8.7"
-  resolved "https://registry.yarnpkg.com/@types/immutable/-/immutable-3.8.7.tgz#536d33d30f3f3d9a6d4642a219419fd82af633fb"
-  dependencies:
-    immutable "*"
 
 "@types/node@*":
   version "10.3.2"
@@ -340,10 +338,6 @@ acorn-dynamic-import@^3.0.0:
 acorn@^5.0.0, acorn@^5.6.2:
   version "5.6.2"
   resolved "https://npm.vip.global.square/acorn/-/acorn-5.6.2.tgz#b1da1d7be2ac1b4a327fb9eab851702c5045b4e7"
-
-ajv-errors@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/ajv-errors/-/ajv-errors-1.0.0.tgz#ecf021fa108fd17dfb5e6b383f2dd233e31ffc59"
 
 ajv-keywords@^3.1.0:
   version "3.2.0"
@@ -2400,7 +2394,7 @@ ignore@^3.3.5:
   version "3.3.10"
   resolved "https://registry.yarnpkg.com/ignore/-/ignore-3.3.10.tgz#0a97fb876986e8081c631160f8f9f389157f0043"
 
-immutable@*, immutable@^3.8.1, immutable@^3.8.2:
+immutable@^3.8.1, immutable@^3.8.2:
   version "3.8.2"
   resolved "https://registry.yarnpkg.com/immutable/-/immutable-3.8.2.tgz#c2439951455bb39913daf281376f1530e104adf3"
 
@@ -3053,7 +3047,7 @@ mime@1.4.1:
   version "1.4.1"
   resolved "https://registry.yarnpkg.com/mime/-/mime-1.4.1.tgz#121f9ebc49e3766f311a76e1fa1c8003c4b03aa6"
 
-mime@^2.0.3, mime@^2.1.0:
+mime@^2.1.0:
   version "2.3.1"
   resolved "https://registry.yarnpkg.com/mime/-/mime-2.3.1.tgz#b1621c54d63b97c47d3cfe7f7215f7d64517c369"
 
@@ -4321,14 +4315,6 @@ sax@^1.2.4:
   version "1.2.4"
   resolved "https://npm.vip.global.square/sax/-/sax-1.2.4.tgz#2816234e2378bddc4e5354fab5caa895df7100d9"
 
-schema-utils@1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/schema-utils/-/schema-utils-1.0.0.tgz#0b79a93204d7b600d4b2850d1f66c2a34951c770"
-  dependencies:
-    ajv "^6.1.0"
-    ajv-errors "^1.0.0"
-    ajv-keywords "^3.1.0"
-
 schema-utils@^0.4.4, schema-utils@^0.4.5:
   version "0.4.5"
   resolved "https://npm.vip.global.square/schema-utils/-/schema-utils-0.4.5.tgz#21836f0608aac17b78f9e3e24daff14a5ca13a3e"
@@ -5127,14 +5113,6 @@ url-join@^4.0.0:
   version "4.0.0"
   resolved "https://registry.yarnpkg.com/url-join/-/url-join-4.0.0.tgz#4d3340e807d3773bda9991f8305acdcc2a665d2a"
 
-url-loader@^1.1.0:
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/url-loader/-/url-loader-1.1.0.tgz#64dd296626d935c68d72ed9d9c69cf3c6ff933ac"
-  dependencies:
-    loader-utils "^1.1.0"
-    mime "^2.0.3"
-    schema-utils "1.0.0"
-
 url-parse@^1.1.8, url-parse@~1.4.0:
   version "1.4.1"
   resolved "https://registry.yarnpkg.com/url-parse/-/url-parse-1.4.1.tgz#4dec9dad3dc8585f862fed461d2e19bbf623df30"
@@ -5322,6 +5300,12 @@ webpack-log@^1.0.1, webpack-log@^1.1.2, webpack-log@^1.2.0:
     log-symbols "^2.1.0"
     loglevelnext "^1.0.1"
     uuid "^3.1.0"
+
+webpack-merge@^4.1.4:
+  version "4.1.4"
+  resolved "https://registry.yarnpkg.com/webpack-merge/-/webpack-merge-4.1.4.tgz#0fde38eabf2d5fd85251c24a5a8c48f8a3f4eb7b"
+  dependencies:
+    lodash "^4.17.5"
 
 webpack-sources@^1.0.1, webpack-sources@^1.1.0:
   version "1.1.0"

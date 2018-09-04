@@ -66,9 +66,9 @@
     skeleton-css "^2.0.4"
     styled-components "^3.4.2"
 
-"@misk/common@^0.0.26":
-  version "0.0.26"
-  resolved "https://registry.yarnpkg.com/@misk/common/-/common-0.0.26.tgz#88eeadfd81e4efe0ab9d421e21593a587cc8ccac"
+"@misk/common@^0.0.27":
+  version "0.0.27"
+  resolved "https://registry.yarnpkg.com/@misk/common/-/common-0.0.27.tgz#2715fdf3354e494d752ccf05042bc9f1ca62cd18"
   dependencies:
     "@blueprintjs/core" "^3.3.0"
     "@blueprintjs/icons" "^3.0.0"
@@ -91,11 +91,11 @@
     skeleton-css "^2.0.4"
     styled-components "^3.4.2"
 
-"@misk/components@^0.0.16":
-  version "0.0.16"
-  resolved "https://registry.yarnpkg.com/@misk/components/-/components-0.0.16.tgz#3739685546c4b0eef98662f01c869a08b95df7bd"
+"@misk/components@^0.0.17":
+  version "0.0.17"
+  resolved "https://registry.yarnpkg.com/@misk/components/-/components-0.0.17.tgz#760384d3244decc95f8aa8870c6b07604247eb6a"
   dependencies:
-    "@misk/common" "^0.0.14"
+    "@misk/common" "^0.0.27"
 
 "@misk/dev@^0.0.14":
   version "0.0.14"
@@ -128,9 +128,9 @@
   dependencies:
     "@misk/common" "^0.0.14"
 
-"@misk/webpack@^0.0.8":
-  version "0.0.8"
-  resolved "https://registry.yarnpkg.com/@misk/webpack/-/webpack-0.0.8.tgz#f0487a4415344bb4762c1c9d2d22d6000e0ea18d"
+"@misk/webpack@^0.0.9":
+  version "0.0.9"
+  resolved "https://registry.yarnpkg.com/@misk/webpack/-/webpack-0.0.9.tgz#68ec8280fd28e20b8f20df77942c7cf8c76c56ff"
   dependencies:
     awesome-typescript-loader "^5.2.0"
     copy-webpack-plugin "^4.5.2"
@@ -145,6 +145,7 @@
     webpack "^4.16.5"
     webpack-cli "^3.1.0"
     webpack-dev-server "^3.1.5"
+    webpack-merge "^4.1.4"
 
 "@types/dom4@^2.0.0":
   version "2.0.0"
@@ -5298,6 +5299,12 @@ webpack-log@^1.0.1, webpack-log@^1.1.2, webpack-log@^1.2.0:
     log-symbols "^2.1.0"
     loglevelnext "^1.0.1"
     uuid "^3.1.0"
+
+webpack-merge@^4.1.4:
+  version "4.1.4"
+  resolved "https://registry.yarnpkg.com/webpack-merge/-/webpack-merge-4.1.4.tgz#0fde38eabf2d5fd85251c24a5a8c48f8a3f4eb7b"
+  dependencies:
+    lodash "^4.17.5"
 
 webpack-sources@^1.0.1, webpack-sources@^1.1.0:
   version "1.1.0"
