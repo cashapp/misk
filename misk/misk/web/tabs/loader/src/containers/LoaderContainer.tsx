@@ -35,7 +35,7 @@ class LoaderContainer extends React.Component<ILoaderProps> {
       const tabLinks = Object.entries(adminTabs).map(([,tab]) => <Link key={tab.slug} to={`/_admin/${tab.slug}/`}>{tab.name}<br/></Link>)
       return (
         <div>
-          <NavTopbarComponent name="Misk Admin Loader" home="/_admin" />
+          <NavTopbarComponent home="/_admin" name="Misk Admin Loader"/>
           <NavSidebarComponent adminTabs={adminTabs} />
           {Object.entries(adminTabs).map(([key,tab]) => (<ScriptComponent key={key} tab={tab}/>))}
           <Switch>
