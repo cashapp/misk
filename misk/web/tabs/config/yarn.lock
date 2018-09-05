@@ -128,9 +128,9 @@
   dependencies:
     "@misk/common" "^0.0.14"
 
-"@misk/webpack@^0.0.12":
-  version "0.0.12"
-  resolved "https://registry.yarnpkg.com/@misk/webpack/-/webpack-0.0.12.tgz#3cfe04a7653241f546373e6b4cbcb8bd8512377e"
+"@misk/webpack@^0.0.16":
+  version "0.0.16"
+  resolved "https://registry.yarnpkg.com/@misk/webpack/-/webpack-0.0.16.tgz#9c47b621d358979875343129cbab07c4cc81f868"
   dependencies:
     awesome-typescript-loader "^5.2.0"
     copy-webpack-plugin "^4.5.2"

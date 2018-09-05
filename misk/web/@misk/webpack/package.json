@@ -1,6 +1,6 @@
 {
   "name": "@misk/webpack",
-  "version": "0.0.12",
+  "version": "0.0.16",
   "description": "Microservice Kontainer Webpack Build Configs",
   "author": "Square/Misk Authors (https://github.com/square/misk/graphs/contributors)",
   "repository": {
