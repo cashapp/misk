@@ -1,6 +1,6 @@
 {
   "name": "@misk/webpack",
-  "version": "0.0.9",
+  "version": "0.0.12",
   "description": "Microservice Kontainer Webpack Build Configs",
   "author": "Square/Misk Authors (https://github.com/square/misk/graphs/contributors)",
   "repository": {
@@ -32,5 +32,8 @@
     "webpack-cli": "^3.1.0",
     "webpack-dev-server": "^3.1.5",
     "webpack-merge": "^4.1.4"
+  },
+  "devDependencies": {
+    "@misk/common": "^0.0.27"
   }
 }

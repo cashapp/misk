@@ -20,8 +20,8 @@
     "json2yaml": "^1.1.0"
   },
   "devDependencies": {
-    "@misk/dev": "^0.0.14",
-    "@misk/webpack": "^0.0.9"
+    "@misk/dev": "^0.0.15",
+    "@misk/webpack": "^0.0.12"
   },
   "miskTabWebpack": {
     "name": "Config",

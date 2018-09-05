@@ -1,3 +1,4 @@
+const MiskCommon = require('@misk/common')
 const webpack = require('webpack')
 
 const dev = process.env.NODE_ENV !== 'production'
@@ -58,6 +59,6 @@ module.exports = {
   mode: dev ? 'development' : 'production',
   plugins: dev
     ? [new webpack.HotModuleReplacementPlugin()]
-    : [DefinePluginConfig]
-  // externals: { defined in child webpack config }
+    : [DefinePluginConfig],
+  externals: MiskCommon.externals
 }
