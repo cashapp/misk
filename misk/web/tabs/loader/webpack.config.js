@@ -1,28 +1,3 @@
-/**
- * Webpack Config
- * 
- * Requires the following metadata be added to the project's package.json 
-  "miskTabWebpack": {
-    "name": "Config",
-    "slug": "config",
-    "relative_path_prefix": "_tab/config/",
-    "port": "3200"
-  }
- *
- * Assumes following project structure
- *  dist/ – output for Webpack builds
- *  src/
- *     index.tsx – entry point for Webpack compilation
- *     index.html – entry for HTML browser
- *  package.json
- *  webpack.config.js – this file
- */
-const validConfig = (config) => {
-  return true
-
-}
-
-const MiskCommon = require('@misk/common')
 const { MiskWebpackConfigBase } = require("@misk/webpack")
 
 const path = require('path')
@@ -57,6 +32,5 @@ module.exports = merge(MiskWebpackConfigBase, {
   devServer: {
     port: MiskTabConfig.port
   },
-  plugins: [CopyWebpackPluginConfig, HTMLWebpackPluginConfig],
-  externals: MiskCommon.externals
+  plugins: [CopyWebpackPluginConfig, HTMLWebpackPluginConfig]
 })
