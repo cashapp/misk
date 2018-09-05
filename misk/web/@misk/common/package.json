@@ -1,9 +1,9 @@
 {
   "name": "@misk/common",
-  "version": "0.0.23",
+  "version": "0.0.27",
   "description": "Microservice Kontainer Common Libraries, Externals, Styles",
   "author": "Square/Misk Authors (https://github.com/square/misk/graphs/contributors)",
-  "main": "lib/tslint.base.json",
+  "main": "lib/common.js",
   "module": "lib/common.js",
   "typings": "lib/index.d.ts",
   "style": "lib/styles.js",
@@ -21,7 +21,7 @@
     "build:lib": "npm run lib",
     "build": "npm run lib",
     "dist": "npm run lib",
-    "lib": "webpack --config webpack.config.js && webpack --config webpack.static.config.js && webpack --config webpack.vendors.config.js",
+    "lib": "webpack --config webpack.config.js && webpack --config webpack.config.static.js && webpack --config webpack.config.vendors.js",
     "lint": "echo no lint",
     "prepare": "yarn run lint && yarn run test && yarn run lib",
     "reinstall": "rm -rf node_modules/ && yarn install",
@@ -50,6 +50,7 @@
     "styled-components": "^3.4.2"
   },
   "devDependencies": {
-    "@misk/dev": "^0.0.8"
+    "@misk/dev": "^0.0.14",
+    "@misk/webpack": "^0.0.9"
   }
 }

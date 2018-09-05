@@ -71,26 +71,26 @@ Included Libraries
 From `package.json`:
 
 ```JSON
-  "@blueprintjs/core": "^3.0.1",
+  "@blueprintjs/core": "^3.3.0",
   "@blueprintjs/icons": "^3.0.0",
   "axios": "^0.18.0",
-  "connected-react-router": "^4.3.0",
-  "dayjs": "^1.7.4",
+  "connected-react-router": "^4.4.1",
+  "dayjs": "^1.7.5",
   "history": "^4.7.2",
   "immutable": "^3.8.2",
-  "react": "^16.4.1",
-  "react-dom": "^16.4.1",
+  "react": "^16.4.2",
+  "react-dom": "^16.4.2",
   "react-helmet": "^5.2.0",
-  "react-hot-loader": "^4.3.3",
+  "react-hot-loader": "^4.3.4",
   "react-redux": "^5.0.7",
   "react-router": "^4.3.1",
   "react-router-dom": "^4.3.1",
   "react-router-redux": "^5.0.0-alpha.9",
-  "react-transition-group": "^2.2.1",
+  "react-transition-group": "^2.4.0",
   "redux": "^4.0.0",
-  "redux-saga": "^0.16.0"
+  "redux-saga": "^0.16.0",
   "skeleton-css": "^2.0.4",
-  "styled-components": "^3.3.3"
+  "styled-components": "^3.4.2"
 ```
 
 Included Styles
@@ -115,12 +115,6 @@ Webpack Configs
 - `webpack.config.js`: Exports common variables including `MiskCommon.Externals`
 - `webpack.static.config.js`: Exports common styles file
 - `webpack.vendor.config.js`: Exports common vendors library file
-
-Base Configs: `src/config`
----
-- `webpack.base.config.js`: Base config for webpack builds
-- `tsconfig.base.js`: Base Typescript compiler options
-- `tslint.base.js`: Base TSLint options
 
 [Releasing](https://github.com/square/misk/blob/master/misk/web/%40misk/RELEASING.md)
 ---
