@@ -1,6 +1,6 @@
 import { Alignment, Navbar, NavbarDivider, NavbarGroup, NavbarHeading } from "@blueprintjs/core"
 import * as React from "react"
-import { Link } from "react-router-dom";
+import { Link } from "react-router-dom"
 
 export interface ITopbarProps {
   name: string

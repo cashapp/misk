@@ -50,7 +50,7 @@ $ yarn add @misk/common
     </body>
     ```
 
-- Use `@misk/common` externals to keep Webpack from bundling duplicate libraries and styles into your Misk module. Add the following to your `webpack.config.js`.
+- Use `@misk/common` externals to keep Webpack from bundling duplicate libraries and styles into your Misk module. Add the following to your `webpack.config.js` as relevant.
   
   ```Typescript
   const MiskCommon = require('@misk/common')
@@ -61,7 +61,7 @@ $ yarn add @misk/common
     mode
     entry
     ...
-    externals: MiskCommon.externals,
+    externals: { ...MiskCommon.externals, ...MiskCommon.miskExternals },
   }
 
   ```
