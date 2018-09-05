@@ -29,11 +29,4 @@ interface IMiskWindow extends Window {
   }
 }
 
-interface IMiskWebpackContext {
-  miskLibraryPath: string
-  outputFileName: string
-  libraryName: string
-  devServerPort: number
-}
-
-export { IMiskAdminTab, IMiskAdminTabs, IMiskWebpackContext, IMiskWindow }
+export { IMiskAdminTab, IMiskAdminTabs, IMiskWindow }
