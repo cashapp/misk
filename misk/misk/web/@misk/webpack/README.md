@@ -53,9 +53,10 @@ The child Webpack template above consumes some static initialization variables t
   },
   "miskTabWebpack": {
     "name": "Config",
-    "slug": "config",
+    "output_path": "dist",
+    "port": "3200",
     "relative_path_prefix": "_tab/config/",
-    "port": "3200"
+    "slug": "config"
   }
 ```
 

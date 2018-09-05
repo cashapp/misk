@@ -21,12 +21,13 @@
   },
   "devDependencies": {
     "@misk/dev": "^0.0.15",
-    "@misk/webpack": "^0.0.12"
+    "@misk/webpack": "^0.0.16"
   },
   "miskTabWebpack": {
     "name": "Config",
-    "slug": "config",
+    "output_path": "dist",
+    "port": "3200",
     "relative_path_prefix": "_tab/config/",
-    "port": "3200"
+    "slug": "config"
   }
 }
