@@ -97,9 +97,9 @@
   dependencies:
     "@misk/common" "^0.0.27"
 
-"@misk/dev@^0.0.14":
-  version "0.0.14"
-  resolved "https://registry.yarnpkg.com/@misk/dev/-/dev-0.0.14.tgz#b3ccccfeb88a50f6eb10682a65720988e6f990b8"
+"@misk/dev@^0.0.15":
+  version "0.0.15"
+  resolved "https://registry.yarnpkg.com/@misk/dev/-/dev-0.0.15.tgz#37f38bc115f38b0582db04e12da6060622fff0bd"
   dependencies:
     "@types/node" "^10.7.0"
     "@types/react" "^16.4.10"
@@ -128,9 +128,9 @@
   dependencies:
     "@misk/common" "^0.0.14"
 
-"@misk/webpack@^0.0.9":
-  version "0.0.9"
-  resolved "https://registry.yarnpkg.com/@misk/webpack/-/webpack-0.0.9.tgz#68ec8280fd28e20b8f20df77942c7cf8c76c56ff"
+"@misk/webpack@^0.0.10":
+  version "0.0.10"
+  resolved "https://registry.yarnpkg.com/@misk/webpack/-/webpack-0.0.10.tgz#be2244927d15d7ea008b198247179ea41a2d46da"
   dependencies:
     awesome-typescript-loader "^5.2.0"
     copy-webpack-plugin "^4.5.2"
