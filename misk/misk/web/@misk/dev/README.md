@@ -1,7 +1,7 @@
 Misk Dev
 ---
 ![](https://raw.githubusercontent.com/square/misk/master/misk.png)
-This package provides shared devDependencies, compiler options, and linting used to provide a common development environment across Misk tab repos.
+This package provides shared devDependencies and compiler options used to provide a common development environment across Misk tab repos. For Typescript linting, see [@misk/tslint](https://www.npmjs.com/package/@misk/tslint).
 
 Getting Started
 ---
@@ -22,21 +22,44 @@ Create a `tsconfig.json` file in the repo root directory with the following:
   }
 ```
 
-TsLint Template
+Webpack Template
 ---
-Create a `tslint.json` file in the repo root directory with the following:
+Create a `webpack.config.js` file in the repo root directory with the following:
+
+```Javascript
+const { MiskWebpackConfigBase } = require("@misk/webpack")
+const path = require('path')
+const miskTabWebpack = require(path.join(process.cwd(), "package.json")).miskTabWebpack
+module.exports = MiskWebpackConfigBase(process.env.NODE_ENV, {
+  "dirname": __dirname,
+  miskTabWebpack,
+})
+```
+
+Package.json Input Parameters
+---
+The child Webpack template above consumes some static initialization variables that you must add to your `package.json`. An example for the Config tab is included below.
+
+Note that the `output_path` must match the `outDir` specified in the repo's `tsconfig.json`.
 
 ```JSON
-  {
-    "extends": "@misk/dev"
+  "devDependencies": {
+    "@misk/dev": "^0.0.20"
+  },
+  "miskTabWebpack": {
+    "name": "Config",
+    "output_path": "dist",
+    "port": "3000",
+    "relative_path_prefix": "_tab/config/",
+    "slug": "config"
   }
 ```
 
 Included Libraries
 ---
 ```JSON
-  "@types/node": "^10.7.0",
-  "@types/react": "^16.4.10",
+  "@types/node": "^10.9.4",
+  "@types/react": "^16.4.13",
   "@types/react-dom": "^16.0.7",
   "@types/react-helmet": "^5.0.7",
   "@types/react-hot-loader": "^4.1.0",
@@ -44,17 +67,23 @@ Included Libraries
   "@types/react-router": "^4.0.30",
   "@types/react-router-dom": "^4.3.0",
   "@types/react-router-redux": "^5.0.15",
+  "@types/webpack": "^4.4.11",
   "@types/webpack-env": "^1.13.6",
-  "tslint": "^5.11.0",
-  "tslint-blueprint": "^0.1.0",
-  "tslint-clean-code": "^0.2.7",
-  "tslint-config-prettier": "^1.14.0",
-  "tslint-consistent-codestyle": "^1.13.3",
-  "tslint-eslint-rules": "^5.3.1",
-  "tslint-immutable": "^4.6.0",
-  "tslint-react": "^3.6.0",
-  "tslint-sonarts": "^1.7.0",
-  "typescript": "^3.0.1"
+  "awesome-typescript-loader": "^5.2.0",
+  "copy-webpack-plugin": "^4.5.2",
+  "cross-env": "^5.2.0",
+  "css-loader": "^1.0.0",
+  "file-loader": "^2.0.0",
+  "html-webpack-plugin": "^3.2.0",
+  "node-sass": "^4.9.3",
+  "sass-loader": "^7.1.0",
+  "source-map-loader": "^0.2.4",
+  "style-loader": "^0.23.0",
+  "typescript": "^3.0.3",
+  "webpack": "^4.17.2",
+  "webpack-cli": "^3.1.0",
+  "webpack-dev-server": "^3.1.7",
+  "webpack-merge": "^4.1.4"
 ```
 
 [Releasing](https://github.com/square/misk/blob/master/misk/web/%40misk/RELEASING.md)
