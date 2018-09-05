@@ -5,8 +5,8 @@ const path = require('path')
 const webpack = require('webpack')
 const merge = require('webpack-merge')
 
-module.exports = (env, argv) => {
-  const { dirname, miskTabWebpack, otherConfigFields = {} } = argv
+module.exports = (env, argv, otherConfigFields = {}) => {
+  const { dirname, miskTabWebpack } = argv
   
   const DefinePluginConfig = new webpack.DefinePlugin({
     'process.env.NODE_ENV': JSON.stringify('production')
