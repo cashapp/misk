@@ -1,4 +1,4 @@
-const MiskCommon = require('@misk/common')
+const { vendorExternals, miskExternals } = require('./externals')
 const CopyWebpackPlugin = require('copy-webpack-plugin')
 const HTMLWebpackPlugin = require('html-webpack-plugin')
 const path = require('path')
@@ -80,7 +80,7 @@ module.exports = (env, argv, otherConfigFields = {}) => {
       .concat(env !== 'production'
       ? [new webpack.HotModuleReplacementPlugin()]
       : [DefinePluginConfig]),
-    externals: { ...MiskCommon.vendorExternals, ...MiskCommon.miskExternals }
+    externals: { ...vendorExternals, ...miskExternals }
   }
   
   return merge(baseConfigFields, otherConfigFields)

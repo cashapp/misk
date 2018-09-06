@@ -1,5 +1,5 @@
 {
-  "name": "misk-tab-admin-wrapper",
+  "name": "misktab-loader",
   "version": "0.0.2",
   "main": "src/index.ts",
   "repository": "git@github.com:square/misk.git",
@@ -12,12 +12,12 @@
     "test": "jest --coverage"
   },
   "dependencies": {
-    "@misk/common": "^0.0.30",
-    "@misk/components": "^0.0.20",
+    "@misk/common": "^0.0.31",
+    "@misk/components": "^0.0.21",
     "@misk/tabs": "^0.0.1"
   },
   "devDependencies": {
-    "@misk/dev": "^0.0.22",
+    "@misk/dev": "^0.0.25",
     "@misk/tslint": "^0.0.3"
   },
   "miskTabWebpack": {
