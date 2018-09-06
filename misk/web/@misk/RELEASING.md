@@ -2,9 +2,6 @@ Releasing a `@Misk/` Package on NPM
 ---
 
 This outlines the steps necessary to release a new NPM package version for any of the `@Misk/` scoped packages in this repo.
-- `@Misk/Common`
-- `@Misk/Components`
-- `@Misk/Dev`
 
 Setup
 ---

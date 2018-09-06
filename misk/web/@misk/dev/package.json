@@ -1,6 +1,6 @@
 {
   "name": "@misk/dev",
-  "version": "0.0.21",
+  "version": "0.0.22",
   "description": "Microservice Kontainer Development Libraries",
   "author": "Square/Misk Authors (https://github.com/square/misk/graphs/contributors)",
   "repository": {
@@ -36,6 +36,6 @@
     "webpack-merge": "^4.1.4"
   },
   "devDependencies": {
-    "@misk/common": "^0.0.28"
+    "@misk/common": "^0.0.30"
   }
 }

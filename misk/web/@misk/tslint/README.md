@@ -21,16 +21,18 @@ Create a `tslint.json` file in the repo root directory with the following:
 
 Included TsLint Packages
 ---
+From `package.json`:
+
 ```JSON
-  "tslint": "^5.11.0",
-  "tslint-blueprint": "^0.1.0",
-  "tslint-clean-code": "^0.2.7",
-  "tslint-config-prettier": "^1.15.0",
-  "tslint-consistent-codestyle": "^1.13.3",
-  "tslint-eslint-rules": "^5.4.0",
-  "tslint-immutable": "^4.7.0",
-  "tslint-react": "^3.6.0",
-  "tslint-sonarts": "^1.7.0"
+  tslint
+  tslint-blueprint
+  tslint-clean-code
+  tslint-config-prettier
+  tslint-consistent-codestyle
+  tslint-eslint-rules
+  tslint-immutable
+  tslint-react
+  tslint-sonarts
 ```
 
 [Releasing](https://github.com/square/misk/blob/master/misk/web/%40misk/RELEASING.md)

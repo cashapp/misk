@@ -80,7 +80,7 @@ module.exports = (env, argv, otherConfigFields = {}) => {
       .concat(env !== 'production'
       ? [new webpack.HotModuleReplacementPlugin()]
       : [DefinePluginConfig]),
-    externals: MiskCommon.externals
+    externals: { ...MiskCommon.vendorExternals, ...MiskCommon.miskExternals }
   }
   
   return merge(baseConfigFields, otherConfigFields)

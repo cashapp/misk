@@ -50,7 +50,7 @@ $ yarn add @misk/common
     </body>
     ```
 
-- Use `@misk/common` externals to keep Webpack from bundling duplicate libraries and styles into your Misk module. Add the following to your `webpack.config.js`.
+- Use `@misk/common` externals to keep Webpack from bundling duplicate libraries and styles into your Misk module. Add the following to your `webpack.config.js` as relevant.
   
   ```Typescript
   const MiskCommon = require('@misk/common')
@@ -61,7 +61,7 @@ $ yarn add @misk/common
     mode
     entry
     ...
-    externals: MiskCommon.externals,
+    externals: { ...MiskCommon.vendorExternals, ...MiskCommon.miskExternals },
   }
 
   ```
@@ -70,27 +70,27 @@ Included Libraries
 ---
 From `package.json`:
 
-```JSON
-  "@blueprintjs/core": "^3.3.0",
-  "@blueprintjs/icons": "^3.0.0",
-  "axios": "^0.18.0",
-  "connected-react-router": "^4.4.1",
-  "dayjs": "^1.7.5",
-  "history": "^4.7.2",
-  "immutable": "^3.8.2",
-  "react": "^16.4.2",
-  "react-dom": "^16.4.2",
-  "react-helmet": "^5.2.0",
-  "react-hot-loader": "^4.3.4",
-  "react-redux": "^5.0.7",
-  "react-router": "^4.3.1",
-  "react-router-dom": "^4.3.1",
-  "react-router-redux": "^5.0.0-alpha.9",
-  "react-transition-group": "^2.4.0",
-  "redux": "^4.0.0",
-  "redux-saga": "^0.16.0",
-  "skeleton-css": "^2.0.4",
-  "styled-components": "^3.4.2"
+```
+  @blueprintjs/core
+  @blueprintjs/icons
+  axios
+  connected-react-router
+  dayjs
+  history
+  immutable
+  react
+  react-dom
+  react-helmet
+  react-hot-loader
+  react-redux
+  react-router
+  react-router-dom
+  react-router-redux
+  react-transition-group
+  redux
+  redux-saga
+  skeleton-css
+  styled-components
 ```
 
 Included Styles

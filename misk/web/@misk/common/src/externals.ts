@@ -30,7 +30,7 @@ export const makeExternals = (inExternals: IInExternal) : IOutExternal => {
   return outExternals
 }
 
-export const externals = makeExternals({
+export const vendorExternals = makeExternals({
   "@blueprintjs/core": ["Blueprint", "Core"],
   "@blueprintjs/icons": ["Blueprint", "Icons"],
   "axios": "Axios",
@@ -49,4 +49,8 @@ export const externals = makeExternals({
   "redux": "Redux",
   "redux-saga": "ReduxSaga",
   "styled-components": "StyledComponents"
+})
+
+export const miskExternals = makeExternals({
+  "@misk/components": ["Misk", "Components"]
 })
