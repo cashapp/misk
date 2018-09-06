@@ -1,0 +1,23 @@
+{
+  "name": "@misk/tslint",
+  "version": "0.0.3",
+  "description": "Microservice Kontainer TsLint",
+  "author": "Square/Misk Authors (https://github.com/square/misk/graphs/contributors)",
+  "main": "tslint.base.json",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:square/misk.git"
+  },
+  "dependencies": {
+    "tslint": "^5.11.0",
+    "tslint-blueprint": "^0.1.0",
+    "tslint-clean-code": "^0.2.7",
+    "tslint-config-prettier": "^1.15.0",
+    "tslint-consistent-codestyle": "^1.13.3",
+    "tslint-eslint-rules": "^5.4.0",
+    "tslint-immutable": "^4.7.0",
+    "tslint-react": "^3.6.0",
+    "tslint-sonarts": "^1.7.0",
+    "typescript": "^3.0.3"
+  }
+}

@@ -5,6 +5,7 @@ import misk.web.Get
 import misk.web.RequestContentType
 import misk.web.ResponseContentType
 import misk.web.mediatype.MediaTypes
+import misk.web.resources.ResourceEntryCommon
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -46,10 +47,10 @@ data class AdminTab(
   init {
     // Requirements enforce the guidelines outlined at top of the file
     // TODO(adrw) see if there's a more readable way to do these requirements
+    ResourceEntryCommon.requireValidUrlPathPrefix(url_path_prefix)
     require(
         slug.filter { char -> !char.isUpperCase() && !char.isWhitespace() }.length == slug.length &&
-            icon.filter { char -> !char.isUpperCase() && !char.isWhitespace() }.length == icon.length &&
-            url_path_prefix.matches(Regex("(/[^/]+)*")) &&
-            !url_path_prefix.startsWith("/api"))
+            icon.filter { char -> !char.isUpperCase() && !char.isWhitespace() }.length == icon.length
+    )
   }
 }

@@ -1,12 +1,4 @@
-const CopyWebpackPlugin = require('copy-webpack-plugin');
 const path = require('path');
-
-const CopyWebpackPluginConfig = new CopyWebpackPlugin(
-  [
-    { from: './src/config/'},
-  ], 
-  { debug: 'info', copyUnmodified: true }
-)
 
 module.exports = {
   name: "library",
@@ -37,8 +29,5 @@ module.exports = {
   },
   resolve: {
     extensions: [".ts", ".tsx"]
-  },
-  plugins: [
-    CopyWebpackPluginConfig
-  ]
+  }
 };
