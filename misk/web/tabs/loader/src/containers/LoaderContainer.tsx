@@ -1,10 +1,11 @@
 import { IMiskAdminTab } from "@misk/common"
-import { NavSidebarComponent, NavTopbarComponent, NoMatchComponent } from "@misk/components"
+import { NavTopbarComponent, NoMatchComponent } from "@misk/components"
 import { RouterState } from "connected-react-router"
 import * as React from "react"
 import { connect } from "react-redux"
 import { Route, Switch } from "react-router"
 import { Link } from "react-router-dom"
+import styled from "styled-components"
 import { dispatchLoader } from "../actions"
 import { MountingDivComponent, ScriptComponent } from "../components"
 import { ILoaderState, IState } from "../reducers"
@@ -19,6 +20,13 @@ export interface ILoaderProps {
   getComponent: (tab: IMiskAdminTab) => any
   registerComponent: (name: string, Component: any) => any
 }
+
+const TabContainer = styled.div`
+  position: relative;
+  top: 100px;
+  width: 1000px;
+  margin: 0 auto;
+`
 
 class LoaderContainer extends React.Component<ILoaderProps> {
   async componentDidMount() {
@@ -35,17 +43,17 @@ class LoaderContainer extends React.Component<ILoaderProps> {
       const tabLinks = Object.entries(adminTabs).map(([,tab]) => <Link key={tab.slug} to={`/_admin/${tab.slug}/`}>{tab.name}<br/></Link>)
       return (
         <div>
-          <NavTopbarComponent home="/_admin" name="Misk Admin Loader"/>
-          <NavSidebarComponent adminTabs={adminTabs} />
-          {Object.entries(adminTabs).map(([key,tab]) => (<ScriptComponent key={key} tab={tab}/>))}
-          <Switch>
-            <Route component={NoMatchComponent}/>
-          </Switch>
-          <hr/>
-          <h1>Loader Debug</h1>
-          <Link to="/_admin/">Home</Link><br/>
-          {tabLinks}
-          <Link to="/_admin/asdf/asdf/asdf/asdf/">Bad Link</Link><br/>
+          <NavTopbarComponent home="/_admin/" name="Misk" links={adminTabs}/>
+          <TabContainer>
+            {Object.entries(adminTabs).map(([key,tab]) => (<ScriptComponent key={key} tab={tab}/>))}
+            <Switch>
+              <Route component={NoMatchComponent}/>
+            </Switch>
+            <h1>Loader Debug</h1>
+            <Link to="/_admin/">Home</Link><br/>
+            {tabLinks}
+            <Link to="/_admin/asdf/asdf/asdf/asdf/">Bad Link</Link><br/>
+          </TabContainer>
         </div>
       )
     } else {

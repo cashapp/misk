@@ -24,8 +24,6 @@ export interface IConfigFile {
 }
 
 const Container = styled.div`
-  margin-left: 180px;
-  margin-top: 20px;
 `
 
 class TabContainer extends React.Component<ITabProps, {children : any}> {
