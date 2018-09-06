@@ -1,4 +1,5 @@
-const MiskWebpackConfigBase = require("./webpack.config.base")
+const miskTabWebpackBuilder = require("./webpack.config.tab")
+const { makeExternals, vendorExternals, miskExternals } = require("./externals")
 module.exports = {
-  MiskWebpackConfigBase
+  miskTabWebpackBuilder, makeExternals, vendorExternals, miskExternals
 }

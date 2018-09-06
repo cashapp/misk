@@ -27,17 +27,53 @@ Webpack Template
 Create a `webpack.config.js` file in the repo root directory with the following:
 
 ```Javascript
-const { MiskWebpackConfigBase } = require("@misk/dev")
+const { miskTabWebpackBuilder } = require("@misk/dev")
 const path = require('path')
 const miskTabWebpack = require(path.join(process.cwd(), "package.json")).miskTabWebpack
-module.exports = MiskWebpackConfigBase(process.env.NODE_ENV, {
+module.exports = miskTabWebpackBuilder(process.env.NODE_ENV, {
   "dirname": __dirname,
   miskTabWebpack
 },
 {
-  // optional: any other Webpack config fields to be merged with the Misk Webpack Base Config
+  // optional: any other Webpack config fields to be merged with the Misk Tab Webpack Config
 })
 ```
+
+Webpack Externals
+---
+Used in `miskTabWebpackBuilder` but also available as an export of `@misk/dev` are the following externals objects that are formatted for use by Webpack to exclude libraries from compiled code:
+
+- `vendorExternals`: vendor libraries included in `@misk/common/lib/vendors.js`
+- `miskExternals`: all Misk libraries
+
+If you are using one of the Webpack builders in `@misk/dev`, all externals above are included in the Webpack config. To use the externals in other Webpack configs, follow the steps below.
+
+- Add the following to your `webpack.config.js` as relevant.
+  
+  ```Javascript
+  const MiskDev = require('@misk/dev')
+
+  ...
+
+  module.exports = {
+    mode
+    entry
+    ...
+    externals: { ...MiskDev.vendorExternals, ...MiskDev.miskExternals },
+  }
+
+  ```
+
+To build your own externals, use the exported function `makeExternals` which consumes an object of the below structure which maps a key (NPM package name) to a normalized library name that will be mounted on browser `window`.
+
+  ```JSON
+  {
+    "@blueprintjs/core": ["Blueprint", "Core"],
+    "@blueprintjs/icons": ["Blueprint", "Icons"],
+    "axios": "Axios",
+    ...
+  }
+  ```
 
 Package.json Input Parameters
 ---
