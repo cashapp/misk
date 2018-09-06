@@ -33,5 +33,5 @@ module.exports = {
   resolve: {
     extensions: [".ts", ".tsx", ".js", ".jsx", ".json"]
   },
-  externals: MiskCommon.externals
+  externals: MiskCommon.vendorExternals
 };
