@@ -9,6 +9,13 @@ Getting Started
 $ yarn add @misk/common
 ```
 
+Automatic Inclusion
+---
+- If your Webpack config builds off of a template in `@misk/dev`, `vendors.js` and `styles.js` will automatically be included in the build of that repo.
+- If your Webpack config does not build off of a template in `@misk/dev`, use the Manual Inclusion steps below.
+
+Manual Inclusion
+---
 - Using the common vendors libraries and styles. We use [`copy-webpack-plugin`](https://github.com/webpack-contrib/copy-webpack-plugin) to copy the compiled `vendor.js` and `styles.js` files into build folder.
   - Install [`copy-webpack-plugin`](https://github.com/webpack-contrib/copy-webpack-plugin)
     
@@ -50,22 +57,6 @@ $ yarn add @misk/common
     </body>
     ```
 
-- Use `@misk/common` externals to keep Webpack from bundling duplicate libraries and styles into your Misk module. Add the following to your `webpack.config.js` as relevant.
-  
-  ```Typescript
-  const MiskCommon = require('@misk/common')
-
-  ...
-
-  module.exports = {
-    mode
-    entry
-    ...
-    externals: { ...MiskCommon.vendorExternals, ...MiskCommon.miskExternals },
-  }
-
-  ```
-
 Included Libraries
 ---
 From `package.json`:
@@ -106,13 +97,13 @@ Contributing
 ---
 #Adding a new package
 - `yarn add {package}` to add the package to `package.json`
-- Add package to window variable mapping to `src/externals.ts`
+- Add package to `vendorExternals` in `@misk/dev/externals.js`
 - Add window to javascript require include in `src/vendors.js`
 - Update `README.md` with a copy of the updated `package.json` list of packages
 
 Webpack Configs
 ---
-- `webpack.config.js`: Exports common variables including `MiskCommon.Externals`
+- `webpack.config.js`: Exports common variables and functions
 - `webpack.static.config.js`: Exports common styles file
 - `webpack.vendor.config.js`: Exports common vendors library file
 

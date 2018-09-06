@@ -1,24 +1,8 @@
-export interface IInExternal {
-  [key: string]: string|string[]
-}
-
-export interface IOutExternal {
-  [key: string]: {
-    amd: string
-    commonjs: string
-    commonjs2: string
-    root: string|string[]
-  }
-}
-
 /**
- * 
- * @param inExternals : IExternal
- * 
  * Create Webpack compatible externals object with compatible entries for amd, commonjs, commonjs2, root
  */
-export const makeExternals = (inExternals: IInExternal) : IOutExternal => {
-  const outExternals: IOutExternal = {}
+const makeExternals = (inExternals) => {
+  const outExternals = {}
   Object.keys(inExternals).map((pkg) => {
     outExternals[pkg] = {
       amd: pkg,
@@ -30,7 +14,7 @@ export const makeExternals = (inExternals: IInExternal) : IOutExternal => {
   return outExternals
 }
 
-export const vendorExternals = makeExternals({
+const vendorExternals = makeExternals({
   "@blueprintjs/core": ["Blueprint", "Core"],
   "@blueprintjs/icons": ["Blueprint", "Icons"],
   "axios": "Axios",
@@ -51,6 +35,8 @@ export const vendorExternals = makeExternals({
   "styled-components": "StyledComponents"
 })
 
-export const miskExternals = makeExternals({
+const miskExternals = makeExternals({
   "@misk/components": ["Misk", "Components"]
 })
+
+module.exports = { makeExternals, vendorExternals, miskExternals }
