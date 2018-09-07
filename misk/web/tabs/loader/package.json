@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "@misk/common": "^0.0.33",
-    "@misk/components": "^0.0.22",
+    "@misk/components": "^0.0.24",
     "@misk/tabs": "^0.0.1"
   },
   "devDependencies": {

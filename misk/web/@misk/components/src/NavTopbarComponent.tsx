@@ -3,6 +3,7 @@ import { IMiskAdminTabs } from "@misk/common"
 import * as React from "react"
 import { Link } from "react-router-dom"
 import styled from "styled-components"
+import { ResponsiveContainer } from "."
 
 export interface ITopbarProps {
   name: string
@@ -28,11 +29,6 @@ const MiskNavbar = styled(Navbar)`
     color: #fff;
     text-decoration: none;
   }
-`
-
-const MiskNavbarContent = styled.div`
-  margin: 0 auto;
-  width: 1000px;
 `
 
 const MiskNavbarGroup = styled(NavbarGroup)`
@@ -70,7 +66,7 @@ const MiskNavbarLinks = (links: IMiskAdminTabs) => (
 
 export const NavTopbarComponent = (props: ITopbarProps) => (
   <MiskNavbar className="bp3-dark">
-    <MiskNavbarContent>
+    <ResponsiveContainer>
       <MiskNavbarGroup align={Alignment.LEFT}>
         <MiskNavbarLink to={props.home}>
           <MiskNavbarHeading>{props.name}</MiskNavbarHeading>
@@ -78,6 +74,6 @@ export const NavTopbarComponent = (props: ITopbarProps) => (
         <MiskNavbarDivider/>
         {MiskNavbarLinks(props.links)}
       </MiskNavbarGroup>
-    </MiskNavbarContent>
+    </ResponsiveContainer>
   </MiskNavbar>
 )
