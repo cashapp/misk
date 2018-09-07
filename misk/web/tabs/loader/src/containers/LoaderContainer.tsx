@@ -1,10 +1,12 @@
+import { NonIdealState } from "@blueprintjs/core"
+import { IconNames } from "@blueprintjs/icons"
 import { IMiskAdminTab } from "@misk/common"
-import { NavTopbarComponent, NoMatchComponent, ResponsiveContainer } from "@misk/components"
+import { NavTopbarComponent, ResponsiveContainer } from "@misk/components"
 import { RouterState } from "connected-react-router"
 import * as React from "react"
+const { Code } = require("react-content-loader")
 import { connect } from "react-redux"
-import { Route, Switch } from "react-router"
-import { Link } from "react-router-dom"
+import { Route } from "react-router"
 import styled from "styled-components"
 import { dispatchLoader } from "../actions"
 import { MountingDivComponent, ScriptComponent } from "../components"
@@ -39,26 +41,21 @@ class LoaderContainer extends React.Component<ILoaderProps> {
   render() {
     const { adminTabs } = this.props.loader
     if (adminTabs) {
-      const tabLinks = Object.entries(adminTabs).map(([,tab]) => <Link key={tab.slug} to={`/_admin/${tab.slug}/`}>{tab.name}<br/></Link>)
       return (
         <div>
-          <NavTopbarComponent home="/_admin/" name="Misk" links={adminTabs}/>
+          <NavTopbarComponent homeName="Misk" homeUrl="/_admin/" links={adminTabs}/>
           <TabContainer>
             {Object.entries(adminTabs).map(([key,tab]) => (<ScriptComponent key={key} tab={tab}/>))}
-            <Switch>
-              <Route component={NoMatchComponent}/>
-            </Switch>
-            <h1>Loader Debug</h1>
-            <Link to="/_admin/">Home</Link><br/>
-            {tabLinks}
-            <Link to="/_admin/asdf/asdf/asdf/asdf/">Bad Link</Link><br/>
           </TabContainer>
         </div>
       )
     } else {
       return (
         <div>
-          <p>Loading Tabs...</p>
+          <NavTopbarComponent homeName="Misk" homeUrl="/_admin/"/>
+          <TabContainer>
+            <NonIdealState children={Code} icon={IconNames.OFFLINE} description="Loading tabs..."/>
+          </TabContainer>
         </div>
       )
     }
