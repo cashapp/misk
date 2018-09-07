@@ -12,6 +12,10 @@ interface IConfigProps {
 const Container = styled.div`
 `
 
+const ConfigOutput = styled.pre`
+  font-family: Menlo, Fira Code;
+`
+
 export default class ConfigComponent extends React.PureComponent<IConfigProps> {
   indent(spaces: number) {
     let result = ""
@@ -23,6 +27,7 @@ export default class ConfigComponent extends React.PureComponent<IConfigProps> {
 
   toYaml(json: string) {
     let result = ""
+    let temp = ""
     let level = 0
     for (const c of json) {
       switch (c) {
@@ -31,23 +36,24 @@ export default class ConfigComponent extends React.PureComponent<IConfigProps> {
           break
         case "}":
           level--
-          result += "\n" + this.indent(level)
+          temp += "\n" + this.indent(level)
           break
         case ",": 
-          result += "\n" + this.indent(level)
+          temp += "\n" + this.indent(level)
           break
         case ":":
           // write parser for string
-          result += ": "
+          temp += ": "
           break
         case "\"":
           break
         case "\,":
           break
         default:
-          result += c
+          temp += c
       }
     }
+    result += temp
     return(result)
   }
 
@@ -67,16 +73,13 @@ export default class ConfigComponent extends React.PureComponent<IConfigProps> {
     const { files, status } = this.props
     return(
       <Container>
-        <h1>App: Config</h1>
+        <h1>Config</h1>
         <p>{status}</p>
         {files && files.map(f => (
-          <div>
-            <br/>
-            <h5>{f.name}</h5>
-            <code><pre>
-            {this.formattedFile(f)}
-            </pre></code>
-          </div>))
+          <ConfigOutput>
+            <h5><strong>classpath:/{f.name}</strong></h5>
+            <code>{this.formattedFile(f)}</code>
+          </ConfigOutput>))
         }
       </Container>
     )
