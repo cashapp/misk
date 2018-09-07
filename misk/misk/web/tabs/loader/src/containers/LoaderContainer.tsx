@@ -1,5 +1,5 @@
 import { IMiskAdminTab } from "@misk/common"
-import { NavTopbarComponent, NoMatchComponent } from "@misk/components"
+import { NavTopbarComponent, NoMatchComponent, ResponsiveContainer } from "@misk/components"
 import { RouterState } from "connected-react-router"
 import * as React from "react"
 import { connect } from "react-redux"
@@ -21,11 +21,10 @@ export interface ILoaderProps {
   registerComponent: (name: string, Component: any) => any
 }
 
-const TabContainer = styled.div`
+const TabContainer = styled(ResponsiveContainer)`
   position: relative;
   top: 100px;
-  width: 1000px;
-  margin: 0 auto;
+  padding-left: 5px;
 `
 
 class LoaderContainer extends React.Component<ILoaderProps> {
