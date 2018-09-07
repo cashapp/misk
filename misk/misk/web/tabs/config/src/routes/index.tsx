@@ -1,4 +1,3 @@
-import { NoMatchComponent } from "@misk/components"
 import * as React from "react"
 import { Route, Switch } from "react-router"
 import { TabContainer } from "../containers"
@@ -8,7 +7,7 @@ const routes = (
     <Switch>
       <Route path="/_admin/config" component={TabContainer}/>
       <Route path="/_tab/config" component={TabContainer}/>
-      <Route component={NoMatchComponent}/>
+      {/* Do not include a Route without a path or it will display during on all tabs */}
     </Switch>
   </div>
 )
