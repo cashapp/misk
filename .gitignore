@@ -9,6 +9,7 @@ build
 build
 lib
 node_modules
+cachedUrls
 *.log
 **/menu_*.js*
 **/module_*.js*
