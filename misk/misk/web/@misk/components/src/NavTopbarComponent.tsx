@@ -5,14 +5,14 @@ import { Link } from "react-router-dom"
 import styled from "styled-components"
 import { ResponsiveContainer } from "."
 
-export interface ITopbarProps {
-  name: string
-  home: string
-  links: IMiskAdminTabs
+export interface INavTopbarProps {
+  homeName: string
+  homeUrl: string
+  links?: IMiskAdminTabs
 }
 
 const MiskNavbar = styled(Navbar)`
-  background-color: #29333a !important;
+  background-color: #29333a;
   min-height: 74px;
   margin-bottom: 20px;
   box-sizing: border-box;
@@ -64,15 +64,15 @@ const MiskNavbarLinks = (links: IMiskAdminTabs) => (
   Object.entries(links).map(([key, tab]) => <MiskNavbarLink key={key} to={tab.url_path_prefix}>{tab.name}</MiskNavbarLink>)
 )
 
-export const NavTopbarComponent = (props: ITopbarProps) => (
-  <MiskNavbar className="bp3-dark">
+export const NavTopbarComponent = (props: INavTopbarProps) => (
+  <MiskNavbar>
     <ResponsiveContainer>
-      <MiskNavbarGroup align={Alignment.LEFT}>
-        <MiskNavbarLink to={props.home}>
-          <MiskNavbarHeading>{props.name}</MiskNavbarHeading>
+      <MiskNavbarGroup align={Alignment.LEFT} className="bp3-dark">
+        <MiskNavbarLink to={props.homeUrl}>
+          <MiskNavbarHeading>{props.homeName}</MiskNavbarHeading>
         </MiskNavbarLink>
         <MiskNavbarDivider/>
-        {MiskNavbarLinks(props.links)}
+        {props.links ? MiskNavbarLinks(props.links) : <span>Loading...</span>}
       </MiskNavbarGroup>
     </ResponsiveContainer>
   </MiskNavbar>

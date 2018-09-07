@@ -91,9 +91,9 @@
     skeleton-css "^2.0.4"
     styled-components "^3.4.2"
 
-"@misk/components@^0.0.24":
-  version "0.0.24"
-  resolved "https://registry.yarnpkg.com/@misk/components/-/components-0.0.24.tgz#708425f1590ab0572d1aed8607025c86a1a682d6"
+"@misk/components@^0.0.26":
+  version "0.0.26"
+  resolved "https://registry.yarnpkg.com/@misk/components/-/components-0.0.26.tgz#4d7047e545f47df51f39e081b7674ef74719be2b"
   dependencies:
     "@misk/common" "^0.0.33"
 
@@ -3942,6 +3942,10 @@ rc@^1.2.7:
     ini "~1.3.0"
     minimist "^1.2.0"
     strip-json-comments "~2.0.1"
+
+react-content-loader@^3.1.2:
+  version "3.1.2"
+  resolved "https://registry.yarnpkg.com/react-content-loader/-/react-content-loader-3.1.2.tgz#98230b4604b4b744eaa2d3fc88917dd988df6766"
 
 react-dom@^16.4.2:
   version "16.4.2"
