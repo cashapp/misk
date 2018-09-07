@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "@misk/common": "^0.0.33",
-    "@misk/components": "^0.0.21",
+    "@misk/components": "^0.0.22",
     "@misk/tabs": "^0.0.1",
     "gray-matter": "^4.0.1",
     "js-yaml": "^3.12.0",
