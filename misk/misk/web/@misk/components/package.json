@@ -27,7 +27,7 @@
     "test": "echo no tests"
   },
   "dependencies": {
-    "@misk/common": "^0.0.31"
+    "@misk/common": "^0.0.33"
   },
   "devDependencies": {
     "@misk/dev": "^0.0.25",
