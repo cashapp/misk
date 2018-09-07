@@ -1,4 +1,5 @@
 src
+cachedUrls
 test
 coverage
 node_modules

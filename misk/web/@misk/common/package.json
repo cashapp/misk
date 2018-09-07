@@ -1,6 +1,6 @@
 {
   "name": "@misk/common",
-  "version": "0.0.31",
+  "version": "0.0.33",
   "description": "Microservice Kontainer Common Libraries, Externals, Styles",
   "author": "Square/Misk Authors (https://github.com/square/misk/graphs/contributors)",
   "main": "lib/common.js",
@@ -23,7 +23,8 @@
     "dist": "npm run lib",
     "lib": "webpack --config webpack.config.js && webpack --config webpack.config.static.js && webpack --config webpack.config.vendors.js",
     "lint": "echo no lint",
-    "prepare": "yarn run lint && yarn run test && yarn run lib",
+    "prepare": "yarn run refresh && yarn run lint && yarn run test && yarn run lib",
+    "refresh": "node refreshCachedUrls.js",
     "reinstall": "rm -rf node_modules/ && yarn install",
     "test": "echo no tests"
   },
@@ -52,5 +53,11 @@
   "devDependencies": {
     "@misk/dev": "^0.0.25",
     "@misk/tslint": "^0.0.3"
+  },
+  "miskCachedUrls": {
+    "sq-market-font": {
+      "filepath": "sq-market.css",
+      "url": "https://d1g145x70srn7h.cloudfront.net/fonts/sqmarket/sq-market.css"
+    }
   }
 }
