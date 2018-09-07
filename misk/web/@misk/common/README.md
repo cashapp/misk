@@ -101,6 +101,24 @@ Contributing
 - Add window to javascript require include in `src/vendors.js`
 - Update `README.md` with a copy of the updated `package.json` list of packages
 
+#Adding a Cached Remote Asset
+- There are sometimes cases where remote assets should be cached in order to be included in the single line imports of `vendors.js` or `styles.js`
+- Add a new task to `package.json` under the metadata key   `"miskCachedUrls"` with the format as follows
+  ```JSON
+  "miskCachedUrls": {
+    "taskname": {
+      "filepath": "font.css",
+      "url": "https://url.com/fonts/font.css"
+    },
+    "taskname2": {...}
+  }
+  ```
+  - `taskname`: string description of the remote asset
+  - `filepath`: filepath within `@misk/common/cachedUrls/` to which the url will be downloaded
+  - `url`: valid url that within a browser downloads or presents the desired file
+- `yarn run refresh` initiates the download of all declared `"miskCachedUrls"` using code in `./refreshCachedUrls.js`
+- Cached files are refreshed on every package publish to NPM
+
 Webpack Configs
 ---
 - `webpack.config.js`: Exports common variables and functions

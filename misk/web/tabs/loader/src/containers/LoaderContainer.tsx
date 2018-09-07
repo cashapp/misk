@@ -42,17 +42,17 @@ class LoaderContainer extends React.Component<ILoaderProps> {
       const tabLinks = Object.entries(adminTabs).map(([,tab]) => <Link key={tab.slug} to={`/_admin/${tab.slug}/`}>{tab.name}<br/></Link>)
       return (
         <div>
-          <NavTopbarComponent home="/_admin" name="Misk Admin Loader" links={adminTabs} />
-          <NavSidebarComponent adminTabs={adminTabs} />
-          {Object.entries(adminTabs).map(([key,tab]) => (<ScriptComponent key={key} tab={tab}/>))}
-          <Switch>
-            <Route component={NoMatchComponent}/>
-          </Switch>
-          <hr/>
-          <h1>Loader Debug</h1>
-          <Link to="/_admin/">Home</Link><br/>
-          {tabLinks}
-          <Link to="/_admin/asdf/asdf/asdf/asdf/">Bad Link</Link><br/>
+          <NavTopbarComponent home="/_admin/" name="Misk" links={adminTabs}/>
+          <TabContainer>
+            {Object.entries(adminTabs).map(([key,tab]) => (<ScriptComponent key={key} tab={tab}/>))}
+            <Switch>
+              <Route component={NoMatchComponent}/>
+            </Switch>
+            <h1>Loader Debug</h1>
+            <Link to="/_admin/">Home</Link><br/>
+            {tabLinks}
+            <Link to="/_admin/asdf/asdf/asdf/asdf/">Bad Link</Link><br/>
+          </TabContainer>
         </div>
       )
     } else {

@@ -10,8 +10,6 @@ interface IConfigProps {
 }
 
 const Container = styled.div`
-  margin-left: 180px;
-  margin-top: 20px;
 `
 
 export default class ConfigComponent extends React.PureComponent<IConfigProps> {
