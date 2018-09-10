@@ -1,5 +1,6 @@
 package misk.web
 
+import misk.Action
 import misk.ApplicationInterceptor
 import misk.web.actions.WebAction
 import misk.web.actions.WebSocketListener
@@ -11,30 +12,27 @@ import misk.web.mediatype.MediaTypes
 import misk.web.mediatype.compareTo
 import okhttp3.HttpUrl
 import okhttp3.MediaType
-import org.eclipse.jetty.http.HttpMethod
+import org.eclipse.jetty.http.HttpFields
+import java.util.function.Supplier
 import java.util.regex.Matcher
 import javax.inject.Provider
 import javax.servlet.http.HttpServletResponse
-import kotlin.reflect.KFunction
 import kotlin.reflect.KParameter
 
 /**
  * Decodes an HTTP request into a call to a web action, then encodes its response into an HTTP
  * response.
  */
-internal class BoundAction<A : WebAction, out R>(
+internal class BoundAction<A : WebAction>(
   private val webActionProvider: Provider<A>,
   private val networkInterceptors: MutableList<NetworkInterceptor>,
   private val applicationInterceptors: MutableList<ApplicationInterceptor>,
   parameterExtractorFactories: List<ParameterExtractor.Factory>,
-  val function: KFunction<R>,
   val pathPattern: PathPattern,
-  private val httpMethod: HttpMethod,
-  private val acceptedContentTypes: List<MediaRange>,
-  private val responseContentType: MediaType?,
-  private val isConnectWebSocketAction: Boolean
+  val action: Action,
+  private val dispatchMechanism: DispatchMechanism
 ) {
-  private val parameterExtractors = function.parameters
+  private val parameterExtractors = action.function.parameters
       .drop(1) // the first parameter is always _this_
       .map { findParameterExtractor(parameterExtractorFactories, it) }
 
@@ -44,7 +42,7 @@ internal class BoundAction<A : WebAction, out R>(
   ): ParameterExtractor {
     var result: ParameterExtractor? = null
     for (factory in parameterExtractorFactories) {
-      val parameterExtractor = factory.create(function, parameter, pathPattern) ?: continue
+      val parameterExtractor = factory.create(action.function, parameter, pathPattern) ?: continue
       if (result != null) {
         throw IllegalArgumentException(
             "multiple ways to extract $parameter: $result and $parameterExtractor")
@@ -58,28 +56,26 @@ internal class BoundAction<A : WebAction, out R>(
   }
 
   fun match(
-    requestMethod: String,
+    requestDispatchMechanism: DispatchMechanism?,
     requestContentType: MediaType?,
     requestAcceptedTypes: List<MediaRange>,
-    url: HttpUrl,
-    isWebSocketRequest: Boolean
+    url: HttpUrl
   ): BoundActionMatch? {
     // Confirm the path and method matches
     val pathMatcher = pathMatcher(url) ?: return null
-    if (requestMethod != httpMethod.name) return null
-    if (isConnectWebSocketAction != isWebSocketRequest) return null
+    if (requestDispatchMechanism != dispatchMechanism) return null
 
     // Confirm the request content type matches the types we accept, and pick the most specific
     // content type match
     val requestContentTypeMatch =
-        requestContentType?.closestMediaRangeMatch(acceptedContentTypes)
+        requestContentType?.closestMediaRangeMatch(action.acceptedMediaRanges)
     if (requestContentType != null && requestContentTypeMatch == null) return null
 
     // Confirm we can generate a response content type matching the set accepted by the request,
     // and pick the most specific response content type match
     val responseContentTypeMatch =
-        responseContentType?.closestMediaRangeMatch(requestAcceptedTypes)
-    if (responseContentType != null && responseContentTypeMatch == null) return null
+        action.responseContentType?.closestMediaRangeMatch(requestAcceptedTypes)
+    if (action.responseContentType != null && responseContentTypeMatch == null) return null
 
     val acceptedMediaRange = requestContentTypeMatch?.mediaRange ?: MediaRange.ALL_MEDIA
     val requestCharsetMatch = requestContentTypeMatch?.matchesCharset ?: false
@@ -89,12 +85,13 @@ internal class BoundAction<A : WebAction, out R>(
         pathMatcher,
         acceptedMediaRange,
         requestCharsetMatch,
-        responseContentType ?: MediaTypes.ALL_MEDIA_TYPE
+        action.responseContentType ?: MediaTypes.ALL_MEDIA_TYPE
     )
   }
 
   internal fun handle(
     request: Request,
+    servletResponse: HttpServletResponse,
     pathMatcher: Matcher
   ): Response<ResponseBody> {
     // Find values for all the parameters.
@@ -105,11 +102,27 @@ internal class BoundAction<A : WebAction, out R>(
     interceptors.add(RequestBridgeInterceptor(parameterExtractors, applicationInterceptors,
         pathMatcher))
 
-    val chain = webAction.asNetworkChain(function, request, *interceptors.toTypedArray())
-    val response = chain.proceed(chain.request)
+    val chain = webAction.asNetworkChain(action.function, request, *interceptors.toTypedArray())
+    var response = chain.proceed(chain.request)
 
     if (response.body !is ResponseBody) {
       throw IllegalStateException("expected a ResponseBody for $webAction")
+    }
+
+    // Format the response for gRPC.
+    if (dispatchMechanism == DispatchMechanism.GRPC) {
+      // Add the required gRPC trailers if that's the mechanism.
+      // TODO(jwilson): permit non-0 GRPC statuses.
+      (servletResponse as org.eclipse.jetty.server.Response).trailers = Supplier<HttpFields> {
+        val trailers = HttpFields()
+        trailers.add("grpc-status", "0")
+        trailers
+      }
+      // TODO(jwilson): permit non-identity GRPC encoding.
+      response = response.copy(headers = response.headers.newBuilder()
+          .set("grpc-encoding", "identity")
+          .set("grpc-accept-encoding", "gzip")
+          .build())
     }
 
     @Suppress("UNCHECKED_CAST")
@@ -125,7 +138,7 @@ internal class BoundAction<A : WebAction, out R>(
       it.extract(webAction, request, pathMatcher)
     }
 
-    val chain = webAction.asChain(function, parameters)
+    val chain = webAction.asChain(action.function, parameters)
     return chain.proceed(chain.args) as WebSocketListener
   }
 
@@ -169,7 +182,7 @@ internal open class RequestMatch(
 
 /** A [RequestMatch] associated with the action that matched */
 internal class BoundActionMatch(
-  val action: BoundAction<*, *>,
+  val action: BoundAction<*>,
   private val pathMatcher: Matcher,
   acceptedMediaRange: MediaRange,
   requestCharsetMatch: Boolean,
@@ -177,9 +190,9 @@ internal class BoundActionMatch(
 ) : RequestMatch(action.pathPattern, acceptedMediaRange, requestCharsetMatch, responseContentType) {
 
   /** Handles the request by handing it off to the action */
-  fun handle(request: Request, jettyResponse: HttpServletResponse) {
-    val result = action.handle(request, pathMatcher)
-    result.writeToJettyResponse(jettyResponse)
+  fun handle(request: Request, servletResponse: HttpServletResponse) {
+    val result = action.handle(request, servletResponse, pathMatcher)
+    result.writeToJettyResponse(servletResponse)
   }
 
   fun handleWebSocket(request: Request): WebSocketListener {
@@ -191,10 +204,10 @@ private fun MediaType.closestMediaRangeMatch(ranges: List<MediaRange>) =
     ranges.mapNotNull { it.matcher(this) }.sorted().firstOrNull()
 
 /**
- *  Acts as the bridge between network interceptors and application interceptors.
- *  The contract is that whatever comes back from the Application chain will be passed back up
- *  as a Response, with extra care given to what happens if the Application chain produces
- *  a Response.
+ * Acts as the bridge between network interceptors and application interceptors.
+ * The contract is that whatever comes back from the Application chain will be passed back up
+ * as a Response, with extra care given to what happens if the Application chain produces
+ * a Response.
  */
 private class RequestBridgeInterceptor(
   val parameterExtractors: List<ParameterExtractor>,

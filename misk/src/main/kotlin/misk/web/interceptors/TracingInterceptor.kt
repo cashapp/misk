@@ -41,7 +41,7 @@ internal class TracingInterceptor internal constructor(private val tracer: Trace
     }
 
     val scopeBuilder = tracer.buildSpan(chain.action.javaClass.name)
-        .withTag(Tags.HTTP_METHOD.key, chain.request.method.toString())
+        .withTag(Tags.HTTP_METHOD.key, chain.request.dispatchMechanism.method.toString())
         .withTag(Tags.HTTP_URL.key, chain.request.url.toString())
         .withTag(Tags.SPAN_KIND.key, SPAN_KIND_SERVER)
 

@@ -4,7 +4,6 @@ import misk.Action
 import misk.web.NetworkChain
 import misk.web.NetworkInterceptor
 import misk.web.Response
-import misk.web.ResponseContentType
 import misk.web.actions.WebSocketListener
 import misk.web.marshal.GenericMarshallers
 import misk.web.marshal.Marshaller
@@ -13,7 +12,6 @@ import okhttp3.MediaType
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.reflect.KType
-import kotlin.reflect.full.findAnnotation
 
 @Singleton
 internal class MarshallerInterceptor constructor(private val marshaller: Marshaller<Any>) :
@@ -44,9 +42,7 @@ internal class MarshallerInterceptor constructor(private val marshaller: Marshal
     }
 
     private fun findMarshaller(action: Action): Marshaller<Any>? {
-      val responseMediaType = action.function.findAnnotation<ResponseContentType>()?.let {
-        MediaType.parse(it.value)
-      }
+      val responseMediaType = action.responseContentType
 
       if (responseMediaType == null || responseMediaType == MediaTypes.ALL_MEDIA_TYPE) {
         return genericMarshallerFor(responseMediaType, action.returnType)
