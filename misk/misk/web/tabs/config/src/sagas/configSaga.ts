@@ -17,7 +17,7 @@ import {
 const dateFormat = "YYYY-MM-DD HH:mm:ss"
 
 function * handleGetAll () {
-  const files: any = []
+  const resources: any = []
   let data: any = {}
   try {
     const response = yield call(axios.get, "/api/config/all")
@@ -30,22 +30,22 @@ function * handleGetAll () {
   }
 
   try {
-    files.push({name: "live-config.yaml", file: data.effective_config})
+    resources.push({name: "live-config.yaml", file: data.effective_config})
     Object.entries(data.yaml_files).forEach(([key,value]) => {
-      files.push({name: key, file: value})
+      resources.push({name: key, file: value})
     })
     yield put(dispatchConfig.success({ 
       data,
-      files,
       lastOnline: dayjs().format(dateFormat),
+      resources,
       status: `Online as of: ${dayjs().format(dateFormat)}`
       }))
   } catch (e) {
     yield put(dispatchConfig.failure({ 
       data,
       error: { ...e, msg: "config yaml parse error" },
-      files,
       lastOnline: dayjs().format(dateFormat),
+      resources,
       status: `Online as of: ${dayjs().format(dateFormat)}`
       }))
   }
