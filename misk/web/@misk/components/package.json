@@ -1,6 +1,6 @@
 {
   "name": "@misk/components",
-  "version": "0.0.26",
+  "version": "0.0.28",
   "description": "Microservice Kontainer Common Components",
   "author": "Square/Misk Authors (https://github.com/square/misk/graphs/contributors)",
   "main": "lib/components.js",
