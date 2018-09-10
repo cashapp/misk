@@ -2,10 +2,10 @@
 // const YAML = require("json2yaml")
 import * as React from "react"
 import styled from "styled-components"
-import { IConfigFile } from "../containers/TabContainer"
+import { IConfigResource } from "../containers/TabContainer"
 
 interface IConfigProps {
-  files: IConfigFile[]
+  resources: IConfigResource[]
   status: string
 }
 
@@ -61,26 +61,30 @@ export default class ConfigComponent extends React.PureComponent<IConfigProps> {
     return(json.split(":{").join(":\n \ \ ").split(",").join("\n").split("}").join("\n").split("{").join("").split("\"").join(""))
   }
 
-  formattedFile(file: IConfigFile) {
-    if (file.name === "live-config.yaml") {
-      return this.toYaml(file.file)
+  formattedFile(resource: IConfigResource) {
+    if (resource.name === "live-config.yaml") {
+      return this.toYaml(resource.file)
     } else {
-      return file.file
+      return resource.file
     }
+  }
+
+  renderConfig(resource: IConfigResource) {
+    return(
+      <ConfigOutput>
+        <h5><strong>classpath:/{resource.name}</strong></h5>
+        <code>{this.formattedFile(resource)}</code>
+      </ConfigOutput>
+    )
   }
   
   render() {
-    const { files, status } = this.props
+    const { resources, status } = this.props
     return(
       <Container>
         <h1>Config</h1>
         <p>{status}</p>
-        {files && files.map(f => (
-          <ConfigOutput>
-            <h5><strong>classpath:/{f.name}</strong></h5>
-            <code>{this.formattedFile(f)}</code>
-          </ConfigOutput>))
-        }
+        {resources && resources.map(resource => this.renderConfig(resource))}
       </Container>
     )
   }
