@@ -1,4 +1,5 @@
-import { Alignment, Navbar, NavbarDivider, NavbarGroup, NavbarHeading } from "@blueprintjs/core"
+import { Alignment, Button, Navbar, NavbarDivider, NavbarGroup, NavbarHeading } from "@blueprintjs/core"
+import { IconNames } from "@blueprintjs/icons"
 import { IMiskAdminTabs } from "@misk/common"
 import * as React from "react"
 import { Link } from "react-router-dom"
@@ -68,6 +69,7 @@ export const NavTopbarComponent = (props: INavTopbarProps) => (
   <MiskNavbar>
     <ResponsiveContainer>
       <MiskNavbarGroup align={Alignment.LEFT} className="bp3-dark">
+        {true ? <Button icon={IconNames.MENU}/>: <span></span>}
         <MiskNavbarLink to={props.homeUrl}>
           <MiskNavbarHeading>{props.homeName}</MiskNavbarHeading>
         </MiskNavbarLink>
