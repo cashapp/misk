@@ -5,25 +5,29 @@ Misk Admin
 - `@misk`: all npm packages
   - `@misk/common`: common dependencies
   - `@misk/components`: reusable React components
-  - `@misk/dev`: common devDependencies
+  - `@misk/dev`: common devDependencies, TsConfig, Webpack build configs, Webpack externals
+  - `@misk/tslint`: common TsLint configs
 - `tabs`: all modular parts of the dashboard
   - `config`: config tab
-  - `dashboard`: UI wrapper that adds dashboard navbar, menu...etc
   - `loader`: thin wrapper that has the main router, all script tags, handles hide/show each tab when it's clicked
-  - `healthcheck`: to be built
+  - ... to be built:
+  - `webActions`: show all installed `WebActions`
   - `guice`: to be built
   - `hibernate`: to be built
+  - `healthcheck`: to be built
 
 ## Framework and Languages
 - Typescript + ReactJS
 - [Blueprintjs](http://blueprintjs.com/) for UI elements + Typescript compatible Icons
+- [Styled Components](https://www.styled-components.com/) for adding CSS to React components
 - [Skeleton](http://getskeleton.com/) for very simple responsive boilerplate styling
 
 ## Getting Started
 
 1. Open Misk in IntelliJ
-2. Start `UrlShortenerService` (used for testing the request forwarding)
-3. For each tab
+1. Start `UrlShortenerService` (used for testing the request forwarding)
+1. Run `./develop@misk.sh` in `web/` directory (builds all @misk/ packages and starts dev server)
+1. Create new Tmux/Terminal sessions for each tab in `web/tabs/` and run
 
   ```
   $ cd tabs/config
@@ -31,8 +35,8 @@ Misk Admin
   $ yarn build
   $ yarn start 
   ```
-4. Open up `http://localhost:8080/_admin/config/` for config
-5. Open up `http://localhost:8080/_admin/dashboard/` for dashboard
+1. Open up `http://localhost:8080/_admin/` for config
+1. If you want to build all the tabs, run `./build.sh` in `web/` directory
 
 
 ## Creating a new Tab
