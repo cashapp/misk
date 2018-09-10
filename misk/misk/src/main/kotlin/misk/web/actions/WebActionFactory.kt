@@ -7,16 +7,15 @@ import misk.MiskDefault
 import misk.asAction
 import misk.web.BoundAction
 import misk.web.ConnectWebSocket
+import misk.web.DispatchMechanism
 import misk.web.Get
+import misk.web.Grpc
 import misk.web.NetworkInterceptor
 import misk.web.PathPattern
 import misk.web.Post
-import misk.web.RequestContentType
-import misk.web.ResponseContentType
 import misk.web.extractors.ParameterExtractor
 import misk.web.mediatype.MediaRange
-import okhttp3.MediaType
-import org.eclipse.jetty.http.HttpMethod
+import misk.web.mediatype.MediaTypes
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.reflect.KClass
@@ -40,20 +39,21 @@ internal class WebActionFactory {
   fun <A : WebAction> newBoundAction(
     webActionClass: KClass<A>,
     pathPrefix: String = "/"
-  ): List<BoundAction<A, *>> {
+  ): List<BoundAction<A>> {
     // Find the function with Get, Post, or ConnectWebSocket annotation. Only one such function is
     // allowed.
     val actionFunctions = webActionClass.members.mapNotNull {
       if (it.findAnnotation<Get>() != null ||
           it.findAnnotation<Post>() != null ||
-          it.findAnnotation<ConnectWebSocket>() != null) {
+          it.findAnnotation<ConnectWebSocket>() != null ||
+          it.findAnnotation<Grpc>() != null) {
         it as? KFunction<*>
             ?: throw IllegalArgumentException("expected $it to be a function")
       } else null
     }
 
     require(actionFunctions.isNotEmpty()) {
-      "no Get or Post annotations on ${webActionClass.simpleName}"
+      "no @Get, @Post, @ConnectWebSocket, or @Grpc annotations on ${webActionClass.simpleName}"
     }
 
     require(actionFunctions.size == 1) {
@@ -64,32 +64,35 @@ internal class WebActionFactory {
     // Bind providers for each supported HTTP method.
     val actionFunction = actionFunctions.first()
     val get = actionFunction.findAnnotation<Get>()
-
-    val connectWebSocket = actionFunction.findAnnotation<ConnectWebSocket>()
     val post = actionFunction.findAnnotation<Post>()
+    val connectWebSocket = actionFunction.findAnnotation<ConnectWebSocket>()
+    val grpc = actionFunction.findAnnotation<Grpc>()
 
     // TODO(adrw) fix this using first provider below so that WebAction::class or WebAction can be passed in
-//    val provider = Providers.of(theInstance)
+    // val provider = Providers.of(theInstance)
 
     val provider = injector.getProvider(webActionClass.java)
 
-    val result: MutableList<BoundAction<A, *>> = mutableListOf()
+    val result: MutableList<BoundAction<A>> = mutableListOf()
 
     require(pathPrefix.last() == '/')
+    val effectivePrefix = pathPrefix.dropLast(1)
+
     if (get != null) {
-      result += newBoundAction(provider, actionFunction, HttpMethod.GET,
-          pathPrefix.dropLast(1) + get.pathPattern, false)
+      result += newBoundAction(provider, actionFunction,
+          effectivePrefix + get.pathPattern, DispatchMechanism.GET)
     }
-
-    if (connectWebSocket != null) {
-      result += newBoundAction(provider, actionFunction, HttpMethod.GET,
-          connectWebSocket.pathPattern, true)
-    }
-
-    require(pathPrefix.last() == '/')
     if (post != null) {
-      result += newBoundAction(provider, actionFunction, HttpMethod.POST,
-          pathPrefix.dropLast(1) + post.pathPattern, false)
+      result += newBoundAction(provider, actionFunction,
+          effectivePrefix + post.pathPattern, DispatchMechanism.POST)
+    }
+    if (connectWebSocket != null) {
+      result += newBoundAction(provider, actionFunction,
+          effectivePrefix + connectWebSocket.pathPattern, DispatchMechanism.WEBSOCKET)
+    }
+    if (grpc != null) {
+      result += newBoundAction(provider, actionFunction,
+          effectivePrefix + grpc.pathPattern, DispatchMechanism.GRPC)
     }
 
     return result
@@ -98,16 +101,23 @@ internal class WebActionFactory {
   private fun <A : WebAction> newBoundAction(
     provider: Provider<A>,
     function: KFunction<*>,
-    httpMethod: HttpMethod,
     pathPattern: String,
-    isConnectWebSocketAction: Boolean
-  ): BoundAction<A, *> {
+    dispatchMechanism: DispatchMechanism
+  ): BoundAction<A> {
     // NB: The response media type may be omitted; in this case only generic return types (String,
     // ByteString, ResponseBody, etc) are supported
-    val responseContentType = function.responseContentType
-    val acceptedContentTypes = function.acceptedContentTypes
+    var action = function.asAction()
 
-    val action = function.asAction()
+    if (dispatchMechanism == DispatchMechanism.GRPC) {
+      require(action.responseContentType == null
+          && action.acceptedMediaRanges == listOf(MediaRange.ALL_MEDIA)) {
+        "@Grpc cannot be used with @RequestContentType or @ResponseContentType on $function"
+      }
+      action = action.copy(
+          responseContentType = MediaTypes.APPLICATION_GRPC_MEDIA_TYPE,
+          acceptedMediaRanges = listOf(MediaRange.parse(MediaTypes.APPLICATION_GRPC))
+      )
+    }
 
     val networkInterceptors = ArrayList<NetworkInterceptor>()
     // Ensure that default interceptors are called before any user provided interceptors
@@ -120,18 +130,6 @@ internal class WebActionFactory {
     }
 
     return BoundAction(provider, networkInterceptors, applicationInterceptors,
-        parameterExtractorFactories, function, PathPattern.parse(pathPattern),
-        httpMethod,
-        acceptedContentTypes, responseContentType, isConnectWebSocketAction)
+        parameterExtractorFactories, PathPattern.parse(pathPattern), action, dispatchMechanism)
   }
 }
-
-private val KFunction<*>.acceptedContentTypes: List<MediaRange>
-  get() = findAnnotation<RequestContentType>()?.value?.flatMap {
-    MediaRange.parseRanges(it)
-  }?.toList() ?: listOf(MediaRange.ALL_MEDIA)
-
-private val KFunction<*>.responseContentType: MediaType?
-  get() = findAnnotation<ResponseContentType>()?.value?.let {
-    MediaType.parse(it)
-  }

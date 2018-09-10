@@ -35,6 +35,8 @@ import misk.web.interceptors.RequestLoggingInterceptor
 import misk.web.interceptors.TracingInterceptor
 import misk.web.interceptors.WideOpenDevelopmentInterceptorFactory
 import misk.web.jetty.JettyService
+import misk.web.marshal.GrpcMarshaller
+import misk.web.marshal.GrpcUnmarshaller
 import misk.web.marshal.JsonMarshaller
 import misk.web.marshal.JsonUnmarshaller
 import misk.web.marshal.Marshaller
@@ -69,8 +71,10 @@ class MiskWebModule : KAbstractModule() {
     multibind<Marshaller.Factory>().to<PlainTextMarshaller.Factory>()
     multibind<Marshaller.Factory>().to<JsonMarshaller.Factory>()
     multibind<Marshaller.Factory>().to<ProtobufMarshaller.Factory>()
+    multibind<Marshaller.Factory>().to<GrpcMarshaller.Factory>()
     multibind<Unmarshaller.Factory>().to<JsonUnmarshaller.Factory>()
     multibind<Unmarshaller.Factory>().to<ProtobufUnmarshaller.Factory>()
+    multibind<Unmarshaller.Factory>().to<GrpcUnmarshaller.Factory>()
 
     // Initialize empty sets for our multibindings.
     newMultibinder<NetworkInterceptor.Factory>()
