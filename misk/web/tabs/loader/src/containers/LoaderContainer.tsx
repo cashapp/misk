@@ -17,8 +17,8 @@ export interface ILoaderProps {
   loader: ILoaderState
   router: RouterState
   cacheTabEntries: (MiskBinder: IMultibinder) => any
-  getComponentsAndTabs: () => any
-  getTabs: () => any
+  getComponentsAndTabs: (url: string) => any
+  getTabs: (url: string) => any
   getComponent: (tab: IMiskAdminTab) => any
   registerComponent: (name: string, Component: any) => any
 }
@@ -29,9 +29,11 @@ const TabContainer = styled(ResponsiveContainer)`
   padding-left: 5px;
 `
 
+const adminTabsUrl = "/api/admintabs/all"
+
 class LoaderContainer extends React.Component<ILoaderProps> {
   async componentDidMount() {
-    this.props.getTabs()
+    this.props.getTabs(adminTabsUrl)
   }
 
   buildTabRouteMountingDiv(tab: IMiskAdminTab) {
@@ -54,7 +56,12 @@ class LoaderContainer extends React.Component<ILoaderProps> {
         <div>
           <NavTopbarComponent homeName="Misk" homeUrl="/_admin/"/>
           <TabContainer>
-            <NonIdealState children={Code} icon={IconNames.OFFLINE} description="Loading tabs..."/>
+            <NonIdealState 
+              children={Code} 
+              icon={IconNames.OFFLINE} 
+              title="Error Loading Tabs" 
+              description={`Unable to get list of tabs from server to begin dashbaord render. Endpoint ${adminTabsUrl} is unavailable.`}
+            />
           </TabContainer>
         </div>
       )
