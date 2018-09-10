@@ -8,7 +8,7 @@ import { IState } from "../reducers"
 interface ITabProps {
   children: any,
   config: {
-    files: IConfigFile[]
+    resources: IConfigResource[]
     status: string
   }
   slug?: string,
@@ -18,7 +18,7 @@ interface ITabProps {
   getConfigs: any
 }
 
-export interface IConfigFile {
+export interface IConfigResource {
   name: string
   file: string
 }
@@ -32,10 +32,10 @@ class TabContainer extends React.Component<ITabProps, {children : any}> {
   }
 
   render() {
-    const { files, status } = this.props.config
+    const { resources, status } = this.props.config
     if (status && window.location.pathname === "/_admin/config/") {
       return (
-        <ConfigComponent files={files} status={status} />
+        <ConfigComponent resources={resources} status={status} />
       )
     } else {
       return (
