@@ -4,6 +4,7 @@ import misk.exceptions.StatusCode
 import misk.inject.keyOf
 import misk.scope.ActionScope
 import misk.web.BoundAction
+import misk.web.DispatchMechanism
 import misk.web.Request
 import misk.web.actions.WebAction
 import misk.web.actions.WebActionEntry
@@ -20,6 +21,7 @@ import org.eclipse.jetty.http.HttpMethod
 import org.eclipse.jetty.websocket.servlet.WebSocketCreator
 import org.eclipse.jetty.websocket.servlet.WebSocketServlet
 import org.eclipse.jetty.websocket.servlet.WebSocketServletFactory
+import java.net.ProtocolException
 import javax.inject.Inject
 import javax.inject.Singleton
 import javax.servlet.http.HttpServletRequest
@@ -32,7 +34,7 @@ internal class WebActionsServlet @Inject constructor(
   private val scope: ActionScope
 ) : WebSocketServlet() {
 
-  private val boundActions: MutableSet<BoundAction<out WebAction, *>> = mutableSetOf()
+  private val boundActions: MutableSet<BoundAction<out WebAction>> = mutableSetOf()
 
   init {
     for (entry in webActionEntries) {
@@ -49,32 +51,33 @@ internal class WebActionsServlet @Inject constructor(
   }
 
   private fun handleCall(request: HttpServletRequest, response: HttpServletResponse) {
-    val asRequest = request.asRequest()
-    val seedData = mapOf(
-        keyOf<HttpServletRequest>() to request,
-        keyOf<Request>() to asRequest)
+    try {
+      val asRequest = request.asRequest()
+      val seedData = mapOf(
+          keyOf<HttpServletRequest>() to request,
+          keyOf<Request>() to asRequest)
 
-    scope.enter(seedData).use {
-      val candidateActions = boundActions.mapNotNull {
-        it.match(
-            request.method,
-            request.contentType?.let { MediaType.parse(it) },
-            request.accepts(),
-            asRequest.url,
-            false
-        )
-      }
+      val requestContentType = request.contentType()
+      val requestAccepts = request.accepts()
+      scope.enter(seedData).use {
+        val candidateActions = boundActions.mapNotNull {
+          it.match(asRequest.dispatchMechanism, requestContentType, requestAccepts, asRequest.url)
+        }
 
-      val bestAction = candidateActions.sorted().firstOrNull()
-      if (bestAction != null) {
-        bestAction.handle(asRequest, response)
-      } else {
-        response.status = StatusCode.NOT_FOUND.code
-        response.addHeader("Content-Type", MediaTypes.TEXT_PLAIN_UTF8)
-        response.writer.print("Nothing found at /${asRequest.url.encodedPath()}")
-        response.writer.close()
+        val bestAction = candidateActions.sorted().firstOrNull()
+        if (bestAction != null) {
+          bestAction.handle(asRequest, response)
+          return
+        }
       }
+    } catch (e: ProtocolException) {
+      // Probably an unexpected HTTP method. Send a 404 below.
     }
+
+    response.status = StatusCode.NOT_FOUND.code
+    response.addHeader("Content-Type", MediaTypes.TEXT_PLAIN_UTF8)
+    response.writer.print("Nothing found at ${request.urlString()}")
+    response.writer.close()
   }
 
   override fun configure(factory: WebSocketServletFactory) {
@@ -83,20 +86,14 @@ internal class WebActionsServlet @Inject constructor(
       val request = servletUpgradeRequest.httpServletRequest
       val asRequest = Request(
           request.urlString()!!,
-          HttpMethod.valueOf(request.method),
+          DispatchMechanism.WEBSOCKET,
           request.headers(),
-          Buffer(), // empty body
+          Buffer(), // Empty body.
           realWebSocket
       )
 
       val candidateActions = boundActions.mapNotNull {
-        it.match(
-            request.method,
-            null,
-            listOf(),
-            asRequest.url,
-            true
-        )
+        it.match(DispatchMechanism.WEBSOCKET, null, listOf(), asRequest.url)
       }
 
       val bestAction = candidateActions.sorted().firstOrNull() ?: return@WebSocketCreator null
@@ -106,6 +103,8 @@ internal class WebActionsServlet @Inject constructor(
     }
   }
 }
+
+internal fun HttpServletRequest.contentType() = contentType?.let { MediaType.parse(it) }
 
 internal fun HttpServletRequest.headers(): Headers {
   val headersBuilder = Headers.Builder()
@@ -128,10 +127,22 @@ private fun HttpServletRequest.urlString(): HttpUrl? {
 private fun HttpServletRequest.asRequest(): Request {
   return Request(
       urlString()!!,
-      HttpMethod.valueOf(method),
+      dispatchMechanism(),
       headers(),
       inputStream.source().buffer()
   )
+}
+
+/** @throws ProtocolException on unexpected methods. */
+internal fun HttpServletRequest.dispatchMechanism(): DispatchMechanism {
+  return when (method) {
+    HttpMethod.GET.name -> DispatchMechanism.GET
+    HttpMethod.POST.name -> when (contentType()) {
+      MediaTypes.APPLICATION_GRPC_MEDIA_TYPE -> DispatchMechanism.GRPC
+      else -> DispatchMechanism.POST
+    }
+    else -> throw ProtocolException("unexpected method: $method")
+  }
 }
 
 private fun HttpServletRequest.accepts(): List<MediaRange> {

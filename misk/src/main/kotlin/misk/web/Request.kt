@@ -7,19 +7,19 @@ import okhttp3.MediaType
 import okhttp3.RequestBody
 import okio.BufferedSink
 import okio.BufferedSource
-import org.eclipse.jetty.http.HttpMethod
 
 data class Request(
   val url: HttpUrl,
-  val method: HttpMethod = HttpMethod.GET,
+  val dispatchMechanism: DispatchMechanism = DispatchMechanism.GET,
   val headers: Headers = Headers.of(),
   val body: BufferedSource,
   val websocket: WebSocket? = null
 ) {
   fun toOkHttp3(): okhttp3.Request {
     // TODO(adrw) https://github.com/square/misk/issues/279
-    val okRequestBody = when (this.method) {
-      HttpMethod.CONNECT, HttpMethod.GET, HttpMethod.HEAD, HttpMethod.OPTIONS, HttpMethod.TRACE -> null
+    val okRequestBody = when (dispatchMechanism) {
+      DispatchMechanism.GET -> null
+      DispatchMechanism.WEBSOCKET -> null
       else -> object : RequestBody() {
         override fun contentType(): MediaType? = null
         override fun writeTo(sink: BufferedSink) {
@@ -30,7 +30,7 @@ data class Request(
 
     return okhttp3.Request.Builder()
         .url(url)
-        .method(method.toString(), okRequestBody)
+        .method(dispatchMechanism.method.toString(), okRequestBody)
         .headers(headers)
         .build()
   }
