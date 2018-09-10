@@ -19,8 +19,9 @@
   "scripts": {
     "build:lib": "npm run lib",
     "build": "npm run lib",
+    "updateDevCache": "cd ..; ./_adminUpdateCache.sh",
     "dist": "npm run lib",
-    "lib": "webpack",
+    "lib": "webpack; yarn run updateDevCache",
     "lint": "echo no lint",
     "prepare": "yarn run lint && yarn run test && yarn run lib",
     "reinstall": "rm -rf node_modules/ && yarn install",
