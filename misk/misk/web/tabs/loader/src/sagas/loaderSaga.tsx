@@ -25,9 +25,10 @@ function * handleCacheTabEntries (action: IAction<IActionType, { MiskBinder: IMu
     }
 }
 
-function * handleGetAllTabs () {
+function * handleGetAllTabs (action: IAction<IActionType, { url: string}>) {
+  const { url } = action.payload
   try {
-    const { data } = yield call(axios.get, "/api/admintab/all")
+    const { data } = yield call(axios.get, url)
     const { adminTabs } = data
     yield put(dispatchLoader.success({ adminTabs }))
   } catch (e) {
@@ -35,11 +36,12 @@ function * handleGetAllTabs () {
   }
 }
 
-function * handleGetAllAndTabs () {
+function * handleGetAllAndTabs (action: IAction<IActionType, { url: string}>) {
+  const { url } = action.payload
   let adminTabs: any = {}
   try {
-    yield put(dispatchLoader.getAllTabs())
-    const { data } = yield call(axios.get, "/api/admintab/all")
+    yield put(dispatchLoader.getAllTabs(url))
+    const { data } = yield call(axios.get, url)
     adminTabs = data.adminTabs
     yield put(dispatchLoader.success({ adminTabs }))
     if (Object.entries(adminTabs).length === 0) {
@@ -52,9 +54,8 @@ function * handleGetAllAndTabs () {
   for (const key in adminTabs) {
     if (adminTabs.hasOwnProperty(key)) {
       const tab = adminTabs[key]
-      const url = `/_tab/${tab.slug}/tab_${tab.slug}.js`
       try {
-        const { data } = yield call(axios.get, url)
+        const { data } = yield call(axios.get, `/_tab/${tab.slug}/tab_${tab.slug}.js`)
         yield put(dispatchLoader.success({ adminTabComponents: { [tab.slug]: data } }))
       } catch (e) {
         yield put(dispatchLoader.failure({ error: { ...e } }))
