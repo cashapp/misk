@@ -9,6 +9,21 @@ annotation class Post(val pathPattern: String)
 @Target(AnnotationTarget.FUNCTION)
 annotation class ConnectWebSocket(val pathPattern: String)
 
+/**
+ * For GRPC actions the path is formatted as `/<service name>/<method name>`. The path pattern of
+ * the proto service below is `/squareup.helloworld.Greeter/SayHello`.
+ *
+ * ```
+ * package squareup.helloworld;
+ *
+ * service Greeter {
+ *   rpc SayHello (HelloRequest) returns (HelloReply) {}
+ * }
+ * ```
+ */
+@Target(AnnotationTarget.FUNCTION)
+annotation class Grpc(val pathPattern: String)
+
 @Target(AnnotationTarget.VALUE_PARAMETER)
 annotation class RequestHeaders
 

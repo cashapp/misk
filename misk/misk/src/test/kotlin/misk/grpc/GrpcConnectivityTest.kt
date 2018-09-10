@@ -1,7 +1,9 @@
-package misk.web.ssl
+package misk.grpc
 
 import com.google.inject.Guice
 import com.google.inject.Provides
+import com.squareup.protos.test.grpc.HelloReply
+import com.squareup.protos.test.grpc.HelloRequest
 import misk.MiskServiceModule
 import misk.client.HttpClientEndpointConfig
 import misk.client.HttpClientModule
@@ -14,26 +16,35 @@ import misk.security.ssl.SslLoader
 import misk.security.ssl.TrustStoreConfig
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
-import misk.web.Get
-import misk.web.ResponseContentType
+import misk.web.Grpc
 import misk.web.WebSslConfig
 import misk.web.WebTestingModule
 import misk.web.actions.WebAction
 import misk.web.actions.WebActionEntry
 import misk.web.jetty.JettyService
 import misk.web.mediatype.MediaTypes
+import misk.web.ssl.Http2Testing
+import okhttp3.MediaType
 import okhttp3.OkHttpClient
-import okhttp3.Protocol
 import okhttp3.Request
-import org.assertj.core.api.Assertions.assertThat
+import okhttp3.RequestBody
+import okio.BufferedSink
 import org.junit.jupiter.api.Assumptions.assumeTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import javax.inject.Inject
 import javax.inject.Singleton
 
+/**
+ * This test gets Misk running as a GRPC server and then acts as a basic GRPC client to send a
+ * request. It's intended to be interoperable with with the
+ * [GRPC 'hello world' sample](https://github.com/grpc/grpc-java/tree/master/examples).
+ *
+ * That sample includes a client and a server that connect to each other. You can also connect this
+ * test's client to that sample server, or that sample client to this test's server.
+ */
 @MiskTest(startService = true)
-class Http2ConnectivityTest {
+class GrpcConnectivityTest {
   @MiskTestModule
   val module = TestModule()
 
@@ -52,48 +63,44 @@ class Http2ConnectivityTest {
   fun happyPath() {
     assumeTrue(Http2Testing.isJava9OrNewer())
 
-    val call = client.newCall(Request.Builder()
-        .url(jetty.httpsServerUrl!!.resolve("/hello")!!)
-        .build())
-    val response = call.execute()
-    response.use {
-      assertThat(response.protocol()).isEqualTo(Protocol.HTTP_2)
-      assertThat(response.body()!!.string()).isEqualTo("hello")
-    }
-  }
+    val request = Request.Builder()
+        .url(jetty.httpsServerUrl!!.resolve("/helloworld.Greeter/SayHello")!!)
+        .addHeader("grpc-trace-bin", "")
+        .addHeader("grpc-accept-encoding", "gzip")
+        .post(object : RequestBody() {
+          override fun contentType(): MediaType? {
+            return MediaTypes.APPLICATION_GRPC_MEDIA_TYPE
+          }
 
-  @Test
-  fun http1ForClientsThatPreferIt() {
-    val http1Client = client.newBuilder()
-        .protocols(listOf(Protocol.HTTP_1_1))
+          override fun writeTo(sink: BufferedSink) {
+            val writer = GrpcWriter.get(sink, HelloRequest.ADAPTER)
+            writer.writeMessage(HelloRequest("jesse!"))
+          }
+        })
         .build()
 
-    val call = http1Client.newCall(Request.Builder()
-        .url(jetty.httpsServerUrl!!.resolve("/hello")!!)
-        .build())
+    val call = client.newCall(request)
     val response = call.execute()
-    response.use {
-      assertThat(response.protocol()).isEqualTo(Protocol.HTTP_1_1)
-      assertThat(response.body()!!.string()).isEqualTo("hello")
+
+    for (i in 0 until response.headers().size()) {
+      println("${response.headers().name(i)}: ${response.headers().value(i)}")
+    }
+
+    val reader = GrpcReader.get(response.body()!!.source(), HelloReply.ADAPTER,
+        response.header("grpc-encoding"))
+    while (true) {
+      val message = reader.readMessage() ?: break
+      println(message)
     }
   }
 
-  @Test
-  fun http1ForCleartext() {
-    val call = client.newCall(Request.Builder()
-        .url(jetty.httpServerUrl.resolve("/hello")!!)
-        .build())
-    val response = call.execute()
-    response.use {
-      assertThat(response.protocol()).isEqualTo(Protocol.HTTP_1_1)
-      assertThat(response.body()!!.string()).isEqualTo("hello")
+  class HelloRpcAction : WebAction {
+    @Grpc("/helloworld.Greeter/SayHello")
+    fun sayHello(@misk.web.RequestBody request: HelloRequest): HelloReply {
+      return HelloReply.Builder()
+          .message("howdy, ${request.name}")
+          .build()
     }
-  }
-
-  class HelloAction : WebAction {
-    @Get("/hello")
-    @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
-    fun sayHello() = "hello"
   }
 
   class TestModule : KAbstractModule() {
@@ -107,7 +114,7 @@ class Http2ConnectivityTest {
               ),
               mutual_auth = WebSslConfig.MutualAuth.NONE)
       ))
-      multibind<WebActionEntry>().toInstance(WebActionEntry<HelloAction>())
+      multibind<WebActionEntry>().toInstance(WebActionEntry<HelloRpcAction>())
     }
   }
 

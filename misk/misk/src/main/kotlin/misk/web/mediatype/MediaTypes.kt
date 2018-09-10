@@ -32,6 +32,9 @@ object MediaTypes {
   const val IMAGE_PNG = "image/png"
   val IMAGE_PNG_MEDIA_TYPE = IMAGE_PNG.asMediaType()
 
+  const val APPLICATION_GRPC = "application/grpc"
+  val APPLICATION_GRPC_MEDIA_TYPE = APPLICATION_GRPC.asMediaType()
+
   fun fromFileExtension(ext: String) : MediaType {
     return when (ext) {
       "css" -> TEXT_CSS_MEDIA_TYPE
@@ -43,7 +46,7 @@ object MediaTypes {
   }
 }
 
-fun String.asMediaType() = MediaType.parse(this)!!
+fun String.asMediaType() = MediaType.get(this)!!
 fun String.asMediaRange() = MediaRange.parse(this)
 
 internal val MediaType.wildcardCount

@@ -11,14 +11,15 @@ import misk.inject.KAbstractModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.testing.MockTracingBackendModule
+import misk.web.DispatchMechanism
 import misk.web.Get
 import misk.web.NetworkChain
 import misk.web.NetworkInterceptor
 import misk.web.Request
 import misk.web.Response
-import misk.web.actions.WebActionEntry
 import misk.web.WebTestingModule
 import misk.web.actions.WebAction
+import misk.web.actions.WebActionEntry
 import misk.web.actions.asNetworkChain
 import misk.web.jetty.JettyService
 import okhttp3.Headers
@@ -26,7 +27,6 @@ import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
 import okio.Buffer
 import org.assertj.core.api.Assertions.assertThat
-import org.eclipse.jetty.http.HttpMethod
 import org.junit.jupiter.api.Test
 import javax.inject.Inject
 
@@ -45,7 +45,7 @@ class TracingInterceptorTest {
     val tracingInterceptor = tracingInterceptorFactory.create(TracingTestAction::call.asAction())!!
     val request = Request(
         HttpUrl.parse("http://foo.bar/")!!,
-        HttpMethod.GET,
+        DispatchMechanism.GET,
         body = Buffer()
     )
     val chain = tracingTestAction.asNetworkChain(TracingTestAction::call, request,
@@ -70,7 +70,7 @@ class TracingInterceptorTest {
     val tracingInterceptor = tracingInterceptorFactory.create(TracingTestAction::call.asAction())!!
     val request = Request(
         HttpUrl.parse("http://foo.bar/")!!,
-        HttpMethod.GET,
+        DispatchMechanism.GET,
         Headers.Builder().add("spanid", "1").add("traceid", "2").build(),
         body = Buffer()
     )
