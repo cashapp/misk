@@ -116,9 +116,9 @@
     skeleton-css "^2.0.4"
     styled-components "^3.4.2"
 
-"@misk/components@^0.0.28":
-  version "0.0.28"
-  resolved "https://registry.yarnpkg.com/@misk/components/-/components-0.0.28.tgz#40d39e2ad37edb4f85ae6fa5b19e9664bda48479"
+"@misk/components@^0.0.29":
+  version "0.0.29"
+  resolved "https://registry.yarnpkg.com/@misk/components/-/components-0.0.29.tgz#e8b4b5df996ca6ab72f45e3af1120ff289496e93"
   dependencies:
     "@misk/common" "^0.0.33"
 

@@ -1,6 +1,6 @@
 import { Alignment, Button, Navbar, NavbarDivider, NavbarGroup, NavbarHeading } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
-import { IMiskAdminTabs, IMiskWindow } from "@misk/common"
+import { IMiskAdminTabs } from "@misk/common"
 import * as React from "react"
 import { Link } from "react-router-dom"
 import styled from "styled-components"
@@ -71,34 +71,38 @@ const MiskMenuButton = styled(Button)`
   position: absolute;
 `
 
-const MiskNavbarLinks = (links: IMiskAdminTabs) => (
-  Object.entries(links).map(([key, tab]) => <MiskNavbarLink key={key} to={tab.url_path_prefix}>{tab.name}</MiskNavbarLink>)
-)
-
-const Window = window as IMiskWindow
-
-const toggleMenu = () => {
-  console.log(Window.Misk.Binder.multibind("NavTopbarMenuShow", "open", true))
-}
-
-
-// OPEN = "menu",
-// CLOSED = "cross"
-
 // TODO...create new MiskBinders like abstraction that lives in window for key/value state store to toggle open/close
 // TODO...^ once this determined, have MiskMenuButton icon deteremined on that boolean value close/open
 
-export const TopbarComponent = (props: ITopbarProps) => (
-  <MiskNavbar>
-    {props.menuButtonShow === true ? <MiskMenuButton icon={IconNames.MENU} onClick={toggleMenu}/>:<div/>}
-    <ResponsiveContainer>
-      <MiskNavbarGroup align={Alignment.LEFT} className="bp3-dark">
-        <MiskNavbarLink to={props.homeUrl}>
-          <MiskNavbarHeading>{props.homeName}</MiskNavbarHeading>
-        </MiskNavbarLink>
-        <MiskNavbarDivider/>
-        {props.links ? MiskNavbarLinks(props.links) : <span>Loading...</span>}
-      </MiskNavbarGroup>
-    </ResponsiveContainer>
-  </MiskNavbar>
-)
+export class TopbarComponent extends React.Component<ITopbarProps, {}> {
+  public state = {
+    isOpen: false
+  }
+
+  render() {
+    const { homeName, homeUrl, links, menuButtonShow } = this.props
+    return(
+      <MiskNavbar>
+        {menuButtonShow === true ? <MiskMenuButton icon={this.state.isOpen ? IconNames.MENU : IconNames.CROSS} onClick={this.handleClick}/>:<div/>}
+        <ResponsiveContainer>
+          <MiskNavbarGroup align={Alignment.LEFT} className="bp3-dark">
+            <MiskNavbarLink to={homeUrl}>
+              <MiskNavbarHeading>{homeName}</MiskNavbarHeading>
+            </MiskNavbarLink>
+            <MiskNavbarDivider/>
+            {links ? this.MiskNavbarLinks(links) : <span>Loading...</span>}
+          </MiskNavbarGroup>
+        </ResponsiveContainer>
+      </MiskNavbar>
+    )
+  }
+
+  private MiskNavbarLinks = (links: IMiskAdminTabs) => (
+    Object.entries(links).map(([key, tab]) => <MiskNavbarLink key={key} to={tab.url_path_prefix}>{tab.name}</MiskNavbarLink>)
+  )
+
+  private handleClick = () => {
+    this.setState({...this.state, isOpen: !this.state.isOpen})
+  }
+}
+  
