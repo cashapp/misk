@@ -1,0 +1,73 @@
+import org.junit.platform.console.options.Details
+
+buildscript {
+  dependencies {
+    classpath dep.protobufGradlePlugin
+  }
+}
+
+apply plugin: 'kotlin'
+apply plugin: 'org.junit.platform.gradle.plugin'
+apply plugin: "com.vanniktech.maven.publish"
+apply plugin: 'java'
+apply plugin: 'com.google.protobuf'
+
+protobuf {
+  plugins {
+    grpc {
+      artifact = dep.grpcGenJava
+    }
+  }
+
+  protoc {
+    artifact = dep.protoc
+  }
+
+  generateProtoTasks {
+    ofSourceSet('main')*.plugins {
+      // Apply the "grpc" plugin whose spec is defined above, without
+      // options.  Note the braces cannot be omitted, otherwise the
+      // plugin will not be added. This is because of the implicit way
+      // NamedDomainObjectContainer binds the methods.
+      grpc {}
+    }
+  }
+}
+
+compileKotlin {
+  kotlinOptions {
+    jvmTarget = "1.8"
+    allWarningsAsErrors = true
+  }
+}
+compileTestKotlin {
+  kotlinOptions {
+    jvmTarget = "1.8"
+    allWarningsAsErrors = true
+  }
+}
+
+sourceSets {
+  main.java.srcDirs += 'src/main/kotlin/'
+  main.java.srcDirs += 'build/generated/source/proto/main/grpc'
+  main.java.srcDirs += 'build/generated/source/proto/main/java'
+  test.java.srcDirs += 'src/test/kotlin/'
+}
+
+junitPlatform {
+  details Details.VERBOSE
+}
+
+dependencies {
+  compile dep.junitApi
+  compile dep.docker
+  compile dep.grpcNetty
+  compile dep.grpcProtobuf
+  compile dep.grpcStub
+  compile project(':misk')
+  compile project(':misk-testing')
+}
+
+if (rootProject.file("hooks.gradle").exists()) {
+  apply from: rootProject.file("hooks.gradle")
+}
