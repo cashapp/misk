@@ -14,7 +14,6 @@ import misk.security.ssl.TrustStoreConfig
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.web.Get
-import misk.web.Http2Testing
 import misk.web.ResponseContentType
 import misk.web.WebTestingModule
 import misk.web.actions.WebAction
@@ -25,9 +24,10 @@ import okhttp3.OkHttpClient
 import okhttp3.Protocol
 import okhttp3.Request
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Assumptions.assumeTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.condition.DisabledOnJre
+import org.junit.jupiter.api.condition.JRE.JAVA_8
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -48,9 +48,8 @@ class Http2ConnectivityTest {
   }
 
   @Test
+  @DisabledOnJre(JAVA_8) // gRPC needs HTTP/2 which needs ALPN which needs Java 9+.
   fun happyPath() {
-    assumeTrue(Http2Testing.isJava9OrNewer())
-
     val call = client.newCall(Request.Builder()
         .url(jetty.httpsServerUrl!!.resolve("/hello")!!)
         .build())
