@@ -9,6 +9,10 @@ ext.dep = [
     "gcpDatastore": "com.google.cloud:google-cloud-datastore:1.26.0",
     "gcpKms": "com.google.apis:google-api-services-cloudkms:v1-rev30-1.23.0",
     "gcpLogback": "com.google.cloud:google-cloud-logging-logback:0.39.0-alpha",
+    "grpcGenJava": "io.grpc:protoc-gen-grpc-java:1.14.0",
+    "grpcNetty": "io.grpc:grpc-netty:1.14.0",
+    "grpcProtobuf": "io.grpc:grpc-protobuf:1.14.0",
+    "grpcStub": "io.grpc:grpc-stub:1.14.0",
     "guava": "com.google.guava:guava:23.6-jre",
     "guice": "com.google.inject:guice:4.1.0",
     "guiceMultibindings": "com.google.inject.extensions:guice-multibindings:4.1.0",
@@ -55,6 +59,8 @@ ext.dep = [
     "prometheusClient": "io.prometheus:simpleclient:0.4.0",
     "prometheusHotspot": "io.prometheus:simpleclient_hotspot:0.4.0",
     "prometheusHttpserver": "io.prometheus:simpleclient_httpserver:0.4.0",
+    "protobufGradlePlugin": "com.google.protobuf:protobuf-gradle-plugin:0.8.6",
+    "protoc": "com.google.protobuf:protoc:3.6.1",
     "retrofit": "com.squareup.retrofit2:retrofit:2.4.0",
     "retrofitMoshi": "com.squareup.retrofit2:converter-moshi:2.4.0",
     "retrofitWire": "com.squareup.retrofit2:converter-wire:2.4.0",
@@ -66,4 +72,4 @@ ext.dep = [
     "wireRuntime": "com.squareup.wire:wire-runtime:2.3.0-RC1",
     "zipkinBrave": "io.zipkin.brave:brave:4.17.2",
     "zipkinReporter": "io.zipkin.reporter2:zipkin-sender-okhttp3:2.4.1"
-]
+]//Generated from polyrepo's master-dependencies.json
