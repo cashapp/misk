@@ -1,7 +1,7 @@
 import { NonIdealState } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
 import { IMiskAdminTab } from "@misk/common"
-import { NavTopbarComponent, ResponsiveContainer } from "@misk/components"
+import { TopbarComponent, ResponsiveContainer } from "@misk/components"
 import { RouterState } from "connected-react-router"
 import * as React from "react"
 const { Code } = require("react-content-loader")
@@ -11,12 +11,11 @@ import styled from "styled-components"
 import { dispatchLoader } from "../actions"
 import { MountingDivComponent, ScriptComponent } from "../components"
 import { ILoaderState, IState } from "../reducers"
-import { IMultibinder } from "../utils/binder"
 
 export interface ILoaderProps {
   loader: ILoaderState
   router: RouterState
-  cacheTabEntries: (MiskBinder: IMultibinder) => any
+  cacheTabEntries: (MiskBinder: any) => any
   getComponentsAndTabs: (url: string) => any
   getTabs: (url: string) => any
   getComponent: (tab: IMiskAdminTab) => any
@@ -29,7 +28,7 @@ const TabContainer = styled(ResponsiveContainer)`
   padding-left: 5px;
 `
 
-const adminTabsUrl = "/api/admintabs/all"
+const adminTabsUrl = "/api/admintabs"
 
 class LoaderContainer extends React.Component<ILoaderProps> {
   async componentDidMount() {
@@ -45,7 +44,7 @@ class LoaderContainer extends React.Component<ILoaderProps> {
     if (adminTabs) {
       return (
         <div>
-          <NavTopbarComponent homeName="Misk" homeUrl="/_admin/" links={adminTabs}/>
+          <TopbarComponent homeName="Misk" homeUrl="/_admin/" links={adminTabs} menuButtonShow={true}/>
           <TabContainer>
             {Object.entries(adminTabs).map(([key,tab]) => (<ScriptComponent key={key} tab={tab}/>))}
           </TabContainer>
@@ -54,14 +53,15 @@ class LoaderContainer extends React.Component<ILoaderProps> {
     } else {
       return (
         <div>
-          <NavTopbarComponent homeName="Misk" homeUrl="/_admin/"/>
+          <TopbarComponent homeName="Misk" homeUrl="/_admin/" menuButtonShow={false}/>
           <TabContainer>
             <NonIdealState 
-              children={Code} 
               icon={IconNames.OFFLINE} 
               title="Error Loading Tabs" 
-              description={`Unable to get list of tabs from server to begin dashbaord render. Endpoint ${adminTabsUrl} is unavailable.`}
-            />
+              description={`Unable to get list of tabs from server to begin dashbaord render. Server endpoint '${adminTabsUrl}' is unavailable.`}
+            >
+            <Code/>
+            </NonIdealState>
           </TabContainer>
         </div>
       )

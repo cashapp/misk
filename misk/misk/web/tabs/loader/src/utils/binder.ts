@@ -1,18 +1,13 @@
-export interface IMultibinder {
-  [key:string]: any[]
-}
+import { IMiskBinderKeys } from "@misk/common"
 
-export enum binders {
-  TabEntry = "TabEntry"
-}
-
-export const multibind = (binder: binders, name: string, Component: any) => {
+export const multibind = (binderKey: IMiskBinderKeys, key: string, value: any) => {
   const Window = (window as any)
   Window.MiskBinders = Window.MiskBinders || {}
-  Window.MiskBinders[binder] = Window.MiskBinders[binder] || []
-  if (name in Window.MiskBinders[binder]) {
-    console.warn("tab registered already")
+  Window.MiskBinders[binderKey] = Window.MiskBinders[binderKey] || []
+  if (key in Window.MiskBinders[binderKey]) {
+    console.warn("key registered already")
   } else {
-    Window.MiskBinders[binder].push({name, Component})
+    Window.MiskBinders[binderKey].push({key, value})
   }
+  return Window.MiskBinders[binderKey]
 }

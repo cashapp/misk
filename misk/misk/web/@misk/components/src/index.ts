@@ -1,5 +1,5 @@
-export * from "./NavSidebarComponent"
-export * from "./NavTopbarComponent"
+export * from "./SidebarComponent"
+export * from "./TopbarComponent"
 export * from "./NoMatchComponent"
 export * from "./PathDebugComponent"
 export * from "./ResponsiveContainer"

@@ -1,5 +1,4 @@
 import { IMiskAdminTab } from "@misk/common"
-import { IMultibinder } from "../utils/binder"
 import { IActionType, ITEM, LOADER } from "./types"
 import { createAction, IAction } from "./utils"
 
@@ -15,7 +14,7 @@ export const dispatchItem = {
 }
 
 export const dispatchLoader = {
-  cacheTabEntries: (MiskBinder: IMultibinder) => createAction(LOADER.CACHE_TAB_ENTRIES, { MiskBinder, staleTabCache: false, loading: true, success: false, error: null }),
+  cacheTabEntries: (MiskBinder: any) => createAction(LOADER.CACHE_TAB_ENTRIES, { MiskBinder, staleTabCache: false, loading: true, success: false, error: null }),
   failure: (error: any) => createAction(LOADER.FAILURE, { ...error, loading: false, success: false }),
   getAllComponentsAndTabs: (url: string) => createAction(LOADER.GET_ALL_COMPONENTS_AND_TABS, { url, loading: true, success: false, error: null }),  
   getAllTabs: (url: string) => createAction(LOADER.GET_ALL_TABS, { url, loading: true, success: false, error: null }),
