@@ -1,4 +1,4 @@
-package misk.grpc
+package misk.grpc.protocserver
 
 import io.grpc.stub.StreamObserver
 import routeguide.RouteGuideGrpc.RouteGuideImplBase
@@ -7,10 +7,10 @@ import routeguide.RouteGuideProto.Point
 import javax.inject.Singleton
 
 @Singleton
-class RouteGuideProtocService : RouteGuideImplBase() {
+internal class RouteGuideProtocService : RouteGuideImplBase() {
   override fun getFeature(point: Point, responseObserver: StreamObserver<Feature>) {
     responseObserver.onNext(Feature.newBuilder()
-        .setName("maple tree")
+        .setName("pine tree")
         .setLocation(point)
         .build())
     responseObserver.onCompleted()

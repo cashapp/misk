@@ -9,14 +9,13 @@ import misk.client.HttpClientSSLConfig
 import misk.client.HttpClientsConfig
 import misk.inject.KAbstractModule
 import misk.inject.getInstance
-import misk.security.ssl.CertStoreConfig
 import misk.security.ssl.SslLoader
 import misk.security.ssl.TrustStoreConfig
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.web.Get
+import misk.web.Http2Testing
 import misk.web.ResponseContentType
-import misk.web.WebSslConfig
 import misk.web.WebTestingModule
 import misk.web.actions.WebAction
 import misk.web.actions.WebActionEntry
@@ -98,15 +97,7 @@ class Http2ConnectivityTest {
 
   class TestModule : KAbstractModule() {
     override fun configure() {
-      install(WebTestingModule(
-          ssl = WebSslConfig(0,
-              cert_store = CertStoreConfig(
-                  resource = "classpath:/ssl/server_cert_key_combo.pem",
-                  passphrase = "serverpassword",
-                  format = SslLoader.FORMAT_PEM
-              ),
-              mutual_auth = WebSslConfig.MutualAuth.NONE)
-      ))
+      install(WebTestingModule())
       multibind<WebActionEntry>().toInstance(WebActionEntry<HelloAction>())
     }
   }
