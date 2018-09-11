@@ -24,10 +24,11 @@ import misk.web.Post
 import misk.web.RequestBody
 import misk.web.RequestContentType
 import misk.web.ResponseContentType
-import misk.web.actions.WebActionEntry
+import misk.web.WebConfig
 import misk.web.WebSslConfig
 import misk.web.WebTestingModule
 import misk.web.actions.WebAction
+import misk.web.actions.WebActionEntry
 import misk.web.jetty.JettyService
 import misk.web.mediatype.MediaTypes
 import org.assertj.core.api.Assertions.assertThat
@@ -94,7 +95,10 @@ internal class JceksSslClientServerTest {
   class TestModule : KAbstractModule() {
     override fun configure() {
       multibind<WebActionEntry>().toInstance(WebActionEntry<HelloAction>())
-      install(WebTestingModule(
+      install(WebTestingModule(WebConfig(
+          port = 0,
+          idle_timeout = 500000,
+          host = "127.0.0.1",
           ssl = WebSslConfig(0,
               cert_store = CertStoreConfig(
                   resource = "classpath:/ssl/server_keystore.jceks",
@@ -104,7 +108,7 @@ internal class JceksSslClientServerTest {
                   resource = "classpath:/ssl/client_cert.pem",
                   format = SslLoader.FORMAT_PEM
               ),
-              mutual_auth = WebSslConfig.MutualAuth.REQUIRED)))
+              mutual_auth = WebSslConfig.MutualAuth.REQUIRED))))
     }
   }
 

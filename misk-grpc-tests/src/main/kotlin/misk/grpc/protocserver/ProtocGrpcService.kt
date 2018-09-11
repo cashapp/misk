@@ -1,9 +1,12 @@
-package misk.grpc
+package misk.grpc.protocserver
 
 import com.google.common.util.concurrent.AbstractIdleService
 import io.grpc.BindableService
 import io.grpc.Server
 import io.grpc.ServerBuilder
+import misk.resources.ResourceLoader
+import java.net.InetSocketAddress
+import java.net.SocketAddress
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -14,13 +17,22 @@ import javax.inject.Singleton
 @Singleton
 class ProtocGrpcService : AbstractIdleService() {
   @Inject lateinit var services: List<BindableService>
+  @Inject lateinit var resourceLoader: ResourceLoader
+
   lateinit var server: Server
 
-  val port: Int
-    get() = server.port
+  val socketAddress: SocketAddress
+    get() = InetSocketAddress("127.0.0.1", server.port)
 
   override fun startUp() {
     val serverBuilder = ServerBuilder.forPort(0)
+
+    resourceLoader.open("classpath:/ssl/server_cert.pem")!!.use { certificate ->
+      resourceLoader.open("classpath:/ssl/server_key.pem")!!.use { privateKey ->
+        serverBuilder.useTransportSecurity(certificate.inputStream(), privateKey.inputStream())
+      }
+    }
+
     for (service in services) {
       serverBuilder.addService(service)
     }
