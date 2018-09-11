@@ -1,6 +1,6 @@
-package misk.web.ssl
+package misk.web
 
-internal object Http2Testing {
+object Http2Testing {
   /**
    * From Java 9 forward Runtime.Version tells us what we need to know. On earlier releases we just
    * probe the presence or absence of that class.

@@ -16,7 +16,6 @@ import misk.web.mediatype.MediaTypes
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okio.ByteString
-import okio.Okio
 import okio.buffer
 import okio.source
 import org.assertj.core.api.Assertions.assertThat

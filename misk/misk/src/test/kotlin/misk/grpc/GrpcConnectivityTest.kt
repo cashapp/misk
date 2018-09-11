@@ -11,19 +11,17 @@ import misk.client.HttpClientSSLConfig
 import misk.client.HttpClientsConfig
 import misk.inject.KAbstractModule
 import misk.inject.getInstance
-import misk.security.ssl.CertStoreConfig
 import misk.security.ssl.SslLoader
 import misk.security.ssl.TrustStoreConfig
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.web.Grpc
-import misk.web.WebSslConfig
 import misk.web.WebTestingModule
 import misk.web.actions.WebAction
 import misk.web.actions.WebActionEntry
 import misk.web.jetty.JettyService
 import misk.web.mediatype.MediaTypes
-import misk.web.ssl.Http2Testing
+import misk.web.Http2Testing
 import okhttp3.MediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -105,15 +103,7 @@ class GrpcConnectivityTest {
 
   class TestModule : KAbstractModule() {
     override fun configure() {
-      install(WebTestingModule(
-          ssl = WebSslConfig(0,
-              cert_store = CertStoreConfig(
-                  resource = "classpath:/ssl/server_cert_key_combo.pem",
-                  passphrase = "serverpassword",
-                  format = SslLoader.FORMAT_PEM
-              ),
-              mutual_auth = WebSslConfig.MutualAuth.NONE)
-      ))
+      install(WebTestingModule())
       multibind<WebActionEntry>().toInstance(WebActionEntry<HelloRpcAction>())
     }
   }
