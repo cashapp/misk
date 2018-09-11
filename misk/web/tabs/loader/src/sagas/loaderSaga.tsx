@@ -13,9 +13,8 @@ import { all, call, put, takeEvery, takeLatest } from "redux-saga/effects"
 import {
   dispatchLoader, IAction, IActionType, LOADER
 } from "../actions"
-import { IMultibinder } from "../utils/binder"
 
-function * handleCacheTabEntries (action: IAction<IActionType, { MiskBinder: IMultibinder}>) {
+function * handleCacheTabEntries (action: IAction<IActionType, { MiskBinder: any}>) {
   const { MiskBinder } = action.payload
     yield put(dispatchLoader.success({ adminTabComponents: { blah: "blah"} , staleTabCache: false }))
     if (MiskBinder) {

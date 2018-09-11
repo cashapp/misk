@@ -11,12 +11,12 @@ import createSagaMiddleware from "redux-saga"
 import App from "./App"
 import rootReducer from "./reducers"
 import rootSaga from "./sagas"
-import { binders, multibind } from "./utils/binder"
-export { binders, multibind }
+import { multibind } from "./utils/binder"
+export { multibind }
 
 const Window = window as IMiskWindow
 
-Window.Misk.Binder = { binders, multibind }
+Window.Misk.Binder = { binders: {}, multibind }
 Window.Misk.History = Window.Misk.History || createBrowserHistory()
 const history = Window.Misk.History
 

@@ -13,10 +13,19 @@ interface IMiskAdminTabs {
   [key:string]: IMiskAdminTab
 }
 
+enum IMiskBinderKeys {
+  NavTopbarMenu = "NavTopbarMenu",
+  TabEntry = "TabEntry",
+}
+
+interface IMiskBinder {
+  multibind: (binder: IMiskBinderKeys, key: string, value: any) => any
+}
+
 interface IMiskWindow extends Window {
   __REDUX_DEVTOOLS_EXTENSION_COMPOSE__: any
   Misk: {
-    Binder: any
+    Binder: IMiskBinder
     Common: any
     Components: any
     History: any
@@ -25,6 +34,7 @@ interface IMiskWindow extends Window {
     Config: any
     Loader: any
   }
+  MiskBinders: any
 }
 
-export { IMiskAdminTab, IMiskAdminTabs, IMiskWindow }
+export { IMiskAdminTab, IMiskAdminTabs, IMiskBinder, IMiskBinderKeys, IMiskWindow }

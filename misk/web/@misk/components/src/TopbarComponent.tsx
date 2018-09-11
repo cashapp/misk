@@ -1,15 +1,16 @@
 import { Alignment, Button, Navbar, NavbarDivider, NavbarGroup, NavbarHeading } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
-import { IMiskAdminTabs } from "@misk/common"
+import { IMiskAdminTabs, IMiskWindow } from "@misk/common"
 import * as React from "react"
 import { Link } from "react-router-dom"
 import styled from "styled-components"
 import { ResponsiveContainer } from "."
 
-export interface INavTopbarProps {
+export interface ITopbarProps {
   homeName: string
   homeUrl: string
   links?: IMiskAdminTabs
+  menuButtonShow?: boolean
 }
 
 const MiskNavbar = styled(Navbar)`
@@ -36,7 +37,7 @@ const MiskNavbarGroup = styled(NavbarGroup)`
   font-size: 13px !important;
   font-weight: 600 !important;
   line-height: 20px;
-  padding-left: 15px;
+  padding-left: 40px;
   padding-right: 15px;
   position: relative;
 `
@@ -61,15 +62,37 @@ const MiskNavbarDivider = styled(NavbarDivider)`
   border: none
 `
 
+const MiskMenuButton = styled(Button)`
+  background-color: #29333a !important;
+  box-shadow: none !important;
+  background-image: none !important;
+  top: 15px;
+  left: 15px;
+  position: absolute;
+`
+
 const MiskNavbarLinks = (links: IMiskAdminTabs) => (
   Object.entries(links).map(([key, tab]) => <MiskNavbarLink key={key} to={tab.url_path_prefix}>{tab.name}</MiskNavbarLink>)
 )
 
-export const NavTopbarComponent = (props: INavTopbarProps) => (
+const Window = window as IMiskWindow
+
+const toggleMenu = () => {
+  console.log(Window.Misk.Binder.multibind("NavTopbarMenuShow", "open", true))
+}
+
+
+// OPEN = "menu",
+// CLOSED = "cross"
+
+// TODO...create new MiskBinders like abstraction that lives in window for key/value state store to toggle open/close
+// TODO...^ once this determined, have MiskMenuButton icon deteremined on that boolean value close/open
+
+export const TopbarComponent = (props: ITopbarProps) => (
   <MiskNavbar>
+    {props.menuButtonShow === true ? <MiskMenuButton icon={IconNames.MENU} onClick={toggleMenu}/>:<div/>}
     <ResponsiveContainer>
       <MiskNavbarGroup align={Alignment.LEFT} className="bp3-dark">
-        {true ? <Button icon={IconNames.MENU}/>: <span></span>}
         <MiskNavbarLink to={props.homeUrl}>
           <MiskNavbarHeading>{props.homeName}</MiskNavbarHeading>
         </MiskNavbarLink>

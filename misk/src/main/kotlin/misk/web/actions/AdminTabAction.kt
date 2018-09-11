@@ -27,7 +27,7 @@ import javax.inject.Singleton
 class AdminTabAction : WebAction {
   @Inject lateinit var registeredTabs: List<AdminTab>
 
-  @Get("/api/admintab/all")
+  @Get("/api/admintabs")
   @RequestContentType(MediaTypes.APPLICATION_JSON)
   @ResponseContentType(MediaTypes.APPLICATION_JSON)
   @Unauthenticated
