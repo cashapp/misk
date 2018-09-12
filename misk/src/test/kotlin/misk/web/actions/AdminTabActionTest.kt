@@ -53,19 +53,19 @@ internal class AdminTabActionTest {
   }
 
   @Test
-  internal fun tabGoodIcon() {
+  internal fun tabGoodCategory() {
     AdminTab("Name", "slug", "/a/path/", "@tea-pot_418")
   }
 
   @Test
-  internal fun tabIconWithSpace() {
+  internal fun tabCategoryWithSpace() {
     assertFailsWith<IllegalArgumentException> {
       AdminTab("Name", "bad slug", "/a/path/", "bad icon")
     }
   }
 
   @Test
-  internal fun tabIconWithUpperCase() {
+  internal fun tabCategoryWithUpperCase() {
     assertFailsWith<IllegalArgumentException> {
       AdminTab("Name", "BadSlug", "/a/path/", "Bad-Icon")
     }
