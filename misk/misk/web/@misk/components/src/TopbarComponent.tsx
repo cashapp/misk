@@ -1,4 +1,4 @@
-import { Alignment, Button, Navbar, NavbarDivider, NavbarGroup, NavbarHeading } from "@blueprintjs/core"
+import { Alignment, Button, Collapse, Icon, Navbar, NavbarDivider, NavbarGroup, NavbarHeading } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
 import { IMiskAdminTabs } from "@misk/common"
 import * as React from "react"
@@ -22,6 +22,7 @@ const MiskNavbar = styled(Navbar)`
   padding-top: 10px;
   position: fixed;
   top: 0px;
+  z-index: 1010;
   
   a {
     color: #9da2a6;
@@ -37,24 +38,24 @@ const MiskNavbarGroup = styled(NavbarGroup)`
   font-size: 13px !important;
   font-weight: 600 !important;
   line-height: 20px;
-  padding-left: 40px;
+  padding-left: 15px;
   padding-right: 15px;
   position: relative;
 `
 
 const MiskNavbarHeading = styled(NavbarHeading)`
-  font-size: 18px;
+  font-size: 24px;
   letter-spacing: 0px;
   padding-top: 25px;
   padding-bottom: 27px;
 `
 
 const MiskNavbarLink = styled(Link)`
-  font-size: 13px;
+  font-size: 16px;
   font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 1px;
-  padding-top: 27px;
+  padding-top: 30px;
   padding-bottom: 27px;
 `
 
@@ -69,37 +70,62 @@ const MiskMenuButton = styled(Button)`
   top: 15px;
   left: 15px;
   position: absolute;
+  z-index: 1020;
 `
 
-// TODO...create new MiskBinders like abstraction that lives in window for key/value state store to toggle open/close
-// TODO...^ once this determined, have MiskMenuButton icon deteremined on that boolean value close/open
+const MiskMenuIcon = styled(Icon)`
+  color: #9da2a6 !important;
+
+  &:hover {
+    color: #fff;
+  }
+`
+
+const MiskCollapse = styled(Collapse)`
+  color: #fff;
+  background-color: #29333a;
+  display: block;
+  margin: 0 -20px;
+  margin-top: 63px;
+  z-index: 1000;
+`
+
+const MiskMenu = styled.div`
+  min-height: 250px;
+  padding: 30px;
+  z-index: 1001;
+`
 
 export class TopbarComponent extends React.Component<ITopbarProps, {}> {
   public state = {
     isOpen: false
   }
 
-  render() {
+  public render() {
+    const { isOpen } = this.state
     const { homeName, homeUrl, links, menuButtonShow } = this.props
     return(
       <MiskNavbar>
-        {menuButtonShow === true ? <MiskMenuButton icon={this.state.isOpen ? IconNames.MENU : IconNames.CROSS} onClick={this.handleClick}/>:<div/>}
+        {menuButtonShow === true ? <MiskMenuButton onClick={this.handleClick}><MiskMenuIcon iconSize={32} icon={isOpen ? IconNames.CROSS : IconNames.MENU}/></MiskMenuButton>:<div/>}
         <ResponsiveContainer>
-          <MiskNavbarGroup align={Alignment.LEFT} className="bp3-dark">
-            <MiskNavbarLink to={homeUrl}>
-              <MiskNavbarHeading>{homeName}</MiskNavbarHeading>
-            </MiskNavbarLink>
-            <MiskNavbarDivider/>
-            {links ? this.MiskNavbarLinks(links) : <span>Loading...</span>}
-          </MiskNavbarGroup>
+        <MiskNavbarGroup align={Alignment.LEFT} className="bp3-dark">
+          <MiskNavbarDivider/>
+          <MiskNavbarDivider/>
+          <MiskNavbarLink to={homeUrl}>
+            <MiskNavbarHeading>{homeName}</MiskNavbarHeading>
+          </MiskNavbarLink>
+        </MiskNavbarGroup>
         </ResponsiveContainer>
+        <MiskCollapse isOpen={isOpen} keepChildrenMounted={true}>
+          <ResponsiveContainer>
+            <MiskMenu>
+              {links ? Object.entries(links).map(([,link]) => <MiskNavbarLink onClick={this.handleClick} to={link.url_path_prefix} key={link.slug}>{link.name}</MiskNavbarLink>) : <span>Loading...</span>}
+            </MiskMenu>
+          </ResponsiveContainer>
+        </MiskCollapse>
       </MiskNavbar>
     )
   }
-
-  private MiskNavbarLinks = (links: IMiskAdminTabs) => (
-    Object.entries(links).map(([key, tab]) => <MiskNavbarLink key={key} to={tab.url_path_prefix}>{tab.name}</MiskNavbarLink>)
-  )
 
   private handleClick = () => {
     this.setState({...this.state, isOpen: !this.state.isOpen})
