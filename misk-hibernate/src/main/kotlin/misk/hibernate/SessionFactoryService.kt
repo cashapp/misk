@@ -81,8 +81,12 @@ internal class SessionFactoryService(
       applySetting(AvailableSettings.DRIVER, config.type.driverClassName)
       applySetting("hibernate.hikari.driverClassName", config.type.driverClassName)
       applySetting(AvailableSettings.URL, config.type.buildJdbcUrl(config, environment))
-      applySetting(AvailableSettings.USER, config.username)
-      applySetting(AvailableSettings.PASS, config.password)
+      if (config.username != null) {
+        applySetting(AvailableSettings.USER, config.username)
+      }
+      if (config.password != null) {
+        applySetting(AvailableSettings.PASS, config.password)
+      }
       applySetting(AvailableSettings.POOL_SIZE, config.fixed_pool_size.toString())
       applySetting(AvailableSettings.DIALECT, config.type.hibernateDialect)
       applySetting(AvailableSettings.SHOW_SQL, "false")
