@@ -24,6 +24,7 @@ dependencies {
   compile dep.logbackClassic
   compile project(':misk')
   compile project(':misk-prometheus')
+  compile project(':misk-eventrouter')
 
   testCompile project(':misk-testing')
 }
