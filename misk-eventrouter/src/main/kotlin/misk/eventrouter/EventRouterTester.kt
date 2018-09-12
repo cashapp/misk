@@ -6,10 +6,12 @@ class EventRouterTester {
   @Inject private lateinit var fakeClusterConnector: FakeClusterConnector
 
   @Inject
-  @ForEventRouterActions private lateinit var actionExecutor: QueueingExecutorService
+  @ForEventRouterActions
+  private lateinit var actionExecutor: QueueingExecutorService
 
   @Inject
-  @ForEventRouterSubscribers private lateinit var subscriberExecutor: QueueingExecutorService
+  @ForEventRouterSubscribers
+  private lateinit var subscriberExecutor: QueueingExecutorService
 
   fun processEverything() {
     do {

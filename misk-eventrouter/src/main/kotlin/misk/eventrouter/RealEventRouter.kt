@@ -103,7 +103,8 @@ internal class RealEventRouter : EventRouter {
     if (localTopicSubscribers.isEmpty()) {
       val topicOwner = clusterMapper.topicToHost(clusterSnapshot, topicName)
       if (topicOwner != clusterSnapshot.self) {
-        val unsubscribeEvent = eventJsonAdapter.toJson(SocketEvent.Unsubscribe(topicName))
+        val unsubscribeEvent = eventJsonAdapter.toJson(
+            SocketEvent.Unsubscribe(topicName))
         hostToSocket(topicOwner).send(unsubscribeEvent)
       }
     }
@@ -131,7 +132,8 @@ internal class RealEventRouter : EventRouter {
     val topicName = action.localSubscription.topic.name
     val topicOwner = clusterMapper.topicToHost(clusterSnapshot, topicName)
     if (topicOwner != clusterSnapshot.self) {
-      val subscribeEvent = eventJsonAdapter.toJson(SocketEvent.Subscribe(topicName))
+      val subscribeEvent = eventJsonAdapter.toJson(
+          SocketEvent.Subscribe(topicName))
       hostToSocket(topicOwner).send(subscribeEvent)
     } else {
       action.localSubscription.onOpen()
@@ -157,7 +159,8 @@ internal class RealEventRouter : EventRouter {
 
       is SocketEvent.Subscribe -> {
         remoteSubscribers.put(socketEvent.topic, action.webSocket)
-        action.webSocket.send(eventJsonAdapter.toJson(SocketEvent.Ack(socketEvent.topic)))
+        action.webSocket.send(eventJsonAdapter.toJson(
+            SocketEvent.Ack(socketEvent.topic)))
       }
 
       is SocketEvent.Ack -> {
@@ -267,7 +270,8 @@ internal class RealEventRouter : EventRouter {
 
       override fun subscribe(listener: Listener<T>): Subscription<T> {
         val localSubscription =
-            LocalSubscriber(listener, this@RealEventRouter, subscriberExecutor, this)
+            LocalSubscriber(listener, this@RealEventRouter, subscriberExecutor,
+                this)
         enqueue(Action.Subscribe(localSubscription))
         return localSubscription
       }

@@ -84,7 +84,8 @@ internal class KubernetesClusterConnector : ClusterConnector {
       }
 
       if (hostMapping.isNotEmpty()) {
-        topicPeer.clusterChanged(ClusterSnapshot(hostMapping.keys.toList(), config.my_pod_name))
+        topicPeer.clusterChanged(
+            ClusterSnapshot(hostMapping.keys.toList(), config.my_pod_name))
       }
     }
   }

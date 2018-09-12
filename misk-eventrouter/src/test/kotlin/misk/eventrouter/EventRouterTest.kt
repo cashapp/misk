@@ -11,14 +11,16 @@ import javax.inject.Inject
 @MiskTest(startService = false)
 internal class EventRouterTest {
   @MiskTestModule
-  val module = Modules.combine(MiskServiceModule(), EventRouterTestingModule(distributed = true))
+  val module = Modules.combine(MiskServiceModule(),
+      EventRouterTestingModule(distributed = true))
 
   @Inject lateinit var machineA: RealEventRouter
   @Inject lateinit var machineB: RealEventRouter
   @Inject lateinit var machineC: RealEventRouter
   @Inject lateinit var clusterMapper: FakeClusterMapper
   @Inject lateinit var fakeEventRouterProcessor: EventRouterTester
-  @Inject @ForEventRouterActions lateinit var actionExecutor: QueueingExecutorService
+  @Inject @ForEventRouterActions
+  lateinit var actionExecutor: QueueingExecutorService
 
   @Test fun helloWorld() {
     clusterMapper.setOwnerForHostList(listOf("host_1", "host_2"), "host_1")
