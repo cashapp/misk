@@ -3,10 +3,10 @@ package misk.hibernate
 import com.github.dockerjava.api.DockerClient
 import com.github.dockerjava.api.model.*
 import com.github.dockerjava.core.DockerClientBuilder
+import com.github.dockerjava.core.async.ResultCallbackTemplate
 import com.github.dockerjava.netty.NettyDockerCmdExecFactory
 import com.google.common.cache.CacheBuilder
 import com.google.common.cache.CacheLoader
-import com.google.common.cache.LoadingCache
 import com.google.common.util.concurrent.AbstractIdleService
 import com.google.gson.Gson
 import mu.KotlinLogging
@@ -24,12 +24,14 @@ internal class DockerVitessCluster(
 ) {
   private var containerId: String? = null
 
-  fun isRunning() = containerId != null
+  private var isRunning = false
 
   fun start() {
-    if (isRunning()) {
+    if (isRunning) {
       return
     }
+
+    isRunning = true
 
     val schemaDir = Paths.get(config.vitess_schema_dir)
     check(Files.isDirectory(schemaDir)) {
@@ -73,18 +75,35 @@ internal class DockerVitessCluster(
         .withBinds(Bind(schemaDir.toAbsolutePath().toString(), schemaVolume))
         .withExposedPorts(httpPort, grpcPort)
         .withPortBindings(ports)
+        .withTty(true)
         .exec().id
-    docker.startContainerCmd(containerId!!).exec()
+
+    val containerId = containerId!!
+    docker.startContainerCmd(containerId).exec()
+    docker.logContainerCmd(containerId)
+        .withStdErr(true)
+        .withStdOut(true)
+        .withFollowStream(true)
+        .withSince(0)
+        .exec(LogContainerResultCallback())
+        .awaitStarted()
     StartVitessService.logger.info("Started Vitess with container id $containerId")
   }
 
   fun stop() {
-    if (!isRunning()) {
+    if (!isRunning) {
       return
     }
+    isRunning = false
 
     docker.removeContainerCmd(containerId!!).withForce(true).exec()
     StartVitessService.logger.info("Killed Vitess cluster with container id $containerId")
+  }
+}
+
+class LogContainerResultCallback : ResultCallbackTemplate<LogContainerResultCallback, Frame>() {
+  override fun onNext(item: Frame) {
+    StartVitessService.logger.info(String(item.payload).trim())
   }
 }
 
@@ -127,4 +146,17 @@ internal class StartVitessService(val config: DataSourceConfig) : AbstractIdleSe
       })
     }
   }
+}
+
+fun main(args: Array<String>) {
+  val config = DataSourceConfig(type = DataSourceType.VITESS, vitess_schema_dir = ".")
+  val docker: DockerClient = DockerClientBuilder.getInstance()
+      .withDockerCmdExecFactory(NettyDockerCmdExecFactory())
+      .build()
+  val gson = Gson()
+  val cluster = DockerVitessCluster(config, docker, gson)
+  cluster.start()
+  Runtime.getRuntime().addShutdownHook(thread(start = false) {
+    cluster.stop()
+  })
 }
