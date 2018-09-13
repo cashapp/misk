@@ -74,14 +74,14 @@ data class DataSourceConfig(
   val fixed_pool_size: Int = 10,
   val connection_timeout: Duration = Duration.ofSeconds(30),
   val connection_max_lifetime: Duration = Duration.ofMinutes(30),
-  val migrations_resource: String?,
-  val vitess_schema_dir: String?,
+  val migrations_resource: String? = null,
+  val vitess_schema_dir: String? = null,
   /*
      See https://dev.mysql.com/doc/connector-j/8.0/en/connector-j-reference-using-ssl.html for
      trust_certificate_key_store_* details.
    */
-  val trust_certificate_key_store_url: String?,
-  val trust_certificate_key_store_password: String?
+  val trust_certificate_key_store_url: String? = null,
+  val trust_certificate_key_store_password: String? = null
 )
 
 /** Configuration element for a cluster of DataSources */
