@@ -5,8 +5,7 @@ import io.grpc.BindableService
 import io.grpc.Server
 import io.grpc.ServerBuilder
 import misk.resources.ResourceLoader
-import java.net.InetSocketAddress
-import java.net.SocketAddress
+import okhttp3.HttpUrl
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -21,8 +20,8 @@ class ProtocGrpcService : AbstractIdleService() {
 
   lateinit var server: Server
 
-  val socketAddress: SocketAddress
-    get() = InetSocketAddress("127.0.0.1", server.port)
+  val url: HttpUrl
+    get() = HttpUrl.Builder().scheme("https").host("127.0.0.1").port(server.port).build()
 
   override fun startUp() {
     val serverBuilder = ServerBuilder.forPort(0)

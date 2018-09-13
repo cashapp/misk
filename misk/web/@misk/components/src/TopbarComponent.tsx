@@ -1,4 +1,4 @@
-import { Alignment, Button, Navbar, NavbarDivider, NavbarGroup, NavbarHeading } from "@blueprintjs/core"
+import { Alignment, Button, Collapse, Icon, Navbar, NavbarDivider, NavbarGroup, NavbarHeading } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
 import { IMiskAdminTab, IMiskAdminTabCategories } from "@misk/common"
 import * as React from "react"
@@ -85,6 +85,7 @@ const MiskMenuButton = styled(Button)`
   top: 15px;
   left: 15px;
   position: absolute;
+  z-index: 1020;
 `
 
 const MiskMenuIcon = styled(Icon)`
@@ -138,11 +139,12 @@ export class TopbarComponent extends React.Component<ITopbarProps, {}> {
     isOpen: false
   }
 
-  render() {
+  public render() {
+    const { isOpen } = this.state
     const { homeName, homeUrl, links, menuButtonShow } = this.props
     return(
       <MiskNavbar>
-        {menuButtonShow === true ? <MiskMenuButton icon={this.state.isOpen ? IconNames.MENU : IconNames.CROSS} onClick={this.handleClick}/>:<div/>}
+        {menuButtonShow === true ? <MiskMenuButton onClick={this.handleClick}><MiskMenuIcon iconSize={32} icon={isOpen ? IconNames.CROSS : IconNames.MENU}/></MiskMenuButton>:<div/>}
         <ResponsiveContainer>
         <MiskNavbarGroup align={Alignment.LEFT} className="bp3-dark">
           <MiskNavbarLink to={homeUrl}><MiskNavbarHeading>{homeName}</MiskNavbarHeading></MiskNavbarLink>

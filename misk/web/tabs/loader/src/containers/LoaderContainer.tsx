@@ -1,10 +1,9 @@
-import { NonIdealState } from "@blueprintjs/core"
+import { Card, Classes, NonIdealState } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
 import { IMiskAdminTab } from "@misk/common"
-import { TopbarComponent, ResponsiveContainer } from "@misk/components"
+import { ResponsiveContainer, TopbarComponent } from "@misk/components"
 import { RouterState } from "connected-react-router"
 import * as React from "react"
-const { Code } = require("react-content-loader")
 import { connect } from "react-redux"
 import { Route } from "react-router"
 import styled from "styled-components"
@@ -53,14 +52,17 @@ class LoaderContainer extends React.Component<ILoaderProps> {
     } else {
       return (
         <div>
-          <TopbarComponent homeName="Misk" homeUrl="/_admin/" menuButtonShow={false}/>
+          <TopbarComponent homeName="Misk" homeUrl="/_admin/" menuButtonShow={true}/>
           <TabContainer>
             <NonIdealState 
               icon={IconNames.OFFLINE} 
               title="Error Loading Tabs" 
               description={`Unable to get list of tabs from server to begin dashbaord render. Server endpoint '${adminTabsUrl}' is unavailable.`}
             >
-            <Code/>
+            <Card>
+              <h5 className={Classes.SKELETON}>This is test text</h5>
+              <p className={Classes.SKELETON}>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque eget tortor felis. Fusce dapibus metus in dapibus mollis. Quisque eget ex diam.</p>
+            </Card>
             </NonIdealState>
           </TabContainer>
         </div>
