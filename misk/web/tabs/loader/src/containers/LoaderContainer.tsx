@@ -39,11 +39,11 @@ class LoaderContainer extends React.Component<ILoaderProps> {
   }
 
   render() {
-    const { adminTabs } = this.props.loader
+    const { adminTabs, adminTabCategories } = this.props.loader
     if (adminTabs) {
       return (
         <div>
-          <TopbarComponent homeName="Misk" homeUrl="/_admin/" links={adminTabs} menuButtonShow={true}/>
+          <TopbarComponent homeName="URL Shortener" homeUrl="/_admin/" links={adminTabCategories} menuButtonShow={true}/>
           <TabContainer>
             {Object.entries(adminTabs).map(([key,tab]) => (<ScriptComponent key={key} tab={tab}/>))}
           </TabContainer>

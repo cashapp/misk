@@ -16,7 +16,7 @@ export { multibind }
 
 const Window = window as IMiskWindow
 
-Window.Misk.Binder = { binders: {}, multibind }
+Window.Misk.Binder = { multibind }
 Window.Misk.History = Window.Misk.History || createBrowserHistory()
 const history = Window.Misk.History
 

@@ -1,4 +1,4 @@
-import { IMiskAdminTabs } from "@misk/common"
+import { IMiskAdminTab, IMiskAdminTabs } from "@misk/common"
 import { RouterState } from "connected-react-router"
 import { fromJS, List } from "immutable"
 import { combineReducers } from "redux"
@@ -22,6 +22,9 @@ export interface ILoaderState {
     [tab:string]: string
   }
   adminTabs: IMiskAdminTabs
+  adminTabCategories: {
+    [key:string]: IMiskAdminTab[]
+  }
   staleTabCache: boolean
   toJS: () => any
 }
