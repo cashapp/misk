@@ -28,8 +28,8 @@ function * handleGetAllTabs (action: IAction<IActionType, { url: string}>) {
   const { url } = action.payload
   try {
     const { data } = yield call(axios.get, url)
-    const { adminTabs } = data
-    yield put(dispatchLoader.success({ adminTabs }))
+    const { adminTabs, adminTabCategories } = data
+    yield put(dispatchLoader.success({ adminTabs, adminTabCategories }))
   } catch (e) {
     yield put(dispatchLoader.failure({ error: { ...e } }))
   }
@@ -38,11 +38,13 @@ function * handleGetAllTabs (action: IAction<IActionType, { url: string}>) {
 function * handleGetAllAndTabs (action: IAction<IActionType, { url: string}>) {
   const { url } = action.payload
   let adminTabs: any = {}
+  let adminTabCategories: any = {}
   try {
     yield put(dispatchLoader.getAllTabs(url))
     const { data } = yield call(axios.get, url)
     adminTabs = data.adminTabs
-    yield put(dispatchLoader.success({ adminTabs }))
+    adminTabCategories = data.adminTabCategories
+    yield put(dispatchLoader.success({ adminTabs, adminTabCategories }))
     if (Object.entries(adminTabs).length === 0) {
       yield put(dispatchLoader.success({ adminTabComponents: { } }))
     }
