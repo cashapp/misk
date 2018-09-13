@@ -1,7 +1,7 @@
 package com.squareup.chat
 
 import misk.config.Config
-import misk.eventrouter.KubernetesConfig
+import misk.clustering.kubernetes.KubernetesConfig
 import misk.metrics.backends.prometheus.PrometheusConfig
 import misk.web.WebConfig
 

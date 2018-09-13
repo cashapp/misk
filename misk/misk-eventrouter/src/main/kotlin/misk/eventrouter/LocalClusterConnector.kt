@@ -1,5 +1,6 @@
 package misk.eventrouter
 
+import misk.clustering.kubernetes.KubernetesConfig
 import misk.web.actions.WebSocket
 import misk.web.actions.WebSocketListener
 import javax.inject.Inject
