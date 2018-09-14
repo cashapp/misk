@@ -17,9 +17,8 @@ import javax.inject.Singleton
  * Guidelines
  * - name should start with a capital letter unless it is a proper noun (ie. iOS)
  * - slug must be valid slug (lowercase and no white space)
- * - icon must be valid slug (lowercase and no white space)
- *      - Not enforced in Misk but icon must also be a valid slug in BlueprintJS/Icons
  * - url_path_prefix must start and end with "/"
+ * - category is a string, no enforcement on consistency of names
  *
  */
 
@@ -43,7 +42,7 @@ data class AdminTab(
   val name: String,
   val slug: String,
   val url_path_prefix: String,
-  val category: String = "Other"
+  val category: String = "Container Admin"
 ) {
   init {
     // Requirements enforce the guidelines outlined at top of the file

@@ -25,8 +25,26 @@ class ConfigAdminAction : WebAction {
     // TODO(mmihic): Need to figure out how to get the overrides.
     val yamlFiles = MiskConfig.loadConfigYamlMap(appName, environment, listOf())
     val effectiveYaml = MiskConfig.flattenYamlMap(yamlFiles).toString()
-    return Response(effective_config = effectiveYaml, yaml_files = yamlFiles)
+
+    // Regex to match on password values for password redaction in output
+    val yamlFilesRegex = Regex("(?<=password: )([^\n]*)")
+    val effectiveYamlRegex = Regex("(?<=password\":\")([^\"]*)")
+
+    return Response(
+        effective_config = redact(effectiveYaml, effectiveYamlRegex),
+        yaml_files = redact(yamlFiles, yamlFilesRegex)
+    )
   }
 
   data class Response(val effective_config: String, val yaml_files: Map<String, String?>)
+
+  companion object {
+    fun redact(
+      mapOfOutputs: Map<String, String?>,
+      regex: Regex
+    ) = mapOfOutputs.mapValues { it.value?.replace(regex, "████████") }
+
+    fun redact(output: String, regex: Regex) =
+        output.replace(regex, "████████")
+  }
 }
