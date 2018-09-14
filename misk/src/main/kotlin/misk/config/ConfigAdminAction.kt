@@ -27,8 +27,8 @@ class ConfigAdminAction : WebAction {
     val effectiveYaml = MiskConfig.flattenYamlMap(yamlFiles).toString()
 
     // Regex to match on password values for password redaction in output
-    val yamlFilesRegex = Regex("(?<=password: )([^\n]*)")
-    val effectiveYamlRegex = Regex("(?<=password\":\")([^\"]*)")
+    val yamlFilesRegex = Regex("(?<=(password|passphrase): )([^\n]*)")
+    val effectiveYamlRegex = Regex("(?<=(password|passphrase)\":\")([^\"]*)")
 
     return Response(
         effective_config = redact(effectiveYaml, effectiveYamlRegex),
