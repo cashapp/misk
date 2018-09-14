@@ -21,7 +21,7 @@ class ConfigWebModule(val environment: Environment): KAbstractModule() {
     ))
 
 
-
+    // True for testing Misk Menu with populated tabs and categories, tabs are no functional
     if (true) {
       multibind<AdminTab>().toInstance(AdminTab(
           "URL Lookup",
