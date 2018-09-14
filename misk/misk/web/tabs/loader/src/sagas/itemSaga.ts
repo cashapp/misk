@@ -10,7 +10,7 @@ import axios from "axios"
 import { all, call, put, takeLatest } from "redux-saga/effects"
 
 import {
-  dispatchItem, IAction, IActionType, ITEM
+  dispatchItem, IMiskAction, IActionType, ITEM
 } from "../actions"
 
 function * handleGet () {
@@ -22,7 +22,7 @@ function * handleGet () {
   }
 }
 
-function * handleGetOne (action: IAction<IActionType, {id: number}>) {
+function * handleGetOne (action: IMiskAction<IActionType, {id: number}>) {
   try {
     const { id } = action.payload
     const { data } = yield call(axios.get, `https://jsonplaceholder.typicode.com/posts/${id}`)
@@ -32,7 +32,7 @@ function * handleGetOne (action: IAction<IActionType, {id: number}>) {
   }
 }
 
-function * handlePost (action: IAction<IActionType, {saveData: string}>) {
+function * handlePost (action: IMiskAction<IActionType, {saveData: string}>) {
   try {
     const { saveData } = action.payload
     const { data } = yield call(axios.post, "https://jsonplaceholder.typicode.com/posts/", { saveData })
@@ -42,7 +42,7 @@ function * handlePost (action: IAction<IActionType, {saveData: string}>) {
   }
 }
 
-function * handlePut (action: IAction<IActionType, {id: number, updateData: string}>) {
+function * handlePut (action: IMiskAction<IActionType, {id: number, updateData: string}>) {
   try {
     const { id, updateData } = action.payload
     const { data } = yield call(axios.put, `https://jsonplaceholder.typicode.com/posts/${id}`, { updateData })
@@ -52,7 +52,7 @@ function * handlePut (action: IAction<IActionType, {id: number, updateData: stri
   }
 }
 
-function * handlePatch (action: IAction<IActionType, {id: number, updateData: string}>) {
+function * handlePatch (action: IMiskAction<IActionType, {id: number, updateData: string}>) {
   try {
     const { id, updateData } = action.payload
     const { data } = yield call(axios.patch, `https://jsonplaceholder.typicode.com/posts/${id}`, { updateData })
@@ -62,7 +62,7 @@ function * handlePatch (action: IAction<IActionType, {id: number, updateData: st
   }
 }
 
-function * handleDelete (action: IAction<IActionType, {id: number}>) {
+function * handleDelete (action: IMiskAction<IActionType, {id: number}>) {
   try {
     const { id } = action.payload
     const { data } = yield call(axios.delete, `https://jsonplaceholder.typicode.com/posts/${id}`)

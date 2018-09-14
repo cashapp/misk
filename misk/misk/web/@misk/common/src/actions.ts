@@ -1,9 +1,9 @@
-export interface IAction<T, P> {
+export interface IMiskAction<T, P> {
   readonly type: T
   readonly payload?: P
 }
 
-export function createAction<T extends string, P>(type: T, payload: P): IAction<T,P> {
+export function createAction<T extends string, P>(type: T, payload: P): IMiskAction<T,P> {
   return {type, payload}
 }
 

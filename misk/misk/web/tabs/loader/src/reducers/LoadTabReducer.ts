@@ -1,5 +1,5 @@
 import { fromJS, Map } from "immutable"
-import { IAction, LOADER } from "../actions"
+import { IMiskAction, LOADER } from "../actions"
 
 const initialState = fromJS({
   data: Map(),
@@ -8,14 +8,11 @@ const initialState = fromJS({
   success: false,
 })
 
-export default function loadTabReducer (state = initialState, action: IAction<string, {}>) {
+export default function loadTabReducer (state = initialState, action: IMiskAction<string, {}>) {
   switch (action.type) {
     case LOADER.FAILURE:
-    case LOADER.CACHE_TAB_ENTRIES:
     case LOADER.GET_ONE_COMPONENT:
-    case LOADER.GET_ALL_COMPONENTS_AND_TABS:
     case LOADER.GET_ALL_TABS:
-    case LOADER.REGISTER_COMPONENT:
     case LOADER.SUCCESS:
       return state.mergeDeep(action.payload)
     default:

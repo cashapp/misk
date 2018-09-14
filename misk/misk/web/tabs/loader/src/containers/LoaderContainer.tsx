@@ -14,11 +14,8 @@ import { ILoaderState, IState } from "../reducers"
 export interface ILoaderProps {
   loader: ILoaderState
   router: RouterState
-  cacheTabEntries: (MiskBinder: any) => any
-  getComponentsAndTabs: (url: string) => any
   getTabs: (url: string) => any
   getComponent: (tab: IMiskAdminTab) => any
-  registerComponent: (name: string, Component: any) => any
 }
 
 const TabContainer = styled(ResponsiveContainer)`
@@ -39,11 +36,11 @@ class LoaderContainer extends React.Component<ILoaderProps> {
   }
 
   render() {
-    const { adminTabs, adminTabCategories } = this.props.loader
+    const { adminTabs } = this.props.loader
     if (adminTabs) {
       return (
         <div>
-          <TopbarComponent homeName="URL Shortener" homeUrl="/_admin/" links={adminTabCategories} menuButtonShow={true}/>
+          <TopbarComponent homeName="URL Shortener" homeUrl="/_admin/" links={adminTabs} menuButtonShow={true}/>
           <TabContainer>
             {Object.entries(adminTabs).map(([key,tab]) => (<ScriptComponent key={key} tab={tab}/>))}
           </TabContainer>
@@ -55,7 +52,7 @@ class LoaderContainer extends React.Component<ILoaderProps> {
           <TopbarComponent homeName="Misk" homeUrl="/_admin/" menuButtonShow={true}/>
           <TabContainer>
             <NonIdealState 
-              icon={IconNames.OFFLINE} 
+              icon={IconNames.OFFLINE}
               title="Error Loading Tabs" 
               description={`Unable to get list of tabs from server to begin dashbaord render. Server endpoint '${adminTabsUrl}' is unavailable.`}
             >
@@ -77,11 +74,8 @@ const mapStateToProps = (state: IState) => ({
 })
 
 const mapDispatchToProps = {
-  cacheTabEntries: dispatchLoader.cacheTabEntries,
   getComponent: dispatchLoader.getOneComponent,
-  getComponentsAndTabs: dispatchLoader.getAllComponentsAndTabs,
   getTabs: dispatchLoader.getAllTabs,
-  registerComponent: dispatchLoader.registerComponent
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(LoaderContainer)
