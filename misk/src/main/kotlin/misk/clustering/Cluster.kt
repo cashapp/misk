@@ -18,11 +18,17 @@ interface Cluster {
     val hasDiffs = added.isNotEmpty() || removed.isNotEmpty()
   }
 
-  /** @property The member representing this instance of the service */
+  /** @property Member The member representing this instance of the service */
   val self: Member
 
-  /** @property The set of peer instances to this service */
+  /** @property Set<Member> The set of peer instances to this service */
   val peers: Set<Member>
+
+  /** @property Set<Member> of the members in the cluster */
+  val members: Set<Member> get() = peers + self
+
+  /** @property ClusterHashRing built from the members of this cluster */
+  val hashRing: ClusterHashRing get() = ClusterHashRing(members) // inefficient default impl
 
   /** Registers interest in cluster changes */
   fun watch(watch: ClusterWatch)
