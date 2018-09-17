@@ -6,6 +6,7 @@ import io.kubernetes.client.models.V1Pod
 import io.kubernetes.client.util.Watch
 import misk.DependentService
 import misk.clustering.Cluster
+import misk.clustering.ClusterHashRing
 import misk.clustering.ClusterWatch
 import misk.logging.getLogger
 import org.eclipse.jetty.util.BlockingArrayQueue
@@ -25,16 +26,19 @@ internal class KubernetesClusterService @Inject internal constructor(
   config: KubernetesConfig
 ) : AbstractIdleService(), Cluster, DependentService {
   private val peersRef = AtomicReference<Set<Cluster.Member>>(setOf())
+  private val hashRingRef = AtomicReference<ClusterHashRing>(ClusterHashRing(setOf()))
   private val running = AtomicBoolean(false)
   private val events = BlockingArrayQueue<Event>()
 
+  override val hashRing: ClusterHashRing get() = hashRingRef.get()
+  override val peers: Set<Cluster.Member> get() = peersRef.get()
   override val self: Cluster.Member = Cluster.Member(config.my_pod_name, config.my_pod_ip)
+
   override val consumedKeys: Set<Key<*>> = setOf()
   override val producedKeys: Set<Key<*>> = setOf(
       Key.get(Cluster::class.java),
       Key.get(KubernetesClusterService::class.java)
   )
-  override val peers: Set<Cluster.Member> get() = peersRef.get()
 
   override fun startUp() {
     log.info { "starting k8s cluster manager" }
@@ -96,6 +100,7 @@ internal class KubernetesClusterService @Inject internal constructor(
     if (!changes.hasDiffs) return
 
     peersRef.set(changes.current)
+    hashRingRef.set(ClusterHashRing(changes.current))
 
     watches.forEach {
       try {
