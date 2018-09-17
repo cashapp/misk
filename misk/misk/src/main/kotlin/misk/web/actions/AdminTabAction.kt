@@ -32,10 +32,9 @@ class AdminTabAction : WebAction {
   @Unauthenticated
   @Suppress("UNUSED_PARAMETER")
   fun getAll(): Response {
-    return Response(adminTabs = registeredTabs.map { tab -> tab.slug to tab }.toMap(), adminTabCategories = registeredTabs.sortedBy { it.slug }.groupBy { it.category }.toSortedMap())
+    return Response(adminTabs = registeredTabs)
   }
-
-  data class Response(val adminTabs: Map<String, AdminTab>, val adminTabCategories: Map<String, List<AdminTab>>)
+  data class Response(val adminTabs: List<AdminTab>)
 }
 
 data class AdminTab(
@@ -46,7 +45,6 @@ data class AdminTab(
 ) {
   init {
     // Requirements enforce the guidelines outlined at top of the file
-    // TODO(adrw) see if there's a more readable way to do these requirements
     ResourceEntryCommon.requireValidUrlPathPrefix(url_path_prefix)
     require(slug.filter { char -> !char.isUpperCase() && !char.isWhitespace() }.length == slug.length)
   }

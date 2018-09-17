@@ -1,18 +1,18 @@
 import { Menu, MenuItem } from "@blueprintjs/core"
-import { IMiskAdminTabs } from "@misk/common"
+import { IMiskAdminTab } from "@misk/common"
 import * as React from "react"
 import styled from "styled-components" 
 
 interface ISidebarProps {
-  adminTabs: IMiskAdminTabs
+  adminTabs: IMiskAdminTab[]
 }
 
 const Sidebar = styled.div`
   position: absolute;
 `
 
-const buildMenuItems = (adminTabs: IMiskAdminTabs) => (
-  Object.entries(adminTabs).map(([key, tab]) => <MenuItem key={key} href={tab.url_path_prefix} className="" icon={tab.icon} text={tab.name}/>)
+const buildMenuItems = (adminTabs: IMiskAdminTab[]) => (
+  adminTabs.map((tab) => <MenuItem key={tab.slug} href={tab.url_path_prefix} className="" text={`${tab.category} :: ${tab.name}`}/>)
 )
 
 export const SidebarComponent = (props: ISidebarProps) => (

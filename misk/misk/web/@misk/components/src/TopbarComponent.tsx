@@ -1,6 +1,6 @@
 import { Alignment, Button, Collapse, Icon, Navbar, NavbarDivider, NavbarGroup, NavbarHeading } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
-import { IMiskAdminTab, IMiskAdminTabCategories } from "@misk/common"
+import { IMiskAdminTab } from "@misk/common"
 import * as React from "react"
 import { Link } from "react-router-dom"
 import styled from "styled-components"
@@ -9,7 +9,7 @@ import { ResponsiveContainer } from "."
 export interface ITopbarProps {
   homeName: string
   homeUrl: string
-  links?: IMiskAdminTabCategories
+  links?: IMiskAdminTab[]
   menuButtonShow?: boolean
 }
 
@@ -35,14 +35,14 @@ const MiskNavbarGroup = styled(NavbarGroup)`
     color: #fff;
     text-decoration: none;
   }
-  @media (max-width: 860px) {
-    padding-left: 50px;
+  @media (max-width: 870px) {
+    padding-left: 60px;
   }
-  @media (min-width: 992px) and (max-width: 1075px) {
-    padding-left: 50px;
+  @media (min-width: 992px) and (max-width: 1085px) {
+    padding-left: 60px;
   }
-  @media (min-width: 1200px) and (max-width: 1275px) {
-    padding-left: 50px;
+  @media (min-width: 1200px) and (max-width: 1285px) {
+    padding-left: 60px;
   }
 `
 
@@ -146,15 +146,15 @@ export class TopbarComponent extends React.Component<ITopbarProps, {}> {
       <MiskNavbar>
         {menuButtonShow === true ? <MiskMenuButton onClick={this.handleClick}><MiskMenuIcon iconSize={32} icon={isOpen ? IconNames.CROSS : IconNames.MENU}/></MiskMenuButton>:<div/>}
         <ResponsiveContainer>
-        <MiskNavbarGroup align={Alignment.LEFT} className="bp3-dark">
-          <MiskNavbarLink to={homeUrl}><MiskNavbarHeading>{homeName}</MiskNavbarHeading></MiskNavbarLink>
-          <MiskNavbarDivider/>
-        </MiskNavbarGroup>
+          <MiskNavbarGroup align={Alignment.LEFT} className="bp3-dark">
+            <MiskNavbarLink to={homeUrl}><MiskNavbarHeading>{homeName}</MiskNavbarHeading></MiskNavbarLink>
+            <MiskNavbarDivider/>
+          </MiskNavbarGroup>
         </ResponsiveContainer>
         <MiskCollapse isOpen={isOpen} keepChildrenMounted={true}>
           <ResponsiveContainer>
             <MiskMenu>
-              {links ? Object.entries(links).map(([categoryName,categoryLinks]) => this.renderMenuCategory(categoryName,categoryLinks)) : <span>Loading...</span>}
+              {links ? Object.entries(this.groupBy(links, "category")).map(([categoryName, categoryLinks]) => this.renderMenuCategory(categoryName, categoryLinks)) : <span>Loading...</span>}
             </MiskMenu>
           </ResponsiveContainer>
         </MiskCollapse>
@@ -162,17 +162,35 @@ export class TopbarComponent extends React.Component<ITopbarProps, {}> {
     )
   }
 
-  private renderMenuCategory(name: string, links: IMiskAdminTab[]) {
+  private groupBy = (items: any, key: any) => items.reduce(
+    (result: any, item: any) => ({
+      ...result,
+      [item[key]]: [
+        ...(result[item[key]] || []),
+        item,
+      ],
+    }),
+    {},
+  )
+
+  private sortBy = (items: any, key: any) => items.sort(
+    ((item1: any, item2: any) => {
+      if (item1[key] < item2[key]) { return -1 }
+      else if (item1[key] > item2[key]) { return 1 }
+      else { return 0 }
+    })
+  )
+
+  private renderMenuCategory(name: string, links: any) {
     return (
       <div>
         <MiskMenuCategory>{name}</MiskMenuCategory>
         <MiskMenuDivider/>
         <MiskMenuLinks>
-          {links.map((link: IMiskAdminTab) => <MiskMenuLink key={link.slug} onClick={this.handleClick} to={link.url_path_prefix}>{link.name}</MiskMenuLink>)}
+          {this.sortBy(links, "name").map((link: IMiskAdminTab) => <MiskMenuLink key={link.slug} onClick={this.handleClick} to={link.url_path_prefix}>{link.name}</MiskMenuLink>)}
         </MiskMenuLinks>
       </div>
     )
-
   }
 
   private handleClick = () => {
