@@ -1,9 +1,10 @@
+export * from "./actions"
+
 /**
  * Common Interfaces
  */
-import { IconName } from "@blueprintjs/icons"
 interface IMiskAdminTab {
-  icon: IconName
+  category: string
   name: string
   slug: string
   url_path_prefix: string
