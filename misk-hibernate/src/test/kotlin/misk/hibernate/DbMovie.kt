@@ -9,10 +9,13 @@ import javax.persistence.Table
 
 @Entity
 @Table(name = "movies")
-class DbMovie() : DbEntity<DbMovie>, DbTimestampedEntity {
+class DbMovie() : DbRoot<DbMovie>, DbTimestampedEntity {
   @javax.persistence.Id
   @GeneratedValue
   override lateinit var id: Id<DbMovie>
+
+  override val rootId: Id<DbMovie>
+    get() = id
 
   @Column
   override lateinit var updated_at: Instant

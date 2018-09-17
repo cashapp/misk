@@ -19,9 +19,11 @@ import org.hibernate.cfg.AvailableSettings
 import org.hibernate.engine.spi.SessionFactoryImplementor
 import org.hibernate.event.service.spi.EventListenerRegistry
 import org.hibernate.integrator.spi.Integrator
+import org.hibernate.mapping.Component
 import org.hibernate.mapping.PersistentClass
 import org.hibernate.mapping.Property
 import org.hibernate.mapping.SimpleValue
+import org.hibernate.mapping.Value
 import org.hibernate.service.spi.SessionFactoryServiceRegistry
 import org.hibernate.usertype.UserType
 import javax.inject.Provider
@@ -170,12 +172,32 @@ internal class SessionFactoryService(
     for (entityBinding in entityBindings) {
       for (property in entityBinding.allProperties()) {
         val value = property.value
-        if (value is SimpleValue) {
-          result.add(kClassForName(value.typeName))
+        if (value is Component) {
+          for (subProperty in value.propertyIterator) {
+            if (subProperty is Property) {
+              maybeAddSimpleValueProperty(subProperty.value, subProperty, entityBinding, result)
+            }
+          }
+        } else {
+          maybeAddSimpleValueProperty(value, property, entityBinding, result)
         }
       }
     }
     return result
+  }
+
+  fun maybeAddSimpleValueProperty(
+    value: Value?,
+    property: Property,
+    entityBinding: PersistentClass,
+    result: MutableSet<KClass<*>>
+  ) {
+    if (value is SimpleValue) {
+      checkNotNull(value.typeName)
+      { "property ${property.name} in class ${entityBinding.className} has null type" }
+
+      result.add(kClassForName(value.typeName))
+    }
   }
 
   /** Returns all properties (IDs, joined columns, regular columns) of this persistent class. */
