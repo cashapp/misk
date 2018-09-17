@@ -3,6 +3,7 @@ package misk.web
 import misk.Action
 import misk.ApplicationInterceptor
 import misk.web.actions.WebAction
+import misk.web.actions.WebActionMetadata
 import misk.web.actions.WebSocketListener
 import misk.web.actions.asChain
 import misk.web.actions.asNetworkChain
@@ -25,12 +26,12 @@ import kotlin.reflect.KParameter
  */
 internal class BoundAction<A : WebAction>(
   private val webActionProvider: Provider<A>,
-  private val networkInterceptors: MutableList<NetworkInterceptor>,
-  private val applicationInterceptors: MutableList<ApplicationInterceptor>,
+  val networkInterceptors: MutableList<NetworkInterceptor>,
+  val applicationInterceptors: MutableList<ApplicationInterceptor>,
   parameterExtractorFactories: List<ParameterExtractor.Factory>,
   val pathPattern: PathPattern,
   val action: Action,
-  private val dispatchMechanism: DispatchMechanism
+  val dispatchMechanism: DispatchMechanism
 ) {
   private val parameterExtractors = action.function.parameters
       .drop(1) // the first parameter is always _this_
@@ -146,6 +147,22 @@ internal class BoundAction<A : WebAction>(
   private fun pathMatcher(requestUrl: HttpUrl): Matcher? {
     val matcher = pathPattern.regex.matcher(requestUrl.encodedPath())
     return if (matcher.matches()) matcher else null
+  }
+
+  internal val metadata: WebActionMetadata by lazy {
+    WebActionMetadata(
+      name = action.name,
+      function = action.function,
+      functionAnnotations = action.function.annotations,
+      acceptedMediaRanges = action.acceptedMediaRanges,
+      responseContentType = action.responseContentType,
+      parameterTypes = action.parameterTypes,
+      returnType = action.returnType,
+      pathPattern = pathPattern,
+      applicationInterceptors = applicationInterceptors,
+      networkInterceptors = networkInterceptors,
+      dispatchMechanism = dispatchMechanism
+    )
   }
 }
 
