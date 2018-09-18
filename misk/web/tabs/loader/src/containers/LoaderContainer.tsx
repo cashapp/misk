@@ -5,9 +5,8 @@ import * as React from "react"
 import { connect } from "react-redux"
 import { Route } from "react-router"
 import styled from "styled-components"
-import { dispatchLoader } from "../actions"
 import { MountingDivComponent, ScriptComponent } from "../components"
-import { ILoaderState, IState } from "../reducers"
+import { dispatchLoader, ILoaderState, IState } from "../ducks"
 
 export interface ILoaderProps {
   loader: ILoaderState
@@ -22,11 +21,11 @@ const TabContainer = styled(ResponsiveContainer)`
   padding-left: 5px;
 `
 
-const adminTabsUrl = "/api/admintabs"
+const apiUrl = "/api/admintabs"
 
 class LoaderContainer extends React.Component<ILoaderProps> {
   async componentDidMount() {
-    this.props.getTabs(adminTabsUrl)
+    this.props.getTabs(apiUrl)
   }
 
   buildTabRouteMountingDiv(tab: IMiskAdminTab) {
@@ -49,7 +48,7 @@ class LoaderContainer extends React.Component<ILoaderProps> {
         <div>
           <TopbarComponent homeName="Misk" homeUrl="/_admin/" menuButtonShow={true}/>
           <TabContainer>
-            <OfflineComponent title={"Error Loading Multibound Admin Tabs"} endpoint={adminTabsUrl}/>
+            <OfflineComponent title={"Error Loading Multibound Admin Tabs"} endpoint={apiUrl}/>
           </TabContainer>
         </div>
       )
