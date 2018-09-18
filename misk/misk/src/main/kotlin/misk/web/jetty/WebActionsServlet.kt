@@ -9,6 +9,7 @@ import misk.web.Request
 import misk.web.actions.WebAction
 import misk.web.actions.WebActionEntry
 import misk.web.actions.WebActionFactory
+import misk.web.actions.WebActionMetadata
 import misk.web.mediatype.MediaRange
 import misk.web.mediatype.MediaTypes
 import okhttp3.Headers
@@ -35,6 +36,8 @@ internal class WebActionsServlet @Inject constructor(
 ) : WebSocketServlet() {
 
   private val boundActions: MutableSet<BoundAction<out WebAction>> = mutableSetOf()
+
+  internal val webActionsMetadata: List<WebActionMetadata> by lazy { boundActions.map { it.metadata } }
 
   init {
     for (entry in webActionEntries) {
