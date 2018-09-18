@@ -30,7 +30,6 @@ class AdminTabAction : WebAction {
   @RequestContentType(MediaTypes.APPLICATION_JSON)
   @ResponseContentType(MediaTypes.APPLICATION_JSON)
   @Unauthenticated
-  @Suppress("UNUSED_PARAMETER")
   fun getAll(): Response {
     return Response(adminTabs = registeredTabs)
   }

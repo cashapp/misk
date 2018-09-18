@@ -19,7 +19,7 @@ class ConfigAdminAction : WebAction {
   @RequestContentType(MediaTypes.APPLICATION_JSON)
   @ResponseContentType(MediaTypes.APPLICATION_JSON)
   // TODO(adrw) create new @AdminDashboard annotation because this will fail since there is no @Access
-  // @AdminDashboard will then be able to be picked up by misq
+  // @AdminDashboard will then be able to be picked up by skim
   @Unauthenticated
   fun getAll(): Response {
     // TODO(mmihic): Need to figure out how to get the overrides.
