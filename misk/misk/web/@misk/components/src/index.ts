@@ -1,5 +1,2 @@
-export * from "./SidebarComponent"
-export * from "./TopbarComponent"
-export * from "./NoMatchComponent"
-export * from "./PathDebugComponent"
-export * from "./ResponsiveContainer"
+export * from "./components"
+export * from "./containers"
