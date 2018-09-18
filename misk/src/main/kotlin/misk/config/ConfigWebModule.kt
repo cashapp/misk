@@ -12,80 +12,12 @@ import misk.web.resources.StaticResourceEntry
 class ConfigWebModule(val environment: Environment): KAbstractModule() {
   override fun configure() {
     multibind<WebActionEntry>().toInstance(WebActionEntry<ConfigAdminAction>())
-
     multibind<AdminTab>().toInstance(AdminTab(
         "Config",
         "config",
         "/_admin/config/",
         "Container Admin"
     ))
-
-
-    // True for testing Misk Menu with populated tabs and categories, tabs are no functional
-    if (true) {
-      multibind<AdminTab>().toInstance(AdminTab(
-          "URL Lookup",
-          "a",
-          "/_admin/a/",
-          "URL Shortener Admin"
-      ))
-      multibind<AdminTab>().toInstance(AdminTab(
-          "Domains",
-          "a",
-          "/_admin/a/",
-          "URL Shortener Admin"
-      ))
-      multibind<AdminTab>().toInstance(AdminTab(
-          "Cookies",
-          "a",
-          "/_admin/a/",
-          "URL Shortener Admin"
-      ))
-      multibind<AdminTab>().toInstance(AdminTab(
-          "Redirect Config",
-          "a",
-          "/_admin/a/",
-          "URL Shortener Admin"
-      ))
-      multibind<AdminTab>().toInstance(AdminTab(
-          "URL Eviction",
-          "a",
-          "/_admin/a/",
-          "URL Shortener Admin"
-      ))
-      multibind<AdminTab>().toInstance(AdminTab(
-          "gRPC client",
-          "a",
-          "/_admin/a/",
-          "Container Admin"
-      ))
-      multibind<AdminTab>().toInstance(AdminTab(
-          "gRPC server",
-          "a",
-          "/_admin/a/",
-          "Container Admin"
-      ))
-      multibind<AdminTab>().toInstance(AdminTab(
-          "Threads",
-          "a",
-          "/_admin/a/",
-          "Container Admin"
-      ))
-      multibind<AdminTab>().toInstance(AdminTab(
-          "Guice",
-          "a",
-          "/_admin/a/",
-          "Container Admin"
-      ))
-      multibind<AdminTab>().toInstance(AdminTab(
-          "Connections",
-          "a",
-          "/_admin/a/",
-          "Container Admin"
-      ))
-    }
-
-
 
     if (environment == Environment.DEVELOPMENT) {
       multibind<WebActionEntry>().toInstance(WebActionEntry<WebProxyAction>("/_tab/config/"))
