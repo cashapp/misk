@@ -4,7 +4,7 @@ import { IMiskAdminTab } from "@misk/common"
 import * as React from "react"
 import { Link } from "react-router-dom"
 import styled from "styled-components"
-import { ResponsiveContainer } from "."
+import { ResponsiveContainer } from "../containers"
 
 export interface ITopbarProps {
   homeName: string
