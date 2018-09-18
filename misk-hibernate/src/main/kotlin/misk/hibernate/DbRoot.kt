@@ -1,10 +1,14 @@
 package misk.hibernate
 
 /**
- * Marker interface for persistent entities. Ensures that only persistent entities can be passed
- * into [Session] methods.
+ * Marker interface for sharded entity group roots. Entity group roots are spread out across shards
+ * they can also have children in the form of [DbChild] subclasses that always stay in the same
+ * shard as their roots. A typical root is for example `DbCustomer`.
  */
-interface DbRoot<T : DbRoot<T>> : DbMember<T, T> {
+interface DbRoot<T : DbRoot<T>> : DbSharded<T, T> {
   override val cid: Cid<T, T>
     get() = Cid(id, id)
+
+  override val rootId: Id<T>
+    get() = id
 }

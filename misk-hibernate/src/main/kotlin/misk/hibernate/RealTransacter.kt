@@ -166,11 +166,12 @@ internal class RealTransacter private constructor(
 
     @Suppress("UNCHECKED_CAST")
     override fun <T : DbEntity<T>> save(entity: T): Id<T> {
-      val id = session.save(entity)
-      if (id is Cid<*, *>) {
-        return id.id as Id<T>
-      }
-      return id as Id<T>
+      return when (entity) {
+        is DbChild<*, *> -> (session.save(entity) as Cid<*, *>).id
+        is DbRoot<*> -> session.save(entity)
+        is DbUnsharded<*> -> session.save(entity)
+        else -> throw IllegalArgumentException("You need to sub-class one of [DbChild, DbRoot, DbUnsharded]")
+      } as Id<T>
     }
 
     override fun <T : DbEntity<T>> load(id: Id<T>, type: KClass<T>): T {

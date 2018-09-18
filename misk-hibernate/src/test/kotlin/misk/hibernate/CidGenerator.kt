@@ -27,28 +27,27 @@ import java.util.Properties
 
 @Suppress("RedundantVisibilityModifier", "unused")
 public class CidGenerator : AbstractPostInsertGenerator(), Configurable {
-  private lateinit var parentColumn: String
+  private lateinit var rootColumn: String
 
   @Throws(MappingException::class)
   override fun configure(type: Type, params: Properties, serviceRegistry: ServiceRegistry) {
-    this.parentColumn = params.getProperty("parentColumn")
-    checkNotNull(parentColumn)
-  }
-
-  fun generate(s: SessionImplementor, obj: Any): Serializable {
-    return super.generate(s, obj)
+    this.rootColumn = params.getProperty("rootColumn")
+    checkNotNull(rootColumn)
   }
 
   @Throws(HibernateException::class)
   override fun getInsertGeneratedIdentifierDelegate(
-    persister: PostInsertIdentityPersister, dialect: Dialect, isGetGeneratedKeysEnabled: Boolean
+    persister: PostInsertIdentityPersister,
+    dialect: Dialect,
+    isGetGeneratedKeysEnabled: Boolean
   ): InsertGeneratedIdentifierDelegate {
-    return GetGeneratedKeysDelegate(persister, dialect, parentColumn)
+    return GetGeneratedKeysDelegate(persister, dialect, rootColumn)
   }
 
   private class GetGeneratedKeysDelegate(
-    persister: PostInsertIdentityPersister, val dialect: Dialect,
-    val parentColumn: String
+    persister: PostInsertIdentityPersister,
+    val dialect: Dialect,
+    val rootColumn: String
   ) : InsertGeneratedIdentifierDelegate {
     private val persister: SingleTableEntityPersister
 
@@ -58,7 +57,7 @@ public class CidGenerator : AbstractPostInsertGenerator(), Configurable {
     }
 
     override fun prepareIdentifierGeneratingInsert(): IdentifierGeneratingInsert {
-      val insert = IdentifierGeneratingWithParentInsert(dialect, parentColumn)
+      val insert = IdentifierGeneratingWithParentInsert(dialect, rootColumn)
       insert.addIdentityColumn(persister.rootTableKeyColumnNames[0])
       return insert
     }
@@ -148,16 +147,16 @@ public class CidGenerator : AbstractPostInsertGenerator(), Configurable {
 
   private class IdentifierGeneratingWithParentInsert(
     dialect: Dialect,
-    private val parentColumn: String
+    private val rootColumn: String
   ) : IdentifierGeneratingInsert(dialect) {
-    private var parentColumnAdded = false
+    private var rootColumnAdded = false
 
     override fun toStatementString(): String {
       // Make sure the parent column is the last column because the actual entity being saved
       // will always get set to the first columns in the PreparedStatement.
-      if (!parentColumnAdded) {
-        addColumn(parentColumn)
-        parentColumnAdded = true
+      if (!rootColumnAdded) {
+        addColumn(rootColumn)
+        rootColumnAdded = true
       }
       return super.toStatementString()
     }

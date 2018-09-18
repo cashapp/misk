@@ -72,7 +72,7 @@ class PrimitiveColumnsTest {
     @Column var c16: Char = '\u0000',
     @Column var f32: Float = 0.0f,
     @Column var f64: Double = 0.0
-  ) : DbEntity<DbPrimitiveTour> {
+  ) : DbUnsharded<DbPrimitiveTour> {
     @javax.persistence.Id @GeneratedValue override lateinit var id: Id<DbPrimitiveTour>
   }
 
