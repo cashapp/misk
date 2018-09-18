@@ -6,8 +6,8 @@ package misk.hibernate
  * shard as their roots. A typical root is for example `DbCustomer`.
  */
 interface DbRoot<T : DbRoot<T>> : DbSharded<T, T> {
-  override val cid: Cid<T, T>
-    get() = Cid(id, id)
+  override val gid: Gid<T, T>
+    get() = Gid(id, id)
 
   override val rootId: Id<T>
     get() = id

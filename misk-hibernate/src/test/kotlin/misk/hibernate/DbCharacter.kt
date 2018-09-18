@@ -19,12 +19,12 @@ class DbCharacter() : DbChild<DbMovie, DbCharacter>, DbTimestampedEntity {
   @EmbeddedId
   @AttributeOverride(name = "rootId", column = Column(name = "movie_id"))
   @GeneratedValue(generator = "child")
-  @GenericGenerator(name = "child", strategy = "misk.hibernate.CidGenerator",
+  @GenericGenerator(name = "child", strategy = "misk.hibernate.GidGenerator",
       parameters = [Parameter(name = "rootColumn", value = "movie_id")])
-  override lateinit var cid: Cid<DbMovie, DbCharacter>
+  override lateinit var gid: Gid<DbMovie, DbCharacter>
 
   override val id: Id<DbCharacter>
-    get() = cid.id
+    get() = gid.id
 
   override val rootId: Id<DbMovie>
     get() = movie_id

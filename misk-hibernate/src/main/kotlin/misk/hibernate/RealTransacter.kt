@@ -167,7 +167,7 @@ internal class RealTransacter private constructor(
     @Suppress("UNCHECKED_CAST")
     override fun <T : DbEntity<T>> save(entity: T): Id<T> {
       return when (entity) {
-        is DbChild<*, *> -> (session.save(entity) as Cid<*, *>).id
+        is DbChild<*, *> -> (session.save(entity) as Gid<*, *>).id
         is DbRoot<*> -> session.save(entity)
         is DbUnsharded<*> -> session.save(entity)
         else -> throw IllegalArgumentException("You need to sub-class one of [DbChild, DbRoot, DbUnsharded]")

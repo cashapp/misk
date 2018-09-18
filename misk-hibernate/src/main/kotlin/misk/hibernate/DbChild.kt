@@ -8,5 +8,5 @@ package misk.hibernate
  */
 interface DbChild<R : DbRoot<R>, T : DbChild<R, T>> : DbSharded<R, T> {
   override val id: Id<T>
-    get() = cid.id
+    get() = gid.id
 }

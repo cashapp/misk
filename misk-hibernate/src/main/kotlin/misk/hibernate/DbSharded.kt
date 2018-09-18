@@ -6,5 +6,5 @@ package misk.hibernate
  */
 interface DbSharded<R : DbRoot<R>, T : DbSharded<R, T>> : DbEntity<T> {
   val rootId: Id<R>
-  val cid: Cid<R, T>
+  val gid: Gid<R, T>
 }

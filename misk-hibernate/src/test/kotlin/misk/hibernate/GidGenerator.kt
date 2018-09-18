@@ -1,4 +1,4 @@
-@file:JvmName("CidGenerator")
+@file:JvmName("GidGenerator")
 
 package misk.hibernate
 
@@ -6,7 +6,6 @@ import org.hibernate.HibernateException
 import org.hibernate.MappingException
 import org.hibernate.dialect.Dialect
 import org.hibernate.engine.jdbc.spi.JdbcServices
-import org.hibernate.engine.spi.SessionImplementor
 import org.hibernate.engine.spi.SharedSessionContractImplementor
 import org.hibernate.id.AbstractPostInsertGenerator
 import org.hibernate.id.Configurable
@@ -17,7 +16,6 @@ import org.hibernate.id.insert.InsertGeneratedIdentifierDelegate
 import org.hibernate.persister.entity.SingleTableEntityPersister
 import org.hibernate.pretty.MessageHelper
 import org.hibernate.service.ServiceRegistry
-import org.hibernate.sql.Insert
 import org.hibernate.type.Type
 import java.io.Serializable
 import java.sql.PreparedStatement
@@ -26,7 +24,7 @@ import java.sql.SQLException
 import java.util.Properties
 
 @Suppress("RedundantVisibilityModifier", "unused")
-public class CidGenerator : AbstractPostInsertGenerator(), Configurable {
+public class GidGenerator : AbstractPostInsertGenerator(), Configurable {
   private lateinit var rootColumn: String
 
   @Throws(MappingException::class)
@@ -69,7 +67,7 @@ public class CidGenerator : AbstractPostInsertGenerator(), Configurable {
     ): Serializable {
       @Suppress("UNCHECKED_CAST")
       val entity = binder.entity as DbChild<Nothing, Nothing>
-      // Square service container supports pre-assigning the cid by the app in which case we don't
+      // Square service container supports pre-assigning the gid by the app in which case we don't
       // generate a new autoinc value and instead just use what's there already. We use this for
       // shard migrations where we want to keep the same row id. Hopefully we never need to use that
       // for our Misk apps, if we do then we should port performIdentifierPresetInsert from
@@ -135,7 +133,7 @@ public class CidGenerator : AbstractPostInsertGenerator(), Configurable {
         rs = insert.generatedKeys
         rs!!.next()
         val id = Id<Nothing>(rs.getLong(1))
-        return Cid(parentId, id)
+        return Gid(parentId, id)
       } finally {
         if (rs != null) {
           session.jdbcCoordinator.logicalConnection.resourceRegistry.release(rs, insert)
