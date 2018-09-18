@@ -6,6 +6,7 @@ import io.kubernetes.client.apis.CoreV1Api
 import io.kubernetes.client.models.V1Pod
 import io.kubernetes.client.util.Config
 import io.kubernetes.client.util.Watch
+import misk.clustering.kubernetes.KubernetesConfig
 import misk.healthchecks.HealthStatus
 import misk.logging.getLogger
 import misk.web.WebConfig
@@ -84,7 +85,8 @@ internal class KubernetesClusterConnector : ClusterConnector {
       }
 
       if (hostMapping.isNotEmpty()) {
-        topicPeer.clusterChanged(ClusterSnapshot(hostMapping.keys.toList(), config.my_pod_name))
+        topicPeer.clusterChanged(
+            ClusterSnapshot(hostMapping.keys.toList(), config.my_pod_name))
       }
     }
   }
