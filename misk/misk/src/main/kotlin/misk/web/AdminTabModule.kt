@@ -1,5 +1,6 @@
 package misk.web
 
+import misk.config.ConfigAdminAction
 import misk.environment.Environment
 import misk.inject.KAbstractModule
 import misk.web.actions.AdminTab
@@ -23,14 +24,25 @@ class AdminTabModule(val environment: Environment) : KAbstractModule() {
   override fun configure() {
     multibind<WebActionEntry>().toInstance(WebActionEntry<AdminTabAction>())
 
+    multibind<AdminTab>().toInstance(AdminTab(
+        "Example",
+        "example",
+        "/_tab/example/",
+        "Misk Development"
+    ))
+
     if (environment == Environment.DEVELOPMENT) {
       multibind<WebActionEntry>().toInstance(
           WebActionEntry<WebProxyAction>("/_admin/"))
+      multibind<WebActionEntry>().toInstance(
+          WebActionEntry<WebProxyAction>("/_tab/example/"))
       multibind<WebActionEntry>().toInstance(
           WebActionEntry<WebProxyAction>("/_admin/@misk/"))
 
       multibind<WebProxyEntry>().toInstance(
           WebProxyEntry("/_admin/", "http://localhost:3100/"))
+      multibind<WebProxyEntry>().toInstance(
+          WebProxyEntry("/_tab/example/", "http://localhost:3199/"))
       multibind<WebProxyEntry>().toInstance(
           WebProxyEntry("/_admin/@misk/", "http://localhost:9100/"))
 
@@ -38,10 +50,14 @@ class AdminTabModule(val environment: Environment) : KAbstractModule() {
       multibind<WebActionEntry>().toInstance(
           WebActionEntry<StaticResourceAction>("/_admin/"))
       multibind<WebActionEntry>().toInstance(
+          WebActionEntry<StaticResourceAction>("/_tab/example/"))
+      multibind<WebActionEntry>().toInstance(
           WebActionEntry<StaticResourceAction>("/_admin/@misk/"))
 
       multibind<StaticResourceEntry>()
           .toInstance(StaticResourceEntry("/_admin/", "classpath:/web/_admin/"))
+      multibind<StaticResourceEntry>()
+          .toInstance(StaticResourceEntry("/_tab/example/", "classpath:/web/_tab/example/"))
       multibind<StaticResourceEntry>()
           .toInstance(StaticResourceEntry("/_admin/@misk/", "classpath:/web/_admin/@misk/"))
 
