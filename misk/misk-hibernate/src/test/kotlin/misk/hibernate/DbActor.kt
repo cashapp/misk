@@ -9,7 +9,7 @@ import javax.persistence.Table
 
 @Entity
 @Table(name = "actors")
-class DbActor() : DbEntity<DbActor>, DbTimestampedEntity {
+class DbActor() : DbRoot<DbActor>, DbTimestampedEntity {
   @javax.persistence.Id
   @GeneratedValue
   override lateinit var id: Id<DbActor>

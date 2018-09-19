@@ -1,6 +1,6 @@
 package com.squareup.urlshortener
 
-import misk.hibernate.DbEntity
+import misk.hibernate.DbUnsharded
 import misk.hibernate.Id
 import javax.persistence.Column
 import javax.persistence.Entity
@@ -9,7 +9,8 @@ import javax.persistence.Table
 
 @Entity
 @Table(name = "shortened_urls")
-class DbShortenedUrl() : DbEntity<DbShortenedUrl> {
+// TODO we really should shard this sample
+class DbShortenedUrl() : DbUnsharded<DbShortenedUrl> {
   @javax.persistence.Id
   @GeneratedValue
   override lateinit var id: Id<DbShortenedUrl>

@@ -164,9 +164,14 @@ internal class RealTransacter private constructor(
   ) : Session {
     override val hibernateSession = session
 
+    @Suppress("UNCHECKED_CAST")
     override fun <T : DbEntity<T>> save(entity: T): Id<T> {
-      @Suppress("UNCHECKED_CAST") // Entities always use Id<T> as their ID type.
-      return session.save(entity) as Id<T>
+      return when (entity) {
+        is DbChild<*, *> -> (session.save(entity) as Gid<*, *>).id
+        is DbRoot<*> -> session.save(entity)
+        is DbUnsharded<*> -> session.save(entity)
+        else -> throw IllegalArgumentException("You need to sub-class one of [DbChild, DbRoot, DbUnsharded]")
+      } as Id<T>
     }
 
     override fun <T : DbEntity<T>> load(id: Id<T>, type: KClass<T>): T {

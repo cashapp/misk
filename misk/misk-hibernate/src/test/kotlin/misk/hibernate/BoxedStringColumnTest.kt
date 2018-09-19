@@ -108,7 +108,7 @@ class BoxedStringColumnTest {
 
   @Entity
   @Table(name = "text_tokens")
-  class DbTextToken() : DbEntity<DbTextToken> {
+  class DbTextToken() : DbUnsharded<DbTextToken> {
     @javax.persistence.Id
     @GeneratedValue
     override lateinit var id: Id<DbTextToken>

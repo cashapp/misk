@@ -107,7 +107,7 @@ class ByteStringColumnTest {
 
   @Entity
   @Table(name = "text_hashes")
-  class DbTextHash() : DbEntity<DbTextHash> {
+  class DbTextHash() : DbUnsharded<DbTextHash> {
     @javax.persistence.Id
     @GeneratedValue
     override lateinit var id: Id<DbTextHash>
