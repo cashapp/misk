@@ -7,6 +7,7 @@ const merge = require('webpack-merge')
 
 module.exports = (env, argv, otherConfigFields = {}) => {
   const { dirname, miskTabWebpack } = argv
+  const outputPath = miskTabWebpack.output_path ? miskTabWebpack.output_path : "dist"
   
   const DefinePluginConfig = new webpack.DefinePlugin({
     'process.env.NODE_ENV': JSON.stringify('production')
@@ -30,7 +31,7 @@ module.exports = (env, argv, otherConfigFields = {}) => {
     entry: ['react-hot-loader/patch', path.join(dirname, '/src/index.tsx')],
     output: {
       filename: `${miskTabWebpack.relative_path_prefix}tab_${miskTabWebpack.slug}.js`,
-      path: path.join(dirname, miskTabWebpack.output_path),
+      path: path.join(dirname, outputPath),
       publicPath: "/",
       library: ['MiskTabs', miskTabWebpack.name],
       libraryTarget: 'umd',

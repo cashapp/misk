@@ -20,12 +20,11 @@
     "json2yaml": "^1.1.0"
   },
   "devDependencies": {
-    "@misk/dev": "^0.0.25",
+    "@misk/dev": "^0.0.27",
     "@misk/tslint": "^0.0.3"
   },
   "miskTabWebpack": {
     "name": "Config",
-    "output_path": "dist",
     "port": "3200",
     "relative_path_prefix": "_tab/config/",
     "slug": "config"

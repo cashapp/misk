@@ -1,6 +1,6 @@
 {
   "name": "@misk/dev",
-  "version": "0.0.25",
+  "version": "0.0.27",
   "description": "Microservice Kontainer Development Libraries",
   "author": "Square/Misk Authors (https://github.com/square/misk/graphs/contributors)",
   "repository": {

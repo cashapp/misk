@@ -17,12 +17,11 @@
     "@misk/tabs": "^0.0.1"
   },
   "devDependencies": {
-    "@misk/dev": "^0.0.25",
+    "@misk/dev": "^0.0.27",
     "@misk/tslint": "^0.0.3"
   },
   "miskTabWebpack": {
     "name": "Loader",
-    "output_path": "dist",
     "port": "3100",
     "relative_path_prefix": "_admin/",
     "slug": "loader"
