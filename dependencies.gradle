@@ -40,6 +40,7 @@ ext.dep = [
     "kotlinReflection": "org.jetbrains.kotlin:kotlin-reflect:1.2.51",
     "kotlinStdLib": "org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.2.51",
     "kotlinTest": "org.jetbrains.kotlin:kotlin-test:1.2.51",
+    "kotlinNoArgPlugin": "org.jetbrains.kotlin:kotlin-noarg:1.2.51",
     "kotlinxCoroutines": "org.jetbrains.kotlinx:kotlinx-coroutines-core:0.24.0",
     "kubernetesClient": "io.kubernetes:client-java:1.0.0",
     "logbackClassic": "ch.qos.logback:logback-classic:1.2.3",

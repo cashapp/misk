@@ -64,9 +64,9 @@ internal class HibernateEntityModuleTest {
   @Qualifier
   annotation class Shapes
 
-  abstract class Square : DbEntity<Square>
+  abstract class Square : DbUnsharded<Square>
   abstract class Circle : DbEntity<Circle>
 
-  abstract class Triceratops : DbEntity<Triceratops>
-  abstract class Stegosaurus : DbEntity<Stegosaurus>
+  abstract class Triceratops : DbUnsharded<Triceratops>
+  abstract class Stegosaurus : DbUnsharded<Stegosaurus>
 }
