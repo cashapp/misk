@@ -13,6 +13,8 @@ import { rootReducer, rootSaga } from "./ducks"
 import { multibind } from "./utils/binder"
 export { multibind }
 
+const tabSlug = "loader"
+
 const Window = window as IMiskWindow
 
 Window.Misk.Binder = { multibind }
@@ -44,7 +46,7 @@ const render = () => {
         <App history={history} />
       </Provider>
     </AppContainer>,
-    document.getElementById("loader")
+    document.getElementById(tabSlug)
   )
 }
 

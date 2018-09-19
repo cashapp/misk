@@ -14,7 +14,7 @@ import { rootReducer, rootSaga } from "./ducks"
 export * from "./components"
 export * from "./containers"
 
-const tabSlug = "config"
+const tabSlug = "example" // UPDATE THIS FOR YOUR TAB
 
 const Window = window as IMiskWindow
 
@@ -45,7 +45,7 @@ const render = () => {
         <App history={history} />
       </Provider>
     </AppContainer>,
-    document.getElementById(tabSlug)
+    document.getElementById(tabSlug)        
   )
 }
 

@@ -1,14 +1,14 @@
 import { RouterState } from "connected-react-router"
 import { combineReducers } from "redux"
 import { all, fork } from "redux-saga/effects"
-import { default as LoaderReducer, ILoaderState, watchLoaderSagas } from "./loader"
-export * from "./loader"
+import { default as ExampleReducer, IExampleState, watchExampleSagas } from "./example"
+export * from "./example"
 
 /**
  * Redux Store State
  */
 export interface IState {
-  loader: ILoaderState
+  example: IExampleState
   router: RouterState
 }
 
@@ -16,7 +16,7 @@ export interface IState {
  * Reducers
  */
 export const rootReducer = combineReducers({
-  loader: LoaderReducer
+  example: ExampleReducer
 })
 
 /**
@@ -24,6 +24,6 @@ export const rootReducer = combineReducers({
  */
 export function * rootSaga () {
   yield all([
-    fork(watchLoaderSagas)
+    fork(watchExampleSagas)
   ])
 }
