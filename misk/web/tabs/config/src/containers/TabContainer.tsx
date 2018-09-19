@@ -5,16 +5,17 @@ import { ConfigComponent } from "../components"
 import { dispatchConfig, IState } from "../ducks"
 
 interface ITabProps {
-  config: {
-    resources: IConfigResource[]
-    status: string
-  }
+  config: IConfigProps
   getAllConfig: (url: string) => void
 }
 
-export interface IConfigResource {
-  name: string
-  file: string
+export interface IConfigProps {
+  resources: IConfigResources
+  status: string
+}
+
+export interface IConfigResources {
+  [name: string]: string
 }
 
 const apiUrl = "/api/config/all"
@@ -26,7 +27,7 @@ class TabContainer extends React.Component<ITabProps, {children : any}> {
 
   render() {
     const { resources, status } = this.props.config
-      if (resources) {
+    if (resources) {
       return (
         <ConfigComponent resources={resources} status={status} />
       )
