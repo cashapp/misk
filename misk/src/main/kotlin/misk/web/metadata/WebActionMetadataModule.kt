@@ -19,6 +19,11 @@ class WebActionMetadataModule(val environment: Environment) : KAbstractModule() 
         url_path_prefix = "/_admin/webactions/"
     ))
 
+    multibind<StaticResourceEntry>()
+        .toInstance(
+            StaticResourceEntry("/_tab/webactions/",
+                "classpath:/web/_tab/webactions"))
+
     if (environment == Environment.DEVELOPMENT) {
       multibind<WebActionEntry>().toInstance(
           WebActionEntry<WebProxyAction>("/_tab/webactions/"))
@@ -27,10 +32,6 @@ class WebActionMetadataModule(val environment: Environment) : KAbstractModule() 
     } else {
       multibind<WebActionEntry>().toInstance(
           WebActionEntry<StaticResourceAction>("/_tab/webactions/"))
-      multibind<StaticResourceEntry>()
-          .toInstance(
-              StaticResourceEntry("/_tab/webactions/",
-                  "classpath:/web/_tab/webactions"))
 
     }
   }

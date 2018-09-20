@@ -8,13 +8,10 @@ package misk.web.resources
  * multibind<StaticResourceEntry>().toInstance(StaticResourceEntry(...))
  * ```
  */
-data class StaticResourceEntry(
-  override val url_path_prefix: String = "/",
+class StaticResourceEntry(
+  url_path_prefix: String = "/",
   private val resourcePath: String
-) : ResourceEntryCommon.Entry {
-  init {
-    ResourceEntryCommon.requireValidUrlPathPrefix(url_path_prefix)
-  }
+) : ResourceEntry(url_path_prefix) {
 
   fun resourcePath(urlPath: String): String {
     val normalizedResourcePath = if (!resourcePath.endsWith("/")) "$resourcePath/" else resourcePath

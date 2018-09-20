@@ -23,7 +23,6 @@ Misk Admin
 - [Skeleton](http://getskeleton.com/) for very simple responsive boilerplate styling
 
 ## DevEnv Setup
-
 - Install IntelliJ Ultimate and [Setup Typescript Support](https://www.jetbrains.com/help/idea/2017.1/typescript-support.html). Typescript errors will now appear as you type. 
 - For a more native React/Typescript environment, install Microsoft Visual Studio Code and the following packages
   - Blueprint: Syntax theme that includes highlighting of BlueprintJS elements
@@ -40,12 +39,15 @@ Misk Admin
   - You can be a good OSS citizen and add typings files to the packages you want to use.
   - Override Typescript using require imports `const module = require('package-name');` instead of es6 standard imports `import { module } from 'package-name';`.
 
-  ## Assumptions
-  - All modules and code are being run on network internal environments by authenticated employees
-    - Thus: production webpack does output `source-map` for easier debugging of any production errors. If this framework were to be used outside of a trusted environment, then that should be removed since it does expose source code.
+## Assumptions
+- All modules and code are being run on network internal environments by authenticated employees
+  - Thus: production webpack does output `source-map` for easier debugging of any production errors. If this framework were to be used outside of a trusted environment, then that should be removed since it does expose source code.
 
-Resources
----
+## Resources
 - [Primary Strategy](https://stackoverflow.com/questions/44778265/dynamically-loading-react-components)
 - [Dynamic Loading React Components](https://www.slightedgecoder.com/2017/12/03/loading-react-components-dynamically-demand/)
 - [Webpack: export to existing module in window](https://stackoverflow.com/questions/30539725/webpack-export-to-existing-module-in-window?utm_medium=organic&utm_source=google_rich_qa&utm_campaign=google_rich_qa)
+
+## Running in Production
+- Run ShadowJar Gradle task in Intellij for urlshortener
+- `$ java -jar {urlshortener jar path}`
