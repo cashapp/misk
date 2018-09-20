@@ -5,5 +5,5 @@ for dir in $(pwd)/*/*
 do
     dir=${dir%*/}
     [ -d $dir ] && echo $dir
-    [ -d $dir ] && bash -c "cd $dir; yarn build"
+    [ -d $dir ] && bash -c "cd $dir; yarn install; yarn build"
 done

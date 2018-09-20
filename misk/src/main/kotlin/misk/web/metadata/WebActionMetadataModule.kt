@@ -1,4 +1,4 @@
-package misk.web
+package misk.web.metadata
 
 import misk.environment.Environment
 import misk.inject.KAbstractModule
