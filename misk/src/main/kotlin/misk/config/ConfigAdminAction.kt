@@ -1,5 +1,7 @@
 package misk.config
 
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.dataformat.yaml.YAMLMapper
 import misk.environment.Environment
 import misk.security.authz.Unauthenticated
 import misk.web.Get
@@ -23,20 +25,22 @@ class ConfigAdminAction : WebAction {
   @Unauthenticated
   fun getAll(): Response {
     // TODO(mmihic): Need to figure out how to get the overrides.
-    val yamlFiles = MiskConfig.loadConfigYamlMap(appName, environment, listOf())
-    val effectiveYaml = MiskConfig.flattenYamlMap(yamlFiles).toString()
+    val rawYamlFiles = MiskConfig.loadConfigYamlMap(appName, environment, listOf())
+    val effectiveConfigJsonString = MiskConfig.flattenYamlMap(rawYamlFiles).toString()
+    val effectiveConfigJsonNodeTree = ObjectMapper().readTree(effectiveConfigJsonString)
+    val effectiveConfigYaml = YAMLMapper().writeValueAsString(effectiveConfigJsonNodeTree).drop(4)
+    val yamlFiles = linkedMapOf<String, String?>("Effective Config" to effectiveConfigYaml)
+    rawYamlFiles.map { yamlFiles.put("classpath:/${it.key}", it.value) }
 
     // Regex to match on password values for password redaction in output
     val yamlFilesRegex = Regex("(?<=(password|passphrase): )([^\n]*)")
-    val effectiveYamlRegex = Regex("(?<=(password|passphrase)\":\")([^\"]*)")
 
     return Response(
-        effective_config = redact(effectiveYaml, effectiveYamlRegex),
-        yaml_files = redact(yamlFiles, yamlFilesRegex)
+        resources = redact(yamlFiles, yamlFilesRegex)
     )
   }
 
-  data class Response(val effective_config: String, val yaml_files: Map<String, String?>)
+  data class Response(val resources: Map<String, String?>)
 
   companion object {
     fun redact(
