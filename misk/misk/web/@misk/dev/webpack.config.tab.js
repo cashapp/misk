@@ -7,7 +7,20 @@ const merge = require('webpack-merge')
 
 module.exports = (env, argv, otherConfigFields = {}) => {
   const { dirname, miskTabWebpack } = argv
+
+  if ("name" in miskTabWebpack && "port" in miskTabWebpack && "slug" in miskTabWebpack) {
+    console.log("[MISK] Valid miskTabWebpack")
+  } else {
+    console.log("[MISK] Invalid miskTabWebpack, testing for missing fields...")
+    let errMsg = "\n"
+    errMsg += ("name" in miskTabWebpack) ? "[MISK] miskTabWebpack contains name\n" : "[MISK] miskTabWebpack missing name\n";
+    errMsg += ("port" in miskTabWebpack) ? "[MISK] miskTabWebpack contains port\n" : "[MISK] miskTabWebpack missing port\n";
+    errMsg += ("slug" in miskTabWebpack) ? "[MISK] miskTabWebpack contains slug\n" : "[MISK] miskTabWebpack missing slug\n";
+    throw Error(errMsg)
+  } 
+  
   const outputPath = miskTabWebpack.output_path ? miskTabWebpack.output_path : "dist"
+  const relative_path_prefix = miskTabWebpack.relative_path_prefix ? miskTabWebpack.relative_path_prefix : `_tab/${miskTabWebpack.slug}/`
   
   const DefinePluginConfig = new webpack.DefinePlugin({
     'process.env.NODE_ENV': JSON.stringify('production')
@@ -21,8 +34,8 @@ module.exports = (env, argv, otherConfigFields = {}) => {
   
   const CopyWebpackPluginConfig = new CopyWebpackPlugin(
     [
-      { from: './node_modules/@misk/common/lib', to: `${miskTabWebpack.relative_path_prefix}@misk/`},
-      { from: './node_modules/@misk/components/lib', to: `${miskTabWebpack.relative_path_prefix}@misk/`}
+      { from: './node_modules/@misk/common/lib', to: `${relative_path_prefix}@misk/`},
+      { from: './node_modules/@misk/components/lib', to: `${relative_path_prefix}@misk/`}
     ], 
     { copyUnmodified: true }
   )
@@ -30,7 +43,7 @@ module.exports = (env, argv, otherConfigFields = {}) => {
   const baseConfigFields = {
     entry: ['react-hot-loader/patch', path.join(dirname, '/src/index.tsx')],
     output: {
-      filename: `${miskTabWebpack.relative_path_prefix}tab_${miskTabWebpack.slug}.js`,
+      filename: `${relative_path_prefix}tab_${miskTabWebpack.slug}.js`,
       path: path.join(dirname, outputPath),
       publicPath: "/",
       library: ['MiskTabs', miskTabWebpack.name],
