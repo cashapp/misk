@@ -20,26 +20,30 @@ interface Cluster {
 
   /** [Snapshot] is a consistent moment-in-time view of the cluster state */
   data class Snapshot(
-    /** @property Member The member representing this instance of the service */
+    /** The member representing this instance of the service */
     val self: Member,
 
-    /** @property Boolean true if the current service instance is ready as perceived by the cluster manager */
-    val selfReady: Boolean,
-
-    /** @property Set<Member> of the ready members of the cluster */
+    /** All of the members of the cluster that are up and reporting as ready to handle traffic */
     val readyMembers: Set<Cluster.Member>,
 
-    /** @property ClusterHashRing built from the ready members of this cluster */
-    val hashRing: ClusterHashRing = ClusterHashRing(readyMembers)
-  ) {
+    /** true if the current service instance is ready as perceived by the cluster manager */
+    val selfReady: Boolean = readyMembers.any { it.name == self.name },
 
-    /** @property Set<Member> of the ready peers */
-    val readyPeers: Set<Member> get() = readyMembers - self
+    /** A [ClusterResourceMapper] built from the ready members of this cluster */
+    val resourceMapper: ClusterResourceMapper
+  ) {
+    /** The of the ready peers; basically all of the ready cluster members except sel */
+    val readyPeers: Set<Member> = readyMembers - self
   }
 
-  /** @property Snapshot The current moment-in-time view of the cluster state */
+  /** The current moment-in-time view of the cluster state */
   val snapshot: Snapshot
 
   /** Registers interest in cluster changes */
   fun watch(watch: ClusterWatch)
+
+  /** @return A new [ClusterResourceMapper] for the given set of ready members */
+  fun newResourceMapper(readyMembers: Set<Cluster.Member>): ClusterResourceMapper =
+      ClusterHashRing(readyMembers)
 }
+

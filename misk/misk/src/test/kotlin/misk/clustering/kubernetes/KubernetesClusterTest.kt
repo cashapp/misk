@@ -10,10 +10,13 @@ import io.kubernetes.client.models.V1PodStatus
 import io.kubernetes.client.util.Watches
 import misk.MiskServiceModule
 import misk.clustering.Cluster
-import misk.clustering.kubernetes.KubernetesClusterService.Companion.CHANGE_TYPE_ADDED
-import misk.clustering.kubernetes.KubernetesClusterService.Companion.CHANGE_TYPE_DELETED
-import misk.clustering.kubernetes.KubernetesClusterService.Companion.CHANGE_TYPE_MODIFIED
+import misk.clustering.ClusterHashRing
+import misk.clustering.DefaultCluster
+import misk.clustering.kubernetes.KubernetesClusterWatcher.Companion.CHANGE_TYPE_ADDED
+import misk.clustering.kubernetes.KubernetesClusterWatcher.Companion.CHANGE_TYPE_DELETED
+import misk.clustering.kubernetes.KubernetesClusterWatcher.Companion.CHANGE_TYPE_MODIFIED
 import misk.inject.KAbstractModule
+import misk.inject.asSingleton
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
@@ -23,12 +26,13 @@ import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 @MiskTest(startService = true)
-internal class KubernetesClusterServiceTest {
+internal class KubernetesClusterTest {
   @MiskTestModule val module: Module = Modules.combine(
       MiskServiceModule(),
       object : KAbstractModule() {
         override fun configure() {
-          multibind<Service>().to<KubernetesClusterService>()
+          multibind<Service>().to<DefaultCluster>()
+          bind<DefaultCluster>().toProvider(KubernetesClusterProvider::class.java).asSingleton()
           bind<KubernetesConfig>().toInstance(KubernetesConfig(
               my_pod_namespace = TEST_NAMESPACE,
               my_pod_name = TEST_SELF_NAME,
@@ -37,7 +41,7 @@ internal class KubernetesClusterServiceTest {
         }
       })
 
-  @Inject private lateinit var cluster: KubernetesClusterService
+  @Inject private lateinit var cluster: DefaultCluster
 
   @Test fun startsWithSelfNotReady() {
     val self = cluster.snapshot.self
@@ -55,10 +59,8 @@ internal class KubernetesClusterServiceTest {
 
     val changes = mutableListOf<Cluster.Changes>()
     cluster.watch { changes.add(it) }
-    cluster.clusterChanged(
-        Watches.newResponse(CHANGE_TYPE_ADDED, newPod(TEST_SELF_NAME, true, TEST_SELF_IP)))
-    cluster.clusterChanged(
-        Watches.newResponse(CHANGE_TYPE_MODIFIED, newPod(TEST_SELF_NAME, false, TEST_SELF_IP)))
+    handleWatch(CHANGE_TYPE_ADDED, newPod(TEST_SELF_NAME, true, TEST_SELF_IP))
+    handleWatch(CHANGE_TYPE_MODIFIED, newPod(TEST_SELF_NAME, false, TEST_SELF_IP))
     cluster.syncPoint { ready.countDown() }
 
     assertThat(ready.await(5, TimeUnit.SECONDS)).isTrue()
@@ -67,17 +69,20 @@ internal class KubernetesClusterServiceTest {
         Cluster.Changes(snapshot = Cluster.Snapshot(
             self = expectedSelf,
             selfReady = false,
-            readyMembers = setOf()
+            readyMembers = setOf(),
+            resourceMapper = ClusterHashRing(setOf())
         )),
         Cluster.Changes(snapshot = Cluster.Snapshot(
             self = expectedSelf,
             selfReady = true,
-            readyMembers = setOf(expectedSelf)
+            readyMembers = setOf(expectedSelf),
+            resourceMapper = ClusterHashRing(setOf(expectedSelf))
         ), added = setOf(expectedSelf)),
         Cluster.Changes(snapshot = Cluster.Snapshot(
             self = expectedSelf,
             selfReady = false,
-            readyMembers = setOf()
+            readyMembers = setOf(),
+            resourceMapper = ClusterHashRing(setOf())
         ), removed = setOf(expectedSelf))
     )
   }
@@ -87,8 +92,8 @@ internal class KubernetesClusterServiceTest {
 
     val changes = mutableListOf<Cluster.Changes>()
     cluster.watch { changes.add(it) }
-    cluster.clusterChanged(Watches.newResponse("ADDED", newPod("larry-blerp", true, "10.0.0.3")))
-    cluster.clusterChanged(Watches.newResponse("ADDED", newPod("larry-blerp2", true, "10.0.0.4")))
+    handleWatch("ADDED", newPod("larry-blerp", true, "10.0.0.3"))
+    handleWatch("ADDED", newPod("larry-blerp2", true, "10.0.0.4"))
     cluster.syncPoint { ready.countDown() }
     assertThat(ready.await(5, TimeUnit.SECONDS)).isTrue()
 
@@ -96,19 +101,25 @@ internal class KubernetesClusterServiceTest {
         Cluster.Changes(snapshot = Cluster.Snapshot(
             self = expectedSelf,
             selfReady = false,
-            readyMembers = setOf()
+            readyMembers = setOf(),
+            resourceMapper = ClusterHashRing(setOf())
         )),
         Cluster.Changes(snapshot = Cluster.Snapshot(
             self = expectedSelf,
             selfReady = false,
-            readyMembers = setOf(Cluster.Member("larry-blerp", "10.0.0.3"))
+            readyMembers = setOf(Cluster.Member("larry-blerp", "10.0.0.3")),
+            resourceMapper = ClusterHashRing(setOf(Cluster.Member("larry-blerp", "10.0.0.3")))
         ), added = setOf(Cluster.Member("larry-blerp", "10.0.0.3"))),
         Cluster.Changes(snapshot = Cluster.Snapshot(
             self = expectedSelf,
             selfReady = false,
             readyMembers = setOf(
                 Cluster.Member("larry-blerp", "10.0.0.3"),
+                Cluster.Member("larry-blerp2", "10.0.0.4")),
+            resourceMapper = ClusterHashRing(setOf(
+                Cluster.Member("larry-blerp", "10.0.0.3"),
                 Cluster.Member("larry-blerp2", "10.0.0.4"))
+            )
         ), added = setOf(Cluster.Member("larry-blerp2", "10.0.0.4"))))
   }
 
@@ -117,14 +128,12 @@ internal class KubernetesClusterServiceTest {
     val ready = CountDownLatch(1)
 
     // Start with members
-    cluster.clusterChanged(
-        Watches.newResponse(CHANGE_TYPE_ADDED, newPod("larry-blerp", true, "10.0.0.3")))
-    cluster.clusterChanged(
-        Watches.newResponse(CHANGE_TYPE_ADDED, newPod("larry-blerp2", true, "10.0.0.4")))
+    handleWatch(CHANGE_TYPE_ADDED, newPod("larry-blerp", true, "10.0.0.3"))
+    handleWatch(CHANGE_TYPE_ADDED, newPod("larry-blerp2", true, "10.0.0.4"))
 
     // Explicitly remove a member
     cluster.watch { changes.add(it) }
-    cluster.clusterChanged(Watches.newResponse(CHANGE_TYPE_DELETED, newPod("larry-blerp")))
+    handleWatch(CHANGE_TYPE_DELETED, newPod("larry-blerp"))
     cluster.syncPoint { ready.countDown() }
     assertThat(ready.await(5, TimeUnit.SECONDS)).isTrue()
 
@@ -134,12 +143,19 @@ internal class KubernetesClusterServiceTest {
             selfReady = false,
             readyMembers = setOf(
                 Cluster.Member("larry-blerp", "10.0.0.3"),
+                Cluster.Member("larry-blerp2", "10.0.0.4")),
+            resourceMapper = ClusterHashRing(setOf(
+                Cluster.Member("larry-blerp", "10.0.0.3"),
                 Cluster.Member("larry-blerp2", "10.0.0.4"))
-        )),
+            ))
+        ),
         Cluster.Changes(snapshot = Cluster.Snapshot(
             self = expectedSelf,
             selfReady = false,
-            readyMembers = setOf(Cluster.Member("larry-blerp2", "10.0.0.4"))
+            readyMembers = setOf(Cluster.Member("larry-blerp2", "10.0.0.4")),
+            resourceMapper = ClusterHashRing(setOf(
+                Cluster.Member("larry-blerp2", "10.0.0.4")
+            ))
         ), removed = setOf(Cluster.Member("larry-blerp", ""))))
   }
 
@@ -148,8 +164,7 @@ internal class KubernetesClusterServiceTest {
     val ready = CountDownLatch(1)
 
     cluster.watch { changes.add(it) }
-    cluster.clusterChanged(
-        Watches.newResponse(CHANGE_TYPE_ADDED, newPod("larry-blerp", false, "10.0.0.3")))
+    handleWatch(CHANGE_TYPE_ADDED, newPod("larry-blerp", false, "10.0.0.3"))
     cluster.syncPoint { ready.countDown() }
     assertThat(ready.await(5, TimeUnit.SECONDS)).isTrue()
 
@@ -158,7 +173,8 @@ internal class KubernetesClusterServiceTest {
         Cluster.Changes(snapshot = Cluster.Snapshot(
             self = expectedSelf,
             selfReady = false,
-            readyMembers = setOf()
+            readyMembers = setOf(),
+            resourceMapper = ClusterHashRing(setOf())
         )))
   }
 
@@ -167,7 +183,7 @@ internal class KubernetesClusterServiceTest {
     val ready = CountDownLatch(1)
 
     cluster.watch { changes.add(it) }
-    cluster.clusterChanged(Watches.newResponse(CHANGE_TYPE_ADDED, newPod("larry-blerp", true)))
+    handleWatch(CHANGE_TYPE_ADDED, newPod("larry-blerp", true))
     cluster.syncPoint { ready.countDown() }
     assertThat(ready.await(5, TimeUnit.SECONDS)).isTrue()
 
@@ -176,7 +192,8 @@ internal class KubernetesClusterServiceTest {
         Cluster.Changes(snapshot = Cluster.Snapshot(
             self = expectedSelf,
             selfReady = false,
-            readyMembers = setOf()
+            readyMembers = setOf(),
+            resourceMapper = ClusterHashRing(setOf())
         )))
   }
 
@@ -185,15 +202,12 @@ internal class KubernetesClusterServiceTest {
     val changes = mutableListOf<Cluster.Changes>()
 
     // Start as an existing member
-    cluster.clusterChanged(
-        Watches.newResponse(CHANGE_TYPE_ADDED, newPod("larry-blerp", true, "10.0.0.3")))
-    cluster.clusterChanged(
-        Watches.newResponse(CHANGE_TYPE_ADDED, newPod("larry-blerp2", true, "10.0.0.4")))
+    handleWatch(CHANGE_TYPE_ADDED, newPod("larry-blerp", true, "10.0.0.3"))
+    handleWatch(CHANGE_TYPE_ADDED, newPod("larry-blerp2", true, "10.0.0.4"))
 
     // Transition to not ready - should remove from the list
     cluster.watch { changes.add(it) }
-    cluster.clusterChanged(
-        Watches.newResponse(CHANGE_TYPE_MODIFIED, newPod("larry-blerp", false, "10.0.0.3")))
+    handleWatch(CHANGE_TYPE_MODIFIED, newPod("larry-blerp", false, "10.0.0.3"))
     cluster.syncPoint { ready.countDown() }
     assertThat(ready.await(5, TimeUnit.SECONDS)).isTrue()
 
@@ -203,12 +217,19 @@ internal class KubernetesClusterServiceTest {
             selfReady = false,
             readyMembers = setOf(
                 Cluster.Member("larry-blerp", "10.0.0.3"),
+                Cluster.Member("larry-blerp2", "10.0.0.4")),
+            resourceMapper = ClusterHashRing(setOf(
+                Cluster.Member("larry-blerp", "10.0.0.3"),
                 Cluster.Member("larry-blerp2", "10.0.0.4"))
-        )),
+            ))
+        ),
         Cluster.Changes(snapshot = Cluster.Snapshot(
             self = expectedSelf,
             selfReady = false,
-            readyMembers = setOf(Cluster.Member("larry-blerp2", "10.0.0.4"))
+            readyMembers = setOf(Cluster.Member("larry-blerp2", "10.0.0.4")),
+            resourceMapper = ClusterHashRing(setOf(
+                Cluster.Member("larry-blerp2", "10.0.0.4")
+            ))
         ), removed = setOf(Cluster.Member("larry-blerp", "10.0.0.3"))))
   }
 
@@ -217,14 +238,12 @@ internal class KubernetesClusterServiceTest {
     val changes = mutableListOf<Cluster.Changes>()
 
     // Start as an existing member
-    cluster.clusterChanged(
-        Watches.newResponse(CHANGE_TYPE_ADDED, newPod("larry-blerp", true, "10.0.0.3")))
-    cluster.clusterChanged(
-        Watches.newResponse(CHANGE_TYPE_ADDED, newPod("larry-blerp2", true, "10.0.0.4")))
+    handleWatch(CHANGE_TYPE_ADDED, newPod("larry-blerp", true, "10.0.0.3"))
+    handleWatch(CHANGE_TYPE_ADDED, newPod("larry-blerp2", true, "10.0.0.4"))
 
     // Transition to no IP address
     cluster.watch { changes.add(it) }
-    cluster.clusterChanged(Watches.newResponse(CHANGE_TYPE_MODIFIED, newPod("larry-blerp", true)))
+    handleWatch(CHANGE_TYPE_MODIFIED, newPod("larry-blerp", true))
     cluster.syncPoint { ready.countDown() }
     assertThat(ready.await(5, TimeUnit.SECONDS)).isTrue()
 
@@ -234,13 +253,24 @@ internal class KubernetesClusterServiceTest {
             selfReady = false,
             readyMembers = setOf(
                 Cluster.Member("larry-blerp", "10.0.0.3"),
+                Cluster.Member("larry-blerp2", "10.0.0.4")),
+            resourceMapper = ClusterHashRing(setOf(
+                Cluster.Member("larry-blerp", "10.0.0.3"),
                 Cluster.Member("larry-blerp2", "10.0.0.4"))
-        )),
+            ))
+        ),
         Cluster.Changes(snapshot = Cluster.Snapshot(
             self = expectedSelf,
             selfReady = false,
-            readyMembers = setOf(Cluster.Member("larry-blerp2", "10.0.0.4"))
+            readyMembers = setOf(Cluster.Member("larry-blerp2", "10.0.0.4")),
+            resourceMapper = ClusterHashRing(setOf(
+                Cluster.Member("larry-blerp2", "10.0.0.4")
+            ))
         ), removed = setOf(Cluster.Member("larry-blerp", ""))))
+  }
+
+  private fun handleWatch(type: String, pod: V1Pod) {
+    Watches.newResponse(type, pod).applyTo(cluster)
   }
 
   private fun newPod(name: String, isReady: Boolean = false, ipAddress: String? = null): V1Pod {
