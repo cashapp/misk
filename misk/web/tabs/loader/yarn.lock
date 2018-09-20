@@ -97,9 +97,9 @@
   dependencies:
     "@misk/common" "^0.0.36"
 
-"@misk/dev@^0.0.27":
-  version "0.0.27"
-  resolved "https://registry.yarnpkg.com/@misk/dev/-/dev-0.0.27.tgz#3996660fec8790d2ed383953c2ac151f5edf3376"
+"@misk/dev@^0.0.28":
+  version "0.0.28"
+  resolved "https://registry.yarnpkg.com/@misk/dev/-/dev-0.0.28.tgz#d73a274171f469dc4424118e45d55a357848c44e"
   dependencies:
     "@types/node" "^10.9.4"
     "@types/react" "^16.4.13"
