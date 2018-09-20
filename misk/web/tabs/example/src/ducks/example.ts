@@ -12,7 +12,24 @@ import { all, call, put, takeLatest } from "redux-saga/effects"
  * First, some terminology:
  * State: A central store of the React app's knowledge at a given point in time
  * Redux: unidirectional data flow state management for React (in the spirit of Flux)
- * Sagas: a Redux pattern that uses Actions, Dispatchers, Sagas, and Reducers to handle state updates
+ * Redux-Sagas: a Redux pattern that uses Actions, Dispatchers, Sagas, and Reducers to handle state updates
+ * Actions: small context objects used to pass around and process state changes. In Misk, they will by default
+ *      have fields for `data`, `error`, `loading`, and `success`.
+ * Dispatchers: An object that has functions that dispatch actions. The Dispatcher has one function for each action.
+ *      The advantages of a Dispatcher and dispatching functions are as follows:
+ *        - Import a single Dispatcher object and have access to all action-dispatching functions
+ *        - Dispatching function ensures consistent formatting for emitted actions
+ *        - Dispatching function can handle any marshalling or default values to set in the action
+ * Sagas: A generating function that handles actions asynchronously. Each Duck Saga is registered with the tab
+ *       rootSaga and has an array of take{Latest|Every} functions that bind an action to a handling function.
+ *       The handling function is also an asynchronous generating function that does any web requests or blocking
+ *       state change computation. In the process of computation, it can yield other actions to signal 
+ *       success, failure, or progress which will consequently be picked up and handled asynchronously by other handlers.
+ * Reducers: Maintain up to date state by continuing to merge in changes as they come from dispatched actions.
+ *       Each Duck Reducer is registered with the tab's rootReducer to provide a single merged reducer for all state change.
+ *       Each Duck Reducer effectively is responsible for a domain or keyspace of the global state object.
+ *       The structure and typing of this state domain is defined in the Duck State Interface.
+ * Interface: a Typescript specific syntax that allows definition of an object interface with expected keys and value types
  * Ducks: a Redux-Sagas pattern that puts all elements in a single Ducks module file instead of different directories
  * 
  * Why would you need a Ducks module
@@ -27,6 +44,7 @@ import { all, call, put, takeLatest } from "redux-saga/effects"
  * processing of all non-View related computation letting you build non-View-blocking React apps.
  * 
  * Pro tip: Use the Redux DevTools Chrome plugin to see all state changes in your tab as they occur.
+ * https://chrome.google.com/webstore/detail/redux-devtools/lmhkpmbekcpmknklioeibfkpmmfibljd
  * 
  * Using the Redux-Sagas Ducks pattern helps developers easily build Misk tabs with minimal 
  * front end React, Redux, or Sagas knowledge. 

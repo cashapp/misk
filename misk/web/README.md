@@ -22,27 +22,15 @@ Misk Admin
 - [Styled Components](https://www.styled-components.com/) for adding CSS to React components
 - [Skeleton](http://getskeleton.com/) for very simple responsive boilerplate styling
 
-## Getting Started
-
-1. Open Misk in IntelliJ
-1. Start `UrlShortenerService` (used for testing the request forwarding)
-1. Run `./develop@misk.sh` in `web/` directory (builds all @misk/ packages and starts dev server)
-1. Create new Tmux/Terminal sessions for each tab in `web/tabs/` and run
-
-  ```
-  $ cd tabs/config
-  $ yarn install
-  $ yarn build
-  $ yarn start 
-  ```
-1. Open up `http://localhost:8080/_admin/` for config
-1. If you want to build all the tabs, run `./build.sh` in `web/` directory
-
-
-## Creating a new Tab
+## DevEnv Setup
 
 - Install IntelliJ Ultimate and [Setup Typescript Support](https://www.jetbrains.com/help/idea/2017.1/typescript-support.html). Typescript errors will now appear as you type. 
-- Use Config as your exemplar tab for now
+- For a more native React/Typescript environment, install Microsoft Visual Studio Code and the following packages
+  - Blueprint: Syntax theme that includes highlighting of BlueprintJS elements
+  - Prettier - Code formatter
+  - stylelint: CSS/SCSS/Less linter
+  - TSLint: provides linting recommendations and auto-fixes within the editor for Typescript
+- Duplicate the Example tab and follow the instructions in [tabs/README.md](./tabs/README.md).
 
 ## Typescript Nuances
 - Some NPM packages are written in Typescript, these are very easy to import and use without issue.
