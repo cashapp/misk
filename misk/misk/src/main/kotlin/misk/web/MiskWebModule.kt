@@ -132,9 +132,6 @@ class MiskWebModule : KAbstractModule() {
     multibind<WebActionEntry>().toInstance(WebActionEntry<ReadinessCheckAction>())
     multibind<WebActionEntry>().toInstance(WebActionEntry<LivenessCheckAction>())
     multibind<WebActionEntry>().toInstance(WebActionEntry<NotFoundAction>())
-
-    // Adds open CORS headers in development to allow through API calls from webpack servers
-    multibind<NetworkInterceptor.Factory>().to<WideOpenDevelopmentInterceptorFactory>()
   }
 
   class MiskCallerProvider : ActionScopedProvider<MiskCaller?> {

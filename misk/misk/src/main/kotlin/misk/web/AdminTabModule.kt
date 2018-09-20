@@ -1,12 +1,15 @@
 package misk.web
 
-import misk.config.ConfigAdminAction
 import misk.environment.Environment
 import misk.inject.KAbstractModule
 import misk.web.actions.AdminTab
 import misk.web.actions.AdminTabAction
 import misk.web.actions.WebActionEntry
+import misk.web.interceptors.WideOpenDevelopmentInterceptorFactory
+import misk.web.metadata.ConfigMetadataModule
+import misk.web.metadata.WebActionMetadataModule
 import misk.web.proxy.WebProxyAction
+import misk.web.proxy.WebProxyActionModule
 import misk.web.proxy.WebProxyEntry
 import misk.web.resources.StaticResourceAction
 import misk.web.resources.StaticResourceEntry
@@ -17,20 +20,30 @@ import misk.web.resources.StaticResourceEntry
  * Binds the admin UI framework. Individual tabs should be bound with their other code.
  *
  * Example
- * Config tab is tightly coupled to the config module. Thus binding should be in ConfigWebModule
+ * Config tab is tightly coupled to the config module. Thus binding should be in ConfigMetadataModule
  */
 
 class AdminTabModule(val environment: Environment) : KAbstractModule() {
   override fun configure() {
+    // Misc. Necessary Modules and Bindings for AdminTabModule
+    install(WebProxyActionModule())
     multibind<WebActionEntry>().toInstance(WebActionEntry<AdminTabAction>())
+    // Adds open CORS headers in development to allow through API calls from webpack servers
+    multibind<NetworkInterceptor.Factory>().to<WideOpenDevelopmentInterceptorFactory>()
 
+    // Tab Modules
+    install(ConfigMetadataModule(environment))
+    install(WebActionMetadataModule(environment))
+
+    //  AdminTab Bindings
     multibind<AdminTab>().toInstance(AdminTab(
         "Example",
         "example",
-        "/_tab/example/",
+        "/_admin/example/",
         "Misk Development"
     ))
 
+    // Environment Dependent WebProxyAction or StaticResourceAction bindings
     if (environment == Environment.DEVELOPMENT) {
       multibind<WebActionEntry>().toInstance(
           WebActionEntry<WebProxyAction>("/_admin/"))
@@ -67,9 +80,6 @@ class AdminTabModule(val environment: Environment) : KAbstractModule() {
             .toInstance(StaticResourceEntry("/_tab/loader/", "classpath:/web/_tab/loader/"))
       }
     }
-
-    // All simple Admin Tabs + Endpoints
-    install(WebActionMetadataModule(environment))
 
     // True for testing Misk Menu with populated tabs and categories, tabs are not functional
     if (true) {
