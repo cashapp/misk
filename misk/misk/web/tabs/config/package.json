@@ -16,13 +16,12 @@
     "@misk/components": "^0.0.37"
   },
   "devDependencies": {
-    "@misk/dev": "^0.0.27",
+    "@misk/dev": "^0.0.28",
     "@misk/tslint": "^0.0.3"
   },
   "miskTabWebpack": {
     "name": "Config",
     "port": "3200",
-    "relative_path_prefix": "_tab/config/",
     "slug": "config"
   }
 }
