@@ -8,6 +8,7 @@ import javax.persistence.GeneratedValue
 import javax.persistence.Table
 
 @Entity
+@misk.hibernate.annotation.Keyspace("movies")
 @Table(name = "movies")
 class DbMovie() : DbRoot<DbMovie>, DbTimestampedEntity {
   @javax.persistence.Id
