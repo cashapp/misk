@@ -63,6 +63,8 @@ internal class DockerVitessCluster(
         "-web_dir=web/vtctld/app",
         "-web_dir2=web/vtctld2/app",
         "-mysql_bind_host=0.0.0.0",
+        // TODO this flag is not supported yet waiting for this PR: https://github.com/vitessio/vitess/pull/4199
+//        "-transaction_mode=SINGLE",
         "-schema_dir=schema",
         "-keyspaces=$keyspaces",
         "-num_shards=$shardCounts"

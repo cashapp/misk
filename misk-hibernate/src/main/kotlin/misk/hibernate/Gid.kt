@@ -9,4 +9,6 @@ import javax.persistence.Embeddable
 @Embeddable
 data class Gid<R : DbRoot<R>, T : DbSharded<R, T>>(val rootId: Id<R>, val id: Id<T>) : Serializable {
   override fun toString() = rootId.toString() + "/" + id.toString()
+
+  fun shardKey() = rootId.shardKey()
 }
