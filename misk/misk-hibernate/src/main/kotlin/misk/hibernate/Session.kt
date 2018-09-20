@@ -12,20 +12,6 @@ interface Session {
   fun <T> useConnection(work: (Connection) -> T): T
 }
 
-data class Keyspace(val name: String) {
-  init {
-    checkValidShardIdentifier(name)
-  }
-}
-
-data class Shard(val keyspace: Keyspace, val name: String) {
-  init {
-    checkValidShardIdentifier(name)
-  }
-
-  override fun toString() = "${keyspace.name}/$name"
-}
-
 inline fun <reified T : DbEntity<T>> Session.load(id: Id<T>): T = load(id, T::class)
 
 fun checkValidShardIdentifier(identifier: String) {
@@ -33,3 +19,5 @@ fun checkValidShardIdentifier(identifier: String) {
   check(!identifier.contains(' '))
   check(!identifier.contains('/'))
 }
+
+fun Session.shards(keyspace: Keyspace) = shards().filter { it.keyspace == keyspace }
