@@ -78,8 +78,13 @@ dependencies {
 
 jar {
   into("web/") {
+    from("./web/@misk/common/lib/")
+    from("./web/@misk/components/dist/")
+    from("./web/@misk/dev/")
+    from("./web/@misk/tabs/")
+    from("./web/@misk/tslint/")
     from("./web/tabs/config/dist/")
-    from("./web/tabs/dashboard/dist/")
+    from("./web/tabs/example/dist/")
     from("./web/tabs/loader/dist/")
   }
 }
@@ -87,3 +92,22 @@ jar {
 if (rootProject.file("hooks.gradle").exists()) {
   apply from: rootProject.file("hooks.gradle")
 }
+
+task compileWebpack {
+  doLast {
+    def cmd = ['bash', '-c', 'npm config set loglevel warn && npm install && yarn build']
+    def webpackProjects = [
+            "misk/web/@misk/common",
+            "misk/web/@misk/components",
+            "misk/web/tabs/config",
+            "misk/web/tabs/example",
+            "misk/web/tabs/loader",
+    ]
+    webpackProjects.each { project ->
+      println "Compiling Webpack Project... " + project
+      println cmd.execute(null, new File(project)).text
+    }
+  }
+}
+
+assemble.dependsOn compileWebpack
