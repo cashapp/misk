@@ -2,13 +2,15 @@ package misk.clustering
 
 import com.google.common.hash.HashFunction
 import com.google.common.hash.Hashing
+import java.util.Arrays
+import java.util.Objects
 
 /** A [ClusterHashRing] maps resources to cluster members based on a consistent hash */
 class ClusterHashRing(
   members: Collection<Cluster.Member>,
   private val hashFn: HashFunction = Hashing.murmur3_32(),
   private val vnodesCount: Int = 16
-) {
+) : ClusterResourceMapper {
   private val vnodes: IntArray
   private val vnodesToMembers: Map<Int, Cluster.Member>
 
@@ -32,7 +34,7 @@ class ClusterHashRing(
   }
 
   /** @return The [Cluster.Member] that should own the given resource id */
-  fun mapResourceToMember(resourceId: String): Cluster.Member {
+  override fun get(resourceId: String): Cluster.Member {
     check(vnodesToMembers.isNotEmpty()) { "no members available for $resourceId" }
 
     val resourceHash = hashFn.hashBytes(resourceId.toByteArray()).asInt()
@@ -46,5 +48,9 @@ class ClusterHashRing(
     return vnodesCount == otherRing.vnodesCount &&
         vnodes.contentEquals(otherRing.vnodes) &&
         vnodesToMembers == other.vnodesToMembers
+  }
+
+  override fun hashCode(): Int {
+    return Objects.hash(vnodesCount, vnodesToMembers, Arrays.hashCode(vnodes))
   }
 }

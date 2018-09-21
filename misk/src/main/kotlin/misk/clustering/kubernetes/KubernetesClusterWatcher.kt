@@ -9,6 +9,12 @@ import io.kubernetes.client.util.Config
 import io.kubernetes.client.util.Watch
 import misk.DependentService
 import misk.backoff.ExponentialBackoff
+import misk.clustering.Cluster
+import misk.clustering.DefaultCluster
+import misk.clustering.kubernetes.KubernetesClusterWatcher.Companion.CHANGE_TYPE_ADDED
+import misk.clustering.kubernetes.KubernetesClusterWatcher.Companion.CHANGE_TYPE_DELETED
+import misk.clustering.kubernetes.KubernetesClusterWatcher.Companion.CHANGE_TYPE_MODIFIED
+import misk.inject.keyOf
 import misk.logging.getLogger
 import java.time.Duration
 import java.util.concurrent.TimeUnit
@@ -19,18 +25,18 @@ import kotlin.concurrent.thread
 
 /**
  * [KubernetesClusterWatcher] watches for changes in the Kubernetes namespace to which this
- * service belongs, and sends watch events to the corresponding [KubernetesClusterService]
+ * service belongs, and sends watch events to the corresponding [DefaultCluster]
  * which determines changes to the cluster and forwards them to the application. We separate
  * cluster watching from managing cluster membership to allow each to be tested in isolation
  */
 @Singleton
-internal class KubernetesClusterWatcher @Inject internal constructor (
-  private val clusterService: KubernetesClusterService,
+internal class KubernetesClusterWatcher @Inject internal constructor(
+  private val cluster: DefaultCluster,
   private val config: KubernetesConfig
-): AbstractIdleService(), DependentService {
+) : AbstractIdleService(), DependentService {
   private val running = AtomicBoolean(false)
 
-  override val consumedKeys: Set<Key<*>> = setOf(Key.get(KubernetesClusterService::class.java))
+  override val consumedKeys: Set<Key<*>> = setOf(keyOf<Cluster>())
   override val producedKeys: Set<Key<*>> = setOf()
 
   override fun startUp() {
@@ -83,7 +89,8 @@ internal class KubernetesClusterWatcher @Inject internal constructor (
             return
           }
 
-          clusterService.clusterChanged(response)
+          response.applyTo(cluster)
+
         }
       } catch (ex: Exception) {
         // This can occur if we have temporary connectivity glitches to the API server
@@ -97,8 +104,35 @@ internal class KubernetesClusterWatcher @Inject internal constructor (
     }
   }
 
-  private companion object {
-    val log = getLogger<KubernetesClusterWatcher>()
-    val podType: java.lang.reflect.Type = object : TypeToken<Watch.Response<V1Pod>>() {}.type
+  companion object {
+    private val log = getLogger<KubernetesClusterWatcher>()
+    private val podType: java.lang.reflect.Type =
+        object : TypeToken<Watch.Response<V1Pod>>() {}.type
+
+    const val CHANGE_TYPE_MODIFIED = "MODIFIED"
+    const val CHANGE_TYPE_DELETED = "DELETED"
+    const val CHANGE_TYPE_ADDED = "ADDED"
   }
 }
+
+internal val V1Pod.asClusterMember get() = Cluster.Member(metadata.name, status.podIP ?: "")
+
+internal val V1Pod.isReady: Boolean
+  get() {
+    if (status.containerStatuses == null) return false
+    if (status.containerStatuses.any { !it.isReady }) return false
+    return status.podIP?.isNotEmpty() ?: false
+  }
+
+internal val Watch.Response<V1Pod>.pod: V1Pod get() = `object`
+
+internal fun Watch.Response<V1Pod>.applyTo(cluster: DefaultCluster) {
+  val memberSet = setOf(pod.asClusterMember)
+  when (type) {
+    CHANGE_TYPE_ADDED, CHANGE_TYPE_MODIFIED ->
+      if (pod.isReady) cluster.clusterChanged(membersBecomingReady = memberSet)
+      else cluster.clusterChanged(membersBecomingNotReady = memberSet)
+    CHANGE_TYPE_DELETED -> cluster.clusterChanged(membersBecomingNotReady = memberSet)
+  }
+}
+
