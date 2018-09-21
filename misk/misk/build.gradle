@@ -76,6 +76,89 @@ dependencies {
   testCompile project(':misk-testing')
 }
 
+task webpackMiskCommon(type: Exec) {
+  inputs.file("web/@misk/common/package-lock.json").
+          withPathSensitivity(PathSensitivity.RELATIVE)
+  inputs.file("web/@misk/common/yarn.lock").withPathSensitivity(PathSensitivity.RELATIVE)
+  inputs.dir("web/@misk/common/src").withPathSensitivity(PathSensitivity.RELATIVE)
+  inputs.file("web/@misk/common/webpack.config.js").
+          withPathSensitivity(PathSensitivity.RELATIVE)
+  inputs.file("web/@misk/common/webpack.config.static.js").
+          withPathSensitivity(PathSensitivity.RELATIVE)
+  inputs.file("web/@misk/common/webpack.config.vendors.js").
+          withPathSensitivity(PathSensitivity.RELATIVE)
+  outputs.dir("web/@misk/common/lib")
+  outputs.cacheIf { true }
+
+  workingDir "web/@misk/common"
+  commandLine "yarn", "gradle"
+}
+
+
+task webpackMiskComponents(type: Exec) {
+  inputs.file("web/@misk/components/package-lock.json")
+  inputs.file("web/@misk/components/yarn.lock").withPathSensitivity(PathSensitivity.RELATIVE)
+  inputs.dir("web/@misk/components/src").withPathSensitivity(PathSensitivity.RELATIVE)
+  inputs.file("web/@misk/components/webpack.config.js").
+          withPathSensitivity(PathSensitivity.RELATIVE)
+  outputs.dir("web/@misk/components/lib")
+  outputs.cacheIf { true }
+
+  workingDir "web/@misk/components"
+  commandLine "yarn", "gradle"
+}
+
+
+task webpackTabsConfig(type: Exec) {
+  inputs.file("web/tabs/config/package-lock.json").
+          withPathSensitivity(PathSensitivity.RELATIVE)
+  inputs.file("web/tabs/config/yarn.lock").withPathSensitivity(PathSensitivity.RELATIVE)
+  inputs.dir("web/tabs/config/src").withPathSensitivity(PathSensitivity.RELATIVE)
+  inputs.file("web/tabs/config/webpack.config.js").
+          withPathSensitivity(PathSensitivity.RELATIVE)
+  outputs.dir("web/tabs/config/dist")
+  outputs.cacheIf { true }
+
+  workingDir "web/tabs/config"
+  commandLine "yarn", "gradle"
+}
+
+
+task webpackTabsExample(type: Exec) {
+  inputs.file("web/tabs/example/package-lock.json").
+          withPathSensitivity(PathSensitivity.RELATIVE)
+  inputs.file("web/tabs/example/yarn.lock").withPathSensitivity(PathSensitivity.RELATIVE)
+  inputs.dir("web/tabs/example/src").withPathSensitivity(PathSensitivity.RELATIVE)
+  inputs.file("web/tabs/example/webpack.config.js").
+          withPathSensitivity(PathSensitivity.RELATIVE)
+  outputs.dir("web/tabs/example/dist")
+  outputs.cacheIf { true }
+
+  workingDir "web/tabs/example"
+  commandLine "yarn", "gradle"
+}
+
+
+task webpackTabsLoader(type: Exec) {
+  inputs.file("web/tabs/loader/package-lock.json").
+          withPathSensitivity(PathSensitivity.RELATIVE)
+  inputs.file("web/tabs/loader/yarn.lock").withPathSensitivity(PathSensitivity.RELATIVE)
+  inputs.dir("web/tabs/loader/src").withPathSensitivity(PathSensitivity.RELATIVE)
+  inputs.file("web/tabs/loader/webpack.config.js").
+          withPathSensitivity(PathSensitivity.RELATIVE)
+  outputs.dir("web/tabs/loader/dist")
+  outputs.cacheIf { true }
+
+  workingDir "web/tabs/loader"
+  commandLine "yarn", "gradle"
+}
+
+jar.dependsOn webpackMiskCommon
+jar.dependsOn webpackMiskComponents
+jar.dependsOn webpackTabsConfig
+jar.dependsOn webpackTabsExample
+jar.dependsOn webpackTabsLoader
+
 jar {
   into("web/") {
     from("./web/@misk/common/lib/")
@@ -92,22 +175,3 @@ jar {
 if (rootProject.file("hooks.gradle").exists()) {
   apply from: rootProject.file("hooks.gradle")
 }
-
-task compileWebpack {
-  doLast {
-    def cmd = ['bash', '-c', 'npm config set loglevel warn && npm install && yarn build']
-    def webpackProjects = [
-            "misk/web/@misk/common",
-            "misk/web/@misk/components",
-            "misk/web/tabs/config",
-            "misk/web/tabs/example",
-            "misk/web/tabs/loader",
-    ]
-    webpackProjects.each { project ->
-      println "Compiling Webpack Project... " + project
-      println cmd.execute(null, new File(project)).text
-    }
-  }
-}
-
-assemble.dependsOn compileWebpack
