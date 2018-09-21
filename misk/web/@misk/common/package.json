@@ -22,7 +22,7 @@
     "build": "npm run lib",
     "updateDevCache": "cd ..; ./_adminUpdateCache.sh",
     "dist": "npm run lib",
-    "lib": "webpack --config webpack.config.js && webpack --config webpack.config.static.js && webpack --config webpack.config.vendors.js; yarn run refresh; yarn run updateDevCache",
+    "lib": "yarn run refresh; webpack --config webpack.config.js && webpack --config webpack.config.static.js && webpack --config webpack.config.vendors.js; yarn run updateDevCache",
     "lint": "echo no lint",
     "prepare": "yarn run lint && yarn run test && yarn run lib",
     "refresh": "node refreshCachedUrls.js",
