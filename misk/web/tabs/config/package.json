@@ -5,6 +5,7 @@
   "scripts": {
     "build": "cross-env NODE_ENV=production webpack",
     "clean": "rm -rf dist node_modules",
+    "gradle": "npm install && yarn build",
     "reinstall": "yarn clean && yarn install",
     "start": "cross-env NODE_ENV=development webpack-dev-server",
     "test": "jest --coverage"
@@ -14,7 +15,7 @@
     "@misk/components": "^0.0.37"
   },
   "devDependencies": {
-    "@misk/dev": "^0.0.28",
+    "@misk/dev": "^0.0.30",
     "@misk/tslint": "^0.0.3"
   },
   "miskTabWebpack": {

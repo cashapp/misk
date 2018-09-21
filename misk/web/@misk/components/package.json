@@ -21,6 +21,7 @@
     "build:lib": "npm run lib",
     "updateDevCache": "cd ..; ./_adminUpdateCache.sh",
     "dist": "npm run lib",
+    "gradle": "npm install && yarn build",
     "lib": "webpack; yarn run updateDevCache",
     "lint": "echo no lint",
     "prepare": "yarn run lint && yarn run test && yarn run lib",

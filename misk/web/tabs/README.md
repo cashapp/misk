@@ -67,6 +67,42 @@ Configuring the Misk Service
   }
   ```
 
+Adding your Tab Webpack Build to Gradle
+---
+
+In your service's main `build.gradle` file you will need to add a task that will build your tab with Webpack, cache the resulting compiled code, and rebuild if the source code changes. Adjust the template below to fit your service's file structure.
+
+```Gradle
+  task webpackTabsTRexFoodLog(type: Exec) {
+    inputs.file("web/tabs/trexfoodlog/package-lock.json").
+            withPathSensitivity(PathSensitivity.RELATIVE)
+    inputs.file("web/tabs/trexfoodlog/yarn.lock").withPathSensitivity(PathSensitivity.RELATIVE)
+    inputs.dir("web/tabs/trexfoodlog/src").withPathSensitivity(PathSensitivity.RELATIVE)
+    inputs.file("web/tabs/trexfoodlog/webpack.config.js").
+            withPathSensitivity(PathSensitivity.RELATIVE)
+    outputs.dir("web/tabs/trexfoodlog/dist")
+    outputs.cacheIf { true }
+
+    workingDir "web/tabs/trexfoodlog"
+    commandLine "yarn", "gradle"
+  }
+
+  jar.dependsOn webpackTabsTRexFoodLog
+
+```
+
+You'll notice the build runs the command `yarn gradle`. By default in the Example tab you used as a starter, `yarn gradle` expands to `npm install && yarn build` so that even on CI (continuous integration) systems where `node_modules` have not been installed yet, the build still succeeds.
+
+You will also have to add a `from` to the service's jar task so that your compiled tab code is included in the service jar. Adjust the template below to fit your service's file structure.
+
+```Gradle
+  jar {
+    into("web/") {
+      from("./web/tabs/trexfoodlog/dist/")
+    }
+  }
+```
+
 Loading Data into your Misk Tab
 ---
 - All data retrieval and processing is done within a Ducks module in `src/ducks`.
