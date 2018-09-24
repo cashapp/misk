@@ -1,6 +1,6 @@
 package misk.client
 
-import io.prometheus.client.Histogram
+import misk.metrics.Histogram
 import misk.metrics.Metrics
 import misk.time.timed
 import okhttp3.Response
@@ -16,9 +16,9 @@ class ClientMetricsInterceptor internal constructor(
     val (elapsedTime, result) = timed { chain.proceed(chain.request) }
     val elapsedMillis = elapsedTime.toMillis().toDouble()
 
-    requestDuration.labels(actionName, "all").observe(elapsedMillis)
-    requestDuration.labels(actionName, "${result.code() / 100}xx").observe(elapsedMillis)
-    requestDuration.labels(actionName, "${result.code()}").observe(elapsedMillis)
+    requestDuration.record(elapsedMillis, actionName, "all")
+    requestDuration.record(elapsedMillis, actionName, "${result.code() / 100}xx")
+    requestDuration.record(elapsedMillis, actionName, "${result.code()}")
 
     return result
   }
