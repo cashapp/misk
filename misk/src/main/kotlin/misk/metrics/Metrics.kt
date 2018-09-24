@@ -3,7 +3,6 @@ package misk.metrics
 import io.prometheus.client.CollectorRegistry
 import io.prometheus.client.Counter
 import io.prometheus.client.Gauge
-import io.prometheus.client.Histogram
 import io.prometheus.client.Summary
 import io.prometheus.client.hotspot.BufferPoolsExports
 import io.prometheus.client.hotspot.ClassLoadingExports
@@ -15,6 +14,8 @@ import io.prometheus.client.hotspot.VersionInfoExports
 import javax.inject.Inject
 
 class Metrics @Inject internal constructor(val registry: CollectorRegistry) {
+  @Inject private lateinit var histogramRegistry: HistogramRegistry
+
   init {
     registry.register(StandardExports())
     registry.register(MemoryPoolsExports())
@@ -43,9 +44,7 @@ class Metrics @Inject internal constructor(val registry: CollectorRegistry) {
     labelNames: List<String> = listOf(),
     buckets: DoubleArray? = null
   ): Histogram {
-    val builder = Histogram.build(name, help).labelNames(*labelNames.toTypedArray())
-    if (buckets != null) builder.buckets(*buckets)
-    return builder.register(registry)
+    return histogramRegistry.newHistogram(name, help, labelNames, buckets)
   }
 
   companion object {
@@ -56,5 +55,3 @@ class Metrics @Inject internal constructor(val registry: CollectorRegistry) {
     fun sanitize(name: String) = name.replace("[\\-\\.\t]", "_")
   }
 }
-
-internal val Histogram.Child.Value.count get() = buckets.max()?.toInt() ?: 0
