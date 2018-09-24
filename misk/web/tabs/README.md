@@ -12,7 +12,8 @@ How to make a New Misk Tab
   - miskTabWebpack:
     - name: `T-Rex Food Log`. Titlecase tab name.
     - output_path: optional override field. By default it will be `dist`.
-    - port: `30420`.  port number for Webpack Dev Server. Reserve a port number with a PR into `@misk/tabs`. Otherwise there will be the risk that while working in development mode on your tab and another tab, the other tab may fail to serve because of port conflict.
+    - port: `30420`.  port number for Webpack Dev Server. 
+      - Todo(adrw): Find a way to centrally reserve a port number. Otherwise there will be the risk that while working in development mode on your tab and another tab, the other tab may fail to serve because of port conflict.
       - `3100-3199`: Misk infrastructure (ex. Loader tab).
       - `3200-3499`: Shipped with Misk tabs (ex. Config).
       - `3500-9000`: Square reserved ports.

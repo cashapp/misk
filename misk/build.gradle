@@ -164,7 +164,6 @@ jar {
     from("./web/@misk/common/lib/")
     from("./web/@misk/components/dist/")
     from("./web/@misk/dev/")
-    from("./web/@misk/tabs/")
     from("./web/@misk/tslint/")
     from("./web/tabs/config/dist/")
     from("./web/tabs/example/dist/")
