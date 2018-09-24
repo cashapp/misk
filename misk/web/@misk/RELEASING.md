@@ -20,7 +20,7 @@ Package Release Order
 - Release packages in the following order given that each are dependent or peer dependent differently on each other:
   - `@Misk/Dev`
   - `@Misk/Common`
-  - `@Misk/Components`, `@Misk/Tabs`
+  - `@Misk/Components`
 - Update the `package.json` for each further package with the newest version of the immedietely previous updated package
 
 Example Release Flow
