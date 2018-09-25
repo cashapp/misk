@@ -1,6 +1,6 @@
 {
   "name": "@misk/common",
-  "version": "0.0.37",
+  "version": "0.0.40",
   "description": "Microservice Kontainer Common Libraries, Externals, Styles",
   "author": "Square/Misk Authors (https://github.com/square/misk/graphs/contributors)",
   "main": "lib/common.js",
@@ -20,14 +20,15 @@
   "scripts": {
     "build:lib": "npm run lib",
     "build": "npm run lib",
-    "updateDevCache": "cd ..; ./_adminUpdateCache.sh",
+    "dev": "yarn run lib; yarn run updateDevCache",
     "dist": "npm run lib",
     "gradle": "npm install && yarn build",
-    "lib": "yarn run refresh; webpack --config webpack.config.js && webpack --config webpack.config.static.js && webpack --config webpack.config.vendors.js; yarn run updateDevCache",
+    "lib": "yarn run refresh; webpack --config webpack.config.js && webpack --config webpack.config.static.js && webpack --config webpack.config.vendors.js",
     "lint": "echo no lint",
     "prepare": "yarn run lint && yarn run test && yarn run lib",
     "refresh": "node refreshCachedUrls.js",
     "reinstall": "rm -rf node_modules/ && yarn install",
+    "updateDevCache": "cd ..; ./updateLocalCache.sh",
     "test": "echo no tests"
   },
   "dependencies": {
