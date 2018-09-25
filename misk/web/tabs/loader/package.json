@@ -4,19 +4,19 @@
   "main": "src/index.ts",
   "scripts": {
     "build": "cross-env NODE_ENV=production webpack",
-    "clean": "rm -rf dist node_modules",
-    "gradle": "npm install && yarn build",
+    "clean": "rm -rf lib node_modules",
+    "gradle": "yarn install && yarn build",
     "reinstall": "yarn clean && yarn install",
     "start": "cross-env NODE_ENV=development webpack-dev-server",
     "test": "jest --coverage"
   },
   "dependencies": {
-    "@misk/common": "^0.0.40",
-    "@misk/components": "^0.0.39"
+    "@misk/common": "^0.0.46",
+    "@misk/components": "^0.0.45"
   },
   "devDependencies": {
-    "@misk/dev": "^0.0.37",
-    "@misk/tslint": "^0.0.3"
+    "@misk/dev": "^0.0.43",
+    "@misk/tslint": "^0.0.7"
   },
   "miskTabWebpack": {
     "name": "Loader",

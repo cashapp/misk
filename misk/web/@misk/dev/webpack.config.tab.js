@@ -39,9 +39,9 @@ module.exports = (env, argv, otherConfigFields = {}) => {
   
   const CopyWebpackPluginConfig = new CopyWebpackPlugin(
     [
-      { from: './node_modules/@misk/common/lib', to: `@misk/`},
-      { from: './node_modules/@misk/components/lib', to: `@misk/`}
-    ], 
+      { from: './node_modules/@misk/common/lib/web/' },
+      { from: './node_modules/@misk/components/lib/web/' }
+    ],
     { copyUnmodified: true }
   )
 

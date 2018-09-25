@@ -1,10 +1,10 @@
 #!/bin/sh
 
-for dir in "$(pwd)"/*/lib/
+for dir in "$(pwd)/"*/lib/web/
 do
     dir=${dir%*/}
-    mkdir -p "$(pwd)"/@misk/
-    cp -r $dir/* "$(pwd)"/@misk/
+    mkdir -p "$(pwd)/web"
+    cp -r "$dir/"* "$(pwd)/web/"
 done
 
 # Don't break build scripts

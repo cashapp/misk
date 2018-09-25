@@ -92,7 +92,7 @@ In your service's main `build.gradle` file you will need to add a task that will
 
 ```
 
-You'll notice the build runs the command `yarn gradle`. By default in the Example tab you used as a starter, `yarn gradle` expands to `npm install && yarn build` so that even on CI (continuous integration) systems where `node_modules` have not been installed yet, the build still succeeds.
+You'll notice the build runs the command `yarn gradle`. By default in the Example tab you used as a starter, `yarn gradle` expands to `yarn install && yarn build` so that even on CI (continuous integration) systems where `node_modules` have not been installed yet, the build still succeeds.
 
 You will also have to add a `from` to the service's jar task so that your compiled tab code is included in the service jar. Adjust the template below to fit your service's file structure.
 
