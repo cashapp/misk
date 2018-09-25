@@ -8,7 +8,7 @@ build
 .git
 build
 lib
-**/@misk/_admin
+**/@misk/@misk
 node_modules
 cachedUrls
 *.log

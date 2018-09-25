@@ -41,9 +41,9 @@
     reflect-metadata "^0.1.12"
     tslib "^1.8.1"
 
-"@misk/common@^0.0.36":
-  version "0.0.36"
-  resolved "https://registry.yarnpkg.com/@misk/common/-/common-0.0.36.tgz#72b7692e8fed4672a20b0b7e683cd7f3c8e29edc"
+"@misk/common@^0.0.39":
+  version "0.0.39"
+  resolved "https://registry.yarnpkg.com/@misk/common/-/common-0.0.39.tgz#47ce9c55902f24d18da4b162f1dbd912d21f2571"
   dependencies:
     "@blueprintjs/core" "^3.3.0"
     "@blueprintjs/icons" "^3.0.0"
@@ -66,9 +66,9 @@
     skeleton-css "^2.0.4"
     styled-components "^3.4.2"
 
-"@misk/dev@^0.0.25":
-  version "0.0.25"
-  resolved "https://registry.yarnpkg.com/@misk/dev/-/dev-0.0.25.tgz#efdf4e112d865c1f8413a58ffde5e0223b4e4739"
+"@misk/dev@^0.0.35":
+  version "0.0.35"
+  resolved "https://registry.yarnpkg.com/@misk/dev/-/dev-0.0.35.tgz#196c79cd5de093a744fdf76819f7070d9a2a9278"
   dependencies:
     "@types/node" "^10.9.4"
     "@types/react" "^16.4.13"
