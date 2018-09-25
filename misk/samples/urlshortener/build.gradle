@@ -50,3 +50,7 @@ shadowJar {
 artifacts {
   archives shadowJar
 }
+
+uploadArchives {
+  it.onlyIf { false }
+}
