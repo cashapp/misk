@@ -50,14 +50,14 @@ class AdminTabModule(val environment: Environment) : KAbstractModule() {
       multibind<WebActionEntry>().toInstance(
           WebActionEntry<WebProxyAction>("/_tab/example/"))
       multibind<WebActionEntry>().toInstance(
-          WebActionEntry<WebProxyAction>("/_admin/@misk/"))
+          WebActionEntry<WebProxyAction>("/@misk/"))
 
       multibind<WebProxyEntry>().toInstance(
           WebProxyEntry("/_admin/", "http://localhost:3100/"))
       multibind<WebProxyEntry>().toInstance(
           WebProxyEntry("/_tab/example/", "http://localhost:3199/"))
       multibind<WebProxyEntry>().toInstance(
-          WebProxyEntry("/_admin/@misk/", "http://localhost:9100/"))
+          WebProxyEntry("/@misk/", "http://localhost:9100/"))
 
     } else {
       multibind<WebActionEntry>().toInstance(
@@ -65,14 +65,14 @@ class AdminTabModule(val environment: Environment) : KAbstractModule() {
       multibind<WebActionEntry>().toInstance(
           WebActionEntry<StaticResourceAction>("/_tab/example/"))
       multibind<WebActionEntry>().toInstance(
-          WebActionEntry<StaticResourceAction>("/_admin/@misk/"))
+          WebActionEntry<StaticResourceAction>("/@misk/"))
 
       multibind<StaticResourceEntry>()
           .toInstance(StaticResourceEntry("/_admin/", "classpath:/web/_admin/"))
       multibind<StaticResourceEntry>()
           .toInstance(StaticResourceEntry("/_tab/example/", "classpath:/web/_tab/example/"))
       multibind<StaticResourceEntry>()
-          .toInstance(StaticResourceEntry("/_admin/@misk/", "classpath:/web/_admin/@misk/"))
+          .toInstance(StaticResourceEntry("/@misk/", "classpath:/web/_admin/@misk/"))
 
       // TODO(adrw) needs further testing in production to see if still necessary for serving and bundling Loader tab code
       if (false) {

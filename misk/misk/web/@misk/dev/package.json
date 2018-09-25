@@ -1,6 +1,6 @@
 {
   "name": "@misk/dev",
-  "version": "0.0.30",
+  "version": "0.0.37",
   "description": "Microservice Kontainer Development Libraries",
   "author": "Square/Misk Authors (https://github.com/square/misk/graphs/contributors)",
   "repository": {
@@ -25,6 +25,7 @@
     "css-loader": "^1.0.0",
     "file-loader": "^2.0.0",
     "html-webpack-plugin": "^3.2.0",
+    "html-webpack-harddisk-plugin": "^0.2.0",
     "node-sass": "^4.9.3",
     "sass-loader": "^7.1.0",
     "source-map-loader": "^0.2.4",
