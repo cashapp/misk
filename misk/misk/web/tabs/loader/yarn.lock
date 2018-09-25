@@ -41,9 +41,9 @@
     reflect-metadata "^0.1.12"
     tslib "^1.8.1"
 
-"@misk/common@^0.0.36":
-  version "0.0.36"
-  resolved "https://registry.yarnpkg.com/@misk/common/-/common-0.0.36.tgz#72b7692e8fed4672a20b0b7e683cd7f3c8e29edc"
+"@misk/common@^0.0.40":
+  version "0.0.40"
+  resolved "https://registry.yarnpkg.com/@misk/common/-/common-0.0.40.tgz#ba2c2287c4fc2792bb39972bc137a7e2441aefd5"
   dependencies:
     "@blueprintjs/core" "^3.3.0"
     "@blueprintjs/icons" "^3.0.0"
@@ -66,15 +66,15 @@
     skeleton-css "^2.0.4"
     styled-components "^3.4.2"
 
-"@misk/components@^0.0.37":
-  version "0.0.37"
-  resolved "https://registry.yarnpkg.com/@misk/components/-/components-0.0.37.tgz#1763cf474d72737f1f933616a6bd4e48b48fb2b1"
+"@misk/components@^0.0.39":
+  version "0.0.39"
+  resolved "https://registry.yarnpkg.com/@misk/components/-/components-0.0.39.tgz#bd2b2de1339ea5a3e394cd8bc032ae2bcb650eec"
   dependencies:
-    "@misk/common" "^0.0.36"
+    "@misk/common" "^0.0.40"
 
-"@misk/dev@^0.0.30":
-  version "0.0.30"
-  resolved "https://registry.yarnpkg.com/@misk/dev/-/dev-0.0.30.tgz#fec7e7944e96ad8fad1183ef0a2f9fd5ba591261"
+"@misk/dev@^0.0.37":
+  version "0.0.37"
+  resolved "https://registry.yarnpkg.com/@misk/dev/-/dev-0.0.37.tgz#aca5c81df9c7b727eb824328436599d27bfc873b"
   dependencies:
     "@types/node" "^10.9.4"
     "@types/react" "^16.4.13"
@@ -92,6 +92,7 @@
     cross-env "^5.2.0"
     css-loader "^1.0.0"
     file-loader "^2.0.0"
+    html-webpack-harddisk-plugin "^0.2.0"
     html-webpack-plugin "^3.2.0"
     node-sass "^4.9.3"
     sass-loader "^7.1.0"
@@ -215,6 +216,10 @@
   version "1.0.4"
   resolved "https://registry.yarnpkg.com/@types/tapable/-/tapable-1.0.4.tgz#b4ffc7dc97b498c969b360a41eee247f82616370"
 
+"@types/tapable@^0":
+  version "0.2.5"
+  resolved "https://registry.yarnpkg.com/@types/tapable/-/tapable-0.2.5.tgz#2443fc12da514c81346b1a665675559cee21fa75"
+
 "@types/uglify-js@*":
   version "3.0.3"
   resolved "https://registry.yarnpkg.com/@types/uglify-js/-/uglify-js-3.0.3.tgz#801a5ca1dc642861f47c46d14b700ed2d610840b"
@@ -224,6 +229,15 @@
 "@types/webpack-env@^1.13.6":
   version "1.13.6"
   resolved "https://npm.vip.global.square/@types%2fwebpack-env/-/webpack-env-1.13.6.tgz#128d1685a7c34d31ed17010fc87d6a12c1de6976"
+
+"@types/webpack@^3.0.5":
+  version "3.8.14"
+  resolved "https://registry.yarnpkg.com/@types/webpack/-/webpack-3.8.14.tgz#e2bfdf7f604b3f7dc776eaa17446d7f7538f3de7"
+  dependencies:
+    "@types/node" "*"
+    "@types/tapable" "^0"
+    "@types/uglify-js" "*"
+    source-map "^0.6.0"
 
 "@types/webpack@^4.4.11":
   version "4.4.11"
@@ -2311,6 +2325,13 @@ html-minifier@^3.2.3:
     param-case "2.1.x"
     relateurl "0.2.x"
     uglify-js "3.4.x"
+
+html-webpack-harddisk-plugin@^0.2.0:
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/html-webpack-harddisk-plugin/-/html-webpack-harddisk-plugin-0.2.0.tgz#465414a534219b69c1fd8127b585f8d86897fb2d"
+  dependencies:
+    "@types/webpack" "^3.0.5"
+    mkdirp "^0.5.1"
 
 html-webpack-plugin@^3.2.0:
   version "3.2.0"

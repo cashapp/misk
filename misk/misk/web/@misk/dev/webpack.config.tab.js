@@ -1,6 +1,7 @@
 const { vendorExternals, miskExternals } = require('./externals')
 const CopyWebpackPlugin = require('copy-webpack-plugin')
 const HTMLWebpackPlugin = require('html-webpack-plugin')
+const HTMLWebpackHarddiskPlugin = require('html-webpack-harddisk-plugin')
 const path = require('path')
 const webpack = require('webpack')
 const merge = require('webpack-merge')
@@ -19,8 +20,9 @@ module.exports = (env, argv, otherConfigFields = {}) => {
     throw Error(errMsg)
   } 
   
-  const outputPath = miskTabWebpack.output_path ? miskTabWebpack.output_path : "dist"
+  const { name, port, slug } = miskTabWebpack
   const relative_path_prefix = miskTabWebpack.relative_path_prefix ? miskTabWebpack.relative_path_prefix : `_tab/${miskTabWebpack.slug}/`
+  const output_path = miskTabWebpack.output_path ? miskTabWebpack.output_path : `lib/web/_tab/${slug}`
   
   const DefinePluginConfig = new webpack.DefinePlugin({
     'process.env.NODE_ENV': JSON.stringify('production')
@@ -28,14 +30,17 @@ module.exports = (env, argv, otherConfigFields = {}) => {
   
   const HTMLWebpackPluginConfig = new HTMLWebpackPlugin({
     template: path.join(dirname, '/src/index.html'),
-    filename: 'index.html',
-    inject: 'body'
+    filename: `index.html`,
+    inject: 'body',
+    alwaysWriteToDisk: true
   })
+
+  const HTMLWebpackHarddiskPluginConfig = new HTMLWebpackHarddiskPlugin()
   
   const CopyWebpackPluginConfig = new CopyWebpackPlugin(
     [
-      { from: './node_modules/@misk/common/lib', to: `${relative_path_prefix}@misk/`},
-      { from: './node_modules/@misk/components/lib', to: `${relative_path_prefix}@misk/`}
+      { from: './node_modules/@misk/common/lib', to: `@misk/`},
+      { from: './node_modules/@misk/components/lib', to: `@misk/`}
     ], 
     { copyUnmodified: true }
   )
@@ -43,10 +48,10 @@ module.exports = (env, argv, otherConfigFields = {}) => {
   const baseConfigFields = {
     entry: ['react-hot-loader/patch', path.join(dirname, '/src/index.tsx')],
     output: {
-      filename: `${relative_path_prefix}tab_${miskTabWebpack.slug}.js`,
-      path: path.join(dirname, outputPath),
+      filename: `${relative_path_prefix}tab_${slug}.js`,
+      path: path.join(dirname, output_path),
       publicPath: "/",
-      library: ['MiskTabs', miskTabWebpack.name],
+      library: ['MiskTabs', name],
       libraryTarget: 'umd',
       /**
        * library will try to bind to browser `window` variable
@@ -56,7 +61,7 @@ module.exports = (env, argv, otherConfigFields = {}) => {
       globalObject: 'typeof self !== \'undefined\' ? self : this'
     },
     devServer: {
-      port: miskTabWebpack.port,
+      port: port,
       inline: true,
       hot: true,
       historyApiFallback: true
@@ -90,7 +95,7 @@ module.exports = (env, argv, otherConfigFields = {}) => {
       extensions: ['.js', '.jsx', '.ts', '.tsx', '.json']
     },
     mode: env !== 'production' ? 'development' : 'production',
-    plugins: [CopyWebpackPluginConfig, HTMLWebpackPluginConfig]
+    plugins: [CopyWebpackPluginConfig, HTMLWebpackPluginConfig, HTMLWebpackHarddiskPluginConfig]
       .concat(env !== 'production'
       ? [new webpack.HotModuleReplacementPlugin()]
       : [DefinePluginConfig]),
