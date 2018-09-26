@@ -1,8 +1,6 @@
 {
   "sharded": false,
   "tables": {
-    "actors": {},
-    "characters_seq": {"type": "sequence"},
-    "movies_seq": {"type": "sequence"}
+    "actors": {}
   }
 }

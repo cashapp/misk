@@ -6,6 +6,7 @@ import misk.exceptions.UnauthorizedException
 import misk.hibernate.RealTransacter.Companion.APPLICATION_TRANSACTION_SPAN_NAME
 import misk.hibernate.RealTransacter.Companion.DB_TRANSACTION_SPAN_NAME
 import misk.hibernate.RealTransacter.Companion.TRANSACTER_SPAN_TAG
+import misk.jdbc.CrossShardQueryDetector
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
@@ -23,6 +24,7 @@ class TransacterTest {
   val module = MoviesTestModule()
 
   @Inject @Movies lateinit var transacter: Transacter
+  @Inject @Movies lateinit var crossShardQueryDetector: CrossShardQueryDetector
   @Inject lateinit var queryFactory: Query.Factory
   @Inject lateinit var tracer: MockTracer
 
@@ -77,12 +79,16 @@ class TransacterTest {
     assertFailsWith<UnauthorizedException> {
       transacter.transaction { session ->
         session.save(DbMovie("Star Wars", LocalDate.of(1977, 5, 25)))
-        assertThat(queryFactory.newQuery<MovieQuery>().list(session)).isNotEmpty()
+        crossShardQueryDetector.disable {
+          assertThat(queryFactory.newQuery<MovieQuery>().list(session)).isNotEmpty()
+        }
         throw UnauthorizedException("boom!")
       }
     }
     transacter.transaction { session ->
-      assertThat(queryFactory.newQuery<MovieQuery>().list(session)).isEmpty()
+      crossShardQueryDetector.disable {
+        assertThat(queryFactory.newQuery<MovieQuery>().list(session)).isEmpty()
+      }
     }
   }
 
@@ -152,13 +158,17 @@ class TransacterTest {
     val callCount = AtomicInteger()
     transacter.transaction { session ->
       session.save(DbMovie("Star Wars", LocalDate.of(1977, 5, 25)))
-      assertThat(queryFactory.newQuery<MovieQuery>().list(session)).isNotEmpty()
+      crossShardQueryDetector.disable {
+        assertThat(queryFactory.newQuery<MovieQuery>().list(session)).isNotEmpty()
+      }
 
       if (callCount.getAndIncrement() == 0) throw RetryTransactionException()
     }
     assertThat(callCount.get()).isEqualTo(2)
     transacter.transaction { session ->
-      assertThat(queryFactory.newQuery<MovieQuery>().list(session)).hasSize(1)
+      crossShardQueryDetector.disable {
+        assertThat(queryFactory.newQuery<MovieQuery>().list(session)).hasSize(1)
+      }
     }
   }
 

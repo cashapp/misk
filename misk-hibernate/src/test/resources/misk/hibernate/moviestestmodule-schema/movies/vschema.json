@@ -3,6 +3,17 @@
   "vindexes": {
     "hash": {
       "type": "hash"
+    },
+    "character_name_lookup": {
+      "type": "lookup_hash",
+      "params": {
+        "table": "main.character_name_lookup",
+        "from": "name",
+        "to": "movie_id",
+
+        "autocommit": "true"
+      },
+      "owner": "characters"
     }
   },
   "tables": {
@@ -15,7 +26,7 @@
       ],
       "auto_increment": {
         "column": "id",
-        "sequence": "actors.movies_seq"
+        "sequence": "main.movies_seq"
       }
     },
     "characters": {
@@ -23,11 +34,15 @@
         {
           "column": "movie_id",
           "name": "hash"
+        },
+        {
+          "column": "name",
+          "name": "character_name_lookup"
         }
       ],
       "auto_increment": {
         "column": "id",
-        "sequence": "actors.characters_seq"
+        "sequence": "main.characters_seq"
       }
     }
   }
