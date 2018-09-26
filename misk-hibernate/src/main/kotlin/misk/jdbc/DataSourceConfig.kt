@@ -1,4 +1,4 @@
-package misk.hibernate
+package misk.jdbc
 
 import misk.config.Config
 import misk.environment.Environment

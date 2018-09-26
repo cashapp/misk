@@ -1,4 +1,4 @@
-package misk.hibernate
+package misk.jdbc
 
 import com.github.dockerjava.api.DockerClient
 import com.github.dockerjava.api.model.*
@@ -63,8 +63,6 @@ internal class DockerVitessCluster(
         "-web_dir=web/vtctld/app",
         "-web_dir2=web/vtctld2/app",
         "-mysql_bind_host=0.0.0.0",
-        // TODO this flag is not supported yet waiting for this PR: https://github.com/vitessio/vitess/pull/4199
-//        "-transaction_mode=SINGLE",
         "-schema_dir=schema",
         "-keyspaces=$keyspaces",
         "-num_shards=$shardCounts"
@@ -136,7 +134,9 @@ internal class StartVitessService(val config: DataSourceConfig) : AbstractIdleSe
     val clusters = CacheBuilder.newBuilder()
         .removalListener<DataSourceConfig, DockerVitessCluster> { it.value.stop() }
         .build(CacheLoader.from { config: DataSourceConfig? ->
-          DockerVitessCluster(config!!, docker, gson)
+          DockerVitessCluster(config!!,
+              docker,
+              gson)
         })
 
     /**
@@ -151,7 +151,8 @@ internal class StartVitessService(val config: DataSourceConfig) : AbstractIdleSe
 }
 
 fun main(args: Array<String>) {
-  val config = DataSourceConfig(type = DataSourceType.VITESS, vitess_schema_dir = ".")
+  val config = DataSourceConfig(type = DataSourceType.VITESS,
+      vitess_schema_dir = ".")
   val docker: DockerClient = DockerClientBuilder.getInstance()
       .withDockerCmdExecFactory(NettyDockerCmdExecFactory())
       .build()

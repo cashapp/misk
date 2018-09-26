@@ -3,6 +3,8 @@ package misk.hibernate
 import io.opentracing.mock.MockTracer
 import misk.backoff.FlatBackoff
 import misk.backoff.retry
+import misk.jdbc.CrossShardQueryException
+import misk.jdbc.CrossShardTransactionException
 import misk.hibernate.annotation.keyspace
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
@@ -37,35 +39,98 @@ class ScaleSafetyTest {
     }
 
     // TODO waiting for this PR: https://github.com/vitessio/vitess/pull/4199
-//    assertThrows<CrossShardTransactionException> {
+    assertThrows<CrossShardTransactionException> {
       transacter.transaction { session ->
         session.save(DbCharacter("Ian Malcolm", session.load(jp), session.load(jg)))
         session.save(DbCharacter("Leia Organa", session.load(sw), session.load(cf)))
       }
-//    }
-//    assertThrows<CrossShardTransactionException> {
+    }
+    assertThrows<CrossShardTransactionException> {
       transacter.transaction { session ->
         val jpEntity = session.load(jp)
         jpEntity.release_date = LocalDate.now()
         val swEntity = session.load(sw)
         swEntity.release_date = LocalDate.now()
       }
+    }
+  }
+
+  @Test
+  fun transactionsSpanningEntityGroupsInTheSameShard() {
+    val jg = transacter.save(
+        DbActor("Jeff Goldblum", LocalDate.of(1952, 10, 22)))
+    val cf = transacter.save(
+        DbActor("Carrie Fisher", null))
+
+    val jp = transacter.save(
+        DbMovie("Jurassic Park", LocalDate.of(1993, 6, 9)))
+    val sw = transacter.createInSameShard(jp) {
+      DbMovie("Star Wars", LocalDate.of(1977, 5, 25))
+    }
+
+    // TODO not implemented yet
+    // needs a Vitess function to see which keyspace IDs have been touched by a transaction or
+    // just a port of the EntityGroupListener from the Square monorepo
+//    assertThrows<CrossShardTransactionException> {
+    transacter.transaction { session ->
+      session.save(DbCharacter("Ian Malcolm", session.load(jp), session.load(jg)))
+      session.save(DbCharacter("Leia Organa", session.load(sw), session.load(cf)))
+    }
 //    }
+//    assertThrows<CrossShardTransactionException> {
+    transacter.transaction { session ->
+      val jpEntity = session.load(jp)
+      jpEntity.release_date = LocalDate.now()
+      val swEntity = session.load(sw)
+      swEntity.release_date = LocalDate.now()
+    }
+//    }
+  }
+
+  @Test
+  fun crossShardQueries() {
+    assertThrows<CrossShardQueryException> {
+      transacter.transaction { session ->
+        queryFactory.newQuery<MovieQuery>()
+            .releaseDateBefore(LocalDate.of(1977, 6, 15))
+            .list(session)
+      }
+    }
   }
 }
 
 private fun <T : DbEntity<T>> Transacter.save(entity: T): Id<T> = transaction { it.save(entity) }
 
-class WrongShardException : RuntimeException()
+fun Transacter.createInSeparateShard(
+  id: Id<DbMovie>,
+  factory: () -> DbMovie
+): Id<DbMovie> {
+  val sw = createUntil(factory) { session, newId ->
+    newId.shard(session) != id.shard(session)
+  }
+  return sw
+}
 
-inline fun <reified T : DbRoot<T>> Transacter.createInSeparateShard(
-  id: Id<T>,
-  crossinline factory: () -> T
+fun Transacter.createInSameShard(
+  id: Id<DbMovie>,
+  factory: () -> DbMovie
+): Id<DbMovie> {
+  val sw = createUntil(factory) { session, newId ->
+    newId.shard(session) == id.shard(session)
+  }
+  return sw
+}
+
+class NotThereYetException : RuntimeException()
+
+inline fun <reified T : DbRoot<T>> Transacter.createUntil(
+  crossinline factory: () -> T,
+  crossinline condition: (Session, Id<T>) -> Boolean
 ): Id<T> = retry(10, FlatBackoff()) {
   transaction { session ->
     val newId = session.save(factory())
-    if (newId.shard(session) == id.shard(session)) {
-      throw WrongShardException()
+    if (!condition(session, newId)) {
+      throw NotThereYetException()
     }
     newId
   }

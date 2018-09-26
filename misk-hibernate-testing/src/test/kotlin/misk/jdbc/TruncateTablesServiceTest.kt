@@ -1,10 +1,13 @@
-package misk.hibernate
+package misk.jdbc
 
 import com.google.inject.util.Providers
 import misk.MiskServiceModule
 import misk.config.Config
 import misk.config.MiskConfig
 import misk.environment.Environment
+import misk.hibernate.HibernateEntityModule
+import misk.hibernate.HibernateModule
+import misk.hibernate.Transacter
 import misk.inject.KAbstractModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
@@ -23,7 +26,8 @@ internal class TruncateTablesServiceTest {
 
   @Inject @TestDatasource lateinit var config: DataSourceConfig
   @Inject @TestDatasource lateinit var sessionFactory: SessionFactory
-  @Inject @TestDatasource lateinit var transacter: Transacter
+  @Inject @TestDatasource
+  lateinit var transacter: Transacter
 
   @BeforeEach
   internal fun setUp() {
@@ -53,7 +57,8 @@ internal class TruncateTablesServiceTest {
     assertThat(rowCount("movies")).isGreaterThan(0)
 
     // Start up TruncateTablesService. The inserted data should be truncated.
-    val service = TruncateTablesService(TestDatasource::class, config, Providers.of(transacter))
+    val service = TruncateTablesService(TestDatasource::class, config,
+        Providers.of(transacter))
     service.startAsync()
     service.awaitRunning()
     assertThat(rowCount("schema_version")).isGreaterThan(0)
@@ -105,8 +110,10 @@ internal class TruncateTablesServiceTest {
       install(MiskServiceModule())
 
       val config = MiskConfig.load<TestConfig>("test_truncatetables_app", Environment.TESTING)
-      install(HibernateModule(TestDatasource::class, config.data_source))
-      install(object : HibernateEntityModule(TestDatasource::class) {
+      install(HibernateModule(
+          TestDatasource::class, config.data_source))
+      install(object : HibernateEntityModule(
+          TestDatasource::class) {
         override fun configureHibernate() {
         }
       })

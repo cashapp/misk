@@ -1,8 +1,12 @@
 package misk.hibernate
 
 import com.google.common.util.concurrent.Service
+import misk.jdbc.CrossShardQueryDetector
+import misk.jdbc.DataSourceConfig
+import misk.jdbc.DataSourceDecorator
+import misk.jdbc.StartVitessService
+import misk.jdbc.TruncateTablesService
 import misk.inject.KAbstractModule
-import misk.inject.asSingleton
 import misk.inject.toKey
 import javax.inject.Provider
 import kotlin.reflect.KClass
@@ -43,5 +47,7 @@ class HibernateTestingModule(
           startUpStatements = startUpStatements,
           shutDownStatements = shutDownStatements)
     })
+
+    multibind<DataSourceDecorator>(qualifier).to<CrossShardQueryDetector>()
   }
 }

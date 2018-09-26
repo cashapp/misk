@@ -1,9 +1,13 @@
-package misk.hibernate
+package misk.jdbc
 
 import com.google.common.base.Stopwatch
 import com.google.common.util.concurrent.AbstractIdleService
 import com.google.inject.Key
 import misk.DependentService
+import misk.hibernate.SchemaMigratorService
+import misk.hibernate.Transacter
+import misk.hibernate.shards
+import misk.hibernate.transaction
 import misk.inject.toKey
 import misk.logging.getLogger
 import java.util.*

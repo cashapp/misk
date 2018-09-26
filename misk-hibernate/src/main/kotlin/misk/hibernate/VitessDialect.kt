@@ -2,6 +2,7 @@
 
 package misk.hibernate
 
+import misk.jdbc.CrossShardTransactionException
 import org.hibernate.dialect.MySQL57Dialect
 import org.hibernate.exception.spi.SQLExceptionConversionDelegate
 

@@ -1,4 +1,4 @@
-package misk.hibernate
+package misk.jdbc
 
 import com.google.common.util.concurrent.AbstractIdleService
 import com.google.inject.Key

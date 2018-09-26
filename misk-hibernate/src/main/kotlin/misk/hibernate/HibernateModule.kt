@@ -2,6 +2,10 @@ package misk.hibernate
 
 import com.google.common.util.concurrent.Service
 import io.opentracing.Tracer
+import misk.jdbc.DataSourceConfig
+import misk.jdbc.DataSourceDecorator
+import misk.jdbc.DataSourceService
+import misk.jdbc.PingDatabaseService
 import misk.environment.Environment
 import misk.inject.KAbstractModule
 import misk.inject.asSingleton
@@ -12,12 +16,13 @@ import org.hibernate.SessionFactory
 import org.hibernate.event.spi.EventType
 import javax.inject.Inject
 import javax.inject.Provider
+import javax.sql.DataSource
 import kotlin.reflect.KClass
 
 /**
  * Binds database connectivity for a qualified datasource. This binds the following public types:
  *
- *  * @Qualifier [DataSourceConfig]
+ *  * @Qualifier [misk.jdbc.DataSourceConfig]
  *  * @Qualifier [SessionFactory]
  *  * @Qualifier [Transacter]
  *  * [Query.Factory] (with no qualifier)
@@ -46,12 +51,20 @@ class HibernateModule(
 
     val sessionFactoryServiceKey = SessionFactoryService::class.toKey(qualifier)
 
+    val dataSourceDecoratorsKey = setOfType(DataSourceDecorator::class).toKey(qualifier)
+    val dataSourceDecoratorsProvider = getProvider(dataSourceDecoratorsKey)
+
     val schemaMigratorKey = SchemaMigrator::class.toKey(qualifier)
     val schemaMigratorProvider = getProvider(schemaMigratorKey)
 
     val transacterKey = Transacter::class.toKey(qualifier)
 
     val pingDatabaseServiceKey = PingDatabaseService::class.toKey(qualifier)
+
+    val dataSourceKey = DataSource::class.toKey(qualifier)
+    val dataSourceProvider = getProvider(dataSourceKey)
+
+    val dataSourceServiceKey = DataSourceService::class.toKey(qualifier)
 
     bind(configKey).toInstance(config)
 
@@ -60,9 +73,19 @@ class HibernateModule(
     }).asSingleton()
     multibind<Service>().to(pingDatabaseServiceKey)
 
+    // Declare the empty set of decorators
+    newMultibinder<DataSourceDecorator>(qualifier)
+
+    bind(dataSourceKey).toProvider(dataSourceServiceKey).asSingleton()
+    bind(dataSourceServiceKey).toProvider(Provider<DataSourceService> {
+      DataSourceService(qualifier, config, environmentProvider.get(),
+          dataSourceDecoratorsProvider.get())
+    }).asSingleton()
+    multibind<Service>().to(dataSourceServiceKey)
+
     bind(sessionFactoryKey).toProvider(sessionFactoryServiceKey).asSingleton()
     bind(sessionFactoryServiceKey).toProvider(Provider<SessionFactoryService> {
-      SessionFactoryService(qualifier, config, environmentProvider.get(), entitiesProvider.get(),
+      SessionFactoryService(qualifier, config, dataSourceProvider, entitiesProvider.get(),
           eventListenersProvider.get())
     }).asSingleton()
     multibind<Service>().to(sessionFactoryServiceKey)

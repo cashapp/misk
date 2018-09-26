@@ -4,6 +4,7 @@ import com.google.inject.util.Modules
 import misk.MiskServiceModule
 import misk.config.Config
 import misk.config.MiskConfig
+import misk.jdbc.DataSourceConfig
 import misk.environment.Environment
 import misk.environment.EnvironmentModule
 import misk.inject.KAbstractModule
