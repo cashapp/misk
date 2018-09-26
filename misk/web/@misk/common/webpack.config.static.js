@@ -8,7 +8,7 @@ module.exports = {
   },
   devtool: 'source-map',
   output: {
-    path: path.resolve(__dirname, './lib'),
+    path: path.resolve(__dirname, './lib/web/@misk/common'),
     filename: '[name].js'
   },
   module: {

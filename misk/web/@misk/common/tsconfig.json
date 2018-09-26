@@ -1,6 +1,6 @@
 {
     "extends": "./node_modules/@misk/dev/tsconfig.base",
     "compilerOptions": {
-        "outDir": "./lib",
+        "outDir": "./lib/web/@misk/common",
     }
 }
