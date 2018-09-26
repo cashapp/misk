@@ -1,12 +1,12 @@
 {
   "name": "@misk/common",
-  "version": "0.0.40",
+  "version": "0.0.46",
   "description": "Microservice Kontainer Common Libraries, Externals, Styles",
   "author": "Square/Misk Authors (https://github.com/square/misk/graphs/contributors)",
-  "main": "lib/common.js",
-  "module": "lib/common.js",
-  "typings": "lib/index.d.ts",
-  "style": "lib/styles.js",
+  "main": "lib/web/@misk/common/common.js",
+  "module": "lib/web/@misk/common/common.js",
+  "typings": "lib/web/@misk/common/index.d.ts",
+  "style": "lib/web/@misk/common/styles.js",
   "engines": {
     "node": ">=7.8.0"
   },
@@ -18,11 +18,11 @@
     "url": "git@github.com:square/misk.git"
   },
   "scripts": {
-    "build:lib": "npm run lib",
-    "build": "npm run lib",
+    "build:lib": "yarn run lib",
+    "build": "yarn run lib",
     "dev": "yarn run lib; yarn run updateDevCache",
-    "dist": "npm run lib",
-    "gradle": "npm install && yarn build",
+    "dist": "yarn run lib",
+    "gradle": "yarn install && yarn build",
     "lib": "yarn run refresh; webpack --config webpack.config.js && webpack --config webpack.config.static.js && webpack --config webpack.config.vendors.js",
     "lint": "echo no lint",
     "prepare": "yarn run lint && yarn run test && yarn run lib",
@@ -32,17 +32,17 @@
     "test": "echo no tests"
   },
   "dependencies": {
-    "@blueprintjs/core": "^3.3.0",
-    "@blueprintjs/icons": "^3.0.0",
+    "@blueprintjs/core": "^3.6.1",
+    "@blueprintjs/icons": "^3.1.0",
     "axios": "^0.18.0",
-    "connected-react-router": "^4.4.1",
-    "dayjs": "^1.7.5",
+    "connected-react-router": "^4.5.0",
+    "dayjs": "^1.7.7",
     "history": "^4.7.2",
     "immutable": "^3.8.2",
-    "react": "^16.4.2",
-    "react-dom": "^16.4.2",
+    "react": "^16.5.2",
+    "react-dom": "^16.5.2",
     "react-helmet": "^5.2.0",
-    "react-hot-loader": "^4.3.4",
+    "react-hot-loader": "^4.3.11",
     "react-redux": "^5.0.7",
     "react-router": "^4.3.1",
     "react-router-dom": "^4.3.1",
@@ -51,11 +51,11 @@
     "redux": "^4.0.0",
     "redux-saga": "^0.16.0",
     "skeleton-css": "^2.0.4",
-    "styled-components": "^3.4.2"
+    "styled-components": "^3.4.9"
   },
   "devDependencies": {
-    "@misk/dev": "^0.0.27",
-    "@misk/tslint": "^0.0.3"
+    "@misk/dev": "^0.0.43",
+    "@misk/tslint": "^0.0.7"
   },
   "miskCachedUrls": {
     "sq-market-font": {

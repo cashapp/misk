@@ -25,6 +25,18 @@ compileTestKotlin {
 sourceSets {
   main.java.srcDirs += 'src/main/kotlin/'
   test.java.srcDirs += 'src/test/kotlin/'
+  main.resources {
+    srcDirs += [
+      'web/@misk/common/lib',
+      'web/@misk/components/lib',
+      'web/@misk/dev/lib',
+      'web/@misk/tslint/lib',
+      'web/tabs/config/lib',
+      'web/tabs/example/lib',
+      'web/tabs/loader/lib'
+    ]
+    exclude "**/node_modules"
+  }
 }
 
 junitPlatform {
@@ -89,11 +101,9 @@ task webpackMiskCommon(type: Exec) {
           withPathSensitivity(PathSensitivity.RELATIVE)
   outputs.dir("web/@misk/common/lib")
   outputs.cacheIf { true }
-
   workingDir "web/@misk/common"
   commandLine "yarn", "gradle"
 }
-
 
 task webpackMiskComponents(type: Exec) {
   inputs.file("web/@misk/components/package-lock.json")
@@ -103,11 +113,27 @@ task webpackMiskComponents(type: Exec) {
           withPathSensitivity(PathSensitivity.RELATIVE)
   outputs.dir("web/@misk/components/lib")
   outputs.cacheIf { true }
-
   workingDir "web/@misk/components"
   commandLine "yarn", "gradle"
 }
 
+task webpackMiskDev(type: Exec) {
+  inputs.file("web/@misk/dev/package-lock.json")
+  inputs.file("web/@misk/dev/yarn.lock").withPathSensitivity(PathSensitivity.RELATIVE)
+  outputs.dir("web/@misk/dev/lib")
+  outputs.cacheIf { true }
+  workingDir "web/@misk/dev"
+  commandLine "yarn", "gradle"
+}
+
+task webpackMiskTslint(type: Exec) {
+  inputs.file("web/@misk/tslint/package-lock.json")
+  inputs.file("web/@misk/tslint/yarn.lock").withPathSensitivity(PathSensitivity.RELATIVE)
+  outputs.dir("web/@misk/tslint/lib")
+  outputs.cacheIf { true }
+  workingDir "web/@misk/tslint"
+  commandLine "yarn", "gradle"
+}
 
 task webpackTabsConfig(type: Exec) {
   inputs.file("web/tabs/config/package-lock.json").
@@ -116,9 +142,8 @@ task webpackTabsConfig(type: Exec) {
   inputs.dir("web/tabs/config/src").withPathSensitivity(PathSensitivity.RELATIVE)
   inputs.file("web/tabs/config/webpack.config.js").
           withPathSensitivity(PathSensitivity.RELATIVE)
-  outputs.dir("web/tabs/config/dist")
+  outputs.dir("web/tabs/config/lib")
   outputs.cacheIf { true }
-
   workingDir "web/tabs/config"
   commandLine "yarn", "gradle"
 }
@@ -131,13 +156,11 @@ task webpackTabsExample(type: Exec) {
   inputs.dir("web/tabs/example/src").withPathSensitivity(PathSensitivity.RELATIVE)
   inputs.file("web/tabs/example/webpack.config.js").
           withPathSensitivity(PathSensitivity.RELATIVE)
-  outputs.dir("web/tabs/example/dist")
+  outputs.dir("web/tabs/example/lib")
   outputs.cacheIf { true }
-
   workingDir "web/tabs/example"
   commandLine "yarn", "gradle"
 }
-
 
 task webpackTabsLoader(type: Exec) {
   inputs.file("web/tabs/loader/package-lock.json").
@@ -146,30 +169,19 @@ task webpackTabsLoader(type: Exec) {
   inputs.dir("web/tabs/loader/src").withPathSensitivity(PathSensitivity.RELATIVE)
   inputs.file("web/tabs/loader/webpack.config.js").
           withPathSensitivity(PathSensitivity.RELATIVE)
-  outputs.dir("web/tabs/loader/dist")
+  outputs.dir("web/tabs/loader/lib")
   outputs.cacheIf { true }
-
   workingDir "web/tabs/loader"
   commandLine "yarn", "gradle"
 }
 
 jar.dependsOn webpackMiskCommon
 jar.dependsOn webpackMiskComponents
+jar.dependsOn webpackMiskDev
+jar.dependsOn webpackMiskTslint
 jar.dependsOn webpackTabsConfig
 jar.dependsOn webpackTabsExample
 jar.dependsOn webpackTabsLoader
-
-jar {
-  into("web/") {
-    from("./web/@misk/common/lib/")
-    from("./web/@misk/components/dist/")
-    from("./web/@misk/dev/")
-    from("./web/@misk/tslint/")
-    from("./web/tabs/config/dist/")
-    from("./web/tabs/example/dist/")
-    from("./web/tabs/loader/dist/")
-  }
-}
 
 if (rootProject.file("hooks.gradle").exists()) {
   apply from: rootProject.file("hooks.gradle")

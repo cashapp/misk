@@ -43,6 +43,13 @@ class AdminTabModule(val environment: Environment) : KAbstractModule() {
         "Misk Development"
     ))
 
+    multibind<StaticResourceEntry>()
+        .toInstance(StaticResourceEntry("/_admin/", "classpath:/web/_tab/loader"))
+    multibind<StaticResourceEntry>()
+        .toInstance(StaticResourceEntry("/_tab/example/", "classpath:/web/_tab/example/"))
+    multibind<StaticResourceEntry>()
+        .toInstance(StaticResourceEntry("/@misk/", "classpath:/web/@misk/"))
+
     // Environment Dependent WebProxyAction or StaticResourceAction bindings
     if (environment == Environment.DEVELOPMENT) {
       multibind<WebActionEntry>().toInstance(
@@ -66,13 +73,6 @@ class AdminTabModule(val environment: Environment) : KAbstractModule() {
           WebActionEntry<StaticResourceAction>("/_tab/example/"))
       multibind<WebActionEntry>().toInstance(
           WebActionEntry<StaticResourceAction>("/@misk/"))
-
-      multibind<StaticResourceEntry>()
-          .toInstance(StaticResourceEntry("/_admin/", "classpath:/web/_admin/"))
-      multibind<StaticResourceEntry>()
-          .toInstance(StaticResourceEntry("/_tab/example/", "classpath:/web/_tab/example/"))
-      multibind<StaticResourceEntry>()
-          .toInstance(StaticResourceEntry("/@misk/", "classpath:/web/_admin/@misk/"))
 
       // TODO(adrw) needs further testing in production to see if still necessary for serving and bundling Loader tab code
       if (false) {
