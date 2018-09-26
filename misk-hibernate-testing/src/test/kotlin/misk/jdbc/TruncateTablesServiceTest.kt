@@ -1,6 +1,7 @@
 package misk.jdbc
 
 import com.google.inject.util.Providers
+import com.squareup.moshi.Moshi
 import misk.MiskServiceModule
 import misk.config.Config
 import misk.config.MiskConfig
@@ -11,6 +12,7 @@ import misk.hibernate.Transacter
 import misk.inject.KAbstractModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
+import okhttp3.OkHttpClient
 import org.assertj.core.api.Assertions.assertThat
 import org.hibernate.SessionFactory
 import org.hibernate.query.Query
@@ -26,11 +28,11 @@ internal class TruncateTablesServiceTest {
 
   @Inject @TestDatasource lateinit var config: DataSourceConfig
   @Inject @TestDatasource lateinit var sessionFactory: SessionFactory
-  @Inject @TestDatasource
-  lateinit var transacter: Transacter
+  @Inject @TestDatasource lateinit var transacter: Transacter
 
   // Just a dummy
-  val crossShardQueryDetector = CrossShardQueryDetector()
+  val crossShardQueryDetector =
+      CrossShardQueryDetector(OkHttpClient(), Moshi.Builder().build(), config)
 
   @BeforeEach
   internal fun setUp() {

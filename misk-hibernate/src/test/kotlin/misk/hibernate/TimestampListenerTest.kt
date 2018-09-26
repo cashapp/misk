@@ -13,10 +13,9 @@ import javax.inject.Inject
 @MiskTest(startService = true)
 class TimestampListenerTest {
   @MiskTestModule
-  val module = MoviesTestModule()
+  val module = MoviesTestModule(disableCrossShardQueryDetector = true)
 
   @Inject @Movies lateinit var transacter: Transacter
-  @Inject @Movies lateinit var crossShardQueryDetector: CrossShardQueryDetector
   @Inject lateinit var queryFactory: Query.Factory
   @Inject lateinit var clock: FakeClock
 
@@ -42,9 +41,7 @@ class TimestampListenerTest {
 
     val updatedAt = clock.instant()
     transacter.transaction { session ->
-      val movie = crossShardQueryDetector.disable {
-        queryFactory.newQuery<MovieQuery>().uniqueResult(session)!!
-      }
+      val movie = queryFactory.newQuery<MovieQuery>().uniqueResult(session)!!
       movie.name = "A New Hope"
       session.hibernateSession.update(movie) // TODO(jwilson): expose session.update() directly.
       session.hibernateSession.flush() // TODO(jwilson): expose session.flush() directly.

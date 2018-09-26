@@ -21,10 +21,9 @@ import kotlin.test.assertFailsWith
 @MiskTest(startService = true)
 class TransacterTest {
   @MiskTestModule
-  val module = MoviesTestModule()
+  val module = MoviesTestModule(disableCrossShardQueryDetector = true)
 
   @Inject @Movies lateinit var transacter: Transacter
-  @Inject @Movies lateinit var crossShardQueryDetector: CrossShardQueryDetector
   @Inject lateinit var queryFactory: Query.Factory
   @Inject lateinit var tracer: MockTracer
 
@@ -79,16 +78,12 @@ class TransacterTest {
     assertFailsWith<UnauthorizedException> {
       transacter.transaction { session ->
         session.save(DbMovie("Star Wars", LocalDate.of(1977, 5, 25)))
-        crossShardQueryDetector.disable {
-          assertThat(queryFactory.newQuery<MovieQuery>().list(session)).isNotEmpty()
-        }
+        assertThat(queryFactory.newQuery<MovieQuery>().list(session)).isNotEmpty()
         throw UnauthorizedException("boom!")
       }
     }
     transacter.transaction { session ->
-      crossShardQueryDetector.disable {
-        assertThat(queryFactory.newQuery<MovieQuery>().list(session)).isEmpty()
-      }
+      assertThat(queryFactory.newQuery<MovieQuery>().list(session)).isEmpty()
     }
   }
 
@@ -158,17 +153,13 @@ class TransacterTest {
     val callCount = AtomicInteger()
     transacter.transaction { session ->
       session.save(DbMovie("Star Wars", LocalDate.of(1977, 5, 25)))
-      crossShardQueryDetector.disable {
-        assertThat(queryFactory.newQuery<MovieQuery>().list(session)).isNotEmpty()
-      }
+      assertThat(queryFactory.newQuery<MovieQuery>().list(session)).isNotEmpty()
 
       if (callCount.getAndIncrement() == 0) throw RetryTransactionException()
     }
     assertThat(callCount.get()).isEqualTo(2)
     transacter.transaction { session ->
-      crossShardQueryDetector.disable {
-        assertThat(queryFactory.newQuery<MovieQuery>().list(session)).hasSize(1)
-      }
+      assertThat(queryFactory.newQuery<MovieQuery>().list(session)).hasSize(1)
     }
   }
 

@@ -14,7 +14,7 @@ import javax.inject.Inject
 class EventListenersTest {
   @MiskTestModule
   val module = Modules.combine(
-      MoviesTestModule(),
+      MoviesTestModule(disableCrossShardQueryDetector = true),
       object : HibernateEntityModule(Movies::class) {
         override fun configureHibernate() {
           bindListener(EventType.PRE_LOAD).to<FakeEventListener>()
@@ -27,7 +27,6 @@ class EventListenersTest {
   @Inject @Movies lateinit var transacter: Transacter
   @Inject lateinit var queryFactory: Query.Factory
   @Inject lateinit var eventListener: FakeEventListener
-  @Inject @Movies lateinit var crossShardQueryDetector: CrossShardQueryDetector
 
   @Test
   fun happyPath() {
@@ -44,9 +43,7 @@ class EventListenersTest {
     }
 
     transacter.transaction { session ->
-      val movie = crossShardQueryDetector.disable {
-        queryFactory.newQuery<MovieQuery>().uniqueResult(session)!!
-      }
+      queryFactory.newQuery<MovieQuery>().uniqueResult(session)!!
       assertThat(eventListener.takeEvents()).containsExactly("preload")
 
       session.hibernateSession.delete(movie) // TODO(jwilson): expose session.delete() directly.

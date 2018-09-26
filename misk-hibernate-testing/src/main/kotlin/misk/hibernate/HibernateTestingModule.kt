@@ -22,7 +22,8 @@ import kotlin.reflect.KClass
 class HibernateTestingModule(
   private val qualifier: KClass<out Annotation>,
   private val startUpStatements: List<String> = listOf(),
-  private val shutDownStatements: List<String> = listOf()
+  private val shutDownStatements: List<String> = listOf(),
+  val disableCrossShardQueryDetector: Boolean = false
 ) : KAbstractModule() {
   override fun configure() {
     val truncateTablesServiceKey = TruncateTablesService::class.toKey(qualifier)
@@ -53,7 +54,9 @@ class HibernateTestingModule(
       )
     }).asSingleton()
 
-    multibind<DataSourceDecorator>(qualifier).to(crossShardQueryDetectorKey)
+    if (!disableCrossShardQueryDetector) {
+      multibind<DataSourceDecorator>(qualifier).to(crossShardQueryDetectorKey)
+    }
 
     multibind<Service>().to(truncateTablesServiceKey)
 

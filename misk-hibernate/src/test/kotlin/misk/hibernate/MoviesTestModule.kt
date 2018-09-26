@@ -8,19 +8,22 @@ import misk.jdbc.DataSourceConfig
 import misk.environment.Environment
 import misk.environment.EnvironmentModule
 import misk.inject.KAbstractModule
+import misk.jdbc.CrossShardQueryDetector
 import misk.logging.LogCollectorModule
 import misk.testing.MockTracingBackendModule
 import misk.time.FakeClockModule
 
 /** This module creates movies, actors, and characters tables for several Hibernate tests. */
-class MoviesTestModule : KAbstractModule() {
+class MoviesTestModule(val disableCrossShardQueryDetector: Boolean = false) : KAbstractModule() {
   override fun configure() {
     install(LogCollectorModule())
-    install(Modules.override(MiskServiceModule()).with(FakeClockModule(), MockTracingBackendModule()))
+    install(
+        Modules.override(MiskServiceModule()).with(FakeClockModule(), MockTracingBackendModule()))
     install(EnvironmentModule(Environment.TESTING))
 
     val config = MiskConfig.load<MoviesConfig>("moviestestmodule", Environment.TESTING)
-    install(HibernateTestingModule(Movies::class))
+    install(HibernateTestingModule(Movies::class,
+        disableCrossShardQueryDetector = disableCrossShardQueryDetector))
     install(HibernateModule(Movies::class, config.data_source))
     install(object : HibernateEntityModule(Movies::class) {
       override fun configureHibernate() {
