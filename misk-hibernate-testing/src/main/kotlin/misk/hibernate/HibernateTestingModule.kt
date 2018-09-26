@@ -1,13 +1,16 @@
 package misk.hibernate
 
 import com.google.common.util.concurrent.Service
+import com.squareup.moshi.Moshi
 import misk.jdbc.CrossShardQueryDetector
 import misk.jdbc.DataSourceConfig
 import misk.jdbc.DataSourceDecorator
 import misk.jdbc.StartVitessService
 import misk.jdbc.TruncateTablesService
 import misk.inject.KAbstractModule
+import misk.inject.asSingleton
 import misk.inject.toKey
+import okhttp3.OkHttpClient
 import javax.inject.Provider
 import kotlin.reflect.KClass
 
@@ -40,7 +43,16 @@ class HibernateTestingModule(
       StartVitessService(config = configProvider.get())
     })
 
-    bind(crossShardQueryDetectorKey).to()
+    val moshiProvider = getProvider(Moshi::class.java)
+    val okHttpClientProvider = getProvider(OkHttpClient::class.java)
+    bind(crossShardQueryDetectorKey).toProvider(Provider<CrossShardQueryDetector> {
+      CrossShardQueryDetector(
+          config = configProvider.get(),
+          moshi = moshiProvider.get(),
+          okHttpClient = okHttpClientProvider.get()
+      )
+    }).asSingleton()
+
     multibind<DataSourceDecorator>(qualifier).to(crossShardQueryDetectorKey)
 
     multibind<Service>().to(truncateTablesServiceKey)

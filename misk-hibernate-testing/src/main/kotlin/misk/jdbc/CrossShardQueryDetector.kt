@@ -12,7 +12,6 @@ import okhttp3.Request
 import okio.BufferedSource
 import okio.ByteString.Companion.encodeUtf8
 import java.io.EOFException
-import javax.inject.Inject
 import javax.inject.Singleton
 import javax.sql.DataSource
 
@@ -35,14 +34,22 @@ data class QueryPlan(
     get() = Instructions.isScatter
 }
 
+/**
+ * Throws a [CrossShardQueryException] for scatter queries that doesn't have a lookup vindex.
+ * Note: Current implementation is not thread safe and will not work in production.
+ */
 @Singleton
-class CrossShardQueryDetector : DataSourceDecorator {
-  @Inject var okHttpClient: OkHttpClient = OkHttpClient()
-  @Inject var moshi = Moshi.Builder().build()
+class CrossShardQueryDetector(
+  val okHttpClient: OkHttpClient,
+  val moshi: Moshi,
+  val config: DataSourceConfig
+) : DataSourceDecorator {
 
-  val listener = Listener()
+  private val listener = Listener()
 
   override fun decorate(dataSource: DataSource): DataSource {
+    if (config.type != DataSourceType.VITESS) return dataSource
+
     val proxy = ProxyDataSource(dataSource)
     proxy.addListener(listener)
     return proxy
