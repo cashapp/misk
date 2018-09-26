@@ -6,6 +6,7 @@ import misk.backoff.retry
 import misk.jdbc.CrossShardQueryException
 import misk.jdbc.CrossShardTransactionException
 import misk.hibernate.annotation.keyspace
+import misk.jdbc.CrossShardQueryDetector
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.junit.jupiter.api.Test
@@ -22,8 +23,8 @@ class ScaleSafetyTest {
   val module = MoviesTestModule()
 
   @Inject @Movies lateinit var transacter: Transacter
+  @Inject @Movies lateinit var crossShardQueryDetector: CrossShardQueryDetector
   @Inject lateinit var queryFactory: Query.Factory
-  @Inject lateinit var tracer: MockTracer
 
   @Test
   fun crossShardTransactionsAreDisabled() {
@@ -88,9 +89,20 @@ class ScaleSafetyTest {
   }
 
   @Test
-  fun crossShardQueries() {
+  fun crossShardQueriesAreDetected() {
     assertThrows<CrossShardQueryException> {
       transacter.transaction { session ->
+        queryFactory.newQuery<MovieQuery>()
+            .releaseDateBefore(LocalDate.of(1977, 6, 15))
+            .list(session)
+      }
+    }
+  }
+
+  @Test
+  fun crossShardQueriesDetectorCanBeDisabled() {
+    transacter.transaction { session ->
+      crossShardQueryDetector.disable {
         queryFactory.newQuery<MovieQuery>()
             .releaseDateBefore(LocalDate.of(1977, 6, 15))
             .list(session)

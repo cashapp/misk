@@ -13,6 +13,7 @@ import okio.BufferedSource
 import okio.ByteString.Companion.encodeUtf8
 import java.io.EOFException
 import javax.inject.Inject
+import javax.inject.Singleton
 import javax.sql.DataSource
 
 data class Instruction(
@@ -34,27 +35,39 @@ data class QueryPlan(
     get() = Instructions.isScatter
 }
 
+@Singleton
 class CrossShardQueryDetector : DataSourceDecorator {
   @Inject var okHttpClient: OkHttpClient = OkHttpClient()
   @Inject var moshi = Moshi.Builder().build()
 
+  val listener = Listener()
+
   override fun decorate(dataSource: DataSource): DataSource {
     val proxy = ProxyDataSource(dataSource)
-    proxy.addListener(object : QueryExecutionListener {
-      val count = ThreadLocal.withInitial { 0 }
-
-      override fun beforeQuery(execInfo: ExecutionInfo?, queryInfoList: MutableList<QueryInfo>?) {
-        count.set(extractScatterQueryCount())
-      }
-
-      override fun afterQuery(execInfo: ExecutionInfo, queryInfoList: MutableList<QueryInfo>) {
-        val newScatterQueryCount = extractScatterQueryCount()
-        if (newScatterQueryCount > count.get()) {
-          throw CrossShardQueryException()
-        }
-      }
-    })
+    proxy.addListener(listener)
     return proxy
+  }
+
+  inner class Listener : QueryExecutionListener {
+    val disabled = ThreadLocal.withInitial { false }
+    val count = ThreadLocal.withInitial { 0 }
+
+    override fun beforeQuery(execInfo: ExecutionInfo?, queryInfoList: MutableList<QueryInfo>?) {
+      if (disabled.get()) return
+
+      count.set(extractScatterQueryCount())
+    }
+
+    override fun afterQuery(execInfo: ExecutionInfo, queryInfoList: MutableList<QueryInfo>) {
+      if (disabled.get()) return
+
+      val newScatterQueryCount = extractScatterQueryCount()
+      if (newScatterQueryCount > count.get()) {
+        throw CrossShardQueryException()
+      }
+    }
+
+    fun <T> disable(body: () -> T): T = disabled.withValue(true, body)
   }
 
   private fun extractScatterQueryCount(): Int {
@@ -83,5 +96,17 @@ class CrossShardQueryDetector : DataSourceDecorator {
         null
       }
     }.filterNotNull()
+  }
+
+  fun <T> disable(body: () -> T): T  = listener.disable(body)
+}
+
+private inline fun <T, R> ThreadLocal<T>.withValue(value: T, body: () -> R): R {
+  val prev = get()
+  set(value)
+  try {
+    return body()
+  } finally {
+    set(prev)
   }
 }

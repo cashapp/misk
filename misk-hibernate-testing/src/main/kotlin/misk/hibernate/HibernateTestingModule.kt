@@ -25,6 +25,9 @@ class HibernateTestingModule(
     val truncateTablesServiceKey = TruncateTablesService::class.toKey(qualifier)
     val startVitessServiceKey = StartVitessService::class.toKey(qualifier)
 
+    val crossShardQueryDetectorKey = CrossShardQueryDetector::class.toKey(qualifier)
+    val crossShardQueryDetectorProvider = getProvider(crossShardQueryDetectorKey)
+
     val configKey = DataSourceConfig::class.toKey(qualifier)
     val configProvider = getProvider(configKey)
 
@@ -37,6 +40,9 @@ class HibernateTestingModule(
       StartVitessService(config = configProvider.get())
     })
 
+    bind(crossShardQueryDetectorKey).to()
+    multibind<DataSourceDecorator>(qualifier).to(crossShardQueryDetectorKey)
+
     multibind<Service>().to(truncateTablesServiceKey)
 
     bind(truncateTablesServiceKey).toProvider(Provider<TruncateTablesService> {
@@ -44,10 +50,9 @@ class HibernateTestingModule(
           qualifier = qualifier,
           config = configProvider.get(),
           transacterProvider = transacterProvider,
+          crossShardQueryDetector = crossShardQueryDetectorProvider.get(),
           startUpStatements = startUpStatements,
           shutDownStatements = shutDownStatements)
     })
-
-    multibind<DataSourceDecorator>(qualifier).to<CrossShardQueryDetector>()
   }
 }

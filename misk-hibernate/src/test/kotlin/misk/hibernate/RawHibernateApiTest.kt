@@ -1,10 +1,12 @@
 package misk.hibernate
 
+import misk.jdbc.CrossShardQueryDetector
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
 import org.hibernate.SessionFactory
 import org.junit.jupiter.api.Test
+import java.nio.file.spi.FileTypeDetector
 import java.time.LocalDate
 import javax.inject.Inject
 
@@ -15,6 +17,7 @@ class RawHibernateApiTest {
   val module = MoviesTestModule()
 
   @Inject @Movies lateinit var sessionFactory: SessionFactory
+  @Inject @Movies lateinit var crossShardQueryDetector: CrossShardQueryDetector
 
   @Test
   fun happyPath() {
@@ -32,7 +35,9 @@ class RawHibernateApiTest {
       val criteria = criteriaBuilder.createQuery(DbMovie::class.java)
       val queryRoot = criteria.from(DbMovie::class.java)
       criteria.where(criteriaBuilder.notEqual(queryRoot.get<String>("name"), "Star Wars"))
-      val resultList: List<DbMovie> = session.createQuery(criteria).resultList
+      val resultList = crossShardQueryDetector.disable {
+        session.createQuery(criteria).resultList
+      }
       assertThat(resultList.map { it.name }).containsExactly("Jurassic Park")
     }
   }
