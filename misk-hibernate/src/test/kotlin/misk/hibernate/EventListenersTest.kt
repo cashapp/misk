@@ -1,7 +1,6 @@
 package misk.hibernate
 
 import com.google.inject.util.Modules
-import misk.jdbc.CrossShardQueryDetector
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
@@ -43,7 +42,7 @@ class EventListenersTest {
     }
 
     transacter.transaction { session ->
-      queryFactory.newQuery<MovieQuery>().uniqueResult(session)!!
+      val movie = queryFactory.newQuery<MovieQuery>().uniqueResult(session)!!
       assertThat(eventListener.takeEvents()).containsExactly("preload")
 
       session.hibernateSession.delete(movie) // TODO(jwilson): expose session.delete() directly.
