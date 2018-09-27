@@ -31,8 +31,8 @@ internal class TruncateTablesServiceTest {
   @Inject @TestDatasource lateinit var transacter: Transacter
 
   // Just a dummy
-  val crossShardQueryDetector: CrossShardQueryDetector
-    get() = CrossShardQueryDetector(OkHttpClient(), Moshi.Builder().build(), config)
+  val vitessScatterDetector: VitessScatterDetector
+    get() = VitessScatterDetector(OkHttpClient(), Moshi.Builder().build(), config)
 
   @BeforeEach
   internal fun setUp() {
@@ -64,7 +64,7 @@ internal class TruncateTablesServiceTest {
     // Start up TruncateTablesService. The inserted data should be truncated.
     val service = TruncateTablesService(TestDatasource::class, config,
         Providers.of(transacter),
-        crossShardQueryDetector)
+        vitessScatterDetector)
     service.startAsync()
     service.awaitRunning()
     assertThat(rowCount("schema_version")).isGreaterThan(0)
@@ -77,7 +77,7 @@ internal class TruncateTablesServiceTest {
         TestDatasource::class,
         config,
         Providers.of(transacter),
-        crossShardQueryDetector,
+        vitessScatterDetector,
         startUpStatements = listOf("INSERT INTO movies (name) VALUES ('Star Wars')"))
 
     assertThat(rowCount("movies")).isEqualTo(0)
@@ -92,7 +92,7 @@ internal class TruncateTablesServiceTest {
         TestDatasource::class,
         config,
         Providers.of(transacter),
-        crossShardQueryDetector,
+        vitessScatterDetector,
         shutDownStatements = listOf("INSERT INTO movies (name) VALUES ('Star Wars')"))
 
     service.startAsync()

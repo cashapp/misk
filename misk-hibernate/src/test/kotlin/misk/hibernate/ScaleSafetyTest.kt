@@ -1,12 +1,10 @@
 package misk.hibernate
 
-import io.opentracing.mock.MockTracer
 import misk.backoff.FlatBackoff
 import misk.backoff.retry
-import misk.jdbc.CrossShardQueryException
-import misk.jdbc.CrossShardTransactionException
+import misk.jdbc.WideScatterException
 import misk.hibernate.annotation.keyspace
-import misk.jdbc.CrossShardQueryDetector
+import misk.jdbc.VitessScatterDetector
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.junit.jupiter.api.Test
@@ -23,7 +21,7 @@ class ScaleSafetyTest {
   val module = MoviesTestModule()
 
   @Inject @Movies lateinit var transacter: Transacter
-  @Inject @Movies lateinit var crossShardQueryDetector: CrossShardQueryDetector
+  @Inject @Movies lateinit var crossShardQueryDetector: VitessScatterDetector
   @Inject lateinit var queryFactory: Query.Factory
 
   @Test
@@ -90,7 +88,7 @@ class ScaleSafetyTest {
 
   @Test
   fun crossShardQueriesAreDetected() {
-    assertThrows<CrossShardQueryException> {
+    assertThrows<WideScatterException> {
       transacter.transaction { session ->
         queryFactory.newQuery<MovieQuery>()
             .releaseDateBefore(LocalDate.of(1977, 6, 15))

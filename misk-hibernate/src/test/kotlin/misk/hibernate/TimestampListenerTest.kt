@@ -1,6 +1,5 @@
 package misk.hibernate
 
-import misk.jdbc.CrossShardQueryDetector
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.time.FakeClock

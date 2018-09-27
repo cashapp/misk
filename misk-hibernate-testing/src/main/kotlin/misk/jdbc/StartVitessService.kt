@@ -1,26 +1,56 @@
 package misk.jdbc
 
 import com.github.dockerjava.api.DockerClient
-import com.github.dockerjava.api.model.*
+import com.github.dockerjava.api.model.Bind
+import com.github.dockerjava.api.model.ExposedPort
+import com.github.dockerjava.api.model.Frame
+import com.github.dockerjava.api.model.Ports
+import com.github.dockerjava.api.model.Volume
 import com.github.dockerjava.core.DockerClientBuilder
 import com.github.dockerjava.core.async.ResultCallbackTemplate
 import com.github.dockerjava.netty.NettyDockerCmdExecFactory
 import com.google.common.cache.CacheBuilder
 import com.google.common.cache.CacheLoader
 import com.google.common.util.concurrent.AbstractIdleService
-import com.google.gson.Gson
+import com.squareup.moshi.Moshi
+import misk.moshi.adapter
 import mu.KotlinLogging
-import java.io.FileReader
+import okio.buffer
+import okio.source
 import java.nio.file.Files
 import java.nio.file.Paths
 import javax.inject.Singleton
 import kotlin.concurrent.thread
 import kotlin.streams.toList
 
+class Keyspace(val sharded: Boolean) {
+  // Defaulting to 2 shards for sharded keyspaces,
+  // maybe this should be configurable at some point?
+  fun shardCount() = if (sharded) 2 else 1
+}
+
+class VitessCluster(val config: DataSourceConfig, moshi: Moshi = Moshi.Builder().build()) {
+  val schemaDir = Paths.get(config.vitess_schema_dir)
+
+  init {
+    check(Files.isDirectory(schemaDir)) {
+      "can't find directory ${schemaDir}"
+    }
+  }
+
+  val keyspaceAdapter = moshi.adapter<Keyspace>()
+
+  fun keyspaces(): Map<String, Keyspace> {
+    val keyspaceDirs = Files.list(schemaDir).toList().filter { Files.isDirectory(it) }
+    return keyspaceDirs.associateBy(
+            { it.fileName.toString() },
+            { keyspaceAdapter.fromJson(it.resolve("vschema.json").source().buffer())!! })
+  }
+}
+
 internal class DockerVitessCluster(
-  val config: DataSourceConfig,
-  val docker: DockerClient,
-  val gson: Gson
+  val cluster: VitessCluster,
+  val docker: DockerClient
 ) {
   private var containerId: String? = null
 
@@ -33,24 +63,14 @@ internal class DockerVitessCluster(
 
     isRunning = true
 
-    val schemaDir = Paths.get(config.vitess_schema_dir)
-    check(Files.isDirectory(schemaDir)) {
-      "can't find directory ${config.vitess_schema_dir}"
-    }
-    val keyspaceDirs = Files.list(schemaDir).toList().filter { Files.isDirectory(it) }
-    val keyspaces =
-        keyspaceDirs.map { it.fileName }.joinToString(",")
-    val shardCounts = keyspaceDirs.map { it.resolve("vschema.json") }
-        .map { gson.fromJson(FileReader(it.toFile()), Map::class.java) }
-        // Defaulting to 2 shards for sharded keyspaces,
-        // maybe this should be configurable at some point?
-        .map { if (it["sharded"] as Boolean) "2" else "1" }
-        .joinToString(",")
+    val keyspaces = cluster.keyspaces()
+    val keyspacesArg = keyspaces.keys.map { it }.joinToString(",")
+    val shardCounts = keyspaces.values.map { it.shardCount() }.joinToString(",")
 
     val schemaVolume = Volume("/vt/src/vitess.io/vitess/schema")
     val httpPort = ExposedPort.tcp(27000)
     // TODO auto-allocate a port for grpc so they don't conflict
-    val grpcPort = ExposedPort.tcp(config.port ?: 27001)
+    val grpcPort = ExposedPort.tcp(cluster.config.port ?: 27001)
     val ports = Ports()
     ports.bind(grpcPort, Ports.Binding.bindPort(grpcPort.port))
     ports.bind(httpPort, Ports.Binding.bindPort(httpPort.port))
@@ -64,7 +84,7 @@ internal class DockerVitessCluster(
         "-web_dir2=web/vtctld2/app",
         "-mysql_bind_host=0.0.0.0",
         "-schema_dir=schema",
-        "-keyspaces=$keyspaces",
+        "-keyspaces=$keyspacesArg",
         "-num_shards=$shardCounts"
     )
 
@@ -72,7 +92,7 @@ internal class DockerVitessCluster(
     containerId = docker.createContainerCmd("vitess/base")
         .withCmd(cmd.toList())
         .withVolumes(schemaVolume)
-        .withBinds(Bind(schemaDir.toAbsolutePath().toString(), schemaVolume))
+        .withBinds(Bind(cluster.schemaDir.toAbsolutePath().toString(), schemaVolume))
         .withExposedPorts(httpPort, grpcPort)
         .withPortBindings(ports)
         .withTty(true)
@@ -126,7 +146,6 @@ internal class StartVitessService(val config: DataSourceConfig) : AbstractIdleSe
     val docker: DockerClient = DockerClientBuilder.getInstance()
         .withDockerCmdExecFactory(NettyDockerCmdExecFactory())
         .build()
-    val gson = Gson()
 
     /**
      * Global cache of running vitess clusters.
@@ -134,9 +153,7 @@ internal class StartVitessService(val config: DataSourceConfig) : AbstractIdleSe
     val clusters = CacheBuilder.newBuilder()
         .removalListener<DataSourceConfig, DockerVitessCluster> { it.value.stop() }
         .build(CacheLoader.from { config: DataSourceConfig? ->
-          DockerVitessCluster(config!!,
-              docker,
-              gson)
+          DockerVitessCluster(VitessCluster(config!!), docker)
         })
 
     /**
@@ -156,8 +173,7 @@ fun main(args: Array<String>) {
   val docker: DockerClient = DockerClientBuilder.getInstance()
       .withDockerCmdExecFactory(NettyDockerCmdExecFactory())
       .build()
-  val gson = Gson()
-  val cluster = DockerVitessCluster(config, docker, gson)
+  val cluster = DockerVitessCluster(VitessCluster(config), docker)
   cluster.start()
   Runtime.getRuntime().addShutdownHook(thread(start = false) {
     cluster.stop()

@@ -8,7 +8,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
-class CrossShardQueryDetectorTest {
+class VitessScatterDetectorTest {
   val queryPlans = """Length: 2
 "select dbmovie0_.id as id1_2_, dbmovie0_.created_at as created_2_2_, dbmovie0_.name as name3_2_, dbmovie0_.release_date as release_4_2_, dbmovie0_.updated_at as updated_5_2_ from movies as dbmovie0_ where dbmovie0_.release_date < :v1 limit :v2"
 {
@@ -55,7 +55,7 @@ class CrossShardQueryDetectorTest {
 """
 
   @Test fun parseQueryPlans() {
-    val detector = CrossShardQueryDetector(
+    val detector = VitessScatterDetector(
         OkHttpClient(),
         Moshi.Builder().build(),
         DataSourceConfig(type = DataSourceType.VITESS))

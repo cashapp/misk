@@ -1,6 +1,5 @@
 package misk.jdbc
 
-import misk.hibernate.Cluster
 import javax.sql.DataSource
 
 class DataSourceCluster(

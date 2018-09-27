@@ -15,7 +15,7 @@ import java.io.EOFException
 import javax.inject.Singleton
 import javax.sql.DataSource
 
-data class Instruction(
+internal data class Instruction(
   val Opcode: String,
   val Input: Instruction?
 ) {
@@ -25,7 +25,7 @@ data class Instruction(
     }
 }
 
-data class QueryPlan(
+internal data class QueryPlan(
   val Original: String,
   val Instructions: Instruction,
   val ExecCount: Int
@@ -35,11 +35,11 @@ data class QueryPlan(
 }
 
 /**
- * Throws a [CrossShardQueryException] for scatter queries that doesn't have a lookup vindex.
+ * Throws a [WideScatterException] for scatter queries that doesn't have a lookup vindex.
  * Note: Current implementation is not thread safe and will not work in production.
  */
 @Singleton
-class CrossShardQueryDetector(
+class VitessScatterDetector(
   val okHttpClient: OkHttpClient,
   val moshi: Moshi,
   val config: DataSourceConfig
@@ -70,7 +70,7 @@ class CrossShardQueryDetector(
 
       val newScatterQueryCount = extractScatterQueryCount()
       if (newScatterQueryCount > count.get()) {
-        throw CrossShardQueryException()
+        throw WideScatterException()
       }
     }
 
@@ -88,7 +88,7 @@ class CrossShardQueryDetector(
 
   private val EMPTY_LINE = "\n\n".encodeUtf8()
 
-  fun parseQueryPlans(data: BufferedSource): Sequence<QueryPlan> {
+  internal fun parseQueryPlans(data: BufferedSource): Sequence<QueryPlan> {
     // Read (and discard) the "Length" line
     data.readUtf8Line()
 

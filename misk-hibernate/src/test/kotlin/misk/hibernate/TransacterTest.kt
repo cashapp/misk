@@ -6,7 +6,6 @@ import misk.exceptions.UnauthorizedException
 import misk.hibernate.RealTransacter.Companion.APPLICATION_TRANSACTION_SPAN_NAME
 import misk.hibernate.RealTransacter.Companion.DB_TRANSACTION_SPAN_NAME
 import misk.hibernate.RealTransacter.Companion.TRANSACTER_SPAN_TAG
-import misk.jdbc.CrossShardQueryDetector
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat

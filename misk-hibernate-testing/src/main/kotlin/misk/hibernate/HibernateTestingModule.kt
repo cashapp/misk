@@ -2,7 +2,7 @@ package misk.hibernate
 
 import com.google.common.util.concurrent.Service
 import com.squareup.moshi.Moshi
-import misk.jdbc.CrossShardQueryDetector
+import misk.jdbc.VitessScatterDetector
 import misk.jdbc.DataSourceConfig
 import misk.jdbc.DataSourceDecorator
 import misk.jdbc.StartVitessService
@@ -29,7 +29,7 @@ class HibernateTestingModule(
     val truncateTablesServiceKey = TruncateTablesService::class.toKey(qualifier)
     val startVitessServiceKey = StartVitessService::class.toKey(qualifier)
 
-    val crossShardQueryDetectorKey = CrossShardQueryDetector::class.toKey(qualifier)
+    val crossShardQueryDetectorKey = VitessScatterDetector::class.toKey(qualifier)
     val crossShardQueryDetectorProvider = getProvider(crossShardQueryDetectorKey)
 
     val configKey = DataSourceConfig::class.toKey(qualifier)
@@ -46,8 +46,8 @@ class HibernateTestingModule(
 
     val moshiProvider = getProvider(Moshi::class.java)
     val okHttpClientProvider = getProvider(OkHttpClient::class.java)
-    bind(crossShardQueryDetectorKey).toProvider(Provider<CrossShardQueryDetector> {
-      CrossShardQueryDetector(
+    bind(crossShardQueryDetectorKey).toProvider(Provider<VitessScatterDetector> {
+      VitessScatterDetector(
           config = configProvider.get(),
           moshi = moshiProvider.get(),
           okHttpClient = okHttpClientProvider.get()
@@ -65,7 +65,7 @@ class HibernateTestingModule(
           qualifier = qualifier,
           config = configProvider.get(),
           transacterProvider = transacterProvider,
-          crossShardQueryDetector = crossShardQueryDetectorProvider.get(),
+          vitessScatterDetector = crossShardQueryDetectorProvider.get(),
           startUpStatements = startUpStatements,
           shutDownStatements = shutDownStatements)
     })

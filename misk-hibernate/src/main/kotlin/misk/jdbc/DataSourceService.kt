@@ -15,7 +15,7 @@ import javax.sql.DataSource
 import kotlin.reflect.KClass
 
 /**
- * Builds a bare connection to a Hibernate database. Doesn't do any schema migration or validation.
+ * Builds a connection pool to a JDBC database. Doesn't do any schema migration or validation.
  */
 @Singleton
 internal class DataSourceService(
@@ -34,7 +34,7 @@ internal class DataSourceService(
 
   override fun startUp() {
     val stopwatch = Stopwatch.createStarted()
-    logger.info("Starting @${qualifier.simpleName} Hibernate")
+    logger.info("Starting @${qualifier.simpleName} connection pool")
 
     require(dataSource == null)
 

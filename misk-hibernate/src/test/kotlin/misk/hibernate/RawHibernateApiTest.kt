@@ -1,12 +1,10 @@
 package misk.hibernate
 
-import misk.jdbc.CrossShardQueryDetector
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
 import org.hibernate.SessionFactory
 import org.junit.jupiter.api.Test
-import java.nio.file.spi.FileTypeDetector
 import java.time.LocalDate
 import javax.inject.Inject
 
