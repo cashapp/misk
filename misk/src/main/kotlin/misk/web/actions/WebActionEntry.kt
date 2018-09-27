@@ -1,6 +1,7 @@
 package misk.web.actions
 
-import misk.web.resources.ResourceEntryCommon
+import misk.web.resources.ResourceEntry
+import misk.web.resources.ResourceEntryFinder
 import kotlin.reflect.KClass
 
 /**
@@ -13,14 +14,10 @@ import kotlin.reflect.KClass
  *   - any number of non-whitespace characters (including additional path segments or "/")
  *   - must terminate with a non-"/" because rest of path will start with "/"
  */
-data class WebActionEntry(
+class WebActionEntry(
   val actionClass: KClass<out WebAction>,
-  val url_path_prefix: String = "/"
-) {
-  init {
-    ResourceEntryCommon.requireValidUrlPathPrefix(url_path_prefix)
-  }
-}
+  url_path_prefix: String = "/"
+) : ResourceEntry(url_path_prefix)
 
 inline fun <reified T : WebAction> WebActionEntry(
   url_path_prefix: String = "/"

@@ -11,9 +11,10 @@ import misk.web.ResponseBody
 import misk.web.ResponseContentType
 import misk.web.actions.NotFoundAction
 import misk.web.actions.WebAction
-import misk.web.resources.ResourceEntryCommon
 import misk.web.mediatype.MediaTypes
 import misk.web.mediatype.asMediaType
+import misk.web.resources.ResourceEntryFinder
+import misk.web.resources.StaticResourceAction
 import misk.web.toMisk
 import misk.web.toResponseBody
 import okhttp3.Headers
@@ -45,10 +46,12 @@ import javax.inject.Singleton
  */
 
 @Singleton
-class WebProxyAction : WebAction {
-  @Inject @Named("web_proxy_action") private lateinit var proxyClient: OkHttpClient
-  @Inject private lateinit var entries: List<WebProxyEntry>
-  @Inject @JvmSuppressWildcards private lateinit var clientRequest: ActionScoped<Request>
+class WebProxyAction @Inject constructor(
+  @Named("web_proxy_action") private val proxyClient: OkHttpClient,
+  @JvmSuppressWildcards private val clientRequest: ActionScoped<Request>,
+  private val staticResourceAction: StaticResourceAction,
+  private val resourceEntryFinder: ResourceEntryFinder
+) : WebAction {
 
   @Get("/{path:.*}")
   @Post("/{path:.*}")
@@ -57,8 +60,7 @@ class WebProxyAction : WebAction {
   @Unauthenticated
   fun action(): Response<ResponseBody> {
     val request = clientRequest.get()
-    val matchedEntry = ResourceEntryCommon.findEntryFromUrl(entries,
-        request.url) as WebProxyEntry?
+    val matchedEntry = resourceEntryFinder.webProxy(request.url) as WebProxyEntry?
         ?: return NotFoundAction.response(request.url.toString())
     val proxyUrl = matchedEntry.web_proxy_url.newBuilder()
         .encodedPath(request.url.encodedPath())
@@ -73,7 +75,7 @@ class WebProxyAction : WebAction {
     return try {
       proxyClient.newCall(proxyRequest).execute().toMisk()
     } catch (e: IOException) {
-      fetchFailResponse(proxyRequest.url())
+      staticResourceAction.getResponse(request)
     }
   }
 

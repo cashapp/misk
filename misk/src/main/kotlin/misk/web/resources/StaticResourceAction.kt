@@ -30,12 +30,12 @@ import javax.inject.Singleton
  * multibind<StaticResourceEntry>().toInstance(StaticResourceEntry(...))
  * ```
  */
-
 @Singleton
-class StaticResourceAction : WebAction {
-  @Inject private lateinit var entries: List<StaticResourceEntry>
-  @Inject @JvmSuppressWildcards private lateinit var clientRequest: ActionScoped<Request>
-  @Inject private lateinit var resourceLoader: ResourceLoader
+class StaticResourceAction @Inject constructor(
+  @JvmSuppressWildcards private val clientRequest: ActionScoped<Request>,
+  private val resourceLoader: ResourceLoader,
+  private val resourceEntryFinder: ResourceEntryFinder
+) : WebAction {
 
   @Get("/{path:.*}")
   @Post("/{path:.*}")
@@ -47,87 +47,89 @@ class StaticResourceAction : WebAction {
     return getResponse(request)
   }
 
-  private fun getResponse(request: Request): Response<ResponseBody> {
-    val urlPath = request.url.encodedPath()
-    val matchedEntry =
-        ResourceEntryCommon.findEntryFromUrl(entries, request.url) as StaticResourceEntry?
-    return when (exists(urlPath)) {
-      Kind.NO_MATCH -> when {
-        !urlPath.endsWith("/") -> redirectResponse(normalizePathWithQuery(request.url))
-        // actually return the resource, don't redirect. Path must stay the same since this will be handled by React router
-        urlPath.endsWith("/") -> resourceResponse(normalizePath(matchedEntry?.url_path_prefix ?: urlPath))
-        else -> null
-      }
-      Kind.RESOURCE -> resourceResponse(urlPath)
-      Kind.RESOURCE_DIRECTORY -> redirectResponse(normalizePathWithQuery(request.url))
-    } ?: NotFoundAction.response(request.url.toString())
+  fun getResponse(request: Request): Response<ResponseBody> {
+    val entry =
+        (resourceEntryFinder.staticResource(request.url) as StaticResourceEntry?
+            ?: return NotFoundAction.response(request.url.encodedPath().drop(1)))
+    return MatchedResource(entry).getResponse(request)
   }
 
-  /** Returns true if the mapped path exists on either the resource path or file system. */
-  private fun exists(urlPath: String): Kind {
-    val staticResource =
-        ResourceEntryCommon.findEntryFromUrl(entries, urlPath) as StaticResourceEntry?
-            ?: return Kind.NO_MATCH
-    val resourcePath = staticResource.resourcePath(urlPath)
-    if (resourceLoader.exists(resourcePath)) return Kind.RESOURCE
-    if (resourceLoader.list(resourcePath).isNotEmpty()) return Kind.RESOURCE_DIRECTORY
-    return Kind.NO_MATCH
-  }
-
-  enum class Kind {
+  private enum class Kind {
     NO_MATCH,
     RESOURCE,
     RESOURCE_DIRECTORY,
   }
 
-  /** Returns a source to the mapped path, or null if it doesn't exist. */
-  fun open(urlPath: String): BufferedSource? {
-    val staticResource =
-        ResourceEntryCommon.findEntryFromUrl(entries, urlPath) as StaticResourceEntry?
-            ?: return null
-    val resourcePath = staticResource.resourcePath(urlPath)
-    return when {
-      resourceLoader.exists(resourcePath) -> resourceLoader.open(resourcePath)!!
-      else -> null
-    }
-  }
-
-  private fun normalizePath(urlPath: String): String {
-    return when {
-      urlPath.endsWith("/") -> "${urlPath}index.html"
-      !urlPath.endsWith("/") -> "$urlPath/"
-      else -> urlPath
-    }
-  }
-
-  private fun normalizePathWithQuery(url: HttpUrl): String {
-    return if (url.encodedQuery().isNullOrEmpty()) normalizePath(url.encodedPath())
-    else normalizePath(url.encodedPath()) + "?" + url.encodedQuery()
-  }
-
-  private fun resourceResponse(resourcePath: String): Response<ResponseBody>? {
-    return if (exists(resourcePath) == Kind.RESOURCE) {
-      val responseBody = object : ResponseBody {
-        override fun writeTo(sink: BufferedSink) {
-          open(resourcePath)!!.use {
-            sink.writeAll(it)
-          }
+  private inner class MatchedResource(var matchedEntry: StaticResourceEntry) {
+    fun getResponse(request: Request): Response<ResponseBody> {
+      val urlPath = request.url.encodedPath()
+      return when (exists(urlPath)) {
+        Kind.NO_MATCH -> when {
+          !urlPath.endsWith("/") -> redirectResponse(normalizePathWithQuery(request.url))
+        // actually return the resource, don't redirect. Path must stay the same since this will be handled by React router
+          urlPath.endsWith("/") -> resourceResponse(
+              normalizePath(matchedEntry.url_path_prefix))
+          else -> null
         }
-      }
-      Response(
-          body = responseBody,
-          headers = Headers.of("Content-Type", MediaTypes.fromFileExtension(
-              resourcePath.substring(resourcePath.lastIndexOf('.') + 1)).toString()))
-    } else {
-      null
+        Kind.RESOURCE -> resourceResponse(urlPath)
+        Kind.RESOURCE_DIRECTORY -> resourceResponse(normalizePathWithQuery(request.url))
+      } ?: NotFoundAction.response(request.url.encodedPath().drop(1))
     }
-  }
 
-  private fun redirectResponse(urlPath: String): Response<ResponseBody> {
-    return Response(
-        body = "".toResponseBody(),
-        statusCode = HttpURLConnection.HTTP_MOVED_TEMP,
-        headers = Headers.of("Location", "$urlPath"))
+    /** Returns true if the mapped path exists on either the resource path or file system. */
+    private fun exists(urlPath: String): Kind {
+      val resourcePath = matchedEntry.resourcePath(urlPath)
+      if (resourceLoader.exists(resourcePath)) return Kind.RESOURCE
+      if (resourceLoader.list(resourcePath).isNotEmpty()) return Kind.RESOURCE_DIRECTORY
+      return Kind.NO_MATCH
+    }
+
+    /** Returns a source to the mapped path, or null if it doesn't exist. */
+    fun open(urlPath: String): BufferedSource? {
+      val resourcePath = matchedEntry.resourcePath(urlPath)
+      return when {
+        resourceLoader.exists(resourcePath) -> resourceLoader.open(resourcePath)!!
+        else -> null
+      }
+    }
+
+    private fun normalizePath(urlPath: String): String {
+      return when {
+        urlPath.endsWith("/") -> "${urlPath}index.html"
+        !urlPath.endsWith("/") -> "$urlPath/"
+        else -> urlPath
+      }
+    }
+
+    private fun normalizePathWithQuery(url: HttpUrl): String {
+      return if (url.encodedQuery().isNullOrEmpty()) normalizePath(url.encodedPath())
+      else normalizePath(url.encodedPath()) + "?" + url.encodedQuery()
+    }
+
+    private fun resourceResponse(resourcePath: String): Response<ResponseBody>? {
+      return when (exists(resourcePath)) {
+        Kind.RESOURCE -> {
+          val responseBody = object : ResponseBody {
+            override fun writeTo(sink: BufferedSink) {
+              open(resourcePath)!!.use {
+                sink.writeAll(it)
+              }
+            }
+          }
+          Response(
+              body = responseBody,
+              headers = Headers.of("Content-Type", MediaTypes.fromFileExtension(
+                  resourcePath.substring(resourcePath.lastIndexOf('.') + 1)).toString()))
+        }
+        else -> null
+      }
+    }
+
+    private fun redirectResponse(urlPath: String): Response<ResponseBody> {
+      return Response(
+          body = "".toResponseBody(),
+          statusCode = HttpURLConnection.HTTP_MOVED_TEMP,
+          headers = Headers.of("Location", "$urlPath"))
+    }
   }
 }
-

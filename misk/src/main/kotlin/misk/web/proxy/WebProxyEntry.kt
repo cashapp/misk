@@ -1,6 +1,6 @@
 package misk.web.proxy
 
-import misk.web.resources.ResourceEntryCommon
+import misk.web.resources.ResourceEntry
 import okhttp3.HttpUrl
 
 //  TODO(adrw) fix this documentation if forwarding rewrites are restricted or other conditions in place
@@ -22,12 +22,11 @@ import okhttp3.HttpUrl
  * multibind<WebProxyEntry>().toInstance(WebProxyEntry(...))
  * ```
  */
-data class WebProxyEntry(
-  override val url_path_prefix: String = "/",
+class WebProxyEntry(
+  url_path_prefix: String = "/",
   val web_proxy_url: HttpUrl
-) : ResourceEntryCommon.Entry {
+) : ResourceEntry(url_path_prefix) {
   init {
-    ResourceEntryCommon.requireValidUrlPathPrefix(url_path_prefix)
     require(web_proxy_url.encodedPath().endsWith("/") &&
         web_proxy_url.pathSegments().size == 1)
   }

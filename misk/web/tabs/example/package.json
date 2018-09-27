@@ -15,7 +15,7 @@
     "@misk/components": "^0.0.45"
   },
   "devDependencies": {
-    "@misk/dev": "^0.0.43",
+    "@misk/dev": "^0.0.44",
     "@misk/tslint": "^0.0.7"
   },
   "miskTabWebpack": {

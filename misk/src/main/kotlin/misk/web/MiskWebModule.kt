@@ -44,6 +44,7 @@ import misk.web.marshal.PlainTextMarshaller
 import misk.web.marshal.ProtobufMarshaller
 import misk.web.marshal.ProtobufUnmarshaller
 import misk.web.marshal.Unmarshaller
+import misk.web.proxy.WebProxyEntry
 import misk.web.resources.StaticResourceEntry
 import javax.inject.Inject
 import javax.servlet.http.HttpServletRequest
@@ -80,6 +81,7 @@ class MiskWebModule : KAbstractModule() {
     newMultibinder<NetworkInterceptor.Factory>()
     newMultibinder<ApplicationInterceptor.Factory>()
     newMultibinder<StaticResourceEntry>()
+    newMultibinder<WebProxyEntry>()
 
     // Register built-in interceptors. Interceptors run in the order in which they are
     // installed, and the order of these interceptors is critical.

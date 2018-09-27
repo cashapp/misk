@@ -38,3 +38,12 @@ Example Release Flow
 - Reinstall node modules and test that they work with the new `@Misk/Dev` and `@Misk/Common` package version `rm -rf node_modules/; yarn install`
 - Publish new version 0.0.3 for `@Misk/Components`
 - Update all related tabs to the newest `@Misk/` packages
+
+Deprecating
+---
+
+If a package is no longer required, you must mark it as deprecated on NPM. Use the command below with an informative message and your One Time Password for NPM 2FA.
+```Bash
+npm deprecate @misk/tabs@0.0.1 "Deprecation Message" --otp=
+
+```
