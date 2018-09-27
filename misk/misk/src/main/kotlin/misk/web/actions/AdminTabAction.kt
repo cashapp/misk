@@ -5,7 +5,8 @@ import misk.web.Get
 import misk.web.RequestContentType
 import misk.web.ResponseContentType
 import misk.web.mediatype.MediaTypes
-import misk.web.resources.ResourceEntryCommon
+import misk.web.resources.ResourceEntry
+import misk.web.resources.ResourceEntryFinder
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -36,15 +37,14 @@ class AdminTabAction : WebAction {
   data class Response(val adminTabs: List<AdminTab>)
 }
 
-data class AdminTab(
+class AdminTab(
   val name: String,
   val slug: String,
-  val url_path_prefix: String,
+  url_path_prefix: String,
   val category: String = "Container Admin"
-) {
+) : ResourceEntry(url_path_prefix) {
   init {
     // Requirements enforce the guidelines outlined at top of the file
-    ResourceEntryCommon.requireValidUrlPathPrefix(url_path_prefix)
     require(slug.filter { char -> !char.isUpperCase() && !char.isWhitespace() }.length == slug.length)
   }
 }

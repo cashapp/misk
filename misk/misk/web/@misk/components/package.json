@@ -33,7 +33,7 @@
     "@misk/common": "^0.0.46"
   },
   "devDependencies": {
-    "@misk/dev": "^0.0.43",
+    "@misk/dev": "^0.0.44",
     "@misk/tslint": "^0.0.7"
   }
 }

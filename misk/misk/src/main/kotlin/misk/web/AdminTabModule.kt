@@ -44,7 +44,9 @@ class AdminTabModule(val environment: Environment) : KAbstractModule() {
     ))
 
     multibind<StaticResourceEntry>()
-        .toInstance(StaticResourceEntry("/_admin/", "classpath:/web/_tab/loader"))
+        .toInstance(StaticResourceEntry("/_admin/", "classpath:/web/_tab/loader/"))
+    multibind<StaticResourceEntry>()
+        .toInstance(StaticResourceEntry("/_tab/loader/", "classpath:/web/_tab/loader/"))
     multibind<StaticResourceEntry>()
         .toInstance(StaticResourceEntry("/_tab/example/", "classpath:/web/_tab/example/"))
     multibind<StaticResourceEntry>()
@@ -55,12 +57,16 @@ class AdminTabModule(val environment: Environment) : KAbstractModule() {
       multibind<WebActionEntry>().toInstance(
           WebActionEntry<WebProxyAction>("/_admin/"))
       multibind<WebActionEntry>().toInstance(
+          WebActionEntry<WebProxyAction>("/_tab/loader/"))
+      multibind<WebActionEntry>().toInstance(
           WebActionEntry<WebProxyAction>("/_tab/example/"))
       multibind<WebActionEntry>().toInstance(
           WebActionEntry<WebProxyAction>("/@misk/"))
 
       multibind<WebProxyEntry>().toInstance(
           WebProxyEntry("/_admin/", "http://localhost:3100/"))
+      multibind<WebProxyEntry>().toInstance(
+          WebProxyEntry("/_tab/loader/", "http://localhost:3100/"))
       multibind<WebProxyEntry>().toInstance(
           WebProxyEntry("/_tab/example/", "http://localhost:3199/"))
       multibind<WebProxyEntry>().toInstance(
@@ -70,15 +76,11 @@ class AdminTabModule(val environment: Environment) : KAbstractModule() {
       multibind<WebActionEntry>().toInstance(
           WebActionEntry<StaticResourceAction>("/_admin/"))
       multibind<WebActionEntry>().toInstance(
+          WebActionEntry<StaticResourceAction>("/_tab/loader/"))
+      multibind<WebActionEntry>().toInstance(
           WebActionEntry<StaticResourceAction>("/_tab/example/"))
       multibind<WebActionEntry>().toInstance(
           WebActionEntry<StaticResourceAction>("/@misk/"))
-
-      // TODO(adrw) needs further testing in production to see if still necessary for serving and bundling Loader tab code
-      if (false) {
-        multibind<StaticResourceEntry>()
-            .toInstance(StaticResourceEntry("/_tab/loader/", "classpath:/web/_tab/loader/"))
-      }
     }
 
     // True for testing Misk Menu with populated tabs and categories, tabs are not functional

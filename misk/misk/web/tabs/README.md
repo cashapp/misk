@@ -11,7 +11,7 @@ How to make a New Misk Tab
   - name: `misktab-trexfoodlog`. Package name must only have lowercase letters.
   - miskTabWebpack:
     - name: `T-Rex Food Log`. Titlecase tab name.
-    - output_path: optional override field. By default it will be `dist`.
+    - output_path: optional override field. By default it will be `lib`.
     - port: `30420`.  port number for Webpack Dev Server. 
       - Todo(adrw): Find a way to centrally reserve a port number. Otherwise there will be the risk that while working in development mode on your tab and another tab, the other tab may fail to serve because of port conflict.
       - `3100-3199`: Misk infrastructure (ex. Loader tab).
@@ -102,6 +102,14 @@ You will also have to add a `from` to the service's jar task so that your compil
       from("./web/tabs/trexfoodlog/dist/")
     }
   }
+```
+
+To confirm that your tab is shipping in the jar, you can run the following commands to build the jar, find it in your filesystem, browse the included files, and confirm that related compiled JS code is in your jar.
+
+```Bash
+  $ ./gradlew clean assemble jar
+  $ find misk/build | grep jar
+  $ jar -tf misk/build/libs/{your jar location found above}.jar | grep _tab/trexfoodlog/
 ```
 
 Loading Data into your Misk Tab
