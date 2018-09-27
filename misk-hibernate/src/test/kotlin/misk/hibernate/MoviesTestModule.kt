@@ -14,7 +14,13 @@ import misk.testing.MockTracingBackendModule
 import misk.time.FakeClockModule
 
 /** This module creates movies, actors, and characters tables for several Hibernate tests. */
-class MoviesTestModule(val disableCrossShardQueryDetector: Boolean = false) : KAbstractModule() {
+class MoviesTestModule(
+  /**
+   * Disable the cross shard query detector. This is a temporary workaround for too many failing
+   * tests. This should eventually be removed.
+   */
+  val disableCrossShardQueryDetector: Boolean = false
+) : KAbstractModule() {
   override fun configure() {
     install(LogCollectorModule())
     install(
