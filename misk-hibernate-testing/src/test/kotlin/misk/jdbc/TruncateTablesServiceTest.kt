@@ -31,8 +31,8 @@ internal class TruncateTablesServiceTest {
   @Inject @TestDatasource lateinit var transacter: Transacter
 
   // Just a dummy
-  val crossShardQueryDetector =
-      CrossShardQueryDetector(OkHttpClient(), Moshi.Builder().build(), config)
+  val crossShardQueryDetector: CrossShardQueryDetector
+    get() = CrossShardQueryDetector(OkHttpClient(), Moshi.Builder().build(), config)
 
   @BeforeEach
   internal fun setUp() {
