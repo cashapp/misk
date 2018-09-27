@@ -175,13 +175,13 @@ task webpackTabsLoader(type: Exec) {
   commandLine "yarn", "gradle"
 }
 
-jar.dependsOn webpackMiskCommon
-jar.dependsOn webpackMiskComponents
-jar.dependsOn webpackMiskDev
-jar.dependsOn webpackMiskTslint
-jar.dependsOn webpackTabsConfig
-jar.dependsOn webpackTabsExample
-jar.dependsOn webpackTabsLoader
+//jar.dependsOn webpackMiskCommon
+//jar.dependsOn webpackMiskComponents
+//jar.dependsOn webpackMiskDev
+//jar.dependsOn webpackMiskTslint
+//jar.dependsOn webpackTabsConfig
+//jar.dependsOn webpackTabsExample
+//jar.dependsOn webpackTabsLoader
 
 if (rootProject.file("hooks.gradle").exists()) {
   apply from: rootProject.file("hooks.gradle")
