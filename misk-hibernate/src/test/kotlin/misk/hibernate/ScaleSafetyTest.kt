@@ -39,7 +39,7 @@ class ScaleSafetyTest {
       DbMovie("Star Wars", LocalDate.of(1977, 5, 25))
     }
 
-    // TODO transaction_mode=SINGLE doesn't work the way I expected it: it doesn't allow cross shard queries either, gotta figure this out
+    // TODO transaction_mode=SINGLE doesn't work the way I expected it: it doesn't allow cross shard queries either, gotta figure this outCrossShardQueryDetectorTest
 //    assertThrows<CrossShardTransactionException> {
       transacter.transaction { session ->
         session.save(DbCharacter("Ian Malcolm", session.load(jp), session.load(jg)))

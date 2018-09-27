@@ -1,5 +1,7 @@
 package misk.jdbc
 
+import com.squareup.moshi.Moshi
+import okhttp3.OkHttpClient
 import okio.Buffer
 import org.junit.Test
 import kotlin.test.assertEquals
@@ -53,7 +55,13 @@ class CrossShardQueryDetectorTest {
 """
 
   @Test fun parseQueryPlans() {
-    val plans = CrossShardQueryDetector().parseQueryPlans(Buffer().writeUtf8(queryPlans)).toList()
+    val detector = CrossShardQueryDetector(
+        OkHttpClient(),
+        Moshi.Builder().build(),
+        DataSourceConfig(type = DataSourceType.VITESS))
+
+    val plans = detector.parseQueryPlans(
+        Buffer().writeUtf8(queryPlans)).toList()
     assertEquals(2, plans.count())
 
     assertTrue(plans[0].isScatter)
