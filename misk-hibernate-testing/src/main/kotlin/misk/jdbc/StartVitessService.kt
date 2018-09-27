@@ -43,8 +43,8 @@ class VitessCluster(val config: DataSourceConfig, moshi: Moshi = Moshi.Builder()
   fun keyspaces(): Map<String, Keyspace> {
     val keyspaceDirs = Files.list(schemaDir).toList().filter { Files.isDirectory(it) }
     return keyspaceDirs.associateBy(
-            { it.fileName.toString() },
-            { keyspaceAdapter.fromJson(it.resolve("vschema.json").source().buffer())!! })
+        { it.fileName.toString() },
+        { keyspaceAdapter.fromJson(it.resolve("vschema.json").source().buffer())!! })
   }
 }
 
@@ -153,7 +153,7 @@ internal class StartVitessService(val config: DataSourceConfig) : AbstractIdleSe
     val clusters = CacheBuilder.newBuilder()
         .removalListener<DataSourceConfig, DockerVitessCluster> { it.value.stop() }
         .build(CacheLoader.from { config: DataSourceConfig? ->
-          DockerVitessCluster(VitessCluster(config!!), docker)
+          config?.let { DockerVitessCluster(VitessCluster(config), docker) }
         })
 
     /**
