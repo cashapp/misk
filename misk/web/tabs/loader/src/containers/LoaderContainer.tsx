@@ -37,7 +37,7 @@ class LoaderContainer extends React.Component<ILoaderProps> {
     if (adminTabs) {
       return (
         <div>
-          <TopbarComponent homeName="URL Shortener" homeUrl="/_admin/" links={adminTabs} menuButtonShow={true}/>
+          <TopbarComponent links={adminTabs}/>
           <TabContainer>
             {Object.entries(adminTabs).map(([key,tab]) => (<ScriptComponent key={key} tab={tab}/>))}
           </TabContainer>
@@ -46,7 +46,7 @@ class LoaderContainer extends React.Component<ILoaderProps> {
     } else {
       return (
         <div>
-          <TopbarComponent homeName="Misk" homeUrl="/_admin/" menuButtonShow={true}/>
+          <TopbarComponent/>
           <TabContainer>
             <OfflineComponent title={"Error Loading Multibound Admin Tabs"} endpoint={apiUrl}/>
           </TabContainer>

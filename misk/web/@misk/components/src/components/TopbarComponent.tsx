@@ -7,10 +7,7 @@ import styled from "styled-components"
 import { ResponsiveContainer } from "../containers"
 
 export interface ITopbarProps {
-  homeName: string
-  homeUrl: string
   links?: IMiskAdminTab[]
-  menuButtonShow?: boolean
 }
 
 const MiskNavbar = styled(Navbar)`
@@ -141,25 +138,57 @@ export class TopbarComponent extends React.Component<ITopbarProps, {}> {
 
   public render() {
     const { isOpen } = this.state
-    const { homeName, homeUrl, links, menuButtonShow } = this.props
+    const { links } = this.props
     return(
       <MiskNavbar>
-        {menuButtonShow === true ? <MiskMenuButton onClick={this.handleClick}><MiskMenuIcon iconSize={32} icon={isOpen ? IconNames.CROSS : IconNames.MENU}/></MiskMenuButton>:<div/>}
+        <MiskMenuButton onClick={this.handleClick}><MiskMenuIcon iconSize={32} icon={isOpen ? IconNames.CROSS : IconNames.MENU}/></MiskMenuButton>
         <ResponsiveContainer>
           <MiskNavbarGroup align={Alignment.LEFT} className="bp3-dark">
-            <MiskNavbarLink to={homeUrl}><MiskNavbarHeading>{homeName}</MiskNavbarHeading></MiskNavbarLink>
+            {links ? this.renderMenuLink(links) : <MiskNavbarHeading>Misk</MiskNavbarHeading>}
             <MiskNavbarDivider/>
           </MiskNavbarGroup>
         </ResponsiveContainer>
         <MiskCollapse isOpen={isOpen} keepChildrenMounted={true}>
           <ResponsiveContainer>
             <MiskMenu>
-              {links ? Object.entries(this.groupBy(links, "category")).map(([categoryName, categoryLinks]) => this.renderMenuCategory(categoryName, categoryLinks)) : <span>Loading...</span>}
+              {links ? this.renderMenuCategories(links) : <span>Loading...</span>}
             </MiskMenu>
           </ResponsiveContainer>
         </MiskCollapse>
       </MiskNavbar>
     )
+  }
+
+  private renderMenuLink(links: IMiskAdminTab[]) {
+    const homeLink : IMiskAdminTab = links.find((link: IMiskAdminTab) => link.slug === "home")
+    if (homeLink) {
+      return (<MiskNavbarLink to={homeLink.url_path_prefix}><MiskNavbarHeading>{homeLink.name}</MiskNavbarHeading></MiskNavbarLink>)
+    } else {
+      console.log("[MISK][WARN] Multibind AdminTab with slug `home` to add custom service name and link beside menu button.")
+      return (<MiskNavbarHeading>Misk</MiskNavbarHeading>)
+    }
+  }
+
+  private renderMenuCategories(links: IMiskAdminTab[]) {
+    const categories : Array<[string, IMiskAdminTab[]]> = Object.entries(this.groupBy(links, "category"))
+    return (categories.map(([categoryName, categoryLinks]) => this.renderMenuCategory(categoryName, categoryLinks)))
+  }
+
+  private renderMenuCategory(categoryName: string, categoryLinks: IMiskAdminTab[]) {
+    const sortedCategoryLinks = this.sortBy(categoryLinks, "name").filter((link: IMiskAdminTab) => link.category !== "")
+    return (
+      <div>
+        <MiskMenuCategory>{categoryName}</MiskMenuCategory>
+        <MiskMenuDivider/>
+        <MiskMenuLinks>
+          {sortedCategoryLinks.map((link: IMiskAdminTab) => <MiskMenuLink key={link.slug} onClick={this.handleClick} to={link.url_path_prefix}>{link.name}</MiskMenuLink>)}
+        </MiskMenuLinks>
+      </div>
+    )
+  }
+
+  private handleClick = () => {
+    this.setState({...this.state, isOpen: !this.state.isOpen})
   }
 
   private groupBy = (items: any, key: any) => items.reduce(
@@ -180,21 +209,5 @@ export class TopbarComponent extends React.Component<ITopbarProps, {}> {
       else { return 0 }
     })
   )
-
-  private renderMenuCategory(name: string, links: any) {
-    return (
-      <div>
-        <MiskMenuCategory>{name}</MiskMenuCategory>
-        <MiskMenuDivider/>
-        <MiskMenuLinks>
-          {this.sortBy(links, "name").map((link: IMiskAdminTab) => <MiskMenuLink key={link.slug} onClick={this.handleClick} to={link.url_path_prefix}>{link.name}</MiskMenuLink>)}
-        </MiskMenuLinks>
-      </div>
-    )
-  }
-
-  private handleClick = () => {
-    this.setState({...this.state, isOpen: !this.state.isOpen})
-  }
 }
   

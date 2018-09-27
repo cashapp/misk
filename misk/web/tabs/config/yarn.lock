@@ -45,10 +45,10 @@
     reflect-metadata "^0.1.12"
     tslib "^1.8.1"
 
-"@misk/common@^0.0.46":
-  version "0.0.46"
-  resolved "https://registry.yarnpkg.com/@misk/common/-/common-0.0.46.tgz#c10e2fa830df3d280b186e4df1f8635c3df48e35"
-  integrity sha512-Txv3PR5o40DfKXayDWqEzzpSSlJ/WdeNi12fwoRbA/moYTFB/9aeiqX7emp+JTSxIillTPllrg7ESQLAMYDgsQ==
+"@misk/common@^0.0.47":
+  version "0.0.47"
+  resolved "https://registry.yarnpkg.com/@misk/common/-/common-0.0.47.tgz#db438e0ff79336053e82553b19f0b2e469b34cff"
+  integrity sha512-rftYSkYaRRQJdrnoQEgQWEHkPrUHQjGYl0Fh7iy5tFmAIIX+c9NNlQPwtXNBiDYP8z46OVs9VhOo10da+GlKng==
   dependencies:
     "@blueprintjs/core" "^3.6.1"
     "@blueprintjs/icons" "^3.1.0"
@@ -71,12 +71,12 @@
     skeleton-css "^2.0.4"
     styled-components "^3.4.9"
 
-"@misk/components@^0.0.45":
-  version "0.0.45"
-  resolved "https://registry.yarnpkg.com/@misk/components/-/components-0.0.45.tgz#dad073e0ee45ffe5e9339b4a3e249287e0d862a7"
-  integrity sha512-ECN9OFHLlnxA0AdFt3fCv2k/eKLl9cGsnBSHXognTXkJaRTzlCV23qXhQVZxIjP0YWdZoxzrgU3ck1yQoO8jAw==
+"@misk/components@^0.0.46":
+  version "0.0.46"
+  resolved "https://registry.yarnpkg.com/@misk/components/-/components-0.0.46.tgz#8e5c1ee65dc291e83a17cf1172a4f613ec3b3cbb"
+  integrity sha512-Oz5NZ+Gxm8zn4VQyG7YswplcMzVnnLBzcYqdCs0UGrWMCZ1/qr5blcPQ67t+LkTyWN8g+n8EcVieF9QI+L21yg==
   dependencies:
-    "@misk/common" "^0.0.46"
+    "@misk/common" "^0.0.47"
 
 "@misk/dev@^0.0.44":
   version "0.0.44"

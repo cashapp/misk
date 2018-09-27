@@ -18,6 +18,5 @@ class UrlShortenerServiceModule : KAbstractModule() {
 
     multibind<WebActionEntry>().toInstance(WebActionEntry<CreateShortUrlWebAction>())
     multibind<WebActionEntry>().toInstance(WebActionEntry<ShortUrlWebAction>())
-
   }
 }

@@ -10,14 +10,6 @@ interface IMiskAdminTab {
   url_path_prefix: string
 }
 
-interface IMiskAdminTabs {
-  [key:string]: IMiskAdminTab
-}
-
-interface IMiskAdminTabCategories {
-  [key:string]: IMiskAdminTab[]
-}
-
 enum IMiskBinderKeys {
   NavTopbarMenu = "NavTopbarMenu",
   TabEntry = "TabEntry",
@@ -42,4 +34,4 @@ interface IMiskWindow extends Window {
   MiskBinders: any
 }
 
-export { IMiskAdminTab, IMiskAdminTabs, IMiskAdminTabCategories, IMiskBinder, IMiskBinderKeys, IMiskWindow }
+export { IMiskAdminTab, IMiskBinder, IMiskBinderKeys, IMiskWindow }

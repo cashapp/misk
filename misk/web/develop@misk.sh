@@ -6,7 +6,12 @@ server () {
   python -c $'import SimpleHTTPServer;\nmap = SimpleHTTPServer.SimpleHTTPRequestHandler.extensions_map;\nmap[""] = "text/plain";\nfor key, value in map.items():\n\tmap[key] = value + ";charset=UTF-8";\nSimpleHTTPServer.test();' "$port"
 }
 
-cd @misk/web
+FATAL () {
+  echo "[FATAL] Run ./updateLocalCache.sh in @misk/ to build local dev cache"
+  exit 1
+}
+
+cd @misk/web || FATAL
 # If port is changed, it must be updated in Misk::AdminTabModule multibindings
 server 9100
 
