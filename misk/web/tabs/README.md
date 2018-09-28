@@ -1,12 +1,40 @@
 How to make a New Misk Tab
----
+===
 
-- For this document, the following tab properties are used for example
+- For this guide, the following tab properties are used for example
   - name: T-Rex Food Log
   - slugified name: trexfoodlog
   - port: 30420
   - action name: TRexFoodLogAction
-- Duplicate the `tabs/example` tab
+
+
+Directory Structure
+---
+- Any new tabs or `@misk/` packages live in a top level `web/` directory of the same level as your service's `src`, `build`, or `out` directories. 
+- All tabs live in `web/tabs/` and `@misk/` packages live in `web/@misk/`. For most services, you will only need a `web/tabs/` directory.
+- This structure is assumed by the Docker build containers and scripts. An example is included below.
+
+```
+  trex-service/
+    build/
+    out/
+    src/
+    web/
+      tabs/
+        trexangermanagement/
+        trexhealthcheck/
+        trexfoodlog/
+          lib/
+          node_modules/
+          src/
+            index.ts
+
+          package.json
+```
+
+Wiring up a New Tab
+---
+- Copy the `tabs/example` tab in the [misk/misk/web repo](https://github.com/square/misk/tree/master/misk/web/tabs/example) to your service's `web/tabs` directory.
 - Open `package.json` and update the following fields using your new tab name, slug, port...etc.
   - name: `misktab-trexfoodlog`. Package name must only have lowercase letters.
   - miskTabWebpack:
@@ -44,12 +72,15 @@ Configuring the Misk Service
     - Else, install it in your main service module.
 
   ```Kotlin
-  multibind<WebActionEntry>().toInstance(WebActionEntry<NewTabAction>())
+  multibind<WebActionEntry>().toInstance(WebActionEntry<TRexFoodLogAction>())
   multibind<AdminTab>().toInstance(AdminTab(
       name = "T-Rex Food Log",
       slug = "trexfoodlog",
-      url_path_prefix = "/_admin/trexfoodlog/"
+      url_path_prefix = "/_admin/trexfoodlog/",
+      category = "T-Rex"
   ))
+  multibind<StaticResourceEntry>()
+      .toInstance(StaticResourceEntry("/_tab/trexfoodlog/", "classpath:/web/_tab/trexfoodlog"))
   ...
   if (environment == Environment.DEVELOPMENT) {
     ...
@@ -62,21 +93,100 @@ Configuring the Misk Service
     ...
     multibind<WebActionEntry>().toInstance(
       WebActionEntry<StaticResourceAction>("/_tab/trexfoodlog/"))
-    multibind<StaticResourceEntry>()
-      .toInstance(StaticResourceEntry("/_tab/trexfoodlog/", "classpath:/web/_tab/trexfoodlog"))
     ...
   }
   ```
 
+  - The following explains why each multibinding is used:
+    - WebActionEntry: Installs and configures a WebAction with optional prefix.
+    - AdminTab: Metadata of the tab that is used to generate dashbaord menus and other views.
+    - WebProxyAction: an endpoint that is used in tab development to forward tab requests to a Webpack-Dev-Server which is continuously building the tab as you edit.
+    - WebProxyEntry: Binds a WebProxyAction to a specific `url_prefix` to match on and a URL to forward matching requests to. This is usually a local port for the tab's Webpack-Dev-Server
+    - StaticResourceAction: returns the most recently compiled web code from either the `classpath` or from the jar.
+    - StaticResourceEntry: Binds a StaticResourceAction to a url_prefix and a resource location to find the requested web assets in the `classpath` or jar. This should be bound regardless of environment since `WebProxyAction` will fall back to look at static resources if a Webpack-Dev-Server is not running.
+  - Environment Differences
+    - Live Editing a Tab: Use Webpack-Dev-Server in the specific tab you're editing to see edits live in the browser. The service should be run with Development environment and WebProxyAction bound so that all requests attempt to find a Webpack-Dev-Server. If requests fail, they return any matching static resources from `classpath` or jar. This is why a StaticResourceEntry must be bound regardless of environment.
+    - In Development Mode but not Editing: WebProxyAction will still be bound but any requests that do not find a Webpack-Dev-Server will fall back to the previously compiled static resources in `classpath` or jar.
+    - In Production: All web assets are served by StaticResourceAction from jar.
+
 Adding your Tab Webpack Build to Gradle
 ---
+Tab builds are kicked off by Gradle but done within a Docker container for portability across environments. The following steps will update your Gradle to be able to start the `misk-node` Docker container and to build your tab in it.
 
-In your service's main `build.gradle` file you will need to add a task that will build your tab with Webpack, cache the resulting compiled code, and rebuild if the source code changes. Adjust the template below to fit your service's file structure.
+Add the following code to your service's `dependencies.gradle`.
+
+```JSON
+  "dockerGradlePlugin": "gradle.plugin.com.palantir.gradle.docker:gradle-docker:0.20.1",
+```
+
+If this is an internal Square service, leave the value of the above blank and pull the latest `polyrepo` pinned version with `./polyrepo deb-upgrade {service name}`.
+
+In your service's central `build.gradle` add the following where appropriate. Primarily, you may need to add the maven repository pointing to `https://plugins.gradle.org/m2/` and `classpath dep.dockerGradlePlugin` to your dependencies. If your service has no subprojects, that section can be ignored.
 
 ```Gradle
+  ...
+  apply from: new File("./dependencies.gradle")
+  ...
+  subprojects {
+    buildscript {
+      repositories {
+        ...
+        maven {
+          url "https://plugins.gradle.org/m2/"
+        }
+      }
+
+      dependencies {
+        ...
+        classpath dep.dockerGradlePlugin
+        ...
+      }
+    }
+    repositories {
+      ...
+      maven {
+        url "https://plugins.gradle.org/m2/"
+      }
+    }
+  }
+
+```
+
+In your service's project `build.gradle` file you will need to add the following to configure the Docker plugin, start the container, and let Gradle spin off a build if there is a change in your tab code. Adjust the template below to fit your service's file structure and to use the most up to date [Docker image version](https://hub.docker.com/r/squareup/misk-node/tags/).
+
+```Gradle
+  apply plugin: "com.palantir.docker-run"
+  
+  ...
+  def dockerContainerName = "{service}-{project}-gradle-${new Date().format("YMD-HMS")}"
+
+  configurations {
+    dockerRun {
+      name "${dockerContainerName}"
+      image 'squareup/misk-node:0.0.1'
+      volumes 'web': '/web'
+      daemonize true
+      clean true
+    }
+  }
+
+  ...
+
+  sourceSets {
+    ...
+    main.resources {
+      srcDirs += [
+        'web/tabs/trexangermanagement/lib',
+        'web/tabs/trexhealthcheck/lib',
+        'web/tabs/trexfoodlog/lib'
+      ]
+      exclude '**/node_modules'
+    }
+  }
+
+  ...
+
   task webpackTabsTRexFoodLog(type: Exec) {
-    inputs.file("web/tabs/trexfoodlog/package-lock.json").
-            withPathSensitivity(PathSensitivity.RELATIVE)
     inputs.file("web/tabs/trexfoodlog/yarn.lock").withPathSensitivity(PathSensitivity.RELATIVE)
     inputs.dir("web/tabs/trexfoodlog/src").withPathSensitivity(PathSensitivity.RELATIVE)
     inputs.file("web/tabs/trexfoodlog/webpack.config.js").
@@ -84,25 +194,16 @@ In your service's main `build.gradle` file you will need to add a task that will
     outputs.dir("web/tabs/trexfoodlog/dist")
     outputs.cacheIf { true }
 
-    workingDir "web/tabs/trexfoodlog"
-    commandLine "yarn", "gradle"
+    executable "sh"
+    args "-c", "docker exec ${dockerContainerName} sh -c 'cd /web/tabs/trexfoodlog; yarn gradle'"
   }
 
   jar.dependsOn webpackTabsTRexFoodLog
+  jar.doLast { 'dockerStop' }
 
 ```
 
 You'll notice the build runs the command `yarn gradle`. By default in the Example tab you used as a starter, `yarn gradle` expands to `yarn install && yarn build` so that even on CI (continuous integration) systems where `node_modules` have not been installed yet, the build still succeeds.
-
-You will also have to add a `from` to the service's jar task so that your compiled tab code is included in the service jar. Adjust the template below to fit your service's file structure.
-
-```Gradle
-  jar {
-    into("web/") {
-      from("./web/tabs/trexfoodlog/dist/")
-    }
-  }
-```
 
 To confirm that your tab is shipping in the jar, you can run the following commands to build the jar, find it in your filesystem, browse the included files, and confirm that related compiled JS code is in your jar.
 
@@ -120,20 +221,22 @@ Loading Data into your Misk Tab
 
 Building your Tab
 ---
-1. Run `./develop@misk.sh` in `web/` directory. This builds all `@misk/` packages and starts `@misk/` packages dev server)
-1. Run `./build.sh` in `web/` directory. This installs and builds all `@misk/` packages and Tabs
-1. For any tab that you'll be doing active development on, open a new Tmux/Terminal session and run
+1. Kick off an initial build with Gradle `./gradlew clean jar`.
+1. Start your primary Misk service in IntelliJ, or use `UrlShortenerService` for testing.
+1. Open up [`http://localhost:8080/_admin/`](http://localhost:8080/_admin/) in the browser.
 
-  ```
-  $ cd tabs/trexfoodlog
-  $ yarn start
-  ```
+Developing your Tab
+---
+1. Follow the steps above to build all local tabs and start your service.
+1. Run the following commands to spin up a Webpack-Dev-Server in Docker instance to serve live edits to your service.
 
-1. Start your primary Misk service in IntelliJ, or use `UrlShortenerService` for testing
-1. Open up [`http://localhost:8080/_admin/`](http://localhost:8080/_admin/) in the browser
+```Bash
+
+
+```
 
 Other Development Notes
 ---
 - Notice in the Misk multibindings that the AdminTabAction url had the prefix `_admin/` but all other multibindings had the prefix `_tab/`. This allows you to develop your tab without any of the surrounding Admin dashboard UI or overhead. Use the respective link below to open your tab in the browser.
   - [`http://localhost:8080/_admin/trexfoodlog/`](http://localhost:8080/_admin/trexfoodlog/): full dashboard UI with menu, other tabs...etc. Before the tab is pushed in production, extensive testing should be done here to ensure there are no bugs when the tab is loaded into the dashboard.
-  - [`http://localhost:8080/_tab/trexfoodlog/`](http://localhost:8080/_tab/trexfoodlog/): develop your tab in the full browser window. All functionality and styling should end up being identical to when the tab is loaded in the dashboard.
+  - [`http://localhost:8080/_tab/trexfoodlog/`](http://localhost:8080/_tab/trexfoodlog/): develop your tab in the full browser window without dashboard nav bar or other UI. All functionality and styling should end up being identical to when the tab is loaded in the dashboard.

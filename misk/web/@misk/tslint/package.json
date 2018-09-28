@@ -10,8 +10,9 @@
   },
   "scripts": {
     "build": "mkdir -p lib/web/@misk/tslint && cp package.json README.md tslint.base.json lib/web/@misk/tslint",
-    "gradle": "yarn build",
-    "prepare": "rm -rf lib && yarn build"
+    "clean": "rm -rf lib node_modules package-lock.json yarn.lock",
+    "gradle": "yarn clean && yarn build",
+    "prepare": "yarn gradle"
   },
   "dependencies": {
     "tslint": "^5.11.0",

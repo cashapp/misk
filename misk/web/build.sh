@@ -1,9 +1,8 @@
 #!/bin/sh
 # Build all @misk/ packages and tabs
+# Run in web/ directory
 
-for dir in $(pwd)/*/*
-do
+for dir in "$(pwd)"/*/*; do
     dir=${dir%*/}
-    [ -d $dir ] && echo $dir
-    [ -d $dir ] && bash -c "cd $dir; yarn install; yarn build"
+    [ -d "$dir" ] && echo "[BUILD] $dir" && sh -c "cd $dir; yarn gradle"
 done

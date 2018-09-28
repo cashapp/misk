@@ -10,8 +10,9 @@
   },
   "scripts": {
     "build": "mkdir -p lib/web/@misk/dev && cp package.json README.md index.js externals.js tsconfig.base.json webpack.config.tab.js lib/web/@misk/dev",
-    "gradle": "yarn build",
-    "prepare": "rm -rf lib && yarn build"
+    "clean": "rm -rf lib node_modules package-lock.json yarn.lock",
+    "gradle": "yarn clean && yarn build",
+    "prepare": "yarn gradle"
   },
   "dependencies": {
     "@types/node": "^10.11.0",
