@@ -1,16 +1,14 @@
 import { Alignment, Button, Collapse, Icon, Navbar, NavbarDivider, NavbarGroup, NavbarHeading } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
-import { IMiskAdminTab } from "@misk/common"
+import { IMiskAdminTab, IMiskServiceMetadata } from "@misk/common"
 import * as React from "react"
 import { Link } from "react-router-dom"
 import styled from "styled-components"
 import { ResponsiveContainer } from "../containers"
 
 export interface ITopbarProps {
-  homeName: string
-  homeUrl: string
+  serviceMetadata?: IMiskServiceMetadata
   links?: IMiskAdminTab[]
-  menuButtonShow?: boolean
 }
 
 const MiskNavbar = styled(Navbar)`
@@ -141,25 +139,55 @@ export class TopbarComponent extends React.Component<ITopbarProps, {}> {
 
   public render() {
     const { isOpen } = this.state
-    const { homeName, homeUrl, links, menuButtonShow } = this.props
+    const { links, serviceMetadata } = this.props
     return(
       <MiskNavbar>
-        {menuButtonShow === true ? <MiskMenuButton onClick={this.handleClick}><MiskMenuIcon iconSize={32} icon={isOpen ? IconNames.CROSS : IconNames.MENU}/></MiskMenuButton>:<div/>}
+        <MiskMenuButton onClick={this.handleClick}><MiskMenuIcon iconSize={32} icon={isOpen ? IconNames.CROSS : IconNames.MENU}/></MiskMenuButton>
         <ResponsiveContainer>
           <MiskNavbarGroup align={Alignment.LEFT} className="bp3-dark">
-            <MiskNavbarLink to={homeUrl}><MiskNavbarHeading>{homeName}</MiskNavbarHeading></MiskNavbarLink>
+            {this.renderMenuLink(serviceMetadata)}
             <MiskNavbarDivider/>
           </MiskNavbarGroup>
         </ResponsiveContainer>
         <MiskCollapse isOpen={isOpen} keepChildrenMounted={true}>
           <ResponsiveContainer>
             <MiskMenu>
-              {links ? Object.entries(this.groupBy(links, "category")).map(([categoryName, categoryLinks]) => this.renderMenuCategory(categoryName, categoryLinks)) : <span>Loading...</span>}
+              {links ? this.renderMenuCategories(links) : <span>Loading...</span>}
             </MiskMenu>
           </ResponsiveContainer>
         </MiskCollapse>
       </MiskNavbar>
     )
+  }
+
+  private renderMenuLink(serviceMetadata: IMiskServiceMetadata) {
+    if (serviceMetadata) {
+      return (<MiskNavbarLink to={serviceMetadata.url}><MiskNavbarHeading>{serviceMetadata.name}</MiskNavbarHeading></MiskNavbarLink>)
+    } else {
+      return (<MiskNavbarHeading>Misk</MiskNavbarHeading>)
+    }
+  }
+
+  private renderMenuCategories(links: IMiskAdminTab[]) {
+    const categories : Array<[string, IMiskAdminTab[]]> = Object.entries(this.groupBy(links, "category"))
+    return (categories.map(([categoryName, categoryLinks]) => this.renderMenuCategory(categoryName, categoryLinks)))
+  }
+
+  private renderMenuCategory(categoryName: string, categoryLinks: IMiskAdminTab[]) {
+    const sortedCategoryLinks = this.sortBy(categoryLinks, "name").filter((link: IMiskAdminTab) => link.category !== "")
+    return (
+      <div>
+        <MiskMenuCategory>{categoryName}</MiskMenuCategory>
+        <MiskMenuDivider/>
+        <MiskMenuLinks>
+          {sortedCategoryLinks.map((link: IMiskAdminTab) => <MiskMenuLink key={link.slug} onClick={this.handleClick} to={link.url_path_prefix}>{link.name}</MiskMenuLink>)}
+        </MiskMenuLinks>
+      </div>
+    )
+  }
+
+  private handleClick = () => {
+    this.setState({...this.state, isOpen: !this.state.isOpen})
   }
 
   private groupBy = (items: any, key: any) => items.reduce(
@@ -180,21 +208,5 @@ export class TopbarComponent extends React.Component<ITopbarProps, {}> {
       else { return 0 }
     })
   )
-
-  private renderMenuCategory(name: string, links: any) {
-    return (
-      <div>
-        <MiskMenuCategory>{name}</MiskMenuCategory>
-        <MiskMenuDivider/>
-        <MiskMenuLinks>
-          {this.sortBy(links, "name").map((link: IMiskAdminTab) => <MiskMenuLink key={link.slug} onClick={this.handleClick} to={link.url_path_prefix}>{link.name}</MiskMenuLink>)}
-        </MiskMenuLinks>
-      </div>
-    )
-  }
-
-  private handleClick = () => {
-    this.setState({...this.state, isOpen: !this.state.isOpen})
-  }
 }
   

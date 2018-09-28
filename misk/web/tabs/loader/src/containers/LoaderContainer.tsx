@@ -13,6 +13,7 @@ export interface ILoaderProps {
   router: RouterState
   getTabs: (url: string) => any
   getComponent: (tab: IMiskAdminTab) => any
+  getServiceMetadata: (url: string) => any
 }
 
 const TabContainer = styled(ResponsiveContainer)`
@@ -21,11 +22,13 @@ const TabContainer = styled(ResponsiveContainer)`
   padding-left: 5px;
 `
 
-const apiUrl = "/api/admintabs"
+const tabsUrl = "/api/admintabs"
+const serviceUrl = "/api/service/metadata"
 
 class LoaderContainer extends React.Component<ILoaderProps> {
   async componentDidMount() {
-    this.props.getTabs(apiUrl)
+    this.props.getTabs(tabsUrl)
+    this.props.getServiceMetadata(serviceUrl)
   }
 
   buildTabRouteMountingDiv(tab: IMiskAdminTab) {
@@ -33,11 +36,14 @@ class LoaderContainer extends React.Component<ILoaderProps> {
   }
 
   render() {
-    const { adminTabs } = this.props.loader
-    if (adminTabs) {
+    const { adminTabs, serviceMetadata } = this.props.loader
+    let unavailableEndpointUrls = ""
+    if (!adminTabs) { unavailableEndpointUrls += tabsUrl + " " }
+    if (!serviceMetadata) { unavailableEndpointUrls += serviceUrl + " " }
+    if (adminTabs && serviceMetadata) {
       return (
         <div>
-          <TopbarComponent homeName="URL Shortener" homeUrl="/_admin/" links={adminTabs} menuButtonShow={true}/>
+          <TopbarComponent links={adminTabs} serviceMetadata={serviceMetadata}/>
           <TabContainer>
             {Object.entries(adminTabs).map(([key,tab]) => (<ScriptComponent key={key} tab={tab}/>))}
           </TabContainer>
@@ -46,9 +52,9 @@ class LoaderContainer extends React.Component<ILoaderProps> {
     } else {
       return (
         <div>
-          <TopbarComponent homeName="Misk" homeUrl="/_admin/" menuButtonShow={true}/>
+          <TopbarComponent/>
           <TabContainer>
-            <OfflineComponent title={"Error Loading Multibound Admin Tabs"} endpoint={apiUrl}/>
+            <OfflineComponent title={"Error Loading Multibound Admin Tabs"} endpoint={unavailableEndpointUrls}/>
           </TabContainer>
         </div>
       )
@@ -63,6 +69,7 @@ const mapStateToProps = (state: IState) => ({
 
 const mapDispatchToProps = {
   getComponent: dispatchLoader.getOneComponent,
+  getServiceMetadata: dispatchLoader.getServiceMetadata,
   getTabs: dispatchLoader.getAllTabs,
 }
 

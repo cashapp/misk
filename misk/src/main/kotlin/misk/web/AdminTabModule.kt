@@ -4,6 +4,7 @@ import misk.environment.Environment
 import misk.inject.KAbstractModule
 import misk.web.actions.AdminTab
 import misk.web.actions.AdminTabAction
+import misk.web.actions.ServiceMetadataAction
 import misk.web.actions.WebActionEntry
 import misk.web.interceptors.WideOpenDevelopmentInterceptorFactory
 import misk.web.metadata.ConfigMetadataModule
@@ -28,6 +29,7 @@ class AdminTabModule(val environment: Environment) : KAbstractModule() {
     // Misc. Necessary Modules and Bindings for AdminTabModule
     install(WebProxyActionModule())
     multibind<WebActionEntry>().toInstance(WebActionEntry<AdminTabAction>())
+    multibind<WebActionEntry>().toInstance(WebActionEntry<ServiceMetadataAction>())
     // Adds open CORS headers in development to allow through API calls from webpack servers
     multibind<NetworkInterceptor.Factory>().to<WideOpenDevelopmentInterceptorFactory>()
 
