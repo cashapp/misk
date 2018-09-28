@@ -1,5 +1,6 @@
 package misk.hibernate
 
+import misk.jdbc.DataSourceConfig
 import misk.healthchecks.HealthCheck
 import misk.inject.KAbstractModule
 import misk.inject.asSingleton

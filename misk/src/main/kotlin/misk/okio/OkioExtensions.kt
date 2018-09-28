@@ -1,6 +1,10 @@
 package misk.okio
 
+import okio.Buffer
 import okio.BufferedSource
+import okio.ByteString
+import kotlin.coroutines.experimental.SequenceBuilder
+import kotlin.coroutines.experimental.buildSequence
 
 fun BufferedSource.forEachBlock(buffer: ByteArray, f: (buffer: ByteArray, bytesRead: Int) -> Unit) {
   var bytesRead = read(buffer)
@@ -12,4 +16,24 @@ fun BufferedSource.forEachBlock(buffer: ByteArray, f: (buffer: ByteArray, bytesR
 
 fun BufferedSource.forEachBlock(blockSize: Int, f: (buffer: ByteArray, bytesRead: Int) -> Unit) {
   forEachBlock(ByteArray(blockSize), f)
+}
+
+fun BufferedSource.split(separator: ByteString) : Sequence<Buffer> {
+  val source = this
+  return buildSequence {
+    while (true) {
+      val indexOf = indexOf(separator)
+      if (indexOf >= 0) {
+        val buffer = Buffer()
+        source.read(buffer, indexOf)
+        yield(buffer)
+        source.skip(separator.size.toLong())
+      } else {
+        break
+      }
+    }
+    val buffer = Buffer()
+    source.readAll(buffer)
+    yield(buffer)
+  }
 }

@@ -12,7 +12,7 @@ import javax.inject.Inject
 @MiskTest(startService = true)
 class TimestampListenerTest {
   @MiskTestModule
-  val module = MoviesTestModule()
+  val module = MoviesTestModule(disableCrossShardQueryDetector = true)
 
   @Inject @Movies lateinit var transacter: Transacter
   @Inject lateinit var queryFactory: Query.Factory

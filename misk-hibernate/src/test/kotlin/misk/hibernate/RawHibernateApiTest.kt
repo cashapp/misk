@@ -12,7 +12,7 @@ import javax.inject.Inject
 @MiskTest(startService = true)
 class RawHibernateApiTest {
   @MiskTestModule
-  val module = MoviesTestModule()
+  val module = MoviesTestModule(disableCrossShardQueryDetector = true)
 
   @Inject @Movies lateinit var sessionFactory: SessionFactory
 
@@ -32,7 +32,7 @@ class RawHibernateApiTest {
       val criteria = criteriaBuilder.createQuery(DbMovie::class.java)
       val queryRoot = criteria.from(DbMovie::class.java)
       criteria.where(criteriaBuilder.notEqual(queryRoot.get<String>("name"), "Star Wars"))
-      val resultList: List<DbMovie> = session.createQuery(criteria).resultList
+      val resultList = session.createQuery(criteria).resultList
       assertThat(resultList.map { it.name }).containsExactly("Jurassic Park")
     }
   }

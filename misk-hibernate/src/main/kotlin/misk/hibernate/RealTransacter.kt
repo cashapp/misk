@@ -4,6 +4,10 @@ import com.google.common.collect.ImmutableSet
 import io.opentracing.Tracer
 import io.opentracing.tag.Tags
 import misk.backoff.ExponentialBackoff
+import misk.jdbc.DataSourceConfig
+import misk.jdbc.DataSourceType
+import misk.jdbc.map
+import misk.jdbc.uniqueResult
 import misk.logging.getLogger
 import misk.tracing.traceWithSpan
 import org.hibernate.SessionFactory
@@ -219,7 +223,7 @@ internal class RealTransacter private constructor(
           }
         }
       } else {
-        return function();
+        return function()
       }
     }
 

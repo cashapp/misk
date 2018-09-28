@@ -1,9 +1,16 @@
 package misk.hibernate
 
 import com.google.common.util.concurrent.Service
+import com.squareup.moshi.Moshi
+import misk.jdbc.VitessScatterDetector
+import misk.jdbc.DataSourceConfig
+import misk.jdbc.DataSourceDecorator
+import misk.jdbc.StartVitessService
+import misk.jdbc.TruncateTablesService
 import misk.inject.KAbstractModule
 import misk.inject.asSingleton
 import misk.inject.toKey
+import okhttp3.OkHttpClient
 import javax.inject.Provider
 import kotlin.reflect.KClass
 
@@ -15,11 +22,15 @@ import kotlin.reflect.KClass
 class HibernateTestingModule(
   private val qualifier: KClass<out Annotation>,
   private val startUpStatements: List<String> = listOf(),
-  private val shutDownStatements: List<String> = listOf()
+  private val shutDownStatements: List<String> = listOf(),
+  val disableCrossShardQueryDetector: Boolean = false
 ) : KAbstractModule() {
   override fun configure() {
     val truncateTablesServiceKey = TruncateTablesService::class.toKey(qualifier)
     val startVitessServiceKey = StartVitessService::class.toKey(qualifier)
+
+    val crossShardQueryDetectorKey = VitessScatterDetector::class.toKey(qualifier)
+    val crossShardQueryDetectorProvider = getProvider(crossShardQueryDetectorKey)
 
     val configKey = DataSourceConfig::class.toKey(qualifier)
     val configProvider = getProvider(configKey)
@@ -33,6 +44,20 @@ class HibernateTestingModule(
       StartVitessService(config = configProvider.get())
     })
 
+    val moshiProvider = getProvider(Moshi::class.java)
+    val okHttpClientProvider = getProvider(OkHttpClient::class.java)
+    bind(crossShardQueryDetectorKey).toProvider(Provider<VitessScatterDetector> {
+      VitessScatterDetector(
+          config = configProvider.get(),
+          moshi = moshiProvider.get(),
+          okHttpClient = okHttpClientProvider.get()
+      )
+    }).asSingleton()
+
+    if (!disableCrossShardQueryDetector) {
+      multibind<DataSourceDecorator>(qualifier).to(crossShardQueryDetectorKey)
+    }
+
     multibind<Service>().to(truncateTablesServiceKey)
 
     bind(truncateTablesServiceKey).toProvider(Provider<TruncateTablesService> {
@@ -40,6 +65,7 @@ class HibernateTestingModule(
           qualifier = qualifier,
           config = configProvider.get(),
           transacterProvider = transacterProvider,
+          vitessScatterDetector = crossShardQueryDetectorProvider.get(),
           startUpStatements = startUpStatements,
           shutDownStatements = shutDownStatements)
     })

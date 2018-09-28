@@ -2,7 +2,7 @@ package com.squareup.urlshortener
 
 import misk.client.HttpClientsConfig
 import misk.config.Config
-import misk.hibernate.DataSourceClusterConfig
+import misk.jdbc.DataSourceClusterConfig
 import misk.metrics.backends.prometheus.PrometheusConfig
 import misk.web.WebConfig
 

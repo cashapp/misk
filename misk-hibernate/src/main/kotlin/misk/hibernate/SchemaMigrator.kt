@@ -1,6 +1,7 @@
 package misk.hibernate
 
 import com.google.common.base.Stopwatch
+import misk.jdbc.DataSourceConfig
 import misk.logging.getLogger
 import misk.resources.ResourceLoader
 import org.hibernate.SessionFactory
@@ -70,8 +71,8 @@ internal class SchemaMigrator(
   }
 
   /**
-   * Returns the versions of applied migrations. Throws a [PersistenceException] if the migrations
-   * table has not been initialized.
+   * Returns the versions of applied migrations. Throws a [javax.persistence.PersistenceException]
+   * if the migrations table has not been initialized.
    */
   fun appliedMigrations(): NavigableSet<Int> {
     sessionFactory.openSession().use { session ->
