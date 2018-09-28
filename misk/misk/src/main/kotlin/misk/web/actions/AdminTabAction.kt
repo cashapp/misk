@@ -11,8 +11,6 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * Admin Tab Action
- *
  * Returns all Admin Tabs for primary use in dynamically building the menu bar of the /_admin dashboard
  *
  * Guidelines
