@@ -34,6 +34,7 @@ junitPlatform {
 }
 
 dependencies {
+  compile dep.datasourceProxy
   compile dep.hibernateCore
   compile dep.hikariCp
   compile dep.hsqldb

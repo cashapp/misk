@@ -1,9 +1,13 @@
-package misk.hibernate
+package misk.jdbc
 
 import com.google.common.base.Stopwatch
 import com.google.common.util.concurrent.AbstractIdleService
 import com.google.inject.Key
 import misk.DependentService
+import misk.hibernate.SchemaMigratorService
+import misk.hibernate.Transacter
+import misk.hibernate.shards
+import misk.hibernate.transaction
 import misk.inject.toKey
 import misk.logging.getLogger
 import java.util.*
@@ -27,6 +31,7 @@ internal class TruncateTablesService(
   private val qualifier: KClass<out Annotation>,
   private val config: DataSourceConfig,
   private val transacterProvider: Provider<Transacter>,
+  private val vitessScatterDetector: VitessScatterDetector,
   private val startUpStatements: List<String> = listOf(),
   private val shutDownStatements: List<String> = listOf()
 ) : AbstractIdleService(), DependentService {
@@ -36,12 +41,16 @@ internal class TruncateTablesService(
   override val producedKeys = setOf<Key<*>>()
 
   override fun startUp() {
-    truncateUserTables()
-    executeStatements(startUpStatements, "startup")
+    vitessScatterDetector.disable {
+      truncateUserTables()
+      executeStatements(startUpStatements, "startup")
+    }
   }
 
   override fun shutDown() {
-    executeStatements(shutDownStatements, "shutdown")
+    vitessScatterDetector.disable {
+      executeStatements(shutDownStatements, "shutdown")
+    }
   }
 
   private fun truncateUserTables() {

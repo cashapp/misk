@@ -1,5 +1,6 @@
 package misk.hibernate
 
+import misk.jdbc.DataSourceConfig
 import misk.healthchecks.HealthCheck
 import misk.healthchecks.HealthStatus
 import misk.logging.getLogger

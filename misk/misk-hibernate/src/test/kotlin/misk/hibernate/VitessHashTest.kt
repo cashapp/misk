@@ -1,10 +1,8 @@
 package misk.hibernate
 
-import okio.ByteString
 import okio.ByteString.Companion.decodeHex
-import org.junit.Test
-
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Test
 
 class VitessHashTest {
   @Test

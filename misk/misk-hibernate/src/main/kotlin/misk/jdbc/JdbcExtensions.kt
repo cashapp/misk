@@ -1,4 +1,4 @@
-package misk.hibernate
+package misk.jdbc
 
 import java.sql.ResultSet
 

@@ -3,9 +3,9 @@ package misk.hibernate
 import com.google.common.base.Stopwatch
 import com.google.common.util.concurrent.AbstractIdleService
 import com.google.inject.Key
-import com.zaxxer.hikari.hibernate.HikariConnectionProvider
 import misk.DependentService
-import misk.environment.Environment
+import misk.jdbc.DataSourceConfig
+import misk.jdbc.DataSourceService
 import misk.inject.toKey
 import misk.logging.getLogger
 import okio.ByteString
@@ -28,6 +28,7 @@ import org.hibernate.service.spi.SessionFactoryServiceRegistry
 import org.hibernate.usertype.UserType
 import javax.inject.Provider
 import javax.inject.Singleton
+import javax.sql.DataSource
 import kotlin.reflect.KClass
 import kotlin.reflect.jvm.jvmName
 
@@ -40,13 +41,13 @@ private val logger = getLogger<SessionFactoryService>()
 internal class SessionFactoryService(
   private val qualifier: KClass<out Annotation>,
   private val config: DataSourceConfig,
-  private val environment: Environment,
+  private val dataSource: Provider<DataSource>,
   private val entityClasses: Set<HibernateEntity> = setOf(),
   private val listenerRegistrations: Set<ListenerRegistration> = setOf()
 ) : AbstractIdleService(), DependentService, Provider<SessionFactory> {
   private var sessionFactory: SessionFactory? = null
 
-  override val consumedKeys = setOf<Key<*>>(PingDatabaseService::class.toKey(qualifier))
+  override val consumedKeys = setOf<Key<*>>(DataSourceService::class.toKey(qualifier))
   override val producedKeys = setOf<Key<*>>(SessionFactoryService::class.toKey(qualifier))
 
   override fun startUp() {
@@ -80,60 +81,12 @@ internal class SessionFactoryService(
 
     val registryBuilder = StandardServiceRegistryBuilder(bootstrapRegistryBuilder)
     registryBuilder.run {
-      applySetting(AvailableSettings.DRIVER, config.type.driverClassName)
-      applySetting("hibernate.hikari.driverClassName", config.type.driverClassName)
-      applySetting(AvailableSettings.URL, config.type.buildJdbcUrl(config, environment))
-      if (config.username != null) {
-        applySetting(AvailableSettings.USER, config.username)
-      }
-      if (config.password != null) {
-        applySetting(AvailableSettings.PASS, config.password)
-      }
-      applySetting(AvailableSettings.POOL_SIZE, config.fixed_pool_size.toString())
+      applySetting(AvailableSettings.DATASOURCE, dataSource.get())
       applySetting(AvailableSettings.DIALECT, config.type.hibernateDialect)
       applySetting(AvailableSettings.SHOW_SQL, "false")
       applySetting(AvailableSettings.USE_SQL_COMMENTS, "true")
-      applySetting(AvailableSettings.CONNECTION_PROVIDER, HikariConnectionProvider::class.java.name)
       applySetting(AvailableSettings.USE_GET_GENERATED_KEYS, "true")
       applySetting(AvailableSettings.USE_NEW_ID_GENERATOR_MAPPINGS, "false")
-      applySetting("hibernate.hikari.poolName", qualifier.simpleName)
-
-      if (config.type == DataSourceType.MYSQL || config.type == DataSourceType.VITESS) {
-        applySetting("hibernate.hikari.minimumIdle", "5")
-        if (config.type == DataSourceType.MYSQL) {
-          applySetting("hibernate.hikari.connectionInitSql", "SET time_zone = '+00:00'")
-        }
-
-        // https://github.com/brettwooldridge/HikariCP/wiki/MySQL-Configuration
-        applySetting("hibernate.hikari.dataSource.cachePrepStmts", "true")
-        applySetting("hibernate.hikari.dataSource.prepStmtCacheSize", "250")
-        applySetting("hibernate.hikari.dataSource.prepStmtCacheSqlLimit", "2048")
-        applySetting("hibernate.hikari.dataSource.useServerPrepStmts", "true")
-        applySetting("hibernate.hikari.dataSource.useLocalSessionState", "true")
-        applySetting("hibernate.hikari.dataSource.rewriteBatchedStatements", "true")
-        applySetting("hibernate.hikari.dataSource.cacheResultSetMetadata", "true")
-        applySetting("hibernate.hikari.dataSource.cacheServerConfiguration", "true")
-        applySetting("hibernate.hikari.dataSource.elideSetAutoCommits", "true")
-        applySetting("hibernate.hikari.dataSource.maintainTimeStats", "false")
-      }
-
-      // https://dev.mysql.com/doc/connector-j/8.0/en/connector-j-reference-using-ssl.html
-      if (!config.trust_certificate_key_store_url.isNullOrBlank()) {
-        require(!config.trust_certificate_key_store_password.isNullOrBlank()) {
-          "must provide a trust_certificate_key_store_password"
-        }
-        applySetting(
-            "hibernate.hikari.dataSource.trustCertificateKeyStoreUrl",
-            "${config.trust_certificate_key_store_url}"
-        )
-        applySetting(
-            "hibernate.hikari.dataSource.trustCertificateKeyStorePassword",
-            config.trust_certificate_key_store_password
-        )
-        applySetting("hibernate.hikari.dataSource.verifyServerCertificate", "true")
-        applySetting("hibernate.hikari.dataSource.useSSL", "true")
-        applySetting("hibernate.hikari.dataSource.requireSSL", "true")
-      }
     }
 
     val registry = registryBuilder.build()

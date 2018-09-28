@@ -7,6 +7,9 @@ import misk.DependentService
 import misk.MiskServiceModule
 import misk.config.Config
 import misk.config.MiskConfig
+import misk.jdbc.DataSourceConfig
+import misk.jdbc.DataSourceService
+import misk.jdbc.PingDatabaseService
 import misk.environment.Environment
 import misk.inject.KAbstractModule
 import misk.inject.toKey
@@ -20,6 +23,7 @@ import javax.inject.Inject
 import javax.inject.Provider
 import javax.inject.Singleton
 import javax.persistence.PersistenceException
+import javax.sql.DataSource
 import kotlin.test.assertFailsWith
 
 @MiskTest(startService = true)
@@ -58,8 +62,13 @@ internal class SchemaMigratorTest {
       multibind<Service>().to<DropTablesService>()
       multibind<Service>().toInstance(
           PingDatabaseService(Movies::class, config.data_source, defaultEnv))
+      val dataSourceService =
+          DataSourceService(Movies::class, config.data_source, defaultEnv,
+              emptySet())
+      multibind<Service>().toInstance(dataSourceService)
+      bind<DataSource>().annotatedWith<Movies>().toProvider(dataSourceService)
       val sessionFactoryService =
-          SessionFactoryService(Movies::class, config.data_source, defaultEnv)
+          SessionFactoryService(Movies::class, config.data_source, dataSourceService)
       multibind<Service>().toInstance(sessionFactoryService)
       bind<SessionFactory>().annotatedWith<Movies>().toProvider(sessionFactoryService)
     }

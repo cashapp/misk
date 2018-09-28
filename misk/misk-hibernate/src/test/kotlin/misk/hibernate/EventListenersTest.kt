@@ -13,7 +13,7 @@ import javax.inject.Inject
 class EventListenersTest {
   @MiskTestModule
   val module = Modules.combine(
-      MoviesTestModule(),
+      MoviesTestModule(disableCrossShardQueryDetector = true),
       object : HibernateEntityModule(Movies::class) {
         override fun configureHibernate() {
           bindListener(EventType.PRE_LOAD).to<FakeEventListener>()
