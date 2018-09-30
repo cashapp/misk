@@ -4,6 +4,8 @@ import misk.DependentService
 import misk.clustering.Cluster
 import misk.clustering.ClusterWatch
 import misk.clustering.DefaultCluster
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
 
 /**
@@ -25,14 +27,28 @@ class FakeCluster internal constructor(
 
   constructor() : this(ExplicitClusterResourceMapper())
 
-  override fun watch(watch: ClusterWatch) = delegate.watch(watch)
+  override fun watch(watch: ClusterWatch) {
+    waitFor {
+      delegate.watch(watch)
+    }
+  }
 
   fun clusterChanged(
     membersBecomingReady: Set<Cluster.Member> = setOf(),
     membersBecomingNotReady: Set<Cluster.Member> = setOf()
-  ) = delegate.clusterChanged(membersBecomingReady, membersBecomingNotReady)
+  ) {
+    waitFor {
+      delegate.clusterChanged(membersBecomingReady, membersBecomingNotReady)
+    }
+  }
 
-  fun syncPoint(callback: () -> Unit) = delegate.syncPoint(callback)
+  private fun waitFor(f: () -> Unit) {
+    // Single thread all changes to the cluster by waiting for each operation to complete
+    val latch = CountDownLatch(1)
+    f()
+    delegate.syncPoint { latch.countDown() }
+    check(latch.await(5, TimeUnit.SECONDS)) { "cluster change did not complete within 5 seconds " }
+  }
 
   companion object {
     const val SELF_NAME = "fake-self-node"
