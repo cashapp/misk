@@ -1,0 +1,35 @@
+package misk.clustering.fake
+
+import com.google.inject.util.Modules
+import misk.MiskServiceModule
+import misk.clustering.fake.lease.FakeLeaseManager
+import misk.testing.MiskTest
+import misk.testing.MiskTestModule
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Test
+import javax.inject.Inject
+
+@MiskTest(startService = true)
+internal class FakeLeaseManagerTest {
+  @MiskTestModule val module = Modules.combine(
+      MiskServiceModule(),
+      FakeClusterModule()
+  )
+
+  @Inject private lateinit var leaseManager: FakeLeaseManager
+
+  @Test fun leaseRespectsAuthority() {
+    val lease = leaseManager.requestLease("my-lease")
+    val otherLease = leaseManager.requestLease("my-other-lease")
+    assertThat(lease.checkHeld()).isFalse()
+    assertThat(otherLease.checkHeld()).isFalse()
+
+    leaseManager.markLeaseHeld("my-lease")
+    assertThat(lease.checkHeld()).isTrue()
+    assertThat(otherLease.checkHeld()).isFalse()
+
+    leaseManager.markLeaseReleased("my-lease")
+    assertThat(lease.checkHeld()).isFalse()
+    assertThat(otherLease.checkHeld()).isFalse()
+  }
+}

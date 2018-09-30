@@ -55,12 +55,12 @@ internal class DefaultCluster(
     }
   }
 
-  public override fun startUp() {
+  override fun startUp() {
     log.info { "starting cluster manager" }
     running.set(true)
   }
 
-  public override fun shutDown() {
+  override fun shutDown() {
     log.info { "shutting down cluster manager" }
     running.set(false)
     actions.add { _ -> } // empty action to up the action queue if it is empty
