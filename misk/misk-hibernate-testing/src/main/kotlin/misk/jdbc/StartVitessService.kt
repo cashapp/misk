@@ -127,7 +127,6 @@ class LogContainerResultCallback : ResultCallbackTemplate<LogContainerResultCall
   }
 }
 
-@Singleton
 internal class StartVitessService(val config: DataSourceConfig) : AbstractIdleService() {
   override fun startUp() {
     if (config.type != DataSourceType.VITESS) {

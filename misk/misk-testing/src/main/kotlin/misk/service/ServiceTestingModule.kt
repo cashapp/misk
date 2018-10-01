@@ -5,6 +5,7 @@ import com.google.inject.Key
 import com.google.inject.Provider
 import misk.DependentService
 import misk.inject.KAbstractModule
+import misk.inject.asSingleton
 import javax.inject.Singleton
 import kotlin.reflect.KClass
 
@@ -26,7 +27,7 @@ class ServiceTestingModule<T : Service> internal constructor(
     multibind<Service>().toProvider(ServiceWithTestDependenciesProvider(
         getProvider(wrappedServiceType.java),
         extraDependencies
-    ))
+    )).asSingleton()
 
     // Bind the wrapped service directly so that application code can inject it
     bind(wrappedServiceType.java)
@@ -50,7 +51,6 @@ class ServiceTestingModule<T : Service> internal constructor(
    * The [ServiceWithTestDependencies] wraps the given service and adds additional test specific
    * dependencies
    */
-  @Singleton
   private class ServiceWithTestDependencies internal constructor(
     private val delegate: Service,
     extraDependencies: Set<Key<*>>

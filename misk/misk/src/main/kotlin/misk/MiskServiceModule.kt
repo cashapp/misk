@@ -2,7 +2,22 @@ package misk
 
 import com.google.common.util.concurrent.Service
 import com.google.common.util.concurrent.ServiceManager
+import com.google.inject.Binding
+import com.google.inject.Injector
+import com.google.inject.Key
 import com.google.inject.Provides
+import com.google.inject.Scopes
+import com.google.inject.multibindings.MapBinderBinding
+import com.google.inject.multibindings.MultibinderBinding
+import com.google.inject.multibindings.MultibindingsTargetVisitor
+import com.google.inject.multibindings.OptionalBinderBinding
+import com.google.inject.spi.ConstructorBinding
+import com.google.inject.spi.ConvertedConstantBinding
+import com.google.inject.spi.DefaultBindingTargetVisitor
+import com.google.inject.spi.InstanceBinding
+import com.google.inject.spi.LinkedKeyBinding
+import com.google.inject.spi.ProviderInstanceBinding
+import com.google.inject.util.Types
 import misk.healthchecks.HealthCheck
 import misk.inject.KAbstractModule
 import misk.metrics.MetricsModule
@@ -29,19 +44,57 @@ class MiskServiceModule : KAbstractModule() {
 
   @Provides
   @Singleton
-  fun provideServiceManager(services: List<Service>): ServiceManager {
+  fun provideServiceManager(injector: Injector, services: List<Service>): ServiceManager {
+    // NB(mmihic): We get the binding for the Set<Service> because this uses a multibinder,
+    // which allows us to retrieve the bindings for the elements
+    val serviceListBinding = injector.getBinding(serviceSetKey)
+    val invalidServices = serviceListBinding
+        .acceptTargetVisitor(CheckServicesVisitor())
+        .sorted()
+
     // Confirm all services have been registered as singleton. If they aren't singletons,
     // _readiness checks will fail
-    val invalidServices = services.map { it.javaClass }.filter { !isSingleton(it) }.map { it.name }
     check(invalidServices.isEmpty()) {
-      "the following services are not marked as @Singleton: ${invalidServices.sorted().joinToString(
-          ", ")}"
+      "the following services are not marked as @Singleton: ${invalidServices.joinToString(", ")}"
     }
 
     return CoordinatedService.coordinate(services)
   }
 
-  private fun isSingleton(clazz: Class<*>) =
-      clazz.getAnnotation(com.google.inject.Singleton::class.java) != null ||
-          clazz.getAnnotation(javax.inject.Singleton::class.java) != null
+  @Suppress("DEPRECATION")
+  private class CheckServicesVisitor :
+      DefaultBindingTargetVisitor<Set<Service>, List<String>>(),
+      MultibindingsTargetVisitor<Set<Service>, List<String>> {
+
+    override fun visit(multibinding: MultibinderBinding<out Set<Service>>): List<String> {
+      return multibinding.elements.asSequence()
+          .filter { !Scopes.isSingleton(it) }
+          .map { toHumanString(it) }
+          .toList()
+    }
+
+    override fun visit(mapbinding: MapBinderBinding<out Set<Service>>): List<String> {
+      return listOf()
+    }
+
+    override fun visit(optionalbinding: OptionalBinderBinding<out Set<Service>>): List<String> {
+      return listOf()
+    }
+
+    private fun toHumanString(binding: Binding<*>): String {
+      return when (binding) {
+        is InstanceBinding<*> -> binding.instance.javaClass.canonicalName
+        is ConstructorBinding<*> -> binding.constructor.declaringType.type.typeName
+        is LinkedKeyBinding<*> -> binding.linkedKey.typeLiteral.type.typeName
+        is ProviderInstanceBinding<*> -> binding.userSuppliedProvider.javaClass.canonicalName
+        is ConvertedConstantBinding<*> -> binding.value.toString()
+        else -> binding.provider.get().javaClass.canonicalName
+      }
+    }
+  }
+
+  companion object {
+    @Suppress("UNCHECKED_CAST")
+    val serviceSetKey = Key.get(Types.setOf(Service::class.java)) as Key<Set<Service>>
+  }
 }

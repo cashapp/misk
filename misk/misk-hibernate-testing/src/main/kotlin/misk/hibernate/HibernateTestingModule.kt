@@ -42,7 +42,7 @@ class HibernateTestingModule(
 
     bind(startVitessServiceKey).toProvider(Provider<StartVitessService> {
       StartVitessService(config = configProvider.get())
-    })
+    }).asSingleton()
 
     val moshiProvider = getProvider(Moshi::class.java)
     val okHttpClientProvider = getProvider(OkHttpClient::class.java)
@@ -68,6 +68,6 @@ class HibernateTestingModule(
           vitessScatterDetector = crossShardQueryDetectorProvider.get(),
           startUpStatements = startUpStatements,
           shutDownStatements = shutDownStatements)
-    })
+    }).asSingleton()
   }
 }
