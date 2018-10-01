@@ -1,0 +1,26 @@
+
+syntax = "proto3";
+
+option java_package = "com.squareup.digester.protos.tdigest";
+
+package tdigest;
+
+// MergingDigestData contains all fields necessary to generate a MergingDigest.
+// This type should generally just be used when serializing MergingDigest's,
+// and doesn't have much of a purpose on its own.
+//
+// Replica of stripe's tdigest implementation
+// https://github.com/stripe/veneur/blob/master/tdigest/tdigest.proto
+message MergingDigestData {
+    repeated Centroid main_centroids = 1;
+
+    double compression = 2;
+    double min = 3;
+    double max = 4;
+}
+
+message Centroid {
+    double mean = 1;
+    double weight = 2;
+    repeated double samples = 3;
+}
