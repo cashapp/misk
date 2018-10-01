@@ -10,9 +10,8 @@ import misk.hibernate.shards
 import misk.hibernate.transaction
 import misk.inject.toKey
 import misk.logging.getLogger
-import java.util.*
+import java.util.Locale
 import javax.inject.Provider
-import javax.inject.Singleton
 import kotlin.reflect.KClass
 
 private val logger = getLogger<TruncateTablesService>()
@@ -26,7 +25,6 @@ private val logger = getLogger<TruncateTablesService>()
  * We truncate _before_ tests because that way we always have a clean slate, even if a preceding
  * test wasn't able to clean up after itself.
  */
-@Singleton
 internal class TruncateTablesService(
   private val qualifier: KClass<out Annotation>,
   private val config: DataSourceConfig,
