@@ -1,0 +1,85 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "com.squareup.digester.protos.service";
+option java_outer_classname = "DigesterServiceProtos";
+
+package digester;
+
+// Service that exposes t-digest-based histogram data.
+service DigestProvider {
+    // Get all time windowed digests ending within a given time range.
+    rpc GetDigests (GetDigestsRequest) returns (stream GetDigestsResponse) {
+    }
+}
+
+// Representation of internals of a t-digest implementation.
+message DigestData {
+    // Count of values observed.
+    int64 count = 1;
+
+    // Sum of observed values.
+    double sum = 2;
+
+    oneof digest_data {
+        // Serialized Veneur t-digest proto bytes.
+        // github.com/stripe/veneur/tdigest
+        bytes veneur_digest = 3;
+    }
+}
+
+// A group of digest metrics all having the same name and label names.
+message MetricFamily {
+    // MetricDescriptor describes a named metric.
+    message MetricDescriptor {
+        // Name of the metric.
+        string name = 1;
+
+        // User-friendly description of the metric.
+        string help = 2;
+    }
+
+    // Digest holds a t-digest of data points observed in a specific time range.
+    message Digest {
+        // Start time window of data points, inclusive.
+        int64 start_at_ms = 1;
+
+        // End time window of data points, exclusive.
+        int64 end_at_ms = 2;
+
+        // Number of overlapping windows.
+        // This is not directly related to the data, but is used by the collector to validate
+        // that registry and server configurations are compatible.
+        int64 stagger = 3;
+
+        // t-digest of observed values.
+        // The registry and server must agree on the format of the digest.
+        DigestData digest_data = 4;
+    }
+
+    message Metric {
+        // Label values. There will be one value corresponding to each entry in the MetricDescriptor's label_names.
+        map<string, string> labels = 1;
+
+        // t-digests for the metric, each for a different window of time.
+        repeated Digest digests = 2;
+    }
+
+    // Descriptor shared by each metric in this family.
+    MetricDescriptor metric_descriptor = 1;
+
+    // Metrics in the family, each having a unique set of labels.
+    repeated Metric metrics = 2;
+}
+
+message GetDigestsRequest {
+    // Earliest end time of windows to return, inclusive.
+    int64 windows_end_from_ms = 1;
+
+    // Latest end time of windows to return, inclusive.
+    int64 windows_end_to_ms = 2;
+}
+
+message GetDigestsResponse {
+    MetricFamily metric_family = 1;
+}
