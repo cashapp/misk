@@ -7,7 +7,7 @@ class DigesterService{
   var tDigestHistogramRegistry: TDigestHistogramRegistry()
 
   @Get
-  fun getTDigests(): List<TDigestHistogram>  {
+  fun getTDigests(): List<VeneurDigest>  {
     return tDigestHistogramRegistry.
   }
 }

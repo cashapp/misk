@@ -8,6 +8,6 @@ class TDigestHistogramRegistryModule : KAbstractModule() {
 
   override fun configure() {
     bind<HistogramRegistry>().to<TDigestHistogramRegistry>()
-    bind<Histogram>().to<TDigestHistogram>()
+    bind<Histogram>().to<VeneurDigest>()
   }
 }

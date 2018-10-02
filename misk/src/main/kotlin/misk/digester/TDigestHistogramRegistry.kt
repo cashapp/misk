@@ -1,36 +1,34 @@
 package misk.digester
 
-import io.prometheus.client.CollectorRegistry
 import misk.metrics.HistogramRegistry
-import javax.inject.Inject
 
 class TDigestHistogramRegistry: HistogramRegistry {
 
   //@Inject lateinit var collectorRegistry: CollectorRegistry
 
-  private val collectorRegistry = HashMap<String, TDigestHistogram>()
+  private val collectorRegistry = HashMap<String, VeneurDigest>()
 
   override fun newHistogram(
     name: String,
     help: String,
     labelNames: List<String>,
     buckets: DoubleArray?
-  ): TDigestHistogram {
+  ): VeneurDigest {
 
     if (collectorRegistry.containsKey(name)) {
       throw IllegalArgumentException("Collector already registered that provides name: $name")
     }
 
-    var tDigestHistogramObject = TDigestHistogram(name, help, labelNames, buckets)
+    var tDigestHistogramObject = VeneurDigest(name, help, labelNames, buckets)
     collectorRegistry.put(name, tDigestHistogramObject)
     return tDigestHistogramObject
   }
 
-  fun getTDigests(): List<TDigestHistogram> {
+  fun getTDigests(): List<VeneurDigest> {
     return collectorRegistry.values.toList()
   }
 
-  fun getTDigest(name: String): TDigestHistogram? {
+  fun getTDigest(name: String): VeneurDigest? {
     return collectorRegistry[name]
   }
 
