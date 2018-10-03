@@ -13,7 +13,7 @@ RUN yarn add \
       @misk/dev \
       @misk/tslint \
   && rm -rf /tmp/web/node_modules \
-  && yarn global add webpack webpack-cli webpack-dev-server
+  && yarn global add cross-env webpack webpack-cli webpack-dev-server
 
-ENTRYPOINT ["/sbin/tini", "-vvv", "--"]
+ENTRYPOINT ["/sbin/tini", "--"]
 CMD tail -f /dev/null

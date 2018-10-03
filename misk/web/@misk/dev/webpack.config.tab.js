@@ -64,6 +64,7 @@ module.exports = (env, argv, otherConfigFields = {}) => {
       globalObject: 'typeof self !== \'undefined\' ? self : this'
     },
     devServer: {
+      host: '0.0.0.0',
       port: port,
       inline: true,
       hot: true,

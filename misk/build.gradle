@@ -1,4 +1,5 @@
 import org.junit.platform.console.options.Details
+import groovy.json.JsonSlurper
 
 apply plugin: 'kotlin'
 kotlin {
@@ -93,23 +94,30 @@ ext.generateDockerContainerName = { service, project, task ->
   return "${new Date().format("YMD-HMS")}-${service}-${project}-${task}"
 }
 
-dockerRun {
-  name "${generateDockerContainerName('misk', 'misk', 'runtime')}"
-  image 'squareup/misk-build:0.0.1'
-  volumes 'web': '/web'
-  daemonize true
-  clean true
+ext.getPackageJsonPort = { path ->
+  def packageFile= new File("${project.projectDir}/web/${path}/package.json")
+  def packageJson = new JsonSlurper().parseText(packageFile.text)
+  return packageJson.miskTabWebpack.port
 }
 
 task compileWeb(type: Exec) {
   workingDir 'web'
-  commandLine 'sh', '-c', "docker run --rm --name ${generateDockerContainerName('misk', 'misk', 'compileWeb')} -v \$(pwd):/web squareup/misk-build:0.0.1"
+  commandLine 'sh', '-c', "docker run --rm --name ${generateDockerContainerName('misk', 'misk', 'compileWeb')} -v ${project.projectDir}/web:/web squareup/misk-node-build:0.0.1"
 }
 
-//task developWeb(type: Exec) {
-//
-//
-//}
+task developWeb(type: Exec) {
+  workingDir 'web'
+  if (project.hasProperty("devtabs")) {
+    project.devtabs.split(',').each {
+      def devContainerName = "${generateDockerContainerName('misk', 'misk', "develop-${it.split('/').join('-')}")}"
+      def command = "docker run -d --rm --name ${devContainerName} -v ${project.projectDir}/web/${it}:/web/${it} -p ${getPackageJsonPort(it)}:${getPackageJsonPort(it)} squareup/misk-node-develop:0.0.1"
+      println command
+      println "See dev server logs at \$ docker logs -f ${devContainerName}"
+      println "Manually shut down dev server with \$ docker kill ${devContainerName}"
+      commandLine 'sh', '-c', command
+    }
+  }
+}
 
 jar.dependsOn compileWeb
 
