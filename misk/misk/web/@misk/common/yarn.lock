@@ -41,9 +41,9 @@
     reflect-metadata "^0.1.12"
     tslib "^1.8.1"
 
-"@misk/dev@^0.0.43":
-  version "0.0.43"
-  resolved "https://registry.yarnpkg.com/@misk/dev/-/dev-0.0.43.tgz#2d50493a8acf72dab57c6019cf00e2027044d5a4"
+"@misk/dev@^0.0.44":
+  version "0.0.44"
+  resolved "https://registry.yarnpkg.com/@misk/dev/-/dev-0.0.44.tgz#41cbec82084773a3c5606e819905abee9387e6a0"
   dependencies:
     "@types/node" "^10.11.0"
     "@types/react" "^16.4.14"
