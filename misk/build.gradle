@@ -7,7 +7,8 @@ kotlin {
   }
 }
 apply plugin: 'org.junit.platform.gradle.plugin'
-apply plugin: "com.vanniktech.maven.publish"
+apply plugin: 'com.vanniktech.maven.publish'
+apply plugin: "com.palantir.docker-run"
 
 compileKotlin {
   kotlinOptions {
@@ -35,7 +36,7 @@ sourceSets {
       'web/tabs/example/lib',
       'web/tabs/loader/lib'
     ]
-    exclude "**/node_modules"
+    exclude '**/node_modules'
   }
 }
 
@@ -88,100 +89,29 @@ dependencies {
   testCompile project(':misk-testing')
 }
 
-task webpackMiskCommon(type: Exec) {
-  inputs.file("web/@misk/common/package-lock.json").
-          withPathSensitivity(PathSensitivity.RELATIVE)
-  inputs.file("web/@misk/common/yarn.lock").withPathSensitivity(PathSensitivity.RELATIVE)
-  inputs.dir("web/@misk/common/src").withPathSensitivity(PathSensitivity.RELATIVE)
-  inputs.file("web/@misk/common/webpack.config.js").
-          withPathSensitivity(PathSensitivity.RELATIVE)
-  inputs.file("web/@misk/common/webpack.config.static.js").
-          withPathSensitivity(PathSensitivity.RELATIVE)
-  inputs.file("web/@misk/common/webpack.config.vendors.js").
-          withPathSensitivity(PathSensitivity.RELATIVE)
-  outputs.dir("web/@misk/common/lib")
-  outputs.cacheIf { true }
-  workingDir "web/@misk/common"
-  commandLine "yarn", "gradle"
+ext.generateDockerContainerName = { service, project, task ->
+  return "${new Date().format("YMD-HMS")}-${service}-${project}-${task}"
 }
 
-task webpackMiskComponents(type: Exec) {
-  inputs.file("web/@misk/components/package-lock.json")
-  inputs.file("web/@misk/components/yarn.lock").withPathSensitivity(PathSensitivity.RELATIVE)
-  inputs.dir("web/@misk/components/src").withPathSensitivity(PathSensitivity.RELATIVE)
-  inputs.file("web/@misk/components/webpack.config.js").
-          withPathSensitivity(PathSensitivity.RELATIVE)
-  outputs.dir("web/@misk/components/lib")
-  outputs.cacheIf { true }
-  workingDir "web/@misk/components"
-  commandLine "yarn", "gradle"
+dockerRun {
+  name "${generateDockerContainerName('misk', 'misk', 'runtime')}"
+  image 'squareup/misk-build:0.0.1'
+  volumes 'web': '/web'
+  daemonize true
+  clean true
 }
 
-task webpackMiskDev(type: Exec) {
-  inputs.file("web/@misk/dev/package-lock.json")
-  inputs.file("web/@misk/dev/yarn.lock").withPathSensitivity(PathSensitivity.RELATIVE)
-  outputs.dir("web/@misk/dev/lib")
-  outputs.cacheIf { true }
-  workingDir "web/@misk/dev"
-  commandLine "yarn", "gradle"
+task compileWeb(type: Exec) {
+  workingDir 'web'
+  commandLine 'sh', '-c', "docker run --rm --name ${generateDockerContainerName('misk', 'misk', 'compileWeb')} -v \$(pwd):/web squareup/misk-build:0.0.1"
 }
 
-task webpackMiskTslint(type: Exec) {
-  inputs.file("web/@misk/tslint/package-lock.json")
-  inputs.file("web/@misk/tslint/yarn.lock").withPathSensitivity(PathSensitivity.RELATIVE)
-  outputs.dir("web/@misk/tslint/lib")
-  outputs.cacheIf { true }
-  workingDir "web/@misk/tslint"
-  commandLine "yarn", "gradle"
-}
+//task developWeb(type: Exec) {
+//
+//
+//}
 
-task webpackTabsConfig(type: Exec) {
-  inputs.file("web/tabs/config/package-lock.json").
-          withPathSensitivity(PathSensitivity.RELATIVE)
-  inputs.file("web/tabs/config/yarn.lock").withPathSensitivity(PathSensitivity.RELATIVE)
-  inputs.dir("web/tabs/config/src").withPathSensitivity(PathSensitivity.RELATIVE)
-  inputs.file("web/tabs/config/webpack.config.js").
-          withPathSensitivity(PathSensitivity.RELATIVE)
-  outputs.dir("web/tabs/config/lib")
-  outputs.cacheIf { true }
-  workingDir "web/tabs/config"
-  commandLine "yarn", "gradle"
-}
-
-
-task webpackTabsExample(type: Exec) {
-  inputs.file("web/tabs/example/package-lock.json").
-          withPathSensitivity(PathSensitivity.RELATIVE)
-  inputs.file("web/tabs/example/yarn.lock").withPathSensitivity(PathSensitivity.RELATIVE)
-  inputs.dir("web/tabs/example/src").withPathSensitivity(PathSensitivity.RELATIVE)
-  inputs.file("web/tabs/example/webpack.config.js").
-          withPathSensitivity(PathSensitivity.RELATIVE)
-  outputs.dir("web/tabs/example/lib")
-  outputs.cacheIf { true }
-  workingDir "web/tabs/example"
-  commandLine "yarn", "gradle"
-}
-
-task webpackTabsLoader(type: Exec) {
-  inputs.file("web/tabs/loader/package-lock.json").
-          withPathSensitivity(PathSensitivity.RELATIVE)
-  inputs.file("web/tabs/loader/yarn.lock").withPathSensitivity(PathSensitivity.RELATIVE)
-  inputs.dir("web/tabs/loader/src").withPathSensitivity(PathSensitivity.RELATIVE)
-  inputs.file("web/tabs/loader/webpack.config.js").
-          withPathSensitivity(PathSensitivity.RELATIVE)
-  outputs.dir("web/tabs/loader/lib")
-  outputs.cacheIf { true }
-  workingDir "web/tabs/loader"
-  commandLine "yarn", "gradle"
-}
-
-//jar.dependsOn webpackMiskCommon
-//jar.dependsOn webpackMiskComponents
-//jar.dependsOn webpackMiskDev
-//jar.dependsOn webpackMiskTslint
-//jar.dependsOn webpackTabsConfig
-//jar.dependsOn webpackTabsExample
-//jar.dependsOn webpackTabsLoader
+jar.dependsOn compileWeb
 
 if (rootProject.file("hooks.gradle").exists()) {
   apply from: rootProject.file("hooks.gradle")
