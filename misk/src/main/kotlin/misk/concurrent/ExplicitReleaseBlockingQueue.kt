@@ -18,11 +18,23 @@ class ExplicitReleaseBlockingQueue<T> internal constructor(
 ) : BlockingQueue<T> {
   constructor() : this(LinkedBlockingQueue<T>(), LinkedBlockingQueue<T>())
 
-  fun release(n: Int) {
+  /**
+   * releases up to n items from the pending queue, making them visible to [take], [poll], [peek],
+   * etc. This method does not "extend credit"; if n > number of pending items on the queue, every
+   * currently pending item is made visible, but any items added in the future continue to go
+   * onto the pending queue
+   *
+   * @return the number of items actually releases
+   */
+  fun release(n: Int) : Int {
+    var numReleased = 0
     for (i in (0 until n)) {
-      val e = pending.poll() ?: return
+      val e = pending.poll() ?: return numReleased
       visible.add(e)
+      numReleased ++
     }
+
+    return numReleased
   }
 
   override fun contains(element: T) = visible.contains(element)
