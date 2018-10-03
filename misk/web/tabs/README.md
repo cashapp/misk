@@ -111,64 +111,12 @@ Configuring the Misk Service
 
 Adding your Tab Webpack Build to Gradle
 ---
-Tab builds are kicked off by Gradle but done within a Docker container for portability across environments. The following steps will update your Gradle to be able to start the `misk-node` Docker container and to build your tab in it.
+Tab builds are kicked off by Gradle but done within a Docker container for portability across environments.
 
-Add the following code to your service's `dependencies.gradle`.
-
-```JSON
-  "dockerGradlePlugin": "gradle.plugin.com.palantir.gradle.docker:gradle-docker:0.20.1",
-```
-
-If this is an internal Square service, leave the value of the above blank and pull the latest `polyrepo` pinned version with `./polyrepo deb-upgrade {service name}`.
-
-In your service's central `build.gradle` add the following where appropriate. Primarily, you may need to add the maven repository pointing to `https://plugins.gradle.org/m2/` and `classpath dep.dockerGradlePlugin` to your dependencies. If your service has no subprojects, that section can be ignored.
+In your service's project `build.gradle` file you will need to add the following to configure the Docker plugin, start the container, and let Gradle spin off a build if there is a change in your tab code. Adjust the template below to fit your service's file structure and to use the most up to date [Docker image version](https://hub.docker.com/r/squareup/).
 
 ```Gradle
-  ...
-  apply from: new File("./dependencies.gradle")
-  ...
-  subprojects {
-    buildscript {
-      repositories {
-        ...
-        maven {
-          url "https://plugins.gradle.org/m2/"
-        }
-      }
-
-      dependencies {
-        ...
-        classpath dep.dockerGradlePlugin
-        ...
-      }
-    }
-    repositories {
-      ...
-      maven {
-        url "https://plugins.gradle.org/m2/"
-      }
-    }
-  }
-
-```
-
-In your service's project `build.gradle` file you will need to add the following to configure the Docker plugin, start the container, and let Gradle spin off a build if there is a change in your tab code. Adjust the template below to fit your service's file structure and to use the most up to date [Docker image version](https://hub.docker.com/r/squareup/misk-node/tags/).
-
-```Gradle
-  apply plugin: "com.palantir.docker-run"
-  
-  ...
-  def dockerContainerName = "{service}-{project}-gradle-${new Date().format("YMD-HMS")}"
-
-  configurations {
-    dockerRun {
-      name "${dockerContainerName}"
-      image 'squareup/misk-node:0.0.1'
-      volumes 'web': '/web'
-      daemonize true
-      clean true
-    }
-  }
+  import groovy.json.JsonSlurper
 
   ...
 
@@ -183,23 +131,38 @@ In your service's project `build.gradle` file you will need to add the following
       exclude '**/node_modules'
     }
   }
-
+  
   ...
-
-  task webpackTabsTRexFoodLog(type: Exec) {
-    inputs.file("web/tabs/trexfoodlog/yarn.lock").withPathSensitivity(PathSensitivity.RELATIVE)
-    inputs.dir("web/tabs/trexfoodlog/src").withPathSensitivity(PathSensitivity.RELATIVE)
-    inputs.file("web/tabs/trexfoodlog/webpack.config.js").
-            withPathSensitivity(PathSensitivity.RELATIVE)
-    outputs.dir("web/tabs/trexfoodlog/dist")
-    outputs.cacheIf { true }
-
-    executable "sh"
-    args "-c", "docker exec ${dockerContainerName} sh -c 'cd /web/tabs/trexfoodlog; yarn gradle'"
+  ext.generateDockerContainerName = { service, project, task ->
+    return "${new Date().format("YMD-HMS")}-${service}-${project}-${task}"
   }
 
-  jar.dependsOn webpackTabsTRexFoodLog
-  jar.doLast { 'dockerStop' }
+  ext.getPackageJsonPort = { path ->
+    def packageFile= new File("${project.projectDir}/web/${path}/package.json")
+    def packageJson = new JsonSlurper().parseText(packageFile.text)
+    return packageJson.miskTabWebpack.port
+  }
+
+  task compileWeb(type: Exec) {
+    workingDir 'web'
+    commandLine 'sh', '-c', "docker run --rm --name ${generateDockerContainerName('misk', 'misk', 'compileWeb')} -v ${project.projectDir}/web:/web squareup/misk-node-build:0.0.1"
+  }
+
+  task developWeb(type: Exec) {
+    workingDir 'web'
+    if (project.hasProperty("devtabs")) {
+      project.devtabs.split(',').each {
+        def devContainerName = "${generateDockerContainerName('misk', 'misk', "develop-${it.split('/').join('-')}")}"
+        def command = "docker run -d --rm --name ${devContainerName} -v ${project.projectDir}/web/${it}:/web/${it} -p ${getPackageJsonPort(it)}:${getPackageJsonPort(it)} squareup/misk-node-develop:0.0.1"
+        println command
+        println "See dev server logs at \$ docker logs -f ${devContainerName}"
+        println "Manually shut down dev server with \$ docker kill ${devContainerName}"
+        commandLine 'sh', '-c', command
+      }
+    }
+  }
+
+  jar.dependsOn compileWeb
 
 ```
 
@@ -230,10 +193,11 @@ Developing your Tab
 1. Follow the steps above to build all local tabs and start your service.
 1. Run the following commands to spin up a Webpack-Dev-Server in Docker instance to serve live edits to your service.
 
-```Bash
-
-
-```
+  ```Bash
+  $ ./gradlew {service}:developWeb -Pdevtabs='tabs/trexfoodlog/, tabs/healtcheck/'
+  ```
+1. This will start separate docker containers with webpack-dev-servers for each of the tabs you pass in to `devtabs`.
+1. Your service will now automatically route traffic (when in development mode) to the dev servers and you should see any changes you make appearing live.
 
 Other Development Notes
 ---
