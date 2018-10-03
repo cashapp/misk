@@ -2,8 +2,10 @@ package misk.tasks
 
 import com.google.common.annotations.VisibleForTesting
 import com.google.common.util.concurrent.AbstractExecutionThreadService
+import com.google.common.util.concurrent.MoreExecutors.newDirectExecutorService
 import misk.backoff.Backoff
 import misk.backoff.ExponentialBackoff
+import misk.concurrent.ExplicitReleaseDelayQueue
 import misk.logging.getLogger
 import java.time.Clock
 import java.time.Duration
@@ -11,6 +13,7 @@ import java.util.concurrent.BlockingQueue
 import java.util.concurrent.DelayQueue
 import java.util.concurrent.Executor
 import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors.newSingleThreadExecutor
 import java.util.concurrent.atomic.AtomicBoolean
 
 /**
@@ -25,8 +28,20 @@ class RepeatedTaskQueue @VisibleForTesting internal constructor(
   private val dispatchExecutor: Executor?, // visible internally for testing only
   private val pendingTasks: BlockingQueue<DelayedTask> // visible internally for testing only
 ) : AbstractExecutionThreadService() {
+  /**
+   * Creates a [RepeatedTaskQueue] backed by a real [DelayQueue], with tasks dequeued on the
+   * service background thread and executed via the provided [ExecutorService]
+   */
   constructor(name: String, clock: Clock, taskExecutor: ExecutorService) :
       this(name, clock, taskExecutor, null, DelayQueue<DelayedTask>())
+
+  /**
+   * Creates a [RepeatedTaskQueue] backed by an [ExplicitReleaseDelayQueue], allowing tests
+   * to explicitly control when tasks are released for execution. Tasks are executed in a single
+   * thread in the order in which they expire.
+   */
+  constructor(name: String, clock: Clock, pendingTasks: ExplicitReleaseDelayQueue<DelayedTask>) :
+      this(name, clock, newDirectExecutorService(), newSingleThreadExecutor(), pendingTasks)
 
   private val running = AtomicBoolean(false)
 
@@ -102,7 +117,7 @@ class RepeatedTaskQueue @VisibleForTesting internal constructor(
             noWorkBackoff.reset()
             Result(status, failureBackoff.nextRetry())
           }
-          Status.NO_RESCHEDULE ->
+          Status.NO_RESCHEDULE -> // NB(mmihic): The delay doesn't matter since we aren't rescheduling
             Result(status, Duration.ofMillis(0))
         }
       } catch (th: Throwable) {

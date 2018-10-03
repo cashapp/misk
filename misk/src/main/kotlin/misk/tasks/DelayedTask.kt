@@ -6,10 +6,11 @@ import java.time.Instant
 import java.util.concurrent.Delayed
 import java.util.concurrent.TimeUnit
 
-internal class DelayedTask(
+/** A [DelayedTask] is a task that runs in  the future */
+class DelayedTask(
   internal val clock: Clock,
   internal val executionTime: Instant,
-  val task: () -> Result
+  internal val task: () -> Result
 ) : Delayed {
   override fun compareTo(other: Delayed): Int {
     val timeDiff = getDelay(TimeUnit.MILLISECONDS) - other.getDelay(

@@ -1,6 +1,5 @@
 package misk.tasks
 
-import com.google.common.util.concurrent.MoreExecutors
 import com.google.common.util.concurrent.Service
 import com.google.inject.Provides
 import com.google.inject.util.Modules
@@ -19,7 +18,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.Duration
 import java.util.concurrent.CountDownLatch
-import java.util.concurrent.Executors
 import java.util.concurrent.PriorityBlockingQueue
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicReference
@@ -467,16 +465,8 @@ internal class RepeatedTaskQueueTest {
     }
 
     @Provides @Singleton
-    fun repeatedTaskQueue(
-      clock: FakeClock,
-      queue: ExplicitReleaseDelayQueue<DelayedTask>
-    ) = RepeatedTaskQueue(
-        "my-task-queue",
-        clock,
-        MoreExecutors.newDirectExecutorService(),
-        Executors.newSingleThreadExecutor(),
-        queue
-    )
+    fun repeatedTaskQueue(clock: FakeClock, queue: ExplicitReleaseDelayQueue<DelayedTask>) =
+        RepeatedTaskQueue("my-task-queue", clock, queue)
   }
 
   private fun waitForNextPendingTask(): DelayedTask =
