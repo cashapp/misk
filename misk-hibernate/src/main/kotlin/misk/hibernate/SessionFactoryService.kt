@@ -189,6 +189,7 @@ internal class SessionFactoryService(
       "char" -> Char::class
       "float" -> Float::class
       "double" -> Double::class
+      "materialized_clob" -> String::class
       else -> Class.forName(name).kotlin
     }
   }
