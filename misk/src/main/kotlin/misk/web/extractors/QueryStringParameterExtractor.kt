@@ -1,11 +1,9 @@
 package misk.web.extractors
 
-import com.google.common.base.CharMatcher
 import misk.web.PathPattern
 import misk.web.QueryParam
 import misk.web.Request
 import misk.web.actions.WebAction
-import misk.web.actions.WebSocket
 import java.util.regex.Matcher
 import kotlin.reflect.KFunction
 import kotlin.reflect.KParameter
@@ -24,7 +22,7 @@ object QueryStringParameterExtractorFactory : ParameterExtractor.Factory {
   ): ParameterExtractor? {
     val queryParamAnnotation = parameter.findAnnotation<QueryParam>() ?: return null
     val parameterName =
-        if (CharMatcher.whitespace().matchesAllOf(queryParamAnnotation.value)) parameter.name!!
+        if (queryParamAnnotation.value.isBlank()) parameter.name!!
         else queryParamAnnotation.value
     val queryParamProcessor = QueryStringParameterProcessor(parameter)
 
