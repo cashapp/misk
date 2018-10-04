@@ -9,14 +9,13 @@ import javax.inject.Inject
 import kotlin.test.assertFailsWith
 
 @MiskTest
-internal class AdminTabActionTest {
+internal class AdminDashboardTabTest {
   @MiskTestModule
   val module = TestModule()
 
-  @Inject lateinit var adminTabAction: AdminDashboardTabAction
   @Inject lateinit var adminDashboardTabs: List<AdminDashboardTab>
 
-  private val logger = getLogger<AdminTabActionTest>()
+  private val logger = getLogger<AdminDashboardTabTest>()
 
   class TestModule : KAbstractModule() {
     override fun configure() {
@@ -36,7 +35,7 @@ internal class AdminTabActionTest {
 
   @Test
   internal fun tabGoodSlug() {
-    AdminDashboardTab("Name", "@good-slug_test", "/a/path/")
+    AdminDashboardTab("Name", "good-1-slug-test", "/a/path/")
   }
 
   @Test
@@ -90,12 +89,4 @@ internal class AdminTabActionTest {
       AdminDashboardTab("Name", "slug", "/a/path")
     }
   }
-
-//  @Test
-//  internal fun getInstalledTabs() {
-//
-//    lateinit var registeredDashboardTabs: List<AdminDashboardTab>
-//
-//    val tabRequest = adminTabAction.getAll()
-//  }
 }
