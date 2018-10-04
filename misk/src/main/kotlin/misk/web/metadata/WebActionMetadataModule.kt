@@ -2,7 +2,7 @@ package misk.web.metadata
 
 import misk.environment.Environment
 import misk.inject.KAbstractModule
-import misk.web.actions.AdminTab
+import misk.web.actions.AdminDashboardTab
 import misk.web.actions.WebActionEntry
 import misk.web.actions.WebActionMetadataAction
 import misk.web.proxy.WebProxyAction
@@ -13,7 +13,7 @@ import misk.web.resources.StaticResourceEntry
 class WebActionMetadataModule(val environment: Environment) : KAbstractModule() {
   override fun configure() {
     multibind<WebActionEntry>().toInstance(WebActionEntry<WebActionMetadataAction>())
-    multibind<AdminTab>().toInstance(AdminTab(
+    multibind<AdminDashboardTab>().toInstance(AdminDashboardTab(
         name = "Web Actions",
         slug = "webactions",
         url_path_prefix = "/_admin/webactions/"
@@ -21,17 +21,17 @@ class WebActionMetadataModule(val environment: Environment) : KAbstractModule() 
 
     multibind<StaticResourceEntry>()
         .toInstance(
-            StaticResourceEntry("/_tab/webactions/",
-                "classpath:/web/_tab/webactions"))
+            StaticResourceEntry(url_path_prefix = "/_tab/webactions/",
+                resourcePath = "classpath:/web/_tab/webactions"))
 
     if (environment == Environment.DEVELOPMENT) {
       multibind<WebActionEntry>().toInstance(
-          WebActionEntry<WebProxyAction>("/_tab/webactions/"))
+          WebActionEntry<WebProxyAction>(url_path_prefix = "/_tab/webactions/"))
       multibind<WebProxyEntry>().toInstance(
-          WebProxyEntry("/_tab/webactions/", "http://localhost:3201/"))
+          WebProxyEntry(url_path_prefix = "/_tab/webactions/", web_proxy_url = "http://localhost:3201/"))
     } else {
       multibind<WebActionEntry>().toInstance(
-          WebActionEntry<StaticResourceAction>("/_tab/webactions/"))
+          WebActionEntry<StaticResourceAction>(url_path_prefix = "/_tab/webactions/"))
 
     }
   }

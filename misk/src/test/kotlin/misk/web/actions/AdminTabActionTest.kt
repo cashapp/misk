@@ -13,87 +13,88 @@ internal class AdminTabActionTest {
   @MiskTestModule
   val module = TestModule()
 
-  @Inject lateinit var adminTabAction: AdminTabAction
-  @Inject lateinit var adminTabs: List<AdminTab>
+  @Inject lateinit var adminTabAction: AdminDashboardTabAction
+  @Inject lateinit var adminDashboardTabs: List<AdminDashboardTab>
 
   private val logger = getLogger<AdminTabActionTest>()
 
   class TestModule : KAbstractModule() {
     override fun configure() {
-      multibind<AdminTab>().toInstance(AdminTab(
-          "Dashboard",
-          "dashboard",
-          "/_admin/dashboard/"
-      ))
+      multibind<AdminDashboardTab>().toInstance(
+          AdminDashboardTab(
+              "Dashboard",
+              "dashboard",
+              "/_admin/dashboard/"
+          ))
     }
   }
 
   @Test
   internal fun testBindings() {
-    logger.info(adminTabs.toString())
+    logger.info(adminDashboardTabs.toString())
   }
 
   @Test
   internal fun tabGoodSlug() {
-    AdminTab("Name", "@good-slug_test", "/a/path/")
+    AdminDashboardTab("Name", "@good-slug_test", "/a/path/")
   }
 
   @Test
   internal fun tabSlugWithSpace() {
     assertFailsWith<IllegalArgumentException> {
-      AdminTab("Name", "bad slug", "/a/path/")
+      AdminDashboardTab("Name", "bad slug", "/a/path/")
     }
   }
 
   @Test
   internal fun tabSlugWithUpperCase() {
     assertFailsWith<IllegalArgumentException> {
-      AdminTab("Name", "BadSlug", "/a/path/")
+      AdminDashboardTab("Name", "BadSlug", "/a/path/")
     }
   }
 
   @Test
   internal fun tabGoodCategory() {
-    AdminTab("Name", "slug", "/a/path/", "@tea-pot_418")
+    AdminDashboardTab("Name", "slug", "/a/path/", "@tea-pot_418")
   }
 
   @Test
   internal fun tabCategoryWithSpace() {
     assertFailsWith<IllegalArgumentException> {
-      AdminTab("Name", "bad slug", "/a/path/", "bad icon")
+      AdminDashboardTab("Name", "bad slug", "/a/path/", "bad icon")
     }
   }
 
   @Test
   internal fun tabCategoryWithUpperCase() {
     assertFailsWith<IllegalArgumentException> {
-      AdminTab("Name", "BadSlug", "/a/path/", "Bad-Icon")
+      AdminDashboardTab("Name", "BadSlug", "/a/path/", "Bad-Icon")
     }
   }
 
   @Test
   internal fun tabGoodPath() {
-    AdminTab("Name", "slug", "/a/path/")
+    AdminDashboardTab("Name", "slug", "/a/path/")
   }
 
   @Test
   internal fun tabPathWithoutLeadingSlash() {
     assertFailsWith<IllegalArgumentException> {
-      AdminTab("Name", "slug", "a/path/")
+      AdminDashboardTab("Name", "slug", "a/path/")
     }
   }
 
   @Test
   internal fun tabPathWithoutTrailingSlash() {
     assertFailsWith<IllegalArgumentException> {
-      AdminTab("Name", "slug", "/a/path")
+      AdminDashboardTab("Name", "slug", "/a/path")
     }
   }
 
 //  @Test
 //  internal fun getInstalledTabs() {
 //
-//    lateinit var registeredTabs: List<AdminTab>
+//    lateinit var registeredDashboardTabs: List<AdminDashboardTab>
 //
 //    val tabRequest = adminTabAction.getAll()
 //  }

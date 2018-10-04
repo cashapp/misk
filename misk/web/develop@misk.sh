@@ -12,7 +12,7 @@ FATAL () {
 }
 
 cd @misk/web || FATAL
-# If port is changed, it must be updated in Misk::AdminTabModule multibindings
+# If port is changed, it must be updated in Misk::AdminDashboardModule multibindings
 server 9100
 
 # Now a server runs at 9100 with root at ./@misk/web
