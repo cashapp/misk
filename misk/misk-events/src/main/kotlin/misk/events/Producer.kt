@@ -17,6 +17,11 @@ interface Producer {
    *
    * Transactions remaining outstanding until the application calls commit, or rollback, or until
    * a producer specific timeout occurs.
+   *
+   * Transactions may only be used from the thread that began them; accessing a transaction
+   * in multiple threads or handing it off between threads has undefined behavior.
+   *
+   * Having multiple outstanding transactions on the same thread also has undefined behavior.
    */
   interface Transaction {
     fun publish(topic: Topic, vararg events: Event)
@@ -24,5 +29,6 @@ interface Producer {
     fun rollback()
   }
 
+  /** Begins a new transaction on the current thread */
   fun beginTransaction(): Transaction
 }

@@ -16,5 +16,6 @@ class ExplicitReleaseDelayQueue<T : Delayed> private constructor(
   )
 
   fun release(n: Int) = delegate.release(n)
+  fun releaseAll() = delegate.releaseAll()
   fun peekPending(): T? = delegate.peekPending()
 }
