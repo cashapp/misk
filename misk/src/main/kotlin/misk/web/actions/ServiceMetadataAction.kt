@@ -6,7 +6,6 @@ import misk.web.Get
 import misk.web.RequestContentType
 import misk.web.ResponseContentType
 import misk.web.mediatype.MediaTypes
-import okhttp3.HttpUrl
 import javax.inject.Inject
 import javax.inject.Singleton
 

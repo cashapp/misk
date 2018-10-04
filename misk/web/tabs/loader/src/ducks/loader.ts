@@ -35,9 +35,8 @@ export interface ILoaderState {
   adminTabComponents: {
     [tab:string]: string
   }
-  adminTabs: IMiskAdminTab[]
+  adminDashboardTabs: IMiskAdminTab[]
   serviceMetadata: IMiskServiceMetadata
-  staleTabCache: boolean
   toJS: () => any
 }
 
@@ -69,8 +68,8 @@ function * handleGetAllTabs (action: IMiskAction<IActionType, { url: string}>) {
   const { url } = action.payload
   try {
     const { data } = yield call(axios.get, url)
-    const { adminTabs, adminTabCategories } = data
-    yield put(dispatchLoader.success({ adminTabs, adminTabCategories }))
+    const { adminDashboardTabs } = data
+    yield put(dispatchLoader.success({ adminDashboardTabs }))
   } catch (e) {
     yield put(dispatchLoader.failure({ error: { ...e } }))
   }

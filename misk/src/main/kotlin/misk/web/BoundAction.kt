@@ -151,17 +151,17 @@ internal class BoundAction<A : WebAction>(
 
   internal val metadata: WebActionMetadata by lazy {
     WebActionMetadata(
-      name = action.name,
-      function = action.function,
-      functionAnnotations = action.function.annotations,
-      acceptedMediaRanges = action.acceptedMediaRanges,
-      responseContentType = action.responseContentType,
-      parameterTypes = action.parameterTypes,
-      returnType = action.returnType,
-      pathPattern = pathPattern,
-      applicationInterceptors = applicationInterceptors,
-      networkInterceptors = networkInterceptors,
-      dispatchMechanism = dispatchMechanism
+        name = action.name,
+        function = action.function,
+        functionAnnotations = action.function.annotations,
+        acceptedMediaRanges = action.acceptedMediaRanges,
+        responseContentType = action.responseContentType,
+        parameterTypes = action.parameterTypes,
+        returnType = action.returnType,
+        pathPattern = pathPattern,
+        applicationInterceptors = applicationInterceptors,
+        networkInterceptors = networkInterceptors,
+        dispatchMechanism = dispatchMechanism
     )
   }
 }
