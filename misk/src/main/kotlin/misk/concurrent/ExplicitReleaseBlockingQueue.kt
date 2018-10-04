@@ -37,6 +37,16 @@ class ExplicitReleaseBlockingQueue<T> internal constructor(
     return numReleased
   }
 
+  /** releases all items from the pending queue, returning the number of items released */
+  fun releaseAll() : Int {
+    var numReleased = 0
+    while (true) {
+      val e = pending.poll() ?: return numReleased
+      visible.add(e)
+      numReleased ++
+    }
+  }
+
   override fun contains(element: T) = visible.contains(element)
 
   override fun addAll(elements: Collection<T>) = pending.addAll(elements)
