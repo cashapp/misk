@@ -1,6 +1,5 @@
 package misk.security.ssl
 
-import com.google.common.base.CharMatcher
 import okio.Buffer
 import okio.BufferedSource
 import okio.ByteString
@@ -64,7 +63,7 @@ data class PemComboFile(
             privateKeys += decodeBase64Until(lines,
                 Regex("-+END PRIVATE KEY-+"))
           }
-          CharMatcher.whitespace().matchesAllOf(line) -> {
+          line.isBlank() -> {
             // This is ok, just keep going
           }
           else -> throw IOException("unexpected line: $line")
