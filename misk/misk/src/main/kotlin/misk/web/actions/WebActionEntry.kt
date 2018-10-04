@@ -1,6 +1,6 @@
 package misk.web.actions
 
-import misk.web.UrlPathPrefixEntry
+import misk.web.ValidWebEntry
 import kotlin.reflect.KClass
 
 /**
@@ -16,7 +16,7 @@ import kotlin.reflect.KClass
 class WebActionEntry(
   val actionClass: KClass<out WebAction>,
   url_path_prefix: String = "/"
-) : UrlPathPrefixEntry(url_path_prefix)
+) : ValidWebEntry(url_path_prefix = url_path_prefix)
 
 inline fun <reified T : WebAction> WebActionEntry(
   url_path_prefix: String = "/"
