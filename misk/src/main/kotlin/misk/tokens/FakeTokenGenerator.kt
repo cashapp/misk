@@ -19,7 +19,7 @@ internal class FakeTokenGenerator : TokenGenerator {
 
     val unpaddedLength = effectiveLabel.length + suffix.length
     val rawResult = when {
-      unpaddedLength < length -> effectiveLabel + suffix.padStart(length - effectiveLabel.length, '0')
+      unpaddedLength < length -> effectiveLabel + "0".repeat(length - unpaddedLength) + suffix
       suffix.length <= length -> effectiveLabel.substring(0, length - suffix.length) + suffix
       else -> suffix.substring(suffix.length - length) // Possible collision.
     }

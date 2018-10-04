@@ -1,6 +1,5 @@
 package misk.web.extractors
 
-import com.google.common.base.CharMatcher
 import misk.web.PathParam
 import misk.web.PathPattern
 import misk.web.Request
@@ -23,7 +22,7 @@ object PathPatternParameterExtractorFactory : ParameterExtractor.Factory {
   ): ParameterExtractor? {
     val pathParamAnnotation = parameter.findAnnotation<PathParam>() ?: return null
     val parameterName =
-        if (CharMatcher.whitespace().matchesAllOf(pathParamAnnotation.value)) parameter.name
+        if (pathParamAnnotation.value.isBlank()) parameter.name
         else pathParamAnnotation.value
 
     val patternIndex = pathPattern.variableNames.indexOf(parameterName)
