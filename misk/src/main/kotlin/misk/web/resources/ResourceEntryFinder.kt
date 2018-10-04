@@ -1,6 +1,6 @@
 package misk.web.resources
 
-import misk.web.UrlPathPrefixEntry
+import misk.web.ValidWebEntry
 import misk.web.proxy.WebProxyEntry
 import okhttp3.HttpUrl
 import javax.inject.Inject
@@ -12,16 +12,16 @@ class ResourceEntryFinder @Inject constructor(
   /**
    * @return entry whose url_path_prefix most closely matches given url; longest match wins
    */
-  fun staticResource(url: HttpUrl): UrlPathPrefixEntry? =
+  fun staticResource(url: HttpUrl): ValidWebEntry? =
       findEntryFromUrlString(staticResourceEntries, url.encodedPath())
 
   /**
    * @return entry whose url_path_prefix most closely matches given url; longest match wins
    */
-  fun webProxy(url: HttpUrl): UrlPathPrefixEntry? =
+  fun webProxy(url: HttpUrl): ValidWebEntry? =
       findEntryFromUrlString(webProxyEntries, url.encodedPath())
 
-  private fun findEntryFromUrlString(entries: List<UrlPathPrefixEntry>, urlPath: String): UrlPathPrefixEntry? {
+  private fun findEntryFromUrlString(entries: List<ValidWebEntry>, urlPath: String): ValidWebEntry? {
     val results = entries
         .filter { urlPath.startsWith(it.url_path_prefix) }
         .sortedByDescending { it.url_path_prefix.length }

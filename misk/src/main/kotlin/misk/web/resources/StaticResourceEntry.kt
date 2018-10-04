@@ -1,6 +1,6 @@
 package misk.web.resources
 
-import misk.web.UrlPathPrefixEntry
+import misk.web.ValidWebEntry
 
 /**
  * This data class is used with Guice multibindings. Register instances by calling `multibind()`
@@ -13,7 +13,7 @@ import misk.web.UrlPathPrefixEntry
 class StaticResourceEntry(
   url_path_prefix: String = "/",
   private val resourcePath: String
-) : UrlPathPrefixEntry(url_path_prefix) {
+) : ValidWebEntry(url_path_prefix = url_path_prefix) {
 
   fun resourcePath(urlPath: String): String {
     val normalizedResourcePath = if (!resourcePath.endsWith("/")) "$resourcePath/" else resourcePath
