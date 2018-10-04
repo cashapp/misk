@@ -2,6 +2,7 @@ package misk.digester
 
 import com.google.protobuf.Int64Value
 import misk.metrics.Histogram
+import misk.proto.tdigest.MergingDigestData
 
 class VeneurDigest
   constructor (
@@ -18,7 +19,7 @@ class VeneurDigest
     var sum: Double
   }
 
-  var mergingDigestInstance = MergingDigest()
+  var mergingDigestInstance = MergingDigest() //this should not be instantiated here?
 
   //add adds a new observation to the t-digest
   fun Add(v: VeneurDigestStruct, value: Double) {
@@ -50,8 +51,12 @@ class VeneurDigest
 
   //proto returns a representation fo the t-digest that can be later be reconstituted into an instance of the same type
   fun proto(v: VeneurDigestStruct) {
-    //implementation for proto
-    mergingDigestInstance.Data(v.mergingDigest)
+    //encode example
+    var encode: ByteArray = MergingDigestData.ADAPTER.encode(mergingDigestInstance.Data(v.mergingDigest))
+
+    //decode example
+    var decode: MergingDigestData = MergingDigestData.ADAPTER.decode(encode)
+
   }
 
   fun NewVeneurDigest() {

@@ -43,6 +43,8 @@ class MergingDigest {
   // in Dunning's paper.
   fun NewMerging(compressionValue: Double): MergingDigestStruct {
     // this is a provable upper bound on the size of the centroid list
+
+    //Todo: Restrict site of mainCentroid - is this even necessary?
     var sizeBound = ((PI * compressionValue / 2) + 0.5).toInt()
 
     return object : MergingDigestStruct {
