@@ -1,7 +1,6 @@
 package misk.web.actions
 
-import misk.web.resources.ResourceEntry
-import misk.web.resources.ResourceEntryFinder
+import misk.web.UrlPathPrefixEntry
 import kotlin.reflect.KClass
 
 /**
@@ -17,7 +16,7 @@ import kotlin.reflect.KClass
 class WebActionEntry(
   val actionClass: KClass<out WebAction>,
   url_path_prefix: String = "/"
-) : ResourceEntry(url_path_prefix)
+) : UrlPathPrefixEntry(url_path_prefix)
 
 inline fun <reified T : WebAction> WebActionEntry(
   url_path_prefix: String = "/"

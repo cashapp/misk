@@ -67,7 +67,7 @@ Configuring the Misk Service
 ---
 - Add the following multibindings to the appropriate KAbstractModule.
   - Create a new module for the tab named `misk/src/main/kotlin/misk/web/metadata/{TabName}MetadataModule` and add the below multibindings to it. Install the tab module in the respective location:
-    - If the tab is part of base `Misk`, then install that module in the list of tabs in `misk/src/main/kotlin/misk/web/AdminTabModule.kt`.
+    - If the tab is part of base `Misk`, then install that module in the list of tabs in `misk/src/main/kotlin/misk/web/AdminDashboardModule.kt`.
     - Else If it's a service specific tab, then add to your main service module (ie. for a `UrlShortenerFrontend` tab, install it in `UrlShortenerServiceModule`).
     - Else, install it in your main service module.
 

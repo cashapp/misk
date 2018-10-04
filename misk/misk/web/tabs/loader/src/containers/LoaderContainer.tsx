@@ -22,7 +22,7 @@ const TabContainer = styled(ResponsiveContainer)`
   padding-left: 5px;
 `
 
-const tabsUrl = "/api/admintabs"
+const tabsUrl = "/api/admindashboardtabs"
 const serviceUrl = "/api/service/metadata"
 
 class LoaderContainer extends React.Component<ILoaderProps> {
@@ -36,16 +36,16 @@ class LoaderContainer extends React.Component<ILoaderProps> {
   }
 
   render() {
-    const { adminTabs, serviceMetadata } = this.props.loader
+    const { adminDashboardTabs, serviceMetadata } = this.props.loader
     let unavailableEndpointUrls = ""
-    if (!adminTabs) { unavailableEndpointUrls += tabsUrl + " " }
+    if (!adminDashboardTabs) { unavailableEndpointUrls += tabsUrl + " " }
     if (!serviceMetadata) { unavailableEndpointUrls += serviceUrl + " " }
-    if (adminTabs && serviceMetadata) {
+    if (adminDashboardTabs && serviceMetadata) {
       return (
         <div>
-          <TopbarComponent links={adminTabs} serviceMetadata={serviceMetadata}/>
+          <TopbarComponent links={adminDashboardTabs} serviceMetadata={serviceMetadata}/>
           <TabContainer>
-            {Object.entries(adminTabs).map(([key,tab]) => (<ScriptComponent key={key} tab={tab}/>))}
+            {Object.entries(adminDashboardTabs).map(([key,tab]) => (<ScriptComponent key={key} tab={tab}/>))}
           </TabContainer>
         </div>
       )
