@@ -1,4 +1,4 @@
-import { createAction, IMiskAction } from "@misk/common"
+import { createAction, IAction } from "@misk/common"
 import axios from "axios"
 import { fromJS, List } from "immutable"
 import { all, call, put, takeLatest } from "redux-saga/effects"
@@ -122,7 +122,7 @@ function * handleGet () {
   }
 }
 
-function * handleGetOne (action: IMiskAction<EXAMPLE, {id: number}>) {
+function * handleGetOne (action: IAction<EXAMPLE, {id: number}>) {
   try {
     const { id } = action.payload
     const { data } = yield call(axios.get, `https://jsonplaceholder.typicode.com/posts/${id}`)
@@ -132,7 +132,7 @@ function * handleGetOne (action: IMiskAction<EXAMPLE, {id: number}>) {
   }
 }
 
-function * handlePost (action: IMiskAction<EXAMPLE, {saveData: string}>) {
+function * handlePost (action: IAction<EXAMPLE, {saveData: string}>) {
   try {
     const { saveData } = action.payload
     const { data } = yield call(axios.post, "https://jsonplaceholder.typicode.com/posts/", { saveData })
@@ -142,7 +142,7 @@ function * handlePost (action: IMiskAction<EXAMPLE, {saveData: string}>) {
   }
 }
 
-function * handlePut (action: IMiskAction<EXAMPLE, {id: number, updateData: string}>) {
+function * handlePut (action: IAction<EXAMPLE, {id: number, updateData: string}>) {
   try {
     const { id, updateData } = action.payload
     const { data } = yield call(axios.put, `https://jsonplaceholder.typicode.com/posts/${id}`, { updateData })
@@ -152,7 +152,7 @@ function * handlePut (action: IMiskAction<EXAMPLE, {id: number, updateData: stri
   }
 }
 
-function * handlePatch (action: IMiskAction<EXAMPLE, {id: number, updateData: string}>) {
+function * handlePatch (action: IAction<EXAMPLE, {id: number, updateData: string}>) {
   try {
     const { id, updateData } = action.payload
     const { data } = yield call(axios.patch, `https://jsonplaceholder.typicode.com/posts/${id}`, { updateData })
@@ -162,7 +162,7 @@ function * handlePatch (action: IMiskAction<EXAMPLE, {id: number, updateData: st
   }
 }
 
-function * handleDelete (action: IMiskAction<EXAMPLE, {id: number}>) {
+function * handleDelete (action: IAction<EXAMPLE, {id: number}>) {
   try {
     const { id } = action.payload
     const { data } = yield call(axios.delete, `https://jsonplaceholder.typicode.com/posts/${id}`)
@@ -198,7 +198,7 @@ const initialState = fromJS({
  * Duck Reducer
  * Merges dispatched action objects on to the existing (or initial) state to generate new state
  */
-export default function ExampleReducer (state = initialState, action: IMiskAction<string, {}>) {
+export default function ExampleReducer (state = initialState, action: IAction<string, {}>) {
   switch (action.type) {
     case EXAMPLE.GET:
     case EXAMPLE.GET_ONE:

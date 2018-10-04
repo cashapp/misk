@@ -3,6 +3,7 @@ package misk.web.actions
 import misk.MiskCaller
 import misk.scope.ActionScoped
 import misk.security.authz.Unauthenticated
+import misk.web.DashboardTab
 import misk.web.Get
 import misk.web.RequestContentType
 import misk.web.ResponseContentType
@@ -40,11 +41,11 @@ class AdminDashboardTabAction : WebAction {
 }
 
 class AdminDashboardTab(
-  val name: String,
   slug: String,
   url_path_prefix: String,
-  val category: String = "Container Admin",
   roles: Set<String> = setOf(),
-  services: Set<String> = setOf()
-) : WebTab(slug = slug, url_path_prefix = url_path_prefix, roles = roles, services = services)
+  services: Set<String> = setOf(),
+  name: String,
+  category: String = "Container Admin"
+) : DashboardTab(slug = slug, url_path_prefix = url_path_prefix, roles = roles, services = services, name = name, category = category)
 

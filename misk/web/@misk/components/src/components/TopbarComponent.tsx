@@ -1,14 +1,15 @@
 import { Alignment, Button, Collapse, Icon, Navbar, NavbarDivider, NavbarGroup, NavbarHeading } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
-import { IMiskAdminTab, IMiskServiceMetadata } from "@misk/common"
+import { IDashboardTab } from "@misk/common"
 import * as React from "react"
 import { Link } from "react-router-dom"
 import styled from "styled-components"
 import { ResponsiveContainer } from "../containers"
 
 export interface ITopbarProps {
-  serviceMetadata?: IMiskServiceMetadata
-  links?: IMiskAdminTab[]
+  homeName?: string
+  homeUrl?: string
+  links?: IDashboardTab[]
 }
 
 const MiskNavbar = styled(Navbar)`
@@ -139,13 +140,13 @@ export class TopbarComponent extends React.Component<ITopbarProps, {}> {
 
   public render() {
     const { isOpen } = this.state
-    const { links, serviceMetadata } = this.props
+    const { homeName, homeUrl, links } = this.props
     return(
       <MiskNavbar>
         <MiskMenuButton onClick={this.handleClick}><MiskMenuIcon iconSize={32} icon={isOpen ? IconNames.CROSS : IconNames.MENU}/></MiskMenuButton>
         <ResponsiveContainer>
           <MiskNavbarGroup align={Alignment.LEFT} className="bp3-dark">
-            {this.renderMenuLink(serviceMetadata)}
+            {this.renderMenuLink(homeName, homeUrl)}
             <MiskNavbarDivider/>
           </MiskNavbarGroup>
         </ResponsiveContainer>
@@ -160,27 +161,29 @@ export class TopbarComponent extends React.Component<ITopbarProps, {}> {
     )
   }
 
-  private renderMenuLink(serviceMetadata: IMiskServiceMetadata) {
-    if (serviceMetadata) {
-      return (<MiskNavbarLink to={serviceMetadata.url}><MiskNavbarHeading>{serviceMetadata.name}</MiskNavbarHeading></MiskNavbarLink>)
+  private renderMenuLink(homeName: string, homeUrl: string) {
+    if (homeName && homeUrl) {
+      return (<MiskNavbarLink to={homeUrl}><MiskNavbarHeading>{homeName}</MiskNavbarHeading></MiskNavbarLink>)
+    } else if (homeName) {
+      return (<MiskNavbarHeading>{homeName}</MiskNavbarHeading>)
     } else {
       return (<MiskNavbarHeading>Misk</MiskNavbarHeading>)
     }
   }
 
-  private renderMenuCategories(links: IMiskAdminTab[]) {
-    const categories : Array<[string, IMiskAdminTab[]]> = Object.entries(this.groupBy(links, "category"))
+  private renderMenuCategories(links: IDashboardTab[]) {
+    const categories : Array<[string, IDashboardTab[]]> = Object.entries(this.groupBy(links, "category"))
     return (categories.map(([categoryName, categoryLinks]) => this.renderMenuCategory(categoryName, categoryLinks)))
   }
 
-  private renderMenuCategory(categoryName: string, categoryLinks: IMiskAdminTab[]) {
-    const sortedCategoryLinks = this.sortBy(categoryLinks, "name").filter((link: IMiskAdminTab) => link.category !== "")
+  private renderMenuCategory(categoryName: string, categoryLinks: IDashboardTab[]) {
+    const sortedCategoryLinks = this.sortBy(categoryLinks, "name").filter((link: IDashboardTab) => link.category !== "")
     return (
       <div>
         <MiskMenuCategory>{categoryName}</MiskMenuCategory>
         <MiskMenuDivider/>
         <MiskMenuLinks>
-          {sortedCategoryLinks.map((link: IMiskAdminTab) => <MiskMenuLink key={link.slug} onClick={this.handleClick} to={link.url_path_prefix}>{link.name}</MiskMenuLink>)}
+          {sortedCategoryLinks.map((link: IDashboardTab) => <MiskMenuLink key={link.slug} onClick={this.handleClick} to={link.url_path_prefix}>{link.name}</MiskMenuLink>)}
         </MiskMenuLinks>
       </div>
     )

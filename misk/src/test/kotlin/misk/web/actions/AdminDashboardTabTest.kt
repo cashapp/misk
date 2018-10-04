@@ -19,12 +19,11 @@ internal class AdminDashboardTabTest {
 
   class TestModule : KAbstractModule() {
     override fun configure() {
-      multibind<AdminDashboardTab>().toInstance(
-          AdminDashboardTab(
-              "Dashboard",
-              "dashboard",
-              "/_admin/dashboard/"
-          ))
+      multibind<AdminDashboardTab>().toInstance(AdminDashboardTab(
+          slug = "dashboard",
+          url_path_prefix = "/_admin/dashboard/",
+          name = "Dashboard"
+      ))
     }
   }
 
@@ -35,58 +34,58 @@ internal class AdminDashboardTabTest {
 
   @Test
   internal fun tabGoodSlug() {
-    AdminDashboardTab("Name", "good-1-slug-test", "/a/path/")
+    AdminDashboardTab("good-1-slug-test", url_path_prefix = "/a/path/", name = "Name")
   }
 
   @Test
   internal fun tabSlugWithSpace() {
     assertFailsWith<IllegalArgumentException> {
-      AdminDashboardTab("Name", "bad slug", "/a/path/")
+      AdminDashboardTab("bad slug", url_path_prefix = "/a/path/", name = "Name")
     }
   }
 
   @Test
   internal fun tabSlugWithUpperCase() {
     assertFailsWith<IllegalArgumentException> {
-      AdminDashboardTab("Name", "BadSlug", "/a/path/")
+      AdminDashboardTab("BadSlug", url_path_prefix = "/a/path/", name = "Name")
     }
   }
 
   @Test
   internal fun tabGoodCategory() {
-    AdminDashboardTab("Name", "slug", "/a/path/", "@tea-pot_418")
+    AdminDashboardTab(slug = "slug", url_path_prefix = "/a/path/", name = "Name", category = "@tea-pot_418")
   }
 
   @Test
   internal fun tabCategoryWithSpace() {
     assertFailsWith<IllegalArgumentException> {
-      AdminDashboardTab("Name", "bad slug", "/a/path/", "bad icon")
+      AdminDashboardTab(slug = "bad slug", url_path_prefix = "/a/path/", name = "Name", category = "bad icon")
     }
   }
 
   @Test
   internal fun tabCategoryWithUpperCase() {
     assertFailsWith<IllegalArgumentException> {
-      AdminDashboardTab("Name", "BadSlug", "/a/path/", "Bad-Icon")
+      AdminDashboardTab(slug = "BadSlug", url_path_prefix = "/a/path/", name = "Name", category = "Bad-Icon")
     }
   }
 
   @Test
   internal fun tabGoodPath() {
-    AdminDashboardTab("Name", "slug", "/a/path/")
+    AdminDashboardTab(slug = "slug", url_path_prefix = "/a/path/", name = "Name")
   }
 
   @Test
   internal fun tabPathWithoutLeadingSlash() {
     assertFailsWith<IllegalArgumentException> {
-      AdminDashboardTab("Name", "slug", "a/path/")
+      AdminDashboardTab(slug = "slug", url_path_prefix = "a/path/", name = "Name")
     }
   }
 
   @Test
   internal fun tabPathWithoutTrailingSlash() {
     assertFailsWith<IllegalArgumentException> {
-      AdminDashboardTab("Name", "slug", "/a/path")
+      AdminDashboardTab(slug = "slug", url_path_prefix = "/a/path", name = "Name")
     }
   }
 }
