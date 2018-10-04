@@ -7,6 +7,9 @@ interface Consumer {
     /** the topic from which events are being received */
     val topic: Topic
 
+    /** if true, the batch is being retried */
+    val isRetry: Boolean
+
     /** Defers processing a set of events to a later time, typically placing them on a retry queue */
     fun retryLater(vararg events: Event)
   }
@@ -18,4 +21,16 @@ interface Consumer {
 
   /** listens for incoming events to a topic */
   fun subscribe(topic: Topic, handler: Handler)
+}
+
+/** listens for incoming events, dispatching them to a handler function */
+inline fun Consumer.subscribe(
+  topic: Topic,
+  crossinline handler: (Consumer.Context, List<Event>) -> Unit
+) {
+  subscribe(topic, object : Consumer.Handler {
+    override fun handleEvents(ctx: Consumer.Context, vararg events: Event) {
+      handler(ctx, events.toList())
+    }
+  })
 }
