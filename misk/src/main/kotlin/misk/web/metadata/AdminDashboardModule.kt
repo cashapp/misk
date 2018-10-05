@@ -10,7 +10,6 @@ import misk.web.actions.ServiceMetadataAction
 import misk.web.actions.WebActionEntry
 import misk.web.interceptors.WideOpenDevelopmentInterceptorFactory
 import misk.web.proxy.WebProxyAction
-import misk.web.proxy.WebProxyActionModule
 import misk.web.proxy.WebProxyEntry
 import misk.web.resources.StaticResourceAction
 import misk.web.resources.StaticResourceEntry
@@ -32,7 +31,6 @@ class AdminDashboardModule(
         url = url_path_prefix,
         environment = environment
     ))
-    install(WebProxyActionModule())
     multibind<WebActionEntry>().toInstance(WebActionEntry<AdminDashboardTabAction>())
     multibind<WebActionEntry>().toInstance(WebActionEntry<ServiceMetadataAction>())
     // Adds open CORS headers in development to allow through API calls from webpack servers

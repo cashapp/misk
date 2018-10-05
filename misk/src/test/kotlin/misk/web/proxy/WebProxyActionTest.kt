@@ -1,16 +1,8 @@
 package misk.web.proxy
 
-import com.google.inject.Provides
-import com.google.inject.name.Names
 import kotlinx.coroutines.experimental.async
 import kotlinx.coroutines.experimental.runBlocking
-import misk.client.HttpClientEndpointConfig
-import misk.client.HttpClientModule
-import misk.client.HttpClientSSLConfig
-import misk.client.HttpClientsConfig
 import misk.inject.KAbstractModule
-import misk.security.ssl.SslLoader
-import misk.security.ssl.TrustStoreConfig
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.web.WebTestingModule
@@ -21,7 +13,6 @@ import misk.web.mediatype.asMediaType
 import misk.web.readUtf8
 import misk.web.toMisk
 import okhttp3.MediaType
-import okhttp3.OkHttpClient
 import okhttp3.RequestBody
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
@@ -33,9 +24,7 @@ import java.lang.IllegalArgumentException
 import java.net.HttpURLConnection
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
-import javax.inject.Named
 import javax.inject.Provider
-import javax.inject.Singleton
 import kotlin.test.assertFailsWith
 
 @MiskTest(startService = true)
@@ -45,7 +34,7 @@ class WebProxyActionTest {
   @MiskTestModule
   val module = TestModule(upstreamServer)
 
-  @Inject @Named("web_proxy_action") private lateinit var httpClient: OkHttpClient
+  @Inject private lateinit var optionalBinder: OptionalBinder
 
   private val plainTextMediaType = MediaTypes.TEXT_PLAIN_UTF8.asMediaType()
   private val weirdMediaType = "application/weird".asMediaType()
@@ -123,7 +112,7 @@ class WebProxyActionTest {
         .setBody("I am an intercepted response!"))
 
     val responseAsync = async {
-      httpClient.newCall(
+      optionalBinder.proxyClient.newCall(
           get("/local/prefix/tacos/", weirdMediaType)).execute().toMisk()
     }
 
@@ -149,7 +138,10 @@ class WebProxyActionTest {
         .setBody("I am an intercepted response!"))
 
     val responseAsync =
-        async { httpClient.newCall(get("/local/prefix/tacos", weirdMediaType)).execute().toMisk() }
+        async {
+          optionalBinder.proxyClient.newCall(get("/local/prefix/tacos", weirdMediaType)).execute()
+              .toMisk()
+        }
 
     val upstreamReceivedRequest = upstreamServer.takeRequest(200, TimeUnit.MILLISECONDS)
     assertThat(upstreamReceivedRequest.getHeader("Forwarded")).isEqualTo(
@@ -167,7 +159,7 @@ class WebProxyActionTest {
   @Test
   internal fun getNotForwardedPathNoMatch() {
     val request = get("/local/notredirectedprefix/tacos", weirdMediaType)
-    val response = httpClient.newCall(request).execute().toMisk()
+    val response = optionalBinder.proxyClient.newCall(request).execute().toMisk()
     assertThat(response.readUtf8()).isEqualTo("Nothing found at /local/notredirectedprefix/tacos")
 
     assertThat(upstreamServer.requestCount).isZero()
@@ -181,7 +173,7 @@ class WebProxyActionTest {
         .setBody("I am an intercepted response!"))
 
     val response = async {
-      httpClient.newCall(
+      optionalBinder.proxyClient.newCall(
           post("/local/prefix/tacos/", weirdMediaType, "my taco", weirdMediaType)).execute()
           .toMisk()
     }
@@ -208,7 +200,7 @@ class WebProxyActionTest {
         .setBody("I am an intercepted response!"))
 
     val response = async {
-      httpClient.newCall(
+      optionalBinder.proxyClient.newCall(
           post("/local/prefix/tacos", weirdMediaType, "my taco", weirdMediaType)).execute().toMisk()
     }
 
@@ -230,7 +222,7 @@ class WebProxyActionTest {
   internal fun postNotForwardedPathNoMatch() {
     val request =
         post("/local/notredirectedprefix/tacos", weirdMediaType, "my taco", weirdMediaType)
-    val response = httpClient.newCall(request).execute().toMisk()
+    val response = optionalBinder.proxyClient.newCall(request).execute().toMisk()
     assertThat(response.readUtf8()).isEqualTo("Nothing found at /local/notredirectedprefix/tacos")
 
     assertThat(upstreamServer.requestCount).isZero()
@@ -241,7 +233,7 @@ class WebProxyActionTest {
     upstreamServer.shutdown()
 
     val request = get("/local/prefix/tacos", plainTextMediaType)
-    val response = httpClient.newCall(request).execute().toMisk()
+    val response = optionalBinder.proxyClient.newCall(request).execute().toMisk()
 
     assertThat(response.readUtf8()).isEqualTo(
         "Nothing found at /local/prefix/tacos")
@@ -265,7 +257,7 @@ class WebProxyActionTest {
         .setBody("I am an intercepted response!"))
 
     val responseAsync = async {
-      httpClient.newCall(
+      optionalBinder.proxyClient.newCall(
           get("/local/prefix/tacos/another/long/prefix/see/if/forwards/", weirdMediaType)).execute()
           .toMisk()
     }
@@ -293,7 +285,7 @@ class WebProxyActionTest {
         .setBody("I am an intercepted response!"))
 
     val responseAsync = async {
-      httpClient.newCall(
+      optionalBinder.proxyClient.newCall(
           get("/local/prefix/tacos////see/if/forwards/", weirdMediaType)).execute().toMisk()
     }
 
@@ -319,7 +311,7 @@ class WebProxyActionTest {
         .setBody("I am an intercepted response!"))
 
     val responseAsync = async {
-      httpClient.newCall(
+      optionalBinder.proxyClient.newCall(
           get("/local/prefix/tacos/.test/.config/.ssh/see/if/forwards/", weirdMediaType)).execute()
           .toMisk()
     }
@@ -354,8 +346,6 @@ class WebProxyActionTest {
 
   class TestModule(private val upstreamServer: MockWebServer) : KAbstractModule() {
     override fun configure() {
-      install(HttpClientModule("web_proxy_action", Names.named("web_proxy_action")))
-
       multibind<WebActionEntry>().toInstance(
           WebActionEntry<WebProxyAction>("/local/prefix/"))
       multibind<WebProxyEntry>().toProvider(
@@ -363,16 +353,6 @@ class WebProxyActionTest {
             WebProxyEntry("/local/prefix/", upstreamServer.url("/").toString())
           })
       install(WebTestingModule())
-    }
-
-    @Provides
-    @Singleton
-    fun provideHttpClientsConfig(): HttpClientsConfig {
-      return HttpClientsConfig(
-          endpoints = mapOf(
-              "web_proxy_action" to HttpClientEndpointConfig("http://example.com/")
-          )
-      )
     }
   }
 }
