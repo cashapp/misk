@@ -1,5 +1,29 @@
-Misk Admin
+Misk Web
+===
+
+Installing the Admin Dashboard on a new service
 ---
+
+For the purpose of this guide, the service will be called DinoService.
+
+1. Install `MiskWebModule` and `AdminDashboardModule` in `DinoServiceModule`
+
+  ```Kotlin
+  class DinoServiceModule : KAbstractModule() {
+    override fun configure() {
+      val environment = Environment.fromEnvironmentVariable()
+      install(DinoModule(environment))
+
+      install(MiskWebModule())
+      install(AdminDashboardModule(environment, "Dino", "/_admin/"))
+
+      ...
+    }
+  }
+  ```
+
+Other Notes
+===
 
 ## Organization
 - `@misk`: all npm packages
