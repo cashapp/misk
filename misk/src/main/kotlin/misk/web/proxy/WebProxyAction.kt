@@ -1,5 +1,6 @@
 package misk.web.proxy
 
+import com.google.inject.Inject
 import misk.scope.ActionScoped
 import misk.security.authz.Unauthenticated
 import misk.web.Get
@@ -22,7 +23,6 @@ import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
 import java.io.IOException
 import java.net.HttpURLConnection
-import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Singleton
 
@@ -47,7 +47,7 @@ import javax.inject.Singleton
 
 @Singleton
 class WebProxyAction @Inject constructor(
-  @Named("web_proxy_action") private val proxyClient: OkHttpClient,
+  val optionalBinder: OptionalBinder,
   @JvmSuppressWildcards private val clientRequest: ActionScoped<Request>,
   private val staticResourceAction: StaticResourceAction,
   private val resourceEntryFinder: ResourceEntryFinder
@@ -73,7 +73,7 @@ class WebProxyAction @Inject constructor(
     val request = clientRequest.get()
     val proxyRequest = request.toOkHttp3().forwardedWithUrl(proxyUrl)
     return try {
-      proxyClient.newCall(proxyRequest).execute().toMisk()
+      optionalBinder.proxyClient.newCall(proxyRequest).execute().toMisk()
     } catch (e: IOException) {
       staticResourceAction.getResponse(request)
     }
@@ -99,3 +99,12 @@ class WebProxyAction @Inject constructor(
   }
 }
 
+/**
+ * https://github.com/google/guice/wiki/FrequentlyAskedQuestions#how-can-i-inject-optional-parameters-into-a-constructor
+ */
+@Singleton
+class OptionalBinder {
+  @Inject(optional = true)
+  @field:Named("web_proxy_action")
+  var proxyClient: OkHttpClient = OkHttpClient()
+}
