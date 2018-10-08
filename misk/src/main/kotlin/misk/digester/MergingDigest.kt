@@ -7,22 +7,39 @@ import kotlin.math.asin
 
 class MergingDigest {
 
-  interface MergingDigestStruct {
-    var compression: Double
+    //amount of compression to data
+    var compression: Double = 0.0
 
     //main list of centroids
-    var mainCentroids: MutableList<Centroid> //this list can be a mutableList instead?
+    var mainCentroids: MutableList<Centroid> = mutableListOf()
     //total weight of unmerged main centroids
-    var mainWeight: Double
+    var mainWeight: Double = 0.0
 
     //centroids that have been added but not yet merged into main list
-    var tempCentroids: MutableList<Centroid>
+    var tempCentroids: MutableList<Centroid> = mutableListOf()
     //total weight of unmerged temp centroids
-    var tempWeight: Double
+    var tempWeight: Double = 0.0
 
-    var min: Double
-    var max: Double
-  }
+    var min: Double = Double.POSITIVE_INFINITY
+    var max: Double = Double.NEGATIVE_INFINITY
+
+    constructor()
+
+    constructor(compression: Double) {
+      this.compression = compression
+    }
+
+    constructor (
+      compression: Double,
+      mainCentroids: MutableList<Centroid>,
+      min: Double,
+      max: Double
+    ) {
+      this.compression = compression
+      this.mainCentroids = mainCentroids
+      this.min = min
+      this.max = max
+    }
 
   /**
    * Initializes a new merging t-digest using the given compression parameter.
@@ -30,21 +47,13 @@ class MergingDigest {
    * precision, especially at the median. Values from 20 to 1000 are recommended
    * in Dunning's paper.
    */
-  fun newMerging(compressionValue: Double): MergingDigestStruct {
+  fun newMerging(compressionValue: Double): MergingDigest {
     // this is a provable upper bound on the size of the centroid list
 
-    //Todo: Restrict site of mainCentroid - is this even necessary?
+    //Todo: Restrict size of mainCentroid - is this even necessary? Its properties not seem to be used in stripe's merging_digest
    // var sizeBound = ((PI * compressionValue / 2) + 0.5).toInt()
 
-    return object : MergingDigestStruct {
-      override var compression = compressionValue
-      override var mainCentroids =  mutableListOf<Centroid>()
-      override var tempCentroids = mutableListOf<Centroid>()
-      override var min = Double.POSITIVE_INFINITY
-      override var max = Double.NEGATIVE_INFINITY
-      override var mainWeight = 0.0
-      override var tempWeight = 0.0
-    }
+    return MergingDigest(compressionValue)
   }
 
   /**
@@ -52,17 +61,13 @@ class MergingDigest {
    * MergingDigestData.  This should be the way to generate a MergingDigest
    * from a serialized protobuf.
    */
-  fun newMergingFromData(mergingDigestData: MergingDigestData): MergingDigestStruct {
-    var td = object : MergingDigestStruct {
-      override var compression = mergingDigestData.compression
-      //todo: this is pass by reference? probably should be by value
-      override var mainCentroids = mergingDigestData.main_centroids.toMutableList()
-      override var tempCentroids = mutableListOf<Centroid>()
-      override var min = mergingDigestData.min
-      override  var max = mergingDigestData.max
-      override var mainWeight = 0.0
-      override var tempWeight = 0.0
-    }
+  fun newMergingFromData(mergingDigestData: MergingDigestData): MergingDigest {
+
+    var td = MergingDigest(
+        mergingDigestData.compression,
+        mergingDigestData.main_centroids.toMutableList(),
+        mergingDigestData.min,
+        mergingDigestData.max)
 
     td.mainWeight = 0.0
     for (c in td.mainCentroids) {
@@ -79,7 +84,7 @@ class MergingDigest {
   fun estimateTempBuffer(compressionValue: Double): Int {
     // this heuristic comes from Dunning's paper
     // 925 is the maximum point of this quadratic equation
-    var tempCompression = minOf(925.0, maxOf(20.0, compressionValue))
+    val tempCompression = minOf(925.0, maxOf(20.0, compressionValue))
     return (7.5 + 0.37*tempCompression - 2e-4*tempCompression*tempCompression).toInt()
   }
 
@@ -87,17 +92,17 @@ class MergingDigest {
    * Adds a new value to the t-digest, with a given weight that must be positive.
    * Infinities and NaN cannot be added.
    */
-  fun add(mergingDigestObject: MergingDigestStruct, value: Double, weight: Double) {
+  fun add(value: Double, weight: Double) {
     if (Double.NaN == value || Double.POSITIVE_INFINITY == value || weight <= 0) {
       Exception("invalid value added")
     }
 
-    if (mergingDigestObject.tempCentroids.size == estimateTempBuffer(mergingDigestObject.compression)) {
-          mergeAllTemps(mergingDigestObject) //<- will we still need this?
+    if (tempCentroids.size == estimateTempBuffer(compression)) {
+          mergeAllTemps() //<- will we still need this?
     }
 
-    mergingDigestObject.min = minOf(mergingDigestObject.min, value)
-    mergingDigestObject.max = maxOf(mergingDigestObject.max, value)
+    min = minOf(min, value)
+    max = maxOf(max, value)
 
     var next = Centroid(
       value,
@@ -105,28 +110,28 @@ class MergingDigest {
       mutableListOf<Double>()
     )
 
-    mergingDigestObject.tempCentroids.add(next)
-    mergingDigestObject.tempWeight += weight
+    tempCentroids.add(next)
+    tempWeight += weight
 
   }
 
   /**
    * combine the mainCentroids and tempCentroids in-place into mainCentroids
    */
-  fun mergeAllTemps(mergingDigestObject: MergingDigestStruct) {
+  fun mergeAllTemps() {
     // this optimization is really important! if you remove it, the main list
     // will get merged into itself every time this is called
-    if (mergingDigestObject.tempCentroids.size == 0) {
+    if (tempCentroids.size == 0) {
       return
     }
 
     // we iterate over both centroid lists from least to greatest mean, so first
     // we have to sort this one
-    mergingDigestObject.tempCentroids.sortBy { it.mean }
+    tempCentroids.sortBy { it.mean }
     var tempIndex = 0
 
     // total weight that the final t-digest will have, after everything is merged
-    var totalWeight = mergingDigestObject.mainWeight + mergingDigestObject.tempWeight
+    var totalWeight = mainWeight + tempWeight
     // how much weight has been merged so far
     var mergedWeight = 0.0
     // the index of the last quantile to be merged into the previous centroid
@@ -135,21 +140,21 @@ class MergingDigest {
     var lastMergedIndex = 0.0
     // since we will be merging in-place into td.mainCentroids, we need to keep
     // track of the indices of the remaining elements
-    var actualMainCentroids = mergingDigestObject.mainCentroids.toMutableList()
-    mergingDigestObject.mainCentroids = mergingDigestObject.mainCentroids.subList(0, 0) //this should be clear list
+    var actualMainCentroids = mainCentroids.toMutableList()
+    mainCentroids = mainCentroids.subList(0, 0) //this should be clear list
     // to facilitate the in-place merge, we will need a place to store the main
     // centroids that would be overwritten - we will use space from the start
     // of tempCentroids for this
     var swappedCentroids = mutableListOf<Centroid>()
 
-    while ((actualMainCentroids.size + swappedCentroids.size != 0) || tempIndex < mergingDigestObject.tempCentroids.size) {
+    while ((actualMainCentroids.size + swappedCentroids.size != 0) || tempIndex < tempCentroids.size) {
       var nextTemp: Centroid = Centroid (
         Double.POSITIVE_INFINITY,
         0.0,
         mutableListOf<Double>()
       )
-      if (tempIndex < mergingDigestObject.tempCentroids.size) {
-        nextTemp = mergingDigestObject.tempCentroids[tempIndex]
+      if (tempIndex < tempCentroids.size) {
+        nextTemp = tempCentroids[tempIndex]
       }
 
       var nextMain: Centroid = Centroid (
@@ -180,7 +185,7 @@ class MergingDigest {
           swappedCentroids.removeAt(0)
         }
 
-        lastMergedIndex = mergeOne(mergingDigestObject, mergedWeight, totalWeight, lastMergedIndex, nextMain)
+        lastMergedIndex = mergeOne(mergedWeight, totalWeight, lastMergedIndex, nextMain)
         mergedWeight += nextMain.weight
       } else {
         // before merging, we have to save the next main centroid somewhere
@@ -191,14 +196,14 @@ class MergingDigest {
         }
         tempIndex++
 
-        lastMergedIndex = mergeOne(mergingDigestObject, mergedWeight, totalWeight, lastMergedIndex, nextTemp)
+        lastMergedIndex = mergeOne(mergedWeight, totalWeight, lastMergedIndex, nextTemp)
         mergedWeight += nextTemp.weight
       }
     }
 
-    mergingDigestObject.tempCentroids.clear()
-    mergingDigestObject.tempWeight = 0.0
-    mergingDigestObject.mainWeight = totalWeight
+    tempCentroids.clear()
+    tempWeight = 0.0
+    mainWeight = totalWeight
   }
 
   /**
@@ -207,7 +212,6 @@ class MergingDigest {
    * the length of the list has a strict upper bound (see constructor)
    */
   fun mergeOne(
-    mergingDigestObject : MergingDigestStruct,
       beforeWeight: Double,
       totalWeight: Double,
       beforeIndex: Double,
@@ -215,15 +219,15 @@ class MergingDigest {
   ): Double {
 
     // compute the quantile index of the element we're about to merge
-    var nextIndex = indexEstimate(mergingDigestObject, (beforeWeight + next.weight) / totalWeight)
+    var nextIndex = indexEstimate((beforeWeight + next.weight) / totalWeight)
 
-    if (nextIndex-beforeIndex > 1 || mergingDigestObject.mainCentroids.size == 0) {
+    if (nextIndex-beforeIndex > 1 || mainCentroids.size == 0) {
       // the new index is far away from the last index of the current centroid
       // therefore we cannot merge into the current centroid or it would
       // become too wide, so we will append a new centroid
-      mergingDigestObject.mainCentroids.add(next)
+      mainCentroids.add(next)
       // return the last index that was merged into the previous centroid
-      return indexEstimate(mergingDigestObject,beforeWeight / totalWeight)
+      return indexEstimate(beforeWeight / totalWeight)
     } else {
       // the new index fits into the range of the current centroid, so we
       // combine it into the current centroid's values
@@ -231,12 +235,11 @@ class MergingDigest {
       // weight must be updated before mean
 
       //TODO: is this thread safe? doublecheck that this successfully updates all properties
-      var mainCentroidsTemp = mergingDigestObject.mainCentroids[mergingDigestObject.mainCentroids.size-1]
+      var mainCentroidsTemp = mainCentroids[mainCentroids.size-1]
       var builder = mainCentroidsTemp.newBuilder()
       builder.weight += next.weight
       builder.mean +=
-          (next.mean - mergingDigestObject.mainCentroids[mergingDigestObject.mainCentroids.size-1].mean) *
-          next.weight / mergingDigestObject.mainCentroids[mergingDigestObject.mainCentroids.size-1].weight
+          (next.mean - mainCentroids[mainCentroids.size-1].mean) * next.weight / mainCentroids[mainCentroids.size-1].weight
 
       // we did not create a new centroid, so the trailing index of the previous
       // centroid remains
@@ -248,30 +251,30 @@ class MergingDigest {
    * given a quantile, estimate the index of the centroid that contains it using
    * the given compression
    */
-  fun indexEstimate(mergingDigestObject: MergingDigestStruct, quantile: Double) : Double {
-    return mergingDigestObject.compression * ((asin(2*quantile-1) / PI) + 0.5).toFloat()
+  fun indexEstimate(quantile: Double) : Double {
+    return compression * ((asin(2*quantile-1) / PI) + 0.5).toFloat()
   }
 
   /**
    * Returns a value such that the fraction of values in td below that value is
    * approximately equal to quantile. Returns NaN if the digest is empty.
    */
-  fun quantile(mergingDigestObject: MergingDigestStruct, quantile: Double): Double {
+  fun quantile(quantile: Double): Double {
     if (quantile < 0 || quantile > 1) {
       throw IndexOutOfBoundsException("quantile out of bounds")
     }
-    mergeAllTemps(mergingDigestObject)
+    mergeAllTemps()
 
     // add up the weights of centroids in ascending order until we reach a
     // centroid that pushes us over the quantile
-    var q = quantile * mergingDigestObject.mainWeight
+    var q = quantile * mainWeight
     var weightSoFar = 0.0
-    var lowerBound = mergingDigestObject.min
+    var lowerBound = min
 
-    val iterator = mergingDigestObject.mainCentroids.iterator()
+    val iterator = mainCentroids.iterator()
 
     for((i, c) in iterator.withIndex()) {
-      var upperBound = centroidUpperBound(mergingDigestObject, i)
+      var upperBound = centroidUpperBound(i)
       if (q <= weightSoFar+c.weight) {
         // the target quantile is somewhere inside this centroid
         // we compute how much of this centroid's weight falls into the quantile
@@ -302,11 +305,11 @@ class MergingDigest {
    * this assumption is justified empirically in dunning's paper
    * TODO: does this assumption actually apply to our implementation?
    */
-  fun centroidUpperBound(mergingDigestObject: MergingDigestStruct, i: Int): Double {
-    if (i != mergingDigestObject.mainCentroids.size-1) {
-      return (mergingDigestObject.mainCentroids[i+1].mean + mergingDigestObject.mainCentroids[i].mean) / 2
+  fun centroidUpperBound(i: Int): Double {
+    if (i != mainCentroids.size-1) {
+      return (mainCentroids[i+1].mean + mainCentroids[i].mean) / 2
     } else {
-      return mergingDigestObject.max
+      return max
     }
   }
 
@@ -314,20 +317,20 @@ class MergingDigest {
    * merge another digest into this one. Neither td nor other can be shared
    * concurrently during the execution of this method.
    */
-  fun merge( mergingDigestObject: MergingDigestStruct, other: MergingDigestStruct) {
+  fun merge(other: MergingDigest) {
 
     //end inclusive
     var shuffledIndices = IntArray(other.mainCentroids.size) { it }.toMutableList()
     shuffledIndices.shuffle()
 
     for (i in shuffledIndices) {
-        add(mergingDigestObject, other.mainCentroids[i].mean, other.mainCentroids[i].weight)
+        add(other.mainCentroids[i].mean, other.mainCentroids[i].weight)
     }
 
     // we did not merge other's temps, so we need to add those too
     // they're unsorted so there's no need to shuffle them
     for (centroid in other.tempCentroids) {
-      add(mergingDigestObject, centroid.mean, centroid.weight)
+      add(centroid.mean, centroid.weight)
     }
   }
 
@@ -336,13 +339,13 @@ class MergingDigest {
    * This type should generally just be used when serializing MergingDigest's,
    * and doesn't have much of a purpose on its own.
    */
-  fun data(mergingDigestObject: MergingDigestStruct): MergingDigestData {
-    mergeAllTemps(mergingDigestObject)
+  fun data(): MergingDigestData {
+    mergeAllTemps()
     return MergingDigestData(
-        mergingDigestObject.mainCentroids,
-        mergingDigestObject.compression,
-        mergingDigestObject.min,
-        mergingDigestObject.max
+        mainCentroids,
+        compression,
+        min,
+        max
     )
   }
 }
