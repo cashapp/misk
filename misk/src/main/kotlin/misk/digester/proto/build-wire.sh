@@ -9,3 +9,8 @@ java -jar ~/Downloads/wire-compiler-2.3.0-RC1-jar-with-dependencies.jar \
 	--proto_path=src/main/kotlin/misk/digester/proto/ \
 	--java_out=src/main/kotlin/ \
 	tdigest.proto
+
+java -jar ~/Downloads/wire-compiler-2.3.0-RC1-jar-with-dependencies.jar \
+	--proto_path=src/main/kotlin/misk/digester/proto/ \
+	--java_out=src/main/kotlin/ \
+	service.proto
