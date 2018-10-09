@@ -1,6 +1,6 @@
 package misk.digester
 
-import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
 class VeneurDigestTest {
@@ -9,15 +9,15 @@ class VeneurDigestTest {
   fun testVeneurDigest() {
 
     var digest = VeneurDigest().newDefaultVeneurDigest()
-    Assertions.assertThat(digest.mergingDigest.quantile( 0.5)).isEqualTo(Double.NaN)
-    Assertions.assertThat(digest.sum()).isEqualTo(Double.NaN)
-    Assertions.assertThat(digest.count()).isEqualTo(0)
+    assertThat(digest.mergingDigest.quantile( 0.5)).isEqualTo(Double.NaN)
+    assertThat(digest.sum()).isEqualTo(Double.NaN)
+    assertThat(digest.count()).isEqualTo(0)
 
     digest.add(10.0)
     digest.add(20.0)
-    Assertions.assertThat(digest.mergingDigest.quantile(0.5)).isEqualTo(15.0)
-    Assertions.assertThat(digest.count()).isEqualTo(2)
-    Assertions.assertThat(digest.sum()).isEqualTo(30.0)
+    assertThat(digest.mergingDigest.quantile(0.5)).isEqualTo(15.0)
+    assertThat(digest.count()).isEqualTo(2)
+    assertThat(digest.sum()).isEqualTo(30.0)
 
   }
 
@@ -76,14 +76,14 @@ class VeneurDigestTest {
       src.mergeInto(dest)
 
       // Check that src is unchanged
-      Assertions.assertThat(srcMedian).isEqualTo(src.mergingDigest.quantile(0.5))
-      Assertions.assertThat(srcSum).isEqualTo(src.sum())
-      Assertions.assertThat(srcCount).isEqualTo(src.count())
+      assertThat(srcMedian).isEqualTo(src.mergingDigest.quantile(0.5))
+      assertThat(srcSum).isEqualTo(src.sum())
+      assertThat(srcCount).isEqualTo(src.count())
 
       //Check dest
-      Assertions.assertThat(tc.expectedMedian).isEqualTo(dest.mergingDigest.quantile( 0.5))
-      Assertions.assertThat(tc.expectedSum).isEqualTo(dest.sum())
-      Assertions.assertThat((tc.sourceVals.size + tc.destVals.size).toLong()).isEqualTo(dest.count())
+      assertThat(tc.expectedMedian).isEqualTo(dest.mergingDigest.quantile( 0.5))
+      assertThat(tc.expectedSum).isEqualTo(dest.sum())
+      assertThat((tc.sourceVals.size + tc.destVals.size).toLong()).isEqualTo(dest.count())
     }
   }
 
@@ -99,10 +99,10 @@ class VeneurDigestTest {
 
     val deserialized = VeneurDigest().newVeneurDigestFromProto(proto)
 
-    Assertions.assertThat(deserialized.mergingDigest.quantile(0.1)).isEqualTo(digest.mergingDigest.quantile(0.1))
-    Assertions.assertThat(deserialized.mergingDigest.quantile(0.99)).isEqualTo(digest.mergingDigest.quantile(0.99))
-    Assertions.assertThat(deserialized.sum()).isEqualTo(digest.sum())
-    Assertions.assertThat(deserialized.count()).isEqualTo(digest.count())
+    assertThat(deserialized.mergingDigest.quantile(0.1)).isEqualTo(digest.mergingDigest.quantile(0.1))
+    assertThat(deserialized.mergingDigest.quantile(0.99)).isEqualTo(digest.mergingDigest.quantile(0.99))
+    assertThat(deserialized.sum()).isEqualTo(digest.sum())
+    assertThat(deserialized.count()).isEqualTo(digest.count())
   }
 
 }
