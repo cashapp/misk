@@ -45,6 +45,7 @@ internal class ReflectionQuery<T : DbEntity<T>>(
     }
 
   private val constraints = mutableListOf<PredicateFactory>()
+  private val orderFactories = mutableListOf<OrderFactory>()
 
   override fun uniqueResult(session: Session): T? {
     val list = select(false, session)
@@ -62,6 +63,8 @@ internal class ReflectionQuery<T : DbEntity<T>>(
 
     val predicate = buildWherePredicate(queryRoot, criteriaBuilder)
     query.where(predicate)
+
+    query.orderBy(buildOrderBys(queryRoot, criteriaBuilder))
 
     val typedQuery = session.hibernateSession.createQuery(query)
     typedQuery.maxResults = effectiveMaxRows(returnList)
@@ -176,6 +179,7 @@ internal class ReflectionQuery<T : DbEntity<T>>(
 
       query.select(select(criteriaBuilder, root))
       query.where(reflectionQuery.buildWherePredicate(root, criteriaBuilder))
+      query.orderBy(reflectionQuery.buildOrderBys(root, criteriaBuilder))
       val typedQuery = session.hibernateSession.createQuery(query)
       typedQuery.maxResults = reflectionQuery.effectiveMaxRows(returnList)
       val rows = typedQuery.list()
@@ -210,6 +214,7 @@ internal class ReflectionQuery<T : DbEntity<T>>(
       ) {
         val constraint = function.findAnnotation<Constraint>()
         val select = function.findAnnotation<Select>()
+        val order = function.findAnnotation<Order>()
 
         if (constraint != null && select != null) {
           errors.add("${function.name}() has too many annotations")
@@ -221,12 +226,50 @@ internal class ReflectionQuery<T : DbEntity<T>>(
           return
         }
 
+        if (order != null) {
+          createOrder(errors, function, result, order)
+          return
+        }
+
         if (select != null) {
           createSelect(errors, function, result, select)
           return
         }
 
-        errors.add("${function.name}() must be annotated @Constraint or @Select")
+        errors.add("${function.name}() must be annotated @Constraint, @Order or @Select")
+      }
+
+      private fun createOrder(
+        errors: MutableList<String>,
+        function: KFunction<*>,
+        result: MutableMap<Method, QueryMethodHandler>,
+        order: Order
+      ) {
+        if (!order.path.matches(PATH_PATTERN)) {
+          errors.add("${function.name}() path is not valid: '${order.path}'")
+          return
+        }
+
+        val path = order.path.split('.')
+
+        val javaMethod = function.javaMethod ?: throw UnsupportedOperationException()
+        if (javaMethod.returnType != javaMethod.declaringClass) {
+          errors.add("${function.name}() returns ${javaMethod.returnType.name} but " +
+              "@Order methods must return this (${javaMethod.declaringClass.name})")
+          return
+        }
+
+        result[javaMethod] = object : QueryMethodHandler {
+          override fun invoke(reflectionQuery: ReflectionQuery<*>, args: Array<out Any>): Any? {
+            return reflectionQuery.addOrderBy { root, builder ->
+              if (order.asc) {
+                builder.asc(root.traverse<Any?>(path))
+              } else {
+                builder.desc(root.traverse<Any?>(path))
+              }
+            }
+          }
+        }
       }
 
       private fun createConstraint(
@@ -452,10 +495,25 @@ internal class ReflectionQuery<T : DbEntity<T>>(
       criteriaBuilder.and(*predicates.toTypedArray())
     }
   }
+
+  internal fun addOrderBy(orderFactory: OrderFactory): ReflectionQuery<T> {
+    orderFactories.add(orderFactory)
+    return this
+  }
+
+  /**
+   * Root: the table root, like 'm' in 'SELECT * FROM movies m ORDER BY m.release_date'
+   * CriteriaBuilder: factory for asc, desc
+   */
+  private fun buildOrderBys(root: Root<*>, criteriaBuilder: CriteriaBuilder): List<javax.persistence.criteria.Order>  {
+    return orderFactories.map { it(root, criteriaBuilder) };
+  }
 }
 
 /** Creates a predicate. This allows us to defer attaching the predicate to the session. */
 private typealias PredicateFactory = (root: Root<*>, criteriaBuilder: CriteriaBuilder) -> Predicate
+
+private typealias OrderFactory = (root: Root<*>, criteriaBuilder: CriteriaBuilder) -> javax.persistence.criteria.Order
 
 private val PATH_PATTERN = Regex("""\w+(\.\w+)*""")
 

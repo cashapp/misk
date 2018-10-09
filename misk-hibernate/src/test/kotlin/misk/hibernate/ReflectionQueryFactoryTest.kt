@@ -385,6 +385,36 @@ class ReflectionQueryFactoryTest {
     }).hasMessageContaining("query expected a unique result but was")
   }
 
+  @Test
+  fun order() {
+    transacter.transaction { session ->
+      val jurassicPark = DbMovie("Jurassic Park", LocalDate.of(1993, 6, 9))
+      val rocky = DbMovie("Rocky", LocalDate.of(1976, 11, 21))
+      val starWars = DbMovie("Star Wars", LocalDate.of(1977, 5, 25))
+
+      val m1 = NameAndReleaseDate(jurassicPark.name, jurassicPark.release_date)
+      val m2 = NameAndReleaseDate(rocky.name, rocky.release_date)
+      val m3 = NameAndReleaseDate(starWars.name, starWars.release_date)
+
+      session.save(jurassicPark)
+      session.save(rocky)
+      session.save(starWars)
+
+      assertThat(queryFactory.newQuery<OperatorsMovieQuery>()
+          .releaseDateAsc()
+          .listAsNameAndReleaseDate(session))
+          .containsExactly(m2, m3, m1)
+      assertThat(queryFactory.newQuery<OperatorsMovieQuery>()
+          .releaseDateDesc()
+          .listAsNameAndReleaseDate(session))
+          .containsExactly(m1, m3, m2)
+      assertThat(queryFactory.newQuery<OperatorsMovieQuery>()
+          .releaseDateDesc()
+          .list(session))
+          .containsExactly(jurassicPark, starWars, rocky)
+    }
+  }
+
   interface OperatorsMovieQuery : Query<DbMovie> {
     @Constraint(path = "release_date", operator = Operator.LT)
     fun releaseDateLessThan(upperBound: LocalDate?): OperatorsMovieQuery
@@ -415,6 +445,12 @@ class ReflectionQueryFactoryTest {
 
     @Constraint(path = "release_date", operator = Operator.IS_NULL)
     fun releaseDateIsNull(): OperatorsMovieQuery
+
+    @Order(path = "release_date")
+    fun releaseDateAsc(): OperatorsMovieQuery
+
+    @Order(path = "release_date", asc = false)
+    fun releaseDateDesc(): OperatorsMovieQuery
 
     @Select
     fun listAsNameAndReleaseDate(session: Session): List<NameAndReleaseDate>

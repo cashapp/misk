@@ -65,3 +65,12 @@ enum class Operator {
 annotation class Select(
   val path: String = ""
 )
+
+/**
+ * Annotates a function on a subinterface of [Query] to indicate which columns to order the
+ * the selected columns.
+ */
+annotation class Order(
+  val path: String,
+  val asc: Boolean = true
+)
