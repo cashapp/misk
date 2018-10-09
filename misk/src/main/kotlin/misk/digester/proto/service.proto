@@ -1,10 +1,9 @@
 syntax = "proto3";
 
 option java_multiple_files = true;
-//option java_package = "com.squareup.digester.protos.service";
 option java_outer_classname = "DigesterServiceProtos";
 
-package misk.proto.service;
+package digester;
 
 // Service that exposes t-digest-based histogram data.
 service DigestProvider {

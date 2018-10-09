@@ -1,7 +1,7 @@
 package misk.digester
 
-import misk.proto.tdigest.Centroid
-import misk.proto.tdigest.MergingDigestData
+import tdigest.Centroid
+import tdigest.MergingDigestData
 import kotlin.math.PI
 import kotlin.math.asin
 

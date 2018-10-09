@@ -1,7 +1,7 @@
 
 syntax = "proto3";
 
-package misk.proto.tdigest;
+package tdigest;
 
 // MergingDigestData contains all fields necessary to generate a MergingDigest.
 // This type should generally just be used when serializing MergingDigest's,

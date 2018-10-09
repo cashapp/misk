@@ -1,7 +1,7 @@
 package misk.digester
 
-import misk.proto.service.DigestData
-import misk.proto.tdigest.MergingDigestData
+import digester.DigestData
+import tdigest.MergingDigestData
 import okio.ByteString.Companion.toByteString
 
 /**
