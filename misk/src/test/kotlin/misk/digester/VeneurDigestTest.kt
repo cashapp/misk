@@ -94,9 +94,6 @@ class VeneurDigestTest {
 
     assertThat(deserialized.sum()).isEqualTo(digest.sum())
     assertThat(deserialized.count()).isEqualTo(digest.count())
-    //assertThat(1).isEqualTo(2)
-   // Expected :2
-   // Actual   :1
     assertThat(deserialized.mergingDigest().quantile(0.1)).isEqualTo(digest.mergingDigest().quantile(0.1))
     assertThat(deserialized.mergingDigest().quantile(0.99)).isEqualTo(digest.mergingDigest().quantile(0.99))
   }
