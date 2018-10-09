@@ -5,83 +5,57 @@ import misk.proto.tdigest.MergingDigestData
 import kotlin.math.PI
 import kotlin.math.asin
 
+/**
+ * Provides an implementation of t-digest to be used to send histogram data
+ *
+ * Direct port of Veneur digest created by Stripe
+ * https://github.com/stripe/veneur/blob/master/tdigest/merging_digest.go
+ */
 class MergingDigest {
 
-    //amount of compression to data
-    var compression: Double = 0.0
+  // amount of compression to data
+  private var compression: Double = 0.0
 
-    //main list of centroids
-    var mainCentroids: MutableList<Centroid> = mutableListOf()
-    //total weight of unmerged main centroids
-    var mainWeight: Double = 0.0
+  // main list of centroids
+  private var mainCentroids: MutableList<Centroid> = mutableListOf()
+  // total weight of unmerged main centroids
+  private var mainWeight: Double = 0.0
 
-    //centroids that have been added but not yet merged into main list
-    var tempCentroids: MutableList<Centroid> = mutableListOf()
-    //total weight of unmerged temp centroids
-    var tempWeight: Double = 0.0
+  // centroids that have been added but not yet merged into main list
+  private var tempCentroids: MutableList<Centroid> = mutableListOf()
+  // total weight of unmerged temp centroids
+  private var tempWeight: Double = 0.0
 
-    var min: Double = Double.POSITIVE_INFINITY
-    var max: Double = Double.NEGATIVE_INFINITY
+  private var min: Double = Double.POSITIVE_INFINITY
+  private var max: Double = Double.NEGATIVE_INFINITY
 
-    constructor()
-
-    constructor(compression: Double) {
-      this.compression = compression
-    }
-
-    constructor (
-      compression: Double,
-      mainCentroids: MutableList<Centroid>,
-      min: Double,
-      max: Double
-    ) {
-      this.compression = compression
-      this.mainCentroids = mainCentroids
-      this.min = min
-      this.max = max
-    }
-
-  /**
-   * Initializes a new merging t-digest using the given compression parameter.
-   * Lower compression values result in reduced memory consumption and less
-   * precision, especially at the median. Values from 20 to 1000 are recommended
-   * in Dunning's paper.
-   */
-  fun newMerging(compressionValue: Double): MergingDigest {
-    // this is a provable upper bound on the size of the centroid list
-
-    //Todo: Restrict size of mainCentroid - is this even necessary? Its properties not seem to be used in stripe's merging_digest
-   // var sizeBound = ((PI * compressionValue / 2) + 0.5).toInt()
-
-    return MergingDigest(compressionValue)
+  constructor(compression: Double) {
+    this.compression = compression
   }
 
   /**
-   *  NewMergingFromData returns a MergingDigest with values initialized from
-   * MergingDigestData.  This should be the way to generate a MergingDigest
-   * from a serialized protobuf.
+   * Constructs a MergingDigest with values initialized from MergingDigestData.
+   * This should be the way to generate a MergingDigest from a serialized protobuf.
    */
-  fun newMergingFromData(mergingDigestData: MergingDigestData): MergingDigest {
+  constructor(mergingDigestData: MergingDigestData) {
+    compression = mergingDigestData.compression
+    mainCentroids = mergingDigestData.main_centroids.toMutableList()
+    min = mergingDigestData.min
+    max = mergingDigestData.max
 
-    var td = MergingDigest(
-        mergingDigestData.compression,
-        mergingDigestData.main_centroids.toMutableList(),
-        mergingDigestData.min,
-        mergingDigestData.max)
-
-    td.mainWeight = 0.0
-    for (c in td.mainCentroids) {
-      td.mainWeight += c.weight
+    mainWeight = 0.0
+    for (c in mainCentroids) {
+      mainWeight += c.weight
     }
-
-    return td
   }
 
   /**
-   * function taken from stripes implementation of merging_digest
+   * Returns the estimated size of the temporary buffer based on compression value
+   *
+   * Function taken from stripes implementation of merging_digest
    * https://github.com/stripe/veneur/blob/master/tdigest/merging_digest.go
    */
-  fun estimateTempBuffer(compressionValue: Double): Int {
+  private fun estimateTempBuffer(compressionValue: Double): Int {
     // this heuristic comes from Dunning's paper
     // 925 is the maximum point of this quadratic equation
     val tempCompression = minOf(925.0, maxOf(20.0, compressionValue))
@@ -93,12 +67,12 @@ class MergingDigest {
    * Infinities and NaN cannot be added.
    */
   fun add(value: Double, weight: Double) {
-    if (Double.NaN == value || Double.POSITIVE_INFINITY == value || weight <= 0) {
-      Exception("invalid value added")
+    require (value != Double.NaN && value != Double.POSITIVE_INFINITY && weight > 0) {
+      "invalid value added"
     }
 
     if (tempCentroids.size == estimateTempBuffer(compression)) {
-          mergeAllTemps() //<- will we still need this?
+          mergeAllTemps()
     }
 
     min = minOf(min, value)
@@ -112,13 +86,12 @@ class MergingDigest {
 
     tempCentroids.add(next)
     tempWeight += weight
-
   }
 
   /**
-   * combine the mainCentroids and tempCentroids in-place into mainCentroids
+   * Combine the mainCentroids and tempCentroids in-place into mainCentroids
    */
-  fun mergeAllTemps() {
+  private fun mergeAllTemps() {
     // this optimization is really important! if you remove it, the main list
     // will get merged into itself every time this is called
     if (tempCentroids.size == 0) {
@@ -207,8 +180,8 @@ class MergingDigest {
   }
 
   /**
-   * merges a single centroid into the mergedCentroids list
-   * note that "merging" sometimes creates a new centroid in the list, however
+   * Merges a single centroid into the mergedCentroids list.
+   * Note that "merging" sometimes creates a new centroid in the list, however
    * the length of the list has a strict upper bound (see constructor)
    */
   fun mergeOne(
@@ -234,7 +207,6 @@ class MergingDigest {
       // this computation is known as welford's method, the order matters
       // weight must be updated before mean
 
-      //TODO: is this thread safe? doublecheck that this successfully updates all properties
       var mainCentroidsTemp = mainCentroids[mainCentroids.size-1]
       var builder = mainCentroidsTemp.newBuilder()
       builder.weight += next.weight
@@ -248,11 +220,11 @@ class MergingDigest {
   }
 
   /**
-   * given a quantile, estimate the index of the centroid that contains it using
+   * Given a quantile, estimate the index of the centroid that contains it using
    * the given compression
    */
   fun indexEstimate(quantile: Double) : Double {
-    return compression * ((asin(2*quantile-1) / PI) + 0.5).toFloat()
+    return compression * ((asin(2*quantile-1) / PI) + 0.5)
   }
 
   /**
@@ -261,7 +233,7 @@ class MergingDigest {
    */
   fun quantile(quantile: Double): Double {
     if (quantile < 0 || quantile > 1) {
-      throw IndexOutOfBoundsException("quantile out of bounds")
+      throw IllegalArgumentException("quantile out of bounds")
     }
     mergeAllTemps()
 
@@ -295,7 +267,7 @@ class MergingDigest {
   }
 
   /**
-   *  we assume each centroid contains a uniform distribution of values
+   * We assume each centroid contains a uniform distribution of values
    * the lower bound of the distribution is the midpoint between this centroid and
    * the previous one (or the minimum, if this is the lowest centroid)
    * similarly, the upper bound is the midpoint between this centroid and the
@@ -314,10 +286,10 @@ class MergingDigest {
   }
 
   /**
-   * merge another digest into this one. Neither td nor other can be shared
+   * Merge another digest into this one. Neither td nor other can be shared
    * concurrently during the execution of this method.
    */
-  fun merge(other: MergingDigest) {
+  fun mergeFrom(other: MergingDigest) {
 
     //end inclusive
     var shuffledIndices = IntArray(other.mainCentroids.size) { it }.toMutableList()
