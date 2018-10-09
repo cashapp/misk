@@ -14,7 +14,7 @@ import kotlin.math.asin
 class MergingDigest {
 
   // amount of compression to data
-  private var compression: Double = 0.0
+  private val compression: Double
 
   // main list of centroids
   private var mainCentroids: MutableList<Centroid> = mutableListOf()
@@ -79,9 +79,9 @@ class MergingDigest {
     max = maxOf(max, value)
 
     var next = Centroid(
-      value,
-      weight,
-      mutableListOf<Double>()
+        value,
+        weight,
+        mutableListOf<Double>()
     )
 
     tempCentroids.add(next)
@@ -121,19 +121,19 @@ class MergingDigest {
     var swappedCentroids = mutableListOf<Centroid>()
 
     while ((actualMainCentroids.size + swappedCentroids.size != 0) || tempIndex < tempCentroids.size) {
-      var nextTemp: Centroid = Centroid (
-        Double.POSITIVE_INFINITY,
-        0.0,
-        mutableListOf<Double>()
+      var nextTemp: Centroid = Centroid(
+          Double.POSITIVE_INFINITY,
+          0.0,
+          mutableListOf<Double>()
       )
       if (tempIndex < tempCentroids.size) {
         nextTemp = tempCentroids[tempIndex]
       }
 
-      var nextMain: Centroid = Centroid (
-        Double.POSITIVE_INFINITY,
-        Double.NEGATIVE_INFINITY,
-        mutableListOf<Double>()
+      var nextMain: Centroid = Centroid(
+          Double.POSITIVE_INFINITY,
+          Double.NEGATIVE_INFINITY,
+          mutableListOf<Double>()
       )
       if (swappedCentroids.size != 0) {
         nextMain = swappedCentroids[0]
@@ -184,7 +184,7 @@ class MergingDigest {
    * Note that "merging" sometimes creates a new centroid in the list, however
    * the length of the list has a strict upper bound (see constructor)
    */
-  fun mergeOne(
+  private fun mergeOne(
       beforeWeight: Double,
       totalWeight: Double,
       beforeIndex: Double,
@@ -223,7 +223,7 @@ class MergingDigest {
    * Given a quantile, estimate the index of the centroid that contains it using
    * the given compression
    */
-  fun indexEstimate(quantile: Double) : Double {
+  private fun indexEstimate(quantile: Double) : Double {
     return compression * ((asin(2*quantile-1) / PI) + 0.5)
   }
 
@@ -232,8 +232,8 @@ class MergingDigest {
    * approximately equal to quantile. Returns NaN if the digest is empty.
    */
   fun quantile(quantile: Double): Double {
-    if (quantile < 0 || quantile > 1) {
-      throw IllegalArgumentException("quantile out of bounds")
+    require (quantile in 0 .. 1) {
+      "quantile out of bounds"
     }
     mergeAllTemps()
 
@@ -277,7 +277,7 @@ class MergingDigest {
    * this assumption is justified empirically in dunning's paper
    * TODO: does this assumption actually apply to our implementation?
    */
-  fun centroidUpperBound(i: Int): Double {
+  private fun centroidUpperBound(i: Int): Double {
     if (i != mainCentroids.size-1) {
       return (mainCentroids[i+1].mean + mainCentroids[i].mean) / 2
     } else {

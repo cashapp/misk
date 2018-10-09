@@ -9,7 +9,7 @@ import okio.ByteString.Companion.toByteString
  */
 class VeneurDigest {
 
-  private var mergingDigest: MergingDigest
+  private val mergingDigest: MergingDigest
   private var count: Long = 0
   private var sum: Double = 0.0
 

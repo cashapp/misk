@@ -7,7 +7,7 @@ class VeneurDigestTest {
 
   @Test
   fun testVeneurDigest() {
-    var digest = VeneurDigest()
+    val digest = VeneurDigest()
     assertThat(digest.mergingDigest().quantile( 0.5)).isEqualTo(Double.NaN)
     assertThat(digest.sum()).isEqualTo(Double.NaN)
     assertThat(digest.count()).isEqualTo(0)
@@ -17,14 +17,13 @@ class VeneurDigestTest {
     assertThat(digest.mergingDigest().quantile(0.5)).isEqualTo(15.0)
     assertThat(digest.count()).isEqualTo(2)
     assertThat(digest.sum()).isEqualTo(30.0)
-
   }
 
   private data class VeneurDigestMergeTestClass (
-    var sourceVals: Array<Double> = emptyArray(),
-    var destVals: Array<Double> = emptyArray(),
-    var expectedMedian: Double = Double.NaN,
-    var expectedSum: Double = Double.NaN)
+    val sourceVals: Array<Double> = emptyArray(),
+    val destVals: Array<Double> = emptyArray(),
+    val expectedMedian: Double = Double.NaN,
+    val expectedSum: Double = Double.NaN)
 
   @Test
   fun testVeneurDigest_MergeInto() {
@@ -52,8 +51,8 @@ class VeneurDigestTest {
         )
 
     for(tc in testCases) {
-      var src = VeneurDigest()
-      var dest = VeneurDigest()
+      val src = VeneurDigest()
+      val dest = VeneurDigest()
 
       for (v in tc.sourceVals) {
         src.add(v)
@@ -82,7 +81,7 @@ class VeneurDigestTest {
 
   @Test
   fun testVeneurDigest_Proto() {
-    var digest = VeneurDigest()
+    val digest = VeneurDigest()
     digest.add( 10.0)
     digest.add( 20.0)
     digest.add(30.0)
@@ -97,5 +96,4 @@ class VeneurDigestTest {
     assertThat(deserialized.mergingDigest().quantile(0.1)).isEqualTo(digest.mergingDigest().quantile(0.1))
     assertThat(deserialized.mergingDigest().quantile(0.99)).isEqualTo(digest.mergingDigest().quantile(0.99))
   }
-
 }
