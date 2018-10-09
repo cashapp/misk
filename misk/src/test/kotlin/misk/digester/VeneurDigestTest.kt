@@ -7,7 +7,6 @@ class VeneurDigestTest {
 
   @Test
   fun testVeneurDigest() {
-
     var digest = VeneurDigest()
     assertThat(digest.mergingDigest().quantile( 0.5)).isEqualTo(Double.NaN)
     assertThat(digest.sum()).isEqualTo(Double.NaN)
@@ -21,41 +20,35 @@ class VeneurDigestTest {
 
   }
 
-  interface TestCasesStructure {
-    var sourceVals: Array<Double>
-    var destVals: Array<Double>
-    var expectedMedian: Double
-    var expectedSum: Double
-  }
+  private data class VeneurDigestMergeTestClass (
+    var sourceVals: Array<Double> = emptyArray(),
+    var destVals: Array<Double> = emptyArray(),
+    var expectedMedian: Double = Double.NaN,
+    var expectedSum: Double = Double.NaN)
 
   @Test
   fun testVeneurDigest_MergeInto() {
-    val testCases: Array<TestCasesStructure>
+    val testCases: Array<VeneurDigestMergeTestClass>
         = arrayOf(
-          object: TestCasesStructure {
-            override var sourceVals = emptyArray<Double>()
-            override var destVals = emptyArray<Double>()
-            override var expectedMedian = Double.NaN
-            override var expectedSum = Double.NaN
-          },
-          object: TestCasesStructure {
-            override var sourceVals = emptyArray<Double>()
-            override var destVals = arrayOf(30.0, 40.0)
-            override var expectedMedian = 35.0
-            override var expectedSum = 70.0
-          },
-          object: TestCasesStructure {
-            override var sourceVals = arrayOf(10.0, 20.0)
-            override var destVals = emptyArray<Double>()
-            override var expectedMedian = 15.0
-            override var expectedSum = 30.0
-          },
-          object: TestCasesStructure {
-            override var sourceVals = arrayOf(10.0, 20.0)
-            override var destVals = arrayOf(30.0, 40.0)
-            override var expectedMedian = 25.0
-            override var expectedSum = 100.0
-          }
+          VeneurDigestMergeTestClass(),
+          VeneurDigestMergeTestClass(
+            emptyArray(),
+            arrayOf(30.0, 40.0),
+            35.0,
+            70.0
+          ),
+          VeneurDigestMergeTestClass(
+           arrayOf(10.0, 20.0),
+            emptyArray(),
+            15.0,
+            30.0
+          ),
+          VeneurDigestMergeTestClass(
+            arrayOf(10.0, 20.0),
+            arrayOf(30.0, 40.0),
+            25.0,
+            100.0
+          )
         )
 
     for(tc in testCases) {

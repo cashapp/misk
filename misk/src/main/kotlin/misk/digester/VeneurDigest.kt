@@ -18,13 +18,6 @@ class VeneurDigest {
     mergingDigest = MergingDigest(50.0)
   }
 
-  /** Creates a VeneurDigest from an instance of mergingDigest */
-  constructor(mergingDigest: MergingDigest, count: Long, sum: Double) {
-    this.mergingDigest = mergingDigest
-    this.count = count
-    this.sum = sum
-  }
-
   /**
    * Creates a VeneurDigest from a DigestData proto
    * The DigestData proto must have veneur_digest set correctly
@@ -73,10 +66,5 @@ class VeneurDigest {
   fun proto(): DigestData {
     val encode: ByteArray = MergingDigestData.ADAPTER.encode(mergingDigest.data())
     return DigestData(count, sum, encode.toByteString())
-  }
-
-  /** Creates a TDigest backed by a VeneurDigest */
-  fun newVeneurDigest(compression: Double) : VeneurDigest {
-    return VeneurDigest(MergingDigest(compression), 0, 0.0)
   }
 }
