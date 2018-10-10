@@ -1,13 +1,15 @@
 package misk.digester
 
+import digester.DigestData
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import tdigest.MergingDigestData
 
 class VeneurDigestTest {
 
   @Test
   fun testVeneurDigest() {
-    val digest = VeneurDigest()
+    val digest = VeneurDigest(MergingDigestHelper(50.0))
     assertThat(digest.mergingDigest().quantile( 0.5)).isEqualTo(Double.NaN)
     assertThat(digest.sum()).isEqualTo(Double.NaN)
     assertThat(digest.count()).isEqualTo(0)
@@ -96,4 +98,14 @@ class VeneurDigestTest {
     assertThat(deserialized.mergingDigest().quantile(0.1)).isEqualTo(digest.mergingDigest().quantile(0.1))
     assertThat(deserialized.mergingDigest().quantile(0.99)).isEqualTo(digest.mergingDigest().quantile(0.99))
   }
+}
+
+ open class MergingDigestHelper : MergingDigest {
+
+   constructor(compression: Double): super(compression)
+   constructor(mergingDigestData: MergingDigestData): super(mergingDigestData)
+
+   override fun <Int> MutableList<Int>.shuffle() {
+      //do nothing so there will be no randomized shuffle
+   }
 }

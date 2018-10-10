@@ -7,7 +7,7 @@ import okio.ByteString.Companion.toByteString
 /**
  * Wraps an adapted t-digest implementation from Stripe's Veneur project
  */
-class VeneurDigest {
+open class VeneurDigest {
 
   private val mergingDigest: MergingDigest
   private var count: Long = 0
@@ -16,6 +16,10 @@ class VeneurDigest {
   /** Creates a TDigest backed by a VeneurDigest, using a default compression level */
   constructor() {
     mergingDigest = MergingDigest(50.0)
+  }
+
+  constructor(mergingDigest: MergingDigest) {
+    this.mergingDigest = mergingDigest
   }
 
   /**
