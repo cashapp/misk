@@ -2,15 +2,15 @@ package misk.hibernate
 
 import com.google.common.util.concurrent.Service
 import io.opentracing.Tracer
-import misk.jdbc.DataSourceConfig
-import misk.jdbc.DataSourceDecorator
-import misk.jdbc.DataSourceService
-import misk.jdbc.PingDatabaseService
 import misk.environment.Environment
 import misk.inject.KAbstractModule
 import misk.inject.asSingleton
 import misk.inject.setOfType
 import misk.inject.toKey
+import misk.jdbc.DataSourceConfig
+import misk.jdbc.DataSourceDecorator
+import misk.jdbc.DataSourceService
+import misk.jdbc.PingDatabaseService
 import misk.resources.ResourceLoader
 import org.hibernate.SessionFactory
 import org.hibernate.event.spi.EventType
@@ -84,9 +84,11 @@ class HibernateModule(
     multibind<Service>().to(dataSourceServiceKey)
 
     bind(sessionFactoryKey).toProvider(sessionFactoryServiceKey).asSingleton()
+    val hibernateInjectorAccessProvider = getProvider(HibernateInjectorAccess::class.java)
+
     bind(sessionFactoryServiceKey).toProvider(Provider<SessionFactoryService> {
-      SessionFactoryService(qualifier, config, dataSourceProvider, entitiesProvider.get(),
-          eventListenersProvider.get())
+      SessionFactoryService(qualifier, config, dataSourceProvider, hibernateInjectorAccessProvider.get(),
+          entitiesProvider.get(), eventListenersProvider.get())
     }).asSingleton()
     multibind<Service>().to(sessionFactoryServiceKey)
 
