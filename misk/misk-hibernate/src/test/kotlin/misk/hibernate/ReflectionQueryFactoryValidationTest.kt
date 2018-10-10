@@ -50,7 +50,7 @@ class ReflectionQueryFactoryValidationTest {
       queryFactory.newQuery<AnnotationRequiredOnQuery>()
     }.cause).hasMessage("""
         |Query class ${AnnotationRequiredOnQuery::class.java.name} has problems:
-        |  name() must be annotated @Constraint or @Select""".trimMargin())
+        |  name() must be annotated @Constraint, @Order or @Select""".trimMargin())
   }
 
   interface AnnotationRequiredOnQuery : Query<DbCharacter> {
