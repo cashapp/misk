@@ -8,6 +8,7 @@ import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.kotlin.MissingKotlinParameterException
 import misk.environment.Environment
 import misk.logging.getLogger
+import misk.web.actions.ServiceMetadata
 import okio.buffer
 import okio.source
 import java.io.File

@@ -9,6 +9,7 @@ import misk.web.RequestContentType
 import misk.web.ResponseContentType
 import misk.web.actions.WebAction
 import misk.web.mediatype.MediaTypes
+import misk.web.metadata.AdminDashboardAccess
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -22,7 +23,7 @@ class ConfigAdminAction : WebAction {
   @ResponseContentType(MediaTypes.APPLICATION_JSON)
   // TODO(adrw) create new @AdminDashboard annotation because this will fail since there is no @Access
   // @AdminDashboard will then be able to be picked up by skim
-  @Unauthenticated
+  @AdminDashboardAccess
   fun getAll(): Response {
     // TODO(mmihic): Need to figure out how to get the overrides.
     val rawYamlFiles = MiskConfig.loadConfigYamlMap(appName, environment, listOf())

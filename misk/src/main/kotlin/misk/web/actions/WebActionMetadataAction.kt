@@ -11,6 +11,7 @@ import misk.web.ResponseContentType
 import misk.web.jetty.WebActionsServlet
 import misk.web.mediatype.MediaRange
 import misk.web.mediatype.MediaTypes
+import misk.web.metadata.AdminDashboardAccess
 import okhttp3.MediaType
 import javax.inject.Inject
 import javax.inject.Provider
@@ -24,7 +25,7 @@ class WebActionMetadataAction : WebAction {
   @Get("/api/webactionmetadata")
   @RequestContentType(MediaTypes.APPLICATION_JSON)
   @ResponseContentType(MediaTypes.APPLICATION_JSON)
-  @Unauthenticated // TODO(adrw) add AccessAnnotation for AdminDashboardTab
+  @AdminDashboardAccess
   fun getAll(): Response {
     return Response(webActionMetadata = servletProvider.get().webActionsMetadata)
   }

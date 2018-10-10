@@ -1,5 +1,7 @@
 package misk.web.actions
 
+import misk.MiskCaller
+import misk.scope.ActionScoped
 import misk.security.authz.Unauthenticated
 import misk.web.Get
 import misk.web.RequestContentType
@@ -10,24 +12,28 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * Returns all Admin Tabs for primary use in dynamically building the menu bar of the /_admin dashboard
+ * Returns list of all Admin Tabs visible to current calling authenticated user
+ *
+ * Used in computing topbar nav menu and in inferring tab compiled JS paths
  *
  * Guidelines
  * - name should start with a capital letter unless it is a proper noun (ie. iOS)
  * - category is a string, no enforcement on consistency of names
- *
  */
 
 @Singleton
 class AdminDashboardTabAction : WebAction {
-  @Inject lateinit var registeredDashboardTabs: List<AdminDashboardTab>
+  @Inject lateinit var adminDashboardTabs: List<AdminDashboardTab>
+  @Inject lateinit var callerProvider: @JvmSuppressWildcards ActionScoped<MiskCaller?>
 
   @Get("/api/admindashboardtabs")
   @RequestContentType(MediaTypes.APPLICATION_JSON)
   @ResponseContentType(MediaTypes.APPLICATION_JSON)
   @Unauthenticated
   fun getAll(): Response {
-    return Response(adminDashboardTabs = registeredDashboardTabs)
+    val caller = callerProvider.get()
+    val authorizedAdminDashboardTabs = adminDashboardTabs.filter { it.isAuthenticated(caller)}
+    return Response(adminDashboardTabs = authorizedAdminDashboardTabs)
   }
 
   data class Response(val adminDashboardTabs: List<AdminDashboardTab>)
@@ -37,6 +43,8 @@ class AdminDashboardTab(
   val name: String,
   slug: String,
   url_path_prefix: String,
-  val category: String = "Container Admin"
-) : WebTab(slug = slug, url_path_prefix = url_path_prefix)
+  val category: String = "Container Admin",
+  roles: Set<String> = setOf(),
+  services: Set<String> = setOf()
+) : WebTab(slug = slug, url_path_prefix = url_path_prefix, roles = roles, services = services)
 
