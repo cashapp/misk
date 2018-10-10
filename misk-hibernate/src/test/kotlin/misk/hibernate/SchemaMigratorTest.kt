@@ -7,12 +7,13 @@ import misk.DependentService
 import misk.MiskServiceModule
 import misk.config.Config
 import misk.config.MiskConfig
+import misk.environment.Environment
+import misk.inject.KAbstractModule
+import misk.inject.asSingleton
+import misk.inject.toKey
 import misk.jdbc.DataSourceConfig
 import misk.jdbc.DataSourceService
 import misk.jdbc.PingDatabaseService
-import misk.environment.Environment
-import misk.inject.KAbstractModule
-import misk.inject.toKey
 import misk.resources.ResourceLoader
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
@@ -67,10 +68,13 @@ internal class SchemaMigratorTest {
               emptySet())
       multibind<Service>().toInstance(dataSourceService)
       bind<DataSource>().annotatedWith<Movies>().toProvider(dataSourceService)
-      val sessionFactoryService =
-          SessionFactoryService(Movies::class, config.data_source, dataSourceService)
-      multibind<Service>().toInstance(sessionFactoryService)
-      bind<SessionFactory>().annotatedWith<Movies>().toProvider(sessionFactoryService)
+      val injectorServiceProvider = getProvider(HibernateInjectorAccess::class.java)
+      val sessionFactoryServiceKey = Key.get(SessionFactoryService::class.java, Movies::class.java)
+      bind(sessionFactoryServiceKey).toProvider(Provider<SessionFactoryService> {
+        SessionFactoryService(Movies::class, config.data_source, dataSourceService, injectorServiceProvider.get())
+      }).asSingleton()
+      bind<SessionFactory>().annotatedWith<Movies>().toProvider(sessionFactoryServiceKey)
+      multibind<Service>().to(sessionFactoryServiceKey)
     }
   }
 
