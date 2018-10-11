@@ -8,12 +8,10 @@ package misk.metrics
  *
  * A sample implementation can be found in PrometheusHistogram
  */
-
 interface Histogram {
+  /** records a new set of labels and accompanying duration */
+  fun record(duration: Double, vararg labelValues: String)
 
-    /** records a new set of labels and accompanying duration */
-    fun record(duration: Double, vararg labelValues: String)
-
-    /** returns the number of buckets */
-    fun count(vararg labelValues: String): Int
+  /** returns the number of buckets */
+  fun count(vararg labelValues: String): Int
 }
