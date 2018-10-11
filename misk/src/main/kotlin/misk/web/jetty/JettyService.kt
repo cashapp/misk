@@ -60,10 +60,15 @@ class JettyService @Inject internal constructor(
     }
 
     // TODO(mmihic): Allow require running only on HTTPS?
-    val httpConnector = ServerConnector(server, HttpConnectionFactory(httpConfig))
+    val httpConnector = ServerConnector(server, null, null, null,
+        webConfig.acceptors ?: -1, webConfig.selectors ?: -1, HttpConnectionFactory(httpConfig))
     httpConnector.port = webConfig.port
     httpConnector.idleTimeout = webConfig.idle_timeout
     httpConnector.reuseAddress = true
+    if (webConfig.queueSize != null) {
+      httpConnector.acceptQueueSize = webConfig.queueSize
+    }
+
     webConfig.host?.let { httpConnector.host = it }
     server.addConnector(httpConnector)
 
@@ -97,10 +102,14 @@ class JettyService @Inject internal constructor(
       val ssl = SslConnectionFactory(sslContextFactory, alpn.protocol)
       val http2 = HTTP2ServerConnectionFactory(httpsConfig)
       val http1 = HttpConnectionFactory(httpsConfig)
-      val httpsConnector = ServerConnector(server, ssl, alpn, http2, http1)
+      val httpsConnector = ServerConnector(server, null, null, null,
+          webConfig.acceptors ?: -1, webConfig.selectors ?: -1, ssl, alpn, http2, http1)
       httpsConnector.port = webConfig.ssl.port
       httpsConnector.idleTimeout = webConfig.idle_timeout
       httpsConnector.reuseAddress = true
+      if (webConfig.queueSize != null) {
+        httpsConnector.acceptQueueSize = webConfig.queueSize
+      }
       webConfig.host?.let { httpsConnector.host = it }
       server.addConnector(httpsConnector)
     }
