@@ -70,9 +70,6 @@ class Windower {
     // Find the earliest possible time the window could start,
     // then round up to the nearest second boundary
     val startFrom: Calendar = t.clone() as Calendar
-    var a = ("${startFrom.time}")
-    print(a)
-    //startFrom.setTime(t.time)
 
     startFrom.add(Calendar.SECOND, -windowSize)
     var boundaryIndex = 0
@@ -84,28 +81,17 @@ class Windower {
       }
     }
 
-    var windowStart: Calendar = t.clone() as Calendar
-    a = ("${windowStart.time}")
-    print(a)
-    t.set(Calendar.SECOND, startSecs[boundaryIndex])
-    a = ("${t.time}")
-    print(a)
-
+    var windowStart: Calendar = startFrom.clone() as Calendar
+    windowStart.set(Calendar.SECOND, startSecs[boundaryIndex])
 
     // Keep creating potential windows until none hold the given time
     val windows: MutableList<Window> = mutableListOf()
     var endTime: Calendar = windowStart.clone() as Calendar
-    a = ("${endTime.time}")
-    print(a)
     endTime.add(Calendar.SECOND, windowSize)
-    a = ("${endTime.time}")
-    print(a)
     var currWindow = Window(windowStart.clone() as Calendar, endTime.clone() as Calendar)
-    a = (currWindow.string())
-    print(a)
     while (true) {
       if (currWindow.contains(t)) {
-        windows.add(currWindow)
+        windows.add( Window(windowStart.clone() as Calendar, endTime.clone() as Calendar))
       } else if (windows.count() > 0) {
         // if len(windows) == 0 that means the first potential window started too early.
         // otherwise, len(windows) > 0 means that all possible windows were already appended
@@ -113,17 +99,11 @@ class Windower {
       }
 
       val pair = nextTime(windowStart, boundaryIndex)
-      windowStart = pair.first
+      windowStart = pair.first.clone() as Calendar
       boundaryIndex= pair.second
-      a = ("${windowStart.time}")
-      print(a)
-      var windowEnd: Calendar = windowStart.clone() as Calendar
-      windowEnd.add(Calendar.SECOND, windowSize)
-      a = ("${windowEnd.time}")
-      print(a)
-      currWindow = Window(windowStart, windowEnd)
-      a = ("${currWindow.string()}")
-      print(a)
+      endTime = windowStart.clone() as Calendar
+      endTime.add(Calendar.SECOND, windowSize)
+      currWindow = Window(windowStart.clone() as Calendar, endTime.clone() as Calendar)
     }
 
     return windows

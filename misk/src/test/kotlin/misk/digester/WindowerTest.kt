@@ -26,13 +26,10 @@ class WindowerTest {
     val description: String,
     val windowSecs: Int,
     val count: Int,
-    //the time of which to look for the windows
     val at: WindowerTestClassCalendar,
-    //windows expected to exist at that time
     val expected: Array<WindowTestClass>
   )
 
-  // represents a single window set by the start and the end date
   private class WindowTestClass(
     val start: WindowerTestClassCalendar,
     val end: WindowerTestClassCalendar
@@ -74,8 +71,131 @@ class WindowerTest {
                     WindowerTestClassCalendar(2018, 5, 10, 15, 21, 0)
                 )
             )
+        ),
+        WindowerTestClass(
+            "1 min size at 1/2 window start",
+            60,
+            2,
+            WindowerTestClassCalendar(2018, 5, 10, 15, 20, 0),
+            arrayOf(
+                WindowTestClass(
+                    WindowerTestClassCalendar(2018, 5, 10, 15, 19, 30),
+                    WindowerTestClassCalendar(2018, 5, 10, 15, 20, 30)
+                ),
+                WindowTestClass(
+                    WindowerTestClassCalendar(2018, 5, 10, 15, 20, 0),
+                    WindowerTestClassCalendar(2018, 5, 10, 15, 21, 0)
+                )
+            )
+        ),
+        WindowerTestClass(
+            "1 min size inside 1/2 window",
+            60,
+            2,
+            WindowerTestClassCalendar(2018, 5, 10, 15, 20, 15),
+            arrayOf(
+                WindowTestClass(
+                    WindowerTestClassCalendar(2018, 5, 10, 15, 19, 30),
+                    WindowerTestClassCalendar(2018, 5, 10, 15, 20, 30)
+                ),
+                WindowTestClass(
+                    WindowerTestClassCalendar(2018, 5, 10, 15, 20, 0),
+                    WindowerTestClassCalendar(2018, 5, 10, 15, 21, 0)
+                )
+            )
+        ),
+        WindowerTestClass(
+            "1 min size at 2/2 window start",
+            60,
+            2,
+            WindowerTestClassCalendar(2018, 5, 10, 15, 20, 30),
+            arrayOf(
+                WindowTestClass(
+                    WindowerTestClassCalendar(2018, 5, 10, 15, 20, 0),
+                    WindowerTestClassCalendar(2018, 5, 10, 15, 21, 0)
+                ),
+                WindowTestClass(
+                    WindowerTestClassCalendar(2018, 5, 10, 15, 20, 30),
+                    WindowerTestClassCalendar(2018, 5, 10, 15, 21, 30)
+                )
+            )
+        ),
+        WindowerTestClass(
+            "1 min size inside 2/2 window",
+            60,
+            2,
+            WindowerTestClassCalendar(2018, 5, 10, 15, 20, 45),
+            arrayOf(
+                WindowTestClass(
+                    WindowerTestClassCalendar(2018, 5, 10, 15, 20, 0),
+                    WindowerTestClassCalendar(2018, 5, 10, 15, 21, 0)
+                ),
+                WindowTestClass(
+                    WindowerTestClassCalendar(2018, 5, 10, 15, 20, 30),
+                    WindowerTestClassCalendar(2018, 5, 10, 15, 21, 30)
+                )
+            )
+        ),
+        WindowerTestClass(
+            "15 sec size at 1/3 window start",
+            15,
+            3,
+            WindowerTestClassCalendar(2018, 5, 10, 15, 20, 45),
+            arrayOf(
+                WindowTestClass(
+                    WindowerTestClassCalendar(2018, 5, 10, 15, 20, 35),
+                    WindowerTestClassCalendar(2018, 5, 10, 15, 20, 50)
+                ),
+                WindowTestClass(
+                    WindowerTestClassCalendar(2018, 5, 10, 15, 20, 40),
+                    WindowerTestClassCalendar(2018, 5, 10, 15, 20, 55)
+                ),
+                WindowTestClass(
+                    WindowerTestClassCalendar(2018, 5, 10, 15, 20, 45),
+                    WindowerTestClassCalendar(2018, 5, 10, 15, 21, 0)
+                )
+            )
+        ),
+        WindowerTestClass(
+            "15 sec size at 3/3 window start",
+            15,
+            3,
+            WindowerTestClassCalendar(2018, 5, 10, 15, 20, 55),
+            arrayOf(
+                WindowTestClass(
+                    WindowerTestClassCalendar(2018, 5, 10, 15, 20, 45),
+                    WindowerTestClassCalendar(2018, 5, 10, 15, 21, 0)
+                ),
+                WindowTestClass(
+                    WindowerTestClassCalendar(2018, 5, 10, 15, 20, 50),
+                    WindowerTestClassCalendar(2018, 5, 10, 15, 21, 5)
+                ),
+                WindowTestClass(
+                    WindowerTestClassCalendar(2018, 5, 10, 15, 20, 55),
+                    WindowerTestClassCalendar(2018, 5, 10, 15, 21, 10)
+                )
+            )
+        ),
+        WindowerTestClass(
+            "15 sec size inside 3/3 window",
+            15,
+            3,
+            WindowerTestClassCalendar(2018, 5, 10, 15, 20, 59),
+            arrayOf(
+                WindowTestClass(
+                    WindowerTestClassCalendar(2018, 5, 10, 15, 20, 45),
+                    WindowerTestClassCalendar(2018, 5, 10, 15, 21, 0)
+                ),
+                WindowTestClass(
+                    WindowerTestClassCalendar(2018, 5, 10, 15, 20, 50),
+                    WindowerTestClassCalendar(2018, 5, 10, 15, 21, 5)
+                ),
+                WindowTestClass(
+                    WindowerTestClassCalendar(2018, 5, 10, 15, 20, 55),
+                    WindowerTestClassCalendar(2018, 5, 10, 15, 21, 10)
+                )
+            )
         )
-
     )
 
     testCases.forEachIndexed { i, t ->
@@ -99,15 +219,14 @@ class WindowerTest {
       atCalendar.set(t.at.year, t.at.month, t.at.date, t.at.hrs, t.at.min, t.at.sec)
       atCalendar.set(Calendar.MILLISECOND, 0)
 
-      // get the windows returned by the windower
       val windowContaining = windower.windowContaining(atCalendar)
 
       // check size of expected list is equal to output of windower
-      assertEquals(exCalendar.count(), windowContaining.count(), "${t.description}. Test case: $i")
+      assertEquals(exCalendar.count(), windowContaining.count(), "${t.description}. Size test case: $i")
 
       // check all values and order of windower is equal to expected
       windowContaining.forEachIndexed { ii, window ->
-        assertEquals(exCalendar[ii].string(), window.string(), "${t.description}. Test case: $i")
+        assertEquals(exCalendar[ii].string(), window.string(), "${t.description}. Value test case: $i, value: $ii")
       }
     }
   }
