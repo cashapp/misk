@@ -47,7 +47,7 @@ import javax.inject.Singleton
 
 @Singleton
 class WebProxyAction @Inject constructor(
-  val optionalBinder: OptionalBinder,
+  private val optionalBinder: OptionalBinder,
   @JvmSuppressWildcards private val clientRequest: ActionScoped<Request>,
   private val staticResourceAction: StaticResourceAction,
   private val resourceEntryFinder: ResourceEntryFinder
