@@ -15,20 +15,20 @@ import javax.inject.Singleton
 
 @Singleton
 class ServiceMetadataAction : WebAction {
-  @Inject lateinit var serviceMetadata: List<ServiceMetadata>
+  @Inject lateinit var serviceMetadata: ServiceMetadata
 
   @Get("/api/service/metadata")
   @RequestContentType(MediaTypes.APPLICATION_JSON)
   @ResponseContentType(MediaTypes.APPLICATION_JSON)
   @Unauthenticated
   fun getAll(): Response {
-    return Response(serviceMetadata = serviceMetadata.first())
+    return Response(serviceMetadata = serviceMetadata)
   }
   data class Response(val serviceMetadata: ServiceMetadata)
 }
 
 data class ServiceMetadata(
-  val name: String,
-  val url: String,
-  val environment: Environment
+  val app_name: String,
+  val environment: Environment,
+  val admin_dashboard_url: String
 )

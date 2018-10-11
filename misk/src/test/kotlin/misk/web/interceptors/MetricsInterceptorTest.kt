@@ -1,19 +1,20 @@
 package misk.web.interceptors
 
-import misk.prometheus.PrometheusHistogramRegistryModule
 import misk.inject.KAbstractModule
+import misk.prometheus.PrometheusHistogramRegistryModule
 import misk.security.authz.AccessControlModule
+import misk.security.authz.FakeCallerAuthenticator
+import misk.security.authz.FakeCallerAuthenticator.Companion.SERVICE_HEADER
+import misk.security.authz.MiskCallerAuthenticator
 import misk.security.authz.Unauthenticated
-import misk.security.authz.fake.FakeCallerAuthenticator.Companion.SERVICE_HEADER
-import misk.security.authz.fake.FakeCallerAuthenticatorModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.web.Get
 import misk.web.PathParam
 import misk.web.Response
-import misk.web.actions.WebActionEntry
 import misk.web.WebTestingModule
 import misk.web.actions.WebAction
+import misk.web.actions.WebActionEntry
 import misk.web.jetty.JettyService
 import okhttp3.OkHttpClient
 import org.assertj.core.api.Assertions.assertThat
@@ -47,7 +48,7 @@ class MetricsInterceptorTest {
   @Test
   fun responseCodes() {
     val requestDuration = metricsInterceptorFactory.requestDuration
-    requestDuration.record(1.0,"TestAction", "unknown", "all")
+    requestDuration.record(1.0, "TestAction", "unknown", "all")
     assertThat(requestDuration.count("TestAction", "unknown", "all")).isEqualTo(7)
     requestDuration.record(1.0, "TestAction", "unknown", "2xx")
     assertThat(requestDuration.count("TestAction", "unknown", "2xx")).isEqualTo(4)
@@ -66,7 +67,7 @@ class MetricsInterceptorTest {
     assertThat(requestDuration.count("TestAction", "my-peer", "all")).isEqualTo(5)
     requestDuration.record(1.0, "TestAction", "my-peer", "2xx")
     assertThat(requestDuration.count("TestAction", "my-peer", "2xx")).isEqualTo(5)
-    requestDuration.record(1.0,"TestAction", "my-peer", "200")
+    requestDuration.record(1.0, "TestAction", "my-peer", "200")
     assertThat(requestDuration.count("TestAction", "my-peer", "200")).isEqualTo(5)
   }
 
@@ -94,7 +95,7 @@ class MetricsInterceptorTest {
     override fun configure() {
       install(AccessControlModule())
       install(WebTestingModule())
-      install(FakeCallerAuthenticatorModule())
+      multibind<MiskCallerAuthenticator>().to<FakeCallerAuthenticator>()
       install(PrometheusHistogramRegistryModule())
       multibind<WebActionEntry>().toInstance(WebActionEntry<TestAction>())
     }
