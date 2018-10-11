@@ -6,13 +6,16 @@ build
 
 .DS_Store
 .git
+**/@misk/web
+cachedUrls
+logs
+*.log
+npm-debug.log*
+coverage
+node_modules
+.npm
 build
 lib
-**/@misk/web
-node_modules
-cachedUrls
-*.log
-**/menu_*.js*
-**/module_*.js*
-old_modules
+dist
+.hash
 hooks.gradle

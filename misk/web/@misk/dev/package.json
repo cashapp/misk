@@ -11,8 +11,8 @@
   "scripts": {
     "build": "mkdir -p lib/web/@misk/dev && cp package.json README.md index.js externals.js tsconfig.base.json webpack.config.tab.js lib/web/@misk/dev",
     "clean": "rm -rf lib node_modules package-lock.json yarn.lock",
-    "gradle": "yarn clean && yarn build",
-    "prepare": "yarn gradle"
+    "ci-build": "yarn clean && yarn build",
+    "prepare": "yarn ci-build"
   },
   "dependencies": {
     "@types/node": "^10.11.7",

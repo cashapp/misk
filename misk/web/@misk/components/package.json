@@ -19,14 +19,14 @@
   "scripts": {
     "build": "yarn run lib",
     "build:lib": "yarn run lib",
-    "clean": "rm -rf lib node_modules",
+    "clean": "rm -rf lib",
     "dev": "yarn run lib; yarn run updateDevCache",
     "dist": "yarn run lib",
-    "gradle": "yarn install && yarn build",
+    "ci-build": "yarn install && yarn clean && yarn build",
     "lib": "webpack",
     "lint": "echo no lint",
     "prepare": "yarn run lint && yarn run test && yarn run lib",
-    "reinstall": "yarn clean && yarn install",
+    "reinstall": "rm -rf node_modules && yarn install",
     "updateDevCache": "cd ..; ./updateLocalCache.sh",
     "test": "echo no tests"
   },

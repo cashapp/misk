@@ -44,13 +44,3 @@ class AdminDashboardTabAction : WebAction {
 @Qualifier
 @Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION)
 annotation class AdminDashboardTab
-
-//class AdminDashboardTab(
-//  slug: String,
-//  url_path_prefix: String,
-//  roles: Set<String> = setOf(),
-//  services: Set<String> = setOf(),
-//  name: String,
-//  category: String = "Container Admin"
-//) : DashboardTab(slug = slug, url_path_prefix = url_path_prefix, roles = roles, services = services, name = name, category = category)
-
