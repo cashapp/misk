@@ -7,8 +7,8 @@ import misk.inject.KAbstractModule
 import misk.scope.ActionScoped
 import misk.security.authz.AccessAnnotation
 import misk.security.authz.AccessControlModule
-import misk.security.authz.fake.FakeCallerAuthenticator
-import misk.security.authz.fake.FakeCallerAuthenticatorModule
+import misk.security.authz.MiskCallerAuthenticator
+import misk.security.authz.FakeCallerAuthenticator
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.web.Get
@@ -103,10 +103,10 @@ class AuthenticationTest {
       multibind<WebActionEntry>().toInstance(WebActionEntry<CustomRoleAccessAction>())
 
       multibind<AccessAnnotation>().toInstance(
-          AccessAnnotation(CustomServiceAccess::class, services = listOf("payments")))
+          AccessAnnotation<CustomServiceAccess>(services = listOf("payments")))
       multibind<AccessAnnotation>().toInstance(
-          AccessAnnotation(CustomRoleAccess::class, roles = listOf("admin")))
-      install(FakeCallerAuthenticatorModule())
+          AccessAnnotation<CustomRoleAccess>(roles = listOf("admin")))
+      multibind<MiskCallerAuthenticator>().to<FakeCallerAuthenticator>()
     }
   }
 

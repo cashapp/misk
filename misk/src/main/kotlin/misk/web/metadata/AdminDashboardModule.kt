@@ -5,7 +5,6 @@ import misk.inject.KAbstractModule
 import misk.web.NetworkInterceptor
 import misk.web.actions.AdminDashboardTab
 import misk.web.actions.AdminDashboardTabAction
-import misk.web.actions.ServiceMetadata
 import misk.web.actions.ServiceMetadataAction
 import misk.web.actions.WebActionEntry
 import misk.web.interceptors.WideOpenDevelopmentInterceptorFactory
@@ -19,20 +18,12 @@ import misk.web.resources.StaticResourceEntry
  * Each Misk included tab in dashboard is installed with the respective tab module (ie. ConfigMetadataModule)
  * Non-Misk tabs can be added by binding AdminDashboardTab entries which will be displayed in the dashboard menu
  */
-class AdminDashboardModule(
-  val environment: Environment,
-  val name: String,
-  val url_path_prefix: String
-) : KAbstractModule() {
+class AdminDashboardModule(val environment: Environment) : KAbstractModule() {
   override fun configure() {
-    // Misc. Necessary Modules and Bindings for AdminDashboardModule
-    multibind<ServiceMetadata>().toInstance(ServiceMetadata(
-        name = name,
-        url = url_path_prefix,
-        environment = environment
-    ))
+    // Loader Endpoints
     multibind<WebActionEntry>().toInstance(WebActionEntry<AdminDashboardTabAction>())
     multibind<WebActionEntry>().toInstance(WebActionEntry<ServiceMetadataAction>())
+
     // Adds open CORS headers in development to allow through API calls from webpack servers
     multibind<NetworkInterceptor.Factory>().to<WideOpenDevelopmentInterceptorFactory>()
 
@@ -44,12 +35,12 @@ class AdminDashboardModule(
     multibind<AdminDashboardTab>().toInstance(AdminDashboardTab(
         name = "Example",
         slug = "example",
-        url_path_prefix = "${url_path_prefix}example/",
+        url_path_prefix = "/_admin/example/",
         category = "Misk Development"
     ))
 
     multibind<StaticResourceEntry>()
-        .toInstance(StaticResourceEntry(url_path_prefix = url_path_prefix,
+        .toInstance(StaticResourceEntry(url_path_prefix = "/_admin/",
             resourcePath = "classpath:/web/_tab/loader/"))
     multibind<StaticResourceEntry>()
         .toInstance(StaticResourceEntry(url_path_prefix = "/_tab/loader/",
@@ -64,7 +55,7 @@ class AdminDashboardModule(
     // Environment Dependent WebProxyAction or StaticResourceAction bindings
     if (environment == Environment.DEVELOPMENT) {
       multibind<WebActionEntry>().toInstance(
-          WebActionEntry<WebProxyAction>(url_path_prefix = url_path_prefix))
+          WebActionEntry<WebProxyAction>(url_path_prefix = "/_admin/"))
       multibind<WebActionEntry>().toInstance(
           WebActionEntry<WebProxyAction>(url_path_prefix = "/_tab/loader/"))
       multibind<WebActionEntry>().toInstance(
@@ -73,7 +64,7 @@ class AdminDashboardModule(
           WebActionEntry<WebProxyAction>(url_path_prefix = "/@misk/"))
 
       multibind<WebProxyEntry>().toInstance(
-          WebProxyEntry(url_path_prefix = url_path_prefix,
+          WebProxyEntry(url_path_prefix = "/_admin/",
               web_proxy_url = "http://localhost:3100/"))
       multibind<WebProxyEntry>().toInstance(
           WebProxyEntry(url_path_prefix = "/_tab/loader/",
@@ -86,7 +77,7 @@ class AdminDashboardModule(
 
     } else {
       multibind<WebActionEntry>().toInstance(
-          WebActionEntry<StaticResourceAction>(url_path_prefix = url_path_prefix))
+          WebActionEntry<StaticResourceAction>(url_path_prefix = "/_admin/"))
       multibind<WebActionEntry>().toInstance(
           WebActionEntry<StaticResourceAction>(url_path_prefix = "/_tab/loader/"))
       multibind<WebActionEntry>().toInstance(
@@ -101,35 +92,35 @@ class AdminDashboardModule(
           AdminDashboardTab(
               name = "gRPC client",
               slug = "a",
-              url_path_prefix = "${url_path_prefix}a/",
+              url_path_prefix = "/_admin/a/",
               category = "Container Admin"
           ))
       multibind<AdminDashboardTab>().toInstance(
           AdminDashboardTab(
               name = "gRPC server",
               slug = "a",
-              url_path_prefix = "${url_path_prefix}a/",
+              url_path_prefix = "/_admin/a/",
               category = "Container Admin"
           ))
       multibind<AdminDashboardTab>().toInstance(
           AdminDashboardTab(
               name = "Threads",
               slug = "a",
-              url_path_prefix = "${url_path_prefix}a/",
+              url_path_prefix = "/_admin/a/",
               category = "Container Admin"
           ))
       multibind<AdminDashboardTab>().toInstance(
           AdminDashboardTab(
               name = "Guice",
               slug = "a",
-              url_path_prefix = "${url_path_prefix}a/",
+              url_path_prefix = "/_admin/a/",
               category = "Container Admin"
           ))
       multibind<AdminDashboardTab>().toInstance(
           AdminDashboardTab(
               name = "Connections",
               slug = "a",
-              url_path_prefix = "${url_path_prefix}a/",
+              url_path_prefix = "/_admin/a/",
               category = "Container Admin"
           ))
     }
