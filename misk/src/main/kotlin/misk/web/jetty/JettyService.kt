@@ -26,6 +26,7 @@ import org.eclipse.jetty.server.handler.ContextHandler
 import org.eclipse.jetty.servlet.ServletContextHandler
 import org.eclipse.jetty.servlet.ServletHolder
 import org.eclipse.jetty.util.ssl.SslContextFactory
+import org.eclipse.jetty.util.thread.QueuedThreadPool
 import java.net.InetAddress
 import javax.inject.Inject
 import javax.inject.Provider
@@ -39,9 +40,11 @@ class JettyService @Inject internal constructor(
   private val sslLoader: SslLoader,
   private val webActionsServlet: WebActionsServlet,
   private val webConfig: WebConfig,
-  @ForConscrypt private val conscryptProvider: Provider<SecurityProvider>
+  @ForConscrypt private val conscryptProvider: Provider<SecurityProvider>,
+  threadPool: QueuedThreadPool,
+  private val connectionMetricsCollector: JettyConnectionMetricsCollector
 ) : AbstractIdleService(), DependentService {
-  private val server = Server()
+  private val server = Server(threadPool)
 
   val httpServerUrl: HttpUrl get() = server.httpUrl!!
   val httpsServerUrl: HttpUrl? get() = server.httpsUrl
@@ -70,6 +73,10 @@ class JettyService @Inject internal constructor(
     }
 
     webConfig.host?.let { httpConnector.host = it }
+    httpConnector.addBean(connectionMetricsCollector.newConnectionListener(
+        "http",
+        webConfig.port
+    ))
     server.addConnector(httpConnector)
 
     if (webConfig.ssl != null) {
@@ -111,6 +118,10 @@ class JettyService @Inject internal constructor(
         httpsConnector.acceptQueueSize = webConfig.queueSize
       }
       webConfig.host?.let { httpsConnector.host = it }
+      httpsConnector.addBean(connectionMetricsCollector.newConnectionListener(
+          "https",
+          webConfig.ssl.port
+      ))
       server.addConnector(httpsConnector)
     }
 

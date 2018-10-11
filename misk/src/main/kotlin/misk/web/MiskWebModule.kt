@@ -1,6 +1,7 @@
 package misk.web
 
 import com.google.common.util.concurrent.Service
+import com.google.inject.Provides
 import com.google.inject.TypeLiteral
 import misk.ApplicationInterceptor
 import misk.MiskCaller
@@ -33,8 +34,9 @@ import misk.web.interceptors.MetricsInterceptor
 import misk.web.interceptors.RequestLogContextInterceptor
 import misk.web.interceptors.RequestLoggingInterceptor
 import misk.web.interceptors.TracingInterceptor
-import misk.web.interceptors.WideOpenDevelopmentInterceptorFactory
+import misk.web.jetty.JettyConnectionMetricsCollector
 import misk.web.jetty.JettyService
+import misk.web.jetty.JettyThreadPoolMetricsCollector
 import misk.web.marshal.GrpcMarshaller
 import misk.web.marshal.GrpcUnmarshaller
 import misk.web.marshal.JsonMarshaller
@@ -46,7 +48,9 @@ import misk.web.marshal.ProtobufUnmarshaller
 import misk.web.marshal.Unmarshaller
 import misk.web.proxy.WebProxyEntry
 import misk.web.resources.StaticResourceEntry
+import org.eclipse.jetty.util.thread.QueuedThreadPool
 import javax.inject.Inject
+import javax.inject.Singleton
 import javax.servlet.http.HttpServletRequest
 import java.security.Provider as SecurityProvider
 
@@ -54,6 +58,8 @@ class MiskWebModule : KAbstractModule() {
   override fun configure() {
     multibind<Service>().to<JettyService>()
     multibind<Service>().to<ConscryptService>()
+    multibind<Service>().to<JettyThreadPoolMetricsCollector>()
+    multibind<Service>().to<JettyConnectionMetricsCollector>()
     bind<SecurityProvider>()
         .annotatedWith(ForConscrypt::class.java)
         .toProvider(ConscryptService::class.java)
@@ -134,6 +140,12 @@ class MiskWebModule : KAbstractModule() {
     multibind<WebActionEntry>().toInstance(WebActionEntry<ReadinessCheckAction>())
     multibind<WebActionEntry>().toInstance(WebActionEntry<LivenessCheckAction>())
     multibind<WebActionEntry>().toInstance(WebActionEntry<NotFoundAction>())
+  }
+
+  @Provides @Singleton
+  fun provideJettyThreadPool(): QueuedThreadPool {
+    // TODO(mmihic): Consider tuning
+    return QueuedThreadPool()
   }
 
   class MiskCallerProvider : ActionScopedProvider<MiskCaller?> {
