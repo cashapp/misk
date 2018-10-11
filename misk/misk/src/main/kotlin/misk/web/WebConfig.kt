@@ -8,7 +8,10 @@ data class WebConfig(
   val port: Int,
   val idle_timeout: Long,
   val host: String? = null,
-  val ssl: WebSslConfig? = null
+  val ssl: WebSslConfig? = null,
+  val selectors: Int? = null,
+  val acceptors: Int? = null,
+  val queueSize: Int? = null
 ) : Config
 
 data class WebSslConfig(
