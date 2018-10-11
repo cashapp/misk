@@ -9,12 +9,11 @@ package misk.metrics
  */
 
 interface HistogramRegistry {
-
-    /** Creates a new histogram */
-     fun newHistogram(
-             name: String,
-             help: String,
-             labelNames: List<String> = listOf(),
-             buckets: DoubleArray?
-     ): Histogram
+  /** Creates a new histogram */
+  fun newHistogram(
+    name: String,
+    help: String,
+    labelNames: List<String> = listOf(),
+    buckets: DoubleArray?
+  ): Histogram
 }
