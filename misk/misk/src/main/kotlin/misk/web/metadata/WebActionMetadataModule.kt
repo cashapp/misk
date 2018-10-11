@@ -32,7 +32,6 @@ class WebActionMetadataModule(val environment: Environment) : KAbstractModule() 
     } else {
       multibind<WebActionEntry>().toInstance(
           WebActionEntry<StaticResourceAction>(url_path_prefix = "/_tab/webactions/"))
-
     }
   }
 }
