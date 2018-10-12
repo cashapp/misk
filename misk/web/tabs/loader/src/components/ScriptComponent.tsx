@@ -1,10 +1,10 @@
-import { IMiskAdminTab } from "@misk/common"
+import { IWebTab } from "@misk/common"
 import * as React from "react"
 import Helmet from "react-helmet"
 import { MountingDivComponent } from "../components"
 
 export interface IScriptProps {
-  tab: IMiskAdminTab,
+  tab: IWebTab,
 }
 
 export const ScriptComponent = (props: IScriptProps) => {

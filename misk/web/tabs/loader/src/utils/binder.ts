@@ -1,6 +1,6 @@
-import { IMiskBinderKeys } from "@misk/common"
+import { IBinderKeys } from "@misk/common"
 
-export const multibind = (binderKey: IMiskBinderKeys, key: string, value: any) => {
+export const multibind = (binderKey: IBinderKeys, key: string, value: any) => {
   const Window = (window as any)
   Window.MiskBinders = Window.MiskBinders || {}
   Window.MiskBinders[binderKey] = Window.MiskBinders[binderKey] || []

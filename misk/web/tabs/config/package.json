@@ -11,14 +11,14 @@
     "test": "jest --coverage"
   },
   "dependencies": {
-    "@misk/common": "^0.0.48",
-    "@misk/components": "^0.0.49"
+    "@misk/common": "^0.0.50",
+    "@misk/components": "^0.0.51"
   },
   "devDependencies": {
-    "@misk/dev": "^0.0.45",
+    "@misk/dev": "^0.0.46",
     "@misk/tslint": "^0.0.7"
   },
-  "miskTabWebpack": {
+  "miskTab": {
     "name": "Config",
     "port": "3200",
     "slug": "config"

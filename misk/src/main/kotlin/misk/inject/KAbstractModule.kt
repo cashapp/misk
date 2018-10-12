@@ -46,6 +46,9 @@ abstract class KAbstractModule : AbstractModule() {
     annotation: KClass<out Annotation>? = null
   ): LinkedBindingBuilder<T> = newMultibinder<T>(annotation).addBinding()
 
+  protected inline fun <reified T : Any, reified A: Annotation> multibind():
+      LinkedBindingBuilder<T> = newMultibinder<T>(A::class).addBinding()
+
   protected inline fun <reified T : Any> newMultibinder(
     annotation: KClass<out Annotation>? = null
   ): Multibinder<T> = newMultibinder(T::class, annotation)

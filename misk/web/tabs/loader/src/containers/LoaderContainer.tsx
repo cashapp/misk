@@ -1,4 +1,4 @@
-import { IMiskAdminTab } from "@misk/common"
+import { IDashboardTab } from "@misk/common"
 import { OfflineComponent, ResponsiveContainer, TopbarComponent } from "@misk/components"
 import { RouterState } from "connected-react-router"
 import * as React from "react"
@@ -12,7 +12,7 @@ export interface ILoaderProps {
   loader: ILoaderState
   router: RouterState
   getTabs: (url: string) => any
-  getComponent: (tab: IMiskAdminTab) => any
+  getComponent: (tab: IDashboardTab) => any
   getServiceMetadata: (url: string) => any
 }
 
@@ -31,7 +31,7 @@ class LoaderContainer extends React.Component<ILoaderProps> {
     this.props.getServiceMetadata(serviceUrl)
   }
 
-  buildTabRouteMountingDiv(tab: IMiskAdminTab) {
+  buildTabRouteMountingDiv(tab: IDashboardTab) {
     return(<Route path={`/_admin/${tab.slug}/`} render={() => <MountingDivComponent tab={tab}/>}/>)
   }
 
@@ -43,7 +43,7 @@ class LoaderContainer extends React.Component<ILoaderProps> {
     if (adminDashboardTabs && serviceMetadata) {
       return (
         <div>
-          <TopbarComponent links={adminDashboardTabs} serviceMetadata={serviceMetadata}/>
+          <TopbarComponent links={adminDashboardTabs} homeName={serviceMetadata.app_name} homeUrl={serviceMetadata.admin_dashboard_url}/>
           <TabContainer>
             {Object.entries(adminDashboardTabs).map(([key,tab]) => (<ScriptComponent key={key} tab={tab}/>))}
           </TabContainer>
