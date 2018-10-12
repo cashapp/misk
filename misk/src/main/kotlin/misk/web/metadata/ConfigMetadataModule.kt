@@ -3,6 +3,7 @@ package misk.web.metadata
 import misk.config.ConfigAdminAction
 import misk.environment.Environment
 import misk.inject.KAbstractModule
+import misk.web.DashboardTab
 import misk.web.actions.AdminDashboardTab
 import misk.web.actions.WebActionEntry
 import misk.web.proxy.WebProxyAction
@@ -13,7 +14,7 @@ import misk.web.resources.StaticResourceEntry
 class ConfigMetadataModule(val environment: Environment) : KAbstractModule() {
   override fun configure() {
     multibind<WebActionEntry>().toInstance(WebActionEntry<ConfigAdminAction>())
-    multibind<AdminDashboardTab>().toInstance(AdminDashboardTab(
+    multibind<DashboardTab, AdminDashboardTab>().toInstance(DashboardTab(
         name = "Config",
         slug = "config",
         url_path_prefix = "/_admin/config/",

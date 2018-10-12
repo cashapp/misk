@@ -2,6 +2,7 @@ package misk.web.metadata
 
 import misk.environment.Environment
 import misk.inject.KAbstractModule
+import misk.web.DashboardTab
 import misk.web.actions.AdminDashboardTab
 import misk.web.actions.WebActionEntry
 import misk.web.actions.WebActionMetadataAction
@@ -13,7 +14,7 @@ import misk.web.resources.StaticResourceEntry
 class WebActionMetadataModule(val environment: Environment) : KAbstractModule() {
   override fun configure() {
     multibind<WebActionEntry>().toInstance(WebActionEntry<WebActionMetadataAction>())
-    multibind<AdminDashboardTab>().toInstance(AdminDashboardTab(
+    multibind<DashboardTab, AdminDashboardTab>().toInstance(DashboardTab(
         name = "Web Actions",
         slug = "webactions",
         url_path_prefix = "/_admin/webactions/"

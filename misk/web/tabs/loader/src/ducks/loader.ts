@@ -1,4 +1,4 @@
-import { createAction, IMiskAction, IMiskAdminTab, IMiskServiceMetadata } from "@misk/common"
+import { createAction, IAction, IDashboardTab, IServiceMetadata } from "@misk/common"
 import axios from "axios"
 import { fromJS, Map } from "immutable"
 import { all, call, put, takeEvery, takeLatest } from "redux-saga/effects"
@@ -21,7 +21,7 @@ export enum LOADER {
 export const dispatchLoader = {
   failure: (error: any) => createAction(LOADER.FAILURE, { ...error, loading: false, success: false }),
   getAllTabs: (url: string) => createAction(LOADER.GET_ALL_TABS, { url, loading: true, success: false, error: null }),
-  getOneComponent: (tab: IMiskAdminTab) => createAction(LOADER.GET_ONE_COMPONENT, { tab, loading: true, success: false, error: null }),  
+  getOneComponent: (tab: IDashboardTab) => createAction(LOADER.GET_ONE_COMPONENT, { tab, loading: true, success: false, error: null }),  
   getServiceMetadata: (url: string) => createAction(LOADER.GET_SERVICE_METADATA, { url, loading: true, success: false, error: null }),
   success: (data: any) => createAction(LOADER.SUCCESS, { ...data, loading: false, success: true, error: null }),
 }
@@ -35,8 +35,8 @@ export interface ILoaderState {
   adminTabComponents: {
     [tab:string]: string
   }
-  adminDashboardTabs: IMiskAdminTab[]
-  serviceMetadata: IMiskServiceMetadata
+  adminDashboardTabs: IDashboardTab[]
+  serviceMetadata: IServiceMetadata
   toJS: () => any
 }
 
@@ -47,7 +47,7 @@ const initialState = fromJS({
   success: false,
 })
 
-export default function loaderReducer (state = initialState, action: IMiskAction<string, {}>) {
+export default function loaderReducer (state = initialState, action: IAction<string, {}>) {
   switch (action.type) {
     case LOADER.FAILURE:
     case LOADER.GET_ONE_COMPONENT:
@@ -64,7 +64,7 @@ export default function loaderReducer (state = initialState, action: IMiskAction
  * Sagas
  */
 
-function * handleGetAllTabs (action: IMiskAction<IActionType, { url: string}>) {
+function * handleGetAllTabs (action: IAction<IActionType, { url: string}>) {
   const { url } = action.payload
   try {
     const { data } = yield call(axios.get, url)
@@ -75,7 +75,7 @@ function * handleGetAllTabs (action: IMiskAction<IActionType, { url: string}>) {
   }
 }
 
-function * handleGetOneComponent (action: IMiskAction<IActionType, { tab: IMiskAdminTab }>) {
+function * handleGetOneComponent (action: IAction<IActionType, { tab: IDashboardTab }>) {
   const { tab } = action.payload
   const url = `/_tab/${tab.slug}/tab_${tab.slug}.js`
   try {
@@ -86,7 +86,7 @@ function * handleGetOneComponent (action: IMiskAction<IActionType, { tab: IMiskA
   }
 }
 
-function * handleGetServiceMetadata (action: IMiskAction<IActionType, { url: string}>) {
+function * handleGetServiceMetadata (action: IAction<IActionType, { url: string}>) {
   const { url } = action.payload
   try {
     const { data } = yield call(axios.get, url)

@@ -37,7 +37,7 @@ Wiring up a New Tab
 - Copy the `tabs/example` tab in the [misk/misk/web repo](https://github.com/square/misk/tree/master/misk/web/tabs/example) to your service's `web/tabs` directory.
 - Open `package.json` and update the following fields using your new tab name, slug, port...etc.
   - name: `misktab-trexfoodlog`. Package name must only have lowercase letters.
-  - miskTabWebpack:
+  - miskTab:
     - name: `T-Rex Food Log`. Titlecase tab name.
     - output_path: optional override field. By default it will be `lib`.
     - port: `30420`.  port number for Webpack Dev Server. 
@@ -53,7 +53,7 @@ Wiring up a New Tab
     ```JSON
     "name": "misktab-trexfoodlog",
     ...
-    "miskTabWebpack": {
+    "miskTab": {
       "name": "T-Rex Food Log",
       "port": "30420",
       "slug": "trexfoodlog"
@@ -140,7 +140,7 @@ In your service's project `build.gradle` file you will need to add the following
   ext.getPackageJsonPort = { path ->
     def packageFile= new File("${project.projectDir}/web/${path}/package.json")
     def packageJson = new JsonSlurper().parseText(packageFile.text)
-    return packageJson.miskTabWebpack.port
+    return packageJson.miskTab.port
   }
 
   task compileWeb(type: Exec) {

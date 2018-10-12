@@ -3,6 +3,7 @@ package misk.security.authz
 import misk.MiskCaller
 import misk.scope.ActionScoped
 import javax.inject.Inject
+import javax.inject.Qualifier
 import javax.inject.Singleton
 
 /**
@@ -36,6 +37,10 @@ class FakeCallerAuthenticator @Inject constructor(
     const val ROLES_HEADER = "X-Forwarded-Roles"
   }
 }
+
+@Qualifier
+@Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION)
+annotation class DevelopmentOnly
 
 /**
  * https://github.com/google/guice/wiki/FrequentlyAskedQuestions#how-can-i-inject-optional-parameters-into-a-constructor
