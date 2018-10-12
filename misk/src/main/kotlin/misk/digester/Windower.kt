@@ -32,7 +32,7 @@ class Windower {
    * 1, 2, 3, 4, 5, 6, 10, 12, 15, 20, 30 second window sizes are permitted.
    * Stagger defines how many windows will contain a single time; a value of 1 means windows never overlap.
    */
-  fun NewWindower(windowSecs: Int, stagger: Int) { //todo: <--should this be a constructor
+  constructor(windowSecs: Int, stagger: Int) {
     require (windowSecs > 0 || windowSecs <= 60)  {
       "windowSecs must be in the range of (0, 60]"
     }
@@ -43,8 +43,7 @@ class Windower {
       "stagger must be >= 1 and <= windowSecs"
     }
 
-    startSecs.clear()
-    var start: Int = 0
+    var start = 0
     while (start < 60) {
       startSecs.add(start)
 
@@ -55,7 +54,6 @@ class Windower {
       start += windowSecs
     }
 
-    //TODO: does this need to be converted into a date or seconds tracked somehow?
     this.windowSize = windowSecs
   }
 
@@ -66,44 +64,39 @@ class Windower {
    * given when the Windower was created.
    */
   fun windowContaining(t: Calendar): MutableList<Window> {
-
     // Find the earliest possible time the window could start,
     // then round up to the nearest second boundary
-    val startFrom: Calendar = t.clone() as Calendar
+    var windowStart: Calendar = t.clone() as Calendar
+    windowStart.add(Calendar.SECOND, -windowSize)
 
-    startFrom.add(Calendar.SECOND, -windowSize)
     var boundaryIndex = 0
-
     for (i in 0..(startSecs.count()-1)) {
-      if (startSecs[i] >= startFrom.get(Calendar.SECOND)) {
+      if (startSecs[i] >= windowStart.get(Calendar.SECOND)) {
         boundaryIndex = i
         break
       }
     }
 
-    var windowStart: Calendar = startFrom.clone() as Calendar
     windowStart.set(Calendar.SECOND, startSecs[boundaryIndex])
+    var windowEnd: Calendar = windowStart.clone() as Calendar
+    windowEnd.add(Calendar.SECOND, windowSize)
 
     // Keep creating potential windows until none hold the given time
     val windows: MutableList<Window> = mutableListOf()
-    var endTime: Calendar = windowStart.clone() as Calendar
-    endTime.add(Calendar.SECOND, windowSize)
-    var currWindow = Window(windowStart.clone() as Calendar, endTime.clone() as Calendar)
+    var currWindow = Window(windowStart.clone() as Calendar, windowEnd.clone() as Calendar)
     while (true) {
       if (currWindow.contains(t)) {
-        windows.add( Window(windowStart.clone() as Calendar, endTime.clone() as Calendar))
+        windows.add(currWindow)
       } else if (windows.count() > 0) {
         // if len(windows) == 0 that means the first potential window started too early.
         // otherwise, len(windows) > 0 means that all possible windows were already appended
         break
       }
 
-      val pair = nextTime(windowStart, boundaryIndex)
-      windowStart = pair.first.clone() as Calendar
-      boundaryIndex= pair.second
-      endTime = windowStart.clone() as Calendar
-      endTime.add(Calendar.SECOND, windowSize)
-      currWindow = Window(windowStart.clone() as Calendar, endTime.clone() as Calendar)
+      boundaryIndex= nextTime(windowStart, boundaryIndex)
+      windowEnd = windowStart.clone() as Calendar
+      windowEnd.add(Calendar.SECOND, windowSize)
+      currWindow = Window(windowStart.clone() as Calendar, windowEnd.clone() as Calendar)
     }
 
     return windows
@@ -121,15 +114,15 @@ class Windower {
    * Returns the start time of the next window and boundary index of where
    * the window is within the current minute
    */
-  private fun nextTime(start: Calendar, startBoundary: Int): Pair<Calendar, Int> {
+  private fun nextTime(start: Calendar, startBoundary: Int): Int {
     val boundaryIndex = nextBoundaryIndex(startBoundary)
     if (boundaryIndex == 0) {
       start.set(Calendar.SECOND, 0)
       start.add(Calendar.MINUTE, 1)
-      return Pair(start, boundaryIndex)
+      return boundaryIndex
     }
 
     start.set(Calendar.SECOND, startSecs[boundaryIndex])
-    return Pair(start, boundaryIndex)
+    return boundaryIndex
   }
 }

@@ -8,18 +8,10 @@ import kotlin.test.assertEquals
 class WindowerTest {
   @Test
   fun testWindowerInitialBoundaries() {
-    var w = Windower()
-    w.NewWindower(60, 1)
-    assertThat(w.startSecs).isEqualTo(mutableListOf(0))
-
-    w.NewWindower(30, 1)
-    assertThat(w.startSecs).isEqualTo(mutableListOf(0, 30))
-
-    w.NewWindower(60, 2)
-    assertThat(w.startSecs).isEqualTo(mutableListOf(0, 30))
-
-    w.NewWindower(60, 3)
-    assertThat(w.startSecs).isEqualTo(mutableListOf(0, 20, 40))
+    assertThat(Windower(60, 1).startSecs).isEqualTo(mutableListOf(0))
+    assertThat(Windower(30, 1).startSecs).isEqualTo(mutableListOf(0, 30))
+    assertThat(Windower(60, 2).startSecs).isEqualTo(mutableListOf(0, 30))
+    assertThat(Windower(60, 3).startSecs).isEqualTo(mutableListOf(0, 20, 40))
   }
 
   private data class WindowerTestClass(
@@ -199,34 +191,36 @@ class WindowerTest {
     )
 
     testCases.forEachIndexed { i, t ->
-      val windower = Windower()
-      windower.NewWindower(t.windowSecs, t.count)
-
-      // populate expected list by generating the window
-      val exCalendar: MutableList<Window> = mutableListOf()
-      t.expected.forEach{ c ->
-        val startCalender = Calendar.getInstance()
-        val endCalendar = Calendar.getInstance()
-        startCalender.set(c.start.year, c.start.month, c.start.date, c.start.hrs, c.start.min, c.start.sec)
-        startCalender.set(Calendar.MILLISECOND, 0)
-        endCalendar.set(c.end.year, c.end.month, c.end.date, c.end.hrs, c.end.min, c.end.sec)
-        endCalendar.set(Calendar.MILLISECOND, 0)
-        val window = Window(startCalender, endCalendar)
-        exCalendar.add(window)
-      }
-
+      // Create the calendar instance of the time to check at
       val atCalendar: Calendar = Calendar.getInstance()
       atCalendar.set(t.at.year, t.at.month, t.at.date, t.at.hrs, t.at.min, t.at.sec)
       atCalendar.set(Calendar.MILLISECOND, 0)
 
+      // Generate list of expected windows
+      val exCalendar: MutableList<Window> = mutableListOf()
+      t.expected.forEach{ c ->
+        val startCalender = Calendar.getInstance()
+        startCalender.set(c.start.year, c.start.month, c.start.date, c.start.hrs, c.start.min, c.start.sec)
+        startCalender.set(Calendar.MILLISECOND, 0)
+
+        val endCalendar = Calendar.getInstance()
+        endCalendar.set(c.end.year, c.end.month, c.end.date, c.end.hrs, c.end.min, c.end.sec)
+        endCalendar.set(Calendar.MILLISECOND, 0)
+        
+        val window = Window(startCalender, endCalendar)
+        exCalendar.add(window)
+      }
+
+      // Get list of returned windows
+      val windower = Windower(t.windowSecs, t.count)
       val windowContaining = windower.windowContaining(atCalendar)
 
-      // check size of expected list is equal to output of windower
-      assertEquals(exCalendar.count(), windowContaining.count(), "${t.description}. Size test case: $i")
+      // Check number of windows to equal to expected
+      assertEquals(exCalendar.count(), windowContaining.count(), "${t.description}. Window amount test case: $i")
 
-      // check all values and order of windower is equal to expected
+      // Check all values and order of windows is equal to expected
       windowContaining.forEachIndexed { ii, window ->
-        assertEquals(exCalendar[ii].string(), window.string(), "${t.description}. Value test case: $i, value: $ii")
+        assertEquals(exCalendar[ii].string(), window.string(), "${t.description}. Window value test case: $i, Window: $ii")
       }
     }
   }
