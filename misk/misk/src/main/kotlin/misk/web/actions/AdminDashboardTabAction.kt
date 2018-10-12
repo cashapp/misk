@@ -3,12 +3,14 @@ package misk.web.actions
 import misk.MiskCaller
 import misk.scope.ActionScoped
 import misk.security.authz.Unauthenticated
+import misk.web.DashboardTab
 import misk.web.Get
 import misk.web.RequestContentType
 import misk.web.ResponseContentType
 import misk.web.WebTab
 import misk.web.mediatype.MediaTypes
 import javax.inject.Inject
+import javax.inject.Qualifier
 import javax.inject.Singleton
 
 /**
@@ -23,7 +25,7 @@ import javax.inject.Singleton
 
 @Singleton
 class AdminDashboardTabAction : WebAction {
-  @Inject lateinit var adminDashboardTabs: List<AdminDashboardTab>
+  @Inject @AdminDashboardTab private lateinit var adminDashboardTabs: List<DashboardTab>
   @Inject lateinit var callerProvider: @JvmSuppressWildcards ActionScoped<MiskCaller?>
 
   @Get("/api/admindashboardtabs")
@@ -36,15 +38,19 @@ class AdminDashboardTabAction : WebAction {
     return Response(adminDashboardTabs = authorizedAdminDashboardTabs)
   }
 
-  data class Response(val adminDashboardTabs: List<AdminDashboardTab>)
+  data class Response(val adminDashboardTabs: List<DashboardTab>)
 }
 
-class AdminDashboardTab(
-  val name: String,
-  slug: String,
-  url_path_prefix: String,
-  val category: String = "Container Admin",
-  roles: Set<String> = setOf(),
-  services: Set<String> = setOf()
-) : WebTab(slug = slug, url_path_prefix = url_path_prefix, roles = roles, services = services)
+@Qualifier
+@Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION)
+annotation class AdminDashboardTab
+
+//class AdminDashboardTab(
+//  slug: String,
+//  url_path_prefix: String,
+//  roles: Set<String> = setOf(),
+//  services: Set<String> = setOf(),
+//  name: String,
+//  category: String = "Container Admin"
+//) : DashboardTab(slug = slug, url_path_prefix = url_path_prefix, roles = roles, services = services, name = name, category = category)
 

@@ -2,6 +2,7 @@ package misk.web.metadata
 
 import misk.environment.Environment
 import misk.inject.KAbstractModule
+import misk.web.DashboardTab
 import misk.web.NetworkInterceptor
 import misk.web.actions.AdminDashboardTab
 import misk.web.actions.AdminDashboardTabAction
@@ -32,7 +33,7 @@ class AdminDashboardModule(val environment: Environment) : KAbstractModule() {
     install(WebActionMetadataModule(environment))
 
     //  AdminDashboardTab Bindings
-    multibind<AdminDashboardTab>().toInstance(AdminDashboardTab(
+    multibind<DashboardTab, AdminDashboardTab>().toInstance(DashboardTab(
         name = "Example",
         slug = "example",
         url_path_prefix = "/_admin/example/",
@@ -88,36 +89,31 @@ class AdminDashboardModule(val environment: Environment) : KAbstractModule() {
 
     // True for testing Misk Menu with populated tabs and categories, tabs are not functional
     if (true) {
-      multibind<AdminDashboardTab>().toInstance(
-          AdminDashboardTab(
+      multibind<DashboardTab, AdminDashboardTab>().toInstance(DashboardTab(
               name = "gRPC client",
               slug = "a",
               url_path_prefix = "/_admin/a/",
               category = "Container Admin"
           ))
-      multibind<AdminDashboardTab>().toInstance(
-          AdminDashboardTab(
+      multibind<DashboardTab, AdminDashboardTab>().toInstance(DashboardTab(
               name = "gRPC server",
               slug = "a",
               url_path_prefix = "/_admin/a/",
               category = "Container Admin"
           ))
-      multibind<AdminDashboardTab>().toInstance(
-          AdminDashboardTab(
+      multibind<DashboardTab, AdminDashboardTab>().toInstance(DashboardTab(
               name = "Threads",
               slug = "a",
               url_path_prefix = "/_admin/a/",
               category = "Container Admin"
           ))
-      multibind<AdminDashboardTab>().toInstance(
-          AdminDashboardTab(
+      multibind<DashboardTab, AdminDashboardTab>().toInstance(DashboardTab(
               name = "Guice",
               slug = "a",
               url_path_prefix = "/_admin/a/",
               category = "Container Admin"
           ))
-      multibind<AdminDashboardTab>().toInstance(
-          AdminDashboardTab(
+      multibind<DashboardTab, AdminDashboardTab>().toInstance(DashboardTab(
               name = "Connections",
               slug = "a",
               url_path_prefix = "/_admin/a/",

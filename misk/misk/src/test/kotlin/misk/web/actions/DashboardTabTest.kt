@@ -4,89 +4,89 @@ import misk.inject.KAbstractModule
 import misk.logging.getLogger
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
+import misk.web.DashboardTab
 import org.junit.jupiter.api.Test
 import javax.inject.Inject
 import kotlin.test.assertFailsWith
 
 @MiskTest
-internal class AdminDashboardTabTest {
+internal class DashboardTabTest {
   @MiskTestModule
   val module = TestModule()
 
-  @Inject lateinit var adminDashboardTabs: List<AdminDashboardTab>
+  @Inject lateinit var dashboardTabs: List<DashboardTab>
 
-  private val logger = getLogger<AdminDashboardTabTest>()
+  private val logger = getLogger<DashboardTabTest>()
 
   class TestModule : KAbstractModule() {
     override fun configure() {
-      multibind<AdminDashboardTab>().toInstance(
-          AdminDashboardTab(
-              "Dashboard",
-              "dashboard",
-              "/_admin/dashboard/"
-          ))
+      multibind<DashboardTab>().toInstance(DashboardTab(
+          slug = "dashboard",
+          url_path_prefix = "/_admin/dashboard/",
+          name = "Dashboard"
+      ))
     }
   }
 
   @Test
   internal fun testBindings() {
-    logger.info(adminDashboardTabs.toString())
+    logger.info(dashboardTabs.toString())
   }
 
   @Test
   internal fun tabGoodSlug() {
-    AdminDashboardTab("Name", "good-1-slug-test", "/a/path/")
+    DashboardTab("good-1-slug-test", url_path_prefix = "/a/path/", name = "Name")
   }
 
   @Test
   internal fun tabSlugWithSpace() {
     assertFailsWith<IllegalArgumentException> {
-      AdminDashboardTab("Name", "bad slug", "/a/path/")
+      DashboardTab("bad slug", url_path_prefix = "/a/path/", name = "Name")
     }
   }
 
   @Test
   internal fun tabSlugWithUpperCase() {
     assertFailsWith<IllegalArgumentException> {
-      AdminDashboardTab("Name", "BadSlug", "/a/path/")
+      DashboardTab("BadSlug", url_path_prefix = "/a/path/", name = "Name")
     }
   }
 
   @Test
   internal fun tabGoodCategory() {
-    AdminDashboardTab("Name", "slug", "/a/path/", "@tea-pot_418")
+    DashboardTab(slug = "slug", url_path_prefix = "/a/path/", name = "Name", category = "@tea-pot_418")
   }
 
   @Test
   internal fun tabCategoryWithSpace() {
     assertFailsWith<IllegalArgumentException> {
-      AdminDashboardTab("Name", "bad slug", "/a/path/", "bad icon")
+      DashboardTab(slug = "bad slug", url_path_prefix = "/a/path/", name = "Name", category = "bad icon")
     }
   }
 
   @Test
   internal fun tabCategoryWithUpperCase() {
     assertFailsWith<IllegalArgumentException> {
-      AdminDashboardTab("Name", "BadSlug", "/a/path/", "Bad-Icon")
+      DashboardTab(slug = "BadSlug", url_path_prefix = "/a/path/", name = "Name", category = "Bad-Icon")
     }
   }
 
   @Test
   internal fun tabGoodPath() {
-    AdminDashboardTab("Name", "slug", "/a/path/")
+    DashboardTab(slug = "slug", url_path_prefix = "/a/path/", name = "Name")
   }
 
   @Test
   internal fun tabPathWithoutLeadingSlash() {
     assertFailsWith<IllegalArgumentException> {
-      AdminDashboardTab("Name", "slug", "a/path/")
+      DashboardTab(slug = "slug", url_path_prefix = "a/path/", name = "Name")
     }
   }
 
   @Test
   internal fun tabPathWithoutTrailingSlash() {
     assertFailsWith<IllegalArgumentException> {
-      AdminDashboardTab("Name", "slug", "/a/path")
+      DashboardTab(slug = "slug", url_path_prefix = "/a/path", name = "Name")
     }
   }
 }

@@ -1,8 +1,8 @@
-import { IMiskAdminTab } from "@misk/common"
+import { IWebTab } from "@misk/common"
 import * as React from "react"
 
 export interface IMountingDivProps {
-  tab: IMiskAdminTab,
+  tab: IWebTab,
 }
 
 export const MountingDivComponent = (props: IMountingDivProps) => (

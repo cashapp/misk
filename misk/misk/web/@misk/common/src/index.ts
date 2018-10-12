@@ -3,32 +3,39 @@ export * from "./actions"
 /**
  * Common Interfaces
  */
-interface IMiskAdminTab {
-  category: string
-  name: string
+interface IWebTab {
   slug: string
   url_path_prefix: string
+  roles?: string[]
+  services?: string[]
 }
 
-interface IMiskServiceMetadata {
+interface IDashboardTab extends IWebTab {
   name: string
-  url: string
-  environment: string
+  category?: string
 }
 
-enum IMiskBinderKeys {
+interface IAdminDashboardTab extends IDashboardTab {}
+
+interface IServiceMetadata {
+  app_name: string
+  environment: string
+  admin_dashboard_url: string
+}
+
+enum IBinderKeys {
   NavTopbarMenu = "NavTopbarMenu",
   TabEntry = "TabEntry",
 }
 
-interface IMiskBinder {
-  multibind: (binder: IMiskBinderKeys, key: string, value: any) => any
+interface IBinder {
+  multibind: (binder: IBinderKeys, key: string, value: any) => any
 }
 
-interface IMiskWindow extends Window {
+interface IWindow extends Window {
   __REDUX_DEVTOOLS_EXTENSION_COMPOSE__: any
   Misk: {
-    Binder: IMiskBinder
+    Binder: IBinder
     Common: any
     Components: any
     History: any
@@ -40,4 +47,4 @@ interface IMiskWindow extends Window {
   MiskBinders: any
 }
 
-export { IMiskAdminTab, IMiskServiceMetadata, IMiskBinder, IMiskBinderKeys, IMiskWindow }
+export { IWebTab, IDashboardTab, IAdminDashboardTab, IServiceMetadata, IBinder, IBinderKeys, IWindow }

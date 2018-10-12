@@ -27,12 +27,12 @@ Webpack Template
 Create a `webpack.config.js` file in the repo root directory with the following:
 
 ```Javascript
-const { miskTabWebpackBuilder } = require("@misk/dev")
+const { miskTabBuilder } = require("@misk/dev")
 const path = require('path')
-const miskTabWebpack = require(path.join(process.cwd(), "package.json")).miskTabWebpack
-module.exports = miskTabWebpackBuilder(process.env.NODE_ENV, {
+const miskTab = require(path.join(process.cwd(), "package.json")).miskTab
+module.exports = miskTabBuilder(process.env.NODE_ENV, {
   "dirname": __dirname,
-  miskTabWebpack
+  miskTab
 },
 {
   // optional: any other Webpack config fields to be merged with the Misk Tab Webpack Config
@@ -41,7 +41,7 @@ module.exports = miskTabWebpackBuilder(process.env.NODE_ENV, {
 
 Webpack Externals
 ---
-Used in `miskTabWebpackBuilder` but also available as an export of `@misk/dev` are the following externals objects that are formatted for use by Webpack to exclude libraries from compiled code:
+Used in `miskTabBuilder` but also available as an export of `@misk/dev` are the following externals objects that are formatted for use by Webpack to exclude libraries from compiled code:
 
 - `vendorExternals`: vendor libraries included in `@misk/common/lib/vendors.js`
 - `miskExternals`: all Misk libraries
@@ -85,7 +85,7 @@ Note that the `output_path` must match the `outDir` specified in the repo's `tsc
   "devDependencies": {
     "@misk/dev": "^0.0.20"
   },
-  "miskTabWebpack": {
+  "miskTab": {
     "name": "Config",
     "output_path": "dist",
     "port": "3000",
