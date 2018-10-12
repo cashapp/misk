@@ -1,5 +1,5 @@
 ///<reference types="webpack-env" />
-import { IMiskWindow } from "@misk/common"
+import { IWindow } from "@misk/common"
 import { connectRouter, routerMiddleware } from "connected-react-router"
 import { createBrowserHistory } from "history"
 import * as React from "react"
@@ -15,7 +15,7 @@ export { multibind }
 
 const tabSlug = "loader"
 
-const Window = window as IMiskWindow
+const Window = window as IWindow
 
 Window.Misk.Binder = { multibind }
 Window.Misk.History = Window.Misk.History || createBrowserHistory()

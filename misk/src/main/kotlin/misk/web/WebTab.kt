@@ -20,3 +20,12 @@ abstract class WebTab(
     }
   }
 }
+
+abstract class DashboardTab(
+  slug: String,
+  url_path_prefix: String,
+  roles: Set<String> = setOf(),
+  services: Set<String> = setOf(),
+  val name: String,
+  val category: String
+) : WebTab(slug = slug, url_path_prefix = url_path_prefix, roles = roles, services = services)

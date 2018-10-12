@@ -7,22 +7,22 @@ const webpack = require('webpack')
 const merge = require('webpack-merge')
 
 module.exports = (env, argv, otherConfigFields = {}) => {
-  const { dirname, miskTabWebpack } = argv
+  const { dirname, miskTab } = argv
 
-  if ("name" in miskTabWebpack && "port" in miskTabWebpack && "slug" in miskTabWebpack) {
-    console.log("[MISK] Valid miskTabWebpack")
+  if ("name" in miskTab && "port" in miskTab && "slug" in miskTab) {
+    console.log("[MISK] Valid miskTab in package.json")
   } else {
-    console.log("[MISK] Invalid miskTabWebpack, testing for missing fields...")
+    console.log("[MISK] Invalid miskTab in package.json, testing for missing fields...")
     let errMsg = "\n"
-    errMsg += ("name" in miskTabWebpack) ? "[MISK] miskTabWebpack contains name\n" : "[MISK] miskTabWebpack missing name\n";
-    errMsg += ("port" in miskTabWebpack) ? "[MISK] miskTabWebpack contains port\n" : "[MISK] miskTabWebpack missing port\n";
-    errMsg += ("slug" in miskTabWebpack) ? "[MISK] miskTabWebpack contains slug\n" : "[MISK] miskTabWebpack missing slug\n";
+    errMsg += ("name" in miskTab) ? "[MISK] miskTab contains name\n" : "[MISK] miskTab missing name\n";
+    errMsg += ("port" in miskTab) ? "[MISK] miskTab contains port\n" : "[MISK] miskTab missing port\n";
+    errMsg += ("slug" in miskTab) ? "[MISK] miskTab contains slug\n" : "[MISK] miskTab missing slug\n";
     throw Error(errMsg)
   } 
   
-  const { name, port, slug } = miskTabWebpack
-  const relative_path_prefix = miskTabWebpack.relative_path_prefix ? miskTabWebpack.relative_path_prefix : `_tab/${miskTabWebpack.slug}/`
-  const output_path = miskTabWebpack.output_path ? miskTabWebpack.output_path : `lib/web/_tab/${slug}`
+  const { name, port, slug } = miskTab
+  const relative_path_prefix = miskTab.relative_path_prefix ? miskTab.relative_path_prefix : `_tab/${miskTab.slug}/`
+  const output_path = miskTab.output_path ? miskTab.output_path : `lib/web/_tab/${slug}`
   
   const DefinePluginConfig = new webpack.DefinePlugin({
     'process.env.NODE_ENV': JSON.stringify('production')

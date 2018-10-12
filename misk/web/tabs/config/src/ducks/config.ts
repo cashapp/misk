@@ -1,4 +1,4 @@
-import { createAction, IMiskAction } from "@misk/common"
+import { createAction, IAction } from "@misk/common"
 import axios from "axios"
 import { fromJS, Map } from "immutable"
 import { all, call, put, takeLatest } from "redux-saga/effects"
@@ -42,7 +42,7 @@ const initialState = fromJS({
   success: false,
 })
 
-export default function ConfigReducer (state = initialState, action: IMiskAction<string, {}>) {
+export default function ConfigReducer (state = initialState, action: IAction<string, {}>) {
   switch (action.type) {
     case CONFIG.GET_ALL:
     case CONFIG.SUCCESS:
@@ -58,7 +58,7 @@ export default function ConfigReducer (state = initialState, action: IMiskAction
  */
 const dateFormat = "YYYY-MM-DD HH:mm:ss"
 
-function * handleGetAll (action: IMiskAction<IActionType, { url: string}>) {
+function * handleGetAll (action: IAction<IActionType, { url: string}>) {
   const { url } = action.payload
   try {
     const response = yield call(axios.get, url)
