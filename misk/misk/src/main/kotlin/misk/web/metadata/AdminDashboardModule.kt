@@ -90,35 +90,35 @@ class AdminDashboardModule(val environment: Environment) : KAbstractModule() {
     // True for testing Misk Menu with populated tabs and categories, tabs are not functional
     if (true) {
       multibind<DashboardTab, AdminDashboardTab>().toInstance(DashboardTab(
-              name = "gRPC client",
-              slug = "a",
-              url_path_prefix = "/_admin/a/",
-              category = "Container Admin"
-          ))
+          name = "gRPC client",
+          slug = "a",
+          url_path_prefix = "/_admin/a/",
+          category = "Container Admin"
+      ))
       multibind<DashboardTab, AdminDashboardTab>().toInstance(DashboardTab(
-              name = "gRPC server",
-              slug = "a",
-              url_path_prefix = "/_admin/a/",
-              category = "Container Admin"
-          ))
+          name = "gRPC server",
+          slug = "a",
+          url_path_prefix = "/_admin/a/",
+          category = "Container Admin"
+      ))
       multibind<DashboardTab, AdminDashboardTab>().toInstance(DashboardTab(
-              name = "Threads",
-              slug = "a",
-              url_path_prefix = "/_admin/a/",
-              category = "Container Admin"
-          ))
+          name = "Threads",
+          slug = "a",
+          url_path_prefix = "/_admin/a/",
+          category = "Container Admin"
+      ))
       multibind<DashboardTab, AdminDashboardTab>().toInstance(DashboardTab(
-              name = "Guice",
-              slug = "a",
-              url_path_prefix = "/_admin/a/",
-              category = "Container Admin"
-          ))
+          name = "Guice",
+          slug = "a",
+          url_path_prefix = "/_admin/a/",
+          category = "Container Admin"
+      ))
       multibind<DashboardTab, AdminDashboardTab>().toInstance(DashboardTab(
-              name = "Connections",
-              slug = "a",
-              url_path_prefix = "/_admin/a/",
-              category = "Container Admin"
-          ))
+          name = "Connections",
+          slug = "a",
+          url_path_prefix = "/_admin/a/",
+          category = "Container Admin"
+      ))
     }
   }
 }
