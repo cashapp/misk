@@ -49,6 +49,7 @@ class MiskApplication(private val modules: List<Module>, commands: List<MiskComm
   internal fun doRun(args: Array<String>) {
     if (args.isEmpty()) {
       startServiceAndAwaitTermination()
+      return
     }
 
     try {
