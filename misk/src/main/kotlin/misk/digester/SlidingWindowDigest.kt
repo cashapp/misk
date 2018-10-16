@@ -1,44 +1,67 @@
 package misk.digester
 
+import java.time.Clock
 import java.time.ZonedDateTime
+import java.util.Collections
 
+/** WindowDigest holds a t-digest whose data points are scoped to a specific time window. */
+data class WindowDigest(
+  var window: Window,
+  var Digest: VeneurDigest
+)
+
+/** Snapshot is the state of a SlidingWindowDigest at a point in time. */
+data class Snapshot(
+  private var quantiles: DoubleArray,  // Values of specific quantiles.
+  private var count: Long,             // Count of observations.
+  private var sum: Double              // Sum of observations.
+)
+
+/**
+ * SlidingWindowDigest approximates quantiles of data for a trailing time period. It is thread-safe.
+ *
+ * To efficiently store observed data in a mergeable way, t-openDigests are used.
+ * As t-openDigests do not support discarding older data points, the sliding window
+ * aspect is approximated by keeping multiple separate t-openDigests scoped to discrete
+ * overlapping time windows. As a result, quantile data is reported from the most recent window that has ended.
+ *
+ * The following example creates a 1 minute sliding window where there are 6 overlapping windows at a given time.
+ * Reported quantiles are at most 10 seconds out of date.
+ * NewSlidingWindowDigest(time.Now, NewDefaultVeneurDigest, NewWindower(60, 6))
+ *
+ * The following example creates a 10 second sliding window where there are 2 overlapping windows at a given time.
+ * Reported quantiles are at most 5 seconds out of date:
+ * NewSlidingWindowDigest(time.Now, NewDefaultVeneurDigest, NewWindower(10, 2))
+ */
 class SlidingWindowDigest constructor(
+  private val utcNowClock: Clock,
   private val windower: Windower,
-  private val windows: MutableList<WindowDigest>
+  private var windows: MutableList<WindowDigest>
 ) {
 
- // var windower: Windower
- // var windows: MutableList<WindowDigest>
- // var shuffle: (MutableList<Int>)
-
-  //synchronized methods
-  //countdown latches for each of the variables (problem with a permenate lock)
-  //synchronized data accessors for each of hte variables
-
-  data class WindowDigest(
-    var window: Window,
-    var Digest: VeneurDigest) //?is it veneur digest????????
-
-  data class Snapshot(
-    var quantiles: DoubleArray, // Values of specific quantiles.
-    var count: Long,             // Count of observations.
-    var sum: Double              // Sum of observations.
-  )
-
+  /**
+   * Adds the given value to all currently open t-openDigests.
+   * It is important to note that an observed value is not immediately
+   * reflected in calls to Quantile.
+   */
   @Synchronized fun observe(value: Double) {
-
     for (digest in openDigests(true)) {
-      digest
+      digest.Digest.add(value)
     }
   }
 
+  /**
+   * Returns estimated value for a quantile. The returned value
+   * may not include recently observed values due to how sliding windows are approximated.
+   * If no data has been observed then NaN is returned.
+   */
   @Synchronized fun quantile(quantile: Double): Double {
     if (windows.count() == 0) { //is this part even necessary?
       return Double.NaN
     }
 
-    val now = ZonedDateTime.now()
-    for (i in windows.count()-1 downTo 0) {
+    val now = ZonedDateTime.now(utcNowClock)
+    for (i in windows.count() - 1 downTo 0) {
       if (!now.isBefore(windows[i].window.end)) {
         return windows[i].Digest.mergingDigest().quantile(quantile)
       }
@@ -54,9 +77,9 @@ class SlidingWindowDigest constructor(
    */
   @Synchronized fun snapshot(quantiles: List<Double>): Snapshot {
 
-    val now = ZonedDateTime.now()
+    val now = ZonedDateTime.now(utcNowClock)
 
-    for (i in windows.count()-1 downTo 0) {
+    for (i in windows.count() - 1 downTo 0) {
       if (!now.isBefore(windows[i].window.end)) {
 
         val quantileVals = DoubleArray(quantiles.count()) { Double.NaN }
@@ -81,7 +104,10 @@ class SlidingWindowDigest constructor(
     )
   }
 
-
+  /**
+   * Returns all WindowDigests that ended starting from the given time (inclusive).
+   *The returned WindowDigest are ordered by their start time.
+   */
   @Synchronized fun closedDigests(from: ZonedDateTime): List<WindowDigest> {
 
     deleteOlderDigests()
@@ -97,37 +123,41 @@ class SlidingWindowDigest constructor(
     return wds.toList()
   }
 
-  @Synchronized fun MergeIn(windowDigests: List<WindowDigest>) {
+  /**
+   * Merges in the data from the given WindowDigests.
+   * The given windowDigests should use the same windowing boundaries
+   * as this; if they do not then quantiles reported by this sliding
+   * window digest may be incorrect.
+   */
+  @Synchronized fun mergeIn(windowDigests: List<WindowDigest>) {
     deleteOlderDigests()
 
     for (wd in windowDigests) {
       var found = false
       for (existing in windows) {
         if (existing.window.equals(wd.window)) {
-              wd.Digest.mergeInto(existing.Digest)
-              found = true
-              break
-            }
+          wd.Digest.mergeInto(existing.Digest)
+          found = true
+          break
         }
+      }
 
-        if (!found) {
-          val newDigest = WindowDigest(
-              wd.window,
-              newDigestFn()
-          )
-          windows.add(newDigest)
-          wd.Digest.mergeInto(newDigest.Digest)
-        }
+      if (!found) {
+        val newDigest = WindowDigest(
+            wd.window,
+            VeneurDigest() //should this be some kind of custom new tDigest function?
+        )
+        windows.add(newDigest)
+        wd.Digest.mergeInto(newDigest.Digest)
       }
     }
 
-    sort.Slice(s.windows, func(i, j int) bool {
-      return s.windows[i].Start.Before(s.windows[j].Start)
-    })
+    windows = windows.asSequence().sortedWith(compareBy { it.window.start }).toMutableList()
   }
 
-  fun deleteOlderDigests(val now: ZonedDateTime) {
-    val now = ZonedDateTime.now()
+  /** Deletes openDigests with windows that ended more than 1 minute ago. */
+  private fun deleteOlderDigests() {
+    val now = ZonedDateTime.now(utcNowClock)
 
     val deleteBefore = now.minusMinutes(1)
     var firstIndex = 0
@@ -146,13 +176,18 @@ class SlidingWindowDigest constructor(
 
   }
 
-  fun openDigests(gc: Boolean): List<WindowDigest> {
-    val now = ZonedDateTime.now()
+  /**
+   * Returns all WindowDigests that are currently open, creating new windows if necessary.
+   * Older openDigests that ended more than 1 minute earlier are discarded if gc is true.
+   */
+  private fun openDigests(gc: Boolean): List<WindowDigest> {
+    val now = ZonedDateTime.now(utcNowClock)
+
     if (gc) {
-      deleteOlderDigests(now)
+      deleteOlderDigests()
     }
 
-    var localWindows = windower.windowContaining(now)
+    var localWindows = windower.windowsContaining(now)
 
     val digests: MutableList<WindowDigest> = mutableListOf()
 
@@ -167,17 +202,16 @@ class SlidingWindowDigest constructor(
       }
 
       if (!found) {
-        val newDigest = WindowDigest(newWindow, newDigestFn())
+        val newDigest = WindowDigest(
+            newWindow,
+            VeneurDigest() //should this be some kind of custom new tDigest function?
+        )
         windows.add(newDigest)
         digests.add(newDigest)
       }
     }
 
-    /*if !sort.SliceIsSorted(s.windows, func(i, j int) bool {
-      return s.windows[i].Start.Before(s.windows[j].Start)
-    }) {
-      panic("internal windows are not sorted as expected")
-    }*/
+    windows = windows.asSequence().sortedWith(compareBy { it.window.start }).toMutableList()
 
     return digests
   }
