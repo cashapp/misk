@@ -1,27 +1,44 @@
 Releasing
-=========
-
- 1. Change the version in `gradle.properties` to a non-SNAPSHOT verson.
- 2. Update the `CHANGELOG.md` for the impending release.
- 3. `git commit -am "Prepare for release X.Y.Z."` (where X.Y.Z is the new version)
- 4. `./gradlew clean uploadArchives`.
- 5. Visit [Sonatype Nexus](https://oss.sonatype.org/) and promote the artifact.
- 6. `git tag -a X.Y.X -m "Version X.Y.Z"` (where X.Y.Z is the new version)
- 7. Update the `gradle.properties` to the next SNAPSHOT version.
- 8. `git commit -am "Prepare next development version."`
- 9. `git push && git push --tags`
-
-If step 5 fails, drop the Sonatype repo, fix the problem, commit, and start again at step 4.
-
-
-Prerequisites
 -------------
 
-In `~/.gradle/gradle.properties`, set the following:
+The upload isn't idempotent, so if you're uploading multiple artifacts and it fails partway,
+you'll need to invoke the uploadArchives command for each remaining artifact.
 
- * `SONATYPE_NEXUS_USERNAME` - Sonatype username for releasing to `com.squareup`.
- * `SONATYPE_NEXUS_PASSWORD` - Sonatype password for releasing to `com.squareup`.
- * `signing.keyId` - The public key ID (The last 8 symbols of the keyId. You can use `gpg -K` to get it).
- * `signing.password` - Passphrase for private key
- * `signing.secretKeyRingFile` - Secret key ring file containing your private key. May need to export this with `gpg --keyring secring.gpg --export-secret-keys > ~/.gnupg/secring.gpg`
- 
+Release the base `misk/misk` subproject with command below from the main `cash/misk` directory.
+
+  ```
+  $ ./gradlew misk:uploadArchives -Pinternal
+
+  ```
+
+Release a specific misk subproject with `./gradlew { misk-subproject }:uploadArchives -Pinternal`. Example for `misk-aws` below.
+
+  ```
+  $ ./gradlew misk-aws:uploadArchives -Pinternal
+
+  ```
+
+Release all misk subprojects with command below from the main `cash/misk` directory.
+
+  ```
+  $ ./gradlew uploadArchives -Pinternal
+  ```
+
+If base `misk/misk` subproject or other artifacts have already been published, any of the above commands will fail. You will then need to manually `uploadArchives` for all subprojects.
+Note: the below command may not be up to date with all of the current Misk subprojects.
+
+  ```
+  $ ./gradlew misk:uploadArchives -Pinternal && \
+      ./gradlew misk-aws:uploadArchives -Pinternal && \
+      ./gradlew misk-eventrouter:uploadArchives -Pinternal && \
+      ./gradlew misk-events:uploadArchives -Pinternal && \
+      ./gradlew misk-gcp:uploadArchives -Pinternal && \
+      ./gradlew misk-gcp-testing:uploadArchives -Pinternal && \
+      ./gradlew misk-grpc-tests:uploadArchives -Pinternal && \
+      ./gradlew misk-hibernate:uploadArchives -Pinternal && \
+      ./gradlew misk-hibernate-testing:uploadArchives -Pinternal && \
+      ./gradlew misk-jaeger:uploadArchives -Pinternal && \
+      ./gradlew misk-prometheus:uploadArchives -Pinternal && \
+      ./gradlew misk-testing:uploadArchives -Pinternal && \
+      ./gradlew misk-zipkin:uploadArchives -Pinternal
+  ```
