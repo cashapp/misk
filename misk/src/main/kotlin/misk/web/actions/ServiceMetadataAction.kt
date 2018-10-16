@@ -34,10 +34,11 @@ class ServiceMetadataAction @Inject constructor(
  */
 @Singleton
 class OptionalBinder @Inject constructor(
-  @AppName val appName: String
+  @AppName val appName: String,
+  val environment: Environment = Environment.fromEnvironmentVariable()
 ) {
   @com.google.inject.Inject(optional = true)
-  var serviceMetadata: ServiceMetadata = ServiceMetadata(appName, Environment.fromEnvironmentVariable(), "/_admin/")
+  var serviceMetadata: ServiceMetadata = ServiceMetadata(appName, environment, "/_admin/")
 }
 
 data class ServiceMetadata(
