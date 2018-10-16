@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# usage: ./build-tag-push.sh
+# usage: ./build-tag-push.sh <image name> <tag>
 
 org="squareup/"
 name=${1%/}

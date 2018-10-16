@@ -4,9 +4,9 @@
   "main": "src/index.ts",
   "scripts": {
     "build": "cross-env NODE_ENV=production webpack",
-    "clean": "rm -rf lib node_modules",
-    "gradle": "yarn reinstall && yarn build",
-    "reinstall": "yarn clean && yarn install",
+    "clean": "rm -rf lib",
+    "ci-build": "yarn install && yarn clean && yarn build",
+    "reinstall": "rm -rf node_modules && yarn install",
     "start": "cross-env NODE_ENV=development webpack-dev-server",
     "test": "jest --coverage"
   },

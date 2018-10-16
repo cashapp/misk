@@ -24,8 +24,8 @@ abstract class WebTab(
 class DashboardTab(
   slug: String,
   url_path_prefix: String,
-  roles: Set<String> = setOf(),
-  services: Set<String> = setOf(),
   val name: String,
-  val category: String = "Container Admin"
+  val category: String = "Container Admin",
+  roles: Set<String> = setOf(),
+  services: Set<String> = setOf()
 ) : WebTab(slug = slug, url_path_prefix = url_path_prefix, roles = roles, services = services)

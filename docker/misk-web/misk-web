@@ -1,0 +1,127 @@
+#!/bin/sh
+
+function usage {
+  cat << EOF
+  Usage :: misk-web <opts>
+
+  Runs command on all @misk/ packages and tabs
+
+  -h    Usage
+
+  -a    'build' all, clean install and build tab
+
+  -b    'build' *if directory hash is different* clean install and build tab
+
+  -c    'clean' all build folders and caches
+
+  -d    'start' webpack-dev-server on first found tab
+        note: only run when docker container is mounted with a single tab
+
+  -i    'install' all dependencies
+
+  -o    compute a md5 hash over the current directory and stores in .hash file
+
+  -m    compute a md5 hash over the current directory and stores in .hash file, creates .hashdiff file if there is an existing hash
+        exclude patterns: cachedUrls, lib, node_modules, .hash
+
+  -n    remove yarn.lock and node_modules
+
+  -r    'reinstall' all node_modules dependencies
+
+  -w    overide location for web mount point
+        default: '/web'
+
+  -x    run next option on all tabs *if directory hash is different*
+
+  -z    run <optarg> command
+
+
+  Must run script in the following directory structure
+  For Docker container, mount localpath:...web/ -> /web/
+
+  /web
+    misk-build.sh
+    tabs/
+      tab1/
+        package.json
+      tab2/
+        package.json
+      tab3/
+        package.json
+      ...
+EOF
+  exit 0
+}
+
+LABEL=""
+CMD=""
+WEB="/web"
+HD="false"
+
+function hashDir {
+  tar --exclude="cachedUrls" --exclude="lib" --exclude="node_modules" --exclude=".DS_Store" --exclude=".hash" --exclude="yarn.lock" -cf - . | md5sum 2>&1
+}
+
+function hashDiff {
+  newHash=$(hashDir | sed 's/[[:space:]]//g')
+  if [ -f .hash ]; then
+    oldHash=$(sed 's/[[:space:]]//g' < .hash)
+    if [ "$oldHash" = "$newHash" ]; then
+      echo "${oldHash} ${newHash} false"
+    else
+      echo "${oldHash} ${newHash} true"
+    fi
+
+  else 
+    echo "${newHash} true"
+  fi
+}
+
+function runCmd {
+  echo "[RUNCMD]: ${WEB}/*/* $LABEL HD: $HD CMD: $CMD"
+  for dir in ${WEB}/*/* ; do
+    dir=${dir%*/}
+    if [ -d $dir ]; then
+      cd $dir
+      if [ "$HD" = "true" ]; then
+        diffResult=$(hashDiff)
+        echo "[HASH DIFF] $dir $diffResult"
+        # Run command if hashdiff is different
+        echo "$LABEL $dir" && echo "$diffResult" | grep -Fq "true" && $CMD
+        # Run command anyways if there is no lib directory
+        [ ! -d $dir/lib ] && echo "$LABEL $dir" && $CMD
+      else
+        # Run command if no hashdiff check required
+        echo "$LABEL $dir" && $CMD
+      fi
+      # Update hash after every command
+      hashDir | tee .hash
+    fi
+  done
+}
+
+function reset {
+  LABEL=""
+  CMD=""
+  HD="false"
+}
+
+while getopts "h?abcdiomnrwxz:" opt; do
+  case "$opt" in
+    h|\?)   usage && exit 0   ;;
+    a)      LABEL="[BUILD ALL]" && CMD='yarn ci-build' && runCmd && reset   ;;
+    b)      LABEL="[BUILD]" && HD="true" && CMD='yarn ci-build' && runCmd && reset   ;;
+    c)      LABEL="[CLEAN]" && CMD='yarn clean' && runCmd && reset    ;;
+    d)      LABEL="[DEV]" && CMD='yarn start' && runCmd && reset   ;;
+    i)      LABEL="[INSTALL]" && CMD='yarn install' && runCmd && reset    ;;
+    o)      LABEL="[MD5 HASH]" && CMD='hashDir | tee .hash' && runCmd && reset   ;;
+    m)      LABEL="[MD5 HASHDIFF]" && CMD='hashDiff' && runCmd && reset   ;;
+    n)      LABEL="[RM NODE_MODULES]" && CMD='rm yarn.lock && rm -rf node_modules' && runCmd && reset   ;;
+    r)      LABEL="[REINSTALL]" && CMD='yarn reinstall' && runCmd && reset    ;;
+    w)      LABEL="[ALT WEB LOCATION]" && WEB="${OPTARG}" && reset    ;;
+    x)      LABEL="[HD=\"true\"]" && HD="true"    ;;
+    z)      LABEL="[CMD]" && CMD="${OPTARG}" && runCmd && reset   ;;
+  esac
+done
+
+exit 0
