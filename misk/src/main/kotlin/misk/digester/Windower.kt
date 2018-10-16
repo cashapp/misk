@@ -3,7 +3,7 @@ package misk.digester
 import java.util.Calendar
 
 /** Window represents a time range */
-class Window (private val start: Calendar, private val end: Calendar) {
+class Window (val start: Calendar, val end: Calendar) {
 
   /** Returns true if the given time t falls within the window's Start <= t < End. */
   fun contains(t: Calendar): Boolean {
