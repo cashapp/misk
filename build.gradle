@@ -6,6 +6,9 @@ apply from: new File("./dependencies.gradle")
 subprojects {
   buildscript {
     repositories {
+      maven {
+        url "https://maven.global.square/artifactory/square-public"
+      }
       mavenCentral()
       jcenter()
     }
@@ -18,6 +21,9 @@ subprojects {
     }
   }
   repositories {
+    maven {
+      url "https://maven.global.square/artifactory/square-public"
+    }
     mavenCentral()
     jcenter()
   }
