@@ -7,6 +7,7 @@ import misk.MiskCaller
 import misk.exceptions.UnauthenticatedException
 import misk.exceptions.UnauthorizedException
 import misk.scope.ActionScoped
+import misk.web.metadata.AdminDashboardAccess
 import javax.inject.Inject
 import kotlin.reflect.KClass
 import kotlin.reflect.full.findAnnotation
@@ -65,6 +66,7 @@ internal class AccessInterceptor private constructor(
       val requiredAnnotations = mutableListOf<KClass<out Annotation>>()
       requiredAnnotations += Authenticated::class
       requiredAnnotations += Unauthenticated::class
+      requiredAnnotations += AdminDashboardAccess::class
       requiredAnnotations += accessAnnotations.map { it.annotation }
       throw IllegalStateException(
           "action ${action.name} must have one of the following annotations: $requiredAnnotations")
