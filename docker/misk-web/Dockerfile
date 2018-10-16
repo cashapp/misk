@@ -15,5 +15,7 @@ RUN yarn add \
   && rm -rf /tmp/web/node_modules \
   && yarn global add cross-env webpack webpack-cli webpack-dev-server
 
+COPY misk-web /bin/
+WORKDIR /web
 ENTRYPOINT ["/sbin/tini", "--"]
 CMD tail -f /dev/null

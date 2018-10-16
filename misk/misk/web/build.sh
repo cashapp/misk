@@ -4,5 +4,5 @@
 
 for dir in "$(pwd)"/*/*; do
     dir=${dir%*/}
-    [ -d "$dir" ] && echo "[BUILD] $dir" && sh -c "cd $dir; yarn gradle"
+    [ -d "$dir" ] && echo "[BUILD] $dir" && sh -c "cd $dir; yarn ci-build"
 done

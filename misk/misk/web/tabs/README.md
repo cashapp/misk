@@ -115,6 +115,8 @@ Tab builds are kicked off by Gradle but done within a Docker container for porta
 
 In your service's project `build.gradle` file you will need to add the following to configure the Docker plugin, start the container, and let Gradle spin off a build if there is a change in your tab code. Adjust the template below to fit your service's file structure and to use the most up to date [Docker image version](https://hub.docker.com/r/squareup/).
 
+Copy the latest `web` task from `misk/misk/build.gradle` into `{ latest web task goes here }` in the template below.
+
 ```Gradle
   import groovy.json.JsonSlurper
 
@@ -133,40 +135,14 @@ In your service's project `build.gradle` file you will need to add the following
   }
   
   ...
-  ext.generateDockerContainerName = { service, project, task ->
-    return "${new Date().format("YMD-HMS")}-${service}-${project}-${task}"
-  }
 
-  ext.getPackageJsonPort = { path ->
-    def packageFile= new File("${project.projectDir}/web/${path}/package.json")
-    def packageJson = new JsonSlurper().parseText(packageFile.text)
-    return packageJson.miskTab.port
-  }
+  { latest web task goes here }
 
-  task compileWeb(type: Exec) {
-    workingDir 'web'
-    commandLine 'sh', '-c', "docker run --rm --name ${generateDockerContainerName('misk', 'misk', 'compileWeb')} -v ${project.projectDir}/web:/web squareup/misk-node-build:0.0.1"
-  }
-
-  task developWeb(type: Exec) {
-    workingDir 'web'
-    if (project.hasProperty("devtabs")) {
-      project.devtabs.split(',').each {
-        def devContainerName = "${generateDockerContainerName('misk', 'misk', "develop-${it.split('/').join('-')}")}"
-        def command = "docker run -d --rm --name ${devContainerName} -v ${project.projectDir}/web/${it}:/web/${it} -p ${getPackageJsonPort(it)}:${getPackageJsonPort(it)} squareup/misk-node-develop:0.0.1"
-        println command
-        println "See dev server logs at \$ docker logs -f ${devContainerName}"
-        println "Manually shut down dev server with \$ docker kill ${devContainerName}"
-        commandLine 'sh', '-c', command
-      }
-    }
-  }
-
-  jar.dependsOn compileWeb
+  jar.dependsOn web
 
 ```
 
-You'll notice the build runs the command `yarn gradle`. By default in the Example tab you used as a starter, `yarn gradle` expands to `yarn install && yarn build` so that even on CI (continuous integration) systems where `node_modules` have not been installed yet, the build still succeeds.
+You'll notice the build runs the command `yarn ci-build`. By default in the Example tab you used as a starter, `yarn ci-build` expands to `yarn install && yarn build` so that even on CI (continuous integration) systems where `node_modules` have not been installed yet, the build still succeeds.
 
 To confirm that your tab is shipping in the jar, you can run the following commands to build the jar, find it in your filesystem, browse the included files, and confirm that related compiled JS code is in your jar.
 
@@ -184,7 +160,7 @@ Loading Data into your Misk Tab
 
 Building your Tab
 ---
-1. Kick off an initial build with Gradle `./gradlew clean jar`.
+1. Kick off an initial build with Gradle `$ ./gradlew clean jar` or `$ ./gradlew web`.
 1. Start your primary Misk service in IntelliJ, or use `UrlShortenerService` for testing.
 1. Open up [`http://localhost:8080/_admin/`](http://localhost:8080/_admin/) in the browser.
 
@@ -194,9 +170,9 @@ Developing your Tab
 1. Run the following commands to spin up a Webpack-Dev-Server in Docker instance to serve live edits to your service.
 
   ```Bash
-  $ ./gradlew {service}:developWeb -Pdevtabs='tabs/trexfoodlog/, tabs/healtcheck/'
+  $ ./gradlew web -Pcmd='-d' -Ptabs='tabs/trexfoodlog, tabs/healthcheck'
   ```
-1. This will start separate docker containers with webpack-dev-servers for each of the tabs you pass in to `devtabs`.
+1. This will start separate docker containers with webpack-dev-servers for each of the tabs you pass in to `tabs`.
 1. Your service will now automatically route traffic (when in development mode) to the dev servers and you should see any changes you make appearing live.
 
 Other Development Notes
