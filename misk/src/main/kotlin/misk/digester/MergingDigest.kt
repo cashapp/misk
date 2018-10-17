@@ -11,7 +11,7 @@ import kotlin.math.asin
  * Direct port of Veneur digest created by Stripe
  * https://github.com/stripe/veneur/blob/master/tdigest/merging_digest.go
  */
-class MergingDigest {
+open class MergingDigest {
 
   // amount of compression to data
   private val compression: Double

@@ -2,19 +2,18 @@ package misk.digester
 
 import java.time.Clock
 import java.time.ZonedDateTime
-import java.util.Collections
 
 /** WindowDigest holds a t-digest whose data points are scoped to a specific time window. */
 data class WindowDigest(
   var window: Window,
-  var Digest: VeneurDigest
+  var Digest: TDigest
 )
 
 /** Snapshot is the state of a SlidingWindowDigest at a point in time. */
 data class Snapshot(
-  private var quantiles: DoubleArray,  // Values of specific quantiles.
-  private var count: Long,             // Count of observations.
-  private var sum: Double              // Sum of observations.
+  var quantileVals: DoubleArray,  // Values of specific quantiles.
+  var count: Long,                // Count of observations.
+  var sum: Double                 // Sum of observations.
 )
 
 /**
@@ -34,10 +33,11 @@ data class Snapshot(
  * NewSlidingWindowDigest(time.Now, NewDefaultVeneurDigest, NewWindower(10, 2))
  */
 class SlidingWindowDigest constructor(
-  private val utcNowClock: Clock,
-  private val windower: Windower,
-  private var windows: MutableList<WindowDigest>
+  var utcNowClock: Clock,
+  val windower: Windower
 ) {
+
+  internal var windows: MutableList<WindowDigest> = mutableListOf()
 
   /**
    * Adds the given value to all currently open t-openDigests.
@@ -63,7 +63,7 @@ class SlidingWindowDigest constructor(
     val now = ZonedDateTime.now(utcNowClock)
     for (i in windows.count() - 1 downTo 0) {
       if (!now.isBefore(windows[i].window.end)) {
-        return windows[i].Digest.mergingDigest().quantile(quantile)
+        return windows[i].Digest.quantile(quantile)
       }
     }
 
@@ -85,8 +85,8 @@ class SlidingWindowDigest constructor(
         val quantileVals = DoubleArray(quantiles.count()) { Double.NaN }
         val digest = windows[i].Digest
 
-        quantiles.forEachIndexed { i, quantile ->
-          quantileVals[i] = digest.mergingDigest().quantile(quantile)
+        quantiles.forEachIndexed { ii, quantile ->
+          quantileVals[ii] = digest.quantile(quantile)
         }
 
         return Snapshot(
@@ -145,7 +145,7 @@ class SlidingWindowDigest constructor(
       if (!found) {
         val newDigest = WindowDigest(
             wd.window,
-            VeneurDigest() //should this be some kind of custom new tDigest function?
+            FakeDigest() //should this be some kind of custom new tDigest function?
         )
         windows.add(newDigest)
         wd.Digest.mergeInto(newDigest.Digest)
@@ -194,7 +194,7 @@ class SlidingWindowDigest constructor(
     for (newWindow in localWindows) {
       var found = false
       for (existingWindow in windows) {
-        if (existingWindow.equals(newWindow)) {
+        if (existingWindow.window.equals(newWindow)) {
           found = true
           digests.add(existingWindow)
           break
@@ -204,7 +204,7 @@ class SlidingWindowDigest constructor(
       if (!found) {
         val newDigest = WindowDigest(
             newWindow,
-            VeneurDigest() //should this be some kind of custom new tDigest function?
+            FakeDigest() //should this be some kind of custom new tDigest function? This will need to become a TDigest through guice to support Veneur Digest?
         )
         windows.add(newDigest)
         digests.add(newDigest)

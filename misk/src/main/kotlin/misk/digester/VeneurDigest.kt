@@ -7,7 +7,7 @@ import okio.ByteString.Companion.toByteString
 /**
  * Wraps an adapted t-digest implementation from Stripe's Veneur project
  */
-class VeneurDigest {
+class VeneurDigest: TDigest {
 
   private val mergingDigest: MergingDigest
   private var count: Long = 0
@@ -31,7 +31,7 @@ class VeneurDigest {
   }
 
   /** Adds a new observation to the t-digest */
-  fun add(value: Double) {
+  override fun add(value: Double) {
     mergingDigest.add(value, 1.0)
     count += 1
     sum += value
@@ -43,27 +43,34 @@ class VeneurDigest {
   }
 
   /** Returns the count of the number of observations recorded within the t-digest */
-  fun count(): Long {
+  override fun count(): Long {
     return count
   }
 
   /** Returns the sum of all values added into the digest, or NaN if no values have been added */
-  fun sum(): Double {
+  override fun sum(): Double {
     if (count > 0) {
       return sum
     }
     return Double.NaN
   }
 
+  override fun quantile(quantile: Double): Double {
+    return mergingDigest.quantile(quantile)
+  }
+
   /** Merges this t-digest into another t-digest */
-  fun mergeInto(other: VeneurDigest) {
-    other.mergingDigest.mergeFrom(mergingDigest)
+  override fun mergeInto(other: TDigest) {
+    require (other is VeneurDigest) {
+      "VeneurDigest type required as mergeInto argument"
+    }
+    (other as VeneurDigest).mergingDigest.mergeFrom(mergingDigest)
     other.count += count
     other.sum += sum
   }
 
   /** Returns a representation fo the t-digest that can be later be reconstituted into an instance of the same type */
-  fun proto(): DigestData {
+  override fun proto(): DigestData {
     val encode: ByteArray = MergingDigestData.ADAPTER.encode(mergingDigest.data())
     return DigestData(count, sum, encode.toByteString())
   }
