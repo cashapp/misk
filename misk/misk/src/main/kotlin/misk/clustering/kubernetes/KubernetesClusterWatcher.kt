@@ -54,7 +54,7 @@ internal class KubernetesClusterWatcher @Inject internal constructor(
 
   private fun watchCluster() {
     val client = Config.defaultClient()
-    client.httpClient.setReadTimeout(config.kubernetes_read_timeout, TimeUnit.SECONDS)
+    client.httpClient.setReadTimeout(config.kubernetes_watch_read_timeout, TimeUnit.SECONDS)
     client.httpClient.setConnectTimeout(config.kubernetes_connect_timeout, TimeUnit.SECONDS)
 
     val api = CoreV1Api(client)
