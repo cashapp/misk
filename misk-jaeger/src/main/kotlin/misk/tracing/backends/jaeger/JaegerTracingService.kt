@@ -10,7 +10,13 @@ import javax.inject.Singleton
 internal class JaegerTracingService @Inject internal constructor(
   private val tracer: Tracer
 ) : AbstractIdleService() {
-  override fun startUp() = GlobalTracer.register(tracer)
+  override fun startUp() {
+    // In case startUp is called multiple times, ensure tracer is only registered once
+    if (!GlobalTracer.isRegistered()) {
+      GlobalTracer.register(tracer)
+    }
+  }
+
   override fun shutDown() {
   }
 }
