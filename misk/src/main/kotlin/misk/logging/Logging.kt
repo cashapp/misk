@@ -5,7 +5,7 @@ import mu.KotlinLogging
 import org.slf4j.MDC
 import org.slf4j.event.Level
 
-typealias Tag = Pair<String, Any?>
+typealias Tag = Pair<String, String>
 
 inline fun <reified T> getLogger(): KLogger {
   return KotlinLogging.logger(T::class.qualifiedName!!)
@@ -63,7 +63,7 @@ private fun withTags(vararg tags: Tag, f: () -> Unit) {
   // Establish MDC, saving prior MDC
   val priorMDC = tags.map { (k, v) ->
     val priorValue = MDC.get(k)
-    MDC.put(k, v.toString())
+    MDC.put(k, v)
     k to priorValue
   }
 
