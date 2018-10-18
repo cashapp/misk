@@ -7,7 +7,7 @@ import okio.ByteString.Companion.toByteString
 /**
  * Wraps an adapted t-digest implementation from Stripe's Veneur project
  */
-class VeneurDigest {
+class VeneurDigest: TDigest<VeneurDigest> {
 
   private val mergingDigest: MergingDigest
   private var count: Long = 0
@@ -32,10 +32,18 @@ class VeneurDigest {
   }
 
   /** Adds a new observation to the t-digest */
-  fun add(value: Double) {
+  override fun add(value: Double) {
     mergingDigest.add(value, 1.0)
     count += 1
     sum += value
+  }
+
+  /**
+   * Returns a value such that the fraction of values in td below that value is
+   * approximately equal to quantile. Returns NaN if the digest is empty.
+   */
+  override fun quantile(quantile: Double): Double {
+    return mergingDigest.quantile(quantile)
   }
 
   /** Returns the mergingDigest instance */
@@ -44,12 +52,12 @@ class VeneurDigest {
   }
 
   /** Returns the count of the number of observations recorded within the t-digest */
-  fun count(): Long {
+  override fun count(): Long {
     return count
   }
 
   /** Returns the sum of all values added into the digest, or NaN if no values have been added */
-  fun sum(): Double {
+  override fun sum(): Double {
     if (count > 0) {
       return sum
     }
@@ -57,14 +65,14 @@ class VeneurDigest {
   }
 
   /** Merges this t-digest into another t-digest */
-  fun mergeInto(other: VeneurDigest) {
+  override fun mergeInto(other: VeneurDigest) {
     other.mergingDigest.mergeFrom(mergingDigest)
     other.count += count
     other.sum += sum
   }
 
   /** Returns a representation fo the t-digest that can be later be reconstituted into an instance of the same type */
-  fun proto(): DigestData {
+  override fun proto(): DigestData {
     val encode: ByteArray = MergingDigestData.ADAPTER.encode(mergingDigest.data())
     return DigestData(count, sum, encode.toByteString())
   }
