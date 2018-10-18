@@ -180,7 +180,7 @@ class SlidingWindowDigest constructor(
    * Returns all WindowDigests that are currently open, creating new windows if necessary.
    * Older openDigests that ended more than 1 minute earlier are discarded if gc is true.
    */
-  private fun openDigests(gc: Boolean): List<WindowDigest> {
+  fun openDigests(gc: Boolean): List<WindowDigest> {
     val now = ZonedDateTime.now(utcNowClock)
 
     if (gc) {
