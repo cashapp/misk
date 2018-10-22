@@ -1,6 +1,7 @@
 package misk.prometheus
 
 import io.prometheus.client.CollectorRegistry
+import io.prometheus.client.Summary
 import misk.metrics.HistogramRegistry
 import javax.inject.Inject
 
@@ -11,11 +12,12 @@ class PrometheusHistogramRegistry : HistogramRegistry {
     name: String,
     help: String,
     labelNames: List<String>,
-    buckets: DoubleArray?
+    quantiles: Map<Double, Double>
   ): PrometheusHistogram {
-    val builder =
-        io.prometheus.client.Histogram.build(name, help).labelNames(*labelNames.toTypedArray())
-    if (buckets != null) builder.buckets(*buckets)
+    val builder = Summary.build(name, help).labelNames(*labelNames.toTypedArray())
+    quantiles.forEach { quantile ->
+      builder.quantile(quantile.key, quantile.value)
+    }
     return PrometheusHistogram(builder.register(collectorRegistry))
   }
 }

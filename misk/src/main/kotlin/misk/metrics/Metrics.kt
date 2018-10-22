@@ -16,6 +16,8 @@ import javax.inject.Inject
 class Metrics @Inject internal constructor(val registry: CollectorRegistry) {
   @Inject private lateinit var histogramRegistry: HistogramRegistry
 
+  private val defaultQuantiles = mapOf(0.5 to 0.05, 0.75 to 0.02, 0.95 to 0.01, 0.99 to 0.001, 0.999 to 0.0001)
+
   init {
     registry.register(StandardExports())
     registry.register(MemoryPoolsExports())
@@ -34,17 +36,13 @@ class Metrics @Inject internal constructor(val registry: CollectorRegistry) {
     return Gauge.build(name, help).labelNames(*labelNames.toTypedArray()).register(registry)
   }
 
-  fun summary(name: String, help: String = "", labelNames: List<String> = listOf()): Summary {
-    return Summary.build(name, help).labelNames(*labelNames.toTypedArray()).register(registry)
-  }
-
   fun histogram(
     name: String,
     help: String = "",
-    labelNames: List<String> = listOf(),
-    buckets: DoubleArray? = null
+    labelNames: List<String>,
+    quantiles: Map<Double, Double> = defaultQuantiles
   ): Histogram {
-    return histogramRegistry.newHistogram(name, help, labelNames, buckets)
+    return histogramRegistry.newHistogram(name, help, labelNames, quantiles)
   }
 
   companion object {

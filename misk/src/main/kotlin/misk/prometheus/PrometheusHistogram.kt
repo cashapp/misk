@@ -3,7 +3,7 @@ package misk.prometheus
 import misk.metrics.Histogram
 
 class PrometheusHistogram constructor(
-  val histogram: io.prometheus.client.Histogram
+  val histogram: io.prometheus.client.Summary
 ) : Histogram {
 
   override fun record(duration: Double, vararg labelValues: String) {
@@ -11,6 +11,6 @@ class PrometheusHistogram constructor(
   }
 
   override fun count(vararg labelValues: String): Int {
-    return histogram.labels(*labelValues).get().buckets.max()?.toInt() ?: 0
+    return histogram.labels(*labelValues).get().count.toInt()
   }
 }
