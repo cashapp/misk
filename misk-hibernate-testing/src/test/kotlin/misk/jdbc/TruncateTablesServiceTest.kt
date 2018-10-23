@@ -31,8 +31,12 @@ internal class TruncateTablesServiceTest {
   @Inject @TestDatasource lateinit var transacter: Transacter
 
   // Just a dummy
-  val vitessScatterDetector: VitessScatterDetector
-    get() = VitessScatterDetector(OkHttpClient(), Moshi.Builder().build(), config)
+  val vitessScatterDetector: VitessScaleSafetyChecks
+    get() = VitessScaleSafetyChecks(
+        OkHttpClient(),
+        Moshi.Builder().build(),
+        config,
+        StartVitessService(config))
 
   @BeforeEach
   internal fun setUp() {

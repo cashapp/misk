@@ -29,7 +29,7 @@ internal class TruncateTablesService(
   private val qualifier: KClass<out Annotation>,
   private val config: DataSourceConfig,
   private val transacterProvider: Provider<Transacter>,
-  private val vitessScatterDetector: VitessScatterDetector,
+  private val checks: VitessScaleSafetyChecks,
   private val startUpStatements: List<String> = listOf(),
   private val shutDownStatements: List<String> = listOf()
 ) : AbstractIdleService(), DependentService {
@@ -39,14 +39,14 @@ internal class TruncateTablesService(
   override val producedKeys = setOf<Key<*>>()
 
   override fun startUp() {
-    vitessScatterDetector.disable {
+    checks.disable {
       truncateUserTables()
       executeStatements(startUpStatements, "startup")
     }
   }
 
   override fun shutDown() {
-    vitessScatterDetector.disable {
+    checks.disable {
       executeStatements(shutDownStatements, "shutdown")
     }
   }
