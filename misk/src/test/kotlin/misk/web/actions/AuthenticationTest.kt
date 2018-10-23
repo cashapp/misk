@@ -5,10 +5,10 @@ import misk.client.HttpClientEndpointConfig
 import misk.client.HttpClientFactory
 import misk.inject.KAbstractModule
 import misk.scope.ActionScoped
-import misk.security.authz.AccessAnnotation
+import misk.security.authz.AccessAnnotationEntry
 import misk.security.authz.AccessControlModule
-import misk.security.authz.MiskCallerAuthenticator
 import misk.security.authz.FakeCallerAuthenticator
+import misk.security.authz.MiskCallerAuthenticator
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.web.Get
@@ -102,10 +102,10 @@ class AuthenticationTest {
       multibind<WebActionEntry>().toInstance(WebActionEntry<CustomServiceAccessAction>())
       multibind<WebActionEntry>().toInstance(WebActionEntry<CustomRoleAccessAction>())
 
-      multibind<AccessAnnotation>().toInstance(
-          AccessAnnotation<CustomServiceAccess>(services = listOf("payments")))
-      multibind<AccessAnnotation>().toInstance(
-          AccessAnnotation<CustomRoleAccess>(roles = listOf("admin")))
+      multibind<AccessAnnotationEntry>().toInstance(
+          AccessAnnotationEntry<CustomServiceAccess>(services = listOf("payments")))
+      multibind<AccessAnnotationEntry>().toInstance(
+          AccessAnnotationEntry<CustomRoleAccess>(roles = listOf("admin")))
       multibind<MiskCallerAuthenticator>().to<FakeCallerAuthenticator>()
     }
   }

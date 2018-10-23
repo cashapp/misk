@@ -9,6 +9,6 @@ import misk.scope.ActionScopedProviderModule
 class AccessControlModule : ActionScopedProviderModule() {
   override fun configureProviders() {
     multibind<ApplicationInterceptor.Factory>().to<AccessInterceptor.Factory>()
-    newMultibinder<AccessAnnotation>()
+    newMultibinder<AccessAnnotationEntry>()
   }
 }
