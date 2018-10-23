@@ -14,7 +14,7 @@ import javax.persistence.PersistenceException
  * differentiate between these types of reads for the detector but if you do need this it can be
  * implemented.
  */
-class WideScatterException(
+class FullScatterException(
   message: String? = null,
   cause: Throwable? = null
 ) : PersistenceException(message, cause)
