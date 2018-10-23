@@ -32,7 +32,7 @@ Directory Structure
           package.json
 ```
 
-Wiring up a New Tab
+1. Wiring up a New Tab
 ---
 - Copy the `tabs/example` tab in the [misk/misk/web repo](https://github.com/square/misk/tree/master/misk/web/tabs/example) to your service's `web/tabs` directory.
 - Open `package.json` and update the following fields using your new tab name, slug, port...etc.
@@ -62,6 +62,28 @@ Wiring up a New Tab
 
 - Open `src/index.html` and update the line `<div id="example">` to `<div id="trexfoodlog">`.
 - Open `src/index.tsx ` and update the line `const tabSlug = "example"` to `const tabSlug = "trexfoodlog"`.
+- Open `src/routes/index.tsx` and update the routes to the tab slug:
+
+  ```JSX
+  <Route path="/_admin/trexfoodlog/" component={TabContainer}/>
+  <Route path="/_tab/trexfoodlog/" component={TabContainer}/>
+  ```
+
+2. Components: The User Interface
+---
+- The UI for your tab lives in `src/components/`
+
+3. Sagas: Loading Data into your Misk Tab
+---
+- All data retrieval and processing is done within a Ducks module in `src/ducks`.
+- `src/ducks/example.ts` contains detailed documentation on the purpose of a Ducks module and is used throughout the Example Tab to show example functionality.
+- Best practice is to create a new Ducks module and copy necessary elements and wiring up techniques in from the `example` Ducks module. You can delete the `example.ts` file when it is no longer necessary.
+
+4. TabContainer: Connect Ducks to Components
+---
+-
+
+
 
 Configuring the Misk Service
 ---
@@ -152,19 +174,13 @@ To confirm that your tab is shipping in the jar, you can run the following comma
   $ jar -tf misk/build/libs/{your jar location found above}.jar | grep _tab/trexfoodlog/
 ```
 
-Loading Data into your Misk Tab
----
-- All data retrieval and processing is done within a Ducks module in `src/ducks`.
-- `src/ducks/example.ts` contains detailed documentation on the purpose of a Ducks module and is used throughout the Example Tab to show example functionality.
-- Best practice is to create a new Ducks module and copy necessary elements and wiring up techniques in from the `example` Ducks module. You can delete the `example.ts` file when it is no longer necessary.
-
-Building your Tab
+Gradle: Building your Tab
 ---
 1. Kick off an initial build with Gradle `$ ./gradlew clean jar` or `$ ./gradlew web`.
 1. Start your primary Misk service in IntelliJ, or use `UrlShortenerService` for testing.
 1. Open up [`http://localhost:8080/_admin/`](http://localhost:8080/_admin/) in the browser.
 
-Developing your Tab
+Gradle: Developing your Tab
 ---
 1. Follow the steps above to build all local tabs and start your service.
 1. Run the following commands to spin up a Webpack-Dev-Server in Docker instance to serve live edits to your service.

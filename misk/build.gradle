@@ -96,7 +96,7 @@ task web(type: Exec) {
   // Running webpack-dev-servers for various tabs: ./gradlew web -Pcmd='-d' -Ptabs='tabs/config, tabs/example'
   // Build all tabs: ./gradlew web
   // See other misk-web options: ./gradlew web -Pcmd='-h'
-  
+
   def generateDockerContainerName = { service, project, task ->
     def slug = task.split('/').join('-').split('@').join('')
     return "${new Date().format("YMD-HMS")}-${service}-${project}${slug}"
@@ -111,7 +111,7 @@ task web(type: Exec) {
   def generateDockerRunCommand = { service, project, projectPath, path, cmd, daemon="-d", image = "squareup/misk-web:0.0.1" ->
     def containerName = "${generateDockerContainerName(service, project, path)}"
     def port = ""
-    if (path.startsWith("tabs")) {
+    if (path.startsWith("/tabs")) {
       port = "-p ${getPackageJsonPort(path)}:${getPackageJsonPort(path)}"
     }
 
