@@ -4,6 +4,7 @@ import misk.DependentService
 import misk.clustering.Cluster
 import misk.clustering.ClusterWatch
 import misk.clustering.DefaultCluster
+import misk.logging.getLogger
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
@@ -23,7 +24,7 @@ class FakeCluster internal constructor(
 ) : Cluster by delegate, DependentService by delegate {
 
   constructor(resourceMapper: ExplicitClusterResourceMapper) :
-      this(resourceMapper, DefaultCluster(Cluster.Member(SELF_NAME, SELF_IP)) { resourceMapper })
+      this(resourceMapper, DefaultCluster(self) { resourceMapper })
 
   constructor() : this(ExplicitClusterResourceMapper())
 
@@ -46,12 +47,17 @@ class FakeCluster internal constructor(
     // Single thread all changes to the cluster by waiting for each operation to complete
     val latch = CountDownLatch(1)
     f()
-    delegate.syncPoint { latch.countDown() }
+    delegate.syncPoint {
+      latch.countDown()
+    }
     check(latch.await(5, TimeUnit.SECONDS)) { "cluster change did not complete within 5 seconds " }
   }
 
   companion object {
     const val SELF_NAME = "fake-self-node"
     const val SELF_IP = "10.0.0.1"
+    @JvmStatic val self = Cluster.Member(name = SELF_NAME, ipAddress = SELF_IP)
+
+    private val log = getLogger<FakeCluster>()
   }
 }
