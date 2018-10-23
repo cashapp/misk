@@ -220,5 +220,5 @@ export default function ExampleReducer (state = initialState, action: IAction<st
  */
 export interface IExampleState {
   [key: string]: any
-  toJS: () => any
+  toJS?: () => any
 }
