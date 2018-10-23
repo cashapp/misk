@@ -2,8 +2,8 @@ import { OfflineComponent } from "@misk/components"
 import * as React from "react"
 import { connect } from "react-redux"
 import { TabComponent } from "../components"
-import { dispatchExample, IState } from "../ducks"
 import { IComponentProps } from "../components/TabComponent"
+import { dispatchExample, IState } from "../ducks"
 
 interface IContainerProps {
   example: IComponentProps
