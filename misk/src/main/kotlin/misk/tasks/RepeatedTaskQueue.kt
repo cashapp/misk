@@ -46,11 +46,14 @@ class RepeatedTaskQueue @VisibleForTesting internal constructor(
   private val running = AtomicBoolean(false)
 
   override fun startUp() {
+    if (!running.compareAndSet(false, true)) return
+
     log.info { "starting repeated task queue $name" }
-    running.set(true)
   }
 
-  override fun shutDown() {
+  override fun triggerShutdown() {
+    if (!running.compareAndSet(true, false)) return
+
     log.info { "stopping repeated task queue $name" }
 
     // Remove all currently scheduled tasks, and schedule an empty task to kick the background thread
