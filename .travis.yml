@@ -6,6 +6,7 @@ jdk:
 
 before_script:
   - docker pull vitess/base
+  - docker pull zookeeper:3.5.4-beta
 
 script:
   - ./gradlew test
