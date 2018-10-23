@@ -2,9 +2,10 @@ package misk.hibernate
 
 import misk.backoff.FlatBackoff
 import misk.backoff.retry
-import misk.jdbc.WideScatterException
 import misk.hibernate.annotation.keyspace
-import misk.jdbc.VitessScatterDetector
+import misk.jdbc.CowriteException
+import misk.jdbc.FullScatterException
+import misk.jdbc.VitessScaleSafetyChecks
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.junit.jupiter.api.Test
@@ -21,11 +22,11 @@ class ScaleSafetyTest {
   val module = MoviesTestModule()
 
   @Inject @Movies lateinit var transacter: Transacter
-  @Inject @Movies lateinit var crossShardQueryDetector: VitessScatterDetector
+  @Inject @Movies lateinit var checks: VitessScaleSafetyChecks
   @Inject lateinit var queryFactory: Query.Factory
 
   @Test
-  fun crossShardTransactionsAreDisabled() {
+  fun crossShardTransactions() {
     val jg = transacter.save(
         DbActor("Jeff Goldblum", LocalDate.of(1952, 10, 22)))
     val cf = transacter.save(
@@ -37,20 +38,23 @@ class ScaleSafetyTest {
       DbMovie("Star Wars", LocalDate.of(1977, 5, 25))
     }
 
-    // TODO transaction_mode=SINGLE doesn't work the way I expected it: it doesn't allow cross shard queries either, gotta figure this outCrossShardQueryDetectorTest
-//    assertThrows<CrossShardTransactionException> {
+    assertThrows<CowriteException> {
       transacter.transaction { session ->
-        session.save(DbCharacter("Ian Malcolm", session.load(jp), session.load(jg)))
-        session.save(DbCharacter("Leia Organa", session.load(sw), session.load(cf)))
+        val jpMovie = session.load(jp)
+        val jgActor = session.load(jg)
+        session.save(DbCharacter("Ian Malcolm", jpMovie, jgActor))
+        val swMovie = session.load(sw)
+        val cfActor = session.load(cf)
+        session.save(DbCharacter("Leia Organa", swMovie, cfActor))
       }
-//    }
-//    assertThrows<CrossShardTransactionException> {
+    }
+    assertThrows<CowriteException> {
       transacter.transaction { session ->
         val jpEntity = session.load(jp)
         jpEntity.release_date = LocalDate.now()
         val swEntity = session.load(sw)
         swEntity.release_date = LocalDate.now()
-//      }
+      }
     }
   }
 
@@ -67,28 +71,25 @@ class ScaleSafetyTest {
       DbMovie("Star Wars", LocalDate.of(1977, 5, 25))
     }
 
-    // TODO not implemented yet
-    // needs a Vitess function to see which keyspace IDs have been touched by a transaction or
-    // just a port of the EntityGroupListener from the Square monorepo
-//    assertThrows<CrossShardTransactionException> {
-    transacter.transaction { session ->
-      session.save(DbCharacter("Ian Malcolm", session.load(jp), session.load(jg)))
-      session.save(DbCharacter("Leia Organa", session.load(sw), session.load(cf)))
+    assertThrows<CowriteException> {
+      transacter.transaction { session ->
+        session.save(DbCharacter("Ian Malcolm", session.load(jp), session.load(jg)))
+        session.save(DbCharacter("Leia Organa", session.load(sw), session.load(cf)))
+      }
     }
-//    }
-//    assertThrows<CrossShardTransactionException> {
-    transacter.transaction { session ->
-      val jpEntity = session.load(jp)
-      jpEntity.release_date = LocalDate.now()
-      val swEntity = session.load(sw)
-      swEntity.release_date = LocalDate.now()
+    assertThrows<CowriteException> {
+      transacter.transaction { session ->
+        val jpEntity = session.load(jp)
+        jpEntity.release_date = LocalDate.now()
+        val swEntity = session.load(sw)
+        swEntity.release_date = LocalDate.now()
+      }
     }
-//    }
   }
 
   @Test
   fun crossShardQueriesAreDetected() {
-    assertThrows<WideScatterException> {
+    assertThrows<FullScatterException> {
       transacter.transaction { session ->
         queryFactory.newQuery<MovieQuery>()
             .releaseDateBefore(LocalDate.of(1977, 6, 15))
@@ -100,7 +101,7 @@ class ScaleSafetyTest {
   @Test
   fun crossShardQueriesDetectorCanBeDisabled() {
     transacter.transaction { session ->
-      crossShardQueryDetector.disable {
+      checks.disable {
         queryFactory.newQuery<MovieQuery>()
             .releaseDateBefore(LocalDate.of(1977, 6, 15))
             .list(session)
