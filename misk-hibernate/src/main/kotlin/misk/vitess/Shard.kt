@@ -1,10 +1,11 @@
-package misk.hibernate
+package misk.vitess
 
 import com.google.common.base.Strings
-import com.google.common.collect.Range
-import okio.ByteString
-
 import com.google.common.base.Suppliers
+import com.google.common.collect.Range
+import misk.hibernate.VitessHash
+import misk.hibernate.checkValidShardIdentifier
+import okio.ByteString
 import okio.ByteString.Companion.decodeHex
 
 data class Shard(val keyspace: Keyspace, val name: String) {

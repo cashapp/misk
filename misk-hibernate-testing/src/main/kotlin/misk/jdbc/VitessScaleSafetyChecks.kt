@@ -3,6 +3,10 @@ package misk.jdbc
 import com.squareup.moshi.Moshi
 import misk.moshi.adapter
 import misk.okio.split
+import misk.vitess.CowriteException
+import misk.vitess.FullScatterException
+import misk.vitess.UpdateStreamSource
+import misk.vitess.shards
 import mu.KotlinLogging
 import net.ttddyy.dsproxy.ExecutionInfo
 import net.ttddyy.dsproxy.QueryInfo
@@ -18,8 +22,11 @@ import okio.ByteString.Companion.encodeUtf8
 import java.io.EOFException
 import java.sql.Connection
 import java.util.Locale
+import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.locks.ReentrantLock
 import javax.inject.Singleton
 import javax.sql.DataSource
+import kotlin.concurrent.withLock
 
 internal data class Instruction(
   val Opcode: String,
@@ -163,7 +170,8 @@ class VitessScaleSafetyChecks(
   val okHttpClient: OkHttpClient,
   val moshi: Moshi,
   val config: DataSourceConfig,
-  val startVitessService: StartVitessService
+  val startVitessService: StartVitessService,
+  val updateStreamSource: UpdateStreamSource
 ) : DataSourceDecorator {
 
   private val fullScatterDetector = FullScatterDetector()
@@ -207,24 +215,75 @@ class VitessScaleSafetyChecks(
     }
   }
 
+  inner class UpdateListener() {
+    private val start = Once()
+    private val statements = arrayListOf<String>()
+    private val lock = ReentrantLock()
+    private val condition = lock.newCondition()
+
+    fun start() {
+      start.run {
+        val shards = startVitessService.cluster().openVtgateConnection().use { it.shards() }
+        shards.forEach { shard ->
+          updateStreamSource.streamUpdates(shard, null, null) { update ->
+            lock.withLock {
+              statements.addAll(update.statements)
+              condition.signalAll()
+            }
+          }
+        }
+      }
+    }
+
+    fun waitForStatementCountMoreThan(count: Int) {
+      while (true) {
+        lock.withLock {
+          if (statements.count() > count) {
+            return
+          }
+          condition.await()
+        }
+      }
+    }
+
+    fun lastStatement(): String {
+      return statements.last()
+    }
+  }
+
   inner class CowriteDetector : ExtendedQueryExectionListener() {
+    private val updateListener = UpdateListener()
     private val keyspaceIdsThisTransaction: ThreadLocal<LinkedHashSet<String>> =
         ThreadLocal.withInitial { LinkedHashSet<String>() }
+    private val updates: ThreadLocal<List<String>> =
+        ThreadLocal.withInitial { arrayListOf<String>() }
+    private val statementCountBefore: ThreadLocal<Int> =
+        ThreadLocal.withInitial { 0 }
 
     override fun beforeStartTransaction() {
-      // Connect before the query because connecting spits out a bunch of crap in the general_log
-      // that makes it harder for us to get to the thread id
-      connect()
+      if (disabled.get()) return
+
+      updateListener.start()
 
       check(keyspaceIdsThisTransaction.get().isEmpty()) {
         "Transaction state has not been cleaned up, beforeEndTransaction was never executed"
       }
     }
 
+    override fun beforeQuery(query: String) {
+      if (disabled.get()) return
+
+      statementCountBefore.set(statementCount())
+    }
+
     override fun afterQuery(query: String) {
+      if (disabled.get()) return
       if (!isDml(query)) return
 
-      val queryInDatabase = extractLastDmlQuery() ?: return
+      updateListener.waitForStatementCountMoreThan(statementCountBefore.get())
+
+      // We got the statement. Let's inspect it.
+      val queryInDatabase = updateListener.lastStatement()
 
       val m = "vtgate:: keyspace_id:([^ ]+)".toRegex().find(queryInDatabase) ?: return
       val keyspaceId = m.groupValues[1]
@@ -244,6 +303,11 @@ class VitessScaleSafetyChecks(
       keyspaceIdsThisTransaction.get().clear()
     }
   }
+
+  private fun waitForNextStatement() {
+  }
+
+  private fun statementCount(): Int = 0
 
   val COMMENT_PATTERN = "/\\*+[^*]*\\*+(?:[^/*][^*]*\\*+)*/".toRegex()
   val DML = setOf("insert", "delete", "update")
@@ -380,3 +444,17 @@ fun String.quoteSql(escape: String): String =
         .replace("%", "$escape%")
         .replace("_", "${escape}_")
         .replace("[", "$escape[")
+
+/**
+ * Equivalent to Golang's sync.Once
+ */
+class Once {
+  private val done = AtomicBoolean(false)
+
+  fun run(lambda: () -> Any) {
+    if (done.get()) return
+    if (done.compareAndSet(false, true)) {
+      lambda()
+    }
+  }
+}

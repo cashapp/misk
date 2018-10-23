@@ -12,6 +12,7 @@ import misk.jdbc.DataSourceDecorator
 import misk.jdbc.DataSourceService
 import misk.jdbc.PingDatabaseService
 import misk.resources.ResourceLoader
+import misk.vitess.UpdateStreamSource
 import org.hibernate.SessionFactory
 import org.hibernate.event.spi.EventType
 import javax.inject.Inject
@@ -49,6 +50,8 @@ class HibernateModule(
     val sessionFactoryKey = SessionFactory::class.toKey(qualifier)
     val sessionFactoryProvider = getProvider(sessionFactoryKey)
 
+    val updateStreamSourceKey = UpdateStreamSource::class.toKey(qualifier)
+
     val sessionFactoryServiceKey = SessionFactoryService::class.toKey(qualifier)
 
     val dataSourceDecoratorsKey = setOfType(DataSourceDecorator::class).toKey(qualifier)
@@ -67,6 +70,10 @@ class HibernateModule(
     val dataSourceServiceKey = DataSourceService::class.toKey(qualifier)
 
     bind(configKey).toInstance(config)
+
+    bind(updateStreamSourceKey).toProvider(Provider<UpdateStreamSource> {
+      UpdateStreamSource(config)
+    })
 
     bind(pingDatabaseServiceKey).toProvider(Provider<PingDatabaseService> {
       PingDatabaseService(qualifier, config, environmentProvider.get())

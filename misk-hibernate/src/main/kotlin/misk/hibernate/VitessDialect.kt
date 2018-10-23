@@ -2,7 +2,7 @@
 
 package misk.hibernate
 
-import misk.jdbc.CowriteException
+import misk.vitess.CowriteException
 import org.hibernate.dialect.MySQL57Dialect
 import org.hibernate.exception.spi.SQLExceptionConversionDelegate
 

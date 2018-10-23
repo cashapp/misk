@@ -1,5 +1,7 @@
 package misk.hibernate
 
+import misk.vitess.Keyspace
+import misk.vitess.Shard
 import java.sql.Connection
 import kotlin.reflect.KClass
 

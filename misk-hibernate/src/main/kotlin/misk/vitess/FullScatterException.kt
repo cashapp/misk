@@ -1,4 +1,4 @@
-package misk.jdbc
+package misk.vitess
 
 import javax.persistence.PersistenceException
 

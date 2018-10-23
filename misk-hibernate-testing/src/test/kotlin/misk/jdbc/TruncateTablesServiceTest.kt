@@ -12,6 +12,7 @@ import misk.hibernate.Transacter
 import misk.inject.KAbstractModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
+import misk.vitess.UpdateStreamSource
 import okhttp3.OkHttpClient
 import org.assertj.core.api.Assertions.assertThat
 import org.hibernate.SessionFactory
@@ -36,7 +37,8 @@ internal class TruncateTablesServiceTest {
         OkHttpClient(),
         Moshi.Builder().build(),
         config,
-        StartVitessService(config))
+        StartVitessService(config),
+        UpdateStreamSource(config))
 
   @BeforeEach
   internal fun setUp() {

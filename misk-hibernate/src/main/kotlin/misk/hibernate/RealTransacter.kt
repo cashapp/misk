@@ -10,6 +10,8 @@ import misk.jdbc.map
 import misk.jdbc.uniqueResult
 import misk.logging.getLogger
 import misk.tracing.traceWithSpan
+import misk.vitess.Keyspace
+import misk.vitess.Shard
 import org.hibernate.FlushMode
 import org.hibernate.SessionFactory
 import org.hibernate.StaleObjectStateException

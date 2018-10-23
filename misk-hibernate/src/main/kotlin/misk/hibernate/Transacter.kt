@@ -1,5 +1,7 @@
 package misk.hibernate
 
+import misk.vitess.Shard
+
 /**
  * Provides explicit block-based transaction demarcation.
  */

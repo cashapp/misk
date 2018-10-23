@@ -10,6 +10,7 @@ import misk.jdbc.DataSourceDecorator
 import misk.jdbc.StartVitessService
 import misk.jdbc.TruncateTablesService
 import misk.jdbc.VitessScaleSafetyChecks
+import misk.vitess.UpdateStreamSource
 import okhttp3.OkHttpClient
 import javax.inject.Provider
 import kotlin.reflect.KClass
@@ -30,6 +31,9 @@ class HibernateTestingModule(
 
     val startVitessServiceKey = StartVitessService::class.toKey(qualifier)
     val startVitessServiceProvider = getProvider(startVitessServiceKey)
+
+    val updateStreamSourceKey = UpdateStreamSource::class.toKey(qualifier)
+    val updateStreamSourceProvider = getProvider(updateStreamSourceKey)
 
     val crossShardQueryDetectorKey = VitessScaleSafetyChecks::class.toKey(qualifier)
     val crossShardQueryDetectorProvider = getProvider(crossShardQueryDetectorKey)
@@ -53,7 +57,8 @@ class HibernateTestingModule(
           config = configProvider.get(),
           moshi = moshiProvider.get(),
           okHttpClient = okHttpClientProvider.get(),
-          startVitessService = startVitessServiceProvider.get()
+          startVitessService = startVitessServiceProvider.get(),
+          updateStreamSource = updateStreamSourceProvider.get()
       )
     }).asSingleton()
 

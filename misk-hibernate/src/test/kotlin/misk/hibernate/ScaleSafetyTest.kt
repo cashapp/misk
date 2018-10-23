@@ -3,11 +3,13 @@ package misk.hibernate
 import misk.backoff.FlatBackoff
 import misk.backoff.retry
 import misk.hibernate.annotation.keyspace
-import misk.jdbc.CowriteException
-import misk.jdbc.FullScatterException
+import misk.jdbc.StartVitessService
 import misk.jdbc.VitessScaleSafetyChecks
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
+import misk.vitess.CowriteException
+import misk.vitess.FullScatterException
+import misk.vitess.Shard
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
@@ -23,6 +25,7 @@ class ScaleSafetyTest {
 
   @Inject @Movies lateinit var transacter: Transacter
   @Inject @Movies lateinit var checks: VitessScaleSafetyChecks
+  @Inject @Movies lateinit var vitess: StartVitessService
   @Inject lateinit var queryFactory: Query.Factory
 
   @Test
@@ -108,6 +111,34 @@ class ScaleSafetyTest {
       }
     }
   }
+
+//  @Test
+//  fun updateStream() {
+//    transacter.shards().forEach { shard ->
+//      val client = vitess.cluster().openGrpcFutureClient()
+//      val call = client.channel.newCall(VitessGrpc.getUpdateStreamMethod(),
+//          CallOptions.DEFAULT.withWaitForReady())
+//      call.start(object: ClientCall.Listener<Vtgate.UpdateStreamResponse?>() {
+//        override fun onMessage(update: Vtgate.UpdateStreamResponse?) {
+//          update?.event?.statementsList?.forEach { s ->
+//            println("$shard UPDATE: ${s.sql.toStringUtf8()}")
+//          }
+//        }
+//      }, Metadata())
+//    }
+//
+//    val jg = transacter.save(
+//        DbActor("Jeff Goldblum", LocalDate.of(1952, 10, 22)))
+//
+//    val jp = transacter.save(
+//        DbMovie("Jurassic Park", LocalDate.of(1993, 6, 9)))
+//
+//    transacter.transaction { session ->
+//      val jpMovie = session.load(jp)
+//      val jgActor = session.load(jg)
+//      session.save(DbCharacter("Ian Malcolm", jpMovie, jgActor))
+//    }
+//  }
 }
 
 private fun <T : DbEntity<T>> Transacter.save(entity: T): Id<T> = transaction { it.save(entity) }

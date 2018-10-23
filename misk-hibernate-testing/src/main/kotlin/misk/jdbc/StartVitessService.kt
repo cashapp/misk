@@ -247,7 +247,7 @@ class StartVitessService(val config: DataSourceConfig) : AbstractIdleService() {
     // the first time you do it. After that it's really fast though.
     logger.info("Pulling vitess/base:latest...")
     logger.info("If this is the first time this can be quite slow but should be fast " +
-        "after that.")
+        "after that")
     try {
       docker.pullImageCmd("vitess/base")
           .withTag("latest")
