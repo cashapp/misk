@@ -34,19 +34,19 @@ import kotlin.reflect.KClass
  * Finally we use multibindings to specify which services and roles are permitted:
  *
  * ```
- * multibind<AccessAnnotation>().toInstance(
- *  AccessAnnotation<PaleontologistAccess>(roles = listOf("paleontologist", "intern")))
+ * multibind<AccessAnnotationEntry>().toInstance(
+ *  AccessAnnotationEntry<PaleontologistAccess>(roles = listOf("paleontologist", "intern")))
  * ```
  */
-data class AccessAnnotation(
+data class AccessAnnotationEntry(
   val annotation: KClass<out Annotation>,
   val services: List<String> = listOf(),
   val roles: List<String> = listOf()
 )
 
-inline fun <reified T : Annotation> AccessAnnotation(
+inline fun <reified T : Annotation> AccessAnnotationEntry(
   services: List<String> = listOf(),
   roles: List<String> = listOf()
-): AccessAnnotation {
-  return AccessAnnotation(T::class, services, roles)
+): AccessAnnotationEntry {
+  return AccessAnnotationEntry(T::class, services, roles)
 }

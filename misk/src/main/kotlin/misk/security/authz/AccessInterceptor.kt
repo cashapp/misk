@@ -9,7 +9,6 @@ import misk.exceptions.UnauthorizedException
 import misk.scope.ActionScoped
 import javax.inject.Inject
 import kotlin.reflect.KClass
-import kotlin.reflect.full.findAnnotation
 
 internal class AccessInterceptor private constructor(
   private val allowedServices: Set<String>,
@@ -39,42 +38,62 @@ internal class AccessInterceptor private constructor(
 
   internal class Factory @Inject internal constructor(
     private val caller: @JvmSuppressWildcards ActionScoped<MiskCaller?>,
-    @Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN") private val accessAnnotations: java.util.List<out AccessAnnotation>
+    private val registeredEntries: List<AccessAnnotationEntry>
   ) : ApplicationInterceptor.Factory {
     override fun create(action: Action): ApplicationInterceptor? {
       // Gather all of the access annotations on this action.
-      val actionAnnotations = mutableListOf<AccessAnnotation>()
-      val authenticated = action.function.findAnnotation<Authenticated>()
-      if (authenticated != null) {
-        actionAnnotations += authenticated.toAccessAnnotation()
-      }
-      actionAnnotations += accessAnnotations.filter { action.hasAnnotation(it.annotation) }
-
-      // This action is explicitly marked @Authenticated or with a custom annotation.
-      if (actionAnnotations.size == 1) {
-        return AccessInterceptor(actionAnnotations[0].services.toSet(),
-            actionAnnotations[0].roles.toSet(), caller)
+      val actionEntries = mutableListOf<AccessAnnotationEntry>()
+      for (annotation in action.function.annotations) when {
+        annotation is Authenticated -> actionEntries += annotation.toAccessAnnotationEntry()
+        annotation is Unauthenticated -> actionEntries += annotation.toAccessAnnotationEntry()
+        registeredEntries.find { it.annotation == annotation.annotationClass } != null -> {
+          actionEntries += registeredEntries.find { it.annotation == annotation.annotationClass }!!
+        }
       }
 
-      // This action is explicitly marked as unauthenticated.
-      if (actionAnnotations.isEmpty() && action.hasAnnotation(Unauthenticated::class)) {
-        return null
+      when {
+        // There should only be one access annotation on the action
+        actionEntries.size > 1 -> throw IllegalStateException("""
+        |
+        |Only one AccessAnnotation is permitted on a WebAction. Remove one from ${action.name}::${action.function.name}():
+        | ${actionEntries.map { it.annotation }}
+        |
+        """.trimMargin())
+        // This action is explicitly marked as unauthenticated.
+        actionEntries.size == 1 && action.hasAnnotation<Unauthenticated>() -> return null
+        // Successfully return @Authenticated or custom Access Annotation
+        actionEntries.size == 1 -> return AccessInterceptor(actionEntries[0].services.toSet(), actionEntries[0].roles.toSet(), caller)
+        // Not exactly one access annotation. Fail with a useful message.
+        else -> {
+          val requiredAnnotations = mutableListOf<KClass<out Annotation>>()
+          requiredAnnotations += Authenticated::class
+          requiredAnnotations += Unauthenticated::class
+          requiredAnnotations += registeredEntries.map { it.annotation }
+          throw IllegalStateException("""AccessInterceptor A) can't find an AccessAnnotation for this WebAction or B) can't find the related AccessAnnotationEntry multibinding.
+          |
+          |A) ${action.name}::${action.function.name}() must be annotated with one of the following AccessAnnotations that have a matching AccessAnnotationEntry:
+          |   $requiredAnnotations
+          |
+          |B) Add an AccessAnnotationEntry multibinding in a module for one of the annotations on ${action.name}::${action.function.name}():
+          |   ${action.function.annotations}
+          |
+          |   AccessAnnotationEntry Example Multibinding:
+          |   multibind<AccessAnnotationEntry>().toInstance(
+          |     AccessAnnotationEntry<${action.function.annotations.filter { it.annotationClass.simpleName.toString().endsWith("Access") }.firstOrNull()?.annotationClass?.simpleName ?: "{Access Annotation Class Simple Name}"}>(roles = ???, services = ???))
+          |
+          """.trimMargin())
+        }
       }
-
-      // Not exactly one access annotation. Fail with a useful message.
-      val requiredAnnotations = mutableListOf<KClass<out Annotation>>()
-      requiredAnnotations += Authenticated::class
-      requiredAnnotations += Unauthenticated::class
-      requiredAnnotations += accessAnnotations.map { it.annotation }
-      throw IllegalStateException(
-          "action ${action.name} must have one of the following annotations: $requiredAnnotations")
     }
 
-    private fun Authenticated.toAccessAnnotation() = AccessAnnotation(
+    private fun Authenticated.toAccessAnnotationEntry() = AccessAnnotationEntry(
         Authenticated::class, services.toList(), roles.toList())
 
-    private fun Action.hasAnnotation(annotationClass: KClass<out Annotation>) =
-        function.annotations.any { it.annotationClass == annotationClass }
+    private fun Unauthenticated.toAccessAnnotationEntry() = AccessAnnotationEntry(
+        Unauthenticated::class, listOf(), listOf())
+
+    private inline fun <reified T : Annotation> Action.hasAnnotation() =
+        function.annotations.any { it.annotationClass == T::class }
   }
 }
 
