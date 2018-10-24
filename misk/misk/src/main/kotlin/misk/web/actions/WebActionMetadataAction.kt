@@ -1,7 +1,6 @@
 package misk.web.actions
 
 import misk.ApplicationInterceptor
-import misk.security.authz.Unauthenticated
 import misk.web.DispatchMechanism
 import misk.web.Get
 import misk.web.NetworkInterceptor
