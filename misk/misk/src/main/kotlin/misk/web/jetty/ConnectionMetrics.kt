@@ -12,7 +12,7 @@ internal class ConnectionMetrics @Inject internal constructor(metrics: Metrics) 
       "total number of connections accepted by jetty",
       labels
   )
-  val connectionDurations = metrics.summary(
+  val connectionDurations = metrics.histogram(
       "jetty_connection_duration_ms",
       "average duration a incoming jetty connection is held open (in ms)",
       labels
