@@ -1,6 +1,6 @@
 import * as React from "react"
 import styled from "styled-components"
-import { IConfigProps, IConfigResources } from "../containers/TabContainer"
+import { IConfigResources, IConfigState } from "../ducks"
 
 const Container = styled.div`
 `
@@ -9,7 +9,7 @@ const ConfigOutput = styled.pre`
   font-family: Menlo, Fira Code;
 `
 
-export default class ConfigComponent extends React.PureComponent<IConfigProps> {
+export default class ConfigComponent extends React.PureComponent<IConfigState> {
   renderConfig(resource: IConfigResources) {
     return(
       <ConfigOutput>

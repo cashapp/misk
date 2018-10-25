@@ -1,6 +1,6 @@
-import { createAction, IAction, IDashboardTab, IServiceMetadata } from "@misk/common"
+import { createAction, defaultState, IAction, IDashboardTab, IDefaultState, IServiceMetadata } from "@misk/common"
 import axios from "axios"
-import { fromJS, Map } from "immutable"
+import { fromJS } from "immutable"
 import { all, call, put, takeEvery, takeLatest } from "redux-saga/effects"
 
 /**
@@ -31,20 +31,19 @@ export const dispatchLoader = {
  * @param state 
  * @param action 
  */
-export interface ILoaderState {
+export interface ILoaderState extends IDefaultState {
   adminTabComponents: {
     [tab:string]: string
   }
   adminDashboardTabs: IDashboardTab[]
   serviceMetadata: IServiceMetadata
-  toJS: () => any
 }
 
 const initialState = fromJS({
-  data: Map(),
-  error: null,
-  loading: false,
-  success: false,
+  adminDashboardTabs: [],
+  adminTabComponents: {},
+  serviceMetadata: {},
+  ...defaultState.toJS()
 })
 
 export default function loaderReducer (state = initialState, action: IAction<string, {}>) {

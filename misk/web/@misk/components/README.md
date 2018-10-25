@@ -1,7 +1,7 @@
 Misk Components
 ---
 ![](https://raw.githubusercontent.com/square/misk/master/misk.png)
-This package provides shared, styled React components across Misk tab repos.
+This package provides shared, styled React components across Misk tab repos. The top of each component/container file contains a usage example.
 
 Getting Started
 ---
@@ -11,7 +11,7 @@ $ yarn add @misk/components
 
 Components
 ---
-- `NoMatchComponent`: very basic component for route 404s
+- `ErrorCalloutComponent`: Processes a Redux / Axios error and dumps raw JSON for debugging
 - `OfflineComponent`: NonIdealState component for Offline or Loading tab state
 - `PathDebugComponent`: outputs values passed in by props for `hash`, `pathname`, and `search` in React-Router instance
 - `SidebarComponent`: dashboard styled sidebar

@@ -1,5 +1,11 @@
 import styled from "styled-components"
 
+/**
+ * <ResponsiveContainer>
+ *    <span>Stuff</span>
+ * </ResponsiveContainer>
+ */
+
 export const ResponsiveContainer = styled.div`
   margin: 0 auto;
   @media (min-width: 768px) {

@@ -3,6 +3,10 @@ import { IDashboardTab } from "@misk/common"
 import * as React from "react"
 import styled from "styled-components" 
 
+/**
+ * <SidebarComponent tabs={props.tabs}/>
+ */
+
 interface ISidebarProps {
   tabs: IDashboardTab[]
 }
