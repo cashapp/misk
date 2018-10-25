@@ -43,6 +43,7 @@ internal class DefaultCluster(
    * is known at that time, and then receives diffs as they arrive.
    */
   override fun run() {
+    log.info { "cluster manager worker running" }
     val watches = mutableSetOf<ClusterWatch>()
 
     while (running.get()) {
@@ -60,7 +61,7 @@ internal class DefaultCluster(
     running.set(true)
   }
 
-  override fun shutDown() {
+  override fun triggerShutdown() {
     log.info { "shutting down cluster manager" }
     running.set(false)
     actions.add { _ -> } // empty action to up the action queue if it is empty
@@ -69,6 +70,7 @@ internal class DefaultCluster(
   /** Adds a new cluster watch */
   override fun watch(watch: ClusterWatch) {
     actions.add { watches ->
+      log.info { "registering new watch" }
       watches.add(watch)
       watch(Cluster.Changes(snapshot))
     }
