@@ -23,6 +23,12 @@ interface Transacter {
   fun retries(): Transacter
 
   fun noRetries(): Transacter
+
+  /**
+   * Creates a new transacter that produces read only sessions. This does not mean the underlying
+   * datasource is read only, only that the session produced won't modify the database.
+   */
+  fun readOnly(): Transacter
 }
 
 fun Transacter.shards() = transaction { it.shards() }
