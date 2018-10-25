@@ -1,8 +1,7 @@
-import { createAction, IAction } from "@misk/common"
+import { createAction, defaultState, IAction, IDefaultState } from "@misk/common"
 import axios from "axios"
 import { fromJS, Map } from "immutable"
 import { all, call, put, takeLatest } from "redux-saga/effects"
-import { IConfigResources } from "../containers/TabContainer"
 const dayjs = require("dayjs")
 
 /**
@@ -29,17 +28,20 @@ export const dispatchConfig = {
  * @param state 
  * @param action 
  */
-export interface IConfigState {
+export interface IConfigResources {
+  [name: string]: string
+}
+
+export interface IConfigState extends IDefaultState {
   resources: IConfigResources
   status: string
-  toJS: () => any
 }
 
 const initialState = fromJS({
   data: Map(),
-  error: null,
-  loading: false,
-  success: false,
+  query: "",
+  urlTokenMetadata: [],
+  ...defaultState.toJS()
 })
 
 export default function ConfigReducer (state = initialState, action: IAction<string, {}>) {

@@ -6,6 +6,10 @@ import { Link } from "react-router-dom"
 import styled from "styled-components"
 import { ResponsiveContainer } from "../containers"
 
+/**
+ * <TopbarComponent homeName={"Service Name"} homeUrl={"/_admin/"} links={props.tabs}/>
+ */
+
 export interface ITopbarProps {
   homeName?: string
   homeUrl?: string

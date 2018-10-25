@@ -36,7 +36,7 @@ class LoaderContainer extends React.Component<ILoaderProps> {
   }
 
   render() {
-    const { adminDashboardTabs, serviceMetadata } = this.props.loader
+    const { adminDashboardTabs, serviceMetadata, error } = this.props.loader
     let unavailableEndpointUrls = ""
     if (!adminDashboardTabs) { unavailableEndpointUrls += tabsUrl + " " }
     if (!serviceMetadata) { unavailableEndpointUrls += serviceUrl + " " }
@@ -54,7 +54,7 @@ class LoaderContainer extends React.Component<ILoaderProps> {
         <div>
           <TopbarComponent/>
           <TabContainer>
-            <OfflineComponent title={"Error Loading Multibound Admin Tabs"} endpoint={unavailableEndpointUrls}/>
+            <OfflineComponent error={error} title={"Error Loading Multibound Admin Tabs"} endpoint={unavailableEndpointUrls}/>
           </TabContainer>
         </div>
       )

@@ -1,4 +1,4 @@
-import { createAction, IAction } from "@misk/common"
+import { createAction, defaultState, IAction, IDefaultState } from "@misk/common"
 import axios from "axios"
 import { fromJS, List } from "immutable"
 import { all, call, put, takeLatest } from "redux-saga/effects"
@@ -188,10 +188,9 @@ export function * watchExampleSagas () {
  * Reducer merges all changes from dispatched action objects on to this initial state
  */
 const initialState = fromJS({
-  data: List([]),
-  error: null,
-  loading: false,
-  success: false,
+  query: "",
+  urlTokenMetadata: [],
+  ...defaultState.toJS()
 })
 
 /**

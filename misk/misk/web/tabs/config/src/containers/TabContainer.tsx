@@ -2,16 +2,11 @@ import { OfflineComponent } from "@misk/components"
 import * as React from "react"
 import { connect } from "react-redux"
 import { ConfigComponent } from "../components"
-import { dispatchConfig, IState } from "../ducks"
+import { dispatchConfig, IConfigState, IState } from "../ducks"
 
 interface ITabProps {
-  config: IConfigProps
+  config: IConfigState
   getAllConfig: (url: string) => void
-}
-
-export interface IConfigProps {
-  resources: IConfigResources
-  status: string
 }
 
 export interface IConfigResources {
@@ -26,14 +21,14 @@ class TabContainer extends React.Component<ITabProps, {children : any}> {
   }
 
   render() {
-    const { resources, status } = this.props.config
+    const { error, resources, status } = this.props.config
     if (resources) {
       return (
         <ConfigComponent resources={resources} status={status} />
       )
     } else {
       return (
-        <OfflineComponent title={"Error Loading Config Data"} endpoint={apiUrl}/>
+        <OfflineComponent error={error} title={"Error Loading Config Data"} endpoint={apiUrl} />
       )
     }
   }

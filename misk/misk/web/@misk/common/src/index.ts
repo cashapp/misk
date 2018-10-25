@@ -1,3 +1,4 @@
+import { fromJS, List } from "immutable"
 export * from "./actions"
 
 /**
@@ -23,6 +24,27 @@ interface IServiceMetadata {
   admin_dashboard_url: string
 }
 
+/**
+ * Ducks
+ */
+interface IDefaultState {
+  data?: any
+  error?: any
+  loading?: boolean
+  success?: boolean
+  toJS?: () => any
+}
+
+const defaultState: IDefaultState = fromJS({
+  data: List([]),
+  error: null,
+  loading: false,
+  success: false,
+})
+
+/**
+ * Binder
+ */
 enum IBinderKeys {
   NavTopbarMenu = "NavTopbarMenu",
   TabEntry = "TabEntry",
@@ -32,6 +54,9 @@ interface IBinder {
   multibind: (binder: IBinderKeys, key: string, value: any) => any
 }
 
+/**
+ * Window
+ */
 interface IWindow extends Window {
   __REDUX_DEVTOOLS_EXTENSION_COMPOSE__: any
   Misk: {
@@ -47,4 +72,4 @@ interface IWindow extends Window {
   MiskBinders: any
 }
 
-export { IWebTab, IDashboardTab, IAdminDashboardTab, IServiceMetadata, IBinder, IBinderKeys, IWindow }
+export { IWebTab, IDashboardTab, IAdminDashboardTab, IServiceMetadata, defaultState, IDefaultState, IBinder, IBinderKeys, IWindow }
