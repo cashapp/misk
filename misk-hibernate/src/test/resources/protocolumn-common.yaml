@@ -1,0 +1,6 @@
+data_source:
+  type: MYSQL
+  username: root
+  password: ""
+  database: protocolumn
+  migrations_resource: classpath:/misk/hibernate/protocolumn-migrations
