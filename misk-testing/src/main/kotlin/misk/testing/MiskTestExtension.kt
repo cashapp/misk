@@ -66,6 +66,7 @@ internal class MiskTestExtension : BeforeEachCallback, AfterEachCallback {
       if (context.startService()) {
         serviceManager.stopAsync()
       }
+      serviceManager.awaitStopped(20, TimeUnit.SECONDS)
     }
   }
 

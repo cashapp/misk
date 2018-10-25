@@ -4,6 +4,7 @@ ext.dep = [
   "awsLogging": "com.amazonaws:aws-java-sdk-logs:1.11.143",
   "bouncycastle": "org.bouncycastle:bcprov-jdk15on:1.55",
   "conscrypt": "org.conscrypt:conscrypt-openjdk-uber:1.1.4",
+  "curatorFramework": "org.apache.curator:curator-framework:4.0.1",
   "datasourceProxy": "net.ttddyy:datasource-proxy:1.4.9",
   "docker": "com.github.docker-java:docker-java:3.0.14",
   "gcpCloudStorage": "com.google.cloud:google-cloud-storage:1.15.0",
@@ -73,5 +74,7 @@ ext.dep = [
   "vitess": "io.vitess:vitess-jdbc:2.2.0",
   "wireRuntime": "com.squareup.wire:wire-runtime:2.3.0-RC1",
   "zipkinBrave": "io.zipkin.brave:brave:4.17.2",
-  "zipkinReporter": "io.zipkin.reporter2:zipkin-sender-okhttp3:2.4.1"
+  "zipkinReporter": "io.zipkin.reporter2:zipkin-sender-okhttp3:2.4.1",
+  "zookeeper": "org.apache.zookeeper:zookeeper:3.5.4-beta",
 ]//Generated from polyrepo's master-dependencies.json
+
