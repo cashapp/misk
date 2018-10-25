@@ -45,10 +45,10 @@
     reflect-metadata "^0.1.12"
     tslib "^1.8.1"
 
-"@misk/common@^0.0.50":
-  version "0.0.50"
-  resolved "https://registry.yarnpkg.com/@misk/common/-/common-0.0.50.tgz#bb979e2936a3c135bfb145777051b8cc0285ef97"
-  integrity sha512-Eg8jznW2A4aBGHWgPk7ZmZXGOxA1B7m8rXdBXfO9d1kn7VA1H1ALDSTQczc0nn10du1UbwS5WQlzdUI6ChEvzQ==
+"@misk/common@^0.0.52":
+  version "0.0.52"
+  resolved "https://registry.yarnpkg.com/@misk/common/-/common-0.0.52.tgz#12997dc9e8abdc47d5e0063f27c337ede34ff80f"
+  integrity sha512-WAR8vg7D8l21XtvJewSDy+HKfK8L5+npdr5aF8FtTDc149A5lVhVhEbl/egqGuw1sVK+KphS+oZRyZSxcy2daw==
   dependencies:
     "@blueprintjs/core" "^3.7.0"
     "@blueprintjs/icons" "^3.2.0"

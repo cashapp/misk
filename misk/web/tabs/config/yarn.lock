@@ -71,10 +71,10 @@
     skeleton-css "^2.0.4"
     styled-components "^3.4.10"
 
-"@misk/components@^0.0.66":
-  version "0.0.66"
-  resolved "https://registry.yarnpkg.com/@misk/components/-/components-0.0.66.tgz#b6567dcaea29bc16722e542cf1588418f56ff523"
-  integrity sha512-9vOdgFsW2kflTaQSevC21Km46s1MqaFmgmPOSfO9e3I/a1CJjGWt8eDhvd3jincFp3N0Bija8cKbXNLaNT0jrw==
+"@misk/components@^0.0.68":
+  version "0.0.68"
+  resolved "https://registry.yarnpkg.com/@misk/components/-/components-0.0.68.tgz#45e24d41b9f469ca339d9be7720e7d3b83a9b459"
+  integrity sha512-fPEZVOrTc0Gd7WRkGHZstCyDG5XbjSIjVbNBhlPGxSmOcFpy5+7g2UMzfE4ZCLEbHRKkr89qrr/+cKqEqvPjzQ==
   dependencies:
     "@misk/common" "^0.0.52"
 
