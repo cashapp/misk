@@ -12,5 +12,6 @@ class KubernetesClusterModule : KAbstractModule() {
     bind<Cluster>().to<DefaultCluster>()
     bind<DefaultCluster>().toProvider(KubernetesClusterProvider::class.java).asSingleton()
     multibind<Service>().to<KubernetesClusterWatcher>()
+    multibind<Service>().to<DefaultCluster>()
   }
 }
