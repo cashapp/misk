@@ -9,6 +9,11 @@ Getting Started
 $ yarn add @misk/components
 ```
 
+Builders
+---
+- `createApp(routes)`: builder function to create an `<App history={history}/>` component
+- `createIndex(tabSlug, App, Ducks)`: builder function to create bootstrapping objects necessary for `index.tsx`
+
 Components
 ---
 - `ErrorCalloutComponent`: Processes a Redux / Axios error and dumps raw JSON for debugging

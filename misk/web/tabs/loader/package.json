@@ -1,6 +1,6 @@
 {
   "name": "misktab-loader",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "main": "src/index.ts",
   "scripts": {
     "build": "cross-env NODE_ENV=production webpack",
@@ -12,7 +12,7 @@
   },
   "dependencies": {
     "@misk/common": "^0.0.52",
-    "@misk/components": "^0.0.66"
+    "@misk/components": "^0.0.68"
   },
   "devDependencies": {
     "@misk/dev": "^0.0.46",
