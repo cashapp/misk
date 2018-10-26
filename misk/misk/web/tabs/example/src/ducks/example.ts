@@ -1,6 +1,6 @@
 import { createAction, defaultState, IAction, IDefaultState } from "@misk/common"
 import axios from "axios"
-import { fromJS, List } from "immutable"
+import { fromJS } from "immutable"
 import { all, call, put, takeLatest } from "redux-saga/effects"
 
 /**
@@ -217,7 +217,6 @@ export default function ExampleReducer (state = initialState, action: IAction<st
  * Consumed by the root reducer in ./ducks index to update global state
  * Duck state is attached at the root level of global state
  */
-export interface IExampleState {
+export interface IExampleState extends IDefaultState {
   [key: string]: any
-  toJS?: () => any
 }

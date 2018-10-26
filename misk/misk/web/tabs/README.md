@@ -61,7 +61,7 @@ Directory Structure
     ```
 
 - Open `src/index.html` and update the line `<div id="example">` to `<div id="trexfoodlog">`.
-- Open `src/index.tsx ` and update the line `const tabSlug = "example"` to `const tabSlug = "trexfoodlog"`.
+- Open `src/index.tsx ` and update the line `createIndex("example", createApp(routes), Ducks)` to `createIndex("trexfoodlog", createApp(routes), Ducks)`.
 - Open `src/routes/index.tsx` and update the routes to the tab slug:
 
   ```JSX
