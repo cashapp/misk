@@ -3,10 +3,10 @@ package misk.hibernate
 import misk.MiskServiceModule
 import misk.config.Config
 import misk.config.MiskConfig
-import misk.jdbc.DataSourceConfig
 import misk.environment.Environment
 import misk.environment.EnvironmentModule
 import misk.inject.KAbstractModule
+import misk.jdbc.DataSourceConfig
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import okio.ByteString
@@ -118,6 +118,9 @@ class ByteStringColumnTest {
 
     @Column(nullable = false)
     lateinit var hash: ByteString
+
+    @Column
+    var nullable_hash: ByteString? = null
 
     constructor(text: String, hash: ByteString) : this() {
       this.text = text

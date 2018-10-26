@@ -12,11 +12,11 @@ import java.sql.Types
 internal object ByteStringType : UserType {
   override fun hashCode(x: Any) = x.hashCode()
 
-  override fun deepCopy(value: Any) = value
+  override fun deepCopy(value: Any?) = value
 
   override fun replace(original: Any, target: Any, owner: Any?) = original
 
-  override fun equals(x: Any, y: Any) = x == y
+  override fun equals(x: Any?, y: Any?) = x == y
 
   override fun returnedClass() = ByteString::class.java
 
