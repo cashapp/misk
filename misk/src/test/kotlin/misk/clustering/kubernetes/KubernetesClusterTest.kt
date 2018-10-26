@@ -1,6 +1,5 @@
 package misk.clustering.kubernetes
 
-import com.google.common.util.concurrent.Service
 import com.google.inject.Module
 import com.google.inject.util.Modules
 import io.kubernetes.client.models.V1ContainerStatus
@@ -16,7 +15,6 @@ import misk.clustering.kubernetes.KubernetesClusterWatcher.Companion.CHANGE_TYPE
 import misk.clustering.kubernetes.KubernetesClusterWatcher.Companion.CHANGE_TYPE_DELETED
 import misk.clustering.kubernetes.KubernetesClusterWatcher.Companion.CHANGE_TYPE_MODIFIED
 import misk.inject.KAbstractModule
-import misk.inject.asSingleton
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
@@ -31,8 +29,7 @@ internal class KubernetesClusterTest {
       MiskServiceModule(),
       object : KAbstractModule() {
         override fun configure() {
-          multibind<Service>().to<DefaultCluster>()
-          bind<DefaultCluster>().toProvider(KubernetesClusterProvider::class.java).asSingleton()
+          install(KubernetesClusterModule())
           bind<KubernetesConfig>().toInstance(KubernetesConfig(
               my_pod_namespace = TEST_NAMESPACE,
               my_pod_name = TEST_SELF_NAME,
