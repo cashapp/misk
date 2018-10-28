@@ -10,6 +10,7 @@ import misk.security.ssl.CipherSuites
 import misk.security.ssl.SslLoader
 import misk.security.ssl.TlsProtocols
 import misk.web.ForConscrypt
+import misk.web.HttpProtocol
 import misk.web.WebConfig
 import misk.web.WebSslConfig
 import okhttp3.HttpUrl
@@ -105,7 +106,12 @@ class JettyService @Inject internal constructor(
       httpsConfig.addCustomizer(SecureRequestCustomizer())
 
       val alpn = ALPNServerConnectionFactory("h2", "http/1.1")
-      alpn.defaultProtocol = "http/1.1"
+      val defaultProtocol = when(webConfig.default_protocol) {
+        HttpProtocol.HTTP2 -> "h2"
+        HttpProtocol.HTTP1_1 -> "http/1.1"
+      }
+      alpn.defaultProtocol = defaultProtocol
+
       val ssl = SslConnectionFactory(sslContextFactory, alpn.protocol)
       val http2 = HTTP2ServerConnectionFactory(httpsConfig)
       val http1 = HttpConnectionFactory(httpsConfig)

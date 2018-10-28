@@ -11,7 +11,8 @@ data class WebConfig(
   val ssl: WebSslConfig? = null,
   val selectors: Int? = null,
   val acceptors: Int? = null,
-  val queueSize: Int? = null
+  val queueSize: Int? = null,
+  val default_protocol: HttpProtocol = HttpProtocol.HTTP2
 ) : Config
 
 data class WebSslConfig(
@@ -25,4 +26,9 @@ data class WebSslConfig(
     REQUIRED,
     DESIRED
   }
+}
+
+enum class HttpProtocol {
+  HTTP2,
+  HTTP1_1
 }
