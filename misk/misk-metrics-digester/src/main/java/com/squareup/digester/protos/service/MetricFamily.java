@@ -32,7 +32,7 @@ public final class MetricFamily extends Message<MetricFamily, MetricFamily.Build
    */
   @WireField(
       tag = 1,
-      adapter = "com.squareup.digester.protos.service.MetricFamily$MetricDescriptor#ADAPTER"
+      adapter = "MetricFamily$MetricDescriptor#ADAPTER"
   )
   public final MetricDescriptor metric_descriptor;
 
@@ -41,7 +41,7 @@ public final class MetricFamily extends Message<MetricFamily, MetricFamily.Build
    */
   @WireField(
       tag = 2,
-      adapter = "com.squareup.digester.protos.service.MetricFamily$Metric#ADAPTER",
+      adapter = "MetricFamily$Metric#ADAPTER",
       label = WireField.Label.REPEATED
   )
   public final List<Metric> metrics;
@@ -333,7 +333,7 @@ public final class MetricFamily extends Message<MetricFamily, MetricFamily.Build
      */
     @WireField(
         tag = 4,
-        adapter = "com.squareup.digester.protos.service.DigestData#ADAPTER"
+        adapter = "DigestData#ADAPTER"
     )
     public final DigestData digest_data;
 
@@ -524,7 +524,7 @@ public final class MetricFamily extends Message<MetricFamily, MetricFamily.Build
      */
     @WireField(
         tag = 2,
-        adapter = "com.squareup.digester.protos.service.MetricFamily$Digest#ADAPTER",
+        adapter = "MetricFamily$Digest#ADAPTER",
         label = WireField.Label.REPEATED
     )
     public final List<Digest> digests;

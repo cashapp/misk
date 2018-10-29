@@ -1,4 +1,4 @@
-package misk.digester
+package misk.metrics.digester
 
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
