@@ -90,7 +90,7 @@ internal class ConnectionListener(
       metrics.messagesSent.labels(*labels).inc(messagesSentDiff.toDouble())
     }
 
-    if (messagesReceivedSnapshot > 0) {
+    if (messagesReceivedDiff > 0) {
       metrics.messagesReceived.labels(*labels).inc(messagesReceivedDiff.toDouble())
     }
   }
