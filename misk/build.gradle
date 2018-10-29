@@ -9,7 +9,7 @@ kotlin {
 }
 apply plugin: 'org.junit.platform.gradle.plugin'
 apply plugin: 'com.vanniktech.maven.publish'
-apply from: "https://raw.githubusercontent.com/adrw/misk/4e5ce9df6d3057efcee9dcd185623c69bfe39599/gradle/web.gradle"
+apply from: "https://raw.githubusercontent.com/square/misk/100bb1945623a6f28b8e000b2e4f227cd8af1041/gradle/web.gradle"
 
 compileKotlin {
   kotlinOptions {
