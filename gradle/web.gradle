@@ -65,7 +65,3 @@ task web(type: Exec) {
 
   commandLine 'sh', '-c', runCommand
 }
-
-jar.dependsOn web
-
-shadowJar.dependsOn web
