@@ -39,7 +39,7 @@ public final class MergingDigestData extends Message<MergingDigestData, MergingD
 
   @WireField(
       tag = 1,
-      adapter = "com.squareup.digester.protos.tdigest.Centroid#ADAPTER",
+      adapter = "Centroid#ADAPTER",
       label = WireField.Label.REPEATED
   )
   public final List<Centroid> main_centroids;

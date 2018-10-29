@@ -1,4 +1,4 @@
-package misk.digester
+package misk.metrics.digester
 
 import com.squareup.digester.protos.tdigest.Centroid
 import com.squareup.digester.protos.tdigest.MergingDigestData

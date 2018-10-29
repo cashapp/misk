@@ -15,3 +15,5 @@ include ':misk-events'
 include ':samples:exemplar'
 include ':samples:exemplarchat'
 include ':samples:urlshortener'
+include ':misk-metrics-digester'
+

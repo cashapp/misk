@@ -1,4 +1,4 @@
-package misk.digester
+package misk.metrics.digester
 
 import misk.time.FakeClock
 import org.assertj.core.api.Assertions.assertThat
