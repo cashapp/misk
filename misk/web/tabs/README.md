@@ -135,12 +135,14 @@ Adding your Tab Webpack Build to Gradle
 ---
 Tab builds are kicked off by Gradle but done within a Docker container for portability across environments.
 
-In your service's project `build.gradle` file you will need to add the following to configure the Docker plugin, start the container, and let Gradle spin off a build if there is a change in your tab code. Adjust the template below to fit your service's file structure and to use the most up to date [Docker image version](https://hub.docker.com/r/squareup/).
+In your service's project `build.gradle` file you will need to add the following to configure the Docker plugin, start the container, and let Gradle spin off a build if there is a change in your tab code.
 
-Copy the latest `web` task from `misk/misk/build.gradle` into `{ latest web task goes here }` in the template below.
+Adjust the template below to fit your service's file structure and to use the most up to date [Docker image version](https://hub.docker.com/r/squareup/) and [Misk commit hash](https://github.com/square/misk/blob/master/gradle/web.gradle).
 
 ```Gradle
   import groovy.json.JsonSlurper
+
+  apply from: "https://raw.githubusercontent.com/square/misk/100bb1945623a6f28b8e000b2e4f227cd8af1041/gradle/web.gradle"
 
   ...
 
@@ -155,10 +157,6 @@ Copy the latest `web` task from `misk/misk/build.gradle` into `{ latest web task
       exclude '**/node_modules'
     }
   }
-  
-  ...
-
-  { latest web task goes here }
 
   jar.dependsOn web
 
