@@ -1,0 +1,71 @@
+import groovy.json.JsonSlurper
+
+task web(type: Exec) {
+  // -Pcmd='-d': pass in argument to misk-web shell script in Docker container
+  // -Ptabs='tabs/config, tabs/example': spins up parallel Docker containers with the following paths as volumes
+  // -Pdockerd: boolean to run Docker container as daemon in background
+  // Running webpack-dev-servers for various tabs: ./gradlew web -Pcmd='-d' -Ptabs='tabs/config, tabs/example'
+  // Build all tabs: ./gradlew web
+  // See other misk-web options: ./gradlew web -Pcmd='-h'
+
+  def generateDockerContainerName = { service, project, task ->
+    def slug = task.split('/').join('-').split('@').join('')
+    return "${new Date().format("YMD-HMS")}-${service}-${project}${slug}"
+  }
+
+  def getPackageJsonPort = { path ->
+    def packageFile= new File("${project.projectDir}/web/${path}/package.json")
+    def packageJson = new JsonSlurper().parseText(packageFile.text)
+    return packageJson.miskTab.port
+  }
+
+  def generateDockerRunCommand = { service, project, projectPath, path, cmd, daemon="-d", image = "squareup/misk-web:0.0.1" ->
+    def containerName = "${generateDockerContainerName(service, project, path)}"
+    def port = ""
+    if (path.startsWith("/tabs")) {
+      port = "-p ${getPackageJsonPort(path)}:${getPackageJsonPort(path)}"
+    }
+
+    def command = "docker run ${daemon} --rm --name ${containerName} -v ${projectPath}/web${path}:/web${path} ${port} ${image} ${cmd}"
+    println "\nContainer: ${containerName}"
+    println "Running... \$ ${command}"
+    println "Logs       \$ docker logs -f ${containerName}"
+    println "Shut Down  \$ docker kill ${containerName}"
+    return command
+  }
+
+  def cmd = ""
+  if (project.hasProperty("cmd")) {
+    cmd = project.cmd
+  } else {
+    cmd = "-b"
+  }
+
+  def dockerd = ""
+  if (project.hasProperty("dockerd")) {
+    dockerd = "-d"
+  }
+
+  def runCommand = ""
+  if (project.hasProperty("tabs")) {
+    if (project.tabs.split(',').length > 1) {
+      dockerd = "-d"
+    }
+
+    project.tabs.split(',').each {
+      def command = generateDockerRunCommand('misk', 'misk', project.projectDir, "/$it", "/bin/misk-web ${cmd}", dockerd)
+      if (runCommand != "") {
+        runCommand += " && "
+      }
+      runCommand += command
+    }
+  } else {
+    runCommand = generateDockerRunCommand('misk', 'misk', project.projectDir, "", "/bin/misk-web ${cmd}", dockerd)
+  }
+
+  commandLine 'sh', '-c', runCommand
+}
+
+jar.dependsOn web
+
+shadowJar.dependsOn web
