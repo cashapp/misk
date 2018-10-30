@@ -184,7 +184,7 @@ Gradle: Developing your Tab
 1. Run the following commands to spin up a Webpack-Dev-Server in Docker instance to serve live edits to your service.
 
   ```Bash
-  $ ./gradlew web -Pcmd='-d' -Ptabs='tabs/trexfoodlog, tabs/healthcheck'
+  $ ./gradlew web -Pcmd='-d' -Ptabs='tabs/trexfoodlog,tabs/healthcheck'
   ```
 1. This will start separate docker containers with webpack-dev-servers for each of the tabs you pass in to `tabs`.
 1. Your service will now automatically route traffic (when in development mode) to the dev servers and you should see any changes you make appearing live.
