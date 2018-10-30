@@ -1,4 +1,4 @@
-package misk.digester
+package misk.metrics.digester
 
 import java.time.Clock
 import java.time.ZonedDateTime

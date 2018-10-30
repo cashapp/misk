@@ -23,7 +23,7 @@ public final class GetDigestsResponse extends Message<GetDigestsResponse, GetDig
 
   @WireField(
       tag = 1,
-      adapter = "com.squareup.digester.protos.service.MetricFamily#ADAPTER"
+      adapter = "MetricFamily#ADAPTER"
   )
   public final MetricFamily metric_family;
 
