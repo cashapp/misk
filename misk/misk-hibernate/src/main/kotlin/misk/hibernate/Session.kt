@@ -5,6 +5,9 @@ import kotlin.reflect.KClass
 
 interface Session {
   val hibernateSession: org.hibernate.Session
+  /**
+   * @throws IllegalStateException when save is called on a read only session.
+   */
   fun <T : DbEntity<T>> save(entity: T): Id<T>
   fun <T : DbEntity<T>> load(id: Id<T>, type: KClass<T>): T
   fun shards(): Set<Shard>

@@ -10,6 +10,7 @@ import misk.jdbc.map
 import misk.jdbc.uniqueResult
 import misk.logging.getLogger
 import misk.tracing.traceWithSpan
+import org.hibernate.FlushMode
 import org.hibernate.SessionFactory
 import org.hibernate.StaleObjectStateException
 import org.hibernate.exception.LockAcquisitionException
@@ -114,13 +115,15 @@ internal class RealTransacter private constructor(
 
   override fun noRetries(): Transacter = withOptions(options.copy(maxAttempts = 1))
 
+  override fun readOnly(): Transacter = withOptions(options.copy(readOnly = true))
+
   private fun withOptions(options: TransacterOptions): Transacter =
     RealTransacter(qualifier, sessionFactory, config, threadLocalSession, options, tracer)
 
   private fun <T> withSession(lambda: (session: Session) -> T): T {
     check(threadLocalSession.get() == null) { "Attempted to start a nested session" }
 
-    val realSession = RealSession(sessionFactory.openSession(), config)
+    val realSession = RealSession(sessionFactory.openSession(), config, options.readOnly)
     threadLocalSession.set(realSession)
 
     try {
@@ -153,7 +156,8 @@ internal class RealTransacter private constructor(
     val maxAttempts: Int = 2,
     val minRetryDelayMillis: Long = 100,
     val maxRetryDelayMillis: Long = 100,
-    val retryJitterMillis: Long = 400
+    val retryJitterMillis: Long = 400,
+    val readOnly: Boolean = false
   )
 
   companion object {
@@ -164,12 +168,22 @@ internal class RealTransacter private constructor(
 
   internal class RealSession(
     val session: org.hibernate.Session,
-    val config: DataSourceConfig
+    val config: DataSourceConfig,
+    val readOnly: Boolean
   ) : Session {
     override val hibernateSession = session
+    init {
+      if (readOnly) {
+        hibernateSession.isDefaultReadOnly = true
+        hibernateSession.hibernateFlushMode = FlushMode.MANUAL
+      }
+    }
 
     @Suppress("UNCHECKED_CAST")
     override fun <T : DbEntity<T>> save(entity: T): Id<T> {
+      if (readOnly) {
+        throw IllegalStateException("Saving isn't permitted in a read only session.")
+      }
       return when (entity) {
         is DbChild<*, *> -> (session.save(entity) as Gid<*, *>).id
         is DbRoot<*> -> session.save(entity)
