@@ -95,5 +95,4 @@ build
 lib
 dist
 .hash
-hooks.gradle
 ```
