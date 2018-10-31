@@ -75,3 +75,25 @@ Other Notes
 ## Running in Production
 - Run ShadowJar Gradle task in Intellij for urlshortener
 - `$ java -jar {urlshortener jar path}`
+
+## GitIgnore
+
+Add these to your `.gitignore` and you will be happy
+
+```
+.DS_Store
+.git
+**/@misk/web
+cachedUrls
+logs
+*.log
+npm-debug.log*
+coverage
+node_modules
+.npm
+build
+lib
+dist
+.hash
+hooks.gradle
+```
