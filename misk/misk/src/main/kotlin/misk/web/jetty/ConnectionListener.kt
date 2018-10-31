@@ -22,10 +22,6 @@ internal class ConnectionListener(
   private val labels = ConnectionMetrics.forPort(protocol, port)
 
   override fun onOpened(connection: Connection) {
-    log.info {
-      "received new connection from ${connection.endPoint.remoteAddress} with idle timeout ${connection.endPoint.idleTimeout}"
-    }
-
     connections.add(ConnectionKey(connection))
     metrics.activeConnections.labels(*labels).inc()
     metrics.acceptedConnections.labels(*labels).inc()
@@ -35,11 +31,7 @@ internal class ConnectionListener(
     // Force a refresh so that we gather the final stats on the connection
     refreshMetrics()
 
-    log.info {
-      "connection connection from ${connection.endPoint.remoteAddress}}"
-    }
     if (connections.remove(ConnectionKey(connection))) {
-      log.warn { "not tracking connection" }
       metrics.activeConnections.labels(*labels).dec()
     }
   }
@@ -102,9 +94,4 @@ internal class ConnectionListener(
 
     override fun hashCode() = System.identityHashCode(connection)
   }
-
-  companion object {
-    private val log = getLogger<ConnectionListener>()
-  }
-
 }
