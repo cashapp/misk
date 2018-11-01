@@ -1,16 +1,16 @@
-Misk TsLint
----
+## Misk TsLint
+
 ![](https://raw.githubusercontent.com/square/misk/master/misk.png)
 This package provides shared TsLint linting across Misk tab repos.
 
-Getting Started
----
+## Getting Started
+
 ```bash
 $ yarn add @misk/tslint
 ```
 
-TsLint Template
----
+## TsLint Template
+
 Create a `tslint.json` file in the repo root directory with the following:
 
 ```JSON
@@ -19,8 +19,8 @@ Create a `tslint.json` file in the repo root directory with the following:
   }
 ```
 
-Included TsLint Packages
----
+## Included TsLint Packages
+
 From `package.json`:
 
 ```JSON
@@ -35,5 +35,6 @@ From `package.json`:
   tslint-sonarts
 ```
 
-[Releasing](https://github.com/square/misk/blob/master/misk/web/%40misk/RELEASING.md)
----
+## [Releasing](https://github.com/square/misk/blob/master/misk/web/%40misk/RELEASING.md)
+
+## [Changelog (and Breaking Changes)](https://github.com/square/misk/blob/master/misk/web/%40misk/CHANGELOG.md)

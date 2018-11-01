@@ -1,6 +1,6 @@
 {
   "name": "@misk/common",
-  "version": "0.0.52",
+  "version": "0.0.54",
   "description": "Microservice Kontainer Common Libraries, Externals, Styles",
   "author": "Square/Misk Authors (https://github.com/square/misk/graphs/contributors)",
   "main": "lib/web/@misk/common/common.js",
@@ -25,8 +25,8 @@
     "dist": "yarn run lib",
     "docker-build": "yarn run refresh; node node_modules/webpack/bin/webpack.js --config webpack.config.js && node node_modules/webpack/bin/webpack.js --config webpack.config.static.js && node node_modules/webpack/bin/webpack.js --config webpack.config.vendors.js",
     "ci-build": "yarn install && yarn clean && yarn build",
-    "lib": "yarn run refresh; webpack --config webpack.config.js && webpack --config webpack.config.static.js && webpack --config webpack.config.vendors.js",
-    "lint": "echo no lint",
+    "lib": "yarn run refresh; yarn run lint && webpack --config webpack.config.js && webpack --config webpack.config.static.js && webpack --config webpack.config.vendors.js",
+    "lint": "prettier --write --config prettier.config.js \"./src/**/*.{md,css,sass,less,json,js,jsx,ts,tsx}\"",
     "prepare": "yarn run lint && yarn run test && yarn run lib",
     "refresh": "node refreshCachedUrls.js",
     "reinstall": "rm -rf node_modules && yarn install",
@@ -36,28 +36,31 @@
   "dependencies": {
     "@blueprintjs/core": "^3.7.0",
     "@blueprintjs/icons": "^3.2.0",
+    "@emotion/core": "^10.0.0-beta.6",
     "axios": "^0.18.0",
     "connected-react-router": "^4.5.0",
+    "create-emotion-styled": "9.2.8",
     "dayjs": "^1.7.7",
+    "emotion": "^10.0.0-beta.6",
     "history": "^4.7.2",
-    "immutable": "^3.8.2",
-    "react": "^16.5.2",
-    "react-dom": "^16.5.2",
+    "immutable": "^4.0.0-rc.12",
+    "lodash-es": "^4.17.11",
+    "react": "^16.6.0",
+    "react-dom": "^16.6.0",
+    "react-emotion": "^10.0.0-beta.5",
     "react-helmet": "^5.2.0",
-    "react-hot-loader": "^4.3.11",
-    "react-redux": "^5.0.7",
+    "react-hot-loader": "^4.3.12",
+    "react-redux": "^5.1.0",
     "react-router": "^4.3.1",
     "react-router-dom": "^4.3.1",
-    "react-router-redux": "^5.0.0-alpha.9",
     "react-transition-group": "^2.5.0",
-    "redux": "^4.0.0",
+    "redux": "^4.0.1",
     "redux-saga": "^0.16.2",
-    "skeleton-css": "^2.0.4",
-    "styled-components": "^3.4.10"
+    "skeleton-css": "^2.0.4"
   },
   "devDependencies": {
-    "@misk/dev": "^0.0.46",
-    "@misk/tslint": "^0.0.7"
+    "@misk/dev": "^0.0.53",
+    "@misk/tslint": "^0.0.8"
   },
   "miskCachedUrls": {
     "sq-market-font": {

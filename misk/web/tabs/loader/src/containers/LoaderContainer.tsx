@@ -1,10 +1,14 @@
 import { IDashboardTab } from "@misk/common"
-import { OfflineComponent, ResponsiveContainer, TopbarComponent } from "@misk/components"
+import {
+  OfflineComponent,
+  ResponsiveContainer,
+  TopbarComponent
+} from "@misk/components"
 import { RouterState } from "connected-react-router"
 import * as React from "react"
 import { connect } from "react-redux"
 import { Route } from "react-router"
-import styled from "styled-components"
+import styled from "react-emotion"
 import { MountingDivComponent, ScriptComponent } from "../components"
 import { dispatchLoader, ILoaderState, IState } from "../ducks"
 
@@ -32,29 +36,48 @@ class LoaderContainer extends React.Component<ILoaderProps> {
   }
 
   buildTabRouteMountingDiv(tab: IDashboardTab) {
-    return(<Route path={`/_admin/${tab.slug}/`} render={() => <MountingDivComponent tab={tab}/>}/>)
+    return (
+      <Route
+        path={`/_admin/${tab.slug}/`}
+        render={() => <MountingDivComponent tab={tab} />}
+      />
+    )
   }
 
   render() {
     const { adminDashboardTabs, serviceMetadata, error } = this.props.loader
     let unavailableEndpointUrls = ""
-    if (!adminDashboardTabs) { unavailableEndpointUrls += tabsUrl + " " }
-    if (!serviceMetadata) { unavailableEndpointUrls += serviceUrl + " " }
+    if (!adminDashboardTabs) {
+      unavailableEndpointUrls += tabsUrl + " "
+    }
+    if (!serviceMetadata) {
+      unavailableEndpointUrls += serviceUrl + " "
+    }
     if (adminDashboardTabs && serviceMetadata) {
       return (
         <div>
-          <TopbarComponent links={adminDashboardTabs} homeName={serviceMetadata.app_name} homeUrl={serviceMetadata.admin_dashboard_url}/>
+          <TopbarComponent
+            links={adminDashboardTabs}
+            homeName={serviceMetadata.app_name}
+            homeUrl={serviceMetadata.admin_dashboard_url}
+          />
           <TabContainer>
-            {Object.entries(adminDashboardTabs).map(([key,tab]) => (<ScriptComponent key={key} tab={tab}/>))}
+            {Object.entries(adminDashboardTabs).map(([key, tab]) => (
+              <ScriptComponent key={key} tab={tab} />
+            ))}
           </TabContainer>
         </div>
       )
     } else {
       return (
         <div>
-          <TopbarComponent/>
+          <TopbarComponent />
           <TabContainer>
-            <OfflineComponent error={error} title={"Error Loading Multibound Admin Tabs"} endpoint={unavailableEndpointUrls}/>
+            <OfflineComponent
+              error={error}
+              title={"Error Loading Multibound Admin Tabs"}
+              endpoint={unavailableEndpointUrls}
+            />
           </TabContainer>
         </div>
       )
@@ -70,7 +93,10 @@ const mapStateToProps = (state: IState) => ({
 const mapDispatchToProps = {
   getComponent: dispatchLoader.getOneComponent,
   getServiceMetadata: dispatchLoader.getServiceMetadata,
-  getTabs: dispatchLoader.getAllTabs,
+  getTabs: dispatchLoader.getAllTabs
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(LoaderContainer)
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(LoaderContainer)

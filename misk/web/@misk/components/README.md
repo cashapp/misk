@@ -1,30 +1,31 @@
-Misk Components
----
+## Misk Components
+
 ![](https://raw.githubusercontent.com/square/misk/master/misk.png)
 This package provides shared, styled React components across Misk tab repos. The top of each component/container file contains a usage example.
 
-Getting Started
----
+## Getting Started
+
 ```bash
 $ yarn add @misk/components
 ```
 
-Builders
----
+## Builders
+
 - `createApp(routes)`: builder function to create an `<App history={history}/>` component
 - `createIndex(tabSlug, App, Ducks)`: builder function to create bootstrapping objects necessary for `index.tsx`
 
-Components
----
+## Components
+
 - `ErrorCalloutComponent`: Processes a Redux / Axios error and dumps raw JSON for debugging
 - `OfflineComponent`: NonIdealState component for Offline or Loading tab state
 - `PathDebugComponent`: outputs values passed in by props for `hash`, `pathname`, and `search` in React-Router instance
 - `SidebarComponent`: dashboard styled sidebar
 - `TopbarComponent`: dashboard styled topbar
 
-Containers
----
+## Containers
+
 - `ResponsiveContainer`: Responsive container that all tabs and Nav Topbar use to ensure consistent view width
 
-[Releasing](https://github.com/square/misk/blob/master/misk/web/%40misk/RELEASING.md)
----
+## [Releasing](https://github.com/square/misk/blob/master/misk/web/%40misk/RELEASING.md)
+
+## [Changelog (and Breaking Changes)](https://github.com/square/misk/blob/master/misk/web/%40misk/CHANGELOG.md)

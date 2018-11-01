@@ -1,7 +1,11 @@
 import { RouterState } from "connected-react-router"
 import { combineReducers } from "redux"
 import { all, fork } from "redux-saga/effects"
-import { default as ConfigReducer, IConfigState, watchConfigSagas } from "./config"
+import {
+  default as ConfigReducer,
+  IConfigState,
+  watchConfigSagas
+} from "./config"
 export * from "./config"
 
 /**
@@ -22,8 +26,6 @@ export const rootReducer = combineReducers({
 /**
  * Sagas
  */
-export function * rootSaga () {
-  yield all([
-    fork(watchConfigSagas)
-  ])
+export function* rootSaga() {
+  yield all([fork(watchConfigSagas)])
 }

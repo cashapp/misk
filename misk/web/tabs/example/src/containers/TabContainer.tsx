@@ -10,7 +10,7 @@ interface IContainerProps {
   request: () => void
 }
 
-class TabContainer extends React.Component<IContainerProps, {children : any}> {
+class TabContainer extends React.Component<IContainerProps, { children: any }> {
   componentDidMount() {
     this.props.request()
   }
@@ -18,23 +18,27 @@ class TabContainer extends React.Component<IContainerProps, {children : any}> {
   render() {
     const { data } = this.props.example
     if (data) {
-      return (
-        <TabComponent data={data} />
-      )
+      return <TabComponent data={data} />
     } else {
       return (
-        <OfflineComponent title={"Error Loading Example Data"} endpoint={`/all example posts`}/>
+        <OfflineComponent
+          title={"Error Loading Example Data"}
+          endpoint={`/all example posts`}
+        />
       )
     }
   }
 }
 
 const mapStateToProps = (state: IState) => ({
-  example: state.example.toJS(),
+  example: state.example.toJS()
 })
 
 const mapDispatchToProps = {
-  request: dispatchExample.request,
+  request: dispatchExample.request
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(TabContainer)
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(TabContainer)

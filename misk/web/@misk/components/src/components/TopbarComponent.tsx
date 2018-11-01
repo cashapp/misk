@@ -1,9 +1,18 @@
-import { Alignment, Button, Collapse, Icon, Navbar, NavbarDivider, NavbarGroup, NavbarHeading } from "@blueprintjs/core"
+import {
+  Alignment,
+  Button,
+  Collapse,
+  Icon,
+  Navbar,
+  NavbarDivider,
+  NavbarGroup,
+  NavbarHeading
+} from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
 import { IDashboardTab } from "@misk/common"
 import * as React from "react"
 import { Link } from "react-router-dom"
-import styled from "styled-components"
+import styled from "react-emotion"
 import { ResponsiveContainer } from "../containers"
 
 /**
@@ -56,7 +65,7 @@ const MiskNavbarHeading = styled(NavbarHeading)`
   letter-spacing: 0px;
   padding-top: 25px;
   padding-bottom: 27px;
-  color: #cecece
+  color: #cecece;
 `
 
 const MiskLink = styled(Link)`
@@ -78,7 +87,7 @@ const MiskNavbarLink = styled(MiskLink)`
 `
 
 const MiskNavbarDivider = styled(NavbarDivider)`
-  border: none
+  border: none;
 `
 
 const MiskMenuButton = styled(Button)`
@@ -128,7 +137,7 @@ const MiskMenuLink = styled(MiskLink)`
 const MiskMenuCategory = styled.span`
   font-size: 24px;
   color: #9da2a6;
-  letter-spacing: 0px;  
+  letter-spacing: 0px;
   display: block;
 `
 
@@ -145,19 +154,28 @@ export class TopbarComponent extends React.Component<ITopbarProps, {}> {
   public render() {
     const { isOpen } = this.state
     const { homeName, homeUrl, links } = this.props
-    return(
+    return (
       <MiskNavbar>
-        <MiskMenuButton onClick={this.handleClick}><MiskMenuIcon iconSize={32} icon={isOpen ? IconNames.CROSS : IconNames.MENU}/></MiskMenuButton>
+        <MiskMenuButton onClick={this.handleClick}>
+          <MiskMenuIcon
+            iconSize={32}
+            icon={isOpen ? IconNames.CROSS : IconNames.MENU}
+          />
+        </MiskMenuButton>
         <ResponsiveContainer>
           <MiskNavbarGroup align={Alignment.LEFT} className="bp3-dark">
             {this.renderMenuLink(homeName, homeUrl)}
-            <MiskNavbarDivider/>
+            <MiskNavbarDivider />
           </MiskNavbarGroup>
         </ResponsiveContainer>
         <MiskCollapse isOpen={isOpen} keepChildrenMounted={true}>
           <ResponsiveContainer>
             <MiskMenu>
-              {links ? this.renderMenuCategories(links) : <span>Loading...</span>}
+              {links ? (
+                this.renderMenuCategories(links)
+              ) : (
+                <span>Loading...</span>
+              )}
             </MiskMenu>
           </ResponsiveContainer>
         </MiskCollapse>
@@ -167,53 +185,74 @@ export class TopbarComponent extends React.Component<ITopbarProps, {}> {
 
   private renderMenuLink(homeName: string, homeUrl: string) {
     if (homeName && homeUrl) {
-      return (<MiskNavbarLink to={homeUrl}><MiskNavbarHeading>{homeName}</MiskNavbarHeading></MiskNavbarLink>)
+      return (
+        <MiskNavbarLink to={homeUrl}>
+          <MiskNavbarHeading>{homeName}</MiskNavbarHeading>
+        </MiskNavbarLink>
+      )
     } else if (homeName) {
-      return (<MiskNavbarHeading>{homeName}</MiskNavbarHeading>)
+      return <MiskNavbarHeading>{homeName}</MiskNavbarHeading>
     } else {
-      return (<MiskNavbarHeading>Misk</MiskNavbarHeading>)
+      return <MiskNavbarHeading>Misk</MiskNavbarHeading>
     }
   }
 
   private renderMenuCategories(links: IDashboardTab[]) {
-    const categories : Array<[string, IDashboardTab[]]> = Object.entries(this.groupBy(links, "category"))
-    return (categories.map(([categoryName, categoryLinks]) => this.renderMenuCategory(categoryName, categoryLinks)))
+    const categories: Array<[string, IDashboardTab[]]> = Object.entries(
+      this.groupBy(links, "category")
+    )
+    return categories.map(([categoryName, categoryLinks]) =>
+      this.renderMenuCategory(categoryName, categoryLinks)
+    )
   }
 
-  private renderMenuCategory(categoryName: string, categoryLinks: IDashboardTab[]) {
-    const sortedCategoryLinks = this.sortBy(categoryLinks, "name").filter((link: IDashboardTab) => link.category !== "")
+  private renderMenuCategory(
+    categoryName: string,
+    categoryLinks: IDashboardTab[]
+  ) {
+    const sortedCategoryLinks = this.sortBy(categoryLinks, "name").filter(
+      (link: IDashboardTab) => link.category !== ""
+    )
     return (
       <div>
         <MiskMenuCategory>{categoryName}</MiskMenuCategory>
-        <MiskMenuDivider/>
+        <MiskMenuDivider />
         <MiskMenuLinks>
-          {sortedCategoryLinks.map((link: IDashboardTab) => <MiskMenuLink key={link.slug} onClick={this.handleClick} to={link.url_path_prefix}>{link.name}</MiskMenuLink>)}
+          {sortedCategoryLinks.map((link: IDashboardTab) => (
+            <MiskMenuLink
+              key={link.slug}
+              onClick={this.handleClick}
+              to={link.url_path_prefix}
+            >
+              {link.name}
+            </MiskMenuLink>
+          ))}
         </MiskMenuLinks>
       </div>
     )
   }
 
   private handleClick = () => {
-    this.setState({...this.state, isOpen: !this.state.isOpen})
+    this.setState({ ...this.state, isOpen: !this.state.isOpen })
   }
 
-  private groupBy = (items: any, key: any) => items.reduce(
-    (result: any, item: any) => ({
-      ...result,
-      [item[key]]: [
-        ...(result[item[key]] || []),
-        item,
-      ],
-    }),
-    {},
-  )
+  private groupBy = (items: any, key: any) =>
+    items.reduce(
+      (result: any, item: any) => ({
+        ...result,
+        [item[key]]: [...(result[item[key]] || []), item]
+      }),
+      {}
+    )
 
-  private sortBy = (items: any, key: any) => items.sort(
-    ((item1: any, item2: any) => {
-      if (item1[key] < item2[key]) { return -1 }
-      else if (item1[key] > item2[key]) { return 1 }
-      else { return 0 }
+  private sortBy = (items: any, key: any) =>
+    items.sort((item1: any, item2: any) => {
+      if (item1[key] < item2[key]) {
+        return -1
+      } else if (item1[key] > item2[key]) {
+        return 1
+      } else {
+        return 0
+      }
     })
-  )
 }
-  

@@ -1,9 +1,8 @@
 import * as React from "react"
-import styled from "styled-components"
+import styled from "react-emotion"
 import { IConfigResources, IConfigState } from "../ducks"
 
-const Container = styled.div`
-`
+const Container = styled.div``
 
 const ConfigOutput = styled.pre`
   font-family: Menlo, Fira Code;
@@ -11,21 +10,26 @@ const ConfigOutput = styled.pre`
 
 export default class ConfigComponent extends React.PureComponent<IConfigState> {
   renderConfig(resource: IConfigResources) {
-    return(
+    return (
       <ConfigOutput>
-        <h5><strong>{resource.name}</strong></h5>
+        <h5>
+          <strong>{resource.name}</strong>
+        </h5>
         <code>{resource.file}</code>
       </ConfigOutput>
     )
   }
-  
+
   render() {
     const { resources, status } = this.props
-    return(
+    return (
       <Container>
         <h1>Config</h1>
         <p>{status}</p>
-        {resources && Object.entries(resources).map(([name,file]) => this.renderConfig({name, file}))}
+        {resources &&
+          Object.entries(resources).map(([name, file]) =>
+            this.renderConfig({ name, file })
+          )}
       </Container>
     )
   }
