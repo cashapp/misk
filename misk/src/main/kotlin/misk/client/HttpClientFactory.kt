@@ -1,7 +1,7 @@
 package misk.client
 
-import misk.security.ssl.SslLoader
 import misk.security.ssl.SslContextFactory
+import misk.security.ssl.SslLoader
 import okhttp3.OkHttpClient
 import java.net.Proxy
 import java.util.concurrent.TimeUnit
@@ -13,6 +13,7 @@ import javax.net.ssl.X509TrustManager
 class HttpClientFactory {
   @Inject lateinit var sslLoader: SslLoader
   @Inject lateinit var sslContextFactory: SslContextFactory
+  @com.google.inject.Inject(optional = true) lateinit var envoyClientEndpointProvider: EnvoyClientEndpointProvider
 
   /** Returns a client initialized based on `config`. */
   fun create(config: HttpClientEndpointConfig): OkHttpClient {
@@ -32,7 +33,12 @@ class HttpClientFactory {
       val sslContext = sslContextFactory.create(it.cert_store, it.trust_store)
       builder.sslSocketFactory(sslContext.socketFactory, x509TrustManager)
     }
+    config.envoy?.let {
+      builder.socketFactory(
+          UnixDomainSocketFactory(envoyClientEndpointProvider.unixSocket(config.envoy)))
+    }
     builder.proxy(Proxy.NO_PROXY)
+
     return builder.build()
   }
 
