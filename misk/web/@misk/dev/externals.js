@@ -1,42 +1,44 @@
 /**
  * Create Webpack compatible externals object with compatible entries for amd, commonjs, commonjs2, root
  */
-const makeExternals = (inExternals) => {
+const createExternals = inExternals => {
   const outExternals = {}
-  Object.keys(inExternals).map((pkg) => {
+  Object.keys(inExternals).map(pkg => {
     outExternals[pkg] = {
       amd: pkg,
       commonjs: pkg,
       commonjs2: pkg,
-      root: inExternals[pkg],
+      root: inExternals[pkg]
     }
   })
   return outExternals
 }
 
-const vendorExternals = makeExternals({
+const vendorExternals = createExternals({
   "@blueprintjs/core": ["Blueprint", "Core"],
   "@blueprintjs/icons": ["Blueprint", "Icons"],
-  "axios": "Axios",
+  axios: "Axios",
   "connected-react-router": "ConnectedReactRouter",
-  "dayjs": "Dayjs",
-  "history": "HistoryNPM",
-  "immutable": "Immutable",
-  "react": "React",
+  dayjs: "Dayjs",
+  history: "HistoryNPM",
+  immutable: "Immutable",
+  "lodash-es": "_",
+  react: "React",
   "react-dom": "ReactDom",
+  "reaat-emotion": "ReactEmotion",
   "react-helmet": "ReactHelmet",
   "react-hot-loader": "ReactHotLoader",
   "react-redux": "ReactRedux",
   "react-router": "ReactRouter",
   "react-router-dom": "ReactRouterDom",
-  "react-router-redux": "ReactRouterRedux",
-  "redux": "Redux",
+  redux: "Redux",
   "redux-saga": "ReduxSaga",
-  "styled-components": "StyledComponents"
+  "redux-saga/effects": "ReduxSagaEffects"
 })
 
-const miskExternals = makeExternals({
+const miskExternals = createExternals({
+  "@misk/common": ["Misk", "Common"],
   "@misk/components": ["Misk", "Components"]
 })
 
-module.exports = { makeExternals, vendorExternals, miskExternals }
+module.exports = { createExternals, vendorExternals, miskExternals }

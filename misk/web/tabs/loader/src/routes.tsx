@@ -5,7 +5,7 @@ import { LoaderContainer } from "./containers"
 const routes = (
   <div>
     <Switch>
-      <Route component={LoaderContainer}/>
+      <Route component={LoaderContainer} />
     </Switch>
   </div>
 )

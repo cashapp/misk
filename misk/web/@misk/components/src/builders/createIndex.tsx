@@ -6,40 +6,42 @@ import * as React from "react"
 import * as ReactDOM from "react-dom"
 import { AppContainer } from "react-hot-loader"
 import { Provider } from "react-redux"
-import { AnyAction, applyMiddleware, compose, createStore, Reducer } from "redux"
+import {
+  AnyAction,
+  applyMiddleware,
+  compose,
+  createStore,
+  Reducer
+} from "redux"
 import createSagaMiddleware from "redux-saga"
 import { AllEffect } from "redux-saga/effects"
 
 export const createIndex = (
-  tabSlug: string, 
-  App: ({ history }: { history: History}) => JSX.Element, 
+  tabSlug: string,
+  App: ({ history }: { history: History }) => JSX.Element,
   Ducks: {
-    rootReducer: Reducer<any, AnyAction>, 
-    rootSaga: () => IterableIterator<AllEffect>  
-  },
+    rootReducer: Reducer<any, AnyAction>
+    rootSaga: () => IterableIterator<AllEffect>
+  }
 ) => {
   const Window = window as IWindow
 
   Window.Misk.History = Window.Misk.History || createBrowserHistory()
   const history = Window.Misk.History
   const sagaMiddleware = createSagaMiddleware()
-  
-  const composeEnhancer: typeof compose = Window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose
+
+  const composeEnhancer: typeof compose =
+    Window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose
   const store = createStore(
     connectRouter(history)(Ducks.rootReducer),
-    composeEnhancer(
-      applyMiddleware(
-        sagaMiddleware,
-        routerMiddleware(history),
-      ),
-    ),
+    composeEnhancer(applyMiddleware(sagaMiddleware, routerMiddleware(history)))
   )
-  
+
   /**
    * Starts the rootSaga which forks off instances of all sagas used to receive and process actions as they are dispatched (./sagas/index.ts)
    */
   sagaMiddleware.run(Ducks.rootSaga)
-  
+
   const render = () => {
     ReactDOM.render(
       <AppContainer>
@@ -50,16 +52,16 @@ export const createIndex = (
       document.getElementById(tabSlug)
     )
   }
-  
+
   render()
-  
+
   // Hot reloading
   if (module.hot) {
     // Reload components
     module.hot.accept(App as any, () => {
       render()
     })
-  
+
     // Reload reducers
     module.hot.accept(Ducks as any, () => {
       store.replaceReducer(connectRouter(history)(Ducks.rootReducer))
