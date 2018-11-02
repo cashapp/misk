@@ -8,7 +8,7 @@ const { BundleAnalyzerPlugin } = require("webpack-bundle-analyzer")
 const merge = require("webpack-merge")
 
 module.exports = (env, argv, otherConfigFields = {}) => {
-  const { dirname, miskTab } = argv
+  const { dirname, miskTab, bundleAnalyzer = false } = argv
 
   if ("name" in miskTab && "port" in miskTab && "slug" in miskTab) {
     console.log("[MISK] Valid miskTab in package.json")
@@ -137,7 +137,9 @@ module.exports = (env, argv, otherConfigFields = {}) => {
     ].concat(
       env !== "production"
         ? [new webpack.HotModuleReplacementPlugin()]
-        : [BundleAnalyzerPluginConfig, DefinePluginConfig]
+        : [DefinePluginConfig].concat(
+            bundleAnalyzer ? [BundleAnalyzerPluginConfig] : []
+          )
     ),
     externals: { ...vendorExternals, ...miskExternals }
   }

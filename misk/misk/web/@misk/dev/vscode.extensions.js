@@ -4,6 +4,6 @@ module.exports = () => {
     "eg2.tslint",
     "esbenp.prettier-vscode",
     "giladgray.theme-blueprint",
-    "timonwong.shellcheck",
+    "timonwong.shellcheck"
   ]
 }

@@ -230,10 +230,10 @@
     reflect-metadata "^0.1.12"
     tslib "^1.8.1"
 
-"@misk/dev@^0.0.53":
-  version "0.0.53"
-  resolved "https://registry.yarnpkg.com/@misk/dev/-/dev-0.0.53.tgz#1e60e63b4fd666830e743adc3947ebad2986f0cd"
-  integrity sha512-u6XfvQbdcI9GwoHUWWtWUULk9/S7wVfGt2unzq5ZXqfsmkuYC7pSmC35f9oYaYvtzSlc+pgIPX5SrcN8ZEGXKA==
+"@misk/dev@^0.0.57":
+  version "0.0.57"
+  resolved "https://registry.yarnpkg.com/@misk/dev/-/dev-0.0.57.tgz#83ccaed13a1fbd4a832694c9eb36e313b1b963fc"
+  integrity sha512-nK38CGJnAlr+D7sY+BSeNcILQSVLjHqZs6lyij+vm7AsLmsFVHDKVBXGh6y+L6nxF8TuwunhXe++k8oxkwn9zA==
   dependencies:
     "@types/lodash-es" "^4.17.1"
     "@types/node" "^10.11.7"

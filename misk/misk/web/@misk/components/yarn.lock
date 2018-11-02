@@ -230,17 +230,19 @@
     reflect-metadata "^0.1.12"
     tslib "^1.8.1"
 
-"@misk/common@^0.0.53":
-  version "0.0.53"
-  resolved "https://registry.yarnpkg.com/@misk/common/-/common-0.0.53.tgz#67a7d3c5a14244029d461bb416e32b4b3d22269c"
-  integrity sha512-uo2ceBOrVXOCgr++BpXPMks8PSz7oe2aE03T4Whs1TxEhu23fOrGnvUnt2qc+d5bOCOdCL9AlGbVmAAyngjJzg==
+"@misk/common@^0.0.55":
+  version "0.0.55"
+  resolved "https://registry.yarnpkg.com/@misk/common/-/common-0.0.55.tgz#967e54080fd43afade41d5f1347ab74800980071"
+  integrity sha512-kIGg8Zmo7u9rMNyrX99vtw+/fji4tagDm5Onj0H2nFnu5nCOWcB5rxThkFKl7Li3rJ0Ls1f0D/FhkB1VvqCI4g==
   dependencies:
     "@blueprintjs/core" "^3.7.0"
     "@blueprintjs/icons" "^3.2.0"
     "@emotion/core" "^10.0.0-beta.6"
     axios "^0.18.0"
     connected-react-router "^4.5.0"
+    create-emotion-styled "9.2.8"
     dayjs "^1.7.7"
+    emotion "^10.0.0-beta.6"
     history "^4.7.2"
     immutable "^4.0.0-rc.12"
     lodash-es "^4.17.11"
@@ -257,10 +259,10 @@
     redux-saga "^0.16.2"
     skeleton-css "^2.0.4"
 
-"@misk/dev@^0.0.53":
-  version "0.0.53"
-  resolved "https://registry.yarnpkg.com/@misk/dev/-/dev-0.0.53.tgz#1e60e63b4fd666830e743adc3947ebad2986f0cd"
-  integrity sha512-u6XfvQbdcI9GwoHUWWtWUULk9/S7wVfGt2unzq5ZXqfsmkuYC7pSmC35f9oYaYvtzSlc+pgIPX5SrcN8ZEGXKA==
+"@misk/dev@^0.0.57":
+  version "0.0.57"
+  resolved "https://registry.yarnpkg.com/@misk/dev/-/dev-0.0.57.tgz#83ccaed13a1fbd4a832694c9eb36e313b1b963fc"
+  integrity sha512-nK38CGJnAlr+D7sY+BSeNcILQSVLjHqZs6lyij+vm7AsLmsFVHDKVBXGh6y+L6nxF8TuwunhXe++k8oxkwn9zA==
   dependencies:
     "@types/lodash-es" "^4.17.1"
     "@types/node" "^10.11.7"

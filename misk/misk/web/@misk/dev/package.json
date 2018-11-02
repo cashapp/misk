@@ -1,6 +1,6 @@
 {
   "name": "@misk/dev",
-  "version": "0.0.56",
+  "version": "0.0.57",
   "description": "Microservice Kontainer Development Libraries",
   "author": "Square/Misk Authors (https://github.com/square/misk/graphs/contributors)",
   "main": "lib/web/@misk/dev/index.js",
@@ -9,9 +9,10 @@
     "url": "git@github.com:square/misk.git"
   },
   "scripts": {
-    "build": "mkdir -p lib/web/@misk/dev && cp package.json README.md index.js externals.js prettier.config.base.js tsconfig.base.json vscode.extensions.js vscode.settings.js webpack.config.tab.js lib/web/@misk/dev",
+    "build": "yarn run lint && mkdir -p lib/web/@misk/dev && cp *.{json,js,md} lib/web/@misk/dev",
     "clean": "rm -rf lib node_modules package-lock.json yarn.lock",
     "ci-build": "yarn clean && yarn build",
+    "lint": "../common/node_modules/prettier/bin-prettier.js --write --config prettier.config.js \"*.{md,css,sass,less,json,js,jsx,ts,tsx}\"",
     "prepare": "yarn ci-build"
   },
   "dependencies": {

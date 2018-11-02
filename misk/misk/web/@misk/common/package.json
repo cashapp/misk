@@ -1,6 +1,6 @@
 {
   "name": "@misk/common",
-  "version": "0.0.54",
+  "version": "0.0.55",
   "description": "Microservice Kontainer Common Libraries, Externals, Styles",
   "author": "Square/Misk Authors (https://github.com/square/misk/graphs/contributors)",
   "main": "lib/web/@misk/common/common.js",
@@ -59,7 +59,7 @@
     "skeleton-css": "^2.0.4"
   },
   "devDependencies": {
-    "@misk/dev": "^0.0.53",
+    "@misk/dev": "^0.0.57",
     "@misk/tslint": "^0.0.8"
   },
   "miskCachedUrls": {
