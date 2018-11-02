@@ -1,6 +1,6 @@
 FROM node:alpine
 
-RUN apk add --no-cache tini
+RUN apk add --no-cache tini python python2 alpine-sdk
 
 WORKDIR /tmp/web/
 
