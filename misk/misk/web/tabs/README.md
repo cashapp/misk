@@ -92,50 +92,38 @@
 
 ## Configuring the Misk Service
 
-- Add the following multibindings to the appropriate KAbstractModule.
+- Add the following multibindings to a KAbstractModule that will not be included with Testing Modules.
 
-  - Create a new module for the tab named `misk/src/main/kotlin/misk/web/metadata/{TabName}MetadataModule` and add the below multibindings to it. Install the tab module in the respective location:
-    - If the tab is part of base `Misk`, then install that module in the list of tabs in `misk/src/main/kotlin/misk/web/AdminDashboardModule.kt`.
-    - Else If it's a service specific tab, then add to your main service module (ie. for a `UrlShortenerFrontend` tab, install it in `UrlShortenerServiceModule`).
-    - Else, install it in your main service module.
+  - If the tab is part of base `Misk`, then install that module in the list of tabs in `misk/src/main/kotlin/misk/web/AdminDashboardModule.kt`.
+  - Else If it's a service specific tab, then add to your main service module (ie. for a `UrlShortenerFrontend` tab, install it in `UrlShortenerServiceModule`).
+  - Else, install it in your main service module.
 
   ```Kotlin
-  multibind<WebActionEntry>().toInstance(WebActionEntry<TRexFoodLogAction>())
-  multibind<AdminTab>().toInstance(AdminTab(
-      name = "T-Rex Food Log",
-      slug = "trexfoodlog",
-      url_path_prefix = "/_admin/trexfoodlog/",
-      category = "T-Rex"
-  ))
-  multibind<StaticResourceEntry>()
-      .toInstance(StaticResourceEntry("/_tab/trexfoodlog/", "classpath:/web/_tab/trexfoodlog"))
-  ...
-  if (environment == Environment.DEVELOPMENT) {
-    ...
-    multibind<WebActionEntry>().toInstance(
-      WebActionEntry<WebProxyAction>("/_tab/trexfoodlog/"))
-    multibind<WebProxyEntry>().toInstance(
-      WebProxyEntry("/_tab/trexfoodlog/", "http://localhost:30420/"))
-    ...
-  } else {
-    ...
-    multibind<WebActionEntry>().toInstance(
-      WebActionEntry<StaticResourceAction>("/_tab/trexfoodlog/"))
-    ...
-  }
+  // Tab API Endpoints
+  multibind<WebActionEntry>().toInstance(WebActionEntry<ConfigAdminAction>())
+  // Show tab in menu
+  multibind<DashboardTab, AdminDashboardTab>().toInstance(DashboardTab(
+        name = "Config",
+        slug = "trexfoodlog",
+        url_path_prefix = "/_admin/trexfoodlog/",
+        category = "Container Admin"
+        ))
+  // Wire up tab resources (static and web proxy dev-server)
+  install(WebTabResourceModule(
+        environment = environment,
+        slug = "trexfoodlog",
+        web_proxy_url = "http://localhost:30420/"
+        ))
   ```
 
   - The following explains why each multibinding is used:
-    - WebActionEntry: Installs and configures a WebAction with optional prefix.
-    - AdminTab: Metadata of the tab that is used to generate dashbaord menus and other views.
-    - WebProxyAction: an endpoint that is used in tab development to forward tab requests to a Webpack-Dev-Server which is continuously building the tab as you edit.
-    - WebProxyEntry: Binds a WebProxyAction to a specific `url_prefix` to match on and a URL to forward matching requests to. This is usually a local port for the tab's Webpack-Dev-Server
-    - StaticResourceAction: returns the most recently compiled web code from either the `classpath` or from the jar.
-    - StaticResourceEntry: Binds a StaticResourceAction to a url_prefix and a resource location to find the requested web assets in the `classpath` or jar. This should be bound regardless of environment since `WebProxyAction` will fall back to look at static resources if a Webpack-Dev-Server is not running.
-  - Environment Differences
-    - Live Editing a Tab: Use Webpack-Dev-Server in the specific tab you're editing to see edits live in the browser. The service should be run with Development environment and WebProxyAction bound so that all requests attempt to find a Webpack-Dev-Server. If requests fail, they return any matching static resources from `classpath` or jar. This is why a StaticResourceEntry must be bound regardless of environment.
-    - In Development Mode but not Editing: WebProxyAction will still be bound but any requests that do not find a Webpack-Dev-Server will fall back to the previously compiled static resources in `classpath` or jar.
-    - In Production: All web assets are served by StaticResourceAction from jar.
+    - WebActionEntry: Installs and configures a WebAction with optional prefix, for binding any API endpoints used in the Tab.
+    - DashboardTab: Metadata of the tab that is used to generate dashbaord menus and other views.
+    - WebTabResourcesModule: Binds the location of the compiled web code and dev-server so the tab code can be served through the service.
+  - WebTabResourceModule Environment Differences
+    - Live Editing a Tab: Use `./gradlew web -Pcmd='-d' -Ptabs='tabs/trexfoodlog'` to start a Webpack-Dev-Server for the specific tab you're editing to see edits live in the browser. This will only work in Development environment. If requests to the dev-server fail, service returns any matching static resources from `classpath` or jar.
+    - In Development Mode but not Editing: Use `./gradlew web -Ptabs='tabs/trexfoodlog'` to do a tab build. Proxy web server will still be attempted to be reached but failed requests will return the most recently built tab code from `classpath` or jar.
+    - In Production: All web assets are served from jar.
 
 ## Adding your Tab Webpack Build to Gradle
 
