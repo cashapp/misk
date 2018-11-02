@@ -2,12 +2,11 @@ package misk.metrics.digester
 
 import misk.metrics.Histogram
 import misk.metrics.HistogramRegistry
-import java.lang.StringBuilder
 
 /** DigestMetric contains the contents of an individual metrics within a histogram */
 class DigestMetric(
-  val digest: SlidingWindowDigest<*>,
-  val labels: List<String>
+  internal val digest: SlidingWindowDigest<*>,
+  private val labels: List<String>
 ) {
   /** Adds an observation to the metric */
   fun observe(value: Double) {
@@ -93,7 +92,7 @@ class TDigestHistogramRegistry <T : TDigest<T>> constructor(
             fun() = VeneurDigest())
   ): HistogramRegistry {
 
-  val histograms: MutableMap<String, TDigestHistogram<T>> = mutableMapOf()
+  private val histograms: MutableMap<String, TDigestHistogram<T>> = mutableMapOf()
 
   /** Creates and returns a new histogram. Histogram is registered within the Registry */
   override fun newHistogram(
