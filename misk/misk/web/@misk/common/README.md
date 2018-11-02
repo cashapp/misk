@@ -1,24 +1,25 @@
-Misk Common
----
+## Misk Common
+
 ![](https://raw.githubusercontent.com/square/misk/master/misk.png)
 This package provides shared libraries, externals, and styles across Misk tab repos.
 
-Getting Started
----
+## Getting Started
+
 ```bash
 $ yarn add @misk/common
 ```
 
-Automatic Inclusion
----
+## Automatic Inclusion
+
 - If your Webpack config builds off of a template in `@misk/dev`, `vendors.js` and `styles.js` will automatically be included in the build of that repo.
 - If your Webpack config does not build off of a template in `@misk/dev`, use the Manual Inclusion steps below.
 
-Manual Inclusion
----
+## Manual Inclusion
+
 - Using the common vendors libraries and styles. We use [`copy-webpack-plugin`](https://github.com/webpack-contrib/copy-webpack-plugin) to copy the compiled `vendor.js` and `styles.js` files into build folder.
+
   - Install [`copy-webpack-plugin`](https://github.com/webpack-contrib/copy-webpack-plugin)
-    
+
     ```bash
     npm i -D copy-webpack-plugin
     ```
@@ -35,13 +36,13 @@ Manual Inclusion
       ...
       plugins: [
         new CopyWebpackPlugin(
-          [{ from: './node_modules/@misk/common/lib' }], 
+          [{ from: './node_modules/@misk/common/lib' }],
           { debug: 'info', copyUnmodified: true }
         )
       ],
     }
     ```
-  
+
   - Add the following to your `index.html` to import `styles.js` and `vendors.js`
 
     ```HTML
@@ -57,8 +58,8 @@ Manual Inclusion
     </body>
     ```
 
-Included Libraries
----
+## Included Libraries
+
 From `package.json`:
 
 ```
@@ -84,8 +85,8 @@ From `package.json`:
   styled-components
 ```
 
-Included Styles
----
+## Included Styles
+
 ```Typescript
   import '../node_modules/@blueprintjs/core/lib/css/blueprint.css'
   import '../node_modules/normalize.css/normalize.css'
@@ -93,17 +94,19 @@ Included Styles
   import './styles/misk-common.css'
 ```
 
-Contributing
----
+## Contributing
+
 #Adding a new package
+
 - `yarn add {package}` to add the package to `package.json`
 - Add package to `vendorExternals` in `@misk/dev/externals.js`
 - Add window to javascript require include in `src/vendors.js`
 - Update `README.md` with a copy of the updated `package.json` list of packages
 
 #Adding a Cached Remote Asset
+
 - There are sometimes cases where remote assets should be cached in order to be included in the single line imports of `vendors.js` or `styles.js`
-- Add a new task to `package.json` under the metadata key   `"miskCachedUrls"` with the format as follows
+- Add a new task to `package.json` under the metadata key `"miskCachedUrls"` with the format as follows
   ```JSON
   "miskCachedUrls": {
     "taskname": {
@@ -119,11 +122,12 @@ Contributing
 - `yarn run refresh` initiates the download of all declared `"miskCachedUrls"` using code in `./refreshCachedUrls.js`
 - Cached files are refreshed on every package publish to NPM
 
-Webpack Configs
----
+## Webpack Configs
+
 - `webpack.config.js`: Exports common variables and functions
 - `webpack.static.config.js`: Exports common styles file
 - `webpack.vendor.config.js`: Exports common vendors library file
 
-[Releasing](https://github.com/square/misk/blob/master/misk/web/%40misk/RELEASING.md)
----
+## [Releasing](https://github.com/square/misk/blob/master/misk/web/%40misk/RELEASING.md)
+
+## [Changelog (and Breaking Changes)](https://github.com/square/misk/blob/master/misk/web/%40misk/CHANGELOG.md)

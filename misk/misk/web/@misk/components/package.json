@@ -1,6 +1,6 @@
 {
   "name": "@misk/components",
-  "version": "0.0.68",
+  "version": "0.0.70",
   "description": "Microservice Kontainer Common Components",
   "author": "Square/Misk Authors (https://github.com/square/misk/graphs/contributors)",
   "main": "lib/web/@misk/components/components.js",
@@ -23,18 +23,18 @@
     "dev": "yarn run lib; yarn run updateDevCache",
     "dist": "yarn run lib",
     "ci-build": "yarn install && yarn clean && yarn build",
-    "lib": "webpack",
-    "lint": "echo no lint",
+    "lib": "yarn run lint && webpack",
+    "lint": "prettier --write --config prettier.config.js \"./src/**/*.{md,css,sass,less,json,js,jsx,ts,tsx}\"",
     "prepare": "yarn run lint && yarn run test && yarn run lib",
     "reinstall": "rm -rf node_modules && yarn install",
     "updateDevCache": "cd ..; ./updateLocalCache.sh",
     "test": "echo no tests"
   },
   "dependencies": {
-    "@misk/common": "^0.0.52"
+    "@misk/common": "^0.0.53"
   },
   "devDependencies": {
-    "@misk/dev": "^0.0.46",
-    "@misk/tslint": "^0.0.7"
+    "@misk/dev": "^0.0.53",
+    "@misk/tslint": "^0.0.8"
   }
 }

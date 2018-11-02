@@ -3,8 +3,11 @@ export interface IAction<T, P> {
   readonly payload?: P
 }
 
-export function createAction<T extends string, P>(type: T, payload: P): IAction<T,P> {
-  return {type, payload}
+export function createAction<T extends string, P>(
+  type: T,
+  payload: P
+): IAction<T, P> {
+  return { type, payload }
 }
 
 export const errorMessage = (error: any) => {
@@ -14,9 +17,10 @@ export const errorMessage = (error: any) => {
 
   let code = error.errorCode
   if (!code) {
-    code = error.response && error.response.status === 401
-      ? "Unauthorized"
-      : "InternalServerError"
+    code =
+      error.response && error.response.status === 401
+        ? "Unauthorized"
+        : "InternalServerError"
   }
 
   return code

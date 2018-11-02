@@ -1,6 +1,6 @@
 {
   "name": "@misk/tslint",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "Microservice Kontainer TsLint",
   "author": "Square/Misk Authors (https://github.com/square/misk/graphs/contributors)",
   "main": "lib/web/@misk/tslint/tslint.base.json",

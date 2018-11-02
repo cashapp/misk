@@ -39,7 +39,7 @@ const defaultState: IDefaultState = fromJS({
   data: List([]),
   error: null,
   loading: false,
-  success: false,
+  success: false
 })
 
 /**
@@ -47,7 +47,7 @@ const defaultState: IDefaultState = fromJS({
  */
 enum IBinderKeys {
   NavTopbarMenu = "NavTopbarMenu",
-  TabEntry = "TabEntry",
+  TabEntry = "TabEntry"
 }
 
 interface IBinder {
@@ -72,4 +72,14 @@ interface IWindow extends Window {
   MiskBinders: any
 }
 
-export { IWebTab, IDashboardTab, IAdminDashboardTab, IServiceMetadata, defaultState, IDefaultState, IBinder, IBinderKeys, IWindow }
+export {
+  IWebTab,
+  IDashboardTab,
+  IAdminDashboardTab,
+  IServiceMetadata,
+  defaultState,
+  IDefaultState,
+  IBinder,
+  IBinderKeys,
+  IWindow
+}

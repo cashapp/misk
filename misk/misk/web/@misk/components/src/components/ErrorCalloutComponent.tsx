@@ -1,13 +1,13 @@
 import { Callout } from "@blueprintjs/core"
 import * as React from "react"
-import styled from "styled-components"
+import styled from "react-emotion"
 
 /**
  * <ErrorCalloutComponent error={props.error}/>
  */
 
 export interface IError {
-  [key: string]: any   
+  [key: string]: any
 }
 
 export interface IErrorCalloutProps {
@@ -27,7 +27,9 @@ const generateStatus = (props: IErrorCalloutProps) => {
 }
 
 const generateDescription = (props: IErrorCalloutProps) => {
-  const statusText = props.error.response.statusText ? `${props.error.response.statusText}. ` : ""
+  const statusText = props.error.response.statusText
+    ? `${props.error.response.statusText}. `
+    : ""
   const data = props.error.response.data ? `${props.error.response.data}. ` : ""
   return statusText + data
 }
@@ -37,7 +39,10 @@ const generateUrl = (props: IErrorCalloutProps) => {
 }
 
 export const ErrorCalloutComponent = (props: IErrorCalloutProps) => (
-  <ErrorCallout title={`${generateStatus(props)} ${generateDescription(props)}`} intent="danger">
+  <ErrorCallout
+    title={`${generateStatus(props)} ${generateDescription(props)}`}
+    intent="danger"
+  >
     {generateUrl(props)}
     <RawError>{JSON.stringify(props.error, null, 2)}</RawError>
   </ErrorCallout>
