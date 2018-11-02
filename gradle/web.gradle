@@ -19,7 +19,7 @@ task web(type: Exec) {
     return packageJson.miskTab.port
   }
 
-  def generateDockerRunCommand = { service, project, projectPath, path, cmd, daemon="-d", image = "squareup/misk-web:0.0.1" ->
+  def generateDockerRunCommand = { service, project, projectPath, path, cmd, daemon="-d", image = "squareup/misk-web:0.0.2" ->
     def containerName = "${generateDockerContainerName(service, project, path)}"
     def port = ""
     if (path.startsWith("/tabs")) {
