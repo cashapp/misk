@@ -62,11 +62,14 @@ class TypedHttpClientModule<T : Any>(
     @Inject(optional=true)
     private val tracer: Tracer? = null
 
+    @Inject
+    private lateinit var httpClientConfigUrlProvider: HttpClientConfigUrlProvider
+
     override fun get(): T {
       val okhttp = httpClientProvider.get()
       val endpointConfig = httpClientsConfig[name]
       val retrofit = Retrofit.Builder()
-          .baseUrl(endpointConfig.url)
+          .baseUrl(httpClientConfigUrlProvider.getUrl(endpointConfig))
           .build()
 
       val invocationHandler = ClientInvocationHandler(

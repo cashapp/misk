@@ -35,16 +35,16 @@ class HttpClientModule constructor(
     private val name: String,
     private val httpClientProvider: Provider<OkHttpClient>
   ) : Provider<ProtoMessageHttpClient> {
-    @Inject
-    lateinit var moshi: Moshi
-
-    @Inject
-    lateinit var httpClientsConfig: HttpClientsConfig
+    @Inject lateinit var moshi: Moshi
+    @Inject lateinit var httpClientsConfig: HttpClientsConfig
+    @Inject lateinit var httpClientConfigUrlProvider: HttpClientConfigUrlProvider
 
     override fun get(): ProtoMessageHttpClient {
       val endpointConfig = httpClientsConfig[name]
       val httpClient = httpClientProvider.get()
-      return ProtoMessageHttpClient(endpointConfig.url, moshi, httpClient)
+
+      return ProtoMessageHttpClient(
+          httpClientConfigUrlProvider.getUrl(endpointConfig), moshi, httpClient)
     }
   }
 }
