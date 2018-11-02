@@ -88,7 +88,7 @@
 
 ---
 
--
+- Full guide coming soon...
 
 ## Configuring the Misk Service
 
@@ -100,13 +100,13 @@
 
   ```Kotlin
   // Tab API Endpoints
-  multibind<WebActionEntry>().toInstance(WebActionEntry<ConfigAdminAction>())
+  multibind<WebActionEntry>().toInstance(WebActionEntry<TRexFoodAction>())
   // Show tab in menu
   multibind<DashboardTab, AdminDashboardTab>().toInstance(DashboardTab(
-        name = "Config",
+        name = "T-Rex Food Log",
         slug = "trexfoodlog",
         url_path_prefix = "/_admin/trexfoodlog/",
-        category = "Container Admin"
+        category = "Dinosaurs"
         ))
   // Wire up tab resources (static and web proxy dev-server)
   install(WebTabResourceModule(

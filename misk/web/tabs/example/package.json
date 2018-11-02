@@ -12,11 +12,11 @@
     "test": "echo no lint"
   },
   "dependencies": {
-    "@misk/common": "^0.0.54",
-    "@misk/components": "^0.0.70"
+    "@misk/common": "^0.0.55",
+    "@misk/components": "^0.0.71"
   },
   "devDependencies": {
-    "@misk/dev": "^0.0.53",
+    "@misk/dev": "^0.0.57",
     "@misk/tslint": "^0.0.8"
   },
   "miskTab": {

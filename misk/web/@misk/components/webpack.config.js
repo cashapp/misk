@@ -2,6 +2,8 @@ const path = require("path")
 const MiskDev = require("@misk/dev")
 const { BundleAnalyzerPlugin } = require("webpack-bundle-analyzer")
 
+const bundleAnalyzer = false
+
 module.exports = {
   mode: "production",
   entry: {
@@ -35,14 +37,16 @@ module.exports = {
   resolve: {
     extensions: [".ts", ".tsx", ".js", ".jsx", ".json"]
   },
-  plugins: [
-    new BundleAnalyzerPlugin({
-      analyzerMode: "static",
-      reportFilename: "bundle-analyzer-report-components.html",
-      statsFilename: "bundle-analyzer-report-components.json",
-      generateStatsFile: true,
-      openAnalyzer: false
-    })
-  ],
+  plugins: bundleAnalyzer
+    ? [
+        new BundleAnalyzerPlugin({
+          analyzerMode: "static",
+          reportFilename: "bundle-analyzer-report-common.html",
+          statsFilename: "bundle-analyzer-report-common.json",
+          generateStatsFile: true,
+          openAnalyzer: false
+        })
+      ]
+    : [],
   externals: MiskDev.vendorExternals
 }

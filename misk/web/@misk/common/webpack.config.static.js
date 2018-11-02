@@ -1,6 +1,8 @@
 const path = require("path")
 const { BundleAnalyzerPlugin } = require("webpack-bundle-analyzer")
 
+const bundleAnalyzer = false
+
 module.exports = {
   name: "static",
   mode: "production",
@@ -20,13 +22,15 @@ module.exports = {
       }
     ]
   },
-  plugins: [
-    new BundleAnalyzerPlugin({
-      analyzerMode: "static",
-      reportFilename: "bundle-analyzer-report-static.html",
-      statsFilename: "bundle-analyzer-report-static.json",
-      generateStatsFile: true,
-      openAnalyzer: false
-    })
-  ]
+  plugins: bundleAnalyzer
+    ? [
+        new BundleAnalyzerPlugin({
+          analyzerMode: "static",
+          reportFilename: "bundle-analyzer-report-common.html",
+          statsFilename: "bundle-analyzer-report-common.json",
+          generateStatsFile: true,
+          openAnalyzer: false
+        })
+      ]
+    : []
 }
