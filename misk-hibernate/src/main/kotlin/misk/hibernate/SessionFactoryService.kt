@@ -149,6 +149,14 @@ internal class SessionFactoryService(
       }
       value.typeParameters.setField("jsonColumnField", field)
     }
+    else if (field.isAnnotationPresent(ProtoColumn::class.java)) {
+      value.typeName = ProtoColumnType::class.java.name
+
+      if (value.typeParameters == null) {
+        value.typeParameters = Properties()
+      }
+      value.typeParameters.setField("protoColumnField", field)
+    }
   }
 
   /** Returns a custom user type for `propertyType`, or null if the user type should be built-in. */
