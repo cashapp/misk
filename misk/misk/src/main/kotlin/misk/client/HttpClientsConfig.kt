@@ -20,6 +20,7 @@ data class HttpClientsConfig(
 
     return HttpClientEndpointConfig(
         endpointConfig.url,
+        endpointConfig.envoy,
         connectTimeout = endpointConfig.connectTimeout ?: defaultConnectTimeout,
         writeTimeout = endpointConfig.writeTimeout ?: defaultWriteTimeout,
         readTimeout = endpointConfig.readTimeout ?: defaultReadTimeout,
@@ -34,10 +35,14 @@ data class HttpClientSSLConfig(
 )
 
 data class HttpClientEndpointConfig(
-  val url: String,
+  val url: String? = null,
+  val envoy: HttpClientEnvoyConfig? = null,
   val connectTimeout: Duration? = null,
   val writeTimeout: Duration? = null,
   val readTimeout: Duration? = null,
   val ssl: HttpClientSSLConfig? = null
 )
 
+data class HttpClientEnvoyConfig(
+  val app: String
+)

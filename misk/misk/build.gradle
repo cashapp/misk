@@ -86,6 +86,7 @@ dependencies {
   compile dep.jaxbApi
   compile dep.prometheusClient
   compile dep.prometheusHotspot
+  compile dep.jnrUnixsocket
 
   testCompile dep.kotlinxCoroutines
   testCompile dep.mockitoCore
