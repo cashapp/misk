@@ -148,7 +148,7 @@ Adjust the template below to fit your service's file structure and to use the mo
 ```Gradle
   import groovy.json.JsonSlurper
 
-  apply from: "https://raw.githubusercontent.com/square/misk/100bb1945623a6f28b8e000b2e4f227cd8af1041/gradle/web.gradle"
+  apply from: "https://raw.githubusercontent.com/square/misk/91372d3c46e8b12061356b10ae6dd8a4c3c019a4/gradle/web.gradle"
 
   ...
 
