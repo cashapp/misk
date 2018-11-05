@@ -1,6 +1,6 @@
 FROM node:alpine
 
-RUN apk add --no-cache tini python python2 alpine-sdk
+RUN apk add --no-cache tini
 
 WORKDIR /tmp/web/
 
@@ -8,13 +8,14 @@ WORKDIR /tmp/web/
 RUN yarn add \
     --pure-lockfile \
     --non-interactive \
+    --modules-folder /node_modules \
       @misk/common \
       @misk/components \
       @misk/dev \
       @misk/tslint \
-  && rm -rf /tmp/web/node_modules \
-  && yarn global add cross-env webpack webpack-cli webpack-dev-server
+  && yarn global add cross-env prettier webpack webpack-cli webpack-dev-server
 
+ENV NODE_PATH='/node_modules'
 COPY misk-web /bin/
 WORKDIR /web
 ENTRYPOINT ["/sbin/tini", "--"]

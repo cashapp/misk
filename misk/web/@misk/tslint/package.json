@@ -11,8 +11,8 @@
   "scripts": {
     "build": "mkdir -p lib/web/@misk/tslint && cp package.json README.md tslint.base.json lib/web/@misk/tslint",
     "clean": "rm -rf lib node_modules package-lock.json yarn.lock",
-    "ci-build": "yarn clean && yarn build",
-    "prepare": "yarn ci-build"
+    "ci-build": "yarn run clean && yarn run build",
+    "prepare": "yarn run ci-build"
   },
   "dependencies": {
     "tslint": "^5.11.0",
