@@ -1,6 +1,6 @@
 import { Callout } from "@blueprintjs/core"
 import * as React from "react"
-import styled from "react-emotion"
+import styled from "styled-components"
 
 /**
  * <ErrorCalloutComponent error={props.error}/>

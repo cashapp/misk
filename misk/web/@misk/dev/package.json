@@ -1,6 +1,6 @@
 {
   "name": "@misk/dev",
-  "version": "0.0.57",
+  "version": "0.0.60",
   "description": "Microservice Kontainer Development Libraries",
   "author": "Square/Misk Authors (https://github.com/square/misk/graphs/contributors)",
   "main": "lib/web/@misk/dev/index.js",
@@ -25,6 +25,7 @@
     "@types/react-redux": "^6.0.9",
     "@types/react-router": "^4.0.31",
     "@types/react-router-dom": "^4.3.1",
+    "@types/styled-components": "^4.0.3",
     "@types/webpack": "^4.4.16",
     "@types/webpack-env": "^1.13.6",
     "awesome-typescript-loader": "^5.2.1",
