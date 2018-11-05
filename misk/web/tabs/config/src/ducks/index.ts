@@ -1,5 +1,10 @@
-import { RouterState } from "connected-react-router"
-import { combineReducers } from "redux"
+import {
+  connectRouter,
+  LocationChangeAction,
+  RouterState
+} from "connected-react-router"
+import { History } from "history"
+import { combineReducers, Reducer } from "redux"
 import { all, fork } from "redux-saga/effects"
 import {
   default as ConfigReducer,
@@ -13,15 +18,17 @@ export * from "./config"
  */
 export interface IState {
   config: IConfigState
-  router: RouterState
+  router: Reducer<RouterState, LocationChangeAction>
 }
 
 /**
  * Reducers
  */
-export const rootReducer = combineReducers({
-  config: ConfigReducer
-})
+export const rootReducer = (history: History) =>
+  combineReducers({
+    config: ConfigReducer,
+    router: connectRouter(history)
+  })
 
 /**
  * Sagas
