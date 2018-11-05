@@ -1,5 +1,36 @@
 ## Breaking Changes in @misk packages
 
+- 2018-11-05: `@misk/common@^0.0.59`, `@misk/components@^0.0.76`, `@misk/dev@^0.0.60`, `@misk/tslint^@0.0.10`. Revert back to StyledComponents because of difficulties in downstream migrations. Upgrade to `connected-react-router@^5.0.0`.
+
+  Replace all imports of `react-emotion` with `styled-components`.
+
+  In `src/ducks/index.ts` update `rootReducer` and `IState` to the following
+
+  ```Typescript
+  import {
+    connectRouter,
+    LocationChangeAction,
+    RouterState
+  } from "connected-react-router"
+  import { History } from "history"
+  import { combineReducers, Reducer } from "redux"
+
+  ...
+
+  export interface IState {
+    loader: ILoaderState
+    router: Reducer<RouterState, LocationChangeAction>
+  }
+
+  ...
+
+  export const rootReducer = (history: History) =>
+    combineReducers({
+        loader: LoaderReducer,
+        router: connectRouter(history)
+    })
+  ```
+
 - 2018-11-01: `@misk/dev@^0.0.47` and `@misk/common@^0.0.52`. Prettier integration, Slug now injected into `index.html`.
 
   Replace `src/index.html` with the following:
@@ -34,7 +65,7 @@
   module.exports = createPrettierConfig()
   ```
 
-  Replace all imports of `styled-components` with `react-emotion`.
+  **This was reverted on 2018-11-05**: Replace all imports of `styled-components` with `react-emotion`.
 
   Add the following to `package.json` and add it as a prerequisite to `build` and `start` steps.
 

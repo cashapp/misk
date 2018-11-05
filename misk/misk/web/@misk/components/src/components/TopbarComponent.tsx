@@ -12,7 +12,7 @@ import { IconNames } from "@blueprintjs/icons"
 import { IDashboardTab } from "@misk/common"
 import * as React from "react"
 import { Link } from "react-router-dom"
-import styled from "react-emotion"
+import styled from "styled-components"
 import { ResponsiveContainer } from "../containers"
 
 /**

@@ -25,7 +25,6 @@ const vendorExternals = createExternals({
   "lodash-es": "_",
   react: "React",
   "react-dom": "ReactDom",
-  "reaat-emotion": "ReactEmotion",
   "react-helmet": "ReactHelmet",
   "react-hot-loader": "ReactHotLoader",
   "react-redux": "ReactRedux",
@@ -33,7 +32,8 @@ const vendorExternals = createExternals({
   "react-router-dom": "ReactRouterDom",
   redux: "Redux",
   "redux-saga": "ReduxSaga",
-  "redux-saga/effects": "ReduxSagaEffects"
+  "redux-saga/effects": "ReduxSagaEffects",
+  "styled-components": "StyledComponents"
 })
 
 const miskExternals = createExternals({

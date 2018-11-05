@@ -1,6 +1,10 @@
 ///<reference types="webpack-env" />
 import { IWindow } from "@misk/common"
-import { connectRouter, routerMiddleware } from "connected-react-router"
+import {
+  routerMiddleware,
+  RouterState,
+  LocationChangeAction
+} from "connected-react-router"
 import { createBrowserHistory, History } from "history"
 import * as React from "react"
 import * as ReactDOM from "react-dom"
@@ -20,7 +24,12 @@ export const createIndex = (
   tabSlug: string,
   App: ({ history }: { history: History }) => JSX.Element,
   Ducks: {
-    rootReducer: Reducer<any, AnyAction>
+    rootReducer: (
+      history: History
+    ) => Reducer<
+      { router: Reducer<RouterState, LocationChangeAction> } & any,
+      AnyAction
+    >
     rootSaga: () => IterableIterator<AllEffect>
   }
 ) => {
@@ -33,7 +42,7 @@ export const createIndex = (
   const composeEnhancer: typeof compose =
     Window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose
   const store = createStore(
-    connectRouter(history)(Ducks.rootReducer),
+    Ducks.rootReducer(history),
     composeEnhancer(applyMiddleware(sagaMiddleware, routerMiddleware(history)))
   )
 
@@ -64,7 +73,7 @@ export const createIndex = (
 
     // Reload reducers
     module.hot.accept(Ducks as any, () => {
-      store.replaceReducer(connectRouter(history)(Ducks.rootReducer))
+      store.replaceReducer(Ducks.rootReducer(history))
     })
   }
 }

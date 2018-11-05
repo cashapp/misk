@@ -4,17 +4,14 @@ import {
   ResponsiveContainer,
   TopbarComponent
 } from "@misk/components"
-import { RouterState } from "connected-react-router"
 import * as React from "react"
 import { connect } from "react-redux"
 import { Route } from "react-router"
-import styled from "react-emotion"
+import styled from "styled-components"
 import { MountingDivComponent, ScriptComponent } from "../components"
-import { dispatchLoader, ILoaderState, IState } from "../ducks"
+import { dispatchLoader, IState } from "../ducks"
 
-export interface ILoaderProps {
-  loader: ILoaderState
-  router: RouterState
+export interface ILoaderProps extends IState {
   getTabs: (url: string) => any
   getComponent: (tab: IDashboardTab) => any
   getServiceMetadata: (url: string) => any

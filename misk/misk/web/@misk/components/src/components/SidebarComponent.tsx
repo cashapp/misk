@@ -1,7 +1,7 @@
 import { Menu, MenuItem } from "@blueprintjs/core"
 import { IDashboardTab } from "@misk/common"
 import * as React from "react"
-import styled from "react-emotion"
+import styled from "styled-components"
 
 /**
  * <SidebarComponent tabs={props.tabs}/>

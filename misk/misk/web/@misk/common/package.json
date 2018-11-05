@@ -1,6 +1,6 @@
 {
   "name": "@misk/common",
-  "version": "0.0.55",
+  "version": "0.0.59",
   "description": "Microservice Kontainer Common Libraries, Externals, Styles",
   "author": "Square/Misk Authors (https://github.com/square/misk/graphs/contributors)",
   "main": "lib/web/@misk/common/common.js",
@@ -36,18 +36,14 @@
   "dependencies": {
     "@blueprintjs/core": "^3.7.0",
     "@blueprintjs/icons": "^3.2.0",
-    "@emotion/core": "^10.0.0-beta.6",
     "axios": "^0.18.0",
-    "connected-react-router": "^4.5.0",
-    "create-emotion-styled": "9.2.8",
+    "connected-react-router": "^5.0.1",
     "dayjs": "^1.7.7",
-    "emotion": "^10.0.0-beta.6",
     "history": "^4.7.2",
     "immutable": "^4.0.0-rc.12",
     "lodash-es": "^4.17.11",
     "react": "^16.6.0",
     "react-dom": "^16.6.0",
-    "react-emotion": "^10.0.0-beta.5",
     "react-helmet": "^5.2.0",
     "react-hot-loader": "^4.3.12",
     "react-redux": "^5.1.0",
@@ -56,11 +52,12 @@
     "react-transition-group": "^2.5.0",
     "redux": "^4.0.1",
     "redux-saga": "^0.16.2",
-    "skeleton-css": "^2.0.4"
+    "skeleton-css": "^2.0.4",
+    "styled-components": "^4.0.3"
   },
   "devDependencies": {
-    "@misk/dev": "^0.0.57",
-    "@misk/tslint": "^0.0.8"
+    "@misk/dev": "^0.0.60",
+    "@misk/tslint": "^0.0.10"
   },
   "miskCachedUrls": {
     "sq-market-font": {
