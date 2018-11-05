@@ -28,13 +28,16 @@ junitPlatform {
 
 dependencies {
   compile dep.awsApi
-  compile dep.awsLogging
+  compile dep.awsSqs
+  compile dep.tracingJaeger
   compile project(':misk')
+  compile project(':misk-jobqueue')
 
   testCompile dep.assertj
   testCompile dep.junitApi
   testCompile dep.junitEngine
   testCompile dep.junitParams
+  testCompile dep.docker
   testCompile project(':misk-testing')
 }
 
