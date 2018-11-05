@@ -6,22 +6,22 @@ import java.io.File
 import javax.inject.Singleton
 
 @Singleton
-class MockWebServerService(val socketFile: String?) : AbstractIdleService() {
+class MockWebServerService(val unixSocketFile: String?) : AbstractIdleService() {
   var server: MockWebServer? = null
-  private var file: File = File(socketFile)
+  private var file: File = File(unixSocketFile)
 
   override fun startUp() {
     // Cleanup from previous test runs just in case previous run did not successfully shutdown
     file.delete()
 
     server = MockWebServer()
-    socketFile?.let {
+    unixSocketFile?.let {
       server!!.setServerSocketFactory(UnixDomainServerSocketFactory(file))
     }
   }
 
   override fun shutDown() {
-    server!!.shutdown()
+    server?.let { it.shutdown() }
     file.delete()
   }
 }
