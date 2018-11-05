@@ -20,7 +20,7 @@ public class ExemplarJavaApp {
         new MiskWebModule(),
         new ExemplarJavaModule(),
         new ConfigModule<>(ExemplarJavaConfig.class, "exemplar", config),
-        new EnvironmentModule(environment, null)
+        new EnvironmentModule(environment)
     ).run(args);
   }
 }
