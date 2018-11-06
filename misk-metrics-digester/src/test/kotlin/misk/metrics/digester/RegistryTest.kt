@@ -13,18 +13,18 @@ class RegistryTest {
             fun() = FakeDigest()))
 
     val histogram = registry.newHistogram("name", "help", listOf(), mapOf(0.1 to 0.1, 0.2 to 0.2))
-    histogram.record(1.23, "test")
+    histogram.record("test").observe(1.23)
 
     val firstWindow = histogram.getMetric("test")!!.digest.windows[0].digest as FakeDigest
 
     // Check that recorded value gets added to the metric
     assertThat(firstWindow.addedValues).isEqualTo(listOf(1.23))
 
-    histogram.record(4.56, "test")
+    histogram.record("test").observe(4.56)
     assertThat(firstWindow.addedValues).isEqualTo(listOf(1.23, 4.56))
 
     // Add a different metric name
-    histogram.record(2.34, "another_test", "another_test_2")
+    histogram.record( "another_test", "another_test_2").observe(2.34)
 
     // Check that a new metric gets created for the new key
     assertThat(histogram.getMetric("another_test", "another_test_2")).isNotNull()

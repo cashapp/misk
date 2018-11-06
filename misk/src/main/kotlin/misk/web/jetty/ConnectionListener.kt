@@ -64,7 +64,7 @@ internal class ConnectionListener(
       if (messagesOut > 0) messagesSentSnapshot += messagesOut
 
       val connectionDuration = System.currentTimeMillis() - it.connection.createdTimeStamp
-      metrics.connectionDurations.record(connectionDuration.toDouble(), *labels)
+      metrics.connectionDurations.record(*labels).observe(connectionDuration.toDouble())
     }
 
     // Compute any diffs with the last time we took a snapshot, and apply those diffs

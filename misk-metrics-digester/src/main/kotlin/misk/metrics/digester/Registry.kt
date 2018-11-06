@@ -1,14 +1,10 @@
 package misk.metrics.digester
 
-import misk.logging.getLogger
 import misk.metrics.Histogram
+import misk.metrics.HistogramRecordMetric
 import misk.metrics.HistogramRegistry
 import java.util.Objects
 import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.ConcurrentMap
-import kotlin.reflect.KClass
-import java.lang.reflect.InvocationTargetException
-import java.lang.reflect.Method
 
 /** DigestMetric contains the contents of an individual metrics within a histogram */
 class DigestMetric(
@@ -18,6 +14,13 @@ class DigestMetric(
   /** Adds an observation to the metric */
   fun observe(value: Double) {
     digest.observe(value)
+  }
+}
+
+class TDigestHistogramRecordMetric constructor(private val metric: DigestMetric) :
+    HistogramRecordMetric {
+  override fun observe(duration: Double) {
+    metric.observe(duration)
   }
 }
 
@@ -32,11 +35,11 @@ class TDigestHistogram<T : TDigest<T>> constructor(
   private val metrics = ConcurrentHashMap<Int, DigestMetric>()
 
   /** Records a new metric within the histogram */
-  override fun record(duration: Double, vararg labelValues: String) {
+  override fun record(vararg labelValues: String): TDigestHistogramRecordMetric {
     val metric = metrics.getOrPut(key(labelValues)) {
       DigestMetric(tDigest(), labelValues.asList())
     }
-    metric.observe(duration)
+    return TDigestHistogramRecordMetric(metric)
   }
 
   /** Returns the number of windows within the histogram */

@@ -1,6 +1,6 @@
 package misk.metrics
 
-/*
+/**
  * Skeleton for the functionality of histograms
  *
  * A histogram samples observations (usually things like request durations or response sizes)
@@ -10,8 +10,13 @@ package misk.metrics
  */
 interface Histogram {
   /** records a new set of labels and accompanying duration */
-  fun record(duration: Double, vararg labelValues: String)
+  fun record(vararg labelValues: String): HistogramRecordMetric
 
   /** returns the number of buckets */
   fun count(vararg labelValues: String): Int
+}
+
+/** HistogramRecordMetric provides the metric to record an observation */
+interface HistogramRecordMetric {
+  fun observe(duration: Double)
 }

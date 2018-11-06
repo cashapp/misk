@@ -16,9 +16,9 @@ class ClientMetricsInterceptor internal constructor(
     val (elapsedTime, result) = timed { chain.proceed(chain.request) }
     val elapsedMillis = elapsedTime.toMillis().toDouble()
 
-    requestDuration.record(elapsedMillis, actionName, "all")
-    requestDuration.record(elapsedMillis, actionName, "${result.code() / 100}xx")
-    requestDuration.record(elapsedMillis, actionName, "${result.code()}")
+    requestDuration.record(actionName, "all").observe(elapsedMillis)
+    requestDuration.record(actionName, "${result.code() / 100}xx").observe(elapsedMillis)
+    requestDuration.record(actionName, "${result.code()}").observe(elapsedMillis)
 
     return result
   }
