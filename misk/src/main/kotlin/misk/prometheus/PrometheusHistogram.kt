@@ -8,7 +8,7 @@ class PrometheusHistogram constructor(
   val histogram: io.prometheus.client.Summary
 ) : Histogram {
 
-  override fun record(vararg labelValues: String): HistogramRecordMetric {
+  override fun labels(vararg labelValues: String): HistogramRecordMetric {
     return PrometheusHistogramRecordMetric(histogram.labels(*labelValues))
   }
 

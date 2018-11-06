@@ -35,7 +35,7 @@ class TDigestHistogram<T : TDigest<T>> constructor(
   private val metrics = ConcurrentHashMap<Int, DigestMetric>()
 
   /** Records a new metric within the histogram */
-  override fun record(vararg labelValues: String): TDigestHistogramRecordMetric {
+  override fun labels(vararg labelValues: String): TDigestHistogramRecordMetric {
     val metric = metrics.getOrPut(key(labelValues)) {
       DigestMetric(tDigest(), labelValues.asList())
     }
@@ -48,8 +48,8 @@ class TDigestHistogram<T : TDigest<T>> constructor(
   }
 
   /** Returns a metric of the histogram. Order of labels matters */
-  fun getMetric(vararg metric: String): DigestMetric? {
-    return metrics[key(metric)]
+  fun getMetric(vararg metric: String): DigestMetric {
+    return metrics.getValue(key(metric))
   }
 
   /** Creates a hash for a list of labels */

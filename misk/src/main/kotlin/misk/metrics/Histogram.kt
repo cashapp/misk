@@ -10,7 +10,7 @@ package misk.metrics
  */
 interface Histogram {
   /** records a new set of labels and accompanying duration */
-  fun record(vararg labelValues: String): HistogramRecordMetric
+  fun labels(vararg labelValues: String): HistogramRecordMetric
 
   /** returns the number of buckets */
   fun count(vararg labelValues: String): Int
