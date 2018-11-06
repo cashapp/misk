@@ -13,11 +13,11 @@
     "test": "echo no test"
   },
   "dependencies": {
-    "@misk/common": "^0.0.59",
+    "@misk/common": "^0.0.60",
     "@misk/components": "^0.0.76"
   },
   "devDependencies": {
-    "@misk/dev": "^0.0.60",
+    "@misk/dev": "^0.0.61",
     "@misk/tslint": "^0.0.10"
   },
   "miskTab": {

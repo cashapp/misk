@@ -1,6 +1,10 @@
 window.Blueprint = {}
 window.Blueprint.Core = require("@blueprintjs/core")
+window.Blueprint.Datetime = require("@blueprintjs/datetime")
 window.Blueprint.Icons = require("@blueprintjs/icons")
+window.Blueprint.Select = require("@blueprintjs/select")
+window.Blueprint.Table = require("@blueprintjs/table")
+window.Blueprint.Timezone = require("@blueprintjs/timezone")
 window.Axios = require("axios")
 window.ConnectedReactRouter = require("connected-react-router")
 window.Dayjs = require("dayjs")
