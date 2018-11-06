@@ -4,10 +4,12 @@ jdk:
   - oraclejdk8
   - oraclejdk9
 
-before_script:
-  - docker pull vitess/base
-  - docker pull zookeeper:3.5.4-beta
-  - docker pull pafortin/goaws
+# Run Docker Pulls in parallel, esp for vitess/base with size > 1GB
+install:
+  - docker pull squareup/misk-web &
+  - docker pull vitess/base &
+  - docker pull zookeeper:3.5.4-beta &
+  - docker pull pafortin/goaws &
 
 script:
   - ./gradlew test
@@ -16,11 +18,12 @@ script:
 before_cache:
   - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
   - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
+
 cache:
+  bundler: true
   directories:
     - $HOME/.gradle/caches/
     - $HOME/.gradle/wrapper/
-    - $HOME/misk/web/*/*/lib
 
 services:
   - mysql

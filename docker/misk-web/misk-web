@@ -1,6 +1,6 @@
 #!/bin/sh
 
-function usage {
+usage() {
   cat << EOF
   Usage :: misk-web <opts>
 
@@ -17,16 +17,16 @@ function usage {
   -d    'start' webpack-dev-server on first found tab
         note: only run when docker container is mounted with a single tab
 
-  -i    'install' all dependencies
+  -g    'ci-build', same as '-b' but without linting for faster CI builds
+
+  -l    'lint' run Prettier linting
 
   -o    compute a md5 hash over the current directory and stores in .hash file
 
   -m    compute a md5 hash over the current directory and stores in .hash file, creates .hashdiff file if there is an existing hash
         exclude patterns: cachedUrls, lib, node_modules, .hash
 
-  -n    remove yarn.lock and node_modules
-
-  -r    'reinstall' all node_modules dependencies
+  -r    'refresh' local web/node_modules from Docker image /node_modules
 
   -w    overide location for web mount point
         default: '/web'
@@ -41,6 +41,7 @@ function usage {
 
   /web
     misk-build.sh
+    node_modules/
     tabs/
       tab1/
         package.json
@@ -50,7 +51,7 @@ function usage {
         package.json
       ...
 EOF
-  exit 0
+    exit 0
 }
 
 LABEL=""
@@ -58,70 +59,88 @@ CMD=""
 WEB="/web"
 HD="false"
 
-function hashDir {
-  tar --exclude="cachedUrls" --exclude="lib" --exclude="node_modules" --exclude=".DS_Store" --exclude=".hash" --exclude="yarn.lock" -cf - . | md5sum 2>&1
+hashDir() {
+    tar --exclude="cachedUrls" --exclude="lib" --exclude="node_modules" --exclude=".DS_Store" --exclude=".hash" --exclude="yarn.lock" -cf - . | md5sum 2>&1
 }
 
-function hashDiff {
-  newHash=$(hashDir | sed 's/[[:space:]]//g')
-  if [ -f .hash ]; then
-    oldHash=$(sed 's/[[:space:]]//g' < .hash)
-    if [ "$oldHash" = "$newHash" ]; then
-      echo "${oldHash} ${newHash} false"
+hashDiff() {
+    newHash=$(hashDir | sed 's/[[:space:]]//g')
+    if [ -f .hash ]; then
+        oldHash=$(sed 's/[[:space:]]//g' < .hash)
+        if [ "$oldHash" = "$newHash" ]; then
+            echo "${oldHash} ${newHash} false"
+        else
+            echo "${oldHash} ${newHash} true"
+        fi
+        
     else
-      echo "${oldHash} ${newHash} true"
+        echo "${newHash} true"
     fi
-
-  else 
-    echo "${newHash} true"
-  fi
 }
 
-function runCmd {
-  echo "[RUNCMD]: ${WEB}/*/* $LABEL HD: $HD CMD: $CMD"
-  for dir in ${WEB}/*/* ; do
-    dir=${dir%*/}
-    if [ -d $dir ]; then
-      cd $dir
-      if [ "$HD" = "true" ]; then
-        diffResult=$(hashDiff)
-        echo "[HASH DIFF] $dir $diffResult"
-        # Run command if hashdiff is different
-        echo "$LABEL $dir" && echo "$diffResult" | grep -Fq "true" && $CMD
-        # Run command anyways if there is no lib directory
-        [ ! -d $dir/lib ] && echo "$LABEL $dir" && $CMD
-      else
-        # Run command if no hashdiff check required
-        echo "$LABEL $dir" && $CMD
-      fi
-      # Update hash after every command
-      hashDir | tee .hash
-    fi
-  done
+stashNodeModules() {
+    # Remove any previous node_modules links or directories
+    rm ./node_modules
+    # Link to cached node_modules in Docker image
+    ln -s /node_modules .
 }
 
-function reset {
-  LABEL=""
-  CMD=""
-  HD="false"
+restoreNodeModules() {
+    # Install local web/node_modules if not already present, not in CI environments
+    [ ! -d ${WEB}/node_modules ] && ! printenv | grep -q "CI" && echo "[REFRESH] Updating local web/node_modules/ from Docker image" && cp -r /node_modules ${WEB}/node_modules
+    # Relink back to web/node_modules
+    ln -s ${WEB}/node_modules .
 }
 
-while getopts "h?abcdiomnrwxz:" opt; do
-  case "$opt" in
-    h|\?)   usage && exit 0   ;;
-    a)      LABEL="[BUILD ALL]" && CMD='yarn ci-build' && runCmd && reset   ;;
-    b)      LABEL="[BUILD]" && HD="true" && CMD='yarn ci-build' && runCmd && reset   ;;
-    c)      LABEL="[CLEAN]" && CMD='yarn clean' && runCmd && reset    ;;
-    d)      LABEL="[DEV]" && CMD='yarn start' && runCmd && reset   ;;
-    i)      LABEL="[INSTALL]" && CMD='yarn install' && runCmd && reset    ;;
-    o)      LABEL="[MD5 HASH]" && CMD='hashDir | tee .hash' && runCmd && reset   ;;
-    m)      LABEL="[MD5 HASHDIFF]" && CMD='hashDiff' && runCmd && reset   ;;
-    n)      LABEL="[RM NODE_MODULES]" && CMD='rm yarn.lock && rm -rf node_modules' && runCmd && reset   ;;
-    r)      LABEL="[REINSTALL]" && CMD='yarn reinstall' && runCmd && reset    ;;
-    w)      LABEL="[ALT WEB LOCATION]" && WEB="${OPTARG}" && reset    ;;
-    x)      LABEL="[HD=\"true\"]" && HD="true"    ;;
-    z)      LABEL="[CMD]" && CMD="${OPTARG}" && runCmd && reset   ;;
-  esac
+runCmd() {
+    echo "[RUNCMD]: ${WEB}/*/* $LABEL HD: '$HD' CMD: '$CMD'"
+    
+    for dir in ${WEB}/*/* ; do
+        dir=${dir%*/}
+        if [ -d $dir ] && [ "$dir" = "${dir%"node_modules"*}" ]; then
+            cd $dir || continue
+            if [ "$HD" = "true" ]; then
+                diffResult=$(hashDiff)
+                echo "[HASH DIFF] $dir $diffResult"
+                stashNodeModules
+                # Run command if hashdiff is different
+                echo "$LABEL $dir" && echo "$diffResult" | grep -Fq "true" && $CMD
+                # Run command anyways if there is no lib directory
+                [ ! -d $dir/lib ] && echo "$LABEL $dir" && $CMD
+            else
+                stashNodeModules
+                # Run command if no hashdiff check required
+                echo "$LABEL $dir" && $CMD
+            fi
+            restoreNodeModules
+            # Update hash after every command
+            hashDir | tee .hash
+        fi
+    done
+}
+
+reset() {
+    LABEL=""
+    CMD=""
+    HD="false"
+}
+
+while getopts "h?abcdglomrwxz:" opt; do
+    case "$opt" in
+        h|\?)   usage && exit 0   ;;
+        a)      LABEL="[BUILD ALL]" && CMD='yarn build' && runCmd && reset   ;;
+        b)      LABEL="[BUILD]" && HD="true" && CMD='yarn build' && runCmd && reset   ;;
+        c)      LABEL="[CLEAN]" && CMD='yarn clean' && runCmd && reset    ;;
+        d)      LABEL="[DEV]" && CMD='yarn start' && runCmd && reset   ;;
+        g)      LABEL="[CI-BUILD]" && HD="true" && CMD='yarn ci-build' && runCmd && reset   ;;
+        l)      LABEL="[LINT]" && CMD='yarn run lint' && runCmd && reset  ;;
+        o)      LABEL="[MD5 HASH]" && CMD='hashDir | tee .hash' && runCmd && reset   ;;
+        m)      LABEL="[MD5 HASHDIFF]" && CMD='hashDiff' && runCmd && reset   ;;
+        r)      restoreNodeModules && reset    ;;
+        w)      LABEL="[ALT WEB LOCATION]" && WEB="${OPTARG}" && reset    ;;
+        x)      LABEL="[HD=\"true\"]" && HD="true"    ;;
+        z)      LABEL="[CMD]" && CMD="${OPTARG}" && runCmd && reset   ;;
+    esac
 done
 
 exit 0

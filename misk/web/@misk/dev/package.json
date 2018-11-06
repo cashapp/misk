@@ -9,11 +9,12 @@
     "url": "git@github.com:square/misk.git"
   },
   "scripts": {
-    "build": "yarn run lint && mkdir -p lib/web/@misk/dev && cp *.{json,js,md} lib/web/@misk/dev",
+    "build": "yarn run lint && yarn run lib",
     "clean": "rm -rf lib node_modules package-lock.json yarn.lock",
-    "ci-build": "yarn clean && yarn build",
-    "lint": "../common/node_modules/prettier/bin-prettier.js --write --config prettier.config.js \"*.{md,css,sass,less,json,js,jsx,ts,tsx}\"",
-    "prepare": "yarn ci-build"
+    "ci-build": "yarn run clean && yarn run lib",
+    "lib": "mkdir -p lib/web/@misk/dev && cp *.json *.js *.md lib/web/@misk/dev",
+    "lint": "prettier --write --config prettier.config.js \"*.{md,css,sass,less,json,js,jsx,ts,tsx}\"",
+    "prepare": "yarn run ci-build"
   },
   "dependencies": {
     "@types/lodash-es": "^4.17.1",

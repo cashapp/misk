@@ -15,9 +15,9 @@ Create a `tsconfig.json` file in the repo root directory with the following:
 
 ```JSON
   {
-    "extends": "./node_modules/@misk/dev/tsconfig.base",
+    "extends": "../../node_modules/@misk/dev/tsconfig.base",
     "compilerOptions": {
-        "outDir": "./dist"
+      "outDir": "./lib/web/_tab/{tabname}"
     }
   }
 ```
