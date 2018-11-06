@@ -1,7 +1,7 @@
 ext.dep = [
   "assertj": "org.assertj:assertj-core:3.9.0",
   "awsApi": "com.amazonaws:aws-java-sdk-bom:1.11.143",
-  "awsLogging": "com.amazonaws:aws-java-sdk-logs:1.11.143",
+  "awsSqs": "com.amazonaws:aws-java-sdk-sqs:1.11.143",
   "bouncycastle": "org.bouncycastle:bcprov-jdk15on:1.55",
   "conscrypt": "org.conscrypt:conscrypt-openjdk-uber:1.1.4",
   "curatorFramework": "org.apache.curator:curator-framework:4.0.1",

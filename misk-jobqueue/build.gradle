@@ -1,6 +1,13 @@
 import org.junit.platform.console.options.Details
 
+buildscript {
+  dependencies {
+    classpath dep.kotlinNoArgPlugin
+  }
+}
+
 apply plugin: 'kotlin'
+apply plugin: 'kotlin-jpa'
 apply plugin: 'org.junit.platform.gradle.plugin'
 apply plugin: "com.vanniktech.maven.publish"
 
@@ -27,17 +34,11 @@ junitPlatform {
 }
 
 dependencies {
-  compile dep.awsApi
-  compile dep.awsSqs
-  compile dep.tracingJaeger
+  compile dep.guava
+  compile dep.guice
+  compile dep.guiceMultibindings
   compile project(':misk')
-  compile project(':misk-jobqueue')
 
-  testCompile dep.assertj
-  testCompile dep.junitApi
-  testCompile dep.junitEngine
-  testCompile dep.junitParams
-  testCompile dep.docker
   testCompile project(':misk-testing')
 }
 
