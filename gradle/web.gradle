@@ -1,5 +1,7 @@
 import groovy.json.JsonSlurper
 
+def dockerMiskWebVersion = "0.0.3"
+
 task web(type: Exec) {
   // -Pcmd='-d': pass in argument to misk-web shell script in Docker container
   // -Ptabs='tabs/config, tabs/example': spins up parallel Docker containers with the following paths as volumes
@@ -19,7 +21,7 @@ task web(type: Exec) {
     return packageJson.miskTab.port
   }
 
-  def generateDockerRunCommand = { service, project, projectPath, path, cmd, daemon="-d", image = "squareup/misk-web:0.0.2" ->
+  def generateDockerRunCommand = { service, project, projectPath, path, cmd, daemon="-d", image = "squareup/misk-web:${dockerMiskWebVersion}" ->
     def containerName = "${generateDockerContainerName(service, project, path)}"
     def port = ""
     if (path.startsWith("/tabs")) {
@@ -38,7 +40,7 @@ task web(type: Exec) {
   if (project.hasProperty("cmd")) {
     cmd = project.cmd
   } else {
-    cmd = "-b"
+    cmd = "-g"
   }
 
   def dockerd = ""

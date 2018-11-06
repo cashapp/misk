@@ -17,13 +17,11 @@
     "url": "git@github.com:square/misk.git"
   },
   "scripts": {
-    "build": "yarn run lib",
-    "build:lib": "yarn run lib",
+    "build": "yarn run lint && yarn run lib",
     "clean": "rm -rf lib",
-    "dev": "yarn run lib; yarn run updateDevCache",
-    "dist": "yarn run lib",
-    "ci-build": "yarn install && yarn clean && yarn build",
-    "lib": "yarn run lint && webpack",
+    "dev": "yarn run build; yarn run updateDevCache",
+    "ci-build": "yarn run clean && yarn run lib",
+    "lib": "webpack",
     "lint": "prettier --write --config prettier.config.js \"./src/**/*.{md,css,sass,less,json,js,jsx,ts,tsx}\"",
     "prepare": "yarn run lint && yarn run test && yarn run lib",
     "reinstall": "rm -rf node_modules && yarn install",
