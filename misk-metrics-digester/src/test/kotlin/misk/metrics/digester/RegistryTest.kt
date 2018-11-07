@@ -23,7 +23,12 @@ class RegistryTest {
   fun registryDigestWithLabels() {
     val registry = histogramRegistryFactory()
 
-    val histogram = registry.newHistogram("name", "help", listOf(), mapOf(0.1 to 0.1, 0.2 to 0.2))
+    val histogram = registry.newHistogram("name", "help", listOf("label1", "label2"),
+        mapOf(0.1 to 0.1, 0.2 to 0.2))
+
+    //Check that passed labels exist
+    assertThat(histogram.getMetric("label1")).isNotNull()
+
     val metric = histogram.labels("test")
     metric.observe(1.23)
 

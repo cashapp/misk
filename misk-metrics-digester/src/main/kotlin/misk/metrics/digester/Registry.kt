@@ -29,10 +29,18 @@ class TDigestHistogram<T : TDigest<T>> constructor(
   val name: String,
   val help: String,
   val quantiles: List<Double>,
+  private val labelNames: List<String>,
   private val tDigest: () -> SlidingWindowDigest<T>
 ) : Histogram {
 
   private val metrics = ConcurrentHashMap<Int, DigestMetric>()
+
+  /** Add all labels passed to the histogram */
+  init {
+    labelNames.forEach { label ->
+      labels(label)
+    }
+  }
 
   /** Records a new metric within the histogram */
   override fun labels(vararg labelValues: String): TDigestHistogramRecordMetric {
@@ -84,7 +92,7 @@ class TDigestHistogramRegistry<T : TDigest<T>> constructor(
     labelNames: List<String>,
     quantiles: Map<Double, Double>
   ): TDigestHistogram<T> {
-    val histogram = TDigestHistogram(name, help, quantiles.keys.toList(), fun() = newDigestFn())
+    val histogram = TDigestHistogram(name, help, quantiles.keys.toList(), labelNames, fun() = newDigestFn())
     return register(histogram)
   }
 
