@@ -16,7 +16,11 @@ const createExternals = inExternals => {
 
 const vendorExternals = createExternals({
   "@blueprintjs/core": ["Blueprint", "Core"],
+  "@blueprintjs/datetime": ["Blueprint", "Datetime"],
   "@blueprintjs/icons": ["Blueprint", "Icons"],
+  "@blueprintjs/select": ["Blueprint", "Select"],
+  "@blueprintjs/table": ["Blueprint", "Table"],
+  "@blueprintjs/timezone": ["Blueprint", "Timezone"],
   axios: "Axios",
   "connected-react-router": "ConnectedReactRouter",
   dayjs: "Dayjs",
