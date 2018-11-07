@@ -97,7 +97,6 @@ internal class SqsJobQueueTest {
     assertThat(sqsMetrics.jobsReceived.labels(queueName.value).get()).isEqualTo(10.0)
     assertThat(sqsMetrics.jobsAcknowledged.labels(queueName.value).get()).isEqualTo(10.0)
     assertThat(sqsMetrics.handlerFailures.labels(queueName.value).get()).isEqualTo(0.0)
-    assertThat(sqsMetrics.handlerDispatchTime.count(queueName.value)).isEqualTo(10)
   }
 
   @Test fun retriesIfNotAcknowledged() {
