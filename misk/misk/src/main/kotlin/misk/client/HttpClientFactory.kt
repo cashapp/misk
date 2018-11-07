@@ -1,5 +1,6 @@
 package misk.client
 
+import misk.client.NoOpDns
 import misk.security.ssl.SslContextFactory
 import misk.security.ssl.SslLoader
 import okhttp3.OkHttpClient
@@ -36,6 +37,8 @@ class HttpClientFactory {
     config.envoy?.let {
       builder.socketFactory(
           UnixDomainSocketFactory(envoyClientEndpointProvider.unixSocket(config.envoy)))
+      // No DNS lookup needed since we're just sending the request over a socket.
+      builder.dns(NoOpDns())
     }
     builder.proxy(Proxy.NO_PROXY)
 
