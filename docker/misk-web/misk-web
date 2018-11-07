@@ -79,21 +79,29 @@ hashDiff() {
 }
 
 stashNodeModules() {
+    echo "[STASH] Removing tab node_modules and linking to node_modules from Docker image"
     # Remove any previous node_modules links or directories
-    rm ./node_modules
+    rm -f ./node_modules
+    rm -rf ./node_modules
     # Link to cached node_modules in Docker image
     ln -s /node_modules .
 }
 
-restoreNodeModules() {
+refreshNodeModules() {
     # Install local web/node_modules if not already present, not in CI environments
     [ ! -d ${WEB}/node_modules ] && ! printenv | grep -q "CI" && echo "[REFRESH] Updating local web/node_modules/ from Docker image" && cp -r /node_modules ${WEB}/node_modules
+}
+
+restoreNodeModules() {
+    echo "[RESTORE] Restoring symlink of node_modules to local web/node_modules directory"
     # Relink back to web/node_modules
     ln -s ${WEB}/node_modules .
 }
 
 runCmd() {
     echo "[RUNCMD]: ${WEB}/*/* $LABEL HD: '$HD' CMD: '$CMD'"
+    
+    refreshNodeModules
     
     for dir in ${WEB}/*/* ; do
         dir=${dir%*/}

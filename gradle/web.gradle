@@ -1,6 +1,6 @@
 import groovy.json.JsonSlurper
 
-def dockerMiskWebVersion = "0.0.3"
+def dockerMiskWebVersion = "0.0.4"
 
 task web(type: Exec) {
   // -Pcmd='-d': pass in argument to misk-web shell script in Docker container
