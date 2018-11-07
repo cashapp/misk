@@ -43,16 +43,14 @@ $ yarn add @misk/common
     }
     ```
 
-  - Add the following to your `index.html` to import `styles.js` and `vendors.js`
+  - Add the following to your `index.html` to import `styles.css`, `vendors.js`, and `common.js`
 
     ```HTML
     <body>
-
-      ...
-
       <!-- Misk Common Libraries -->
-      <script type="text/javascript" src="js/styles.js" async></script>
-      <script type="text/javascript" src="js/vendors.js" preload></script>
+      <link rel="stylesheet" type="text/css" href="/@misk/common/styles.css" />
+      <script type="text/javascript" src="/@misk/common/vendors.js" preload />
+      <script type="text/javascript" src="/@misk/common/common.js" preload />
 
       <!-- Other JS -->
     </body>

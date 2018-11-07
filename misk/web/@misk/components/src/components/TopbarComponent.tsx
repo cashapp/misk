@@ -10,6 +10,7 @@ import {
 } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
 import { IDashboardTab } from "@misk/common"
+import { groupBy, sortBy } from "lodash"
 import * as React from "react"
 import { Link } from "react-router-dom"
 import styled from "styled-components"
@@ -26,15 +27,15 @@ export interface ITopbarProps {
 }
 
 const MiskNavbar = styled(Navbar)`
-  background-color: #29333a;
+  background-color: #29333a !important;
   min-height: 74px;
   margin-bottom: 20px;
   box-sizing: border-box;
   border: 1px solid #14191c;
-  padding-top: 10px;
-  position: fixed;
+  padding-top: 10px !important;
+  position: fixed !important;
   top: 0px;
-  z-index: 1010;
+  z-index: 1010 !important;
 `
 
 const MiskNavbarGroup = styled(NavbarGroup)`
@@ -59,7 +60,7 @@ const MiskNavbarGroup = styled(NavbarGroup)`
 `
 
 const MiskNavbarHeading = styled(NavbarHeading)`
-  font-size: 24px;
+  font-size: 24px !important;
   text-decoration: none;
   text-transform: uppercase;
   letter-spacing: 0px;
@@ -87,7 +88,7 @@ const MiskNavbarLink = styled(MiskLink)`
 `
 
 const MiskNavbarDivider = styled(NavbarDivider)`
-  border: none;
+  border: none !important;
 `
 
 const MiskMenuButton = styled(Button)`
@@ -199,7 +200,7 @@ export class TopbarComponent extends React.Component<ITopbarProps, {}> {
 
   private renderMenuCategories(links: IDashboardTab[]) {
     const categories: Array<[string, IDashboardTab[]]> = Object.entries(
-      this.groupBy(links, "category")
+      groupBy(links, "category")
     )
     return categories.map(([categoryName, categoryLinks]) =>
       this.renderMenuCategory(categoryName, categoryLinks)
@@ -210,7 +211,7 @@ export class TopbarComponent extends React.Component<ITopbarProps, {}> {
     categoryName: string,
     categoryLinks: IDashboardTab[]
   ) {
-    const sortedCategoryLinks = this.sortBy(categoryLinks, "name").filter(
+    const sortedCategoryLinks = sortBy(categoryLinks, "name").filter(
       (link: IDashboardTab) => link.category !== ""
     )
     return (
@@ -235,24 +236,4 @@ export class TopbarComponent extends React.Component<ITopbarProps, {}> {
   private handleClick = () => {
     this.setState({ ...this.state, isOpen: !this.state.isOpen })
   }
-
-  private groupBy = (items: any, key: any) =>
-    items.reduce(
-      (result: any, item: any) => ({
-        ...result,
-        [item[key]]: [...(result[item[key]] || []), item]
-      }),
-      {}
-    )
-
-  private sortBy = (items: any, key: any) =>
-    items.sort((item1: any, item2: any) => {
-      if (item1[key] < item2[key]) {
-        return -1
-      } else if (item1[key] > item2[key]) {
-        return 1
-      } else {
-        return 0
-      }
-    })
 }
