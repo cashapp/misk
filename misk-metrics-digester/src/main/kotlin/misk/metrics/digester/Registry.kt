@@ -60,6 +60,11 @@ class TDigestHistogram<T : TDigest<T>> constructor(
     return metrics.getValue(key(metric))
   }
 
+  /** Returns all of the metrics from the histogram */
+  fun allMetrics(): List<DigestMetric> {
+    return metrics.values as List<DigestMetric>
+  }
+
   /** Creates a hash for a list of labels */
   private fun key(labels: Array<out String>) = Objects.hash(labels.sorted())
 }
