@@ -9,10 +9,25 @@ interface Session {
    * @throws IllegalStateException when save is called on a read only session.
    */
   fun <T : DbEntity<T>> save(entity: T): Id<T>
+
   fun <T : DbEntity<T>> load(id: Id<T>, type: KClass<T>): T
   fun shards(): Set<Shard>
   fun <T> target(shard: Shard, function: () -> T): T
   fun <T> useConnection(work: (Connection) -> T): T
+
+  /**
+   * Registers a hook that fires after the session transaction commits. Post-commit hooks cannot
+   * affect the disposition of the transaction; if a post-commit hook fails, the failure
+   * will be logged but not propagated to the application, as the transaction will have already
+   * committed
+   */
+  fun onPostCommit(work: () -> Unit)
+
+  /**
+   * Registers a hook that fires before the session's transaction commits. Failures in a pre-commit
+   * hook will cause the transaction to be rolled back.
+   */
+  fun onPreCommit(work: () -> Unit)
 }
 
 inline fun <reified T : DbEntity<T>> Session.load(id: Id<T>): T = load(id, T::class)

@@ -12,6 +12,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.hibernate.exception.ConstraintViolationException
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
 import java.util.concurrent.atomic.AtomicInteger
 import javax.inject.Inject
@@ -193,7 +194,7 @@ class TransacterTest {
         session.save(DbMovie("Star Wars", LocalDate.of(1977, 5, 25)))
       }
     }
-    transacter.transaction {session ->
+    transacter.transaction { session ->
       assertThat(queryFactory.newQuery<MovieQuery>().list(session)).isEmpty()
     }
   }
@@ -237,6 +238,141 @@ class TransacterTest {
     }
 
     tracingAssertions()
+  }
+
+  @Test
+  fun preCommitHooksCalledPriorToCommit() {
+    val preCommitHooksTriggered = mutableListOf<String>()
+    lateinit var cid: Id<DbMovie>
+    lateinit var bbid: Id<DbMovie>
+    lateinit var swid: Id<DbMovie>
+
+    transacter.transaction { session ->
+      session.onPreCommit {
+        preCommitHooksTriggered.add("first")
+        cid = session.save(DbMovie("Cinderella", LocalDate.of(1950, 3, 4)))
+      }
+
+      session.onPreCommit {
+        preCommitHooksTriggered.add("second")
+        bbid = session.save(DbMovie("Beauty and the Beast", LocalDate.of(1991, 11, 22)))
+      }
+
+      swid = session.save(DbMovie("Star Wars", LocalDate.of(1977, 5, 25)))
+
+      session.onPreCommit {
+        preCommitHooksTriggered.add("third")
+      }
+    }
+
+    // Pre-commit hooks should be triggered in the order in which they were registered...
+    assertThat(preCommitHooksTriggered).containsExactly("first", "second", "third")
+
+    // ...and should have been able to take actions on the session since it has not yet committed
+    assertThat(transacter.transaction { it.load(cid) }.name).isEqualTo("Cinderella")
+    assertThat(transacter.transaction { it.load(swid) }.name).isEqualTo("Star Wars")
+    assertThat(transacter.transaction { it.load(bbid) }.name).isEqualTo("Beauty and the Beast")
+  }
+
+  @Test
+  fun errorInPreCommitHookCausesTransactionRollback() {
+    val preCommitHooksTriggered = mutableListOf<String>()
+    lateinit var swid: Id<DbMovie>
+
+    assertThrows<IllegalStateException> {
+      transacter.transaction { session ->
+        session.onPreCommit {
+          preCommitHooksTriggered.add("first")
+          throw IllegalStateException("bad things happened")
+        }
+
+        session.onPreCommit {
+          preCommitHooksTriggered.add("second")
+        }
+
+        swid = session.save(DbMovie("Star Wars", LocalDate.of(1977, 5, 25)))
+
+        session.onPreCommit {
+          preCommitHooksTriggered.add("third")
+        }
+      }
+    }
+
+    // Only the first hook should be called, the others should be skipped since the first failed...
+    assertThat(preCommitHooksTriggered).containsExactly("first")
+
+    // ...and the transaction should have been rolled back
+    assertThat(transacter.transaction {
+      queryFactory.newQuery<MovieQuery>().id(swid).list(it)
+    }).isEmpty()
+  }
+
+  @Test
+  fun postCommitHooksCalledOnCommit() {
+    val postCommitHooksTriggered = mutableListOf<String>()
+    lateinit var swid: Id<DbMovie>
+
+    transacter.transaction { session ->
+      session.onPostCommit { postCommitHooksTriggered.add("first") }
+      session.onPostCommit { postCommitHooksTriggered.add("second") }
+
+      swid = session.save(DbMovie("Star Wars", LocalDate.of(1977, 5, 25)))
+
+      session.onPostCommit { postCommitHooksTriggered.add("third") }
+    }
+
+    // Post-commit hooks should be triggered in the order in which they were registered...
+    assertThat(postCommitHooksTriggered).containsExactly("first", "second", "third")
+
+    // ...and the transaction should have completed
+    assertThat(transacter.transaction { it.load(swid) }.name).isEqualTo("Star Wars")
+  }
+
+  @Test
+  fun postCommitHooksNotCalledOnRollback() {
+    val postCommitHooksTriggered = mutableListOf<String>()
+
+    assertThrows<IllegalStateException> {
+      transacter.transaction { session ->
+        session.onPostCommit { postCommitHooksTriggered.add("first") }
+        session.onPostCommit { postCommitHooksTriggered.add("second") }
+        throw IllegalStateException("bad things happened here")
+      }
+    }
+
+    assertThat(postCommitHooksTriggered).isEmpty()
+  }
+
+  @Test
+  fun errorInPostCommitHookDoesNotRollback() {
+    val postCommitHooksTriggered = mutableListOf<String>()
+    lateinit var swid: Id<DbMovie>
+
+    val cause = assertThrows<PostCommitHookFailedException> {
+      transacter.transaction { session ->
+        session.onPostCommit {
+          postCommitHooksTriggered.add("first")
+          throw IllegalStateException("first hook failed")
+        }
+        session.onPostCommit {
+          postCommitHooksTriggered.add("second")
+        }
+
+        swid = session.save(DbMovie("Star Wars", LocalDate.of(1977, 5, 25)))
+
+        session.onPostCommit { postCommitHooksTriggered.add("third") }
+      }
+    }.cause
+
+    assertThat(cause).hasMessage("first hook failed")
+    assertThat(cause).isInstanceOf(IllegalStateException::class.java)
+
+    // Only the first hook should complete - the others should be the skipped due to error...
+    assertThat(postCommitHooksTriggered).containsExactly("first")
+
+    // ...but the transaction itself should have completed
+    assertThat(transacter.transaction { it.load(swid) }.name).isEqualTo("Star Wars")
+
   }
 
   fun tracingAssertions() {
