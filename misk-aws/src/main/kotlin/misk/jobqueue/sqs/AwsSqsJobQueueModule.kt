@@ -11,6 +11,7 @@ import misk.cloud.aws.AwsRegion
 import misk.inject.KAbstractModule
 import misk.jobqueue.JobConsumer
 import misk.jobqueue.JobQueue
+import misk.jobqueue.TransactionalJobQueue
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
@@ -21,6 +22,7 @@ class AwsSqsJobQueueModule : KAbstractModule() {
     requireBinding(AwsRegion::class.java)
     bind<JobConsumer>().to<SqsJobConsumer>()
     bind<JobQueue>().to<SqsJobQueue>()
+    bind<TransactionalJobQueue>().to<SqsTransactionalJobQueue>()
     multibind<Service>().to<SqsJobConsumer>()
   }
 
