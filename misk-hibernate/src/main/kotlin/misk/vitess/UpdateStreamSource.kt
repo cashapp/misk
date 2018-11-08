@@ -4,6 +4,7 @@ import io.grpc.CallOptions
 import io.grpc.ClientCall
 import io.grpc.ManagedChannel
 import io.grpc.Metadata
+import io.grpc.Status
 import io.grpc.netty.NegotiationType
 import io.grpc.netty.NettyChannelBuilder
 import io.vitess.proto.Query
@@ -11,6 +12,8 @@ import io.vitess.proto.Topodata
 import io.vitess.proto.Vtgate
 import io.vitess.proto.grpc.VitessGrpc
 import misk.jdbc.DataSourceConfig
+import mu.KotlinLogging
+import java.time.Instant
 
 data class Update(
   val statements: List<String>,
@@ -55,22 +58,59 @@ class UpdateStreamSource(
   fun streamUpdates(
     shard: Shard,
     position: String?,
-    timestamp: Long?,
-    listener: (Update) -> Any
+    timestamp: Instant?,
+    listener: (Update) -> Unit
   ): Subscription {
     val subscription = Subscription(channel(), shard, position, timestamp, listener)
     subscription.start()
     return subscription
   }
 
+  @Suppress("UNUSED_PARAMETER")
+  fun streamUpdates(
+    shard: Shard,
+    fromPosition: String?,
+    fromTime: Instant?
+  ): Sequence<Update> {
+    // TODO What happens if we loose the connection. Do we get an exception?
+    // TODO We're not using the fromPosition yet...
+    // TODO We're not using the fromTime yet...
+
+    val request = Vtgate.UpdateStreamRequest.newBuilder()
+        .setKeyspace(shard.keyspace.name)
+        .setShard(shard.name)
+        // TODO this is not right...
+        .setTimestamp(0)
+        .setTabletType(Topodata.TabletType.MASTER)
+
+    return VitessGrpc.newBlockingStub(channel()).updateStream(request.build())
+        .asSequence()
+        .map { message ->
+          Update(
+              message.event.statementsList.map { it.sql.toStringUtf8() },
+              message.event.eventToken.position)
+        }
+  }
+
   class Subscription(
     val channel: ManagedChannel,
     val shard: Shard,
-    val position: String?,
-    val timestamp: Long?,
-    val listener: (Update) -> Any
+    val fromPosition: String?,
+    val fromTime: Instant?,
+    val listener: (Update) -> Unit
   ) : ClientCall.Listener<Vtgate.UpdateStreamResponse?>() {
-    private var call: ClientCall<Vtgate.UpdateStreamRequest, Vtgate.UpdateStreamResponse>? = null
+    var isReady = false
+      private set
+    var isStarted = false
+      private set
+    var isClosed = false
+      private set
+    var closedStatus: Status? = null
+      private set
+
+    private var call: ClientCall<Vtgate.UpdateStreamRequest, Vtgate.UpdateStreamResponse> =
+        channel.newCall(VitessGrpc.getUpdateStreamMethod(),
+            CallOptions.DEFAULT.withWaitForReady())
 
     override fun onMessage(message: Vtgate.UpdateStreamResponse?) {
       if (message != null) {
@@ -78,40 +118,53 @@ class UpdateStreamSource(
             message.event.statementsList.map { it.sql.toStringUtf8() },
             message.event.eventToken.position))
       }
+      call.request(1)
+    }
+
+    override fun onReady() {
+      isReady = true;
+    }
+
+    override fun onClose(status: Status?, trailers: Metadata?) {
+      logger.warn("UpdateStream closed: $status")
+      isClosed = true
+      closedStatus = status;
     }
 
     internal fun start() {
-      // TODO This doesn't support reconnecting if e.g. the vtgate goes down for a redepl
-      val call = channel.newCall(VitessGrpc.getUpdateStreamMethod(),
-          CallOptions.DEFAULT.withWaitForReady())
-      this.call = call
+      // TODO This doesn't support reconnecting if e.g. the vtgate goes down for a redeploy
+      // TODO We're not using the fromPosition yet...
+      // TODO We're not using the fromTime yet...
       call.start(this, Metadata())
+      call.request(1)
 
-      val eventToken = Query.EventToken.newBuilder()
-          .setShard(shard.name)
-      if (position != null) {
-        eventToken.position = position
-      }
-      if (timestamp != null) {
-        eventToken.timestamp = timestamp
-      }
-      call.sendMessage(Vtgate.UpdateStreamRequest.newBuilder()
+      val request = Vtgate.UpdateStreamRequest.newBuilder()
           .setKeyspace(shard.keyspace.name)
           .setShard(shard.name)
-          .setTabletType(Topodata.TabletType.REPLICA)
-//        .setEvent(eventToken.build())
-          .build())
+          .setTabletType(Topodata.TabletType.MASTER)
+
+      if (fromTime != null) {
+        request.timestamp = fromTime.toEpochMilli() / 1000
+      }
+      if (fromPosition != null) {
+        request.event = Query.EventToken.newBuilder()
+            .setShard(shard.name)
+            .setPosition(fromPosition)
+            .build()
+      }
+
+      call.sendMessage(request.build())
       call.halfClose()
+
+      isStarted = true
     }
 
     fun cancel() {
-      val call = this.call
-      this.call = null
-      call?.cancel(null, null)
+      call.cancel("Cancel because we're done", null)
     }
   }
 
-  interface Listener {
-    fun update(it: Vtgate.UpdateStreamResponse)
+  companion object {
+    private val logger = KotlinLogging.logger {}
   }
 }

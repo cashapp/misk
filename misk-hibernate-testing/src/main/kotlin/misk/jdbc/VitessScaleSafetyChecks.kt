@@ -22,7 +22,8 @@ import okio.ByteString.Companion.encodeUtf8
 import java.io.EOFException
 import java.sql.Connection
 import java.util.Locale
-import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.CompletableFuture
+import java.util.concurrent.atomic.AtomicReference
 import java.util.concurrent.locks.ReentrantLock
 import javax.inject.Singleton
 import javax.sql.DataSource
@@ -216,16 +217,20 @@ class VitessScaleSafetyChecks(
   }
 
   inner class UpdateListener() {
-    private val start = Once()
-    private val statements = arrayListOf<String>()
+    private val start = Once<Unit>()
+    val statements = arrayListOf<String>()
     private val lock = ReentrantLock()
     private val condition = lock.newCondition()
+    private var subscriptions: List<UpdateStreamSource.Subscription>? = null
 
     fun start() {
       start.run {
         val shards = startVitessService.cluster().openVtgateConnection().use { it.shards() }
-        shards.forEach { shard ->
+        subscriptions = shards.map { shard ->
           updateStreamSource.streamUpdates(shard, null, null) { update ->
+            for (statement in update.statements) {
+              println("STATEMENT: $statement")
+            }
             lock.withLock {
               statements.addAll(update.statements)
               condition.signalAll()
@@ -238,6 +243,8 @@ class VitessScaleSafetyChecks(
     fun waitForStatementCountMoreThan(count: Int) {
       while (true) {
         lock.withLock {
+          println("isReady = ${subscriptions?.all { it.isReady }}")
+          checkClosedSubscription()
           if (statements.count() > count) {
             return
           }
@@ -246,13 +253,22 @@ class VitessScaleSafetyChecks(
       }
     }
 
-    fun lastStatement(): String {
-      return statements.last()
+    private fun checkClosedSubscription() {
+      val subscriptions = this.subscriptions ?: throw IllegalStateException("Not started")
+      val closed = subscriptions.firstOrNull { it.isClosed }
+      if (closed != null) {
+        throw IllegalStateException("Subscription stopped: ${closed.closedStatus}")
+      }
+    }
+
+    fun stop() {
+      println("stopping UpdateListener")
+      subscriptions?.forEach { it.cancel() }
     }
   }
 
   inner class CowriteDetector : ExtendedQueryExectionListener() {
-    private val updateListener = UpdateListener()
+    private var updateListener : UpdateListener? = null
     private val keyspaceIdsThisTransaction: ThreadLocal<LinkedHashSet<String>> =
         ThreadLocal.withInitial { LinkedHashSet<String>() }
     private val updates: ThreadLocal<List<String>> =
@@ -263,8 +279,6 @@ class VitessScaleSafetyChecks(
     override fun beforeStartTransaction() {
       if (disabled.get()) return
 
-      updateListener.start()
-
       check(keyspaceIdsThisTransaction.get().isEmpty()) {
         "Transaction state has not been cleaned up, beforeEndTransaction was never executed"
       }
@@ -273,41 +287,68 @@ class VitessScaleSafetyChecks(
     override fun beforeQuery(query: String) {
       if (disabled.get()) return
 
-      statementCountBefore.set(statementCount())
+//      statementCountBefore.set(updateListener.statements.size)
     }
 
     override fun afterQuery(query: String) {
       if (disabled.get()) return
       if (!isDml(query)) return
 
-      updateListener.waitForStatementCountMoreThan(statementCountBefore.get())
+      println("DML: " + query)
 
-      // We got the statement. Let's inspect it.
-      val queryInDatabase = updateListener.lastStatement()
+      updateListener = UpdateListener()
+      updateListener?.start()
 
-      val m = "vtgate:: keyspace_id:([^ ]+)".toRegex().find(queryInDatabase) ?: return
-      val keyspaceId = m.groupValues[1]
-
-      val keyspaceIds = keyspaceIdsThisTransaction.get()
-      keyspaceIds.add(keyspaceId)
-
-      if (keyspaceIds.size > 1) {
-        throw CowriteException(
-            "DML against more than one entity group in the same transaction. " +
-                "These are not guaranteed to be ACID across shard splits and should be avoided. " +
-                "Query was: $queryInDatabase")
-      }
+//      println("Waiting for binlog statement for: $query")
+//      updateListener.waitForStatementCountMoreThan(statementCountBefore.get())
+//
+//      // We got the statement. Let's inspect it.
+//      val queryInDatabase = updateListener.lastStatement()
+//
+//      val m = "vtgate:: keyspace_id:([^ ]+)".toRegex().find(queryInDatabase) ?: return
+//      val keyspaceId = m.groupValues[1]
+//
+//      val keyspaceIds = keyspaceIdsThisTransaction.get()
+//      keyspaceIds.add(keyspaceId)
+//
+//      if (keyspaceIds.size > 1) {
+//        throw CowriteException(
+//            "DML against more than one entity group in the same transaction. " +
+//                "These are not guaranteed to be ACID across shard splits and should be avoided. " +
+//                "Query was: $queryInDatabase")
+//      }
     }
 
     override fun beforeEndTransaction() {
       keyspaceIdsThisTransaction.get().clear()
     }
-  }
 
-  private fun waitForNextStatement() {
-  }
+    override fun afterCommitTransaction() {
+      val updateListener = updateListener ?: return
+      this.updateListener = null
 
-  private fun statementCount(): Int = 0
+      Thread.sleep(5000)
+      updateListener.stop()
+
+      val keyspaceIds = updateListener.statements.asSequence()
+          .flatMap { query ->
+            val m = "vtgate:: keyspace_id:([^ ]+)".toRegex().find(query)
+            if (m != null) {
+              val keyspaceId = m.groupValues[1]
+              sequenceOf(keyspaceId)
+            } else {
+              emptySequence()
+            }
+          }
+          .toSet()
+
+      if (keyspaceIds.size > 1) {
+        throw CowriteException(
+            "This transaction updates than one entity group in the same transaction. " +
+                "These are not guaranteed to be ACID across shard splits and should be avoided.")
+      }
+    }
+  }
 
   val COMMENT_PATTERN = "/\\*+[^*]*\\*+(?:[^/*][^*]*\\*+)*/".toRegex()
   val DML = setOf("insert", "delete", "update")
@@ -448,13 +489,17 @@ fun String.quoteSql(escape: String): String =
 /**
  * Equivalent to Golang's sync.Once
  */
-class Once {
-  private val done = AtomicBoolean(false)
+class Once<T> {
+  private val value =
+      AtomicReference<CompletableFuture<T>>(null)
 
-  fun run(lambda: () -> Any) {
-    if (done.get()) return
-    if (done.compareAndSet(false, true)) {
-      lambda()
+  fun run(lambda: () -> T): T {
+    if (value.get() != null) return value.get().get()
+
+    if (value.compareAndSet(null, CompletableFuture())) {
+      // We won the race, run the lambda and complete the future
+      value.get().complete(lambda())
     }
+    return value.get().get()
   }
 }
