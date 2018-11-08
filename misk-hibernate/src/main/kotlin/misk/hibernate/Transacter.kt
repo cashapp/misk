@@ -32,6 +32,7 @@ interface Transacter {
 }
 
 fun Transacter.shards() = transaction { it.shards() }
+
 fun <T> Transacter.transaction(shard: Shard, lambda: (session: Session) -> T) =
     transaction { it.target(shard) { lambda(it) } }
 
