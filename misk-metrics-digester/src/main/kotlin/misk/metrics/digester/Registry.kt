@@ -34,16 +34,16 @@ class TDigestHistogram<T : TDigest<T>> constructor(
 ) : Histogram {
 
   private val metrics = ConcurrentHashMap<Int, DigestMetric>()
-
-  /** Add all labels passed to the histogram */
-  init {
-    labelNames.forEach { label ->
-      labels(label)
-    }
-  }
+  private val labelRegex = "[a-zA-Z0-9_]*".toRegex()
 
   /** Records a new metric within the histogram */
   override fun labels(vararg labelValues: String): TDigestHistogramRecordMetric {
+    labelValues.forEach { label ->
+      require (labelRegex.matches(label)) {
+        "label name is invalid"
+      }
+    }
+
     val metric = metrics.getOrPut(key(labelValues)) {
       DigestMetric(tDigest(), labelValues.asList())
     }
@@ -51,14 +51,10 @@ class TDigestHistogram<T : TDigest<T>> constructor(
   }
 
   /** Returns the number of windows within the histogram */
-  override fun count(vararg labelValues: String): Int {
-    return metrics.get(key(labelValues))?.digest?.windows?.count() ?: 0
-  }
+  override fun count(vararg labelValues: String) = metrics.get(key(labelValues))?.digest?.windows?.count() ?: 0
 
   /** Returns a metric of the histogram. Order of labels matters */
-  fun getMetric(vararg metric: String): DigestMetric {
-    return metrics.getValue(key(metric))
-  }
+  internal fun metric(vararg metric: String) = metrics[key(metric)]
 
   /** Creates a hash for a list of labels */
   private fun key(labels: Array<out String>) = Objects.hash(labels.sorted())
@@ -84,26 +80,24 @@ class TDigestHistogramRegistry<T : TDigest<T>> constructor(
   }
 
   private val histograms = ConcurrentHashMap<String, TDigestHistogram<T>>()
+  private val metricRegex =  "[a-zA-Z_:][a-zA-Z0-9_:]*".toRegex()
 
   /** Creates and returns a new histogram. Histogram is registered within the Registry */
-  override fun newHistogram(
+  @Synchronized override fun newHistogram(
     name: String,
     help: String,
     labelNames: List<String>,
     quantiles: Map<Double, Double>
   ): TDigestHistogram<T> {
-    val histogram = TDigestHistogram(name, help, quantiles.keys.toList(), labelNames, fun() = newDigestFn())
-    return register(histogram)
-  }
 
-  /** Registers a histogram within the Registry */
-  @Synchronized private fun register(histogram: TDigestHistogram<T>): TDigestHistogram<T> {
+    require(metricRegex.matches(name)) {
+      "metrics name is invalid"
+    }
+
+    val histogram = TDigestHistogram(name, help, quantiles.keys.toList(), labelNames, fun() = newDigestFn())
     return histograms.getOrPut(histogram.name) { histogram }
   }
 
   /** Returns a list of all Histograms registered by the Registry */
   fun allHistograms() = histograms.values
-
-  /** Returns a histogram set under the given labels */
-  fun getHistogram(labels: String) = histograms[labels]
 }
