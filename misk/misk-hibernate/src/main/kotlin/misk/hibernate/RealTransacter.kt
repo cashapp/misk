@@ -30,8 +30,12 @@ internal class RealTransacter private constructor(
   private val tracer: Tracer?
 ) : Transacter {
 
-  constructor(qualifier: KClass<out Annotation>, sessionFactory: SessionFactory, config: DataSourceConfig, tracer: Tracer?) :
-      this(qualifier, sessionFactory, config, ThreadLocal(), TransacterOptions(), tracer)
+  constructor(
+    qualifier: KClass<out Annotation>,
+    sessionFactory: SessionFactory,
+    config: DataSourceConfig,
+    tracer: Tracer?
+  ) : this(qualifier, sessionFactory, config, ThreadLocal(), TransacterOptions(), tracer)
 
   override val inTransaction: Boolean
     get() = threadLocalSession.get() != null
@@ -50,9 +54,9 @@ internal class RealTransacter private constructor(
     assert(options.maxAttempts > 0)
 
     val backoff = ExponentialBackoff(
-      Duration.ofMillis(options.minRetryDelayMillis),
-      Duration.ofMillis(options.maxRetryDelayMillis),
-      Duration.ofMillis(options.retryJitterMillis)
+        Duration.ofMillis(options.minRetryDelayMillis),
+        Duration.ofMillis(options.maxRetryDelayMillis),
+        Duration.ofMillis(options.retryJitterMillis)
     )
     var attempt = 0
 
@@ -64,11 +68,15 @@ internal class RealTransacter private constructor(
         if (!isRetryable(e)) throw e
 
         if (attempt >= options.maxAttempts) {
-          logger.info(e) { "${qualifier.simpleName} recoverable transaction exception (attempt: $attempt), max attempts exceeded" }
+          logger.info(e) {
+            "${qualifier.simpleName} recoverable transaction exception (attempt: $attempt), max attempts exceeded"
+          }
           throw e
         }
 
-        logger.info(e) { "${qualifier.simpleName} recoverable transaction exception (attempt: $attempt), retrying" }
+        logger.info(e) {
+          "${qualifier.simpleName} recoverable transaction exception (attempt: $attempt), retrying"
+        }
         val sleepDuration = backoff.nextRetry()
         if (!sleepDuration.isZero) {
           try {
@@ -82,23 +90,22 @@ internal class RealTransacter private constructor(
   }
 
   private fun <T> transactionInternal(lambda: (session: Session) -> T): T {
-    if (tracer != null) {
-      return tracer.traceWithSpan(DB_TRANSACTION_SPAN_NAME) { span ->
-        Tags.COMPONENT.set(span, TRANSACTER_SPAN_TAG)
-        transactionInternalSession(lambda)
-      }
-    }
-    return transactionInternalSession(lambda)
+    return if (tracer != null) tracer.traceWithSpan(DB_TRANSACTION_SPAN_NAME) { span ->
+      Tags.COMPONENT.set(span, TRANSACTER_SPAN_TAG)
+      transactionInternalSession(lambda)
+    } else transactionInternalSession(lambda)
   }
 
   private fun <T> transactionInternalSession(lambda: (session: Session) -> T): T {
     return withSession { session ->
       val transaction = session.hibernateSession.beginTransaction()!!
-      val result: T
       try {
-        result = lambda(session)
+        val result = lambda(session)
+
+        session.preCommit()
         transaction.commit()
-        return@withSession result
+        session.postCommit()
+        result
       } catch (e: Throwable) {
         if (transaction.isActive) {
           try {
@@ -111,6 +118,7 @@ internal class RealTransacter private constructor(
       }
     }
   }
+
   override fun retries(): Transacter = withOptions(options.copy(maxAttempts = 2))
 
   override fun noRetries(): Transacter = withOptions(options.copy(maxAttempts = 1))
@@ -118,9 +126,9 @@ internal class RealTransacter private constructor(
   override fun readOnly(): Transacter = withOptions(options.copy(readOnly = true))
 
   private fun withOptions(options: TransacterOptions): Transacter =
-    RealTransacter(qualifier, sessionFactory, config, threadLocalSession, options, tracer)
+      RealTransacter(qualifier, sessionFactory, config, threadLocalSession, options, tracer)
 
-  private fun <T> withSession(lambda: (session: Session) -> T): T {
+  private fun <T> withSession(lambda: (session: RealSession) -> T): T {
     check(threadLocalSession.get() == null) { "Attempted to start a nested session" }
 
     val realSession = RealSession(sessionFactory.openSession(), config, options.readOnly)
@@ -141,13 +149,13 @@ internal class RealTransacter private constructor(
     }
   }
 
-  private fun isRetryable(e: Exception): Boolean {
-    return when (e) {
+  private fun isRetryable(th: Throwable): Boolean {
+    return when (th) {
       is RetryTransactionException,
       is StaleObjectStateException,
       is LockAcquisitionException,
       is OptimisticLockException -> true
-      else -> false
+      else -> th.cause?.let { isRetryable(it) } ?: false
     }
   }
 
@@ -161,9 +169,9 @@ internal class RealTransacter private constructor(
   )
 
   companion object {
-    val APPLICATION_TRANSACTION_SPAN_NAME = "app-db-transaction"
-    val DB_TRANSACTION_SPAN_NAME = "db-session"
-    val TRANSACTER_SPAN_TAG = "hibernate-transacter"
+    const val APPLICATION_TRANSACTION_SPAN_NAME = "app-db-transaction"
+    const val DB_TRANSACTION_SPAN_NAME = "db-session"
+    const val TRANSACTER_SPAN_TAG = "hibernate-transacter"
   }
 
   internal class RealSession(
@@ -172,6 +180,9 @@ internal class RealTransacter private constructor(
     val readOnly: Boolean
   ) : Session {
     override val hibernateSession = session
+    private val preCommitHooks = mutableListOf<() -> Unit>()
+    private val postCommitHooks = mutableListOf<() -> Unit>()
+
     init {
       if (readOnly) {
         hibernateSession.isDefaultReadOnly = true
@@ -188,7 +199,8 @@ internal class RealTransacter private constructor(
         is DbChild<*, *> -> (session.save(entity) as Gid<*, *>).id
         is DbRoot<*> -> session.save(entity)
         is DbUnsharded<*> -> session.save(entity)
-        else -> throw IllegalArgumentException("You need to sub-class one of [DbChild, DbRoot, DbUnsharded]")
+        else -> throw IllegalArgumentException(
+            "You need to sub-class one of [DbChild, DbRoot, DbUnsharded]")
       } as Id<T>
     }
 
@@ -197,17 +209,15 @@ internal class RealTransacter private constructor(
     }
 
     override fun shards(): Set<Shard> {
-      if (config.type == DataSourceType.VITESS) {
-        return useConnection { connection ->
+      return if (config.type == DataSourceType.VITESS) {
+        useConnection { connection ->
           connection.createStatement().use {
             it.executeQuery("SHOW VITESS_SHARDS")
                 .map { parseShard(it.getString(1)) }
                 .toSet()
           }
         }
-      } else {
-        return SINGLE_SHARD_SET
-      }
+      } else SINGLE_SHARD_SET
     }
 
     private fun parseShard(string: String): Shard {
@@ -245,10 +255,37 @@ internal class RealTransacter private constructor(
       return session.doReturningWork(work)
     }
 
+    internal fun preCommit() {
+      preCommitHooks.forEach {
+        // Propagate hook exceptions up to the transacter so that the the transaction is rolled
+        // back and the error gets returned to the applicatiob
+        it()
+      }
+    }
+
+    override fun onPreCommit(work: () -> Unit) {
+      preCommitHooks.add(work)
+    }
+
+    internal fun postCommit() {
+      postCommitHooks.forEach {
+        try {
+          it()
+        } catch (th: Throwable) {
+          throw PostCommitHookFailedException(th)
+        }
+      }
+    }
+
+    override fun onPostCommit(work: () -> Unit) {
+      postCommitHooks.add(work)
+    }
+
     companion object {
-      val SINGLE_KEYSPACE = Keyspace("keyspace")
-      val SINGLE_SHARD = Shard(SINGLE_KEYSPACE, "0")
-      val SINGLE_SHARD_SET = ImmutableSet.of(SINGLE_SHARD)
+      private val log = getLogger<RealSession>()
+      private val SINGLE_KEYSPACE = Keyspace("keyspace")
+      private val SINGLE_SHARD = Shard(SINGLE_KEYSPACE, "0")
+      private val SINGLE_SHARD_SET = ImmutableSet.of(SINGLE_SHARD)
     }
   }
 }
