@@ -183,9 +183,12 @@ internal class SqsJobQueueTest {
       it.acknowledge()
     }
 
-    subscription.close()
 
-    // Send 10 jobs, then wait a second to make sure none of them are delivered
+    // Close the subscription and wait for any currently outstanding long-polls to complete
+    subscription.close()
+    Thread.sleep(1001)
+
+    // Send 10 jobs, then wait again for the long-poll to complete make sure none of them are delivered
     for (i in (0 until 10)) {
       queue.enqueue(queueName, "this is job $i", attributes = mapOf("index" to i.toString()))
     }
