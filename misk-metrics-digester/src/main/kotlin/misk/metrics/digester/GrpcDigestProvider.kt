@@ -2,6 +2,7 @@ package misk.metrics.digester
 
 import com.squareup.digester.protos.service.GetDigestsRequest
 import com.squareup.digester.protos.service.MetricFamily
+import misk.grpc.GrpcClient
 import java.time.Instant
 import java.time.ZonedDateTime
 
@@ -14,13 +15,16 @@ import java.time.ZonedDateTime
       defaultQuantiles
   )
 
-class DigestProviderService<T : TDigest<T>> {
+class GetDigests<T : TDigest<T>>(req: GetDigestsRequest, srv: GetDigestsRequest) {
 
   /** Streams metric digests for metrics available in the request's time range */
   fun getDigests(digestsRequest: GetDigestsRequest, server: DigestMetric<>) {
     val histograms = registry.allHistograms()
+    require(digestsRequest.windows_end_from_ms <= digestsRequest.windows_end_to_ms) {
+      "windows_end_from_ms cannot be later then window_end_to_ms"
+    }
 
-    val logger =
+    val logger = GrpcClient()
   }
 
 
