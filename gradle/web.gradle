@@ -1,6 +1,6 @@
 import groovy.json.JsonSlurper
 
-def dockerMiskWebVersion = "0.0.4"
+def dockerMiskWebVersion = "0.0.5"
 
 task web(type: Exec) {
   // -Pcmd='-d': pass in argument to misk-web shell script in Docker container
@@ -10,30 +10,66 @@ task web(type: Exec) {
   // Build all tabs: ./gradlew web
   // See other misk-web options: ./gradlew web -Pcmd='-h'
 
-  def generateDockerContainerName = { service, project, task ->
-    def slug = task.split('/').join('-').split('@').join('')
-    return "${new Date().format("YMD-HMS")}-${service}-${project}${slug}"
+  def projectName = project.projectDir.toString().split('/').dropRight(1).last()
+  def subProjectName = project.projectDir.toString().split('/').last()
+
+  def slugify = { str ->
+    def slug = str.split('/').join('-').split('@').join('')
+    if (slug.startsWith('-')) {
+      slug = slug.drop(1)
+    }
+    return slug
+  }
+
+  def generateDockerContainerName = { task ->
+    def slug = slugify(task)
+    return "${new Date().format("YMD-HMS")}-${projectName}-${subProjectName}-${slug}"
   }
 
   def getPackageJsonPort = { path ->
-    def packageFile= new File("${project.projectDir}/web/${path}/package.json")
+    def packageFile = new File("$path/package.json")
     def packageJson = new JsonSlurper().parseText(packageFile.text)
-    return packageJson.miskTab.port
+    try {
+      return packageJson.miskTab.port
+    } catch (all) {
+      return null
+    }
   }
 
-  def generateDockerRunCommand = { service, project, projectPath, path, cmd, daemon="-d", image = "squareup/misk-web:${dockerMiskWebVersion}" ->
-    def containerName = "${generateDockerContainerName(service, project, path)}"
-    def port = ""
-    if (path.startsWith("/tabs")) {
-      port = "-p ${getPackageJsonPort(path)}:${getPackageJsonPort(path)}"
+  def getPackageVersion = { path ->
+    def packageFile = new File("$path/package.json")
+    def packageJson = new JsonSlurper().parseText(packageFile.text)
+    try {
+      return packageJson.miskTab.version
+    } catch (all) {
+      return null
     }
+  }
 
-    def command = "docker run ${daemon} --rm --name ${containerName} -v ${projectPath}/web${path}:/web${path} ${port} ${image} ${cmd}"
-    println "\nContainer: ${containerName}"
-    println "Running... \$ ${command}"
-    println "Logs       \$ docker logs -f ${containerName}"
-    println "Shut Down  \$ docker kill ${containerName}"
-    return command
+  def generateDockerRunCommand = {
+    projectPath, path, cmd, daemon = "-d", image = "squareup/misk-web" ->
+      def containerName = "${generateDockerContainerName(path)}"
+      def port = ""
+      if (path.startsWith("/tabs")) {
+        port = "-p ${getPackageJsonPort("${projectPath}/web/${path}")}:${getPackageJsonPort("${projectPath}/web/${path}")}"
+      }
+      def versionWarningLog = ""
+      def imageVersion = getPackageVersion("${projectPath}/web/${path}")
+      if (imageVersion < dockerMiskWebVersion) {
+        def versionWarning = "\n[WARN] Upgrade miskTab.version ${imageVersion} -> ${dockerMiskWebVersion} in ${path}/package.json\nCheck for breaking changes and upgrade to latest @misk/ packages: https://github.com/square/misk/tree/master/docker/misk-web\n"
+        versionWarningLog = "; echo '$versionWarning'"
+        println versionWarning
+      }
+      def command = "docker run ${daemon} --rm --name ${containerName} -v ${projectPath}/web${path}:/web${path} ${port} ${image}:${imageVersion} ${cmd}"
+      def logsDir = "${projectPath}/web/logs/"
+      println "\nContainer: ${containerName} ${cmd}"
+      println "Running... \$ ${command}"
+      println "Logs       \$ docker logs -f ${containerName}"
+      println "Logs File  ${logsDir}${containerName.toString()}.log"
+      println "Shut Down  \$ docker kill ${containerName}"
+      def waitForContainer = "while ! docker ps --format '{{.Names}}' | grep -q '${containerName}'; do sleep 1; done"
+      def formattedLogs = "mkdir -p $logsDir && bash -c \'docker logs -f ${containerName} | tee \"${logsDir}${containerName.toString()}.log\" > >(sed \"s/^/[${slugify(path)}] /\") 2> >(sed \"s/^/[${slugify(path)}][err] /\" >&2) &\'"
+      return "sh -c '$command &'; $waitForContainer && $formattedLogs $versionWarningLog"
   }
 
   def cmd = ""
@@ -49,21 +85,51 @@ task web(type: Exec) {
   }
 
   def runCommand = ""
+
   if (project.hasProperty("tabs")) {
     if (project.tabs.split(',').length > 1) {
       dockerd = "-d"
     }
 
     project.tabs.split(',').each {
-      def command = generateDockerRunCommand('misk', 'misk', project.projectDir, "/$it", "/bin/misk-web ${cmd}", dockerd)
+      def command = generateDockerRunCommand(project.projectDir, "/$it", "/bin/misk-web ${cmd}", dockerd)
       if (runCommand != "") {
         runCommand += " && "
       }
       runCommand += command
     }
   } else {
-    runCommand = generateDockerRunCommand('misk', 'misk', project.projectDir, "", "/bin/misk-web ${cmd}", dockerd)
+    // Spin up parallel images for all @misk/ packages and tabs
+    def paths = []
+    try {
+      new File("${project.projectDir}/web/@misk").eachDir {
+        paths += it.toString().split('/web/').drop(1)[0]
+      }
+    } catch (all) {
+      println "Can't find any @misk packages in ${project.projectDir}/web/@misk"
+    }
+    try {
+      new File("${project.projectDir}/web/tabs").eachDir {
+        paths += it.toString().split('/web/').drop(1)[0]
+      }
+    } catch (all) {
+      println "Can't find any tabs in ${project.projectDir}/web/tabs"
+    }
+
+    if (paths.size() > 1) {
+      dockerd = "-d"
+    }
+
+    paths.each {
+      def command = generateDockerRunCommand(project.projectDir, "/$it", "/bin/misk-web ${cmd}", dockerd)
+      if (runCommand != "") {
+        runCommand += " && "
+      }
+      runCommand += command
+    }
   }
 
+  def sleepUntilDockerExits = "while docker ps --format '{{.Names}}' | grep -q '${projectName}-${subProjectName}'; do echo -e \"\\r\\033[1A\\033[0K[\$(date +'%Y-%m-%d %T')] waiting for [\$(docker ps --format '{{.Names}}' | grep '${projectName}-${subProjectName}' | wc -l | tr -d '\t')] ${projectName}-${subProjectName} running containers to finish...\" && sleep 5; done"
+  runCommand += " && ${sleepUntilDockerExits}"
   commandLine 'sh', '-c', runCommand
 }

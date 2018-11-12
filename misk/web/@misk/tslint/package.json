@@ -1,6 +1,7 @@
 {
   "name": "@misk/tslint",
-  "version": "0.0.8",
+  "version": "0.0.10",
+  "license": "SEE LICENSE IN https://github.com/square/misk",
   "description": "Microservice Kontainer TsLint",
   "author": "Square/Misk Authors (https://github.com/square/misk/graphs/contributors)",
   "main": "lib/web/@misk/tslint/tslint.base.json",
@@ -25,5 +26,8 @@
     "tslint-react": "^3.6.0",
     "tslint-sonarts": "^1.8.0",
     "typescript": "^3.0.3"
+  },
+  "miskTab": {
+    "version": "0.0.5"
   }
 }

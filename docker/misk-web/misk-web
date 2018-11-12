@@ -123,6 +123,7 @@ runCmd() {
             restoreNodeModules
             # Update hash after every command
             hashDir | tee .hash
+            echo "[DONE]" && echo ""
         fi
     done
 }

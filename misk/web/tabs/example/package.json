@@ -1,6 +1,7 @@
 {
   "name": "misktab-example",
   "version": "0.0.3",
+  "license": "SEE LICENSE IN https://github.com/square/misk",
   "main": "src/index.ts",
   "scripts": {
     "build": "yarn run lint && yarn run lib",
@@ -13,16 +14,17 @@
     "test": "echo no test"
   },
   "dependencies": {
-    "@misk/common": "^0.0.60",
-    "@misk/components": "^0.0.76"
+    "@misk/common": "^0.0.61",
+    "@misk/components": "^0.0.79"
   },
   "devDependencies": {
-    "@misk/dev": "^0.0.61",
+    "@misk/dev": "^0.0.64",
     "@misk/tslint": "^0.0.10"
   },
   "miskTab": {
     "name": "Example",
     "port": "3199",
-    "slug": "example"
+    "slug": "example",
+    "version": "0.0.5"
   }
 }
