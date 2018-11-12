@@ -50,6 +50,7 @@
       - `30000-39999`: Open ports for all other tabs built on Misk.
     - relative_path_prefix: optional override field. By default, it will be tab slug prefixed by `_tab/`.
     - slug: lowercase, no symbols name to be used in determining URL domain space. Should be the same as the `package.json` -> name without the prefix `misktab-`.
+    - version: [`squareup/misk-web`](https://hub.docker.com/r/squareup/misk-web/) Docker image version for the build and packages Misk Web environment to be used for the tab. Upgrade this periodically to get latest `@misk/` packages and build environment.
 
   - Example
     ```JSON
@@ -58,7 +59,8 @@
     "miskTab": {
       "name": "T-Rex Food Log",
       "port": "30420",
-      "slug": "trexfoodlog"
+      "slug": "trexfoodlog",
+      "version": "0.0.5"
     }
     ```
 

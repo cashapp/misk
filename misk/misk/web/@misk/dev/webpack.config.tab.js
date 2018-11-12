@@ -10,7 +10,12 @@ const merge = require("webpack-merge")
 module.exports = (env, argv, otherConfigFields = {}) => {
   const { dirname, miskTab, bundleAnalyzer = false } = argv
 
-  if ("name" in miskTab && "port" in miskTab && "slug" in miskTab) {
+  if (
+    "name" in miskTab &&
+    "port" in miskTab &&
+    "slug" in miskTab &&
+    "version" in miskTab
+  ) {
     console.log("[MISK] Valid miskTab in package.json")
   } else {
     console.log(
@@ -19,16 +24,20 @@ module.exports = (env, argv, otherConfigFields = {}) => {
     let errMsg = "\n"
     errMsg +=
       "name" in miskTab
-        ? "[MISK] miskTab contains name\n"
+        ? `[MISK] miskTab contains name: ${miskTab.name}\n`
         : "[MISK] miskTab missing name\n"
     errMsg +=
       "port" in miskTab
-        ? "[MISK] miskTab contains port\n"
+        ? `[MISK] miskTab contains port: ${miskTab.port}\n`
         : "[MISK] miskTab missing port\n"
     errMsg +=
       "slug" in miskTab
-        ? "[MISK] miskTab contains slug\n"
+        ? `[MISK] miskTab contains slug: ${miskTab.slug}\n`
         : "[MISK] miskTab missing slug\n"
+    errMsg +=
+      "version" in miskTab
+        ? `[MISK] miskTab contains version: ${miskTab.version}\n`
+        : "[MISK] miskTab missing version, upgrade to latest squareup/misk-web Docker image version at https://hub.docker.com/r/squareup/misk-web/\n"
     throw Error(errMsg)
   }
 

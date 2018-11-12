@@ -4,19 +4,23 @@ import { IConfigResources, IConfigState } from "../ducks"
 
 const Container = styled.div``
 
-const ConfigOutput = styled.pre`
-  font-family: Menlo, Fira Code;
+const ConfigEntry = styled.pre`
+  font-family: Fira Code, Menlo;
+`
+
+const ConfigCode = styled.code`
+  font-family: Fira Code, Menlo;
 `
 
 export default class ConfigComponent extends React.PureComponent<IConfigState> {
   renderConfig(resource: IConfigResources) {
     return (
-      <ConfigOutput>
+      <ConfigEntry>
         <h5>
           <strong>{resource.name}</strong>
         </h5>
-        <code>{resource.file}</code>
-      </ConfigOutput>
+        <ConfigCode>{resource.file}</ConfigCode>
+      </ConfigEntry>
     )
   }
 
