@@ -1,5 +1,6 @@
 import { fromJS, List } from "immutable"
 export * from "./actions"
+export * from "./css"
 
 /**
  * Common Interfaces
@@ -20,8 +21,18 @@ interface IAdminDashboardTab extends IDashboardTab {}
 
 interface IServiceMetadata {
   app_name: string
-  environment: string
+  environment: Environment
   admin_dashboard_url: string
+}
+
+/**
+ * Environment
+ */
+enum Environment {
+  TESTING = "TESTING",
+  DEVELOPMENT = "DEVELOPMENT",
+  STAGING = "STAGING",
+  PRODUCTION = "PRODUCTION"
 }
 
 /**
@@ -78,6 +89,7 @@ export {
   IAdminDashboardTab,
   IServiceMetadata,
   defaultState,
+  Environment,
   IDefaultState,
   IBinder,
   IBinderKeys,

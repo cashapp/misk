@@ -24,6 +24,10 @@ $ yarn add @misk/components
 
 ## Containers
 
+- `DesktopWideOnlyContainer`: Only shows container when window width >1200px
+- `FlexContainer`: Container using CSS FlexBox to have enclosed items flow responsively to screen width
+- `MobileNeverContainer`: Never show container when window width <768px
+- `MobileOnlyContainer`: Only show container when window width <768px
 - `ResponsiveContainer`: Responsive container that all tabs and Nav Topbar use to ensure consistent view width
 
 ## [Releasing](https://github.com/square/misk/blob/master/misk/web/%40misk/RELEASING.md)

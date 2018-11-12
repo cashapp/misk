@@ -1,6 +1,6 @@
 {
   "name": "@misk/common",
-  "version": "0.0.61",
+  "version": "0.0.65",
   "license": "SEE LICENSE IN https://github.com/square/misk",
   "description": "Microservice Kontainer Common Libraries, Externals, Styles",
   "author": "Square/Misk Authors (https://github.com/square/misk/graphs/contributors)",
@@ -58,7 +58,7 @@
     "styled-components": "^4.0.3"
   },
   "devDependencies": {
-    "@misk/dev": "^0.0.64",
+    "@misk/dev": "^0.0.67",
     "@misk/tslint": "^0.0.10"
   },
   "miskCachedUrls": {
@@ -68,6 +68,6 @@
     }
   },
   "miskTab": {
-    "version": "0.0.5"
+    "version": "0.0.6"
   }
 }

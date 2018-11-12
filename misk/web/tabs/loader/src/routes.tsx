@@ -3,11 +3,11 @@ import { Route, Switch } from "react-router"
 import { LoaderContainer } from "./containers"
 
 const routes = (
-  <div>
+  <span>
     <Switch>
       <Route component={LoaderContainer} />
     </Switch>
-  </div>
+  </span>
 )
 
 export default routes

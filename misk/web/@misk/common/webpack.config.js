@@ -7,7 +7,7 @@ module.exports = {
   name: "library",
   mode: "production",
   entry: {
-    common: path.resolve(__dirname, "src/index.ts")
+    common: path.resolve(__dirname, "src/index.ts"),
   },
   devtool: "source-map",
   output: {

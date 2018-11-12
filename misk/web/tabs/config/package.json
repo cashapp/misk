@@ -14,17 +14,17 @@
     "test": "echo no test"
   },
   "dependencies": {
-    "@misk/common": "^0.0.61",
-    "@misk/components": "^0.0.79"
+    "@misk/common": "^0.0.65",
+    "@misk/components": "^0.0.81"
   },
   "devDependencies": {
-    "@misk/dev": "^0.0.64",
+    "@misk/dev": "^0.0.67",
     "@misk/tslint": "^0.0.10"
   },
   "miskTab": {
     "name": "Config",
     "port": "3200",
     "slug": "config",
-    "version": "0.0.5"
+    "version": "0.0.6"
   }
 }

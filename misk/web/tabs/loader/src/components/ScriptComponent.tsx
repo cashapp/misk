@@ -9,7 +9,7 @@ export interface IScriptProps {
 
 export const ScriptComponent = (props: IScriptProps) => {
   return (
-    <div>
+    <span>
       <Helmet>
         <script
           async={true}
@@ -17,6 +17,6 @@ export const ScriptComponent = (props: IScriptProps) => {
         />
       </Helmet>
       <MountingDivComponent tab={props.tab} />
-    </div>
+    </span>
   )
 }

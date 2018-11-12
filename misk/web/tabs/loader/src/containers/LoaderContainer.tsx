@@ -19,7 +19,7 @@ export interface ILoaderProps extends IState {
 
 const TabContainer = styled(ResponsiveContainer)`
   position: relative;
-  top: 100px;
+  top: 110px;
   padding-left: 5px;
 `
 
@@ -52,8 +52,9 @@ class LoaderContainer extends React.Component<ILoaderProps> {
     }
     if (adminDashboardTabs && serviceMetadata) {
       return (
-        <div>
+        <span>
           <TopbarComponent
+            environment={serviceMetadata.environment}
             links={adminDashboardTabs}
             homeName={serviceMetadata.app_name}
             homeUrl={serviceMetadata.admin_dashboard_url}
@@ -63,11 +64,11 @@ class LoaderContainer extends React.Component<ILoaderProps> {
               <ScriptComponent key={key} tab={tab} />
             ))}
           </TabContainer>
-        </div>
+        </span>
       )
     } else {
       return (
-        <div>
+        <span>
           <TopbarComponent />
           <TabContainer>
             <OfflineComponent
@@ -76,7 +77,7 @@ class LoaderContainer extends React.Component<ILoaderProps> {
               endpoint={unavailableEndpointUrls}
             />
           </TabContainer>
-        </div>
+        </span>
       )
     }
   }

@@ -21,10 +21,7 @@ usage() {
 
   -l    'lint' run Prettier linting
 
-  -o    compute a md5 hash over the current directory and stores in .hash file
-
-  -m    compute a md5 hash over the current directory and stores in .hash file, creates .hashdiff file if there is an existing hash
-        exclude patterns: cachedUrls, lib, node_modules, .hash
+  -m    compute a md5 hash over the current directory and stores in .hash file
 
   -r    'refresh' local web/node_modules from Docker image /node_modules
 
@@ -34,6 +31,7 @@ usage() {
   -x    run next option on all tabs *if directory hash is different*
 
   -z    run <optarg> command
+        $ misk-build -z "yarn upgrade"
 
 
   Must run script in the following directory structure
@@ -64,15 +62,28 @@ hashDir() {
 }
 
 hashDiff() {
+    oldHash=$(echo "$1" | sed 's/[[:space:]]//g')
+    newHash=$(echo "$2" | sed 's/[[:space:]]//g')
+    if [ "$oldHash" = "$newHash" ]; then
+        echo "${oldHash} ${newHash} false"
+    else
+        echo "${oldHash} ${newHash} true"
+    fi
+}
+
+hashDiffFiles() {
+    oldHashFile="$1"
+    newHashFile="$2"
+    [ -f "$oldHashFile" ] || echo "true"
+    [ -f "$newHashFile" ] || echo "true"
+    hashDiff "$(cat "$oldHashFile")" "$(cat "$newHashFile")"
+}
+
+hashDirDiff() {
     newHash=$(hashDir | sed 's/[[:space:]]//g')
     if [ -f .hash ]; then
         oldHash=$(sed 's/[[:space:]]//g' < .hash)
-        if [ "$oldHash" = "$newHash" ]; then
-            echo "${oldHash} ${newHash} false"
-        else
-            echo "${oldHash} ${newHash} true"
-        fi
-        
+        hashDiff "$oldHash" "$newHash"
     else
         echo "${newHash} true"
     fi
@@ -88,8 +99,10 @@ stashNodeModules() {
 }
 
 refreshNodeModules() {
+    # Refresh node_modules if hash doesn't match, not in CI environments
+    ! printenv | grep -q "CI" && [ -d ${WEB}/node_modules ] && hashDiffFiles ${WEB}/node_modules/.hash /node_modules/.hash | grep -Fq "true" && echo "[INVALIDATE] Invalidate local web/node_modules/" && echo "" && rm -rf ${WEB}/node_modules
     # Install local web/node_modules if not already present, not in CI environments
-    [ ! -d ${WEB}/node_modules ] && ! printenv | grep -q "CI" && echo "[REFRESH] Updating local web/node_modules/ from Docker image" && cp -r /node_modules ${WEB}/node_modules
+    ! printenv | grep -q "CI" && [ ! -d ${WEB}/node_modules ] && echo "[REFRESH] Installing local web/node_modules/ from Docker image" && echo "" && cp -rf /node_modules ${WEB}/node_modules
 }
 
 restoreNodeModules() {
@@ -108,7 +121,7 @@ runCmd() {
         if [ -d $dir ] && [ "$dir" = "${dir%"node_modules"*}" ]; then
             cd $dir || continue
             if [ "$HD" = "true" ]; then
-                diffResult=$(hashDiff)
+                diffResult=$(hashDirDiff)
                 echo "[HASH DIFF] $dir $diffResult"
                 stashNodeModules
                 # Run command if hashdiff is different
@@ -134,7 +147,7 @@ reset() {
     HD="false"
 }
 
-while getopts "h?abcdglomrwxz:" opt; do
+while getopts "h?abcdglmrwxz:" opt; do
     case "$opt" in
         h|\?)   usage && exit 0   ;;
         a)      LABEL="[BUILD ALL]" && CMD='yarn build' && runCmd && reset   ;;
@@ -143,9 +156,8 @@ while getopts "h?abcdglomrwxz:" opt; do
         d)      LABEL="[DEV]" && CMD='yarn start' && runCmd && reset   ;;
         g)      LABEL="[CI-BUILD]" && HD="true" && CMD='yarn ci-build' && runCmd && reset   ;;
         l)      LABEL="[LINT]" && CMD='yarn run lint' && runCmd && reset  ;;
-        o)      LABEL="[MD5 HASH]" && CMD='hashDir | tee .hash' && runCmd && reset   ;;
-        m)      LABEL="[MD5 HASHDIFF]" && CMD='hashDiff' && runCmd && reset   ;;
-        r)      restoreNodeModules && reset    ;;
+        m)      hashDir | tee .hash   ;;
+        r)      refreshNodeModules && restoreNodeModules && reset    ;;
         w)      LABEL="[ALT WEB LOCATION]" && WEB="${OPTARG}" && reset    ;;
         x)      LABEL="[HD=\"true\"]" && HD="true"    ;;
         z)      LABEL="[CMD]" && CMD="${OPTARG}" && runCmd && reset   ;;

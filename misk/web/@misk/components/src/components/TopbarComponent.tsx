@@ -4,30 +4,33 @@ import {
   Collapse,
   Icon,
   Navbar,
-  NavbarDivider,
-  NavbarGroup,
-  NavbarHeading
+  NavbarGroup
 } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
-import { IDashboardTab } from "@misk/common"
+import { color, Environment, IDashboardTab } from "@misk/common"
 import { groupBy, sortBy } from "lodash"
 import * as React from "react"
 import { Link } from "react-router-dom"
 import styled from "styled-components"
-import { ResponsiveContainer } from "../containers"
+import { FlexContainer, ResponsiveContainer } from "../containers"
+import { ErrorCalloutComponent } from "./ErrorCalloutComponent"
 
 /**
  * <TopbarComponent homeName={"Service Name"} homeUrl={"/_admin/"} links={props.tabs}/>
  */
 
 export interface ITopbarProps {
+  status?: string | Element
+  environment?: Environment
+  environmentBannerVisible?: Environment[]
+  error?: any
   homeName?: string
   homeUrl?: string
   links?: IDashboardTab[]
 }
 
 const MiskNavbar = styled(Navbar)`
-  background-color: #29333a !important;
+  background-color: ${color.text} !important;
   min-height: 74px;
   margin-bottom: 20px;
   box-sizing: border-box;
@@ -41,11 +44,12 @@ const MiskNavbar = styled(Navbar)`
 const MiskNavbarGroup = styled(NavbarGroup)`
   font-size: 13px !important;
   font-weight: 600 !important;
-  line-height: 20px;
   position: relative;
-  color: #9da2a6;
+  padding-top: 25px;
+  padding-bottom: 27px;
+  color: ${color.gray};
   &:hover {
-    color: #fff;
+    color: ${color.white};
     text-decoration: none;
   }
   @media (max-width: 870px) {
@@ -59,40 +63,36 @@ const MiskNavbarGroup = styled(NavbarGroup)`
   }
 `
 
-const MiskNavbarHeading = styled(NavbarHeading)`
+const MiskNavbarHeading = styled.span`
   font-size: 24px !important;
   text-decoration: none;
   text-transform: uppercase;
   letter-spacing: 0px;
-  padding-top: 25px;
-  padding-bottom: 27px;
-  color: #cecece;
+  padding-right: 15px;
+  color: ${color.accent};
+`
+
+const MiskNavbarHeadingEnvironment = styled(MiskNavbarHeading).attrs({
+  environment: (props: any) => props.environment
+})`
+  color: ${props =>
+    (props.environment && environmentToColor(props.environment)) ||
+    color.accent} !important;
 `
 
 const MiskLink = styled(Link)`
   font-size: 16px;
   font-weight: 500;
-  color: #9da2a6;
+  color: ${color.gray};
   text-decoration: none;
-  letter-spacing: 1px;
   &:hover {
-    color: #fff;
+    color: ${color.white};
     text-decoration: none;
   }
 `
 
-const MiskNavbarLink = styled(MiskLink)`
-  text-transform: uppercase;
-  padding-top: 30px;
-  padding-bottom: 27px;
-`
-
-const MiskNavbarDivider = styled(NavbarDivider)`
-  border: none !important;
-`
-
-const MiskMenuButton = styled(Button)`
-  background-color: #29333a !important;
+const MiskNavbarButton = styled(Button)`
+  background-color: ${color.text} !important;
   box-shadow: none !important;
   background-image: none !important;
   top: 15px;
@@ -101,100 +101,230 @@ const MiskMenuButton = styled(Button)`
   z-index: 1020;
 `
 
-const MiskMenuIcon = styled(Icon)`
-  color: #9da2a6 !important;
+const MiskNavbarIcon = styled(Icon)`
+  color: ${color.gray} !important;
   &:hover {
-    color: #fff;
+    color: ${color.white};
   }
 `
 
 const MiskCollapse = styled(Collapse)`
-  color: #fff;
-  background-color: #29333a;
+  color: ${color.white};
+  background-color: ${color.text};
   display: block;
   margin: 60px -20px 0 -20px;
 `
 
 const MiskMenu = styled.div`
   min-height: 250px;
+  padding-top: 20px;
   @media (max-width: 768px) {
-    padding: 0 20px 20px 20px;
+    padding: 20px;
   }
 `
 
-const MiskMenuLinks = styled.div`
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
+const MiskMenuNavbarItems = styled.div`
+  display: inline-block;
+`
+
+const MiskMenuLinks = styled(FlexContainer)`
   padding-bottom: 35px;
 `
 
 const MiskMenuLink = styled(MiskLink)`
   flex-basis: 300px;
   padding: 5px 0;
-  color: #cecece;
+  color: ${color.accent};
 `
 
 const MiskMenuCategory = styled.span`
   font-size: 24px;
-  color: #9da2a6;
+  color: ${color.gray};
   letter-spacing: 0px;
   display: block;
 `
 
 const MiskMenuDivider = styled.hr`
-  border-color: #9da2a6;
+  border-color: ${color.gray};
   margin: 5px 0 10px 0;
 `
 
+const MiskBanner = styled.span.attrs({
+  environment: (props: any) => props.environment
+})`
+  background-color: ${props =>
+    (props.environment && environmentToColor(props.environment)) ||
+    color.text} !important;
+  color: ${color.accent} !important;
+  text-align: center;
+  font-weight: 600;
+  padding: 5px 0px;
+  position: fixed !important;
+  width: 100%;
+  top: 70px;
+  left: 0px;
+  z-index: 1010 !important;
+
+  a {
+    font-weight: 300;
+    color: ${color.accent};
+    text-decoration: underline;
+    letter-spacing: 1px;
+    &:hover {
+      color: ${color.white};
+      text-decoration: underline;
+    }
+  }
+`
+
+const environmentToColor = (environment: Environment) => {
+  switch (environment) {
+    case Environment.DEVELOPMENT:
+      return color.blue
+    case Environment.TESTING:
+      return color.indigo
+    case Environment.STAGING:
+      return color.green
+    case Environment.PRODUCTION:
+      return color.red
+  }
+}
+
 export class TopbarComponent extends React.Component<ITopbarProps, {}> {
   public state = {
-    isOpen: false
+    isOpen: false,
+    width: 0
+  }
+
+  updateDimensions = () => {
+    this.setState({ ...this.state, width: window.innerWidth })
+  }
+
+  componentDidMount = () => {
+    window.addEventListener("resize", this.updateDimensions)
+    this.setState({ ...this.state, width: window.innerWidth })
+  }
+
+  componentWillUnmount = () => {
+    window.removeEventListener("resize", this.updateDimensions)
   }
 
   public render() {
     const { isOpen } = this.state
-    const { homeName, homeUrl, links } = this.props
+    const {
+      environment,
+      environmentBannerVisible,
+      error,
+      homeName,
+      homeUrl,
+      links,
+      status
+    } = this.props
     return (
       <MiskNavbar>
-        <MiskMenuButton onClick={this.handleClick}>
-          <MiskMenuIcon
+        <MiskNavbarButton onClick={this.handleClick}>
+          <MiskNavbarIcon
             iconSize={32}
             icon={isOpen ? IconNames.CROSS : IconNames.MENU}
           />
-        </MiskMenuButton>
+        </MiskNavbarButton>
         <ResponsiveContainer>
           <MiskNavbarGroup align={Alignment.LEFT} className="bp3-dark">
-            {this.renderMenuLink(homeName, homeUrl)}
-            <MiskNavbarDivider />
+            {this.renderNavbarHome(homeName, homeUrl)}
+            {this.NavbarItems(environment)
+              .slice(
+                0,
+                Math.floor(Math.min(this.state.width - 300, 1800) / 400)
+              )
+              .map(item => item)}
           </MiskNavbarGroup>
         </ResponsiveContainer>
         <MiskCollapse isOpen={isOpen} keepChildrenMounted={true}>
-          <ResponsiveContainer>
-            <MiskMenu>
+          <MiskMenu>
+            <ResponsiveContainer>
+              <MiskMenuNavbarItems>
+                <FlexContainer>
+                  {this.NavbarItems(environment).map(item => item)}
+                </FlexContainer>
+              </MiskMenuNavbarItems>
               {links ? (
                 this.renderMenuCategories(links)
               ) : (
-                <span>Loading...</span>
+                <ErrorCalloutComponent error={error} />
               )}
-            </MiskMenu>
-          </ResponsiveContainer>
+            </ResponsiveContainer>
+          </MiskMenu>
         </MiskCollapse>
+        {this.renderBanner(status, environment, environmentBannerVisible)}
       </MiskNavbar>
     )
   }
 
-  private renderMenuLink(homeName: string, homeUrl: string) {
+  private NavbarItems(environment?: Environment) {
+    return [this.renderNavbarEnvironment(environment)]
+  }
+
+  private renderBanner(
+    status?: string | Element,
+    environment?: Environment,
+    environmentBannerVisible: Environment[] = [
+      Environment.DEVELOPMENT,
+      Environment.STAGING,
+      Environment.TESTING
+    ]
+  ) {
+    if (environmentBannerVisible.includes(environment)) {
+      let formattedStatus: any = status
+      if (typeof status === "string") {
+        if (status.startsWith("<")) {
+          formattedStatus = (
+            <span dangerouslySetInnerHTML={{ __html: status }} />
+          )
+        } else if (status.length > 35) {
+          formattedStatus = `${status.substring(0, 35)}...`
+          console.log(`[ALERT] ${status}`)
+        }
+      }
+      return (
+        <MiskBanner environment={environment}>
+          <ResponsiveContainer>{formattedStatus}</ResponsiveContainer>
+        </MiskBanner>
+      )
+    } else {
+      return <div />
+    }
+  }
+
+  private renderNavbarHome(homeName: string, homeUrl: string) {
     if (homeName && homeUrl) {
       return (
-        <MiskNavbarLink to={homeUrl}>
+        <MiskLink to={homeUrl}>
           <MiskNavbarHeading>{homeName}</MiskNavbarHeading>
-        </MiskNavbarLink>
+        </MiskLink>
       )
     } else if (homeName) {
       return <MiskNavbarHeading>{homeName}</MiskNavbarHeading>
     } else {
       return <MiskNavbarHeading>Misk</MiskNavbarHeading>
+    }
+  }
+
+  private renderNavbarEnvironment(
+    environment?: Environment,
+    environmentBannerVisible: Environment[] = [
+      Environment.DEVELOPMENT,
+      Environment.STAGING,
+      Environment.TESTING
+    ]
+  ) {
+    if (environmentBannerVisible.includes(environment)) {
+      return (
+        <MiskNavbarHeadingEnvironment environment={environment}>
+          {environment}
+        </MiskNavbarHeadingEnvironment>
+      )
+    } else {
+      return <div />
     }
   }
 
