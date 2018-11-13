@@ -57,6 +57,9 @@ class HibernateModule(
     val schemaMigratorKey = SchemaMigrator::class.toKey(qualifier)
     val schemaMigratorProvider = getProvider(schemaMigratorKey)
 
+    val schemaValidationKey = SchemaValidation::class.toKey(qualifier)
+    val schemaValidationProvider = getProvider(schemaValidationKey)
+
     val transacterKey = Transacter::class.toKey(qualifier)
 
     val pingDatabaseServiceKey = PingDatabaseService::class.toKey(qualifier)
@@ -98,6 +101,9 @@ class HibernateModule(
           sessionFactoryProvider.get(), config)
     }).asSingleton()
 
+    bind(schemaValidationKey).toProvider(Provider<SchemaValidation> {
+      SchemaValidation(sessionFactoryProvider.get(), config) }).asSingleton()
+
     bind(transacterKey).toProvider(object : Provider<Transacter> {
       @com.google.inject.Inject(optional=true) val tracer: Tracer? = null
       override fun get(): RealTransacter = RealTransacter(
@@ -108,6 +114,12 @@ class HibernateModule(
       @Inject lateinit var environment: Environment
       override fun get(): SchemaMigratorService = SchemaMigratorService(
           qualifier, environment, schemaMigratorProvider)
+    }).asSingleton()
+
+    multibind<Service>().toProvider(object : Provider<SchemaValidationService> {
+      @Inject lateinit var environment: Environment
+      override fun get(): SchemaValidationService = SchemaValidationService(
+          qualifier, environment, schemaValidationProvider)
     }).asSingleton()
 
     bind<Query.Factory>().to<ReflectionQuery.Factory>()

@@ -77,6 +77,7 @@ internal class SessionFactoryService(
 
     val bootstrapRegistryBuilder = BootstrapServiceRegistryBuilder()
         .applyIntegrator(integrator)
+        .applyIntegrator(MetadataIntegrator)
         .build()
 
     val registryBuilder = StandardServiceRegistryBuilder(bootstrapRegistryBuilder)
