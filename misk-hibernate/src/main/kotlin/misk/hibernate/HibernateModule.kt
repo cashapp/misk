@@ -13,6 +13,7 @@ import misk.jdbc.DataSourceService
 import misk.jdbc.PingDatabaseService
 import misk.resources.ResourceLoader
 import org.hibernate.SessionFactory
+import org.hibernate.boot.Metadata
 import org.hibernate.event.spi.EventType
 import javax.inject.Inject
 import javax.inject.Provider
@@ -50,6 +51,7 @@ class HibernateModule(
     val sessionFactoryProvider = getProvider(sessionFactoryKey)
 
     val sessionFactoryServiceKey = SessionFactoryService::class.toKey(qualifier)
+    val sessionFactoryServiceProvider = getProvider(sessionFactoryServiceKey)
 
     val dataSourceDecoratorsKey = setOfType(DataSourceDecorator::class).toKey(qualifier)
     val dataSourceDecoratorsProvider = getProvider(dataSourceDecoratorsKey)
@@ -87,7 +89,8 @@ class HibernateModule(
     val hibernateInjectorAccessProvider = getProvider(HibernateInjectorAccess::class.java)
 
     bind(sessionFactoryServiceKey).toProvider(Provider<SessionFactoryService> {
-      SessionFactoryService(qualifier, config, dataSourceProvider, hibernateInjectorAccessProvider.get(),
+      SessionFactoryService(qualifier, config, dataSourceProvider,
+          hibernateInjectorAccessProvider.get(),
           entitiesProvider.get(), eventListenersProvider.get())
     }).asSingleton()
     multibind<Service>().to(sessionFactoryServiceKey)
@@ -99,7 +102,7 @@ class HibernateModule(
     }).asSingleton()
 
     bind(transacterKey).toProvider(object : Provider<Transacter> {
-      @com.google.inject.Inject(optional=true) val tracer: Tracer? = null
+      @com.google.inject.Inject(optional = true) val tracer: Tracer? = null
       override fun get(): RealTransacter = RealTransacter(
           qualifier, sessionFactoryProvider, config, tracer)
     }).asSingleton()
@@ -108,6 +111,14 @@ class HibernateModule(
       @Inject lateinit var environment: Environment
       override fun get(): SchemaMigratorService = SchemaMigratorService(
           qualifier, environment, schemaMigratorProvider)
+    }).asSingleton()
+
+    multibind<Service>().toProvider(Provider<SchemaValidatorService> {
+      SchemaValidatorService(
+          qualifier,
+          sessionFactoryServiceProvider,
+          config
+      )
     }).asSingleton()
 
     bind<Query.Factory>().to<ReflectionQuery.Factory>()
