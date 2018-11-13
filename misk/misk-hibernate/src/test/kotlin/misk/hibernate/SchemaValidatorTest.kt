@@ -1,0 +1,321 @@
+package misk.hibernate
+
+import com.google.common.util.concurrent.Service
+import com.google.inject.Key
+import misk.MiskServiceModule
+import misk.config.Config
+import misk.config.MiskConfig
+import misk.environment.Environment
+import misk.inject.KAbstractModule
+import misk.inject.asSingleton
+import misk.inject.setOfType
+import misk.inject.toKey
+import misk.jdbc.DataSourceConfig
+import misk.jdbc.DataSourceService
+import misk.jdbc.PingDatabaseService
+import misk.resources.ResourceLoader
+import misk.testing.MiskTest
+import misk.testing.MiskTestModule
+import okio.ByteString
+import org.assertj.core.api.Assertions.assertThat
+import org.hibernate.SessionFactory
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
+import javax.inject.Inject
+import javax.inject.Provider
+import javax.inject.Qualifier
+import javax.persistence.Column
+import javax.persistence.Entity
+import javax.persistence.GeneratedValue
+import javax.persistence.Table
+import javax.sql.DataSource
+
+@MiskTest(startService = true)
+class SchemaValidatorTest {
+
+  @MiskTestModule
+  val module = TestModule()
+  val config = MiskConfig.load<RootConfig>("schemavalidation", Environment.TESTING)
+
+  private lateinit var sessionFactoryService: Provider<SessionFactoryService>
+
+  inner class TestModule : KAbstractModule() {
+    override fun configure() {
+      install(MiskServiceModule())
+      val qualifier = ValidationDb::class
+
+      val dataSourceService =
+          DataSourceService(qualifier, config.data_source, Environment.TESTING,
+              emptySet())
+
+      val injectorServiceProvider = getProvider(HibernateInjectorAccess::class.java)
+      val sessionFactoryServiceKey =
+          Key.get(SessionFactoryService::class.java, qualifier.java)
+
+      sessionFactoryService = getProvider(sessionFactoryServiceKey)
+
+      val entitiesKey = setOfType(HibernateEntity::class).toKey(qualifier)
+      val entitiesProvider = getProvider(entitiesKey)
+
+      val sessionFactoryKey = SessionFactory::class.toKey(qualifier)
+      val sessionFactoryProvider = getProvider(sessionFactoryKey)
+
+      val schemaMigratorKey = SchemaMigrator::class.toKey(qualifier)
+      val schemaMigratorProvider = getProvider(schemaMigratorKey)
+
+      bind(sessionFactoryServiceKey).toProvider(Provider<SessionFactoryService> {
+        SessionFactoryService(qualifier, config.data_source, dataSourceService,
+            injectorServiceProvider.get(), entitiesProvider.get())
+      }).asSingleton()
+
+      bind<SessionFactory>().annotatedWith<ValidationDb>().toProvider(sessionFactoryServiceKey)
+      multibind<Service>().to(sessionFactoryServiceKey)
+
+      bind(schemaMigratorKey).toProvider(object : Provider<SchemaMigrator> {
+        @Inject lateinit var resourceLoader: ResourceLoader
+        override fun get(): SchemaMigrator = SchemaMigrator(qualifier, resourceLoader,
+            sessionFactoryProvider.get(), config.data_source)
+      }).asSingleton()
+
+      install(object : HibernateEntityModule(qualifier) {
+        override fun configureHibernate() {
+          addEntities(DbBasicTestTable::class)
+          addEntities(DbHibernateOnlyTable::class)
+          addEntities(DbMissingColumnsTable::class)
+          addEntities(DbNullableMismatchTable::class)
+          addEntities(DbBadIdentifierTable::class)
+        }
+      })
+
+      multibind<Service>().toInstance(
+          PingDatabaseService(qualifier, config.data_source, Environment.TESTING))
+
+      multibind<Service>().toInstance(dataSourceService)
+      bind<DataSource>().annotatedWith<ValidationDb>().toProvider(dataSourceService)
+
+      multibind<Service>().toProvider(Provider<SchemaMigratorService> {
+        SchemaMigratorService(
+            qualifier, Environment.TESTING, schemaMigratorProvider)
+      }).asSingleton()
+    }
+  }
+
+  @Inject @ValidationDb lateinit var sessionFactory: SessionFactory
+
+  // TODO (maacosta) Breakup into smaller unit tests.
+  private val schemaValidationErrorMessage: String by lazy {
+    assertThrows<IllegalStateException> {
+      SchemaValidator().validate(sessionFactory,  sessionFactoryService.get().hibernateMetadata, config.data_source)
+    }.message!!
+  }
+
+  @Test
+  fun findMissingTablesInHibernate() {
+    assertThat(schemaValidationErrorMessage).contains(
+        "Hibernate missing tables [database_only_table, unquoted_database_table]")
+  }
+
+  @Test
+  fun findMissingTablesInDb() {
+    assertThat(schemaValidationErrorMessage).contains(
+        "Database missing tables [hibernate_only_table]")
+  }
+
+  @Test
+  fun findMissingColumnsInHibernate() {
+    assertThat(schemaValidationErrorMessage).contains(
+        "Hibernate entity \"missing_columns_table\" is missing columns " +
+            "[tbl4_string_column_database, tbl4_int_column_database] " +
+            "expected in table \"missing_columns_table\"")
+  }
+
+  @Test
+  fun findMissingColumnsInDb() {
+    assertThat(schemaValidationErrorMessage).contains(
+        "Database table \"missing_columns_table\" is missing columns " +
+            "[tbl4_int_column_hibernate, tbl4_string_column_hibernate] " +
+            "found in hibernate \"missing_columns_table\"")
+  }
+
+  @Test
+  fun findNullableColumnsInHibernate() {
+    assertThat(schemaValidationErrorMessage).contains(
+        "Column tbl5_hibernate_null is NOT NULL in database but tbl5_hibernate_null is nullable in hibernate")
+  }
+
+  @Test
+  fun catchBadTables() {
+    assertThat(schemaValidationErrorMessage).contains(
+        "\"BAD_identifier_table\" should be in lower_snake_case")
+    assertThat(schemaValidationErrorMessage).contains(
+        "\"BAD_identifier_table\" should exactly match hibernate \"bad_identifier_table\"")
+  }
+
+  @Test
+  fun toSnakeCase() {
+    assertThat("tbl6DatabaseCamelcase".toSnakeCase()).isEqualTo("tbl6_database_camelcase")
+    assertThat("MarioAcosta".toSnakeCase()).isEqualTo("mario_acosta")
+    assertThat("Coca-Cola".toSnakeCase()).isEqualTo("coca_cola")
+  }
+
+  @Test
+  fun catchBadColumnNames() {
+    assertThat(schemaValidationErrorMessage).contains(
+        "tbl6CamelCase should be in lower_snake_case"
+    )
+    assertThat(schemaValidationErrorMessage).contains(
+        "tbl6_UPPER_UNDERSCORE should be in lower_snake_case"
+    )
+    assertThat(schemaValidationErrorMessage).contains(
+        "tbl6_MixEd_UNDERScore should be in lower_snake_case"
+    )
+    assertThat(schemaValidationErrorMessage).contains(
+        "tbl6-lower-hyphen should be in lower_snake_case"
+    )
+    assertThat(schemaValidationErrorMessage).contains(
+        "tbl6DatabaseCamelcase should be in lower_snake_case"
+    )
+    assertThat(schemaValidationErrorMessage).contains(
+        "tbl6DatabaseCamelcase should exactly match hibernate tbl6_database_camelcase"
+    )
+    assertThat(schemaValidationErrorMessage).contains(
+        "tbl6_hibernate_camelcase should exactly match hibernate tbl6HibernateCamelcase"
+    )
+  }
+
+  @Test
+  fun catchNotReallyUniqueColumnNames(){
+    assertThat(schemaValidationErrorMessage).contains(
+        "Duplicate identifiers: [[tbl6NotReallyUnique, tbl6_not_really_unique]]")
+
+    assertThat(schemaValidationErrorMessage).contains(
+        "Duplicate identifiers: " +
+            "[[tbl6NotReallyUnique, tbl6_not_REALLY_unique], " +
+            "[tbl6NotReallyUnique2, tbl6_not_really_unique2]]")
+  }
+
+  data class RootConfig(val data_source: DataSourceConfig) : Config
+
+  @Qualifier
+  @Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION)
+  annotation class ValidationDb
+
+  @Entity
+  @Table(name = "`quoted_basic_table`")
+  class DbBasicTestTable() : DbUnsharded<DbBasicTestTable> {
+
+    @javax.persistence.Id
+    @GeneratedValue
+    override lateinit var id: Id<DbBasicTestTable>
+
+    @Column
+    var tbl1_string_nullable: String? = null
+
+    @Column
+    var tbl1_int_nullable: Int? = null
+
+    @Column
+    var tbl1_bin_nullable: ByteString? = null
+
+    @Column(nullable = false)
+    lateinit var tbl1_string: String
+
+    @Column(nullable = false)
+    var tbl1_int: Int = 0
+
+    @Column(name = "`tbl1_bin`")
+    lateinit var anotherNameForThisBinColumn: ByteString
+  }
+
+  @Entity
+  @Table(name = "`hibernate_only_table`")
+  class DbHibernateOnlyTable() : DbUnsharded<DbHibernateOnlyTable> {
+    @javax.persistence.Id
+    @GeneratedValue
+    override lateinit var id: Id<DbHibernateOnlyTable>
+
+    @Column(nullable = false)
+    lateinit var string_column: String
+
+    @Column(nullable = false)
+    var int_column: Int = 0
+  }
+
+  @Entity
+  @Table(name = "`missing_columns_table`")
+  class DbMissingColumnsTable() : DbUnsharded<DbMissingColumnsTable> {
+    @javax.persistence.Id
+    @GeneratedValue
+    override lateinit var id: Id<DbMissingColumnsTable>
+
+    @Column(nullable = false)
+    lateinit var tbl4_string_column: String
+
+    @Column(nullable = false)
+    var tbl4_int_column: Int = 0
+
+    @Column(nullable = false)
+    lateinit var tbl4_string_column_hibernate: String
+
+    @Column(nullable = false)
+    var tbl4_int_column_hibernate: Int = 0
+  }
+
+  @Entity
+  @Table(name = "`nullable_mismatch_table`")
+  class DbNullableMismatchTable() : DbUnsharded<DbNullableMismatchTable> {
+    @javax.persistence.Id
+    @GeneratedValue
+    override lateinit var id: Id<DbNullableMismatchTable>
+
+    @Column(nullable = false)
+    var tbl5_both_notnull: Int = 0
+
+    @Column
+    var tbl5_hibernate_null: Int = 0
+
+    @Column
+    var tbl5_both_null: Int = 0
+
+    @Column(nullable = false)
+    var tbl5_database_null: Int = 0
+  }
+
+  @Entity
+  @Table(name = "bad_identifier_table")
+  class DbBadIdentifierTable() : DbUnsharded<DbBadIdentifierTable> {
+    @javax.persistence.Id
+    @GeneratedValue
+    override lateinit var id: Id<DbBadIdentifierTable>
+
+    @Column
+    var tbl6CamelCase: Int = 0
+
+    @Column
+    var tbl6_UPPER_UNDERSCORE: Int = 0
+
+    @Column
+    var tbl6_MixEd_UNDERScore: Int = 0
+
+    @Column(name = "`tbl6-lower-hyphen`")
+    var tbl6LowerHyphen: Int = 0
+
+    @Column
+    var tbl6NotReallyUnique: Int = 0
+
+    @Column
+    var tbl6_not_REALLY_unique: Int = 0
+
+    @Column
+    var tbl6NotReallyUnique2: Int = 0
+
+    @Column
+    var tbl6_not_really_unique2: Int = 0
+
+    @Column
+    var tbl6HibernateCamelcase: Int = 0
+
+    @Column
+    var tbl6_database_camelcase: Int = 0
+  }
+}
