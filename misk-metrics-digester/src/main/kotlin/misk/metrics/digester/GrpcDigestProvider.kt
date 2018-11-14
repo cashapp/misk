@@ -1,11 +1,17 @@
 package misk.metrics.digester
 
 import com.squareup.digester.protos.service.GetDigestsRequest
+import com.squareup.digester.protos.service.GetDigestsResponse
 import com.squareup.digester.protos.service.MetricFamily
 import misk.grpc.GrpcClient
+import misk.logging.getLogger
+import misk.logging.log
+import java.lang.StringBuilder
 import java.time.Instant
+import java.time.ZoneId
 import java.time.ZonedDateTime
 
+  private val logger =  getLogger<DigestProviderServer<*>>()
 
   val registry = TDigestHistogramRegistry.newVeneurRegistry()
   val grpcServerMethosMsMetric = registry.newHistogram(
@@ -15,16 +21,40 @@ import java.time.ZonedDateTime
       defaultQuantiles
   )
 
-class GetDigests<T : TDigest<T>>(req: GetDigestsRequest, srv: GetDigestsRequest) {
+
+class DigestProviderServer<T : TDigest<T>>(req: GetDigestsRequest, srv: Any) {
 
   /** Streams metric digests for metrics available in the request's time range */
-  fun getDigests(digestsRequest: GetDigestsRequest, server: DigestMetric<>) {
-    val histograms = registry.allHistograms()
-    require(digestsRequest.windows_end_from_ms <= digestsRequest.windows_end_to_ms) {
+  fun getDigests(req: GetDigestsRequest, server: GetDigestsResponse) {
+    require(req.windows_end_from_ms <= req.windows_end_to_ms) {
       "windows_end_from_ms cannot be later then window_end_to_ms"
     }
 
-    val logger = GrpcClient()
+    val histograms = registry.allHistograms()
+    val from = ZonedDateTime.ofInstant(Instant.ofEpochMilli(req.windows_end_from_ms), ZoneId.of("UTC"))
+    val to = ZonedDateTime.ofInstant(Instant.ofEpochMilli(req.windows_end_to_ms), ZoneId.of("UTC"))
+
+
+    var metricCount: Int = 0
+    histograms.forEach { histogram ->
+      val metricFamily = histogramToMetricFamily(histogram, from, to)
+      if (metricFamily != null) {
+        metricCount += metricFamily.metrics.count()
+        //SEND - not completely sure how this is going to work. The golang implementation has a DigestProvider service
+        // which does not seem to be generated on the kotlin side for some reason
+      }
+    }
+
+    val builder = StringBuilder()
+    builder.append("metric_family_count: ")
+    builder.append(histograms.count())
+    builder.appendln()
+    builder.append("digest_count: ")
+    builder.append(metricCount)
+    builder.appendln()
+    builder.append("sent digests")
+
+    logger.debug { builder.toString() }
   }
 
 
@@ -33,7 +63,7 @@ class GetDigests<T : TDigest<T>>(req: GetDigestsRequest, srv: GetDigestsRequest)
    * Returns null if the histogram has no data in given range
    */
   fun histogramToMetricFamily(
-    histogram: TDigestHistogram<T>,
+    histogram: TDigestHistogram<VeneurDigest>,
     from: ZonedDateTime,
     to: ZonedDateTime
   ): MetricFamily? {
@@ -74,7 +104,7 @@ class GetDigests<T : TDigest<T>>(req: GetDigestsRequest, srv: GetDigestsRequest)
       digestProtos.add(MetricFamily.Digest(
           Instant.from(digest.window.start).toEpochMilli(),
           Instant.from(digest.window.end).toEpochMilli(),
-          0, //0 stagger set as place holder
+          1, //1 stagger set as place holder
           digest.digest.proto()
       ))
     }
