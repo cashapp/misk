@@ -14,5 +14,8 @@ export enum color {
   text = "#3e4348",
   gray = "#7a7e82",
   accent = "#eceef1",
-  white = "white"
+  white = "white",
+  cadet = "#29333a",
+  silver = "#9da2a6",
+  platinum = "#cecece"
 }

@@ -7,6 +7,7 @@ import {
 import * as React from "react"
 import { connect } from "react-redux"
 import { Route } from "react-router"
+import { Link } from "react-router-dom"
 import styled from "styled-components"
 import { MountingDivComponent, ScriptComponent } from "../components"
 import { dispatchLoader, IState } from "../ducks"
@@ -58,6 +59,14 @@ class LoaderContainer extends React.Component<ILoaderProps> {
             links={adminDashboardTabs}
             homeName={serviceMetadata.app_name}
             homeUrl={serviceMetadata.admin_dashboard_url}
+            navbarItems={[
+              <Link key={3} to="/_admin/config/">
+                Config
+              </Link>,
+              '<a href="#">Guice</>',
+              <span key={2}>Search</span>
+            ]}
+            status={'<a href="#">Guice</>'}
           />
           <TabContainer>
             {Object.entries(adminDashboardTabs).map(([key, tab]) => (
