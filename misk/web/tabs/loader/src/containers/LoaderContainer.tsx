@@ -1,14 +1,10 @@
 import { IDashboardTab } from "@misk/common"
-import {
-  OfflineComponent,
-  ResponsiveContainer,
-  TopbarComponent
-} from "@misk/components"
+import { Navbar, OfflineComponent, ResponsiveContainer } from "@misk/components"
 import * as React from "react"
 import { connect } from "react-redux"
-import { Route } from "react-router"
+import { Link } from "react-router-dom"
 import styled from "styled-components"
-import { MountingDivComponent, ScriptComponent } from "../components"
+import { ScriptComponent } from "../components"
 import { dispatchLoader, IState } from "../ducks"
 
 export interface ILoaderProps extends IState {
@@ -19,7 +15,7 @@ export interface ILoaderProps extends IState {
 
 const TabContainer = styled(ResponsiveContainer)`
   position: relative;
-  top: 100px;
+  top: 110px;
   padding-left: 5px;
 `
 
@@ -30,15 +26,6 @@ class LoaderContainer extends React.Component<ILoaderProps> {
   async componentDidMount() {
     this.props.getTabs(tabsUrl)
     this.props.getServiceMetadata(serviceUrl)
-  }
-
-  buildTabRouteMountingDiv(tab: IDashboardTab) {
-    return (
-      <Route
-        path={`/_admin/${tab.slug}/`}
-        render={() => <MountingDivComponent tab={tab} />}
-      />
-    )
   }
 
   render() {
@@ -52,23 +39,26 @@ class LoaderContainer extends React.Component<ILoaderProps> {
     }
     if (adminDashboardTabs && serviceMetadata) {
       return (
-        <div>
-          <TopbarComponent
+        <span>
+          <Navbar
+            environment={serviceMetadata.environment}
             links={adminDashboardTabs}
             homeName={serviceMetadata.app_name}
             homeUrl={serviceMetadata.admin_dashboard_url}
+            navbar_items={serviceMetadata.navbar_items}
+            status={serviceMetadata.status}
           />
           <TabContainer>
             {Object.entries(adminDashboardTabs).map(([key, tab]) => (
               <ScriptComponent key={key} tab={tab} />
             ))}
           </TabContainer>
-        </div>
+        </span>
       )
     } else {
       return (
-        <div>
-          <TopbarComponent />
+        <span>
+          <Navbar />
           <TabContainer>
             <OfflineComponent
               error={error}
@@ -76,7 +66,7 @@ class LoaderContainer extends React.Component<ILoaderProps> {
               endpoint={unavailableEndpointUrls}
             />
           </TabContainer>
-        </div>
+        </span>
       )
     }
   }

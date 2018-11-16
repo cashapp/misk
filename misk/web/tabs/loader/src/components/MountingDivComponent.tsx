@@ -6,5 +6,5 @@ export interface IMountingDivProps {
 }
 
 export const MountingDivComponent = (props: IMountingDivProps) => (
-  <div id={props.tab.slug} />
+  <span id={props.tab.slug} />
 )

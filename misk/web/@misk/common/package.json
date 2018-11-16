@@ -1,6 +1,6 @@
 {
   "name": "@misk/common",
-  "version": "0.0.61",
+  "version": "0.0.70",
   "license": "SEE LICENSE IN https://github.com/square/misk",
   "description": "Microservice Kontainer Common Libraries, Externals, Styles",
   "author": "Square/Misk Authors (https://github.com/square/misk/graphs/contributors)",
@@ -24,7 +24,7 @@
     "dev": "yarn run build; yarn run updateDevCache",
     "ci-build": "yarn run clean && yarn run lib",
     "lib": "yarn run refresh; webpack --config webpack.config.js && webpack --config webpack.config.static.js && webpack --config webpack.config.vendors.js",
-    "lint": "prettier --write --config prettier.config.js \"./src/**/*.{md,css,sass,less,json,js,jsx,ts,tsx}\"",
+    "lint": "prettier --write --config prettier.config.js \".{/src/**/,/}*.{md,css,sass,less,json,js,jsx,ts,tsx}\"",
     "prepare": "cd ../../../../ && ./gradlew web -Pcmd='-a' -Ptabs='@misk/common'",
     "refresh": "node refreshCachedUrls.js",
     "reinstall": "rm -rf node_modules && yarn install",
@@ -44,21 +44,21 @@
     "history": "^4.7.2",
     "immutable": "^4.0.0-rc.12",
     "lodash-es": "^4.17.11",
-    "react": "^16.6.0",
-    "react-dom": "^16.6.0",
+    "react": "^16.6.3",
+    "react-dom": "^16.6.3",
     "react-helmet": "^5.2.0",
     "react-hot-loader": "^4.3.12",
-    "react-redux": "^5.1.0",
+    "react-redux": "^5.1.1",
     "react-router": "^4.3.1",
     "react-router-dom": "^4.3.1",
     "react-transition-group": "^2.5.0",
     "redux": "^4.0.1",
     "redux-saga": "^0.16.2",
     "skeleton-css": "^2.0.4",
-    "styled-components": "^4.0.3"
+    "styled-components": "^4.1.1"
   },
   "devDependencies": {
-    "@misk/dev": "^0.0.64",
+    "@misk/dev": "^0.0.69",
     "@misk/tslint": "^0.0.10"
   },
   "miskCachedUrls": {
@@ -68,6 +68,6 @@
     }
   },
   "miskTab": {
-    "version": "0.0.5"
+    "version": "0.0.6"
   }
 }

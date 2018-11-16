@@ -1,5 +1,7 @@
+///<reference types="react" />
 import { fromJS, List } from "immutable"
 export * from "./actions"
+export * from "./css"
 
 /**
  * Common Interfaces
@@ -20,8 +22,20 @@ interface IAdminDashboardTab extends IDashboardTab {}
 
 interface IServiceMetadata {
   app_name: string
-  environment: string
+  environment: Environment
   admin_dashboard_url: string
+  navbar_items: Array<string | Element | JSX.Element>
+  navbar_status: string | Element | JSX.Element
+}
+
+/**
+ * Environment
+ */
+enum Environment {
+  TESTING = "TESTING",
+  DEVELOPMENT = "DEVELOPMENT",
+  STAGING = "STAGING",
+  PRODUCTION = "PRODUCTION"
 }
 
 /**
@@ -46,7 +60,7 @@ const defaultState: IDefaultState = fromJS({
  * Binder
  */
 enum IBinderKeys {
-  NavTopbarMenu = "NavTopbarMenu",
+  NavNavbarMenu = "NavNavbarMenu",
   TabEntry = "TabEntry"
 }
 
@@ -78,6 +92,7 @@ export {
   IAdminDashboardTab,
   IServiceMetadata,
   defaultState,
+  Environment,
   IDefaultState,
   IBinder,
   IBinderKeys,
