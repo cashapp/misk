@@ -1,20 +1,20 @@
 import * as React from "react"
-import { IDimensionAwareProps } from "../Topbar"
+import { IDimensionAwareProps } from "../Navbar"
 
 /**
- * <TopbarNavItems
+ * <NavItems
  *    height={this.state.height}
  *    width={this.state.width}
  *    processedNavbarItems={this.props.processedNavbarItems}
  *  />
  */
 
-export interface ITopbarNavItemsProps {
+export interface INavItemsProps {
   processedNavbarItems?: JSX.Element[]
 }
 
-export class TopbarNavItems extends React.Component<
-  IDimensionAwareProps & ITopbarNavItemsProps,
+export class NavItems extends React.Component<
+  IDimensionAwareProps & INavItemsProps,
   {}
 > {
   public render() {

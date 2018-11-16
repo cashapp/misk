@@ -6,17 +6,17 @@ import * as React from "react"
 import styled from "styled-components"
 import { ErrorCalloutComponent } from "../../components"
 import { FlexContainer, ResponsiveContainer } from "../../containers"
-import { MiskLink } from "../Topbar"
+import { MiskLink } from "../Navbar"
 
 /**
- * <TopbarMenu
+ * <Menu
  *    error={this.props.error}
  *    links={this.props.links}
  *    processedNavbarItems={this.props.processedNavbarItems}
  *  />
  */
 
-export interface ITopbarMenuProps {
+export interface IMenuProps {
   error?: any
   links?: IDashboardTab[]
   processedNavbarItems?: JSX.Element[]
@@ -83,7 +83,7 @@ const MiskMenuDivider = styled.hr`
   margin: 5px 0 10px 0;
 `
 
-export class TopbarMenu extends React.Component<ITopbarMenuProps, {}> {
+export class Menu extends React.Component<IMenuProps, {}> {
   public state = {
     isOpen: false
   }

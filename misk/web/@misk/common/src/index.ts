@@ -1,3 +1,4 @@
+///<reference types="react" />
 import { fromJS, List } from "immutable"
 export * from "./actions"
 export * from "./css"
@@ -23,6 +24,8 @@ interface IServiceMetadata {
   app_name: string
   environment: Environment
   admin_dashboard_url: string
+  navbar_items: Array<string | Element | JSX.Element>
+  navbar_status: string | Element | JSX.Element
 }
 
 /**
@@ -57,7 +60,7 @@ const defaultState: IDefaultState = fromJS({
  * Binder
  */
 enum IBinderKeys {
-  NavTopbarMenu = "NavTopbarMenu",
+  NavNavbarMenu = "NavNavbarMenu",
   TabEntry = "TabEntry"
 }
 

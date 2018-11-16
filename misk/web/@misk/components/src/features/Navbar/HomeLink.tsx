@@ -1,15 +1,15 @@
 import * as React from "react"
 import styled from "styled-components"
-import { MiskLink, MiskNavbarHeading } from "../Topbar"
+import { MiskLink, MiskNavbarHeading } from "."
 
 /**
- * <TopbarHomeLink
+ * <HomeLink
  *    homeName={this.props.homeName}
  *    homeUrl={this.props.homeUrl}
  *  />
  */
 
-export interface ITopbarHomeLinkProps {
+export interface IHomeLinkProps {
   homeName?: string
   homeUrl?: string
 }
@@ -18,7 +18,7 @@ const MiskLinkHome = styled(MiskLink)`
   min-width: fit-content;
 `
 
-export const TopbarHomeLink = (props: ITopbarHomeLinkProps) => {
+export const HomeLink = (props: IHomeLinkProps) => {
   const { homeName, homeUrl } = props
   if (homeName && homeUrl) {
     return (

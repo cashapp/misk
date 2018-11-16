@@ -1,6 +1,6 @@
 {
   "name": "@misk/components",
-  "version": "0.0.83",
+  "version": "0.0.90",
   "license": "SEE LICENSE IN https://github.com/square/misk",
   "description": "Microservice Kontainer Common Components",
   "author": "Square/Misk Authors (https://github.com/square/misk/graphs/contributors)",
@@ -23,7 +23,7 @@
     "dev": "yarn run build; yarn run updateDevCache",
     "ci-build": "yarn run clean && yarn run lib",
     "lib": "webpack",
-    "lint": "prettier --write --config prettier.config.js \"./src/**/*.{md,css,sass,less,json,js,jsx,ts,tsx}\"",
+    "lint": "prettier --write --config prettier.config.js \".{/src/**/,/}*.{md,css,sass,less,json,js,jsx,ts,tsx}\"",
     "prepare": "cd ../../../../ && ./gradlew web -Pcmd='-a' -Ptabs='@misk/components'",
     "reinstall": "rm -rf node_modules && yarn install",
     "start": "yarn run lint && cross-env NODE_ENV=development webpack-dev-server",
@@ -31,10 +31,10 @@
     "updateDevCache": "cd ..; ./updateLocalCache.sh"
   },
   "dependencies": {
-    "@misk/common": "^0.0.67"
+    "@misk/common": "^0.0.70"
   },
   "devDependencies": {
-    "@misk/dev": "^0.0.68",
+    "@misk/dev": "^0.0.69",
     "@misk/tslint": "^0.0.10"
   },
   "miskTab": {

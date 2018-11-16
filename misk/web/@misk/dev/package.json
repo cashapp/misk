@@ -1,6 +1,6 @@
 {
   "name": "@misk/dev",
-  "version": "0.0.68",
+  "version": "0.0.69",
   "license": "SEE LICENSE IN https://github.com/square/misk",
   "description": "Microservice Kontainer Development Libraries",
   "author": "Square/Misk Authors (https://github.com/square/misk/graphs/contributors)",
@@ -14,7 +14,7 @@
     "clean": "rm -rf lib node_modules package-lock.json yarn.lock",
     "ci-build": "yarn run clean && yarn run lib",
     "lib": "mkdir -p lib/web/@misk/dev && cp *.json *.js *.md lib/web/@misk/dev",
-    "lint": "prettier --write --config prettier.config.js \"*.{md,css,sass,less,json,js,jsx,ts,tsx}\"",
+    "lint": "prettier --write --config prettier.config.js \".{/src/**/,/}*.{md,css,sass,less,json,js,jsx,ts,tsx}\"",
     "prepare": "yarn run ci-build"
   },
   "dependencies": {
@@ -38,7 +38,6 @@
     "html-webpack-harddisk-plugin": "^1.0.1",
     "html-webpack-plugin": "^3.2.0",
     "mini-css-extract-plugin": "^0.4.4",
-    "node-sass": "^4.10.0",
     "optimize-css-assets-webpack-plugin": "^5.0.1",
     "prettier": "^1.15.2",
     "sass-loader": "^7.1.0",

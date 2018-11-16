@@ -5,13 +5,13 @@ import {
   defaultEnvironment,
   defaultEnvironmentIndicatorsVisible
 } from "../../utilities"
-import { ITopbarProps, TopbarDimensionAware } from "../Topbar"
+import { DimensionAwareNavbar, INavbarProps } from "../Navbar"
 
 /**
- * <TopbarComponent
+ * <Component
  *    environment={environment}
  *    environmentBannerVisible={[Environment.DEVELOPMENT]}
- *    environmentTopbarVisible={[Environment.DEVELOPMENT]}
+ *    environmentNavbarVisible={[Environment.DEVELOPMENT]}
  *    error={error}
  *    homeName={"Misk Home"}
  *    homeUrl={"/"}
@@ -26,7 +26,7 @@ export interface IDimensionAwareProps {
   width: number
 }
 
-export class TopbarComponent extends React.Component<ITopbarProps, {}> {
+export class Navbar extends React.Component<INavbarProps, {}> {
   public state = {
     height: 0,
     width: 0
@@ -49,28 +49,28 @@ export class TopbarComponent extends React.Component<ITopbarProps, {}> {
     const {
       environment = defaultEnvironment,
       environmentBannerVisible = defaultEnvironmentIndicatorsVisible,
-      environmentTopbarVisible = defaultEnvironmentIndicatorsVisible,
+      environmentNavbarVisible = defaultEnvironmentIndicatorsVisible,
       error,
       homeName,
       homeUrl,
       links,
-      navbarItems,
+      navbar_items,
       status
     } = this.props
     const { height, width } = this.state
     return (
       <ResizeSensor onResize={this.handleResize}>
-        <TopbarDimensionAware
+        <DimensionAwareNavbar
           height={height}
           width={width}
           environment={environment}
           environmentBannerVisible={environmentBannerVisible}
-          environmentTopbarVisible={environmentTopbarVisible}
+          environmentNavbarVisible={environmentNavbarVisible}
           error={error}
           homeName={homeName}
           homeUrl={homeUrl}
           links={links}
-          navbarItems={navbarItems}
+          navbar_items={navbar_items}
           status={status}
         />
       </ResizeSensor>

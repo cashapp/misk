@@ -1,6 +1,6 @@
 {
   "name": "@misk/common",
-  "version": "0.0.67",
+  "version": "0.0.70",
   "license": "SEE LICENSE IN https://github.com/square/misk",
   "description": "Microservice Kontainer Common Libraries, Externals, Styles",
   "author": "Square/Misk Authors (https://github.com/square/misk/graphs/contributors)",
@@ -24,7 +24,7 @@
     "dev": "yarn run build; yarn run updateDevCache",
     "ci-build": "yarn run clean && yarn run lib",
     "lib": "yarn run refresh; webpack --config webpack.config.js && webpack --config webpack.config.static.js && webpack --config webpack.config.vendors.js",
-    "lint": "prettier --write --config prettier.config.js \"./src/**/*.{md,css,sass,less,json,js,jsx,ts,tsx}\"",
+    "lint": "prettier --write --config prettier.config.js \".{/src/**/,/}*.{md,css,sass,less,json,js,jsx,ts,tsx}\"",
     "prepare": "cd ../../../../ && ./gradlew web -Pcmd='-a' -Ptabs='@misk/common'",
     "refresh": "node refreshCachedUrls.js",
     "reinstall": "rm -rf node_modules && yarn install",
@@ -58,7 +58,7 @@
     "styled-components": "^4.1.1"
   },
   "devDependencies": {
-    "@misk/dev": "^0.0.68",
+    "@misk/dev": "^0.0.69",
     "@misk/tslint": "^0.0.10"
   },
   "miskCachedUrls": {

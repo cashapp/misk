@@ -7,15 +7,18 @@ export const defaultEnvironmentIndicatorsVisible = [
   Environment.TESTING
 ]
 
+export const environmentColorMap = {
+  default: color.cadet,
+  [`${Environment.DEVELOPMENT}`]: color.blue,
+  [`${Environment.TESTING}`]: color.indigo,
+  [`${Environment.STAGING}`]: color.green,
+  [`${Environment.PRODUCTION}`]: color.red
+}
+
 export const environmentToColor = (environment: Environment) => {
-  switch (environment) {
-    case Environment.DEVELOPMENT:
-      return color.blue
-    case Environment.TESTING:
-      return color.indigo
-    case Environment.STAGING:
-      return color.green
-    case Environment.PRODUCTION:
-      return color.red
+  try {
+    return environmentColorMap[environment]
+  } catch (e) {
+    return environmentColorMap.default
   }
 }

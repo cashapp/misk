@@ -2,19 +2,19 @@ import { Environment } from "@misk/common"
 import * as React from "react"
 import { TextHTMLOrElementComponent } from "../../components"
 import { environmentToColor } from "../../utilities"
-import { MiskNavbarHeading, MiskNavbarHeadingEnvironment } from "../Topbar"
+import { MiskNavbarHeading, MiskNavbarHeadingEnvironment } from "../Navbar"
 
 /**
- * processNavbarItems(environment, environmentTopbarVisible, navbarItems)
+ * processNavbarItems(environment, environmentNavbarVisible, navbarItems)
  */
 
 const renderEnvironmentLink = (
   environment?: Environment,
-  environmentTopbarVisible?: Environment[]
+  environmentNavbarVisible?: Environment[]
 ) => {
   if (
-    environmentTopbarVisible &&
-    environmentTopbarVisible.includes(environment)
+    environmentNavbarVisible &&
+    environmentNavbarVisible.includes(environment)
   ) {
     return [environment].map(env => (
       <MiskNavbarHeadingEnvironment color={environmentToColor(env)}>
@@ -31,16 +31,16 @@ const renderNavbarItems = (
 ) => {
   return navbarItems.map(item => (
     <MiskNavbarHeading>
-      <TextHTMLOrElementComponent content={item} />
+      <TextHTMLOrElementComponent>{item}</TextHTMLOrElementComponent>
     </MiskNavbarHeading>
   ))
 }
 
 export const processNavbarItems = (
   environment?: Environment,
-  environmentTopbarVisible?: Environment[],
-  navbarItems?: Array<string | Element | JSX.Element>
+  environmentNavbarVisible?: Environment[],
+  navbar_items?: Array<string | Element | JSX.Element>
 ) =>
-  renderEnvironmentLink(environment, environmentTopbarVisible).concat(
-    renderNavbarItems(navbarItems)
+  renderEnvironmentLink(environment, environmentNavbarVisible).concat(
+    renderNavbarItems(navbar_items)
   )

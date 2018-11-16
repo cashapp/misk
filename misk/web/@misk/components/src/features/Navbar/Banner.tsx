@@ -6,20 +6,20 @@ import { FlexContainer, ResponsiveContainer } from "../../containers"
 import { environmentToColor } from "../../utilities"
 
 /**
- * <TopbarBanner
+ * <Banner
  *    environment={this.props.environment}
  *    environmentBannerVisible={this.props.environmentBannerVisible}
  *    status={this.props.status}
  *  />
  */
 
-export interface ITopbarBannerProps {
+export interface IBannerProps {
   environment?: Environment
   environmentBannerVisible?: Environment[]
   status?: string | Element | JSX.Element
 }
 
-const MiskBanner = styled.span`
+const MiskNavbarBanner = styled.span`
   background-color: ${props => props.color} !important;
   color: ${color.accent} !important;
   text-align: center;
@@ -43,24 +43,21 @@ const MiskBanner = styled.span`
   }
 `
 
-export class TopbarBanner extends React.Component<ITopbarBannerProps, {}> {
+export class Banner extends React.Component<IBannerProps, {}> {
   public render() {
     const { environment, environmentBannerVisible, status } = this.props
     if (
       environmentBannerVisible &&
       environmentBannerVisible.includes(environment)
     ) {
-      if (typeof status === "string" && !status.startsWith("<")) {
-        console.log(`[STATUS] ${status}`)
-      }
       return (
-        <MiskBanner color={environmentToColor(environment)}>
+        <MiskNavbarBanner color={environmentToColor(environment)}>
           <ResponsiveContainer>
             <FlexContainer>
-              <TextHTMLOrElementComponent content={status} />
+              <TextHTMLOrElementComponent>{status}</TextHTMLOrElementComponent>
             </FlexContainer>
           </ResponsiveContainer>
-        </MiskBanner>
+        </MiskNavbarBanner>
       )
     } else {
       return <div />

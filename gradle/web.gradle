@@ -14,20 +14,28 @@ task web(type: Exec) {
   def projectName = project.projectDir.toString().split('/').dropRight(1).last()
   def subProjectName = project.projectDir.toString().split('/').last()
 
-  def slugify = { str ->
+  def strToSlug = { str ->
     def slug = str.split('/').join('-').split('@').join('')
     if (slug.startsWith('-')) {
       slug = slug.drop(1)
     }
     if (slug == "") {
-      slug = "xyz"
+      slug = "container"
     }
     return slug
   }
 
+  def strToPrefixSlug = { str, prefix = "-" ->
+    def slug = strToSlug(str)
+    def prefixSlug = ""
+    if (slug != "") {
+      prefixSlug = "${prefix}${slug}"
+    }
+    return prefixSlug
+  }
+
   def generateDockerContainerName = { task, prefix = "web" ->
-    def slug = slugify(task)
-    return "${new Date().format("YMD-HMS")}-${projectName}-${subProjectName}-${prefix}-${slug}"
+    return "${new Date().format("YMD-HMS")}-${projectName}-${subProjectName}-${prefix}${strToPrefixSlug(task)}"
   }
 
   def getPackageJsonPort = { path ->
@@ -90,7 +98,7 @@ task web(type: Exec) {
       println "Logs File  ${logsDir}${containerName.toString()}.log"
       println "Shut Down  \$ docker kill ${containerName}"
       def waitForContainer = "while ! docker ps --format '{{.Names}}' | grep -q '${containerName}'; do sleep 1; done"
-      def formattedLogs = "mkdir -p $logsDir && bash -c \'docker logs -f ${containerName} | tee \"${logsDir}${containerName.toString()}.log\" > >(sed \"s/^/[${slugify(path)}] /\") 2> >(sed \"s/^/[${slugify(path)}][err] /\" >&2) &\'"
+      def formattedLogs = "mkdir -p $logsDir && bash -c \'docker logs -f ${containerName} | tee \"${logsDir}${containerName.toString()}.log\" > >(sed \"s/^/[${strToSlug(path)}] /\") 2> >(sed \"s/^/[${strToSlug(path)}][err] /\" >&2) &\'"
       return "sh -c '$command &'; $waitForContainer && $formattedLogs $versionWarningLog"
   }
 
@@ -107,7 +115,8 @@ task web(type: Exec) {
   }
 
   // Ensure local node_modules present and up to date
-  def runCommand = generateDockerRunCommand(project.projectDir, "", "/bin/misk-web -r", "-d", "node-modules")
+  def runCommand = generateDockerRunCommand(project.projectDir, "", "/bin/misk-web -r", "-d",
+          "node-modules")
 
   if (project.hasProperty("tabs")) {
     if (project.tabs.split(',').length > 1) {
@@ -115,7 +124,8 @@ task web(type: Exec) {
     }
 
     project.tabs.split(',').each {
-      def command = generateDockerRunCommand(project.projectDir, "/$it", "/bin/misk-web ${cmd}", dockerd)
+      def command = generateDockerRunCommand(project.projectDir, "/$it", "/bin/misk-web ${cmd}",
+              dockerd)
       if (runCommand != "") {
         runCommand += " && "
       }
@@ -146,7 +156,8 @@ task web(type: Exec) {
     }
 
     paths.each {
-      def command = generateDockerRunCommand(project.projectDir, "/$it", "/bin/misk-web ${cmd}", dockerd)
+      def command = generateDockerRunCommand(project.projectDir, "/$it", "/bin/misk-web ${cmd}",
+              dockerd)
       if (runCommand != "") {
         runCommand += " && "
       }

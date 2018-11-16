@@ -4,21 +4,21 @@ import * as React from "react"
 import styled from "styled-components"
 import { ResponsiveContainer } from "../../containers"
 import {
+  Banner,
+  HomeLink,
   IDimensionAwareProps,
-  processNavbarItems,
-  TopbarBanner,
-  TopbarHomeLink,
-  TopbarMenu,
-  TopbarNavItems
-} from "../Topbar"
+  Menu,
+  NavItems,
+  processNavbarItems
+} from "../Navbar"
 
 /**
- * <TopbarDimensionAware
+ * <DimensionAwareComponent
  *    height={this.state.height}
  *    width={this.state.width}
  *    environment={this.props.environment}
  *    environmentBannerVisible={this.props.environmentBannerVisible}
- *    environmentTopbarVisible={this.props.environmentBannerVisible}
+ *    environmentNavbarVisible={this.props.environmentBannerVisible}
  *    error={this.props.error}
  *    homeName={this.props.homeName}
  *    homeUrl={this.props.homeUrl}
@@ -28,14 +28,14 @@ import {
  *  />
  */
 
-export interface ITopbarProps {
+export interface INavbarProps {
   environment?: Environment
   environmentBannerVisible?: Environment[]
-  environmentTopbarVisible?: Environment[]
+  environmentNavbarVisible?: Environment[]
   error?: any
   homeName?: string
   homeUrl?: string
-  navbarItems?: Array<string | Element | JSX.Element>
+  navbar_items?: Array<string | Element | JSX.Element>
   links?: IDashboardTab[]
   status?: string | Element | JSX.Element
 }
@@ -69,8 +69,8 @@ const MiskNavbarGroup = styled(NavbarGroup)`
   }
 `
 
-export class TopbarDimensionAware extends React.Component<
-  IDimensionAwareProps & ITopbarProps,
+export class DimensionAwareNavbar extends React.Component<
+  IDimensionAwareProps & INavbarProps,
   {}
 > {
   public state = {
@@ -81,39 +81,39 @@ export class TopbarDimensionAware extends React.Component<
     const {
       environment,
       environmentBannerVisible,
-      environmentTopbarVisible,
+      environmentNavbarVisible,
       error,
       homeName,
       homeUrl,
       links,
       height,
-      navbarItems,
+      navbar_items,
       width,
       status
     } = this.props
     const processedNavbarItems = processNavbarItems(
       environment,
-      environmentTopbarVisible,
-      navbarItems
+      environmentNavbarVisible,
+      navbar_items
     )
     return (
       <MiskNavbar>
         <ResponsiveContainer>
           <MiskNavbarGroup align={Alignment.LEFT} className="bp3-dark">
-            <TopbarHomeLink homeName={homeName} homeUrl={homeUrl} />
-            <TopbarNavItems
+            <HomeLink homeName={homeName} homeUrl={homeUrl} />
+            <NavItems
               processedNavbarItems={processedNavbarItems}
               height={height}
               width={width}
             />
           </MiskNavbarGroup>
         </ResponsiveContainer>
-        <TopbarMenu
+        <Menu
           processedNavbarItems={processedNavbarItems}
           error={error}
           links={links}
         />
-        <TopbarBanner
+        <Banner
           environment={environment}
           environmentBannerVisible={environmentBannerVisible}
           status={status}
