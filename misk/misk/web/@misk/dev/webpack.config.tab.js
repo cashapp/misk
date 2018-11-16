@@ -2,6 +2,9 @@ const { vendorExternals, miskExternals } = require("./externals")
 const CopyWebpackPlugin = require("copy-webpack-plugin")
 const HTMLWebpackPlugin = require("html-webpack-plugin")
 const HTMLWebpackHarddiskPlugin = require("html-webpack-harddisk-plugin")
+const StyledComponentsTransformerPlugin = require("typescript-plugin-styled-components")
+const createStyledComponentsTransformer =
+  StyledComponentsTransformerPlugin.default
 const path = require("path")
 const webpack = require("webpack")
 const { BundleAnalyzerPlugin } = require("webpack-bundle-analyzer")
@@ -53,15 +56,13 @@ module.exports = (env, argv, otherConfigFields = {}) => {
     "process.env.NODE_ENV": JSON.stringify("production")
   })
 
-  const HTMLWebpackPluginConfig = new HTMLWebpackPlugin({
-    slug: `${slug}`,
-    template: path.join(dirname, "/src/index.html"),
-    filename: `index.html`,
-    inject: "body",
-    alwaysWriteToDisk: true
+  const BundleAnalyzerPluginConfig = new BundleAnalyzerPlugin({
+    analyzerMode: "static",
+    reportFilename: `bundle-analyzer-report-${slug}.html`,
+    statsFilename: `bundle-analyzer-report-${slug}.json`,
+    generateStatsFile: true,
+    openAnalyzer: false
   })
-
-  const HTMLWebpackHarddiskPluginConfig = new HTMLWebpackHarddiskPlugin()
 
   const CopyWebpackPluginConfig = new CopyWebpackPlugin(
     [
@@ -71,13 +72,17 @@ module.exports = (env, argv, otherConfigFields = {}) => {
     { copyUnmodified: true }
   )
 
-  const BundleAnalyzerPluginConfig = new BundleAnalyzerPlugin({
-    analyzerMode: "static",
-    reportFilename: `bundle-analyzer-report-${slug}.html`,
-    statsFilename: `bundle-analyzer-report-${slug}.json`,
-    generateStatsFile: true,
-    openAnalyzer: false
+  const HTMLWebpackHarddiskPluginConfig = new HTMLWebpackHarddiskPlugin()
+
+  const HTMLWebpackPluginConfig = new HTMLWebpackPlugin({
+    slug: `${slug}`,
+    template: path.join(dirname, "/src/index.html"),
+    filename: `index.html`,
+    inject: "body",
+    alwaysWriteToDisk: true
   })
+
+  const StyledComponentsTransformer = createStyledComponentsTransformer()
 
   const baseConfigFields = {
     entry: {
@@ -115,7 +120,12 @@ module.exports = (env, argv, otherConfigFields = {}) => {
         {
           test: /\.(tsx|ts)$/,
           exclude: /node_modules/,
-          loaders: "awesome-typescript-loader"
+          loader: "awesome-typescript-loader",
+          options: {
+            getCustomTransformers: () => ({
+              before: [StyledComponentsTransformer]
+            })
+          }
         },
         {
           enforce: "pre",

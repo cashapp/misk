@@ -20,11 +20,15 @@ $ yarn add @misk/components
 - `OfflineComponent`: NonIdealState component for Offline or Loading tab state
 - `PathDebugComponent`: outputs values passed in by props for `hash`, `pathname`, and `search` in React-Router instance
 - `SidebarComponent`: dashboard styled sidebar
-- `TopbarComponent`: dashboard styled topbar
+- `NavbarComponent`: dashboard styled Navbar
 
 ## Containers
 
-- `ResponsiveContainer`: Responsive container that all tabs and Nav Topbar use to ensure consistent view width
+- `DesktopWideOnlyContainer`: Only shows container when window width >1200px
+- `FlexContainer`: Container using CSS FlexBox to have enclosed items flow responsively to screen width
+- `MobileNeverContainer`: Never show container when window width <768px
+- `MobileOnlyContainer`: Only show container when window width <768px
+- `ResponsiveContainer`: Responsive container that all tabs and Nav Navbar use to ensure consistent view width
 
 ## [Releasing](https://github.com/square/misk/blob/master/misk/web/%40misk/RELEASING.md)
 
