@@ -1,12 +1,17 @@
 import { IResizeEntry, ResizeSensor } from "@blueprintjs/core"
 import { reduce } from "lodash"
 import * as React from "react"
-import { ITopbarProps, TopbarComponentDimensionAware } from "../components"
+import {
+  defaultEnvironment,
+  defaultEnvironmentIndicatorsVisible
+} from "../../utilities"
+import { ITopbarProps, TopbarDimensionAware } from "../Topbar"
 
 /**
  * <TopbarComponent
  *    environment={environment}
  *    environmentBannerVisible={[Environment.DEVELOPMENT]}
+ *    environmentTopbarVisible={[Environment.DEVELOPMENT]}
  *    error={error}
  *    homeName={"Misk Home"}
  *    homeUrl={"/"}
@@ -41,19 +46,32 @@ export class TopbarComponent extends React.Component<ITopbarProps, {}> {
   }
 
   public render() {
+    const {
+      environment = defaultEnvironment,
+      environmentBannerVisible = defaultEnvironmentIndicatorsVisible,
+      environmentTopbarVisible = defaultEnvironmentIndicatorsVisible,
+      error,
+      homeName,
+      homeUrl,
+      links,
+      navbarItems,
+      status
+    } = this.props
+    const { height, width } = this.state
     return (
       <ResizeSensor onResize={this.handleResize}>
-        <TopbarComponentDimensionAware
-          height={this.state.height}
-          width={this.state.width}
-          environment={this.props.environment}
-          environmentBannerVisible={this.props.environmentBannerVisible}
-          error={this.props.error}
-          homeName={this.props.homeName}
-          homeUrl={this.props.homeUrl}
-          links={this.props.links}
-          navbarItems={this.props.navbarItems}
-          status={this.props.status}
+        <TopbarDimensionAware
+          height={height}
+          width={width}
+          environment={environment}
+          environmentBannerVisible={environmentBannerVisible}
+          environmentTopbarVisible={environmentTopbarVisible}
+          error={error}
+          homeName={homeName}
+          homeUrl={homeUrl}
+          links={links}
+          navbarItems={navbarItems}
+          status={status}
         />
       </ResizeSensor>
     )

@@ -1,4 +1,4 @@
-import { IDashboardTab } from "@misk/common"
+import { IDashboardTab, Environment } from "@misk/common"
 import {
   OfflineComponent,
   ResponsiveContainer,
@@ -66,7 +66,7 @@ class LoaderContainer extends React.Component<ILoaderProps> {
               '<a href="#">Guice</>',
               <span key={2}>Search</span>
             ]}
-            status={'<a href="#">Guice</>'}
+            status={`${serviceMetadata.environment} | <a href="#">Guice</>`}
           />
           <TabContainer>
             {Object.entries(adminDashboardTabs).map(([key, tab]) => (
