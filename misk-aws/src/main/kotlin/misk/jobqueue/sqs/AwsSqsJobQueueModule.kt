@@ -7,7 +7,6 @@ import com.google.common.util.concurrent.Service
 import com.google.common.util.concurrent.ThreadFactoryBuilder
 import com.google.inject.Provides
 import com.google.inject.Singleton
-import misk.cloud.aws.AwsClientConfiguration
 import misk.cloud.aws.AwsRegion
 import misk.inject.KAbstractModule
 import misk.jobqueue.JobConsumer
@@ -28,17 +27,11 @@ class AwsSqsJobQueueModule : KAbstractModule() {
   }
 
   @Provides @Singleton
-  fun provideSQSClient(
-      region: AwsRegion,
-      credentials: AWSCredentialsProvider,
-      clientConfiguration: AwsClientConfiguration): AmazonSQS {
-    val sqsClientBuilder = AmazonSQSClientBuilder.standard()
+  fun provideSQSClient(region: AwsRegion, credentials: AWSCredentialsProvider): AmazonSQS {
+    return AmazonSQSClientBuilder.standard()
         .withCredentials(credentials)
         .withRegion(region.name)
-
-    clientConfiguration.clientConfiguration.let { sqsClientBuilder.withClientConfiguration(it) }
-
-    return sqsClientBuilder.build()
+        .build()
   }
 
   @Provides @ForSqsConsumer @Singleton
