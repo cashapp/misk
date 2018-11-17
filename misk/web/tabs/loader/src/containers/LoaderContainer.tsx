@@ -2,7 +2,6 @@ import { IDashboardTab } from "@misk/common"
 import { Navbar, OfflineComponent, ResponsiveContainer } from "@misk/components"
 import * as React from "react"
 import { connect } from "react-redux"
-import { Link } from "react-router-dom"
 import styled from "styled-components"
 import { ScriptComponent } from "../components"
 import { dispatchLoader, IState } from "../ducks"
@@ -46,7 +45,7 @@ class LoaderContainer extends React.Component<ILoaderProps> {
             homeName={serviceMetadata.app_name}
             homeUrl={serviceMetadata.admin_dashboard_url}
             navbar_items={serviceMetadata.navbar_items}
-            status={serviceMetadata.status}
+            status={serviceMetadata.navbar_status}
           />
           <TabContainer>
             {Object.entries(adminDashboardTabs).map(([key, tab]) => (
