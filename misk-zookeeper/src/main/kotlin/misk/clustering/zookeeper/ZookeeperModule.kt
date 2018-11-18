@@ -4,6 +4,7 @@ import com.google.common.util.concurrent.Service
 import com.google.common.util.concurrent.ThreadFactoryBuilder
 import com.google.inject.Key
 import com.google.inject.Provides
+import misk.clustering.lease.LeaseManager
 import misk.inject.KAbstractModule
 import org.apache.curator.framework.CuratorFramework
 import org.apache.curator.framework.CuratorFrameworkFactory
@@ -14,6 +15,7 @@ class ZookeeperModule : KAbstractModule() {
   override fun configure() {
     multibind<Service>().to<ZkService>()
     multibind<Service>().to<ZkLeaseManager>()
+    bind<LeaseManager>().to<ZkLeaseManager>()
     bind<CuratorFramework>().toProvider(CuratorFrameworkProvider::class.java)
   }
 
