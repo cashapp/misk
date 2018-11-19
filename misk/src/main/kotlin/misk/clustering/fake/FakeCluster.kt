@@ -26,7 +26,9 @@ class FakeCluster internal constructor(
   constructor(resourceMapper: ExplicitClusterResourceMapper) :
       this(resourceMapper, DefaultCluster(self) { resourceMapper })
 
-  constructor() : this(ExplicitClusterResourceMapper())
+  constructor() : this(ExplicitClusterResourceMapper().apply {
+    setDefaultMapping(self)
+  })
 
   override fun watch(watch: ClusterWatch) {
     waitFor {
