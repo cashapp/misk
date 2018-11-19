@@ -21,15 +21,17 @@ internal class FakeLeaseManagerTest {
   @Test fun leaseRespectsAuthority() {
     val lease = leaseManager.requestLease("my-lease")
     val otherLease = leaseManager.requestLease("my-other-lease")
+
+    // leases are held by the current process by default
+    assertThat(lease.checkHeld()).isTrue()
+    assertThat(otherLease.checkHeld()).isTrue()
+
+    leaseManager.markLeaseHeldElsewhere("my-lease")
     assertThat(lease.checkHeld()).isFalse()
-    assertThat(otherLease.checkHeld()).isFalse()
+    assertThat(otherLease.checkHeld()).isTrue()
 
     leaseManager.markLeaseHeld("my-lease")
     assertThat(lease.checkHeld()).isTrue()
-    assertThat(otherLease.checkHeld()).isFalse()
-
-    leaseManager.markLeaseReleased("my-lease")
-    assertThat(lease.checkHeld()).isFalse()
-    assertThat(otherLease.checkHeld()).isFalse()
+    assertThat(otherLease.checkHeld()).isTrue()
   }
 }
