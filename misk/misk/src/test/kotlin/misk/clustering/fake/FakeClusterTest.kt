@@ -27,6 +27,9 @@ internal class FakeClusterTest {
   }
 
   @Test fun clusterUsesExplicitResourceMapping() {
+    // By default all resources should be owned by us
+    assertThat(cluster.resourceMapper["my-object"]).isEqualTo(FakeCluster.self)
+
     cluster.resourceMapper.setDefaultMapping(Cluster.Member("zork", "192.168.12.0"))
     cluster.resourceMapper.addMapping("my-object", Cluster.Member("bork", "192.168.12.1"))
 

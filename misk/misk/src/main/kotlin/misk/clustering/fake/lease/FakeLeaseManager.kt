@@ -5,21 +5,24 @@ import misk.clustering.lease.Lease
 import misk.clustering.lease.LeaseManager
 import javax.inject.Singleton
 
-/** A [FakeLeaseManager] provides explicit control over leases for the purposes of testing */
+/**
+ * A [FakeLeaseManager] provides explicit control over leases for the purposes of testing. By
+ * default a lease is considered held, but it can be explicitly marked as not held if desired
+ */
 @Singleton
 class FakeLeaseManager : LeaseManager {
-  private val heldLeases = newConcurrentHashSet<String>()
+  private val leasesHeldElsewhere = newConcurrentHashSet<String>()
 
   override fun requestLease(name: String): Lease = FakeLease(name, this)
 
-  fun isLeaseHeld(name: String) = heldLeases.contains(name)
+  fun isLeaseHeld(name: String) = !leasesHeldElsewhere.contains(name)
 
   fun markLeaseHeld(name: String) {
-    heldLeases.add(name)
+    leasesHeldElsewhere.remove(name)
   }
 
-  fun markLeaseReleased(name: String) {
-    heldLeases.remove(name)
+  fun markLeaseHeldElsewhere(name: String) {
+    leasesHeldElsewhere.add(name)
   }
 
   internal class FakeLease(
