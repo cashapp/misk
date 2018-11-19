@@ -52,6 +52,6 @@
     "webpack-merge": "^4.1.4"
   },
   "miskTab": {
-    "version": "0.0.6"
+    "version": "0.0.7"
   }
 }
