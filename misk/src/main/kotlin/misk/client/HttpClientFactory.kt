@@ -1,9 +1,9 @@
 package misk.client
 
-import misk.client.NoOpDns
 import misk.security.ssl.SslContextFactory
 import misk.security.ssl.SslLoader
 import okhttp3.OkHttpClient
+import okhttp3.Protocol
 import java.net.Proxy
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
@@ -39,6 +39,10 @@ class HttpClientFactory {
           UnixDomainSocketFactory(envoyClientEndpointProvider.unixSocket(config.envoy)))
       // No DNS lookup needed since we're just sending the request over a socket.
       builder.dns(NoOpDns())
+      // In-flight Envoy requests do not get properly closed when those requests aren't done via HTTP/2.
+      // As such, ensure that communications via Envoy sidecar always happen over HTTP/2. Standard protocol
+      // negotiation is fine for non-Envoy sidecar (read: non-unix socket) traffic.
+      builder.protocols(listOf(Protocol.H2_PRIOR_KNOWLEDGE))
     }
     builder.proxy(Proxy.NO_PROXY)
 
