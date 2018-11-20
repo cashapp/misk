@@ -101,7 +101,7 @@ class HibernateModule(
     bind(transacterKey).toProvider(object : Provider<Transacter> {
       @com.google.inject.Inject(optional=true) val tracer: Tracer? = null
       override fun get(): RealTransacter = RealTransacter(
-          qualifier, sessionFactoryProvider.get(), config, tracer)
+          qualifier, sessionFactoryProvider, config, tracer)
     }).asSingleton()
 
     multibind<Service>().toProvider(object : Provider<SchemaMigratorService> {
