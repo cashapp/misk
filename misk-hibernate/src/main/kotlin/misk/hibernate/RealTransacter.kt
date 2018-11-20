@@ -16,6 +16,7 @@ import org.hibernate.StaleObjectStateException
 import org.hibernate.exception.LockAcquisitionException
 import java.sql.Connection
 import java.time.Duration
+import javax.inject.Provider
 import javax.persistence.OptimisticLockException
 import kotlin.reflect.KClass
 
@@ -23,7 +24,7 @@ private val logger = getLogger<RealTransacter>()
 
 internal class RealTransacter private constructor(
   private val qualifier: KClass<out Annotation>,
-  private val sessionFactory: SessionFactory,
+  private val sessionFactoryProvider: Provider<SessionFactory>,
   private val config: DataSourceConfig,
   private val threadLocalSession: ThreadLocal<Session>,
   private val options: TransacterOptions,
@@ -32,10 +33,13 @@ internal class RealTransacter private constructor(
 
   constructor(
     qualifier: KClass<out Annotation>,
-    sessionFactory: SessionFactory,
+    sessionFactoryProvider: Provider<SessionFactory>,
     config: DataSourceConfig,
     tracer: Tracer?
-  ) : this(qualifier, sessionFactory, config, ThreadLocal(), TransacterOptions(), tracer)
+  ) : this(qualifier, sessionFactoryProvider, config, ThreadLocal(), TransacterOptions(), tracer)
+
+  private val sessionFactory
+    get() = sessionFactoryProvider.get()
 
   override val inTransaction: Boolean
     get() = threadLocalSession.get() != null
@@ -126,7 +130,7 @@ internal class RealTransacter private constructor(
   override fun readOnly(): Transacter = withOptions(options.copy(readOnly = true))
 
   private fun withOptions(options: TransacterOptions): Transacter =
-      RealTransacter(qualifier, sessionFactory, config, threadLocalSession, options, tracer)
+      RealTransacter(qualifier, sessionFactoryProvider, config, threadLocalSession, options, tracer)
 
   private fun <T> withSession(lambda: (session: RealSession) -> T): T {
     check(threadLocalSession.get() == null) { "Attempted to start a nested session" }
