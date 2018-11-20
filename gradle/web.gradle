@@ -1,7 +1,7 @@
 import groovy.json.JsonSlurper
 
 def dockerMiskWebImage = "squareup/misk-web"
-def dockerMiskWebVersion = "0.0.7"
+def dockerMiskWebVersion = "0.0.6"
 
 task web(type: Exec) {
   // -Pcmd='-d': pass in argument to misk-web shell script in Docker container
@@ -90,7 +90,7 @@ task web(type: Exec) {
           println versionWarning
         }
       }
-      def command = "docker run ${daemon} --rm --name ${containerName} -e CI=\$CI -v ${projectPath}/web${path}:/web${path} ${port} ${image}:${imageVersion} ${cmd}"
+      def command = "docker run ${daemon} --rm --name ${containerName} -v ${projectPath}/web${path}:/web${path} ${port} ${image}:${imageVersion} ${cmd}"
       def logsDir = "${projectPath}/web/logs/"
       println "\nContainer: ${containerName} ${cmd}"
       println "Running... \$ ${command}"

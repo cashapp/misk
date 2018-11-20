@@ -65,37 +65,9 @@
     "sq-market-font": {
       "filepath": "sq-market.css",
       "url": "https://d1g145x70srn7h.cloudfront.net/fonts/sqmarket/sq-market.css"
-    },
-    "normalize.css": {
-      "filepath": "normalize.css",
-      "url": "https://unpkg.com/normalize.css/normalize.css"
-    },
-    "blueprintjs-core.css": {
-      "filepath": "blueprintjs-core.css",
-      "url": "https://unpkg.com/@blueprintjs/core/lib/css/blueprint.css"
-    },
-    "blueprintjs-datetime.css": {
-      "filepath": "blueprintjs-datetime.css",
-      "url": "https://unpkg.com/@blueprintjs/datetime/lib/css/blueprint-datetime.css"
-    },
-    "blueprintjs-select.css": {
-      "filepath": "blueprintjs-select.css",
-      "url": "https://unpkg.com/@blueprintjs/select/lib/css/blueprint-select.css"
-    },
-    "blueprintjs-table.css": {
-      "filepath": "blueprintjs-table.css",
-      "url": "https://unpkg.com/@blueprintjs/table/lib/css/table.css"
-    },
-    "blueprintjs-timezone.css": {
-      "filepath": "blueprintjs-timezone.css",
-      "url": "https://unpkg.com/@blueprintjs/timezone/lib/css/blueprint-timezone.css"
-    },
-    "skeleton.css": {
-      "filepath": "skeleton.css",
-      "url": "https://unpkg.com/skeleton-css/css/skeleton.css"
     }
   },
   "miskTab": {
-    "version": "0.0.7"
+    "version": "0.0.6"
   }
 }

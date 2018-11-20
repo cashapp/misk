@@ -96,16 +96,13 @@ stashNodeModules() {
     rm -rf ./node_modules
     # Link to cached node_modules in Docker image
     ln -s /node_modules .
-    # Put @misk/dev/tsconfig.base.json where it needs to be
-    mkdir -p /web/node_modules/@misk/dev/
-    cp /node_modules/@misk/dev/tsconfig.base.json /web/node_modules/@misk/dev/
 }
 
 refreshNodeModules() {
     # Refresh node_modules if hash doesn't match, not in CI environments
-    [ -z "$CI" ] && [ -d ${WEB}/node_modules ] && hashDiffFiles ${WEB}/node_modules/.hash /node_modules/.hash | grep -Fq "true" && echo "[INVALIDATE] Invalidate local web/node_modules/" && echo "" && rm -rf ${WEB}/node_modules
+    ! printenv | grep -q "CI" && [ -d ${WEB}/node_modules ] && hashDiffFiles ${WEB}/node_modules/.hash /node_modules/.hash | grep -Fq "true" && echo "[INVALIDATE] Invalidate local web/node_modules/" && echo "" && rm -rf ${WEB}/node_modules
     # Install local web/node_modules if not already present, not in CI environments
-    [ -z "$CI" ] && [ ! -d ${WEB}/node_modules ] && echo "[REFRESH] Installing local web/node_modules/ from Docker image" && echo "" && cp -rf /node_modules ${WEB}/node_modules
+    ! printenv | grep -q "CI" && [ ! -d ${WEB}/node_modules ] && echo "[REFRESH] Installing local web/node_modules/ from Docker image" && echo "" && cp -rf /node_modules ${WEB}/node_modules
 }
 
 restoreNodeModules() {
