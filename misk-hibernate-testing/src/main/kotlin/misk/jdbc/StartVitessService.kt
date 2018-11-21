@@ -1,7 +1,6 @@
 package misk.jdbc
 
 import com.github.dockerjava.api.DockerClient
-import com.github.dockerjava.api.exception.InternalServerErrorException
 import com.github.dockerjava.api.model.Bind
 import com.github.dockerjava.api.model.ExposedPort
 import com.github.dockerjava.api.model.Frame
@@ -9,7 +8,6 @@ import com.github.dockerjava.api.model.Ports
 import com.github.dockerjava.api.model.Volume
 import com.github.dockerjava.core.DockerClientBuilder
 import com.github.dockerjava.core.async.ResultCallbackTemplate
-import com.github.dockerjava.core.command.PullImageResultCallback
 import com.github.dockerjava.netty.NettyDockerCmdExecFactory
 import com.google.common.cache.CacheBuilder
 import com.google.common.cache.CacheLoader
@@ -27,6 +25,7 @@ import java.nio.file.Files
 import java.nio.file.Paths
 import java.time.Duration
 import java.util.Properties
+import java.util.concurrent.TimeUnit
 import kotlin.concurrent.thread
 import kotlin.streams.toList
 
@@ -245,20 +244,8 @@ class StartVitessService(val config: DataSourceConfig) : AbstractIdleService() {
   init {
     // We need to do this outside of the service start up because this takes a really long time
     // the first time you do it. After that it's really fast though.
-    logger.info("Pulling vitess/base:latest...")
-    logger.info("If this is the first time this can be quite slow but should be fast " +
-        "after that.")
-    try {
-      docker.pullImageCmd("vitess/base")
-          .withTag("latest")
-          .exec(PullImageResultCallback())
-          .awaitSuccess()
-    } catch (e: InternalServerErrorException) {
-      if (e.message?.contains("Service Unavailable") == true) {
-        logger.info("You do not have an internet connection. Skipping pull.")
-      } else {
-        throw e
-      }
+    if (runCommand("docker pull vitess/base:latest") != 0) {
+      logger.warn("Failed to pull Vitess docker image. Proceeding regardless.")
     }
   }
 
@@ -298,6 +285,16 @@ class StartVitessService(val config: DataSourceConfig) : AbstractIdleService() {
       Runtime.getRuntime().addShutdownHook(Thread {
         clusters.invalidateAll()
       })
+    }
+
+    fun runCommand(command : String): Int {
+      logger.info(command)
+      val process = ProcessBuilder(*command.split(" ").toTypedArray())
+          .redirectOutput(ProcessBuilder.Redirect.INHERIT)
+          .redirectError(ProcessBuilder.Redirect.INHERIT)
+          .start()
+      process.waitFor(60, TimeUnit.MINUTES)
+      return process.exitValue()
     }
   }
 }
