@@ -2,12 +2,17 @@ package misk.hibernate
 
 import com.google.common.base.Stopwatch
 import misk.jdbc.DataSourceConfig
+import misk.jdbc.DataSourceType
 import misk.logging.getLogger
 import misk.resources.ResourceLoader
 import org.hibernate.SessionFactory
 import org.hibernate.query.Query
 import java.sql.Connection
-import java.util.*
+import java.util.Collections
+import java.util.NavigableMap
+import java.util.NavigableSet
+import java.util.TreeMap
+import java.util.TreeSet
 import java.util.regex.Pattern
 import javax.persistence.PersistenceException
 import kotlin.reflect.KClass
@@ -113,6 +118,9 @@ internal class SchemaMigrator(
 
   /** Throws an exception unless all available migrations have been applied. */
   fun requireAll() {
+    if (config.type == DataSourceType.VITESS) {
+      logger.warn { "schema check currently not supported on Vitess" }
+    }
     try {
       val availableMigrations = availableMigrations()
       val appliedMigrations = appliedMigrations()
