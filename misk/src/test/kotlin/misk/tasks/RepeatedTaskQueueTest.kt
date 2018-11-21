@@ -18,10 +18,8 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.Duration
 import java.util.concurrent.CountDownLatch
-import java.util.concurrent.Executors
 import java.util.concurrent.PriorityBlockingQueue
 import java.util.concurrent.TimeUnit
-import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicReference
 import java.util.concurrent.locks.ReentrantLock
 import javax.inject.Inject
@@ -471,26 +469,7 @@ internal class RepeatedTaskQueueTest {
       clock: FakeClock,
       backingStorage: ExplicitReleaseDelayQueue<DelayedTask>
     ): RepeatedTaskQueue {
-      val queue = RepeatedTaskQueue("my-task-queue", clock, backingStorage)
-
-      // Install a listener that will kick the once we start shutting down until we terminate,
-      // ensuring that the termination action runs
-      val fullyTerminated = AtomicBoolean(false)
-      queue.addListener(object : Service.Listener() {
-        override fun stopping(from: Service.State) {
-          // Keep kicking the storage until the task queue finally shuts down
-          while (!fullyTerminated.get()) {
-            backingStorage.releaseAll()
-            Thread.sleep(500)
-          }
-        }
-
-        override fun terminated(from: Service.State) {
-          fullyTerminated.set(true)
-        }
-      }, Executors.newSingleThreadExecutor())
-
-      return queue
+      return RepeatedTaskQueue.forTesting("my-task-queue", clock, backingStorage)
     }
   }
 
