@@ -3,6 +3,7 @@ package misk.tasks
 import com.google.common.annotations.VisibleForTesting
 import com.google.common.util.concurrent.AbstractExecutionThreadService
 import com.google.common.util.concurrent.MoreExecutors.newDirectExecutorService
+import com.google.common.util.concurrent.Service
 import misk.backoff.Backoff
 import misk.backoff.ExponentialBackoff
 import misk.concurrent.ExplicitReleaseDelayQueue
@@ -13,6 +14,7 @@ import java.util.concurrent.BlockingQueue
 import java.util.concurrent.DelayQueue
 import java.util.concurrent.Executor
 import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
 import java.util.concurrent.Executors.newSingleThreadExecutor
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -34,14 +36,6 @@ class RepeatedTaskQueue @VisibleForTesting internal constructor(
    */
   constructor(name: String, clock: Clock, taskExecutor: ExecutorService) :
       this(name, clock, taskExecutor, null, DelayQueue<DelayedTask>())
-
-  /**
-   * Creates a [RepeatedTaskQueue] backed by an [ExplicitReleaseDelayQueue], allowing tests
-   * to explicitly control when tasks are released for execution. Tasks are executed in a single
-   * thread in the order in which they expire.
-   */
-  constructor(name: String, clock: Clock, pendingTasks: ExplicitReleaseDelayQueue<DelayedTask>) :
-      this(name, clock, newDirectExecutorService(), newSingleThreadExecutor(), pendingTasks)
 
   private val running = AtomicBoolean(false)
 
@@ -141,5 +135,44 @@ class RepeatedTaskQueue @VisibleForTesting internal constructor(
     private val defaultMaxDelay = Duration.ofMinutes(1)
     private val defaultJitter = Duration.ofMillis(50)
     private val log = getLogger<RepeatedTaskQueue>()
+
+    /**
+     * Creates a [RepeatedTaskQueue] backed by an [ExplicitReleaseDelayQueue], allowing tests
+     * to explicitly control when tasks are released for execution. Tasks are executed in a single
+     * thread in the order in which they expire
+     */
+    @JvmStatic fun forTesting(
+      name: String,
+      clock: Clock,
+      backingStorage: ExplicitReleaseDelayQueue<DelayedTask>
+    ) : RepeatedTaskQueue {
+      val queue = RepeatedTaskQueue(
+          name,
+          clock,
+          newDirectExecutorService(),
+          newSingleThreadExecutor(),
+          backingStorage
+      )
+
+      // Install a status listener that will explicitly release all of the tasks from the
+      // underlying delay queue at shutdown, ensuring that the termination action runs and
+      // allowing the task queue itself to shutdown
+      val fullyTerminated = AtomicBoolean(false)
+      queue.addListener(object : Service.Listener() {
+        override fun stopping(from: Service.State) {
+          // Keep kicking the storage until the task queue finally shuts down
+          while (!fullyTerminated.get()) {
+            backingStorage.releaseAll()
+            Thread.sleep(500)
+          }
+        }
+
+        override fun terminated(from: Service.State) {
+          fullyTerminated.set(true)
+        }
+      }, Executors.newSingleThreadExecutor())
+
+      return queue
+    }
   }
 }
