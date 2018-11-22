@@ -66,6 +66,15 @@ fun <T : Any> setOfType(elementType: KClass<T>) = setOfType(elementType.typeLite
 
 inline fun <reified T : Any> setOfType() = setOfType(T::class)
 
+inline fun <reified K : Any, reified V : Any> mapOfType() = mapOfType(K::class, V::class)
+
+fun <K : Any, V : Any> mapOfType(keyType: KClass<K>, valueType: KClass<V>) =
+  mapOfType(keyType.typeLiteral(), valueType.typeLiteral())
+
+@Suppress("UNCHECKED_CAST") // The type system isn't aware of constructed types.
+fun <K, V> mapOfType(keyType: TypeLiteral<K>, valueType: TypeLiteral<V>): TypeLiteral<Map<K, V>> =
+  Types.mapOf(keyType.type, valueType.type).typeLiteral() as TypeLiteral<Map<K, V>>
+
 inline fun <reified T : Any> Injector.getInstance(annotation: Annotation? = null): T {
   val key = annotation?.let { Key.get(T::class.java, it) } ?: Key.get(T::class.java)
   return getInstance(key)
