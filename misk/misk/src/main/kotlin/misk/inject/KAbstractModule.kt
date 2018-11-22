@@ -6,8 +6,10 @@ import com.google.inject.TypeLiteral
 import com.google.inject.binder.AnnotatedBindingBuilder
 import com.google.inject.binder.LinkedBindingBuilder
 import com.google.inject.binder.ScopedBindingBuilder
+import com.google.inject.multibindings.MapBinder
 import com.google.inject.multibindings.Multibinder
 import com.google.inject.util.Types
+import java.lang.reflect.Type
 import kotlin.reflect.KClass
 
 /**
@@ -73,4 +75,40 @@ abstract class KAbstractModule : AbstractModule() {
       else -> Multibinder.newSetBinder(binder(), type.java, annotation.java)
     }
   }
+
+  protected inline fun <reified K : Any, reified V : Any> newMapBinder(
+    annotation: KClass<out Annotation>? = null
+  ): MapBinder<K, V> = newMapBinder(K::class, V::class, annotation)
+
+  protected fun <K : Any, V : Any> newMapBinder(
+    keyType: KClass<K>,
+    valueType: KClass<V>,
+    annotation: KClass<out Annotation>? = null
+  ): MapBinder<K, V> = newMapBinder(keyType.typeLiteral(), valueType.typeLiteral(), annotation)
+
+  protected fun <K : Any, V : Any> newMapBinder(
+    keyType: TypeLiteral<K>,
+    valueType: TypeLiteral<V>,
+    annotation: KClass<out Annotation>? = null
+  ): MapBinder<K, V> {
+    val mapOfKV = mapOfType(keyType, valueType).toKey(annotation)
+    val mapOfKOutV = mapOfType<K, V>(keyType.type, valueType.subtype()).toKey(annotation)
+    val mapOfOutKV = mapOfType<K, V>(keyType.subtype(), valueType.type).toKey(annotation)
+    val mapOfOutKOutV = mapOfType<K, V>(keyType.subtype(), valueType.subtype()).toKey(annotation)
+
+    bind(mapOfKOutV).to(mapOfKV)
+    bind(mapOfOutKV).to(mapOfKV)
+    bind(mapOfOutKOutV).to(mapOfKV)
+
+    return when (annotation) {
+      null -> MapBinder.newMapBinder(binder(), keyType, valueType)
+      else -> MapBinder.newMapBinder(binder(), keyType, valueType, annotation.java)
+    }
+  }
+
+  @Suppress("UNCHECKED_CAST") // The type system isn't aware of constructed types.
+  private fun <K, V> mapOfType(keyType: Type, valueType: Type): TypeLiteral<Map<K, V>> =
+    Types.mapOf(keyType, valueType).typeLiteral() as TypeLiteral<Map<K, V>>
+
+  private fun <T : Any> TypeLiteral<T>.subtype() : Type = Types.subtypeOf(type)
 }
