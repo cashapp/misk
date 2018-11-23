@@ -1,5 +1,4 @@
 import org.junit.platform.console.options.Details
-import groovy.json.JsonSlurper
 
 apply plugin: 'kotlin'
 kotlin {
@@ -10,7 +9,7 @@ kotlin {
 apply plugin: 'org.junit.platform.gradle.plugin'
 apply plugin: 'com.vanniktech.maven.publish'
 apply from: rootProject.file("gradle/localdb.gradle")
-apply from: rootProject.file("gradle/web.gradle")
+apply from: "https://raw.githubusercontent.com/square/misk-web/master/gradle/web.gradle"
 
 compileKotlin {
   kotlinOptions {
@@ -30,10 +29,6 @@ sourceSets {
   test.java.srcDirs += 'src/test/kotlin/'
   main.resources {
     srcDirs += [
-      'web/@misk/common/lib',
-      'web/@misk/components/lib',
-      'web/@misk/dev/lib',
-      'web/@misk/tslint/lib',
       'web/tabs/config/lib',
       'web/tabs/example/lib',
       'web/tabs/loader/lib'
