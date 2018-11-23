@@ -1,5 +1,7 @@
 <img src="misk.png" width="300">
 
+[![Build Status](https://travis-ci.org/square/misk.svg?branch=master)](https://travis-ci.org/square/misk)
+
 Misk is a new open source application container from Square.
 
 Looking for `@misk/` NPM Packages? **Check out [Misk-Web](https://github.com/square/misk-web)**
