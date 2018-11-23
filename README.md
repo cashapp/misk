@@ -2,6 +2,8 @@
 
 Misk is a new open source application container from Square.
 
+Looking for `@misk/` NPM Packages? **Check out [Misk-Web](https://github.com/square/misk-web)**
+
 Misk is not ready for use. The API is not stable.
 
 Quick Links

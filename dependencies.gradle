@@ -49,6 +49,7 @@ ext.dep = [
   "logbackClassic": "ch.qos.logback:logback-classic:1.2.3",
   "logbackJsonCore": "ch.qos.logback.contrib:logback-json-core:0.1.5",
   "loggingApi": "io.github.microutils:kotlin-logging:1.4.9",
+  "miskWeb": "com.squareup.misk-web:misk-web:2018.11.20-06a2d00",
   "mockitoCore": "org.mockito:mockito-core:2.8.9",
   "moshi": "com.squareup.moshi:moshi-kotlin:1.5.0",
   "mysql": "mysql:mysql-connector-java:5.1.16",
@@ -76,6 +77,5 @@ ext.dep = [
   "wireRuntime": "com.squareup.wire:wire-runtime:2.3.0-RC1",
   "zipkinBrave": "io.zipkin.brave:brave:4.17.2",
   "zipkinReporter": "io.zipkin.reporter2:zipkin-sender-okhttp3:2.4.1",
-  "zookeeper": "org.apache.zookeeper:zookeeper:3.5.4-beta",
+  "zookeeper": "org.apache.zookeeper:zookeeper:3.5.4-beta"
 ]//Generated from polyrepo's master-dependencies.json
-
