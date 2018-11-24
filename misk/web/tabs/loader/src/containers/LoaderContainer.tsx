@@ -1,9 +1,13 @@
 import { IDashboardTab } from "@misk/common"
-import { Navbar, OfflineComponent, ResponsiveContainer } from "@misk/components"
+import {
+  Navbar,
+  OfflineComponent,
+  ResponsiveContainer,
+  TabLoaderComponent
+} from "@misk/components"
 import * as React from "react"
 import { connect } from "react-redux"
 import styled from "styled-components"
-import { ScriptComponent } from "../components"
 import { dispatchLoader, IState } from "../ducks"
 
 export interface ILoaderProps extends IState {
@@ -48,9 +52,7 @@ class LoaderContainer extends React.Component<ILoaderProps> {
             status={serviceMetadata.navbar_status}
           />
           <TabContainer>
-            {Object.entries(adminDashboardTabs).map(([key, tab]) => (
-              <ScriptComponent key={key} tab={tab} />
-            ))}
+            <TabLoaderComponent tabs={adminDashboardTabs} />
           </TabContainer>
         </span>
       )
