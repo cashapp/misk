@@ -120,6 +120,7 @@ internal class SchemaMigrator(
   fun requireAll() {
     if (config.type == DataSourceType.VITESS) {
       logger.warn { "schema check currently not supported on Vitess" }
+      return
     }
     try {
       val availableMigrations = availableMigrations()
