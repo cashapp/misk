@@ -1,5 +1,6 @@
 ext {
   isCi = "true".equals(System.getenv('CI'))
+  isSqCi = "true".equals(System.getenv('SQCI'))
 }
 apply from: new File("./dependencies.gradle")
 
