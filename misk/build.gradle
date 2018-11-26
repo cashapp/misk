@@ -89,6 +89,12 @@ dependencies {
   testCompile project(':misk-testing')
 }
 
+if (rootProject.ext.isSqCi) {
+  dependencies {
+    compile dep.miskWeb
+  }
+}
+
 if (rootProject.file("hooks.gradle").exists()) {
   apply from: rootProject.file("hooks.gradle")
 }
