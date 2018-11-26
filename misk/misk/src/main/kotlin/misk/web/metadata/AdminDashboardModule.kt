@@ -80,22 +80,7 @@ class AdminDashboardModule(val environment: Environment) : KAbstractModule() {
         slug = "webactions",
         web_proxy_url = "http://localhost:3201/"
     ))
-
-    // Example
-    multibind<DashboardTab, AdminDashboardTab>().toInstance(DashboardTab(
-        name = "Example",
-        slug = "example",
-        url_path_prefix = "/_admin/example/",
-        category = "Misk Development"
-    ))
-    install(WebTabResourceModule(
-        environment = environment,
-        slug = "example",
-        web_proxy_url = "http://localhost:3199/"
-    ))
-
-
-
+    
     // True for testing Misk Menu with populated tabs and categories, tabs are not functional
     if (environment == Environment.DEVELOPMENT || environment == Environment.TESTING) {
       multibind<DashboardTab, AdminDashboardTab>().toInstance(DashboardTab(
