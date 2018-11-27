@@ -6,8 +6,6 @@ import com.google.inject.TypeLiteral
 import com.google.inject.name.Names
 import misk.inject.KAbstractModule
 import misk.inject.asSingleton
-import misk.inject.typeLiteral
-import misk.web.actions.WebActionEntry
 import javax.inject.Provider
 import kotlin.reflect.KProperty1
 import kotlin.reflect.full.createType
@@ -24,19 +22,19 @@ class ConfigModule<T : Config>(
   override fun configure() {
     bind<String>().annotatedWith<AppName>().toInstance(appName)
     bind(configClass).toInstance(config)
-    bindConfigClassRecursively(configClass)
+    bindChildConfigClass(configClass)
   }
 
   @Suppress("UNCHECKED_CAST")
-  private fun bindConfigClassRecursively(configClass: Class<out Config>) {
+  private fun bindChildConfigClass(configClass: Class<out Config>) {
     for (property in configClass.kotlin.declaredMemberProperties) {
       if (!property.returnType.isSubtypeOf(Config::class.createType())) {
         continue
       }
-      bindConfigClassRecursively(
-          property.returnType.typeLiteral().rawType as Class<out Config>)
-      val subConfigProvider = SubConfigProvider(config,
-          property as KProperty1<Config, Any?>)
+      val subConfigProvider = Provider {
+        (property as KProperty1<Config, Any?>).get(config)
+      }
+
       val subConfigTypeLiteral = TypeLiteral.get(
           property.returnType.javaType) as TypeLiteral<Any?>
 
@@ -54,15 +52,6 @@ class ConfigModule<T : Config>(
         bind(subConfigTypeLiteral).annotatedWith(Names.named(property.name))
             .toProvider(subConfigProvider).asSingleton()
       }
-    }
-  }
-
-  internal class SubConfigProvider<T : Config>(
-    private val config: T,
-    private val subconfigGetter: KProperty1<Config, Any?>
-  ) : Provider<Any?> {
-    override fun get(): Any? {
-      return subconfigGetter.get(config)
     }
   }
 
