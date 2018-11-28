@@ -31,7 +31,7 @@ class ChildEntityTest {
       val ianMalcolm = queryFactory.newQuery<CharacterQuery>()
           .name("Ian Malcolm")
           .uniqueResult(session)!!
-      val ianMalcolmByGid = session.loadByGid(ianMalcolm.gid)
+      val ianMalcolmByGid = session.loadSharded(ianMalcolm.gid)
       assertThat(ianMalcolm).isEqualTo(ianMalcolmByGid)
     }
   }
