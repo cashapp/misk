@@ -89,7 +89,7 @@ dependencies {
   testCompile project(':misk-testing')
 }
 
-if (!rootProject.ext.isCi || rootProject.ext.isSqCi) {
+if (rootProject.ext.isSqCi) {
   dependencies {
     compile dep.miskWeb
   }
