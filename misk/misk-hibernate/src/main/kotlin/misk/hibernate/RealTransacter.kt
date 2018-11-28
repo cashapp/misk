@@ -217,7 +217,8 @@ internal class RealTransacter private constructor(
       }
     }
 
-    override fun  <R : DbRoot<R>, T : DbSharded<R, T>> loadByGid(gid: Gid<R, T>, type: KClass<T>): T {
+    override fun  <R : DbRoot<R>, T : DbSharded<R, T>> loadSharded(gid: Gid<R, T>, type: KClass<T>)
+        : T {
       return session.get(type.java, gid)
     }
 
