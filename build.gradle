@@ -23,7 +23,3 @@ subprojects {
     jcenter()
   }
 }
-
-if (rootProject.file("repositories.gradle").exists()) {
-  apply from: rootProject.file("repositories.gradle")
-}
