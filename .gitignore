@@ -19,3 +19,4 @@ lib
 dist
 .hash
 hooks.gradle
+repositories.gradle
