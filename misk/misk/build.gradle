@@ -88,7 +88,7 @@ dependencies {
   testCompile project(':misk-testing')
 }
 
-if (rootProject.ext.isSqCi) {
+if (rootProject.file("repositories.gradle").exists()) {
   dependencies {
     compile dep.miskWeb
   }
