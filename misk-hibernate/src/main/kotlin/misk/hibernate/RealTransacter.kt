@@ -13,7 +13,6 @@ import misk.tracing.traceWithSpan
 import org.hibernate.FlushMode
 import org.hibernate.SessionFactory
 import org.hibernate.StaleObjectStateException
-import org.hibernate.TypeMismatchException
 import org.hibernate.exception.LockAcquisitionException
 import java.sql.Connection
 import java.time.Duration
@@ -210,11 +209,7 @@ internal class RealTransacter private constructor(
     }
 
     override fun <T : DbEntity<T>> load(id: Id<T>, type: KClass<T>): T {
-      try {
-        return session.get(type.java, id)
-      } catch (e : TypeMismatchException) {
-        throw InvalidChildEntityLoadException(e)
-      }
+      return session.get(type.java, id)
     }
 
     override fun  <R : DbRoot<R>, T : DbSharded<R, T>> loadSharded(gid: Gid<R, T>, type: KClass<T>)
