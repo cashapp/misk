@@ -25,6 +25,6 @@
     "name": "Config",
     "port": "3200",
     "slug": "config",
-    "version": "0.0.9"
+    "version": "0.0.11"
   }
 }
