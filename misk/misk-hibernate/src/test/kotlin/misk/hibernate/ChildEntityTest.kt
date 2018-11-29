@@ -1,9 +1,9 @@
 package misk.hibernate
 
-import io.opentracing.mock.MockTracer
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
+import org.hibernate.TypeMismatchException
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
@@ -16,7 +16,6 @@ class ChildEntityTest {
 
   @Inject @Movies lateinit var transacter: Transacter
   @Inject lateinit var queryFactory: Query.Factory
-  @Inject lateinit var tracer: MockTracer
 
   @Test
   fun loadChildEntityByGid() {
@@ -49,7 +48,7 @@ class ChildEntityTest {
       session.save(DbCharacter("Leia Organa", session.load(movieId), session.load(actorId)))
     }
 
-    assertThrows<InvalidChildEntityLoadException> {
+    assertThrows<TypeMismatchException> {
       transacter.transaction { session ->
         session.load(charId, DbCharacter::class)
       }
