@@ -1,4 +1,4 @@
-import { OfflineComponent } from "@misk/components"
+import { OfflineComponent } from "@misk/core"
 import * as React from "react"
 import { connect } from "react-redux"
 import { ConfigComponent } from "../components"

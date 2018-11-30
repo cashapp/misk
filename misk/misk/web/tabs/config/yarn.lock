@@ -106,9 +106,9 @@
     skeleton-css "^2.0.4"
     styled-components "^4.0.3"
 
-"@misk/components@^0.0.76":
+"@misk/core@^0.0.76":
   version "0.0.76"
-  resolved "https://registry.yarnpkg.com/@misk/components/-/components-0.0.76.tgz#fd4ee34d9cd1c618dfc6ede102157ec3fb11ce3a"
+  resolved "https://registry.yarnpkg.com/@misk/core/-/components-0.0.76.tgz#fd4ee34d9cd1c618dfc6ede102157ec3fb11ce3a"
   integrity sha512-XQbDnOmx+cI3uetBWf824TErJdNaWtsWESda6r6/GFJha0eLs8c26SW0gl1gjZDrwUQLdH9hCq9F65aPmfRawA==
   dependencies:
     "@misk/common" "^0.0.59"

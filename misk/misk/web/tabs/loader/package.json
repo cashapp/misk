@@ -14,18 +14,18 @@
     "test": "echo no test"
   },
   "dependencies": {
-    "@misk/common": "^0.1.0-alpha-0.2",
-    "@misk/components": "^0.1.0-alpha-0.7"
+    "@misk/common": "^0.1.1-alpha-0.1",
+    "@misk/core": "^0.1.1-alpha-0.2"
   },
   "devDependencies": {
-    "@misk/dev": "^0.1.0-alpha-0.1",
-    "@misk/tslint": "^0.1.0-alpha-0.1"
+    "@misk/dev": "^0.1.1-alpha-0.1",
+    "@misk/tslint": "^0.1.1-alpha-0.1"
   },
   "miskTab": {
     "name": "Loader",
     "port": "3100",
     "relative_path_prefix": "_admin/",
     "slug": "loader",
-    "version": "0.0.11"
+    "version": "0.1.1-alpha-0.1"
   }
 }
