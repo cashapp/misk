@@ -17,7 +17,6 @@ subprojects {
       if (rep != null) {
         if (rep.maven) {
           for (Map.Entry<String, String> repEntry : rep.maven) {
-            println(repEntry.value)
             maven {
               url repEntry.value
             }
@@ -39,7 +38,6 @@ subprojects {
     if (rep != null) {
       if (rep.maven) {
         for (Map.Entry<String, String> repEntry : rep.maven) {
-          println(repEntry.value)
           maven {
             url repEntry.value
           }
