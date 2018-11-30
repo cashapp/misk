@@ -41,8 +41,7 @@ abstract class BaseCustomStorageRpc : StorageRpc {
     throw UnsupportedOperationException()
   }
 
-  override fun createAcl(acl: BucketAccessControl?, options: Map<StorageRpc.Option, *>?)
-      : BucketAccessControl {
+  override fun createAcl(acl: BucketAccessControl?, options: Map<StorageRpc.Option, *>?): BucketAccessControl {
     throw UnsupportedOperationException()
   }
 
@@ -54,8 +53,7 @@ abstract class BaseCustomStorageRpc : StorageRpc {
     throw UnsupportedOperationException()
   }
 
-  override fun patchAcl(acl: BucketAccessControl?, options: Map<StorageRpc.Option, *>?)
-      : BucketAccessControl {
+  override fun patchAcl(acl: BucketAccessControl?, options: Map<StorageRpc.Option, *>?): BucketAccessControl {
     throw UnsupportedOperationException()
   }
 
@@ -96,8 +94,7 @@ abstract class BaseCustomStorageRpc : StorageRpc {
     throw UnsupportedOperationException()
   }
 
-  override fun continueRewrite(previousResponse: StorageRpc.RewriteResponse)
-      : StorageRpc.RewriteResponse {
+  override fun continueRewrite(previousResponse: StorageRpc.RewriteResponse): StorageRpc.RewriteResponse {
     throw UnsupportedOperationException()
   }
 
@@ -129,28 +126,33 @@ abstract class BaseCustomStorageRpc : StorageRpc {
   }
 
   override fun deleteAcl(
-    bucket: String?, entity: String?,
+    bucket: String?,
+    entity: String?,
     options: Map<StorageRpc.Option, *>?
   ): Boolean {
     throw UnsupportedOperationException()
   }
 
   override fun deleteAcl(
-    bucket: String?, `object`: String?, generation: Long?,
+    bucket: String?,
+    `object`: String?,
+    generation: Long?,
     entity: String?
   ): Boolean {
     throw UnsupportedOperationException()
   }
 
   override fun compose(
-    sources: Iterable<StorageObject>?, target: StorageObject?,
+    sources: Iterable<StorageObject>?,
+    target: StorageObject?,
     targetOptions: Map<StorageRpc.Option, *>?
   ): StorageObject {
     throw UnsupportedOperationException()
   }
 
   override fun setIamPolicy(
-    bucket: String?, policy: Policy?,
+    bucket: String?,
+    policy: Policy?,
     options: Map<StorageRpc.Option, *>?
   ): Policy {
     throw UnsupportedOperationException()

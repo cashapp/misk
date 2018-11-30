@@ -7,7 +7,6 @@ import misk.web.DashboardTab
 import misk.web.Get
 import misk.web.RequestContentType
 import misk.web.ResponseContentType
-import misk.web.WebTab
 import misk.web.mediatype.MediaTypes
 import javax.inject.Inject
 import javax.inject.Qualifier
@@ -34,7 +33,7 @@ class AdminDashboardTabAction : WebAction {
   @Unauthenticated
   fun getAll(): Response {
     val caller = callerProvider.get()
-    val authorizedAdminDashboardTabs = adminDashboardTabs.filter { it.isAuthenticated(caller)}
+    val authorizedAdminDashboardTabs = adminDashboardTabs.filter { it.isAuthenticated(caller) }
     return Response(adminDashboardTabs = authorizedAdminDashboardTabs)
   }
 

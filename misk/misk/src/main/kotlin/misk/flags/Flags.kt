@@ -150,6 +150,4 @@ open class Flags internal constructor(val name: String, val context: Context) {
       }
     }
   }
-
 }
-

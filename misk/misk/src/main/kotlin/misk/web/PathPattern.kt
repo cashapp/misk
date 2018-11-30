@@ -9,12 +9,12 @@ import java.util.regex.Pattern
  * characters.
  */
 class PathPattern(
-    val pattern: String,
-    val regex: Pattern,
-    val variableNames: List<String>,
-    val numRegexVariables: Int,
-    val numSegments: Int,
-    val matchesWildcardPath: Boolean
+  val pattern: String,
+  val regex: Pattern,
+  val variableNames: List<String>,
+  val numRegexVariables: Int,
+  val numSegments: Int,
+  val matchesWildcardPath: Boolean
 ) : Comparable<PathPattern> {
 
   override fun hashCode(): Int = pattern.hashCode()

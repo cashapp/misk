@@ -3,7 +3,7 @@ package misk.metrics.digester
 import com.squareup.digester.protos.service.DigestData
 
 /** TDigest abstract common methods for t-digest implementations */
-interface TDigest<T : TDigest<T>>{
+interface TDigest<T : TDigest<T>> {
 
   /** Adds an observed value to the digest. */
   fun add(value: Double)

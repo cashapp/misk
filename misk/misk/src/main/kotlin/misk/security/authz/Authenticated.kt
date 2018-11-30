@@ -14,4 +14,3 @@ annotation class Authenticated(val services: Array<String> = [], val roles: Arra
 @Retention(AnnotationRetention.RUNTIME)
 @Target(AnnotationTarget.FUNCTION)
 annotation class Unauthenticated
-

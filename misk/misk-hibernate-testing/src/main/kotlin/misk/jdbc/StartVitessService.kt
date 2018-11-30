@@ -40,7 +40,7 @@ class VitessCluster(val config: DataSourceConfig, moshi: Moshi = Moshi.Builder()
 
   init {
     check(Files.isDirectory(schemaDir)) {
-      "can't find directory ${schemaDir}"
+      "can't find directory $schemaDir"
     }
   }
 
@@ -180,7 +180,7 @@ class DockerVitessCluster(
                     "currently have good error reporting on this. Please inspect the logs or your " +
                     "vschema to see if you can find the error.")
           } else {
-            throw e;
+            throw e
           }
         }
       }
@@ -287,7 +287,7 @@ class StartVitessService(val config: DataSourceConfig) : AbstractIdleService() {
       })
     }
 
-    fun runCommand(command : String): Int {
+    fun runCommand(command: String): Int {
       logger.info(command)
       val process = ProcessBuilder(*command.split(" ").toTypedArray())
           .redirectOutput(ProcessBuilder.Redirect.INHERIT)

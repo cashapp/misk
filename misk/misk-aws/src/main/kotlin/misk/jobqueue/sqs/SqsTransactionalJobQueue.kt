@@ -17,7 +17,7 @@ import javax.inject.Singleton
 @Singleton
 internal class SqsTransactionalJobQueue @Inject internal constructor(
   private val jobQueue: JobQueue
-): TransactionalJobQueue {
+) : TransactionalJobQueue {
   override fun enqueue(
     session: Session,
     queueName: QueueName,

@@ -65,5 +65,3 @@ internal class MDCScopeManager : ScopeManager {
   }
 }
 
-
-

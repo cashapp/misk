@@ -96,4 +96,3 @@ internal class AccessInterceptor private constructor(
         function.annotations.any { it.annotationClass == T::class }
   }
 }
-

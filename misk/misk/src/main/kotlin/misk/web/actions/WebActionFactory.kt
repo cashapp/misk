@@ -109,8 +109,8 @@ internal class WebActionFactory {
     var action = function.asAction()
 
     if (dispatchMechanism == DispatchMechanism.GRPC) {
-      require(action.responseContentType == null
-          && action.acceptedMediaRanges == listOf(MediaRange.ALL_MEDIA)) {
+      require(action.responseContentType == null &&
+          action.acceptedMediaRanges == listOf(MediaRange.ALL_MEDIA)) {
         "@Grpc cannot be used with @RequestContentType or @ResponseContentType on $function"
       }
       action = action.copy(

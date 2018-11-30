@@ -7,7 +7,6 @@ import com.google.api.services.cloudkms.v1.model.EncryptResponse
 import misk.cloud.gcp.testing.FakeHttpRouter
 import misk.cloud.gcp.testing.FakeHttpRouter.Companion.respondWithError
 import misk.cloud.gcp.testing.FakeHttpRouter.Companion.respondWithJson
-import okio.ByteString
 import okio.ByteString.Companion.encodeUtf8
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -30,7 +29,6 @@ internal class GcpKeyServiceTest {
       "$TARGET_RESOURCE_URL:decrypt" -> respondWithJson(DecryptResponse()
           .encodePlaintext("decrypted".toByteArray(Charsets.UTF_8)))
       else -> respondWithError(404)
-
     }
   }
   val kms = CloudKMS.Builder(transport, JacksonFactory(), null).build()

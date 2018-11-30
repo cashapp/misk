@@ -23,5 +23,4 @@ internal class ActionExceptionMapperTest {
     assertThat(mapper.loggingLevel(ResourceUnavailableException()))
         .isEqualTo(Level.INFO)
   }
-
 }

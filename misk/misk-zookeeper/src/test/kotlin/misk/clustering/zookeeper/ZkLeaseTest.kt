@@ -201,6 +201,5 @@ internal class ZkLeaseTest {
   companion object {
     private val self = Cluster.Member(name = FakeCluster.SELF_NAME, ipAddress = FakeCluster.SELF_IP)
     private const val LEASE_NAME = "my_lease"
-
   }
 }

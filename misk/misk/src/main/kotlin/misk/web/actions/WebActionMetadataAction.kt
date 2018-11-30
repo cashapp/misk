@@ -58,7 +58,7 @@ internal fun WebActionMetadata(
   applicationInterceptors: List<ApplicationInterceptor>,
   networkInterceptors: List<NetworkInterceptor>,
   dispatchMechanism: DispatchMechanism
-) : WebActionMetadata {
+): WebActionMetadata {
   return WebActionMetadata(
       name = name,
       function = function.toString(),

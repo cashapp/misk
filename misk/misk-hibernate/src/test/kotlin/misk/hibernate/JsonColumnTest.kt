@@ -74,7 +74,6 @@ class JsonColumnTest {
     }
   }
 
-
   @Qualifier
   @Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION)
   annotation class WillFerrellDb
@@ -99,7 +98,7 @@ class JsonColumnTest {
     @JsonColumn
     var setting: Setting?
 
-    constructor(name: String, cameos: List<String>, setting: Setting? = null)  {
+    constructor(name: String, cameos: List<String>, setting: Setting? = null) {
       this.name = name
       this.cameos = cameos
       this.setting = setting

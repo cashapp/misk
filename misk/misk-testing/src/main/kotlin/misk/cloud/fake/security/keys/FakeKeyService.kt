@@ -29,6 +29,6 @@ class FakeKeyService : KeyService {
       32 -> keyText
       else -> keyText.take(32)
     }
-    return SecretKeySpec(keyInput.toByteArray(Charsets.US_ASCII), "AES");
+    return SecretKeySpec(keyInput.toByteArray(Charsets.US_ASCII), "AES")
   }
 }

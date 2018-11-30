@@ -80,7 +80,7 @@ open class ExtendedQueryExectionListener : QueryExecutionListener, MethodExecuti
       executionContext.method.name == "commit"
 
   final override fun beforeQuery(execInfo: ExecutionInfo?, queryInfoList: List<QueryInfo>?) {
-    if (queryInfoList == null) return;
+    if (queryInfoList == null) return
 
     for (info in queryInfoList) {
       val query = info.query.toLowerCase()
@@ -97,7 +97,7 @@ open class ExtendedQueryExectionListener : QueryExecutionListener, MethodExecuti
   }
 
   final override fun afterQuery(execInfo: ExecutionInfo?, queryInfoList: List<QueryInfo>?) {
-    if (queryInfoList == null) return;
+    if (queryInfoList == null) return
 
     for (info in queryInfoList) {
       val query = info.query.toLowerCase(Locale.ROOT)
@@ -286,8 +286,8 @@ class VitessScaleSafetyChecks(
    * this doesn't need to be closed explicitly.
    */
   private fun connect(): Connection {
-    var connection = connection;
-    if (connection != null) return connection;
+    var connection = connection
+    if (connection != null) return connection
 
     val cluster = startVitessService.cluster()
     connection = cluster.openMysqlConnection()

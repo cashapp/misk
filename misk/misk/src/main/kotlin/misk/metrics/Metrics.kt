@@ -3,7 +3,6 @@ package misk.metrics
 import io.prometheus.client.CollectorRegistry
 import io.prometheus.client.Counter
 import io.prometheus.client.Gauge
-import io.prometheus.client.Summary
 import io.prometheus.client.hotspot.BufferPoolsExports
 import io.prometheus.client.hotspot.ClassLoadingExports
 import io.prometheus.client.hotspot.GarbageCollectorExports

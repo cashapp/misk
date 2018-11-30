@@ -15,5 +15,5 @@ import misk.MiskCaller
  * ```
  */
 interface MiskCallerAuthenticator {
-  fun getAuthenticatedCaller() : MiskCaller?
+  fun getAuthenticatedCaller(): MiskCaller?
 }

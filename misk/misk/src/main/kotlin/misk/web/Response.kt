@@ -49,8 +49,8 @@ fun Response<ResponseBody>.writeToJettyResponse(jettyResponse: HttpServletRespon
 
 private fun HttpServletResponse.bufferedSink() = outputStream.sink().buffer()
 
-fun okhttp3.Response.toMisk() : Response<ResponseBody> {
-  val miskBody = if (body() is okhttp3.ResponseBody) { object: ResponseBody {
+fun okhttp3.Response.toMisk(): Response<ResponseBody> {
+  val miskBody = if (body() is okhttp3.ResponseBody) { object : ResponseBody {
       override fun writeTo(sink: BufferedSink) {
         body()!!.use {
           sink.writeAll(it.source())

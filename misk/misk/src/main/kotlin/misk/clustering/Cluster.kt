@@ -46,4 +46,3 @@ interface Cluster {
   fun newResourceMapper(readyMembers: Set<Cluster.Member>): ClusterResourceMapper =
       ClusterHashRing(readyMembers)
 }
-

@@ -47,4 +47,3 @@ open class BadRequestException(message: String = "", cause: Throwable? = null) :
 inline fun requireRequest(check: Boolean, lazyMessage: () -> String) {
   if (!check) throw BadRequestException(lazyMessage())
 }
-

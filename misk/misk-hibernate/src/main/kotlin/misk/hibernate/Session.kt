@@ -34,7 +34,6 @@ interface Session {
 inline fun <reified T : DbEntity<T>> Session.load(id: Id<T>): T = load(id, T::class)
 inline fun <R : DbRoot<R>, reified S : DbSharded<R, S>> Session.loadSharded(gid: Gid<R, S>): S = loadSharded(gid, S::class)
 
-
 fun checkValidShardIdentifier(identifier: String) {
   check(!identifier.isBlank())
   check(!identifier.contains(' '))

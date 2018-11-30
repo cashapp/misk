@@ -47,5 +47,4 @@ internal class RequestMatchTest {
         false,
         MediaType.parse(responseType)!!
     )
-
 }

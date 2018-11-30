@@ -35,7 +35,6 @@ class ChildEntityTest {
     }
   }
 
-
   @Test
   fun exceptionWhenLoadingChildEntityById() {
     val movieId = transacter.transaction { session ->

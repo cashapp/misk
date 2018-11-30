@@ -48,7 +48,7 @@ fun KeyStore.getPrivateKey(alias: String, passphrase: CharArray): PrivateKey {
   } catch (e: NoSuchAlgorithmException) {
     throw IllegalStateException("Algorithm for reading key not available", e)
   } catch (e: UnrecoverableKeyException) {
-    throw IllegalArgumentException("Invalid password for reading key $alias", e);
+    throw IllegalArgumentException("Invalid password for reading key $alias", e)
   }
 }
 
