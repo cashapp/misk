@@ -35,7 +35,8 @@ abstract class WrappingListeningExecutorService : ForwardingListeningExecutorSer
 
   @Throws(InterruptedException::class)
   override fun <T> invokeAll(
-    callables: Collection<Callable<T>>, timeout: Long,
+    callables: Collection<Callable<T>>,
+    timeout: Long,
     timeUnit: TimeUnit
   ): List<Future<T>> {
     return delegate().invokeAll(callables.map { wrap(it) }, timeout, timeUnit)
@@ -48,7 +49,8 @@ abstract class WrappingListeningExecutorService : ForwardingListeningExecutorSer
 
   @Throws(InterruptedException::class, ExecutionException::class, TimeoutException::class)
   override fun <T> invokeAny(
-    callables: Collection<Callable<T>>, timeout: Long,
+    callables: Collection<Callable<T>>,
+    timeout: Long,
     timeUnit: TimeUnit
   ): T {
     return delegate().invokeAny(callables.map { wrap(it) }, timeout, timeUnit)

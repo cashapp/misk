@@ -12,8 +12,8 @@ class WebTabResourceModule(
   val environment: Environment,
   val slug: String,
   val web_proxy_url: String,
-  val url_path_prefix: String = "/_tab/${slug}/",
-  val resourcePath: String = "classpath:/web/_tab/${slug}/"
+  val url_path_prefix: String = "/_tab/$slug/",
+  val resourcePath: String = "classpath:/web/_tab/$slug/"
 ) : KAbstractModule() {
   override fun configure() {
     // Environment Dependent WebProxyAction or StaticResourceAction bindings

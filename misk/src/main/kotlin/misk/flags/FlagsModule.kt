@@ -57,7 +57,6 @@ abstract class FlagsModule : KAbstractModule() {
     } ?: throw IllegalArgumentException(
         "$type has no single argument constructor taking a Flags.Context")
 
-
     if (actualQualifier == null) {
       bind(type.java)
           .toProvider(FlagsProvider(constructor, prefix))

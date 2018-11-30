@@ -47,7 +47,7 @@ class PingDatabaseService @Inject constructor(
           } else {
             e.printStackTrace()
           }
-          throw e;
+          throw e
         }
       }
     }

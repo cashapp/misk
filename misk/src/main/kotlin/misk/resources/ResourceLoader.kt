@@ -67,7 +67,7 @@ class ResourceLoader @Inject constructor(
   fun exists(address: String): Boolean {
     try {
       checkAddress(address)
-    } catch(e: IllegalArgumentException) {
+    } catch (e: IllegalArgumentException) {
       return false
     }
 
@@ -80,7 +80,7 @@ class ResourceLoader @Inject constructor(
   fun list(address: String): List<String> {
     try {
       checkAddress(address)
-    } catch(e: IllegalArgumentException) {
+    } catch (e: IllegalArgumentException) {
       return listOf()
     }
 

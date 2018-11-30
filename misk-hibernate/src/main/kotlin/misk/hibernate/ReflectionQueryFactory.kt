@@ -411,8 +411,8 @@ internal class ReflectionQuery<T : DbEntity<T>>(
         result: MutableMap<Method, QueryMethodHandler>,
         select: Select
       ) {
-        if (function.parameters.size != 2
-            || function.parameters[1].type.classifier != Session::class) {
+        if (function.parameters.size != 2 ||
+            function.parameters[1].type.classifier != Session::class) {
           errors.add("${function.name}() must accept a single Session parameter")
           return
         }
@@ -505,8 +505,8 @@ internal class ReflectionQuery<T : DbEntity<T>>(
    * Root: the table root, like 'm' in 'SELECT * FROM movies m ORDER BY m.release_date'
    * CriteriaBuilder: factory for asc, desc
    */
-  private fun buildOrderBys(root: Root<*>, criteriaBuilder: CriteriaBuilder): List<javax.persistence.criteria.Order>  {
-    return orderFactories.map { it(root, criteriaBuilder) };
+  private fun buildOrderBys(root: Root<*>, criteriaBuilder: CriteriaBuilder): List<javax.persistence.criteria.Order> {
+    return orderFactories.map { it(root, criteriaBuilder) }
   }
 }
 

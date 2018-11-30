@@ -100,5 +100,4 @@ class MetricsInterceptorTest {
       multibind<WebActionEntry>().toInstance(WebActionEntry<TestAction>())
     }
   }
-
 }

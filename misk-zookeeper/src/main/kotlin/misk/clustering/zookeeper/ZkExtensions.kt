@@ -10,8 +10,7 @@ val String.asZkNamespace: String get() = if (startsWith("/")) substring(1) else 
 val String.asZkPath: String get() = if (startsWith("/")) this else "/$this"
 
 /** @return true if the client is running */
-val CuratorFramework.isRunning: Boolean get() = state == CuratorFrameworkState.STARTED;
+val CuratorFramework.isRunning: Boolean get() = state == CuratorFrameworkState.STARTED
 
 /** @return true if the client is connected to zk */
 val CuratorFramework.isConnected: Boolean get() = zookeeperClient?.isConnected ?: false
-

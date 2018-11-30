@@ -29,7 +29,6 @@ internal class JsonColumnType<T> : UserType, ParameterizedType, TypeConfiguratio
     jsonAdapter = moshi.adapter<T>(properties.getField("jsonColumnField")!!.genericType)
   }
 
-
   override fun hashCode(x: Any) = x.hashCode()
 
   override fun deepCopy(value: Any?) = value
@@ -52,7 +51,7 @@ internal class JsonColumnType<T> : UserType, ParameterizedType, TypeConfiguratio
     index: Int,
     session: SharedSessionContractImplementor?
   ) {
-    if (value == null ) {
+    if (value == null) {
       st.setNull(index, Types.CHAR)
     } else {
       st.setString(index, jsonAdapter.toJson(value as T))
@@ -72,5 +71,4 @@ internal class JsonColumnType<T> : UserType, ParameterizedType, TypeConfiguratio
   override fun isMutable() = false
 
   override fun sqlTypes() = intArrayOf(Types.VARCHAR)
-
 }

@@ -7,4 +7,3 @@ typealias FakeHttpResponse = MockLowLevelHttpResponse
 
 fun FakeHttpResponse.setJsonContent(item: Any): FakeHttpResponse =
     setContent(JacksonFactory.getDefaultInstance().toByteArray(item))
-

@@ -88,7 +88,6 @@ internal class DockerSqs {
     }
   }
 
-
   companion object {
     private val log = getLogger<DockerSqs>()
     private val docker: DockerClient = DockerClientBuilder.getInstance()

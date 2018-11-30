@@ -41,7 +41,7 @@ class StaticResourceAction @Inject constructor(
   @Post("/{path:.*}")
   @RequestContentType(MediaTypes.ALL)
   @ResponseContentType(MediaTypes.ALL)
-  @Unauthenticated  // TODO(adrw) https://github.com/square/misk/issues/429
+  @Unauthenticated // TODO(adrw) https://github.com/square/misk/issues/429
   fun action(): Response<ResponseBody> {
     val request = clientRequest.get()
     return getResponse(request)

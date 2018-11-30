@@ -183,7 +183,6 @@ internal class SqsJobQueueTest {
       it.acknowledge()
     }
 
-
     // Close the subscription and wait for any currently outstanding long-polls to complete
     subscription.close()
     Thread.sleep(1001)

@@ -48,7 +48,7 @@ abstract class KAbstractModule : AbstractModule() {
     annotation: KClass<out Annotation>? = null
   ): LinkedBindingBuilder<T> = newMultibinder<T>(annotation).addBinding()
 
-  protected inline fun <reified T : Any, reified A: Annotation> multibind():
+  protected inline fun <reified T : Any, reified A : Annotation> multibind():
       LinkedBindingBuilder<T> = newMultibinder<T>(A::class).addBinding()
 
   protected inline fun <reified T : Any> newMultibinder(
@@ -110,5 +110,5 @@ abstract class KAbstractModule : AbstractModule() {
   private fun <K, V> mapOfType(keyType: Type, valueType: Type): TypeLiteral<Map<K, V>> =
     Types.mapOf(keyType, valueType).typeLiteral() as TypeLiteral<Map<K, V>>
 
-  private fun <T : Any> TypeLiteral<T>.subtype() : Type = Types.subtypeOf(type)
+  private fun <T : Any> TypeLiteral<T>.subtype(): Type = Types.subtypeOf(type)
 }

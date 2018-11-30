@@ -47,7 +47,6 @@ class InMemoryFlagStore : FlagStore {
     return flags
         .filterValues { it is A }
         .mapValues { (_, flag) -> flag as A }
-
   }
 
   override fun awaitRegistrationsComplete(timeout: Long, unit: TimeUnit) {}

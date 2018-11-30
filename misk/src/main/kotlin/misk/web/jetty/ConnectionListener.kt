@@ -1,6 +1,5 @@
 package misk.web.jetty
 
-import misk.logging.getLogger
 import org.eclipse.jetty.io.Connection
 import org.eclipse.jetty.util.component.AbstractLifeCycle
 import java.util.Collections

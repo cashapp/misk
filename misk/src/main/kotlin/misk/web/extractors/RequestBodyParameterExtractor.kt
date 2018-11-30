@@ -4,7 +4,6 @@ import misk.web.PathPattern
 import misk.web.Request
 import misk.web.RequestBody
 import misk.web.actions.WebAction
-import misk.web.actions.WebSocket
 import misk.web.marshal.GenericUnmarshallers
 import misk.web.marshal.Unmarshaller
 import okhttp3.MediaType

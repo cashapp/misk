@@ -37,7 +37,6 @@ interface Marshaller<in T> {
         }
         else -> typeLiteral.type
       }
-
     }
   }
 }

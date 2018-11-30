@@ -7,7 +7,6 @@ import com.squareup.protos.test.parsing.Warehouse
 import misk.MiskServiceModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
-import okio.ByteString
 import okio.ByteString.Companion.encodeUtf8
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.isEqualToAsJson
@@ -204,7 +203,6 @@ internal class WireMessageAdapterTest {
         |}
         |""".trimMargin())
     assertThat(warehouseAdapter.fromJson(json)).isEqualTo(warehouse)
-
   }
 
   @Test

@@ -18,4 +18,3 @@ class FakeHttpRouter(val router: (FakeHttpRequest) -> FakeHttpResponse) : HttpTr
 
   override fun buildRequest(method: String, url: String) = FakeHttpRequest(method, url, router)
 }
-

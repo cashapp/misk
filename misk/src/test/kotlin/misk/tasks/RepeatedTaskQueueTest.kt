@@ -139,7 +139,6 @@ internal class RepeatedTaskQueueTest {
 
     val task = waitForNextPendingTask()
     assertThat(task.executionTime).isEqualTo(clock.instant().plusMillis(25000))
-
   }
 
   @Test fun honorsFailureBackoffOnException() {

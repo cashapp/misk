@@ -90,7 +90,6 @@ internal class KubernetesClusterWatcher @Inject internal constructor(
           }
 
           response.applyTo(cluster)
-
         }
       } catch (ex: Exception) {
         // This can occur if we have temporary connectivity glitches to the API server
@@ -135,4 +134,3 @@ internal fun Watch.Response<V1Pod>.applyTo(cluster: DefaultCluster) {
     CHANGE_TYPE_DELETED -> cluster.clusterChanged(membersBecomingNotReady = memberSet)
   }
 }
-

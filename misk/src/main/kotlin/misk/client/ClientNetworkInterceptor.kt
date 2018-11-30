@@ -7,7 +7,7 @@ import okhttp3.Response
  * outgoing HTTP request and observe the returned HTTP response
  */
 interface ClientNetworkInterceptor {
-  fun intercept(chain: ClientNetworkChain) : Response
+  fun intercept(chain: ClientNetworkChain): Response
 
   /**
    * This interface is used with Guice multibindings. Register instances by calling `multibind()`
@@ -18,6 +18,6 @@ interface ClientNetworkInterceptor {
    * ```
    */
   interface Factory {
-    fun create(action: ClientAction) : ClientNetworkInterceptor?
+    fun create(action: ClientAction): ClientNetworkInterceptor?
   }
 }

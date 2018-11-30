@@ -27,4 +27,3 @@ internal class DefaultActionsWorkWithAccessControlModuleTest {
     override fun getAuthenticatedCaller(): MiskCaller? = null
   }
 }
-

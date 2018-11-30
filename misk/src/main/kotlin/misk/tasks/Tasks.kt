@@ -17,4 +17,3 @@ enum class Status {
 }
 
 data class Result(val status: Status, val nextDelay: Duration)
-

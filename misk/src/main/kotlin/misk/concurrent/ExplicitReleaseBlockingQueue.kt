@@ -1,9 +1,7 @@
 package misk.concurrent
 
 import java.util.concurrent.BlockingQueue
-import java.util.concurrent.Delayed
 import java.util.concurrent.LinkedBlockingQueue
-import java.util.concurrent.PriorityBlockingQueue
 import java.util.concurrent.TimeUnit
 
 /**
@@ -26,7 +24,7 @@ class ExplicitReleaseBlockingQueue<T> internal constructor(
    *
    * @return the number of items actually releases
    */
-  fun release(n: Int) : Int {
+  fun release(n: Int): Int {
     var numReleased = 0
     for (i in (0 until n)) {
       val e = pending.poll() ?: return numReleased
@@ -38,7 +36,7 @@ class ExplicitReleaseBlockingQueue<T> internal constructor(
   }
 
   /** releases all items from the pending queue, returning the number of items released */
-  fun releaseAll() : Int {
+  fun releaseAll(): Int {
     var numReleased = 0
     while (true) {
       val e = pending.poll() ?: return numReleased

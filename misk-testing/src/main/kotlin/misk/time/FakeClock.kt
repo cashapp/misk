@@ -9,7 +9,8 @@ import java.util.concurrent.atomic.AtomicLong
 
 class FakeClock(
   epochMillis: Long = Instant.parse("2018-01-01T00:00:00Z").toEpochMilli(),
-  private val zone: ZoneId = ZoneId.of("UTC")) : Clock() {
+  private val zone: ZoneId = ZoneId.of("UTC")
+) : Clock() {
 
   private val millis: AtomicLong = AtomicLong(epochMillis)
 

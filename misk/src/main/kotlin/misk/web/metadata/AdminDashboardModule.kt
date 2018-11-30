@@ -11,10 +11,6 @@ import misk.web.actions.ServiceMetadataAction
 import misk.web.actions.WebActionEntry
 import misk.web.actions.WebActionMetadataAction
 import misk.web.interceptors.WideOpenDevelopmentInterceptorFactory
-import misk.web.proxy.WebProxyAction
-import misk.web.proxy.WebProxyEntry
-import misk.web.resources.StaticResourceAction
-import misk.web.resources.StaticResourceEntry
 
 /**
  * Installs default Admin Dashboard that runs at passed in url_path_prefix

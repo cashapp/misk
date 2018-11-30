@@ -64,9 +64,9 @@ internal class ClientMetricsInterceptorTest {
 
   @Test
   fun responseCodes() {
-    requestDuration.record(1.0,"pinger.ping", "all")
+    requestDuration.record(1.0, "pinger.ping", "all")
     assertThat(requestDuration.count("pinger.ping", "all")).isEqualTo(7)
-    requestDuration.record(1.0,"pinger.ping", "202")
+    requestDuration.record(1.0, "pinger.ping", "202")
     assertThat(requestDuration.count("pinger.ping", "202")).isEqualTo(2)
     requestDuration.record(1.0, "pinger.ping", "4xx")
     assertThat(requestDuration.count("pinger.ping", "4xx")).isEqualTo(3)

@@ -33,5 +33,4 @@ class StatusAction @Inject internal constructor(
     val serviceStatus: Map<String, Service.State>,
     val healthCheckStatus: Map<String, HealthStatus>
   )
-
 }
