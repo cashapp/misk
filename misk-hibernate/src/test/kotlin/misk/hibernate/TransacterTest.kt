@@ -372,7 +372,6 @@ class TransacterTest {
 
     // ...but the transaction itself should have completed
     assertThat(transacter.transaction { it.load(swid) }.name).isEqualTo("Star Wars")
-
   }
 
   fun tracingAssertions() {

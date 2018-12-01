@@ -99,5 +99,4 @@ internal class MiskServiceModuleTest {
     }.message).contains("the following services are not marked as @Singleton: " +
         "misk.MiskServiceModuleTest\$NonSingletonService1, misk.MiskServiceModuleTest\$NonSingletonService2")
   }
-
 }

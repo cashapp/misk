@@ -37,7 +37,7 @@ internal class ClusterHashRingTest {
     val hashRing3 = ClusterHashRing(
         members = setOf(zork, quark, bork),
         hashFn = Hashing.murmur3_32(0))
-    assertThat(listOf("foo", "bar", "zed", "abadidea").map {hashRing3[it]})
+    assertThat(listOf("foo", "bar", "zed", "abadidea").map { hashRing3[it] })
         .containsExactly(zork, quark, zork, zork)
   }
 }

@@ -2,7 +2,6 @@ package misk.clustering.zookeeper
 
 import com.google.common.util.concurrent.AbstractIdleService
 import com.google.common.util.concurrent.Service
-import com.google.common.util.concurrent.ServiceManager
 import com.google.inject.Key
 import misk.DependentService
 import misk.clustering.fake.FakeClusterModule
@@ -13,11 +12,6 @@ import misk.inject.asSingleton
 import misk.inject.keyOf
 import misk.logging.getLogger
 import org.apache.curator.framework.CuratorFramework
-import org.junit.jupiter.api.extension.AfterEachCallback
-import org.junit.jupiter.api.extension.BeforeEachCallback
-import org.junit.jupiter.api.extension.ExtensionContext
-import java.util.concurrent.TimeUnit
-import javax.inject.Inject
 import javax.inject.Singleton
 
 internal class ZkTestModule : KAbstractModule() {

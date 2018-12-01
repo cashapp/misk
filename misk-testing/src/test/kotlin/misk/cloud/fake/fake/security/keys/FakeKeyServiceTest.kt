@@ -1,6 +1,5 @@
 package misk.cloud.fake.security.keys
 
-import okio.ByteString
 import okio.ByteString.Companion.encodeUtf8
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -28,6 +27,5 @@ class FakeKeyServiceTest {
 
     val recoveredPlainText = keyManager.decrypt(keyAlias, cipherText)
     assertThat(recoveredPlainText).isEqualTo(plainText)
-
   }
 }

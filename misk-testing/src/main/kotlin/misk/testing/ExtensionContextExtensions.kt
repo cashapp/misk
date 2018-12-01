@@ -13,4 +13,3 @@ inline fun <reified T> ExtensionContext.retrieve(name: String): T {
   val namespace = ExtensionContext.Namespace.create(requiredTestClass)
   return getStore(namespace)[name, T::class.java]
 }
-

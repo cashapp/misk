@@ -2,7 +2,6 @@ package misk.environment
 
 import misk.logging.getLogger
 
-
 /** The environment in which the application is running */
 enum class Environment {
   TESTING,

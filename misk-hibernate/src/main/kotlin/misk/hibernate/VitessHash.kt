@@ -47,7 +47,6 @@ internal object VitessHash {
     } catch (e: GeneralSecurityException) {
       throw AssertionError("Should be fine", e)
     }
-
   }
 
   /*
@@ -74,6 +73,5 @@ func vunhash(k []byte) (uint64, error) {
     } catch (e: GeneralSecurityException) {
       throw AssertionError("Should be fine", e)
     }
-
   }
 }

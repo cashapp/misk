@@ -80,5 +80,4 @@ internal class ActionScopePropagationTest {
     val result = executor.submit(Callable { function() }).get()
     assertThat(result).isEqualTo("my seed data and bar and foo!")
   }
-
 }

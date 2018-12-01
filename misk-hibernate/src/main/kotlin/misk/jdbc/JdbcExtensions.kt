@@ -11,4 +11,3 @@ fun <T> ResultSet.map(function: (ResultSet) -> T): List<T> {
 }
 
 fun <T> ResultSet.uniqueResult(function: (ResultSet) -> T): T? = map(function).firstOrNull()
-

@@ -39,8 +39,7 @@ inline fun <reified T : Any> subtypeOf(): WildcardType {
   return Types.subtypeOf(T::class.java)
 }
 
-inline fun <reified T : Any> parameterizedType(vararg typeParameters: Type)
-    : ParameterizedType {
+inline fun <reified T : Any> parameterizedType(vararg typeParameters: Type): ParameterizedType {
   return Types.newParameterizedType(T::class.java, *typeParameters)
 }
 
@@ -56,7 +55,7 @@ fun <T> listOfType(elementType: TypeLiteral<T>): TypeLiteral<List<T>> = TypeLite
 
 fun <T : Any> listOfType(elementType: KClass<T>) = listOfType(elementType.typeLiteral())
 
-inline fun <reified T: Any> listOfType() = listOfType(T::class)
+inline fun <reified T : Any> listOfType() = listOfType(T::class)
 
 @Suppress("UNCHECKED_CAST") // The type system isn't aware of constructed types.
 fun <T> setOfType(elementType: TypeLiteral<T>): TypeLiteral<Set<T>> = TypeLiteral.get(

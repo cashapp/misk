@@ -32,4 +32,3 @@ fun enableStackDriverLogging(config: StackDriverLoggingConfig) {
 
   rootLogger.addAppender(appender)
 }
-

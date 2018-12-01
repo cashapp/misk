@@ -59,7 +59,7 @@ class TypedHttpClientModule<T : Any>(
     @Inject
     private lateinit var moshi: Moshi
 
-    @Inject(optional=true)
+    @Inject(optional = true)
     private val tracer: Tracer? = null
 
     @Inject

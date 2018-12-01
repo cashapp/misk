@@ -136,7 +136,7 @@ internal class JettyServiceMetricsTest {
   internal class TestModule : KAbstractModule() {
     override fun configure() {
       install(Modules.override(WebTestingModule()).with(
-          object: KAbstractModule() {
+          object : KAbstractModule() {
             override fun configure() {
               bind<QueuedThreadPool>().toInstance(QueuedThreadPool(
                   10, 10 // Fixed # of threads

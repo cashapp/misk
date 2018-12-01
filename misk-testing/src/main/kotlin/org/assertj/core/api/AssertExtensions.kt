@@ -1,7 +1,6 @@
 package org.assertj.core.api
 
 import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.data.MapEntry
 
 inline fun <reified KEY, VALUE> MapAssert<KEY, VALUE>.containsExactly(
   vararg p: Pair<KEY, VALUE>
@@ -44,4 +43,3 @@ fun <A : Comparable<A>> assertOrdering(vararg values: A) {
     }
   }
 }
-

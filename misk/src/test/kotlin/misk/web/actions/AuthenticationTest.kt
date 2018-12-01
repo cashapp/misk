@@ -136,4 +136,3 @@ class AuthenticationTest {
   @Target(AnnotationTarget.FUNCTION)
   annotation class CustomRoleAccess
 }
-

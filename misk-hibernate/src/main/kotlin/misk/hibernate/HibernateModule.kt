@@ -99,7 +99,7 @@ class HibernateModule(
     }).asSingleton()
 
     bind(transacterKey).toProvider(object : Provider<Transacter> {
-      @com.google.inject.Inject(optional=true) val tracer: Tracer? = null
+      @com.google.inject.Inject(optional = true) val tracer: Tracer? = null
       override fun get(): RealTransacter = RealTransacter(
           qualifier, sessionFactoryProvider, config, tracer)
     }).asSingleton()

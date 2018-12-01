@@ -148,8 +148,7 @@ internal class SessionFactoryService(
         value.typeParameters = Properties()
       }
       value.typeParameters.setField("jsonColumnField", field)
-    }
-    else if (field.isAnnotationPresent(ProtoColumn::class.java)) {
+    } else if (field.isAnnotationPresent(ProtoColumn::class.java)) {
       value.typeName = ProtoColumnType::class.java.name
 
       if (value.typeParameters == null) {

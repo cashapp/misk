@@ -23,6 +23,4 @@ interface ExceptionMapper<in T : Throwable> {
    * be overridden by the mapper for the given exception
    */
   fun loggingLevel(th: T): Level = Level.ERROR
-
 }
-

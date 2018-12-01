@@ -89,6 +89,5 @@ class ProtoMessageHttpClientTest {
               "dinosaur" to HttpClientEndpointConfig(jetty.httpServerUrl.toString())
           ))
     }
-
   }
 }

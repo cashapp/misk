@@ -15,8 +15,8 @@ fun WebAction.asNetworkChain(
   function: KFunction<*>,
   request: Request,
   vararg _networkInterceptors: NetworkInterceptor
-): NetworkChain
-    = RealNetworkChain(this, request, _networkInterceptors.toList(), function, 0)
+): NetworkChain =
+    RealNetworkChain(this, request, _networkInterceptors.toList(), function, 0)
 
 fun WebAction.asChain(
   function: KFunction<*>,

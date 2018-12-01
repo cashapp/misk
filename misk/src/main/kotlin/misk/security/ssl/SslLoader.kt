@@ -13,7 +13,7 @@ import javax.inject.Inject
 /** Loads keys and certificates from the file system. */
 class SslLoader @Inject internal constructor(
   val resourceLoader: ResourceLoader
-){
+) {
   fun loadTrustStore(
     path: String,
     format: String = FORMAT_PEM,

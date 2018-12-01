@@ -21,5 +21,4 @@ class GcpKeyManagementModule : KAbstractModule() {
       CloudKMS.Builder(newTrustedTransport(), JacksonFactory(), null)
           .setApplicationName(appName)
           .build()
-
 }

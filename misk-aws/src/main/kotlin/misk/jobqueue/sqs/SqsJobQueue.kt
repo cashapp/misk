@@ -59,5 +59,4 @@ internal class SqsJobQueue @Inject internal constructor(
   companion object {
     private val log = getLogger<SqsJobQueue>()
   }
-
 }

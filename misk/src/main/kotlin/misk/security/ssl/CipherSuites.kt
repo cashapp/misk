@@ -30,5 +30,4 @@ object CipherSuites {
       availableCipherSuites.contains(it)
     }.toTypedArray()
   }()
-
 }

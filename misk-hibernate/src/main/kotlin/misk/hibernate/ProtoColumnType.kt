@@ -11,9 +11,8 @@ import java.sql.ResultSet
 import java.sql.Types
 import java.util.Properties
 
-internal class ProtoColumnType<T: Message<T,*>> : UserType, ParameterizedType {
+internal class ProtoColumnType<T : Message<T, *>> : UserType, ParameterizedType {
   private lateinit var protoAdapter: ProtoAdapter<T>
-
 
   @Suppress("UNCHECKED_CAST")
   override fun setParameterValues(properties: Properties) {
@@ -43,7 +42,7 @@ internal class ProtoColumnType<T: Message<T,*>> : UserType, ParameterizedType {
     index: Int,
     session: SharedSessionContractImplementor?
   ) {
-    if (value == null ) {
+    if (value == null) {
       st.setNull(index, Types.BLOB)
     } else {
       st.setBytes(index, protoAdapter.encode(value as T))
@@ -63,5 +62,4 @@ internal class ProtoColumnType<T: Message<T,*>> : UserType, ParameterizedType {
   override fun isMutable() = false
 
   override fun sqlTypes() = intArrayOf(Types.VARCHAR)
-
 }

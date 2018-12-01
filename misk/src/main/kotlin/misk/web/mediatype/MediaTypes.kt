@@ -35,7 +35,7 @@ object MediaTypes {
   const val APPLICATION_GRPC = "application/grpc"
   val APPLICATION_GRPC_MEDIA_TYPE = APPLICATION_GRPC.asMediaType()
 
-  fun fromFileExtension(ext: String) : MediaType {
+  fun fromFileExtension(ext: String): MediaType {
     return when (ext) {
       "css" -> TEXT_CSS_MEDIA_TYPE
       "html", "htm" -> TEXT_HTML_MEDIA_TYPE

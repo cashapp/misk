@@ -7,10 +7,6 @@ import com.google.inject.name.Names
 import helpers.protos.Dinosaur
 import misk.MiskServiceModule
 import misk.inject.KAbstractModule
-import misk.security.ssl.CertStoreConfig
-import misk.security.ssl.SslContextFactory
-import misk.security.ssl.SslLoader
-import misk.security.ssl.TrustStoreConfig
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import okhttp3.Protocol
@@ -59,7 +55,7 @@ internal class HttpClientEnvoyTest {
         .isEqualTo(String.format("%s:%s", server.hostName, server.port))
   }
 
-  interface DinosaurService{
+  interface DinosaurService {
     @POST("/cooldinos") fun postDinosaur(@Body request: Dinosaur): Call<Void>
   }
 
