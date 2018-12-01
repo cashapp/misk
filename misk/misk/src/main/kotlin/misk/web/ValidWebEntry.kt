@@ -23,4 +23,3 @@ abstract class ValidWebEntry(val slug: String = "", val url_path_prefix: String 
     }
   }
 }
-

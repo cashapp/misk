@@ -6,7 +6,6 @@ import com.google.inject.Provider
 import misk.DependentService
 import misk.inject.KAbstractModule
 import misk.inject.asSingleton
-import javax.inject.Singleton
 import kotlin.reflect.KClass
 
 /**

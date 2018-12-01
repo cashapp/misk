@@ -8,5 +8,4 @@ package misk.hibernate
  * occurred during a post-commit hook
  *
  */
-class PostCommitHookFailedException(cause: Throwable) : Exception(cause) {
-}
+class PostCommitHookFailedException(cause: Throwable) : Exception(cause)

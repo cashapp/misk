@@ -99,7 +99,6 @@ class ProtoColumnTest {
         }
       })
     }
-
   }
 
   @Qualifier

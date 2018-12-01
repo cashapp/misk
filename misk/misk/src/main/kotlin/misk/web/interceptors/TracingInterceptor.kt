@@ -19,11 +19,11 @@ private val logger = getLogger<TracingInterceptor>()
 /**
  * Enables distributed tracing on all web actions, if a client has installed a tracer.
  */
-internal class TracingInterceptor internal constructor(private val tracer: Tracer):
+internal class TracingInterceptor internal constructor(private val tracer: Tracer) :
     NetworkInterceptor {
   @Singleton
   class Factory : NetworkInterceptor.Factory {
-    @Inject(optional=true) var tracer: Tracer? = null
+    @Inject(optional = true) var tracer: Tracer? = null
 
     // NOTE(nb): returning null ensures interceptor is filtered out when generating interceptors to
     // apply for a specific action. See WebActionModule for implementation details

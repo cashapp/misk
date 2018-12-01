@@ -18,7 +18,7 @@ import javax.inject.Inject
  * implementation details and possible vulnerabilities
  */
 internal class ActionExceptionMapper @Inject internal constructor(
-    val config: ActionExceptionLogLevelConfig
+  val config: ActionExceptionLogLevelConfig
 ) : ExceptionMapper<ActionException> {
   override fun toResponse(th: ActionException): Response<ResponseBody> {
     val message = if (th.statusCode.isClientError) th.message ?: th.statusCode.name
@@ -45,6 +45,6 @@ internal class ActionExceptionMapper @Inject internal constructor(
  * @property server_error_level the level used for 5xx error codes
  */
 data class ActionExceptionLogLevelConfig(
-    val client_error_level: Level = Level.WARN,
-    val server_error_level: Level = Level.ERROR
+  val client_error_level: Level = Level.WARN,
+  val server_error_level: Level = Level.ERROR
 ) : Config

@@ -11,7 +11,7 @@ package misk.clustering.lease
  */
 interface Lease {
   /** @property String the name of the resource being leased */
-  val name: String;
+  val name: String
 
   /**
    * @return true if the lease is owned by this process instance. This may involve remote calls,

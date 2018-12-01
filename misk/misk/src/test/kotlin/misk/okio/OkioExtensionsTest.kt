@@ -1,7 +1,6 @@
 package misk.okio
 
 import okio.Buffer
-import okio.ByteString
 import okio.ByteString.Companion.encodeUtf8
 import org.junit.Test
 import kotlin.test.assertEquals

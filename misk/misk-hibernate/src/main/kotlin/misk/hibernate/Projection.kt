@@ -1,8 +1,7 @@
 package misk.hibernate
 
 /** Marker interface for query projections. */
-interface Projection {
-}
+interface Projection
 
 /**
  * Annotates a parameter of a [Projection] data class to indicate which column (or path of columns)

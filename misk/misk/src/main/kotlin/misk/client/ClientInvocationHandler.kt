@@ -197,4 +197,3 @@ private val KFunction<*>.isRetrofitMethod: Boolean
           it is DELETE || it is HTTP
     }
   }
-

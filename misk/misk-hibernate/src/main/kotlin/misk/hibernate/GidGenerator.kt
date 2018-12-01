@@ -78,7 +78,8 @@ public class GidGenerator : AbstractPostInsertGenerator(), Configurable {
     private fun performIdentityGeneratingInsert(
       insertSQL: String,
       session: SharedSessionContractImplementor,
-      binder: Binder, entity: DbChild<Nothing, Nothing>
+      binder: Binder,
+      entity: DbChild<Nothing, Nothing>
     ): Serializable {
       val parentId = entity.rootId
 
@@ -100,7 +101,6 @@ public class GidGenerator : AbstractPostInsertGenerator(), Configurable {
             insertSQL
         )
       }
-
     }
 
     @Throws(SQLException::class)

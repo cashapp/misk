@@ -55,4 +55,3 @@ data class Event(
   inline fun <reified A : Message<*, *>> header(name: String) =
       header(name, ProtoAdapter.get(A::class.java))
 }
-

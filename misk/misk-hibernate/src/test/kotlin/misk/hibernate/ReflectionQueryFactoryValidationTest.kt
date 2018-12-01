@@ -218,6 +218,5 @@ class ReflectionQueryFactoryValidationTest {
     assertThat(query.toString()).isNotNull()
   }
 
-  interface EmptyQuery : Query<DbCharacter> {
-  }
+  interface EmptyQuery : Query<DbCharacter>
 }

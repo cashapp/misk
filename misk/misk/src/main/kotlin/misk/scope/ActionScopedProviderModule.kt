@@ -142,5 +142,4 @@ abstract class ActionScopedProviderModule : KAbstractModule() {
       }
     }
   }
-
 }

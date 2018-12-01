@@ -283,7 +283,7 @@ class MergingDigest(private val compression: Double) {
    */
   fun mergeFrom(other: MergingDigest) {
 
-    //end inclusive
+    // end inclusive
     var shuffledIndices = IntArray(other.mainCentroids.size) { it }.toMutableList()
     shuffledIndices.shuffle()
 

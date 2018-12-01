@@ -126,4 +126,3 @@ private fun ExtensionContext.modulesViaReflection(): Iterable<Module> {
         it.get(requiredTestInstance) as Module
       }
 }
-

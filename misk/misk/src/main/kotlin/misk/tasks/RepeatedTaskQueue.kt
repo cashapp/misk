@@ -145,7 +145,7 @@ class RepeatedTaskQueue @VisibleForTesting internal constructor(
       name: String,
       clock: Clock,
       backingStorage: ExplicitReleaseDelayQueue<DelayedTask>
-    ) : RepeatedTaskQueue {
+    ): RepeatedTaskQueue {
       val queue = RepeatedTaskQueue(
           name,
           clock,

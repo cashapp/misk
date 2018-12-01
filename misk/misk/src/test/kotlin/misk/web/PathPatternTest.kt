@@ -110,4 +110,3 @@ internal class PathPatternTest {
   }
 }
 
-

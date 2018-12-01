@@ -34,7 +34,6 @@ class FlagsTest {
           bindFlag<String>("my-other-string", "this is the other string flag")
           bindFlag<Int>("my-other-int", "this is the other int flag")
           bindJsonFlag<JsonData>("my-other-json", "this is the other json flag")
-
         }
       })
     }

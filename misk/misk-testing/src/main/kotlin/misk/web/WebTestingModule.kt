@@ -7,8 +7,6 @@ import misk.environment.EnvironmentModule
 import misk.inject.KAbstractModule
 import misk.security.ssl.CertStoreConfig
 import misk.security.ssl.SslLoader
-import misk.web.proxy.WebProxyEntry
-import misk.web.resources.StaticResourceEntry
 import javax.inject.Singleton
 
 /**

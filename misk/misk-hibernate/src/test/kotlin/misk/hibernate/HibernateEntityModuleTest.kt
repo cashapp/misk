@@ -9,12 +9,12 @@ import javax.inject.Qualifier
 internal class HibernateEntityModuleTest {
   @Test fun multipleDataSources() {
     val injector = Guice.createInjector(
-        object: HibernateEntityModule(Dinosaurs::class) {
+        object : HibernateEntityModule(Dinosaurs::class) {
           override fun configureHibernate() {
             addEntities(Triceratops::class, Stegosaurus::class)
           }
         },
-        object: HibernateEntityModule(Shapes::class) {
+        object : HibernateEntityModule(Shapes::class) {
           override fun configureHibernate() {
             addEntities(Square::class, Circle::class)
           }
@@ -28,22 +28,22 @@ internal class HibernateEntityModuleTest {
 
   @Test fun multipleModulesSameDataSource() {
     val injector = Guice.createInjector(
-        object: HibernateEntityModule(Dinosaurs::class) {
+        object : HibernateEntityModule(Dinosaurs::class) {
           override fun configureHibernate() {
             addEntities(Triceratops::class)
           }
         },
-        object: HibernateEntityModule(Dinosaurs::class) {
+        object : HibernateEntityModule(Dinosaurs::class) {
           override fun configureHibernate() {
             addEntities(Stegosaurus::class)
           }
         },
-        object: HibernateEntityModule(Shapes::class) {
+        object : HibernateEntityModule(Shapes::class) {
           override fun configureHibernate() {
             addEntities(Square::class)
           }
         },
-        object: HibernateEntityModule(Shapes::class) {
+        object : HibernateEntityModule(Shapes::class) {
           override fun configureHibernate() {
             addEntities(Circle::class)
           }
