@@ -69,17 +69,18 @@ internal class AccessInterceptor private constructor(
           requiredAnnotations += Authenticated::class
           requiredAnnotations += Unauthenticated::class
           requiredAnnotations += registeredEntries.map { it.annotation }
-          throw IllegalStateException("""AccessInterceptor A) can't find an AccessAnnotation for this WebAction or B) can't find the related AccessAnnotationEntry multibinding.
+          throw IllegalStateException("""You need to register an AccessAnnotationEntry to tell the authorization system which roles and services are allowed to access ${action.name}::${action.function.name}(). You can either:
           |
-          |A) ${action.name}::${action.function.name}() must be annotated with one of the following AccessAnnotations that have a matching AccessAnnotationEntry:
-          |   $requiredAnnotations
-          |
-          |B) Add an AccessAnnotationEntry multibinding in a module for one of the annotations on ${action.name}::${action.function.name}():
+          |A) Add an AccessAnnotationEntry multibinding in a module for one of the annotations on ${action.name}::${action.function.name}():
           |   ${action.function.annotations}
           |
           |   AccessAnnotationEntry Example Multibinding:
           |   multibind<AccessAnnotationEntry>().toInstance(
           |     AccessAnnotationEntry<${action.function.annotations.filter { it.annotationClass.simpleName.toString().endsWith("Access") }.firstOrNull()?.annotationClass?.simpleName ?: "{Access Annotation Class Simple Name}"}>(roles = ???, services = ???))
+          |
+          |B) Add an AccessAnnotation to ${action.name}::${action.function.name}() that already has a matching AccessAnnotationEntry such as:
+          |   $requiredAnnotations
+          |
           |
           """.trimMargin())
         }
