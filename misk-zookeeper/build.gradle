@@ -5,7 +5,6 @@ buildscript {
 }
 
 apply plugin: 'kotlin-jpa'
-apply plugin: "com.vanniktech.maven.publish"
 
 dependencies {
   compile dep.curatorFramework
@@ -16,8 +15,4 @@ dependencies {
   testCompile dep.junitApi
   testCompile dep.zookeeper
   testCompile project(':misk-testing')
-}
-
-if (rootProject.file("hooks.gradle").exists()) {
-  apply from: rootProject.file("hooks.gradle")
 }

@@ -4,7 +4,6 @@ buildscript {
   }
 }
 
-apply plugin: "com.vanniktech.maven.publish"
 apply plugin: 'com.google.protobuf'
 
 protobuf {
@@ -42,8 +41,4 @@ dependencies {
   compile dep.grpcStub
   compile project(':misk')
   compile project(':misk-testing')
-}
-
-if (rootProject.file("hooks.gradle").exists()) {
-  apply from: rootProject.file("hooks.gradle")
 }

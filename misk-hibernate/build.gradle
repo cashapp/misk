@@ -5,7 +5,6 @@ buildscript {
 }
 
 apply plugin: 'kotlin-jpa'
-apply plugin: "com.vanniktech.maven.publish"
 
 dependencies {
   compile dep.datasourceProxy
@@ -21,8 +20,4 @@ dependencies {
 
   testCompile project(':misk-testing')
   testCompile project(':misk-hibernate-testing')
-}
-
-if (rootProject.file("hooks.gradle").exists()) {
-  apply from: rootProject.file("hooks.gradle")
 }

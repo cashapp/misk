@@ -1,5 +1,3 @@
-apply plugin: "com.vanniktech.maven.publish"
-
 dependencies {
   compile dep.awsApi
   compile dep.awsSqs
@@ -13,8 +11,4 @@ dependencies {
   testCompile dep.junitParams
   testCompile dep.docker
   testCompile project(':misk-testing')
-}
-
-if (rootProject.file("hooks.gradle").exists()) {
-  apply from: rootProject.file("hooks.gradle")
 }

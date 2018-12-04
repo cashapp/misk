@@ -3,7 +3,6 @@ kotlin {
     coroutines 'enable'
   }
 }
-apply plugin: 'com.vanniktech.maven.publish'
 apply from: rootProject.file("gradle/localdb.gradle")
 apply from: "https://raw.githubusercontent.com/square/misk-web/master/gradle/web.gradle"
 
@@ -70,8 +69,4 @@ if (rootProject.file("repositories.gradle").exists()) {
   dependencies {
     compile dep.miskWeb
   }
-}
-
-if (rootProject.file("hooks.gradle").exists()) {
-  apply from: rootProject.file("hooks.gradle")
 }
