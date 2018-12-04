@@ -1,5 +1,3 @@
-apply plugin: "com.vanniktech.maven.publish"
-
 dependencies {
   compile dep.gcpCloudStorage
   compile(dep.gcpDatastore) {
@@ -15,8 +13,4 @@ dependencies {
 
   testCompile project(':misk-testing')
   testCompile project(':misk-gcp-testing')
-}
-
-if (rootProject.file("hooks.gradle").exists()) {
-  apply from: rootProject.file("hooks.gradle")
 }

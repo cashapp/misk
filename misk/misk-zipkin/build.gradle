@@ -1,5 +1,3 @@
-apply plugin: "com.vanniktech.maven.publish"
-
 dependencies {
   compile dep.tracingZipkin
   compile dep.zipkinReporter
@@ -11,8 +9,4 @@ dependencies {
   testCompile dep.junitEngine
   testCompile dep.junitParams
   testCompile project(':misk-testing')
-}
-
-if (rootProject.file("../upload.gradle").exists()) {
-  apply from: rootProject.file("../upload.gradle")
 }
