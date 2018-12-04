@@ -1,4 +1,3 @@
-apply plugin: 'kotlin'
 kotlin {
   experimental {
     coroutines 'enable'
@@ -8,22 +7,8 @@ apply plugin: 'com.vanniktech.maven.publish'
 apply from: rootProject.file("gradle/localdb.gradle")
 apply from: "https://raw.githubusercontent.com/square/misk-web/master/gradle/web.gradle"
 
-compileKotlin {
-  kotlinOptions {
-    jvmTarget = "1.8"
-    allWarningsAsErrors = true
-  }
-}
-compileTestKotlin {
-  kotlinOptions {
-    jvmTarget = "1.8"
-    allWarningsAsErrors = true
-  }
-}
 
 sourceSets {
-  main.java.srcDirs += 'src/main/kotlin/'
-  test.java.srcDirs += 'src/test/kotlin/'
   main.resources {
     srcDirs += [
       'web/tabs/config/lib',
