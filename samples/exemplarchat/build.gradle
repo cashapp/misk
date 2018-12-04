@@ -1,19 +1,5 @@
-apply plugin: 'kotlin'
 apply plugin: "com.vanniktech.maven.publish"
 apply plugin: 'com.github.johnrengelman.shadow'
-
-compileKotlin {
-  kotlinOptions {
-    jvmTarget = "1.8"
-    allWarningsAsErrors = true
-  }
-}
-compileTestKotlin {
-  kotlinOptions {
-    jvmTarget = "1.8"
-    allWarningsAsErrors = true
-  }
-}
 
 dependencies {
   compile dep.kotlinStdLib
@@ -26,11 +12,6 @@ dependencies {
   compile project(':misk-eventrouter')
 
   testCompile project(':misk-testing')
-}
-
-sourceSets {
-  main.java.srcDirs += 'src/main/kotlin/'
-  test.java.srcDirs += 'src/test/kotlin/'
 }
 
 jar {
