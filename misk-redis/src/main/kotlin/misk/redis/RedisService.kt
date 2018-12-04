@@ -12,13 +12,19 @@ import javax.inject.Singleton
 internal class RedisService @Inject internal constructor(
   private val redisProvider: Provider<Redis>
 ) : AbstractIdleService() {
+  // We initialize the client in startUp because creating the client will connect it to Redis
   private lateinit var redis: Redis
 
   override fun startUp() {
+    // Create the client and connect to the redis instance
     redis = redisProvider.get()
   }
 
   override fun shutDown() {
-    if (::redis.isInitialized) redis.close()
+    // If the redis client variable was initialized
+    if (::redis.isInitialized) {
+      // If the redis client was a real client, close the connection
+      (redis as? RealRedis)?.close()
+    }
   }
 }

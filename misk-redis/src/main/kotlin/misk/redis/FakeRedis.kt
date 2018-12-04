@@ -18,16 +18,15 @@ class FakeRedis : Redis {
   // Acts as the Redis key-value store
   private val keyValueStore = ConcurrentHashMap<String, Value>()
 
-  override fun del(key: String): Long {
-    if (!keyValueStore.containsKey(key)) return 0
+  override fun del(key: String): Boolean {
+    if (!keyValueStore.containsKey(key)) return false
 
-    keyValueStore.remove(key)
-    return 1
+    return keyValueStore.remove(key) != null
   }
 
-  override fun del(vararg keys: String): Long {
+  override fun del(vararg keys: String): Int {
     // Call delete on each key and count how many were successful
-    return keys.count { del(it) == 1L }.toLong()
+    return keys.count { del(it) }
   }
 
   override fun get(key: String): String? {
@@ -52,9 +51,5 @@ class FakeRedis : Redis {
   override fun setex(key: String, expiryDuration: Duration, value: String): String {
     keyValueStore[key] = Value(value = value, expiryInstant = clock.instant().plusSeconds(expiryDuration.seconds))
     return value
-  }
-
-  override fun close() {
-    // Nothing to close
   }
 }
