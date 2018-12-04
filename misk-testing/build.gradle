@@ -27,6 +27,7 @@ junitPlatform {
 }
 
 dependencies {
+  compile dep.docker
   compile dep.junitApi
   compile dep.junitParams
   compile dep.junitEngine
