@@ -10,7 +10,7 @@ interface Redis {
    * @param key the key to delete
    * @return 0 if the key was not deleted, 1 if the key was deleted
    */
-  fun del(key: String): Long
+  fun del(key: String): Boolean
 
   /**
    * Deletes multiple keys.
@@ -19,7 +19,7 @@ interface Redis {
    * @return 0 if none of the keys were deleted, otherwise a positive integer
    *         representing the number of keys that were deleted
    */
-  fun del(vararg keys: String): Long
+  fun del(vararg keys: String): Int
 
   /**
    * Retrieves a key.
@@ -27,7 +27,7 @@ interface Redis {
    * @param key the key to retrieve
    * @return a string value if the key was found, null if the key was not found
    */
-  fun get(key: String): String?
+  operator fun get(key: String): String?
 
   /**
    * Sets a value for a key.
@@ -36,7 +36,7 @@ interface Redis {
    * @param value the value to set
    * @return the value that was set
    */
-  fun set(key: String, value: String): String
+  operator fun set(key: String, value: String): String
 
   /**
    * Sets a key with an expiration date.
@@ -47,9 +47,4 @@ interface Redis {
    * @return the value that was set
    */
   fun setex(key: String, expiryDuration: Duration, value: String): String
-
-  /**
-   * Closes the connection to the redis instance.
-   */
-  fun close()
 }

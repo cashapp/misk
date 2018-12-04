@@ -4,12 +4,12 @@ import redis.clients.jedis.Jedis
 import java.time.Duration
 
 class RealRedis(private val jedis : Jedis) : Redis {
-  override fun del(key: String): Long {
-    return jedis.del(key)
+  override fun del(key: String): Boolean {
+    return (jedis.del(key) == 1L)
   }
 
-  override fun del(vararg keys: String): Long {
-    return jedis.del(*keys)
+  override fun del(vararg keys: String): Int {
+    return jedis.del(*keys).toInt()
   }
 
   override fun get(key: String): String? {
@@ -24,7 +24,8 @@ class RealRedis(private val jedis : Jedis) : Redis {
     return jedis.setex(key, expiryDuration.seconds.toInt(), value)
   }
 
-  override fun close() {
+  /** Closes the connection to Redis. */
+  fun close() {
     return jedis.close()
   }
 }
