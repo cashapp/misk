@@ -1,13 +1,7 @@
-apply plugin: "com.vanniktech.maven.publish"
-
 dependencies {
   compile dep.assertj
   compile dep.junitApi
   compile project(':misk')
   compile project(':misk-gcp')
   compile project(':misk-testing')
-}
-
-if (rootProject.file("hooks.gradle").exists()) {
-  apply from: rootProject.file("hooks.gradle")
 }

@@ -1,13 +1,7 @@
-apply plugin: "com.vanniktech.maven.publish"
-
 dependencies {
   compile dep.junitApi
   compile dep.docker
   compile project(':misk')
   compile project(':misk-testing')
   compile project(':misk-hibernate')
-}
-
-if (rootProject.file("hooks.gradle").exists()) {
-  apply from: rootProject.file("hooks.gradle")
 }
