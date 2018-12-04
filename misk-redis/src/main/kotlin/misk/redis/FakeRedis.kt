@@ -53,4 +53,8 @@ class FakeRedis : Redis {
     keyValueStore[key] = Value(value = value, expiryInstant = clock.instant().plusSeconds(expiryDuration.seconds))
     return value
   }
+
+  override fun close() {
+    // Nothing to close
+  }
 }
