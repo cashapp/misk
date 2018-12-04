@@ -1,7 +1,4 @@
-import org.junit.platform.console.options.Details
-
 apply plugin: 'kotlin'
-apply plugin: 'org.junit.platform.gradle.plugin'
 apply plugin: "com.vanniktech.maven.publish"
 
 compileKotlin {
@@ -20,10 +17,6 @@ compileTestKotlin {
 sourceSets {
   main.java.srcDirs += 'src/main/kotlin/'
   test.java.srcDirs += 'src/test/kotlin/'
-}
-
-junitPlatform {
-  details Details.VERBOSE
 }
 
 dependencies {

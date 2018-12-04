@@ -10,6 +10,7 @@ if (rootProject.file("repositories.gradle").exists()) {
 }
 
 subprojects {
+  apply plugin: "java"
   buildscript {
     repositories {
       mavenCentral()
@@ -27,7 +28,6 @@ subprojects {
 
     dependencies {
       classpath dep.kotlinGradlePlugin
-      classpath 'org.junit.platform:junit-platform-gradle-plugin:1.0.2'
       classpath 'com.github.jengelman.gradle.plugins:shadow:2.0.2'
       classpath 'com.vanniktech:gradle-maven-publish-plugin:0.4.0'
     }
@@ -43,6 +43,17 @@ subprojects {
           }
         }
       }
+    }
+  }
+  dependencies {
+    testImplementation dep.junitApi
+    testRuntimeOnly dep.junitEngine
+  }
+  test {
+    useJUnitPlatform()
+    testLogging {
+      events "started", "passed", "skipped", "failed"
+      exceptionFormat = 'full'
     }
   }
 }
