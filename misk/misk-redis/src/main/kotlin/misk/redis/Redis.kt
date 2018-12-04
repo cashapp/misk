@@ -46,5 +46,5 @@ interface Redis {
    * @param value the value to set
    * @return the value that was set
    */
-  fun setex(key: String, expiryDuration: Duration, value: String): String
+  fun set(key: String, expiryDuration: Duration, value: String): String
 }
