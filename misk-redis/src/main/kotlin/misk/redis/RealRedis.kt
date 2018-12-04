@@ -20,7 +20,7 @@ class RealRedis(private val jedis : Jedis) : Redis {
     return jedis.set(key, value)
   }
 
-  override fun setex(key: String, expiryDuration: Duration, value: String): String {
+  override fun set(key: String, expiryDuration: Duration, value: String): String {
     return jedis.setex(key, expiryDuration.seconds.toInt(), value)
   }
 

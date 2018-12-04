@@ -43,7 +43,7 @@ class FakeRedisTest {
     val expirySec = 5L
 
     // Set a key that expires
-    redis.setex(key, Duration.ofSeconds(expirySec), value)
+    redis.set(key, Duration.ofSeconds(expirySec), value)
     assertEquals(value, redis[key], "Got unexpected value")
 
     // Key should still be there
@@ -65,11 +65,11 @@ class FakeRedisTest {
     val expirySec = 5L
 
     // Set a key that expires
-    redis.setex(key, Duration.ofSeconds(expirySec), value)
+    redis.set(key, Duration.ofSeconds(expirySec), value)
 
     // Right before the key expires, override it with a new expiry time
     clock.add(Duration.ofSeconds(4))
-    redis.setex(key, Duration.ofSeconds(expirySec), value)
+    redis.set(key, Duration.ofSeconds(expirySec), value)
 
     // Key should not be expired
     clock.add(Duration.ofSeconds(4))

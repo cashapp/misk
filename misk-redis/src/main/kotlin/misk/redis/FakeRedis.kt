@@ -48,7 +48,7 @@ class FakeRedis : Redis {
     return value
   }
 
-  override fun setex(key: String, expiryDuration: Duration, value: String): String {
+  override fun set(key: String, expiryDuration: Duration, value: String): String {
     keyValueStore[key] = Value(value = value, expiryInstant = clock.instant().plusSeconds(expiryDuration.seconds))
     return value
   }
