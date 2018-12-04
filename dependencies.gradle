@@ -39,7 +39,6 @@ ext.dep = [
   "junitApi": "org.junit.jupiter:junit-jupiter-api:5.3.1",
   "junitEngine": "org.junit.jupiter:junit-jupiter-engine:5.3.1",
   "junitParams": "org.junit.jupiter:junit-jupiter-params:5.3.1",
-  "kotlinGradlePlugin": "org.jetbrains.kotlin:kotlin-gradle-plugin:1.2.51",
   "kotlinNoArgPlugin": "org.jetbrains.kotlin:kotlin-noarg:1.2.51",
   "kotlinReflection": "org.jetbrains.kotlin:kotlin-reflect:1.2.51",
   "kotlinStdLib": "org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.2.51",
