@@ -7,8 +7,7 @@ jdk:
 # Run Docker Pulls in parallel, esp for vitess/base with size > 1GB
 install:
   - docker pull squareup/misk-web &
-  - docker pull vitess/base &
-  - docker pull pafortin/goaws &
+  - docker pull vitess/base
 
 script:
   - ./gradlew test
