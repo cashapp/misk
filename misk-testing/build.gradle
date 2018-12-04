@@ -1,5 +1,3 @@
-apply plugin: "com.vanniktech.maven.publish"
-
 dependencies {
   compile dep.docker
   compile dep.junitApi
@@ -12,8 +10,4 @@ dependencies {
   compile dep.openTracingMock
   compile dep.mockitoCore
   compile project(':misk')
-}
-
-if (rootProject.file("hooks.gradle").exists()) {
-  apply from: rootProject.file("hooks.gradle")
 }

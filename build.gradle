@@ -1,5 +1,6 @@
 plugins {
   id "org.jetbrains.kotlin.jvm" version "1.2.51" apply false
+  id "com.vanniktech.maven.publish" version "0.4.0" apply false
 }
 
 ext {
@@ -33,7 +34,6 @@ subprojects {
 
     dependencies {
       classpath 'com.github.jengelman.gradle.plugins:shadow:2.0.2'
-      classpath 'com.vanniktech:gradle-maven-publish-plugin:0.4.0'
     }
   }
   repositories {
@@ -76,6 +76,9 @@ subprojects {
       events "started", "passed", "skipped", "failed"
       exceptionFormat = 'full'
     }
+  }
+  if (rootProject.file("hooks.gradle").exists()) {
+    apply from: rootProject.file("hooks.gradle")
   }
 }
 
