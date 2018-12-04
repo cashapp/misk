@@ -14,7 +14,7 @@ class RedisModule(val config: RedisConfig): KAbstractModule() {
 
   @Provides @Singleton
   internal fun provideRedisClient(config: RedisConfig): Redis {
-    val jedis = Jedis(config.host_name, config.port)
+    val jedis = Jedis(config.host_name, config.port, true)
     jedis.auth(config.auth_password)
     return RealRedis(jedis)
   }
