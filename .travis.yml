@@ -8,7 +8,6 @@ jdk:
 install:
   - docker pull squareup/misk-web &
   - docker pull vitess/base &
-  - docker pull zookeeper:3.5.4-beta &
   - docker pull pafortin/goaws &
 
 script:
