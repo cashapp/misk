@@ -1,7 +1,9 @@
 package misk.redis
 
 import misk.time.FakeClock
+import java.time.Duration
 import java.time.Instant
+import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 
 class FakeRedis : Redis {
@@ -10,11 +12,11 @@ class FakeRedis : Redis {
   // The value type stored in our key-value store
   private data class Value (
     val value: String,
-    val expiryInstant: Instant = Instant.MAX
+    val expiryInstant: Instant
   )
 
   // Acts as the Redis key-value store
-  private val keyValueStore = HashMap<String, Value>()
+  private val keyValueStore = ConcurrentHashMap<String, Value>()
 
   override fun del(key: String): Long {
     if (!keyValueStore.containsKey(key)) return 0
@@ -40,13 +42,15 @@ class FakeRedis : Redis {
     return value.value
   }
 
+  // Sets the value for a key, the key does not expire
   override fun set(key: String, value: String): String {
-    keyValueStore[key] = Value(value = value)
+    // Set the key to expire at the latest possible instant
+    keyValueStore[key] = Value(value = value, expiryInstant = Instant.MAX)
     return value
   }
 
-  override fun setex(key: String, seconds: Int, value: String): String {
-    keyValueStore[key] = Value(value, clock.instant().plusSeconds(seconds.toLong()))
+  override fun setex(key: String, expiryDuration: Duration, value: String): String {
+    keyValueStore[key] = Value(value = value, expiryInstant = clock.instant().plusSeconds(expiryDuration.seconds))
     return value
   }
 }

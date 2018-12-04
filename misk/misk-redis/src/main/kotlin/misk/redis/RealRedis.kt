@@ -1,6 +1,7 @@
 package misk.redis
 
 import redis.clients.jedis.Jedis
+import java.time.Duration
 
 class RealRedis(private val jedis : Jedis) : Redis {
   override fun del(key: String): Long {
@@ -19,7 +20,7 @@ class RealRedis(private val jedis : Jedis) : Redis {
     return jedis.set(key, value)
   }
 
-  override fun setex(key: String, seconds: Int, value: String): String {
-    return jedis.setex(key, seconds, value)
+  override fun setex(key: String, expiryDuration: Duration, value: String): String {
+    return jedis.setex(key, expiryDuration.seconds.toInt(), value)
   }
 }
