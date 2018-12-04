@@ -7,27 +7,20 @@ import misk.containers.Container
 
 class EmbeddedZookeeper(val basePort: Int) {
 
-  private val composer: Composer
-
-  init {
-    val clientPort = ExposedPort.tcp(CLIENT_PORT)
-    val peerPort = ExposedPort.tcp(PEER_PORT)
-    val leaderPort = ExposedPort.tcp(LEADER_PORT)
-    val cmd = arrayOf("zkServer.sh", "start-foreground")
-    val container = Container {
-      this
-          .withImage("zookeeper:3.5.4-beta")
-          .withName("zookeeper")
-          .withCmd(cmd.toList())
-          .withExposedPorts(clientPort, peerPort, leaderPort)
-          .withPortBindings(Ports().apply {
-            bind(clientPort, Ports.Binding.bindPort(basePort))
-            bind(peerPort, Ports.Binding.bindPort(basePort + 1))
-            bind(leaderPort, Ports.Binding.bindPort(basePort + 2))
-          })
-    }
-    composer = Composer("e-zk", container)
-  }
+  private val clientPort = ExposedPort.tcp(CLIENT_PORT)
+  private val peerPort = ExposedPort.tcp(PEER_PORT)
+  private val leaderPort = ExposedPort.tcp(LEADER_PORT)
+  private val composer = Composer("e-zk", Container {
+    withImage("zookeeper:3.5.4-beta")
+        .withName("zookeeper")
+        .withCmd(listOf("zkServer.sh", "start-foreground"))
+        .withExposedPorts(clientPort, peerPort, leaderPort)
+        .withPortBindings(Ports().apply {
+          bind(clientPort, Ports.Binding.bindPort(basePort))
+          bind(peerPort, Ports.Binding.bindPort(basePort + 1))
+          bind(leaderPort, Ports.Binding.bindPort(basePort + 2))
+        })
+  })
 
   fun start() {
     composer.start()
