@@ -1,3 +1,7 @@
+plugins {
+  id "org.jetbrains.kotlin.jvm" version "1.2.51" apply false
+}
+
 ext {
   isCi = "true".equals(System.getenv('CI'))
   isSqCi = "true".equals(System.getenv('SQCI'))
@@ -11,6 +15,7 @@ if (rootProject.file("repositories.gradle").exists()) {
 
 subprojects {
   apply plugin: "java"
+  apply plugin: 'kotlin'
   buildscript {
     repositories {
       mavenCentral()
@@ -27,7 +32,6 @@ subprojects {
     }
 
     dependencies {
-      classpath dep.kotlinGradlePlugin
       classpath 'com.github.jengelman.gradle.plugins:shadow:2.0.2'
       classpath 'com.vanniktech:gradle-maven-publish-plugin:0.4.0'
     }
@@ -45,6 +49,23 @@ subprojects {
       }
     }
   }
+  compileKotlin {
+    kotlinOptions {
+      jvmTarget = "1.8"
+      allWarningsAsErrors = true
+    }
+  }
+  compileTestKotlin {
+    kotlinOptions {
+      jvmTarget = "1.8"
+      allWarningsAsErrors = true
+    }
+  } 
+  sourceSets {
+    main.java.srcDirs += 'src/main/kotlin/'
+    test.java.srcDirs += 'src/test/kotlin/'
+  }
+  
   dependencies {
     testImplementation dep.junitApi
     testRuntimeOnly dep.junitEngine

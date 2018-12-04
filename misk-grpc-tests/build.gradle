@@ -4,9 +4,7 @@ buildscript {
   }
 }
 
-apply plugin: 'kotlin'
 apply plugin: "com.vanniktech.maven.publish"
-apply plugin: 'java'
 apply plugin: 'com.google.protobuf'
 
 protobuf {
@@ -31,24 +29,9 @@ protobuf {
   }
 }
 
-compileKotlin {
-  kotlinOptions {
-    jvmTarget = "1.8"
-    allWarningsAsErrors = true
-  }
-}
-compileTestKotlin {
-  kotlinOptions {
-    jvmTarget = "1.8"
-    allWarningsAsErrors = true
-  }
-}
-
 sourceSets {
-  main.java.srcDirs += 'src/main/kotlin/'
   main.java.srcDirs += 'build/generated/source/proto/main/grpc'
   main.java.srcDirs += 'build/generated/source/proto/main/java'
-  test.java.srcDirs += 'src/test/kotlin/'
 }
 
 dependencies {
