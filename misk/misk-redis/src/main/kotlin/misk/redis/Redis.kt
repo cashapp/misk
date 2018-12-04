@@ -47,4 +47,9 @@ interface Redis {
    * @return the value that was set
    */
   fun setex(key: String, expiryDuration: Duration, value: String): String
+
+  /**
+   * Closes the connection to the redis instance.
+   */
+  fun close()
 }
