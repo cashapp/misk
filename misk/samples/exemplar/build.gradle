@@ -1,4 +1,3 @@
-apply plugin: "com.vanniktech.maven.publish"
 apply plugin: 'com.github.johnrengelman.shadow'
 
 dependencies {
@@ -28,8 +27,4 @@ shadowJar {
 
 artifacts {
   archives shadowJar
-}
-
-uploadArchives {
-  it.onlyIf { false }
 }
