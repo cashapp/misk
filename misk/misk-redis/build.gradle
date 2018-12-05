@@ -1,0 +1,19 @@
+buildscript {
+  dependencies {
+    classpath dep.kotlinNoArgPlugin
+  }
+}
+
+apply plugin: 'kotlin-jpa'
+apply plugin: "com.vanniktech.maven.publish"
+
+dependencies {
+  compile dep.guava
+  compile dep.guice
+  compile dep.guiceMultibindings
+  compile dep.jedis
+  compile project(':misk')
+  compile project(':misk-testing')
+
+  testCompile project(':misk-testing')
+}
