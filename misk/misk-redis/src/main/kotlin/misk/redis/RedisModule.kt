@@ -6,9 +6,8 @@ import com.google.inject.Singleton
 import misk.inject.KAbstractModule
 import redis.clients.jedis.Jedis
 
-class RedisModule(val config: RedisConfig): KAbstractModule() {
+class RedisModule : KAbstractModule() {
   override fun configure() {
-    bind<RedisConfig>().toInstance(config)
     multibind<Service>().to<RedisService>()
   }
 
