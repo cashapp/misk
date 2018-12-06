@@ -44,7 +44,6 @@ class HttpClientFactory {
       // negotiation is fine for non-Envoy sidecar (read: non-unix socket) traffic.
       builder.protocols(listOf(Protocol.H2_PRIOR_KNOWLEDGE))
     }
-    builder.proxy(Proxy.NO_PROXY)
 
     return builder.build()
   }
