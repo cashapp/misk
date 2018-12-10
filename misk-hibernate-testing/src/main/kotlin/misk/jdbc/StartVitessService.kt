@@ -29,6 +29,7 @@ import java.util.concurrent.TimeUnit
 import kotlin.concurrent.thread
 import kotlin.streams.toList
 
+const val VITESS_VERSION = "sha256:3cef0e042dee2312e5e0d80c56a6bf1581b52063ad0441551241f6785b110c38"
 class Keyspace(val sharded: Boolean) {
   // Defaulting to 2 shards for sharded keyspaces,
   // maybe this should be configurable at some point?
@@ -138,7 +139,7 @@ class DockerVitessCluster(
     )
 
     StartVitessService.logger.info("Starting Vitess cluster with command: ${cmd.joinToString(" ")}")
-    containerId = docker.createContainerCmd("vitess/base")
+    containerId = docker.createContainerCmd("vitess/base@$VITESS_VERSION")
         .withCmd(cmd.toList())
         .withVolumes(schemaVolume)
         .withBinds(Bind(cluster.schemaDir.toAbsolutePath().toString(), schemaVolume))
@@ -244,7 +245,7 @@ class StartVitessService(val config: DataSourceConfig) : AbstractIdleService() {
   init {
     // We need to do this outside of the service start up because this takes a really long time
     // the first time you do it. After that it's really fast though.
-    if (runCommand("docker pull vitess/base:latest") != 0) {
+    if (runCommand("docker pull vitess/base@$VITESS_VERSION") != 0) {
       logger.warn("Failed to pull Vitess docker image. Proceeding regardless.")
     }
   }
