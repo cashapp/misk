@@ -64,7 +64,7 @@ internal class TruncateTablesService(
             "SELECT TABLE_NAME FROM INFORMATION_SCHEMA.SYSTEM_TABLES WHERE TABLE_TYPE='TABLE'"
           }
           DataSourceType.VITESS -> {
-            "SHOW VSCHEMA_TABLES"
+            "SHOW VSCHEMA TABLES"
           }
         }
 
