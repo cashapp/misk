@@ -3,7 +3,7 @@ package misk.resources
 import com.google.inject.multibindings.MapBinder
 import misk.inject.KAbstractModule
 
-internal class ResourceLoaderModule : KAbstractModule() {
+class ResourceLoaderModule : KAbstractModule() {
   override fun configure() {
     val mapBinder = MapBinder.newMapBinder(
         binder(), String::class.java, ResourceLoader.Backend::class.java)
