@@ -4,10 +4,8 @@ jdk:
   - oraclejdk8
   - oraclejdk9
 
-# Run Docker Pulls in parallel, esp for vitess/base with size > 1GB
 install:
-  - docker pull squareup/misk-web &
-  - docker pull vitess/base
+  - docker pull squareup/misk-web
 
 script:
   - ./gradlew test
