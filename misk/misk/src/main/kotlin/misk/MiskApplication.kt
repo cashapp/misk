@@ -78,6 +78,7 @@ class MiskApplication(private val modules: List<Module>, commands: List<MiskComm
   }
 
   private fun startServiceAndAwaitTermination() {
+    log.info { "creating application injector" }
     val injector = Guice.createInjector(modules)
     val serviceManager = injector.getInstance<ServiceManager>()
     Runtime.getRuntime().addShutdownHook(object : Thread() {
@@ -87,9 +88,12 @@ class MiskApplication(private val modules: List<Module>, commands: List<MiskComm
       }
     })
 
+    log.info { "starting services and waiting for them to be healthy" }
     serviceManager.startAsync()
     serviceManager.awaitHealthy()
+    log.info { "all services are healthy" }
     serviceManager.awaitStopped()
+    log.info { "all services stopped" }
   }
 
   private companion object {
