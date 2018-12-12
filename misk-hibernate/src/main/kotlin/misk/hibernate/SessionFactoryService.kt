@@ -50,7 +50,10 @@ internal class SessionFactoryService(
   override val consumedKeys = setOf<Key<*>>(DataSourceService::class.toKey(qualifier))
   override val producedKeys = setOf<Key<*>>(SessionFactoryService::class.toKey(qualifier))
 
+  lateinit var hibernateMetadata: Metadata
+
   override fun startUp() {
+
     val stopwatch = Stopwatch.createStarted()
     logger.info("Starting @${qualifier.simpleName} Hibernate")
 
@@ -58,6 +61,7 @@ internal class SessionFactoryService(
 
     // Register event listeners.
     val integrator = object : Integrator {
+
       override fun integrate(
         metadata: Metadata,
         sessionFactory: SessionFactoryImplementor,
@@ -66,6 +70,8 @@ internal class SessionFactoryService(
         val eventListenerRegistry = serviceRegistry.getService(EventListenerRegistry::class.java)
         val aggregateListener = AggregateListener(listenerRegistrations)
         aggregateListener.registerAll(eventListenerRegistry)
+
+        hibernateMetadata = metadata
       }
 
       override fun disintegrate(
@@ -73,8 +79,8 @@ internal class SessionFactoryService(
         serviceRegistry: SessionFactoryServiceRegistry
       ) {
       }
-    }
 
+    }
     val bootstrapRegistryBuilder = BootstrapServiceRegistryBuilder()
         .applyIntegrator(integrator)
         .build()
