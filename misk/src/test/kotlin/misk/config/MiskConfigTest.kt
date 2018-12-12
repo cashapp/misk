@@ -1,6 +1,7 @@
 package misk.config
 
 import com.google.inject.util.Modules
+import misk.MiskServiceModule
 import misk.environment.Environment
 import misk.environment.EnvironmentModule
 import misk.testing.MiskTest
