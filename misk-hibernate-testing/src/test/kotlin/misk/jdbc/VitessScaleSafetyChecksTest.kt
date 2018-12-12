@@ -1,6 +1,8 @@
 package misk.jdbc
 
 import com.squareup.moshi.Moshi
+import misk.environment.Environment
+import misk.vitess.StartVitessService
 import okhttp3.OkHttpClient
 import okio.Buffer
 import org.junit.Test
@@ -59,7 +61,10 @@ class VitessScaleSafetyChecksTest {
         OkHttpClient(),
         Moshi.Builder().build(),
         DataSourceConfig(type = DataSourceType.VITESS),
-        StartVitessService(DataSourceConfig(type = DataSourceType.VITESS)))
+        StartVitessService(
+            qualifier = Movies::class,
+            environment = Environment.TESTING,
+            config = DataSourceConfig(type = DataSourceType.VITESS)))
 
     val plans = detector.parseQueryPlans(
         Buffer().writeUtf8(queryPlans)).toList()

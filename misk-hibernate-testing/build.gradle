@@ -1,6 +1,5 @@
 dependencies {
   compile dep.junitApi
-  compile dep.docker
   compile project(':misk')
   compile project(':misk-testing')
   compile project(':misk-hibernate')

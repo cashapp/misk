@@ -8,6 +8,7 @@ apply plugin: 'kotlin-jpa'
 
 dependencies {
   compile dep.datasourceProxy
+  compile dep.docker
   compile dep.hibernateCore
   compile dep.hikariCp
   compile dep.hsqldb
