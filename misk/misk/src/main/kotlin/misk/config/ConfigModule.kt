@@ -8,6 +8,7 @@ import misk.inject.KAbstractModule
 import misk.inject.asSingleton
 import javax.inject.Provider
 import kotlin.reflect.KProperty1
+import kotlin.reflect.KTypeProjection
 import kotlin.reflect.full.createType
 import kotlin.reflect.full.declaredMemberProperties
 import kotlin.reflect.full.isSubtypeOf
@@ -28,16 +29,27 @@ class ConfigModule<T : Config>(
   @Suppress("UNCHECKED_CAST")
   private fun bindChildConfigClass(configClass: Class<out Config>) {
     for (property in configClass.kotlin.declaredMemberProperties) {
-      if (!property.returnType.isSubtypeOf(Config::class.createType())) {
-        continue
-      }
-      val subConfigProvider = Provider {
-        (property as KProperty1<Config, Any?>).get(config)
-      }
 
-      val subConfigTypeLiteral = TypeLiteral.get(
-          property.returnType.javaType) as TypeLiteral<Any?>
+      val configProperty = (property as KProperty1<Config, Any?>).get(config)
 
+      val (subConfigReturnType, subConfigProvider) =
+          if (property.returnType.isSubtypeOf(ANY_SECRET_TYPE)) {
+            // We know that `property.returnType` is parameterized since it should be a Secret<T>.
+            // actualSecretType == null if a STAR projection was used for the type.
+            // If T is parameterized or STAR projection was used we cannot bind.
+            val actualSecretType = property.returnType.arguments[0].type
+            if (actualSecretType == null ||
+                !actualSecretType.isSubtypeOf(Config::class.createType())) {
+              continue
+            }
+            actualSecretType.javaType to Provider { (configProperty as Secret<T>).value }
+          } else if (property.returnType.isSubtypeOf(Config::class.createType())) {
+            property.returnType.javaType to Provider { configProperty }
+          } else {
+            continue
+          }
+
+      val subConfigTypeLiteral = TypeLiteral.get(subConfigReturnType) as TypeLiteral<Any?>
       val subConfigTypeName = subConfigTypeLiteral.rawType.simpleName
       val defaultSubConfigFieldName = UPPER_CAMEL.to(LOWER_UNDERSCORE, subConfigTypeName)
 
@@ -56,6 +68,7 @@ class ConfigModule<T : Config>(
   }
 
   companion object {
+    private val ANY_SECRET_TYPE = Secret::class.createType(listOf(KTypeProjection.STAR))
     inline fun <reified T : Config> create(appName: String, config: T) =
         ConfigModule(T::class.java, appName, config)
   }

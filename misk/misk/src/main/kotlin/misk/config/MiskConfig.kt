@@ -1,13 +1,22 @@
 package misk.config
 
+import com.fasterxml.jackson.core.JsonParser
+import com.fasterxml.jackson.databind.BeanProperty
+import com.fasterxml.jackson.databind.DeserializationContext
+import com.fasterxml.jackson.databind.JavaType
+import com.fasterxml.jackson.databind.JsonDeserializer
+import com.fasterxml.jackson.databind.JsonMappingException
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.deser.ContextualDeserializer
+import com.fasterxml.jackson.databind.module.SimpleModule
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.kotlin.MissingKotlinParameterException
 import misk.environment.Environment
 import misk.logging.getLogger
+import misk.resources.ResourceLoader
 import okio.buffer
 import okio.source
 import java.io.File
@@ -33,9 +42,16 @@ object MiskConfig {
     environment: Environment,
     overrideFiles: List<File> = listOf()
   ): T {
-    val mapper = ObjectMapper(YAMLFactory()).registerModules(KotlinModule(), JavaTimeModule())
-    val configYamls = loadConfigYamlMap(appName, environment, overrideFiles)
+    check(!Secret::class.java.isAssignableFrom(configClass)) {
+      "Top level service config cannot be a Secret<*>"
+    }
 
+    val mapper = ObjectMapper(YAMLFactory()).registerModules(
+        KotlinModule(),
+        JavaTimeModule(),
+        SecretJacksonModule())
+
+    val configYamls = loadConfigYamlMap(appName, environment, overrideFiles)
     check(configYamls.values.any { it != null }) {
       "could not find configuration files - checked ${configYamls.keys}"
     }
@@ -49,7 +65,8 @@ object MiskConfig {
       throw IllegalStateException(
           "could not find $appName $environment configuration for ${e.parameter.name}", e)
     } catch (e: Exception) {
-      throw IllegalStateException("failed to load configuration for $appName $environment", e)
+      throw IllegalStateException(
+          "failed to load configuration for $appName $environment: ${e.message}", e)
     }
   }
 
@@ -115,4 +132,67 @@ object MiskConfig {
   /** @return the list of config file names in the order they should be read */
   private fun embeddedConfigFileNames(appName: String, environment: Environment) =
       listOf("common", environment.name.toLowerCase()).map { "$appName-$it.yaml" }
+
+  class SecretJacksonModule() : SimpleModule() {
+    override fun setupModule(context: SetupContext?) {
+      addDeserializer(Secret::class.java, SecretDeserializer())
+      super.setupModule(context)
+    }
+  }
+
+  private class SecretDeserializer(val type: JavaType? = null) : JsonDeserializer<Secret<*>>(),
+      ContextualDeserializer {
+
+    override fun createContextual(
+      deserializationContext: DeserializationContext?,
+      property: BeanProperty
+    ): JsonDeserializer<*> {
+      return SecretDeserializer(property.type.bindings.getBoundType(0))
+    }
+
+    override fun deserialize(
+      jsonParser: JsonParser,
+      deserializationContext: DeserializationContext
+    ): Secret<*>? {
+      if (type == null) {
+        // This only happens if ObjectMapper does not call createContextual fo this property.
+        throw JsonMappingException.from(jsonParser,
+            "Attempting to deserialize an object with no type")
+      }
+      val reference = deserializationContext.readValue(jsonParser, String::class.java) as String
+      return RealSecret(loadSecret(reference, type))
+    }
+
+    private fun loadSecret(reference: String, type: JavaType): Any {
+      val source = requireNotNull(ResourceLoader.SYSTEM.utf8(reference)) {
+        "No secret found at: $reference."
+      }
+      val referenceFileExtension = Regex(".*\\.([^.]+)$").find(reference)?.groupValues?.get(1) ?: ""
+      return when (referenceFileExtension) {
+        "yaml" -> {
+          mapper.readValue(source, type) as Any
+        }
+        "txt" -> {
+          check(type.rawClass.isAssignableFrom(String::class.java)) {
+            "Secrets with the .txt extension map to Secret<String> fields in Config classes."
+          }
+          source
+        }
+        else -> {
+          check(referenceFileExtension.isNotBlank()) {
+            "Secret [$reference] needs a file extension for parsing."
+          }
+          throw IllegalStateException(
+              "Unknown file extension \"$referenceFileExtension\" for secret [$reference].")
+        }
+      }
+    }
+
+    companion object {
+      private val mapper =
+          ObjectMapper(YAMLFactory()).registerModules(KotlinModule(), SecretJacksonModule())
+    }
+  }
+
+  class RealSecret<T>(override val value: T) : Secret<T>
 }
