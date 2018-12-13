@@ -1,30 +1,31 @@
 package misk.metrics
 
+import io.prometheus.client.Collector
 import io.prometheus.client.CollectorRegistry
 import io.prometheus.client.Counter
 import io.prometheus.client.Gauge
-import io.prometheus.client.hotspot.BufferPoolsExports
-import io.prometheus.client.hotspot.ClassLoadingExports
-import io.prometheus.client.hotspot.GarbageCollectorExports
-import io.prometheus.client.hotspot.MemoryPoolsExports
-import io.prometheus.client.hotspot.StandardExports
-import io.prometheus.client.hotspot.ThreadExports
-import io.prometheus.client.hotspot.VersionInfoExports
 import javax.inject.Inject
 
-class Metrics @Inject internal constructor(val registry: CollectorRegistry) {
+/**
+ * Manages the Prometheus [CollectorRegistry].
+ *
+ * Developers can either directly build new metrics via the [counter], [gauge] and [histogram]
+ * methods or add additional [Collector]s by binding to the multiset in a module.
+ *
+ * ```
+ * multibind<Collector>().toInstance(MyCollector())
+ * ```
+ */
+class Metrics @Inject internal constructor(
+  private val registry: CollectorRegistry,
+  collectors: @JvmSuppressWildcards Set<Collector>
+) {
   @Inject private lateinit var histogramRegistry: HistogramRegistry
 
   private val defaultQuantiles = mapOf(0.5 to 0.05, 0.75 to 0.02, 0.95 to 0.01, 0.99 to 0.001, 0.999 to 0.0001)
 
   init {
-    registry.register(StandardExports())
-    registry.register(MemoryPoolsExports())
-    registry.register(BufferPoolsExports())
-    registry.register(ThreadExports())
-    registry.register(GarbageCollectorExports())
-    registry.register(ClassLoadingExports())
-    registry.register(VersionInfoExports())
+    collectors.forEach { registry.register(it) }
   }
 
   fun counter(name: String, help: String? = "", labelNames: List<String> = listOf()): Counter {
