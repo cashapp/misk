@@ -27,6 +27,7 @@ import okhttp3.Request
 import okhttp3.RequestBody
 import okio.BufferedSink
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.condition.DisabledOnJre
 import org.junit.jupiter.api.condition.JRE.JAVA_8
@@ -58,7 +59,7 @@ class GrpcConnectivityTest {
   }
 
   @Test
-  @DisabledOnJre(JAVA_8) // gRPC needs HTTP/2 which needs ALPN which needs Java 9+.
+  @Disabled("while we are on java 8 without conscrypt or java9 without jetty alpn dependency")
   fun happyPath() {
     val request = Request.Builder()
         .url(jetty.httpsServerUrl!!.resolve("/helloworld.Greeter/SayHello")!!)
