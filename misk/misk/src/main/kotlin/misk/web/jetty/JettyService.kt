@@ -11,7 +11,6 @@ import misk.security.ssl.TlsProtocols
 import misk.web.WebConfig
 import misk.web.WebSslConfig
 import okhttp3.HttpUrl
-import org.eclipse.jetty.alpn.server.ALPNServerConnectionFactory
 import org.eclipse.jetty.http2.server.HTTP2ServerConnectionFactory
 import org.eclipse.jetty.server.HttpConfiguration
 import org.eclipse.jetty.server.HttpConnectionFactory
@@ -99,13 +98,11 @@ class JettyService @Inject internal constructor(
       val httpsConfig = HttpConfiguration(httpConfig)
       httpsConfig.addCustomizer(SecureRequestCustomizer())
 
-      val alpn = ALPNServerConnectionFactory("h2", "http/1.1")
-      alpn.defaultProtocol = "http/1.1"
-      val ssl = SslConnectionFactory(sslContextFactory, alpn.protocol)
+      val ssl = SslConnectionFactory(sslContextFactory, "http/1.1")
       val http2 = HTTP2ServerConnectionFactory(httpsConfig)
       val http1 = HttpConnectionFactory(httpsConfig)
       val httpsConnector = ServerConnector(server, null, null, null,
-          webConfig.acceptors ?: -1, webConfig.selectors ?: -1, ssl, alpn, http2, http1)
+          webConfig.acceptors ?: -1, webConfig.selectors ?: -1, ssl, http2, http1)
       httpsConnector.port = webConfig.ssl.port
       httpsConnector.idleTimeout = webConfig.idle_timeout
       httpsConnector.reuseAddress = true
