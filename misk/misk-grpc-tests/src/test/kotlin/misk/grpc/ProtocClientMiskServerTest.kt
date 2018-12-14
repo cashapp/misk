@@ -9,6 +9,8 @@ import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.condition.DisabledOnJre
+import org.junit.jupiter.api.condition.JRE
 import routeguide.RouteGuideGrpc
 import routeguide.RouteGuideProto.Feature
 import routeguide.RouteGuideProto.Point
@@ -25,7 +27,7 @@ class ProtocClientMiskServerTest {
   @Inject lateinit var channelProvider: Provider<ManagedChannel>
 
   @Test
-  @Disabled("while we are on java 8 without conscrypt or java9 without jetty alpn dependency")
+  @Disabled("Disabled while ALPN is disabled")
   fun requestResponse() {
     val channel = channelProvider.get()
     val stub = RouteGuideGrpc.newBlockingStub(channel)

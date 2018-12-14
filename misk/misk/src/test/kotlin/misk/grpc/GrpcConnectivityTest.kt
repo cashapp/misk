@@ -30,6 +30,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.condition.DisabledOnJre
+import org.junit.jupiter.api.condition.JRE
 import org.junit.jupiter.api.condition.JRE.JAVA_8
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -59,7 +60,7 @@ class GrpcConnectivityTest {
   }
 
   @Test
-  @Disabled("while we are on java 8 without conscrypt or java9 without jetty alpn dependency")
+  @DisabledOnJre(JRE.JAVA_8) // gRPC needs HTTP/2 which needs ALPN which needs Java 9+.
   fun happyPath() {
     val request = Request.Builder()
         .url(jetty.httpsServerUrl!!.resolve("/helloworld.Greeter/SayHello")!!)
