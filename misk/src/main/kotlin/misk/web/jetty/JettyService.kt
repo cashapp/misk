@@ -4,12 +4,10 @@ import com.google.common.base.Stopwatch
 import com.google.common.util.concurrent.AbstractIdleService
 import com.google.inject.Key
 import misk.DependentService
-import misk.inject.toKey
 import misk.logging.getLogger
 import misk.security.ssl.CipherSuites
 import misk.security.ssl.SslLoader
 import misk.security.ssl.TlsProtocols
-import misk.web.ForConscrypt
 import misk.web.WebConfig
 import misk.web.WebSslConfig
 import okhttp3.HttpUrl
@@ -29,7 +27,6 @@ import org.eclipse.jetty.util.ssl.SslContextFactory
 import org.eclipse.jetty.util.thread.QueuedThreadPool
 import java.net.InetAddress
 import javax.inject.Inject
-import javax.inject.Provider
 import javax.inject.Singleton
 import java.security.Provider as SecurityProvider
 
@@ -40,7 +37,6 @@ class JettyService @Inject internal constructor(
   private val sslLoader: SslLoader,
   private val webActionsServlet: WebActionsServlet,
   private val webConfig: WebConfig,
-  @ForConscrypt private val conscryptProvider: Provider<SecurityProvider>,
   threadPool: QueuedThreadPool,
   private val connectionMetricsCollector: JettyConnectionMetricsCollector
 ) : AbstractIdleService(), DependentService {
@@ -49,7 +45,7 @@ class JettyService @Inject internal constructor(
   val httpServerUrl: HttpUrl get() = server.httpUrl!!
   val httpsServerUrl: HttpUrl? get() = server.httpsUrl
 
-  override val consumedKeys = setOf<Key<*>>(SecurityProvider::class.toKey(ForConscrypt::class))
+  override val consumedKeys = setOf<Key<*>>()
   override val producedKeys = setOf<Key<*>>()
 
   override fun startUp() {
@@ -81,7 +77,6 @@ class JettyService @Inject internal constructor(
 
     if (webConfig.ssl != null) {
       val sslContextFactory = SslContextFactory()
-      sslContextFactory.provider = conscryptProvider.get().name
       sslContextFactory.keyStore = sslLoader.loadCertStore(webConfig.ssl.cert_store)!!.keyStore
       sslContextFactory.setKeyStorePassword(webConfig.ssl.cert_store.passphrase)
       webConfig.ssl.trust_store?.let {
