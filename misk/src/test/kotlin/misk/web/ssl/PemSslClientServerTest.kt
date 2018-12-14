@@ -35,6 +35,8 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.condition.DisabledOnJre
+import org.junit.jupiter.api.condition.JRE
 import javax.inject.Inject
 import javax.inject.Singleton
 import javax.net.ssl.SSLHandshakeException
@@ -61,7 +63,7 @@ internal class PemSslClientServerTest {
   }
 
   @Test
-  @Disabled("while we are on java 8 without conscrypt or java9 without jetty alpn dependency")
+  @DisabledOnJre(JRE.JAVA_8) // gRPC needs HTTP/2 which needs ALPN which needs Java 9+.
   fun usesSsl() {
     val dinosaur = certClient.post<Dinosaur>("/hello", Dinosaur.Builder().name("trex").build())
     assertThat(dinosaur.name).isEqualTo("hello trex from misk-client")
@@ -77,7 +79,7 @@ internal class PemSslClientServerTest {
   }
 
   @Test
-  @Disabled("while we are on java 8 without conscrypt or java9 without jetty alpn dependency")
+  @DisabledOnJre(JRE.JAVA_8) // gRPC needs HTTP/2 which needs ALPN which needs Java 9+.
   fun failsIfServerIsUntrusted() {
     assertFailsWith<SSLHandshakeException> {
       noTrustClient.post<Dinosaur>("/hello", Dinosaur.Builder().name("trex").build())
