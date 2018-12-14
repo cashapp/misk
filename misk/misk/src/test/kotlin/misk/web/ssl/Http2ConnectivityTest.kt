@@ -25,9 +25,8 @@ import okhttp3.Protocol
 import okhttp3.Request
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.condition.DisabledOnJre
-import org.junit.jupiter.api.condition.JRE.JAVA_8
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -48,7 +47,7 @@ class Http2ConnectivityTest {
   }
 
   @Test
-  @DisabledOnJre(JAVA_8) // gRPC needs HTTP/2 which needs ALPN which needs Java 9+.
+  @Disabled("while we are on java 8 without conscrypt or java9 without jetty alpn dependency")
   fun happyPath() {
     val call = client.newCall(Request.Builder()
         .url(jetty.httpsServerUrl!!.resolve("/hello")!!)
@@ -61,6 +60,7 @@ class Http2ConnectivityTest {
   }
 
   @Test
+  @Disabled("while we are on java 8 without conscrypt or java9 without jetty alpn dependency")
   fun http1ForClientsThatPreferIt() {
     val http1Client = client.newBuilder()
         .protocols(listOf(Protocol.HTTP_1_1))

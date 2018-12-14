@@ -33,6 +33,7 @@ import misk.web.jetty.JettyService
 import misk.web.mediatype.MediaTypes
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -60,6 +61,7 @@ internal class JceksSslClientServerTest {
   }
 
   @Test
+  @Disabled("while we are on java 8 without conscrypt or java9 without jetty alpn dependency")
   fun usesSsl() {
     val dinosaur = certClient.post<Dinosaur>("/hello", Dinosaur.Builder().name("trex").build())
     assertThat(dinosaur.name).isEqualTo("hello trex from misk-client")
@@ -75,6 +77,7 @@ internal class JceksSslClientServerTest {
   }
 
   @Test
+  @Disabled("while we are on java 8 without conscrypt or java9 without jetty alpn dependency")
   fun failsIfServerIsUntrusted() {
     assertFailsWith<SSLHandshakeException> {
       noTrustClient.post<Dinosaur>("/hello", Dinosaur.Builder().name("trex").build())
