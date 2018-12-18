@@ -49,7 +49,6 @@ class Http2ConnectivityTest {
   }
 
   @Test
-  @Disabled("Disabled since ALPN is disabled")
   fun happyPath() {
     val call = client.newCall(Request.Builder()
         .url(jetty.httpsServerUrl!!.resolve("/hello")!!)
@@ -62,7 +61,6 @@ class Http2ConnectivityTest {
   }
 
   @Test
-  @DisabledOnJre(JRE.JAVA_8) // gRPC needs HTTP/2 which needs ALPN which needs Java 9+.
   fun http1ForClientsThatPreferIt() {
     val http1Client = client.newBuilder()
         .protocols(listOf(Protocol.HTTP_1_1))
