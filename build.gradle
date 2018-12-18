@@ -52,13 +52,13 @@ subprojects {
   compileKotlin {
     kotlinOptions {
       jvmTarget = "1.8"
-      allWarningsAsErrors = true
+      // TODO(jayestrella): re-add allWarningsAsErrors = true when we (+okio) bump kotlin versions
     }
   }
   compileTestKotlin {
     kotlinOptions {
       jvmTarget = "1.8"
-      allWarningsAsErrors = true
+      // TODO(jayestrella): re-add allWarningsAsErrors = true when we (+okio) bump kotlin versions
     }
   } 
   sourceSets {
