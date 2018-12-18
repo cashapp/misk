@@ -7,8 +7,6 @@ import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.condition.DisabledOnJre
-import org.junit.jupiter.api.condition.JRE.JAVA_8
 import routeguide.Feature
 import routeguide.Point
 import javax.inject.Inject
@@ -24,7 +22,6 @@ class MiskClientMiskServerTest {
   @Inject lateinit var grpcClientProvider: Provider<GrpcClient>
 
   @Test
-  @DisabledOnJre(JAVA_8) // gRPC needs HTTP/2 which needs ALPN which needs Java 9+.
   fun requestResponse() {
     val grpcMethod = GrpcMethod("/routeguide.RouteGuide/GetFeature",
         routeguide.Point.ADAPTER, routeguide.Feature.ADAPTER)

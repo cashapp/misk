@@ -9,8 +9,6 @@ import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.condition.DisabledOnJre
-import org.junit.jupiter.api.condition.JRE.JAVA_8
 import routeguide.RouteGuideGrpc
 import routeguide.RouteGuideProto.Feature
 import routeguide.RouteGuideProto.Point
@@ -28,7 +26,6 @@ class ProtocClientProtocServerTest {
   @Inject lateinit var channelProvider: Provider<ManagedChannel>
 
   @Test
-  @DisabledOnJre(JAVA_8) // gRPC needs HTTP/2 which needs ALPN which needs Java 9+.
   fun requestResponse() {
     val channel = channelProvider.get()
     val stub = RouteGuideGrpc.newBlockingStub(channel)
