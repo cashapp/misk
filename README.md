@@ -13,9 +13,9 @@ Quick Links
 
 Web
 ---
-- [General Info on Misk Admin Dashboard / Web](/misk/web/README.md)
-- [Developing a New Tab Guide](/misk/web/tabs/README.md)
-- [Template Exemplar Web Tab](/misk/web/tabs/example)
+- [General Info on Misk Admin Dashboard / Web](https://github.com/square/misk-web/blob/master/README.md)
+- [Developing a New Tab Guide](https://github.com/square/misk-web/blob/master/HOWTO.md)
+- [Template Exemplar Web Tab](https://github.com/square/misk-web/tree/master/examples)
 
 [Recommended Workflow](https://blog.scottlowe.org/2015/01/27/using-fork-branch-git-workflow/)
 ---
