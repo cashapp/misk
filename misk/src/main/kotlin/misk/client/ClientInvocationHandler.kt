@@ -5,6 +5,7 @@ import com.squareup.moshi.Moshi
 import io.opentracing.Tracer
 import io.opentracing.contrib.okhttp3.TracingCallFactory
 import misk.web.mediatype.MediaTypes
+import okhttp3.EventListener
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -38,6 +39,7 @@ internal class ClientInvocationHandler(
   okHttpTemplate: OkHttpClient,
   networkInterceptorFactories: List<ClientNetworkInterceptor.Factory>,
   applicationInterceptorFactories: List<ClientApplicationInterceptor.Factory>,
+  eventListenerFactory : EventListener.Factory?,
   tracer: Tracer?,
   moshi: Moshi
 ) : InvocationHandler {
@@ -57,15 +59,14 @@ internal class ClientInvocationHandler(
   // need to create a separate OkHttpClient and retrofit proxy per method
   private val proxiesByMethod: Map<String, Any> = actionsByMethod.map { (methodName, action) ->
     val networkInterceptors = networkInterceptorFactories.mapNotNull { it.create(action) }
-    val actionSpecificClient =
-        if (networkInterceptors.isEmpty()) okHttpTemplate
-        else {
-          val clientBuilder = okHttpTemplate.newBuilder()
-          networkInterceptors.forEach {
-            clientBuilder.addNetworkInterceptor(NetworkInterceptorWrapper(action, it))
-          }
-          clientBuilder.build()
-        }
+    val clientBuilder = okHttpTemplate.newBuilder()
+    networkInterceptors.forEach {
+      clientBuilder.addNetworkInterceptor(NetworkInterceptorWrapper(action, it))
+    }
+    if (eventListenerFactory != null) {
+      clientBuilder.eventListenerFactory(eventListenerFactory)
+    }
+    val actionSpecificClient = clientBuilder.build()
 
     val retrofitBuilder = retrofit.newBuilder()
         .client(actionSpecificClient)

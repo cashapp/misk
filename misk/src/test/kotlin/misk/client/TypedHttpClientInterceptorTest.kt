@@ -1,7 +1,6 @@
 package misk.client
 
 import com.google.inject.Guice
-import com.google.inject.Provides
 import helpers.protos.Dinosaur
 import misk.Action
 import misk.MiskServiceModule
@@ -11,25 +10,16 @@ import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.web.NetworkChain
 import misk.web.NetworkInterceptor
-import misk.web.Post
-import misk.web.RequestBody
-import misk.web.RequestContentType
-import misk.web.ResponseContentType
-import misk.web.actions.WebActionEntry
 import misk.web.WebTestingModule
-import misk.web.actions.WebAction
+import misk.web.actions.WebActionEntry
 import misk.web.jetty.JettyService
-import misk.web.mediatype.MediaTypes
 import okhttp3.Response
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import retrofit2.Call
 import retrofit2.Callback
-import retrofit2.http.Body
-import retrofit2.http.POST
 import javax.inject.Inject
-import javax.inject.Singleton
 
 @MiskTest(startService = true)
 internal class TypedHttpClientInterceptorTest {
@@ -55,20 +45,6 @@ internal class TypedHttpClientInterceptorTest {
     assertThat(response.body()?.name!!)
         .isEqualTo("supertrex from dinosaur.getDinosaur intercepted on response")
     assertThat(response.headers()["X-Original-From"]).isEqualTo("dinosaur.getDinosaur")
-  }
-
-  interface ReturnADinosaur {
-    @POST("/cooldinos")
-    fun getDinosaur(@Body request: Dinosaur): Call<Dinosaur>
-  }
-
-  class ReturnADinosaurAction : WebAction {
-    @Post("/cooldinos")
-    @RequestContentType(MediaTypes.APPLICATION_JSON)
-    @ResponseContentType(MediaTypes.APPLICATION_JSON)
-    fun getDinosaur(@RequestBody request: Dinosaur): Dinosaur = request.newBuilder()
-        .name("super${request.name}")
-        .build()
   }
 
   /** Server [NetworkInterceptor] that echos back the X-Originating-Action from the request */
@@ -150,18 +126,9 @@ internal class TypedHttpClientInterceptorTest {
   class ClientModule(val jetty: JettyService) : KAbstractModule() {
     override fun configure() {
       install(MiskServiceModule())
-      install(TypedHttpClientModule.create<ReturnADinosaur>("dinosaur"))
+      install(DinoClientModule(jetty))
       multibind<ClientNetworkInterceptor.Factory>().to<ClientHeaderInterceptor.Factory>()
       multibind<ClientApplicationInterceptor.Factory>().to<ClientNameInterceptor.Factory>()
-    }
-
-    @Provides
-    @Singleton
-    fun provideHttpClientConfig(): HttpClientsConfig {
-      return HttpClientsConfig(
-          endpoints = mapOf(
-              "dinosaur" to HttpClientEndpointConfig(jetty.httpServerUrl.toString())
-          ))
     }
   }
 }
