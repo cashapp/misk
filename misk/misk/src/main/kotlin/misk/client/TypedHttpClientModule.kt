@@ -6,6 +6,7 @@ import com.google.inject.Provider
 import com.squareup.moshi.Moshi
 import io.opentracing.Tracer
 import misk.inject.KAbstractModule
+import okhttp3.EventListener
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import java.lang.reflect.Proxy
@@ -62,6 +63,9 @@ class TypedHttpClientModule<T : Any>(
     @Inject(optional = true)
     private val tracer: Tracer? = null
 
+    @Inject(optional = true)
+    private val eventListenerFactory: EventListener.Factory? = null
+
     @Inject
     private lateinit var httpClientConfigUrlProvider: HttpClientConfigUrlProvider
 
@@ -79,6 +83,7 @@ class TypedHttpClientModule<T : Any>(
           okhttp,
           clientNetworkInterceptorFactories,
           clientApplicationInterceptorFactories,
+          eventListenerFactory,
           tracer,
           moshi)
 
