@@ -17,14 +17,11 @@ import javax.inject.Singleton
 internal class ZkTestModule : KAbstractModule() {
   override fun configure() {
     bind<ZookeeperConfig>().toInstance(ZookeeperConfig(zk_connect = "127.0.0.1:$zkPortKey"))
-    bind<CuratorFramework>().toProvider(CuratorFrameworkProvider::class.java).asSingleton()
-    bind<LeaseManager>().to<ZkLeaseManager>()
     bind<String>().annotatedWith<AppName>().toInstance("my-app")
 
-    multibind<Service>().to<ZkService>()
     multibind<Service>().to<StartZookeeperService>()
-    multibind<Service>().to<ZkLeaseManager>()
     install(FakeClusterModule())
+    install(ZookeeperModule())
   }
 
   @Singleton
