@@ -8,7 +8,6 @@ import javax.inject.Inject
 import javax.inject.Provider
 import javax.inject.Singleton
 
-@Singleton
 internal class CuratorFrameworkProvider @Inject internal constructor(
   private val config: ZookeeperConfig
 ) : Provider<CuratorFramework> {
