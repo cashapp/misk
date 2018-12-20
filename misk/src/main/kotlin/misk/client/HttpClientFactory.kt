@@ -35,14 +35,19 @@ class HttpClientFactory {
       builder.sslSocketFactory(sslContext.socketFactory, x509TrustManager)
     }
     config.envoy?.let {
-      builder.socketFactory(
-          UnixDomainSocketFactory(envoyClientEndpointProvider.unixSocket(config.envoy)))
-      // No DNS lookup needed since we're just sending the request over a socket.
+      // No DNS lookup needed since we're just sending the request to a local socket.
       builder.dns(NoOpDns())
-      // In-flight Envoy requests do not get properly closed when those requests aren't done via HTTP/2.
-      // As such, ensure that communications via Envoy sidecar always happen over HTTP/2. Standard protocol
-      // negotiation is fine for non-Envoy sidecar (read: non-unix socket) traffic.
-      builder.protocols(listOf(Protocol.H2_PRIOR_KNOWLEDGE))
+
+      if (config.envoy.useUnixSockets!!) {
+        builder.socketFactory(
+            UnixDomainSocketFactory(envoyClientEndpointProvider.unixSocket(config.envoy)))
+        // In-flight Envoy requests do not get properly closed when those requests aren't done via HTTP/2.
+        // As such, ensure that communications via Envoy sidecar always happen over HTTP/2. Standard protocol
+        // negotiation is fine for non-Envoy sidecar (read: non-unix socket) traffic.
+        builder.protocols(listOf(Protocol.H2_PRIOR_KNOWLEDGE))
+      } else {
+        builder.socketFactory(EnvoyHttpEgressSocketFactory(envoyClientEndpointProvider.port(config.envoy)))
+      }
     }
 
     return builder.build()

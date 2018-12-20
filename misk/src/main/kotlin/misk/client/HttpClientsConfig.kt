@@ -44,5 +44,6 @@ data class HttpClientEndpointConfig(
 )
 
 data class HttpClientEnvoyConfig(
-  val app: String
+  val app: String,
+  val useUnixSockets: Boolean? = true
 )
