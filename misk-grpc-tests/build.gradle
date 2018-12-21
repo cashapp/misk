@@ -37,13 +37,13 @@ protobuf {
 compileKotlin {
   kotlinOptions {
     jvmTarget = "1.8"
-    allWarningsAsErrors = true
+     
   }
 }
 compileTestKotlin {
   kotlinOptions {
     jvmTarget = "1.8"
-    allWarningsAsErrors = true
+     
   }
 }
 
