@@ -1,9 +1,11 @@
 package misk.client
 
-import misk.security.ssl.SslLoader
+import misk.logging.getLogger
 import misk.security.ssl.SslContextFactory
+import misk.security.ssl.SslLoader
 import okhttp3.OkHttpClient
 import java.net.Proxy
+import java.time.Duration
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -24,6 +26,11 @@ class HttpClientFactory {
         TimeUnit.MILLISECONDS) }
     config.writeTimeout?.let { builder.writeTimeout(it.toMillis(),
         TimeUnit.MILLISECONDS) }
+
+    builder.readTimeout(Duration.ofHours(1))
+    builder.writeTimeout(Duration.ofHours(1))
+    builder.connectTimeout(Duration.ofHours(1))
+
     config.ssl?.let {
       val trustStore = sslLoader.loadTrustStore(it.trust_store)!!
       val trustManagers = sslContextFactory.loadTrustManagers(trustStore.keyStore)
