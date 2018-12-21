@@ -12,7 +12,6 @@ import com.github.dockerjava.netty.NettyDockerCmdExecFactory
 import com.google.common.cache.CacheBuilder
 import com.google.common.cache.CacheLoader
 import com.google.common.util.concurrent.AbstractIdleService
-import com.google.inject.Guice
 import com.squareup.moshi.Moshi
 import com.zaxxer.hikari.util.DriverDataSource
 import misk.backoff.ExponentialBackoff
@@ -25,11 +24,9 @@ import misk.jdbc.DataSourceType
 import misk.jdbc.uniqueResult
 import misk.moshi.adapter
 import misk.resources.ResourceLoader
-import misk.resources.ResourceLoaderModule
 import mu.KotlinLogging
 import okio.buffer
 import okio.source
-import java.lang.IllegalStateException
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
@@ -41,6 +38,7 @@ import kotlin.reflect.KClass
 import kotlin.streams.toList
 
 const val VITESS_VERSION = "sha256:3cef0e042dee2312e5e0d80c56a6bf1581b52063ad0441551241f6785b110c38"
+
 class Keyspace(val sharded: Boolean) {
   // Defaulting to 2 shards for sharded keyspaces,
   // maybe this should be configurable at some point?
@@ -67,7 +65,6 @@ class VitessCluster(
     } else {
       val root = config.vitess_schema_resource_root
           ?: throw IllegalStateException("vitess_schema_resource_root must be specified")
-      println("java.io.tmpdir = ${System.getProperty("java.io.tmpdir")}")
       // We can't use Files::createTempDirectory because it creates a directory under the path
       // /var/folders that is not possible to mount in Docker
       schemaDir = Paths.get("/tmp/vitess_schema_${System.currentTimeMillis()}")
@@ -279,10 +276,9 @@ class StartVitessService(
   private val qualifier: KClass<out Annotation>,
   private val environment: Environment,
   private val config: DataSourceConfig
-) :
-    AbstractIdleService() {
+) : AbstractIdleService() {
 
-  var cluster : DockerVitessCluster? = null
+  var cluster: DockerVitessCluster? = null
 
   init {
     // We need to do this outside of the service start up because this takes a really long time
@@ -297,9 +293,8 @@ class StartVitessService(
       // We only start up Vitess if Vitess has been configured
       return
     }
-    if (environment != TESTING && environment != DEVELOPMENT) {
-      // We only start up Vitess in TESTING or DEVELOPMENT
-      return
+    check(environment == TESTING || environment == DEVELOPMENT) {
+      "We should only start up Vitess in TESTING or DEVELOPMENT"
     }
 
     val name = qualifier.simpleName!!
@@ -307,7 +302,11 @@ class StartVitessService(
     cluster?.start()
   }
 
-  data class VitessClusterConfig(val name: String, val config: DataSourceConfig, val environment: Environment)
+  data class VitessClusterConfig(
+    val name: String,
+    val config: DataSourceConfig,
+    val environment: Environment
+  )
 
   fun cluster() = cluster!!.cluster
 
@@ -319,11 +318,7 @@ class StartVitessService(
     val docker: DockerClient = DockerClientBuilder.getInstance()
         .withDockerCmdExecFactory(NettyDockerCmdExecFactory())
         .build()
-    /**
-     * Vitess clusters are cached statically so we create a static instance of ResourceLoaderModule.
-     */
-    private val resourceLoader =
-        Guice.createInjector(ResourceLoaderModule()).getInstance(ResourceLoader::class.java)!!
+    val moshi = Moshi.Builder().build()
 
     /**
      * Global cache of running vitess clusters.
@@ -334,8 +329,9 @@ class StartVitessService(
           config?.let {
             val cluster = VitessCluster(
                 name = config.name,
-                resourceLoader = resourceLoader,
-                config = config.config)
+                resourceLoader = ResourceLoader.SYSTEM,
+                config = config.config,
+                moshi = moshi)
             DockerVitessCluster(cluster, docker)
           }
         })
