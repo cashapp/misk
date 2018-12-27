@@ -139,8 +139,8 @@ class SchemaValidatorTest {
 
   @Test
   fun findNullableColumnsInHibernate() {
-    assertThat(schemaValidationErrorMessage).contains(
-        "Column tbl5_hibernate_null is NOT NULL in database but tbl5_hibernate_null is nullable in hibernate")
+    assertThat(schemaValidationErrorMessage).contains("ERROR at schemavalidation.nullable_mismatch_table.tbl5_hibernate_null:\n" +
+        "  Column tbl5_hibernate_null is NOT NULL in database but tbl5_hibernate_null is nullable in hibernate")
   }
 
   @Test
