@@ -81,7 +81,8 @@ data class DataSourceConfig(
      trust_certificate_key_store_* details.
    */
   val trust_certificate_key_store_url: String? = null,
-  val trust_certificate_key_store_password: String? = null
+  val trust_certificate_key_store_password: String? = null,
+  val show_sql: String? = "false"
 )
 
 /** Configuration element for a cluster of DataSources */
