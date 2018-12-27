@@ -126,7 +126,7 @@ class SchemaValidatorTest {
   fun findMissingColumnsInHibernate() {
     assertThat(schemaValidationErrorMessage).contains(
         "Hibernate entity \"missing_columns_table\" is missing columns " +
-            "[tbl4_string_column_database, tbl4_int_column_database] " +
+            "[tbl4_string_column_database] " +
             "expected in table \"missing_columns_table\"")
   }
 

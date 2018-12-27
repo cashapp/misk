@@ -136,11 +136,8 @@ internal class SchemaValidator {
       "Database table \"${dbTable.name}\" is missing columns ${hibernateOnly.map { it.name }} found in hibernate \"${hibernateTable.name}\""
     }
 
-    // TODO (maacosta) how strict should we be here? If `DEFAULT NULL` column exists in the Db and hibernate
-    //                does not know about it hibernate can still do writes to db. However if we are going to do
-    //                lookups on this column it might not work. Do we look at queries?.
-    validate(dbOnly.isEmpty()) {
-      "Hibernate entity \"${hibernateTable.name}\" is missing columns ${dbOnly.map { it.name }} expected in table \"${dbTable.name}\""
+    validate(dbOnly.isEmpty() || dbOnly.all { it.hasDefaultValue || it.nullable }) {
+      "Hibernate entity \"${hibernateTable.name}\" is missing columns ${dbOnly.filter { !(it.hasDefaultValue || it.nullable) }.map { it.name }} expected in table \"${dbTable.name}\""
     }
 
     for ((dbColumn, hibernateColumn) in intersectionPairs) {
