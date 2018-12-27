@@ -21,6 +21,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.hibernate.SessionFactory
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import java.time.Instant
 import javax.inject.Inject
 import javax.inject.Provider
 import javax.inject.Qualifier
@@ -144,11 +145,21 @@ class SchemaValidatorTest {
   }
 
   @Test
+  fun itOkWithNotNullableColumnWithDefaults() {
+    assertThat(schemaValidationErrorMessage).doesNotContain("ERROR at schemavalidation.nullable_mismatch_table.tbl5_hibernate_null_default:")
+  }
+
+  @Test
   fun catchBadTables() {
     assertThat(schemaValidationErrorMessage).contains(
         "\"BAD_identifier_table\" should be in lower_snake_case")
     assertThat(schemaValidationErrorMessage).contains(
         "\"BAD_identifier_table\" should exactly match hibernate \"bad_identifier_table\"")
+  }
+
+  @Test
+  fun quotaTableIsOk() {
+    assertThat(schemaValidationErrorMessage).doesNotContain("quoted_basic_table")
   }
 
   @Test
@@ -202,7 +213,7 @@ class SchemaValidatorTest {
 
   @Entity
   @Table(name = "`quoted_basic_table`")
-  class DbBasicTestTable() : DbUnsharded<DbBasicTestTable> {
+  class DbBasicTestTable() : DbUnsharded<DbBasicTestTable>, DbTimestampedEntity {
 
     @javax.persistence.Id
     @GeneratedValue
@@ -223,8 +234,14 @@ class SchemaValidatorTest {
     @Column(nullable = false)
     var tbl1_int: Int = 0
 
-    @Column(name = "`tbl1_bin`")
+    @Column(name = "`tbl1_bin`", nullable = false)
     lateinit var anotherNameForThisBinColumn: ByteString
+
+    @Column
+    override lateinit var updated_at: Instant
+
+    @Column
+    override lateinit var created_at: Instant
   }
 
   @Entity
@@ -273,6 +290,9 @@ class SchemaValidatorTest {
 
     @Column
     var tbl5_hibernate_null: Int = 0
+
+    @Column
+    var tbl5_hibernate_null_default: Int = 0
 
     @Column
     var tbl5_both_null: Int = 0
