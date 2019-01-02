@@ -17,7 +17,7 @@ internal class DockerSqs {
   // the same external port as we do for the internal port
   private val clientPort = ExposedPort.tcp(CLIENT_PORT)
   private val composer = Composer("e-sqs", Container {
-    withImage("pafortin/goaws")
+    withImage("pafortin/goaws:1.0.3")
         .withName("sqs")
         .withCmd(listOf("goaws"))
         .withExposedPorts(clientPort)
