@@ -237,7 +237,7 @@ internal class SchemaValidator {
     try {
       lambda()
     } finally {
-      pathBreadcrumbs.dropLast(1)
+      pathBreadcrumbs.removeAt(pathBreadcrumbs.size - 1)
     }
   }
 
