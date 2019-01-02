@@ -61,8 +61,9 @@ internal class SchemaValidator {
 
       while (columnResultSet.next()) {
         columns += ColumnDeclaration(
-            columnResultSet.getString("COLUMN_NAME"),
-            columnResultSet.getString("IS_NULLABLE") == "YES")
+            name = columnResultSet.getString("COLUMN_NAME"),
+            nullable = columnResultSet.getString("IS_NULLABLE") == "YES",
+            hasDefaultValue = columnResultSet.getString("COLUMN_DEF")?.isNotBlank() ?: false)
       }
       schemaTables += TableDeclaration(tableName, columns)
     }
@@ -80,7 +81,8 @@ internal class SchemaValidator {
       val columns = mutableListOf<ColumnDeclaration>()
       while (columnsIt.hasNext()) {
         val column = columnsIt.next() as Column
-        columns += ColumnDeclaration(column.name, column.isNullable)
+        columns += ColumnDeclaration(column.name, column.isNullable,
+            column.defaultValue?.isNotBlank() ?: false)
       }
 
       hibernateTables += TableDeclaration(tableName, columns)
@@ -134,11 +136,8 @@ internal class SchemaValidator {
       "Database table \"${dbTable.name}\" is missing columns ${hibernateOnly.map { it.name }} found in hibernate \"${hibernateTable.name}\""
     }
 
-    // TODO (maacosta) how strict should we be here? If `DEFAULT NULL` column exists in the Db and hibernate
-    //                does not know about it hibernate can still do writes to db. However if we are going to do
-    //                lookups on this column it might not work.. do we look at queries?.
-    validate(dbOnly.isEmpty()) {
-      "Hibernate entity \"${hibernateTable.name}\" is missing columns ${dbOnly.map { it.name }} expected in table \"${dbTable.name}\""
+    validate(dbOnly.isEmpty() || dbOnly.all { it.hasDefaultValue || it.nullable }) {
+      "Hibernate entity \"${hibernateTable.name}\" is missing columns ${dbOnly.filter { !(it.hasDefaultValue || it.nullable) }.map { it.name }} expected in table \"${dbTable.name}\""
     }
 
     for ((dbColumn, hibernateColumn) in intersectionPairs) {
@@ -157,8 +156,8 @@ internal class SchemaValidator {
     }
 
     // We have that the hibernate column only needs to be null if the database is null.
-    // It's okay if hibernate is more strict.
-    validate(dbColumn.nullable || !hibernateColumn.nullable) {
+    // It's okay if hibernate is more strict. However, we shouldn't care that much if the column has a default value
+    validate(dbColumn.nullable || !hibernateColumn.nullable || dbColumn.hasDefaultValue) {
       "Column ${dbColumn.name} is NOT NULL in database but ${hibernateColumn.name} is nullable in hibernate"
     }
   }
@@ -279,7 +278,8 @@ internal data class TableDeclaration(
 
 internal data class ColumnDeclaration(
   override val name: String,
-  val nullable: Boolean
+  val nullable: Boolean,
+  val hasDefaultValue: Boolean
 ) : Declaration()
 
 internal data class Message(
