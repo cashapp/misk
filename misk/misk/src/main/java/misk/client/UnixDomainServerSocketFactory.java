@@ -1,3 +1,18 @@
+/*
+ * Copyright (C) 2018 Square, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package misk.client;
 
 import java.io.File;
@@ -9,16 +24,10 @@ import java.net.Socket;
 import java.net.SocketAddress;
 import javax.net.ServerSocketFactory;
 import jnr.unixsocket.UnixServerSocketChannel;
-import jnr.unixsocket.UnixSocket;
 import jnr.unixsocket.UnixSocketAddress;
 import jnr.unixsocket.UnixSocketChannel;
 
-/**
- * Impersonate TCP-style ServerSocketFactory over UNIX domain sockets.
- *
- * Shamelessly stolen from
- * https://github.com/square/okhttp/blob/master/samples/unixdomainsockets/src/main/java/okhttp3/unixdomainsockets/UnixDomainServerSocketFactory.java
- */
+/** Impersonate TCP-style ServerSocketFactory over UNIX domain sockets. */
 public final class UnixDomainServerSocketFactory extends ServerSocketFactory {
   private final File path;
 
@@ -72,13 +81,8 @@ public final class UnixDomainServerSocketFactory extends ServerSocketFactory {
     }
 
     @Override public Socket accept() throws IOException {
-      UnixSocketChannel socketChannel = serverSocketChannel.accept();
-
-      return new UnixSocket(socketChannel) {
-        @Override public InetAddress getInetAddress() {
-          return endpoint.getAddress(); // TODO(jwilson): fake the remote address?
-        }
-      };
+      UnixSocketChannel channel = serverSocketChannel.accept();
+      return new BlockingUnixSocket(path, channel, endpoint);
     }
 
     @Override public void close() throws IOException {
@@ -86,4 +90,3 @@ public final class UnixDomainServerSocketFactory extends ServerSocketFactory {
     }
   }
 }
-
