@@ -12,6 +12,7 @@ import misk.jdbc.DataSourceDecorator
 import misk.jdbc.DataSourceService
 import misk.jdbc.PingDatabaseService
 import misk.resources.ResourceLoader
+import misk.vitess.StartVitessService
 import org.hibernate.SessionFactory
 import org.hibernate.boot.Metadata
 import org.hibernate.event.spi.EventType
@@ -67,6 +68,8 @@ class HibernateModule(
     val dataSourceProvider = getProvider(dataSourceKey)
 
     val dataSourceServiceKey = DataSourceService::class.toKey(qualifier)
+
+    maybeBindStartVitessService()
 
     bind(configKey).toInstance(config)
 
@@ -131,5 +134,16 @@ class HibernateModule(
     })
 
     install(HibernateHealthCheckModule(qualifier, sessionFactoryProvider, config))
+  }
+
+  private fun maybeBindStartVitessService() {
+    val environment = Environment.fromEnvironmentVariable()
+    if (environment == Environment.DEVELOPMENT || environment == Environment.TESTING) {
+      val startVitessServiceKey = StartVitessService::class.toKey(qualifier)
+      multibind<Service>().to(startVitessServiceKey)
+      bind(startVitessServiceKey).toProvider(Provider<StartVitessService> {
+        StartVitessService(environment = environment, config = config, qualifier = qualifier)
+      }).asSingleton()
+    }
   }
 }

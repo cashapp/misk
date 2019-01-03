@@ -1,4 +1,4 @@
-package misk.jdbc
+package misk.vitess
 
 import com.github.dockerjava.api.DockerClient
 import com.github.dockerjava.api.model.Bind
@@ -17,31 +17,62 @@ import com.zaxxer.hikari.util.DriverDataSource
 import misk.backoff.ExponentialBackoff
 import misk.backoff.retry
 import misk.environment.Environment
+import misk.environment.Environment.DEVELOPMENT
+import misk.environment.Environment.TESTING
+import misk.jdbc.DataSourceConfig
+import misk.jdbc.DataSourceType
+import misk.jdbc.uniqueResult
 import misk.moshi.adapter
+import misk.resources.ResourceLoader
 import mu.KotlinLogging
 import okio.buffer
 import okio.source
 import java.nio.file.Files
+import java.nio.file.Path
 import java.nio.file.Paths
 import java.time.Duration
 import java.util.Properties
 import java.util.concurrent.TimeUnit
 import kotlin.concurrent.thread
+import kotlin.reflect.KClass
 import kotlin.streams.toList
 
 const val VITESS_VERSION = "sha256:3cef0e042dee2312e5e0d80c56a6bf1581b52063ad0441551241f6785b110c38"
+
 class Keyspace(val sharded: Boolean) {
   // Defaulting to 2 shards for sharded keyspaces,
   // maybe this should be configurable at some point?
   fun shardCount() = if (sharded) 2 else 1
 }
 
-class VitessCluster(val config: DataSourceConfig, moshi: Moshi = Moshi.Builder().build()) {
-  val schemaDir = Paths.get(config.vitess_schema_dir)
+class VitessCluster(
+  val name: String,
+  resourceLoader: ResourceLoader,
+  val config: DataSourceConfig,
+  val moshi: Moshi = Moshi.Builder().build()
+) {
+  val schemaDir: Path
 
   init {
-    check(Files.isDirectory(schemaDir)) {
-      "can't find directory $schemaDir"
+    if (config.vitess_schema_dir != null) {
+      schemaDir = Paths.get(config.vitess_schema_dir)
+      StartVitessService.logger.warn {
+        "vitess_schema_dir is deprecated, use vitess_schema_resource_root instead"
+      }
+      check(Files.isDirectory(schemaDir)) {
+        "can't find directory $schemaDir"
+      }
+    } else {
+      val root = config.vitess_schema_resource_root
+          ?: throw IllegalStateException("vitess_schema_resource_root must be specified")
+      // We can't use Files::createTempDirectory because it creates a directory under the path
+      // /var/folders that is not possible to mount in Docker
+      schemaDir = Paths.get("/tmp/vitess_schema_${System.currentTimeMillis()}")
+      Files.createDirectories(schemaDir)
+      resourceLoader.copyTo(root, schemaDir)
+      Runtime.getRuntime().addShutdownHook(thread(start = false) {
+        schemaDir.toFile().deleteRecursively()
+      })
     }
   }
 
@@ -65,7 +96,7 @@ class VitessCluster(val config: DataSourceConfig, moshi: Moshi = Moshi.Builder()
   fun openMysqlConnection() = mysqlDataSource().connection
 
   private fun dataSource(): DriverDataSource {
-    val jdbcUrl = config.type.buildJdbcUrl(config, Environment.TESTING)
+    val jdbcUrl = config.type.buildJdbcUrl(config, TESTING)
     return DriverDataSource(
         jdbcUrl, config.type.driverClassName, Properties(), config.username, config.password)
   }
@@ -80,7 +111,7 @@ class VitessCluster(val config: DataSourceConfig, moshi: Moshi = Moshi.Builder()
 
   private fun mysqlDataSource(): DriverDataSource {
     val config = mysqlConfig()
-    val jdbcUrl = config.type.buildJdbcUrl(config, Environment.TESTING)
+    val jdbcUrl = config.type.buildJdbcUrl(config, TESTING)
     return DriverDataSource(
         jdbcUrl, config.type.driverClassName, Properties(), config.username, config.password)
   }
@@ -241,7 +272,14 @@ class LogContainerResultCallback : ResultCallbackTemplate<LogContainerResultCall
   }
 }
 
-class StartVitessService(val config: DataSourceConfig) : AbstractIdleService() {
+class StartVitessService(
+  private val qualifier: KClass<out Annotation>,
+  private val environment: Environment,
+  private val config: DataSourceConfig
+) : AbstractIdleService() {
+
+  var cluster: DockerVitessCluster? = null
+
   init {
     // We need to do this outside of the service start up because this takes a really long time
     // the first time you do it. After that it's really fast though.
@@ -255,11 +293,22 @@ class StartVitessService(val config: DataSourceConfig) : AbstractIdleService() {
       // We only start up Vitess if Vitess has been configured
       return
     }
+    check(environment == TESTING || environment == DEVELOPMENT) {
+      "We should only start up Vitess in TESTING or DEVELOPMENT"
+    }
 
-    clusters[config].start()
+    val name = qualifier.simpleName!!
+    cluster = clusters[VitessClusterConfig(name, config, environment)]
+    cluster?.start()
   }
 
-  fun cluster() = clusters[config]!!.cluster
+  data class VitessClusterConfig(
+    val name: String,
+    val config: DataSourceConfig,
+    val environment: Environment
+  )
+
+  fun cluster() = cluster!!.cluster
 
   override fun shutDown() {
   }
@@ -269,14 +318,22 @@ class StartVitessService(val config: DataSourceConfig) : AbstractIdleService() {
     val docker: DockerClient = DockerClientBuilder.getInstance()
         .withDockerCmdExecFactory(NettyDockerCmdExecFactory())
         .build()
+    val moshi = Moshi.Builder().build()
 
     /**
      * Global cache of running vitess clusters.
      */
     val clusters = CacheBuilder.newBuilder()
-        .removalListener<DataSourceConfig, DockerVitessCluster> { it.value.stop() }
-        .build(CacheLoader.from { config: DataSourceConfig? ->
-          config?.let { DockerVitessCluster(VitessCluster(config), docker) }
+        .removalListener<VitessClusterConfig, DockerVitessCluster> { it.value.stop() }
+        .build(CacheLoader.from { config: VitessClusterConfig? ->
+          config?.let {
+            val cluster = VitessCluster(
+                name = config.name,
+                resourceLoader = ResourceLoader.SYSTEM,
+                config = config.config,
+                moshi = moshi)
+            DockerVitessCluster(cluster, docker)
+          }
         })
 
     /**
@@ -298,19 +355,4 @@ class StartVitessService(val config: DataSourceConfig) : AbstractIdleService() {
       return process.exitValue()
     }
   }
-}
-
-/**
- * Runs a Vitess cluster based on the current working directory.
- */
-fun main(args: Array<String>) {
-  val config = DataSourceConfig(type = DataSourceType.VITESS, vitess_schema_dir = ".")
-  val docker: DockerClient = DockerClientBuilder.getInstance()
-      .withDockerCmdExecFactory(NettyDockerCmdExecFactory())
-      .build()
-  val cluster = DockerVitessCluster(VitessCluster(config), docker)
-  cluster.start()
-  Runtime.getRuntime().addShutdownHook(thread(start = false) {
-    cluster.stop()
-  })
 }
