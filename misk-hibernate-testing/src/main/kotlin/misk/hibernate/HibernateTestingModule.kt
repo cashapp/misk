@@ -7,7 +7,7 @@ import misk.inject.asSingleton
 import misk.inject.toKey
 import misk.jdbc.DataSourceConfig
 import misk.jdbc.DataSourceDecorator
-import misk.jdbc.StartVitessService
+import misk.vitess.StartVitessService
 import misk.jdbc.TruncateTablesService
 import misk.jdbc.VitessScaleSafetyChecks
 import okhttp3.OkHttpClient
@@ -39,12 +39,6 @@ class HibernateTestingModule(
 
     val transacterKey = Transacter::class.toKey(qualifier)
     val transacterProvider = getProvider(transacterKey)
-
-    multibind<Service>().to(startVitessServiceKey)
-
-    bind(startVitessServiceKey).toProvider(Provider<StartVitessService> {
-      StartVitessService(config = configProvider.get())
-    }).asSingleton()
 
     val moshiProvider = getProvider(Moshi::class.java)
     val okHttpClientProvider = getProvider(OkHttpClient::class.java)

@@ -124,4 +124,15 @@ class ResourceLoaderTest {
     assertThat(resourceLoader.utf8("unknown:/misk/resources/ResourceLoaderTest.txt")).isNull()
     assertThat(resourceLoader.list("unknown:/misk/resources/")).isEmpty()
   }
+
+  @Test
+  fun copyTo() {
+    val tempRoot = tempFolder.root.toAbsolutePath()
+    resourceLoader.copyTo("classpath:/misk/resources", tempRoot)
+    val prefix = "filesystem:$tempRoot"
+    assertThat(resourceLoader.utf8("$prefix/ResourceLoaderTest.txt")!!)
+        .isEqualTo("69e0753934d2838d1953602ca7722444\n")
+    assertThat(resourceLoader.utf8("$prefix/nested/nested.txt")!!)
+        .isEqualTo("I am nested\n")
+  }
 }

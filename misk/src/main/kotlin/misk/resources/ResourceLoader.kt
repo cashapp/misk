@@ -5,6 +5,10 @@ import misk.resources.ResourceLoader.Backend
 import okio.BufferedSource
 import okio.ByteString
 import okio.ByteString.Companion.encodeUtf8
+import okio.buffer
+import okio.sink
+import java.nio.file.Files
+import java.nio.file.Path
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -110,6 +114,32 @@ class ResourceLoader @Inject constructor(
   private fun parseAddress(path: String): Address {
     val colon = path.indexOf(':')
     return Address(path.substring(0, colon + 1), path.substring(colon + 1))
+  }
+
+  /**
+   * Copies all resources with [root] as a prefix to the directory [dir].
+   */
+  fun copyTo(root: String, dir: Path) {
+    val (scheme, path) = parseAddress(root)
+    val prefix = if (path.endsWith("/")) path else "$path/"
+    for (resource in backends[scheme].all()) {
+      if (resource.startsWith(prefix)) {
+        copyResource("$scheme$resource", dir.resolve(resource.substring(prefix.length)))
+      }
+    }
+  }
+
+  /**
+   * Copy the resource to the specified filename [destination], creating all of the parent
+   * directories if necessary.
+   */
+  private fun copyResource(address: String, destination: Path) {
+    Files.createDirectories(destination.parent)
+    open(address).use { i ->
+      destination.sink().buffer().use { o ->
+        o.writeAll(i!!)
+      }
+    }
   }
 
   private data class Address(val scheme: String, val path: String)

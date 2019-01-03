@@ -3,6 +3,7 @@ package misk.jdbc
 import com.squareup.moshi.Moshi
 import misk.moshi.adapter
 import misk.okio.split
+import misk.vitess.StartVitessService
 import mu.KotlinLogging
 import net.ttddyy.dsproxy.ExecutionInfo
 import net.ttddyy.dsproxy.QueryInfo
