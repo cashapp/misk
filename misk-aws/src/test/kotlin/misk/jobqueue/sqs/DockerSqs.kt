@@ -1,11 +1,15 @@
 package misk.jobqueue.sqs
 
+import com.amazonaws.services.sqs.AmazonSQS
+import com.amazonaws.services.sqs.model.QueueDoesNotExistException
 import com.github.dockerjava.api.model.ExposedPort
 import com.github.dockerjava.api.model.Ports
 import com.google.common.util.concurrent.AbstractIdleService
 import misk.containers.Composer
 import misk.containers.Container
 import misk.jobqueue.sqs.DockerSqs.Companion.CLIENT_PORT
+import misk.logging.getLogger
+import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
@@ -17,7 +21,7 @@ internal class DockerSqs {
   // the same external port as we do for the internal port
   private val clientPort = ExposedPort.tcp(CLIENT_PORT)
   private val composer = Composer("e-sqs", Container {
-    withImage("pafortin/goaws:1.0.3")
+    withImage("pafortin/goaws")
         .withName("sqs")
         .withCmd(listOf("goaws"))
         .withExposedPorts(clientPort)
@@ -34,18 +38,32 @@ internal class DockerSqs {
 
 
   @Singleton
-  internal class Service(val sqs: DockerSqs = DockerSqs()) : AbstractIdleService() {
+  internal class Service @Inject constructor(
+    private val server: DockerSqs,
+    private val client: AmazonSQS
+  ) : AbstractIdleService() {
     override fun startUp() {
-      sqs.start()
+      server.start()
+      while (true) {
+        try {
+          client.getQueueUrl("does not exist")
+        } catch (e: Exception) {
+          if (e is QueueDoesNotExistException) {
+            break
+          }
+          log.info { "sqs not available yet" }
+          Thread.sleep(100)
+        }
+      }
     }
 
     override fun shutDown() {
-      sqs.stop()
+      server.stop()
     }
   }
 
   companion object {
-
+    private val log = getLogger<DockerSqs>()
     const val CLIENT_PORT = 4100
   }
 }
