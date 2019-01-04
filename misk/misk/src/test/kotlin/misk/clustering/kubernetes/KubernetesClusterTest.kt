@@ -7,7 +7,7 @@ import io.kubernetes.client.models.V1ObjectMeta
 import io.kubernetes.client.models.V1Pod
 import io.kubernetes.client.models.V1PodStatus
 import io.kubernetes.client.util.Watches
-import misk.MiskServiceModule
+import misk.MiskTestingServiceModule
 import misk.clustering.Cluster
 import misk.clustering.ClusterHashRing
 import misk.clustering.DefaultCluster
@@ -26,7 +26,7 @@ import javax.inject.Inject
 @MiskTest(startService = true)
 internal class KubernetesClusterTest {
   @MiskTestModule val module: Module = Modules.combine(
-      MiskServiceModule(),
+      MiskTestingServiceModule(),
       object : KAbstractModule() {
         override fun configure() {
           install(KubernetesClusterModule())

@@ -1,7 +1,7 @@
 package misk.grpc
 
 import com.google.inject.util.Modules
-import misk.MiskServiceModule
+import misk.MiskTestingServiceModule
 import misk.grpc.miskclient.MiskGrpcClientModule
 import misk.grpc.protocserver.RouteGuideProtocServiceModule
 import misk.testing.MiskTest
@@ -19,7 +19,7 @@ class MiskClientProtocServerTest {
   val module = Modules.combine(
       MiskGrpcClientModule(),
       RouteGuideProtocServiceModule(),
-      MiskServiceModule())
+      MiskTestingServiceModule())
 
   @Inject lateinit var grpcClientProvider: Provider<GrpcClient>
 

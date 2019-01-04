@@ -2,7 +2,8 @@ package com.squareup.exemplar;
 
 import com.google.common.collect.ImmutableList;
 import misk.MiskApplication;
-import misk.MiskServiceModule;
+import misk.MiskRealServiceModule;
+import misk.MiskTestingServiceModule;
 import misk.config.ConfigModule;
 import misk.config.MiskConfig;
 import misk.environment.Environment;
@@ -16,7 +17,7 @@ public class ExemplarJavaApp {
         environment, ImmutableList.of());
 
     new MiskApplication(
-        new MiskServiceModule(),
+        new MiskRealServiceModule(),
         new MiskWebModule(),
         new ExemplarJavaModule(),
         new ConfigModule<>(ExemplarJavaConfig.class, "exemplar", config),

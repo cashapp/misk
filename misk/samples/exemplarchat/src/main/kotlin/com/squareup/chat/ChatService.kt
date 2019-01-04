@@ -1,7 +1,8 @@
 package com.squareup.chat
 
 import misk.MiskApplication
-import misk.MiskServiceModule
+import misk.MiskRealServiceModule
+import misk.MiskTestingServiceModule
 import misk.config.ConfigModule
 import misk.config.MiskConfig
 import misk.environment.Environment
@@ -15,7 +16,7 @@ fun main(args: Array<String>) {
   val config = MiskConfig.load<ChatConfig>("chat", environment)
 
   MiskApplication(
-      MiskServiceModule(),
+      MiskRealServiceModule(),
       MiskWebModule(),
       RealEventRouterModule(environment),
       ChatModule(),

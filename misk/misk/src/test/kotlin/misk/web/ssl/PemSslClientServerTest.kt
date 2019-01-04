@@ -4,7 +4,7 @@ import com.google.inject.Guice
 import com.google.inject.Provides
 import com.google.inject.name.Names
 import helpers.protos.Dinosaur
-import misk.MiskServiceModule
+import misk.MiskTestingServiceModule
 import misk.client.HttpClientEndpointConfig
 import misk.client.HttpClientModule
 import misk.client.HttpClientSSLConfig
@@ -118,7 +118,7 @@ internal class PemSslClientServerTest {
   // need to create the client module _after_ we start the services
   class ClientModule(val jetty: JettyService) : KAbstractModule() {
     override fun configure() {
-      install(MiskServiceModule())
+      install(MiskTestingServiceModule())
       install(HttpClientModule("cert-and-trust", Names.named("cert-and-trust")))
       install(HttpClientModule("no-cert", Names.named("no-cert")))
       install(HttpClientModule("no-trust", Names.named("no-trust")))

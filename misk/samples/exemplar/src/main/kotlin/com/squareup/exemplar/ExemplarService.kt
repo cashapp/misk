@@ -1,7 +1,8 @@
 package com.squareup.exemplar
 
 import misk.MiskApplication
-import misk.MiskServiceModule
+import misk.MiskRealServiceModule
+import misk.MiskTestingServiceModule
 import misk.config.ConfigModule
 import misk.config.MiskConfig
 import misk.environment.Environment
@@ -14,7 +15,7 @@ fun main(args: Array<String>) {
   val config = MiskConfig.load<ExemplarConfig>("exemplar", environment)
 
   MiskApplication(
-      MiskServiceModule(),
+      MiskRealServiceModule(),
       MiskWebModule(),
       ExemplarModule(),
       ConfigModule.create("exemplar", config),

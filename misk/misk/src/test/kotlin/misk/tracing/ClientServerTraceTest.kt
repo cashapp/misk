@@ -8,7 +8,7 @@ import helpers.protos.Dinosaur
 import io.opentracing.Tracer
 import io.opentracing.mock.MockSpan
 import io.opentracing.mock.MockTracer
-import misk.MiskServiceModule
+import misk.MiskTestingServiceModule
 import misk.client.HttpClientEndpointConfig
 import misk.client.HttpClientsConfig
 import misk.client.TypedHttpClientModule
@@ -57,7 +57,7 @@ internal class ClientServerTraceTest {
   @BeforeEach
   fun createClient() {
     clientInjector = Guice.createInjector(
-        MockTracingBackendModule(), MiskServiceModule(), ClientModule(jetty))
+        MockTracingBackendModule(), MiskTestingServiceModule(), ClientModule(jetty))
   }
 
   @Test
@@ -84,7 +84,7 @@ internal class ClientServerTraceTest {
 
   @Test
   fun noTracerNoTracesOrFailures() {
-    val clientInjector = Guice.createInjector(MiskServiceModule(), ClientModule(jetty))
+    val clientInjector = Guice.createInjector(MiskTestingServiceModule(), ClientModule(jetty))
     val client = clientInjector.getInstance<ReturnADinosaur>(Names.named("dinosaur"))
 
     client.getDinosaur(dinosaurRequest).execute()

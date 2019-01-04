@@ -4,7 +4,7 @@ import com.google.inject.Guice
 import com.google.inject.Injector
 import com.google.inject.Provides
 import com.google.inject.name.Names
-import misk.MiskServiceModule
+import misk.MiskTestingServiceModule
 import misk.metrics.Histogram
 import misk.inject.KAbstractModule
 import misk.inject.getInstance
@@ -107,7 +107,7 @@ internal class ClientMetricsInterceptorTest {
 
   class ClientModule(val jetty: JettyService) : KAbstractModule() {
     override fun configure() {
-      install(MiskServiceModule())
+      install(MiskTestingServiceModule())
       install(PrometheusHistogramRegistryModule())
       install(TypedHttpClientModule.create<Pinger>("pinger", Names.named("pinger")))
       multibind<ClientNetworkInterceptor.Factory>().to<ClientMetricsInterceptor.Factory>()

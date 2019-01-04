@@ -4,7 +4,7 @@ import com.google.inject.Guice
 import com.google.inject.Provides
 import com.squareup.protos.test.grpc.HelloReply
 import com.squareup.protos.test.grpc.HelloRequest
-import misk.MiskServiceModule
+import misk.MiskTestingServiceModule
 import misk.client.HttpClientEndpointConfig
 import misk.client.HttpClientModule
 import misk.client.HttpClientSSLConfig
@@ -108,7 +108,7 @@ class GrpcConnectivityTest {
   // _after_ we start the services
   class ClientModule(val jetty: JettyService) : KAbstractModule() {
     override fun configure() {
-      install(MiskServiceModule())
+      install(MiskTestingServiceModule())
       install(HttpClientModule("default"))
     }
 

@@ -1,10 +1,8 @@
 package misk.client
 
 import com.google.inject.Guice
-import com.google.inject.Provides
 import helpers.protos.Dinosaur
-import junit.framework.TestListener
-import misk.MiskServiceModule
+import misk.MiskTestingServiceModule
 import misk.inject.KAbstractModule
 import misk.inject.getInstance
 import misk.testing.MiskTest
@@ -55,7 +53,7 @@ internal class HttpClientEventListenerTest {
   class ClientModule(val jetty: JettyService, val eventListener : TestEventListener)
     : KAbstractModule() {
     override fun configure() {
-      install(MiskServiceModule())
+      install(MiskTestingServiceModule())
       install(DinoClientModule(jetty))
       bind<EventListener.Factory>().to<TestEventListenerFactory>()
       bind<TestEventListener>().toInstance(eventListener)

@@ -5,7 +5,7 @@ import com.google.inject.Provides
 import com.google.inject.name.Named
 import com.google.inject.name.Names
 import helpers.protos.Dinosaur
-import misk.MiskServiceModule
+import misk.MiskTestingServiceModule
 import misk.inject.KAbstractModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
@@ -73,7 +73,7 @@ internal class HttpClientEnvoyTest {
 
   class TestModule : KAbstractModule() {
     override fun configure() {
-      install(MiskServiceModule())
+      install(MiskTestingServiceModule())
 
       bind<MockWebServerService>().toInstance(MockWebServerService("@socket"))
       multibind<Service>().to<MockWebServerService>()
