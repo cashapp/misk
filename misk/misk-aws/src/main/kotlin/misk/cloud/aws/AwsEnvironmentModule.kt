@@ -1,21 +1,30 @@
 package misk.cloud.aws
 
+import com.google.inject.Provides
+import misk.environment.EnvVarLoader
+import misk.environment.ForEnvVars
 import misk.inject.KAbstractModule
-import java.lang.System.getenv
 
 /** [AwsEnvironmentModule] pulls region and account information from installed env vars */
-class AwsEnvironmentModule(
-  private val region: String = getRequiredEnv("REGION"),
-  private val accountId: String = getRequiredEnv("ACCOUNT_ID")
-) : KAbstractModule() {
-  override fun configure() {
-    bind<AwsRegion>().toInstance(AwsRegion(region))
-    bind<AwsAccountId>().toInstance(AwsAccountId(accountId))
+class AwsEnvironmentModule : KAbstractModule() {
+
+  @Provides fun awsRegion(envVarLoader: EnvVarLoader): AwsRegion {
+    return AwsRegion(envVarLoader.getEnvVar("REGION"))
   }
 
-  companion object {
-    private fun getRequiredEnv(name: String): String {
-      return getenv(name) ?: throw IllegalStateException("$name env var not set")
-    }
+  @Provides fun awsAccountId(envVarLoader: EnvVarLoader): AwsAccountId {
+    return AwsAccountId(envVarLoader.getEnvVar("ACCOUNT_ID"))
+  }
+}
+
+/**
+ * [FakeAwsEnvironmentModule] pulls region and account information from an in memory map.
+ */
+class FakeAwsEnvironmentModule : KAbstractModule() {
+  override fun configure() {
+    newMapBinder<String, String>(ForEnvVars::class)
+        .addBinding("REGION").toInstance("us-east-1")
+    newMapBinder<String, String>(ForEnvVars::class)
+        .addBinding("ACCOUNT_ID").toInstance("8675309")
   }
 }
