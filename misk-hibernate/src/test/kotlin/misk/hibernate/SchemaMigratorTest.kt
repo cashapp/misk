@@ -4,7 +4,7 @@ import com.google.common.util.concurrent.AbstractIdleService
 import com.google.common.util.concurrent.Service
 import com.google.inject.Key
 import misk.DependentService
-import misk.MiskServiceModule
+import misk.MiskTestingServiceModule
 import misk.config.Config
 import misk.config.MiskConfig
 import misk.environment.Environment
@@ -59,7 +59,7 @@ internal class SchemaMigratorTest {
   @MiskTestModule
   val module = object : KAbstractModule() {
     override fun configure() {
-      install(MiskServiceModule())
+      install(MiskTestingServiceModule())
       multibind<Service>().to<DropTablesService>()
       multibind<Service>().toInstance(
           PingDatabaseService(Movies::class, config.data_source, defaultEnv))

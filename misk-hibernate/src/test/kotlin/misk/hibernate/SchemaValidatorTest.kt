@@ -2,7 +2,7 @@ package misk.hibernate
 
 import com.google.common.util.concurrent.Service
 import com.google.inject.Key
-import misk.MiskServiceModule
+import misk.MiskTestingServiceModule
 import misk.config.Config
 import misk.config.MiskConfig
 import misk.environment.Environment
@@ -42,7 +42,7 @@ class SchemaValidatorTest {
 
   inner class TestModule : KAbstractModule() {
     override fun configure() {
-      install(MiskServiceModule())
+      install(MiskTestingServiceModule())
       val qualifier = ValidationDb::class
 
       val dataSourceService =

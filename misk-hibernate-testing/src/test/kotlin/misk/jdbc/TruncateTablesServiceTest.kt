@@ -2,7 +2,7 @@ package misk.jdbc
 
 import com.google.inject.util.Providers
 import com.squareup.moshi.Moshi
-import misk.MiskServiceModule
+import misk.MiskTestingServiceModule
 import misk.config.Config
 import misk.config.MiskConfig
 import misk.environment.Environment
@@ -120,7 +120,7 @@ internal class TruncateTablesServiceTest {
   class TestModule : KAbstractModule() {
     override fun configure() {
       bind<Environment>().toInstance(Environment.TESTING)
-      install(MiskServiceModule())
+      install(MiskTestingServiceModule())
 
       val config = MiskConfig.load<TestConfig>("test_truncatetables_app", Environment.TESTING)
       install(HibernateModule(

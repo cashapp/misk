@@ -1,6 +1,6 @@
 package misk.hibernate
 
-import misk.MiskServiceModule
+import misk.MiskTestingServiceModule
 import misk.config.Config
 import misk.config.MiskConfig
 import misk.environment.Environment
@@ -87,7 +87,7 @@ class ProtoColumnTest {
   }
   class TestModule : KAbstractModule() {
     override fun configure() {
-      install(MiskServiceModule())
+      install(MiskTestingServiceModule())
       install(EnvironmentModule(Environment.TESTING))
 
       val config = MiskConfig.load<RootConfig>("protocolumn", Environment.TESTING)

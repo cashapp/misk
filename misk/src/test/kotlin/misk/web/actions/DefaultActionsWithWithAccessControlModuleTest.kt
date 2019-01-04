@@ -1,7 +1,7 @@
 package misk.web.actions
 
 import misk.MiskCaller
-import misk.MiskServiceModule
+import misk.MiskTestingServiceModule
 import misk.inject.KAbstractModule
 import misk.security.authz.MiskCallerAuthenticator
 import misk.testing.MiskTest
@@ -13,7 +13,7 @@ internal class DefaultActionsWorkWithAccessControlModuleTest {
   @MiskTestModule
   val module = object : KAbstractModule() {
     override fun configure() {
-      install(MiskServiceModule())
+      install(MiskTestingServiceModule())
       multibind<MiskCallerAuthenticator>().to<ExampleAuthenticator>()
     }
   }

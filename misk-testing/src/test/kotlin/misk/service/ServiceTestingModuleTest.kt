@@ -6,7 +6,7 @@ import com.google.common.util.concurrent.ServiceManager
 import com.google.inject.Guice
 import com.google.inject.Key
 import misk.DependentService
-import misk.MiskServiceModule
+import misk.MiskTestingServiceModule
 import misk.inject.KAbstractModule
 import misk.inject.getInstance
 import misk.inject.keyOf
@@ -20,7 +20,7 @@ internal class ServiceTestingModuleTest {
   @Test fun serviceTestModuleAddsTestSpecificDependency() {
     val injector = Guice.createInjector(object : KAbstractModule() {
       override fun configure() {
-        install(MiskServiceModule())
+        install(MiskTestingServiceModule())
         multibind<Service>().to<LowestLevelService>()
         install(ServiceTestingModule.withExtraDependencies<AppService>(
             keyOf<ExternalServiceSpinupService>())

@@ -1,7 +1,7 @@
 package misk.hibernate
 
 import com.google.inject.util.Modules
-import misk.MiskServiceModule
+import misk.MiskTestingServiceModule
 import misk.config.Config
 import misk.config.MiskConfig
 import misk.jdbc.DataSourceConfig
@@ -23,7 +23,7 @@ class MoviesTestModule(
   override fun configure() {
     install(LogCollectorModule())
     install(
-        Modules.override(MiskServiceModule()).with(FakeClockModule(), MockTracingBackendModule()))
+        Modules.override(MiskTestingServiceModule()).with(FakeClockModule(), MockTracingBackendModule()))
     install(EnvironmentModule(Environment.TESTING))
 
     val config = MiskConfig.load<MoviesConfig>("moviestestmodule", Environment.TESTING)

@@ -2,7 +2,7 @@ package misk.web.actions
 
 import com.google.common.util.concurrent.ServiceManager
 import com.google.inject.util.Modules
-import misk.MiskServiceModule
+import misk.MiskTestingServiceModule
 import misk.healthchecks.FakeHealthCheck
 import misk.healthchecks.FakeHealthCheckModule
 import misk.services.FakeServiceModule
@@ -16,7 +16,7 @@ import javax.inject.Inject
 class ReadinessCheckActionTest {
   @MiskTestModule
   val module = Modules.combine(
-      MiskServiceModule(),
+      MiskTestingServiceModule(),
       FakeServiceModule(),
       FakeHealthCheckModule()
   )

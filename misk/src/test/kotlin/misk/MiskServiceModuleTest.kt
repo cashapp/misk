@@ -69,7 +69,7 @@ internal class MiskServiceModuleTest {
   @Test fun detectsNonSingletonServices() {
     assertThat(assertFailsWith<com.google.inject.ProvisionException> {
       val injector = Guice.createInjector(
-          MiskServiceModule(),
+          MiskTestingServiceModule(),
           object : KAbstractModule() {
             override fun configure() {
               // Should be recognized as singletons

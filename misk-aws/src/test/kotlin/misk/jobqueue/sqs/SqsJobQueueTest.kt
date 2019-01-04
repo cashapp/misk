@@ -10,7 +10,7 @@ import com.amazonaws.services.sqs.model.CreateQueueRequest
 import com.google.common.util.concurrent.Service
 import com.google.inject.Provides
 import com.google.inject.util.Modules
-import misk.MiskServiceModule
+import misk.MiskTestingServiceModule
 import misk.cloud.aws.AwsRegion
 import misk.inject.KAbstractModule
 import misk.jobqueue.Job
@@ -228,7 +228,7 @@ internal class SqsJobQueueTest {
   class TestModule : KAbstractModule() {
     override fun configure() {
       multibind<Service>().to<DockerSqs.Service>()
-      install(MiskServiceModule())
+      install(MiskTestingServiceModule())
       install(MockTracingBackendModule())
       install(Modules.override(AwsSqsJobQueueModule()).with(SQSTestModule()))
     }

@@ -3,7 +3,7 @@ package misk.client
 import com.google.inject.Guice
 import helpers.protos.Dinosaur
 import misk.Action
-import misk.MiskServiceModule
+import misk.MiskTestingServiceModule
 import misk.inject.KAbstractModule
 import misk.inject.getInstance
 import misk.testing.MiskTest
@@ -125,7 +125,7 @@ internal class TypedHttpClientInterceptorTest {
 
   class ClientModule(val jetty: JettyService) : KAbstractModule() {
     override fun configure() {
-      install(MiskServiceModule())
+      install(MiskTestingServiceModule())
       install(DinoClientModule(jetty))
       multibind<ClientNetworkInterceptor.Factory>().to<ClientHeaderInterceptor.Factory>()
       multibind<ClientApplicationInterceptor.Factory>().to<ClientNameInterceptor.Factory>()

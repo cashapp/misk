@@ -2,7 +2,7 @@ package misk.grpc
 
 import com.google.inject.util.Modules
 import io.grpc.ManagedChannel
-import misk.MiskServiceModule
+import misk.MiskTestingServiceModule
 import misk.grpc.protocclient.ProtocGrpcClientModule
 import misk.grpc.protocserver.RouteGuideProtocServiceModule
 import misk.testing.MiskTest
@@ -21,7 +21,7 @@ class ProtocClientProtocServerTest {
   val module = Modules.combine(
       ProtocGrpcClientModule(),
       RouteGuideProtocServiceModule(),
-      MiskServiceModule())
+      MiskTestingServiceModule())
 
   @Inject lateinit var channelProvider: Provider<ManagedChannel>
 
