@@ -1,7 +1,7 @@
 package misk.clustering.zookeeper
 
 import com.google.inject.util.Modules
-import misk.MiskServiceModule
+import misk.MiskTestingServiceModule
 import misk.clustering.Cluster
 import misk.clustering.fake.FakeCluster
 import misk.testing.MiskTest
@@ -18,7 +18,7 @@ import javax.inject.Inject
 
 @MiskTest(startService = true)
 internal class ZkLeaseTest {
-  @MiskTestModule private val module = Modules.combine(MiskServiceModule(), ZkTestModule())
+  @MiskTestModule private val module = Modules.combine(MiskTestingServiceModule(), ZkTestModule())
 
   @Inject lateinit var cluster: FakeCluster
   @Inject lateinit var leaseManager: ZkLeaseManager

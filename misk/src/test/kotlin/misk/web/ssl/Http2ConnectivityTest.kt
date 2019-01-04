@@ -2,7 +2,7 @@ package misk.web.ssl
 
 import com.google.inject.Guice
 import com.google.inject.Provides
-import misk.MiskServiceModule
+import misk.MiskTestingServiceModule
 import misk.client.HttpClientEndpointConfig
 import misk.client.HttpClientModule
 import misk.client.HttpClientSSLConfig
@@ -25,10 +25,7 @@ import okhttp3.Protocol
 import okhttp3.Request
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.condition.DisabledOnJre
-import org.junit.jupiter.api.condition.JRE
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -105,7 +102,7 @@ class Http2ConnectivityTest {
   // _after_ we start the services
   class ClientModule(val jetty: JettyService) : KAbstractModule() {
     override fun configure() {
-      install(MiskServiceModule())
+      install(MiskTestingServiceModule())
       install(HttpClientModule("default"))
     }
 

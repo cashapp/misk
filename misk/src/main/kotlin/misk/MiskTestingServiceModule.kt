@@ -18,24 +18,59 @@ import com.google.inject.spi.InstanceBinding
 import com.google.inject.spi.LinkedKeyBinding
 import com.google.inject.spi.ProviderInstanceBinding
 import com.google.inject.util.Types
+import misk.environment.FakeEnvVarModule
+import misk.environment.RealEnvVarModule
 import misk.healthchecks.HealthCheck
 import misk.inject.KAbstractModule
 import misk.metrics.MetricsModule
 import misk.moshi.MoshiModule
 import misk.prometheus.PrometheusHistogramRegistryModule
 import misk.resources.ResourceLoaderModule
+import misk.resources.TestingResourceLoaderModule
 import misk.time.ClockModule
 import misk.tokens.TokenGeneratorModule
 import javax.inject.Singleton
 
-class MiskServiceModule : KAbstractModule() {
+/**
+ * [MiskRealServiceModule] should be installed in real environments.
+ *
+ * The vast majority of Service bindings belong in [MiskCommonServiceModule], in order to share
+ * with [MiskTestingServiceModule]. Only bindings that are not suitable for a unit testing
+ * environment belong here.
+ */
+class MiskRealServiceModule : KAbstractModule() {
+  override fun configure() {
+    install(ResourceLoaderModule())
+    install(RealEnvVarModule())
+    install(MiskCommonServiceModule())
+  }
+}
+
+/**
+ * [MiskTestingServiceModule] should be installed in unit testing environments.
+ *
+ * This should not contain application level fakes for testing. It includes a small, selective
+ * set of fake bindings to replace real bindings that cannot exist in a unit testing environment
+ * (e.g system env vars and filesystem dependencies).
+ */
+class MiskTestingServiceModule : KAbstractModule() {
+  override fun configure() {
+    install(TestingResourceLoaderModule())
+    install(FakeEnvVarModule())
+    install(MiskCommonServiceModule())
+  }  
+}
+
+/**
+ * [MiskCommonServiceModule] has common bindings for all environments (both real and testing)
+ */
+private class MiskCommonServiceModule : KAbstractModule() {
   override fun configure() {
     binder().disableCircularProxies()
     binder().requireExactBindingAnnotations()
     install(MetricsModule())
     install(ClockModule())
     install(MoshiModule())
-    install(ResourceLoaderModule())
     install(TokenGeneratorModule())
     install(PrometheusHistogramRegistryModule())
 
@@ -99,4 +134,6 @@ class MiskServiceModule : KAbstractModule() {
     @Suppress("UNCHECKED_CAST")
     val serviceSetKey = Key.get(Types.setOf(Service::class.java)) as Key<Set<Service>>
   }
+
 }
+

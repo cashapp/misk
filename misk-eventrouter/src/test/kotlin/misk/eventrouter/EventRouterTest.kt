@@ -1,7 +1,7 @@
 package misk.eventrouter
 
 import com.google.inject.util.Modules
-import misk.MiskServiceModule
+import misk.MiskTestingServiceModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
@@ -11,7 +11,7 @@ import javax.inject.Inject
 @MiskTest(startService = false)
 internal class EventRouterTest {
   @MiskTestModule
-  val module = Modules.combine(MiskServiceModule(),
+  val module = Modules.combine(MiskTestingServiceModule(),
       EventRouterTestingModule(distributed = true))
 
   @Inject lateinit var machineA: RealEventRouter

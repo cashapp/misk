@@ -2,7 +2,7 @@ package com.squareup.chat
 
 import com.google.inject.util.Modules
 import com.squareup.chat.actions.ChatWebSocketAction
-import misk.MiskServiceModule
+import misk.MiskTestingServiceModule
 import misk.eventrouter.EventRouterTester
 import misk.eventrouter.EventRouterTestingModule
 import misk.testing.MiskTest
@@ -15,7 +15,7 @@ import javax.inject.Inject
 @MiskTest(startService = true)
 class ChatWebSocketActionTest {
   @MiskTestModule
-  val module = Modules.combine(MiskServiceModule(), EventRouterTestingModule())
+  val module = Modules.combine(MiskTestingServiceModule(), EventRouterTestingModule())
 
   @Inject lateinit var chatWebSocketAction: ChatWebSocketAction
   @Inject lateinit var eventRouterTester: EventRouterTester

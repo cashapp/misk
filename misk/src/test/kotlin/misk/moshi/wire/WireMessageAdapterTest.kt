@@ -4,7 +4,7 @@ import com.squareup.moshi.Moshi
 import com.squareup.protos.test.parsing.Robot
 import com.squareup.protos.test.parsing.Shipment
 import com.squareup.protos.test.parsing.Warehouse
-import misk.MiskServiceModule
+import misk.MiskTestingServiceModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import okio.ByteString.Companion.encodeUtf8
@@ -17,7 +17,7 @@ import kotlin.test.assertFailsWith
 @MiskTest(startService = false)
 internal class WireMessageAdapterTest {
   @MiskTestModule
-  val module = MiskServiceModule()
+  val module = MiskTestingServiceModule()
 
   @Inject
   lateinit var moshi: Moshi

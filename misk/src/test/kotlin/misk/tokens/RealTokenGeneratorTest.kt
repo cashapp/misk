@@ -1,6 +1,6 @@
 package misk.tokens
 
-import misk.MiskServiceModule
+import misk.MiskTestingServiceModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
@@ -11,7 +11,7 @@ import kotlin.test.assertFailsWith
 @MiskTest
 class RealTokenGeneratorTest {
   @MiskTestModule
-  val module = MiskServiceModule()
+  val module = MiskTestingServiceModule()
 
   @Inject lateinit var tokenGenerator: TokenGenerator
 

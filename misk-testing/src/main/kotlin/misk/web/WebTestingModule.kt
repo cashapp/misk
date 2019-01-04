@@ -1,7 +1,7 @@
 package misk.web
 
 import com.google.inject.Provides
-import misk.MiskServiceModule
+import misk.MiskTestingServiceModule
 import misk.environment.Environment
 import misk.environment.EnvironmentModule
 import misk.inject.KAbstractModule
@@ -29,7 +29,7 @@ class WebTestingModule(
 ) : KAbstractModule() {
   override fun configure() {
     install(EnvironmentModule(Environment.TESTING))
-    install(MiskServiceModule())
+    install(MiskTestingServiceModule())
     install(MiskWebModule())
   }
 
