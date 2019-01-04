@@ -1,7 +1,7 @@
 package misk.flags
 
 import com.google.inject.name.Named
-import misk.MiskServiceModule
+import misk.MiskTestingServiceModule
 import misk.flags.memory.InMemoryFlagStore
 import misk.flags.memory.InMemoryFlagStoreModule
 import misk.inject.KAbstractModule
@@ -28,7 +28,7 @@ class FlagPropertiesTest {
   @MiskTestModule
   val testModule = object : KAbstractModule() {
     override fun configure() {
-      install(MiskServiceModule())
+      install(MiskTestingServiceModule())
       install(InMemoryFlagStoreModule())
       install(object : FlagsModule() {
         override fun configureFlags() {

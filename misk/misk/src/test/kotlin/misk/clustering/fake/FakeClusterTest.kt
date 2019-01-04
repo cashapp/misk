@@ -1,7 +1,7 @@
 package misk.clustering.fake
 
 import com.google.inject.util.Modules
-import misk.MiskServiceModule
+import misk.MiskTestingServiceModule
 import misk.clustering.Cluster
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
@@ -12,7 +12,7 @@ import javax.inject.Inject
 @MiskTest(startService = true)
 internal class FakeClusterTest {
   @MiskTestModule val module = Modules.combine(
-      MiskServiceModule(),
+      MiskTestingServiceModule(),
       FakeClusterModule()
   )
 
