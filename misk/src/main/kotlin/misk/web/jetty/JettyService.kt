@@ -126,6 +126,8 @@ class JettyService @Inject internal constructor(
     server.addManaged(servletContextHandler)
     server.handler = servletContextHandler
 
+    server.stopAtShutdown = true
+
     server.start()
 
     logger.info {
