@@ -4,6 +4,9 @@ import io.opentracing.mock.MockTracer
 import io.opentracing.tag.Tags
 import misk.exceptions.UnauthorizedException
 import misk.hibernate.RealTransacter.Companion.APPLICATION_TRANSACTION_SPAN_NAME
+import misk.hibernate.RealTransacter.Companion.DB_BEGIN_SPAN_NAME
+import misk.hibernate.RealTransacter.Companion.DB_COMMIT_SPAN_NAME
+import misk.hibernate.RealTransacter.Companion.DB_ROLLBACK_SPAN_NAME
 import misk.hibernate.RealTransacter.Companion.DB_TRANSACTION_SPAN_NAME
 import misk.hibernate.RealTransacter.Companion.TRANSACTER_SPAN_TAG
 import misk.testing.MiskTest
@@ -224,7 +227,7 @@ class TransacterTest {
       // No need to do anything
     }
 
-    tracingAssertions()
+    tracingAssertions(true)
   }
 
   @Test
@@ -237,7 +240,7 @@ class TransacterTest {
       }
     }
 
-    tracingAssertions()
+    tracingAssertions(false)
   }
 
   @Test
@@ -374,16 +377,32 @@ class TransacterTest {
     assertThat(transacter.transaction { it.load(swid) }.name).isEqualTo("Star Wars")
   }
 
-  fun tracingAssertions() {
+  fun tracingAssertions(committed: Boolean) {
     // Assert on span, implicitly asserting that it's complete by looking at finished spans
-    assertThat(tracer.finishedSpans()).hasSize(2)
-    assertThat(tracer.finishedSpans().get(0).operationName())
-        .isEqualTo(DB_TRANSACTION_SPAN_NAME)
-    assertThat(tracer.finishedSpans().get(0).tags())
-        .containsEntry(Tags.COMPONENT.getKey(), TRANSACTER_SPAN_TAG)
-    assertThat(tracer.finishedSpans().get(1).operationName())
+    val orderedSpans = tracer.finishedSpans().sortedBy { it.context().spanId() }
+    assertThat(orderedSpans).hasSize(4)
+
+    assertThat(orderedSpans.get(0).operationName())
         .isEqualTo(APPLICATION_TRANSACTION_SPAN_NAME)
-    assertThat(tracer.finishedSpans().get(1).tags())
+    assertThat(orderedSpans.get(0).tags())
+        .containsEntry(Tags.COMPONENT.getKey(), TRANSACTER_SPAN_TAG)
+
+    assertThat(orderedSpans.get(1).operationName())
+        .isEqualTo(DB_TRANSACTION_SPAN_NAME)
+    assertThat(orderedSpans.get(1).tags())
+        .containsEntry(Tags.COMPONENT.getKey(), TRANSACTER_SPAN_TAG)
+
+    assertThat(orderedSpans.get(2).operationName())
+        .isEqualTo(DB_BEGIN_SPAN_NAME)
+    assertThat(orderedSpans.get(2).tags())
+        .containsEntry(Tags.COMPONENT.getKey(), TRANSACTER_SPAN_TAG)
+
+    if (committed) {
+      assertThat(orderedSpans.get(3).operationName()).isEqualTo(DB_COMMIT_SPAN_NAME)
+    } else {
+      assertThat(orderedSpans.get(3).operationName()).isEqualTo(DB_ROLLBACK_SPAN_NAME)
+    }
+    assertThat(orderedSpans.get(3).tags())
         .containsEntry(Tags.COMPONENT.getKey(), TRANSACTER_SPAN_TAG)
 
     // There should be no on-going span
