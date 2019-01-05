@@ -45,13 +45,9 @@ internal class RealTransacter private constructor(
     get() = threadLocalSession.get() != null
 
   override fun <T> transaction(lambda: (session: Session) -> T): T {
-    if (tracer != null) {
-      return tracer.traceWithSpan(APPLICATION_TRANSACTION_SPAN_NAME) { span ->
-        Tags.COMPONENT.set(span, TRANSACTER_SPAN_TAG)
-        transactionWithRetriesInternal(lambda)
-      }
+    return maybeWithTracing(APPLICATION_TRANSACTION_SPAN_NAME) {
+      transactionWithRetriesInternal(lambda)
     }
-    return transactionWithRetriesInternal(lambda)
   }
 
   private fun <T> transactionWithRetriesInternal(lambda: (session: Session) -> T): T {
@@ -94,26 +90,27 @@ internal class RealTransacter private constructor(
   }
 
   private fun <T> transactionInternal(lambda: (session: Session) -> T): T {
-    return if (tracer != null) tracer.traceWithSpan(DB_TRANSACTION_SPAN_NAME) { span ->
-      Tags.COMPONENT.set(span, TRANSACTER_SPAN_TAG)
-      transactionInternalSession(lambda)
-    } else transactionInternalSession(lambda)
+    return maybeWithTracing(DB_TRANSACTION_SPAN_NAME) { transactionInternalSession(lambda) }
   }
 
   private fun <T> transactionInternalSession(lambda: (session: Session) -> T): T {
     return withSession { session ->
-      val transaction = session.hibernateSession.beginTransaction()!!
+      val transaction = maybeWithTracing(DB_BEGIN_SPAN_NAME) {
+        session.hibernateSession.beginTransaction()!!
+      }
       try {
         val result = lambda(session)
 
         session.preCommit()
-        transaction.commit()
+        maybeWithTracing(DB_COMMIT_SPAN_NAME) { transaction.commit() }
         session.postCommit()
         result
       } catch (e: Throwable) {
         if (transaction.isActive) {
           try {
-            transaction.rollback()
+            maybeWithTracing(DB_ROLLBACK_SPAN_NAME) {
+              transaction.rollback()
+            }
           } catch (suppressed: Exception) {
             e.addSuppressed(suppressed)
           }
@@ -175,6 +172,9 @@ internal class RealTransacter private constructor(
   companion object {
     const val APPLICATION_TRANSACTION_SPAN_NAME = "app-db-transaction"
     const val DB_TRANSACTION_SPAN_NAME = "db-session"
+    const val DB_BEGIN_SPAN_NAME = "db-begin"
+    const val DB_COMMIT_SPAN_NAME = "db-commit"
+    const val DB_ROLLBACK_SPAN_NAME = "db-rollback"
     const val TRANSACTER_SPAN_TAG = "hibernate-transacter"
   }
 
@@ -212,7 +212,10 @@ internal class RealTransacter private constructor(
       return session.get(type.java, id)
     }
 
-    override fun <R : DbRoot<R>, T : DbSharded<R, T>> loadSharded(gid: Gid<R, T>, type: KClass<T>): T {
+    override fun <R : DbRoot<R>, T : DbSharded<R, T>> loadSharded(
+      gid: Gid<R, T>,
+      type: KClass<T>
+    ): T {
       return session.get(type.java, gid)
     }
 
@@ -296,6 +299,15 @@ internal class RealTransacter private constructor(
       private val SINGLE_KEYSPACE = Keyspace("keyspace")
       private val SINGLE_SHARD = Shard(SINGLE_KEYSPACE, "0")
       private val SINGLE_SHARD_SET = ImmutableSet.of(SINGLE_SHARD)
+    }
+  }
+
+  private fun <T> maybeWithTracing(spanName: String, lambda: () -> T): T {
+    return if (tracer != null) tracer.traceWithSpan(spanName) { span ->
+      Tags.COMPONENT.set(span, TRANSACTER_SPAN_TAG)
+      lambda()
+    } else {
+      lambda()
     }
   }
 }
