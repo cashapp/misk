@@ -1,8 +1,3 @@
-kotlin {
-  experimental {
-    coroutines 'enable'
-  }
-}
 apply from: rootProject.file("gradle/localdb.gradle")
 apply from: "https://raw.githubusercontent.com/square/misk-web/master/gradle/web.gradle"
 

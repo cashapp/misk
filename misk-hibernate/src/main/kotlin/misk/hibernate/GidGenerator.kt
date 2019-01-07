@@ -51,7 +51,7 @@ public class GidGenerator : AbstractPostInsertGenerator(), Configurable {
 
     init {
       require(persister is SingleTableEntityPersister) { "Single table entities supported only" }
-      this.persister = persister as SingleTableEntityPersister
+      this.persister = persister
     }
 
     override fun prepareIdentifierGeneratingInsert(): IdentifierGeneratingInsert {

@@ -21,7 +21,7 @@ class MockWebServerService(val unixSocketFile: String?) : AbstractIdleService() 
   }
 
   override fun shutDown() {
-    server?.let { it.shutdown() }
+    server?.shutdown()
     file.delete()
   }
 }

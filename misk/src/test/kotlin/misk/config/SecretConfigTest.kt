@@ -3,7 +3,6 @@ package misk.config
 import com.google.inject.util.Modules
 import misk.environment.Environment
 import misk.environment.EnvironmentModule
-import misk.inject.KAbstractModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat

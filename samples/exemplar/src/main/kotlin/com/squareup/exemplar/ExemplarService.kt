@@ -2,7 +2,6 @@ package com.squareup.exemplar
 
 import misk.MiskApplication
 import misk.MiskRealServiceModule
-import misk.MiskTestingServiceModule
 import misk.config.ConfigModule
 import misk.config.MiskConfig
 import misk.environment.Environment

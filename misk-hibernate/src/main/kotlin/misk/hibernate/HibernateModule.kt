@@ -14,7 +14,6 @@ import misk.jdbc.PingDatabaseService
 import misk.resources.ResourceLoader
 import misk.vitess.StartVitessService
 import org.hibernate.SessionFactory
-import org.hibernate.boot.Metadata
 import org.hibernate.event.spi.EventType
 import javax.inject.Inject
 import javax.inject.Provider

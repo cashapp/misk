@@ -2,7 +2,6 @@ package misk.resources
 
 import com.google.inject.multibindings.MapBinder
 import misk.inject.KAbstractModule
-import misk.inject.asSingleton
 
 class ResourceLoaderModule : KAbstractModule() {
   override fun configure() {

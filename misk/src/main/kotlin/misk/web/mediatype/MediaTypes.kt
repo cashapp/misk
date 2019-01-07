@@ -46,7 +46,7 @@ object MediaTypes {
   }
 }
 
-fun String.asMediaType() = MediaType.get(this)!!
+fun String.asMediaType() = MediaType.get(this)
 fun String.asMediaRange() = MediaRange.parse(this)
 
 internal val MediaType.wildcardCount
