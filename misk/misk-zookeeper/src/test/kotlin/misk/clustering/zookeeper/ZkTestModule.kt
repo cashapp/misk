@@ -5,13 +5,10 @@ import com.google.common.util.concurrent.Service
 import com.google.inject.Key
 import misk.DependentService
 import misk.clustering.fake.FakeClusterModule
-import misk.clustering.lease.LeaseManager
 import misk.config.AppName
 import misk.inject.KAbstractModule
-import misk.inject.asSingleton
 import misk.inject.keyOf
 import misk.logging.getLogger
-import org.apache.curator.framework.CuratorFramework
 import javax.inject.Singleton
 
 internal class ZkTestModule : KAbstractModule() {

@@ -129,7 +129,7 @@ class StaticResourceAction @Inject constructor(
       return Response(
           body = "".toResponseBody(),
           statusCode = HttpURLConnection.HTTP_MOVED_TEMP,
-          headers = Headers.of("Location", "$urlPath"))
+          headers = Headers.of("Location", urlPath))
     }
   }
 }

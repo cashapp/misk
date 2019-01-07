@@ -1,7 +1,6 @@
 package misk.resources
 
 import com.google.inject.util.Modules
-import misk.MiskTestingServiceModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.testing.TemporaryFolder
