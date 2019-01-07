@@ -1,5 +1,7 @@
 data_source:
   type: VITESS
+  host: 127.0.0.1
+  port: 27001
   username: vt_app
   password: whatever
   vitess_schema_dir: src/test/resources/misk/hibernate/moviestestmodule-schema

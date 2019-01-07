@@ -57,14 +57,15 @@ class VitessScaleSafetyChecksTest {
 """
 
   @Test fun parseQueryPlans() {
+    val dsConfig = DataSourceConfig(type = DataSourceType.VITESS, host = "127.0.0.1", port = 27001)
     val detector = VitessScaleSafetyChecks(
         OkHttpClient(),
         Moshi.Builder().build(),
-        DataSourceConfig(type = DataSourceType.VITESS),
+        dsConfig,
         StartVitessService(
             qualifier = Movies::class,
             environment = Environment.TESTING,
-            config = DataSourceConfig(type = DataSourceType.VITESS)))
+            config = dsConfig))
 
     val plans = detector.parseQueryPlans(
         Buffer().writeUtf8(queryPlans)).toList()
