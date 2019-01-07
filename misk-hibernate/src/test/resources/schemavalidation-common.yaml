@@ -1,6 +1,8 @@
 data_source:
   type: MYSQL
   username: root
+  host: 127.0.0.1
+  port: 3306
   password: ""
   database: schemavalidation
   migrations_resource: classpath:/misk/hibernate/schemavalidation-migrations
