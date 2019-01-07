@@ -9,7 +9,7 @@ import misk.backoff.retry
 import misk.environment.Environment
 import misk.inject.toKey
 import java.time.Duration
-import java.util.*
+import java.util.Properties
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.reflect.KClass
@@ -43,11 +43,10 @@ class PingDatabaseService @Inject constructor(
           if (message != null && message.contains("table dual not found")) {
             throw RuntimeException(
                 "Something is wrong with your vschema and unfortunately vtcombo does not " +
-                    "currently have good error reporting on this. Please do an ocular inspection.")
-          } else {
-            e.printStackTrace()
+                    "currently have good error reporting on this. Please do an ocular inspection.",
+                e)
           }
-          throw e
+          throw RuntimeException("Problem pinging url $jdbcUrl", e)
         }
       }
     }
