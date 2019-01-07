@@ -2,5 +2,7 @@ data_source_clusters:
   exemplar:
     writer:
       type: VITESS
+      host: 127.0.0.1
+      port: 27001
       username: vt_app
       password: whatever
