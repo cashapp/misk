@@ -1,7 +1,8 @@
 package misk.web.proxy
 
-import kotlinx.coroutines.experimental.async
-import kotlinx.coroutines.experimental.runBlocking
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.async
+import kotlinx.coroutines.runBlocking
 import misk.inject.KAbstractModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
@@ -111,7 +112,7 @@ class WebProxyActionTest {
         .addHeader("UpstreamHeader", "UpstreamHeaderValue")
         .setBody("I am an intercepted response!"))
 
-    val responseAsync = async {
+    val responseAsync = GlobalScope.async {
       optionalBinder.proxyClient.newCall(
           get("/local/prefix/tacos/", weirdMediaType)).execute().toMisk()
     }
@@ -138,7 +139,7 @@ class WebProxyActionTest {
         .setBody("I am an intercepted response!"))
 
     val responseAsync =
-        async {
+        GlobalScope.async {
           optionalBinder.proxyClient.newCall(get("/local/prefix/tacos", weirdMediaType)).execute()
               .toMisk()
         }
@@ -172,7 +173,7 @@ class WebProxyActionTest {
         .addHeader("UpstreamHeader", "UpstreamHeaderValue")
         .setBody("I am an intercepted response!"))
 
-    val response = async {
+    val response = GlobalScope.async {
       optionalBinder.proxyClient.newCall(
           post("/local/prefix/tacos/", weirdMediaType, "my taco", weirdMediaType)).execute()
           .toMisk()
@@ -199,7 +200,7 @@ class WebProxyActionTest {
         .addHeader("UpstreamHeader", "UpstreamHeaderValue")
         .setBody("I am an intercepted response!"))
 
-    val response = async {
+    val response = GlobalScope.async {
       optionalBinder.proxyClient.newCall(
           post("/local/prefix/tacos", weirdMediaType, "my taco", weirdMediaType)).execute().toMisk()
     }
@@ -256,7 +257,7 @@ class WebProxyActionTest {
         .addHeader("UpstreamHeader", "UpstreamHeaderValue")
         .setBody("I am an intercepted response!"))
 
-    val responseAsync = async {
+    val responseAsync = GlobalScope.async {
       optionalBinder.proxyClient.newCall(
           get("/local/prefix/tacos/another/long/prefix/see/if/forwards/", weirdMediaType)).execute()
           .toMisk()
@@ -284,7 +285,7 @@ class WebProxyActionTest {
         .addHeader("UpstreamHeader", "UpstreamHeaderValue")
         .setBody("I am an intercepted response!"))
 
-    val responseAsync = async {
+    val responseAsync = GlobalScope.async {
       optionalBinder.proxyClient.newCall(
           get("/local/prefix/tacos////see/if/forwards/", weirdMediaType)).execute().toMisk()
     }
@@ -310,7 +311,7 @@ class WebProxyActionTest {
         .addHeader("UpstreamHeader", "UpstreamHeaderValue")
         .setBody("I am an intercepted response!"))
 
-    val responseAsync = async {
+    val responseAsync = GlobalScope.async {
       optionalBinder.proxyClient.newCall(
           get("/local/prefix/tacos/.test/.config/.ssh/see/if/forwards/", weirdMediaType)).execute()
           .toMisk()

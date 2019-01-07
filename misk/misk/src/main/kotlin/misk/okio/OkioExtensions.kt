@@ -3,7 +3,7 @@ package misk.okio
 import okio.Buffer
 import okio.BufferedSource
 import okio.ByteString
-import kotlin.coroutines.experimental.buildSequence
+import kotlin.sequences.sequence
 
 fun BufferedSource.forEachBlock(buffer: ByteArray, f: (buffer: ByteArray, bytesRead: Int) -> Unit) {
   var bytesRead = read(buffer)
@@ -19,7 +19,7 @@ fun BufferedSource.forEachBlock(blockSize: Int, f: (buffer: ByteArray, bytesRead
 
 fun BufferedSource.split(separator: ByteString): Sequence<Buffer> {
   val source = this
-  return buildSequence {
+  return sequence {
     while (true) {
       val indexOf = indexOf(separator)
       if (indexOf >= 0) {

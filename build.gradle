@@ -1,5 +1,5 @@
 plugins {
-  id "org.jetbrains.kotlin.jvm" version "1.2.51" apply false
+  id "org.jetbrains.kotlin.jvm" version "1.3.11" apply false
   id "com.vanniktech.maven.publish" version "0.4.0" apply false
 }
 
@@ -52,13 +52,13 @@ subprojects {
   compileKotlin {
     kotlinOptions {
       jvmTarget = "1.8"
-      // TODO(jayestrella): re-add allWarningsAsErrors = true when we (+okio) bump kotlin versions
+      allWarningsAsErrors = true
     }
   }
   compileTestKotlin {
     kotlinOptions {
       jvmTarget = "1.8"
-      // TODO(jayestrella): re-add allWarningsAsErrors = true when we (+okio) bump kotlin versions
+      allWarningsAsErrors = true
     }
   } 
   sourceSets {
