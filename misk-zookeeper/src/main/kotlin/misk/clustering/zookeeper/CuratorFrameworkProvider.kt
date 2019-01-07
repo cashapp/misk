@@ -6,7 +6,6 @@ import org.apache.curator.framework.CuratorFrameworkFactory
 import org.apache.curator.retry.ExponentialBackoffRetry
 import javax.inject.Inject
 import javax.inject.Provider
-import javax.inject.Singleton
 
 internal class CuratorFrameworkProvider @Inject internal constructor(
   private val config: ZookeeperConfig

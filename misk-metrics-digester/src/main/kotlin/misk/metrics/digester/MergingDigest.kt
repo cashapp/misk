@@ -224,7 +224,7 @@ class MergingDigest(private val compression: Double) {
    * approximately equal to quantile. Returns NaN if the digest is empty.
    */
   fun quantile(quantile: Double): Double {
-    require(quantile in 0..1) {
+    require(quantile in 0.toDouble().rangeTo(1.toDouble())) {
       "quantile out of bounds"
     }
     mergeAllTemps()

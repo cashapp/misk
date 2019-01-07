@@ -143,7 +143,7 @@ class DockerVitessCluster(
 
     val schemaVolume = Volume("/vt/src/vitess.io/vitess/schema")
     val httpPort = ExposedPort.tcp(cluster.httpPort)
-    if (cluster.config.port != null && cluster.config.port != cluster.grpcPort) {
+    if (cluster.config.port != cluster.grpcPort) {
       throw RuntimeException(
           "Config port ${cluster.config.port} has to match Vitess Docker container: ${cluster.grpcPort}")
     }
