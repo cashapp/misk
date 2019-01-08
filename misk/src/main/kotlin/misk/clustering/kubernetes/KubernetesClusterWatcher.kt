@@ -81,15 +81,17 @@ internal class KubernetesClusterWatcher @Inject internal constructor(
             ),
             podType)
 
-        for (response in watch) {
-          log.info { "received watch in namespace ${config.my_pod_namespace}" }
-          connectBackoff.reset()
-          if (!running.get()) {
-            watch.close()
-            return
-          }
+        watch.use {
+          for (response in watch) {
+            log.info { "received watch in namespace ${config.my_pod_namespace}" }
+            connectBackoff.reset()
+            if (!running.get()) {
+              watch.close()
+              return
+            }
 
-          response.applyTo(cluster)
+            response.applyTo(cluster)
+          }
         }
       } catch (ex: Exception) {
         // This can occur if we have temporary connectivity glitches to the API server
