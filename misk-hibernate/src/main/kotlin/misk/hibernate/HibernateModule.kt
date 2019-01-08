@@ -141,7 +141,7 @@ class HibernateModule(
       val startVitessServiceKey = StartVitessService::class.toKey(qualifier)
       multibind<Service>().to(startVitessServiceKey)
       bind(startVitessServiceKey).toProvider(Provider<StartVitessService> {
-        StartVitessService(environment = environment, config = config, qualifier = qualifier)
+        StartVitessService(environment = Environment.TESTING, config = config, qualifier = qualifier)
       }).asSingleton()
     }
   }
