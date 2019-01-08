@@ -14,8 +14,8 @@ enum class DataSourceType(
       driverClassName = "io.opentracing.contrib.jdbc.TracingDriver",
       hibernateDialect = "org.hibernate.dialect.MySQL57Dialect",
       buildJdbcUrl = { config, env ->
-        val port = config.port
-        val host = config.host
+        val port = config.port ?: 3306
+        val host = config.host ?: "127.0.0.1"
         val database = config.database ?: ""
         val testing = env == Environment.TESTING || env == Environment.DEVELOPMENT
         var queryParams = if (testing) "?createDatabaseIfNotExist=true" else ""
@@ -54,8 +54,8 @@ enum class DataSourceType(
       driverClassName = "io.vitess.jdbc.VitessDriver",
       hibernateDialect = "misk.hibernate.VitessDialect",
       buildJdbcUrl = { config, _ ->
-        val port = config.port
-        val host = config.host
+        val port = config.port ?: 27001
+        val host = config.host ?: "127.0.0.1"
         val database = config.database ?: ""
         "jdbc:vitess://$host:$port/$database"
       }
@@ -65,8 +65,8 @@ enum class DataSourceType(
 /** Configuration element for an individual datasource */
 data class DataSourceConfig(
   val type: DataSourceType,
-  val host: String,
-  val port: Int,
+  val host: String? = null,
+  val port: Int? = null,
   val database: String? = null,
   val username: String? = null,
   val password: String? = null,
