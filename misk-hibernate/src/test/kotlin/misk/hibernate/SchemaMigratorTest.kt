@@ -48,6 +48,8 @@ internal class SchemaMigratorTest {
           statement.addBatch("DROP TABLE IF EXISTS table_2")
           statement.addBatch("DROP TABLE IF EXISTS table_3")
           statement.addBatch("DROP TABLE IF EXISTS table_4")
+          statement.addBatch("DROP TABLE IF EXISTS library_table")
+          statement.addBatch("DROP TABLE IF EXISTS merged_library_table")
           statement.executeBatch()
         }
       }
@@ -71,7 +73,8 @@ internal class SchemaMigratorTest {
       val injectorServiceProvider = getProvider(HibernateInjectorAccess::class.java)
       val sessionFactoryServiceKey = Key.get(SessionFactoryService::class.java, Movies::class.java)
       bind(sessionFactoryServiceKey).toProvider(Provider<SessionFactoryService> {
-        SessionFactoryService(Movies::class, config.data_source, dataSourceService, injectorServiceProvider.get())
+        SessionFactoryService(Movies::class, config.data_source, dataSourceService,
+            injectorServiceProvider.get())
       }).asSingleton()
       bind<SessionFactory>().annotatedWith<Movies>().toProvider(sessionFactoryServiceKey)
       multibind<Service>().to(sessionFactoryServiceKey)
@@ -85,11 +88,18 @@ internal class SchemaMigratorTest {
     val schemaMigrator =
         SchemaMigrator(Movies::class, resourceLoader, sessionFactory, config.data_source)
 
-    resourceLoader.put("${config.data_source.migrations_resource}/v1001__movies.sql", """
+    val mainSource = config.data_source.migrations_resources!![0]
+    val librarySource = config.data_source.migrations_resources!![1]
+
+    resourceLoader.put("${mainSource}/v1002__movies.sql", """
+        |CREATE TABLE table_2 (name varchar(255))
+        |""".trimMargin())
+    resourceLoader.put("${mainSource}/v1001__movies.sql", """
         |CREATE TABLE table_1 (name varchar(255))
         |""".trimMargin())
-    resourceLoader.put("${config.data_source.migrations_resource}/v1002__movies.sql", """
-        |CREATE TABLE table_2 (name varchar(255))
+
+    resourceLoader.put("${librarySource}/name/space/v1001__actors.sql", """
+        |CREATE TABLE library_table (name varchar(255))
         |""".trimMargin())
 
     // Initially the schema_version table is absent.
@@ -98,6 +108,8 @@ internal class SchemaMigratorTest {
     assertThat(tableExists("table_2")).isFalse()
     assertThat(tableExists("table_3")).isFalse()
     assertThat(tableExists("table_4")).isFalse()
+    assertThat(tableExists("library_table")).isFalse()
+    assertThat(tableExists("merged_library_table")).isFalse()
     assertFailsWith<PersistenceException> {
       schemaMigrator.appliedMigrations()
     }
@@ -110,31 +122,52 @@ internal class SchemaMigratorTest {
     assertThat(tableExists("table_2")).isFalse()
     assertThat(tableExists("table_3")).isFalse()
     assertThat(tableExists("table_4")).isFalse()
+    assertThat(tableExists("library_table")).isFalse()
+    assertThat(tableExists("merged_library_table")).isFalse()
 
     // When we apply migrations, the table is present and contains the applied migrations.
-    schemaMigrator.applyAll("SchemaMigratorTest", setOf())
-    assertThat(schemaMigrator.appliedMigrations()).containsExactly(1001, 1002)
+    schemaMigrator.applyAll("SchemaMigratorTest", sortedSetOf())
+    assertThat(schemaMigrator.appliedMigrations()).containsExactly(
+        NamedspacedMigration(1001),
+        NamedspacedMigration(1002),
+        NamedspacedMigration(1001, "name/space/"))
     assertThat(tableExists("schema_version")).isTrue()
     assertThat(tableExists("table_1")).isTrue()
     assertThat(tableExists("table_2")).isTrue()
+    assertThat(tableExists("library_table")).isTrue()
     assertThat(tableExists("table_3")).isFalse()
     assertThat(tableExists("table_4")).isFalse()
+    assertThat(tableExists("merged_library_table")).isFalse()
     schemaMigrator.requireAll()
 
     // When new migrations are added they can be applied.
-    resourceLoader.put("${config.data_source.migrations_resource}/v1003__movies.sql", """
+    resourceLoader.put("${mainSource}/v1003__movies.sql", """
         |CREATE TABLE table_3 (name varchar(255))
         |""".trimMargin())
-    resourceLoader.put("${config.data_source.migrations_resource}/v1004__movies.sql", """
+    resourceLoader.put("${mainSource}/v1004__movies.sql", """
         |CREATE TABLE table_4 (name varchar(255))
         |""".trimMargin())
-    schemaMigrator.applyAll("SchemaMigratorTest", setOf(1001, 1002))
-    assertThat(schemaMigrator.appliedMigrations()).containsExactly(1001, 1002, 1003, 1004)
+    resourceLoader.put("${mainSource}/namespace/v1001__props.sql", """
+        |CREATE TABLE merged_library_table (name varchar(255))
+        |""".trimMargin())
+    schemaMigrator.applyAll("SchemaMigratorTest", sortedSetOf(
+        NamedspacedMigration(1001),
+        NamedspacedMigration(1002),
+        NamedspacedMigration(1001, "name/space/")))
+    assertThat(schemaMigrator.appliedMigrations()).containsExactly(
+        NamedspacedMigration(1001),
+        NamedspacedMigration(1002),
+        NamedspacedMigration(1003),
+        NamedspacedMigration(1004),
+        NamedspacedMigration(1001, "name/space/"),
+        NamedspacedMigration(1001, "namespace/"))
     assertThat(tableExists("schema_version")).isTrue()
     assertThat(tableExists("table_1")).isTrue()
     assertThat(tableExists("table_2")).isTrue()
     assertThat(tableExists("table_3")).isTrue()
     assertThat(tableExists("table_4")).isTrue()
+    assertThat(tableExists("library_table")).isTrue()
+    assertThat(tableExists("merged_library_table")).isTrue()
     schemaMigrator.requireAll()
   }
 
@@ -143,10 +176,10 @@ internal class SchemaMigratorTest {
         SchemaMigrator(Movies::class, resourceLoader, sessionFactory, config.data_source)
     schemaMigrator.initialize()
 
-    resourceLoader.put("${config.data_source.migrations_resource}/v1001__foo.sql", """
+    resourceLoader.put("${config.data_source.migrations_resources!![0]}/v1001__foo.sql", """
         |CREATE TABLE table_1 (name varchar(255))
         |""".trimMargin())
-    resourceLoader.put("${config.data_source.migrations_resource}/v1002__foo.sql", """
+    resourceLoader.put("${config.data_source.migrations_resources!![1]}/v1002__foo.sql", """
         |CREATE TABLE table_1 (name varchar(255))
         |""".trimMargin())
 
@@ -154,24 +187,42 @@ internal class SchemaMigratorTest {
       schemaMigrator.requireAll()
     }).hasMessage("""
           |Movies is missing migrations:
-          |  ${config.data_source.migrations_resource}/v1001__foo.sql
-          |  ${config.data_source.migrations_resource}/v1002__foo.sql""".trimMargin())
+          |  ${config.data_source.migrations_resources!![0]}/v1001__foo.sql
+          |  ${config.data_source.migrations_resources!![1]}/v1002__foo.sql""".trimMargin())
+  }
+
+  @Test fun errorOnDuplicateMigrations() {
+    val schemaMigrator =
+        SchemaMigrator(Movies::class, resourceLoader, sessionFactory, config.data_source)
+
+    resourceLoader.put("${config.data_source.migrations_resources!![0]}/v1001__foo.sql", """
+        |CREATE TABLE table_1 (name varchar(255))
+        |""".trimMargin())
+    resourceLoader.put("${config.data_source.migrations_resources!![0]}/v1001__bar.sql", """
+        |CREATE TABLE table_2 (name varchar(255))
+        |""".trimMargin())
+
+    assertThat(assertFailsWith<IllegalArgumentException> {
+      schemaMigrator.requireAll()
+    }).hasMessageContaining("Duplicate migrations found")
   }
 
   @Test fun resourceVersionParsing() {
-    val sm = SchemaMigrator(Movies::class, resourceLoader, sessionFactory, config.data_source)
-
-    assertThat(sm.resourceVersionOrNull("foo/migrations/v100__bar.sql")).isEqualTo(100)
-    assertThat(sm.resourceVersionOrNull("foo/migrations/v100__v200.sql")).isEqualTo(100)
-    assertThat(sm.resourceVersionOrNull("v100_foo/migrations/v200__bar.sql")).isEqualTo(200)
-    assertThat(sm.resourceVersionOrNull("v100_foo/migrations")).isNull()
-    assertThat(sm.resourceVersionOrNull("v100_foo/migrations/")).isNull()
-    assertThat(sm.resourceVersionOrNull("v100__bar.sql")).isEqualTo(100)
-    assertThat(sm.resourceVersionOrNull("foo/migrations/v100__bar.SQL")).isNull()
-    assertThat(sm.resourceVersionOrNull("foo/migrations/V100__bar.sql")).isNull()
-    assertThat(sm.resourceVersionOrNull("foo/migrations/v100_.sql")).isNull()
-    assertThat(sm.resourceVersionOrNull("foo/migrations/v100__.sql")).isNull()
-    assertThat(sm.resourceVersionOrNull("foo/migrations/v100__.sql")).isNull()
+    assertThat(namespacedMigrationOrNull("foo/migrations/v100__bar.sql")).isEqualTo(
+        NamedspacedMigration(100, "foo/migrations/"))
+    assertThat(namespacedMigrationOrNull("foo/migrations/v100__v200.sql")).isEqualTo(
+        NamedspacedMigration(100, "foo/migrations/"))
+    assertThat(namespacedMigrationOrNull("v100_foo/migrations/v200__bar.sql")).isEqualTo(
+        NamedspacedMigration(200, "v100_foo/migrations/"))
+    assertThat(namespacedMigrationOrNull("v100_foo/migrations")).isNull()
+    assertThat(namespacedMigrationOrNull("v100_foo/migrations/")).isNull()
+    assertThat(namespacedMigrationOrNull("v100__bar.sql")).isEqualTo(NamedspacedMigration(100))
+    assertThat(namespacedMigrationOrNull("foo/migrations/v100__bar.SQL")).isNull()
+    assertThat(namespacedMigrationOrNull("foo/migrations/V100__bar.sql")).isNull()
+    assertThat(namespacedMigrationOrNull("foo/migrations/v100_.sql")).isNull()
+    assertThat(namespacedMigrationOrNull("foo/migrations/v100__.sql")).isNull()
+    assertThat(namespacedMigrationOrNull("foo/migrations/v100__.sql")).isNull()
+    assertThat(namespacedMigrationOrNull("foo/luv1__franklin.sql")).isNull()
   }
 
   private fun tableExists(table: String): Boolean {
@@ -185,9 +236,9 @@ internal class SchemaMigratorTest {
     }
   }
 
-  private fun SchemaMigrator.resourceVersionOrNull(resource: String): Int? {
+  private fun namespacedMigrationOrNull(resource: String): NamedspacedMigration? {
     try {
-      return resourceVersion(resource)
+      return NamedspacedMigration.fromResourcePath(resource, "")
     } catch (expected: IllegalArgumentException) {
       return null
     }
