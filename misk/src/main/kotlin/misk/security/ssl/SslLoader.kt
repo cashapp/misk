@@ -25,7 +25,7 @@ class SslLoader @Inject internal constructor(
         // a certificate chain and no private keys.
         load(path, passphrase).toTrustStore()
       }
-      FORMAT_JCEKS -> {
+      FORMAT_JCEKS, FORMAT_JKS -> {
         // TODO(young): This function should check that the underlying keystore complies with what
         // TrustStore provides.
         TrustStore(loadJavaKeystore(path, format, passphrase))
@@ -123,5 +123,6 @@ class SslLoader @Inject internal constructor(
   companion object {
     const val FORMAT_PEM = "PEM"
     const val FORMAT_JCEKS = "JCEKS"
+    const val FORMAT_JKS = "JKS"
   }
 }
