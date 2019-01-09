@@ -22,6 +22,9 @@ import java.util.concurrent.atomic.AtomicBoolean
  * A [RepeatedTaskQueue] runs repeated tasks at a user controlled rate. Internally it uses
  * a [DelayQueue] to hold the pending tasks; a background thread pulls the next task
  * from the [DelayQueue] and hands it off to an executor service for execution.
+ *
+ * [RepeatedTaskQueue] implements the [Service] interface, which requires proper startup and shutdown.
+ * Alternatively, you can add new instances to the [Service] multibind.
  */
 class RepeatedTaskQueue @VisibleForTesting internal constructor(
   private val name: String,
