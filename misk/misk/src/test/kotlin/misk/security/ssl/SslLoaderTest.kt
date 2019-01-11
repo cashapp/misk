@@ -2,6 +2,7 @@ package misk.security.ssl
 
 import misk.MiskTestingServiceModule
 import misk.security.ssl.SslLoader.Companion.FORMAT_JCEKS
+import misk.security.ssl.SslLoader.Companion.FORMAT_JKS
 import misk.security.ssl.SslLoader.Companion.FORMAT_PEM
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
@@ -18,6 +19,8 @@ internal class SslLoaderTest {
   val clientComboPemPath = "classpath:/ssl/client_cert_key_combo.pem"
   val clientTrustPemPath = "classpath:/ssl/client_cert.pem"
   val serverKeystoreJceksPath = "classpath:/ssl/server_keystore.jceks"
+  val keystoreJksPath = "classpath:/ssl/keystore.jks"
+  val truststoreJksPath = "classpath:/ssl/truststore.jks"
 
   @Inject lateinit var sslLoader: SslLoader
 
@@ -61,5 +64,28 @@ internal class SslLoaderTest {
     val certificateChain = keystore.getX509CertificateChain()
     assertThat(certificateChain.map { it.issuerX500Principal.name }).containsExactly(
         "CN=misk-server,OU=Server,O=Misk,L=San Francisco,ST=CA,C=US")
+  }
+
+  @Test
+  fun loadKeystoreFromJKS() {
+    val keystore = sslLoader.loadCertStore(keystoreJksPath, FORMAT_JKS, "changeit")!!.keyStore
+    assertThat(keystore.aliasesOfType<KeyStore.PrivateKeyEntry>()).containsExactly("combined-key-cert")
+    assertThat(keystore.getPrivateKey("changeit".toCharArray())).isNotNull()
+
+    assertThat((keystore.getX509Certificate()).issuerX500Principal.name)
+        .isEqualTo("CN=misk-client,OU=Client,O=Misk,L=San Francisco,ST=CA,C=US")
+    assertThat(keystore.getX509Certificate().subjectAlternativeNames.toList()[0][1])
+        .isEqualTo("127.0.0.1")
+  }
+
+  @Test
+  fun loadTrustFromJKS() {
+    val keystore =
+        sslLoader.loadTrustStore(truststoreJksPath, FORMAT_JKS, "changeit")!!.keyStore
+    assertThat(keystore.aliases().toList()).containsExactly("ca")
+    assertThat((keystore.getX509Certificate()).issuerX500Principal.name)
+        .isEqualTo("CN=misk-client,OU=Client,O=Misk,L=San Francisco,ST=CA,C=US")
+    assertThat(keystore.getX509Certificate().subjectAlternativeNames.toList()[0][1])
+        .isEqualTo("127.0.0.1")
   }
 }
