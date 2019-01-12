@@ -12,6 +12,6 @@ Configuration:
         level: debug
 
     Root:
-      level: info
+      level: debug
       AppenderRef:
         ref: STDOUT
