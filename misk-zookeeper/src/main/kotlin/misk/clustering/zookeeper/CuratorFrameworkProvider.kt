@@ -5,6 +5,8 @@ import org.apache.curator.framework.CuratorFramework
 import org.apache.curator.framework.CuratorFrameworkFactory
 import org.apache.curator.retry.ExponentialBackoffRetry
 import org.apache.curator.utils.DefaultZookeeperFactory
+import org.apache.zookeeper.ZooKeeper
+import org.apache.zookeeper.client.ZKClientConfig
 import javax.inject.Inject
 import javax.inject.Provider
 
@@ -34,16 +36,16 @@ internal class CuratorFrameworkProvider @Inject internal constructor(
             .setNameFormat("zk-clustering-${config.zk_connect}")
             .build())
         .zookeeperFactory { connectString, sessionTimeout, watcher, canBeReadOnly ->
-          val zk = DefaultZookeeperFactory().newZooKeeper(connectString, sessionTimeout, watcher, canBeReadOnly)
+          val clientConfig = ZKClientConfig()
           if (tlsEnabled) {
-            zk.clientConfig.setProperty("zookeeper.clientCnxnSocket", "org.apache.zookeeper.ClientCnxnSocketNetty")
-            zk.clientConfig.setProperty("zookeeper.client.secure", "true")
-            zk.clientConfig.setProperty("zookeeper.ssl.keyStore.location", config.cert_store?.resource)
-            zk.clientConfig.setProperty("zookeeper.ssl.keyStore.password", config.cert_store?.passphrase)
-            zk.clientConfig.setProperty("zookeeper.ssl.trustStore.location", config.trust_store?.resource)
-            zk.clientConfig.setProperty("zookeeper.ssl.trustStore.password", config.trust_store?.passphrase)
+            clientConfig.setProperty("zookeeper.clientCnxnSocket", "org.apache.zookeeper.ClientCnxnSocketNetty")
+            clientConfig.setProperty("zookeeper.client.secure", "true")
+            clientConfig.setProperty("zookeeper.ssl.keyStore.location", config.cert_store?.resource)
+            clientConfig.setProperty("zookeeper.ssl.keyStore.password", config.cert_store?.passphrase)
+            clientConfig.setProperty("zookeeper.ssl.trustStore.location", config.trust_store?.resource)
+            clientConfig.setProperty("zookeeper.ssl.trustStore.password", config.trust_store?.passphrase)
           }
-          zk
+          ZooKeeper(connectString, sessionTimeout, watcher, canBeReadOnly, clientConfig)
         }
         .build()
   }
