@@ -52,6 +52,10 @@ internal fun field(entityClass: Class<*>, property: Property): Field {
   try {
     return entityClass.getDeclaredField(property.name)
   } catch (e: NoSuchFieldException) {
+    val superclass = entityClass.superclass
+    if (superclass != null) {
+      return field(superclass, property)
+    }
     throw IllegalStateException("expected a field for ${property.name} in ${entityClass.name}", e)
   }
 }
