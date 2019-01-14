@@ -15,13 +15,21 @@ import java.util.concurrent.atomic.AtomicBoolean
 /**
  * A [Container] creates a Docker container for testing.
  *
- * Tests provide a lambda to build a [CreateContainerCmd]. The lambda must set
+ * Tests provide a lambda to build a [CreateContainerCmd]. The [createCmd] lambda must set
  * [CreateContainerCmd.withName] and [CreateContainerCmd.withImage]. All other fields are
  * optional. The [Composer] takes care of setting up the network.
  *
+ * There may be a need to configure your container between the creation and start steps.
+ * [beforeStartHook] provides you with an id to your container allowing you to
+ * manipulate as necessary before the command/entrypoint is invoked.
+ *
  * See [Composer] for an example.
  */
-data class Container(val createCmd: CreateContainerCmd.() -> Unit)
+data class Container(
+  val createCmd: CreateContainerCmd.() -> Unit,
+  val beforeStartHook: (docker: DockerClient, id: String) -> Unit) {
+  constructor(createCmd: CreateContainerCmd.() -> Unit): this(createCmd, { _, _ -> })
+}
 
 /**
  * [Composer] composes many [Container]s together to use in a unit test.
@@ -100,6 +108,8 @@ class Composer(private val name: String, private vararg val containers: Containe
           .exec()
           .id
       containerIds[name] = id
+
+      container.beforeStartHook(docker, id)
 
       docker.startContainerCmd(id).exec()
       docker.logContainerCmd(id)

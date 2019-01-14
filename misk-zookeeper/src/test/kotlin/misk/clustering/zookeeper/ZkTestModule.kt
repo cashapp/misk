@@ -9,11 +9,19 @@ import misk.config.AppName
 import misk.inject.KAbstractModule
 import misk.inject.keyOf
 import misk.logging.getLogger
+import misk.security.ssl.CertStoreConfig
+import misk.security.ssl.SslLoader.Companion.FORMAT_JKS
+import misk.security.ssl.TrustStoreConfig
 import javax.inject.Singleton
 
 internal class ZkTestModule : KAbstractModule() {
   override fun configure() {
-    bind<ZookeeperConfig>().toInstance(ZookeeperConfig(zk_connect = "127.0.0.1:$zkPortKey"))
+    val keystorePath = this::class.java.getResource("/zookeeper/keystore.jks").path
+    val truststrorePath = this::class.java.getResource("/zookeeper/truststore.jks").path
+    bind<ZookeeperConfig>().toInstance(ZookeeperConfig(
+        zk_connect = "127.0.0.1:$zkPortKey",
+        cert_store = CertStoreConfig(keystorePath, "changeit", FORMAT_JKS),
+        trust_store = TrustStoreConfig(truststrorePath, "changeit", FORMAT_JKS)))
     bind<String>().annotatedWith<AppName>().toInstance("my-app")
 
     multibind<Service>().to<StartZookeeperService>()
