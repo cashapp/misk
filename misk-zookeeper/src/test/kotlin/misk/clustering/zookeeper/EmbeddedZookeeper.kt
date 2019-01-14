@@ -10,7 +10,7 @@ class EmbeddedZookeeper(val basePort: Int) {
   private val clientPort = ExposedPort.tcp(CLIENT_PORT)
   private val peerPort = ExposedPort.tcp(PEER_PORT)
   private val leaderPort = ExposedPort.tcp(LEADER_PORT)
-  private val composer = Composer("e-zk", Container {
+  private val composer = Composer("e-zk", Container({
     withImage("zookeeper:3.5.4-beta")
         .withName("zookeeper")
         .withCmd(listOf("zkServer.sh", "start-foreground"))
@@ -20,7 +20,15 @@ class EmbeddedZookeeper(val basePort: Int) {
           bind(peerPort, Ports.Binding.bindPort(basePort + 1))
           bind(leaderPort, Ports.Binding.bindPort(basePort + 2))
         })
-  })
+  }, { docker, id ->
+    // Provide zoo.cfg and certs to run ZK with mTLS enabled.
+    val confPath = EmbeddedZookeeper::class.java.getResource("/zookeeper").path
+    docker.copyArchiveToContainerCmd(id)
+        .withHostResource(confPath)
+        .withDirChildrenOnly(true)
+        .withRemotePath("/conf")
+        .exec()
+  }))
 
   fun start() {
     composer.start()

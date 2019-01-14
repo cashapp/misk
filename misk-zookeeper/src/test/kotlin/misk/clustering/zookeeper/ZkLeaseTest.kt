@@ -40,7 +40,7 @@ internal class ZkLeaseTest {
       if (it && connected.count > 0) connected.countDown()
     }
 
-    assertThat(connected.await(5, TimeUnit.SECONDS)).isTrue()
+    assertThat(connected.await(10, TimeUnit.SECONDS)).isTrue()
   }
 
   @Test fun acquiresLeaseIfMappedToSelf() {
