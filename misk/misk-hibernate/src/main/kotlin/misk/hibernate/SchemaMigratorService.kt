@@ -22,8 +22,8 @@ class SchemaMigratorService internal constructor(
   override fun startUp() {
     val schemaMigrator = schemaMigratorProvider.get()
     if (environment == Environment.TESTING || environment == Environment.DEVELOPMENT) {
-      val appliedVersions = schemaMigrator.initialize()
-      schemaMigrator.applyAll("SchemaMigratorService", appliedVersions)
+      val appliedMigrations = schemaMigrator.initialize()
+      schemaMigrator.applyAll("SchemaMigratorService", appliedMigrations)
     } else {
       schemaMigrator.requireAll()
     }

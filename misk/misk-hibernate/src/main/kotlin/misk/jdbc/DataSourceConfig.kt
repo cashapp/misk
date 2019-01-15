@@ -75,6 +75,7 @@ data class DataSourceConfig(
   val connection_timeout: Duration = Duration.ofSeconds(30),
   val connection_max_lifetime: Duration = Duration.ofMinutes(30),
   val migrations_resource: String? = null,
+  val migrations_resources: List<String>? = null,
   val vitess_schema_dir: String? = null,
   val vitess_schema_resource_root: String? = null,
   /*

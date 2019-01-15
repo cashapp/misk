@@ -1,5 +1,6 @@
 package misk.resources
 
+import com.google.common.collect.ImmutableList
 import com.google.common.collect.ImmutableSet
 import misk.resources.ResourceLoader.Backend
 import okio.BufferedSource
@@ -91,6 +92,18 @@ class ResourceLoader @Inject constructor(
     val (scheme, path) = parseAddress(address)
     val backend = backends[scheme] ?: return listOf()
     return backend.list(path).map { scheme + it }
+  }
+
+  fun walk(address: String): List<String> {
+    val resourcesResult = ImmutableList.builder<String>()
+    for (resource in list(address)) {
+      if (list(resource).isEmpty()) {
+        resourcesResult.add(resource)
+      } else {
+        resourcesResult.addAll(walk(resource))
+      }
+    }
+    return resourcesResult.build()
   }
 
   /**

@@ -3,4 +3,6 @@ data_source:
   username: root
   password: ""
   database: schemamigrator
-  migrations_resource: memory:/migrations
+  migrations_resources:
+    - memory:/migrations/sql
+    - memory:/migrations/library
