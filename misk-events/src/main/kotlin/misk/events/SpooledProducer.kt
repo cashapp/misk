@@ -12,6 +12,20 @@ import misk.hibernate.Session
  * to the event stream, and are done so through a [Producer] transaction.
  */
 interface SpooledProducer {
+  /**
+   * Publishes events to a sharded spool.
+   *
+   * @param session Session for the database transaction the event should be spooled in.
+   * @param groupRootId Entity group root ID for the event, used as the sharding key in the database,
+   *   and will be passed to the mapping function configured for the spool to look up a partition
+   *   key for the event.
+   */
   fun publish(session: Session, groupRootId: Gid<*, *>, topic: Topic, vararg event: Event)
+
+  /**
+   * Publishes events to an unsharded spool.
+   *
+   * @param session Session for the database transaction the event should be spooled in.
+   */
   fun publishUnsharded(session: Session, topic: Topic, vararg event: Event)
 }
