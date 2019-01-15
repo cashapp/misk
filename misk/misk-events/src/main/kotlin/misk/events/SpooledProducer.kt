@@ -13,5 +13,5 @@ import misk.hibernate.Session
  */
 interface SpooledProducer {
   fun publish(session: Session, groupRootId: Gid<*, *>, topic: Topic, vararg event: Event)
-  fun publish(session: Session, topic: Topic, vararg event: Event)
+  fun publishUnsharded(session: Session, topic: Topic, vararg event: Event)
 }
