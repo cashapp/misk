@@ -45,11 +45,30 @@ class ResourceLoaderTest {
   }
 
   @Test
+  fun walk() {
+    val resourcesBaseDir = "classpath:/misk/resources"
+    assertThat(resourceLoader.walk("$resourcesBaseDir/nested/deeper")).isEqualTo(
+        listOf("$resourcesBaseDir/nested/deeper/nested2.txt"))
+
+    assertThat(resourceLoader.walk("$resourcesBaseDir/nested")).containsExactlyInAnyOrder(
+        "$resourcesBaseDir/nested/nested.txt",
+        "$resourcesBaseDir/nested/deeper/nested2.txt")
+
+    assertThat(resourceLoader.walk("$resourcesBaseDir/")).contains(
+        "$resourcesBaseDir/nested/nested.txt",
+        "$resourcesBaseDir/nested/deeper/nested2.txt")
+  }
+
+  @Test
   fun memoryResources() {
     val data1 = "memory:/misk/resources/data1.txt"
     val data2 = "memory:/misk/resources/data2.txt"
+    val data3 = "memory:/misk/data3.txt"
+    val data4 = "memory:/misk/tmp/data4.txt"
     resourceLoader.put(data1, "foo")
     resourceLoader.put(data2, "bar")
+    resourceLoader.put(data3, "baz")
+    resourceLoader.put(data4, "qux")
 
     assertThat(resourceLoader.exists(data1)).isTrue()
     assertThat(resourceLoader.exists(data2)).isTrue()
@@ -64,8 +83,13 @@ class ResourceLoaderTest {
 
     assertThat(resourceLoader.list("memory:/misk/resources")).containsExactly(data1, data2)
     assertThat(resourceLoader.list("memory:/misk/resources/")).containsExactly(data1, data2)
-    assertThat(resourceLoader.list("memory:/misk")).containsExactly("memory:/misk/resources")
-    assertThat(resourceLoader.list("memory:/misk/")).containsExactly("memory:/misk/resources")
+    assertThat(resourceLoader.list("memory:/misk")).containsExactlyInAnyOrder(
+        "memory:/misk/resources", "memory:/misk/tmp", data3)
+    assertThat(resourceLoader.list("memory:/misk/")).containsExactlyInAnyOrder(
+        "memory:/misk/resources", "memory:/misk/tmp", data3)
+
+    assertThat(resourceLoader.walk("memory:/misk")).containsExactlyInAnyOrder(data1, data2, data3,
+        data4)
   }
 
   @Test
@@ -96,6 +120,10 @@ class ResourceLoaderTest {
 
     assertFailsWith<UnsupportedOperationException> {
       resourceLoader.list("filesystem:$tempRoot")
+    }
+
+    assertFailsWith<UnsupportedOperationException> {
+      resourceLoader.walk("filesystem:$tempRoot")
     }
   }
 
