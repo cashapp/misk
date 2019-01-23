@@ -195,6 +195,7 @@ class DockerVitessCluster(
     grantExternalAccessToDbaUser()
 
     turnOnGeneralLog()
+    setRowBasedBinaryLogging()
   }
 
   private fun waitUntilHealthy() {
@@ -255,13 +256,24 @@ class DockerVitessCluster(
     }
   }
 
+  /**
+   * Set binary logging to row based.
+   */
+  private fun setRowBasedBinaryLogging() {
+    cluster.openMysqlConnection().use { connection ->
+      connection.createStatement().use { statement ->
+        statement.execute("SET GLOBAL binlog_format = 'ROW'")
+      }
+    }
+  }
+
   fun stop() {
     if (!isRunning) {
       return
     }
     isRunning = false
 
-    docker.removeContainerCmd(containerId!!).withForce(true).exec()
+    docker.removeContainerCmd(containerId!!).withForce(true).withRemoveVolumes(true).exec()
     StartVitessService.logger.info("Killed Vitess cluster with container id $containerId")
   }
 }
