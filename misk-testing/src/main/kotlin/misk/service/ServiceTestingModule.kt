@@ -27,9 +27,6 @@ class ServiceTestingModule<T : Service> internal constructor(
         getProvider(wrappedServiceType.java),
         extraDependencies
     )).asSingleton()
-
-    // Bind the wrapped service directly so that application code can inject it
-    bind(wrappedServiceType.java)
   }
 
   companion object {
