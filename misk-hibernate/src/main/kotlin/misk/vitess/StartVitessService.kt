@@ -12,8 +12,10 @@ import com.github.dockerjava.netty.NettyDockerCmdExecFactory
 import com.google.common.cache.CacheBuilder
 import com.google.common.cache.CacheLoader
 import com.google.common.util.concurrent.AbstractIdleService
+import com.google.inject.Key
 import com.squareup.moshi.Moshi
 import com.zaxxer.hikari.util.DriverDataSource
+import misk.DependentService
 import misk.backoff.ExponentialBackoff
 import misk.backoff.retry
 import misk.environment.Environment
@@ -276,7 +278,10 @@ class StartVitessService(
   private val qualifier: KClass<out Annotation>,
   private val environment: Environment,
   private val config: DataSourceConfig
-) : AbstractIdleService() {
+) : AbstractIdleService(), DependentService {
+
+  override val consumedKeys: Set<Key<*>> = setOf()
+  override val producedKeys: Set<Key<*>> = setOf(Key.get(StartVitessService::class.java))
 
   var cluster: DockerVitessCluster? = null
 
