@@ -15,7 +15,7 @@ import kotlin.reflect.KClass
  * that is being spun up within the test itself
  */
 class ServiceTestingModule<T : Service> internal constructor(
-  private val wrappedServiceType: KClass<T>,
+  private val wrappedServiceKey: Key<T>,
   private val extraDependencies: Set<Key<*>>
 ) : KAbstractModule() {
 
@@ -24,7 +24,7 @@ class ServiceTestingModule<T : Service> internal constructor(
     // to the underlying service for all calls except [DependentService.consumedKeys], which
     // it overrides to extend the consumed service list with the extra dependencies
     multibind<Service>().toProvider(ServiceWithTestDependenciesProvider(
-        getProvider(wrappedServiceType.java),
+        getProvider(wrappedServiceKey),
         extraDependencies
     )).asSingleton()
   }
@@ -35,12 +35,19 @@ class ServiceTestingModule<T : Service> internal constructor(
       wrappedServiceType: KClass<T>,
       vararg extraDependencies: Key<*>
     ): com.google.inject.Module =
-        ServiceTestingModule(wrappedServiceType, extraDependencies.toSet())
+        ServiceTestingModule(Key.get(wrappedServiceType.java), extraDependencies.toSet())
 
     /** @return A [Module] binding the given service with extra dependencies */
     inline fun <reified T : Service> withExtraDependencies(
       vararg extraDependencies: Key<*>
     ): com.google.inject.Module = withExtraDependencies(T::class, *extraDependencies)
+
+    /** @return A [Module] binding the service with extra dependencies */
+    fun <T : Service> withExtraDependencies(
+      wrappedServiceKey: Key<T>,
+      vararg extraDependencies: Key<*>
+    ): com.google.inject.Module =
+        ServiceTestingModule(wrappedServiceKey, extraDependencies.toSet())
   }
 
   /**
