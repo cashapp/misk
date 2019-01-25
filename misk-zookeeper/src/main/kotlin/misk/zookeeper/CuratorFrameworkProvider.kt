@@ -1,10 +1,10 @@
-package misk.clustering.zookeeper
+package misk.zookeeper
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder
+import misk.clustering.zookeeper.ZookeeperConfig
 import org.apache.curator.framework.CuratorFramework
 import org.apache.curator.framework.CuratorFrameworkFactory
 import org.apache.curator.retry.ExponentialBackoffRetry
-import org.apache.curator.utils.DefaultZookeeperFactory
 import org.apache.zookeeper.ZooKeeper
 import org.apache.zookeeper.client.ZKClientConfig
 import javax.inject.Inject
@@ -33,7 +33,7 @@ internal class CuratorFrameworkProvider @Inject internal constructor(
         .sessionTimeoutMs(config.session_timeout_msecs)
         .canBeReadOnly(false)
         .threadFactory(ThreadFactoryBuilder()
-            .setNameFormat("zk-clustering-${config.zk_connect}")
+            .setNameFormat("zk-${config.zk_connect}")
             .build())
         .zookeeperFactory { connectString, sessionTimeout, watcher, canBeReadOnly ->
           val clientConfig = ZKClientConfig()
