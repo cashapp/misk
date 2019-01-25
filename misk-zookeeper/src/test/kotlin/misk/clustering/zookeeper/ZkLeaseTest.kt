@@ -1,14 +1,19 @@
 package misk.clustering.zookeeper
 
+import com.google.common.collect.Iterables
 import com.google.inject.util.Modules
 import misk.MiskTestingServiceModule
 import misk.clustering.Cluster
 import misk.clustering.fake.FakeCluster
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
+import misk.zookeeper.DEFAULT_PERMS
+import misk.zookeeper.SHARED_DIR_PERMS
 import org.apache.curator.framework.CuratorFramework
 import org.apache.zookeeper.CreateMode
 import org.apache.zookeeper.ZooDefs
+import org.apache.zookeeper.data.ACL
+import org.apache.zookeeper.data.Id
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -53,6 +58,16 @@ internal class ZkLeaseTest {
     // Confirm exists in zk
     val leaseData = curator.data.forPath(leasePath.asZkPath)
     assertThat(leaseData.toString(Charsets.UTF_8)).isEqualTo(FakeCluster.SELF_NAME)
+
+    // Data has correct ACL set
+    val acl = curator.acl.forPath(leasePath.asZkPath)
+    val dnFromCert = "CN=misk-client,OU=Client,O=Misk,L=San Francisco,ST=CA,C=US"
+    assertThat(Iterables.getOnlyElement(acl)).isEqualTo(ACL(DEFAULT_PERMS, Id("x509", dnFromCert)))
+
+    // Verify shared directory ACL
+    val leasesAcl = curator.acl.forPath("/leases")
+    assertThat(Iterables.getOnlyElement(leasesAcl))
+        .isEqualTo(ACL(SHARED_DIR_PERMS, ZooDefs.Ids.ANYONE_ID_UNSAFE))
   }
 
   @Test fun doesNotAcquireLeaseIfNotMappedToSelf() {
@@ -154,7 +169,6 @@ internal class ZkLeaseTest {
     // testing a different path from when another process owns the node
     curator.create()
         .withMode(CreateMode.EPHEMERAL)
-        .withACL(ZooDefs.Ids.OPEN_ACL_UNSAFE)
         .forPath(leasePath.asZkPath, FakeCluster.SELF_IP.toByteArray())
 
     // Since we don't own the lease, we won't attempt to delete the node
