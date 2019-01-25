@@ -1,7 +1,7 @@
 package misk.hibernate
 
-import misk.jdbc.DataSourceConfig
 import misk.healthchecks.HealthCheck
+import misk.jdbc.DataSourceConfig
 import misk.mockito.Mockito.mock
 import misk.mockito.Mockito.whenever
 import misk.testing.MiskTest
@@ -13,6 +13,7 @@ import org.hibernate.SessionFactory
 import org.junit.jupiter.api.Test
 import java.time.Instant
 import javax.inject.Inject
+import javax.inject.Provider
 
 @MiskTest(startService = true)
 class HealthCheckTest {
@@ -22,7 +23,7 @@ class HealthCheckTest {
   @Inject lateinit var fakeClock: FakeClock
   @Inject lateinit var healthChecks: List<HealthCheck>
   @Inject @Movies lateinit var config: DataSourceConfig
-  @Inject @Movies lateinit var sessionFactory: SessionFactory
+  @Inject @Movies lateinit var sessionFactory: Provider<SessionFactory>
 
   @Test
   fun healthy() {
@@ -37,7 +38,8 @@ class HealthCheckTest {
     val mockSessionFactory: SessionFactory = mock()
     whenever(mockSessionFactory.openSession()).thenThrow(HibernateException("Cannot open session"))
 
-    val status = HibernateHealthCheck(Movies::class, mockSessionFactory, config, fakeClock).status()
+    val status = HibernateHealthCheck(Movies::class, Provider { mockSessionFactory }, config,
+        fakeClock).status()
     assertThat(status.isHealthy).isFalse()
     assertThat(status.messages).contains("Hibernate: failed to query Movies database")
   }
