@@ -8,6 +8,7 @@ import org.hibernate.SessionFactory
 import java.sql.Timestamp
 import java.time.Clock
 import java.time.Duration
+import javax.inject.Provider
 import kotlin.reflect.KClass
 
 private val logger = getLogger<HibernateHealthCheck>()
@@ -17,14 +18,15 @@ private val logger = getLogger<HibernateHealthCheck>()
  */
 class HibernateHealthCheck(
   private val qualifier: KClass<out Annotation>,
-  private val sessionFactory: SessionFactory,
+  // Lazily provide since the SessionFactory construction relies on Service startup.
+  private val sessionFactory: Provider<SessionFactory>,
   private val config: DataSourceConfig,
   private val clock: Clock
 ) : HealthCheck {
 
   override fun status(): HealthStatus {
     val databaseInstant = try {
-      sessionFactory.openSession().use { session ->
+      sessionFactory.get().openSession().use { session ->
         session.createNativeQuery("SELECT NOW()").uniqueResult() as Timestamp
       }.toInstant()
     } catch (e: Exception) {

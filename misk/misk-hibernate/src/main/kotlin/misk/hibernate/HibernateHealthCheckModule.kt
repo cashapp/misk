@@ -25,7 +25,7 @@ class HibernateHealthCheckModule(
         @Inject lateinit var clock: Clock
 
         override fun get(): HibernateHealthCheck =
-          HibernateHealthCheck(qualifier, sessionFactoryProvider.get(), config, clock)
+          HibernateHealthCheck(qualifier, sessionFactoryProvider, config, clock)
       }).asSingleton()
   }
 }
