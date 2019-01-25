@@ -9,6 +9,7 @@ import misk.clustering.lease.LeaseManager
 import misk.config.AppName
 import misk.inject.keyOf
 import misk.logging.getLogger
+import misk.zookeeper.LEASES_NODE
 import org.apache.curator.framework.CuratorFramework
 import org.apache.curator.framework.state.ConnectionStateListener
 import java.util.concurrent.ConcurrentHashMap
@@ -34,7 +35,7 @@ internal class ZkLeaseManager @Inject internal constructor(
   override val consumedKeys = setOf(ZookeeperModule.serviceKey, keyOf<Cluster>())
   override val producedKeys = setOf(ZookeeperModule.leaseManagerKey)
 
-  internal val leaseNamespace = "leases/${appName.asZkNamespace}"
+  internal val leaseNamespace = "$LEASES_NODE/${appName.asZkNamespace}"
   internal val client = lazy { curator.usingNamespace(leaseNamespace) }
 
   private val ownerName = cluster.snapshot.self.name
