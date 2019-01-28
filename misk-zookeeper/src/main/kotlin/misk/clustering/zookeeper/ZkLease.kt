@@ -141,7 +141,6 @@ internal class ZkLease(
     try {
       manager.client.value.create()
           .withMode(CreateMode.EPHEMERAL)
-          .withACL(ZooDefs.Ids.OPEN_ACL_UNSAFE)
           .forPath(leaseZkPath, leaseData)
       status = Status.HELD
       log.info { "acquired lease $name" }
