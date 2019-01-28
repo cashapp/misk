@@ -3,7 +3,6 @@ package com.squareup.exemplar;
 import com.google.common.collect.ImmutableList;
 import misk.MiskApplication;
 import misk.MiskRealServiceModule;
-import misk.MiskTestingServiceModule;
 import misk.config.ConfigModule;
 import misk.config.MiskConfig;
 import misk.environment.Environment;
