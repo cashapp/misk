@@ -17,11 +17,7 @@ import java.util.Collections
 import javax.inject.Inject
 import javax.inject.Provider
 
-// Directory where ZooKeeper stores the leases that it manages on a service's behalf
-const val LEASES_NODE = "leases"
-
-// Directory where service-specific directories are created that clients can use to store
-// their service-specific data
+// Directory where service-specific directories are created
 const val SERVICES_NODE = "services"
 
 const val DEFAULT_PERMS = ZooDefs.Perms.READ or
@@ -76,10 +72,10 @@ internal class CuratorFrameworkProvider @Inject internal constructor(
           }
 
           override fun getAclForPath(path: String?): List<ACL> {
-            // Shared directories need to be created in such a way that anyone can create them if
-            // they're missing and read or write to them, but anyone should not be able to delete
-            // them.
-            if (path == LEASES_NODE.asZkPath || path == SERVICES_NODE.asZkPath) {
+            // Shared directories (i.e. /services) need to be created in such a way that apps can
+            // create them if they're missing and read or write to them, but an app should not be
+            // able to delete a shared directory as it contains more than just that app's data.
+            if (path == SERVICES_NODE.asZkPath) {
               return Collections.singletonList(ACL(SHARED_DIR_PERMS, ANYONE_ID_UNSAFE))
             }
 
