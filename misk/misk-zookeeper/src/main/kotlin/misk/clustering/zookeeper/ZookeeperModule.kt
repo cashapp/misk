@@ -5,6 +5,7 @@ import com.google.inject.Key
 import misk.clustering.lease.LeaseManager
 import misk.inject.KAbstractModule
 import misk.inject.asSingleton
+import misk.zookeeper.CuratorFrameworkProvider
 import org.apache.curator.framework.CuratorFramework
 
 class ZookeeperModule : KAbstractModule() {
