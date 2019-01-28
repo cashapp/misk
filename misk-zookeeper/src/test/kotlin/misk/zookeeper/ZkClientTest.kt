@@ -29,14 +29,23 @@ internal class ZkClientTest {
     val client = clientFactory.client()
     client.create().forPath("/test-node", "test-data".toByteArray())
 
-    // Data is written to /services/<app-name> by default
-    val data = curatorFramework.data.forPath("/services/my-app/test-node")
+    // Data is written to /services/<app-name>/data by default
+    val data = curatorFramework.data.forPath("/services/my-app/data/test-node")
     assertThat(String(data)).isEqualTo("test-data")
 
     // Data has correct ACL set
-    val acl = curatorFramework.acl.forPath("/services/my-app/test-node")
+    val dataAcl = curatorFramework.acl.forPath("/services/my-app/data/test-node")
     val dnFromCert = "CN=misk-client,OU=Client,O=Misk,L=San Francisco,ST=CA,C=US"
-    assertThat(Iterables.getOnlyElement(acl)).isEqualTo(ACL(DEFAULT_PERMS, Id("x509", dnFromCert)))
+    val defaultACL = ACL(DEFAULT_PERMS, Id("x509", dnFromCert))
+    assertThat(Iterables.getOnlyElement(dataAcl)).isEqualTo(defaultACL)
+
+    // Data dir has correct ACL
+    val dataDirAcl = curatorFramework.acl.forPath("/services/my-app/data")
+    assertThat(Iterables.getOnlyElement(dataDirAcl)).isEqualTo(defaultACL)
+
+    // App dir has correct ACL
+    val appDirAcl = curatorFramework.acl.forPath("/services/my-app")
+    assertThat(Iterables.getOnlyElement(appDirAcl)).isEqualTo(defaultACL)
 
     // Shared directory has correct ACL set
     val servicesAcl = curatorFramework.acl.forPath("/services")

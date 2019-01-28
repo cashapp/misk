@@ -13,7 +13,7 @@ class ZkClientFactory @Inject constructor(
   @AppName appName: String,
   curator: CuratorFramework
 ) {
-  internal val client = lazy { curator.usingNamespace("$SERVICES_NODE/${appName.asZkNamespace}") }
+  internal val client = lazy { curator.usingNamespace("$SERVICES_NODE/${appName.asZkNamespace}/data") }
 
   fun client(): CuratorFramework {
     return client.value

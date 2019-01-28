@@ -62,12 +62,12 @@ internal class ZkLeaseTest {
     // Data has correct ACL set
     val acl = curator.acl.forPath(leasePath.asZkPath)
     val dnFromCert = "CN=misk-client,OU=Client,O=Misk,L=San Francisco,ST=CA,C=US"
-    assertThat(Iterables.getOnlyElement(acl)).isEqualTo(ACL(DEFAULT_PERMS, Id("x509", dnFromCert)))
+    val defaultAcl = ACL(DEFAULT_PERMS, Id("x509", dnFromCert))
+    assertThat(Iterables.getOnlyElement(acl)).isEqualTo(defaultAcl)
 
-    // Verify shared directory ACL
-    val leasesAcl = curator.acl.forPath("/leases")
-    assertThat(Iterables.getOnlyElement(leasesAcl))
-        .isEqualTo(ACL(SHARED_DIR_PERMS, ZooDefs.Ids.ANYONE_ID_UNSAFE))
+    // Verify lease directory ACL
+    val leasesAcl = curator.acl.forPath("/services/my-app/leases")
+    assertThat(Iterables.getOnlyElement(leasesAcl)).isEqualTo(defaultAcl)
   }
 
   @Test fun doesNotAcquireLeaseIfNotMappedToSelf() {
