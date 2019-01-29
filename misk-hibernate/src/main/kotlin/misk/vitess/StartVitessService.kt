@@ -167,6 +167,7 @@ class DockerVitessCluster(
         "-mysql_bind_host=0.0.0.0",
         "-data_dir=/vt/vtdataroot",
         "-schema_dir=schema",
+        "-extra_my_cnf=/vt/src/vitess.io/vitess/config/mycnf/rbr.cnf",
         "-keyspaces=$keyspacesArg",
         "-num_shards=$shardCounts"
     )
@@ -197,7 +198,6 @@ class DockerVitessCluster(
     grantExternalAccessToDbaUser()
 
     turnOnGeneralLog()
-    setRowBasedBinaryLogging()
   }
 
   private fun waitUntilHealthy() {
@@ -254,17 +254,6 @@ class DockerVitessCluster(
       connection.createStatement().use { statement ->
         statement.execute("SET GLOBAL log_output = 'TABLE'")
         statement.execute("SET GLOBAL general_log = 1")
-      }
-    }
-  }
-
-  /**
-   * Set binary logging to row based.
-   */
-  private fun setRowBasedBinaryLogging() {
-    cluster.openMysqlConnection().use { connection ->
-      connection.createStatement().use { statement ->
-        statement.execute("SET GLOBAL binlog_format = 'ROW'")
       }
     }
   }
