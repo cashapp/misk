@@ -264,16 +264,18 @@ class VitessScaleSafetyChecks(
   private fun extractLastDmlQuery(): String? {
     return connect().let { c ->
       c.createStatement().use { s ->
-        // OFFSET 1 because this query itself is also directly logged before it's executed
-        // "/* _stream" is appended to every DML statement by Vitess so that we skip a bunch of
-        // irrelevant statements
         s.executeQuery("""
                   SELECT argument
                   FROM mysql.general_log
                   WHERE command_type = 'Query'
-                  AND argument LIKE '%/* _stream%'
+                  AND (
+                    argument LIKE '%update%'
+                    OR argument LIKE '%insert%'
+                    OR argument LIKE '%delete%'
+                  )
+                  AND NOT argument LIKE 'SELECT argument%'
                   ORDER BY event_time DESC
-                  LIMIT 1 OFFSET 1
+                  LIMIT 1
                 """.trimIndent())
             .uniqueResult { it.getString(1) }
       }
