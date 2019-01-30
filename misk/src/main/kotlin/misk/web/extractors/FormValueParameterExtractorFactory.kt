@@ -89,7 +89,7 @@ object FormValueParameterExtractorFactory : ParameterExtractor.Factory {
 
     while (!source.exhausted()) {
       var keyValueEnd = source.indexOf('&'.toByte())
-      if (keyValueEnd == -1L) keyValueEnd = source.buffer().size
+      if (keyValueEnd == -1L) keyValueEnd = source.buffer.size
 
       val keyEnd = source.indexOf('='.toByte(), 0, keyValueEnd)
       requireRequest(keyEnd != 1L) { "invalid form encoding" }
