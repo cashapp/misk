@@ -140,6 +140,7 @@ internal class ZkLease(
     // the lease
     try {
       manager.client.value.create()
+          .creatingParentsIfNeeded()
           .withMode(CreateMode.EPHEMERAL)
           .forPath(leaseZkPath, leaseData)
       status = Status.HELD
