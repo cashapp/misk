@@ -48,6 +48,7 @@ internal class ZkLease(
   }
 
   @GuardedBy("lock") private var status: Status = Status.UNKNOWN
+  @GuardedBy("lock") private val listeners = mutableListOf<Lease.StateChangeListener>()
   private val lock = ReentrantLock()
   private val leaseData = ownerName.toByteArray(Charsets.UTF_8)
   private val leaseZkPath = name.asZkPath
@@ -85,6 +86,19 @@ internal class ZkLease(
     }
   }
 
+  override fun addListener(listener: Lease.StateChangeListener) {
+    lock.withLock {
+      listeners.add(listener)
+      when (status) {
+        // We already own the lease and should tell the listener
+        Status.HELD -> listener.afterAcquire(this)
+        // We don't know if we own the lease, so check
+        Status.UNKNOWN -> checkHeld()
+        else -> {}
+      }
+    }
+  }
+
   fun close() {
     lock.withLock {
       if (status != Status.NOT_HELD) release()
@@ -104,6 +118,7 @@ internal class ZkLease(
   private fun release(): Boolean {
     try {
       if (checkLeaseNodeExists() && checkLeaseDataMatches()) {
+        notifyBeforeRelease()
         // Lease exists in zk and we own it, so delete it
         manager.client.value.delete().guaranteed().forPath(leaseZkPath)
         log.info { "released lease $name" }
@@ -129,6 +144,7 @@ internal class ZkLease(
       if (checkLeaseDataMatches()) {
         log.info { "reclaiming currently held lease $name" }
         status = Status.HELD
+        notifyAfterAcquire()
         return true
       }
 
@@ -145,6 +161,7 @@ internal class ZkLease(
           .forPath(leaseZkPath, leaseData)
       status = Status.HELD
       log.info { "acquired lease $name" }
+      notifyAfterAcquire()
       return true
     } catch (e: KeeperException.NodeExistsException) {
       leaseHeldByAnother()
@@ -153,6 +170,26 @@ internal class ZkLease(
     }
 
     return false
+  }
+
+  private fun notifyAfterAcquire() {
+    listeners.forEach {
+      try {
+        it.afterAcquire(this)
+      } catch (e: Exception) {
+        log.warn(e) { "exception from afterAcquire() listener for lease $name" }
+      }
+    }
+  }
+
+  private fun notifyBeforeRelease() {
+    listeners.forEach {
+      try {
+        it.beforeRelease(this)
+      } catch (e: Exception) {
+        log.warn(e) { "exception from beforeRelease() listener for lease $name" }
+      }
+    }
   }
 
   /** @return true if we should hold the lease per the cluster membership */
