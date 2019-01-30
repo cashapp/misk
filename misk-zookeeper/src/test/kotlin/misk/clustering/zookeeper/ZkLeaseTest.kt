@@ -24,6 +24,7 @@ import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyZeroInteractions
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
 
 @MiskTest(startService = true)
@@ -257,6 +258,24 @@ internal class ZkLeaseTest {
 
     lease.addListener(listenerMock)
     verify(listenerMock, times(1)).afterAcquire(lease)
+  }
+
+  @Test fun checkLeaseInListenerDoesNotDeadlock() {
+    cluster.resourceMapper.addMapping(leasePath, self)
+    val lease = leaseManager.requestLease(LEASE_NAME)
+    assertThat(lease.checkHeld()).isTrue()
+
+    val acquireCalled = AtomicBoolean()
+    lease.addListener(object : Lease.StateChangeListener {
+      override fun afterAcquire(lease: Lease) {
+        lease.checkHeld()
+        acquireCalled.set(true)
+      }
+
+      override fun beforeRelease(lease: Lease) {}
+    })
+
+    assertThat(acquireCalled.get()).isTrue()
   }
 
   companion object {
