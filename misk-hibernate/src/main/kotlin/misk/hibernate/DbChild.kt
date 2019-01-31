@@ -9,4 +9,12 @@ package misk.hibernate
 interface DbChild<R : DbRoot<R>, T : DbChild<R, T>> : DbSharded<R, T> {
   override val id: Id<T>
     get() = gid.id
+
+  /**
+   * Create a new copy of this entity in the target entity group (possibly different shard).
+   */
+  fun migrate(shardMigrator: ShardMigrator, session: Session, newParentId: Id<R>): T {
+    throw UnsupportedOperationException(
+        "${this::class.qualifiedName} can't be migrated yet. You need to implement this method.")
+  }
 }

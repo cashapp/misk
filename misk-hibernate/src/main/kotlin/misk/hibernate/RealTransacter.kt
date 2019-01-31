@@ -208,6 +208,38 @@ internal class RealTransacter private constructor(
       } as Id<T>
     }
 
+    override fun <T : DbEntity<T>> delete(entity: T) {
+      if (readOnly) {
+        throw IllegalStateException("Deleting isn't permitted in a read only session.")
+      } else {
+        when (entity) {
+          is DbChild<*, *> -> session.delete(entity)
+          is DbRoot<*> -> session.delete(entity)
+          is DbUnsharded<*> -> session.delete(entity)
+          else -> throw IllegalArgumentException(
+              "You need to sub-class one of [DbChild, DbRoot, DbUnsharded]")
+        }
+      }
+    }
+
+    override fun <T : DbEntity<T>> update(entity: T) {
+      if (readOnly) {
+        throw IllegalStateException("Updating isn't permitted in a read only session.")
+      } else {
+        when (entity) {
+          is DbChild<*, *> -> session.update(entity)
+          is DbRoot<*> -> session.update(entity)
+          is DbUnsharded<*> -> session.update(entity)
+          else -> throw IllegalArgumentException(
+              "You need to sub-class one of [DbChild, DbRoot, DbUnsharded]")
+        }
+      }
+    }
+
+    override fun flush() {
+      session.flush()
+    }
+
     override fun <T : DbEntity<T>> load(id: Id<T>, type: KClass<T>): T {
       return session.get(type.java, id)
     }

@@ -11,4 +11,9 @@ interface DbRoot<T : DbRoot<T>> : DbSharded<T, T> {
 
   override val rootId: Id<T>
     get() = id
+
+  /**
+   * Increase the version to trigger an "empty" update which forces Vitess to start a transaction.
+   */
+  abstract fun incrementEditCount()
 }

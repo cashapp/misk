@@ -9,6 +9,9 @@ interface Session {
    * @throws IllegalStateException when save is called on a read only session.
    */
   fun <T : DbEntity<T>> save(entity: T): Id<T>
+  fun <T: DbEntity<T>> delete(entity: T)
+  fun <T: DbEntity<T>> update(entity: T)
+  fun flush()
 
   fun <T : DbEntity<T>> load(id: Id<T>, type: KClass<T>): T
   fun <R : DbRoot<R>, T : DbSharded<R, T>> loadSharded(gid: Gid<R, T>, type: KClass<T>): T
