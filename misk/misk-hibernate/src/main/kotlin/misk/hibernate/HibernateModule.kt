@@ -60,6 +60,7 @@ class HibernateModule(
     val schemaMigratorProvider = getProvider(schemaMigratorKey)
 
     val transacterKey = Transacter::class.toKey(qualifier)
+    val transacterProvider = getProvider(transacterKey)
 
     val pingDatabaseServiceKey = PingDatabaseService::class.toKey(qualifier)
 
@@ -100,7 +101,7 @@ class HibernateModule(
     bind(schemaMigratorKey).toProvider(object : Provider<SchemaMigrator> {
       @Inject lateinit var resourceLoader: ResourceLoader
       override fun get(): SchemaMigrator = SchemaMigrator(qualifier, resourceLoader,
-          sessionFactoryProvider.get(), config)
+          transacterProvider, config)
     }).asSingleton()
 
     bind(transacterKey).toProvider(object : Provider<Transacter> {
@@ -112,7 +113,7 @@ class HibernateModule(
     multibind<Service>().toProvider(object : Provider<SchemaMigratorService> {
       @Inject lateinit var environment: Environment
       override fun get(): SchemaMigratorService = SchemaMigratorService(
-          qualifier, environment, schemaMigratorProvider)
+          qualifier, environment, schemaMigratorProvider, config)
     }).asSingleton()
 
     multibind<Service>().toProvider(Provider<SchemaValidatorService> {

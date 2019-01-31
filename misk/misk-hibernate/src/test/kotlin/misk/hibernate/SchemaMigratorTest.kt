@@ -77,16 +77,22 @@ internal class SchemaMigratorTest {
             injectorServiceProvider.get())
       }).asSingleton()
       bind<SessionFactory>().annotatedWith<Movies>().toProvider(sessionFactoryServiceKey)
+      val sessionFactoryKey = Key.get(SessionFactory::class.java, Movies::class.java)
+      val sessionFactoryProvider = getProvider(sessionFactoryKey)
       multibind<Service>().to(sessionFactoryServiceKey)
+      val transacterKey = Key.get(Transacter::class.java, Movies::class.java)
+      bind(transacterKey).toProvider(Provider<Transacter> {
+        RealTransacter(Movies::class, sessionFactoryProvider, config.data_source, null)
+      }).asSingleton()
     }
   }
 
   @Inject lateinit var resourceLoader: ResourceLoader
-  @Inject @Movies lateinit var sessionFactory: SessionFactory
+  @Inject @Movies lateinit var transacter: Provider<Transacter>
 
   @Test fun initializeAndMigrate() {
     val schemaMigrator =
-        SchemaMigrator(Movies::class, resourceLoader, sessionFactory, config.data_source)
+        SchemaMigrator(Movies::class, resourceLoader, transacter, config.data_source)
 
     val mainSource = config.data_source.migrations_resources!![0]
     val librarySource = config.data_source.migrations_resources!![1]
@@ -111,12 +117,12 @@ internal class SchemaMigratorTest {
     assertThat(tableExists("library_table")).isFalse()
     assertThat(tableExists("merged_library_table")).isFalse()
     assertFailsWith<PersistenceException> {
-      schemaMigrator.appliedMigrations()
+      schemaMigrator.appliedMigrations(Shard.SINGLE_SHARD)
     }
 
     // Once we initialize, that table is present but empty.
     schemaMigrator.initialize()
-    assertThat(schemaMigrator.appliedMigrations()).isEmpty()
+    assertThat(schemaMigrator.appliedMigrations(Shard.SINGLE_SHARD)).isEmpty()
     assertThat(tableExists("schema_version")).isTrue()
     assertThat(tableExists("table_1")).isFalse()
     assertThat(tableExists("table_2")).isFalse()
@@ -127,7 +133,7 @@ internal class SchemaMigratorTest {
 
     // When we apply migrations, the table is present and contains the applied migrations.
     schemaMigrator.applyAll("SchemaMigratorTest", sortedSetOf())
-    assertThat(schemaMigrator.appliedMigrations()).containsExactly(
+    assertThat(schemaMigrator.appliedMigrations(Shard.SINGLE_SHARD)).containsExactly(
         NamedspacedMigration(1001),
         NamedspacedMigration(1002),
         NamedspacedMigration(1001, "name/space/"))
@@ -154,7 +160,7 @@ internal class SchemaMigratorTest {
         NamedspacedMigration(1001),
         NamedspacedMigration(1002),
         NamedspacedMigration(1001, "name/space/")))
-    assertThat(schemaMigrator.appliedMigrations()).containsExactly(
+    assertThat(schemaMigrator.appliedMigrations(Shard.SINGLE_SHARD)).containsExactly(
         NamedspacedMigration(1001),
         NamedspacedMigration(1002),
         NamedspacedMigration(1003),
@@ -173,7 +179,7 @@ internal class SchemaMigratorTest {
 
   @Test fun requireAllWithMissingMigrations() {
     val schemaMigrator =
-        SchemaMigrator(Movies::class, resourceLoader, sessionFactory, config.data_source)
+        SchemaMigrator(Movies::class, resourceLoader, transacter, config.data_source)
     schemaMigrator.initialize()
 
     resourceLoader.put("${config.data_source.migrations_resources!![0]}/v1001__foo.sql", """
@@ -193,7 +199,7 @@ internal class SchemaMigratorTest {
 
   @Test fun errorOnDuplicateMigrations() {
     val schemaMigrator =
-        SchemaMigrator(Movies::class, resourceLoader, sessionFactory, config.data_source)
+        SchemaMigrator(Movies::class, resourceLoader, transacter, config.data_source)
 
     resourceLoader.put("${config.data_source.migrations_resources!![0]}/v1001__foo.sql", """
         |CREATE TABLE table_1 (name varchar(255))
@@ -227,8 +233,8 @@ internal class SchemaMigratorTest {
 
   private fun tableExists(table: String): Boolean {
     try {
-      sessionFactory.openSession().use { session ->
-        session.createNativeQuery("SELECT * FROM $table LIMIT 1").list()
+      transacter.get().transaction { session ->
+        session.hibernateSession.createNativeQuery("SELECT * FROM $table LIMIT 1").list()
       }
       return true
     } catch (e: PersistenceException) {

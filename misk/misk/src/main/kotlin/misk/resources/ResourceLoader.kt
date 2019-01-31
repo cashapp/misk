@@ -126,6 +126,7 @@ class ResourceLoader @Inject constructor(
    */
   private fun parseAddress(path: String): Address {
     val colon = path.indexOf(':')
+    check(colon != -1) { "address scheme not specified in: $path"}
     return Address(path.substring(0, colon + 1), path.substring(colon + 1))
   }
 
