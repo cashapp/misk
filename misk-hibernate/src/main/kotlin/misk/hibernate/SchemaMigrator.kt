@@ -1,21 +1,21 @@
 package misk.hibernate
 
+import com.google.common.annotations.VisibleForTesting
 import com.google.common.base.Stopwatch
 import com.google.common.collect.ImmutableList
 import misk.jdbc.DataSourceConfig
 import misk.jdbc.DataSourceType
 import misk.logging.getLogger
 import misk.resources.ResourceLoader
-import org.hibernate.SessionFactory
 import org.hibernate.query.Query
-import java.sql.Connection
 import java.util.SortedSet
+import java.util.TreeSet
 import java.util.regex.Pattern
+import javax.inject.Provider
 import javax.persistence.PersistenceException
 import kotlin.reflect.KClass
 
 private val logger = getLogger<SchemaMigrator>()
-
 
 internal data class NamedspacedMigration(
   val version: Int,
@@ -73,7 +73,6 @@ internal data class NamedspacedMigration(
   }
 }
 
-
 /**
  * Manages **available** and **applied** schema migrations.
  *
@@ -89,7 +88,7 @@ internal data class NamedspacedMigration(
  * Migrations found in subdirectories will become namespaced, where the namespace is the directory
  * path. This allows including migrations from dependencies. Migrations in the root directory have
  * versions "1", "2", etc. Namespaced migrations have versions in the form of "dir/1", "dir/sub/1"
- * 
+ *
  * Applied schema migrations are tracked in the database in a `schema_version` table. Migrations may
  * be applied either by [SchemaMigrator.applyAll] or manually. When you applying schema changes
  * manually you must add a row to the `schema_version` table to record which version was applied.
@@ -97,11 +96,11 @@ internal data class NamedspacedMigration(
 internal class SchemaMigrator(
   private val qualifier: KClass<out Annotation>,
   private val resourceLoader: ResourceLoader,
-  private val sessionFactory: SessionFactory,
+  private val transacter: Provider<Transacter>,
   private val config: DataSourceConfig
 ) {
 
-  private fun getMigrationsResources(): List<String> {
+  private fun getMigrationsResources(keyspace: Keyspace): List<String> {
     val migrationsResources = ImmutableList.builder<String>()
     if (config.migrations_resource != null) {
       migrationsResources.add(config.migrations_resource)
@@ -109,48 +108,60 @@ internal class SchemaMigrator(
     if (config.migrations_resources != null) {
       migrationsResources.addAll(config.migrations_resources)
     }
+    if (config.vitess_schema_resource_root != null) {
+      migrationsResources.add(config.vitess_schema_resource_root + "/" + keyspace.name)
+    }
+    if (config.vitess_schema_dir != null) {
+      logger.warn { "vitess_schema_dir config property used instead of vitess_schema_resource_root, this config does not work with schema migration checks. Please use vitess_schema_resource_root instead." }
+    }
     return migrationsResources.build()
   }
 
   /** Returns a SortedSet of all migrations found in the source directories and subdirectories. */
-  private fun availableMigrations(): SortedSet<NamedspacedMigration> {
+  fun availableMigrations(keyspace: Keyspace): SortedSet<NamedspacedMigration> {
     val migrations = mutableListOf<NamedspacedMigration>()
-    for (migrationsResource in getMigrationsResources()) {
+    for (migrationsResource in getMigrationsResources(keyspace)) {
       val migrationsFound = resourceLoader.walk(migrationsResource).filter { it.endsWith(".sql") }
           .map { NamedspacedMigration.fromResourcePath(it, migrationsResource) }
       migrations.addAll(migrationsFound)
     }
     migrations.toSortedSet().let {
-      require(it.size == migrations.size) { "Duplicate migrations found $migrations"}
+      require(it.size == migrations.size) { "Duplicate migrations found $migrations" }
       return it
     }
   }
 
   /** Creates the `schema_version` table if it does not exist. Returns the applied migrations. */
   fun initialize(): SortedSet<NamedspacedMigration> {
-    if (getMigrationsResources().isEmpty()) {
+    val noMigrations =
+        transacter.get().shards().all { shard -> getMigrationsResources(shard.keyspace).isEmpty() }
+    if (noMigrations) {
       return sortedSetOf()
     }
-    try {
-      val result = appliedMigrations()
-      logger.info {
-        "${qualifier.simpleName} has ${result.size} migrations applied;" +
-            " latest is ${result.lastOrNull()}"
-      }
-      return result
-    } catch (e: PersistenceException) {
-      sessionFactory.doWork {
-        val statement = createStatement()
-        statement.addBatch("""
+    return transacter.get().shards().flatMapTo(TreeSet()) { shard ->
+      try {
+        val result = appliedMigrations(shard)
+        logger.info {
+          "${qualifier.simpleName} has ${result.size} migrations applied;" +
+              " latest is ${result.lastOrNull()}"
+        }
+        return result
+      } catch (e: PersistenceException) {
+        transacter.get().transaction(shard) { s ->
+          s.useConnection { c ->
+            val statement = c.createStatement()
+            statement.addBatch("""
             |CREATE TABLE schema_version (
             |  version varchar(50) NOT NULL,
             |  installed_by varchar(30) DEFAULT NULL,
             |  UNIQUE KEY (version)
             |);
             |""".trimMargin())
-        statement.executeBatch()
+            statement.executeBatch()
+          }
+          sortedSetOf<NamedspacedMigration>()
+        }
       }
-      return sortedSetOf()
     }
   }
 
@@ -158,11 +169,12 @@ internal class SchemaMigrator(
    * Returns the versions of applied migrations. Throws a [javax.persistence.PersistenceException]
    * if the migrations table has not been initialized.
    */
-  fun appliedMigrations(): SortedSet<NamedspacedMigration> {
-    sessionFactory.openSession().use { session ->
+  fun appliedMigrations(shard: Shard): SortedSet<NamedspacedMigration> {
+    return transacter.get().transaction(shard) { session ->
       @Suppress("UNCHECKED_CAST") // createNativeQuery returns a raw Query.
-      val query = session.createNativeQuery("SELECT version FROM schema_version") as Query<String>
-      return query.list().map { NamedspacedMigration.fromNamespacedVersion(it) }.toSortedSet()
+      val query = session.hibernateSession.createNativeQuery(
+          "SELECT version FROM schema_version") as Query<String>
+      query.list().map { NamedspacedMigration.fromNamespacedVersion(it) }.toSortedSet()
     }
   }
 
@@ -170,49 +182,52 @@ internal class SchemaMigrator(
   fun applyAll(author: String, appliedMigrations: SortedSet<NamedspacedMigration>) {
     require(author.matches(Regex("\\w+"))) // Prevent SQL injection.
 
-    for (migration in availableMigrations() - appliedMigrations) {
-      val migrationSql = resourceLoader.utf8(migration.path)
-      val stopwatch = Stopwatch.createStarted()
+    transacter.get().shards().forEach { shard ->
+      for (migration in availableMigrations(shard.keyspace) - appliedMigrations) {
+        val migrationSql = resourceLoader.utf8(migration.path)
+        val stopwatch = Stopwatch.createStarted()
 
-      sessionFactory.doWork {
-        val migrationStatement = createStatement()
-        migrationStatement.addBatch(migrationSql)
-        migrationStatement.executeBatch()
+        transacter.get().transaction(shard) { s ->
+          s.useConnection { c ->
+            val migrationStatement = c.createStatement()
+            migrationStatement.addBatch(migrationSql)
+            migrationStatement.executeBatch()
 
-        val schemaVersion = prepareStatement("""
+            val schemaVersion = c.prepareStatement("""
             |INSERT INTO schema_version (version, installed_by) VALUES (?, ?);
             |""".trimMargin())
-        schemaVersion.setString(1, migration.toNamespacedVersion())
-        schemaVersion.setString(2, author)
-        schemaVersion.executeUpdate()
-      }
+            schemaVersion.setString(1, migration.toNamespacedVersion())
+            schemaVersion.setString(2, author)
+            schemaVersion.executeUpdate()
+          }
+        }
 
-      logger.info { "${qualifier.simpleName} applied $migration in $stopwatch" }
+        logger.info { "${qualifier.simpleName} applied $migration in $stopwatch" }
+      }
     }
   }
 
   /** Throws an exception unless all available migrations have been applied. */
   fun requireAll() {
-    if (config.type == DataSourceType.VITESS) {
-      logger.warn { "schema check currently not supported on Vitess" }
-      return
-    }
     try {
-      val missingMigrations = availableMigrations() - appliedMigrations()
-      check(missingMigrations.isEmpty()) {
-        "${qualifier.simpleName} is missing migrations:\n  " +
-            missingMigrations.map { it.path }.joinToString(separator = "\n  ")
-      }
+      transacter.get().shards().forEach { requireAll(it) }
     } catch (e: PersistenceException) {
       throw IllegalStateException("${qualifier.simpleName} is not ready", e)
     }
   }
 
-  private fun <R> SessionFactory.doWork(lambda: Connection.() -> R): R {
-    openSession().use { session ->
-      return session.doReturningWork { connection ->
-        connection.lambda()
+  @VisibleForTesting
+  internal fun requireAll(shard: Shard) {
+    val missingMigrations = availableMigrations(shard.keyspace) - appliedMigrations(shard)
+
+    check(missingMigrations.isEmpty()) {
+      val shardMessage = if (shard != Shard.SINGLE_SHARD) {
+        " shard $shard"
+      } else {
+        ""
       }
+      "${qualifier.simpleName}$shardMessage is missing migrations:\n  " + missingMigrations.map { it.path }.joinToString(
+          separator = "\n  ")
     }
   }
 }

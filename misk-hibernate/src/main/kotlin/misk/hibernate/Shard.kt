@@ -5,6 +5,7 @@ import com.google.common.collect.Range
 import okio.ByteString
 
 import com.google.common.base.Suppliers
+import com.google.common.collect.ImmutableSet
 import okio.ByteString.Companion.decodeHex
 
 data class Shard(val keyspace: Keyspace, val name: String) {
@@ -72,5 +73,8 @@ data class Shard(val keyspace: Keyspace, val name: String) {
   companion object {
     const val SINGLE_SHARD_ID = "0"
     const val MAX_LENGTH = 8
+    val SINGLE_KEYSPACE = Keyspace("keyspace")
+    val SINGLE_SHARD = Shard(SINGLE_KEYSPACE, SINGLE_SHARD_ID)
+    val SINGLE_SHARD_SET = ImmutableSet.of(SINGLE_SHARD)
   }
 }
