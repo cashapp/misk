@@ -2,6 +2,7 @@ package misk.hibernate
 
 import com.google.common.util.concurrent.Service
 import com.google.inject.Key
+import io.opentracing.Tracer
 import misk.MiskTestingServiceModule
 import misk.config.Config
 import misk.config.MiskConfig
@@ -61,6 +62,9 @@ class SchemaValidatorTest {
       val sessionFactoryKey = SessionFactory::class.toKey(qualifier)
       val sessionFactoryProvider = getProvider(sessionFactoryKey)
 
+      val transacterKey = Transacter::class.toKey(qualifier)
+      val transacterProvider = getProvider(transacterKey)
+
       val schemaMigratorKey = SchemaMigrator::class.toKey(qualifier)
       val schemaMigratorProvider = getProvider(schemaMigratorKey)
 
@@ -72,10 +76,18 @@ class SchemaValidatorTest {
       bind<SessionFactory>().annotatedWith<ValidationDb>().toProvider(sessionFactoryServiceKey)
       multibind<Service>().to(sessionFactoryServiceKey)
 
+      bind(transacterKey).toProvider(object : Provider<Transacter> {
+        @com.google.inject.Inject(optional = true) val tracer: Tracer? = null
+        override fun get(): RealTransacter = RealTransacter(
+            qualifier, sessionFactoryProvider, config.data_source, tracer)
+      }).asSingleton()
+
       bind(schemaMigratorKey).toProvider(object : Provider<SchemaMigrator> {
         @Inject lateinit var resourceLoader: ResourceLoader
-        override fun get(): SchemaMigrator = SchemaMigrator(qualifier, resourceLoader,
-            sessionFactoryProvider.get(), config.data_source)
+        override fun get(): SchemaMigrator {
+          return SchemaMigrator(qualifier, resourceLoader,
+              transacterProvider, config.data_source)
+        }
       }).asSingleton()
 
       install(object : HibernateEntityModule(qualifier) {
@@ -96,7 +108,7 @@ class SchemaValidatorTest {
 
       multibind<Service>().toProvider(Provider<SchemaMigratorService> {
         SchemaMigratorService(
-            qualifier, Environment.TESTING, schemaMigratorProvider)
+            qualifier, Environment.TESTING, schemaMigratorProvider, config.data_source)
       }).asSingleton()
     }
   }

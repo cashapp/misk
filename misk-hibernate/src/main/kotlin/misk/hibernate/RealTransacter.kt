@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableSet
 import io.opentracing.Tracer
 import io.opentracing.tag.Tags
 import misk.backoff.ExponentialBackoff
+import misk.hibernate.Shard.Companion.SINGLE_SHARD_SET
 import misk.jdbc.DataSourceConfig
 import misk.jdbc.DataSourceType
 import misk.jdbc.map
@@ -296,9 +297,6 @@ internal class RealTransacter private constructor(
 
     companion object {
       private val log = getLogger<RealSession>()
-      private val SINGLE_KEYSPACE = Keyspace("keyspace")
-      private val SINGLE_SHARD = Shard(SINGLE_KEYSPACE, "0")
-      private val SINGLE_SHARD_SET = ImmutableSet.of(SINGLE_SHARD)
     }
   }
 
