@@ -18,4 +18,24 @@ interface Lease {
    * so it is marked as a function rather than a property to make the potential expense clearer
    */
   fun checkHeld(): Boolean
+
+  /**
+   * Registers a listener that is called on lease state changes.
+   */
+  fun addListener(listener: StateChangeListener)
+
+  interface StateChangeListener {
+    /**
+     * Called immediately after the lease is acquired. Also called immediately if the lease is
+     * already owned by this process instance when the listener is registered.
+     * @param lease the lease that is acquired
+     */
+    fun afterAcquire(lease: Lease)
+
+    /**
+     * Called immediately before the lease is released.
+     * @param lease the lease that is released
+     */
+    fun beforeRelease(lease: Lease)
+  }
 }

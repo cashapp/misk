@@ -3,6 +3,7 @@ package misk.clustering.fake.lease
 import com.google.common.collect.Sets.newConcurrentHashSet
 import misk.clustering.lease.Lease
 import misk.clustering.lease.LeaseManager
+import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Singleton
 
 /**
@@ -12,16 +13,23 @@ import javax.inject.Singleton
 @Singleton
 class FakeLeaseManager : LeaseManager {
   private val leasesHeldElsewhere = newConcurrentHashSet<String>()
+  private val leases = ConcurrentHashMap<String, FakeLease>()
 
-  override fun requestLease(name: String): Lease = FakeLease(name, this)
+  override fun requestLease(name: String): Lease {
+    return leases.computeIfAbsent(name) {
+      FakeLease(name, this)
+    }
+  }
 
   fun isLeaseHeld(name: String) = !leasesHeldElsewhere.contains(name)
 
   fun markLeaseHeld(name: String) {
     leasesHeldElsewhere.remove(name)
+    (requestLease(name) as FakeLease).notifyAfterAcquire()
   }
 
   fun markLeaseHeldElsewhere(name: String) {
+    (requestLease(name) as FakeLease).notifyBeforeRelease()
     leasesHeldElsewhere.add(name)
   }
 
@@ -29,6 +37,24 @@ class FakeLeaseManager : LeaseManager {
     override val name: String,
     private val manager: FakeLeaseManager
   ) : Lease {
+    private val listeners = mutableListOf<Lease.StateChangeListener>()
+
     override fun checkHeld() = manager.isLeaseHeld(name)
+
+    override fun addListener(listener: Lease.StateChangeListener) {
+      listeners.add(listener)
+    }
+
+    fun notifyAfterAcquire() {
+      listeners.forEach {
+        it.afterAcquire(this)
+      }
+    }
+
+    fun notifyBeforeRelease() {
+      listeners.forEach {
+        it.beforeRelease(this)
+      }
+    }
   }
 }

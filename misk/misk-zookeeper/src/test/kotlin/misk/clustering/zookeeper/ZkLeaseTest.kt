@@ -5,10 +5,11 @@ import com.google.inject.util.Modules
 import misk.MiskTestingServiceModule
 import misk.clustering.Cluster
 import misk.clustering.fake.FakeCluster
+import misk.clustering.lease.Lease
+import misk.mockito.Mockito
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.zookeeper.DEFAULT_PERMS
-import misk.zookeeper.SHARED_DIR_PERMS
 import org.apache.curator.framework.CuratorFramework
 import org.apache.zookeeper.CreateMode
 import org.apache.zookeeper.ZooDefs
@@ -17,8 +18,13 @@ import org.apache.zookeeper.data.Id
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.mockito.Mockito.reset
+import org.mockito.Mockito.times
+import org.mockito.Mockito.verify
+import org.mockito.Mockito.verifyZeroInteractions
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
 
 @MiskTest(startService = true)
@@ -210,6 +216,66 @@ internal class ZkLeaseTest {
     leaseManager.handleConnectionStateChanged(true)
 
     assertThat(lease.checkHeld()).isFalse() // still not held since its closed
+  }
+
+  @Test fun listenerNotifications() {
+    val listenerMock = Mockito.mock<Lease.StateChangeListener>()
+
+    val lease = leaseManager.requestLease(LEASE_NAME)
+    lease.addListener(listenerMock)
+    assertThat(lease.checkHeld()).isFalse()
+    verifyZeroInteractions(listenerMock)
+
+    // Assign the lease to this node
+    cluster.resourceMapper.addMapping(leasePath, self)
+
+    verifyZeroInteractions(listenerMock)
+    // checkHeld() should trigger the lease to be acquired
+    assertThat(lease.checkHeld()).isTrue()
+    verify(listenerMock, times(1)).afterAcquire(lease)
+    reset(listenerMock)
+
+    // Further calls to checkHeld() should not trigger events because the lease does not change
+    lease.checkHeld()
+    lease.checkHeld()
+    verifyZeroInteractions(listenerMock)
+    reset(listenerMock)
+
+    // Fake a cluster change which moves the lease to another process
+    cluster.resourceMapper.removeMapping(leasePath)
+
+    // Should no longer own the lease and should have deleted the lease node
+    assertThat(lease.checkHeld()).isFalse()
+    verify(listenerMock, times(1)).beforeRelease(lease)
+  }
+
+  @Test fun listenerLateRegistrationGetsNotified() {
+    val listenerMock = Mockito.mock<Lease.StateChangeListener>()
+
+    cluster.resourceMapper.addMapping(leasePath, self)
+    val lease = leaseManager.requestLease(LEASE_NAME)
+    assertThat(lease.checkHeld()).isTrue()
+
+    lease.addListener(listenerMock)
+    verify(listenerMock, times(1)).afterAcquire(lease)
+  }
+
+  @Test fun checkLeaseInListenerDoesNotDeadlock() {
+    cluster.resourceMapper.addMapping(leasePath, self)
+    val lease = leaseManager.requestLease(LEASE_NAME)
+    assertThat(lease.checkHeld()).isTrue()
+
+    val acquireCalled = AtomicBoolean()
+    lease.addListener(object : Lease.StateChangeListener {
+      override fun afterAcquire(lease: Lease) {
+        lease.checkHeld()
+        acquireCalled.set(true)
+      }
+
+      override fun beforeRelease(lease: Lease) {}
+    })
+
+    assertThat(acquireCalled.get()).isTrue()
   }
 
   companion object {
