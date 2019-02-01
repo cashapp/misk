@@ -9,7 +9,7 @@ install:
 script:
   - ./gradlew test
 
-# Gradle caching - as per https://docs.travis-ci.com/user/languages/java/#Projects-Using-Gradle
+# Gradle caching - as per https://docs.travis-ci.com/user/languages/java/#caching
 before_cache:
   - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
   - rm -fr $HOME/.gradle/caches/*/plugin-resolution/

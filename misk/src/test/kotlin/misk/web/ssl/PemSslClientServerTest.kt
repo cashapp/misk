@@ -25,10 +25,10 @@ import misk.web.RequestBody
 import misk.web.RequestContentType
 import misk.web.ResponseContentType
 import misk.web.WebConfig
-import misk.web.actions.WebActionEntry
 import misk.web.WebSslConfig
 import misk.web.WebTestingModule
 import misk.web.actions.WebAction
+import misk.web.actions.WebActionEntry
 import misk.web.jetty.JettyService
 import misk.web.mediatype.MediaTypes
 import org.assertj.core.api.Assertions.assertThat
@@ -74,11 +74,16 @@ internal class PemSslClientServerTest {
     }
   }
 
+  /*
+ misk.web.ssl.PemSslClientServerTest > failsIfServerIsUntrusted() FAILED
+    java.util.concurrent.TimeoutException: Timeout waiting for the services to stop. The following services have not stopped: {STOPPING=[JettyService [STOPPING]]}
+   */
   @Test
-  fun failsIfServerIsUntrusted() {
+  fun failsIfServerIsUntrusted() { // this fails
     assertFailsWith<SSLHandshakeException> {
       noTrustClient.post<Dinosaur>("/hello", Dinosaur.Builder().name("trex").build())
     }
+    System.out.println("Examine threads")
   }
 
   class HelloAction : WebAction {

@@ -71,6 +71,7 @@ subprojects {
     testRuntimeOnly dep.junitEngine
   }
   test {
+    maxParallelForks = Runtime.runtime.availableProcessors()
     useJUnitPlatform()
     testLogging {
       events "started", "passed", "skipped", "failed"
