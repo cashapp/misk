@@ -6,6 +6,7 @@ import java.time.Instant
 import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 
+/** Mimics a Redis instance for testing. */
 class FakeRedis : Redis {
   @Inject lateinit var clock: FakeClock
 
