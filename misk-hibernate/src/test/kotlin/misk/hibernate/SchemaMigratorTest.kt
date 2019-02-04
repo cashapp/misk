@@ -81,8 +81,15 @@ internal class SchemaMigratorTest {
       val sessionFactoryProvider = getProvider(sessionFactoryKey)
       multibind<Service>().to(sessionFactoryServiceKey)
       val transacterKey = Key.get(Transacter::class.java, Movies::class.java)
-      bind(transacterKey).toProvider(Provider<Transacter> {
-        RealTransacter(Movies::class, sessionFactoryProvider, config.data_source, null)
+      bind(transacterKey).toProvider(object : Provider<Transacter> {
+        @Inject lateinit var queryTracingListener: QueryTracingListener
+        override fun get(): RealTransacter = RealTransacter(
+            Movies::class,
+            sessionFactoryProvider,
+            config.data_source,
+            queryTracingListener,
+            null
+        )
       }).asSingleton()
     }
   }
