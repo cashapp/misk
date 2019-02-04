@@ -3,8 +3,11 @@ package misk.hibernate
 import com.google.common.cache.CacheBuilder
 import com.google.common.cache.CacheLoader
 import com.google.inject.TypeLiteral
+import io.opentracing.Tracer
+import misk.hibernate.QueryTracingSpanNames.Companion.DB_SELECT
 import misk.inject.typeLiteral
 import misk.logging.getLogger
+import misk.tracing.traceWithSpan
 import java.lang.reflect.InvocationHandler
 import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Method
@@ -36,7 +39,8 @@ private const val ROW_COUNT_WARNING_LIMIT = 2000
  */
 internal class ReflectionQuery<T : DbEntity<T>>(
   private val rootEntityType: KClass<T>,
-  private val queryMethodHandlers: Map<Method, QueryMethodHandler>
+  private val queryMethodHandlers: Map<Method, QueryMethodHandler>,
+  private val tracer: Tracer?
 ) : Query<T>, InvocationHandler {
   override var maxRows = -1
     set(value) {
@@ -68,7 +72,9 @@ internal class ReflectionQuery<T : DbEntity<T>>(
 
     val typedQuery = session.hibernateSession.createQuery(query)
     typedQuery.maxResults = effectiveMaxRows(returnList)
-    val rows = typedQuery.list()
+    val rows = traceSelect {
+      typedQuery.list()
+    }
     checkRowCount(returnList, rows.size)
     return rows
   }
@@ -117,8 +123,18 @@ internal class ReflectionQuery<T : DbEntity<T>>(
     }
   }
 
+  private fun <T> traceSelect(lambda: () -> T): T {
+    return if (tracer != null) tracer.traceWithSpan(DB_SELECT) { _ ->
+      lambda()
+    } else {
+      lambda()
+    }
+  }
+
   @Singleton
   internal class Factory : Query.Factory {
+    @com.google.inject.Inject(optional = true) var tracer: Tracer? = null
+
     private val queryMethodHandlersCache = CacheBuilder.newBuilder()
         .build(object : CacheLoader<KClass<*>, Map<Method, QueryMethodHandler>>() {
           override fun load(key: KClass<*>) = queryMethodHandlers(key)
@@ -137,7 +153,7 @@ internal class ReflectionQuery<T : DbEntity<T>>(
       return Proxy.newProxyInstance(
           classLoader,
           arrayOf<Class<*>>(queryClass.java),
-          ReflectionQuery(entityType.kotlin, queryMethodHandlers)
+          ReflectionQuery(entityType.kotlin, queryMethodHandlers, tracer)
       ) as T
     }
 
