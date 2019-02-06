@@ -43,6 +43,9 @@ class FakeLeaseManager : LeaseManager {
 
     override fun addListener(listener: Lease.StateChangeListener) {
       listeners.add(listener)
+      if (checkHeld()) {
+        listener.afterAcquire(this)
+      }
     }
 
     fun notifyAfterAcquire() {
