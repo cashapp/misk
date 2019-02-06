@@ -223,7 +223,7 @@ class VitessScaleSafetyChecks(
     }
 
     override fun afterQuery(query: String) {
-      if (!isDml(query)) return
+      if (!enabled.get() || !isDml(query)) return
 
       val queryInDatabase = extractLastDmlQuery() ?: return
 
