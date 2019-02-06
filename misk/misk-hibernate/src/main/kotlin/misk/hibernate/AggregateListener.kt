@@ -3,6 +3,12 @@ package misk.hibernate
 import com.google.common.collect.LinkedHashMultimap
 import org.hibernate.event.service.spi.EventListenerRegistry
 import org.hibernate.event.spi.EventType
+import org.hibernate.event.spi.PostDeleteEvent
+import org.hibernate.event.spi.PostDeleteEventListener
+import org.hibernate.event.spi.PostInsertEvent
+import org.hibernate.event.spi.PostInsertEventListener
+import org.hibernate.event.spi.PostUpdateEvent
+import org.hibernate.event.spi.PostUpdateEventListener
 import org.hibernate.event.spi.PreDeleteEvent
 import org.hibernate.event.spi.PreDeleteEventListener
 import org.hibernate.event.spi.PreInsertEvent
@@ -11,6 +17,7 @@ import org.hibernate.event.spi.PreLoadEvent
 import org.hibernate.event.spi.PreLoadEventListener
 import org.hibernate.event.spi.PreUpdateEvent
 import org.hibernate.event.spi.PreUpdateEventListener
+import org.hibernate.persister.entity.EntityPersister
 import javax.inject.Provider
 
 /**
@@ -21,8 +28,11 @@ internal class AggregateListener(
   registrations: Set<ListenerRegistration>
 ) : PreLoadEventListener,
     PreDeleteEventListener,
+    PostDeleteEventListener,
     PreUpdateEventListener,
-    PreInsertEventListener {
+    PostUpdateEventListener,
+    PreInsertEventListener,
+    PostInsertEventListener {
   private val multimap = LinkedHashMultimap.create<EventType<*>, Provider<*>>()!!
 
   init {
@@ -66,5 +76,37 @@ internal class AggregateListener(
       veto = veto or (provider.get() as PreInsertEventListener).onPreInsert(event)
     }
     return veto
+  }
+
+  override fun requiresPostCommitHanding(persister: EntityPersister?): Boolean {
+    var veto = false
+    for (provider in multimap[EventType.POST_INSERT]) {
+      veto = veto or (provider.get() as PostInsertEventListener).requiresPostCommitHandling(persister)
+    }
+    for (provider in multimap[EventType.POST_UPDATE]) {
+      veto = veto or (provider.get() as PostUpdateEventListener).requiresPostCommitHandling(persister)
+    }
+    for (provider in multimap[EventType.POST_DELETE]) {
+      veto = veto or (provider.get() as PostDeleteEventListener).requiresPostCommitHandling(persister)
+    }
+    return veto
+  }
+
+  override fun onPostDelete(event: PostDeleteEvent?) {
+    for (provider in multimap[EventType.POST_DELETE]) {
+      (provider.get() as PostDeleteEventListener).onPostDelete(event)
+    }
+  }
+
+  override fun onPostUpdate(event: PostUpdateEvent?) {
+    for (provider in multimap[EventType.POST_UPDATE]) {
+      (provider.get() as PostUpdateEventListener).onPostUpdate(event)
+    }
+  }
+
+  override fun onPostInsert(event: PostInsertEvent?) {
+    for (provider in multimap[EventType.POST_INSERT]) {
+      (provider.get() as PostInsertEventListener).onPostInsert(event)
+    }
   }
 }
