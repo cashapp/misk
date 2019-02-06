@@ -77,9 +77,15 @@ class SchemaValidatorTest {
       multibind<Service>().to(sessionFactoryServiceKey)
 
       bind(transacterKey).toProvider(object : Provider<Transacter> {
+        @Inject lateinit var queryTracingListener: QueryTracingListener
         @com.google.inject.Inject(optional = true) val tracer: Tracer? = null
         override fun get(): RealTransacter = RealTransacter(
-            qualifier, sessionFactoryProvider, config.data_source, tracer)
+            qualifier,
+            sessionFactoryProvider,
+            config.data_source,
+            queryTracingListener,
+            tracer
+        )
       }).asSingleton()
 
       bind(schemaMigratorKey).toProvider(object : Provider<SchemaMigrator> {

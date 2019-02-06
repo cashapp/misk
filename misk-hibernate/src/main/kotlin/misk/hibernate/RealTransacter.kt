@@ -1,6 +1,5 @@
 package misk.hibernate
 
-import com.google.common.collect.ImmutableSet
 import io.opentracing.Tracer
 import io.opentracing.tag.Tags
 import misk.backoff.ExponentialBackoff
@@ -29,6 +28,7 @@ internal class RealTransacter private constructor(
   private val config: DataSourceConfig,
   private val threadLocalSession: ThreadLocal<Session>,
   private val options: TransacterOptions,
+  private val queryTracingListener: QueryTracingListener,
   private val tracer: Tracer?
 ) : Transacter {
 
@@ -36,8 +36,17 @@ internal class RealTransacter private constructor(
     qualifier: KClass<out Annotation>,
     sessionFactoryProvider: Provider<SessionFactory>,
     config: DataSourceConfig,
+    queryTracingListener: QueryTracingListener,
     tracer: Tracer?
-  ) : this(qualifier, sessionFactoryProvider, config, ThreadLocal(), TransacterOptions(), tracer)
+  ) : this(
+        qualifier,
+        sessionFactoryProvider,
+        config,
+        ThreadLocal(),
+        TransacterOptions(),
+        queryTracingListener,
+        tracer
+      )
 
   private val sessionFactory
     get() = sessionFactoryProvider.get()
@@ -102,6 +111,8 @@ internal class RealTransacter private constructor(
       try {
         val result = lambda(session)
 
+        // Flush any changes to the databased before commit
+        session.hibernateSession.flush()
         session.preCommit()
         maybeWithTracing(DB_COMMIT_SPAN_NAME) { transaction.commit() }
         session.postCommit()
@@ -117,6 +128,9 @@ internal class RealTransacter private constructor(
           }
         }
         throw e
+      } finally {
+        // For any reason if tracing was left open, end it.
+        queryTracingListener.endLastSpan()
       }
     }
   }
@@ -128,7 +142,15 @@ internal class RealTransacter private constructor(
   override fun readOnly(): Transacter = withOptions(options.copy(readOnly = true))
 
   private fun withOptions(options: TransacterOptions): Transacter =
-      RealTransacter(qualifier, sessionFactoryProvider, config, threadLocalSession, options, tracer)
+      RealTransacter(
+          qualifier,
+          sessionFactoryProvider,
+          config,
+          threadLocalSession,
+          options,
+          queryTracingListener,
+          tracer
+      )
 
   private fun <T> withSession(lambda: (session: RealSession) -> T): T {
     check(threadLocalSession.get() == null) { "Attempted to start a nested session" }
