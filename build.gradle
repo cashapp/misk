@@ -3,6 +3,11 @@ plugins {
   id "com.vanniktech.maven.publish" version "0.4.0" apply false
 }
 
+buildScan {
+    termsOfServiceUrl = 'https://gradle.com/terms-of-service'
+    termsOfServiceAgree = 'yes'
+}
+
 ext {
   isCi = "true".equals(System.getenv('CI'))
   isSqCi = "true".equals(System.getenv('SQCI'))
