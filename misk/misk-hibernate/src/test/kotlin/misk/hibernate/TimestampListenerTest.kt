@@ -6,6 +6,7 @@ import misk.time.FakeClock
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
+import java.time.ZoneOffset
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
@@ -46,6 +47,29 @@ class TimestampListenerTest {
       session.hibernateSession.flush() // TODO(jwilson): expose session.flush() directly.
       assertThat(movie.created_at).isEqualTo(createdAt)
       assertThat(movie.updated_at).isEqualTo(updatedAt)
+    }
+  }
+
+  @Test
+  fun utcTimezone() {
+    val movie = transacter.transaction { session ->
+      val movie = DbMovie("Star Wars", LocalDate.of(1993, 6, 9))
+      session.save(movie)
+      movie
+    }
+    transacter.transaction { session ->
+      session.useConnection { c ->
+        // Use raw SQL in order to verify the actual value in the DB. If Hibernate is used it
+        // would map back into an Instant correctly using whatever TZ is configured.
+        c.prepareStatement("select created_at from movies where id = ?").use { s ->
+          s.setLong(1, movie.id.id)
+          s.executeQuery().use { rs ->
+            rs.next()
+            assertThat(rs.getTimestamp(1).toLocalDateTime().toInstant(ZoneOffset.UTC))
+                .isEqualTo(clock.instant())
+          }
+        }
+      }
     }
   }
 }
