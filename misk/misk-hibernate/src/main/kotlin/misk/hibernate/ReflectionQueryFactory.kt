@@ -13,6 +13,7 @@ import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Method
 import java.lang.reflect.ParameterizedType
 import java.lang.reflect.Proxy
+import javax.inject.Inject
 import javax.inject.Singleton
 import javax.persistence.criteria.CriteriaBuilder
 import javax.persistence.criteria.Path
@@ -29,9 +30,6 @@ import kotlin.reflect.full.primaryConstructor
 import kotlin.reflect.jvm.javaMethod
 
 private val logger = getLogger<ReflectionQuery<*>>()
-private const val MAX_MAX_ROWS = 10_000
-private const val ROW_COUNT_ERROR_LIMIT = 3000
-private const val ROW_COUNT_WARNING_LIMIT = 2000
 
 /**
  * Implements the [Query] @[Constraint] methods using a dynamic proxy, and projections using
@@ -40,11 +38,12 @@ private const val ROW_COUNT_WARNING_LIMIT = 2000
 internal class ReflectionQuery<T : DbEntity<T>>(
   private val rootEntityType: KClass<T>,
   private val queryMethodHandlers: Map<Method, QueryMethodHandler>,
-  private val tracer: Tracer?
+  private val tracer: Tracer?,
+  private val queryLimitsConfig: QueryLimitsConfig
 ) : Query<T>, InvocationHandler {
   override var maxRows = -1
     set(value) {
-      require(value == -1 || (value in 1..MAX_MAX_ROWS)) { "out of range: $value" }
+      require(value == -1 || (value in 1..queryLimitsConfig.maxMaxRows)) { "out of range: $value" }
       field = value
     }
 
@@ -83,7 +82,7 @@ internal class ReflectionQuery<T : DbEntity<T>>(
     return when {
       !returnList -> 2 // Detect if the result wasn't actually unique.
       (maxRows != -1) -> maxRows
-      else -> MAX_MAX_ROWS + 1 // Detect if the result was truncated.
+      else -> queryLimitsConfig.maxMaxRows + 1 // Detect if the result was truncated.
     }
   }
 
@@ -91,12 +90,12 @@ internal class ReflectionQuery<T : DbEntity<T>>(
     if (!returnList) {
       check(rowCount <= 1) { "query expected a unique result but was $rowCount" }
     } else if (maxRows == -1) {
-      if (rowCount > MAX_MAX_ROWS) {
+      if (rowCount > queryLimitsConfig.maxMaxRows) {
         throw IllegalStateException("query truncated at $rowCount rows")
-      } else if (rowCount > ROW_COUNT_ERROR_LIMIT) {
+      } else if (rowCount > queryLimitsConfig.rowCountErrorLimit) {
         logger.error("Unbounded query returned $rowCount rows. " +
             "(Specify maxRows to suppress this error)")
-      } else if (rowCount > ROW_COUNT_WARNING_LIMIT) {
+      } else if (rowCount > queryLimitsConfig.rowCountWarningLimit) {
         logger.warn("Unbounded query returned $rowCount rows. " +
             "(Specify maxRows to suppress this warning)")
       }
@@ -132,7 +131,8 @@ internal class ReflectionQuery<T : DbEntity<T>>(
   }
 
   @Singleton
-  internal class Factory : Query.Factory {
+  internal class Factory @Inject internal constructor(var queryLimitsConfig: QueryLimitsConfig)
+      : Query.Factory {
     @com.google.inject.Inject(optional = true) var tracer: Tracer? = null
 
     private val queryMethodHandlersCache = CacheBuilder.newBuilder()
@@ -153,7 +153,7 @@ internal class ReflectionQuery<T : DbEntity<T>>(
       return Proxy.newProxyInstance(
           classLoader,
           arrayOf<Class<*>>(queryClass.java),
-          ReflectionQuery(entityType.kotlin, queryMethodHandlers, tracer)
+          ReflectionQuery(entityType.kotlin, queryMethodHandlers, tracer, queryLimitsConfig)
       ) as T
     }
 
@@ -179,6 +179,12 @@ internal class ReflectionQuery<T : DbEntity<T>>(
       return result
     }
   }
+
+  data class QueryLimitsConfig(
+      var maxMaxRows: Int,
+      var rowCountErrorLimit: Int,
+      var rowCountWarningLimit: Int
+  )
 
   class SelectMethodHandler(
     private val returnList: Boolean,
