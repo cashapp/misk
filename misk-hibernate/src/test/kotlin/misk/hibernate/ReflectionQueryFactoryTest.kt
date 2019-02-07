@@ -16,8 +16,13 @@ class ReflectionQueryFactoryTest {
   @MiskTestModule
   val module = MoviesTestModule(disableCrossShardQueryDetector = true)
 
+  val maxMaxRows = 40
+  val rowCountErrorLimit = 30
+  val rowCountWarningLimit = 20
+  private val queryFactory = ReflectionQuery.Factory(ReflectionQuery.QueryLimitsConfig(
+      maxMaxRows, rowCountErrorLimit, rowCountWarningLimit))
+
   @Inject @Movies lateinit var transacter: Transacter
-  @Inject lateinit var queryFactory: Query.Factory
   @Inject lateinit var logCollector: LogCollector
 
   @Test
@@ -253,55 +258,55 @@ class ReflectionQueryFactoryTest {
    */
   @Test
   fun rowResultCountWarning() {
-    // 1900 rows is too small for the warning threshold (2000).
+    // 18 rows is too small for the warning threshold (20).
     transacter.transaction { session ->
-      for (i in 1..1900) {
+      for (i in 1..18) {
         session.save(DbMovie("Rocky $i", null))
       }
     }
     transacter.transaction { session ->
-      assertThat(queryFactory.newQuery<OperatorsMovieQuery>().list(session)).hasSize(1900)
+      assertThat(queryFactory.newQuery<OperatorsMovieQuery>().list(session)).hasSize(18)
     }
     assertThat(logCollector.takeMessages(loggerClass = ReflectionQuery::class)).isEmpty()
 
-    // 2100 rows logs a warning.
+    // 21 rows logs a warning.
     transacter.transaction { session ->
-      for (i in 1901..2100) {
+      for (i in 19..21) {
         session.save(DbMovie("Rocky $i", null))
       }
     }
     transacter.transaction { session ->
-      assertThat(queryFactory.newQuery<OperatorsMovieQuery>().list(session)).hasSize(2100)
+      assertThat(queryFactory.newQuery<OperatorsMovieQuery>().list(session)).hasSize(21)
     }
     assertThat(getOnlyElement(
         logCollector.takeMessages(loggerClass = ReflectionQuery::class, minLevel = Level.WARN))
-    ).startsWith("Unbounded query returned 2100 rows.")
+    ).startsWith("Unbounded query returned 21 rows.")
 
-    // 3100 rows logs an error.
+    // 31 rows logs an error.
     transacter.transaction { session ->
-      for (i in 2101..3100) {
+      for (i in 22..31) {
         session.save(DbMovie("Rocky $i", null))
       }
     }
     transacter.transaction { session ->
-      assertThat(queryFactory.newQuery<OperatorsMovieQuery>().list(session)).hasSize(3100)
+      assertThat(queryFactory.newQuery<OperatorsMovieQuery>().list(session)).hasSize(31)
     }
     assertThat(getOnlyElement(
         logCollector.takeMessages(loggerClass = ReflectionQuery::class, minLevel = Level.ERROR))
-    ).startsWith("Unbounded query returned 3100 rows.")
+    ).startsWith("Unbounded query returned 31 rows.")
 
     // An explicit max row count suppresses the warning.
     transacter.transaction { session ->
       assertThat(queryFactory.newQuery<OperatorsMovieQuery>()
-          .apply { maxRows = 3200 }
+          .apply { maxRows = 32 }
           .list(session))
-          .hasSize(3100)
+          .hasSize(31)
     }
     assertThat(logCollector.takeMessages(loggerClass = ReflectionQuery::class)).isEmpty()
 
-    // More than 10000 rows throws an exception.
+    // More than 40 rows throws an exception.
     transacter.transaction { session ->
-      for (i in 3101..10100) {
+      for (i in 32..41) {
         session.save(DbMovie("Rocky $i", null))
       }
     }
@@ -309,7 +314,7 @@ class ReflectionQueryFactoryTest {
       transacter.transaction { session ->
         queryFactory.newQuery<OperatorsMovieQuery>().list(session)
       }
-    }).hasMessage("query truncated at 10001 rows")
+    }).hasMessage("query truncated at 41 rows")
   }
 
   @Test
