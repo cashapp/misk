@@ -165,7 +165,7 @@ class VitessScaleSafetyChecks(
   val moshi: Moshi,
   val config: DataSourceConfig,
   val startVitessService: StartVitessService
-) : DataSourceDecorator {
+) : ScalabilityChecks {
 
   private val fullScatterDetector = FullScatterDetector()
   private val crossEntityGroupTransactionDetector = CowriteDetector()
