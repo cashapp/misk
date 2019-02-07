@@ -31,6 +31,11 @@ import kotlin.reflect.KClass
  * This also registers services to connect to the database ([SessionFactoryService]) and to verify
  * that the schema is up-to-date ([SchemaMigratorService]).
  */
+
+private const val MAX_MAX_ROWS = 10_000
+private const val ROW_COUNT_ERROR_LIMIT = 3000
+private const val ROW_COUNT_WARNING_LIMIT = 2000
+
 class HibernateModule(
   private val qualifier: KClass<out Annotation>,
   private val config: DataSourceConfig
@@ -131,6 +136,8 @@ class HibernateModule(
     }).asSingleton()
 
     bind<Query.Factory>().to<ReflectionQuery.Factory>()
+    bind<ReflectionQuery.QueryLimitsConfig>().toInstance(ReflectionQuery.QueryLimitsConfig(
+        MAX_MAX_ROWS, ROW_COUNT_ERROR_LIMIT, ROW_COUNT_WARNING_LIMIT))
 
     install(object : HibernateEntityModule(qualifier) {
       override fun configureHibernate() {
