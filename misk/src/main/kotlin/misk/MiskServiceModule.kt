@@ -18,6 +18,7 @@ import com.google.inject.spi.InstanceBinding
 import com.google.inject.spi.LinkedKeyBinding
 import com.google.inject.spi.ProviderInstanceBinding
 import com.google.inject.util.Types
+import misk.concurrent.SleeperModule
 import misk.environment.RealEnvVarModule
 import misk.healthchecks.HealthCheck
 import misk.inject.KAbstractModule
@@ -41,6 +42,7 @@ class MiskRealServiceModule : KAbstractModule() {
     install(ResourceLoaderModule())
     install(RealEnvVarModule())
     install(ClockModule())
+    install(SleeperModule())
     install(MiskCommonServiceModule())
   }
 }
