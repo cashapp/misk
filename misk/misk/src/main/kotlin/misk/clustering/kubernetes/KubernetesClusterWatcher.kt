@@ -1,5 +1,6 @@
 package misk.clustering.kubernetes
 
+import com.google.common.base.Stopwatch
 import com.google.common.reflect.TypeToken
 import com.google.common.util.concurrent.AbstractIdleService
 import com.google.inject.Key
@@ -35,6 +36,7 @@ internal class KubernetesClusterWatcher @Inject internal constructor(
   private val config: KubernetesConfig
 ) : AbstractIdleService(), DependentService {
   private val running = AtomicBoolean(false)
+  private val exceptionWatch = Stopwatch.createUnstarted()
 
   override val consumedKeys: Set<Key<*>> = setOf(keyOf<Cluster>())
   override val producedKeys: Set<Key<*>> = setOf()
@@ -93,13 +95,23 @@ internal class KubernetesClusterWatcher @Inject internal constructor(
             response.applyTo(cluster)
           }
         }
+        exceptionWatch.reset()
       } catch (ex: Exception) {
         // This can occur if we have temporary connectivity glitches to the API server
-        val backoffDelay = connectBackoff.nextRetry()
-        log.error(ex) {
-          "connectivity lost to k8s; waiting ${backoffDelay.toMillis()}ms before retrying"
+        if (!exceptionWatch.isRunning) {
+          exceptionWatch.start()
         }
-
+        val backoffDelay = connectBackoff.nextRetry()
+        if (exceptionWatch.elapsed(TimeUnit.SECONDS) > 60) {
+          // k8s uses long polling which can result in temporary connection issues. Only log errors
+          // if the problems persist
+          log.error(ex) {
+            "connectivity lost to k8s for over 60 seconds; waiting ${backoffDelay.toMillis()}ms " +
+                "before retrying"
+          }
+          exceptionWatch.reset()
+          exceptionWatch.start()
+        }
         Thread.sleep(backoffDelay.toMillis())
       }
     }
