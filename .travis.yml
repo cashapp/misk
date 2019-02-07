@@ -7,7 +7,7 @@ install:
   - docker pull squareup/misk-web
 
 script:
-  - ./gradlew test --parallel --scan
+  - ./gradlew test --scan
 
 # Gradle caching - as per https://docs.travis-ci.com/user/languages/java/#Projects-Using-Gradle
 before_cache:
