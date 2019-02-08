@@ -35,11 +35,13 @@ import java.nio.file.Paths
 import java.time.Duration
 import java.util.Properties
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.concurrent.thread
 import kotlin.reflect.KClass
 import kotlin.streams.toList
 
 const val VITESS_VERSION = "sha256:3cef0e042dee2312e5e0d80c56a6bf1581b52063ad0441551241f6785b110c38"
+const val CONTAINER_NAME_PREFIX = "misk-vitess-testing"
 
 class Keyspace(val sharded: Boolean) {
   // Defaulting to 2 shards for sharded keyspaces,
@@ -69,7 +71,9 @@ class VitessCluster(
           ?: throw IllegalStateException("vitess_schema_resource_root must be specified")
       val hasVschema = resourceLoader.walk(config.vitess_schema_resource_root)
           .any { it.endsWith("vschema.json") }
-      check(hasVschema) { "schema root not valid, does not contain any vschema.json: ${config.vitess_schema_resource_root}"}
+      check(hasVschema) {
+        "schema root not valid, does not contain any vschema.json: ${config.vitess_schema_resource_root}"
+      }
       // We can't use Files::createTempDirectory because it creates a directory under the path
       // /var/folders that is not possible to mount in Docker
       schemaDir = Paths.get("/tmp/vitess_schema_${System.currentTimeMillis()}")
@@ -134,6 +138,7 @@ class DockerVitessCluster(
   private var containerId: String? = null
 
   private var isRunning = false
+  private var stopContainerOnExit = true
 
   fun start() {
     if (isRunning) {
@@ -175,25 +180,39 @@ class DockerVitessCluster(
         "-num_shards=$shardCounts"
     )
 
-    StartVitessService.logger.info("Starting Vitess cluster with command: ${cmd.joinToString(" ")}")
-    containerId = docker.createContainerCmd("vitess/base@$VITESS_VERSION")
-        .withCmd(cmd.toList())
-        .withVolumes(schemaVolume)
-        .withBinds(Bind(cluster.schemaDir.toAbsolutePath().toString(), schemaVolume))
-        .withExposedPorts(httpPort, grpcPort, mysqlPort, vtgateMysqlPort)
-        .withPortBindings(ports)
-        .withTty(true)
-        .exec().id
+    val containerName = "$CONTAINER_NAME_PREFIX-${cluster.name}"
 
-    val containerId = containerId!!
-    docker.startContainerCmd(containerId).exec()
-    docker.logContainerCmd(containerId)
-        .withStdErr(true)
-        .withStdOut(true)
-        .withFollowStream(true)
-        .withSince(0)
-        .exec(LogContainerResultCallback())
-        .awaitStarted()
+    val runningContainer = docker.listContainersCmd()
+        .withNameFilter(listOf(containerName))
+        .withLimit(1)
+        .exec()
+        .firstOrNull()
+    if (runningContainer != null) {
+      StartVitessService.logger.info("Existing Vitess cluster named $containerName found")
+      stopContainerOnExit = false
+      containerId = runningContainer.id
+    } else {
+      StartVitessService.logger.info(
+          "Starting Vitess cluster with command: ${cmd.joinToString(" ")}")
+      containerId = docker.createContainerCmd("vitess/base@$VITESS_VERSION")
+          .withCmd(cmd.toList())
+          .withVolumes(schemaVolume)
+          .withBinds(Bind(cluster.schemaDir.toAbsolutePath().toString(), schemaVolume))
+          .withExposedPorts(httpPort, grpcPort, mysqlPort, vtgateMysqlPort)
+          .withPortBindings(ports)
+          .withTty(true)
+          .withName(containerName)
+          .exec().id!!
+      val containerId = containerId!!
+      docker.startContainerCmd(containerId).exec()
+      docker.logContainerCmd(containerId)
+          .withStdErr(true)
+          .withStdOut(true)
+          .withFollowStream(true)
+          .withSince(0)
+          .exec(LogContainerResultCallback())
+          .awaitStarted()
+    }
     StartVitessService.logger.info("Started Vitess with container id $containerId")
 
     waitUntilHealthy()
@@ -267,6 +286,10 @@ class DockerVitessCluster(
     }
     isRunning = false
 
+    if (!stopContainerOnExit) {
+      return
+    }
+
     docker.removeContainerCmd(containerId!!).withForce(true).withRemoveVolumes(true).exec()
     StartVitessService.logger.info("Killed Vitess cluster with container id $containerId")
   }
@@ -278,6 +301,17 @@ class LogContainerResultCallback : ResultCallbackTemplate<LogContainerResultCall
   }
 }
 
+/**
+ * All Vitess clusters used by the app/test are tracked in a global cache as a [DockerVitessCluster].
+ *
+ * On startup, the service will look for a cluster in the cache, and if not found, look for it in
+ * Docker by container name, or as a last resort start the container itself.
+ *
+ * On shutdown, the cache is invalidated by a JVM shutdown hook. On invalidation, the cache will
+ * call the each entry's `stop()` method. If the cluster container was created in this JVM, it
+ * will be stopped and removed. Otherwise (if the container was started by a different process), it
+ * will be left running.
+ */
 class StartVitessService(
   private val qualifier: KClass<out Annotation>,
   private val environment: Environment,
@@ -288,14 +322,6 @@ class StartVitessService(
   override val producedKeys: Set<Key<*>> = setOf(Key.get(StartVitessService::class.java))
 
   var cluster: DockerVitessCluster? = null
-
-  init {
-    // We need to do this outside of the service start up because this takes a really long time
-    // the first time you do it. After that it's really fast though.
-    if (runCommand("docker pull vitess/base@$VITESS_VERSION") != 0) {
-      logger.warn("Failed to pull Vitess docker image. Proceeding regardless.")
-    }
-  }
 
   override fun startUp() {
     if (config.type != DataSourceType.VITESS) {
@@ -329,6 +355,8 @@ class StartVitessService(
         .build()
     val moshi = Moshi.Builder().build()
 
+    private val imagePulled = AtomicBoolean()
+
     /**
      * Global cache of running vitess clusters.
      */
@@ -349,6 +377,12 @@ class StartVitessService(
      * Shut down the cached clusters on JVM exit.
      */
     init {
+      // We need to do this outside of the service start up because this takes a really long time
+      // the first time you do it and can cause service manager to time out.
+      if (imagePulled.compareAndSet(false, true) &&
+          runCommand("docker pull vitess/base@$VITESS_VERSION") != 0) {
+        logger.warn("Failed to pull Vitess docker image. Proceeding regardless.")
+      }
       Runtime.getRuntime().addShutdownHook(Thread {
         clusters.invalidateAll()
       })
@@ -363,5 +397,41 @@ class StartVitessService(
       process.waitFor(60, TimeUnit.MINUTES)
       return process.exitValue()
     }
+
+    /**
+     * A helper method to start the Vitess cluster outside of the dev server or test process, to
+     * enable rapid iteration. This should be called directly a `main()` function, for example:
+     *
+     * MyAppVitessDaemon.kt:
+     *
+     *  fun main() {
+     *    val config = MiskConfig.load<MyAppConfig>("myapp")
+     *    startVitessDaemon(MyAppDb::class, config.data_source_clusters.values.first().writer)
+     *  }
+     *
+     */
+    fun startVitessDaemon(
+      /** The same qualifier passed into [HibernateModule], used to uniquely name the container */
+      qualifier: KClass<out Annotation>,
+      /** Config for the Vitess cluster */
+      config: DataSourceConfig
+    ) {
+      val docker: DockerClient = DockerClientBuilder.getInstance()
+          .withDockerCmdExecFactory(NettyDockerCmdExecFactory())
+          .build()
+      val moshi = Moshi.Builder().build()
+
+      val cluster = VitessCluster(
+          name = qualifier.simpleName!!,
+          resourceLoader = ResourceLoader.SYSTEM,
+          config = config,
+          moshi = moshi)
+      val dockerCluster = DockerVitessCluster(cluster, docker)
+      Runtime.getRuntime().addShutdownHook(Thread {
+        dockerCluster.stop()
+      })
+      dockerCluster.start()
+    }
+
   }
 }
