@@ -29,6 +29,21 @@ class TracerExtTest {
     val spanUsed = tracer.traceWithSpan("traceMe") { span -> span }
     assertThat(mockTracer.finishedSpans().size).isEqualTo(1)
     assertThat(spanUsed).isEqualTo(mockTracer.finishedSpans().first())
+    assertThat(mockTracer.finishedSpans().first().tags()).isEmpty()
+  }
+
+  @Test
+  fun traceTracedMethodWithTags() {
+    val mockTracer = tracer as MockTracer
+
+    val tags = mapOf("a" to "b", "x" to "y")
+
+    assertThat(mockTracer.finishedSpans().size).isEqualTo(0)
+    val spanUsed = tracer.traceWithSpan("traceMe", tags) { span -> span }
+    assertThat(mockTracer.finishedSpans().size).isEqualTo(1)
+    assertThat(spanUsed).isEqualTo(mockTracer.finishedSpans().first())
+
+    assertThat(mockTracer.finishedSpans().first().tags()).isEqualTo(tags)
   }
 
   @Test
