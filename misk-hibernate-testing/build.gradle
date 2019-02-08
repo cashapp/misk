@@ -4,3 +4,9 @@ dependencies {
   compile project(':misk-testing')
   compile project(':misk-hibernate')
 }
+
+test {
+  // To help that with parallel execution by reusing test setup,
+  // misk-hibernate-testing is made dependent on misk-hibernate
+  dependsOn ':misk-hibernate:test'
+}
