@@ -41,7 +41,7 @@ import kotlin.reflect.KClass
 import kotlin.streams.toList
 
 const val VITESS_VERSION = "sha256:3cef0e042dee2312e5e0d80c56a6bf1581b52063ad0441551241f6785b110c38"
-const val CONTAINER_NAME_PREFIX = "cash-vitess-testing"
+const val CONTAINER_NAME_PREFIX = "misk-vitess-testing"
 
 class Keyspace(val sharded: Boolean) {
   // Defaulting to 2 shards for sharded keyspaces,
@@ -71,8 +71,9 @@ class VitessCluster(
           ?: throw IllegalStateException("vitess_schema_resource_root must be specified")
       val hasVschema = resourceLoader.walk(config.vitess_schema_resource_root)
           .any { it.endsWith("vschema.json") }
-      check(
-          hasVschema) { "schema root not valid, does not contain any vschema.json: ${config.vitess_schema_resource_root}" }
+      check(hasVschema) {
+        "schema root not valid, does not contain any vschema.json: ${config.vitess_schema_resource_root}"
+      }
       // We can't use Files::createTempDirectory because it creates a directory under the path
       // /var/folders that is not possible to mount in Docker
       schemaDir = Paths.get("/tmp/vitess_schema_${System.currentTimeMillis()}")
@@ -385,5 +386,41 @@ class StartVitessService(
       process.waitFor(60, TimeUnit.MINUTES)
       return process.exitValue()
     }
+
+    /**
+     * A helper method to start the Vitess cluster outside of the dev server or test process, to
+     * enable rapid iteration. This should be called directly a `main()` function, for example:
+     *
+     * MyAppVitessDaemon.kt:
+     *
+     *  fun main() {
+     *    val config = MiskConfig.load<MyAppConfig>("myapp")
+     *    startVitessDaemon(MyAppDb::class, config.data_source_clusters.values.first().writer)
+     *  }
+     *
+     */
+    fun startVitessDaemon(
+      /** The same qualifier passed into [HibernateModule], used to uniquely name the container */
+      qualifier: KClass<out Annotation>,
+      /** Config for the Vitess cluster */
+      config: DataSourceConfig
+    ) {
+      val docker: DockerClient = DockerClientBuilder.getInstance()
+          .withDockerCmdExecFactory(NettyDockerCmdExecFactory())
+          .build()
+      val moshi = Moshi.Builder().build()
+
+      val cluster = VitessCluster(
+          name = qualifier.simpleName!!,
+          resourceLoader = ResourceLoader.SYSTEM,
+          config = config,
+          moshi = moshi)
+      val dockerCluster = DockerVitessCluster(cluster, docker)
+      Runtime.getRuntime().addShutdownHook(Thread {
+        dockerCluster.stop()
+      })
+      dockerCluster.start()
+    }
+
   }
 }
