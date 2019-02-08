@@ -301,6 +301,17 @@ class LogContainerResultCallback : ResultCallbackTemplate<LogContainerResultCall
   }
 }
 
+/**
+ * All Vitess clusters used by the app/test are tracked in a global cache as a [DockerVitessCluster].
+ *
+ * On startup, the service will look for a cluster in the cache, and if not found, look for it in
+ * Docker by container name, or as a last resort start the container itself.
+ *
+ * On shutdown, the cache is invalidated by a JVM shutdown hook. On invalidation, the cache will
+ * call the each entry's `stop()` method. If the cluster container was created in this JVM, it
+ * will be stopped and removed. Otherwise (if the container was started by a different process), it
+ * will be left running.
+ */
 class StartVitessService(
   private val qualifier: KClass<out Annotation>,
   private val environment: Environment,
