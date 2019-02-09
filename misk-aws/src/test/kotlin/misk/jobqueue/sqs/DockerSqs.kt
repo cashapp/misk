@@ -4,11 +4,11 @@ import com.amazonaws.services.sqs.AmazonSQS
 import com.amazonaws.services.sqs.model.QueueDoesNotExistException
 import com.github.dockerjava.api.model.ExposedPort
 import com.github.dockerjava.api.model.Ports
-import com.google.common.util.concurrent.AbstractIdleService
 import misk.containers.Composer
 import misk.containers.Container
 import misk.jobqueue.sqs.DockerSqs.Companion.CLIENT_PORT
 import misk.logging.getLogger
+import misk.service.CachedTestService
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -37,12 +37,10 @@ internal class DockerSqs {
   }
 
 
-  @Singleton
-  internal class Service @Inject constructor(
-    private val server: DockerSqs,
+  @Singleton internal class Service @Inject constructor(
     private val client: AmazonSQS
-  ) : AbstractIdleService() {
-    override fun startUp() {
+  ) : CachedTestService() {
+    override fun actualStartup() {
       server.start()
       while (true) {
         try {
@@ -57,8 +55,12 @@ internal class DockerSqs {
       }
     }
 
-    override fun shutDown() {
+    override fun actualShutdown() {
       server.stop()
+    }
+
+    companion object {
+      val server = DockerSqs()
     }
   }
 

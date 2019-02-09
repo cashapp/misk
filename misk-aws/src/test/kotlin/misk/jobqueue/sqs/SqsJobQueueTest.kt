@@ -40,7 +40,13 @@ internal class SqsJobQueueTest {
   @Inject private lateinit var consumer: JobConsumer
   @Inject private lateinit var sqsMetrics: SqsMetrics
 
+  private lateinit var queueName: QueueName
+  private lateinit var deadLetterQueueName: QueueName
+
   @BeforeEach fun createQueues() {
+    // Ensure that each test case runs on a unique queue
+    queueName = QueueName("sqs_job_queue_test" + queueSuffix.incrementAndGet())
+    deadLetterQueueName = queueName.deadLetterQueue
     sqs.createQueue(deadLetterQueueName.value)
     sqs.createQueue(CreateQueueRequest()
         .withQueueName(queueName.value)
@@ -257,7 +263,6 @@ internal class SqsJobQueueTest {
   }
 
   companion object {
-    private val queueName = QueueName("my_queue")
-    private val deadLetterQueueName = queueName.deadLetterQueue
+    private val queueSuffix = AtomicInteger(0)
   }
 }
