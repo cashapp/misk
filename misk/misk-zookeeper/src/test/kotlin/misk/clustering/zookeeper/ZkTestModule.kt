@@ -1,6 +1,5 @@
 package misk.clustering.zookeeper
 
-import com.google.common.util.concurrent.AbstractIdleService
 import com.google.common.util.concurrent.Service
 import com.google.inject.Key
 import misk.DependentService
@@ -12,7 +11,7 @@ import misk.logging.getLogger
 import misk.security.ssl.CertStoreConfig
 import misk.security.ssl.SslLoader.Companion.FORMAT_JKS
 import misk.security.ssl.TrustStoreConfig
-import java.util.concurrent.atomic.AtomicBoolean
+import misk.service.CachedTestService
 import javax.inject.Singleton
 
 internal class ZkTestModule : KAbstractModule() {
@@ -30,31 +29,20 @@ internal class ZkTestModule : KAbstractModule() {
     install(ZookeeperModule())
   }
 
-  @Singleton class StartZookeeperService : AbstractIdleService(), DependentService {
+  @Singleton class StartZookeeperService : CachedTestService(), DependentService {
     override val consumedKeys: Set<Key<*>> = setOf()
     override val producedKeys: Set<Key<*>> = setOf(startZkServiceKey)
 
-    override fun startUp() {
-      if (hasStarted.compareAndSet(false, true)) {
-        log.info { "starting zk instance" }
-        sharedZookeeper.start()
-        Runtime.getRuntime().addShutdownHook(Thread {
-          log.info { "stopping zk instance" }
-          sharedZookeeper.stop()
-        })
-      } else {
-        log.info { "zk instance already running" }
-      }
+    override fun actualStartup() {
+      sharedZookeeper.start()
     }
 
-    override fun shutDown() {
-      // Shutdown happens as a runtime shutdown hook
-      log.info { "zk instance shuts down on runtime shutdown" }
+    override fun actualShutdown() {
+      sharedZookeeper.stop()
     }
 
     companion object {
       private val sharedZookeeper = EmbeddedZookeeper(zkPortKey)
-      private var hasStarted = AtomicBoolean(false)
     }
   }
 
