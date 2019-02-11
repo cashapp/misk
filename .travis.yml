@@ -3,9 +3,6 @@ language: java
 jdk:
   - openjdk11
 
-install:
-  - docker pull squareup/misk-web
-
 script:
   - ./gradlew test --parallel --scan
 
