@@ -30,6 +30,7 @@ import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.test.assertTrue
 
 @MiskTest(startService = true)
 internal class SqsJobQueueTest {
@@ -103,6 +104,10 @@ internal class SqsJobQueueTest {
     assertThat(sqsMetrics.jobsReceived.labels(queueName.value).get()).isEqualTo(10.0)
     assertThat(sqsMetrics.jobsAcknowledged.labels(queueName.value).get()).isEqualTo(10.0)
     assertThat(sqsMetrics.handlerFailures.labels(queueName.value).get()).isEqualTo(0.0)
+  }
+
+  @Test fun retriesIfNotAcknowledged222() {
+    assertTrue(true)
   }
 
   @Test fun retriesIfNotAcknowledged() {
