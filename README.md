@@ -1,3 +1,4 @@
+test cache
 <img src="misk.png" width="300">
 
 [![Build Status](https://travis-ci.org/square/misk.svg?branch=master)](https://travis-ci.org/square/misk)
