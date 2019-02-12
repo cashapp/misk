@@ -119,12 +119,12 @@ class SchemaValidatorTest {
     }
   }
 
-  @Inject @ValidationDb lateinit var sessionFactory: SessionFactory
+  @Inject @ValidationDb lateinit var transacter: Transacter
 
   // TODO (maacosta) Breakup into smaller unit tests.
   private val schemaValidationErrorMessage: String by lazy {
     assertThrows<IllegalStateException> {
-      SchemaValidator().validate(sessionFactory,  sessionFactoryService.get().hibernateMetadata, config.data_source)
+      SchemaValidator().validate(transacter, sessionFactoryService.get().hibernateMetadata)
     }.message!!
   }
 

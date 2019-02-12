@@ -7,7 +7,7 @@ import misk.hibernate.Shard.Companion.SINGLE_SHARD_SET
 import misk.jdbc.DataSourceConfig
 import misk.jdbc.DataSourceType
 import misk.jdbc.map
-import misk.jdbc.uniqueResult
+import misk.jdbc.uniqueString
 import misk.logging.getLogger
 import misk.tracing.traceWithSpan
 import org.hibernate.FlushMode
@@ -266,7 +266,7 @@ internal class RealTransacter private constructor(
           // We should only change the shard we're targeting, not the tablet type
           val previousTarget =
               connection.createStatement().use { statement ->
-                statement.executeQuery("SHOW VITESS_TARGET").uniqueResult { it.getString(1) }!!
+                statement.executeQuery("SHOW VITESS_TARGET").uniqueString()
               }
           connection.createStatement().use { statement ->
             statement.execute("USE `$shard`")
