@@ -1,13 +1,11 @@
 package misk.hibernate
 
 import com.google.common.base.CaseFormat
-import misk.jdbc.DataSourceConfig
-import misk.jdbc.DataSourceType
+import misk.jdbc.uniqueString
 import org.hibernate.SessionFactory
 import org.hibernate.boot.Metadata
 import org.hibernate.mapping.Column
 import java.sql.Connection
-import java.sql.DatabaseMetaData
 
 /**
  * Reports the inconsistencies between two [Declaration]s. The DB schema must be able to carry the
@@ -20,21 +18,35 @@ internal class SchemaValidator {
 
   /** Compares the Database's Schema against Hibernate's Schema and throws errors if there are problems. */
   internal fun validate(
-    sessionFactory: SessionFactory,
-    hibernateMetadata: Metadata,
-    config: DataSourceConfig
+    transacter: Transacter,
+    hibernateMetadata: Metadata
   ) {
-    // TODO: Figure out how to extract schema from a Vitess connection.
-    if (config.type == DataSourceType.VITESS) return
-
-    val dbMetadata = sessionFactory.doWork { metaData }
-    val dbSchema = readDeclarationFromDatabase(dbMetadata, config.database)
-
     val hibernateSchema = readDeclarationFromHibernate(hibernateMetadata)
 
-    withDeclaration(config.database!!) {
-      validateDatabase(dbSchema, hibernateSchema)
+    val allDbTables = LinkedHashSet<TableDeclaration>()
+
+    transacter.shards().forEach { shard ->
+      val dbSchema = transacter.transaction(shard) { s ->
+        s.hibernateSession.doReturningWork { readDeclarationFromDatabase(it) }
+      }
+
+      withDeclaration(dbSchema.name) {
+        validateDatabase(dbSchema, hibernateSchema)
+      }
+      allDbTables.addAll(dbSchema.tables)
     }
+
+    val (dbOnly, hibernateOnly, _) = splitChildren(
+        allDbTables.toList(), hibernateSchema.tables)
+
+    validate(hibernateOnly.isEmpty()) {
+      "Database missing tables ${hibernateOnly.map { it.name }}"
+    }
+
+    checkWarning(dbOnly.isEmpty()) {
+      "Hibernate missing tables ${dbOnly.map { it.name }}"
+    }
+
     throwIfErrorsFound()
   }
 
@@ -45,32 +57,47 @@ internal class SchemaValidator {
   }
 
   private fun readDeclarationFromDatabase(
-    metaData: DatabaseMetaData,
-    catalog: String?
+    connection: Connection
   ): DatabaseDeclaration {
     val ignoreTables = arrayOf("schema_version")
-    val tablesRs = metaData.getTables(catalog, null, "%", null)
-    val schemaTables = mutableListOf<TableDeclaration>()
+    connection.createStatement().use { tablesStmt ->
+      val tablesRs = tablesStmt.executeQuery(
+          "SELECT * FROM information_schema.tables WHERE table_schema = database()")
 
-    while (tablesRs.next()) {
-      val tableName = tablesRs.getString("TABLE_NAME")
-      if (tableName in ignoreTables) continue
-      val tableSchema: String? = tablesRs.getString("TABLE_SCHEM")
-      val columnResultSet = metaData.getColumns(catalog, tableSchema, tableName, "%")
-      val columns = mutableListOf<ColumnDeclaration>()
+      val schemaTables = mutableListOf<TableDeclaration>()
+      var tableSchema : String? = null
 
-      while (columnResultSet.next()) {
-        columns += ColumnDeclaration(
-            name = columnResultSet.getString("COLUMN_NAME"),
-            nullable = columnResultSet.getString("IS_NULLABLE") == "YES",
-            hasDefaultValue = columnResultSet.getString("COLUMN_DEF")?.isNotBlank() ?: false)
+      while (tablesRs.next()) {
+        val tableName = tablesRs.getString("TABLE_NAME")
+        if (tableName in ignoreTables) continue
+        tableSchema = tablesRs.getString("TABLE_SCHEMA")
+        val columns = connection.prepareStatement(
+            "SELECT * FROM information_schema.columns WHERE table_schema = ? AND table_name = ?"
+        ).use { columnsStmt ->
+          columnsStmt.setString(1, tableSchema)
+          columnsStmt.setString(2, tableName)
+
+          val columnResultSet = columnsStmt.executeQuery()
+          val columns = mutableListOf<ColumnDeclaration>()
+
+          while (columnResultSet.next()) {
+            columns += ColumnDeclaration(
+                name = columnResultSet.getString("COLUMN_NAME"),
+                nullable = columnResultSet.getString("IS_NULLABLE") == "YES",
+                hasDefaultValue = columnResultSet.getString("COLUMN_DEFAULT")?.isNotBlank() ?: false)
+          }
+
+          columns
+        }
+        schemaTables += TableDeclaration(tableName, columns)
       }
-      schemaTables += TableDeclaration(tableName, columns)
+      return DatabaseDeclaration(tableSchema ?: "unknown", schemaTables)
     }
-    return DatabaseDeclaration("databaseSchema", schemaTables)
   }
 
-  private fun readDeclarationFromHibernate(metadata: Metadata): DatabaseDeclaration {
+  private fun readDeclarationFromHibernate(
+    metadata: Metadata
+  ): DatabaseDeclaration {
     val hibernateTables = mutableListOf<TableDeclaration>()
     val tableIt = metadata.collectTableMappings().iterator()
     while (tableIt.hasNext()) {
@@ -101,17 +128,12 @@ internal class SchemaValidator {
     return errorReport.toString()
   }
 
-  private fun validateDatabase(dbSchema: DatabaseDeclaration, hibernateSchema: DatabaseDeclaration) {
-    val (dbOnly, hibernateOnly, intersectionPairs) = splitChildren(
+  private fun validateDatabase(
+    dbSchema: DatabaseDeclaration,
+    hibernateSchema: DatabaseDeclaration
+  ) {
+    val (_, _, intersectionPairs) = splitChildren(
         dbSchema.tables, hibernateSchema.tables)
-
-    validate(hibernateOnly.isEmpty()) {
-      "Database missing tables ${hibernateOnly.map { it.name }}"
-    }
-
-    checkWarning(dbOnly.isEmpty()) {
-      "Hibernate missing tables ${dbOnly.map { it.name }}"
-    }
 
     for ((dbTable, hibernateTable) in intersectionPairs) {
       withDeclaration(hibernateTable.snakeCaseName) {

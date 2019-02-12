@@ -36,7 +36,7 @@ class PingDatabaseService @Inject constructor(
       dataSource.connection.use { c ->
         try {
           val result =
-              c.createStatement().executeQuery("SELECT 1 FROM dual").uniqueResult { it.getInt(1) }
+              c.createStatement().executeQuery("SELECT 1 FROM dual").uniqueInt()
           check(result == 1)
         } catch (e: Exception) {
           val message = e.message
