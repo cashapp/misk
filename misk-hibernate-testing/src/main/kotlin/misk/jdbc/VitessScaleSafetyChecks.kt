@@ -277,7 +277,7 @@ class VitessScaleSafetyChecks(
                   ORDER BY event_time DESC
                   LIMIT 1
                 """.trimIndent())
-            .uniqueResult { it.getString(1) }
+            .uniqueString()
       }
     }
   }

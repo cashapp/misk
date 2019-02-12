@@ -23,7 +23,8 @@ import misk.environment.Environment.DEVELOPMENT
 import misk.environment.Environment.TESTING
 import misk.jdbc.DataSourceConfig
 import misk.jdbc.DataSourceType
-import misk.jdbc.uniqueResult
+import misk.jdbc.uniqueInt
+import misk.jdbc.uniqueString
 import misk.moshi.adapter
 import misk.resources.ResourceLoader
 import mu.KotlinLogging
@@ -227,7 +228,7 @@ class DockerVitessCluster(
       cluster.openVtgateConnection().use { c ->
         try {
           val result =
-              c.createStatement().executeQuery("SELECT 1 FROM dual").uniqueResult { it.getInt(1) }
+              c.createStatement().executeQuery("SELECT 1 FROM dual").uniqueInt()
           check(result == 1)
         } catch (e: Exception) {
           val message = e.message

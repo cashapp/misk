@@ -13,6 +13,7 @@ import kotlin.reflect.KClass
 internal class SchemaValidatorService internal constructor(
   qualifier: KClass<out Annotation>,
   private val sessionFactoryServiceProvider: Provider<SessionFactoryService>,
+  private val transacterProvider: Provider<Transacter>,
   private val config: DataSourceConfig
 ) : AbstractIdleService(), DependentService {
 
@@ -23,9 +24,11 @@ internal class SchemaValidatorService internal constructor(
   override val producedKeys = setOf<Key<*>>(SchemaValidatorService::class.toKey(qualifier))
 
   override fun startUp() {
-    val validator = SchemaValidator()
-    val sessionFactoryService = sessionFactoryServiceProvider.get()
-    validator.validate(sessionFactoryService.get(), sessionFactoryService.hibernateMetadata, config)
+    synchronized(this) {
+      val validator = SchemaValidator()
+      val sessionFactoryService = sessionFactoryServiceProvider.get()
+      validator.validate(transacterProvider.get(), sessionFactoryService.hibernateMetadata)
+    }
   }
 
   override fun shutDown() {

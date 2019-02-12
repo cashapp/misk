@@ -131,6 +131,7 @@ class HibernateModule(
       SchemaValidatorService(
           qualifier,
           sessionFactoryServiceProvider,
+          transacterProvider,
           config
       )
     }).asSingleton()
