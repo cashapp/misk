@@ -1,6 +1,7 @@
 package misk.redis
 
 import misk.time.FakeClock
+import okio.ByteString
 import java.time.Duration
 import java.time.Instant
 import java.util.concurrent.ConcurrentHashMap
@@ -10,17 +11,19 @@ import javax.inject.Inject
 class FakeRedis : Redis {
   @Inject lateinit var clock: FakeClock
 
-  // The value type stored in our key-value store
+  // The value type stored in our key-value store.
   private data class Value (
-    val value: String,
+    val data: ByteString,
     val expiryInstant: Instant
   )
 
-  // Acts as the Redis key-value store
+  // Acts as the Redis key-value store.
   private val keyValueStore = ConcurrentHashMap<String, Value>()
 
   override fun del(key: String): Boolean {
-    if (!keyValueStore.containsKey(key)) return false
+    if (!keyValueStore.containsKey(key)) {
+      return false
+    }
 
     return keyValueStore.remove(key) != null
   }
@@ -30,7 +33,7 @@ class FakeRedis : Redis {
     return keys.count { del(it) }
   }
 
-  override fun get(key: String): String? {
+  override fun get(key: String): ByteString? {
     val value = keyValueStore[key] ?: return null
 
     // Check if the key has expired
@@ -39,18 +42,21 @@ class FakeRedis : Redis {
       return null
     }
 
-    return value.value
+    return value.data
   }
 
-  // Sets the value for a key, the key does not expire
-  override fun set(key: String, value: String): String {
+  override fun set(key: String, value: ByteString) {
     // Set the key to expire at the latest possible instant
-    keyValueStore[key] = Value(value = value, expiryInstant = Instant.MAX)
-    return value
+    keyValueStore[key] = Value(
+      data = value,
+      expiryInstant = Instant.MAX
+    )
   }
 
-  override fun set(key: String, expiryDuration: Duration, value: String): String {
-    keyValueStore[key] = Value(value = value, expiryInstant = clock.instant().plusSeconds(expiryDuration.seconds))
-    return value
+  override fun set(key: String, expiryDuration: Duration, value: ByteString) {
+    keyValueStore[key] = Value(
+      data = value,
+      expiryInstant = clock.instant().plusSeconds(expiryDuration.seconds)
+    )
   }
 }
