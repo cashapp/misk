@@ -105,7 +105,7 @@ class VitessCluster(
   fun openMysqlConnection() = mysqlDataSource().connection
 
   private fun dataSource(): DriverDataSource {
-    val jdbcUrl = config.type.buildJdbcUrl(config, TESTING)
+    val jdbcUrl = config.buildJdbcUrl(TESTING)
     return DriverDataSource(
         jdbcUrl, config.type.driverClassName, Properties(), config.username, config.password)
   }
@@ -120,7 +120,7 @@ class VitessCluster(
 
   private fun mysqlDataSource(): DriverDataSource {
     val config = mysqlConfig()
-    val jdbcUrl = config.type.buildJdbcUrl(config, TESTING)
+    val jdbcUrl = config.buildJdbcUrl(TESTING)
     return DriverDataSource(
         jdbcUrl, config.type.driverClassName, Properties(), config.username, config.password)
   }
