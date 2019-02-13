@@ -208,6 +208,12 @@ internal class SchemaMigrator(
     }
   }
 
+  /** Validates all the schema file names. */
+  fun validateAll() {
+    // This validates the migrations
+    transacter.get().keyspaces().forEach { availableMigrations(it) }
+  }
+
   /** Throws an exception unless all available migrations have been applied. */
   fun requireAll() {
     try {

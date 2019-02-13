@@ -76,5 +76,6 @@ data class Shard(val keyspace: Keyspace, val name: String) {
     val SINGLE_KEYSPACE = Keyspace("keyspace")
     val SINGLE_SHARD = Shard(SINGLE_KEYSPACE, SINGLE_SHARD_ID)
     val SINGLE_SHARD_SET = ImmutableSet.of(SINGLE_SHARD)
+    val SINGLE_KEYSPACE_SET = ImmutableSet.of(SINGLE_KEYSPACE)
   }
 }

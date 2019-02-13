@@ -13,6 +13,7 @@ interface Session {
   fun <T : DbEntity<T>> load(id: Id<T>, type: KClass<T>): T
   fun <R : DbRoot<R>, T : DbSharded<R, T>> loadSharded(gid: Gid<R, T>, type: KClass<T>): T
   fun shards(): Set<Shard>
+  fun keyspaces(): Set<Keyspace>
   fun <T> target(shard: Shard, function: () -> T): T
   fun <T> useConnection(work: (Connection) -> T): T
 

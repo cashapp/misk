@@ -3,6 +3,8 @@ package misk.hibernate
 import io.opentracing.Tracer
 import io.opentracing.tag.Tags
 import misk.backoff.ExponentialBackoff
+import misk.hibernate.Shard.Companion.SINGLE_KEYSPACE
+import misk.hibernate.Shard.Companion.SINGLE_KEYSPACE_SET
 import misk.hibernate.Shard.Companion.SINGLE_SHARD_SET
 import misk.jdbc.DataSourceConfig
 import misk.jdbc.DataSourceType
@@ -252,6 +254,18 @@ internal class RealTransacter private constructor(
           }
         }
       } else SINGLE_SHARD_SET
+    }
+
+    override fun keyspaces(): Set<Keyspace> {
+      return if (config.type == DataSourceType.VITESS) {
+        useConnection { connection ->
+          connection.createStatement().use {
+            it.executeQuery("SHOW VITESS_KEYSPACES")
+                .map { Keyspace(it.getString(1)) }
+                .toSet()
+          }
+        }
+      } else SINGLE_KEYSPACE_SET
     }
 
     private fun parseShard(string: String): Shard {

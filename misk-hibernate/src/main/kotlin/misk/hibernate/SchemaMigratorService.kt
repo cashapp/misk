@@ -24,8 +24,10 @@ class SchemaMigratorService internal constructor(
   override fun startUp() {
     val schemaMigrator = schemaMigratorProvider.get()
     if (environment == Environment.TESTING || environment == Environment.DEVELOPMENT) {
-      if (config.type != DataSourceType.VITESS) {
-        // vttestserver automatically applies migrations
+      if (config.type == DataSourceType.VITESS) {
+        // vttestserver automatically applies migrations but we validate the file names at least
+        schemaMigrator.validateAll()
+      } else {
         val appliedMigrations = schemaMigrator.initialize()
         schemaMigrator.applyAll("SchemaMigratorService", appliedMigrations)
       }
