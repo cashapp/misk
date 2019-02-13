@@ -29,7 +29,7 @@ class PingDatabaseService @Inject constructor(
   override val producedKeys: Set<Key<*>> = setOf(PingDatabaseService::class.toKey(qualifier))
 
   override fun startUp() {
-    val jdbcUrl = config.type.buildJdbcUrl(config, environment)
+    val jdbcUrl = this.config.buildJdbcUrl(environment)
     val dataSource = DriverDataSource(
         jdbcUrl, config.type.driverClassName, Properties(), config.username, config.password)
     retry(10, ExponentialBackoff(Duration.ofMillis(20), Duration.ofMillis(1000))) {
