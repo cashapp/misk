@@ -38,8 +38,10 @@ private const val ROW_COUNT_WARNING_LIMIT = 2000
 
 class HibernateModule(
   private val qualifier: KClass<out Annotation>,
-  private val config: DataSourceConfig
+  config: DataSourceConfig
 ) : KAbstractModule() {
+  val config = config.withDefaults()
+
   override fun configure() {
     val configKey = DataSourceConfig::class.toKey(qualifier)
 

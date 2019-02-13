@@ -40,7 +40,7 @@ internal class DataSourceService(
 
     val config = HikariConfig()
     config.driverClassName = this.config.type.driverClassName
-    config.jdbcUrl = this.config.type.buildJdbcUrl(this.config, environment)
+    config.jdbcUrl = this.config.buildJdbcUrl(environment)
     if (this.config.username != null) {
       config.username = this.config.username
     }
