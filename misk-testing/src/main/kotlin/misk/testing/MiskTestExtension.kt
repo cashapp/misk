@@ -118,11 +118,14 @@ private fun ExtensionContext.getActionTestModules(): Iterable<Module> {
       { modulesViaReflection() }) as Iterable<Module>
 }
 
+// Find [MiskTestModule]-annoted [Module]s on the test class and, recursively, its base classes.
 private fun ExtensionContext.modulesViaReflection(): Iterable<Module> {
-  return requiredTestClass.declaredFields
+  return generateSequence(requiredTestClass) { c -> c.superclass }
+      .flatMap { it.declaredFields.asSequence() }
       .filter { it.isAnnotationPresent(MiskTestModule::class.java) }
       .map {
         it.isAccessible = true
         it.get(requiredTestInstance) as Module
       }
+      .toList()
 }
