@@ -256,7 +256,7 @@ class DockerVitessCluster(
             "-S", "/vt/vtdataroot/vt_0000000001/mysql.sock",
             "-u", "root",
             "mysql",
-            "-e", "grant all on *.* to 'vt_dba'@'%'")
+            "-e", "grant all on *.* to 'vt_dba'@'%'; grant REPLICATION CLIENT, REPLICATION SLAVE on *.* to 'vt_app'@'%'")
         .exec()
 
     docker.execStartCmd(exec.id)
