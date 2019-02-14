@@ -6,6 +6,7 @@ import org.hibernate.SessionFactory
 import org.hibernate.boot.Metadata
 import org.hibernate.mapping.Column
 import java.sql.Connection
+import kotlin.reflect.full.memberProperties
 
 /**
  * Reports the inconsistencies between two [Declaration]s. The DB schema must be able to carry the
@@ -99,19 +100,61 @@ internal class SchemaValidator {
     metadata: Metadata
   ): DatabaseDeclaration {
     val hibernateTables = mutableListOf<TableDeclaration>()
-    val tableIt = metadata.collectTableMappings().iterator()
-    while (tableIt.hasNext()) {
-      val table = tableIt.next()
-      val tableName = table.name
+    val entityBindingsIt = metadata.getEntityBindings().iterator()
+    //val tableIt = metadata.collectTableMappings().iterator()
 
-      val columnsIt = table.columnIterator
+    while (entityBindingsIt.hasNext()) {
+      val entity = entityBindingsIt.next()
+      val table = entity.table
+      val tableName = table.name
+      val kClass = Class.forName(entity.className).kotlin
+      /*
+       * Since we're working in kotlin land, we need to see if *kotlin* is forbidding us from using
+       * null in addition to checking if we've specified nullability in the hibernate annotation.
+       */
+      val propertiesByNullability = kClass.memberProperties
+          .map({ it.name to it.returnType.isMarkedNullable })
+          .toMap()
+
       val columns = mutableListOf<ColumnDeclaration>()
-      while (columnsIt.hasNext()) {
-        val column = columnsIt.next() as Column
-        columns += ColumnDeclaration(column.name, column.isNullable,
-            column.defaultValue?.isNotBlank() ?: false)
+      val identifierProperty = entity.identifierProperty
+      val properties = mutableListOf<org.hibernate.mapping.Property>()
+      entity.propertyIterator.forEach {
+        val property = it as org.hibernate.mapping.Property
+        properties.add(property)
+      }
+      // equivalent to identifierProperty.isComposite()
+      val identifierPropertyValue = identifierProperty.value
+      if (identifierPropertyValue is org.hibernate.mapping.Component) {
+        identifierPropertyValue.propertyIterator.forEach {
+          val property = it as org.hibernate.mapping.Property
+          // TODO(jayestrella): This is hard coded, since rootId is a property but it isn't
+          //                    really a property that has a column. Find a way to disambiguate
+          if (property.name != "rootId") {
+            properties.add(property)
+          }
+        }
+      } else {
+        properties.add(identifierProperty)
       }
 
+      properties.forEach { property ->
+        val columnIt = property.columnIterator
+        validate(columnIt.hasNext()) {
+          "A property should only be mapped to one column. How did this happen?"
+        }
+        val column = columnIt.next() as Column
+        validate(!columnIt.hasNext()) {
+          "A property should only be mapped to one column. How did this happen?"
+        }
+        validate(propertiesByNullability.containsKey(property.name)) {
+          "A property should be the field name not the column name. " +
+              "How did we find a field name not found by reflection?"
+        }
+        val nullable = column.isNullable && propertiesByNullability[property.name]!!
+        columns += ColumnDeclaration(column.name, nullable,
+            column.defaultValue?.isNotBlank() ?: false)
+      }
       hibernateTables += TableDeclaration(tableName, columns)
     }
     return DatabaseDeclaration("hibernateSchema", hibernateTables)
@@ -177,10 +220,13 @@ internal class SchemaValidator {
       "Column ${dbColumn.name} should exactly match hibernate ${hibernateColumn.name}"
     }
 
-    // We have that the hibernate column only needs to be null if the database is null.
+    // We have that the hibernate column only needs to be nullable if the database is nullable.
     // It's okay if hibernate is more strict. However, we shouldn't care that much if the column has a default value
-    validate(dbColumn.nullable || !hibernateColumn.nullable || dbColumn.hasDefaultValue) {
-      "Column ${dbColumn.name} is NOT NULL in database but ${hibernateColumn.name} is nullable in hibernate"
+    // dbColumn.nullable
+    if (!dbColumn.nullable) {
+      validate(!hibernateColumn.nullable || dbColumn.hasDefaultValue) {
+        "Column ${dbColumn.name} is NOT NULL in database but ${hibernateColumn.name} is nullable in hibernate"
+      }
     }
   }
 
