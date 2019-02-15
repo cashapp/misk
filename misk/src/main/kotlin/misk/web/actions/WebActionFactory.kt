@@ -31,7 +31,8 @@ internal class WebActionFactory {
 
   @Inject lateinit var userProvidedNetworkInterceptorFactories: List<NetworkInterceptor.Factory>
 
-  @Inject @MiskDefault lateinit var miskInterceptorFactories: List<NetworkInterceptor.Factory>
+  @Inject @MiskDefault lateinit var miskNetworkInterceptorFactories: List<NetworkInterceptor.Factory>
+  @Inject @MiskDefault lateinit var miskApplicationInterceptorFactories: List<ApplicationInterceptor.Factory>
 
   @Inject lateinit var parameterExtractorFactories: List<ParameterExtractor.Factory>
 
@@ -121,10 +122,11 @@ internal class WebActionFactory {
 
     val networkInterceptors = ArrayList<NetworkInterceptor>()
     // Ensure that default interceptors are called before any user provided interceptors
-    miskInterceptorFactories.mapNotNullTo(networkInterceptors) { it.create(action) }
+    miskNetworkInterceptorFactories.mapNotNullTo(networkInterceptors) { it.create(action) }
     userProvidedNetworkInterceptorFactories.mapNotNullTo(networkInterceptors) { it.create(action) }
 
     val applicationInterceptors = ArrayList<ApplicationInterceptor>()
+    miskApplicationInterceptorFactories.mapNotNullTo(applicationInterceptors) { it.create(action) }
     userProvidedApplicationInterceptorFactories.mapNotNullTo(applicationInterceptors) {
       it.create(action)
     }

@@ -96,10 +96,6 @@ class MiskWebModule : KAbstractModule() {
     multibind<NetworkInterceptor.Factory>(MiskDefault::class)
         .to<RequestLogContextInterceptor.Factory>()
 
-    // Optionally log request and response details
-    multibind<NetworkInterceptor.Factory>(MiskDefault::class)
-        .to<RequestLoggingInterceptor.Factory>()
-
     // Collect metrics on the status of results and response times of requests
     multibind<NetworkInterceptor.Factory>(MiskDefault::class)
         .to<MetricsInterceptor.Factory>()
@@ -116,6 +112,10 @@ class MiskWebModule : KAbstractModule() {
     // the client's requested content-type
     multibind<NetworkInterceptor.Factory>(MiskDefault::class)
         .to<MarshallerInterceptor.Factory>()
+
+    // Optionally log request and response details
+    multibind<ApplicationInterceptor.Factory>(MiskDefault::class)
+      .to<RequestLoggingInterceptor.Factory>()
 
     install(ExceptionMapperModule.create<ActionException, ActionExceptionMapper>())
 
