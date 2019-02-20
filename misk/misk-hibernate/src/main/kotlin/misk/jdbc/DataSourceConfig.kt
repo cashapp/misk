@@ -75,23 +75,20 @@ data class DataSourceConfig(
     val config = withDefaults()
     return when (type) {
       DataSourceType.MYSQL -> {
-        val testing = env == Environment.TESTING || env == Environment.DEVELOPMENT
-        var queryParams = if (testing) "?createDatabaseIfNotExist=true" else ""
+        var queryParams = "?useLegacyDatetimeCode=false"
+        if (env == Environment.TESTING || env == Environment.DEVELOPMENT) {
+          queryParams += "&createDatabaseIfNotExist=true"
+        }
         // TODO(rhall): share this with DataSource config in SessionFactoryService.
         // https://github.com/square/misk/issues/397
         // Explicitly not updating VITESS below since this is a temporary hack until the above
         // issue is resolved.
-        if (!trust_certificate_key_store_url.isNullOrBlank()) {
-          require(!trust_certificate_key_store_password.isNullOrBlank()) {
+        if (!config.trust_certificate_key_store_url.isNullOrBlank()) {
+          require(!config.trust_certificate_key_store_password.isNullOrBlank()) {
             "must provide a trust_certificate_key_store_password"
           }
-          if (!testing) {
-            queryParams += "?"
-          } else {
-            queryParams += "&"
-          }
-          queryParams += "trustCertificateKeyStoreUrl=${trust_certificate_key_store_url}"
-          queryParams += "&trustCertificateKeyStorePassword=${trust_certificate_key_store_password}"
+          queryParams += "&trustCertificateKeyStoreUrl=${config.trust_certificate_key_store_url}"
+          queryParams += "&trustCertificateKeyStorePassword=${config.trust_certificate_key_store_password}"
           queryParams += "&verifyServerCertificate=true"
           queryParams += "&useSSL=true"
           queryParams += "&requireSSL=true"
