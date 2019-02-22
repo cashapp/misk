@@ -40,7 +40,7 @@ class ClusterHashRing(
     }
 
     val resourceHash = hashFn.hashBytes(resourceId.toByteArray()).asInt()
-    val vnode = vnodes.first { it >= resourceHash }
+    val vnode = vnodes.firstOrNull { it >= resourceHash } ?: vnodes[0]
     return vnodesToMembers[vnode] ?: throw IllegalStateException(
         "no member corresponding to vnode hash $vnode")
   }
