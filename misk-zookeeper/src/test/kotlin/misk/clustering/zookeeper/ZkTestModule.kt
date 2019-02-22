@@ -2,8 +2,11 @@ package misk.clustering.zookeeper
 
 import com.google.common.util.concurrent.Service
 import com.google.inject.Key
+import com.google.inject.Provides
+import com.google.inject.util.Modules
 import misk.DependentService
 import misk.clustering.fake.FakeClusterModule
+import misk.concurrent.ExplicitReleaseDelayQueue
 import misk.config.AppName
 import misk.inject.KAbstractModule
 import misk.inject.keyOf
@@ -12,6 +15,9 @@ import misk.security.ssl.CertStoreConfig
 import misk.security.ssl.SslLoader.Companion.FORMAT_JKS
 import misk.security.ssl.TrustStoreConfig
 import misk.service.CachedTestService
+import misk.tasks.DelayedTask
+import misk.tasks.RepeatedTaskQueue
+import java.time.Clock
 import javax.inject.Singleton
 
 internal class ZkTestModule : KAbstractModule() {
@@ -26,10 +32,24 @@ internal class ZkTestModule : KAbstractModule() {
 
     multibind<Service>().to<StartZookeeperService>()
     install(FakeClusterModule())
-    install(ZookeeperModule())
+    install(Modules.override(ZookeeperModule()).with(object : KAbstractModule() {
+      override fun configure() {}
+
+      @Provides @ForZkLease
+      fun provideTaskQueue(
+        clock: Clock,
+        delayQueue: ExplicitReleaseDelayQueue<DelayedTask>
+      ): RepeatedTaskQueue {
+        return RepeatedTaskQueue.forTesting("zk-lease-poller", clock, delayQueue)
+      }
+
+      @Provides @ForZkLease
+      fun provideDelayQueue(): ExplicitReleaseDelayQueue<DelayedTask> = ExplicitReleaseDelayQueue()
+    }))
   }
 
-  @Singleton class StartZookeeperService : CachedTestService(), DependentService {
+  @Singleton
+  class StartZookeeperService : CachedTestService(), DependentService {
     override val consumedKeys: Set<Key<*>> = setOf()
     override val producedKeys: Set<Key<*>> = setOf(startZkServiceKey)
 

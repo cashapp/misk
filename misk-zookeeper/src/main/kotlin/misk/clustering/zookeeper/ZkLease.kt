@@ -1,10 +1,10 @@
 package misk.clustering.zookeeper
 
+import misk.clustering.NoMembersAvailableException
 import misk.clustering.lease.Lease
 import misk.logging.getLogger
 import org.apache.zookeeper.CreateMode
 import org.apache.zookeeper.KeeperException
-import org.apache.zookeeper.ZooDefs
 import java.util.concurrent.locks.ReentrantLock
 import javax.annotation.concurrent.GuardedBy
 import kotlin.concurrent.withLock
@@ -94,7 +94,8 @@ internal class ZkLease(
         Status.HELD -> listener.afterAcquire(this)
         // We don't know if we own the lease, so check
         Status.UNKNOWN -> checkHeld()
-        else -> {}
+        else -> {
+        }
       }
     }
   }
@@ -195,8 +196,13 @@ internal class ZkLease(
   /** @return true if we should hold the lease per the cluster membership */
   private fun shouldHoldLease(): Boolean {
     val clusterSnapshot = manager.cluster.snapshot
-    val desiredLeaseOwner = clusterSnapshot.resourceMapper[leaseResourceName]
-    return desiredLeaseOwner.name == clusterSnapshot.self.name
+    val desiredLeaseOwner = try {
+      clusterSnapshot.resourceMapper[leaseResourceName]
+    } catch (e: NoMembersAvailableException) {
+      log.warn { e.message }
+      null
+    }
+    return desiredLeaseOwner?.name == clusterSnapshot.self.name
   }
 
   /** @return true if the lease node exists in zk */

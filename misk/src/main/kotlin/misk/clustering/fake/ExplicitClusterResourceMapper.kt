@@ -2,6 +2,7 @@ package misk.clustering.fake
 
 import misk.clustering.Cluster
 import misk.clustering.ClusterResourceMapper
+import misk.clustering.NoMembersAvailableException
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicReference
 
@@ -30,6 +31,9 @@ class ExplicitClusterResourceMapper : ClusterResourceMapper {
   }
 
   override fun get(resourceId: String): Cluster.Member {
+    if (mappings.isEmpty()) {
+      defaultMapping.get() ?: throw NoMembersAvailableException(resourceId)
+    }
     return mappings[resourceId] ?: defaultMapping.get() ?: throw IllegalStateException(
         "no mapping for $resourceId")
   }
