@@ -47,6 +47,8 @@ data class DataSourceConfig(
      */
   val trust_certificate_key_store_url: String? = null,
   val trust_certificate_key_store_password: String? = null,
+  val client_certificate_key_store_url: String? = null,
+  val client_certificate_key_store_password: String? = null,
   val show_sql: String? = "false"
 ) {
   fun withDefaults(): DataSourceConfig {
@@ -99,7 +101,34 @@ data class DataSourceConfig(
         "jdbc:hsqldb:mem:${database!!};sql.syntax_mys=true"
       }
       DataSourceType.VITESS -> {
-        "jdbc:vitess://${config.host}:${config.port}/${config.database}"
+        var queryParams = ""
+        var useSSL = false
+        /**
+         * Query params for VitessJDBC driver look like default MySQL JDBC driver query params
+         * but are named slightly differently and a smaller subset are supported. See
+         * [io.vitess.jdbc.VitessJDBCUrl] for the complete list
+         */
+        if (!config.trust_certificate_key_store_url.isNullOrBlank()) {
+          require(!config.trust_certificate_key_store_password.isNullOrBlank()) {
+            "must provide a trust_certificate_key_store_password if trust_certificate_key_store_url is set"
+          }
+          queryParams += "${if (queryParams.isEmpty()) "?" else "&"}trustStore=${config.trust_certificate_key_store_url}"
+          queryParams += "&trustStorePassword=${config.trust_certificate_key_store_password}"
+          useSSL = true
+        }
+        if (!config.client_certificate_key_store_url.isNullOrBlank()) {
+          require(!config.client_certificate_key_store_password.isNullOrBlank()) {
+            "must provide a client_certificate_key_store_password if client_certificate_key_store_url is set"
+          }
+          queryParams += "${if (queryParams.isEmpty()) "?" else "&"}keyStore=${config.client_certificate_key_store_url}"
+          queryParams += "&keyStorePassword=${config.client_certificate_key_store_password}"
+          useSSL = true
+        }
+        if (useSSL) {
+          queryParams += "&useSSL=true"
+        }
+
+        "jdbc:vitess://${config.host}:${config.port}/${config.database}$queryParams"
       }
     }
   }
