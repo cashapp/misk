@@ -1,9 +1,15 @@
 package misk.clustering
 
+import com.google.common.hash.Funnel
+import com.google.common.hash.HashCode
+import com.google.common.hash.HashFunction
+import com.google.common.hash.Hasher
 import com.google.common.hash.Hashing
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import java.nio.ByteBuffer
+import java.nio.charset.Charset
 
 internal class ClusterHashRingTest {
   @Test fun singleNode() {
@@ -47,6 +53,49 @@ internal class ClusterHashRingTest {
         ClusterHashRing(members = setOf(), hashFn = Hashing.murmur3_32(0))
     assertThrows<NoMembersAvailableException> {
       hashRing["foo"]
+    }
+  }
+
+  @Test fun resourceToRangeMapping() {
+    /*
+     If we have 3 vnodes and they hash to a, b, and c, we want to map the hashed resource ID to
+     vnodes using the following ranges.
+      [0, a] => a
+      (a, b] => b
+      (b, c] => c
+      (c, INT_MAX] => a
+     This test ensures that each range ends up mapping to the expected vnode.
+     */
+    val a = Cluster.Member("a", "192.49.168.23")
+    val b = Cluster.Member("b", "192.49.168.24")
+    val c = Cluster.Member("c", "192.49.168.25")
+
+    // First version of hash ring
+    val hashRing = ClusterHashRing(
+        members = setOf(a, b, c),
+        hashFn = FakeHashFn(mapOf(
+          "a 0" to 100,
+          "b 0" to 200,
+          "c 0" to 300,
+          "foo" to 50,
+          "bar" to 150,
+          "zed" to 250,
+          "zork" to 350
+        )),
+        vnodesCount = 1)
+    assertThat(listOf("foo", "bar", "zed", "zork").map { hashRing[it] })
+        .containsExactly(a, b, c, a)
+  }
+
+  /**
+   * Hash function that uses pre-determined mapping to determine hashes for inputs.
+   *
+   * Does not actually delegate to sha256. It just uses delegation to avoid implementing the full
+   * interface.
+   */
+  class FakeHashFn(val hashes: Map<String, Int>) : HashFunction by Hashing.sha256() {
+    override fun hashBytes(input: ByteArray): HashCode {
+      return HashCode.fromInt(hashes.getValue(String(input)).toInt())
     }
   }
 }
