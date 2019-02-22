@@ -3,6 +3,7 @@ package misk.clustering
 import com.google.common.hash.Hashing
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 internal class ClusterHashRingTest {
   @Test fun singleNode() {
@@ -39,5 +40,13 @@ internal class ClusterHashRingTest {
         hashFn = Hashing.murmur3_32(0))
     assertThat(listOf("foo", "bar", "zed", "abadidea").map { hashRing3[it] })
         .containsExactly(zork, quark, zork, zork)
+  }
+
+  @Test fun zeroNodes() {
+    val hashRing =
+        ClusterHashRing(members = setOf(), hashFn = Hashing.murmur3_32(0))
+    assertThrows<NoMembersAvailableException> {
+      hashRing["foo"]
+    }
   }
 }

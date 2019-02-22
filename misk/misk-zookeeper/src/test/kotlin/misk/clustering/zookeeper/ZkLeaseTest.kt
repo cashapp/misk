@@ -91,7 +91,7 @@ internal class ZkLeaseTest {
 
     // Fake a cluster change which moves the lease to another process
     cluster.resourceMapper.removeMapping(leasePath)
-    leaseManager.handleClusterChange()
+    leaseManager.checkAllLeases()
 
     // Should no longer own the lease and should have deleted the lease node
     assertThat(lease.checkHeld()).isFalse()
@@ -236,8 +236,8 @@ internal class ZkLeaseTest {
     reset(listenerMock)
 
     // Further calls to checkHeld() should not trigger events because the lease does not change
-    lease.checkHeld()
-    lease.checkHeld()
+    assertThat(lease.checkHeld()).isTrue()
+    assertThat(lease.checkHeld()).isTrue()
     verifyZeroInteractions(listenerMock)
     reset(listenerMock)
 

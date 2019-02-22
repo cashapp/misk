@@ -35,7 +35,9 @@ class ClusterHashRing(
 
   /** @return The [Cluster.Member] that should own the given resource id */
   override fun get(resourceId: String): Cluster.Member {
-    check(vnodesToMembers.isNotEmpty()) { "no members available for $resourceId" }
+    if (vnodesToMembers.isEmpty()) {
+      throw NoMembersAvailableException(resourceId)
+    }
 
     val resourceHash = hashFn.hashBytes(resourceId.toByteArray()).asInt()
     val vnode = vnodes.first { it >= resourceHash }
