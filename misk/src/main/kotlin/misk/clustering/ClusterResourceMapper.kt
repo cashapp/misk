@@ -7,6 +7,9 @@ package misk.clustering
  * own mappings if there is a mechanism specific to that cluster (or to supply a fake)
  */
 interface ClusterResourceMapper {
-  /** @return The [Cluster.Member] that should own the given resource id */
+  /**
+   * @throws NoMembersAvailableException if there are no members in the cluster
+   * @return The [Cluster.Member] that should own the given resource id
+   */
   operator fun get(resourceId: String): Cluster.Member
 }

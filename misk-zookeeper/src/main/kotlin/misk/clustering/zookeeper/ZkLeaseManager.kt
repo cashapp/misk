@@ -2,19 +2,21 @@ package misk.clustering.zookeeper
 
 import com.google.common.annotations.VisibleForTesting
 import com.google.common.util.concurrent.AbstractExecutionThreadService
-import com.google.common.util.concurrent.ThreadFactoryBuilder
 import misk.DependentService
 import misk.clustering.Cluster
 import misk.clustering.lease.LeaseManager
 import misk.config.AppName
 import misk.inject.keyOf
 import misk.logging.getLogger
+import misk.tasks.RepeatedTaskQueue
+import misk.tasks.Result
+import misk.tasks.Status
 import misk.zookeeper.SERVICES_NODE
 import org.apache.curator.framework.CuratorFramework
 import org.apache.curator.framework.state.ConnectionStateListener
+import java.time.Duration
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CountDownLatch
-import java.util.concurrent.Executors
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
@@ -29,6 +31,7 @@ import javax.inject.Singleton
 @Singleton
 internal class ZkLeaseManager @Inject internal constructor(
   @AppName appName: String,
+  @ForZkLease private val taskQueue: RepeatedTaskQueue,
   internal val cluster: Cluster,
   curator: CuratorFramework
 ) : AbstractExecutionThreadService(), LeaseManager, DependentService {
@@ -40,9 +43,7 @@ internal class ZkLeaseManager @Inject internal constructor(
 
   private val ownerName = cluster.snapshot.self.name
   private val actionQueue = LinkedBlockingQueue<() -> Unit>()
-  private val leaseCheckExecutor = Executors.newCachedThreadPool(ThreadFactoryBuilder()
-      .setNameFormat("lease-monitor-%d")
-      .build())
+  private val leasePollInterval: Duration = Duration.ofSeconds(1L)
 
   enum class State {
     NOT_STARTED,
@@ -65,19 +66,17 @@ internal class ZkLeaseManager @Inject internal constructor(
     if (!state.compareAndSet(State.NOT_STARTED, State.RUNNING)) return
     connected.set(false)
 
-    // When a cluster change occurs, recheck each lease to see if it should still be owned
-    cluster.watch {
-      actionQueue.put {
-        handleClusterChange()
-      }
-    }
-
     // When we are disconnected from zk, inform all of the leases that their state is now unknown
     client.value.connectionStateListenable.addListener(ConnectionStateListener { _, state ->
       actionQueue.put {
         handleConnectionStateChanged(state.isConnected)
       }
     })
+
+    taskQueue.schedule(leasePollInterval) {
+      checkAllLeases()
+      Result(Status.OK, leasePollInterval)
+    }
   }
 
   override fun triggerShutdown() {
@@ -94,9 +93,6 @@ internal class ZkLeaseManager @Inject internal constructor(
       log.info { "fully stopped zk lease manager" }
       fullyStopped.countDown()
     }
-
-    // Empty out any pending lease checks
-    leaseCheckExecutor.shutdownNow()
 
     // Wait for full stop
     if (!fullyStopped.await(15, TimeUnit.SECONDS)) {
@@ -136,15 +132,11 @@ internal class ZkLeaseManager @Inject internal constructor(
     connectionListeners.forEach { it.invoke(connected) }
   }
 
-  @VisibleForTesting internal fun handleClusterChange() {
+  @VisibleForTesting internal fun checkAllLeases() {
     if (state.get() != State.RUNNING) return
 
     // Reconfirm whether we should hold any of the leases that we have
-    leases.values.forEach { lease ->
-      leaseCheckExecutor.submit {
-        lease.checkHeld()
-      }
-    }
+    leases.values.forEach { it.checkHeld() }
   }
 
   companion object {
