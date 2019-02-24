@@ -73,13 +73,25 @@ internal class DataSourceService(
     // https://dev.mysql.com/doc/connector-j/8.0/en/connector-j-reference-using-ssl.html
     if (!this.config.trust_certificate_key_store_url.isNullOrBlank()) {
       require(!this.config.trust_certificate_key_store_password.isNullOrBlank()) {
-        "must provide a trust_certificate_key_store_password"
+        "must provide a trust_certificate_key_store_password when providing trust_certificate_key_store_url"
       }
       config.dataSourceProperties["trustCertificateKeyStoreUrl"] =
           this.config.trust_certificate_key_store_url
       config.dataSourceProperties["trustCertificateKeyStorePassword"] =
           this.config.trust_certificate_key_store_password
       config.dataSourceProperties["verifyServerCertificate"] = "true"
+      config.dataSourceProperties["useSSL"] = "true"
+      config.dataSourceProperties["requireSSL"] = "true"
+    }
+
+    if (!this.config.client_certificate_key_store_url.isNullOrBlank()) {
+      require(!this.config.client_certificate_key_store_password.isNullOrBlank()) {
+        "must provide a client_certificate_key_store_password when providing client_certificate_key_store_url"
+      }
+      config.dataSourceProperties["clientCertificateKeyStoreUrl"] =
+          this.config.client_certificate_key_store_url
+      config.dataSourceProperties["clientCertificateKeyStorePassword"] =
+          this.config.client_certificate_key_store_password
       config.dataSourceProperties["useSSL"] = "true"
       config.dataSourceProperties["requireSSL"] = "true"
     }
