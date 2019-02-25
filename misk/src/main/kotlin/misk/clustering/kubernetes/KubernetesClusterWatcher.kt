@@ -36,7 +36,7 @@ internal class KubernetesClusterWatcher @Inject internal constructor(
   private val config: KubernetesConfig
 ) : AbstractIdleService(), DependentService {
   private val running = AtomicBoolean(false)
-  private val exceptionWatch = Stopwatch.createUnstarted()
+  private val watchFailedTimer = Stopwatch.createUnstarted()
 
   override val consumedKeys: Set<Key<*>> = setOf(keyOf<Cluster>())
   override val producedKeys: Set<Key<*>> = setOf()
@@ -82,6 +82,10 @@ internal class KubernetesClusterWatcher @Inject internal constructor(
                 null  // progressRequestListener
             ),
             podType)
+        // createWatch() throws an exception if the long poll fails. If we get here, it means
+        // the API client received a success response code from the server and the watch is in
+        // progress.
+        watchFailedTimer.reset()
 
         watch.use {
           for (response in watch) {
@@ -95,22 +99,21 @@ internal class KubernetesClusterWatcher @Inject internal constructor(
             response.applyTo(cluster)
           }
         }
-        exceptionWatch.reset()
       } catch (ex: Exception) {
         // This can occur if we have temporary connectivity glitches to the API server
-        if (!exceptionWatch.isRunning) {
-          exceptionWatch.start()
+        if (!watchFailedTimer.isRunning) {
+          watchFailedTimer.start()
         }
         val backoffDelay = connectBackoff.nextRetry()
-        if (exceptionWatch.elapsed(TimeUnit.SECONDS) > 60) {
+        if (watchFailedTimer.elapsed(TimeUnit.SECONDS) > 60) {
           // k8s uses long polling which can result in temporary connection issues. Only log errors
           // if the problems persist
           log.error(ex) {
             "connectivity lost to k8s for over 60 seconds; waiting ${backoffDelay.toMillis()}ms " +
                 "before retrying"
           }
-          exceptionWatch.reset()
-          exceptionWatch.start()
+          watchFailedTimer.reset()
+          watchFailedTimer.start()
         }
         Thread.sleep(backoffDelay.toMillis())
       }
