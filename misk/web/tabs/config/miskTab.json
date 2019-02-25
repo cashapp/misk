@@ -1,0 +1,8 @@
+{
+  "output_path": "lib/web/_tab/config",
+  "port": "3200",
+  "version": "latest",
+  "zipOnBuild": false,
+  "name": "Config",
+  "slug": "config"
+}
