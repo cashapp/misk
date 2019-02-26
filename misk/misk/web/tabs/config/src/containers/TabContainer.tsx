@@ -1,13 +1,9 @@
 import { OfflineComponent } from "@misk/core"
+import { simpleSelect } from "@misk/simpleredux"
 import * as React from "react"
 import { connect } from "react-redux"
 import { ConfigComponent } from "../components"
-import { dispatchConfig, IConfigState, IState } from "../ducks"
-
-interface ITabProps {
-  config: IConfigState
-  getAllConfig: (url: string) => void
-}
+import { IDispatchProps, IState, rootDispatcher, rootSelectors } from "../ducks"
 
 export interface IConfigResources {
   [name: string]: string
@@ -15,13 +11,16 @@ export interface IConfigResources {
 
 const apiUrl = "/api/config/all"
 
-class TabContainer extends React.Component<ITabProps, { children: any }> {
+class TabContainer extends React.Component<IState & IDispatchProps, IState> {
   componentDidMount() {
-    this.props.getAllConfig(apiUrl)
+    this.props.simpleNetworkGet("config", apiUrl)
   }
 
   render() {
-    const { error, resources, status } = this.props.config
+    const { error, resources, status } = simpleSelect(
+      this.props.simpleNetwork,
+      "config"
+    )
     if (resources) {
       return <ConfigComponent resources={resources} status={status} />
     } else {
@@ -36,12 +35,10 @@ class TabContainer extends React.Component<ITabProps, { children: any }> {
   }
 }
 
-const mapStateToProps = (state: IState) => ({
-  config: state.config.toJS()
-})
+const mapStateToProps = (state: IState) => rootSelectors(state)
 
 const mapDispatchToProps = {
-  getAllConfig: dispatchConfig.getAll
+  ...rootDispatcher
 }
 
 export default connect(

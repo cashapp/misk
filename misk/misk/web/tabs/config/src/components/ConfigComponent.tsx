@@ -1,6 +1,5 @@
 import * as React from "react"
 import styled from "styled-components"
-import { IConfigResources, IConfigState } from "../ducks"
 
 const Container = styled.div``
 
@@ -12,8 +11,18 @@ const ConfigCode = styled.code`
   font-family: Fira Code, Menlo;
 `
 
-export default class ConfigComponent extends React.PureComponent<IConfigState> {
-  renderConfig(resource: IConfigResources) {
+export interface IConfigResource {
+  name: string
+  file: string
+}
+
+export interface IConfigProps {
+  resources: string
+  status: string
+}
+
+export default class ConfigComponent extends React.PureComponent<IConfigProps> {
+  renderConfig(resource: IConfigResource) {
     return (
       <ConfigEntry>
         <h5>
