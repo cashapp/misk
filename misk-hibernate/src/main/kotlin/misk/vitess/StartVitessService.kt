@@ -41,7 +41,6 @@ import kotlin.concurrent.thread
 import kotlin.reflect.KClass
 import kotlin.streams.toList
 
-const val VITESS_VERSION = "sha256:3cef0e042dee2312e5e0d80c56a6bf1581b52063ad0441551241f6785b110c38"
 const val CONTAINER_NAME_PREFIX = "misk-vitess-testing"
 
 class Keyspace(val sharded: Boolean) {
@@ -195,7 +194,7 @@ class DockerVitessCluster(
     } else {
       StartVitessService.logger.info(
           "Starting Vitess cluster with command: ${cmd.joinToString(" ")}")
-      containerId = docker.createContainerCmd("vitess/base@$VITESS_VERSION")
+      containerId = docker.createContainerCmd("vitess/slim")
           .withCmd(cmd.toList())
           .withVolumes(schemaVolume)
           .withBinds(Bind(cluster.schemaDir.toAbsolutePath().toString(), schemaVolume))
@@ -381,7 +380,7 @@ class StartVitessService(
       // We need to do this outside of the service start up because this takes a really long time
       // the first time you do it and can cause service manager to time out.
       if (imagePulled.compareAndSet(false, true) &&
-          runCommand("docker pull vitess/base@$VITESS_VERSION") != 0) {
+          runCommand("docker pull vitess/slim") != 0) {
         logger.warn("Failed to pull Vitess docker image. Proceeding regardless.")
       }
       Runtime.getRuntime().addShutdownHook(Thread {
