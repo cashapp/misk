@@ -1,5 +1,4 @@
 apply from: rootProject.file("gradle/localdb.gradle")
-apply from: "https://raw.githubusercontent.com/square/misk-web/master/gradle/web.gradle"
 
 sourceSets {
   main.resources {
@@ -10,8 +9,6 @@ sourceSets {
     exclude '**/node_modules'
   }
 }
-
-jar.dependsOn web
 
 dependencies {
   compile dep.kotlinStdLib
