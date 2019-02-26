@@ -16,8 +16,8 @@ ext {
 
 apply from: file("./dependencies.gradle")
 
-if (rootProject.file("repositories.gradle").exists()) {
-  apply from: rootProject.file("repositories.gradle")
+if (rootProject.file("../repositories.gradle").exists()) {
+  apply from: rootProject.file("../repositories.gradle")
 }
 
 subprojects {
