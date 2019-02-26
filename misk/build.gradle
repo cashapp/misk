@@ -58,9 +58,3 @@ dependencies {
   testCompile dep.mockitoCore
   testCompile project(':misk-testing')
 }
-
-if (rootProject.file("../repositories.gradle").exists()) {
-  dependencies {
-    compile dep.miskWeb
-  }
-}
