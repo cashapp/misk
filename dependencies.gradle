@@ -48,7 +48,6 @@ ext.dep = [
   "logbackClassic": "ch.qos.logback:logback-classic:1.2.3",
   "logbackJsonCore": "ch.qos.logback.contrib:logback-json-core:0.1.5",
   "loggingApi": "io.github.microutils:kotlin-logging:1.4.9",
-  "miskWeb": "com.squareup.misk-web:misk-web:2019.02.25-5526a5b",
   "mockitoCore": "org.mockito:mockito-core:2.23.4",
   "moshi": "com.squareup.moshi:moshi-kotlin:1.8.0",
   "mysql": "mysql:mysql-connector-java:5.1.16",
