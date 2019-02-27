@@ -70,20 +70,6 @@ internal class DataSourceService(
       config.dataSourceProperties["maintainTimeStats"] = "false"
     }
 
-    // https://dev.mysql.com/doc/connector-j/8.0/en/connector-j-reference-using-ssl.html
-    if (!this.config.trust_certificate_key_store_url.isNullOrBlank()) {
-      require(!this.config.trust_certificate_key_store_password.isNullOrBlank()) {
-        "must provide a trust_certificate_key_store_password"
-      }
-      config.dataSourceProperties["trustCertificateKeyStoreUrl"] =
-          this.config.trust_certificate_key_store_url
-      config.dataSourceProperties["trustCertificateKeyStorePassword"] =
-          this.config.trust_certificate_key_store_password
-      config.dataSourceProperties["verifyServerCertificate"] = "true"
-      config.dataSourceProperties["useSSL"] = "true"
-      config.dataSourceProperties["requireSSL"] = "true"
-    }
-
     hikariDataSource = HikariDataSource(config)
     dataSource = decorate(hikariDataSource!!)
 
