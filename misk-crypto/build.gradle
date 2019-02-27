@@ -1,0 +1,14 @@
+buildscript {
+  dependencies {
+    classpath dep.kotlinNoArgPlugin
+  }
+}
+
+apply plugin: 'kotlin-jpa'
+
+dependencies {
+  compile dep.tink
+  compile project(':misk')
+
+  testCompile project(':misk-testing')
+}
