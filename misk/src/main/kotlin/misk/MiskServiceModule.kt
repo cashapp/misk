@@ -25,8 +25,10 @@ import misk.inject.KAbstractModule
 import misk.metrics.MetricsModule
 import misk.moshi.MoshiModule
 import misk.prometheus.PrometheusHistogramRegistryModule
+import misk.random.RandomModule
 import misk.resources.ResourceLoaderModule
 import misk.time.ClockModule
+import misk.time.TickerModule
 import misk.tokens.TokenGeneratorModule
 import javax.inject.Singleton
 
@@ -43,6 +45,8 @@ class MiskRealServiceModule : KAbstractModule() {
     install(RealEnvVarModule())
     install(ClockModule())
     install(SleeperModule())
+    install(TickerModule())
+    install(RandomModule())
     install(MiskCommonServiceModule())
   }
 }

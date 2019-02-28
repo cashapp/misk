@@ -9,5 +9,6 @@ dependencies {
   compile dep.okio
   compile dep.openTracingMock
   compile dep.mockitoCore
+  compile dep.guavaTestLib
   compile project(':misk')
 }

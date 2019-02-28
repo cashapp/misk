@@ -1,0 +1,17 @@
+package misk.random
+
+import javax.inject.Singleton
+
+/**
+ * Abstraction for Java's Random that allows for testing.
+ */
+@Singleton
+open class Random : java.util.Random()
+
+/**
+ * Abstraction for Java's ThreadLocalRandom that allows for testing.
+ */
+@Singleton
+open class ThreadLocalRandom {
+  open fun current() : java.util.Random = java.util.concurrent.ThreadLocalRandom.current()
+}
