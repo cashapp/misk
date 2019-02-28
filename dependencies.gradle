@@ -15,6 +15,7 @@ ext.dep = [
   "grpcProtobuf": "io.grpc:grpc-protobuf:1.14.0",
   "grpcStub": "io.grpc:grpc-stub:1.14.0",
   "guava": "com.google.guava:guava:23.6-jre",
+  "guavaTestLib": "com.google.guava:guava-testlib:23.6-jre",
   "guice": "com.google.inject:guice:4.2.2",
   "guiceMultibindings": "com.google.inject.extensions:guice-multibindings:4.2.2",
   "guiceServlet": "com.google.inject.extensions:guice-servlet:4.2.2",
