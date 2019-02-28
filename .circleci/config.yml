@@ -1,0 +1,37 @@
+version: 2.1
+jobs:
+  java:
+    working_directory: ~/misk
+    machine:
+      image: circleci/classic:201808-01
+    steps:
+      - checkout # check out source code to working directory
+      - run: docker run -p 3306:3306 -e MYSQL_ALLOW_EMPTY_PASSWORD=1 -d mysql:5.7
+      - run: ./gradlew test --parallel --scan --build-cache
+      - store_test_results:
+          path: build/test-results
+  node:
+    working_directory: ~/misk-web
+    docker:
+      - image: circleci/node:10.15
+    steps:
+      - checkout
+      - run: sudo npm install -g @misk/cli && miskweb ci-build -e
+
+workflows:
+  version: 2.1
+  commit:
+    jobs:
+      - java
+      - node
+  nightly:
+    triggers:
+      - schedule:
+          cron: "0 0 * * *"
+          filters:
+            branches:
+              only:
+                - master
+    jobs:
+      - java
+      - node

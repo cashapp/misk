@@ -22,4 +22,3 @@ matrix:
         - 10.15
       script:
         - npm install -g @misk/cli && miskweb ci-build -e
-          
