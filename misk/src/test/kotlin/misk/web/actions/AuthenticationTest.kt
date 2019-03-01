@@ -106,7 +106,7 @@ class AuthenticationTest {
           AccessAnnotationEntry<CustomServiceAccess>(services = listOf("payments")))
       multibind<AccessAnnotationEntry>().toInstance(
           AccessAnnotationEntry<CustomRoleAccess>(roles = listOf("admin")))
-      multibind<MiskCallerAuthenticator>().to<FakeCallerAuthenticator>()
+      bind<MiskCallerAuthenticator>().to<FakeCallerAuthenticator>()
     }
   }
 

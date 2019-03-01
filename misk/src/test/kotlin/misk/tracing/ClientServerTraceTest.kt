@@ -15,6 +15,8 @@ import misk.client.TypedHttpClientModule
 import misk.inject.KAbstractModule
 import misk.inject.getInstance
 import misk.inject.keyOf
+import misk.security.authz.FakeCallerAuthenticator
+import misk.security.authz.MiskCallerAuthenticator
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.testing.MockTracingBackendModule
@@ -172,6 +174,7 @@ internal class ClientServerTraceTest {
     override fun configure() {
       install(MockTracingBackendModule())
       install(WebTestingModule())
+      bind<MiskCallerAuthenticator>().to<FakeCallerAuthenticator>()
       multibind<WebActionEntry>().toInstance(WebActionEntry<ReturnADinosaurAction>())
       multibind<WebActionEntry>().toInstance(WebActionEntry<RoarLikeDinosaurAction>())
     }

@@ -95,7 +95,7 @@ class MetricsInterceptorTest {
     override fun configure() {
       install(AccessControlModule())
       install(WebTestingModule())
-      multibind<MiskCallerAuthenticator>().to<FakeCallerAuthenticator>()
+      bind<MiskCallerAuthenticator>().to<FakeCallerAuthenticator>()
       install(PrometheusHistogramRegistryModule())
       multibind<WebActionEntry>().toInstance(WebActionEntry<TestAction>())
     }

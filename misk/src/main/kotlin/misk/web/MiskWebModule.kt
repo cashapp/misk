@@ -66,7 +66,6 @@ class MiskWebModule : KAbstractModule() {
         bindSeedData(Request::class)
         bindSeedData(HttpServletRequest::class)
         bindProvider(miskCallerType, MiskCallerProvider::class)
-        newMultibinder<MiskCallerAuthenticator>()
       }
     })
 
@@ -145,12 +144,10 @@ class MiskWebModule : KAbstractModule() {
   }
 
   class MiskCallerProvider : ActionScopedProvider<MiskCaller?> {
-    @Inject lateinit var authenticators: List<MiskCallerAuthenticator>
+    @Inject lateinit var authenticator: MiskCallerAuthenticator
 
     override fun get(): MiskCaller? {
-      return authenticators.mapNotNull {
-        it.getAuthenticatedCaller()
-      }.firstOrNull()
+      return authenticator.getAuthenticatedCaller()
     }
   }
 

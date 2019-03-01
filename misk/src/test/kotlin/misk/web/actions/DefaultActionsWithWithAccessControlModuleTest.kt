@@ -14,7 +14,7 @@ internal class DefaultActionsWorkWithAccessControlModuleTest {
   val module = object : KAbstractModule() {
     override fun configure() {
       install(MiskTestingServiceModule())
-      multibind<MiskCallerAuthenticator>().to<ExampleAuthenticator>()
+      bind<MiskCallerAuthenticator>().to<ExampleAuthenticator>()
     }
   }
 
