@@ -68,12 +68,12 @@ class AdminDashboardModule(val environment: Environment) : KAbstractModule() {
     multibind<WebActionEntry>().toInstance(WebActionEntry<WebActionMetadataAction>())
     multibind<DashboardTab, AdminDashboardTab>().toInstance(DashboardTab(
         name = "Web Actions",
-        slug = "webactions",
-        url_path_prefix = "/_admin/webactions/"
+        slug = "web-actions",
+        url_path_prefix = "/_admin/web-actions/"
     ))
     install(WebTabResourceModule(
         environment = environment,
-        slug = "webactions",
+        slug = "web-actions",
         web_proxy_url = "http://localhost:3201/"
     ))
 
