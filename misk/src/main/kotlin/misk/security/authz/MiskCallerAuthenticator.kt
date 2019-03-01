@@ -13,6 +13,11 @@ import misk.MiskCaller
  * ```
  * multibind<MiskCallerAuthenticator>().to<MyAuthenticator>()
  * ```
+ *
+ * We allow binding up many authenticators in case applications would like to support
+ * alternative ways in which to authenticate requests. For example, one mechanism
+ * might leverage HTTP headers while another mechanism might leverage third party
+ * authentication services.
  */
 interface MiskCallerAuthenticator {
   fun getAuthenticatedCaller(): MiskCaller?
