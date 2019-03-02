@@ -47,7 +47,7 @@ class AdminDashboardModule(val environment: Environment) : KAbstractModule() {
         slug = "@misk",
         web_proxy_url = "http://localhost:9100/",
         url_path_prefix = "/@misk/",
-        resourcePath = "classpath:/web/@misk/"
+        resourcePath = "classpath:/web/_tab/loader/@misk/"
     ))
 
     // Config
