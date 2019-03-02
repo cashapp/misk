@@ -7,10 +7,13 @@
     "yarn": "YARN NO LONGER USED - use npm instead."
   },
   "scripts": {
-    "build": "cross-env NODE_ENV=development npm run-script lib",
-    "ci-build": "npm install && npm run-script clean && npm run-script prebuild && cross-env NODE_ENV=production npm run-script lib",
+    "build": "npm run-script lib ",
+    "ci-build": "npm install && npm run-script clean && npm run-script prebuild && cross-env NODE_ENV=production npm run-script lib ",
+    "dev-build": "npm run-script dev-lib ",
     "clean": "rm -rf demo lib",
-    "lib": "webpack",
+    "clean-build-files": "rm .hash package-lock.json package.json tsconfig.json tslint.json webpack.config.js",
+    "lib": "cross-env NODE_ENV=production webpack",
+    "dev-lib": "cross-env NODE_ENV=development webpack",
     "lint": "prettier --write --config package.json \".{/src/**/,/}*.{md,css,sass,less,json,js,jsx,ts,tsx}\"",
     "prebuild": "npm run-script lint",
     "reinstall": "rm -rf node_modules && npm run-script install",
@@ -19,13 +22,13 @@
     "zip": "tar --exclude='.DS_Store' --exclude='.old_build_files' --exclude='demo' --exclude='lib' --exclude='node_modules' --exclude='package-lock.json' --exclude='config.tgz' -czvf config.tgz ./"
   },
   "dependencies": {
-    "@misk/common": "^0.1.5-4",
-    "@misk/core": "^0.1.5-4",
-    "@misk/simpleredux": "^0.1.5-4"
+    "@misk/common": "0.1.5-4",
+    "@misk/core": "0.1.5-4",
+    "@misk/simpleredux": "0.1.5-4"
   },
   "devDependencies": {
-    "@misk/dev": "^0.1.5-4",
-    "@misk/tslint": "^0.1.5-4"
+    "@misk/dev": "0.1.5-4",
+    "@misk/tslint": "0.1.5-4"
   },
   "prettier": {
     "arrowParens": "avoid",
