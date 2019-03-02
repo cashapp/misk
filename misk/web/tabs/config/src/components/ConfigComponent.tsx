@@ -1,3 +1,4 @@
+import { H1 } from "@blueprintjs/core"
 import * as React from "react"
 import styled from "styled-components"
 
@@ -37,7 +38,7 @@ export default class ConfigComponent extends React.PureComponent<IConfigProps> {
     const { resources, status } = this.props
     return (
       <Container>
-        <h1>Config</h1>
+        <H1>Config</H1>
         <p>{status}</p>
         {resources &&
           Object.entries(resources).map(([name, file]) =>
