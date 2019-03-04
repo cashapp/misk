@@ -1,8 +1,8 @@
 {
   "output_path": "lib/web/_tab/web-actions",
   "port": "3201",
-  "version": "latest",
-  "zipOnBuild": true,
+  "version": "0.1.5-14",
+  "zipOnBuild": false,
   "name": "Web Actions",
   "slug": "web-actions"
 }
