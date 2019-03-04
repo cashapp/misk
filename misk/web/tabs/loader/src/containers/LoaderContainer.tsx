@@ -1,7 +1,7 @@
+import { Spinner } from "@blueprintjs/core"
 import {
   IDashboardTab,
   Navbar,
-  OfflineComponent,
   ResponsiveContainer,
   TabLoaderComponent
 } from "@misk/core"
@@ -43,13 +43,6 @@ class LoaderContainer extends React.Component<IState & IDispatchProps> {
       "serviceMetadata",
       "serviceMetadata"
     )
-    let unavailableEndpointUrls = ""
-    if (!adminDashboardTabs) {
-      unavailableEndpointUrls += tabsUrl + " "
-    }
-    if (!serviceMetadata) {
-      unavailableEndpointUrls += serviceUrl + " "
-    }
     if (adminDashboardTabs && serviceMetadata) {
       return (
         <span>
@@ -71,10 +64,7 @@ class LoaderContainer extends React.Component<IState & IDispatchProps> {
         <span>
           <Navbar />
           <TabContainer>
-            <OfflineComponent
-              title={"Error Loading Multibound Admin Tabs"}
-              endpoint={unavailableEndpointUrls}
-            />
+            <Spinner />
           </TabContainer>
         </span>
       )

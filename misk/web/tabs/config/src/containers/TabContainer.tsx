@@ -1,4 +1,4 @@
-import { OfflineComponent } from "@misk/core"
+import { Spinner } from "@blueprintjs/core"
 import { simpleSelect } from "@misk/simpleredux"
 import * as React from "react"
 import { connect } from "react-redux"
@@ -17,20 +17,14 @@ class TabContainer extends React.Component<IState & IDispatchProps, IState> {
   }
 
   render() {
-    const { error, resources, status } = simpleSelect(
+    const { resources, status } = simpleSelect(
       this.props.simpleNetwork,
       "config"
     )
     if (resources) {
       return <ConfigComponent resources={resources} status={status} />
     } else {
-      return (
-        <OfflineComponent
-          error={error}
-          title={"Error Loading Config Data"}
-          endpoint={apiUrl}
-        />
-      )
+      return <Spinner />
     }
   }
 }

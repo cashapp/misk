@@ -6,9 +6,9 @@ import {
   Intent,
   Menu,
   MenuItem,
+  Spinner,
   Tag,
-  Tooltip,
-  Spinner
+  Tooltip
 } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
 import { FlexContainer } from "@misk/core"
@@ -206,7 +206,6 @@ export const WebAction = (props: { action: IWebAction }) => {
 }
 
 export const WebActions = (props: { metadata: IWebAction[] }) => {
-  console.log(props)
   if (props.metadata) {
     return (
       <div>
