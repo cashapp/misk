@@ -2,10 +2,11 @@ package misk.tokens
 
 import misk.tokens.TokenGenerator.Companion.canonicalize
 import java.util.concurrent.atomic.AtomicLong
+import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-internal class FakeTokenGenerator : TokenGenerator {
+internal class FakeTokenGenerator @Inject constructor(): TokenGenerator {
   internal val nextByLabel = mutableMapOf<String, AtomicLong>()
 
   override fun generate(label: String?, length: Int): String {

@@ -7,6 +7,7 @@ import com.squareup.moshi.Moshi
 import com.squareup.wire.Message
 import com.squareup.wire.WireField
 import java.lang.reflect.Type
+import javax.inject.Inject
 
 /** Json marshaling for Wire messages, correctly using Builders to construct properly formed type */
 internal class WireMessageAdapter(
@@ -69,7 +70,7 @@ internal class WireMessageAdapter(
     else -> true
   }
 
-  class Factory : JsonAdapter.Factory {
+  class Factory @Inject constructor(): JsonAdapter.Factory {
     override fun create(
       type: Type,
       annotations: Set<Annotation>,

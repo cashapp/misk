@@ -49,14 +49,14 @@ internal class JsonRequestTest {
     assertThat(post("/as-byte-string", Packet("foo")).message).isEqualTo("foo as-byte-string")
   }
 
-  class PassAsObject : WebAction {
+  class PassAsObject @Inject constructor(): WebAction {
     @Post("/as-object")
     @RequestContentType(MediaTypes.APPLICATION_JSON)
     @ResponseContentType(MediaTypes.APPLICATION_JSON)
     fun call(@RequestBody packet: Packet) = Packet("${packet.message} as-object")
   }
 
-  class PassAsString : WebAction {
+  class PassAsString @Inject constructor(): WebAction {
     @Inject lateinit var moshi: Moshi
     private val packetJsonAdapter get() = moshi.adapter(Packet::class.java)
 
@@ -69,7 +69,7 @@ internal class JsonRequestTest {
     }
   }
 
-  class PassAsByteString : WebAction {
+  class PassAsByteString @Inject constructor(): WebAction {
     @Inject lateinit var moshi: Moshi
     private val packetJsonAdapter get() = moshi.adapter(Packet::class.java)
 

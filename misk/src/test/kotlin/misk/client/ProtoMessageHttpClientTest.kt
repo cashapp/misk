@@ -58,7 +58,7 @@ class ProtoMessageHttpClientTest {
     ))
   }
 
-  class ReturnADinosaur : WebAction {
+  class ReturnADinosaur @Inject constructor() : WebAction {
     @Post("/cooldinos")
     @RequestContentType(MediaTypes.APPLICATION_JSON)
     @ResponseContentType(MediaTypes.APPLICATION_JSON)

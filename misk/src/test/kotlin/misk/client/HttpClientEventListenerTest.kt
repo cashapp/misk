@@ -68,7 +68,7 @@ internal class HttpClientEventListenerTest {
   }
 
   @Singleton
-  class TestEventListener : EventListener() {
+  class TestEventListener @Inject constructor(): EventListener() {
     private var started = false
     override fun connectStart(call: Call, inetSocketAddress: InetSocketAddress, proxy: Proxy) {
       started = true

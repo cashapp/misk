@@ -4,7 +4,6 @@ import com.google.inject.util.Modules
 import misk.MiskTestingServiceModule
 import misk.grpc.miskclient.MiskGrpcClientModule
 import misk.grpc.protocserver.RouteGuideProtocServiceModule
-import misk.security.ssl.SslModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
@@ -20,7 +19,6 @@ class MiskClientProtocServerTest {
   val module = Modules.combine(
       MiskGrpcClientModule(),
       RouteGuideProtocServiceModule(),
-      SslModule(),
       MiskTestingServiceModule())
 
   @Inject lateinit var grpcClientProvider: Provider<GrpcClient>

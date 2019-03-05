@@ -67,7 +67,7 @@ internal class TypedHttpClientTest {
     fun getDinosaur(@Body request: Dinosaur): Call<Dinosaur>
   }
 
-  class ReturnADinosaurAction : WebAction {
+  class ReturnADinosaurAction @Inject constructor() : WebAction {
     @Post("/cooldinos")
     @RequestContentType(MediaTypes.APPLICATION_JSON)
     @ResponseContentType(MediaTypes.APPLICATION_JSON)
@@ -83,7 +83,7 @@ internal class TypedHttpClientTest {
     fun getDinosaur(@Body request: Dinosaur): Call<Dinosaur>
   }
 
-  class ReturnAProtoDinosaurAction : WebAction {
+  class ReturnAProtoDinosaurAction @Inject constructor() : WebAction {
     @Post("/protodinos")
     @RequestContentType(MediaTypes.APPLICATION_PROTOBUF)
     @ResponseContentType(MediaTypes.APPLICATION_PROTOBUF)

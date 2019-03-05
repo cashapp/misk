@@ -53,7 +53,7 @@ internal class PathParamDispatchTest {
     }
   }
 
-  class GetObjectDetails : WebAction {
+  class GetObjectDetails @Inject constructor() : WebAction {
     @Get("/objects/{resourceType}/{name}/{version}")
     @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
     fun getObjectDetails(
@@ -63,7 +63,7 @@ internal class PathParamDispatchTest {
     ): String = "(type=$resourceType,name=$name,version=$version)"
   }
 
-  class CustomPathParamName : WebAction {
+  class CustomPathParamName @Inject constructor() : WebAction {
     @Get("/{router}")
     @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
     fun router(@PathParam("router") routeName: String) = "routing to $routeName"

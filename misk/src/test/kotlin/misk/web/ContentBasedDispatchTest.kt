@@ -107,55 +107,55 @@ internal class ContentBasedDispatchTest {
     }
   }
 
-  class PostJsonReturnJson : WebAction {
+  class PostJsonReturnJson @Inject constructor() : WebAction {
     @Post("/hello")
     @RequestContentType("application/json")
     @ResponseContentType("application/json")
     fun hello(@misk.web.RequestBody request: Packet) = Packet("json->json ${request.message}")
   }
 
-  class PostPlainTextReturnJson : WebAction {
+  class PostPlainTextReturnJson @Inject constructor() : WebAction {
     @Post("/hello")
     @RequestContentType("text/plain")
     @ResponseContentType("application/json")
     fun hello(@misk.web.RequestBody message: String) = Packet("text->json $message")
   }
 
-  class PostPlainTextReturnPlainText : WebAction {
+  class PostPlainTextReturnPlainText @Inject constructor() : WebAction {
     @Post("/hello")
     @RequestContentType("text/plain")
     @ResponseContentType("text/plain")
     fun hello(@misk.web.RequestBody message: String) = "text->text $message"
   }
 
-  class PostAnyTextReturnPlainText : WebAction {
+  class PostAnyTextReturnPlainText @Inject constructor() : WebAction {
     @Post("/hello")
     @RequestContentType("text/*")
     @ResponseContentType("text/plain")
     fun hello(@misk.web.RequestBody message: String) = "text*->text $message"
   }
 
-  class PostPlainTextReturnAnyText : WebAction {
+  class PostPlainTextReturnAnyText @Inject constructor() : WebAction {
     @Post("/hello")
     @RequestContentType("text/plain")
     @ResponseContentType("text/*")
     fun hello(@misk.web.RequestBody message: String) = "text->text* $message"
   }
 
-  class PostJsonReturnPlainText : WebAction {
+  class PostJsonReturnPlainText @Inject constructor() : WebAction {
     @Post("/hello")
     @RequestContentType("application/json")
     @ResponseContentType("text/plain")
     fun hello(@misk.web.RequestBody request: Packet) = "json->text ${request.message}"
   }
 
-  class PostAnythingReturnJson : WebAction {
+  class PostAnythingReturnJson @Inject constructor() : WebAction {
     @Post("/hello")
     @ResponseContentType("application/json")
     fun hello(@misk.web.RequestBody message: String) = Packet("*->json $message")
   }
 
-  class PostAnythingReturnAnything : WebAction {
+  class PostAnythingReturnAnything @Inject constructor() : WebAction {
     @Post("/hello")
     fun hello(@misk.web.RequestBody message: String) = "*->* $message"
   }

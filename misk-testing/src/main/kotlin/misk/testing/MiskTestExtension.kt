@@ -18,8 +18,8 @@ internal class MiskTestExtension : BeforeEachCallback, AfterEachCallback {
   override fun beforeEach(context: ExtensionContext) {
     val module = object : KAbstractModule() {
       override fun configure() {
-        binder().requireExplicitBindings()
-        
+        binder().requireAtInjectOnConstructors()
+
         if (context.startService()) {
           multibind<BeforeEachCallback>().to<StartServicesBeforeEach>()
           multibind<AfterEachCallback>().to<StopServicesAfterEach>()
@@ -50,7 +50,7 @@ internal class MiskTestExtension : BeforeEachCallback, AfterEachCallback {
     uninject(context.requiredTestInstance)
   }
 
-  class StartServicesBeforeEach : BeforeEachCallback {
+  class StartServicesBeforeEach @Inject constructor(): BeforeEachCallback {
     @Inject
     lateinit var serviceManager: ServiceManager
 
@@ -61,7 +61,7 @@ internal class MiskTestExtension : BeforeEachCallback, AfterEachCallback {
     }
   }
 
-  class StopServicesAfterEach : AfterEachCallback {
+  class StopServicesAfterEach @Inject constructor(): AfterEachCallback {
     @Inject
     lateinit var serviceManager: ServiceManager
 
@@ -75,7 +75,7 @@ internal class MiskTestExtension : BeforeEachCallback, AfterEachCallback {
 
   /** We inject after starting services and uninject after stopping services. */
   @Singleton
-  class InjectUninject : BeforeEachCallback, AfterEachCallback {
+  class InjectUninject @Inject constructor() : BeforeEachCallback, AfterEachCallback {
     override fun beforeEach(context: ExtensionContext) {
       val injector = context.retrieve<Injector>("injector")
       injector.injectMembers(context.requiredTestInstance)
@@ -86,14 +86,10 @@ internal class MiskTestExtension : BeforeEachCallback, AfterEachCallback {
     }
   }
 
-  class Callbacks : BeforeEachCallback, AfterEachCallback {
-    @Inject
-    @JvmSuppressWildcards
-    lateinit var beforeEachCallbacks: Set<BeforeEachCallback>
-
-    @Inject
-    @JvmSuppressWildcards
-    lateinit var afterEachCallbacks: Set<AfterEachCallback>
+  class Callbacks @Inject constructor(
+    private val beforeEachCallbacks: Set<BeforeEachCallback>,
+    private val afterEachCallbacks: Set<AfterEachCallback>
+  ) : BeforeEachCallback, AfterEachCallback {
 
     override fun afterEach(context: ExtensionContext) {
       afterEachCallbacks.forEach { it.afterEach(context) }

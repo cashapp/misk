@@ -6,7 +6,6 @@ import misk.inject.asSingleton
 
 class InMemoryFlagStoreModule : KAbstractModule() {
   override fun configure() {
-    bind<InMemoryFlagStore>().asSingleton()
     bind<FlagStore>().to<InMemoryFlagStore>()
   }
 }

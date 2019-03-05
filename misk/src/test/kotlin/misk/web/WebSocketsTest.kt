@@ -45,7 +45,7 @@ internal class WebSocketsTest {
   }
 
   @Singleton
-  class EchoWebSocket : WebAction {
+  class EchoWebSocket @Inject constructor() : WebAction {
     @ConnectWebSocket("/echo")
     fun echo(@Suppress("UNUSED_PARAMETER") webSocket: WebSocket): WebSocketListener {
       return object : WebSocketListener() {

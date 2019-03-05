@@ -10,7 +10,7 @@ import misk.web.mediatype.MediaTypes
 import javax.inject.Singleton
 
 @Singleton
-class HelloWebPostAction : WebAction {
+class HelloWebPostAction @Inject constructor() : WebAction {
   @Post("/hello/{name}")
   @RequestContentType(MediaTypes.APPLICATION_JSON)
   @ResponseContentType(MediaTypes.APPLICATION_JSON)

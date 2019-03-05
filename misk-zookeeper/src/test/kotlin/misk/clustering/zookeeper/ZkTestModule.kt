@@ -19,23 +19,24 @@ import misk.tasks.DelayedTask
 import misk.tasks.RepeatedTaskQueue
 import misk.zookeeper.ZkClientFactory
 import java.time.Clock
+import javax.inject.Inject
 import javax.inject.Singleton
 
 internal class ZkTestModule : KAbstractModule() {
   override fun configure() {
     val keystorePath = this::class.java.getResource("/zookeeper/keystore.jks").path
     val truststrorePath = this::class.java.getResource("/zookeeper/truststore.jks").path
-    bind<ZookeeperConfig>().toInstance(ZookeeperConfig(
-        zk_connect = "127.0.0.1:$zkPortKey",
-        cert_store = CertStoreConfig(keystorePath, "changeit", FORMAT_JKS),
-        trust_store = TrustStoreConfig(truststrorePath, "changeit", FORMAT_JKS)))
     bind<String>().annotatedWith<AppName>().toInstance("my-app")
 
     bind<ZkLeaseManager>()
     bind<ZkClientFactory>()
     multibind<Service>().to<StartZookeeperService>()
     install(FakeClusterModule())
-    install(Modules.override(ZookeeperModule()).with(object : KAbstractModule() {
+    install(Modules.override(ZookeeperModule(ZookeeperConfig(
+        zk_connect = "127.0.0.1:$zkPortKey",
+        cert_store = CertStoreConfig(keystorePath, "changeit", FORMAT_JKS),
+        trust_store = TrustStoreConfig(truststrorePath, "changeit", FORMAT_JKS))))
+        .with(object : KAbstractModule() {
       override fun configure() {}
 
       @Provides @ForZkLease
@@ -52,7 +53,7 @@ internal class ZkTestModule : KAbstractModule() {
   }
 
   @Singleton
-  class StartZookeeperService : CachedTestService(), DependentService {
+  class StartZookeeperService @Inject constructor(): CachedTestService(), DependentService {
     override val consumedKeys: Set<Key<*>> = setOf()
     override val producedKeys: Set<Key<*>> = setOf(startZkServiceKey)
 

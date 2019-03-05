@@ -10,8 +10,9 @@ class WebActionModule<A : WebAction> private constructor(
   val url_path_prefix: String
 ) : KAbstractModule() {
   override fun configure() {
-    bind(actionClass.java)
     multibind<WebActionEntry>().toInstance(WebActionEntry(actionClass, url_path_prefix))
+    // Ensures that the action has an @Inject annotation and that its dependencies are satisfied
+    getProvider(actionClass.java)
   }
 
   companion object {

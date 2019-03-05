@@ -11,10 +11,11 @@ import misk.web.ResponseContentType
 import misk.web.mediatype.MediaTypes
 import misk.web.toResponseBody
 import okhttp3.Headers
+import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class NotFoundAction : WebAction {
+class NotFoundAction @Inject constructor(): WebAction {
   @Get("/{path:.*}")
   @Post("/{path:.*}")
   @RequestContentType(MediaTypes.ALL)

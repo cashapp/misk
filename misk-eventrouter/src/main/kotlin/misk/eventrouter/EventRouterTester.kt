@@ -2,7 +2,7 @@ package misk.eventrouter
 
 import javax.inject.Inject
 
-class EventRouterTester {
+class EventRouterTester @Inject constructor() {
   @Inject private lateinit var fakeClusterConnector: FakeClusterConnector
 
   @Inject

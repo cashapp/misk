@@ -22,7 +22,7 @@ private val logger = getLogger<TracingInterceptor>()
 internal class TracingInterceptor internal constructor(private val tracer: Tracer) :
     NetworkInterceptor {
   @Singleton
-  class Factory : NetworkInterceptor.Factory {
+  class Factory @Inject constructor(): NetworkInterceptor.Factory {
     @Inject(optional = true) var tracer: Tracer? = null
 
     // NOTE(nb): returning null ensures interceptor is filtered out when generating interceptors to

@@ -57,7 +57,7 @@ internal class QueryStringRequestTest {
     TWO
   }
 
-  class BasicParamsAction : WebAction {
+  class BasicParamsAction @Inject constructor() : WebAction {
     @Get("/basic-params")
     fun call(
       @QueryParam str: String,
@@ -67,12 +67,12 @@ internal class QueryStringRequestTest {
     ) = "$str $other $int $testEnum basic-params"
   }
 
-  class OptionalParamsAction : WebAction {
+  class OptionalParamsAction @Inject constructor() : WebAction {
     @Get("/optional-params")
     fun call(@QueryParam str: String?, @QueryParam int: Int?) = "$str $int optional-params"
   }
 
-  class DefaultParamsAction : WebAction {
+  class DefaultParamsAction @Inject constructor() : WebAction {
     @Get("/default-params")
     fun call(
       @QueryParam str: String = "square",
@@ -81,7 +81,7 @@ internal class QueryStringRequestTest {
     ) = "$str $int $testEnum default-params"
   }
 
-  class ListParamsAction : WebAction {
+  class ListParamsAction @Inject constructor() : WebAction {
     @Get("/list-params")
     @ResponseContentType(MediaTypes.APPLICATION_JSON)
     fun call(@QueryParam strs: List<String>, @QueryParam ints: List<Int>) = "${strs.joinToString(

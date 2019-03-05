@@ -100,7 +100,7 @@ internal class JettyServiceMetricsTest {
     assertThat(metrics.utilization_max).isCloseTo(0.5, Percentage.withPercentage(10.0))
   }
 
-  internal class HelloAction : WebAction {
+  internal class HelloAction @Inject constructor() : WebAction {
     @Get("/hello")
     @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
     fun hi(): String {
@@ -115,7 +115,7 @@ internal class JettyServiceMetricsTest {
     val utilization_max: Double
   )
 
-  internal class CurrentPoolMetricsAction : WebAction {
+  internal class CurrentPoolMetricsAction @Inject constructor() : WebAction {
     @Inject lateinit var threadPoolMetrics: ThreadPoolMetrics
 
     @Get("/current-pool-metrics")

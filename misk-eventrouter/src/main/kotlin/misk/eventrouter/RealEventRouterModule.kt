@@ -56,7 +56,6 @@ class RealEventRouterModule(val environment: Environment) : KAbstractModule() {
  * not run multiple enqueued tasks concurrently! Instead it should have exactly 1 thread always.
  */
 @Qualifier
-@Retention(AnnotationRetention.RUNTIME)
 @Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION)
 internal annotation class ForEventRouterActions
 
@@ -65,11 +64,9 @@ internal annotation class ForEventRouterActions
  * onClose).
  */
 @Qualifier
-@Retention(AnnotationRetention.RUNTIME)
 @Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION)
 internal annotation class ForEventRouterSubscribers
 
 @Qualifier
-@Retention(AnnotationRetention.RUNTIME)
 @Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION)
 internal annotation class ForKubernetesWatching

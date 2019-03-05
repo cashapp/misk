@@ -7,12 +7,13 @@ import misk.web.NetworkInterceptor
 import misk.web.Response
 import misk.web.toResponseBody
 import okhttp3.Headers
+import javax.inject.Inject
 import javax.inject.Singleton
 
 private val logger = getLogger<InternalErrorInterceptorFactory>()
 
 @Singleton
-class InternalErrorInterceptorFactory : NetworkInterceptor.Factory {
+class InternalErrorInterceptorFactory @Inject constructor(): NetworkInterceptor.Factory {
   override fun create(action: Action): NetworkInterceptor? {
     return INTERCEPTOR
   }

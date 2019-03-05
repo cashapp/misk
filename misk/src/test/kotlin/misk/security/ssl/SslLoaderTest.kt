@@ -1,6 +1,5 @@
 package misk.security.ssl
 
-import com.google.inject.util.Modules
 import misk.MiskTestingServiceModule
 import misk.security.ssl.SslLoader.Companion.FORMAT_JCEKS
 import misk.security.ssl.SslLoader.Companion.FORMAT_JKS
@@ -15,7 +14,7 @@ import javax.inject.Inject
 @MiskTest
 internal class SslLoaderTest {
   @MiskTestModule
-  val module = Modules.combine(SslModule(), MiskTestingServiceModule())
+  val module = MiskTestingServiceModule()
 
   val clientComboPemPath = "classpath:/ssl/client_cert_key_combo.pem"
   val clientTrustPemPath = "classpath:/ssl/client_cert.pem"
@@ -70,7 +69,8 @@ internal class SslLoaderTest {
   @Test
   fun loadKeystoreFromJKS() {
     val keystore = sslLoader.loadCertStore(keystoreJksPath, FORMAT_JKS, "changeit")!!.keyStore
-    assertThat(keystore.aliasesOfType<KeyStore.PrivateKeyEntry>()).containsExactly("combined-key-cert")
+    assertThat(keystore.aliasesOfType<KeyStore.PrivateKeyEntry>()).containsExactly(
+        "combined-key-cert")
     assertThat(keystore.getPrivateKey("changeit".toCharArray())).isNotNull()
 
     assertThat((keystore.getX509Certificate()).issuerX500Principal.name)

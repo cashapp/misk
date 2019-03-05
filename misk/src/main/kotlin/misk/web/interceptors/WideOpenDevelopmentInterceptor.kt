@@ -18,7 +18,7 @@ internal class WideOpenDevelopmentInterceptor : NetworkInterceptor {
   }
 }
 
-internal class WideOpenDevelopmentInterceptorFactory : NetworkInterceptor.Factory {
+internal class WideOpenDevelopmentInterceptorFactory @Inject constructor(): NetworkInterceptor.Factory {
   @Inject lateinit var wideOpenDevelopmentInterceptor: WideOpenDevelopmentInterceptor
   @Inject lateinit var environment: Environment
 

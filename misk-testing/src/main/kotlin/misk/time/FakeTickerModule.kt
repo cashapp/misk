@@ -7,6 +7,6 @@ import misk.inject.KAbstractModule
 class FakeTickerModule : KAbstractModule() {
   override fun configure() {
     bind<Ticker>().to<FakeTicker>()
-    bind<FakeTicker>().asEagerSingleton()
+    bind<FakeTicker>().toInstance(FakeTicker())
   }
 }

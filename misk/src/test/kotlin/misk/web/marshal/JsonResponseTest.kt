@@ -72,49 +72,49 @@ internal class JsonResponseTest {
     assertThat(get("/response/as-wrapped-response-body").message).isEqualTo("as-response-body")
   }
 
-  class ReturnAsObject : WebAction {
+  class ReturnAsObject @Inject constructor(): WebAction {
     @Get("/response/as-object")
     @ResponseContentType(MediaTypes.APPLICATION_JSON)
     fun call() = Packet("as-object")
   }
 
-  class ReturnAsString : WebAction {
+  class ReturnAsString @Inject constructor(): WebAction {
     @Get("/response/as-string")
     @ResponseContentType(MediaTypes.APPLICATION_JSON)
     fun call() = "{\"message\":\"as-string\"}"
   }
 
-  class ReturnAsByteString : WebAction {
+  class ReturnAsByteString @Inject constructor(): WebAction {
     @Get("/response/as-byte-string")
     @ResponseContentType(MediaTypes.APPLICATION_JSON)
     fun call(): ByteString = "{\"message\":\"as-byte-string\"}".encodeUtf8()
   }
 
-  class ReturnAsResponseBody : WebAction {
+  class ReturnAsResponseBody @Inject constructor(): WebAction {
     @Get("/response/as-response-body")
     @ResponseContentType(MediaTypes.APPLICATION_JSON)
     fun call() = "{\"message\":\"as-response-body\"}".toResponseBody()
   }
 
-  class ReturnAsObjectResponse : WebAction {
+  class ReturnAsObjectResponse @Inject constructor(): WebAction {
     @Get("/response/as-wrapped-object")
     @ResponseContentType(MediaTypes.APPLICATION_JSON)
     fun call() = Response(Packet("as-object"))
   }
 
-  class ReturnAsStringResponse : WebAction {
+  class ReturnAsStringResponse @Inject constructor(): WebAction {
     @Get("/response/as-wrapped-string")
     @ResponseContentType(MediaTypes.APPLICATION_JSON)
     fun call() = Response("{\"message\":\"as-string\"}")
   }
 
-  class ReturnAsByteStringResponse : WebAction {
+  class ReturnAsByteStringResponse @Inject constructor(): WebAction {
     @Get("/response/as-wrapped-byte-string")
     @ResponseContentType(MediaTypes.APPLICATION_JSON)
     fun call() = Response("""{"message":"as-byte-string"}""".encodeUtf8())
   }
 
-  class ReturnAsResponseBodyResponse : WebAction {
+  class ReturnAsResponseBodyResponse @Inject constructor(): WebAction {
     @Get("/response/as-wrapped-response-body")
     @ResponseContentType(MediaTypes.APPLICATION_JSON)
     fun call() = Response("""{"message":"as-response-body"}""".encodeUtf8())

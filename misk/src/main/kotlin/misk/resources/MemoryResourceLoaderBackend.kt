@@ -4,6 +4,7 @@ import okio.Buffer
 import okio.BufferedSource
 import okio.ByteString
 import java.util.TreeMap
+import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
@@ -13,7 +14,7 @@ import javax.inject.Singleton
  * This uses the scheme `memory:`.
  */
 @Singleton
-internal class MemoryResourceLoaderBackend : ResourceLoader.Backend() {
+internal class MemoryResourceLoaderBackend @Inject constructor(): ResourceLoader.Backend() {
   private val resources = TreeMap<String, ByteString>()
 
   override fun open(path: String): BufferedSource? {

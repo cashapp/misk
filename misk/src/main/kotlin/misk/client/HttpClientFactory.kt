@@ -10,9 +10,10 @@ import javax.inject.Singleton
 import javax.net.ssl.X509TrustManager
 
 @Singleton
-class HttpClientFactory {
-  @Inject lateinit var sslLoader: SslLoader
-  @Inject lateinit var sslContextFactory: SslContextFactory
+class HttpClientFactory @Inject constructor(
+  private val sslLoader: SslLoader,
+  private val sslContextFactory: SslContextFactory
+) {
   @com.google.inject.Inject(optional = true) lateinit var envoyClientEndpointProvider: EnvoyClientEndpointProvider
 
   /** Returns a client initialized based on `config`. */

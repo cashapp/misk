@@ -97,7 +97,7 @@ internal class FormValueParameterTest {
     TWO
   }
 
-  class BasicParamsAction : WebAction {
+  class BasicParamsAction @Inject constructor() : WebAction {
     @Post("/basic-params")
     fun call(@FormValue basicForm: BasicForm) = "$basicForm"
 
@@ -109,7 +109,7 @@ internal class FormValueParameterTest {
     )
   }
 
-  class OptionalParamsAction : WebAction {
+  class OptionalParamsAction @Inject constructor() : WebAction {
     @Post("/optional-params")
     fun call(@FormValue optionalForm: OptionalForm) = "$optionalForm"
 
@@ -119,7 +119,7 @@ internal class FormValueParameterTest {
     )
   }
 
-  class DefaultParamsAction : WebAction {
+  class DefaultParamsAction @Inject constructor() : WebAction {
     @Post("/default-params")
     fun call(@FormValue defaultForm: DefaultForm) = "$defaultForm"
 
@@ -130,7 +130,7 @@ internal class FormValueParameterTest {
     )
   }
 
-  class ListParamsAction : WebAction {
+  class ListParamsAction @Inject constructor() : WebAction {
     @Post("/list-params")
     fun call(@FormValue listForm: ListForm) = "$listForm"
 
@@ -140,7 +140,7 @@ internal class FormValueParameterTest {
     )
   }
 
-  class FormValueAnnotationAction : WebAction {
+  class FormValueAnnotationAction @Inject constructor() : WebAction {
     @Post("/form-value-annotation")
     fun call(@FormValue annotationForm: AnnotationForm) = "$annotationForm"
 

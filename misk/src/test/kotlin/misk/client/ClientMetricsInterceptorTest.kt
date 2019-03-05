@@ -96,7 +96,7 @@ internal class ClientMetricsInterceptorTest {
     fun ping(@Body request: AppRequest): Call<AppResponse>
   }
 
-  class PingAction : WebAction {
+  class PingAction @Inject constructor() : WebAction {
     @Post("/ping")
     @RequestContentType(MediaTypes.APPLICATION_JSON)
     @ResponseContentType(MediaTypes.APPLICATION_JSON)

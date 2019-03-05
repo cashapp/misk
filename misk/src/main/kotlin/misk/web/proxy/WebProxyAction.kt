@@ -103,7 +103,7 @@ class WebProxyAction @Inject constructor(
  * https://github.com/google/guice/wiki/FrequentlyAskedQuestions#how-can-i-inject-optional-parameters-into-a-constructor
  */
 @Singleton
-class OptionalBinder {
+class OptionalBinder @Inject constructor() {
   @Inject(optional = true)
   @field:Named("web_proxy_action")
   var proxyClient: OkHttpClient = OkHttpClient()

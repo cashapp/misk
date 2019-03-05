@@ -2,11 +2,12 @@ package misk.tokens
 
 import misk.tokens.TokenGenerator.Companion.indexToChar
 import java.security.SecureRandom
+import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.experimental.and
 
 @Singleton
-internal class RealTokenGenerator : TokenGenerator {
+internal class RealTokenGenerator @Inject constructor(): TokenGenerator {
   private val random = SecureRandom()
 
   override fun generate(label: String?, length: Int): String {

@@ -29,31 +29,31 @@ internal class DeterministicRoutingTest {
     assertThat(get("/org/unknown/caller/deep/path")).isEqualTo("whole-path")
   }
 
-  class SpecificPathAction : WebAction {
+  class SpecificPathAction @Inject constructor(): WebAction {
     @Get("/org/admin/users")
     @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
     fun handle() = "specific-path-action"
   }
 
-  class SubsectionAction : WebAction {
+  class SubsectionAction @Inject constructor(): WebAction {
     @Get("/org/admin/{subsection}")
     @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
     fun handle() = "subsection-action"
   }
 
-  class SectionAction : WebAction {
+  class SectionAction @Inject constructor(): WebAction {
     @Get("/org/{section}/{subsection}")
     @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
     fun handle() = "section-action"
   }
 
-  class RemainderPathAction : WebAction {
+  class RemainderPathAction @Inject constructor(): WebAction {
     @Get("/org/admin/{path:.*}")
     @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
     fun handle() = "remainder-path-action"
   }
 
-  class WholePathAction : WebAction {
+  class WholePathAction @Inject constructor(): WebAction {
     @Get("/{path:.*}")
     @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
     fun handle() = "whole-path"

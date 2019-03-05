@@ -36,14 +36,14 @@ internal class PlainTextRequestTest {
     assertThat(post("/as-byte-string", "foo")).isEqualTo("foo as-byte-string")
   }
 
-  class PassAsString : WebAction {
+  class PassAsString @Inject constructor(): WebAction {
     @Post("/as-string")
     @RequestContentType(MediaTypes.TEXT_PLAIN_UTF8)
     @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
     fun call(@RequestBody message: String): String = "$message as-string"
   }
 
-  class PassAsByteString : WebAction {
+  class PassAsByteString @Inject constructor(): WebAction {
     @Post("/as-byte-string")
     @RequestContentType(MediaTypes.TEXT_PLAIN_UTF8)
     @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)

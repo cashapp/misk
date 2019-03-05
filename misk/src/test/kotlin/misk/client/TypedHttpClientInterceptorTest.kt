@@ -60,7 +60,7 @@ internal class TypedHttpClientInterceptorTest {
       } else response
     }
 
-    class Factory : NetworkInterceptor.Factory {
+    class Factory @Inject constructor(): NetworkInterceptor.Factory {
       override fun create(action: Action): NetworkInterceptor? = ServerHeaderInterceptor()
     }
   }

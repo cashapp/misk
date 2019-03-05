@@ -11,7 +11,7 @@ import okhttp3.Headers
 import javax.inject.Singleton
 
 @Singleton
-class HelloWebAction : WebAction {
+class HelloWebAction @Inject constructor() : WebAction {
   @Get("/hello/{name}")
   @ResponseContentType(MediaTypes.APPLICATION_JSON)
   fun hello(

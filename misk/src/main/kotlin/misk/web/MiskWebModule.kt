@@ -12,7 +12,6 @@ import misk.scope.ActionScopedProvider
 import misk.scope.ActionScopedProviderModule
 import misk.security.authz.MiskCallerAuthenticator
 import misk.security.ssl.CertificatesModule
-import misk.security.ssl.SslModule
 import misk.web.actions.InternalErrorAction
 import misk.web.actions.LivenessCheckAction
 import misk.web.actions.NotFoundAction
@@ -146,7 +145,6 @@ class MiskWebModule(private val config: WebConfig) : KAbstractModule() {
 
     // Install infrastructure support
     install(CertificatesModule())
-    install(SslModule())
 
     // Bind build-in actions.
     install(WebActionModule.create<InternalErrorAction>())
@@ -162,9 +160,9 @@ class MiskWebModule(private val config: WebConfig) : KAbstractModule() {
     return QueuedThreadPool()
   }
 
-  class MiskCallerProvider : ActionScopedProvider<MiskCaller?> {
-    @Inject lateinit var authenticators: List<MiskCallerAuthenticator>
-
+  class MiskCallerProvider @Inject constructor(
+    private val authenticators: List<MiskCallerAuthenticator>
+  ): ActionScopedProvider<MiskCaller?> {
     override fun get(): MiskCaller? {
       return authenticators.mapNotNull {
         it.getAuthenticatedCaller()

@@ -112,7 +112,7 @@ class AuthenticationTest {
     }
   }
 
-  class CustomServiceAccessAction : WebAction {
+  class CustomServiceAccessAction @Inject constructor() : WebAction {
     @Inject lateinit var scopedCaller: ActionScoped<MiskCaller?>
 
     @Get("/custom_service_access")
@@ -125,7 +125,7 @@ class AuthenticationTest {
   @Target(AnnotationTarget.FUNCTION)
   annotation class CustomServiceAccess
 
-  class CustomRoleAccessAction : WebAction {
+  class CustomRoleAccessAction @Inject constructor() : WebAction {
     @Inject lateinit var scopedCaller: ActionScoped<MiskCaller?>
 
     @Get("/custom_role_access")

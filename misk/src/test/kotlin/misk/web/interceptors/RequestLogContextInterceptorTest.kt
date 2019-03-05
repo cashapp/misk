@@ -61,7 +61,7 @@ internal class RequestLogContextInterceptorTest {
     return httpClient.newCall(request.build()).execute()
   }
 
-  internal class TestAction : WebAction {
+  internal class TestAction @Inject constructor(): WebAction {
     @Get("/call/me")
     @Unauthenticated
     @ResponseContentType(MediaTypes.APPLICATION_JSON)
