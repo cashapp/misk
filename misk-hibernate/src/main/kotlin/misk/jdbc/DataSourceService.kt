@@ -77,7 +77,9 @@ internal class DataSourceService(
   }
 
   private fun decorate(dataSource: DataSource): DataSource =
-      dataSourceDecorators.fold(dataSource) { ds, decorator -> decorator.decorate(ds) }
+    dataSourceDecorators.fold(dataSource) { ds, decorator ->
+      DecoratedDataSource(decorator.decorate(ds), ds)
+    }
 
   override fun shutDown() {
     val stopwatch = Stopwatch.createStarted()

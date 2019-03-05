@@ -8,6 +8,7 @@ import misk.jdbc.DataSourceConfig
 import misk.environment.Environment
 import misk.environment.EnvironmentModule
 import misk.inject.KAbstractModule
+import misk.jdbc.HikariMetricsModule
 import misk.logging.LogCollectorModule
 import misk.testing.MockTracingBackendModule
 import misk.time.FakeClockModule
@@ -35,6 +36,7 @@ class MoviesTestModule(
         addEntities(DbMovie::class, DbActor::class, DbCharacter::class)
       }
     })
+    install(HikariMetricsModule(Movies::class))
   }
 
   data class MoviesConfig(val data_source: DataSourceConfig) : Config
