@@ -18,6 +18,8 @@ internal class MiskTestExtension : BeforeEachCallback, AfterEachCallback {
   override fun beforeEach(context: ExtensionContext) {
     val module = object : KAbstractModule() {
       override fun configure() {
+        binder().requireExplicitBindings()
+        
         if (context.startService()) {
           multibind<BeforeEachCallback>().to<StartServicesBeforeEach>()
           multibind<AfterEachCallback>().to<StopServicesAfterEach>()
