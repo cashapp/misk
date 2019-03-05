@@ -8,7 +8,7 @@ import misk.web.Post
 import misk.web.RequestBody
 import misk.web.RequestContentType
 import misk.web.ResponseContentType
-import misk.web.actions.WebActionEntry
+import misk.web.WebActionModule
 import misk.web.WebTestingModule
 import misk.web.actions.WebAction
 import misk.web.jetty.JettyService
@@ -86,9 +86,9 @@ internal class JsonRequestTest {
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(WebTestingModule())
-      multibind<WebActionEntry>().toInstance(WebActionEntry<PassAsObject>())
-      multibind<WebActionEntry>().toInstance(WebActionEntry<PassAsString>())
-      multibind<WebActionEntry>().toInstance(WebActionEntry<PassAsByteString>())
+      install(WebActionModule.forAction<PassAsObject>())
+      install(WebActionModule.forAction<PassAsString>())
+      install(WebActionModule.forAction<PassAsByteString>())
     }
   }
 

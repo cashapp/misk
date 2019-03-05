@@ -1,5 +1,6 @@
 package misk.security.ssl
 
+import com.google.inject.util.Modules
 import misk.MiskTestingServiceModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
@@ -10,7 +11,7 @@ import javax.inject.Inject
 @MiskTest
 internal class PemComboFileTest {
   @MiskTestModule
-  val module = MiskTestingServiceModule()
+  val module = Modules.combine(MiskTestingServiceModule(), SslModule())
 
   val clientComboPemPath = "classpath:/ssl/client_cert_key_combo.pem"
   val clientRsaComboPemPath = "classpath:/ssl/client_rsa_cert_key_combo.pem"

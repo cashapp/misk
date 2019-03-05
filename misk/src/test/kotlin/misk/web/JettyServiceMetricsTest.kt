@@ -7,7 +7,6 @@ import misk.moshi.adapter
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.web.actions.WebAction
-import misk.web.actions.WebActionEntry
 import misk.web.jetty.ConnectionMetrics
 import misk.web.jetty.JettyConnectionMetricsCollector
 import misk.web.jetty.JettyService
@@ -144,8 +143,8 @@ internal class JettyServiceMetricsTest {
             }
           }
       ))
-      multibind<WebActionEntry>().toInstance(WebActionEntry<HelloAction>())
-      multibind<WebActionEntry>().toInstance(WebActionEntry<CurrentPoolMetricsAction>())
+      install(WebActionModule.forAction<HelloAction>())
+      install(WebActionModule.forAction<CurrentPoolMetricsAction>())
     }
   }
 

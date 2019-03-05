@@ -1,5 +1,6 @@
 package misk.security.ssl
 
+import com.google.inject.util.Modules
 import misk.MiskTestingServiceModule
 import misk.security.ssl.SslLoader.Companion.FORMAT_JCEKS
 import misk.security.ssl.SslLoader.Companion.FORMAT_JKS
@@ -14,7 +15,7 @@ import javax.inject.Inject
 @MiskTest
 internal class SslLoaderTest {
   @MiskTestModule
-  val module = MiskTestingServiceModule()
+  val module = Modules.combine(SslModule(), MiskTestingServiceModule())
 
   val clientComboPemPath = "classpath:/ssl/client_cert_key_combo.pem"
   val clientTrustPemPath = "classpath:/ssl/client_cert.pem"

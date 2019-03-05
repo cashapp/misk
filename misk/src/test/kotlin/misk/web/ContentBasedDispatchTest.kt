@@ -5,7 +5,6 @@ import misk.inject.KAbstractModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.web.actions.WebAction
-import misk.web.actions.WebActionEntry
 import misk.web.jetty.JettyService
 import misk.web.mediatype.MediaTypes
 import misk.web.mediatype.asMediaType
@@ -97,14 +96,14 @@ internal class ContentBasedDispatchTest {
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(WebTestingModule())
-      multibind<WebActionEntry>().toInstance(WebActionEntry<PostPlainTextReturnAnyText>())
-      multibind<WebActionEntry>().toInstance(WebActionEntry<PostAnyTextReturnPlainText>())
-      multibind<WebActionEntry>().toInstance(WebActionEntry<PostPlainTextReturnPlainText>())
-      multibind<WebActionEntry>().toInstance(WebActionEntry<PostJsonReturnJson>())
-      multibind<WebActionEntry>().toInstance(WebActionEntry<PostPlainTextReturnJson>())
-      multibind<WebActionEntry>().toInstance(WebActionEntry<PostJsonReturnPlainText>())
-      multibind<WebActionEntry>().toInstance(WebActionEntry<PostAnythingReturnJson>())
-      multibind<WebActionEntry>().toInstance(WebActionEntry<PostAnythingReturnAnything>())
+      install(WebActionModule.forAction<PostPlainTextReturnAnyText>())
+      install(WebActionModule.forAction<PostAnyTextReturnPlainText>())
+      install(WebActionModule.forAction<PostPlainTextReturnPlainText>())
+      install(WebActionModule.forAction<PostJsonReturnJson>())
+      install(WebActionModule.forAction<PostPlainTextReturnJson>())
+      install(WebActionModule.forAction<PostJsonReturnPlainText>())
+      install(WebActionModule.forAction<PostAnythingReturnJson>())
+      install(WebActionModule.forAction<PostAnythingReturnAnything>())
     }
   }
 

@@ -10,8 +10,8 @@ import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.web.NetworkChain
 import misk.web.NetworkInterceptor
+import misk.web.WebActionModule
 import misk.web.WebTestingModule
-import misk.web.actions.WebActionEntry
 import misk.web.jetty.JettyService
 import okhttp3.Response
 import org.assertj.core.api.Assertions.assertThat
@@ -118,7 +118,7 @@ internal class TypedHttpClientInterceptorTest {
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(WebTestingModule())
-      multibind<WebActionEntry>().toInstance(WebActionEntry<ReturnADinosaurAction>())
+      install(WebActionModule.forAction<ReturnADinosaurAction>())
       multibind<NetworkInterceptor.Factory>().to<ServerHeaderInterceptor.Factory>()
     }
   }

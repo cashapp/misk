@@ -16,6 +16,7 @@ import kotlin.reflect.KClass
 /** Module used by components and applications to provide [ActionScoped] context objects */
 abstract class ActionScopedProviderModule : KAbstractModule() {
   override fun configure() {
+    bind<ActionScope>()
     MapBinder.newMapBinder(binder(), KEY_TYPE, ACTION_SCOPED_PROVIDER_TYPE)
     Multibinder.newSetBinder(binder(), KEY_TYPE)
     configureProviders()
@@ -59,6 +60,7 @@ abstract class ActionScopedProviderModule : KAbstractModule() {
         if (annotatedBy == null) Key.get(actionScopedType)
         else Key.get(actionScopedType, annotatedBy)
 
+    bind(providerType.java)
     bindProvider(typeKey, actionScopedKey, binder().getProvider(providerType.java))
   }
 
@@ -78,6 +80,7 @@ abstract class ActionScopedProviderModule : KAbstractModule() {
         if (annotatedBy == null) Key.get(actionScopedType)
         else Key.get(actionScopedType, annotatedBy)
 
+    bind(providerType.java)
     bindProvider(typeKey, actionScopedKey, binder().getProvider(providerType.java))
   }
 
@@ -90,6 +93,7 @@ abstract class ActionScopedProviderModule : KAbstractModule() {
     val typeKey = Key.get(kclass.java, annotatedBy)
     val actionScopedType = actionScopedType(kclass.java)
     val actionScopedKey = Key.get(actionScopedType, annotatedBy)
+    bind(providerType.java)
     bindProvider(typeKey, actionScopedKey, binder().getProvider(providerType.java))
   }
 
@@ -103,6 +107,7 @@ abstract class ActionScopedProviderModule : KAbstractModule() {
     @Suppress("UNCHECKED_CAST")
     val actionScopedType = actionScopedType(type.type) as TypeLiteral<ActionScoped<T>>
     val actionScopedKey = Key.get(actionScopedType, annotatedBy)
+    bind(providerType.java)
     bindProvider(typeKey, actionScopedKey, binder().getProvider(providerType.java))
   }
 

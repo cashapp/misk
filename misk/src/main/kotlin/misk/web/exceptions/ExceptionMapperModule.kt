@@ -30,6 +30,7 @@ class ExceptionMapperModule<M : ExceptionMapper<T>, in T : Throwable>(
   private val mapperClass: KClass<M>
 ) : KAbstractModule() {
   override fun configure() {
+    bind<ExceptionMapperResolver>()
     MapBinder.newMapBinder(binder(), exceptionTypeLiteral, exceptionMapperTypeLiteral)
         .addBinding(exceptionClass)
         .to(mapperClass.java)

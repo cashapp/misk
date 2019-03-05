@@ -6,7 +6,7 @@ import misk.testing.MiskTestModule
 import misk.web.Get
 import misk.web.Response
 import misk.web.ResponseContentType
-import misk.web.actions.WebActionEntry
+import misk.web.WebActionModule
 import misk.web.WebTestingModule
 import misk.web.actions.WebAction
 import misk.web.jetty.JettyService
@@ -118,14 +118,14 @@ internal class PlainTextResponseTest {
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(WebTestingModule())
-      multibind<WebActionEntry>().toInstance(WebActionEntry<ReturnAsObject>())
-      multibind<WebActionEntry>().toInstance(WebActionEntry<ReturnAsString>())
-      multibind<WebActionEntry>().toInstance(WebActionEntry<ReturnAsByteString>())
-      multibind<WebActionEntry>().toInstance(WebActionEntry<ReturnAsResponseBody>())
-      multibind<WebActionEntry>().toInstance(WebActionEntry<ReturnAsObjectResponse>())
-      multibind<WebActionEntry>().toInstance(WebActionEntry<ReturnAsStringResponse>())
-      multibind<WebActionEntry>().toInstance(WebActionEntry<ReturnAsByteStringResponse>())
-      multibind<WebActionEntry>().toInstance(WebActionEntry<ReturnAsResponseBodyResponse>())
+      install(WebActionModule.forAction<ReturnAsObject>())
+      install(WebActionModule.forAction<ReturnAsString>())
+      install(WebActionModule.forAction<ReturnAsByteString>())
+      install(WebActionModule.forAction<ReturnAsResponseBody>())
+      install(WebActionModule.forAction<ReturnAsObjectResponse>())
+      install(WebActionModule.forAction<ReturnAsStringResponse>())
+      install(WebActionModule.forAction<ReturnAsByteStringResponse>())
+      install(WebActionModule.forAction<ReturnAsResponseBodyResponse>())
     }
   }
 

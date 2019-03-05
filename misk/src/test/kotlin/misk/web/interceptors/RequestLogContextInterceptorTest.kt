@@ -11,9 +11,9 @@ import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.web.Get
 import misk.web.ResponseContentType
+import misk.web.WebActionModule
 import misk.web.WebTestingModule
 import misk.web.actions.WebAction
-import misk.web.actions.WebActionEntry
 import misk.web.jetty.JettyService
 import misk.web.mediatype.MediaTypes
 import okhttp3.OkHttpClient
@@ -73,7 +73,7 @@ internal class RequestLogContextInterceptorTest {
       install(AccessControlModule())
       install(WebTestingModule())
       multibind<MiskCallerAuthenticator>().to<FakeCallerAuthenticator>()
-      multibind<WebActionEntry>().toInstance(WebActionEntry<TestAction>())
+      install(WebActionModule.forAction<TestAction>())
     }
   }
 }

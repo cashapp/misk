@@ -2,7 +2,6 @@ package misk.tracing
 
 import com.google.inject.Guice
 import com.google.inject.Injector
-import com.google.inject.Provides
 import com.google.inject.name.Names
 import helpers.protos.Dinosaur
 import io.opentracing.Tracer
@@ -11,6 +10,7 @@ import io.opentracing.mock.MockTracer
 import misk.MiskTestingServiceModule
 import misk.client.HttpClientEndpointConfig
 import misk.client.HttpClientsConfig
+import misk.client.HttpClientsConfigModule
 import misk.client.TypedHttpClientModule
 import misk.inject.KAbstractModule
 import misk.inject.getInstance
@@ -22,7 +22,7 @@ import misk.web.Post
 import misk.web.RequestBody
 import misk.web.RequestContentType
 import misk.web.ResponseContentType
-import misk.web.actions.WebActionEntry
+import misk.web.WebActionModule
 import misk.web.WebTestingModule
 import misk.web.actions.WebAction
 import misk.web.jetty.JettyService
@@ -172,8 +172,8 @@ internal class ClientServerTraceTest {
     override fun configure() {
       install(MockTracingBackendModule())
       install(WebTestingModule())
-      multibind<WebActionEntry>().toInstance(WebActionEntry<ReturnADinosaurAction>())
-      multibind<WebActionEntry>().toInstance(WebActionEntry<RoarLikeDinosaurAction>())
+      install(WebActionModule.forAction<ReturnADinosaurAction>())
+      install(WebActionModule.forAction<RoarLikeDinosaurAction>())
     }
   }
 
@@ -181,16 +181,11 @@ internal class ClientServerTraceTest {
     override fun configure() {
       install(TypedHttpClientModule.create<ReturnADinosaur>("dinosaur", Names.named("dinosaur")))
       install(TypedHttpClientModule.create<RoarLikeDinosaur>("roar", Names.named("roar")))
-    }
-
-    @Provides
-    @Singleton
-    fun provideHttpClientConfig(): HttpClientsConfig {
-      return HttpClientsConfig(
+      install(HttpClientsConfigModule(HttpClientsConfig(
           endpoints = mapOf(
               "dinosaur" to HttpClientEndpointConfig(jetty.httpServerUrl.toString()),
               "roar" to HttpClientEndpointConfig(jetty.httpServerUrl.toString())
-          ))
+          ))))
     }
   }
 }

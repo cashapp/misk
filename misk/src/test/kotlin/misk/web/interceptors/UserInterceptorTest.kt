@@ -12,7 +12,7 @@ import misk.web.NetworkInterceptor
 import misk.web.PathParam
 import misk.web.Response
 import misk.web.ResponseContentType
-import misk.web.actions.WebActionEntry
+import misk.web.WebActionModule
 import misk.web.WebTestingModule
 import misk.web.actions.WebAction
 import misk.web.jetty.JettyService
@@ -122,7 +122,7 @@ class UserInterceptorTest {
       multibind<NetworkInterceptor.Factory>().toInstance(UserCreatedNetworkInterceptor.Factory())
       multibind<ApplicationInterceptor.Factory>().toInstance(UserCreatedInterceptor.Factory())
 
-      multibind<WebActionEntry>().toInstance(WebActionEntry<TestAction>())
+      install(WebActionModule.forAction<TestAction>())
     }
   }
 

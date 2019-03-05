@@ -12,12 +12,14 @@ import misk.scope.ActionScopedProvider
 import misk.scope.ActionScopedProviderModule
 import misk.security.authz.MiskCallerAuthenticator
 import misk.security.ssl.CertificatesModule
+import misk.security.ssl.SslModule
 import misk.web.actions.InternalErrorAction
 import misk.web.actions.LivenessCheckAction
 import misk.web.actions.NotFoundAction
 import misk.web.actions.ReadinessCheckAction
 import misk.web.actions.StatusAction
-import misk.web.actions.WebActionEntry
+import misk.web.actions.WebActionFactory
+import misk.web.exceptions.ActionExceptionLogLevelConfig
 import misk.web.exceptions.ActionExceptionMapper
 import misk.web.exceptions.ExceptionHandlingInterceptor
 import misk.web.exceptions.ExceptionMapperModule
@@ -34,9 +36,12 @@ import misk.web.interceptors.MetricsInterceptor
 import misk.web.interceptors.RequestLogContextInterceptor
 import misk.web.interceptors.RequestLoggingInterceptor
 import misk.web.interceptors.TracingInterceptor
+import misk.web.jetty.ConnectionMetrics
 import misk.web.jetty.JettyConnectionMetricsCollector
 import misk.web.jetty.JettyService
 import misk.web.jetty.JettyThreadPoolMetricsCollector
+import misk.web.jetty.ThreadPoolMetrics
+import misk.web.jetty.WebActionsServlet
 import misk.web.marshal.GrpcMarshaller
 import misk.web.marshal.GrpcUnmarshaller
 import misk.web.marshal.JsonMarshaller
@@ -47,6 +52,7 @@ import misk.web.marshal.ProtobufMarshaller
 import misk.web.marshal.ProtobufUnmarshaller
 import misk.web.marshal.Unmarshaller
 import misk.web.proxy.WebProxyEntry
+import misk.web.resources.ResourceEntryFinder
 import misk.web.resources.StaticResourceEntry
 import org.eclipse.jetty.util.thread.QueuedThreadPool
 import javax.inject.Inject
@@ -54,8 +60,18 @@ import javax.inject.Singleton
 import javax.servlet.http.HttpServletRequest
 import java.security.Provider as SecurityProvider
 
-class MiskWebModule : KAbstractModule() {
+class MiskWebModule(private val config: WebConfig) : KAbstractModule() {
   override fun configure() {
+    bind<WebConfig>().toInstance(config)
+    bind<ActionExceptionLogLevelConfig>().toInstance(config.action_exception_log_level)
+
+    bind<ConnectionMetrics>()
+    bind<JettyConnectionMetricsCollector>()
+    bind<JettyService>()
+    bind<ResourceEntryFinder>()
+    bind<ThreadPoolMetrics>()
+    bind<WebActionFactory>()
+    bind<WebActionsServlet>()
     multibind<Service>().to<JettyService>()
     multibind<Service>().to<JettyThreadPoolMetricsCollector>()
     multibind<Service>().to<JettyConnectionMetricsCollector>()
@@ -91,6 +107,7 @@ class MiskWebModule : KAbstractModule() {
     // Handle all unexpected errors that occur during dispatch
     multibind<NetworkInterceptor.Factory>(MiskDefault::class)
         .to<InternalErrorInterceptorFactory>()
+    bind<InternalErrorInterceptorFactory>()
 
     // Add request related fields to MDC for logging
     multibind<NetworkInterceptor.Factory>(MiskDefault::class)
@@ -115,7 +132,7 @@ class MiskWebModule : KAbstractModule() {
 
     // Optionally log request and response details
     multibind<ApplicationInterceptor.Factory>(MiskDefault::class)
-      .to<RequestLoggingInterceptor.Factory>()
+        .to<RequestLoggingInterceptor.Factory>()
 
     install(ExceptionMapperModule.create<ActionException, ActionExceptionMapper>())
 
@@ -129,13 +146,14 @@ class MiskWebModule : KAbstractModule() {
 
     // Install infrastructure support
     install(CertificatesModule())
+    install(SslModule())
 
     // Bind build-in actions.
-    multibind<WebActionEntry>().toInstance(WebActionEntry<InternalErrorAction>())
-    multibind<WebActionEntry>().toInstance(WebActionEntry<StatusAction>())
-    multibind<WebActionEntry>().toInstance(WebActionEntry<ReadinessCheckAction>())
-    multibind<WebActionEntry>().toInstance(WebActionEntry<LivenessCheckAction>())
-    multibind<WebActionEntry>().toInstance(WebActionEntry<NotFoundAction>())
+    install(WebActionModule.forAction<InternalErrorAction>())
+    install(WebActionModule.forAction<StatusAction>())
+    install(WebActionModule.forAction<ReadinessCheckAction>())
+    install(WebActionModule.forAction<LivenessCheckAction>())
+    install(WebActionModule.forAction<NotFoundAction>())
   }
 
   @Provides @Singleton

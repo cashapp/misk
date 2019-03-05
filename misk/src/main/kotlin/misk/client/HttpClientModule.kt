@@ -22,6 +22,8 @@ class HttpClientModule constructor(
     bind(httpClientKey).toProvider(HttpClientProvider(name))
     bind(protoMessageHttpClientKey)
         .toProvider(ProtoMessageHttpClientProvider(name, getProvider(httpClientKey)))
+    bind<HttpClientFactory>()
+    bind<HttpClientConfigUrlProvider>()
   }
 
   private class HttpClientProvider(private val name: String) : Provider<OkHttpClient> {

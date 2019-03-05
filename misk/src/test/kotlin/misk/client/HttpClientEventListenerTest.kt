@@ -7,6 +7,7 @@ import misk.inject.KAbstractModule
 import misk.inject.getInstance
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
+import misk.web.WebActionModule
 import misk.web.WebTestingModule
 import misk.web.actions.WebActionEntry
 import misk.web.jetty.JettyService
@@ -82,8 +83,8 @@ internal class HttpClientEventListenerTest {
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(WebTestingModule())
-      multibind<WebActionEntry>().toInstance(
-          WebActionEntry<ReturnADinosaurAction>())
+      install(WebActionModule.forAction<ReturnADinosaurAction>())
+      bind<TestEventListener>()
     }
   }
 }

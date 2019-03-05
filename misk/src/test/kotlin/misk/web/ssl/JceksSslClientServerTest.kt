@@ -24,11 +24,11 @@ import misk.web.Post
 import misk.web.RequestBody
 import misk.web.RequestContentType
 import misk.web.ResponseContentType
+import misk.web.WebActionModule
 import misk.web.WebConfig
 import misk.web.WebSslConfig
 import misk.web.WebTestingModule
 import misk.web.actions.WebAction
-import misk.web.actions.WebActionEntry
 import misk.web.jetty.JettyService
 import misk.web.mediatype.MediaTypes
 import org.assertj.core.api.Assertions.assertThat
@@ -94,7 +94,7 @@ internal class JceksSslClientServerTest {
 
   class TestModule : KAbstractModule() {
     override fun configure() {
-      multibind<WebActionEntry>().toInstance(WebActionEntry<HelloAction>())
+      install(WebActionModule.forAction<HelloAction>())
       install(WebTestingModule(WebConfig(
           port = 0,
           idle_timeout = 500000,

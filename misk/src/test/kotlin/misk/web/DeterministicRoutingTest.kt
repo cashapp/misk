@@ -72,7 +72,7 @@ internal class DeterministicRoutingTest {
       )
       shuffle(webActions)
       for (webAction in webActions) {
-        multibind<WebActionEntry>().toInstance(WebActionEntry(webAction))
+        install(WebActionModule.forAction(webAction))
       }
     }
   }

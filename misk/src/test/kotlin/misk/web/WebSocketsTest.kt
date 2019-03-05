@@ -4,7 +4,6 @@ import misk.inject.KAbstractModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.web.actions.WebAction
-import misk.web.actions.WebActionEntry
 import misk.web.actions.WebSocket
 import misk.web.actions.WebSocketListener
 import misk.web.jetty.JettyService
@@ -60,7 +59,7 @@ internal class WebSocketsTest {
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(WebTestingModule())
-      multibind<WebActionEntry>().toInstance(WebActionEntry<EchoWebSocket>())
+      install(WebActionModule.forAction<EchoWebSocket>())
     }
   }
 }
