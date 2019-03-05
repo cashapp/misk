@@ -1,26 +1,38 @@
 import {
+  Button,
   Card,
+  Collapse,
+  ControlGroup,
   H3,
   H5,
   Icon,
   Intent,
   Menu,
   MenuItem,
+  Pre,
+  Spinner,
   Tag,
-  Tooltip,
-  Spinner
+  Tooltip
 } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
 import { FlexContainer } from "@misk/core"
-import { simpleSelect, simpleType } from "@misk/simpleredux"
+import {
+  onChangeToggleFnCall,
+  simpleSelect,
+  simpleType
+} from "@misk/simpleredux"
+import { HTTPMethod } from "http-method-enum"
+import { chain, flatMap } from "lodash"
 import * as React from "react"
 import { connect } from "react-redux"
 import styled from "styled-components"
 import { IDispatchProps, IState, rootDispatcher, rootSelectors } from "../ducks"
 
-export interface IWebAction {
+export interface IWebActionAPI {
+  allowedServices: string[]
+  allowedRoles: string[]
   applicationInterceptors: string[]
-  dispatchMechanism: string
+  dispatchMechanism: HTTPMethod
   function: string
   functionAnnotations: string[]
   name: string
@@ -32,8 +44,41 @@ export interface IWebAction {
   returnType: string
 }
 
-const HttpMethodTag = styled.span`
+export interface IWebActionInternal {
+  allowedServices: string[]
+  allowedRoles: string[]
+  applicationInterceptors: string[]
+  authFunctionAnnotations: string[]
+  dispatchMechanism: HTTPMethod[]
+  function: string
+  functionAnnotations: string[]
+  name: string
+  networkInterceptors: string[]
+  nonAccessOrTypeFunctionAnnotations: string[]
+  parameterTypes: string[]
+  pathPattern: string
+  requestMediaTypes: string[]
+  responseMediaType: string
+  returnType: string
+}
+
+const FloatLeft = styled.span`
+  float: left;
+  margin: 0 10px 0 0;
+`
+
+const FloatRight = styled.span`
   float: right;
+  margin: 0 0 0 10px;
+`
+
+const CodeTag = styled(Tag)`
+  font-family: monospace;
+`
+
+const Header = styled.div`
+  display: block;
+  height: 36px;
 `
 
 const Column = styled.div`
@@ -42,18 +87,13 @@ const Column = styled.div`
   min-width: 320px;
 `
 
-const MenuItemProps = {
-  multiline: true
-}
+const MetadataMenu = styled(Menu)`
+  li {
+    margin-bottom: 0;
+  }
+`
 
-const ComingSoon = () => (
-  <span>
-    <span>{"Coming soon "}</span>
-    <Icon icon={IconNames.AIRPLANE} />
-  </span>
-)
-
-const RequestResponeContentTypes = (props: { action: IWebAction }) => (
+const RequestResponeContentTypes = (props: { action: IWebActionInternal }) => (
   <span>
     <span>{props.action.requestMediaTypes}</span>{" "}
     <Icon icon={IconNames.ARROW_RIGHT} />{" "}
@@ -61,142 +101,154 @@ const RequestResponeContentTypes = (props: { action: IWebAction }) => (
   </span>
 )
 
-enum HttpMethod {
-  "DELTE" = "DELETE",
-  "GET" = "GET",
-  "HEAD" = "HEAD",
-  "POST" = "POST",
-  "PATCH" = "PATCH",
-  "PUT" = "PUT"
-}
-
-const HttpMethodIntent = {
-  DELETE: Intent.DANGER,
-  GET: Intent.PRIMARY,
-  HEAD: Intent.WARNING,
-  PATCH: Intent.SUCCESS,
-  POST: Intent.SUCCESS,
-  PUT: Intent.SUCCESS
-}
-
-const filterAnnotations = (functionAnnotations: string[]) =>
-  functionAnnotations.filter(
-    a =>
-      !(
-        a.includes("RequestContentType") ||
-        a.includes("ResponseContentType") ||
-        a.includes("Access") ||
-        a.includes("authz") ||
-        a.toUpperCase().includes(HttpMethod.DELTE) ||
-        a.toUpperCase().includes(HttpMethod.GET) ||
-        a.toUpperCase().includes(HttpMethod.HEAD) ||
-        a.toUpperCase().includes(HttpMethod.PATCH) ||
-        a.toUpperCase().includes(HttpMethod.POST) ||
-        a.toUpperCase().includes(HttpMethod.PUT)
-      )
+const Metadata = (
+  props: {
+    content: string | JSX.Element
+    label: string
+    tooltip: string | JSX.Element
+    action: IWebActionInternal
+  } & IState &
+    IDispatchProps
+) => {
+  return (
+    <MenuItem
+      label={props.label}
+      onClick={onChangeToggleFnCall(
+        props.simpleFormToggle,
+        `WebAction::${props.action.pathPattern}::${props.label}`,
+        props.simpleForm
+      )}
+      text={<Tooltip content={props.tooltip}>{props.content}</Tooltip>}
+    />
   )
+}
 
-const securityAnnotation = (functionAnnotations: string[]) =>
-  functionAnnotations.filter(
-    a => a.includes("Access") || a.includes("authz")
-  )[0]
+const FilterTag = "WebActions::FilterForm"
 
-export const WebAction = (props: { action: IWebAction }) => {
+//TODO(adrw) upstream to @misk/core
+const HTTPMethodIntent: { [method in HTTPMethod]: Intent } = {
+  [HTTPMethod.CONNECT]: Intent.DANGER,
+  [HTTPMethod.DELETE]: Intent.DANGER,
+  [HTTPMethod.GET]: Intent.PRIMARY,
+  [HTTPMethod.HEAD]: Intent.WARNING,
+  [HTTPMethod.OPTIONS]: Intent.NONE,
+  [HTTPMethod.PATCH]: Intent.SUCCESS,
+  [HTTPMethod.POST]: Intent.SUCCESS,
+  [HTTPMethod.PUT]: Intent.SUCCESS,
+  [HTTPMethod.TRACE]: Intent.NONE
+}
+
+const MethodTag = (props: { method: HTTPMethod }) => (
+  <FloatRight>
+    <Tag large={true} intent={HTTPMethodIntent[props.method]}>
+      {props.method}
+    </Tag>
+  </FloatRight>
+)
+
+const WebAction = (
+  props: { action: IWebActionInternal } & IState & IDispatchProps
+) => {
   return (
     <div>
       <Card>
-        <HttpMethodTag>
-          <Tag
-            large={true}
-            intent={
-              HttpMethodIntent[props.action.dispatchMechanism as HttpMethod]
-            }
-          >
-            {props.action.dispatchMechanism}
-          </Tag>
-        </HttpMethodTag>
-        <H3>{props.action.pathPattern}</H3>
-        {filterAnnotations(props.action.functionAnnotations).map(a => (
+        <Header>
+          {props.action.dispatchMechanism.map(m => (
+            <MethodTag method={m} />
+          ))}
+          <FloatLeft>
+            <H3>{props.action.name}</H3>
+          </FloatLeft>
+          <FloatLeft>
+            <CodeTag large={true}>{props.action.pathPattern}</CodeTag>
+          </FloatLeft>
+        </Header>
+        {props.action.nonAccessOrTypeFunctionAnnotations.map(a => (
           <H5>{a}</H5>
         ))}
         <FlexContainer>
           <Column>
-            <Menu>
-              <MenuItem
-                label={"Action"}
-                text={
-                  <Tooltip content={props.action.function}>
-                    {props.action.name}
-                  </Tooltip>
-                }
-                {...MenuItemProps}
+            <MetadataMenu>
+              <Metadata
+                content={props.action.function}
+                label={"Function"}
+                tooltip={props.action.function}
+                {...props}
               />
-              <MenuItem
+              <Metadata
+                content={props.action.allowedServices.join(", ")}
                 label={"Services"}
-                text={<ComingSoon />}
-                {...MenuItemProps}
+                tooltip={props.action.allowedServices.join(", ")}
+                {...props}
               />
-              <MenuItem
+              <Metadata
+                content={props.action.allowedRoles.join(", ")}
                 label={"Roles"}
-                text={<ComingSoon />}
-                {...MenuItemProps}
+                tooltip={props.action.allowedRoles.join(", ")}
+                {...props}
               />
-              <MenuItem
+              <Metadata
+                content={props.action.authFunctionAnnotations[0]}
                 label={"Access"}
-                text={
-                  <Tooltip
-                    content={securityAnnotation(
-                      props.action.functionAnnotations
-                    )}
-                  >
-                    {securityAnnotation(props.action.functionAnnotations)
-                      .split(".")
-                      .slice(-1)}
-                  </Tooltip>
-                }
-                {...MenuItemProps}
+                tooltip={props.action.authFunctionAnnotations[0]}
+                {...props}
               />
-            </Menu>
+            </MetadataMenu>
           </Column>
           <Column>
-            <Menu>
-              <MenuItem
-                active={false}
+            <MetadataMenu>
+              <Metadata
+                content={<RequestResponeContentTypes action={props.action} />}
                 label={"Content Types"}
-                text={
-                  <Tooltip
-                    content={
-                      <RequestResponeContentTypes action={props.action} />
-                    }
-                  >
-                    <RequestResponeContentTypes action={props.action} />
-                  </Tooltip>
-                }
-                {...MenuItemProps}
+                tooltip={<RequestResponeContentTypes action={props.action} />}
+                {...props}
               />
-              <MenuItem
-                label={`Application Interceptors (${
-                  props.action.applicationInterceptors.length
-                })`}
-                text={props.action.applicationInterceptors.pop()}
-                {...MenuItemProps}
+              <Metadata
+                content={"Application Interceptors"}
+                label={`(${props.action.applicationInterceptors.length})`}
+                tooltip={"Application Interceptors"}
+                {...props}
+              />
+              <Collapse
+                isOpen={
+                  props.action.applicationInterceptors.length &&
+                  simpleSelect(
+                    props.simpleForm,
+                    `WebAction::${props.action.pathPattern}::(${
+                      props.action.applicationInterceptors.length
+                    })`,
+                    "data"
+                  )
+                }
               >
                 {props.action.applicationInterceptors.map(i => (
-                  <MenuItem text={i} {...MenuItemProps} />
+                  <MenuItem text={<Tooltip content={i}>{i}</Tooltip>} />
                 ))}
-              </MenuItem>
-              <MenuItem
-                label={`Network Interceptors (${
-                  props.action.networkInterceptors.length
-                })`}
-                text={props.action.networkInterceptors[0]}
-                {...MenuItemProps}
+              </Collapse>
+
+              <Metadata
+                content={"Network Interceptors"}
+                label={`(${props.action.networkInterceptors.length})`}
+                tooltip={"Network Interceptors"}
+                {...props}
+              />
+              <Collapse
+                isOpen={
+                  props.action.networkInterceptors.length &&
+                  simpleSelect(
+                    props.simpleForm,
+                    `WebAction::${props.action.pathPattern}::(${
+                      props.action.networkInterceptors.length
+                    })`,
+                    "data"
+                  )
+                }
               >
                 {props.action.networkInterceptors.map(i => (
-                  <MenuItem text={i} {...MenuItemProps} />
+                  <MenuItem text={<Tooltip content={i}>{i}</Tooltip>} />
                 ))}
-              </MenuItem>
-            </Menu>
+              </Collapse>
+            </MetadataMenu>
           </Column>
         </FlexContainer>
       </Card>
@@ -205,13 +257,14 @@ export const WebAction = (props: { action: IWebAction }) => {
   )
 }
 
-export const WebActions = (props: { metadata: IWebAction[] }) => {
-  console.log(props)
+const WebActions = (
+  props: { metadata: IWebActionInternal[] } & IState & IDispatchProps
+) => {
   if (props.metadata) {
     return (
       <div>
         {props.metadata.map((action: any) => (
-          <WebAction action={action} />
+          <WebAction action={action} {...props} />
         ))}
       </div>
     )
@@ -220,17 +273,81 @@ export const WebActions = (props: { metadata: IWebAction[] }) => {
   }
 }
 
+export const FilterWebActions = (props: IState & IDispatchProps) => {
+  return (
+    <div>
+      <Pre>
+        sampleFormData:
+        {JSON.stringify(simpleSelect(props.simpleForm, FilterTag), null, 2)}
+      </Pre>
+      <ControlGroup fill={true} vertical={false}>
+        <Button icon={IconNames.FILTER} />
+        {/* TODO(adrw) Use multiselect to do autocomplete filters */}
+        {/* <MultiSelect /> */}
+      </ControlGroup>
+    </div>
+  )
+}
+
 export const WebActionsContainer = (props: IState & IDispatchProps) => {
   const tag = "WebAction"
-  const metadata = simpleSelect(
+  const rawMetadata = simpleSelect(
     props.simpleNetwork,
     tag,
     "webActionMetadata",
     simpleType.array
   )
+  const metadata = chain(rawMetadata)
+    .map(action => ({
+      ...action,
+      dispatchMechanism: [action.dispatchMechanism]
+    }))
+    .groupBy("pathPattern")
+    .map((actions: IWebActionInternal[]) => {
+      const dispatchMechanism = flatMap(
+        actions,
+        action => action.dispatchMechanism
+      )
+      const mergedAction = actions.pop()
+      mergedAction.dispatchMechanism = dispatchMechanism.sort().reverse()
+      return mergedAction
+    })
+    .map((action: IWebActionInternal) => {
+      const authFunctionAnnotations = action.functionAnnotations.filter(
+        a => a.includes("Access") || a.includes("authz")
+      )
+      const nonAccessOrTypeFunctionAnnotations = action.functionAnnotations.filter(
+        a =>
+          !(
+            a.includes("RequestContentType") ||
+            a.includes("ResponseContentType") ||
+            a.includes("Access") ||
+            a.includes("authz") ||
+            a.toUpperCase().includes(HTTPMethod.DELETE) ||
+            a.toUpperCase().includes(HTTPMethod.GET) ||
+            a.toUpperCase().includes(HTTPMethod.HEAD) ||
+            a.toUpperCase().includes(HTTPMethod.PATCH) ||
+            a.toUpperCase().includes(HTTPMethod.POST) ||
+            a.toUpperCase().includes(HTTPMethod.PUT)
+          )
+      )
+      const fun: string = action.function.split("fun ").pop()
+      return {
+        ...action,
+        authFunctionAnnotations,
+        function: fun,
+        nonAccessOrTypeFunctionAnnotations
+      }
+    })
+    .sortBy(["name", "pathPattern"])
+    .value()
+  // TODO(adrw) build index of keyspace for filterable fields
+  // const index = chain(metadata).value()
+  // console.log(index)
   return (
     <div>
-      <WebActions metadata={metadata} />
+      <WebActions metadata={metadata} {...props} />
+      {/* <FilterWebActions {...props} /> */}
     </div>
   )
 }
