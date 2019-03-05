@@ -84,7 +84,7 @@ internal class ClientMetricsInterceptorTest {
     override fun configure() {
       install(PrometheusHistogramRegistryModule())
       install(WebTestingModule())
-      install(WebActionModule.forAction<PingAction>())
+      install(WebActionModule.create<PingAction>())
     }
   }
 

@@ -118,14 +118,14 @@ internal class PlainTextResponseTest {
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(WebTestingModule())
-      install(WebActionModule.forAction<ReturnAsObject>())
-      install(WebActionModule.forAction<ReturnAsString>())
-      install(WebActionModule.forAction<ReturnAsByteString>())
-      install(WebActionModule.forAction<ReturnAsResponseBody>())
-      install(WebActionModule.forAction<ReturnAsObjectResponse>())
-      install(WebActionModule.forAction<ReturnAsStringResponse>())
-      install(WebActionModule.forAction<ReturnAsByteStringResponse>())
-      install(WebActionModule.forAction<ReturnAsResponseBodyResponse>())
+      install(WebActionModule.create<ReturnAsObject>())
+      install(WebActionModule.create<ReturnAsString>())
+      install(WebActionModule.create<ReturnAsByteString>())
+      install(WebActionModule.create<ReturnAsResponseBody>())
+      install(WebActionModule.create<ReturnAsObjectResponse>())
+      install(WebActionModule.create<ReturnAsStringResponse>())
+      install(WebActionModule.create<ReturnAsByteStringResponse>())
+      install(WebActionModule.create<ReturnAsResponseBodyResponse>())
     }
   }
 

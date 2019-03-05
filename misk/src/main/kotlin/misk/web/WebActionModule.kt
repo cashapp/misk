@@ -19,21 +19,21 @@ class WebActionModule<A : WebAction> private constructor(
      * Registers a web action.
      * @param actionClass: The web action to register.
      */
-    inline fun <reified A : WebAction> forAction(): WebActionModule<A> = forAction(A::class)
+    inline fun <reified A : WebAction> create(): WebActionModule<A> = create(A::class)
 
     /**
      * Registers a web action.
      * @param actionClass: The web action to register.
      */
     @JvmStatic
-    fun <A : WebAction> forAction(actionClass: Class<A>): WebActionModule<A> {
-      return forAction(actionClass.kotlin)
+    fun <A : WebAction> create(actionClass: Class<A>): WebActionModule<A> {
+      return create(actionClass.kotlin)
     }
 
     /**
      * Registers a web action.
      */
-    fun <A : WebAction> forAction(actionClass: KClass<A>): WebActionModule<A> {
+    fun <A : WebAction> create(actionClass: KClass<A>): WebActionModule<A> {
       return WebActionModule(actionClass, "/")
     }
 
@@ -44,8 +44,8 @@ class WebActionModule<A : WebAction> private constructor(
      *   - any number of non-whitespace characters (including additional path segments or "/")
      *   - must terminate with a non-"/" because rest of path will start with "/"
      */
-    inline fun <reified A : WebAction> forPrefixedAction(url_path_prefix: String): WebActionModule<A> =
-        forPrefixedAction(A::class, url_path_prefix)
+    inline fun <reified A : WebAction> createWithPrefix(url_path_prefix: String): WebActionModule<A> =
+        createWithPrefix(A::class, url_path_prefix)
 
     /**
      * Registers a web action with a path prefix.
@@ -56,11 +56,11 @@ class WebActionModule<A : WebAction> private constructor(
      *   - must terminate with a non-"/" because rest of path will start with "/"
      */
     @JvmStatic
-    fun <A : WebAction> forPrefixedAction(
+    fun <A : WebAction> createWithPrefix(
       actionClass: Class<A>,
       url_path_prefix: String
     ): WebActionModule<A> {
-      return forPrefixedAction(actionClass.kotlin, url_path_prefix)
+      return createWithPrefix(actionClass.kotlin, url_path_prefix)
     }
 
     /**
@@ -71,7 +71,7 @@ class WebActionModule<A : WebAction> private constructor(
      *   - any number of non-whitespace characters (including additional path segments or "/")
      *   - must terminate with a non-"/" because rest of path will start with "/"
      */
-    fun <A : WebAction> forPrefixedAction(
+    fun <A : WebAction> createWithPrefix(
       actionClass: KClass<A>,
       url_path_prefix: String
     ): WebActionModule<A> {

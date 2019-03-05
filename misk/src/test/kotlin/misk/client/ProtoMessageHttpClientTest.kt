@@ -69,7 +69,7 @@ class ProtoMessageHttpClientTest {
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(WebTestingModule())
-      install(WebActionModule.forAction<ReturnADinosaur>())
+      install(WebActionModule.create<ReturnADinosaur>())
     }
   }
 

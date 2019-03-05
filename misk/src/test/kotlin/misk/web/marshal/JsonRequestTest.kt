@@ -86,9 +86,9 @@ internal class JsonRequestTest {
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(WebTestingModule())
-      install(WebActionModule.forAction<PassAsObject>())
-      install(WebActionModule.forAction<PassAsString>())
-      install(WebActionModule.forAction<PassAsByteString>())
+      install(WebActionModule.create<PassAsObject>())
+      install(WebActionModule.create<PassAsString>())
+      install(WebActionModule.create<PassAsByteString>())
     }
   }
 

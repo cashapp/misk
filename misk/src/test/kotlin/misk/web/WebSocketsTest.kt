@@ -59,7 +59,7 @@ internal class WebSocketsTest {
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(WebTestingModule())
-      install(WebActionModule.forAction<EchoWebSocket>())
+      install(WebActionModule.create<EchoWebSocket>())
     }
   }
 }

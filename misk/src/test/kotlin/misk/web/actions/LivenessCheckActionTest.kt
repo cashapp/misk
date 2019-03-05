@@ -17,7 +17,7 @@ class LivenessCheckActionTest {
   val module = Modules.combine(
       MiskTestingServiceModule(),
       FakeServiceModule(),
-      WebActionModule.forAction<LivenessCheckAction>()
+      WebActionModule.create<LivenessCheckAction>()
   )
 
   @Inject lateinit var livenessCheckAction: LivenessCheckAction

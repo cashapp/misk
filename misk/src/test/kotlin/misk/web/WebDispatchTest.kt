@@ -118,12 +118,12 @@ internal class WebDispatchTest {
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(WebTestingModule())
-      install(WebActionModule.forAction<PostHello>())
-      install(WebActionModule.forAction<GetHello>())
-      install(WebActionModule.forAction<PostBye>())
-      install(WebActionModule.forAction<GetBye>())
-      install(WebActionModule.forAction<GetNothing>())
-      install(WebActionModule.forPrefixedAction<GetHello>("/path/prefix/"))
+      install(WebActionModule.create<PostHello>())
+      install(WebActionModule.create<GetHello>())
+      install(WebActionModule.create<PostBye>())
+      install(WebActionModule.create<GetBye>())
+      install(WebActionModule.create<GetNothing>())
+      install(WebActionModule.createWithPrefix<GetHello>("/path/prefix/"))
     }
   }
 

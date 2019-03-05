@@ -94,8 +94,8 @@ internal class TypedHttpClientTest {
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(WebTestingModule())
-      install(WebActionModule.forAction<ReturnADinosaurAction>())
-      install(WebActionModule.forAction<ReturnAProtoDinosaurAction>())
+      install(WebActionModule.create<ReturnADinosaurAction>())
+      install(WebActionModule.create<ReturnAProtoDinosaurAction>())
     }
   }
 

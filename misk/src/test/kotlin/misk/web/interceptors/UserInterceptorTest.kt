@@ -122,7 +122,7 @@ class UserInterceptorTest {
       multibind<NetworkInterceptor.Factory>().toInstance(UserCreatedNetworkInterceptor.Factory())
       multibind<ApplicationInterceptor.Factory>().toInstance(UserCreatedInterceptor.Factory())
 
-      install(WebActionModule.forAction<TestAction>())
+      install(WebActionModule.create<TestAction>())
     }
   }
 

@@ -8,8 +8,8 @@ import misk.web.WebActionModule
 
 class ExemplarModule : KAbstractModule() {
   override fun configure() {
-    install(WebActionModule.forAction<HelloWebAction>())
-    install(WebActionModule.forAction<HelloWebPostAction>())
-    install(WebActionModule.forAction<EchoFormAction>())
+    install(WebActionModule.create<HelloWebAction>())
+    install(WebActionModule.create<HelloWebPostAction>())
+    install(WebActionModule.create<EchoFormAction>())
   }
 }

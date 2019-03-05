@@ -217,16 +217,16 @@ class StaticResourceActionTest {
       install(HttpClientModule("static_resource_action",
           Names.named("static_resource_action")))
 
-      install(WebActionModule.forAction<NotFoundAction>())
+      install(WebActionModule.create<NotFoundAction>())
 
-      install(WebActionModule.forPrefixedAction<StaticResourceAction>("/hi/"))
+      install(WebActionModule.createWithPrefix<StaticResourceAction>("/hi/"))
       multibind<StaticResourceEntry>()
           .toInstance(StaticResourceEntry("/hi/", "memory:/web/hi"))
 
-      install(WebActionModule.forPrefixedAction<StaticResourceAction>("/nasa/command/"))
+      install(WebActionModule.createWithPrefix<StaticResourceAction>("/nasa/command/"))
       multibind<StaticResourceEntry>()
           .toInstance(StaticResourceEntry("/nasa/command/", "memory:/web/nasa/command/"))
-      install(WebActionModule.forPrefixedAction<StaticResourceAction>("/nasa/tabs/o2fuel/"))
+      install(WebActionModule.createWithPrefix<StaticResourceAction>("/nasa/tabs/o2fuel/"))
       multibind<StaticResourceEntry>()
           .toInstance(StaticResourceEntry("/nasa/tabs/o2fuel/", "memory:/web/nasa/tabs/o2fuel/"))
 

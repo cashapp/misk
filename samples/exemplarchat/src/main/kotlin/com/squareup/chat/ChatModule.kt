@@ -12,12 +12,12 @@ import misk.web.resources.StaticResourceEntry
 class ChatModule : KAbstractModule() {
   override fun configure() {
     // TODO(adrw) finish testing this with the new StaticResourceAction
-    install(WebActionModule.forPrefixedAction<StaticResourceAction>("/room/"))
+    install(WebActionModule.createWithPrefix<StaticResourceAction>("/room/"))
     multibind<StaticResourceEntry>().toInstance(
         StaticResourceEntry("/room/", "classpath:/web/index.html"))
 
-    install(WebActionModule.forAction<ChatWebSocketAction>())
-    install(WebActionModule.forAction<ToggleManualHealthCheckAction>())
+    install(WebActionModule.create<ChatWebSocketAction>())
+    install(WebActionModule.create<ToggleManualHealthCheckAction>())
     multibind<HealthCheck>().to<ManualHealthCheck>()
   }
 }

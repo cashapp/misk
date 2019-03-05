@@ -117,7 +117,7 @@ class NotFoundActionTest {
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(WebTestingModule())
-      install(WebActionModule.forAction<NotFoundAction>())
+      install(WebActionModule.create<NotFoundAction>())
     }
   }
 }

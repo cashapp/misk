@@ -100,7 +100,7 @@ class GrpcConnectivityTest {
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(WebTestingModule())
-      install(WebActionModule.forAction<HelloRpcAction>())
+      install(WebActionModule.create<HelloRpcAction>())
     }
   }
 

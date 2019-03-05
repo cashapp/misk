@@ -118,7 +118,7 @@ internal class TypedHttpClientInterceptorTest {
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(WebTestingModule())
-      install(WebActionModule.forAction<ReturnADinosaurAction>())
+      install(WebActionModule.create<ReturnADinosaurAction>())
       multibind<NetworkInterceptor.Factory>().to<ServerHeaderInterceptor.Factory>()
     }
   }

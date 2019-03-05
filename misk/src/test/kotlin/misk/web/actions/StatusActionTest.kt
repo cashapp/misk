@@ -22,7 +22,7 @@ class StatusActionTest {
       MiskTestingServiceModule(),
       FakeServiceModule(),
       FakeHealthCheckModule(),
-      WebActionModule.forAction<StatusAction>()
+      WebActionModule.create<StatusAction>()
   )
 
   @Inject lateinit var statusAction: StatusAction

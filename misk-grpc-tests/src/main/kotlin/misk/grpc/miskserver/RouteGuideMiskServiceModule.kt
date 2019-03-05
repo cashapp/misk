@@ -11,7 +11,7 @@ import javax.inject.Named
 class RouteGuideMiskServiceModule : KAbstractModule() {
   override fun configure() {
     install(WebTestingModule())
-    install(WebActionModule.forAction<GetFeatureGrpcAction>())
+    install(WebActionModule.create<GetFeatureGrpcAction>())
   }
 
   @Provides

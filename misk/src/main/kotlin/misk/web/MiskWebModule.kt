@@ -149,11 +149,11 @@ class MiskWebModule(private val config: WebConfig) : KAbstractModule() {
     install(SslModule())
 
     // Bind build-in actions.
-    install(WebActionModule.forAction<InternalErrorAction>())
-    install(WebActionModule.forAction<StatusAction>())
-    install(WebActionModule.forAction<ReadinessCheckAction>())
-    install(WebActionModule.forAction<LivenessCheckAction>())
-    install(WebActionModule.forAction<NotFoundAction>())
+    install(WebActionModule.create<InternalErrorAction>())
+    install(WebActionModule.create<StatusAction>())
+    install(WebActionModule.create<ReadinessCheckAction>())
+    install(WebActionModule.create<LivenessCheckAction>())
+    install(WebActionModule.create<NotFoundAction>())
   }
 
   @Provides @Singleton

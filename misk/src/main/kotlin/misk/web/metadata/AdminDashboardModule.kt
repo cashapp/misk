@@ -26,8 +26,8 @@ class AdminDashboardModule(val environment: Environment) : KAbstractModule() {
     multibind<NetworkInterceptor.Factory>().to<WideOpenDevelopmentInterceptorFactory>()
 
     // Loader
-    install(WebActionModule.forAction<AdminDashboardTabAction>())
-    install(WebActionModule.forAction<ServiceMetadataAction>())
+    install(WebActionModule.create<AdminDashboardTabAction>())
+    install(WebActionModule.create<ServiceMetadataAction>())
     install(WebTabResourceModule(
         environment = environment,
         slug = "loader",
@@ -51,7 +51,7 @@ class AdminDashboardModule(val environment: Environment) : KAbstractModule() {
     ))
 
     // Config
-    install(WebActionModule.forAction<ConfigAdminAction>())
+    install(WebActionModule.create<ConfigAdminAction>())
     multibind<DashboardTab, AdminDashboardTab>().toInstance(DashboardTab(
         name = "Config",
         slug = "config",
@@ -65,7 +65,7 @@ class AdminDashboardModule(val environment: Environment) : KAbstractModule() {
     ))
 
     // Web Actions
-    install(WebActionModule.forAction<WebActionMetadataAction>())
+    install(WebActionModule.create<WebActionMetadataAction>())
     multibind<DashboardTab, AdminDashboardTab>().toInstance(DashboardTab(
         name = "Web Actions",
         slug = "web-actions",

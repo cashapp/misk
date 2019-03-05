@@ -156,9 +156,9 @@ class TracingInterceptorTest {
     override fun configure() {
       install(WebTestingModule())
       install(MockTracingBackendModule())
-      install(WebActionModule.forAction<TracingTestAction>())
-      install(WebActionModule.forAction<FailedTracingTestAction>())
-      install(WebActionModule.forAction<ExceptionThrowingTracingTestAction>())
+      install(WebActionModule.create<TracingTestAction>())
+      install(WebActionModule.create<FailedTracingTestAction>())
+      install(WebActionModule.create<ExceptionThrowingTracingTestAction>())
 
       bind<TracingInterceptor.Factory>()
     }

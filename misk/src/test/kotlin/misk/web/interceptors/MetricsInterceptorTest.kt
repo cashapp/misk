@@ -97,7 +97,7 @@ class MetricsInterceptorTest {
       install(WebTestingModule())
       multibind<MiskCallerAuthenticator>().to<FakeCallerAuthenticator>()
       install(PrometheusHistogramRegistryModule())
-      install(WebActionModule.forAction<TestAction>())
+      install(WebActionModule.create<TestAction>())
 
       bind<MetricsInterceptor.Factory>()
     }

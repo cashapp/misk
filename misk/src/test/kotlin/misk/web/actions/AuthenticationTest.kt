@@ -100,8 +100,8 @@ class AuthenticationTest {
       install(WebTestingModule())
       install(AccessControlModule())
 
-      install(WebActionModule.forAction<CustomServiceAccessAction>())
-      install(WebActionModule.forAction<CustomRoleAccessAction>())
+      install(WebActionModule.create<CustomServiceAccessAction>())
+      install(WebActionModule.create<CustomRoleAccessAction>())
 
       multibind<AccessAnnotationEntry>().toInstance(
           AccessAnnotationEntry<CustomServiceAccess>(services = listOf("payments")))

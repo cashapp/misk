@@ -55,7 +55,7 @@ public class JavaPathParamDispatchTest {
   private static final class TestModule extends AbstractModule {
     @Override protected void configure() {
       install(new WebTestingModule());
-      install(WebActionModule.forAction(GetObjectDetails.class));
+      install(WebActionModule.create(GetObjectDetails.class));
     }
   }
 

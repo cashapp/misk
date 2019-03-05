@@ -94,7 +94,7 @@ internal class JceksSslClientServerTest {
 
   class TestModule : KAbstractModule() {
     override fun configure() {
-      install(WebActionModule.forAction<HelloAction>())
+      install(WebActionModule.create<HelloAction>())
       install(WebTestingModule(WebConfig(
           port = 0,
           idle_timeout = 500000,

@@ -143,8 +143,8 @@ internal class JettyServiceMetricsTest {
             }
           }
       ))
-      install(WebActionModule.forAction<HelloAction>())
-      install(WebActionModule.forAction<CurrentPoolMetricsAction>())
+      install(WebActionModule.create<HelloAction>())
+      install(WebActionModule.create<CurrentPoolMetricsAction>())
     }
   }
 

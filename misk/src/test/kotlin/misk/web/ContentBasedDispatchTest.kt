@@ -96,14 +96,14 @@ internal class ContentBasedDispatchTest {
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(WebTestingModule())
-      install(WebActionModule.forAction<PostPlainTextReturnAnyText>())
-      install(WebActionModule.forAction<PostAnyTextReturnPlainText>())
-      install(WebActionModule.forAction<PostPlainTextReturnPlainText>())
-      install(WebActionModule.forAction<PostJsonReturnJson>())
-      install(WebActionModule.forAction<PostPlainTextReturnJson>())
-      install(WebActionModule.forAction<PostJsonReturnPlainText>())
-      install(WebActionModule.forAction<PostAnythingReturnJson>())
-      install(WebActionModule.forAction<PostAnythingReturnAnything>())
+      install(WebActionModule.create<PostPlainTextReturnAnyText>())
+      install(WebActionModule.create<PostAnyTextReturnPlainText>())
+      install(WebActionModule.create<PostPlainTextReturnPlainText>())
+      install(WebActionModule.create<PostJsonReturnJson>())
+      install(WebActionModule.create<PostPlainTextReturnJson>())
+      install(WebActionModule.create<PostJsonReturnPlainText>())
+      install(WebActionModule.create<PostAnythingReturnJson>())
+      install(WebActionModule.create<PostAnythingReturnAnything>())
     }
   }
 

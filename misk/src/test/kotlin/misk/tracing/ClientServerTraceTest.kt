@@ -172,8 +172,8 @@ internal class ClientServerTraceTest {
     override fun configure() {
       install(MockTracingBackendModule())
       install(WebTestingModule())
-      install(WebActionModule.forAction<ReturnADinosaurAction>())
-      install(WebActionModule.forAction<RoarLikeDinosaurAction>())
+      install(WebActionModule.create<ReturnADinosaurAction>())
+      install(WebActionModule.create<RoarLikeDinosaurAction>())
     }
   }
 

@@ -351,7 +351,7 @@ class WebProxyActionTest {
     override fun configure() {
       bind<OptionalBinder>()
       bind<StaticResourceAction>()
-      install(WebActionModule.forPrefixedAction<WebProxyAction>("/local/prefix/"))
+      install(WebActionModule.createWithPrefix<WebProxyAction>("/local/prefix/"))
       multibind<WebProxyEntry>().toProvider(
           Provider<WebProxyEntry> {
             WebProxyEntry("/local/prefix/", upstreamServer.url("/").toString())

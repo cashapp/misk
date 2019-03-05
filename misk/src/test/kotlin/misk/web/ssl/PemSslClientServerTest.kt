@@ -110,7 +110,7 @@ internal class PemSslClientServerTest {
               ),
               mutual_auth = WebSslConfig.MutualAuth.REQUIRED)
       )))
-      install(WebActionModule.forAction<HelloAction>())
+      install(WebActionModule.create<HelloAction>())
     }
   }
 

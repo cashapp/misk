@@ -20,7 +20,7 @@ class ReadinessCheckActionTest {
       MiskTestingServiceModule(),
       FakeServiceModule(),
       FakeHealthCheckModule(),
-      WebActionModule.forAction<ReadinessCheckAction>()
+      WebActionModule.create<ReadinessCheckAction>()
   )
 
   @Inject lateinit var readinessCheckAction: ReadinessCheckAction

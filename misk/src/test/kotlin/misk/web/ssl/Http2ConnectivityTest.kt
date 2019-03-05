@@ -94,7 +94,7 @@ class Http2ConnectivityTest {
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(WebTestingModule())
-      install(WebActionModule.forAction<HelloAction>())
+      install(WebActionModule.create<HelloAction>())
     }
   }
 

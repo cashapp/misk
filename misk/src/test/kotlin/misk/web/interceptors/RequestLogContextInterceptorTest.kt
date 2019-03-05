@@ -73,7 +73,7 @@ internal class RequestLogContextInterceptorTest {
       install(AccessControlModule())
       install(WebTestingModule())
       multibind<MiskCallerAuthenticator>().to<FakeCallerAuthenticator>()
-      install(WebActionModule.forAction<TestAction>())
+      install(WebActionModule.create<TestAction>())
     }
   }
 }

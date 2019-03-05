@@ -53,8 +53,8 @@ internal class PlainTextRequestTest {
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(WebTestingModule())
-      install(WebActionModule.forAction<PassAsString>())
-      install(WebActionModule.forAction<PassAsByteString>())
+      install(WebActionModule.create<PassAsString>())
+      install(WebActionModule.create<PassAsByteString>())
     }
   }
 
