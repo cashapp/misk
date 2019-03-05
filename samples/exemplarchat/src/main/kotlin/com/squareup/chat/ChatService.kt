@@ -16,11 +16,11 @@ fun main(args: Array<String>) {
 
   MiskApplication(
       MiskRealServiceModule(),
-      MiskWebModule(),
+      MiskWebModule(config.web),
       RealEventRouterModule(environment),
       ChatModule(),
       ConfigModule.create("chat", config),
       EnvironmentModule(environment),
-      PrometheusMetricsModule()
+      PrometheusMetricsModule(config.prometheus)
   ).run(args)
 }

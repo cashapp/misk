@@ -31,18 +31,6 @@ class MiskConfigTest {
   @Inject
   private lateinit var testConfig: TestConfig
 
-  @field:[Inject Named("consumer_a")]
-  lateinit var consumerA: ConsumerConfig
-
-  @field:[Inject Named("consumer_b")]
-  lateinit var consumerB: ConsumerConfig
-
-  @field:[Inject]
-  lateinit var webConfig: WebConfig
-
-  @field:[Inject]
-  lateinit var nestedConfig: NestedConfig
-
   @Test
   fun configIsProperlyParsed() {
     assertThat(testConfig.web).isEqualTo(WebConfig(5678, 30_000))
@@ -52,17 +40,6 @@ class MiskConfigTest {
     assertThat((testConfig.action_exception_log_level)).isEqualTo(
         ActionExceptionLogLevelConfig(Level.INFO, Level.ERROR)
     )
-  }
-
-  @Test
-  fun subConfigsWithDefaultNamesAreBoundUnqualified() {
-    assertThat(webConfig).isEqualTo(WebConfig(5678, 30_000))
-  }
-
-  @Test
-  fun subConfigsWithCustomNamesAreBoundWithNamedQualifiers() {
-    assertThat(consumerA).isEqualTo(ConsumerConfig(0, 1))
-    assertThat(consumerB).isEqualTo(ConsumerConfig(1, 2))
   }
 
   @Test
@@ -134,10 +111,5 @@ class MiskConfigTest {
     // NB(mmihic): These are absolute paths, so we can only look at the end which is consistent
     assertThat(filesInDir[0]).endsWith("/overrides/override-test-app1.yaml")
     assertThat(filesInDir[1]).endsWith("/overrides/override-test-app2.yaml")
-  }
-
-  @Test
-  fun bindImmediateChildren() {
-    assertThat(nestedConfig.child_nested.nested_value).isEqualTo("nested value")
   }
 }

@@ -24,15 +24,6 @@ class SecretConfigTest {
   @Inject
   private lateinit var secretConfig: SuperSecretConfig
 
-  @Inject
-  lateinit var secretInformationConfig: SecretInformationConfig
-
-  @field:[Inject Named("consumer_a")]
-  private lateinit var consumerA: SecretInformationConfig
-
-  @field:[Inject Named("consumer_b")]
-  private lateinit var consumerB: SecretInformationConfig
-
   @Test
   fun topLevelSecretsLoaded() {
     // Basic secrets.
@@ -67,18 +58,6 @@ class SecretConfigTest {
         .isEqualTo("nothing")
     assertThat(
         secretConfig.secret_information_wrapper.secret_information.value.limit).isEqualTo(73)
-  }
-
-  @Test
-  fun injectSecretValue() {
-    assertThat(secretInformationConfig.answer_to_universe).isEqualTo("42")
-    assertThat(secretInformationConfig.limit).isEqualTo(5)
-  }
-
-  @Test
-  fun subSecretConfigsWithCustomNamesAreBoundWithNamedQualifiers() {
-    assertThat(consumerA.answer_to_universe).isEqualTo("this is consumer A")
-    assertThat(consumerB.answer_to_universe).isEqualTo("this is consumer B")
   }
 
   @Test
