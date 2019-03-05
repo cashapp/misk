@@ -15,7 +15,6 @@ import javax.inject.Singleton
  * ChatWebSocketAction is a basic chat program which supports multiple chat rooms and their
  * histories through web socket connections.
  */
-@Singleton
 class ChatWebSocketAction : WebAction {
   @Inject lateinit var eventRouter: EventRouter
 

@@ -10,11 +10,9 @@ import javax.inject.Inject
 
 @MiskTest
 class HelloWebActionTest {
-  @Inject lateinit var helloWebAction: HelloWebAction
-
   @Test
   fun happyPath() {
-    assertThat(helloWebAction.hello("sandy", Headers.of(), null, null))
+    assertThat(HelloWebAction().hello("sandy", Headers.of(), null, null))
         .isEqualTo(HelloResponse("YO", "SANDY"))
   }
 }

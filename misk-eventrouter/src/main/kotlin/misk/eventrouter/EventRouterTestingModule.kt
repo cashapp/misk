@@ -47,6 +47,8 @@ class EventRouterTestingModule internal constructor(val distributed: Boolean) : 
       multibind<Service>().to<TestingService>()
     }
 
+    bind<FakeClusterMapper>()
+    bind<FakeClusterConnector>()
     bind<ClusterConnector>().to<FakeClusterConnector>()
     bind<ClusterMapper>().to<FakeClusterMapper>()
     install(MoshiAdapterModule(SocketEventJsonAdapter))
