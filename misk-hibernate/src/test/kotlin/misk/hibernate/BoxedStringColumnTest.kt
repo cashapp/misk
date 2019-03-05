@@ -87,7 +87,7 @@ class BoxedStringColumnTest {
       install(EnvironmentModule(Environment.TESTING))
 
       val config = MiskConfig.load<RootConfig>("boxedstring", Environment.TESTING)
-      install(HibernateTestingModule(TokenColumn::class))
+      install(HibernateTestingModule(TokenColumn::class, config.data_source))
       install(HibernateModule(TokenColumn::class, config.data_source))
       install(object : HibernateEntityModule(TokenColumn::class) {
         override fun configureHibernate() {

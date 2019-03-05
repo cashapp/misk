@@ -91,7 +91,7 @@ class ProtoColumnTest {
       install(EnvironmentModule(Environment.TESTING))
 
       val config = MiskConfig.load<RootConfig>("protocolumn", Environment.TESTING)
-      install(HibernateTestingModule(SuperHeroMoviesDb::class))
+      install(HibernateTestingModule(SuperHeroMoviesDb::class, config.data_source))
       install(HibernateModule(SuperHeroMoviesDb::class, config.data_source))
       install(object : HibernateEntityModule(SuperHeroMoviesDb::class) {
         override fun configureHibernate() {
