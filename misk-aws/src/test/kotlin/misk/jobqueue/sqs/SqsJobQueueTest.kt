@@ -236,7 +236,7 @@ internal class SqsJobQueueTest {
       multibind<Service>().to<DockerSqs.Service>()
       install(MiskTestingServiceModule())
       install(MockTracingBackendModule())
-      install(Modules.override(AwsSqsJobQueueModule()).with(SQSTestModule()))
+      install(Modules.override(AwsSqsJobQueueModule(AwsSqsJobQueueConfig())).with(SQSTestModule()))
     }
   }
 

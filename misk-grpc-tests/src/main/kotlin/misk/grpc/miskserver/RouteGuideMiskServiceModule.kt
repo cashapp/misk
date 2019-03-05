@@ -2,8 +2,8 @@ package misk.grpc.miskserver
 
 import com.google.inject.Provides
 import misk.inject.KAbstractModule
+import misk.web.WebActionModule
 import misk.web.WebTestingModule
-import misk.web.actions.WebActionEntry
 import misk.web.jetty.JettyService
 import javax.inject.Named
 
@@ -11,7 +11,7 @@ import javax.inject.Named
 class RouteGuideMiskServiceModule : KAbstractModule() {
   override fun configure() {
     install(WebTestingModule())
-    multibind<WebActionEntry>().toInstance(WebActionEntry<GetFeatureGrpcAction>())
+    install(WebActionModule.forAction<GetFeatureGrpcAction>())
   }
 
   @Provides

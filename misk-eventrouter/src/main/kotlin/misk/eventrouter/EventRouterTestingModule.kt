@@ -39,8 +39,12 @@ class EventRouterTestingModule internal constructor(val distributed: Boolean) : 
   }
 
   override fun configure() {
+    bind<EventRouterTester>()
     if (distributed) {
+      bind<FakeClusterMapper>()
+      bind<FakeClusterConnector>()
       bind<EventRouter>().to<RealEventRouter>()
+      bind<RealEventRouter>()
     } else {
       bind<EventRouter>().to<RealEventRouter>().asSingleton()
       bind<RealEventRouter>().asSingleton()

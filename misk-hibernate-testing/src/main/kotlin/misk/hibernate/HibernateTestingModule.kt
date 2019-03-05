@@ -41,6 +41,7 @@ class HibernateTestingModule(
     val transacterProvider = getProvider(transacterKey)
 
     val moshiProvider = getProvider(Moshi::class.java)
+    bind<OkHttpClient>()
     val okHttpClientProvider = getProvider(OkHttpClient::class.java)
     bind(crossShardQueryDetectorKey).toProvider(Provider<VitessScaleSafetyChecks> {
       VitessScaleSafetyChecks(

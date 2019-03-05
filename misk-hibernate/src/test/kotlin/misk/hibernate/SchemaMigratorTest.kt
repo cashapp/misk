@@ -70,6 +70,7 @@ internal class SchemaMigratorTest {
               emptySet())
       multibind<Service>().toInstance(dataSourceService)
       bind<DataSource>().annotatedWith<Movies>().toProvider(dataSourceService)
+      bind<HibernateInjectorAccess>()
       val injectorServiceProvider = getProvider(HibernateInjectorAccess::class.java)
       val sessionFactoryServiceKey = Key.get(SessionFactoryService::class.java, Movies::class.java)
       bind(sessionFactoryServiceKey).toProvider(Provider<SessionFactoryService> {
@@ -81,6 +82,7 @@ internal class SchemaMigratorTest {
       val sessionFactoryProvider = getProvider(sessionFactoryKey)
       multibind<Service>().to(sessionFactoryServiceKey)
       val transacterKey = Key.get(Transacter::class.java, Movies::class.java)
+      bind<QueryTracingListener>()
       bind(transacterKey).toProvider(object : Provider<Transacter> {
         @Inject lateinit var queryTracingListener: QueryTracingListener
         override fun get(): RealTransacter = RealTransacter(

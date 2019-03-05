@@ -9,7 +9,7 @@ import misk.inject.KAbstractModule
 import misk.inject.asSingleton
 import misk.moshi.MoshiAdapterModule
 import misk.moshi.adapter
-import misk.web.actions.WebActionEntry
+import misk.web.WebActionModule
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.ThreadPoolExecutor
@@ -30,7 +30,7 @@ class RealEventRouterModule(val environment: Environment) : KAbstractModule() {
     }
     bind<ClusterMapper>().to<ConsistentHashing>()
     install(MoshiAdapterModule(SocketEventJsonAdapter))
-    multibind<WebActionEntry>().toInstance(WebActionEntry<EventRouterConnectionAction>())
+    install(WebActionModule.forAction<EventRouterConnectionAction>())
   }
 
   @Provides @Singleton @ForEventRouterActions

@@ -17,6 +17,7 @@ import misk.security.ssl.TrustStoreConfig
 import misk.service.CachedTestService
 import misk.tasks.DelayedTask
 import misk.tasks.RepeatedTaskQueue
+import misk.zookeeper.ZkClientFactory
 import java.time.Clock
 import javax.inject.Singleton
 
@@ -30,6 +31,8 @@ internal class ZkTestModule : KAbstractModule() {
         trust_store = TrustStoreConfig(truststrorePath, "changeit", FORMAT_JKS)))
     bind<String>().annotatedWith<AppName>().toInstance("my-app")
 
+    bind<ZkLeaseManager>()
+    bind<ZkClientFactory>()
     multibind<Service>().to<StartZookeeperService>()
     install(FakeClusterModule())
     install(Modules.override(ZookeeperModule()).with(object : KAbstractModule() {
@@ -38,7 +41,7 @@ internal class ZkTestModule : KAbstractModule() {
       @Provides @ForZkLease
       fun provideTaskQueue(
         clock: Clock,
-        delayQueue: ExplicitReleaseDelayQueue<DelayedTask>
+        @ForZkLease delayQueue: ExplicitReleaseDelayQueue<DelayedTask>
       ): RepeatedTaskQueue {
         return RepeatedTaskQueue.forTesting("zk-lease-poller", clock, delayQueue)
       }

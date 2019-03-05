@@ -30,10 +30,6 @@ class WebTestingModule(
   override fun configure() {
     install(EnvironmentModule(Environment.TESTING))
     install(MiskTestingServiceModule())
-    install(MiskWebModule())
+    install(MiskWebModule(webConfig))
   }
-
-  @Provides
-  @Singleton
-  fun provideWebConfig() = webConfig
 }

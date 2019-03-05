@@ -33,6 +33,7 @@ internal class MiskTestExtension : BeforeEachCallback, AfterEachCallback {
         // Initialize empty sets for our multibindings.
         newMultibinder<BeforeEachCallback>()
         newMultibinder<AfterEachCallback>()
+        bind<Callbacks>()
       }
     }
 

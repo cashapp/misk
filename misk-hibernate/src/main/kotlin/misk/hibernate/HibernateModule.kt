@@ -80,6 +80,10 @@ class HibernateModule(
 
     bind(configKey).toInstance(config)
 
+    // Explicitly bind non-annotated bindings
+    bind<QueryTracingListener>()
+    bind<HibernateInjectorAccess>()
+
     bind(pingDatabaseServiceKey).toProvider(Provider<PingDatabaseService> {
       PingDatabaseService(qualifier, config, environmentProvider.get())
     }).asSingleton()
