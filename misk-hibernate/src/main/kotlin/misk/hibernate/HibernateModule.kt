@@ -11,6 +11,7 @@ import misk.jdbc.DataSourceConfig
 import misk.jdbc.DataSourceDecorator
 import misk.jdbc.DataSourceService
 import misk.jdbc.PingDatabaseService
+import misk.metrics.Metrics
 import misk.resources.ResourceLoader
 import misk.vitess.StartVitessService
 import org.hibernate.SessionFactory
@@ -89,9 +90,15 @@ class HibernateModule(
     newMultibinder<DataSourceDecorator>(qualifier)
 
     bind(dataSourceKey).toProvider(dataSourceServiceKey).asSingleton()
-    bind(dataSourceServiceKey).toProvider(Provider<DataSourceService> {
-      DataSourceService(qualifier, config, environmentProvider.get(),
-          dataSourceDecoratorsProvider.get())
+    bind(dataSourceServiceKey).toProvider(object : Provider<DataSourceService> {
+      @com.google.inject.Inject(optional = true) var metrics: Metrics? = null
+      override fun get() = DataSourceService(
+        qualifier,
+        config,
+        environmentProvider.get(),
+        dataSourceDecoratorsProvider.get(),
+        metrics
+      )
     }).asSingleton()
     multibind<Service>().to(dataSourceServiceKey)
 
