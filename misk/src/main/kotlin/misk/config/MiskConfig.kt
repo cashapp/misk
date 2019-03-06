@@ -70,6 +70,14 @@ object MiskConfig {
     }
   }
 
+  fun <T : Config> toYaml(config: T): String {
+    val mapper = ObjectMapper(YAMLFactory()).registerModules(
+        KotlinModule(),
+        JavaTimeModule(),
+        SecretJacksonModule())
+    return mapper.writeValueAsString(config)
+  }
+
   @JvmStatic
   fun filesInDir(
     dir: String,
