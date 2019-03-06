@@ -256,6 +256,47 @@ export const FilterWebActions = (props: IState & IDispatchProps) => {
     </div>
   )
 }
+const SkeletonText = () => (
+  <span className={Classes.SKELETON}>{"Lorem ipsum"}</span>
+)
+
+const SkeletonWebActions = () => (
+  <Card>
+    <Header>
+      {[HTTPMethod.DELETE, HTTPMethod.GET, HTTPMethod.PUT, HTTPMethod.POST].map(
+        m => (
+          <MethodTag method={m} />
+        )
+      )}
+      <FloatLeft>
+        <H3 className={Classes.SKELETON}>{"AnotherWebAction"}</H3>
+      </FloatLeft>
+      <FloatLeft>
+        <CodeTag large={true}>{<SkeletonText />}</CodeTag>
+      </FloatLeft>
+    </Header>
+    <FlexContainer>
+      <Column>
+        <MetadataMenu>
+          <MenuItem label={"Function"} text={<SkeletonText />} />
+          <MenuItem label={"Services"} text={<SkeletonText />} />
+          <MenuItem label={"Roles"} text={<SkeletonText />} />
+          <MenuItem label={"Access"} text={<SkeletonText />} />
+        </MetadataMenu>
+      </Column>
+      <Column>
+        <MetadataMenu>
+          <MenuItem label={"Content Types"} text={<SkeletonText />} />
+          <MenuItem
+            label={"Application Interceptors"}
+            text={<SkeletonText />}
+          />
+          <MenuItem label={"Network Interceptors"} text={<SkeletonText />} />
+        </MetadataMenu>
+      </Column>
+    </FlexContainer>
+  </Card>
+)
 
 const WebActionsContainer = (props: IState & IDispatchProps) => {
   const metadata = simpleSelect(props.webActions, "metadata")
@@ -267,7 +308,7 @@ const WebActionsContainer = (props: IState & IDispatchProps) => {
       </div>
     )
   } else {
-    return <Spinner />
+    return <SkeletonWebActions />
   }
 }
 
