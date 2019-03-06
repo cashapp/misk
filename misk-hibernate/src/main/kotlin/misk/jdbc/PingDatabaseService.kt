@@ -8,11 +8,14 @@ import misk.backoff.ExponentialBackoff
 import misk.backoff.retry
 import misk.environment.Environment
 import misk.inject.toKey
+import misk.logging.getLogger
 import java.time.Duration
 import java.util.Properties
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.reflect.KClass
+
+private val logger = getLogger<PingDatabaseService>()
 
 /**
  * Service that waits for the database to become healthy. This is needed if we're booting up a
@@ -39,6 +42,7 @@ class PingDatabaseService @Inject constructor(
               c.createStatement().executeQuery("SELECT 1 FROM dual").uniqueInt()
           check(result == 1)
         } catch (e: Exception) {
+          logger.error(e) { "error attempting to ping the database" }
           val message = e.message
           if (message != null && message.contains("table dual not found")) {
             throw RuntimeException(
