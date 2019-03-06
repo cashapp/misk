@@ -1,11 +1,47 @@
 import {
   createAction,
+  defaultRootState,
   IAction,
-  IRootState,
-  defaultRootState
+  IRootState
 } from "@misk/simpleredux"
 import axios from "axios"
+import { HTTPMethod } from "http-method-enum"
+import { chain, flatMap } from "lodash"
 import { all, AllEffect, call, put, takeLatest } from "redux-saga/effects"
+
+export interface IWebActionAPI {
+  allowedServices: string[]
+  allowedRoles: string[]
+  applicationInterceptors: string[]
+  dispatchMechanism: HTTPMethod
+  function: string
+  functionAnnotations: string[]
+  name: string
+  networkInterceptors: string[]
+  parameterTypes: string[]
+  pathPattern: string
+  requestMediaTypes: string[]
+  responseMediaType: string
+  returnType: string
+}
+
+export interface IWebActionInternal {
+  allowedServices: string
+  allowedRoles: string
+  applicationInterceptors: string[]
+  authFunctionAnnotations: string[]
+  dispatchMechanism: HTTPMethod[]
+  function: string
+  functionAnnotations: string[]
+  name: string
+  networkInterceptors: string[]
+  nonAccessOrTypeFunctionAnnotations: string[]
+  parameterTypes: string[]
+  pathPattern: string
+  requestMediaTypes: string[]
+  responseMediaType: string
+  returnType: string
+}
 
 /**
  * Actions
@@ -13,6 +49,7 @@ import { all, AllEffect, call, put, takeLatest } from "redux-saga/effects"
  */
 export enum WEBACTIONS {
   DINOSAUR = "WEBACTIONS_DINOSAUR",
+  METADATA = "WEBACTIONS_METADATA",
   SUCCESS = "WEBACTIONS_SUCCESS",
   FAILURE = "WEBACTIONS_FAILURE"
 }
@@ -38,6 +75,7 @@ export interface IDispatchWebActions {
   webActionsFailure: (
     error: any
   ) => IAction<WEBACTIONS.FAILURE, IWebActionsPayload>
+  webActionsMetadata: () => IAction<WEBACTIONS.METADATA, IWebActionsPayload>
   webActionsSuccess: (
     data: any
   ) => IAction<WEBACTIONS.SUCCESS, IWebActionsPayload>
@@ -54,6 +92,12 @@ export const dispatchWebActions: IDispatchWebActions = {
     createAction<WEBACTIONS.FAILURE, IWebActionsPayload>(WEBACTIONS.FAILURE, {
       ...error,
       loading: false,
+      success: false
+    }),
+  webActionsMetadata: () =>
+    createAction<WEBACTIONS.METADATA, IWebActionsPayload>(WEBACTIONS.METADATA, {
+      error: null,
+      loading: true,
       success: false
     }),
   webActionsSuccess: (data: any) =>
@@ -90,8 +134,82 @@ function* handleDinosaur(action: IAction<WEBACTIONS, IWebActionsPayload>) {
   }
 }
 
+function* handleMetadata() {
+  try {
+    const { data } = yield call(axios.get, "/api/webactionmetadata")
+    const { webActionMetadata } = data
+    const metadata = chain(webActionMetadata)
+      .map((action: IWebActionAPI) => {
+        const authFunctionAnnotations = action.functionAnnotations.filter(
+          a => a.includes("Access") || a.includes("authz")
+        )
+        const nonAccessOrTypeFunctionAnnotations = action.functionAnnotations.filter(
+          a =>
+            !(
+              a.includes("RequestContentType") ||
+              a.includes("ResponseContentType") ||
+              a.includes("Access") ||
+              a.includes("authz") ||
+              a.toUpperCase().includes(HTTPMethod.DELETE) ||
+              a.toUpperCase().includes(HTTPMethod.GET) ||
+              a.toUpperCase().includes(HTTPMethod.HEAD) ||
+              a.toUpperCase().includes(HTTPMethod.PATCH) ||
+              a.toUpperCase().includes(HTTPMethod.POST) ||
+              a.toUpperCase().includes(HTTPMethod.PUT)
+            )
+        )
+        const emptyAllowedArrayValue =
+          authFunctionAnnotations.length > 1 &&
+          authFunctionAnnotations[0].includes("Unauthenticated")
+            ? "All"
+            : "None"
+        const allowedRoles =
+          action.allowedRoles.length > 0
+            ? action.allowedRoles.join(", ")
+            : emptyAllowedArrayValue
+
+        const allowedServices =
+          action.allowedServices.length > 0
+            ? action.allowedServices.join(", ")
+            : emptyAllowedArrayValue
+
+        return {
+          ...action,
+          allowedRoles,
+          allowedServices,
+          authFunctionAnnotations,
+          dispatchMechanism: [action.dispatchMechanism],
+          function: action.function.split("fun ").pop(),
+          nonAccessOrTypeFunctionAnnotations
+        }
+      })
+      .groupBy("pathPattern")
+      .map((actions: IWebActionInternal[]) => {
+        const dispatchMechanism = flatMap(
+          actions,
+          action => action.dispatchMechanism
+        )
+        const mergedAction = actions[0]
+        mergedAction.dispatchMechanism = dispatchMechanism.sort().reverse()
+        return mergedAction
+      })
+      .sortBy(["name", "pathPattern"])
+      .value()
+    // TODO(adrw) build index of keyspace for filterable fields
+    // const index = chain(metadata).value()
+    // console.log(index)
+
+    yield put(dispatchWebActions.webActionsSuccess({ metadata }))
+  } catch (e) {
+    yield put(dispatchWebActions.webActionsFailure({ error: { ...e } }))
+  }
+}
+
 export function* watchWebActionsSagas(): IterableIterator<AllEffect> {
-  yield all([takeLatest(WEBACTIONS.DINOSAUR, handleDinosaur)])
+  yield all([
+    takeLatest(WEBACTIONS.DINOSAUR, handleDinosaur),
+    takeLatest(WEBACTIONS.METADATA, handleMetadata)
+  ])
 }
 
 /**
@@ -111,6 +229,7 @@ export const WebActionsReducer = (
   switch (action.type) {
     case WEBACTIONS.DINOSAUR:
     case WEBACTIONS.FAILURE:
+    case WEBACTIONS.METADATA:
     case WEBACTIONS.SUCCESS:
       return state.merge(action.payload)
     default:
@@ -125,6 +244,7 @@ export const WebActionsReducer = (
  * Duck state is attached at the root level of global state
  */
 export interface IWebActionsState extends IRootState {
+  metadata: IWebActionInternal
   [key: string]: any
 }
 
