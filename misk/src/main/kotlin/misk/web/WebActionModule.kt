@@ -12,7 +12,7 @@ class WebActionModule<A : WebAction> private constructor(
   override fun configure() {
     multibind<WebActionEntry>().toInstance(WebActionEntry(actionClass, url_path_prefix))
     // Ensures that the action has an @Inject annotation and that its dependencies are satisfied
-    getProvider(actionClass.java)
+    binder().skipSources(WebActionModule::class.java).getProvider(actionClass.java)
   }
 
   companion object {
