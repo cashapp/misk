@@ -45,8 +45,8 @@ export interface IWebActionAPI {
 }
 
 export interface IWebActionInternal {
-  allowedServices: string[]
-  allowedRoles: string[]
+  allowedServices: string
+  allowedRoles: string
   applicationInterceptors: string[]
   authFunctionAnnotations: string[]
   dispatchMechanism: HTTPMethod[]
@@ -176,15 +176,15 @@ const WebAction = (
                 {...props}
               />
               <Metadata
-                content={props.action.allowedServices.join(", ")}
+                content={props.action.allowedServices}
                 label={"Services"}
-                tooltip={props.action.allowedServices.join(", ")}
+                tooltip={props.action.allowedServices}
                 {...props}
               />
               <Metadata
-                content={props.action.allowedRoles.join(", ")}
+                content={props.action.allowedRoles}
                 label={"Roles"}
-                tooltip={props.action.allowedRoles.join(", ")}
+                tooltip={props.action.allowedRoles}
                 {...props}
               />
               <Metadata
@@ -298,21 +298,7 @@ export const WebActionsContainer = (props: IState & IDispatchProps) => {
     simpleType.array
   )
   const metadata = chain(rawMetadata)
-    .map(action => ({
-      ...action,
-      dispatchMechanism: [action.dispatchMechanism]
-    }))
-    .groupBy("pathPattern")
-    .map((actions: IWebActionInternal[]) => {
-      const dispatchMechanism = flatMap(
-        actions,
-        action => action.dispatchMechanism
-      )
-      const mergedAction = actions.pop()
-      mergedAction.dispatchMechanism = dispatchMechanism.sort().reverse()
-      return mergedAction
-    })
-    .map((action: IWebActionInternal) => {
+    .map((action: IWebActionAPI) => {
       const authFunctionAnnotations = action.functionAnnotations.filter(
         a => a.includes("Access") || a.includes("authz")
       )
@@ -331,13 +317,40 @@ export const WebActionsContainer = (props: IState & IDispatchProps) => {
             a.toUpperCase().includes(HTTPMethod.PUT)
           )
       )
-      const fun: string = action.function.split("fun ").pop()
+      const emptyAllowedArrayValue =
+        authFunctionAnnotations.length > 1 &&
+        authFunctionAnnotations[0].includes("Unauthenticated")
+          ? "All"
+          : "None"
+      const allowedRoles =
+        action.allowedRoles.length > 0
+          ? action.allowedRoles.join(", ")
+          : emptyAllowedArrayValue
+
+      const allowedServices =
+        action.allowedServices.length > 0
+          ? action.allowedServices.join(", ")
+          : emptyAllowedArrayValue
+
       return {
         ...action,
+        allowedRoles,
+        allowedServices,
         authFunctionAnnotations,
-        function: fun,
+        dispatchMechanism: [action.dispatchMechanism],
+        function: action.function.split("fun ").pop(),
         nonAccessOrTypeFunctionAnnotations
       }
+    })
+    .groupBy("pathPattern")
+    .map((actions: IWebActionInternal[]) => {
+      const dispatchMechanism = flatMap(
+        actions,
+        action => action.dispatchMechanism
+      )
+      const mergedAction = actions[0]
+      mergedAction.dispatchMechanism = dispatchMechanism.sort().reverse()
+      return mergedAction
     })
     .sortBy(["name", "pathPattern"])
     .value()
