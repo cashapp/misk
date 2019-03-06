@@ -1,13 +1,11 @@
 package misk.web
 
-import com.google.inject.Provides
 import misk.MiskTestingServiceModule
 import misk.environment.Environment
 import misk.environment.EnvironmentModule
 import misk.inject.KAbstractModule
 import misk.security.ssl.CertStoreConfig
 import misk.security.ssl.SslLoader
-import javax.inject.Singleton
 
 /**
  * A module that starts an embedded Jetty web server configured for testing. The server supports
@@ -30,10 +28,6 @@ class WebTestingModule(
   override fun configure() {
     install(EnvironmentModule(Environment.TESTING))
     install(MiskTestingServiceModule())
-    install(MiskWebModule())
+    install(MiskWebModule(webConfig))
   }
-
-  @Provides
-  @Singleton
-  fun provideWebConfig() = webConfig
 }

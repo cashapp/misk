@@ -15,10 +15,10 @@ fun main(args: Array<String>) {
 
   MiskApplication(
       MiskRealServiceModule(),
-      MiskWebModule(),
+      MiskWebModule(config.web),
       ExemplarModule(),
       ConfigModule.create("exemplar", config),
       EnvironmentModule(environment),
-      PrometheusMetricsModule()
+      PrometheusMetricsModule(config.prometheus)
   ).run(args)
 }

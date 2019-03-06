@@ -6,7 +6,7 @@ import misk.testing.MiskTestModule
 import misk.web.Get
 import misk.web.PathParam
 import misk.web.ResponseContentType
-import misk.web.actions.WebActionEntry
+import misk.web.WebActionModule
 import misk.web.WebTestingModule
 import misk.web.actions.WebAction
 import misk.web.jetty.JettyService
@@ -48,12 +48,12 @@ internal class PathParamDispatchTest {
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(WebTestingModule())
-      multibind<WebActionEntry>().toInstance(WebActionEntry<GetObjectDetails>())
-      multibind<WebActionEntry>().toInstance(WebActionEntry<CustomPathParamName>())
+      install(WebActionModule.create<GetObjectDetails>())
+      install(WebActionModule.create<CustomPathParamName>())
     }
   }
 
-  class GetObjectDetails : WebAction {
+  class GetObjectDetails @Inject constructor() : WebAction {
     @Get("/objects/{resourceType}/{name}/{version}")
     @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
     fun getObjectDetails(
@@ -63,7 +63,7 @@ internal class PathParamDispatchTest {
     ): String = "(type=$resourceType,name=$name,version=$version)"
   }
 
-  class CustomPathParamName : WebAction {
+  class CustomPathParamName @Inject constructor() : WebAction {
     @Get("/{router}")
     @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
     fun router(@PathParam("router") routeName: String) = "routing to $routeName"

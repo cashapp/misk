@@ -6,9 +6,7 @@ import javax.net.ssl.SSLContext
 import javax.net.ssl.TrustManager
 import javax.net.ssl.TrustManagerFactory
 
-class SslContextFactory {
-  @Inject lateinit var sslLoader: SslLoader
-
+class SslContextFactory @Inject constructor(private val sslLoader: SslLoader) {
   /** @return A new [SSLContext] for the given certstore and optional truststore config */
   fun create(certStore: CertStoreConfig? = null, trustStore: TrustStoreConfig? = null): SSLContext {
     val loadedCertStore = certStore?.let { sslLoader.loadCertStore(certStore) }

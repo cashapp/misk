@@ -1,5 +1,7 @@
 package misk.jobqueue.sqs
 
+import misk.config.Config
+
 /**
  * [AwsSqsJobQueueConfig] is the configuration for job queueing backed by Amazon's
  * Simple Queuing Service
@@ -10,4 +12,4 @@ class AwsSqsJobQueueConfig(
    * at a time, so this parameter controls how many fetches of 10 are outstanding at any one time.
    */
   val concurrent_receivers_per_queue: Int = 1
-)
+): Config

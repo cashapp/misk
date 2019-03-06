@@ -9,6 +9,7 @@ import misk.security.authz.FakeCallerAuthenticator
 import misk.security.authz.MiskCallerAuthenticator
 import misk.web.Get
 import misk.web.ResponseContentType
+import misk.web.WebActionModule
 import misk.web.WebTestingModule
 import misk.web.mediatype.MediaTypes
 import misk.web.toResponseBody
@@ -20,8 +21,8 @@ class TestWebActionModule : KAbstractModule() {
     install(WebTestingModule())
     install(AccessControlModule())
 
-    multibind<WebActionEntry>().toInstance(WebActionEntry<CustomServiceAccessAction>())
-    multibind<WebActionEntry>().toInstance(WebActionEntry<CustomRoleAccessAction>())
+    install(WebActionModule.create<CustomServiceAccessAction>())
+    install(WebActionModule.create<CustomRoleAccessAction>())
 
     multibind<AccessAnnotationEntry>().toInstance(
         AccessAnnotationEntry<CustomServiceAccess>(services = listOf("payments")))
@@ -30,7 +31,7 @@ class TestWebActionModule : KAbstractModule() {
     multibind<MiskCallerAuthenticator>().to<FakeCallerAuthenticator>()
   }
 
-  class CustomServiceAccessAction : WebAction {
+  class CustomServiceAccessAction @Inject constructor() : WebAction {
     @Inject
     lateinit var scopedCaller: ActionScoped<MiskCaller?>
 
@@ -44,7 +45,7 @@ class TestWebActionModule : KAbstractModule() {
   @Target(AnnotationTarget.FUNCTION)
   annotation class CustomServiceAccess
 
-  class CustomRoleAccessAction : WebAction {
+  class CustomRoleAccessAction @Inject constructor() : WebAction {
     @Inject
     lateinit var scopedCaller: ActionScoped<MiskCaller?>
 

@@ -18,13 +18,13 @@ import kotlin.reflect.KClass
  * Next we define actions that apply our annotation:
  *
  * ```
- * class DiscoverDinosaurAction : WebAction {
+ * class DiscoverDinosaurAction @Inject constructor() : WebAction {
  *   @Get("/discover")
  *   @PaleontologistAccess
  *   fun discover()
  * }
  *
- * class DigUpDinosaurAction : WebAction {
+ * class DigUpDinosaurAction @Inject constructor() : WebAction {
  *   @Get("/dig")
  *   @PaleontologistAccess
  *   fun dig()

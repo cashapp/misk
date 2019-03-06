@@ -7,8 +7,9 @@ import misk.inject.KAbstractModule
 import misk.inject.asSingleton
 
 /** [KubernetesClusterModule] installs cluster support based on Kubernetes */
-class KubernetesClusterModule : KAbstractModule() {
+class KubernetesClusterModule(private val config: KubernetesConfig) : KAbstractModule() {
   override fun configure() {
+    bind<KubernetesConfig>().toInstance(config)
     bind<Cluster>().to<DefaultCluster>()
     bind<DefaultCluster>().toProvider(KubernetesClusterProvider::class.java).asSingleton()
     multibind<Service>().to<KubernetesClusterWatcher>()

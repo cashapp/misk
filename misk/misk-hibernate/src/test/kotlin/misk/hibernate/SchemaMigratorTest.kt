@@ -33,7 +33,7 @@ internal class SchemaMigratorTest {
   val config = MiskConfig.load<RootConfig>("test_schemamigrator_app", defaultEnv)
 
   @Singleton
-  class DropTablesService : AbstractIdleService(), DependentService {
+  class DropTablesService @Inject constructor() : AbstractIdleService(), DependentService {
     @Inject @Movies lateinit var sessionFactoryProvider: Provider<SessionFactory>
 
     override val consumedKeys = setOf<Key<*>>(SessionFactoryService::class.toKey(Movies::class))

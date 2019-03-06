@@ -4,10 +4,10 @@ import com.google.inject.util.Modules
 import misk.MiskTestingServiceModule
 import misk.config.Config
 import misk.config.MiskConfig
-import misk.jdbc.DataSourceConfig
 import misk.environment.Environment
 import misk.environment.EnvironmentModule
 import misk.inject.KAbstractModule
+import misk.jdbc.DataSourceConfig
 import misk.logging.LogCollectorModule
 import misk.testing.MockTracingBackendModule
 import misk.time.FakeClockModule

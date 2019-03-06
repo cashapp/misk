@@ -7,6 +7,7 @@ import misk.clustering.DefaultCluster
 import misk.logging.getLogger
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
+import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
@@ -26,7 +27,7 @@ class FakeCluster internal constructor(
   constructor(resourceMapper: ExplicitClusterResourceMapper) :
       this(resourceMapper, DefaultCluster(self) { resourceMapper })
 
-  constructor() : this(ExplicitClusterResourceMapper().apply {
+  @Inject constructor() : this(ExplicitClusterResourceMapper().apply {
     setDefaultMapping(self)
   })
 

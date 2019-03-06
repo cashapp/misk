@@ -118,16 +118,16 @@ internal class WebDispatchTest {
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(WebTestingModule())
-      multibind<WebActionEntry>().toInstance(WebActionEntry<PostHello>())
-      multibind<WebActionEntry>().toInstance(WebActionEntry<GetHello>())
-      multibind<WebActionEntry>().toInstance(WebActionEntry<PostBye>())
-      multibind<WebActionEntry>().toInstance(WebActionEntry<GetBye>())
-      multibind<WebActionEntry>().toInstance(WebActionEntry<GetNothing>())
-      multibind<WebActionEntry>().toInstance(WebActionEntry<GetHello>("/path/prefix/"))
+      install(WebActionModule.create<PostHello>())
+      install(WebActionModule.create<GetHello>())
+      install(WebActionModule.create<PostBye>())
+      install(WebActionModule.create<GetBye>())
+      install(WebActionModule.create<GetNothing>())
+      install(WebActionModule.createWithPrefix<GetHello>("/path/prefix/"))
     }
   }
 
-  class PostHello : WebAction {
+  class PostHello @Inject constructor() : WebAction {
     @Post("/hello")
     @RequestContentType(MediaTypes.APPLICATION_JSON)
     @ResponseContentType(MediaTypes.APPLICATION_JSON)
@@ -135,14 +135,14 @@ internal class WebDispatchTest {
         HelloBye("post hello ${request.message}")
   }
 
-  class GetHello : WebAction {
+  class GetHello @Inject constructor() : WebAction {
     @Get("/hello/{message}")
     @ResponseContentType(MediaTypes.APPLICATION_JSON)
     fun hello(@PathParam("message") message: String) =
         HelloBye("get hello $message")
   }
 
-  class PostBye : WebAction {
+  class PostBye @Inject constructor() : WebAction {
     @Post("/bye")
     @RequestContentType(MediaTypes.APPLICATION_JSON)
     @ResponseContentType(MediaTypes.APPLICATION_JSON)
@@ -150,14 +150,14 @@ internal class WebDispatchTest {
         HelloBye("post bye ${request.message}")
   }
 
-  class GetBye : WebAction {
+  class GetBye @Inject constructor() : WebAction {
     @Get("/bye/{message}")
     @ResponseContentType(MediaTypes.APPLICATION_JSON)
     fun bye(@PathParam("message") message: String) =
         HelloBye("get bye $message")
   }
 
-  class GetNothing : WebAction {
+  class GetNothing @Inject constructor() : WebAction {
     @Get("/nothing")
     fun doNothing(): Nothing {
       throw UnsupportedOperationException("we did nothing")

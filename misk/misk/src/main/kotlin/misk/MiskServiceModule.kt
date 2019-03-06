@@ -25,7 +25,6 @@ import misk.inject.KAbstractModule
 import misk.metrics.MetricsModule
 import misk.moshi.MoshiModule
 import misk.prometheus.PrometheusHistogramRegistryModule
-import misk.random.RandomModule
 import misk.resources.ResourceLoaderModule
 import misk.time.ClockModule
 import misk.time.TickerModule
@@ -46,7 +45,6 @@ class MiskRealServiceModule : KAbstractModule() {
     install(ClockModule())
     install(SleeperModule())
     install(TickerModule())
-    install(RandomModule())
     install(MiskCommonServiceModule())
   }
 }

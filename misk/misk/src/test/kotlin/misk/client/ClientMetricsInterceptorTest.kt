@@ -16,7 +16,6 @@ import misk.web.RequestBody
 import misk.web.RequestContentType
 import misk.web.Response
 import misk.web.ResponseContentType
-import misk.web.actions.WebActionEntry
 import misk.web.WebTestingModule
 import misk.web.actions.WebAction
 import misk.web.jetty.JettyService
@@ -31,6 +30,7 @@ import retrofit2.http.POST
 import javax.inject.Inject
 import javax.inject.Singleton
 import misk.prometheus.PrometheusHistogramRegistryModule
+import misk.web.WebActionModule
 
 @MiskTest(startService = true)
 internal class ClientMetricsInterceptorTest {
@@ -84,7 +84,7 @@ internal class ClientMetricsInterceptorTest {
     override fun configure() {
       install(PrometheusHistogramRegistryModule())
       install(WebTestingModule())
-      multibind<WebActionEntry>().toInstance(WebActionEntry<PingAction>())
+      install(WebActionModule.create<PingAction>())
     }
   }
 
@@ -96,7 +96,7 @@ internal class ClientMetricsInterceptorTest {
     fun ping(@Body request: AppRequest): Call<AppResponse>
   }
 
-  class PingAction : WebAction {
+  class PingAction @Inject constructor() : WebAction {
     @Post("/ping")
     @RequestContentType(MediaTypes.APPLICATION_JSON)
     @ResponseContentType(MediaTypes.APPLICATION_JSON)

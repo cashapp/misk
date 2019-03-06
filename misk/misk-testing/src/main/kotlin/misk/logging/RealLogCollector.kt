@@ -7,11 +7,12 @@ import ch.qos.logback.core.UnsynchronizedAppenderBase
 import com.google.common.util.concurrent.AbstractIdleService
 import com.google.common.util.concurrent.Service.State.NEW
 import org.slf4j.LoggerFactory
+import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.reflect.KClass
 
 @Singleton
-internal class RealLogCollector : AbstractIdleService(), LogCollector {
+internal class RealLogCollector @Inject constructor() : AbstractIdleService(), LogCollector {
   private val events = mutableListOf<ILoggingEvent>()
 
   private val appender = object : UnsynchronizedAppenderBase<ILoggingEvent>() {

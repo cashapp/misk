@@ -2,7 +2,7 @@ package misk.web.metadata
 
 import misk.environment.Environment
 import misk.inject.KAbstractModule
-import misk.web.actions.WebActionEntry
+import misk.web.WebActionModule
 import misk.web.proxy.WebProxyAction
 import misk.web.proxy.WebProxyEntry
 import misk.web.resources.StaticResourceAction
@@ -22,13 +22,12 @@ class WebTabResourceModule(
             StaticResourceEntry(url_path_prefix = url_path_prefix, resourcePath = resourcePath))
 
     if (environment == Environment.DEVELOPMENT) {
-      multibind<WebActionEntry>().toInstance(
-          WebActionEntry<WebProxyAction>(url_path_prefix = url_path_prefix))
+      install(WebActionModule.createWithPrefix<WebProxyAction>(url_path_prefix = url_path_prefix))
       multibind<WebProxyEntry>().toInstance(
           WebProxyEntry(url_path_prefix = url_path_prefix, web_proxy_url = web_proxy_url))
     } else {
-      multibind<WebActionEntry>().toInstance(
-          WebActionEntry<StaticResourceAction>(url_path_prefix = url_path_prefix))
+      install(WebActionModule.createWithPrefix<StaticResourceAction>(url_path_prefix = url_path_prefix))
+      install(WebActionModule.createWithPrefix<StaticResourceAction>(url_path_prefix = url_path_prefix))
     }
   }
 }

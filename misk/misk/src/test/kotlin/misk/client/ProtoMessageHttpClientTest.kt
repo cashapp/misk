@@ -13,7 +13,7 @@ import misk.web.Post
 import misk.web.RequestBody
 import misk.web.RequestContentType
 import misk.web.ResponseContentType
-import misk.web.actions.WebActionEntry
+import misk.web.WebActionModule
 import misk.web.WebTestingModule
 import misk.web.actions.WebAction
 import misk.web.jetty.JettyService
@@ -58,7 +58,7 @@ class ProtoMessageHttpClientTest {
     ))
   }
 
-  class ReturnADinosaur : WebAction {
+  class ReturnADinosaur @Inject constructor() : WebAction {
     @Post("/cooldinos")
     @RequestContentType(MediaTypes.APPLICATION_JSON)
     @ResponseContentType(MediaTypes.APPLICATION_JSON)
@@ -69,7 +69,7 @@ class ProtoMessageHttpClientTest {
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(WebTestingModule())
-      multibind<WebActionEntry>().toInstance(WebActionEntry<ReturnADinosaur>())
+      install(WebActionModule.create<ReturnADinosaur>())
     }
   }
 

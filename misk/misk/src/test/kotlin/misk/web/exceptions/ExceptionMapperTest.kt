@@ -9,7 +9,7 @@ import misk.testing.MiskTestModule
 import misk.web.Get
 import misk.web.PathParam
 import misk.web.ResponseContentType
-import misk.web.actions.WebActionEntry
+import misk.web.WebActionModule
 import misk.web.WebTestingModule
 import misk.web.actions.WebAction
 import misk.web.jetty.JettyService
@@ -67,7 +67,7 @@ internal class ExceptionMapperTest {
     return httpClient.newCall(request).execute()
   }
 
-  class ThrowsActionException : WebAction {
+  class ThrowsActionException @Inject constructor() : WebAction {
     @Get("/throws/action/{statusCode}")
     @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
     fun throwsActionException(@PathParam statusCode: StatusCode): Nothing {
@@ -75,7 +75,7 @@ internal class ExceptionMapperTest {
     }
   }
 
-  class ThrowsUnmappedError : WebAction {
+  class ThrowsUnmappedError @Inject constructor() : WebAction {
     @Get("/throws/unmapped-error")
     @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
     fun throwsUnmappedException() {
@@ -86,8 +86,8 @@ internal class ExceptionMapperTest {
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(WebTestingModule())
-      multibind<WebActionEntry>().toInstance(WebActionEntry<ThrowsActionException>())
-      multibind<WebActionEntry>().toInstance(WebActionEntry<ThrowsUnmappedError>())
+      install(WebActionModule.create<ThrowsActionException>())
+      install(WebActionModule.create<ThrowsUnmappedError>())
     }
   }
 }

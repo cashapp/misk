@@ -7,8 +7,8 @@ import misk.inject.KAbstractModule
 import misk.inject.getInstance
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
+import misk.web.WebActionModule
 import misk.web.WebTestingModule
-import misk.web.actions.WebActionEntry
 import misk.web.jetty.JettyService
 import okhttp3.Call
 import okhttp3.EventListener
@@ -68,7 +68,7 @@ internal class HttpClientEventListenerTest {
   }
 
   @Singleton
-  class TestEventListener : EventListener() {
+  class TestEventListener @Inject constructor() : EventListener() {
     private var started = false
     override fun connectStart(call: Call, inetSocketAddress: InetSocketAddress, proxy: Proxy) {
       started = true
@@ -82,8 +82,7 @@ internal class HttpClientEventListenerTest {
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(WebTestingModule())
-      multibind<WebActionEntry>().toInstance(
-          WebActionEntry<ReturnADinosaurAction>())
+      install(WebActionModule.create<ReturnADinosaurAction>())
     }
   }
 }

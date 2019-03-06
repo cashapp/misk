@@ -7,7 +7,6 @@ import misk.moshi.adapter
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.web.actions.WebAction
-import misk.web.actions.WebActionEntry
 import misk.web.jetty.ConnectionMetrics
 import misk.web.jetty.JettyConnectionMetricsCollector
 import misk.web.jetty.JettyService
@@ -101,7 +100,7 @@ internal class JettyServiceMetricsTest {
     assertThat(metrics.utilization_max).isCloseTo(0.5, Percentage.withPercentage(10.0))
   }
 
-  internal class HelloAction : WebAction {
+  internal class HelloAction @Inject constructor() : WebAction {
     @Get("/hello")
     @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
     fun hi(): String {
@@ -116,7 +115,7 @@ internal class JettyServiceMetricsTest {
     val utilization_max: Double
   )
 
-  internal class CurrentPoolMetricsAction : WebAction {
+  internal class CurrentPoolMetricsAction @Inject constructor() : WebAction {
     @Inject lateinit var threadPoolMetrics: ThreadPoolMetrics
 
     @Get("/current-pool-metrics")
@@ -144,8 +143,8 @@ internal class JettyServiceMetricsTest {
             }
           }
       ))
-      multibind<WebActionEntry>().toInstance(WebActionEntry<HelloAction>())
-      multibind<WebActionEntry>().toInstance(WebActionEntry<CurrentPoolMetricsAction>())
+      install(WebActionModule.create<HelloAction>())
+      install(WebActionModule.create<CurrentPoolMetricsAction>())
     }
   }
 

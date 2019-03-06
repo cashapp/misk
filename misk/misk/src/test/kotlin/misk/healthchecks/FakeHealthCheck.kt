@@ -1,9 +1,10 @@
 package misk.healthchecks
 
+import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class FakeHealthCheck : HealthCheck {
+class FakeHealthCheck @Inject constructor() : HealthCheck {
   var status = HealthStatus.healthy()
 
   fun setHealthy(vararg messages: String) {

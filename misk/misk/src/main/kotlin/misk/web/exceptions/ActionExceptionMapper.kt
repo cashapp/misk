@@ -13,7 +13,7 @@ import javax.inject.Inject
 /**
  * Maps [ActionException]s into the appropriate status code. [ActionException]s corresponding
  * to client-errors (bad requests, resource not found, etc) are returned with full messages
- * allowing the client to deterine what went wrong; exceptions representing server errors
+ * allowing the client to determine what went wrong; exceptions representing server errors
  * are returned with just a status code and minimal messaging, to avoid leaking internal
  * implementation details and possible vulnerabilities
  */

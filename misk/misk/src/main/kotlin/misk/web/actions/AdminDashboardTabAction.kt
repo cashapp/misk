@@ -23,7 +23,7 @@ import javax.inject.Singleton
  */
 
 @Singleton
-class AdminDashboardTabAction : WebAction {
+class AdminDashboardTabAction @Inject constructor() : WebAction {
   @Inject @AdminDashboardTab private lateinit var adminDashboardTabs: List<DashboardTab>
   @Inject lateinit var callerProvider: @JvmSuppressWildcards ActionScoped<MiskCaller?>
 

@@ -14,7 +14,7 @@ import misk.web.Post
 import misk.web.RequestBody
 import misk.web.RequestContentType
 import misk.web.ResponseContentType
-import misk.web.actions.WebActionEntry
+import misk.web.WebActionModule
 import misk.web.WebTestingModule
 import misk.web.actions.WebAction
 import misk.web.jetty.JettyService
@@ -67,7 +67,7 @@ internal class TypedHttpClientTest {
     fun getDinosaur(@Body request: Dinosaur): Call<Dinosaur>
   }
 
-  class ReturnADinosaurAction : WebAction {
+  class ReturnADinosaurAction @Inject constructor() : WebAction {
     @Post("/cooldinos")
     @RequestContentType(MediaTypes.APPLICATION_JSON)
     @ResponseContentType(MediaTypes.APPLICATION_JSON)
@@ -83,7 +83,7 @@ internal class TypedHttpClientTest {
     fun getDinosaur(@Body request: Dinosaur): Call<Dinosaur>
   }
 
-  class ReturnAProtoDinosaurAction : WebAction {
+  class ReturnAProtoDinosaurAction @Inject constructor() : WebAction {
     @Post("/protodinos")
     @RequestContentType(MediaTypes.APPLICATION_PROTOBUF)
     @ResponseContentType(MediaTypes.APPLICATION_PROTOBUF)
@@ -94,8 +94,8 @@ internal class TypedHttpClientTest {
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(WebTestingModule())
-      multibind<WebActionEntry>().toInstance(WebActionEntry<ReturnADinosaurAction>())
-      multibind<WebActionEntry>().toInstance(WebActionEntry<ReturnAProtoDinosaurAction>())
+      install(WebActionModule.create<ReturnADinosaurAction>())
+      install(WebActionModule.create<ReturnAProtoDinosaurAction>())
     }
   }
 

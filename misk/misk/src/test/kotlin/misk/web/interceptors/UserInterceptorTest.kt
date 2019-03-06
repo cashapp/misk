@@ -12,7 +12,7 @@ import misk.web.NetworkInterceptor
 import misk.web.PathParam
 import misk.web.Response
 import misk.web.ResponseContentType
-import misk.web.actions.WebActionEntry
+import misk.web.WebActionModule
 import misk.web.WebTestingModule
 import misk.web.actions.WebAction
 import misk.web.jetty.JettyService
@@ -95,7 +95,7 @@ class UserInterceptorTest {
     }
   }
 
-  internal class TestAction : WebAction {
+  internal class TestAction @Inject constructor() : WebAction {
     @Get("/call/{responseType}")
     @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
     fun call(@Suppress("UNUSED_PARAMETER") @PathParam responseType: String): TestActionResponse {
@@ -122,7 +122,7 @@ class UserInterceptorTest {
       multibind<NetworkInterceptor.Factory>().toInstance(UserCreatedNetworkInterceptor.Factory())
       multibind<ApplicationInterceptor.Factory>().toInstance(UserCreatedInterceptor.Factory())
 
-      multibind<WebActionEntry>().toInstance(WebActionEntry<TestAction>())
+      install(WebActionModule.create<TestAction>())
     }
   }
 

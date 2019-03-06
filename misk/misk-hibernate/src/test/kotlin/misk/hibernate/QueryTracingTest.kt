@@ -8,7 +8,6 @@ import misk.hibernate.QueryTracingSpanNames.Companion.DB_SELECT
 import misk.hibernate.QueryTracingSpanNames.Companion.DB_UPDATE
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
-import misk.testing.MockTracingBackendModule
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -18,8 +17,7 @@ import javax.inject.Inject
 class QueryTracingTest {
   @MiskTestModule
   val module = Modules.combine(
-      MoviesTestModule(disableCrossShardQueryDetector = true),
-      MockTracingBackendModule()
+      MoviesTestModule(disableCrossShardQueryDetector = true)
   )
 
   @Inject @Movies private lateinit var transacter: Transacter

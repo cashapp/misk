@@ -18,7 +18,7 @@ import javax.inject.Singleton
 import kotlin.reflect.KType
 
 @Singleton
-class WebActionMetadataAction : WebAction {
+class WebActionMetadataAction @Inject constructor() : WebAction {
   @Inject internal lateinit var servletProvider: Provider<WebActionsServlet>
 
   @Get("/api/webactionmetadata")

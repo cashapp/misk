@@ -5,10 +5,10 @@ import misk.environment.Environment
 import misk.inject.KAbstractModule
 import misk.web.DashboardTab
 import misk.web.NetworkInterceptor
+import misk.web.WebActionModule
 import misk.web.actions.AdminDashboardTab
 import misk.web.actions.AdminDashboardTabAction
 import misk.web.actions.ServiceMetadataAction
-import misk.web.actions.WebActionEntry
 import misk.web.actions.WebActionMetadataAction
 import misk.web.interceptors.WideOpenDevelopmentInterceptorFactory
 
@@ -26,8 +26,8 @@ class AdminDashboardModule(val environment: Environment) : KAbstractModule() {
     multibind<NetworkInterceptor.Factory>().to<WideOpenDevelopmentInterceptorFactory>()
 
     // Loader
-    multibind<WebActionEntry>().toInstance(WebActionEntry<AdminDashboardTabAction>())
-    multibind<WebActionEntry>().toInstance(WebActionEntry<ServiceMetadataAction>())
+    install(WebActionModule.create<AdminDashboardTabAction>())
+    install(WebActionModule.create<ServiceMetadataAction>())
     install(WebTabResourceModule(
         environment = environment,
         slug = "loader",
@@ -51,7 +51,7 @@ class AdminDashboardModule(val environment: Environment) : KAbstractModule() {
     ))
 
     // Config
-    multibind<WebActionEntry>().toInstance(WebActionEntry<ConfigAdminAction>())
+    install(WebActionModule.create<ConfigAdminAction>())
     multibind<DashboardTab, AdminDashboardTab>().toInstance(DashboardTab(
         name = "Config",
         slug = "config",
@@ -65,7 +65,7 @@ class AdminDashboardModule(val environment: Environment) : KAbstractModule() {
     ))
 
     // Web Actions
-    multibind<WebActionEntry>().toInstance(WebActionEntry<WebActionMetadataAction>())
+    install(WebActionModule.create<WebActionMetadataAction>())
     multibind<DashboardTab, AdminDashboardTab>().toInstance(DashboardTab(
         name = "Web Actions",
         slug = "web-actions",
