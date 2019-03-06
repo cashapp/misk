@@ -21,7 +21,7 @@ internal interface ReturnADinosaur {
   fun getDinosaur(@Body request: Dinosaur): Call<Dinosaur>
 }
 
-internal class ReturnADinosaurAction @Inject constructor(): WebAction {
+internal class ReturnADinosaurAction @Inject constructor() : WebAction {
   @Post("/cooldinos")
   @RequestContentType(MediaTypes.APPLICATION_JSON)
   @ResponseContentType(MediaTypes.APPLICATION_JSON)

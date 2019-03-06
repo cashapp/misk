@@ -127,21 +127,21 @@ class TracingInterceptorTest {
     httpClient.newCall(request).execute()
   }
 
-  internal class TracingTestAction @Inject constructor(): WebAction {
+  internal class TracingTestAction @Inject constructor() : WebAction {
     @Get("/trace")
     fun call(): Response<String> {
       return Response("success")
     }
   }
 
-  internal class FailedTracingTestAction @Inject constructor(): WebAction {
+  internal class FailedTracingTestAction @Inject constructor() : WebAction {
     @Get("/failed_trace")
     fun call(): Response<String> {
       return Response("no good", statusCode = StatusCode.BAD_REQUEST.code)
     }
   }
 
-  internal class ExceptionThrowingTracingTestAction @Inject constructor(): WebAction {
+  internal class ExceptionThrowingTracingTestAction @Inject constructor() : WebAction {
     @Get("/exception_trace")
     fun call(): Response<String> {
       throw ActionException(StatusCode.ENHANCE_YOUR_CALM, "Chill, man")

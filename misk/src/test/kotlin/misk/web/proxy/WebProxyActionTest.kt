@@ -349,8 +349,6 @@ class WebProxyActionTest {
 
   class TestModule(private val upstreamServer: MockWebServer) : KAbstractModule() {
     override fun configure() {
-      bind<OptionalBinder>()
-      bind<StaticResourceAction>()
       install(WebActionModule.createWithPrefix<WebProxyAction>("/local/prefix/"))
       multibind<WebProxyEntry>().toProvider(
           Provider<WebProxyEntry> {

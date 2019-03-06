@@ -17,7 +17,6 @@ class EventListenersTest {
       MoviesTestModule(disableCrossShardQueryDetector = true),
       object : HibernateEntityModule(Movies::class) {
         override fun configureHibernate() {
-          bind<FakeEventListener>().asSingleton()
           bindListener(EventType.PRE_LOAD).to<FakeEventListener>()
           bindListener(EventType.PRE_INSERT).to<FakeEventListener>()
           bindListener(EventType.PRE_UPDATE).to<FakeEventListener>()

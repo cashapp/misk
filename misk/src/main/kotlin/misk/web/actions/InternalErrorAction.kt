@@ -6,7 +6,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class InternalErrorAction @Inject constructor(): WebAction {
+class InternalErrorAction @Inject constructor() : WebAction {
   @Get("/error")
   @Unauthenticated
   fun error(): Nothing {

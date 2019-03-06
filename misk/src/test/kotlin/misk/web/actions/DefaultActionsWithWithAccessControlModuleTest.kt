@@ -24,7 +24,7 @@ internal class DefaultActionsWorkWithAccessControlModuleTest {
     // of the default actions can be combined with access control
   }
 
-  class ExampleAuthenticator @Inject constructor(): MiskCallerAuthenticator {
+  class ExampleAuthenticator @Inject constructor() : MiskCallerAuthenticator {
     override fun getAuthenticatedCaller(): MiskCaller? = null
   }
 }

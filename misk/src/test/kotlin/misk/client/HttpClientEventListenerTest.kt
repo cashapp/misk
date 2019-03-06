@@ -68,7 +68,7 @@ internal class HttpClientEventListenerTest {
   }
 
   @Singleton
-  class TestEventListener @Inject constructor(): EventListener() {
+  class TestEventListener @Inject constructor() : EventListener() {
     private var started = false
     override fun connectStart(call: Call, inetSocketAddress: InetSocketAddress, proxy: Proxy) {
       started = true
@@ -83,7 +83,6 @@ internal class HttpClientEventListenerTest {
     override fun configure() {
       install(WebTestingModule())
       install(WebActionModule.create<ReturnADinosaurAction>())
-      bind<TestEventListener>()
     }
   }
 }

@@ -25,7 +25,7 @@ internal class GrpcMarshaller<T>(val adapter: ProtoAdapter<T>) : Marshaller<T> {
   }
 
   @Singleton
-  class Factory @Inject constructor(): Marshaller.Factory {
+  class Factory @Inject constructor() : Marshaller.Factory {
     override fun create(mediaType: MediaType, type: KType): Marshaller<Any>? {
       if (mediaType.type() != MediaTypes.APPLICATION_GRPC_MEDIA_TYPE.type() ||
           mediaType.subtype() != MediaTypes.APPLICATION_GRPC_MEDIA_TYPE.subtype()) {
@@ -48,7 +48,7 @@ internal class GrpcUnmarshaller<T>(val adapter: ProtoAdapter<T>) : Unmarshaller 
   }
 
   @Singleton
-  class Factory @Inject constructor(): Unmarshaller.Factory {
+  class Factory @Inject constructor() : Unmarshaller.Factory {
     override fun create(mediaType: MediaType, type: KType): Unmarshaller? {
       if (mediaType.type() != MediaTypes.APPLICATION_GRPC_MEDIA_TYPE.type() ||
           mediaType.subtype() != MediaTypes.APPLICATION_GRPC_MEDIA_TYPE.subtype()) {

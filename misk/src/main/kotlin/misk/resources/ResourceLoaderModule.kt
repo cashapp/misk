@@ -5,7 +5,6 @@ import misk.inject.KAbstractModule
 
 class ResourceLoaderModule : KAbstractModule() {
   override fun configure() {
-    bind<ResourceLoader>()
     val mapBinder = MapBinder.newMapBinder(
         binder(), String::class.java, ResourceLoader.Backend::class.java)
     mapBinder.addBinding("classpath:").toInstance(ClasspathResourceLoaderBackend)
@@ -20,7 +19,6 @@ class ResourceLoaderModule : KAbstractModule() {
  */
 class TestingResourceLoaderModule : KAbstractModule() {
   override fun configure() {
-    bind<ResourceLoader>()
     val mapBinder = MapBinder.newMapBinder(
         binder(), String::class.java, ResourceLoader.Backend::class.java)
     mapBinder.addBinding("classpath:").toInstance(ClasspathResourceLoaderBackend)

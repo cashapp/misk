@@ -140,7 +140,7 @@ internal class ClientServerTraceTest {
     fun getDinosaur(@Body request: Dinosaur): Call<Dinosaur>
   }
 
-  class ReturnADinosaurAction @Inject constructor(): WebAction {
+  class ReturnADinosaurAction @Inject constructor() : WebAction {
     @Post("/cooldinos")
     @RequestContentType(MediaTypes.APPLICATION_JSON)
     @ResponseContentType(MediaTypes.APPLICATION_JSON)
@@ -154,7 +154,7 @@ internal class ClientServerTraceTest {
   }
 
   @Singleton
-  class RoarLikeDinosaurAction @Inject constructor(): WebAction {
+  class RoarLikeDinosaurAction @Inject constructor() : WebAction {
     // NOTE(nb): hackily pass in a client because I can't Guice well enough to figure out how to
     // inject this and I'm exhausted from trying to make it work.
     companion object {

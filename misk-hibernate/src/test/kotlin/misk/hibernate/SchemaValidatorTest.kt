@@ -50,7 +50,6 @@ class SchemaValidatorTest {
           DataSourceService(qualifier, config.data_source, Environment.TESTING,
               emptySet())
 
-      bind<HibernateInjectorAccess>()
       val injectorServiceProvider = getProvider(HibernateInjectorAccess::class.java)
       val sessionFactoryServiceKey =
           Key.get(SessionFactoryService::class.java, qualifier.java)
@@ -77,7 +76,6 @@ class SchemaValidatorTest {
       bind<SessionFactory>().annotatedWith<ValidationDb>().toProvider(sessionFactoryServiceKey)
       multibind<Service>().to(sessionFactoryServiceKey)
 
-      bind<QueryTracingListener>()
       bind(transacterKey).toProvider(object : Provider<Transacter> {
         @Inject lateinit var queryTracingListener: QueryTracingListener
         @com.google.inject.Inject(optional = true) val tracer: Tracer? = null

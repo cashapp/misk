@@ -17,7 +17,6 @@ import misk.web.actions.LivenessCheckAction
 import misk.web.actions.NotFoundAction
 import misk.web.actions.ReadinessCheckAction
 import misk.web.actions.StatusAction
-import misk.web.actions.WebActionFactory
 import misk.web.exceptions.ActionExceptionLogLevelConfig
 import misk.web.exceptions.ActionExceptionMapper
 import misk.web.exceptions.ExceptionHandlingInterceptor
@@ -35,12 +34,9 @@ import misk.web.interceptors.MetricsInterceptor
 import misk.web.interceptors.RequestLogContextInterceptor
 import misk.web.interceptors.RequestLoggingInterceptor
 import misk.web.interceptors.TracingInterceptor
-import misk.web.jetty.ConnectionMetrics
 import misk.web.jetty.JettyConnectionMetricsCollector
 import misk.web.jetty.JettyService
 import misk.web.jetty.JettyThreadPoolMetricsCollector
-import misk.web.jetty.ThreadPoolMetrics
-import misk.web.jetty.WebActionsServlet
 import misk.web.marshal.GrpcMarshaller
 import misk.web.marshal.GrpcUnmarshaller
 import misk.web.marshal.JsonMarshaller
@@ -51,7 +47,6 @@ import misk.web.marshal.ProtobufMarshaller
 import misk.web.marshal.ProtobufUnmarshaller
 import misk.web.marshal.Unmarshaller
 import misk.web.proxy.WebProxyEntry
-import misk.web.resources.ResourceEntryFinder
 import misk.web.resources.StaticResourceEntry
 import org.eclipse.jetty.util.thread.QueuedThreadPool
 import javax.inject.Inject
@@ -64,13 +59,6 @@ class MiskWebModule(private val config: WebConfig) : KAbstractModule() {
     bind<WebConfig>().toInstance(config)
     bind<ActionExceptionLogLevelConfig>().toInstance(config.action_exception_log_level)
 
-    bind<ConnectionMetrics>()
-    bind<JettyConnectionMetricsCollector>()
-    bind<JettyService>()
-    bind<ResourceEntryFinder>()
-    bind<ThreadPoolMetrics>()
-    bind<WebActionFactory>()
-    bind<WebActionsServlet>()
     multibind<Service>().to<JettyService>()
     multibind<Service>().to<JettyThreadPoolMetricsCollector>()
     multibind<Service>().to<JettyConnectionMetricsCollector>()
@@ -106,7 +94,6 @@ class MiskWebModule(private val config: WebConfig) : KAbstractModule() {
     // Handle all unexpected errors that occur during dispatch
     multibind<NetworkInterceptor.Factory>(MiskDefault::class)
         .to<InternalErrorInterceptorFactory>()
-    bind<InternalErrorInterceptorFactory>()
 
     // Add request related fields to MDC for logging
     multibind<NetworkInterceptor.Factory>(MiskDefault::class)

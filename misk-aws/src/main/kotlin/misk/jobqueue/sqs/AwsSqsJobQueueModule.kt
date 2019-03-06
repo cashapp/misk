@@ -23,8 +23,6 @@ class AwsSqsJobQueueModule(private val config: AwsSqsJobQueueConfig) : KAbstract
 
     bind<AwsSqsJobQueueConfig>().toInstance(config)
 
-    bind<QueueUrlMapping>()
-    bind<SqsMetrics>()
     bind<JobConsumer>().to<SqsJobConsumer>()
     bind<JobQueue>().to<SqsJobQueue>()
     bind<TransactionalJobQueue>().to<SqsTransactionalJobQueue>()

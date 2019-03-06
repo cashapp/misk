@@ -127,7 +127,7 @@ internal class WebDispatchTest {
     }
   }
 
-  class PostHello @Inject constructor(): WebAction {
+  class PostHello @Inject constructor() : WebAction {
     @Post("/hello")
     @RequestContentType(MediaTypes.APPLICATION_JSON)
     @ResponseContentType(MediaTypes.APPLICATION_JSON)
@@ -135,14 +135,14 @@ internal class WebDispatchTest {
         HelloBye("post hello ${request.message}")
   }
 
-  class GetHello @Inject constructor(): WebAction {
+  class GetHello @Inject constructor() : WebAction {
     @Get("/hello/{message}")
     @ResponseContentType(MediaTypes.APPLICATION_JSON)
     fun hello(@PathParam("message") message: String) =
         HelloBye("get hello $message")
   }
 
-  class PostBye @Inject constructor(): WebAction {
+  class PostBye @Inject constructor() : WebAction {
     @Post("/bye")
     @RequestContentType(MediaTypes.APPLICATION_JSON)
     @ResponseContentType(MediaTypes.APPLICATION_JSON)
@@ -150,14 +150,14 @@ internal class WebDispatchTest {
         HelloBye("post bye ${request.message}")
   }
 
-  class GetBye @Inject constructor(): WebAction {
+  class GetBye @Inject constructor() : WebAction {
     @Get("/bye/{message}")
     @ResponseContentType(MediaTypes.APPLICATION_JSON)
     fun bye(@PathParam("message") message: String) =
         HelloBye("get bye $message")
   }
 
-  class GetNothing @Inject constructor(): WebAction {
+  class GetNothing @Inject constructor() : WebAction {
     @Get("/nothing")
     fun doNothing(): Nothing {
       throw UnsupportedOperationException("we did nothing")

@@ -81,7 +81,7 @@ internal class PemSslClientServerTest {
     }
   }
 
-  class HelloAction @Inject constructor(): WebAction {
+  class HelloAction @Inject constructor() : WebAction {
     @Inject @ClientCertSubject private lateinit var clientCertSubjectDN: ActionScoped<X500Name?>
 
     @Post("/hello")

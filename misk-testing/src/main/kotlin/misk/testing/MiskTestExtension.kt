@@ -33,7 +33,6 @@ internal class MiskTestExtension : BeforeEachCallback, AfterEachCallback {
         // Initialize empty sets for our multibindings.
         newMultibinder<BeforeEachCallback>()
         newMultibinder<AfterEachCallback>()
-        bind<Callbacks>()
       }
     }
 
@@ -50,7 +49,7 @@ internal class MiskTestExtension : BeforeEachCallback, AfterEachCallback {
     uninject(context.requiredTestInstance)
   }
 
-  class StartServicesBeforeEach @Inject constructor(): BeforeEachCallback {
+  class StartServicesBeforeEach @Inject constructor() : BeforeEachCallback {
     @Inject
     lateinit var serviceManager: ServiceManager
 
@@ -61,7 +60,7 @@ internal class MiskTestExtension : BeforeEachCallback, AfterEachCallback {
     }
   }
 
-  class StopServicesAfterEach @Inject constructor(): AfterEachCallback {
+  class StopServicesAfterEach @Inject constructor() : AfterEachCallback {
     @Inject
     lateinit var serviceManager: ServiceManager
 

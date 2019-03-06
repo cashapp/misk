@@ -85,7 +85,7 @@ class Http2ConnectivityTest {
     }
   }
 
-  class HelloAction @Inject constructor(): WebAction {
+  class HelloAction @Inject constructor() : WebAction {
     @Get("/hello")
     @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
     fun sayHello() = "hello"

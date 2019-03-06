@@ -12,7 +12,7 @@ import javax.inject.Singleton
 import kotlin.reflect.KClass
 
 @Singleton
-internal class RealLogCollector @Inject constructor(): AbstractIdleService(), LogCollector {
+internal class RealLogCollector @Inject constructor() : AbstractIdleService(), LogCollector {
   private val events = mutableListOf<ILoggingEvent>()
 
   private val appender = object : UnsynchronizedAppenderBase<ILoggingEvent>() {

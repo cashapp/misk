@@ -9,7 +9,7 @@ import kotlin.reflect.KClass
 
 /** In memory implementation of a [FlagStore], suitable for use in testing */
 @Singleton
-class InMemoryFlagStore @Inject constructor(): FlagStore {
+class InMemoryFlagStore @Inject constructor() : FlagStore {
   private val _flags = ConcurrentHashMap<String, InMemoryFlag<*>>()
 
   val flags: Map<String, InMemoryFlag<*>> get() = _flags

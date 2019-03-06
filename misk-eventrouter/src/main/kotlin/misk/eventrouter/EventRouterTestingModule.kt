@@ -23,7 +23,7 @@ class EventRouterTestingModule internal constructor(val distributed: Boolean) : 
   private val subscriberExecutor = QueueingExecutorService()
 
   @Singleton
-  private class TestingService : AbstractIdleService() {
+  private class TestingService @Inject constructor() : AbstractIdleService() {
     @Inject private lateinit var eventRouter: RealEventRouter
     @Inject private lateinit var eventRouterTester: EventRouterTester
     @Inject private lateinit var clusterMapper: FakeClusterMapper

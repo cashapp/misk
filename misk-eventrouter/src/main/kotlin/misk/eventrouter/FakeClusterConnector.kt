@@ -9,7 +9,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-internal class FakeClusterConnector @Inject constructor(): ClusterConnector {
+internal class FakeClusterConnector @Inject constructor() : ClusterConnector {
   val queue = LinkedBlockingQueue<Action>()
   private var nextHostId = 1
   private val peers = mutableMapOf<String, TopicPeer>()

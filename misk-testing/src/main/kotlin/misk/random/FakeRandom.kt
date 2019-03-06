@@ -4,7 +4,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class FakeRandom @Inject constructor(): Random() {
+class FakeRandom @Inject constructor() : Random() {
   var nextBoolean : Boolean? = null
   var nextInt : Int? = null
   var nextLong : Long? = null
@@ -19,7 +19,7 @@ class FakeRandom @Inject constructor(): Random() {
 }
 
 @Singleton
-class FakeThreadLocalRandom @Inject constructor(): ThreadLocalRandom() {
+class FakeThreadLocalRandom @Inject constructor() : ThreadLocalRandom() {
   @Inject lateinit var fakeRandom: FakeRandom
 
   override fun current() = fakeRandom

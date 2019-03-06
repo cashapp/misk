@@ -108,7 +108,6 @@ class AuthenticationTest {
       multibind<AccessAnnotationEntry>().toInstance(
           AccessAnnotationEntry<CustomRoleAccess>(roles = listOf("admin")))
       multibind<MiskCallerAuthenticator>().to<FakeCallerAuthenticator>()
-      bind<HttpClientFactory>()
     }
   }
 

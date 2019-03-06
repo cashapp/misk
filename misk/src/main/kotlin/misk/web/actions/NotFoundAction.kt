@@ -15,7 +15,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class NotFoundAction @Inject constructor(): WebAction {
+class NotFoundAction @Inject constructor() : WebAction {
   @Get("/{path:.*}")
   @Post("/{path:.*}")
   @RequestContentType(MediaTypes.ALL)

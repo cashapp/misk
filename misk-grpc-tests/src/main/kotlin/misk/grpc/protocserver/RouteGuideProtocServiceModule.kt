@@ -9,7 +9,6 @@ import javax.inject.Named
 /** A module that runs a standard gRPC server: generated protoc protos and a Netty backend. */
 class RouteGuideProtocServiceModule : KAbstractModule() {
   override fun configure() {
-    bind<ProtocGrpcService>()
     multibind<BindableService>().to<RouteGuideProtocService>()
     multibind<Service>().to<ProtocGrpcService>()
   }

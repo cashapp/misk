@@ -8,9 +8,7 @@ import javax.inject.Named
 import javax.inject.Singleton
 
 class ProtocGrpcClientModule : KAbstractModule() {
-  override fun configure() {
-    bind<GrpcChannelFactory>()
-  }
+  override fun configure() {}
 
   @Provides
   @Singleton

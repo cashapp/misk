@@ -26,7 +26,7 @@ import javax.inject.Singleton
 private val logger = getLogger<KubernetesClusterConnector>()
 
 @Singleton
-internal class KubernetesClusterConnector @Inject constructor(): ClusterConnector {
+internal class KubernetesClusterConnector @Inject constructor() : ClusterConnector {
   @Inject @ForKubernetesWatching lateinit var executor: ExecutorService
   @Inject lateinit var config: KubernetesConfig
   @Inject lateinit var webConfig: WebConfig

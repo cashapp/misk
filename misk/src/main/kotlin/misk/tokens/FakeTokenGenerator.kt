@@ -6,7 +6,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-internal class FakeTokenGenerator @Inject constructor(): TokenGenerator {
+internal class FakeTokenGenerator @Inject constructor() : TokenGenerator {
   internal val nextByLabel = mutableMapOf<String, AtomicLong>()
 
   override fun generate(label: String?, length: Int): String {

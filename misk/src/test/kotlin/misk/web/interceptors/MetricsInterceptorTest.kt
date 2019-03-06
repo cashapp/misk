@@ -83,7 +83,7 @@ class MetricsInterceptorTest {
     return httpClient.newCall(request.build()).execute()
   }
 
-  internal class TestAction @Inject constructor(): WebAction {
+  internal class TestAction @Inject constructor() : WebAction {
     @Get("/call/{desiredStatusCode}")
     @Unauthenticated
     fun call(@PathParam desiredStatusCode: Int): Response<String> {

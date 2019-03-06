@@ -70,7 +70,7 @@ internal class WireMessageAdapter(
     else -> true
   }
 
-  class Factory @Inject constructor(): JsonAdapter.Factory {
+  class Factory @Inject constructor() : JsonAdapter.Factory {
     override fun create(
       type: Type,
       annotations: Set<Annotation>,

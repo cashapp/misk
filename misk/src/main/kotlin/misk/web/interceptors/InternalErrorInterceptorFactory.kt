@@ -13,7 +13,7 @@ import javax.inject.Singleton
 private val logger = getLogger<InternalErrorInterceptorFactory>()
 
 @Singleton
-class InternalErrorInterceptorFactory @Inject constructor(): NetworkInterceptor.Factory {
+class InternalErrorInterceptorFactory @Inject constructor() : NetworkInterceptor.Factory {
   override fun create(action: Action): NetworkInterceptor? {
     return INTERCEPTOR
   }

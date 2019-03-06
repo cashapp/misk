@@ -105,7 +105,7 @@ internal class RequestLoggingInterceptorTest {
     return httpClient.newCall(request.build()).execute()
   }
 
-  internal class IncludeBodyRequestLoggingAction @Inject constructor(): WebAction {
+  internal class IncludeBodyRequestLoggingAction @Inject constructor() : WebAction {
     @Get("/call/includeBodyRequestLogging/{message}")
     @Unauthenticated
     @ResponseContentType(MediaTypes.APPLICATION_JSON)
@@ -113,7 +113,7 @@ internal class RequestLoggingInterceptorTest {
     fun call(@PathParam message: String) = "echo: $message"
   }
 
-  internal class ExcludeBodyRequestLoggingAction @Inject constructor(): WebAction {
+  internal class ExcludeBodyRequestLoggingAction @Inject constructor() : WebAction {
     @Get("/call/excludeBodyRequestLogging/{message}")
     @Unauthenticated
     @ResponseContentType(MediaTypes.APPLICATION_JSON)
@@ -121,7 +121,7 @@ internal class RequestLoggingInterceptorTest {
     fun call(@PathParam message: String) = "echo: $message"
   }
 
-  internal class ExceptionThrowingRequestLoggingAction @Inject constructor(): WebAction {
+  internal class ExceptionThrowingRequestLoggingAction @Inject constructor() : WebAction {
     @Get("/call/exceptionThrowingRequestLogging/{message}")
     @Unauthenticated
     @ResponseContentType(MediaTypes.APPLICATION_JSON)
@@ -129,7 +129,7 @@ internal class RequestLoggingInterceptorTest {
     fun call(@PathParam message: String) : String = throw IllegalStateException(message)
   }
 
-  internal class SampledRequestLoggingAction @Inject constructor(): WebAction {
+  internal class SampledRequestLoggingAction @Inject constructor() : WebAction {
     @Get("/call/sampledRequestLogging/{message}")
     @Unauthenticated
     @ResponseContentType(MediaTypes.APPLICATION_JSON)
@@ -137,7 +137,7 @@ internal class RequestLoggingInterceptorTest {
     fun call(@PathParam message: String) = "echo: $message"
   }
 
-  internal class NoRequestLoggingAction @Inject constructor(): WebAction {
+  internal class NoRequestLoggingAction @Inject constructor() : WebAction {
     @Get("/call/noRequestLogging/{message}")
     @Unauthenticated
     @ResponseContentType(MediaTypes.APPLICATION_JSON)

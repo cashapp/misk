@@ -12,7 +12,7 @@ import javax.inject.Singleton
  * default a lease is considered held, but it can be explicitly marked as not held if desired
  */
 @Singleton
-class FakeLeaseManager @Inject constructor(): LeaseManager {
+class FakeLeaseManager @Inject constructor() : LeaseManager {
   private val leasesHeldElsewhere = newConcurrentHashSet<String>()
   private val leases = ConcurrentHashMap<String, FakeLease>()
 

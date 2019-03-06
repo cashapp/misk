@@ -17,7 +17,6 @@ import misk.security.ssl.TrustStoreConfig
 import misk.service.CachedTestService
 import misk.tasks.DelayedTask
 import misk.tasks.RepeatedTaskQueue
-import misk.zookeeper.ZkClientFactory
 import java.time.Clock
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -28,8 +27,6 @@ internal class ZkTestModule : KAbstractModule() {
     val truststrorePath = this::class.java.getResource("/zookeeper/truststore.jks").path
     bind<String>().annotatedWith<AppName>().toInstance("my-app")
 
-    bind<ZkLeaseManager>()
-    bind<ZkClientFactory>()
     multibind<Service>().to<StartZookeeperService>()
     install(FakeClusterModule())
     install(Modules.override(ZookeeperModule(ZookeeperConfig(
@@ -53,7 +50,7 @@ internal class ZkTestModule : KAbstractModule() {
   }
 
   @Singleton
-  class StartZookeeperService @Inject constructor(): CachedTestService(), DependentService {
+  class StartZookeeperService @Inject constructor() : CachedTestService(), DependentService {
     override val consumedKeys: Set<Key<*>> = setOf()
     override val producedKeys: Set<Key<*>> = setOf(startZkServiceKey)
 
