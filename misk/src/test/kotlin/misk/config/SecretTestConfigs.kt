@@ -3,8 +3,6 @@ package misk.config
 data class SuperSecretConfig(
   val string_value: String,
   val secret_information: Secret<SecretInformationConfig>,
-  val consumer_a: Secret<SecretInformationConfig>,
-  val consumer_b: Secret<SecretInformationConfig>,
   val secret_api_key: Secret<String>,
   val secret_number: Secret<Int>,
   val secrets_list: Secret<List<SecretInformationConfig>>,

@@ -3,6 +3,7 @@ package misk.web
 import misk.config.Config
 import misk.security.ssl.CertStoreConfig
 import misk.security.ssl.TrustStoreConfig
+import misk.web.exceptions.ActionExceptionLogLevelConfig
 
 data class WebConfig(
   val port: Int,
@@ -11,7 +12,8 @@ data class WebConfig(
   val ssl: WebSslConfig? = null,
   val selectors: Int? = null,
   val acceptors: Int? = null,
-  val queueSize: Int? = null
+  val queueSize: Int? = null,
+  val action_exception_log_level: ActionExceptionLogLevelConfig = ActionExceptionLogLevelConfig()
 ) : Config
 
 data class WebSslConfig(

@@ -1,6 +1,7 @@
 package misk.hibernate
 
 import com.google.inject.util.Modules
+import misk.inject.asSingleton
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat

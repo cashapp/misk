@@ -4,6 +4,7 @@ import com.google.common.collect.Sets.newConcurrentHashSet
 import misk.clustering.lease.Lease
 import misk.clustering.lease.LeaseManager
 import java.util.concurrent.ConcurrentHashMap
+import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
@@ -11,7 +12,7 @@ import javax.inject.Singleton
  * default a lease is considered held, but it can be explicitly marked as not held if desired
  */
 @Singleton
-class FakeLeaseManager : LeaseManager {
+class FakeLeaseManager @Inject constructor() : LeaseManager {
   private val leasesHeldElsewhere = newConcurrentHashSet<String>()
   private val leases = ConcurrentHashMap<String, FakeLease>()
 

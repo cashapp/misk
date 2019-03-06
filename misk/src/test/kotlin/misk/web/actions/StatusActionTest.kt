@@ -10,6 +10,7 @@ import misk.healthchecks.HealthStatus
 import misk.services.FakeServiceModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
+import misk.web.WebActionModule
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import javax.inject.Inject
@@ -20,7 +21,8 @@ class StatusActionTest {
   val module = Modules.combine(
       MiskTestingServiceModule(),
       FakeServiceModule(),
-      FakeHealthCheckModule()
+      FakeHealthCheckModule(),
+      WebActionModule.create<StatusAction>()
   )
 
   @Inject lateinit var statusAction: StatusAction

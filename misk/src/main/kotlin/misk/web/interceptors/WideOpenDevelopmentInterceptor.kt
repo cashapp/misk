@@ -7,7 +7,7 @@ import misk.web.NetworkInterceptor
 import misk.web.Response
 import javax.inject.Inject
 
-internal class WideOpenDevelopmentInterceptor : NetworkInterceptor {
+internal class WideOpenDevelopmentInterceptor @Inject constructor() : NetworkInterceptor {
   override fun intercept(chain: NetworkChain): Response<*> {
     val response = chain.proceed(chain.request)
     return response.copy(
@@ -18,7 +18,7 @@ internal class WideOpenDevelopmentInterceptor : NetworkInterceptor {
   }
 }
 
-internal class WideOpenDevelopmentInterceptorFactory : NetworkInterceptor.Factory {
+internal class WideOpenDevelopmentInterceptorFactory @Inject constructor() : NetworkInterceptor.Factory {
   @Inject lateinit var wideOpenDevelopmentInterceptor: WideOpenDevelopmentInterceptor
   @Inject lateinit var environment: Environment
 

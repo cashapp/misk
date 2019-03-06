@@ -7,9 +7,9 @@ import misk.inject.asSingleton
 import misk.inject.toKey
 import misk.jdbc.DataSourceConfig
 import misk.jdbc.DataSourceDecorator
-import misk.vitess.StartVitessService
 import misk.jdbc.TruncateTablesService
 import misk.jdbc.VitessScaleSafetyChecks
+import misk.vitess.StartVitessService
 import okhttp3.OkHttpClient
 import javax.inject.Provider
 import kotlin.reflect.KClass
@@ -41,12 +41,11 @@ class HibernateTestingModule(
     val transacterProvider = getProvider(transacterKey)
 
     val moshiProvider = getProvider(Moshi::class.java)
-    val okHttpClientProvider = getProvider(OkHttpClient::class.java)
     bind(crossShardQueryDetectorKey).toProvider(Provider<VitessScaleSafetyChecks> {
       VitessScaleSafetyChecks(
           config = configProvider.get(),
           moshi = moshiProvider.get(),
-          okHttpClient = okHttpClientProvider.get(),
+          okHttpClient = OkHttpClient(),
           startVitessService = startVitessServiceProvider.get()
       )
     }).asSingleton()

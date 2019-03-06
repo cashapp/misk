@@ -10,8 +10,9 @@ import misk.inject.KAbstractModule
  * the prometheus operator, one would generally create a k8s ClusterIP service exporting the
  * metrics port, then a prometheus ServiceMonitor selecting that service via a label.
  */
-class PrometheusMetricsModule : KAbstractModule() {
+class PrometheusMetricsModule(private val config: PrometheusConfig) : KAbstractModule() {
   override fun configure() {
+    bind<PrometheusConfig>().toInstance(config)
     multibind<Service>().to<PrometheusHttpService>()
   }
 }

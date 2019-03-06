@@ -6,7 +6,7 @@ import misk.inject.KAbstractModule
 
 class MockTracingBackendModule : KAbstractModule() {
   override fun configure() {
-    bind<MockTracer>().asEagerSingleton()
+    bind<MockTracer>().toInstance(MockTracer())
     bind<Tracer>().to<MockTracer>()
   }
 }

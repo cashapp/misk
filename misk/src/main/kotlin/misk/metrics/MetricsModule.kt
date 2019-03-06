@@ -14,7 +14,7 @@ import misk.inject.KAbstractModule
 internal class MetricsModule : KAbstractModule() {
   override fun configure() {
     bind<Metrics>().asEagerSingleton()
-    bind<CollectorRegistry>().asEagerSingleton()
+    bind<CollectorRegistry>().toInstance(CollectorRegistry())
     multibind<Collector>().toInstance(StandardExports())
     multibind<Collector>().toInstance(MemoryPoolsExports())
     multibind<Collector>().toInstance(BufferPoolsExports())

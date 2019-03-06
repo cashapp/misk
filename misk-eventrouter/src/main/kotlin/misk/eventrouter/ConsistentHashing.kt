@@ -2,10 +2,11 @@ package misk.eventrouter
 
 import com.google.common.hash.HashFunction
 import com.google.common.hash.Hashing
+import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class ConsistentHashing(
+class ConsistentHashing @Inject constructor(
   private val hashFunction: HashFunction = Hashing.murmur3_32(),
   private val mod: Long = 65536L,
   private val virtualPoints: Int = 16

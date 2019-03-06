@@ -15,8 +15,9 @@ import java.time.Clock
 import java.util.concurrent.Executors
 import javax.inject.Singleton
 
-class ZookeeperModule : KAbstractModule() {
+class ZookeeperModule(private val config: ZookeeperConfig) : KAbstractModule() {
   override fun configure() {
+    bind<ZookeeperConfig>().toInstance(config)
     multibind<Service>().to<ZkService>()
     multibind<Service>().to<ZkLeaseManager>()
     multibind<Service>().to(RepeatedTaskQueue::class.toKey(ForZkLease::class)).asSingleton()

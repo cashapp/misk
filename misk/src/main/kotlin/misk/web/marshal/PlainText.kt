@@ -6,6 +6,7 @@ import misk.web.toResponseBody
 import okhttp3.MediaType
 import okio.BufferedSource
 import okio.ByteString
+import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.reflect.KType
 
@@ -14,7 +15,7 @@ object PlainTextMarshaller : Marshaller<Any> {
   override fun responseBody(o: Any) = o.toString().toResponseBody()
 
   @Singleton
-  class Factory : Marshaller.Factory {
+  class Factory @Inject constructor() : Marshaller.Factory {
     override fun create(mediaType: MediaType, type: KType): Marshaller<Any>? {
       if (mediaType.type() != MediaTypes.TEXT_PLAIN_UTF8_MEDIA_TYPE.type() ||
           mediaType.subtype() != MediaTypes.TEXT_PLAIN_UTF8_MEDIA_TYPE.subtype()) {
@@ -36,7 +37,7 @@ object PlainTextUnmarshaller {
     override fun unmarshal(source: BufferedSource) = source.readByteString()
   }
 
-  class Factory : Unmarshaller.Factory {
+  class Factory @Inject constructor() : Unmarshaller.Factory {
     override fun create(mediaType: MediaType, type: KType): Unmarshaller? {
       if (mediaType.type() != MediaTypes.TEXT_PLAIN_UTF8_MEDIA_TYPE.type() ||
           mediaType.subtype() != MediaTypes.TEXT_PLAIN_UTF8_MEDIA_TYPE.subtype()) return null

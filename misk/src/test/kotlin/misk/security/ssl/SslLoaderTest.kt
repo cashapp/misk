@@ -69,7 +69,8 @@ internal class SslLoaderTest {
   @Test
   fun loadKeystoreFromJKS() {
     val keystore = sslLoader.loadCertStore(keystoreJksPath, FORMAT_JKS, "changeit")!!.keyStore
-    assertThat(keystore.aliasesOfType<KeyStore.PrivateKeyEntry>()).containsExactly("combined-key-cert")
+    assertThat(keystore.aliasesOfType<KeyStore.PrivateKeyEntry>()).containsExactly(
+        "combined-key-cert")
     assertThat(keystore.getPrivateKey("changeit".toCharArray())).isNotNull()
 
     assertThat((keystore.getX509Certificate()).issuerX500Principal.name)

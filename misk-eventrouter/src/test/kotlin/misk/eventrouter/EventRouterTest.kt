@@ -19,7 +19,7 @@ internal class EventRouterTest {
   @Inject lateinit var machineC: RealEventRouter
   @Inject lateinit var clusterMapper: FakeClusterMapper
   @Inject lateinit var fakeEventRouterProcessor: EventRouterTester
-  @Inject @ForEventRouterActions
+  @Inject @field:ForEventRouterActions
   lateinit var actionExecutor: QueueingExecutorService
 
   @Test fun helloWorld() {

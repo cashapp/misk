@@ -19,6 +19,7 @@ import org.hibernate.event.spi.PreInsertEventListener
 import org.hibernate.event.spi.PreUpdateEvent
 import org.hibernate.event.spi.PreUpdateEventListener
 import org.hibernate.persister.entity.EntityPersister
+import javax.inject.Inject
 import javax.inject.Singleton
 
 private val logger = getLogger<QueryTracingListener>()
@@ -32,7 +33,7 @@ private val logger = getLogger<QueryTracingListener>()
  * {@see misk.hibernate.ReflectionQuery}.
  */
 @Singleton
-internal class QueryTracingListener
+internal class QueryTracingListener @Inject constructor()
   : PreInsertEventListener,
     PostInsertEventListener,
     PreUpdateEventListener,

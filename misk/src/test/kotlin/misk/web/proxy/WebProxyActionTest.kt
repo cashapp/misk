@@ -6,12 +6,14 @@ import kotlinx.coroutines.runBlocking
 import misk.inject.KAbstractModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
+import misk.web.WebActionModule
 import misk.web.WebTestingModule
 import misk.web.actions.WebActionEntry
 import misk.web.jetty.JettyService
 import misk.web.mediatype.MediaTypes
 import misk.web.mediatype.asMediaType
 import misk.web.readUtf8
+import misk.web.resources.StaticResourceAction
 import misk.web.toMisk
 import okhttp3.MediaType
 import okhttp3.RequestBody
@@ -347,8 +349,7 @@ class WebProxyActionTest {
 
   class TestModule(private val upstreamServer: MockWebServer) : KAbstractModule() {
     override fun configure() {
-      multibind<WebActionEntry>().toInstance(
-          WebActionEntry<WebProxyAction>("/local/prefix/"))
+      install(WebActionModule.createWithPrefix<WebProxyAction>("/local/prefix/"))
       multibind<WebProxyEntry>().toProvider(
           Provider<WebProxyEntry> {
             WebProxyEntry("/local/prefix/", upstreamServer.url("/").toString())

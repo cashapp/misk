@@ -1,17 +1,17 @@
 package misk.web.resource
 
-import com.google.inject.Provides
 import com.google.inject.name.Names
 import misk.client.HttpClientEndpointConfig
 import misk.client.HttpClientModule
 import misk.client.HttpClientsConfig
+import misk.client.HttpClientsConfigModule
 import misk.inject.KAbstractModule
 import misk.resources.ResourceLoader
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
+import misk.web.WebActionModule
 import misk.web.WebTestingModule
 import misk.web.actions.NotFoundAction
-import misk.web.actions.WebActionEntry
 import misk.web.jetty.JettyService
 import misk.web.resources.StaticResourceAction
 import misk.web.resources.StaticResourceEntry
@@ -21,7 +21,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import javax.inject.Inject
 import javax.inject.Named
-import javax.inject.Singleton
 import kotlin.test.assertFailsWith
 
 @MiskTest(startService = true)
@@ -29,7 +28,7 @@ class StaticResourceActionTest {
   @MiskTestModule
   val module = TestModule()
 
-  @Inject @Named("static_resource_action_test") private lateinit var httpClient: OkHttpClient
+  @Inject @field:Named("static_resource_action") private lateinit var httpClient: OkHttpClient
 
   @Inject private lateinit var jettyService: JettyService
   @Inject private lateinit var resourceLoader: ResourceLoader
@@ -211,33 +210,27 @@ class StaticResourceActionTest {
 
   class TestModule : KAbstractModule() {
     override fun configure() {
+      install(HttpClientsConfigModule(HttpClientsConfig(
+          endpoints = mapOf(
+              "static_resource_action" to HttpClientEndpointConfig("http://example.com/")
+          ))))
       install(HttpClientModule("static_resource_action",
           Names.named("static_resource_action")))
-      multibind<WebActionEntry>().toInstance(WebActionEntry<NotFoundAction>())
 
-      multibind<WebActionEntry>().toInstance(WebActionEntry<StaticResourceAction>("/hi/"))
+      install(WebActionModule.create<NotFoundAction>())
+
+      install(WebActionModule.createWithPrefix<StaticResourceAction>("/hi/"))
       multibind<StaticResourceEntry>()
           .toInstance(StaticResourceEntry("/hi/", "memory:/web/hi"))
 
-      multibind<WebActionEntry>().toInstance(WebActionEntry<StaticResourceAction>("/nasa/command/"))
+      install(WebActionModule.createWithPrefix<StaticResourceAction>("/nasa/command/"))
       multibind<StaticResourceEntry>()
           .toInstance(StaticResourceEntry("/nasa/command/", "memory:/web/nasa/command/"))
-      multibind<WebActionEntry>().toInstance(
-          WebActionEntry<StaticResourceAction>("/nasa/tabs/o2fuel/"))
+      install(WebActionModule.createWithPrefix<StaticResourceAction>("/nasa/tabs/o2fuel/"))
       multibind<StaticResourceEntry>()
           .toInstance(StaticResourceEntry("/nasa/tabs/o2fuel/", "memory:/web/nasa/tabs/o2fuel/"))
 
       install(WebTestingModule())
-    }
-
-    @Provides
-    @Singleton
-    fun provideHttpClientsConfig(): HttpClientsConfig {
-      return HttpClientsConfig(
-          endpoints = mapOf(
-              "static_resource_action" to HttpClientEndpointConfig("http://example.com/")
-          )
-      )
     }
   }
 

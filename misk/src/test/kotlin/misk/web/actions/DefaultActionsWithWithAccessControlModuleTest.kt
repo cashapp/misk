@@ -7,6 +7,7 @@ import misk.security.authz.MiskCallerAuthenticator
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.junit.jupiter.api.Test
+import javax.inject.Inject
 
 @MiskTest(startService = true)
 internal class DefaultActionsWorkWithAccessControlModuleTest {
@@ -23,7 +24,7 @@ internal class DefaultActionsWorkWithAccessControlModuleTest {
     // of the default actions can be combined with access control
   }
 
-  class ExampleAuthenticator : MiskCallerAuthenticator {
+  class ExampleAuthenticator @Inject constructor() : MiskCallerAuthenticator {
     override fun getAuthenticatedCaller(): MiskCaller? = null
   }
 }

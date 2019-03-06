@@ -6,6 +6,7 @@ import misk.MiskTestingServiceModule
 import misk.services.FakeServiceModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
+import misk.web.WebActionModule
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import javax.inject.Inject
@@ -15,7 +16,8 @@ class LivenessCheckActionTest {
   @MiskTestModule
   val module = Modules.combine(
       MiskTestingServiceModule(),
-      FakeServiceModule()
+      FakeServiceModule(),
+      WebActionModule.create<LivenessCheckAction>()
   )
 
   @Inject lateinit var livenessCheckAction: LivenessCheckAction

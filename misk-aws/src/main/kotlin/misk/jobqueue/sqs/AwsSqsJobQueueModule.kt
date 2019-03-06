@@ -16,10 +16,13 @@ import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
 /** [AwsSqsJobQueueModule] installs job queue support provided by SQS */
-class AwsSqsJobQueueModule : KAbstractModule() {
+class AwsSqsJobQueueModule(private val config: AwsSqsJobQueueConfig) : KAbstractModule() {
   override fun configure() {
     requireBinding(AWSCredentialsProvider::class.java)
     requireBinding(AwsRegion::class.java)
+
+    bind<AwsSqsJobQueueConfig>().toInstance(config)
+
     bind<JobConsumer>().to<SqsJobConsumer>()
     bind<JobQueue>().to<SqsJobQueue>()
     bind<TransactionalJobQueue>().to<SqsTransactionalJobQueue>()

@@ -7,9 +7,9 @@ import misk.web.Post
 import misk.web.RequestBody
 import misk.web.RequestContentType
 import misk.web.ResponseContentType
+import misk.web.WebActionModule
 import misk.web.WebTestingModule
 import misk.web.actions.WebAction
-import misk.web.actions.WebActionEntry
 import misk.web.jetty.JettyService
 import misk.web.mediatype.MediaTypes
 import okhttp3.OkHttpClient
@@ -36,14 +36,14 @@ internal class PlainTextRequestTest {
     assertThat(post("/as-byte-string", "foo")).isEqualTo("foo as-byte-string")
   }
 
-  class PassAsString : WebAction {
+  class PassAsString @Inject constructor() : WebAction {
     @Post("/as-string")
     @RequestContentType(MediaTypes.TEXT_PLAIN_UTF8)
     @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
     fun call(@RequestBody message: String): String = "$message as-string"
   }
 
-  class PassAsByteString : WebAction {
+  class PassAsByteString @Inject constructor() : WebAction {
     @Post("/as-byte-string")
     @RequestContentType(MediaTypes.TEXT_PLAIN_UTF8)
     @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
@@ -53,8 +53,8 @@ internal class PlainTextRequestTest {
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(WebTestingModule())
-      multibind<WebActionEntry>().toInstance(WebActionEntry<PassAsString>())
-      multibind<WebActionEntry>().toInstance(WebActionEntry<PassAsByteString>())
+      install(WebActionModule.create<PassAsString>())
+      install(WebActionModule.create<PassAsByteString>())
     }
   }
 

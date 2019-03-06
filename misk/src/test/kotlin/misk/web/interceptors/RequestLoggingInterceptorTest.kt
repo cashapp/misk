@@ -14,9 +14,9 @@ import misk.testing.MiskTestModule
 import misk.web.Get
 import misk.web.PathParam
 import misk.web.ResponseContentType
+import misk.web.WebActionModule
 import misk.web.WebTestingModule
 import misk.web.actions.WebAction
-import misk.web.actions.WebActionEntry
 import misk.web.jetty.JettyService
 import misk.web.mediatype.MediaTypes
 import okhttp3.OkHttpClient
@@ -105,7 +105,7 @@ internal class RequestLoggingInterceptorTest {
     return httpClient.newCall(request.build()).execute()
   }
 
-  internal class IncludeBodyRequestLoggingAction : WebAction {
+  internal class IncludeBodyRequestLoggingAction @Inject constructor() : WebAction {
     @Get("/call/includeBodyRequestLogging/{message}")
     @Unauthenticated
     @ResponseContentType(MediaTypes.APPLICATION_JSON)
@@ -113,7 +113,7 @@ internal class RequestLoggingInterceptorTest {
     fun call(@PathParam message: String) = "echo: $message"
   }
 
-  internal class ExcludeBodyRequestLoggingAction : WebAction {
+  internal class ExcludeBodyRequestLoggingAction @Inject constructor() : WebAction {
     @Get("/call/excludeBodyRequestLogging/{message}")
     @Unauthenticated
     @ResponseContentType(MediaTypes.APPLICATION_JSON)
@@ -121,7 +121,7 @@ internal class RequestLoggingInterceptorTest {
     fun call(@PathParam message: String) = "echo: $message"
   }
 
-  internal class ExceptionThrowingRequestLoggingAction : WebAction {
+  internal class ExceptionThrowingRequestLoggingAction @Inject constructor() : WebAction {
     @Get("/call/exceptionThrowingRequestLogging/{message}")
     @Unauthenticated
     @ResponseContentType(MediaTypes.APPLICATION_JSON)
@@ -129,7 +129,7 @@ internal class RequestLoggingInterceptorTest {
     fun call(@PathParam message: String) : String = throw IllegalStateException(message)
   }
 
-  internal class SampledRequestLoggingAction : WebAction {
+  internal class SampledRequestLoggingAction @Inject constructor() : WebAction {
     @Get("/call/sampledRequestLogging/{message}")
     @Unauthenticated
     @ResponseContentType(MediaTypes.APPLICATION_JSON)
@@ -137,7 +137,7 @@ internal class RequestLoggingInterceptorTest {
     fun call(@PathParam message: String) = "echo: $message"
   }
 
-  internal class NoRequestLoggingAction : WebAction {
+  internal class NoRequestLoggingAction @Inject constructor() : WebAction {
     @Get("/call/noRequestLogging/{message}")
     @Unauthenticated
     @ResponseContentType(MediaTypes.APPLICATION_JSON)
@@ -150,11 +150,11 @@ internal class RequestLoggingInterceptorTest {
       install(WebTestingModule())
       install(LogCollectorModule())
       multibind<MiskCallerAuthenticator>().to<FakeCallerAuthenticator>()
-      multibind<WebActionEntry>().toInstance(WebActionEntry<RequestLoggingInterceptorTest.IncludeBodyRequestLoggingAction>())
-      multibind<WebActionEntry>().toInstance(WebActionEntry<RequestLoggingInterceptorTest.ExcludeBodyRequestLoggingAction>())
-      multibind<WebActionEntry>().toInstance(WebActionEntry<RequestLoggingInterceptorTest.ExceptionThrowingRequestLoggingAction>())
-      multibind<WebActionEntry>().toInstance(WebActionEntry<RequestLoggingInterceptorTest.NoRequestLoggingAction>())
-      multibind<WebActionEntry>().toInstance(WebActionEntry<RequestLoggingInterceptorTest.SampledRequestLoggingAction>())
+      install(WebActionModule.create<RequestLoggingInterceptorTest.IncludeBodyRequestLoggingAction>())
+      install(WebActionModule.create<RequestLoggingInterceptorTest.ExcludeBodyRequestLoggingAction>())
+      install(WebActionModule.create<RequestLoggingInterceptorTest.ExceptionThrowingRequestLoggingAction>())
+      install(WebActionModule.create<RequestLoggingInterceptorTest.NoRequestLoggingAction>())
+      install(WebActionModule.create<RequestLoggingInterceptorTest.SampledRequestLoggingAction>())
     }
   }
 }

@@ -23,18 +23,14 @@ import kotlin.reflect.KFunction
 import kotlin.reflect.full.findAnnotation
 
 @Singleton
-internal class WebActionFactory {
-  @Inject lateinit var injector: Injector
-
-  @Inject
-  lateinit var userProvidedApplicationInterceptorFactories: List<ApplicationInterceptor.Factory>
-
-  @Inject lateinit var userProvidedNetworkInterceptorFactories: List<NetworkInterceptor.Factory>
-
-  @Inject @MiskDefault lateinit var miskNetworkInterceptorFactories: List<NetworkInterceptor.Factory>
-  @Inject @MiskDefault lateinit var miskApplicationInterceptorFactories: List<ApplicationInterceptor.Factory>
-
-  @Inject lateinit var parameterExtractorFactories: List<ParameterExtractor.Factory>
+internal class WebActionFactory @Inject constructor(
+  private val injector: Injector,
+  private val userProvidedApplicationInterceptorFactories: List<ApplicationInterceptor.Factory>,
+  private val userProvidedNetworkInterceptorFactories: List<NetworkInterceptor.Factory>,
+  @MiskDefault private val miskNetworkInterceptorFactories: List<NetworkInterceptor.Factory>,
+  @MiskDefault private val miskApplicationInterceptorFactories: List<ApplicationInterceptor.Factory>,
+  private val parameterExtractorFactories: List<ParameterExtractor.Factory>
+) {
 
   /** Returns the bound actions for `webActionClass`. */
   fun <A : WebAction> newBoundAction(

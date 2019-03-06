@@ -12,9 +12,9 @@ import misk.testing.MiskTestModule
 import misk.web.Get
 import misk.web.PathParam
 import misk.web.Response
+import misk.web.WebActionModule
 import misk.web.WebTestingModule
 import misk.web.actions.WebAction
-import misk.web.actions.WebActionEntry
 import misk.web.jetty.JettyService
 import okhttp3.OkHttpClient
 import org.assertj.core.api.Assertions.assertThat
@@ -83,7 +83,7 @@ class MetricsInterceptorTest {
     return httpClient.newCall(request.build()).execute()
   }
 
-  internal class TestAction : WebAction {
+  internal class TestAction @Inject constructor() : WebAction {
     @Get("/call/{desiredStatusCode}")
     @Unauthenticated
     fun call(@PathParam desiredStatusCode: Int): Response<String> {
@@ -97,7 +97,9 @@ class MetricsInterceptorTest {
       install(WebTestingModule())
       multibind<MiskCallerAuthenticator>().to<FakeCallerAuthenticator>()
       install(PrometheusHistogramRegistryModule())
-      multibind<WebActionEntry>().toInstance(WebActionEntry<TestAction>())
+      install(WebActionModule.create<TestAction>())
+
+      bind<MetricsInterceptor.Factory>()
     }
   }
 }

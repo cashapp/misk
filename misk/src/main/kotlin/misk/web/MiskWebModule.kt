@@ -17,7 +17,7 @@ import misk.web.actions.LivenessCheckAction
 import misk.web.actions.NotFoundAction
 import misk.web.actions.ReadinessCheckAction
 import misk.web.actions.StatusAction
-import misk.web.actions.WebActionEntry
+import misk.web.exceptions.ActionExceptionLogLevelConfig
 import misk.web.exceptions.ActionExceptionMapper
 import misk.web.exceptions.ExceptionHandlingInterceptor
 import misk.web.exceptions.ExceptionMapperModule
@@ -54,8 +54,11 @@ import javax.inject.Singleton
 import javax.servlet.http.HttpServletRequest
 import java.security.Provider as SecurityProvider
 
-class MiskWebModule : KAbstractModule() {
+class MiskWebModule(private val config: WebConfig) : KAbstractModule() {
   override fun configure() {
+    bind<WebConfig>().toInstance(config)
+    bind<ActionExceptionLogLevelConfig>().toInstance(config.action_exception_log_level)
+
     multibind<Service>().to<JettyService>()
     multibind<Service>().to<JettyThreadPoolMetricsCollector>()
     multibind<Service>().to<JettyConnectionMetricsCollector>()
@@ -115,7 +118,7 @@ class MiskWebModule : KAbstractModule() {
 
     // Optionally log request and response details
     multibind<ApplicationInterceptor.Factory>(MiskDefault::class)
-      .to<RequestLoggingInterceptor.Factory>()
+        .to<RequestLoggingInterceptor.Factory>()
 
     install(ExceptionMapperModule.create<ActionException, ActionExceptionMapper>())
 
@@ -131,11 +134,11 @@ class MiskWebModule : KAbstractModule() {
     install(CertificatesModule())
 
     // Bind build-in actions.
-    multibind<WebActionEntry>().toInstance(WebActionEntry<InternalErrorAction>())
-    multibind<WebActionEntry>().toInstance(WebActionEntry<StatusAction>())
-    multibind<WebActionEntry>().toInstance(WebActionEntry<ReadinessCheckAction>())
-    multibind<WebActionEntry>().toInstance(WebActionEntry<LivenessCheckAction>())
-    multibind<WebActionEntry>().toInstance(WebActionEntry<NotFoundAction>())
+    install(WebActionModule.create<InternalErrorAction>())
+    install(WebActionModule.create<StatusAction>())
+    install(WebActionModule.create<ReadinessCheckAction>())
+    install(WebActionModule.create<LivenessCheckAction>())
+    install(WebActionModule.create<NotFoundAction>())
   }
 
   @Provides @Singleton
@@ -144,9 +147,9 @@ class MiskWebModule : KAbstractModule() {
     return QueuedThreadPool()
   }
 
-  class MiskCallerProvider : ActionScopedProvider<MiskCaller?> {
-    @Inject lateinit var authenticators: List<MiskCallerAuthenticator>
-
+  class MiskCallerProvider @Inject constructor(
+    private val authenticators: List<MiskCallerAuthenticator>
+  ): ActionScopedProvider<MiskCaller?> {
     override fun get(): MiskCaller? {
       return authenticators.mapNotNull {
         it.getAuthenticatedCaller()

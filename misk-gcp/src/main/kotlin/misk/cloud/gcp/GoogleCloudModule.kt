@@ -22,8 +22,13 @@ import java.nio.file.Paths
 import javax.inject.Inject
 
 /** Installs support for talking to real GCP services, either direct or via emulator */
-class GoogleCloudModule : KAbstractModule() {
+class GoogleCloudModule(
+  private val datastoreConfig: DatastoreConfig,
+  private val storageConfig: StorageConfig
+) : KAbstractModule() {
   override fun configure() {
+    bind<DatastoreConfig>().toInstance(datastoreConfig)
+    bind<StorageConfig>().toInstance(storageConfig)
     multibind<Service>().to<GoogleCloud>()
   }
 

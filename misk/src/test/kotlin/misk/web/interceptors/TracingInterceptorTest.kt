@@ -17,9 +17,9 @@ import misk.web.NetworkChain
 import misk.web.NetworkInterceptor
 import misk.web.Request
 import misk.web.Response
+import misk.web.WebActionModule
 import misk.web.WebTestingModule
 import misk.web.actions.WebAction
-import misk.web.actions.WebActionEntry
 import misk.web.actions.asNetworkChain
 import misk.web.jetty.JettyService
 import okhttp3.Headers
@@ -127,21 +127,21 @@ class TracingInterceptorTest {
     httpClient.newCall(request).execute()
   }
 
-  internal class TracingTestAction : WebAction {
+  internal class TracingTestAction @Inject constructor() : WebAction {
     @Get("/trace")
     fun call(): Response<String> {
       return Response("success")
     }
   }
 
-  internal class FailedTracingTestAction : WebAction {
+  internal class FailedTracingTestAction @Inject constructor() : WebAction {
     @Get("/failed_trace")
     fun call(): Response<String> {
       return Response("no good", statusCode = StatusCode.BAD_REQUEST.code)
     }
   }
 
-  internal class ExceptionThrowingTracingTestAction : WebAction {
+  internal class ExceptionThrowingTracingTestAction @Inject constructor() : WebAction {
     @Get("/exception_trace")
     fun call(): Response<String> {
       throw ActionException(StatusCode.ENHANCE_YOUR_CALM, "Chill, man")
@@ -156,8 +156,11 @@ class TracingInterceptorTest {
     override fun configure() {
       install(WebTestingModule())
       install(MockTracingBackendModule())
-      multibind<WebActionEntry>().toInstance(WebActionEntry<FailedTracingTestAction>())
-      multibind<WebActionEntry>().toInstance(WebActionEntry<ExceptionThrowingTracingTestAction>())
+      install(WebActionModule.create<TracingTestAction>())
+      install(WebActionModule.create<FailedTracingTestAction>())
+      install(WebActionModule.create<ExceptionThrowingTracingTestAction>())
+
+      bind<TracingInterceptor.Factory>()
     }
   }
 }

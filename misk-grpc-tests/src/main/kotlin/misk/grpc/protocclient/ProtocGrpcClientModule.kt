@@ -8,8 +8,7 @@ import javax.inject.Named
 import javax.inject.Singleton
 
 class ProtocGrpcClientModule : KAbstractModule() {
-  override fun configure() {
-  }
+  override fun configure() {}
 
   @Provides
   @Singleton
