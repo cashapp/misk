@@ -1,5 +1,6 @@
 package misk.crypto
 
+import com.google.inject.Inject
 import javax.inject.Singleton
 
 /**
@@ -7,7 +8,7 @@ import javax.inject.Singleton
  * It's being populated by the [CryptoModule] class when loaded.
  */
 @Singleton
-class KeyManager {
+class KeyManager @Inject constructor() {
 
   private var keys: HashMap<String, Cipher> = LinkedHashMap()
 
