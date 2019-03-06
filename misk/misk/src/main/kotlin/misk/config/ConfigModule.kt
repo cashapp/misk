@@ -11,6 +11,7 @@ class ConfigModule<T : Config>(
   override fun configure() {
     bind<String>().annotatedWith<AppName>().toInstance(appName)
     bind(configClass).toInstance(config)
+    bind<Config>().toInstance(config)
   }
 
   companion object {

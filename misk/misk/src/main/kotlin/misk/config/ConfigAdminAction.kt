@@ -1,8 +1,6 @@
 package misk.config
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.dataformat.yaml.YAMLMapper
-import misk.config.ConfigAdminAction.Companion.generateConfigResources
+import com.google.inject.Inject
 import misk.environment.Environment
 import misk.web.Get
 import misk.web.RequestContentType
@@ -10,14 +8,16 @@ import misk.web.ResponseContentType
 import misk.web.actions.WebAction
 import misk.web.mediatype.MediaTypes
 import misk.web.metadata.AdminDashboardAccess
-import javax.inject.Inject
-import javax.inject.Qualifier
 import javax.inject.Singleton
 
 @Singleton
 class ConfigAdminAction @Inject constructor(
-  val optionalBinder: OptionalBinder
+  @AppName val appName: String,
+  val environment: Environment,
+  val config: Config
 ) : WebAction {
+  val resources: Map<String, String?> = generateConfigResources(appName, environment, config)
+
   @Get("/api/config/all")
   @RequestContentType(MediaTypes.APPLICATION_JSON)
   @ResponseContentType(MediaTypes.APPLICATION_JSON)
@@ -28,7 +28,7 @@ class ConfigAdminAction @Inject constructor(
     val yamlFilesRegex = Regex("(?<=(password|passphrase): )([^\n]*)")
 
     return Response(
-        resources = redact(optionalBinder.resources, yamlFilesRegex)
+        resources = redact(resources, yamlFilesRegex)
     )
   }
 
@@ -43,31 +43,15 @@ class ConfigAdminAction @Inject constructor(
     fun redact(output: String, regex: Regex) =
         output.replace(regex, "████████")
 
-    fun generateConfigResources(appName: String, environment: Environment): Map<String, String?> {
+    fun generateConfigResources(
+      appName: String,
+      environment: Environment,
+      config: Config
+    ): Map<String, String?> {
       val rawYamlFiles = MiskConfig.loadConfigYamlMap(appName, environment, listOf())
-      val effectiveConfigJsonString = MiskConfig.flattenYamlMap(rawYamlFiles).toString()
-      val effectiveConfigJsonNodeTree = ObjectMapper().readTree(effectiveConfigJsonString)
-      val effectiveConfigYaml = YAMLMapper().writeValueAsString(effectiveConfigJsonNodeTree).drop(4)
-      val yamlFiles = linkedMapOf<String, String?>("Effective Config" to effectiveConfigYaml)
+      val yamlFiles = linkedMapOf<String, String?>("Effective Config" to MiskConfig.toYaml(config))
       rawYamlFiles.map { yamlFiles.put("classpath:/${it.key}", it.value) }
       return yamlFiles
     }
   }
-}
-
-@Qualifier
-@Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION)
-annotation class ConfigResources
-
-/**
- * https://github.com/google/guice/wiki/FrequentlyAskedQuestions#how-can-i-inject-optional-parameters-into-a-constructor
- */
-@Singleton
-class OptionalBinder @Inject constructor(
-  @AppName val appName: String,
-  val environment: Environment
-) {
-  @com.google.inject.Inject(optional = true)
-  @ConfigResources
-  var resources: Map<String, String?> = generateConfigResources(appName, environment)
 }
