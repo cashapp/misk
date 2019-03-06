@@ -6,10 +6,7 @@ import { IDispatchProps, IState, rootDispatcher, rootSelectors } from "../ducks"
 
 class TabContainer extends React.Component<IState & IDispatchProps, IState> {
   componentDidMount() {
-    this.props.simpleNetworkGet(
-      "WebActions::Metadata",
-      "/api/webactionmetadata"
-    )
+    this.props.webActionsMetadata()
   }
 
   render() {
