@@ -1,6 +1,7 @@
 import {
   Button,
   Card,
+  Classes,
   Collapse,
   ControlGroup,
   H3,
@@ -16,51 +17,18 @@ import {
 } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
 import { FlexContainer } from "@misk/core"
-import {
-  onChangeToggleFnCall,
-  simpleSelect,
-  simpleType
-} from "@misk/simpleredux"
+import { onChangeToggleFnCall, simpleSelect } from "@misk/simpleredux"
 import { HTTPMethod } from "http-method-enum"
-import { chain, flatMap } from "lodash"
 import * as React from "react"
 import { connect } from "react-redux"
 import styled from "styled-components"
-import { IDispatchProps, IState, rootDispatcher, rootSelectors } from "../ducks"
-
-export interface IWebActionAPI {
-  allowedServices: string[]
-  allowedRoles: string[]
-  applicationInterceptors: string[]
-  dispatchMechanism: HTTPMethod
-  function: string
-  functionAnnotations: string[]
-  name: string
-  networkInterceptors: string[]
-  parameterTypes: string[]
-  pathPattern: string
-  requestMediaTypes: string[]
-  responseMediaType: string
-  returnType: string
-}
-
-export interface IWebActionInternal {
-  allowedServices: string
-  allowedRoles: string
-  applicationInterceptors: string[]
-  authFunctionAnnotations: string[]
-  dispatchMechanism: HTTPMethod[]
-  function: string
-  functionAnnotations: string[]
-  name: string
-  networkInterceptors: string[]
-  nonAccessOrTypeFunctionAnnotations: string[]
-  parameterTypes: string[]
-  pathPattern: string
-  requestMediaTypes: string[]
-  responseMediaType: string
-  returnType: string
-}
+import {
+  IDispatchProps,
+  IState,
+  IWebActionInternal,
+  rootDispatcher,
+  rootSelectors
+} from "../ducks"
 
 const FloatLeft = styled.span`
   float: left;
@@ -283,86 +251,68 @@ export const FilterWebActions = (props: IState & IDispatchProps) => {
       <ControlGroup fill={true} vertical={false}>
         <Button icon={IconNames.FILTER} />
         {/* TODO(adrw) Use multiselect to do autocomplete filters */}
-        {/* <MultiSelect /> */}
       </ControlGroup>
     </div>
   )
 }
 
-export const WebActionsContainer = (props: IState & IDispatchProps) => {
-  const tag = "WebAction"
-  const rawMetadata = simpleSelect(
-    props.simpleNetwork,
-    tag,
-    "webActionMetadata",
-    simpleType.array
-  )
-  const metadata = chain(rawMetadata)
-    .map((action: IWebActionAPI) => {
-      const authFunctionAnnotations = action.functionAnnotations.filter(
-        a => a.includes("Access") || a.includes("authz")
-      )
-      const nonAccessOrTypeFunctionAnnotations = action.functionAnnotations.filter(
-        a =>
-          !(
-            a.includes("RequestContentType") ||
-            a.includes("ResponseContentType") ||
-            a.includes("Access") ||
-            a.includes("authz") ||
-            a.toUpperCase().includes(HTTPMethod.DELETE) ||
-            a.toUpperCase().includes(HTTPMethod.GET) ||
-            a.toUpperCase().includes(HTTPMethod.HEAD) ||
-            a.toUpperCase().includes(HTTPMethod.PATCH) ||
-            a.toUpperCase().includes(HTTPMethod.POST) ||
-            a.toUpperCase().includes(HTTPMethod.PUT)
-          )
-      )
-      const emptyAllowedArrayValue =
-        authFunctionAnnotations.length > 1 &&
-        authFunctionAnnotations[0].includes("Unauthenticated")
-          ? "All"
-          : "None"
-      const allowedRoles =
-        action.allowedRoles.length > 0
-          ? action.allowedRoles.join(", ")
-          : emptyAllowedArrayValue
+/**
+ * Empty text for use with BlueprintJS Skeleton class for mocking loading UIs
+ * https://blueprintjs.com/docs/#core/components/skeleton
+ */
+const SkeletonText = () => (
+  <span className={Classes.SKELETON}>{"Lorem ipsum"}</span>
+)
 
-      const allowedServices =
-        action.allowedServices.length > 0
-          ? action.allowedServices.join(", ")
-          : emptyAllowedArrayValue
+const SkeletonWebActions = () => (
+  <Card>
+    <Header>
+      {[HTTPMethod.DELETE, HTTPMethod.GET, HTTPMethod.PUT, HTTPMethod.POST].map(
+        m => (
+          <MethodTag method={m} />
+        )
+      )}
+      <FloatLeft>
+        <H3 className={Classes.SKELETON}>{"AnotherWebAction"}</H3>
+      </FloatLeft>
+      <FloatLeft>
+        <CodeTag large={true}>{<SkeletonText />}</CodeTag>
+      </FloatLeft>
+    </Header>
+    <FlexContainer>
+      <Column>
+        <MetadataMenu>
+          <MenuItem label={"Function"} text={<SkeletonText />} />
+          <MenuItem label={"Services"} text={<SkeletonText />} />
+          <MenuItem label={"Roles"} text={<SkeletonText />} />
+          <MenuItem label={"Access"} text={<SkeletonText />} />
+        </MetadataMenu>
+      </Column>
+      <Column>
+        <MetadataMenu>
+          <MenuItem label={"Content Types"} text={<SkeletonText />} />
+          <MenuItem
+            label={"Application Interceptors"}
+            text={<SkeletonText />}
+          />
+          <MenuItem label={"Network Interceptors"} text={<SkeletonText />} />
+        </MetadataMenu>
+      </Column>
+    </FlexContainer>
+  </Card>
+)
 
-      return {
-        ...action,
-        allowedRoles,
-        allowedServices,
-        authFunctionAnnotations,
-        dispatchMechanism: [action.dispatchMechanism],
-        function: action.function.split("fun ").pop(),
-        nonAccessOrTypeFunctionAnnotations
-      }
-    })
-    .groupBy("pathPattern")
-    .map((actions: IWebActionInternal[]) => {
-      const dispatchMechanism = flatMap(
-        actions,
-        action => action.dispatchMechanism
-      )
-      const mergedAction = actions[0]
-      mergedAction.dispatchMechanism = dispatchMechanism.sort().reverse()
-      return mergedAction
-    })
-    .sortBy(["name", "pathPattern"])
-    .value()
-  // TODO(adrw) build index of keyspace for filterable fields
-  // const index = chain(metadata).value()
-  // console.log(index)
-  return (
-    <div>
-      <WebActions metadata={metadata} {...props} />
-      {/* <FilterWebActions {...props} /> */}
-    </div>
-  )
+const WebActionsContainer = (props: IState & IDispatchProps) => {
+  const metadata = simpleSelect(props.webActions, "metadata")
+  if (metadata.length > 0) {
+    return (
+      <div>
+        <WebActions metadata={metadata} {...props} />
+      </div>
+    )
+  } else {
+    return <SkeletonWebActions />
+  }
 }
 
 const mapStateToProps = (state: IState) => rootSelectors(state)

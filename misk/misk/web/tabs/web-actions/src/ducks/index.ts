@@ -26,8 +26,8 @@ import {
   IDispatchWebActions,
   IWebActionsImmutableState,
   IWebActionsState,
-  WebActionsReducer,
-  watchWebActionsSagas
+  watchWebActionsSagas,
+  WebActionsReducer
 } from "./webActions"
 export * from "./webActions"
 
