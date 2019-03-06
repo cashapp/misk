@@ -5,9 +5,11 @@ import com.google.common.util.concurrent.AbstractIdleService
 import com.google.inject.Key
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
+import com.zaxxer.hikari.metrics.prometheus.PrometheusMetricsTrackerFactory
 import misk.DependentService
 import misk.environment.Environment
 import misk.inject.toKey
+import misk.metrics.Metrics
 import mu.KotlinLogging
 import javax.inject.Provider
 import javax.inject.Singleton
@@ -22,7 +24,8 @@ internal class DataSourceService(
   private val qualifier: KClass<out Annotation>,
   private val config: DataSourceConfig,
   private val environment: Environment,
-  private val dataSourceDecorators: Set<DataSourceDecorator>
+  private val dataSourceDecorators: Set<DataSourceDecorator>,
+  private val metrics: Metrics? = null
 ) : AbstractIdleService(), DependentService, Provider<DataSource> {
   /** The backing connection pool */
   private var hikariDataSource: HikariDataSource? = null
@@ -69,6 +72,8 @@ internal class DataSourceService(
       config.dataSourceProperties["elideSetAutoCommits"] = "true"
       config.dataSourceProperties["maintainTimeStats"] = "false"
     }
+
+    metrics?.let { config.metricsTrackerFactory = PrometheusMetricsTrackerFactory(it.registry) }
 
     hikariDataSource = HikariDataSource(config)
     dataSource = decorate(hikariDataSource!!)
