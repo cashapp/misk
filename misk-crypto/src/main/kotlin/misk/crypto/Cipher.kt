@@ -16,12 +16,11 @@ import java.util.Base64
 interface Cipher {
   /**
    * Encrypt the given data.
-   * If anything goes wrong, throws a [java.security.GeneralSecurityException]
    */
   fun encrypt(plaintext: ByteString): ByteString
 
   /**
-   * Decrypt the given data
+   * Decrypt the given data.
    * If anything goes wrong, including failing to decipher the data,
    * throws a [java.security.GeneralSecurityException]
    */
