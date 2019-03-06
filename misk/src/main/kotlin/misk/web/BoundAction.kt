@@ -2,6 +2,7 @@ package misk.web
 
 import misk.Action
 import misk.ApplicationInterceptor
+import misk.security.authz.AccessInterceptor
 import misk.web.actions.WebAction
 import misk.web.actions.WebActionMetadata
 import misk.web.actions.WebSocketListener
@@ -161,8 +162,21 @@ internal class BoundAction<A : WebAction>(
         pathPattern = pathPattern,
         applicationInterceptors = applicationInterceptors,
         networkInterceptors = networkInterceptors,
-        dispatchMechanism = dispatchMechanism
+        dispatchMechanism = dispatchMechanism,
+        allowedServices = fetchAllowedCallers(applicationInterceptors, AccessInterceptor::allowedServices),
+        allowedRoles = fetchAllowedCallers(applicationInterceptors, AccessInterceptor::allowedRoles)
     )
+  }
+
+  private fun fetchAllowedCallers(
+      applicationInterceptors: List<ApplicationInterceptor>,
+      accessFun: (AccessInterceptor) -> Set<String>): Set<String> {
+    for (interceptor in applicationInterceptors) {
+      if (interceptor is AccessInterceptor) {
+        return accessFun.invoke(interceptor)
+      }
+    }
+    return setOf()
   }
 }
 

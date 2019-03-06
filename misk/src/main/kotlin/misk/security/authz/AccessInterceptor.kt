@@ -10,9 +10,9 @@ import misk.scope.ActionScoped
 import javax.inject.Inject
 import kotlin.reflect.KClass
 
-internal class AccessInterceptor private constructor(
-  private val allowedServices: Set<String>,
-  private val allowedRoles: Set<String>,
+class AccessInterceptor private constructor(
+  val allowedServices: Set<String>,
+  val allowedRoles: Set<String>,
   private val caller: ActionScoped<MiskCaller?>
 ) : ApplicationInterceptor {
 

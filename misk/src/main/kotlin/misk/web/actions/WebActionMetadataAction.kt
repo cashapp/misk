@@ -43,21 +43,25 @@ data class WebActionMetadata(
   val pathPattern: String,
   val applicationInterceptors: List<String>,
   val networkInterceptors: List<String>,
-  val dispatchMechanism: DispatchMechanism
+  val dispatchMechanism: DispatchMechanism,
+  val allowedServices: Set<String>,
+  val allowedRoles: Set<String>
 )
 
 internal fun WebActionMetadata(
-  name: String,
-  function: Function<*>,
-  functionAnnotations: List<Annotation>,
-  acceptedMediaRanges: List<MediaRange>,
-  responseContentType: MediaType?,
-  parameterTypes: List<KType>,
-  returnType: KType,
-  pathPattern: PathPattern,
-  applicationInterceptors: List<ApplicationInterceptor>,
-  networkInterceptors: List<NetworkInterceptor>,
-  dispatchMechanism: DispatchMechanism
+    name: String,
+    function: Function<*>,
+    functionAnnotations: List<Annotation>,
+    acceptedMediaRanges: List<MediaRange>,
+    responseContentType: MediaType?,
+    parameterTypes: List<KType>,
+    returnType: KType,
+    pathPattern: PathPattern,
+    applicationInterceptors: List<ApplicationInterceptor>,
+    networkInterceptors: List<NetworkInterceptor>,
+    dispatchMechanism: DispatchMechanism,
+    allowedServices: Set<String>,
+    allowedRoles: Set<String>
 ): WebActionMetadata {
   return WebActionMetadata(
       name = name,
@@ -70,6 +74,8 @@ internal fun WebActionMetadata(
       pathPattern = pathPattern.toString(),
       applicationInterceptors = applicationInterceptors.map { it::class.qualifiedName.toString() },
       networkInterceptors = networkInterceptors.map { it::class.qualifiedName.toString() },
-      dispatchMechanism = dispatchMechanism
+      dispatchMechanism = dispatchMechanism,
+      allowedServices = allowedServices,
+      allowedRoles = allowedRoles
   )
 }
