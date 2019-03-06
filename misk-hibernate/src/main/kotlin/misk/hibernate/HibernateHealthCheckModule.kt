@@ -15,8 +15,7 @@ import kotlin.reflect.KClass
  */
 class HibernateHealthCheckModule(
   private val qualifier: KClass<out Annotation>,
-  private val sessionFactoryProvider: Provider<SessionFactory>,
-  private val config: DataSourceConfig
+  private val sessionFactoryProvider: Provider<SessionFactory>
 ) : KAbstractModule() {
 
   override fun configure() {
@@ -25,7 +24,7 @@ class HibernateHealthCheckModule(
         @Inject lateinit var clock: Clock
 
         override fun get(): HibernateHealthCheck =
-          HibernateHealthCheck(qualifier, sessionFactoryProvider, config, clock)
+          HibernateHealthCheck(qualifier, sessionFactoryProvider, clock)
       }).asSingleton()
   }
 }
