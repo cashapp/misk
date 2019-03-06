@@ -17,7 +17,7 @@ import javax.inject.Inject
  * ```
  */
 class Metrics @Inject internal constructor(
-  private val registry: CollectorRegistry,
+  val registry: CollectorRegistry,
   collectors: @JvmSuppressWildcards Set<Collector>
 ) {
   @Inject private lateinit var histogramRegistry: HistogramRegistry
