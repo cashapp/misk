@@ -3,6 +3,7 @@ package misk.web.metadata
 import misk.config.ConfigAdminAction
 import misk.environment.Environment
 import misk.inject.KAbstractModule
+import misk.security.authz.AccessAnnotationEntry
 import misk.web.DashboardTab
 import misk.web.NetworkInterceptor
 import misk.web.WebActionModule
@@ -110,5 +111,16 @@ class AdminDashboardModule(val environment: Environment) : KAbstractModule() {
           category = "Container Admin"
       ))
     }
+  }
+}
+
+// Module that allows testing/development environments to bind up the admin dashboard
+class AdminDashboardTestingModule(val environment: Environment): KAbstractModule() {
+  override fun configure() {
+    install(AdminDashboardModule(environment))
+    multibind<AccessAnnotationEntry>()
+        // Set dummy values for access, these shouldn't matter,
+        // as test environments should prefer to use the FakeCallerAuthenticator.
+        .toInstance(AccessAnnotationEntry<AdminDashboardAccess>(roles = listOf("admin_access")))
   }
 }
