@@ -201,103 +201,97 @@ const MethodTag = (props: { method: HTTPMethod }) => (
  */
 const SendRequestCollapse = (
   props: { action: IWebActionInternal } & IState & IDispatchProps
-) => (
-  <Collapse
-    isOpen={simpleSelect(
+) => {
+  // Determine if Send Request form for the Web Action should be open
+  const isOpen =
+    simpleSelect(
       props.simpleForm,
       `${tag}::${props.action.pathPattern}::Request`,
       "data"
-    )}
-  >
-    <InputGroup
-      onChange={onChangeFnCall(
-        props.simpleFormInput,
-        `${tag}::${props.action.pathPattern}::URL`
-      )}
-      value={
-        simpleSelect(
-          props.simpleForm,
-          `${tag}::${props.action.pathPattern}::URL`,
-          "data"
-        ) ||
-        (simpleSelect(
-          props.simpleForm,
-          `${tag}::${props.action.pathPattern}::Request`,
-          "data"
-        ) &&
-          props.simpleFormInput(
-            `${tag}::${props.action.pathPattern}::URL`,
-            props.action.pathPattern
-          ))
-      }
-      type={"url"}
-    />
-    <TextArea
-      fill={true}
-      onChange={onChangeFnCall(
-        props.simpleFormInput,
-        `${tag}::${props.action.pathPattern}::Body`
-      )}
-      placeholder={
-        "Request Body (JSON or Text).\nDrag bottom right corner of text area input to expand."
-      }
-    />
-    <ButtonGroup>
-      {props.action.dispatchMechanism.map(m => (
-        <Button
-          onClick={onClickFnCall(
-            HTTPMethodDispatch(props)[m],
-            `${tag}::${props.action.pathPattern}::Response::${m}`,
-            simpleSelect(
-              props.simpleForm,
-              `${tag}::${props.action.pathPattern}::URL`,
-              "data"
-            ),
-            simpleSelect(
-              props.simpleForm,
-              `${tag}::${props.action.pathPattern}::Body`,
-              "data"
-            )
-          )}
-          intent={HTTPMethodIntent[m]}
-          loading={simpleSelect(
+    ) || false
+  const url = simpleSelect(
+    props.simpleForm,
+    `${tag}::${props.action.pathPattern}::URL`,
+    "data"
+  )
+  // Pre-populate the URL field with the action path pattern on open of request form
+  if (isOpen && !url) {
+    props.simpleFormInput(
+      `${tag}::${props.action.pathPattern}::URL`,
+      props.action.pathPattern
+    )
+  }
+  return (
+    <Collapse isOpen={isOpen}>
+      <InputGroup
+        defaultValue={props.action.pathPattern}
+        onChange={onChangeFnCall(
+          props.simpleFormInput,
+          `${tag}::${props.action.pathPattern}::URL`
+        )}
+        placeholder={
+          "Request URL: absolute ( http://your.url.com/to/send/a/request/to/ ) or internal service endpoint ( /service/web/action )"
+        }
+        type={"url"}
+      />
+      <TextArea
+        fill={true}
+        onChange={onChangeFnCall(
+          props.simpleFormInput,
+          `${tag}::${props.action.pathPattern}::Body`
+        )}
+        placeholder={
+          "Request Body (JSON or Text).\nDrag bottom right corner of text area input to expand."
+        }
+      />
+      <ButtonGroup>
+        {props.action.dispatchMechanism.map(m => (
+          <Button
+            onClick={onClickFnCall(
+              HTTPMethodDispatch(props)[m],
+              `${tag}::${props.action.pathPattern}::Response::${m}`,
+              url,
+              simpleSelect(
+                props.simpleForm,
+                `${tag}::${props.action.pathPattern}::Body`,
+                "data"
+              )
+            )}
+            intent={HTTPMethodIntent[m]}
+            loading={simpleSelect(
+              props.simpleNetwork,
+              `${tag}::${props.action.pathPattern}::Response::${m}`,
+              "loading"
+            )}
+            text={`${m}`}
+          />
+        ))}
+      </ButtonGroup>
+      <Pre>
+        Request URL: {url}
+        {"\n"}Request Body:
+        {JSON.stringify(
+          simpleSelect(
+            props.simpleForm,
+            `${tag}::${props.action.pathPattern}::Body`,
+            "data"
+          ),
+          null,
+          2
+        )}
+        {"\n"}Response:
+        {JSON.stringify(
+          simpleSelect(
             props.simpleNetwork,
-            `${tag}::${props.action.pathPattern}::Response::${m}`,
-            "loading"
-          )}
-          text={`${m}`}
-        />
-      ))}
-    </ButtonGroup>
-    <Pre>
-      Request URL:{" "}
-      {simpleSelect(
-        props.simpleForm,
-        `${tag}::${props.action.pathPattern}::URL`,
-        "data"
-      )}
-      {"\n"}Request Body:
-      {JSON.stringify(
-        simpleSelect(
-          props.simpleForm,
-          `${tag}::${props.action.pathPattern}::Body`,
-          "data"
-        ),
-        null,
-        2
-      )}
-      {"\n"}Response:
-      {JSON.stringify(
-        simpleSelect(
-          props.simpleNetwork,
-          `${tag}::${props.action.pathPattern}::Response`
-        ),
-        null,
-        2
-      )}
-    </Pre>
-  </Collapse>
-)
+            `${tag}::${props.action.pathPattern}::Response`
+          ),
+          null,
+          2
+        )}
+      </Pre>
+    </Collapse>
+  )
+}
 
 /**
  * Web Action Card rendered for each bound Web Action
