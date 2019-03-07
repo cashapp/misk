@@ -29,7 +29,7 @@ class HealthCheckTest {
   fun healthy() {
     fakeClock.setNow(Instant.now())
 
-    val status = HibernateHealthCheck(Movies::class, sessionFactory, config, fakeClock).status()
+    val status = HibernateHealthCheck(Movies::class, sessionFactory, fakeClock).status()
     assertThat(status.isHealthy).isTrue()
   }
 
@@ -38,8 +38,7 @@ class HealthCheckTest {
     val mockSessionFactory: SessionFactory = mock()
     whenever(mockSessionFactory.openSession()).thenThrow(HibernateException("Cannot open session"))
 
-    val status = HibernateHealthCheck(Movies::class, Provider { mockSessionFactory }, config,
-        fakeClock).status()
+    val status = HibernateHealthCheck(Movies::class, Provider { mockSessionFactory }, fakeClock).status()
     assertThat(status.isHealthy).isFalse()
     assertThat(status.messages).contains("Hibernate: failed to query Movies database")
   }
@@ -49,7 +48,7 @@ class HealthCheckTest {
     val skew = HibernateHealthCheck.CLOCK_SKEW_UNHEALTHY_THRESHOLD.multipliedBy(2)
     fakeClock.setNow(Instant.now().minus(skew))
 
-    val status = HibernateHealthCheck(Movies::class, sessionFactory, config, fakeClock).status()
+    val status = HibernateHealthCheck(Movies::class, sessionFactory, fakeClock).status()
     assertThat(status.isHealthy).isFalse()
     assertThat(status.messages).anyMatch {
       it.startsWith("Hibernate: host and Movies database clocks have drifted")

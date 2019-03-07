@@ -162,7 +162,7 @@ class HibernateModule(
       }
     })
 
-    install(HibernateHealthCheckModule(qualifier, sessionFactoryProvider, config))
+    install(HibernateHealthCheckModule(qualifier, sessionFactoryProvider))
   }
 
   private fun maybeBindStartVitessService() {
