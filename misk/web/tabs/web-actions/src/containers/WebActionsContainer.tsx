@@ -1,5 +1,6 @@
 import {
   Button,
+  ButtonGroup,
   Card,
   Classes,
   Collapse,
@@ -7,17 +8,24 @@ import {
   H3,
   H5,
   Icon,
+  InputGroup,
   Intent,
   Menu,
   MenuItem,
   Pre,
   Spinner,
   Tag,
+  TextArea,
   Tooltip
 } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
 import { FlexContainer } from "@misk/core"
-import { onChangeToggleFnCall, simpleSelect } from "@misk/simpleredux"
+import {
+  onChangeFnCall,
+  onChangeToggleFnCall,
+  onClickFnCall,
+  simpleSelect
+} from "@misk/simpleredux"
 import { HTTPMethod } from "http-method-enum"
 import * as React from "react"
 import { connect } from "react-redux"
@@ -29,6 +37,34 @@ import {
   rootDispatcher,
   rootSelectors
 } from "../ducks"
+
+const tag = "WebActions"
+const FilterTag = "WebActions::FilterForm"
+
+//TODO(adrw) upstream to @misk/core
+const HTTPMethodIntent: { [method in HTTPMethod]: Intent } = {
+  [HTTPMethod.CONNECT]: Intent.DANGER,
+  [HTTPMethod.DELETE]: Intent.DANGER,
+  [HTTPMethod.GET]: Intent.PRIMARY,
+  [HTTPMethod.HEAD]: Intent.WARNING,
+  [HTTPMethod.OPTIONS]: Intent.NONE,
+  [HTTPMethod.PATCH]: Intent.SUCCESS,
+  [HTTPMethod.POST]: Intent.SUCCESS,
+  [HTTPMethod.PUT]: Intent.SUCCESS,
+  [HTTPMethod.TRACE]: Intent.NONE
+}
+
+const HTTPMethodDispatch: any = (props: IDispatchProps) => ({
+  [HTTPMethod.CONNECT]: props.simpleNetworkGet,
+  [HTTPMethod.DELETE]: props.simpleNetworkDelete,
+  [HTTPMethod.GET]: props.simpleNetworkGet,
+  [HTTPMethod.HEAD]: props.simpleNetworkHead,
+  [HTTPMethod.OPTIONS]: props.simpleNetworkGet,
+  [HTTPMethod.PATCH]: props.simpleNetworkPatch,
+  [HTTPMethod.POST]: props.simpleNetworkPost,
+  [HTTPMethod.PUT]: props.simpleNetworkPut,
+  [HTTPMethod.TRACE]: props.simpleNetworkGet
+})
 
 const FloatLeft = styled.span`
   float: left;
@@ -60,7 +96,9 @@ const MetadataMenu = styled(Menu)`
     margin-bottom: 0;
   }
 `
-
+/**
+ * Used in rendering the Content Types metadata request -> response
+ */
 const RequestResponeContentTypes = (props: { action: IWebActionInternal }) => (
   <span>
     <span>{props.action.requestMediaTypes}</span>{" "}
@@ -69,6 +107,15 @@ const RequestResponeContentTypes = (props: { action: IWebActionInternal }) => (
   </span>
 )
 
+/**
+ * Single cell component for a piece of metadata
+ * @param props
+ *  * content: primary content that is displayed (ie. eng, service-owners)
+ *  * label: right aligned faded text that is a label for the data (ie. Roles)
+ *  * tooltip: text displayed in tooltip when content is hovered over.
+ *      Separate definition from content in the case that a truncated length
+ *      is displayed but the full length of content is displayed in tooltip
+ */
 const Metadata = (
   props: {
     content: string | JSX.Element
@@ -83,9 +130,19 @@ const Metadata = (
   />
 )
 
+/**
+ * Metadata that slides out content below when clicked
+ * @param props : includes same props as Metadata with a few additional
+ *  * children: any components to display when the Metadata is clicked
+ *  * tag: string to use in @misk/SimpleRedux/SimpleForm to register Metadata clicks
+ *  * IState: include connected State from parent container
+ *      Provides access to @misk/SimpleRedux/SimpleForm substate in Redux
+ *  * IDispatchProps: include connected dispatch object from parent container
+ *      Provides access to @misk/SimpleRedux/SimpleForm input handlers
+ */
 const MetadataCollapse = (
   props: {
-    collapseContent: any
+    children: any
     content: string | JSX.Element
     label: string
     tag: string
@@ -123,26 +180,14 @@ const MetadataCollapse = (
       }
     />
     <Collapse isOpen={simpleSelect(props.simpleForm, props.tag, "data")}>
-      {props.collapseContent}
+      {props.children}
     </Collapse>
   </div>
 )
 
-const FilterTag = "WebActions::FilterForm"
-
-//TODO(adrw) upstream to @misk/core
-const HTTPMethodIntent: { [method in HTTPMethod]: Intent } = {
-  [HTTPMethod.CONNECT]: Intent.DANGER,
-  [HTTPMethod.DELETE]: Intent.DANGER,
-  [HTTPMethod.GET]: Intent.PRIMARY,
-  [HTTPMethod.HEAD]: Intent.WARNING,
-  [HTTPMethod.OPTIONS]: Intent.NONE,
-  [HTTPMethod.PATCH]: Intent.SUCCESS,
-  [HTTPMethod.POST]: Intent.SUCCESS,
-  [HTTPMethod.PUT]: Intent.SUCCESS,
-  [HTTPMethod.TRACE]: Intent.NONE
-}
-
+/**
+ * Renders HTTP Method tags for each Web Action card
+ */
 const MethodTag = (props: { method: HTTPMethod }) => (
   <FloatRight>
     <Tag large={true} intent={HTTPMethodIntent[props.method]}>
@@ -151,91 +196,208 @@ const MethodTag = (props: { method: HTTPMethod }) => (
   </FloatRight>
 )
 
+/**
+ * Collapse wrapped Send a Request form for each Web Action card
+ */
+const SendRequestCollapse = (
+  props: { action: IWebActionInternal } & IState & IDispatchProps
+) => (
+  <Collapse
+    isOpen={simpleSelect(
+      props.simpleForm,
+      `${tag}::${props.action.pathPattern}::Request`,
+      "data"
+    )}
+  >
+    <InputGroup
+      onChange={onChangeFnCall(
+        props.simpleFormInput,
+        `${tag}::${props.action.pathPattern}::URL`
+      )}
+      value={
+        simpleSelect(
+          props.simpleForm,
+          `${tag}::${props.action.pathPattern}::URL`,
+          "data"
+        ) ||
+        (simpleSelect(
+          props.simpleForm,
+          `${tag}::${props.action.pathPattern}::Request`,
+          "data"
+        ) &&
+          props.simpleFormInput(
+            `${tag}::${props.action.pathPattern}::URL`,
+            props.action.pathPattern
+          ))
+      }
+      type={"url"}
+    />
+    <TextArea
+      fill={true}
+      onChange={onChangeFnCall(
+        props.simpleFormInput,
+        `${tag}::${props.action.pathPattern}::Body`
+      )}
+      placeholder={
+        "Request Body (JSON or Text).\nDrag bottom right corner of text area input to expand."
+      }
+    />
+    <ButtonGroup>
+      {props.action.dispatchMechanism.map(m => (
+        <Button
+          onClick={onClickFnCall(
+            HTTPMethodDispatch(props)[m],
+            `${tag}::${props.action.pathPattern}::Response::${m}`,
+            simpleSelect(
+              props.simpleForm,
+              `${tag}::${props.action.pathPattern}::URL`,
+              "data"
+            ),
+            simpleSelect(
+              props.simpleForm,
+              `${tag}::${props.action.pathPattern}::Body`,
+              "data"
+            )
+          )}
+          intent={HTTPMethodIntent[m]}
+          loading={simpleSelect(
+            props.simpleNetwork,
+            `${tag}::${props.action.pathPattern}::Response::${m}`,
+            "loading"
+          )}
+          text={`${m}`}
+        />
+      ))}
+    </ButtonGroup>
+    <Pre>
+      Request URL:{" "}
+      {simpleSelect(
+        props.simpleForm,
+        `${tag}::${props.action.pathPattern}::URL`,
+        "data"
+      )}
+      {"\n"}Request Body:
+      {JSON.stringify(
+        simpleSelect(
+          props.simpleForm,
+          `${tag}::${props.action.pathPattern}::Body`,
+          "data"
+        ),
+        null,
+        2
+      )}
+      {"\n"}Response:
+      {JSON.stringify(
+        simpleSelect(
+          props.simpleNetwork,
+          `${tag}::${props.action.pathPattern}::Response`
+        ),
+        null,
+        2
+      )}
+    </Pre>
+  </Collapse>
+)
+
+/**
+ * Web Action Card rendered for each bound Web Action
+ */
 const WebAction = (
   props: { action: IWebActionInternal } & IState & IDispatchProps
-) => {
-  return (
-    <div>
-      <Card>
-        <Header>
-          {props.action.dispatchMechanism.map(m => (
-            <MethodTag method={m} />
-          ))}
-          <FloatLeft>
-            <H3>{props.action.name}</H3>
-          </FloatLeft>
-          <FloatLeft>
-            <CodeTag large={true}>{props.action.pathPattern}</CodeTag>
-          </FloatLeft>
-        </Header>
-        {props.action.nonAccessOrTypeFunctionAnnotations.map(a => (
-          <H5>{a}</H5>
+) => (
+  <div>
+    <Card>
+      <Header>
+        {props.action.dispatchMechanism.map(m => (
+          <MethodTag method={m} />
         ))}
-        <FlexContainer>
-          <Column>
-            <MetadataMenu>
-              <Metadata
-                content={props.action.function}
-                label={"Function"}
-                tooltip={props.action.function}
-              />
-              <Metadata
-                content={props.action.allowedServices}
-                label={"Services"}
-                tooltip={props.action.allowedServices}
-              />
-              <Metadata
-                content={props.action.allowedRoles}
-                label={"Roles"}
-                tooltip={props.action.allowedRoles}
-              />
-              <Metadata
-                content={props.action.authFunctionAnnotations[0]}
-                label={"Access"}
-                tooltip={props.action.authFunctionAnnotations[0]}
-              />
-            </MetadataMenu>
-          </Column>
-          <Column>
-            <MetadataMenu>
-              <Metadata
-                content={<RequestResponeContentTypes action={props.action} />}
-                label={"Content Types"}
-                tooltip={<RequestResponeContentTypes action={props.action} />}
-              />
-              <MetadataCollapse
-                collapseContent={props.action.applicationInterceptors.map(i => (
-                  <MenuItem text={<Tooltip content={i}>{i}</Tooltip>} />
-                ))}
-                content={"Application Interceptors"}
-                label={`(${props.action.applicationInterceptors.length})`}
-                tag={`WebAction::${
-                  props.action.pathPattern
-                }::ApplicationInterceptors`}
-                tooltip={"Application Interceptors"}
-                {...props}
-              />
-              <MetadataCollapse
-                collapseContent={props.action.networkInterceptors.map(i => (
-                  <MenuItem text={<Tooltip content={i}>{i}</Tooltip>} />
-                ))}
-                content={"Network Interceptors"}
-                label={`(${props.action.networkInterceptors.length})`}
-                tag={`WebAction::${
-                  props.action.pathPattern
-                }::NetworkInterceptors`}
-                tooltip={"Network Interceptors"}
-                {...props}
-              />
-            </MetadataMenu>
-          </Column>
-        </FlexContainer>
-      </Card>
-      <br />
-    </div>
-  )
-}
+        <FloatLeft>
+          <H3>{props.action.name}</H3>
+        </FloatLeft>
+        <FloatLeft>
+          <CodeTag large={true}>{props.action.pathPattern}</CodeTag>
+        </FloatLeft>
+      </Header>
+      {props.action.nonAccessOrTypeFunctionAnnotations.map(a => (
+        <H5>{a}</H5>
+      ))}
+      <FlexContainer>
+        <Column>
+          <MetadataMenu>
+            <Metadata
+              content={props.action.function}
+              label={"Function"}
+              tooltip={props.action.function}
+            />
+            <Metadata
+              content={props.action.allowedServices}
+              label={"Services"}
+              tooltip={props.action.allowedServices}
+            />
+            <Metadata
+              content={props.action.allowedRoles}
+              label={"Roles"}
+              tooltip={props.action.allowedRoles}
+            />
+            <Metadata
+              content={props.action.authFunctionAnnotations[0]}
+              label={"Access"}
+              tooltip={props.action.authFunctionAnnotations[0]}
+            />
+          </MetadataMenu>
+        </Column>
+        <Column>
+          <MetadataMenu>
+            <Metadata
+              content={<RequestResponeContentTypes action={props.action} />}
+              label={"Content Types"}
+              tooltip={<RequestResponeContentTypes action={props.action} />}
+            />
+            <MetadataCollapse
+              content={"Application Interceptors"}
+              label={`(${props.action.applicationInterceptors.length})`}
+              tag={`${tag}::${
+                props.action.pathPattern
+              }::ApplicationInterceptors`}
+              tooltip={"Application Interceptors"}
+              {...props}
+            >
+              {props.action.applicationInterceptors.map(i => (
+                <MenuItem text={<Tooltip content={i}>{i}</Tooltip>} />
+              ))}
+            </MetadataCollapse>
+            <MetadataCollapse
+              content={"Network Interceptors"}
+              label={`(${props.action.networkInterceptors.length})`}
+              tag={`${tag}::${props.action.pathPattern}::NetworkInterceptors`}
+              tooltip={"Network Interceptors"}
+              {...props}
+            >
+              {props.action.networkInterceptors.map(i => (
+                <MenuItem text={<Tooltip content={i}>{i}</Tooltip>} />
+              ))}
+            </MetadataCollapse>
+            <MetadataCollapse
+              content={"Send a Request"}
+              label={""}
+              tag={`${tag}::${props.action.pathPattern}::Request`}
+              tooltip={"Send a Request"}
+              {...props}
+            >
+              <span />
+            </MetadataCollapse>
+          </MetadataMenu>
+        </Column>
+      </FlexContainer>
+      <SendRequestCollapse {...props} />
+    </Card>
+    <br />
+  </div>
+)
 
+/**
+ * Loops over bound Web Actions array (metadata) and renders Web Action card
+ */
 const WebActions = (
   props: { metadata: IWebActionInternal[] } & IState & IDispatchProps
 ) => {
@@ -268,7 +430,7 @@ export const FilterWebActions = (props: IState & IDispatchProps) => {
 }
 
 /**
- * Empty text for use with BlueprintJS Skeleton class for mocking loading UIs
+ * Empty Web Action Card UI for use with BlueprintJS Skeleton class in loading UIs
  * https://blueprintjs.com/docs/#core/components/skeleton
  */
 const SkeletonText = () => (
@@ -278,13 +440,11 @@ const SkeletonText = () => (
 const SkeletonWebActions = () => (
   <Card>
     <Header>
-      {[HTTPMethod.DELETE, HTTPMethod.GET, HTTPMethod.PUT, HTTPMethod.POST].map(
-        m => (
-          <MethodTag method={m} />
-        )
-      )}
+      {[HTTPMethod.GET].map(m => (
+        <MethodTag method={m} />
+      ))}
       <FloatLeft>
-        <H3 className={Classes.SKELETON}>{"AnotherWebAction"}</H3>
+        <H3 className={Classes.SKELETON}>{"AnotherSimpleWebAction"}</H3>
       </FloatLeft>
       <FloatLeft>
         <CodeTag large={true}>{<SkeletonText />}</CodeTag>
@@ -293,20 +453,21 @@ const SkeletonWebActions = () => (
     <FlexContainer>
       <Column>
         <MetadataMenu>
-          <MenuItem label={"Function"} text={<SkeletonText />} />
-          <MenuItem label={"Services"} text={<SkeletonText />} />
-          <MenuItem label={"Roles"} text={<SkeletonText />} />
-          <MenuItem label={"Access"} text={<SkeletonText />} />
+          <Metadata label={"Function"} content={<SkeletonText />} />
+          <Metadata label={"Services"} content={<SkeletonText />} />
+          <Metadata label={"Roles"} content={<SkeletonText />} />
+          <Metadata label={"Access"} content={<SkeletonText />} />
         </MetadataMenu>
       </Column>
       <Column>
         <MetadataMenu>
-          <MenuItem label={"Content Types"} text={<SkeletonText />} />
-          <MenuItem
+          <Metadata label={"Content Types"} content={<SkeletonText />} />
+          <Metadata
             label={"Application Interceptors"}
             text={<SkeletonText />}
           />
-          <MenuItem label={"Network Interceptors"} text={<SkeletonText />} />
+          <Metadata label={"Network Interceptors"} content={<SkeletonText />} />
+          <Metadata label={"Send a Request"} content={<SkeletonText />} />
         </MetadataMenu>
       </Column>
     </FlexContainer>
@@ -322,7 +483,20 @@ const WebActionsContainer = (props: IState & IDispatchProps) => {
       </div>
     )
   } else {
-    return <SkeletonWebActions />
+    // Displays mock of 5 Web Action cards which fill in when data is available
+    return (
+      <div>
+        <SkeletonWebActions />
+        <br />
+        <SkeletonWebActions />
+        <br />
+        <SkeletonWebActions />
+        <br />
+        <SkeletonWebActions />
+        <br />
+        <SkeletonWebActions />
+      </div>
+    )
   }
 }
 
