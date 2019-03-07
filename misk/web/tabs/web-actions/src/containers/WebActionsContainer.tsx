@@ -74,22 +74,59 @@ const Metadata = (
     content: string | JSX.Element
     label: string
     tooltip: string | JSX.Element
-    action: IWebActionInternal
+  } & any
+) => (
+  <MenuItem
+    label={props.label}
+    text={<Tooltip content={props.tooltip}>{props.content}</Tooltip>}
+    {...props}
+  />
+)
+
+const MetadataCollapse = (
+  props: {
+    collapseContent: any
+    content: string | JSX.Element
+    label: string
+    tag: string
+    tooltip: string | JSX.Element
   } & IState &
     IDispatchProps
-) => {
-  return (
-    <MenuItem
+) => (
+  <div>
+    <Metadata
+      content={
+        <span>
+          {simpleSelect(props.simpleForm, props.tag, "data") ? (
+            <Icon icon={IconNames.CARET_DOWN} />
+          ) : (
+            <Icon icon={IconNames.CARET_RIGHT} />
+          )}{" "}
+          {props.content}
+        </span>
+      }
       label={props.label}
       onClick={onChangeToggleFnCall(
         props.simpleFormToggle,
-        `WebAction::${props.action.pathPattern}::${props.label}`,
+        props.tag,
         props.simpleForm
       )}
-      text={<Tooltip content={props.tooltip}>{props.content}</Tooltip>}
+      tooltip={
+        <span>
+          {simpleSelect(props.simpleForm, props.tag, "data") ? (
+            <Icon icon={IconNames.CARET_DOWN} />
+          ) : (
+            <Icon icon={IconNames.CARET_RIGHT} />
+          )}{" "}
+          {props.content}
+        </span>
+      }
     />
-  )
-}
+    <Collapse isOpen={simpleSelect(props.simpleForm, props.tag, "data")}>
+      {props.collapseContent}
+    </Collapse>
+  </div>
+)
 
 const FilterTag = "WebActions::FilterForm"
 
@@ -141,25 +178,21 @@ const WebAction = (
                 content={props.action.function}
                 label={"Function"}
                 tooltip={props.action.function}
-                {...props}
               />
               <Metadata
                 content={props.action.allowedServices}
                 label={"Services"}
                 tooltip={props.action.allowedServices}
-                {...props}
               />
               <Metadata
                 content={props.action.allowedRoles}
                 label={"Roles"}
                 tooltip={props.action.allowedRoles}
-                {...props}
               />
               <Metadata
                 content={props.action.authFunctionAnnotations[0]}
                 label={"Access"}
                 tooltip={props.action.authFunctionAnnotations[0]}
-                {...props}
               />
             </MetadataMenu>
           </Column>
@@ -169,53 +202,31 @@ const WebAction = (
                 content={<RequestResponeContentTypes action={props.action} />}
                 label={"Content Types"}
                 tooltip={<RequestResponeContentTypes action={props.action} />}
-                {...props}
               />
-              <Metadata
+              <MetadataCollapse
+                collapseContent={props.action.applicationInterceptors.map(i => (
+                  <MenuItem text={<Tooltip content={i}>{i}</Tooltip>} />
+                ))}
                 content={"Application Interceptors"}
                 label={`(${props.action.applicationInterceptors.length})`}
+                tag={`WebAction::${
+                  props.action.pathPattern
+                }::ApplicationInterceptors`}
                 tooltip={"Application Interceptors"}
                 {...props}
               />
-              <Collapse
-                isOpen={
-                  props.action.applicationInterceptors.length &&
-                  simpleSelect(
-                    props.simpleForm,
-                    `WebAction::${props.action.pathPattern}::(${
-                      props.action.applicationInterceptors.length
-                    })`,
-                    "data"
-                  )
-                }
-              >
-                {props.action.applicationInterceptors.map(i => (
+              <MetadataCollapse
+                collapseContent={props.action.networkInterceptors.map(i => (
                   <MenuItem text={<Tooltip content={i}>{i}</Tooltip>} />
                 ))}
-              </Collapse>
-
-              <Metadata
                 content={"Network Interceptors"}
                 label={`(${props.action.networkInterceptors.length})`}
+                tag={`WebAction::${
+                  props.action.pathPattern
+                }::NetworkInterceptors`}
                 tooltip={"Network Interceptors"}
                 {...props}
               />
-              <Collapse
-                isOpen={
-                  props.action.networkInterceptors.length &&
-                  simpleSelect(
-                    props.simpleForm,
-                    `WebAction::${props.action.pathPattern}::(${
-                      props.action.networkInterceptors.length
-                    })`,
-                    "data"
-                  )
-                }
-              >
-                {props.action.networkInterceptors.map(i => (
-                  <MenuItem text={<Tooltip content={i}>{i}</Tooltip>} />
-                ))}
-              </Collapse>
             </MetadataMenu>
           </Column>
         </FlexContainer>
