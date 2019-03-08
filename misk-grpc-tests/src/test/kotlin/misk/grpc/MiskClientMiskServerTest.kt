@@ -1,6 +1,7 @@
 package misk.grpc
 
 import com.google.inject.util.Modules
+import kotlinx.coroutines.experimental.runBlocking
 import misk.grpc.miskclient.MiskGrpcClientModule
 import misk.grpc.miskserver.RouteGuideMiskServiceModule
 import misk.testing.MiskTest
@@ -25,7 +26,7 @@ class MiskClientMiskServerTest {
 
   @Test
   @DisabledOnJre(JAVA_8) // gRPC needs HTTP/2 which needs ALPN which needs Java 9+.
-  fun requestResponse() {
+  fun requestResponse(): Unit = runBlocking {
     val grpcMethod = GrpcMethod("/routeguide.RouteGuide/GetFeature",
         routeguide.Point.ADAPTER, routeguide.Feature.ADAPTER)
 
@@ -41,5 +42,6 @@ class MiskClientMiskServerTest {
             .longitude(-80)
             .build())
         .build())
+    Unit
   }
 }

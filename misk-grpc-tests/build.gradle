@@ -64,6 +64,7 @@ dependencies {
   compile dep.grpcNetty
   compile dep.grpcProtobuf
   compile dep.grpcStub
+  compile dep.kotlinxCoroutines
   compile project(':misk')
   compile project(':misk-testing')
 }

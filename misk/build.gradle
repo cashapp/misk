@@ -70,8 +70,8 @@ dependencies {
   compile dep.jaxbApi
   compile dep.prometheusClient
   compile dep.prometheusHotspot
+  compile dep.kotlinxCoroutines
 
-  testCompile dep.kotlinxCoroutines
   testCompile dep.mockitoCore
   testCompile project(':misk-testing')
 }

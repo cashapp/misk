@@ -6,5 +6,7 @@ import com.squareup.wire.ProtoAdapter
 class GrpcMethod<S, R>(
   val path: String,
   val requestAdapter: ProtoAdapter<S>,
-  val responseAdapter: ProtoAdapter<R>
+  val responseAdapter: ProtoAdapter<R>,
+  val requestStreaming: Boolean = false,
+  val responseStreaming: Boolean = false
 )
