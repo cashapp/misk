@@ -6,7 +6,7 @@ import {
 } from "@misk/simpleredux"
 import axios from "axios"
 import { HTTPMethod } from "http-method-enum"
-import { chain, flatMap } from "lodash"
+import { chain } from "lodash"
 import { all, AllEffect, call, put, takeLatest } from "redux-saga/effects"
 
 export interface IWebActionAPI {
@@ -134,6 +134,23 @@ function* handleDinosaur(action: IAction<WEBACTIONS, IWebActionsPayload>) {
   }
 }
 
+/**
+ * hash for groupBy that provides a string hash that uses an aggregate of
+ * non-dispatchMechanism metadata. This allows coalescing of web action entries
+ * that only differ by dispatchMechanism (GET, POST, PUT...)
+ */
+const groupByWebActionHash = (action: IWebActionInternal): string =>
+  "" +
+  action.pathPattern +
+  action.function +
+  action.functionAnnotations +
+  action.applicationInterceptors +
+  action.networkInterceptors +
+  action.parameterTypes +
+  action.requestMediaTypes +
+  action.responseMediaType +
+  action.returnType
+
 function* handleMetadata() {
   try {
     const { data } = yield call(axios.get, "/api/webactionmetadata")
@@ -183,12 +200,14 @@ function* handleMetadata() {
           nonAccessOrTypeFunctionAnnotations
         }
       })
-      .groupBy("pathPattern")
+      .groupBy(groupByWebActionHash)
       .map((actions: IWebActionInternal[]) => {
-        const dispatchMechanism = flatMap(
-          actions,
-          action => action.dispatchMechanism
-        )
+        const dispatchMechanism = chain(actions)
+          .flatMap(action => action.dispatchMechanism)
+          // remove duplicate identical dispatchMechanisms that come from
+          // duplicate installation of the same webAction
+          .uniq()
+          .value()
         const mergedAction = actions[0]
         mergedAction.dispatchMechanism = dispatchMechanism.sort().reverse()
         return mergedAction
