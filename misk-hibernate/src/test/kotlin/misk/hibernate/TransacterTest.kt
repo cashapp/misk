@@ -377,6 +377,54 @@ class TransacterTest {
     assertThat(transacter.transaction { it.load(swid) }.name).isEqualTo("Star Wars")
   }
 
+  @Test
+  fun sessionCloseHookWorks() {
+    val logs = mutableListOf<String>()
+
+    transacter.transaction { session ->
+      session.onSessionClose {
+        assertThat(transacter.inTransaction).isFalse()
+        logs.add("first")
+      }
+      session.onSessionClose {
+        assertThat(transacter.inTransaction).isFalse()
+        logs.add("second")
+      }
+    }
+
+    assertThat(logs).containsExactly("first", "second")
+  }
+
+  @Test
+  fun exceptionRaisedFromSessionCloseHook() {
+    val cause = assertThrows<IllegalStateException> {
+      transacter.transaction { session ->
+        session.onSessionClose {
+          throw IllegalStateException("hook failed")
+        }
+      }
+    }
+
+    assertThat(cause).hasMessage("hook failed")
+    assertThat(cause).isInstanceOf(IllegalStateException::class.java)
+  }
+
+  @Test
+  fun sessionCloseHookInvokedEvenOnRollBak() {
+    val logs = mutableListOf<String>()
+
+    assertThrows<NonRetryableException> {
+      transacter.transaction { session ->
+        session.onSessionClose {
+          logs.add("hook invoked")
+        }
+        throw NonRetryableException()
+      }
+    }
+
+    assertThat(logs).containsExactly("hook invoked")
+  }
+
   fun tracingAssertions(committed: Boolean) {
     // Assert on span, implicitly asserting that it's complete by looking at finished spans
     val orderedSpans = tracer.finishedSpans().sortedBy { it.context().spanId() }

@@ -29,6 +29,14 @@ interface Session {
    * hook will cause the transaction to be rolled back.
    */
   fun onPreCommit(work: () -> Unit)
+
+  /**
+   * Registers a hook that fires after a session is closed. This is called regardless if a session
+   * was successfully committed or rolled back.
+   *
+   * A new transaction can be initiated as part of this hook.
+   */
+  fun onSessionClose(work: () -> Unit)
 }
 
 inline fun <reified T : DbEntity<T>> Session.load(id: Id<T>): T = load(id, T::class)
