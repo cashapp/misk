@@ -24,17 +24,26 @@ class ReadinessCheckAction @Inject internal constructor(
   @Unauthenticated
   fun readinessCheck(): Response<String> {
     val servicesNotRunning = services.filter { !it.isRunning }
-    val failedHealthChecks = healthChecks
-        .map { it.status() }
-        .filter { !it.isHealthy }
-
-    if (servicesNotRunning.isEmpty() && failedHealthChecks.isEmpty()) {
-      return Response("", statusCode = 200)
-    }
 
     for (service in servicesNotRunning) {
       logger.info("Service not running: $service")
     }
+
+    if (!servicesNotRunning.isEmpty()) {
+      // Don't do healthchecks if services haven't all started. The app isn't in a good state yet,
+      // and a health check could end up triggering random errors that we don't want to flood the
+      // logs with.
+      return Response("", statusCode = 503)
+    }
+
+    val failedHealthChecks = healthChecks
+        .map { it.status() }
+        .filter { !it.isHealthy }
+
+    if (failedHealthChecks.isEmpty()) {
+      return Response("", statusCode = 200)
+    }
+
     for (healthCheck in failedHealthChecks) {
       logger.info("Failed health check: ${healthCheck.messages}")
     }
