@@ -49,6 +49,10 @@ data class DataSourceConfig(
   val trust_certificate_key_store_password: String? = null,
   val client_certificate_key_store_url: String? = null,
   val client_certificate_key_store_password: String? = null,
+  // Vitess driver doesn't support passing in URLs so support paths and prefer this for Vitess
+  // going forward
+  val trust_certificate_key_store_path: String? = null,
+  val client_certificate_key_store_path: String? = null,
   val show_sql: String? = "false"
 ) {
   fun withDefaults(): DataSourceConfig {
@@ -75,21 +79,38 @@ data class DataSourceConfig(
 
   fun buildJdbcUrl(env: Environment): String {
     val config = withDefaults()
+
+    require(config.client_certificate_key_store_path.isNullOrBlank() || config.client_certificate_key_store_url.isNullOrBlank()) {
+      "can optionally set client_certificate_key_store_path or client_certificate_key_store_url, but not both"
+    }
+
+    require(config.trust_certificate_key_store_path.isNullOrBlank() || config.trust_certificate_key_store_url.isNullOrBlank()) {
+      "can optionally set trust_certificate_key_store_path or trust_certificate_key_store_url, but not both"
+    }
+
     return when (type) {
       DataSourceType.MYSQL -> {
         var queryParams = "?useLegacyDatetimeCode=false"
         if (env == Environment.TESTING || env == Environment.DEVELOPMENT) {
           queryParams += "&createDatabaseIfNotExist=true"
         }
+
+        var trustStoreUrl: String? = null
+        if (!config.trust_certificate_key_store_path.isNullOrBlank()) {
+          trustStoreUrl = "file://${config.trust_certificate_key_store_path}"
+        } else if (!config.trust_certificate_key_store_url.isNullOrBlank()) {
+          trustStoreUrl = config.trust_certificate_key_store_url
+        }
+
         // TODO(rhall): share this with DataSource config in SessionFactoryService.
         // https://github.com/square/misk/issues/397
         // Explicitly not updating VITESS below since this is a temporary hack until the above
         // issue is resolved.
-        if (!config.trust_certificate_key_store_url.isNullOrBlank()) {
+        if (!trustStoreUrl.isNullOrBlank()) {
           require(!config.trust_certificate_key_store_password.isNullOrBlank()) {
             "must provide a trust_certificate_key_store_password"
           }
-          queryParams += "&trustCertificateKeyStoreUrl=${config.trust_certificate_key_store_url}"
+          queryParams += "&trustCertificateKeyStoreUrl=${trustStoreUrl}"
           queryParams += "&trustCertificateKeyStorePassword=${config.trust_certificate_key_store_password}"
           queryParams += "&verifyServerCertificate=true"
           queryParams += "&useSSL=true"
@@ -103,24 +124,31 @@ data class DataSourceConfig(
       DataSourceType.VITESS -> {
         var queryParams = ""
         var useSSL = false
+
+        // NOTE(nb): still support url properties in Vitess for backwards compatibility.
+        val trustStorePath = getStorePath(config.trust_certificate_key_store_url, config.trust_certificate_key_store_path)
+        val certStorePath = getStorePath(config.client_certificate_key_store_url, config.client_certificate_key_store_path)
+
         /**
          * Query params for VitessJDBC driver look like default MySQL JDBC driver query params
          * but are named slightly differently and a smaller subset are supported. See
          * [io.vitess.jdbc.VitessJDBCUrl] for the complete list
          */
-        if (!config.trust_certificate_key_store_url.isNullOrBlank()) {
+        if (!trustStorePath.isNullOrBlank()) {
           require(!config.trust_certificate_key_store_password.isNullOrBlank()) {
-            "must provide a trust_certificate_key_store_password if trust_certificate_key_store_url is set"
+            "must provide a trust_certificate_key_store_password if trust_certificate_key_store_url" +
+                " or trust_certificate_key_store_path is set"
           }
-          queryParams += "${if (queryParams.isEmpty()) "?" else "&"}trustStore=${config.trust_certificate_key_store_url}"
+          queryParams += "${if (queryParams.isEmpty()) "?" else "&"}trustStore=${trustStorePath}"
           queryParams += "&trustStorePassword=${config.trust_certificate_key_store_password}"
           useSSL = true
         }
-        if (!config.client_certificate_key_store_url.isNullOrBlank()) {
+        if (!certStorePath.isNullOrBlank()) {
           require(!config.client_certificate_key_store_password.isNullOrBlank()) {
-            "must provide a client_certificate_key_store_password if client_certificate_key_store_url is set"
+            "must provide a client_certificate_key_store_password if client_certificate_key_store_url" +
+                " or client_certificate_key_store_path is set"
           }
-          queryParams += "${if (queryParams.isEmpty()) "?" else "&"}keyStore=${config.client_certificate_key_store_url}"
+          queryParams += "${if (queryParams.isEmpty()) "?" else "&"}keyStore=${certStorePath}"
           queryParams += "&keyStorePassword=${config.client_certificate_key_store_password}"
           useSSL = true
         }
@@ -131,6 +159,17 @@ data class DataSourceConfig(
         "jdbc:vitess://${config.host}:${config.port}/${config.database}$queryParams"
       }
     }
+  }
+
+  private fun getStorePath(url: String?, path: String?): String? {
+    var pathToUse: String? = null
+    if (!url.isNullOrBlank()) {
+      pathToUse = url.split("file://").last()
+    } else if (!path.isNullOrBlank()) {
+      pathToUse = path
+    }
+
+    return pathToUse
   }
 }
 
