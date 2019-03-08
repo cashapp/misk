@@ -1,16 +1,17 @@
 package misk.grpc.miskclient
 
 import com.google.inject.Provides
+import com.squareup.wire.GrpcClient
 import misk.client.HttpClientEndpointConfig
 import misk.client.HttpClientModule
 import misk.client.HttpClientSSLConfig
 import misk.client.HttpClientsConfig
-import misk.grpc.GrpcClient
 import misk.inject.KAbstractModule
 import misk.security.ssl.SslLoader
 import misk.security.ssl.TrustStoreConfig
 import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
+import routeguide.RouteGuide
 import javax.inject.Named
 import javax.inject.Singleton
 
@@ -43,5 +44,9 @@ class MiskGrpcClientModule : KAbstractModule() {
   fun provideGrpcClient(
     client: OkHttpClient,
     @Named("grpc server") url: HttpUrl
-  ) = GrpcClient(client, url)
+  ) = GrpcClient.Builder().client(client).baseUrl(url.toString()).build()
+
+  @Provides
+  @Singleton
+  fun provideRouteGuideClient(client: GrpcClient) = client.create(RouteGuide::class)
 }
