@@ -159,7 +159,7 @@ function* handleMetadata() {
             )
         )
         const emptyAllowedArrayValue =
-          authFunctionAnnotations.length > 1 &&
+          authFunctionAnnotations.length > 0 &&
           authFunctionAnnotations[0].includes("Unauthenticated")
             ? "All"
             : "None"
