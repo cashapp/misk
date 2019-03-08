@@ -19,7 +19,7 @@ interface EnvVarLoader {
 /**
  * A Real [EnvVarLoader] that loads from the system environment variables.
  */
-internal class RealEnvVarLoader : EnvVarLoader {
+internal class RealEnvVarLoader @Inject constructor() : EnvVarLoader {
   override fun getEnvVar(name: String): String {
     return System.getenv(name) ?: throw IllegalStateException("$name env var not set")
   }
