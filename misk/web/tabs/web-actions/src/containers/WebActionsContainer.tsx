@@ -120,15 +120,27 @@ const Metadata = (
   props: {
     content: string | JSX.Element
     label: string
-    tooltip: string | JSX.Element
+    tooltip?: string | JSX.Element
   } & any
-) => (
-  <MenuItem
-    label={props.label}
-    text={<Tooltip content={props.tooltip}>{props.content}</Tooltip>}
-    {...props}
-  />
-)
+) => {
+  if (props.tooltip) {
+    return (
+      <MenuItem
+        label={props.label}
+        text={<Tooltip content={props.tooltip}>{props.content}</Tooltip>}
+        {...props}
+      />
+    )
+  } else {
+    return (
+      <MenuItem
+        label={props.label}
+        text={<Tooltip>{props.content}</Tooltip>}
+        {...props}
+      />
+    )
+  }
+}
 
 /**
  * Metadata that slides out content below when clicked
@@ -146,7 +158,7 @@ const MetadataCollapse = (
     content: string | JSX.Element
     label: string
     tag: string
-    tooltip: string | JSX.Element
+    tooltip?: string | JSX.Element
   } & IState &
     IDispatchProps
 ) => (
@@ -168,16 +180,6 @@ const MetadataCollapse = (
         props.tag,
         props.simpleForm
       )}
-      tooltip={
-        <span>
-          {simpleSelect(props.simpleForm, props.tag, "data") ? (
-            <Icon icon={IconNames.CARET_DOWN} />
-          ) : (
-            <Icon icon={IconNames.CARET_RIGHT} />
-          )}{" "}
-          {props.content}
-        </span>
-      }
     />
     <Collapse isOpen={simpleSelect(props.simpleForm, props.tag, "data")}>
       {props.children}
@@ -353,7 +355,6 @@ const WebAction = (
               tag={`${tag}::${
                 props.action.pathPattern
               }::ApplicationInterceptors`}
-              tooltip={"Application Interceptors"}
               {...props}
             >
               {props.action.applicationInterceptors.map(i => (
@@ -364,7 +365,6 @@ const WebAction = (
               content={"Network Interceptors"}
               label={`(${props.action.networkInterceptors.length})`}
               tag={`${tag}::${props.action.pathPattern}::NetworkInterceptors`}
-              tooltip={"Network Interceptors"}
               {...props}
             >
               {props.action.networkInterceptors.map(i => (
@@ -375,7 +375,6 @@ const WebAction = (
               content={"Send a Request"}
               label={""}
               tag={`${tag}::${props.action.pathPattern}::Request`}
-              tooltip={"Send a Request"}
               {...props}
             >
               <span />
