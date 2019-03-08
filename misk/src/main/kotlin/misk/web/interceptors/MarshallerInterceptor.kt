@@ -14,7 +14,7 @@ import javax.inject.Singleton
 import kotlin.reflect.KType
 
 @Singleton
-internal class MarshallerInterceptor constructor(private val marshaller: Marshaller<Any>) :
+internal class MarshallerInterceptor @Inject constructor(private val marshaller: Marshaller<Any>) :
     NetworkInterceptor {
   override fun intercept(chain: NetworkChain): Response<*> {
     @Suppress("UNCHECKED_CAST")
