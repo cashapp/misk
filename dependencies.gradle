@@ -74,7 +74,9 @@ ext.dep = [
   "tracingJaeger": "com.uber.jaeger:jaeger-core:0.24.0",
   "tracingZipkin": "io.opentracing.brave:brave-opentracing:0.29.0",
   "vitess": "io.vitess:vitess-jdbc:3.0.0",
-  "wireRuntime": "com.squareup.wire:wire-runtime:2.3.0-RC1",
+  "wireCompiler": "com.squareup.wire:wire-compiler:2.3.0-SNAPSHOT",
+  "wireGrpcClient": "com.squareup.wire:wire-grpc-client:2.3.0-SNAPSHOT",
+  "wireRuntime": "com.squareup.wire:wire-runtime:2.3.0-SNAPSHOT",
   "zipkinBrave": "io.zipkin.brave:brave:4.17.2",
   "zipkinReporter": "io.zipkin.reporter2:zipkin-sender-okhttp3:2.4.1",
   "zookeeper": "org.apache.zookeeper:zookeeper:3.5.4-beta"
