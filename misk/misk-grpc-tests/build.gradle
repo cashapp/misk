@@ -12,7 +12,6 @@ protobuf {
       artifact = dep.grpcGenJava
     }
   }
-
   protoc {
     artifact = dep.protoc
   }
@@ -28,9 +27,32 @@ protobuf {
   }
 }
 
+tasks.register("generateKotlinProtos", JavaExec) {
+  def kotlin = file('kotlin.txt').readLines()
+  def prefix = '+[Kotlin]'
+  def includes = kotlin.findAll { it.startsWith(prefix) }.collect { it.substring(prefix.length()) }
+
+  doFirst {
+    println "INCLUDE:\n * ${includes.join('\n * ')}"
+    println ''
+  }
+
+  classpath = configurations.wire
+  main = 'com.squareup.wire.WireCompiler'
+  args = [
+          '--proto_path=src/main/proto',
+          '--kotlin_out=src/main/kotlin',
+          '--includes=' + includes.join(',')
+  ]
+}
+
 sourceSets {
   main.java.srcDirs += 'build/generated/source/proto/main/grpc'
   main.java.srcDirs += 'build/generated/source/proto/main/java'
+}
+
+configurations {
+  wire
 }
 
 dependencies {
@@ -39,6 +61,8 @@ dependencies {
   compile dep.grpcNetty
   compile dep.grpcProtobuf
   compile dep.grpcStub
+  compile dep.wireGrpcClient
   compile project(':misk')
   compile project(':misk-testing')
+  wire dep.wireCompiler
 }
