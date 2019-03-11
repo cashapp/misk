@@ -27,7 +27,6 @@ class WebTabResourceModule(
           WebProxyEntry(url_path_prefix = url_path_prefix, web_proxy_url = web_proxy_url))
     } else {
       install(WebActionModule.createWithPrefix<StaticResourceAction>(url_path_prefix = url_path_prefix))
-      install(WebActionModule.createWithPrefix<StaticResourceAction>(url_path_prefix = url_path_prefix))
     }
   }
 }
