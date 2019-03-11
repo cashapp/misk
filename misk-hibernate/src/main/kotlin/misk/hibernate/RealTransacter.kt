@@ -26,7 +26,7 @@ internal class RealTransacter private constructor(
   private val qualifier: KClass<out Annotation>,
   private val sessionFactoryProvider: Provider<SessionFactory>,
   private val config: DataSourceConfig,
-  private val threadLocalSession: ThreadLocal<Session>,
+  private val threadLocalSession: ThreadLocal<RealSession>,
   private val options: TransacterOptions,
   private val queryTracingListener: QueryTracingListener,
   private val tracer: Tracer?
@@ -169,7 +169,11 @@ internal class RealTransacter private constructor(
     try {
       threadLocalSession.get().hibernateSession.close()
     } finally {
+      val localSession = threadLocalSession.get()
+      // Remove the session before calling session close hooks so that a new transaction can be
+      // allowed to be started as part of the close hook.
       threadLocalSession.remove()
+      localSession.sessionClose()
     }
   }
 
@@ -209,6 +213,7 @@ internal class RealTransacter private constructor(
     override val hibernateSession = session
     private val preCommitHooks = mutableListOf<() -> Unit>()
     private val postCommitHooks = mutableListOf<() -> Unit>()
+    private val sessionCloseHooks = mutableListOf<() -> Unit>()
 
     init {
       if (readOnly) {
@@ -315,6 +320,16 @@ internal class RealTransacter private constructor(
 
     override fun onPostCommit(work: () -> Unit) {
       postCommitHooks.add(work)
+    }
+
+    internal fun sessionClose() {
+      sessionCloseHooks.forEach {
+        it()
+      }
+    }
+
+    override fun onSessionClose(work: () -> Unit) {
+      sessionCloseHooks.add(work)
     }
 
     companion object {
