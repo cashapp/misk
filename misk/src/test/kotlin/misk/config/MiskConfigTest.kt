@@ -112,4 +112,23 @@ class MiskConfigTest {
     assertThat(filesInDir[0]).endsWith("/overrides/override-test-app1.yaml")
     assertThat(filesInDir[1]).endsWith("/overrides/override-test-app2.yaml")
   }
+
+  @Test
+  fun handlesDuplicateNamedExternalFiles() {
+    val overrides = listOf(
+      MiskConfigTest::class.java.getResource("/overrides/override-test-app1.yaml"),
+      MiskConfigTest::class.java.getResource("/additional_overrides/override-test-app1.yaml"))
+      .map { File(it.file) }
+
+    val config = MiskConfig.load<TestConfig>("test_app", defaultEnv, overrides)
+    assertThat(config.consumer_a).isEqualTo(ConsumerConfig(14, 1))
+    assertThat(config.consumer_b).isEqualTo(ConsumerConfig(34, 79))
+  }
+
+  @Test
+  fun handlesNonExistentExternalFile() {
+    // A common config does not exist, but the testing config does, loading the config should not fail
+    val config = MiskConfig.load<DurationConfig>("no_common_config_app", defaultEnv, listOf())
+    assertThat(config.interval).isEqualTo(Duration.ofSeconds(23))
+  }
 }

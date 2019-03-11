@@ -125,7 +125,7 @@ object MiskConfig {
     // Load from override files second, in the order specified, only if they exist
     val overrideFileUrls = overrideFiles
         .filter { it.exists() }
-        .map { it.name to it.toURI().toURL() }
+        .map { it.toURI().toURL().toString() to it.toURI().toURL() }
 
     // Produce a combined map of all of the results
     return (embeddedConfigUrls + overrideFileUrls).map { it.first to it.second?.readUtf8() }.toMap()
