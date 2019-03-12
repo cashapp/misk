@@ -3,9 +3,11 @@ package misk.jobqueue.sqs
 import com.amazonaws.services.sqs.AmazonSQS
 import com.amazonaws.services.sqs.model.ReceiveMessageRequest
 import com.google.common.util.concurrent.AbstractIdleService
+import com.google.inject.Key
 import io.opentracing.Tracer
 import io.opentracing.tag.StringTag
 import io.opentracing.tag.Tags
+import misk.DependentService
 import misk.jobqueue.JobConsumer
 import misk.jobqueue.JobHandler
 import misk.jobqueue.QueueName
@@ -27,7 +29,10 @@ internal class SqsJobConsumer @Inject internal constructor(
   @ForSqsConsumer private val dispatchThreadPool: ExecutorService,
   private val tracer: Tracer,
   private val metrics: SqsMetrics
-) : AbstractIdleService(), JobConsumer {
+) : AbstractIdleService(), JobConsumer, DependentService {
+  override val consumedKeys: Set<Key<*>> = setOf()
+  override val producedKeys: Set<Key<*>> = setOf(Key.get(SqsJobConsumer::class.java))
+
   private val subscriptions = ConcurrentHashMap<QueueName, JobConsumer.Subscription>()
 
   override fun startUp() {}
