@@ -32,10 +32,6 @@ subprojects {
   repositories {
     mavenCentral()
     jcenter()
-    // TODO(oldergod) remove once wire ships gRPC
-    maven{
-      url "https://oss.sonatype.org/content/repositories/snapshots/"
-    }
   }
   compileKotlin {
     kotlinOptions {
