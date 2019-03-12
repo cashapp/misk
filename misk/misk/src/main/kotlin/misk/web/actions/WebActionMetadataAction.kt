@@ -21,7 +21,7 @@ import kotlin.reflect.KType
 class WebActionMetadataAction @Inject constructor() : WebAction {
   @Inject internal lateinit var servletProvider: Provider<WebActionsServlet>
 
-  @Get("/api/webactionmetadata")
+  @Get("/api/webaction/metadata")
   @RequestContentType(MediaTypes.APPLICATION_JSON)
   @ResponseContentType(MediaTypes.APPLICATION_JSON)
   @AdminDashboardAccess
