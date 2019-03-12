@@ -17,6 +17,7 @@ import misk.web.actions.LivenessCheckAction
 import misk.web.actions.NotFoundAction
 import misk.web.actions.ReadinessCheckAction
 import misk.web.actions.StatusAction
+import misk.web.actions.WebActionMetadataAction
 import misk.web.exceptions.ActionExceptionLogLevelConfig
 import misk.web.exceptions.ActionExceptionMapper
 import misk.web.exceptions.ExceptionHandlingInterceptor
@@ -28,6 +29,7 @@ import misk.web.extractors.PathPatternParameterExtractorFactory
 import misk.web.extractors.QueryStringParameterExtractorFactory
 import misk.web.extractors.RequestBodyParameterExtractor
 import misk.web.extractors.WebSocketParameterExtractorFactory
+import misk.web.formatter.ClassNameFormatter
 import misk.web.interceptors.InternalErrorInterceptorFactory
 import misk.web.interceptors.MarshallerInterceptor
 import misk.web.interceptors.MetricsInterceptor
@@ -139,6 +141,10 @@ class MiskWebModule(private val config: WebConfig) : KAbstractModule() {
     install(WebActionModule.create<ReadinessCheckAction>())
     install(WebActionModule.create<LivenessCheckAction>())
     install(WebActionModule.create<NotFoundAction>())
+
+    // WebActionMetadataAction.Factory
+    bind<ClassNameFormatter>().toInstance(ClassNameFormatter())
+    bind<WebActionMetadataAction.Factory>().toInstance(WebActionMetadataAction.Factory())
   }
 
   @Provides @Singleton

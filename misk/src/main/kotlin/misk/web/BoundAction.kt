@@ -5,6 +5,7 @@ import misk.ApplicationInterceptor
 import misk.security.authz.AccessInterceptor
 import misk.web.actions.WebAction
 import misk.web.actions.WebActionMetadata
+import misk.web.actions.WebActionMetadataAction
 import misk.web.actions.WebSocketListener
 import misk.web.actions.asChain
 import misk.web.actions.asNetworkChain
@@ -32,7 +33,8 @@ internal class BoundAction<A : WebAction>(
   parameterExtractorFactories: List<ParameterExtractor.Factory>,
   val pathPattern: PathPattern,
   val action: Action,
-  val dispatchMechanism: DispatchMechanism
+  val dispatchMechanism: DispatchMechanism,
+  val webActionMetadataFactory: WebActionMetadataAction.Factory
 ) {
   private val parameterExtractors = action.function.parameters
       .drop(1) // the first parameter is always _this_
@@ -151,7 +153,7 @@ internal class BoundAction<A : WebAction>(
   }
 
   internal val metadata: WebActionMetadata by lazy {
-    WebActionMetadata(
+    webActionMetadataFactory.create(
         name = action.name,
         function = action.function,
         functionAnnotations = action.function.annotations,
@@ -163,14 +165,16 @@ internal class BoundAction<A : WebAction>(
         applicationInterceptors = applicationInterceptors,
         networkInterceptors = networkInterceptors,
         dispatchMechanism = dispatchMechanism,
-        allowedServices = fetchAllowedCallers(applicationInterceptors, AccessInterceptor::allowedServices),
+        allowedServices = fetchAllowedCallers(applicationInterceptors,
+            AccessInterceptor::allowedServices),
         allowedRoles = fetchAllowedCallers(applicationInterceptors, AccessInterceptor::allowedRoles)
     )
   }
 
   private fun fetchAllowedCallers(
-      applicationInterceptors: List<ApplicationInterceptor>,
-      accessFun: (AccessInterceptor) -> Set<String>): Set<String> {
+    applicationInterceptors: List<ApplicationInterceptor>,
+    accessFun: (AccessInterceptor) -> Set<String>
+  ): Set<String> {
     for (interceptor in applicationInterceptors) {
       if (interceptor is AccessInterceptor) {
         return accessFun.invoke(interceptor)

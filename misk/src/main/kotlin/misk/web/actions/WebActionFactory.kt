@@ -29,7 +29,8 @@ internal class WebActionFactory @Inject constructor(
   private val userProvidedNetworkInterceptorFactories: List<NetworkInterceptor.Factory>,
   @MiskDefault private val miskNetworkInterceptorFactories: List<NetworkInterceptor.Factory>,
   @MiskDefault private val miskApplicationInterceptorFactories: List<ApplicationInterceptor.Factory>,
-  private val parameterExtractorFactories: List<ParameterExtractor.Factory>
+  private val parameterExtractorFactories: List<ParameterExtractor.Factory>,
+  private val webActionMetadataFactory: WebActionMetadataAction.Factory
 ) {
 
   /** Returns the bound actions for `webActionClass`. */
@@ -128,6 +129,6 @@ internal class WebActionFactory @Inject constructor(
     }
 
     return BoundAction(provider, networkInterceptors, applicationInterceptors,
-        parameterExtractorFactories, PathPattern.parse(pathPattern), action, dispatchMechanism)
+        parameterExtractorFactories, PathPattern.parse(pathPattern), action, dispatchMechanism, webActionMetadataFactory)
   }
 }

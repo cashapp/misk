@@ -7,6 +7,7 @@ import misk.web.NetworkInterceptor
 import misk.web.PathPattern
 import misk.web.RequestContentType
 import misk.web.ResponseContentType
+import misk.web.formatter.ClassNameFormatter
 import misk.web.jetty.WebActionsServlet
 import misk.web.mediatype.MediaRange
 import misk.web.mediatype.MediaTypes
@@ -30,6 +31,44 @@ class WebActionMetadataAction @Inject constructor() : WebAction {
   }
 
   data class Response(val webActionMetadata: List<WebActionMetadata>)
+
+  class Factory {
+    @Inject lateinit var classNameFormatter: ClassNameFormatter
+
+    fun create(
+      name: String,
+      function: Function<*>,
+      functionAnnotations: List<Annotation>,
+      acceptedMediaRanges: List<MediaRange>,
+      responseContentType: MediaType?,
+      parameterTypes: List<KType>,
+      returnType: KType,
+      pathPattern: PathPattern,
+      applicationInterceptors: List<ApplicationInterceptor>,
+      networkInterceptors: List<NetworkInterceptor>,
+      dispatchMechanism: DispatchMechanism,
+      allowedServices: Set<String>,
+      allowedRoles: Set<String>
+    ): WebActionMetadata {
+      return WebActionMetadata(
+          name = name,
+          function = function.toString(),
+          functionAnnotations = functionAnnotations.map { it.toString() },
+          requestMediaTypes = acceptedMediaRanges.map { it.toString() },
+          responseMediaType = responseContentType.toString(),
+          parameterTypes = parameterTypes.map { it.toString() },
+          returnType = returnType.toString(),
+          pathPattern = pathPattern.toString(),
+          applicationInterceptors = applicationInterceptors.map {
+            classNameFormatter.format(it::class)
+          },
+          networkInterceptors = networkInterceptors.map { classNameFormatter.format(it::class) },
+          dispatchMechanism = dispatchMechanism,
+          allowedServices = allowedServices,
+          allowedRoles = allowedRoles
+      )
+    }
+  }
 }
 
 data class WebActionMetadata(
@@ -47,35 +86,3 @@ data class WebActionMetadata(
   val allowedServices: Set<String>,
   val allowedRoles: Set<String>
 )
-
-internal fun WebActionMetadata(
-    name: String,
-    function: Function<*>,
-    functionAnnotations: List<Annotation>,
-    acceptedMediaRanges: List<MediaRange>,
-    responseContentType: MediaType?,
-    parameterTypes: List<KType>,
-    returnType: KType,
-    pathPattern: PathPattern,
-    applicationInterceptors: List<ApplicationInterceptor>,
-    networkInterceptors: List<NetworkInterceptor>,
-    dispatchMechanism: DispatchMechanism,
-    allowedServices: Set<String>,
-    allowedRoles: Set<String>
-): WebActionMetadata {
-  return WebActionMetadata(
-      name = name,
-      function = function.toString(),
-      functionAnnotations = functionAnnotations.map { it.toString() },
-      requestMediaTypes = acceptedMediaRanges.map { it.toString() },
-      responseMediaType = responseContentType.toString(),
-      parameterTypes = parameterTypes.map { it.toString() },
-      returnType = returnType.toString(),
-      pathPattern = pathPattern.toString(),
-      applicationInterceptors = applicationInterceptors.map { it::class.qualifiedName.toString() },
-      networkInterceptors = networkInterceptors.map { it::class.qualifiedName.toString() },
-      dispatchMechanism = dispatchMechanism,
-      allowedServices = allowedServices,
-      allowedRoles = allowedRoles
-  )
-}

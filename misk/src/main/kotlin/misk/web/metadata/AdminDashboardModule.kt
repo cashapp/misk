@@ -115,7 +115,7 @@ class AdminDashboardModule(val environment: Environment) : KAbstractModule() {
 }
 
 // Module that allows testing/development environments to bind up the admin dashboard
-class AdminDashboardTestingModule(val environment: Environment): KAbstractModule() {
+class AdminDashboardTestingModule(val environment: Environment) : KAbstractModule() {
   override fun configure() {
     install(AdminDashboardModule(environment))
     multibind<AccessAnnotationEntry>()
