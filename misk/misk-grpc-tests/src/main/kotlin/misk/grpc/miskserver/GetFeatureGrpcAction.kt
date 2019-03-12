@@ -10,6 +10,9 @@ import javax.inject.Inject
 class GetFeatureGrpcAction @Inject constructor() : WebAction {
   @Grpc("/routeguide.RouteGuide/GetFeature")
   fun sayHello(@RequestBody point: Point): Feature {
-    return Feature(name = "maple tree", location = point)
+    return Feature.Builder()
+        .name("maple tree")
+        .location(point)
+        .build()
   }
 }
