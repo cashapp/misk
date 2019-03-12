@@ -16,7 +16,8 @@ import {
   Spinner,
   Tag,
   TextArea,
-  Tooltip
+  Tooltip,
+  HTMLSelect
 } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
 import { FlexContainer } from "@misk/core"
@@ -26,6 +27,7 @@ import {
   onClickFnCall,
   simpleSelect
 } from "@misk/simpleredux"
+import { chain } from "lodash"
 import { HTTPMethod } from "http-method-enum"
 import * as React from "react"
 import { connect } from "react-redux"
@@ -35,11 +37,12 @@ import {
   IState,
   IWebActionInternal,
   rootDispatcher,
-  rootSelectors
+  rootSelectors,
+  WebActionInternalLabel
 } from "../ducks"
 
 const tag = "WebActions"
-const FilterTag = "WebActions::FilterForm"
+const filterTag = `${tag}::Filter`
 
 //TODO(adrw) upstream to @misk/core
 const HTTPMethodIntent: { [method in HTTPMethod]: Intent } = {
@@ -407,15 +410,27 @@ const WebActions = (
   }
 }
 
-export const FilterWebActions = (props: IState & IDispatchProps) => {
+const FilterWebActions = (props: IState & IDispatchProps) => {
+  const FilterSelectOptions = [...Object.keys(WebActionInternalLabel)]
   return (
     <div>
-      <Pre>
-        sampleFormData:
-        {JSON.stringify(simpleSelect(props.simpleForm, FilterTag), null, 2)}
-      </Pre>
-      <ControlGroup fill={true} vertical={false}>
-        <Button icon={IconNames.FILTER} />
+      <ControlGroup fill={true}>
+        <HTMLSelect
+          large={true}
+          onChange={onChangeFnCall(
+            props.simpleFormInput,
+            `${filterTag}::HTMLSelect`
+          )}
+          options={FilterSelectOptions}
+        />
+        <InputGroup
+          large={true}
+          onChange={onChangeFnCall(
+            props.simpleFormInput,
+            `${filterTag}::Input`
+          )}
+          placeholder={"Filter Web Actions"}
+        />
         {/* TODO(adrw) Use multiselect to do autocomplete filters */}
       </ControlGroup>
     </div>
@@ -470,15 +485,38 @@ const SkeletonWebActions = () => (
 const WebActionsContainer = (props: IState & IDispatchProps) => {
   const metadata = simpleSelect(props.webActions, "metadata")
   if (metadata.length > 0) {
+    const filterKey =
+      WebActionInternalLabel[
+        simpleSelect(props.simpleForm, `${filterTag}::HTMLSelect`, "data") ||
+          "All Metadata"
+      ]
+    const filterValue = simpleSelect(
+      props.simpleForm,
+      `${filterTag}::Input`,
+      "data"
+    )
+    const filteredMetadata = chain(metadata)
+      .filter((action: IWebActionInternal) =>
+        ((action as any)[filterKey] || "")
+          .toString()
+          .toLowerCase()
+          .includes(filterValue.toLowerCase())
+      )
+      .value()
     return (
       <div>
-        <WebActions metadata={metadata} {...props} />
+        <FilterWebActions {...props} />
+        <WebActions
+          metadata={filteredMetadata as IWebActionInternal[]}
+          {...props}
+        />
       </div>
     )
   } else {
     // Displays mock of 5 Web Action cards which fill in when data is available
     return (
       <div>
+        <FilterWebActions {...props} />
         <SkeletonWebActions />
         <br />
         <SkeletonWebActions />
