@@ -175,7 +175,7 @@ const groupByWebActionHash = (
 
 function* handleMetadata() {
   try {
-    const { data } = yield call(axios.get, "/api/webactionmetadata")
+    const { data } = yield call(axios.get, "/api/webaction/metadata")
     const { webActionMetadata } = data
     const metadata = chain(webActionMetadata)
       .map((action: IWebActionAPI) => {
