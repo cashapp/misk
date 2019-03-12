@@ -26,8 +26,9 @@ export interface IWebActionAPI {
 }
 
 export interface IWebActionInternal {
-  allowedServices: string
+  allFields: string
   allowedRoles: string
+  allowedServices: string
   applicationInterceptors: string[]
   authFunctionAnnotations: string[]
   dispatchMechanism: HTTPMethod[]
@@ -41,6 +42,25 @@ export interface IWebActionInternal {
   requestMediaTypes: string[]
   responseMediaType: string
   returnType: string
+}
+
+/**
+ * Titlecase versions of IWebActionInternal fields for use in Filter UI
+ */
+export const WebActionInternalLabel: { [key: string]: string } = {
+  "All Metadata": "allFields",
+  "Allowed Roles": "allowedRoles",
+  "Allowed Services": "allowedServices",
+  "Application Interceptor": "applicationInterceptors",
+  "Dispatch Mechanism": "dispatchMechanism",
+  Function: "function",
+  "Function Annotations": "functionAnnotations",
+  Name: "name",
+  "Network Interceptor": "networkInterceptors",
+  "Parameter Types": "parameterTypes",
+  "Path Pattern": "pathPattern",
+  "Request Type": "requestMediaTypes",
+  "Response Type": "responseMediaType"
 }
 
 /**
@@ -139,7 +159,9 @@ function* handleDinosaur(action: IAction<WEBACTIONS, IWebActionsPayload>) {
  * non-dispatchMechanism metadata. This allows coalescing of web action entries
  * that only differ by dispatchMechanism (GET, POST, PUT...)
  */
-const groupByWebActionHash = (action: IWebActionInternal): string =>
+const groupByWebActionHash = (
+  action: IWebActionInternal | IWebActionAPI
+): string =>
   "" +
   action.pathPattern +
   action.function +
@@ -192,6 +214,7 @@ function* handleMetadata() {
 
         return {
           ...action,
+          allFields: JSON.stringify(action),
           allowedRoles,
           allowedServices,
           authFunctionAnnotations,
