@@ -1,7 +1,7 @@
 package misk.web.actions
 
 import misk.config.Config
-import misk.config.ConfigAdminAction
+import misk.config.ConfigMetadataAction
 import misk.environment.Environment
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
@@ -10,7 +10,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 @MiskTest(startService = true)
-class ConfigAdminActionTest {
+class ConfigMetadataActionTest {
   @MiskTestModule
   val module = TestAdminDashboardActionModule()
 
@@ -19,17 +19,17 @@ class ConfigAdminActionTest {
       OverriddenConfig("bar"),
       RedactedConfig("pass1", "phrase2"))
 
-  lateinit var configAdminAction: ConfigAdminAction
+  lateinit var configMetadataAction: ConfigMetadataAction
 
   @BeforeEach fun beforeEach() {
-    configAdminAction = ConfigAdminAction(
+    configMetadataAction = ConfigMetadataAction(
         "admin_dashboard_app",
         Environment.TESTING,
         testConfig)
   }
 
   @Test fun passesAlongEffectiveConfig() {
-    val response = configAdminAction.getAll()
+    val response = configMetadataAction.getAll()
     assertThat(response.resources).containsKey("Effective Config")
 
     val effectiveConfig = response.resources.get("Effective Config")
@@ -38,7 +38,7 @@ class ConfigAdminActionTest {
   }
 
   @Test fun passesAlongFullUnderlyingConfigResources() {
-    val response = configAdminAction.getAll()
+    val response = configMetadataAction.getAll()
     assertThat(response.resources).containsKey("classpath:/admin_dashboard_app-common.yaml")
     assertThat(response.resources).containsKey("classpath:/admin_dashboard_app-testing.yaml")
 
@@ -51,7 +51,7 @@ class ConfigAdminActionTest {
   }
 
   @Test fun redactsConfig() {
-    val response = configAdminAction.getAll()
+    val response = configMetadataAction.getAll()
     assertThat(response.resources).containsKey("classpath:/admin_dashboard_app-common.yaml")
     assertThat(response.resources).containsKey("Effective Config")
 

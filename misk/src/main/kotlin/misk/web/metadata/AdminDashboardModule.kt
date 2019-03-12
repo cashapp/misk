@@ -1,6 +1,6 @@
 package misk.web.metadata
 
-import misk.config.ConfigAdminAction
+import misk.config.ConfigMetadataAction
 import misk.environment.Environment
 import misk.inject.KAbstractModule
 import misk.security.authz.AccessAnnotationEntry
@@ -52,7 +52,7 @@ class AdminDashboardModule(val environment: Environment) : KAbstractModule() {
     ))
 
     // Config
-    install(WebActionModule.create<ConfigAdminAction>())
+    install(WebActionModule.create<ConfigMetadataAction>())
     multibind<DashboardTab, AdminDashboardTab>().toInstance(DashboardTab(
         name = "Config",
         slug = "config",

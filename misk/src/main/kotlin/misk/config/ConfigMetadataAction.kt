@@ -11,14 +11,14 @@ import misk.web.metadata.AdminDashboardAccess
 import javax.inject.Singleton
 
 @Singleton
-class ConfigAdminAction @Inject constructor(
+class ConfigMetadataAction @Inject constructor(
   @AppName val appName: String,
   val environment: Environment,
   val config: Config
 ) : WebAction {
   val resources: Map<String, String?> = generateConfigResources(appName, environment, config)
 
-  @Get("/api/config/all")
+  @Get("/api/config/metadata")
   @RequestContentType(MediaTypes.APPLICATION_JSON)
   @ResponseContentType(MediaTypes.APPLICATION_JSON)
   @AdminDashboardAccess
