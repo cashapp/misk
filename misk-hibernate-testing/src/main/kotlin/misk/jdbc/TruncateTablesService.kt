@@ -25,7 +25,7 @@ private val logger = getLogger<TruncateTablesService>()
  * We truncate _before_ tests because that way we always have a clean slate, even if a preceding
  * test wasn't able to clean up after itself.
  */
-internal class TruncateTablesService(
+class TruncateTablesService(
   private val qualifier: KClass<out Annotation>,
   private val config: DataSourceConfig,
   private val transacterProvider: Provider<Transacter>,
@@ -36,7 +36,7 @@ internal class TruncateTablesService(
   private val persistentTables = setOf("schema_version")
 
   override val consumedKeys = setOf<Key<*>>(SchemaMigratorService::class.toKey(qualifier))
-  override val producedKeys = setOf<Key<*>>()
+  override val producedKeys = setOf<Key<*>>(TruncateTablesService::class.toKey(qualifier))
 
   override fun startUp() {
     checks.disable {
