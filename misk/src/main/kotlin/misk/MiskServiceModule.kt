@@ -64,11 +64,12 @@ class MiskCommonServiceModule : KAbstractModule() {
     // Initialize empty sets for our multibindings.
     newMultibinder<HealthCheck>()
     newMultibinder<Service>()
+    newMultibinder<ServiceDependencyOverride>()
   }
 
   @Provides
   @Singleton
-  fun provideServiceManager(injector: Injector, services: List<Service>): ServiceManager {
+  fun provideServiceManager(injector: Injector, services: List<Service>, depOverrides: List<ServiceDependencyOverride>): ServiceManager {
     // NB(mmihic): We get the binding for the Set<Service> because this uses a multibinder,
     // which allows us to retrieve the bindings for the elements
     val serviceListBinding = injector.getBinding(serviceSetKey)
@@ -82,7 +83,7 @@ class MiskCommonServiceModule : KAbstractModule() {
       "the following services are not marked as @Singleton: ${invalidServices.joinToString(", ")}"
     }
 
-    return CoordinatedService.coordinate(services)
+    return CoordinatedService.coordinate(services, depOverrides)
   }
 
   @Suppress("DEPRECATION")

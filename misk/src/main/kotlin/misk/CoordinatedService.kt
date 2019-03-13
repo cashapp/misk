@@ -86,7 +86,10 @@ internal class CoordinatedService(val service: Service) : AbstractService(), Dep
   override fun toString() = service.toString()
 
   companion object {
-    fun coordinate(services: List<Service>): ServiceManager {
+    fun coordinate(
+      services: List<Service>,
+      depOverrides: List<ServiceDependencyOverride>
+    ): ServiceManager {
       val coordinatedServices = services.map { CoordinatedService(it) }
       val errors = mutableListOf<String>()
 
@@ -103,7 +106,12 @@ internal class CoordinatedService(val service: Service) : AbstractService(), Dep
 
       // Satisfy all consumers with a producer.
       for (service in coordinatedServices) {
-        for (key in service.consumedKeys) {
+        val consumedKeys = service.consumedKeys.toMutableSet()
+        val override = depOverrides.find { it.service.isInstance(service.service) }
+        if (override != null) {
+          consumedKeys += override.extraDependencies
+        }
+        for (key in consumedKeys) {
           val producer = producersMap[key]
           if (producer == null) {
             errors.add("$service requires $key but no service produces it")

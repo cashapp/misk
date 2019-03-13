@@ -2,10 +2,8 @@ package misk.service
 
 import com.google.common.util.concurrent.Service
 import com.google.inject.Key
-import com.google.inject.Provider
-import misk.DependentService
+import misk.ServiceDependencyOverride
 import misk.inject.KAbstractModule
-import misk.inject.asSingleton
 import kotlin.reflect.KClass
 
 /**
@@ -15,63 +13,26 @@ import kotlin.reflect.KClass
  * that is being spun up within the test itself
  */
 class ServiceTestingModule<T : Service> internal constructor(
-  private val wrappedServiceKey: Key<T>,
+  private val wrappedServiceClass: KClass<T>,
   private val extraDependencies: Set<Key<*>>
 ) : KAbstractModule() {
 
   override fun configure() {
-    // Register a wrapper around the service with the service manager. The wrapper delegates
-    // to the underlying service for all calls except [DependentService.consumedKeys], which
-    // it overrides to extend the consumed service list with the extra dependencies
-    multibind<Service>().toProvider(ServiceWithTestDependenciesProvider(
-        getProvider(wrappedServiceKey),
-        extraDependencies
-    )).asSingleton()
+    multibind<ServiceDependencyOverride>()
+        .toInstance(ServiceDependencyOverride(wrappedServiceClass, extraDependencies))
   }
 
   companion object {
     /** @return A [Module] binding the service with extra dependencies */
     fun <T : Service> withExtraDependencies(
-      wrappedServiceType: KClass<T>,
+      wrappedServiceClass: KClass<T>,
       vararg extraDependencies: Key<*>
     ): com.google.inject.Module =
-        ServiceTestingModule(Key.get(wrappedServiceType.java), extraDependencies.toSet())
+        ServiceTestingModule(wrappedServiceClass, extraDependencies.toSet())
 
     /** @return A [Module] binding the given service with extra dependencies */
     inline fun <reified T : Service> withExtraDependencies(
       vararg extraDependencies: Key<*>
     ): com.google.inject.Module = withExtraDependencies(T::class, *extraDependencies)
-
-    /** @return A [Module] binding the service with extra dependencies */
-    fun <T : Service> withExtraDependencies(
-      wrappedServiceKey: Key<T>,
-      vararg extraDependencies: Key<*>
-    ): com.google.inject.Module =
-        ServiceTestingModule(wrappedServiceKey, extraDependencies.toSet())
-  }
-
-  /**
-   * The [ServiceWithTestDependencies] wraps the given service and adds additional test specific
-   * dependencies
-   */
-  private class ServiceWithTestDependencies internal constructor(
-    private val delegate: Service,
-    extraDependencies: Set<Key<*>>
-  ) : Service by delegate, DependentService {
-
-    private val delegateDependentService: DependentService? = delegate as? DependentService
-    private val baseConsumedKeys: Set<Key<*>> = delegateDependentService?.consumedKeys ?: setOf()
-
-    override val consumedKeys: Set<Key<*>> = baseConsumedKeys + extraDependencies
-    override val producedKeys: Set<Key<*>> = delegateDependentService?.producedKeys ?: setOf()
-  }
-
-  private class ServiceWithTestDependenciesProvider(
-    private val wrappedServiceProvider: Provider<out Service>,
-    private val extraDependencies: Set<Key<*>>
-  ) : Provider<ServiceWithTestDependencies> {
-    override fun get(): ServiceWithTestDependencies {
-      return ServiceWithTestDependencies(wrappedServiceProvider.get(), extraDependencies)
-    }
   }
 }
