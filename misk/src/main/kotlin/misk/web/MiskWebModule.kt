@@ -141,10 +141,6 @@ class MiskWebModule(private val config: WebConfig) : KAbstractModule() {
     install(WebActionModule.create<ReadinessCheckAction>())
     install(WebActionModule.create<LivenessCheckAction>())
     install(WebActionModule.create<NotFoundAction>())
-
-    // WebActionMetadataAction.Factory
-    bind<ClassNameFormatter>().toInstance(ClassNameFormatter())
-    bind<WebActionMetadataAction.Factory>().toInstance(WebActionMetadataAction.Factory())
   }
 
   @Provides @Singleton

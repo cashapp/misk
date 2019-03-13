@@ -266,7 +266,7 @@ export const WebActionsReducer = (
   state = initialState,
   action: IAction<WEBACTIONS, {}>
 ) => {
-  switch (action.type) {
+  switch (action.type)  {
     case WEBACTIONS.DINOSAUR:
     case WEBACTIONS.FAILURE:
     case WEBACTIONS.METADATA:

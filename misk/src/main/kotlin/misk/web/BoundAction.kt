@@ -33,8 +33,7 @@ internal class BoundAction<A : WebAction>(
   parameterExtractorFactories: List<ParameterExtractor.Factory>,
   val pathPattern: PathPattern,
   val action: Action,
-  val dispatchMechanism: DispatchMechanism,
-  val webActionMetadataFactory: WebActionMetadataAction.Factory
+  val dispatchMechanism: DispatchMechanism
 ) {
   private val parameterExtractors = action.function.parameters
       .drop(1) // the first parameter is always _this_
@@ -153,7 +152,7 @@ internal class BoundAction<A : WebAction>(
   }
 
   internal val metadata: WebActionMetadata by lazy {
-    webActionMetadataFactory.create(
+    WebActionMetadataAction.WebActionMetadata(
         name = action.name,
         function = action.function,
         functionAnnotations = action.function.annotations,
