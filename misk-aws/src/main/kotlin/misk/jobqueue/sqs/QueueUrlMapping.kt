@@ -17,6 +17,6 @@ internal class QueueUrlMapping @Inject internal constructor(private val sqs: Ama
   }
 }
 
-internal val QueueName.isDeadLetterQueue get() = value.endsWith("_dlq")
-internal val QueueName.deadLetterQueue
+val QueueName.isDeadLetterQueue get() = value.endsWith("_dlq")
+val QueueName.deadLetterQueue
   get() = if (isDeadLetterQueue) this else QueueName(this.value + "_dlq")
