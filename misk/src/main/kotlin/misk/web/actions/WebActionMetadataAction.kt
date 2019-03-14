@@ -7,6 +7,7 @@ import misk.web.NetworkInterceptor
 import misk.web.PathPattern
 import misk.web.RequestContentType
 import misk.web.ResponseContentType
+import misk.web.formatter.ClassNameFormatter
 import misk.web.jetty.WebActionsServlet
 import misk.web.mediatype.MediaRange
 import misk.web.mediatype.MediaTypes
@@ -72,8 +73,8 @@ internal fun WebActionMetadata(
       parameterTypes = parameterTypes.map { it.toString() },
       returnType = returnType.toString(),
       pathPattern = pathPattern.toString(),
-      applicationInterceptors = applicationInterceptors.map { it::class.qualifiedName.toString() },
-      networkInterceptors = networkInterceptors.map { it::class.qualifiedName.toString() },
+      applicationInterceptors = applicationInterceptors.map { ClassNameFormatter.format(it::class) },
+      networkInterceptors = networkInterceptors.map { ClassNameFormatter.format(it::class) },
       dispatchMechanism = dispatchMechanism,
       allowedServices = allowedServices,
       allowedRoles = allowedRoles
