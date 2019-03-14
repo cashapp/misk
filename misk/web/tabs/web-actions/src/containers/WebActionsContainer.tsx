@@ -7,17 +7,18 @@ import {
   ControlGroup,
   H3,
   H5,
+  HTMLSelect,
   Icon,
   InputGroup,
   Intent,
+  Label,
   Menu,
   MenuItem,
   Pre,
   Spinner,
   Tag,
   TextArea,
-  Tooltip,
-  HTMLSelect
+  Tooltip
 } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
 import { FlexContainer } from "@misk/core"
@@ -55,6 +56,20 @@ const HTTPMethodIntent: { [method in HTTPMethod]: Intent } = {
   [HTTPMethod.POST]: Intent.SUCCESS,
   [HTTPMethod.PUT]: Intent.SUCCESS,
   [HTTPMethod.TRACE]: Intent.NONE
+}
+
+const HTTPStatusCodeIntent = (code: number) => {
+  if (200 <= code && code < 300) {
+    return Intent.SUCCESS
+  } else if (300 <= code && code < 400) {
+    return Intent.PRIMARY
+  } else if (400 <= code && code < 500) {
+    return Intent.WARNING
+  } else if (500 <= code && code < 600) {
+    return Intent.DANGER
+  } else {
+    return Intent.NONE
+  }
 }
 
 const HTTPMethodDispatch: any = (props: IDispatchProps) => ({
@@ -272,28 +287,115 @@ const SendRequestCollapse = (
           />
         ))}
       </ButtonGroup>
-      <Pre>
-        Request URL: {url}
-        {"\n"}Request Body:
-        {JSON.stringify(
-          simpleSelect(
-            props.simpleForm,
-            `${tag}::${props.action.pathPattern}::Body`,
-            "data"
-          ),
-          null,
-          2
+      <Label>
+        Request <Tag>{url}</Tag>
+      </Label>
+      <Collapse
+        isOpen={simpleSelect(
+          props.simpleForm,
+          `${tag}::${props.action.pathPattern}::Body`,
+          "data"
         )}
-        {"\n"}Response:
-        {JSON.stringify(
-          simpleSelect(
-            props.simpleNetwork,
-            `${tag}::${props.action.pathPattern}::Response`
-          ),
-          null,
-          2
+      >
+        <Pre>
+          {JSON.stringify(
+            simpleSelect(
+              props.simpleForm,
+              `${tag}::${props.action.pathPattern}::Body`,
+              "data"
+            ),
+            null,
+            2
+          )}
+        </Pre>
+      </Collapse>
+      <Collapse
+        isOpen={simpleSelect(
+          props.simpleNetwork,
+          `${tag}::${props.action.pathPattern}::Response`,
+          "status"
         )}
-      </Pre>
+      >
+        <Label>
+          Response{" "}
+          <Tag
+            intent={HTTPStatusCodeIntent(
+              simpleSelect(
+                props.simpleNetwork,
+                `${tag}::${props.action.pathPattern}::Response`,
+                "status"
+              )[0]
+            )}
+          >
+            {(
+              simpleSelect(
+                props.simpleNetwork,
+                `${tag}::${props.action.pathPattern}::Response`,
+                "status"
+              ) || []
+            ).join(" ")}
+          </Tag>{" "}
+          <Tag
+            intent={Intent.NONE}
+            onClick={onChangeToggleFnCall(
+              props.simpleFormToggle,
+              `${tag}::${props.action.pathPattern}::ButtonRawResponse`,
+              props.simpleForm
+            )}
+          >
+            <span>
+              Raw Response{" "}
+              {simpleSelect(
+                props.simpleForm,
+                `${tag}::${props.action.pathPattern}::ButtonRawResponse`,
+                "data"
+              ) ? (
+                <Icon icon={IconNames.CARET_DOWN} />
+              ) : (
+                <Icon icon={IconNames.CARET_RIGHT} />
+              )}
+            </span>
+          </Tag>
+        </Label>
+      </Collapse>
+      <Collapse
+        isOpen={simpleSelect(
+          props.simpleNetwork,
+          `${tag}::${props.action.pathPattern}::Response`,
+          "data"
+        )}
+      >
+        <Pre>
+          {JSON.stringify(
+            simpleSelect(
+              props.simpleNetwork,
+              `${tag}::${props.action.pathPattern}::Response`,
+              "data"
+            ),
+            null,
+            2
+          )}
+        </Pre>
+      </Collapse>
+      <Collapse
+        isOpen={simpleSelect(
+          props.simpleForm,
+          `${tag}::${props.action.pathPattern}::ButtonRawResponse`,
+          "data"
+        )}
+      >
+        <Label>Raw Network Redux State</Label>
+        <Pre>
+          {JSON.stringify(
+            simpleSelect(
+              props.simpleNetwork,
+              `${tag}::${props.action.pathPattern}::Response`
+            ),
+            null,
+            2
+          )}
+        </Pre>
+      </Collapse>
     </Collapse>
   )
 }
