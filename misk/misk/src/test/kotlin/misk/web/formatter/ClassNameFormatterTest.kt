@@ -21,7 +21,7 @@ class ClassNameFormatterTest {
   }
 
   @Test fun validQualifiedName() {
-    val formatted = ClassNameFormatter().format(ValidQualifiedNameClass::class)
+    val formatted = ClassNameFormatter.format(ValidQualifiedNameClass::class)
     isValid(formatted)
     assertEquals(formatted, ValidQualifiedNameClass::class.qualifiedName.toString())
   }
@@ -30,7 +30,7 @@ class ClassNameFormatterTest {
     val noQualifiedNameClass = NoQualifiedNameFactory().create()
     assertNull(noQualifiedNameClass::class.qualifiedName)
 
-    val formatted = ClassNameFormatter().format(noQualifiedNameClass::class)
+    val formatted = ClassNameFormatter.format(noQualifiedNameClass::class)
     isValid(formatted)
     assertEquals(formatted, noQualifiedNameClass::class.toString().split("class ").last())
   }
