@@ -55,7 +55,7 @@ class LoaderContainer extends React.Component<IState & IDispatchProps> {
         <span>
           <Navbar
             environment={serviceMetadata.environment}
-            links={adminDashboardTabs}
+            links={adminDashboardTabs.sort().reverse()}
             homeName={serviceMetadata.app_name}
             homeUrl={serviceMetadata.admin_dashboard_url}
             navbar_items={serviceMetadata.navbar_items}
