@@ -17,12 +17,12 @@ class TabContainer extends React.Component<IState & IDispatchProps, IState> {
   }
 
   render() {
-    const { error, resources, status } = simpleSelect(
+    const { error, resources } = simpleSelect(
       this.props.simpleNetwork,
       "config"
     )
     if (resources) {
-      return <ConfigComponent resources={resources} status={status} />
+      return <ConfigComponent resources={resources} />
     } else {
       return (
         <OfflineComponent
