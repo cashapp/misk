@@ -14,14 +14,13 @@ import {
   Label,
   Menu,
   MenuItem,
-  Pre,
   Spinner,
   Tag,
   TextArea,
   Tooltip
 } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
-import { FlexContainer } from "@misk/core"
+import { CodePreContainer, FlexContainer } from "@misk/core"
 import {
   onChangeFnCall,
   onChangeToggleFnCall,
@@ -114,6 +113,7 @@ const MetadataMenu = styled(Menu)`
     margin-bottom: 0;
   }
 `
+
 /**
  * Used in rendering the Content Types metadata request -> response
  */
@@ -297,7 +297,7 @@ const SendRequestCollapse = (
           "data"
         )}
       >
-        <Pre>
+        <CodePreContainer>
           {JSON.stringify(
             simpleSelect(
               props.simpleForm,
@@ -307,7 +307,7 @@ const SendRequestCollapse = (
             null,
             2
           )}
-        </Pre>
+        </CodePreContainer>
       </Collapse>
       <Collapse
         isOpen={simpleSelect(
@@ -365,7 +365,7 @@ const SendRequestCollapse = (
           "data"
         )}
       >
-        <Pre>
+        <CodePreContainer>
           {JSON.stringify(
             simpleSelect(
               props.simpleNetwork,
@@ -375,7 +375,7 @@ const SendRequestCollapse = (
             null,
             2
           )}
-        </Pre>
+        </CodePreContainer>
       </Collapse>
       <Collapse
         isOpen={simpleSelect(
@@ -385,7 +385,7 @@ const SendRequestCollapse = (
         )}
       >
         <Label>Raw Network Redux State</Label>
-        <Pre>
+        <CodePreContainer>
           {JSON.stringify(
             simpleSelect(
               props.simpleNetwork,
@@ -394,7 +394,7 @@ const SendRequestCollapse = (
             null,
             2
           )}
-        </Pre>
+        </CodePreContainer>
       </Collapse>
     </Collapse>
   )
