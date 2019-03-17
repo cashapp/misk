@@ -246,6 +246,10 @@ const SendRequestCollapse = (
   const method: HTTPMethod =
     simpleSelect(props.simpleForm, `${actionTag}::Method`, "data") ||
     props.action.dispatchMechanism.reverse()[0]
+  const methodHasBody =
+    method === HTTPMethod.PATCH ||
+    method === HTTPMethod.POST ||
+    method === HTTPMethod.PUT
   return (
     <Collapse isOpen={isOpen}>
       <InputGroup
@@ -256,13 +260,15 @@ const SendRequestCollapse = (
         }
         type={"url"}
       />
-      <TextArea
-        fill={true}
-        onChange={onChangeFnCall(props.simpleFormInput, `${actionTag}::Body`)}
-        placeholder={
-          "Request Body (JSON or Text).\nDrag bottom right corner of text area input to expand."
-        }
-      />
+      <Collapse isOpen={methodHasBody}>
+        <TextArea
+          fill={true}
+          onChange={onChangeFnCall(props.simpleFormInput, `${actionTag}::Body`)}
+          placeholder={
+            "Request Body (JSON or Text).\nDrag bottom right corner of text area input to expand."
+          }
+        />
+      </Collapse>
       <ControlGroup>
         <HTMLSelect
           large={true}
