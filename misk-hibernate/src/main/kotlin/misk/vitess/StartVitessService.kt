@@ -30,6 +30,7 @@ import misk.resources.ResourceLoader
 import mu.KotlinLogging
 import okio.buffer
 import okio.source
+import java.io.IOException
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
@@ -389,14 +390,19 @@ class StartVitessService(
       })
     }
 
-    fun runCommand(command: String): Int {
+    private fun runCommand(command: String): Int {
       logger.info(command)
-      val process = ProcessBuilder(*command.split(" ").toTypedArray())
-          .redirectOutput(ProcessBuilder.Redirect.INHERIT)
-          .redirectError(ProcessBuilder.Redirect.INHERIT)
-          .start()
-      process.waitFor(60, TimeUnit.MINUTES)
-      return process.exitValue()
+      return try {
+        val process = ProcessBuilder(*command.split(" ").toTypedArray())
+            .redirectOutput(ProcessBuilder.Redirect.INHERIT)
+            .redirectError(ProcessBuilder.Redirect.INHERIT)
+            .start()
+        process.waitFor(60, TimeUnit.MINUTES)
+        return process.exitValue()
+      } catch (e: IOException) {
+        logger.warn("'$command' threw exception", e)
+        -1  // Failed
+      }
     }
 
     /**
