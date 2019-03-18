@@ -4,10 +4,9 @@ import com.google.common.util.concurrent.Service
 import com.google.inject.Provides
 import com.google.inject.Singleton
 import misk.inject.KAbstractModule
-import misk.logging.getLogger
 import redis.clients.jedis.JedisPool
 import redis.clients.jedis.JedisPoolConfig
-import redis.clients.jedis.exceptions.JedisConnectionException
+import redis.clients.jedis.Protocol
 
 /**
  * Configures a JedisPool to connect to a Redis instance. The use of a JedisPool ensures thread safety.
@@ -33,21 +32,11 @@ class RedisModule(
         jedisPoolConfig,
         replicationGroup.writer_endpoint.hostname,
         replicationGroup.writer_endpoint.port,
+        Protocol.DEFAULT_TIMEOUT,
+        replicationGroup.redis_auth_password,
         true
     )
 
-    // Authenticate with the redis server
-    try {
-      jedisPool.resource.use { it.auth(replicationGroup.redis_auth_password) }
-    } catch(e: JedisConnectionException) {
-      throw RedisConnectionException(
-        "${replicationGroup.writer_endpoint.hostname}:${replicationGroup.writer_endpoint.port}", e)
-    }
-
     return RealRedis(jedisPool)
-  }
-
-  companion object {
-    val log = getLogger<RedisModule>()
   }
 }
