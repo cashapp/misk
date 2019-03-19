@@ -11,7 +11,7 @@ import javax.inject.Singleton
 import kotlin.reflect.KClass
 
 @Singleton
-class SchemaMigratorService internal constructor(
+class SchemaMigratorService constructor(
   qualifier: kotlin.reflect.KClass<out kotlin.Annotation>,
   private val environment: misk.environment.Environment,
   private val schemaMigratorProvider: javax.inject.Provider<misk.hibernate.SchemaMigrator>, // Lazy!

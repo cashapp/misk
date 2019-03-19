@@ -3,12 +3,17 @@ package misk
 import com.beust.jcommander.JCommander
 import com.beust.jcommander.ParameterException
 import com.google.common.annotations.VisibleForTesting
+import com.google.common.util.concurrent.Service
 import com.google.common.util.concurrent.ServiceManager
 import com.google.inject.Guice
 import com.google.inject.Module
+import misk.devmode.DevMode
+import misk.devmode.DevModeCoordinationService
+import misk.devmode.DevModeService
 import misk.inject.KAbstractModule
 import misk.inject.getInstance
 import misk.logging.getLogger
+import java.util.concurrent.TimeUnit
 
 /** The entry point for misk applications */
 class MiskApplication(private val modules: List<Module>, commands: List<MiskCommand> = listOf()) {
@@ -48,7 +53,12 @@ class MiskApplication(private val modules: List<Module>, commands: List<MiskComm
   @VisibleForTesting
   internal fun doRun(args: Array<String>) {
     if (args.isEmpty()) {
-      startServiceAndAwaitTermination()
+      startServiceAndAwaitTermination(false)
+      return
+    }
+
+    if (args.size == 1 && args.first() == "--dev-mode") {
+      startServiceAndAwaitTermination(true)
       return
     }
 
@@ -78,9 +88,15 @@ class MiskApplication(private val modules: List<Module>, commands: List<MiskComm
     }
   }
 
-  private fun startServiceAndAwaitTermination() {
+  private fun startServiceAndAwaitTermination(devMode: Boolean) {
     log.info { "creating application injector" }
-    val injector = Guice.createInjector(modules)
+    val injector = Guice.createInjector(object : KAbstractModule() {
+      override fun configure() {
+        bind<Boolean>().annotatedWith<DevMode>().toInstance(devMode)
+        multibind<Service>().to<DevModeCoordinationService>()
+        newMultibinder<DevModeService>()
+      }
+    }, *modules.toTypedArray())
     val serviceManager = injector.getInstance<ServiceManager>()
     Runtime.getRuntime().addShutdownHook(object : Thread() {
       override fun run() {

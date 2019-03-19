@@ -17,7 +17,7 @@ import kotlin.reflect.KClass
 
 private val logger = getLogger<SchemaMigrator>()
 
-internal data class NamedspacedMigration(
+data class NamedspacedMigration(
   val version: Int,
   val namespace: String = ""
 ) : Comparable<NamedspacedMigration> {
@@ -93,7 +93,7 @@ internal data class NamedspacedMigration(
  * be applied either by [SchemaMigrator.applyAll] or manually. When you applying schema changes
  * manually you must add a row to the `schema_version` table to record which version was applied.
  */
-internal class SchemaMigrator(
+class SchemaMigrator(
   private val qualifier: KClass<out Annotation>,
   private val resourceLoader: ResourceLoader,
   private val transacter: Provider<Transacter>,
