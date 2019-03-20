@@ -17,9 +17,11 @@ matrix:
       services:
         - mysql
         - docker
+      env:
+        - ENVIRONMENT=TESTING
     - language: node_js
       node_js:
         - 10.15
       script:
         - npm install -g @misk/cli && miskweb ci-build -e
-          
+
