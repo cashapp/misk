@@ -11,6 +11,7 @@ import com.google.common.util.concurrent.Service
 import com.google.inject.Provides
 import com.google.inject.util.Modules
 import misk.MiskTestingServiceModule
+import misk.cloud.aws.AwsAccountId
 import misk.cloud.aws.AwsRegion
 import misk.inject.KAbstractModule
 import misk.jobqueue.Job
@@ -242,6 +243,7 @@ internal class SqsJobQueueTest {
 
   class SQSTestModule : KAbstractModule() {
     override fun configure() {
+      bind<AwsAccountId>().toInstance(AwsAccountId("123456789"))
       bind<AwsRegion>().toInstance(AwsRegion("us-east-1"))
       bind<AWSCredentialsProvider>().toInstance(object : AWSCredentialsProvider {
         override fun refresh() {}
