@@ -1,6 +1,5 @@
 package misk.jobqueue.sqs
 
-import com.amazonaws.services.sqs.AmazonSQS
 import com.amazonaws.services.sqs.model.ReceiveMessageRequest
 import com.google.common.util.concurrent.AbstractIdleService
 import com.google.inject.Key
@@ -24,8 +23,7 @@ import kotlin.concurrent.thread
 @Singleton
 internal class SqsJobConsumer @Inject internal constructor(
   private val config: AwsSqsJobQueueConfig,
-  private val sqs: AmazonSQS,
-  private val queueUrls: QueueUrlMapping,
+  private val queues: QueueResolver,
   @ForSqsConsumer private val dispatchThreadPool: ExecutorService,
   private val tracer: Tracer,
   private val metrics: SqsMetrics
@@ -62,11 +60,12 @@ internal class SqsJobConsumer @Inject internal constructor(
   }
 
   private inner class QueueReceiver(
-    private val queue: QueueName,
+    private val queueName: QueueName,
     private val handler: JobHandler
   ) : Runnable, JobConsumer.Subscription {
-
-    private val queueUrl = queueUrls[queue]
+    private val queue = queues[queueName]
+    private val sqs = queue.client
+    private val queueUrl = queue.url
     private val running = AtomicBoolean(true)
 
     override fun run() {
@@ -78,11 +77,11 @@ internal class SqsJobConsumer @Inject internal constructor(
             .withMaxNumberOfMessages(10))
             .messages
 
-        messages.map { SqsJob(queue, queueUrls, sqs, metrics, it) }.forEach { message ->
+        messages.map { SqsJob(queueName, queues, metrics, it) }.forEach { message ->
           dispatchThreadPool.submit {
-            metrics.jobsReceived.labels(queue.value).inc()
+            metrics.jobsReceived.labels(queueName.value).inc()
 
-            tracer.traceWithSpan("handle-job-${queue.value}") { span ->
+            tracer.traceWithSpan("handle-job-${queueName.value}") { span ->
               // If the incoming job has an original trace id, set that as a tag on the new span.
               // We don't turn that into the parent of the current span because that would
               // incorrectly include the execution time of the job in the execution time of the
@@ -94,10 +93,10 @@ internal class SqsJobConsumer @Inject internal constructor(
               // Run the handler and record timing
               try {
                 val (duration, _) = timed { handler.handleJob(message) }
-                metrics.handlerDispatchTime.record(duration.toMillis().toDouble(), queue.value)
+                metrics.handlerDispatchTime.record(duration.toMillis().toDouble(), queueName.value)
               } catch (th: Throwable) {
-                log.error(th) { "error handling job from ${queue.value}" }
-                metrics.handlerFailures.labels(queue.value).inc()
+                log.error(th) { "error handling job from ${queueName.value}" }
+                metrics.handlerFailures.labels(queueName.value).inc()
                 Tags.ERROR.set(span, true)
               }
             }
@@ -107,9 +106,9 @@ internal class SqsJobConsumer @Inject internal constructor(
     }
 
     override fun close() {
-      if (!subscriptions.remove(queue, this)) return
+      if (!subscriptions.remove(queueName, this)) return
 
-      log.info { "closing subscription to queue ${queue.value}" }
+      log.info { "closing subscription to queue ${queueName.value}" }
       running.set(false)
     }
   }
