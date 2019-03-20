@@ -77,7 +77,9 @@ class HibernateModule(
 
     val dataSourceServiceKey = DataSourceService::class.toKey(qualifier)
 
-    maybeBindStartVitessService()
+    if (true) {
+      maybeBindStartVitessService()
+    }
 
     bind(configKey).toInstance(config)
 
@@ -93,11 +95,11 @@ class HibernateModule(
     bind(dataSourceServiceKey).toProvider(object : Provider<DataSourceService> {
       @com.google.inject.Inject(optional = true) var metrics: Metrics? = null
       override fun get() = DataSourceService(
-        qualifier,
-        config,
-        environmentProvider.get(),
-        dataSourceDecoratorsProvider.get(),
-        metrics
+          qualifier,
+          config,
+          environmentProvider.get(),
+          dataSourceDecoratorsProvider.get(),
+          metrics
       )
     }).asSingleton()
     multibind<Service>().to(dataSourceServiceKey)

@@ -196,6 +196,7 @@ class DockerVitessCluster(
     } else {
       StartVitessService.logger.info(
           "Starting Vitess cluster with command: ${cmd.joinToString(" ")}")
+
       containerId = docker.createContainerCmd("vitess/base@$VITESS_VERSION")
           .withCmd(cmd.toList())
           .withVolumes(schemaVolume)
@@ -215,6 +216,16 @@ class DockerVitessCluster(
           .exec(LogContainerResultCallback())
           .awaitStarted()
     }
+
+    StartVitessService.logger.info("DOCKER-----------")
+    StartVitessService.logger.info(cmd.toList().joinToString(" "))
+    StartVitessService.logger.info("${schemaVolume}")
+    StartVitessService.logger.info("${Bind(cluster.schemaDir.toAbsolutePath().toString(), schemaVolume)}")
+    StartVitessService.logger.info("${httpPort}, ${grpcPort}, ${mysqlPort}, ${vtgateMysqlPort}")
+    StartVitessService.logger.info("${ports}")
+
+
+
     StartVitessService.logger.info("Started Vitess with container id $containerId")
 
     waitUntilHealthy()
