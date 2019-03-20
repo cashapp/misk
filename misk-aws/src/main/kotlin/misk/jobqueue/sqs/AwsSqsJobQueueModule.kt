@@ -5,18 +5,23 @@ import com.amazonaws.services.sqs.AmazonSQS
 import com.amazonaws.services.sqs.AmazonSQSClientBuilder
 import com.google.common.util.concurrent.Service
 import com.google.common.util.concurrent.ThreadFactoryBuilder
+import com.google.inject.Provider
 import com.google.inject.Provides
 import com.google.inject.Singleton
 import misk.cloud.aws.AwsRegion
 import misk.inject.KAbstractModule
 import misk.jobqueue.JobConsumer
 import misk.jobqueue.JobQueue
+import misk.jobqueue.QueueName
 import misk.jobqueue.TransactionalJobQueue
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
+import javax.inject.Inject
 
-/** [AwsSqsJobQueueModule] installs job queue support provided by SQS */
-class AwsSqsJobQueueModule(private val config: AwsSqsJobQueueConfig) : KAbstractModule() {
+/** [AwsSqsJobQueueModule] installs job queue support provided by SQS. */
+class AwsSqsJobQueueModule(
+  private val config: AwsSqsJobQueueConfig
+) : KAbstractModule() {
   override fun configure() {
     requireBinding(AWSCredentialsProvider::class.java)
     requireBinding(AwsRegion::class.java)
@@ -27,6 +32,22 @@ class AwsSqsJobQueueModule(private val config: AwsSqsJobQueueConfig) : KAbstract
     bind<JobQueue>().to<SqsJobQueue>()
     bind<TransactionalJobQueue>().to<SqsTransactionalJobQueue>()
     multibind<Service>().to<SqsJobConsumer>()
+
+    // Bind a map of AmazonSQS clients for each external region that we need to contact
+    val regionSpecificClientBinder = newMapBinder<AwsRegion, AmazonSQS>()
+    config.external_queues
+        .mapNotNull { (_, config) -> config.region }
+        .map { AwsRegion(it) }
+        .distinct()
+        .forEach {
+          regionSpecificClientBinder.addBinding(it).toProvider(AmazonSQSProvider(it))
+        }
+
+    // Bind the configs for external queues
+    val externalQueueConfigBinder = newMapBinder<QueueName, AwsSqsQueueConfig>()
+    config.external_queues.map { QueueName(it.key) to it.value }.forEach { (queueName, config) ->
+      externalQueueConfigBinder.addBinding(queueName).toInstance(config)
+    }
   }
 
   @Provides @Singleton
@@ -41,5 +62,14 @@ class AwsSqsJobQueueModule(private val config: AwsSqsJobQueueConfig) : KAbstract
   fun provideSqsConsumerDispatchPool(): ExecutorService {
     val threadFactory = ThreadFactoryBuilder().setNameFormat("sqs-consumer-%d").build()
     return Executors.newCachedThreadPool(threadFactory)
+  }
+
+  private class AmazonSQSProvider(val region: AwsRegion) : Provider<AmazonSQS> {
+    @Inject lateinit var credentials: AWSCredentialsProvider
+
+    override fun get() = AmazonSQSClientBuilder.standard()
+        .withCredentials(credentials)
+        .withRegion(region.name)
+        .build()
   }
 }

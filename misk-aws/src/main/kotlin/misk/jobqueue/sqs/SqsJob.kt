@@ -1,6 +1,5 @@
 package misk.jobqueue.sqs
 
-import com.amazonaws.services.sqs.AmazonSQS
 import com.amazonaws.services.sqs.model.Message
 import com.amazonaws.services.sqs.model.SendMessageRequest
 import misk.jobqueue.Job
@@ -8,8 +7,7 @@ import misk.jobqueue.QueueName
 
 internal class SqsJob(
   override val queueName: QueueName,
-  private val queueUrls: QueueUrlMapping,
-  private val sqs: AmazonSQS,
+  private val queues: QueueResolver,
   private val metrics: SqsMetrics,
   private val message: Message
 ) : Job {
@@ -19,19 +17,22 @@ internal class SqsJob(
     key to value.stringValue
   }.toMap()
 
+  private val queue: ResolvedQueue = queues[queueName]
+
   override fun acknowledge() {
-    sqs.deleteMessage(queueUrls[queueName], message.receiptHandle)
+    queue.client.deleteMessage(queue.url, message.receiptHandle)
     metrics.jobsAcknowledged.labels(queueName.value).inc()
   }
 
   override fun deadLetter() {
     if (queueName.isDeadLetterQueue) return
 
-    sqs.sendMessage(SendMessageRequest()
-        .withQueueUrl(queueUrls[queueName.deadLetterQueue])
+    val dlq = queues[queueName.deadLetterQueue]
+    dlq.client.sendMessage(SendMessageRequest()
+        .withQueueUrl(dlq.url)
         .withMessageBody(body)
         .withMessageAttributes(message.messageAttributes))
-    sqs.deleteMessage(queueUrls[queueName], message.receiptHandle)
+    queue.client.deleteMessage(queue.url, message.receiptHandle)
     metrics.jobsDeadLettered.labels(queueName.value).inc()
   }
 
