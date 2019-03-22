@@ -7,13 +7,12 @@ import com.google.common.util.concurrent.Service
 import com.google.common.util.concurrent.ServiceManager
 import com.google.inject.Guice
 import com.google.inject.Module
-import misk.devmode.DevMode
-import misk.devmode.DevModeCoordinationService
-import misk.devmode.DevModeService
+import misk.reset.RunResetService
+import misk.reset.ResetCoordinationService
+import misk.reset.ResetService
 import misk.inject.KAbstractModule
 import misk.inject.getInstance
 import misk.logging.getLogger
-import java.util.concurrent.TimeUnit
 
 /** The entry point for misk applications */
 class MiskApplication(private val modules: List<Module>, commands: List<MiskCommand> = listOf()) {
@@ -57,7 +56,7 @@ class MiskApplication(private val modules: List<Module>, commands: List<MiskComm
       return
     }
 
-    if (args.size == 1 && args.first() == "--dev-mode") {
+    if (args.size == 1 && args.first() == "--reset-service") {
       startServiceAndAwaitTermination(true)
       return
     }
@@ -88,13 +87,13 @@ class MiskApplication(private val modules: List<Module>, commands: List<MiskComm
     }
   }
 
-  private fun startServiceAndAwaitTermination(devMode: Boolean) {
+  private fun startServiceAndAwaitTermination(resetService: Boolean) {
     log.info { "creating application injector" }
     val injector = Guice.createInjector(object : KAbstractModule() {
       override fun configure() {
-        bind<Boolean>().annotatedWith<DevMode>().toInstance(devMode)
-        multibind<Service>().to<DevModeCoordinationService>()
-        newMultibinder<DevModeService>()
+        bind<Boolean>().annotatedWith<RunResetService>().toInstance(resetService)
+        multibind<Service>().to<ResetCoordinationService>()
+        newMultibinder<ResetService>()
       }
     }, *modules.toTypedArray())
     val serviceManager = injector.getInstance<ServiceManager>()

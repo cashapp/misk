@@ -1,4 +1,4 @@
-package misk.devmode
+package misk.reset
 
 import javax.inject.Qualifier
 
@@ -8,4 +8,4 @@ import javax.inject.Qualifier
     AnnotationTarget.FUNCTION,
     AnnotationTarget.VALUE_PARAMETER
 )
-annotation class DevMode
+annotation class RunResetService
