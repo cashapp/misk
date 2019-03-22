@@ -10,6 +10,7 @@ import misk.inject.toKey
 import misk.jdbc.DataSourceConfig
 import misk.jdbc.DataSourceDecorator
 import misk.jdbc.DataSourceService
+import misk.jdbc.DataSourceType
 import misk.jdbc.PingDatabaseService
 import misk.metrics.Metrics
 import misk.resources.ResourceLoader
@@ -168,6 +169,13 @@ class HibernateModule(
   private fun maybeBindStartVitessService() {
     val environment = Environment.fromEnvironmentVariable()
     if (environment == Environment.DEVELOPMENT || environment == Environment.TESTING) {
+
+      if (config.type == DataSourceType.VITESS) {
+        // Need to pull the docker image here,
+        // can't do it during service start up because it's too slow
+        StartVitessService.pullImage()
+      }
+
       val startVitessServiceKey = StartVitessService::class.toKey(qualifier)
       multibind<Service>().to(startVitessServiceKey)
       bind(startVitessServiceKey).toProvider(Provider<StartVitessService> {

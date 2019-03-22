@@ -329,6 +329,10 @@ class StartVitessService(
       // We only start up Vitess if Vitess has been configured
       return
     }
+    check(StartVitessService.imagePulled.get()) {
+      "Docker image not pulled, we can't pull here because service start up times out, " +
+          "make sure you do it at bind or injection time instead"
+    }
     check(environment == TESTING || environment == DEVELOPMENT) {
       "We should only start up Vitess in TESTING or DEVELOPMENT"
     }
@@ -378,15 +382,16 @@ class StartVitessService(
      * Shut down the cached clusters on JVM exit.
      */
     init {
-      // We need to do this outside of the service start up because this takes a really long time
-      // the first time you do it and can cause service manager to time out.
+      Runtime.getRuntime().addShutdownHook(Thread {
+        clusters.invalidateAll()
+      })
+    }
+
+    fun pullImage() {
       if (imagePulled.compareAndSet(false, true) &&
           runCommand("docker pull vitess/base@$VITESS_VERSION") != 0) {
         logger.warn("Failed to pull Vitess docker image. Proceeding regardless.")
       }
-      Runtime.getRuntime().addShutdownHook(Thread {
-        clusters.invalidateAll()
-      })
     }
 
     fun runCommand(command: String): Int {
