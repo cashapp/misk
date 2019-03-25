@@ -218,34 +218,34 @@ const WebAction = (
               tooltip={<RequestResponeContentTypes action={props.action} />}
             />
             <MetadataCollapse
+              {...props}
               content={"Application Interceptors"}
               label={`(${props.action.applicationInterceptors.length})`}
               tag={`${props.tag}::${
                 props.action.pathPattern
               }::ApplicationInterceptors`}
-              {...props}
             >
               {props.action.applicationInterceptors.map(i => (
                 <MenuItem text={<Tooltip content={i}>{i}</Tooltip>} />
               ))}
             </MetadataCollapse>
             <MetadataCollapse
+              {...props}
               content={"Network Interceptors"}
               label={`(${props.action.networkInterceptors.length})`}
               tag={`${props.tag}::${
                 props.action.pathPattern
               }::NetworkInterceptors`}
-              {...props}
             >
               {props.action.networkInterceptors.map(i => (
                 <MenuItem text={<Tooltip content={i}>{i}</Tooltip>} />
               ))}
             </MetadataCollapse>
             <MetadataCollapse
+              {...props}
               content={"Send a Request"}
               label={""}
               tag={`${props.tag}::${props.action.pathPattern}::Request`}
-              {...props}
             >
               <span />
             </MetadataCollapse>
