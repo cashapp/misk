@@ -166,13 +166,17 @@ class HibernateModule(
   }
 
   private fun maybeBindStartVitessService() {
+    // TODO(jmuia): don't bind the StartVitessService if the datasource is not Vitess.
+
     val environment = Environment.fromEnvironmentVariable()
-    if (environment == Environment.TESTING) {
-      val startVitessServiceKey = StartVitessService::class.toKey(qualifier)
-      multibind<Service>().to(startVitessServiceKey)
-      bind(startVitessServiceKey).toProvider(Provider<StartVitessService> {
-        StartVitessService(environment = environment, config = config, qualifier = qualifier)
-      }).asSingleton()
+    if (environment != Environment.TESTING) {
+      return
     }
+
+    val startVitessServiceKey = StartVitessService::class.toKey(qualifier)
+    multibind<Service>().to(startVitessServiceKey)
+    bind(startVitessServiceKey).toProvider(Provider<StartVitessService> {
+      StartVitessService(environment = environment, config = config, qualifier = qualifier)
+    }).asSingleton()
   }
 }

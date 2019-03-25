@@ -46,7 +46,7 @@ class PrimitiveColumnsTest {
       install(EnvironmentModule(Environment.TESTING))
 
       val config = MiskConfig.load<RootConfig>("primitivecolumns", Environment.TESTING)
-      install(HibernateTestingModule(PrimitivesDb::class))
+      install(HibernateTestingModule(PrimitivesDb::class, config.data_source))
       install(HibernateModule(PrimitivesDb::class, config.data_source))
       install(object : HibernateEntityModule(PrimitivesDb::class) {
         override fun configureHibernate() {
