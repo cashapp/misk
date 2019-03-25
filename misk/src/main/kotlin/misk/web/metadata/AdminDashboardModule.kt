@@ -77,40 +77,6 @@ class AdminDashboardModule(val environment: Environment) : KAbstractModule() {
         slug = "web-actions",
         web_proxy_url = "http://localhost:3201/"
     ))
-
-    // True for testing Misk Menu with populated tabs and categories, tabs are not functional
-    if (environment == Environment.DEVELOPMENT || environment == Environment.TESTING) {
-      multibind<DashboardTab, AdminDashboardTab>().toInstance(DashboardTab(
-          name = "gRPC client",
-          slug = "a",
-          url_path_prefix = "/_admin/a/",
-          category = "Container Admin"
-      ))
-      multibind<DashboardTab, AdminDashboardTab>().toInstance(DashboardTab(
-          name = "gRPC server",
-          slug = "a",
-          url_path_prefix = "/_admin/a/",
-          category = "Container Admin"
-      ))
-      multibind<DashboardTab, AdminDashboardTab>().toInstance(DashboardTab(
-          name = "Threads",
-          slug = "a",
-          url_path_prefix = "/_admin/a/",
-          category = "Container Admin"
-      ))
-      multibind<DashboardTab, AdminDashboardTab>().toInstance(DashboardTab(
-          name = "Guice",
-          slug = "a",
-          url_path_prefix = "/_admin/a/",
-          category = "Container Admin"
-      ))
-      multibind<DashboardTab, AdminDashboardTab>().toInstance(DashboardTab(
-          name = "Connections",
-          slug = "a",
-          url_path_prefix = "/_admin/a/",
-          category = "Container Admin"
-      ))
-    }
   }
 }
 
