@@ -1,7 +1,7 @@
 import { H1 } from "@blueprintjs/core"
 import * as React from "react"
 import { connect } from "react-redux"
-import { WebActionsContainer } from "../containers"
+import { WebActionsComponent } from "../components"
 import { IDispatchProps, IState, rootDispatcher, rootSelectors } from "../ducks"
 
 class TabContainer extends React.Component<IState & IDispatchProps, IState> {
@@ -13,7 +13,7 @@ class TabContainer extends React.Component<IState & IDispatchProps, IState> {
     return (
       <div>
         <H1>Web Actions</H1>
-        <WebActionsContainer {...this.props} />
+        <WebActionsComponent tag={"WebActions"} {...this.props} />
       </div>
     )
   }
