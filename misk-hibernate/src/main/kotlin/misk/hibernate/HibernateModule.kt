@@ -167,7 +167,7 @@ class HibernateModule(
 
   private fun maybeBindStartVitessService() {
     val environment = Environment.fromEnvironmentVariable()
-    if (environment == Environment.DEVELOPMENT || environment == Environment.TESTING) {
+    if (environment == Environment.TESTING) {
       val startVitessServiceKey = StartVitessService::class.toKey(qualifier)
       multibind<Service>().to(startVitessServiceKey)
       bind(startVitessServiceKey).toProvider(Provider<StartVitessService> {
