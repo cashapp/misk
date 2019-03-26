@@ -4,6 +4,7 @@ import com.google.common.util.concurrent.ServiceManager
 import com.google.inject.Guice
 import com.google.inject.Injector
 import com.google.inject.Module
+import misk.environment.Environment
 import misk.inject.KAbstractModule
 import misk.inject.getInstance
 import misk.inject.uninject
@@ -18,6 +19,7 @@ internal class MiskTestExtension : BeforeEachCallback, AfterEachCallback {
   override fun beforeEach(context: ExtensionContext) {
     val module = object : KAbstractModule() {
       override fun configure() {
+        Environment.setTesting()
         binder().requireAtInjectOnConstructors()
 
         if (context.startService()) {
