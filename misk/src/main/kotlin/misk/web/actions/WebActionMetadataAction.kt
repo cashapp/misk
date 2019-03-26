@@ -6,6 +6,7 @@ import misk.web.Get
 import misk.web.NetworkInterceptor
 import misk.web.PathPattern
 import misk.web.RequestContentType
+import misk.web.RequestTypes
 import misk.web.ResponseContentType
 import misk.web.formatter.ClassNameFormatter
 import misk.web.jetty.WebActionsServlet
@@ -40,7 +41,9 @@ data class WebActionMetadata(
   val requestMediaTypes: List<String>,
   val responseMediaType: String?,
   val parameterTypes: List<String>,
+  val requestType: String?,
   val returnType: String,
+  val types: Map<String, Type>,
   val pathPattern: String,
   val applicationInterceptors: List<String>,
   val networkInterceptors: List<String>,
@@ -49,6 +52,9 @@ data class WebActionMetadata(
   val allowedRoles: Set<String>
 )
 
+data class Type(val fields: List<Field>)
+data class Field(val name: String, val type: String, val repeated: Boolean)
+
 internal fun WebActionMetadata(
     name: String,
     function: Function<*>,
@@ -56,6 +62,7 @@ internal fun WebActionMetadata(
     acceptedMediaRanges: List<MediaRange>,
     responseContentType: MediaType?,
     parameterTypes: List<KType>,
+    requestType: KType?,
     returnType: KType,
     pathPattern: PathPattern,
     applicationInterceptors: List<ApplicationInterceptor>,
@@ -71,7 +78,9 @@ internal fun WebActionMetadata(
       requestMediaTypes = acceptedMediaRanges.map { it.toString() },
       responseMediaType = responseContentType.toString(),
       parameterTypes = parameterTypes.map { it.toString() },
+      requestType = requestType.toString(),
       returnType = returnType.toString(),
+      types = RequestTypes().calculateTypes(requestType),
       pathPattern = pathPattern.toString(),
       applicationInterceptors = applicationInterceptors.map { ClassNameFormatter.format(it::class) },
       networkInterceptors = networkInterceptors.map { ClassNameFormatter.format(it::class) },
