@@ -51,11 +51,14 @@ class TypedHttpClientModule<T : Any>(
     @Inject
     private lateinit var httpClientsConfig: HttpClientsConfig
 
+    // Use Providers for the interceptors so Guice can properly detect cycles when apps inject
+    // an HTTP Client in an Interceptor.
+    // https://gist.github.com/ryanhall07/e3eac6d2d47b72a4c37bce87219d7ced
     @Inject
-    private lateinit var clientNetworkInterceptorFactories: List<ClientNetworkInterceptor.Factory>
+    private lateinit var clientNetworkInterceptorFactories: Provider<List<ClientNetworkInterceptor.Factory>>
 
     @Inject
-    private lateinit var clientApplicationInterceptorFactories: List<ClientApplicationInterceptor.Factory>
+    private lateinit var clientApplicationInterceptorFactories: Provider<List<ClientApplicationInterceptor.Factory>>
 
     @Inject
     private lateinit var moshi: Moshi
