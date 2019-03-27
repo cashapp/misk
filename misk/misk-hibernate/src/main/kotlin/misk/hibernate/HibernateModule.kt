@@ -10,6 +10,7 @@ import misk.inject.toKey
 import misk.jdbc.DataSourceConfig
 import misk.jdbc.DataSourceDecorator
 import misk.jdbc.DataSourceService
+import misk.jdbc.DataSourceType
 import misk.jdbc.PingDatabaseService
 import misk.metrics.Metrics
 import misk.resources.ResourceLoader
@@ -130,18 +131,14 @@ class HibernateModule(
       )
     }).asSingleton()
 
-    multibind<Service>().toProvider(object : Provider<SchemaMigratorService> {
-      @Inject lateinit var environment: Environment
-      override fun get(): SchemaMigratorService = SchemaMigratorService(
-          qualifier, environment, schemaMigratorProvider, config)
-    }).asSingleton()
+
+    bindSchemaMigratorServices(schemaMigratorProvider)
 
     multibind<Service>().toProvider(Provider<SchemaValidatorService> {
       SchemaValidatorService(
           qualifier,
           sessionFactoryServiceProvider,
-          transacterProvider,
-          config
+          transacterProvider
       )
     }).asSingleton()
 
@@ -178,5 +175,27 @@ class HibernateModule(
     bind(startVitessServiceKey).toProvider(Provider<StartVitessService> {
       StartVitessService(environment = environment, config = config, qualifier = qualifier)
     }).asSingleton()
+  }
+
+  private fun bindSchemaMigratorServices(schemaMigratorProvider: Provider<SchemaMigrator>) {
+    val environment = Environment.fromEnvironmentVariable()
+    if (environment == Environment.TESTING || environment == Environment.DEVELOPMENT) {
+      if (config.type != DataSourceType.VITESS) {
+        multibind<Service>().toProvider(object : Provider<SchemaMigratorService> {
+          @Inject lateinit var environment: Environment
+          override fun get(): SchemaMigratorService = SchemaMigratorService(
+              qualifier, this.environment, schemaMigratorProvider, config)
+        }).asSingleton()
+      } else {
+        // vttestserver automatically applies migrations
+        multibind<Service>().toProvider(Provider<StartVitessService.MigrationsAlreadyAppliedService> {
+          StartVitessService.MigrationsAlreadyAppliedService(qualifier)
+        }).asSingleton()
+      }
+    } else {
+      multibind<Service>().toProvider(Provider<SchemaMigrationCheckService> {
+        SchemaMigrationCheckService(qualifier, schemaMigratorProvider)
+      }).asSingleton()
+    }
   }
 }
