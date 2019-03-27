@@ -2,10 +2,12 @@ package misk.crypto
 
 import com.google.crypto.tink.Aead
 import com.google.crypto.tink.BinaryKeysetReader
+import com.google.crypto.tink.JsonKeysetReader
 import com.google.crypto.tink.KeysetHandle
 import com.google.crypto.tink.KmsClient
 import com.google.crypto.tink.aead.AeadConfig
 import com.google.inject.name.Names
+import misk.config.Secret
 import misk.inject.KAbstractModule
 import java.util.Base64
 
@@ -24,17 +26,16 @@ class CryptoModule(
     AeadConfig.register()
     val keyManager = KeyManager()
     bind<KeyManager>().toInstance(keyManager)
-    for (keyConfig: Key in config.keys) {
+    config.keys?.forEach { key ->
       val keyUri = config.gcp_key_uri ?: "aws-kms://alias/${config.aws_kms_key_alias}"
-      val cipher = keyConfig.encrypted_key.let { readKey(it, kmsClient.getAead(keyUri)) }
-      keyManager[keyConfig.key_name] = cipher
-      bind<Cipher>().annotatedWith(Names.named(keyConfig.key_name)).toInstance(cipher)
+      val cipher = key.encrypted_key.let { readKey(it, kmsClient.getAead(keyUri)) }
+      keyManager[key.key_name] = cipher
+      bind<Cipher>().annotatedWith(Names.named(key.key_name)).toInstance(cipher)
     }
   }
 
-  private fun readKey(keyConfig: String, masterKey: Aead): Cipher {
-    val encryptedKek = Base64.getDecoder().decode(keyConfig)
-    val keysetHandle = KeysetHandle.read(BinaryKeysetReader.withBytes(encryptedKek), masterKey)
+  private fun readKey(keyConfig: Secret<String>, masterKey: Aead): Cipher {
+    val keysetHandle = KeysetHandle.read(JsonKeysetReader.withString(keyConfig.value), masterKey)
     return RealCipher(keysetHandle, masterKey)
   }
 }

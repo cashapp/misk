@@ -12,7 +12,6 @@ import com.google.crypto.tink.KmsClient
  */
 internal class FakeKmsClient : KmsClient {
   override fun getAead(keyUri: String?): Aead {
-    check(keyUri!!.contains("test_master_key"))
     return FakeMasterEncryptionKey()
   }
 
