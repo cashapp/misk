@@ -26,6 +26,7 @@ import retrofit2.http.POST
 import retrofit2.http.PUT
 import java.lang.reflect.InvocationHandler
 import java.lang.reflect.Method
+import javax.inject.Provider
 import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
 import kotlin.reflect.full.findAnnotation
@@ -37,8 +38,8 @@ internal class ClientInvocationHandler(
   private val clientName: String,
   retrofit: Retrofit,
   okHttpTemplate: OkHttpClient,
-  networkInterceptorFactories: List<ClientNetworkInterceptor.Factory>,
-  applicationInterceptorFactories: List<ClientApplicationInterceptor.Factory>,
+  networkInterceptorFactories: Provider<List<ClientNetworkInterceptor.Factory>>,
+  applicationInterceptorFactories: Provider<List<ClientApplicationInterceptor.Factory>>,
   eventListenerFactory : EventListener.Factory?,
   tracer: Tracer?,
   moshi: Moshi
@@ -52,13 +53,13 @@ internal class ClientInvocationHandler(
       .toMap()
 
   private val interceptorsByMethod = actionsByMethod.map { (methodName, action) ->
-    methodName to applicationInterceptorFactories.mapNotNull { it.create(action) }
+    methodName to applicationInterceptorFactories.get().mapNotNull { it.create(action) }
   }.toMap()
 
   // Each method might have a different set of network interceptors, so sadly we potentially
   // need to create a separate OkHttpClient and retrofit proxy per method
   private val proxiesByMethod: Map<String, Any> = actionsByMethod.map { (methodName, action) ->
-    val networkInterceptors = networkInterceptorFactories.mapNotNull { it.create(action) }
+    val networkInterceptors = networkInterceptorFactories.get().mapNotNull { it.create(action) }
     val clientBuilder = okHttpTemplate.newBuilder()
     networkInterceptors.forEach {
       clientBuilder.addNetworkInterceptor(NetworkInterceptorWrapper(action, it))
