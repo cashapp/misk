@@ -16,10 +16,11 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 internal class MiskTestExtension : BeforeEachCallback, AfterEachCallback {
+
   override fun beforeEach(context: ExtensionContext) {
+    Environment.setTesting()
     val module = object : KAbstractModule() {
       override fun configure() {
-        Environment.setTesting()
         binder().requireAtInjectOnConstructors()
 
         if (context.startService()) {
