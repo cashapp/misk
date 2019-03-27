@@ -158,6 +158,7 @@ internal class BoundAction<A : WebAction>(
         acceptedMediaRanges = action.acceptedMediaRanges,
         responseContentType = action.responseContentType,
         parameterTypes = action.parameterTypes,
+        requestType = action.requestType,
         returnType = action.returnType,
         pathPattern = pathPattern,
         applicationInterceptors = applicationInterceptors,

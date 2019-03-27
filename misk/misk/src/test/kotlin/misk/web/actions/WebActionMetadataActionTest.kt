@@ -1,5 +1,6 @@
 package misk.web.actions
 
+import com.squareup.protos.test.parsing.Shipment
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.web.mediatype.MediaTypes
@@ -37,5 +38,11 @@ class WebActionMetadataActionTest {
     assertThat(customRoleActionMetadata.pathPattern).isEqualTo("/custom_role_access")
     assertThat(customRoleActionMetadata.allowedServices).isEmpty()
     assertThat(customRoleActionMetadata.allowedRoles).containsOnly("admin")
+
+    val requestTypeAction = response.webActionMetadata.find {
+      it.name.equals(TestWebActionModule.RequestTypeAction::class.simpleName)
+    }
+    assertThat(requestTypeAction!!.requestType).isEqualTo(Shipment::class.qualifiedName)
+    assertThat(requestTypeAction.types).isNotEmpty
   }
 }

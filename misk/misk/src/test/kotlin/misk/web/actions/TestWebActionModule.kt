@@ -1,5 +1,6 @@
 package misk.web.actions
 
+import com.squareup.protos.test.parsing.Shipment
 import misk.MiskCaller
 import misk.inject.KAbstractModule
 import misk.scope.ActionScoped
@@ -7,7 +8,11 @@ import misk.security.authz.AccessAnnotationEntry
 import misk.security.authz.AccessControlModule
 import misk.security.authz.FakeCallerAuthenticator
 import misk.security.authz.MiskCallerAuthenticator
+import misk.security.authz.Unauthenticated
 import misk.web.Get
+import misk.web.Post
+import misk.web.RequestBody
+import misk.web.RequestContentType
 import misk.web.ResponseContentType
 import misk.web.WebActionModule
 import misk.web.WebTestingModule
@@ -23,6 +28,7 @@ class TestWebActionModule : KAbstractModule() {
 
     install(WebActionModule.create<CustomServiceAccessAction>())
     install(WebActionModule.create<CustomRoleAccessAction>())
+    install(WebActionModule.create<RequestTypeAction>())
 
     multibind<AccessAnnotationEntry>().toInstance(
         AccessAnnotationEntry<CustomServiceAccess>(services = listOf("payments")))
@@ -58,4 +64,12 @@ class TestWebActionModule : KAbstractModule() {
   @Retention(AnnotationRetention.RUNTIME)
   @Target(AnnotationTarget.FUNCTION)
   annotation class CustomRoleAccess
+
+  class RequestTypeAction @Inject constructor() : WebAction {
+    @Post("/request_type")
+    @RequestContentType(MediaTypes.APPLICATION_JSON)
+    @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
+    @Unauthenticated
+    fun shipment(@RequestBody requestType: Shipment) = "request: $requestType".toResponseBody()
+  }
 }
