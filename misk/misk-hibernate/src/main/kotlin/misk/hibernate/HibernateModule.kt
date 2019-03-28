@@ -10,7 +10,6 @@ import misk.inject.toKey
 import misk.jdbc.DataSourceConfig
 import misk.jdbc.DataSourceDecorator
 import misk.jdbc.DataSourceService
-import misk.jdbc.DataSourceType
 import misk.jdbc.PingDatabaseService
 import misk.metrics.Metrics
 import misk.resources.ResourceLoader
@@ -78,7 +77,7 @@ class HibernateModule(
 
     val dataSourceServiceKey = DataSourceService::class.toKey(qualifier)
 
-    maybeBindStartVitessService()
+    bindStartVitessService()
 
     bind(configKey).toInstance(config)
 
@@ -131,14 +130,18 @@ class HibernateModule(
       )
     }).asSingleton()
 
-
-    bindSchemaMigratorServices(schemaMigratorProvider)
+    multibind<Service>().toProvider(object : Provider<SchemaMigratorService> {
+      @Inject lateinit var environment: Environment
+      override fun get(): SchemaMigratorService = SchemaMigratorService(
+          qualifier, environment, schemaMigratorProvider, config)
+    }).asSingleton()
 
     multibind<Service>().toProvider(Provider<SchemaValidatorService> {
       SchemaValidatorService(
           qualifier,
           sessionFactoryServiceProvider,
-          transacterProvider
+          transacterProvider,
+          config
       )
     }).asSingleton()
 
@@ -162,40 +165,14 @@ class HibernateModule(
     install(HibernateHealthCheckModule(qualifier, sessionFactoryProvider))
   }
 
-  private fun maybeBindStartVitessService() {
-    // TODO(jmuia): don't bind the StartVitessService if the datasource is not Vitess.
-
-    val environment = Environment.fromEnvironmentVariable()
-    if (environment != Environment.TESTING) {
-      return
-    }
-
+  private fun bindStartVitessService() {
     val startVitessServiceKey = StartVitessService::class.toKey(qualifier)
     multibind<Service>().to(startVitessServiceKey)
-    bind(startVitessServiceKey).toProvider(Provider<StartVitessService> {
-      StartVitessService(environment = environment, config = config, qualifier = qualifier)
-    }).asSingleton()
-  }
-
-  private fun bindSchemaMigratorServices(schemaMigratorProvider: Provider<SchemaMigrator>) {
-    val environment = Environment.fromEnvironmentVariable()
-    if (environment == Environment.TESTING || environment == Environment.DEVELOPMENT) {
-      if (config.type != DataSourceType.VITESS) {
-        multibind<Service>().toProvider(object : Provider<SchemaMigratorService> {
-          @Inject lateinit var environment: Environment
-          override fun get(): SchemaMigratorService = SchemaMigratorService(
-              qualifier, this.environment, schemaMigratorProvider, config)
-        }).asSingleton()
-      } else {
-        // vttestserver automatically applies migrations
-        multibind<Service>().toProvider(Provider<StartVitessService.MigrationsAlreadyAppliedService> {
-          StartVitessService.MigrationsAlreadyAppliedService(qualifier)
-        }).asSingleton()
+    bind(startVitessServiceKey).toProvider(object : Provider<StartVitessService> {
+      @Inject lateinit var environment : Environment
+      override fun get(): StartVitessService {
+        return StartVitessService(environment = environment, config = config, qualifier = qualifier)
       }
-    } else {
-      multibind<Service>().toProvider(Provider<SchemaMigrationCheckService> {
-        SchemaMigrationCheckService(qualifier, schemaMigratorProvider)
-      }).asSingleton()
-    }
+    }).asSingleton()
   }
 }

@@ -17,6 +17,7 @@ import misk.jdbc.PingDatabaseService
 import misk.resources.ResourceLoader
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
+import misk.vitess.StartVitessService
 import org.assertj.core.api.Assertions.assertThat
 import org.hibernate.SessionFactory
 import org.junit.jupiter.api.Test
@@ -91,6 +92,8 @@ internal class SchemaMigratorTest {
             null
         )
       }).asSingleton()
+      multibind<Service>().toInstance(
+          StartVitessService(Movies::class, Environment.TESTING, config.data_source))
     }
   }
 
