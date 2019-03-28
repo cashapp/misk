@@ -69,7 +69,7 @@ class MiskConfigTest {
     }
 
     assertThat(exception).hasMessageContaining(
-        "could not find partial_test_app TESTING configuration for consumer_a")
+        "could not find 'consumer_a' of 'TestConfig' in partial_test_app-testing.yaml")
   }
 
   @Test
