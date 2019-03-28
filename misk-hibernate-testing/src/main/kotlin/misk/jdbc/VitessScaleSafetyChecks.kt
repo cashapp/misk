@@ -305,10 +305,10 @@ class VitessScaleSafetyChecks(
     val request = Request.Builder()
         .url("http://localhost:27000/debug/vars")
         .build()
+    val response = okHttpClient.newCall(request).execute()
+    val source = response.body()!!.source()
     val adapter = moshi.adapter<Variables>()
-    val variables = okHttpClient.newCall(request).execute().use {
-      adapter.fromJson(it.body()!!.source())!!
-    }
+    val variables = adapter.fromJson(source)!!
     return variables.QueriesProcessed["SelectScatter"] ?: 0
   }
 
@@ -320,9 +320,9 @@ class VitessScaleSafetyChecks(
     val request = Request.Builder()
         .url("http://localhost:27000/debug/query_plans")
         .build()
-    return okHttpClient.newCall(request).execute().use { r ->
-      parseQueryPlans(r.body()!!.source()).filter { it.isScatter }.sumBy { it.ExecCount }
-    }
+    val response = okHttpClient.newCall(request).execute()
+    val source = response.body()!!.source()
+    return parseQueryPlans(source).filter { it.isScatter }.sumBy { it.ExecCount }
   }
 
   private val EMPTY_LINE = "\n\n".encodeUtf8()

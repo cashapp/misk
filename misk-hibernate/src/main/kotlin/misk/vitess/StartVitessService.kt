@@ -21,12 +21,10 @@ import misk.backoff.retry
 import misk.environment.Environment
 import misk.environment.Environment.DEVELOPMENT
 import misk.environment.Environment.TESTING
-import misk.hibernate.SchemaMigratorService
-import misk.hibernate.SessionFactoryService
-import misk.inject.toKey
 import misk.jdbc.DataSourceConfig
 import misk.jdbc.DataSourceType
 import misk.jdbc.uniqueInt
+import misk.jdbc.uniqueString
 import misk.moshi.adapter
 import misk.resources.ResourceLoader
 import mu.KotlinLogging
@@ -323,7 +321,7 @@ class StartVitessService(
 ) : AbstractIdleService(), DependentService {
 
   override val consumedKeys: Set<Key<*>> = setOf()
-  override val producedKeys: Set<Key<*>> = setOf(StartVitessService::class.toKey(qualifier))
+  override val producedKeys: Set<Key<*>> = setOf(Key.get(StartVitessService::class.java))
 
   var cluster: DockerVitessCluster? = null
 
@@ -442,25 +440,5 @@ class StartVitessService(
       dockerCluster.start()
     }
 
-  }
-
-  /**
-   * A work around to block Services that are dependent on [SchemaMigratorService] since
-   * [StartVitessService] performs migrations in tests.
-   */
-  class MigrationsAlreadyAppliedService(qualifier: kotlin.reflect.KClass<out kotlin.Annotation>) :
-      DependentService,
-      AbstractIdleService() {
-
-    override val consumedKeys = setOf<Key<*>>(
-        SessionFactoryService::class.toKey(qualifier),
-        StartVitessService::class.toKey(qualifier))
-    override val producedKeys = setOf<Key<*>>(SchemaMigratorService::class.toKey(qualifier))
-
-    override fun startUp() {
-    }
-
-    override fun shutDown() {
-    }
   }
 }
