@@ -16,7 +16,7 @@ internal class SchemaValidatorService internal constructor(
   private val transacterProvider: Provider<Transacter>
 ) : AbstractIdleService(), DependentService {
 
-  override val consumedKeys = setOf<Key<*>>(SchemaMigratorService::class.toKey(qualifier))
+  override val consumedKeys = setOf<Key<*>>(SchemaMigrationCheckService::class.toKey(qualifier))
   override val producedKeys = setOf<Key<*>>(SchemaValidatorService::class.toKey(qualifier))
 
   override fun startUp() {

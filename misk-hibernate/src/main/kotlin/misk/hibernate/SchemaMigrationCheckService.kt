@@ -15,8 +15,8 @@ class SchemaMigrationCheckService internal constructor(
   private val schemaMigratorProvider: javax.inject.Provider<misk.hibernate.SchemaMigrator> // Lazy!
 ) : DependentService, AbstractIdleService() {
 
-  override val consumedKeys = setOf<Key<*>>(SchemaMigratorService::class.toKey(qualifier))
-  override val producedKeys = setOf<Key<*>>()
+  override val consumedKeys = setOf<Key<*>>(SessionFactoryService::class.toKey(qualifier))
+  override val producedKeys = setOf<Key<*>>(SchemaMigrationCheckService::class.toKey(qualifier))
 
   override fun startUp() {
     schemaMigratorProvider.get().requireAll()

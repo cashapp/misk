@@ -6,9 +6,13 @@ import misk.DependentService
 import misk.environment.Environment
 import misk.inject.toKey
 import misk.jdbc.DataSourceType
-import misk.vitess.StartVitessService
 import javax.inject.Singleton
 
+/**
+ * This is a test only service that migrates a test database. It should not be depended on by
+ * real services. Instead real services should depend on [SchemaMigrationCheckService] which
+ * this test service also produces.
+ */
 @Singleton
 class SchemaMigratorService internal constructor(
   qualifier: kotlin.reflect.KClass<out kotlin.Annotation>,
@@ -18,7 +22,9 @@ class SchemaMigratorService internal constructor(
 ) : AbstractIdleService(), DependentService {
 
   override val consumedKeys = setOf<Key<*>>(SessionFactoryService::class.toKey(qualifier))
-  override val producedKeys = setOf<Key<*>>(SchemaMigratorService::class.toKey(qualifier))
+  override val producedKeys = setOf<Key<*>>(
+      // Produce the SchemaMigrationCheckService since real consumers depend on it.
+      SchemaMigrationCheckService::class.toKey(qualifier))
 
   override fun startUp() {
     require(config.type != DataSourceType.VITESS) { "Vitess should not bind SchemaMigratorService" }

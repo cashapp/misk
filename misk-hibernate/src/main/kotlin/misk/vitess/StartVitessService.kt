@@ -21,6 +21,7 @@ import misk.backoff.retry
 import misk.environment.Environment
 import misk.environment.Environment.DEVELOPMENT
 import misk.environment.Environment.TESTING
+import misk.hibernate.SchemaMigrationCheckService
 import misk.hibernate.SchemaMigratorService
 import misk.hibernate.SessionFactoryService
 import misk.inject.toKey
@@ -455,7 +456,7 @@ class StartVitessService(
     override val consumedKeys = setOf<Key<*>>(
         SessionFactoryService::class.toKey(qualifier),
         StartVitessService::class.toKey(qualifier))
-    override val producedKeys = setOf<Key<*>>(SchemaMigratorService::class.toKey(qualifier))
+    override val producedKeys = setOf<Key<*>>(SchemaMigrationCheckService::class.toKey(qualifier))
 
     override fun startUp() {
     }

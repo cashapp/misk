@@ -4,6 +4,7 @@ import com.google.common.base.Stopwatch
 import com.google.common.util.concurrent.AbstractIdleService
 import com.google.inject.Key
 import misk.DependentService
+import misk.hibernate.SchemaMigrationCheckService
 import misk.hibernate.SchemaMigratorService
 import misk.hibernate.Transacter
 import misk.hibernate.shards
@@ -35,7 +36,7 @@ class TruncateTablesService(
 ) : AbstractIdleService(), DependentService {
   private val persistentTables = setOf("schema_version")
 
-  override val consumedKeys = setOf<Key<*>>(SchemaMigratorService::class.toKey(qualifier))
+  override val consumedKeys = setOf<Key<*>>(SchemaMigrationCheckService::class.toKey(qualifier))
   override val producedKeys = setOf<Key<*>>(TruncateTablesService::class.toKey(qualifier))
 
   override fun startUp() {
