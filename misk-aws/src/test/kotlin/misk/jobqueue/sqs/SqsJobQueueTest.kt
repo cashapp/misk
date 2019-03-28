@@ -1,24 +1,19 @@
 package misk.jobqueue.sqs
 
-import com.amazonaws.auth.AWSCredentials
 import com.amazonaws.auth.AWSCredentialsProvider
-import com.amazonaws.auth.BasicAWSCredentials
-import com.amazonaws.client.builder.AwsClientBuilder
 import com.amazonaws.services.sqs.AmazonSQS
-import com.amazonaws.services.sqs.AmazonSQSClient
 import com.amazonaws.services.sqs.model.CreateQueueRequest
-import com.google.common.util.concurrent.Service
-import com.google.inject.Provides
 import com.google.inject.util.Modules
 import misk.MiskTestingServiceModule
-import misk.cloud.aws.AwsAccountId
-import misk.cloud.aws.AwsRegion
+import misk.cloud.aws.AwsEnvironmentModule
+import misk.cloud.aws.FakeAwsEnvironmentModule
 import misk.inject.KAbstractModule
 import misk.jobqueue.Job
 import misk.jobqueue.JobConsumer
 import misk.jobqueue.JobQueue
 import misk.jobqueue.QueueName
 import misk.jobqueue.subscribe
+import misk.testing.MiskExternalDependency
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.testing.MockTracingBackendModule
@@ -30,11 +25,11 @@ import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
 import javax.inject.Inject
-import javax.inject.Singleton
 
 @MiskTest(startService = true)
 internal class SqsJobQueueTest {
-  @MiskTestModule private val module = TestModule()
+  @MiskExternalDependency private val dockerSqs = DockerSqs
+  @MiskTestModule private val module = TestModule(dockerSqs.credentials, dockerSqs.client)
 
   @Inject private lateinit var sqs: AmazonSQS
   @Inject private lateinit var queue: JobQueue
@@ -46,7 +41,7 @@ internal class SqsJobQueueTest {
 
   @BeforeEach fun createQueues() {
     // Ensure that each test case runs on a unique queue
-    queueName = QueueName("sqs_job_queue_test" + queueSuffix.incrementAndGet())
+    queueName = QueueName("sqs_job_queue_test")
     deadLetterQueueName = queueName.deadLetterQueue
     sqs.createQueue(deadLetterQueueName.value)
     sqs.createQueue(CreateQueueRequest()
@@ -232,39 +227,30 @@ internal class SqsJobQueueTest {
     assertThat(sqsMetrics.handlerFailures.labels(queueName.value).get()).isEqualTo(2.0)
   }
 
-  class TestModule : KAbstractModule() {
+  class TestModule(
+    private val credentials: AWSCredentialsProvider,
+    private val client: AmazonSQS
+  ) : KAbstractModule() {
     override fun configure() {
-      multibind<Service>().to<DockerSqs.Service>()
       install(MiskTestingServiceModule())
       install(MockTracingBackendModule())
-      install(Modules.override(AwsSqsJobQueueModule(AwsSqsJobQueueConfig())).with(SQSTestModule()))
+      install(AwsEnvironmentModule())
+      install(FakeAwsEnvironmentModule())
+      install(
+          Modules
+              .override(AwsSqsJobQueueModule(AwsSqsJobQueueConfig()))
+              .with(SQSTestModule(credentials, client))
+      )
     }
   }
 
-  class SQSTestModule : KAbstractModule() {
+  class SQSTestModule(
+    private val credentials: AWSCredentialsProvider,
+    private val client: AmazonSQS
+  ) : KAbstractModule() {
     override fun configure() {
-      bind<AwsAccountId>().toInstance(AwsAccountId("123456789"))
-      bind<AwsRegion>().toInstance(AwsRegion("us-east-1"))
-      bind<AWSCredentialsProvider>().toInstance(object : AWSCredentialsProvider {
-        override fun refresh() {}
-        override fun getCredentials(): AWSCredentials {
-          return BasicAWSCredentials("access-key-id", "secret-access-key")
-        }
-      })
+      bind<AWSCredentialsProvider>().toInstance(credentials)
+      bind<AmazonSQS>().toInstance(client)
     }
-
-    @Provides @Singleton
-    fun provideSQS(credentials: AWSCredentialsProvider): AmazonSQS {
-      return AmazonSQSClient.builder()
-          .withCredentials(credentials)
-          .withEndpointConfiguration(AwsClientBuilder.EndpointConfiguration(
-              "http://127.0.0.1:${DockerSqs.CLIENT_PORT}",
-              "us-east-1"))
-          .build()
-    }
-  }
-
-  companion object {
-    private val queueSuffix = AtomicInteger(0)
   }
 }
