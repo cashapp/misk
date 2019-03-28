@@ -21,10 +21,10 @@ import misk.backoff.retry
 import misk.environment.Environment
 import misk.environment.Environment.DEVELOPMENT
 import misk.environment.Environment.TESTING
+import misk.inject.toKey
 import misk.jdbc.DataSourceConfig
 import misk.jdbc.DataSourceType
 import misk.jdbc.uniqueInt
-import misk.jdbc.uniqueString
 import misk.moshi.adapter
 import misk.resources.ResourceLoader
 import mu.KotlinLogging
@@ -257,7 +257,8 @@ class DockerVitessCluster(
             "-S", "/vt/vtdataroot/vt_0000000001/mysql.sock",
             "-u", "root",
             "mysql",
-            "-e", "grant all on *.* to 'vt_dba'@'%'; grant REPLICATION CLIENT, REPLICATION SLAVE on *.* to 'vt_app'@'%'")
+            "-e",
+            "grant all on *.* to 'vt_dba'@'%'; grant REPLICATION CLIENT, REPLICATION SLAVE on *.* to 'vt_app'@'%'")
         .exec()
 
     docker.execStartCmd(exec.id)
@@ -321,17 +322,13 @@ class StartVitessService(
 ) : AbstractIdleService(), DependentService {
 
   override val consumedKeys: Set<Key<*>> = setOf()
-  override val producedKeys: Set<Key<*>> = setOf(Key.get(StartVitessService::class.java))
+  override val producedKeys: Set<Key<*>> = setOf(StartVitessService::class.toKey(qualifier))
 
   var cluster: DockerVitessCluster? = null
 
   override fun startUp() {
-    if (config.type != DataSourceType.VITESS) {
-      // We only start up Vitess if Vitess has been configured
+    if (!shouldRunVitess()) {
       return
-    }
-    check(environment == TESTING || environment == DEVELOPMENT) {
-      "We should only start up Vitess in TESTING or DEVELOPMENT"
     }
 
     val name = qualifier.simpleName!!
@@ -347,7 +344,33 @@ class StartVitessService(
 
   fun cluster() = cluster!!.cluster
 
+  fun shouldRunVitess() =  config.type == DataSourceType.VITESS &&  (environment == TESTING || environment == DEVELOPMENT)
+
   override fun shutDown() {
+  }
+
+  init {
+    // We need to do this outside of the service start up because this takes a really long time
+    // the first time you do it and can cause service manager to time out.
+    if (shouldRunVitess() && imagePulled.compareAndSet(false, true) &&
+        runCommand("docker pull vitess/base@$VITESS_VERSION") != 0) {
+      logger.warn("Failed to pull Vitess docker image. Proceeding regardless.")
+    }
+  }
+
+  private fun runCommand(command: String): Int {
+    logger.info(command)
+    return try {
+      val process = ProcessBuilder(*command.split(" ").toTypedArray())
+          .redirectOutput(ProcessBuilder.Redirect.INHERIT)
+          .redirectError(ProcessBuilder.Redirect.INHERIT)
+          .start()
+      process.waitFor(60, TimeUnit.MINUTES)
+      return process.exitValue()
+    } catch (e: IOException) {
+      logger.warn("'$command' threw exception", e)
+      -1  // Failed
+    }
   }
 
   companion object {
@@ -379,30 +402,9 @@ class StartVitessService(
      * Shut down the cached clusters on JVM exit.
      */
     init {
-      // We need to do this outside of the service start up because this takes a really long time
-      // the first time you do it and can cause service manager to time out.
-      if (imagePulled.compareAndSet(false, true) &&
-          runCommand("docker pull vitess/base@$VITESS_VERSION") != 0) {
-        logger.warn("Failed to pull Vitess docker image. Proceeding regardless.")
-      }
       Runtime.getRuntime().addShutdownHook(Thread {
         clusters.invalidateAll()
       })
-    }
-
-    private fun runCommand(command: String): Int {
-      logger.info(command)
-      return try {
-        val process = ProcessBuilder(*command.split(" ").toTypedArray())
-            .redirectOutput(ProcessBuilder.Redirect.INHERIT)
-            .redirectError(ProcessBuilder.Redirect.INHERIT)
-            .start()
-        process.waitFor(60, TimeUnit.MINUTES)
-        return process.exitValue()
-      } catch (e: IOException) {
-        logger.warn("'$command' threw exception", e)
-        -1  // Failed
-      }
     }
 
     /**

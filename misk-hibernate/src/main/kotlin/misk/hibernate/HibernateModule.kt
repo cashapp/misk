@@ -77,7 +77,7 @@ class HibernateModule(
 
     val dataSourceServiceKey = DataSourceService::class.toKey(qualifier)
 
-    maybeBindStartVitessService()
+    bindStartVitessService()
 
     bind(configKey).toInstance(config)
 
@@ -165,18 +165,14 @@ class HibernateModule(
     install(HibernateHealthCheckModule(qualifier, sessionFactoryProvider))
   }
 
-  private fun maybeBindStartVitessService() {
-    // TODO(jmuia): don't bind the StartVitessService if the datasource is not Vitess.
-
-    val environment = Environment.fromEnvironmentVariable()
-    if (environment != Environment.TESTING) {
-      return
-    }
-
+  private fun bindStartVitessService() {
     val startVitessServiceKey = StartVitessService::class.toKey(qualifier)
     multibind<Service>().to(startVitessServiceKey)
-    bind(startVitessServiceKey).toProvider(Provider<StartVitessService> {
-      StartVitessService(environment = environment, config = config, qualifier = qualifier)
+    bind(startVitessServiceKey).toProvider(object : Provider<StartVitessService> {
+      @Inject lateinit var environment : Environment
+      override fun get(): StartVitessService {
+        return StartVitessService(environment = environment, config = config, qualifier = qualifier)
+      }
     }).asSingleton()
   }
 }

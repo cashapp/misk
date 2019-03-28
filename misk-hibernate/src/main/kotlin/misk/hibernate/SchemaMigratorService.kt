@@ -6,9 +6,7 @@ import misk.DependentService
 import misk.environment.Environment
 import misk.inject.toKey
 import misk.jdbc.DataSourceType
-import javax.inject.Provider
 import javax.inject.Singleton
-import kotlin.reflect.KClass
 
 @Singleton
 class SchemaMigratorService internal constructor(
