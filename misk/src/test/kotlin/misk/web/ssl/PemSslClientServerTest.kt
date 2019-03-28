@@ -79,6 +79,12 @@ internal class PemSslClientServerTest {
     assertFailsWith<SSLHandshakeException> {
       noTrustClient.post<Dinosaur>("/hello", Dinosaur.Builder().name("trex").build())
     }
+    // This can sometimes cause a deadlock stopping the Jetty server, where server shutdown
+    // is triggered but the thread serving the SSL connection is still trying to start up.
+    // (only reproducible on CircleCI for some reason)...
+    // jstack: https://gist.github.com/mightyguava/785d26308beff1321297c798e907a92b
+    // So we just sleep a bit and avoid it.
+    Thread.sleep(100)
   }
 
   class HelloAction @Inject constructor() : WebAction {
