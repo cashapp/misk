@@ -9,16 +9,19 @@ import com.fasterxml.jackson.databind.JsonMappingException
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.deser.ContextualDeserializer
+import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException
 import com.fasterxml.jackson.databind.module.SimpleModule
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.kotlin.MissingKotlinParameterException
+import com.google.common.base.Joiner
 import misk.environment.Environment
 import misk.logging.getLogger
 import misk.resources.ResourceLoader
 import okio.buffer
 import okio.source
+import org.apache.commons.lang3.StringUtils
 import java.io.File
 import java.io.FilenameFilter
 import java.net.URL
@@ -58,18 +61,30 @@ object MiskConfig {
 
     val jsonNode = flattenYamlMap(configYamls)
 
-    @Suppress("UNCHECKED_CAST")
+    val configFile = "$appName-${environment.name.toLowerCase()}.yaml"
     try {
+      @Suppress("UNCHECKED_CAST")
       return mapper.readValue(jsonNode.toString(), configClass) as T
     } catch (e: MissingKotlinParameterException) {
-      val configFile = "$appName-${environment.name.toLowerCase()}.yaml"
       throw IllegalStateException(
           "could not find '${e.parameter.name}' of '${configClass.simpleName}'" +
               " in $configFile or in any of the combined logical config", e)
+    } catch (e: UnrecognizedPropertyException) {
+      val path = Joiner.on('.').join(e.path.map { it.fieldName })
+      throw IllegalStateException(
+          "error in $configFile: '$path' not found in '${configClass.simpleName}' ${suggestSpelling(e)}", e)
     } catch (e: Exception) {
       throw IllegalStateException(
           "failed to load configuration for $appName $environment: ${e.message}", e)
     }
+  }
+
+  private fun suggestSpelling(e: UnrecognizedPropertyException): String {
+    val suggestions = e.knownPropertyIds.filter {
+      @Suppress("DEPRECATION")
+      StringUtils.getLevenshteinDistance(it.toString(), e.propertyName) <= 2
+    }
+    return if (suggestions.isNotEmpty()) "(Did you mean one of $suggestions?)" else ""
   }
 
   fun <T : Config> toYaml(config: T): String {
