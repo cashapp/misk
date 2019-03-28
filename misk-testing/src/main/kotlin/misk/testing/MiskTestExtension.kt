@@ -4,10 +4,12 @@ import com.google.common.util.concurrent.ServiceManager
 import com.google.inject.Guice
 import com.google.inject.Injector
 import com.google.inject.Module
+import io.netty.util.internal.ConcurrentSet
 import misk.environment.Environment
 import misk.inject.KAbstractModule
 import misk.inject.getInstance
 import misk.inject.uninject
+import misk.logging.getLogger
 import org.junit.jupiter.api.extension.AfterEachCallback
 import org.junit.jupiter.api.extension.BeforeEachCallback
 import org.junit.jupiter.api.extension.ExtensionContext
@@ -17,8 +19,22 @@ import javax.inject.Singleton
 
 internal class MiskTestExtension : BeforeEachCallback, AfterEachCallback {
 
+  companion object {
+    private val runningDependencies = ConcurrentSet<String>()
+    private val log = getLogger<MiskTestExtension>()
+  }
+
   override fun beforeEach(context: ExtensionContext) {
     Environment.setTesting()
+
+    for (dep in context.getExternalDependencies()) {
+      dep.startIfNecessary()
+    }
+
+    for (dep in context.getExternalDependencies()) {
+      dep.beforeEach()
+    }
+
     val module = object : KAbstractModule() {
       override fun configure() {
         binder().requireAtInjectOnConstructors()
@@ -50,6 +66,10 @@ internal class MiskTestExtension : BeforeEachCallback, AfterEachCallback {
 
     injector.getInstance<Callbacks>().afterEach(context)
     uninject(context.requiredTestInstance)
+
+    for (dep in context.getExternalDependencies()) {
+      dep.afterEach()
+    }
   }
 
   class StartServicesBeforeEach @Inject constructor() : BeforeEachCallback {
@@ -101,6 +121,20 @@ internal class MiskTestExtension : BeforeEachCallback, AfterEachCallback {
       beforeEachCallbacks.forEach { it.beforeEach(context) }
     }
   }
+
+  private fun ExternalDependency.startIfNecessary() {
+    if (!runningDependencies.contains(id)) {
+      log.info { "starting $id" }
+      startup()
+      Runtime.getRuntime().addShutdownHook(Thread {
+        log.info { "stopping $id" }
+        shutdown()
+      })
+      runningDependencies.add(id)
+    } else {
+      log.info { "$id already running, not starting anything" }
+    }
+  }
 }
 
 private fun ExtensionContext.startService(): Boolean {
@@ -119,7 +153,7 @@ private fun ExtensionContext.getActionTestModules(): Iterable<Module> {
       { modulesViaReflection() }) as Iterable<Module>
 }
 
-// Find [MiskTestModule]-annoted [Module]s on the test class and, recursively, its base classes.
+// Find [MiskTestModule]-annotated [Module]s on the test class and, recursively, its base classes.
 private fun ExtensionContext.modulesViaReflection(): Iterable<Module> {
   return generateSequence(requiredTestClass) { c -> c.superclass }
       .flatMap { it.declaredFields.asSequence() }
@@ -127,6 +161,28 @@ private fun ExtensionContext.modulesViaReflection(): Iterable<Module> {
       .map {
         it.isAccessible = true
         it.get(requiredTestInstance) as Module
+      }
+      .toList()
+}
+
+private fun ExtensionContext.getExternalDependencies(): Iterable<ExternalDependency> {
+  val namespace = ExtensionContext.Namespace.create(requiredTestClass)
+  // First check the context cache
+  @Suppress("UNCHECKED_CAST")
+  return getStore(namespace).getOrComputeIfAbsent("external-dependencies") {
+    externalDependenciesViaReflection()
+  } as Iterable<ExternalDependency>
+}
+
+// Find [MiskExternalDependency]-annotated [ExternalDependency]s on the test class and, recursively,
+// its base classes.
+private fun ExtensionContext.externalDependenciesViaReflection(): Iterable<ExternalDependency> {
+  return generateSequence(requiredTestClass) { c -> c.superclass }
+      .flatMap { it.declaredFields.asSequence() }
+      .filter { it.isAnnotationPresent(MiskExternalDependency::class.java) }
+      .map {
+        it.isAccessible = true
+        it.get(requiredTestInstance) as ExternalDependency
       }
       .toList()
 }
