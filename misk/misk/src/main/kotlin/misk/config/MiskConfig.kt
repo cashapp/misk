@@ -62,8 +62,10 @@ object MiskConfig {
     try {
       return mapper.readValue(jsonNode.toString(), configClass) as T
     } catch (e: MissingKotlinParameterException) {
+      val configFile = "$appName-${environment.name.toLowerCase()}.yaml"
       throw IllegalStateException(
-          "could not find $appName $environment configuration for ${e.parameter.name}", e)
+          "could not find '${e.parameter.name}' of '${configClass.simpleName}'" +
+              " in $configFile or in any of the combined logical config", e)
     } catch (e: Exception) {
       throw IllegalStateException(
           "failed to load configuration for $appName $environment: ${e.message}", e)
