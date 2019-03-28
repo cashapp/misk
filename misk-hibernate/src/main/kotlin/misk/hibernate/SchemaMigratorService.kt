@@ -7,7 +7,9 @@ import misk.environment.Environment
 import misk.inject.toKey
 import misk.jdbc.DataSourceType
 import misk.vitess.StartVitessService
+import javax.inject.Provider
 import javax.inject.Singleton
+import kotlin.reflect.KClass
 
 @Singleton
 class SchemaMigratorService internal constructor(
@@ -21,13 +23,16 @@ class SchemaMigratorService internal constructor(
   override val producedKeys = setOf<Key<*>>(SchemaMigratorService::class.toKey(qualifier))
 
   override fun startUp() {
-    require(config.type != DataSourceType.VITESS) { "Vitess should not bind SchemaMigratorService" }
-    require(environment == Environment.TESTING || environment == Environment.DEVELOPMENT) {
-      "SchemaMigratorService is a testing service"
-    }
     val schemaMigrator = schemaMigratorProvider.get()
-    val appliedMigrations = schemaMigrator.initialize()
-    schemaMigrator.applyAll("SchemaMigratorService", appliedMigrations)
+    if (environment == Environment.TESTING || environment == Environment.DEVELOPMENT) {
+      if (config.type != DataSourceType.VITESS) {
+        // vttestserver automatically applies migrations
+        val appliedMigrations = schemaMigrator.initialize()
+        schemaMigrator.applyAll("SchemaMigratorService", appliedMigrations)
+      }
+    } else {
+      schemaMigrator.requireAll()
+    }
   }
 
   override fun shutDown() {
