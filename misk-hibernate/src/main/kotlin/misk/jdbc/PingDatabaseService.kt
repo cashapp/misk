@@ -9,6 +9,7 @@ import misk.backoff.retry
 import misk.environment.Environment
 import misk.inject.toKey
 import misk.logging.getLogger
+import misk.vitess.StartVitessService
 import java.time.Duration
 import java.util.Properties
 import javax.inject.Inject
@@ -28,7 +29,10 @@ class PingDatabaseService @Inject constructor(
   private val environment: Environment
 ) : AbstractIdleService(), DependentService {
 
-  override val consumedKeys: Set<Key<*>> = setOf()
+  // TODO(rhall): depending on Vitess is a hack to simulate Vitess has already been started in the
+  // env. This is to remove flakiness in tests that are not waiting until Vitess is ready.
+  // This should be replaced with an ExternalDependency that manages vitess.
+  override val consumedKeys: Set<Key<*>> = setOf(StartVitessService::class.toKey(qualifier))
   override val producedKeys: Set<Key<*>> = setOf(PingDatabaseService::class.toKey(qualifier))
 
   override fun startUp() {

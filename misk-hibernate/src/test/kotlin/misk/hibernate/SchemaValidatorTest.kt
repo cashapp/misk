@@ -17,6 +17,7 @@ import misk.jdbc.PingDatabaseService
 import misk.resources.ResourceLoader
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
+import misk.vitess.StartVitessService
 import okio.ByteString
 import org.assertj.core.api.Assertions.assertThat
 import org.hibernate.SessionFactory
@@ -116,6 +117,8 @@ class SchemaValidatorTest {
         SchemaMigratorService(
             qualifier, Environment.TESTING, schemaMigratorProvider, config.data_source)
       }).asSingleton()
+      multibind<Service>().toInstance(
+          StartVitessService(ValidationDb::class, Environment.TESTING, config.data_source))
     }
   }
 
