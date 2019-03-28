@@ -13,7 +13,6 @@ import org.slf4j.event.Level
 import java.io.File
 import java.time.Duration
 import javax.inject.Inject
-import javax.inject.Named
 import kotlin.test.assertFailsWith
 
 @MiskTest
@@ -87,7 +86,16 @@ class MiskConfigTest {
       MiskConfig.load<TestConfig>(TestConfig::class.java, "unknownproperty", defaultEnv)
     }
 
-    assertThat(exception.cause).hasMessageContaining("Unrecognized field \"blue_items\"")
+    assertThat(exception).hasMessageContaining("'consumer_b.blue_items' not found")
+  }
+
+  @Test
+  fun friendlyErrorMessagesWhenPropertiesMisspelled() {
+    val exception = assertFailsWith<IllegalStateException> {
+      MiskConfig.load<TestConfig>(TestConfig::class.java, "misspelledproperty", defaultEnv)
+    }
+
+    assertThat(exception).hasMessageContaining("Did you mean")
   }
 
   @Test
