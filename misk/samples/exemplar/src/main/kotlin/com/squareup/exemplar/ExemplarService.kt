@@ -12,7 +12,6 @@ import misk.web.MiskWebModule
 fun main(args: Array<String>) {
   val environment = Environment.fromEnvironmentVariable()
   val config = MiskConfig.load<ExemplarConfig>("exemplar", environment)
-
   MiskApplication(
       MiskRealServiceModule(),
       MiskWebModule(config.web),
