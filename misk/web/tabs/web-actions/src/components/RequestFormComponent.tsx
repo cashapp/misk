@@ -4,6 +4,7 @@ import {
   ControlGroup,
   FormGroup,
   InputGroup,
+  Intent,
   TextArea,
   Tooltip
 } from "@blueprintjs/core"
@@ -109,6 +110,7 @@ const RequestFormField = (props: IFieldProps & IState & IDispatchProps) => {
               props.simpleFormInput,
               `${tag}::${nestPath}${id}::Data`
             )}
+            placeholder={type}
             value={simpleSelect(
               props.simpleForm,
               `${tag}::${nestPath}${id}::Data`,
@@ -130,6 +132,7 @@ const RequestFormField = (props: IFieldProps & IState & IDispatchProps) => {
               props.simpleFormInput,
               `${tag}::${nestPath}${id}::Data`
             )}
+            placeholder={`${type}\nDrag bottom right corner of text area input to expand.`}
             value={simpleSelect(
               props.simpleForm,
               `${tag}::${nestPath}${id}::Data`,
