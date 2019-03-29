@@ -10,17 +10,24 @@ import { chain } from "lodash"
 import { all, AllEffect, call, put, takeLatest } from "redux-saga/effects"
 
 export const enum TypescriptBaseTypes {
-  "boolean" = "boolean",
-  "number" = "number",
-  "string" = "string",
-  "enum" = "enum",
   "any" = "any",
-  "null" = "null"
+  "boolean" = "boolean",
+  "enum" = "enum",
+  "null" = "null",
+  "number" = "number",
+  "string" = "string"
 }
 
 export const enum KotlinTypes {
-  "int64" = "int64",
-  "string" = "string"
+  "Boolean" = "Boolean",
+  "Byte" = "Byte",
+  "ByteString" = "ByteString",
+  "Char" = "Char",
+  "Double" = "Double",
+  "Int" = "Int",
+  "Long" = "Long",
+  "Short" = "Short",
+  "String" = "String"
 }
 
 export interface IBaseFieldTypes {
@@ -28,8 +35,13 @@ export interface IBaseFieldTypes {
 }
 
 export const BaseFieldTypes: IBaseFieldTypes = {
-  [KotlinTypes.int64]: TypescriptBaseTypes.number,
-  [KotlinTypes.string]: TypescriptBaseTypes.string
+  [KotlinTypes.Boolean]: TypescriptBaseTypes.boolean,
+  [KotlinTypes.Short]: TypescriptBaseTypes.number,
+  [KotlinTypes.Int]: TypescriptBaseTypes.number,
+  [KotlinTypes.Long]: TypescriptBaseTypes.number,
+  [KotlinTypes.Double]: TypescriptBaseTypes.number,
+  [KotlinTypes.ByteString]: TypescriptBaseTypes.string,
+  [KotlinTypes.String]: TypescriptBaseTypes.string
 }
 
 export interface IFieldTypeMetadata {
