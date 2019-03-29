@@ -6,8 +6,7 @@ import {
   InputGroup,
   Intent,
   TextArea,
-  Tooltip,
-  Intent
+  Tooltip
 } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
 import {
