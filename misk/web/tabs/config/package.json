@@ -14,7 +14,7 @@
     "clean-build-files": "rm .hash package-lock.json package.json tsconfig.json tslint.json webpack.config.js",
     "lib": "cross-env NODE_ENV=production webpack",
     "dev-lib": "cross-env NODE_ENV=development webpack",
-    "lint": "prettier --write --config package.json \".{/src/**/,/}*.{md,css,sass,less,json,js,jsx,ts,tsx}\"",
+    "lint": "prettier --write --config package.json \".{/src/**/,/}*.{md,css,scss,less,json,js,jsx,ts,tsx}\"",
     "prebuild": "npm run-script lint",
     "reinstall": "rm -rf node_modules && npm run-script install",
     "start": "npm run-script prebuild && cross-env NODE_ENV=development webpack-dev-server",
@@ -22,13 +22,13 @@
     "zip": "tar --exclude='.gitignore' --exclude='.old_build_files' --exclude='package.json' --exclude='package-lock.json' --exclude='prettier.config.js' --exclude='tsconfig.json' --exclude='tslint.json' --exclude='webpack.config.js' --exclude='yarn.lock' --exclude='demo' --exclude='lib' --exclude='.DS_Store' --exclude='*.log' --exclude='node_modules' --exclude='config.tgz' -czvf config.tgz ./"
   },
   "dependencies": {
-    "@misk/common": "0.1.5-18",
-    "@misk/core": "0.1.5-18",
-    "@misk/simpleredux": "0.1.5-18"
+    "@misk/common": "0.1.5-19",
+    "@misk/core": "0.1.5-19",
+    "@misk/simpleredux": "0.1.5-19"
   },
   "devDependencies": {
-    "@misk/dev": "0.1.5-18",
-    "@misk/tslint": "0.1.5-18"
+    "@misk/dev": "0.1.5-19",
+    "@misk/tslint": "0.1.5-19"
   },
   "prettier": {
     "arrowParens": "avoid",

@@ -12,7 +12,7 @@ import {
   Tooltip
 } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
-import { FlexContainer } from "@misk/core"
+import { FlexContainer, HTTPMethodIntent } from "@misk/core"
 import { onChangeToggleFnCall, simpleSelect } from "@misk/simpleredux"
 import { HTTPMethod } from "http-method-enum"
 import { chain } from "lodash"
@@ -23,7 +23,6 @@ import {
   SendRequestCollapseComponent
 } from "../components"
 import {
-  HTTPMethodIntent,
   IDispatchProps,
   IState,
   IWebActionInternal,
