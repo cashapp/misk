@@ -5,10 +5,16 @@ import {
   FormGroup,
   InputGroup,
   TextArea,
-  Tooltip
+  Tooltip,
+  Intent
 } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
-import { onChangeFnCall, simpleSelect, simpleType } from "@misk/simpleredux"
+import {
+  onChangeFnCall,
+  onChangeToggleFnCall,
+  simpleSelect,
+  simpleType
+} from "@misk/simpleredux"
 import { OrderedSet } from "immutable"
 import uniqueId from "lodash/uniqueId"
 import * as React from "react"
@@ -97,7 +103,40 @@ const RequestFormField = (props: IFieldProps & IState & IDispatchProps) => {
   const { field, id, nestPath, tag } = props
   const { name, type } = field
   if (BaseFieldTypes.hasOwnProperty(type)) {
-    if (BaseFieldTypes[type] === TypescriptBaseTypes.number) {
+    if (BaseFieldTypes[type] === TypescriptBaseTypes.boolean) {
+      return (
+        <ControlGroup>
+          <Tooltip content={type}>
+            <Button>{name}</Button>
+          </Tooltip>
+          <RepeatableFieldButton {...props} id={id} nestPath={nestPath} />
+          <Button
+            intent={
+              simpleSelect(
+                props.simpleForm,
+                `${tag}::${nestPath}${id}::Data`,
+                "data",
+                simpleType.boolean
+              )
+                ? Intent.PRIMARY
+                : Intent.WARNING
+            }
+            onClick={onChangeToggleFnCall(
+              props.simpleFormToggle,
+              `${tag}::${nestPath}${id}::Data`,
+              props.simpleForm
+            )}
+          >
+            {simpleSelect(
+              props.simpleForm,
+              `${tag}::${nestPath}${id}::Data`,
+              "data",
+              simpleType.boolean
+            ).toString()}
+          </Button>
+        </ControlGroup>
+      )
+    } else if (BaseFieldTypes[type] === TypescriptBaseTypes.number) {
       return (
         <ControlGroup>
           <Tooltip content={type}>
