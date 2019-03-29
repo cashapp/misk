@@ -45,8 +45,7 @@ const CodeTag = styled(Tag)`
 `
 
 const Header = styled.div`
-  display: block;
-  height: 36px;
+  display: inline-block;
 `
 
 const Column = styled.div`
@@ -221,9 +220,7 @@ const WebAction = (
               {...props}
               content={"Application Interceptors"}
               label={`(${props.action.applicationInterceptors.length})`}
-              tag={`${props.tag}::${
-                props.action.pathPattern
-              }::ApplicationInterceptors`}
+              tag={`${props.tag}::ApplicationInterceptors`}
             >
               {props.action.applicationInterceptors.map(i => (
                 <MenuItem text={<Tooltip content={i}>{i}</Tooltip>} />
@@ -233,9 +230,7 @@ const WebAction = (
               {...props}
               content={"Network Interceptors"}
               label={`(${props.action.networkInterceptors.length})`}
-              tag={`${props.tag}::${
-                props.action.pathPattern
-              }::NetworkInterceptors`}
+              tag={`${props.tag}::NetworkInterceptors`}
             >
               {props.action.networkInterceptors.map(i => (
                 <MenuItem text={<Tooltip content={i}>{i}</Tooltip>} />
@@ -245,7 +240,7 @@ const WebAction = (
               {...props}
               content={"Send a Request"}
               label={""}
-              tag={`${props.tag}::${props.action.pathPattern}::Request`}
+              tag={`${props.tag}::Request`}
             >
               <span />
             </MetadataCollapse>
@@ -269,7 +264,11 @@ const WebActions = (
     return (
       <div>
         {props.metadata.map((action: any) => (
-          <WebAction action={action} {...props} />
+          <WebAction
+            {...props}
+            action={action}
+            tag={`${props.tag}::${action.name}${action.pathPattern}`}
+          />
         ))}
       </div>
     )
