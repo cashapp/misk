@@ -10,7 +10,12 @@ import {
   Tag
 } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
-import { CodePreContainer } from "@misk/core"
+import {
+  CodePreContainer,
+  HTTPMethodDispatch,
+  HTTPMethodIntent,
+  HTTPStatusCodeIntent
+} from "@misk/core"
 import {
   onChangeFnCall,
   onChangeToggleFnCall,
@@ -20,14 +25,7 @@ import {
 import { HTTPMethod } from "http-method-enum"
 import * as React from "react"
 import { RequestFormComponent } from "../components"
-import {
-  HTTPMethodDispatch,
-  HTTPMethodIntent,
-  HTTPStatusCodeIntent,
-  IDispatchProps,
-  IState,
-  IWebActionInternal
-} from "../ducks"
+import { IDispatchProps, IState, IWebActionInternal } from "../ducks"
 
 /**
  * Collapse wrapped Send a Request form for each Web Action card
