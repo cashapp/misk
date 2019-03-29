@@ -9,6 +9,41 @@ import { HTTPMethod } from "http-method-enum"
 import { chain } from "lodash"
 import { all, AllEffect, call, put, takeLatest } from "redux-saga/effects"
 
+export const enum TypescriptBaseTypes {
+  "boolean" = "boolean",
+  "number" = "number",
+  "string" = "string",
+  "enum" = "enum",
+  "any" = "any",
+  "null" = "null"
+}
+
+export const enum KotlinTypes {
+  "int64" = "int64",
+  "string" = "string"
+}
+
+export interface IBaseFieldTypes {
+  [kotlinType: string]: TypescriptBaseTypes
+}
+
+export const BaseFieldTypes: IBaseFieldTypes = {
+  [KotlinTypes.int64]: TypescriptBaseTypes.number,
+  [KotlinTypes.string]: TypescriptBaseTypes.string
+}
+
+export interface IFieldTypeMetadata {
+  name: string
+  repeated: boolean
+  type: IBaseFieldTypes | any
+}
+
+export interface IActionTypes {
+  [type: string]: {
+    fields: IFieldTypeMetadata[]
+  }
+}
+
 export interface IWebActionAPI {
   allowedServices: string[]
   allowedRoles: string[]
@@ -23,6 +58,8 @@ export interface IWebActionAPI {
   requestMediaTypes: string[]
   responseMediaType: string
   returnType: string
+  requestType: string
+  types: IActionTypes
 }
 
 export interface IWebActionInternal {
@@ -42,6 +79,8 @@ export interface IWebActionInternal {
   requestMediaTypes: string[]
   responseMediaType: string
   returnType: string
+  requestType: string
+  types: IActionTypes
 }
 
 /**
