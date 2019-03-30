@@ -420,6 +420,47 @@ class ReflectionQueryFactoryTest {
     }
   }
 
+  @Test
+  fun deleteFailsWithOrderBy() {
+    transacter.transaction { session ->
+      session.save(DbMovie("Rocky 1", null))
+    }
+
+    assertThat(assertFailsWith<IllegalStateException> {
+      transacter.transaction { session ->
+        queryFactory.newQuery<OperatorsMovieQuery>().releaseDateAsc().delete(session)
+      }
+    }).hasMessageContaining("orderBy shouldn't be used for a delete")
+
+    transacter.transaction { session ->
+      val rocky = queryFactory.newQuery<OperatorsMovieQuery>()
+          .uniqueName(session)
+      assertThat(rocky).isEqualTo("Rocky 1")
+    }
+  }
+
+  @Test
+  fun delete() {
+    transacter.transaction { session ->
+      session.save(DbMovie("Jurassic Park", LocalDate.of(1993, 6, 9)))
+      session.save(DbMovie("Rocky", LocalDate.of(1976, 11, 21)))
+      session.save(DbMovie("Star Wars", LocalDate.of(1977, 5, 25)))
+    }
+
+    val deleted = transacter.transaction { session ->
+      queryFactory.newQuery<OperatorsMovieQuery>()
+          .releaseDateLessThanOrEqualTo(LocalDate.of(1978, 1, 1))
+          .delete(session)
+    }
+    assertThat(deleted).isEqualTo(2)
+
+    transacter.transaction { session ->
+      val jurassicPark = queryFactory.newQuery<OperatorsMovieQuery>()
+          .uniqueName(session)
+      assertThat(jurassicPark).isEqualTo("Jurassic Park")
+    }
+  }
+
   interface OperatorsMovieQuery : Query<DbMovie> {
     @Constraint(path = "release_date", operator = Operator.LT)
     fun releaseDateLessThan(upperBound: LocalDate?): OperatorsMovieQuery
