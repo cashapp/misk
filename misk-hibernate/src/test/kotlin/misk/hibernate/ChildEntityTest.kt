@@ -19,7 +19,6 @@ class ChildEntityTest {
 
   @Test
   fun loadChildEntityByGid() {
-
     transacter.transaction { session ->
       val jp = session.save(DbMovie("Jurassic Park", LocalDate.of(1993, 6, 9)))
       val jg = session.save(DbActor("Jeff Goldblum", LocalDate.of(1952, 10, 22)))
