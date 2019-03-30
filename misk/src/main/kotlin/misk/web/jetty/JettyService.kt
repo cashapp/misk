@@ -64,8 +64,8 @@ class JettyService @Inject internal constructor(
     httpConnector.port = webConfig.port
     httpConnector.idleTimeout = webConfig.idle_timeout
     httpConnector.reuseAddress = true
-    if (webConfig.queueSize != null) {
-      httpConnector.acceptQueueSize = webConfig.queueSize
+    if (webConfig.queue_size != null) {
+      httpConnector.acceptQueueSize = webConfig.queue_size
     }
 
     webConfig.host?.let { httpConnector.host = it }
@@ -109,8 +109,8 @@ class JettyService @Inject internal constructor(
       httpsConnector.port = webConfig.ssl.port
       httpsConnector.idleTimeout = webConfig.idle_timeout
       httpsConnector.reuseAddress = true
-      if (webConfig.queueSize != null) {
-        httpsConnector.acceptQueueSize = webConfig.queueSize
+      if (webConfig.queue_size != null) {
+        httpsConnector.acceptQueueSize = webConfig.queue_size
       }
       webConfig.host?.let { httpsConnector.host = it }
       httpsConnector.addBean(connectionMetricsCollector.newConnectionListener(

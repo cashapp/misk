@@ -143,8 +143,7 @@ class MiskWebModule(private val config: WebConfig) : KAbstractModule() {
 
   @Provides @Singleton
   fun provideJettyThreadPool(): QueuedThreadPool {
-    // TODO(mmihic): Consider tuning
-    return QueuedThreadPool()
+    return config.jetty_max_thread_pool_size?.let { QueuedThreadPool(it) } ?: QueuedThreadPool()
   }
 
   class MiskCallerProvider @Inject constructor(
