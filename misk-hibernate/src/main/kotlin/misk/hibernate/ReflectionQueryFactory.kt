@@ -55,6 +55,21 @@ internal class ReflectionQuery<T : DbEntity<T>>(
     return list.firstOrNull()
   }
 
+  override fun delete(session: Session): Int {
+    check(orderFactories.size == 0) { "orderBy shouldn't be used for a delete" }
+
+    val criteriaBuilder = session.hibernateSession.criteriaBuilder
+    val query = criteriaBuilder.createCriteriaDelete(rootEntityType.java)
+    val queryRoot = query.from(rootEntityType.java)
+
+    val predicate = buildWherePredicate(queryRoot, criteriaBuilder)
+    query.where(predicate)
+
+    return session.hibernateSession
+        .createQuery(query)
+        .executeUpdate()
+  }
+
   override fun list(session: Session): List<T> {
     return select(true, session)
   }

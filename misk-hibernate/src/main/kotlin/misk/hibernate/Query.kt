@@ -11,6 +11,11 @@ interface Query<T> {
 
   fun list(session: Session): List<T>
 
+  /**
+   * the number of entities deleted
+   */
+  fun delete(session: Session): Int
+
   /** Creates instances of queries. */
   interface Factory {
     fun <T : Query<*>> newQuery(queryClass: KClass<T>): T
