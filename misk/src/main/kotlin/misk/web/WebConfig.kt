@@ -12,7 +12,8 @@ data class WebConfig(
   val ssl: WebSslConfig? = null,
   val selectors: Int? = null,
   val acceptors: Int? = null,
-  val queueSize: Int? = null,
+  val queue_size: Int? = null,
+  val jetty_max_thread_pool_size: Int? = null,
   val action_exception_log_level: ActionExceptionLogLevelConfig = ActionExceptionLogLevelConfig()
 ) : Config
 
