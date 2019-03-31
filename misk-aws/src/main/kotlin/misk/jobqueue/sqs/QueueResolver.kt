@@ -5,6 +5,7 @@ import com.amazonaws.services.sqs.model.GetQueueUrlRequest
 import misk.cloud.aws.AwsAccountId
 import misk.cloud.aws.AwsRegion
 import misk.jobqueue.QueueName
+import misk.logging.getLogger
 import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -32,17 +33,20 @@ internal class QueueResolver @Inject internal constructor(
     val sqsQueueName = queueConfig.sqs_queue_name?.let { QueueName(it) } ?: q
     val region = queueConfig.region?.let { AwsRegion(it) } ?: currentRegion
     val accountId = queueConfig.account_id?.let { AwsAccountId(it) } ?: currentAccount
-
     val sqs = if (region == currentRegion) defaultSQS else crossRegionSQS[region]
 
     checkNotNull(sqs) { "could not find SQS client for ${region.name}" }
 
-    val queueUrl = sqs.getQueueUrl(GetQueueUrlRequest().apply {
-      queueName = sqsQueueName.value
-      queueOwnerAWSAccountId = accountId.value
-    }).queueUrl
+    try {
+      val queueUrl = sqs.getQueueUrl(GetQueueUrlRequest().apply {
+        queueName = sqsQueueName.value
+        queueOwnerAWSAccountId = accountId.value
+      }).queueUrl
 
-    return ResolvedQueue(q, sqsQueueName, queueUrl, accountId, sqs)
+      return ResolvedQueue(q, sqsQueueName, queueUrl, accountId, sqs)
+    } catch (ex: Exception) {
+      throw IllegalStateException("could not resolve ${sqsQueueName.value} in ${accountId.value}:${region.name} as ${q.value}", ex)
+    }
   }
 
   private fun resolveDeadLetterQueue(q: QueueName): ResolvedQueue {
@@ -54,6 +58,10 @@ internal class QueueResolver @Inject internal constructor(
     }).queueUrl
 
     return ResolvedQueue(q, sqsQueueName, queueUrl, parentQueue.accountId, parentQueue.client)
+  }
+
+  companion object {
+    private val log = getLogger<QueueResolver>()
   }
 }
 
