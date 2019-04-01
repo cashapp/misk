@@ -1,6 +1,31 @@
 version: 2.1
 jobs:
-  java:
+  java-non-hibernate:
+    machine:
+      image: circleci/classic:latest
+    working_directory: ~/misk
+    steps:
+      - checkout # check out source code to working directory
+      - run:
+          name: "Download and extract OpenJDK 11"
+          command: "mkdir -p ~/openjdk-11 && cd ~/openjdk-11 && curl -sSL https://download.java.net/java/GA/jdk11/9/GPL/openjdk-11.0.2_linux-x64_bin.tar.gz | tar -xz --strip-components 1"
+      - run:
+          name: "Set environment variables"
+          command: |
+            echo '
+              export PATH="$JAVA_HOME/bin:$PATH"
+              export JAVA_HOME="$HOME/openjdk-11"
+              export ENVIRONMENT=TESTING
+              # Not sure if this actually gets applied on the daemon
+              export GRADLE_OPTS=-Xmx4096m
+            ' >> $BASH_ENV
+      - run:
+          name: "Dump environment variables"
+          command: env
+      - run:
+          name: "Build and test"
+          command: ./gradlew testShardNonHibernate -i --scan --parallel --build-cache
+  java-hibernate:
     machine:
       image: circleci/classic:latest
     working_directory: ~/misk
@@ -30,7 +55,7 @@ jobs:
           command: docker run -d -p 3306:3306 --name mysql -e MYSQL_ALLOW_EMPTY_PASSWORD=1 mysql:5.7
       - run:
           name: "Build and test"
-          command: ./gradlew test -i --scan --parallel --build-cache
+          command: ./gradlew testShardHibernate -i --scan --parallel --build-cache
   node:
     working_directory: ~/misk
     docker:
@@ -42,11 +67,13 @@ workflows:
   version: 2
   on_commit:
     jobs:
-      - java
+      - java-non-hibernate
+      - java-hibernate
       - node
   nightly:
     jobs:
-      - java
+      - java-non-hibernate
+      - java-hibernate
       - node
     triggers:
       - schedule:

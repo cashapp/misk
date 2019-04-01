@@ -16,6 +16,20 @@ ext {
 
 apply from: file("./dependencies.gradle")
 
+tasks.register("testShardNonHibernate") {
+  group = "Continuous integration"
+  description = "Runs all tests that don't depend on misk-hibernate. " +
+          "This target is intended for manually sharding tests to make CI faster."
+}
+
+// Runs all tests that depend on misk-hibernate
+// This target is intended for manually sharding tests to make CI faster.
+tasks.register("testShardHibernate") {
+  group = "Continuous integration"
+  description = "Runs all tests that depend on misk-hibernate. " +
+          "This target is intended for manually sharding tests to make CI faster."
+}
+
 subprojects {
   apply plugin: "java"
   apply plugin: 'kotlin'
@@ -64,5 +78,10 @@ subprojects {
   if (rootProject.file("hooks.gradle").exists()) {
     apply from: rootProject.file("hooks.gradle")
   }
-}
 
+  if (["misk-aws","misk-events","misk-jobqueue","misk-hibernate","misk-hibernate-testing"].contains(name)) {
+    rootProject.getTasksByName("testShardHibernate", false)[0].dependsOn.add(test)
+  } else {
+    rootProject.getTasksByName("testShardNonHibernate", false)[0].dependsOn.add(test)
+  }
+}
