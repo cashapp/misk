@@ -46,13 +46,22 @@ class RealCipher internal constructor(
   private val aead = AeadFactory.getPrimitive(keysetHandle)
 
   override fun encrypt(plaintext: ByteString): ByteString {
-    val encrypted = aead.encrypt(plaintext.toByteArray(), null)
+    // .toByteArray() creates a copy of the receiver ByteString.
+    val plaintextBytes = plaintext.toByteArray()
+    val encrypted = aead.encrypt(plaintextBytes, null)
+    // We want to make sure this code doesn't leave behind any unnecessary copies of the plaintext.
+    // So before retuning, make sure we override the extra copy of the plaintext with 0's.
+    plaintextBytes.fill(0)
     return encrypted.toByteString()
   }
 
   override fun decrypt(ciphertext: ByteString): ByteString {
-    val decrypted = aead.decrypt(ciphertext.toByteArray(), null)
-    return decrypted.toByteString()
+    val decryptedBytes = aead.decrypt(ciphertext.toByteArray(), null)
+    // .toByteString() creates a copy of the receiver object
+    val decrypted = decryptedBytes.toByteString()
+    // Make sure we don't leave any unnecessary copies of the decrypted data laying around.
+    decryptedBytes.fill(0)
+    return decrypted
   }
 
   override val keyInfo: KeyInfo

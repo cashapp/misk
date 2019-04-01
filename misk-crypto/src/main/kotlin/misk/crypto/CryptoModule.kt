@@ -1,7 +1,6 @@
 package misk.crypto
 
 import com.google.crypto.tink.Aead
-import com.google.crypto.tink.BinaryKeysetReader
 import com.google.crypto.tink.JsonKeysetReader
 import com.google.crypto.tink.KeysetHandle
 import com.google.crypto.tink.KmsClient
@@ -9,7 +8,6 @@ import com.google.crypto.tink.aead.AeadConfig
 import com.google.inject.name.Names
 import misk.config.Secret
 import misk.inject.KAbstractModule
-import java.util.Base64
 
 /**
  * Configures and registers the keys listed in the configuration file.
