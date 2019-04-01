@@ -22,8 +22,6 @@ tasks.register("testShardNonHibernate") {
           "This target is intended for manually sharding tests to make CI faster."
 }
 
-// Runs all tests that depend on misk-hibernate
-// This target is intended for manually sharding tests to make CI faster.
 tasks.register("testShardHibernate") {
   group = "Continuous integration"
   description = "Runs all tests that depend on misk-hibernate. " +
@@ -80,8 +78,8 @@ subprojects {
   }
 
   if (["misk-aws","misk-events","misk-jobqueue","misk-hibernate","misk-hibernate-testing"].contains(name)) {
-    rootProject.getTasksByName("testShardHibernate", false)[0].dependsOn.add(test)
+    rootProject.getTasksByName("testShardHibernate", false).first().dependsOn.add(test)
   } else {
-    rootProject.getTasksByName("testShardNonHibernate", false)[0].dependsOn.add(test)
+    rootProject.getTasksByName("testShardNonHibernate", false).first().dependsOn.add(test)
   }
 }

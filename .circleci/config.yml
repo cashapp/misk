@@ -1,8 +1,9 @@
 version: 2.1
 jobs:
-  java-non-hibernate:
+  java:
     machine:
       image: circleci/classic:latest
+    parallelism: 2
     working_directory: ~/misk
     steps:
       - checkout # check out source code to working directory
@@ -23,39 +24,25 @@ jobs:
           name: "Dump environment variables"
           command: env
       - run:
-          name: "Build and test"
-          command: ./gradlew testShardNonHibernate -i --scan --parallel --build-cache
-  java-hibernate:
-    machine:
-      image: circleci/classic:latest
-    working_directory: ~/misk
-    steps:
-      - checkout # check out source code to working directory
-      - run:
-          name: "Download and extract OpenJDK 11"
-          command: "mkdir -p ~/openjdk-11 && cd ~/openjdk-11 && curl -sSL https://download.java.net/java/GA/jdk11/9/GPL/openjdk-11.0.2_linux-x64_bin.tar.gz | tar -xz --strip-components 1"
-      - run:
-          name: "Set environment variables"
-          command: |
-            echo '
-              export PATH="$JAVA_HOME/bin:$PATH"
-              export JAVA_HOME="$HOME/openjdk-11"
-              export ENVIRONMENT=TESTING
-              # Not sure if this actually gets applied on the daemon
-              export GRADLE_OPTS=-Xmx4096m
-            ' >> $BASH_ENV
-      - run:
-          name: "Dump environment variables"
-          command: env
-      - run:
-          name: "Start MySQL"
+          name: "Start MySQL if needed"
           # There's a race condition here, where it's possible that MySQL hasn't finished starting
           # up before we try to connect to it. But Kotlin builds are so damn slow it'll never
           # happen in practice.
-          command: docker run -d -p 3306:3306 --name mysql -e MYSQL_ALLOW_EMPTY_PASSWORD=1 mysql:5.7
+          command: |
+            # Only run MySQL for the hibernate tests.
+            if [ "$CIRCLE_NODE_INDEX" -eq 1 ]; then
+              docker run -d -p 3306:3306 --name mysql -e MYSQL_ALLOW_EMPTY_PASSWORD=1 mysql:5.7
+            else
+              echo "Not starting MySQL"
+            fi
       - run:
           name: "Build and test"
-          command: ./gradlew testShardHibernate -i --scan --parallel --build-cache
+          command: |
+            if [ "$CIRCLE_NODE_INDEX" -eq 1 ]; then
+              ./gradlew testShardHibernate -i --scan --parallel --build-cache
+            else
+              ./gradlew testShardNonHibernate -i --scan --parallel --build-cache
+            fi
   node:
     working_directory: ~/misk
     docker:
@@ -67,13 +54,11 @@ workflows:
   version: 2
   on_commit:
     jobs:
-      - java-non-hibernate
-      - java-hibernate
+      - java
       - node
   nightly:
     jobs:
-      - java-non-hibernate
-      - java-hibernate
+      - java
       - node
     triggers:
       - schedule:
