@@ -1,7 +1,6 @@
 package misk.hibernate
 
 import com.google.common.base.CaseFormat
-import misk.jdbc.uniqueString
 import org.hibernate.SessionFactory
 import org.hibernate.boot.Metadata
 import org.hibernate.mapping.Column
@@ -164,23 +163,27 @@ internal class SchemaValidator {
 
     for ((dbColumn, hibernateColumn) in intersectionPairs) {
       withDeclaration(hibernateColumn.snakeCaseName) {
-        validateColumns(dbColumn, hibernateColumn)
+        validateColumns(dbTable, dbColumn, hibernateColumn)
       }
     }
   }
 
-  private fun validateColumns(dbColumn: ColumnDeclaration, hibernateColumn: ColumnDeclaration) {
+  private fun validateColumns(
+    dbTable: TableDeclaration,
+    dbColumn: ColumnDeclaration,
+    hibernateColumn: ColumnDeclaration
+  ) {
     validate(dbColumn.snakeCaseName == dbColumn.name) {
-      "Column ${dbColumn.name} should be in lower_snake_case"
+      "Column ${dbTable.name}.${dbColumn.name} should be in lower_snake_case"
     }
     validate(dbColumn.name == hibernateColumn.name) {
-      "Column ${dbColumn.name} should exactly match hibernate ${hibernateColumn.name}"
+      "Column ${dbTable.name}.${dbColumn.name} should exactly match hibernate ${hibernateColumn.name}"
     }
 
     // We have that the hibernate column only needs to be null if the database is null.
     // It's okay if hibernate is more strict. However, we shouldn't care that much if the column has a default value
     validate(dbColumn.nullable || !hibernateColumn.nullable || dbColumn.hasDefaultValue) {
-      "Column ${dbColumn.name} is NOT NULL in database but ${hibernateColumn.name} is nullable in hibernate"
+      "Column ${dbTable.name}.${dbColumn.name} is NOT NULL in database but ${hibernateColumn.name} is nullable in hibernate"
     }
   }
 
