@@ -17,7 +17,7 @@ In one of your app's module files:
 ```$kotlin
 class MyAppModule : KAbstractModule {
   override fun configure() {
-    val kmsClient = AwsKmsClient().withDefaultCredentials()
+    install(AwsKmsClientModule()) // will provide an AWS client with default credentials
     install(CryptoModule(kmsClient, cryptoConfig))
   }
 }
