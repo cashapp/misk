@@ -37,20 +37,21 @@ class HibernateTestingModule(
     val transacterKey = Transacter::class.toKey(qualifier)
     val transacterProvider = getProvider(transacterKey)
 
-    if ((config == null || config.type == DataSourceType.VITESS)
-      && !disableCrossShardQueryDetector) {
+    val useVitessChecks = ((config == null || config.type == DataSourceType.VITESS)
+        && !disableCrossShardQueryDetector)
+    if (useVitessChecks) {
       bindVitessChecks()
     }
 
     multibind<Service>().to(truncateTablesServiceKey)
     bind(truncateTablesServiceKey).toProvider(object : Provider<TruncateTablesService> {
-      @Inject(optional = true) var checks: VitessScaleSafetyChecks? = null
+      @Inject(optional = true) var vitessScaleSafetyChecks: VitessScaleSafetyChecks? = null
 
       override fun get(): TruncateTablesService = TruncateTablesService(
         qualifier = qualifier,
         config = configProvider.get(),
         transacterProvider = transacterProvider,
-        checks = checks,
+        vitessScaleSafetyChecks = if (useVitessChecks) vitessScaleSafetyChecks else null,
         startUpStatements = startUpStatements,
         shutDownStatements = shutDownStatements
       )
