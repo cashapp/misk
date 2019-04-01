@@ -251,18 +251,31 @@ export const RequestFormComponent = (
   props: { action: IWebActionInternal; tag: string } & IState & IDispatchProps
 ) => {
   const { requestType, types } = props.action
-  const { fields } = types[requestType]
-  return (
-    <div>
-      {fields.map((field: IFieldTypeMetadata) => (
-        <RequestFormFields
-          {...props}
-          field={field}
-          id={0}
-          nestPath={"/"}
-          types={types}
-        />
-      ))}
-    </div>
-  )
+  if (requestType && types && types[requestType] && types[requestType].fields) {
+    const { fields } = types[requestType]
+    return (
+      <div>
+        {fields.map((field: IFieldTypeMetadata) => (
+          <RequestFormFields
+            {...props}
+            field={field}
+            id={0}
+            nestPath={"/"}
+            types={types}
+          />
+        ))}
+      </div>
+    )
+  } else {
+    const { tag } = props
+    return (
+      <TextArea
+        fill={true}
+        onChange={onChangeFnCall(props.simpleFormInput, `${tag}::Body`)}
+        placeholder={
+          "Request Body (JSON or Text).\nDrag bottom right corner of text area input to expand."
+        }
+      />
+    )
+  }
 }

@@ -254,12 +254,12 @@ function* handleMetadata() {
             ? "All"
             : "None"
         const allowedRoles =
-          action.allowedRoles.length > 0
+          action.allowedRoles && action.allowedRoles.length > 0
             ? action.allowedRoles.join(", ")
             : emptyAllowedArrayValue
 
         const allowedServices =
-          action.allowedServices.length > 0
+          action.allowedServices && action.allowedServices.length > 0
             ? action.allowedServices.join(", ")
             : emptyAllowedArrayValue
 
