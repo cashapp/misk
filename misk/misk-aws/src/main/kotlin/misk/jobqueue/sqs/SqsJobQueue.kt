@@ -28,26 +28,28 @@ internal class SqsJobQueue @Inject internal constructor(
       try {
         val queue = queues[queueName]
 
-        queue.client.sendMessage(SendMessageRequest().apply {
-          queueUrl = queue.url
-          messageBody = body
-          if (deliveryDelay != null) delaySeconds = (deliveryDelay.toMillis() / 1000).toInt()
-          attributes.forEach { (key, value) ->
-            addMessageAttributesEntry(key, MessageAttributeValue()
-                .withDataType("String")
-                .withStringValue(value))
-          }
+        queue.call { client ->
+          client.sendMessage(SendMessageRequest().apply {
+            queueUrl = queue.url
+            messageBody = body
+            if (deliveryDelay != null) delaySeconds = (deliveryDelay.toMillis() / 1000).toInt()
+            attributes.forEach { (key, value) ->
+              addMessageAttributesEntry(key, MessageAttributeValue()
+                  .withDataType("String")
+                  .withStringValue(value))
+            }
 
-          // Save the original trace id, if we can determine it
-          // TODO(mmihic): Should put this case somewhere in the tracing modules
-          (span as? com.uber.jaeger.Span)?.let {
-            addMessageAttributesEntry(
-                SqsJob.ORIGINAL_TRACE_ID_ATTR,
-                MessageAttributeValue()
-                    .withDataType("String")
-                    .withStringValue(it.context().traceId.toString()))
-          }
-        })
+            // Save the original trace id, if we can determine it
+            // TODO(mmihic): Should put this case somewhere in the tracing modules
+            (span as? com.uber.jaeger.Span)?.let {
+              addMessageAttributesEntry(
+                  SqsJob.ORIGINAL_TRACE_ID_ATTR,
+                  MessageAttributeValue()
+                      .withDataType("String")
+                      .withStringValue(it.context().traceId.toString()))
+            }
+          })
+        }
       } catch (th: Throwable) {
         log.error(th) { "failed to enqueue to ${queueName.value}" }
         metrics.jobEnqueueFailures.labels(queueName.value).inc()

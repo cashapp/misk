@@ -20,7 +20,7 @@ internal class SqsJob(
   private val queue: ResolvedQueue = queues[queueName]
 
   override fun acknowledge() {
-    queue.client.deleteMessage(queue.url, message.receiptHandle)
+    queue.call { it.deleteMessage(queue.url, message.receiptHandle) }
     metrics.jobsAcknowledged.labels(queueName.value).inc()
   }
 
@@ -28,16 +28,17 @@ internal class SqsJob(
     if (queueName.isDeadLetterQueue) return
 
     val dlq = queues[queueName.deadLetterQueue]
-    dlq.client.sendMessage(SendMessageRequest()
-        .withQueueUrl(dlq.url)
-        .withMessageBody(body)
-        .withMessageAttributes(message.messageAttributes))
-    queue.client.deleteMessage(queue.url, message.receiptHandle)
+    dlq.call { client ->
+      client.sendMessage(SendMessageRequest()
+          .withQueueUrl(dlq.url)
+          .withMessageBody(body)
+          .withMessageAttributes(message.messageAttributes))
+    }
+    queue.call { it.deleteMessage(queue.url, message.receiptHandle) }
     metrics.jobsDeadLettered.labels(queueName.value).inc()
   }
 
   companion object {
     const val ORIGINAL_TRACE_ID_ATTR = "x-original-trace-id"
-    const val APPROX_RECEIVE_COUNT_ATTR = "ApproximateReceiveCount"
   }
 }

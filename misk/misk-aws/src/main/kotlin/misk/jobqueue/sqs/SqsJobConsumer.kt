@@ -64,18 +64,18 @@ internal class SqsJobConsumer @Inject internal constructor(
     private val handler: JobHandler
   ) : Runnable, JobConsumer.Subscription {
     private val queue = queues[queueName]
-    private val sqs = queue.client
-    private val queueUrl = queue.url
     private val running = AtomicBoolean(true)
 
     override fun run() {
       while (running.get()) {
-        val messages = sqs.receiveMessage(ReceiveMessageRequest()
-            .withAttributeNames("All")
-            .withMessageAttributeNames("All")
-            .withQueueUrl(queueUrl)
-            .withMaxNumberOfMessages(10))
-            .messages
+        val messages = queue.call { client ->
+          client.receiveMessage(ReceiveMessageRequest()
+              .withAttributeNames("All")
+              .withMessageAttributeNames("All")
+              .withQueueUrl(queue.url)
+              .withMaxNumberOfMessages(10))
+              .messages
+        }
 
         messages.map { SqsJob(queueName, queues, metrics, it) }.forEach { message ->
           dispatchThreadPool.submit {
