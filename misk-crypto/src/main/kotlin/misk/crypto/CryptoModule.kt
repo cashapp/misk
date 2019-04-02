@@ -10,7 +10,6 @@ import com.google.inject.Provider
 import com.google.inject.name.Names
 import misk.config.Secret
 import misk.inject.KAbstractModule
-import misk.inject.asSingleton
 
 /**
  * Configures and registers the keys listed in the configuration file.
@@ -26,7 +25,6 @@ class CryptoModule(
     check(!(config.gcp_key_uri == null && config.aws_kms_key_alias == null))
     AeadConfig.register()
 
-    bind<KeyManager>().asSingleton()
     config.keys?.forEach { key ->
       val keyUri = config.gcp_key_uri ?: "aws-kms://alias/${config.aws_kms_key_alias}"
       bind<Cipher>()
