@@ -18,7 +18,7 @@ In one of your app's module files:
 class MyAppModule : KAbstractModule {
   override fun configure() {
     install(AwsKmsClientModule()) // will provide an AWS client with default credentials
-    install(CryptoModule(kmsClient, cryptoConfig))
+    install(CryptoModule(cryptoConfig))
   }
 }
 ```
