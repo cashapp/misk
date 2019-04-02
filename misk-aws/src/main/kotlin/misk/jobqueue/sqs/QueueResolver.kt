@@ -42,18 +42,21 @@ internal class QueueResolver @Inject internal constructor(
       queueOwnerAWSAccountId = accountId.value
     }).queueUrl
 
-    return ResolvedQueue(q, sqsQueueName, queueUrl, accountId, sqs)
+    return ResolvedQueue(q, sqsQueueName, queueUrl, region, accountId, sqs)
   }
 
   private fun resolveDeadLetterQueue(q: QueueName): ResolvedQueue {
     val parentQueue = resolve(q.parentQueue)
     val sqsQueueName = QueueName(parentQueue.sqsQueueName.value + deadLetterQueueSuffix)
-    val queueUrl = parentQueue.client.getQueueUrl(GetQueueUrlRequest().apply {
-      queueName = sqsQueueName.value
-      queueOwnerAWSAccountId = parentQueue.accountId.value
-    }).queueUrl
+    val queueUrl = parentQueue.call { client ->
+      client.getQueueUrl(GetQueueUrlRequest().apply {
+        queueName = sqsQueueName.value
+        queueOwnerAWSAccountId = parentQueue.accountId.value
+      })
+    }.queueUrl
 
-    return ResolvedQueue(q, sqsQueueName, queueUrl, parentQueue.accountId, parentQueue.client)
+    return ResolvedQueue(
+        q, sqsQueueName, queueUrl, parentQueue.region, parentQueue.accountId, parentQueue.client)
   }
 }
 
