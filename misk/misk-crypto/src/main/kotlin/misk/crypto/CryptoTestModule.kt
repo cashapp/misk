@@ -5,6 +5,7 @@ import com.google.crypto.tink.aead.AeadConfig
 import com.google.crypto.tink.aead.AeadKeyTemplates
 import com.google.inject.name.Names
 import misk.inject.KAbstractModule
+import misk.inject.asSingleton
 
 /**
  * This module should be used for testing purposes only.
@@ -21,13 +22,11 @@ class CryptoTestModule(
 
   override fun configure() {
     AeadConfig.register()
-    val keyManager = KeyManager()
-    bind<KeyManager>().toInstance(keyManager)
+    bind<KeyManager>().asSingleton()
     val masterKey = FakeKmsClient().getAead(config.gcp_key_uri ?: config.aws_kms_key_alias)
     config.keys?.forEach { key ->
       val keysetHandle = KeysetHandle.generateNew(AeadKeyTemplates.AES256_GCM)
       val cipher = RealCipher(keysetHandle, masterKey)
-      keyManager[key.key_name] = cipher
       bind<Cipher>().annotatedWith(Names.named(key.key_name)).toInstance(cipher)
     }
   }

@@ -6,6 +6,7 @@ import com.google.crypto.tink.aead.AeadConfig
 import com.google.crypto.tink.aead.AeadKeyTemplates
 import com.google.inject.CreationException
 import com.google.inject.Guice
+import com.google.inject.name.Names
 import misk.config.Secret
 import misk.testing.MiskTest
 import org.assertj.core.api.Assertions.assertThat
@@ -26,23 +27,25 @@ class CryptoModuleTest {
     val encryptedKey = generateEncryptedKey(keyHandle)
     val key = Key("test", encryptedKey)
     val config = CryptoConfig(listOf(key), "test_master_key")
-    val injector = Guice.createInjector(CryptoModule(config, FakeKmsClient()))
+    val injector = Guice.createInjector(CryptoTestModule(), CryptoModule(config))
     val keyManager = injector.getInstance(KeyManager::class.java)
     val testKey = keyManager["test"]
     assertThat(testKey).isNotNull()
+    val cipher = injector.getInstance(com.google.inject.Key.get(Cipher::class.java, Names.named("test")))
+    assertThat(cipher).isNotNull()
   }
 
   @Test
   fun testInvalidConfig() {
     val config = CryptoConfig(listOf(), "AWS master key alias", "GCP master key URI")
-    assertThatThrownBy { Guice.createInjector(CryptoModule(config, FakeKmsClient())) }
+    assertThatThrownBy { Guice.createInjector(CryptoTestModule(), CryptoModule(config)) }
         .isInstanceOf(CreationException::class.java)
   }
 
   @Test
   fun testMissingMasterKey() {
     val config = CryptoConfig(listOf())
-    assertThatThrownBy { Guice.createInjector(CryptoModule(config, FakeKmsClient())) }
+    assertThatThrownBy { Guice.createInjector(CryptoTestModule(), CryptoModule(config)) }
         .isInstanceOf(CreationException::class.java)
   }
 
