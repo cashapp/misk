@@ -3,6 +3,7 @@ package misk.client
 import com.google.inject.Inject
 import com.google.inject.Key
 import com.google.inject.Provider
+import com.google.inject.name.Names
 import com.squareup.moshi.Moshi
 import io.opentracing.Tracer
 import misk.inject.KAbstractModule
@@ -18,16 +19,17 @@ class TypedHttpClientModule<T : Any>(
   private val name: String,
   private val annotation: Annotation? = null
 ) : KAbstractModule() {
+  private val httpClientAnnotation = annotation ?: Names.named(kclass.qualifiedName)
+
   override fun configure() {
     // Initialize empty sets for our multibindings.
     newMultibinder<ClientNetworkInterceptor.Factory>()
     newMultibinder<ClientApplicationInterceptor.Factory>()
 
     // Install raw HTTP client support
-    install(HttpClientModule(name, annotation))
+    install(HttpClientModule(name, httpClientAnnotation))
 
-    val httpClientKey = if (annotation == null) Key.get(OkHttpClient::class.java)
-    else Key.get(OkHttpClient::class.java, annotation)
+    val httpClientKey = Key.get(OkHttpClient::class.java, httpClientAnnotation)
 
     val httpClientProvider = binder().getProvider(httpClientKey)
     val key = if (annotation == null) Key.get(kclass.java) else Key.get(kclass.java, annotation)
