@@ -18,6 +18,7 @@ dependencies {
   compile dep.openTracingJdbc
   compile dep.vitess
   compile project(':misk')
+  compile project(':misk-crypto')
 
   testCompile project(':misk-testing')
   testCompile project(':misk-hibernate-testing')
