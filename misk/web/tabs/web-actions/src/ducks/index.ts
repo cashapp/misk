@@ -9,6 +9,7 @@ import {
   ISimpleNetworkState,
   SimpleFormReducer,
   SimpleNetworkReducer,
+  simpleRootRawSelector,
   simpleRootSelector,
   watchSimpleFormSagas,
   watchSimpleNetworkSagas
@@ -35,10 +36,11 @@ export * from "./webActions"
  * Redux Store State
  */
 export interface IState {
-  webActions: IWebActionsState
   router: Reducer<RouterState, LocationChangeAction>
   simpleForm: ISimpleFormState
   simpleNetwork: ISimpleNetworkState
+  webActions: IWebActionsState
+  webActionsRaw: IWebActionsImmutableState
 }
 
 /**
@@ -59,16 +61,20 @@ export const rootDispatcher: IDispatchProps = {
  * State Selectors
  */
 export const rootSelectors = (state: IState) => ({
-  webActions: simpleRootSelector<IState, IWebActionsImmutableState>(
-    "webActions",
-    state
-  ),
   simpleForm: simpleRootSelector<IState, ISimpleFormImmutableState>(
     "simpleForm",
     state
   ),
   simpleNetwork: simpleRootSelector<IState, ISimpleNetworkImmutableState>(
     "simpleNetwork",
+    state
+  ),
+  webActions: simpleRootSelector<IState, IWebActionsImmutableState>(
+    "webActions",
+    state
+  ),
+  webActionsRaw: simpleRootRawSelector<any, IWebActionsImmutableState>(
+    "webActions",
     state
   )
 })
@@ -78,10 +84,11 @@ export const rootSelectors = (state: IState) => ({
  */
 export const rootReducer = (history: History): Reducer<any, AnyAction> =>
   combineReducers({
-    webActions: WebActionsReducer,
     router: connectRouter(history),
     simpleForm: SimpleFormReducer,
-    simpleNetwork: SimpleNetworkReducer
+    simpleNetwork: SimpleNetworkReducer,
+    webActions: WebActionsReducer,
+    webActionsRaw: WebActionsReducer
   })
 
 /**

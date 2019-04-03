@@ -59,6 +59,14 @@ const MetadataMenu = styled(Menu)`
   }
 `
 
+const WrapText = styled.span`
+  white-space: pre-wrap; /* Since CSS 2.1 */
+  white-space: -moz-pre-wrap; /* Mozilla, since 1999 */
+  white-space: -pre-wrap; /* Opera 4-6 */
+  white-space: -o-pre-wrap; /* Opera 7 */
+  word-wrap: break-word; /* Internet Explorer 5.5+ */
+`
+
 /**
  * Used in rendering the Content Types metadata request -> response
  */
@@ -171,7 +179,7 @@ const WebAction = (
     <Card>
       <Header>
         {props.action.dispatchMechanism.map(m => (
-          <MethodTag method={m} />
+          <MethodTag key={m} method={m} />
         ))}
         <FloatLeft>
           <H3>{props.action.name}</H3>
@@ -181,7 +189,7 @@ const WebAction = (
         </FloatLeft>
       </Header>
       {props.action.nonAccessOrTypeFunctionAnnotations.map(a => (
-        <H5>{a}</H5>
+        <H5 key={a}>{a}</H5>
       ))}
       <FlexContainer>
         <Column>
@@ -222,7 +230,7 @@ const WebAction = (
               tag={`${props.tag}::ApplicationInterceptors`}
             >
               {props.action.applicationInterceptors.map(i => (
-                <MenuItem text={<Tooltip content={i}>{i}</Tooltip>} />
+                <MenuItem key={i} text={<WrapText>{i}</WrapText>} />
               ))}
             </MetadataCollapse>
             <MetadataCollapse
@@ -232,7 +240,7 @@ const WebAction = (
               tag={`${props.tag}::NetworkInterceptors`}
             >
               {props.action.networkInterceptors.map(i => (
-                <MenuItem text={<Tooltip content={i}>{i}</Tooltip>} />
+                <MenuItem key={i} text={<WrapText>{i}</WrapText>} />
               ))}
             </MetadataCollapse>
             <MetadataCollapse
