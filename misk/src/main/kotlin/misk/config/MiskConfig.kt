@@ -33,9 +33,10 @@ object MiskConfig {
   inline fun <reified T : Config> load(
     appName: String,
     environment: Environment,
-    overrideFiles: List<File> = listOf()
+    overrideFiles: List<File> = listOf(),
+    resourceLoader: ResourceLoader = ResourceLoader.SYSTEM
   ): T {
-    return load(T::class.java, appName, environment, overrideFiles)
+    return load(T::class.java, appName, environment, overrideFiles, resourceLoader)
   }
 
   @JvmStatic
@@ -43,16 +44,14 @@ object MiskConfig {
     configClass: Class<out Config>,
     appName: String,
     environment: Environment,
-    overrideFiles: List<File> = listOf()
+    overrideFiles: List<File> = listOf(),
+    resourceLoader: ResourceLoader = ResourceLoader.SYSTEM
   ): T {
     check(!Secret::class.java.isAssignableFrom(configClass)) {
       "Top level service config cannot be a Secret<*>"
     }
 
-    val mapper = ObjectMapper(YAMLFactory()).registerModules(
-        KotlinModule(),
-        JavaTimeModule(),
-        SecretJacksonModule())
+    val mapper = newObjectMapper(resourceLoader)
 
     val configYamls = loadConfigYamlMap(appName, environment, overrideFiles)
     check(configYamls.values.any { it != null }) {
@@ -87,14 +86,20 @@ object MiskConfig {
     return if (suggestions.isNotEmpty()) "(Did you mean one of $suggestions?)" else ""
   }
 
-  fun <T : Config> toYaml(config: T): String {
-    val mapper = ObjectMapper(YAMLFactory()).registerModules(
-        KotlinModule(),
-        JavaTimeModule(),
-        SecretJacksonModule())
-    return mapper.writeValueAsString(config)
+  fun <T : Config> toYaml(config: T, resourceLoader: ResourceLoader): String {
+    return newObjectMapper(resourceLoader).writeValueAsString(config)
   }
 
+  private fun newObjectMapper(resourceLoader: ResourceLoader) : ObjectMapper {
+    val mapper = ObjectMapper(YAMLFactory()).registerModules(
+        KotlinModule(),
+        JavaTimeModule())
+
+    // The SecretDeserializer supports deserializing json, so bind last so it can use previous
+    // mappings.
+    mapper.registerModule(SecretJacksonModule(resourceLoader, mapper))
+    return mapper
+  }
   @JvmStatic
   fun filesInDir(
     dir: String,
@@ -158,21 +163,26 @@ object MiskConfig {
   private fun embeddedConfigFileNames(appName: String, environment: Environment) =
       listOf("common", environment.name.toLowerCase()).map { "$appName-$it.yaml" }
 
-  class SecretJacksonModule() : SimpleModule() {
+  class SecretJacksonModule(val resourceLoader: ResourceLoader, val mapper: ObjectMapper) :
+      SimpleModule() {
     override fun setupModule(context: SetupContext?) {
-      addDeserializer(Secret::class.java, SecretDeserializer())
+      addDeserializer(Secret::class.java, SecretDeserializer(resourceLoader, mapper))
       super.setupModule(context)
     }
   }
 
-  private class SecretDeserializer(val type: JavaType? = null) : JsonDeserializer<Secret<*>>(),
+  private class SecretDeserializer(
+    val resourceLoader: ResourceLoader,
+    val mapper: ObjectMapper,
+    val type: JavaType? = null
+  ) : JsonDeserializer<Secret<*>>(),
       ContextualDeserializer {
 
     override fun createContextual(
       deserializationContext: DeserializationContext?,
       property: BeanProperty
     ): JsonDeserializer<*> {
-      return SecretDeserializer(property.type.bindings.getBoundType(0))
+      return SecretDeserializer(resourceLoader, mapper, property.type.bindings.getBoundType(0))
     }
 
     override fun deserialize(
@@ -189,7 +199,7 @@ object MiskConfig {
     }
 
     private fun loadSecret(reference: String, type: JavaType): Any {
-      val source = requireNotNull(ResourceLoader.SYSTEM.utf8(reference)) {
+      val source = requireNotNull(resourceLoader.utf8(reference)) {
         "No secret found at: $reference."
       }
       val referenceFileExtension = Regex(".*\\.([^.]+)$").find(reference)?.groupValues?.get(1) ?: ""
@@ -211,11 +221,6 @@ object MiskConfig {
               "Unknown file extension \"$referenceFileExtension\" for secret [$reference].")
         }
       }
-    }
-
-    companion object {
-      private val mapper =
-          ObjectMapper(YAMLFactory()).registerModules(KotlinModule(), SecretJacksonModule())
     }
   }
 
