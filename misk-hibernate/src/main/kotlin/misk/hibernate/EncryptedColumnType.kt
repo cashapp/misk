@@ -1,6 +1,8 @@
 package misk.hibernate
 
+import misk.crypto.Cipher
 import misk.crypto.KeyManager
+import okio.ByteString
 import org.hibernate.HibernateException
 import org.hibernate.engine.spi.SharedSessionContractImplementor
 import org.hibernate.usertype.ParameterizedType
@@ -10,15 +12,26 @@ import java.sql.PreparedStatement
 import java.sql.ResultSet
 import java.sql.Types
 import java.util.Properties
-import javax.inject.Inject
 import okio.ByteString.Companion.toByteString
+import org.hibernate.type.spi.TypeConfiguration
+import org.hibernate.type.spi.TypeConfigurationAware
 
-internal class EncryptedColumnType : UserType, ParameterizedType {
-  private lateinit var keyName: String
-  @Inject lateinit private var keyManager: KeyManager
+internal class EncryptedColumnType : UserType, ParameterizedType, TypeConfigurationAware {
+  private lateinit var cipher: Cipher
+  private lateinit var _typeConfiguration: TypeConfiguration
+
+  override fun setTypeConfiguration(typeConfiguration: TypeConfiguration) {
+    _typeConfiguration = typeConfiguration
+  }
+
+  override fun getTypeConfiguration(): TypeConfiguration = _typeConfiguration
 
   override fun setParameterValues(parameters: Properties) {
-    keyName = parameters.getProperty("encryptedColumnField")
+    val keyManager = _typeConfiguration.metadataBuildingContext.bootstrapContext.serviceRegistry.injector
+        .getInstance(KeyManager::class.java)
+    val keyName = parameters.getProperty("encryptedColumnField")
+    cipher = keyManager[keyName] ?:
+        throw HibernateException("Cannot set field, key $keyName not found")
   }
 
   override fun hashCode(x: Any?): Int = x.hashCode()
@@ -45,10 +58,7 @@ internal class EncryptedColumnType : UserType, ParameterizedType {
       st.setNull(index, Types.BINARY)
     } else {
       // encrypt the data in set it in the prepared statement
-      val cipher = keyManager[keyName] ?:
-          throw HibernateException("Cannot set field, $keyName not found")
-      val valueBytes = (value as ByteArray).toByteString()
-      val encrypted = cipher.encrypt(valueBytes).toByteArray()
+      val encrypted = cipher.encrypt(value as ByteString).toByteArray()
       st.setBytes(index, encrypted)
     }
   }
@@ -59,8 +69,6 @@ internal class EncryptedColumnType : UserType, ParameterizedType {
     session: SharedSessionContractImplementor?,
     owner: Any?
   ): Any? {
-    val cipher = KeyManager()[keyName] ?:
-        throw HibernateException("Cannot get encrypted field, $keyName not found")
     val result = rs?.getBytes(names[0])?.toByteString()
     return result?.let { cipher.decrypt(it) }
   }
