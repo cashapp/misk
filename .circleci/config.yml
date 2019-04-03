@@ -5,20 +5,20 @@ jobs:
       image: circleci/classic:latest
     parallelism: 2
     working_directory: ~/misk
+    environment:
+      ENVIRONMENT: TESTING
+      JVM_OPTS: -Xmx1024M
+      GRADLE_OPTS: "-Dorg.gradle.daemon=false -Dorg.gradle.workers.max=3 -Xmx4096m"
+      TERM: dumb
     steps:
       - checkout # check out source code to working directory
       - run:
           name: "Download and extract OpenJDK 11"
-          command: "mkdir -p ~/openjdk-11 && cd ~/openjdk-11 && curl -sSL https://download.java.net/java/GA/jdk11/9/GPL/openjdk-11.0.2_linux-x64_bin.tar.gz | tar -xz --strip-components 1"
-      - run:
-          name: "Set environment variables"
           command: |
+            mkdir -p ~/openjdk-11 && cd ~/openjdk-11 && curl -sSL https://download.java.net/java/GA/jdk11/9/GPL/openjdk-11.0.2_linux-x64_bin.tar.gz | tar -xz --strip-components 1
             echo '
               export PATH="$JAVA_HOME/bin:$PATH"
               export JAVA_HOME="$HOME/openjdk-11"
-              export ENVIRONMENT=TESTING
-              # Not sure if this actually gets applied on the daemon
-              export GRADLE_OPTS=-Xmx4096m
             ' >> $BASH_ENV
       - run:
           name: "Dump environment variables"
@@ -43,6 +43,24 @@ jobs:
             else
               ./gradlew testShardNonHibernate -i --scan --parallel --build-cache
             fi
+      - run:
+          name: Collect test results
+          command: |
+            mkdir -p ~/test-results/junit/
+            find . -type f -regex ".*/build/test-results/.*xml" -exec cp {} ~/test-results/junit/ \;
+          when: always
+      - store_test_results:
+          name: Store test results
+          path: ~/test-results
+      - run:
+          name: Collect gradle reports
+          command: |
+            mkdir -p ~/reports/
+            tar cf - */build/reports | (cd ~/reports/; tar xf -)
+          when: always
+      - store_artifacts:
+          name: Store gradle reports
+          path: ~/reports
   node:
     working_directory: ~/misk
     docker:
