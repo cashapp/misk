@@ -2,6 +2,7 @@ package misk.config
 
 import com.google.inject.Inject
 import misk.environment.Environment
+import misk.resources.ResourceLoader
 import misk.web.Get
 import misk.web.RequestContentType
 import misk.web.ResponseContentType
@@ -49,7 +50,7 @@ class ConfigMetadataAction @Inject constructor(
       config: Config
     ): Map<String, String?> {
       val rawYamlFiles = MiskConfig.loadConfigYamlMap(appName, environment, listOf())
-      val yamlFiles = linkedMapOf<String, String?>("Effective Config" to MiskConfig.toYaml(config))
+      val yamlFiles = linkedMapOf<String, String?>("Effective Config" to MiskConfig.toYaml(config, ResourceLoader.SYSTEM))
       rawYamlFiles.map { yamlFiles.put("classpath:/${it.key}", it.value) }
       return yamlFiles
     }
