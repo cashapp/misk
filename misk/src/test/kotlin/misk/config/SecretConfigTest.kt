@@ -3,9 +3,13 @@ package misk.config
 import com.google.inject.util.Modules
 import misk.environment.Environment
 import misk.environment.EnvironmentModule
+import misk.resources.FakeFilesModule
+import misk.resources.ResourceLoader
+import misk.resources.TestingResourceLoaderModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import javax.inject.Inject
@@ -13,16 +17,25 @@ import javax.inject.Named
 
 @MiskTest
 class SecretConfigTest {
-  val environment = Environment.TESTING
-  val config = MiskConfig.load<SuperSecretConfig>("secret_config_app", environment)
+  private val environment = Environment.TESTING
 
   @MiskTestModule
-  val module = Modules.combine(
-      ConfigModule.create("secret_app", config),
-      EnvironmentModule(environment))
+  private val module = Modules.combine(
+      TestingResourceLoaderModule(),
+      FakeFilesModule(mapOf("/misk/resources/secrets/secret_information_values.yaml"
+          to """
+            |answer_to_universe: 42
+            |limit: 5
+          """.trimMargin())))
 
-  @Inject
   private lateinit var secretConfig: SuperSecretConfig
+  @Inject
+  private lateinit var resourceLoader : ResourceLoader
+
+  @BeforeEach
+  fun setConfig() {
+    secretConfig = MiskConfig.load("secret_config_app", Environment.TESTING, listOf(), resourceLoader)
+  }
 
   @Test
   fun topLevelSecretsLoaded() {

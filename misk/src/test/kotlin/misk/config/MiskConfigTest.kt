@@ -3,11 +3,13 @@ package misk.config
 import com.google.inject.util.Modules
 import misk.environment.Environment
 import misk.environment.EnvironmentModule
+import misk.resources.ResourceLoader
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.web.WebConfig
 import misk.web.exceptions.ActionExceptionLogLevelConfig
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.slf4j.event.Level
 import java.io.File
@@ -54,7 +56,7 @@ class MiskConfigTest {
   @Test
   fun friendlyErrorMessagesWhenFilesNotFound() {
     val exception = assertFailsWith<IllegalStateException> {
-      MiskConfig.load<TestConfig>(TestConfig::class.java, "missing", defaultEnv)
+      MiskConfig.load<TestConfig>("missing", defaultEnv)
     }
 
     assertThat(exception).hasMessageContaining("could not find configuration files -" +
@@ -64,7 +66,7 @@ class MiskConfigTest {
   @Test
   fun friendlyErrorMessageWhenConfigPropertyMissing() {
     val exception = assertFailsWith<IllegalStateException> {
-      MiskConfig.load<TestConfig>(TestConfig::class.java, "partial_test_app", defaultEnv)
+      MiskConfig.load<TestConfig>("partial_test_app", defaultEnv)
     }
 
     assertThat(exception).hasMessageContaining(
@@ -74,7 +76,7 @@ class MiskConfigTest {
   @Test
   fun friendlyErrorMessagesWhenFileUnparseable() {
     val exception = assertFailsWith<IllegalStateException> {
-      MiskConfig.load<TestConfig>(TestConfig::class.java, "unparsable", defaultEnv)
+      MiskConfig.load<TestConfig>("unparsable", defaultEnv)
     }
 
     assertThat(exception).hasMessageContaining("could not parse unparsable-common.yaml")
@@ -83,7 +85,7 @@ class MiskConfigTest {
   @Test
   fun friendlyErrorMessagesWhenPropertiesNotFound() {
     val exception = assertFailsWith<IllegalStateException> {
-      MiskConfig.load<TestConfig>(TestConfig::class.java, "unknownproperty", defaultEnv)
+      MiskConfig.load<TestConfig>("unknownproperty", defaultEnv)
     }
 
     assertThat(exception).hasMessageContaining("'consumer_b.blue_items' not found")
@@ -92,7 +94,7 @@ class MiskConfigTest {
   @Test
   fun friendlyErrorMessagesWhenPropertiesMisspelled() {
     val exception = assertFailsWith<IllegalStateException> {
-      MiskConfig.load<TestConfig>(TestConfig::class.java, "misspelledproperty", defaultEnv)
+      MiskConfig.load<TestConfig>("misspelledproperty", defaultEnv)
     }
 
     assertThat(exception).hasMessageContaining("Did you mean")
