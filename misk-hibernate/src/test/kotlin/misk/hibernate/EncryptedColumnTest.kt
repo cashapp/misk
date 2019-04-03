@@ -21,6 +21,7 @@ import javax.persistence.Table
 import okio.ByteString.Companion.toByteString
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import kotlin.test.assertNull
 
 @MiskTest(startService = true)
 class EncryptedColumnTest {
@@ -32,16 +33,37 @@ class EncryptedColumnTest {
   @Inject lateinit var queryFactory: Query.Factory
 
   @Test
-  fun happyPath() {
+  fun testHappyPath() {
+    val title = "Dark Star"
+    val length = 2918 // longest recorded dark star was 47 minutes and 18 seconds
     val album = "Live/Dead".toByteArray().toByteString()
     transacter.transaction { session ->
-      session.save(DbJerryGarciaSong("Dark Star", 2918, album))
+      session.save(DbJerryGarciaSong(title, length, album))
     }
     transacter.transaction { session ->
       val song = queryFactory.newQuery(JerryGarciaSongQuery::class)
           .title("Dark Star")
           .query(session)[0]
+      assertThat(song.title).isEqualTo(title)
+      assertThat(song.length).isEqualTo(length)
       assertThat(song.album).isEqualTo(album)
+    }
+  }
+
+  @Test
+  fun testNullValue() {
+    val title = "Ripple"
+    val length = 165
+    transacter.transaction { session ->
+      session.save(DbJerryGarciaSong(title, length))
+    }
+    transacter.transaction { session ->
+      val song = queryFactory.newQuery(JerryGarciaSongQuery::class)
+          .title("Ripple")
+          .query(session)[0]
+      assertThat(song.title).isEqualTo(title)
+      assertThat(song.length).isEqualTo(length)
+      assertNull(song.album)
     }
   }
 
@@ -62,11 +84,11 @@ class EncryptedColumnTest {
     @Column(nullable = false)
     var length: Int = 0
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     @EncryptedColumn(keyName = "albumKey")
-    var album: ByteString
+    var album: ByteString?
 
-    constructor(title: String, length: Int, album: ByteString) {
+    constructor(title: String, length: Int, album: ByteString? = null) {
       this.title = title
       this.length = length
       this.album = album
@@ -84,7 +106,7 @@ class EncryptedColumnTest {
   data class SongInfo(
     @Property("title") val title: String,
     @Property("length") val length: Int,
-    @Property("album") val album: ByteString
+    @Property("album") val album: ByteString?
   ) : Projection
 
   data class AppConfig(
