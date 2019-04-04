@@ -17,6 +17,9 @@ import org.hibernate.type.spi.TypeConfiguration
 import org.hibernate.type.spi.TypeConfigurationAware
 
 internal class EncryptedColumnType : UserType, ParameterizedType, TypeConfigurationAware {
+  companion object {
+    const val FIELD_ENCRYPTION_KEY_NAME: String = ""
+  }
   private lateinit var cipher: Cipher
   private lateinit var _typeConfiguration: TypeConfiguration
 
@@ -29,7 +32,7 @@ internal class EncryptedColumnType : UserType, ParameterizedType, TypeConfigurat
   override fun setParameterValues(parameters: Properties) {
     val keyManager = _typeConfiguration.metadataBuildingContext.bootstrapContext.serviceRegistry.injector
         .getInstance(KeyManager::class.java)
-    val keyName = parameters.getProperty("encryptedColumnField")
+    val keyName = parameters.getProperty(FIELD_ENCRYPTION_KEY_NAME)
     cipher = keyManager[keyName] ?:
         throw HibernateException("Cannot set field, key $keyName not found")
   }
@@ -57,7 +60,6 @@ internal class EncryptedColumnType : UserType, ParameterizedType, TypeConfigurat
     if (value == null) {
       st.setNull(index, Types.BINARY)
     } else {
-      // encrypt the data in set it in the prepared statement
       val encrypted = cipher.encrypt(value as ByteString).toByteArray()
       st.setBytes(index, encrypted)
     }
@@ -75,6 +77,5 @@ internal class EncryptedColumnType : UserType, ParameterizedType, TypeConfigurat
 
   override fun isMutable() = false
 
-  override fun sqlTypes() = intArrayOf(Types.BINARY)
-
+  override fun sqlTypes() = intArrayOf(Types.BINARY, Types.VARBINARY)
 }

@@ -168,7 +168,7 @@ internal class SessionFactoryService(
       if (value.typeParameters == null) {
         value.typeParameters = Properties()
       }
-      value.typeParameters.setProperty("encryptedColumnField",
+      value.typeParameters.setProperty(EncryptedColumnType.FIELD_ENCRYPTION_KEY_NAME,
           field.getAnnotation(EncryptedColumn::class.java).keyName)
     }
   }
