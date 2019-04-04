@@ -77,5 +77,5 @@ internal class EncryptedColumnType : UserType, ParameterizedType, TypeConfigurat
 
   override fun isMutable() = false
 
-  override fun sqlTypes() = intArrayOf(Types.BINARY, Types.VARBINARY)
+  override fun sqlTypes() = intArrayOf(Types.BINARY)
 }
