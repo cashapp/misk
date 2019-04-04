@@ -27,7 +27,7 @@ class DbMovie() : DbRoot<DbMovie>, DbTimestampedEntity {
   @Column(nullable = true)
   var release_date: LocalDate? = null
 
-  constructor(name: String, releaseDate: LocalDate?) : this() {
+  constructor(name: String, releaseDate: LocalDate? = null) : this() {
     this.name = name
     this.release_date = releaseDate
   }

@@ -53,9 +53,4 @@ class ChildEntityTest {
       }
     }
   }
-
-  interface CharacterQuery : Query<DbCharacter> {
-    @Constraint("name")
-    fun name(name: String): CharacterQuery
-  }
 }
