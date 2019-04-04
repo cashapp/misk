@@ -1,5 +1,34 @@
 version: 2.1
 jobs:
+  compile_and_cache_java:
+    machine:
+      image: circleci/classic:latest
+    working_directory: ~/misk
+    environment:
+      ENVIRONMENT: TESTING
+      JVM_OPTS: -Xmx1024M
+      GRADLE_OPTS: "-Dorg.gradle.daemon=false -Dorg.gradle.workers.max=3 -Xmx4096m"
+      TERM: dumb
+    steps:
+      - checkout
+      - run:
+          name: "Download and extract OpenJDK 11"
+          command: |
+            mkdir -p ~/openjdk-11 && cd ~/openjdk-11 && curl -sSL https://download.java.net/java/GA/jdk11/9/GPL/openjdk-11.0.2_linux-x64_bin.tar.gz | tar -xz --strip-components 1
+            echo '
+              export PATH="$JAVA_HOME/bin:$PATH"
+              export JAVA_HOME="$HOME/openjdk-11"
+            ' >> $BASH_ENV
+      - run:
+          name: "Compile"
+          command: |
+            ./gradlew testClasses --parallel --build-cache
+      - save_cache:
+          paths:
+            - ~/.gradle/caches
+            - ~/.gradle/wrapper
+          # Under normal usage, saves compiled results from master once a day
+          key: v1-master-compile-{{ .BuildNum }}
   java:
     machine:
       image: circleci/classic:latest
@@ -12,6 +41,12 @@ jobs:
       TERM: dumb
     steps:
       - checkout # check out source code to working directory
+      - restore_cache:
+          keys:
+            # restore compilation and wrapper from previous branch/job build or master
+            - v1-{{ .Branch }}-{{ .Environment.CIRCLE_JOB }}-{{ .Environment.CIRCLE_NODE_INDEX }}
+            - v1-{{ .Branch }}-{{ .Environment.CIRCLE_JOB }}
+            - v1-master-compile
       - run:
           name: "Download and extract OpenJDK 11"
           command: |
@@ -49,6 +84,12 @@ jobs:
             mkdir -p ~/test-results/junit/
             find . -type f -regex ".*/build/test-results/.*xml" -exec cp {} ~/test-results/junit/ \;
           when: always
+      - save_cache:
+          paths:
+            - ~/.gradle/caches
+            - ~/.gradle/wrapper
+          # Under normal usage, saves compiled results from master once a day
+          key: v1-{{ .Branch }}-{{ .Environment.CIRCLE_JOB }}-{{ .Environment.CIRCLE_NODE_INDEX }}-build-{{ .BuildNum }}
       - store_test_results:
           name: Store test results
           path: ~/test-results
@@ -72,6 +113,10 @@ workflows:
   version: 2
   on_commit:
     jobs:
+      - compile_and_cache_java:
+          filters:
+            branches:
+              only: master
       - java
       - node
   nightly:
