@@ -1,11 +1,13 @@
 package misk.crypto
 
+import com.google.crypto.tink.Aead
 import com.google.crypto.tink.KeysetHandle
 import com.google.crypto.tink.aead.AeadConfig
 import com.google.crypto.tink.aead.AeadKeyTemplates
 import com.google.inject.name.Names
 import misk.inject.KAbstractModule
-import misk.inject.asSingleton
+import javax.inject.Inject
+import javax.inject.Provider
 
 /**
  * This module should be used for testing purposes only.
@@ -22,12 +24,23 @@ class CryptoTestModule(
 
   override fun configure() {
     AeadConfig.register()
-    bind<KeyManager>().asSingleton()
-    val masterKey = FakeKmsClient().getAead(config.gcp_key_uri ?: config.aws_kms_key_alias)
+
+    val masterKey = FakeKmsClient().getAead(null)
     config.keys?.forEach { key ->
+      bind<Cipher>()
+          .annotatedWith(Names.named(key.key_name))
+          .toProvider(CipherProvider(key.key_name, masterKey))
+          .asEagerSingleton()
+    }
+  }
+
+  private class CipherProvider(val keyName: String, val masterAead: Aead) : Provider<Cipher> {
+    @Inject lateinit var keyManager: KeyManager
+
+    override fun get(): Cipher {
       val keysetHandle = KeysetHandle.generateNew(AeadKeyTemplates.AES256_GCM)
-      val cipher = RealCipher(keysetHandle, masterKey)
-      bind<Cipher>().annotatedWith(Names.named(key.key_name)).toInstance(cipher)
+      return  RealCipher(keysetHandle, masterAead)
+          .also { keyManager[keyName] = it }
     }
   }
 }
