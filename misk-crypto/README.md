@@ -36,7 +36,11 @@ Then, to specify a new `Cipher` key called "myKey", add the following in your ap
 crypto:
   keys:
     - key_name: "my_payment_token_key"
-      encrypted_kek: [key encrypted using the same KMS used by the app encoded in base64] 
+      details:
+        - json_key_spec: [path to json file containing key information from step above]
+          aws_kms_key_alias: primaryKekAlias # will be translated to "aws-kms://alias/$keyAlias"
+        - json_key_spec: [path to json file containing key information from step above]
+          aws_kms_key_alias: secondaryKekAlias
 ``` 
 Using a key
 -----
