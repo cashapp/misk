@@ -26,7 +26,7 @@ class CryptoTestModule(
     AeadConfig.register()
 
     val masterKey = FakeKmsClient().getAead(null)
-    config.keys?.forEach { key ->
+    config.keys.forEach { key ->
       bind<Cipher>()
           .annotatedWith(Names.named(key.key_name))
           .toProvider(CipherProvider(key.key_name, masterKey))

@@ -3,6 +3,7 @@ package misk.crypto
 import com.google.crypto.tink.Aead
 import com.google.crypto.tink.JsonKeysetWriter
 import com.google.crypto.tink.KeysetHandle
+import com.google.crypto.tink.aead.AeadFactory
 import okio.ByteString
 import okio.ByteString.Companion.toByteString
 import java.io.ByteArrayOutputStream
@@ -42,10 +43,13 @@ class RealCipher internal constructor(
   private val keys: List<Pair<KeysetHandle, Aead>>
 ) : Cipher {
 
+  private val keysets = keys.map { it.first }
+
   override fun encrypt(plaintext: ByteString): ByteString {
     // .toByteArray() creates a copy of the receiver ByteString.
     val plaintextBytes = plaintext.toByteArray()
-    val encrypted = keys.first().second.encrypt(plaintextBytes, null)
+    val aead = AeadFactory.getPrimitive(keysets.first())
+    val encrypted = aead.encrypt(plaintextBytes, null)
     // We want to make sure this code doesn't leave behind any unnecessary copies of the plaintext.
     // So before retuning, make sure we override the extra copy of the plaintext with 0's.
     plaintextBytes.fill(0)
@@ -55,8 +59,9 @@ class RealCipher internal constructor(
   override fun decrypt(ciphertext: ByteString): ByteString {
     var decryptedBytes: ByteArray?
     var decrypted: ByteString? = null
-    for (aead in keys.map {it.second}) {
+    for (keyset in keysets) {
       try {
+        val aead = AeadFactory.getPrimitive(keyset)
         decryptedBytes = aead.decrypt(ciphertext.toByteArray(), null)
         // .toByteString() creates a copy of the receiver object
         // Make sure we don't leave any unnecessary copies of the decrypted data laying around.
