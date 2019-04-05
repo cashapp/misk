@@ -64,6 +64,7 @@ class CipherTest {
     var cipher = RealCipher(listOf(Pair(keysetHandle, masterKey)))
     val plain = "plain".toByteArray().toByteString()
     val encrypted = cipher.encrypt(plain)
+    // generate new cipher that has an additional keyset that doesn't belong
     val newKeysetHandle = KeysetHandle.generateNew(AeadKeyTemplates.AES256_GCM)
     cipher = RealCipher(listOf(
         Pair(newKeysetHandle, masterKey),
@@ -73,6 +74,15 @@ class CipherTest {
     assertThat(encrypted).isNotEqualTo(plain)
     assertThat(decrypted).isEqualTo(plain)
 
+  }
+
+  @Test
+  fun testMasterKeyIsntUsedForEncryption() {
+    var cipher = RealCipher(listOf(Pair(keysetHandle, masterKey)))
+    val plain = "plain".toByteArray().toByteString()
+    val encrypted = cipher.encrypt(plain)
+    val masterKeyEncryptedData = masterKey.encrypt("plain".toByteArray(), null)
+    assertThat(encrypted).isNotEqualTo(masterKeyEncryptedData)
   }
 
   @Test
