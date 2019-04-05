@@ -24,6 +24,7 @@ interface Cipher {
    * Decrypt the given data.
    * If anything goes wrong, including failing to decipher the data,
    * throws a [java.security.GeneralSecurityException]
+   * and [NullPointerException] if no suitable key was found to decrypt the data.
    */
   fun decrypt(ciphertext: ByteString): ByteString
 
