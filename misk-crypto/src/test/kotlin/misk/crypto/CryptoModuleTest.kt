@@ -25,8 +25,8 @@ class CryptoModuleTest {
   fun testImportKey() {
     val keyHandle = KeysetHandle.generateNew(AeadKeyTemplates.AES256_GCM)
     val encryptedKey = generateEncryptedKey(keyHandle)
-    val key = Key("test", encryptedKey)
-    val config = CryptoConfig(listOf(key), "test_master_key")
+    val key = Key("test", listOf(EncryptedKey(encryptedKey, "test")))
+    val config = CryptoConfig(listOf(key))
     val injector = Guice.createInjector(CryptoTestModule(), CryptoModule(config))
     val keyManager = injector.getInstance(KeyManager::class.java)
     val testKey = keyManager["test"]
@@ -37,7 +37,13 @@ class CryptoModuleTest {
 
   @Test
   fun testInvalidConfig() {
-    val config = CryptoConfig(listOf(), "AWS master key alias", "GCP master key URI")
+    val keyHandle = KeysetHandle.generateNew(AeadKeyTemplates.AES256_GCM)
+    val encryptedKey = generateEncryptedKey(keyHandle)
+    val config = CryptoConfig(listOf(
+        Key("key_name", listOf(
+            EncryptedKey(encryptedKey, "AWS master key alias", "GCP master key URI")
+        ))
+    ))
     assertThatThrownBy { Guice.createInjector(CryptoTestModule(), CryptoModule(config)) }
         .isInstanceOf(CreationException::class.java)
   }

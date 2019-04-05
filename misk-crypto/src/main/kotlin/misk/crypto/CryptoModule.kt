@@ -21,32 +21,40 @@ class CryptoModule(
 
   override fun configure() {
     requireBinding(KmsClient::class.java)
-    check(!(config.gcp_key_uri != null && config.aws_kms_key_alias != null))
-    check(!(config.gcp_key_uri == null && config.aws_kms_key_alias == null))
     AeadConfig.register()
 
-    config.keys?.forEach { key ->
-      val keyUri = config.gcp_key_uri ?: "aws-kms://alias/${config.aws_kms_key_alias}"
+    config.keys.forEach { key ->
       bind<Cipher>()
           .annotatedWith(Names.named(key.key_name))
-          .toProvider(CipherProvider(keyUri, key))
+          .toProvider(CipherProvider(key.key_name, key.details))
           .asEagerSingleton()
     }
   }
 
-  private class CipherProvider(val keyUri: String, val key: Key) : Provider<Cipher> {
+  private class CipherProvider(val keyName: String, val keyDetails: List<EncryptedKey>) : Provider<Cipher> {
     @Inject lateinit var keyManager: KeyManager
     @Inject lateinit var kmsClient: KmsClient
 
     override fun get(): Cipher {
-      val cipher = readKey(key.encrypted_key, kmsClient.getAead(keyUri))
-      keyManager[key.key_name] = cipher
+      val pairs = keyDetails.map { encryptedKeySpec ->
+        val keyUri = getMasterKeyUri(encryptedKeySpec)
+        val masterKey = kmsClient.getAead(keyUri)
+        val keysetHandle = readKey(encryptedKeySpec.json_key_spec, masterKey)
+        Pair(keysetHandle, masterKey)
+      }
+      val cipher = RealCipher(pairs)
+      keyManager[keyName] = cipher
       return cipher
     }
 
-    private fun readKey(keyConfig: Secret<String>, masterKey: Aead): Cipher {
-      val keysetHandle = KeysetHandle.read(JsonKeysetReader.withString(keyConfig.value), masterKey)
-      return RealCipher(keysetHandle, masterKey)
+    private fun readKey(keyConfig: Secret<String>, masterKey: Aead): KeysetHandle {
+      return KeysetHandle.read(JsonKeysetReader.withString(keyConfig.value), masterKey)
+    }
+
+    private fun getMasterKeyUri(keyDetails: EncryptedKey): String {
+      check(!(keyDetails.gcp_key_uri != null && keyDetails.aws_kms_key_alias != null))
+      check(!(keyDetails.gcp_key_uri == null && keyDetails.aws_kms_key_alias == null))
+      return  keyDetails.gcp_key_uri ?: "aws-kms://alias/${keyDetails.aws_kms_key_alias}"
     }
   }
 }

@@ -20,7 +20,7 @@ class CipherTest {
 
   @Test
   fun testEncryptDecryptRoundTrip() {
-    val cipher = RealCipher(keysetHandle, masterKey)
+    val cipher = RealCipher(listOf(Pair(keysetHandle, masterKey)))
     val plain = "plain".toByteArray().toByteString()
     val encrypted = cipher.encrypt(plain)
     val decrypted = cipher.decrypt(encrypted)
@@ -30,8 +30,8 @@ class CipherTest {
 
   @Test
   fun testKeyInfo() {
-    val cipher = RealCipher(keysetHandle, masterKey)
+    val cipher = RealCipher(listOf(Pair(keysetHandle, masterKey)))
     val keysetHandleInfo = keysetHandle.keysetInfo.toString()
-    assertThat(cipher.keyInfo.tinkInfo).isEqualTo(keysetHandleInfo)
+    assertThat(cipher.keyInfo.map { it.tinkInfo }).contains(keysetHandleInfo)
   }
 }
