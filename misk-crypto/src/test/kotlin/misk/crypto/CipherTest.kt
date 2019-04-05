@@ -22,7 +22,7 @@ class CipherTest {
 
   @Test
   fun testEncryptDecryptRoundTrip() {
-    val cipher = RealCipher(listOf(Pair(keysetHandle, masterKey)))
+    val cipher = RealCipher(listOf(KeyMaterial(keysetHandle, masterKey)))
     val plain = "plain".toByteArray().toByteString()
     val encrypted = cipher.encrypt(plain)
     val decrypted = cipher.decrypt(encrypted)
@@ -32,11 +32,11 @@ class CipherTest {
 
   @Test
   fun testNoSuitableKeyFound() {
-    var cipher = RealCipher(listOf(Pair(keysetHandle, masterKey)))
+    var cipher = RealCipher(listOf(KeyMaterial(keysetHandle, masterKey)))
     val plain = "plain".toByteArray().toByteString()
     val encrypted = cipher.encrypt(plain)
     val newKeysetHandle = KeysetHandle.generateNew(AeadKeyTemplates.AES256_GCM)
-    cipher = RealCipher(listOf(Pair(newKeysetHandle, masterKey)))
+    cipher = RealCipher(listOf(KeyMaterial(newKeysetHandle, masterKey)))
     assertThatThrownBy { cipher.decrypt(encrypted) }
         .isInstanceOf(NullPointerException::class.java)
   }
@@ -44,14 +44,14 @@ class CipherTest {
   @Test
   fun testKeyRotation() {
     // encrypt something
-    var cipher = RealCipher(listOf(Pair(keysetHandle, masterKey)))
+    var cipher = RealCipher(listOf(KeyMaterial(keysetHandle, masterKey)))
     val plain = "plain".toByteArray().toByteString()
     val encrypted = cipher.encrypt(plain)
     // rotate the key
     val rotatedKeysetHandle = KeysetManager.withKeysetHandle(keysetHandle)
         .rotate(AeadKeyTemplates.AES256_GCM)
         .keysetHandle
-    cipher = RealCipher(listOf(Pair(rotatedKeysetHandle, masterKey)))
+    cipher = RealCipher(listOf(KeyMaterial(rotatedKeysetHandle, masterKey)))
     // decrpyt it
     val decrypted = cipher.decrypt(encrypted)
     assertThat(encrypted).isNotEqualTo(plain)
@@ -61,14 +61,14 @@ class CipherTest {
   @Test
   fun testDecryptionIterateThroughKeys() {
     // encrypt something
-    var cipher = RealCipher(listOf(Pair(keysetHandle, masterKey)))
+    var cipher = RealCipher(listOf(KeyMaterial(keysetHandle, masterKey)))
     val plain = "plain".toByteArray().toByteString()
     val encrypted = cipher.encrypt(plain)
     // generate new cipher that has an additional keyset that doesn't belong
     val newKeysetHandle = KeysetHandle.generateNew(AeadKeyTemplates.AES256_GCM)
     cipher = RealCipher(listOf(
-        Pair(newKeysetHandle, masterKey),
-        Pair(keysetHandle, masterKey)))
+        KeyMaterial(newKeysetHandle, masterKey),
+        KeyMaterial(keysetHandle, masterKey)))
     // decrpyt it
     val decrypted = cipher.decrypt(encrypted)
     assertThat(encrypted).isNotEqualTo(plain)
@@ -78,7 +78,7 @@ class CipherTest {
 
   @Test
   fun testMasterKeyIsntUsedForEncryption() {
-    var cipher = RealCipher(listOf(Pair(keysetHandle, masterKey)))
+    var cipher = RealCipher(listOf(KeyMaterial(keysetHandle, masterKey)))
     val plain = "plain".toByteArray().toByteString()
     val encrypted = cipher.encrypt(plain)
     val masterKeyEncryptedData = masterKey.encrypt("plain".toByteArray(), null)
@@ -87,7 +87,7 @@ class CipherTest {
 
   @Test
   fun testKeyInfo() {
-    val cipher = RealCipher(listOf(Pair(keysetHandle, masterKey)))
+    val cipher = RealCipher(listOf(KeyMaterial(keysetHandle, masterKey)))
     val keysetHandleInfo = keysetHandle.keysetInfo.toString()
     assertThat(cipher.keyInfo.map { it.tinkInfo }).contains(keysetHandleInfo)
   }

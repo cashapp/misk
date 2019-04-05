@@ -40,7 +40,7 @@ class CryptoModule(
         val keyUri = getMasterKeyUri(encryptedKeySpec)
         val masterKey = kmsClient.getAead(keyUri)
         val keysetHandle = readKey(encryptedKeySpec.json_key_spec, masterKey)
-        Pair(keysetHandle, masterKey)
+        KeyMaterial(keysetHandle, masterKey)
       }
       val cipher = RealCipher(pairs)
       keyManager[keyName] = cipher

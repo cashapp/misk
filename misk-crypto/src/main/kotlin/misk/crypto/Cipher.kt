@@ -41,10 +41,10 @@ interface Cipher {
  * This class uses key [KeysetHandle] that's been decrypted by the KMS when the module was loaded.
  */
 class RealCipher internal constructor(
-  private val keys: List<Pair<KeysetHandle, Aead>>
+  private val keys: List<KeyMaterial>
 ) : Cipher {
 
-  private val keysets = keys.map { it.first }
+  private val keysets = keys.map { it.keysetHandle }
 
   override fun encrypt(plaintext: ByteString): ByteString {
     // .toByteArray() creates a copy of the receiver ByteString.
@@ -85,6 +85,19 @@ class RealCipher internal constructor(
       }
     }
 }
+
+data class KeyMaterial(
+  /**
+   * Contains keys and their associated information listed in this set.
+   * That information includes the primary key to use,
+   * and for each key, its key ID, whether it's enabled and when it was created, etc.
+   */
+  val keysetHandle: KeysetHandle,
+  /**
+   * This primitive is the master key used to encrypt the above [keysetHandle].
+   */
+  val masterKey: Aead
+)
 
 data class KeyInfo(
   val tinkInfo: String,

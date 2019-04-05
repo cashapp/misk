@@ -39,7 +39,7 @@ class CryptoTestModule(
 
     override fun get(): Cipher {
       val keysetHandle = KeysetHandle.generateNew(AeadKeyTemplates.AES256_GCM)
-      return  RealCipher(listOf(Pair(keysetHandle, masterAead)))
+      return  RealCipher(listOf(KeyMaterial(keysetHandle, masterAead)))
           .also { keyManager[keyName] = it }
     }
   }
