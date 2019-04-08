@@ -1,5 +1,6 @@
 package misk.web.actions
 
+import misk.logging.getLogger
 import misk.security.authz.Unauthenticated
 import misk.web.Get
 import misk.web.PathParam
@@ -26,7 +27,10 @@ class NotFoundAction @Inject constructor() : WebAction {
   }
 
   companion object {
+    private val logger = getLogger<NotFoundAction>()
+
     fun response(path: String): Response<ResponseBody> {
+      logger.info("Nothing found at /$path")
       return Response(
           body = "Nothing found at /$path".toResponseBody(),
           headers = Headers.of("Content-Type", MediaTypes.TEXT_PLAIN_UTF8),
