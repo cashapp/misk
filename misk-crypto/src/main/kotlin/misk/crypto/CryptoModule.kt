@@ -52,8 +52,9 @@ class CryptoModule(
     }
 
     private fun getMasterKeyUri(keyDetails: EncryptedKey): String {
-      check(!(keyDetails.gcp_key_uri != null && keyDetails.aws_kms_key_alias != null))
-      check(!(keyDetails.gcp_key_uri == null && keyDetails.aws_kms_key_alias == null))
+      check((keyDetails.gcp_key_uri == null) != (keyDetails.aws_kms_key_alias == null)) {
+        "exactly one of gcp_key_uri and aws_kms_key_alias should be set"
+      }
       return  keyDetails.gcp_key_uri ?: "aws-kms://alias/${keyDetails.aws_kms_key_alias}"
     }
   }
