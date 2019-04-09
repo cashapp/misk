@@ -1,0 +1,12 @@
+{
+  "groups": {
+    "default": {
+      "packages": [
+        "misk/web/tabs/config/package.json",
+        "misk/web/tabs/loader/package.json",
+        "misk/web/tabs/web-actions/package.json",
+        "samples/exemplarchat/web/package.json"
+      ]
+    }
+  }
+}
