@@ -507,9 +507,4 @@ class ReflectionQueryFactoryTest {
     @Select("name")
     fun listAsNames(session: Session): List<String>
   }
-
-  data class NameAndReleaseDate(
-    @Property("name") var name: String,
-    @Property("release_date") var releaseDate: LocalDate?
-  ) : Projection
 }
