@@ -1,7 +1,5 @@
 <img src="misk.png" width="300">
 
-[![CircleCI](https://circleci.com/gh/square/misk.svg?style=svg)](https://circleci.com/gh/square/misk) [![Greenkeeper badge](https://badges.greenkeeper.io/square/misk.svg)](https://greenkeeper.io/)
-
 Misk is a new open source application container from Square.
 
 Looking for `@misk/` NPM Packages? **Check out [Misk-Web](https://github.com/square/misk-web)**
