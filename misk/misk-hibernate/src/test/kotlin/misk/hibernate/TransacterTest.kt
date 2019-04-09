@@ -64,8 +64,8 @@ class TransacterTest {
           .actorName("Laura Dern")
           .listAsMovieNameAndReleaseDate(session)
       assertThat(lauraDernMovies).containsExactlyInAnyOrder(
-          ReflectionQueryFactoryTest.NameAndReleaseDate("Star Wars", LocalDate.of(1977, 5, 25)),
-          ReflectionQueryFactoryTest.NameAndReleaseDate("Jurassic Park", LocalDate.of(1993, 6, 9)))
+          NameAndReleaseDate("Star Wars", LocalDate.of(1977, 5, 25)),
+          NameAndReleaseDate("Jurassic Park", LocalDate.of(1993, 6, 9)))
 
       val actorsInOldMovies = queryFactory.newQuery<CharacterQuery>()
           .movieReleaseDateBefore(LocalDate.of(1980, 1, 1))
@@ -456,33 +456,6 @@ class TransacterTest {
     // There should be no on-going span
     assertThat(tracer.activeSpan()).isNull()
   }
-
-  interface CharacterQuery : Query<DbCharacter> {
-    @Constraint("name")
-    fun name(name: String): CharacterQuery
-
-    @Constraint("actor.name")
-    fun actorName(name: String): CharacterQuery
-
-    @Constraint(path = "movie.release_date", operator = Operator.LT)
-    fun movieReleaseDateBefore(upperBound: LocalDate): CharacterQuery
-
-    @Select("movie")
-    fun listAsMovieNameAndReleaseDate(session: Session): List<ReflectionQueryFactoryTest.NameAndReleaseDate>
-
-    @Select
-    fun listAsActorAndReleaseDate(session: Session): List<ActorAndReleaseDate>
-  }
-
-  data class NameAndReleaseDate(
-    @Property("name") var movieName: String,
-    @Property("release_date") var movieReleaseDate: LocalDate?
-  ) : Projection
-
-  data class ActorAndReleaseDate(
-    @Property("actor.name") var actorName: String,
-    @Property("movie.release_date") var movieReleaseDate: LocalDate?
-  ) : Projection
 
   class NonRetryableException : Exception()
 }
