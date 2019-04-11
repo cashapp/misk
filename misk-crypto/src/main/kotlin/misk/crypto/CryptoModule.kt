@@ -21,15 +21,12 @@ class CryptoModule(
 
   override fun configure() {
     requireBinding(KmsClient::class.java)
-    check(!(config.gcp_key_uri != null && config.aws_kms_key_alias != null))
-    check(!(config.gcp_key_uri == null && config.aws_kms_key_alias == null))
     AeadConfig.register()
 
     config.keys?.forEach { key ->
-      val keyUri = config.gcp_key_uri ?: "aws-kms://alias/${config.aws_kms_key_alias}"
       bind<Cipher>()
           .annotatedWith(Names.named(key.key_name))
-          .toProvider(CipherProvider(keyUri, key))
+          .toProvider(CipherProvider(config.kms_uri, key))
           .asEagerSingleton()
     }
   }

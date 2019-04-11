@@ -8,8 +8,7 @@ import misk.config.Secret
  */
 data class CryptoConfig(
   val keys: List<Key>?,
-  val aws_kms_key_alias: String? = null,
-  val gcp_key_uri: String? = null
+  val kms_uri: String
 ) : Config
 
 data class Key(
