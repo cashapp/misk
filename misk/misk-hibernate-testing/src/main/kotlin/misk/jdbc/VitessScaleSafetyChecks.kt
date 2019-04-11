@@ -262,7 +262,7 @@ class VitessScaleSafetyChecks(
    * Digs into the MySQL log to find the last executed DML statement that passed through Vitess.
    */
   private fun extractLastDmlQuery(): String? {
-    return connect().let { c ->
+    return connect()?.let { c ->
       c.createStatement().use { s ->
         s.executeQuery("""
                   SELECT argument
@@ -288,11 +288,11 @@ class VitessScaleSafetyChecks(
    * closed. We shut down the Vitess docker container after the tests have completed running so
    * this doesn't need to be closed explicitly.
    */
-  private fun connect(): Connection {
+  private fun connect(): Connection? {
     var connection = connection
     if (connection != null) return connection
 
-    val cluster = startVitessService.cluster()
+    val cluster = startVitessService.cluster() ?: return null
     connection = cluster.openMysqlConnection()
     this.connection = connection
     return connection

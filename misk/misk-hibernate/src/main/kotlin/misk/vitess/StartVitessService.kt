@@ -342,9 +342,9 @@ class StartVitessService(
     val environment: Environment
   )
 
-  fun cluster() = cluster!!.cluster
+  fun cluster() = cluster?.cluster
 
-  fun shouldRunVitess() =  config.type == DataSourceType.VITESS &&  (environment == TESTING || environment == DEVELOPMENT)
+  fun shouldRunVitess() = config.type == DataSourceType.VITESS && (environment == TESTING || environment == DEVELOPMENT)
 
   override fun shutDown() {
   }
@@ -414,7 +414,7 @@ class StartVitessService(
      * MyAppVitessDaemon.kt:
      *
      *  fun main() {
-     *    val config = MiskConfig.load<MyAppConfig>("myapp")
+     *    val config = MiskConfig.load<MyAppConfig>("myapp", Environment.TESTING)
      *    startVitessDaemon(MyAppDb::class, config.data_source_clusters.values.first().writer)
      *  }
      *
@@ -422,7 +422,8 @@ class StartVitessService(
     fun startVitessDaemon(
       /** The same qualifier passed into [HibernateModule], used to uniquely name the container */
       qualifier: KClass<out Annotation>,
-      /** Config for the Vitess cluster */
+      /** Config for the Vitess clu
+       * ster */
       config: DataSourceConfig
     ) {
       val docker: DockerClient = DockerClientBuilder.getInstance()
