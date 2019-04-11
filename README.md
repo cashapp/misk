@@ -9,6 +9,8 @@ Misk is not ready for use. The API is not stable.
 Quick Links
 ===
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/square/misk.svg)](https://greenkeeper.io/)
+
 Web
 ---
 - [General Info on Misk Admin Dashboard / Web](https://github.com/square/misk-web/blob/master/README.md)
