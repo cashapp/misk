@@ -3,8 +3,12 @@ package misk.hibernate
 import com.google.common.util.concurrent.AbstractIdleService
 import com.google.inject.Key
 import misk.DependentService
+import misk.backoff.Backoff
+import misk.backoff.ExponentialBackoff
+import misk.backoff.retry
 import misk.inject.toKey
 import misk.jdbc.DataSourceConfig
+import java.time.Duration
 import javax.inject.Provider
 import javax.inject.Singleton
 import kotlin.reflect.KClass
@@ -27,7 +31,10 @@ internal class SchemaValidatorService internal constructor(
     synchronized(this) {
       val validator = SchemaValidator()
       val sessionFactoryService = sessionFactoryServiceProvider.get()
-      validator.validate(transacterProvider.get(), sessionFactoryService.hibernateMetadata)
+      // Sometimes the schema hasn't been refreshed at this point in Vitess. So we retry a few times.
+      retry(5, ExponentialBackoff(Duration.ofMillis(10), Duration.ofMillis(100))) {
+        validator.validate(transacterProvider.get(), sessionFactoryService.hibernateMetadata)
+      }
     }
   }
 
