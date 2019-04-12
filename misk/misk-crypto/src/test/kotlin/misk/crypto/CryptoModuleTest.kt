@@ -35,20 +35,6 @@ class CryptoModuleTest {
     assertThat(cipher).isNotNull()
   }
 
-  @Test
-  fun testInvalidConfig() {
-    val config = CryptoConfig(listOf(), "AWS master key alias", "GCP master key URI")
-    assertThatThrownBy { Guice.createInjector(CryptoTestModule(), CryptoModule(config)) }
-        .isInstanceOf(CreationException::class.java)
-  }
-
-  @Test
-  fun testMissingMasterKey() {
-    val config = CryptoConfig(listOf())
-    assertThatThrownBy { Guice.createInjector(CryptoTestModule(), CryptoModule(config)) }
-        .isInstanceOf(CreationException::class.java)
-  }
-
   private fun generateEncryptedKey(keyHandle: KeysetHandle): Secret<String> {
     val masterKey = FakeMasterEncryptionKey()
     val keyOutputStream = ByteArrayOutputStream()

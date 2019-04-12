@@ -34,6 +34,7 @@ tinkey create-keyset --key-template AES256-GCM --master-key-uri aws-kms://arn:km
 Then, to specify a new `Cipher` key called "myKey", add the following in your app's configuration file:
 ```$yaml
 crypto:
+  kms_uri: "aws-kms://arn:kms:<region>:<account-id>:key/<key-id>"
   keys:
     - key_name: "my_payment_token_key"
       encrypted_kek: [key encrypted using the same KMS used by the app encoded in base64] 
