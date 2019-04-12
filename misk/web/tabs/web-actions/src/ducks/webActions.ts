@@ -75,8 +75,8 @@ export interface IWebActionAPI {
   requestMediaTypes: string[]
   responseMediaType: string
   returnType: string
-  requestType: string
-  types: IActionTypes
+  requestType?: string
+  types?: IActionTypes
 }
 
 export interface IWebActionInternal {
@@ -123,6 +123,11 @@ export const findIndexAction = (
     webActionsRaw.get("metadata"),
     (rawAction: IWebActionInternal) => rawAction.allFields === action.allFields
   )
+
+export const methodHasBody = (method: HTTPMethod) =>
+  method === HTTPMethod.PATCH ||
+  method === HTTPMethod.POST ||
+  method === HTTPMethod.PUT
 
 /**
  * Titlecase versions of IWebActionInternal fields for use in Filter UI
@@ -260,7 +265,7 @@ export const dispatchWebActions: IDispatchWebActions = {
 
 export const padId = (id: string) => padStart(id, 10, "0")
 
-const mapOverChildrenData = (
+export const mapOverChildrenData = (
   typesMetadata: Map<string, ITypesFieldMetadata>,
   children: Set<string>,
   simpleForm: ISimpleFormState,
@@ -307,55 +312,69 @@ export const parseType = (
   }
 }
 
-const getFieldData = (
+export const getFieldData = (
   typesMetadata: Map<string, ITypesFieldMetadata>,
   id: string,
   simpleForm: ISimpleFormState,
   tag: string
 ): any => {
-  const {
-    idChildren,
-    idParent,
-    name,
-    repeated,
-    serverType
-  } = typesMetadata.get(id)
-  const parent = typesMetadata.get(idParent)
-  if (id === "0" && idChildren.size === 0) {
-    // root with no children
-    return simpleSelect(simpleForm, `${tag}::${padId(id)}`, "data")
-  } else if (id === "0" && idChildren.size > 0) {
-    // root with children, iterate over children
-    return mapOverChildrenData(typesMetadata, idChildren, simpleForm, tag)
-  } else if (repeated === false && idChildren.size > 0) {
-    // field group parent node
-    return mapOverChildrenData(typesMetadata, idChildren, simpleForm, tag)
-  } else if (parent && parent.repeated === true && idChildren.size === 0) {
-    // leaf node of a repeated list
-    return parseType(
-      serverType,
-      simpleSelect(simpleForm, `${tag}::${padId(id)}`, "data")
-    )
-  } else if (parent && parent.repeated === false && idChildren.size === 0) {
-    // regular leaf node
-    return {
-      [name]: parseType(
+  if (typesMetadata.size > 0) {
+    const {
+      idChildren,
+      idParent,
+      name,
+      repeated,
+      serverType
+    } = typesMetadata.get(id)
+    const parent = typesMetadata.get(idParent)
+    if (id === "0" && idChildren.size === 0) {
+      // root with no children
+      return simpleSelect(simpleForm, `${tag}::${padId(id)}`, "data")
+    } else if (id === "0" && idChildren.size > 0) {
+      // root with children, iterate over children
+      return mapOverChildrenData(typesMetadata, idChildren, simpleForm, tag)
+    } else if (
+      parent.repeated === false &&
+      repeated === false &&
+      idChildren.size > 0 &&
+      BaseFieldTypes.hasOwnProperty(serverType) === false
+    ) {
+      // field group parent node of a defined type (not a standard language type)
+      return {
+        [name]: mapOverChildrenData(typesMetadata, idChildren, simpleForm, tag)
+      }
+    } else if (repeated === false && idChildren.size > 0) {
+      // field group parent node (standard language type)
+      return mapOverChildrenData(typesMetadata, idChildren, simpleForm, tag)
+    } else if (parent && parent.repeated === true && idChildren.size === 0) {
+      // leaf node of a repeated list
+      return parseType(
         serverType,
         simpleSelect(simpleForm, `${tag}::${padId(id)}`, "data")
       )
-    }
-  } else if (repeated === true && idChildren.size > 0) {
-    // repeated node reached, iterate and return as list
-    return {
-      [name]: idChildren
-        .toList()
-        .map((child: string) =>
-          getFieldData(typesMetadata, child, simpleForm, tag)
+    } else if (parent && parent.repeated === false && idChildren.size === 0) {
+      // regular leaf node
+      return {
+        [name]: parseType(
+          serverType,
+          simpleSelect(simpleForm, `${tag}::${padId(id)}`, "data")
         )
-        .toJS()
+      }
+    } else if (repeated === true && idChildren.size > 0) {
+      // repeated node reached, iterate and return as list
+      return {
+        [name]: idChildren
+          .toList()
+          .map((child: string) =>
+            getFieldData(typesMetadata, child, simpleForm, tag)
+          )
+          .toJS()
+      }
+    } else {
+      throw new Error("Unhandled field data retrieval case.")
     }
   } else {
-    throw new Error("Unhandled field data retrieval case.")
+    return
   }
 }
 
@@ -372,6 +391,33 @@ export const getFormData = (
   return data
 }
 
+export const addRepeatedField = (
+  types: IActionTypes,
+  typesMetadata: Map<string, ITypesFieldMetadata>,
+  parentId: string
+) => {
+  let newTypesMetadata = typesMetadata as Map<string, ITypesFieldMetadata>
+  const parentMetadata = newTypesMetadata.get(parentId)
+  const newChildId = uniqueId()
+  const parentChildren = parentMetadata.idChildren.add(newChildId)
+  newTypesMetadata = newTypesMetadata
+    .setIn([parentId, "idChildren"], parentChildren)
+    .mergeDeep(
+      generateFieldTypesMetadata(
+        {
+          name: parentMetadata.name,
+          repeated: false,
+          type: parentMetadata.serverType
+        },
+        types,
+        newTypesMetadata,
+        newChildId,
+        parentId
+      )
+    )
+  return newTypesMetadata
+}
+
 function* handleAddRepeatedField(
   action: IAction<WEBACTIONS, IWebActionsPayload>
 ) {
@@ -380,28 +426,9 @@ function* handleAddRepeatedField(
     const webActionIndex = findIndexAction(webAction, oldState)
     const webActionMetadata = oldState.get("metadata")
     const { types, typesMetadata } = webActionMetadata[webActionIndex]
-    let newTypesMetadata = typesMetadata as Map<string, ITypesFieldMetadata>
-    const parentMetadata = newTypesMetadata.get(parentId)
-    const newChildId = uniqueId()
-    const parentChildren = parentMetadata.idChildren.add(newChildId)
-    newTypesMetadata = newTypesMetadata
-      .setIn([parentId, "idChildren"], parentChildren)
-      .mergeDeep(
-        generateFieldTypesMetadata(
-          {
-            name: parentMetadata.name,
-            repeated: false,
-            type: parentMetadata.serverType
-          },
-          types,
-          newTypesMetadata,
-          newChildId,
-          parentId
-        )
-      )
     const newWebAction = {
       ...webActionMetadata[webActionIndex],
-      typesMetadata: newTypesMetadata
+      typesMetadata: addRepeatedField(types, typesMetadata, parentId)
     }
     webActionMetadata[webActionIndex] = newWebAction
     yield put(
@@ -414,7 +441,7 @@ function* handleAddRepeatedField(
   }
 }
 
-const recursivelyDelete = (
+export const recursivelyDelete = (
   id: string,
   typesMetadata: Map<string, ITypesFieldMetadata>
 ): Map<string, ITypesFieldMetadata> => {
@@ -424,9 +451,7 @@ const recursivelyDelete = (
     .get(id)
     .idChildren.forEach(
       (child: string) =>
-        (newTypesMetadata = newTypesMetadata.mergeDeep(
-          recursivelyDelete(child, newTypesMetadata)
-        ))
+        (newTypesMetadata = recursivelyDelete(child, newTypesMetadata))
     )
   return newTypesMetadata
     .setIn(
@@ -434,6 +459,19 @@ const recursivelyDelete = (
       newTypesMetadata.getIn([idParent, "idChildren"]).delete(id)
     )
     .delete(id)
+}
+
+export const removeRepeatedField = (
+  childId: string,
+  typesMetadata: Map<string, ITypesFieldMetadata>
+) => {
+  const { idParent } = typesMetadata.get(childId)
+  let newTypesMetadata = recursivelyDelete(childId, typesMetadata)
+  newTypesMetadata = newTypesMetadata.setIn(
+    [idParent, "idChildren"],
+    newTypesMetadata.get(idParent).idChildren.delete(childId)
+  )
+  return newTypesMetadata
 }
 
 function* handleRemoveRepeatedField(
@@ -444,15 +482,10 @@ function* handleRemoveRepeatedField(
     const webActionIndex = findIndexAction(webAction, oldState)
     const webActionMetadata = oldState.get("metadata")
     const { typesMetadata } = webActionMetadata[webActionIndex]
-    const newTypesMetadata = recursivelyDelete(childId, typesMetadata)
-    const { idParent } = typesMetadata.get(childId)
     const newWebactionMetadata = webActionMetadata
     const newWebAction = {
       ...newWebactionMetadata[webActionIndex],
-      typesMetadata: newTypesMetadata.setIn(
-        [idParent, "idChildren"],
-        newTypesMetadata.get(idParent).idChildren.delete(childId)
-      )
+      typesMetadata: removeRepeatedField(childId, typesMetadata)
     }
     newWebactionMetadata[webActionIndex] = newWebAction
     yield put(
@@ -484,7 +517,7 @@ const groupByWebActionHash = (
   action.responseMediaType +
   action.returnType
 
-const buildTypeFieldMetadata = (
+export const buildTypeFieldMetadata = (
   idChildren: Set<string> = Set(),
   id: string = "",
   name: string = "",
@@ -610,10 +643,10 @@ const generateFieldTypesMetadata = (
   }
 }
 
-const generateTypesMetadata = (
+export const generateTypesMetadata = (
   action: IWebActionAPI
 ): Map<string, ITypesFieldMetadata> => {
-  const { requestType, types } = action
+  const { dispatchMechanism, requestType, types } = action
   let typesMetadata = Map<string, ITypesFieldMetadata>().set(
     "0",
     buildTypeFieldMetadata(Set(), "0")
@@ -639,7 +672,7 @@ const generateTypesMetadata = (
       }
     }
     return typesMetadata
-  } else {
+  } else if (methodHasBody(dispatchMechanism)) {
     return Map<string, ITypesFieldMetadata>().set(
       "0",
       buildTypeFieldMetadata(
@@ -652,6 +685,8 @@ const generateTypesMetadata = (
         TypescriptBaseTypes.string
       )
     )
+  } else {
+    return Map<string, ITypesFieldMetadata>()
   }
 }
 

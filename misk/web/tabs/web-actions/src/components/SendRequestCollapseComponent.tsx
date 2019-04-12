@@ -7,11 +7,11 @@ import {
   InputGroup,
   Intent,
   Label,
-  Pre,
   Tag
 } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
 import {
+  CodePreContainer,
   FlexContainer,
   HTTPMethodDispatch,
   HTTPMethodIntent,
@@ -28,25 +28,17 @@ import * as React from "react"
 import styled from "styled-components"
 import { RequestFormComponent } from "../components"
 import {
+  getFormData,
   IDispatchProps,
   IState,
   IWebActionInternal,
-  getFormData
+  methodHasBody
 } from "../ducks"
 
 const Column = styled.div`
   flex-grow: 1;
   flex-basis: 0;
   min-width: 320px;
-`
-
-export const CodePreContainer = styled(Pre)`
-  font-family: Fira Code, Menlo !important;
-  white-space: pre-wrap !important; /* Since CSS 2.1 */
-  white-space: -moz-pre-wrap !important; /* Mozilla, since 1999 */
-  white-space: -pre-wrap !important; /* Opera 4-6 */
-  white-space: -o-pre-wrap !important; /* Opera 7 */
-  word-wrap: break-word !important; /* Internet Explorer 5.5+ */
 `
 
 /**
@@ -67,10 +59,6 @@ export const SendRequestCollapseComponent = (
   const method: HTTPMethod =
     simpleSelect(props.simpleForm, `${tag}::Method`, "data") ||
     props.action.dispatchMechanism.reverse()[0]
-  const methodHasBody =
-    method === HTTPMethod.PATCH ||
-    method === HTTPMethod.POST ||
-    method === HTTPMethod.PUT
   return (
     <Collapse isOpen={isOpen}>
       <InputGroup
@@ -83,7 +71,7 @@ export const SendRequestCollapseComponent = (
       />
       <FlexContainer>
         <Column>
-          <Collapse isOpen={methodHasBody}>
+          <Collapse isOpen={methodHasBody(method)}>
             <RequestFormComponent {...props} tag={tag} />
             <br />
           </Collapse>

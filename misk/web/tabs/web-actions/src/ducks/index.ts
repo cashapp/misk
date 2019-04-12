@@ -9,7 +9,6 @@ import {
   ISimpleNetworkState,
   SimpleFormReducer,
   SimpleNetworkReducer,
-  simpleRootRawSelector,
   simpleRootSelector,
   watchSimpleFormSagas,
   watchSimpleNetworkSagas
@@ -73,10 +72,7 @@ export const rootSelectors = (state: IState) => ({
     "webActions",
     state
   ),
-  webActionsRaw: simpleRootRawSelector<any, IWebActionsImmutableState>(
-    "webActions",
-    state
-  )
+  webActionsRaw: state.webActionsRaw
 })
 
 /**

@@ -12,7 +12,7 @@ import {
   Tooltip
 } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
-import { FlexContainer, HTTPMethodIntent } from "@misk/core"
+import { FlexContainer, HTTPMethodIntent, WrapTextContainer } from "@misk/core"
 import { onChangeToggleFnCall, simpleSelect } from "@misk/simpleredux"
 import { HTTPMethod } from "http-method-enum"
 import { chain } from "lodash"
@@ -57,14 +57,6 @@ const MetadataMenu = styled(Menu)`
   li {
     margin-bottom: 0;
   }
-`
-
-const WrapText = styled.span`
-  white-space: pre-wrap; /* Since CSS 2.1 */
-  white-space: -moz-pre-wrap; /* Mozilla, since 1999 */
-  white-space: -pre-wrap; /* Opera 4-6 */
-  white-space: -o-pre-wrap; /* Opera 7 */
-  word-wrap: break-word; /* Internet Explorer 5.5+ */
 `
 
 /**
@@ -230,7 +222,10 @@ const WebAction = (
               tag={`${props.tag}::ApplicationInterceptors`}
             >
               {props.action.applicationInterceptors.map(i => (
-                <MenuItem key={i} text={<WrapText>{i}</WrapText>} />
+                <MenuItem
+                  key={i}
+                  text={<WrapTextContainer>{i}</WrapTextContainer>}
+                />
               ))}
             </MetadataCollapse>
             <MetadataCollapse
@@ -240,7 +235,10 @@ const WebAction = (
               tag={`${props.tag}::NetworkInterceptors`}
             >
               {props.action.networkInterceptors.map(i => (
-                <MenuItem key={i} text={<WrapText>{i}</WrapText>} />
+                <MenuItem
+                  key={i}
+                  text={<WrapTextContainer>{i}</WrapTextContainer>}
+                />
               ))}
             </MetadataCollapse>
             <MetadataCollapse

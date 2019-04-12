@@ -15,9 +15,11 @@ import {
   simpleSelect,
   simpleType
 } from "@misk/simpleredux"
+import { Map } from "immutable"
 import * as React from "react"
 import styled from "styled-components"
 import {
+  BaseFieldTypes,
   findIndexAction,
   IDispatchProps,
   IState,
@@ -133,33 +135,46 @@ const RequestFormFieldBuilder = (
   const metadata = typesMetadata.get(id)
   const {
     idChildren,
-    serverType: serverType,
     name,
+    serverType,
     typescriptType
   } = metadata as ITypesFieldMetadata
   if (typescriptType === null) {
     if (
       idChildren.first() &&
-      typesMetadata.get(idChildren.first()).typescriptType
+      typesMetadata.get(idChildren.first()).typescriptType &&
+      BaseFieldTypes.hasOwnProperty(serverType)
     ) {
       return (
         <div>
-          {idChildren.map((id: string) => (
-            <RequestFormFieldBuilder {...props} id={id} />
+          {idChildren.map((child: string) => (
+            <RequestFormFieldBuilder {...props} id={child} />
           ))}
         </div>
       )
     } else {
-      return (
-        <RequestFieldGroup>
-          {idChildren.map((id: string) => (
+      const fieldGroup = (child: string) => {
+        const { serverType: childServerType } = typesMetadata.get(child)
+        if (BaseFieldTypes.hasOwnProperty(childServerType)) {
+          return (
+            <div>
+              <RequestFormFieldBuilder {...props} id={child} />
+            </div>
+          )
+        } else {
+          return (
             <div>
               <ControlGroup>
-                {...repeatableFieldButtons({ ...props, id })}
+                {...repeatableFieldButtons({ ...props, id: child })}
               </ControlGroup>
-              <RequestFormFieldBuilder {...props} id={id} />
+              <RequestFormFieldBuilder {...props} id={child} />
             </div>
-          ))}
+          )
+        }
+      }
+      return (
+        <RequestFieldGroup>
+          {idChildren.map((child: string) => fieldGroup(child))}
         </RequestFieldGroup>
       )
     }
