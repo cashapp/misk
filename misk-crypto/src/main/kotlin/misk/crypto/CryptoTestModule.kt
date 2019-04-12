@@ -19,17 +19,17 @@ import javax.inject.Provider
  * Instead, it'll generate a random keyset handle for each named key.
  */
 class CryptoTestModule(
-  private val config: CryptoConfig
+  private val keyNames: List<String>
 ) : KAbstractModule() {
 
   override fun configure() {
     AeadConfig.register()
 
     val masterKey = FakeKmsClient().getAead(null)
-    config.keys?.forEach { key ->
+    keyNames.forEach { key ->
       bind<Cipher>()
-          .annotatedWith(Names.named(key.key_name))
-          .toProvider(CipherProvider(key.key_name, masterKey))
+          .annotatedWith(Names.named(key))
+          .toProvider(CipherProvider(key, masterKey))
           .asEagerSingleton()
     }
   }
