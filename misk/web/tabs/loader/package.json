@@ -8,7 +8,7 @@
   },
   "scripts": {
     "build": "npm run-script lib ",
-    "ci-build": "npm install && npm run-script clean && npm run-script prebuild && cross-env NODE_ENV=production npm run-script lib ",
+    "ci-build": "npm install && npm run-script clean && npm run-script prebuild && cross-env NODE_ENV=production npm run-script lib && npm run-script test ",
     "dev-build": "npm run-script dev-lib ",
     "clean": "rm -rf demo lib",
     "clean-build-files": "rm .hash package-lock.json package.json tsconfig.json tslint.json webpack.config.js",
@@ -18,17 +18,35 @@
     "prebuild": "npm run-script lint",
     "reinstall": "rm -rf node_modules && npm run-script install",
     "start": "npm run-script prebuild && cross-env NODE_ENV=development webpack-dev-server",
-    "test": "echo no test",
+    "test": "jest --passWithNoTests",
     "zip": "tar --exclude='.gitignore' --exclude='.old_build_files' --exclude='package.json' --exclude='package-lock.json' --exclude='prettier.config.js' --exclude='tsconfig.json' --exclude='tslint.json' --exclude='webpack.config.js' --exclude='yarn.lock' --exclude='demo' --exclude='lib' --exclude='.DS_Store' --exclude='*.log' --exclude='node_modules' --exclude='loader.tgz' -czvf loader.tgz ./"
   },
   "dependencies": {
-    "@misk/common": "0.1.5-21",
-    "@misk/core": "0.1.5-21",
-    "@misk/simpleredux": "0.1.5-21"
+    "@misk/common": "0.1.5-29",
+    "@misk/core": "0.1.5-29",
+    "@misk/simpleredux": "0.1.5-29"
   },
   "devDependencies": {
-    "@misk/dev": "0.1.5-21",
-    "@misk/tslint": "0.1.5-21"
+    "@misk/dev": "0.1.5-29",
+    "@misk/tslint": "0.1.5-29",
+    "@misk/test": "0.1.5-29"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "snapshotSerializers": [
+      "jest-serializer-html"
+    ],
+    "transform": {
+      "^.+\\.tsx?$": "ts-jest"
+    },
+    "testRegex": "(/__tests__/.*|\\.(test|spec))\\.(tsx?|jsx?)$",
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js",
+      "json",
+      "jsx"
+    ]
   },
   "prettier": {
     "arrowParens": "avoid",
