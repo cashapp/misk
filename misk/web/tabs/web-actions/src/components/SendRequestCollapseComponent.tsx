@@ -3,13 +3,9 @@ import {
   Collapse,
   ControlGroup,
   HTMLSelect,
-  Icon,
   InputGroup,
-  Intent,
-  Label,
   Tag
 } from "@blueprintjs/core"
-import { IconNames } from "@blueprintjs/icons"
 import {
   CodePreContainer,
   FlexContainer,
@@ -17,16 +13,16 @@ import {
   HTTPMethodIntent,
   HTTPStatusCodeIntent
 } from "@misk/core"
-import {
-  onChangeFnCall,
-  onChangeToggleFnCall,
-  onClickFnCall,
-  simpleSelect
-} from "@misk/simpleredux"
+import { onChangeFnCall, simpleSelect } from "@misk/simpleredux"
 import { HTTPMethod } from "http-method-enum"
 import * as React from "react"
 import styled from "styled-components"
-import { RequestFormComponent } from "../components"
+import {
+  Metadata,
+  MetadataCollapse,
+  MetadataMenu,
+  RequestFormComponent
+} from "../components"
 import {
   getFormData,
   IDispatchProps,
@@ -41,28 +37,109 @@ const Column = styled.div`
   min-width: 320px;
 `
 
+const RequestBodyForm = (
+  props: {
+    action: IWebActionInternal
+    method: HTTPMethod
+    tag: string
+  } & IState &
+    IDispatchProps
+) => {
+  const { method, tag } = props
+  if (methodHasBody(props.method)) {
+    return (
+      <MetadataCollapse
+        {...props}
+        content={"Request Body"}
+        label={"Input"}
+        tag={`${tag}::ButtonFormRequestBody`}
+      >
+        <RequestFormComponent {...props} tag={tag} />
+      </MetadataCollapse>
+    )
+  } else {
+    return (
+      <Metadata
+        {...props}
+        content={"Request Body"}
+        label={`${method} does not have a Body`}
+      />
+    )
+  }
+}
+
+const StatusTag = (props: { tag: string } & IState & IDispatchProps) => {
+  const status = simpleSelect(
+    props.simpleNetwork,
+    `${props.tag}::Response`,
+    "status"
+  )
+  if (status) {
+    const intent = HTTPStatusCodeIntent(status[0])
+    return <Tag intent={intent}>{status.join(" ")}</Tag>
+  } else {
+    return <span />
+  }
+}
+
 /**
  * Collapse wrapped Send a Request form for each Web Action card
  */
 export const SendRequestCollapseComponent = (
   props: { action: IWebActionInternal; tag: string } & IState & IDispatchProps
 ) => {
-  const { tag } = props
+  const { action, tag } = props
   // Determine if Send Request form for the Web Action should be open
-  const isOpen =
-    simpleSelect(props.simpleForm, `${tag}::Request`, "data") || false
+  const isOpen = simpleSelect(
+    props.simpleForm,
+    `${tag}::ButtonSendRequest`,
+    "data"
+  )
   const url = simpleSelect(props.simpleForm, `${tag}::URL`, "data")
   // Pre-populate the URL field with the action path pattern on open of request form
   if (isOpen && !url) {
-    props.simpleFormInput(`${tag}::URL`, props.action.pathPattern)
+    props.simpleFormInput(`${tag}::URL`, action.pathPattern)
   }
   const method: HTTPMethod =
     simpleSelect(props.simpleForm, `${tag}::Method`, "data") ||
-    props.action.dispatchMechanism.reverse()[0]
+    action.dispatchMechanism.reverse()[0]
+  const formData = getFormData(
+    action,
+    props.simpleForm,
+    tag,
+    props.webActionsRaw
+  )
+  if (
+    methodHasBody(method) &&
+    typeof simpleSelect(
+      props.simpleForm,
+      `${tag}::ButtonRequestBody`,
+      "data"
+    ) === "string"
+  ) {
+    props.simpleFormInput(`${tag}::ButtonRequestBody`, true)
+  }
+  if (
+    methodHasBody(method) &&
+    typeof simpleSelect(
+      props.simpleForm,
+      `${tag}::ButtonFormRequestBody`,
+      "data"
+    ) === "string"
+  ) {
+    props.simpleFormInput(`${tag}::ButtonFormRequestBody`, true)
+  }
+  if (
+    typeof simpleSelect(props.simpleForm, `${tag}::ButtonResponse`, "data") ===
+      "string" &&
+    simpleSelect(props.simpleNetwork, `${tag}::Response`, "data")
+  ) {
+    props.simpleFormInput(`${tag}::ButtonResponse`, true)
+  }
   return (
     <Collapse isOpen={isOpen}>
       <InputGroup
-        defaultValue={props.action.pathPattern}
+        defaultValue={action.pathPattern}
         onChange={onChangeFnCall(props.simpleFormInput, `${tag}::URL`)}
         placeholder={
           "Request URL: absolute ( http://your.url.com/to/send/a/request/to/ ) or internal service endpoint ( /service/web/action )"
@@ -71,33 +148,33 @@ export const SendRequestCollapseComponent = (
       />
       <FlexContainer>
         <Column>
-          <Collapse isOpen={methodHasBody(method)}>
-            <RequestFormComponent {...props} tag={tag} />
-            <br />
-          </Collapse>
+          <MetadataMenu>
+            <RequestBodyForm
+              action={action}
+              method={method}
+              tag={tag}
+              {...props}
+            />
+          </MetadataMenu>
         </Column>
         <Column>
           <ControlGroup>
             <HTMLSelect
               large={true}
               onChange={onChangeFnCall(props.simpleFormInput, `${tag}::Method`)}
-              options={props.action.dispatchMechanism.sort()}
+              options={action.dispatchMechanism.sort()}
               value={method}
             />
             <Button
               large={true}
-              onClick={onClickFnCall(
-                HTTPMethodDispatch(props)[method],
-                `${tag}::Response`,
-                url,
-                isOpen &&
-                  getFormData(
-                    props.action,
-                    props.simpleForm,
-                    tag,
-                    props.webActionsRaw
-                  )
-              )}
+              onClick={(event: any) => {
+                props.simpleFormInput(`${tag}::ButtonRequestBody`, false)
+                HTTPMethodDispatch(props)[method](
+                  `${tag}::Response`,
+                  url,
+                  isOpen && formData
+                )
+              }}
               intent={HTTPMethodIntent[method]}
               loading={simpleSelect(
                 props.simpleNetwork,
@@ -107,114 +184,56 @@ export const SendRequestCollapseComponent = (
               text={"Submit"}
             />
           </ControlGroup>
-          <Label>
-            Request <Tag>{url}</Tag>
-          </Label>
-          <Collapse
-            isOpen={
-              isOpen &&
-              getFormData(
-                props.action,
-                props.simpleForm,
-                tag,
-                props.webActionsRaw
-              )
-            }
-          >
-            <CodePreContainer>
-              {JSON.stringify(
-                isOpen &&
-                  getFormData(
-                    props.action,
-                    props.simpleForm,
-                    tag,
-                    props.webActionsRaw
-                  ),
-                null,
-                2
-              )}
-            </CodePreContainer>
-          </Collapse>
-          <Collapse
-            isOpen={simpleSelect(
-              props.simpleNetwork,
-              `${tag}::Response`,
-              "status"
+          <MetadataMenu>
+            {methodHasBody(method) ? (
+              <MetadataCollapse
+                {...props}
+                content={"Request Body"}
+                label={`${url}`}
+                tag={`${tag}::ButtonRequestBody`}
+              >
+                <CodePreContainer>
+                  {JSON.stringify(isOpen && formData, null, 2)}
+                </CodePreContainer>
+              </MetadataCollapse>
+            ) : (
+              <Metadata content={"Request"} label={`${url}`} {...props} />
             )}
-          >
-            <Label>
-              Response{" "}
-              <Tag
-                intent={HTTPStatusCodeIntent(
-                  simpleSelect(
-                    props.simpleNetwork,
-                    `${tag}::Response`,
-                    "status"
-                  )[0]
-                )}
-              >
-                {(
-                  simpleSelect(
-                    props.simpleNetwork,
-                    `${tag}::Response`,
-                    "status"
-                  ) || []
-                ).join(" ")}
-              </Tag>{" "}
-              <Tag
-                intent={Intent.NONE}
-                onClick={onChangeToggleFnCall(
-                  props.simpleFormToggle,
-                  `${tag}::ButtonRawResponse`,
-                  props.simpleForm
-                )}
-              >
-                <span>
-                  Raw Response{" "}
-                  {simpleSelect(
-                    props.simpleForm,
-                    `${tag}::ButtonRawResponse`,
-                    "data"
-                  ) ? (
-                    <Icon icon={IconNames.CARET_DOWN} />
-                  ) : (
-                    <Icon icon={IconNames.CARET_RIGHT} />
+            <MetadataCollapse
+              {...props}
+              content={"Response"}
+              labelElement={<StatusTag {...props} tag={tag} />}
+              tag={`${tag}::ButtonResponse`}
+            >
+              <div>
+                <CodePreContainer>
+                  {JSON.stringify(
+                    simpleSelect(
+                      props.simpleNetwork,
+                      `${tag}::Response`,
+                      "data"
+                    ),
+                    null,
+                    2
                   )}
-                </span>
-              </Tag>
-            </Label>
-          </Collapse>
-          <Collapse
-            isOpen={simpleSelect(
-              props.simpleNetwork,
-              `${tag}::Response`,
-              "data"
-            )}
-          >
-            <CodePreContainer>
-              {JSON.stringify(
-                simpleSelect(props.simpleNetwork, `${tag}::Response`, "data"),
-                null,
-                2
-              )}
-            </CodePreContainer>
-          </Collapse>
-          <Collapse
-            isOpen={simpleSelect(
-              props.simpleForm,
-              `${tag}::ButtonRawResponse`,
-              "data"
-            )}
-          >
-            <Label>Raw Network Redux State</Label>
-            <CodePreContainer>
-              {JSON.stringify(
-                simpleSelect(props.simpleNetwork, `${tag}::Response`),
-                null,
-                2
-              )}
-            </CodePreContainer>
-          </Collapse>
+                </CodePreContainer>
+                <MetadataCollapse
+                  {...props}
+                  content={"Raw Response"}
+                  label={"Redux State"}
+                  tag={`${tag}::ButtonRawResponse`}
+                >
+                  <CodePreContainer>
+                    {JSON.stringify(
+                      simpleSelect(props.simpleNetwork, `${tag}::Response`),
+                      null,
+                      2
+                    )}
+                  </CodePreContainer>
+                </MetadataCollapse>
+              </div>
+            </MetadataCollapse>
+          </MetadataMenu>
         </Column>
       </FlexContainer>
     </Collapse>

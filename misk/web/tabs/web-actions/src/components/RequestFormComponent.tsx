@@ -2,7 +2,6 @@ import {
   Button,
   Card,
   ControlGroup,
-  FormGroup,
   InputGroup,
   Intent,
   TextArea,
@@ -34,10 +33,6 @@ const RequestFieldGroup = styled(Card)`
   border-left: 2px black;
   margin-bottom: 0px;
   padding: 0px 0px 0px 10px !important;
-`
-
-const RequestFormGroup = styled(FormGroup)`
-  margin: 0 !important;
 `
 
 const AddButton = (
@@ -133,135 +128,85 @@ const RequestFormFieldBuilder = (
 ) => {
   const { id, tag, typesMetadata } = props
   const metadata = typesMetadata.get(id)
-  const {
-    idChildren,
-    name,
-    serverType,
-    typescriptType
-  } = metadata as ITypesFieldMetadata
-  if (typescriptType === null) {
-    if (
-      idChildren.first() &&
-      typesMetadata.get(idChildren.first()).typescriptType &&
-      BaseFieldTypes.hasOwnProperty(serverType)
-    ) {
-      return (
-        <div>
-          {idChildren.map((child: string) => (
-            <RequestFormFieldBuilder {...props} id={child} />
-          ))}
-        </div>
-      )
-    } else {
-      const fieldGroup = (child: string) => {
-        const { serverType: childServerType } = typesMetadata.get(child)
-        if (BaseFieldTypes.hasOwnProperty(childServerType)) {
-          return (
-            <div>
+  if (metadata) {
+    const {
+      idChildren,
+      serverType,
+      typescriptType
+    } = metadata as ITypesFieldMetadata
+    if (typescriptType === null) {
+      if (
+        idChildren.first() &&
+        typesMetadata.get(idChildren.first()).typescriptType &&
+        BaseFieldTypes.hasOwnProperty(serverType)
+      ) {
+        return (
+          <div>
+            {idChildren.map((child: string) => (
               <RequestFormFieldBuilder {...props} id={child} />
-            </div>
-          )
-        } else {
-          return (
-            <div>
-              <ControlGroup>
-                {...repeatableFieldButtons({ ...props, id: child })}
-              </ControlGroup>
-              <RequestFormFieldBuilder {...props} id={child} />
-            </div>
-          )
-        }
-      }
-      return (
-        <RequestFieldGroup>
-          {idChildren.map((child: string) => fieldGroup(child))}
-        </RequestFieldGroup>
-      )
-    }
-  } else if (typescriptType === TypescriptBaseTypes.boolean) {
-    return (
-      <ControlGroup>
-        {...repeatableFieldButtons({ ...props, id })}
-        <Button
-          intent={
-            simpleSelect(
-              props.simpleForm,
-              `${tag}::${padId(id)}`,
-              "data",
-              simpleType.boolean
+            ))}
+          </div>
+        )
+      } else {
+        const fieldGroup = (child: string) => {
+          const { serverType: childServerType } = typesMetadata.get(child)
+          if (BaseFieldTypes.hasOwnProperty(childServerType)) {
+            return (
+              <div>
+                <RequestFormFieldBuilder {...props} id={child} />
+              </div>
             )
-              ? Intent.PRIMARY
-              : Intent.WARNING
+          } else {
+            return (
+              <div>
+                <ControlGroup>
+                  {...repeatableFieldButtons({ ...props, id: child })}
+                </ControlGroup>
+                <RequestFormFieldBuilder {...props} id={child} />
+              </div>
+            )
           }
-          onClick={onChangeToggleFnCall(
-            props.simpleFormToggle,
-            `${tag}::${padId(id)}`,
-            props.simpleForm
-          )}
-        >
-          {simpleSelect(
-            props.simpleForm,
-            `${tag}::${padId(id)}`,
-            "data",
-            simpleType.boolean
-          ).toString()}
-        </Button>
-      </ControlGroup>
-    )
-  } else if (typescriptType === TypescriptBaseTypes.number) {
-    return (
-      <ControlGroup>
-        {...repeatableFieldButtons({ ...props, id })}
-        <InputGroup
-          onChange={onChangeFnCall(
-            props.simpleFormInput,
-            `${tag}::${padId(id)}`
-          )}
-          placeholder={serverType}
-          value={simpleSelect(props.simpleForm, `${tag}::${padId(id)}`, "data")}
-        />
-      </ControlGroup>
-    )
-  } else if (typescriptType === TypescriptBaseTypes.string) {
-    return (
-      <ControlGroup>
-        {...repeatableFieldButtons({ ...props, id })}
-        <Tooltip content={"Toggle large text input"}>
+        }
+        return (
+          <RequestFieldGroup>
+            {idChildren.map((child: string) => fieldGroup(child))}
+          </RequestFieldGroup>
+        )
+      }
+    } else if (typescriptType === TypescriptBaseTypes.boolean) {
+      return (
+        <ControlGroup>
+          {...repeatableFieldButtons({ ...props, id })}
           <Button
-            active={simpleSelect(
-              props.simpleForm,
-              `${tag}::LongText:${padId(id)}`,
-              "data",
-              simpleType.boolean
-            )}
-            icon={IconNames.MORE}
+            intent={
+              simpleSelect(
+                props.simpleForm,
+                `${tag}::${padId(id)}`,
+                "data",
+                simpleType.boolean
+              )
+                ? Intent.PRIMARY
+                : Intent.WARNING
+            }
             onClick={onChangeToggleFnCall(
               props.simpleFormToggle,
-              `${tag}::LongText:${padId(id)}`,
+              `${tag}::${padId(id)}`,
               props.simpleForm
             )}
-          />
-        </Tooltip>
-        {simpleSelect(
-          props.simpleForm,
-          `${tag}::LongText:${padId(id)}`,
-          "data",
-          simpleType.boolean
-        ) ? (
-          <TextArea
-            fill={true}
-            onChange={onChangeFnCall(
-              props.simpleFormInput,
-              `${tag}::${padId(id)}`
-            )}
-            placeholder={`${serverType}\nDrag bottom right corner of text area input to expand.`}
-            value={simpleSelect(
+          >
+            {simpleSelect(
               props.simpleForm,
               `${tag}::${padId(id)}`,
-              "data"
-            )}
-          />
-        ) : (
+              "data",
+              simpleType.boolean
+            ).toString()}
+          </Button>
+        </ControlGroup>
+      )
+    } else if (typescriptType === TypescriptBaseTypes.number) {
+      return (
+        <ControlGroup>
+          {...repeatableFieldButtons({ ...props, id })}
           <InputGroup
             onChange={onChangeFnCall(
               props.simpleFormInput,
@@ -274,14 +219,67 @@ const RequestFormFieldBuilder = (
               "data"
             )}
           />
-        )}
-      </ControlGroup>
-    )
-  } else {
-    return (
-      <div>
-        {...repeatableFieldButtons({ ...props, id })}
-        <RequestFormGroup label={`${name}:${JSON.stringify(serverType)}`}>
+        </ControlGroup>
+      )
+    } else if (typescriptType === TypescriptBaseTypes.string) {
+      return (
+        <ControlGroup>
+          {...repeatableFieldButtons({ ...props, id })}
+          <Tooltip content={"Toggle large text input"}>
+            <Button
+              active={simpleSelect(
+                props.simpleForm,
+                `${tag}::LongText:${padId(id)}`,
+                "data",
+                simpleType.boolean
+              )}
+              icon={IconNames.MORE}
+              onClick={onChangeToggleFnCall(
+                props.simpleFormToggle,
+                `${tag}::LongText:${padId(id)}`,
+                props.simpleForm
+              )}
+            />
+          </Tooltip>
+          {simpleSelect(
+            props.simpleForm,
+            `${tag}::LongText:${padId(id)}`,
+            "data",
+            simpleType.boolean
+          ) ? (
+            <TextArea
+              fill={true}
+              onChange={onChangeFnCall(
+                props.simpleFormInput,
+                `${tag}::${padId(id)}`
+              )}
+              placeholder={`${serverType}\nDrag bottom right corner of text area input to expand.`}
+              value={simpleSelect(
+                props.simpleForm,
+                `${tag}::${padId(id)}`,
+                "data"
+              )}
+            />
+          ) : (
+            <InputGroup
+              onChange={onChangeFnCall(
+                props.simpleFormInput,
+                `${tag}::${padId(id)}`
+              )}
+              placeholder={serverType}
+              value={simpleSelect(
+                props.simpleForm,
+                `${tag}::${padId(id)}`,
+                "data"
+              )}
+            />
+          )}
+        </ControlGroup>
+      )
+    } else {
+      return (
+        <ControlGroup>
+          {...repeatableFieldButtons({ ...props, id })}
           <TextArea
             fill={true}
             onChange={onChangeFnCall(
@@ -292,9 +290,11 @@ const RequestFormFieldBuilder = (
               "Unparseable type. (JSON or Text).\nDrag bottom right corner of text area input to expand."
             }
           />
-        </RequestFormGroup>
-      </div>
-    )
+        </ControlGroup>
+      )
+    }
+  } else {
+    return <span />
   }
 }
 

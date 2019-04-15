@@ -93,12 +93,6 @@ describe("Test parsing of string to ServerType: parseType()", () => {
   })
 })
 
-/**
- * Other TODOs
- * Have request body and response be tag drop downs so they can be hidden
- * Only show 2 columns on requests with
- */
-
 const nonTypedActionAPI: IWebActionAPI = {
   allowedRoles: [] as string[],
   allowedServices: [] as string[],

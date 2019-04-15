@@ -1,25 +1,25 @@
 import {
   Card,
   Classes,
-  Collapse,
   H3,
   H5,
   Icon,
-  Menu,
   MenuItem,
   Spinner,
-  Tag,
-  Tooltip
+  Tag
 } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
 import { FlexContainer, HTTPMethodIntent, WrapTextContainer } from "@misk/core"
-import { onChangeToggleFnCall, simpleSelect } from "@misk/simpleredux"
+import { simpleSelect } from "@misk/simpleredux"
 import { HTTPMethod } from "http-method-enum"
 import { chain } from "lodash"
 import * as React from "react"
 import styled from "styled-components"
 import {
   FilterWebActionsComponent,
+  Metadata,
+  MetadataCollapse,
+  MetadataMenu,
   SendRequestCollapseComponent
 } from "../components"
 import {
@@ -53,12 +53,6 @@ const Column = styled.div`
   min-width: 320px;
 `
 
-const MetadataMenu = styled(Menu)`
-  li {
-    margin-bottom: 0;
-  }
-`
-
 /**
  * Used in rendering the Content Types metadata request -> response
  */
@@ -68,86 +62,6 @@ const RequestResponeContentTypes = (props: { action: IWebActionInternal }) => (
     <Icon icon={IconNames.ARROW_RIGHT} />{" "}
     <span>{props.action.responseMediaType}</span>
   </span>
-)
-
-/**
- * Single cell component for a piece of metadata
- * @param props
- *  * content: primary content that is displayed (ie. eng, service-owners)
- *  * label: right aligned faded text that is a label for the data (ie. Roles)
- *  * tooltip: text displayed in tooltip when content is hovered over.
- *      Separate definition from content in the case that a truncated length
- *      is displayed but the full length of content is displayed in tooltip
- */
-const Metadata = (
-  props: {
-    content: string | JSX.Element
-    label: string
-    tooltip?: string | JSX.Element
-  } & any
-) => {
-  if (props.tooltip) {
-    return (
-      <MenuItem
-        label={props.label}
-        text={<Tooltip content={props.tooltip}>{props.content}</Tooltip>}
-        {...props}
-      />
-    )
-  } else {
-    return (
-      <MenuItem
-        label={props.label}
-        text={<Tooltip>{props.content}</Tooltip>}
-        {...props}
-      />
-    )
-  }
-}
-
-/**
- * Metadata that slides out content below when clicked
- * @param props : includes same props as Metadata with a few additional
- *  * children: any components to display when the Metadata is clicked
- *  * tag: string to use in @misk/SimpleRedux/SimpleForm to register Metadata clicks
- *  * IState: include connected State from parent container
- *      Provides access to @misk/SimpleRedux/SimpleForm substate in Redux
- *  * IDispatchProps: include connected dispatch object from parent container
- *      Provides access to @misk/SimpleRedux/SimpleForm input handlers
- */
-const MetadataCollapse = (
-  props: {
-    children: any
-    content: string | JSX.Element
-    label: string
-    tag: string
-    tooltip?: string | JSX.Element
-  } & IState &
-    IDispatchProps
-) => (
-  <div>
-    <Metadata
-      content={
-        <span>
-          {simpleSelect(props.simpleForm, props.tag, "data") ? (
-            <Icon icon={IconNames.CARET_DOWN} />
-          ) : (
-            <Icon icon={IconNames.CARET_RIGHT} />
-          )}{" "}
-          {props.content}
-        </span>
-      }
-      label={props.label}
-      onClick={onChangeToggleFnCall(
-        props.simpleFormToggle,
-        props.tag,
-        props.simpleForm
-      )}
-    />
-    <Collapse isOpen={simpleSelect(props.simpleForm, props.tag, "data")}>
-      {props.children}
-    </Collapse>
-  </div>
 )
 
 /**
@@ -245,7 +159,7 @@ const WebAction = (
               {...props}
               content={"Send a Request"}
               label={""}
-              tag={`${props.tag}::Request`}
+              tag={`${props.tag}::ButtonSendRequest`}
             >
               <span />
             </MetadataCollapse>
@@ -317,7 +231,7 @@ const SkeletonWebActions = () => (
           <Metadata label={"Content Types"} content={<SkeletonText />} />
           <Metadata
             label={"Application Interceptors"}
-            text={<SkeletonText />}
+            content={<SkeletonText />}
           />
           <Metadata label={"Network Interceptors"} content={<SkeletonText />} />
           <Metadata label={"Send a Request"} content={<SkeletonText />} />
