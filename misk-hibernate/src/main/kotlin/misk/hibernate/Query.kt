@@ -79,3 +79,12 @@ annotation class Order(
   val path: String,
   val asc: Boolean = true
 )
+
+/**
+ * Annotates a function on an interface to execute a `SELECT` query. Functions with
+ * this annotation must return a `List` to fetch multiple rows results, or a regular type
+ * to fetch a unique result. They may return a data class which maps properties to SQL fields.
+ */
+annotation class Sql(
+  val query: String
+)
