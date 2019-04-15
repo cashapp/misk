@@ -33,6 +33,8 @@ interface Transacter {
 
 fun Transacter.shards() = transaction { it.shards() }
 
+fun Transacter.shards(keyspace: Keyspace) = transaction { it.shards(keyspace) }
+
 fun <T> Transacter.transaction(shard: Shard, lambda: (session: Session) -> T): T =
     transaction { it.target(shard) { lambda(it) } }
 
