@@ -27,7 +27,7 @@ internal class VitessSchemaMigratorTest {
   }
 
   @AfterEach fun cleanUpMigrationTable() {
-    openDirectConnection().use { c ->
+    openDirectConnection()?.use { c ->
       val schemaVersion = c.prepareStatement("""
             |DELETE FROM `vt_movies_-80`.schema_version
             |""".trimMargin())
@@ -62,7 +62,7 @@ internal class VitessSchemaMigratorTest {
     // The schema_version is unknown to Vitess which means we can query it with shard targetting
     // but we can't insert into it (unless we specify -queryserver-config-allowunsafe-dmls which
     // vttestserver currently does not). So we bypass Vitess to insert into it directly.
-    openDirectConnection().use { c ->
+    openDirectConnection()?.use { c ->
       val schemaVersion = c.prepareStatement("""
               |INSERT INTO `vt_movies_-80`.schema_version (version, installed_by) VALUES (?, ?)
               |""".trimMargin())
@@ -73,8 +73,8 @@ internal class VitessSchemaMigratorTest {
   }
 
   /** Open a direct connection to the Vitess MySQL instance. */
-  private fun openDirectConnection(): Connection {
+  private fun openDirectConnection(): Connection? {
     val cluster = vitessService.cluster()
-    return cluster.openMysqlConnection()
+    return cluster?.openMysqlConnection()
   }
 }
