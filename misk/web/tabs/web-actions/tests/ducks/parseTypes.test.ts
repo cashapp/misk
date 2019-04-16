@@ -8,7 +8,7 @@ describe("Test parsing of string to ServerType", () => {
     expect(parseType(ServerTypes.Int, "-123.456")).toEqual(-123)
   })
   it("long", () => {
-    expect(parseType(ServerTypes.Long, "-123.456")).toEqual(-123.456)
+    expect(parseType(ServerTypes.Long, "-123.456")).toEqual(-123)
   })
   it("short", () => {
     expect(parseType(ServerTypes.Short, "-123.456")).toEqual(-123.456)

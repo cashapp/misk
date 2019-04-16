@@ -304,7 +304,7 @@ export const parseType = (
     case ServerTypes.JSON:
       return value
     case ServerTypes.Long:
-      return parseFloat(value)
+      return parseInt(value, 10)
     case ServerTypes.Short:
       return parseFloat(value)
     default:

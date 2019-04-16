@@ -1,10 +1,10 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Build typesMetadata from a raw WebActionMetadata generateNested 1`] = `
-Immutable.Map {
+Immutable.OrderedMap {
   "0": Object {
     "id": "0",
-    "idChildren": Immutable.Set [
+    "idChildren": Immutable.OrderedSet [
       "2",
     ],
     "idParent": "0",
@@ -15,7 +15,7 @@ Immutable.Map {
   },
   "2": Object {
     "id": "2",
-    "idChildren": Immutable.Set [
+    "idChildren": Immutable.OrderedSet [
       "3",
     ],
     "idParent": "0",
@@ -26,7 +26,7 @@ Immutable.Map {
   },
   "3": Object {
     "id": "3",
-    "idChildren": Immutable.Set [],
+    "idChildren": Immutable.OrderedSet [],
     "idParent": "2",
     "name": "Int Field",
     "repeated": false,
@@ -37,10 +37,10 @@ Immutable.Map {
 `;
 
 exports[`Build typesMetadata from a raw WebActionMetadata generateNoNested 1`] = `
-Immutable.Map {
+Immutable.OrderedMap {
   "0": Object {
     "id": "0",
-    "idChildren": Immutable.Set [
+    "idChildren": Immutable.OrderedSet [
       "1",
     ],
     "idParent": "0",
@@ -51,7 +51,7 @@ Immutable.Map {
   },
   "1": Object {
     "id": "1",
-    "idChildren": Immutable.Set [],
+    "idChildren": Immutable.OrderedSet [],
     "idParent": "0",
     "name": "Int Field",
     "repeated": false,
@@ -61,13 +61,13 @@ Immutable.Map {
 }
 `;
 
-exports[`Build typesMetadata from a raw WebActionMetadata generateNonTypedGET 1`] = `Immutable.Map {}`;
+exports[`Build typesMetadata from a raw WebActionMetadata generateNonTypedGET 1`] = `Immutable.OrderedMap {}`;
 
 exports[`Build typesMetadata from a raw WebActionMetadata generateNonTypedPOST 1`] = `
-Immutable.Map {
+Immutable.OrderedMap {
   "0": Object {
     "id": "0",
-    "idChildren": Immutable.Set [],
+    "idChildren": Immutable.OrderedSet [],
     "idParent": "",
     "name": "",
     "repeated": false,
@@ -78,10 +78,10 @@ Immutable.Map {
 `;
 
 exports[`Build typesMetadata from a raw WebActionMetadata generateRepeated 1`] = `
-Immutable.Map {
+Immutable.OrderedMap {
   "0": Object {
     "id": "0",
-    "idChildren": Immutable.Set [
+    "idChildren": Immutable.OrderedSet [
       "4",
     ],
     "idParent": "0",
@@ -92,7 +92,7 @@ Immutable.Map {
   },
   "4": Object {
     "id": "4",
-    "idChildren": Immutable.Set [
+    "idChildren": Immutable.OrderedSet [
       "5",
     ],
     "idParent": "0",
@@ -103,7 +103,7 @@ Immutable.Map {
   },
   "5": Object {
     "id": "5",
-    "idChildren": Immutable.Set [],
+    "idChildren": Immutable.OrderedSet [],
     "idParent": "4",
     "name": "Repeated Double Field",
     "repeated": false,
@@ -114,10 +114,10 @@ Immutable.Map {
 `;
 
 exports[`Build typesMetadata from a raw WebActionMetadata generateRepeatedNested 1`] = `
-Immutable.Map {
+Immutable.OrderedMap {
   "0": Object {
     "id": "0",
-    "idChildren": Immutable.Set [
+    "idChildren": Immutable.OrderedSet [
       "6",
     ],
     "idParent": "0",
@@ -128,7 +128,7 @@ Immutable.Map {
   },
   "6": Object {
     "id": "6",
-    "idChildren": Immutable.Set [
+    "idChildren": Immutable.OrderedSet [
       "7",
     ],
     "idParent": "0",
@@ -139,7 +139,7 @@ Immutable.Map {
   },
   "7": Object {
     "id": "7",
-    "idChildren": Immutable.Set [
+    "idChildren": Immutable.OrderedSet [
       "8",
     ],
     "idParent": "6",
@@ -150,7 +150,7 @@ Immutable.Map {
   },
   "8": Object {
     "id": "8",
-    "idChildren": Immutable.Set [
+    "idChildren": Immutable.OrderedSet [
       "9",
     ],
     "idParent": "7",
@@ -161,7 +161,7 @@ Immutable.Map {
   },
   "9": Object {
     "id": "9",
-    "idChildren": Immutable.Set [],
+    "idChildren": Immutable.OrderedSet [],
     "idParent": "8",
     "name": "Int Field",
     "repeated": false,
@@ -172,10 +172,10 @@ Immutable.Map {
 `;
 
 exports[`Build typesMetadata from a raw WebActionMetadata generateRepeatedNestedRepeated 1`] = `
-Immutable.Map {
+Immutable.OrderedMap {
   "0": Object {
     "id": "0",
-    "idChildren": Immutable.Set [
+    "idChildren": Immutable.OrderedSet [
       "10",
     ],
     "idParent": "0",
@@ -186,7 +186,7 @@ Immutable.Map {
   },
   "10": Object {
     "id": "10",
-    "idChildren": Immutable.Set [
+    "idChildren": Immutable.OrderedSet [
       "11",
     ],
     "idParent": "0",
@@ -197,7 +197,7 @@ Immutable.Map {
   },
   "11": Object {
     "id": "11",
-    "idChildren": Immutable.Set [
+    "idChildren": Immutable.OrderedSet [
       "12",
     ],
     "idParent": "10",
@@ -208,7 +208,7 @@ Immutable.Map {
   },
   "12": Object {
     "id": "12",
-    "idChildren": Immutable.Set [
+    "idChildren": Immutable.OrderedSet [
       "13",
     ],
     "idParent": "11",
@@ -219,7 +219,7 @@ Immutable.Map {
   },
   "13": Object {
     "id": "13",
-    "idChildren": Immutable.Set [
+    "idChildren": Immutable.OrderedSet [
       "14",
     ],
     "idParent": "12",
@@ -230,7 +230,7 @@ Immutable.Map {
   },
   "14": Object {
     "id": "14",
-    "idChildren": Immutable.Set [],
+    "idChildren": Immutable.OrderedSet [],
     "idParent": "13",
     "name": "Repeated Double Field",
     "repeated": false,
