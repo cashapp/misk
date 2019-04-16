@@ -88,3 +88,14 @@ export const MetadataCollapse = (
     </div>
   )
 }
+
+// const mapStateToProps = (state: IState) => rootSelectors(state)
+
+// const mapDispatchToProps = {
+//   ...rootDispatcher
+// }
+
+// export default connect(
+//   mapStateToProps,
+//   mapDispatchToProps
+// )(TabContainer)

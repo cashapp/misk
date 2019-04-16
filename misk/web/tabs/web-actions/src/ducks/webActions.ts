@@ -129,6 +129,8 @@ export const methodHasBody = (method: HTTPMethod) =>
   method === HTTPMethod.POST ||
   method === HTTPMethod.PUT
 
+export const padId = (id: string) => padStart(id, 10, "0")
+
 /**
  * Titlecase versions of IWebActionInternal fields for use in Filter UI
  */
@@ -262,8 +264,6 @@ export const dispatchWebActions: IDispatchWebActions = {
  *  function to prevent unhelpful errors. Ie. a failed request error is
  *  returned but it actually was just a parsing error within the try/catch.
  */
-
-export const padId = (id: string) => padStart(id, 10, "0")
 
 export const mapOverChildrenData = (
   typesMetadata: Map<string, ITypesFieldMetadata>,
@@ -692,11 +692,7 @@ export const generateTypesMetadata = (
 
 function* handleMetadata() {
   try {
-    // const { data } = yield call(axios.get, "/api/webaction/metadata")
-    const { data } = yield call(
-      axios.get,
-      "https://raw.githubusercontent.com/adrw/misk-web/adrw/20190409.WebActionsExampleData/examples/data/demo/webactions.json"
-    )
+    const { data } = yield call(axios.get, "/api/webaction/metadata")
     const { webActionMetadata } = data
     const metadata = chain(webActionMetadata)
       .map((action: IWebActionAPI) => {

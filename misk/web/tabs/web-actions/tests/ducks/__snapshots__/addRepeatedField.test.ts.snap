@@ -1,0 +1,201 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Add a repeated field addNestedRepeated 1`] = `
+Immutable.Map {
+  "11": Object {
+    "id": "11",
+    "idChildren": Immutable.Set [
+      "12",
+      "14",
+    ],
+    "idParent": "10",
+    "name": "Nested Double Field",
+    "repeated": false,
+    "serverType": "repeatedDouble",
+    "typescriptType": null,
+  },
+  "12": Object {
+    "id": "12",
+    "idChildren": Immutable.Set [
+      "13",
+    ],
+    "idParent": "11",
+    "name": "Repeated Double Field",
+    "repeated": true,
+    "serverType": "Double",
+    "typescriptType": null,
+  },
+  "13": Object {
+    "id": "13",
+    "idChildren": Immutable.Set [],
+    "idParent": "12",
+    "name": "Repeated Double Field",
+    "repeated": false,
+    "serverType": "Double",
+    "typescriptType": "number",
+  },
+  "14": Object {
+    "id": "14",
+    "idChildren": Immutable.Set [
+      "15",
+    ],
+    "idParent": "11",
+    "name": "Nested Double Field",
+    "repeated": false,
+    "serverType": "repeatedDouble",
+    "typescriptType": null,
+  },
+  "15": Object {
+    "id": "15",
+    "idChildren": Immutable.Set [
+      "16",
+    ],
+    "idParent": "14",
+    "name": "Repeated Double Field",
+    "repeated": true,
+    "serverType": "Double",
+    "typescriptType": null,
+  },
+  "16": Object {
+    "id": "16",
+    "idChildren": Immutable.Set [],
+    "idParent": "15",
+    "name": "Repeated Double Field",
+    "repeated": false,
+    "serverType": "Double",
+    "typescriptType": "number",
+  },
+  "0": Object {
+    "id": "0",
+    "idChildren": Immutable.Set [
+      "5",
+    ],
+    "idParent": "0",
+    "name": "",
+    "repeated": false,
+    "serverType": null,
+    "typescriptType": null,
+  },
+  "5": Object {
+    "id": "5",
+    "idChildren": Immutable.Set [
+      "6",
+      "10",
+    ],
+    "idParent": "0",
+    "name": "Nested Repeated Double Field",
+    "repeated": true,
+    "serverType": "nestedRepeatedDouble",
+    "typescriptType": null,
+  },
+  "6": Object {
+    "id": "6",
+    "idChildren": Immutable.Set [
+      "7",
+    ],
+    "idParent": "5",
+    "name": "Nested Repeated Double Field",
+    "repeated": false,
+    "serverType": "nestedRepeatedDouble",
+    "typescriptType": null,
+  },
+  "7": Object {
+    "id": "7",
+    "idChildren": Immutable.Set [
+      "8",
+    ],
+    "idParent": "6",
+    "name": "Nested Double Field",
+    "repeated": false,
+    "serverType": "repeatedDouble",
+    "typescriptType": null,
+  },
+  "8": Object {
+    "id": "8",
+    "idChildren": Immutable.Set [
+      "9",
+    ],
+    "idParent": "7",
+    "name": "Repeated Double Field",
+    "repeated": true,
+    "serverType": "Double",
+    "typescriptType": null,
+  },
+  "9": Object {
+    "id": "9",
+    "idChildren": Immutable.Set [],
+    "idParent": "8",
+    "name": "Repeated Double Field",
+    "repeated": false,
+    "serverType": "Double",
+    "typescriptType": "number",
+  },
+  "10": Object {
+    "id": "10",
+    "idChildren": Immutable.Set [
+      "11",
+    ],
+    "idParent": "5",
+    "name": "Nested Repeated Double Field",
+    "repeated": false,
+    "serverType": "nestedRepeatedDouble",
+    "typescriptType": null,
+  },
+}
+`;
+
+exports[`Add a repeated field addRepeated 1`] = `
+Immutable.Map {
+  "0": Object {
+    "id": "0",
+    "idChildren": Immutable.Set [
+      "1",
+    ],
+    "idParent": "0",
+    "name": "",
+    "repeated": false,
+    "serverType": null,
+    "typescriptType": null,
+  },
+  "1": Object {
+    "id": "1",
+    "idChildren": Immutable.Set [
+      "2",
+      "3",
+      "4",
+    ],
+    "idParent": "0",
+    "name": "Repeated Double Field",
+    "repeated": true,
+    "serverType": "Double",
+    "typescriptType": null,
+  },
+  "2": Object {
+    "id": "2",
+    "idChildren": Immutable.Set [],
+    "idParent": "1",
+    "name": "Repeated Double Field",
+    "repeated": false,
+    "serverType": "Double",
+    "typescriptType": "number",
+  },
+  "3": Object {
+    "id": "3",
+    "idChildren": Immutable.Set [],
+    "idParent": "1",
+    "name": "Repeated Double Field",
+    "repeated": false,
+    "serverType": "Double",
+    "typescriptType": "number",
+  },
+  "4": Object {
+    "id": "4",
+    "idChildren": Immutable.Set [],
+    "idParent": "1",
+    "name": "Repeated Double Field",
+    "repeated": false,
+    "serverType": "Double",
+    "typescriptType": "number",
+  },
+}
+`;

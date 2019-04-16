@@ -32,7 +32,7 @@ const RequestFieldGroup = styled(Card)`
   box-shadow: none !important;
   border-left: 2px black;
   margin-bottom: 0px;
-  padding: 0px 0px 0px 10px !important;
+  padding: 0px 0px 0px 15px !important;
 `
 
 const AddButton = (
