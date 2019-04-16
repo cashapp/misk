@@ -27,7 +27,6 @@ class CryptoModule(
       bind<Cipher>()
           .annotatedWith(Names.named(key.key_name))
           .toProvider(CipherProvider(config.kms_uri, key))
-          .asEagerSingleton()
     }
   }
 
