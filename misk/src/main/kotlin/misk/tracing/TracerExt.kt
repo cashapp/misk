@@ -12,9 +12,11 @@ fun <T : Any?> Tracer.trace(spanName: String, tags: Map<String, String> = mapOf(
 fun <T : Any?> Tracer.traceWithSpan(
   spanName: String,
   tags: Map<String, String> = mapOf(),
+  customizer: (Tracer.SpanBuilder) -> Unit = {},
   f: (Span) -> T
 ): T {
   val spanBuilder = buildSpan(spanName)
+  customizer(spanBuilder)
   tags.forEach { k, v -> spanBuilder.withTag(k, v) }
 
   activeSpan()?.let { spanBuilder.asChildOf(it) }
@@ -29,3 +31,19 @@ fun <T : Any?> Tracer.traceWithSpan(
     scope.close()
   }
 }
+
+/**
+ * Start a new span with an explicit parent span, useful when connecting a child spand to a parent
+ * span that isn't the active span. For example when running parts of a trace in a separate thread.
+ */
+fun <T : Any?> Tracer.traceWithChildSpan(
+  spanName: String,
+  span: Span,
+  tags: Map<String, String> = mapOf(),
+  customizer: (Tracer.SpanBuilder) -> Unit = {},
+  f: (Span) -> T
+): T =
+    traceWithSpan(spanName, tags, { sb ->
+      sb.asChildOf(span)
+      customizer(sb)
+    }, f)
