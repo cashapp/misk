@@ -42,7 +42,7 @@ import kotlin.concurrent.thread
 import kotlin.reflect.KClass
 import kotlin.streams.toList
 
-const val VITESS_VERSION = "sha256:3cef0e042dee2312e5e0d80c56a6bf1581b52063ad0441551241f6785b110c38"
+const val VITESS_IMAGE = "vitess/base@sha256:ad6d22aafa73c9bb64cebf6dffe5f82df7cfcded00cf801fd4e64d0f46dbab43"
 const val CONTAINER_NAME_PREFIX = "misk-vitess-testing"
 
 class Keyspace(val sharded: Boolean) {
@@ -177,6 +177,9 @@ class DockerVitessCluster(
         "-mysql_bind_host=0.0.0.0",
         "-data_dir=/vt/vtdataroot",
         "-schema_dir=schema",
+        // Increase the transaction timeout so you can have a breakpoint
+        // inside a transaction without it timing out
+        "-queryserver-config-transaction-timeout=${Duration.ofHours(24).toMillis()}",
         "-extra_my_cnf=/vt/src/vitess.io/vitess/config/mycnf/rbr.cnf",
         "-keyspaces=$keyspacesArg",
         "-num_shards=$shardCounts"
@@ -196,7 +199,7 @@ class DockerVitessCluster(
     } else {
       StartVitessService.logger.info(
           "Starting Vitess cluster with command: ${cmd.joinToString(" ")}")
-      containerId = docker.createContainerCmd("vitess/base@$VITESS_VERSION")
+      containerId = docker.createContainerCmd(VITESS_IMAGE)
           .withCmd(cmd.toList())
           .withVolumes(schemaVolume)
           .withBinds(Bind(cluster.schemaDir.toAbsolutePath().toString(), schemaVolume))
@@ -342,9 +345,9 @@ class StartVitessService(
     val environment: Environment
   )
 
-  fun cluster() = cluster!!.cluster
+  fun cluster() = cluster?.cluster
 
-  fun shouldRunVitess() =  config.type == DataSourceType.VITESS &&  (environment == TESTING || environment == DEVELOPMENT)
+  fun shouldRunVitess() = config.type == DataSourceType.VITESS && (environment == TESTING || environment == DEVELOPMENT)
 
   override fun shutDown() {
   }
@@ -352,9 +355,10 @@ class StartVitessService(
   init {
     // We need to do this outside of the service start up because this takes a really long time
     // the first time you do it and can cause service manager to time out.
-    if (shouldRunVitess() && imagePulled.compareAndSet(false, true) &&
-        runCommand("docker pull vitess/base@$VITESS_VERSION") != 0) {
-      logger.warn("Failed to pull Vitess docker image. Proceeding regardless.")
+    if (shouldRunVitess() && imagePulled.compareAndSet(false, true)) {
+      if (runCommand("docker pull $VITESS_IMAGE") != 0) {
+        logger.warn("Failed to pull Vitess docker image. Proceeding regardless.")
+      }
     }
   }
 
@@ -414,7 +418,7 @@ class StartVitessService(
      * MyAppVitessDaemon.kt:
      *
      *  fun main() {
-     *    val config = MiskConfig.load<MyAppConfig>("myapp")
+     *    val config = MiskConfig.load<MyAppConfig>("myapp", Environment.TESTING)
      *    startVitessDaemon(MyAppDb::class, config.data_source_clusters.values.first().writer)
      *  }
      *
