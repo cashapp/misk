@@ -13,5 +13,11 @@ data class CryptoConfig(
 
 data class Key(
   val key_name: String,
+  val key_type: KeyType,
   val encrypted_key: Secret<String>
 ) : Config
+
+enum class KeyType {
+  ENCRYPTION,
+  MAC
+}
