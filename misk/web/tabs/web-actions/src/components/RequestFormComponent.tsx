@@ -134,46 +134,7 @@ const RequestFormFieldBuilder = (
       serverType,
       typescriptType
     } = metadata as ITypesFieldMetadata
-    if (typescriptType === null) {
-      if (
-        idChildren.first() &&
-        typesMetadata.get(idChildren.first()).typescriptType &&
-        BaseFieldTypes.hasOwnProperty(serverType)
-      ) {
-        return (
-          <div>
-            {idChildren.map((child: string) => (
-              <RequestFormFieldBuilder {...props} id={child} />
-            ))}
-          </div>
-        )
-      } else {
-        const fieldGroup = (child: string) => {
-          const { serverType: childServerType } = typesMetadata.get(child)
-          if (BaseFieldTypes.hasOwnProperty(childServerType)) {
-            return (
-              <div>
-                <RequestFormFieldBuilder {...props} id={child} />
-              </div>
-            )
-          } else {
-            return (
-              <div>
-                <ControlGroup>
-                  {...repeatableFieldButtons({ ...props, id: child })}
-                </ControlGroup>
-                <RequestFormFieldBuilder {...props} id={child} />
-              </div>
-            )
-          }
-        }
-        return (
-          <RequestFieldGroup>
-            {idChildren.map((child: string) => fieldGroup(child))}
-          </RequestFieldGroup>
-        )
-      }
-    } else if (typescriptType === TypescriptBaseTypes.boolean) {
+    if (typescriptType === TypescriptBaseTypes.boolean) {
       return (
         <ControlGroup>
           {...repeatableFieldButtons({ ...props, id })}
@@ -276,6 +237,45 @@ const RequestFormFieldBuilder = (
           )}
         </ControlGroup>
       )
+    } else if (typescriptType === null && idChildren.size > 0) {
+      if (
+        idChildren.first() &&
+        typesMetadata.get(idChildren.first()).typescriptType &&
+        BaseFieldTypes.hasOwnProperty(serverType)
+      ) {
+        return (
+          <div>
+            {idChildren.map((child: string) => (
+              <RequestFormFieldBuilder {...props} id={child} />
+            ))}
+          </div>
+        )
+      } else {
+        const fieldGroup = (child: string) => {
+          const { serverType: childServerType } = typesMetadata.get(child)
+          if (BaseFieldTypes.hasOwnProperty(childServerType)) {
+            return (
+              <div>
+                <RequestFormFieldBuilder {...props} id={child} />
+              </div>
+            )
+          } else {
+            return (
+              <div>
+                <ControlGroup>
+                  {...repeatableFieldButtons({ ...props, id: child })}
+                </ControlGroup>
+                <RequestFormFieldBuilder {...props} id={child} />
+              </div>
+            )
+          }
+        }
+        return (
+          <RequestFieldGroup>
+            {idChildren.map((child: string) => fieldGroup(child))}
+          </RequestFieldGroup>
+        )
+      }
     } else {
       return (
         <ControlGroup>
