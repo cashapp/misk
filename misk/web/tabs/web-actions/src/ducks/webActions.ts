@@ -8,7 +8,7 @@ import {
 } from "@misk/simpleredux"
 import axios from "axios"
 import { HTTPMethod } from "http-method-enum"
-import { Map, Set } from "immutable"
+import { OrderedMap, OrderedSet } from "immutable"
 import { chain, findIndex, get, padStart, reduce, uniqueId } from "lodash"
 import { all, AllEffect, call, put, takeLatest } from "redux-saga/effects"
 
@@ -103,7 +103,7 @@ export interface IWebActionInternal {
 
 export interface ITypesFieldMetadata {
   idParent: string
-  idChildren: Set<string>
+  idChildren: OrderedSet<string>
   id: string
   name: string
   repeated: boolean
@@ -266,8 +266,8 @@ export const dispatchWebActions: IDispatchWebActions = {
  */
 
 export const mapOverChildrenData = (
-  typesMetadata: Map<string, ITypesFieldMetadata>,
-  children: Set<string>,
+  typesMetadata: OrderedMap<string, ITypesFieldMetadata>,
+  children: OrderedSet<string>,
   simpleForm: ISimpleFormState,
   tag: string
 ) =>
@@ -313,7 +313,7 @@ export const parseType = (
 }
 
 export const getFieldData = (
-  typesMetadata: Map<string, ITypesFieldMetadata>,
+  typesMetadata: OrderedMap<string, ITypesFieldMetadata>,
   id: string,
   simpleForm: ISimpleFormState,
   tag: string
@@ -393,10 +393,13 @@ export const getFormData = (
 
 export const addRepeatedField = (
   types: IActionTypes,
-  typesMetadata: Map<string, ITypesFieldMetadata>,
+  typesMetadata: OrderedMap<string, ITypesFieldMetadata>,
   parentId: string
 ) => {
-  let newTypesMetadata = typesMetadata as Map<string, ITypesFieldMetadata>
+  let newTypesMetadata = typesMetadata as OrderedMap<
+    string,
+    ITypesFieldMetadata
+  >
   const parentMetadata = newTypesMetadata.get(parentId)
   const newChildId = uniqueId()
   const parentChildren = parentMetadata.idChildren.add(newChildId)
@@ -443,8 +446,8 @@ function* handleAddRepeatedField(
 
 export const recursivelyDelete = (
   id: string,
-  typesMetadata: Map<string, ITypesFieldMetadata>
-): Map<string, ITypesFieldMetadata> => {
+  typesMetadata: OrderedMap<string, ITypesFieldMetadata>
+): OrderedMap<string, ITypesFieldMetadata> => {
   let newTypesMetadata = typesMetadata
   const { idParent } = typesMetadata.get(id)
   typesMetadata
@@ -463,7 +466,7 @@ export const recursivelyDelete = (
 
 export const removeRepeatedField = (
   childId: string,
-  typesMetadata: Map<string, ITypesFieldMetadata>
+  typesMetadata: OrderedMap<string, ITypesFieldMetadata>
 ) => {
   const { idParent } = typesMetadata.get(childId)
   let newTypesMetadata = recursivelyDelete(childId, typesMetadata)
@@ -518,7 +521,7 @@ const groupByWebActionHash = (
   action.returnType
 
 export const buildTypeFieldMetadata = (
-  idChildren: Set<string> = Set(),
+  idChildren: OrderedSet<string> = OrderedSet(),
   id: string = "",
   name: string = "",
   repeated: boolean = false,
@@ -538,10 +541,10 @@ export const buildTypeFieldMetadata = (
 const generateFieldTypesMetadata = (
   field: IFieldTypeMetadata,
   types: IActionTypes,
-  typesMetadata: Map<string, ITypesFieldMetadata>,
+  typesMetadata: OrderedMap<string, ITypesFieldMetadata>,
   id: string = uniqueId(),
   parent: string = ""
-): Map<string, ITypesFieldMetadata> => {
+): OrderedMap<string, ITypesFieldMetadata> => {
   const { name, repeated, type } = field
   if (repeated) {
     const repeatedChildId = uniqueId()
@@ -549,7 +552,7 @@ const generateFieldTypesMetadata = (
       .set(
         id,
         buildTypeFieldMetadata(
-          Set().add(repeatedChildId),
+          OrderedSet().add(repeatedChildId),
           id,
           name,
           true,
@@ -573,10 +576,10 @@ const generateFieldTypesMetadata = (
       BaseFieldTypes[type] === TypescriptBaseTypes.string
     ) {
       return typesMetadata.mergeDeep(
-        Map<string, ITypesFieldMetadata>().set(
+        OrderedMap<string, ITypesFieldMetadata>().set(
           id,
           buildTypeFieldMetadata(
-            Set(),
+            OrderedSet(),
             id,
             name,
             repeated,
@@ -596,7 +599,7 @@ const generateFieldTypesMetadata = (
     }
   } else if (types.hasOwnProperty(type)) {
     const fields = types[type].fields
-    let childIds = Set()
+    let childIds = OrderedSet()
     let subMap = typesMetadata
     for (const subField in fields) {
       if (fields.hasOwnProperty(subField)) {
@@ -631,7 +634,7 @@ const generateFieldTypesMetadata = (
     return typesMetadata.set(
       id,
       buildTypeFieldMetadata(
-        Set(),
+        OrderedSet(),
         id,
         name,
         repeated,
@@ -645,11 +648,11 @@ const generateFieldTypesMetadata = (
 
 export const generateTypesMetadata = (
   action: IWebActionAPI
-): Map<string, ITypesFieldMetadata> => {
+): OrderedMap<string, ITypesFieldMetadata> => {
   const { dispatchMechanism, requestType, types } = action
-  let typesMetadata = Map<string, ITypesFieldMetadata>().set(
+  let typesMetadata = OrderedMap<string, ITypesFieldMetadata>().set(
     "0",
-    buildTypeFieldMetadata(Set(), "0")
+    buildTypeFieldMetadata(OrderedSet(), "0")
   )
   if (requestType && types && get(types, requestType)) {
     const { fields } = get(types, requestType)
@@ -673,10 +676,10 @@ export const generateTypesMetadata = (
     }
     return typesMetadata
   } else if (methodHasBody(dispatchMechanism)) {
-    return Map<string, ITypesFieldMetadata>().set(
+    return OrderedMap<string, ITypesFieldMetadata>().set(
       "0",
       buildTypeFieldMetadata(
-        Set(),
+        OrderedSet(),
         "0",
         "",
         false,
@@ -686,7 +689,7 @@ export const generateTypesMetadata = (
       )
     )
   } else {
-    return Map<string, ITypesFieldMetadata>()
+    return OrderedMap<string, ITypesFieldMetadata>()
   }
 }
 
@@ -806,6 +809,6 @@ export interface IWebActionsState extends IRootState {
   [key: string]: any
 }
 
-export interface IWebActionsImmutableState extends Map<string, any> {
+export interface IWebActionsImmutableState extends OrderedMap<string, any> {
   toJS: () => IWebActionsState
 }

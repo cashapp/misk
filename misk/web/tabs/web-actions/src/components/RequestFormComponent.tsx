@@ -14,7 +14,7 @@ import {
   simpleSelect,
   simpleType
 } from "@misk/simpleredux"
-import { Map } from "immutable"
+import { OrderedMap } from "immutable"
 import * as React from "react"
 import styled from "styled-components"
 import {
@@ -79,7 +79,7 @@ const repeatableFieldButtons = (
   props: {
     action: IWebActionInternal
     id: string
-    typesMetadata: Map<string, ITypesFieldMetadata>
+    typesMetadata: OrderedMap<string, ITypesFieldMetadata>
   } & IState &
     IDispatchProps
 ) => {
@@ -122,7 +122,7 @@ const RequestFormFieldBuilder = (
     action: IWebActionInternal
     id: string
     tag: string
-    typesMetadata: Map<string, ITypesFieldMetadata>
+    typesMetadata: OrderedMap<string, ITypesFieldMetadata>
   } & IState &
     IDispatchProps
 ) => {
