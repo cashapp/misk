@@ -1,0 +1,33 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Common Components Metadata 1`] = `
+<DocumentFragment>
+  <li
+    class=""
+  >
+    <a
+      class="bp3-menu-item bp3-popover-dismiss"
+      content="Test Content"
+    >
+      <div
+        class="bp3-text-overflow-ellipsis bp3-fill"
+      >
+        <span
+          class="bp3-popover-wrapper"
+        >
+          <span
+            class="bp3-popover-target"
+          >
+            <span
+              class=""
+              tabindex="0"
+            >
+              Test Content
+            </span>
+          </span>
+        </span>
+      </div>
+    </a>
+  </li>
+</DocumentFragment>
+`;
