@@ -9,38 +9,48 @@ import com.google.inject.Key
 import com.google.inject.name.Names
 import javax.inject.Singleton
 
-/**
- * Singleton class used as a map of key name to its corresponding [Cipher] implementation.
- */
 @Singleton
-class KeyManager @Inject constructor(
+class AeadKeyManager @Inject internal constructor(
   private val injector: Injector
 ) {
+  private val aeads: HashMap<String, Aead> = LinkedHashMap()
 
-  private var keys: HashMap<String, Any> = LinkedHashMap()
-
-  internal operator fun set(name: String, key: Any) {
-    keys[name] = key
+  internal operator fun set(name: String, aead: Aead) {
+    aeads[name] = aead
   }
 
-  operator fun <T> get(name: String): T? {
-    var key: Any?
-    key = keys[name]
-    if (key == null) {
+  operator fun get(name: String): Aead? {
+    var aead = aeads[name]
+    if (aead == null) {
       try {
-        key = injector.getInstance(Key.get(Aead::class.java, Names.named(name)))
-        keys[name] = key
+        aead = injector.getInstance(Key.get(Aead::class.java, Names.named(name)))
+        this[name] = aead
       } catch (e: ConfigurationException) {
       }
-      if (key == null) {
-        try {
-          key = injector.getInstance(Key.get(Mac::class.java, Names.named(name)))
-          keys[name] = key
-        } catch (e: ConfigurationException) {
-        }
+    }
+    return aead
+  }
+}
+
+@Singleton
+class MacKeyManager @Inject internal constructor(
+  private val injector: Injector
+) {
+  private val macs: HashMap<String, Mac> = LinkedHashMap()
+
+  internal operator fun set(name: String, mac: Mac) {
+    macs[name] = mac
+  }
+
+  operator fun get(name: String): Mac? {
+    var mac = macs[name]
+    if (mac == null) {
+      try {
+        mac = injector.getInstance(Key.get(Mac::class.java, Names.named(name)))
+        this[name] = mac
+      } catch (e: ConfigurationException) {
       }
     }
-    @Suppress("UNCHECKED_CAST")
-    return key as T?
+    return mac
   }
 }

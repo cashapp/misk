@@ -48,7 +48,7 @@ class CryptoModule(
   }
 
   private class CipherProvider(val keyUri: String, val key: Key) : Provider<Aead> {
-    @Inject lateinit var keyManager: KeyManager
+    @Inject lateinit var keyManager: AeadKeyManager
     @Inject lateinit var kmsClient: KmsClient
 
     override fun get(): Aead {
@@ -60,7 +60,7 @@ class CryptoModule(
   }
 
   private class MacProvider(val keyUri: String, val key: Key) : Provider<Mac> {
-    @Inject lateinit var keyManager: KeyManager
+    @Inject lateinit var keyManager: MacKeyManager
     @Inject lateinit var kmsClient: KmsClient
 
     override fun get(): Mac {

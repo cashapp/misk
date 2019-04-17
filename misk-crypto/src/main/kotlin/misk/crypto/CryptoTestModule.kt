@@ -35,7 +35,7 @@ class CryptoTestModule(
   }
 
   private class CipherProvider(val keyName: String) : Provider<Aead> {
-    @Inject lateinit var keyManager: KeyManager
+    @Inject lateinit var keyManager: AeadKeyManager
 
     override fun get(): Aead {
       val keysetHandle = KeysetHandle.generateNew(AeadKeyTemplates.AES256_GCM)
