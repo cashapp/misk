@@ -1,9 +1,51 @@
-import { Collapse, Icon, Menu, MenuItem, Tooltip } from "@blueprintjs/core"
+import { Collapse, Icon, Menu, MenuItem, Tag, Tooltip } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
-import { onChangeToggleFnCall, simpleSelect } from "@misk/simpleredux"
+import { HTTPMethodIntent } from "@misk/core"
+import {
+  ISimpleFormState,
+  onChangeToggleFnCall,
+  simpleSelect
+} from "@misk/simpleredux"
+import HTTPMethod from "http-method-enum"
 import * as React from "react"
+import { connect } from "react-redux"
 import styled from "styled-components"
-import { IDispatchProps, IState } from "../ducks"
+import { IDispatchProps, mapDispatchToProps, mapStateToProps } from "../ducks"
+
+export const FloatLeft = styled.span`
+  float: left;
+  margin: 0 10px 0 0;
+`
+
+export const FloatRight = styled.span`
+  float: right;
+  margin: 0 0 0 10px;
+`
+
+export const CodeTag = styled(Tag)`
+  font-family: monospace;
+`
+
+export const Header = styled.div`
+  display: inline-block;
+`
+
+export const Column = styled.div`
+  flex-grow: 1;
+  flex-basis: 0;
+  min-width: 320px;
+`
+
+/**
+ * Renders HTTP Method tags for each Web Action card
+ */
+export const MethodTag = (props: { method: HTTPMethod }) => (
+  <FloatRight>
+    <Tag large={true} intent={HTTPMethodIntent[props.method]}>
+      {props.method}
+    </Tag>
+  </FloatRight>
+)
 
 export const MetadataMenu = styled(Menu)`
   li {
@@ -49,23 +91,21 @@ export const Metadata = (props: {
  *  * IDispatchProps: include connected dispatch object from parent container
  *      Provides access to @misk/SimpleRedux/SimpleForm input handlers
  */
-export const MetadataCollapse = (
+const UnconnectedMetadataCollapse = (
   props: {
     children: any
     content: string | JSX.Element
     isOpen?: boolean
     label?: string
     labelElement?: JSX.Element
+    simpleForm: ISimpleFormState
     tag: string
-  } & IState &
-    IDispatchProps
+  } & IDispatchProps
 ) => {
   const { children } = props
-  delete props.children
   return (
     <div>
       <Metadata
-        {...props}
         content={
           <span>
             {simpleSelect(props.simpleForm, props.tag, "data") ? (
@@ -76,6 +116,9 @@ export const MetadataCollapse = (
             {props.content}
           </span>
         }
+        data-testid={"metadata-collapse"}
+        label={props.label}
+        labelElement={props.labelElement}
         onClick={onChangeToggleFnCall(
           props.simpleFormToggle,
           props.tag,
@@ -89,13 +132,7 @@ export const MetadataCollapse = (
   )
 }
 
-// const mapStateToProps = (state: IState) => rootSelectors(state)
-
-// const mapDispatchToProps = {
-//   ...rootDispatcher
-// }
-
-// export default connect(
-//   mapStateToProps,
-//   mapDispatchToProps
-// )(TabContainer)
+export const MetadataCollapse = connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(UnconnectedMetadataCollapse)

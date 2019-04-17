@@ -49,7 +49,6 @@ const RequestBodyForm = (
   if (methodHasBody(props.method)) {
     return (
       <MetadataCollapse
-        {...props}
         content={"Request Body"}
         label={"Input"}
         tag={`${tag}::ButtonFormRequestBody`}
