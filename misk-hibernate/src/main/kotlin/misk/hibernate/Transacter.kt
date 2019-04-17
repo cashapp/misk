@@ -20,7 +20,7 @@ interface Transacter {
    */
   fun <T> transaction(lambda: (session: Session) -> T): T
 
-  fun retries(): Transacter
+  fun retries(maxAttempts: Int = 2): Transacter
 
   fun noRetries(): Transacter
 
