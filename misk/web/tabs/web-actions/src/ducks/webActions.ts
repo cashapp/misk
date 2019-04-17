@@ -693,6 +693,68 @@ export const generateTypesMetadata = (
   }
 }
 
+export const processMetadata = (webActionMetadata: IWebActionAPI[]): any =>
+  chain(webActionMetadata)
+    .map((action: IWebActionAPI) => {
+      const authFunctionAnnotations = action.functionAnnotations.filter(
+        a => a.includes("Access") || a.includes("authz")
+      )
+      const nonAccessOrTypeFunctionAnnotations = action.functionAnnotations.filter(
+        a =>
+          !(
+            a.includes("RequestContentType") ||
+            a.includes("ResponseContentType") ||
+            a.includes("Access") ||
+            a.includes("authz") ||
+            a.toUpperCase().includes(HTTPMethod.DELETE) ||
+            a.toUpperCase().includes(HTTPMethod.GET) ||
+            a.toUpperCase().includes(HTTPMethod.HEAD) ||
+            a.toUpperCase().includes(HTTPMethod.PATCH) ||
+            a.toUpperCase().includes(HTTPMethod.POST) ||
+            a.toUpperCase().includes(HTTPMethod.PUT)
+          )
+      )
+      const emptyAllowedArrayValue =
+        authFunctionAnnotations.length > 0 &&
+        authFunctionAnnotations[0].includes("Unauthenticated")
+          ? "All"
+          : "None"
+      const allowedRoles =
+        action.allowedRoles && action.allowedRoles.length > 0
+          ? action.allowedRoles.join(", ")
+          : emptyAllowedArrayValue
+
+      const allowedServices =
+        action.allowedServices && action.allowedServices.length > 0
+          ? action.allowedServices.join(", ")
+          : emptyAllowedArrayValue
+      return {
+        ...action,
+        allFields: JSON.stringify(action),
+        allowedRoles,
+        allowedServices,
+        authFunctionAnnotations,
+        dispatchMechanism: [action.dispatchMechanism],
+        function: action.function.split("fun ").pop(),
+        nonAccessOrTypeFunctionAnnotations,
+        typesMetadata: generateTypesMetadata(action)
+      }
+    })
+    .groupBy(groupByWebActionHash)
+    .map((actions: IWebActionInternal[]) => {
+      const dispatchMechanism = chain(actions)
+        .flatMap(action => action.dispatchMechanism)
+        // remove duplicate identical dispatchMechanisms that come from
+        // duplicate installation of the same webAction
+        .uniq()
+        .value()
+      const mergedAction = actions[0]
+      mergedAction.dispatchMechanism = dispatchMechanism.sort().reverse()
+      return mergedAction
+    })
+    .sortBy(["name", "pathPattern"])
+    .value()
+
 function* handleMetadata() {
   try {
     // const { data } = yield call(axios.get, "/api/webaction/metadata")
@@ -701,67 +763,7 @@ function* handleMetadata() {
       "https://raw.githubusercontent.com/adrw/misk-web/adrw/20190409.WebActionsExampleData/examples/data/demo/webactions.json"
     )
     const { webActionMetadata } = data
-    const metadata = chain(webActionMetadata)
-      .map((action: IWebActionAPI) => {
-        const authFunctionAnnotations = action.functionAnnotations.filter(
-          a => a.includes("Access") || a.includes("authz")
-        )
-        const nonAccessOrTypeFunctionAnnotations = action.functionAnnotations.filter(
-          a =>
-            !(
-              a.includes("RequestContentType") ||
-              a.includes("ResponseContentType") ||
-              a.includes("Access") ||
-              a.includes("authz") ||
-              a.toUpperCase().includes(HTTPMethod.DELETE) ||
-              a.toUpperCase().includes(HTTPMethod.GET) ||
-              a.toUpperCase().includes(HTTPMethod.HEAD) ||
-              a.toUpperCase().includes(HTTPMethod.PATCH) ||
-              a.toUpperCase().includes(HTTPMethod.POST) ||
-              a.toUpperCase().includes(HTTPMethod.PUT)
-            )
-        )
-        const emptyAllowedArrayValue =
-          authFunctionAnnotations.length > 0 &&
-          authFunctionAnnotations[0].includes("Unauthenticated")
-            ? "All"
-            : "None"
-        const allowedRoles =
-          action.allowedRoles && action.allowedRoles.length > 0
-            ? action.allowedRoles.join(", ")
-            : emptyAllowedArrayValue
-
-        const allowedServices =
-          action.allowedServices && action.allowedServices.length > 0
-            ? action.allowedServices.join(", ")
-            : emptyAllowedArrayValue
-        return {
-          ...action,
-          allFields: JSON.stringify(action),
-          allowedRoles,
-          allowedServices,
-          authFunctionAnnotations,
-          dispatchMechanism: [action.dispatchMechanism],
-          function: action.function.split("fun ").pop(),
-          nonAccessOrTypeFunctionAnnotations,
-          typesMetadata: generateTypesMetadata(action)
-        }
-      })
-      .groupBy(groupByWebActionHash)
-      .map((actions: IWebActionInternal[]) => {
-        const dispatchMechanism = chain(actions)
-          .flatMap(action => action.dispatchMechanism)
-          // remove duplicate identical dispatchMechanisms that come from
-          // duplicate installation of the same webAction
-          .uniq()
-          .value()
-        const mergedAction = actions[0]
-        mergedAction.dispatchMechanism = dispatchMechanism.sort().reverse()
-        return mergedAction
-      })
-      .sortBy(["name", "pathPattern"])
-      .value()
-    // TODO(adrw) build index of keyspace for filterable fields
+    const metadata = processMetadata(webActionMetadata)
     yield put(dispatchWebActions.webActionsSuccess({ metadata }))
   } catch (e) {
     yield put(dispatchWebActions.webActionsFailure({ error: { ...e } }))

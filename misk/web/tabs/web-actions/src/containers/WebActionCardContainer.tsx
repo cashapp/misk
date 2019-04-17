@@ -41,8 +41,8 @@ const WebActionCardContainer = (
           <CodeTag large={true}>{props.action.pathPattern}</CodeTag>
         </FloatLeft>
       </Header>
-      {props.action.nonAccessOrTypeFunctionAnnotations.map(a => (
-        <H5 key={a}>{a}</H5>
+      {props.action.nonAccessOrTypeFunctionAnnotations.map((a, index) => (
+        <H5 key={index}>{a}</H5>
       ))}
       <FlexContainer>
         <Column>
@@ -82,10 +82,10 @@ const WebActionCardContainer = (
               label={`(${props.action.applicationInterceptors.length})`}
               tag={`${props.tag}::ApplicationInterceptors`}
             >
-              {props.action.applicationInterceptors.map(i => (
+              {props.action.applicationInterceptors.map((ai, index) => (
                 <MenuItem
-                  key={i}
-                  text={<WrapTextContainer>{i}</WrapTextContainer>}
+                  key={index}
+                  text={<WrapTextContainer>{ai}</WrapTextContainer>}
                 />
               ))}
             </MetadataCollapse>
@@ -95,10 +95,10 @@ const WebActionCardContainer = (
               label={`(${props.action.networkInterceptors.length})`}
               tag={`${props.tag}::NetworkInterceptors`}
             >
-              {props.action.networkInterceptors.map(i => (
+              {props.action.networkInterceptors.map((ni, index) => (
                 <MenuItem
-                  key={i}
-                  text={<WrapTextContainer>{i}</WrapTextContainer>}
+                  key={index}
+                  text={<WrapTextContainer>{ni}</WrapTextContainer>}
                 />
               ))}
             </MetadataCollapse>

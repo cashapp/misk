@@ -3,15 +3,13 @@ import {
   Collapse,
   ControlGroup,
   HTMLSelect,
-  InputGroup,
-  Tag
+  InputGroup
 } from "@blueprintjs/core"
 import {
   CodePreContainer,
   FlexContainer,
   HTTPMethodDispatch,
-  HTTPMethodIntent,
-  HTTPStatusCodeIntent
+  HTTPMethodIntent
 } from "@misk/core"
 import { onChangeFnCall, simpleSelect } from "@misk/simpleredux"
 import { HTTPMethod } from "http-method-enum"
@@ -21,7 +19,8 @@ import {
   Metadata,
   MetadataCollapse,
   MetadataMenu,
-  RequestFormComponent
+  RequestFormComponent,
+  StatusTagComponent
 } from "../components"
 import {
   getFormData,
@@ -64,20 +63,6 @@ const RequestBodyForm = (
         label={`${method} does not have a Body`}
       />
     )
-  }
-}
-
-const StatusTag = (props: { tag: string } & IState & IDispatchProps) => {
-  const status = simpleSelect(
-    props.simpleNetwork,
-    `${props.tag}::Response`,
-    "status"
-  )
-  if (status) {
-    const intent = HTTPStatusCodeIntent(status[0])
-    return <Tag intent={intent}>{status.join(" ")}</Tag>
-  } else {
-    return <span />
   }
 }
 
@@ -201,7 +186,15 @@ export const SendRequestCollapseComponent = (
             <MetadataCollapse
               {...props}
               content={"Response"}
-              labelElement={<StatusTag {...props} tag={tag} />}
+              labelElement={
+                <StatusTagComponent
+                  status={simpleSelect(
+                    props.simpleNetwork,
+                    `${props.tag}::Response`,
+                    "status"
+                  )}
+                />
+              }
               tag={`${tag}::ButtonResponse`}
             >
               <div>

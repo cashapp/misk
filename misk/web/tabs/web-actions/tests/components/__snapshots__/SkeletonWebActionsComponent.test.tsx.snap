@@ -1,0 +1,339 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`SkeletonWebActionsComponent SkeletonText glowing text block used as loading screen 1`] = `
+<DocumentFragment>
+  <span
+    class="bp3-skeleton"
+  >
+    Lorem ipsum
+  </span>
+</DocumentFragment>
+`;
+
+exports[`SkeletonWebActionsComponent SkeletonWebActionsComponent single Web Actions Card used as loading screen 1`] = `
+<DocumentFragment>
+  <div
+    class="bp3-card bp3-elevation-0"
+  >
+    <div
+      class="sc-bxivhb jzkpli"
+    >
+      <span
+        class="sc-bwzfXH jyNnlm"
+      >
+        <span
+          class="bp3-tag bp3-intent-primary bp3-large"
+        >
+          <span
+            class="bp3-text-overflow-ellipsis bp3-fill"
+          >
+            GET
+          </span>
+        </span>
+      </span>
+      <span
+        class="sc-bdVaJa YEVeM"
+      >
+        <h3
+          class="bp3-heading bp3-skeleton"
+        >
+          AnotherSimpleWebAction
+        </h3>
+      </span>
+      <span
+        class="sc-bdVaJa YEVeM"
+      >
+        <span
+          class="bp3-tag bp3-large sc-htpNat hpvuBC"
+        >
+          <span
+            class="bp3-text-overflow-ellipsis bp3-fill"
+          >
+            <span
+              class="bp3-skeleton"
+            >
+              Lorem ipsum
+            </span>
+          </span>
+        </span>
+      </span>
+    </div>
+    <div
+      class="FlexContainer-sc-uyd4r0 eEoNQY"
+    >
+      <div
+        class="sc-ifAKCX iOsfuG"
+      >
+        <ul
+          class="bp3-menu sc-EHOje gDRVEN"
+        >
+          <li
+            class=""
+          >
+            <a
+              class="bp3-menu-item bp3-popover-dismiss"
+              content="[object Object]"
+              label="Function"
+            >
+              <div
+                class="bp3-text-overflow-ellipsis bp3-fill"
+              >
+                <span
+                  class="bp3-popover-wrapper"
+                >
+                  <span
+                    class="bp3-popover-target"
+                  >
+                    <span
+                      class="bp3-skeleton"
+                    >
+                      Lorem ipsum
+                    </span>
+                  </span>
+                </span>
+              </div>
+              <span
+                class="bp3-menu-item-label"
+              >
+                Function
+              </span>
+            </a>
+          </li>
+          <li
+            class=""
+          >
+            <a
+              class="bp3-menu-item bp3-popover-dismiss"
+              content="[object Object]"
+              label="Services"
+            >
+              <div
+                class="bp3-text-overflow-ellipsis bp3-fill"
+              >
+                <span
+                  class="bp3-popover-wrapper"
+                >
+                  <span
+                    class="bp3-popover-target"
+                  >
+                    <span
+                      class="bp3-skeleton"
+                    >
+                      Lorem ipsum
+                    </span>
+                  </span>
+                </span>
+              </div>
+              <span
+                class="bp3-menu-item-label"
+              >
+                Services
+              </span>
+            </a>
+          </li>
+          <li
+            class=""
+          >
+            <a
+              class="bp3-menu-item bp3-popover-dismiss"
+              content="[object Object]"
+              label="Roles"
+            >
+              <div
+                class="bp3-text-overflow-ellipsis bp3-fill"
+              >
+                <span
+                  class="bp3-popover-wrapper"
+                >
+                  <span
+                    class="bp3-popover-target"
+                  >
+                    <span
+                      class="bp3-skeleton"
+                    >
+                      Lorem ipsum
+                    </span>
+                  </span>
+                </span>
+              </div>
+              <span
+                class="bp3-menu-item-label"
+              >
+                Roles
+              </span>
+            </a>
+          </li>
+          <li
+            class=""
+          >
+            <a
+              class="bp3-menu-item bp3-popover-dismiss"
+              content="[object Object]"
+              label="Access"
+            >
+              <div
+                class="bp3-text-overflow-ellipsis bp3-fill"
+              >
+                <span
+                  class="bp3-popover-wrapper"
+                >
+                  <span
+                    class="bp3-popover-target"
+                  >
+                    <span
+                      class="bp3-skeleton"
+                    >
+                      Lorem ipsum
+                    </span>
+                  </span>
+                </span>
+              </div>
+              <span
+                class="bp3-menu-item-label"
+              >
+                Access
+              </span>
+            </a>
+          </li>
+        </ul>
+      </div>
+      <div
+        class="sc-ifAKCX iOsfuG"
+      >
+        <ul
+          class="bp3-menu sc-EHOje gDRVEN"
+        >
+          <li
+            class=""
+          >
+            <a
+              class="bp3-menu-item bp3-popover-dismiss"
+              content="[object Object]"
+              label="Content Types"
+            >
+              <div
+                class="bp3-text-overflow-ellipsis bp3-fill"
+              >
+                <span
+                  class="bp3-popover-wrapper"
+                >
+                  <span
+                    class="bp3-popover-target"
+                  >
+                    <span
+                      class="bp3-skeleton"
+                    >
+                      Lorem ipsum
+                    </span>
+                  </span>
+                </span>
+              </div>
+              <span
+                class="bp3-menu-item-label"
+              >
+                Content Types
+              </span>
+            </a>
+          </li>
+          <li
+            class=""
+          >
+            <a
+              class="bp3-menu-item bp3-popover-dismiss"
+              content="[object Object]"
+              label="Application Interceptors"
+            >
+              <div
+                class="bp3-text-overflow-ellipsis bp3-fill"
+              >
+                <span
+                  class="bp3-popover-wrapper"
+                >
+                  <span
+                    class="bp3-popover-target"
+                  >
+                    <span
+                      class="bp3-skeleton"
+                    >
+                      Lorem ipsum
+                    </span>
+                  </span>
+                </span>
+              </div>
+              <span
+                class="bp3-menu-item-label"
+              >
+                Application Interceptors
+              </span>
+            </a>
+          </li>
+          <li
+            class=""
+          >
+            <a
+              class="bp3-menu-item bp3-popover-dismiss"
+              content="[object Object]"
+              label="Network Interceptors"
+            >
+              <div
+                class="bp3-text-overflow-ellipsis bp3-fill"
+              >
+                <span
+                  class="bp3-popover-wrapper"
+                >
+                  <span
+                    class="bp3-popover-target"
+                  >
+                    <span
+                      class="bp3-skeleton"
+                    >
+                      Lorem ipsum
+                    </span>
+                  </span>
+                </span>
+              </div>
+              <span
+                class="bp3-menu-item-label"
+              >
+                Network Interceptors
+              </span>
+            </a>
+          </li>
+          <li
+            class=""
+          >
+            <a
+              class="bp3-menu-item bp3-popover-dismiss"
+              content="[object Object]"
+              label="Send a Request"
+            >
+              <div
+                class="bp3-text-overflow-ellipsis bp3-fill"
+              >
+                <span
+                  class="bp3-popover-wrapper"
+                >
+                  <span
+                    class="bp3-popover-target"
+                  >
+                    <span
+                      class="bp3-skeleton"
+                    >
+                      Lorem ipsum
+                    </span>
+                  </span>
+                </span>
+              </div>
+              <span
+                class="bp3-menu-item-label"
+              >
+                Send a Request
+              </span>
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</DocumentFragment>
+`;
