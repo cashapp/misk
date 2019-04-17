@@ -135,7 +135,7 @@ internal class RealTransacter private constructor(
     }
   }
 
-  override fun retries(): Transacter = withOptions(options.copy(maxAttempts = 2))
+  override fun retries(maxAttempts: Int): Transacter = withOptions(options.copy(maxAttempts = maxAttempts))
 
   override fun noRetries(): Transacter = withOptions(options.copy(maxAttempts = 1))
 
