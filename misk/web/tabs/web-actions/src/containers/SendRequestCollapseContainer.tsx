@@ -14,19 +14,22 @@ import {
 import { onChangeFnCall, simpleSelect } from "@misk/simpleredux"
 import { HTTPMethod } from "http-method-enum"
 import * as React from "react"
+import { connect } from "react-redux"
 import styled from "styled-components"
 import {
   Metadata,
   MetadataCollapse,
   MetadataMenu,
-  RequestFormComponent,
   StatusTagComponent
 } from "../components"
+import { RequestFormContainer } from "../containers"
 import {
   getFormData,
   IDispatchProps,
   IState,
   IWebActionInternal,
+  mapDispatchToProps,
+  mapStateToProps,
   methodHasBody
 } from "../ducks"
 
@@ -52,7 +55,7 @@ const RequestBodyForm = (
         label={"Input"}
         tag={`${tag}::ButtonFormRequestBody`}
       >
-        <RequestFormComponent {...props} tag={tag} />
+        <RequestFormContainer {...props} tag={tag} />
       </MetadataCollapse>
     )
   } else {
@@ -69,7 +72,7 @@ const RequestBodyForm = (
 /**
  * Collapse wrapped Send a Request form for each Web Action card
  */
-export const SendRequestCollapseComponent = (
+const SendRequestCollapseContainer = (
   props: { action: IWebActionInternal; tag: string } & IState & IDispatchProps
 ) => {
   const { action, tag } = props
@@ -171,7 +174,6 @@ export const SendRequestCollapseComponent = (
           <MetadataMenu>
             {methodHasBody(method) ? (
               <MetadataCollapse
-                {...props}
                 content={"Request Body"}
                 label={`${url}`}
                 tag={`${tag}::ButtonRequestBody`}
@@ -181,10 +183,9 @@ export const SendRequestCollapseComponent = (
                 </CodePreContainer>
               </MetadataCollapse>
             ) : (
-              <Metadata content={"Request"} label={`${url}`} {...props} />
+              <Metadata content={"Request"} label={`${url}`} />
             )}
             <MetadataCollapse
-              {...props}
               content={"Response"}
               labelElement={
                 <StatusTagComponent
@@ -210,7 +211,6 @@ export const SendRequestCollapseComponent = (
                   )}
                 </CodePreContainer>
                 <MetadataCollapse
-                  {...props}
                   content={"Raw Response"}
                   label={"Redux State"}
                   tag={`${tag}::ButtonRawResponse`}
@@ -231,3 +231,8 @@ export const SendRequestCollapseComponent = (
     </Collapse>
   )
 }
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(SendRequestCollapseContainer)

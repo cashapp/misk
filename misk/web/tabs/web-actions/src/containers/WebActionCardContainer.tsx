@@ -11,9 +11,9 @@ import {
   MetadataCollapse,
   MetadataMenu,
   MethodTag,
-  RequestResponeContentTypes,
-  SendRequestCollapseComponent
+  RequestResponeContentTypes
 } from "../components"
+import { SendRequestCollapseContainer } from "../containers"
 import {
   IDispatchProps,
   IState,
@@ -77,7 +77,6 @@ const WebActionCardContainer = (
               tooltip={<RequestResponeContentTypes action={props.action} />}
             />
             <MetadataCollapse
-              {...props}
               content={"Application Interceptors"}
               label={`(${props.action.applicationInterceptors.length})`}
               tag={`${props.tag}::ApplicationInterceptors`}
@@ -90,7 +89,6 @@ const WebActionCardContainer = (
               ))}
             </MetadataCollapse>
             <MetadataCollapse
-              {...props}
               content={"Network Interceptors"}
               label={`(${props.action.networkInterceptors.length})`}
               tag={`${props.tag}::NetworkInterceptors`}
@@ -103,7 +101,6 @@ const WebActionCardContainer = (
               ))}
             </MetadataCollapse>
             <MetadataCollapse
-              {...props}
               content={"Send a Request"}
               label={""}
               tag={`${props.tag}::ButtonSendRequest`}
@@ -113,7 +110,7 @@ const WebActionCardContainer = (
           </MetadataMenu>
         </Column>
       </FlexContainer>
-      <SendRequestCollapseComponent {...props} />
+      <SendRequestCollapseContainer action={props.action} tag={props.tag} />
     </Card>
     <br />
   </div>

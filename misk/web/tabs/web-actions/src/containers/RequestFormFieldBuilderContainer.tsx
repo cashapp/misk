@@ -16,14 +16,17 @@ import {
 } from "@misk/simpleredux"
 import { OrderedMap } from "immutable"
 import * as React from "react"
+import { connect } from "react-redux"
 import styled from "styled-components"
+import { QuantityButton } from "../components"
 import {
   BaseFieldTypes,
-  findIndexAction,
   IDispatchProps,
   IState,
   ITypesFieldMetadata,
   IWebActionInternal,
+  mapDispatchToProps,
+  mapStateToProps,
   padId,
   TypescriptBaseTypes
 } from "../ducks"
@@ -34,46 +37,6 @@ const RequestFieldGroup = styled(Card)`
   margin-bottom: 0px;
   padding: 0px 0px 0px 15px !important;
 `
-
-const AddButton = (
-  props: {
-    idParent: string
-    action: IWebActionInternal
-  } & IState &
-    IDispatchProps
-) => (
-  <Tooltip content={"Add Field"}>
-    <Button
-      icon={IconNames.PLUS}
-      onClick={onChangeFnCall(
-        props.webActionsAdd,
-        props.idParent,
-        props.action,
-        props.webActionsRaw
-      )}
-    />
-  </Tooltip>
-)
-
-const RemoveButton = (
-  props: {
-    id: string
-    action: IWebActionInternal
-  } & IState &
-    IDispatchProps
-) => (
-  <Tooltip content={"Remove Field"}>
-    <Button
-      icon={IconNames.CROSS}
-      onClick={onChangeFnCall(
-        props.webActionsRemove,
-        props.id,
-        props.action,
-        props.webActionsRaw
-      )}
-    />
-  </Tooltip>
-)
 
 const repeatableFieldButtons = (
   props: {
@@ -92,9 +55,26 @@ const repeatableFieldButtons = (
   ) {
     const { idParent, name, serverType } = metadata
     const { idChildren } = typesMetadata.get(idParent)
+    const addButton = (
+      <QuantityButton
+        action={action}
+        changeFn={props.webActionsAdd}
+        content={"Add Field"}
+        icon={IconNames.PLUS}
+        id={idParent}
+        oldState={props.webActionsRaw}
+      />
+    )
     const removeButton =
       idChildren.size > 1 ? (
-        <RemoveButton {...props} action={action} id={id} />
+        <QuantityButton
+          action={action}
+          changeFn={props.webActionsRemove}
+          content={"Remove Field"}
+          icon={IconNames.CROSS}
+          id={id}
+          oldState={props.webActionsRaw}
+        />
       ) : (
         <span />
       )
@@ -102,7 +82,7 @@ const repeatableFieldButtons = (
       <Tooltip content={`Repeated ${serverType}`}>
         <Button icon={IconNames.REPEAT}>{name}</Button>
       </Tooltip>,
-      <AddButton {...props} action={action} idParent={idParent} />,
+      addButton,
       removeButton
     ]
   } else if (metadata && !metadata.repeated) {
@@ -117,7 +97,7 @@ const repeatableFieldButtons = (
   }
 }
 
-const RequestFormFieldBuilder = (
+const UnconnectedRequestFormFieldBuilderContainer = (
   props: {
     action: IWebActionInternal
     id: string
@@ -126,7 +106,7 @@ const RequestFormFieldBuilder = (
   } & IState &
     IDispatchProps
 ) => {
-  const { id, tag, typesMetadata } = props
+  const { action, id, tag, typesMetadata } = props
   const metadata = typesMetadata.get(id)
   if (metadata) {
     const {
@@ -246,7 +226,12 @@ const RequestFormFieldBuilder = (
         return (
           <div>
             {idChildren.map((child: string) => (
-              <RequestFormFieldBuilder {...props} id={child} />
+              <RequestFormFieldBuilderContainer
+                action={action}
+                id={child}
+                tag={tag}
+                typesMetadata={typesMetadata}
+              />
             ))}
           </div>
         )
@@ -256,7 +241,12 @@ const RequestFormFieldBuilder = (
           if (BaseFieldTypes.hasOwnProperty(childServerType)) {
             return (
               <div>
-                <RequestFormFieldBuilder {...props} id={child} />
+                <RequestFormFieldBuilderContainer
+                  action={action}
+                  id={child}
+                  tag={tag}
+                  typesMetadata={typesMetadata}
+                />
               </div>
             )
           } else {
@@ -265,7 +255,12 @@ const RequestFormFieldBuilder = (
                 <ControlGroup>
                   {...repeatableFieldButtons({ ...props, id: child })}
                 </ControlGroup>
-                <RequestFormFieldBuilder {...props} id={child} />
+                <RequestFormFieldBuilderContainer
+                  action={action}
+                  id={child}
+                  tag={tag}
+                  typesMetadata={typesMetadata}
+                />
               </div>
             )
           }
@@ -298,22 +293,9 @@ const RequestFormFieldBuilder = (
   }
 }
 
-export const RequestFormComponent = (
-  props: {
-    action: IWebActionInternal
-    tag: string
-  } & IState &
-    IDispatchProps
-) => {
-  const { action } = props
-  const { typesMetadata } = props.webActionsRaw.get("metadata")[
-    findIndexAction(action, props.webActionsRaw)
-  ]
-  return (
-    <RequestFormFieldBuilder
-      {...props}
-      id={"0"}
-      typesMetadata={typesMetadata}
-    />
-  )
-}
+const RequestFormFieldBuilderContainer = connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(UnconnectedRequestFormFieldBuilderContainer)
+
+export default RequestFormFieldBuilderContainer
