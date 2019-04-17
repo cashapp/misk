@@ -7,9 +7,11 @@ import com.google.crypto.tink.KmsClient
 import com.google.crypto.tink.Mac
 import com.google.crypto.tink.aead.AeadConfig
 import com.google.crypto.tink.aead.AeadFactory
+import com.google.crypto.tink.mac.MacConfig
 import com.google.crypto.tink.mac.MacFactory
 import com.google.inject.Inject
 import com.google.inject.Provider
+import com.google.inject.Singleton
 import com.google.inject.name.Names
 import misk.config.Secret
 import misk.inject.KAbstractModule
@@ -27,6 +29,7 @@ class CryptoModule(
   override fun configure() {
     requireBinding(KmsClient::class.java)
     AeadConfig.register()
+    MacConfig.register()
 
     check(config.keys?.map { it.key_name }?.distinct()?.size == config.keys?.size) {
       "Found duplicate key name"
@@ -37,11 +40,13 @@ class CryptoModule(
           bind<Aead>()
               .annotatedWith(Names.named(key.key_name))
               .toProvider(CipherProvider(config.kms_uri, key))
+              .`in`(Singleton::class.java)
         }
         KeyType.MAC -> {
           bind<Mac>()
               .annotatedWith(Names.named(key.key_name))
               .toProvider(MacProvider(config.kms_uri, key))
+              .`in`(Singleton::class.java)
         }
       }
     }
