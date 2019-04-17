@@ -4,17 +4,17 @@ import com.google.crypto.tink.Aead
 import com.google.crypto.tink.JsonKeysetReader
 import com.google.crypto.tink.KeysetHandle
 import com.google.crypto.tink.KmsClient
-import com.google.crypto.tink.KmsClients
 import com.google.crypto.tink.Mac
 import com.google.crypto.tink.aead.AeadConfig
 import com.google.crypto.tink.aead.AeadFactory
-import com.google.crypto.tink.aead.AeadKeyTemplates
 import com.google.crypto.tink.mac.MacFactory
 import com.google.inject.Inject
 import com.google.inject.Provider
 import com.google.inject.name.Names
 import misk.config.Secret
 import misk.inject.KAbstractModule
+import okio.ByteString
+import okio.ByteString.Companion.toByteString
 
 /**
  * Configures and registers the keys listed in the configuration file.
@@ -75,4 +75,26 @@ class CryptoModule(
       return KeysetHandle.read(JsonKeysetReader.withString(keyConfig.value), masterKey)
     }
   }
+}
+
+/**
+ * Extension function for convenient encryption of [ByteString]s.
+ * This function also makes sure that no extra copies of the plaintext data are kept in memory.
+ */
+fun Aead.encrypt(plaintext: ByteString): ByteString {
+  val plaintextBytes = plaintext.toByteArray()
+  val encrypted = this.encrypt(plaintextBytes, null)
+  plaintextBytes.fill(0)
+  return encrypted.toByteString()
+}
+
+/**
+ * Extension function for convenient decryption of [ByteString]s.
+ * This function also makes sure that no extra copies of the plaintext data are kept in memory.
+ */
+fun Aead.decrypt(ciphertext: ByteString): ByteString {
+  val decryptedBytes = this.decrypt(ciphertext.toByteArray(), null)
+  val decrypted = decryptedBytes.toByteString()
+  decryptedBytes.fill(0)
+  return decrypted
 }
