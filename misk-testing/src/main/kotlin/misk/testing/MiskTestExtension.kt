@@ -78,7 +78,13 @@ internal class MiskTestExtension : BeforeEachCallback, AfterEachCallback {
 
     override fun beforeEach(context: ExtensionContext) {
       if (context.startService()) {
-        serviceManager.startAsync().awaitHealthy(60, TimeUnit.SECONDS)
+        try {
+          serviceManager.startAsync().awaitHealthy(60, TimeUnit.SECONDS)
+        } catch (e: IllegalStateException) {
+          // Unearth the root cause so we can see it in logs easily.
+          log.error("Startup failure -- ${e.cause!!.message}")
+          throw e
+        }
       }
     }
   }
