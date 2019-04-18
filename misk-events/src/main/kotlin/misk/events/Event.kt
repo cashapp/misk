@@ -20,6 +20,14 @@ data class Event(
   val id: ByteString,
 
   /**
+   * Events often represent a stream of state changes or entity updates; the update_version
+   * can be used to indicate the version of the updated entity or state machine at the time
+   * the event was generated. Legacy events may not have this field populated. New events
+   * must specify this for true ordering and race prevention.
+   */
+  val updateVersion: Long? = null,
+
+  /**
    * The id of the entity to which the event is referencing. Many but not all events
    * are correlated with a specific entity; if this event is related to an entity,
    * the entity_identifier should specify the id of that entity
