@@ -1,6 +1,6 @@
 import FilterWebActionsContainer from "./FilterWebActionsContainer"
 import RequestFormContainer from "./RequestFormContainer"
-import UnconnectedRequestFormFieldBuilderContainer from "./RequestFormFieldBuilderContainer"
+import RequestFormFieldBuilderContainer from "./RequestFormFieldBuilderContainer"
 import SendRequestCollapseContainer from "./SendRequestCollapseContainer"
 import TabContainer from "./TabContainer"
 import WebActionCardContainer from "./WebActionCardContainer"
@@ -8,7 +8,7 @@ import WebActionsContainer from "./WebActionsContainer"
 export {
   FilterWebActionsContainer,
   RequestFormContainer,
-  UnconnectedRequestFormFieldBuilderContainer as RequestFormFieldBuilderContainer,
+  RequestFormFieldBuilderContainer,
   SendRequestCollapseContainer,
   TabContainer,
   WebActionCardContainer,

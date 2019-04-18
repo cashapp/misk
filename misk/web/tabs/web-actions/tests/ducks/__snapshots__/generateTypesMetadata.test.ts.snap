@@ -1,5 +1,60 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`Build typesMetadata from a raw WebActionMetadata generate multiple top level fields 1`] = `
+Immutable.OrderedMap {
+  "0": Object {
+    "id": "0",
+    "idChildren": Immutable.OrderedSet [
+      "15",
+      "16",
+      "17",
+      "18",
+    ],
+    "idParent": "0",
+    "name": "",
+    "repeated": false,
+    "serverType": null,
+    "typescriptType": null,
+  },
+  "15": Object {
+    "id": "15",
+    "idChildren": Immutable.OrderedSet [],
+    "idParent": "0",
+    "name": "Field 1",
+    "repeated": false,
+    "serverType": "Double",
+    "typescriptType": "number",
+  },
+  "16": Object {
+    "id": "16",
+    "idChildren": Immutable.OrderedSet [],
+    "idParent": "0",
+    "name": "Field 2",
+    "repeated": false,
+    "serverType": "Int",
+    "typescriptType": "number",
+  },
+  "17": Object {
+    "id": "17",
+    "idChildren": Immutable.OrderedSet [],
+    "idParent": "0",
+    "name": "Field 3",
+    "repeated": false,
+    "serverType": "Long",
+    "typescriptType": "number",
+  },
+  "18": Object {
+    "id": "18",
+    "idChildren": Immutable.OrderedSet [],
+    "idParent": "0",
+    "name": "Field 4",
+    "repeated": false,
+    "serverType": "Short",
+    "typescriptType": "number",
+  },
+}
+`;
+
 exports[`Build typesMetadata from a raw WebActionMetadata generateNested 1`] = `
 Immutable.OrderedMap {
   "0": Object {

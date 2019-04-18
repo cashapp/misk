@@ -1,10 +1,38 @@
 import HTTPMethod from "http-method-enum"
-import { IWebActionAPI } from "../src/ducks"
+import {
+  IWebActionAPI,
+  IWebActionInternal,
+  processMetadata
+} from "../src/ducks"
 
 /**
  * Test Constants
  */
 export const testTypes = {
+  multipleFlatFields: {
+    fields: [
+      {
+        name: "Field 1",
+        repeated: false,
+        type: "Double"
+      },
+      {
+        name: "Field 2",
+        repeated: false,
+        type: "Int"
+      },
+      {
+        name: "Field 3",
+        repeated: false,
+        type: "Long"
+      },
+      {
+        name: "Field 4",
+        repeated: false,
+        type: "Short"
+      }
+    ]
+  },
   nestedNoRepeatedInt: {
     fields: [
       {
@@ -94,3 +122,7 @@ export const nonTypedActionAPI: IWebActionAPI = {
   responseMediaType: "text/plain;charset=utf-8",
   returnType: "misk.web.Response<kotlin.String>"
 }
+
+export const nonTypedActionInternal: IWebActionInternal = processMetadata([
+  nonTypedActionAPI
+])[0]

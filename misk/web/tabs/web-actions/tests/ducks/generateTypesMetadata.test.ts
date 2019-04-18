@@ -130,4 +130,14 @@ describe("Build typesMetadata from a raw WebActionMetadata", () => {
     expect(tmFieldChild.typescriptType).toBe(TypescriptBaseTypes.number)
     expect(typesMetadata).toMatchSnapshot()
   })
+  it("generate multiple top level fields", () => {
+    const typesMetadata = generateTypesMetadata({
+      ...nonTypedActionAPI,
+      dispatchMechanism: HTTPMethod.POST,
+      requestType: "multipleFlatFields",
+      types: testTypes
+    })
+    expect(typesMetadata.size).toBe(5)
+    expect(typesMetadata).toMatchSnapshot()
+  })
 })

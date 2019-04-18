@@ -1,8 +1,6 @@
 import React from "react"
 import { cleanup } from "react-testing-library"
 import { WebActionsContainer } from "../../src/containers"
-import { processMetadata } from "../../src/ducks"
-import { nonTypedActionAPI } from "../testUtilities"
 import { renderWithRedux } from "../upstreamableTestUtilities"
 
 describe("WebActionsContainer", () => {
@@ -12,9 +10,6 @@ describe("WebActionsContainer", () => {
       <WebActionsContainer tag={"WebActions"} />
     )
     expect(asFragment()).toMatchSnapshot()
-  })
-  it("processMetadata converts IWebActionAPI[] to IWebActionInternal[]", () => {
-    expect(processMetadata([nonTypedActionAPI])).toMatchSnapshot()
   })
   // todo(adrw) fix
   // it("WebActionsContainer can render with redux test data", () => {

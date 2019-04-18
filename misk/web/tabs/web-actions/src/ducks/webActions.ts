@@ -757,11 +757,7 @@ export const processMetadata = (webActionMetadata: IWebActionAPI[]): any =>
 
 function* handleMetadata() {
   try {
-    // const { data } = yield call(axios.get, "/api/webaction/metadata")
-    const { data } = yield call(
-      axios.get,
-      "https://raw.githubusercontent.com/adrw/misk-web/adrw/20190409.WebActionsExampleData/examples/data/demo/webactions.json"
-    )
+    const { data } = yield call(axios.get, "/api/webaction/metadata")
     const { webActionMetadata } = data
     const metadata = processMetadata(webActionMetadata)
     yield put(dispatchWebActions.webActionsSuccess({ metadata }))

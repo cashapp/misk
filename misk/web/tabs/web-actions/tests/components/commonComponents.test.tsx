@@ -1,10 +1,6 @@
 import React from "react"
 import { cleanup, render } from "react-testing-library"
-import {
-  Metadata,
-  MetadataCollapse,
-  MetadataMenu
-} from "../../src/components/CommonComponents"
+import { Metadata, MetadataCollapse, MetadataMenu } from "../../src/components"
 import { renderWithRedux } from "../upstreamableTestUtilities"
 
 describe("Common Components", () => {

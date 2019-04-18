@@ -62,6 +62,7 @@ const repeatableFieldButtons = (
         content={"Add Field"}
         icon={IconNames.PLUS}
         id={idParent}
+        key={`Add${id}`}
         oldState={props.webActionsRaw}
       />
     )
@@ -73,13 +74,14 @@ const repeatableFieldButtons = (
           content={"Remove Field"}
           icon={IconNames.CROSS}
           id={id}
+          key={`Remove${id}`}
           oldState={props.webActionsRaw}
         />
       ) : (
-        <span />
+        <span key={`span${id}`} />
       )
     return [
-      <Tooltip content={`Repeated ${serverType}`}>
+      <Tooltip content={`Repeated ${serverType}`} key={`repeated${id}`}>
         <Button icon={IconNames.REPEAT}>{name}</Button>
       </Tooltip>,
       addButton,
@@ -88,12 +90,12 @@ const repeatableFieldButtons = (
   } else if (metadata && !metadata.repeated) {
     const { name, serverType } = metadata
     return [
-      <Tooltip content={serverType}>
+      <Tooltip content={serverType} key={`notrepeated${id}`}>
         <Button>{name || "Body"}</Button>
       </Tooltip>
     ]
   } else {
-    return [<span />]
+    return [<span key={`span${id}`} />]
   }
 }
 
@@ -166,7 +168,10 @@ const UnconnectedRequestFormFieldBuilderContainer = (
       return (
         <ControlGroup>
           {...repeatableFieldButtons({ ...props, id })}
-          <Tooltip content={"Toggle large text input"}>
+          <Tooltip
+            content={"Toggle large text input"}
+            key={`toggleLargeText${id}`}
+          >
             <Button
               active={simpleSelect(
                 props.simpleForm,
@@ -229,6 +234,7 @@ const UnconnectedRequestFormFieldBuilderContainer = (
               <RequestFormFieldBuilderContainer
                 action={action}
                 id={child}
+                key={child}
                 tag={tag}
                 typesMetadata={typesMetadata}
               />
@@ -240,7 +246,7 @@ const UnconnectedRequestFormFieldBuilderContainer = (
           const { serverType: childServerType } = typesMetadata.get(child)
           if (BaseFieldTypes.hasOwnProperty(childServerType)) {
             return (
-              <div>
+              <div key={child}>
                 <RequestFormFieldBuilderContainer
                   action={action}
                   id={child}
@@ -251,7 +257,7 @@ const UnconnectedRequestFormFieldBuilderContainer = (
             )
           } else {
             return (
-              <div>
+              <div key={child}>
                 <ControlGroup>
                   {...repeatableFieldButtons({ ...props, id: child })}
                 </ControlGroup>
