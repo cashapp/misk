@@ -1,0 +1,65 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Get formatted form data getNested 1`] = `
+Object {
+  "Nested Int Field": Object {
+    "Int Field": 123456,
+  },
+}
+`;
+
+exports[`Get formatted form data getNoNested 1`] = `
+Object {
+  "Int Field": 123456,
+}
+`;
+
+exports[`Get formatted form data getNonTypedPOST 1`] = `"Alpha"`;
+
+exports[`Get formatted form data getRepeated 1`] = `
+Object {
+  "Repeated Double Field": Array [
+    -123.456,
+    456.789,
+  ],
+}
+`;
+
+exports[`Get formatted form data getRepeatedNested 1`] = `
+Object {
+  "Repeated Nested Int Field": Array [
+    Object {
+      "Nested Int Field": Object {
+        "Int Field": -123456,
+      },
+    },
+    Object {
+      "Nested Int Field": Object {
+        "Int Field": 456789,
+      },
+    },
+  ],
+}
+`;
+
+exports[`Get formatted form data getRepeatedNestedRepeated 1`] = `
+Object {
+  "Nested Repeated Double Field": Array [
+    Object {
+      "Nested Double Field": Object {
+        "Repeated Double Field": Array [
+          -123.456,
+        ],
+      },
+    },
+    Object {
+      "Nested Double Field": Object {
+        "Repeated Double Field": Array [
+          456.789,
+          -789.123,
+        ],
+      },
+    },
+  ],
+}
+`;
