@@ -13,7 +13,7 @@ exports[`Common Components Metadata 1`] = `
         class="bp3-text-overflow-ellipsis bp3-fill"
       >
         <span
-          class="bp3-popover-wrapper"
+          class="bp3-popover-wrapper sc-bZQynM hRiALA"
         >
           <span
             class="bp3-popover-target"
@@ -47,7 +47,7 @@ exports[`Common Components MetadataCollapse can render with redux 1`] = `
           class="bp3-text-overflow-ellipsis bp3-fill"
         >
           <span
-            class="bp3-popover-wrapper"
+            class="bp3-popover-wrapper sc-bZQynM hRiALA"
           >
             <span
               class="bp3-popover-target"
@@ -75,7 +75,9 @@ exports[`Common Components MetadataCollapse can render with redux 1`] = `
                     />
                   </svg>
                 </span>
-                 Test Content
+                <span>
+                  Collapse Span
+                </span>
               </span>
             </span>
           </span>
@@ -98,7 +100,7 @@ exports[`Common Components MetadataCollapse can render with redux 1`] = `
 exports[`Common Components MetadataMenu 1`] = `
 <DocumentFragment>
   <ul
-    class="bp3-menu sc-EHOje gDRVEN"
+    class="bp3-menu sc-gzVnrw ipVOmx"
   />
 </DocumentFragment>
 `;

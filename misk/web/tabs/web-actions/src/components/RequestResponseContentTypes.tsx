@@ -6,7 +6,7 @@ import { IWebActionInternal } from "../ducks"
 /**
  * Used in rendering the Content Types metadata request -> response
  */
-export const RequestResponeContentTypes = (props: {
+export const RequestResponseContentTypesSpan = (props: {
   action: IWebActionInternal
 }) => (
   <span>
@@ -15,3 +15,6 @@ export const RequestResponeContentTypes = (props: {
     <span>{props.action.responseMediaType}</span>
   </span>
 )
+
+export const requestResponseContentTypesString = (action: IWebActionInternal) =>
+  `${action.requestMediaTypes} -> ${action.responseMediaType}`

@@ -20,7 +20,7 @@ describe("Build typesMetadata from a raw WebActionMetadata", () => {
     expect(typesMetadata.size).toBe(1)
     const tmRoot = typesMetadata.get("0")
     expect(tmRoot.serverType).toBe(ServerTypes.JSON)
-    expect(tmRoot.typescriptType).toBe(TypescriptBaseTypes.string)
+    expect(tmRoot.typescriptType).toBeNull()
     expect(typesMetadata).toMatchSnapshot()
   })
   it("get non-repeated int", () => {
@@ -50,11 +50,11 @@ describe("Build typesMetadata from a raw WebActionMetadata", () => {
     expect(tmField.typescriptType).toBe(TypescriptBaseTypes.number)
     expect(typesMetadata).toMatchSnapshot()
   })
-  it("get repeated double", () => {
+  it("get repeated short", () => {
     const typesMetadata = generateTypesMetadata({
       ...nonTypedActionAPI,
       dispatchMechanism: HTTPMethod.POST,
-      requestType: "repeatedDouble",
+      requestType: "repeatedShort",
       types: testTypes
     })
     expect(typesMetadata.size).toBe(3)
@@ -62,11 +62,11 @@ describe("Build typesMetadata from a raw WebActionMetadata", () => {
     expect(tmRoot.idChildren.size).toBe(1)
     const tmParent = typesMetadata.get(tmRoot.idChildren.first())
     expect(tmParent.repeated).toBe(true)
-    expect(tmParent.serverType).toBe(ServerTypes.Double)
+    expect(tmParent.serverType).toBe(ServerTypes.Short)
     expect(tmParent.typescriptType).toBeNull()
     const tmChild = typesMetadata.get(tmParent.idChildren.first())
     expect(tmChild.repeated).toBe(false)
-    expect(tmChild.serverType).toBe(ServerTypes.Double)
+    expect(tmChild.serverType).toBe(ServerTypes.Short)
     expect(tmChild.typescriptType).toBe(TypescriptBaseTypes.number)
     expect(typesMetadata).toMatchSnapshot()
   })
@@ -98,11 +98,11 @@ describe("Build typesMetadata from a raw WebActionMetadata", () => {
     expect(tmField.typescriptType).toBe(TypescriptBaseTypes.number)
     expect(typesMetadata).toMatchSnapshot()
   })
-  it("get repeated nested repeated double", () => {
+  it("get repeated nested repeated short", () => {
     const typesMetadata = generateTypesMetadata({
       ...nonTypedActionAPI,
       dispatchMechanism: HTTPMethod.POST,
-      requestType: "repeatedNestedRepeatedDouble",
+      requestType: "repeatedNestedRepeatedShort",
       types: testTypes
     })
     expect(typesMetadata.size).toBe(6)
@@ -110,23 +110,23 @@ describe("Build typesMetadata from a raw WebActionMetadata", () => {
     expect(tmRoot.idChildren.size).toBe(1)
     const tmParent = typesMetadata.get(tmRoot.idChildren.first())
     expect(tmParent.repeated).toBe(true)
-    expect(tmParent.serverType).toBe("nestedRepeatedDouble")
+    expect(tmParent.serverType).toBe("nestedRepeatedShort")
     expect(tmParent.typescriptType).toBeNull()
     const tmChild = typesMetadata.get(tmParent.idChildren.first())
     expect(tmChild.repeated).toBe(false)
-    expect(tmChild.serverType).toBe("nestedRepeatedDouble")
+    expect(tmChild.serverType).toBe("nestedRepeatedShort")
     expect(tmChild.typescriptType).toBeNull()
     const tmFieldGroup = typesMetadata.get(tmChild.idChildren.first())
     expect(tmFieldGroup.repeated).toBe(false)
-    expect(tmFieldGroup.serverType).toBe("repeatedDouble")
+    expect(tmFieldGroup.serverType).toBe("repeatedShort")
     expect(tmFieldGroup.typescriptType).toBeNull()
     const tmFieldParent = typesMetadata.get(tmFieldGroup.idChildren.first())
     expect(tmFieldParent.repeated).toBe(true)
-    expect(tmFieldParent.serverType).toBe(ServerTypes.Double)
+    expect(tmFieldParent.serverType).toBe(ServerTypes.Short)
     expect(tmFieldParent.typescriptType).toBeNull()
     const tmFieldChild = typesMetadata.get(tmFieldParent.idChildren.first())
     expect(tmFieldChild.repeated).toBe(false)
-    expect(tmFieldChild.serverType).toBe(ServerTypes.Double)
+    expect(tmFieldChild.serverType).toBe(ServerTypes.Short)
     expect(tmFieldChild.typescriptType).toBe(TypescriptBaseTypes.number)
     expect(typesMetadata).toMatchSnapshot()
   })

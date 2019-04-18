@@ -3,6 +3,7 @@
 exports[`Build typesMetadata from a raw WebActionMetadata generate multiple top level fields 1`] = `
 Immutable.OrderedMap {
   "0": Object {
+    "dirtyInput": false,
     "id": "0",
     "idChildren": Immutable.OrderedSet [
       "15",
@@ -17,15 +18,17 @@ Immutable.OrderedMap {
     "typescriptType": null,
   },
   "15": Object {
+    "dirtyInput": false,
     "id": "15",
     "idChildren": Immutable.OrderedSet [],
     "idParent": "0",
     "name": "Field 1",
     "repeated": false,
-    "serverType": "Double",
+    "serverType": "Short",
     "typescriptType": "number",
   },
   "16": Object {
+    "dirtyInput": false,
     "id": "16",
     "idChildren": Immutable.OrderedSet [],
     "idParent": "0",
@@ -35,6 +38,7 @@ Immutable.OrderedMap {
     "typescriptType": "number",
   },
   "17": Object {
+    "dirtyInput": false,
     "id": "17",
     "idChildren": Immutable.OrderedSet [],
     "idParent": "0",
@@ -44,6 +48,7 @@ Immutable.OrderedMap {
     "typescriptType": "number",
   },
   "18": Object {
+    "dirtyInput": false,
     "id": "18",
     "idChildren": Immutable.OrderedSet [],
     "idParent": "0",
@@ -58,6 +63,7 @@ Immutable.OrderedMap {
 exports[`Build typesMetadata from a raw WebActionMetadata get nested int 1`] = `
 Immutable.OrderedMap {
   "0": Object {
+    "dirtyInput": false,
     "id": "0",
     "idChildren": Immutable.OrderedSet [
       "2",
@@ -69,6 +75,7 @@ Immutable.OrderedMap {
     "typescriptType": null,
   },
   "2": Object {
+    "dirtyInput": false,
     "id": "2",
     "idChildren": Immutable.OrderedSet [
       "3",
@@ -80,6 +87,7 @@ Immutable.OrderedMap {
     "typescriptType": null,
   },
   "3": Object {
+    "dirtyInput": false,
     "id": "3",
     "idChildren": Immutable.OrderedSet [],
     "idParent": "2",
@@ -94,6 +102,7 @@ Immutable.OrderedMap {
 exports[`Build typesMetadata from a raw WebActionMetadata get non-repeated int 1`] = `
 Immutable.OrderedMap {
   "0": Object {
+    "dirtyInput": false,
     "id": "0",
     "idChildren": Immutable.OrderedSet [
       "1",
@@ -105,6 +114,7 @@ Immutable.OrderedMap {
     "typescriptType": null,
   },
   "1": Object {
+    "dirtyInput": false,
     "id": "1",
     "idChildren": Immutable.OrderedSet [],
     "idParent": "0",
@@ -121,49 +131,14 @@ exports[`Build typesMetadata from a raw WebActionMetadata get non-typed GET 1`] 
 exports[`Build typesMetadata from a raw WebActionMetadata get non-typed POST 1`] = `
 Immutable.OrderedMap {
   "0": Object {
+    "dirtyInput": false,
     "id": "0",
     "idChildren": Immutable.OrderedSet [],
     "idParent": "",
     "name": "",
     "repeated": false,
     "serverType": "JSON",
-    "typescriptType": "string",
-  },
-}
-`;
-
-exports[`Build typesMetadata from a raw WebActionMetadata get repeated double 1`] = `
-Immutable.OrderedMap {
-  "0": Object {
-    "id": "0",
-    "idChildren": Immutable.OrderedSet [
-      "4",
-    ],
-    "idParent": "0",
-    "name": "",
-    "repeated": false,
-    "serverType": null,
     "typescriptType": null,
-  },
-  "4": Object {
-    "id": "4",
-    "idChildren": Immutable.OrderedSet [
-      "5",
-    ],
-    "idParent": "0",
-    "name": "Repeated Double Field",
-    "repeated": true,
-    "serverType": "Double",
-    "typescriptType": null,
-  },
-  "5": Object {
-    "id": "5",
-    "idChildren": Immutable.OrderedSet [],
-    "idParent": "4",
-    "name": "Repeated Double Field",
-    "repeated": false,
-    "serverType": "Double",
-    "typescriptType": "number",
   },
 }
 `;
@@ -171,6 +146,7 @@ Immutable.OrderedMap {
 exports[`Build typesMetadata from a raw WebActionMetadata get repeated nested int 1`] = `
 Immutable.OrderedMap {
   "0": Object {
+    "dirtyInput": false,
     "id": "0",
     "idChildren": Immutable.OrderedSet [
       "6",
@@ -182,6 +158,7 @@ Immutable.OrderedMap {
     "typescriptType": null,
   },
   "6": Object {
+    "dirtyInput": false,
     "id": "6",
     "idChildren": Immutable.OrderedSet [
       "7",
@@ -193,6 +170,7 @@ Immutable.OrderedMap {
     "typescriptType": null,
   },
   "7": Object {
+    "dirtyInput": false,
     "id": "7",
     "idChildren": Immutable.OrderedSet [
       "8",
@@ -204,6 +182,7 @@ Immutable.OrderedMap {
     "typescriptType": null,
   },
   "8": Object {
+    "dirtyInput": false,
     "id": "8",
     "idChildren": Immutable.OrderedSet [
       "9",
@@ -215,6 +194,7 @@ Immutable.OrderedMap {
     "typescriptType": null,
   },
   "9": Object {
+    "dirtyInput": false,
     "id": "9",
     "idChildren": Immutable.OrderedSet [],
     "idParent": "8",
@@ -226,9 +206,10 @@ Immutable.OrderedMap {
 }
 `;
 
-exports[`Build typesMetadata from a raw WebActionMetadata get repeated nested repeated double 1`] = `
+exports[`Build typesMetadata from a raw WebActionMetadata get repeated nested repeated short 1`] = `
 Immutable.OrderedMap {
   "0": Object {
+    "dirtyInput": false,
     "id": "0",
     "idChildren": Immutable.OrderedSet [
       "10",
@@ -240,56 +221,100 @@ Immutable.OrderedMap {
     "typescriptType": null,
   },
   "10": Object {
+    "dirtyInput": false,
     "id": "10",
     "idChildren": Immutable.OrderedSet [
       "11",
     ],
     "idParent": "0",
-    "name": "Nested Repeated Double Field",
+    "name": "Nested Repeated Short Field",
     "repeated": true,
-    "serverType": "nestedRepeatedDouble",
+    "serverType": "nestedRepeatedShort",
     "typescriptType": null,
   },
   "11": Object {
+    "dirtyInput": false,
     "id": "11",
     "idChildren": Immutable.OrderedSet [
       "12",
     ],
     "idParent": "10",
-    "name": "Nested Repeated Double Field",
+    "name": "Nested Repeated Short Field",
     "repeated": false,
-    "serverType": "nestedRepeatedDouble",
+    "serverType": "nestedRepeatedShort",
     "typescriptType": null,
   },
   "12": Object {
+    "dirtyInput": false,
     "id": "12",
     "idChildren": Immutable.OrderedSet [
       "13",
     ],
     "idParent": "11",
-    "name": "Nested Double Field",
+    "name": "Nested Short Field",
     "repeated": false,
-    "serverType": "repeatedDouble",
+    "serverType": "repeatedShort",
     "typescriptType": null,
   },
   "13": Object {
+    "dirtyInput": false,
     "id": "13",
     "idChildren": Immutable.OrderedSet [
       "14",
     ],
     "idParent": "12",
-    "name": "Repeated Double Field",
+    "name": "Repeated Short Field",
     "repeated": true,
-    "serverType": "Double",
+    "serverType": "Short",
     "typescriptType": null,
   },
   "14": Object {
+    "dirtyInput": false,
     "id": "14",
     "idChildren": Immutable.OrderedSet [],
     "idParent": "13",
-    "name": "Repeated Double Field",
+    "name": "Repeated Short Field",
     "repeated": false,
-    "serverType": "Double",
+    "serverType": "Short",
+    "typescriptType": "number",
+  },
+}
+`;
+
+exports[`Build typesMetadata from a raw WebActionMetadata get repeated short 1`] = `
+Immutable.OrderedMap {
+  "0": Object {
+    "dirtyInput": false,
+    "id": "0",
+    "idChildren": Immutable.OrderedSet [
+      "4",
+    ],
+    "idParent": "0",
+    "name": "",
+    "repeated": false,
+    "serverType": null,
+    "typescriptType": null,
+  },
+  "4": Object {
+    "dirtyInput": false,
+    "id": "4",
+    "idChildren": Immutable.OrderedSet [
+      "5",
+    ],
+    "idParent": "0",
+    "name": "Repeated Short Field",
+    "repeated": true,
+    "serverType": "Short",
+    "typescriptType": null,
+  },
+  "5": Object {
+    "dirtyInput": false,
+    "id": "5",
+    "idChildren": Immutable.OrderedSet [],
+    "idParent": "4",
+    "name": "Repeated Short Field",
+    "repeated": false,
+    "serverType": "Short",
     "typescriptType": "number",
   },
 }

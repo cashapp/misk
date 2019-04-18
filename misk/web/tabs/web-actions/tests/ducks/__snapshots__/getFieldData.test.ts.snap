@@ -1,17 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Get formatted form data get data but no field input 1`] = `
-Object {
-  "Nested Repeated Double Field": Array [
-    Object {
-      "Nested Double Field": Object {},
-    },
-    Object {
-      "Nested Double Field": Object {},
-    },
-  ],
-}
-`;
+exports[`Get formatted form data get data but no field input 1`] = `undefined`;
 
 exports[`Get formatted form data get nested int 1`] = `
 Object {
@@ -28,15 +17,6 @@ Object {
 `;
 
 exports[`Get formatted form data get non-typed POST 1`] = `"Alpha"`;
-
-exports[`Get formatted form data get repeated double 1`] = `
-Object {
-  "Repeated Double Field": Array [
-    -123.456,
-    456.789,
-  ],
-}
-`;
 
 exports[`Get formatted form data get repeated nested int 1`] = `
 Object {
@@ -55,24 +35,33 @@ Object {
 }
 `;
 
-exports[`Get formatted form data get repeated nested repeated double 1`] = `
+exports[`Get formatted form data get repeated nested repeated short 1`] = `
 Object {
-  "Nested Repeated Double Field": Array [
+  "Nested Repeated Short Field": Array [
     Object {
-      "Nested Double Field": Object {
-        "Repeated Double Field": Array [
-          -123.456,
+      "Nested Short Field": Object {
+        "Repeated Short Field": Array [
+          -123,
         ],
       },
     },
     Object {
-      "Nested Double Field": Object {
-        "Repeated Double Field": Array [
-          456.789,
-          -789.123,
+      "Nested Short Field": Object {
+        "Repeated Short Field": Array [
+          456,
+          -789,
         ],
       },
     },
+  ],
+}
+`;
+
+exports[`Get formatted form data get repeated short 1`] = `
+Object {
+  "Repeated Short Field": Array [
+    -123,
+    456,
   ],
 }
 `;

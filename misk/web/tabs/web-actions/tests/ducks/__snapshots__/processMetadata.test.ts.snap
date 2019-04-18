@@ -4,8 +4,12 @@ exports[`Convert incoming IWebActionAPI to IWebActionInternal processMetadata co
 Array [
   Object {
     "allFields": "{\\"allowedRoles\\":[],\\"allowedServices\\":[],\\"applicationInterceptors\\":[],\\"dispatchMechanism\\":\\"GET\\",\\"function\\":\\"fun misk.web.actions.LivenessCheckAction.livenessCheck(): misk.web.Response<kotlin.String>\\",\\"functionAnnotations\\":[\\"@misk.web.Get(pathPattern=/_liveness)\\",\\"@misk.web.ResponseContentType(value=text/plain;charset=utf-8)\\",\\"@misk.security.authz.Unauthenticated()\\"],\\"name\\":\\"LivenessCheckAction\\",\\"networkInterceptors\\":[\\"misk.web.interceptors.InternalErrorInterceptorFactory$Companion$INTERCEPTOR$1\\",\\"misk.web.interceptors.RequestLogContextInterceptor\\",\\"misk.web.interceptors.RequestLoggingInterceptor\\",\\"misk.web.interceptors.MetricsInterceptor\\",\\"misk.web.interceptors.TracingInterceptor\\",\\"misk.web.exceptions.ExceptionHandlingInterceptor\\",\\"misk.web.interceptors.MarshallerInterceptor\\",\\"misk.web.interceptors.WideOpenDevelopmentInterceptor\\"],\\"parameterTypes\\":[],\\"pathPattern\\":\\"/_liveness\\",\\"requestMediaTypes\\":[\\"*/*\\"],\\"responseMediaType\\":\\"text/plain;charset=utf-8\\",\\"returnType\\":\\"misk.web.Response<kotlin.String>\\"}",
-    "allowedRoles": "All",
-    "allowedServices": "All",
+    "allowedRoles": Array [
+      "All",
+    ],
+    "allowedServices": Array [
+      "All",
+    ],
     "applicationInterceptors": Array [],
     "authFunctionAnnotations": Array [
       "@misk.security.authz.Unauthenticated()",
