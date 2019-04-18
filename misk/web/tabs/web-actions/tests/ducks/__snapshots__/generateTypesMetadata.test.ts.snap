@@ -55,7 +55,7 @@ Immutable.OrderedMap {
 }
 `;
 
-exports[`Build typesMetadata from a raw WebActionMetadata generateNested 1`] = `
+exports[`Build typesMetadata from a raw WebActionMetadata get nested int 1`] = `
 Immutable.OrderedMap {
   "0": Object {
     "id": "0",
@@ -91,7 +91,7 @@ Immutable.OrderedMap {
 }
 `;
 
-exports[`Build typesMetadata from a raw WebActionMetadata generateNoNested 1`] = `
+exports[`Build typesMetadata from a raw WebActionMetadata get non-repeated int 1`] = `
 Immutable.OrderedMap {
   "0": Object {
     "id": "0",
@@ -116,9 +116,9 @@ Immutable.OrderedMap {
 }
 `;
 
-exports[`Build typesMetadata from a raw WebActionMetadata generateNonTypedGET 1`] = `Immutable.OrderedMap {}`;
+exports[`Build typesMetadata from a raw WebActionMetadata get non-typed GET 1`] = `Immutable.OrderedMap {}`;
 
-exports[`Build typesMetadata from a raw WebActionMetadata generateNonTypedPOST 1`] = `
+exports[`Build typesMetadata from a raw WebActionMetadata get non-typed POST 1`] = `
 Immutable.OrderedMap {
   "0": Object {
     "id": "0",
@@ -132,7 +132,7 @@ Immutable.OrderedMap {
 }
 `;
 
-exports[`Build typesMetadata from a raw WebActionMetadata generateRepeated 1`] = `
+exports[`Build typesMetadata from a raw WebActionMetadata get repeated double 1`] = `
 Immutable.OrderedMap {
   "0": Object {
     "id": "0",
@@ -168,7 +168,7 @@ Immutable.OrderedMap {
 }
 `;
 
-exports[`Build typesMetadata from a raw WebActionMetadata generateRepeatedNested 1`] = `
+exports[`Build typesMetadata from a raw WebActionMetadata get repeated nested int 1`] = `
 Immutable.OrderedMap {
   "0": Object {
     "id": "0",
@@ -226,7 +226,7 @@ Immutable.OrderedMap {
 }
 `;
 
-exports[`Build typesMetadata from a raw WebActionMetadata generateRepeatedNestedRepeated 1`] = `
+exports[`Build typesMetadata from a raw WebActionMetadata get repeated nested repeated double 1`] = `
 Immutable.OrderedMap {
   "0": Object {
     "id": "0",
