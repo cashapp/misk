@@ -7,12 +7,12 @@ import {
 import { nonTypedActionAPI, testTypes } from "../testUtilities"
 
 describe("Build typesMetadata from a raw WebActionMetadata", () => {
-  it("generateNonTypedGET", () => {
+  it("get non-typed GET", () => {
     const typesMetadata = generateTypesMetadata(nonTypedActionAPI)
     expect(typesMetadata.size).toBe(0)
     expect(typesMetadata).toMatchSnapshot()
   })
-  it("generateNonTypedPOST", () => {
+  it("get non-typed POST", () => {
     const typesMetadata = generateTypesMetadata({
       ...nonTypedActionAPI,
       dispatchMechanism: HTTPMethod.POST
@@ -23,7 +23,7 @@ describe("Build typesMetadata from a raw WebActionMetadata", () => {
     expect(tmRoot.typescriptType).toBe(TypescriptBaseTypes.string)
     expect(typesMetadata).toMatchSnapshot()
   })
-  it("generateNoNested", () => {
+  it("get non-repeated int", () => {
     const typesMetadata = generateTypesMetadata({
       ...nonTypedActionAPI,
       dispatchMechanism: HTTPMethod.POST,
@@ -33,7 +33,7 @@ describe("Build typesMetadata from a raw WebActionMetadata", () => {
     expect(typesMetadata.size).toBe(2)
     expect(typesMetadata).toMatchSnapshot()
   })
-  it("generateNested", () => {
+  it("get nested int", () => {
     const typesMetadata = generateTypesMetadata({
       ...nonTypedActionAPI,
       dispatchMechanism: HTTPMethod.POST,
@@ -50,7 +50,7 @@ describe("Build typesMetadata from a raw WebActionMetadata", () => {
     expect(tmField.typescriptType).toBe(TypescriptBaseTypes.number)
     expect(typesMetadata).toMatchSnapshot()
   })
-  it("generateRepeated", () => {
+  it("get repeated double", () => {
     const typesMetadata = generateTypesMetadata({
       ...nonTypedActionAPI,
       dispatchMechanism: HTTPMethod.POST,
@@ -70,7 +70,7 @@ describe("Build typesMetadata from a raw WebActionMetadata", () => {
     expect(tmChild.typescriptType).toBe(TypescriptBaseTypes.number)
     expect(typesMetadata).toMatchSnapshot()
   })
-  it("generateRepeatedNested", () => {
+  it("get repeated nested int", () => {
     const typesMetadata = generateTypesMetadata({
       ...nonTypedActionAPI,
       dispatchMechanism: HTTPMethod.POST,
@@ -98,7 +98,7 @@ describe("Build typesMetadata from a raw WebActionMetadata", () => {
     expect(tmField.typescriptType).toBe(TypescriptBaseTypes.number)
     expect(typesMetadata).toMatchSnapshot()
   })
-  it("generateRepeatedNestedRepeated", () => {
+  it("get repeated nested repeated double", () => {
     const typesMetadata = generateTypesMetadata({
       ...nonTypedActionAPI,
       dispatchMechanism: HTTPMethod.POST,

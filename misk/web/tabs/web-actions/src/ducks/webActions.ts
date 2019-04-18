@@ -9,7 +9,16 @@ import {
 import axios from "axios"
 import { HTTPMethod } from "http-method-enum"
 import { OrderedMap, OrderedSet } from "immutable"
-import { chain, findIndex, get, padStart, reduce, uniqueId } from "lodash"
+import {
+  chain,
+  findIndex,
+  get,
+  isBoolean,
+  isEmpty,
+  padStart,
+  reduce,
+  uniqueId
+} from "lodash"
 import { all, AllEffect, call, put, takeLatest } from "redux-saga/effects"
 
 export const enum TypescriptBaseTypes {
@@ -312,6 +321,8 @@ export const parseType = (
   }
 }
 
+const isInput = (data: any) => data || isBoolean(data)
+
 export const getFieldData = (
   typesMetadata: OrderedMap<string, ITypesFieldMetadata>,
   id: string,
@@ -348,27 +359,43 @@ export const getFieldData = (
       return mapOverChildrenData(typesMetadata, idChildren, simpleForm, tag)
     } else if (parent && parent.repeated === true && idChildren.size === 0) {
       // leaf node of a repeated list
-      return parseType(
+      const data = parseType(
         serverType,
         simpleSelect(simpleForm, `${tag}::${padId(id)}`, "data")
       )
+      if (isInput(data)) {
+        return data
+      } else {
+        return
+      }
     } else if (parent && parent.repeated === false && idChildren.size === 0) {
       // regular leaf node
-      return {
-        [name]: parseType(
-          serverType,
-          simpleSelect(simpleForm, `${tag}::${padId(id)}`, "data")
-        )
+      const data = parseType(
+        serverType,
+        simpleSelect(simpleForm, `${tag}::${padId(id)}`, "data")
+      )
+      if (isInput(data)) {
+        return {
+          [name]: data
+        }
+      } else {
+        return
       }
     } else if (repeated === true && idChildren.size > 0) {
       // repeated node reached, iterate and return as list
-      return {
-        [name]: idChildren
-          .toList()
-          .map((child: string) =>
-            getFieldData(typesMetadata, child, simpleForm, tag)
-          )
-          .toJS()
+      const repeatedData = idChildren
+        .toList()
+        .map((child: string) =>
+          getFieldData(typesMetadata, child, simpleForm, tag)
+        )
+        .filter(data => isInput(data))
+        .toJS()
+      if (isEmpty(repeatedData)) {
+        return
+      } else {
+        return {
+          [name]: repeatedData
+        }
       }
     } else {
       throw new Error("Unhandled field data retrieval case.")

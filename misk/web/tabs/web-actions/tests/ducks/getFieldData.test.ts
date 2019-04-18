@@ -8,12 +8,12 @@ import {
 import { nonTypedActionAPI, simpleForm, testTypes } from "../testUtilities"
 
 describe("Get formatted form data", () => {
-  it("getNonTypedGET", () => {
+  it("get non-typed GET", () => {
     const typesMetadata = generateTypesMetadata(nonTypedActionAPI)
     const data = getFieldData(typesMetadata, "0", simpleForm, "Tag")
     expect(data).toBeUndefined()
   })
-  it("getNonTypedPOST", () => {
+  it("get non-typed POST", () => {
     const typesMetadata = generateTypesMetadata({
       ...nonTypedActionAPI,
       dispatchMechanism: HTTPMethod.POST
@@ -28,7 +28,7 @@ describe("Get formatted form data", () => {
     expect(getData).toBe(data)
     expect(getData).toMatchSnapshot()
   })
-  it("getNoNested", () => {
+  it("get non-repeated int", () => {
     const typesMetadata = generateTypesMetadata({
       ...nonTypedActionAPI,
       dispatchMechanism: HTTPMethod.POST,
@@ -45,7 +45,7 @@ describe("Get formatted form data", () => {
     )
     expect(getData).toMatchSnapshot()
   })
-  it("getNested", () => {
+  it("get nested int", () => {
     const typesMetadata = generateTypesMetadata({
       ...nonTypedActionAPI,
       dispatchMechanism: HTTPMethod.POST,
@@ -63,7 +63,7 @@ describe("Get formatted form data", () => {
     )
     expect(getData).toMatchSnapshot()
   })
-  it("getRepeated", () => {
+  it("get repeated double", () => {
     let typesMetadata = generateTypesMetadata({
       ...nonTypedActionAPI,
       dispatchMechanism: HTTPMethod.POST,
@@ -92,7 +92,7 @@ describe("Get formatted form data", () => {
     )
     expect(getData).toMatchSnapshot()
   })
-  it("getRepeatedNested", () => {
+  it("get repeated nested int", () => {
     let typesMetadata = generateTypesMetadata({
       ...nonTypedActionAPI,
       dispatchMechanism: HTTPMethod.POST,
@@ -129,7 +129,7 @@ describe("Get formatted form data", () => {
     )
     expect(getData).toMatchSnapshot()
   })
-  it("getRepeatedNestedRepeated", () => {
+  it("get repeated nested repeated double", () => {
     let typesMetadata = generateTypesMetadata({
       ...nonTypedActionAPI,
       dispatchMechanism: HTTPMethod.POST,
@@ -174,6 +174,33 @@ describe("Get formatted form data", () => {
         [`Tag::${padId(fieldId1)}`]: { data: data1 },
         [`Tag::${padId(fieldId2)}`]: { data: data2 },
         [`Tag::${padId(fieldId3)}`]: { data: data3 }
+      },
+      "Tag"
+    )
+    expect(getData).toMatchSnapshot()
+  })
+  it("get data but no field input", () => {
+    let typesMetadata = generateTypesMetadata({
+      ...nonTypedActionAPI,
+      dispatchMechanism: HTTPMethod.POST,
+      requestType: "repeatedNestedRepeatedDouble",
+      types: testTypes
+    })
+    const repeatedParentId = typesMetadata.get("0").idChildren.first() as string
+    typesMetadata = addRepeatedField(testTypes, typesMetadata, repeatedParentId)
+    const fieldId2Parent = typesMetadata
+      .get(
+        typesMetadata
+          .get(typesMetadata.get(repeatedParentId).idChildren.last())
+          .idChildren.first()
+      )
+      .idChildren.first() as string
+    typesMetadata = addRepeatedField(testTypes, typesMetadata, fieldId2Parent)
+    const getData = getFieldData(
+      typesMetadata,
+      "0",
+      {
+        ...simpleForm
       },
       "Tag"
     )
