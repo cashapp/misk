@@ -204,6 +204,7 @@ describe("Get formatted form data", () => {
       },
       "Tag"
     )
+    expect(getData).toBeUndefined()
     expect(getData).toMatchSnapshot()
   })
 })

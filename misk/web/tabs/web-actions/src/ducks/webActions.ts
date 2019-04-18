@@ -15,8 +15,10 @@ import {
   get,
   isBoolean,
   isEmpty,
+  isObject,
   padStart,
   reduce,
+  size,
   uniqueId
 } from "lodash"
 import { all, AllEffect, call, put, takeLatest } from "redux-saga/effects"
@@ -321,7 +323,10 @@ export const parseType = (
   }
 }
 
-const isInput = (data: any) => data || isBoolean(data)
+const isInput = (data: any) =>
+  isBoolean(data) ||
+  (isObject(data) && size(data) > 0) ||
+  (!isObject(data) && data)
 
 export const getFieldData = (
   typesMetadata: OrderedMap<string, ITypesFieldMetadata>,
@@ -343,7 +348,13 @@ export const getFieldData = (
       return simpleSelect(simpleForm, `${tag}::${padId(id)}`, "data")
     } else if (id === "0" && idChildren.size > 0) {
       // root with children, iterate over children
-      return mapOverChildrenData(typesMetadata, idChildren, simpleForm, tag)
+      const data = mapOverChildrenData(
+        typesMetadata,
+        idChildren,
+        simpleForm,
+        tag
+      )
+      return isInput(data) ? data : undefined
     } else if (
       parent.repeated === false &&
       repeated === false &&
@@ -351,9 +362,13 @@ export const getFieldData = (
       BaseFieldTypes.hasOwnProperty(serverType) === false
     ) {
       // field group parent node of a defined type (not a standard language type)
-      return {
-        [name]: mapOverChildrenData(typesMetadata, idChildren, simpleForm, tag)
-      }
+      const data = mapOverChildrenData(
+        typesMetadata,
+        idChildren,
+        simpleForm,
+        tag
+      )
+      return isInput(data) ? { [name]: data } : undefined
     } else if (repeated === false && idChildren.size > 0) {
       // field group parent node (standard language type)
       return mapOverChildrenData(typesMetadata, idChildren, simpleForm, tag)
@@ -363,40 +378,24 @@ export const getFieldData = (
         serverType,
         simpleSelect(simpleForm, `${tag}::${padId(id)}`, "data")
       )
-      if (isInput(data)) {
-        return data
-      } else {
-        return
-      }
+      return isInput(data) ? data : undefined
     } else if (parent && parent.repeated === false && idChildren.size === 0) {
       // regular leaf node
       const data = parseType(
         serverType,
         simpleSelect(simpleForm, `${tag}::${padId(id)}`, "data")
       )
-      if (isInput(data)) {
-        return {
-          [name]: data
-        }
-      } else {
-        return
-      }
+      return isInput(data) ? { [name]: data } : undefined
     } else if (repeated === true && idChildren.size > 0) {
       // repeated node reached, iterate and return as list
-      const repeatedData = idChildren
+      const data = idChildren
         .toList()
         .map((child: string) =>
           getFieldData(typesMetadata, child, simpleForm, tag)
         )
-        .filter(data => isInput(data))
+        .filter(item => isInput(item))
         .toJS()
-      if (isEmpty(repeatedData)) {
-        return
-      } else {
-        return {
-          [name]: repeatedData
-        }
-      }
+      return isEmpty(data) ? undefined : { [name]: data }
     } else {
       throw new Error("Unhandled field data retrieval case.")
     }

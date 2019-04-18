@@ -1,17 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Get formatted form data get data but no field input 1`] = `
-Object {
-  "Nested Repeated Double Field": Array [
-    Object {
-      "Nested Double Field": Object {},
-    },
-    Object {
-      "Nested Double Field": Object {},
-    },
-  ],
-}
-`;
+exports[`Get formatted form data get data but no field input 1`] = `undefined`;
 
 exports[`Get formatted form data get nested int 1`] = `
 Object {
