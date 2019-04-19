@@ -2,6 +2,7 @@ package misk.web.jetty
 
 import misk.exceptions.StatusCode
 import misk.inject.keyOf
+import misk.logging.getLogger
 import misk.scope.ActionScope
 import misk.web.BoundAction
 import misk.web.DispatchMechanism
@@ -75,11 +76,17 @@ internal class WebActionsServlet @Inject constructor(
       }
     } catch (e: ProtocolException) {
       // Probably an unexpected HTTP method. Send a 404 below.
+    } catch (e: Exception) {
+      log.error(e) { "Unexpected error handling request. "}
+      response.status = StatusCode.INTERNAL_SERVER_ERROR.code
+      response.addHeader("Content-Type", MediaTypes.TEXT_PLAIN_UTF8)
+      response.writer.println("Internal error")
+      response.writer.close()
     }
 
     response.status = StatusCode.NOT_FOUND.code
     response.addHeader("Content-Type", MediaTypes.TEXT_PLAIN_UTF8)
-    response.writer.print("Nothing found at ${request.urlString()}")
+    response.writer.println("Nothing found at ${request.urlString()}")
     response.writer.close()
   }
 
@@ -104,6 +111,10 @@ internal class WebActionsServlet @Inject constructor(
       realWebSocket.listener = webSocketListener
       realWebSocket.adapter
     }
+  }
+
+  companion object {
+    val log = getLogger<WebActionsServlet>()
   }
 }
 
