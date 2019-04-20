@@ -9,6 +9,7 @@ import misk.MiskCaller
 import misk.logging.getLogger
 import misk.random.ThreadLocalRandom
 import misk.scope.ActionScoped
+import java.lang.reflect.InvocationTargetException
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.reflect.full.findAnnotation
@@ -69,7 +70,9 @@ internal class RequestLoggingInterceptor internal constructor(
       logger.info { "${action.name} principal=$principal time=$stopwatch response=$resultString" }
       return result
     } catch (t: Throwable) {
-      logger.info { "${action.name} principal=$principal time=$stopwatch failed" }
+      logger.info { "${action.name} principal=$principal time=$stopwatch failed ${t.stackTrace}" }
+      logger.info(t) { "JAYDEBUGINFO Internal error occurred" }
+      logger.error(t) { "JAYDEBUGERROR Internal error occurred" }
       throw t
     }
   }
