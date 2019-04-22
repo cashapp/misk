@@ -9,6 +9,13 @@ import com.google.inject.Key
 import com.google.inject.name.Names
 import javax.inject.Singleton
 
+/**
+ * Holds a map of every [Aead] key name to its primitive listed in the configuration for this app.
+ * Users may use this object to obtain an [Aead] dynamically:
+ * ```
+ * val myKey: Aead? = aeadKeyManager["myKey"]
+ * ```
+ */
 @Singleton
 class AeadKeyManager @Inject internal constructor(
   private val injector: Injector
@@ -32,6 +39,13 @@ class AeadKeyManager @Inject internal constructor(
   }
 }
 
+/**
+ * Holds a map of every [Mac] key name to its primitive listed in the configuration for this app.
+ * Users may use htis objecy to obtain a [Mac] object dynamically:
+ * ```
+ * val hmac: Mac? = macKeyManager["myHmac"]
+ * ```
+ */
 @Singleton
 class MacKeyManager @Inject internal constructor(
   private val injector: Injector

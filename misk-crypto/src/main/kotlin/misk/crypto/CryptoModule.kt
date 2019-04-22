@@ -27,19 +27,22 @@ class CryptoModule(
 ) : KAbstractModule() {
 
   override fun configure() {
+    // no keys? no worries! exit early
+    config.keys?: return
     requireBinding(KmsClient::class.java)
     AeadConfig.register()
     MacConfig.register()
 
-    check(config.keys?.map { it.key_name }?.distinct()?.size == config.keys?.size) {
-      "Found duplicate key name"
+    val duplicateNames = config.keys - config.keys.map { it.key_name }.distinct().iterator()
+    check(duplicateNames.isEmpty()) {
+      "Found duplicate keys: [$duplicateNames]"
     }
-    config.keys?.forEach { key ->
+    config.keys.forEach { key ->
       when(key.key_type) {
-        KeyType.ENCRYPTION -> {
+        KeyType.AEAD -> {
           bind<Aead>()
               .annotatedWith(Names.named(key.key_name))
-              .toProvider(CipherProvider(config.kms_uri, key))
+              .toProvider(AeadProvider(config.kms_uri, key))
               .`in`(Singleton::class.java)
         }
         KeyType.MAC -> {
@@ -52,7 +55,7 @@ class CryptoModule(
     }
   }
 
-  private class CipherProvider(val keyUri: String, val key: Key) : Provider<Aead> {
+  private class AeadProvider(val keyUri: String, val key: Key) : Provider<Aead> {
     @Inject lateinit var keyManager: AeadKeyManager
     @Inject lateinit var kmsClient: KmsClient
 

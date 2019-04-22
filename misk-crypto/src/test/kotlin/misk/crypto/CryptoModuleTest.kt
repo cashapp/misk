@@ -64,14 +64,14 @@ class CryptoModuleTest {
 
   private fun getInjector(keyMap: List<Pair<String, KeysetHandle>>): Injector{
     val keys = keyMap.map {
-      var keyType = KeyType.ENCRYPTION
+      var keyType = KeyType.AEAD
       if (it.second.keysetInfo.getKeyInfo(0).typeUrl.endsWith("HmacKey")) {
         keyType = KeyType.MAC
       }
       Key(it.first, keyType, generateEncryptedKey(it.second))
     }
     val config = CryptoConfig(keys, "test_master_key")
-    return  Guice.createInjector(CryptoTestModule(), CryptoModule(config))
+    return Guice.createInjector(CryptoTestModule(), CryptoModule(config))
   }
 
   private fun generateEncryptedKey(keyHandle: KeysetHandle): Secret<String> {
