@@ -11,6 +11,7 @@ interface Session {
   fun <T : DbEntity<T>> save(entity: T): Id<T>
 
   fun <T : DbEntity<T>> load(id: Id<T>, type: KClass<T>): T
+  fun <T : DbEntity<T>> loadOrNull(id: Id<T>, type: KClass<T>): T?
   fun <R : DbRoot<R>, T : DbSharded<R, T>> loadSharded(gid: Gid<R, T>, type: KClass<T>): T
   fun shards(): Set<Shard>
   fun <T> target(shard: Shard, function: () -> T): T
@@ -41,6 +42,7 @@ interface Session {
 
 inline fun <reified T : DbEntity<T>> Session.load(id: Id<T>): T = load(id, T::class)
 inline fun <R : DbRoot<R>, reified S : DbSharded<R, S>> Session.loadSharded(gid: Gid<R, S>): S = loadSharded(gid, S::class)
+inline fun <reified T : DbEntity<T>> Session.loadOrNull(id: Id<T>): T? = loadOrNull(id, T::class)
 
 fun checkValidShardIdentifier(identifier: String) {
   check(!identifier.isBlank())
