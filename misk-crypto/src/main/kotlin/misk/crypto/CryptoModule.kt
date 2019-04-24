@@ -89,9 +89,9 @@ class CryptoModule(
  * Extension function for convenient encryption of [ByteString]s.
  * This function also makes sure that no extra copies of the plaintext data are kept in memory.
  */
-fun Aead.encrypt(plaintext: ByteString): ByteString {
+fun Aead.encrypt(plaintext: ByteString, aad: ByteArray? = null): ByteString {
   val plaintextBytes = plaintext.toByteArray()
-  val encrypted = this.encrypt(plaintextBytes, null)
+  val encrypted = this.encrypt(plaintextBytes, aad)
   plaintextBytes.fill(0)
   return encrypted.toByteString()
 }
@@ -100,8 +100,8 @@ fun Aead.encrypt(plaintext: ByteString): ByteString {
  * Extension function for convenient decryption of [ByteString]s.
  * This function also makes sure that no extra copies of the plaintext data are kept in memory.
  */
-fun Aead.decrypt(ciphertext: ByteString): ByteString {
-  val decryptedBytes = this.decrypt(ciphertext.toByteArray(), null)
+fun Aead.decrypt(ciphertext: ByteString, aad: ByteArray? = null): ByteString {
+  val decryptedBytes = this.decrypt(ciphertext.toByteArray(), aad)
   val decrypted = decryptedBytes.toByteString()
   decryptedBytes.fill(0)
   return decrypted
