@@ -2,9 +2,17 @@ package misk.crypto
 
 import com.google.crypto.tink.Aead
 import com.google.crypto.tink.KeysetHandle
+import com.google.crypto.tink.Mac
+import com.google.crypto.tink.PublicKeySign
+import com.google.crypto.tink.PublicKeyVerify
 import com.google.crypto.tink.aead.AeadConfig
 import com.google.crypto.tink.aead.AeadFactory
 import com.google.crypto.tink.aead.AeadKeyTemplates
+import com.google.crypto.tink.mac.MacFactory
+import com.google.crypto.tink.mac.MacKeyTemplates
+import com.google.crypto.tink.signature.PublicKeySignFactory
+import com.google.crypto.tink.signature.PublicKeyVerifyFactory
+import com.google.crypto.tink.signature.SignatureKeyTemplates
 import com.google.inject.name.Names
 import misk.inject.KAbstractModule
 import javax.inject.Inject
@@ -20,17 +28,39 @@ import javax.inject.Provider
  * Instead, it'll generate a random keyset handle for each named key.
  */
 class CryptoTestModule(
-  private val keyNames: List<String>
+  private val keyNames: List<Key>
 ) : KAbstractModule() {
 
   override fun configure() {
     AeadConfig.register()
 
     keyNames.forEach { key ->
-      bind<Aead>()
-          .annotatedWith(Names.named(key))
-          .toProvider(CipherProvider(key))
-          .asEagerSingleton()
+      when(key.key_type) {
+        KeyType.AEAD -> {
+          bind<Aead>()
+              .annotatedWith(Names.named(key.key_name))
+              .toProvider(CipherProvider(key.key_name))
+              .asEagerSingleton()
+        }
+        KeyType.MAC -> {
+          bind<Mac>()
+              .annotatedWith(Names.named(key.key_name))
+              .toProvider(MacProvider(key.key_name))
+              .asEagerSingleton()
+        }
+        KeyType.DIGITAL_SIGNATURE -> {
+          val keysetHandle = KeysetHandle.generateNew(SignatureKeyTemplates.ED25519)
+          val signer = PublicKeySignFactory.getPrimitive(keysetHandle)
+          val verifier = PublicKeyVerifyFactory.getPrimitive(keysetHandle.publicKeysetHandle)
+          bind<PublicKeySign>()
+              .annotatedWith(Names.named(key.key_name))
+              .toProvider(DigitalSignatureSignerProvider(signer, verifier, key.key_name))
+              .asEagerSingleton()
+          bind<PublicKeyVerify>()
+              .annotatedWith(Names.named(key.key_name))
+              .toInstance(verifier)
+        }
+      }
     }
   }
 
@@ -41,6 +71,26 @@ class CryptoTestModule(
       val keysetHandle = KeysetHandle.generateNew(AeadKeyTemplates.AES256_GCM)
       return AeadFactory.getPrimitive(keysetHandle)
           .also { keyManager[keyName] = it }
+    }
+  }
+
+  private class MacProvider(val keyName: String) : Provider<Mac> {
+    @Inject lateinit var keyManager: MacKeyManager
+
+    override fun get(): Mac {
+      val keysetHandle = KeysetHandle.generateNew(MacKeyTemplates.HMAC_SHA256_256BITTAG)
+      return MacFactory.getPrimitive(keysetHandle)
+          .also { keyManager[keyName] = it }
+    }
+  }
+
+  private class DigitalSignatureSignerProvider(val signer: PublicKeySign,
+    val verifier: PublicKeyVerify, val name: String) : Provider<PublicKeySign> {
+    @Inject lateinit var keyManager: DigitalSignatureKeyManager
+
+    override fun get(): PublicKeySign {
+      keyManager[name] = DigitalSignature(signer, verifier)
+      return signer
     }
   }
 }
