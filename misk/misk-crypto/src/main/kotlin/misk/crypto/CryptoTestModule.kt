@@ -3,6 +3,7 @@ package misk.crypto
 import com.google.crypto.tink.Aead
 import com.google.crypto.tink.KeysetHandle
 import com.google.crypto.tink.aead.AeadConfig
+import com.google.crypto.tink.aead.AeadFactory
 import com.google.crypto.tink.aead.AeadKeyTemplates
 import com.google.inject.name.Names
 import misk.inject.KAbstractModule
@@ -25,21 +26,20 @@ class CryptoTestModule(
   override fun configure() {
     AeadConfig.register()
 
-    val masterKey = FakeKmsClient().getAead(null)
     keyNames.forEach { key ->
-      bind<Cipher>()
+      bind<Aead>()
           .annotatedWith(Names.named(key))
-          .toProvider(CipherProvider(key, masterKey))
+          .toProvider(CipherProvider(key))
           .asEagerSingleton()
     }
   }
 
-  private class CipherProvider(val keyName: String, val masterAead: Aead) : Provider<Cipher> {
-    @Inject lateinit var keyManager: KeyManager
+  private class CipherProvider(val keyName: String) : Provider<Aead> {
+    @Inject lateinit var keyManager: AeadKeyManager
 
-    override fun get(): Cipher {
+    override fun get(): Aead {
       val keysetHandle = KeysetHandle.generateNew(AeadKeyTemplates.AES256_GCM)
-      return  RealCipher(keysetHandle, masterAead)
+      return AeadFactory.getPrimitive(keysetHandle)
           .also { keyManager[keyName] = it }
     }
   }

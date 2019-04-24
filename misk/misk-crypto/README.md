@@ -3,13 +3,13 @@ safe and easy way.
 
 How it works?
 -----
-The `Cipher` object is used to encrypt/decrypt data.
+This module reads a configuration key and uses it to initialize and bind Tink primitives (`Aead`, `Mac`).
+- Each primitive is also given a `@Named` annotation to make it easy to inject where needed.
+- Each primitive must have a serialized and *encrypted* `KeysetHandle` 
+file associated with it in order to be initialized.
 
-It uses a key which is loaded from a configuration file at startup.
-The key associated with each cipher should be stored **encrypted** in the app's common configuration file.
-
-In order to initialize the module, the app must have a configured GcpKmsClient (Google),
-or an AwsKmsClient (Amazon) client in order to have access to the KMS.
+In order to initialize the module, the app must have a configured `GcpKmsClient` (Google),
+or an `AwsKmsClient` (Amazon) client in order to have access to the KMS.
 
 Setup
 -----
@@ -31,7 +31,7 @@ The first step to generating a key is to use Google's
 ```
 tinkey create-keyset --key-template AES256-GCM --master-key-uri aws-kms://arn:kms:<region>:<account-id>:key/<key-id> --out myKey.json --credentials path/to/aws-credentials.json
 ```
-Then, to specify a new `Cipher` key called "myKey", add the following in your app's configuration file:
+Then, to specify a new `Aead` key called "myKey", add the following in your app's configuration file:
 ```$yaml
 crypto:
   kms_uri: "aws-kms://arn:kms:<region>:<account-id>:key/<key-id>"
@@ -44,7 +44,7 @@ Using a key
 To use your newly created key:
 ```$kotlin
 class PaymentTokenGenerator @Inject constructor(
-  @Named("my_payment_token_key") lateinit var tokenCipher: Cipher
+  @Named("my_payment_token_key") lateinit var tokenCipher: Aead
 ) {
   
   fun encryptToken(token: String): ByteString {
