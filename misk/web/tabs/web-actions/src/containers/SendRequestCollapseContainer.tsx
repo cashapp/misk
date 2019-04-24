@@ -1,5 +1,4 @@
 import {
-  Button,
   Collapse,
   ControlGroup,
   HTMLSelect,
@@ -11,14 +10,16 @@ import {
   HTTPMethodDispatch,
   HTTPMethodIntent
 } from "@misk/core"
-import { onChangeFnCall, simpleSelect } from "@misk/simpleredux"
+import { onChangeFnCall, simpleSelect, simpleType } from "@misk/simpleredux"
 import { HTTPMethod } from "http-method-enum"
 import * as React from "react"
 import { connect } from "react-redux"
 import styled from "styled-components"
 import {
+  Button,
   Metadata,
   MetadataCollapse,
+  MetadataCopyToClipboard,
   MetadataMenu,
   StatusTagComponent
 } from "../components"
@@ -51,9 +52,9 @@ const RequestBodyForm = (
   if (methodHasBody(props.method)) {
     return (
       <MetadataCollapse
-        content={"Request Body"}
         label={"Input"}
         tag={`${tag}::ButtonFormRequestBody`}
+        text={"Request Body"}
       >
         <RequestFormContainer {...props} tag={tag} />
       </MetadataCollapse>
@@ -90,12 +91,20 @@ const SendRequestCollapseContainer = (
   const method: HTTPMethod =
     simpleSelect(props.simpleForm, `${tag}::Method`, "data") ||
     action.dispatchMechanism.reverse()[0]
-  const formData = getFormData(
-    action,
+  const response = simpleSelect(props.simpleNetwork, `${tag}::Response`)
+  const responseData = response.data
+  const whichFormData = simpleSelect(
     props.simpleForm,
-    tag,
-    props.webActionsRaw
+    `${tag}::RequestBodyFormInputType`,
+    "data",
+    simpleType.boolean
   )
+    ? "RAW"
+    : "FORM"
+  const formData =
+    whichFormData === "RAW"
+      ? simpleSelect(props.simpleForm, `${tag}::RawRequestBody`, "data")
+      : getFormData(action, props.simpleForm, tag, props.webActionsRaw)
   if (
     methodHasBody(method) &&
     typeof simpleSelect(
@@ -119,7 +128,7 @@ const SendRequestCollapseContainer = (
   if (
     typeof simpleSelect(props.simpleForm, `${tag}::ButtonResponse`, "data") ===
       "string" &&
-    simpleSelect(props.simpleNetwork, `${tag}::Response`, "data")
+    responseData
   ) {
     props.simpleFormInput(`${tag}::ButtonResponse`, true)
   }
@@ -174,19 +183,27 @@ const SendRequestCollapseContainer = (
           <MetadataMenu>
             {methodHasBody(method) ? (
               <MetadataCollapse
-                content={"Request Body"}
                 label={`${url}`}
                 tag={`${tag}::ButtonRequestBody`}
+                text={"Request"}
               >
+                <MetadataCopyToClipboard
+                  data={formData}
+                  description={"Request Body"}
+                />
                 <CodePreContainer>
                   {JSON.stringify(isOpen && formData, null, 2)}
                 </CodePreContainer>
               </MetadataCollapse>
             ) : (
-              <Metadata content={"Request"} label={`${url}`} />
+              <MetadataCollapse
+                content={[]}
+                label={`${url}`}
+                tag={`${tag}::ButtonRequestBody`}
+                text={"Request"}
+              />
             )}
             <MetadataCollapse
-              content={"Response"}
               labelElement={
                 <StatusTagComponent
                   status={simpleSelect(
@@ -197,30 +214,27 @@ const SendRequestCollapseContainer = (
                 />
               }
               tag={`${tag}::ButtonResponse`}
+              text={"Response"}
             >
               <div>
+                <MetadataCopyToClipboard
+                  data={responseData}
+                  description={"Raw Response"}
+                />
                 <CodePreContainer>
-                  {JSON.stringify(
-                    simpleSelect(
-                      props.simpleNetwork,
-                      `${tag}::Response`,
-                      "data"
-                    ),
-                    null,
-                    2
-                  )}
+                  {JSON.stringify(responseData, null, 2)}
                 </CodePreContainer>
                 <MetadataCollapse
-                  content={"Raw Response"}
                   label={"Redux State"}
                   tag={`${tag}::ButtonRawResponse`}
+                  text={"Raw Response"}
                 >
+                  <MetadataCopyToClipboard
+                    data={response}
+                    description={"Response"}
+                  />
                   <CodePreContainer>
-                    {JSON.stringify(
-                      simpleSelect(props.simpleNetwork, `${tag}::Response`),
-                      null,
-                      2
-                    )}
+                    {JSON.stringify(response, null, 2)}
                   </CodePreContainer>
                 </MetadataCollapse>
               </div>

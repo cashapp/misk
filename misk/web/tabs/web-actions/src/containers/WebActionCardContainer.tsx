@@ -1,5 +1,5 @@
-import { Card, H3, H5, MenuItem } from "@blueprintjs/core"
-import { FlexContainer, WrapTextContainer } from "@misk/core"
+import { Card, H3, H5 } from "@blueprintjs/core"
+import { FlexContainer } from "@misk/core"
 import * as React from "react"
 import { connect } from "react-redux"
 import {
@@ -7,11 +7,11 @@ import {
   Column,
   FloatLeft,
   Header,
-  Metadata,
   MetadataCollapse,
   MetadataMenu,
   MethodTag,
-  RequestResponeContentTypes
+  RequestResponseContentTypesSpan,
+  requestResponseContentTypesString
 } from "../components"
 import { SendRequestCollapseContainer } from "../containers"
 import {
@@ -47,66 +47,63 @@ const WebActionCardContainer = (
       <FlexContainer>
         <Column>
           <MetadataMenu>
-            <Metadata
+            <MetadataCollapse
               content={props.action.function}
               label={"Function"}
-              tooltip={props.action.function}
+              tag={`${props.tag}::Function`}
+              text={
+                props.action.function
+                  .split("(")[0]
+                  .split(".")
+                  .slice(-1)[0]
+              }
             />
-            <Metadata
+            <MetadataCollapse
               content={props.action.allowedServices}
+              countLabel={true}
               label={"Services"}
-              tooltip={props.action.allowedServices}
+              tag={`${props.tag}::Services`}
             />
-            <Metadata
+            <MetadataCollapse
               content={props.action.allowedRoles}
+              countLabel={true}
               label={"Roles"}
-              tooltip={props.action.allowedRoles}
+              tag={`${props.tag}::Roles`}
             />
-            <Metadata
-              content={props.action.authFunctionAnnotations[0]}
+            <MetadataCollapse
+              content={props.action.authFunctionAnnotations}
               label={"Access"}
-              tooltip={props.action.authFunctionAnnotations[0]}
+              tag={`${props.tag}::Access`}
             />
           </MetadataMenu>
         </Column>
         <Column>
           <MetadataMenu>
-            <Metadata
-              content={<RequestResponeContentTypes action={props.action} />}
+            <MetadataCollapse
+              content={requestResponseContentTypesString(props.action)}
+              data={requestResponseContentTypesString(props.action)}
               label={"Content Types"}
-              tooltip={<RequestResponeContentTypes action={props.action} />}
+              tag={`${props.tag}::ContentTypes`}
+              text={<RequestResponseContentTypesSpan action={props.action} />}
             />
             <MetadataCollapse
-              content={"Application Interceptors"}
-              label={`(${props.action.applicationInterceptors.length})`}
+              content={props.action.applicationInterceptors}
+              countLabel={true}
+              label={"Application Interceptors"}
               tag={`${props.tag}::ApplicationInterceptors`}
-            >
-              {props.action.applicationInterceptors.map((ai, index) => (
-                <MenuItem
-                  key={index}
-                  text={<WrapTextContainer>{ai}</WrapTextContainer>}
-                />
-              ))}
-            </MetadataCollapse>
+              text={props.action.applicationInterceptors.join(", ")}
+            />
             <MetadataCollapse
-              content={"Network Interceptors"}
-              label={`(${props.action.networkInterceptors.length})`}
+              content={props.action.networkInterceptors}
+              countLabel={true}
+              label={"Network Interceptors"}
               tag={`${props.tag}::NetworkInterceptors`}
-            >
-              {props.action.networkInterceptors.map((ni, index) => (
-                <MenuItem
-                  key={index}
-                  text={<WrapTextContainer>{ni}</WrapTextContainer>}
-                />
-              ))}
-            </MetadataCollapse>
+            />
             <MetadataCollapse
-              content={"Send a Request"}
-              label={""}
+              children={<span />}
               tag={`${props.tag}::ButtonSendRequest`}
-            >
-              <span />
-            </MetadataCollapse>
+              text={"Send a Request"}
+            />
           </MetadataMenu>
         </Column>
       </FlexContainer>

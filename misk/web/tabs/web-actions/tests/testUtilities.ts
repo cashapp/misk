@@ -14,7 +14,7 @@ export const testTypes = {
       {
         name: "Field 1",
         repeated: false,
-        type: "Double"
+        type: "Short"
       },
       {
         name: "Field 2",
@@ -42,12 +42,12 @@ export const testTypes = {
       }
     ]
   },
-  nestedRepeatedDouble: {
+  nestedRepeatedShort: {
     fields: [
       {
-        name: "Nested Double Field",
+        name: "Nested Short Field",
         repeated: false,
-        type: "repeatedDouble"
+        type: "repeatedShort"
       }
     ]
   },
@@ -60,12 +60,12 @@ export const testTypes = {
       }
     ]
   },
-  repeatedDouble: {
+  repeatedShort: {
     fields: [
       {
-        name: "Repeated Double Field",
+        name: "Repeated Short Field",
         repeated: true,
-        type: "Double"
+        type: "Short"
       }
     ]
   },
@@ -78,12 +78,12 @@ export const testTypes = {
       }
     ]
   },
-  repeatedNestedRepeatedDouble: {
+  repeatedNestedRepeatedShort: {
     fields: [
       {
-        name: "Nested Repeated Double Field",
+        name: "Nested Repeated Short Field",
         repeated: true,
-        type: "nestedRepeatedDouble"
+        type: "nestedRepeatedShort"
       }
     ]
   }

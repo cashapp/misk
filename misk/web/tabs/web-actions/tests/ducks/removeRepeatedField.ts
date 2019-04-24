@@ -11,7 +11,7 @@ describe("Remove a repeated field", () => {
     let typesMetadata = generateTypesMetadata({
       ...nonTypedActionAPI,
       dispatchMechanism: HTTPMethod.POST,
-      requestType: "repeatedDouble",
+      requestType: "repeatedShort",
       types: testTypes
     })
     const parentId = typesMetadata.get("0").idChildren.first() as string
@@ -28,7 +28,7 @@ describe("Remove a repeated field", () => {
     let typesMetadata = generateTypesMetadata({
       ...nonTypedActionAPI,
       dispatchMechanism: HTTPMethod.POST,
-      requestType: "repeatedNestedRepeatedDouble",
+      requestType: "repeatedNestedRepeatedShort",
       types: testTypes
     })
     const parentId = typesMetadata.get("0").idChildren.first() as string

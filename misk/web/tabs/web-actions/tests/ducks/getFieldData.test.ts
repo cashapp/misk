@@ -3,7 +3,8 @@ import {
   addRepeatedField,
   generateTypesMetadata,
   getFieldData,
-  padId
+  padId,
+  recursivelySetDirtyInput
 } from "../../src/ducks"
 import { nonTypedActionAPI, simpleForm, testTypes } from "../testUtilities"
 
@@ -29,7 +30,7 @@ describe("Get formatted form data", () => {
     expect(getData).toMatchSnapshot()
   })
   it("get non-repeated int", () => {
-    const typesMetadata = generateTypesMetadata({
+    let typesMetadata = generateTypesMetadata({
       ...nonTypedActionAPI,
       dispatchMechanism: HTTPMethod.POST,
       requestType: "noRepeatedInt",
@@ -37,7 +38,15 @@ describe("Get formatted form data", () => {
     })
     const data = "123456"
     const fieldId = typesMetadata.get("0").idChildren.first() as string
-    const getData = getFieldData(
+    let getData = getFieldData(
+      typesMetadata,
+      "0",
+      { ...simpleForm, [`Tag::${padId(fieldId)}`]: { data } },
+      "Tag"
+    )
+    expect(getData).toBeUndefined()
+    typesMetadata = recursivelySetDirtyInput(fieldId, typesMetadata, true)
+    getData = getFieldData(
       typesMetadata,
       "0",
       { ...simpleForm, [`Tag::${padId(fieldId)}`]: { data } },
@@ -46,7 +55,7 @@ describe("Get formatted form data", () => {
     expect(getData).toMatchSnapshot()
   })
   it("get nested int", () => {
-    const typesMetadata = generateTypesMetadata({
+    let typesMetadata = generateTypesMetadata({
       ...nonTypedActionAPI,
       dispatchMechanism: HTTPMethod.POST,
       requestType: "nestedNoRepeatedInt",
@@ -55,7 +64,15 @@ describe("Get formatted form data", () => {
     const data = "123456"
     const fieldGroupId = typesMetadata.get("0").idChildren.first() as string
     const fieldId = typesMetadata.get(fieldGroupId).idChildren.first() as string
-    const getData = getFieldData(
+    let getData = getFieldData(
+      typesMetadata,
+      "0",
+      { ...simpleForm, [`Tag::${padId(fieldId)}`]: { data } },
+      "Tag"
+    )
+    expect(getData).toBeUndefined()
+    typesMetadata = recursivelySetDirtyInput(fieldId, typesMetadata, true)
+    getData = getFieldData(
       typesMetadata,
       "0",
       { ...simpleForm, [`Tag::${padId(fieldId)}`]: { data } },
@@ -63,11 +80,11 @@ describe("Get formatted form data", () => {
     )
     expect(getData).toMatchSnapshot()
   })
-  it("get repeated double", () => {
+  it("get repeated short", () => {
     let typesMetadata = generateTypesMetadata({
       ...nonTypedActionAPI,
       dispatchMechanism: HTTPMethod.POST,
-      requestType: "repeatedDouble",
+      requestType: "repeatedShort",
       types: testTypes
     })
     const repeatedParentId = typesMetadata.get("0").idChildren.first() as string
@@ -80,7 +97,20 @@ describe("Get formatted form data", () => {
     const fieldId2 = typesMetadata
       .get(repeatedParentId)
       .idChildren.last() as string
-    const getData = getFieldData(
+    let getData = getFieldData(
+      typesMetadata,
+      "0",
+      {
+        ...simpleForm,
+        [`Tag::${padId(fieldId1)}`]: { data: data1 },
+        [`Tag::${padId(fieldId2)}`]: { data: data2 }
+      },
+      "Tag"
+    )
+    expect(getData).toBeUndefined()
+    typesMetadata = recursivelySetDirtyInput(fieldId1, typesMetadata, true)
+    typesMetadata = recursivelySetDirtyInput(fieldId2, typesMetadata, true)
+    getData = getFieldData(
       typesMetadata,
       "0",
       {
@@ -117,7 +147,20 @@ describe("Get formatted form data", () => {
           .idChildren.first()
       )
       .idChildren.first() as string
-    const getData = getFieldData(
+    let getData = getFieldData(
+      typesMetadata,
+      "0",
+      {
+        ...simpleForm,
+        [`Tag::${padId(fieldId1)}`]: { data: data1 },
+        [`Tag::${padId(fieldId2)}`]: { data: data2 }
+      },
+      "Tag"
+    )
+    expect(getData).toBeUndefined()
+    typesMetadata = recursivelySetDirtyInput(fieldId1, typesMetadata, true)
+    typesMetadata = recursivelySetDirtyInput(fieldId2, typesMetadata, true)
+    getData = getFieldData(
       typesMetadata,
       "0",
       {
@@ -129,11 +172,11 @@ describe("Get formatted form data", () => {
     )
     expect(getData).toMatchSnapshot()
   })
-  it("get repeated nested repeated double", () => {
+  it("get repeated nested repeated short", () => {
     let typesMetadata = generateTypesMetadata({
       ...nonTypedActionAPI,
       dispatchMechanism: HTTPMethod.POST,
-      requestType: "repeatedNestedRepeatedDouble",
+      requestType: "repeatedNestedRepeatedShort",
       types: testTypes
     })
     const repeatedParentId = typesMetadata.get("0").idChildren.first() as string
@@ -166,7 +209,22 @@ describe("Get formatted form data", () => {
     const fieldId3 = typesMetadata
       .get(fieldId2Parent)
       .idChildren.last() as string
-    const getData = getFieldData(
+    let getData = getFieldData(
+      typesMetadata,
+      "0",
+      {
+        ...simpleForm,
+        [`Tag::${padId(fieldId1)}`]: { data: data1 },
+        [`Tag::${padId(fieldId2)}`]: { data: data2 },
+        [`Tag::${padId(fieldId3)}`]: { data: data3 }
+      },
+      "Tag"
+    )
+    expect(getData).toBeUndefined()
+    typesMetadata = recursivelySetDirtyInput(fieldId1, typesMetadata, true)
+    typesMetadata = recursivelySetDirtyInput(fieldId2, typesMetadata, true)
+    typesMetadata = recursivelySetDirtyInput(fieldId3, typesMetadata, true)
+    getData = getFieldData(
       typesMetadata,
       "0",
       {
@@ -183,7 +241,7 @@ describe("Get formatted form data", () => {
     let typesMetadata = generateTypesMetadata({
       ...nonTypedActionAPI,
       dispatchMechanism: HTTPMethod.POST,
-      requestType: "repeatedNestedRepeatedDouble",
+      requestType: "repeatedNestedRepeatedShort",
       types: testTypes
     })
     const repeatedParentId = typesMetadata.get("0").idChildren.first() as string
@@ -204,6 +262,7 @@ describe("Get formatted form data", () => {
       },
       "Tag"
     )
+    expect(getData).toBeUndefined()
     expect(getData).toMatchSnapshot()
   })
 })
