@@ -82,7 +82,7 @@ internal class MiskTestExtension : BeforeEachCallback, AfterEachCallback {
           serviceManager.startAsync().awaitHealthy(60, TimeUnit.SECONDS)
         } catch (e: IllegalStateException) {
           // Unearth the root cause so we can see it in logs easily.
-          log.error("Startup failure -- ${e.cause!!.message}")
+          log.error("Startup failure -- ${e.cause?.message}")
           throw e
         }
       }
