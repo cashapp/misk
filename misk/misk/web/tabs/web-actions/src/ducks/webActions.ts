@@ -14,9 +14,10 @@ import {
   findIndex,
   get,
   isBoolean,
-  isEmpty,
+  isObject,
   padStart,
   reduce,
+  size,
   uniqueId
 } from "lodash"
 import { all, AllEffect, call, put, takeLatest } from "redux-saga/effects"
@@ -36,6 +37,8 @@ export const enum ServerTypes {
   "ByteString" = "ByteString",
   "Char" = "Char",
   "Double" = "Double",
+  // "Enum" = "String",
+  "Float" = "Float",
   "Int" = "Int",
   "JSON" = "JSON",
   "Long" = "Long",
@@ -53,7 +56,6 @@ export const BaseFieldTypes: IBaseFieldTypes = {
   [ServerTypes.Int]: TypescriptBaseTypes.number,
   [ServerTypes.JSON]: TypescriptBaseTypes.string,
   [ServerTypes.Long]: TypescriptBaseTypes.number,
-  [ServerTypes.Double]: TypescriptBaseTypes.number,
   [ServerTypes.ByteString]: TypescriptBaseTypes.string,
   [ServerTypes.String]: TypescriptBaseTypes.string
 }
@@ -90,8 +92,8 @@ export interface IWebActionAPI {
 
 export interface IWebActionInternal {
   allFields: string
-  allowedRoles: string
-  allowedServices: string
+  allowedRoles: string[]
+  allowedServices: string[]
   applicationInterceptors: string[]
   authFunctionAnnotations: string[]
   dispatchMechanism: HTTPMethod[]
@@ -118,6 +120,7 @@ export interface ITypesFieldMetadata {
   repeated: boolean
   serverType: ServerTypes | null
   typescriptType: TypescriptBaseTypes | null
+  dirtyInput: boolean
 }
 
 export interface ITypesMetadata {
@@ -167,6 +170,8 @@ export enum WEBACTIONS {
   ADD_REPEATED_FIELD = "WEBACTIONS_ADD_REPEATED_FIELD",
   REMOVE_REPEATED_FIELD = "WEBACTIONS_REMOVE_REPEATED_FIELD",
   METADATA = "WEBACTIONS_METADATA",
+  SET_DIRTY_INPUT_FIELD = "WEBACTIONS_SET_DIRTY_INPUT_FIELD",
+  UNSET_DIRTY_INPUT_FIELD = "WEBACTIONS_UNSET_DIRTY_INPUT_FIELD",
   SUCCESS = "WEBACTIONS_SUCCESS",
   FAILURE = "WEBACTIONS_FAILURE"
 }
@@ -178,6 +183,7 @@ export enum WEBACTIONS {
  */
 export interface IWebActionsPayload {
   data?: any
+  dirtyInput?: boolean
   error: any
   loading: boolean
   oldState?: IWebActionsImmutableState
@@ -192,6 +198,7 @@ export interface IDispatchWebActions {
     webAction: IWebActionInternal,
     oldState: IWebActionsImmutableState
   ) => IAction<WEBACTIONS.ADD_REPEATED_FIELD, IWebActionsPayload>
+
   webActionsFailure: (
     error: any
   ) => IAction<WEBACTIONS.FAILURE, IWebActionsPayload>
@@ -201,6 +208,16 @@ export interface IDispatchWebActions {
     webAction: IWebActionInternal,
     oldState: IWebActionsImmutableState
   ) => IAction<WEBACTIONS.REMOVE_REPEATED_FIELD, IWebActionsPayload>
+  webActionsSetDirtyInput: (
+    id: string,
+    webAction: IWebActionInternal,
+    oldState: IWebActionsImmutableState
+  ) => IAction<WEBACTIONS.SET_DIRTY_INPUT_FIELD, IWebActionsPayload>
+  webActionsUnsetDirtyInput: (
+    id: string,
+    webAction: IWebActionInternal,
+    oldState: IWebActionsImmutableState
+  ) => IAction<WEBACTIONS.SET_DIRTY_INPUT_FIELD, IWebActionsPayload>
   webActionsSuccess: (
     data: any
   ) => IAction<WEBACTIONS.SUCCESS, IWebActionsPayload>
@@ -223,6 +240,7 @@ export const dispatchWebActions: IDispatchWebActions = {
         webAction
       }
     ),
+
   webActionsFailure: (error: any) =>
     createAction<WEBACTIONS.FAILURE, IWebActionsPayload>(WEBACTIONS.FAILURE, {
       ...error,
@@ -251,13 +269,47 @@ export const dispatchWebActions: IDispatchWebActions = {
         webAction
       }
     ),
+  webActionsSetDirtyInput: (
+    id: string,
+    webAction: IWebActionInternal,
+    oldState: IWebActionsImmutableState
+  ) =>
+    createAction<WEBACTIONS.SET_DIRTY_INPUT_FIELD, IWebActionsPayload>(
+      WEBACTIONS.SET_DIRTY_INPUT_FIELD,
+      {
+        dirtyInput: true,
+        error: null,
+        id,
+        loading: true,
+        oldState,
+        success: false,
+        webAction
+      }
+    ),
   webActionsSuccess: (data: any) =>
     createAction<WEBACTIONS.SUCCESS, IWebActionsPayload>(WEBACTIONS.SUCCESS, {
       ...data,
       error: null,
       loading: false,
       success: true
-    })
+    }),
+  webActionsUnsetDirtyInput: (
+    id: string,
+    webAction: IWebActionInternal,
+    oldState: IWebActionsImmutableState
+  ) =>
+    createAction<WEBACTIONS.SET_DIRTY_INPUT_FIELD, IWebActionsPayload>(
+      WEBACTIONS.SET_DIRTY_INPUT_FIELD,
+      {
+        dirtyInput: false,
+        error: null,
+        id,
+        loading: true,
+        oldState,
+        success: false,
+        webAction
+      }
+    )
 }
 
 /**
@@ -307,6 +359,8 @@ export const parseType = (
     case ServerTypes.Char:
       return value
     case ServerTypes.Double:
+      return value
+    case ServerTypes.Float:
       return parseFloat(value)
     case ServerTypes.Int:
       return parseInt(value, 10)
@@ -315,13 +369,16 @@ export const parseType = (
     case ServerTypes.Long:
       return parseInt(value, 10)
     case ServerTypes.Short:
-      return parseFloat(value)
+      return parseInt(value, 10)
     default:
       return value
   }
 }
 
-const isInput = (data: any) => data || isBoolean(data)
+const isInput = (data: any) =>
+  isBoolean(data) ||
+  (isObject(data) && size(data) > 0) ||
+  (!isObject(data) && data)
 
 export const getFieldData = (
   typesMetadata: OrderedMap<string, ITypesFieldMetadata>,
@@ -331,6 +388,7 @@ export const getFieldData = (
 ): any => {
   if (typesMetadata.size > 0) {
     const {
+      dirtyInput,
       idChildren,
       idParent,
       name,
@@ -343,7 +401,13 @@ export const getFieldData = (
       return simpleSelect(simpleForm, `${tag}::${padId(id)}`, "data")
     } else if (id === "0" && idChildren.size > 0) {
       // root with children, iterate over children
-      return mapOverChildrenData(typesMetadata, idChildren, simpleForm, tag)
+      const data = mapOverChildrenData(
+        typesMetadata,
+        idChildren,
+        simpleForm,
+        tag
+      )
+      return isInput(data) ? data : undefined
     } else if (
       parent.repeated === false &&
       repeated === false &&
@@ -351,9 +415,13 @@ export const getFieldData = (
       BaseFieldTypes.hasOwnProperty(serverType) === false
     ) {
       // field group parent node of a defined type (not a standard language type)
-      return {
-        [name]: mapOverChildrenData(typesMetadata, idChildren, simpleForm, tag)
-      }
+      const data = mapOverChildrenData(
+        typesMetadata,
+        idChildren,
+        simpleForm,
+        tag
+      )
+      return dirtyInput === true ? { [name]: data } : undefined
     } else if (repeated === false && idChildren.size > 0) {
       // field group parent node (standard language type)
       return mapOverChildrenData(typesMetadata, idChildren, simpleForm, tag)
@@ -363,40 +431,24 @@ export const getFieldData = (
         serverType,
         simpleSelect(simpleForm, `${tag}::${padId(id)}`, "data")
       )
-      if (isInput(data)) {
-        return data
-      } else {
-        return
-      }
+      return dirtyInput === true ? data : undefined
     } else if (parent && parent.repeated === false && idChildren.size === 0) {
       // regular leaf node
       const data = parseType(
         serverType,
         simpleSelect(simpleForm, `${tag}::${padId(id)}`, "data")
       )
-      if (isInput(data)) {
-        return {
-          [name]: data
-        }
-      } else {
-        return
-      }
+      return dirtyInput === true ? { [name]: data } : undefined
     } else if (repeated === true && idChildren.size > 0) {
       // repeated node reached, iterate and return as list
-      const repeatedData = idChildren
+      const data = idChildren
         .toList()
         .map((child: string) =>
           getFieldData(typesMetadata, child, simpleForm, tag)
         )
-        .filter(data => isInput(data))
+        .filter(item => isInput(item))
         .toJS()
-      if (isEmpty(repeatedData)) {
-        return
-      } else {
-        return {
-          [name]: repeatedData
-        }
-      }
+      return dirtyInput === false ? undefined : { [name]: data }
     } else {
       throw new Error("Unhandled field data retrieval case.")
     }
@@ -528,6 +580,71 @@ function* handleRemoveRepeatedField(
   }
 }
 
+export const recursivelySetDirtyInput = (
+  id: string,
+  typesMetadata: OrderedMap<string, ITypesFieldMetadata>,
+  dirtyInput: boolean
+): OrderedMap<string, ITypesFieldMetadata> => {
+  let newTypesMetadata = typesMetadata
+  const { idChildren, idParent } = typesMetadata.get(id)
+  if (dirtyInput === false) {
+    idChildren.forEach(
+      (child: string) =>
+        (newTypesMetadata = recursivelySetDirtyInput(
+          child,
+          newTypesMetadata,
+          dirtyInput
+        ))
+    )
+  }
+  let parent = idParent
+  while (parent !== "0") {
+    const {
+      idChildren: parentChildren,
+      idParent: newParent
+    } = newTypesMetadata.get(parent)
+    const otherDirtyInputChildren = parentChildren
+      .map(
+        (child: string) =>
+          child !== id && newTypesMetadata.get(child).dirtyInput
+      )
+      .has(true)
+    if (dirtyInput === true || otherDirtyInputChildren === false) {
+      newTypesMetadata = newTypesMetadata.setIn(
+        [parent, "dirtyInput"],
+        dirtyInput
+      )
+      parent = newParent
+    } else {
+      parent = "0"
+    }
+  }
+  return newTypesMetadata.setIn([id, "dirtyInput"], dirtyInput)
+}
+
+function* handleDirtyInputField(
+  action: IAction<WEBACTIONS, IWebActionsPayload>
+) {
+  try {
+    const { dirtyInput, id, oldState, webAction } = action.payload
+    const webActionIndex = findIndexAction(webAction, oldState)
+    const webActionMetadata = oldState.get("metadata")
+    const { typesMetadata } = webActionMetadata[webActionIndex]
+    const newWebAction = {
+      ...webActionMetadata[webActionIndex],
+      typesMetadata: recursivelySetDirtyInput(id, typesMetadata, dirtyInput)
+    }
+    webActionMetadata[webActionIndex] = newWebAction
+    yield put(
+      dispatchWebActions.webActionsSuccess({
+        metadata: webActionMetadata
+      })
+    )
+  } catch (e) {
+    yield put(dispatchWebActions.webActionsFailure({ error: { ...e } }))
+  }
+}
+
 /**
  * hash for groupBy that provides a string hash that uses an aggregate of
  * non-dispatchMechanism metadata. This allows coalescing of web action entries
@@ -554,8 +671,10 @@ export const buildTypeFieldMetadata = (
   repeated: boolean = false,
   idParent: string = "0",
   serverType: ServerTypes | null = null,
-  typescriptType: TypescriptBaseTypes | null = null
+  typescriptType: TypescriptBaseTypes | null = null,
+  dirtyInput: boolean = false
 ): ITypesFieldMetadata => ({
+  dirtyInput,
   id,
   idChildren,
   idParent,
@@ -712,7 +831,7 @@ export const generateTypesMetadata = (
         false,
         "",
         ServerTypes.JSON,
-        TypescriptBaseTypes.string
+        null
       )
     )
   } else {
@@ -748,13 +867,13 @@ export const processMetadata = (webActionMetadata: IWebActionAPI[]): any =>
           : "None"
       const allowedRoles =
         action.allowedRoles && action.allowedRoles.length > 0
-          ? action.allowedRoles.join(", ")
-          : emptyAllowedArrayValue
+          ? action.allowedRoles
+          : [emptyAllowedArrayValue]
 
       const allowedServices =
         action.allowedServices && action.allowedServices.length > 0
-          ? action.allowedServices.join(", ")
-          : emptyAllowedArrayValue
+          ? action.allowedServices
+          : [emptyAllowedArrayValue]
       return {
         ...action,
         allFields: JSON.stringify(action),
@@ -796,6 +915,8 @@ function* handleMetadata() {
 export function* watchWebActionsSagas(): IterableIterator<AllEffect> {
   yield all([
     takeLatest(WEBACTIONS.ADD_REPEATED_FIELD, handleAddRepeatedField),
+    takeLatest(WEBACTIONS.SET_DIRTY_INPUT_FIELD, handleDirtyInputField),
+    takeLatest(WEBACTIONS.UNSET_DIRTY_INPUT_FIELD, handleDirtyInputField),
     takeLatest(WEBACTIONS.REMOVE_REPEATED_FIELD, handleRemoveRepeatedField),
     takeLatest(WEBACTIONS.METADATA, handleMetadata)
   ])
@@ -817,6 +938,8 @@ export const WebActionsReducer = (
 ) => {
   switch (action.type) {
     case WEBACTIONS.ADD_REPEATED_FIELD:
+    case WEBACTIONS.SET_DIRTY_INPUT_FIELD:
+    case WEBACTIONS.UNSET_DIRTY_INPUT_FIELD:
     case WEBACTIONS.REMOVE_REPEATED_FIELD:
     case WEBACTIONS.FAILURE:
     case WEBACTIONS.METADATA:

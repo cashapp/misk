@@ -1,11 +1,23 @@
-import { Collapse, Icon, Menu, MenuItem, Tag, Tooltip } from "@blueprintjs/core"
+import {
+  Button as BlueprintButton,
+  Collapse,
+  Colors,
+  Icon,
+  Menu,
+  MenuItem,
+  Tag,
+  TextArea,
+  Tooltip as BlueprintTooltip
+} from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
-import { HTTPMethodIntent } from "@misk/core"
+import { HTTPMethodIntent, WrapTextContainer } from "@misk/core"
 import {
   ISimpleFormState,
   onChangeToggleFnCall,
+  onClickFnCall,
   simpleSelect
 } from "@misk/simpleredux"
+import copy from "copy-to-clipboard"
 import HTTPMethod from "http-method-enum"
 import * as React from "react"
 import { connect } from "react-redux"
@@ -14,12 +26,12 @@ import { IDispatchProps, mapDispatchToProps, mapStateToProps } from "../ducks"
 
 export const FloatLeft = styled.span`
   float: left;
-  margin: 0 10px 0 0;
+  margin: 5px 10px 0 0;
 `
 
 export const FloatRight = styled.span`
   float: right;
-  margin: 0 0 0 10px;
+  margin: 5px 0 0 10px;
 `
 
 export const CodeTag = styled(Tag)`
@@ -34,6 +46,17 @@ export const Column = styled.div`
   flex-grow: 1;
   flex-basis: 0;
   min-width: 320px;
+`
+
+export const Button = styled(BlueprintButton)`
+  line-height: normal;
+  text-transform: inherit;
+`
+
+export const Tooltip = styled(BlueprintTooltip)`
+  span.bp3-popover-target {
+    display: inherit !important;
+  }
 `
 
 /**
@@ -52,6 +75,13 @@ export const MetadataMenu = styled(Menu)`
     margin-bottom: 0;
   }
 `
+
+export const WrapTextArea = styled(TextArea)`
+  white-space: pre-line;
+`
+
+const definedOrDefault = (item: any, booleanIfUndefined: boolean) =>
+  item !== undefined ? item : booleanIfUndefined
 
 /**
  * Single cell component for a piece of metadata
@@ -73,52 +103,116 @@ export const Metadata = (props: {
     return (
       <MenuItem
         {...props}
-        text={<Tooltip content={props.tooltip}>{props.content}</Tooltip>}
+        text={
+          <Tooltip content={props.tooltip} lazy={true}>
+            {props.content}
+          </Tooltip>
+        }
       />
     )
   } else {
-    return <MenuItem {...props} text={<Tooltip>{props.content}</Tooltip>} />
+    return (
+      <MenuItem
+        {...props}
+        text={<Tooltip lazy={true}>{props.content}</Tooltip>}
+      />
+    )
   }
 }
 
 /**
- * Metadata that slides out content below when clicked
+ * Metadata pre-filled with content to support a click-to-copy-to-clipboard flow
+ */
+export const MetadataCopyToClipboard = (props: {
+  clipboardLabelElement?: boolean
+  content?: string | JSX.Element
+  data: any
+  description?: string
+  label?: string
+  labelElement?: JSX.Element
+  onClick?: (event: any) => void
+  tooltip?: string | JSX.Element
+}) => {
+  const description = props.description && `${props.description} `
+  const content: string | JSX.Element =
+    props.content || `Click to Copy ${description}to Clipboard`
+  const labelElement: JSX.Element =
+    props.labelElement ||
+    (definedOrDefault(props.clipboardLabelElement, true) && (
+      <Tooltip content={"Click to Copy to Clipboard"}>
+        <Icon icon={IconNames.CLIPBOARD} />
+      </Tooltip>
+    ))
+  const safeData =
+    typeof props.data === "string" ? props.data : JSON.stringify(props.data)
+  return (
+    <Metadata
+      content={content}
+      label={props.label}
+      labelElement={labelElement}
+      onClick={onClickFnCall(copy, safeData)}
+      tooltip={props.tooltip}
+    />
+  )
+}
+
+/**
+ * MetadataCollapse is a generic container for all Metadata
+ * It handles
+ *  * Sliding out to reveal child content when clicked
+ *  * Automatically showing overflow content below when clicked
+ *  * Displaying a list of given content below when clicked
+ *  * In most cases all content is "click-to-copy" enabled
+ *
  * @param props : includes same props as Metadata with a few additional
  *  * children: any components to display when the Metadata is clicked
  *  * tag: string to use in @misk/SimpleRedux/SimpleForm to register Metadata clicks
- *  * IState: include connected State from parent container
- *      Provides access to @misk/SimpleRedux/SimpleForm substate in Redux
  *  * IDispatchProps: include connected dispatch object from parent container
  *      Provides access to @misk/SimpleRedux/SimpleForm input handlers
  */
+
 const UnconnectedMetadataCollapse = (
   props: {
-    children: any
-    content: string | JSX.Element
+    clipboardLabelElement?: boolean
+    children?: any
+    content?: string | string[] | JSX.Element | JSX.Element[]
+    countLabel?: boolean
+    data?: string
     isOpen?: boolean
     label?: string
     labelElement?: JSX.Element
     simpleForm: ISimpleFormState
     tag: string
+    text?: string | JSX.Element
+    tooltip?: string | JSX.Element
   } & IDispatchProps
 ) => {
-  const { children } = props
+  const content = Array.isArray(props.content) ? props.content : [props.content]
+  const collapseIcon = simpleSelect(props.simpleForm, props.tag, "data") ? (
+    <Icon icon={IconNames.CARET_DOWN} />
+  ) : (
+    <Icon icon={IconNames.CARET_RIGHT} />
+  )
   return (
     <div>
       <Metadata
         content={
           <span>
-            {simpleSelect(props.simpleForm, props.tag, "data") ? (
-              <Icon icon={IconNames.CARET_DOWN} />
+            {props.children || content.length > 0 ? (
+              collapseIcon
             ) : (
-              <Icon icon={IconNames.CARET_RIGHT} />
-            )}{" "}
-            {props.content}
+              <Icon color={Colors.LIGHT_GRAY1} icon={IconNames.CARET_RIGHT} />
+            )}
+            {props.text || props.children || content.join(", ")}
           </span>
         }
         data-testid={"metadata-collapse"}
-        label={props.label}
-        labelElement={props.labelElement}
+        label={
+          props.children || !props.countLabel
+            ? props.label
+            : `${props.label} (${content.length})`
+        }
+        labelElement={props.children ? props.labelElement : null}
         onClick={onChangeToggleFnCall(
           props.simpleFormToggle,
           props.tag,
@@ -126,7 +220,20 @@ const UnconnectedMetadataCollapse = (
         )}
       />
       <Collapse isOpen={simpleSelect(props.simpleForm, props.tag, "data")}>
-        {children}
+        {props.children
+          ? props.children
+          : content.map(c => (
+              <MetadataCopyToClipboard
+                clipboardLabelElement={definedOrDefault(
+                  props.clipboardLabelElement,
+                  true
+                )}
+                content={<WrapTextContainer>{c}</WrapTextContainer>}
+                data={props.data || c}
+                key={c.toString()}
+                labelElement={props.labelElement}
+              />
+            ))}
       </Collapse>
     </div>
   )

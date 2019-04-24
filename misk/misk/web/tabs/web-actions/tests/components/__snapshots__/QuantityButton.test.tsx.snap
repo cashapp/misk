@@ -3,13 +3,13 @@
 exports[`Quantity Button QuantityButton for Add Field 1`] = `
 <DocumentFragment>
   <span
-    class="bp3-popover-wrapper"
+    class="bp3-popover-wrapper sc-bZQynM hRiALA"
   >
     <span
       class="bp3-popover-target"
     >
       <button
-        class="bp3-button"
+        class="bp3-button sc-EHOje bcIieJ"
         tabindex="0"
         type="button"
       >
@@ -41,13 +41,13 @@ exports[`Quantity Button QuantityButton for Add Field 1`] = `
 exports[`Quantity Button QuantityButton for Remove Field 1`] = `
 <DocumentFragment>
   <span
-    class="bp3-popover-wrapper"
+    class="bp3-popover-wrapper sc-bZQynM hRiALA"
   >
     <span
       class="bp3-popover-target"
     >
       <button
-        class="bp3-button"
+        class="bp3-button sc-EHOje bcIieJ"
         tabindex="0"
         type="button"
       >

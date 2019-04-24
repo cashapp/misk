@@ -1,8 +1,8 @@
-import { Button, Tooltip } from "@blueprintjs/core"
 import { IconName } from "@blueprintjs/icons"
 import { onChangeFnCall } from "@misk/simpleredux"
 import * as React from "react"
 import { IWebActionInternal } from "../ducks"
+import { Button, Tooltip } from "./CommonComponents"
 
 export const QuantityButton = (props: {
   id: string
@@ -12,7 +12,7 @@ export const QuantityButton = (props: {
   icon: IconName
   oldState: any
 }) => (
-  <Tooltip content={props.content}>
+  <Tooltip content={props.content} lazy={true}>
     <Button
       icon={props.icon}
       onClick={onChangeFnCall(
