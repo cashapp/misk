@@ -75,6 +75,86 @@ class SecretColumnTest {
     }
   }
 
+  /*
+  This test is commented out because it will cause Hibernate to fail initialization
+  Which is exactly what you want in case you specify a key that doesn't exist.
+  This is the exception you'll get during startup:
+  java.lang.IllegalStateException: Expected to be healthy after starting. The following services are not running: {STARTING=[TruncateTablesService [NEW], SchemaMigratorService [NEW], SchemaValidatorService [NEW]], FAILED=[SessionFactoryService [FAILED]]}
+
+	at com.google.common.util.concurrent.ServiceManager$ServiceManagerState.checkHealthy(ServiceManager.java:741)
+	at com.google.common.util.concurrent.ServiceManager$ServiceManagerState.awaitHealthy(ServiceManager.java:568)
+	at com.google.common.util.concurrent.ServiceManager.awaitHealthy(ServiceManager.java:329)
+	...
+	Suppressed: com.google.common.util.concurrent.ServiceManager$FailedService: SessionFactoryService [FAILED]
+	Caused by: org.hibernate.MappingException: Unable to instantiate custom type: misk.hibernate.SecretColumnType
+		at org.hibernate.type.TypeFactory.custom(TypeFactory.java:169)
+		at org.hibernate.type.TypeFactory.byClass(TypeFactory.java:74)
+		at org.hibernate.type.TypeResolver.heuristicType(TypeResolver.java:124)
+		at org.hibernate.mapping.SimpleValue.getType(SimpleValue.java:471)
+		at org.hibernate.mapping.SimpleValue.isValid(SimpleValue.java:453)
+		at org.hibernate.mapping.Property.isValid(Property.java:226)
+		at org.hibernate.mapping.PersistentClass.validate(PersistentClass.java:624)
+		at org.hibernate.mapping.RootClass.validate(RootClass.java:267)
+		at org.hibernate.boot.internal.MetadataImpl.validate(MetadataImpl.java:347)
+		at org.hibernate.boot.internal.SessionFactoryBuilderImpl.build(SessionFactoryBuilderImpl.java:466)
+		at org.hibernate.boot.internal.MetadataImpl.buildSessionFactory(MetadataImpl.java:188)
+		at misk.hibernate.SessionFactoryService.startUp(SessionFactoryService.kt:135)
+		at com.google.common.util.concurrent.AbstractIdleService$DelegateService$1.run(AbstractIdleService.java:62)
+		at com.google.common.util.concurrent.Callables$4.run(Callables.java:119)
+		at java.base/java.lang.Thread.run(Thread.java:834)
+	Caused by: org.hibernate.HibernateException: Cannot set field, key wrongKey not found
+   */
+//  @Test
+//  fun testNoSuchKey() {
+//    val title = "Dark Star"
+//    val length = 2918 // longest recorded dark star was 47 minutes and 18 seconds
+//    val album = "Live/Dead".toByteArray()
+//    transacter.transaction { session ->
+//      session.save(DbJerryGarciaSongWrongKey(title, length, album))
+//    }
+//  }
+//  @Entity
+//  @Table(name = "jerry_garcia_songs")
+//  class DbJerryGarciaSongWrongKey : DbUnsharded<DbJerryGarciaSongWrongKey> {
+//    @javax.persistence.Id
+//    @GeneratedValue
+//    override lateinit var id: Id<DbJerryGarciaSongWrongKey>
+//
+//    @Column(nullable = false)
+//    var title: String
+//
+//    @Column(nullable = false)
+//    var length: Int = 0
+//
+//    @Column(nullable = true)
+//    @SecretColumn(keyName = "wrongKey")
+//    var album: ByteArray?
+//
+//    constructor(title: String, length: Int, album: ByteArray? = null) {
+//      this.title = title
+//      this.length = length
+//      this.album = album
+//    }
+//  }
+
+  @Test
+  fun testFailedDecryption() {
+    val title = "Dark Star"
+    val length = 2918 // longest recorded dark star was 47 minutes and 18 seconds
+    val album = "Live/Dead".toByteArray()
+    transacter.transaction { session ->
+      session.save(DbJerryGarciaSongRaw(title, length, album))
+    }
+    transacter.transaction { session ->
+      val song = queryFactory.newQuery(JerryGarciaSongQuery::class)
+          .title("Dark Star")
+          .query(session)[0]
+      assertThat(song.title).isEqualTo(title)
+      assertThat(song.length).isEqualTo(length)
+      assertThat(song.album).isNull()
+    }
+  }
+
   @Qualifier
   @Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION)
   annotation class JerryGarciaDb
