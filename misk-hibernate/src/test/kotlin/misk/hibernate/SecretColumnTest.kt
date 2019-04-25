@@ -19,6 +19,8 @@ import javax.persistence.Entity
 import javax.persistence.GeneratedValue
 import javax.persistence.Table
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatThrownBy
+import org.hibernate.HibernateException
 import org.junit.jupiter.api.Test
 import java.util.Arrays
 import java.util.Objects
@@ -150,6 +152,24 @@ class SecretColumnTest {
       session.save(DbJerryGarciaSongRaw(title, length, album))
 
       Assertions.assertThatThrownBy {
+        queryFactory.newQuery<JerryGarciaSongQuery>()
+            .title(title).query(session)[0]
+      }.isInstanceOf(javax.persistence.PersistenceException::class.java)
+    }
+  }
+
+  @Test
+  fun testBadDecryptionThrows() {
+    val title = "Dark Star"
+    val length = 2918
+    val album = "Live/Dead".toByteArray()
+    transacter.transaction { session ->
+      session.save(DbJerryGarciaSong(title, length, album))
+
+      // album here can be anything, just not a validly-encrypted album
+      session.save(DbJerryGarciaSongRaw(title, length, album))
+
+      assertThatThrownBy {
         queryFactory.newQuery<JerryGarciaSongQuery>()
             .title(title).query(session)[0]
       }.isInstanceOf(javax.persistence.PersistenceException::class.java)
