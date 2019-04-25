@@ -77,6 +77,21 @@ class TransacterTest {
   }
 
   @Test
+  fun loadOrNullReturnsEntity() {
+    transacter.transaction { session ->
+      val ld = session.save(DbActor("Laura Dern", LocalDate.of(1967, 2, 10)))
+      assertThat(session.loadOrNull(ld)).isNotNull()
+    }
+  }
+
+  @Test
+  fun loadOrNullMissingEntityReturnsNull() {
+    transacter.transaction { session ->
+      assertThat(session.loadOrNull(Id<DbActor>(123))).isNull()
+    }
+  }
+
+  @Test
   fun exceptionCausesTransactionToRollback() {
     assertFailsWith<UnauthorizedException> {
       transacter.transaction { session ->

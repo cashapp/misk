@@ -247,6 +247,10 @@ internal class RealTransacter private constructor(
       return session.get(type.java, gid)
     }
 
+    override fun <T : DbEntity<T>> loadOrNull(id: Id<T>, type: KClass<T>): T? {
+      return session.get(type.java, id)
+    }
+
     override fun shards(): Set<Shard> {
       return if (config.type == DataSourceType.VITESS) {
         useConnection { connection ->
