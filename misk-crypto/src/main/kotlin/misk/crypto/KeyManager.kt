@@ -119,6 +119,7 @@ class DigitalSignatureKeyManager @Inject internal constructor(
     }
     return verifier
   }
-  data class DigitalSignature(val signer: PublicKeySign, val verifier: PublicKeyVerify)
 }
+
+internal data class DigitalSignature(val signer: PublicKeySign, val verifier: PublicKeyVerify)
 

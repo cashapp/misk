@@ -19,7 +19,6 @@ import com.google.inject.Provider
 import com.google.inject.Singleton
 import com.google.inject.name.Names
 import misk.config.Secret
-import misk.crypto.DigitalSignatureKeyManager.DigitalSignature
 import misk.inject.KAbstractModule
 import okio.ByteString
 import okio.ByteString.Companion.toByteString
