@@ -162,14 +162,14 @@ internal class SessionFactoryService(
         value.typeParameters = Properties()
       }
       value.typeParameters.setField("protoColumnField", field)
-    } else if (field.isAnnotationPresent(EncryptedColumn::class.java)) {
-      value.typeName = EncryptedColumnType::class.java.name
+    } else if (field.isAnnotationPresent(SecretColumn::class.java)) {
+      value.typeName = SecretColumnType::class.java.name
 
       if (value.typeParameters == null) {
         value.typeParameters = Properties()
       }
-      value.typeParameters.setProperty(EncryptedColumnType.FIELD_ENCRYPTION_KEY_NAME,
-          field.getAnnotation(EncryptedColumn::class.java).keyName)
+      value.typeParameters.setProperty(SecretColumnType.FIELD_ENCRYPTION_KEY_NAME,
+          field.getAnnotation(SecretColumn::class.java).keyName)
     }
   }
 

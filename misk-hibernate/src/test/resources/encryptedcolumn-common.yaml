@@ -5,6 +5,8 @@ data_source:
   database: encryptedcolumn
   migrations_resource: classpath:/misk/hibernate/encryptedcolumn-migrations
 crypto:
+  kms_uri: "not_relevant"
   keys:
     - key_name: albumKey
+      key_type: AEAD
       encrypted_key: "classpath:/secrets/albumKey.txt"

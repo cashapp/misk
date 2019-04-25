@@ -11,20 +11,20 @@ import misk.inject.KAbstractModule
 import misk.jdbc.DataSourceConfig
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
-import okio.ByteString
 import javax.inject.Inject
 import javax.inject.Qualifier
 import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.GeneratedValue
 import javax.persistence.Table
-import okio.ByteString.Companion.toByteString
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import java.util.Arrays
+import java.util.Objects
 import kotlin.test.assertNull
 
 @MiskTest(startService = true)
-class EncryptedColumnTest {
+class SecretColumnTest {
 
   @MiskTestModule
   val module = TestModule()
@@ -36,10 +36,18 @@ class EncryptedColumnTest {
   fun testHappyPath() {
     val title = "Dark Star"
     val length = 2918 // longest recorded dark star was 47 minutes and 18 seconds
-    val album = "Live/Dead".toByteArray().toByteString()
+    val album = "Live/Dead".toByteArray()
     transacter.transaction { session ->
       session.save(DbJerryGarciaSong(title, length, album))
     }
+    // make sure the data in the database is not the same as the plaintext data
+    transacter.transaction { session ->
+      val songRaw = queryFactory.newQuery(JerryGarciaSongRawQuery::class)
+          .title("Dark Star")
+          .query(session)[0]
+      assertThat(songRaw.album).isNotEqualTo(album)
+    }
+    // test that when retrieving from the database we get the plaintext value
     transacter.transaction { session ->
       val song = queryFactory.newQuery(JerryGarciaSongQuery::class)
           .title("Dark Star")
@@ -85,10 +93,33 @@ class EncryptedColumnTest {
     var length: Int = 0
 
     @Column(nullable = true)
-    @EncryptedColumn(keyName = "albumKey")
-    var album: ByteString?
+    @SecretColumn(keyName = "albumKey")
+    var album: ByteArray?
 
-    constructor(title: String, length: Int, album: ByteString? = null) {
+    constructor(title: String, length: Int, album: ByteArray? = null) {
+      this.title = title
+      this.length = length
+      this.album = album
+    }
+  }
+
+  @Entity
+  @Table(name = "jerry_garcia_songs")
+  class DbJerryGarciaSongRaw : DbUnsharded<DbJerryGarciaSongRaw> {
+    @javax.persistence.Id
+    @GeneratedValue
+    override lateinit var id: Id<DbJerryGarciaSongRaw>
+
+    @Column(nullable = false)
+    var title: String
+
+    @Column(nullable = false)
+    var length: Int = 0
+
+    @Column(nullable = true)
+    var album: ByteArray?
+
+    constructor(title: String, length: Int, album: ByteArray? = null) {
       this.title = title
       this.length = length
       this.album = album
@@ -103,11 +134,30 @@ class EncryptedColumnTest {
     fun query(session: Session): List<SongInfo>
   }
 
+  interface JerryGarciaSongRawQuery : Query<DbJerryGarciaSongRaw> {
+    @Constraint(path = "title")
+    fun title(title: String): JerryGarciaSongRawQuery
+
+    @Select
+    fun query(session: Session): List<SongInfo>
+  }
+
   data class SongInfo(
     @Property("title") val title: String,
     @Property("length") val length: Int,
-    @Property("album") val album: ByteString?
-  ) : Projection
+    @Property("album") val album: ByteArray?
+  ) : Projection {
+    override fun hashCode(): Int = Objects.hash(title, length, album)
+    override fun equals(other: Any?): Boolean {
+      if (other == null) {
+        return false
+      }
+      if (other !is SongInfo) {
+        return false
+      }
+      return title == other.title && length == other.length && Arrays.equals(album, other.album)
+    }
+  }
 
   data class AppConfig(
     val data_source: DataSourceConfig,
@@ -120,12 +170,13 @@ class EncryptedColumnTest {
       install(EnvironmentModule(Environment.TESTING))
 
       val config = MiskConfig.load<AppConfig>("encryptedcolumn", Environment.TESTING)
-      install(CryptoTestModule(config.crypto))
+      install(CryptoTestModule(config.crypto.keys!!.map { it.key_name }))
       install(HibernateTestingModule(JerryGarciaDb::class, config.data_source))
       install(HibernateModule(JerryGarciaDb::class, config.data_source))
       install(object : HibernateEntityModule(JerryGarciaDb::class) {
         override fun configureHibernate() {
           addEntities(DbJerryGarciaSong::class)
+          addEntities(DbJerryGarciaSongRaw::class)
         }
       })
     }

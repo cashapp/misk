@@ -1,6 +1,8 @@
 package misk.hibernate
 
-import misk.crypto
+import com.google.crypto.tink.Aead
+import misk.crypto.AeadKeyManager
+import misk.crypto.encrypt
 import okio.ByteString
 import org.hibernate.HibernateException
 import org.hibernate.engine.spi.SharedSessionContractImplementor
@@ -11,13 +13,12 @@ import java.sql.PreparedStatement
 import java.sql.ResultSet
 import java.sql.Types
 import java.util.Properties
-import okio.ByteString.Companion.toByteString
 import org.hibernate.type.spi.TypeConfiguration
 import org.hibernate.type.spi.TypeConfigurationAware
 
-internal class EncryptedColumnType : UserType, ParameterizedType, TypeConfigurationAware {
+internal class SecretColumnType : UserType, ParameterizedType, TypeConfigurationAware {
   companion object {
-    const val FIELD_ENCRYPTION_KEY_NAME: String = ""
+    const val FIELD_ENCRYPTION_KEY_NAME: String = "key_name"
   }
   private lateinit var aead: Aead
   private lateinit var _typeConfiguration: TypeConfiguration
@@ -44,7 +45,7 @@ internal class EncryptedColumnType : UserType, ParameterizedType, TypeConfigurat
 
   override fun equals(x: Any?, y: Any?) = x == y
 
-  override fun returnedClass() = this.javaClass
+  override fun returnedClass() = ByteArray::class.java
 
   override fun assemble(cached: Serializable?, owner: Any?) = cached
 
@@ -59,7 +60,7 @@ internal class EncryptedColumnType : UserType, ParameterizedType, TypeConfigurat
     if (value == null) {
       st.setNull(index, Types.BINARY)
     } else {
-      val encrypted = aead.encrypt(value as ByteString).toByteArray()
+      val encrypted = aead.encrypt(value as ByteArray, null)
       st.setBytes(index, encrypted)
     }
   }
@@ -70,8 +71,8 @@ internal class EncryptedColumnType : UserType, ParameterizedType, TypeConfigurat
     session: SharedSessionContractImplementor?,
     owner: Any?
   ): Any? {
-    val result = rs?.getBytes(names[0])?.toByteString()
-    return result?.let { aead.decrypt(it) }
+    val result = rs?.getBytes(names[0])
+    return result?.let { aead.decrypt(it, null) }
   }
 
   override fun isMutable() = false

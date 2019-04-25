@@ -17,6 +17,7 @@ dependencies {
   compile dep.openTracingUtil
   compile dep.openTracingJdbc
   compile dep.vitess
+  compile dep.tink
   compile project(':misk')
   compile project(':misk-crypto')
 

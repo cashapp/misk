@@ -1,7 +1,7 @@
 package misk.hibernate
 
 /**
- * [EncryptedColumn] is an annotation used to get Hibernate to encrypt a field before writing it
+ * [SecretColumn] is an annotation used to get Hibernate to encrypt a field before writing it
  * to the database.
  * The [keyName] string is used to specify the name of the key to be used to encrypt and decrypt the value.
  * Install [misk.crypto.CryptoModule] to configure the keys the app uses.
@@ -15,10 +15,10 @@ package misk.hibernate
  * Then, in an entity class:
  * ```
  * @Column
- * @EncryptedColumn(keyName = "secretColumnKey")
+ * @SecretColumn(keyName = "secretColumnKey")
  * var secret: String
  * ```
- * Hibernate fields annotated with [EncryptedColumn] must be declared as `VARBINARY()` or `BINARY`
+ * Hibernate fields annotated with [SecretColumn] must be declared as `VARBINARY()` or `BINARY`
  * in their respective MySQL table. For example:
  * ```
  * CREATE TABLE my_table(
@@ -28,4 +28,4 @@ package misk.hibernate
  * ```
  */
 @Target(AnnotationTarget.FIELD)
-annotation class EncryptedColumn(val keyName: String)
+annotation class SecretColumn(val keyName: String)
