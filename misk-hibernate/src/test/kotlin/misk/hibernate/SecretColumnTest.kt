@@ -35,6 +35,9 @@ class SecretColumnTest {
   @Inject @JerryGarciaDb lateinit var transacter: Transacter
   @Inject lateinit var queryFactory: Query.Factory
 
+  /**
+   * Test that the value is being encrypted when persisted in the database and decrypted when fetched.
+   */
   @Test
   fun testHappyPath() {
     val title = "Dark Star"
@@ -140,6 +143,9 @@ class SecretColumnTest {
 //    }
 //  }
 
+  /**
+   * Test that in case we fail to decrypt a value, null is returned instead
+   */
   @Test
   fun testFailedDecryption() {
     val title = "Dark Star"

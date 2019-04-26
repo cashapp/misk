@@ -18,12 +18,12 @@ package misk.hibernate
  * @SecretColumn(keyName = "secretColumnKey")
  * var secret: String
  * ```
- * Hibernate fields annotated with [SecretColumn] must be declared as `VARBINARY()` or `BINARY`
+ * Hibernate fields annotated with [SecretColumn] must be declared as `VARBINARY()`
  * in their respective MySQL table. For example:
  * ```
  * CREATE TABLE my_table(
  *   id BIGINT NOT NULL AUTO_INCREMENT,
- *   secret VARBINARY(200)
+ *   secret VARBINARY(8000)
  * _
  * ```
  */
