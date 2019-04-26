@@ -29,3 +29,4 @@ package misk.hibernate
  */
 @Target(AnnotationTarget.FIELD)
 annotation class SecretColumn(val keyName: String)
+

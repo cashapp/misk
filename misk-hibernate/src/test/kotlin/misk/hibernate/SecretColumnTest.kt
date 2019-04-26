@@ -158,24 +158,6 @@ class SecretColumnTest {
     }
   }
 
-  @Test
-  fun testBadDecryptionThrows() {
-    val title = "Dark Star"
-    val length = 2918
-    val album = "Live/Dead".toByteArray()
-    transacter.transaction { session ->
-      session.save(DbJerryGarciaSong(title, length, album))
-
-      // album here can be anything, just not a validly-encrypted album
-      session.save(DbJerryGarciaSongRaw(title, length, album))
-
-      assertThatThrownBy {
-        queryFactory.newQuery<JerryGarciaSongQuery>()
-            .title(title).query(session)[0]
-      }.isInstanceOf(javax.persistence.PersistenceException::class.java)
-    }
-  }
-
   @Qualifier
   @Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION)
   annotation class JerryGarciaDb

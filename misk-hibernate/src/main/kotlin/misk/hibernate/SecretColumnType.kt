@@ -15,7 +15,6 @@ import java.util.Properties
 import java.security.GeneralSecurityException
 import org.hibernate.type.spi.TypeConfiguration
 import org.hibernate.type.spi.TypeConfigurationAware
-import java.util.Base64
 
 internal class SecretColumnType : UserType, ParameterizedType, TypeConfigurationAware {
   companion object {
