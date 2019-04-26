@@ -46,7 +46,7 @@ class CryptoModuleTest {
   }
 
   @Test
-  fun testImportSigitalSignature() {
+  fun testImportDigitalSignature() {
     val keyHandle = KeysetHandle.generateNew(SignatureKeyTemplates.ED25519)
     val injector = getInjector(listOf(Pair("test-ds", keyHandle)))
     val keyManager = injector.getInstance(DigitalSignatureKeyManager::class.java)

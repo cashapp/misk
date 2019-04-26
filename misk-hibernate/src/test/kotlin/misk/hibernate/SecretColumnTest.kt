@@ -145,7 +145,7 @@ class SecretColumnTest {
 //  }
 
   /**
-   * Test that in case we fail to decrypt a value, null is returned instead
+   * Test that in case we fail to decrypt a value, we raise an exception
    */
   @Test
   fun testFailedDecryption() {
@@ -170,7 +170,6 @@ class SecretColumnTest {
     val length = 2918
     val album = "Live/Dead".toByteArray()
     transacter.transaction { session ->
-      // album here can be anything, just not a validly-encrypted album
       session.save(DbJerryGarciaSong(title, length, album))
       val song = queryFactory.newQuery<JerryGarciaSongQuery>()
           .album(album)
