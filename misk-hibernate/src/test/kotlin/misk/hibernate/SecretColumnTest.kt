@@ -24,6 +24,7 @@ import org.hibernate.HibernateException
 import org.junit.jupiter.api.Test
 import java.util.Arrays
 import java.util.Objects
+import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 
 @MiskTest(startService = true)
@@ -152,15 +153,29 @@ class SecretColumnTest {
     val length = 2918
     val album = "Live/Dead".toByteArray()
     transacter.transaction { session ->
-      session.save(DbJerryGarciaSong(title, length, album))
-
       // album here can be anything, just not a validly-encrypted album
       session.save(DbJerryGarciaSongRaw(title, length, album))
 
-      Assertions.assertThatThrownBy {
+      assertThatThrownBy {
         queryFactory.newQuery<JerryGarciaSongQuery>()
-            .title(title).query(session)[0]
+            .title(title)
+            .query(session)[0]
       }.isInstanceOf(javax.persistence.PersistenceException::class.java)
+    }
+  }
+
+  @Test
+  fun testGetRecordByEncryptedColumn() {
+    val title = "Dark Star"
+    val length = 2918
+    val album = "Live/Dead".toByteArray()
+    transacter.transaction { session ->
+      // album here can be anything, just not a validly-encrypted album
+      session.save(DbJerryGarciaSong(title, length, album))
+      val song = queryFactory.newQuery<JerryGarciaSongQuery>()
+          .album(album)
+          .query(session)
+      assertNotNull(song)
     }
   }
 
@@ -219,6 +234,9 @@ class SecretColumnTest {
     @Constraint(path = "title")
     fun title(title: String): JerryGarciaSongQuery
 
+    @Constraint(path = "album")
+    fun album(album: ByteArray): JerryGarciaSongQuery
+
     @Select
     fun query(session: Session): List<SongInfo>
   }
@@ -259,7 +277,7 @@ class SecretColumnTest {
       install(EnvironmentModule(Environment.TESTING))
 
       val config = MiskConfig.load<AppConfig>("encryptedcolumn", Environment.TESTING)
-      install(CryptoTestModule(config.crypto.keys!!.map { it.key_name }))
+      install(CryptoTestModule(config.crypto.keys!!))
       install(HibernateTestingModule(JerryGarciaDb::class, config.data_source))
       install(HibernateModule(JerryGarciaDb::class, config.data_source))
       install(object : HibernateEntityModule(JerryGarciaDb::class) {

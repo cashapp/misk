@@ -15,6 +15,7 @@ import java.util.Properties
 import java.security.GeneralSecurityException
 import org.hibernate.type.spi.TypeConfiguration
 import org.hibernate.type.spi.TypeConfigurationAware
+import java.util.Objects
 
 internal class SecretColumnType : UserType, ParameterizedType, TypeConfigurationAware {
   companion object {
@@ -39,29 +40,13 @@ internal class SecretColumnType : UserType, ParameterizedType, TypeConfiguration
         throw HibernateException("Cannot set field, key $keyName not found")
   }
 
-  override fun hashCode(x: Any): Int = aead.decrypt(x as ByteArray, null).hashCode()
+  override fun hashCode(x: Any): Int = (x as ByteArray).hashCode()
 
   override fun deepCopy(value: Any?) = (value as ByteArray?)?.copyOf()
 
   override fun replace(original: Any?, target: Any?, owner: Any?) = (original as ByteArray).copyOf()
 
-  override fun equals(x: Any?, y: Any?): Boolean {
-    if (x == null && y == null) {
-      return true
-    }
-    if (x == null && y !== null) {
-      return false
-    }
-    if (x != null && y == null) {
-      return false
-    }
-    return try {
-      aead.decrypt(x as ByteArray, null) contentEquals
-          (aead.decrypt(y as ByteArray, null))
-    } catch (e: GeneralSecurityException) {
-      false
-    }
-  }
+  override fun equals(x: Any?, y: Any?): Boolean = Objects.equals(x, y)
 
   override fun returnedClass() = ByteArray::class.java
 
@@ -93,7 +78,7 @@ internal class SecretColumnType : UserType, ParameterizedType, TypeConfiguration
     return result?.let { try {
         aead.decrypt(it, null)
       } catch (e: java.security.GeneralSecurityException) {
-        throw HibernateException(e);
+        throw HibernateException(e)
       }
     }
   }
