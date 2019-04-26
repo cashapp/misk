@@ -11,6 +11,7 @@ import misk.inject.KAbstractModule
 import misk.jdbc.DataSourceConfig
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
+import org.assertj.core.api.Assertions
 import javax.inject.Inject
 import javax.inject.Qualifier
 import javax.persistence.Column
@@ -140,18 +141,18 @@ class SecretColumnTest {
   @Test
   fun testFailedDecryption() {
     val title = "Dark Star"
-    val length = 2918 // longest recorded dark star was 47 minutes and 18 seconds
+    val length = 2918
     val album = "Live/Dead".toByteArray()
     transacter.transaction { session ->
+      session.save(DbJerryGarciaSong(title, length, album))
+
+      // album here can be anything, just not a validly-encrypted album
       session.save(DbJerryGarciaSongRaw(title, length, album))
-    }
-    transacter.transaction { session ->
-      val song = queryFactory.newQuery(JerryGarciaSongQuery::class)
-          .title("Dark Star")
-          .query(session)[0]
-      assertThat(song.title).isEqualTo(title)
-      assertThat(song.length).isEqualTo(length)
-      assertThat(song.album).isNull()
+
+      Assertions.assertThatThrownBy {
+        queryFactory.newQuery<JerryGarciaSongQuery>()
+            .title(title).query(session)[0]
+      }.isInstanceOf(javax.persistence.PersistenceException::class.java)
     }
   }
 

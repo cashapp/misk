@@ -12,9 +12,9 @@ import java.sql.PreparedStatement
 import java.sql.ResultSet
 import java.sql.Types
 import java.util.Properties
+import java.security.GeneralSecurityException
 import org.hibernate.type.spi.TypeConfiguration
 import org.hibernate.type.spi.TypeConfigurationAware
-import java.security.GeneralSecurityException
 import java.util.Base64
 
 internal class SecretColumnType : UserType, ParameterizedType, TypeConfigurationAware {
@@ -92,11 +92,11 @@ internal class SecretColumnType : UserType, ParameterizedType, TypeConfiguration
   ): Any? {
     val result = rs?.getBytes(names[0])
     return result?.let { try {
-      aead.decrypt(it, null)
-    } catch (e: GeneralSecurityException) {
-      logger.warn { "Failed to decrypt ${Base64.getEncoder().encodeToString(it)} using key $keyName" }
-      null
-    }}
+        aead.decrypt(it, null)
+      } catch (e: java.security.GeneralSecurityException) {
+        throw HibernateException(e);
+      }
+    }
   }
 
   override fun isMutable() = false
