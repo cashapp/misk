@@ -2,6 +2,8 @@ package misk.crypto
 
 import com.google.crypto.tink.Aead
 import com.google.crypto.tink.Mac
+import com.google.crypto.tink.PublicKeySign
+import com.google.crypto.tink.PublicKeyVerify
 import com.google.inject.ConfigurationException
 import com.google.inject.Inject
 import com.google.inject.Injector
@@ -41,7 +43,7 @@ class AeadKeyManager @Inject internal constructor(
 
 /**
  * Holds a map of every [Mac] key name to its primitive listed in the configuration for this app.
- * Users may use htis objecy to obtain a [Mac] object dynamically:
+ * Users may use this class to obtain a [Mac] object dynamically:
  * ```
  * val hmac: Mac? = macKeyManager["myHmac"]
  * ```
@@ -68,3 +70,56 @@ class MacKeyManager @Inject internal constructor(
     return mac
   }
 }
+
+/**
+ * Holds a map of every key name to its corresponding [PublicKeySign] and [PublicKeyVerify] primitives.
+ * Users may use this class to obtain a [PublicKeySign] to sign data
+ * or [PublicKeyVerify] to verify the integrity of a message dynamically:
+ * ```
+ * val signer: PublicKeySign? = keyManager.getSigner("myDigitalSignatureKey")
+ * val verifier: PublicKeyVerify? = keyManager.getVerifier("mySigitalSignatureKey")
+ * val signature = signer.sign(data)
+ * verifier.verify(signature, data)
+ * ```
+ */
+@Singleton
+class DigitalSignatureKeyManager @Inject internal constructor(
+  private val injector: Injector
+) {
+  private val signers: HashMap<String, DigitalSignature> = LinkedHashMap()
+
+  internal operator fun set(name: String, signerAndVerifier: DigitalSignature) {
+    if (!signers.containsKey(name)) {
+      signers[name] = signerAndVerifier
+    }
+  }
+
+  fun getSigner(name: String): PublicKeySign? {
+    var signer = signers[name]?.signer
+    if (signer == null) {
+      try {
+        signer = injector.getInstance(Key.get(PublicKeySign::class.java, Names.named(name)))
+        val verifier = injector.getInstance(Key.get(PublicKeyVerify::class.java, Names.named(name)))
+        this[name] = DigitalSignature(signer, verifier)
+      } catch (e: ConfigurationException) {
+      }
+    }
+    return signer
+  }
+
+  fun getVerifier(name: String): PublicKeyVerify? {
+    var verifier = signers[name]?.verifier
+    if (verifier == null) {
+      try {
+        verifier = injector.getInstance(Key.get(PublicKeyVerify::class.java, Names.named(name)))
+        val signer = injector.getInstance(Key.get(PublicKeySign::class.java, Names.named(name)))
+        this[name] = DigitalSignature(signer, verifier)
+      } catch (e: ConfigurationException) {
+      }
+    }
+    return verifier
+  }
+}
+
+internal data class DigitalSignature(val signer: PublicKeySign, val verifier: PublicKeyVerify)
+

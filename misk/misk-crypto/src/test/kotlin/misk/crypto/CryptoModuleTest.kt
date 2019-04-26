@@ -4,13 +4,18 @@ import com.google.crypto.tink.JsonKeysetWriter
 import com.google.crypto.tink.KeysetHandle
 import com.google.crypto.tink.aead.AeadConfig
 import com.google.crypto.tink.aead.AeadKeyTemplates
+import com.google.crypto.tink.mac.MacConfig
 import com.google.crypto.tink.mac.MacKeyTemplates
+import com.google.crypto.tink.signature.PublicKeySignFactory
+import com.google.crypto.tink.signature.SignatureConfig
+import com.google.crypto.tink.signature.SignatureKeyTemplates
 import com.google.inject.CreationException
 import com.google.inject.Guice
 import com.google.inject.Injector
 import misk.config.Secret
 import misk.testing.MiskTest
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatCode
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.Test
 import java.io.ByteArrayOutputStream
@@ -20,6 +25,8 @@ class CryptoModuleTest {
 
   init {
     AeadConfig.register()
+    MacConfig.register()
+    SignatureConfig.register()
   }
 
   @Test
@@ -36,6 +43,22 @@ class CryptoModuleTest {
     val injector = getInjector(listOf(Pair("test-mac", keyHandle)))
     val mac = injector.getInstance(MacKeyManager::class.java)["test-mac"]
     assertThat(mac).isNotNull()
+  }
+
+  @Test
+  fun testImportSigitalSignature() {
+    val keyHandle = KeysetHandle.generateNew(SignatureKeyTemplates.ED25519)
+    val injector = getInjector(listOf(Pair("test-ds", keyHandle)))
+    val keyManager = injector.getInstance(DigitalSignatureKeyManager::class.java)
+    val signer = keyManager.getSigner("test-ds")
+    val verifier = keyManager.getVerifier("test-ds")
+    assertThat(signer).isNotNull()
+    assertThat(verifier).isNotNull()
+
+    val data = "sign this".toByteArray()
+    val signature = signer!!.sign(data)
+    assertThatCode { verifier!!.verify(signature, data) }
+        .doesNotThrowAnyException()
   }
 
   @Test
@@ -65,8 +88,11 @@ class CryptoModuleTest {
   private fun getInjector(keyMap: List<Pair<String, KeysetHandle>>): Injector{
     val keys = keyMap.map {
       var keyType = KeyType.AEAD
-      if (it.second.keysetInfo.getKeyInfo(0).typeUrl.endsWith("HmacKey")) {
+      val keyTypeUrl = it.second.keysetInfo.getKeyInfo(0).typeUrl
+      if (keyTypeUrl.endsWith("HmacKey")) {
         keyType = KeyType.MAC
+      } else if (keyTypeUrl.endsWith("Ed25519PrivateKey")) {
+        keyType = KeyType.DIGITAL_SIGNATURE
       }
       Key(it.first, keyType, generateEncryptedKey(it.second))
     }
