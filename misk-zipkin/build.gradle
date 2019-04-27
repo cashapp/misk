@@ -1,12 +1,12 @@
 dependencies {
-  compile dep.tracingZipkin
-  compile dep.zipkinReporter
-  compile dep.zipkinBrave
-  compile project(':misk')
+  implementation dep.tracingZipkin
+  implementation dep.zipkinReporter
+  implementation dep.zipkinBrave
+  implementation project(':misk')
 
-  testCompile dep.assertj
-  testCompile dep.junitApi
-  testCompile dep.junitEngine
-  testCompile dep.junitParams
-  testCompile project(':misk-testing')
+  testImplementation dep.assertj
+  testImplementation dep.junitApi
+  testImplementation dep.junitEngine
+  testImplementation dep.junitParams
+  testImplementation project(':misk-testing')
 }

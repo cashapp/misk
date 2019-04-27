@@ -1,16 +1,16 @@
 dependencies {
-  compile dep.gcpCloudStorage
-  compile(dep.gcpDatastore) {
-    exclude group: 'com.google.protobuf'
-    exclude group: 'com.google.api.grpc'
-    exclude group: 'io.grpc'
-  }
-  compile dep.gcpKms
-  compile dep.gcpLogback
-  compile project(':misk')
-  compile project(':misk-jaeger')
-  compile project(':misk-zipkin')
+  implementation dep.gcpCloudStorage
+  implementation(dep.gcpDatastore) {
 
-  testCompile project(':misk-testing')
-  testCompile project(':misk-gcp-testing')
+
+
+  }
+  implementation dep.gcpKms
+  implementation dep.gcpLogback
+  implementation project(':misk')
+  implementation project(':misk-jaeger')
+  implementation project(':misk-zipkin')
+
+  testImplementation project(':misk-testing')
+  testImplementation project(':misk-gcp-testing')
 }

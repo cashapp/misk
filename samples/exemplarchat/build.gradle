@@ -1,16 +1,16 @@
 apply plugin: 'com.github.johnrengelman.shadow'
 
 dependencies {
-  compile dep.kotlinStdLib
-  compile dep.kotlinTest
-  compile dep.guava
-  compile dep.guice
-  compile dep.logbackClassic
-  compile project(':misk')
-  compile project(':misk-prometheus')
-  compile project(':misk-eventrouter')
+  implementation dep.kotlinStdLib
+  implementation dep.kotlinTest
+  implementation dep.guava
+  implementation dep.guice
+  implementation dep.logbackClassic
+  implementation project(':misk')
+  implementation project(':misk-prometheus')
+  implementation project(':misk-eventrouter')
 
-  testCompile project(':misk-testing')
+  testImplementation project(':misk-testing')
 }
 
 jar {

@@ -1,14 +1,14 @@
 dependencies {
-  compile dep.docker
-  compile dep.junitApi
-  compile dep.junitParams
-  compile dep.junitEngine
-  compile dep.assertj
-  compile dep.logbackClassic
-  compile dep.okHttpMockWebServer
-  compile dep.okio
-  compile dep.openTracingMock
-  compile dep.mockitoCore
-  compile dep.guavaTestLib
-  compile project(':misk')
+  implementation dep.docker
+  implementation dep.junitApi
+  implementation dep.junitParams
+  implementation dep.junitEngine
+  implementation dep.assertj
+  implementation dep.logbackClassic
+  implementation dep.okHttpMockWebServer
+  implementation dep.okio
+  implementation dep.openTracingMock
+  implementation dep.mockitoCore
+  implementation dep.guavaTestLib
+  implementation project(':misk')
 }

@@ -7,12 +7,12 @@ buildscript {
 apply plugin: 'kotlin-jpa'
 
 dependencies {
-  compile dep.curatorFramework
-  compile project(':misk')
-  compile dep.zookeeper
+  implementation dep.curatorFramework
+  implementation project(':misk')
+  implementation dep.zookeeper
 
-  testCompile dep.docker
-  testCompile dep.junitApi
-  testCompile dep.zookeeper
-  testCompile project(':misk-testing')
+  testImplementation dep.docker
+  testImplementation dep.junitApi
+  testImplementation dep.zookeeper
+  testImplementation project(':misk-testing')
 }

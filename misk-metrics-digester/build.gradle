@@ -1,6 +1,6 @@
 dependencies {
-    compile dep.tracingJaeger
-    compile project(':misk')
+    implementation dep.tracingJaeger
+    implementation project(':misk')
 
-    testCompile project(':misk-testing')
+    testImplementation project(':misk-testing')
 }

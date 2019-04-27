@@ -34,11 +34,11 @@ sourceSets {
 }
 
 dependencies {
-  compile dep.junitApi
-  compile dep.docker
-  compile dep.grpcNetty
-  compile dep.grpcProtobuf
-  compile dep.grpcStub
-  compile project(':misk')
-  compile project(':misk-testing')
+  implementation dep.junitApi
+  implementation dep.docker
+  implementation dep.grpcNetty
+  implementation dep.grpcProtobuf
+  implementation dep.grpcStub
+  implementation project(':misk')
+  implementation project(':misk-testing')
 }

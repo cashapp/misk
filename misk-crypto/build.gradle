@@ -1,6 +1,6 @@
 dependencies {
-  compile dep.tink
-  compile project(':misk')
+  implementation dep.tink
+  implementation project(':misk')
 
-  testCompile project(':misk-testing')
+  testImplementation project(':misk-testing')
 }

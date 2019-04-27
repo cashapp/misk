@@ -7,18 +7,18 @@ buildscript {
 apply plugin: 'kotlin-jpa'
 
 dependencies {
-  compile dep.datasourceProxy
-  compile dep.docker
-  compile dep.hibernateCore
-  compile dep.hikariCp
-  compile dep.hsqldb
-  compile dep.mysql
-  compile dep.openTracing
-  compile dep.openTracingUtil
-  compile dep.openTracingJdbc
-  compile dep.vitess
-  compile project(':misk')
+  implementation dep.datasourceProxy
+  implementation dep.docker
+  implementation dep.hibernateCore
+  implementation dep.hikariCp
+  implementation dep.hsqldb
+  implementation dep.mysql
+  implementation dep.openTracing
+  implementation dep.openTracingUtil
+  implementation dep.openTracingJdbc
+  implementation dep.vitess
+  implementation project(':misk')
 
-  testCompile project(':misk-testing')
-  testCompile project(':misk-hibernate-testing')
+  testImplementation project(':misk-testing')
+  testImplementation project(':misk-hibernate-testing')
 }

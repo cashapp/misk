@@ -1,10 +1,10 @@
 dependencies {
-  compile dep.tracingJaeger
-  compile project(':misk')
+  implementation dep.tracingJaeger
+  implementation project(':misk')
 
-  testCompile dep.assertj
-  testCompile dep.junitApi
-  testCompile dep.junitEngine
-  testCompile dep.junitParams
-  testCompile project(':misk-testing')
+  testImplementation dep.assertj
+  testImplementation dep.junitApi
+  testImplementation dep.junitEngine
+  testImplementation dep.junitParams
+  testImplementation project(':misk-testing')
 }
