@@ -14,7 +14,7 @@ jobs:
       - run:
           name: "Download and extract OpenJDK 11"
           command: |
-            mkdir -p ~/openjdk-11 && cd ~/openjdk-11 && curl -sSL https://download.java.net/java/GA/jdk11/9/GPL/openjdk-11.0.2_linux-x64_bin.tar.gz | tar -xz --strip-components 1
+            mkdir -p ~/openjdk-11 && cd ~/openjdk-11 && curl -sSL https://download.oracle.com/java/GA/jdk11/9/GPL/openjdk-11.0.2_linux-x64_bin.tar.gz | tar -xz --strip-components 1
             echo '
               export PATH="$JAVA_HOME/bin:$PATH"
               export JAVA_HOME="$HOME/openjdk-11"
