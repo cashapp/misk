@@ -29,16 +29,10 @@ class MiskClientProtocServerTest {
         routeguide.Point.ADAPTER, routeguide.Feature.ADAPTER)
 
     val grpcClient = grpcClientProvider.get()
-    val feature = grpcClient.call(grpcMethod, Point.Builder()
-        .latitude(43)
-        .longitude(-80)
-        .build())
-    assertThat(feature).isEqualTo(Feature.Builder()
-        .name("pine tree")
-        .location(Point.Builder()
-            .latitude(43)
-            .longitude(-80)
-            .build())
-        .build())
+    val feature = grpcClient.call(grpcMethod, Point(latitude = 43, longitude = -80))
+    assertThat(feature).isEqualTo(Feature(
+        name = "pine tree",
+        location = Point(latitude = 43, longitude = -80)
+    ))
   }
 }
