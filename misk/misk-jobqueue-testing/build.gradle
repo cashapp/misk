@@ -1,0 +1,6 @@
+dependencies {
+  compile dep.junitApi
+  compile project(':misk')
+  compile project(':misk-testing')
+  compile project(':misk-jobqueue')
+}
