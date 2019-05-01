@@ -452,6 +452,36 @@ internal class RepeatedTaskQueueTest {
     assertThat(queue.poll().task().status).isEqualTo(Status.NO_WORK)
   }
 
+  @Test fun handlesUncaughtThrowableFromTask() {
+    val latch = CountDownLatch(1)
+    taskQueue.schedule(Duration.ofSeconds(3)) {
+      if (latch.count > 0) latch.countDown()
+      throw Throwable("a throwable!")
+    }
+
+    // Allow the first task to be dispatched, then wait for it complete
+    pendingTasks.release(1)
+    assertThat(latch.await(5, TimeUnit.SECONDS)).isTrue()
+
+    val nextScheduled = waitForNextPendingTask()
+    assertThat(nextScheduled.getDelay(TimeUnit.SECONDS)).isEqualTo(3)
+  }
+
+  @Test fun handlesUncaughtThrowableFromTaskWithRetryDelay() {
+    val latch = CountDownLatch(1)
+    taskQueue.schedule(Duration.ofSeconds(3), Duration.ofSeconds(5)) {
+      if (latch.count > 0) latch.countDown()
+      throw Throwable("a throwable!")
+    }
+
+    // Allow the first task to be dispatched, then wait for it complete
+    pendingTasks.release(1)
+    assertThat(latch.await(5, TimeUnit.SECONDS)).isTrue()
+
+    val nextScheduled = waitForNextPendingTask()
+    assertThat(nextScheduled.getDelay(TimeUnit.SECONDS)).isEqualTo(5)
+  }
+
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(Modules.override(MiskTestingServiceModule()).with(FakeClockModule()))
