@@ -119,7 +119,7 @@ internal class FakeJobQueueTest {
     val jobs = fakeJobQueue.peekJobs(GREEN_QUEUE)
     assertThat(jobs).hasSize(1)
 
-    val e = assertFailsWith<AssertionError> {
+    val e = assertFailsWith<IllegalStateException> {
       fakeJobQueue.handleJobs()
     }
 

@@ -61,7 +61,7 @@ internal class RealTransacter private constructor(
   }
 
   private fun <T> transactionWithRetriesInternal(lambda: (session: Session) -> T): T {
-    assert(options.maxAttempts > 0)
+    require(options.maxAttempts > 0)
 
     val backoff = ExponentialBackoff(
         Duration.ofMillis(options.minRetryDelayMillis),
