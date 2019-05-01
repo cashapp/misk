@@ -51,7 +51,7 @@ class FakeJobQueue @Inject constructor(
     while (true) {
       val job = jobs.poll() ?: break
       jobHandler.handleJob(job)
-      assert(job.acknowledged) { "Expected $job to be acknowledged after handling" }
+      check(job.acknowledged) { "Expected $job to be acknowledged after handling" }
     }
   }
 
