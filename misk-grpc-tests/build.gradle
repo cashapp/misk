@@ -37,6 +37,9 @@ wire {
 sourceSets {
   main.java.srcDirs += 'build/generated/source/proto/main/grpc'
   main.java.srcDirs += 'build/generated/source/proto/main/java'
+
+  // TODO(jwilson): we do this to make IntelliJ happy but the Wire Gradle plugin should do that.
+  main.java.srcDirs += 'build/generated/src/main/java'
 }
 
 dependencies {
@@ -45,6 +48,7 @@ dependencies {
   compile dep.grpcNetty
   compile dep.grpcProtobuf
   compile dep.grpcStub
+  compile dep.wireGrpcClient
   compile project(':misk')
   compile project(':misk-testing')
 }
