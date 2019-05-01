@@ -76,7 +76,7 @@ class JettyService @Inject internal constructor(
     server.addConnector(httpConnector)
 
     if (webConfig.ssl != null) {
-      val sslContextFactory = SslContextFactory()
+      val sslContextFactory = SslContextFactory.Server()
       sslContextFactory.keyStore = sslLoader.loadCertStore(webConfig.ssl.cert_store)!!.keyStore
       sslContextFactory.setKeyStorePassword(webConfig.ssl.cert_store.passphrase)
       webConfig.ssl.trust_store?.let {
