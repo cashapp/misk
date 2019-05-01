@@ -9,6 +9,7 @@ import com.google.crypto.tink.mac.MacKeyTemplates
 import com.google.crypto.tink.signature.PublicKeySignFactory
 import com.google.crypto.tink.signature.SignatureConfig
 import com.google.crypto.tink.signature.SignatureKeyTemplates
+import com.google.inject.ConfigurationException
 import com.google.inject.CreationException
 import com.google.inject.Guice
 import com.google.inject.Injector
@@ -81,8 +82,10 @@ class CryptoModuleTest {
   @Test
   fun testNoKeyLoaded() {
     val injector = getInjector(listOf())
-    assertThat(injector.getInstance(MacKeyManager::class.java)["not there"]).isNull()
-    assertThat(injector.getInstance(AeadKeyManager::class.java)["not there either"]).isNull()
+    assertThatThrownBy { injector.getInstance(MacKeyManager::class.java)["not there"] }
+            .isInstanceOf(KeyNotFoundException::class.java)
+    assertThatThrownBy { injector.getInstance(AeadKeyManager::class.java)["not there either"]}
+            .isInstanceOf(KeyNotFoundException::class.java)
   }
 
   private fun getInjector(keyMap: List<Pair<String, KeysetHandle>>): Injector{
