@@ -76,16 +76,30 @@ class RepeatedTaskQueue @VisibleForTesting internal constructor(
       // task requests rescheduling
       taskExecutor.submit {
         val result = task()
-        if (result.status != Status.NO_RESCHEDULE) schedule(result.nextDelay, task)
+        // Reschedule using enqueue so as to not repeatedly wrap the task in try-catch blocks
+        if (result.status != Status.NO_RESCHEDULE) enqueue(result.nextDelay, task)
       }
     }
   }
 
   /**
    * Schedules a task to run repeatedly after an initial delay. The task itself determines the
-   * next execution time
+   * next execution time. Provide an optional retryDelayOnFailure parameter to determine when
+   * the job should be retried in the case of an unhandled exception by the client
    */
-  fun schedule(delay: Duration, task: () -> Result) {
+  fun schedule(delay: Duration, retryDelayOnFailure: Duration? = null, task: () -> Result) {
+    val wrappedTask: () -> Result = {
+      try {
+        task()
+      } catch (th: Throwable) {
+        log.error(th) { "error running repeated task on queue $name" }
+        Result(Status.FAILED, retryDelayOnFailure ?: delay)
+      }
+    }
+    enqueue(delay, wrappedTask)
+  }
+
+  private fun enqueue(delay: Duration, task: () -> Result) {
     pendingTasks.add(DelayedTask(clock, clock.instant().plus(delay), task))
   }
 
@@ -100,7 +114,7 @@ class RepeatedTaskQueue @VisibleForTesting internal constructor(
     failureBackoff: Backoff = ExponentialBackoff(timeBetweenRuns, defaultMaxDelay, defaultJitter),
     task: () -> Status
   ) {
-    val wrappedTask: () -> Result = {
+    schedule(delay = initialDelay) {
       try {
         val status = task()
         when (status) {
@@ -126,8 +140,6 @@ class RepeatedTaskQueue @VisibleForTesting internal constructor(
         Result(Status.FAILED, failureBackoff.nextRetry())
       }
     }
-
-    schedule(initialDelay, wrappedTask)
   }
 
   override fun serviceName() = name
