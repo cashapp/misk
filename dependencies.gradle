@@ -1,3 +1,4 @@
+//Generated from polyrepo's master-dependencies.json
 ext.dep = [
   "assertj": "org.assertj:assertj-core:3.9.0",
   "awsApi": "com.amazonaws:aws-java-sdk:1.11.144",
@@ -75,8 +76,10 @@ ext.dep = [
   "tracingJaeger": "com.uber.jaeger:jaeger-core:0.24.0",
   "tracingZipkin": "io.opentracing.brave:brave-opentracing:0.29.0",
   "vitess": "io.vitess:vitess-jdbc:3.0.0",
-  "wireRuntime": "com.squareup.wire:wire-runtime:2.3.0-RC1",
+  "wireRuntime": "com.squareup.wire:wire-runtime:3.0.0-alpha01",
+  "wirePlugin": "com.squareup.wire:wire-gradle-plugin:3.0.0-alpha01",
   "zipkinBrave": "io.zipkin.brave:brave:4.17.2",
   "zipkinReporter": "io.zipkin.reporter2:zipkin-sender-okhttp3:2.4.1",
-  "zookeeper": "org.apache.zookeeper:zookeeper:3.5.4-beta"
-]//Generated from polyrepo's master-dependencies.json
+  "zookeeper": "org.apache.zookeeper:zookeeper:3.5.4-beta",
+]
+//Generated from polyrepo's master-dependencies.json

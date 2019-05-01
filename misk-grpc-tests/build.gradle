@@ -5,6 +5,7 @@ buildscript {
 }
 
 apply plugin: 'com.google.protobuf'
+apply plugin: 'com.squareup.wire'
 
 protobuf {
   plugins {
@@ -25,6 +26,11 @@ protobuf {
       // NamedDomainObjectContainer binds the methods.
       grpc {}
     }
+  }
+}
+
+wire {
+  kotlin {
   }
 }
 
