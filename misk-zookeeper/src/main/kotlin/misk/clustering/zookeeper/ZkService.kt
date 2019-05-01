@@ -5,16 +5,13 @@ import com.google.inject.Key
 import misk.DependentService
 import misk.logging.getLogger
 import org.apache.curator.framework.CuratorFramework
-import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
-internal class ZkService @Inject internal constructor(
+internal class ZkService internal constructor(
   private val curatorFramework: CuratorFramework
 ) : AbstractIdleService(), DependentService {
 
   override val consumedKeys: Set<Key<*>> = setOf()
-  override val producedKeys: Set<Key<*>> = setOf(ZookeeperModule.serviceKey)
+  override val producedKeys: Set<Key<*>> = setOf(ZkLeaseModule.serviceKey)
 
   override fun startUp() {
     log.info { "starting connection to zookeeper" }

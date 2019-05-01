@@ -33,10 +33,10 @@ internal class ZkLeaseManager @Inject internal constructor(
   @AppName appName: String,
   @ForZkLease private val taskQueue: RepeatedTaskQueue,
   internal val cluster: Cluster,
-  curator: CuratorFramework
+  @ForZkLease curator: CuratorFramework
 ) : AbstractExecutionThreadService(), LeaseManager, DependentService {
-  override val consumedKeys = setOf(ZookeeperModule.serviceKey, keyOf<Cluster>())
-  override val producedKeys = setOf(ZookeeperModule.leaseManagerKey)
+  override val consumedKeys = setOf(ZkLeaseModule.serviceKey, keyOf<Cluster>())
+  override val producedKeys = setOf(ZkLeaseModule.leaseManagerKey)
 
   internal val leaseNamespace = "$SERVICES_NODE/${appName.asZkNamespace}/leases"
   internal val client = lazy { curator.usingNamespace(leaseNamespace) }

@@ -17,6 +17,8 @@ import misk.security.ssl.TrustStoreConfig
 import misk.service.CachedTestService
 import misk.tasks.DelayedTask
 import misk.tasks.RepeatedTaskQueue
+import misk.zookeeper.ZkClientFactory
+import org.apache.curator.framework.CuratorFramework
 import java.time.Clock
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -27,9 +29,10 @@ internal class ZkTestModule : KAbstractModule() {
     val truststrorePath = this::class.java.getResource("/zookeeper/truststore.jks").path
     bind<String>().annotatedWith<AppName>().toInstance("my-app")
 
+
     multibind<Service>().to<StartZookeeperService>()
     install(FakeClusterModule())
-    install(Modules.override(ZookeeperModule(ZookeeperConfig(
+    install(Modules.override(ZkLeaseModule(ZookeeperConfig(
         zk_connect = "127.0.0.1:$zkPortKey",
         cert_store = CertStoreConfig(keystorePath, "changeit", FORMAT_JKS),
         trust_store = TrustStoreConfig(truststrorePath, "changeit", FORMAT_JKS))))
@@ -47,6 +50,12 @@ internal class ZkTestModule : KAbstractModule() {
       @Provides @ForZkLease
       fun provideDelayQueue(): ExplicitReleaseDelayQueue<DelayedTask> = ExplicitReleaseDelayQueue()
     }))
+  }
+
+  @Provides @ForZkLease
+  fun provideZkClientFacotry(@ForZkLease curator: CuratorFramework, @AppName app: String)
+      : ZkClientFactory {
+    return ZkClientFactory(app, curator)
   }
 
   @Singleton

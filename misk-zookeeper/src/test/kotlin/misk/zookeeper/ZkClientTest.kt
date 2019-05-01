@@ -3,6 +3,7 @@ package misk.zookeeper
 import com.google.common.collect.Iterables
 import com.google.inject.util.Modules
 import misk.MiskTestingServiceModule
+import misk.clustering.zookeeper.ForZkLease
 import misk.clustering.zookeeper.ZkTestModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
@@ -13,6 +14,7 @@ import org.apache.zookeeper.ZooDefs.Ids.AUTH_IDS
 import org.apache.zookeeper.data.ACL
 import org.apache.zookeeper.data.Id
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.Before
 import org.junit.jupiter.api.Test
 import java.security.AuthProvider
 import javax.inject.Inject
@@ -22,8 +24,8 @@ import kotlin.test.assertEquals
 internal class ZkClientTest {
   @MiskTestModule private val module = Modules.combine(MiskTestingServiceModule(), ZkTestModule())
 
-  @Inject lateinit var clientFactory: ZkClientFactory
-  @Inject lateinit var curatorFramework: CuratorFramework
+  @Inject @ForZkLease lateinit var clientFactory: ZkClientFactory
+  @Inject @ForZkLease lateinit var curatorFramework: CuratorFramework
 
   @Test fun clientDefaultsAreCorrect() {
     val client = clientFactory.client()
