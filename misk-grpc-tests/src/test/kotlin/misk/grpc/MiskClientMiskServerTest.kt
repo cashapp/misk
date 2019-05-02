@@ -1,6 +1,7 @@
 package misk.grpc
 
 import com.google.inject.util.Modules
+import kotlinx.coroutines.runBlocking
 import misk.grpc.miskclient.MiskGrpcClientModule
 import misk.grpc.miskserver.RouteGuideMiskServiceModule
 import misk.testing.MiskTest
@@ -9,6 +10,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import routeguide.Feature
 import routeguide.Point
+import routeguide.RouteGuide
 import javax.inject.Inject
 import javax.inject.Provider
 
@@ -19,20 +21,20 @@ class MiskClientMiskServerTest {
       MiskGrpcClientModule(),
       RouteGuideMiskServiceModule())
 
-  @Inject lateinit var grpcClientProvider: Provider<GrpcClient>
+  @Inject lateinit var routeGuideProvider: Provider<RouteGuide>
 
   @Test
   fun requestResponse() {
-    val grpcMethod = GrpcMethod("/routeguide.RouteGuide/GetFeature",
-        routeguide.Point.ADAPTER, routeguide.Feature.ADAPTER)
+    runBlocking {
+      val routeGuide = routeGuideProvider.get()
 
-    val grpcClient = grpcClientProvider.get()
-    val feature = grpcClient.call(grpcMethod, Point(
-        latitude = 43,
-        longitude = -80))
-    assertThat(feature).isEqualTo(Feature(
-        name = "maple tree",
-        location = Point(latitude = 43, longitude = -80)
-    ))
+      val feature = routeGuide.GetFeature(Point(
+          latitude = 43,
+          longitude = -80))
+      assertThat(feature).isEqualTo(Feature(
+          name = "maple tree",
+          location = Point(latitude = 43, longitude = -80)
+      ))
+    }
   }
 }
