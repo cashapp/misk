@@ -8,10 +8,12 @@ import com.google.crypto.tink.PublicKeyVerify
 import com.google.crypto.tink.aead.AeadConfig
 import com.google.crypto.tink.aead.AeadFactory
 import com.google.crypto.tink.aead.AeadKeyTemplates
+import com.google.crypto.tink.mac.MacConfig
 import com.google.crypto.tink.mac.MacFactory
 import com.google.crypto.tink.mac.MacKeyTemplates
 import com.google.crypto.tink.signature.PublicKeySignFactory
 import com.google.crypto.tink.signature.PublicKeyVerifyFactory
+import com.google.crypto.tink.signature.SignatureConfig
 import com.google.crypto.tink.signature.SignatureKeyTemplates
 import com.google.inject.name.Names
 import misk.inject.KAbstractModule
@@ -33,6 +35,8 @@ class CryptoTestModule(
 
   override fun configure() {
     AeadConfig.register()
+    MacConfig.register()
+    SignatureConfig.register()
 
     keyNames.forEach { key ->
       when(key.key_type) {
