@@ -9,6 +9,7 @@ import com.google.crypto.tink.aead.AeadConfig
 import com.google.crypto.tink.aead.AeadFactory
 import com.google.crypto.tink.aead.AeadKeyTemplates
 import com.google.crypto.tink.mac.MacConfig
+import com.google.crypto.tink.aead.KmsEnvelopeAead
 import com.google.crypto.tink.mac.MacFactory
 import com.google.crypto.tink.mac.MacKeyTemplates
 import com.google.crypto.tink.signature.PublicKeySignFactory
@@ -73,8 +74,9 @@ class CryptoTestModule(
 
     override fun get(): Aead {
       val keysetHandle = KeysetHandle.generateNew(AeadKeyTemplates.AES256_GCM)
-      return AeadFactory.getPrimitive(keysetHandle)
-          .also { keyManager[keyName] = it }
+      val kek = AeadFactory.getPrimitive(keysetHandle)
+      val envelopeKey = KmsEnvelopeAead(AeadKeyTemplates.AES128_GCM, kek)
+      return envelopeKey.also { keyManager[keyName] = it }
     }
   }
 
