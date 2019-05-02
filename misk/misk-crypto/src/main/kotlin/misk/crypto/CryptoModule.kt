@@ -9,8 +9,11 @@ import com.google.crypto.tink.PublicKeySign
 import com.google.crypto.tink.PublicKeyVerify
 import com.google.crypto.tink.aead.AeadConfig
 import com.google.crypto.tink.aead.AeadFactory
+import com.google.crypto.tink.aead.AeadKeyTemplates
+import com.google.crypto.tink.aead.KmsEnvelopeAead
 import com.google.crypto.tink.mac.MacConfig
 import com.google.crypto.tink.mac.MacFactory
+import com.google.crypto.tink.proto.KeyTemplate
 import com.google.crypto.tink.signature.PublicKeySignFactory
 import com.google.crypto.tink.signature.PublicKeyVerifyFactory
 import com.google.crypto.tink.signature.SignatureConfig
@@ -49,7 +52,7 @@ class CryptoModule(
         KeyType.AEAD -> {
           bind<Aead>()
               .annotatedWith(Names.named(key.key_name))
-              .toProvider(AeadProvider(config.kms_uri, key))
+              .toProvider(AeadEnvelopeProvider(config.kms_uri, key))
               .`in`(Singleton::class.java)
         }
         KeyType.MAC -> {
@@ -72,16 +75,24 @@ class CryptoModule(
     }
   }
 
-  private class AeadProvider(val keyUri: String, val key: Key) : Provider<Aead> {
+  /**
+   * We do not support creating bare AEAD keys, only via envelope encryption.
+   */
+  private class AeadEnvelopeProvider(val keyUri: String, val key: Key) : Provider<Aead> {
     @Inject lateinit var keyManager: AeadKeyManager
     @Inject lateinit var kmsClient: KmsClient
 
     override fun get(): Aead {
       val keysetHandle = readKey(key.encrypted_key, kmsClient.getAead(keyUri))
-      return AeadFactory.getPrimitive(keysetHandle)
-          .also { keyManager[key.key_name] = it }
+      val kek = AeadFactory.getPrimitive(keysetHandle)
+      val envelopeKey = KmsEnvelopeAead(DEK_TEMPLATE, kek)
+
+      return envelopeKey.also { keyManager[key.key_name] = it }
     }
 
+    companion object {
+      val DEK_TEMPLATE : KeyTemplate = AeadKeyTemplates.AES128_GCM
+    }
   }
 
   private class MacProvider(val keyUri: String, val key: Key) : Provider<Mac> {

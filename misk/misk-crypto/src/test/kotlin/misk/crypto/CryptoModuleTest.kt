@@ -4,6 +4,7 @@ import com.google.crypto.tink.JsonKeysetWriter
 import com.google.crypto.tink.KeysetHandle
 import com.google.crypto.tink.aead.AeadConfig
 import com.google.crypto.tink.aead.AeadKeyTemplates
+import com.google.crypto.tink.aead.KmsEnvelopeAead
 import com.google.crypto.tink.mac.MacConfig
 import com.google.crypto.tink.mac.MacKeyTemplates
 import com.google.crypto.tink.signature.PublicKeySignFactory
@@ -38,6 +39,14 @@ class CryptoModuleTest {
   }
 
   @Test
+  fun testAeadIsEnvelopeKey() {
+    val keyHandle = KeysetHandle.generateNew(AeadKeyTemplates.AES256_GCM)
+    val injector = getInjector(listOf(Pair("test", keyHandle)))
+    val testKey = injector.getInstance(AeadKeyManager::class.java)["test"]
+    assertThat(testKey).isInstanceOf(KmsEnvelopeAead::class.java)
+  }
+
+  @Test
   fun testImportMacKey() {
     val keyHandle = KeysetHandle.generateNew(MacKeyTemplates.HMAC_SHA256_256BITTAG)
     val injector = getInjector(listOf(Pair("test-mac", keyHandle)))
@@ -46,7 +55,7 @@ class CryptoModuleTest {
   }
 
   @Test
-  fun testImportSigitalSignature() {
+  fun testImportDigitalSignature() {
     val keyHandle = KeysetHandle.generateNew(SignatureKeyTemplates.ED25519)
     val injector = getInjector(listOf(Pair("test-ds", keyHandle)))
     val keyManager = injector.getInstance(DigitalSignatureKeyManager::class.java)
