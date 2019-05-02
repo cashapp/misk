@@ -53,12 +53,10 @@ class CryptoModuleTest {
     val keyManager = injector.getInstance(DigitalSignatureKeyManager::class.java)
     val signer = keyManager.getSigner("test-ds")
     val verifier = keyManager.getVerifier("test-ds")
-    assertThat(signer).isNotNull()
-    assertThat(verifier).isNotNull()
 
     val data = "sign this".toByteArray()
-    val signature = signer!!.sign(data)
-    assertThatCode { verifier!!.verify(signature, data) }
+    val signature = signer.sign(data)
+    assertThatCode { verifier.verify(signature, data) }
         .doesNotThrowAnyException()
   }
 

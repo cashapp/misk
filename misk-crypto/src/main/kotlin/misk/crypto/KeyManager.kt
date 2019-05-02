@@ -20,15 +20,16 @@ sealed class MappedKeyManager<KeyT> constructor(
 
     internal operator fun set(name: String, k: KeyT) = keys.set(name, k)
 
-    operator fun get(name: String): KeyT? =
+    operator fun get(name: String): KeyT =
             keys.getOrPut(name) { getKeyInstance(name) }
 
-    protected fun <T> getNamedInstance(klass: Class<T>, name: String): T =
-            try {
-                injector.getInstance(Key.get(klass, Names.named(name)))
-            } catch (ex: ConfigurationException) {
-                throw KeyNotFoundException("key '$name' could not be found", ex)
-            }
+    protected fun <T> getNamedInstance(klass: Class<T>, name: String): T {
+        try {
+            return injector.getInstance(Key.get(klass, Names.named(name)))
+        } catch (ex: ConfigurationException) {
+            throw KeyNotFoundException("key '$name' could not be found", ex)
+        }
+    }
 
     internal open fun getKeyInstance(name: String): KeyT =
             getNamedInstance(keyClass, name)
@@ -72,8 +73,8 @@ class MacKeyManager @Inject internal constructor(injector: Injector)
 class DigitalSignatureKeyManager @Inject internal constructor(injector: Injector)
     : MappedKeyManager<DigitalSignature>(injector, DigitalSignature::class.java) {
 
-    fun getSigner(name: String): PublicKeySign? = this[name]?.signer
-    fun getVerifier(name: String): PublicKeyVerify? = this[name]?.verifier
+    fun getSigner(name: String): PublicKeySign = this[name].signer
+    fun getVerifier(name: String): PublicKeyVerify = this[name].verifier
 
     override fun getKeyInstance(name: String): DigitalSignature {
         val signer = getNamedInstance(PublicKeySign::class.java, name)
