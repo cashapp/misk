@@ -149,6 +149,6 @@ inline fun <reified T : DbRoot<T>> Transacter.createUntil(
 
 inline fun <reified T : DbRoot<T>> Id<T>.shard(session: Session): Shard {
   val keyspace = T::class.java.getAnnotation(misk.hibernate.annotation.Keyspace::class.java)
-  val shards = session.shards(keyspace.keyspace())
+  val shards = session.shards(keyspace.keyspace()).plus(Shard.SINGLE_SHARD)
   return shards.find { it.contains(this.shardKey()) }!!
 }
