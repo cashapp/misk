@@ -2,6 +2,7 @@ package misk.hibernate
 
 import com.google.crypto.tink.Aead
 import misk.crypto.AeadKeyManager
+import misk.crypto.KeyNotFoundException
 import misk.logging.getLogger
 import org.hibernate.HibernateException
 import org.hibernate.engine.spi.SharedSessionContractImplementor
@@ -36,8 +37,11 @@ internal class SecretColumnType : UserType, ParameterizedType, TypeConfiguration
     val keyManager = _typeConfiguration.metadataBuildingContext.bootstrapContext.serviceRegistry.injector
         .getInstance(AeadKeyManager::class.java)
     keyName = parameters.getProperty(FIELD_ENCRYPTION_KEY_NAME)
-    aead = keyManager[keyName] ?:
-        throw HibernateException("Cannot set field, key $keyName not found")
+    try {
+      aead = keyManager[keyName]
+    } catch (ex: KeyNotFoundException) {
+      throw HibernateException("Cannot set field, key $keyName not found")
+    }
   }
 
   override fun hashCode(x: Any): Int = (x as ByteArray).hashCode()
