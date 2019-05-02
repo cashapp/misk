@@ -114,7 +114,7 @@ class RepeatedTaskQueue @VisibleForTesting internal constructor(
     failureBackoff: Backoff = ExponentialBackoff(timeBetweenRuns, defaultMaxDelay, defaultJitter),
     task: () -> Status
   ) {
-    schedule(delay = initialDelay) {
+    enqueue(delay = initialDelay) {
       try {
         val status = task()
         when (status) {
