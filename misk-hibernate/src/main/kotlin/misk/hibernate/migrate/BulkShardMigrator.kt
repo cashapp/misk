@@ -10,6 +10,7 @@ import misk.hibernate.Keyspace
 import misk.hibernate.PersistenceMetadata
 import misk.hibernate.Session
 import misk.hibernate.Shard
+import misk.hibernate.Shard.Companion.SINGLE_KEYSPACE
 import misk.hibernate.Transacter
 import misk.hibernate.shards
 import misk.logging.getLogger
@@ -29,7 +30,7 @@ import kotlin.reflect.full.isSubclassOf
 /**
  * BulkShardMigrator facilitates moving of child entities belonging to a source root entity to
  * target root entity in bulk. Source or target entity can either live on the same or different
- * shards. It only works for Vitess.
+ * shards.
  *
  * If moving between shards it will copy the rows between shards using a SELECT and a batched INSERT
  * statements. The mutations are applied to the result set in memory between the SELECT and the
@@ -259,7 +260,7 @@ class BulkShardMigrator<R : DbRoot<R>, C : DbChild<R, C>> private constructor(
 
   private fun getShard(id: Id<R>): Shard =
       transacter.shards().stream().filter {
-        it.keyspace == keyspace && it.contains(id.shardKey())
+        listOf(keyspace, SINGLE_KEYSPACE).contains(it.keyspace) && it.contains(id.shardKey())
       }.findFirst()
        .get()
 
