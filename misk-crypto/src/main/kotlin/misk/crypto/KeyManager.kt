@@ -38,9 +38,15 @@ sealed class MappedKeyManager<KeyT> constructor(
 /**
  * Holds a map of every [Aead] key name to its primitive listed in the configuration for this app.
  * Users may use this object to obtain an [Aead] dynamically:
+ *
  * ```
  * val myKey: Aead = aeadKeyManager["myKey"]
  * ```
+ *
+ * Note, that Aead instances provided by this module are envelope Aead instances. This means that
+ * all data is encrypted with an ephemeral data encryption key (DEK), which is then protected by a key-encryption
+ * key (KEK) and stored inline with ciphertext. This effectively means that ciphertext will be a bit larger than
+ * the plaintext, and that migrating keys (KEKs) should not require the re-encryption of stored data.
  */
 @Singleton
 class AeadKeyManager @Inject internal constructor(
