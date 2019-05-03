@@ -31,7 +31,7 @@ class AwsSqsJobQueueModule(
     bind<TransactionalJobQueue>().to<SqsTransactionalJobQueue>()
     multibind<Service>().to<SqsJobConsumer>()
 
-    install(ExecutorServiceModule.withCachedThreadPool(ForSqsConsumer::class, "sqs-consumer-%d"))
+    install(ExecutorServiceModule.withFixedThreadPool(ForSqsConsumer::class, "sqs-consumer-%d", 4))
 
     // Bind a map of AmazonSQS clients for each external region that we need to contact
     val regionSpecificClientBinder = newMapBinder<AwsRegion, AmazonSQS>()
