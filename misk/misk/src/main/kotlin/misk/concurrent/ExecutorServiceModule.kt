@@ -15,12 +15,16 @@ class ExecutorServiceModule(
   }
 
   companion object {
-    fun withCachedThreadPool(
+    fun withFixedThreadPool(
       annotation: KClass<out Annotation>,
-      nameFormat: String
+      nameFormat: String,
+      nThreads: Int
     ): ExecutorServiceModule {
-      val threadFactory = ThreadFactoryBuilder().setNameFormat(nameFormat).build()
-      return ExecutorServiceModule(annotation, Executors.newCachedThreadPool(threadFactory))
+      return ExecutorServiceModule(
+          annotation,
+          Executors.newFixedThreadPool(
+              nThreads,
+              ThreadFactoryBuilder().setNameFormat(nameFormat).build()))
     }
   }
 }
