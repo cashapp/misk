@@ -76,7 +76,7 @@ class CryptoModule(
   }
 
   /**
-   * We do not support creating bare AEAD keys, only via envelope encryption.
+   * We only support AEAD keys via envelope encryption.
    */
   private class AeadEnvelopeProvider(val keyUri: String, val key: Key) : Provider<Aead> {
     @Inject lateinit var keyManager: AeadKeyManager
