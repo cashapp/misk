@@ -18,7 +18,8 @@ class MoviesTestModule(
    * Disable the cross shard query detector. This is a temporary workaround for too many failing
    * tests. This should eventually be removed.
    */
-  val disableCrossShardQueryDetector: Boolean = false
+  val disableCrossShardQueryDetector: Boolean = false,
+  private val useVitess: Boolean = true
 ) : KAbstractModule() {
   override fun configure() {
     install(LogCollectorModule())
@@ -27,9 +28,9 @@ class MoviesTestModule(
     install(EnvironmentModule(Environment.TESTING))
 
     val config = MiskConfig.load<MoviesConfig>("moviestestmodule", Environment.TESTING)
-    install(HibernateTestingModule(Movies::class, config.data_source,
-        disableCrossShardQueryDetector = disableCrossShardQueryDetector))
-    install(HibernateModule(Movies::class, config.data_source))
+    install(HibernateTestingModule(Movies::class,
+        disableCrossShardQueryDetector = useVitess && disableCrossShardQueryDetector))
+    install(HibernateModule(Movies::class, selectDataSourceConfig(config)))
     install(object : HibernateEntityModule(Movies::class) {
       override fun configureHibernate() {
         addEntities(DbMovie::class, DbActor::class, DbCharacter::class)
@@ -37,5 +38,14 @@ class MoviesTestModule(
     })
   }
 
-  data class MoviesConfig(val data_source: DataSourceConfig) : Config
+  private fun selectDataSourceConfig(config: MoviesConfig) : DataSourceConfig {
+    return if (useVitess)
+      config.data_source
+    else
+      config.mysql_data_source
+  }
+
+  data class MoviesConfig(
+      val data_source: DataSourceConfig,
+      val mysql_data_source: DataSourceConfig) : Config
 }
