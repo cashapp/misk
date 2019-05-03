@@ -18,14 +18,19 @@ package misk.hibernate
  * @SecretColumn(keyName = "secretColumnKey")
  * var secret: String
  * ```
- * Hibernate fields annotated with [SecretColumn] must be declared as `VARBINARY()`
- * in their respective MySQL table. For example:
+ * A Column annotated with [SecretColumn] has the following limitations:
+ * - It must be declared as `VARBINARY()` in its respective MySQL table. For example:
  * ```
  * CREATE TABLE my_table(
  *   id BIGINT NOT NULL AUTO_INCREMENT,
- *   secret VARBINARY(8000)
- * _
+ *   secret VARBINARY(500)
  * ```
+ * - It cannot be a part of an index
+ * - It cannot be annotates with any other custom column annotations like [ProtoColumn] or [JsonColumn].
+ *
+ * *Note*: the resulting ciphertext that is persisted in the database may be much larger in size
+ * than the original plaintext because it also contains some metadata.
+ * Please make sure to allocate enough space when defining the column using `VARBINARY()`.
  */
 @Target(AnnotationTarget.FIELD)
 annotation class SecretColumn(val keyName: String)
