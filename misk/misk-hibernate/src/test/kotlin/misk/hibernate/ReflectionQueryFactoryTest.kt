@@ -461,7 +461,76 @@ class ReflectionQueryFactoryTest {
     }
   }
 
+  @Test
+  fun orOperator() {
+    val m1 = NameAndReleaseDate("Rocky 1", LocalDate.of(2018, 1, 1))
+    val m2 = NameAndReleaseDate("Rocky 2", LocalDate.of(2018, 1, 2))
+    val m3 = NameAndReleaseDate("Rocky 3", LocalDate.of(2018, 1, 3))
+
+    transacter.transaction { session ->
+      session.save(DbMovie(m1.name, m1.releaseDate))
+      session.save(DbMovie(m2.name, m2.releaseDate))
+      session.save(DbMovie(m3.name, m3.releaseDate))
+
+      assertThat(queryFactory.newQuery<OperatorsMovieQuery>()
+          .or {
+            option { name("Rocky 1") }
+            option { name("Rocky 3") }
+          }
+          .listAsNameAndReleaseDate(session))
+          .containsExactlyInAnyOrder(m1, m3)
+    }
+  }
+
+  @Test
+  fun orWithZeroOptionsExplodes() {
+    transacter.transaction { session ->
+      assertFailsWith<IllegalStateException> {
+        queryFactory.newQuery<OperatorsMovieQuery>()
+            .or {
+            }
+            .list(session)
+      }
+    }
+  }
+
+  @Test
+  fun orWithEmptyOptionExplodes() {
+    transacter.transaction { session ->
+      assertFailsWith<IllegalStateException> {
+        queryFactory.newQuery<OperatorsMovieQuery>()
+            .or {
+              option { }
+            }
+            .list(session)
+      }
+    }
+  }
+
+  @Test
+  fun orOperatorFailsOnNonPredicateCall() {
+    transacter.transaction { session ->
+      assertFailsWith<IllegalStateException> {
+        queryFactory.newQuery<OperatorsMovieQuery>()
+            .or {
+              option { list(session) }
+            }
+            .list(session)
+      }
+      assertFailsWith<IllegalStateException> {
+        queryFactory.newQuery<OperatorsMovieQuery>()
+            .or {
+              option { releaseDateAsc() }
+            }
+            .list(session)
+      }
+    }
+  }
+
   interface OperatorsMovieQuery : Query<DbMovie> {
+    @Constraint(path = "name")
+    fun name(name: String): OperatorsMovieQuery
+
     @Constraint(path = "release_date", operator = Operator.LT)
     fun releaseDateLessThan(upperBound: LocalDate?): OperatorsMovieQuery
 
