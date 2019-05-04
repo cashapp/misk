@@ -24,7 +24,7 @@ class RealRedis(private val jedisPool: JedisPool) : Redis {
   // Get a ByteString value
   override fun get(key: String): ByteString? {
     jedisPool.resource.use { jedis ->
-      return jedis.get(key.toByteArray(charset)).toByteString()
+      return jedis.get(key.toByteArray(charset))?.toByteString()
     }
   }
 
