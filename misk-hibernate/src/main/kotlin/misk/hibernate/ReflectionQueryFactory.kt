@@ -36,10 +36,14 @@ private val logger = getLogger<ReflectionQuery<*>>()
  * reflection to call the primary constructor.
  */
 internal class ReflectionQuery<T : DbEntity<T>>(
+  private val queryClass: KClass<*>,
   private val rootEntityType: KClass<T>,
   private val queryMethodHandlers: Map<Method, QueryMethodHandler>,
   private val tracer: Tracer?,
-  private val queryLimitsConfig: QueryLimitsConfig
+  private val queryLimitsConfig: QueryLimitsConfig,
+
+  /** True if this query only exists to collect predicates for an OR clause. */
+  private val predicatesOnly: Boolean = false
 ) : Query<T>, InvocationHandler {
   override var maxRows = -1
     set(value) {
@@ -56,6 +60,8 @@ internal class ReflectionQuery<T : DbEntity<T>>(
   }
 
   override fun delete(session: Session): Int {
+    check(!predicatesOnly) { "cannot delete on this query" }
+
     check(orderFactories.size == 0) { "orderBy shouldn't be used for a delete" }
 
     val criteriaBuilder = session.hibernateSession.criteriaBuilder
@@ -75,6 +81,8 @@ internal class ReflectionQuery<T : DbEntity<T>>(
   }
 
   private fun select(returnList: Boolean, session: Session): List<T> {
+    check(!predicatesOnly) { "cannot select on this query" }
+
     val criteriaBuilder = session.hibernateSession.criteriaBuilder
     val query = criteriaBuilder.createQuery(rootEntityType.java)
     val queryRoot = query.from(rootEntityType.java)
@@ -145,6 +153,14 @@ internal class ReflectionQuery<T : DbEntity<T>>(
     }
   }
 
+  private fun toProxy(): Query<T> {
+    val classLoader = queryClass.java.classLoader
+
+    @Suppress("UNCHECKED_CAST") // The proxy implements the requested interface.
+    return Proxy.newProxyInstance(
+        classLoader, arrayOf<Class<*>>(queryClass.java), this) as Query<T>
+  }
+
   @Singleton
   internal class Factory @Inject internal constructor(var queryLimitsConfig: QueryLimitsConfig)
       : Query.Factory {
@@ -155,21 +171,24 @@ internal class ReflectionQuery<T : DbEntity<T>>(
           override fun load(key: KClass<*>) = queryMethodHandlers(key)
         })
 
-    override fun <T : Query<*>> newQuery(queryClass: KClass<T>): T {
+    override fun <Q : Query<*>> newQuery(queryClass: KClass<Q>): Q {
       val queryMethodHandlers = queryMethodHandlersCache[queryClass]
       val queryType = queryClass.typeLiteral().getSupertype(Query::class.java)
 
       @Suppress("UNCHECKED_CAST") // Hack because we don't have a parameter for the runtime type.
       val entityType =
           (queryType.type as ParameterizedType).actualTypeArguments[0] as Class<DbPlaceholder>
-      val classLoader = queryClass.java.classLoader
 
-      @Suppress("UNCHECKED_CAST") // The proxy implements the requested interface.
-      return Proxy.newProxyInstance(
-          classLoader,
-          arrayOf<Class<*>>(queryClass.java),
-          ReflectionQuery(entityType.kotlin, queryMethodHandlers, tracer, queryLimitsConfig)
-      ) as T
+      @Suppress("UNCHECKED_CAST")
+      val reflectionQuery = ReflectionQuery(
+          queryClass as KClass<DbPlaceholder>,
+          entityType.kotlin,
+          queryMethodHandlers,
+          tracer,
+          queryLimitsConfig
+      )
+      @Suppress("UNCHECKED_CAST")
+      return reflectionQuery.toProxy() as Q
     }
 
     private fun queryMethodHandlers(
@@ -208,6 +227,8 @@ internal class ReflectionQuery<T : DbEntity<T>>(
   ) : QueryMethodHandler {
 
     override fun invoke(reflectionQuery: ReflectionQuery<*>, args: Array<out Any>): Any? {
+      check(!reflectionQuery.predicatesOnly) { "cannot select on this query" }
+
       val session = args[0] as Session
 
       val criteriaBuilder = session.hibernateSession.criteriaBuilder
@@ -298,6 +319,8 @@ internal class ReflectionQuery<T : DbEntity<T>>(
 
         result[javaMethod] = object : QueryMethodHandler {
           override fun invoke(reflectionQuery: ReflectionQuery<*>, args: Array<out Any>): Any? {
+            check(!reflectionQuery.predicatesOnly) { "cannot define sort order on this query" }
+
             return reflectionQuery.addOrderBy { root, builder ->
               if (order.asc) {
                 builder.asc(root.traverse<Any?>(path))
@@ -544,6 +567,45 @@ internal class ReflectionQuery<T : DbEntity<T>>(
    */
   private fun buildOrderBys(root: Root<*>, criteriaBuilder: CriteriaBuilder): List<javax.persistence.criteria.Order> {
     return orderFactories.map { it(root, criteriaBuilder) }
+  }
+
+  override fun <Q : Query<*>> newOrBuilder(): OrBuilder<Q> {
+    val orPredicateFactory = OrClausePredicateFactory<Q>()
+    constraints += orPredicateFactory
+    return orPredicateFactory
+  }
+
+  /**
+   * Accept options by creating subqueries, and then aggregate them into a Hibernate predicate.
+   */
+  inner class OrClausePredicateFactory<Q : Query<*>> : PredicateFactory, OrBuilder<Q> {
+    /** Model each option as a query. */
+    val options = mutableListOf<ReflectionQuery<T>>()
+
+    /** Builds a single option. */
+    override fun option(lambda: Q.() -> Unit) {
+      val queryForOption = ReflectionQuery(
+          queryClass,
+          rootEntityType,
+          queryMethodHandlers,
+          tracer,
+          queryLimitsConfig,
+          predicatesOnly = true
+      )
+      @Suppress("UNCHECKED_CAST") // Q is the query type that we're implementing reflectively.
+      (queryForOption.toProxy() as Q).lambda()
+      options += queryForOption
+    }
+
+    /** Return the full set of options. */
+    override fun invoke(root: Root<*>, criteriaBuilder: CriteriaBuilder): Predicate {
+      check(options.isNotEmpty()) { "or clause with no options" }
+      val choices: List<Predicate?> = options.map { option ->
+        check(option.constraints.isNotEmpty()) { "or option with no constraints" }
+        option.buildWherePredicate(root, criteriaBuilder)
+      }
+      return criteriaBuilder.or(*choices.toTypedArray())
+    }
   }
 }
 

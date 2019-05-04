@@ -16,13 +16,43 @@ interface Query<T> {
    */
   fun delete(session: Session): Int
 
+  fun <T : Query<*>> newOrBuilder(): OrBuilder<T>
+
   /** Creates instances of queries. */
   interface Factory {
-    fun <T : Query<*>> newQuery(queryClass: KClass<T>): T
+    fun <Q : Query<*>> newQuery(queryClass: KClass<Q>): Q
   }
 }
 
 inline fun <reified T : Query<*>> Query.Factory.newQuery(): T = newQuery(T::class)
+
+/**
+ * This functional interface accepts a set of options. Each option lambda is executed within the
+ * scope of a query. It is inappropriate to call methods like list() and uniqueResult() on this
+ * query.
+ */
+interface OrBuilder<Q : Query<*>> {
+  fun option(lambda: Q.() -> Unit)
+}
+
+/**
+ * Collects options that are all OR'd together. If any are true the predicate matches.
+ *
+ * ```
+ * queryFactory.newQuery<OperatorsMovieQuery>()
+ *     .or {
+ *       option { name("Rocky 1") }
+ *       option { name("Rocky 3") }
+ *     }
+ *     .list()
+ * ```
+ *
+ * Each option has a list of constraints that are themselves AND'd together.
+ */
+inline fun <T, reified Q : Query<T>> Q.or(lambda: OrBuilder<Q>.() -> Unit): Q {
+  newOrBuilder<Q>().lambda()
+  return this
+}
 
 /**
  * Annotates a function on a subinterface of [Query] to indicate which column (or path of columns)
