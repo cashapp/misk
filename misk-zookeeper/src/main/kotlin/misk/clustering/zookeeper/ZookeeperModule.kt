@@ -1,10 +1,10 @@
 package misk.clustering.zookeeper
 
 import com.google.common.util.concurrent.Service
-import com.google.common.util.concurrent.ThreadFactoryBuilder
 import com.google.inject.Key
 import com.google.inject.Provides
 import misk.clustering.lease.LeaseManager
+import misk.concurrent.ExecutorServiceModule
 import misk.inject.KAbstractModule
 import misk.inject.asSingleton
 import misk.inject.toKey
@@ -12,7 +12,7 @@ import misk.tasks.RepeatedTaskQueue
 import misk.zookeeper.CuratorFrameworkProvider
 import org.apache.curator.framework.CuratorFramework
 import java.time.Clock
-import java.util.concurrent.Executors
+import java.util.concurrent.ExecutorService
 import javax.inject.Singleton
 
 class ZookeeperModule(private val config: ZookeeperConfig) : KAbstractModule() {
@@ -23,6 +23,7 @@ class ZookeeperModule(private val config: ZookeeperConfig) : KAbstractModule() {
     multibind<Service>().to(RepeatedTaskQueue::class.toKey(ForZkLease::class)).asSingleton()
     bind<LeaseManager>().to<ZkLeaseManager>()
     bind<CuratorFramework>().toProvider(CuratorFrameworkProvider::class.java).asSingleton()
+    install(ExecutorServiceModule.withFixedThreadPool(ForZkLease::class, "zk-lease-poller", 1))
   }
 
   companion object {
@@ -34,12 +35,10 @@ class ZookeeperModule(private val config: ZookeeperConfig) : KAbstractModule() {
   }
 
   @Provides @ForZkLease @Singleton
-  fun provideTaskQueue(clock: Clock): RepeatedTaskQueue {
-    return RepeatedTaskQueue(
-        "zk-lease-poller",
-        clock,
-        Executors.newFixedThreadPool(1, ThreadFactoryBuilder()
-            .setNameFormat("zk-lease-poller")
-            .build()))
+  fun provideTaskQueue(
+    clock: Clock,
+    @ForZkLease executorService: ExecutorService
+  ): RepeatedTaskQueue {
+    return RepeatedTaskQueue("zk-lease-poller", clock, executorService)
   }
 }
