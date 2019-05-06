@@ -17,6 +17,11 @@ class AwsSqsJobQueueConfig(
    * External queues is a set of externally owned SQS queues accessed by this service, mapping
    * an internal queue name to the (account ID, region, name) of the queue in the external account
    */
-  val external_queues: Map<String, AwsSqsQueueConfig> = mapOf()
+  val external_queues: Map<String, AwsSqsQueueConfig> = mapOf(),
+
+  /**
+   * Number of jobs that can be processed concurrently.
+   */
+  val consumer_thread_pool_size: Int = 4
 ) : Config
 
