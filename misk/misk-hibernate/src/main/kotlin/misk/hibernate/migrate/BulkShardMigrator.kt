@@ -20,6 +20,7 @@ import java.sql.PreparedStatement
 import java.sql.SQLException
 import java.util.ArrayList
 import java.util.HashMap
+import java.util.function.Supplier
 import java.util.stream.Collectors
 import java.util.stream.Collectors.joining
 import javax.inject.Inject
@@ -261,8 +262,7 @@ class BulkShardMigrator<R : DbRoot<R>, C : DbChild<R, C>> private constructor(
   private fun getShard(id: Id<R>): Shard =
       transacter.shards().stream().filter {
         listOf(keyspace, SINGLE_KEYSPACE).contains(it.keyspace) && it.contains(id.shardKey())
-      }.findFirst()
-       .get()
+      }.findFirst().orElseThrow { NoSuchElementException("No shard for $id ${id.shardKey()}") }
 
   private fun tableName(): String {
     return persistenceMetadata.getTableName(childClass)
