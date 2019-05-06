@@ -12,6 +12,7 @@ import misk.tasks.RepeatedTaskQueue
 import misk.tasks.Result
 import misk.tasks.Status
 import misk.zookeeper.SERVICES_NODE
+import misk.zookeeper.ZkService
 import org.apache.curator.framework.CuratorFramework
 import org.apache.curator.framework.state.ConnectionStateListener
 import java.time.Duration
@@ -35,7 +36,7 @@ internal class ZkLeaseManager @Inject internal constructor(
   internal val cluster: Cluster,
   @ForZkLease curator: CuratorFramework
 ) : AbstractExecutionThreadService(), LeaseManager, DependentService {
-  override val consumedKeys = setOf(ZkLeaseModule.serviceKey, keyOf<Cluster>())
+  override val consumedKeys = setOf(keyOf<ZkService>(ForZkLease::class), keyOf<Cluster>())
   override val producedKeys = setOf(ZkLeaseModule.leaseManagerKey)
 
   internal val leaseNamespace = "$SERVICES_NODE/${appName.asZkNamespace}/leases"

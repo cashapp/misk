@@ -9,6 +9,7 @@ import misk.inject.KAbstractModule
 import misk.inject.asSingleton
 import misk.inject.toKey
 import misk.tasks.RepeatedTaskQueue
+import misk.zookeeper.ZkService
 import misk.zookeeper.ZookeeperModule
 import java.time.Clock
 import java.util.concurrent.ExecutorService
@@ -27,9 +28,6 @@ class ZkLeaseModule(private val config: ZookeeperConfig) : KAbstractModule() {
   }
 
   companion object {
-    /** @property Key<*> The key of the service which manages the zk connection, for service dependencies */
-    val serviceKey: Key<*> = Key.get(ZkService::class.java) as Key<*>
-
     /** @property Key<*> the Key of the lease manager service */
     val leaseManagerKey: Key<*> = Key.get(ZkLeaseManager::class.java)
   }

@@ -29,11 +29,11 @@ import javax.inject.Inject
 
 @MiskTest(startService = true)
 internal class ZkLeaseTest {
-  @MiskTestModule private val module = Modules.combine(MiskTestingServiceModule(), ZkTestModule())
+  @MiskTestModule private val module = Modules.combine(MiskTestingServiceModule(), ZkLeaseTestModule())
 
   @Inject lateinit var cluster: FakeCluster
   @Inject lateinit var leaseManager: ZkLeaseManager
-  @Inject lateinit var curator: CuratorFramework
+  @Inject @ForZkLease lateinit var curator: CuratorFramework
   lateinit var leaseNamespace: String
   lateinit var leasePath: String
 

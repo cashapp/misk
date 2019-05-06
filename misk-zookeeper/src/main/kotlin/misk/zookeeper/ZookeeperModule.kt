@@ -2,10 +2,10 @@ package misk.zookeeper
 
 import com.google.common.util.concurrent.Service
 import com.google.inject.Key
-import misk.clustering.zookeeper.ZkService
 import misk.clustering.zookeeper.ZookeeperConfig
 import misk.inject.KAbstractModule
 import misk.inject.asSingleton
+import misk.inject.keyOf
 import org.apache.curator.framework.CuratorFramework
 import javax.inject.Provider
 import kotlin.reflect.KClass
@@ -31,13 +31,11 @@ class ZookeeperModule(
   private val qualifier: KClass<out Annotation>?
 ) : KAbstractModule() {
   override fun configure() {
-    val key = if (qualifier == null) Key.get(CuratorFramework::class.java) else Key.get(
-        CuratorFramework::class.java, qualifier.java)
-    bind(key).toProvider(CuratorFrameworkProvider(config)).asSingleton()
-    val curator = getProvider(key)
+    bind(keyOf<CuratorFramework>(qualifier)).toProvider(CuratorFrameworkProvider(config)).asSingleton()
+    val curator = getProvider(keyOf<CuratorFramework>(qualifier))
     multibind<Service>().toProvider(object : Provider<ZkService> {
       override fun get(): ZkService {
-        return ZkService(curator.get())
+        return ZkService(curator.get(), qualifier)
       }
     }).asSingleton()
   }
