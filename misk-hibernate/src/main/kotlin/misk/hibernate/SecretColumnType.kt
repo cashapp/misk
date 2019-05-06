@@ -50,7 +50,18 @@ internal class SecretColumnType : UserType, ParameterizedType, TypeConfiguration
 
   override fun replace(original: Any?, target: Any?, owner: Any?) = (original as ByteArray).copyOf()
 
-  override fun equals(x: Any?, y: Any?): Boolean = Objects.equals(x, y)
+  override fun equals(x: Any?, y: Any?): Boolean {
+    if (x == null && y == null) {
+      return true
+    }
+    if (x == null && y != null) {
+      return false
+    }
+    if (x != null && y == null) {
+      return false
+    }
+    return Objects.equals(aead.decrypt(x as ByteArray, null), aead.decrypt(y as ByteArray, null))
+  }
 
   override fun returnedClass() = ByteArray::class.java
 
@@ -81,7 +92,7 @@ internal class SecretColumnType : UserType, ParameterizedType, TypeConfiguration
     val result = rs?.getBytes(names[0])
     return result?.let { try {
         aead.decrypt(it, null)
-      } catch (e: java.security.GeneralSecurityException) {
+      } catch (e: GeneralSecurityException) {
         throw HibernateException(e)
       }
     }
