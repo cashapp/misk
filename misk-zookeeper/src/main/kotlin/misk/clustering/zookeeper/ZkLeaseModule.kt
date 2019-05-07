@@ -9,27 +9,22 @@ import misk.inject.KAbstractModule
 import misk.inject.asSingleton
 import misk.inject.toKey
 import misk.tasks.RepeatedTaskQueue
-import misk.zookeeper.CuratorFrameworkProvider
-import org.apache.curator.framework.CuratorFramework
+import misk.zookeeper.ZookeeperModule
 import java.time.Clock
 import java.util.concurrent.ExecutorService
 import javax.inject.Singleton
 
-class ZookeeperModule(private val config: ZookeeperConfig) : KAbstractModule() {
+/**
+ * Binds a [LeaseManager] that uses Zookeeper.
+ */
+class ZkLeaseModule(private val config: ZookeeperConfig) : KAbstractModule() {
   override fun configure() {
-    bind<ZookeeperConfig>().toInstance(config)
-    multibind<Service>().to<ZkService>()
-    multibind<Service>().to<ZkLeaseManager>()
-    multibind<Service>().to(RepeatedTaskQueue::class.toKey(ForZkLease::class)).asSingleton()
-    bind<LeaseManager>().to<ZkLeaseManager>()
-    bind<CuratorFramework>().toProvider(CuratorFrameworkProvider::class.java).asSingleton()
+    install(ZkLeaseCommonModule())
     install(ExecutorServiceModule.withFixedThreadPool(ForZkLease::class, "zk-lease-poller", 1))
+    install(ZookeeperModule(config, ForZkLease::class))
   }
 
   companion object {
-    /** @property Key<*> The key of the service which manages the zk connection, for service dependencies */
-    val serviceKey: Key<*> = Key.get(ZkService::class.java) as Key<*>
-
     /** @property Key<*> the Key of the lease manager service */
     val leaseManagerKey: Key<*> = Key.get(ZkLeaseManager::class.java)
   }
@@ -40,5 +35,16 @@ class ZookeeperModule(private val config: ZookeeperConfig) : KAbstractModule() {
     @ForZkLease executorService: ExecutorService
   ): RepeatedTaskQueue {
     return RepeatedTaskQueue("zk-lease-poller", clock, executorService)
+  }
+}
+
+/**
+ * Common bindings between [ZkLeaseModule] and [ZkLeaseTestModule].
+ */
+internal class ZkLeaseCommonModule : KAbstractModule() {
+  override fun configure() {
+    multibind<Service>().to<ZkLeaseManager>()
+    multibind<Service>().to(RepeatedTaskQueue::class.toKey(ForZkLease::class)).asSingleton()
+    bind<LeaseManager>().to<ZkLeaseManager>()
   }
 }

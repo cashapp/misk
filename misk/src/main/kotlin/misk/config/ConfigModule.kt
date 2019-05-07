@@ -9,7 +9,7 @@ class ConfigModule<T : Config>(
 ) : KAbstractModule() {
   @Suppress("UNCHECKED_CAST")
   override fun configure() {
-    bind<String>().annotatedWith<AppName>().toInstance(appName)
+    install(AppNameModule(appName))
     bind(configClass).toInstance(config)
     bind<Config>().toInstance(config)
   }

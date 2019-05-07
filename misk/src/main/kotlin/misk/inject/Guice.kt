@@ -87,6 +87,12 @@ fun <T : Any> Injector.getSetOf(
 
 inline fun <reified T : Any> keyOf(): Key<T> = Key.get(T::class.java)
 inline fun <reified T : Any> keyOf(a: Annotation): Key<T> = Key.get(T::class.java, a)
+/**
+ * If annotation is not null, returns a key for @Annotation T, otherwise a key for T.
+ */
+inline fun <reified T : Any> keyOf(a: KClass<out Annotation>?): Key<T> =
+    if (a == null) Key.get(T::class.java) else Key.get(T::class.java, a.java)
+
 
 fun <T : Any> TypeLiteral<T>.toKey(annotation: KClass<out Annotation>? = null): Key<T> {
   return when (annotation) {
