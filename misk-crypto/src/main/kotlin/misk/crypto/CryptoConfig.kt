@@ -15,7 +15,7 @@ data class CryptoConfig(
    * For AWS users that the Key URI looks like:
    * aws-kms://arn:aws:kms:<region>:<account-id>:key/<key-id>
    */
-  val kms_uri: String
+  val kms_uri: String?
 ) : Config
 
 /**
@@ -37,7 +37,7 @@ data class Key(
   /**
    * Path to a file containing the encrypted key material in Tink's JSON format.
    */
-  val encrypted_key: Secret<String>
+  val encrypted_key: Secret<String>?
 ) : Config
 
 /**

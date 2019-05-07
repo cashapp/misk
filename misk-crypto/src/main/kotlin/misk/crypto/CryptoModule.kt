@@ -37,6 +37,7 @@ class CryptoModule(
   override fun configure() {
     // no keys? no worries! exit early
     config.keys?: return
+    config.kms_uri ?: throw IllegalArgumentException("Configuration value 'kms_uri' is missing")
     requireBinding(KmsClient::class.java)
     AeadConfig.register()
     MacConfig.register()
@@ -48,6 +49,8 @@ class CryptoModule(
       "Found duplicate keys: [$duplicateNames]"
     }
     config.keys.forEach { key ->
+      key.encrypted_key ?: throw IllegalArgumentException(
+          "Configuration value 'encryped_key' is missing for key '${key.key_name}'")
       when(key.key_type) {
         KeyType.AEAD -> {
           bind<Aead>()
@@ -83,7 +86,7 @@ class CryptoModule(
     @Inject lateinit var kmsClient: KmsClient
 
     override fun get(): Aead {
-      val keysetHandle = readKey(key.encrypted_key, kmsClient.getAead(keyUri))
+      val keysetHandle = readKey(key.encrypted_key!!, kmsClient.getAead(keyUri))
       val kek = AeadFactory.getPrimitive(keysetHandle)
       val envelopeKey = KmsEnvelopeAead(DEK_TEMPLATE, kek)
 
@@ -100,7 +103,7 @@ class CryptoModule(
     @Inject lateinit var kmsClient: KmsClient
 
     override fun get(): Mac {
-      val keysetHandle = readKey(key.encrypted_key, kmsClient.getAead(keyUri))
+      val keysetHandle = readKey(key.encrypted_key!!, kmsClient.getAead(keyUri))
       return MacFactory.getPrimitive(keysetHandle)
           .also { keyManager[key.key_name] = it }
     }
@@ -112,7 +115,7 @@ class CryptoModule(
     @Inject lateinit var kmsClient: KmsClient
 
     override fun get(): PublicKeySign {
-      val keysetHandle = readKey(key.encrypted_key, kmsClient.getAead(keyUri))
+      val keysetHandle = readKey(key.encrypted_key!!, kmsClient.getAead(keyUri))
       val signer = PublicKeySignFactory.getPrimitive(keysetHandle)
       val verifier = PublicKeyVerifyFactory.getPrimitive(keysetHandle.publicKeysetHandle)
       keyManager[key.key_name] = DigitalSignature(signer, verifier)
@@ -126,7 +129,7 @@ class CryptoModule(
     @Inject lateinit var kmsClient: KmsClient
 
     override fun get(): PublicKeyVerify {
-      val keysetHandle = readKey(key.encrypted_key, kmsClient.getAead(keyUri))
+      val keysetHandle = readKey(key.encrypted_key!!, kmsClient.getAead(keyUri))
       val signer = PublicKeySignFactory.getPrimitive(keysetHandle)
       val verifier = PublicKeyVerifyFactory.getPrimitive(keysetHandle.publicKeysetHandle)
       keyManager[key.key_name] = DigitalSignature(signer, verifier)
