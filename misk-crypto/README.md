@@ -22,6 +22,7 @@ class MyAppModule : KAbstractModule {
   }
 }
 ```
+For testing and development purposes, use `CryptoTestModule` which will provide a fake `KmsClient`.
 
 Create a new key
 -----
@@ -37,14 +38,19 @@ crypto:
   kms_uri: "aws-kms://arn:kms:<region>:<account-id>:key/<key-id>"
   keys:
     - key_name: "my_payment_token_key"
-      encrypted_kek: [key encrypted using the same KMS used by the app encoded in base64] 
+      key_type: AEAD
+      encrypted_kek: [key encrypted using the same KMS used by the app in JSON format] 
 ``` 
+For development and testing purposes, there's no need to specify the `kms_uri` or the `encrypted_key` values.
+They'll be replaces by fake implementations that will provide hardcoded static keys and a fake `KmsClient`
+  
 Using a key
 -----
 To use your newly created key:
 ```$kotlin
 class PaymentTokenGenerator @Inject constructor(
-  @Named("my_payment_token_key") lateinit var tokenCipher: Aead
+  @Named("my_payment_token_key") lateinit var tokenCipher: Aead,
+  lateinit var keyManager: AeadKeyManager
 ) {
   
   fun encryptToken(token: String): ByteString {
@@ -53,7 +59,7 @@ class PaymentTokenGenerator @Inject constructor(
   
   fun decryptToken(encryptedToken: ByteString): String {
     // using the key manager to get the right cipher by name
-    return KeyManager["my_payment_token_key"]
+    return keyManager["my_payment_token_key"]
         .decrypt(encryptedToken)
         .toString()
   }

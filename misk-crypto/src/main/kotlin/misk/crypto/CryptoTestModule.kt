@@ -39,7 +39,16 @@ class CryptoTestModule(
      */
     val masterKey = FakeMasterEncryptionKey()
     /**
-     * Hardcoded [Aead] [KeysetHandle] that's loaded and used by [AeadProvider]
+     * Hardcoded [Aead] [KeysetHandle] that's loaded and used by [AeadProvider].
+     *
+     * This string was generated using the following snippet:
+     * ```
+     * val kh = KeysetHandle.generateNew(AeadKeyTemplates.AES256_GCM)
+     * val output = ByteArrayOutputStream()
+     * val writer = JsonKeysetWriter.withOutputStream(output)
+     * kh.write(writer, masterKey)
+     * output.toString()
+     * ```
      */
     const val TEST_AEAD_KEYSET = "{\n" +
         "    \"keysetInfo\": {\n" +

@@ -14,6 +14,8 @@ data class CryptoConfig(
    * gcp-kms://projects/<project>/locations/<location>/keyRings/<keyRing>/cryptoKeys/<key>
    * For AWS users that the Key URI looks like:
    * aws-kms://arn:aws:kms:<region>:<account-id>:key/<key-id>
+   *
+   * When using [CryptoTestModule] this value can be omitted, it'll be replaces by a [FakeKmsClient]
    */
   val kms_uri: String?
 ) : Config
@@ -36,6 +38,8 @@ data class Key(
   val key_type: KeyType,
   /**
    * Path to a file containing the encrypted key material in Tink's JSON format.
+   *
+   * When using [CryptoTestModule] this value can be omitted, it'll be replaced by a hardcoded keyset.
    */
   val encrypted_key: Secret<String>?
 ) : Config
