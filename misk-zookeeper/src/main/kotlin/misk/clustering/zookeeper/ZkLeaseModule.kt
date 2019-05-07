@@ -9,7 +9,6 @@ import misk.inject.KAbstractModule
 import misk.inject.asSingleton
 import misk.inject.toKey
 import misk.tasks.RepeatedTaskQueue
-import misk.zookeeper.ZkService
 import misk.zookeeper.ZookeeperModule
 import java.time.Clock
 import java.util.concurrent.ExecutorService
@@ -20,9 +19,7 @@ import javax.inject.Singleton
  */
 class ZkLeaseModule(private val config: ZookeeperConfig) : KAbstractModule() {
   override fun configure() {
-    multibind<Service>().to<ZkLeaseManager>()
-    multibind<Service>().to(RepeatedTaskQueue::class.toKey(ForZkLease::class)).asSingleton()
-    bind<LeaseManager>().to<ZkLeaseManager>()
+    install(ZkLeaseCommonModule())
     install(ExecutorServiceModule.withFixedThreadPool(ForZkLease::class, "zk-lease-poller", 1))
     install(ZookeeperModule(config, ForZkLease::class))
   }
@@ -38,5 +35,16 @@ class ZkLeaseModule(private val config: ZookeeperConfig) : KAbstractModule() {
     @ForZkLease executorService: ExecutorService
   ): RepeatedTaskQueue {
     return RepeatedTaskQueue("zk-lease-poller", clock, executorService)
+  }
+}
+
+/**
+ * Common bindings between [ZkLeaseModule] and [ZkLeaseTestModule].
+ */
+internal class ZkLeaseCommonModule : KAbstractModule() {
+  override fun configure() {
+    multibind<Service>().to<ZkLeaseManager>()
+    multibind<Service>().to(RepeatedTaskQueue::class.toKey(ForZkLease::class)).asSingleton()
+    bind<LeaseManager>().to<ZkLeaseManager>()
   }
 }
