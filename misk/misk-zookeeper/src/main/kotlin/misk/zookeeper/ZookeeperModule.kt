@@ -28,15 +28,16 @@ import kotlin.reflect.KClass
  */
 class ZookeeperModule(
   private val config: ZookeeperConfig,
-  private val qualifier: KClass<out Annotation>?
+  private val qualifier: KClass<out Annotation>? = null
 ) : KAbstractModule() {
   override fun configure() {
     bind(keyOf<CuratorFramework>(qualifier)).toProvider(CuratorFrameworkProvider(config)).asSingleton()
     val curator = getProvider(keyOf<CuratorFramework>(qualifier))
-    multibind<Service>().toProvider(object : Provider<ZkService> {
+    bind(keyOf<ZkService>(qualifier)).toProvider(object : Provider<ZkService> {
       override fun get(): ZkService {
         return ZkService(curator.get(), qualifier)
       }
     }).asSingleton()
+    multibind<Service>().to(keyOf<ZkService>(qualifier))
   }
 }

@@ -15,4 +15,5 @@ dependencies {
   testCompile dep.junitApi
   testCompile dep.zookeeper
   testCompile project(':misk-testing')
+  testCompile project(':misk-zookeeper-testing')
 }
