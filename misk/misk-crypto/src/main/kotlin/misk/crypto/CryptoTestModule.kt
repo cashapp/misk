@@ -1,6 +1,7 @@
 package misk.crypto
 
 import com.google.crypto.tink.Aead
+import com.google.crypto.tink.KmsClient
 import com.google.crypto.tink.Mac
 import com.google.crypto.tink.PublicKeySign
 import com.google.crypto.tink.PublicKeyVerify
@@ -29,6 +30,8 @@ class CryptoTestModule(
     AeadConfig.register()
     MacConfig.register()
     SignatureConfig.register()
+
+    bind<KmsClient>().toInstance(FakeKmsClient())
 
     keyNames.forEach { key ->
       when (key.key_type) {
