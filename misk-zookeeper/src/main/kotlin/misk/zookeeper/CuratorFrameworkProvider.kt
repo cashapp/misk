@@ -3,6 +3,7 @@ package misk.zookeeper
 import com.google.common.util.concurrent.ThreadFactoryBuilder
 import misk.clustering.zookeeper.ZookeeperConfig
 import misk.clustering.zookeeper.asZkPath
+import org.apache.curator.ensemble.EnsembleProvider
 import org.apache.curator.framework.CuratorFramework
 import org.apache.curator.framework.CuratorFrameworkFactory
 import org.apache.curator.framework.api.ACLProvider
@@ -28,7 +29,8 @@ const val DEFAULT_PERMS = ZooDefs.Perms.READ or
 const val SHARED_DIR_PERMS = ZooDefs.Perms.READ or ZooDefs.Perms.WRITE or ZooDefs.Perms.CREATE
 
 internal class CuratorFrameworkProvider @Inject internal constructor(
-  private val config: ZookeeperConfig
+  private val config: ZookeeperConfig,
+  private val ensembleProvider: Provider<EnsembleProvider>
 ) : Provider<CuratorFramework> {
 
   override fun get(): CuratorFramework {
@@ -45,7 +47,6 @@ internal class CuratorFrameworkProvider @Inject internal constructor(
     // Uses reasonable default values from http://curator.apache.org/getting-started.html
     val retryPolicy = ExponentialBackoffRetry(1000, 3)
     return CuratorFrameworkFactory.builder()
-        .connectString(config.zk_connect)
         .retryPolicy(retryPolicy)
         .sessionTimeoutMs(config.session_timeout_msecs)
         .canBeReadOnly(false)
@@ -82,6 +83,7 @@ internal class CuratorFrameworkProvider @Inject internal constructor(
             return defaultAcl
           }
         })
+        .ensembleProvider(ensembleProvider.get())
         .build()
   }
 }

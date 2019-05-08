@@ -15,7 +15,7 @@ internal class ZkLeaseTestModule : KAbstractModule() {
     bind<String>().annotatedWith<AppName>().toInstance("my-app")
     install(FakeClusterModule())
     install(ZkTestModule(ForZkLease::class))
-    install(ZkLeaseCommonModule())
+    install(ZkLeaseManagerModule())
 
   }
 
