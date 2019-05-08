@@ -1,0 +1,15 @@
+buildscript {
+  dependencies {
+    classpath dep.kotlinNoArgPlugin
+  }
+}
+
+apply plugin: 'kotlin-jpa'
+
+dependencies {
+  compile dep.curatorFramework
+  compile dep.zookeeper
+  compile dep.docker
+  compile project(':misk-testing')
+  compile project(':misk-zookeeper')
+}

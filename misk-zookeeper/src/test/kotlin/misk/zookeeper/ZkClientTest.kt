@@ -6,6 +6,7 @@ import misk.MiskTestingServiceModule
 import misk.config.AppNameModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
+import misk.zookeeper.testing.ZkTestModule
 import org.apache.curator.framework.CuratorFramework
 import org.apache.zookeeper.ZooDefs
 import org.apache.zookeeper.data.ACL

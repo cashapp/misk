@@ -8,7 +8,7 @@ import misk.logging.getLogger
 import org.apache.curator.framework.CuratorFramework
 import kotlin.reflect.KClass
 
-internal class ZkService internal constructor(
+class ZkService internal constructor(
   private val curatorFramework: CuratorFramework,
   qualifier: KClass<out Annotation>?
 ) : AbstractIdleService(), DependentService {

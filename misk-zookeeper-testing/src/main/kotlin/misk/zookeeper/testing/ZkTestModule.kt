@@ -1,4 +1,4 @@
-package misk.zookeeper
+package misk.zookeeper.testing
 
 import com.google.common.util.concurrent.Service
 import com.google.inject.Key
@@ -11,6 +11,8 @@ import misk.security.ssl.CertStoreConfig
 import misk.security.ssl.SslLoader
 import misk.security.ssl.TrustStoreConfig
 import misk.service.CachedTestService
+import misk.zookeeper.ZkClientFactory
+import misk.zookeeper.ZookeeperModule
 import org.apache.curator.framework.CuratorFramework
 import javax.inject.Inject
 import javax.inject.Provider
