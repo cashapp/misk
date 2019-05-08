@@ -7,7 +7,7 @@ import misk.config.AppName
 import misk.inject.KAbstractModule
 import misk.tasks.DelayedTask
 import misk.tasks.RepeatedTaskQueue
-import misk.zookeeper.ZkTestModule
+import misk.zookeeper.testing.ZkTestModule
 import java.time.Clock
 
 internal class ZkLeaseTestModule : KAbstractModule() {

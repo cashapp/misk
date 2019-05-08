@@ -1,4 +1,4 @@
-package misk.zookeeper
+package misk.zookeeper.testing
 
 import com.github.dockerjava.api.model.ExposedPort
 import com.github.dockerjava.api.model.Ports
