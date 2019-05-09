@@ -165,16 +165,16 @@ class SecretColumnTest {
   }
 
   @Test
-  fun testGetRecordByEncryptedColumn() {
+  fun testGetRecordByEncryptedColumnFails() {
     val title = "Dark Star"
     val length = 2918
     val album = "Live/Dead".toByteArray()
     transacter.transaction { session ->
       session.save(DbJerryGarciaSong(title, length, album))
-      val song = queryFactory.newQuery<JerryGarciaSongQuery>()
+      val songs = queryFactory.newQuery<JerryGarciaSongQuery>()
           .album(album)
           .query(session)
-      assertNotNull(song)
+      assertThat(songs.size).isEqualTo(0)
     }
   }
 
