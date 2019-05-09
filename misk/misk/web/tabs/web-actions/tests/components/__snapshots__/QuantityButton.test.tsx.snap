@@ -2,14 +2,23 @@
 
 exports[`Quantity Button QuantityButton for Add Field 1`] = `
 <DocumentFragment>
-  <span
-    class="bp3-popover-wrapper sc-bZQynM hRiALA"
+  .emotion-1 span.bp3-popover-target {
+  display: inherit !important;
+}
+
+.emotion-0 {
+  line-height: normal;
+  text-transform: inherit;
+}
+
+<span
+    class="bp3-popover-wrapper emotion-1"
   >
     <span
       class="bp3-popover-target"
     >
       <button
-        class="bp3-button sc-EHOje bcIieJ"
+        class="bp3-button  emotion-0"
         tabindex="0"
         type="button"
       >
@@ -40,14 +49,23 @@ exports[`Quantity Button QuantityButton for Add Field 1`] = `
 
 exports[`Quantity Button QuantityButton for Remove Field 1`] = `
 <DocumentFragment>
-  <span
-    class="bp3-popover-wrapper sc-bZQynM hRiALA"
+  .emotion-1 span.bp3-popover-target {
+  display: inherit !important;
+}
+
+.emotion-0 {
+  line-height: normal;
+  text-transform: inherit;
+}
+
+<span
+    class="bp3-popover-wrapper emotion-1"
   >
     <span
       class="bp3-popover-target"
     >
       <button
-        class="bp3-button sc-EHOje bcIieJ"
+        class="bp3-button  emotion-0"
         tabindex="0"
         type="button"
       >

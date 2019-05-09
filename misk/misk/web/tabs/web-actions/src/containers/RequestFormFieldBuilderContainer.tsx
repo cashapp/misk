@@ -1,13 +1,18 @@
+/** @jsx jsx */
 import {
+  Button,
   ButtonGroup,
   Card,
   ControlGroup,
   FormGroup,
   InputGroup,
   Intent,
-  Label
+  Label,
+  TextArea,
+  Tooltip
 } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
+import { css, jsx } from "@emotion/core"
 import { WrapTextContainer } from "@misk/core"
 import {
   onChangeFnCall,
@@ -17,15 +22,13 @@ import {
   simpleType
 } from "@misk/simpleredux"
 import { OrderedMap } from "immutable"
-import * as React from "react"
 import { connect } from "react-redux"
-import styled from "styled-components"
 import {
-  Button,
+  cssButton,
+  cssTooltip,
+  cssWrapTextArea,
   Metadata,
-  QuantityButton,
-  Tooltip,
-  WrapTextArea
+  QuantityButton
 } from "../components"
 import {
   BaseFieldTypes,
@@ -39,14 +42,14 @@ import {
   TypescriptBaseTypes
 } from "../ducks"
 
-const RequestFieldGroup = styled(Card)`
+const cssCard = css`
   box-shadow: none !important;
   border-left: 2px black;
   margin-bottom: 0px;
   padding: 0px 0px 0px 15px !important;
 `
 
-const Field = styled(FormGroup)`
+const cssFormGroup = css`
   margin: 0px !important;
 `
 
@@ -62,7 +65,12 @@ const repeatableFieldButtons = (
   const { action, id, tag, typesMetadata } = props
   const metadata = typesMetadata.get(id)
   const editRawButton = (
-    <Tooltip content={"Edit raw input"} key={`editRaw${id}`} lazy={true}>
+    <Tooltip
+      css={cssTooltip}
+      content={"Edit raw input"}
+      key={`editRaw${id}`}
+      lazy={true}
+    >
       <Button
         active={simpleSelect(
           props.simpleForm,
@@ -70,6 +78,7 @@ const repeatableFieldButtons = (
           "data",
           simpleType.boolean
         )}
+        css={cssButton}
         icon={IconNames.MORE}
         onClick={onChangeToggleFnCall(
           props.simpleFormToggle,
@@ -82,6 +91,7 @@ const repeatableFieldButtons = (
   const dirtyInput = metadata.dirtyInput
   const dirtyInputButton = (
     <Tooltip
+      css={cssTooltip}
       content={dirtyInput ? "Remove from request body" : "Add to request body"}
       key={`dirtyInput${id}`}
       lazy={true}
@@ -134,7 +144,7 @@ const repeatableFieldButtons = (
   } else if (metadata && metadata.id === "0") {
     return []
   } else {
-    return [<Button icon={IconNames.WARNING_SIGN} />]
+    return [<Button css={cssButton} icon={IconNames.WARNING_SIGN} />]
   }
 }
 
@@ -150,7 +160,8 @@ const EditRawInput = (
   )
   if (editRawIsOpen) {
     return (
-      <WrapTextArea
+      <TextArea
+        css={cssWrapTextArea}
         fill={true}
         growVertically={true}
         onChange={onChangeFnCall(props.simpleFormInput, `${tag}::${padId(id)}`)}
@@ -205,11 +216,15 @@ const UnconnectedRequestFormFieldBuilderContainer = (
     } = metadata as ITypesFieldMetadata
     if (typescriptType === TypescriptBaseTypes.boolean) {
       return (
-        <Field label={formLabelFormatter(name, serverType)}>
+        <FormGroup
+          css={cssFormGroup}
+          label={formLabelFormatter(name, serverType)}
+        >
           <ControlGroup>
             {...repeatableFieldButtons({ ...props, id })}
             <EditRawInput {...props} id={id} tag={tag}>
               <Button
+                css={cssButton}
                 intent={
                   simpleSelect(
                     props.simpleForm,
@@ -236,11 +251,14 @@ const UnconnectedRequestFormFieldBuilderContainer = (
               </Button>
             </EditRawInput>
           </ControlGroup>
-        </Field>
+        </FormGroup>
       )
     } else if (typescriptType === TypescriptBaseTypes.number) {
       return (
-        <Field label={formLabelFormatter(name, serverType)}>
+        <FormGroup
+          css={cssFormGroup}
+          label={formLabelFormatter(name, serverType)}
+        >
           <ControlGroup>
             {...repeatableFieldButtons({ ...props, id })}
             <EditRawInput {...props} id={id} tag={tag}>
@@ -259,11 +277,14 @@ const UnconnectedRequestFormFieldBuilderContainer = (
               />
             </EditRawInput>
           </ControlGroup>
-        </Field>
+        </FormGroup>
       )
     } else if (typescriptType === TypescriptBaseTypes.string) {
       return (
-        <Field label={formLabelFormatter(name, serverType)}>
+        <FormGroup
+          css={cssFormGroup}
+          label={formLabelFormatter(name, serverType)}
+        >
           <ControlGroup>
             {...repeatableFieldButtons({ ...props, id })}
             <EditRawInput {...props} id={id} tag={tag}>
@@ -282,7 +303,7 @@ const UnconnectedRequestFormFieldBuilderContainer = (
               />
             </EditRawInput>
           </ControlGroup>
-        </Field>
+        </FormGroup>
       )
     } else if (typescriptType === null && idChildren.size > 0) {
       if (
@@ -362,6 +383,7 @@ const UnconnectedRequestFormFieldBuilderContainer = (
               <ControlGroup fill={true}>
                 <Button
                   active={whichFormData === "FORM"}
+                  css={cssButton}
                   icon={IconNames.FORM}
                   onClick={onChangeToggleFnCall(
                     props.simpleFormToggle,
@@ -372,6 +394,7 @@ const UnconnectedRequestFormFieldBuilderContainer = (
                 />
                 <Button
                   active={whichFormData === "RAW"}
+                  css={cssButton}
                   icon={IconNames.MORE}
                   onClick={onChangeToggleFnCall(
                     props.simpleFormToggle,
@@ -382,14 +405,15 @@ const UnconnectedRequestFormFieldBuilderContainer = (
                 />
               </ControlGroup>
               {whichFormData === "FORM" ? (
-                <RequestFieldGroup>
+                <Card css={cssCard}>
                   {idChildren.map((child: string) =>
                     fieldGroup(child, serverType)
                   )}
-                </RequestFieldGroup>
+                </Card>
               ) : (
-                <RequestFieldGroup>
-                  <WrapTextArea
+                <Card css={cssCard}>
+                  <TextArea
+                    css={cssWrapTextArea}
                     fill={true}
                     growVertically={true}
                     onClick={onClickFnCall(clickDirtyInputFns(props))}
@@ -401,24 +425,28 @@ const UnconnectedRequestFormFieldBuilderContainer = (
                       "Raw request body. This input will return a string or JSON."
                     }
                   />
-                </RequestFieldGroup>
+                </Card>
               )}
             </div>
           )
         } else {
           return (
-            <RequestFieldGroup>
+            <Card css={cssCard}>
               {idChildren.map((child: string) => fieldGroup(child, serverType))}
-            </RequestFieldGroup>
+            </Card>
           )
         }
       }
     } else {
       return (
-        <Field label={formLabelFormatter(name, serverType)}>
+        <FormGroup
+          css={cssFormGroup}
+          label={formLabelFormatter(name, serverType)}
+        >
           <ControlGroup>
             {...repeatableFieldButtons({ ...props, id })}
-            <WrapTextArea
+            <TextArea
+              css={cssWrapTextArea}
               fill={true}
               growVertically={true}
               onClick={onClickFnCall(clickDirtyInputFns(props))}
@@ -431,7 +459,7 @@ const UnconnectedRequestFormFieldBuilderContainer = (
               }
             />
           </ControlGroup>
-        </Field>
+        </FormGroup>
       )
     }
   } else {

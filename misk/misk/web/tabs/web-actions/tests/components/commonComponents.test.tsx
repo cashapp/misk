@@ -1,14 +1,10 @@
 import React from "react"
 import { cleanup, render } from "react-testing-library"
-import { Metadata, MetadataCollapse, MetadataMenu } from "../../src/components"
+import { Metadata, MetadataCollapse } from "../../src/components"
 import { renderWithRedux } from "../upstreamableTestUtilities"
 
 describe("Common Components", () => {
   afterEach(cleanup)
-  it("MetadataMenu", () => {
-    const { asFragment } = render(<MetadataMenu />)
-    expect(asFragment()).toMatchSnapshot()
-  })
   it("Metadata", () => {
     const { asFragment } = render(<Metadata content={"Test Content"} />)
     expect(asFragment()).toMatchSnapshot()

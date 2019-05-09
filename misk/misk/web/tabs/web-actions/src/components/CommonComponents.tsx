@@ -1,15 +1,14 @@
+/** @jsx jsx */
 import {
-  Button as BlueprintButton,
   Collapse,
   Colors,
   Icon,
-  Menu,
   MenuItem,
   Tag,
-  TextArea,
-  Tooltip as BlueprintTooltip
+  Tooltip
 } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
+import { css, jsx } from "@emotion/core"
 import { HTTPMethodIntent, WrapTextContainer } from "@misk/core"
 import {
   ISimpleFormState,
@@ -19,41 +18,39 @@ import {
 } from "@misk/simpleredux"
 import copy from "copy-to-clipboard"
 import HTTPMethod from "http-method-enum"
-import * as React from "react"
 import { connect } from "react-redux"
-import styled from "styled-components"
 import { IDispatchProps, mapDispatchToProps, mapStateToProps } from "../ducks"
 
-export const FloatLeft = styled.span`
+export const cssFloatLeft = css`
   float: left;
   margin: 5px 10px 0 0;
 `
 
-export const FloatRight = styled.span`
+export const cssFloatRight = css`
   float: right;
   margin: 5px 0 0 10px;
 `
 
-export const CodeTag = styled(Tag)`
+export const cssCodeTag = css`
   font-family: monospace;
 `
 
-export const Header = styled.div`
+export const cssHeader = css`
   display: inline-block;
 `
 
-export const Column = styled.div`
+export const cssColumn = css`
   flex-grow: 1;
   flex-basis: 0;
   min-width: 320px;
 `
 
-export const Button = styled(BlueprintButton)`
+export const cssButton = css`
   line-height: normal;
   text-transform: inherit;
 `
 
-export const Tooltip = styled(BlueprintTooltip)`
+export const cssTooltip = css`
   span.bp3-popover-target {
     display: inherit !important;
   }
@@ -63,20 +60,18 @@ export const Tooltip = styled(BlueprintTooltip)`
  * Renders HTTP Method tags for each Web Action card
  */
 export const MethodTag = (props: { method: HTTPMethod }) => (
-  <FloatRight>
-    <Tag large={true} intent={HTTPMethodIntent[props.method]}>
-      {props.method}
-    </Tag>
-  </FloatRight>
+  <Tag css={cssFloatRight} large={true} intent={HTTPMethodIntent[props.method]}>
+    {props.method}
+  </Tag>
 )
 
-export const MetadataMenu = styled(Menu)`
+export const cssMetadataMenu = css`
   li {
     margin-bottom: 0;
   }
 `
 
-export const WrapTextArea = styled(TextArea)`
+export const cssWrapTextArea = css`
   white-space: pre-line;
 `
 
@@ -104,19 +99,14 @@ export const Metadata = (props: {
       <MenuItem
         {...props}
         text={
-          <Tooltip content={props.tooltip} lazy={true}>
+          <Tooltip css={cssTooltip} content={props.tooltip} lazy={true}>
             {props.content}
           </Tooltip>
         }
       />
     )
   } else {
-    return (
-      <MenuItem
-        {...props}
-        text={<Tooltip lazy={true}>{props.content}</Tooltip>}
-      />
-    )
+    return <MenuItem {...props} text={props.content} />
   }
 }
 
@@ -139,7 +129,7 @@ export const MetadataCopyToClipboard = (props: {
   const labelElement: JSX.Element =
     props.labelElement ||
     (definedOrDefault(props.clipboardLabelElement, true) && (
-      <Tooltip content={"Click to Copy to Clipboard"}>
+      <Tooltip css={cssTooltip} content={"Click to Copy to Clipboard"}>
         <Icon icon={IconNames.CLIPBOARD} />
       </Tooltip>
     ))
