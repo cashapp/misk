@@ -1,7 +1,9 @@
 package misk.hibernate
 
 import com.google.crypto.tink.Aead
+import com.google.crypto.tink.DeterministicAead
 import misk.crypto.AeadKeyManager
+import misk.crypto.DeterministicAeadKeyManager
 import misk.crypto.KeyNotFoundException
 import misk.logging.getLogger
 import org.hibernate.HibernateException
@@ -13,17 +15,74 @@ import java.sql.PreparedStatement
 import java.sql.ResultSet
 import java.sql.Types
 import java.util.Properties
-import java.security.GeneralSecurityException
 import org.hibernate.type.spi.TypeConfiguration
 import org.hibernate.type.spi.TypeConfigurationAware
 import java.util.Objects
+
+internal interface EncryptionAdapter {
+  fun encrypt(plaintext: ByteArray?, associatedData: ByteArray?): ByteArray
+  fun decrypt(ciphertext: ByteArray?, associatedData: ByteArray?): ByteArray
+}
+
+internal class AeadAdapter(typeConfig: TypeConfiguration, keyName: String) : EncryptionAdapter {
+
+  val aead: Aead
+
+  init {
+    val keyManager = typeConfig.metadataBuildingContext.bootstrapContext.serviceRegistry.injector
+        .getInstance(AeadKeyManager::class.java)
+    try {
+      aead = keyManager[keyName]
+    } catch (ex: KeyNotFoundException) {
+      throw HibernateException("Cannot set field, key $keyName not found")
+    }
+  }
+
+  override
+  fun encrypt(plaintext: ByteArray?, associatedData: ByteArray?) : ByteArray {
+    return aead.encrypt(plaintext, associatedData)
+  }
+
+  override
+  fun decrypt(ciphertext: ByteArray?, associatedData: ByteArray?) : ByteArray {
+    return aead.decrypt(ciphertext, associatedData)
+
+  }
+}
+
+internal class DeterministicAeadAdapter(typeConfig: TypeConfiguration, keyName: String)
+  : EncryptionAdapter {
+
+  val daead: DeterministicAead
+
+  init {
+    val keyManager = typeConfig.metadataBuildingContext.bootstrapContext.serviceRegistry.injector
+        .getInstance(DeterministicAeadKeyManager::class.java)
+    try {
+      daead = keyManager[keyName]
+    } catch (ex: KeyNotFoundException) {
+      throw HibernateException("Cannot set field, key $keyName not found")
+    }
+  }
+
+  override
+  fun encrypt(plaintext: ByteArray?, associatedData: ByteArray?) : ByteArray {
+    return daead.encryptDeterministically(plaintext, associatedData)
+  }
+
+  override
+  fun decrypt(ciphertext: ByteArray?, associatedData: ByteArray?) : ByteArray {
+    return daead.decryptDeterministically(ciphertext, associatedData)
+
+  }
+}
 
 internal class SecretColumnType : UserType, ParameterizedType, TypeConfigurationAware {
   companion object {
     const val FIELD_ENCRYPTION_KEY_NAME: String = "key_name"
     val logger = getLogger<SecretColumnType>()
   }
-  private lateinit var aead: Aead
+  private lateinit var daead: EncryptionAdapter
   private lateinit var keyName: String
   private lateinit var _typeConfiguration: TypeConfiguration
 
@@ -34,14 +93,8 @@ internal class SecretColumnType : UserType, ParameterizedType, TypeConfiguration
   override fun getTypeConfiguration(): TypeConfiguration = _typeConfiguration
 
   override fun setParameterValues(parameters: Properties) {
-    val keyManager = _typeConfiguration.metadataBuildingContext.bootstrapContext.serviceRegistry.injector
-        .getInstance(AeadKeyManager::class.java)
     keyName = parameters.getProperty(FIELD_ENCRYPTION_KEY_NAME)
-    try {
-      aead = keyManager[keyName]
-    } catch (ex: KeyNotFoundException) {
-      throw HibernateException("Cannot set field, key $keyName not found")
-    }
+    daead = AeadAdapter(_typeConfiguration, keyName)
   }
 
   override fun hashCode(x: Any): Int = (x as ByteArray).hashCode()
@@ -67,7 +120,7 @@ internal class SecretColumnType : UserType, ParameterizedType, TypeConfiguration
     if (value == null) {
       st.setNull(index, Types.VARBINARY)
     } else {
-      val encrypted = aead.encrypt(value as ByteArray, null)
+      val encrypted = daead.encrypt(value as ByteArray, null)
       st.setBytes(index, encrypted)
     }
   }
@@ -80,7 +133,7 @@ internal class SecretColumnType : UserType, ParameterizedType, TypeConfiguration
   ): Any? {
     val result = rs?.getBytes(names[0])
     return result?.let { try {
-        aead.decrypt(it, null)
+        daead.decrypt(it, null)
       } catch (e: java.security.GeneralSecurityException) {
         throw HibernateException(e)
       }

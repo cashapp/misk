@@ -25,12 +25,17 @@ package misk.hibernate
  *   id BIGINT NOT NULL AUTO_INCREMENT,
  *   secret VARBINARY(500)
  * ```
- * - It cannot be a part of an index
  * - It cannot be annotates with any other custom column annotations like [ProtoColumn] or [JsonColumn].
  *
- * *Note*: the resulting ciphertext that is persisted in the database may be much larger in size
- * than the original plaintext because it also contains some metadata.
- * Please make sure to allocate enough space when defining the column using `VARBINARY()`.
+ * *Note*:
+ *
+ *  1. the resulting ciphertext that is persisted in the database may be much larger in size than
+ *     the original plaintext because it also contains some metadata. Please make sure to allocate
+ *     enough space when defining the column using `VARBINARY()`.
+ *
+ *  2. SecretColumn uses deterministic encryption. This means that multiple plaintexts encrypted
+ *     with the same key will result in identical ciphertext. This does not preserve secrecy, but
+ *     does permit searching for encrypted values.
  */
 @Target(AnnotationTarget.FIELD)
 annotation class SecretColumn(val keyName: String)
