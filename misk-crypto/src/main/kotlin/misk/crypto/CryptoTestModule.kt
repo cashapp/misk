@@ -48,9 +48,6 @@ class CryptoTestModule(
               .asEagerSingleton()
         }
         KeyType.DIGITAL_SIGNATURE -> {
-          // val keysetHandle = KeysetHandle.generateNew(SignatureKeyTemplates.ED25519)
-          // val signer = PublicKeySignFactory.getPrimitive(keysetHandle)
-          // val verifier = PublicKeyVerifyFactory.getPrimitive(keysetHandle.publicKeysetHandle)
           bind<PublicKeySign>()
               .annotatedWith(Names.named(key.key_name))
               .toProvider(DigitalSignatureSignerProvider(key, null))
