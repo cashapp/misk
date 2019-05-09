@@ -1,14 +1,15 @@
-import { Card, H3, H5 } from "@blueprintjs/core"
+/** @jsx jsx */
+import { Card, H3, H5, Menu, Tag } from "@blueprintjs/core"
+import { jsx } from "@emotion/core"
 import { FlexContainer } from "@misk/core"
-import * as React from "react"
 import { connect } from "react-redux"
 import {
-  CodeTag,
-  Column,
-  FloatLeft,
-  Header,
+  cssCodeTag,
+  cssColumn,
+  cssFloatLeft,
+  cssHeader,
+  cssMetadataMenu,
   MetadataCollapse,
-  MetadataMenu,
   MethodTag,
   RequestResponseContentTypesSpan,
   requestResponseContentTypesString
@@ -30,23 +31,25 @@ const WebActionCardContainer = (
 ) => (
   <div>
     <Card>
-      <Header>
+      <div css={cssHeader}>
         {props.action.dispatchMechanism.map(m => (
           <MethodTag key={m} method={m} />
         ))}
-        <FloatLeft>
+        <span css={cssFloatLeft}>
           <H3>{props.action.name}</H3>
-        </FloatLeft>
-        <FloatLeft>
-          <CodeTag large={true}>{props.action.pathPattern}</CodeTag>
-        </FloatLeft>
-      </Header>
+        </span>
+        <span css={cssFloatLeft}>
+          <Tag css={cssCodeTag} large={true}>
+            {props.action.pathPattern}
+          </Tag>
+        </span>
+      </div>
       {props.action.nonAccessOrTypeFunctionAnnotations.map((a, index) => (
         <H5 key={index}>{a}</H5>
       ))}
       <FlexContainer>
-        <Column>
-          <MetadataMenu>
+        <div css={cssColumn}>
+          <Menu css={cssMetadataMenu}>
             <MetadataCollapse
               content={props.action.function}
               label={"Function"}
@@ -75,10 +78,10 @@ const WebActionCardContainer = (
               label={"Access"}
               tag={`${props.tag}::Access`}
             />
-          </MetadataMenu>
-        </Column>
-        <Column>
-          <MetadataMenu>
+          </Menu>
+        </div>
+        <div css={cssColumn}>
+          <Menu css={cssMetadataMenu}>
             <MetadataCollapse
               content={requestResponseContentTypesString(props.action)}
               data={requestResponseContentTypesString(props.action)}
@@ -104,8 +107,8 @@ const WebActionCardContainer = (
               tag={`${props.tag}::ButtonSendRequest`}
               text={"Send a Request"}
             />
-          </MetadataMenu>
-        </Column>
+          </Menu>
+        </div>
       </FlexContainer>
       <SendRequestCollapseContainer action={props.action} tag={props.tag} />
     </Card>

@@ -7,7 +7,7 @@
     "yarn": "YARN NO LONGER USED - use npm instead."
   },
   "scripts": {
-    "build": "npm run-script lib ",
+    "build": "npm run-script lib && npm run-script test ",
     "ci-build": "npm install && npm run-script clean && npm run-script prebuild && cross-env NODE_ENV=production npm run-script lib && npm run-script test ",
     "dev-build": "npm run-script dev-lib ",
     "clean": "rm -rf demo lib",
@@ -18,23 +18,24 @@
     "prebuild": "npm run-script lint",
     "reinstall": "rm -rf node_modules && npm run-script install",
     "start": "npm run-script prebuild && cross-env NODE_ENV=development webpack-dev-server",
-    "test": "jest --passWithNoTests --env=jsdom",
+    "test": "jest --passWithNoTests",
     "zip": "tar --exclude='.gitignore' --exclude='.old_build_files' --exclude='package.json' --exclude='package-lock.json' --exclude='prettier.config.js' --exclude='tsconfig.json' --exclude='tslint.json' --exclude='webpack.config.js' --exclude='yarn.lock' --exclude='demo' --exclude='lib' --exclude='.DS_Store' --exclude='*.log' --exclude='node_modules' --exclude='loader.tgz' -czvf loader.tgz ./"
   },
   "dependencies": {
-    "@misk/common": "0.1.5-31",
-    "@misk/core": "0.1.5-31",
-    "@misk/simpleredux": "0.1.5-31"
+    "@misk/common": "0.1.5-39",
+    "@misk/core": "0.1.5-39",
+    "@misk/simpleredux": "0.1.5-39"
   },
   "devDependencies": {
-    "@misk/dev": "0.1.5-31",
-    "@misk/tslint": "0.1.5-31",
-    "@misk/test": "0.1.5-31"
+    "@misk/dev": "0.1.5-39",
+    "@misk/tslint": "0.1.5-39",
+    "@misk/test": "0.1.5-39"
   },
   "jest": {
-    "testEnvironment": "node",
+    "testEnvironment": "jsdom",
     "snapshotSerializers": [
-      "jest-serializer-html"
+      "jest-serializer-html",
+      "jest-emotion"
     ],
     "transform": {
       "^.+\\.tsx?$": "ts-jest"

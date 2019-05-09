@@ -1,9 +1,16 @@
 {
+  "name": "Loader",
   "output_path": "lib/web/_tab/loader",
   "port": "3100",
-  "version": "0.1.5-31",
-  "zipOnBuild": false,
-  "name": "Loader",
+  "rawGitginore": "",
+  "rawPackageJson": {},
+  "rawTsconfig": {},
+  "rawTslint": {},
+  "rawWebpackConfig": {},
   "relative_path_prefix": "_admin/",
-  "slug": "loader"
+  "slug": "loader",
+  "useWebpackExternals": false,
+  "version": "0.1.5-39",
+  "zipOnBuild": false,
+  "___DeprecatedKeys": "Any keys below this point in your miskTab.json are deprecated and can be safely removed."
 }

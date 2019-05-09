@@ -2,7 +2,42 @@
 
 exports[`WebActionsContainer WebActionsContainer can render with redux loading (no data) 1`] = `
 <DocumentFragment>
-  <div>
+  .emotion-3 {
+  display: inline-block;
+}
+
+.emotion-0 {
+  float: right;
+  margin: 5px 0 0 10px;
+}
+
+.emotion-1 {
+  float: left;
+  margin: 5px 10px 0 0;
+}
+
+.emotion-2 {
+  float: left;
+  margin: 5px 10px 0 0;
+  font-family: monospace;
+}
+
+.emotion-5 {
+  -webkit-box-flex: 1;
+  -webkit-flex-grow: 1;
+  -ms-flex-positive: 1;
+  flex-grow: 1;
+  -webkit-flex-basis: 0;
+  -ms-flex-preferred-size: 0;
+  flex-basis: 0;
+  min-width: 320px;
+}
+
+.emotion-4 li {
+  margin-bottom: 0;
+}
+
+<div>
     <div
       class="bp3-control-group bp3-fill"
     >
@@ -111,56 +146,44 @@ exports[`WebActionsContainer WebActionsContainer can render with redux loading (
       class="bp3-card bp3-elevation-0"
     >
       <div
-        class="sc-bxivhb jzkpli"
+        class="emotion-3"
       >
         <span
-          class="sc-bwzfXH izDztE"
+          class="bp3-tag bp3-intent-primary bp3-large emotion-0"
         >
           <span
-            class="bp3-tag bp3-intent-primary bp3-large"
+            class="bp3-text-overflow-ellipsis bp3-fill"
           >
-            <span
-              class="bp3-text-overflow-ellipsis bp3-fill"
-            >
-              GET
-            </span>
+            GET
           </span>
         </span>
-        <span
-          class="sc-bdVaJa MOZvL"
+        <h3
+          class="bp3-heading bp3-skeleton emotion-1"
         >
-          <h3
-            class="bp3-heading bp3-skeleton"
-          >
-            AnotherSimpleWebAction
-          </h3>
-        </span>
+          AnotherSimpleWebAction
+        </h3>
         <span
-          class="sc-bdVaJa MOZvL"
+          class="bp3-tag bp3-large emotion-2"
         >
           <span
-            class="bp3-tag bp3-large sc-htpNat hpvuBC"
+            class="bp3-text-overflow-ellipsis bp3-fill"
           >
             <span
-              class="bp3-text-overflow-ellipsis bp3-fill"
+              class="bp3-skeleton"
             >
-              <span
-                class="bp3-skeleton"
-              >
-                Lorem ipsum
-              </span>
+              Lorem ipsum
             </span>
           </span>
         </span>
       </div>
       <div
-        class="FlexContainer"
+        class="emotion-8"
       >
         <div
-          class="sc-ifAKCX iOsfuG"
+          class="emotion-5"
         >
           <ul
-            class="bp3-menu sc-gzVnrw ipVOmx"
+            class="bp3-menu emotion-4"
           >
             <li
               class=""
@@ -174,17 +197,9 @@ exports[`WebActionsContainer WebActionsContainer can render with redux loading (
                   class="bp3-text-overflow-ellipsis bp3-fill"
                 >
                   <span
-                    class="bp3-popover-wrapper sc-bZQynM hRiALA"
+                    class="bp3-skeleton"
                   >
-                    <span
-                      class="bp3-popover-target"
-                    >
-                      <span
-                        class="bp3-skeleton"
-                      >
-                        Lorem ipsum
-                      </span>
-                    </span>
+                    Lorem ipsum
                   </span>
                 </div>
                 <span
@@ -206,17 +221,9 @@ exports[`WebActionsContainer WebActionsContainer can render with redux loading (
                   class="bp3-text-overflow-ellipsis bp3-fill"
                 >
                   <span
-                    class="bp3-popover-wrapper sc-bZQynM hRiALA"
+                    class="bp3-skeleton"
                   >
-                    <span
-                      class="bp3-popover-target"
-                    >
-                      <span
-                        class="bp3-skeleton"
-                      >
-                        Lorem ipsum
-                      </span>
-                    </span>
+                    Lorem ipsum
                   </span>
                 </div>
                 <span
@@ -238,17 +245,9 @@ exports[`WebActionsContainer WebActionsContainer can render with redux loading (
                   class="bp3-text-overflow-ellipsis bp3-fill"
                 >
                   <span
-                    class="bp3-popover-wrapper sc-bZQynM hRiALA"
+                    class="bp3-skeleton"
                   >
-                    <span
-                      class="bp3-popover-target"
-                    >
-                      <span
-                        class="bp3-skeleton"
-                      >
-                        Lorem ipsum
-                      </span>
-                    </span>
+                    Lorem ipsum
                   </span>
                 </div>
                 <span
@@ -270,17 +269,9 @@ exports[`WebActionsContainer WebActionsContainer can render with redux loading (
                   class="bp3-text-overflow-ellipsis bp3-fill"
                 >
                   <span
-                    class="bp3-popover-wrapper sc-bZQynM hRiALA"
+                    class="bp3-skeleton"
                   >
-                    <span
-                      class="bp3-popover-target"
-                    >
-                      <span
-                        class="bp3-skeleton"
-                      >
-                        Lorem ipsum
-                      </span>
-                    </span>
+                    Lorem ipsum
                   </span>
                 </div>
                 <span
@@ -293,10 +284,10 @@ exports[`WebActionsContainer WebActionsContainer can render with redux loading (
           </ul>
         </div>
         <div
-          class="sc-ifAKCX iOsfuG"
+          class="emotion-5"
         >
           <ul
-            class="bp3-menu sc-gzVnrw ipVOmx"
+            class="bp3-menu emotion-4"
           >
             <li
               class=""
@@ -310,17 +301,9 @@ exports[`WebActionsContainer WebActionsContainer can render with redux loading (
                   class="bp3-text-overflow-ellipsis bp3-fill"
                 >
                   <span
-                    class="bp3-popover-wrapper sc-bZQynM hRiALA"
+                    class="bp3-skeleton"
                   >
-                    <span
-                      class="bp3-popover-target"
-                    >
-                      <span
-                        class="bp3-skeleton"
-                      >
-                        Lorem ipsum
-                      </span>
-                    </span>
+                    Lorem ipsum
                   </span>
                 </div>
                 <span
@@ -342,17 +325,9 @@ exports[`WebActionsContainer WebActionsContainer can render with redux loading (
                   class="bp3-text-overflow-ellipsis bp3-fill"
                 >
                   <span
-                    class="bp3-popover-wrapper sc-bZQynM hRiALA"
+                    class="bp3-skeleton"
                   >
-                    <span
-                      class="bp3-popover-target"
-                    >
-                      <span
-                        class="bp3-skeleton"
-                      >
-                        Lorem ipsum
-                      </span>
-                    </span>
+                    Lorem ipsum
                   </span>
                 </div>
                 <span
@@ -374,17 +349,9 @@ exports[`WebActionsContainer WebActionsContainer can render with redux loading (
                   class="bp3-text-overflow-ellipsis bp3-fill"
                 >
                   <span
-                    class="bp3-popover-wrapper sc-bZQynM hRiALA"
+                    class="bp3-skeleton"
                   >
-                    <span
-                      class="bp3-popover-target"
-                    >
-                      <span
-                        class="bp3-skeleton"
-                      >
-                        Lorem ipsum
-                      </span>
-                    </span>
+                    Lorem ipsum
                   </span>
                 </div>
                 <span
@@ -406,17 +373,9 @@ exports[`WebActionsContainer WebActionsContainer can render with redux loading (
                   class="bp3-text-overflow-ellipsis bp3-fill"
                 >
                   <span
-                    class="bp3-popover-wrapper sc-bZQynM hRiALA"
+                    class="bp3-skeleton"
                   >
-                    <span
-                      class="bp3-popover-target"
-                    >
-                      <span
-                        class="bp3-skeleton"
-                      >
-                        Lorem ipsum
-                      </span>
-                    </span>
+                    Lorem ipsum
                   </span>
                 </div>
                 <span
@@ -435,56 +394,44 @@ exports[`WebActionsContainer WebActionsContainer can render with redux loading (
       class="bp3-card bp3-elevation-0"
     >
       <div
-        class="sc-bxivhb jzkpli"
+        class="emotion-3"
       >
         <span
-          class="sc-bwzfXH izDztE"
+          class="bp3-tag bp3-intent-primary bp3-large emotion-0"
         >
           <span
-            class="bp3-tag bp3-intent-primary bp3-large"
+            class="bp3-text-overflow-ellipsis bp3-fill"
           >
-            <span
-              class="bp3-text-overflow-ellipsis bp3-fill"
-            >
-              GET
-            </span>
+            GET
           </span>
         </span>
-        <span
-          class="sc-bdVaJa MOZvL"
+        <h3
+          class="bp3-heading bp3-skeleton emotion-1"
         >
-          <h3
-            class="bp3-heading bp3-skeleton"
-          >
-            AnotherSimpleWebAction
-          </h3>
-        </span>
+          AnotherSimpleWebAction
+        </h3>
         <span
-          class="sc-bdVaJa MOZvL"
+          class="bp3-tag bp3-large emotion-2"
         >
           <span
-            class="bp3-tag bp3-large sc-htpNat hpvuBC"
+            class="bp3-text-overflow-ellipsis bp3-fill"
           >
             <span
-              class="bp3-text-overflow-ellipsis bp3-fill"
+              class="bp3-skeleton"
             >
-              <span
-                class="bp3-skeleton"
-              >
-                Lorem ipsum
-              </span>
+              Lorem ipsum
             </span>
           </span>
         </span>
       </div>
       <div
-        class="FlexContainer"
+        class="emotion-8"
       >
         <div
-          class="sc-ifAKCX iOsfuG"
+          class="emotion-5"
         >
           <ul
-            class="bp3-menu sc-gzVnrw ipVOmx"
+            class="bp3-menu emotion-4"
           >
             <li
               class=""
@@ -498,17 +445,9 @@ exports[`WebActionsContainer WebActionsContainer can render with redux loading (
                   class="bp3-text-overflow-ellipsis bp3-fill"
                 >
                   <span
-                    class="bp3-popover-wrapper sc-bZQynM hRiALA"
+                    class="bp3-skeleton"
                   >
-                    <span
-                      class="bp3-popover-target"
-                    >
-                      <span
-                        class="bp3-skeleton"
-                      >
-                        Lorem ipsum
-                      </span>
-                    </span>
+                    Lorem ipsum
                   </span>
                 </div>
                 <span
@@ -530,17 +469,9 @@ exports[`WebActionsContainer WebActionsContainer can render with redux loading (
                   class="bp3-text-overflow-ellipsis bp3-fill"
                 >
                   <span
-                    class="bp3-popover-wrapper sc-bZQynM hRiALA"
+                    class="bp3-skeleton"
                   >
-                    <span
-                      class="bp3-popover-target"
-                    >
-                      <span
-                        class="bp3-skeleton"
-                      >
-                        Lorem ipsum
-                      </span>
-                    </span>
+                    Lorem ipsum
                   </span>
                 </div>
                 <span
@@ -562,17 +493,9 @@ exports[`WebActionsContainer WebActionsContainer can render with redux loading (
                   class="bp3-text-overflow-ellipsis bp3-fill"
                 >
                   <span
-                    class="bp3-popover-wrapper sc-bZQynM hRiALA"
+                    class="bp3-skeleton"
                   >
-                    <span
-                      class="bp3-popover-target"
-                    >
-                      <span
-                        class="bp3-skeleton"
-                      >
-                        Lorem ipsum
-                      </span>
-                    </span>
+                    Lorem ipsum
                   </span>
                 </div>
                 <span
@@ -594,17 +517,9 @@ exports[`WebActionsContainer WebActionsContainer can render with redux loading (
                   class="bp3-text-overflow-ellipsis bp3-fill"
                 >
                   <span
-                    class="bp3-popover-wrapper sc-bZQynM hRiALA"
+                    class="bp3-skeleton"
                   >
-                    <span
-                      class="bp3-popover-target"
-                    >
-                      <span
-                        class="bp3-skeleton"
-                      >
-                        Lorem ipsum
-                      </span>
-                    </span>
+                    Lorem ipsum
                   </span>
                 </div>
                 <span
@@ -617,10 +532,10 @@ exports[`WebActionsContainer WebActionsContainer can render with redux loading (
           </ul>
         </div>
         <div
-          class="sc-ifAKCX iOsfuG"
+          class="emotion-5"
         >
           <ul
-            class="bp3-menu sc-gzVnrw ipVOmx"
+            class="bp3-menu emotion-4"
           >
             <li
               class=""
@@ -634,17 +549,9 @@ exports[`WebActionsContainer WebActionsContainer can render with redux loading (
                   class="bp3-text-overflow-ellipsis bp3-fill"
                 >
                   <span
-                    class="bp3-popover-wrapper sc-bZQynM hRiALA"
+                    class="bp3-skeleton"
                   >
-                    <span
-                      class="bp3-popover-target"
-                    >
-                      <span
-                        class="bp3-skeleton"
-                      >
-                        Lorem ipsum
-                      </span>
-                    </span>
+                    Lorem ipsum
                   </span>
                 </div>
                 <span
@@ -666,17 +573,9 @@ exports[`WebActionsContainer WebActionsContainer can render with redux loading (
                   class="bp3-text-overflow-ellipsis bp3-fill"
                 >
                   <span
-                    class="bp3-popover-wrapper sc-bZQynM hRiALA"
+                    class="bp3-skeleton"
                   >
-                    <span
-                      class="bp3-popover-target"
-                    >
-                      <span
-                        class="bp3-skeleton"
-                      >
-                        Lorem ipsum
-                      </span>
-                    </span>
+                    Lorem ipsum
                   </span>
                 </div>
                 <span
@@ -698,17 +597,9 @@ exports[`WebActionsContainer WebActionsContainer can render with redux loading (
                   class="bp3-text-overflow-ellipsis bp3-fill"
                 >
                   <span
-                    class="bp3-popover-wrapper sc-bZQynM hRiALA"
+                    class="bp3-skeleton"
                   >
-                    <span
-                      class="bp3-popover-target"
-                    >
-                      <span
-                        class="bp3-skeleton"
-                      >
-                        Lorem ipsum
-                      </span>
-                    </span>
+                    Lorem ipsum
                   </span>
                 </div>
                 <span
@@ -730,17 +621,9 @@ exports[`WebActionsContainer WebActionsContainer can render with redux loading (
                   class="bp3-text-overflow-ellipsis bp3-fill"
                 >
                   <span
-                    class="bp3-popover-wrapper sc-bZQynM hRiALA"
+                    class="bp3-skeleton"
                   >
-                    <span
-                      class="bp3-popover-target"
-                    >
-                      <span
-                        class="bp3-skeleton"
-                      >
-                        Lorem ipsum
-                      </span>
-                    </span>
+                    Lorem ipsum
                   </span>
                 </div>
                 <span
@@ -759,56 +642,44 @@ exports[`WebActionsContainer WebActionsContainer can render with redux loading (
       class="bp3-card bp3-elevation-0"
     >
       <div
-        class="sc-bxivhb jzkpli"
+        class="emotion-3"
       >
         <span
-          class="sc-bwzfXH izDztE"
+          class="bp3-tag bp3-intent-primary bp3-large emotion-0"
         >
           <span
-            class="bp3-tag bp3-intent-primary bp3-large"
+            class="bp3-text-overflow-ellipsis bp3-fill"
           >
-            <span
-              class="bp3-text-overflow-ellipsis bp3-fill"
-            >
-              GET
-            </span>
+            GET
           </span>
         </span>
-        <span
-          class="sc-bdVaJa MOZvL"
+        <h3
+          class="bp3-heading bp3-skeleton emotion-1"
         >
-          <h3
-            class="bp3-heading bp3-skeleton"
-          >
-            AnotherSimpleWebAction
-          </h3>
-        </span>
+          AnotherSimpleWebAction
+        </h3>
         <span
-          class="sc-bdVaJa MOZvL"
+          class="bp3-tag bp3-large emotion-2"
         >
           <span
-            class="bp3-tag bp3-large sc-htpNat hpvuBC"
+            class="bp3-text-overflow-ellipsis bp3-fill"
           >
             <span
-              class="bp3-text-overflow-ellipsis bp3-fill"
+              class="bp3-skeleton"
             >
-              <span
-                class="bp3-skeleton"
-              >
-                Lorem ipsum
-              </span>
+              Lorem ipsum
             </span>
           </span>
         </span>
       </div>
       <div
-        class="FlexContainer"
+        class="emotion-8"
       >
         <div
-          class="sc-ifAKCX iOsfuG"
+          class="emotion-5"
         >
           <ul
-            class="bp3-menu sc-gzVnrw ipVOmx"
+            class="bp3-menu emotion-4"
           >
             <li
               class=""
@@ -822,17 +693,9 @@ exports[`WebActionsContainer WebActionsContainer can render with redux loading (
                   class="bp3-text-overflow-ellipsis bp3-fill"
                 >
                   <span
-                    class="bp3-popover-wrapper sc-bZQynM hRiALA"
+                    class="bp3-skeleton"
                   >
-                    <span
-                      class="bp3-popover-target"
-                    >
-                      <span
-                        class="bp3-skeleton"
-                      >
-                        Lorem ipsum
-                      </span>
-                    </span>
+                    Lorem ipsum
                   </span>
                 </div>
                 <span
@@ -854,17 +717,9 @@ exports[`WebActionsContainer WebActionsContainer can render with redux loading (
                   class="bp3-text-overflow-ellipsis bp3-fill"
                 >
                   <span
-                    class="bp3-popover-wrapper sc-bZQynM hRiALA"
+                    class="bp3-skeleton"
                   >
-                    <span
-                      class="bp3-popover-target"
-                    >
-                      <span
-                        class="bp3-skeleton"
-                      >
-                        Lorem ipsum
-                      </span>
-                    </span>
+                    Lorem ipsum
                   </span>
                 </div>
                 <span
@@ -886,17 +741,9 @@ exports[`WebActionsContainer WebActionsContainer can render with redux loading (
                   class="bp3-text-overflow-ellipsis bp3-fill"
                 >
                   <span
-                    class="bp3-popover-wrapper sc-bZQynM hRiALA"
+                    class="bp3-skeleton"
                   >
-                    <span
-                      class="bp3-popover-target"
-                    >
-                      <span
-                        class="bp3-skeleton"
-                      >
-                        Lorem ipsum
-                      </span>
-                    </span>
+                    Lorem ipsum
                   </span>
                 </div>
                 <span
@@ -918,17 +765,9 @@ exports[`WebActionsContainer WebActionsContainer can render with redux loading (
                   class="bp3-text-overflow-ellipsis bp3-fill"
                 >
                   <span
-                    class="bp3-popover-wrapper sc-bZQynM hRiALA"
+                    class="bp3-skeleton"
                   >
-                    <span
-                      class="bp3-popover-target"
-                    >
-                      <span
-                        class="bp3-skeleton"
-                      >
-                        Lorem ipsum
-                      </span>
-                    </span>
+                    Lorem ipsum
                   </span>
                 </div>
                 <span
@@ -941,10 +780,10 @@ exports[`WebActionsContainer WebActionsContainer can render with redux loading (
           </ul>
         </div>
         <div
-          class="sc-ifAKCX iOsfuG"
+          class="emotion-5"
         >
           <ul
-            class="bp3-menu sc-gzVnrw ipVOmx"
+            class="bp3-menu emotion-4"
           >
             <li
               class=""
@@ -958,17 +797,9 @@ exports[`WebActionsContainer WebActionsContainer can render with redux loading (
                   class="bp3-text-overflow-ellipsis bp3-fill"
                 >
                   <span
-                    class="bp3-popover-wrapper sc-bZQynM hRiALA"
+                    class="bp3-skeleton"
                   >
-                    <span
-                      class="bp3-popover-target"
-                    >
-                      <span
-                        class="bp3-skeleton"
-                      >
-                        Lorem ipsum
-                      </span>
-                    </span>
+                    Lorem ipsum
                   </span>
                 </div>
                 <span
@@ -990,17 +821,9 @@ exports[`WebActionsContainer WebActionsContainer can render with redux loading (
                   class="bp3-text-overflow-ellipsis bp3-fill"
                 >
                   <span
-                    class="bp3-popover-wrapper sc-bZQynM hRiALA"
+                    class="bp3-skeleton"
                   >
-                    <span
-                      class="bp3-popover-target"
-                    >
-                      <span
-                        class="bp3-skeleton"
-                      >
-                        Lorem ipsum
-                      </span>
-                    </span>
+                    Lorem ipsum
                   </span>
                 </div>
                 <span
@@ -1022,17 +845,9 @@ exports[`WebActionsContainer WebActionsContainer can render with redux loading (
                   class="bp3-text-overflow-ellipsis bp3-fill"
                 >
                   <span
-                    class="bp3-popover-wrapper sc-bZQynM hRiALA"
+                    class="bp3-skeleton"
                   >
-                    <span
-                      class="bp3-popover-target"
-                    >
-                      <span
-                        class="bp3-skeleton"
-                      >
-                        Lorem ipsum
-                      </span>
-                    </span>
+                    Lorem ipsum
                   </span>
                 </div>
                 <span
@@ -1054,17 +869,9 @@ exports[`WebActionsContainer WebActionsContainer can render with redux loading (
                   class="bp3-text-overflow-ellipsis bp3-fill"
                 >
                   <span
-                    class="bp3-popover-wrapper sc-bZQynM hRiALA"
+                    class="bp3-skeleton"
                   >
-                    <span
-                      class="bp3-popover-target"
-                    >
-                      <span
-                        class="bp3-skeleton"
-                      >
-                        Lorem ipsum
-                      </span>
-                    </span>
+                    Lorem ipsum
                   </span>
                 </div>
                 <span
@@ -1083,56 +890,44 @@ exports[`WebActionsContainer WebActionsContainer can render with redux loading (
       class="bp3-card bp3-elevation-0"
     >
       <div
-        class="sc-bxivhb jzkpli"
+        class="emotion-3"
       >
         <span
-          class="sc-bwzfXH izDztE"
+          class="bp3-tag bp3-intent-primary bp3-large emotion-0"
         >
           <span
-            class="bp3-tag bp3-intent-primary bp3-large"
+            class="bp3-text-overflow-ellipsis bp3-fill"
           >
-            <span
-              class="bp3-text-overflow-ellipsis bp3-fill"
-            >
-              GET
-            </span>
+            GET
           </span>
         </span>
-        <span
-          class="sc-bdVaJa MOZvL"
+        <h3
+          class="bp3-heading bp3-skeleton emotion-1"
         >
-          <h3
-            class="bp3-heading bp3-skeleton"
-          >
-            AnotherSimpleWebAction
-          </h3>
-        </span>
+          AnotherSimpleWebAction
+        </h3>
         <span
-          class="sc-bdVaJa MOZvL"
+          class="bp3-tag bp3-large emotion-2"
         >
           <span
-            class="bp3-tag bp3-large sc-htpNat hpvuBC"
+            class="bp3-text-overflow-ellipsis bp3-fill"
           >
             <span
-              class="bp3-text-overflow-ellipsis bp3-fill"
+              class="bp3-skeleton"
             >
-              <span
-                class="bp3-skeleton"
-              >
-                Lorem ipsum
-              </span>
+              Lorem ipsum
             </span>
           </span>
         </span>
       </div>
       <div
-        class="FlexContainer"
+        class="emotion-8"
       >
         <div
-          class="sc-ifAKCX iOsfuG"
+          class="emotion-5"
         >
           <ul
-            class="bp3-menu sc-gzVnrw ipVOmx"
+            class="bp3-menu emotion-4"
           >
             <li
               class=""
@@ -1146,17 +941,9 @@ exports[`WebActionsContainer WebActionsContainer can render with redux loading (
                   class="bp3-text-overflow-ellipsis bp3-fill"
                 >
                   <span
-                    class="bp3-popover-wrapper sc-bZQynM hRiALA"
+                    class="bp3-skeleton"
                   >
-                    <span
-                      class="bp3-popover-target"
-                    >
-                      <span
-                        class="bp3-skeleton"
-                      >
-                        Lorem ipsum
-                      </span>
-                    </span>
+                    Lorem ipsum
                   </span>
                 </div>
                 <span
@@ -1178,17 +965,9 @@ exports[`WebActionsContainer WebActionsContainer can render with redux loading (
                   class="bp3-text-overflow-ellipsis bp3-fill"
                 >
                   <span
-                    class="bp3-popover-wrapper sc-bZQynM hRiALA"
+                    class="bp3-skeleton"
                   >
-                    <span
-                      class="bp3-popover-target"
-                    >
-                      <span
-                        class="bp3-skeleton"
-                      >
-                        Lorem ipsum
-                      </span>
-                    </span>
+                    Lorem ipsum
                   </span>
                 </div>
                 <span
@@ -1210,17 +989,9 @@ exports[`WebActionsContainer WebActionsContainer can render with redux loading (
                   class="bp3-text-overflow-ellipsis bp3-fill"
                 >
                   <span
-                    class="bp3-popover-wrapper sc-bZQynM hRiALA"
+                    class="bp3-skeleton"
                   >
-                    <span
-                      class="bp3-popover-target"
-                    >
-                      <span
-                        class="bp3-skeleton"
-                      >
-                        Lorem ipsum
-                      </span>
-                    </span>
+                    Lorem ipsum
                   </span>
                 </div>
                 <span
@@ -1242,17 +1013,9 @@ exports[`WebActionsContainer WebActionsContainer can render with redux loading (
                   class="bp3-text-overflow-ellipsis bp3-fill"
                 >
                   <span
-                    class="bp3-popover-wrapper sc-bZQynM hRiALA"
+                    class="bp3-skeleton"
                   >
-                    <span
-                      class="bp3-popover-target"
-                    >
-                      <span
-                        class="bp3-skeleton"
-                      >
-                        Lorem ipsum
-                      </span>
-                    </span>
+                    Lorem ipsum
                   </span>
                 </div>
                 <span
@@ -1265,10 +1028,10 @@ exports[`WebActionsContainer WebActionsContainer can render with redux loading (
           </ul>
         </div>
         <div
-          class="sc-ifAKCX iOsfuG"
+          class="emotion-5"
         >
           <ul
-            class="bp3-menu sc-gzVnrw ipVOmx"
+            class="bp3-menu emotion-4"
           >
             <li
               class=""
@@ -1282,17 +1045,9 @@ exports[`WebActionsContainer WebActionsContainer can render with redux loading (
                   class="bp3-text-overflow-ellipsis bp3-fill"
                 >
                   <span
-                    class="bp3-popover-wrapper sc-bZQynM hRiALA"
+                    class="bp3-skeleton"
                   >
-                    <span
-                      class="bp3-popover-target"
-                    >
-                      <span
-                        class="bp3-skeleton"
-                      >
-                        Lorem ipsum
-                      </span>
-                    </span>
+                    Lorem ipsum
                   </span>
                 </div>
                 <span
@@ -1314,17 +1069,9 @@ exports[`WebActionsContainer WebActionsContainer can render with redux loading (
                   class="bp3-text-overflow-ellipsis bp3-fill"
                 >
                   <span
-                    class="bp3-popover-wrapper sc-bZQynM hRiALA"
+                    class="bp3-skeleton"
                   >
-                    <span
-                      class="bp3-popover-target"
-                    >
-                      <span
-                        class="bp3-skeleton"
-                      >
-                        Lorem ipsum
-                      </span>
-                    </span>
+                    Lorem ipsum
                   </span>
                 </div>
                 <span
@@ -1346,17 +1093,9 @@ exports[`WebActionsContainer WebActionsContainer can render with redux loading (
                   class="bp3-text-overflow-ellipsis bp3-fill"
                 >
                   <span
-                    class="bp3-popover-wrapper sc-bZQynM hRiALA"
+                    class="bp3-skeleton"
                   >
-                    <span
-                      class="bp3-popover-target"
-                    >
-                      <span
-                        class="bp3-skeleton"
-                      >
-                        Lorem ipsum
-                      </span>
-                    </span>
+                    Lorem ipsum
                   </span>
                 </div>
                 <span
@@ -1378,17 +1117,9 @@ exports[`WebActionsContainer WebActionsContainer can render with redux loading (
                   class="bp3-text-overflow-ellipsis bp3-fill"
                 >
                   <span
-                    class="bp3-popover-wrapper sc-bZQynM hRiALA"
+                    class="bp3-skeleton"
                   >
-                    <span
-                      class="bp3-popover-target"
-                    >
-                      <span
-                        class="bp3-skeleton"
-                      >
-                        Lorem ipsum
-                      </span>
-                    </span>
+                    Lorem ipsum
                   </span>
                 </div>
                 <span
@@ -1407,56 +1138,44 @@ exports[`WebActionsContainer WebActionsContainer can render with redux loading (
       class="bp3-card bp3-elevation-0"
     >
       <div
-        class="sc-bxivhb jzkpli"
+        class="emotion-3"
       >
         <span
-          class="sc-bwzfXH izDztE"
+          class="bp3-tag bp3-intent-primary bp3-large emotion-0"
         >
           <span
-            class="bp3-tag bp3-intent-primary bp3-large"
+            class="bp3-text-overflow-ellipsis bp3-fill"
           >
-            <span
-              class="bp3-text-overflow-ellipsis bp3-fill"
-            >
-              GET
-            </span>
+            GET
           </span>
         </span>
-        <span
-          class="sc-bdVaJa MOZvL"
+        <h3
+          class="bp3-heading bp3-skeleton emotion-1"
         >
-          <h3
-            class="bp3-heading bp3-skeleton"
-          >
-            AnotherSimpleWebAction
-          </h3>
-        </span>
+          AnotherSimpleWebAction
+        </h3>
         <span
-          class="sc-bdVaJa MOZvL"
+          class="bp3-tag bp3-large emotion-2"
         >
           <span
-            class="bp3-tag bp3-large sc-htpNat hpvuBC"
+            class="bp3-text-overflow-ellipsis bp3-fill"
           >
             <span
-              class="bp3-text-overflow-ellipsis bp3-fill"
+              class="bp3-skeleton"
             >
-              <span
-                class="bp3-skeleton"
-              >
-                Lorem ipsum
-              </span>
+              Lorem ipsum
             </span>
           </span>
         </span>
       </div>
       <div
-        class="FlexContainer"
+        class="emotion-8"
       >
         <div
-          class="sc-ifAKCX iOsfuG"
+          class="emotion-5"
         >
           <ul
-            class="bp3-menu sc-gzVnrw ipVOmx"
+            class="bp3-menu emotion-4"
           >
             <li
               class=""
@@ -1470,17 +1189,9 @@ exports[`WebActionsContainer WebActionsContainer can render with redux loading (
                   class="bp3-text-overflow-ellipsis bp3-fill"
                 >
                   <span
-                    class="bp3-popover-wrapper sc-bZQynM hRiALA"
+                    class="bp3-skeleton"
                   >
-                    <span
-                      class="bp3-popover-target"
-                    >
-                      <span
-                        class="bp3-skeleton"
-                      >
-                        Lorem ipsum
-                      </span>
-                    </span>
+                    Lorem ipsum
                   </span>
                 </div>
                 <span
@@ -1502,17 +1213,9 @@ exports[`WebActionsContainer WebActionsContainer can render with redux loading (
                   class="bp3-text-overflow-ellipsis bp3-fill"
                 >
                   <span
-                    class="bp3-popover-wrapper sc-bZQynM hRiALA"
+                    class="bp3-skeleton"
                   >
-                    <span
-                      class="bp3-popover-target"
-                    >
-                      <span
-                        class="bp3-skeleton"
-                      >
-                        Lorem ipsum
-                      </span>
-                    </span>
+                    Lorem ipsum
                   </span>
                 </div>
                 <span
@@ -1534,17 +1237,9 @@ exports[`WebActionsContainer WebActionsContainer can render with redux loading (
                   class="bp3-text-overflow-ellipsis bp3-fill"
                 >
                   <span
-                    class="bp3-popover-wrapper sc-bZQynM hRiALA"
+                    class="bp3-skeleton"
                   >
-                    <span
-                      class="bp3-popover-target"
-                    >
-                      <span
-                        class="bp3-skeleton"
-                      >
-                        Lorem ipsum
-                      </span>
-                    </span>
+                    Lorem ipsum
                   </span>
                 </div>
                 <span
@@ -1566,17 +1261,9 @@ exports[`WebActionsContainer WebActionsContainer can render with redux loading (
                   class="bp3-text-overflow-ellipsis bp3-fill"
                 >
                   <span
-                    class="bp3-popover-wrapper sc-bZQynM hRiALA"
+                    class="bp3-skeleton"
                   >
-                    <span
-                      class="bp3-popover-target"
-                    >
-                      <span
-                        class="bp3-skeleton"
-                      >
-                        Lorem ipsum
-                      </span>
-                    </span>
+                    Lorem ipsum
                   </span>
                 </div>
                 <span
@@ -1589,10 +1276,10 @@ exports[`WebActionsContainer WebActionsContainer can render with redux loading (
           </ul>
         </div>
         <div
-          class="sc-ifAKCX iOsfuG"
+          class="emotion-5"
         >
           <ul
-            class="bp3-menu sc-gzVnrw ipVOmx"
+            class="bp3-menu emotion-4"
           >
             <li
               class=""
@@ -1606,17 +1293,9 @@ exports[`WebActionsContainer WebActionsContainer can render with redux loading (
                   class="bp3-text-overflow-ellipsis bp3-fill"
                 >
                   <span
-                    class="bp3-popover-wrapper sc-bZQynM hRiALA"
+                    class="bp3-skeleton"
                   >
-                    <span
-                      class="bp3-popover-target"
-                    >
-                      <span
-                        class="bp3-skeleton"
-                      >
-                        Lorem ipsum
-                      </span>
-                    </span>
+                    Lorem ipsum
                   </span>
                 </div>
                 <span
@@ -1638,17 +1317,9 @@ exports[`WebActionsContainer WebActionsContainer can render with redux loading (
                   class="bp3-text-overflow-ellipsis bp3-fill"
                 >
                   <span
-                    class="bp3-popover-wrapper sc-bZQynM hRiALA"
+                    class="bp3-skeleton"
                   >
-                    <span
-                      class="bp3-popover-target"
-                    >
-                      <span
-                        class="bp3-skeleton"
-                      >
-                        Lorem ipsum
-                      </span>
-                    </span>
+                    Lorem ipsum
                   </span>
                 </div>
                 <span
@@ -1670,17 +1341,9 @@ exports[`WebActionsContainer WebActionsContainer can render with redux loading (
                   class="bp3-text-overflow-ellipsis bp3-fill"
                 >
                   <span
-                    class="bp3-popover-wrapper sc-bZQynM hRiALA"
+                    class="bp3-skeleton"
                   >
-                    <span
-                      class="bp3-popover-target"
-                    >
-                      <span
-                        class="bp3-skeleton"
-                      >
-                        Lorem ipsum
-                      </span>
-                    </span>
+                    Lorem ipsum
                   </span>
                 </div>
                 <span
@@ -1702,17 +1365,9 @@ exports[`WebActionsContainer WebActionsContainer can render with redux loading (
                   class="bp3-text-overflow-ellipsis bp3-fill"
                 >
                   <span
-                    class="bp3-popover-wrapper sc-bZQynM hRiALA"
+                    class="bp3-skeleton"
                   >
-                    <span
-                      class="bp3-popover-target"
-                    >
-                      <span
-                        class="bp3-skeleton"
-                      >
-                        Lorem ipsum
-                      </span>
-                    </span>
+                    Lorem ipsum
                   </span>
                 </div>
                 <span

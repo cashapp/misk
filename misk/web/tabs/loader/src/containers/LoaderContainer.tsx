@@ -1,3 +1,5 @@
+/** @jsx jsx */
+import { css, jsx } from "@emotion/core"
 import {
   IDashboardTab,
   Navbar,
@@ -8,7 +10,6 @@ import {
 import { simpleSelect } from "@misk/simpleredux"
 import * as React from "react"
 import { connect } from "react-redux"
-import styled from "styled-components"
 import { IDispatchProps, IState, rootDispatcher, rootSelectors } from "../ducks"
 
 export interface ILoaderProps extends IState {
@@ -17,7 +18,7 @@ export interface ILoaderProps extends IState {
   getServiceMetadata: (url: string) => any
 }
 
-const TabContainer = styled(ResponsiveContainer)`
+const cssTabContainer = css`
   position: relative;
   top: 110px;
   padding-left: 5px;
@@ -61,21 +62,21 @@ class LoaderContainer extends React.Component<IState & IDispatchProps> {
             navbar_items={serviceMetadata.navbar_items}
             status={serviceMetadata.navbar_status}
           />
-          <TabContainer>
+          <ResponsiveContainer css={cssTabContainer}>
             <TabLoaderComponent tabs={adminDashboardTabs} />
-          </TabContainer>
+          </ResponsiveContainer>
         </span>
       )
     } else {
       return (
         <span>
           <Navbar />
-          <TabContainer>
+          <ResponsiveContainer css={cssTabContainer}>
             <OfflineComponent
               title={"Error Loading Multibound Admin Tabs"}
               endpoint={unavailableEndpointUrls}
             />
-          </TabContainer>
+          </ResponsiveContainer>
         </span>
       )
     }

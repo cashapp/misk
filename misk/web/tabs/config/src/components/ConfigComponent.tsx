@@ -1,11 +1,8 @@
+/** @jsx jsx */
 import { H1, H3 } from "@blueprintjs/core"
+import { css, jsx } from "@emotion/core"
 import { CodePreContainer } from "@misk/core"
 import * as React from "react"
-import styled from "styled-components"
-
-const FileName = styled(H3)`
-  font-family: Fira Code, Menlo;
-`
 
 export interface IConfigResource {
   name: string
@@ -21,7 +18,7 @@ export default class ConfigComponent extends React.PureComponent<IConfigProps> {
     return (
       <div>
         <br />
-        <FileName>{resource.name}</FileName>
+        <H3 css={css({ fontFamily: "Fira Code, Menlo" })}>{resource.name}</H3>
         <CodePreContainer>{resource.file}</CodePreContainer>
       </div>
     )
