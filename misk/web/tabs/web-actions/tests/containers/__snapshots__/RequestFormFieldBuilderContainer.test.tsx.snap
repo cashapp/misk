@@ -138,7 +138,7 @@ exports[`RequestFormFieldBuilderContainer Renders typed form int field 1`] = `
             class="bp3-label"
           >
             <span
-              class="WrapTextContainer-sc-183e5nt coQeii"
+              class="emotion-0"
             >
               Int Field (Int)
             </span>
@@ -315,7 +315,7 @@ exports[`RequestFormFieldBuilderContainer Renders typed form multiple top level 
             class="bp3-label"
           >
             <span
-              class="WrapTextContainer-sc-183e5nt coQeii"
+              class="emotion-0"
             >
               Field 1 (Short)
             </span>
@@ -419,7 +419,7 @@ exports[`RequestFormFieldBuilderContainer Renders typed form multiple top level 
             class="bp3-label"
           >
             <span
-              class="WrapTextContainer-sc-183e5nt coQeii"
+              class="emotion-0"
             >
               Field 2 (Int)
             </span>
@@ -523,7 +523,7 @@ exports[`RequestFormFieldBuilderContainer Renders typed form multiple top level 
             class="bp3-label"
           >
             <span
-              class="WrapTextContainer-sc-183e5nt coQeii"
+              class="emotion-0"
             >
               Field 3 (Long)
             </span>
@@ -627,7 +627,7 @@ exports[`RequestFormFieldBuilderContainer Renders typed form multiple top level 
             class="bp3-label"
           >
             <span
-              class="WrapTextContainer-sc-183e5nt coQeii"
+              class="emotion-0"
             >
               Field 4 (Short)
             </span>
@@ -808,7 +808,7 @@ exports[`RequestFormFieldBuilderContainer Renders typed form nested int field 1`
                 class="bp3-label"
               >
                 <span
-                  class="WrapTextContainer-sc-183e5nt coQeii"
+                  class="emotion-0"
                 >
                   Int Field (Int)
                 </span>
@@ -984,7 +984,7 @@ exports[`RequestFormFieldBuilderContainer Renders typed form repeated nested int
           class="bp3-label"
         >
           <span
-            class="WrapTextContainer-sc-183e5nt coQeii"
+            class="emotion-0"
           >
             Repeated Nested Int Field (nestedNoRepeatedInt)
           </span>
@@ -1034,7 +1034,7 @@ exports[`RequestFormFieldBuilderContainer Renders typed form repeated nested int
               class="bp3-label"
             >
               <span
-                class="WrapTextContainer-sc-183e5nt coQeii"
+                class="emotion-0"
               >
                 Repeated Nested Int Field (nestedNoRepeatedInt)
               </span>
@@ -1150,7 +1150,7 @@ exports[`RequestFormFieldBuilderContainer Renders typed form repeated nested int
                   class="bp3-label"
                 >
                   <span
-                    class="WrapTextContainer-sc-183e5nt coQeii"
+                    class="emotion-0"
                   >
                     Nested Int Field (noRepeatedInt)
                   </span>
@@ -1203,7 +1203,7 @@ exports[`RequestFormFieldBuilderContainer Renders typed form repeated nested int
                         class="bp3-label"
                       >
                         <span
-                          class="WrapTextContainer-sc-183e5nt coQeii"
+                          class="emotion-0"
                         >
                           Int Field (Int)
                         </span>
@@ -1383,7 +1383,7 @@ exports[`RequestFormFieldBuilderContainer Renders typed form repeated nested rep
           class="bp3-label"
         >
           <span
-            class="WrapTextContainer-sc-183e5nt coQeii"
+            class="emotion-0"
           >
             Nested Repeated Short Field (nestedRepeatedShort)
           </span>
@@ -1433,7 +1433,7 @@ exports[`RequestFormFieldBuilderContainer Renders typed form repeated nested rep
               class="bp3-label"
             >
               <span
-                class="WrapTextContainer-sc-183e5nt coQeii"
+                class="emotion-0"
               >
                 Nested Repeated Short Field (nestedRepeatedShort)
               </span>
@@ -1549,7 +1549,7 @@ exports[`RequestFormFieldBuilderContainer Renders typed form repeated nested rep
                   class="bp3-label"
                 >
                   <span
-                    class="WrapTextContainer-sc-183e5nt coQeii"
+                    class="emotion-0"
                   >
                     Nested Short Field (repeatedShort)
                   </span>
@@ -1603,7 +1603,7 @@ exports[`RequestFormFieldBuilderContainer Renders typed form repeated nested rep
                           class="bp3-label"
                         >
                           <span
-                            class="WrapTextContainer-sc-183e5nt coQeii"
+                            class="emotion-0"
                           >
                             Repeated Short Field (Short)
                           </span>
@@ -1821,7 +1821,7 @@ exports[`RequestFormFieldBuilderContainer Renders typed form repeated short fiel
               class="bp3-label"
             >
               <span
-                class="WrapTextContainer-sc-183e5nt coQeii"
+                class="emotion-0"
               >
                 Repeated Short Field (Short)
               </span>

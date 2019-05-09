@@ -154,7 +154,7 @@ exports[`WebActionsContainer WebActionsContainer can render with redux loading (
         </span>
       </div>
       <div
-        class="FlexContainer"
+        class="emotion-0"
       >
         <div
           class="sc-ifAKCX iOsfuG"
@@ -478,7 +478,7 @@ exports[`WebActionsContainer WebActionsContainer can render with redux loading (
         </span>
       </div>
       <div
-        class="FlexContainer"
+        class="emotion-0"
       >
         <div
           class="sc-ifAKCX iOsfuG"
@@ -802,7 +802,7 @@ exports[`WebActionsContainer WebActionsContainer can render with redux loading (
         </span>
       </div>
       <div
-        class="FlexContainer"
+        class="emotion-0"
       >
         <div
           class="sc-ifAKCX iOsfuG"
@@ -1126,7 +1126,7 @@ exports[`WebActionsContainer WebActionsContainer can render with redux loading (
         </span>
       </div>
       <div
-        class="FlexContainer"
+        class="emotion-0"
       >
         <div
           class="sc-ifAKCX iOsfuG"
@@ -1450,7 +1450,7 @@ exports[`WebActionsContainer WebActionsContainer can render with redux loading (
         </span>
       </div>
       <div
-        class="FlexContainer"
+        class="emotion-0"
       >
         <div
           class="sc-ifAKCX iOsfuG"
