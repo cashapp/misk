@@ -17,3 +17,11 @@ dependencies {
   testCompile project(':misk-testing')
   testCompile project(':misk-zookeeper-testing')
 }
+
+sourceSets {
+  test {
+    resources {
+      srcDir '../misk-zookeeper-testing/src/main/resources'
+    }
+  }
+}
