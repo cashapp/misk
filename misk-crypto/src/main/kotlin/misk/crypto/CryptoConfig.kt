@@ -45,6 +45,7 @@ data class Key(
  */
 enum class KeyType {
   AEAD,
+  DAEAD,
   MAC,
   DIGITAL_SIGNATURE
 }
