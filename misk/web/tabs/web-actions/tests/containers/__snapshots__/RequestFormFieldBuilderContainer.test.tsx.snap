@@ -12,20 +12,7 @@ exports[`RequestFormFieldBuilderContainer Doesn't fail on empty metadata 1`] = `
       <div
         class="bp3-text-overflow-ellipsis bp3-fill"
       >
-        <span
-          class="bp3-popover-wrapper sc-bZQynM hRiALA"
-        >
-          <span
-            class="bp3-popover-target"
-          >
-            <span
-              class=""
-              tabindex="0"
-            >
-              No Request Body for LivenessCheckAction /_liveness
-            </span>
-          </span>
-        </span>
+        No Request Body for LivenessCheckAction /_liveness
       </div>
     </a>
   </li>
@@ -34,8 +21,16 @@ exports[`RequestFormFieldBuilderContainer Doesn't fail on empty metadata 1`] = `
 
 exports[`RequestFormFieldBuilderContainer Renders single body input 1`] = `
 <DocumentFragment>
-  <div
-    class="bp3-form-group sc-iwsKbI eHluxy"
+  .emotion-1 {
+  margin: 0px !important;
+}
+
+.emotion-0 {
+  white-space: pre-line;
+}
+
+<div
+    class="bp3-form-group emotion-1"
   >
     <label
       class="bp3-label"
@@ -53,7 +48,7 @@ exports[`RequestFormFieldBuilderContainer Renders single body input 1`] = `
         class="bp3-control-group"
       >
         <textarea
-          class="bp3-input bp3-fill sc-htoDjs jGMiBx"
+          class="bp3-input bp3-fill emotion-0"
           placeholder="Unparseable type. This input will return a string or JSON."
         />
       </div>
@@ -64,12 +59,32 @@ exports[`RequestFormFieldBuilderContainer Renders single body input 1`] = `
 
 exports[`RequestFormFieldBuilderContainer Renders typed form int field 1`] = `
 <DocumentFragment>
-  <div>
+  .emotion-6 {
+  margin: 0px !important;
+}
+
+.emotion-0 {
+  line-height: normal;
+  text-transform: inherit;
+}
+
+.emotion-7 {
+  box-shadow: none !important;
+  border-left: 2px black;
+  margin-bottom: 0px;
+  padding: 0px 0px 0px 15px !important;
+}
+
+.emotion-3 span.bp3-popover-target {
+  display: inherit !important;
+}
+
+<div>
     <div
       class="bp3-control-group bp3-fill"
     >
       <button
-        class="bp3-button bp3-active sc-EHOje bcIieJ"
+        class="bp3-button bp3-active emotion-0"
         type="button"
       >
         <span
@@ -98,7 +113,7 @@ exports[`RequestFormFieldBuilderContainer Renders typed form int field 1`] = `
         </span>
       </button>
       <button
-        class="bp3-button sc-EHOje bcIieJ"
+        class="bp3-button emotion-0"
         type="button"
       >
         <span
@@ -128,17 +143,17 @@ exports[`RequestFormFieldBuilderContainer Renders typed form int field 1`] = `
       </button>
     </div>
     <div
-      class="bp3-card bp3-elevation-0 sc-dnqmqq cnhlyr"
+      class="bp3-card bp3-elevation-0 emotion-7"
     >
       <div>
         <div
-          class="bp3-form-group sc-iwsKbI eHluxy"
+          class="bp3-form-group emotion-6"
         >
           <label
             class="bp3-label"
           >
             <span
-              class="emotion-0"
+              class="emotion-2"
             >
               Int Field (Int)
             </span>
@@ -154,13 +169,13 @@ exports[`RequestFormFieldBuilderContainer Renders typed form int field 1`] = `
               class="bp3-control-group"
             >
               <span
-                class="bp3-popover-wrapper sc-bZQynM hRiALA"
+                class="bp3-popover-wrapper emotion-3"
               >
                 <span
                   class="bp3-popover-target"
                 >
                   <button
-                    class="bp3-button sc-EHOje bcIieJ"
+                    class="bp3-button"
                     tabindex="0"
                     type="button"
                   >
@@ -187,13 +202,13 @@ exports[`RequestFormFieldBuilderContainer Renders typed form int field 1`] = `
                 </span>
               </span>
               <span
-                class="bp3-popover-wrapper sc-bZQynM hRiALA"
+                class="bp3-popover-wrapper emotion-3"
               >
                 <span
                   class="bp3-popover-target"
                 >
                   <button
-                    class="bp3-button sc-EHOje bcIieJ"
+                    class="bp3-button  emotion-0"
                     tabindex="0"
                     type="button"
                   >
@@ -241,12 +256,32 @@ exports[`RequestFormFieldBuilderContainer Renders typed form int field 1`] = `
 
 exports[`RequestFormFieldBuilderContainer Renders typed form multiple top level fields 1`] = `
 <DocumentFragment>
-  <div>
+  .emotion-6 {
+  margin: 0px !important;
+}
+
+.emotion-0 {
+  line-height: normal;
+  text-transform: inherit;
+}
+
+.emotion-22 {
+  box-shadow: none !important;
+  border-left: 2px black;
+  margin-bottom: 0px;
+  padding: 0px 0px 0px 15px !important;
+}
+
+.emotion-3 span.bp3-popover-target {
+  display: inherit !important;
+}
+
+<div>
     <div
       class="bp3-control-group bp3-fill"
     >
       <button
-        class="bp3-button bp3-active sc-EHOje bcIieJ"
+        class="bp3-button bp3-active emotion-0"
         type="button"
       >
         <span
@@ -275,7 +310,7 @@ exports[`RequestFormFieldBuilderContainer Renders typed form multiple top level 
         </span>
       </button>
       <button
-        class="bp3-button sc-EHOje bcIieJ"
+        class="bp3-button emotion-0"
         type="button"
       >
         <span
@@ -305,17 +340,17 @@ exports[`RequestFormFieldBuilderContainer Renders typed form multiple top level 
       </button>
     </div>
     <div
-      class="bp3-card bp3-elevation-0 sc-dnqmqq cnhlyr"
+      class="bp3-card bp3-elevation-0 emotion-22"
     >
       <div>
         <div
-          class="bp3-form-group sc-iwsKbI eHluxy"
+          class="bp3-form-group emotion-6"
         >
           <label
             class="bp3-label"
           >
             <span
-              class="emotion-0"
+              class="emotion-2"
             >
               Field 1 (Short)
             </span>
@@ -331,13 +366,13 @@ exports[`RequestFormFieldBuilderContainer Renders typed form multiple top level 
               class="bp3-control-group"
             >
               <span
-                class="bp3-popover-wrapper sc-bZQynM hRiALA"
+                class="bp3-popover-wrapper emotion-3"
               >
                 <span
                   class="bp3-popover-target"
                 >
                   <button
-                    class="bp3-button sc-EHOje bcIieJ"
+                    class="bp3-button"
                     tabindex="0"
                     type="button"
                   >
@@ -364,13 +399,13 @@ exports[`RequestFormFieldBuilderContainer Renders typed form multiple top level 
                 </span>
               </span>
               <span
-                class="bp3-popover-wrapper sc-bZQynM hRiALA"
+                class="bp3-popover-wrapper emotion-3"
               >
                 <span
                   class="bp3-popover-target"
                 >
                   <button
-                    class="bp3-button sc-EHOje bcIieJ"
+                    class="bp3-button  emotion-0"
                     tabindex="0"
                     type="button"
                   >
@@ -413,13 +448,13 @@ exports[`RequestFormFieldBuilderContainer Renders typed form multiple top level 
       </div>
       <div>
         <div
-          class="bp3-form-group sc-iwsKbI eHluxy"
+          class="bp3-form-group emotion-6"
         >
           <label
             class="bp3-label"
           >
             <span
-              class="emotion-0"
+              class="emotion-2"
             >
               Field 2 (Int)
             </span>
@@ -435,13 +470,13 @@ exports[`RequestFormFieldBuilderContainer Renders typed form multiple top level 
               class="bp3-control-group"
             >
               <span
-                class="bp3-popover-wrapper sc-bZQynM hRiALA"
+                class="bp3-popover-wrapper emotion-3"
               >
                 <span
                   class="bp3-popover-target"
                 >
                   <button
-                    class="bp3-button sc-EHOje bcIieJ"
+                    class="bp3-button"
                     tabindex="0"
                     type="button"
                   >
@@ -468,13 +503,13 @@ exports[`RequestFormFieldBuilderContainer Renders typed form multiple top level 
                 </span>
               </span>
               <span
-                class="bp3-popover-wrapper sc-bZQynM hRiALA"
+                class="bp3-popover-wrapper emotion-3"
               >
                 <span
                   class="bp3-popover-target"
                 >
                   <button
-                    class="bp3-button sc-EHOje bcIieJ"
+                    class="bp3-button  emotion-0"
                     tabindex="0"
                     type="button"
                   >
@@ -517,13 +552,13 @@ exports[`RequestFormFieldBuilderContainer Renders typed form multiple top level 
       </div>
       <div>
         <div
-          class="bp3-form-group sc-iwsKbI eHluxy"
+          class="bp3-form-group emotion-6"
         >
           <label
             class="bp3-label"
           >
             <span
-              class="emotion-0"
+              class="emotion-2"
             >
               Field 3 (Long)
             </span>
@@ -539,13 +574,13 @@ exports[`RequestFormFieldBuilderContainer Renders typed form multiple top level 
               class="bp3-control-group"
             >
               <span
-                class="bp3-popover-wrapper sc-bZQynM hRiALA"
+                class="bp3-popover-wrapper emotion-3"
               >
                 <span
                   class="bp3-popover-target"
                 >
                   <button
-                    class="bp3-button sc-EHOje bcIieJ"
+                    class="bp3-button"
                     tabindex="0"
                     type="button"
                   >
@@ -572,13 +607,13 @@ exports[`RequestFormFieldBuilderContainer Renders typed form multiple top level 
                 </span>
               </span>
               <span
-                class="bp3-popover-wrapper sc-bZQynM hRiALA"
+                class="bp3-popover-wrapper emotion-3"
               >
                 <span
                   class="bp3-popover-target"
                 >
                   <button
-                    class="bp3-button sc-EHOje bcIieJ"
+                    class="bp3-button  emotion-0"
                     tabindex="0"
                     type="button"
                   >
@@ -621,13 +656,13 @@ exports[`RequestFormFieldBuilderContainer Renders typed form multiple top level 
       </div>
       <div>
         <div
-          class="bp3-form-group sc-iwsKbI eHluxy"
+          class="bp3-form-group emotion-6"
         >
           <label
             class="bp3-label"
           >
             <span
-              class="emotion-0"
+              class="emotion-2"
             >
               Field 4 (Short)
             </span>
@@ -643,13 +678,13 @@ exports[`RequestFormFieldBuilderContainer Renders typed form multiple top level 
               class="bp3-control-group"
             >
               <span
-                class="bp3-popover-wrapper sc-bZQynM hRiALA"
+                class="bp3-popover-wrapper emotion-3"
               >
                 <span
                   class="bp3-popover-target"
                 >
                   <button
-                    class="bp3-button sc-EHOje bcIieJ"
+                    class="bp3-button"
                     tabindex="0"
                     type="button"
                   >
@@ -676,13 +711,13 @@ exports[`RequestFormFieldBuilderContainer Renders typed form multiple top level 
                 </span>
               </span>
               <span
-                class="bp3-popover-wrapper sc-bZQynM hRiALA"
+                class="bp3-popover-wrapper emotion-3"
               >
                 <span
                   class="bp3-popover-target"
                 >
                   <button
-                    class="bp3-button sc-EHOje bcIieJ"
+                    class="bp3-button  emotion-0"
                     tabindex="0"
                     type="button"
                   >
@@ -730,12 +765,32 @@ exports[`RequestFormFieldBuilderContainer Renders typed form multiple top level 
 
 exports[`RequestFormFieldBuilderContainer Renders typed form nested int field 1`] = `
 <DocumentFragment>
-  <div>
+  .emotion-6 {
+  margin: 0px !important;
+}
+
+.emotion-0 {
+  line-height: normal;
+  text-transform: inherit;
+}
+
+.emotion-7 {
+  box-shadow: none !important;
+  border-left: 2px black;
+  margin-bottom: 0px;
+  padding: 0px 0px 0px 15px !important;
+}
+
+.emotion-3 span.bp3-popover-target {
+  display: inherit !important;
+}
+
+<div>
     <div
       class="bp3-control-group bp3-fill"
     >
       <button
-        class="bp3-button bp3-active sc-EHOje bcIieJ"
+        class="bp3-button bp3-active emotion-0"
         type="button"
       >
         <span
@@ -764,7 +819,7 @@ exports[`RequestFormFieldBuilderContainer Renders typed form nested int field 1`
         </span>
       </button>
       <button
-        class="bp3-button sc-EHOje bcIieJ"
+        class="bp3-button emotion-0"
         type="button"
       >
         <span
@@ -794,21 +849,21 @@ exports[`RequestFormFieldBuilderContainer Renders typed form nested int field 1`
       </button>
     </div>
     <div
-      class="bp3-card bp3-elevation-0 sc-dnqmqq cnhlyr"
+      class="bp3-card bp3-elevation-0 emotion-7"
     >
       <div>
         <div
-          class="bp3-card bp3-elevation-0 sc-dnqmqq cnhlyr"
+          class="bp3-card bp3-elevation-0 emotion-7"
         >
           <div>
             <div
-              class="bp3-form-group sc-iwsKbI eHluxy"
+              class="bp3-form-group emotion-6"
             >
               <label
                 class="bp3-label"
               >
                 <span
-                  class="emotion-0"
+                  class="emotion-2"
                 >
                   Int Field (Int)
                 </span>
@@ -824,13 +879,13 @@ exports[`RequestFormFieldBuilderContainer Renders typed form nested int field 1`
                   class="bp3-control-group"
                 >
                   <span
-                    class="bp3-popover-wrapper sc-bZQynM hRiALA"
+                    class="bp3-popover-wrapper emotion-3"
                   >
                     <span
                       class="bp3-popover-target"
                     >
                       <button
-                        class="bp3-button sc-EHOje bcIieJ"
+                        class="bp3-button"
                         tabindex="0"
                         type="button"
                       >
@@ -857,13 +912,13 @@ exports[`RequestFormFieldBuilderContainer Renders typed form nested int field 1`
                     </span>
                   </span>
                   <span
-                    class="bp3-popover-wrapper sc-bZQynM hRiALA"
+                    class="bp3-popover-wrapper emotion-3"
                   >
                     <span
                       class="bp3-popover-target"
                     >
                       <button
-                        class="bp3-button sc-EHOje bcIieJ"
+                        class="bp3-button  emotion-0"
                         tabindex="0"
                         type="button"
                       >
@@ -913,12 +968,32 @@ exports[`RequestFormFieldBuilderContainer Renders typed form nested int field 1`
 
 exports[`RequestFormFieldBuilderContainer Renders typed form repeated nested int field 1`] = `
 <DocumentFragment>
-  <div>
+  .emotion-16 {
+  margin: 0px !important;
+}
+
+.emotion-0 {
+  line-height: normal;
+  text-transform: inherit;
+}
+
+.emotion-17 {
+  box-shadow: none !important;
+  border-left: 2px black;
+  margin-bottom: 0px;
+  padding: 0px 0px 0px 15px !important;
+}
+
+.emotion-3 span.bp3-popover-target {
+  display: inherit !important;
+}
+
+<div>
     <div
       class="bp3-control-group bp3-fill"
     >
       <button
-        class="bp3-button bp3-active sc-EHOje bcIieJ"
+        class="bp3-button bp3-active emotion-0"
         type="button"
       >
         <span
@@ -947,7 +1022,7 @@ exports[`RequestFormFieldBuilderContainer Renders typed form repeated nested int
         </span>
       </button>
       <button
-        class="bp3-button sc-EHOje bcIieJ"
+        class="bp3-button emotion-0"
         type="button"
       >
         <span
@@ -977,14 +1052,14 @@ exports[`RequestFormFieldBuilderContainer Renders typed form repeated nested int
       </button>
     </div>
     <div
-      class="bp3-card bp3-elevation-0 sc-dnqmqq cnhlyr"
+      class="bp3-card bp3-elevation-0 emotion-17"
     >
       <div>
         <label
           class="bp3-label"
         >
           <span
-            class="emotion-0"
+            class="emotion-2"
           >
             Repeated Nested Int Field (nestedNoRepeatedInt)
           </span>
@@ -993,13 +1068,13 @@ exports[`RequestFormFieldBuilderContainer Renders typed form repeated nested int
           class="bp3-button-group"
         >
           <span
-            class="bp3-popover-wrapper sc-bZQynM hRiALA"
+            class="bp3-popover-wrapper emotion-3"
           >
             <span
               class="bp3-popover-target"
             >
               <button
-                class="bp3-button sc-EHOje bcIieJ"
+                class="bp3-button"
                 tabindex="0"
                 type="button"
               >
@@ -1027,14 +1102,14 @@ exports[`RequestFormFieldBuilderContainer Renders typed form repeated nested int
           </span>
         </div>
         <div
-          class="bp3-card bp3-elevation-0 sc-dnqmqq cnhlyr"
+          class="bp3-card bp3-elevation-0 emotion-17"
         >
           <div>
             <label
               class="bp3-label"
             >
               <span
-                class="emotion-0"
+                class="emotion-2"
               >
                 Repeated Nested Int Field (nestedNoRepeatedInt)
               </span>
@@ -1043,13 +1118,13 @@ exports[`RequestFormFieldBuilderContainer Renders typed form repeated nested int
               class="bp3-button-group"
             >
               <span
-                class="bp3-popover-wrapper sc-bZQynM hRiALA"
+                class="bp3-popover-wrapper emotion-3"
               >
                 <span
                   class="bp3-popover-target"
                 >
                   <button
-                    class="bp3-button sc-EHOje bcIieJ"
+                    class="bp3-button"
                     tabindex="0"
                     type="button"
                   >
@@ -1076,13 +1151,13 @@ exports[`RequestFormFieldBuilderContainer Renders typed form repeated nested int
                 </span>
               </span>
               <span
-                class="bp3-popover-wrapper sc-bZQynM hRiALA"
+                class="bp3-popover-wrapper emotion-3"
               >
                 <span
                   class="bp3-popover-target"
                 >
                   <button
-                    class="bp3-button sc-EHOje bcIieJ"
+                    class="bp3-button  emotion-0"
                     tabindex="0"
                     type="button"
                   >
@@ -1109,13 +1184,13 @@ exports[`RequestFormFieldBuilderContainer Renders typed form repeated nested int
                 </span>
               </span>
               <span
-                class="bp3-popover-wrapper sc-bZQynM hRiALA"
+                class="bp3-popover-wrapper emotion-3"
               >
                 <span
                   class="bp3-popover-target"
                 >
                   <button
-                    class="bp3-button sc-EHOje bcIieJ"
+                    class="bp3-button  emotion-0"
                     tabindex="0"
                     type="button"
                   >
@@ -1143,14 +1218,14 @@ exports[`RequestFormFieldBuilderContainer Renders typed form repeated nested int
               </span>
             </div>
             <div
-              class="bp3-card bp3-elevation-0 sc-dnqmqq cnhlyr"
+              class="bp3-card bp3-elevation-0 emotion-17"
             >
               <div>
                 <label
                   class="bp3-label"
                 >
                   <span
-                    class="emotion-0"
+                    class="emotion-2"
                   >
                     Nested Int Field (noRepeatedInt)
                   </span>
@@ -1159,13 +1234,13 @@ exports[`RequestFormFieldBuilderContainer Renders typed form repeated nested int
                   class="bp3-button-group"
                 >
                   <span
-                    class="bp3-popover-wrapper sc-bZQynM hRiALA"
+                    class="bp3-popover-wrapper emotion-3"
                   >
                     <span
                       class="bp3-popover-target"
                     >
                       <button
-                        class="bp3-button sc-EHOje bcIieJ"
+                        class="bp3-button"
                         tabindex="0"
                         type="button"
                       >
@@ -1193,17 +1268,17 @@ exports[`RequestFormFieldBuilderContainer Renders typed form repeated nested int
                   </span>
                 </div>
                 <div
-                  class="bp3-card bp3-elevation-0 sc-dnqmqq cnhlyr"
+                  class="bp3-card bp3-elevation-0 emotion-17"
                 >
                   <div>
                     <div
-                      class="bp3-form-group sc-iwsKbI eHluxy"
+                      class="bp3-form-group emotion-16"
                     >
                       <label
                         class="bp3-label"
                       >
                         <span
-                          class="emotion-0"
+                          class="emotion-2"
                         >
                           Int Field (Int)
                         </span>
@@ -1219,13 +1294,13 @@ exports[`RequestFormFieldBuilderContainer Renders typed form repeated nested int
                           class="bp3-control-group"
                         >
                           <span
-                            class="bp3-popover-wrapper sc-bZQynM hRiALA"
+                            class="bp3-popover-wrapper emotion-3"
                           >
                             <span
                               class="bp3-popover-target"
                             >
                               <button
-                                class="bp3-button sc-EHOje bcIieJ"
+                                class="bp3-button"
                                 tabindex="0"
                                 type="button"
                               >
@@ -1252,13 +1327,13 @@ exports[`RequestFormFieldBuilderContainer Renders typed form repeated nested int
                             </span>
                           </span>
                           <span
-                            class="bp3-popover-wrapper sc-bZQynM hRiALA"
+                            class="bp3-popover-wrapper emotion-3"
                           >
                             <span
                               class="bp3-popover-target"
                             >
                               <button
-                                class="bp3-button sc-EHOje bcIieJ"
+                                class="bp3-button  emotion-0"
                                 tabindex="0"
                                 type="button"
                               >
@@ -1312,12 +1387,32 @@ exports[`RequestFormFieldBuilderContainer Renders typed form repeated nested int
 
 exports[`RequestFormFieldBuilderContainer Renders typed form repeated nested repeated short field 1`] = `
 <DocumentFragment>
-  <div>
+  .emotion-18 {
+  margin: 0px !important;
+}
+
+.emotion-0 {
+  line-height: normal;
+  text-transform: inherit;
+}
+
+.emotion-19 {
+  box-shadow: none !important;
+  border-left: 2px black;
+  margin-bottom: 0px;
+  padding: 0px 0px 0px 15px !important;
+}
+
+.emotion-3 span.bp3-popover-target {
+  display: inherit !important;
+}
+
+<div>
     <div
       class="bp3-control-group bp3-fill"
     >
       <button
-        class="bp3-button bp3-active sc-EHOje bcIieJ"
+        class="bp3-button bp3-active emotion-0"
         type="button"
       >
         <span
@@ -1346,7 +1441,7 @@ exports[`RequestFormFieldBuilderContainer Renders typed form repeated nested rep
         </span>
       </button>
       <button
-        class="bp3-button sc-EHOje bcIieJ"
+        class="bp3-button emotion-0"
         type="button"
       >
         <span
@@ -1376,14 +1471,14 @@ exports[`RequestFormFieldBuilderContainer Renders typed form repeated nested rep
       </button>
     </div>
     <div
-      class="bp3-card bp3-elevation-0 sc-dnqmqq cnhlyr"
+      class="bp3-card bp3-elevation-0 emotion-19"
     >
       <div>
         <label
           class="bp3-label"
         >
           <span
-            class="emotion-0"
+            class="emotion-2"
           >
             Nested Repeated Short Field (nestedRepeatedShort)
           </span>
@@ -1392,13 +1487,13 @@ exports[`RequestFormFieldBuilderContainer Renders typed form repeated nested rep
           class="bp3-button-group"
         >
           <span
-            class="bp3-popover-wrapper sc-bZQynM hRiALA"
+            class="bp3-popover-wrapper emotion-3"
           >
             <span
               class="bp3-popover-target"
             >
               <button
-                class="bp3-button sc-EHOje bcIieJ"
+                class="bp3-button"
                 tabindex="0"
                 type="button"
               >
@@ -1426,14 +1521,14 @@ exports[`RequestFormFieldBuilderContainer Renders typed form repeated nested rep
           </span>
         </div>
         <div
-          class="bp3-card bp3-elevation-0 sc-dnqmqq cnhlyr"
+          class="bp3-card bp3-elevation-0 emotion-19"
         >
           <div>
             <label
               class="bp3-label"
             >
               <span
-                class="emotion-0"
+                class="emotion-2"
               >
                 Nested Repeated Short Field (nestedRepeatedShort)
               </span>
@@ -1442,13 +1537,13 @@ exports[`RequestFormFieldBuilderContainer Renders typed form repeated nested rep
               class="bp3-button-group"
             >
               <span
-                class="bp3-popover-wrapper sc-bZQynM hRiALA"
+                class="bp3-popover-wrapper emotion-3"
               >
                 <span
                   class="bp3-popover-target"
                 >
                   <button
-                    class="bp3-button sc-EHOje bcIieJ"
+                    class="bp3-button"
                     tabindex="0"
                     type="button"
                   >
@@ -1475,13 +1570,13 @@ exports[`RequestFormFieldBuilderContainer Renders typed form repeated nested rep
                 </span>
               </span>
               <span
-                class="bp3-popover-wrapper sc-bZQynM hRiALA"
+                class="bp3-popover-wrapper emotion-3"
               >
                 <span
                   class="bp3-popover-target"
                 >
                   <button
-                    class="bp3-button sc-EHOje bcIieJ"
+                    class="bp3-button  emotion-0"
                     tabindex="0"
                     type="button"
                   >
@@ -1508,13 +1603,13 @@ exports[`RequestFormFieldBuilderContainer Renders typed form repeated nested rep
                 </span>
               </span>
               <span
-                class="bp3-popover-wrapper sc-bZQynM hRiALA"
+                class="bp3-popover-wrapper emotion-3"
               >
                 <span
                   class="bp3-popover-target"
                 >
                   <button
-                    class="bp3-button sc-EHOje bcIieJ"
+                    class="bp3-button  emotion-0"
                     tabindex="0"
                     type="button"
                   >
@@ -1542,14 +1637,14 @@ exports[`RequestFormFieldBuilderContainer Renders typed form repeated nested rep
               </span>
             </div>
             <div
-              class="bp3-card bp3-elevation-0 sc-dnqmqq cnhlyr"
+              class="bp3-card bp3-elevation-0 emotion-19"
             >
               <div>
                 <label
                   class="bp3-label"
                 >
                   <span
-                    class="emotion-0"
+                    class="emotion-2"
                   >
                     Nested Short Field (repeatedShort)
                   </span>
@@ -1558,13 +1653,13 @@ exports[`RequestFormFieldBuilderContainer Renders typed form repeated nested rep
                   class="bp3-button-group"
                 >
                   <span
-                    class="bp3-popover-wrapper sc-bZQynM hRiALA"
+                    class="bp3-popover-wrapper emotion-3"
                   >
                     <span
                       class="bp3-popover-target"
                     >
                       <button
-                        class="bp3-button sc-EHOje bcIieJ"
+                        class="bp3-button"
                         tabindex="0"
                         type="button"
                       >
@@ -1592,18 +1687,18 @@ exports[`RequestFormFieldBuilderContainer Renders typed form repeated nested rep
                   </span>
                 </div>
                 <div
-                  class="bp3-card bp3-elevation-0 sc-dnqmqq cnhlyr"
+                  class="bp3-card bp3-elevation-0 emotion-19"
                 >
                   <div>
                     <div>
                       <div
-                        class="bp3-form-group sc-iwsKbI eHluxy"
+                        class="bp3-form-group emotion-18"
                       >
                         <label
                           class="bp3-label"
                         >
                           <span
-                            class="emotion-0"
+                            class="emotion-2"
                           >
                             Repeated Short Field (Short)
                           </span>
@@ -1619,13 +1714,13 @@ exports[`RequestFormFieldBuilderContainer Renders typed form repeated nested rep
                             class="bp3-control-group"
                           >
                             <span
-                              class="bp3-popover-wrapper sc-bZQynM hRiALA"
+                              class="bp3-popover-wrapper emotion-3"
                             >
                               <span
                                 class="bp3-popover-target"
                               >
                                 <button
-                                  class="bp3-button sc-EHOje bcIieJ"
+                                  class="bp3-button"
                                   tabindex="0"
                                   type="button"
                                 >
@@ -1652,13 +1747,13 @@ exports[`RequestFormFieldBuilderContainer Renders typed form repeated nested rep
                               </span>
                             </span>
                             <span
-                              class="bp3-popover-wrapper sc-bZQynM hRiALA"
+                              class="bp3-popover-wrapper emotion-3"
                             >
                               <span
                                 class="bp3-popover-target"
                               >
                                 <button
-                                  class="bp3-button sc-EHOje bcIieJ"
+                                  class="bp3-button  emotion-0"
                                   tabindex="0"
                                   type="button"
                                 >
@@ -1685,13 +1780,13 @@ exports[`RequestFormFieldBuilderContainer Renders typed form repeated nested rep
                               </span>
                             </span>
                             <span
-                              class="bp3-popover-wrapper sc-bZQynM hRiALA"
+                              class="bp3-popover-wrapper emotion-3"
                             >
                               <span
                                 class="bp3-popover-target"
                               >
                                 <button
-                                  class="bp3-button sc-EHOje bcIieJ"
+                                  class="bp3-button  emotion-0"
                                   tabindex="0"
                                   type="button"
                                 >
@@ -1746,12 +1841,32 @@ exports[`RequestFormFieldBuilderContainer Renders typed form repeated nested rep
 
 exports[`RequestFormFieldBuilderContainer Renders typed form repeated short field 1`] = `
 <DocumentFragment>
-  <div>
+  .emotion-8 {
+  margin: 0px !important;
+}
+
+.emotion-0 {
+  line-height: normal;
+  text-transform: inherit;
+}
+
+.emotion-9 {
+  box-shadow: none !important;
+  border-left: 2px black;
+  margin-bottom: 0px;
+  padding: 0px 0px 0px 15px !important;
+}
+
+.emotion-3 span.bp3-popover-target {
+  display: inherit !important;
+}
+
+<div>
     <div
       class="bp3-control-group bp3-fill"
     >
       <button
-        class="bp3-button bp3-active sc-EHOje bcIieJ"
+        class="bp3-button bp3-active emotion-0"
         type="button"
       >
         <span
@@ -1780,7 +1895,7 @@ exports[`RequestFormFieldBuilderContainer Renders typed form repeated short fiel
         </span>
       </button>
       <button
-        class="bp3-button sc-EHOje bcIieJ"
+        class="bp3-button emotion-0"
         type="button"
       >
         <span
@@ -1810,18 +1925,18 @@ exports[`RequestFormFieldBuilderContainer Renders typed form repeated short fiel
       </button>
     </div>
     <div
-      class="bp3-card bp3-elevation-0 sc-dnqmqq cnhlyr"
+      class="bp3-card bp3-elevation-0 emotion-9"
     >
       <div>
         <div>
           <div
-            class="bp3-form-group sc-iwsKbI eHluxy"
+            class="bp3-form-group emotion-8"
           >
             <label
               class="bp3-label"
             >
               <span
-                class="emotion-0"
+                class="emotion-2"
               >
                 Repeated Short Field (Short)
               </span>
@@ -1837,13 +1952,13 @@ exports[`RequestFormFieldBuilderContainer Renders typed form repeated short fiel
                 class="bp3-control-group"
               >
                 <span
-                  class="bp3-popover-wrapper sc-bZQynM hRiALA"
+                  class="bp3-popover-wrapper emotion-3"
                 >
                   <span
                     class="bp3-popover-target"
                   >
                     <button
-                      class="bp3-button sc-EHOje bcIieJ"
+                      class="bp3-button"
                       tabindex="0"
                       type="button"
                     >
@@ -1870,13 +1985,13 @@ exports[`RequestFormFieldBuilderContainer Renders typed form repeated short fiel
                   </span>
                 </span>
                 <span
-                  class="bp3-popover-wrapper sc-bZQynM hRiALA"
+                  class="bp3-popover-wrapper emotion-3"
                 >
                   <span
                     class="bp3-popover-target"
                   >
                     <button
-                      class="bp3-button sc-EHOje bcIieJ"
+                      class="bp3-button  emotion-0"
                       tabindex="0"
                       type="button"
                     >
@@ -1903,13 +2018,13 @@ exports[`RequestFormFieldBuilderContainer Renders typed form repeated short fiel
                   </span>
                 </span>
                 <span
-                  class="bp3-popover-wrapper sc-bZQynM hRiALA"
+                  class="bp3-popover-wrapper emotion-3"
                 >
                   <span
                     class="bp3-popover-target"
                   >
                     <button
-                      class="bp3-button sc-EHOje bcIieJ"
+                      class="bp3-button  emotion-0"
                       tabindex="0"
                       type="button"
                     >

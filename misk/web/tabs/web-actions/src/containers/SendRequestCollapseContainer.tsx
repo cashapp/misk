@@ -1,9 +1,13 @@
+/** @jsx jsx */
 import {
+  Button,
   Collapse,
   ControlGroup,
   HTMLSelect,
-  InputGroup
+  InputGroup,
+  Menu
 } from "@blueprintjs/core"
+import { jsx } from "@emotion/core"
 import {
   CodePreContainer,
   FlexContainer,
@@ -12,15 +16,14 @@ import {
 } from "@misk/core"
 import { onChangeFnCall, simpleSelect, simpleType } from "@misk/simpleredux"
 import { HTTPMethod } from "http-method-enum"
-import * as React from "react"
 import { connect } from "react-redux"
-import styled from "styled-components"
 import {
-  Button,
+  cssButton,
+  cssColumn,
+  cssMetadataMenu,
   Metadata,
   MetadataCollapse,
   MetadataCopyToClipboard,
-  MetadataMenu,
   StatusTagComponent
 } from "../components"
 import { RequestFormContainer } from "../containers"
@@ -33,12 +36,6 @@ import {
   mapStateToProps,
   methodHasBody
 } from "../ducks"
-
-const Column = styled.div`
-  flex-grow: 1;
-  flex-basis: 0;
-  min-width: 320px;
-`
 
 const RequestBodyForm = (
   props: {
@@ -143,17 +140,17 @@ const SendRequestCollapseContainer = (
         type={"url"}
       />
       <FlexContainer>
-        <Column>
-          <MetadataMenu>
+        <div css={cssColumn}>
+          <Menu css={cssMetadataMenu}>
             <RequestBodyForm
               action={action}
               method={method}
               tag={tag}
               {...props}
             />
-          </MetadataMenu>
-        </Column>
-        <Column>
+          </Menu>
+        </div>
+        <div css={cssColumn}>
           <ControlGroup>
             <HTMLSelect
               large={true}
@@ -162,6 +159,7 @@ const SendRequestCollapseContainer = (
               value={method}
             />
             <Button
+              css={cssButton}
               large={true}
               onClick={(event: any) => {
                 props.simpleFormInput(`${tag}::ButtonRequestBody`, false)
@@ -180,7 +178,7 @@ const SendRequestCollapseContainer = (
               text={"Submit"}
             />
           </ControlGroup>
-          <MetadataMenu>
+          <Menu css={cssMetadataMenu}>
             {methodHasBody(method) ? (
               <MetadataCollapse
                 label={`${url}`}
@@ -239,8 +237,8 @@ const SendRequestCollapseContainer = (
                 </MetadataCollapse>
               </div>
             </MetadataCollapse>
-          </MetadataMenu>
-        </Column>
+          </Menu>
+        </div>
       </FlexContainer>
     </Collapse>
   )

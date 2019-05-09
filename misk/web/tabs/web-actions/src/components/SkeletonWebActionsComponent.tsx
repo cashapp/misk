@@ -1,16 +1,17 @@
-import { Card, Classes, H3 } from "@blueprintjs/core"
+/** @jsx jsx */
+import { Card, Classes, H3, Menu, Tag } from "@blueprintjs/core"
+import { jsx } from "@emotion/core"
 import { FlexContainer } from "@misk/core"
 import { HTTPMethod } from "http-method-enum"
-import * as React from "react"
 import {
-  CodeTag,
-  Column,
-  FloatLeft,
-  Header,
+  cssCodeTag,
+  cssColumn,
+  cssFloatLeft,
+  cssHeader,
   Metadata,
-  MetadataMenu,
   MethodTag
 } from "."
+import { cssMetadataMenu } from "./CommonComponents"
 
 /**
  * Empty Web Action Card UI for use with BlueprintJS Skeleton class in loading UIs
@@ -22,28 +23,28 @@ export const SkeletonText = () => (
 
 export const SkeletonWebActionsComponent = () => (
   <Card>
-    <Header>
+    <div css={cssHeader}>
       {[HTTPMethod.GET].map((m, index) => (
         <MethodTag key={index} method={m} />
       ))}
-      <FloatLeft>
-        <H3 className={Classes.SKELETON}>{"AnotherSimpleWebAction"}</H3>
-      </FloatLeft>
-      <FloatLeft>
-        <CodeTag large={true}>{<SkeletonText />}</CodeTag>
-      </FloatLeft>
-    </Header>
+      <H3 css={cssFloatLeft} className={Classes.SKELETON}>
+        {"AnotherSimpleWebAction"}
+      </H3>
+      <Tag css={[cssFloatLeft, cssCodeTag]} large={true}>
+        {<SkeletonText />}
+      </Tag>
+    </div>
     <FlexContainer>
-      <Column>
-        <MetadataMenu>
+      <div css={cssColumn}>
+        <Menu css={cssMetadataMenu}>
           <Metadata label={"Function"} content={<SkeletonText />} />
           <Metadata label={"Services"} content={<SkeletonText />} />
           <Metadata label={"Roles"} content={<SkeletonText />} />
           <Metadata label={"Access"} content={<SkeletonText />} />
-        </MetadataMenu>
-      </Column>
-      <Column>
-        <MetadataMenu>
+        </Menu>
+      </div>
+      <div css={cssColumn}>
+        <Menu css={cssMetadataMenu}>
           <Metadata label={"Content Types"} content={<SkeletonText />} />
           <Metadata
             label={"Application Interceptors"}
@@ -51,8 +52,8 @@ export const SkeletonWebActionsComponent = () => (
           />
           <Metadata label={"Network Interceptors"} content={<SkeletonText />} />
           <Metadata label={"Send a Request"} content={<SkeletonText />} />
-        </MetadataMenu>
-      </Column>
+        </Menu>
+      </div>
     </FlexContainer>
   </Card>
 )
