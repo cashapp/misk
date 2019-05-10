@@ -1,9 +1,15 @@
 package misk.hibernate
 
 /**
- * [SecretColumn] is an annotation used to get Hibernate to encrypt a field before writing it
- * to the database.
+ * [SecretColumn] is an annotation used to get Hibernate to encrypt a field before writing it  to the database.
+ *
  * The [keyName] string is used to specify the name of the key to be used to encrypt and decrypt the value.
+ *
+ * The [indexable] attribute controls whether or not this data will be able to be indexed, defaulted to true. This
+ * uses deterministic encryption: encrypting the same plaintext will produce the same ciphertext. This is weaker than
+ * non-deterministic encryption, but makes searching for encrypted values possible. If searching for ciphertexts is
+ * not something your use case requires, set [indexable] to false for stronger security.
+ *
  * Install [misk.crypto.CryptoModule] to configure the keys the app uses.
  * Example:
  * In app-common.yaml:
@@ -33,10 +39,7 @@ package misk.hibernate
  *     the original plaintext because it also contains some metadata. Please make sure to allocate
  *     enough space when defining the column using `VARBINARY()`.
  *
- *  2. SecretColumn uses deterministic encryption. This means that multiple plaintexts encrypted
- *     with the same key will result in identical ciphertext. This does not preserve secrecy, but
- *     does permit searching for encrypted values.
  */
 @Target(AnnotationTarget.FIELD)
-annotation class SecretColumn(val keyName: String)
+annotation class SecretColumn(val keyName: String, val indexable: Boolean = true)
 
