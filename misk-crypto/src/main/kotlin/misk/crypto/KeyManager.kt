@@ -1,6 +1,7 @@
 package misk.crypto
 
 import com.google.crypto.tink.Aead
+import com.google.crypto.tink.DeterministicAead
 import com.google.crypto.tink.Mac
 import com.google.crypto.tink.PublicKeySign
 import com.google.crypto.tink.PublicKeyVerify
@@ -52,6 +53,24 @@ sealed class MappedKeyManager<KeyT> constructor(
 class AeadKeyManager @Inject internal constructor(
   injector: Injector
 ) : MappedKeyManager<Aead>(injector, Aead::class.java)
+
+/**
+ * Holds a map of every [DeterministicAead] key name to its primitive listed in the configuration for this app.
+ * Users may use this object to obtain an [DeterministicAead] dynamically:
+ *
+ * ```
+ * val myKey: DeterministicAead = deterministicAeadKeyManager["myKey"]
+ * ```
+ *
+ * Note, that DeterministicAead objects do not provide secrecy to the same level as AEAD do, since
+ * multiple plaintexts encrypted with the same key will produce identical ciphertext. This behavior
+ * is desirable when querying data via its ciphertext (i.e. equality will hold), but an attacker can
+ * detect repeated plaintexts.
+ */
+@Singleton
+class DeterministicAeadKeyManager @Inject internal constructor(
+  injector: Injector
+) : MappedKeyManager<DeterministicAead>(injector, DeterministicAead::class.java)
 
 /**
  * Holds a map of every [Mac] key name to its primitive listed in the configuration for this app.

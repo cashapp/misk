@@ -2,6 +2,7 @@ package misk.crypto
 
 import com.google.crypto.tink.Aead
 import com.google.crypto.tink.CleartextKeysetHandle
+import com.google.crypto.tink.DeterministicAead
 import com.google.crypto.tink.KmsClient
 import com.google.crypto.tink.Mac
 import com.google.crypto.tink.PublicKeySign
@@ -15,6 +16,7 @@ import com.google.crypto.tink.KeysetHandle
 import com.google.crypto.tink.aead.AeadFactory
 import com.google.crypto.tink.aead.AeadKeyTemplates
 import com.google.crypto.tink.aead.KmsEnvelopeAead
+import com.google.crypto.tink.daead.DeterministicAeadFactory
 import com.google.inject.Inject
 import com.google.inject.Provider
 import misk.logging.getLogger
@@ -38,6 +40,18 @@ internal class AeadEnvelopeProvider(val key: Key, val kmsUri: String?) : Provide
 
   companion object {
     val DEK_TEMPLATE: KeyTemplate = AeadKeyTemplates.AES128_GCM
+  }
+}
+
+internal class DeterministicAeadProvider(val key: Key, val kmsUri: String?) : Provider<DeterministicAead> {
+  @Inject lateinit var keyManager: DeterministicAeadKeyManager
+  @Inject lateinit var kmsClient: KmsClient
+
+  override fun get(): DeterministicAead {
+    val keysetHandle = readKey(key, kmsUri, kmsClient)
+    val daeadKey = DeterministicAeadFactory.getPrimitive(keysetHandle)
+
+    return daeadKey.also { keyManager[key.key_name] = it }
   }
 }
 
