@@ -44,8 +44,10 @@ class SecretColumnTest {
     val title = "Dark Star"
     val length = 2918 // longest recorded dark star was 47 minutes and 18 seconds
     val album = "Live/Dead".toByteArray()
+    val reviewer = "Myself".toByteArray()
     transacter.transaction { session ->
-      session.save(DbJerryGarciaSong(title, length, album))
+      val song = DbJerryGarciaSong(title, length, album, reviewer)
+      session.save(song)
     }
     // make sure the data in the database is not the same as the plaintext data
     transacter.transaction { session ->
@@ -62,6 +64,7 @@ class SecretColumnTest {
       assertThat(song.title).isEqualTo(title)
       assertThat(song.length).isEqualTo(length)
       assertThat(song.album).isEqualTo(album)
+      assertThat(song.reviewer).isEqualTo(reviewer)
     }
   }
 
@@ -79,6 +82,7 @@ class SecretColumnTest {
       assertThat(song.title).isEqualTo(title)
       assertThat(song.length).isEqualTo(length)
       assertNull(song.album)
+      assertNull(song.reviewer)
     }
   }
 
@@ -152,9 +156,10 @@ class SecretColumnTest {
     val title = "Dark Star"
     val length = 2918
     val album = "Live/Dead".toByteArray()
+    val reviewer = "Myself".toByteArray()
     transacter.transaction { session ->
       // album here can be anything, just not a validly-encrypted album
-      session.save(DbJerryGarciaSongRaw(title, length, album))
+      session.save(DbJerryGarciaSongRaw(title, length, album, reviewer))
 
       assertThatThrownBy {
         queryFactory.newQuery<JerryGarciaSongQuery>()
@@ -165,7 +170,21 @@ class SecretColumnTest {
   }
 
   @Test
-  fun testGetRecordByEncryptedColumnFails() {
+  fun testGetRecordByEncryptedIndexedColumnSucceeds() {
+    val title = "Dark Star"
+    val length = 2918
+    val album = "Live/Dead".toByteArray()
+    val reviewer = "Reviewer".toByteArray()
+    transacter.transaction { session ->
+      session.save(DbJerryGarciaSong(title, length, album, reviewer))
+      val songs = queryFactory.newQuery<JerryGarciaSongQuery>()
+              .reviewer(reviewer)
+              .query(session)
+      assertThat(songs.size).isEqualTo(1)
+    }
+  }
+  @Test
+  fun testGetRecordByEncryptedNonIndexedColumnFails() {
     val title = "Dark Star"
     val length = 2918
     val album = "Live/Dead".toByteArray()
@@ -175,6 +194,32 @@ class SecretColumnTest {
           .album(album)
           .query(session)
       assertThat(songs.size).isEqualTo(0)
+    }
+  }
+
+  @Test
+  fun testEncryptedIndxedQueryMultiple() {
+    val reviewer = "Some Reviewer".toByteArray()
+    transacter.transaction { session ->
+        session.save(DbJerryGarciaSong("title 1", 123, "album".toByteArray(), reviewer))
+        session.save(DbJerryGarciaSong("title 2", 124, "another album".toByteArray(), reviewer))
+        session.save(DbJerryGarciaSong("title 3", 125, "yet another".toByteArray(), reviewer))
+
+        val songs = queryFactory.newQuery<JerryGarciaSongQuery>()
+                .reviewer(reviewer)
+                .query(session)
+
+        assertThat(songs.size).isEqualTo(3)
+
+        val songRaw = queryFactory.newQuery(JerryGarciaSongRawQuery::class)
+                .query(session)
+
+        // Make sure that all reviewer ciphertexts are equivalent
+        val oneReviewer = songRaw[0].reviewer
+        songRaw.fold(oneReviewer) { acc, songInfo ->
+          assertThat(acc).isEqualTo(songInfo.reviewer)
+          oneReviewer
+        }
     }
   }
 
@@ -196,13 +241,18 @@ class SecretColumnTest {
     var length: Int = 0
 
     @Column(nullable = true)
-    @SecretColumn(keyName = "albumKey")
+    @SecretColumn(keyName="albumKey", indexable=false)
     var album: ByteArray?
 
-    constructor(title: String, length: Int, album: ByteArray? = null) {
+    @Column(nullable = true)
+    @SecretColumn(keyName="reviewerKey")
+    var reviewer: ByteArray?
+
+    constructor(title: String, length: Int, album: ByteArray? = null, reviewer: ByteArray? = null) {
       this.title = title
       this.length = length
       this.album = album
+      this.reviewer = reviewer
     }
   }
 
@@ -222,10 +272,14 @@ class SecretColumnTest {
     @Column(nullable = true)
     var album: ByteArray?
 
-    constructor(title: String, length: Int, album: ByteArray? = null) {
+    @Column(nullable = true)
+    var reviewer: ByteArray?
+
+    constructor(title: String, length: Int, album: ByteArray? = null, reviewer: ByteArray? = null) {
       this.title = title
       this.length = length
       this.album = album
+      this.reviewer = reviewer
     }
   }
 
@@ -235,6 +289,9 @@ class SecretColumnTest {
 
     @Constraint(path = "album")
     fun album(album: ByteArray): JerryGarciaSongQuery
+
+    @Constraint(path = "reviewer")
+    fun reviewer(reviewer: ByteArray): JerryGarciaSongQuery
 
     @Select
     fun query(session: Session): List<SongInfo>
@@ -251,9 +308,10 @@ class SecretColumnTest {
   data class SongInfo(
     @Property("title") val title: String,
     @Property("length") val length: Int,
-    @Property("album") val album: ByteArray?
+    @Property("album") val album: ByteArray?,
+    @Property("reviewer") val reviewer: ByteArray?
   ) : Projection {
-    override fun hashCode(): Int = Objects.hash(title, length, album)
+    override fun hashCode(): Int = Objects.hash(title, length, album, reviewer)
     override fun equals(other: Any?): Boolean {
       if (other == null) {
         return false
@@ -261,7 +319,7 @@ class SecretColumnTest {
       if (other !is SongInfo) {
         return false
       }
-      return title == other.title && length == other.length && Arrays.equals(album, other.album)
+      return title == other.title && length == other.length && Arrays.equals(album, other.album) && Arrays.equals(reviewer, other.reviewer)
     }
   }
 
