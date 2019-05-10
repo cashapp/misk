@@ -19,70 +19,13 @@ import org.hibernate.type.spi.TypeConfiguration
 import org.hibernate.type.spi.TypeConfigurationAware
 import java.util.Objects
 
-internal interface EncryptionAdapter {
-  fun encrypt(plaintext: ByteArray?, associatedData: ByteArray?): ByteArray
-  fun decrypt(ciphertext: ByteArray?, associatedData: ByteArray?): ByteArray
-}
-
-internal class AeadAdapter(typeConfig: TypeConfiguration, keyName: String) : EncryptionAdapter {
-
-  val aead: Aead
-
-  init {
-    val keyManager = typeConfig.metadataBuildingContext.bootstrapContext.serviceRegistry.injector
-        .getInstance(AeadKeyManager::class.java)
-    try {
-      aead = keyManager[keyName]
-    } catch (ex: KeyNotFoundException) {
-      throw HibernateException("Cannot set field, key $keyName not found")
-    }
-  }
-
-  override
-  fun encrypt(plaintext: ByteArray?, associatedData: ByteArray?) : ByteArray {
-    return aead.encrypt(plaintext, associatedData)
-  }
-
-  override
-  fun decrypt(ciphertext: ByteArray?, associatedData: ByteArray?) : ByteArray {
-    return aead.decrypt(ciphertext, associatedData)
-
-  }
-}
-
-internal class DeterministicAeadAdapter(typeConfig: TypeConfiguration, keyName: String)
-  : EncryptionAdapter {
-
-  val daead: DeterministicAead
-
-  init {
-    val keyManager = typeConfig.metadataBuildingContext.bootstrapContext.serviceRegistry.injector
-        .getInstance(DeterministicAeadKeyManager::class.java)
-    try {
-      daead = keyManager[keyName]
-    } catch (ex: KeyNotFoundException) {
-      throw HibernateException("Cannot set field, key $keyName not found")
-    }
-  }
-
-  override
-  fun encrypt(plaintext: ByteArray?, associatedData: ByteArray?) : ByteArray {
-    return daead.encryptDeterministically(plaintext, associatedData)
-  }
-
-  override
-  fun decrypt(ciphertext: ByteArray?, associatedData: ByteArray?) : ByteArray {
-    return daead.decryptDeterministically(ciphertext, associatedData)
-
-  }
-}
-
 internal class SecretColumnType : UserType, ParameterizedType, TypeConfigurationAware {
   companion object {
     const val FIELD_ENCRYPTION_KEY_NAME: String = "key_name"
+    const val FIELD_ENCRYPTION_INDEXABLE: String = "indexable"
     val logger = getLogger<SecretColumnType>()
   }
-  private lateinit var daead: EncryptionAdapter
+  private lateinit var encryptionAdapter: EncryptionAdapter
   private lateinit var keyName: String
   private lateinit var _typeConfiguration: TypeConfiguration
 
@@ -94,7 +37,14 @@ internal class SecretColumnType : UserType, ParameterizedType, TypeConfiguration
 
   override fun setParameterValues(parameters: Properties) {
     keyName = parameters.getProperty(FIELD_ENCRYPTION_KEY_NAME)
-    daead = AeadAdapter(_typeConfiguration, keyName)
+    val indexable = parameters.getProperty(FIELD_ENCRYPTION_INDEXABLE)!!.toBoolean()
+
+    encryptionAdapter = if (indexable) {
+      DeterministicAeadAdapter(_typeConfiguration, keyName)
+    } else {
+      AeadAdapter(_typeConfiguration, keyName)
+    }
+
   }
 
   override fun hashCode(x: Any): Int = (x as ByteArray).hashCode()
@@ -120,7 +70,7 @@ internal class SecretColumnType : UserType, ParameterizedType, TypeConfiguration
     if (value == null) {
       st.setNull(index, Types.VARBINARY)
     } else {
-      val encrypted = daead.encrypt(value as ByteArray, null)
+      val encrypted = encryptionAdapter.encrypt(value as ByteArray, null)
       st.setBytes(index, encrypted)
     }
   }
@@ -133,7 +83,7 @@ internal class SecretColumnType : UserType, ParameterizedType, TypeConfiguration
   ): Any? {
     val result = rs?.getBytes(names[0])
     return result?.let { try {
-        daead.decrypt(it, null)
+        encryptionAdapter.decrypt(it, null)
       } catch (e: java.security.GeneralSecurityException) {
         throw HibernateException(e)
       }
@@ -144,3 +94,58 @@ internal class SecretColumnType : UserType, ParameterizedType, TypeConfiguration
 
   override fun sqlTypes() = intArrayOf(Types.VARBINARY)
 }
+
+internal interface EncryptionAdapter {
+  fun encrypt(plaintext: ByteArray, associatedData: ByteArray?): ByteArray
+  fun decrypt(ciphertext: ByteArray, associatedData: ByteArray?): ByteArray
+}
+
+internal class AeadAdapter(typeConfig: TypeConfiguration, keyName: String) : EncryptionAdapter {
+
+  val aead: Aead
+
+  init {
+    val keyManager = typeConfig.metadataBuildingContext.bootstrapContext.serviceRegistry.injector
+            .getInstance(AeadKeyManager::class.java)
+    try {
+      aead = keyManager[keyName]
+    } catch (ex: KeyNotFoundException) {
+      throw HibernateException("Cannot set field, key $keyName not found")
+    }
+  }
+
+  override fun encrypt(plaintext: ByteArray, associatedData: ByteArray?) : ByteArray {
+    return aead.encrypt(plaintext, associatedData)
+  }
+
+  override fun decrypt(ciphertext: ByteArray, associatedData: ByteArray?) : ByteArray {
+    return aead.decrypt(ciphertext, associatedData)
+  }
+}
+
+internal class DeterministicAeadAdapter(typeConfig: TypeConfiguration, keyName: String)
+  : EncryptionAdapter {
+
+  val daead: DeterministicAead
+
+  init {
+    val keyManager = typeConfig.metadataBuildingContext.bootstrapContext.serviceRegistry.injector
+            .getInstance(DeterministicAeadKeyManager::class.java)
+    try {
+      daead = keyManager[keyName]
+    } catch (ex: KeyNotFoundException) {
+      throw HibernateException("Cannot set field, key $keyName not found")
+    }
+  }
+
+  // DeterministicAEAD throws if associatedData is null, so we pass an empty array if it is.
+
+  override fun encrypt(plaintext: ByteArray, associatedData: ByteArray?) : ByteArray {
+    return daead.encryptDeterministically(plaintext, associatedData ?: byteArrayOf())
+  }
+
+  override fun decrypt(ciphertext: ByteArray, associatedData: ByteArray?) : ByteArray {
+    return daead.decryptDeterministically(ciphertext, associatedData ?: byteArrayOf())
+  }
+}
+
