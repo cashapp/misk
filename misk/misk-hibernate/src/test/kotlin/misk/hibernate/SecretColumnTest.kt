@@ -201,9 +201,9 @@ class SecretColumnTest {
   fun testEncryptedIndxedQueryMultiple() {
     val reviewer = "Some Reviewer".toByteArray()
     transacter.transaction { session ->
-        session.save(DbJerryGarciaSong("title 1", 123, "album".toByteArray(), reviewer))
-        session.save(DbJerryGarciaSong("title 2", 124, "another album".toByteArray(), reviewer))
-        session.save(DbJerryGarciaSong("title 3", 125, "yet another".toByteArray(), reviewer))
+        session.save(DbJerryGarciaSong("Sugaree", 123, "Steal Your Face".toByteArray(), reviewer))
+        session.save(DbJerryGarciaSong("Truckin'", 124, "American Beauty".toByteArray(), reviewer))
+        session.save(DbJerryGarciaSong("Eyes of the World", 125, "Wake of the Flood".toByteArray(), reviewer))
 
         val songs = queryFactory.newQuery<JerryGarciaSongQuery>()
                 .reviewer(reviewer)

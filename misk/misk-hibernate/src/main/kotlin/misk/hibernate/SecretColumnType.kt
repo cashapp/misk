@@ -138,9 +138,8 @@ internal class DeterministicAeadAdapter(typeConfig: TypeConfiguration, keyName: 
     }
   }
 
-  // DeterministicAEAD throws if associatedData is null, so we pass an empty array if it is.
-
   override fun encrypt(plaintext: ByteArray, associatedData: ByteArray?) : ByteArray {
+    // DeterministicAEAD throws if associatedData is null, so we pass an empty array if it is.
     return daead.encryptDeterministically(plaintext, associatedData ?: byteArrayOf())
   }
 
@@ -148,4 +147,3 @@ internal class DeterministicAeadAdapter(typeConfig: TypeConfiguration, keyName: 
     return daead.decryptDeterministically(ciphertext, associatedData ?: byteArrayOf())
   }
 }
-

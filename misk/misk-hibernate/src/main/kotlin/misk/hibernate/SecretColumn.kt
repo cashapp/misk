@@ -1,7 +1,7 @@
 package misk.hibernate
 
 /**
- * [SecretColumn] is an annotation used to get Hibernate to encrypt a field before writing it  to the database.
+ * [SecretColumn] is an annotation used to get Hibernate to encrypt a field before writing it to the database.
  *
  * The [keyName] string is used to specify the name of the key to be used to encrypt and decrypt the value.
  *
@@ -35,9 +35,9 @@ package misk.hibernate
  *
  * *Note*:
  *
- *  1. the resulting ciphertext that is persisted in the database may be much larger in size than
- *     the original plaintext because it also contains some metadata. Please make sure to allocate
- *     enough space when defining the column using `VARBINARY()`.
+ *  The resulting ciphertext that is persisted in the database may be much larger in size than
+ *  the original plaintext because it also contains some metadata. Please make sure to allocate
+ *  enough space when defining the column using `VARBINARY()`.
  *
  */
 @Target(AnnotationTarget.FIELD)
