@@ -7,6 +7,7 @@ import com.google.crypto.tink.Mac
 import com.google.crypto.tink.PublicKeySign
 import com.google.crypto.tink.PublicKeyVerify
 import com.google.crypto.tink.aead.AeadConfig
+import com.google.crypto.tink.daead.DeterministicAeadConfig
 import com.google.crypto.tink.mac.MacConfig
 import com.google.crypto.tink.signature.SignatureConfig
 import com.google.inject.name.Names
@@ -28,6 +29,7 @@ class CryptoTestModule(
   override fun configure() {
 
     AeadConfig.register()
+    DeterministicAeadConfig.register()
     MacConfig.register()
     SignatureConfig.register()
 
