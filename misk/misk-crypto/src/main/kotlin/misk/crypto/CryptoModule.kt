@@ -1,6 +1,7 @@
 package misk.crypto
 
 import com.google.crypto.tink.Aead
+import com.google.crypto.tink.DeterministicAead
 import com.google.crypto.tink.KmsClient
 import com.google.crypto.tink.aead.AeadConfig
 import com.google.crypto.tink.mac.MacConfig
@@ -9,6 +10,7 @@ import misk.inject.KAbstractModule
 import com.google.crypto.tink.Mac
 import com.google.crypto.tink.PublicKeySign
 import com.google.crypto.tink.PublicKeyVerify
+import com.google.crypto.tink.daead.DeterministicAeadConfig
 import com.google.inject.Singleton
 import com.google.inject.name.Names
 import okio.ByteString
@@ -27,6 +29,7 @@ class CryptoModule(
     config.keys ?: return
     requireBinding(KmsClient::class.java)
     AeadConfig.register()
+    DeterministicAeadConfig.register()
     MacConfig.register()
     SignatureConfig.register()
 
@@ -42,6 +45,12 @@ class CryptoModule(
           bind<Aead>()
               .annotatedWith(Names.named(key.key_name))
               .toProvider(AeadEnvelopeProvider(key, config.kms_uri))
+              .`in`(Singleton::class.java)
+        }
+        KeyType.DAEAD -> {
+          bind<DeterministicAead>()
+              .annotatedWith(Names.named(key.key_name))
+              .toProvider(DeterministicAeadProvider(key, config.kms_uri))
               .`in`(Singleton::class.java)
         }
         KeyType.MAC -> {

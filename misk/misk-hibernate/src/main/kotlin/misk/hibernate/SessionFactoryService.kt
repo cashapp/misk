@@ -170,6 +170,8 @@ internal class SessionFactoryService(
       }
       value.typeParameters.setProperty(SecretColumnType.FIELD_ENCRYPTION_KEY_NAME,
           field.getAnnotation(SecretColumn::class.java).keyName)
+      value.typeParameters.setProperty(SecretColumnType.FIELD_ENCRYPTION_INDEXABLE,
+          field.getAnnotation(SecretColumn::class.java).indexable.toString())
     }
   }
 

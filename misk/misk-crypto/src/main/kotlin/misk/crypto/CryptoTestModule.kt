@@ -1,16 +1,17 @@
 package misk.crypto
 
 import com.google.crypto.tink.Aead
+import com.google.crypto.tink.DeterministicAead
 import com.google.crypto.tink.KmsClient
 import com.google.crypto.tink.Mac
 import com.google.crypto.tink.PublicKeySign
 import com.google.crypto.tink.PublicKeyVerify
 import com.google.crypto.tink.aead.AeadConfig
+import com.google.crypto.tink.daead.DeterministicAeadConfig
 import com.google.crypto.tink.mac.MacConfig
 import com.google.crypto.tink.signature.SignatureConfig
 import com.google.inject.name.Names
 import misk.inject.KAbstractModule
-import misk.resources.ResourceLoaderModule
 
 /**
  * This module should be used for testing purposes only.
@@ -28,6 +29,7 @@ class CryptoTestModule(
   override fun configure() {
 
     AeadConfig.register()
+    DeterministicAeadConfig.register()
     MacConfig.register()
     SignatureConfig.register()
 
@@ -39,6 +41,12 @@ class CryptoTestModule(
           bind<Aead>()
               .annotatedWith(Names.named(key.key_name))
               .toProvider(AeadEnvelopeProvider(key,null))
+              .asEagerSingleton()
+        }
+        KeyType.DAEAD -> {
+          bind<DeterministicAead>()
+              .annotatedWith(Names.named(key.key_name))
+              .toProvider(DeterministicAeadProvider(key, null))
               .asEagerSingleton()
         }
         KeyType.MAC -> {
