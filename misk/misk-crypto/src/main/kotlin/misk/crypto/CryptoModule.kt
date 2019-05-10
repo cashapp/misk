@@ -10,6 +10,7 @@ import misk.inject.KAbstractModule
 import com.google.crypto.tink.Mac
 import com.google.crypto.tink.PublicKeySign
 import com.google.crypto.tink.PublicKeyVerify
+import com.google.crypto.tink.daead.DeterministicAeadConfig
 import com.google.inject.Singleton
 import com.google.inject.name.Names
 import okio.ByteString
@@ -28,6 +29,7 @@ class CryptoModule(
     config.keys ?: return
     requireBinding(KmsClient::class.java)
     AeadConfig.register()
+    DeterministicAeadConfig.register()
     MacConfig.register()
     SignatureConfig.register()
 
