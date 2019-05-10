@@ -10,3 +10,6 @@ crypto:
     - key_name: albumKey
       key_type: AEAD
       encrypted_key: "classpath:/secrets/albumKey.txt"
+    - key_name: reviewerKey
+      key_type: DAEAD
+      encrypted_key: "classpath:/secrets/reviewerKey.txt"
