@@ -8,7 +8,8 @@ import com.google.common.util.concurrent.Service.*
 internal class CoordinatedService2(val service: Service) : AbstractService() {
   val upstream = mutableSetOf<CoordinatedService2>()   // upstream services dependent on me
   val downstream = mutableSetOf<CoordinatedService2>() // downstream dependencies
-  val enhancements = mutableSetOf<CoordinatedService2>()
+  val enhancements = mutableSetOf<CoordinatedService2>() // services that enhance me
+  var target : CoordinatedService2? = null
 
   init {
     service.addListener(object : Listener() {
@@ -17,18 +18,16 @@ internal class CoordinatedService2(val service: Service) : AbstractService() {
         synchronized(this) {
           notifyStarted()
         }
-        for (service in downstream) {
-          service.startIfReady()
-        }
+        startDependentServices()
       }
 
       override fun terminated(from: State?) {
+        println("$service is stopping!")
+
         synchronized(this) {
           notifyStopped()
         }
-        for (service in upstream) {
-          service.stopIfReady()
-        }
+        stopDependentServices()
       }
 
       override fun failed(from: State, failure: Throwable) {
@@ -37,15 +36,45 @@ internal class CoordinatedService2(val service: Service) : AbstractService() {
     }, MoreExecutors.directExecutor())
   }
 
-  val isUpstreamRunning: Boolean
-    get() = upstream.none { it.state() == State.RUNNING }
+  private fun startDependentServices() {
+    for (service in downstream) {
+      service.startIfReady()
+    }
+    for (service in enhancements) {
+      service.startIfReady()
+    }
+    target?.startDependentServices()
+  }
 
-  val isDownstreamTerminated: Boolean
-    get() = downstream.none { it.state() == State.TERMINATED }
+  private fun stopDependentServices() {
+    //target?.stopDependentServices()
+    for (service in enhancements) {
+      service.stopIfReady()
+    }
+    for (service in upstream) {
+      service.stopIfReady()
+    }
+  }
 
-  val enhancementsAreRunning: Boolean get() = TODO()
+  fun isRunningSelf(): Boolean {
+    return state() == State.RUNNING
+  }
 
-  val enhancementsAreTerminated: Boolean get() = TODO()
+  fun isRunningWithEnhancements(): Boolean {
+    return isRunningSelf() && enhancements.all { it.isRunningWithEnhancements() }
+  }
+
+  fun isStoppedSelf(): Boolean {
+    return state() == State.TERMINATED
+  }
+
+  fun isStoppedWithEnhancements(): Boolean {
+    return isStoppedSelf() && enhancements.all { it.isStoppedWithEnhancements() }
+  }
+
+  fun isUpstreamRunning(): Boolean = upstream.all { it.isRunningWithEnhancements() }
+
+  fun isDownstreamTerminated(): Boolean = downstream.all { it.state() == State.TERMINATED}
 
   override fun doStart() {
     startIfReady()
@@ -55,11 +84,13 @@ internal class CoordinatedService2(val service: Service) : AbstractService() {
     synchronized(this) {
       if (state() != State.STARTING || service.state() != State.NEW) return
 
-      // Make sure upstream is ready for us to start.
-      if (!isUpstreamRunning) return
+      // If any upstream service or its enhancements are not running, don't start
+      if (upstream.any { !it.isRunningWithEnhancements() }) return
+      if (target != null && !target!!.isRunningSelf()) return
 
       // Actually start.
       service.startAsync()
+
     }
   }
 
@@ -71,8 +102,11 @@ internal class CoordinatedService2(val service: Service) : AbstractService() {
     synchronized(this) {
       if (state() != State.STOPPING || service.state() != State.RUNNING) return
 
-      // Make sure downstream is ready for us to stop.
-      if (!isDownstreamTerminated) return
+      // If any downstream service or its enhancements are still running, don't stop
+      //if (downstream.any { !it.isStoppedWithEnhancements() }) return
+      //if (target != null && !target!!.isStoppedSelf()) return
+      if (enhancements.any { !it.isStoppedSelf() }) return
+      if (downstream.any { !it.isStoppedWithEnhancements() }) return
 
       // Actually stop.
       service.stopAsync()
@@ -91,24 +125,14 @@ internal class CoordinatedService2(val service: Service) : AbstractService() {
   }
 
   /**
-   * Adds the provided list of services as producers upstream.
-   *
-   * I am not sure if this is useful to have?
-   */
-  fun addToUpstream(services: List<CoordinatedService2>) {
-    // Satisfy all producers with this consumer
-    upstream.addAll(services)
-    services.forEach { it.downstream.add(this) }
-  }
-
-  /**
    * Adds indicated services as "enhancements" to this service.
    *
    * Enhancements will start after the coordinated service is running, and stop before it stops.
    */
   fun enhanceWith(services: List<CoordinatedService2>) {
     enhancements.addAll(services)
-    services.forEach { it.addToDownstream(listOf(this)) }
+    services.forEach { it.target = this }
+//    services.forEach { it.addToDownstream(listOf(this)) }
   }
 
   /**
