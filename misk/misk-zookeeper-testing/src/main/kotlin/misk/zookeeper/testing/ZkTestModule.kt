@@ -24,12 +24,12 @@ class ZkTestModule(
   override fun configure() {
     val keystorePath = this::class.java.getResource("/zookeeper/keystore.jks").path
     val truststorePath = this::class.java.getResource("/zookeeper/truststore.jks").path
-
-    install(ZookeeperModule(ZookeeperConfig(
+    val config = ZookeeperConfig(
         zk_connect = "127.0.0.1:$zkPortKey",
         cert_store = CertStoreConfig(keystorePath, "changeit", SslLoader.FORMAT_JKS),
-        trust_store = TrustStoreConfig(truststorePath, "changeit", SslLoader.FORMAT_JKS)),
-        qualifier))
+        trust_store = TrustStoreConfig(truststorePath, "changeit", SslLoader.FORMAT_JKS))
+
+    install(ZookeeperModule(config, qualifier))
 
     multibind<Service>().toInstance(StartZookeeperService(qualifier))
     val curator = getProvider(keyOf<CuratorFramework>(qualifier))

@@ -37,7 +37,7 @@ internal class ZkLeaseManager @Inject internal constructor(
   @ForZkLease curator: CuratorFramework
 ) : AbstractExecutionThreadService(), LeaseManager, DependentService {
   override val consumedKeys = setOf(keyOf<ZkService>(ForZkLease::class), keyOf<Cluster>())
-  override val producedKeys = setOf(ZkLeaseModule.leaseManagerKey)
+  override val producedKeys = setOf(ZkLeaseCommonModule.leaseManagerKey)
 
   internal val leaseNamespace = "$SERVICES_NODE/${appName.asZkNamespace}/leases"
   internal val client = lazy { curator.usingNamespace(leaseNamespace) }
