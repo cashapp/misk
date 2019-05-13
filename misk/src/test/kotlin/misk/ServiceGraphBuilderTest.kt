@@ -9,32 +9,24 @@ import org.junit.jupiter.api.Test
 import kotlin.test.assertFailsWith
 
 class ServiceGraphBuilderTest {
+  val a = NamedKey("Service A")
+  val b = NamedKey("Service B")
+  val c = NamedKey("Service C")
+  val d = NamedKey("Service D")
+  val e = NamedKey("Service E")
+  val unregistered = NamedKey("Unregistered Service")
+  val enhancementA = NamedKey("Enhancement A")
+  val enhancementB = NamedKey("Enhancement B")
+  val enhancementC = NamedKey("Enhancement C")
 
   @Test
-  fun happyPath() {
-    val target = StringBuilder()
+  fun happyPathNoEnhancements() {
+    val script = startUpAndShutDown(listOf(a, b, c)) {
+      addDependency(c.key, a.key)
+      addDependency(c.key, b.key)
+    }
 
-    val keyA = key("a")
-    val keyB = key("b")
-    val keyC = key("c")
-
-    val builder = ServiceGraphBuilder()
-    builder.addService(keyA, AppendingService(target, "Service A"))
-    builder.addService(keyB, AppendingService(target, "Service B"))
-    builder.addService(keyC, AppendingService(target, "Service C"))
-
-    builder.addDependency(keyC, keyA)
-    builder.addDependency(keyC, keyB)
-
-    val serviceManager = builder.build()
-
-    serviceManager.startAsync()
-    serviceManager.awaitHealthy()
-    target.append("healthy\n")
-    serviceManager.stopAsync()
-    serviceManager.awaitStopped()
-
-    assertThat(target.toString()).isEqualTo("""
+    assertThat(script).isEqualTo("""
         |starting Service A
         |starting Service B
         |starting Service C
@@ -46,75 +38,33 @@ class ServiceGraphBuilderTest {
   }
 
   @Test
-  fun enhancer() {
-    val target = StringBuilder()
+  fun enhancementsAndDependencies() {
 
-    val keyA = key("a")
-    val keyAEnhancement = key("a enhancement")
-    val keyC = key("c")
+    val script = startUpAndShutDown(listOf(a, c, enhancementA)) { _ ->
+      addEnhancement(a.key, enhancementA.key)
+      addDependency(c.key, a.key)
+    }
 
-    val builder = ServiceGraphBuilder()
-    builder.addService(keyA, AppendingService(target, "Service A"))
-    builder.addService(keyC, AppendingService(target, "Service C"))
-    builder.addService(keyAEnhancement, AppendingService(target, "Service A enhancement"))
-
-    builder.addEnhancement(keyA, keyAEnhancement)
-    builder.addDependency(keyC, keyA)
-
-    val serviceManager = builder.build()
-
-    serviceManager.startAsync()
-    serviceManager.awaitHealthy()
-    target.append("healthy\n")
-    serviceManager.stopAsync()
-    serviceManager.awaitStopped()
-
-    assertThat(target.toString()).isEqualTo("""
+    assertThat(script).isEqualTo("""
         |starting Service A
-        |starting Service A enhancement
+        |starting Enhancement A
         |starting Service C
         |healthy
         |stopping Service C
-        |stopping Service A enhancement
+        |stopping Enhancement A
         |stopping Service A
         |""".trimMargin())
   }
 
   @Test fun chainsOfDependencies() {
-    val target = StringBuilder()
+    val script = startUpAndShutDown(listOf(a, b, c, d, e)) {
+      addDependency(b.key, c.key)
+      addDependency(c.key, a.key)
+      addDependency(d.key, b.key)
+      addDependency(e.key, d.key)
+    }
 
-    val a = AppendingService(target, "Service A")
-    val b = AppendingService(target, "Service B")
-    val c = AppendingService(target, "Service C")
-    val d = AppendingService(target, "Service D")
-    val e = AppendingService(target, "Service E")
-
-    val keyA = key("a")
-    val keyB = key("b")
-    val keyC = key("c")
-    val keyD = key("d")
-    val keyE = key("e")
-
-    val builder = ServiceGraphBuilder()
-    builder.addService(keyA, a)
-    builder.addService(keyB, b)
-    builder.addService(keyC, c)
-    builder.addService(keyD, d)
-    builder.addService(keyE, e)
-
-    builder.addDependency(keyB, keyC)
-    builder.addDependency(keyC, keyA)
-    builder.addDependency(keyD, keyB)
-    builder.addDependency(keyE, keyD)
-
-    val serviceManager = builder.build()
-    serviceManager.startAsync()
-    serviceManager.awaitHealthy()
-    target.append("healthy\n")
-    serviceManager.stopAsync()
-    serviceManager.awaitStopped()
-
-    assertThat(target.toString()).isEqualTo("""
+    assertThat(script).isEqualTo("""
         |starting Service A
         |starting Service C
         |starting Service B
@@ -130,100 +80,233 @@ class ServiceGraphBuilderTest {
   }
 
   @Test fun treesOfDependencies() {
-    TODO()
-//    val target = StringBuilder()
-//
-//    val a = CoordinatedServiceTest.AppendingService(target, "Service A", produced = setOf("a"),
-//        consumed = setOf())
-//    val b = CoordinatedServiceTest.AppendingService(target, "Service B", produced = setOf("b"),
-//        consumed = setOf())
-//    val c = CoordinatedServiceTest.AppendingService(target, "Service C", produced = setOf("c"),
-//        consumed = setOf("a", "b"))
-//    val d = CoordinatedServiceTest.AppendingService(target, "Service D", produced = setOf("d"),
-//        consumed = setOf("c", "e"))
-//    val e = CoordinatedServiceTest.AppendingService(target, "Service E", produced = setOf("e"),
-//        consumed = setOf("a", "c"))
-//
-//    val serviceManager = CoordinatedService.coordinate(listOf(a, b, c, d, e))
-//    serviceManager.startAsync()
-//    serviceManager.awaitHealthy()
-//    target.append("healthy\n")
-//    serviceManager.stopAsync()
-//    serviceManager.awaitStopped()
-//
-//    assertThat(target.toString()).isEqualTo("""
-//        |starting Service A
-//        |starting Service B
-//        |starting Service C
-//        |starting Service E
-//        |starting Service D
-//        |healthy
-//        |stopping Service D
-//        |stopping Service E
-//        |stopping Service C
-//        |stopping Service A
-//        |stopping Service B
-//        |""".trimMargin())
+    val script = startUpAndShutDown(listOf(a, b, c, d, e)) {
+      addDependency(c.key, b.key)
+      addDependency(c.key, a.key)
+      addDependency(d.key, c.key)
+      addDependency(d.key, e.key)
+      addDependency(e.key, a.key)
+      addDependency(e.key, c.key)
+    }
+    assertThat(script).isEqualTo("""
+        |starting Service A
+        |starting Service B
+        |starting Service C
+        |starting Service E
+        |starting Service D
+        |healthy
+        |stopping Service D
+        |stopping Service E
+        |stopping Service C
+        |stopping Service A
+        |stopping Service B
+        |""".trimMargin())
   }
 
   @Test fun unsatisfiedDependency() {
-    TODO()
-//    val target = StringBuilder()
-//
-//    val a = CoordinatedServiceTest.AppendingService(target, "Service A", produced = setOf("a"))
-//    val c = CoordinatedServiceTest.AppendingService(target, "Service C", consumed = setOf("a", "b"))
-//
-//    assertThat(assertFailsWith<IllegalArgumentException> {
-//      CoordinatedService.coordinate(listOf(a, c))
-//    }).hasMessage("""
-//        |Service dependency graph has problems:
-//        |  Service C requires ${key("b")} but no service produces it""".trimMargin())
+    val failure = buildAndExpectFailure(listOf(a, c)) {
+      addDependency(c.key, a.key)
+      addDependency(c.key, unregistered.key) // unregistered doesn't exist
+    }
+    assertThat(failure).hasMessage("Service C requires ${unregistered.key} but no such service was "
+        + "registered with the builder")
   }
 
-
   @Test fun dependencyCycle() {
-    TODO()
-//    val target = StringBuilder()
-//
-//    val a = CoordinatedServiceTest.AppendingService(target, "Service A", produced = setOf("a"),
-//        consumed = setOf("d"))
-//    val b = CoordinatedServiceTest.AppendingService(target, "Service B", produced = setOf("b"),
-//        consumed = setOf("c"))
-//    val c = CoordinatedServiceTest.AppendingService(target, "Service C", produced = setOf("c"),
-//        consumed = setOf("a"))
-//    val d = CoordinatedServiceTest.AppendingService(target, "Service D", produced = setOf("d"),
-//        consumed = setOf("c"))
-//
-//    assertThat(assertFailsWith<IllegalArgumentException> {
-//      CoordinatedService.coordinate(listOf(a, b, c, d))
-//    }).hasMessage("""
-//        |Service dependency graph has problems:
-//        |  dependency cycle: Service A -> Service D -> Service C -> Service A""".trimMargin())
+    val failure = buildAndExpectFailure(listOf(a, b, c, d)) {
+      addDependency(a.key, d.key)
+      addDependency(b.key, c.key)
+      addDependency(c.key, a.key)
+      addDependency(d.key, c.key)
+    }
+
+    assertThat(failure).hasMessage("Dependency cycle: Service A -> Service D -> Service C -> "
+        + "Service A")
   }
 
   @Test fun failuresPropagate() {
-    TODO()
-//    val target = StringBuilder()
-//
-//    val a = object : AbstractService(), DependentService {
-//      override val consumedKeys: Set<Key<*>> = setOf()
-//      override val producedKeys: Set<Key<*>> = setOf(key("a"))
-//      override fun doStart() = throw Exception("boom!")
-//      override fun doStop() = Unit
-//      override fun toString() = "FailingService"
-//    }
-//
-//    val b = CoordinatedServiceTest.AppendingService(target, "Service B", consumed = setOf("a"))
-//
-//    val serviceManager = CoordinatedService.coordinate(listOf(a, b))
-//    serviceManager.startAsync()
-//    assertFailsWith<IllegalStateException> {
-//      serviceManager.awaitHealthy()
-//    }
+    val bomb = object : AbstractService() {
+      override fun doStart() = throw Exception("boom!")
+      override fun doStop() = Unit
+      override fun toString() = "FailingService"
+    }
+
+    assertFailsWith<IllegalStateException> {
+      startUpAndShutDown(listOf(b)) {
+        addService(a.key, bomb)
+        addDependency(b.key, a.key)
+      }
+    }
   }
 
+  @Test fun emptyBuilder() {
+    buildAndExpectFailure(null) {}
+  }
 
-  /** Appends messages to `target` on start up and shut down. */
+  @Test fun transitiveEnhancements() {
+    /*
+
+    A
+      enhanced by B
+                    enhanced by C
+      depended on by D
+
+      should be A, B, C, D
+
+
+     */
+    TODO()
+  }
+
+  @Test fun enhancementDependency() {
+    /*
+
+    A
+      enhanced by B
+                    depended on by C
+
+      should be A, B, C
+
+     */
+    TODO()
+  }
+
+  @Test fun transitiveEnhancementDependency() {
+    /*
+
+    A
+      enhanced by B
+                    enhanced by C
+                                  depended on by D
+
+      should be A, B, C, D
+
+     */
+    TODO()
+  }
+
+  @Test fun enhancementCannotHaveMultipleTargets() {
+    /*
+
+    A
+      enhanced by B
+    C
+      enhanced by B
+
+    BOOM
+
+     */
+    TODO()
+  }
+
+  @Test fun dependingServiceHasEnhancements() {
+    /*
+
+    A
+      depended on by B
+                       enhanced by C
+
+    A, B, C
+
+     */
+    TODO()
+  }
+
+  @Test fun multipleEnhancements() {
+    /*
+
+    A
+      enhanced by B
+      enhanced by C
+                    depended on by D
+
+    A, B, C, D
+
+     */
+    TODO()
+  }
+
+  @Test fun enhancementDependencyCycle() {
+    /*
+
+    A
+      enhanced by B
+                    depended on by A
+
+    BOOM
+
+     */
+    TODO()
+  }
+
+  @Test fun cyclicEnhancements() {
+    /*
+
+    A
+      enhanced by B
+                    enhanced by A
+
+    BOOM
+
+     */
+    TODO()
+  }
+
+  @Test fun selfEnhancement() {
+    /*
+
+    A
+      enhanced by A
+
+    BOOM
+
+     */
+    TODO()
+  }
+
+  private fun startUpAndShutDown(
+    services: List<NamedKey>?,
+    block: ServiceGraphBuilder.(target: StringBuilder) -> Unit
+  ): String {
+    val target = StringBuilder()
+    val builder = newBuilderWithServices(target, services)
+    builder.block(target)
+    val serviceManager = builder.build()
+
+    serviceManager.startAsync()
+    serviceManager.awaitHealthy()
+    target.append("healthy\n")
+    serviceManager.stopAsync()
+    serviceManager.awaitStopped()
+
+    return target.toString()
+  }
+
+  private fun buildAndExpectFailure(
+    services: List<NamedKey>?,
+    block: ServiceGraphBuilder.(target: StringBuilder) -> Unit
+  ): IllegalStateException {
+    return assertFailsWith<IllegalStateException> {
+      val target = StringBuilder()
+      val builder = newBuilderWithServices(target, services)
+      builder.block(target)
+
+      builder.build() // should fail
+    }
+  }
+
+  private fun newBuilderWithServices(
+    target: StringBuilder,
+    services: List<NamedKey>?
+  ): ServiceGraphBuilder {
+    val builder = ServiceGraphBuilder()
+    services?.forEach { builder.addService(it.key, AppendingService(target, it.name)) }
+    return builder
+  }
+
+  /**
+   * Service that appends messages to its `target` on start up and shut down.
+   */
   class AppendingService(
     val target: StringBuilder,
     val name: String
@@ -242,6 +325,11 @@ class ServiceGraphBuilderTest {
     override fun toString() = name
   }
 
-  fun key(name: String): Key<*> = Key.get(Service::class.java, Names.named(name))
+  /**
+   * Data class that pairs a Key with its name, leaving the name readable by the universe.
+   */
+  data class NamedKey(val name: String) {
+    val key: Key<*> = Key.get(Service::class.java, Names.named(name))
+  }
 
 }
