@@ -130,7 +130,6 @@ internal class CoordinatedService2(val service: Service) : AbstractService() {
   fun enhanceWith(services: List<CoordinatedService2>) {
     enhancements.addAll(services)
     services.forEach { it.target = this }
-//    services.forEach { it.addToDownstream(listOf(this)) }
   }
 
   /**
@@ -139,9 +138,19 @@ internal class CoordinatedService2(val service: Service) : AbstractService() {
   fun requireNoCycles() {
     val validityMap = mutableMapOf<CoordinatedService2, CycleValidity>()
     for (service in this.downstream) {
-      val cycle = service.findCycle(validityMap)
+      val cycle = service.findDependencyCycle(validityMap)
       if (cycle != null) {
         throw IllegalStateException("Dependency cycle: ${cycle.joinToString(" -> ")}")
+      }
+    }
+  }
+
+  fun requireNoCyclicEnhancements() {
+    val validityMap = mutableMapOf<CoordinatedService2, CycleValidity>()
+    if (target != null) {
+      val cycle = this.findEnhancementCycle(validityMap)
+      if (cycle != null) {
+        throw java.lang.IllegalStateException("Enhancement cycle: ${cycle.joinToString (" -> " )}")
       }
     }
   }
@@ -157,7 +166,7 @@ internal class CoordinatedService2(val service: Service) : AbstractService() {
      * Returns the elements of a dependency cycle, or null if there are no cycles originating at
      * a given node.
      */
-    fun CoordinatedService2.findCycle(
+    fun CoordinatedService2.findDependencyCycle(
       validityMap: MutableMap<CoordinatedService2, CycleValidity>
     ): MutableList<CoordinatedService2>? {
       when (validityMap[this]) {
@@ -166,7 +175,28 @@ internal class CoordinatedService2(val service: Service) : AbstractService() {
         else -> {
           validityMap[this] = CycleValidity.CHECKING_FOR_CYCLES
           for (service in downstream) {
-            val cycle = service.findCycle(validityMap)
+            val cycle = service.findDependencyCycle(validityMap)
+            if (cycle != null) {
+              cycle.add(this)
+              return cycle
+            }
+          }
+          validityMap[this] = CycleValidity.NO_CYCLES
+          return null
+        }
+      }
+    }
+
+    fun CoordinatedService2.findEnhancementCycle(
+      validityMap: MutableMap<CoordinatedService2, CycleValidity>
+    ): MutableList<CoordinatedService2>? {
+      when (validityMap[this]) {
+        CycleValidity.NO_CYCLES -> return null
+        CycleValidity.CHECKING_FOR_CYCLES -> return mutableListOf(this)
+        else -> {
+          validityMap[this] = CycleValidity.CHECKING_FOR_CYCLES
+          if (target != null) {
+            val cycle = target!!.findEnhancementCycle(validityMap)
             if (cycle != null) {
               cycle.add(this)
               return cycle

@@ -5,6 +5,7 @@ import com.google.common.util.concurrent.Service
 import com.google.inject.Key
 import com.google.inject.name.Names
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.fail
 import org.junit.jupiter.api.Test
 import kotlin.test.assertFailsWith
 
@@ -124,6 +125,15 @@ class ServiceGraphBuilderTest {
         + "Service A")
   }
 
+  @Test fun simpleDependencyCycle() {
+    val failure = buildAndExpectFailure(listOf(a, b, c, d)) {
+      addDependency(b.key, a.key)
+      addDependency(a.key, b.key)
+    }
+
+    assertThat(failure).hasMessage("Dependency cycle: Service A -> Service B -> Service A")
+  }
+
   @Test fun failuresPropagate() {
     val bomb = object : AbstractService() {
       override fun doStart() = throw Exception("boom!")
@@ -145,123 +155,181 @@ class ServiceGraphBuilderTest {
 
   @Test fun transitiveEnhancements() {
     /*
-
     A
       enhanced by B
                     enhanced by C
       depended on by D
-
-      should be A, B, C, D
-
-
+     -> should be A, B, C, D
      */
+    val script = startUpAndShutDown(listOf(a, b, c, d)) {
+      addEnhancement(a.key, b.key)
+      addEnhancement(b.key, c.key)
+      addDependency(d.key, a.key)
+    }
+    // not sure about this! my expectation might be wrong, or the actual might also be correct!
+    assertThat(script).isEqualTo("""
+    |starting Service A
+    |starting Service B
+    |starting Service C
+    |starting Service D
+    |healthy
+    |stopping Service D
+    |stopping Service C
+    |stopping Service B
+    |stopping Service A
+    |""".trimMargin())
     TODO()
   }
 
   @Test fun enhancementDependency() {
     /*
-
     A
       enhanced by B
                     depended on by C
-
-      should be A, B, C
-
+     -> should be A, B, C
      */
-    TODO()
+    val script = startUpAndShutDown(listOf(a, b, c)) {
+      addEnhancement(a.key, b.key)
+      addDependency(c.key, b.key)
+    }
+    assertThat(script).isEqualTo("""
+      |starting Service A
+      |starting Service B
+      |starting Service C
+      |healthy
+      |stopping Service C
+      |stopping Service B
+      |stopping Service A
+      |""".trimMargin())
   }
 
   @Test fun transitiveEnhancementDependency() {
     /*
-
     A
       enhanced by B
                     enhanced by C
                                   depended on by D
-
-      should be A, B, C, D
-
+     -> should be A, B, C, D
      */
-    TODO()
+    val script = startUpAndShutDown(listOf(a, b, c, d)) {
+      addEnhancement(a.key, b.key)
+      addEnhancement(b.key, c.key)
+      addDependency(d.key, c.key)
+    }
+    assertThat(script).isEqualTo("""
+      |starting Service A
+      |starting Service B
+      |starting Service C
+      |starting Service D
+      |healthy
+      |stopping Service D
+      |stopping Service C
+      |stopping Service B
+      |stopping Service A
+      |""".trimMargin())
   }
 
   @Test fun enhancementCannotHaveMultipleTargets() {
     /*
-
     A
       enhanced by B
     C
       enhanced by B
-
-    BOOM
-
+     -> BOOM
      */
-    TODO()
+    val failure = buildAndExpectFailure(listOf(a, b, c)) {
+      addEnhancement(a.key, b.key)
+      addEnhancement(c.key, b.key)
+    }
+    assertThat(failure).hasMessage("Enhancement ${b.key} cannot be applied more than once")
   }
 
   @Test fun dependingServiceHasEnhancements() {
     /*
-
     A
       depended on by B
                        enhanced by C
-
-    A, B, C
-
+     -> A, B, C
      */
-    TODO()
+    val script = startUpAndShutDown(listOf(a, b, c)) {
+      addDependency(b.key, a.key)
+      addEnhancement(b.key, c.key)
+    }
+    assertThat(script).isEqualTo("""
+      |starting Service A
+      |starting Service B
+      |starting Service C
+      |healthy
+      |stopping Service C
+      |stopping Service B
+      |stopping Service A
+      |""".trimMargin())
   }
 
   @Test fun multipleEnhancements() {
     /*
-
     A
       enhanced by B
       enhanced by C
                     depended on by D
-
-    A, B, C, D
-
+     -> A, B, C, D
      */
-    TODO()
+    val script = startUpAndShutDown(listOf(a, b, c, d)) {
+      addEnhancement(a.key, b.key)
+      addEnhancement(a.key, c.key)
+      addDependency(d.key, c.key)
+    }
+    assertThat(script).isEqualTo("""
+      |starting Service A
+      |starting Service B
+      |starting Service C
+      |starting Service D
+      |healthy
+      |stopping Service B
+      |stopping Service D
+      |stopping Service C
+      |stopping Service A
+      |""".trimMargin())
   }
 
   @Test fun enhancementDependencyCycle() {
-    /*
-
-    A
-      enhanced by B
-                    depended on by A
-
-    BOOM
-
-     */
-    TODO()
+      /*
+      A
+        enhanced by B
+                      depended on by A
+       -> BOOM
+       */
+      val failure = buildAndExpectFailure(listOf(a, b)) {
+        addEnhancement(a.key, b.key)
+        addDependency(a.key, b.key)
+      }
+    TODO(failure.toString())
   }
 
   @Test fun cyclicEnhancements() {
     /*
-
     A
       enhanced by B
                     enhanced by A
-
-    BOOM
-
+     -> BOOM
      */
-    TODO()
+    val failure = buildAndExpectFailure(listOf(a, b)) {
+      addEnhancement(a.key, b.key)
+      addEnhancement(b.key, a.key)
+    }
+    assertThat(failure).hasMessage("Enhancement cycle: Service A -> Service B -> Service A")
   }
 
   @Test fun selfEnhancement() {
     /*
-
     A
       enhanced by A
-
-    BOOM
-
+     -> BOOM
      */
-    TODO()
+    val failure = buildAndExpectFailure(listOf(a)) {
+      addEnhancement(a.key, a.key)
+    }
+    assertThat(failure).hasMessage("Enhancement cycle: ${a.name} -> ${a.name}")
   }
 
   private fun startUpAndShutDown(

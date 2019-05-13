@@ -64,11 +64,13 @@ class ServiceGraphBuilder {
    * Builds a service manager.
    */
   fun build(): ServiceManager {
-    if (serviceMap.isEmpty()) {
-      throw IllegalStateException("ServiceGraphBuilder cannot be built without registered services")
+    check(serviceMap.isNotEmpty()) {
+      "ServiceGraphBuilder cannot be built without registered services"
     }
-    checkDependencies()
     linkDependencies()
+    checkCycles()
+    checkDependencies()
+    checkEnhancements()
     return ServiceManager(serviceMap.values)
   }
 
@@ -82,7 +84,13 @@ class ServiceGraphBuilder {
       val dependencies = dependencyMap[key]?.map { serviceMap[it]!! } ?: listOf()
 
       service.addToDownstream(dependencies)
+    }
+  }
+
+  private fun checkCycles() {
+    for ((_, service) in serviceMap) {
       service.requireNoCycles() // throws
+      service.requireNoCyclicEnhancements() // throws
     }
   }
 
@@ -98,6 +106,17 @@ class ServiceGraphBuilder {
         throw IllegalStateException("${stringBuilder.toString()} requires $big but no such service "
             + "was registered with the builder")
       }
+    }
+  }
+
+  // check that no enhancement has been applied more than once
+  private fun checkEnhancements() {
+    val enhancementList = mutableListOf<Key<*>>()
+    for ((_, set) in enhancementMap.asMap()) {
+      enhancementList.addAll(set)
+    }
+    enhancementList.groupingBy { it }.eachCount().forEach {
+      check(it.value <= 1) { "Enhancement ${it.key} cannot be applied more than once" }
     }
   }
 
