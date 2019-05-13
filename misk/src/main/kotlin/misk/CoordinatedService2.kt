@@ -14,7 +14,6 @@ internal class CoordinatedService2(val service: Service) : AbstractService() {
   init {
     service.addListener(object : Listener() {
       override fun running() {
-        println("$service is running!")
         synchronized(this) {
           notifyStarted()
         }
@@ -22,8 +21,6 @@ internal class CoordinatedService2(val service: Service) : AbstractService() {
       }
 
       override fun terminated(from: State?) {
-        println("$service is stopping!")
-
         synchronized(this) {
           notifyStopped()
         }
@@ -140,17 +137,12 @@ internal class CoordinatedService2(val service: Service) : AbstractService() {
    * Checks for dependency cycles and throws if one is detected.
    */
   fun requireNoCycles() {
-    val errors = mutableListOf<String>()
     val validityMap = mutableMapOf<CoordinatedService2, CycleValidity>()
     for (service in this.downstream) {
       val cycle = service.findCycle(validityMap)
       if (cycle != null) {
-        errors.add("dependency cycle: ${cycle.joinToString("->")}")
-        break
+        throw IllegalStateException("Dependency cycle: ${cycle.joinToString(" -> ")}")
       }
-    }
-    require(errors.isEmpty()) {
-      "Service dependency graph has problems:\n  ${errors.joinToString("\n  ")}"
     }
   }
 

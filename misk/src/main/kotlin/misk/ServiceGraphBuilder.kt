@@ -7,8 +7,7 @@ import com.google.common.collect.SetMultimap
 import com.google.common.util.concurrent.Service
 import com.google.common.util.concurrent.ServiceManager
 import com.google.inject.Key
-
-// MultiMap -> Map of Sets
+import java.lang.IllegalStateException
 
 /**
  * Builds a graph of CoordinatedService2s which defer start up and shut down until their dependent
@@ -65,8 +64,11 @@ class ServiceGraphBuilder {
    * Builds a service manager.
    */
   fun build(): ServiceManager {
-    linkDependencies()
+    if (serviceMap.isEmpty()) {
+      throw IllegalStateException("ServiceGraphBuilder cannot be built without registered services")
+    }
     checkDependencies()
+    linkDependencies()
     return ServiceManager(serviceMap.values)
   }
 
@@ -85,9 +87,18 @@ class ServiceGraphBuilder {
   }
 
   // check that each service has its dependencies met
-  // (i.e. no one service requires a dependency that doesn't exist)
+  // (i.e. no one service requires a dependency or enhancement that doesn't exist)
   private fun checkDependencies() {
-
+    for ((big, dependents) in dependencyMap.asMap()) {
+      if (serviceMap[big] == null) {
+        val stringBuilder = StringBuilder()
+        for (dependent in dependents) {
+          stringBuilder.append("${serviceMap[dependent]}")
+        }
+        throw IllegalStateException("${stringBuilder.toString()} requires $big but no such service "
+            + "was registered with the builder")
+      }
+    }
   }
 
   private fun enhanceService(key: Key<*>) {
