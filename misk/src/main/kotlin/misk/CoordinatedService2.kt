@@ -47,29 +47,35 @@ internal class CoordinatedService2(val service: Service) : AbstractService() {
   }
 
   private fun stopDependentServices() {
-    //target?.stopDependentServices()
-    for (service in enhancements) {
-      service.stopIfReady()
-    }
+    target?.stopIfReady()
+
     for (service in upstream) {
-      service.stopIfReady()
+      service.stopDependentServices()
     }
   }
 
-  fun isRunningSelf(): Boolean {
+  private fun isRunningSelf(): Boolean {
     return state() == State.RUNNING
   }
 
-  fun isRunningWithEnhancements(): Boolean {
+  private fun isRunningWithEnhancements(): Boolean {
     return isRunningSelf() && enhancements.all { it.isRunningWithEnhancements() }
   }
 
-  fun isStoppedSelf(): Boolean {
+  private fun isStoppedSelf(): Boolean {
     return state() == State.TERMINATED
   }
 
-  fun isStoppedWithEnhancements(): Boolean {
-    return isStoppedSelf() && enhancements.all { it.isStoppedWithEnhancements() }
+  private fun canStart() : Boolean {
+    if (upstream.any { !it.isRunningWithEnhancements() }) return false
+    if (target != null && !target!!.isRunningSelf()) return false
+    return true
+  }
+
+  private fun canStop() : Boolean {
+    if (enhancements.any { !it.isStoppedSelf() }) return false
+    if (downstream.any {!it.isStoppedSelf() }) return false
+    return true
   }
 
   fun isUpstreamRunning(): Boolean = upstream.all { it.isRunningWithEnhancements() }
@@ -80,17 +86,15 @@ internal class CoordinatedService2(val service: Service) : AbstractService() {
     startIfReady()
   }
 
-  fun startIfReady() {
+  private fun startIfReady() {
     synchronized(this) {
       if (state() != State.STARTING || service.state() != State.NEW) return
 
       // If any upstream service or its enhancements are not running, don't start
-      if (upstream.any { !it.isRunningWithEnhancements() }) return
-      if (target != null && !target!!.isRunningSelf()) return
+      if (!canStart()) return
 
       // Actually start.
       service.startAsync()
-
     }
   }
 
@@ -98,15 +102,12 @@ internal class CoordinatedService2(val service: Service) : AbstractService() {
     stopIfReady()
   }
 
-  fun stopIfReady() {
+  private fun stopIfReady() {
     synchronized(this) {
       if (state() != State.STOPPING || service.state() != State.RUNNING) return
 
       // If any downstream service or its enhancements are still running, don't stop
-      //if (downstream.any { !it.isStoppedWithEnhancements() }) return
-      //if (target != null && !target!!.isStoppedSelf()) return
-      if (enhancements.any { !it.isStoppedSelf() }) return
-      if (downstream.any { !it.isStoppedWithEnhancements() }) return
+      if (!canStop()) return
 
       // Actually stop.
       service.stopAsync()
