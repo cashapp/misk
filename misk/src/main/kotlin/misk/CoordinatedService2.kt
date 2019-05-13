@@ -50,7 +50,7 @@ internal class CoordinatedService2(val service: Service) : AbstractService() {
     target?.stopIfReady()
 
     for (service in upstream) {
-      service.stopDependentServices()
+      service.stopIfReady()
     }
   }
 

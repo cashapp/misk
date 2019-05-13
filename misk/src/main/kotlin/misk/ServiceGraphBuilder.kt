@@ -26,6 +26,7 @@ class ServiceGraphBuilder {
   /**
    * Registers a service with this ServiceGraphBuilder.
    * A service must be added first before it can have dependencies or enhancements applied.
+   * Keys must be unique. If a key is reused, then the original key-service pair will be replaced.
    */
   fun addService(key: Key<*>, service: Service) {
     serviceMap[key] = CoordinatedService2(service)
@@ -65,6 +66,7 @@ class ServiceGraphBuilder {
    */
   fun build(): ServiceManager {
     linkDependencies()
+    checkDependencies()
     return ServiceManager(serviceMap.values)
   }
 
@@ -80,6 +82,12 @@ class ServiceGraphBuilder {
       service.addToDownstream(dependencies)
       service.requireNoCycles() // throws
     }
+  }
+
+  // check that each service has its dependencies met
+  // (i.e. no one service requires a dependency that doesn't exist)
+  private fun checkDependencies() {
+
   }
 
   private fun enhanceService(key: Key<*>) {
