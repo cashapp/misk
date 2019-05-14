@@ -181,6 +181,13 @@ internal class CoordinatedService2(val service: Service) : AbstractService() {
 //              return cycle
 //            }
 //          }
+          for (enhancement in enhancements) {
+            val cycle = enhancement.findCycle(validityMap)
+            if (cycle != null) {
+              cycle.add(this)
+              return cycle
+            }
+          }
           for (dependency in getServicesThatNeedMe()) {
             val cycle = dependency.findCycle(validityMap)
             if (cycle != null) {
