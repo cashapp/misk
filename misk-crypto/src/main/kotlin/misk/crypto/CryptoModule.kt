@@ -15,6 +15,7 @@ import com.google.inject.Singleton
 import com.google.inject.name.Names
 import okio.ByteString
 import okio.ByteString.Companion.toByteString
+import java.util.Base64
 
 /**
  * Configures and registers the keys listed in the configuration file.
@@ -94,4 +95,44 @@ fun Aead.decrypt(ciphertext: ByteString, aad: ByteArray? = null): ByteString {
   val decrypted = decryptedBytes.toByteString()
   decryptedBytes.fill(0)
   return decrypted
+}
+
+/**
+ * Extension function for convenient encryption of [ByteString]s.
+ * This function also makes sure that no extra copies of the plaintext data are kept in memory.
+ */
+fun DeterministicAead.encryptDeterministically(plaintext: ByteString, aad: ByteArray? = null
+): ByteString {
+  val plaintextBytes = plaintext.toByteArray()
+  val encrypted = this.encryptDeterministically(plaintextBytes, aad ?: byteArrayOf())
+  plaintextBytes.fill(0)
+  return encrypted.toByteString()
+}
+
+/**
+ * Extension function for convenient decryption of [ByteString]s.
+ * This function also makes sure that no extra copies of the plaintext data are kept in memory.
+ */
+fun DeterministicAead.decryptDeterministically(ciphertext: ByteString, aad: ByteArray? = null
+): ByteString {
+  val decryptedBytes = this.decryptDeterministically(ciphertext.toByteArray(), aad)
+  val decrypted = decryptedBytes.toByteString()
+  decryptedBytes.fill(0)
+  return decrypted
+}
+
+/**
+ * Extension function for conveniently computing an HMAC and encoding it with Base64.
+ */
+fun Mac.computeMac(data: String): String {
+  return Base64.getEncoder().encode(this.computeMac(data.toByteArray())).toString(Charsets.UTF_8)
+}
+
+/**
+ * Extension function for conveniently verifying a message's authenticity.
+ * This function expects the [tag] string variable to contain a [Base64] encoded array of bytes.
+ */
+fun Mac.verifyMac(tag: String, data: String) {
+  val decodedTag = Base64.getDecoder().decode(tag)
+  this.verifyMac(decodedTag, data.toByteArray())
 }

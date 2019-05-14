@@ -44,7 +44,6 @@ internal class SecretColumnType : UserType, ParameterizedType, TypeConfiguration
     } else {
       AeadAdapter(_typeConfiguration, keyName)
     }
-
   }
 
   override fun hashCode(x: Any): Int = (x as ByteArray).hashCode()
@@ -57,9 +56,17 @@ internal class SecretColumnType : UserType, ParameterizedType, TypeConfiguration
 
   override fun returnedClass() = ByteArray::class.java
 
-  override fun assemble(cached: Serializable?, owner: Any?) = cached
+  override fun assemble(cached: Serializable?, owner: Any?): ByteArray {
+    return encryptionAdapter.decrypt(cached as ByteArray, null)
+  }
 
-  override fun disassemble(value: Any?) = (value as ByteArray).copyOf() as Serializable
+  /**
+   * This method is used by Hibernate when caching values, see [org.hibernate.type.Type.disassemble].
+   * This implementation makes sure that data is stored encrypted even when being cached in memory.
+   */
+  override fun disassemble(value: Any?): Serializable {
+    return encryptionAdapter.encrypt(value as ByteArray, null)
+  }
 
   override fun nullSafeSet(
     st: PreparedStatement,
