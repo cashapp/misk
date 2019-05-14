@@ -61,10 +61,10 @@ class ServiceGraphBuilder {
   }
 
   /**
-   * Validates the Service Graph then builds a ServiceManager.
+   * Validates the Service Graph is a valid DAG, then builds a ServiceManager.
    *
-   * @return ServiceManager coordinating all the services that were registered with this builder.
-   * @throws IllegalStateException
+   * @return ServiceManager that coordinates all services that were registered with this builder.
+   * @throws IllegalStateException if the graph is not valid.
    */
   fun build(): ServiceManager {
     check(serviceMap.isNotEmpty()) {
@@ -79,13 +79,13 @@ class ServiceGraphBuilder {
 
   // Builds CoordinatedServices from the instructions provided in the dependency map.
   private fun linkDependencies() {
-    // for each service, add its dependencies and ensure no dependency cycles
+    // For each service, add its dependencies and ensure no dependency cycles.
     for ((key, service) in serviceMap) {
-      // first get the enhancements for the service and handle their downstream dependencies
+      // First get the enhancements for the service and handle their downstream dependencies.
       val enhancements = enhancementMap[key]?.map { serviceMap[it]!! } ?: listOf()
       service.enhanceWith(enhancements)
 
-      // now handle regular dependencies
+      // Now handle regular dependencies.
       val dependencies = dependencyMap[key]?.map { serviceMap[it]!! } ?: listOf()
       service.addToDownstream(dependencies)
     }

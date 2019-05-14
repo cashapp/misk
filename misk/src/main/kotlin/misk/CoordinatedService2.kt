@@ -20,10 +20,10 @@ import com.google.common.util.concurrent.Service.*
  * @param service The Service to wrap.
  */
 internal class CoordinatedService2(val service: Service) : AbstractService() {
-  private val upstream = mutableSetOf<CoordinatedService2>()      // upstream services dependent on me
-  private val downstream = mutableSetOf<CoordinatedService2>()    // downstream dependencies
-  private val enhancements = mutableSetOf<CoordinatedService2>()  // services that enhance me (depend on me)
-  private var target: CoordinatedService2? = null                 // service I enhance
+  private val upstream = mutableSetOf<CoordinatedService2>()     // upstream dependent services
+  private val downstream = mutableSetOf<CoordinatedService2>()   // downstream dependencies
+  private val enhancements = mutableSetOf<CoordinatedService2>() // dependent on me
+  private var target: CoordinatedService2? = null                // service I enhance
 
   init {
     service.addListener(object : Listener() {
@@ -50,8 +50,8 @@ internal class CoordinatedService2(val service: Service) : AbstractService() {
   /**
    * Returns a set of services that are required by this service.
    *
-   * This set consists of the target, all first-level dependencies and each dependency's transitive
-   * enhancements. This is the set of services that block start-up of this service.
+   * The set consists of the target, all first-level dependencies and each dependency's transitive
+   * enhancements. It is the set of services that block start-up of this service.
    */
   fun getRequiredServices(): Set<CoordinatedService2> {
     val requiredServices = mutableSetOf<CoordinatedService2>()
@@ -68,10 +68,9 @@ internal class CoordinatedService2(val service: Service) : AbstractService() {
   /**
    * Returns a set of all services which rely on this service.
    *
-   * This set consists of this service's enhancements, and the entire chain of its target's
-   * downstream dependencies. This is the set of services that block shut-down of this service.
+   * The set consists of this service's enhancements, and the entire chain of its target's
+   * downstream dependencies. It is the set of services that block shut-down of this service.
    */
-  // for this service
   fun getReliantServices(): Set<CoordinatedService2> {
     val reliantServices = mutableSetOf<CoordinatedService2>()
     reliantServices.addAll(enhancements)
@@ -99,7 +98,6 @@ internal class CoordinatedService2(val service: Service) : AbstractService() {
    * @param services List of dependencies for this service.
    */
   fun addToDownstream(services: List<CoordinatedService2>) {
-    // Satisfy all consumers with a producer (maintain bi-directional links up/down-stream)
     downstream.addAll(services)
     services.forEach { it.upstream.add(this) }
   }
@@ -140,7 +138,7 @@ internal class CoordinatedService2(val service: Service) : AbstractService() {
     synchronized(this) {
       if (state() != State.STARTING || service.state() != State.NEW) return
 
-      // If any upstream service or its enhancements are not running, don't start
+      // If any upstream service or its enhancements are not running, don't start.
       if (!canStart()) return
 
       // Actually start.
@@ -156,7 +154,7 @@ internal class CoordinatedService2(val service: Service) : AbstractService() {
     synchronized(this) {
       if (state() != State.STOPPING || service.state() != State.RUNNING) return
 
-      // If any downstream service or its enhancements are still running, don't stop
+      // If any downstream service or its enhancements are still running, don't stop.
       if (!canStop()) return
 
       // Actually stop.
@@ -180,8 +178,8 @@ internal class CoordinatedService2(val service: Service) : AbstractService() {
       CycleValidity.CHECKING_FOR_CYCLES -> return mutableListOf(this) // We found a cycle!
       else -> {
         validityMap[this] = CycleValidity.CHECKING_FOR_CYCLES
-        // first check there are no cycles in the enhancements that could cause
-        // getReliantServices() to get stuck
+        // First check there are no cycles in the enhancements that could cause
+        // getReliantServices() to get stuck.
         for (enhancement in enhancements) {
           val cycle = enhancement.findCycle(validityMap)
           if (cycle != null) {
@@ -189,7 +187,7 @@ internal class CoordinatedService2(val service: Service) : AbstractService() {
             return cycle
           }
         }
-        // now check that there are no mixed enhancement-dependency cycles
+        // Now check that there are no mixed enhancement-dependency cycles.
         for (dependency in getReliantServices()) {
           val cycle = dependency.findCycle(validityMap)
           if (cycle != null) {
