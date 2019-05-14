@@ -6,10 +6,42 @@ import com.google.common.util.concurrent.Service
 import com.google.common.util.concurrent.Service.*
 
 internal class CoordinatedService2(val service: Service) : AbstractService() {
-  val upstream = mutableSetOf<CoordinatedService2>()   // upstream services dependent on me
-  val downstream = mutableSetOf<CoordinatedService2>() // downstream dependencies
-  val enhancements = mutableSetOf<CoordinatedService2>() // services that enhance me
-  var target : CoordinatedService2? = null
+  val upstream = mutableSetOf<CoordinatedService2>()      // upstream services dependent on me
+  val downstream = mutableSetOf<CoordinatedService2>()    // downstream dependencies
+  val enhancements = mutableSetOf<CoordinatedService2>()  // services that enhance me (depend on me)
+  var target: CoordinatedService2? = null                 // service I enhance
+
+  fun getServicesThatINeed(): Set<CoordinatedService2> {
+    // target
+    // upstream providers
+    val neededServices = mutableSetOf<CoordinatedService2>()
+    if (target != null) {
+      neededServices.add(target!!)
+    }
+    for (provider in upstream) {
+      neededServices.add(provider)
+      neededServices.addAll(provider.enhancements)
+    }
+    return neededServices
+  }
+
+  // obtains all dependencies and enhancements (and their dependencies and enhancements)
+  // for this service
+  fun getServicesThatNeedMe(): Set<CoordinatedService2> {
+    // my enhancements
+    // my target's dependencies
+    // my target's target's dependencies
+    // etc.
+
+    val needsMe = mutableSetOf<CoordinatedService2>()
+    needsMe.addAll(enhancements)
+    var t: CoordinatedService2? = this
+    while (t != null) {
+      needsMe.addAll(t.downstream)
+      t = t.target
+    }
+    return needsMe
+  }
 
   init {
     service.addListener(object : Listener() {
@@ -17,14 +49,14 @@ internal class CoordinatedService2(val service: Service) : AbstractService() {
         synchronized(this) {
           notifyStarted()
         }
-        startDependentServices()
+        getServicesThatNeedMe().forEach { it.startIfReady() }
       }
 
       override fun terminated(from: State?) {
         synchronized(this) {
           notifyStopped()
         }
-        stopDependentServices()
+        getServicesThatINeed().forEach { it.stopIfReady() }
       }
 
       override fun failed(from: State, failure: Throwable) {
@@ -33,46 +65,16 @@ internal class CoordinatedService2(val service: Service) : AbstractService() {
     }, MoreExecutors.directExecutor())
   }
 
-  private fun startDependentServices() {
-    for (service in downstream) {
-      service.startIfReady()
-    }
-    for (service in enhancements) {
-      service.startIfReady()
-    }
-    target?.startDependentServices()
-  }
-
-  private fun stopDependentServices() {
-    target?.stopIfReady()
-
-    for (service in upstream) {
-      service.stopIfReady()
-    }
-  }
-
-  private fun isRunningSelf(): Boolean {
-    return state() == State.RUNNING
-  }
-
-  private fun isRunningWithEnhancements(): Boolean {
-    return isRunningSelf() && enhancements.all { it.isRunningWithEnhancements() }
-  }
-
-  private fun isStoppedSelf(): Boolean {
+  private fun isTerminated(): Boolean {
     return state() == State.TERMINATED
   }
 
-  private fun canStart() : Boolean {
-    if (upstream.any { !it.isRunningWithEnhancements() }) return false
-    if (target != null && !target!!.isRunningSelf()) return false
-    return true
+  private fun canStart(): Boolean {
+    return getServicesThatINeed().all { it.isRunning() }
   }
 
-  private fun canStop() : Boolean {
-    if (enhancements.any { !it.isStoppedSelf() }) return false
-    if (downstream.any {!it.isStoppedSelf() }) return false
-    return true
+  private fun canStop(): Boolean {
+    return getServicesThatNeedMe().all { it.isTerminated() }
   }
 
   fun isUpstreamRunning(): Boolean = upstream.all { it.isRunningWithEnhancements() }
@@ -137,21 +139,9 @@ internal class CoordinatedService2(val service: Service) : AbstractService() {
    */
   fun requireNoCycles() {
     val validityMap = mutableMapOf<CoordinatedService2, CycleValidity>()
-    for (service in this.downstream) {
-      val cycle = service.findDependencyCycle(validityMap)
-      if (cycle != null) {
-        throw IllegalStateException("Dependency cycle: ${cycle.joinToString(" -> ")}")
-      }
-    }
-  }
-
-  fun requireNoCyclicEnhancements() {
-    val validityMap = mutableMapOf<CoordinatedService2, CycleValidity>()
-    if (target != null) {
-      val cycle = this.findEnhancementCycle(validityMap)
-      if (cycle != null) {
-        throw java.lang.IllegalStateException("Enhancement cycle: ${cycle.joinToString (" -> " )}")
-      }
+    val cycle = this.findCycle(validityMap)
+    if (cycle != null) {
+      throw IllegalStateException("Detected cycle: ${cycle.joinToString(" -> ")}")
     }
   }
 
@@ -166,7 +156,7 @@ internal class CoordinatedService2(val service: Service) : AbstractService() {
      * Returns the elements of a dependency cycle, or null if there are no cycles originating at
      * a given node.
      */
-    fun CoordinatedService2.findDependencyCycle(
+    fun CoordinatedService2.findCycle(
       validityMap: MutableMap<CoordinatedService2, CycleValidity>
     ): MutableList<CoordinatedService2>? {
       when (validityMap[this]) {
@@ -174,29 +164,15 @@ internal class CoordinatedService2(val service: Service) : AbstractService() {
         CycleValidity.CHECKING_FOR_CYCLES -> return mutableListOf(this) // We found a cycle!
         else -> {
           validityMap[this] = CycleValidity.CHECKING_FOR_CYCLES
-          for (service in downstream) {
-            val cycle = service.findDependencyCycle(validityMap)
+          if (target != null) {
+            val cycle = target!!.findCycle(validityMap)
             if (cycle != null) {
               cycle.add(this)
               return cycle
             }
           }
-          validityMap[this] = CycleValidity.NO_CYCLES
-          return null
-        }
-      }
-    }
-
-    fun CoordinatedService2.findEnhancementCycle(
-      validityMap: MutableMap<CoordinatedService2, CycleValidity>
-    ): MutableList<CoordinatedService2>? {
-      when (validityMap[this]) {
-        CycleValidity.NO_CYCLES -> return null
-        CycleValidity.CHECKING_FOR_CYCLES -> return mutableListOf(this)
-        else -> {
-          validityMap[this] = CycleValidity.CHECKING_FOR_CYCLES
-          if (target != null) {
-            val cycle = target!!.findEnhancementCycle(validityMap)
+          for (dependency in downstream) {
+            val cycle = dependency.findCycle(validityMap)
             if (cycle != null) {
               cycle.add(this)
               return cycle

@@ -65,12 +65,12 @@ class ServiceGraphBuilder {
    */
   fun build(): ServiceManager {
     check(serviceMap.isNotEmpty()) {
-      "ServiceGraphBuilder cannot be built without registered services"
+      "ServiceGraphBuilder cannot be built without registering services"
     }
+    validateDependencyMap()
+    validateEnhancementMap()
     linkDependencies()
     checkCycles()
-    checkDependencies()
-    checkEnhancements()
     return ServiceManager(serviceMap.values)
   }
 
@@ -79,10 +79,11 @@ class ServiceGraphBuilder {
     // for each service, add its dependencies and ensure no dependency cycles
     for ((key, service) in serviceMap) {
       // first get the enhancements for the service and handle their downstreams
-      enhanceService(key)
+      val enhancements = enhancementMap[key]?.map { serviceMap[it]!! } ?: listOf()
+      service.enhanceWith(enhancements)
+
       // now handle regular dependencies
       val dependencies = dependencyMap[key]?.map { serviceMap[it]!! } ?: listOf()
-
       service.addToDownstream(dependencies)
     }
   }
@@ -90,13 +91,12 @@ class ServiceGraphBuilder {
   private fun checkCycles() {
     for ((_, service) in serviceMap) {
       service.requireNoCycles() // throws
-      service.requireNoCyclicEnhancements() // throws
     }
   }
 
   // check that each service has its dependencies met
   // (i.e. no one service requires a dependency or enhancement that doesn't exist)
-  private fun checkDependencies() {
+  private fun validateDependencyMap() {
     for ((big, dependents) in dependencyMap.asMap()) {
       if (serviceMap[big] == null) {
         val stringBuilder = StringBuilder()
@@ -110,7 +110,7 @@ class ServiceGraphBuilder {
   }
 
   // check that no enhancement has been applied more than once
-  private fun checkEnhancements() {
+  private fun validateEnhancementMap() {
     val enhancementList = mutableListOf<Key<*>>()
     for ((_, set) in enhancementMap.asMap()) {
       enhancementList.addAll(set)
@@ -123,9 +123,6 @@ class ServiceGraphBuilder {
   private fun enhanceService(key: Key<*>) {
     val service = serviceMap[key]!!
     val enhancements = enhancementMap[key]?.map { serviceMap[it]!! } ?: listOf()
-    // enhancements will have their service to be enhanced downstream
-    enhancements.forEach { it.addToDownstream(listOf(service)) }
-    // any dependents of the enhanced service must depend on enhancers
-    service.downstream.forEach { it.addToDownstream(enhancements) }
+    service.enhanceWith(enhancements)
   }
 }
