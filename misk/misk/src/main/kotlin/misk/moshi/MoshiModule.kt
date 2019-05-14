@@ -3,6 +3,7 @@ package misk.moshi
 import com.google.inject.Provides
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.Moshi
+import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import misk.inject.KAbstractModule
 import misk.moshi.okio.ByteStringAdapter
 import misk.moshi.wire.WireMessageAdapter
@@ -27,6 +28,9 @@ internal class MoshiModule : KAbstractModule() {
         else -> builder.add(jsonAdapter)
       }
     }
+
+    // Install last so that user adapters take precedence.
+    builder.add(KotlinJsonAdapterFactory())
 
     return builder.build()
   }
