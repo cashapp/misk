@@ -7,6 +7,7 @@ import com.google.common.collect.SetMultimap
 import com.google.common.util.concurrent.Service
 import com.google.common.util.concurrent.ServiceManager
 import com.google.inject.Key
+import misk.CoordinatedService2.Companion.findCycle
 import java.lang.IllegalStateException
 
 /**
@@ -89,8 +90,14 @@ class ServiceGraphBuilder {
   }
 
   private fun checkCycles() {
+    val validityMap =
+        mutableMapOf<CoordinatedService2, CoordinatedService2.Companion.CycleValidity>()
+
     for ((_, service) in serviceMap) {
-      service.requireNoCycles() // throws
+      val cycle = service.findCycle(validityMap)
+      if (cycle != null) {
+        throw IllegalStateException("Detected cycle: ${cycle.joinToString(" -> ")}")
+      }
     }
   }
 

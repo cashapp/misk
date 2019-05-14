@@ -113,27 +113,6 @@ class ServiceGraphBuilderTest {
         + "registered with the builder")
   }
 
-  @Test fun dependencyCycle() {
-    val failure = buildAndExpectFailure(listOf(a, b, c, d)) {
-      addDependency(a.key, d.key)
-      addDependency(b.key, c.key)
-      addDependency(c.key, a.key)
-      addDependency(d.key, c.key)
-    }
-
-    assertThat(failure).hasMessage("Detected cycle: Service A -> Service D -> Service C -> "
-        + "Service A")
-  }
-
-  @Test fun simpleDependencyCycle() {
-    val failure = buildAndExpectFailure(listOf(a, b, c, d)) {
-      addDependency(b.key, a.key)
-      addDependency(a.key, b.key)
-    }
-
-    assertThat(failure).hasMessage("Detected cycle: Service A -> Service B -> Service A")
-  }
-
   @Test fun failuresPropagate() {
     val bomb = object : AbstractService() {
       override fun doStart() = throw Exception("boom!")
@@ -180,7 +159,6 @@ class ServiceGraphBuilderTest {
     |stopping Service B
     |stopping Service A
     |""".trimMargin())
-    TODO()
   }
 
   @Test fun enhancementDependency() {
@@ -294,21 +272,28 @@ class ServiceGraphBuilderTest {
       |""".trimMargin())
   }
 
-  @Test fun enhancementDependencyCycle() {
-    /*
-    A
-      enhanced by B
-                    depended on by A
-     -> BOOM
-     */
-    val failure = buildAndExpectFailure(listOf(a, b)) {
-      addEnhancement(a.key, b.key)
-      addDependency(a.key, b.key)
+  @Test fun dependencyCycle() {
+    val failure = buildAndExpectFailure(listOf(a, b, c, d)) {
+      addDependency(a.key, d.key)
+      addDependency(b.key, c.key)
+      addDependency(c.key, a.key)
+      addDependency(d.key, c.key)
     }
-    TODO(failure.toString())
+
+    assertThat(failure).hasMessage("Detected cycle: Service A -> Service D -> Service C -> "
+        + "Service A")
   }
 
-  @Test fun cyclicEnhancements() {
+  @Test fun simpleDependencyCycle() {
+    val failure = buildAndExpectFailure(listOf(a, b, c, d)) {
+      addDependency(b.key, a.key)
+      addDependency(a.key, b.key)
+    }
+
+    assertThat(failure).hasMessage("Detected cycle: Service A -> Service B -> Service A")
+  }
+
+  @Test fun enhancementCycle() {
     /*
     A
       enhanced by B
@@ -334,35 +319,18 @@ class ServiceGraphBuilderTest {
     assertThat(failure).hasMessage("Detected cycle: ${a.name} -> ${a.name}")
   }
 
-  @Test fun neededServices() {
-    val target = StringBuilder()
-    val builder = newBuilderWithServices(target, listOf(a, b, c, d, e))
-    builder.addEnhancement(a.key, b.key)
-    builder.addEnhancement(b.key, c.key)
-    builder.addEnhancement(b.key, d.key)
-    builder.addDependency(e.key, a.key)
-    builder.addDependency(e.key, c.key)
-    builder.build()
-    val aService = builder.serviceMap[a.key]!!
-    val bService = builder.serviceMap[b.key]!!
-    val cService = builder.serviceMap[c.key]!!
-    val dService = builder.serviceMap[d.key]!!
-    val eService = builder.serviceMap[e.key]!!
-    print(target.toString())
-    assertThat(aService.getServicesThatNeedMe())
-        .isEqualTo(setOf(bService, eService))
-    assertThat(bService.getServicesThatNeedMe())
-        .isEqualTo(setOf(cService, dService, eService))
-    assertThat(cService.getServicesThatNeedMe())
-        .isEqualTo(setOf(eService))
-    assertThat(dService.getServicesThatNeedMe()).isEqualTo(setOf(eService))
-    assertThat(eService.getServicesThatNeedMe()).isEmpty()
-
-    assertThat(eService.getServicesThatINeed())
-        .isEqualTo(setOf(aService, bService, cService))
-    assertThat(aService.getServicesThatINeed()).isEmpty()
-    assertThat(bService.getServicesThatINeed())
-        .isEqualTo(setOf(aService))
+  @Test fun enhancementDependencyCycle() {
+    /*
+    A
+      enhanced by B
+                    depended on by A
+     -> BOOM
+     */
+    val failure = buildAndExpectFailure(listOf(a, b)) {
+      addEnhancement(a.key, b.key)
+      addDependency(a.key, b.key)
+    }
+    assertThat(failure).hasMessage("Detected cycle: Service A -> Service B -> Service A")
   }
 
   private fun startUpAndShutDown(
