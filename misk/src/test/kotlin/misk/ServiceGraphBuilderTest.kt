@@ -17,8 +17,6 @@ class ServiceGraphBuilderTest {
   val e = NamedKey("Service E")
   val unregistered = NamedKey("Unregistered Service")
   val enhancementA = NamedKey("Enhancement A")
-  val enhancementB = NamedKey("Enhancement B")
-  val enhancementC = NamedKey("Enhancement C")
 
   @Test
   fun happyPathNoEnhancements() {
@@ -374,7 +372,7 @@ class ServiceGraphBuilderTest {
   }
 
   /**
-   * Service that appends messages to its `target` on start up and shut down.
+   * AppendingService is a Service that appends messages to its `target` on start up and shut down.
    */
   class AppendingService(
     val target: StringBuilder,
