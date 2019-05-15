@@ -20,7 +20,7 @@ ext.dep = [
   "guice": "com.google.inject:guice:4.2.2",
   "guiceMultibindings": "com.google.inject.extensions:guice-multibindings:4.2.2",
   "guiceServlet": "com.google.inject.extensions:guice-servlet:4.2.2",
-  "hibernateCore": "org.hibernate:hibernate-core:5.3.0.Final",
+  "hibernateCore": "org.hibernate:hibernate-core:5.4.2.Final",
   "hikariCp": "com.zaxxer:HikariCP:3.3.1",
   "hsqldb": "org.hsqldb:hsqldb:2.4.0",
   "jCommander": "com.beust:jcommander:1.72",
