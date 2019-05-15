@@ -149,14 +149,12 @@ internal class SessionFactoryService(
       value.typeParameters.setField("jsonColumnField", field)
     } else if (field.isAnnotationPresent(ProtoColumn::class.java)) {
       value.typeName = ProtoColumnType::class.java.name
-
       if (value.typeParameters == null) {
         value.typeParameters = Properties()
       }
       value.typeParameters.setField("protoColumnField", field)
     } else if (field.isAnnotationPresent(SecretColumn::class.java)) {
       value.typeName = SecretColumnType::class.java.name
-
       if (value.typeParameters == null) {
         value.typeParameters = Properties()
       }
@@ -170,6 +168,13 @@ internal class SessionFactoryService(
       }
       value.typeParameters.setProperty(SelectableSecretColumnType.FIELD_ENCRYPTION_KEY_NAME,
           field.getAnnotation(SelectableSecretColumn::class.java).keyName)
+    } else if (field.isAnnotationPresent(VerifiedColumn::class.java)) {
+      value.typeName = VerifiedColumnType::class.java.name
+      if (value.typeParameters == null) {
+        value.typeParameters = Properties()
+      }
+      value.typeParameters.setProperty(VerifiedColumnType.FIELD_HMAC_KEY_NAME,
+          field.getAnnotation(VerifiedColumn::class.java).keyName)
     }
   }
 

@@ -1,0 +1,6 @@
+CREATE TABLE auth_tokens(
+  id BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+  client_id VARCHAR(64) NOT NULL,
+  token VARCHAR(64),
+  token_hash VARBINARY(256)
+)

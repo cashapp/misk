@@ -24,11 +24,13 @@ package misk.hibernate
  * - It must be declared as `VARBINARY()` in its respective MySQL table. For example:
  * ```
  * CREATE TABLE my_table(
- *   id BIGINT NOT NULL AUTO_INCREMENT,
+ *   id BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT,
  *   secret VARBINARY(500),
  *   secret_aad VARBINARY(36),
  *
  *   CONSTRAINT UNIQUE secret_aad
+ *   id BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+ *   secret VARBINARY(500)
  * ```
  * - It cannot be annotates with any other custom column annotations like [ProtoColumn] or [JsonColumn].
  * - It is not searchable. The encryption algorithm used by this annotation is non-deterministic,
