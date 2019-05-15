@@ -14,8 +14,7 @@ import misk.CoordinatedService2.Companion.CycleValidity
  * services are ready.
  */
 class ServiceGraphBuilder {
-
-  private var serviceMap = mutableMapOf<Key<*>, CoordinatedService2>() // map of all services
+  private var serviceMap = mutableMapOf<Key<*>, CoordinatedService2>()
   private val dependencyMap = LinkedHashMultimap.create<Key<*>, Key<*>>()
   private val enhancementMap = LinkedHashMultimap.create<Key<*>, Key<*>>()
 
@@ -39,23 +38,23 @@ class ServiceGraphBuilder {
    * @param service The identifier for the service that provides for `dependency`.
    */
   fun addDependency(service: Key<*>, dependency: Key<*>) {
-    val dependencySet = dependencyMap[service]
-    dependencySet!!.add(dependency)
+    dependencyMap.put(service, dependency)
   }
 
   /**
-   * Adds a [enhancement] enhancement to the [service] service. The [service] service depends on its enhancements.
+   * Adds a [enhancement] enhancement to the [service] service. The [service] service depends on its
+   * enhancements.
    *
-   * Service enhancements [enhancement] will be started after the [service] service is started, but before any
-   * of the [service] service's dependents can start. Conversely, the dependents of the service service will
-   * be shut down, followed by all [enhancement] enhancements, and finally the [service] service itself.
+   * Service enhancements [enhancement] will be started after the [service] service is started,
+   * but before any of the [service] service's dependents can start. Conversely, the dependents of
+   * the service service will be shut down, followed by all [enhancement] enhancements, and finally
+   * the [service] service itself.
    *
    * @param service The identifier for the service to be enhanced by [enhancement].
    * @param enhancement The identifier for the service that depends on [service].
    */
   fun enhanceService(service: Key<*>, enhancement: Key<*>) {
-    val enhancementSet = enhancementMap[service]
-    enhancementSet!!.add(enhancement)
+    enhancementMap.put(service, enhancement)
   }
 
   /**
@@ -72,8 +71,10 @@ class ServiceGraphBuilder {
     return ServiceManager(serviceMap.values)
   }
 
-  // Builds CoordinatedService2s from the instructions provided in the dependency and enhancement
-  // maps.
+  /**
+   * Builds CoordinatedService2s from the instructions provided in the dependency and enhancement
+   * maps.
+   */
   private fun linkDependencies() {
     // For each service, add its dependencies and ensure no dependency cycles.
     for ((key, service) in serviceMap) {
@@ -87,47 +88,42 @@ class ServiceGraphBuilder {
     }
   }
 
-  // Checks that no service in this builder has specified a dependency cycle.
+  /**
+   * Checks that no service in this builder has specified a dependency cycle.
+   */
   private fun checkCycles() {
     val validityMap = mutableMapOf<CoordinatedService2, CycleValidity>()
 
-    for ((_, service) in serviceMap) {
+    for (service in serviceMap.values) {
       val cycle = service.findCycle(validityMap)
-      if (cycle != null) {
-        throw IllegalStateException("Detected cycle: ${cycle.joinToString(" -> ")}")
-      }
+      check(cycle == null) { "Detected cycle: ${cycle!!.joinToString(" -> ")}" }
     }
   }
 
-  // Checks that each service registered with this builder has its dependencies registered.
-  // (i.e. no one service requires a dependency or enhancement that doesn't exist.)
+  /**
+   * Checks that each service registered with this builder has its dependencies registered.
+   * (i.e. no one service requires a dependency or enhancement that doesn't exist.)
+   */
   private fun validateDependencyMap() {
-    for ((big, dependents) in dependencyMap.asMap()) {
-      if (serviceMap[big] == null) {
+    for ((service, dependents) in dependencyMap.asMap()) {
+      check(serviceMap[service] != null) {
         val stringBuilder = StringBuilder()
         for (dependent in dependents) {
           stringBuilder.append("${serviceMap[dependent]}")
         }
-        throw IllegalStateException("${stringBuilder.toString()} requires $big but no such service "
-            + "was registered with the builder")
+        "$stringBuilder requires $service but no such service was registered with the builder"
       }
     }
   }
 
-  // Checks that no enhancement has been applied more than once.
+  /**
+   * Checks that no enhancement has been applied more than once.
+   */
   private fun validateEnhancementMap() {
     val enhancementList = mutableListOf<Key<*>>()
-    for ((_, set) in enhancementMap.asMap()) {
-      enhancementList.addAll(set)
-    }
+    enhancementList += enhancementMap.values()
     enhancementList.groupingBy { it }.eachCount().forEach {
       check(it.value <= 1) { "Enhancement ${it.key} cannot be applied more than once" }
     }
-  }
-
-  private fun enhanceService(key: Key<*>) {
-    val service = serviceMap[key]!!
-    val enhancements = enhancementMap[key]?.map { serviceMap[it]!! } ?: listOf()
-    service.addEnhancements(enhancements)
   }
 }
