@@ -5,7 +5,7 @@ package misk.hibernate
  *
  * The [keyName] string is used to specify the name of the key to be used to encrypt and decrypt the value.
  *
- * The [indexable] attribute controls whether or not this data will be able to be indexed, defaulted to true. This
+ * The [indexable] variable controls whether or not this data will be able to be indexed, defaulted to true. This
  * uses deterministic encryption: encrypting the same plaintext will produce the same ciphertext. This is weaker than
  * non-deterministic encryption, but makes searching for encrypted values possible. If searching for ciphertexts is
  * not something your use case requires, set [indexable] to false for stronger security.
@@ -28,7 +28,7 @@ package misk.hibernate
  * - It must be declared as `VARBINARY()` in its respective MySQL table. For example:
  * ```
  * CREATE TABLE my_table(
- *   id BIGINT NOT NULL AUTO_INCREMENT,
+ *   id BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT,
  *   secret VARBINARY(500)
  * ```
  * - It cannot be annotates with any other custom column annotations like [ProtoColumn] or [JsonColumn].

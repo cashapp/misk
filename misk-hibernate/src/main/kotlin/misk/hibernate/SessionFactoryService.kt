@@ -149,6 +149,7 @@ internal class SessionFactoryService(
     if (value !is SimpleValue) return
 
     val field = field(persistentClass, property)
+
     if (field.isAnnotationPresent(JsonColumn::class.java)) {
       value.typeName = JsonColumnType::class.java.name
       if (value.typeParameters == null) {
@@ -157,14 +158,12 @@ internal class SessionFactoryService(
       value.typeParameters.setField("jsonColumnField", field)
     } else if (field.isAnnotationPresent(ProtoColumn::class.java)) {
       value.typeName = ProtoColumnType::class.java.name
-
       if (value.typeParameters == null) {
         value.typeParameters = Properties()
       }
       value.typeParameters.setField("protoColumnField", field)
     } else if (field.isAnnotationPresent(SecretColumn::class.java)) {
       value.typeName = SecretColumnType::class.java.name
-
       if (value.typeParameters == null) {
         value.typeParameters = Properties()
       }
@@ -172,6 +171,13 @@ internal class SessionFactoryService(
           field.getAnnotation(SecretColumn::class.java).keyName)
       value.typeParameters.setProperty(SecretColumnType.FIELD_ENCRYPTION_INDEXABLE,
           field.getAnnotation(SecretColumn::class.java).indexable.toString())
+    } else if (field.isAnnotationPresent(VerifiedColumn::class.java)) {
+      value.typeName = VerifiedColumnType::class.java.name
+      if (value.typeParameters == null) {
+        value.typeParameters = Properties()
+      }
+      value.typeParameters.setProperty(VerifiedColumnType.FIELD_HMAC_KEY_NAME,
+          field.getAnnotation(VerifiedColumn::class.java).keyName)
     }
   }
 
