@@ -1,4 +1,0 @@
-package misk
-
-class ServiceDependency {
-}
