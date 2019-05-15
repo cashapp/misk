@@ -3,7 +3,8 @@ package misk
 import com.google.common.util.concurrent.AbstractService
 import com.google.common.util.concurrent.MoreExecutors
 import com.google.common.util.concurrent.Service
-import com.google.common.util.concurrent.Service.*
+import com.google.common.util.concurrent.Service.Listener
+import com.google.common.util.concurrent.Service.State
 
 /**
  * CoordinatedService2 wraps a Service to defer its start up and shut down until its dependent
@@ -20,10 +21,17 @@ import com.google.common.util.concurrent.Service.*
  * @param service The Service to wrap.
  */
 internal class CoordinatedService2(val service: Service) : AbstractService() {
-  private val upstream = mutableSetOf<CoordinatedService2>()     // upstream dependent services
-  private val downstream = mutableSetOf<CoordinatedService2>()   // downstream dependencies
-  private val enhancements = mutableSetOf<CoordinatedService2>() // dependent on me
-  private var target: CoordinatedService2? = null                // service I enhance
+  /** Services that start before this. */
+  private val upstream = mutableSetOf<CoordinatedService2>()
+
+  /** Services this starts before. */
+  private val downstream = mutableSetOf<CoordinatedService2>()
+
+  /** Services that enhance this. This starts before them, but they start before [downstream].*/
+  private val enhancements = mutableSetOf<CoordinatedService2>()
+
+  /** Service that starts up before this, and whose [downstream] also depend on this. */
+  private var target: CoordinatedService2? = null
 
   init {
     service.addListener(object : Listener() {
@@ -31,14 +39,14 @@ internal class CoordinatedService2(val service: Service) : AbstractService() {
         synchronized(this) {
           notifyStarted()
         }
-        getReliantServices().forEach { it.startIfReady() }
+        reliantServices.forEach { it.startIfReady() }
       }
 
       override fun terminated(from: State?) {
         synchronized(this) {
           notifyStopped()
         }
-        getRequiredServices().forEach { it.stopIfReady() }
+        requiredServices.forEach { it.stopIfReady() }
       }
 
       override fun failed(from: State, failure: Throwable) {
@@ -53,43 +61,41 @@ internal class CoordinatedService2(val service: Service) : AbstractService() {
    * The set consists of the target, all first-level dependencies and each dependency's transitive
    * enhancements. It is the set of services that block start-up of this service.
    */
-  fun getRequiredServices(): Set<CoordinatedService2> {
-    val requiredServices = mutableSetOf<CoordinatedService2>()
+  val requiredServices: Set<CoordinatedService2> by lazy {
+    val result = mutableSetOf<CoordinatedService2>()
     if (target != null) {
-      requiredServices.add(target!!)
+      result += target!!
     }
     for (provider in upstream) {
-      requiredServices.add(provider)
-      requiredServices.addAll(provider.getTransitiveEnhancements())
+      result += provider
+      provider.getTransitiveEnhancements(result)
     }
-    return requiredServices
+    result
+  }
+
+  private fun getTransitiveEnhancements(list: MutableSet<CoordinatedService2>) {
+    list.addAll(enhancements)
+    for (enhancement in enhancements) {
+      enhancement.getTransitiveEnhancements(list)
+    }
   }
 
   /**
-   * Returns a set of all services which rely on this service.
+   * Returns a set of all services which require this service to be started before they can start,
+   * and who must shut down before this service shuts down.
    *
-   * The set consists of this service's enhancements, and the entire chain of its target's
-   * downstream dependencies. It is the set of services that block shut-down of this service.
+   * The set contains this service's enhancements, its dependencies, and the dependencies of target
+   * (if it exists) and all transitive targets.
    */
-  fun getReliantServices(): Set<CoordinatedService2> {
-    val reliantServices = mutableSetOf<CoordinatedService2>()
-    reliantServices.addAll(enhancements)
+  val reliantServices: Set<CoordinatedService2> by lazy {
+    val result = mutableSetOf<CoordinatedService2>()
+    result += enhancements
     var t: CoordinatedService2? = this
     while (t != null) {
-      reliantServices.addAll(t.downstream)
+      result += t.downstream
       t = t.target
     }
-    return reliantServices
-  }
-
-  // Recursively obtains all enhancements of a service.
-  private fun getTransitiveEnhancements(): Set<CoordinatedService2> {
-    val list = mutableSetOf<CoordinatedService2>()
-    list.addAll(enhancements)
-    for (enhancement in enhancements) {
-      list.addAll(enhancement.getTransitiveEnhancements())
-    }
-    return list
+    result
   }
 
   /**
@@ -97,9 +103,9 @@ internal class CoordinatedService2(val service: Service) : AbstractService() {
    *
    * @param services List of dependencies for this service.
    */
-  fun addToDownstream(services: List<CoordinatedService2>) {
-    downstream.addAll(services)
-    services.forEach { it.upstream.add(this) }
+  fun addDependencies(services: List<CoordinatedService2>) {
+    downstream += services
+    services.forEach { it.upstream += this }
   }
 
   /**
@@ -109,7 +115,7 @@ internal class CoordinatedService2(val service: Service) : AbstractService() {
    *
    * @param services List of "enhancements" for this service.
    */
-  fun enhanceWith(services: List<CoordinatedService2>) {
+  fun addEnhancements(services: List<CoordinatedService2>) {
     enhancements.addAll(services)
     services.forEach { it.target = this }
   }
@@ -119,16 +125,12 @@ internal class CoordinatedService2(val service: Service) : AbstractService() {
   }
 
   private fun canStart(): Boolean {
-    return getRequiredServices().all { it.isRunning() }
+    return requiredServices.all { it.isRunning() }
   }
 
   private fun canStop(): Boolean {
-    return getReliantServices().all { it.isTerminated() }
+    return reliantServices.all { it.isTerminated() }
   }
-
-  fun isUpstreamRunning(): Boolean = upstream.all { it.isRunningWithEnhancements() }
-
-  fun isDownstreamTerminated(): Boolean = downstream.all { it.state() == State.TERMINATED}
 
   override fun doStart() {
     startIfReady()
@@ -188,7 +190,7 @@ internal class CoordinatedService2(val service: Service) : AbstractService() {
           }
         }
         // Now check that there are no mixed enhancement-dependency cycles.
-        for (dependency in getReliantServices()) {
+        for (dependency in reliantServices) {
           val cycle = dependency.findCycle(validityMap)
           if (cycle != null) {
             cycle.add(this)

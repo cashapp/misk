@@ -7,7 +7,7 @@ import com.google.common.collect.SetMultimap
 import com.google.common.util.concurrent.Service
 import com.google.common.util.concurrent.ServiceManager
 import com.google.inject.Key
-import java.lang.IllegalStateException
+import misk.CoordinatedService2.Companion.CycleValidity
 
 /**
  * Builds a graph of `CoordinatedService2`s which defer start up and shut down until their dependent
@@ -20,7 +20,7 @@ class ServiceGraphBuilder {
   private val enhancementMap = LinkedHashMultimap.create<Key<*>, Key<*>>()
 
   /**
-   * Registers a service with this ServiceGraphBuilder.
+   * Registers a [service] with this [ServiceGraphBuilder]
    *
    * A service should be added before dependencies or enhancements are specified.
    * Keys must be unique. If a key is reused, then the original key-service pair will be replaced.
@@ -33,31 +33,29 @@ class ServiceGraphBuilder {
   }
 
   /**
-   * Adds the (small) service as a dependency to the (big) provider service.
+   * Adds the [dependency] service as a dependency to the [service] provider service.
    *
-   * @param small The identifier for the dependent service.
-   * @param big The identifier for the service that provides for `small`.
+   * @param dependency The identifier for the dependent service.
+   * @param service The identifier for the service that provides for `dependency`.
    */
-  fun addDependency(small: Key<*>, big: Key<*>) {
-    // maintain a set of dependents on the provider
-    val dependencySet = dependencyMap[big]
-    dependencySet!!.add(small)
+  fun addDependency(service: Key<*>, dependency: Key<*>) {
+    val dependencySet = dependencyMap[service]
+    dependencySet!!.add(dependency)
   }
 
   /**
-   * Adds a (small) enhancement to the (big) service. The (big) service depends on its enhancements.
+   * Adds a [enhancement] enhancement to the [service] service. The [service] service depends on its enhancements.
    *
-   * Service enhancements (small) will be started after the (big) service is started, but before any
-   * of the (big) service's dependents can start. Conversely, the dependents of the big service will
-   * be shut down, followed by all (small) enhancements, and finally the (big) service itself.
+   * Service enhancements [enhancement] will be started after the [service] service is started, but before any
+   * of the [service] service's dependents can start. Conversely, the dependents of the service service will
+   * be shut down, followed by all [enhancement] enhancements, and finally the [service] service itself.
    *
-   * @param big The identifier for the service to be enhanced by `small`.
-   * @param small The identifier for the service that depends on `big`.
+   * @param service The identifier for the service to be enhanced by [enhancement].
+   * @param enhancement The identifier for the service that depends on [service].
    */
-  fun addEnhancement(big: Key<*>, small: Key<*>) {
-    // maintain enhancements to be applied to services
-    val enhancementSet = enhancementMap[big]
-    enhancementSet!!.add(small)
+  fun enhanceService(service: Key<*>, enhancement: Key<*>) {
+    val enhancementSet = enhancementMap[service]
+    enhancementSet!!.add(enhancement)
   }
 
   /**
@@ -67,9 +65,6 @@ class ServiceGraphBuilder {
    * @throws IllegalStateException if the graph is not valid.
    */
   fun build(): ServiceManager {
-    check(serviceMap.isNotEmpty()) {
-      "ServiceGraphBuilder cannot be built without registering services"
-    }
     validateDependencyMap()
     validateEnhancementMap()
     linkDependencies()
@@ -77,24 +72,24 @@ class ServiceGraphBuilder {
     return ServiceManager(serviceMap.values)
   }
 
-  // Builds CoordinatedServices from the instructions provided in the dependency map.
+  // Builds CoordinatedService2s from the instructions provided in the dependency and enhancement
+  // maps.
   private fun linkDependencies() {
     // For each service, add its dependencies and ensure no dependency cycles.
     for ((key, service) in serviceMap) {
       // First get the enhancements for the service and handle their downstream dependencies.
       val enhancements = enhancementMap[key]?.map { serviceMap[it]!! } ?: listOf()
-      service.enhanceWith(enhancements)
+      service.addEnhancements(enhancements)
 
       // Now handle regular dependencies.
       val dependencies = dependencyMap[key]?.map { serviceMap[it]!! } ?: listOf()
-      service.addToDownstream(dependencies)
+      service.addDependencies(dependencies)
     }
   }
 
   // Checks that no service in this builder has specified a dependency cycle.
   private fun checkCycles() {
-    val validityMap =
-        mutableMapOf<CoordinatedService2, CoordinatedService2.Companion.CycleValidity>()
+    val validityMap = mutableMapOf<CoordinatedService2, CycleValidity>()
 
     for ((_, service) in serviceMap) {
       val cycle = service.findCycle(validityMap)
@@ -105,7 +100,7 @@ class ServiceGraphBuilder {
   }
 
   // Checks that each service registered with this builder has its dependencies registered.
-  // (i.e. no one service requires a dependency or enhancement that doesn't exist)
+  // (i.e. no one service requires a dependency or enhancement that doesn't exist.)
   private fun validateDependencyMap() {
     for ((big, dependents) in dependencyMap.asMap()) {
       if (serviceMap[big] == null) {
@@ -133,6 +128,6 @@ class ServiceGraphBuilder {
   private fun enhanceService(key: Key<*>) {
     val service = serviceMap[key]!!
     val enhancements = enhancementMap[key]?.map { serviceMap[it]!! } ?: listOf()
-    service.enhanceWith(enhancements)
+    service.addEnhancements(enhancements)
   }
 }
