@@ -16,8 +16,7 @@ import misk.CoordinatedService2.Companion.CycleValidity
 class ServiceGraphBuilder {
   private var serviceMap = mutableMapOf<Key<*>, CoordinatedService2>()
   private val dependencyMap = LinkedHashMultimap.create<Key<*>, Key<*>>()
-  private val enhancementMap = LinkedHashMultimap.create<Key<*>, Key<*>>()
-
+  private val enhancementMap = mutableMapOf<Key<*>, Key<*>>()
   /**
    * Registers a [service] with this [ServiceGraphBuilder]
    *
@@ -52,9 +51,13 @@ class ServiceGraphBuilder {
    *
    * @param service The identifier for the service to be enhanced by [enhancement].
    * @param enhancement The identifier for the service that depends on [service].
+   * @throws IllegalStateException if the enhancement has already been applied to another service.
    */
   fun enhanceService(service: Key<*>, enhancement: Key<*>) {
-    enhancementMap.put(service, enhancement)
+    check(enhancementMap[enhancement] == null) {
+      "Enhancement $enhancement cannot be applied more than once"
+    }
+    enhancementMap[enhancement] = service
   }
 
   /**
@@ -65,7 +68,6 @@ class ServiceGraphBuilder {
    */
   fun build(): ServiceManager {
     validateDependencyMap()
-    validateEnhancementMap()
     linkDependencies()
     checkCycles()
     return ServiceManager(serviceMap.values)
@@ -76,15 +78,17 @@ class ServiceGraphBuilder {
    * maps.
    */
   private fun linkDependencies() {
-    // For each service, add its dependencies and ensure no dependency cycles.
-    for ((key, service) in serviceMap) {
-      // First get the enhancements for the service and handle their downstream dependencies.
-      val enhancements = enhancementMap[key]?.map { serviceMap[it]!! } ?: listOf()
-      service.addEnhancements(enhancements)
+    // First apply enhancements.
+    for ((enhancementKey, serviceKey) in enhancementMap) {
+      val service = serviceMap[serviceKey]!!
+      val enhancement = serviceMap[enhancementKey]!!
+      service.addEnhancements(enhancement)
+    }
 
-      // Now handle regular dependencies.
+    // Now handle regular dependencies.
+    for ((key, service) in serviceMap) {
       val dependencies = dependencyMap[key]?.map { serviceMap[it]!! } ?: listOf()
-      service.addDependencies(dependencies)
+      service.addDependencies(*dependencies.toTypedArray())
     }
   }
 
@@ -113,17 +117,6 @@ class ServiceGraphBuilder {
         }
         "$stringBuilder requires $service but no such service was registered with the builder"
       }
-    }
-  }
-
-  /**
-   * Checks that no enhancement has been applied more than once.
-   */
-  private fun validateEnhancementMap() {
-    val enhancementList = mutableListOf<Key<*>>()
-    enhancementList += enhancementMap.values()
-    enhancementList.groupingBy { it }.eachCount().forEach {
-      check(it.value <= 1) { "Enhancement ${it.key} cannot be applied more than once" }
     }
   }
 }

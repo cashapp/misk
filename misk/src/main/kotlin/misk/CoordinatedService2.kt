@@ -137,7 +137,7 @@ internal class CoordinatedService2(val service: Service) : AbstractService() {
   }
 
   /** Adds [services] as dependents downstream. */
-  fun addDependencies(services: List<CoordinatedService2>) {
+  fun addDependencies(vararg services: CoordinatedService2) {
     directDependencies += services
     services.forEach { it.directDependsOn += this }
   }
@@ -146,7 +146,7 @@ internal class CoordinatedService2(val service: Service) : AbstractService() {
    * Adds [services] as enhancements to this service. Enhancements will start after the coordinated
    * service is running, and stop before it stops.
    */
-  fun addEnhancements(services: List<CoordinatedService2>) {
+  fun addEnhancements(vararg services: CoordinatedService2) {
     enhancements.addAll(services)
     services.forEach { it.enhancementTarget = this }
   }

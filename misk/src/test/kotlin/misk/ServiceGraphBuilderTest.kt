@@ -304,8 +304,8 @@ class ServiceGraphBuilderTest {
   ): IllegalStateException {
     val target = StringBuilder()
     val builder = newBuilderWithServices(target, services)
-    builder.block(target)
     return assertFailsWith {
+      builder.block(target)
       builder.build()
     }
   }
