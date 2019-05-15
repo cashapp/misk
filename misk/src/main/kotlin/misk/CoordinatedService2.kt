@@ -72,6 +72,7 @@ internal class CoordinatedService2(val service: Service) : AbstractService() {
   private var enhancementTarget: CoordinatedService2? = null
 
   init {
+    service.checkNew("$service must be NEW for it to be coordinated")
     service.addListener(object : Listener() {
       override fun running() {
         synchronized(this) {
@@ -138,8 +139,13 @@ internal class CoordinatedService2(val service: Service) : AbstractService() {
 
   /** Adds [services] as dependents downstream. */
   fun addDependencies(vararg services: CoordinatedService2) {
-    directDependencies += services
-    services.forEach { it.directDependsOn += this }
+    // Check that this service and all dependent services are new before modifying the graph.
+    this.checkNew()
+    for (service in services) {
+      service.checkNew()
+      directDependencies += service
+      service.directDependsOn += this
+    }
   }
 
   /**
@@ -147,8 +153,13 @@ internal class CoordinatedService2(val service: Service) : AbstractService() {
    * service is running, and stop before it stops.
    */
   fun addEnhancements(vararg services: CoordinatedService2) {
-    enhancements.addAll(services)
-    services.forEach { it.enhancementTarget = this }
+    // Check that this service and all dependent services are new before modifying the graph.
+    this.checkNew()
+    for (service in services) {
+      service.checkNew()
+      enhancements += service
+      service.enhancementTarget = this
+    }
   }
 
   private fun isTerminated(): Boolean {
@@ -226,6 +237,7 @@ internal class CoordinatedService2(val service: Service) : AbstractService() {
     }
   }
 
+
   companion object {
     /**
      * CycleValidity provides states used to track dependency graph traversal and cycle detection.
@@ -234,5 +246,15 @@ internal class CoordinatedService2(val service: Service) : AbstractService() {
       CHECKING_FOR_CYCLES,
       NO_CYCLES,
     }
+
+    /**
+     * Extension to check that a given [Service] is `NEW`.
+     */
+    private fun Service.checkNew(
+      message: String = "Cannot add dependencies after the service graph has been built"
+    ) {
+      check(state() == State.NEW) { message }
+    }
+
   }
 }

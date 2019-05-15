@@ -276,6 +276,36 @@ class ServiceGraphBuilderTest {
     assertThat(failure).hasMessage("Detected cycle: Service A -> Service B -> Service A")
   }
 
+  @Test fun cannotChangeGraphOnceRunning() {
+    val target = StringBuilder()
+    val builder = newBuilderWithServices(target, listOf(keyA))
+    val serviceManager = builder.build()
+    serviceManager.startAsync()
+    val badEnhancer = CoordinatedService2(AppendingService(target, "bad enhancement"))
+    val badDependency = CoordinatedService2(AppendingService(target, "bad dependency"))
+
+    serviceManager.awaitHealthy()
+
+    // This loop is probably the only sane way to obtain services from a ServiceManager?
+    for (service in serviceManager.servicesByState().values()) {
+      assertFailsWith<IllegalStateException> {
+        (service as CoordinatedService2).addEnhancements(badEnhancer)
+      }
+      assertFailsWith<IllegalStateException> {
+        (service as CoordinatedService2).addDependencies(badDependency)
+      }
+    }
+
+    serviceManager.stopAsync()
+
+    assertThat(target.toString()).isEqualTo("""
+        |starting ${keyA.name}
+        |stopping ${keyA.name}
+        |""".trimMargin())
+  }
+
+
+
   /**
    * Build a service graph with the named services. Configure the graph edges in [block], start the
    * services, and return the order of startup and shutdown.
