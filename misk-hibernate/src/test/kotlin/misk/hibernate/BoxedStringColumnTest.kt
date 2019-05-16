@@ -29,10 +29,13 @@ class BoxedStringColumnTest {
   @Test
   fun happyPath() {
     val abcToken = GoodLuckToken("abc")
+    val abcOptionalToken = GoodLuckToken("abc optional")
+
     val defToken = GoodLuckToken("def")
+    val defOptionalToken = GoodLuckToken("def optional")
     transacter.transaction { session ->
-      session.save(DbTextToken("abc", abcToken))
-      session.save(DbTextToken("def", defToken))
+      session.save(DbTextToken("abc", abcToken, abcOptionalToken))
+      session.save(DbTextToken("def", defToken, defOptionalToken))
     }
     transacter.transaction { session ->
       val textHash = queryFactory.newQuery(TextTokenQuery::class)
@@ -40,6 +43,23 @@ class BoxedStringColumnTest {
           .uniqueResult(session)!!
       assertThat(textHash.text).isEqualTo("abc")
       assertThat(textHash.token).isEqualTo(abcToken)
+      assertThat(textHash.optional_token).isEqualTo(abcOptionalToken)
+    }
+  }
+
+  @Test
+  fun nullOptionalToken() {
+    val abcToken = GoodLuckToken("abc")
+    transacter.transaction { session ->
+      session.save(DbTextToken("abc", abcToken))
+    }
+    transacter.transaction { session ->
+      val textHash = queryFactory.newQuery(TextTokenQuery::class)
+        .token(abcToken)
+        .uniqueResult(session)!!
+      assertThat(textHash.text).isEqualTo("abc")
+      assertThat(textHash.token).isEqualTo(abcToken)
+      assertThat(textHash.optional_token).isNull()
     }
   }
 
@@ -120,9 +140,13 @@ class BoxedStringColumnTest {
     @Column(nullable = false)
     lateinit var token: GoodLuckToken
 
-    constructor(text: String, token: GoodLuckToken) : this() {
+    @Column
+    var optional_token: GoodLuckToken? = null
+
+    constructor(text: String, token: GoodLuckToken, optionalToken: GoodLuckToken? = null) : this() {
       this.text = text
       this.token = token
+      this.optional_token = optionalToken
     }
   }
 
