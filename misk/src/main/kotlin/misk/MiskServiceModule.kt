@@ -23,6 +23,7 @@ import misk.environment.RealEnvVarModule
 import misk.healthchecks.HealthCheck
 import misk.inject.KAbstractModule
 import misk.inject.asSingleton
+import misk.inject.toKey
 import misk.metrics.MetricsModule
 import misk.moshi.MoshiModule
 import misk.prometheus.PrometheusHistogramRegistryModule
@@ -33,6 +34,7 @@ import misk.tokens.TokenGeneratorModule
 import mu.KotlinLogging
 import javax.inject.Provider
 import javax.inject.Singleton
+import kotlin.reflect.KClass
 
 /**
  * [MiskRealServiceModule] should be installed in real environments.
@@ -76,7 +78,9 @@ class MiskCommonServiceModule : KAbstractModule() {
         }
       }
     }).asSingleton()
-
+    newMultibinder<ServiceEntry>()
+    newMultibinder<DependencyEdge>()
+    newMultibinder<EnhancementEdge>()
   }
 
   @Provides
@@ -98,6 +102,41 @@ class MiskCommonServiceModule : KAbstractModule() {
     val serviceManager = CoordinatedService.coordinate(services)
     listeners.forEach { serviceManager.addListener(it) }
     return serviceManager
+  }
+
+  @Provides
+  @Singleton
+  fun provideServiceGraphBuilder(
+    injector: Injector,
+    serviceEntries: List<ServiceEntry>,
+    dependencies: List<DependencyEdge>,
+    enhancements: List<EnhancementEdge>
+  ): ServiceGraphBuilder {
+    // NB(mmihic): We get the binding for the Set<Service> because this uses a multibinder,
+    // which allows us to retrieve the bindings for the elements
+    val serviceListBinding = injector.getBinding(serviceSetKey)
+    val invalidServices = serviceListBinding
+        .acceptTargetVisitor(CheckServicesVisitor())
+        .sorted()
+
+    // Confirm all services have been registered as singleton. If they aren't singletons,
+    // _readiness checks will fail
+    check(invalidServices.isEmpty()) {
+      "the following serviceEntries are not marked as @Singleton: ${invalidServices.joinToString(", ")}"
+    }
+
+    val builder = ServiceGraphBuilder()
+    for (entry in serviceEntries) {
+      val service = injector.getInstance(entry.key)
+      builder.addService(entry.key, service)
+    }
+    for (edge in dependencies) {
+      builder.addDependency(service = edge.service, dependency = edge.dependency)
+    }
+    for (edge in enhancements) {
+      builder.enhanceService(service = edge.service, enhancement = edge.enhancement)
+    }
+    return builder
   }
 
   @Suppress("DEPRECATION")
@@ -140,3 +179,55 @@ class MiskCommonServiceModule : KAbstractModule() {
 
 }
 
+data class DependencyEdge(val service: Key<*>, val dependency: Key<*>)
+data class EnhancementEdge(val service: Key<*>, val enhancement: Key<*>)
+data class ServiceEntry(val key: Key<out Service>)
+
+inline fun <reified T : Service> service(): ServiceModule {
+  return ServiceModule(T::class)
+}
+
+class ServiceModule(
+  val serviceClass: KClass<out Service>,
+  val dependsOn: List<Key<out Service>> = listOf(),
+  val enhancedBy: List<Key<out Service>> = listOf()
+) : KAbstractModule() {
+
+  val key = serviceClass.toKey()
+
+  override fun configure() {
+    // bind the Service to this module
+    multibind<Service>().to(serviceClass.java)
+
+    // bind this module's ServiceEntry to register the keys with a ServiceGraphBuilder
+    multibind<ServiceEntry>().toInstance(ServiceEntry(key))
+
+    // bind each edge for the ServiceGraphBuilder
+    for (dependencyKey in dependsOn) {
+      multibind<DependencyEdge>().toInstance(
+          DependencyEdge(service = key, dependency = dependencyKey)
+      )
+    }
+    for (enhancementKey in enhancedBy) {
+      multibind<EnhancementEdge>().toInstance(
+          EnhancementEdge(service = key, enhancement = enhancementKey)
+      )
+    }
+  }
+
+  fun dependsOn(upstream: Key<out Service>): ServiceModule {
+    return ServiceModule(serviceClass, dependsOn + upstream, enhancedBy)
+  }
+
+  fun enhancedBy(enhancement: Key<out Service>): ServiceModule {
+    return ServiceModule(serviceClass, dependsOn,enhancedBy + enhancement)
+  }
+
+  inline fun <reified T : Service> dependsOn(): ServiceModule {
+    return dependsOn(T::class.toKey())
+  }
+
+  inline fun <reified T : Service> enhancedBy(): ServiceModule {
+    return enhancedBy(T::class.toKey())
+  }
+}
