@@ -183,21 +183,23 @@ data class DependencyEdge(val service: Key<*>, val dependency: Key<*>)
 data class EnhancementEdge(val service: Key<*>, val enhancement: Key<*>)
 data class ServiceEntry(val key: Key<out Service>)
 
-inline fun <reified T : Service> service(): ServiceModule {
-  return ServiceModule(T::class)
+
+/**
+ * Utility method to create a [ServiceModule].
+ */
+inline fun <reified T : Service> service(qualifier: KClass<out Annotation>? = null): ServiceModule {
+  return ServiceModule(T::class.toKey(qualifier))
 }
 
 class ServiceModule(
-  val serviceClass: KClass<out Service>,
+
+  val key: Key<out Service>,
   val dependsOn: List<Key<out Service>> = listOf(),
   val enhancedBy: List<Key<out Service>> = listOf()
 ) : KAbstractModule() {
-
-  val key = serviceClass.toKey()
-
   override fun configure() {
     // bind the Service to this module
-    multibind<Service>().to(serviceClass.java)
+    multibind<Service>().to(key)
 
     // bind this module's ServiceEntry to register the keys with a ServiceGraphBuilder
     multibind<ServiceEntry>().toInstance(ServiceEntry(key))
@@ -216,11 +218,12 @@ class ServiceModule(
   }
 
   fun dependsOn(upstream: Key<out Service>): ServiceModule {
-    return ServiceModule(serviceClass, dependsOn + upstream, enhancedBy)
+
+    return ServiceModule(key, dependsOn + upstream, enhancedBy)
   }
 
   fun enhancedBy(enhancement: Key<out Service>): ServiceModule {
-    return ServiceModule(serviceClass, dependsOn,enhancedBy + enhancement)
+    return ServiceModule(key, dependsOn, enhancedBy + enhancement)
   }
 
   inline fun <reified T : Service> dependsOn(): ServiceModule {
