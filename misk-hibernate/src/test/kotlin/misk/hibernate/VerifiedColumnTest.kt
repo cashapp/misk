@@ -11,9 +11,10 @@ import misk.inject.KAbstractModule
 import misk.jdbc.DataSourceConfig
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
-import org.assertj.core.api.Assertions.assertThatCode
+import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.hibernate.annotations.Columns
+import org.hibernate.exception.ConstraintViolationException
 import org.junit.jupiter.api.Test
 import java.util.UUID
 import javax.inject.Inject
@@ -44,13 +45,12 @@ class VerifiedColumnTest {
       val row = DbAuthToken(clientId, clientToken)
       session.save(row)
     }
-    transacter.transaction { session ->
-      assertThatCode {
-        queryFactory.newQuery(AuthQuery::class)
-          .clientId(clientId)
-          .query(session)[0]
-      }.doesNotThrowAnyException()
+    val token = transacter.transaction { session ->
+      queryFactory.newQuery(AuthQuery::class)
+        .clientId(clientId)
+        .list(session)[0]
     }
+    assertThat(token.token).isEqualTo(clientToken)
   }
 
   /**
@@ -66,16 +66,50 @@ class VerifiedColumnTest {
     }
     transacter.transaction { session ->
       val evilToken = UUID.randomUUID().toString()
-      val evilRowUpdate = DbAuthTokensRaw(id, clientId, evilToken)
-      session.hibernateSession.update(evilRowUpdate)
+      session.hibernateSession.createNativeQuery("update auth_tokens " +
+          "set token=? where id=?")
+          .setParameter(1, evilToken)
+          .setParameter(2, id)
+          .executeUpdate()
+      session.hibernateSession.flush()
     }
     transacter.transaction { session ->
       assertThatThrownBy {
         queryFactory.newQuery(AuthQuery::class)
             .clientId(clientId)
-            .query(session)[0]
+            .list(session)[0]
       }.isInstanceOf(PersistenceException::class.java)
     }
+  }
+
+  /**
+   * Test that given the salt is unique, one cannot copy paste a verified column to a new row.
+   */
+  @Test
+  fun testCopyPastingTokenFails() {
+    val clientId = "2345"
+    val clientToken = UUID.randomUUID().toString()
+    transacter.transaction { session ->
+      val row = DbAuthToken(clientId, clientToken)
+      session.save(row)
+    }
+    val row = transacter.transaction { session ->
+      queryFactory.newQuery(AuthQuery::class)
+          .clientId(clientId)
+          .list(session)[0]
+    }
+    assertThatThrownBy {
+      transacter.transaction { session ->
+        session.hibernateSession.createNativeQuery("insert into auth_tokens " +
+            "(client_id, token, token_salt, token_hmac) values (?, ?, ?, ?)")
+            .setParameter(1, row.clientId)
+            .setParameter(2, row.token)
+            .setParameter(3, row.salt)
+            .setParameter(4, row.hmac)
+            .executeUpdate()
+        session.hibernateSession.flush()
+      }
+    }.isInstanceOf(ConstraintViolationException::class.java)
   }
 
   @Qualifier
@@ -95,72 +129,36 @@ class VerifiedColumnTest {
     @VerifiedColumn("tokenVerificationKey")
     @Columns(columns = [
       Column(name = "token", nullable = true),
-      Column(name = "token_hash", nullable = true)
+      Column(name = "token_salt", nullable = true),
+      Column(name = "token_hmac", nullable = true)
     ])
     var token: String?
 
-    constructor(clientId: String, authToken: String) {
+    /**
+     * This column is here only for testing purposes,
+     * there's no need for it to be accessible in real situations.
+     */
+    @Column(name = "token_salt", nullable = true, insertable = false, updatable = false)
+    var salt: ByteArray?
+
+    /**
+     * This column is here only for testing purposes,
+     * there's no need for it to be accessible in real situations.
+     */
+    @Column(name = "token_hmac", nullable = true, insertable = false, updatable = false)
+    var hmac: ByteArray?
+
+    constructor(clientId: String, authToken: String, salt: ByteArray? = null, hmac: ByteArray? = null) {
       this.clientId = clientId
       this.token = authToken
-    }
-  }
-
-  @Entity
-  @Table(name = "auth_tokens")
-  class DbAuthTokensRaw : DbUnsharded<DbAuthTokensRaw> {
-
-    @javax.persistence.Id
-    @GeneratedValue
-    override lateinit var id: Id<DbAuthTokensRaw>
-
-    @Column(name = "client_id", nullable = false)
-    var clientId: String
-
-    @Column(name = "token", nullable = true)
-    var token: String?
-
-    constructor(id: Id<DbAuthToken>? = null, clientId: String, token: String) {
-      if (id != null) {
-        this.id = Id(id.id)
-      }
-      this.clientId = clientId
-      this.token = token
+      this.salt = salt
+      this.hmac = hmac
     }
   }
 
   interface AuthQuery : Query<DbAuthToken> {
     @Constraint(path = "clientId")
     fun clientId(clientId: String): AuthQuery
-
-    @Select
-    fun query(session: Session): List<AuthToken>
-  }
-
-  data class AuthToken(
-    @Property("clientId") val clientId: String,
-    @Property("token") val token: String?
-
-  ) : Projection {
-    override fun equals(other: Any?): Boolean {
-      if (this === other) return true
-      if (javaClass != other?.javaClass) return false
-
-      other as AuthToken
-
-      if (clientId != other.clientId) return false
-      if (token != null) {
-        if (other.token == null) return false
-        if (!token.contentEquals(other.token)) return false
-      } else if (other.token != null) return false
-
-      return true
-    }
-
-    override fun hashCode(): Int {
-      var result = clientId.hashCode()
-      result = 31 * result + (token?.hashCode() ?: 0)
-      return result
-    }
   }
 
   data class AppConfig(val data_source: DataSourceConfig, val crypto: CryptoConfig) : Config
@@ -170,13 +168,13 @@ class VerifiedColumnTest {
       install(MiskTestingServiceModule())
       install(EnvironmentModule(Environment.TESTING))
 
-      val config = MiskConfig.load<AppConfig>("authenticationcolumn", Environment.TESTING)
+      val config = MiskConfig.load<AppConfig>("verifiedcolumn", Environment.TESTING)
       install(CryptoTestModule(config.crypto.keys!!))
       install(HibernateTestingModule(AuthDb::class, config.data_source))
       install(HibernateModule(AuthDb::class, config.data_source))
       install(object : HibernateEntityModule(AuthDb::class) {
         override fun configureHibernate() {
-          addEntities(DbAuthToken::class, DbAuthTokensRaw::class)
+          addEntities(DbAuthToken::class)
         }
       })
     }

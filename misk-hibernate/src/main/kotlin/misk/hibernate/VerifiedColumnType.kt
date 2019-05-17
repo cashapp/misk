@@ -5,6 +5,7 @@ import misk.crypto.MacKeyManager
 import misk.logging.getLogger
 import org.hibernate.HibernateException
 import org.hibernate.engine.spi.SharedSessionContractImplementor
+import org.hibernate.id.UUIDGenerator
 import org.hibernate.type.spi.TypeConfiguration
 import org.hibernate.type.spi.TypeConfigurationAware
 import org.hibernate.usertype.ParameterizedType
@@ -27,6 +28,9 @@ internal class VerifiedColumnType : UserType, ParameterizedType, TypeConfigurati
   private lateinit var mac: Mac
   private lateinit var keyName: String
   private lateinit var _typeConfiguration: TypeConfiguration
+  private val uuidGenerator: UUIDGenerator =
+      UUIDGenerator.buildSessionFactoryUniqueIdentifierGenerator()
+
   override fun getTypeConfiguration(): TypeConfiguration = _typeConfiguration
 
   override fun setTypeConfiguration(typeConfiguration: TypeConfiguration) {
@@ -60,10 +64,12 @@ internal class VerifiedColumnType : UserType, ParameterizedType, TypeConfigurati
     index: Int,
     session: SharedSessionContractImplementor?
   ) {
+    val salt = uuidGenerator.generate(session, value).toString().toByteArray()
     (value as String?)?.let {
       st.setString(index, it)
-      st.setBytes(index + 1, mac.computeMac(it.toByteArray()))
-    } ?: st.setNull(index, Types.VARBINARY)
+      st.setBytes(index + 1, salt)
+      st.setBytes(index + 2, mac.computeMac(it.toByteArray() + salt))
+    } ?: st.setNull(index, Types.VARCHAR)
   }
 
   override fun nullSafeGet(
@@ -74,9 +80,10 @@ internal class VerifiedColumnType : UserType, ParameterizedType, TypeConfigurati
   ): Any? {
     return rs?.let {
       val data = rs.getString(names[0])
-      val tag = rs.getBytes(names[1])
+      val salt = rs.getBytes(names[1])
+      val tag = rs.getBytes(names[2])
       try {
-        mac.verifyMac(tag, data.toByteArray())
+        mac.verifyMac(tag, data.toByteArray() + salt)
       } catch (e: GeneralSecurityException) {
         val columnCount = rs.metaData.columnCount
         val dataColumnName = 1.rangeTo(columnCount)
@@ -94,5 +101,5 @@ internal class VerifiedColumnType : UserType, ParameterizedType, TypeConfigurati
 
   override fun isMutable() = false
 
-  override fun sqlTypes() = intArrayOf(Types.VARCHAR, Types.VARBINARY)
+  override fun sqlTypes() = intArrayOf(Types.VARCHAR, Types.VARBINARY, Types.VARBINARY)
 }

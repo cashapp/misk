@@ -14,13 +14,19 @@ package misk.hibernate
  *   keys:
  *     - key_name: "columnVerificationKeyName"
  * ```
- * Then, add a table in your database with 2 columns,
- * one for the data you'd like to verify and another column for the verification hmac:
+ * Then, add a table in your database with 3 columns:
+ * - my_data: the column where you'd liek to persist your authenticated data
+ * - my_data_salt: this column will be used internally to generate and store a salt value
+ *   used in coomupting the data's MAC.
+ * - my_data_hmac: this column stores the HMAC for (my_data + my_data_salt)
  * ```
  * CREATE TABLE my_table(
  *   id BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT,
  *   my_data VARCHAR(50),
- *   my_data_hmac VARBINARY(100)
+ *   my_data_salt VARBINARY(36),
+ *   my_data_hmac VARBINARY(100),
+ *
+ *   CONSTRAINT my_data_salt_uniq UNIQUE (my_data_salt)
  * )
  * ```
  * When bninding a Hibernate entity to your table, specify the following annotation for your verified column:
@@ -28,6 +34,7 @@ package misk.hibernate
  * @VerifiedColumn(keyName = "columnVerificationKeyName")
  * @Columns(columns = [
  *   Column(name = "my_data"),
+ *   Column(name = "my_data_salt"),
  *   Column(name = "my_data_hmac")
  * ])
  * var myData: String
@@ -37,6 +44,8 @@ package misk.hibernate
  *   The data is always first, and the data's hmac is second.
  * - This annotation only supports verifying [String]s.
  *   Use `VARCHAR` and `VARBINARY` when defining your table.
+ * - It's important to include the CONSTRAINT over the "salt" column.
+ *   Without it, verified data cannot be modified, but can still be duplicated/inserted to other rows in the table
  * - Using this annotation will help make sure the data stored with it is authentic and will throw
  *   an exception if the data does not match the HMAC.
  * - Lastly, in case of a failed MAC verification, an error level message will be logged as well

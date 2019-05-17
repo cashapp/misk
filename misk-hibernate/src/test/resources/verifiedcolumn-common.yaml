@@ -2,8 +2,8 @@ data_source:
   type: MYSQL
   username: root
   password: ""
-  database: authenticationcolumn
-  migrations_resource: classpath:/misk/hibernate/authenticationcolumn-migrations
+  database: verifiedcolumn
+  migrations_resource: classpath:/misk/hibernate/verifiedcolumn-migrations
 crypto:
   kms_uri: "not_relevant"
   keys:
