@@ -22,6 +22,7 @@ import misk.concurrent.SleeperModule
 import misk.environment.RealEnvVarModule
 import misk.healthchecks.HealthCheck
 import misk.inject.KAbstractModule
+import misk.inject.asSingleton
 import misk.metrics.MetricsModule
 import misk.moshi.MoshiModule
 import misk.prometheus.PrometheusHistogramRegistryModule
@@ -29,6 +30,8 @@ import misk.resources.ResourceLoaderModule
 import misk.time.ClockModule
 import misk.time.TickerModule
 import misk.tokens.TokenGeneratorModule
+import mu.KotlinLogging
+import javax.inject.Provider
 import javax.inject.Singleton
 
 /**
@@ -64,11 +67,21 @@ class MiskCommonServiceModule : KAbstractModule() {
     // Initialize empty sets for our multibindings.
     newMultibinder<HealthCheck>()
     newMultibinder<Service>()
+    newMultibinder<ServiceManager.Listener>()
+
+    multibind<ServiceManager.Listener>().toProvider(Provider<ServiceManager.Listener> {
+      object : ServiceManager.Listener() {
+        override fun failure(service: Service) {
+          log.error(service.failureCause()) { "Service $service failed" }
+        }
+      }
+    }).asSingleton()
+
   }
 
   @Provides
   @Singleton
-  fun provideServiceManager(injector: Injector, services: List<Service>): ServiceManager {
+  fun provideServiceManager(injector: Injector, services: List<Service>, listeners: List<ServiceManager.Listener>): ServiceManager {
     // NB(mmihic): We get the binding for the Set<Service> because this uses a multibinder,
     // which allows us to retrieve the bindings for the elements
     val serviceListBinding = injector.getBinding(serviceSetKey)
@@ -82,7 +95,9 @@ class MiskCommonServiceModule : KAbstractModule() {
       "the following services are not marked as @Singleton: ${invalidServices.joinToString(", ")}"
     }
 
-    return CoordinatedService.coordinate(services)
+    val serviceManager = CoordinatedService.coordinate(services)
+    listeners.forEach { serviceManager.addListener(it) }
+    return serviceManager
   }
 
   @Suppress("DEPRECATION")
@@ -120,6 +135,7 @@ class MiskCommonServiceModule : KAbstractModule() {
   companion object {
     @Suppress("UNCHECKED_CAST")
     val serviceSetKey = Key.get(Types.setOf(Service::class.java)) as Key<Set<Service>>
+    private val log = KotlinLogging.logger {}
   }
 
 }
