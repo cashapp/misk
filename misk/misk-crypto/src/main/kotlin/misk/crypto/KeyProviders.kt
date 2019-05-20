@@ -19,7 +19,10 @@ import com.google.crypto.tink.aead.KmsEnvelopeAead
 import com.google.crypto.tink.daead.DeterministicAeadFactory
 import com.google.inject.Inject
 import com.google.inject.Provider
+import misk.crypto.KeyReader.readKey
+import misk.environment.Environment
 import misk.logging.getLogger
+import java.security.GeneralSecurityException
 
 val logger by lazy { getLogger<CryptoModule>() }
 
@@ -98,15 +101,24 @@ internal class DigitalSignatureVerifierProvider(
   }
 }
 
-private fun readKey(key: Key, kmsUri: String?, kmsClient: KmsClient): KeysetHandle {
-  val keyJson = JsonKeysetReader.withString(key.encrypted_key.value)
+private object KeyReader {
+  @Inject lateinit var env: Environment
 
-  return if (kmsUri != null) {
-    val masterKey = kmsClient.getAead(kmsUri)
-    KeysetHandle.read(keyJson, masterKey)
-  } else {
-    logger.warn { "Reading a plaintext key" }
-    CleartextKeysetHandle.read(keyJson)
+  fun readKey(key: Key, kmsUri: String?, kmsClient: KmsClient): KeysetHandle {
+    val keyJson = JsonKeysetReader.withString(key.encrypted_key.value)
+
+    return if (kmsUri != null) {
+      val masterKey = kmsClient.getAead(kmsUri)
+      KeysetHandle.read(keyJson, masterKey)
+    } else {
+      if (env != Environment.TESTING && env != Environment.DEVELOPMENT)
+        throw GeneralSecurityException(
+            "Trying to use a plaintext key outside of a development environment")
+
+      logger.warn { "Reading a plaintext key" }
+      CleartextKeysetHandle.read(keyJson)
+    }
   }
-}
 
+
+}
