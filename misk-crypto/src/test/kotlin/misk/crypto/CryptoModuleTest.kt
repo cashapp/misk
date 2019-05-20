@@ -15,6 +15,8 @@ import com.google.inject.CreationException
 import com.google.inject.Guice
 import com.google.inject.Injector
 import misk.config.Secret
+import misk.environment.Environment
+import misk.environment.EnvironmentModule
 import misk.testing.MiskTest
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatCode
@@ -107,7 +109,8 @@ class CryptoModuleTest {
       Key(it.first, keyType, generateEncryptedKey(it.second))
     }
     val config = CryptoConfig(keys, "test_master_key")
-    return Guice.createInjector(CryptoTestModule(), CryptoModule(config))
+    val envModule = EnvironmentModule(Environment.TESTING)
+    return Guice.createInjector(CryptoTestModule(), CryptoModule(config), envModule)
   }
 
   private fun generateEncryptedKey(keyHandle: KeysetHandle): Secret<String> {
