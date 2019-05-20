@@ -3,19 +3,16 @@ package misk.hibernate
 import com.google.common.util.concurrent.AbstractIdleService
 import com.google.inject.Key
 import misk.DependentService
-import misk.backoff.Backoff
-import misk.backoff.ExponentialBackoff
-import misk.backoff.retry
 import misk.inject.toKey
 import misk.jdbc.DataSourceConfig
-import java.time.Duration
+import java.util.Collections
 import javax.inject.Provider
 import javax.inject.Singleton
 import kotlin.reflect.KClass
 
 @Singleton
 internal class SchemaValidatorService internal constructor(
-  qualifier: KClass<out Annotation>,
+  private val qualifier: KClass<out Annotation>,
   private val sessionFactoryServiceProvider: Provider<SessionFactoryService>,
   private val transacterProvider: Provider<Transacter>,
   private val config: DataSourceConfig
@@ -29,15 +26,21 @@ internal class SchemaValidatorService internal constructor(
 
   override fun startUp() {
     synchronized(this) {
+      if (validated.contains(qualifier)) {
+        return
+      }
       val validator = SchemaValidator()
       val sessionFactoryService = sessionFactoryServiceProvider.get()
-      // Sometimes the schema hasn't been refreshed at this point in Vitess. So we retry a few times.
-      retry(5, ExponentialBackoff(Duration.ofMillis(10), Duration.ofMillis(100))) {
-        validator.validate(transacterProvider.get(), sessionFactoryService.hibernateMetadata)
-      }
+      validator.validate(transacterProvider.get(), sessionFactoryService.hibernateMetadata)
+      validated.add(qualifier)
     }
   }
 
   override fun shutDown() {
+  }
+
+  companion object {
+    /** Make sure we only validate each database once. It can be quite slow sometimes. */
+    private val validated = Collections.synchronizedSet(HashSet<KClass<out Annotation>>())
   }
 }
