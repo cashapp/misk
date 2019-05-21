@@ -1,9 +1,6 @@
 package misk
 
-import com.google.common.collect.HashMultimap
 import com.google.common.collect.LinkedHashMultimap
-import com.google.common.collect.Multimap
-import com.google.common.collect.SetMultimap
 import com.google.common.util.concurrent.Service
 import com.google.common.util.concurrent.ServiceManager
 import com.google.inject.Key
@@ -22,9 +19,6 @@ class ServiceGraphBuilder {
    *
    * A service should be added before dependencies or enhancements are specified.
    * Keys must be unique. If a key is reused, then the original key-service pair will be replaced.
-   *
-   * @param key A Guice Key used to identify the service.
-   * @param service The Service to register with this ServiceGraphBuilder.
    */
   fun addService(key: Key<*>, service: Service) {
     serviceMap[key] = CoordinatedService2(service)
