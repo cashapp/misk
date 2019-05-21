@@ -31,6 +31,7 @@ import misk.web.extractors.WebSocketParameterExtractorFactory
 import misk.web.interceptors.InternalErrorInterceptorFactory
 import misk.web.interceptors.MarshallerInterceptor
 import misk.web.interceptors.MetricsInterceptor
+import misk.web.interceptors.RebalancingInterceptor
 import misk.web.interceptors.RequestLogContextInterceptor
 import misk.web.interceptors.RequestLoggingInterceptor
 import misk.web.interceptors.TracingInterceptor
@@ -90,6 +91,9 @@ class MiskWebModule(private val config: WebConfig) : KAbstractModule() {
 
     // Register built-in interceptors. Interceptors run in the order in which they are
     // installed, and the order of these interceptors is critical.
+
+    multibind<NetworkInterceptor.Factory>(MiskDefault::class)
+        .to<RebalancingInterceptor.Factory>()
 
     // Handle all unexpected errors that occur during dispatch
     multibind<NetworkInterceptor.Factory>(MiskDefault::class)
