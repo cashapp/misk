@@ -85,7 +85,11 @@ class MiskCommonServiceModule : KAbstractModule() {
 
   @Provides
   @Singleton
-  fun provideServiceManager(injector: Injector, services: List<Service>, listeners: List<ServiceManager.Listener>): ServiceManager {
+  fun provideServiceManager(
+    injector: Injector,
+    services: List<Service>,
+    listeners: List<ServiceManager.Listener>
+  ): ServiceManager {
     // NB(mmihic): We get the binding for the Set<Service> because this uses a multibinder,
     // which allows us to retrieve the bindings for the elements
     val serviceListBinding = injector.getBinding(serviceSetKey)
@@ -106,6 +110,11 @@ class MiskCommonServiceModule : KAbstractModule() {
 
   @Provides
   @Singleton
+  // NB(keeferrourke): provideServiceGraph builder will be used to replace usages of the
+  // provideServiceManager method while portions of this code are migrated to use
+  // ServiceGraphBuilder. Once the migration is complete, then this method should be renamed back to
+  // provideServiceManager, and it should return a built ServiceManager rather than the
+  // ServiceGraphBuilder.
   fun provideServiceGraphBuilder(
     injector: Injector,
     serviceEntries: List<ServiceEntry>,
@@ -122,7 +131,7 @@ class MiskCommonServiceModule : KAbstractModule() {
     // Confirm all services have been registered as singleton. If they aren't singletons,
     // _readiness checks will fail
     check(invalidServices.isEmpty()) {
-      "the following serviceEntries are not marked as @Singleton: ${invalidServices.joinToString(", ")}"
+      "the following services are not marked as @Singleton: ${invalidServices.joinToString(", ")}"
     }
 
     val builder = ServiceGraphBuilder()
@@ -183,7 +192,6 @@ data class DependencyEdge(val service: Key<*>, val dependency: Key<*>)
 data class EnhancementEdge(val service: Key<*>, val enhancement: Key<*>)
 data class ServiceEntry(val key: Key<out Service>)
 
-
 /**
  * Utility method to create a [ServiceModule].
  */
@@ -191,8 +199,40 @@ inline fun <reified T : Service> service(qualifier: KClass<out Annotation>? = nu
   return ServiceModule(T::class.toKey(qualifier))
 }
 
+/**
+ * This Module installs a Service and registers dependency and enhancement edges for the
+ * ServiceGraph. A ServiceModule must be installed for every service that is used by a module.
+ *
+ * This provides a small Embedded Domain Specific Language for specifying Service Graphs with Guice
+ * bindings.
+ *
+ * The EDSL method [service] should be used to perform this installation.
+ *
+ * e.g.
+ *
+ * ```
+ * Guice.createInjector(object : KAbstractModule() {
+ *   override fun configure() {
+ *     install(service<MyService>().dependsOn<MyServiceDependency>())
+ *     install(service<MyServiceDependency>())
+ *   }
+ * }
+ * ```
+ *
+ * Dependencies and services may be optionally annotated as:
+ *
+ * ```
+ * Guice.createInjector(object : KAbstractModule() {
+ *   override fun configure() {
+ *     install(service<MyService>(MyAnnotation::class)
+ *         .dependsOn<MyServiceDependency>(AnotherAnnotation::class)
+ *     )
+ *     install(service<MyServiceDependency>(AnotherAnnotation::class))
+ *   }
+ * }
+ * ```
+ */
 class ServiceModule(
-
   val key: Key<out Service>,
   val dependsOn: List<Key<out Service>> = listOf(),
   val enhancedBy: List<Key<out Service>> = listOf()
@@ -226,11 +266,21 @@ class ServiceModule(
     return ServiceModule(key, dependsOn, enhancedBy + enhancement)
   }
 
-  inline fun <reified T : Service> dependsOn(): ServiceModule {
-    return dependsOn(T::class.toKey())
+  inline fun <reified T : Service> dependsOn(qualifier: KClass<out Annotation>? = null): ServiceModule {
+    val dependencyKey = if (qualifier != null) {
+      T::class.toKey(qualifier)
+    } else {
+      T::class.toKey()
+    }
+    return dependsOn(dependencyKey)
   }
 
-  inline fun <reified T : Service> enhancedBy(): ServiceModule {
-    return enhancedBy(T::class.toKey())
+  inline fun <reified T : Service> enhancedBy(qualifier: KClass<out Annotation>? = null): ServiceModule {
+    val enhancementKey = if (qualifier != null) {
+      T::class.toKey(qualifier)
+    } else {
+      T::class.toKey()
+    }
+    return enhancedBy(enhancementKey)
   }
 }
