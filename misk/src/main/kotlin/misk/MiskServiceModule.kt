@@ -258,7 +258,6 @@ class ServiceModule(
   }
 
   fun dependsOn(upstream: Key<out Service>): ServiceModule {
-
     return ServiceModule(key, dependsOn + upstream, enhancedBy)
   }
 
