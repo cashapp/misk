@@ -23,6 +23,7 @@ import misk.environment.RealEnvVarModule
 import misk.healthchecks.HealthCheck
 import misk.inject.KAbstractModule
 import misk.inject.asSingleton
+import misk.inject.toKey
 import misk.metrics.MetricsModule
 import misk.moshi.MoshiModule
 import misk.prometheus.PrometheusHistogramRegistryModule
@@ -33,9 +34,10 @@ import misk.tokens.TokenGeneratorModule
 import mu.KotlinLogging
 import javax.inject.Provider
 import javax.inject.Singleton
+import kotlin.reflect.KClass
 
 /**
- * [MiskRealServiceModule] should be installed in real environments.
+ * Install this module in real environments.
  *
  * The vast majority of Service bindings belong in [MiskCommonServiceModule], in order to share
  * with [MiskTestingServiceModule]. Only bindings that are not suitable for a unit testing
@@ -53,7 +55,7 @@ class MiskRealServiceModule : KAbstractModule() {
 }
 
 /**
- * [MiskCommonServiceModule] has common bindings for all environments (both real and testing)
+ * This module has common bindings for all environments (both real and testing).
  */
 class MiskCommonServiceModule : KAbstractModule() {
   override fun configure() {
@@ -76,12 +78,18 @@ class MiskCommonServiceModule : KAbstractModule() {
         }
       }
     }).asSingleton()
-
+    newMultibinder<ServiceEntry>()
+    newMultibinder<DependencyEdge>()
+    newMultibinder<EnhancementEdge>()
   }
 
   @Provides
   @Singleton
-  fun provideServiceManager(injector: Injector, services: List<Service>, listeners: List<ServiceManager.Listener>): ServiceManager {
+  fun provideServiceManager(
+    injector: Injector,
+    services: List<Service>,
+    listeners: List<ServiceManager.Listener>
+  ): ServiceManager {
     // NB(mmihic): We get the binding for the Set<Service> because this uses a multibinder,
     // which allows us to retrieve the bindings for the elements
     val serviceListBinding = injector.getBinding(serviceSetKey)
@@ -98,6 +106,42 @@ class MiskCommonServiceModule : KAbstractModule() {
     val serviceManager = CoordinatedService.coordinate(services)
     listeners.forEach { serviceManager.addListener(it) }
     return serviceManager
+  }
+
+  /** TODO: this should replace provideServiceManager(). */
+  @Provides
+  @Singleton
+  internal fun provideServiceGraphBuilder(
+    injector: Injector,
+    serviceEntries: List<ServiceEntry>,
+    dependencies: List<DependencyEdge>,
+    enhancements: List<EnhancementEdge>
+  ): ServiceGraphBuilder {
+    // NB(mmihic): We get the binding for the Set<Service> because this uses a multibinder,
+    // which allows us to retrieve the bindings for the elements
+    val serviceListBinding = injector.getBinding(serviceSetKey)
+    val invalidServices = serviceListBinding
+        .acceptTargetVisitor(CheckServicesVisitor())
+        .sorted()
+
+    // Confirm all services have been registered as singleton. If they aren't singletons,
+    // _readiness checks will fail
+    check(invalidServices.isEmpty()) {
+      "the following services are not marked as @Singleton: ${invalidServices.joinToString(", ")}"
+    }
+
+    val builder = ServiceGraphBuilder()
+    for (entry in serviceEntries) {
+      val service = injector.getInstance(entry.key)
+      builder.addService(entry.key, service)
+    }
+    for (edge in dependencies) {
+      builder.addDependency(service = edge.service, dependency = edge.dependency)
+    }
+    for (edge in enhancements) {
+      builder.enhanceService(service = edge.service, enhancement = edge.enhancement)
+    }
+    return builder
   }
 
   @Suppress("DEPRECATION")
@@ -140,3 +184,70 @@ class MiskCommonServiceModule : KAbstractModule() {
 
 }
 
+internal data class DependencyEdge(val service: Key<*>, val dependency: Key<*>)
+internal data class EnhancementEdge(val service: Key<*>, val enhancement: Key<*>)
+internal data class ServiceEntry(val key: Key<out Service>)
+
+inline fun <reified T : Service> ServiceModule(qualifier: KClass<out Annotation>? = null) =
+    ServiceModule(T::class.toKey(qualifier))
+
+/**
+ * This module installs a service and hooks up its dependencies and enhancements.
+ *
+ * Here's how:
+ *
+ * ```
+ * Guice.createInjector(object : KAbstractModule() {
+ *   override fun configure() {
+ *     install(ServiceModule<MyService>()
+ *         .dependsOn<MyServiceDependency>())
+ *     install(service<MyServiceDependency>())
+ *   }
+ * }
+ * ```
+ *
+ * Dependencies and services may be optionally annotated:
+ *
+ * ```
+ * Guice.createInjector(object : KAbstractModule() {
+ *   override fun configure() {
+ *     install(ServiceModule<MyService>(MyAnnotation::class)
+ *         .dependsOn<MyServiceDependency>(AnotherAnnotation::class))
+ *     install(service<MyServiceDependency>(AnotherAnnotation::class))
+ *   }
+ * }
+ * ```
+ */
+class ServiceModule(
+  val key: Key<out Service>,
+  val dependsOn: List<Key<out Service>> = listOf(),
+  val enhancedBy: List<Key<out Service>> = listOf()
+) : KAbstractModule() {
+  override fun configure() {
+    multibind<Service>().to(key)
+
+    multibind<ServiceEntry>().toInstance(ServiceEntry(key))
+
+    for (dependsOnKey in dependsOn) {
+      multibind<DependencyEdge>().toInstance(
+          DependencyEdge(service = key, dependency = dependsOnKey)
+      )
+    }
+    for (enhancedByKey in enhancedBy) {
+      multibind<EnhancementEdge>().toInstance(
+          EnhancementEdge(service = key, enhancement = enhancedByKey)
+      )
+    }
+  }
+
+  fun dependsOn(upstream: Key<out Service>) = ServiceModule(key, dependsOn + upstream, enhancedBy)
+
+  fun enhancedBy(enhancement: Key<out Service>) =
+      ServiceModule(key, dependsOn, enhancedBy + enhancement)
+
+  inline fun <reified T : Service> dependsOn(qualifier: KClass<out Annotation>? = null) =
+      dependsOn(T::class.toKey(qualifier))
+
+  inline fun <reified T : Service> enhancedBy(qualifier: KClass<out Annotation>? = null) =
+      enhancedBy(T::class.toKey(qualifier))
+}
