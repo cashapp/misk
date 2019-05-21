@@ -1,13 +1,10 @@
 package misk.hibernate
 
 import com.google.crypto.tink.Aead
-import com.google.crypto.tink.DeterministicAead
 import misk.crypto.AeadKeyManager
-import misk.crypto.DeterministicAeadKeyManager
-import misk.crypto.KeyNotFoundException
-import misk.logging.getLogger
 import org.hibernate.HibernateException
 import org.hibernate.engine.spi.SharedSessionContractImplementor
+import org.hibernate.id.UUIDGenerator
 import org.hibernate.usertype.ParameterizedType
 import org.hibernate.usertype.UserType
 import java.io.Serializable
@@ -17,17 +14,18 @@ import java.sql.Types
 import java.util.Properties
 import org.hibernate.type.spi.TypeConfiguration
 import org.hibernate.type.spi.TypeConfigurationAware
+import java.security.GeneralSecurityException
 import java.util.Objects
 
 internal class SecretColumnType : UserType, ParameterizedType, TypeConfigurationAware {
   companion object {
     const val FIELD_ENCRYPTION_KEY_NAME: String = "key_name"
-    const val FIELD_ENCRYPTION_INDEXABLE: String = "indexable"
-    val logger = getLogger<SecretColumnType>()
   }
-  private lateinit var encryptionAdapter: EncryptionAdapter
   private lateinit var keyName: String
+  private lateinit var aead: Aead
   private lateinit var _typeConfiguration: TypeConfiguration
+  private val aadGenerator: UUIDGenerator =
+      UUIDGenerator.buildSessionFactoryUniqueIdentifierGenerator()
 
   override fun setTypeConfiguration(typeConfiguration: TypeConfiguration) {
     _typeConfiguration = typeConfiguration
@@ -37,13 +35,9 @@ internal class SecretColumnType : UserType, ParameterizedType, TypeConfiguration
 
   override fun setParameterValues(parameters: Properties) {
     keyName = parameters.getProperty(FIELD_ENCRYPTION_KEY_NAME)
-    val indexable = parameters.getProperty(FIELD_ENCRYPTION_INDEXABLE)!!.toBoolean()
-
-    encryptionAdapter = if (indexable) {
-      DeterministicAeadAdapter(_typeConfiguration, keyName)
-    } else {
-      AeadAdapter(_typeConfiguration, keyName)
-    }
+    val keyManager = _typeConfiguration.metadataBuildingContext.bootstrapContext.
+        serviceRegistry.injector.getInstance(AeadKeyManager::class.java)
+    aead = keyManager[keyName]
   }
 
   override fun hashCode(x: Any): Int = (x as ByteArray).hashCode()
@@ -57,7 +51,7 @@ internal class SecretColumnType : UserType, ParameterizedType, TypeConfiguration
   override fun returnedClass() = ByteArray::class.java
 
   override fun assemble(cached: Serializable?, owner: Any?): ByteArray {
-    return encryptionAdapter.decrypt(cached as ByteArray, null)
+    return aead.decrypt(cached as ByteArray, null)
   }
 
   /**
@@ -65,7 +59,7 @@ internal class SecretColumnType : UserType, ParameterizedType, TypeConfiguration
    * This implementation makes sure that data is stored encrypted even when being cached in memory.
    */
   override fun disassemble(value: Any?): Serializable {
-    return encryptionAdapter.encrypt(value as ByteArray, null)
+    return aead.encrypt(value as ByteArray, null)
   }
 
   override fun nullSafeSet(
@@ -76,9 +70,14 @@ internal class SecretColumnType : UserType, ParameterizedType, TypeConfiguration
   ) {
     if (value == null) {
       st.setNull(index, Types.VARBINARY)
+      st.setNull(index + 1, Types.VARBINARY)
     } else {
-      val encrypted = encryptionAdapter.encrypt(value as ByteArray, null)
+      value as ByteArray
+
+      val aad = aadGenerator.generate(session, value).toString().toByteArray()
+      val encrypted = aead.encrypt(value, aad)
       st.setBytes(index, encrypted)
+      st.setBytes(index + 1, aad)
     }
   }
 
@@ -89,9 +88,10 @@ internal class SecretColumnType : UserType, ParameterizedType, TypeConfiguration
     owner: Any?
   ): Any? {
     val result = rs?.getBytes(names[0])
+    val aad = rs?.getBytes(names[1])
     return result?.let { try {
-        encryptionAdapter.decrypt(it, null)
-      } catch (e: java.security.GeneralSecurityException) {
+      aead.decrypt(it, aad)
+      } catch (e: GeneralSecurityException) {
         throw HibernateException(e)
       }
     }
@@ -99,58 +99,5 @@ internal class SecretColumnType : UserType, ParameterizedType, TypeConfiguration
 
   override fun isMutable() = false
 
-  override fun sqlTypes() = intArrayOf(Types.VARBINARY)
-}
-
-internal interface EncryptionAdapter {
-  fun encrypt(plaintext: ByteArray, associatedData: ByteArray?): ByteArray
-  fun decrypt(ciphertext: ByteArray, associatedData: ByteArray?): ByteArray
-}
-
-internal class AeadAdapter(typeConfig: TypeConfiguration, keyName: String) : EncryptionAdapter {
-
-  val aead: Aead
-
-  init {
-    val keyManager = typeConfig.metadataBuildingContext.bootstrapContext.serviceRegistry.injector
-            .getInstance(AeadKeyManager::class.java)
-    try {
-      aead = keyManager[keyName]
-    } catch (ex: KeyNotFoundException) {
-      throw HibernateException("Cannot set field, key $keyName not found")
-    }
-  }
-
-  override fun encrypt(plaintext: ByteArray, associatedData: ByteArray?) : ByteArray {
-    return aead.encrypt(plaintext, associatedData)
-  }
-
-  override fun decrypt(ciphertext: ByteArray, associatedData: ByteArray?) : ByteArray {
-    return aead.decrypt(ciphertext, associatedData)
-  }
-}
-
-internal class DeterministicAeadAdapter(typeConfig: TypeConfiguration, keyName: String)
-  : EncryptionAdapter {
-
-  val daead: DeterministicAead
-
-  init {
-    val keyManager = typeConfig.metadataBuildingContext.bootstrapContext.serviceRegistry.injector
-            .getInstance(DeterministicAeadKeyManager::class.java)
-    try {
-      daead = keyManager[keyName]
-    } catch (ex: KeyNotFoundException) {
-      throw HibernateException("Cannot set field, key $keyName not found")
-    }
-  }
-
-  override fun encrypt(plaintext: ByteArray, associatedData: ByteArray?) : ByteArray {
-    // DeterministicAEAD throws if associatedData is null, so we pass an empty array if it is.
-    return daead.encryptDeterministically(plaintext, associatedData ?: byteArrayOf())
-  }
-
-  override fun decrypt(ciphertext: ByteArray, associatedData: ByteArray?) : ByteArray {
-    return daead.decryptDeterministically(ciphertext, associatedData ?: byteArrayOf())
-  }
+  override fun sqlTypes() = intArrayOf(Types.VARBINARY, Types.VARBINARY)
 }

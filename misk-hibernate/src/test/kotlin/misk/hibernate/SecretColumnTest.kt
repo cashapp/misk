@@ -11,7 +11,6 @@ import misk.inject.KAbstractModule
 import misk.jdbc.DataSourceConfig
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
-import org.assertj.core.api.Assertions
 import javax.inject.Inject
 import javax.inject.Qualifier
 import javax.persistence.Column
@@ -20,11 +19,12 @@ import javax.persistence.GeneratedValue
 import javax.persistence.Table
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
-import org.hibernate.HibernateException
+import org.hibernate.annotations.Columns
 import org.junit.jupiter.api.Test
+import java.math.BigInteger
 import java.util.Arrays
 import java.util.Objects
-import kotlin.test.assertNotNull
+import javax.persistence.PersistenceException
 import kotlin.test.assertNull
 
 @MiskTest(startService = true)
@@ -51,10 +51,9 @@ class SecretColumnTest {
     }
     // make sure the data in the database is not the same as the plaintext data
     transacter.transaction { session ->
-      val songRaw = queryFactory.newQuery(JerryGarciaSongRawQuery::class)
-          .title("Dark Star")
-          .query(session)[0]
-      assertThat(songRaw.album).isNotEqualTo(album)
+      val persistedAlbum = session.hibernateSession.createNativeQuery(
+          "select album from jerry_garcia_songs where title=\"$title\"").list()[0]
+      assertThat(persistedAlbum).isNotEqualTo(album)
     }
     // test that when retrieving from the database we get the plaintext value
     transacter.transaction { session ->
@@ -98,21 +97,7 @@ class SecretColumnTest {
 	...
 	Suppressed: com.google.common.util.concurrent.ServiceManager$FailedService: SessionFactoryService [FAILED]
 	Caused by: org.hibernate.MappingException: Unable to instantiate custom type: misk.hibernate.SecretColumnType
-		at org.hibernate.type.TypeFactory.custom(TypeFactory.java:169)
-		at org.hibernate.type.TypeFactory.byClass(TypeFactory.java:74)
-		at org.hibernate.type.TypeResolver.heuristicType(TypeResolver.java:124)
-		at org.hibernate.mapping.SimpleValue.getType(SimpleValue.java:471)
-		at org.hibernate.mapping.SimpleValue.isValid(SimpleValue.java:453)
-		at org.hibernate.mapping.Property.isValid(Property.java:226)
-		at org.hibernate.mapping.PersistentClass.validate(PersistentClass.java:624)
-		at org.hibernate.mapping.RootClass.validate(RootClass.java:267)
-		at org.hibernate.boot.internal.MetadataImpl.validate(MetadataImpl.java:347)
-		at org.hibernate.boot.internal.SessionFactoryBuilderImpl.build(SessionFactoryBuilderImpl.java:466)
-		at org.hibernate.boot.internal.MetadataImpl.buildSessionFactory(MetadataImpl.java:188)
-		at misk.hibernate.SessionFactoryService.startUp(SessionFactoryService.kt:135)
-		at com.google.common.util.concurrent.AbstractIdleService$DelegateService$1.run(AbstractIdleService.java:62)
-		at com.google.common.util.concurrent.Callables$4.run(Callables.java:119)
-		at java.base/java.lang.Thread.run(Thread.java:834)
+	  ...
 	Caused by: org.hibernate.HibernateException: Cannot set field, key wrongKey not found
    */
 //  @Test
@@ -159,14 +144,22 @@ class SecretColumnTest {
     val reviewer = "Myself".toByteArray()
     transacter.transaction { session ->
       // album here can be anything, just not a validly-encrypted album
-      session.save(DbJerryGarciaSongRaw(title, length, album, reviewer))
-
-      assertThatThrownBy {
+      session.hibernateSession.createNativeQuery("INSERT into jerry_garcia_songs " +
+          "(title, length, album, reviewer) values (?, ?, ?, ?)")
+          .setParameter(1, title)
+          .setParameter(2, length)
+          .setParameter(3, album)
+          .setParameter(4, reviewer)
+          .executeUpdate()
+      session.hibernateSession.flush()
+    }
+    assertThatThrownBy {
+      transacter.transaction { session ->
         queryFactory.newQuery<JerryGarciaSongQuery>()
             .title(title)
             .query(session)[0]
-      }.isInstanceOf(javax.persistence.PersistenceException::class.java)
-    }
+      }
+    }.isInstanceOf(PersistenceException::class.java)
   }
 
   @Test
@@ -183,6 +176,7 @@ class SecretColumnTest {
       assertThat(songs.size).isEqualTo(1)
     }
   }
+
   @Test
   fun testGetRecordByEncryptedNonIndexedColumnFails() {
     val title = "Dark Star"
@@ -201,25 +195,85 @@ class SecretColumnTest {
   fun testEncryptedIndxedQueryMultiple() {
     val reviewer = "Some Reviewer".toByteArray()
     transacter.transaction { session ->
-        session.save(DbJerryGarciaSong("Sugaree", 123, "Steal Your Face".toByteArray(), reviewer))
-        session.save(DbJerryGarciaSong("Truckin'", 124, "American Beauty".toByteArray(), reviewer))
-        session.save(DbJerryGarciaSong("Eyes of the World", 125, "Wake of the Flood".toByteArray(), reviewer))
+      session.save(DbJerryGarciaSong("Sugaree", 123, "Steal Your Face".toByteArray(), reviewer))
+      session.save(DbJerryGarciaSong("Truckin'", 124, "American Beauty".toByteArray(), reviewer))
+      session.save(
+          DbJerryGarciaSong("Eyes of the World", 125, "Wake of the Flood".toByteArray(), reviewer))
+    }
+    transacter.transaction { session ->
+      val numOfIdenticalCiphertexts = session.hibernateSession.createNativeQuery(
+          "select count(reviewer) from jerry_garcia_songs group by reviewer").list()
+      assertThat(numOfIdenticalCiphertexts.size).isEqualTo(1)
+      assertThat(numOfIdenticalCiphertexts[0]).isEqualTo(BigInteger.valueOf(3L))
+    }
+  }
 
-        val songs = queryFactory.newQuery<JerryGarciaSongQuery>()
-                .reviewer(reviewer)
-                .query(session)
+  @Test
+  fun testAuthenticatedEncryptedDataCannotBeCopiedOver() {
+    val title = "Dark Star"
+    val length = 2918
+    val album = "Live/Dead".toByteArray()
+    val reviewer = "Reviewer".toByteArray()
+    transacter.transaction { session ->
+      val row = DbJerryGarciaSong(title, length, album, reviewer)
+      session.save(row)
+    }
+    transacter.transaction { session ->
+      // get data from the existing row
+      val encryptedAlbum = session.hibernateSession
+          .createNativeQuery("select album from jerry_garcia_songs where title = ?")
+          .setParameter(1, title)
+          .list()[0] as ByteArray
+      // try to copy the secret data over
+      session.hibernateSession.createNativeQuery("insert into jerry_garcia_songs" +
+          "(title, length, album) value (?, ?, ?)")
+          .setParameter(1, "Sugar Magnolia") // was not in that album
+          .setParameter(2, length)
+          .setParameter(3, encryptedAlbum)
+          .executeUpdate()
+    }
+    // make sure an exception is thrown because the data is not authenticated
+    assertThatThrownBy {
+      transacter.transaction { session ->
+        queryFactory.newQuery<JerryGarciaSongQuery>()
+            .title("Sugar Magnolia")
+            .query(session)
+      }
+    }.isInstanceOf(PersistenceException::class.java)
+  }
 
-        assertThat(songs.size).isEqualTo(3)
-
-        val songRaw = queryFactory.newQuery(JerryGarciaSongRawQuery::class)
-                .query(session)
-
-        // Make sure that all reviewer ciphertexts are equivalent
-        val oneReviewer = songRaw[0].reviewer
-        songRaw.fold(oneReviewer) { acc, songInfo ->
-          assertThat(acc).isEqualTo(songInfo.reviewer)
-          oneReviewer
-        }
+  @Test
+  fun thatSecretColumnsCannotBeSwapped() {
+    val title = "St. Stephen"
+    val length = 616
+    val album = "Live/Dead".toByteArray()
+    val reviewer = "Charlie Miller".toByteArray()
+    // put a record in the database
+    val id = transacter.transaction { session ->
+      val row = DbJerryGarciaSong(title, length, album, reviewer)
+      session.save(row)
+    }
+    // swap between the album and reviewer columns
+    transacter.transaction { session ->
+      val (encryptedAlbum, encryptedReviewer) = session.hibernateSession
+          .createNativeQuery("select album, reviewer from jerry_garcia_songs")
+          .list()[0] as Array<*>
+      session.hibernateSession.createNativeQuery("UPDATE jerry_garcia_songs set " +
+          "album = ?," +
+          "reviewer = ? " +
+          "where id = ?")
+          .setParameter(1, encryptedReviewer)
+          .setParameter(2, encryptedAlbum)
+          .setParameter(3, id)
+          .executeUpdate()
+    }
+    // make sure an exception is thrown when trying to fetch the modified record
+    assertThatThrownBy {
+      transacter.transaction { session ->
+        queryFactory.newQuery<JerryGarciaSongQuery>()
+            .title(title)
+            .query(session)
+      }
     }
   }
 
@@ -240,39 +294,15 @@ class SecretColumnTest {
     @Column(nullable = false)
     var length: Int = 0
 
-    @Column(nullable = true)
-    @SecretColumn(keyName="albumKey", indexable=false)
+    @SecretColumn(keyName="albumKey")
+    @Columns(columns = [
+      Column(name = "album", nullable = true),
+      Column(name = "album_aad", nullable = true)
+    ])
     var album: ByteArray?
 
-    @Column(nullable = true)
-    @SecretColumn(keyName="reviewerKey")
-    var reviewer: ByteArray?
-
-    constructor(title: String, length: Int, album: ByteArray? = null, reviewer: ByteArray? = null) {
-      this.title = title
-      this.length = length
-      this.album = album
-      this.reviewer = reviewer
-    }
-  }
-
-  @Entity
-  @Table(name = "jerry_garcia_songs")
-  class DbJerryGarciaSongRaw : DbUnsharded<DbJerryGarciaSongRaw> {
-    @javax.persistence.Id
-    @GeneratedValue
-    override lateinit var id: Id<DbJerryGarciaSongRaw>
-
-    @Column(nullable = false)
-    var title: String
-
-    @Column(nullable = false)
-    var length: Int = 0
-
-    @Column(nullable = true)
-    var album: ByteArray?
-
-    @Column(nullable = true)
+    @SelectableSecretColumn(keyName="reviewerKey")
+    @Column(name = "reviewer", nullable = true)
     var reviewer: ByteArray?
 
     constructor(title: String, length: Int, album: ByteArray? = null, reviewer: ByteArray? = null) {
@@ -292,14 +322,6 @@ class SecretColumnTest {
 
     @Constraint(path = "reviewer")
     fun reviewer(reviewer: ByteArray): JerryGarciaSongQuery
-
-    @Select
-    fun query(session: Session): List<SongInfo>
-  }
-
-  interface JerryGarciaSongRawQuery : Query<DbJerryGarciaSongRaw> {
-    @Constraint(path = "title")
-    fun title(title: String): JerryGarciaSongRawQuery
 
     @Select
     fun query(session: Session): List<SongInfo>
@@ -340,7 +362,6 @@ class SecretColumnTest {
       install(object : HibernateEntityModule(JerryGarciaDb::class) {
         override fun configureHibernate() {
           addEntities(DbJerryGarciaSong::class)
-          addEntities(DbJerryGarciaSongRaw::class)
         }
       })
     }
