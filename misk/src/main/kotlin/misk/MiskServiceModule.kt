@@ -37,7 +37,7 @@ import javax.inject.Singleton
 import kotlin.reflect.KClass
 
 /**
- * [MiskRealServiceModule] should be installed in real environments.
+ * Install this module in real environments.
  *
  * The vast majority of Service bindings belong in [MiskCommonServiceModule], in order to share
  * with [MiskTestingServiceModule]. Only bindings that are not suitable for a unit testing
@@ -55,7 +55,7 @@ class MiskRealServiceModule : KAbstractModule() {
 }
 
 /**
- * [MiskCommonServiceModule] has common bindings for all environments (both real and testing)
+ * This module has common bindings for all environments (both real and testing).
  */
 class MiskCommonServiceModule : KAbstractModule() {
   override fun configure() {
@@ -108,14 +108,10 @@ class MiskCommonServiceModule : KAbstractModule() {
     return serviceManager
   }
 
+  /** TODO: this should replace provideServiceManager(). */
   @Provides
   @Singleton
-  // NB(keeferrourke): provideServiceGraph builder will be used to replace usages of the
-  // provideServiceManager method while portions of this code are migrated to use
-  // ServiceGraphBuilder. Once the migration is complete, then this method should be renamed back to
-  // provideServiceManager, and it should return a built ServiceManager rather than the
-  // ServiceGraphBuilder.
-  fun provideServiceGraphBuilder(
+  internal fun provideServiceGraphBuilder(
     injector: Injector,
     serviceEntries: List<ServiceEntry>,
     dependencies: List<DependencyEdge>,
@@ -188,45 +184,35 @@ class MiskCommonServiceModule : KAbstractModule() {
 
 }
 
-data class DependencyEdge(val service: Key<*>, val dependency: Key<*>)
-data class EnhancementEdge(val service: Key<*>, val enhancement: Key<*>)
-data class ServiceEntry(val key: Key<out Service>)
+internal data class DependencyEdge(val service: Key<*>, val dependency: Key<*>)
+internal data class EnhancementEdge(val service: Key<*>, val enhancement: Key<*>)
+internal data class ServiceEntry(val key: Key<out Service>)
+
+inline fun <reified T : Service> ServiceModule(qualifier: KClass<out Annotation>? = null) =
+    ServiceModule(T::class.toKey(qualifier))
 
 /**
- * Utility method to create a [ServiceModule].
- */
-inline fun <reified T : Service> service(qualifier: KClass<out Annotation>? = null): ServiceModule {
-  return ServiceModule(T::class.toKey(qualifier))
-}
-
-/**
- * This Module installs a Service and registers dependency and enhancement edges for the
- * ServiceGraph. A ServiceModule must be installed for every service that is used by a module.
+ * This module installs a service and hooks up its dependencies and enhancements.
  *
- * This provides a small Embedded Domain Specific Language for specifying Service Graphs with Guice
- * bindings.
- *
- * The EDSL method [service] should be used to perform this installation.
- *
- * e.g.
+ * Here's how:
  *
  * ```
  * Guice.createInjector(object : KAbstractModule() {
  *   override fun configure() {
- *     install(service<MyService>().dependsOn<MyServiceDependency>())
+ *     install(ServiceModule<MyService>()
+ *         .dependsOn<MyServiceDependency>())
  *     install(service<MyServiceDependency>())
  *   }
  * }
  * ```
  *
- * Dependencies and services may be optionally annotated as:
+ * Dependencies and services may be optionally annotated:
  *
  * ```
  * Guice.createInjector(object : KAbstractModule() {
  *   override fun configure() {
- *     install(service<MyService>(MyAnnotation::class)
- *         .dependsOn<MyServiceDependency>(AnotherAnnotation::class)
- *     )
+ *     install(ServiceModule<MyService>(MyAnnotation::class)
+ *         .dependsOn<MyServiceDependency>(AnotherAnnotation::class))
  *     install(service<MyServiceDependency>(AnotherAnnotation::class))
  *   }
  * }
@@ -238,48 +224,30 @@ class ServiceModule(
   val enhancedBy: List<Key<out Service>> = listOf()
 ) : KAbstractModule() {
   override fun configure() {
-    // bind the Service to this module
     multibind<Service>().to(key)
 
-    // bind this module's ServiceEntry to register the keys with a ServiceGraphBuilder
     multibind<ServiceEntry>().toInstance(ServiceEntry(key))
 
-    // bind each edge for the ServiceGraphBuilder
-    for (dependencyKey in dependsOn) {
+    for (dependsOnKey in dependsOn) {
       multibind<DependencyEdge>().toInstance(
-          DependencyEdge(service = key, dependency = dependencyKey)
+          DependencyEdge(service = key, dependency = dependsOnKey)
       )
     }
-    for (enhancementKey in enhancedBy) {
+    for (enhancedByKey in enhancedBy) {
       multibind<EnhancementEdge>().toInstance(
-          EnhancementEdge(service = key, enhancement = enhancementKey)
+          EnhancementEdge(service = key, enhancement = enhancedByKey)
       )
     }
   }
 
-  fun dependsOn(upstream: Key<out Service>): ServiceModule {
-    return ServiceModule(key, dependsOn + upstream, enhancedBy)
-  }
+  fun dependsOn(upstream: Key<out Service>) = ServiceModule(key, dependsOn + upstream, enhancedBy)
 
-  fun enhancedBy(enhancement: Key<out Service>): ServiceModule {
-    return ServiceModule(key, dependsOn, enhancedBy + enhancement)
-  }
+  fun enhancedBy(enhancement: Key<out Service>) =
+      ServiceModule(key, dependsOn, enhancedBy + enhancement)
 
-  inline fun <reified T : Service> dependsOn(qualifier: KClass<out Annotation>? = null): ServiceModule {
-    val dependencyKey = if (qualifier != null) {
-      T::class.toKey(qualifier)
-    } else {
-      T::class.toKey()
-    }
-    return dependsOn(dependencyKey)
-  }
+  inline fun <reified T : Service> dependsOn(qualifier: KClass<out Annotation>? = null) =
+      dependsOn(T::class.toKey(qualifier))
 
-  inline fun <reified T : Service> enhancedBy(qualifier: KClass<out Annotation>? = null): ServiceModule {
-    val enhancementKey = if (qualifier != null) {
-      T::class.toKey(qualifier)
-    } else {
-      T::class.toKey()
-    }
-    return enhancedBy(enhancementKey)
-  }
+  inline fun <reified T : Service> enhancedBy(qualifier: KClass<out Annotation>? = null) =
+      enhancedBy(T::class.toKey(qualifier))
 }
