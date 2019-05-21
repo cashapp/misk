@@ -3,5 +3,8 @@ CREATE TABLE jerry_garcia_songs(
   title VARCHAR(64) NOT NULL,
   length INT NOT NULL,
   album VARBINARY(250),
-  reviewer VARBINARY(250)
+  album_aad VARBINARY(36),
+  reviewer VARBINARY(250),
+
+  CONSTRAINT UNIQUE (album_aad)
 )
