@@ -85,10 +85,13 @@ class MiskCommonServiceModule : KAbstractModule() {
 
   @Provides
   @Singleton
-  fun provideServiceManager(
+  internal fun provideServiceManager(
     injector: Injector,
     services: List<Service>,
-    listeners: List<ServiceManager.Listener>
+    listeners: List<ServiceManager.Listener>,
+    serviceEntries: List<ServiceEntry>,
+    dependencies: List<DependencyEdge>,
+    enhancements: List<EnhancementEdge>
   ): ServiceManager {
     // NB(mmihic): We get the binding for the Set<Service> because this uses a multibinder,
     // which allows us to retrieve the bindings for the elements
@@ -103,7 +106,38 @@ class MiskCommonServiceModule : KAbstractModule() {
       "the following services are not marked as @Singleton: ${invalidServices.joinToString(", ")}"
     }
 
-    val serviceManager = CoordinatedService.coordinate(services)
+    val builder = ServiceGraphBuilder()
+
+    // Support the deprecated DependantService interface.
+    for (service in services) {
+      var key : Key<*>
+      when (service) {
+        is DependentService -> {
+          key = service.producedKeys.firstOrNull() ?: service::class.toKey()
+          for (consumedKey in service.consumedKeys) {
+            builder.addDependency(service = consumedKey, dependency = key)
+          }
+        }
+        else -> {
+          key = service::class.toKey()
+        }
+      }
+      builder.addService(key, service)
+    }
+
+    // Support the new ServiceModule API.
+    for (entry in serviceEntries) {
+      val service = injector.getInstance(entry.key)
+      builder.addService(entry.key, service)
+    }
+    for (edge in dependencies) {
+      builder.addDependency(service = edge.service, dependency = edge.dependency)
+    }
+    for (edge in enhancements) {
+      builder.enhanceService(service = edge.service, enhancement = edge.enhancement)
+    }
+
+    val serviceManager = builder.build()
     listeners.forEach { serviceManager.addListener(it) }
     return serviceManager
   }
