@@ -7,13 +7,12 @@ import com.google.crypto.tink.aead.AeadKeyTemplates
 import com.google.crypto.tink.aead.KmsEnvelopeAead
 import com.google.crypto.tink.mac.MacConfig
 import com.google.crypto.tink.mac.MacKeyTemplates
-import com.google.crypto.tink.signature.PublicKeySignFactory
 import com.google.crypto.tink.signature.SignatureConfig
 import com.google.crypto.tink.signature.SignatureKeyTemplates
-import com.google.inject.ConfigurationException
 import com.google.inject.CreationException
 import com.google.inject.Guice
 import com.google.inject.Injector
+import misk.config.MiskConfig
 import misk.config.Secret
 import misk.environment.Environment
 import misk.environment.EnvironmentModule
@@ -23,6 +22,7 @@ import org.assertj.core.api.Assertions.assertThatCode
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.Test
 import java.io.ByteArrayOutputStream
+import java.security.GeneralSecurityException
 
 @MiskTest
 class CryptoModuleTest {
@@ -95,6 +95,24 @@ class CryptoModuleTest {
             .isInstanceOf(KeyNotFoundException::class.java)
     assertThatThrownBy { injector.getInstance(AeadKeyManager::class.java)["not there either"]}
             .isInstanceOf(KeyNotFoundException::class.java)
+  }
+
+  @Test
+  fun testRaisesInWrongEnv() {
+
+    val plainKey = Key("name", KeyType.AEAD, MiskConfig.RealSecret(""))
+    val kr = KeyReader()
+    val client = FakeKmsClient()
+
+    assertThatThrownBy {
+      kr.env = Environment.STAGING
+      kr.readKey(plainKey, null, client)
+    }.isInstanceOf(GeneralSecurityException::class.java)
+
+    assertThatThrownBy {
+      kr.env = Environment.PRODUCTION
+      kr.readKey(plainKey, null, client)
+    }.isInstanceOf(GeneralSecurityException::class.java)
   }
 
   private fun getInjector(keyMap: List<Pair<String, KeysetHandle>>): Injector{
