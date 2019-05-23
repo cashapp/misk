@@ -13,6 +13,7 @@ import com.google.crypto.tink.signature.PublicKeySignFactory
 import com.google.crypto.tink.signature.PublicKeyVerifyFactory
 import com.google.crypto.tink.JsonKeysetReader
 import com.google.crypto.tink.KeysetHandle
+import com.google.crypto.tink.KeysetReader
 import com.google.crypto.tink.aead.AeadFactory
 import com.google.crypto.tink.aead.AeadKeyTemplates
 import com.google.crypto.tink.aead.KmsEnvelopeAead
@@ -28,19 +29,27 @@ val logger by lazy { getLogger<CryptoModule>() }
 open class KeyReader {
   @Inject lateinit var env: Environment
 
+  private fun readCleartextKey(reader: KeysetReader): KeysetHandle {
+    if (env != Environment.TESTING && env != Environment.DEVELOPMENT)
+      throw GeneralSecurityException(
+          "Trying to use a plaintext key outside of a development environment")
+
+    logger.warn { "Reading a plaintext key" }
+    return CleartextKeysetHandle.read(reader)
+  }
+
+  private fun readEncryptedKey(reader: KeysetReader, kmsUri: String, client: KmsClient): KeysetHandle {
+    val masterKey = client.getAead(kmsUri)
+    return KeysetHandle.read(reader, masterKey)
+  }
+
   fun readKey(key: Key, kmsUri: String?, kmsClient: KmsClient): KeysetHandle {
     val keyJson = JsonKeysetReader.withString(key.encrypted_key.value)
 
     return if (kmsUri != null) {
-      val masterKey = kmsClient.getAead(kmsUri)
-      KeysetHandle.read(keyJson, masterKey)
+      readEncryptedKey(keyJson, kmsUri, kmsClient)
     } else {
-      if (env != Environment.TESTING && env != Environment.DEVELOPMENT)
-        throw GeneralSecurityException(
-            "Trying to use a plaintext key outside of a development environment")
-
-      logger.warn { "Reading a plaintext key" }
-      CleartextKeysetHandle.read(keyJson)
+      readCleartextKey(keyJson)
     }
   }
 }
