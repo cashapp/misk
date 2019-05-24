@@ -21,8 +21,8 @@ class ServiceGraphBuilderTest {
   @Test
   fun happyPathNoEnhancements() {
     val script = startUpAndShutDown(listOf(keyA, keyB, keyC)) {
-      addDependency(service = keyA, dependency = keyC)
-      addDependency(service = keyB, dependency = keyC)
+      addDependency(dependsOn = keyA, dependent = keyC)
+      addDependency(dependsOn = keyB, dependent = keyC)
     }
 
     assertThat(script).isEqualTo("""
@@ -39,8 +39,8 @@ class ServiceGraphBuilderTest {
   @Test
   fun enhancementsAndDependencies() {
     val script = startUpAndShutDown(listOf(keyA, keyC, enhancementA)) { _ ->
-      enhanceService(service = keyA, enhancement = enhancementA)
-      addDependency(service = keyA, dependency = keyC)
+      enhanceService(toBeEnhanced = keyA, enhancement = enhancementA)
+      addDependency(dependsOn = keyA, dependent = keyC)
     }
 
     assertThat(script).isEqualTo("""
@@ -56,10 +56,10 @@ class ServiceGraphBuilderTest {
 
   @Test fun chainsOfDependencies() {
     val script = startUpAndShutDown(listOf(keyA, keyB, keyC, keyD, keyE)) {
-      addDependency(service = keyC, dependency = keyB)
-      addDependency(service = keyA, dependency = keyC)
-      addDependency(service = keyB, dependency = keyD)
-      addDependency(service = keyD, dependency = keyE)
+      addDependency(dependsOn = keyC, dependent = keyB)
+      addDependency(dependsOn = keyA, dependent = keyC)
+      addDependency(dependsOn = keyB, dependent = keyD)
+      addDependency(dependsOn = keyD, dependent = keyE)
     }
 
     assertThat(script).isEqualTo("""
@@ -79,12 +79,12 @@ class ServiceGraphBuilderTest {
 
   @Test fun treesOfDependencies() {
     val script = startUpAndShutDown(listOf(keyA, keyB, keyC, keyD, keyE)) {
-      addDependency(service = keyB, dependency = keyC)
-      addDependency(service = keyA, dependency = keyC)
-      addDependency(service = keyC, dependency = keyD)
-      addDependency(service = keyE, dependency = keyD)
-      addDependency(service = keyA, dependency = keyE)
-      addDependency(service = keyC, dependency = keyE)
+      addDependency(dependsOn = keyB, dependent = keyC)
+      addDependency(dependsOn = keyA, dependent = keyC)
+      addDependency(dependsOn = keyC, dependent = keyD)
+      addDependency(dependsOn = keyE, dependent = keyD)
+      addDependency(dependsOn = keyA, dependent = keyE)
+      addDependency(dependsOn = keyC, dependent = keyE)
     }
 
     assertThat(script).isEqualTo("""
@@ -104,8 +104,8 @@ class ServiceGraphBuilderTest {
 
   @Test fun unsatisfiedDependency() {
     val failure = buildAndExpectFailure(listOf(keyA, keyC)) {
-      addDependency(service = keyA, dependency = keyC)
-      addDependency(service = unregistered, dependency = keyC) // Unregistered doesn't exist.
+      addDependency(dependsOn = keyA, dependent = keyC)
+      addDependency(dependsOn = unregistered, dependent = keyC) // Unregistered doesn't exist.
     }
     assertThat(failure).hasMessage("Service C requires $unregistered but no such service was "
         + "registered with the builder")
@@ -121,7 +121,7 @@ class ServiceGraphBuilderTest {
     assertFailsWith<IllegalStateException> {
       startUpAndShutDown(listOf(keyB)) {
         addService(keyA, bomb)
-        addDependency(service = keyA, dependency = keyB)
+        addDependency(dependsOn = keyA, dependent = keyB)
       }
     }
   }
@@ -137,9 +137,9 @@ class ServiceGraphBuilderTest {
 
   @Test fun transitiveEnhancements() {
     val script = startUpAndShutDown(listOf(keyA, keyB, keyC, keyD)) {
-      enhanceService(service = keyA, enhancement = keyB)
-      enhanceService(service = keyB, enhancement = keyC)
-      addDependency(service = keyA, dependency = keyD)
+      enhanceService(toBeEnhanced = keyA, enhancement = keyB)
+      enhanceService(toBeEnhanced = keyB, enhancement = keyC)
+      addDependency(dependsOn = keyA, dependent = keyD)
     }
     assertThat(script).isEqualTo("""
         |starting Service A
@@ -156,8 +156,8 @@ class ServiceGraphBuilderTest {
 
   @Test fun enhancementDependency() {
     val script = startUpAndShutDown(listOf(keyA, keyB, keyC)) {
-      enhanceService(service = keyA, enhancement = keyB)
-      addDependency(service = keyB, dependency = keyC)
+      enhanceService(toBeEnhanced = keyA, enhancement = keyB)
+      addDependency(dependsOn = keyB, dependent = keyC)
     }
     assertThat(script).isEqualTo("""
         |starting Service A
@@ -172,9 +172,9 @@ class ServiceGraphBuilderTest {
 
   @Test fun transitiveEnhancementDependency() {
     val script = startUpAndShutDown(listOf(keyA, keyB, keyC, keyD)) {
-      enhanceService(service = keyA, enhancement = keyB)
-      enhanceService(service = keyB, enhancement = keyC)
-      addDependency(service = keyC, dependency = keyD)
+      enhanceService(toBeEnhanced = keyA, enhancement = keyB)
+      enhanceService(toBeEnhanced = keyB, enhancement = keyC)
+      addDependency(dependsOn = keyC, dependent = keyD)
     }
     assertThat(script).isEqualTo("""
         |starting Service A
@@ -191,16 +191,16 @@ class ServiceGraphBuilderTest {
 
   @Test fun enhancementCannotHaveMultipleTargets() {
     val failure = buildAndExpectFailure(listOf(keyA, keyB, keyC)) {
-      enhanceService(service = keyA, enhancement = keyB)
-      enhanceService(service = keyC, enhancement = keyB)
+      enhanceService(toBeEnhanced = keyA, enhancement = keyB)
+      enhanceService(toBeEnhanced = keyC, enhancement = keyB)
     }
     assertThat(failure).hasMessage("Enhancement $keyB cannot be applied more than once")
   }
 
   @Test fun dependingServiceHasEnhancements() {
     val script = startUpAndShutDown(listOf(keyA, keyB, keyC)) {
-      addDependency(service = keyA, dependency = keyB)
-      enhanceService(service = keyB, enhancement = keyC)
+      addDependency(dependsOn = keyA, dependent = keyB)
+      enhanceService(toBeEnhanced = keyB, enhancement = keyC)
     }
     assertThat(script).isEqualTo("""
         |starting Service A
@@ -215,9 +215,9 @@ class ServiceGraphBuilderTest {
 
   @Test fun multipleEnhancements() {
     val script = startUpAndShutDown(listOf(keyA, keyB, keyC, keyD)) {
-      enhanceService(service = keyA, enhancement = keyB)
-      enhanceService(service = keyA, enhancement = keyC)
-      addDependency(service = keyC, dependency = keyD)
+      enhanceService(toBeEnhanced = keyA, enhancement = keyB)
+      enhanceService(toBeEnhanced = keyA, enhancement = keyC)
+      addDependency(dependsOn = keyC, dependent = keyD)
     }
     assertThat(script).isEqualTo("""
         |starting Service A
@@ -234,10 +234,10 @@ class ServiceGraphBuilderTest {
 
   @Test fun dependencyCycle() {
     val failure = buildAndExpectFailure(listOf(keyA, keyB, keyC, keyD)) {
-      addDependency(service = keyD, dependency = keyA)
-      addDependency(service = keyC, dependency = keyB)
-      addDependency(service = keyA, dependency = keyC)
-      addDependency(service = keyC, dependency = keyD)
+      addDependency(dependsOn = keyD, dependent = keyA)
+      addDependency(dependsOn = keyC, dependent = keyB)
+      addDependency(dependsOn = keyA, dependent = keyC)
+      addDependency(dependsOn = keyC, dependent = keyD)
     }
 
     assertThat(failure)
@@ -246,8 +246,8 @@ class ServiceGraphBuilderTest {
 
   @Test fun simpleDependencyCycle() {
     val failure = buildAndExpectFailure(listOf(keyA, keyB, keyC, keyD)) {
-      addDependency(service = keyA, dependency = keyB)
-      addDependency(service = keyB, dependency = keyA)
+      addDependency(dependsOn = keyA, dependent = keyB)
+      addDependency(dependsOn = keyB, dependent = keyA)
     }
 
     assertThat(failure).hasMessage("Detected cycle: Service A -> Service B -> Service A")
@@ -255,23 +255,23 @@ class ServiceGraphBuilderTest {
 
   @Test fun enhancementCycle() {
     val failure = buildAndExpectFailure(listOf(keyA, keyB)) {
-      enhanceService(service = keyA, enhancement = keyB)
-      enhanceService(service = keyB, enhancement = keyA)
+      enhanceService(toBeEnhanced = keyA, enhancement = keyB)
+      enhanceService(toBeEnhanced = keyB, enhancement = keyA)
     }
     assertThat(failure).hasMessage("Detected cycle: Service A -> Service B -> Service A")
   }
 
   @Test fun selfEnhancement() {
     val failure = buildAndExpectFailure(listOf(keyA)) {
-      enhanceService(service = keyA, enhancement = keyA)
+      enhanceService(toBeEnhanced = keyA, enhancement = keyA)
     }
     assertThat(failure).hasMessage("Detected cycle: ${keyA.name} -> ${keyA.name}")
   }
 
   @Test fun enhancementDependencyCycle() {
     val failure = buildAndExpectFailure(listOf(keyA, keyB)) {
-      enhanceService(service = keyA, enhancement = keyB)
-      addDependency(service = keyB, dependency = keyA)
+      enhanceService(toBeEnhanced = keyA, enhancement = keyB)
+      addDependency(dependsOn = keyB, dependent = keyA)
     }
     assertThat(failure).hasMessage("Detected cycle: Service A -> Service B -> Service A")
   }
@@ -292,7 +292,7 @@ class ServiceGraphBuilderTest {
         (service as CoordinatedService2).addEnhancements(badEnhancer)
       }
       assertFailsWith<IllegalStateException> {
-        (service as CoordinatedService2).addDependencies(badDependency)
+        (service as CoordinatedService2).addDependentServices(badDependency)
       }
     }
 

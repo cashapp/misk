@@ -16,10 +16,10 @@ class CoordinatedService2Test {
     runningService.startAsync()
 
     assertFailsWith<IllegalStateException> {
-      newService.addDependencies(runningService)
+      newService.addDependentServices(runningService)
     }
     assertFailsWith<IllegalStateException> {
-      newService.addDependencies(runningService)
+      newService.addDependentServices(runningService)
     }
 
     runningService.stopAsync()
