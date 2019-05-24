@@ -85,10 +85,13 @@ class MiskCommonServiceModule : KAbstractModule() {
 
   @Provides
   @Singleton
-  fun provideServiceManager(
+  internal fun provideServiceManager(
     injector: Injector,
     services: List<Service>,
-    listeners: List<ServiceManager.Listener>
+    listeners: List<ServiceManager.Listener>,
+    serviceEntries: List<ServiceEntry>,
+    dependencies: List<DependencyEdge>,
+    enhancements: List<EnhancementEdge>
   ): ServiceManager {
     // NB(mmihic): We get the binding for the Set<Service> because this uses a multibinder,
     // which allows us to retrieve the bindings for the elements
@@ -103,45 +106,40 @@ class MiskCommonServiceModule : KAbstractModule() {
       "the following services are not marked as @Singleton: ${invalidServices.joinToString(", ")}"
     }
 
-    val serviceManager = CoordinatedService.coordinate(services)
-    listeners.forEach { serviceManager.addListener(it) }
-    return serviceManager
-  }
+    val builder = ServiceGraphBuilder()
 
-  /** TODO: this should replace provideServiceManager(). */
-  @Provides
-  @Singleton
-  internal fun provideServiceGraphBuilder(
-    injector: Injector,
-    serviceEntries: List<ServiceEntry>,
-    dependencies: List<DependencyEdge>,
-    enhancements: List<EnhancementEdge>
-  ): ServiceGraphBuilder {
-    // NB(mmihic): We get the binding for the Set<Service> because this uses a multibinder,
-    // which allows us to retrieve the bindings for the elements
-    val serviceListBinding = injector.getBinding(serviceSetKey)
-    val invalidServices = serviceListBinding
-        .acceptTargetVisitor(CheckServicesVisitor())
-        .sorted()
-
-    // Confirm all services have been registered as singleton. If they aren't singletons,
-    // _readiness checks will fail
-    check(invalidServices.isEmpty()) {
-      "the following services are not marked as @Singleton: ${invalidServices.joinToString(", ")}"
+    // Support the deprecated DependantService interface.
+    for (service in services) {
+      var key : Key<*>
+      when (service) {
+        is DependentService -> {
+          key = service.producedKeys.firstOrNull() ?: service::class.toKey()
+          for (consumedKey in service.consumedKeys) {
+            builder.addDependency(dependent = key, dependsOn = consumedKey)
+          }
+        }
+        else -> {
+          key = service::class.toKey()
+        }
+      }
+      builder.addService(key, service)
     }
 
-    val builder = ServiceGraphBuilder()
+    // Support the new ServiceModule API.
     for (entry in serviceEntries) {
       val service = injector.getInstance(entry.key)
       builder.addService(entry.key, service)
     }
     for (edge in dependencies) {
-      builder.addDependency(service = edge.service, dependency = edge.dependency)
+      builder.addDependency(dependent = edge.dependent, dependsOn = edge.dependsOn)
     }
     for (edge in enhancements) {
-      builder.enhanceService(service = edge.service, enhancement = edge.enhancement)
+      builder.enhanceService(toBeEnhanced = edge.toBeEnhanced, enhancement = edge.enhancement)
     }
-    return builder
+
+    val serviceManager = builder.build()
+    listeners.forEach { serviceManager.addListener(it) }
+    return serviceManager
   }
 
   @Suppress("DEPRECATION")
@@ -181,11 +179,10 @@ class MiskCommonServiceModule : KAbstractModule() {
     val serviceSetKey = Key.get(Types.setOf(Service::class.java)) as Key<Set<Service>>
     private val log = KotlinLogging.logger {}
   }
-
 }
 
-internal data class DependencyEdge(val service: Key<*>, val dependency: Key<*>)
-internal data class EnhancementEdge(val service: Key<*>, val enhancement: Key<*>)
+internal data class DependencyEdge(val dependent: Key<*>, val dependsOn: Key<*>)
+internal data class EnhancementEdge(val toBeEnhanced: Key<*>, val enhancement: Key<*>)
 internal data class ServiceEntry(val key: Key<out Service>)
 
 inline fun <reified T : Service> ServiceModule(qualifier: KClass<out Annotation>? = null) =
@@ -201,7 +198,7 @@ inline fun <reified T : Service> ServiceModule(qualifier: KClass<out Annotation>
  *   override fun configure() {
  *     install(ServiceModule<MyService>()
  *         .dependsOn<MyServiceDependency>())
- *     install(service<MyServiceDependency>())
+ *     install(ServiceModule<MyServiceDependency>())
  *   }
  * }
  * ```
@@ -213,7 +210,7 @@ inline fun <reified T : Service> ServiceModule(qualifier: KClass<out Annotation>
  *   override fun configure() {
  *     install(ServiceModule<MyService>(MyAnnotation::class)
  *         .dependsOn<MyServiceDependency>(AnotherAnnotation::class))
- *     install(service<MyServiceDependency>(AnotherAnnotation::class))
+ *     install(ServiceModule<MyServiceDependency>(AnotherAnnotation::class))
  *   }
  * }
  * ```
@@ -230,12 +227,12 @@ class ServiceModule(
 
     for (dependsOnKey in dependsOn) {
       multibind<DependencyEdge>().toInstance(
-          DependencyEdge(service = key, dependency = dependsOnKey)
+          DependencyEdge(dependent = key, dependsOn = dependsOnKey)
       )
     }
     for (enhancedByKey in enhancedBy) {
       multibind<EnhancementEdge>().toInstance(
-          EnhancementEdge(service = key, enhancement = enhancedByKey)
+          EnhancementEdge(toBeEnhanced = key, enhancement = enhancedByKey)
       )
     }
   }

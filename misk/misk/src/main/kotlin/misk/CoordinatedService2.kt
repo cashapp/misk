@@ -138,7 +138,7 @@ internal class CoordinatedService2(val service: Service) : AbstractService() {
   }
 
   /** Adds [services] as dependents downstream. */
-  fun addDependencies(vararg services: CoordinatedService2) {
+  fun addDependentServices(vararg services: CoordinatedService2) {
     // Check that this service and all dependent services are new before modifying the graph.
     this.checkNew()
     for (service in services) {
