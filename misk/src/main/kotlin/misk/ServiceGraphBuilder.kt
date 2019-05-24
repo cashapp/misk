@@ -7,13 +7,14 @@ import com.google.inject.Key
 import misk.CoordinatedService2.Companion.CycleValidity
 
 /**
- * Builds a graph of `CoordinatedService2`s which defer start up and shut down until their dependent
+ * Builds a graph of [CoordinatedService2]s which defer start up and shut down until their dependent
  * services are ready.
  */
 class ServiceGraphBuilder {
   private var serviceMap = mutableMapOf<Key<*>, CoordinatedService2>()
   private val dependencyMap = LinkedHashMultimap.create<Key<*>, Key<*>>()
   private val enhancementMap = mutableMapOf<Key<*>, Key<*>>()
+
   /**
    * Registers a [service] with this [ServiceGraphBuilder]
    *
@@ -25,39 +26,36 @@ class ServiceGraphBuilder {
   }
 
   /**
-   * Adds the [dependency] service as a dependency to the [service] provider service.
-   *
-   * @param dependency The identifier for the dependent service.
-   * @param service The identifier for the service that provides for `dependency`.
+   * Registers a dependency pair with the service graph. Specifies that the [dependent] service must
+   * start after [dependsOn], and conversely that [dependent] must stop before [dependsOn].
    */
-  fun addDependency(service: Key<*>, dependency: Key<*>) {
-    dependencyMap.put(service, dependency)
+  fun addDependency(dependent: Key<*>, dependsOn: Key<*>) {
+    dependencyMap.put(dependsOn, dependent)
   }
 
   /**
-   * Adds a [enhancement] enhancement to the [service] service. The [service] service depends on its
+   * Adds a [enhancement] to the service [toBeEnhanced]. The service [toBeEnhanced] depends on its
    * enhancements.
    *
-   * Service enhancements [enhancement] will be started after the [service] service is started,
-   * but before any of the [service] service's dependents can start. Conversely, the dependents of
-   * the service service will be shut down, followed by all [enhancement] enhancements, and finally
-   * the [service] service itself.
+   * Service [enhancement]s will be started after the service [toBeEnhanced] is started, but before
+   * any of its dependents can start. Conversely, the dependents of the service [toBeEnhanced] will
+   * be shut down, followed by all of its [enhancement]s, and finally the service [toBeEnhanced]
+   * itself.
    *
-   * @param service The identifier for the service to be enhanced by [enhancement].
-   * @param enhancement The identifier for the service that depends on [service].
+   * @param toBeEnhanced The identifier for the service to be enhanced by [enhancement].
+   * @param enhancement The identifier for the service that depends on [toBeEnhanced].
    * @throws IllegalStateException if the enhancement has already been applied to another service.
    */
-  fun enhanceService(service: Key<*>, enhancement: Key<*>) {
+  fun enhanceService(toBeEnhanced: Key<*>, enhancement: Key<*>) {
     check(enhancementMap[enhancement] == null) {
       "Enhancement $enhancement cannot be applied more than once"
     }
-    enhancementMap[enhancement] = service
+    enhancementMap[enhancement] = toBeEnhanced
   }
 
   /**
-   * Validates the Service Graph is a valid DAG, then builds a ServiceManager.
+   * Validates the service graph is a valid DAG, then builds a [ServiceManager].
    *
-   * @return ServiceManager that coordinates all services that were registered with this builder.
    * @throws IllegalStateException if the graph is not valid.
    */
   fun build(): ServiceManager {
@@ -68,7 +66,7 @@ class ServiceGraphBuilder {
   }
 
   /**
-   * Builds CoordinatedService2s from the instructions provided in the dependency and enhancement
+   * Builds [CoordinatedService2]s from the instructions provided in the dependency and enhancement
    * maps.
    */
   private fun linkDependencies() {
@@ -82,7 +80,7 @@ class ServiceGraphBuilder {
     // Now handle regular dependencies.
     for ((key, service) in serviceMap) {
       val dependencies = dependencyMap[key]?.map { serviceMap[it]!! } ?: listOf()
-      service.addDependencies(*dependencies.toTypedArray())
+      service.addDependentServices(*dependencies.toTypedArray())
     }
   }
 
