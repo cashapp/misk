@@ -131,7 +131,7 @@ class MiskCommonServiceModule : KAbstractModule() {
       builder.addService(entry.key, service)
     }
     for (edge in dependencies) {
-      builder.addDependency(dependent = edge.service, dependsOn = edge.dependsOn)
+      builder.addDependency(dependent = edge.dependent, dependsOn = edge.dependsOn)
     }
     for (edge in enhancements) {
       builder.enhanceService(toBeEnhanced = edge.toBeEnhanced, enhancement = edge.enhancement)
@@ -179,23 +179,9 @@ class MiskCommonServiceModule : KAbstractModule() {
     val serviceSetKey = Key.get(Types.setOf(Service::class.java)) as Key<Set<Service>>
     private val log = KotlinLogging.logger {}
   }
-
 }
 
-/**
- * Normal dependency edge in the service dependency graph.
- *
- * @param service Identifier for the dependent service.
- * @param dependsOn Identifier for the service that [service] depends on.
- */
-internal data class DependencyEdge(val service: Key<*>, val dependsOn: Key<*>)
-
-/**
- * Enhancement edge in the service dependency graph.
- *
- * @param toBeEnhanced The key of the service to be enhanced.
- * @param enhancement The key of the service that enhances [toBeEnhanced].
- */
+internal data class DependencyEdge(val dependent: Key<*>, val dependsOn: Key<*>)
 internal data class EnhancementEdge(val toBeEnhanced: Key<*>, val enhancement: Key<*>)
 internal data class ServiceEntry(val key: Key<out Service>)
 
@@ -241,7 +227,7 @@ class ServiceModule(
 
     for (dependsOnKey in dependsOn) {
       multibind<DependencyEdge>().toInstance(
-          DependencyEdge(service = key, dependsOn = dependsOnKey)
+          DependencyEdge(dependent = key, dependsOn = dependsOnKey)
       )
     }
     for (enhancedByKey in enhancedBy) {

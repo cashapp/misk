@@ -22,6 +22,9 @@ class ServiceGraphBuilder {
    * Keys must be unique. If a key is reused, then the original key-service pair will be replaced.
    */
   fun addService(key: Key<*>, service: Service) {
+    check(serviceMap[key] == null) {
+      "Service $key cannot be registered more than once"
+    }
     serviceMap[key] = CoordinatedService2(service)
   }
 
