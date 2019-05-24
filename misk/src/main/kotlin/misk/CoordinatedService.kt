@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package misk
 
 import com.google.common.util.concurrent.AbstractService
@@ -14,6 +16,7 @@ import com.google.inject.Key
  * starts up. Symmetrically it stalls in `STOPPING` until all downstream services are `TERMINATED`,
  * then it actually shuts down.
  */
+@Deprecated("Replaced by CoordinatedService2.")
 internal class CoordinatedService(val service: Service) : AbstractService(), DependentService {
   override val producedKeys = (service as? DependentService)?.producedKeys ?: setOf()
   override val consumedKeys = (service as? DependentService)?.consumedKeys ?: setOf()

@@ -1,12 +1,16 @@
+@file:Suppress("DEPRECATION")
+
 package misk
 
 import com.google.common.util.concurrent.AbstractService
 import com.google.inject.Key
 import com.google.inject.name.Names
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.Ignore
 import org.junit.jupiter.api.Test
 import kotlin.test.assertFailsWith
 
+@Ignore("CoordinatedService is deprecated and no longer used.")
 class CoordinatedServiceTest {
   @Test fun happyPath() {
     val target = StringBuilder()
