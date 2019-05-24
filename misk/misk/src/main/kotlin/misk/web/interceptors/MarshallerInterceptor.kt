@@ -19,7 +19,6 @@ internal class MarshallerInterceptor @Inject constructor(private val marshaller:
   override fun intercept(chain: NetworkChain): Response<*> {
     @Suppress("UNCHECKED_CAST")
     val response = chain.proceed(chain.request) as Response<Any>
-
     var headers = response.headers
     if (response.headers.get("Content-Type") == null && marshaller.contentType() != null) {
       headers = response.headers.newBuilder()
