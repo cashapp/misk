@@ -19,7 +19,7 @@ class AwsSqsJobHandlerModule<T : JobHandler> private constructor(
   override fun configure() {
     newMapBinder<QueueName, JobHandler>().addBinding(queueName).to(handler.java)
     install(ServiceModule<AwsSqsJobHandlerSubscriptionService>()
-        .dependsOn<SqsJobConsumer>()) // Installed in AwsSqsJobQueueModule.
+        .dependsOn<SqsJobConsumer>())
   }
 
   companion object {
