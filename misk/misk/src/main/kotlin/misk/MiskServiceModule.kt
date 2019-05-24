@@ -108,14 +108,10 @@ class MiskCommonServiceModule : KAbstractModule() {
 
     val builder = ServiceGraphBuilder()
 
-    // Avoid adding services to the builder twice, while we migrate the API.
-    val trackedKeys = mutableSetOf<Key<*>>()
-
     // Support the new ServiceModule API.
     for (entry in serviceEntries) {
       val service = injector.getInstance(entry.key)
       builder.addService(entry.key, service)
-      trackedKeys += entry.key
     }
     for (edge in dependencies) {
       builder.addDependency(dependent = edge.dependent, dependsOn = edge.dependsOn)
@@ -125,12 +121,8 @@ class MiskCommonServiceModule : KAbstractModule() {
     }
 
     // Support the deprecated DependantService interface.
-    //
-    // Since this loop operates on the set *all* services bound to the injector, we might already
-    // have registered the service using the ServiceEntry API above; already registered services are
-    // skipped to mitigate this issue.
     for (service in services) {
-      var key : Key<*>
+      var key: Key<*>
       when (service) {
         is DependentService -> {
           key = service.producedKeys.firstOrNull() ?: service::class.toKey()
@@ -142,9 +134,7 @@ class MiskCommonServiceModule : KAbstractModule() {
           key = service::class.toKey()
         }
       }
-      if (!trackedKeys.contains(key)) {
-        builder.addService(key, service)
-      }
+      builder.addService(key, service)
     }
 
     val serviceManager = builder.build()
@@ -231,8 +221,7 @@ class ServiceModule(
   val enhancedBy: List<Key<out Service>> = listOf()
 ) : KAbstractModule() {
   override fun configure() {
-    multibind<Service>().to(key)
-
+    requireBinding(key)
     multibind<ServiceEntry>().toInstance(ServiceEntry(key))
 
     for (dependsOnKey in dependsOn) {
