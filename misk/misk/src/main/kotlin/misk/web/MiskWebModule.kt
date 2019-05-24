@@ -1,12 +1,14 @@
 package misk.web
 
-import com.google.common.util.concurrent.Service
 import com.google.inject.Provides
 import com.google.inject.TypeLiteral
 import misk.ApplicationInterceptor
 import misk.MiskCaller
 import misk.MiskDefault
+import misk.ServiceModule
 import misk.exceptions.ActionException
+import misk.grpc.GrpcMarshallerFactory
+import misk.grpc.GrpcUnmarshallerFactory
 import misk.inject.KAbstractModule
 import misk.scope.ActionScopedProvider
 import misk.scope.ActionScopedProviderModule
@@ -38,8 +40,6 @@ import misk.web.interceptors.TracingInterceptor
 import misk.web.jetty.JettyConnectionMetricsCollector
 import misk.web.jetty.JettyService
 import misk.web.jetty.JettyThreadPoolMetricsCollector
-import misk.grpc.GrpcMarshallerFactory
-import misk.grpc.GrpcUnmarshallerFactory
 import misk.web.marshal.JsonMarshaller
 import misk.web.marshal.JsonUnmarshaller
 import misk.web.marshal.Marshaller
@@ -60,9 +60,9 @@ class MiskWebModule(private val config: WebConfig) : KAbstractModule() {
     bind<WebConfig>().toInstance(config)
     bind<ActionExceptionLogLevelConfig>().toInstance(config.action_exception_log_level)
 
-    multibind<Service>().to<JettyService>()
-    multibind<Service>().to<JettyThreadPoolMetricsCollector>()
-    multibind<Service>().to<JettyConnectionMetricsCollector>()
+    install(ServiceModule<JettyService>())
+    install(ServiceModule<JettyThreadPoolMetricsCollector>())
+    install(ServiceModule<JettyConnectionMetricsCollector>())
 
     // Install support for accessing the current request and caller as ActionScoped types
     install(object : ActionScopedProviderModule() {
