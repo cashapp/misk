@@ -103,6 +103,9 @@ class JettyService @Inject internal constructor(
       alpn.defaultProtocol = "http/1.1"
       val ssl = SslConnectionFactory(sslContextFactory, alpn.protocol)
       val http2 = HTTP2ServerConnectionFactory(httpsConfig)
+      if (webConfig.jetty_max_concurrent_streams != null) {
+        http2.maxConcurrentStreams = webConfig.jetty_max_concurrent_streams
+      }
       val http1 = HttpConnectionFactory(httpsConfig)
       val httpsConnector = ServerConnector(server, null, null, null,
           webConfig.acceptors ?: -1, webConfig.selectors ?: -1, ssl, alpn, http2, http1)
