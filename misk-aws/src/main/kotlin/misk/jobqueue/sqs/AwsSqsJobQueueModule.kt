@@ -3,10 +3,10 @@ package misk.jobqueue.sqs
 import com.amazonaws.auth.AWSCredentialsProvider
 import com.amazonaws.services.sqs.AmazonSQS
 import com.amazonaws.services.sqs.AmazonSQSClientBuilder
-import com.google.common.util.concurrent.Service
 import com.google.inject.Provider
 import com.google.inject.Provides
 import com.google.inject.Singleton
+import misk.ServiceModule
 import misk.cloud.aws.AwsRegion
 import misk.concurrent.ExecutorServiceModule
 import misk.inject.KAbstractModule
@@ -29,7 +29,8 @@ class AwsSqsJobQueueModule(
     bind<JobConsumer>().to<SqsJobConsumer>()
     bind<JobQueue>().to<SqsJobQueue>()
     bind<TransactionalJobQueue>().to<SqsTransactionalJobQueue>()
-    multibind<Service>().to<SqsJobConsumer>()
+
+    install(ServiceModule<SqsJobConsumer>())
 
     install(ExecutorServiceModule.withFixedThreadPool(
         ForSqsConsumer::class,

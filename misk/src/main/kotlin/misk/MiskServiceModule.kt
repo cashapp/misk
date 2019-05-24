@@ -108,9 +108,21 @@ class MiskCommonServiceModule : KAbstractModule() {
 
     val builder = ServiceGraphBuilder()
 
+    // Support the new ServiceModule API.
+    for (entry in serviceEntries) {
+      val service = injector.getInstance(entry.key)
+      builder.addService(entry.key, service)
+    }
+    for (edge in dependencies) {
+      builder.addDependency(dependent = edge.dependent, dependsOn = edge.dependsOn)
+    }
+    for (edge in enhancements) {
+      builder.enhanceService(toBeEnhanced = edge.toBeEnhanced, enhancement = edge.enhancement)
+    }
+
     // Support the deprecated DependantService interface.
     for (service in services) {
-      var key : Key<*>
+      var key: Key<*>
       when (service) {
         is DependentService -> {
           key = service.producedKeys.firstOrNull() ?: service::class.toKey()
@@ -123,18 +135,6 @@ class MiskCommonServiceModule : KAbstractModule() {
         }
       }
       builder.addService(key, service)
-    }
-
-    // Support the new ServiceModule API.
-    for (entry in serviceEntries) {
-      val service = injector.getInstance(entry.key)
-      builder.addService(entry.key, service)
-    }
-    for (edge in dependencies) {
-      builder.addDependency(dependent = edge.dependent, dependsOn = edge.dependsOn)
-    }
-    for (edge in enhancements) {
-      builder.enhanceService(toBeEnhanced = edge.toBeEnhanced, enhancement = edge.enhancement)
     }
 
     val serviceManager = builder.build()
@@ -221,8 +221,7 @@ class ServiceModule(
   val enhancedBy: List<Key<out Service>> = listOf()
 ) : KAbstractModule() {
   override fun configure() {
-    multibind<Service>().to(key)
-
+    requireBinding(key)
     multibind<ServiceEntry>().toInstance(ServiceEntry(key))
 
     for (dependsOnKey in dependsOn) {
