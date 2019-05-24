@@ -1,9 +1,7 @@
 package misk.jobqueue.sqs
 
 import com.google.common.util.concurrent.AbstractIdleService
-import com.google.common.util.concurrent.Service
-import com.google.inject.Key
-import misk.DependentService
+import misk.ServiceModule
 import misk.inject.KAbstractModule
 import misk.jobqueue.JobHandler
 import misk.jobqueue.QueueName
@@ -20,7 +18,8 @@ class AwsSqsJobHandlerModule<T : JobHandler> private constructor(
 ) : KAbstractModule() {
   override fun configure() {
     newMapBinder<QueueName, JobHandler>().addBinding(queueName).to(handler.java)
-    multibind<Service>().to<AwsSqsJobHandlerSubscriptionService>()
+    install(ServiceModule<AwsSqsJobHandlerSubscriptionService>()
+        .dependsOn<SqsJobConsumer>()) // Installed in AwsSqsJobQueueModule.
   }
 
   companion object {
@@ -51,10 +50,7 @@ class AwsSqsJobHandlerModule<T : JobHandler> private constructor(
 internal class AwsSqsJobHandlerSubscriptionService @Inject constructor(
   private val consumer: SqsJobConsumer,
   private val consumerMapping: Map<QueueName, JobHandler>
-) : AbstractIdleService(), DependentService {
-  override val consumedKeys: Set<Key<*>> = setOf(Key.get(SqsJobConsumer::class.java))
-  override val producedKeys: Set<Key<*>> = setOf()
-
+) : AbstractIdleService() {
   override fun startUp() {
     consumerMapping.forEach { consumer.subscribe(it.key, it.value) }
   }
