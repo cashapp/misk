@@ -1,6 +1,7 @@
 package misk.clustering.zookeeper
 
 import com.google.inject.Provides
+import com.google.inject.Singleton
 import misk.clustering.fake.FakeClusterModule
 import misk.concurrent.ExplicitReleaseDelayQueue
 import misk.config.AppName
@@ -19,7 +20,7 @@ internal class ZkLeaseTestModule : KAbstractModule() {
 
   }
 
-  @Provides @ForZkLease
+  @Provides @ForZkLease @Singleton
   fun provideTaskQueue(
     clock: Clock,
     @ForZkLease delayQueue: ExplicitReleaseDelayQueue<DelayedTask>
