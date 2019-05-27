@@ -5,6 +5,7 @@ import com.google.common.util.concurrent.MoreExecutors
 import com.google.common.util.concurrent.Service
 import com.google.common.util.concurrent.Service.Listener
 import com.google.common.util.concurrent.Service.State
+import javax.inject.Provider
 
 /**
  * Services in Misk can depend on other services.
@@ -55,7 +56,14 @@ import com.google.common.util.concurrent.Service.State
  * This Service will stall in the `STARTING` state until all upstream services are `RUNNING`.
  * Symmetrically it stalls in the `STOPPING` state until all dependent services are `TERMINATED`.
  */
-internal class CoordinatedService2(val service: Service) : AbstractService() {
+internal class CoordinatedService2(
+    private val serviceProvider : Provider<out Service>
+) : AbstractService() {
+
+  val service : Service by lazy {
+    serviceProvider.get()
+  }
+
   /** Services that start before this. */
   private val directDependsOn = mutableSetOf<CoordinatedService2>()
 
