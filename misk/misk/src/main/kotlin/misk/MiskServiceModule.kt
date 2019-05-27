@@ -110,7 +110,7 @@ class MiskCommonServiceModule : KAbstractModule() {
 
     // Support the new ServiceModule API.
     for (entry in serviceEntries) {
-      builder.addService(entry.key, entry.provider)
+      builder.addService(entry.key, injector.getProvider(entry.key))
     }
     for (edge in dependencies) {
       builder.addDependency(dependent = edge.dependent, dependsOn = edge.dependsOn)
@@ -182,7 +182,7 @@ class MiskCommonServiceModule : KAbstractModule() {
 
 internal data class DependencyEdge(val dependent: Key<*>, val dependsOn: Key<*>)
 internal data class EnhancementEdge(val toBeEnhanced: Key<*>, val enhancement: Key<*>)
-internal data class ServiceEntry(val key: Key<out Service>, val provider: Provider<out Service>)
+internal data class ServiceEntry(val key: Key<out Service>)
 
 inline fun <reified T : Service> ServiceModule(qualifier: KClass<out Annotation>? = null) =
     ServiceModule(T::class.toKey(qualifier))
@@ -220,7 +220,7 @@ class ServiceModule(
   val enhancedBy: List<Key<out Service>> = listOf()
 ) : KAbstractModule() {
   override fun configure() {
-    multibind<ServiceEntry>().toInstance(ServiceEntry(key, getProvider(key)))
+    multibind<ServiceEntry>().toInstance(ServiceEntry(key))
 
     for (dependsOnKey in dependsOn) {
       multibind<DependencyEdge>().toInstance(
