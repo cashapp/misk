@@ -3,19 +3,16 @@ package misk.clustering.kubernetes
 import com.google.common.base.Stopwatch
 import com.google.common.reflect.TypeToken
 import com.google.common.util.concurrent.AbstractIdleService
-import com.google.inject.Key
 import io.kubernetes.client.apis.CoreV1Api
 import io.kubernetes.client.models.V1Pod
 import io.kubernetes.client.util.Config
 import io.kubernetes.client.util.Watch
-import misk.DependentService
 import misk.backoff.ExponentialBackoff
 import misk.clustering.Cluster
 import misk.clustering.DefaultCluster
 import misk.clustering.kubernetes.KubernetesClusterWatcher.Companion.CHANGE_TYPE_ADDED
 import misk.clustering.kubernetes.KubernetesClusterWatcher.Companion.CHANGE_TYPE_DELETED
 import misk.clustering.kubernetes.KubernetesClusterWatcher.Companion.CHANGE_TYPE_MODIFIED
-import misk.inject.keyOf
 import misk.logging.getLogger
 import java.time.Duration
 import java.util.concurrent.TimeUnit
@@ -34,12 +31,9 @@ import kotlin.concurrent.thread
 internal class KubernetesClusterWatcher @Inject internal constructor(
   private val cluster: DefaultCluster,
   private val config: KubernetesConfig
-) : AbstractIdleService(), DependentService {
+) : AbstractIdleService() {
   private val running = AtomicBoolean(false)
   private val watchFailedTimer = Stopwatch.createUnstarted()
-
-  override val consumedKeys: Set<Key<*>> = setOf(keyOf<Cluster>())
-  override val producedKeys: Set<Key<*>> = setOf()
 
   override fun startUp() {
     log.info { "starting k8s cluster watch" }

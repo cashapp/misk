@@ -1,15 +1,15 @@
 package misk.clustering.zookeeper
 
-import com.google.common.util.concurrent.Service
 import com.google.inject.Key
 import com.google.inject.Provides
+import misk.ServiceModule
+import misk.clustering.ClusterService
 import misk.clustering.lease.LeaseManager
 import misk.concurrent.ExecutorServiceModule
 import misk.inject.KAbstractModule
-import misk.inject.asSingleton
-import misk.inject.toKey
 import misk.tasks.RepeatedTaskQueue
 import misk.zookeeper.CuratorFrameworkModule
+import misk.zookeeper.ZkService
 import java.time.Clock
 import java.util.concurrent.ExecutorService
 import javax.inject.Singleton
@@ -41,8 +41,10 @@ class ZkLeaseCommonModule(private val config: ZookeeperConfig) : KAbstractModule
  */
 internal class ZkLeaseManagerModule : KAbstractModule() {
   override fun configure() {
-    multibind<Service>().to<ZkLeaseManager>()
-    multibind<Service>().to(RepeatedTaskQueue::class.toKey(ForZkLease::class)).asSingleton()
+    install(ServiceModule<ZkLeaseManager>()
+        .dependsOn<ZkService>(ForZkLease::class)
+        .dependsOn<ClusterService>())
+    install(ServiceModule<RepeatedTaskQueue>(ForZkLease::class))
     bind<LeaseManager>().to<ZkLeaseManager>()
   }
 }
