@@ -110,8 +110,7 @@ class MiskCommonServiceModule : KAbstractModule() {
 
     // Support the new ServiceModule API.
     for (entry in serviceEntries) {
-      val service = injector.getInstance(entry.key)
-      builder.addService(entry.key, service)
+      builder.addService(entry.key, injector.getProvider(entry.key))
     }
     for (edge in dependencies) {
       builder.addDependency(dependent = edge.dependent, dependsOn = edge.dependsOn)
@@ -221,7 +220,6 @@ class ServiceModule(
   val enhancedBy: List<Key<out Service>> = listOf()
 ) : KAbstractModule() {
   override fun configure() {
-    requireBinding(key)
     multibind<ServiceEntry>().toInstance(ServiceEntry(key))
 
     for (dependsOnKey in dependsOn) {
