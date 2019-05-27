@@ -58,7 +58,7 @@ internal class KubernetesClusterWatcher @Inject internal constructor(
 
     while (running.get()) {
       try {
-        log.info { "preparing watch for namespace ${config.my_pod_namespace}" }
+        log.debug { "preparing watch for namespace ${config.my_pod_namespace}" }
         val watch = Watch.createWatch<V1Pod>(
             client,
             api.listNamespacedPodCall(
@@ -83,7 +83,7 @@ internal class KubernetesClusterWatcher @Inject internal constructor(
 
         watch.use {
           for (response in watch) {
-            log.info { "received watch in namespace ${config.my_pod_namespace}" }
+            log.debug { "received watch in namespace ${config.my_pod_namespace}" }
             connectBackoff.reset()
             if (!running.get()) {
               watch.close()
