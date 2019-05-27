@@ -1,14 +1,15 @@
 package misk.hibernate
 
-import com.google.common.util.concurrent.Service
 import com.google.inject.Key
 import io.opentracing.Tracer
 import misk.MiskTestingServiceModule
+import misk.ServiceModule
 import misk.config.Config
 import misk.config.MiskConfig
 import misk.environment.Environment
 import misk.inject.KAbstractModule
 import misk.inject.asSingleton
+import misk.inject.keyOf
 import misk.inject.setOfType
 import misk.inject.toKey
 import misk.jdbc.DataSourceConfig
@@ -48,8 +49,7 @@ class SchemaValidatorTest {
       val qualifier = ValidationDb::class
 
       val dataSourceService =
-          DataSourceService(qualifier, config.data_source, Environment.TESTING,
-              emptySet())
+          DataSourceService(qualifier, config.data_source, Environment.TESTING, emptySet())
 
       val injectorServiceProvider = getProvider(HibernateInjectorAccess::class.java)
       val sessionFactoryServiceKey =
@@ -70,12 +70,17 @@ class SchemaValidatorTest {
       val schemaMigratorProvider = getProvider(schemaMigratorKey)
 
       bind(sessionFactoryServiceKey).toProvider(Provider<SessionFactoryService> {
-        SessionFactoryService(qualifier, config.data_source, dataSourceService,
-            injectorServiceProvider.get(), entitiesProvider.get())
+        SessionFactoryService(
+            qualifier,
+            config.data_source,
+            dataSourceService,
+            injectorServiceProvider.get(),
+            entitiesProvider.get())
       }).asSingleton()
+      install(ServiceModule<SessionFactoryService>(qualifier)
+          .dependsOn<DataSourceService>(qualifier))
 
       bind<SessionFactory>().annotatedWith<ValidationDb>().toProvider(sessionFactoryServiceKey)
-      multibind<Service>().to(sessionFactoryServiceKey)
 
       bind(transacterKey).toProvider(object : Provider<Transacter> {
         @Inject lateinit var queryTracingListener: QueryTracingListener
@@ -107,17 +112,24 @@ class SchemaValidatorTest {
         }
       })
 
-      multibind<Service>().toInstance(
-          PingDatabaseService(qualifier, config.data_source, Environment.TESTING))
+      install(ServiceModule<PingDatabaseService>(qualifier)
+          .dependsOn<StartVitessService>(qualifier))
+      bind(keyOf<PingDatabaseService>(qualifier)).toInstance(
+          PingDatabaseService(config.data_source, Environment.TESTING))
 
-      multibind<Service>().toInstance(dataSourceService)
+      bind(keyOf<DataSourceService>(qualifier)).toInstance(dataSourceService)
+      install(ServiceModule<DataSourceService>(qualifier)
+          .dependsOn<PingDatabaseService>(qualifier))
       bind<DataSource>().annotatedWith<ValidationDb>().toProvider(dataSourceService)
 
-      multibind<Service>().toProvider(Provider<SchemaMigratorService> {
-        SchemaMigratorService(
-            qualifier, Environment.TESTING, schemaMigratorProvider, config.data_source)
+      install(ServiceModule<SchemaMigratorService>(qualifier)
+          .dependsOn<SessionFactoryService>(qualifier))
+      bind(keyOf<SchemaMigratorService>(qualifier)).toProvider(Provider<SchemaMigratorService> {
+        SchemaMigratorService(Environment.TESTING, schemaMigratorProvider, config.data_source)
       }).asSingleton()
-      multibind<Service>().toInstance(
+
+      install(ServiceModule<StartVitessService>(qualifier))
+      bind(keyOf<StartVitessService>(qualifier)).toInstance(
           StartVitessService(ValidationDb::class, Environment.TESTING, config.data_source))
     }
   }
