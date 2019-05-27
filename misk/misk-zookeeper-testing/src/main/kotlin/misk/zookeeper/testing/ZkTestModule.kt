@@ -1,8 +1,6 @@
 package misk.zookeeper.testing
 
-import com.google.common.util.concurrent.Service
-import com.google.inject.Key
-import misk.DependentService
+import misk.ServiceModule
 import misk.clustering.zookeeper.ZookeeperConfig
 import misk.config.AppName
 import misk.inject.KAbstractModule
@@ -31,7 +29,8 @@ class ZkTestModule(
 
     install(ZookeeperModule(config, qualifier))
 
-    multibind<Service>().toInstance(StartZookeeperService(qualifier))
+    install(ServiceModule<StartZookeeperService>(qualifier))
+    bind(keyOf<StartZookeeperService>(qualifier)).toInstance(StartZookeeperService())
     val curator = getProvider(keyOf<CuratorFramework>(qualifier))
     bind(keyOf<ZkClientFactory>(qualifier)).toProvider(object : Provider<ZkClientFactory> {
       @Inject @AppName private lateinit var app: String
@@ -44,12 +43,7 @@ class ZkTestModule(
   /**
    * The same zookeeper instance is used for all zookeeper bindings to speed up tests.
    */
-  private class StartZookeeperService constructor(
-    qualifier: KClass<out Annotation>?
-  ) : CachedTestService(), DependentService {
-    override val consumedKeys: Set<Key<*>> = setOf()
-    override val producedKeys: Set<Key<*>> = setOf(keyOf<StartZookeeperService>(qualifier))
-
+  private class StartZookeeperService : CachedTestService() {
     override fun actualStartup() {
       sharedZookeeper.start()
     }
