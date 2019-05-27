@@ -3,6 +3,7 @@ package misk
 import com.google.common.util.concurrent.AbstractService
 import com.google.common.util.concurrent.Service
 import com.google.inject.Key
+import com.google.inject.Provider
 import com.google.inject.name.Named
 import com.google.inject.name.Names
 import org.assertj.core.api.Assertions.assertThat
@@ -281,8 +282,12 @@ class ServiceGraphBuilderTest {
     val builder = newBuilderWithServices(target, listOf(keyA))
     val serviceManager = builder.build()
     serviceManager.startAsync()
-    val badEnhancer = CoordinatedService2(AppendingService(target, "bad enhancement"))
-    val badDependency = CoordinatedService2(AppendingService(target, "bad dependency"))
+    val badEnhancer = CoordinatedService2(Provider<Service> {
+      AppendingService(target, "bad enhancement")
+    })
+    val badDependency = CoordinatedService2(Provider<Service> {
+      AppendingService(target, "bad dependency")
+    })
 
     serviceManager.awaitHealthy()
 
@@ -303,8 +308,6 @@ class ServiceGraphBuilderTest {
         |stopping ${keyA.name}
         |""".trimMargin())
   }
-
-
 
   /**
    * Build a service graph with the named services. Configure the graph edges in [block], start the
