@@ -2,13 +2,10 @@ package misk.jdbc
 
 import com.google.common.base.Stopwatch
 import com.google.common.util.concurrent.AbstractIdleService
-import com.google.inject.Key
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import com.zaxxer.hikari.metrics.prometheus.PrometheusMetricsTrackerFactory
-import misk.DependentService
 import misk.environment.Environment
-import misk.inject.toKey
 import misk.metrics.Metrics
 import mu.KotlinLogging
 import javax.inject.Provider
@@ -26,14 +23,11 @@ internal class DataSourceService(
   private val environment: Environment,
   private val dataSourceDecorators: Set<DataSourceDecorator>,
   private val metrics: Metrics? = null
-) : AbstractIdleService(), DependentService, Provider<DataSource> {
+) : AbstractIdleService(), Provider<DataSource> {
   /** The backing connection pool */
   private var hikariDataSource: HikariDataSource? = null
   /** The decorated data source */
   private var dataSource: DataSource? = null
-
-  override val consumedKeys = setOf<Key<*>>(PingDatabaseService::class.toKey(qualifier))
-  override val producedKeys = setOf<Key<*>>(DataSourceService::class.toKey(qualifier))
 
   override fun startUp() {
     val stopwatch = Stopwatch.createStarted()

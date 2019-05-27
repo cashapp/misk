@@ -67,8 +67,11 @@ class HibernateModule(
 
     // Bind PingDataBaseService.
     bind(keyOf<PingDatabaseService>(qualifier)).toProvider(Provider<PingDatabaseService> {
-      PingDatabaseService(qualifier, config, environmentProvider.get())
+      PingDatabaseService(config, environmentProvider.get())
     }).asSingleton()
+    // TODO(rhall): depending on Vitess is a hack to simulate Vitess has already been started in the
+    // env. This is to remove flakiness in tests that are not waiting until Vitess is ready.
+    // This should be replaced with an ExternalDependency that manages vitess.
     install(ServiceModule<PingDatabaseService>(qualifier)
         .dependsOn<StartVitessService>(qualifier))
 
@@ -135,7 +138,6 @@ class HibernateModule(
         qualifier)).toProvider(object : Provider<SchemaMigratorService> {
       @Inject lateinit var environment: Environment
       override fun get(): SchemaMigratorService = SchemaMigratorService(
-          qualifier,
           environment,
           schemaMigratorProvider,
           config
