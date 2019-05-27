@@ -1,17 +1,21 @@
 package misk
 
+import com.google.common.util.concurrent.Service
+import com.google.inject.Provider
 import misk.ServiceGraphBuilderTest.AppendingService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import java.lang.IllegalStateException
 import kotlin.test.assertFailsWith
-
 
 class CoordinatedService2Test {
   @Test fun cannotAddRunningServiceAsDependency() {
     val target = StringBuilder()
-    val runningService = CoordinatedService2(AppendingService(target, "I will be running"))
-    val newService = CoordinatedService2(AppendingService(target, "I will not run"))
+    val runningService = CoordinatedService2(Provider<Service> {
+      AppendingService(target, "I will be running")
+    })
+    val newService = CoordinatedService2(Provider<Service> {
+      AppendingService(target, "I will not run")
+    })
 
     runningService.startAsync()
 
@@ -30,10 +34,11 @@ class CoordinatedService2Test {
     val service = AppendingService(target, "Running Service")
     service.startAsync()
 
-    val failure = assertFailsWith<IllegalStateException> { CoordinatedService2(service) }
+    val failure = assertFailsWith<IllegalStateException> {
+      CoordinatedService2(Provider<Service> { service })
+    }
     assertThat(failure).hasMessage("Running Service must be NEW for it to be coordinated")
 
     service.stopAsync()
   }
-
 }

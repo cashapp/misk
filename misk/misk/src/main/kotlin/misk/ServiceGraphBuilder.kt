@@ -5,6 +5,7 @@ import com.google.common.util.concurrent.Service
 import com.google.common.util.concurrent.ServiceManager
 import com.google.inject.Key
 import misk.CoordinatedService2.Companion.CycleValidity
+import javax.inject.Provider
 
 /**
  * Builds a graph of [CoordinatedService2]s which defer start up and shut down until their dependent
@@ -22,10 +23,14 @@ class ServiceGraphBuilder {
    * Keys must be unique. If a key is reused, then the original key-service pair will be replaced.
    */
   fun addService(key: Key<*>, service: Service) {
+    addService(key, Provider<Service> { service })
+  }
+
+  fun addService(key: Key<*>, serviceProvider: Provider<out Service>) {
     check(serviceMap[key] == null) {
       "Service $key cannot be registered more than once"
     }
-    serviceMap[key] = CoordinatedService2(service)
+    serviceMap[key] = CoordinatedService2(serviceProvider)
   }
 
   /**
