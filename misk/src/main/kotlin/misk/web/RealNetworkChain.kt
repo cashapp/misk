@@ -1,11 +1,13 @@
 package misk.web
 
 import misk.web.actions.WebAction
+import okio.BufferedSink
 import kotlin.reflect.KFunction
 
 internal class RealNetworkChain(
   private val _action: WebAction,
   private val _request: Request,
+  private val _responseBodySink: BufferedSink,
   private val interceptors: List<NetworkInterceptor>,
   private val _function: KFunction<*>,
   private val index: Int = 0
@@ -17,6 +19,9 @@ internal class RealNetworkChain(
   override val request: Request
     get() = _request
 
+  override val responseBodySink: BufferedSink?
+    get() = _responseBodySink
+
   override val function: KFunction<*>
     get() = _function
 
@@ -27,7 +32,7 @@ internal class RealNetworkChain(
     // a new Network chain is TECHNICALLY an option, but is probably a crazy thing to do.
     // If this is something we want to enable, it should be in another layer of interception prior
     // to Action binding.
-    val next = RealNetworkChain(_action, request, interceptors, function, index + 1)
+    val next = RealNetworkChain(_action, request, _responseBodySink, interceptors, function, index + 1)
     return interceptors[index].intercept(next)
   }
 }

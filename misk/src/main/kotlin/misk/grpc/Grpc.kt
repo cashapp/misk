@@ -28,11 +28,11 @@ class GrpcMarshallerFactory @Inject constructor() : Marshaller.Factory {
     val responseType = Marshaller.actualResponseType(type)
     if (GenericMarshallers.canHandle(responseType)) return null
 
-    val elementType = type.streamElementType()
-
     @Suppress("UNCHECKED_CAST") // Guarded by reflection.
-    return if (elementType != null) {
-      GrpcStreamMarshaller(ProtoAdapter.get(elementType as Class<Any>)) as Marshaller<Any>
+    return if (type.classifier == Unit::class) {
+      // TODO(grpc): combine marshalling and parameter extractors so this isn't necessary
+      // TODO: this should really be checking if there's a body stream parameter.
+      GrpcStreamMarshaller() as Marshaller<Any>
     } else {
       GrpcSingleMarshaller<Any>(ProtoAdapter.get(responseType as Class<Any>))
     }
@@ -52,20 +52,11 @@ internal class GrpcSingleMarshaller<T>(val adapter: ProtoAdapter<T>) : Marshalle
   }
 }
 
-internal class GrpcStreamMarshaller<T>(val adapter: ProtoAdapter<T>) : Marshaller<GrpcReceiveChannel<T>> {
+internal class GrpcStreamMarshaller : Marshaller<Unit> {
   override fun contentType() = MediaTypes.APPLICATION_GRPC_MEDIA_TYPE
 
-  override fun responseBody(o: GrpcReceiveChannel<T>): ResponseBody {
-    return object : ResponseBody {
-      override fun writeTo(sink: BufferedSink) {
-        GrpcWriter.get(sink, adapter).use { writer ->
-          o.consumeEach { message ->
-            writer.writeMessage(message)
-            writer.flush()
-          }
-        }
-      }
-    }
+  override fun responseBody(o: Unit): ResponseBody {
+    throw UnsupportedOperationException("don't")
   }
 }
 
@@ -112,7 +103,7 @@ internal class GrpcStreamUnmarshaller<T>(val adapter: ProtoAdapter<T>) : Unmarsh
  * Returns the channel element type, like `MyRequest` if this is `Channel<MyRequest>`. Returns null
  * if this is not a channel.
  */
-private fun KType.streamElementType(): Type? {
+internal fun KType.streamElementType(): Type? {
   val parameterizedType = javaType as? ParameterizedType ?: return null
   if (parameterizedType.rawType != GrpcReceiveChannel::class.java &&
       parameterizedType.rawType != GrpcSendChannel::class.java) return null

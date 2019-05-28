@@ -3,6 +3,7 @@ package misk.web.extractors
 import misk.web.PathPattern
 import misk.web.Request
 import misk.web.actions.WebAction
+import okio.BufferedSink
 import java.util.regex.Matcher
 import kotlin.reflect.KFunction
 import kotlin.reflect.KParameter
@@ -14,6 +15,8 @@ interface ParameterExtractor {
   fun extract(
     webAction: WebAction,
     request: Request,
+    // TODO(grpc): move this to be a field of the request
+    responseBodySink: BufferedSink?,
     pathMatcher: Matcher
   ): Any?
 

@@ -1,22 +1,25 @@
 package misk.web.actions
 
 import com.google.common.collect.Lists
-import misk.Chain
 import misk.ApplicationInterceptor
+import misk.Chain
 import misk.web.NetworkChain
 import misk.web.NetworkInterceptor
 import misk.web.RealChain
 import misk.web.RealNetworkChain
 import misk.web.Request
+import okio.BufferedSink
+import javax.servlet.http.HttpServletResponse
 import kotlin.reflect.KFunction
 import kotlin.reflect.KParameter
 
 fun WebAction.asNetworkChain(
   function: KFunction<*>,
   request: Request,
+  responseBodySink: BufferedSink,
   vararg _networkInterceptors: NetworkInterceptor
 ): NetworkChain =
-    RealNetworkChain(this, request, _networkInterceptors.toList(), function, 0)
+    RealNetworkChain(this, request, responseBodySink, _networkInterceptors.toList(), function, 0)
 
 fun WebAction.asChain(
   function: KFunction<*>,

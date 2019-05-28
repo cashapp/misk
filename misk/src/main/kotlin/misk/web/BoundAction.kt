@@ -104,7 +104,8 @@ internal class BoundAction<A : WebAction>(
     interceptors.add(RequestBridgeInterceptor(parameterExtractors, applicationInterceptors,
         pathMatcher))
 
-    val chain = webAction.asNetworkChain(action.function, request, *interceptors.toTypedArray())
+    val chain = webAction.asNetworkChain(action.function, request, servletResponse.bufferedSink(),
+        *interceptors.toTypedArray())
     var response = chain.proceed(chain.request)
 
     if (response.body !is ResponseBody) {
@@ -137,7 +138,7 @@ internal class BoundAction<A : WebAction>(
   ): WebSocketListener {
     val webAction = webActionProvider.get()
     val parameters = parameterExtractors.map {
-      it.extract(webAction, request, pathMatcher)
+      it.extract(webAction, request, null, pathMatcher)
     }
 
     val chain = webAction.asChain(action.function, parameters)
@@ -248,7 +249,7 @@ private class RequestBridgeInterceptor(
 ) : NetworkInterceptor {
   override fun intercept(chain: NetworkChain): Response<*> {
     val parameters = parameterExtractors.map {
-      it.extract(chain.action, chain.request, pathMatcher)
+      it.extract(chain.action, chain.request, chain.responseBodySink, pathMatcher)
     }
 
     val applicationChain =
@@ -257,6 +258,13 @@ private class RequestBridgeInterceptor(
     val result = applicationChain.proceed(applicationChain.args)
     // NB(young): Something down the chain could have returned a Response, so avoid double
     // wrapping it.
+
+    // TODO: combine the concepts of ParameterExtractors and Marshallers
+    val responseBodyParameter = parameters.find { it is ResponseBody }
+    if (responseBodyParameter != null) {
+      return Response(responseBodyParameter)
+    }
+
     return if (result is Response<*>) result else Response(result)
   }
 }

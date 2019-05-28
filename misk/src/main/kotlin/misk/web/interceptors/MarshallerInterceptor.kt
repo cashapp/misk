@@ -4,6 +4,7 @@ import misk.Action
 import misk.web.NetworkChain
 import misk.web.NetworkInterceptor
 import misk.web.Response
+import misk.web.ResponseBody
 import misk.web.actions.WebSocketListener
 import misk.web.marshal.GenericMarshallers
 import misk.web.marshal.Marshaller
@@ -26,7 +27,13 @@ internal class MarshallerInterceptor @Inject constructor(private val marshaller:
           .build()
     }
 
-    val body = marshaller.responseBody(response.body)
+    val body: ResponseBody
+    if (response.body is ResponseBody) {
+      body = response.body
+    } else {
+      body = marshaller.responseBody(response.body)
+    }
+
     return Response(body, headers, response.statusCode)
   }
 

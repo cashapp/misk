@@ -4,6 +4,7 @@ import misk.web.PathParam
 import misk.web.PathPattern
 import misk.web.Request
 import misk.web.actions.WebAction
+import okio.BufferedSink
 import java.util.regex.Matcher
 import kotlin.reflect.KFunction
 import kotlin.reflect.KParameter
@@ -37,6 +38,7 @@ object PathPatternParameterExtractorFactory : ParameterExtractor.Factory {
       override fun extract(
         webAction: WebAction,
         request: Request,
+        responseBodySink: BufferedSink?,
         pathMatcher: Matcher
       ): Any? {
         val pathParam = pathMatcher.group(patternIndex + 1)

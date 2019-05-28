@@ -7,6 +7,7 @@ import misk.web.actions.WebAction
 import misk.web.marshal.GenericUnmarshallers
 import misk.web.marshal.Unmarshaller
 import okhttp3.MediaType
+import okio.BufferedSink
 import java.util.regex.Matcher
 import javax.inject.Inject
 import kotlin.reflect.KFunction
@@ -20,6 +21,7 @@ internal class RequestBodyParameterExtractor(
   override fun extract(
     webAction: WebAction,
     request: Request,
+    responseBodySink: BufferedSink?,
     pathMatcher: Matcher
   ): Any? {
     val mediaType = request.headers["Content-Type"]?.let { MediaType.parse(it) }

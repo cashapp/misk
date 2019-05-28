@@ -8,6 +8,7 @@ import misk.web.FormValue
 import misk.web.PathPattern
 import misk.web.Request
 import misk.web.actions.WebAction
+import okio.BufferedSink
 import okio.BufferedSource
 import java.net.URLDecoder
 import java.util.regex.Matcher
@@ -54,6 +55,7 @@ object FormValueParameterExtractorFactory : ParameterExtractor.Factory {
       override fun extract(
         webAction: WebAction,
         request: Request,
+        responseBodySink: BufferedSink?,
         pathMatcher: Matcher
       ): Any? {
         val formValueMapping = parseBody(request.body)

@@ -24,6 +24,7 @@ import misk.web.exceptions.ActionExceptionMapper
 import misk.web.exceptions.ExceptionHandlingInterceptor
 import misk.web.exceptions.ExceptionMapperModule
 import misk.web.extractors.FormValueParameterExtractorFactory
+import misk.web.extractors.GrpcResponseChannelParameterExtractor
 import misk.web.extractors.HeadersParameterExtractorFactory
 import misk.web.extractors.ParameterExtractor
 import misk.web.extractors.PathPatternParameterExtractorFactory
@@ -133,6 +134,7 @@ class MiskWebModule(private val config: WebConfig) : KAbstractModule() {
     multibind<ParameterExtractor.Factory>().toInstance(HeadersParameterExtractorFactory)
     multibind<ParameterExtractor.Factory>().toInstance(WebSocketParameterExtractorFactory)
     multibind<ParameterExtractor.Factory>().to<RequestBodyParameterExtractor.Factory>()
+    multibind<ParameterExtractor.Factory>().to<GrpcResponseChannelParameterExtractor.Factory>()
 
     // Install infrastructure support
     install(CertificatesModule())
