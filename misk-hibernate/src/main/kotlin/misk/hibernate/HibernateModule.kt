@@ -93,10 +93,9 @@ class HibernateModule(
         .dependsOn<PingDatabaseService>(qualifier))
 
     // Bind SessionFactoryService.
-    val entitiesKey = setOfType(HibernateEntity::class).toKey(qualifier)
-    val entitiesProvider = getProvider(entitiesKey)
-    val eventListenersKey = setOfType(ListenerRegistration::class).toKey(qualifier)
-    val eventListenersProvider = getProvider(eventListenersKey)
+    val entitiesProvider = getProvider(setOfType(HibernateEntity::class).toKey(qualifier))
+    val eventListenersProvider =
+        getProvider(setOfType(ListenerRegistration::class).toKey(qualifier))
     val hibernateInjectorAccessProvider = getProvider(HibernateInjectorAccess::class.java)
     val dataSourceProvider = getProvider(keyOf<DataSource>(qualifier))
 
