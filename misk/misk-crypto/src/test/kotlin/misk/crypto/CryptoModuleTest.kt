@@ -20,6 +20,7 @@ import misk.testing.MiskTest
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatCode
 import org.assertj.core.api.Assertions.assertThatThrownBy
+import org.junit.Ignore
 import org.junit.Test
 import java.io.ByteArrayOutputStream
 import java.security.GeneralSecurityException
@@ -97,7 +98,7 @@ class CryptoModuleTest {
             .isInstanceOf(KeyNotFoundException::class.java)
   }
 
-  @Test
+  @Ignore @Test // Currently disabled since the env check is as well
   fun testRaisesInWrongEnv() {
 
     val plainKey = Key("name", KeyType.AEAD, MiskConfig.RealSecret(""))
@@ -105,12 +106,12 @@ class CryptoModuleTest {
     val client = FakeKmsClient()
 
     assertThatThrownBy {
-      kr.env = Environment.STAGING
+      // kr.env = Environment.STAGING
       kr.readKey(plainKey, null, client)
     }.isInstanceOf(GeneralSecurityException::class.java)
 
     assertThatThrownBy {
-      kr.env = Environment.PRODUCTION
+      // kr.env = Environment.PRODUCTION
       kr.readKey(plainKey, null, client)
     }.isInstanceOf(GeneralSecurityException::class.java)
   }
