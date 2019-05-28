@@ -27,14 +27,10 @@ import java.security.GeneralSecurityException
 val logger by lazy { getLogger<CryptoModule>() }
 
 open class KeyReader {
-  @Inject lateinit var env: Environment
-
   private fun readCleartextKey(reader: KeysetReader): KeysetHandle {
-    if (env != Environment.TESTING && env != Environment.DEVELOPMENT)
-      throw GeneralSecurityException(
-          "Trying to use a plaintext key outside of a development environment")
-
-    logger.warn { "Reading a plaintext key" }
+    // TODO: Implement a clean check to throw if we are running in prod or staging. Checking for
+    // an injected Environment will fail if a test explicitly creates a staging/prod environment.
+    logger.warn { "reading a plaintext key!" }
     return CleartextKeysetHandle.read(reader)
   }
 
