@@ -9,7 +9,6 @@ buildscript {
 
 plugins {
   id "org.jetbrains.kotlin.jvm" version "1.3.21" apply false
-  id "com.vanniktech.maven.publish" version "0.4.0" apply false
   id 'com.gradle.build-scan' version "2.1"
 }
 
@@ -48,6 +47,7 @@ subprojects {
 
     dependencies {
       classpath dep.shadowJarPlugin
+      classpath dep.mavenPublishGradlePlugin
     }
   }
   repositories {
