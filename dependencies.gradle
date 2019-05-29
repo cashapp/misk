@@ -30,7 +30,7 @@ ext.dep = [
   "jacksonKotlin": "com.fasterxml.jackson.module:jackson-module-kotlin:2.9.3",
   "javaxInject": "javax.inject:javax.inject:1",
   "jaxbApi": "javax.xml.bind:jaxb-api:2.3.0",
-  "jedis": "redis.clients:jedis:2.9.0",
+  "jedis": "redis.clients:jedis:2.9.3",
   "jettyAlpnJava": "org.eclipse.jetty:jetty-alpn-java-server:9.4.18.v20190429",
   "jettyHttp2": "org.eclipse.jetty.http2:http2-server:9.4.18.v20190429",
   "jettyServer": "org.eclipse.jetty:jetty-server:9.4.18.v20190429",
