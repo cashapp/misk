@@ -12,16 +12,13 @@ import com.github.dockerjava.netty.NettyDockerCmdExecFactory
 import com.google.common.cache.CacheBuilder
 import com.google.common.cache.CacheLoader
 import com.google.common.util.concurrent.AbstractIdleService
-import com.google.inject.Key
 import com.squareup.moshi.Moshi
 import com.zaxxer.hikari.util.DriverDataSource
-import misk.DependentService
 import misk.backoff.ExponentialBackoff
 import misk.backoff.retry
 import misk.environment.Environment
 import misk.environment.Environment.DEVELOPMENT
 import misk.environment.Environment.TESTING
-import misk.inject.toKey
 import misk.jdbc.DataSourceConfig
 import misk.jdbc.DataSourceType
 import misk.jdbc.uniqueInt
@@ -322,11 +319,7 @@ class StartVitessService(
   private val qualifier: KClass<out Annotation>,
   private val environment: Environment,
   private val config: DataSourceConfig
-) : AbstractIdleService(), DependentService {
-
-  override val consumedKeys: Set<Key<*>> = setOf()
-  override val producedKeys: Set<Key<*>> = setOf(StartVitessService::class.toKey(qualifier))
-
+) : AbstractIdleService() {
   var cluster: DockerVitessCluster? = null
 
   override fun startUp() {

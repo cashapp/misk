@@ -1,8 +1,8 @@
 package misk.hibernate
 
-import com.google.common.util.concurrent.Service
 import com.google.inject.Inject
 import com.squareup.moshi.Moshi
+import misk.ServiceModule
 import misk.inject.KAbstractModule
 import misk.inject.asSingleton
 import misk.inject.toKey
@@ -42,7 +42,8 @@ class HibernateTestingModule(
       bindVitessChecks()
     }
 
-    multibind<Service>().to(truncateTablesServiceKey)
+    install(ServiceModule(truncateTablesServiceKey)
+        .dependsOn<SchemaMigratorService>(qualifier))
     bind(truncateTablesServiceKey).toProvider(object : Provider<TruncateTablesService> {
       @Inject(optional = true) var checks: VitessScaleSafetyChecks? = null
 

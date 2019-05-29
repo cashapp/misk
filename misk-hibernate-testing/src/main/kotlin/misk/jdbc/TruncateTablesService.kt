@@ -2,13 +2,9 @@ package misk.jdbc
 
 import com.google.common.base.Stopwatch
 import com.google.common.util.concurrent.AbstractIdleService
-import com.google.inject.Key
-import misk.DependentService
-import misk.hibernate.SchemaMigratorService
 import misk.hibernate.Transacter
 import misk.hibernate.shards
 import misk.hibernate.transaction
-import misk.inject.toKey
 import misk.logging.getLogger
 import java.util.Locale
 import javax.inject.Provider
@@ -32,11 +28,8 @@ class TruncateTablesService(
   private val checks: VitessScaleSafetyChecks? = null,
   private val startUpStatements: List<String> = listOf(),
   private val shutDownStatements: List<String> = listOf()
-) : AbstractIdleService(), DependentService {
+) : AbstractIdleService() {
   private val persistentTables = setOf("schema_version")
-
-  override val consumedKeys = setOf<Key<*>>(SchemaMigratorService::class.toKey(qualifier))
-  override val producedKeys = setOf<Key<*>>(TruncateTablesService::class.toKey(qualifier))
 
   override fun startUp() {
     if (checks == null) {
