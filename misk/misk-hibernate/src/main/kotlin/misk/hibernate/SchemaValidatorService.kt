@@ -1,9 +1,6 @@
 package misk.hibernate
 
 import com.google.common.util.concurrent.AbstractIdleService
-import com.google.inject.Key
-import misk.DependentService
-import misk.inject.toKey
 import misk.jdbc.DataSourceConfig
 import java.util.Collections
 import javax.inject.Provider
@@ -16,14 +13,7 @@ internal class SchemaValidatorService internal constructor(
   private val sessionFactoryServiceProvider: Provider<SessionFactoryService>,
   private val transacterProvider: Provider<Transacter>,
   private val config: DataSourceConfig
-) : AbstractIdleService(), DependentService {
-
-  override val consumedKeys = setOf<Key<*>>(
-      SchemaMigratorService::class.toKey(qualifier),
-      SessionFactoryService::class.toKey(qualifier)
-  )
-  override val producedKeys = setOf<Key<*>>(SchemaValidatorService::class.toKey(qualifier))
-
+) : AbstractIdleService() {
   override fun startUp() {
     synchronized(this) {
       if (validated.contains(qualifier)) {
