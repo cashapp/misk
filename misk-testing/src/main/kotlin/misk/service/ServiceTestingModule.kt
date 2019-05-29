@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package misk.service
 
 import com.google.common.util.concurrent.Service
@@ -12,13 +14,15 @@ import kotlin.reflect.KClass
  * [ServiceTestingModule] provides additional help for testing service, notably allowing existing
  * services to be bound with additional dependencies specifically required for testing. Typically
  * used when a [Service] requires an external service (e.g. zookeeper, etcd, vitess, etc)
- * that is being spun up within the test itself
+ * that is being spun up within the test itself.
+ *
+ * Deprecated by [misk.ServiceModule].
  */
+@Deprecated("Replaced by misk.ServiceModule which allows for full dependency graph specification.")
 class ServiceTestingModule<T : Service> internal constructor(
   private val wrappedServiceKey: Key<T>,
   private val extraDependencies: Set<Key<*>>
 ) : KAbstractModule() {
-
   override fun configure() {
     // Register a wrapper around the service with the service manager. The wrapper delegates
     // to the underlying service for all calls except [DependentService.consumedKeys], which
