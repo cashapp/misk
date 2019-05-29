@@ -116,6 +116,11 @@ class SchemaValidatorTest {
       bind(keyOf<DataSourceService>(qualifier)).toInstance(dataSourceService)
       bind<DataSource>().annotatedWith<ValidationDb>().toProvider(dataSourceService)
 
+      install(ServiceModule<SchemaMigratorService>(qualifier))
+      bind(keyOf<SchemaMigratorService>(qualifier)).toProvider(Provider<SchemaMigratorService> {
+        SchemaMigratorService(Environment.TESTING, schemaMigratorProvider, config.data_source)
+      }).asSingleton()
+
       bind(sessionFactoryServiceKey).toProvider(Provider<SessionFactoryService> {
         SessionFactoryService(
             qualifier,
@@ -125,13 +130,8 @@ class SchemaValidatorTest {
             entitiesProvider.get())
       }).asSingleton()
       install(ServiceModule<SessionFactoryService>(qualifier)
+          .enhancedBy<SchemaMigratorService>(qualifier)
           .dependsOn<DataSourceService>(qualifier))
-
-      install(ServiceModule<SchemaMigratorService>(qualifier)
-          .dependsOn<SessionFactoryService>(qualifier))
-      bind(keyOf<SchemaMigratorService>(qualifier)).toProvider(Provider<SchemaMigratorService> {
-        SchemaMigratorService(Environment.TESTING, schemaMigratorProvider, config.data_source)
-      }).asSingleton()
     }
   }
 
