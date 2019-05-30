@@ -202,6 +202,14 @@ object MiskConfig {
       val source = requireNotNull(resourceLoader.utf8(reference)) {
         "No secret found at: $reference."
       }
+
+      // Ignore extension if we're requesting a string or a bytearray
+      if (type.rawClass == source.javaClass) {
+        return source
+      } else if (type.isArrayType && type.contentType.rawClass == Byte::class.java) {
+        return source.toByteArray()
+      }
+
       val referenceFileExtension = Regex(".*\\.([^.]+)$").find(reference)?.groupValues?.get(1) ?: ""
       return when (referenceFileExtension) {
         "yaml" -> {
