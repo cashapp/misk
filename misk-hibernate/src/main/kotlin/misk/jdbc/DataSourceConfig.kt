@@ -33,7 +33,6 @@ data class DataSourceConfig(
   val database: String? = null,
   val username: String? = null,
   val password: String? = null,
-  val connection_properties: Map<String, String> = mapOf(),
   val fixed_pool_size: Int = 10,
   val connection_timeout: Duration = Duration.ofSeconds(30),
   val connection_max_lifetime: Duration = Duration.ofMinutes(30),
