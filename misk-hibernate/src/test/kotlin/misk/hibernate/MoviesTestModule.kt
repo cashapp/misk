@@ -29,7 +29,7 @@ class MoviesTestModule(
 
     val config = MiskConfig.load<MoviesConfig>("moviestestmodule", Environment.TESTING)
     install(HibernateTestingModule(Movies::class,
-        disableCrossShardQueryDetector = useVitess && disableCrossShardQueryDetector))
+        disableChecks = useVitess && disableCrossShardQueryDetector))
     install(HibernateModule(Movies::class, selectDataSourceConfig(config)))
     install(object : HibernateEntityModule(Movies::class) {
       override fun configureHibernate() {

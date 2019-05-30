@@ -25,30 +25,21 @@ class TruncateTablesService(
   private val qualifier: KClass<out Annotation>,
   private val config: DataSourceConfig,
   private val transacterProvider: Provider<Transacter>,
-  private val checks: VitessScaleSafetyChecks? = null,
+  private val checks: ScaleSafetyChecks,
   private val startUpStatements: List<String> = listOf(),
   private val shutDownStatements: List<String> = listOf()
 ) : AbstractIdleService() {
   private val persistentTables = setOf("schema_version")
 
   override fun startUp() {
-    if (checks == null) {
+    checks.disable {
       truncateUserTables()
       executeStatements(startUpStatements, "startup")
-    } else {
-      checks.disable {
-        truncateUserTables()
-        executeStatements(startUpStatements, "startup")
-      }
     }
   }
 
   override fun shutDown() {
-    if (checks == null) {
-      executeStatements(shutDownStatements, "shutdown")
-    } else {
-      checks.disable { executeStatements(shutDownStatements, "shutdown") }
-    }
+    checks.disable { executeStatements(shutDownStatements, "shutdown") }
   }
 
   private fun truncateUserTables() {

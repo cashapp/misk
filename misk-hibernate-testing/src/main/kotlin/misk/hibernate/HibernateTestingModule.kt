@@ -1,6 +1,5 @@
 package misk.hibernate
 
-import com.google.inject.Inject
 import com.squareup.moshi.Moshi
 import misk.ServiceModule
 import misk.inject.KAbstractModule
@@ -9,6 +8,8 @@ import misk.inject.toKey
 import misk.jdbc.DataSourceConfig
 import misk.jdbc.DataSourceDecorator
 import misk.jdbc.DataSourceType
+import misk.jdbc.NullScaleSafetyChecks
+import misk.jdbc.ScaleSafetyChecks
 import misk.jdbc.TruncateTablesService
 import misk.jdbc.VitessScaleSafetyChecks
 import misk.vitess.StartVitessService
@@ -26,7 +27,7 @@ class HibernateTestingModule(
   private val config: DataSourceConfig? = null,
   private val startUpStatements: List<String> = listOf(),
   private val shutDownStatements: List<String> = listOf(),
-  val disableCrossShardQueryDetector: Boolean = false
+  internal val disableChecks: Boolean = false
 ) : KAbstractModule() {
   override fun configure() {
     val truncateTablesServiceKey = TruncateTablesService::class.toKey(qualifier)
@@ -34,26 +35,29 @@ class HibernateTestingModule(
     val configKey = DataSourceConfig::class.toKey(qualifier)
     val configProvider = getProvider(configKey)
 
+    val checksKey = ScaleSafetyChecks::class.toKey(qualifier)
+    val checksProvider = getProvider(checksKey)
+
     val transacterKey = Transacter::class.toKey(qualifier)
     val transacterProvider = getProvider(transacterKey)
 
-    if ((config == null || config.type == DataSourceType.VITESS)
-      && !disableCrossShardQueryDetector) {
+    if ((config == null || config.type == DataSourceType.VITESS) && !disableChecks) {
       bindVitessChecks()
+    } else {
+      val scaleSafetyChecksKey = ScaleSafetyChecks::class.toKey(qualifier)
+      bind(scaleSafetyChecksKey).to(NullScaleSafetyChecks::class.java)
     }
 
     install(ServiceModule(truncateTablesServiceKey)
         .dependsOn<SchemaMigratorService>(qualifier))
-    bind(truncateTablesServiceKey).toProvider(object : Provider<TruncateTablesService> {
-      @Inject(optional = true) var checks: VitessScaleSafetyChecks? = null
-
-      override fun get(): TruncateTablesService = TruncateTablesService(
-        qualifier = qualifier,
-        config = configProvider.get(),
-        transacterProvider = transacterProvider,
-        checks = checks,
-        startUpStatements = startUpStatements,
-        shutDownStatements = shutDownStatements
+    bind(truncateTablesServiceKey).toProvider(Provider<TruncateTablesService> {
+      TruncateTablesService(
+          qualifier = qualifier,
+          config = configProvider.get(),
+          transacterProvider = transacterProvider,
+          checks = checksProvider.get(),
+          startUpStatements = startUpStatements,
+          shutDownStatements = shutDownStatements
       )
     }).asSingleton()
   }
@@ -65,11 +69,14 @@ class HibernateTestingModule(
     val configKey = DataSourceConfig::class.toKey(qualifier)
     val configProvider = getProvider(configKey)
 
-    val crossShardQueryDetectorKey = VitessScaleSafetyChecks::class.toKey(qualifier)
+    val vitessScaleSafetyChecksKey = VitessScaleSafetyChecks::class.toKey(qualifier)
+
+    val scaleSafetyChecksKey = ScaleSafetyChecks::class.toKey(qualifier)
+    bind(scaleSafetyChecksKey).to(vitessScaleSafetyChecksKey)
 
     val moshiProvider = getProvider(Moshi::class.java)
 
-    bind(crossShardQueryDetectorKey).toProvider(Provider<VitessScaleSafetyChecks> {
+    bind(vitessScaleSafetyChecksKey).toProvider(Provider<VitessScaleSafetyChecks> {
       VitessScaleSafetyChecks(
         config = configProvider.get(),
         moshi = moshiProvider.get(),
@@ -78,6 +85,6 @@ class HibernateTestingModule(
       )
     }).asSingleton()
 
-    multibind<DataSourceDecorator>(qualifier).to(crossShardQueryDetectorKey)
+    multibind<DataSourceDecorator>(qualifier).to(vitessScaleSafetyChecksKey)
   }
 }
