@@ -149,7 +149,6 @@ class MiskCommonServiceModule : KAbstractModule() {
     return serviceManager
   }
 
-  @Suppress("DEPRECATION")
   private class CheckServicesVisitor :
       DefaultBindingTargetVisitor<Set<Service>, List<String>>(),
       MultibindingsTargetVisitor<Set<Service>, List<String>> {
