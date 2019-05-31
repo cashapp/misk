@@ -38,8 +38,9 @@ tasks.register("testShardHibernate") {
 }
 
 subprojects {
-  apply plugin: "java"
+  apply plugin: 'java'
   apply plugin: 'kotlin'
+
   buildscript {
     repositories {
       mavenCentral()
@@ -90,5 +91,9 @@ subprojects {
     rootProject.getTasksByName("testShardHibernate", false).first().dependsOn.add(test)
   } else {
     rootProject.getTasksByName("testShardNonHibernate", false).first().dependsOn.add(test)
+  }
+
+  if (!name.startsWith("samples:")) {
+    apply plugin: 'com.vanniktech.maven.publish'
   }
 }
