@@ -34,7 +34,6 @@ import misk.tokens.TokenGeneratorModule
 import mu.KotlinLogging
 import javax.inject.Provider
 import javax.inject.Singleton
-import kotlin.reflect.KClass
 
 /**
  * Install this module in real environments.
@@ -120,6 +119,14 @@ class MiskCommonServiceModule : KAbstractModule() {
     }
 
     // Support the deprecated DependantService interface.
+    if (services.isNotEmpty()) {
+      log.warn {
+        "There is a better way! " +
+            "Instead of using `multibind<Service>().to(${services.first()::class.simpleName})`, " +
+            "use `install(ServiceModule<${services.first()::class.simpleName}>())`. " +
+            "This will let you express nice service dependency graphs easily!"
+      }
+    }
     for (service in services) {
       var key: Key<*>
       when (service) {
@@ -178,70 +185,4 @@ class MiskCommonServiceModule : KAbstractModule() {
     val serviceSetKey = Key.get(Types.setOf(Service::class.java)) as Key<Set<Service>>
     private val log = KotlinLogging.logger {}
   }
-}
-
-internal data class DependencyEdge(val dependent: Key<*>, val dependsOn: Key<*>)
-internal data class EnhancementEdge(val toBeEnhanced: Key<*>, val enhancement: Key<*>)
-internal data class ServiceEntry(val key: Key<out Service>)
-
-inline fun <reified T : Service> ServiceModule(qualifier: KClass<out Annotation>? = null) =
-    ServiceModule(T::class.toKey(qualifier))
-
-/**
- * This module installs a service and hooks up its dependencies and enhancements.
- *
- * Here's how:
- *
- * ```
- * Guice.createInjector(object : KAbstractModule() {
- *   override fun configure() {
- *     install(ServiceModule<MyService>()
- *         .dependsOn<MyServiceDependency>())
- *     install(ServiceModule<MyServiceDependency>())
- *   }
- * }
- * ```
- *
- * Dependencies and services may be optionally annotated:
- *
- * ```
- * Guice.createInjector(object : KAbstractModule() {
- *   override fun configure() {
- *     install(ServiceModule<MyService>(MyAnnotation::class)
- *         .dependsOn<MyServiceDependency>(AnotherAnnotation::class))
- *     install(ServiceModule<MyServiceDependency>(AnotherAnnotation::class))
- *   }
- * }
- * ```
- */
-class ServiceModule(
-  val key: Key<out Service>,
-  val dependsOn: List<Key<out Service>> = listOf(),
-  val enhancedBy: List<Key<out Service>> = listOf()
-) : KAbstractModule() {
-  override fun configure() {
-    multibind<ServiceEntry>().toInstance(ServiceEntry(key))
-
-    for (dependsOnKey in dependsOn) {
-      multibind<DependencyEdge>().toInstance(
-          DependencyEdge(dependent = key, dependsOn = dependsOnKey)
-      )
-    }
-    for (enhancedByKey in enhancedBy) {
-      multibind<EnhancementEdge>().toInstance(
-          EnhancementEdge(toBeEnhanced = key, enhancement = enhancedByKey)
-      )
-    }
-  }
-
-  fun dependsOn(upstream: Key<out Service>) = ServiceModule(key, dependsOn + upstream, enhancedBy)
-
-  fun enhancedBy(enhancement: Key<out Service>) =
-      ServiceModule(key, dependsOn, enhancedBy + enhancement)
-
-  inline fun <reified T : Service> dependsOn(qualifier: KClass<out Annotation>? = null) =
-      dependsOn(T::class.toKey(qualifier))
-
-  inline fun <reified T : Service> enhancedBy(qualifier: KClass<out Annotation>? = null) =
-      enhancedBy(T::class.toKey(qualifier))
 }
