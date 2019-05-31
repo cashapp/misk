@@ -68,6 +68,8 @@ internal class SchemaMigratorTest {
       install(ServiceModule<PingDatabaseService>(Movies::class)
           .dependsOn<StartVitessService>(Movies::class))
 
+      install(ServiceModule<DropTablesService>())
+
       val dataSourceService =
           DataSourceService(Movies::class, config.data_source, defaultEnv, emptySet())
       bind(keyOf<DataSourceService>(Movies::class)).toInstance(dataSourceService)
@@ -84,11 +86,11 @@ internal class SchemaMigratorTest {
       bind<SessionFactory>().annotatedWith<Movies>().toProvider(sessionFactoryServiceKey)
       val sessionFactoryKey = keyOf<SessionFactory>(Movies::class)
       val sessionFactoryProvider = getProvider(sessionFactoryKey)
-      install(ServiceModule<SessionFactoryService>(Movies::class)
-          .dependsOn<DataSourceService>(Movies::class))
 
-      install(ServiceModule<DropTablesService>()
-          .dependsOn<SessionFactoryService>(Movies::class))
+      bind(keyOf<TransacterService>(Movies::class)).to(keyOf<SessionFactoryService>(Movies::class))
+      install(ServiceModule<TransacterService>(Movies::class)
+          .enhancedBy<DropTablesService>()
+          .dependsOn<DataSourceService>(Movies::class))
 
       val transacterKey = keyOf<Transacter>(Movies::class)
       bind(transacterKey).toProvider(object : Provider<Transacter> {

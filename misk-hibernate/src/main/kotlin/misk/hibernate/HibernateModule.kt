@@ -65,7 +65,7 @@ class HibernateModule(
       }
     }).asSingleton()
 
-    // Bind PingDataBaseService.
+    // Bind PingDatabaseService.
     bind(keyOf<PingDatabaseService>(qualifier)).toProvider(Provider<PingDatabaseService> {
       PingDatabaseService(config, environmentProvider.get())
     }).asSingleton()
@@ -91,24 +91,6 @@ class HibernateModule(
     }).asSingleton()
     install(ServiceModule<DataSourceService>(qualifier)
         .dependsOn<PingDatabaseService>(qualifier))
-
-    // Bind SessionFactoryService.
-    val entitiesProvider = getProvider(setOfType(HibernateEntity::class).toKey(qualifier))
-    val eventListenersProvider =
-        getProvider(setOfType(ListenerRegistration::class).toKey(qualifier))
-    val hibernateInjectorAccessProvider = getProvider(HibernateInjectorAccess::class.java)
-    val dataSourceProvider = getProvider(keyOf<DataSource>(qualifier))
-
-    bind(keyOf<SessionFactory>(qualifier))
-        .toProvider(keyOf<SessionFactoryService>(qualifier))
-        .asSingleton()
-    bind(keyOf<SessionFactoryService>(qualifier)).toProvider(Provider<SessionFactoryService> {
-      SessionFactoryService(qualifier, config, dataSourceProvider,
-          hibernateInjectorAccessProvider.get(),
-          entitiesProvider.get(), eventListenersProvider.get())
-    }).asSingleton()
-    install(ServiceModule<SessionFactoryService>(qualifier)
-        .dependsOn<DataSourceService>(qualifier))
 
     // Bind SchemaMigratorService.
     val transacterKey = Transacter::class.toKey(qualifier)
@@ -142,8 +124,7 @@ class HibernateModule(
           config
       )
     }).asSingleton()
-    install(ServiceModule<SchemaMigratorService>(qualifier)
-        .dependsOn<SessionFactoryService>(qualifier))
+    install(ServiceModule<SchemaMigratorService>(qualifier))
 
     // Bind SchemaValidatorService.
     val sessionFactoryServiceProvider = getProvider(keyOf<SessionFactoryService>(qualifier))
@@ -157,8 +138,28 @@ class HibernateModule(
           )
         }).asSingleton()
     install(ServiceModule<SchemaValidatorService>(qualifier)
-        .dependsOn<SchemaMigratorService>(qualifier)
-        .dependsOn<SessionFactoryService>(qualifier))
+        .dependsOn<SchemaMigratorService>(qualifier))
+
+    // Bind SessionFactoryService as implementation of TransacterService.
+    val entitiesProvider = getProvider(setOfType(HibernateEntity::class).toKey(qualifier))
+    val eventListenersProvider =
+        getProvider(setOfType(ListenerRegistration::class).toKey(qualifier))
+    val hibernateInjectorAccessProvider = getProvider(HibernateInjectorAccess::class.java)
+    val dataSourceProvider = getProvider(keyOf<DataSource>(qualifier))
+
+    bind(keyOf<SessionFactory>(qualifier))
+        .toProvider(keyOf<SessionFactoryService>(qualifier))
+        .asSingleton()
+    bind(keyOf<TransacterService>(qualifier)).to(keyOf<SessionFactoryService>(qualifier))
+    bind(keyOf<SessionFactoryService>(qualifier)).toProvider(Provider<SessionFactoryService> {
+      SessionFactoryService(qualifier, config, dataSourceProvider,
+          hibernateInjectorAccessProvider.get(),
+          entitiesProvider.get(), eventListenersProvider.get())
+    }).asSingleton()
+    install(ServiceModule<TransacterService>(qualifier)
+        .enhancedBy<SchemaMigratorService>(qualifier)
+        .enhancedBy<SchemaValidatorService>(qualifier)
+        .dependsOn<DataSourceService>(qualifier))
 
     // Install other modules.
     install(object : HibernateEntityModule(qualifier) {
