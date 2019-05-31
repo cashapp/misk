@@ -7,13 +7,13 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import kotlin.test.assertFailsWith
 
-class CoordinatedService2Test {
+class CoordinatedServiceTest {
   @Test fun cannotAddRunningServiceAsDependency() {
     val target = StringBuilder()
-    val runningService = CoordinatedService2(Provider<Service> {
+    val runningService = CoordinatedService(Provider<Service> {
       AppendingService(target, "I will be running")
     })
-    val newService = CoordinatedService2(Provider<Service> {
+    val newService = CoordinatedService(Provider<Service> {
       AppendingService(target, "I will not run")
     })
 
@@ -35,7 +35,7 @@ class CoordinatedService2Test {
     service.startAsync()
 
     val failure = assertFailsWith<IllegalStateException> {
-      CoordinatedService2(Provider<Service> { service })
+      CoordinatedService(Provider<Service> { service })
     }
     assertThat(failure).hasMessage("Running Service must be NEW for it to be coordinated")
 
