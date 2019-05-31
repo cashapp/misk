@@ -54,6 +54,9 @@ internal class RealTransacter private constructor(
   override val inTransaction: Boolean
     get() = threadLocalSession.get() != null
 
+  override val currentSession: Session
+    get() = threadLocalSession.get()!!
+
   override fun <T> transaction(lambda: (session: Session) -> T): T {
     return maybeWithTracing(APPLICATION_TRANSACTION_SPAN_NAME) {
       transactionWithRetriesInternal(lambda)
@@ -271,24 +274,30 @@ internal class RealTransacter private constructor(
     override fun <T> target(shard: Shard, function: () -> T): T {
       if (config.type == DataSourceType.VITESS) {
         return useConnection { connection ->
-          // TODO we need to parse out the tablet type (replica or master) from the current target and keep that when we target the new shard
-          // We should only change the shard we're targeting, not the tablet type
-          val previousTarget =
-              connection.createStatement().use { statement ->
-                statement.executeQuery("SHOW VITESS_TARGET").uniqueString()
-              }
-          connection.createStatement().use { statement ->
-            statement.execute("USE `$shard`")
+          val previousTarget = withoutChecks {
+            // TODO we need to parse out the tablet type (replica or master) from the current target and keep that when we target the new shard
+            // We should only change the shard we're targeting, not the tablet type
+            val previousTarget =
+                connection.createStatement().use { statement ->
+                  statement.executeQuery("SHOW VITESS_TARGET").uniqueString()
+                }
+            connection.createStatement().use { statement ->
+              statement.execute("USE `$shard`")
+            }
+
+            previousTarget
           }
           try {
             function()
           } finally {
-            val sql = if (previousTarget.isBlank()) {
-              "USE"
-            } else {
-              "USE `$previousTarget`"
+            withoutChecks {
+              val sql = if (previousTarget.isBlank()) {
+                "USE"
+              } else {
+                "USE `$previousTarget`"
+              }
+              connection.createStatement().use { it.execute(sql) }
             }
-            connection.createStatement().use { it.execute(sql) }
           }
         }
       } else {
@@ -336,8 +345,14 @@ internal class RealTransacter private constructor(
       sessionCloseHooks.add(work)
     }
 
+    override fun <T> withoutChecks(body: () -> T): T = checksEnabled.withValue(false, body)
+
+    override fun areChecksEnabled(): Boolean = checksEnabled.get()
+
     companion object {
       private val log = getLogger<RealSession>()
+
+      private val checksEnabled = ThreadLocal.withInitial { true }
     }
   }
 
@@ -348,5 +363,15 @@ internal class RealTransacter private constructor(
     } else {
       lambda()
     }
+  }
+}
+
+private inline fun <T, R> ThreadLocal<T>.withValue(value: T, body: () -> R): R {
+  val prev = get()
+  set(value)
+  try {
+    return body()
+  } finally {
+    set(prev)
   }
 }

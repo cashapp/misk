@@ -38,6 +38,10 @@ interface Session {
    * A new transaction can be initiated as part of this hook.
    */
   fun onSessionClose(work: () -> Unit)
+
+  fun <T> withoutChecks(body: () -> T): T
+
+  fun areChecksEnabled() : Boolean
 }
 
 inline fun <reified T : DbEntity<T>> Session.load(id: Id<T>): T = load(id, T::class)

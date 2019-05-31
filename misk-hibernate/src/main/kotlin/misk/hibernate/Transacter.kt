@@ -10,6 +10,11 @@ interface Transacter {
   val inTransaction: Boolean
 
   /**
+   * Returns the session of the currently running transaction.
+   */
+  val currentSession: Session
+
+  /**
    * Starts a transaction on the current thread, executes lambda, and commits the transaction.
    * If lambda raises an exception the transaction will be rolled back instead of committed.
    *

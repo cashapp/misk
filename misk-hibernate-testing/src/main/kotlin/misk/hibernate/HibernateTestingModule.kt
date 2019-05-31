@@ -8,8 +8,6 @@ import misk.inject.toKey
 import misk.jdbc.DataSourceConfig
 import misk.jdbc.DataSourceDecorator
 import misk.jdbc.DataSourceType
-import misk.jdbc.NullScaleSafetyChecks
-import misk.jdbc.ScaleSafetyChecks
 import misk.jdbc.TruncateTablesService
 import misk.jdbc.VitessScaleSafetyChecks
 import misk.vitess.StartVitessService
@@ -35,17 +33,11 @@ class HibernateTestingModule(
     val configKey = DataSourceConfig::class.toKey(qualifier)
     val configProvider = getProvider(configKey)
 
-    val checksKey = ScaleSafetyChecks::class.toKey(qualifier)
-    val checksProvider = getProvider(checksKey)
-
     val transacterKey = Transacter::class.toKey(qualifier)
     val transacterProvider = getProvider(transacterKey)
 
     if ((config == null || config.type == DataSourceType.VITESS) && !disableChecks) {
-      bindVitessChecks()
-    } else {
-      val scaleSafetyChecksKey = ScaleSafetyChecks::class.toKey(qualifier)
-      bind(scaleSafetyChecksKey).to(NullScaleSafetyChecks::class.java)
+      bindVitessChecks(transacterProvider)
     }
 
     install(ServiceModule(truncateTablesServiceKey)
@@ -55,14 +47,13 @@ class HibernateTestingModule(
           qualifier = qualifier,
           config = configProvider.get(),
           transacterProvider = transacterProvider,
-          checks = checksProvider.get(),
           startUpStatements = startUpStatements,
           shutDownStatements = shutDownStatements
       )
     }).asSingleton()
   }
 
-  private fun bindVitessChecks() {
+  private fun bindVitessChecks(transacterProvider: com.google.inject.Provider<Transacter>) {
     val startVitessServiceKey = StartVitessService::class.toKey(qualifier)
     val startVitessServiceProvider = getProvider(startVitessServiceKey)
 
@@ -71,9 +62,6 @@ class HibernateTestingModule(
 
     val vitessScaleSafetyChecksKey = VitessScaleSafetyChecks::class.toKey(qualifier)
 
-    val scaleSafetyChecksKey = ScaleSafetyChecks::class.toKey(qualifier)
-    bind(scaleSafetyChecksKey).to(vitessScaleSafetyChecksKey)
-
     val moshiProvider = getProvider(Moshi::class.java)
 
     bind(vitessScaleSafetyChecksKey).toProvider(Provider<VitessScaleSafetyChecks> {
@@ -81,7 +69,8 @@ class HibernateTestingModule(
         config = configProvider.get(),
         moshi = moshiProvider.get(),
         okHttpClient = OkHttpClient(),
-        startVitessService = startVitessServiceProvider.get()
+        startVitessService = startVitessServiceProvider.get(),
+        transacter = transacterProvider.get()
       )
     }).asSingleton()
 

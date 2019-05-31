@@ -2,6 +2,7 @@ package misk.jdbc
 
 import com.google.common.collect.ImmutableSet
 import com.squareup.moshi.Moshi
+import misk.hibernate.Transacter
 import misk.moshi.adapter
 import misk.okio.split
 import misk.vitess.StartVitessService
@@ -54,8 +55,7 @@ internal data class Variables(
 )
 
 /**
- * A MySQL query explanation. Ported from com.squareup.franklin.sqlcheck.MySqlQueryChecker in the
- * Java monorepo.
+ * A MySQL query explanation.
  */
 internal class Explanation {
 
@@ -185,17 +185,16 @@ internal class Explanation {
     return "PRIMARY" == key && query.contains(" limit ")
   }
 
-  override fun toString(): String {
-    val builder = StringBuilder()
+  override fun toString(): String = buildString {
     for (field in fields) {
       val value = field.get(this) ?: continue
-      builder
-          .append(", ")
-          .append(field.getName())
-          .append("=")
-          .append(value)
+      append(", ")
+      append(field.name)
+      append("=")
+      append(value)
     }
-    return builder.replace(0, 2, "Explanation{").append('}').toString()
+    replace(0, 2, "Explanation{")
+    append('}')
   }
 
   companion object {
@@ -353,13 +352,13 @@ class VitessScaleSafetyChecks(
   val okHttpClient: OkHttpClient,
   val moshi: Moshi,
   val config: DataSourceConfig,
-  val startVitessService: StartVitessService
-) : DataSourceDecorator, ScaleSafetyChecks {
+  val startVitessService: StartVitessService,
+  val transacter: Transacter
+) : DataSourceDecorator {
 
   private val fullScatterDetector = FullScatterDetector()
   private val crossEntityGroupTransactionDetector = CowriteDetector()
   private val fullTableScanDetector = FullTableScanDetector()
-  val enabled = ThreadLocal.withInitial { true }
 
   private var connection: Connection? = null
   private var vtgate: Connection? = null
@@ -383,13 +382,13 @@ class VitessScaleSafetyChecks(
     val count = ThreadLocal.withInitial { 0 }
 
     override fun beforeQuery(query: String) {
-      if (!enabled.get()) return
+      if (!isEnabled()) return
 
       count.set(extractScatterQueryCount())
     }
 
     override fun afterQuery(query: String) {
-      if (!enabled.get()) return
+      if (!isEnabled()) return
 
       val newScatterQueryCount = extractScatterQueryCount()
       if (newScatterQueryCount > count.get()) {
@@ -401,12 +400,14 @@ class VitessScaleSafetyChecks(
     }
   }
 
+  private fun isEnabled(): Boolean = transacter.currentSession.areChecksEnabled()
+
   inner class FullTableScanDetector : ExtendedQueryExectionListener() {
     private val mysqlTimeBeforeQuery: ThreadLocal<Timestamp?> =
         ThreadLocal.withInitial { null }
 
     override fun beforeQuery(query: String) {
-      if (!enabled.get()) return
+      if (!isEnabled()) return
 
       connect()?.let { c ->
         mysqlTimeBeforeQuery.set(c.createStatement().use { s ->
@@ -418,7 +419,7 @@ class VitessScaleSafetyChecks(
     }
 
     override fun afterQuery(query: String) {
-      if (!enabled.get()) return
+      if (!isEnabled()) return
 
       val mysqlTime = mysqlTimeBeforeQuery.get() ?: return
 
@@ -445,7 +446,6 @@ class VitessScaleSafetyChecks(
               }
               s.execute("USE `$database`")
               return try {
-                println(rawQuery)
                 s.executeQuery("EXPLAIN $rawQuery")
                     .map { Explanation.fromResultSet(it) }
               } catch (e: SQLException) {
@@ -484,7 +484,7 @@ class VitessScaleSafetyChecks(
     }
 
     override fun afterQuery(query: String) {
-      if (!enabled.get() || !isDml(query)) return
+      if (!isEnabled() || !isDml(query)) return
 
       val queryInDatabase = extractLastDmlQuery() ?: return
 
@@ -662,22 +662,10 @@ class VitessScaleSafetyChecks(
     }.filterNotNull()
   }
 
-  override fun <T> disable(body: () -> T): T = enabled.withValue(false, body)
-
   companion object {
     private val logger = KotlinLogging.logger {}
 
     private val wrongDatabaseError = Regex("Table '.*' doesn't exist")
-  }
-}
-
-private inline fun <T, R> ThreadLocal<T>.withValue(value: T, body: () -> R): R {
-  val prev = get()
-  set(value)
-  try {
-    return body()
-  } finally {
-    set(prev)
   }
 }
 
