@@ -127,6 +127,7 @@ class MiskCommonServiceModule : KAbstractModule() {
             "This will let you express nice service dependency graphs easily!"
       }
     }
+    @Suppress("DEPRECATION")
     for (service in services) {
       var key: Key<*>
       when (service) {
