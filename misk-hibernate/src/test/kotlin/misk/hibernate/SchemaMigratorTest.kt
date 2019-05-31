@@ -86,7 +86,9 @@ internal class SchemaMigratorTest {
       bind<SessionFactory>().annotatedWith<Movies>().toProvider(sessionFactoryServiceKey)
       val sessionFactoryKey = keyOf<SessionFactory>(Movies::class)
       val sessionFactoryProvider = getProvider(sessionFactoryKey)
-      install(ServiceModule<SessionFactoryService>(Movies::class)
+
+      bind(keyOf<TransacterService>(Movies::class)).to(keyOf<SessionFactoryService>(Movies::class))
+      install(ServiceModule<TransacterService>(Movies::class)
           .enhancedBy<DropTablesService>()
           .dependsOn<DataSourceService>(Movies::class))
 

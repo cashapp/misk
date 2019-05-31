@@ -40,7 +40,7 @@ internal class SessionFactoryService(
   private val hibernateInjectorAccess: HibernateInjectorAccess,
   private val entityClasses: Set<HibernateEntity> = setOf(),
   private val listenerRegistrations: Set<ListenerRegistration> = setOf()
-) : AbstractIdleService(), Provider<SessionFactory> {
+) : AbstractIdleService(), Provider<SessionFactory>, TransacterService {
   private var sessionFactory: SessionFactory? = null
 
   lateinit var hibernateMetadata: Metadata

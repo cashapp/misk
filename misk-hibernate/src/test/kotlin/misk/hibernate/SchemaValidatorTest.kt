@@ -46,31 +46,25 @@ class SchemaValidatorTest {
   inner class TestModule : KAbstractModule() {
     override fun configure() {
       install(MiskTestingServiceModule())
+
       val qualifier = ValidationDb::class
 
       val dataSourceService =
           DataSourceService(qualifier, config.data_source, Environment.TESTING, emptySet())
 
       val injectorServiceProvider = getProvider(HibernateInjectorAccess::class.java)
-      val sessionFactoryServiceKey = SessionFactoryService::class.toKey(qualifier)
 
-      sessionFactoryService = getProvider(sessionFactoryServiceKey)
+      sessionFactoryService = getProvider(keyOf<SessionFactoryService>(qualifier))
 
-      val entitiesKey = setOfType(HibernateEntity::class).toKey(qualifier)
-      val entitiesProvider = getProvider(entitiesKey)
+      val entitiesProvider = getProvider(setOfType(HibernateEntity::class).toKey(qualifier))
 
-      val sessionFactoryKey = SessionFactory::class.toKey(qualifier)
-      val sessionFactoryProvider = getProvider(sessionFactoryKey)
+      val sessionFactoryProvider = getProvider(keyOf<SessionFactory>(qualifier))
+      bind<SessionFactory>()
+          .annotatedWith<ValidationDb>()
+          .toProvider(keyOf<SessionFactoryService>(qualifier))
 
-      val transacterKey = Transacter::class.toKey(qualifier)
-      val transacterProvider = getProvider(transacterKey)
-
-      val schemaMigratorKey = SchemaMigrator::class.toKey(qualifier)
-      val schemaMigratorProvider = getProvider(schemaMigratorKey)
-
-      bind<SessionFactory>().annotatedWith<ValidationDb>().toProvider(sessionFactoryServiceKey)
-
-      bind(transacterKey).toProvider(object : Provider<Transacter> {
+      val transacterProvider = getProvider(keyOf<Transacter>(qualifier))
+      bind(keyOf<Transacter>(qualifier)).toProvider(object : Provider<Transacter> {
         @Inject lateinit var queryTracingListener: QueryTracingListener
         @com.google.inject.Inject(optional = true) val tracer: Tracer? = null
         override fun get(): RealTransacter = RealTransacter(
@@ -82,7 +76,8 @@ class SchemaValidatorTest {
         )
       }).asSingleton()
 
-      bind(schemaMigratorKey).toProvider(object : Provider<SchemaMigrator> {
+      val schemaMigratorProvider = getProvider(keyOf<SchemaMigrator>(qualifier))
+      bind(keyOf<SchemaMigrator>(qualifier)).toProvider(object : Provider<SchemaMigrator> {
         @Inject lateinit var resourceLoader: ResourceLoader
         override fun get(): SchemaMigrator = SchemaMigrator(
             qualifier,
@@ -121,7 +116,8 @@ class SchemaValidatorTest {
         SchemaMigratorService(Environment.TESTING, schemaMigratorProvider, config.data_source)
       }).asSingleton()
 
-      bind(sessionFactoryServiceKey).toProvider(Provider<SessionFactoryService> {
+      bind(keyOf<TransacterService>(qualifier)).to(keyOf<SessionFactoryService>(qualifier))
+      bind(keyOf<SessionFactoryService>(qualifier)).toProvider(Provider<SessionFactoryService> {
         SessionFactoryService(
             qualifier,
             config.data_source,
@@ -129,7 +125,7 @@ class SchemaValidatorTest {
             injectorServiceProvider.get(),
             entitiesProvider.get())
       }).asSingleton()
-      install(ServiceModule<SessionFactoryService>(qualifier)
+      install(ServiceModule<TransacterService>(qualifier)
           .enhancedBy<SchemaMigratorService>(qualifier)
           .dependsOn<DataSourceService>(qualifier))
     }
