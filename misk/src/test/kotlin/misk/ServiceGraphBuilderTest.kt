@@ -282,10 +282,10 @@ class ServiceGraphBuilderTest {
     val builder = newBuilderWithServices(target, listOf(keyA))
     val serviceManager = builder.build()
     serviceManager.startAsync()
-    val badEnhancer = CoordinatedService2(Provider<Service> {
+    val badEnhancer = CoordinatedService(Provider<Service> {
       AppendingService(target, "bad enhancement")
     })
-    val badDependency = CoordinatedService2(Provider<Service> {
+    val badDependency = CoordinatedService(Provider<Service> {
       AppendingService(target, "bad dependency")
     })
 
@@ -294,10 +294,10 @@ class ServiceGraphBuilderTest {
     // This loop is probably the only sane way to obtain services from a ServiceManager?
     for (service in serviceManager.servicesByState().values()) {
       assertFailsWith<IllegalStateException> {
-        (service as CoordinatedService2).addEnhancements(badEnhancer)
+        (service as CoordinatedService).addEnhancements(badEnhancer)
       }
       assertFailsWith<IllegalStateException> {
-        (service as CoordinatedService2).addDependentServices(badDependency)
+        (service as CoordinatedService).addDependentServices(badDependency)
       }
     }
 
