@@ -63,6 +63,10 @@ class SecretConfigTest {
         "42")
     assertThat(
         secretConfig.nested_secret.value.nested_nested.secret_information.value.limit).isEqualTo(5)
+
+    // A non-supported extension should work if the secret is a String
+    assertThat(secretConfig.secret_string.value).contains("\"answer_to_universe\"")
+    assertThat(secretConfig.secret_bytearray.value).containsSubsequence(*"\"answer_to_universe\"".toByteArray())
   }
 
   @Test

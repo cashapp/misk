@@ -214,6 +214,13 @@ object MiskConfig {
           source
         }
         else -> {
+          // Ignore extension if we're requesting a string or a bytearray
+          if (type.rawClass == String::class.java) {
+            return source
+          } else if (type.isArrayType && type.contentType.rawClass == Byte::class.java) {
+            return source.toByteArray()
+          }
+
           check(referenceFileExtension.isNotBlank()) {
             "Secret [$reference] needs a file extension for parsing."
           }
