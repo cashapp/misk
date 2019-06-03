@@ -7,6 +7,8 @@ interface Query<T> {
   /** How many rows to return. Must be -1 or in range 1..10_000. */
   var maxRows: Int
 
+  fun allowTableScan(): Query<T>
+
   fun uniqueResult(session: Session): T?
 
   fun list(session: Session): List<T>
