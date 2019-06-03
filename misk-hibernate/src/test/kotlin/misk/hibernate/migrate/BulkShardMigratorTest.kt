@@ -291,6 +291,7 @@ class BulkShardMigratorTest {
     return transacter.transaction(shard) { session ->
       ListAssert(
           queryFactory.newQuery(CharacterQuery::class)
+              .allowTableScan()
               .list(session)
               .map { it.name }
               .toList()
