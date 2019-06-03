@@ -1,10 +1,11 @@
 package misk.hibernate
 
 import com.google.crypto.tink.Aead
+import misk.crypto.AadProvider
 import misk.crypto.AeadKeyManager
 import org.hibernate.HibernateException
 import org.hibernate.engine.spi.SharedSessionContractImplementor
-import org.hibernate.id.UUIDGenerator
+//import org.hibernate.id.UUIDGenerator
 import org.hibernate.usertype.ParameterizedType
 import org.hibernate.usertype.UserType
 import java.io.Serializable
@@ -24,8 +25,9 @@ internal class SecretColumnType : UserType, ParameterizedType, TypeConfiguration
   private lateinit var keyName: String
   private lateinit var aead: Aead
   private lateinit var _typeConfiguration: TypeConfiguration
-  private val aadGenerator: UUIDGenerator =
-      UUIDGenerator.buildSessionFactoryUniqueIdentifierGenerator()
+//  private val aadGenerator: UUIDGenerator =
+//      UUIDGenerator.buildSessionFactoryUniqueIdentifierGenerator()
+  private lateinit var aadProvider: AadProvider
 
   override fun setTypeConfiguration(typeConfiguration: TypeConfiguration) {
     _typeConfiguration = typeConfiguration
@@ -35,8 +37,10 @@ internal class SecretColumnType : UserType, ParameterizedType, TypeConfiguration
 
   override fun setParameterValues(parameters: Properties) {
     keyName = parameters.getProperty(FIELD_ENCRYPTION_KEY_NAME)
-    val keyManager = _typeConfiguration.metadataBuildingContext.bootstrapContext.
-        serviceRegistry.injector.getInstance(AeadKeyManager::class.java)
+    val keyManager = _typeConfiguration.metadataBuildingContext.bootstrapContext
+        .serviceRegistry.injector.getInstance(AeadKeyManager::class.java)
+    aadProvider = _typeConfiguration.metadataBuildingContext.bootstrapContext
+        .serviceRegistry.injector.getInstance(AadProvider::class.java)
     aead = keyManager[keyName]
   }
 
@@ -73,8 +77,8 @@ internal class SecretColumnType : UserType, ParameterizedType, TypeConfiguration
       st.setNull(index + 1, Types.VARBINARY)
     } else {
       value as ByteArray
-
-      val aad = aadGenerator.generate(session, value).toString().toByteArray()
+//      val aad = aadGenerator.generate(session, value).toString().toByteArray()
+      val aad = aadProvider.getAad()
       val encrypted = aead.encrypt(value, aad)
       st.setBytes(index, encrypted)
       st.setBytes(index + 1, aad)
@@ -88,7 +92,8 @@ internal class SecretColumnType : UserType, ParameterizedType, TypeConfiguration
     owner: Any?
   ): Any? {
     val result = rs?.getBytes(names[0])
-    val aad = rs?.getBytes(names[1])
+    val aad = aadProvider.getAad()
+//    val aad = rs?.getBytes(names[1])
     return result?.let { try {
       aead.decrypt(it, aad)
       } catch (e: GeneralSecurityException) {
