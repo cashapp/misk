@@ -103,7 +103,11 @@ internal class ReflectionQuery<T : DbEntity<T>>(
     typedQuery.maxResults = effectiveMaxRows(returnList)
     val rows = traceSelect {
       // TODO(jontirsen): We should only disable the table scan check here
-      session.withoutChecks {
+      if (allowTableScan) {
+        session.withoutChecks {
+          typedQuery.list()
+        }
+      } else {
         typedQuery.list()
       }
     }
