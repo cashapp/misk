@@ -576,9 +576,10 @@ class VitessScaleSafetyChecks(
                   AND NOT argument LIKE '%general_log%'
                   AND NOT argument = 'begin'
                   AND NOT argument LIKE '%1 != 1%'
-                  AND NOT argument LIKE '%information_schema%'
-                  AND NOT argument LIKE 'use %'
-                  AND NOT argument LIKE 'show %'
+                  AND NOT lower(argument) LIKE '%information_schema%'
+                  AND NOT lower(argument) LIKE 'use %'
+                  AND NOT lower(argument) LIKE 'show %'
+                  AND NOT lower(argument) LIKE 'describe %'
                   AND event_time > ?
                   ORDER BY event_time DESC
                 """.trimIndent()).use { s ->
