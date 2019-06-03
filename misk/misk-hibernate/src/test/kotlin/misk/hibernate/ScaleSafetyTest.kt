@@ -5,7 +5,9 @@ import misk.backoff.retry
 import misk.hibernate.annotation.keyspace
 import misk.jdbc.CowriteException
 import misk.jdbc.FullScatterException
+import misk.jdbc.TableScanException
 import misk.jdbc.VitessScaleSafetyChecks
+import misk.jdbc.uniqueLong
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.junit.jupiter.api.Test
@@ -99,9 +101,31 @@ class ScaleSafetyTest {
   }
 
   @Test
+  fun tableScansDetected() {
+    val cf = transacter.save(
+        DbActor("Carrie Fisher", null))
+
+    transacter.transaction { session ->
+      val sw = session.save(
+          DbMovie("Star Wars", LocalDate.of(1977, 5, 25)))
+      session.save(DbCharacter("Leia Organa", session.load(sw), session.load(cf)))
+
+      assertThrows<TableScanException> {
+        session.useConnection { c ->
+          // name has a cross shard index on it but it doesn't have a shard local index
+          c.prepareStatement("SELECT COUNT(*) FROM characters WHERE name = ?").use { s ->
+            s.setString(1, "Leia Organa")
+            s.executeQuery().uniqueLong()
+          }
+        }
+      }
+    }
+  }
+
+  @Test
   fun crossShardQueriesDetectorCanBeDisabled() {
     transacter.transaction { session ->
-      checks.disable {
+      session.withoutChecks {
         queryFactory.newQuery<MovieQuery>()
             .releaseDateBefore(LocalDate.of(1977, 6, 15))
             .list(session)

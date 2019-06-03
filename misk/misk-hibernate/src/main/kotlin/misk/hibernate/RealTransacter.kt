@@ -16,6 +16,7 @@ import org.hibernate.StaleObjectStateException
 import org.hibernate.exception.LockAcquisitionException
 import java.sql.Connection
 import java.time.Duration
+import java.util.EnumSet
 import javax.inject.Provider
 import javax.persistence.OptimisticLockException
 import kotlin.reflect.KClass
@@ -39,20 +40,27 @@ internal class RealTransacter private constructor(
     queryTracingListener: QueryTracingListener,
     tracer: Tracer?
   ) : this(
-        qualifier,
-        sessionFactoryProvider,
-        config,
-        ThreadLocal(),
-        TransacterOptions(),
-        queryTracingListener,
-        tracer
-      )
+      qualifier,
+      sessionFactoryProvider,
+      config,
+      ThreadLocal(),
+      TransacterOptions(),
+      queryTracingListener,
+      tracer
+  )
+
+  private val threadLocalDisabledChecks =
+      ThreadLocal.withInitial { EnumSet.noneOf(Check::class.java) }
 
   private val sessionFactory
     get() = sessionFactoryProvider.get()
 
   override val inTransaction: Boolean
     get() = threadLocalSession.get() != null
+
+  override fun isCheckEnabled(check : Check): Boolean {
+    return !threadLocalDisabledChecks.get().contains(check)
+  }
 
   override fun <T> transaction(lambda: (session: Session) -> T): T {
     return maybeWithTracing(APPLICATION_TRANSACTION_SPAN_NAME) {
@@ -135,7 +143,8 @@ internal class RealTransacter private constructor(
     }
   }
 
-  override fun retries(maxAttempts: Int): Transacter = withOptions(options.copy(maxAttempts = maxAttempts))
+  override fun retries(maxAttempts: Int): Transacter = withOptions(
+      options.copy(maxAttempts = maxAttempts))
 
   override fun noRetries(): Transacter = withOptions(options.copy(maxAttempts = 1))
 
@@ -155,7 +164,8 @@ internal class RealTransacter private constructor(
   private fun <T> withSession(lambda: (session: RealSession) -> T): T {
     check(threadLocalSession.get() == null) { "Attempted to start a nested session" }
 
-    val realSession = RealSession(sessionFactory.openSession(), config, options.readOnly)
+    val realSession = RealSession(sessionFactory.openSession(), config, options.readOnly,
+        threadLocalDisabledChecks)
     threadLocalSession.set(realSession)
 
     try {
@@ -208,7 +218,8 @@ internal class RealTransacter private constructor(
   internal class RealSession(
     val session: org.hibernate.Session,
     val config: DataSourceConfig,
-    val readOnly: Boolean
+    val readOnly: Boolean,
+    val threadLocalAreChecksEnabled: ThreadLocal<EnumSet<Check>>
   ) : Session {
     override val hibernateSession = session
     private val preCommitHooks = mutableListOf<() -> Unit>()
@@ -271,24 +282,30 @@ internal class RealTransacter private constructor(
     override fun <T> target(shard: Shard, function: () -> T): T {
       if (config.type == DataSourceType.VITESS) {
         return useConnection { connection ->
-          // TODO we need to parse out the tablet type (replica or master) from the current target and keep that when we target the new shard
-          // We should only change the shard we're targeting, not the tablet type
-          val previousTarget =
-              connection.createStatement().use { statement ->
-                statement.executeQuery("SHOW VITESS_TARGET").uniqueString()
-              }
-          connection.createStatement().use { statement ->
-            statement.execute("USE `$shard`")
+          val previousTarget = withoutChecks {
+            // TODO we need to parse out the tablet type (replica or master) from the current target and keep that when we target the new shard
+            // We should only change the shard we're targeting, not the tablet type
+            val previousTarget =
+                connection.createStatement().use { statement ->
+                  statement.executeQuery("SHOW VITESS_TARGET").uniqueString()
+                }
+            connection.createStatement().use { statement ->
+              statement.execute("USE `$shard`")
+            }
+
+            previousTarget
           }
           try {
             function()
           } finally {
-            val sql = if (previousTarget.isBlank()) {
-              "USE"
-            } else {
-              "USE `$previousTarget`"
+            withoutChecks {
+              val sql = if (previousTarget.isBlank()) {
+                "USE"
+              } else {
+                "USE `$previousTarget`"
+              }
+              connection.createStatement().use { it.execute(sql) }
             }
-            connection.createStatement().use { it.execute(sql) }
           }
         }
       } else {
@@ -336,6 +353,14 @@ internal class RealTransacter private constructor(
       sessionCloseHooks.add(work)
     }
 
+    override fun <T> withoutChecks(vararg checks: Check, body: () -> T): T {
+      return threadLocalAreChecksEnabled.withValue(if (checks.isEmpty()) {
+        EnumSet.allOf(Check::class.java)
+      } else {
+        EnumSet.of(checks[0], *checks)
+      }, body)
+    }
+
     companion object {
       private val log = getLogger<RealSession>()
     }
@@ -348,5 +373,15 @@ internal class RealTransacter private constructor(
     } else {
       lambda()
     }
+  }
+}
+
+private inline fun <T, R> ThreadLocal<T>.withValue(value: T, body: () -> R): R {
+  val prev = get()
+  set(value)
+  try {
+    return body()
+  } finally {
+    set(prev)
   }
 }
