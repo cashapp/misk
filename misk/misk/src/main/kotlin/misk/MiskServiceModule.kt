@@ -127,6 +127,7 @@ class MiskCommonServiceModule : KAbstractModule() {
             "This will let you express nice service dependency graphs easily!"
       }
     }
+    @Suppress("DEPRECATION")
     for (service in services) {
       var key: Key<*>
       when (service) {
@@ -148,7 +149,6 @@ class MiskCommonServiceModule : KAbstractModule() {
     return serviceManager
   }
 
-  @Suppress("DEPRECATION")
   private class CheckServicesVisitor :
       DefaultBindingTargetVisitor<Set<Service>, List<String>>(),
       MultibindingsTargetVisitor<Set<Service>, List<String>> {
