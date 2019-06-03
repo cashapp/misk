@@ -16,6 +16,7 @@ import org.hibernate.StaleObjectStateException
 import org.hibernate.exception.LockAcquisitionException
 import java.sql.Connection
 import java.time.Duration
+import java.util.EnumSet
 import javax.inject.Provider
 import javax.persistence.OptimisticLockException
 import kotlin.reflect.KClass
@@ -39,16 +40,17 @@ internal class RealTransacter private constructor(
     queryTracingListener: QueryTracingListener,
     tracer: Tracer?
   ) : this(
-        qualifier,
-        sessionFactoryProvider,
-        config,
-        ThreadLocal(),
-        TransacterOptions(),
-        queryTracingListener,
-        tracer
-      )
+      qualifier,
+      sessionFactoryProvider,
+      config,
+      ThreadLocal(),
+      TransacterOptions(),
+      queryTracingListener,
+      tracer
+  )
 
-  private val threadLocalAreChecksEnabled = ThreadLocal.withInitial { true }
+  private val threadLocalDisabledChecks =
+      ThreadLocal.withInitial { EnumSet.noneOf(Check::class.java) }
 
   private val sessionFactory
     get() = sessionFactoryProvider.get()
@@ -56,10 +58,9 @@ internal class RealTransacter private constructor(
   override val inTransaction: Boolean
     get() = threadLocalSession.get() != null
 
-  override val areChecksEnabled: Boolean
-    get() {
-      return threadLocalAreChecksEnabled.get()
-    }
+  override fun isCheckEnabled(check : Check): Boolean {
+    return !threadLocalDisabledChecks.get().contains(check)
+  }
 
   override fun <T> transaction(lambda: (session: Session) -> T): T {
     return maybeWithTracing(APPLICATION_TRANSACTION_SPAN_NAME) {
@@ -142,7 +143,8 @@ internal class RealTransacter private constructor(
     }
   }
 
-  override fun retries(maxAttempts: Int): Transacter = withOptions(options.copy(maxAttempts = maxAttempts))
+  override fun retries(maxAttempts: Int): Transacter = withOptions(
+      options.copy(maxAttempts = maxAttempts))
 
   override fun noRetries(): Transacter = withOptions(options.copy(maxAttempts = 1))
 
@@ -163,7 +165,7 @@ internal class RealTransacter private constructor(
     check(threadLocalSession.get() == null) { "Attempted to start a nested session" }
 
     val realSession = RealSession(sessionFactory.openSession(), config, options.readOnly,
-        threadLocalAreChecksEnabled)
+        threadLocalDisabledChecks)
     threadLocalSession.set(realSession)
 
     try {
@@ -217,7 +219,7 @@ internal class RealTransacter private constructor(
     val session: org.hibernate.Session,
     val config: DataSourceConfig,
     val readOnly: Boolean,
-    val threadLocalAreChecksEnabled: ThreadLocal<Boolean>
+    val threadLocalAreChecksEnabled: ThreadLocal<EnumSet<Check>>
   ) : Session {
     override val hibernateSession = session
     private val preCommitHooks = mutableListOf<() -> Unit>()
@@ -351,8 +353,13 @@ internal class RealTransacter private constructor(
       sessionCloseHooks.add(work)
     }
 
-    override fun <T> withoutChecks(body: () -> T): T
-        = threadLocalAreChecksEnabled.withValue(false, body)
+    override fun <T> withoutChecks(vararg checks: Check, body: () -> T): T {
+      return threadLocalAreChecksEnabled.withValue(if (checks.isEmpty()) {
+        EnumSet.allOf(Check::class.java)
+      } else {
+        EnumSet.of(checks[0], *checks)
+      }, body)
+    }
 
     companion object {
       private val log = getLogger<RealSession>()

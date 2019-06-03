@@ -10,9 +10,9 @@ interface Transacter {
   val inTransaction: Boolean
 
   /**
-   * Are scalability checks currently enabled.
+   * Is the scalability check currently enabled. Use [Session.withoutChecks] to disable checks.
    */
-  val areChecksEnabled: Boolean
+  fun isCheckEnabled(check: Check): Boolean
 
   /**
    * Starts a transaction on the current thread, executes lambda, and commits the transaction.

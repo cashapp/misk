@@ -2,6 +2,7 @@ package misk.hibernate.migrate
 
 import com.google.common.collect.ImmutableList
 import com.google.common.collect.ImmutableSet
+import misk.hibernate.Check
 import misk.hibernate.DbChild
 import misk.hibernate.DbRoot
 import misk.hibernate.DbTimestampedEntity
@@ -176,7 +177,7 @@ class BulkShardMigrator<R : DbRoot<R>, C : DbChild<R, C>> private constructor(
       // If the transaction fails due to a shard split,
       // this transaction will retry and we will recompute isShardLocal.
       return transacter.transaction { session ->
-        session.withoutChecks {
+        session.withoutChecks(Check.COWRITE) {
           val sourceRecords = loadSourceRecords(session)
           if (sourceRecords.isEmpty()) {
             0

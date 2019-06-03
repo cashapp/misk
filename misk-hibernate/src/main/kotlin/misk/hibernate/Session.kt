@@ -39,7 +39,18 @@ interface Session {
    */
   fun onSessionClose(work: () -> Unit)
 
-  fun <T> withoutChecks(body: () -> T): T
+  /**
+   * Disable one or more checks for the duration of the execution of [body]. The passed in checks
+   * will entirely replace the other ignored checks at this point, they will not be merged with
+   * whatever is there currently.
+   */
+  fun <T> withoutChecks(vararg checks: Check, body: () -> T): T
+}
+
+enum class Check {
+  FULL_SCATTER,
+  TABLE_SCAN,
+  COWRITE
 }
 
 inline fun <reified T : DbEntity<T>> Session.load(id: Id<T>): T = load(id, T::class)

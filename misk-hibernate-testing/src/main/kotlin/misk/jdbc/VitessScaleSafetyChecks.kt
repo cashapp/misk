@@ -2,6 +2,7 @@ package misk.jdbc
 
 import com.google.common.collect.ImmutableSet
 import com.squareup.moshi.Moshi
+import misk.hibernate.Check
 import misk.hibernate.Transacter
 import misk.moshi.adapter
 import misk.okio.split
@@ -358,7 +359,7 @@ class VitessScaleSafetyChecks(
 
   private val fullScatterDetector = FullScatterDetector()
   private val crossEntityGroupTransactionDetector = CowriteDetector()
-  private val fullTableScanDetector = FullTableScanDetector()
+  private val fullTableScanDetector = TableScanDetector()
 
   private var connection: Connection? = null
   private var vtgate: Connection? = null
@@ -382,13 +383,13 @@ class VitessScaleSafetyChecks(
     val count = ThreadLocal.withInitial { 0 }
 
     override fun beforeQuery(query: String) {
-      if (!isEnabled()) return
+      if (!transacter.isCheckEnabled(Check.FULL_SCATTER)) return
 
       count.set(extractScatterQueryCount())
     }
 
     override fun afterQuery(query: String) {
-      if (!isEnabled()) return
+      if (!transacter.isCheckEnabled(Check.FULL_SCATTER)) return
 
       val newScatterQueryCount = extractScatterQueryCount()
       if (newScatterQueryCount > count.get()) {
@@ -400,14 +401,12 @@ class VitessScaleSafetyChecks(
     }
   }
 
-  private fun isEnabled(): Boolean = transacter.areChecksEnabled
-
-  inner class FullTableScanDetector : ExtendedQueryExectionListener() {
+  inner class TableScanDetector : ExtendedQueryExectionListener() {
     private val mysqlTimeBeforeQuery: ThreadLocal<Timestamp?> =
         ThreadLocal.withInitial { null }
 
     override fun beforeQuery(query: String) {
-      if (!isEnabled()) return
+      if (!transacter.isCheckEnabled(Check.TABLE_SCAN)) return
 
       connect()?.let { c ->
         mysqlTimeBeforeQuery.set(c.createStatement().use { s ->
@@ -419,7 +418,7 @@ class VitessScaleSafetyChecks(
     }
 
     override fun afterQuery(query: String) {
-      if (!isEnabled()) return
+      if (!transacter.isCheckEnabled(Check.TABLE_SCAN)) return
 
       val mysqlTime = mysqlTimeBeforeQuery.get() ?: return
 
@@ -484,7 +483,8 @@ class VitessScaleSafetyChecks(
     }
 
     override fun afterQuery(query: String) {
-      if (!isEnabled() || !isDml(query)) return
+      if (!transacter.isCheckEnabled(Check.COWRITE)) return
+      if (!isDml(query)) return
 
       val queryInDatabase = extractLastDmlQuery() ?: return
 

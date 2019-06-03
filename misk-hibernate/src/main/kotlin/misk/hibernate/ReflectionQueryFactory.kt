@@ -102,9 +102,8 @@ internal class ReflectionQuery<T : DbEntity<T>>(
     val typedQuery = session.hibernateSession.createQuery(query)
     typedQuery.maxResults = effectiveMaxRows(returnList)
     val rows = traceSelect {
-      // TODO(jontirsen): We should only disable the table scan check here
       if (allowTableScan) {
-        session.withoutChecks {
+        session.withoutChecks(Check.TABLE_SCAN) {
           typedQuery.list()
         }
       } else {
