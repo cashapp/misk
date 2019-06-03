@@ -7,7 +7,7 @@ import com.google.common.util.concurrent.Service.Listener
 import com.google.common.util.concurrent.Service.State
 import javax.inject.Provider
 
-internal class CoordinatedService2(
+internal class CoordinatedService(
     private val serviceProvider : Provider<out Service>
 ) : AbstractService() {
 
@@ -16,19 +16,19 @@ internal class CoordinatedService2(
   }
 
   /** Services that start before this. */
-  private val directDependsOn = mutableSetOf<CoordinatedService2>()
+  private val directDependsOn = mutableSetOf<CoordinatedService>()
 
   /** Services this starts before. */
-  private val directDependencies = mutableSetOf<CoordinatedService2>()
+  private val directDependencies = mutableSetOf<CoordinatedService>()
 
   /**
    * Services that enhance this. This starts before them, but they start before
    * [directDependencies].
    */
-  private val enhancements = mutableSetOf<CoordinatedService2>()
+  private val enhancements = mutableSetOf<CoordinatedService>()
 
   /** Service that starts up before this, and whose [directDependencies] also depend on this. */
-  private var enhancementTarget: CoordinatedService2? = null
+  private var enhancementTarget: CoordinatedService? = null
 
   init {
     service.checkNew("$service must be NEW for it to be coordinated")
@@ -59,8 +59,8 @@ internal class CoordinatedService2(
    * The set consists of the [enhancementTarget], all direct dependencies and each dependency's
    * transitive enhancements. It is the set of services that block start-up of this service.
    */
-  val upstreamServices: Set<CoordinatedService2> by lazy {
-    val result = mutableSetOf<CoordinatedService2>()
+  val upstreamServices: Set<CoordinatedService> by lazy {
+    val result = mutableSetOf<CoordinatedService>()
     if (enhancementTarget != null) {
       result += enhancementTarget!!
     }
@@ -71,7 +71,7 @@ internal class CoordinatedService2(
     result
   }
 
-  private fun getTransitiveEnhancements(sink: MutableSet<CoordinatedService2>) {
+  private fun getTransitiveEnhancements(sink: MutableSet<CoordinatedService>) {
     sink += enhancements
     for (enhancement in enhancements) {
       enhancement.getTransitiveEnhancements(sink)
@@ -85,10 +85,10 @@ internal class CoordinatedService2(
    * The set contains this service's enhancements, its dependencies, and the dependencies of
    * [enhancementTarget] (if it exists) and all transitive targets.
    */
-  val downstreamServices: Set<CoordinatedService2> by lazy {
-    val result = mutableSetOf<CoordinatedService2>()
+  val downstreamServices: Set<CoordinatedService> by lazy {
+    val result = mutableSetOf<CoordinatedService>()
     result += enhancements
-    var t: CoordinatedService2? = this
+    var t: CoordinatedService? = this
     while (t != null) {
       result += t.directDependencies
       t = t.enhancementTarget
@@ -97,7 +97,7 @@ internal class CoordinatedService2(
   }
 
   /** Adds [services] as dependents downstream. */
-  fun addDependentServices(vararg services: CoordinatedService2) {
+  fun addDependentServices(vararg services: CoordinatedService) {
     // Check that this service and all dependent services are new before modifying the graph.
     this.checkNew()
     for (service in services) {
@@ -111,7 +111,7 @@ internal class CoordinatedService2(
    * Adds [services] as enhancements to this service. Enhancements will start after the coordinated
    * service is running, and stop before it stops.
    */
-  fun addEnhancements(vararg services: CoordinatedService2) {
+  fun addEnhancements(vararg services: CoordinatedService) {
     // Check that this service and all dependent services are new before modifying the graph.
     this.checkNew()
     for (service in services) {
@@ -166,8 +166,8 @@ internal class CoordinatedService2(
    * @param validityMap: A map that is used to track traversal of this service's dependency graph.
    */
   fun findCycle(
-    validityMap: MutableMap<CoordinatedService2, CycleValidity>
-  ): MutableList<CoordinatedService2>? {
+    validityMap: MutableMap<CoordinatedService, CycleValidity>
+  ): MutableList<CoordinatedService>? {
     when (validityMap[this]) {
       CycleValidity.NO_CYCLES -> return null // We checked this node already.
       CycleValidity.CHECKING_FOR_CYCLES -> return mutableListOf(this) // We found a cycle!
