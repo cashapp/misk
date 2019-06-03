@@ -49,7 +49,7 @@ class TracingInterceptorTest {
         body = Buffer()
     )
     val chain = tracingTestAction.asNetworkChain(TracingTestAction::call, request,
-        tracingInterceptor, TerminalInterceptor(200))
+        listOf(tracingInterceptor, TerminalInterceptor(200)))
 
     chain.proceed(chain.request)
 
@@ -75,7 +75,7 @@ class TracingInterceptorTest {
         body = Buffer()
     )
     val chain = tracingTestAction.asNetworkChain(TracingTestAction::call, request,
-        tracingInterceptor, TerminalInterceptor(200))
+        listOf(tracingInterceptor, TerminalInterceptor(200)))
 
     chain.proceed(chain.request)
 

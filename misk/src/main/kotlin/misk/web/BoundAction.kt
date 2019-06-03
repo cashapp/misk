@@ -27,8 +27,8 @@ import kotlin.reflect.KParameter
  */
 internal class BoundAction<A : WebAction>(
   private val webActionProvider: Provider<A>,
-  val networkInterceptors: MutableList<NetworkInterceptor>,
-  val applicationInterceptors: MutableList<ApplicationInterceptor>,
+  private val networkInterceptors: List<NetworkInterceptor>,
+  private val applicationInterceptors: List<ApplicationInterceptor>,
   parameterExtractorFactories: List<ParameterExtractor.Factory>,
   val pathPattern: PathPattern,
   val action: Action,
@@ -42,19 +42,13 @@ internal class BoundAction<A : WebAction>(
     parameterExtractorFactories: List<ParameterExtractor.Factory>,
     parameter: KParameter
   ): ParameterExtractor {
-    var result: ParameterExtractor? = null
-    for (factory in parameterExtractorFactories) {
-      val parameterExtractor = factory.create(action.function, parameter, pathPattern) ?: continue
-      if (result != null) {
-        throw IllegalArgumentException(
-            "multiple ways to extract $parameter: $result and $parameterExtractor")
-      }
-      result = parameterExtractor
+    val results = parameterExtractorFactories.mapNotNull {
+      it.create(action.function, parameter, pathPattern)
     }
-    if (result == null) {
-      throw IllegalArgumentException("no ways to extract $parameter")
+    require(results.size == 1) {
+      "expected exactly 1 way to extract $parameter but was $results"
     }
-    return result
+    return results[0]
   }
 
   fun match(
@@ -104,12 +98,10 @@ internal class BoundAction<A : WebAction>(
     interceptors.add(RequestBridgeInterceptor(parameterExtractors, applicationInterceptors,
         pathMatcher))
 
-    val chain = webAction.asNetworkChain(action.function, request, *interceptors.toTypedArray())
+    val chain = webAction.asNetworkChain(action.function, request, interceptors.toList())
     var response = chain.proceed(chain.request)
 
-    if (response.body !is ResponseBody) {
-      throw IllegalStateException("expected a ResponseBody for $webAction")
-    }
+    check(response.body is ResponseBody) { "expected a ResponseBody for $webAction" }
 
     // Format the response for gRPC.
     if (dispatchMechanism == DispatchMechanism.GRPC) {
@@ -140,7 +132,7 @@ internal class BoundAction<A : WebAction>(
       it.extract(webAction, request, pathMatcher)
     }
 
-    val chain = webAction.asChain(action.function, parameters)
+    val chain = webAction.asChain(action.function, parameters, listOf())
     return chain.proceed(chain.args) as WebSocketListener
   }
 
@@ -164,24 +156,26 @@ internal class BoundAction<A : WebAction>(
         applicationInterceptors = applicationInterceptors,
         networkInterceptors = networkInterceptors,
         dispatchMechanism = dispatchMechanism,
-        allowedServices = fetchAllowedCallers(applicationInterceptors, AccessInterceptor::allowedServices),
+        allowedServices = fetchAllowedCallers(
+            applicationInterceptors, AccessInterceptor::allowedServices),
         allowedRoles = fetchAllowedCallers(applicationInterceptors, AccessInterceptor::allowedRoles)
     )
   }
 
   private fun fetchAllowedCallers(
-      applicationInterceptors: List<ApplicationInterceptor>,
-      accessFun: (AccessInterceptor) -> Set<String>): Set<String> {
+    applicationInterceptors: List<ApplicationInterceptor>,
+    allowedCallersFun: (AccessInterceptor) -> Set<String>
+  ): Set<String> {
     for (interceptor in applicationInterceptors) {
       if (interceptor is AccessInterceptor) {
-        return accessFun.invoke(interceptor)
+        return allowedCallersFun.invoke(interceptor)
       }
     }
     return setOf()
   }
 }
 
-/** Matches a request . Can be sorted to pick the most specific match amongst a set of candidates */
+/** Matches a request. Can be sorted to pick the most specific match amongst a set of candidates. */
 internal open class RequestMatch(
   private val pathPattern: PathPattern,
   private val acceptedMediaRange: MediaRange,
@@ -190,20 +184,21 @@ internal open class RequestMatch(
 ) : Comparable<RequestMatch> {
 
   override fun compareTo(other: RequestMatch): Int {
+    // More specific path pattern comes first.
     val patternDiff = pathPattern.compareTo(other.pathPattern)
     if (patternDiff != 0) return patternDiff
 
+    // More specific request content type comes first.
     val requestContentTypeDiff = acceptedMediaRange.compareTo(other.acceptedMediaRange)
     if (requestContentTypeDiff != 0) return requestContentTypeDiff
 
+    // More specific response content type comes first.
     val responseContentTypeDiff = responseContentType.compareTo(other.responseContentType)
     if (responseContentTypeDiff != 0) return responseContentTypeDiff
 
-    // Only after we have compared both the accepted and emitted content types should we
-    // bother clarifying with the charset; we'd rather match a (text/*, text/plain)
-    // with no charset over a (text/*, text/*) with charset
-    if (requestCharsetMatch && !other.requestCharsetMatch) return -1
-    if (!requestCharsetMatch && other.requestCharsetMatch) return 1
+    // Matching charset comes first.
+    val requestCharsetMatchDiff = -requestCharsetMatch.compareTo(other.requestCharsetMatch)
+    if (requestCharsetMatchDiff != 0) return requestCharsetMatchDiff
 
     return 0
   }
@@ -212,7 +207,7 @@ internal open class RequestMatch(
       "path: $pathPattern, accepts: $acceptedMediaRange, emits: $responseContentType"
 }
 
-/** A [RequestMatch] associated with the action that matched */
+/** A [RequestMatch] associated with the action that matched. */
 internal class BoundActionMatch(
   val action: BoundAction<*>,
   private val pathMatcher: Matcher,
@@ -221,7 +216,7 @@ internal class BoundActionMatch(
   responseContentType: MediaType
 ) : RequestMatch(action.pathPattern, acceptedMediaRange, requestCharsetMatch, responseContentType) {
 
-  /** Handles the request by handing it off to the action */
+  /** Handles the request by handing it off to the action. */
   fun handle(request: Request, servletResponse: HttpServletResponse) {
     val result = action.handle(request, servletResponse, pathMatcher)
     result.writeToJettyResponse(servletResponse)
@@ -247,12 +242,11 @@ private class RequestBridgeInterceptor(
   val pathMatcher: Matcher
 ) : NetworkInterceptor {
   override fun intercept(chain: NetworkChain): Response<*> {
-    val parameters = parameterExtractors.map {
+    val arguments = parameterExtractors.map {
       it.extract(chain.action, chain.request, pathMatcher)
     }
 
-    val applicationChain =
-        chain.action.asChain(chain.function, parameters, *applicationInterceptors.toTypedArray())
+    val applicationChain = chain.action.asChain(chain.function, arguments, applicationInterceptors)
 
     val result = applicationChain.proceed(applicationChain.args)
     // NB(young): Something down the chain could have returned a Response, so avoid double
