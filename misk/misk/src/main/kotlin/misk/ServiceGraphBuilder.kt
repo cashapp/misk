@@ -4,15 +4,15 @@ import com.google.common.collect.LinkedHashMultimap
 import com.google.common.util.concurrent.Service
 import com.google.common.util.concurrent.ServiceManager
 import com.google.inject.Key
-import misk.CoordinatedService2.Companion.CycleValidity
+import misk.CoordinatedService.Companion.CycleValidity
 import javax.inject.Provider
 
 /**
- * Builds a graph of [CoordinatedService2]s which defer start up and shut down until their dependent
+ * Builds a graph of [CoordinatedService]s which defer start up and shut down until their dependent
  * services are ready.
  */
 class ServiceGraphBuilder {
-  private var serviceMap = mutableMapOf<Key<*>, CoordinatedService2>()
+  private var serviceMap = mutableMapOf<Key<*>, CoordinatedService>()
   private val dependencyMap = LinkedHashMultimap.create<Key<*>, Key<*>>()
   private val enhancementMap = mutableMapOf<Key<*>, Key<*>>()
 
@@ -30,7 +30,7 @@ class ServiceGraphBuilder {
     check(serviceMap[key] == null) {
       "Service $key cannot be registered more than once"
     }
-    serviceMap[key] = CoordinatedService2(serviceProvider)
+    serviceMap[key] = CoordinatedService(serviceProvider)
   }
 
   /**
@@ -74,7 +74,7 @@ class ServiceGraphBuilder {
   }
 
   /**
-   * Builds [CoordinatedService2]s from the instructions provided in the dependency and enhancement
+   * Builds [CoordinatedService]s from the instructions provided in the dependency and enhancement
    * maps.
    */
   private fun linkDependencies() {
@@ -96,7 +96,7 @@ class ServiceGraphBuilder {
    * Checks that no service in this builder has specified a dependency cycle.
    */
   private fun checkCycles() {
-    val validityMap = mutableMapOf<CoordinatedService2, CycleValidity>()
+    val validityMap = mutableMapOf<CoordinatedService, CycleValidity>()
 
     for (service in serviceMap.values) {
       val cycle = service.findCycle(validityMap)
