@@ -116,18 +116,23 @@ internal class WebActionFactory @Inject constructor(
       )
     }
 
-    val networkInterceptors = ArrayList<NetworkInterceptor>()
     // Ensure that default interceptors are called before any user provided interceptors
-    miskNetworkInterceptorFactories.mapNotNullTo(networkInterceptors) { it.create(action) }
-    userProvidedNetworkInterceptorFactories.mapNotNullTo(networkInterceptors) { it.create(action) }
+    val networkInterceptors =
+        miskNetworkInterceptorFactories.mapNotNull { it.create(action) } +
+            userProvidedNetworkInterceptorFactories.mapNotNull { it.create(action) }
 
-    val applicationInterceptors = ArrayList<ApplicationInterceptor>()
-    miskApplicationInterceptorFactories.mapNotNullTo(applicationInterceptors) { it.create(action) }
-    userProvidedApplicationInterceptorFactories.mapNotNullTo(applicationInterceptors) {
-      it.create(action)
-    }
+    val applicationInterceptors =
+        miskApplicationInterceptorFactories.mapNotNull { it.create(action) } +
+            userProvidedApplicationInterceptorFactories.mapNotNull { it.create(action) }
 
-    return BoundAction(provider, networkInterceptors, applicationInterceptors,
-        parameterExtractorFactories, PathPattern.parse(pathPattern), action, dispatchMechanism)
+    return BoundAction(
+        provider,
+        networkInterceptors,
+        applicationInterceptors,
+        parameterExtractorFactories,
+        PathPattern.parse(pathPattern),
+        action,
+        dispatchMechanism
+    )
   }
 }
