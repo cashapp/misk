@@ -1,6 +1,5 @@
 package misk.hibernate
 
-import com.google.inject.Inject
 import com.squareup.moshi.Moshi
 import misk.ServiceModule
 import misk.inject.KAbstractModule
@@ -26,7 +25,7 @@ class HibernateTestingModule(
   private val config: DataSourceConfig? = null,
   private val startUpStatements: List<String> = listOf(),
   private val shutDownStatements: List<String> = listOf(),
-  val disableCrossShardQueryDetector: Boolean = false
+  internal val disableChecks: Boolean = false
 ) : KAbstractModule() {
   override fun configure() {
     val truncateTablesServiceKey = TruncateTablesService::class.toKey(qualifier)
@@ -37,47 +36,44 @@ class HibernateTestingModule(
     val transacterKey = Transacter::class.toKey(qualifier)
     val transacterProvider = getProvider(transacterKey)
 
-    if ((config == null || config.type == DataSourceType.VITESS)
-      && !disableCrossShardQueryDetector) {
-      bindVitessChecks()
+    if ((config == null || config.type == DataSourceType.VITESS) && !disableChecks) {
+      bindVitessChecks(transacterProvider)
     }
 
     install(ServiceModule(truncateTablesServiceKey)
         .dependsOn<SchemaMigratorService>(qualifier))
-    bind(truncateTablesServiceKey).toProvider(object : Provider<TruncateTablesService> {
-      @Inject(optional = true) var checks: VitessScaleSafetyChecks? = null
-
-      override fun get(): TruncateTablesService = TruncateTablesService(
-        qualifier = qualifier,
-        config = configProvider.get(),
-        transacterProvider = transacterProvider,
-        checks = checks,
-        startUpStatements = startUpStatements,
-        shutDownStatements = shutDownStatements
+    bind(truncateTablesServiceKey).toProvider(Provider<TruncateTablesService> {
+      TruncateTablesService(
+          qualifier = qualifier,
+          config = configProvider.get(),
+          transacterProvider = transacterProvider,
+          startUpStatements = startUpStatements,
+          shutDownStatements = shutDownStatements
       )
     }).asSingleton()
   }
 
-  private fun bindVitessChecks() {
+  private fun bindVitessChecks(transacterProvider: com.google.inject.Provider<Transacter>) {
     val startVitessServiceKey = StartVitessService::class.toKey(qualifier)
     val startVitessServiceProvider = getProvider(startVitessServiceKey)
 
     val configKey = DataSourceConfig::class.toKey(qualifier)
     val configProvider = getProvider(configKey)
 
-    val crossShardQueryDetectorKey = VitessScaleSafetyChecks::class.toKey(qualifier)
+    val vitessScaleSafetyChecksKey = VitessScaleSafetyChecks::class.toKey(qualifier)
 
     val moshiProvider = getProvider(Moshi::class.java)
 
-    bind(crossShardQueryDetectorKey).toProvider(Provider<VitessScaleSafetyChecks> {
+    bind(vitessScaleSafetyChecksKey).toProvider(Provider<VitessScaleSafetyChecks> {
       VitessScaleSafetyChecks(
         config = configProvider.get(),
         moshi = moshiProvider.get(),
         okHttpClient = OkHttpClient(),
-        startVitessService = startVitessServiceProvider.get()
+        startVitessService = startVitessServiceProvider.get(),
+        transacter = transacterProvider.get()
       )
     }).asSingleton()
 
-    multibind<DataSourceDecorator>(qualifier).to(crossShardQueryDetectorKey)
+    multibind<DataSourceDecorator>(qualifier).to(vitessScaleSafetyChecksKey)
   }
 }

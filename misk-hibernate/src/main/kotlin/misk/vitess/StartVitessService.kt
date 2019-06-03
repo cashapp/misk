@@ -42,7 +42,9 @@ import kotlin.streams.toList
 const val VITESS_IMAGE = "vitess/base@sha256:ad6d22aafa73c9bb64cebf6dffe5f82df7cfcded00cf801fd4e64d0f46dbab43"
 const val CONTAINER_NAME_PREFIX = "misk-vitess-testing"
 
-class Keyspace(val sharded: Boolean) {
+class Table
+
+class Keyspace(val sharded: Boolean, val tables: Map<String, Table>) {
   // Defaulting to 2 shards for sharded keyspaces,
   // maybe this should be configurable at some point?
   fun shardCount() = if (sharded) 2 else 1

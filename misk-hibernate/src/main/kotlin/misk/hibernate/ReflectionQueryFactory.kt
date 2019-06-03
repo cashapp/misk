@@ -54,6 +54,13 @@ internal class ReflectionQuery<T : DbEntity<T>>(
   private val constraints = mutableListOf<PredicateFactory>()
   private val orderFactories = mutableListOf<OrderFactory>()
 
+  private var allowTableScan = false
+
+  override fun allowTableScan(): Query<T> {
+    allowTableScan = true
+    return this
+  }
+
   override fun uniqueResult(session: Session): T? {
     val list = select(false, session)
     return list.firstOrNull()
@@ -95,7 +102,13 @@ internal class ReflectionQuery<T : DbEntity<T>>(
     val typedQuery = session.hibernateSession.createQuery(query)
     typedQuery.maxResults = effectiveMaxRows(returnList)
     val rows = traceSelect {
-      typedQuery.list()
+      if (allowTableScan) {
+        session.withoutChecks(Check.TABLE_SCAN) {
+          typedQuery.list()
+        }
+      } else {
+        typedQuery.list()
+      }
     }
     checkRowCount(returnList, rows.size)
     return rows
