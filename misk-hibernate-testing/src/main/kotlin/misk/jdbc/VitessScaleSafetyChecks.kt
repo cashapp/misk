@@ -187,7 +187,7 @@ internal class Explanation {
 
   override fun toString(): String = buildString {
     for (field in fields) {
-      val value = field.get(this) ?: continue
+      val value = field.get(this@Explanation) ?: continue
       append(", ")
       append(field.name)
       append("=")
@@ -400,7 +400,7 @@ class VitessScaleSafetyChecks(
     }
   }
 
-  private fun isEnabled(): Boolean = transacter.currentSession.areChecksEnabled()
+  private fun isEnabled(): Boolean = transacter.areChecksEnabled
 
   inner class FullTableScanDetector : ExtendedQueryExectionListener() {
     private val mysqlTimeBeforeQuery: ThreadLocal<Timestamp?> =
@@ -639,33 +639,33 @@ class VitessScaleSafetyChecks(
         .url("http://localhost:27000/debug/query_plans")
         .build()
     return okHttpClient.newCall(request).execute().use { r ->
-      parseQueryPlans(r.body()!!.source()).filter { it.isScatter }.sumBy { it.ExecCount }
+      parseQueryPlans(moshi, r.body()!!.source()).filter { it.isScatter }.sumBy { it.ExecCount }
     }
-  }
-
-  private val EMPTY_LINE = "\n\n".encodeUtf8()
-
-  internal fun parseQueryPlans(data: BufferedSource): Sequence<QueryPlan> {
-    // Read (and discard) the "Length" line
-    data.readUtf8Line()
-
-    val adapter = moshi.adapter<QueryPlan>()
-
-    return data.split(EMPTY_LINE).map { buffer ->
-      // Discard top line
-      buffer.readUtf8Line()
-      try {
-        adapter.fromJson(buffer)
-      } catch (e: EOFException) {
-        null
-      }
-    }.filterNotNull()
   }
 
   companion object {
     private val logger = KotlinLogging.logger {}
 
     private val wrongDatabaseError = Regex("Table '.*' doesn't exist")
+
+    private val EMPTY_LINE = "\n\n".encodeUtf8()
+
+    internal fun parseQueryPlans(moshi : Moshi, data: BufferedSource): Sequence<QueryPlan> {
+      // Read (and discard) the "Length" line
+      data.readUtf8Line()
+
+      val adapter = moshi.adapter<QueryPlan>()
+
+      return data.split(EMPTY_LINE).map { buffer ->
+        // Discard top line
+        buffer.readUtf8Line()
+        try {
+          adapter.fromJson(buffer)
+        } catch (e: EOFException) {
+          null
+        }
+      }.filterNotNull()
+    }
   }
 }
 

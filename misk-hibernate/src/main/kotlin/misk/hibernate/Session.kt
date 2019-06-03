@@ -40,8 +40,6 @@ interface Session {
   fun onSessionClose(work: () -> Unit)
 
   fun <T> withoutChecks(body: () -> T): T
-
-  fun areChecksEnabled() : Boolean
 }
 
 inline fun <reified T : DbEntity<T>> Session.load(id: Id<T>): T = load(id, T::class)

@@ -10,9 +10,9 @@ interface Transacter {
   val inTransaction: Boolean
 
   /**
-   * Returns the session of the currently running transaction.
+   * Are scalability checks currently enabled.
    */
-  val currentSession: Session
+  val areChecksEnabled: Boolean
 
   /**
    * Starts a transaction on the current thread, executes lambda, and commits the transaction.

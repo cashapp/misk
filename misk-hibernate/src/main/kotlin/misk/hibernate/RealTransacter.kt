@@ -48,14 +48,18 @@ internal class RealTransacter private constructor(
         tracer
       )
 
+  private val threadLocalAreChecksEnabled = ThreadLocal.withInitial { true }
+
   private val sessionFactory
     get() = sessionFactoryProvider.get()
 
   override val inTransaction: Boolean
     get() = threadLocalSession.get() != null
 
-  override val currentSession: Session
-    get() = threadLocalSession.get()!!
+  override val areChecksEnabled: Boolean
+    get() {
+      return threadLocalAreChecksEnabled.get()
+    }
 
   override fun <T> transaction(lambda: (session: Session) -> T): T {
     return maybeWithTracing(APPLICATION_TRANSACTION_SPAN_NAME) {
@@ -158,7 +162,8 @@ internal class RealTransacter private constructor(
   private fun <T> withSession(lambda: (session: RealSession) -> T): T {
     check(threadLocalSession.get() == null) { "Attempted to start a nested session" }
 
-    val realSession = RealSession(sessionFactory.openSession(), config, options.readOnly)
+    val realSession = RealSession(sessionFactory.openSession(), config, options.readOnly,
+        threadLocalAreChecksEnabled)
     threadLocalSession.set(realSession)
 
     try {
@@ -211,7 +216,8 @@ internal class RealTransacter private constructor(
   internal class RealSession(
     val session: org.hibernate.Session,
     val config: DataSourceConfig,
-    val readOnly: Boolean
+    val readOnly: Boolean,
+    val threadLocalAreChecksEnabled: ThreadLocal<Boolean>
   ) : Session {
     override val hibernateSession = session
     private val preCommitHooks = mutableListOf<() -> Unit>()
@@ -345,14 +351,11 @@ internal class RealTransacter private constructor(
       sessionCloseHooks.add(work)
     }
 
-    override fun <T> withoutChecks(body: () -> T): T = checksEnabled.withValue(false, body)
-
-    override fun areChecksEnabled(): Boolean = checksEnabled.get()
+    override fun <T> withoutChecks(body: () -> T): T
+        = threadLocalAreChecksEnabled.withValue(false, body)
 
     companion object {
       private val log = getLogger<RealSession>()
-
-      private val checksEnabled = ThreadLocal.withInitial { true }
     }
   }
 

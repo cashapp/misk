@@ -1,7 +1,6 @@
 package misk.jdbc
 
 import com.google.inject.util.Providers
-import com.squareup.moshi.Moshi
 import misk.MiskTestingServiceModule
 import misk.config.Config
 import misk.config.MiskConfig
@@ -12,8 +11,6 @@ import misk.hibernate.Transacter
 import misk.inject.KAbstractModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
-import misk.vitess.StartVitessService
-import okhttp3.OkHttpClient
 import org.assertj.core.api.Assertions.assertThat
 import org.hibernate.SessionFactory
 import org.hibernate.query.Query
@@ -30,14 +27,6 @@ internal class TruncateTablesServiceTest {
   @Inject @TestDatasource lateinit var config: DataSourceConfig
   @Inject @TestDatasource lateinit var sessionFactory: SessionFactory
   @Inject @TestDatasource lateinit var transacter: Transacter
-
-  // Just a dummy
-  val vitessScatterDetector: VitessScaleSafetyChecks
-    get() = VitessScaleSafetyChecks(
-        OkHttpClient(),
-        Moshi.Builder().build(),
-        config,
-        StartVitessService(Movies::class, Environment.TESTING, config))
 
   @BeforeEach
   internal fun setUp() {
@@ -68,8 +57,7 @@ internal class TruncateTablesServiceTest {
 
     // Start up TruncateTablesService. The inserted data should be truncated.
     val service = TruncateTablesService(TestDatasource::class, config,
-        Providers.of(transacter),
-        vitessScatterDetector)
+        Providers.of(transacter))
     service.startAsync()
     service.awaitRunning()
     assertThat(rowCount("schema_version")).isGreaterThan(0)
@@ -82,7 +70,6 @@ internal class TruncateTablesServiceTest {
         TestDatasource::class,
         config,
         Providers.of(transacter),
-        vitessScatterDetector,
         startUpStatements = listOf("INSERT INTO movies (name) VALUES ('Star Wars')"))
 
     assertThat(rowCount("movies")).isEqualTo(0)
@@ -97,7 +84,6 @@ internal class TruncateTablesServiceTest {
         TestDatasource::class,
         config,
         Providers.of(transacter),
-        vitessScatterDetector,
         shutDownStatements = listOf("INSERT INTO movies (name) VALUES ('Star Wars')"))
 
     service.startAsync()

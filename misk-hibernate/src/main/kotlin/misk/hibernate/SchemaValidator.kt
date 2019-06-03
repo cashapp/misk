@@ -26,7 +26,7 @@ internal class SchemaValidator {
 
     transacter.shards().forEach { shard ->
       val dbSchema = transacter.transaction(shard) { s ->
-        s.hibernateSession.doReturningWork { readDeclarationFromDatabase(it) }
+        s.withoutChecks { s.hibernateSession.doReturningWork { readDeclarationFromDatabase(it) } }
       }
 
       withDeclaration(dbSchema.name) {
