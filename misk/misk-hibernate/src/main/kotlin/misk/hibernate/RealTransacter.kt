@@ -49,9 +49,6 @@ internal class RealTransacter private constructor(
       tracer
   )
 
-  private val threadLocalDisabledChecks =
-      ThreadLocal.withInitial { EnumSet.noneOf(Check::class.java) }
-
   private val sessionFactory
     get() = sessionFactoryProvider.get()
 
@@ -59,7 +56,8 @@ internal class RealTransacter private constructor(
     get() = threadLocalSession.get() != null
 
   override fun isCheckEnabled(check : Check): Boolean {
-    return !threadLocalDisabledChecks.get().contains(check)
+    val session = threadLocalSession.get()
+    return session != null && !session.disabledChecks.contains(check)
   }
 
   override fun <T> transaction(lambda: (session: Session) -> T): T {
@@ -164,8 +162,7 @@ internal class RealTransacter private constructor(
   private fun <T> withSession(lambda: (session: RealSession) -> T): T {
     check(threadLocalSession.get() == null) { "Attempted to start a nested session" }
 
-    val realSession = RealSession(sessionFactory.openSession(), config, options.readOnly,
-        threadLocalDisabledChecks)
+    val realSession = RealSession(sessionFactory.openSession(), config, options.readOnly)
     threadLocalSession.set(realSession)
 
     try {
@@ -218,13 +215,13 @@ internal class RealTransacter private constructor(
   internal class RealSession(
     val session: org.hibernate.Session,
     val config: DataSourceConfig,
-    val readOnly: Boolean,
-    val threadLocalAreChecksEnabled: ThreadLocal<EnumSet<Check>>
+    val readOnly: Boolean
   ) : Session {
     override val hibernateSession = session
     private val preCommitHooks = mutableListOf<() -> Unit>()
     private val postCommitHooks = mutableListOf<() -> Unit>()
     private val sessionCloseHooks = mutableListOf<() -> Unit>()
+    internal var disabledChecks = EnumSet.noneOf(Check::class.java)
 
     init {
       if (readOnly) {
@@ -354,11 +351,18 @@ internal class RealTransacter private constructor(
     }
 
     override fun <T> withoutChecks(vararg checks: Check, body: () -> T): T {
-      return threadLocalAreChecksEnabled.withValue(if (checks.isEmpty()) {
+      val previous = disabledChecks;
+      val actualChecks = if (checks.isEmpty()) {
         EnumSet.allOf(Check::class.java)
       } else {
         EnumSet.of(checks[0], *checks)
-      }, body)
+      }
+      disabledChecks = actualChecks;
+      return try {
+        body();
+      } finally {
+        disabledChecks = previous;
+      }
     }
 
     companion object {
