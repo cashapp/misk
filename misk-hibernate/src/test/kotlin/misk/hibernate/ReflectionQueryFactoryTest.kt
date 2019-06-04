@@ -14,7 +14,7 @@ import kotlin.test.assertFailsWith
 @MiskTest(startService = true)
 class ReflectionQueryFactoryTest {
   @MiskTestModule
-  val module = MoviesTestModule(disableCrossShardQueryDetector = true)
+  val module = MoviesTestModule()
 
   val maxMaxRows = 40
   val rowCountErrorLimit = 30

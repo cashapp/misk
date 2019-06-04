@@ -12,7 +12,7 @@ import javax.inject.Inject
 @MiskTest(startService = true)
 class RawHibernateApiTest {
   @MiskTestModule
-  val module = MoviesTestModule(disableCrossShardQueryDetector = true)
+  val module = MoviesTestModule()
 
   @Inject @Movies lateinit var sessionFactory: SessionFactory
 

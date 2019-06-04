@@ -6,7 +6,6 @@ import misk.hibernate.annotation.keyspace
 import misk.jdbc.CowriteException
 import misk.jdbc.FullScatterException
 import misk.jdbc.TableScanException
-import misk.jdbc.VitessScaleSafetyChecks
 import misk.jdbc.uniqueLong
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
@@ -24,7 +23,6 @@ class ScaleSafetyTest {
   val module = MoviesTestModule()
 
   @Inject @Movies lateinit var transacter: Transacter
-  @Inject @Movies lateinit var checks: VitessScaleSafetyChecks
   @Inject lateinit var queryFactory: Query.Factory
 
   @Test

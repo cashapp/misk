@@ -17,7 +17,7 @@ import javax.inject.Inject
 class QueryTracingTest {
   @MiskTestModule
   val module = Modules.combine(
-      MoviesTestModule(disableCrossShardQueryDetector = true)
+      MoviesTestModule()
   )
 
   @Inject @Movies private lateinit var transacter: Transacter
