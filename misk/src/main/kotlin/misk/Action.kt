@@ -16,4 +16,6 @@ data class Action(
   val parameterTypes: List<KType>,
   val requestType: KType?,
   val returnType: KType
-)
+) {
+  fun hasReturnValue() = returnType.classifier != Unit::class
+}
