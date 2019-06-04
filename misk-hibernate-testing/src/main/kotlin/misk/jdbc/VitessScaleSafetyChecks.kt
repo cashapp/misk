@@ -445,7 +445,7 @@ class VitessScaleSafetyChecks(
               }
               s.execute("USE `$database`")
               return try {
-                s.executeQuery("EXPLAIN $rawQuery")
+                s.executeQuery("EXPLAIN ${rawQuery.replace("\n", " ")}")
                     .map { Explanation.fromResultSet(it) }
               } catch (e: SQLException) {
                 val message = e.message
