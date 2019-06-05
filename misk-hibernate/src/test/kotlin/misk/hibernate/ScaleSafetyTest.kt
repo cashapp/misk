@@ -117,6 +117,7 @@ class ScaleSafetyTest {
               s.executeQuery().uniqueLong()
             }
           }
+          println("BREAKPOINT ME")
         }
       }
     }

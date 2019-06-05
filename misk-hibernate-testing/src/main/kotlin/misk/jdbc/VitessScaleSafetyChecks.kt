@@ -238,7 +238,7 @@ internal class Explanation {
 open class ExtendedQueryExectionListener : QueryExecutionListener, MethodExecutionListener {
   override fun beforeMethod(executionContext: MethodExecutionContext) {
     if (isStartTransaction(executionContext)) {
-      beforeStartTransaction()
+      beforeStartTransaction(executionContext.target as Connection)
     }
     if (isRollbackTransaction(executionContext)) {
       doBeforeRollback()
@@ -250,7 +250,7 @@ open class ExtendedQueryExectionListener : QueryExecutionListener, MethodExecuti
 
   override fun afterMethod(executionContext: MethodExecutionContext) {
     if (isStartTransaction(executionContext)) {
-      afterStartTransaction()
+      afterStartTransaction(executionContext.target as Connection)
     }
     if (isRollbackTransaction(executionContext)) {
       doAfterRollback()
@@ -275,7 +275,7 @@ open class ExtendedQueryExectionListener : QueryExecutionListener, MethodExecuti
     for (info in queryInfoList) {
       val query = info.query.toLowerCase()
       if (query == "begin") {
-        beforeStartTransaction()
+        beforeStartTransaction(execInfo!!.statement!!.connection)
       } else if (query == "commit") {
         doBeforeCommit()
       } else if (query == "rollback") {
@@ -292,7 +292,7 @@ open class ExtendedQueryExectionListener : QueryExecutionListener, MethodExecuti
     for (info in queryInfoList) {
       val query = info.query.toLowerCase(Locale.ROOT)
       if (query == "begin") {
-        afterStartTransaction()
+        afterStartTransaction(execInfo!!.statement.connection)
       } else if (query == "commit") {
         doAfterCommit()
       } else if (query == "rollback") {
@@ -331,12 +331,12 @@ open class ExtendedQueryExectionListener : QueryExecutionListener, MethodExecuti
   protected open fun beforeRollbackTransaction() {}
   protected open fun beforeCommitTransaction() {}
   protected open fun beforeEndTransaction() {}
-  protected open fun beforeStartTransaction() {}
+  protected open fun beforeStartTransaction(connection: Connection) {}
   protected open fun beforeQuery(query: String) {}
   protected open fun afterRollbackTransaction() {}
   protected open fun afterCommitTransaction() {}
   protected open fun afterEndTransaction() {}
-  protected open fun afterStartTransaction() {}
+  protected open fun afterStartTransaction(connection: Connection) {}
   protected open fun afterQuery(query: String) {}
 
   companion object {
@@ -402,15 +402,42 @@ class VitessScaleSafetyChecks(
   }
 
   inner class TableScanDetector : ExtendedQueryExectionListener() {
+    private val threadId: ThreadLocal<String?> =
+        ThreadLocal.withInitial { null }
     private val mysqlTimeBeforeQuery: ThreadLocal<Timestamp?> =
         ThreadLocal.withInitial { null }
+
+    override fun afterStartTransaction(connection: Connection) {
+      // Use a mark in the logs to figure out what mysql connection id we have based on
+      // our vitess connection id
+      val connectionId = connection.prepareStatement("SELECT connection_id()").use {
+        it.executeQuery().uniqueString()
+      }
+      val mark = "/* log mark for vitess connection id $connectionId */ SELECT 1"
+      connection.prepareStatement(mark).use { it.execute() }
+      connect()?.let { c ->
+        this.threadId.set(c.prepareStatement("""
+          SELECT thread_id
+          FROM mysql.general_log
+          WHERE argument = ?
+          ORDER BY event_time DESC
+          LIMIT 1
+        """.trimIndent()
+        ).use { s ->
+          s.setString(1, mark)
+          s.executeQuery().uniqueString()
+        })
+      }
+    }
 
     override fun beforeQuery(query: String) {
       if (!transacter.isCheckEnabled(Check.TABLE_SCAN)) return
 
       connect()?.let { c ->
-        mysqlTimeBeforeQuery.set(c.createStatement().use { s ->
-          s.executeQuery("SELECT MAX(event_time) FROM mysql.general_log")
+        mysqlTimeBeforeQuery.set(c.prepareStatement("""
+          SELECT MAX(event_time) FROM mysql.general_log
+        """.trimIndent()).use { s ->
+          s.executeQuery()
               .map { it.getTimestamp(1) }
               .singleOrNull()
         })
@@ -421,9 +448,13 @@ class VitessScaleSafetyChecks(
       if (!transacter.isCheckEnabled(Check.TABLE_SCAN)) return
 
       val mysqlTime = mysqlTimeBeforeQuery.get() ?: return
+      val connectionId = this.threadId.get() ?: return
+
+      println("mysqlTime = ${mysqlTime}")
+      println("connectionId = ${connectionId}")
 
       connect()?.let { c ->
-        val queries = extractQueriesSince(mysqlTime)
+        val queries = extractQueriesSince(mysqlTime, connectionId)
 
         for (rawQuery in queries) {
           if (isDml(rawQuery)) return
@@ -472,7 +503,7 @@ class VitessScaleSafetyChecks(
     private val keyspaceIdsThisTransaction: ThreadLocal<LinkedHashSet<String>> =
         ThreadLocal.withInitial { LinkedHashSet<String>() }
 
-    override fun beforeStartTransaction() {
+    override fun beforeStartTransaction(connection: Connection) {
       // Connect before the query because connecting spits out a bunch of crap in the general_log
       // that makes it harder for us to get to the thread id
       connect()
@@ -567,7 +598,7 @@ class VitessScaleSafetyChecks(
   /**
    * Digs into the MySQL log to find the last executed DML statement that passed through Vitess.
    */
-  private fun extractQueriesSince(mysqlTime: Timestamp): List<String> {
+  private fun extractQueriesSince(mysqlTime: Timestamp, connectionId: String): List<String> {
     return connect()?.let { c ->
       c.prepareStatement("""
                   SELECT argument
@@ -581,9 +612,11 @@ class VitessScaleSafetyChecks(
                   AND NOT lower(argument) LIKE 'show %'
                   AND NOT lower(argument) LIKE 'describe %'
                   AND event_time > ?
+                  AND thread_id = ?
                   ORDER BY event_time DESC
                 """.trimIndent()).use { s ->
         s.setTimestamp(1, mysqlTime)
+        s.setString(2, connectionId)
         s.executeQuery().map { it.getString(1) }
       }
     } ?: arrayListOf()
@@ -651,7 +684,7 @@ class VitessScaleSafetyChecks(
 
     private val EMPTY_LINE = "\n\n".encodeUtf8()
 
-    internal fun parseQueryPlans(moshi : Moshi, data: BufferedSource): Sequence<QueryPlan> {
+    internal fun parseQueryPlans(moshi: Moshi, data: BufferedSource): Sequence<QueryPlan> {
       // Read (and discard) the "Length" line
       data.readUtf8Line()
 
