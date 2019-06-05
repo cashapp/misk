@@ -1,13 +1,12 @@
 package misk.web.interceptors
 
 import com.google.inject.Guice
-import io.opentracing.Tracer
-import io.opentracing.mock.MockTracer
 import io.opentracing.tag.Tags
 import misk.asAction
 import misk.exceptions.ActionException
 import misk.exceptions.StatusCode
 import misk.inject.KAbstractModule
+import misk.testing.ConcurrentMockTracer
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.testing.MockTracingBackendModule
@@ -37,7 +36,7 @@ class TracingInterceptorTest {
 
   @Inject private lateinit var tracingInterceptorFactory: TracingInterceptor.Factory
   @Inject private lateinit var tracingTestAction: TracingTestAction
-  @Inject private lateinit var tracer: Tracer
+  @Inject private lateinit var tracer: ConcurrentMockTracer
   @Inject private lateinit var jettyService: JettyService
 
   @Test
@@ -53,10 +52,7 @@ class TracingInterceptorTest {
 
     chain.proceed(chain.request)
 
-    val mockTracer = tracer as MockTracer
-    assertThat(mockTracer.finishedSpans().size).isEqualTo(1)
-    assertThat(mockTracer.finishedSpans().first().parentId()).isEqualTo(0)
-    val span = mockTracer.finishedSpans().first()
+    val span = tracer.take()
     assertThat(span.parentId()).isEqualTo(0)
     assertThat(span.tags()).isEqualTo(mapOf(
         "http.method" to "GET",
@@ -79,19 +75,15 @@ class TracingInterceptorTest {
 
     chain.proceed(chain.request)
 
-    val mockTracer = tracer as MockTracer
-    assertThat(mockTracer.finishedSpans().size).isEqualTo(1)
-    assertThat(mockTracer.finishedSpans().first().parentId()).isEqualTo(1)
+    val span = tracer.take()
+    assertThat(span.parentId()).isEqualTo(1)
   }
 
   @Test
   fun failedTrace() {
     get("/failed_trace")
 
-    val mockTracer = tracer as MockTracer
-    assertThat(mockTracer.finishedSpans().size).isEqualTo(1)
-
-    val span = mockTracer.finishedSpans().first()
+    val span = tracer.take()
     assertThat(span.tags().get(Tags.ERROR.key)).isEqualTo(true)
     assertThat(span.tags().get(Tags.HTTP_STATUS.key)).isEqualTo(400)
   }
@@ -100,10 +92,7 @@ class TracingInterceptorTest {
   fun failedTraceWithException() {
     get("/exception_trace")
 
-    val mockTracer = tracer as MockTracer
-    assertThat(mockTracer.finishedSpans().size).isEqualTo(1)
-
-    val span = mockTracer.finishedSpans().first()
+    val span = tracer.take()
     assertThat(span.tags().get(Tags.ERROR.key)).isEqualTo(true)
     assertThat(span.tags().get(Tags.HTTP_STATUS.key)).isEqualTo(420)
   }
