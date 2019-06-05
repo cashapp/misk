@@ -9,6 +9,8 @@ interface Query<T> {
 
   fun allowTableScan(): Query<T>
 
+  fun allowFullScatter(): Query<T>
+
   fun uniqueResult(session: Session): T?
 
   fun list(session: Session): List<T>
