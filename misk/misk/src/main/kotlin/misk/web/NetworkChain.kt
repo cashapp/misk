@@ -1,11 +1,18 @@
 package misk.web
 
+import misk.Action
 import misk.web.actions.WebAction
-import kotlin.reflect.KFunction
 
 interface NetworkChain {
-  val action: WebAction
+  /** The live HTTP call. You can access hot streams on this call. */
   val request: Request
-  val function: KFunction<*>
-  fun proceed(request: Request): Response<*>
+
+  /** The action for this call. */
+  val action: Action
+
+  /** The action instance this call is routing to. */
+  val webAction: WebAction
+
+  /** Invoke the next call in the interceptor chain. */
+  fun proceed(request: Request)
 }

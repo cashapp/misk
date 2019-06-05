@@ -4,7 +4,6 @@ import com.google.common.base.CharMatcher
 import misk.testing.MiskTest
 import misk.web.NetworkChain
 import misk.web.NetworkInterceptor
-import misk.web.Response
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -45,8 +44,7 @@ class NoQualifiedNameFactory {
 
   private companion object {
     val NoQualifiedNameClass = object : NetworkInterceptor {
-      override fun intercept(chain: NetworkChain): Response<*> {
-        return Response("False")
+      override fun intercept(chain: NetworkChain) {
       }
     }
   }

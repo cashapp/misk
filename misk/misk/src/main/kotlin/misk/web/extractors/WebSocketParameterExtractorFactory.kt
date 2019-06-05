@@ -22,7 +22,7 @@ object WebSocketParameterExtractorFactory : ParameterExtractor.Factory {
         request: Request,
         pathMatcher: Matcher
       ): Any? {
-        return request.websocket
+        return request.takeWebSocket()
       }
     }
   }

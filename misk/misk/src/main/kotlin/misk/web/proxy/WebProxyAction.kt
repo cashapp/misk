@@ -71,7 +71,7 @@ class WebProxyAction @Inject constructor(
 
   private fun forwardRequestTo(proxyUrl: HttpUrl): Response<ResponseBody> {
     val request = clientRequest.get()
-    val proxyRequest = request.toOkHttp3().forwardedWithUrl(proxyUrl)
+    val proxyRequest = request.asOkHttpRequest().forwardedWithUrl(proxyUrl)
     return try {
       optionalBinder.proxyClient.newCall(proxyRequest).execute().toMisk()
     } catch (e: IOException) {

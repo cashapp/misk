@@ -5,7 +5,6 @@ import misk.logging.getLogger
 import misk.random.ThreadLocalRandom
 import misk.web.NetworkChain
 import misk.web.NetworkInterceptor
-import misk.web.Response
 import misk.web.WebConfig
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -21,16 +20,12 @@ class RebalancingInterceptor @Inject constructor(
   private val random: ThreadLocalRandom,
   private val probability: Double
 ) : NetworkInterceptor {
-  override fun intercept(chain: NetworkChain): Response<*> {
-    val response = chain.proceed(chain.request)
-
+  override fun intercept(chain: NetworkChain) {
     if (random.current().nextDouble() < probability) {
-      return response.copy(headers = response.headers.newBuilder()
-          .set("Connection", "close")
-          .build())
+      chain.request.setResponseHeader("Connection", "close")
     }
 
-    return response
+    chain.proceed(chain.request)
   }
 
   @Singleton

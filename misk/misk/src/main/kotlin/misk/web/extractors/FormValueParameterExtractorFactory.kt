@@ -56,7 +56,7 @@ object FormValueParameterExtractorFactory : ParameterExtractor.Factory {
         request: Request,
         pathMatcher: Matcher
       ): Any? {
-        val formValueMapping = parseBody(request.body)
+        val formValueMapping = parseBody(request.takeRequestBody()!!)
         val parameterMap = LinkedHashMap<KParameter, Any?>()
         for (p in constructorParameters) {
           val parameterValue = formValueMapping[p.name]
