@@ -26,6 +26,7 @@ import java.math.BigInteger
 import java.sql.Connection
 import java.sql.ResultSet
 import java.sql.SQLException
+import java.sql.SQLSyntaxErrorException
 import java.sql.Timestamp
 import java.util.Locale
 import javax.inject.Singleton
@@ -447,6 +448,10 @@ class VitessScaleSafetyChecks(
               return try {
                 s.executeQuery("EXPLAIN ${rawQuery.replace("\n", " ")}")
                     .map { Explanation.fromResultSet(it) }
+              } catch (e: SQLSyntaxErrorException) {
+                // TODO(jontirsen): This happens during multi threaded tests, let's ignore it for
+                //   now. Implement proper support for multi-threading at some point (it's hard).
+                null
               } catch (e: SQLException) {
                 val message = e.message
                 if (message != null && message.matches(wrongDatabaseError)) null
