@@ -12,7 +12,6 @@ import misk.logging.getLogger
 import misk.tracing.interceptors.TextMultimapExtractAdapter
 import misk.web.NetworkChain
 import misk.web.NetworkInterceptor
-import misk.web.Response
 
 private val logger = getLogger<TracingInterceptor>()
 
@@ -30,7 +29,7 @@ internal class TracingInterceptor internal constructor(private val tracer: Trace
     override fun create(action: Action) = tracer?.let { TracingInterceptor(it) }
   }
 
-  override fun intercept(chain: NetworkChain): Response<*> {
+  override fun intercept(chain: NetworkChain) {
     val parentContext: SpanContext? = try {
       tracer.extract(Format.Builtin.HTTP_HEADERS,
           TextMultimapExtractAdapter(chain.request.headers.toMultimap()))
@@ -40,7 +39,7 @@ internal class TracingInterceptor internal constructor(private val tracer: Trace
       null
     }
 
-    val scopeBuilder = tracer.buildSpan(chain.action.javaClass.name)
+    val scopeBuilder = tracer.buildSpan(chain.webAction.javaClass.name)
         .withTag(Tags.HTTP_METHOD.key, chain.request.dispatchMechanism.method.toString())
         .withTag(Tags.HTTP_URL.key, chain.request.url.toString())
         .withTag(Tags.SPAN_KIND.key, SPAN_KIND_SERVER)
@@ -50,14 +49,13 @@ internal class TracingInterceptor internal constructor(private val tracer: Trace
     }
 
     val scope = scopeBuilder.startActive(true)
-    return scope.use {
+    scope.use {
       try {
-        val result = chain.proceed(chain.request)
-        Tags.HTTP_STATUS.set(scope.span(), result.statusCode)
-        if (result.statusCode > 399) {
+        chain.proceed(chain.request)
+        Tags.HTTP_STATUS.set(scope.span(), chain.request.statusCode)
+        if (chain.request.statusCode > 399) {
           Tags.ERROR.set(scope.span(), true)
         }
-        result
       } catch (e: Exception) {
         Tags.ERROR.set(scope.span(), true)
         throw e

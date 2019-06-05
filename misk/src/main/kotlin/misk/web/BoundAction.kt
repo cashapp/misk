@@ -7,8 +7,8 @@ import misk.web.actions.WebAction
 import misk.web.actions.WebActionMetadata
 import misk.web.actions.WebSocketListener
 import misk.web.actions.asChain
-import misk.web.actions.asNetworkChain
 import misk.web.extractors.ParameterExtractor
+import misk.web.marshal.Marshaller
 import misk.web.mediatype.MediaRange
 import misk.web.mediatype.MediaTypes
 import misk.web.mediatype.compareTo
@@ -29,6 +29,7 @@ internal class BoundAction<A : WebAction>(
   private val webActionProvider: Provider<A>,
   private val networkInterceptors: List<NetworkInterceptor>,
   private val applicationInterceptors: List<ApplicationInterceptor>,
+  private val responseBodyMarshaller: Marshaller<Any>?,
   parameterExtractorFactories: List<ParameterExtractor.Factory>,
   val pathPattern: PathPattern,
   val action: Action,
@@ -89,19 +90,14 @@ internal class BoundAction<A : WebAction>(
     request: Request,
     servletResponse: HttpServletResponse,
     pathMatcher: Matcher
-  ): Response<ResponseBody> {
+  ) {
     // Find values for all the parameters.
     val webAction = webActionProvider.get()
 
     // RequestBridgeInterceptor necessarily needs to be the last NetworkInterceptor run.
     val interceptors = networkInterceptors.toMutableList()
-    interceptors.add(RequestBridgeInterceptor(parameterExtractors, applicationInterceptors,
-        pathMatcher))
-
-    val chain = webAction.asNetworkChain(action.function, request, interceptors.toList())
-    var response = chain.proceed(chain.request)
-
-    check(response.body is ResponseBody) { "expected a ResponseBody for $webAction" }
+    interceptors.add(RequestBridgeInterceptor(
+        parameterExtractors, responseBodyMarshaller!!, applicationInterceptors, pathMatcher))
 
     // Format the response for gRPC.
     if (dispatchMechanism == DispatchMechanism.GRPC) {
@@ -113,14 +109,12 @@ internal class BoundAction<A : WebAction>(
         trailers
       }
       // TODO(jwilson): permit non-identity GRPC encoding.
-      response = response.copy(headers = response.headers.newBuilder()
-          .set("grpc-encoding", "identity")
-          .set("grpc-accept-encoding", "gzip")
-          .build())
+      request.setResponseHeader("grpc-encoding", "identity")
+      request.setResponseHeader("grpc-accept-encoding", "gzip")
     }
 
-    @Suppress("UNCHECKED_CAST")
-    return response as Response<ResponseBody>
+    val chain = RealNetworkChain(action, webAction, request, interceptors.toList())
+    chain.proceed(request)
   }
 
   internal fun handleWebSocket(
@@ -218,8 +212,7 @@ internal class BoundActionMatch(
 
   /** Handles the request by handing it off to the action. */
   fun handle(request: Request, servletResponse: HttpServletResponse) {
-    val result = action.handle(request, servletResponse, pathMatcher)
-    result.writeToJettyResponse(servletResponse)
+    action.handle(request, servletResponse, pathMatcher)
   }
 
   fun handleWebSocket(request: Request): WebSocketListener {
@@ -232,25 +225,43 @@ private fun MediaType.closestMediaRangeMatch(ranges: List<MediaRange>) =
 
 /**
  * Acts as the bridge between network interceptors and application interceptors.
- * The contract is that whatever comes back from the Application chain will be passed back up
- * as a Response, with extra care given to what happens if the Application chain produces
- * a Response.
+ *
+ * This expects the application chain to return a value or a Response wrapping a value.
+ * If it does, this will be written to the HTTP call's response.
  */
 private class RequestBridgeInterceptor(
   val parameterExtractors: List<ParameterExtractor>,
+  val responseBodyMarshaller: Marshaller<Any>,
   val applicationInterceptors: List<ApplicationInterceptor>,
   val pathMatcher: Matcher
 ) : NetworkInterceptor {
-  override fun intercept(chain: NetworkChain): Response<*> {
+  override fun intercept(chain: NetworkChain) {
+    val request = chain.request
     val arguments = parameterExtractors.map {
-      it.extract(chain.action, chain.request, pathMatcher)
+      it.extract(chain.webAction, request, pathMatcher)
     }
 
-    val applicationChain = chain.action.asChain(chain.function, arguments, applicationInterceptors)
+    val applicationChain = chain.webAction.asChain(
+        chain.action.function, arguments, applicationInterceptors)
 
-    val result = applicationChain.proceed(applicationChain.args)
-    // NB(young): Something down the chain could have returned a Response, so avoid double
-    // wrapping it.
-    return if (result is Response<*>) result else Response(result)
+    var returnValue = applicationChain.proceed(applicationChain.args)
+
+    // If the return value is a boxed response, emit its status and headers.
+    if (returnValue is Response<*>) {
+      request.statusCode = returnValue.statusCode
+      request.addResponseHeaders(returnValue.headers)
+      returnValue = returnValue.body!!
+    }
+
+    // If the response body needs to be written, write it.
+    request.takeResponseBody()?.use { sink ->
+      val contentType = responseBodyMarshaller.contentType()
+      if (request.responseHeaders.get("Content-Type") == null && contentType != null) {
+        request.setResponseHeader("Content-Type", contentType.toString())
+      }
+
+      val responseBody = responseBodyMarshaller.responseBody(returnValue)
+      responseBody.writeTo(sink)
+    }
   }
 }

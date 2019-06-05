@@ -31,7 +31,6 @@ import misk.web.extractors.QueryStringParameterExtractorFactory
 import misk.web.extractors.RequestBodyParameterExtractor
 import misk.web.extractors.WebSocketParameterExtractorFactory
 import misk.web.interceptors.InternalErrorInterceptorFactory
-import misk.web.interceptors.MarshallerInterceptor
 import misk.web.interceptors.MetricsInterceptor
 import misk.web.interceptors.RebalancingInterceptor
 import misk.web.interceptors.RequestLogContextInterceptor
@@ -114,11 +113,6 @@ class MiskWebModule(private val config: WebConfig) : KAbstractModule() {
     // Convert and log application level exceptions into their appropriate response format
     multibind<NetworkInterceptor.Factory>(MiskDefault::class)
         .to<ExceptionHandlingInterceptor.Factory>()
-
-    // Convert typed responses into a ResponseBody that can marshal the response according to
-    // the client's requested content-type
-    multibind<NetworkInterceptor.Factory>(MiskDefault::class)
-        .to<MarshallerInterceptor.Factory>()
 
     // Optionally log request and response details
     multibind<ApplicationInterceptor.Factory>(MiskDefault::class)
