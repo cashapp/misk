@@ -13,6 +13,7 @@ import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Method
 import java.lang.reflect.ParameterizedType
 import java.lang.reflect.Proxy
+import java.util.EnumSet
 import javax.inject.Inject
 import javax.inject.Singleton
 import javax.persistence.criteria.CriteriaBuilder
@@ -54,10 +55,19 @@ internal class ReflectionQuery<T : DbEntity<T>>(
   private val constraints = mutableListOf<PredicateFactory>()
   private val orderFactories = mutableListOf<OrderFactory>()
 
-  private var allowTableScan = false
+  private var disabledChecks: EnumSet<Check>? = null
 
   override fun allowTableScan(): Query<T> {
-    allowTableScan = true
+    val checks = disabledChecks ?: EnumSet.noneOf(Check::class.java)
+    checks.add(Check.TABLE_SCAN)
+    disabledChecks = checks
+    return this
+  }
+
+  override fun allowFullScatter(): Query<T> {
+    val checks = disabledChecks ?: EnumSet.noneOf(Check::class.java)
+    checks.add(Check.FULL_SCATTER)
+    disabledChecks = checks
     return this
   }
 
@@ -102,8 +112,9 @@ internal class ReflectionQuery<T : DbEntity<T>>(
     val typedQuery = session.hibernateSession.createQuery(query)
     typedQuery.maxResults = effectiveMaxRows(returnList)
     val rows = traceSelect {
-      if (allowTableScan) {
-        session.withoutChecks(Check.TABLE_SCAN) {
+      val disableChecks = disabledChecks
+      if (disableChecks != null) {
+        session.withoutChecks(*disableChecks.toArray(emptyArray())) {
           typedQuery.list()
         }
       } else {
@@ -175,8 +186,8 @@ internal class ReflectionQuery<T : DbEntity<T>>(
   }
 
   @Singleton
-  internal class Factory @Inject internal constructor(var queryLimitsConfig: QueryLimitsConfig)
-      : Query.Factory {
+  internal class Factory @Inject internal constructor(var queryLimitsConfig: QueryLimitsConfig) :
+      Query.Factory {
     @com.google.inject.Inject(optional = true) var tracer: Tracer? = null
 
     private val queryMethodHandlersCache = CacheBuilder.newBuilder()
@@ -228,9 +239,9 @@ internal class ReflectionQuery<T : DbEntity<T>>(
   }
 
   data class QueryLimitsConfig(
-      var maxMaxRows: Int,
-      var rowCountErrorLimit: Int,
-      var rowCountWarningLimit: Int
+    var maxMaxRows: Int,
+    var rowCountErrorLimit: Int,
+    var rowCountWarningLimit: Int
   )
 
   class SelectMethodHandler(
@@ -578,7 +589,10 @@ internal class ReflectionQuery<T : DbEntity<T>>(
    * Root: the table root, like 'm' in 'SELECT * FROM movies m ORDER BY m.release_date'
    * CriteriaBuilder: factory for asc, desc
    */
-  private fun buildOrderBys(root: Root<*>, criteriaBuilder: CriteriaBuilder): List<javax.persistence.criteria.Order> {
+  private fun buildOrderBys(
+    root: Root<*>,
+    criteriaBuilder: CriteriaBuilder
+  ): List<javax.persistence.criteria.Order> {
     return orderFactories.map { it(root, criteriaBuilder) }
   }
 
