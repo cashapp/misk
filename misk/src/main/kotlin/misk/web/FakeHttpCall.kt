@@ -7,17 +7,16 @@ import okio.Buffer
 import okio.BufferedSink
 import okio.BufferedSource
 
-// TODO(jwilson): rename this class from Request to FakeHttpCall.
-data class FakeRequest(
+data class FakeHttpCall(
   override val url: HttpUrl = HttpUrl.get("https://example.com/"),
   override val dispatchMechanism: DispatchMechanism = DispatchMechanism.GET,
-  override val headers: Headers = Headers.of(),
+  override val requestHeaders: Headers = Headers.of(),
   override var statusCode: Int = 200,
   val headersBuilder: Headers.Builder = Headers.Builder(),
   var requestBody: BufferedSource? = Buffer(),
   var responseBody: BufferedSink? = Buffer(),
   var webSocket: WebSocket? = null
-) : Request {
+) : HttpCall {
 
   override val responseHeaders: Headers
     get() = headersBuilder.build()

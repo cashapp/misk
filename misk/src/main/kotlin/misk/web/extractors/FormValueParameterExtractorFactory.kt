@@ -6,7 +6,7 @@ import misk.exceptions.requireRequest
 import misk.web.FormField
 import misk.web.FormValue
 import misk.web.PathPattern
-import misk.web.Request
+import misk.web.HttpCall
 import misk.web.actions.WebAction
 import okio.BufferedSource
 import java.net.URLDecoder
@@ -53,10 +53,10 @@ object FormValueParameterExtractorFactory : ParameterExtractor.Factory {
     return object : ParameterExtractor {
       override fun extract(
         webAction: WebAction,
-        request: Request,
+        httpCall: HttpCall,
         pathMatcher: Matcher
       ): Any? {
-        val formValueMapping = parseBody(request.takeRequestBody()!!)
+        val formValueMapping = parseBody(httpCall.takeRequestBody()!!)
         val parameterMap = LinkedHashMap<KParameter, Any?>()
         for (p in constructorParameters) {
           val parameterValue = formValueMapping[p.name]

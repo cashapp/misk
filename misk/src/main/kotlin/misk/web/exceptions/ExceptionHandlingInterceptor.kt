@@ -32,12 +32,12 @@ class ExceptionHandlingInterceptor(
 
   override fun intercept(chain: NetworkChain) {
     try {
-      chain.proceed(chain.request)
+      chain.proceed(chain.httpCall)
     } catch (th: Throwable) {
       val response = toResponse(th)
-      chain.request.statusCode = response.statusCode
-      chain.request.takeResponseBody()?.use { sink ->
-        chain.request.addResponseHeaders(response.headers)
+      chain.httpCall.statusCode = response.statusCode
+      chain.httpCall.takeResponseBody()?.use { sink ->
+        chain.httpCall.addResponseHeaders(response.headers)
         (response.body as ResponseBody).writeTo(sink)
       }
     }

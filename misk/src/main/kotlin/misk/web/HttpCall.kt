@@ -12,13 +12,12 @@ import okio.BufferedSource
 /**
  * A live HTTP call from a client for use by a chain of network interceptors.
  */
-// TODO(jwilson): rename this class from Request to HttpCall.
-interface Request {
+interface HttpCall {
 
   /** Immutable information about the incoming HTTP request. */
   val url: HttpUrl
   val dispatchMechanism: DispatchMechanism
-  val headers: Headers // TODO(jwilson): rename this field to requestHeaders.
+  val requestHeaders: Headers
 
   /** The HTTP response under construction. */
   var statusCode: Int
@@ -45,22 +44,22 @@ interface Request {
   fun takeWebSocket(): WebSocket?
 
   /** Returns a new call with the request body unclaimed. */
-  fun withRequestBody(requestBody: BufferedSource): Request
+  fun withRequestBody(requestBody: BufferedSource): HttpCall
 
   /** Returns a new call with the response body unclaimed. */
-  fun withResponseBody(responseBody: BufferedSink): Request
+  fun withResponseBody(responseBody: BufferedSink): HttpCall
 
   /** Returns a new call with the web socket unclaimed. */
-  fun withWebSocket(webSocket: WebSocket): Request
+  fun withWebSocket(webSocket: WebSocket): HttpCall
 
   fun contentType(): MediaType? {
-    val contentType = headers.get("Content-Type") ?: return null
+    val contentType = requestHeaders.get("Content-Type") ?: return null
     return MediaType.parse(contentType)
   }
 
   fun accepts(): List<MediaRange> {
     // TODO(mmihic): Don't blow up if one of the accept headers can't be parsed
-    val accepts = headers.values("Accept").flatMap { MediaRange.parseRanges(it) }
+    val accepts = requestHeaders.values("Accept").flatMap { MediaRange.parseRanges(it) }
 
     return if (accepts.isEmpty()) {
       listOf(MediaRange.ALL_MEDIA)
@@ -85,7 +84,7 @@ interface Request {
     return okhttp3.Request.Builder()
         .url(url)
         .method(dispatchMechanism.method.toString(), okRequestBody)
-        .headers(headers)
+        .headers(requestHeaders)
         .build()
   }
 }
