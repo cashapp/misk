@@ -143,43 +143,47 @@ class ScaleSafetyTest {
 
 private fun <T : DbEntity<T>> Transacter.save(entity: T): Id<T> = transaction { it.save(entity) }
 
-fun <T : DbRoot<T>> Transacter.createInSeparateShard(
+fun <T : DbRoot<T>> Transacter.createInSeparateShard(id: Id<T>, factory: (Session) -> T): Id<T> =
+    transaction { it.createInSeparateShard(id) { factory(it) } }
+
+fun <T : DbRoot<T>> Transacter.createInSameShard(id: Id<T>, factory: (Session) -> T): Id<T> =
+    transaction { it.createInSameShard(id) { factory(it) } }
+
+fun <T : DbRoot<T>> Session.createInSeparateShard(
   id: Id<T>,
   factory: () -> T
 ): Id<T> {
-  val sw = createUntil(factory) { session, newId ->
-    newId.shard(session) != id.shard(session)
+  val sw = createUntil(factory) { newId ->
+    newId.shard(this) != id.shard(this)
   }
   return sw
 }
 
-fun <T : DbRoot<T>> Transacter.createInSameShard(
+fun <T : DbRoot<T>> Session.createInSameShard(
   id: Id<T>,
   factory: () -> T
 ): Id<T> {
-  val sw = createUntil(factory) { session, newId ->
-    newId.shard(session) == id.shard(session)
+  val sw = createUntil(factory) { newId ->
+    newId.shard(this) == id.shard(this)
   }
   return sw
 }
 
 class NotThereYetException : RuntimeException()
 
-fun <T : DbRoot<T>> Transacter.createUntil(
+fun <T : DbRoot<T>> Session.createUntil(
   factory: () -> T,
-  condition: (Session, Id<T>) -> Boolean
+  condition: (Id<T>) -> Boolean
 ): Id<T> = retry(10, FlatBackoff()) {
-  transaction { session ->
-    val newId = session.save(factory())
-    if (!condition(session, newId)) {
-      throw NotThereYetException()
-    }
-    newId
+  val newId = save(factory())
+  if (!condition(newId)) {
+    throw NotThereYetException()
   }
+  newId
 }
 
 fun <T : DbRoot<T>> Id<T>.shard(session: Session): Shard {
-  val keyspace = this.javaClass.getAnnotation(misk.hibernate.annotation.Keyspace::class.java)
+  val keyspace = javaClass.getAnnotation(misk.hibernate.annotation.Keyspace::class.java)
   val shards = session.shards(keyspace.keyspace()).plus(Shard.SINGLE_SHARD)
   return shards.find { it.contains(this.shardKey()) }!!
 }
