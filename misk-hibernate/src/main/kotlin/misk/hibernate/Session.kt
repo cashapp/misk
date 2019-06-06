@@ -4,6 +4,11 @@ import java.sql.Connection
 import kotlin.reflect.KClass
 
 interface Session {
+
+  companion object {
+    const val ENCRYPTION_CONTEXT_PROPERTY = "aad"
+  }
+
   val hibernateSession: org.hibernate.Session
   /**
    * @throws IllegalStateException when save is called on a read only session.

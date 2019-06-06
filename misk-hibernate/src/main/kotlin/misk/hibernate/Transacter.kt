@@ -43,6 +43,14 @@ fun Transacter.shards(keyspace: Keyspace) = transaction { it.shards(keyspace) }
 fun <T> Transacter.transaction(shard: Shard, lambda: (session: Session) -> T): T =
     transaction { it.target(shard) { lambda(it) } }
 
+fun <T> Transacter.transactionWithEncryptionContext(aad: String, lambda: (session: Session) -> T): T {
+  val wrappedLambda = { session: Session ->
+    session.hibernateSession.setProperty(Session.ENCRYPTION_CONTEXT_PROPERTY, aad)
+    lambda(session)
+  }
+  return this.transaction(wrappedLambda)
+}
+
 /**
  * Thrown to explicitly trigger a retry, subject to retry limits and config such as noRetries().
  */

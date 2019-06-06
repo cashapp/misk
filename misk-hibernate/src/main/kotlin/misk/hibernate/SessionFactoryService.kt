@@ -5,6 +5,7 @@ import com.google.common.util.concurrent.AbstractIdleService
 import misk.jdbc.DataSourceConfig
 import misk.logging.getLogger
 import okio.ByteString
+import org.hibernate.EmptyInterceptor
 import org.hibernate.SessionFactory
 import org.hibernate.boot.Metadata
 import org.hibernate.boot.MetadataSources
@@ -124,7 +125,9 @@ internal class SessionFactoryService(
       }
     }
 
-    sessionFactory = metadata.buildSessionFactory()
+    sessionFactory = metadata.sessionFactoryBuilder
+        .applyInterceptor(SecretColumnInterceptor())
+        .build()
 
     logger.info("Started @${qualifier.simpleName} Hibernate in $stopwatch")
   }
@@ -168,6 +171,14 @@ internal class SessionFactoryService(
       }
       value.typeParameters.setProperty(SelectableSecretColumnType.FIELD_ENCRYPTION_KEY_NAME,
           field.getAnnotation(SelectableSecretColumn::class.java).keyName)
+    } else if (field.isAnnotationPresent(SecretColumnWithAad::class.java)) {
+      value.typeName = SecretColumnWithAadType::class.java.name
+
+      if (value.typeParameters == null) {
+        value.typeParameters = Properties()
+      }
+      value.typeParameters.setProperty(SecretColumnWithAadType.FIELD_ENCRYPTION_KEY_NAME,
+          field.getAnnotation(SecretColumnWithAad::class.java).keyName)
     } else if (field.isAnnotationPresent(VerifiedColumn::class.java)) {
       value.typeName = VerifiedColumnType::class.java.name
       if (value.typeParameters == null) {

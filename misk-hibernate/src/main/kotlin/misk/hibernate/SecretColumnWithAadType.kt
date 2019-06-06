@@ -1,32 +1,30 @@
 package misk.hibernate
 
 import com.google.crypto.tink.Aead
+import misk.crypto.AadProvider
 import misk.crypto.AeadKeyManager
 import org.hibernate.HibernateException
 import org.hibernate.Session
 import org.hibernate.engine.spi.SharedSessionContractImplementor
-import org.hibernate.id.UUIDGenerator
+import org.hibernate.type.spi.TypeConfiguration
+import org.hibernate.type.spi.TypeConfigurationAware
 import org.hibernate.usertype.ParameterizedType
 import org.hibernate.usertype.UserType
 import java.io.Serializable
+import java.security.GeneralSecurityException
 import java.sql.PreparedStatement
 import java.sql.ResultSet
 import java.sql.Types
-import java.util.Properties
-import org.hibernate.type.spi.TypeConfiguration
-import org.hibernate.type.spi.TypeConfigurationAware
-import java.security.GeneralSecurityException
 import java.util.Objects
+import java.util.Properties
 
-internal class SecretColumnType : UserType, ParameterizedType, TypeConfigurationAware {
+internal class SecretColumnWithAadType : UserType, ParameterizedType, TypeConfigurationAware {
   companion object {
     const val FIELD_ENCRYPTION_KEY_NAME: String = "key_name"
   }
   private lateinit var keyName: String
   private lateinit var aead: Aead
   private lateinit var _typeConfiguration: TypeConfiguration
-  private val uuidGenerator: UUIDGenerator =
-      UUIDGenerator.buildSessionFactoryUniqueIdentifierGenerator()
 
   override fun setTypeConfiguration(typeConfiguration: TypeConfiguration) {
     _typeConfiguration = typeConfiguration
@@ -74,7 +72,9 @@ internal class SecretColumnType : UserType, ParameterizedType, TypeConfiguration
       st.setNull(index + 1, Types.VARBINARY)
     } else {
       value as ByteArray
-      val aad = uuidGenerator.generate(session, value).toString().toByteArray()
+      session as Session
+      val aadString = session.properties[misk.hibernate.Session.ENCRYPTION_CONTEXT_PROPERTY] as String
+      val aad = aadString.toByteArray(Charsets.UTF_8)
       val encrypted = aead.encrypt(value, aad)
       st.setBytes(index, encrypted)
       st.setBytes(index + 1, aad)
@@ -88,9 +88,12 @@ internal class SecretColumnType : UserType, ParameterizedType, TypeConfiguration
     owner: Any?
   ): Any? {
     val result = rs?.getBytes(names[0])
-    val aad = rs?.getBytes(names[1])
-    return result?.let { try {
-      aead.decrypt(it, aad)
+    session as Session
+    val aadString = session.properties[misk.hibernate.Session.ENCRYPTION_CONTEXT_PROPERTY] as String
+    val aad = aadString.toByteArray(Charsets.UTF_8)
+    return result?.let {
+      try {
+        aead.decrypt(it, aad)
       } catch (e: GeneralSecurityException) {
         throw HibernateException(e)
       }
