@@ -1,21 +1,14 @@
 package misk.web.extractors
 
-import com.google.common.collect.LinkedHashMultimap
-import com.google.common.collect.Multimap
-import misk.exceptions.requireRequest
-import misk.web.FormField
 import misk.web.FormValue
-import misk.web.PathPattern
 import misk.web.HttpCall
+import misk.web.PathPattern
 import misk.web.actions.WebAction
-import okio.BufferedSource
-import java.net.URLDecoder
 import java.util.regex.Matcher
 import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
 import kotlin.reflect.KParameter
 import kotlin.reflect.full.findAnnotation
-import kotlin.reflect.full.primaryConstructor
 
 object FormValueParameterExtractorFactory : ParameterExtractor.Factory {
   /**
@@ -31,24 +24,8 @@ object FormValueParameterExtractorFactory : ParameterExtractor.Factory {
     parameter.findAnnotation<FormValue>() ?: return null
     if (parameter.type.classifier !is KClass<*>) return null
 
-    val kClass = parameter.type.classifier as KClass<*>
-    val constructor = kClass.primaryConstructor ?: return null
-    val constructorParameters = constructor.parameters.map {
-      val annotation = it.findAnnotation<FormField>()
-      val name = annotation?.name?.toLowerCase()
-          ?: it.name?.toLowerCase()
-          ?: throw IllegalStateException("cannot introspect parameter name")
-
-      val isList = it.type.classifier?.equals(List::class) ?: false
-      ConstructorParameter(
-          it,
-          name,
-          it.isOptional,
-          it.type.isMarkedNullable,
-          isList,
-          converterFor(if (isList) it.type.arguments.first().type!! else it.type)
-      )
-    }
+    val kClass: KClass<*> = parameter.type.classifier as KClass<*>
+    val formClass = FormAdapter.create(kClass) ?: return null
 
     return object : ParameterExtractor {
       override fun extract(
@@ -56,64 +33,9 @@ object FormValueParameterExtractorFactory : ParameterExtractor.Factory {
         httpCall: HttpCall,
         pathMatcher: Matcher
       ): Any? {
-        val formValueMapping = parseBody(httpCall.takeRequestBody()!!)
-        val parameterMap = LinkedHashMap<KParameter, Any?>()
-        for (p in constructorParameters) {
-          val parameterValue = formValueMapping[p.name]
-          if (parameterValue == null || parameterValue.isEmpty()) {
-            if (p.optional) continue
-            requireRequest(p.nullable) { "${p.name} is a required value" }
-          }
-          parameterMap[p.kParameter] = getParameterValue(p, parameterValue)
-        }
-
-        return constructor.callBy(parameterMap)
+        val formData = FormData.decode(httpCall.takeRequestBody()!!)
+        return formClass.fromFormData(formData)
       }
     }
   }
-
-  private fun getParameterValue(
-    p: ConstructorParameter,
-    value: Collection<String>?
-  ): Any? {
-    if (p.isList) {
-      return value?.map { p.converter?.invoke(it) }?.toList()
-    }
-
-    val first = value?.firstOrNull() ?: return null
-    return p.converter?.invoke(first)
-  }
-
-  private fun parseBody(source: BufferedSource): Multimap<String, String> {
-    val result = LinkedHashMultimap.create<String, String>()
-
-    while (!source.exhausted()) {
-      var keyValueEnd = source.indexOf('&'.toByte())
-      if (keyValueEnd == -1L) keyValueEnd = source.buffer.size
-
-      val keyEnd = source.indexOf('='.toByte(), 0, keyValueEnd)
-      requireRequest(keyEnd != 1L) { "invalid form encoding" }
-
-      val key = source.readUtf8(keyEnd).urlDecode().toLowerCase()
-      source.readByte() // Consume '='.
-
-      val value = source.readUtf8(keyValueEnd - keyEnd - 1).urlDecode()
-      result[key].add(value)
-
-      if (!source.exhausted()) source.readByte() // Consume '&'.
-    }
-
-    return result
-  }
-
-  private fun String.urlDecode(): String = URLDecoder.decode(this, "utf-8")
-
-  private data class ConstructorParameter(
-    val kParameter: KParameter,
-    val name: String,
-    val optional: Boolean,
-    val nullable: Boolean,
-    val isList: Boolean,
-    val converter: StringConverter?
-  )
 }
