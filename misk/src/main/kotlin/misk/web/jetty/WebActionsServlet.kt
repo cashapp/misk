@@ -6,19 +6,21 @@ import misk.scope.ActionScope
 import misk.web.BoundAction
 import misk.web.DispatchMechanism
 import misk.web.Request
+import misk.web.ServletHttpCall
+import misk.web.ServletHttpCall.UpstreamResponse
 import misk.web.actions.WebAction
 import misk.web.actions.WebActionEntry
 import misk.web.actions.WebActionFactory
 import misk.web.actions.WebActionMetadata
-import misk.web.mediatype.MediaRange
 import misk.web.mediatype.MediaTypes
 import okhttp3.Headers
 import okhttp3.HttpUrl
 import okhttp3.MediaType
-import okio.Buffer
 import okio.buffer
+import okio.sink
 import okio.source
 import org.eclipse.jetty.http.HttpMethod
+import org.eclipse.jetty.websocket.servlet.ServletUpgradeResponse
 import org.eclipse.jetty.websocket.servlet.WebSocketCreator
 import org.eclipse.jetty.websocket.servlet.WebSocketServlet
 import org.eclipse.jetty.websocket.servlet.WebSocketServletFactory
@@ -55,13 +57,20 @@ internal class WebActionsServlet @Inject constructor(
 
   private fun handleCall(request: HttpServletRequest, response: HttpServletResponse) {
     try {
-      val asRequest = request.asRequest()
+      val asRequest = ServletHttpCall.create(
+          request = request,
+          dispatchMechanism = request.dispatchMechanism(),
+          upstreamResponse = callback(response),
+          requestBody = request.inputStream.source().buffer(),
+          responseBody = response.outputStream.sink().buffer()
+      )
+
       val seedData = mapOf(
           keyOf<HttpServletRequest>() to request,
           keyOf<Request>() to asRequest)
 
-      val requestContentType = request.contentType()
-      val requestAccepts = request.accepts()
+      val requestContentType = asRequest.contentType()
+      val requestAccepts = asRequest.accepts()
       scope.enter(seedData).use {
         val candidateActions = boundActions.mapNotNull {
           it.match(asRequest.dispatchMechanism, requestContentType, requestAccepts, asRequest.url)
@@ -79,20 +88,18 @@ internal class WebActionsServlet @Inject constructor(
 
     response.status = StatusCode.NOT_FOUND.code
     response.addHeader("Content-Type", MediaTypes.TEXT_PLAIN_UTF8)
-    response.writer.print("Nothing found at ${request.urlString()}")
+    response.writer.print("Nothing found at ${request.httpUrl()}")
     response.writer.close()
   }
 
   override fun configure(factory: WebSocketServletFactory) {
-    factory.creator = WebSocketCreator { servletUpgradeRequest, _ ->
+    factory.creator = WebSocketCreator { servletUpgradeRequest, upgradeResponse ->
       val realWebSocket = RealWebSocket()
-      val request = servletUpgradeRequest.httpServletRequest
-      val asRequest = Request(
-          request.urlString()!!,
-          DispatchMechanism.WEBSOCKET,
-          request.headers(),
-          Buffer(), // Empty body.
-          realWebSocket
+      val asRequest = ServletHttpCall.create(
+          request = servletUpgradeRequest.httpServletRequest,
+          dispatchMechanism = DispatchMechanism.WEBSOCKET,
+          upstreamResponse = callback(upgradeResponse),
+          webSocket = realWebSocket
       )
 
       val candidateActions = boundActions.mapNotNull {
@@ -107,33 +114,90 @@ internal class WebActionsServlet @Inject constructor(
   }
 }
 
-internal fun HttpServletRequest.contentType() = contentType?.let { MediaType.parse(it) }
+private fun callback(response: ServletUpgradeResponse): UpstreamResponse {
+  return object : UpstreamResponse {
+    override var statusCode: Int
+      get() = response.statusCode
+      set(value) {
+        response.statusCode = value
+      }
 
-internal fun HttpServletRequest.headers(): Headers {
-  val headersBuilder = Headers.Builder()
-  val headerNames = headerNames
-  for (headerName in headerNames) {
-    val headerValues = getHeaders(headerName)
-    for (headerValue in headerValues) {
-      headersBuilder.add(headerName, headerValue)
+    override val headers: Headers
+      get() = response.headers()
+
+    override fun setHeader(name: String, value: String) {
+      response.setHeader(name, value)
+    }
+
+    override fun addHeaders(headers: Headers) {
+      for (i in 0 until headers.size()) {
+        response.addHeader(headers.name(i), headers.value(i))
+      }
     }
   }
-  return headersBuilder.build()
 }
 
-private fun HttpServletRequest.urlString(): HttpUrl? {
-  return if (queryString == null)
-    HttpUrl.parse(requestURL.toString()) else
-    HttpUrl.parse(requestURL.toString() + "?" + queryString)
+private fun callback(response: HttpServletResponse): UpstreamResponse {
+  return object : UpstreamResponse {
+    override var statusCode: Int
+      get() = response.status
+      set(value) {
+        response.status = value
+      }
+
+    override val headers: Headers
+      get() = response.headers()
+
+    override fun setHeader(name: String, value: String) {
+      response.setHeader(name, value)
+    }
+
+    override fun addHeaders(headers: Headers) {
+      for (i in 0 until headers.size()) {
+        response.addHeader(headers.name(i), headers.value(i))
+      }
+    }
+  }
 }
 
-private fun HttpServletRequest.asRequest(): Request {
-  return Request(
-      urlString()!!,
-      dispatchMechanism(),
-      headers(),
-      inputStream.source().buffer()
-  )
+internal fun HttpServletRequest.contentType() = contentType?.let { MediaType.parse(it) }
+
+internal fun ServletUpgradeResponse.headers(): Headers {
+  val result = Headers.Builder()
+  for (name in headerNames) {
+    for (value in getHeaders(name)) {
+      result.add(name, value)
+    }
+  }
+  return result.build()
+}
+
+internal fun HttpServletRequest.headers(): Headers {
+  val result = Headers.Builder()
+  for (name in headerNames) {
+    for (value in getHeaders(name)) {
+      result.add(name, value)
+    }
+  }
+  return result.build()
+}
+
+internal fun HttpServletResponse.headers(): Headers {
+  val result = Headers.Builder()
+  for (name in headerNames) {
+    for (value in getHeaders(name)) {
+      result.add(name, value)
+    }
+  }
+  return result.build()
+}
+
+internal fun HttpServletRequest.httpUrl(): HttpUrl {
+  return if (queryString == null) {
+    HttpUrl.get("$requestURL")
+  } else {
+    HttpUrl.get("$requestURL?$queryString")
+  }
 }
 
 /** @throws ProtocolException on unexpected methods. */
@@ -145,18 +209,5 @@ internal fun HttpServletRequest.dispatchMechanism(): DispatchMechanism {
       else -> DispatchMechanism.POST
     }
     else -> throw ProtocolException("unexpected method: $method")
-  }
-}
-
-private fun HttpServletRequest.accepts(): List<MediaRange> {
-  // TODO(mmihic): Don't blow up if one of the accept headers can't be parsed
-  val accepts = getHeaders("Accept")?.toList()?.flatMap {
-    MediaRange.parseRanges(it)
-  }
-
-  return if (accepts == null || accepts.isEmpty()) {
-    listOf(MediaRange.ALL_MEDIA)
-  } else {
-    accepts
   }
 }

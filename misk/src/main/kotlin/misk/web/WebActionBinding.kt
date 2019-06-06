@@ -17,31 +17,27 @@ internal class WebActionBinding @Inject constructor(
   private val responseBodyClaimer: FeatureBinding,
   private val returnValueClaimer: FeatureBinding?
 ) {
-  // TODO(jwilson): make a responseBody field in misk.web.Request.
   // TODO(jwilson): rename misk.web.Request to HttpCall.
-  // TODO(jwilson): add a DispatchMechanism field in Action.
 
   /** Returns the parameters for the call. */
   fun beforeCall(
-    responseBody: BufferedSink,
     webAction: WebAction,
     request: Request,
     pathMatcher: Matcher
   ): List<Any?> {
-    val execution = Execution(beforeCallBindings, responseBody, webAction, request, pathMatcher)
+    val execution = Execution(beforeCallBindings, webAction, request, pathMatcher)
     execution.execute()
     return execution.parameters.toList()
   }
 
   /** Accepts the returned value from the call. */
   fun afterCall(
-    responseBody: BufferedSink,
     webAction: WebAction,
     request: Request,
     pathMatcher: Matcher,
     returnValue: Any?
   ) {
-    val execution = Execution(afterCallBindings, responseBody, webAction, request, pathMatcher)
+    val execution = Execution(afterCallBindings, webAction, request, pathMatcher)
     execution.returnValue = returnValue
     execution.execute()
   }
@@ -49,7 +45,6 @@ internal class WebActionBinding @Inject constructor(
   /** Performs bindings before (for parameters) or after a call (for the return value). */
   internal inner class Execution(
     private val bindings: Set<FeatureBinding>,
-    private val responseBody: BufferedSink,
     override val webAction: WebAction,
     override val request: Request,
     override val pathMatcher: Matcher
@@ -78,12 +73,12 @@ internal class WebActionBinding @Inject constructor(
 
     override fun takeRequestBody(): BufferedSource {
       require(current == requestBodyClaimer) { "request body not claimed by $current" }
-      return request.body
+      return request.takeRequestBody()!!
     }
 
     override fun takeResponseBody(): BufferedSink {
       require(current == responseBodyClaimer) { "response body not claimed by $current" }
-      return responseBody
+      return request.takeResponseBody()!!
     }
 
     override fun takeResponse(): Any? {
