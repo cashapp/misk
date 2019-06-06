@@ -27,30 +27,61 @@ interface HttpCall {
   fun addResponseHeaders(headers: Headers)
 
   /**
+   * Call this before the response body is written to make sure it is encoded in a way that'll
+   * permit trailers to be sent. This will do chunked encoding for HTTP/1. For HTTP/2 trailers are
+   * always permitted. It is an error to call this for web socket calls.
+   */
+  fun requireTrailers()
+
+  /**
+   * Add a trailer. This requires that [requireTrailers] was called before the response body is
+   * written.
+   */
+  fun setResponseTrailer(name: String, value: String)
+
+  /**
    * Claim ownership of the request body stream. Returns null if the stream has already been
-   * claimed. Callers should read the HTTP request body or call [withRequestBody] to create a new
+   * claimed. Callers should read the HTTP request body or call [putRequestBody] to create a new
    * chain with a request body that is unclaimed.
    */
   fun takeRequestBody(): BufferedSource?
 
   /**
+   * Changes this call so that the next call to [takeRequestBody] returns [requestBody]. Use this
+   * to apply filters such as decompression or metrics.
+   *
+   * This may only be called on calls whose request body has been taken. Otherwise that would be
+   * leaked.
+   */
+  fun putRequestBody(requestBody: BufferedSource)
+
+  /**
    * Claim ownership of the response body stream. Returns null if the stream has already been
-   * claimed. Callers should write the HTTP response body or call [withRequestBody] to create a new
+   * claimed. Callers should write the HTTP response body or call [putRequestBody] to create a new
    * chain with a response body that is unclaimed.
    */
   fun takeResponseBody(): BufferedSink?
 
+  /**
+   * Changes this call so that the next call to [takeResponseBody] returns [responseBody]. Use this
+   * to apply filters such as decompression or metrics.
+   *
+   * This may only be called on calls whose response body has been taken. Otherwise that would be
+   * leaked.
+   */
+  fun putResponseBody(responseBody: BufferedSink)
+
   /** Claim ownership of the call's web socket. */
   fun takeWebSocket(): WebSocket?
 
-  /** Returns a new call with the request body unclaimed. */
-  fun withRequestBody(requestBody: BufferedSource): HttpCall
-
-  /** Returns a new call with the response body unclaimed. */
-  fun withResponseBody(responseBody: BufferedSink): HttpCall
-
-  /** Returns a new call with the web socket unclaimed. */
-  fun withWebSocket(webSocket: WebSocket): HttpCall
+  /**
+   * Changes this call so that the next call to [takeWebSocket] returns [webSocket]. Use this to
+   * apply filters such as decompression or metrics.
+   *
+   * This may only be called on calls whose web socket has been taken. Otherwise that would be
+   * leaked.
+   */
+  fun putWebSocket(webSocket: WebSocket)
 
   fun contentType(): MediaType? {
     val contentType = requestHeaders.get("Content-Type") ?: return null
