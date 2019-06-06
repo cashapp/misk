@@ -55,12 +55,14 @@ class TransacterTest {
     // Query that data.
     transacter.transaction { session ->
       val ianMalcolm = queryFactory.newQuery<CharacterQuery>()
+          .allowFullScatter().allowTableScan()
           .name("Ian Malcolm")
           .uniqueResult(session)!!
       assertThat(ianMalcolm.actor?.name).isEqualTo("Jeff Goldblum")
       assertThat(ianMalcolm.movie.name).isEqualTo("Jurassic Park")
 
       val lauraDernMovies = queryFactory.newQuery<CharacterQuery>()
+          .allowFullScatter().allowTableScan()
           .actorName("Laura Dern")
           .listAsMovieNameAndReleaseDate(session)
       assertThat(lauraDernMovies).containsExactlyInAnyOrder(
@@ -68,6 +70,7 @@ class TransacterTest {
           NameAndReleaseDate("Jurassic Park", LocalDate.of(1993, 6, 9)))
 
       val actorsInOldMovies = queryFactory.newQuery<CharacterQuery>()
+          .allowFullScatter().allowTableScan()
           .movieReleaseDateBefore(LocalDate.of(1980, 1, 1))
           .listAsActorAndReleaseDate(session)
       assertThat(actorsInOldMovies).containsExactlyInAnyOrder(

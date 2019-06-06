@@ -31,7 +31,9 @@ class QueryTracingTest {
     }
 
     transacter.transaction { session ->
-      queryFactory.newQuery<MovieQuery>().uniqueResult(session)!!
+      queryFactory.newQuery<MovieQuery>()
+          .allowFullScatter().allowTableScan()
+          .uniqueResult(session)!!
       assertThat(mockTracer.finishedSpans()).extracting("operationName")
           .contains(DB_SELECT)
     }
@@ -76,7 +78,9 @@ class QueryTracingTest {
       session.save(movie)
       movie.name = "Star Wars - The Last Jedi"
       session.hibernateSession.flush()
-      queryFactory.newQuery<MovieQuery>().uniqueResult(session)!!
+      queryFactory.newQuery<MovieQuery>()
+          .allowFullScatter().allowTableScan()
+          .uniqueResult(session)!!
       session.hibernateSession.remove(movie)
     }
     assertThat(mockTracer.finishedSpans()).extracting("operationName")
@@ -90,11 +94,13 @@ class QueryTracingTest {
 
   @Test
   fun multipleEntitysInSelect() {
-    transacter.transaction { session ->
+    transacter.allowCowrites().transaction { session ->
       session.save(DbMovie("Star Wars", LocalDate.of(1993, 6, 9)))
       session.save(DbMovie("Star Wars - The Last Jedi", LocalDate.of(1993, 6, 9)))
       session.hibernateSession.flush()
-      queryFactory.newQuery<MovieQuery>().list(session)
+      queryFactory.newQuery<MovieQuery>()
+          .allowFullScatter().allowTableScan()
+          .list(session)
     }
     assertThat(mockTracer.finishedSpans()).extracting("operationName")
         .containsOnlyOnce(DB_SELECT)
