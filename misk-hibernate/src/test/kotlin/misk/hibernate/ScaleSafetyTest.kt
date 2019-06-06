@@ -143,20 +143,20 @@ class ScaleSafetyTest {
 
 private fun <T : DbEntity<T>> Transacter.save(entity: T): Id<T> = transaction { it.save(entity) }
 
-fun Transacter.createInSeparateShard(
-  id: Id<DbMovie>,
-  factory: () -> DbMovie
-): Id<DbMovie> {
+fun <T : DbRoot<T>> Transacter.createInSeparateShard(
+  id: Id<T>,
+  factory: () -> T
+): Id<T> {
   val sw = createUntil(factory) { session, newId ->
     newId.shard(session) != id.shard(session)
   }
   return sw
 }
 
-fun Transacter.createInSameShard(
-  id: Id<DbMovie>,
-  factory: () -> DbMovie
-): Id<DbMovie> {
+fun <T : DbRoot<T>> Transacter.createInSameShard(
+  id: Id<T>,
+  factory: () -> T
+): Id<T> {
   val sw = createUntil(factory) { session, newId ->
     newId.shard(session) == id.shard(session)
   }
@@ -165,9 +165,9 @@ fun Transacter.createInSameShard(
 
 class NotThereYetException : RuntimeException()
 
-inline fun <reified T : DbRoot<T>> Transacter.createUntil(
-  crossinline factory: () -> T,
-  crossinline condition: (Session, Id<T>) -> Boolean
+fun <T : DbRoot<T>> Transacter.createUntil(
+  factory: () -> T,
+  condition: (Session, Id<T>) -> Boolean
 ): Id<T> = retry(10, FlatBackoff()) {
   transaction { session ->
     val newId = session.save(factory())
@@ -178,8 +178,8 @@ inline fun <reified T : DbRoot<T>> Transacter.createUntil(
   }
 }
 
-inline fun <reified T : DbRoot<T>> Id<T>.shard(session: Session): Shard {
-  val keyspace = T::class.java.getAnnotation(misk.hibernate.annotation.Keyspace::class.java)
+fun <T : DbRoot<T>> Id<T>.shard(session: Session): Shard {
+  val keyspace = this.javaClass.getAnnotation(misk.hibernate.annotation.Keyspace::class.java)
   val shards = session.shards(keyspace.keyspace()).plus(Shard.SINGLE_SHARD)
   return shards.find { it.contains(this.shardKey()) }!!
 }

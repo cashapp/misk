@@ -42,7 +42,8 @@ class EventListenersTest {
     }
 
     transacter.transaction { session ->
-      val movie = queryFactory.newQuery<MovieQuery>().uniqueResult(session)!!
+      val movie = queryFactory.newQuery<MovieQuery>().allowFullScatter().allowTableScan()
+          .uniqueResult(session)!!
       assertThat(eventListener.takeEvents()).containsExactly("preload")
 
       session.hibernateSession.delete(movie) // TODO(jwilson): expose session.delete() directly.

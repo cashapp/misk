@@ -33,7 +33,7 @@ class TransacterTest {
   @Test
   fun happyPath() {
     // Insert some movies, characters and actors.
-    transacter.transaction { session ->
+    transacter.allowCowrites().transaction { session ->
       val jp = session.save(DbMovie("Jurassic Park", LocalDate.of(1993, 6, 9)))
       val sw = session.save(DbMovie("Star Wars", LocalDate.of(1977, 5, 25)))
       val lx = session.save(DbMovie("Luxo Jr.", LocalDate.of(1986, 8, 17)))
@@ -96,12 +96,14 @@ class TransacterTest {
     assertFailsWith<UnauthorizedException> {
       transacter.transaction { session ->
         session.save(DbMovie("Star Wars", LocalDate.of(1977, 5, 25)))
-        assertThat(queryFactory.newQuery<MovieQuery>().list(session)).isNotEmpty()
+        assertThat(queryFactory.newQuery<MovieQuery>()
+            .allowFullScatter().allowTableScan().list(session)).isNotEmpty()
         throw UnauthorizedException("boom!")
       }
     }
     transacter.transaction { session ->
-      assertThat(queryFactory.newQuery<MovieQuery>().list(session)).isEmpty()
+      assertThat(queryFactory.newQuery<MovieQuery>().allowFullScatter().allowTableScan()
+          .list(session)).isEmpty()
     }
   }
 
@@ -171,13 +173,15 @@ class TransacterTest {
     val callCount = AtomicInteger()
     transacter.transaction { session ->
       session.save(DbMovie("Star Wars", LocalDate.of(1977, 5, 25)))
-      assertThat(queryFactory.newQuery<MovieQuery>().list(session)).isNotEmpty()
+      assertThat(queryFactory.newQuery<MovieQuery>().allowFullScatter().allowTableScan()
+          .list(session)).isNotEmpty()
 
       if (callCount.getAndIncrement() == 0) throw RetryTransactionException()
     }
     assertThat(callCount.get()).isEqualTo(2)
     transacter.transaction { session ->
-      assertThat(queryFactory.newQuery<MovieQuery>().list(session)).hasSize(1)
+      assertThat(queryFactory.newQuery<MovieQuery>().allowFullScatter().allowTableScan()
+          .list(session)).hasSize(1)
     }
   }
 
@@ -213,7 +217,8 @@ class TransacterTest {
       }
     }
     transacter.transaction { session ->
-      assertThat(queryFactory.newQuery<MovieQuery>().list(session)).isEmpty()
+      assertThat(queryFactory.newQuery<MovieQuery>().allowFullScatter().allowTableScan()
+          .list(session)).isEmpty()
     }
   }
 
@@ -265,7 +270,7 @@ class TransacterTest {
     lateinit var bbid: Id<DbMovie>
     lateinit var swid: Id<DbMovie>
 
-    transacter.transaction { session ->
+    transacter.allowCowrites().transaction { session ->
       session.onPreCommit {
         preCommitHooksTriggered.add("first")
         cid = session.save(DbMovie("Cinderella", LocalDate.of(1950, 3, 4)))
