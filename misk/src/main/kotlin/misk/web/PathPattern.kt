@@ -1,5 +1,7 @@
 package misk.web
 
+import okhttp3.HttpUrl
+import java.util.regex.Matcher
 import java.util.regex.Pattern
 
 /**
@@ -16,6 +18,12 @@ class PathPattern(
   val numSegments: Int,
   val matchesWildcardPath: Boolean
 ) : Comparable<PathPattern> {
+
+  /** Returns a Matcher if requestUrl can be matched, else null */
+  fun matcher(requestUrl: HttpUrl): Matcher? {
+    val matcher = regex.matcher(requestUrl.encodedPath())
+    return if (matcher.matches()) matcher else null
+  }
 
   override fun hashCode(): Int = pattern.hashCode()
 
