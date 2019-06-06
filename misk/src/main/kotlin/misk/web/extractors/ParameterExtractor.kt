@@ -1,7 +1,7 @@
 package misk.web.extractors
 
 import misk.web.PathPattern
-import misk.web.Request
+import misk.web.HttpCall
 import misk.web.actions.WebAction
 import java.util.regex.Matcher
 import kotlin.reflect.KFunction
@@ -9,11 +9,11 @@ import kotlin.reflect.KParameter
 
 interface ParameterExtractor {
   /**
-   * Extracts a parameter from [request], such as a URL parameter or the request body.
+   * Extracts a parameter from [httpCall], such as a URL parameter or the request body.
    */
   fun extract(
     webAction: WebAction,
-    request: Request,
+    httpCall: HttpCall,
     pathMatcher: Matcher
   ): Any?
 

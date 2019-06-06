@@ -48,7 +48,7 @@ internal interface FeatureBinding {
 
   interface Subject {
     val webAction: WebAction
-    val request: Request
+    val httpCall: HttpCall
     val pathMatcher: Matcher
     fun setParameter(index: Int, value: Any?)
     fun takeRequestBody(): BufferedSource

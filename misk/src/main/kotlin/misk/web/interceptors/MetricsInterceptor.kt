@@ -17,12 +17,12 @@ internal class MetricsInterceptor internal constructor(
   private val caller: ActionScoped<MiskCaller?>
 ) : NetworkInterceptor {
   override fun intercept(chain: NetworkChain) {
-    val (elapsedTime, result) = timed { chain.proceed(chain.request) }
+    val (elapsedTime, result) = timed { chain.proceed(chain.httpCall) }
 
     val elapsedTimeMillis = elapsedTime.toMillis().toDouble()
     val callingPrincipal = caller.get()?.principal ?: "unknown"
 
-    val statusCode = chain.request.statusCode
+    val statusCode = chain.httpCall.statusCode
     arrayOf("all", "${statusCode / 100}xx", "$statusCode").forEach { code ->
       requestDuration.record(elapsedTimeMillis, actionName, callingPrincipal, code)
     }
