@@ -116,6 +116,15 @@ class ScaleSafetyTest {
             }
           }
         }
+        // And we can disable the check too
+        session.withoutChecks(Check.TABLE_SCAN) {
+          session.useConnection { c ->
+            c.prepareStatement("SELECT COUNT(*) FROM characters WHERE name = ?").use { s ->
+              s.setString(1, "Leia Organa")
+              s.executeQuery().uniqueLong()
+            }
+          }
+        }
       }
     }
   }

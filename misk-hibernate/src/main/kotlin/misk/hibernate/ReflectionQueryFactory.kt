@@ -57,18 +57,10 @@ internal class ReflectionQuery<T : DbEntity<T>>(
 
   private var disabledChecks: EnumSet<Check>? = null
 
-  override fun allowTableScan(): Query<T> {
+  override fun disableCheck(check: Check) {
     val checks = disabledChecks ?: EnumSet.noneOf(Check::class.java)
-    checks.add(Check.TABLE_SCAN)
+    checks.add(check)
     disabledChecks = checks
-    return this
-  }
-
-  override fun allowFullScatter(): Query<T> {
-    val checks = disabledChecks ?: EnumSet.noneOf(Check::class.java)
-    checks.add(Check.FULL_SCATTER)
-    disabledChecks = checks
-    return this
   }
 
   override fun uniqueResult(session: Session): T? {
@@ -264,7 +256,14 @@ internal class ReflectionQuery<T : DbEntity<T>>(
       query.orderBy(reflectionQuery.buildOrderBys(root, criteriaBuilder))
       val typedQuery = session.hibernateSession.createQuery(query)
       typedQuery.maxResults = reflectionQuery.effectiveMaxRows(returnList)
-      val rows = typedQuery.list()
+      val disableChecks = reflectionQuery.disabledChecks
+      val rows = if (disableChecks != null) {
+        session.withoutChecks(*disableChecks.toArray(emptyArray())) {
+          typedQuery.list()
+        }
+      } else {
+        typedQuery.list()
+      }
       reflectionQuery.checkRowCount(returnList, rows.size)
       val list = rows.map { toValue(it) }
       return if (returnList) list else list.firstOrNull()

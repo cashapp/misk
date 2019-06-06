@@ -11,6 +11,7 @@ import misk.hibernate.Query
 import misk.hibernate.Session
 import misk.hibernate.Shard
 import misk.hibernate.Transacter
+import misk.hibernate.allowTableScan
 import misk.hibernate.createInSameShard
 import misk.hibernate.createInSeparateShard
 import misk.hibernate.shard
