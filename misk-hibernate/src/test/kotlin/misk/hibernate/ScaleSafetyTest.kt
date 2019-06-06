@@ -143,47 +143,43 @@ class ScaleSafetyTest {
 
 private fun <T : DbEntity<T>> Transacter.save(entity: T): Id<T> = transaction { it.save(entity) }
 
-fun <T : DbRoot<T>> Transacter.createInSeparateShard(id: Id<T>, factory: (Session) -> T): Id<T> =
-    transaction { it.createInSeparateShard(id) { factory(it) } }
-
-fun <T : DbRoot<T>> Transacter.createInSameShard(id: Id<T>, factory: (Session) -> T): Id<T> =
-    transaction { it.createInSameShard(id) { factory(it) } }
-
-fun <T : DbRoot<T>> Session.createInSeparateShard(
-  id: Id<T>,
-  factory: () -> T
-): Id<T> {
-  val sw = createUntil(factory) { newId ->
-    newId.shard(this) != id.shard(this)
+fun Transacter.createInSeparateShard(
+  id: Id<DbMovie>,
+  factory: () -> DbMovie
+): Id<DbMovie> {
+  val sw = createUntil(factory) { session, newId ->
+    newId.shard(session) != id.shard(session)
   }
   return sw
 }
 
-fun <T : DbRoot<T>> Session.createInSameShard(
-  id: Id<T>,
-  factory: () -> T
-): Id<T> {
-  val sw = createUntil(factory) { newId ->
-    newId.shard(this) == id.shard(this)
+fun Transacter.createInSameShard(
+  id: Id<DbMovie>,
+  factory: () -> DbMovie
+): Id<DbMovie> {
+  val sw = createUntil(factory) { session, newId ->
+    newId.shard(session) == id.shard(session)
   }
   return sw
 }
 
 class NotThereYetException : RuntimeException()
 
-fun <T : DbRoot<T>> Session.createUntil(
-  factory: () -> T,
-  condition: (Id<T>) -> Boolean
+inline fun <reified T : DbRoot<T>> Transacter.createUntil(
+  crossinline factory: () -> T,
+  crossinline condition: (Session, Id<T>) -> Boolean
 ): Id<T> = retry(10, FlatBackoff()) {
-  val newId = save(factory())
-  if (!condition(newId)) {
-    throw NotThereYetException()
+  transaction { session ->
+    val newId = session.save(factory())
+    if (!condition(session, newId)) {
+      throw NotThereYetException()
+    }
+    newId
   }
-  newId
 }
 
-fun <T : DbRoot<T>> Id<T>.shard(session: Session): Shard {
-  val keyspace = javaClass.getAnnotation(misk.hibernate.annotation.Keyspace::class.java)
+inline fun <reified T : DbRoot<T>> Id<T>.shard(session: Session): Shard {
+  val keyspace = T::class.java.getAnnotation(misk.hibernate.annotation.Keyspace::class.java)
   val shards = session.shards(keyspace.keyspace()).plus(Shard.SINGLE_SHARD)
   return shards.find { it.contains(this.shardKey()) }!!
 }
