@@ -28,7 +28,7 @@ internal class RequestLogContextInterceptor private constructor(
       MDC.put(MDC_REMOTE_IP, request.remoteAddr)
       MDC.put(MDC_REMOTE_PORT, request.remotePort.toString())
       MDC.put(MDC_REQUEST_URI, request.requestURI)
-      chain.proceed(chain.request)
+      chain.proceed(chain.httpCall)
     } finally {
       allContextNames.forEach { MDC.remove(it) }
     }

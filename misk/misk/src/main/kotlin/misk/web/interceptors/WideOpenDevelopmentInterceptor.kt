@@ -8,8 +8,8 @@ import javax.inject.Inject
 
 internal class WideOpenDevelopmentInterceptor @Inject constructor() : NetworkInterceptor {
   override fun intercept(chain: NetworkChain) {
-    chain.request.setResponseHeader("Access-Control-Allow-Origin", "*")
-    chain.proceed(chain.request)
+    chain.httpCall.setResponseHeader("Access-Control-Allow-Origin", "*")
+    chain.proceed(chain.httpCall)
   }
 }
 

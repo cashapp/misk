@@ -1,7 +1,7 @@
 package misk.web.extractors
 
 import misk.web.PathPattern
-import misk.web.Request
+import misk.web.HttpCall
 import misk.web.actions.WebAction
 import misk.web.actions.WebSocket
 import java.util.regex.Matcher
@@ -19,10 +19,10 @@ object WebSocketParameterExtractorFactory : ParameterExtractor.Factory {
     return object : ParameterExtractor {
       override fun extract(
         webAction: WebAction,
-        request: Request,
+        httpCall: HttpCall,
         pathMatcher: Matcher
       ): Any? {
-        return request.takeWebSocket()
+        return httpCall.takeWebSocket()
       }
     }
   }

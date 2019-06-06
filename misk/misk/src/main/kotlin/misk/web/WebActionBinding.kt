@@ -22,10 +22,10 @@ internal class WebActionBinding @Inject constructor(
   /** Returns the parameters for the call. */
   fun beforeCall(
     webAction: WebAction,
-    request: Request,
+    httpCall: HttpCall,
     pathMatcher: Matcher
   ): List<Any?> {
-    val execution = Execution(beforeCallBindings, webAction, request, pathMatcher)
+    val execution = Execution(beforeCallBindings, webAction, httpCall, pathMatcher)
     execution.execute()
     return execution.parameters.toList()
   }
@@ -33,11 +33,11 @@ internal class WebActionBinding @Inject constructor(
   /** Accepts the returned value from the call. */
   fun afterCall(
     webAction: WebAction,
-    request: Request,
+    httpCall: HttpCall,
     pathMatcher: Matcher,
     returnValue: Any?
   ) {
-    val execution = Execution(afterCallBindings, webAction, request, pathMatcher)
+    val execution = Execution(afterCallBindings, webAction, httpCall, pathMatcher)
     execution.returnValue = returnValue
     execution.execute()
   }
@@ -46,7 +46,7 @@ internal class WebActionBinding @Inject constructor(
   internal inner class Execution(
     private val bindings: Set<FeatureBinding>,
     override val webAction: WebAction,
-    override val request: Request,
+    override val httpCall: HttpCall,
     override val pathMatcher: Matcher
   ) : FeatureBinding.Subject {
     internal val parameters = MutableList<Any?>(action.parameterTypes.size) { null }
@@ -73,12 +73,12 @@ internal class WebActionBinding @Inject constructor(
 
     override fun takeRequestBody(): BufferedSource {
       require(current == requestBodyClaimer) { "request body not claimed by $current" }
-      return request.takeRequestBody()!!
+      return httpCall.takeRequestBody()!!
     }
 
     override fun takeResponseBody(): BufferedSink {
       require(current == responseBodyClaimer) { "response body not claimed by $current" }
-      return request.takeResponseBody()!!
+      return httpCall.takeResponseBody()!!
     }
 
     override fun takeResponse(): Any? {

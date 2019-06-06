@@ -87,7 +87,7 @@ internal class BoundAction<A : WebAction>(
   }
 
   internal fun handle(
-    request: Request,
+    httpCall: HttpCall,
     servletResponse: HttpServletResponse,
     pathMatcher: Matcher
   ) {
@@ -109,21 +109,21 @@ internal class BoundAction<A : WebAction>(
         trailers
       }
       // TODO(jwilson): permit non-identity GRPC encoding.
-      request.setResponseHeader("grpc-encoding", "identity")
-      request.setResponseHeader("grpc-accept-encoding", "gzip")
+      httpCall.setResponseHeader("grpc-encoding", "identity")
+      httpCall.setResponseHeader("grpc-accept-encoding", "gzip")
     }
 
-    val chain = RealNetworkChain(action, webAction, request, interceptors.toList())
-    chain.proceed(request)
+    val chain = RealNetworkChain(action, webAction, httpCall, interceptors.toList())
+    chain.proceed(httpCall)
   }
 
   internal fun handleWebSocket(
-    request: Request,
+    httpCall: HttpCall,
     pathMatcher: Matcher
   ): WebSocketListener {
     val webAction = webActionProvider.get()
     val parameters = parameterExtractors.map {
-      it.extract(webAction, request, pathMatcher)
+      it.extract(webAction, httpCall, pathMatcher)
     }
 
     val chain = webAction.asChain(action.function, parameters, listOf())
@@ -210,13 +210,13 @@ internal class BoundActionMatch(
   responseContentType: MediaType
 ) : RequestMatch(action.pathPattern, acceptedMediaRange, requestCharsetMatch, responseContentType) {
 
-  /** Handles the request by handing it off to the action. */
-  fun handle(request: Request, servletResponse: HttpServletResponse) {
-    action.handle(request, servletResponse, pathMatcher)
+  /** Handles [httpCall] by handing it off to the action. */
+  fun handle(httpCall: HttpCall, servletResponse: HttpServletResponse) {
+    action.handle(httpCall, servletResponse, pathMatcher)
   }
 
-  fun handleWebSocket(request: Request): WebSocketListener {
-    return action.handleWebSocket(request, pathMatcher)
+  fun handleWebSocket(httpCall: HttpCall): WebSocketListener {
+    return action.handleWebSocket(httpCall, pathMatcher)
   }
 }
 
@@ -236,9 +236,9 @@ private class RequestBridgeInterceptor(
   val pathMatcher: Matcher
 ) : NetworkInterceptor {
   override fun intercept(chain: NetworkChain) {
-    val request = chain.request
+    val httpCall = chain.httpCall
     val arguments = parameterExtractors.map {
-      it.extract(chain.webAction, request, pathMatcher)
+      it.extract(chain.webAction, httpCall, pathMatcher)
     }
 
     val applicationChain = chain.webAction.asChain(
@@ -248,16 +248,16 @@ private class RequestBridgeInterceptor(
 
     // If the return value is a boxed response, emit its status and headers.
     if (returnValue is Response<*>) {
-      request.statusCode = returnValue.statusCode
-      request.addResponseHeaders(returnValue.headers)
+      httpCall.statusCode = returnValue.statusCode
+      httpCall.addResponseHeaders(returnValue.headers)
       returnValue = returnValue.body!!
     }
 
     // If the response body needs to be written, write it.
-    request.takeResponseBody()?.use { sink ->
+    httpCall.takeResponseBody()?.use { sink ->
       val contentType = responseBodyMarshaller.contentType()
-      if (request.responseHeaders.get("Content-Type") == null && contentType != null) {
-        request.setResponseHeader("Content-Type", contentType.toString())
+      if (httpCall.responseHeaders.get("Content-Type") == null && contentType != null) {
+        httpCall.setResponseHeader("Content-Type", contentType.toString())
       }
 
       val responseBody = responseBodyMarshaller.responseBody(returnValue)

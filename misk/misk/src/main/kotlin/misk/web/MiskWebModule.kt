@@ -66,7 +66,7 @@ class MiskWebModule(private val config: WebConfig) : KAbstractModule() {
     // Install support for accessing the current request and caller as ActionScoped types
     install(object : ActionScopedProviderModule() {
       override fun configureProviders() {
-        bindSeedData(Request::class)
+        bindSeedData(HttpCall::class)
         bindSeedData(HttpServletRequest::class)
         bindProvider(miskCallerType, MiskCallerProvider::class)
         newMultibinder<MiskCallerAuthenticator>()

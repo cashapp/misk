@@ -10,7 +10,7 @@ import misk.testing.ConcurrentMockTracer
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.testing.MockTracingBackendModule
-import misk.web.FakeRequest
+import misk.web.FakeHttpCall
 import misk.web.Get
 import misk.web.NetworkChain
 import misk.web.NetworkInterceptor
@@ -40,11 +40,11 @@ class TracingInterceptorTest {
   @Test
   fun initiatesTrace() {
     val tracingInterceptor = tracingInterceptorFactory.create(TracingTestAction::call.asAction())!!
-    val request = FakeRequest(url = HttpUrl.get("http://foo.bar"))
+    val httpCall = FakeHttpCall(url = HttpUrl.get("http://foo.bar"))
     val chain = RealNetworkChain(TracingTestAction::call.asAction(), tracingTestAction,
-        request, listOf(tracingInterceptor, TerminalInterceptor(200)))
+        httpCall, listOf(tracingInterceptor, TerminalInterceptor(200)))
 
-    chain.proceed(chain.request)
+    chain.proceed(chain.httpCall)
 
     val span = tracer.take()
     assertThat(span.parentId()).isEqualTo(0)
@@ -58,14 +58,14 @@ class TracingInterceptorTest {
   @Test
   fun looksForParentContext() {
     val tracingInterceptor = tracingInterceptorFactory.create(TracingTestAction::call.asAction())!!
-    val request = FakeRequest(
+    val httpCall = FakeHttpCall(
         url = HttpUrl.get("http://foo.bar"),
-        headers = Headers.of("spanid", "1", "traceid", "2")
+        requestHeaders = Headers.of("spanid", "1", "traceid", "2")
     )
     val chain = RealNetworkChain(TracingTestAction::call.asAction(), tracingTestAction,
-        request, listOf(tracingInterceptor, TerminalInterceptor(200)))
+        httpCall, listOf(tracingInterceptor, TerminalInterceptor(200)))
 
-    chain.proceed(chain.request)
+    chain.proceed(chain.httpCall)
 
     val span = tracer.take()
     assertThat(span.parentId()).isEqualTo(1)
@@ -131,7 +131,7 @@ class TracingInterceptorTest {
 
   internal class TerminalInterceptor(private val status: Int) : NetworkInterceptor {
     override fun intercept(chain: NetworkChain) {
-      chain.request.statusCode = status
+      chain.httpCall.statusCode = status
     }
   }
 
