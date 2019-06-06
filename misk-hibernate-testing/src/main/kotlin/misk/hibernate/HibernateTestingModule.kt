@@ -24,8 +24,7 @@ class HibernateTestingModule(
   private val qualifier: KClass<out Annotation>,
   private val config: DataSourceConfig? = null,
   private val startUpStatements: List<String> = listOf(),
-  private val shutDownStatements: List<String> = listOf(),
-  internal val disableChecks: Boolean = false
+  private val shutDownStatements: List<String> = listOf()
 ) : KAbstractModule() {
   override fun configure() {
     val truncateTablesServiceKey = TruncateTablesService::class.toKey(qualifier)
@@ -36,7 +35,7 @@ class HibernateTestingModule(
     val transacterKey = Transacter::class.toKey(qualifier)
     val transacterProvider = getProvider(transacterKey)
 
-    if ((config == null || config.type == DataSourceType.VITESS) && !disableChecks) {
+    if ((config == null || config.type == DataSourceType.VITESS)) {
       bindVitessChecks(transacterProvider)
     }
 
