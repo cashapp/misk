@@ -81,7 +81,7 @@ internal class WebActionBinding @Inject constructor(
       return httpCall.takeResponseBody()!!
     }
 
-    override fun takeResponse(): Any? {
+    override fun takeReturnValue(): Any? {
       require(current == returnValueClaimer) { "return value not claimed by $current" }
       return returnValue
     }
@@ -93,7 +93,7 @@ internal class WebActionBinding @Inject constructor(
   ) : FeatureBinding.Claimer {
     /** Claims are taken by this placeholder until we get the actual FeatureBinding. */
     private object Placeholder : FeatureBinding {
-      override fun bind(action: FeatureBinding.Subject) = throw AssertionError()
+      override fun bind(subject: FeatureBinding.Subject) = throw AssertionError()
     }
 
     /** Claims by who made them. */
@@ -130,26 +130,26 @@ internal class WebActionBinding @Inject constructor(
     /** Lock in the claims of a single binding. */
     internal fun commitClaims(factory: FeatureBinding.Factory, binding: FeatureBinding?) {
       if (requestBody == Placeholder) {
-        check(binding != null) { "$factory returned null after making a claim " }
+        check(binding != null) { "$factory returned null after making a claim" }
         requestBody = binding
       }
 
       var claimedParameter = false
       for (i in 0 until parameters.size) {
         if (parameters[i] == Placeholder) {
-          check(binding != null) { "$factory returned null after making a claim " }
+          check(binding != null) { "$factory returned null after making a claim" }
           parameters[i] = binding
           claimedParameter = true
         }
       }
 
       if (responseBody == Placeholder) {
-        check(binding != null) { "$factory returned null after making a claim " }
+        check(binding != null) { "$factory returned null after making a claim" }
         responseBody = binding
       }
 
       if (returnValue == Placeholder) {
-        check(binding != null) { "$factory returned null after making a claim " }
+        check(binding != null) { "$factory returned null after making a claim" }
         check(!claimedParameter) { "$factory claimed a parameter and the return value of $action" }
         returnValue = binding
       }
