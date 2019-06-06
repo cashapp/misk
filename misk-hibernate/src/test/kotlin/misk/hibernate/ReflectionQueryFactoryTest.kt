@@ -36,43 +36,46 @@ class ReflectionQueryFactoryTest {
     val m99 = NameAndReleaseDate("Rocky 99", null)
 
     transacter.transaction { session ->
-      session.save(DbMovie(m1.name, m1.releaseDate))
-      session.save(DbMovie(m2.name, m2.releaseDate))
-      session.save(DbMovie(m3.name, m3.releaseDate))
-      session.save(DbMovie(m4.name, m4.releaseDate))
-      session.save(DbMovie(m5.name, m5.releaseDate))
-      session.save(DbMovie(m98.name, m98.releaseDate))
-      session.save(DbMovie(m99.name, m99.releaseDate))
+      session.withoutChecks {
 
-      assertThat(queryFactory.newQuery<OperatorsMovieQuery>()
-          .releaseDateLessThan(m3.releaseDate)
-          .listAsNameAndReleaseDate(session))
-          .containsExactlyInAnyOrder(m1, m2)
+        session.save(DbMovie(m1.name, m1.releaseDate))
+        session.save(DbMovie(m2.name, m2.releaseDate))
+        session.save(DbMovie(m3.name, m3.releaseDate))
+        session.save(DbMovie(m4.name, m4.releaseDate))
+        session.save(DbMovie(m5.name, m5.releaseDate))
+        session.save(DbMovie(m98.name, m98.releaseDate))
+        session.save(DbMovie(m99.name, m99.releaseDate))
 
-      assertThat(queryFactory.newQuery<OperatorsMovieQuery>()
-          .releaseDateLessThanOrEqualTo(m3.releaseDate)
-          .listAsNameAndReleaseDate(session))
-          .containsExactlyInAnyOrder(m1, m2, m3)
+        assertThat(queryFactory.newQuery<OperatorsMovieQuery>()
+            .releaseDateLessThan(m3.releaseDate)
+            .listAsNameAndReleaseDate(session))
+            .containsExactlyInAnyOrder(m1, m2)
 
-      assertThat(queryFactory.newQuery<OperatorsMovieQuery>()
-          .releaseDateEqualTo(m3.releaseDate)
-          .listAsNameAndReleaseDate(session))
-          .containsExactly(m3)
+        assertThat(queryFactory.newQuery<OperatorsMovieQuery>()
+            .releaseDateLessThanOrEqualTo(m3.releaseDate)
+            .listAsNameAndReleaseDate(session))
+            .containsExactlyInAnyOrder(m1, m2, m3)
 
-      assertThat(queryFactory.newQuery<OperatorsMovieQuery>()
-          .releaseDateGreaterThanOrEqualTo(m3.releaseDate)
-          .listAsNameAndReleaseDate(session))
-          .containsExactlyInAnyOrder(m3, m4, m5)
+        assertThat(queryFactory.newQuery<OperatorsMovieQuery>()
+            .releaseDateEqualTo(m3.releaseDate)
+            .listAsNameAndReleaseDate(session))
+            .containsExactly(m3)
 
-      assertThat(queryFactory.newQuery<OperatorsMovieQuery>()
-          .releaseDateGreaterThan(m3.releaseDate)
-          .listAsNameAndReleaseDate(session))
-          .containsExactlyInAnyOrder(m4, m5)
+        assertThat(queryFactory.newQuery<OperatorsMovieQuery>()
+            .releaseDateGreaterThanOrEqualTo(m3.releaseDate)
+            .listAsNameAndReleaseDate(session))
+            .containsExactlyInAnyOrder(m3, m4, m5)
 
-      assertThat(queryFactory.newQuery<OperatorsMovieQuery>()
-          .releaseDateNotEqualTo(m3.releaseDate)
-          .listAsNameAndReleaseDate(session))
-          .containsExactlyInAnyOrder(m1, m2, m4, m5)
+        assertThat(queryFactory.newQuery<OperatorsMovieQuery>()
+            .releaseDateGreaterThan(m3.releaseDate)
+            .listAsNameAndReleaseDate(session))
+            .containsExactlyInAnyOrder(m4, m5)
+
+        assertThat(queryFactory.newQuery<OperatorsMovieQuery>()
+            .releaseDateNotEqualTo(m3.releaseDate)
+            .listAsNameAndReleaseDate(session))
+            .containsExactlyInAnyOrder(m1, m2, m4, m5)
+      }
     }
   }
 
@@ -88,43 +91,46 @@ class ReflectionQueryFactoryTest {
     val m99 = NameAndReleaseDate("Rocky 99", null)
 
     transacter.transaction { session ->
-      session.save(DbMovie(m1.name, m1.releaseDate))
-      session.save(DbMovie(m2.name, m2.releaseDate))
-      session.save(DbMovie(m3.name, m3.releaseDate))
-      session.save(DbMovie(m4.name, m4.releaseDate))
-      session.save(DbMovie(m5.name, m5.releaseDate))
-      session.save(DbMovie(m98.name, m98.releaseDate))
-      session.save(DbMovie(m99.name, m99.releaseDate))
+      session.withoutChecks {
 
-      assertThat(queryFactory.newQuery<OperatorsMovieQuery>()
-          .releaseDateLessThan(null)
-          .listAsNameAndReleaseDate(session))
-          .isEmpty()
+        session.save(DbMovie(m1.name, m1.releaseDate))
+        session.save(DbMovie(m2.name, m2.releaseDate))
+        session.save(DbMovie(m3.name, m3.releaseDate))
+        session.save(DbMovie(m4.name, m4.releaseDate))
+        session.save(DbMovie(m5.name, m5.releaseDate))
+        session.save(DbMovie(m98.name, m98.releaseDate))
+        session.save(DbMovie(m99.name, m99.releaseDate))
 
-      assertThat(queryFactory.newQuery<OperatorsMovieQuery>()
-          .releaseDateLessThanOrEqualTo(null)
-          .listAsNameAndReleaseDate(session))
-          .isEmpty()
+        assertThat(queryFactory.newQuery<OperatorsMovieQuery>()
+            .releaseDateLessThan(null)
+            .listAsNameAndReleaseDate(session))
+            .isEmpty()
 
-      assertThat(queryFactory.newQuery<OperatorsMovieQuery>()
-          .releaseDateEqualTo(null)
-          .listAsNameAndReleaseDate(session))
-          .isEmpty()
+        assertThat(queryFactory.newQuery<OperatorsMovieQuery>()
+            .releaseDateLessThanOrEqualTo(null)
+            .listAsNameAndReleaseDate(session))
+            .isEmpty()
 
-      assertThat(queryFactory.newQuery<OperatorsMovieQuery>()
-          .releaseDateGreaterThanOrEqualTo(null)
-          .listAsNameAndReleaseDate(session))
-          .isEmpty()
+        assertThat(queryFactory.newQuery<OperatorsMovieQuery>()
+            .releaseDateEqualTo(null)
+            .listAsNameAndReleaseDate(session))
+            .isEmpty()
 
-      assertThat(queryFactory.newQuery<OperatorsMovieQuery>()
-          .releaseDateGreaterThan(null)
-          .listAsNameAndReleaseDate(session))
-          .isEmpty()
+        assertThat(queryFactory.newQuery<OperatorsMovieQuery>()
+            .releaseDateGreaterThanOrEqualTo(null)
+            .listAsNameAndReleaseDate(session))
+            .isEmpty()
 
-      assertThat(queryFactory.newQuery<OperatorsMovieQuery>()
-          .releaseDateNotEqualTo(null)
-          .listAsNameAndReleaseDate(session))
-          .isEmpty()
+        assertThat(queryFactory.newQuery<OperatorsMovieQuery>()
+            .releaseDateGreaterThan(null)
+            .listAsNameAndReleaseDate(session))
+            .isEmpty()
+
+        assertThat(queryFactory.newQuery<OperatorsMovieQuery>()
+            .releaseDateNotEqualTo(null)
+            .listAsNameAndReleaseDate(session))
+            .isEmpty()
+      }
     }
   }
 
@@ -136,20 +142,23 @@ class ReflectionQueryFactoryTest {
     val m99 = NameAndReleaseDate("Rocky 99", null)
 
     transacter.transaction { session ->
-      session.save(DbMovie(m1.name, m1.releaseDate))
-      session.save(DbMovie(m2.name, m2.releaseDate))
-      session.save(DbMovie(m98.name, m98.releaseDate))
-      session.save(DbMovie(m99.name, m99.releaseDate))
+      session.withoutChecks {
 
-      assertThat(queryFactory.newQuery<OperatorsMovieQuery>()
-          .releaseDateIsNull()
-          .listAsNameAndReleaseDate(session))
-          .containsExactlyInAnyOrder(m98, m99)
+        session.save(DbMovie(m1.name, m1.releaseDate))
+        session.save(DbMovie(m2.name, m2.releaseDate))
+        session.save(DbMovie(m98.name, m98.releaseDate))
+        session.save(DbMovie(m99.name, m99.releaseDate))
 
-      assertThat(queryFactory.newQuery<OperatorsMovieQuery>()
-          .releaseDateIsNotNull()
-          .listAsNameAndReleaseDate(session))
-          .containsExactlyInAnyOrder(m1, m2)
+        assertThat(queryFactory.newQuery<OperatorsMovieQuery>()
+            .releaseDateIsNull()
+            .listAsNameAndReleaseDate(session))
+            .containsExactlyInAnyOrder(m98, m99)
+
+        assertThat(queryFactory.newQuery<OperatorsMovieQuery>()
+            .releaseDateIsNotNull()
+            .listAsNameAndReleaseDate(session))
+            .containsExactlyInAnyOrder(m1, m2)
+      }
     }
   }
 
