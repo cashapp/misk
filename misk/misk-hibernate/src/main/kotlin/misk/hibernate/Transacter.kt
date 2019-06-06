@@ -1,5 +1,7 @@
 package misk.hibernate
 
+import com.google.common.annotations.VisibleForTesting
+
 /**
  * Provides explicit block-based transaction demarcation.
  */
@@ -34,6 +36,14 @@ interface Transacter {
    * datasource is read only, only that the session produced won't modify the database.
    */
   fun readOnly(): Transacter
+
+  /**
+   * Disable cowrite checks for the duration of the session. Useful for quickly setting up test
+   * data in testing.
+   */
+  // TODO(jontirsen): Figure out a way to make this only available for test code
+  @VisibleForTesting
+  fun allowCowrites(): Transacter
 }
 
 fun Transacter.shards() = transaction { it.shards() }

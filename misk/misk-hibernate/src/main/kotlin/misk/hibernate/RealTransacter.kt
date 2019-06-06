@@ -144,6 +144,13 @@ internal class RealTransacter private constructor(
   override fun retries(maxAttempts: Int): Transacter = withOptions(
       options.copy(maxAttempts = maxAttempts))
 
+  override fun allowCowrites(): Transacter {
+    val disableChecks = options.disabledChecks.clone()
+    disableChecks.add(Check.COWRITE)
+    return withOptions(
+        options.copy(disabledChecks = disableChecks))
+  }
+
   override fun noRetries(): Transacter = withOptions(options.copy(maxAttempts = 1))
 
   override fun readOnly(): Transacter = withOptions(options.copy(readOnly = true))
@@ -162,7 +169,8 @@ internal class RealTransacter private constructor(
   private fun <T> withSession(lambda: (session: RealSession) -> T): T {
     check(threadLocalSession.get() == null) { "Attempted to start a nested session" }
 
-    val realSession = RealSession(sessionFactory.openSession(), config, options.readOnly)
+    val realSession = RealSession(sessionFactory.openSession(), config, options.readOnly,
+        options.disabledChecks)
     threadLocalSession.set(realSession)
 
     try {
@@ -197,6 +205,7 @@ internal class RealTransacter private constructor(
   // NB: all options should be immutable types as copy() is shallow.
   internal data class TransacterOptions(
     val maxAttempts: Int = 2,
+    val disabledChecks: EnumSet<Check> = EnumSet.noneOf(Check::class.java),
     val minRetryDelayMillis: Long = 100,
     val maxRetryDelayMillis: Long = 100,
     val retryJitterMillis: Long = 400,
@@ -215,13 +224,13 @@ internal class RealTransacter private constructor(
   internal class RealSession(
     val session: org.hibernate.Session,
     val config: DataSourceConfig,
-    val readOnly: Boolean
+    val readOnly: Boolean,
+    var disabledChecks: EnumSet<Check>
   ) : Session {
     override val hibernateSession = session
     private val preCommitHooks = mutableListOf<() -> Unit>()
     private val postCommitHooks = mutableListOf<() -> Unit>()
     private val sessionCloseHooks = mutableListOf<() -> Unit>()
-    internal var disabledChecks = EnumSet.noneOf(Check::class.java)
 
     init {
       if (readOnly) {
@@ -377,15 +386,5 @@ internal class RealTransacter private constructor(
     } else {
       lambda()
     }
-  }
-}
-
-private inline fun <T, R> ThreadLocal<T>.withValue(value: T, body: () -> R): R {
-  val prev = get()
-  set(value)
-  try {
-    return body()
-  } finally {
-    set(prev)
   }
 }

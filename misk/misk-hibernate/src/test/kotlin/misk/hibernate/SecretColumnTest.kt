@@ -11,7 +11,6 @@ import misk.inject.KAbstractModule
 import misk.jdbc.DataSourceConfig
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
-import org.assertj.core.api.Assertions
 import javax.inject.Inject
 import javax.inject.Qualifier
 import javax.persistence.Column
@@ -20,11 +19,9 @@ import javax.persistence.GeneratedValue
 import javax.persistence.Table
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
-import org.hibernate.HibernateException
 import org.junit.jupiter.api.Test
 import java.util.Arrays
 import java.util.Objects
-import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 
 @MiskTest(startService = true)
