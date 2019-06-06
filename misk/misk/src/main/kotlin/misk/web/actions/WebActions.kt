@@ -2,19 +2,9 @@ package misk.web.actions
 
 import misk.ApplicationInterceptor
 import misk.Chain
-import misk.web.NetworkChain
-import misk.web.NetworkInterceptor
 import misk.web.RealChain
-import misk.web.RealNetworkChain
-import misk.web.Request
 import kotlin.reflect.KFunction
 import kotlin.reflect.KParameter
-
-internal fun WebAction.asNetworkChain(
-  function: KFunction<*>,
-  request: Request,
-  networkInterceptors: List<NetworkInterceptor>
-): NetworkChain = RealNetworkChain(this, request, networkInterceptors, function, 0)
 
 fun WebAction.asChain(
   function: KFunction<*>,

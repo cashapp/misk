@@ -10,21 +10,19 @@ import misk.testing.ConcurrentMockTracer
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.testing.MockTracingBackendModule
-import misk.web.DispatchMechanism
+import misk.web.FakeRequest
 import misk.web.Get
 import misk.web.NetworkChain
 import misk.web.NetworkInterceptor
-import misk.web.Request
+import misk.web.RealNetworkChain
 import misk.web.Response
 import misk.web.WebActionModule
 import misk.web.WebTestingModule
 import misk.web.actions.WebAction
-import misk.web.actions.asNetworkChain
 import misk.web.jetty.JettyService
 import okhttp3.Headers
 import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
-import okio.Buffer
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import javax.inject.Inject
@@ -42,13 +40,9 @@ class TracingInterceptorTest {
   @Test
   fun initiatesTrace() {
     val tracingInterceptor = tracingInterceptorFactory.create(TracingTestAction::call.asAction())!!
-    val request = Request(
-        HttpUrl.parse("http://foo.bar/")!!,
-        DispatchMechanism.GET,
-        body = Buffer()
-    )
-    val chain = tracingTestAction.asNetworkChain(TracingTestAction::call, request,
-        listOf(tracingInterceptor, TerminalInterceptor(200)))
+    val request = FakeRequest(url = HttpUrl.get("http://foo.bar"))
+    val chain = RealNetworkChain(TracingTestAction::call.asAction(), tracingTestAction,
+        request, listOf(tracingInterceptor, TerminalInterceptor(200)))
 
     chain.proceed(chain.request)
 
@@ -64,14 +58,12 @@ class TracingInterceptorTest {
   @Test
   fun looksForParentContext() {
     val tracingInterceptor = tracingInterceptorFactory.create(TracingTestAction::call.asAction())!!
-    val request = Request(
-        HttpUrl.parse("http://foo.bar/")!!,
-        DispatchMechanism.GET,
-        Headers.Builder().add("spanid", "1").add("traceid", "2").build(),
-        body = Buffer()
+    val request = FakeRequest(
+        url = HttpUrl.get("http://foo.bar"),
+        headers = Headers.of("spanid", "1", "traceid", "2")
     )
-    val chain = tracingTestAction.asNetworkChain(TracingTestAction::call, request,
-        listOf(tracingInterceptor, TerminalInterceptor(200)))
+    val chain = RealNetworkChain(TracingTestAction::call.asAction(), tracingTestAction,
+        request, listOf(tracingInterceptor, TerminalInterceptor(200)))
 
     chain.proceed(chain.request)
 
@@ -137,8 +129,10 @@ class TracingInterceptorTest {
     }
   }
 
-  internal class TerminalInterceptor(val status: Int) : NetworkInterceptor {
-    override fun intercept(chain: NetworkChain): Response<*> = Response("foo", statusCode = status)
+  internal class TerminalInterceptor(private val status: Int) : NetworkInterceptor {
+    override fun intercept(chain: NetworkChain) {
+      chain.request.statusCode = status
+    }
   }
 
   class TestModule : KAbstractModule() {

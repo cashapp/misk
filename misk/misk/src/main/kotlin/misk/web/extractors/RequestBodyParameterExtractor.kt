@@ -28,7 +28,7 @@ internal class RequestBodyParameterExtractor(
     } ?: GenericUnmarshallers.into(parameter)
     ?: throw IllegalArgumentException("no generic unmarshaller for ${parameter.type}")
 
-    return unmarshaller.unmarshal(request.body)
+    return unmarshaller.unmarshal(request.takeRequestBody()!!)
   }
 
   class Factory @Inject internal constructor(
