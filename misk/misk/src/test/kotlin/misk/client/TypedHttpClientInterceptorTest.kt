@@ -50,11 +50,11 @@ internal class TypedHttpClientInterceptorTest {
   /** Server [NetworkInterceptor] that echos back the X-Originating-Action from the request. */
   class ServerHeaderInterceptor : NetworkInterceptor {
     override fun intercept(chain: NetworkChain) {
-      val originatingAction = chain.request.headers["X-From"]
+      val originatingAction = chain.httpCall.requestHeaders["X-From"]
       if (originatingAction != null) {
-        chain.request.setResponseHeader("X-Original-From", originatingAction)
+        chain.httpCall.setResponseHeader("X-Original-From", originatingAction)
       }
-      chain.proceed(chain.request)
+      chain.proceed(chain.httpCall)
     }
 
     class Factory @Inject constructor() : NetworkInterceptor.Factory {

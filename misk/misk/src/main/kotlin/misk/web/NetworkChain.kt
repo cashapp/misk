@@ -5,7 +5,7 @@ import misk.web.actions.WebAction
 
 interface NetworkChain {
   /** The live HTTP call. You can access hot streams on this call. */
-  val request: Request
+  val httpCall: HttpCall
 
   /** The action for this call. */
   val action: Action
@@ -14,5 +14,5 @@ interface NetworkChain {
   val webAction: WebAction
 
   /** Invoke the next call in the interceptor chain. */
-  fun proceed(request: Request)
+  fun proceed(httpCall: HttpCall)
 }

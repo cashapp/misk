@@ -5,7 +5,7 @@ import misk.inject.keyOf
 import misk.scope.ActionScope
 import misk.web.BoundAction
 import misk.web.DispatchMechanism
-import misk.web.Request
+import misk.web.HttpCall
 import misk.web.ServletHttpCall
 import misk.web.ServletHttpCall.UpstreamResponse
 import misk.web.actions.WebAction
@@ -57,7 +57,7 @@ internal class WebActionsServlet @Inject constructor(
 
   private fun handleCall(request: HttpServletRequest, response: HttpServletResponse) {
     try {
-      val asRequest = ServletHttpCall.create(
+      val httpCall = ServletHttpCall.create(
           request = request,
           dispatchMechanism = request.dispatchMechanism(),
           upstreamResponse = callback(response),
@@ -67,18 +67,18 @@ internal class WebActionsServlet @Inject constructor(
 
       val seedData = mapOf(
           keyOf<HttpServletRequest>() to request,
-          keyOf<Request>() to asRequest)
+          keyOf<HttpCall>() to httpCall)
 
-      val requestContentType = asRequest.contentType()
-      val requestAccepts = asRequest.accepts()
+      val requestContentType = httpCall.contentType()
+      val requestAccepts = httpCall.accepts()
       scope.enter(seedData).use {
         val candidateActions = boundActions.mapNotNull {
-          it.match(asRequest.dispatchMechanism, requestContentType, requestAccepts, asRequest.url)
+          it.match(httpCall.dispatchMechanism, requestContentType, requestAccepts, httpCall.url)
         }
 
         val bestAction = candidateActions.sorted().firstOrNull()
         if (bestAction != null) {
-          bestAction.handle(asRequest, response)
+          bestAction.handle(httpCall, response)
           return
         }
       }
@@ -95,7 +95,7 @@ internal class WebActionsServlet @Inject constructor(
   override fun configure(factory: WebSocketServletFactory) {
     factory.creator = WebSocketCreator { servletUpgradeRequest, upgradeResponse ->
       val realWebSocket = RealWebSocket()
-      val asRequest = ServletHttpCall.create(
+      val httpCall = ServletHttpCall.create(
           request = servletUpgradeRequest.httpServletRequest,
           dispatchMechanism = DispatchMechanism.WEBSOCKET,
           upstreamResponse = callback(upgradeResponse),
@@ -103,11 +103,11 @@ internal class WebActionsServlet @Inject constructor(
       )
 
       val candidateActions = boundActions.mapNotNull {
-        it.match(DispatchMechanism.WEBSOCKET, null, listOf(), asRequest.url)
+        it.match(DispatchMechanism.WEBSOCKET, null, listOf(), httpCall.url)
       }
 
       val bestAction = candidateActions.sorted().firstOrNull() ?: return@WebSocketCreator null
-      val webSocketListener = bestAction.handleWebSocket(asRequest)
+      val webSocketListener = bestAction.handleWebSocket(httpCall)
       realWebSocket.listener = webSocketListener
       realWebSocket.adapter
     }

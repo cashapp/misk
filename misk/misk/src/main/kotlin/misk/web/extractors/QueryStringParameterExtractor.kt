@@ -2,7 +2,7 @@ package misk.web.extractors
 
 import misk.web.PathPattern
 import misk.web.QueryParam
-import misk.web.Request
+import misk.web.HttpCall
 import misk.web.actions.WebAction
 import java.util.regex.Matcher
 import kotlin.reflect.KFunction
@@ -29,10 +29,10 @@ object QueryStringParameterExtractorFactory : ParameterExtractor.Factory {
     return object : ParameterExtractor {
       override fun extract(
         webAction: WebAction,
-        request: Request,
+        httpCall: HttpCall,
         pathMatcher: Matcher
       ): Any? {
-        val parameterValues: List<String> = request.url.queryParameterValues(parameterName)
+        val parameterValues: List<String> = httpCall.url.queryParameterValues(parameterName)
         return queryParamProcessor.extractFunctionArgumentValue(parameterValues)
       }
     }

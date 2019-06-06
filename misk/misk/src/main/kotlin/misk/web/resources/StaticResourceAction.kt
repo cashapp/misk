@@ -5,7 +5,7 @@ import misk.scope.ActionScoped
 import misk.security.authz.Unauthenticated
 import misk.web.Get
 import misk.web.Post
-import misk.web.Request
+import misk.web.HttpCall
 import misk.web.RequestContentType
 import misk.web.Response
 import misk.web.ResponseBody
@@ -32,7 +32,7 @@ import javax.inject.Singleton
  */
 @Singleton
 class StaticResourceAction @Inject constructor(
-  @JvmSuppressWildcards private val clientRequest: ActionScoped<Request>,
+  @JvmSuppressWildcards private val clientHttpCall: ActionScoped<HttpCall>,
   private val resourceLoader: ResourceLoader,
   private val resourceEntryFinder: ResourceEntryFinder
 ) : WebAction {
@@ -43,15 +43,15 @@ class StaticResourceAction @Inject constructor(
   @ResponseContentType(MediaTypes.ALL)
   @Unauthenticated // TODO(adrw) https://github.com/square/misk/issues/429
   fun action(): Response<ResponseBody> {
-    val request = clientRequest.get()
-    return getResponse(request)
+    val httpCall = clientHttpCall.get()
+    return getResponse(httpCall)
   }
 
-  fun getResponse(request: Request): Response<ResponseBody> {
+  fun getResponse(httpCall: HttpCall): Response<ResponseBody> {
     val entry =
-        (resourceEntryFinder.staticResource(request.url) as StaticResourceEntry?
-            ?: return NotFoundAction.response(request.url.encodedPath().drop(1)))
-    return MatchedResource(entry).getResponse(request)
+        (resourceEntryFinder.staticResource(httpCall.url) as StaticResourceEntry?
+            ?: return NotFoundAction.response(httpCall.url.encodedPath().drop(1)))
+    return MatchedResource(entry).getResponse(httpCall)
   }
 
   private enum class Kind {
@@ -61,19 +61,19 @@ class StaticResourceAction @Inject constructor(
   }
 
   private inner class MatchedResource(var matchedEntry: StaticResourceEntry) {
-    fun getResponse(request: Request): Response<ResponseBody> {
-      val urlPath = request.url.encodedPath()
+    fun getResponse(httpCall: HttpCall): Response<ResponseBody> {
+      val urlPath = httpCall.url.encodedPath()
       return when (exists(urlPath)) {
         Kind.NO_MATCH -> when {
-          !urlPath.endsWith("/") -> redirectResponse(normalizePathWithQuery(request.url))
+          !urlPath.endsWith("/") -> redirectResponse(normalizePathWithQuery(httpCall.url))
         // actually return the resource, don't redirect. Path must stay the same since this will be handled by React router
           urlPath.endsWith("/") -> resourceResponse(
               normalizePath(matchedEntry.url_path_prefix))
           else -> null
         }
         Kind.RESOURCE -> resourceResponse(urlPath)
-        Kind.RESOURCE_DIRECTORY -> resourceResponse(normalizePathWithQuery(request.url))
-      } ?: NotFoundAction.response(request.url.encodedPath().drop(1))
+        Kind.RESOURCE_DIRECTORY -> resourceResponse(normalizePathWithQuery(httpCall.url))
+      } ?: NotFoundAction.response(httpCall.url.encodedPath().drop(1))
     }
 
     /** Returns true if the mapped path exists on either the resource path or file system. */

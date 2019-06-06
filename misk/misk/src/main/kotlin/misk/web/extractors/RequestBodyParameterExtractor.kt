@@ -1,7 +1,7 @@
 package misk.web.extractors
 
 import misk.web.PathPattern
-import misk.web.Request
+import misk.web.HttpCall
 import misk.web.RequestBody
 import misk.web.actions.WebAction
 import misk.web.marshal.GenericUnmarshallers
@@ -19,16 +19,16 @@ internal class RequestBodyParameterExtractor(
 ) : ParameterExtractor {
   override fun extract(
     webAction: WebAction,
-    request: Request,
+    httpCall: HttpCall,
     pathMatcher: Matcher
   ): Any? {
-    val mediaType = request.headers["Content-Type"]?.let { MediaType.parse(it) }
+    val mediaType = httpCall.requestHeaders["Content-Type"]?.let { MediaType.parse(it) }
     val unmarshaller = mediaType?.let { type ->
       unmarshallerFactories.map { it.create(type, parameter.type) }.filterNotNull().firstOrNull()
     } ?: GenericUnmarshallers.into(parameter)
     ?: throw IllegalArgumentException("no generic unmarshaller for ${parameter.type}")
 
-    return unmarshaller.unmarshal(request.takeRequestBody()!!)
+    return unmarshaller.unmarshal(httpCall.takeRequestBody()!!)
   }
 
   class Factory @Inject internal constructor(

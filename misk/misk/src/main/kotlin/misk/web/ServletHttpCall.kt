@@ -12,12 +12,12 @@ import javax.servlet.http.HttpServletRequest
 internal data class ServletHttpCall(
   override val url: HttpUrl,
   override val dispatchMechanism: DispatchMechanism,
-  override val headers: Headers,
+  override val requestHeaders: Headers,
   var requestBody: BufferedSource? = null,
   val upstreamResponse: UpstreamResponse,
   var responseBody: BufferedSink? = null,
   var webSocket: WebSocket? = null
-) : Request {
+) : HttpCall {
 
   override var statusCode: Int
     get() = upstreamResponse.statusCode
@@ -84,7 +84,7 @@ internal data class ServletHttpCall(
       return ServletHttpCall(
           url = request.httpUrl(),
           dispatchMechanism = dispatchMechanism,
-          headers = request.headers(),
+          requestHeaders = request.headers(),
           upstreamResponse = upstreamResponse,
           requestBody = requestBody,
           responseBody = responseBody,

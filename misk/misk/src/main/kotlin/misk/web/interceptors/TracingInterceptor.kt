@@ -32,7 +32,7 @@ internal class TracingInterceptor internal constructor(private val tracer: Trace
   override fun intercept(chain: NetworkChain) {
     val parentContext: SpanContext? = try {
       tracer.extract(Format.Builtin.HTTP_HEADERS,
-          TextMultimapExtractAdapter(chain.request.headers.toMultimap()))
+          TextMultimapExtractAdapter(chain.httpCall.requestHeaders.toMultimap()))
     } catch (e: Exception) {
       logger.warn("Failure attempting to extract span context. Existing context, if any," +
           " will be ignored in creation of span", e)
@@ -40,8 +40,8 @@ internal class TracingInterceptor internal constructor(private val tracer: Trace
     }
 
     val scopeBuilder = tracer.buildSpan(chain.webAction.javaClass.name)
-        .withTag(Tags.HTTP_METHOD.key, chain.request.dispatchMechanism.method.toString())
-        .withTag(Tags.HTTP_URL.key, chain.request.url.toString())
+        .withTag(Tags.HTTP_METHOD.key, chain.httpCall.dispatchMechanism.method.toString())
+        .withTag(Tags.HTTP_URL.key, chain.httpCall.url.toString())
         .withTag(Tags.SPAN_KIND.key, SPAN_KIND_SERVER)
 
     if (parentContext != null) {
@@ -51,9 +51,9 @@ internal class TracingInterceptor internal constructor(private val tracer: Trace
     val scope = scopeBuilder.startActive(true)
     scope.use {
       try {
-        chain.proceed(chain.request)
-        Tags.HTTP_STATUS.set(scope.span(), chain.request.statusCode)
-        if (chain.request.statusCode > 399) {
+        chain.proceed(chain.httpCall)
+        Tags.HTTP_STATUS.set(scope.span(), chain.httpCall.statusCode)
+        if (chain.httpCall.statusCode > 399) {
           Tags.ERROR.set(scope.span(), true)
         }
       } catch (e: Exception) {

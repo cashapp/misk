@@ -19,12 +19,12 @@ class InternalErrorInterceptorFactory @Inject constructor() : NetworkInterceptor
     val INTERCEPTOR = object : NetworkInterceptor {
       override fun intercept(chain: NetworkChain) {
         try {
-          chain.proceed(chain.request)
+          chain.proceed(chain.httpCall)
         } catch (throwable: Throwable) {
-          logger.error(throwable) { "${chain.request.url} failed; returning an HTTP 500 error" }
-          chain.request.statusCode = 500
-          chain.request.takeResponseBody()?.use { sink ->
-            chain.request.setResponseHeader("Content-Type", "text/plain; charset=utf-8")
+          logger.error(throwable) { "${chain.httpCall.url} failed; returning an HTTP 500 error" }
+          chain.httpCall.statusCode = 500
+          chain.httpCall.takeResponseBody()?.use { sink ->
+            chain.httpCall.setResponseHeader("Content-Type", "text/plain; charset=utf-8")
             sink.writeUtf8("Internal server error")
           }
         }
