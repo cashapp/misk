@@ -44,7 +44,7 @@ import java.util.regex.Matcher
  * parameters, reading the request body, writing the response body, or taking the return value.
  */
 internal interface FeatureBinding {
-  fun bind(action: Subject)
+  fun bind(subject: Subject)
 
   interface Subject {
     val webAction: WebAction
@@ -53,7 +53,7 @@ internal interface FeatureBinding {
     fun setParameter(index: Int, value: Any?)
     fun takeRequestBody(): BufferedSource
     fun takeResponseBody(): BufferedSink
-    fun takeResponse(): Any?
+    fun takeReturnValue(): Any?
   }
 
   interface Factory {

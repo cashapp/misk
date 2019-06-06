@@ -56,7 +56,7 @@ internal class BoundAction<A : WebAction>(
     url: HttpUrl
   ): BoundActionMatch? {
     // Confirm the path and method matches
-    val pathMatcher = pathMatcher(url) ?: return null
+    val pathMatcher = pathPattern.matcher(url) ?: return null
     if (requestDispatchMechanism != dispatchMechanism) return null
 
     // Confirm the request content type matches the types we accept, and pick the most specific
@@ -118,12 +118,6 @@ internal class BoundAction<A : WebAction>(
 
     val chain = webAction.asChain(action.function, parameters, listOf())
     return chain.proceed(chain.args) as WebSocketListener
-  }
-
-  /** Returns a Matcher if requestUrl can be matched, else null */
-  private fun pathMatcher(requestUrl: HttpUrl): Matcher? {
-    val matcher = pathPattern.regex.matcher(requestUrl.encodedPath())
-    return if (matcher.matches()) matcher else null
   }
 
   internal val metadata: WebActionMetadata by lazy {
