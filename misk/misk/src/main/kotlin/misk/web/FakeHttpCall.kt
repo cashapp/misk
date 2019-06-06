@@ -13,6 +13,8 @@ data class FakeHttpCall(
   override val requestHeaders: Headers = Headers.of(),
   override var statusCode: Int = 200,
   val headersBuilder: Headers.Builder = Headers.Builder(),
+  var sendTrailers: Boolean = false,
+  val trailersBuilder: Headers.Builder = Headers.Builder(),
   var requestBody: BufferedSource? = Buffer(),
   var responseBody: BufferedSink? = Buffer(),
   var webSocket: WebSocket? = null
@@ -29,10 +31,25 @@ data class FakeHttpCall(
     headersBuilder.addAll(headers)
   }
 
+  override fun requireTrailers() {
+    check(dispatchMechanism != DispatchMechanism.WEBSOCKET)
+    sendTrailers = true
+  }
+
+  override fun setResponseTrailer(name: String, value: String) {
+    check(sendTrailers)
+    trailersBuilder.set(name, value)
+  }
+
   override fun takeRequestBody(): BufferedSource? {
     val result = requestBody
     requestBody = null
     return result
+  }
+
+  override fun putRequestBody(requestBody: BufferedSource) {
+    check(this.requestBody == null) { "previous request body leaked; take it first" }
+    this.requestBody = requestBody
   }
 
   override fun takeResponseBody(): BufferedSink? {
@@ -41,15 +58,19 @@ data class FakeHttpCall(
     return result
   }
 
+  override fun putResponseBody(responseBody: BufferedSink) {
+    check(this.responseBody == null) { "previous response body leaked; take it first" }
+    this.responseBody = responseBody
+  }
+
   override fun takeWebSocket(): WebSocket? {
     val result = webSocket
     webSocket = null
     return result
   }
 
-  override fun withRequestBody(requestBody: BufferedSource) = copy(requestBody = requestBody)
-
-  override fun withResponseBody(responseBody: BufferedSink) = copy(responseBody = responseBody)
-
-  override fun withWebSocket(webSocket: WebSocket) = copy(webSocket = webSocket)
+  override fun putWebSocket(webSocket: WebSocket) {
+    check(this.webSocket == null) { "previous web socket leaked; take it first" }
+    this.webSocket = webSocket
+  }
 }

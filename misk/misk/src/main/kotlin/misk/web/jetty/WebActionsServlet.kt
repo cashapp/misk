@@ -19,12 +19,15 @@ import okhttp3.MediaType
 import okio.buffer
 import okio.sink
 import okio.source
+import org.eclipse.jetty.http.HttpFields
 import org.eclipse.jetty.http.HttpMethod
+import org.eclipse.jetty.server.Response
 import org.eclipse.jetty.websocket.servlet.ServletUpgradeResponse
 import org.eclipse.jetty.websocket.servlet.WebSocketCreator
 import org.eclipse.jetty.websocket.servlet.WebSocketServlet
 import org.eclipse.jetty.websocket.servlet.WebSocketServletFactory
 import java.net.ProtocolException
+import java.util.function.Supplier
 import javax.inject.Inject
 import javax.inject.Singleton
 import javax.servlet.http.HttpServletRequest
@@ -60,7 +63,7 @@ internal class WebActionsServlet @Inject constructor(
       val httpCall = ServletHttpCall.create(
           request = request,
           dispatchMechanism = request.dispatchMechanism(),
-          upstreamResponse = callback(response),
+          upstreamResponse = callback(response as Response),
           requestBody = request.inputStream.source().buffer(),
           responseBody = response.outputStream.sink().buffer()
       )
@@ -78,7 +81,7 @@ internal class WebActionsServlet @Inject constructor(
 
         val bestAction = candidateActions.sorted().firstOrNull()
         if (bestAction != null) {
-          bestAction.handle(httpCall, response)
+          bestAction.handle(httpCall)
           return
         }
       }
@@ -134,11 +137,18 @@ private fun callback(response: ServletUpgradeResponse): UpstreamResponse {
         response.addHeader(headers.name(i), headers.value(i))
       }
     }
+
+    override fun requireTrailers() = error("no trailers for web sockets")
+
+    override fun setTrailer(name: String, value: String) = error("no trailers for web sockets")
   }
 }
 
-private fun callback(response: HttpServletResponse): UpstreamResponse {
+private fun callback(response: Response): UpstreamResponse {
   return object : UpstreamResponse {
+    var sendTrailers = false
+    var trailers = Headers.of()
+
     override var statusCode: Int
       get() = response.status
       set(value) {
@@ -156,6 +166,26 @@ private fun callback(response: HttpServletResponse): UpstreamResponse {
       for (i in 0 until headers.size()) {
         response.addHeader(headers.name(i), headers.value(i))
       }
+    }
+
+    override fun requireTrailers() {
+      sendTrailers = true
+
+      // Set the callback that'll return trailers at the end of the response body.
+      response.trailers = Supplier<HttpFields> {
+        val httpFields = HttpFields()
+        for (i in 0 until trailers.size()) {
+          httpFields.add(trailers.name(i), trailers.value(i))
+        }
+        httpFields
+      }
+    }
+
+    override fun setTrailer(name: String, value: String) {
+      check(sendTrailers)
+      trailers = trailers.newBuilder()
+          .set(name, value)
+          .build()
     }
   }
 }
