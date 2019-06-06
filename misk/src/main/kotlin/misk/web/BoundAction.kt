@@ -14,11 +14,8 @@ import misk.web.mediatype.MediaTypes
 import misk.web.mediatype.compareTo
 import okhttp3.HttpUrl
 import okhttp3.MediaType
-import org.eclipse.jetty.http.HttpFields
-import java.util.function.Supplier
 import java.util.regex.Matcher
 import javax.inject.Provider
-import javax.servlet.http.HttpServletResponse
 import kotlin.reflect.KParameter
 
 /**
@@ -86,11 +83,7 @@ internal class BoundAction<A : WebAction>(
     )
   }
 
-  internal fun handle(
-    httpCall: HttpCall,
-    servletResponse: HttpServletResponse,
-    pathMatcher: Matcher
-  ) {
+  internal fun handle(httpCall: HttpCall, pathMatcher: Matcher) {
     // Find values for all the parameters.
     val webAction = webActionProvider.get()
 
@@ -103,11 +96,8 @@ internal class BoundAction<A : WebAction>(
     if (dispatchMechanism == DispatchMechanism.GRPC) {
       // Add the required gRPC trailers if that's the mechanism.
       // TODO(jwilson): permit non-0 GRPC statuses.
-      (servletResponse as org.eclipse.jetty.server.Response).trailers = Supplier<HttpFields> {
-        val trailers = HttpFields()
-        trailers.add("grpc-status", "0")
-        trailers
-      }
+      httpCall.requireTrailers()
+      httpCall.setResponseTrailer("grpc-status", "0")
       // TODO(jwilson): permit non-identity GRPC encoding.
       httpCall.setResponseHeader("grpc-encoding", "identity")
       httpCall.setResponseHeader("grpc-accept-encoding", "gzip")
@@ -211,8 +201,8 @@ internal class BoundActionMatch(
 ) : RequestMatch(action.pathPattern, acceptedMediaRange, requestCharsetMatch, responseContentType) {
 
   /** Handles [httpCall] by handing it off to the action. */
-  fun handle(httpCall: HttpCall, servletResponse: HttpServletResponse) {
-    action.handle(httpCall, servletResponse, pathMatcher)
+  fun handle(httpCall: HttpCall) {
+    action.handle(httpCall, pathMatcher)
   }
 
   fun handleWebSocket(httpCall: HttpCall): WebSocketListener {
