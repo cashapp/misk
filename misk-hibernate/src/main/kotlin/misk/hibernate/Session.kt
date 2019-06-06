@@ -56,7 +56,6 @@ enum class Check {
 inline fun <reified T : DbEntity<T>> Session.load(id: Id<T>): T = load(id, T::class)
 inline fun <R : DbRoot<R>, reified S : DbSharded<R, S>> Session.loadSharded(gid: Gid<R, S>): S = loadSharded(gid, S::class)
 inline fun <reified T : DbEntity<T>> Session.loadOrNull(id: Id<T>): T? = loadOrNull(id, T::class)
-fun <T> Session.allowCowrites(body: () -> T): T = this.withoutChecks(Check.COWRITE, body = body)
 
 fun checkValidShardIdentifier(identifier: String) {
   check(!identifier.isBlank())
