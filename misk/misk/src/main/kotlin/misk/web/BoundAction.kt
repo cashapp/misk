@@ -2,10 +2,11 @@ package misk.web
 
 import misk.Action
 import misk.ApplicationInterceptor
+import misk.inject.keyOf
+import misk.scope.ActionScope
 import misk.security.authz.AccessInterceptor
 import misk.web.actions.WebAction
 import misk.web.actions.WebActionMetadata
-import misk.web.actions.WebSocketListener
 import misk.web.actions.asChain
 import misk.web.mediatype.MediaRange
 import misk.web.mediatype.MediaTypes
@@ -14,12 +15,14 @@ import okhttp3.HttpUrl
 import okhttp3.MediaType
 import java.util.regex.Matcher
 import javax.inject.Provider
+import javax.servlet.http.HttpServletRequest
 
 /**
  * Decodes an HTTP request into a call to a web action, then encodes its response into an HTTP
  * response.
  */
 internal class BoundAction<A : WebAction>(
+  private val scope: ActionScope,
   private val webActionProvider: Provider<A>,
   private val networkInterceptors: List<NetworkInterceptor>,
   private val applicationInterceptors: List<ApplicationInterceptor>,
@@ -63,7 +66,21 @@ internal class BoundAction<A : WebAction>(
     )
   }
 
-  internal fun handle(httpCall: HttpCall, pathMatcher: Matcher) {
+  internal fun scopeAndHandle(
+    request: HttpServletRequest,
+    httpCall: HttpCall,
+    pathMatcher: Matcher
+  ) {
+    val seedData = mapOf(
+        keyOf<HttpServletRequest>() to request,
+        keyOf<HttpCall>() to httpCall
+    )
+    scope.enter(seedData).use {
+      handle(httpCall, pathMatcher)
+    }
+  }
+
+  private fun handle(httpCall: HttpCall, pathMatcher: Matcher) {
     // Find values for all the parameters.
     val webAction = webActionProvider.get()
 
@@ -85,18 +102,6 @@ internal class BoundAction<A : WebAction>(
 
     val chain = RealNetworkChain(action, webAction, httpCall, interceptors.toList())
     chain.proceed(httpCall)
-  }
-
-  internal fun handleWebSocket(
-    httpCall: HttpCall,
-    pathMatcher: Matcher
-  ): WebSocketListener {
-    val webAction = webActionProvider.get()
-    val parameters = webActionBinding.beforeCall(webAction, httpCall, pathMatcher)
-
-    val chain = webAction.asChain(action.function, parameters, listOf())
-    // TODO(jwilson): wire this through WebSocketListenerFeatureBinding.
-    return chain.proceed(chain.args) as WebSocketListener
   }
 
   internal val metadata: WebActionMetadata by lazy {
@@ -167,21 +172,11 @@ internal open class RequestMatch(
 /** A [RequestMatch] associated with the action that matched. */
 internal class BoundActionMatch(
   val action: BoundAction<*>,
-  private val pathMatcher: Matcher,
+  val pathMatcher: Matcher,
   acceptedMediaRange: MediaRange,
   requestCharsetMatch: Boolean,
   responseContentType: MediaType
-) : RequestMatch(action.pathPattern, acceptedMediaRange, requestCharsetMatch, responseContentType) {
-
-  /** Handles [httpCall] by handing it off to the action. */
-  fun handle(httpCall: HttpCall) {
-    action.handle(httpCall, pathMatcher)
-  }
-
-  fun handleWebSocket(httpCall: HttpCall): WebSocketListener {
-    return action.handleWebSocket(httpCall, pathMatcher)
-  }
-}
+) : RequestMatch(action.pathPattern, acceptedMediaRange, requestCharsetMatch, responseContentType)
 
 private fun MediaType.closestMediaRangeMatch(ranges: List<MediaRange>) =
     ranges.mapNotNull { it.matcher(this) }.sorted().firstOrNull()
