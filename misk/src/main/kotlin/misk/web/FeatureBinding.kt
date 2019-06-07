@@ -5,6 +5,7 @@ import misk.web.actions.WebAction
 import okio.BufferedSink
 import okio.BufferedSource
 import java.util.regex.Matcher
+import kotlin.reflect.KParameter
 
 /**
  * Binds an HTTP call to a [WebAction] function.
@@ -50,6 +51,7 @@ internal interface FeatureBinding {
     val webAction: WebAction
     val httpCall: HttpCall
     val pathMatcher: Matcher
+    fun setParameter(parameter: KParameter, value: Any?)
     fun setParameter(index: Int, value: Any?)
     fun takeRequestBody(): BufferedSource
     fun takeResponseBody(): BufferedSink
@@ -67,6 +69,7 @@ internal interface FeatureBinding {
   interface Claimer {
     fun claimRequestBody()
     fun claimParameter(index: Int)
+    fun claimParameter(parameter: KParameter)
     fun claimResponseBody()
     fun claimReturnValue()
   }

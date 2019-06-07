@@ -1,7 +1,6 @@
 package misk.web.interceptors
 
 import misk.Action
-import misk.web.actions.WebSocketListener
 import misk.web.marshal.GenericMarshallers
 import misk.web.marshal.Marshaller
 import misk.web.mediatype.MediaTypes
@@ -15,11 +14,7 @@ class ResponseBodyMarshallerFactory @Inject internal constructor(
   @JvmSuppressWildcards private val marshallerFactories: List<Marshaller.Factory>
 ) {
   /** Returns a marshaller for [action], or null if it has no response to marshal. */
-  fun create(action: Action): Marshaller<Any>? {
-    if (action.returnType.classifier == WebSocketListener::class) {
-      return null
-    }
-
+  fun create(action: Action): Marshaller<Any> {
     val responseMediaType = action.responseContentType
     if (responseMediaType == null || responseMediaType == MediaTypes.ALL_MEDIA_TYPE) {
       return genericMarshallerFor(responseMediaType, action.returnType)

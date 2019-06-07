@@ -13,8 +13,7 @@ import misk.web.Grpc
 import misk.web.NetworkInterceptor
 import misk.web.PathPattern
 import misk.web.Post
-import misk.web.extractors.ParameterExtractor
-import misk.web.interceptors.ResponseBodyMarshallerFactory
+import misk.web.WebActionBinding
 import misk.web.mediatype.MediaRange
 import misk.web.mediatype.MediaTypes
 import javax.inject.Inject
@@ -30,8 +29,7 @@ internal class WebActionFactory @Inject constructor(
   private val userProvidedNetworkInterceptorFactories: List<NetworkInterceptor.Factory>,
   @MiskDefault private val miskNetworkInterceptorFactories: List<NetworkInterceptor.Factory>,
   @MiskDefault private val miskApplicationInterceptorFactories: List<ApplicationInterceptor.Factory>,
-  private val responseBodyMarshallerFactory: ResponseBodyMarshallerFactory,
-  private val parameterExtractorFactories: List<ParameterExtractor.Factory>
+  private val webActionBindingFactory: WebActionBinding.Factory
 ) {
 
   /** Returns the bound actions for `webActionClass`. */
@@ -127,15 +125,17 @@ internal class WebActionFactory @Inject constructor(
         miskApplicationInterceptorFactories.mapNotNull { it.create(action) } +
             userProvidedApplicationInterceptorFactories.mapNotNull { it.create(action) }
 
-    val responseBodyMarshaller = responseBodyMarshallerFactory.create(action)
+    val parsedPathPattern = PathPattern.parse(pathPattern)
+
+    val webActionBinding = webActionBindingFactory.create(
+        action, dispatchMechanism, parsedPathPattern)
 
     return BoundAction(
         provider,
         networkInterceptors,
         applicationInterceptors,
-        responseBodyMarshaller,
-        parameterExtractorFactories,
-        PathPattern.parse(pathPattern),
+        webActionBinding,
+        parsedPathPattern,
         action,
         dispatchMechanism
     )
