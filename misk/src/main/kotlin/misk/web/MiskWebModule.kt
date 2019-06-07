@@ -23,13 +23,14 @@ import misk.web.exceptions.ActionExceptionLogLevelConfig
 import misk.web.exceptions.ActionExceptionMapper
 import misk.web.exceptions.ExceptionHandlingInterceptor
 import misk.web.exceptions.ExceptionMapperModule
-import misk.web.extractors.FormValueParameterExtractorFactory
-import misk.web.extractors.HeadersParameterExtractorFactory
-import misk.web.extractors.ParameterExtractor
-import misk.web.extractors.PathPatternParameterExtractorFactory
-import misk.web.extractors.QueryStringParameterExtractorFactory
-import misk.web.extractors.RequestBodyParameterExtractor
-import misk.web.extractors.WebSocketParameterExtractorFactory
+import misk.web.extractors.FormValueFeatureBinding
+import misk.web.extractors.PathParamFeatureBinding
+import misk.web.extractors.QueryParamFeatureBinding
+import misk.web.extractors.RequestBodyFeatureBinding
+import misk.web.extractors.RequestHeadersFeatureBinding
+import misk.web.extractors.ResponseBodyFeatureBinding
+import misk.web.extractors.WebSocketFeatureBinding
+import misk.web.extractors.WebSocketListenerFeatureBinding
 import misk.web.interceptors.InternalErrorInterceptorFactory
 import misk.web.interceptors.MetricsInterceptor
 import misk.web.interceptors.RebalancingInterceptor
@@ -120,13 +121,15 @@ class MiskWebModule(private val config: WebConfig) : KAbstractModule() {
 
     install(ExceptionMapperModule.create<ActionException, ActionExceptionMapper>())
 
-    // Register built-in parameter extractors
-    multibind<ParameterExtractor.Factory>().toInstance(PathPatternParameterExtractorFactory)
-    multibind<ParameterExtractor.Factory>().toInstance(QueryStringParameterExtractorFactory)
-    multibind<ParameterExtractor.Factory>().toInstance(FormValueParameterExtractorFactory)
-    multibind<ParameterExtractor.Factory>().toInstance(HeadersParameterExtractorFactory)
-    multibind<ParameterExtractor.Factory>().toInstance(WebSocketParameterExtractorFactory)
-    multibind<ParameterExtractor.Factory>().to<RequestBodyParameterExtractor.Factory>()
+    // Register built-in feature bindings.
+    multibind<FeatureBinding.Factory>().toInstance(PathParamFeatureBinding.Factory)
+    multibind<FeatureBinding.Factory>().toInstance(QueryParamFeatureBinding.Factory)
+    multibind<FeatureBinding.Factory>().toInstance(FormValueFeatureBinding.Factory)
+    multibind<FeatureBinding.Factory>().toInstance(RequestHeadersFeatureBinding.Factory)
+    multibind<FeatureBinding.Factory>().toInstance(WebSocketFeatureBinding.Factory)
+    multibind<FeatureBinding.Factory>().toInstance(WebSocketListenerFeatureBinding.Factory)
+    multibind<FeatureBinding.Factory>().to<RequestBodyFeatureBinding.Factory>()
+    multibind<FeatureBinding.Factory>().to<ResponseBodyFeatureBinding.Factory>()
 
     // Install infrastructure support
     install(CertificatesModule())
