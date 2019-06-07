@@ -1,6 +1,5 @@
 package misk
 
-import misk.web.RequestBody
 import misk.web.RequestContentType
 import misk.web.ResponseContentType
 import misk.web.mediatype.MediaRange
@@ -14,9 +13,8 @@ fun KFunction<*>.asAction(): Action {
   val instanceParameter = this.instanceParameter
       ?: throw IllegalArgumentException("only methods may be actions")
 
-  val parameterTypes = parameters.drop(1).map { it.type }
-  val requestType = parameters.drop(1).filter { it.annotations.any { it is RequestBody } }
-      .map { it.type }.firstOrNull()
+  // Drop 'this' which is the function's first parameter.
+  val actualParameters = parameters.drop(1)
   val name = instanceParameter.type.classifier?.let {
     when (it) {
       is KClass<*> -> it.simpleName
@@ -33,5 +31,5 @@ fun KFunction<*>.asAction(): Action {
   }?.toList() ?: listOf(MediaRange.ALL_MEDIA)
 
   return Action(
-      name, this, acceptedContentTypes, responseContentType, parameterTypes, requestType, returnType)
+      name, this, acceptedContentTypes, responseContentType, actualParameters, returnType)
 }

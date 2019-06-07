@@ -70,7 +70,7 @@ internal class ExceptionMapperTest {
   class ThrowsActionException @Inject constructor() : WebAction {
     @Get("/throws/action/{statusCode}")
     @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
-    fun throwsActionException(@PathParam statusCode: StatusCode): Nothing {
+    fun throwsActionException(@PathParam statusCode: StatusCode): String {
       throw ActionException(statusCode, "you asked for an error")
     }
   }
@@ -78,7 +78,7 @@ internal class ExceptionMapperTest {
   class ThrowsUnmappedError @Inject constructor() : WebAction {
     @Get("/throws/unmapped-error")
     @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
-    fun throwsUnmappedException() {
+    fun throwsUnmappedException() : String {
       throw AssertionError("this was bad")
     }
   }
