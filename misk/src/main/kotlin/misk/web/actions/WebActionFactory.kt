@@ -5,6 +5,7 @@ import com.google.inject.Provider
 import misk.ApplicationInterceptor
 import misk.MiskDefault
 import misk.asAction
+import misk.scope.ActionScope
 import misk.web.BoundAction
 import misk.web.ConnectWebSocket
 import misk.web.DispatchMechanism
@@ -29,7 +30,8 @@ internal class WebActionFactory @Inject constructor(
   private val userProvidedNetworkInterceptorFactories: List<NetworkInterceptor.Factory>,
   @MiskDefault private val miskNetworkInterceptorFactories: List<NetworkInterceptor.Factory>,
   @MiskDefault private val miskApplicationInterceptorFactories: List<ApplicationInterceptor.Factory>,
-  private val webActionBindingFactory: WebActionBinding.Factory
+  private val webActionBindingFactory: WebActionBinding.Factory,
+  private val scope: ActionScope
 ) {
 
   /** Returns the bound actions for `webActionClass`. */
@@ -131,6 +133,7 @@ internal class WebActionFactory @Inject constructor(
         action, dispatchMechanism, parsedPathPattern)
 
     return BoundAction(
+        scope,
         provider,
         networkInterceptors,
         applicationInterceptors,

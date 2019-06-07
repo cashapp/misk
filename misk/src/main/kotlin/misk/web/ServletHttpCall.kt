@@ -1,6 +1,7 @@
 package misk.web
 
 import misk.web.actions.WebSocket
+import misk.web.actions.WebSocketListener
 import misk.web.jetty.headers
 import misk.web.jetty.httpUrl
 import okhttp3.Headers
@@ -77,6 +78,10 @@ internal data class ServletHttpCall(
     this.webSocket = webSocket
   }
 
+  override fun initWebSocketListener(webSocketListener: WebSocketListener) {
+    this.upstreamResponse.initWebSocketListener(webSocketListener)
+  }
+
   /** Adapts the underlying servlet call to send data to the client. */
   interface UpstreamResponse {
     var statusCode: Int
@@ -85,6 +90,7 @@ internal data class ServletHttpCall(
     fun addHeaders(headers: Headers)
     fun requireTrailers()
     fun setTrailer(name: String, value: String)
+    fun initWebSocketListener(webSocketListener: WebSocketListener)
   }
 
   companion object {
