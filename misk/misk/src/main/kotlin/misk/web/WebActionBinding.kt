@@ -6,6 +6,7 @@ import okio.BufferedSink
 import okio.BufferedSource
 import java.util.regex.Matcher
 import javax.inject.Inject
+import kotlin.reflect.KParameter
 
 /** HTTP binding as specified by [FeatureBinding]. */
 internal class WebActionBinding @Inject constructor(
@@ -14,11 +15,9 @@ internal class WebActionBinding @Inject constructor(
   private val afterCallBindings: Set<FeatureBinding>,
   private var requestBodyClaimer: FeatureBinding?,
   private val parameterClaimers: List<FeatureBinding>,
-  private val responseBodyClaimer: FeatureBinding,
+  private val responseBodyClaimer: FeatureBinding?,
   private val returnValueClaimer: FeatureBinding?
 ) {
-  // TODO(jwilson): rename misk.web.Request to HttpCall.
-
   /** Returns the parameters for the call. */
   fun beforeCall(
     webAction: WebAction,
@@ -71,6 +70,9 @@ internal class WebActionBinding @Inject constructor(
       parameters[index] = value
     }
 
+    override fun setParameter(parameter: KParameter, value: Any?) =
+        setParameter(parameter.index - 1, value)
+
     override fun takeRequestBody(): BufferedSource {
       require(current == requestBodyClaimer) { "request body not claimed by $current" }
       return httpCall.takeRequestBody()!!
@@ -115,6 +117,8 @@ internal class WebActionBinding @Inject constructor(
       check(parameters[index] == null) { "already claimed by ${parameters[index]}" }
       parameters[index] = Placeholder
     }
+
+    override fun claimParameter(parameter: KParameter) = claimParameter(parameter.index - 1)
 
     override fun claimResponseBody() {
       check(responseBody == null) { "already claimed by $responseBody" }
@@ -167,8 +171,12 @@ internal class WebActionBinding @Inject constructor(
 
     /** Confirm everything that needs to be claimed is claimed. */
     internal fun newWebActionBinder(): WebActionBinding {
-      if (dispatchMechanism != DispatchMechanism.GET) {
-        check(requestBody != null) { "$action request body not claimed" }
+      // TODO(jwilson): require request body handlers. Add a DiscardRequestBodyFeatureHandler that
+      //     discards the request body for method annotated with both @Post and @Get.
+      if (false) {
+        if (dispatchMechanism != DispatchMechanism.GET) {
+          check(requestBody != null) { "$action request body not claimed" }
+        }
       }
 
       val nonNullParameters = mutableListOf<FeatureBinding>()
@@ -176,7 +184,9 @@ internal class WebActionBinding @Inject constructor(
         nonNullParameters += checkNotNull(parameters[i]) { "$action parameter $i not claimed" }
       }
 
-      check(responseBody != null) { "$action response body not claimed" }
+      if (dispatchMechanism != DispatchMechanism.WEBSOCKET) {
+        check(responseBody != null) { "$action response body not claimed" }
+      }
 
       if (action.hasReturnValue()) {
         check(returnValue != null) { "return value ${action.returnType} not claimed" }
@@ -188,7 +198,7 @@ internal class WebActionBinding @Inject constructor(
           afterCallBindings.toSet(),
           requestBody,
           nonNullParameters.toList(),
-          responseBody!!,
+          responseBody,
           returnValue
       )
     }

@@ -7,8 +7,6 @@ import misk.web.actions.WebAction
 import misk.web.actions.WebActionMetadata
 import misk.web.actions.WebSocketListener
 import misk.web.actions.asChain
-import misk.web.extractors.ParameterExtractor
-import misk.web.marshal.Marshaller
 import misk.web.mediatype.MediaRange
 import misk.web.mediatype.MediaTypes
 import misk.web.mediatype.compareTo
@@ -16,7 +14,6 @@ import okhttp3.HttpUrl
 import okhttp3.MediaType
 import java.util.regex.Matcher
 import javax.inject.Provider
-import kotlin.reflect.KParameter
 
 /**
  * Decodes an HTTP request into a call to a web action, then encodes its response into an HTTP
@@ -26,28 +23,11 @@ internal class BoundAction<A : WebAction>(
   private val webActionProvider: Provider<A>,
   private val networkInterceptors: List<NetworkInterceptor>,
   private val applicationInterceptors: List<ApplicationInterceptor>,
-  private val responseBodyMarshaller: Marshaller<Any>?,
-  parameterExtractorFactories: List<ParameterExtractor.Factory>,
+  private val webActionBinding: WebActionBinding,
   val pathPattern: PathPattern,
   val action: Action,
   val dispatchMechanism: DispatchMechanism
 ) {
-  private val parameterExtractors = action.function.parameters
-      .drop(1) // the first parameter is always _this_
-      .map { findParameterExtractor(parameterExtractorFactories, it) }
-
-  private fun findParameterExtractor(
-    parameterExtractorFactories: List<ParameterExtractor.Factory>,
-    parameter: KParameter
-  ): ParameterExtractor {
-    val results = parameterExtractorFactories.mapNotNull {
-      it.create(action.function, parameter, pathPattern)
-    }
-    require(results.size == 1) {
-      "expected exactly 1 way to extract $parameter but was $results"
-    }
-    return results[0]
-  }
 
   fun match(
     requestDispatchMechanism: DispatchMechanism?,
@@ -90,7 +70,7 @@ internal class BoundAction<A : WebAction>(
     // RequestBridgeInterceptor necessarily needs to be the last NetworkInterceptor run.
     val interceptors = networkInterceptors.toMutableList()
     interceptors.add(RequestBridgeInterceptor(
-        parameterExtractors, responseBodyMarshaller!!, applicationInterceptors, pathMatcher))
+        webActionBinding, applicationInterceptors, pathMatcher))
 
     // Format the response for gRPC.
     if (dispatchMechanism == DispatchMechanism.GRPC) {
@@ -112,11 +92,10 @@ internal class BoundAction<A : WebAction>(
     pathMatcher: Matcher
   ): WebSocketListener {
     val webAction = webActionProvider.get()
-    val parameters = parameterExtractors.map {
-      it.extract(webAction, httpCall, pathMatcher)
-    }
+    val parameters = webActionBinding.beforeCall(webAction, httpCall, pathMatcher)
 
     val chain = webAction.asChain(action.function, parameters, listOf())
+    // TODO(jwilson): wire this through WebSocketListenerFeatureBinding.
     return chain.proceed(chain.args) as WebSocketListener
   }
 
@@ -214,16 +193,13 @@ private fun MediaType.closestMediaRangeMatch(ranges: List<MediaRange>) =
  * If it does, this will be written to the HTTP call's response.
  */
 private class RequestBridgeInterceptor(
-  val parameterExtractors: List<ParameterExtractor>,
-  val responseBodyMarshaller: Marshaller<Any>,
+  val webActionBinding: WebActionBinding,
   val applicationInterceptors: List<ApplicationInterceptor>,
   val pathMatcher: Matcher
 ) : NetworkInterceptor {
   override fun intercept(chain: NetworkChain) {
     val httpCall = chain.httpCall
-    val arguments = parameterExtractors.map {
-      it.extract(chain.webAction, httpCall, pathMatcher)
-    }
+    val arguments = webActionBinding.beforeCall(chain.webAction, httpCall, pathMatcher)
 
     val applicationChain = chain.webAction.asChain(
         chain.action.function, arguments, applicationInterceptors)
@@ -237,15 +213,6 @@ private class RequestBridgeInterceptor(
       returnValue = returnValue.body!!
     }
 
-    // If the response body needs to be written, write it.
-    httpCall.takeResponseBody()?.use { sink ->
-      val contentType = responseBodyMarshaller.contentType()
-      if (httpCall.responseHeaders.get("Content-Type") == null && contentType != null) {
-        httpCall.setResponseHeader("Content-Type", contentType.toString())
-      }
-
-      val responseBody = responseBodyMarshaller.responseBody(returnValue)
-      responseBody.writeTo(sink)
-    }
+    webActionBinding.afterCall(chain.webAction, httpCall, pathMatcher, returnValue)
   }
 }
