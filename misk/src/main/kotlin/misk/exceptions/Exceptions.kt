@@ -7,6 +7,7 @@ enum class StatusCode(val code: Int) {
   UNAUTHENTICATED(401),
   FORBIDDEN(403),
   NOT_ACCEPTABLE(406),
+  CONFLICT(409),
   ENHANCE_YOUR_CALM(420),
   UNPROCESSABLE_ENTITY(429),
   INTERNAL_SERVER_ERROR(500),
@@ -42,6 +43,10 @@ open class ResourceUnavailableException(message: String = "", cause: Throwable? 
 /** Base exception for bad client requests */
 open class BadRequestException(message: String = "", cause: Throwable? = null) :
     ActionException(StatusCode.BAD_REQUEST, message, cause)
+
+/** Base exception for when a request causes a conflict */
+open class ConflictException(message: String = "", cause: Throwable? = null) :
+    ActionException(StatusCode.CONFLICT, message, cause)
 
 /** Similar to [kotlin.require], but throws [BadRequestException] if the check fails */
 inline fun requireRequest(check: Boolean, lazyMessage: () -> String) {
