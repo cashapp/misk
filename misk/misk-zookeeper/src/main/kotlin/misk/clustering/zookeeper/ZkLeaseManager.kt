@@ -4,6 +4,7 @@ import com.google.common.annotations.VisibleForTesting
 import com.google.common.util.concurrent.AbstractExecutionThreadService
 import misk.clustering.Cluster
 import misk.clustering.lease.LeaseManager
+import misk.clustering.weights.ClusterWeightProvider
 import misk.config.AppName
 import misk.logging.getLogger
 import misk.tasks.RepeatedTaskQueue
@@ -31,7 +32,8 @@ internal class ZkLeaseManager @Inject internal constructor(
   @AppName appName: String,
   @ForZkLease private val taskQueue: RepeatedTaskQueue,
   internal val cluster: Cluster,
-  @ForZkLease curator: CuratorFramework
+  @ForZkLease curator: CuratorFramework,
+  private val clusterWeight : ClusterWeightProvider
 ) : AbstractExecutionThreadService(), LeaseManager {
   internal val leaseNamespace = "$SERVICES_NODE/${appName.asZkNamespace}/leases"
   internal val client = lazy { curator.usingNamespace(leaseNamespace) }
@@ -107,7 +109,7 @@ internal class ZkLeaseManager @Inject internal constructor(
 
   override fun requestLease(name: String): ZkLease {
     return leases.computeIfAbsent(name) {
-      ZkLease(ownerName, this, "$leaseNamespace/$name", name)
+      ZkLease(ownerName, this, "$leaseNamespace/$name", clusterWeight, name)
     }
   }
 
