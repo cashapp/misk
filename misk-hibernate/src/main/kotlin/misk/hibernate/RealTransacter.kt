@@ -57,7 +57,7 @@ internal class RealTransacter private constructor(
 
   override fun isCheckEnabled(check : Check): Boolean {
     val session = threadLocalSession.get()
-    return session != null && !session.disabledChecks.contains(check)
+    return session == null || !session.disabledChecks.contains(check)
   }
 
   override fun <T> transaction(lambda: (session: Session) -> T): T {
