@@ -10,6 +10,7 @@ import misk.testing.ConcurrentMockTracer
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.testing.MockTracingBackendModule
+import misk.web.DispatchMechanism
 import misk.web.FakeHttpCall
 import misk.web.Get
 import misk.web.NetworkChain
@@ -39,10 +40,11 @@ class TracingInterceptorTest {
 
   @Test
   fun initiatesTrace() {
-    val tracingInterceptor = tracingInterceptorFactory.create(TracingTestAction::call.asAction())!!
+    val tracingInterceptor = tracingInterceptorFactory.create(
+        TracingTestAction::call.asAction(DispatchMechanism.GET))!!
     val httpCall = FakeHttpCall(url = HttpUrl.get("http://foo.bar"))
-    val chain = RealNetworkChain(TracingTestAction::call.asAction(), tracingTestAction,
-        httpCall, listOf(tracingInterceptor, TerminalInterceptor(200)))
+    val chain = RealNetworkChain(TracingTestAction::call.asAction(DispatchMechanism.GET),
+        tracingTestAction, httpCall, listOf(tracingInterceptor, TerminalInterceptor(200)))
 
     chain.proceed(chain.httpCall)
 
@@ -57,13 +59,14 @@ class TracingInterceptorTest {
 
   @Test
   fun looksForParentContext() {
-    val tracingInterceptor = tracingInterceptorFactory.create(TracingTestAction::call.asAction())!!
+    val tracingInterceptor = tracingInterceptorFactory.create(
+        TracingTestAction::call.asAction(DispatchMechanism.GET))!!
     val httpCall = FakeHttpCall(
         url = HttpUrl.get("http://foo.bar"),
         requestHeaders = Headers.of("spanid", "1", "traceid", "2")
     )
-    val chain = RealNetworkChain(TracingTestAction::call.asAction(), tracingTestAction,
-        httpCall, listOf(tracingInterceptor, TerminalInterceptor(200)))
+    val chain = RealNetworkChain(TracingTestAction::call.asAction(DispatchMechanism.GET),
+        tracingTestAction, httpCall, listOf(tracingInterceptor, TerminalInterceptor(200)))
 
     chain.proceed(chain.httpCall)
 
@@ -96,7 +99,8 @@ class TracingInterceptorTest {
     val tracingInterceptorFactory: TracingInterceptor.Factory =
         injector.getInstance(TracingInterceptor.Factory::class.java)
 
-    assertThat(tracingInterceptorFactory.create(TracingTestAction::call.asAction())).isNull()
+    assertThat(tracingInterceptorFactory.create(
+        TracingTestAction::call.asAction(DispatchMechanism.GET))).isNull()
   }
 
   private fun get(path: String) {
