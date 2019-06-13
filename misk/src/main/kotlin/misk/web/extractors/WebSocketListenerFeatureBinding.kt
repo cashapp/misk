@@ -10,8 +10,8 @@ import misk.web.actions.WebSocketListener
 /** Binds return values of type [WebSocketListener]. */
 internal class WebSocketListenerFeatureBinding : FeatureBinding {
   override fun bind(subject: Subject) {
-    // TODO(jwilson): wire this return value up
-    subject.takeReturnValue()
+    val webSocketListener = subject.takeReturnValue() as WebSocketListener
+    subject.httpCall.initWebSocketListener(webSocketListener)
   }
 
   companion object Factory : FeatureBinding.Factory {

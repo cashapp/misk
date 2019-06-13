@@ -150,11 +150,11 @@ internal class RequestLoggingInterceptorTest {
       install(WebTestingModule())
       install(LogCollectorModule())
       multibind<MiskCallerAuthenticator>().to<FakeCallerAuthenticator>()
-      install(WebActionModule.create<RequestLoggingInterceptorTest.IncludeBodyRequestLoggingAction>())
-      install(WebActionModule.create<RequestLoggingInterceptorTest.ExcludeBodyRequestLoggingAction>())
-      install(WebActionModule.create<RequestLoggingInterceptorTest.ExceptionThrowingRequestLoggingAction>())
-      install(WebActionModule.create<RequestLoggingInterceptorTest.NoRequestLoggingAction>())
-      install(WebActionModule.create<RequestLoggingInterceptorTest.SampledRequestLoggingAction>())
+      install(WebActionModule.create<IncludeBodyRequestLoggingAction>())
+      install(WebActionModule.create<ExcludeBodyRequestLoggingAction>())
+      install(WebActionModule.create<ExceptionThrowingRequestLoggingAction>())
+      install(WebActionModule.create<NoRequestLoggingAction>())
+      install(WebActionModule.create<SampledRequestLoggingAction>())
     }
   }
 }

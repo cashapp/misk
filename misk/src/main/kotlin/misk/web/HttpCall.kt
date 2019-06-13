@@ -1,6 +1,7 @@
 package misk.web
 
 import misk.web.actions.WebSocket
+import misk.web.actions.WebSocketListener
 import misk.web.mediatype.MediaRange
 import okhttp3.Headers
 import okhttp3.HttpUrl
@@ -82,6 +83,12 @@ interface HttpCall {
    * leaked.
    */
   fun putWebSocket(webSocket: WebSocket)
+
+  /**
+   * Set the call's web socket listener. This should only be called once, and only for web socket
+   * calls.
+   */
+  fun initWebSocketListener(webSocketListener: WebSocketListener)
 
   fun contentType(): MediaType? {
     val contentType = requestHeaders.get("Content-Type") ?: return null
