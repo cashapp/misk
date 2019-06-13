@@ -1,13 +1,9 @@
 package misk.web.jetty
 
 import misk.exceptions.StatusCode
-import misk.inject.keyOf
-import misk.scope.ActionScope
 import misk.web.BoundAction
 import misk.web.DispatchMechanism
-import misk.web.HttpCall
 import misk.web.ServletHttpCall
-import misk.web.ServletHttpCall.UpstreamResponse
 import misk.web.actions.WebAction
 import misk.web.actions.WebActionEntry
 import misk.web.actions.WebActionFactory
@@ -19,15 +15,12 @@ import okhttp3.MediaType
 import okio.buffer
 import okio.sink
 import okio.source
-import org.eclipse.jetty.http.HttpFields
 import org.eclipse.jetty.http.HttpMethod
 import org.eclipse.jetty.server.Response
 import org.eclipse.jetty.websocket.servlet.ServletUpgradeResponse
-import org.eclipse.jetty.websocket.servlet.WebSocketCreator
 import org.eclipse.jetty.websocket.servlet.WebSocketServlet
 import org.eclipse.jetty.websocket.servlet.WebSocketServletFactory
 import java.net.ProtocolException
-import java.util.function.Supplier
 import javax.inject.Inject
 import javax.inject.Singleton
 import javax.servlet.http.HttpServletRequest
@@ -36,8 +29,7 @@ import javax.servlet.http.HttpServletResponse
 @Singleton
 internal class WebActionsServlet @Inject constructor(
   webActionFactory: WebActionFactory,
-  webActionEntries: List<WebActionEntry>,
-  private val scope: ActionScope
+  webActionEntries: List<WebActionEntry>
 ) : WebSocketServlet() {
 
   private val boundActions: MutableSet<BoundAction<out WebAction>> = mutableSetOf()
@@ -63,29 +55,24 @@ internal class WebActionsServlet @Inject constructor(
       val httpCall = ServletHttpCall.create(
           request = request,
           dispatchMechanism = request.dispatchMechanism(),
-          upstreamResponse = callback(response as Response),
+          upstreamResponse = JettyServletUpstreamResponse(response as Response),
           requestBody = request.inputStream.source().buffer(),
           responseBody = response.outputStream.sink().buffer()
       )
 
-      val seedData = mapOf(
-          keyOf<HttpServletRequest>() to request,
-          keyOf<HttpCall>() to httpCall)
-
       val requestContentType = httpCall.contentType()
       val requestAccepts = httpCall.accepts()
-      scope.enter(seedData).use {
-        val candidateActions = boundActions.mapNotNull {
-          it.match(httpCall.dispatchMechanism, requestContentType, requestAccepts, httpCall.url)
-        }
 
-        val bestAction = candidateActions.sorted().firstOrNull()
-        if (bestAction != null) {
-          bestAction.handle(httpCall)
-          return
-        }
+      val candidateActions = boundActions.mapNotNull {
+        it.match(httpCall.dispatchMechanism, requestContentType, requestAccepts, httpCall.url)
       }
-    } catch (e: ProtocolException) {
+      val bestAction = candidateActions.sorted().firstOrNull()
+
+      if (bestAction != null) {
+        bestAction.action.scopeAndHandle(request, httpCall, bestAction.pathMatcher)
+        return
+      }
+    } catch (_: ProtocolException) {
       // Probably an unexpected HTTP method. Send a 404 below.
     }
 
@@ -96,97 +83,7 @@ internal class WebActionsServlet @Inject constructor(
   }
 
   override fun configure(factory: WebSocketServletFactory) {
-    factory.creator = WebSocketCreator { servletUpgradeRequest, upgradeResponse ->
-      val realWebSocket = RealWebSocket()
-      val httpCall = ServletHttpCall.create(
-          request = servletUpgradeRequest.httpServletRequest,
-          dispatchMechanism = DispatchMechanism.WEBSOCKET,
-          upstreamResponse = callback(upgradeResponse),
-          webSocket = realWebSocket
-      )
-
-      val candidateActions = boundActions.mapNotNull {
-        it.match(DispatchMechanism.WEBSOCKET, null, listOf(), httpCall.url)
-      }
-
-      val bestAction = candidateActions.sorted().firstOrNull() ?: return@WebSocketCreator null
-      val webSocketListener = bestAction.handleWebSocket(httpCall)
-      realWebSocket.listener = webSocketListener
-      realWebSocket.adapter
-    }
-  }
-}
-
-private fun callback(response: ServletUpgradeResponse): UpstreamResponse {
-  return object : UpstreamResponse {
-    override var statusCode: Int
-      get() = response.statusCode
-      set(value) {
-        response.statusCode = value
-      }
-
-    override val headers: Headers
-      get() = response.headers()
-
-    override fun setHeader(name: String, value: String) {
-      response.setHeader(name, value)
-    }
-
-    override fun addHeaders(headers: Headers) {
-      for (i in 0 until headers.size()) {
-        response.addHeader(headers.name(i), headers.value(i))
-      }
-    }
-
-    override fun requireTrailers() = error("no trailers for web sockets")
-
-    override fun setTrailer(name: String, value: String) = error("no trailers for web sockets")
-  }
-}
-
-private fun callback(response: Response): UpstreamResponse {
-  return object : UpstreamResponse {
-    var sendTrailers = false
-    var trailers = Headers.of()
-
-    override var statusCode: Int
-      get() = response.status
-      set(value) {
-        response.status = value
-      }
-
-    override val headers: Headers
-      get() = response.headers()
-
-    override fun setHeader(name: String, value: String) {
-      response.setHeader(name, value)
-    }
-
-    override fun addHeaders(headers: Headers) {
-      for (i in 0 until headers.size()) {
-        response.addHeader(headers.name(i), headers.value(i))
-      }
-    }
-
-    override fun requireTrailers() {
-      sendTrailers = true
-
-      // Set the callback that'll return trailers at the end of the response body.
-      response.trailers = Supplier<HttpFields> {
-        val httpFields = HttpFields()
-        for (i in 0 until trailers.size()) {
-          httpFields.add(trailers.name(i), trailers.value(i))
-        }
-        httpFields
-      }
-    }
-
-    override fun setTrailer(name: String, value: String) {
-      check(sendTrailers)
-      trailers = trailers.newBuilder()
-          .set(name, value)
-          .build()
-    }
+    factory.creator = JettyWebSocket.Creator(boundActions)
   }
 }
 

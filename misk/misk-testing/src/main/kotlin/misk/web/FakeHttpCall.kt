@@ -1,6 +1,7 @@
 package misk.web
 
 import misk.web.actions.WebSocket
+import misk.web.actions.WebSocketListener
 import okhttp3.Headers
 import okhttp3.HttpUrl
 import okio.Buffer
@@ -17,7 +18,8 @@ data class FakeHttpCall(
   val trailersBuilder: Headers.Builder = Headers.Builder(),
   var requestBody: BufferedSource? = Buffer(),
   var responseBody: BufferedSink? = Buffer(),
-  var webSocket: WebSocket? = null
+  var webSocket: WebSocket? = null,
+  var webSocketListener: WebSocketListener? = null
 ) : HttpCall {
 
   override val responseHeaders: Headers
@@ -72,5 +74,10 @@ data class FakeHttpCall(
   override fun putWebSocket(webSocket: WebSocket) {
     check(this.webSocket == null) { "previous web socket leaked; take it first" }
     this.webSocket = webSocket
+  }
+
+  override fun initWebSocketListener(webSocketListener: WebSocketListener) {
+    check(this.webSocketListener == null) { "web socket listener already set" }
+    this.webSocketListener = webSocketListener
   }
 }
