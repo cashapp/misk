@@ -45,6 +45,8 @@ import kotlin.reflect.KParameter
  * parameters, reading the request body, writing the response body, or taking the return value.
  */
 internal interface FeatureBinding {
+  // TODO: replace bind() with beforeCall/afterCall so we can combine
+  //     GrpcRequestFeatureBinding, GrpcResponseFeatureBinding
   fun bind(subject: Subject)
 
   interface Subject {

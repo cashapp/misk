@@ -7,8 +7,8 @@ import misk.MiskCaller
 import misk.MiskDefault
 import misk.ServiceModule
 import misk.exceptions.ActionException
-import misk.grpc.GrpcMarshallerFactory
-import misk.grpc.GrpcUnmarshallerFactory
+import misk.grpc.GrpcRequestFeatureBinding
+import misk.grpc.GrpcResponseFeatureBinding
 import misk.inject.KAbstractModule
 import misk.scope.ActionScopedProvider
 import misk.scope.ActionScopedProviderModule
@@ -78,10 +78,8 @@ class MiskWebModule(private val config: WebConfig) : KAbstractModule() {
     multibind<Marshaller.Factory>().to<PlainTextMarshaller.Factory>()
     multibind<Marshaller.Factory>().to<JsonMarshaller.Factory>()
     multibind<Marshaller.Factory>().to<ProtobufMarshaller.Factory>()
-    multibind<Marshaller.Factory>().to<GrpcMarshallerFactory>()
     multibind<Unmarshaller.Factory>().to<JsonUnmarshaller.Factory>()
     multibind<Unmarshaller.Factory>().to<ProtobufUnmarshaller.Factory>()
-    multibind<Unmarshaller.Factory>().to<GrpcUnmarshallerFactory>()
 
     // Initialize empty sets for our multibindings.
     newMultibinder<NetworkInterceptor.Factory>()
@@ -130,6 +128,8 @@ class MiskWebModule(private val config: WebConfig) : KAbstractModule() {
     multibind<FeatureBinding.Factory>().toInstance(WebSocketListenerFeatureBinding.Factory)
     multibind<FeatureBinding.Factory>().to<RequestBodyFeatureBinding.Factory>()
     multibind<FeatureBinding.Factory>().to<ResponseBodyFeatureBinding.Factory>()
+    multibind<FeatureBinding.Factory>().to<GrpcRequestFeatureBinding.Factory>()
+    multibind<FeatureBinding.Factory>().to<GrpcResponseFeatureBinding.Factory>()
 
     // Install infrastructure support
     install(CertificatesModule())

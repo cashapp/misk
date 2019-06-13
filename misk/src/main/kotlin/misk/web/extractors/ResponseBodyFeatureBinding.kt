@@ -1,6 +1,7 @@
 package misk.web.extractors
 
 import misk.Action
+import misk.web.DispatchMechanism
 import misk.web.FeatureBinding
 import misk.web.FeatureBinding.Claimer
 import misk.web.FeatureBinding.Subject
@@ -37,6 +38,7 @@ internal class ResponseBodyFeatureBinding(
       pathPattern: PathPattern,
       claimer: Claimer
     ): FeatureBinding? {
+      if (action.dispatchMechanism == DispatchMechanism.GRPC) return null
       if (action.returnType.classifier == Unit::class) return null
       if (action.returnType.classifier == WebSocketListener::class) return null
 
