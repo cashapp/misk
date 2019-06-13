@@ -89,10 +89,7 @@ internal class WebActionBinding @Inject constructor(
     }
   }
 
-  class RealClaimer(
-    val action: Action,
-    val dispatchMechanism: DispatchMechanism
-  ) : FeatureBinding.Claimer {
+  class RealClaimer(val action: Action) : FeatureBinding.Claimer {
     /** Claims are taken by this placeholder until we get the actual FeatureBinding. */
     private object Placeholder : FeatureBinding {
       override fun bind(subject: FeatureBinding.Subject) = throw AssertionError()
@@ -109,7 +106,9 @@ internal class WebActionBinding @Inject constructor(
 
     override fun claimRequestBody() {
       check(requestBody == null) { "already claimed by $requestBody" }
-      check(dispatchMechanism != DispatchMechanism.GET) { "cannot claim request body of GET" }
+      check(action.dispatchMechanism != DispatchMechanism.GET) {
+        "cannot claim request body of GET"
+      }
       requestBody = Placeholder
     }
 
@@ -174,7 +173,7 @@ internal class WebActionBinding @Inject constructor(
       // TODO(jwilson): require request body handlers. Add a DiscardRequestBodyFeatureHandler that
       //     discards the request body for method annotated with both @Post and @Get.
       if (false) {
-        if (dispatchMechanism != DispatchMechanism.GET) {
+        if (action.dispatchMechanism != DispatchMechanism.GET) {
           check(requestBody != null) { "$action request body not claimed" }
         }
       }
@@ -184,7 +183,7 @@ internal class WebActionBinding @Inject constructor(
         nonNullParameters += checkNotNull(parameters[i]) { "$action parameter $i not claimed" }
       }
 
-      if (dispatchMechanism != DispatchMechanism.WEBSOCKET) {
+      if (action.dispatchMechanism != DispatchMechanism.WEBSOCKET) {
         check(responseBody != null) { "$action response body not claimed" }
       }
 
@@ -210,10 +209,9 @@ internal class WebActionBinding @Inject constructor(
   ) {
     fun create(
       action: Action,
-      dispatchMechanism: DispatchMechanism,
       pathPattern: PathPattern
     ): WebActionBinding {
-      val claimer = RealClaimer(action, dispatchMechanism)
+      val claimer = RealClaimer(action)
       for (factory in featureBindingFactories) {
         val binding = factory.create(action, pathPattern, claimer)
         claimer.commitClaims(factory, binding)
