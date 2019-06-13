@@ -28,8 +28,7 @@ internal class BoundAction<A : WebAction>(
   private val applicationInterceptors: List<ApplicationInterceptor>,
   private val webActionBinding: WebActionBinding,
   val pathPattern: PathPattern,
-  val action: Action,
-  val dispatchMechanism: DispatchMechanism
+  val action: Action
 ) {
 
   fun match(
@@ -40,7 +39,7 @@ internal class BoundAction<A : WebAction>(
   ): BoundActionMatch? {
     // Confirm the path and method matches
     val pathMatcher = pathPattern.matcher(url) ?: return null
-    if (requestDispatchMechanism != dispatchMechanism) return null
+    if (requestDispatchMechanism != action.dispatchMechanism) return null
 
     // Confirm the request content type matches the types we accept, and pick the most specific
     // content type match
@@ -90,7 +89,7 @@ internal class BoundAction<A : WebAction>(
         webActionBinding, applicationInterceptors, pathMatcher))
 
     // Format the response for gRPC.
-    if (dispatchMechanism == DispatchMechanism.GRPC) {
+    if (action.dispatchMechanism == DispatchMechanism.GRPC) {
       // Add the required gRPC trailers if that's the mechanism.
       // TODO(jwilson): permit non-0 GRPC statuses.
       httpCall.requireTrailers()
@@ -117,7 +116,7 @@ internal class BoundAction<A : WebAction>(
         pathPattern = pathPattern,
         applicationInterceptors = applicationInterceptors,
         networkInterceptors = networkInterceptors,
-        dispatchMechanism = dispatchMechanism,
+        dispatchMechanism = action.dispatchMechanism,
         allowedServices = fetchAllowedCallers(
             applicationInterceptors, AccessInterceptor::allowedServices),
         allowedRoles = fetchAllowedCallers(applicationInterceptors, AccessInterceptor::allowedRoles)

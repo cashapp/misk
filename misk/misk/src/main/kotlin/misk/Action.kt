@@ -1,5 +1,6 @@
 package misk
 
+import misk.web.DispatchMechanism
 import misk.web.RequestBody
 import misk.web.mediatype.MediaRange
 import okhttp3.MediaType
@@ -8,14 +9,14 @@ import kotlin.reflect.KParameter
 import kotlin.reflect.KType
 import kotlin.reflect.full.findAnnotation
 
-// TODO(jwilson): add DispatchMechanism to this.
 data class Action(
   val name: String,
   val function: KFunction<*>,
   val acceptedMediaRanges: List<MediaRange>,
   val responseContentType: MediaType?,
   val parameters: List<KParameter>,
-  val returnType: KType
+  val returnType: KType,
+  val dispatchMechanism: DispatchMechanism
 ) {
   /**
    * ParameterTypes and RequestType can differ because RequestType pertains

@@ -15,8 +15,6 @@ import misk.web.NetworkInterceptor
 import misk.web.PathPattern
 import misk.web.Post
 import misk.web.WebActionBinding
-import misk.web.mediatype.MediaRange
-import misk.web.mediatype.MediaTypes
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.reflect.KClass
@@ -105,18 +103,7 @@ internal class WebActionFactory @Inject constructor(
   ): BoundAction<A> {
     // NB: The response media type may be omitted; in this case only generic return types (String,
     // ByteString, ResponseBody, etc) are supported
-    var action = function.asAction()
-
-    if (dispatchMechanism == DispatchMechanism.GRPC) {
-      require(action.responseContentType == null &&
-          action.acceptedMediaRanges == listOf(MediaRange.ALL_MEDIA)) {
-        "@Grpc cannot be used with @RequestContentType or @ResponseContentType on $function"
-      }
-      action = action.copy(
-          responseContentType = MediaTypes.APPLICATION_GRPC_MEDIA_TYPE,
-          acceptedMediaRanges = listOf(MediaRange.parse(MediaTypes.APPLICATION_GRPC))
-      )
-    }
+    val  action = function.asAction(dispatchMechanism)
 
     // Ensure that default interceptors are called before any user provided interceptors
     val networkInterceptors =
@@ -129,8 +116,7 @@ internal class WebActionFactory @Inject constructor(
 
     val parsedPathPattern = PathPattern.parse(pathPattern)
 
-    val webActionBinding = webActionBindingFactory.create(
-        action, dispatchMechanism, parsedPathPattern)
+    val webActionBinding = webActionBindingFactory.create(action, parsedPathPattern)
 
     return BoundAction(
         scope,
@@ -139,8 +125,7 @@ internal class WebActionFactory @Inject constructor(
         applicationInterceptors,
         webActionBinding,
         parsedPathPattern,
-        action,
-        dispatchMechanism
+        action
     )
   }
 }
