@@ -88,17 +88,6 @@ internal class BoundAction<A : WebAction>(
     interceptors.add(RequestBridgeInterceptor(
         webActionBinding, applicationInterceptors, pathMatcher))
 
-    // Format the response for gRPC.
-    if (action.dispatchMechanism == DispatchMechanism.GRPC) {
-      // Add the required gRPC trailers if that's the mechanism.
-      // TODO(jwilson): permit non-0 GRPC statuses.
-      httpCall.requireTrailers()
-      httpCall.setResponseTrailer("grpc-status", "0")
-      // TODO(jwilson): permit non-identity GRPC encoding.
-      httpCall.setResponseHeader("grpc-encoding", "identity")
-      httpCall.setResponseHeader("grpc-accept-encoding", "gzip")
-    }
-
     val chain = RealNetworkChain(action, webAction, httpCall, interceptors.toList())
     chain.proceed(httpCall)
   }
