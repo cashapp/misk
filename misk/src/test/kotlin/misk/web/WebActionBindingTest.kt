@@ -24,13 +24,12 @@ internal class WebActionBindingTest {
       parametersFactory
   ))
   private val pathPattern = PathPattern.parse("/")
-  private val fakeApiCallAction = TestAction::fakeApiCall.asAction()
-  private val voidApiCallAction = TestAction::voidApiCall.asAction()
+  private val voidApiCallAction = TestAction::voidApiCall.asAction(DispatchMechanism.POST)
 
   @Test
   internal fun happyPath() {
     val binding = webActionBindingFactory.create(
-        fakeApiCallAction, DispatchMechanism.POST, pathPattern)
+        TestAction::fakeApiCall.asAction(DispatchMechanism.POST), pathPattern)
     val httpCall = FakeHttpCall()
     val matcher = pathPattern.matcher(httpCall.url)!!
 
@@ -52,9 +51,11 @@ internal class WebActionBindingTest {
     parametersFactory.claimParameterValues.remove(1)
 
     val e = assertFailsWith<IllegalStateException> {
-      webActionBindingFactory.create(fakeApiCallAction, DispatchMechanism.POST, pathPattern)
+      webActionBindingFactory.create(TestAction::fakeApiCall.asAction(DispatchMechanism.POST),
+          pathPattern)
     }
-    assertThat(e).hasMessage("$fakeApiCallAction parameter 1 not claimed")
+    assertThat(e).hasMessage(
+        "${TestAction::fakeApiCall.asAction(DispatchMechanism.POST)} parameter 1 not claimed")
   }
 
   @Test
@@ -62,7 +63,8 @@ internal class WebActionBindingTest {
     requestBodyFactory.result = null
 
     val e = assertFailsWith<IllegalStateException> {
-      webActionBindingFactory.create(fakeApiCallAction, DispatchMechanism.POST, pathPattern)
+      webActionBindingFactory.create(TestAction::fakeApiCall.asAction(DispatchMechanism.POST),
+          pathPattern)
     }
     assertThat(e).hasMessage("FakeFactory returned null after making a claim")
   }
@@ -74,10 +76,12 @@ internal class WebActionBindingTest {
     parametersFactory.claimReturnValue = true
 
     val e = assertFailsWith<IllegalStateException> {
-      webActionBindingFactory.create(fakeApiCallAction, DispatchMechanism.POST, pathPattern)
+      webActionBindingFactory.create(TestAction::fakeApiCall.asAction(DispatchMechanism.POST),
+          pathPattern)
     }
     assertThat(e).hasMessage(
-        "FakeFactory claimed a parameter and the return value of $fakeApiCallAction")
+        "FakeFactory claimed a parameter and the return value of ${TestAction::fakeApiCall.asAction(
+            DispatchMechanism.POST)}")
   }
 
   @Test
@@ -86,7 +90,8 @@ internal class WebActionBindingTest {
     parametersFactory.claimParameterValues[1] = "pepsi"
 
     val e = assertFailsWith<IllegalStateException> {
-      webActionBindingFactory.create(fakeApiCallAction, DispatchMechanism.POST, pathPattern)
+      webActionBindingFactory.create(TestAction::fakeApiCall.asAction(DispatchMechanism.POST),
+          pathPattern)
     }
     assertThat(e).hasMessage("already claimed by ${defaultFactory.result}")
   }
@@ -94,7 +99,7 @@ internal class WebActionBindingTest {
   @Test
   internal fun claimButDoNotSupplyParameter() {
     val binding = webActionBindingFactory.create(
-        fakeApiCallAction, DispatchMechanism.POST, pathPattern)
+        TestAction::fakeApiCall.asAction(DispatchMechanism.POST), pathPattern)
     val httpCall = FakeHttpCall()
     val matcher = pathPattern.matcher(httpCall.url)!!
 
@@ -106,7 +111,8 @@ internal class WebActionBindingTest {
   @Test
   internal fun claimGetRequestBody() {
     val e = assertFailsWith<IllegalStateException> {
-      webActionBindingFactory.create(fakeApiCallAction, DispatchMechanism.GET, pathPattern)
+      webActionBindingFactory.create(
+          TestAction::fakeApiCall.asAction(DispatchMechanism.GET), pathPattern)
     }
     assertThat(e).hasMessage("cannot claim request body of GET")
   }
@@ -114,7 +120,7 @@ internal class WebActionBindingTest {
   @Test
   internal fun claimReturnValueOnActionThatReturnsUnit() {
     val e = assertFailsWith<IllegalStateException> {
-      webActionBindingFactory.create(voidApiCallAction, DispatchMechanism.POST, pathPattern)
+      webActionBindingFactory.create(voidApiCallAction, pathPattern)
     }
     assertThat(e).hasMessage("cannot claim the return value of $voidApiCallAction which has none")
   }

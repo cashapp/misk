@@ -21,16 +21,16 @@ enum class DispatchMechanism {
   val method: HttpMethod
     get() {
       return when (this) {
-        DispatchMechanism.GET -> HttpMethod.GET
+        GET -> HttpMethod.GET
 
         // gRPC layers over POST. https://github.com/grpc/grpc/blob/master/doc/PROTOCOL-HTTP2.md
-        DispatchMechanism.GRPC -> HttpMethod.POST
+        GRPC -> HttpMethod.POST
 
-        DispatchMechanism.POST -> HttpMethod.POST
+        POST -> HttpMethod.POST
 
         // WebSocket upgrades from GET.
         // https://developer.mozilla.org/en-US/docs/Web/HTTP/Protocol_upgrade_mechanism
-        DispatchMechanism.WEBSOCKET -> HttpMethod.GET
+        WEBSOCKET -> HttpMethod.GET
       }
     }
 }
