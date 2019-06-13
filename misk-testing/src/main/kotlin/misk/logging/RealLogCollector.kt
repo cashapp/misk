@@ -27,7 +27,7 @@ internal class RealLogCollector @Inject constructor() : AbstractIdleService(), L
     loggerClass: KClass<*>?,
     minLevel: Level,
     pattern: Regex?
-  ): List<String> = takeEvents(loggerClass, minLevel, pattern).map { it.message.toString() }
+  ): List<String> = takeEvents(loggerClass, minLevel, pattern).map { it.message }
 
   override fun takeMessage(
     loggerClass: KClass<*>?,
@@ -42,24 +42,35 @@ internal class RealLogCollector @Inject constructor() : AbstractIdleService(), L
   ): List<ILoggingEvent> {
     val result = mutableListOf<ILoggingEvent>()
     while (queue.isNotEmpty()) {
-      result += takeEvent(loggerClass, minLevel, pattern)
+      val event = takeOrNull(loggerClass, minLevel, pattern)
+      if (event != null) result += event
     }
     return result
   }
 
   override fun takeEvent(loggerClass: KClass<*>?, minLevel: Level, pattern: Regex?): ILoggingEvent {
+    while (true) {
+      val event = takeOrNull(loggerClass, minLevel, pattern)
+      if (event != null) return event
+    }
+  }
+
+  /** Takes an event. Returns it if it meets the constraints and null if it doesn't. */
+  private fun takeOrNull(
+    loggerClass: KClass<*>?,
+    minLevel: Level,
+    pattern: Regex?
+  ): ILoggingEvent? {
     require(state() != NEW) { "not collecting logs: did you forget to start the service?" }
 
-    while (true) {
-      val event = queue.poll(500, TimeUnit.MILLISECONDS)
-          ?: throw IllegalArgumentException("no events to take!")
+    val event = queue.poll(500, TimeUnit.MILLISECONDS)
+        ?: throw IllegalArgumentException("no events to take!")
 
-      if ((loggerClass == null || loggerClass.qualifiedName == event.loggerName) &&
-          event.level.toInt() >= minLevel.toInt() &&
-          (pattern == null || pattern.containsMatchIn(event.message.toString()))) {
-        return event
-      }
-    }
+    if (loggerClass != null && loggerClass.qualifiedName != event.loggerName) return null
+    if (event.level.toInt() < minLevel.toInt()) return null
+    if (pattern != null && !pattern.containsMatchIn(event.message.toString())) return null
+
+    return event
   }
 
   override fun startUp() {
