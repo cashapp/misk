@@ -32,7 +32,7 @@ internal class JettyWebSocket(
   private var queue = ArrayDeque<String>()
 
   /** Application's listener to notify of incoming messages from the client. */
-  lateinit var listener: WebSocketListener
+  private var listener: WebSocketListener? = null
 
   private val adapter = object : WebSocketAdapter() {
     override fun onWebSocketConnect(sess: Session?) {
@@ -42,19 +42,19 @@ internal class JettyWebSocket(
 
     override fun onWebSocketClose(statusCode: Int, reason: String?) {
       super.onWebSocketClose(statusCode, reason)
-      listener.onClosed(this@JettyWebSocket, statusCode, reason)
+      listener!!.onClosed(this@JettyWebSocket, statusCode, reason)
     }
 
     override fun onWebSocketError(cause: Throwable?) {
-      listener.onFailure(this@JettyWebSocket, cause!!)
+      listener!!.onFailure(this@JettyWebSocket, cause!!)
     }
 
     override fun onWebSocketText(message: String?) {
-      listener.onMessage(this@JettyWebSocket, message!!)
+      listener!!.onMessage(this@JettyWebSocket, message!!)
     }
 
     override fun onWebSocketBinary(payload: ByteArray?, offset: Int, len: Int) {
-      listener.onMessage(this@JettyWebSocket, payload!!.toByteString(offset, len))
+      listener!!.onMessage(this@JettyWebSocket, payload!!.toByteString(offset, len))
     }
   }
 
@@ -83,6 +83,7 @@ internal class JettyWebSocket(
     override fun setTrailer(name: String, value: String) = error("no trailers for web sockets")
 
     override fun initWebSocketListener(webSocketListener: WebSocketListener) {
+      check(this@JettyWebSocket.listener == null) { "web socket listener already set" }
       this@JettyWebSocket.listener = webSocketListener
     }
   }
