@@ -19,7 +19,7 @@ Web
 ---
 1. Fork into your personal Github account
 1. Clone repo from your fork
-1. Add square as a remote with `git remote add square git@github.com:square/misk.git`
-1. Pull any new changes with `git pull square master`
+1. Add square as a remote with `git remote add cashapp git@github.com:cashapp/misk.git`
+1. Pull any new changes with `git pull cashapp master`
 1. Push any new changes to a new branch in your personal fork
-1. Open PR from personal fork -> square/master
+1. Open PR from personal fork -> cashapp/master
