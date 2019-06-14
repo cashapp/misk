@@ -26,5 +26,6 @@ class FakeClusterWeightModule : KAbstractModule() {
     val fake = FakeClusterWeight()
     bind<FakeClusterWeight>().toInstance(fake)
     bind<ClusterWeightProvider>().toInstance(fake)
+    install(NoOpClusterWeightServiceModule())
   }
 }
