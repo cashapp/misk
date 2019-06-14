@@ -5,6 +5,7 @@ import com.google.inject.Provides
 import misk.ServiceModule
 import misk.clustering.ClusterService
 import misk.clustering.lease.LeaseManager
+import misk.clustering.weights.ClusterWeightService
 import misk.concurrent.ExecutorServiceModule
 import misk.inject.KAbstractModule
 import misk.tasks.RepeatedTaskQueue
@@ -43,6 +44,7 @@ internal class ZkLeaseManagerModule : KAbstractModule() {
   override fun configure() {
     install(ServiceModule<ZkLeaseManager>()
         .dependsOn<ZkService>(ForZkLease::class)
+        .dependsOn<ClusterWeightService>()
         .dependsOn<ClusterService>())
     install(ServiceModule<RepeatedTaskQueue>(ForZkLease::class))
     bind<LeaseManager>().to<ZkLeaseManager>()
