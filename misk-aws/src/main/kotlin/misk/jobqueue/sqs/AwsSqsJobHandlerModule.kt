@@ -1,8 +1,11 @@
 package misk.jobqueue.sqs
 
 import com.google.common.util.concurrent.AbstractIdleService
+import com.google.common.util.concurrent.Service
+import com.google.inject.Key
 import misk.ServiceModule
 import misk.inject.KAbstractModule
+import misk.inject.toKey
 import misk.jobqueue.JobHandler
 import misk.jobqueue.QueueName
 import javax.inject.Inject
@@ -14,17 +17,21 @@ import kotlin.reflect.KClass
  */
 class AwsSqsJobHandlerModule<T : JobHandler> private constructor(
   private val queueName: QueueName,
-  private val handler: KClass<T>
+  private val handler: KClass<T>,
+  private val dependsOn: List<Key<out Service>> = listOf()
 ) : KAbstractModule() {
   override fun configure() {
     newMapBinder<QueueName, JobHandler>().addBinding(queueName).to(handler.java)
-    install(ServiceModule<AwsSqsJobHandlerSubscriptionService>()
-        .dependsOn<SqsJobConsumer>())
+    install(ServiceModule(AwsSqsJobHandlerSubscriptionService::class.toKey(),
+        dependsOn + listOf(SqsJobConsumer::class.toKey())))
   }
 
   companion object {
-    inline fun <reified T : JobHandler> create(queueName: QueueName):
-        AwsSqsJobHandlerModule<T> = create(queueName, T::class)
+    inline fun <reified T : JobHandler> create(
+      queueName: QueueName,
+      dependsOn: List<Key<out Service>> = emptyList()
+    ):
+        AwsSqsJobHandlerModule<T> = create(queueName, T::class, dependsOn)
 
     @JvmStatic
     fun <T : JobHandler> create(
@@ -39,9 +46,10 @@ class AwsSqsJobHandlerModule<T : JobHandler> private constructor(
      */
     fun <T : JobHandler> create(
       queueName: QueueName,
-      handlerClass: KClass<T>
+      handlerClass: KClass<T>,
+      dependsOn: List<Key<out Service>> = emptyList()
     ): AwsSqsJobHandlerModule<T> {
-      return AwsSqsJobHandlerModule(queueName, handlerClass)
+      return AwsSqsJobHandlerModule(queueName, handlerClass, dependsOn)
     }
   }
 }
