@@ -117,15 +117,18 @@ class HibernateModule(
       )
     }).asSingleton()
 
-    bind(keyOf<SchemaMigratorService>(
-        qualifier)).toProvider(object : Provider<SchemaMigratorService> {
-      @Inject lateinit var environment: Environment
-      override fun get(): SchemaMigratorService = SchemaMigratorService(
-          environment,
-          schemaMigratorProvider,
-          config
-      )
-    }).asSingleton()
+    val schemaMigratorServiceKey = keyOf<SchemaMigratorService>(qualifier)
+    bind(schemaMigratorServiceKey)
+        .toProvider(object : Provider<SchemaMigratorService> {
+          @Inject lateinit var environment: Environment
+          override fun get(): SchemaMigratorService = SchemaMigratorService(
+              qualifier,
+              environment,
+              schemaMigratorProvider,
+              config
+          )
+        }).asSingleton()
+    multibind<HealthCheck>().to(schemaMigratorServiceKey)
     install(ServiceModule<SchemaMigratorService>(qualifier))
 
     // Bind SchemaValidatorService.

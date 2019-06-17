@@ -4,7 +4,6 @@ import com.google.common.annotations.VisibleForTesting
 import com.google.common.base.Stopwatch
 import com.google.common.collect.ImmutableList
 import misk.jdbc.DataSourceConfig
-import misk.jdbc.DataSourceType
 import misk.logging.getLogger
 import misk.resources.ResourceLoader
 import org.hibernate.query.Query
@@ -112,8 +111,10 @@ internal class SchemaMigrator(
       migrationsResources.add(config.vitess_schema_resource_root + "/" + keyspace.name)
     }
     if (config.vitess_schema_dir != null) {
-      logger.warn { "vitess_schema_dir config property is deprecated! " +
-          "Use vitess_schema_resource_root instead to make schema migration checks works." }
+      logger.warn {
+        "vitess_schema_dir config property is deprecated! " +
+            "Use vitess_schema_resource_root instead to make schema migration checks works."
+      }
     }
     return migrationsResources.build()
   }
@@ -180,11 +181,14 @@ internal class SchemaMigrator(
   }
 
   /** Applies all available migrations that haven't yet been applied. */
-  fun applyAll(author: String, appliedMigrations: SortedSet<NamedspacedMigration>) {
+  fun applyAll(author: String, appliedMigrations: SortedSet<NamedspacedMigration>): MigrationState {
     require(author.matches(Regex("\\w+"))) // Prevent SQL injection.
 
-    transacter.get().shards().forEach { shard ->
-      for (migration in availableMigrations(shard.keyspace) - appliedMigrations) {
+    val result = mutableMapOf<Shard, ShardMigrationState>()
+    for (shard in transacter.get().shards()) {
+      val availableMigrations = availableMigrations(shard.keyspace)
+      val shardMigrationState = ShardMigrationState(availableMigrations, appliedMigrations)
+      for (migration in shardMigrationState.missingMigrations()) {
         val migrationSql = resourceLoader.utf8(migration.path)
         val stopwatch = Stopwatch.createStarted()
 
@@ -205,21 +209,33 @@ internal class SchemaMigrator(
 
         logger.info { "${qualifier.simpleName} applied $migration in $stopwatch" }
       }
+
+      // All available migrations are applied, so use availableMigrations for both properties.
+      result[shard] = ShardMigrationState(
+          availableMigrations, TreeSet(appliedMigrations + availableMigrations))
     }
+    return MigrationState(result)
   }
 
   /** Throws an exception unless all available migrations have been applied. */
-  fun requireAll() {
+  fun requireAll(): MigrationState {
     try {
-      transacter.get().shards().forEach { requireAll(it) }
+      val result = mutableMapOf<Shard, ShardMigrationState>()
+      for (it in transacter.get().shards()) {
+        result[it] = requireAll(it)
+      }
+      return MigrationState(result)
     } catch (e: PersistenceException) {
       throw IllegalStateException("${qualifier.simpleName} is not ready", e)
     }
   }
 
   @VisibleForTesting
-  internal fun requireAll(shard: Shard) {
-    val missingMigrations = availableMigrations(shard.keyspace) - appliedMigrations(shard)
+  internal fun requireAll(shard: Shard): ShardMigrationState {
+    val availableMigrations = availableMigrations(shard.keyspace)
+    val appliedMigrations = appliedMigrations(shard)
+    val state = ShardMigrationState(availableMigrations, appliedMigrations)
+    val missingMigrations = state.missingMigrations()
 
     check(missingMigrations.isEmpty()) {
       val shardMessage = if (shard != Shard.SINGLE_SHARD) {
@@ -227,8 +243,33 @@ internal class SchemaMigrator(
       } else {
         ""
       }
-      "${qualifier.simpleName}$shardMessage is missing migrations:\n  " + missingMigrations.map { it.path }.joinToString(
-          separator = "\n  ")
+      return@check """
+          |${qualifier.simpleName}$shardMessage is missing migrations:
+          |  ${missingMigrations.joinToString(separator = "\n  ") { it.path }}
+          """.trimMargin()
+    }
+
+    return state
+  }
+}
+
+/** Snapshot of all shards in a cluster. */
+internal data class MigrationState(
+  val shards: Map<Shard, ShardMigrationState>
+)
+
+/** Snapshot of the migration state of a single shard. */
+internal data class ShardMigrationState(
+  val available: SortedSet<NamedspacedMigration>,
+  val applied: SortedSet<NamedspacedMigration>
+) {
+  fun missingMigrations() = available - applied
+
+  override fun toString(): String {
+    return if (available == applied) {
+      "(all " + available.size + " migrations applied)"
+    } else {
+      "(not applied=${available - applied}, not tracked=${applied - available})"
     }
   }
 }
