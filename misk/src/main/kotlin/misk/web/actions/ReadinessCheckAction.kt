@@ -1,6 +1,6 @@
 package misk.web.actions
 
-import com.google.common.util.concurrent.Service
+import com.google.common.util.concurrent.ServiceManager
 import misk.healthchecks.HealthCheck
 import misk.logging.getLogger
 import misk.security.authz.Unauthenticated
@@ -9,13 +9,14 @@ import misk.web.Response
 import misk.web.ResponseContentType
 import misk.web.mediatype.MediaTypes
 import javax.inject.Inject
+import javax.inject.Provider
 import javax.inject.Singleton
 
 private val logger = getLogger<ReadinessCheckAction>()
 
 @Singleton
 class ReadinessCheckAction @Inject internal constructor(
-  private val services: List<Service>,
+  private val serviceManagerProvider : Provider<ServiceManager>,
   @JvmSuppressWildcards private val healthChecks: List<HealthCheck>
 ) : WebAction {
 
@@ -23,7 +24,8 @@ class ReadinessCheckAction @Inject internal constructor(
   @ResponseContentType(MediaTypes.APPLICATION_JSON)
   @Unauthenticated
   fun readinessCheck(): Response<String> {
-    val servicesNotRunning = services.filter { !it.isRunning }
+    val servicesNotRunning = serviceManagerProvider.get().servicesByState().values().asList()
+        .filterNot { it.isRunning }
 
     for (service in servicesNotRunning) {
       logger.info("Service not running: $service")
