@@ -1,6 +1,8 @@
 package misk.web.actions
 
 import com.google.common.util.concurrent.Service
+import com.google.common.util.concurrent.ServiceManager
+import misk.CoordinatedService
 import misk.healthchecks.HealthCheck
 import misk.healthchecks.HealthStatus
 import misk.security.authz.Unauthenticated
@@ -8,6 +10,7 @@ import misk.web.Get
 import misk.web.ResponseContentType
 import misk.web.mediatype.MediaTypes
 import javax.inject.Inject
+import javax.inject.Provider
 import javax.inject.Singleton
 
 /**
@@ -16,7 +19,7 @@ import javax.inject.Singleton
  */
 @Singleton
 class StatusAction @Inject internal constructor(
-  private val services: List<Service>,
+  private val serviceManagerProvider: Provider<ServiceManager>,
   @JvmSuppressWildcards private val healthChecks: List<HealthCheck>
 ) : WebAction {
 
@@ -24,7 +27,13 @@ class StatusAction @Inject internal constructor(
   @ResponseContentType(MediaTypes.APPLICATION_JSON)
   @Unauthenticated
   fun getStatus(): ServerStatus {
-    val serviceStatus = services.map { it.javaClass.simpleName to it.state() }.toMap()
+    val services = serviceManagerProvider.get().servicesByState().values().asList()
+    val serviceStatus = services.map {
+      when (it) {
+        is CoordinatedService -> it.service.javaClass.simpleName to it.state()
+        else -> it.javaClass.simpleName to it.state()
+      }
+    }.toMap()
     val healthCheckStatus = healthChecks.map { it.javaClass.simpleName to it.status() }.toMap()
     return ServerStatus(serviceStatus, healthCheckStatus)
   }
