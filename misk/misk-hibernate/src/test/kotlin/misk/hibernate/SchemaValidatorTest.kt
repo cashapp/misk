@@ -34,14 +34,13 @@ import javax.persistence.Table
 import javax.sql.DataSource
 
 @MiskTest(startService = true)
-class SchemaValidatorTest {
+internal class SchemaValidatorTest {
   @MiskTestModule
   val module = TestModule()
   val config = MiskConfig.load<RootConfig>("schemavalidation", Environment.TESTING)
 
   @Inject @ValidationDb lateinit var transacter: Transacter
-
-  private lateinit var sessionFactoryService: Provider<SessionFactoryService>
+  @Inject @ValidationDb lateinit var sessionFactoryService: Provider<SessionFactoryService>
 
   inner class TestModule : KAbstractModule() {
     override fun configure() {
@@ -53,8 +52,6 @@ class SchemaValidatorTest {
           DataSourceService(qualifier, config.data_source, Environment.TESTING, emptySet())
 
       val injectorServiceProvider = getProvider(HibernateInjectorAccess::class.java)
-
-      sessionFactoryService = getProvider(keyOf<SessionFactoryService>(qualifier))
 
       val entitiesProvider = getProvider(setOfType(HibernateEntity::class).toKey(qualifier))
 
