@@ -130,15 +130,16 @@ class HibernateModule(
 
     // Bind SchemaValidatorService.
     val sessionFactoryServiceProvider = getProvider(keyOf<SessionFactoryService>(qualifier))
-    bind(keyOf<SchemaValidatorService>(qualifier))
+    val schemaValidatorServiceKey = keyOf<SchemaValidatorService>(qualifier)
+    bind(schemaValidatorServiceKey)
         .toProvider(Provider<SchemaValidatorService> {
           SchemaValidatorService(
               qualifier,
               sessionFactoryServiceProvider,
-              transacterProvider,
-              config
+              transacterProvider
           )
         }).asSingleton()
+    multibind<HealthCheck>().to(schemaValidatorServiceKey)
     install(ServiceModule<SchemaValidatorService>(qualifier)
         .dependsOn<SchemaMigratorService>(qualifier))
 
