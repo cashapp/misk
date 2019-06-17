@@ -10,7 +10,7 @@ import misk.security.ssl.SslLoader
 import misk.security.ssl.TrustStoreConfig
 import misk.service.CachedTestService
 import misk.zookeeper.ZkClientFactory
-import misk.zookeeper.ZookeeperModule
+import misk.zookeeper.ZookeeperDefaultModule
 import org.apache.curator.framework.CuratorFramework
 import javax.inject.Inject
 import javax.inject.Provider
@@ -27,7 +27,7 @@ class ZkTestModule(
         cert_store = CertStoreConfig(keystorePath, "changeit", SslLoader.FORMAT_JKS),
         trust_store = TrustStoreConfig(truststorePath, "changeit", SslLoader.FORMAT_JKS))
 
-    install(ZookeeperModule(config, qualifier))
+    install(ZookeeperDefaultModule(config, qualifier))
 
     install(ServiceModule<StartZookeeperService>(qualifier))
     bind(keyOf<StartZookeeperService>(qualifier)).toInstance(StartZookeeperService())

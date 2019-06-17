@@ -12,6 +12,7 @@ import org.apache.zookeeper.ZooDefs
 import org.apache.zookeeper.ZooDefs.Ids.ANYONE_ID_UNSAFE
 import org.apache.zookeeper.ZooDefs.Ids.AUTH_IDS
 import org.apache.zookeeper.ZooKeeper
+import org.apache.zookeeper.client.HostProvider
 import org.apache.zookeeper.client.ZKClientConfig
 import org.apache.zookeeper.data.ACL
 import java.util.Collections
@@ -30,7 +31,8 @@ const val SHARED_DIR_PERMS = ZooDefs.Perms.READ or ZooDefs.Perms.WRITE or ZooDef
 
 internal class CuratorFrameworkProvider @Inject internal constructor(
   private val config: ZookeeperConfig,
-  private val ensembleProvider: Provider<EnsembleProvider>
+  private val ensembleProvider: Provider<EnsembleProvider>,
+  private val hostProvider : Provider<HostProvider>
 ) : Provider<CuratorFramework> {
 
   override fun get(): CuratorFramework {
@@ -63,7 +65,8 @@ internal class CuratorFrameworkProvider @Inject internal constructor(
             clientConfig.setProperty("zookeeper.ssl.trustStore.location", config.trust_store?.resource)
             clientConfig.setProperty("zookeeper.ssl.trustStore.password", config.trust_store?.passphrase)
           }
-          ZooKeeper(connectString, sessionTimeout, watcher, canBeReadOnly, clientConfig)
+          ZooKeeper(connectString, sessionTimeout, watcher, canBeReadOnly, hostProvider.get(), clientConfig)
+
         }
         .aclProvider(object : ACLProvider {
           override fun getDefaultAcl(): List<ACL> {
