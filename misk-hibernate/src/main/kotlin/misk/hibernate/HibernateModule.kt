@@ -3,6 +3,7 @@ package misk.hibernate
 import io.opentracing.Tracer
 import misk.ServiceModule
 import misk.environment.Environment
+import misk.healthchecks.HealthCheck
 import misk.hibernate.ReflectionQuery.QueryLimitsConfig
 import misk.inject.KAbstractModule
 import misk.inject.asSingleton
@@ -18,6 +19,7 @@ import misk.resources.ResourceLoader
 import misk.vitess.StartVitessService
 import org.hibernate.SessionFactory
 import org.hibernate.event.spi.EventType
+import java.time.Clock
 import javax.inject.Inject
 import javax.inject.Provider
 import javax.sql.DataSource
@@ -175,6 +177,15 @@ class HibernateModule(
       }
     })
 
-    install(HibernateHealthCheckModule(qualifier, sessionFactoryProvider))
+    val healthCheckKey = keyOf<HealthCheck>(qualifier)
+    bind(healthCheckKey)
+        .toProvider(object : Provider<HibernateHealthCheck> {
+          @Inject lateinit var clock: Clock
+
+          override fun get() = HibernateHealthCheck(
+              qualifier, sessionFactoryServiceProvider, sessionFactoryProvider, clock)
+        })
+        .asSingleton()
+    multibind<HealthCheck>().to(healthCheckKey)
   }
 }
