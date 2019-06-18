@@ -2,6 +2,7 @@ package misk.jobqueue.sqs
 
 import com.amazonaws.services.sqs.model.ReceiveMessageRequest
 import com.google.common.util.concurrent.AbstractIdleService
+import com.google.common.util.concurrent.ServiceManager
 import io.opentracing.Tracer
 import io.opentracing.tag.StringTag
 import io.opentracing.tag.Tags
@@ -15,6 +16,7 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
+import javax.inject.Provider
 import javax.inject.Singleton
 import kotlin.concurrent.thread
 
@@ -24,7 +26,13 @@ internal class SqsJobConsumer @Inject internal constructor(
   private val queues: QueueResolver,
   @ForSqsConsumer private val dispatchThreadPool: ExecutorService,
   private val tracer: Tracer,
-  private val metrics: SqsMetrics
+  private val metrics: SqsMetrics,
+  /**
+   * [SqsJobConsumer] is itself a [Service], but it needs the [ServiceManager] in order to check
+   * that all services are running and the system is in a healthy state before it starts handling
+   * jobs. We use a provider here to avoid a dependency cycle.
+   */
+  private val serviceManagerProvider: Provider<ServiceManager>
 ) : AbstractIdleService(), JobConsumer {
   private val subscriptions = ConcurrentHashMap<QueueName, JobConsumer.Subscription>()
 
@@ -62,6 +70,10 @@ internal class SqsJobConsumer @Inject internal constructor(
     private val running = AtomicBoolean(true)
 
     override fun run() {
+      // Don't call handlers until all services are ready, otherwise handlers will crash because the
+      // services they might need (databases, etc.) won't be ready.
+      serviceManagerProvider.get().awaitHealthy()
+
       while (running.get()) {
         val messages = queue.call { client ->
           client.receiveMessage(ReceiveMessageRequest()
