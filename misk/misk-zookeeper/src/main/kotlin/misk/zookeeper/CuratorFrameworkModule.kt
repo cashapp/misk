@@ -8,6 +8,7 @@ import misk.inject.asSingleton
 import misk.inject.keyOf
 import org.apache.curator.ensemble.EnsembleProvider
 import org.apache.curator.framework.CuratorFramework
+import org.apache.zookeeper.client.HostProvider
 import javax.inject.Provider
 import kotlin.reflect.KClass
 
@@ -33,8 +34,9 @@ class CuratorFrameworkModule(
 ) : KAbstractModule() {
   override fun configure() {
     val ensembleProvider = getProvider(keyOf<EnsembleProvider>(qualifier))
+    val hostProvider = getProvider(keyOf<HostProvider>(qualifier))
     bind(keyOf<CuratorFramework>(qualifier))
-        .toProvider(CuratorFrameworkProvider(config, ensembleProvider))
+        .toProvider(CuratorFrameworkProvider(config, ensembleProvider, hostProvider))
         .asSingleton()
     val curator = getProvider(keyOf<CuratorFramework>(qualifier))
     bind(keyOf<ZkService>(qualifier))
