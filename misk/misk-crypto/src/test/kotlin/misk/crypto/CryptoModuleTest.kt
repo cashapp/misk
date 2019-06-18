@@ -43,14 +43,6 @@ class CryptoModuleTest {
   }
 
   @Test
-  fun testAeadIsEnvelopeKey() {
-    val keyHandle = KeysetHandle.generateNew(AeadKeyTemplates.AES256_GCM)
-    val injector = getInjector(listOf(Pair("test", keyHandle)))
-    val testKey = injector.getInstance(AeadKeyManager::class.java)["test"]
-    assertThat(testKey).isInstanceOf(KmsEnvelopeAead::class.java)
-  }
-
-  @Test
   fun testImportMacKey() {
     val keyHandle = KeysetHandle.generateNew(MacKeyTemplates.HMAC_SHA256_256BITTAG)
     val injector = getInjector(listOf(Pair("test-mac", keyHandle)))

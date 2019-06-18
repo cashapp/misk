@@ -71,14 +71,9 @@ internal class AeadEnvelopeProvider(val key: Key, val kmsUri: String?) : Provide
 
   override fun get(): Aead {
     val keysetHandle = readKey(key, kmsUri, kmsClient)
-    val kek = AeadFactory.getPrimitive(keysetHandle)
-    val envelopeKey = KmsEnvelopeAead(DEK_TEMPLATE, kek)
+    val aeadKey = AeadFactory.getPrimitive(keysetHandle)
 
-    return envelopeKey.also { keyManager[key.key_name] = it }
-  }
-
-  companion object {
-    val DEK_TEMPLATE: KeyTemplate = AeadKeyTemplates.AES128_GCM
+    return aeadKey.also { keyManager[key.key_name] = it }
   }
 }
 
