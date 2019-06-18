@@ -27,25 +27,36 @@ import java.security.GeneralSecurityException
 val logger by lazy { getLogger<CryptoModule>() }
 
 open class KeyReader {
-  private fun readCleartextKey(reader: KeysetReader): KeysetHandle {
+  companion object {
+    val KEK_TEMPLATE : KeyTemplate = AeadKeyTemplates.AES256_GCM
+  }
+
+  private fun readCleartextKey(key: Key): KeysetHandle {
     // TODO: Implement a clean check to throw if we are running in prod or staging. Checking for
     // an injected Environment will fail if a test explicitly creates a staging/prod environment.
     logger.warn { "reading a plaintext key!" }
+    val reader = JsonKeysetReader.withString(key.encrypted_key.value)
     return CleartextKeysetHandle.read(reader)
   }
 
-  private fun readEncryptedKey(reader: KeysetReader, kmsUri: String, client: KmsClient): KeysetHandle {
+  private fun readEncryptedKey(key: Key, kmsUri: String, client: KmsClient): KeysetHandle {
     val masterKey = client.getAead(kmsUri)
-    return KeysetHandle.read(reader, masterKey)
+    return try {
+      val kek = KmsEnvelopeAead(KEK_TEMPLATE, masterKey)
+      val reader = JsonKeysetReader.withString(key.encrypted_key.value)
+      KeysetHandle.read(reader, kek)
+    } catch (ex: GeneralSecurityException) {
+      logger.warn { "using single-encrypted KEKs" }
+      val reader = JsonKeysetReader.withString(key.encrypted_key.value)
+      KeysetHandle.read(reader, masterKey)
+    }
   }
 
   fun readKey(key: Key, kmsUri: String?, kmsClient: KmsClient): KeysetHandle {
-    val keyJson = JsonKeysetReader.withString(key.encrypted_key.value)
-
     return if (kmsUri != null) {
-      readEncryptedKey(keyJson, kmsUri, kmsClient)
+      readEncryptedKey(key, kmsUri, kmsClient)
     } else {
-      readCleartextKey(keyJson)
+      readCleartextKey(key)
     }
   }
 }
