@@ -18,7 +18,6 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.TimeUnit
-import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -50,18 +49,16 @@ internal class ZkLeaseManager @Inject internal constructor(
   }
 
   private val state = AtomicEnum.of(State.NOT_STARTED)
-  private val connected = AtomicBoolean()
   private val leases = ConcurrentHashMap<String, ZkLease>()
   private val connectionListeners = mutableListOf<(Boolean) -> Unit>()
 
-  internal val isConnected get() = connected.get()
+  internal val isConnected get() = client.value.isConnected
   internal val isRunning get() = state.get() == State.RUNNING && client.value.isRunning
 
   override fun startUp() {
     log.info { "starting zk lease manager" }
 
     if (!state.compareAndSet(State.NOT_STARTED, State.RUNNING)) return
-    connected.set(false)
 
     // When we are disconnected from zk, inform all of the leases that their state is now unknown
     client.value.connectionStateListenable.addListener(ConnectionStateListener { _, state ->
@@ -116,14 +113,16 @@ internal class ZkLeaseManager @Inject internal constructor(
   fun addConnectionListener(callback: (Boolean) -> Unit) {
     actionQueue.put {
       connectionListeners.add(callback)
-      callback.invoke(connected.get())
+      callback.invoke(isConnected)
     }
   }
 
   @VisibleForTesting internal fun handleConnectionStateChanged(connected: Boolean) {
-    this.connected.set(connected)
     if (!connected) {
+      log.info { "lost connection to zk server" }
       leases.forEach { (_, lease) -> lease.connectionLost() }
+    } else {
+      log.info { "connection established to zk server" }
     }
 
     connectionListeners.forEach { it.invoke(connected) }
