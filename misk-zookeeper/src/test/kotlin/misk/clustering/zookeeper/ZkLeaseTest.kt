@@ -144,8 +144,7 @@ internal class ZkLeaseTest {
     val lease = leaseManager.requestLease(LEASE_NAME)
     assertThat(lease.checkHeld()).isTrue()
 
-    // Fake a disconnect from zk
-    leaseManager.handleConnectionStateChanged(false)
+    curator.close()
 
     // Should no longer hold the lease
     assertThat(lease.checkHeld()).isFalse()
@@ -157,14 +156,12 @@ internal class ZkLeaseTest {
     val lease = leaseManager.requestLease(LEASE_NAME)
     assertThat(lease.checkHeld()).isTrue()
 
-    // Fake a disconnect from zk
-    leaseManager.handleConnectionStateChanged(false)
+    curator.zookeeperClient.reset()
 
     // Should no longer hold the lease
     assertThat(lease.checkHeld()).isFalse()
 
-    // Reconnect to zk
-    leaseManager.handleConnectionStateChanged(true)
+    curator.zookeeperClient.blockUntilConnectedOrTimedOut()
 
     // Should reacquire the lease
     assertThat(lease.checkHeld()).isTrue()
