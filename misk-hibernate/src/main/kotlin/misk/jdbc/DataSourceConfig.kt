@@ -121,7 +121,7 @@ data class DataSourceConfig(
         "jdbc:hsqldb:mem:${database!!};sql.syntax_mys=true"
       }
       DataSourceType.VITESS -> {
-        var queryParams = ""
+        var queryParams = "tracing=opentracing"
         var useSSL = false
 
         // NOTE(nb): still support url properties in Vitess for backwards compatibility.
@@ -138,7 +138,7 @@ data class DataSourceConfig(
             "must provide a trust_certificate_key_store_password if trust_certificate_key_store_url" +
                 " or trust_certificate_key_store_path is set"
           }
-          queryParams += "${if (queryParams.isEmpty()) "?" else "&"}trustStore=${trustStorePath}"
+          queryParams += "&trustStore=${trustStorePath}"
           queryParams += "&trustStorePassword=${config.trust_certificate_key_store_password}"
           useSSL = true
         }
