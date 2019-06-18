@@ -2,10 +2,12 @@ package misk.zookeeper
 
 import misk.clustering.zookeeper.ZookeeperConfig
 import misk.inject.KAbstractModule
+import misk.inject.asSingleton
 import misk.inject.keyOf
 import org.apache.zookeeper.client.ConnectStringParser
 import org.apache.zookeeper.client.HostProvider
 import org.apache.zookeeper.client.StaticHostProvider
+import javax.inject.Provider
 import kotlin.reflect.KClass
 
 /**
@@ -18,7 +20,8 @@ class StaticHostModule(
   private val qualifier: KClass<out Annotation>? = null
 ) : KAbstractModule() {
   override fun configure() {
-    bind(keyOf<HostProvider>(qualifier))
-        .toInstance(StaticHostProvider(ConnectStringParser(config.zk_connect).serverAddresses))
+    bind(keyOf<HostProvider>(qualifier)).toProvider(Provider {
+      StaticHostProvider(ConnectStringParser(config.zk_connect).serverAddresses)
+    }).asSingleton()
   }
 }
