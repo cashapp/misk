@@ -3,16 +3,16 @@ package misk.cloud.gcp.datastore
 import com.google.cloud.datastore.Datastore
 import com.google.cloud.datastore.testing.LocalDatastoreHelper
 import com.google.common.util.concurrent.AbstractIdleService
-import com.google.common.util.concurrent.Service
 import com.google.inject.Provides
 import com.google.inject.Singleton
+import misk.ServiceModule
 import misk.inject.KAbstractModule
 import javax.inject.Inject
 
 /** Installs a version of the [Datastore] that works off an in-memory local store */
 class FakeDatastoreModule : KAbstractModule() {
   override fun configure() {
-    multibind<Service>().to<FakeDatastoreService>()
+    install(ServiceModule<FakeDatastoreService>())
   }
 
   @Provides
@@ -28,7 +28,6 @@ class FakeDatastoreModule : KAbstractModule() {
   class FakeDatastoreService @Inject constructor(
     private val datastoreHelper: LocalDatastoreHelper
   ) : AbstractIdleService() {
-
     override fun startUp() {
       // Reset on every restart / test run
       datastoreHelper.reset()

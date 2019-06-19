@@ -2,6 +2,7 @@ package misk.logging
 
 import ch.qos.logback.classic.Level
 import ch.qos.logback.classic.spi.ILoggingEvent
+import com.google.common.util.concurrent.Service
 import kotlin.reflect.KClass
 
 /**
@@ -75,3 +76,6 @@ interface LogCollector {
     pattern: Regex? = null
   ): ILoggingEvent
 }
+
+/** Marker interface for the service that produces a [LogCollector]. */
+interface LogCollectorService : Service

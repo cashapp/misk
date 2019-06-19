@@ -1,9 +1,9 @@
 package misk.tasks
 
-import com.google.common.util.concurrent.Service
 import com.google.inject.Provides
 import com.google.inject.util.Modules
 import misk.MiskTestingServiceModule
+import misk.ServiceModule
 import misk.backoff.ExponentialBackoff
 import misk.backoff.FlatBackoff
 import misk.backoff.retry
@@ -485,7 +485,7 @@ internal class RepeatedTaskQueueTest {
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(Modules.override(MiskTestingServiceModule()).with(FakeClockModule()))
-      multibind<Service>().to<RepeatedTaskQueue>()
+      install(ServiceModule<RepeatedTaskQueue>())
     }
 
     @Provides @Singleton
