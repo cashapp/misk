@@ -9,6 +9,7 @@ import com.google.inject.Scopes
 import com.google.inject.Singleton
 import misk.inject.KAbstractModule
 import misk.inject.getInstance
+import misk.inject.keyOf
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import kotlin.test.assertFailsWith
@@ -97,6 +98,47 @@ internal class MiskServiceModuleTest {
 
       injector.getInstance<ServiceManager>()
     }.message).contains("the following services are not marked as @Singleton: " +
-        "misk.MiskServiceModuleTest\$NonSingletonService1, misk.MiskServiceModuleTest\$NonSingletonService2")
+        "misk.MiskServiceModuleTest\$NonSingletonService1, " +
+        "misk.MiskServiceModuleTest\$NonSingletonService2")
+  }
+
+  @Test fun detectsNonSingletonServiceEntries() {
+    assertThat(assertFailsWith<com.google.inject.ProvisionException> {
+      val injector = Guice.createInjector(
+          MiskTestingServiceModule(),
+          object : KAbstractModule() {
+            override fun configure() {
+              // Should be recognized as singletons
+              install(ServiceModule<SingletonService1>())
+              install(ServiceModule<SingletonService2>())
+              install(ServiceModule<ProvidesMethodService>())
+              install(ServiceModule<InstanceService>())
+              bind(keyOf<InstanceService>()).toInstance(InstanceService())
+              install(ServiceModule<ExplicitEagerSingletonService>())
+              bind(keyOf<ExplicitEagerSingletonService>()).asEagerSingleton()
+              install(ServiceModule<SingletonScopeService>())
+              bind(keyOf<SingletonScopeService>())
+                  .`in`(Scopes.SINGLETON)
+              install(ServiceModule<SingletonAnnotationService>())
+              bind(keyOf<SingletonAnnotationService>())
+                  .`in`(com.google.inject.Singleton::class.java)
+              install(ServiceModule<GoogleSingletonAnnotationService>())
+              bind(keyOf<GoogleSingletonAnnotationService>())
+                  .`in`(com.google.inject.Singleton::class.java)
+
+              // Should be recognized as non-singletons
+              install(ServiceModule<NonSingletonService1>())
+              install(ServiceModule<NonSingletonService2>())
+            }
+
+            @Provides @Singleton
+            fun providesSingletonService(): ProvidesMethodService = ProvidesMethodService()
+          }
+      )
+
+      injector.getInstance<ServiceManager>()
+    }.message).contains("the following services are not marked as @Singleton: " +
+        "misk.MiskServiceModuleTest\$NonSingletonService1, " +
+        "misk.MiskServiceModuleTest\$NonSingletonService2")
   }
 }
