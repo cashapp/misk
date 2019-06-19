@@ -2,9 +2,9 @@ package misk.tracing.backends.zipkin
 
 import brave.Tracing
 import brave.opentracing.BraveTracer
-import com.google.common.util.concurrent.Service
 import com.google.inject.Provides
 import io.opentracing.Tracer
+import misk.ServiceModule
 import misk.config.AppName
 import misk.inject.KAbstractModule
 import zipkin2.reporter.AsyncReporter
@@ -14,7 +14,7 @@ import javax.inject.Singleton
 
 class ZipkinTracingModule(val config: ZipkinBackendConfig) : KAbstractModule() {
   override fun configure() {
-    multibind<Service>().to<ZipkinTracingService>()
+    install(ServiceModule<ZipkinTracingService>())
   }
 
   @Provides

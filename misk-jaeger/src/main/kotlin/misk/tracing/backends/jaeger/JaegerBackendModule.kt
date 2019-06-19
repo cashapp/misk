@@ -1,16 +1,16 @@
 package misk.tracing.backends.jaeger
 
-import com.google.common.util.concurrent.Service
 import com.google.inject.Provides
 import com.google.inject.Singleton
 import com.uber.jaeger.Configuration
 import io.opentracing.Tracer
+import misk.ServiceModule
 import misk.config.AppName
 import misk.inject.KAbstractModule
 
 class JaegerBackendModule(val config: JaegerBackendConfig?) : KAbstractModule() {
   override fun configure() {
-    multibind<Service>().to<JaegerTracingService>()
+    install(ServiceModule<JaegerTracingService>())
   }
 
   @Provides

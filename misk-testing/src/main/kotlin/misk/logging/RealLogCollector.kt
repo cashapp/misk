@@ -14,7 +14,10 @@ import javax.inject.Singleton
 import kotlin.reflect.KClass
 
 @Singleton
-internal class RealLogCollector @Inject constructor() : AbstractIdleService(), LogCollector {
+internal class RealLogCollector @Inject constructor() :
+    AbstractIdleService(),
+    LogCollector,
+    LogCollectorService {
   private val queue = LinkedBlockingDeque<ILoggingEvent>()
 
   private val appender = object : UnsynchronizedAppenderBase<ILoggingEvent>() {
