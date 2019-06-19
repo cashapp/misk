@@ -97,18 +97,17 @@ class MiskCommonServiceModule : KAbstractModule() {
     val serviceListBinding = injector.getBinding(serviceSetKey)
     val invalidServices = serviceListBinding
         .acceptTargetVisitor(CheckServicesVisitor())
-        .sorted()
-
-    // Confirm all services have been registered as singleton. If they aren't singletons,
-    // _readiness checks will fail
-    check(invalidServices.isEmpty()) {
-      "the following services are not marked as @Singleton: ${invalidServices.joinToString(", ")}"
-    }
+        .sorted().toMutableList()
 
     val builder = ServiceGraphBuilder()
 
     // Support the new ServiceModule API.
     for (entry in serviceEntries) {
+      // Check that the bound ServiceEntry is Singleton. This does the same thing as the visitor for
+      // the legacy service binding.
+      if (!Scopes.isSingleton(injector.getBinding(entry.key))) {
+        invalidServices += entry.key.typeLiteral.type.typeName
+      }
       builder.addService(entry.key, injector.getProvider(entry.key))
     }
     for (edge in dependencies) {
@@ -116,6 +115,12 @@ class MiskCommonServiceModule : KAbstractModule() {
     }
     for (edge in enhancements) {
       builder.enhanceService(toBeEnhanced = edge.toBeEnhanced, enhancement = edge.enhancement)
+    }
+
+    // Confirm all services have been registered as singleton. If they aren't singletons,
+    // _readiness checks will fail
+    check(invalidServices.isEmpty()) {
+      "the following services are not marked as @Singleton: ${invalidServices.joinToString(", ")}"
     }
 
     // Support the deprecated DependantService interface.
@@ -182,7 +187,7 @@ class MiskCommonServiceModule : KAbstractModule() {
 
   companion object {
     @Suppress("UNCHECKED_CAST")
-    val serviceSetKey = Key.get(Types.setOf(Service::class.java)) as Key<Set<Service>>
+    internal val serviceSetKey = Key.get(Types.setOf(Service::class.java)) as Key<Set<Service>>
     private val log = KotlinLogging.logger {}
   }
 }
