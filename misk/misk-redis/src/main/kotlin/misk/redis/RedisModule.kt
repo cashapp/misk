@@ -1,8 +1,8 @@
 package misk.redis
 
-import com.google.common.util.concurrent.Service
 import com.google.inject.Provides
 import com.google.inject.Singleton
+import misk.ServiceModule
 import misk.inject.KAbstractModule
 import redis.clients.jedis.JedisPool
 import redis.clients.jedis.JedisPoolConfig
@@ -18,7 +18,7 @@ class RedisModule(
 ) : KAbstractModule() {
   override fun configure() {
     bind<RedisConfig>().toInstance(redisConfig)
-    multibind<Service>().to<RedisService>()
+    install(ServiceModule<RedisService>())
   }
 
   @Provides @Singleton

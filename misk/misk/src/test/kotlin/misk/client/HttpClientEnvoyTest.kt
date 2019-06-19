@@ -1,11 +1,11 @@
 package misk.client
 
-import com.google.common.util.concurrent.Service
 import com.google.inject.Provides
 import com.google.inject.name.Named
 import com.google.inject.name.Names
 import helpers.protos.Dinosaur
 import misk.MiskTestingServiceModule
+import misk.ServiceModule
 import misk.inject.KAbstractModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
@@ -76,7 +76,7 @@ internal class HttpClientEnvoyTest {
       install(MiskTestingServiceModule())
 
       bind<MockWebServerService>().toInstance(MockWebServerService("@socket"))
-      multibind<Service>().to<MockWebServerService>()
+      install(ServiceModule<MockWebServerService>())
 
       bind<EnvoyClientEndpointProvider>().to<TestEnvoyClientEndpointProvider>()
 
