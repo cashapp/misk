@@ -1,6 +1,6 @@
 package misk.metrics.backends.prometheus
 
-import com.google.common.util.concurrent.Service
+import misk.ServiceModule
 import misk.inject.KAbstractModule
 
 /**
@@ -13,6 +13,6 @@ import misk.inject.KAbstractModule
 class PrometheusMetricsModule(private val config: PrometheusConfig) : KAbstractModule() {
   override fun configure() {
     bind<PrometheusConfig>().toInstance(config)
-    multibind<Service>().to<PrometheusHttpService>()
+    install(ServiceModule<PrometheusHttpService>())
   }
 }
