@@ -12,28 +12,41 @@ import javax.inject.Inject
 @MiskTest(startService = true)
 class RawHibernateApiTest {
   @MiskTestModule
-  val module = MoviesTestModule(disableCrossShardQueryDetector = true)
+  val module = MoviesTestModule()
 
   @Inject @Movies lateinit var sessionFactory: SessionFactory
 
   @Test
   fun happyPath() {
     // Insert some movies in a transaction.
-    sessionFactory.openSession().use { session ->
-      val transaction = session.beginTransaction()
-      session.save(DbMovie("Jurassic Park", LocalDate.of(1993, 6, 9)))
+    val jpId = sessionFactory.openSession().use { session ->
+      var transaction = session.beginTransaction()
+      val jp = DbMovie("Jurassic Park", LocalDate.of(1993, 6, 9))
+      session.save(jp)
+      val jg = DbActor("Jeff Goldblum")
+      session.save(jg)
+      session.save(DbCharacter("Ian Malcolm", jp, jg))
+      transaction.commit()
+
+      transaction = session.beginTransaction()
       session.save(DbMovie("Star Wars", LocalDate.of(1977, 5, 25)))
       transaction.commit()
+
+      return@use jp.id
     }
 
     // Query those movies without a transaction.
     sessionFactory.openSession().use { session ->
       val criteriaBuilder = session.entityManagerFactory.criteriaBuilder
-      val criteria = criteriaBuilder.createQuery(DbMovie::class.java)
-      val queryRoot = criteria.from(DbMovie::class.java)
-      criteria.where(criteriaBuilder.notEqual(queryRoot.get<String>("name"), "Star Wars"))
+      val criteria = criteriaBuilder.createQuery(DbCharacter::class.java)
+      val queryRoot = criteria.from(DbCharacter::class.java)
+      criteria.where(
+          criteriaBuilder.equal(queryRoot.get<Id<DbMovie>>("movie_id"), jpId),
+          criteriaBuilder.notEqual(queryRoot.get<String>("name"), "Leia Organa")
+      )
+
       val resultList = session.createQuery(criteria).resultList
-      assertThat(resultList.map { it.name }).containsExactly("Jurassic Park")
+      assertThat(resultList.map { it.name }).containsExactly("Ian Malcolm")
     }
   }
 }

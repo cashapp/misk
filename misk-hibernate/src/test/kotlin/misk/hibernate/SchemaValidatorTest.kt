@@ -1,14 +1,14 @@
 package misk.hibernate
 
-import com.google.common.util.concurrent.Service
-import com.google.inject.Key
 import io.opentracing.Tracer
 import misk.MiskTestingServiceModule
+import misk.ServiceModule
 import misk.config.Config
 import misk.config.MiskConfig
 import misk.environment.Environment
 import misk.inject.KAbstractModule
 import misk.inject.asSingleton
+import misk.inject.keyOf
 import misk.inject.setOfType
 import misk.inject.toKey
 import misk.jdbc.DataSourceConfig
@@ -34,50 +34,34 @@ import javax.persistence.Table
 import javax.sql.DataSource
 
 @MiskTest(startService = true)
-class SchemaValidatorTest {
-
+internal class SchemaValidatorTest {
   @MiskTestModule
   val module = TestModule()
   val config = MiskConfig.load<RootConfig>("schemavalidation", Environment.TESTING)
 
-  private lateinit var sessionFactoryService: Provider<SessionFactoryService>
+  @Inject @ValidationDb lateinit var transacter: Transacter
+  @Inject @ValidationDb lateinit var sessionFactoryService: Provider<SessionFactoryService>
 
   inner class TestModule : KAbstractModule() {
     override fun configure() {
       install(MiskTestingServiceModule())
+
       val qualifier = ValidationDb::class
 
       val dataSourceService =
-          DataSourceService(qualifier, config.data_source, Environment.TESTING,
-              emptySet())
+          DataSourceService(qualifier, config.data_source, Environment.TESTING, emptySet())
 
       val injectorServiceProvider = getProvider(HibernateInjectorAccess::class.java)
-      val sessionFactoryServiceKey =
-          Key.get(SessionFactoryService::class.java, qualifier.java)
 
-      sessionFactoryService = getProvider(sessionFactoryServiceKey)
+      val entitiesProvider = getProvider(setOfType(HibernateEntity::class).toKey(qualifier))
 
-      val entitiesKey = setOfType(HibernateEntity::class).toKey(qualifier)
-      val entitiesProvider = getProvider(entitiesKey)
+      val sessionFactoryProvider = getProvider(keyOf<SessionFactory>(qualifier))
+      bind<SessionFactory>()
+          .annotatedWith<ValidationDb>()
+          .toProvider(keyOf<SessionFactoryService>(qualifier))
 
-      val sessionFactoryKey = SessionFactory::class.toKey(qualifier)
-      val sessionFactoryProvider = getProvider(sessionFactoryKey)
-
-      val transacterKey = Transacter::class.toKey(qualifier)
-      val transacterProvider = getProvider(transacterKey)
-
-      val schemaMigratorKey = SchemaMigrator::class.toKey(qualifier)
-      val schemaMigratorProvider = getProvider(schemaMigratorKey)
-
-      bind(sessionFactoryServiceKey).toProvider(Provider<SessionFactoryService> {
-        SessionFactoryService(qualifier, config.data_source, dataSourceService,
-            injectorServiceProvider.get(), entitiesProvider.get())
-      }).asSingleton()
-
-      bind<SessionFactory>().annotatedWith<ValidationDb>().toProvider(sessionFactoryServiceKey)
-      multibind<Service>().to(sessionFactoryServiceKey)
-
-      bind(transacterKey).toProvider(object : Provider<Transacter> {
+      val transacterProvider = getProvider(keyOf<Transacter>(qualifier))
+      bind(keyOf<Transacter>(qualifier)).toProvider(object : Provider<Transacter> {
         @Inject lateinit var queryTracingListener: QueryTracingListener
         @com.google.inject.Inject(optional = true) val tracer: Tracer? = null
         override fun get(): RealTransacter = RealTransacter(
@@ -89,12 +73,15 @@ class SchemaValidatorTest {
         )
       }).asSingleton()
 
-      bind(schemaMigratorKey).toProvider(object : Provider<SchemaMigrator> {
+      val schemaMigratorProvider = getProvider(keyOf<SchemaMigrator>(qualifier))
+      bind(keyOf<SchemaMigrator>(qualifier)).toProvider(object : Provider<SchemaMigrator> {
         @Inject lateinit var resourceLoader: ResourceLoader
-        override fun get(): SchemaMigrator {
-          return SchemaMigrator(qualifier, resourceLoader,
-              transacterProvider, config.data_source)
-        }
+        override fun get(): SchemaMigrator = SchemaMigrator(
+            qualifier,
+            resourceLoader,
+            transacterProvider,
+            config.data_source
+        )
       }).asSingleton()
 
       install(object : HibernateEntityModule(qualifier) {
@@ -107,22 +94,39 @@ class SchemaValidatorTest {
         }
       })
 
-      multibind<Service>().toInstance(
-          PingDatabaseService(qualifier, config.data_source, Environment.TESTING))
+      install(ServiceModule<StartVitessService>(qualifier))
+      bind(keyOf<StartVitessService>(qualifier))
+          .toInstance(StartVitessService(qualifier, Environment.TESTING, config.data_source))
 
-      multibind<Service>().toInstance(dataSourceService)
+      install(ServiceModule<PingDatabaseService>(qualifier)
+          .dependsOn<StartVitessService>(qualifier))
+      bind(keyOf<PingDatabaseService>(qualifier)).toInstance(
+          PingDatabaseService(config.data_source, Environment.TESTING))
+
+      install(ServiceModule<DataSourceService>(qualifier)
+          .dependsOn<PingDatabaseService>(qualifier))
+      bind(keyOf<DataSourceService>(qualifier)).toInstance(dataSourceService)
       bind<DataSource>().annotatedWith<ValidationDb>().toProvider(dataSourceService)
 
-      multibind<Service>().toProvider(Provider<SchemaMigratorService> {
-        SchemaMigratorService(
-            qualifier, Environment.TESTING, schemaMigratorProvider, config.data_source)
+      install(ServiceModule<SchemaMigratorService>(qualifier))
+      bind(keyOf<SchemaMigratorService>(qualifier)).toProvider(Provider<SchemaMigratorService> {
+        SchemaMigratorService(Environment.TESTING, schemaMigratorProvider, config.data_source)
       }).asSingleton()
-      multibind<Service>().toInstance(
-          StartVitessService(ValidationDb::class, Environment.TESTING, config.data_source))
+
+      bind(keyOf<TransacterService>(qualifier)).to(keyOf<SessionFactoryService>(qualifier))
+      bind(keyOf<SessionFactoryService>(qualifier)).toProvider(Provider<SessionFactoryService> {
+        SessionFactoryService(
+            qualifier,
+            config.data_source,
+            dataSourceService,
+            injectorServiceProvider.get(),
+            entitiesProvider.get())
+      }).asSingleton()
+      install(ServiceModule<TransacterService>(qualifier)
+          .enhancedBy<SchemaMigratorService>(qualifier)
+          .dependsOn<DataSourceService>(qualifier))
     }
   }
-
-  @Inject @ValidationDb lateinit var transacter: Transacter
 
   // TODO (maacosta) Breakup into smaller unit tests.
   private val schemaValidationErrorMessage: String by lazy {
@@ -161,13 +165,15 @@ class SchemaValidatorTest {
 
   @Test
   fun findNullableColumnsInHibernate() {
-    assertThat(schemaValidationErrorMessage).contains("ERROR at schemavalidation.nullable_mismatch_table.tbl5_hibernate_null:\n" +
-        "  Column nullable_mismatch_table.tbl5_hibernate_null is NOT NULL in database but tbl5_hibernate_null is nullable in hibernate")
+    assertThat(schemaValidationErrorMessage).contains(
+        "ERROR at schemavalidation.nullable_mismatch_table.tbl5_hibernate_null:\n" +
+            "  Column nullable_mismatch_table.tbl5_hibernate_null is NOT NULL in database but tbl5_hibernate_null is nullable in hibernate")
   }
 
   @Test
   fun itOkWithNotNullableColumnWithDefaults() {
-    assertThat(schemaValidationErrorMessage).doesNotContain("ERROR at schemavalidation.nullable_mismatch_table.tbl5_hibernate_null_default:")
+    assertThat(schemaValidationErrorMessage).doesNotContain(
+        "ERROR at schemavalidation.nullable_mismatch_table.tbl5_hibernate_null_default:")
   }
 
   @Test
@@ -216,7 +222,7 @@ class SchemaValidatorTest {
   }
 
   @Test
-  fun catchNotReallyUniqueColumnNames(){
+  fun catchNotReallyUniqueColumnNames() {
     assertThat(schemaValidationErrorMessage).contains(
         "Duplicate identifiers: [[tbl6NotReallyUnique, tbl6_not_really_unique]]")
 

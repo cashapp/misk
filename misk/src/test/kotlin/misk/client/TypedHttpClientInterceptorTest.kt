@@ -47,21 +47,18 @@ internal class TypedHttpClientInterceptorTest {
     assertThat(response.headers()["X-Original-From"]).isEqualTo("dinosaur.getDinosaur")
   }
 
-  /** Server [NetworkInterceptor] that echos back the X-Originating-Action from the request */
+  /** Server [NetworkInterceptor] that echos back the X-Originating-Action from the request. */
   class ServerHeaderInterceptor : NetworkInterceptor {
-    override fun intercept(chain: NetworkChain): misk.web.Response<*> {
-      val originatingAction = chain.request.headers["X-From"]
-      val response = chain.proceed(chain.request)
-      return if (originatingAction != null) {
-        val newHeaders = response.headers.newBuilder()
-            .add("X-Original-From", originatingAction)
-            .build()
-        misk.web.Response(response.body, newHeaders, response.statusCode)
-      } else response
+    override fun intercept(chain: NetworkChain) {
+      val originatingAction = chain.httpCall.requestHeaders["X-From"]
+      if (originatingAction != null) {
+        chain.httpCall.setResponseHeader("X-Original-From", originatingAction)
+      }
+      chain.proceed(chain.httpCall)
     }
 
     class Factory @Inject constructor() : NetworkInterceptor.Factory {
-      override fun create(action: Action): NetworkInterceptor? = ServerHeaderInterceptor()
+      override fun create(action: Action) = ServerHeaderInterceptor()
     }
   }
 

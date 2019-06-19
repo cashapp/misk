@@ -70,11 +70,18 @@ class UserInterceptorTest {
   }
 
   internal class UserCreatedNetworkInterceptor : NetworkInterceptor {
-    override fun intercept(chain: NetworkChain): Response<*> = when (chain.request.headers.get(
-        "mode")) {
-      "text" -> Response("net text response", UserInterceptorTest.TEXT_HEADERS, 410)
-      "throw" -> throw Exception("Don't throw exceptions like this")
-      else -> chain.proceed(chain.request)
+    override fun intercept(chain: NetworkChain) {
+      when (chain.httpCall.requestHeaders.get("mode")) {
+        "text" -> {
+          chain.httpCall.statusCode = 410
+          chain.httpCall.addResponseHeaders(TEXT_HEADERS)
+          chain.httpCall.takeResponseBody()!!.use {
+            it.writeUtf8("net text response")
+          }
+        }
+        "throw" -> throw Exception("Don't throw exceptions like this")
+        else -> chain.proceed(chain.httpCall)
+      }
     }
 
     class Factory : NetworkInterceptor.Factory {

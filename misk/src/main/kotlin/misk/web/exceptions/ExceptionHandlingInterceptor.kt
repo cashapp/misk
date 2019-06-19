@@ -10,6 +10,7 @@ import misk.logging.log
 import misk.web.NetworkChain
 import misk.web.NetworkInterceptor
 import misk.web.Response
+import misk.web.ResponseBody
 import misk.web.mediatype.MediaTypes
 import misk.web.toResponseBody
 import okhttp3.Headers
@@ -29,10 +30,17 @@ class ExceptionHandlingInterceptor(
   private val mapperResolver: ExceptionMapperResolver
 ) : NetworkInterceptor {
 
-  override fun intercept(chain: NetworkChain): Response<*> = try {
-    chain.proceed(chain.request)
-  } catch (th: Throwable) {
-    toResponse(th)
+  override fun intercept(chain: NetworkChain) {
+    try {
+      chain.proceed(chain.httpCall)
+    } catch (th: Throwable) {
+      val response = toResponse(th)
+      chain.httpCall.statusCode = response.statusCode
+      chain.httpCall.takeResponseBody()?.use { sink ->
+        chain.httpCall.addResponseHeaders(response.headers)
+        (response.body as ResponseBody).writeTo(sink)
+      }
+    }
   }
 
   private fun toResponse(th: Throwable): Response<*> = when (th) {

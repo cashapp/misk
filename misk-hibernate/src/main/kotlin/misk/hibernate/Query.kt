@@ -7,6 +7,8 @@ interface Query<T> {
   /** How many rows to return. Must be -1 or in range 1..10_000. */
   var maxRows: Int
 
+  fun disableCheck(check: Check)
+
   fun uniqueResult(session: Session): T?
 
   fun list(session: Session): List<T>
@@ -51,6 +53,16 @@ interface OrBuilder<Q : Query<*>> {
  */
 inline fun <T, reified Q : Query<T>> Q.or(lambda: OrBuilder<Q>.() -> Unit): Q {
   newOrBuilder<Q>().lambda()
+  return this
+}
+
+inline fun <T, reified Q : Query<T>> Q.allowTableScan(): Q {
+  this.disableCheck(Check.TABLE_SCAN)
+  return this
+}
+
+inline fun <T, reified Q : Query<T>> Q.allowFullScatter(): Q {
+  this.disableCheck(Check.FULL_SCATTER)
   return this
 }
 

@@ -90,7 +90,7 @@ class GrpcConnectivityTest {
 
   class HelloRpcAction @Inject constructor() : WebAction {
     @Grpc("/helloworld.Greeter/SayHello")
-    fun sayHello(@misk.web.RequestBody request: HelloRequest): HelloReply {
+    fun sayHello(request: HelloRequest): HelloReply {
       return HelloReply.Builder()
           .message("howdy, ${request.name}")
           .build()

@@ -14,11 +14,6 @@ import misk.time.FakeClockModule
 
 /** This module creates movies, actors, and characters tables for several Hibernate tests. */
 class MoviesTestModule(
-  /**
-   * Disable the cross shard query detector. This is a temporary workaround for too many failing
-   * tests. This should eventually be removed.
-   */
-  val disableCrossShardQueryDetector: Boolean = false,
   private val useVitess: Boolean = true
 ) : KAbstractModule() {
   override fun configure() {
@@ -28,8 +23,7 @@ class MoviesTestModule(
     install(EnvironmentModule(Environment.TESTING))
 
     val config = MiskConfig.load<MoviesConfig>("moviestestmodule", Environment.TESTING)
-    install(HibernateTestingModule(Movies::class,
-        disableCrossShardQueryDetector = useVitess && disableCrossShardQueryDetector))
+    install(HibernateTestingModule(Movies::class))
     install(HibernateModule(Movies::class, selectDataSourceConfig(config)))
     install(object : HibernateEntityModule(Movies::class) {
       override fun configureHibernate() {

@@ -5,6 +5,7 @@ import com.google.inject.Provider
 import misk.ApplicationInterceptor
 import misk.MiskDefault
 import misk.asAction
+import misk.scope.ActionScope
 import misk.web.BoundAction
 import misk.web.ConnectWebSocket
 import misk.web.DispatchMechanism
@@ -13,9 +14,7 @@ import misk.web.Grpc
 import misk.web.NetworkInterceptor
 import misk.web.PathPattern
 import misk.web.Post
-import misk.web.extractors.ParameterExtractor
-import misk.web.mediatype.MediaRange
-import misk.web.mediatype.MediaTypes
+import misk.web.WebActionBinding
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.reflect.KClass
@@ -29,7 +28,8 @@ internal class WebActionFactory @Inject constructor(
   private val userProvidedNetworkInterceptorFactories: List<NetworkInterceptor.Factory>,
   @MiskDefault private val miskNetworkInterceptorFactories: List<NetworkInterceptor.Factory>,
   @MiskDefault private val miskApplicationInterceptorFactories: List<ApplicationInterceptor.Factory>,
-  private val parameterExtractorFactories: List<ParameterExtractor.Factory>
+  private val webActionBindingFactory: WebActionBinding.Factory,
+  private val scope: ActionScope
 ) {
 
   /** Returns the bound actions for `webActionClass`. */
@@ -103,31 +103,29 @@ internal class WebActionFactory @Inject constructor(
   ): BoundAction<A> {
     // NB: The response media type may be omitted; in this case only generic return types (String,
     // ByteString, ResponseBody, etc) are supported
-    var action = function.asAction()
+    val  action = function.asAction(dispatchMechanism)
 
-    if (dispatchMechanism == DispatchMechanism.GRPC) {
-      require(action.responseContentType == null &&
-          action.acceptedMediaRanges == listOf(MediaRange.ALL_MEDIA)) {
-        "@Grpc cannot be used with @RequestContentType or @ResponseContentType on $function"
-      }
-      action = action.copy(
-          responseContentType = MediaTypes.APPLICATION_GRPC_MEDIA_TYPE,
-          acceptedMediaRanges = listOf(MediaRange.parse(MediaTypes.APPLICATION_GRPC))
-      )
-    }
-
-    val networkInterceptors = ArrayList<NetworkInterceptor>()
     // Ensure that default interceptors are called before any user provided interceptors
-    miskNetworkInterceptorFactories.mapNotNullTo(networkInterceptors) { it.create(action) }
-    userProvidedNetworkInterceptorFactories.mapNotNullTo(networkInterceptors) { it.create(action) }
+    val networkInterceptors =
+        miskNetworkInterceptorFactories.mapNotNull { it.create(action) } +
+            userProvidedNetworkInterceptorFactories.mapNotNull { it.create(action) }
 
-    val applicationInterceptors = ArrayList<ApplicationInterceptor>()
-    miskApplicationInterceptorFactories.mapNotNullTo(applicationInterceptors) { it.create(action) }
-    userProvidedApplicationInterceptorFactories.mapNotNullTo(applicationInterceptors) {
-      it.create(action)
-    }
+    val applicationInterceptors =
+        miskApplicationInterceptorFactories.mapNotNull { it.create(action) } +
+            userProvidedApplicationInterceptorFactories.mapNotNull { it.create(action) }
 
-    return BoundAction(provider, networkInterceptors, applicationInterceptors,
-        parameterExtractorFactories, PathPattern.parse(pathPattern), action, dispatchMechanism)
+    val parsedPathPattern = PathPattern.parse(pathPattern)
+
+    val webActionBinding = webActionBindingFactory.create(action, parsedPathPattern)
+
+    return BoundAction(
+        scope,
+        provider,
+        networkInterceptors,
+        applicationInterceptors,
+        webActionBinding,
+        parsedPathPattern,
+        action
+    )
   }
 }

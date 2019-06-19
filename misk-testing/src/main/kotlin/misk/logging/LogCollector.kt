@@ -37,7 +37,8 @@ import kotlin.reflect.KClass
  */
 interface LogCollector {
   /**
-   * Removes all collected log messages and returns those that match the requested criteria.
+   * Removes all currently-collected log messages and returns those that match the requested
+   * criteria.
    */
   fun takeMessages(
     loggerClass: KClass<*>? = null,
@@ -46,11 +47,31 @@ interface LogCollector {
   ): List<String>
 
   /**
-   * Removes all collected log events and returns those that match the requested criteria.
+   * Waits until a matching event is logged, and returns its message. The returned event and all
+   * preceding events are also removed.
+   */
+  fun takeMessage(
+    loggerClass: KClass<*>? = null,
+    minLevel: Level = Level.INFO,
+    pattern: Regex? = null
+  ): String
+
+  /**
+   * Removes all currently-collected log events and returns those that match the requested criteria.
    */
   fun takeEvents(
     loggerClass: KClass<*>? = null,
     minLevel: Level = Level.INFO,
     pattern: Regex? = null
   ): List<ILoggingEvent>
+
+  /**
+   * Waits until a matching event is logged, and returns it. The returned event and all preceding
+   * events are also removed.
+   */
+  fun takeEvent(
+    loggerClass: KClass<*>? = null,
+    minLevel: Level = Level.INFO,
+    pattern: Regex? = null
+  ): ILoggingEvent
 }

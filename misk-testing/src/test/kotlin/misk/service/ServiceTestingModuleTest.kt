@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package misk.service
 
 import com.google.common.util.concurrent.AbstractIdleService
@@ -10,12 +12,14 @@ import misk.MiskTestingServiceModule
 import misk.inject.KAbstractModule
 import misk.inject.getInstance
 import misk.inject.keyOf
+import org.junit.Ignore
 import org.junit.jupiter.api.Test
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
 import javax.inject.Singleton
 
+@Ignore("ServiceTestingModule is deprecated.")
 internal class ServiceTestingModuleTest {
   @Test fun serviceTestModuleAddsTestSpecificDependency() {
     val injector = Guice.createInjector(object : KAbstractModule() {

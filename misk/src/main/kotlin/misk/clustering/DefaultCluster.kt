@@ -1,9 +1,6 @@
 package misk.clustering
 
 import com.google.common.util.concurrent.AbstractExecutionThreadService
-import com.google.inject.Key
-import misk.DependentService
-import misk.inject.keyOf
 import misk.logging.getLogger
 import org.eclipse.jetty.util.BlockingArrayQueue
 import java.util.concurrent.atomic.AtomicBoolean
@@ -21,7 +18,7 @@ internal class DefaultCluster(
   self: Cluster.Member,
   private val newResourceMapperFn: (members: Set<Cluster.Member>) -> ClusterResourceMapper =
       { ClusterHashRing(it) }
-) : AbstractExecutionThreadService(), Cluster, DependentService {
+) : AbstractExecutionThreadService(), Cluster, ClusterService {
   private val snapshotRef = AtomicReference<Cluster.Snapshot>(Cluster.Snapshot(
       self = self,
       selfReady = false,
@@ -32,8 +29,6 @@ internal class DefaultCluster(
   private val actions = BlockingArrayQueue<(MutableSet<ClusterWatch>) -> Unit>()
 
   override val snapshot: Cluster.Snapshot get() = snapshotRef.get()
-  override val consumedKeys: Set<Key<*>> = setOf()
-  override val producedKeys: Set<Key<*>> = setOf(keyOf<Cluster>())
 
   /**
    * Runs the internal event loop that handles requests to add watches or cluster changes. We use

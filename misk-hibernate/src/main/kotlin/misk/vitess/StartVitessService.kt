@@ -12,16 +12,13 @@ import com.github.dockerjava.netty.NettyDockerCmdExecFactory
 import com.google.common.cache.CacheBuilder
 import com.google.common.cache.CacheLoader
 import com.google.common.util.concurrent.AbstractIdleService
-import com.google.inject.Key
 import com.squareup.moshi.Moshi
 import com.zaxxer.hikari.util.DriverDataSource
-import misk.DependentService
 import misk.backoff.ExponentialBackoff
 import misk.backoff.retry
 import misk.environment.Environment
 import misk.environment.Environment.DEVELOPMENT
 import misk.environment.Environment.TESTING
-import misk.inject.toKey
 import misk.jdbc.DataSourceConfig
 import misk.jdbc.DataSourceType
 import misk.jdbc.uniqueInt
@@ -45,7 +42,9 @@ import kotlin.streams.toList
 const val VITESS_IMAGE = "vitess/base@sha256:ad6d22aafa73c9bb64cebf6dffe5f82df7cfcded00cf801fd4e64d0f46dbab43"
 const val CONTAINER_NAME_PREFIX = "misk-vitess-testing"
 
-class Keyspace(val sharded: Boolean) {
+class Table
+
+class Keyspace(val sharded: Boolean, val tables: Map<String, Table>) {
   // Defaulting to 2 shards for sharded keyspaces,
   // maybe this should be configurable at some point?
   fun shardCount() = if (sharded) 2 else 1
@@ -322,11 +321,7 @@ class StartVitessService(
   private val qualifier: KClass<out Annotation>,
   private val environment: Environment,
   private val config: DataSourceConfig
-) : AbstractIdleService(), DependentService {
-
-  override val consumedKeys: Set<Key<*>> = setOf()
-  override val producedKeys: Set<Key<*>> = setOf(StartVitessService::class.toKey(qualifier))
-
+) : AbstractIdleService() {
   var cluster: DockerVitessCluster? = null
 
   override fun startUp() {

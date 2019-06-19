@@ -26,7 +26,7 @@ class DbActor() : DbRoot<DbActor>, DbTimestampedEntity {
   @Column
   var birth_date: LocalDate? = null
 
-  constructor(name: String, birthDate: LocalDate?) : this() {
+  constructor(name: String, birthDate: LocalDate? = null) : this() {
     this.name = name
     this.birth_date = birthDate
   }

@@ -7,19 +7,19 @@ import ch.qos.logback.core.UnsynchronizedAppenderBase
 import com.google.common.util.concurrent.AbstractIdleService
 import com.google.common.util.concurrent.Service.State.NEW
 import org.slf4j.LoggerFactory
+import java.util.concurrent.LinkedBlockingDeque
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.reflect.KClass
 
 @Singleton
 internal class RealLogCollector @Inject constructor() : AbstractIdleService(), LogCollector {
-  private val events = mutableListOf<ILoggingEvent>()
+  private val queue = LinkedBlockingDeque<ILoggingEvent>()
 
   private val appender = object : UnsynchronizedAppenderBase<ILoggingEvent>() {
     override fun append(event: ILoggingEvent) {
-      synchronized(this@RealLogCollector) {
-        events.add(event)
-      }
+      queue.put(event)
     }
   }
 
@@ -27,28 +27,50 @@ internal class RealLogCollector @Inject constructor() : AbstractIdleService(), L
     loggerClass: KClass<*>?,
     minLevel: Level,
     pattern: Regex?
-  ): List<String> {
-    return takeEvents(loggerClass, minLevel, pattern).map { it.message.toString() }
-  }
+  ): List<String> = takeEvents(loggerClass, minLevel, pattern).map { it.message }
+
+  override fun takeMessage(
+    loggerClass: KClass<*>?,
+    minLevel: Level,
+    pattern: Regex?
+  ): String = takeEvent(loggerClass, minLevel, pattern).message
 
   override fun takeEvents(
     loggerClass: KClass<*>?,
     minLevel: Level,
     pattern: Regex?
   ): List<ILoggingEvent> {
+    val result = mutableListOf<ILoggingEvent>()
+    while (queue.isNotEmpty()) {
+      val event = takeOrNull(loggerClass, minLevel, pattern)
+      if (event != null) result += event
+    }
+    return result
+  }
+
+  override fun takeEvent(loggerClass: KClass<*>?, minLevel: Level, pattern: Regex?): ILoggingEvent {
+    while (true) {
+      val event = takeOrNull(loggerClass, minLevel, pattern)
+      if (event != null) return event
+    }
+  }
+
+  /** Takes an event. Returns it if it meets the constraints and null if it doesn't. */
+  private fun takeOrNull(
+    loggerClass: KClass<*>?,
+    minLevel: Level,
+    pattern: Regex?
+  ): ILoggingEvent? {
     require(state() != NEW) { "not collecting logs: did you forget to start the service?" }
 
-    synchronized(this@RealLogCollector) {
-      val result = events.filter {
-        (loggerClass == null || loggerClass.qualifiedName == it.loggerName) &&
-            it.level.toInt() >= minLevel.toInt() &&
-            (pattern == null || pattern.containsMatchIn(it.message.toString()))
-      }
+    val event = queue.poll(500, TimeUnit.MILLISECONDS)
+        ?: throw IllegalArgumentException("no events to take!")
 
-      events.clear()
+    if (loggerClass != null && loggerClass.qualifiedName != event.loggerName) return null
+    if (event.level.toInt() < minLevel.toInt()) return null
+    if (pattern != null && !pattern.containsMatchIn(event.message.toString())) return null
 
-      return result
-    }
+    return event
   }
 
   override fun startUp() {

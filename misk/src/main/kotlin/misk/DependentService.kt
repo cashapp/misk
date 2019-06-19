@@ -24,7 +24,32 @@ import com.google.inject.Key
  *
  * It is an error for the same key to be produced by multiple services. But multiple consumers can
  * consume the same key.
+ *
+ *
+ *
+ * ### Deprecated by [ServiceModule].
+ *
+ * The above example may be similarly implemented in a [misk.inject.KAbstractModule]. e.g.
+ *
+ *     interface Meat : Service
+ *     class BrontosaurusService : Meat { ... }
+ *     class TyrannosaurusService : Service { ... }
+ *
+ *     class DinosaurModule : KAbstractModule() {
+ *       override fun configure() {
+ *          bind<Meat>().to<BrontosaurusService>()
+ *          install(ServiceModule<Meat>())
+ *          install(ServiceModule<TyranosaurusService>()
+ *              .dependsOn<Meat>())
+ *       }
+ *     }
+ *
+ * It is an error to install the same service twice. Multiple service may depend on the same service
+ * however.
  */
+@Deprecated(
+    "ServiceModule allows you to declare dependencies on installation site. Do not implement this."
+)
 interface DependentService : Service {
   val consumedKeys: Set<Key<*>>
   val producedKeys: Set<Key<*>>

@@ -1,16 +1,13 @@
 package misk.jdbc
 
 import com.squareup.moshi.Moshi
-import misk.environment.Environment
-import misk.vitess.StartVitessService
-import okhttp3.OkHttpClient
 import okio.Buffer
 import org.junit.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
-class VitessScaleSafetyChecksTest {
+class ParseQueryPlansTest {
   val queryPlans = """Length: 2
 "select dbmovie0_.id as id1_2_, dbmovie0_.created_at as created_2_2_, dbmovie0_.name as name3_2_, dbmovie0_.release_date as release_4_2_, dbmovie0_.updated_at as updated_5_2_ from movies as dbmovie0_ where dbmovie0_.release_date < :v1 limit :v2"
 {
@@ -57,17 +54,10 @@ class VitessScaleSafetyChecksTest {
 """
 
   @Test fun parseQueryPlans() {
-    val detector = VitessScaleSafetyChecks(
-        OkHttpClient(),
+    val plans = VitessScaleSafetyChecks.parseQueryPlans(
         Moshi.Builder().build(),
-        DataSourceConfig(type = DataSourceType.VITESS),
-        StartVitessService(
-            qualifier = Movies::class,
-            environment = Environment.TESTING,
-            config = DataSourceConfig(type = DataSourceType.VITESS)))
-
-    val plans = detector.parseQueryPlans(
-        Buffer().writeUtf8(queryPlans)).toList()
+        Buffer().writeUtf8(queryPlans)
+    ).toList()
     assertEquals(2, plans.count())
 
     assertTrue(plans[0].isScatter)

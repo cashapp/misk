@@ -1,16 +1,14 @@
 package misk.hibernate
 
 import com.google.common.util.concurrent.AbstractIdleService
-import com.google.common.util.concurrent.Service
-import com.google.inject.Key
-import misk.DependentService
 import misk.MiskTestingServiceModule
+import misk.ServiceModule
 import misk.config.Config
 import misk.config.MiskConfig
 import misk.environment.Environment
 import misk.inject.KAbstractModule
 import misk.inject.asSingleton
-import misk.inject.toKey
+import misk.inject.keyOf
 import misk.jdbc.DataSourceConfig
 import misk.jdbc.DataSourceService
 import misk.jdbc.PingDatabaseService
@@ -34,11 +32,8 @@ internal class SchemaMigratorTest {
   val config = MiskConfig.load<RootConfig>("test_schemamigrator_app", defaultEnv)
 
   @Singleton
-  class DropTablesService @Inject constructor() : AbstractIdleService(), DependentService {
+  class DropTablesService @Inject constructor() : AbstractIdleService() {
     @Inject @Movies lateinit var sessionFactoryProvider: Provider<SessionFactory>
-
-    override val consumedKeys = setOf<Key<*>>(SessionFactoryService::class.toKey(Movies::class))
-    override val producedKeys = setOf<Key<*>>()
 
     override fun startUp() {
       sessionFactoryProvider.get().openSession().use { session ->
@@ -63,25 +58,41 @@ internal class SchemaMigratorTest {
   val module = object : KAbstractModule() {
     override fun configure() {
       install(MiskTestingServiceModule())
-      multibind<Service>().to<DropTablesService>()
-      multibind<Service>().toInstance(
-          PingDatabaseService(Movies::class, config.data_source, defaultEnv))
+
+      bind(keyOf<StartVitessService>(Movies::class)).toInstance(
+          StartVitessService(Movies::class, Environment.TESTING, config.data_source))
+      install(ServiceModule<StartVitessService>(Movies::class))
+
+      bind(keyOf<PingDatabaseService>(Movies::class)).toInstance(
+          PingDatabaseService(config.data_source, defaultEnv))
+      install(ServiceModule<PingDatabaseService>(Movies::class)
+          .dependsOn<StartVitessService>(Movies::class))
+
+      install(ServiceModule<DropTablesService>())
+
       val dataSourceService =
-          DataSourceService(Movies::class, config.data_source, defaultEnv,
-              emptySet())
-      multibind<Service>().toInstance(dataSourceService)
+          DataSourceService(Movies::class, config.data_source, defaultEnv, emptySet())
+      bind(keyOf<DataSourceService>(Movies::class)).toInstance(dataSourceService)
       bind<DataSource>().annotatedWith<Movies>().toProvider(dataSourceService)
+      install(ServiceModule<DataSourceService>(Movies::class)
+          .dependsOn<PingDatabaseService>(Movies::class))
+
       val injectorServiceProvider = getProvider(HibernateInjectorAccess::class.java)
-      val sessionFactoryServiceKey = Key.get(SessionFactoryService::class.java, Movies::class.java)
+      val sessionFactoryServiceKey = keyOf<SessionFactoryService>(Movies::class)
       bind(sessionFactoryServiceKey).toProvider(Provider<SessionFactoryService> {
         SessionFactoryService(Movies::class, config.data_source, dataSourceService,
             injectorServiceProvider.get())
       }).asSingleton()
       bind<SessionFactory>().annotatedWith<Movies>().toProvider(sessionFactoryServiceKey)
-      val sessionFactoryKey = Key.get(SessionFactory::class.java, Movies::class.java)
+      val sessionFactoryKey = keyOf<SessionFactory>(Movies::class)
       val sessionFactoryProvider = getProvider(sessionFactoryKey)
-      multibind<Service>().to(sessionFactoryServiceKey)
-      val transacterKey = Key.get(Transacter::class.java, Movies::class.java)
+
+      bind(keyOf<TransacterService>(Movies::class)).to(keyOf<SessionFactoryService>(Movies::class))
+      install(ServiceModule<TransacterService>(Movies::class)
+          .enhancedBy<DropTablesService>()
+          .dependsOn<DataSourceService>(Movies::class))
+
+      val transacterKey = keyOf<Transacter>(Movies::class)
       bind(transacterKey).toProvider(object : Provider<Transacter> {
         @Inject lateinit var queryTracingListener: QueryTracingListener
         override fun get(): RealTransacter = RealTransacter(
@@ -92,8 +103,6 @@ internal class SchemaMigratorTest {
             null
         )
       }).asSingleton()
-      multibind<Service>().toInstance(
-          StartVitessService(Movies::class, Environment.TESTING, config.data_source))
     }
   }
 

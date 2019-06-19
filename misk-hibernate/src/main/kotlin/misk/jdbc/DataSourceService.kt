@@ -2,13 +2,10 @@ package misk.jdbc
 
 import com.google.common.base.Stopwatch
 import com.google.common.util.concurrent.AbstractIdleService
-import com.google.inject.Key
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import com.zaxxer.hikari.metrics.prometheus.PrometheusMetricsTrackerFactory
-import misk.DependentService
 import misk.environment.Environment
-import misk.inject.toKey
 import misk.metrics.Metrics
 import mu.KotlinLogging
 import javax.inject.Provider
@@ -26,14 +23,11 @@ internal class DataSourceService(
   private val environment: Environment,
   private val dataSourceDecorators: Set<DataSourceDecorator>,
   private val metrics: Metrics? = null
-) : AbstractIdleService(), DependentService, Provider<DataSource> {
+) : AbstractIdleService(), Provider<DataSource> {
   /** The backing connection pool */
   private var hikariDataSource: HikariDataSource? = null
   /** The decorated data source */
   private var dataSource: DataSource? = null
-
-  override val consumedKeys = setOf<Key<*>>(PingDatabaseService::class.toKey(qualifier))
-  override val producedKeys = setOf<Key<*>>(DataSourceService::class.toKey(qualifier))
 
   override fun startUp() {
     val stopwatch = Stopwatch.createStarted()
@@ -41,41 +35,43 @@ internal class DataSourceService(
 
     require(dataSource == null)
 
-    val config = HikariConfig()
-    config.driverClassName = this.config.type.driverClassName
-    config.jdbcUrl = this.config.buildJdbcUrl(environment)
-    if (this.config.username != null) {
-      config.username = this.config.username
+    val hikariConfig = HikariConfig()
+    hikariConfig.driverClassName = config.type.driverClassName
+    hikariConfig.jdbcUrl = config.buildJdbcUrl(environment)
+    if (config.username != null) {
+      hikariConfig.username = config.username
     }
-    if (this.config.password != null) {
-      config.password = this.config.password
+    if (config.password != null) {
+      hikariConfig.password = config.password
     }
-    config.minimumIdle = this.config.fixed_pool_size
-    config.maximumPoolSize = this.config.fixed_pool_size
-    config.poolName = qualifier.simpleName
+    hikariConfig.minimumIdle = config.fixed_pool_size
+    hikariConfig.maximumPoolSize = config.fixed_pool_size
+    hikariConfig.poolName = qualifier.simpleName
+    hikariConfig.connectionTimeout = config.connection_timeout.toMillis()
+    hikariConfig.maxLifetime = config.connection_max_lifetime.toMillis()
 
-    if (this.config.type == DataSourceType.MYSQL || this.config.type == DataSourceType.VITESS) {
-      config.minimumIdle = 5
-      if (this.config.type == DataSourceType.MYSQL) {
-        config.connectionInitSql = "SET time_zone = '+00:00'"
+    if (config.type == DataSourceType.MYSQL || config.type == DataSourceType.VITESS) {
+      hikariConfig.minimumIdle = 5
+      if (config.type == DataSourceType.MYSQL) {
+        hikariConfig.connectionInitSql = "SET time_zone = '+00:00'"
       }
 
       // https://github.com/brettwooldridge/HikariCP/wiki/MySQL-Configuration
-      config.dataSourceProperties["cachePrepStmts"] = "true"
-      config.dataSourceProperties["prepStmtCacheSize"] = "250"
-      config.dataSourceProperties["prepStmtCacheSqlLimit"] = "2048"
-      config.dataSourceProperties["useServerPrepStmts"] = "true"
-      config.dataSourceProperties["useLocalSessionState"] = "true"
-      config.dataSourceProperties["rewriteBatchedStatements"] = "true"
-      config.dataSourceProperties["cacheResultSetMetadata"] = "true"
-      config.dataSourceProperties["cacheServerConfiguration"] = "true"
-      config.dataSourceProperties["elideSetAutoCommits"] = "true"
-      config.dataSourceProperties["maintainTimeStats"] = "false"
+      hikariConfig.dataSourceProperties["cachePrepStmts"] = "true"
+      hikariConfig.dataSourceProperties["prepStmtCacheSize"] = "250"
+      hikariConfig.dataSourceProperties["prepStmtCacheSqlLimit"] = "2048"
+      hikariConfig.dataSourceProperties["useServerPrepStmts"] = "true"
+      hikariConfig.dataSourceProperties["useLocalSessionState"] = "true"
+      hikariConfig.dataSourceProperties["rewriteBatchedStatements"] = "true"
+      hikariConfig.dataSourceProperties["cacheResultSetMetadata"] = "true"
+      hikariConfig.dataSourceProperties["cacheServerConfiguration"] = "true"
+      hikariConfig.dataSourceProperties["elideSetAutoCommits"] = "true"
+      hikariConfig.dataSourceProperties["maintainTimeStats"] = "false"
     }
 
-    metrics?.let { config.metricsTrackerFactory = PrometheusMetricsTrackerFactory(it.registry) }
+    metrics?.let { hikariConfig.metricsTrackerFactory = PrometheusMetricsTrackerFactory(it.registry) }
 
-    hikariDataSource = HikariDataSource(config)
+    hikariDataSource = HikariDataSource(hikariConfig)
     dataSource = decorate(hikariDataSource!!)
 
     logger.info("Started @${qualifier.simpleName} connection pool in $stopwatch")

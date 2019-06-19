@@ -1,12 +1,14 @@
 package misk.web
 
-import com.google.common.util.concurrent.Service
 import com.google.inject.Provides
 import com.google.inject.TypeLiteral
 import misk.ApplicationInterceptor
 import misk.MiskCaller
 import misk.MiskDefault
+import misk.ServiceModule
 import misk.exceptions.ActionException
+import misk.grpc.GrpcRequestFeatureBinding
+import misk.grpc.GrpcResponseFeatureBinding
 import misk.inject.KAbstractModule
 import misk.scope.ActionScopedProvider
 import misk.scope.ActionScopedProviderModule
@@ -21,24 +23,23 @@ import misk.web.exceptions.ActionExceptionLogLevelConfig
 import misk.web.exceptions.ActionExceptionMapper
 import misk.web.exceptions.ExceptionHandlingInterceptor
 import misk.web.exceptions.ExceptionMapperModule
-import misk.web.extractors.FormValueParameterExtractorFactory
-import misk.web.extractors.HeadersParameterExtractorFactory
-import misk.web.extractors.ParameterExtractor
-import misk.web.extractors.PathPatternParameterExtractorFactory
-import misk.web.extractors.QueryStringParameterExtractorFactory
-import misk.web.extractors.RequestBodyParameterExtractor
-import misk.web.extractors.WebSocketParameterExtractorFactory
+import misk.web.extractors.FormValueFeatureBinding
+import misk.web.extractors.PathParamFeatureBinding
+import misk.web.extractors.QueryParamFeatureBinding
+import misk.web.extractors.RequestBodyFeatureBinding
+import misk.web.extractors.RequestHeadersFeatureBinding
+import misk.web.extractors.ResponseBodyFeatureBinding
+import misk.web.extractors.WebSocketFeatureBinding
+import misk.web.extractors.WebSocketListenerFeatureBinding
 import misk.web.interceptors.InternalErrorInterceptorFactory
-import misk.web.interceptors.MarshallerInterceptor
 import misk.web.interceptors.MetricsInterceptor
+import misk.web.interceptors.RebalancingInterceptor
 import misk.web.interceptors.RequestLogContextInterceptor
 import misk.web.interceptors.RequestLoggingInterceptor
 import misk.web.interceptors.TracingInterceptor
 import misk.web.jetty.JettyConnectionMetricsCollector
 import misk.web.jetty.JettyService
 import misk.web.jetty.JettyThreadPoolMetricsCollector
-import misk.web.marshal.GrpcMarshaller
-import misk.web.marshal.GrpcUnmarshaller
 import misk.web.marshal.JsonMarshaller
 import misk.web.marshal.JsonUnmarshaller
 import misk.web.marshal.Marshaller
@@ -59,14 +60,14 @@ class MiskWebModule(private val config: WebConfig) : KAbstractModule() {
     bind<WebConfig>().toInstance(config)
     bind<ActionExceptionLogLevelConfig>().toInstance(config.action_exception_log_level)
 
-    multibind<Service>().to<JettyService>()
-    multibind<Service>().to<JettyThreadPoolMetricsCollector>()
-    multibind<Service>().to<JettyConnectionMetricsCollector>()
+    install(ServiceModule<JettyService>())
+    install(ServiceModule<JettyThreadPoolMetricsCollector>())
+    install(ServiceModule<JettyConnectionMetricsCollector>())
 
     // Install support for accessing the current request and caller as ActionScoped types
     install(object : ActionScopedProviderModule() {
       override fun configureProviders() {
-        bindSeedData(Request::class)
+        bindSeedData(HttpCall::class)
         bindSeedData(HttpServletRequest::class)
         bindProvider(miskCallerType, MiskCallerProvider::class)
         newMultibinder<MiskCallerAuthenticator>()
@@ -77,10 +78,8 @@ class MiskWebModule(private val config: WebConfig) : KAbstractModule() {
     multibind<Marshaller.Factory>().to<PlainTextMarshaller.Factory>()
     multibind<Marshaller.Factory>().to<JsonMarshaller.Factory>()
     multibind<Marshaller.Factory>().to<ProtobufMarshaller.Factory>()
-    multibind<Marshaller.Factory>().to<GrpcMarshaller.Factory>()
     multibind<Unmarshaller.Factory>().to<JsonUnmarshaller.Factory>()
     multibind<Unmarshaller.Factory>().to<ProtobufUnmarshaller.Factory>()
-    multibind<Unmarshaller.Factory>().to<GrpcUnmarshaller.Factory>()
 
     // Initialize empty sets for our multibindings.
     newMultibinder<NetworkInterceptor.Factory>()
@@ -90,6 +89,9 @@ class MiskWebModule(private val config: WebConfig) : KAbstractModule() {
 
     // Register built-in interceptors. Interceptors run in the order in which they are
     // installed, and the order of these interceptors is critical.
+
+    multibind<NetworkInterceptor.Factory>(MiskDefault::class)
+        .to<RebalancingInterceptor.Factory>()
 
     // Handle all unexpected errors that occur during dispatch
     multibind<NetworkInterceptor.Factory>(MiskDefault::class)
@@ -111,24 +113,23 @@ class MiskWebModule(private val config: WebConfig) : KAbstractModule() {
     multibind<NetworkInterceptor.Factory>(MiskDefault::class)
         .to<ExceptionHandlingInterceptor.Factory>()
 
-    // Convert typed responses into a ResponseBody that can marshal the response according to
-    // the client's requested content-type
-    multibind<NetworkInterceptor.Factory>(MiskDefault::class)
-        .to<MarshallerInterceptor.Factory>()
-
     // Optionally log request and response details
     multibind<ApplicationInterceptor.Factory>(MiskDefault::class)
         .to<RequestLoggingInterceptor.Factory>()
 
     install(ExceptionMapperModule.create<ActionException, ActionExceptionMapper>())
 
-    // Register built-in parameter extractors
-    multibind<ParameterExtractor.Factory>().toInstance(PathPatternParameterExtractorFactory)
-    multibind<ParameterExtractor.Factory>().toInstance(QueryStringParameterExtractorFactory)
-    multibind<ParameterExtractor.Factory>().toInstance(FormValueParameterExtractorFactory)
-    multibind<ParameterExtractor.Factory>().toInstance(HeadersParameterExtractorFactory)
-    multibind<ParameterExtractor.Factory>().toInstance(WebSocketParameterExtractorFactory)
-    multibind<ParameterExtractor.Factory>().to<RequestBodyParameterExtractor.Factory>()
+    // Register built-in feature bindings.
+    multibind<FeatureBinding.Factory>().toInstance(PathParamFeatureBinding.Factory)
+    multibind<FeatureBinding.Factory>().toInstance(QueryParamFeatureBinding.Factory)
+    multibind<FeatureBinding.Factory>().toInstance(FormValueFeatureBinding.Factory)
+    multibind<FeatureBinding.Factory>().toInstance(RequestHeadersFeatureBinding.Factory)
+    multibind<FeatureBinding.Factory>().toInstance(WebSocketFeatureBinding.Factory)
+    multibind<FeatureBinding.Factory>().toInstance(WebSocketListenerFeatureBinding.Factory)
+    multibind<FeatureBinding.Factory>().to<RequestBodyFeatureBinding.Factory>()
+    multibind<FeatureBinding.Factory>().to<ResponseBodyFeatureBinding.Factory>()
+    multibind<FeatureBinding.Factory>().to<GrpcRequestFeatureBinding.Factory>()
+    multibind<FeatureBinding.Factory>().to<GrpcResponseFeatureBinding.Factory>()
 
     // Install infrastructure support
     install(CertificatesModule())

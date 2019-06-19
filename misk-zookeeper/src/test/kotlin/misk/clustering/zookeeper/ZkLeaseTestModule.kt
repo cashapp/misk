@@ -1,7 +1,9 @@
 package misk.clustering.zookeeper
 
 import com.google.inject.Provides
+import com.google.inject.Singleton
 import misk.clustering.fake.FakeClusterModule
+import misk.clustering.weights.FakeClusterWeightModule
 import misk.concurrent.ExplicitReleaseDelayQueue
 import misk.config.AppName
 import misk.inject.KAbstractModule
@@ -15,11 +17,11 @@ internal class ZkLeaseTestModule : KAbstractModule() {
     bind<String>().annotatedWith<AppName>().toInstance("my-app")
     install(FakeClusterModule())
     install(ZkTestModule(ForZkLease::class))
-    install(ZkLeaseManagerModule())
-
+    install(ZkLeaseCommonModule())
+    install(FakeClusterWeightModule())
   }
 
-  @Provides @ForZkLease
+  @Provides @ForZkLease @Singleton
   fun provideTaskQueue(
     clock: Clock,
     @ForZkLease delayQueue: ExplicitReleaseDelayQueue<DelayedTask>

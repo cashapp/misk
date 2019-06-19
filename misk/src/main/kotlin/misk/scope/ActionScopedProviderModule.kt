@@ -5,6 +5,7 @@ import com.google.inject.Provider
 import com.google.inject.TypeLiteral
 import com.google.inject.multibindings.MapBinder
 import com.google.inject.multibindings.Multibinder
+import com.squareup.moshi.Types
 import misk.inject.KAbstractModule
 import misk.inject.asSingleton
 import misk.inject.parameterizedType
@@ -12,6 +13,7 @@ import misk.inject.typeLiteral
 import java.lang.reflect.Type
 import javax.inject.Inject
 import kotlin.reflect.KClass
+import kotlin.reflect.jvm.javaMethod
 
 /** Module used by components and applications to provide [ActionScoped] context objects */
 abstract class ActionScopedProviderModule : KAbstractModule() {
@@ -118,6 +120,19 @@ abstract class ActionScopedProviderModule : KAbstractModule() {
       @Inject lateinit var scope: ActionScope
       override fun get() = RealActionScoped(key, scope)
     }).asSingleton()
+    bind(actionScopedKey.withWildcard()).to(actionScopedKey)
+  }
+
+  /**
+   * Given a key like `ActionScoped<Runnable>` this returns a Key like `ActionScoped<out Runnable>`.
+   * It's necessary because Kotlin gives us wildcards we don't want.
+   */
+  private fun <T> Key<ActionScoped<T>>.withWildcard(): Key<ActionScoped<T>> {
+    val t = typeLiteral.getReturnType(ActionScoped<*>::get.javaMethod).type
+    val outT = Types.subtypeOf(t)
+    val actionScopedOfOutT = Types.newParameterizedType(ActionScoped::class.java, outT)
+    @Suppress("UNCHECKED_CAST") // We do runtime checks to confirm this is safe.
+    return ofType(actionScopedOfOutT) as Key<ActionScoped<T>>
   }
 
   companion object {

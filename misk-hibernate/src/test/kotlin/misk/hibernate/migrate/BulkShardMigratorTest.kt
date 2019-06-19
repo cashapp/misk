@@ -11,12 +11,12 @@ import misk.hibernate.Query
 import misk.hibernate.Session
 import misk.hibernate.Shard
 import misk.hibernate.Transacter
+import misk.hibernate.allowTableScan
 import misk.hibernate.createInSameShard
 import misk.hibernate.createInSeparateShard
 import misk.hibernate.shard
 import misk.hibernate.shards
 import misk.hibernate.transaction
-import misk.jdbc.VitessScaleSafetyChecks
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
@@ -34,7 +34,6 @@ class BulkShardMigratorTest {
 
   @Inject @Movies private lateinit var transacter: Transacter
   @Inject @Movies lateinit var sessionFactory: SessionFactory
-  @Inject @Movies lateinit var checks: VitessScaleSafetyChecks
   @Inject private lateinit var bulkShardMigratorFactory: BulkShardMigrator.Factory
   @Inject lateinit var queryFactory: Query.Factory
 
@@ -113,15 +112,11 @@ class BulkShardMigratorTest {
 
     // It is expected that we would work on two root entities while merging though on the same shard
     // for this case. The vitess safey checks throw, disabling it for now.
-    // TODO(alihussain): add additional flag to VitessScaleSafetyChecks to check on multi shard
-    // writes instead of just multi entity group writes.
-    checks.disable {
-      bulkShardMigratorFactory.create(transacter, sessionFactory, DbMovie::class, DbCharacter::class)
-          .rootColumn("movie_id")
-          .source(sourceId)
-          .target(targetId)
-          .execute()
-    }
+    bulkShardMigratorFactory.create(transacter, sessionFactory, DbMovie::class, DbCharacter::class)
+        .rootColumn("movie_id")
+        .source(sourceId)
+        .target(targetId)
+        .execute()
 
     // Movie remained in the same shard
     assertMovieNamesInShard(targetShard).containsExactly("Jurassic Park", "Star Wars")
@@ -283,6 +278,7 @@ class BulkShardMigratorTest {
     return transacter.transaction(shard) { session ->
       ListAssert(
           queryFactory.newQuery(MovieQuery::class)
+              .allowTableScan()
               .list(session)
               .map { it.name }
               .toList()
@@ -294,6 +290,7 @@ class BulkShardMigratorTest {
     return transacter.transaction(shard) { session ->
       ListAssert(
           queryFactory.newQuery(CharacterQuery::class)
+              .allowTableScan()
               .list(session)
               .map { it.name }
               .toList()

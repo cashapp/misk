@@ -1,8 +1,6 @@
 package misk.zookeeper.testing
 
-import com.google.common.util.concurrent.Service
-import com.google.inject.Key
-import misk.DependentService
+import misk.ServiceModule
 import misk.clustering.zookeeper.ZookeeperConfig
 import misk.config.AppName
 import misk.inject.KAbstractModule
@@ -12,7 +10,7 @@ import misk.security.ssl.SslLoader
 import misk.security.ssl.TrustStoreConfig
 import misk.service.CachedTestService
 import misk.zookeeper.ZkClientFactory
-import misk.zookeeper.ZookeeperModule
+import misk.zookeeper.ZookeeperDefaultModule
 import org.apache.curator.framework.CuratorFramework
 import javax.inject.Inject
 import javax.inject.Provider
@@ -29,9 +27,10 @@ class ZkTestModule(
         cert_store = CertStoreConfig(keystorePath, "changeit", SslLoader.FORMAT_JKS),
         trust_store = TrustStoreConfig(truststorePath, "changeit", SslLoader.FORMAT_JKS))
 
-    install(ZookeeperModule(config, qualifier))
+    install(ZookeeperDefaultModule(config, qualifier))
 
-    multibind<Service>().toInstance(StartZookeeperService(qualifier))
+    install(ServiceModule<StartZookeeperService>(qualifier))
+    bind(keyOf<StartZookeeperService>(qualifier)).toInstance(StartZookeeperService())
     val curator = getProvider(keyOf<CuratorFramework>(qualifier))
     bind(keyOf<ZkClientFactory>(qualifier)).toProvider(object : Provider<ZkClientFactory> {
       @Inject @AppName private lateinit var app: String
@@ -44,12 +43,7 @@ class ZkTestModule(
   /**
    * The same zookeeper instance is used for all zookeeper bindings to speed up tests.
    */
-  private class StartZookeeperService constructor(
-    qualifier: KClass<out Annotation>?
-  ) : CachedTestService(), DependentService {
-    override val consumedKeys: Set<Key<*>> = setOf()
-    override val producedKeys: Set<Key<*>> = setOf(keyOf<StartZookeeperService>(qualifier))
-
+  private class StartZookeeperService : CachedTestService() {
     override fun actualStartup() {
       sharedZookeeper.start()
     }

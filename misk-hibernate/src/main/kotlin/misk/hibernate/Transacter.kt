@@ -1,5 +1,7 @@
 package misk.hibernate
 
+import com.google.common.annotations.VisibleForTesting
+
 /**
  * Provides explicit block-based transaction demarcation.
  */
@@ -8,6 +10,11 @@ interface Transacter {
    * Returns true if the calling thread is currently within a transaction block.
    */
   val inTransaction: Boolean
+
+  /**
+   * Is the scalability check currently enabled. Use [Session.withoutChecks] to disable checks.
+   */
+  fun isCheckEnabled(check: Check): Boolean
 
   /**
    * Starts a transaction on the current thread, executes lambda, and commits the transaction.
@@ -29,6 +36,14 @@ interface Transacter {
    * datasource is read only, only that the session produced won't modify the database.
    */
   fun readOnly(): Transacter
+
+  /**
+   * Disable cowrite checks for the duration of the session. Useful for quickly setting up test
+   * data in testing.
+   */
+  // TODO(jontirsen): Figure out a way to make this only available for test code
+  @VisibleForTesting
+  fun allowCowrites(): Transacter
 }
 
 fun Transacter.shards() = transaction { it.shards() }

@@ -2,6 +2,7 @@ package misk.hibernate.migrate
 
 import com.google.common.collect.ImmutableList
 import com.google.common.collect.ImmutableSet
+import misk.hibernate.Check
 import misk.hibernate.DbChild
 import misk.hibernate.DbRoot
 import misk.hibernate.DbTimestampedEntity
@@ -20,7 +21,6 @@ import java.sql.PreparedStatement
 import java.sql.SQLException
 import java.util.ArrayList
 import java.util.HashMap
-import java.util.function.Supplier
 import java.util.stream.Collectors
 import java.util.stream.Collectors.joining
 import javax.inject.Inject
@@ -47,7 +47,7 @@ import kotlin.reflect.full.isSubclassOf
  *    .execute()
  */
 class BulkShardMigrator<R : DbRoot<R>, C : DbChild<R, C>> private constructor(
-  rootClass: KClass<R>,
+  private val rootClass: KClass<R>,
   sessionFactory: SessionFactory,
   private val transacter: Transacter,
   private val childClass: KClass<C>
@@ -75,6 +75,7 @@ class BulkShardMigrator<R : DbRoot<R>, C : DbChild<R, C>> private constructor(
 
     // TODO(alihussain): cache this immediately after in a follow up!
     val annotation = rootClass.java.getAnnotation(misk.hibernate.annotation.Keyspace::class.java)
+        ?: throw NullPointerException("$rootClass requires the Keyspace annotation to use BulkShardMigrator. If using with MySQL annotate with @Keyspace(\"keyspace\")")
     this.keyspace = Keyspace(annotation.value)
   }
 
@@ -176,17 +177,19 @@ class BulkShardMigrator<R : DbRoot<R>, C : DbChild<R, C>> private constructor(
       // If the transaction fails due to a shard split,
       // this transaction will retry and we will recompute isShardLocal.
       return transacter.transaction { session ->
-        val sourceRecords = loadSourceRecords(session)
-        if (sourceRecords.isEmpty()) {
-          0
-        } else {
-          logger.info("Bulk migrating (same shard) %s entities for table %s",
-              sourceRecords.size, tableName)
-          delete(session, sourceRecords.keys)
-          session.hibernateSession.doWork { connection ->
-            insert(connection, sourceRecords, setOf(), insertIgnore)
+        session.withoutChecks(Check.COWRITE) {
+          val sourceRecords = loadSourceRecords(session)
+          if (sourceRecords.isEmpty()) {
+            0
+          } else {
+            logger.info("Bulk migrating (same shard) %s entities for table %s",
+                sourceRecords.size, tableName)
+            delete(session, sourceRecords.keys)
+            session.hibernateSession.doWork { connection ->
+              insert(connection, sourceRecords, setOf(), insertIgnore)
+            }
+            sourceRecords.size
           }
-          sourceRecords.size
         }
       }
     }
@@ -260,9 +263,11 @@ class BulkShardMigrator<R : DbRoot<R>, C : DbChild<R, C>> private constructor(
   }
 
   private fun getShard(id: Id<R>): Shard =
-      transacter.shards().stream().filter {
-        listOf(keyspace, SINGLE_KEYSPACE).contains(it.keyspace) && it.contains(id.shardKey())
-      }.findFirst().orElseThrow { NoSuchElementException("No shard for $id ${id.shardKey()}") }
+      transacter.shards().find {
+        (it.keyspace == keyspace || it.keyspace == SINGLE_KEYSPACE) && it.contains(id.shardKey())
+      } ?: throw NoSuchElementException(
+          "No shard found for [class=$rootClass][id=$id]" +
+              "[keyspace=$keyspace][shardKey=${id.shardKey()}]")
 
   private fun tableName(): String {
     return persistenceMetadata.getTableName(childClass)

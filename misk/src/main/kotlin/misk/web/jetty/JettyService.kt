@@ -2,8 +2,6 @@ package misk.web.jetty
 
 import com.google.common.base.Stopwatch
 import com.google.common.util.concurrent.AbstractIdleService
-import com.google.inject.Key
-import misk.DependentService
 import misk.logging.getLogger
 import misk.security.ssl.CipherSuites
 import misk.security.ssl.SslLoader
@@ -39,14 +37,10 @@ class JettyService @Inject internal constructor(
   private val webConfig: WebConfig,
   threadPool: QueuedThreadPool,
   private val connectionMetricsCollector: JettyConnectionMetricsCollector
-) : AbstractIdleService(), DependentService {
+) : AbstractIdleService() {
   private val server = Server(threadPool)
-
   val httpServerUrl: HttpUrl get() = server.httpUrl!!
   val httpsServerUrl: HttpUrl? get() = server.httpsUrl
-
-  override val consumedKeys = setOf<Key<*>>()
-  override val producedKeys = setOf<Key<*>>()
 
   override fun startUp() {
     val stopwatch = Stopwatch.createStarted()
@@ -103,6 +97,9 @@ class JettyService @Inject internal constructor(
       alpn.defaultProtocol = "http/1.1"
       val ssl = SslConnectionFactory(sslContextFactory, alpn.protocol)
       val http2 = HTTP2ServerConnectionFactory(httpsConfig)
+      if (webConfig.jetty_max_concurrent_streams != null) {
+        http2.maxConcurrentStreams = webConfig.jetty_max_concurrent_streams
+      }
       val http1 = HttpConnectionFactory(httpsConfig)
       val httpsConnector = ServerConnector(server, null, null, null,
           webConfig.acceptors ?: -1, webConfig.selectors ?: -1, ssl, alpn, http2, http1)

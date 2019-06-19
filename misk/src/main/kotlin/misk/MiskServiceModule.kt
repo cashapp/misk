@@ -22,6 +22,8 @@ import misk.concurrent.SleeperModule
 import misk.environment.RealEnvVarModule
 import misk.healthchecks.HealthCheck
 import misk.inject.KAbstractModule
+import misk.inject.asSingleton
+import misk.inject.toKey
 import misk.metrics.MetricsModule
 import misk.moshi.MoshiModule
 import misk.prometheus.PrometheusHistogramRegistryModule
@@ -29,10 +31,12 @@ import misk.resources.ResourceLoaderModule
 import misk.time.ClockModule
 import misk.time.TickerModule
 import misk.tokens.TokenGeneratorModule
+import mu.KotlinLogging
+import javax.inject.Provider
 import javax.inject.Singleton
 
 /**
- * [MiskRealServiceModule] should be installed in real environments.
+ * Install this module in real environments.
  *
  * The vast majority of Service bindings belong in [MiskCommonServiceModule], in order to share
  * with [MiskTestingServiceModule]. Only bindings that are not suitable for a unit testing
@@ -50,7 +54,7 @@ class MiskRealServiceModule : KAbstractModule() {
 }
 
 /**
- * [MiskCommonServiceModule] has common bindings for all environments (both real and testing)
+ * This module has common bindings for all environments (both real and testing).
  */
 class MiskCommonServiceModule : KAbstractModule() {
   override fun configure() {
@@ -64,11 +68,30 @@ class MiskCommonServiceModule : KAbstractModule() {
     // Initialize empty sets for our multibindings.
     newMultibinder<HealthCheck>()
     newMultibinder<Service>()
+    newMultibinder<ServiceManager.Listener>()
+
+    multibind<ServiceManager.Listener>().toProvider(Provider<ServiceManager.Listener> {
+      object : ServiceManager.Listener() {
+        override fun failure(service: Service) {
+          log.error(service.failureCause()) { "Service $service failed" }
+        }
+      }
+    }).asSingleton()
+    newMultibinder<ServiceEntry>()
+    newMultibinder<DependencyEdge>()
+    newMultibinder<EnhancementEdge>()
   }
 
   @Provides
   @Singleton
-  fun provideServiceManager(injector: Injector, services: List<Service>): ServiceManager {
+  internal fun provideServiceManager(
+    injector: Injector,
+    services: List<Service>,
+    listeners: List<ServiceManager.Listener>,
+    serviceEntries: List<ServiceEntry>,
+    dependencies: List<DependencyEdge>,
+    enhancements: List<EnhancementEdge>
+  ): ServiceManager {
     // NB(mmihic): We get the binding for the Set<Service> because this uses a multibinder,
     // which allows us to retrieve the bindings for the elements
     val serviceListBinding = injector.getBinding(serviceSetKey)
@@ -82,10 +105,50 @@ class MiskCommonServiceModule : KAbstractModule() {
       "the following services are not marked as @Singleton: ${invalidServices.joinToString(", ")}"
     }
 
-    return CoordinatedService.coordinate(services)
+    val builder = ServiceGraphBuilder()
+
+    // Support the new ServiceModule API.
+    for (entry in serviceEntries) {
+      builder.addService(entry.key, injector.getProvider(entry.key))
+    }
+    for (edge in dependencies) {
+      builder.addDependency(dependent = edge.dependent, dependsOn = edge.dependsOn)
+    }
+    for (edge in enhancements) {
+      builder.enhanceService(toBeEnhanced = edge.toBeEnhanced, enhancement = edge.enhancement)
+    }
+
+    // Support the deprecated DependantService interface.
+    if (services.isNotEmpty()) {
+      log.warn {
+        "There is a better way! " +
+            "Instead of using `multibind<Service>().to(${services.first()::class.simpleName})`, " +
+            "use `install(ServiceModule<${services.first()::class.simpleName}>())`. " +
+            "This will let you express nice service dependency graphs easily!"
+      }
+    }
+    @Suppress("DEPRECATION")
+    for (service in services) {
+      var key: Key<*>
+      when (service) {
+        is DependentService -> {
+          key = service.producedKeys.firstOrNull() ?: service::class.toKey()
+          for (consumedKey in service.consumedKeys) {
+            builder.addDependency(dependent = key, dependsOn = consumedKey)
+          }
+        }
+        else -> {
+          key = service::class.toKey()
+        }
+      }
+      builder.addService(key, service)
+    }
+
+    val serviceManager = builder.build()
+    listeners.forEach { serviceManager.addListener(it) }
+    return serviceManager
   }
 
-  @Suppress("DEPRECATION")
   private class CheckServicesVisitor :
       DefaultBindingTargetVisitor<Set<Service>, List<String>>(),
       MultibindingsTargetVisitor<Set<Service>, List<String>> {
@@ -120,7 +183,6 @@ class MiskCommonServiceModule : KAbstractModule() {
   companion object {
     @Suppress("UNCHECKED_CAST")
     val serviceSetKey = Key.get(Types.setOf(Service::class.java)) as Key<Set<Service>>
+    private val log = KotlinLogging.logger {}
   }
-
 }
-

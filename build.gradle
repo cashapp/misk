@@ -9,7 +9,7 @@ buildscript {
 
 plugins {
   id "org.jetbrains.kotlin.jvm" version "1.3.21" apply false
-  id "com.vanniktech.maven.publish" version "0.4.0" apply false
+  id "com.vanniktech.maven.publish" version "0.8.0" apply false
   id 'com.gradle.build-scan' version "2.1"
 }
 
@@ -38,8 +38,9 @@ tasks.register("testShardHibernate") {
 }
 
 subprojects {
-  apply plugin: "java"
+  apply plugin: 'java'
   apply plugin: 'kotlin'
+
   buildscript {
     repositories {
       mavenCentral()
@@ -90,5 +91,9 @@ subprojects {
     rootProject.getTasksByName("testShardHibernate", false).first().dependsOn.add(test)
   } else {
     rootProject.getTasksByName("testShardNonHibernate", false).first().dependsOn.add(test)
+  }
+
+  if (!name.startsWith("samples:")) {
+    apply plugin: 'com.vanniktech.maven.publish'
   }
 }

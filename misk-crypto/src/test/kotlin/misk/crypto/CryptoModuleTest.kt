@@ -7,20 +7,23 @@ import com.google.crypto.tink.aead.AeadKeyTemplates
 import com.google.crypto.tink.aead.KmsEnvelopeAead
 import com.google.crypto.tink.mac.MacConfig
 import com.google.crypto.tink.mac.MacKeyTemplates
-import com.google.crypto.tink.signature.PublicKeySignFactory
 import com.google.crypto.tink.signature.SignatureConfig
 import com.google.crypto.tink.signature.SignatureKeyTemplates
-import com.google.inject.ConfigurationException
 import com.google.inject.CreationException
 import com.google.inject.Guice
 import com.google.inject.Injector
+import misk.config.MiskConfig
 import misk.config.Secret
+import misk.environment.Environment
+import misk.environment.EnvironmentModule
 import misk.testing.MiskTest
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatCode
 import org.assertj.core.api.Assertions.assertThatThrownBy
+import org.junit.Ignore
 import org.junit.Test
 import java.io.ByteArrayOutputStream
+import java.security.GeneralSecurityException
 
 @MiskTest
 class CryptoModuleTest {
@@ -95,6 +98,24 @@ class CryptoModuleTest {
             .isInstanceOf(KeyNotFoundException::class.java)
   }
 
+  @Ignore @Test // Currently disabled since the env check is as well
+  fun testRaisesInWrongEnv() {
+
+    val plainKey = Key("name", KeyType.AEAD, MiskConfig.RealSecret(""))
+    val kr = KeyReader()
+    val client = FakeKmsClient()
+
+    assertThatThrownBy {
+      // kr.env = Environment.STAGING
+      kr.readKey(plainKey, null, client)
+    }.isInstanceOf(GeneralSecurityException::class.java)
+
+    assertThatThrownBy {
+      // kr.env = Environment.PRODUCTION
+      kr.readKey(plainKey, null, client)
+    }.isInstanceOf(GeneralSecurityException::class.java)
+  }
+
   private fun getInjector(keyMap: List<Pair<String, KeysetHandle>>): Injector{
     val keys = keyMap.map {
       var keyType = KeyType.AEAD
@@ -107,7 +128,8 @@ class CryptoModuleTest {
       Key(it.first, keyType, generateEncryptedKey(it.second))
     }
     val config = CryptoConfig(keys, "test_master_key")
-    return Guice.createInjector(CryptoTestModule(), CryptoModule(config))
+    val envModule = EnvironmentModule(Environment.TESTING)
+    return Guice.createInjector(CryptoTestModule(), CryptoModule(config), envModule)
   }
 
   private fun generateEncryptedKey(keyHandle: KeysetHandle): Secret<String> {

@@ -14,7 +14,10 @@ data class WebConfig(
   val acceptors: Int? = null,
   val queue_size: Int? = null,
   val jetty_max_thread_pool_size: Int? = null,
-  val action_exception_log_level: ActionExceptionLogLevelConfig = ActionExceptionLogLevelConfig()
+  val action_exception_log_level: ActionExceptionLogLevelConfig = ActionExceptionLogLevelConfig(),
+  val jetty_max_concurrent_streams: Int? = null,
+  // TODO(jayestrella): Add a sane default value to this.
+  val close_connection_percent: Double = 0.0
 ) : Config
 
 data class WebSslConfig(

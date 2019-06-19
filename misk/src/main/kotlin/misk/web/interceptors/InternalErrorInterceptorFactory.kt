@@ -4,9 +4,6 @@ import misk.Action
 import misk.logging.getLogger
 import misk.web.NetworkChain
 import misk.web.NetworkInterceptor
-import misk.web.Response
-import misk.web.toResponseBody
-import okhttp3.Headers
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -19,21 +16,17 @@ class InternalErrorInterceptorFactory @Inject constructor() : NetworkInterceptor
   }
 
   private companion object {
-    val HEADERS: Headers = Headers.Builder()
-        .set("Content-Type", "text/plain; charset=utf-8")
-        .build()
-
-    const val STATUS_CODE = 500
-
-    val BODY = "Internal server error".toResponseBody()
-
     val INTERCEPTOR = object : NetworkInterceptor {
-      override fun intercept(chain: NetworkChain): Response<*> {
-        return try {
-          chain.proceed(chain.request)
+      override fun intercept(chain: NetworkChain) {
+        try {
+          chain.proceed(chain.httpCall)
         } catch (throwable: Throwable) {
-          logger.error(throwable) { "${chain.request.url} failed; returning an HTTP 500 error" }
-          Response(BODY, HEADERS, STATUS_CODE)
+          logger.error(throwable) { "${chain.httpCall.url} failed; returning an HTTP 500 error" }
+          chain.httpCall.statusCode = 500
+          chain.httpCall.takeResponseBody()?.use { sink ->
+            chain.httpCall.setResponseHeader("Content-Type", "text/plain; charset=utf-8")
+            sink.writeUtf8("Internal server error")
+          }
         }
       }
     }

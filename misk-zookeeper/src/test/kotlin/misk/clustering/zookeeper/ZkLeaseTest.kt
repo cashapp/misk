@@ -6,6 +6,7 @@ import misk.MiskTestingServiceModule
 import misk.clustering.Cluster
 import misk.clustering.fake.FakeCluster
 import misk.clustering.lease.Lease
+import misk.clustering.weights.FakeClusterWeight
 import misk.mockito.Mockito
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
@@ -34,6 +35,7 @@ internal class ZkLeaseTest {
   @Inject lateinit var cluster: FakeCluster
   @Inject lateinit var leaseManager: ZkLeaseManager
   @Inject @ForZkLease lateinit var curator: CuratorFramework
+  @Inject lateinit var clusterWeight : FakeClusterWeight
   lateinit var leaseNamespace: String
   lateinit var leasePath: String
 
@@ -83,6 +85,18 @@ internal class ZkLeaseTest {
     assertThat(curator.checkExists().forPath(leasePath.asZkPath)).isNull()
   }
 
+  @Test fun releasesLeaseAfterClusterWeightChanges() {
+    cluster.resourceMapper.addMapping(leasePath, self)
+
+    val lease = leaseManager.requestLease(LEASE_NAME)
+    assertThat(lease.checkHeld()).isTrue()
+
+    clusterWeight.setClusterWeight(0)
+    leaseManager.checkAllLeases()
+
+    assertThat(lease.checkHeld()).isFalse()
+  }
+
   @Test fun releasesAcquiredLeaseIfMappingChangesAwayFromSelf() {
     cluster.resourceMapper.addMapping(leasePath, self)
 
@@ -130,8 +144,7 @@ internal class ZkLeaseTest {
     val lease = leaseManager.requestLease(LEASE_NAME)
     assertThat(lease.checkHeld()).isTrue()
 
-    // Fake a disconnect from zk
-    leaseManager.handleConnectionStateChanged(false)
+    curator.close()
 
     // Should no longer hold the lease
     assertThat(lease.checkHeld()).isFalse()
@@ -143,14 +156,12 @@ internal class ZkLeaseTest {
     val lease = leaseManager.requestLease(LEASE_NAME)
     assertThat(lease.checkHeld()).isTrue()
 
-    // Fake a disconnect from zk
-    leaseManager.handleConnectionStateChanged(false)
+    curator.zookeeperClient.reset()
 
     // Should no longer hold the lease
     assertThat(lease.checkHeld()).isFalse()
 
-    // Reconnect to zk
-    leaseManager.handleConnectionStateChanged(true)
+    curator.zookeeperClient.blockUntilConnectedOrTimedOut()
 
     // Should reacquire the lease
     assertThat(lease.checkHeld()).isTrue()

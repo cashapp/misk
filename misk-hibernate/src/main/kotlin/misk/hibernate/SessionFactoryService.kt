@@ -2,11 +2,7 @@ package misk.hibernate
 
 import com.google.common.base.Stopwatch
 import com.google.common.util.concurrent.AbstractIdleService
-import com.google.inject.Key
-import misk.DependentService
-import misk.inject.toKey
 import misk.jdbc.DataSourceConfig
-import misk.jdbc.DataSourceService
 import misk.logging.getLogger
 import okio.ByteString
 import org.hibernate.SessionFactory
@@ -25,7 +21,6 @@ import org.hibernate.mapping.Value
 import org.hibernate.service.spi.SessionFactoryServiceRegistry
 import org.hibernate.usertype.UserType
 import javax.inject.Provider
-import javax.inject.Singleton
 import javax.sql.DataSource
 import kotlin.reflect.KClass
 import kotlin.reflect.jvm.jvmName
@@ -35,7 +30,6 @@ private val logger = getLogger<SessionFactoryService>()
 /**
  * Builds a bare connection to a Hibernate database. Doesn't do any schema migration or validation.
  */
-@Singleton
 internal class SessionFactoryService(
   private val qualifier: KClass<out Annotation>,
   private val config: DataSourceConfig,
@@ -43,16 +37,12 @@ internal class SessionFactoryService(
   private val hibernateInjectorAccess: HibernateInjectorAccess,
   private val entityClasses: Set<HibernateEntity> = setOf(),
   private val listenerRegistrations: Set<ListenerRegistration> = setOf()
-) : AbstractIdleService(), DependentService, Provider<SessionFactory> {
+) : AbstractIdleService(), Provider<SessionFactory>, TransacterService {
   private var sessionFactory: SessionFactory? = null
-
-  override val consumedKeys = setOf<Key<*>>(DataSourceService::class.toKey(qualifier))
-  override val producedKeys = setOf<Key<*>>(SessionFactoryService::class.toKey(qualifier))
 
   lateinit var hibernateMetadata: Metadata
 
   override fun startUp() {
-
     val stopwatch = Stopwatch.createStarted()
     logger.info("Starting @${qualifier.simpleName} Hibernate")
 

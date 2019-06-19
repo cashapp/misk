@@ -5,7 +5,6 @@ import misk.MiskCaller
 import misk.scope.ActionScoped
 import misk.web.NetworkChain
 import misk.web.NetworkInterceptor
-import misk.web.Response
 import org.slf4j.MDC
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -21,7 +20,7 @@ internal class RequestLogContextInterceptor private constructor(
   private val currentRequest: ActionScoped<HttpServletRequest>
 ) : NetworkInterceptor {
 
-  override fun intercept(chain: NetworkChain): Response<*> {
+  override fun intercept(chain: NetworkChain) {
     val request = currentRequest.get()
     return try {
       MDC.put(MDC_ACTION, action.name)
@@ -29,7 +28,7 @@ internal class RequestLogContextInterceptor private constructor(
       MDC.put(MDC_REMOTE_IP, request.remoteAddr)
       MDC.put(MDC_REMOTE_PORT, request.remotePort.toString())
       MDC.put(MDC_REQUEST_URI, request.requestURI)
-      chain.proceed(chain.request)
+      chain.proceed(chain.httpCall)
     } finally {
       allContextNames.forEach { MDC.remove(it) }
     }

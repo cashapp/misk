@@ -13,20 +13,48 @@ import com.google.crypto.tink.signature.PublicKeySignFactory
 import com.google.crypto.tink.signature.PublicKeyVerifyFactory
 import com.google.crypto.tink.JsonKeysetReader
 import com.google.crypto.tink.KeysetHandle
+import com.google.crypto.tink.KeysetReader
 import com.google.crypto.tink.aead.AeadFactory
 import com.google.crypto.tink.aead.AeadKeyTemplates
 import com.google.crypto.tink.aead.KmsEnvelopeAead
 import com.google.crypto.tink.daead.DeterministicAeadFactory
 import com.google.inject.Inject
 import com.google.inject.Provider
+import misk.environment.Environment
 import misk.logging.getLogger
+import java.security.GeneralSecurityException
 
 val logger by lazy { getLogger<CryptoModule>() }
+
+open class KeyReader {
+  private fun readCleartextKey(reader: KeysetReader): KeysetHandle {
+    // TODO: Implement a clean check to throw if we are running in prod or staging. Checking for
+    // an injected Environment will fail if a test explicitly creates a staging/prod environment.
+    logger.warn { "reading a plaintext key!" }
+    return CleartextKeysetHandle.read(reader)
+  }
+
+  private fun readEncryptedKey(reader: KeysetReader, kmsUri: String, client: KmsClient): KeysetHandle {
+    val masterKey = client.getAead(kmsUri)
+    return KeysetHandle.read(reader, masterKey)
+  }
+
+  fun readKey(key: Key, kmsUri: String?, kmsClient: KmsClient): KeysetHandle {
+    val keyJson = JsonKeysetReader.withString(key.encrypted_key.value)
+
+    return if (kmsUri != null) {
+      readEncryptedKey(keyJson, kmsUri, kmsClient)
+    } else {
+      readCleartextKey(keyJson)
+    }
+  }
+}
 
 /**
  * We only support AEAD keys via envelope encryption.
  */
-internal class AeadEnvelopeProvider(val key: Key, val kmsUri: String?) : Provider<Aead> {
+internal class AeadEnvelopeProvider(val key: Key, val kmsUri: String?) : Provider<Aead>,
+    KeyReader() {
   @Inject lateinit var keyManager: AeadKeyManager
   @Inject lateinit var kmsClient: KmsClient
 
@@ -43,7 +71,10 @@ internal class AeadEnvelopeProvider(val key: Key, val kmsUri: String?) : Provide
   }
 }
 
-internal class DeterministicAeadProvider(val key: Key, val kmsUri: String?) : Provider<DeterministicAead> {
+internal class DeterministicAeadProvider(
+  val key: Key,
+  val kmsUri: String?
+) : Provider<DeterministicAead>, KeyReader() {
   @Inject lateinit var keyManager: DeterministicAeadKeyManager
   @Inject lateinit var kmsClient: KmsClient
 
@@ -55,7 +86,7 @@ internal class DeterministicAeadProvider(val key: Key, val kmsUri: String?) : Pr
   }
 }
 
-internal class MacProvider(val key: Key, val kmsUri: String?) : Provider<Mac> {
+internal class MacProvider(val key: Key, val kmsUri: String?) : Provider<Mac>, KeyReader() {
   @Inject lateinit var keyManager: MacKeyManager
   @Inject lateinit var kmsClient: KmsClient
 
@@ -69,7 +100,7 @@ internal class MacProvider(val key: Key, val kmsUri: String?) : Provider<Mac> {
 internal class DigitalSignatureSignerProvider(
   val key: Key,
   val kmsUri: String?
-) : Provider<PublicKeySign> {
+) : Provider<PublicKeySign>, KeyReader() {
   @Inject lateinit var keyManager: DigitalSignatureKeyManager
   @Inject lateinit var kmsClient: KmsClient
 
@@ -85,7 +116,7 @@ internal class DigitalSignatureSignerProvider(
 internal class DigitalSignatureVerifierProvider(
   val key: Key,
   val kmsUri: String?
-) : Provider<PublicKeyVerify> {
+) : Provider<PublicKeyVerify>, KeyReader() {
   @Inject lateinit var keyManager: DigitalSignatureKeyManager
   @Inject lateinit var kmsClient: KmsClient
 
@@ -95,18 +126,6 @@ internal class DigitalSignatureVerifierProvider(
     val verifier = PublicKeyVerifyFactory.getPrimitive(keysetHandle.publicKeysetHandle)
     keyManager[key.key_name] = DigitalSignature(signer, verifier)
     return verifier
-  }
-}
-
-private fun readKey(key: Key, kmsUri: String?, kmsClient: KmsClient): KeysetHandle {
-  val keyJson = JsonKeysetReader.withString(key.encrypted_key.value)
-
-  return if (kmsUri != null) {
-    val masterKey = kmsClient.getAead(kmsUri)
-    KeysetHandle.read(keyJson, masterKey)
-  } else {
-    logger.warn { "Reading a plaintext key" }
-    CleartextKeysetHandle.read(keyJson)
   }
 }
 

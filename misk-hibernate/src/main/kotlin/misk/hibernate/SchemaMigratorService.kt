@@ -1,24 +1,16 @@
 package misk.hibernate
 
 import com.google.common.util.concurrent.AbstractIdleService
-import com.google.inject.Key
-import misk.DependentService
 import misk.environment.Environment
-import misk.inject.toKey
 import misk.jdbc.DataSourceType
 import javax.inject.Singleton
 
 @Singleton
 class SchemaMigratorService internal constructor(
-  qualifier: kotlin.reflect.KClass<out kotlin.Annotation>,
-  private val environment: misk.environment.Environment,
-  private val schemaMigratorProvider: javax.inject.Provider<misk.hibernate.SchemaMigrator>, // Lazy!
+  private val environment: Environment,
+  private val schemaMigratorProvider: javax.inject.Provider<SchemaMigrator>, // Lazy!
   private val config: misk.jdbc.DataSourceConfig
-) : AbstractIdleService(), DependentService {
-
-  override val consumedKeys = setOf<Key<*>>(SessionFactoryService::class.toKey(qualifier))
-  override val producedKeys = setOf<Key<*>>(SchemaMigratorService::class.toKey(qualifier))
-
+) : AbstractIdleService() {
   override fun startUp() {
     val schemaMigrator = schemaMigratorProvider.get()
     if (environment == Environment.TESTING || environment == Environment.DEVELOPMENT) {

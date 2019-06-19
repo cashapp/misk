@@ -27,8 +27,7 @@ class ReadinessCheckActionTest {
   @Inject lateinit var serviceManager: ServiceManager
   @Inject lateinit var healthCheck: FakeHealthCheck
 
-  @Test
-  fun readinessDependsOnServiceStateAndHealthChecksPassing() {
+  @Test fun readinessDependsOnServiceStateAndHealthChecksPassing() {
     serviceManager.startAsync()
     serviceManager.awaitHealthy()
     assertThat(readinessCheckAction.readinessCheck().statusCode).isEqualTo(200)

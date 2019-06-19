@@ -12,6 +12,7 @@ class RouteGuideMiskServiceModule : KAbstractModule() {
   override fun configure() {
     install(WebTestingModule())
     install(WebActionModule.create<GetFeatureGrpcAction>())
+    install(WebActionModule.create<RouteChatGrpcAction>())
   }
 
   @Provides

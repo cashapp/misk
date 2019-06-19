@@ -1,7 +1,7 @@
 package misk.clustering.fake
 
-import misk.DependentService
 import misk.clustering.Cluster
+import misk.clustering.ClusterService
 import misk.clustering.ClusterWatch
 import misk.clustering.DefaultCluster
 import misk.logging.getLogger
@@ -22,8 +22,7 @@ import javax.inject.Singleton
 class FakeCluster internal constructor(
   val resourceMapper: ExplicitClusterResourceMapper,
   private val delegate: DefaultCluster
-) : Cluster by delegate, DependentService by delegate {
-
+) : ClusterService by delegate, Cluster by delegate {
   constructor(resourceMapper: ExplicitClusterResourceMapper) :
       this(resourceMapper, DefaultCluster(self) { resourceMapper })
 

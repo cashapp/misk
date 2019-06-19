@@ -1,10 +1,13 @@
 package misk.hibernate
 
-import com.google.common.util.concurrent.Service
 import io.opentracing.Tracer
+import misk.ServiceModule
 import misk.environment.Environment
+import misk.healthchecks.HealthCheck
+import misk.hibernate.ReflectionQuery.QueryLimitsConfig
 import misk.inject.KAbstractModule
 import misk.inject.asSingleton
+import misk.inject.keyOf
 import misk.inject.setOfType
 import misk.inject.toKey
 import misk.jdbc.DataSourceConfig
@@ -16,13 +19,14 @@ import misk.resources.ResourceLoader
 import misk.vitess.StartVitessService
 import org.hibernate.SessionFactory
 import org.hibernate.event.spi.EventType
+import java.time.Clock
 import javax.inject.Inject
 import javax.inject.Provider
 import javax.sql.DataSource
 import kotlin.reflect.KClass
 
 /**
- * Binds database connectivity for a qualified datasource. This binds the following public types:
+ * Binds database connectivity for a qualified data source. This binds the following public types:
  *
  *  * @Qualifier [misk.jdbc.DataSourceConfig]
  *  * @Qualifier [SessionFactory]
@@ -44,80 +48,63 @@ class HibernateModule(
   val config = config.withDefaults()
 
   override fun configure() {
-    val configKey = DataSourceConfig::class.toKey(qualifier)
+    val sessionFactoryProvider = getProvider(keyOf<SessionFactory>(qualifier))
+    val environmentProvider: Provider<Environment> = getProvider(keyOf<Environment>())
 
-    val entitiesKey = setOfType(HibernateEntity::class).toKey(qualifier)
-    val entitiesProvider = getProvider(entitiesKey)
-
-    val environmentKey = Environment::class.toKey()
-    val environmentProvider = getProvider(environmentKey)
-
-    val eventListenersKey = setOfType(ListenerRegistration::class).toKey(qualifier)
-    val eventListenersProvider = getProvider(eventListenersKey)
-
-    val sessionFactoryKey = SessionFactory::class.toKey(qualifier)
-    val sessionFactoryProvider = getProvider(sessionFactoryKey)
-
-    val sessionFactoryServiceKey = SessionFactoryService::class.toKey(qualifier)
-    val sessionFactoryServiceProvider = getProvider(sessionFactoryServiceKey)
-
-    val dataSourceDecoratorsKey = setOfType(DataSourceDecorator::class).toKey(qualifier)
-    val dataSourceDecoratorsProvider = getProvider(dataSourceDecoratorsKey)
-
-    val schemaMigratorKey = SchemaMigrator::class.toKey(qualifier)
-    val schemaMigratorProvider = getProvider(schemaMigratorKey)
-
-    val transacterKey = Transacter::class.toKey(qualifier)
-    val transacterProvider = getProvider(transacterKey)
-
-    val pingDatabaseServiceKey = PingDatabaseService::class.toKey(qualifier)
-
-    val dataSourceKey = DataSource::class.toKey(qualifier)
-    val dataSourceProvider = getProvider(dataSourceKey)
-
-    val dataSourceServiceKey = DataSourceService::class.toKey(qualifier)
-
-    bindStartVitessService()
-
-    bind(configKey).toInstance(config)
-
-    bind(pingDatabaseServiceKey).toProvider(Provider<PingDatabaseService> {
-      PingDatabaseService(qualifier, config, environmentProvider.get())
-    }).asSingleton()
-    multibind<Service>().to(pingDatabaseServiceKey)
-
-    // Declare the empty set of decorators
     newMultibinder<DataSourceDecorator>(qualifier)
 
-    bind(dataSourceKey).toProvider(dataSourceServiceKey).asSingleton()
-    bind(dataSourceServiceKey).toProvider(object : Provider<DataSourceService> {
+    bind<Query.Factory>().to<ReflectionQuery.Factory>()
+    bind<QueryLimitsConfig>()
+        .toInstance(QueryLimitsConfig(MAX_MAX_ROWS, ROW_COUNT_ERROR_LIMIT, ROW_COUNT_WARNING_LIMIT))
+    bind(keyOf<DataSourceConfig>(qualifier)).toInstance(config)
+
+    // Bind StartVitessService.
+    install(ServiceModule<StartVitessService>(qualifier))
+    bind(keyOf<StartVitessService>(qualifier)).toProvider(object : Provider<StartVitessService> {
+      @Inject lateinit var environment: Environment
+      override fun get(): StartVitessService {
+        return StartVitessService(environment = environment, config = config, qualifier = qualifier)
+      }
+    }).asSingleton()
+
+    // Bind PingDatabaseService.
+    bind(keyOf<PingDatabaseService>(qualifier)).toProvider(Provider<PingDatabaseService> {
+      PingDatabaseService(config, environmentProvider.get())
+    }).asSingleton()
+    // TODO(rhall): depending on Vitess is a hack to simulate Vitess has already been started in the
+    // env. This is to remove flakiness in tests that are not waiting until Vitess is ready.
+    // This should be replaced with an ExternalDependency that manages vitess.
+    install(ServiceModule<PingDatabaseService>(qualifier)
+        .dependsOn<StartVitessService>(qualifier))
+
+    // Bind DataSourceService.
+    val dataSourceDecoratorsKey = setOfType(DataSourceDecorator::class).toKey(qualifier)
+    val dataSourceDecoratorsProvider = getProvider(dataSourceDecoratorsKey)
+    bind(keyOf<DataSource>(qualifier)).toProvider(keyOf<DataSourceService>(qualifier)).asSingleton()
+    bind(keyOf<DataSourceService>(qualifier)).toProvider(object : Provider<DataSourceService> {
       @com.google.inject.Inject(optional = true) var metrics: Metrics? = null
       override fun get() = DataSourceService(
-        qualifier,
-        config,
-        environmentProvider.get(),
-        dataSourceDecoratorsProvider.get(),
-        metrics
+          qualifier,
+          config,
+          environmentProvider.get(),
+          dataSourceDecoratorsProvider.get(),
+          metrics
       )
     }).asSingleton()
-    multibind<Service>().to(dataSourceServiceKey)
+    install(ServiceModule<DataSourceService>(qualifier)
+        .dependsOn<PingDatabaseService>(qualifier))
 
-    bind(sessionFactoryKey).toProvider(sessionFactoryServiceKey).asSingleton()
-    val hibernateInjectorAccessProvider = getProvider(HibernateInjectorAccess::class.java)
-
-    bind(sessionFactoryServiceKey).toProvider(Provider<SessionFactoryService> {
-      SessionFactoryService(qualifier, config, dataSourceProvider,
-          hibernateInjectorAccessProvider.get(),
-          entitiesProvider.get(), eventListenersProvider.get())
-    }).asSingleton()
-    multibind<Service>().to(sessionFactoryServiceKey)
+    // Bind SchemaMigratorService.
+    val transacterKey = Transacter::class.toKey(qualifier)
+    val transacterProvider = getProvider(transacterKey)
+    val schemaMigratorKey = SchemaMigrator::class.toKey(qualifier)
+    val schemaMigratorProvider = getProvider(schemaMigratorKey)
 
     bind(schemaMigratorKey).toProvider(object : Provider<SchemaMigrator> {
       @Inject lateinit var resourceLoader: ResourceLoader
       override fun get(): SchemaMigrator = SchemaMigrator(qualifier, resourceLoader,
           transacterProvider, config)
     }).asSingleton()
-
     bind(transacterKey).toProvider(object : Provider<Transacter> {
       @com.google.inject.Inject(optional = true) val tracer: Tracer? = null
       @Inject lateinit var queryTracingListener: QueryTracingListener
@@ -130,25 +117,54 @@ class HibernateModule(
       )
     }).asSingleton()
 
-    multibind<Service>().toProvider(object : Provider<SchemaMigratorService> {
+    bind(keyOf<SchemaMigratorService>(
+        qualifier)).toProvider(object : Provider<SchemaMigratorService> {
       @Inject lateinit var environment: Environment
       override fun get(): SchemaMigratorService = SchemaMigratorService(
-          qualifier, environment, schemaMigratorProvider, config)
-    }).asSingleton()
-
-    multibind<Service>().toProvider(Provider<SchemaValidatorService> {
-      SchemaValidatorService(
-          qualifier,
-          sessionFactoryServiceProvider,
-          transacterProvider,
+          environment,
+          schemaMigratorProvider,
           config
       )
     }).asSingleton()
+    install(ServiceModule<SchemaMigratorService>(qualifier))
 
-    bind<Query.Factory>().to<ReflectionQuery.Factory>()
-    bind<ReflectionQuery.QueryLimitsConfig>().toInstance(ReflectionQuery.QueryLimitsConfig(
-        MAX_MAX_ROWS, ROW_COUNT_ERROR_LIMIT, ROW_COUNT_WARNING_LIMIT))
+    // Bind SchemaValidatorService.
+    val sessionFactoryServiceProvider = getProvider(keyOf<SessionFactoryService>(qualifier))
+    val schemaValidatorServiceKey = keyOf<SchemaValidatorService>(qualifier)
+    bind(schemaValidatorServiceKey)
+        .toProvider(Provider<SchemaValidatorService> {
+          SchemaValidatorService(
+              qualifier,
+              sessionFactoryServiceProvider,
+              transacterProvider
+          )
+        }).asSingleton()
+    multibind<HealthCheck>().to(schemaValidatorServiceKey)
+    install(ServiceModule<SchemaValidatorService>(qualifier)
+        .dependsOn<SchemaMigratorService>(qualifier))
 
+    // Bind SessionFactoryService as implementation of TransacterService.
+    val entitiesProvider = getProvider(setOfType(HibernateEntity::class).toKey(qualifier))
+    val eventListenersProvider =
+        getProvider(setOfType(ListenerRegistration::class).toKey(qualifier))
+    val hibernateInjectorAccessProvider = getProvider(HibernateInjectorAccess::class.java)
+    val dataSourceProvider = getProvider(keyOf<DataSource>(qualifier))
+
+    bind(keyOf<SessionFactory>(qualifier))
+        .toProvider(keyOf<SessionFactoryService>(qualifier))
+        .asSingleton()
+    bind(keyOf<TransacterService>(qualifier)).to(keyOf<SessionFactoryService>(qualifier))
+    bind(keyOf<SessionFactoryService>(qualifier)).toProvider(Provider<SessionFactoryService> {
+      SessionFactoryService(qualifier, config, dataSourceProvider,
+          hibernateInjectorAccessProvider.get(),
+          entitiesProvider.get(), eventListenersProvider.get())
+    }).asSingleton()
+    install(ServiceModule<TransacterService>(qualifier)
+        .enhancedBy<SchemaMigratorService>(qualifier)
+        .enhancedBy<SchemaValidatorService>(qualifier)
+        .dependsOn<DataSourceService>(qualifier))
+
+    // Install other modules.
     install(object : HibernateEntityModule(qualifier) {
       override fun configureHibernate() {
         bindListener(EventType.PRE_INSERT).to<TimestampListener>()
@@ -162,17 +178,15 @@ class HibernateModule(
       }
     })
 
-    install(HibernateHealthCheckModule(qualifier, sessionFactoryProvider))
-  }
+    val healthCheckKey = keyOf<HealthCheck>(qualifier)
+    bind(healthCheckKey)
+        .toProvider(object : Provider<HibernateHealthCheck> {
+          @Inject lateinit var clock: Clock
 
-  private fun bindStartVitessService() {
-    val startVitessServiceKey = StartVitessService::class.toKey(qualifier)
-    multibind<Service>().to(startVitessServiceKey)
-    bind(startVitessServiceKey).toProvider(object : Provider<StartVitessService> {
-      @Inject lateinit var environment : Environment
-      override fun get(): StartVitessService {
-        return StartVitessService(environment = environment, config = config, qualifier = qualifier)
-      }
-    }).asSingleton()
+          override fun get() = HibernateHealthCheck(
+              qualifier, sessionFactoryServiceProvider, sessionFactoryProvider, clock)
+        })
+        .asSingleton()
+    multibind<HealthCheck>().to(healthCheckKey)
   }
 }

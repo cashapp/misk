@@ -34,6 +34,7 @@ internal class JettyServiceMetricsTest {
     val httpClient = OkHttpClient()
     val request = Request.Builder()
         .get()
+        .header("user-agent", "JettyServiceMetricsTest")
         .url(serverUrlBuilder().encodedPath("/hello").build())
         .build()
 
@@ -46,7 +47,7 @@ internal class JettyServiceMetricsTest {
     val labels = ConnectionMetrics.forPort("http", 0) // It's the configured port not the actual
     assertThat(connectionMetrics.acceptedConnections.labels(*labels).get()).isEqualTo(1.0)
     assertThat(connectionMetrics.activeConnections.labels(*labels).get()).isEqualTo(1.0)
-    assertThat(connectionMetrics.bytesReceived.labels(*labels).get()).isEqualTo(120.0)
+    assertThat(connectionMetrics.bytesReceived.labels(*labels).get()).isEqualTo(130.0)
     assertThat(connectionMetrics.bytesSent.labels(*labels).get()).isEqualTo(118.0)
     assertThat(connectionMetrics.messagesReceived.labels(*labels).get()).isEqualTo(1.0)
     assertThat(connectionMetrics.messagesSent.labels(*labels).get()).isEqualTo(1.0)
@@ -67,7 +68,7 @@ internal class JettyServiceMetricsTest {
     // Active connections should have dropped to zero, all other metrics should remain the same
     assertThat(connectionMetrics.acceptedConnections.labels(*labels).get()).isEqualTo(1.0)
     assertThat(connectionMetrics.activeConnections.labels(*labels).get()).isEqualTo(0.0)
-    assertThat(connectionMetrics.bytesReceived.labels(*labels).get()).isEqualTo(120.0)
+    assertThat(connectionMetrics.bytesReceived.labels(*labels).get()).isEqualTo(130.0)
     assertThat(connectionMetrics.bytesSent.labels(*labels).get()).isEqualTo(118.0)
     assertThat(connectionMetrics.messagesReceived.labels(*labels).get()).isEqualTo(1.0)
     assertThat(connectionMetrics.messagesSent.labels(*labels).get()).isEqualTo(1.0)
@@ -76,7 +77,7 @@ internal class JettyServiceMetricsTest {
     connectionMetricsCollector.refreshMetrics()
     assertThat(connectionMetrics.acceptedConnections.labels(*labels).get()).isEqualTo(1.0)
     assertThat(connectionMetrics.activeConnections.labels(*labels).get()).isEqualTo(0.0)
-    assertThat(connectionMetrics.bytesReceived.labels(*labels).get()).isEqualTo(120.0)
+    assertThat(connectionMetrics.bytesReceived.labels(*labels).get()).isEqualTo(130.0)
     assertThat(connectionMetrics.bytesSent.labels(*labels).get()).isEqualTo(118.0)
     assertThat(connectionMetrics.messagesReceived.labels(*labels).get()).isEqualTo(1.0)
     assertThat(connectionMetrics.messagesSent.labels(*labels).get()).isEqualTo(1.0)
