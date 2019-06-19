@@ -20,7 +20,6 @@ import org.hibernate.mapping.SimpleValue
 import org.hibernate.mapping.Value
 import org.hibernate.service.spi.SessionFactoryServiceRegistry
 import org.hibernate.usertype.UserType
-import java.util.Properties
 import javax.inject.Provider
 import javax.sql.DataSource
 import kotlin.reflect.KClass
@@ -96,12 +95,16 @@ internal class SessionFactoryService(
     }
 
     // NB: MetadataSources.getMetadataBuilder() returns a different instance each call!
-    val metadataBuilder = metadataSources.metadataBuilder
-    val metadata = metadataBuilder.build() as MetadataImplementor
+    val metadataDraftBuilder = metadataSources.metadataBuilder
+    // After `build` is called Hibernate creates ID Generators so we have to register this custom
+    // type before we call build, otherwise Id will be treated as a SerializableType instead.
+    // See: Component#createIdentifierGenerator
+    val metadataDraft = metadataDraftBuilder.build() as MetadataImplementor
+
 
     // Loop over all of the properties in all of the entities so we can set up UserTypes.
     val allPropertyTypes = mutableSetOf<KClass<*>>()
-    for ((persistentClass, property) in metadata.allProperties.entries()) {
+    for ((persistentClass, property) in metadataDraft.allProperties.entries()) {
       processPropertyAnnotations(persistentClass, property)
 
       val value: Value? = property.value
@@ -110,18 +113,23 @@ internal class SessionFactoryService(
       }
     }
 
+    val metadataBuilder = metadataSources.metadataBuilder
+
     // Register custom type adapters so we can have columns for ByteString, Id, etc. This needs to
     // happen after we know what all of the property classes are, but before Hibernate validates
     // that their adapters exist.
     for (propertyType in allPropertyTypes) {
       val userType = findUserType(propertyType)
       if (userType != null) {
-        @Suppress("DEPRECATION") // TypeResolver's replacement isn't yet specified.
-        metadata.typeConfiguration.typeResolver.registerTypeOverride(
-            userType, arrayOf(propertyType.jvmName))
+        metadataBuilder.applyBasicType(userType, propertyType.jvmName)
       }
     }
 
+    val metadata = metadataBuilder.build() as MetadataImplementor
+
+    for ((persistentClass, property) in metadata.allProperties.entries()) {
+      processPropertyAnnotations(persistentClass, property)
+    }
     sessionFactory = metadata.buildSessionFactory()
 
     logger.info("Started @${qualifier.simpleName} Hibernate in $stopwatch")
@@ -141,36 +149,28 @@ internal class SessionFactoryService(
     val field = field(persistentClass, property)
     if (field.isAnnotationPresent(JsonColumn::class.java)) {
       value.typeName = JsonColumnType::class.java.name
-      if (value.typeParameters == null) {
-        value.typeParameters = Properties()
-      }
-      value.typeParameters.setField("jsonColumnField", field)
+      value.setTypeParameter("jsonColumnField", field)
     } else if (field.isAnnotationPresent(ProtoColumn::class.java)) {
       value.typeName = ProtoColumnType::class.java.name
-
-      if (value.typeParameters == null) {
-        value.typeParameters = Properties()
-      }
-      value.typeParameters.setField("protoColumnField", field)
+      value.setTypeParameter("protoColumnField", field)
     } else if (field.isAnnotationPresent(SecretColumn::class.java)) {
       value.typeName = SecretColumnType::class.java.name
-
-      if (value.typeParameters == null) {
-        value.typeParameters = Properties()
-      }
-      value.typeParameters.setProperty(SecretColumnType.FIELD_ENCRYPTION_KEY_NAME,
+      value.setTypeParameter(SecretColumnType.FIELD_ENCRYPTION_KEY_NAME,
           field.getAnnotation(SecretColumn::class.java).keyName)
-      value.typeParameters.setProperty(SecretColumnType.FIELD_ENCRYPTION_INDEXABLE,
+      value.setTypeParameter(SecretColumnType.FIELD_ENCRYPTION_INDEXABLE,
           field.getAnnotation(SecretColumn::class.java).indexable.toString())
+    } else if (BoxedStringType.isBoxedString(field.type.kotlin)) {
+      value.typeName = BoxedStringType::class.java.name
+      value.setTypeParameter("boxedStringField", field)
     }
   }
 
   /** Returns a custom user type for `propertyType`, or null if the user type should be built-in. */
   private fun findUserType(propertyType: KClass<*>): UserType? {
     return when (propertyType) {
-      Id::class -> IdType
+      Id::class -> IdType()
       ByteString::class -> ByteStringType
-      else -> BoxedStringType.create(propertyType)
+      else -> null
     }
   }
 
