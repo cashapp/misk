@@ -45,7 +45,28 @@ class RepeatedTaskQueue @VisibleForTesting internal constructor(
   override fun startUp() {
     if (!running.compareAndSet(false, true)) return
 
-    log.info { "starting repeated task queue $name" }
+    addListener(object : Service.Listener() {
+      override fun starting() {
+        log.info { "the background thread for repeated task queue $name is starting" }
+      }
+
+      override fun running() {
+        log.info { "the background thread for repeated task queue $name is running" }
+      }
+
+      override fun stopping(from: Service.State) {
+        log.info { "the background thread for repeated task queue $name is stopping" }
+      }
+
+      override fun terminated(from: Service.State) {
+        log.info { "the background thread for repeated task queue $name terminated" }
+      }
+
+      override fun failed(from: Service.State, failure: Throwable) {
+        log.error(failure) { "the background thread for repeated task queue $name failed" }
+      }
+
+    }, executor())
   }
 
   override fun triggerShutdown() {
@@ -65,6 +86,8 @@ class RepeatedTaskQueue @VisibleForTesting internal constructor(
    * executor for dispatching
    */
   override fun run() {
+    // N.B - If any exception escapes this method the background thread driving the repeated
+    // tasks is terminated.
     while (running.get()) {
       // Fetch the next task, bailing out if we've shutdown
       val task = pendingTasks.take().task
