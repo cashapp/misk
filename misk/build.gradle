@@ -21,6 +21,7 @@ dependencies {
   compile dep.okio
   compile dep.kotlinReflection
   compile dep.moshi
+  compile dep.moshiAdapters
   compile dep.jettyHttp2
   compile dep.jettyServer
   compile dep.servletApi
