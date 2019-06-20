@@ -1,6 +1,9 @@
 package misk.moshi
 
 import com.squareup.moshi.FromJson
+import com.squareup.moshi.JsonAdapter
+import com.squareup.moshi.JsonReader
+import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.ToJson
 import misk.MiskTestingServiceModule
@@ -38,12 +41,30 @@ internal class MoshiModuleTest {
     assertThat(jsonAdapter.fromJson(json)).isEqualTo(value)
   }
 
+  /** We can also install an adapter that has an explicit type. */
+  @Test
+  fun jsonAdapterWithExplicitType() {
+    val json = "5.5"
+    val value = Hat(5.5)
+    val jsonAdapter = moshi.adapter<Hat>()
+    assertThat(jsonAdapter.toJson(value)).isEqualTo(json.trimMargin())
+    assertThat(jsonAdapter.fromJson(json)).isEqualTo(value)
+  }
+
   class TestModule: KAbstractModule() {
     override fun configure() {
       install(MiskTestingServiceModule())
       install(MoshiAdapterModule(object: Any() {
         @ToJson fun pointToJson(point: Point) = listOf(point.x, point.y)
         @FromJson fun jsonToPoint(pair: List<Int>) = Point(pair[0], pair[1])
+      }))
+      install(MoshiAdapterModule<Hat>(object: JsonAdapter<Hat>() {
+        override fun fromJson(reader: JsonReader): Hat? {
+          return Hat(reader.nextDouble())
+        }
+        override fun toJson(writer: JsonWriter, value: Hat?) {
+          writer.value(value!!.size)
+        }
       }))
     }
   }
@@ -58,4 +79,6 @@ internal class MoshiModuleTest {
     val release_year: Int?,
     val genre: String = "sci-fi"
   )
+
+  data class Hat(val size: Double)
 }
