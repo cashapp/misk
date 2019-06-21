@@ -3,6 +3,7 @@ package misk.jobqueue.sqs
 import com.amazonaws.auth.AWSCredentialsProvider
 import com.amazonaws.services.sqs.AmazonSQS
 import com.amazonaws.services.sqs.AmazonSQSClientBuilder
+import com.google.common.util.concurrent.ThreadFactoryBuilder
 import com.google.inject.Provider
 import com.google.inject.Provides
 import com.google.inject.Singleton
@@ -10,10 +11,15 @@ import misk.ServiceModule
 import misk.cloud.aws.AwsRegion
 import misk.concurrent.ExecutorServiceModule
 import misk.inject.KAbstractModule
+import misk.inject.keyOf
 import misk.jobqueue.JobConsumer
 import misk.jobqueue.JobQueue
 import misk.jobqueue.QueueName
 import misk.jobqueue.TransactionalJobQueue
+import misk.tasks.RepeatedTaskQueue
+import java.time.Clock
+import java.time.Duration
+import java.util.concurrent.Executors
 import javax.inject.Inject
 
 /** [AwsSqsJobQueueModule] installs job queue support provided by SQS. */
@@ -30,7 +36,7 @@ class AwsSqsJobQueueModule(
     bind<JobQueue>().to<SqsJobQueue>()
     bind<TransactionalJobQueue>().to<SqsTransactionalJobQueue>()
 
-    install(ServiceModule<SqsJobConsumer>())
+    install(ServiceModule(keyOf<RepeatedTaskQueue>(ForSqsConsumer::class)))
 
     install(ExecutorServiceModule.withFixedThreadPool(
         ForSqsConsumer::class,
@@ -60,6 +66,17 @@ class AwsSqsJobQueueModule(
         .withCredentials(credentials)
         .withRegion(region.name)
         .build()
+  }
+
+  @Provides @ForSqsConsumer @Singleton
+  fun consumerRepeatedTaskQueue(clock: Clock, config : AwsSqsJobQueueConfig): RepeatedTaskQueue {
+    return RepeatedTaskQueue(
+        "sqs-consumer-poller",
+        clock,
+        Executors.newCachedThreadPool(ThreadFactoryBuilder()
+            .setNameFormat("sqs-consumer-%d")
+            .build()),
+        config.task_queue)
   }
 
   private class AmazonSQSProvider(val region: AwsRegion) : Provider<AmazonSQS> {

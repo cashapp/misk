@@ -7,9 +7,10 @@ import misk.MiskTestingServiceModule
 import misk.cloud.aws.AwsEnvironmentModule
 import misk.cloud.aws.FakeAwsEnvironmentModule
 import misk.inject.KAbstractModule
+import misk.tasks.RepeatedTaskQueueConfig
 import misk.testing.MockTracingBackendModule
 
-class SqsJobQueueTestModule(
+class SqsJobQueueTestModule (
   private val credentials: AWSCredentialsProvider,
   private val client: AmazonSQS
 ) : KAbstractModule() {
@@ -20,7 +21,8 @@ class SqsJobQueueTestModule(
     install(FakeAwsEnvironmentModule())
     install(
         Modules.override(
-            AwsSqsJobQueueModule(AwsSqsJobQueueConfig()))
+            AwsSqsJobQueueModule(
+                AwsSqsJobQueueConfig(task_queue = RepeatedTaskQueueConfig(default_jitter_ms = 0))))
             .with(SqsTestModule(credentials, client))
     )
   }
