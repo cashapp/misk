@@ -18,8 +18,7 @@ class AwsSqsJobHandlerModule<T : JobHandler> private constructor(
 ) : KAbstractModule() {
   override fun configure() {
     newMapBinder<QueueName, JobHandler>().addBinding(queueName).to(handler.java)
-    install(ServiceModule<AwsSqsJobHandlerSubscriptionService>()
-        .dependsOn<SqsJobConsumer>())
+    install(ServiceModule<AwsSqsJobHandlerSubscriptionService>())
   }
 
   companion object {
