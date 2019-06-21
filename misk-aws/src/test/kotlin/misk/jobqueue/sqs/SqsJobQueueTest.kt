@@ -7,6 +7,7 @@ import misk.jobqueue.JobConsumer
 import misk.jobqueue.JobQueue
 import misk.jobqueue.QueueName
 import misk.jobqueue.subscribe
+import misk.tasks.RepeatedTaskQueue
 import misk.testing.MiskExternalDependency
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
@@ -28,6 +29,7 @@ internal class SqsJobQueueTest {
   @Inject private lateinit var queue: JobQueue
   @Inject private lateinit var consumer: JobConsumer
   @Inject private lateinit var sqsMetrics: SqsMetrics
+  @Inject @ForSqsConsumer lateinit var taskQueue : RepeatedTaskQueue
 
   private lateinit var queueName: QueueName
   private lateinit var deadLetterQueueName: QueueName
@@ -173,13 +175,14 @@ internal class SqsJobQueueTest {
 
   @Test fun stopsDeliveryAfterClose() {
     val handledJobs = CopyOnWriteArrayList<Job>()
-    val subscription = consumer.subscribe(queueName) {
+    consumer.subscribe(queueName) {
       handledJobs.add(it)
       it.acknowledge()
     }
 
     // Close the subscription and wait for any currently outstanding long-polls to complete
-    subscription.close()
+    taskQueue.stopAsync()
+    taskQueue.awaitTerminated()
     Thread.sleep(1001)
 
     // Send 10 jobs, then wait again for the long-poll to complete make sure none of them are delivered

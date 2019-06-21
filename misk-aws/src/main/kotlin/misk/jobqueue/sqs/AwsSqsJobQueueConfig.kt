@@ -1,6 +1,7 @@
 package misk.jobqueue.sqs
 
 import misk.config.Config
+import misk.tasks.RepeatedTaskQueueConfig
 
 /**
  * [AwsSqsJobQueueConfig] is the configuration for job queueing backed by Amazon's
@@ -22,6 +23,8 @@ class AwsSqsJobQueueConfig(
   /**
    * Number of jobs that can be processed concurrently.
    */
-  val consumer_thread_pool_size: Int = 4
+  val consumer_thread_pool_size: Int = 4,
+
+  val task_queue: RepeatedTaskQueueConfig = RepeatedTaskQueueConfig()
 ) : Config
 

@@ -5,7 +5,6 @@ import com.google.common.util.concurrent.AbstractExecutionThreadService
 import com.google.common.util.concurrent.MoreExecutors.newDirectExecutorService
 import com.google.common.util.concurrent.Service
 import misk.backoff.Backoff
-import misk.backoff.ExponentialBackoff
 import misk.concurrent.ExplicitReleaseDelayQueue
 import misk.logging.getLogger
 import java.time.Clock
@@ -31,14 +30,19 @@ class RepeatedTaskQueue @VisibleForTesting internal constructor(
   private val clock: Clock,
   private val taskExecutor: ExecutorService,
   private val dispatchExecutor: Executor?, // visible internally for testing only
-  private val pendingTasks: BlockingQueue<DelayedTask> // visible internally for testing only
+  private val pendingTasks: BlockingQueue<DelayedTask>, // visible internally for testing only
+  private val config: RepeatedTaskQueueConfig = RepeatedTaskQueueConfig()
+
 ) : AbstractExecutionThreadService() {
   /**
    * Creates a [RepeatedTaskQueue] backed by a real [DelayQueue], with tasks dequeued on the
    * service background thread and executed via the provided [ExecutorService]
    */
-  constructor(name: String, clock: Clock, taskExecutor: ExecutorService) :
-      this(name, clock, taskExecutor, null, DelayQueue<DelayedTask>())
+  constructor(
+    name: String, clock: Clock, taskExecutor: ExecutorService,
+    config: RepeatedTaskQueueConfig = RepeatedTaskQueueConfig()
+  ) :
+      this(name, clock, taskExecutor, null, DelayQueue<DelayedTask>(), config)
 
   private val running = AtomicBoolean(false)
 
@@ -133,8 +137,8 @@ class RepeatedTaskQueue @VisibleForTesting internal constructor(
   fun scheduleWithBackoff(
     timeBetweenRuns: Duration,
     initialDelay: Duration = timeBetweenRuns,
-    noWorkBackoff: Backoff = ExponentialBackoff(timeBetweenRuns, defaultMaxDelay, defaultJitter),
-    failureBackoff: Backoff = ExponentialBackoff(timeBetweenRuns, defaultMaxDelay, defaultJitter),
+    noWorkBackoff: Backoff = config.defaultBackoff(timeBetweenRuns),
+    failureBackoff: Backoff = config.defaultBackoff(timeBetweenRuns),
     task: () -> Status
   ) {
     enqueue(delay = initialDelay) {
@@ -170,8 +174,6 @@ class RepeatedTaskQueue @VisibleForTesting internal constructor(
   override fun executor(): Executor = dispatchExecutor ?: super.executor()
 
   companion object {
-    private val defaultMaxDelay = Duration.ofMinutes(1)
-    private val defaultJitter = Duration.ofMillis(50)
     private val log = getLogger<RepeatedTaskQueue>()
 
     /**
