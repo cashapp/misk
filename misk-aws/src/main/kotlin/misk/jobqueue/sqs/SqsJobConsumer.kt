@@ -15,8 +15,8 @@ import misk.time.timed
 import misk.tracing.traceWithSpan
 import java.time.Duration
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.ExecutionException
 import java.util.concurrent.ExecutorService
-import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
 import javax.inject.Provider
 import javax.inject.Singleton
@@ -50,22 +50,25 @@ internal class SqsJobConsumer @Inject internal constructor(
 
     for (i in (0 until config.concurrent_receivers_per_queue)) {
       taskQueue.scheduleWithBackoff(Duration.ZERO) {
+        // Don't call handlers until all services are ready, otherwise handlers will crash because the
+        // services they might need (databases, etc.) won't be ready.
+        serviceManagerProvider.get().awaitHealthy()
         receiver.runOnce()
       }
     }
   }
 
-  private inner class QueueReceiver(
+  internal fun getReceiver(queueName: QueueName): QueueReceiver {
+    return subscriptions[queueName]!!
+  }
+
+  internal inner class QueueReceiver(
     private val queueName: QueueName,
     private val handler: JobHandler
   ) {
     private val queue = queues[queueName]
 
     fun runOnce(): Status {
-      // Don't call handlers until all services are ready, otherwise handlers will crash because the
-      // services they might need (databases, etc.) won't be ready.
-      serviceManagerProvider.get().awaitHealthy()
-
       val messages = queue.call { client ->
         client.receiveMessage(ReceiveMessageRequest()
             .withAttributeNames("All")
@@ -75,8 +78,11 @@ internal class SqsJobConsumer @Inject internal constructor(
             .messages
       }
 
-      val failure = AtomicBoolean(false)
-      messages.map { SqsJob(queueName, queues, metrics, it) }.forEach { message ->
+      if (messages.size == 0) {
+        return Status.NO_WORK
+      }
+
+      val futures = messages.map { SqsJob(queueName, queues, metrics, it) }.map { message ->
         dispatchThreadPool.submit {
           metrics.jobsReceived.labels(queueName.value).inc()
 
@@ -94,20 +100,25 @@ internal class SqsJobConsumer @Inject internal constructor(
               val (duration, _) = timed { handler.handleJob(message) }
               metrics.handlerDispatchTime.record(duration.toMillis().toDouble(), queueName.value)
             } catch (th: Throwable) {
-              failure.set(true)
               log.error(th) { "error handling job from ${queueName.value}" }
               metrics.handlerFailures.labels(queueName.value).inc()
               Tags.ERROR.set(span, true)
+              throw th
             }
           }
         }
       }
 
-      return when {
-        failure.get() -> Status.FAILED
-        messages.size == 0 -> Status.NO_WORK
-        else -> Status.OK
+      for (future in futures) {
+        try {
+          future.get()
+        } catch (e: ExecutionException) {
+          // the exception was already logged when the dispatched task failed above
+          return Status.FAILED
+        }
       }
+
+      return Status.OK
     }
   }
 

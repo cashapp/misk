@@ -8,6 +8,7 @@ import misk.jobqueue.JobQueue
 import misk.jobqueue.QueueName
 import misk.jobqueue.subscribe
 import misk.tasks.RepeatedTaskQueue
+import misk.tasks.Status
 import misk.testing.MiskExternalDependency
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
@@ -181,8 +182,7 @@ internal class SqsJobQueueTest {
     }
 
     // Close the subscription and wait for any currently outstanding long-polls to complete
-    taskQueue.stopAsync()
-    taskQueue.awaitTerminated()
+    turnOffTaskQueue()
     Thread.sleep(1001)
 
     // Send 10 jobs, then wait again for the long-poll to complete make sure none of them are delivered
@@ -221,5 +221,29 @@ internal class SqsJobQueueTest {
     assertThat(sqsMetrics.jobsReceived.labels(queueName.value).get()).isEqualTo(3.0)
     assertThat(sqsMetrics.jobsDeadLettered.labels(queueName.value).get()).isEqualTo(0.0)
     assertThat(sqsMetrics.handlerFailures.labels(queueName.value).get()).isEqualTo(2.0)
+  }
+
+  @Test fun waitsForDispatchedTasksToFail() {
+    turnOffTaskQueue()
+    consumer.subscribe(queueName) {
+      throw IllegalStateException("boom!")
+    }
+    queue.enqueue(queueName, "fail away")
+    val receiver = (consumer as SqsJobConsumer).getReceiver(queueName)
+    assertThat(receiver.runOnce()).isEqualTo(Status.FAILED)
+  }
+
+  @Test fun noWork() {
+    turnOffTaskQueue()
+    consumer.subscribe(queueName) {
+      throw IllegalStateException("boom!")
+    }
+    val receiver = (consumer as SqsJobConsumer).getReceiver(queueName)
+    assertThat(receiver.runOnce()).isEqualTo(Status.NO_WORK)
+  }
+
+  private fun turnOffTaskQueue() {
+    taskQueue.stopAsync()
+    taskQueue.awaitTerminated()
   }
 }
