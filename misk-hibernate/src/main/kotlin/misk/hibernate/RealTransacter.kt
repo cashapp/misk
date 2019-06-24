@@ -15,6 +15,7 @@ import org.hibernate.SessionFactory
 import org.hibernate.StaleObjectStateException
 import org.hibernate.exception.LockAcquisitionException
 import java.sql.Connection
+import java.sql.SQLRecoverableException
 import java.time.Duration
 import java.util.EnumSet
 import javax.inject.Provider
@@ -55,7 +56,7 @@ internal class RealTransacter private constructor(
   override val inTransaction: Boolean
     get() = threadLocalSession.get() != null
 
-  override fun isCheckEnabled(check : Check): Boolean {
+  override fun isCheckEnabled(check: Check): Boolean {
     val session = threadLocalSession.get()
     return session == null || !session.disabledChecks.contains(check)
   }
@@ -197,6 +198,7 @@ internal class RealTransacter private constructor(
       is RetryTransactionException,
       is StaleObjectStateException,
       is LockAcquisitionException,
+      is SQLRecoverableException,
       is OptimisticLockException -> true
       else -> th.cause?.let { isRetryable(it) } ?: false
     }
@@ -207,7 +209,7 @@ internal class RealTransacter private constructor(
     val maxAttempts: Int = 2,
     val disabledChecks: EnumSet<Check> = EnumSet.noneOf(Check::class.java),
     val minRetryDelayMillis: Long = 100,
-    val maxRetryDelayMillis: Long = 100,
+    val maxRetryDelayMillis: Long = 200,
     val retryJitterMillis: Long = 400,
     val readOnly: Boolean = false
   )
