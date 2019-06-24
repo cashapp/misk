@@ -209,7 +209,7 @@ internal class RealTransacter private constructor(
     val maxAttempts: Int = 2,
     val disabledChecks: EnumSet<Check> = EnumSet.noneOf(Check::class.java),
     val minRetryDelayMillis: Long = 100,
-    val maxRetryDelayMillis: Long = 100,
+    val maxRetryDelayMillis: Long = 200,
     val retryJitterMillis: Long = 400,
     val readOnly: Boolean = false
   )
