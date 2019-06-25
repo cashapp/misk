@@ -12,7 +12,7 @@ import kotlin.reflect.KClass
 
 class AccessInterceptor private constructor(
   val allowedServices: Set<String>,
-  val allowedRoles: Set<String>,
+  val allowedCapabilities: Set<String>,
   private val caller: ActionScoped<MiskCaller?>
 ) : ApplicationInterceptor {
 
@@ -27,13 +27,13 @@ class AccessInterceptor private constructor(
 
   private fun isAllowed(caller: MiskCaller): Boolean {
     // Allow if we don't have any requirements on service or role
-    if (allowedServices.isEmpty() && allowedRoles.isEmpty()) return true
+    if (allowedServices.isEmpty() && allowedCapabilities.isEmpty()) return true
 
     // Allow if the caller has provided an allowed service
     if (caller.service != null && allowedServices.contains(caller.service)) return true
 
     // Allow if the caller has provided an allowed role
-    return caller.roles.any { allowedRoles.contains(it) }
+    return caller.allCapabilities.any { allowedCapabilities.contains(it) }
   }
 
   internal class Factory @Inject internal constructor(
@@ -62,7 +62,7 @@ class AccessInterceptor private constructor(
         // This action is explicitly marked as unauthenticated.
         actionEntries.size == 1 && action.hasAnnotation<Unauthenticated>() -> return null
         // Successfully return @Authenticated or custom Access Annotation
-        actionEntries.size == 1 -> return AccessInterceptor(actionEntries[0].services.toSet(), actionEntries[0].roles.toSet(), caller)
+        actionEntries.size == 1 -> return AccessInterceptor(actionEntries[0].services.toSet(), actionEntries[0].allCapabilities, caller)
         // Not exactly one access annotation. Fail with a useful message.
         else -> {
           val requiredAnnotations = mutableListOf<KClass<out Annotation>>()
@@ -88,7 +88,7 @@ class AccessInterceptor private constructor(
     }
 
     private fun Authenticated.toAccessAnnotationEntry() = AccessAnnotationEntry(
-        Authenticated::class, services.toList(), roles.toList())
+        Authenticated::class, services.toList(), roles.toList(), capabilities.toList())
 
     private fun Unauthenticated.toAccessAnnotationEntry() = AccessAnnotationEntry(
         Unauthenticated::class, listOf(), listOf())
