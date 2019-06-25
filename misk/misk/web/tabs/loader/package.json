@@ -1,11 +1,8 @@
 {
   "name": "misk-web-tab-loader",
   "version": "0.0.3",
-  "license": "SEE LICENSE IN https://github.com/square/misk-web",
+  "license": "SEE LICENSE IN https://github.com/cashapp/misk-web",
   "main": "src/index.tsx",
-  "engines": {
-    "yarn": "YARN NO LONGER USED - use npm instead."
-  },
   "scripts": {
     "build": "npm run-script lib && npm run-script test ",
     "ci-build": "npm install && npm run-script clean && npm run-script prebuild && cross-env NODE_ENV=production npm run-script lib && npm run-script test ",
@@ -22,14 +19,14 @@
     "zip": "tar --exclude='.gitignore' --exclude='.old_build_files' --exclude='package.json' --exclude='package-lock.json' --exclude='prettier.config.js' --exclude='tsconfig.json' --exclude='tslint.json' --exclude='webpack.config.js' --exclude='yarn.lock' --exclude='demo' --exclude='lib' --exclude='.DS_Store' --exclude='*.log' --exclude='node_modules' --exclude='loader.tgz' -czvf loader.tgz ./"
   },
   "dependencies": {
-    "@misk/common": "0.1.5-41",
-    "@misk/core": "0.1.5-41",
-    "@misk/simpleredux": "0.1.5-41"
+    "@misk/common": "0.1.6",
+    "@misk/core": "0.1.6",
+    "@misk/simpleredux": "0.1.6"
   },
   "devDependencies": {
-    "@misk/dev": "0.1.5-41",
-    "@misk/tslint": "0.1.5-41",
-    "@misk/test": "0.1.5-41"
+    "@misk/dev": "0.1.6",
+    "@misk/tslint": "0.1.6",
+    "@misk/test": "0.1.6"
   },
   "jest": {
     "testEnvironment": "jsdom",
