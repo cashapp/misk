@@ -651,7 +651,7 @@ function* handleDirtyInputField(
  * that only differ by dispatchMechanism (GET, POST, PUT...)
  */
 const groupByWebActionHash = (
-  action: IWebActionInternal | IWebActionAPI
+  action: IWebActionInternal | IWebActionAPI | any
 ): string =>
   "" +
   action.pathPattern +
@@ -737,9 +737,7 @@ const generateFieldTypesMetadata = (
       )
     } else {
       console.log(
-        `Valid Base Field Type ${type} has no handler for the corresponding Tyepscript Type ${
-          BaseFieldTypes[type]
-        }`
+        `Valid Base Field Type ${type} has no handler for the corresponding Tyepscript Type ${BaseFieldTypes[type]}`
       )
       return typesMetadata
     }
