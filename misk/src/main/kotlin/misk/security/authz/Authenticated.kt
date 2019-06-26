@@ -8,7 +8,7 @@ package misk.security.authz
 @Target(AnnotationTarget.FUNCTION)
 annotation class Authenticated(
   val services: Array<String> = [],
-  // TODO(rhall): Deprecate this https://github.com/cashapp/misk/issues/1078
+  @Deprecated("use capabilities instead. https://github.com/cashapp/misk/issues/1078", replaceWith = ReplaceWith("capabilities"))
   val roles: Array<String> = [],
   val capabilities: Array<String> = []
 )

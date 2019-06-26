@@ -42,6 +42,7 @@ data class AccessAnnotationEntry(
   val annotation: KClass<out Annotation>,
   val services: List<String> = listOf(),
   // TODO(rhall): Deprecate this https://github.com/cashapp/misk/issues/1078
+  @Deprecated("use capabilities instead. https://github.com/cashapp/misk/issues/1078", replaceWith = ReplaceWith("capabilities"))
   val roles: List<String> = listOf(),
   val capabilities: List<String> = listOf()
 ) {

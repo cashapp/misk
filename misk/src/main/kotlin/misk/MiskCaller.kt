@@ -9,7 +9,7 @@ data class MiskCaller(
   val user: String? = null,
 
   /** Set of roles to which the human user belongs, typically provided by the SSO infrastructure */
-  // TODO(rhall): Deprecate this https://github.com/cashapp/misk/issues/1078
+  @Deprecated("use capabilities instead. https://github.com/cashapp/misk/issues/1078", replaceWith = ReplaceWith("capabilities"))
   val roles: Set<String> = setOf(),
 
   /** Set of capabilities given to a human user, typically provided by the SSO infrastructure */
