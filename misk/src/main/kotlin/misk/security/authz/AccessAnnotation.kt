@@ -41,12 +41,17 @@ import kotlin.reflect.KClass
 data class AccessAnnotationEntry(
   val annotation: KClass<out Annotation>,
   val services: List<String> = listOf(),
-  val roles: List<String> = listOf()
-)
+  // TODO(rhall): Deprecate this https://github.com/cashapp/misk/issues/1078
+  val roles: List<String> = listOf(),
+  val capabilities: List<String> = listOf()
+) {
+  val allCapabilities = (roles + capabilities).toSet()
+}
 
 inline fun <reified T : Annotation> AccessAnnotationEntry(
   services: List<String> = listOf(),
-  roles: List<String> = listOf()
+  roles: List<String> = listOf(),
+  capabilities: List<String> = listOf()
 ): AccessAnnotationEntry {
-  return AccessAnnotationEntry(T::class, services, roles)
+  return AccessAnnotationEntry(T::class, services, roles, capabilities)
 }

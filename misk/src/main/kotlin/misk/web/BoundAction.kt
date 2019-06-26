@@ -108,7 +108,7 @@ internal class BoundAction<A : WebAction>(
         dispatchMechanism = action.dispatchMechanism,
         allowedServices = fetchAllowedCallers(
             applicationInterceptors, AccessInterceptor::allowedServices),
-        allowedRoles = fetchAllowedCallers(applicationInterceptors, AccessInterceptor::allowedRoles)
+        allowedCapabilities = fetchAllowedCallers(applicationInterceptors, AccessInterceptor::allowedCapabilities)
     )
   }
 
