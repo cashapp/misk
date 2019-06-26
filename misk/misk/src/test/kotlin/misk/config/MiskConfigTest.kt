@@ -3,13 +3,11 @@ package misk.config
 import com.google.inject.util.Modules
 import misk.environment.Environment
 import misk.environment.EnvironmentModule
-import misk.resources.ResourceLoader
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.web.WebConfig
 import misk.web.exceptions.ActionExceptionLogLevelConfig
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.slf4j.event.Level
 import java.io.File

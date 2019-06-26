@@ -362,17 +362,17 @@ internal class RealTransacter private constructor(
     }
 
     override fun <T> withoutChecks(vararg checks: Check, body: () -> T): T {
-      val previous = disabledChecks;
+      val previous = disabledChecks
       val actualChecks = if (checks.isEmpty()) {
         EnumSet.allOf(Check::class.java)
       } else {
         EnumSet.of(checks[0], *checks)
       }
-      disabledChecks = actualChecks;
+      disabledChecks = actualChecks
       return try {
-        body();
+        body()
       } finally {
-        disabledChecks = previous;
+        disabledChecks = previous
       }
     }
 

@@ -57,20 +57,20 @@ data class Type(val fields: List<Field>)
 data class Field(val name: String, val type: String, val repeated: Boolean)
 
 internal fun WebActionMetadata(
-    name: String,
-    function: Function<*>,
-    functionAnnotations: List<Annotation>,
-    acceptedMediaRanges: List<MediaRange>,
-    responseContentType: MediaType?,
-    parameterTypes: List<KType>,
-    requestType: KType?,
-    returnType: KType,
-    pathPattern: PathPattern,
-    applicationInterceptors: List<ApplicationInterceptor>,
-    networkInterceptors: List<NetworkInterceptor>,
-    dispatchMechanism: DispatchMechanism,
-    allowedServices: Set<String>,
-    allowedCapabilities: Set<String>
+  name: String,
+  function: Function<*>,
+  functionAnnotations: List<Annotation>,
+  acceptedMediaRanges: List<MediaRange>,
+  responseContentType: MediaType?,
+  parameterTypes: List<KType>,
+  requestType: KType?,
+  returnType: KType,
+  pathPattern: PathPattern,
+  applicationInterceptors: List<ApplicationInterceptor>,
+  networkInterceptors: List<NetworkInterceptor>,
+  dispatchMechanism: DispatchMechanism,
+  allowedServices: Set<String>,
+  allowedCapabilities: Set<String>
 ): WebActionMetadata {
   return WebActionMetadata(
       name = name,

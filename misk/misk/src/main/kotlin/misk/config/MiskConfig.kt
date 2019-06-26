@@ -90,7 +90,7 @@ object MiskConfig {
     return newObjectMapper(resourceLoader).writeValueAsString(config)
   }
 
-  private fun newObjectMapper(resourceLoader: ResourceLoader) : ObjectMapper {
+  private fun newObjectMapper(resourceLoader: ResourceLoader): ObjectMapper {
     val mapper = ObjectMapper(YAMLFactory()).registerModules(
         KotlinModule(),
         JavaTimeModule())

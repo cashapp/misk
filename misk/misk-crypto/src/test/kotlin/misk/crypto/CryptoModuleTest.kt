@@ -94,7 +94,7 @@ class CryptoModuleTest {
     val injector = getInjector(listOf())
     assertThatThrownBy { injector.getInstance(MacKeyManager::class.java)["not there"] }
             .isInstanceOf(KeyNotFoundException::class.java)
-    assertThatThrownBy { injector.getInstance(AeadKeyManager::class.java)["not there either"]}
+    assertThatThrownBy { injector.getInstance(AeadKeyManager::class.java)["not there either"] }
             .isInstanceOf(KeyNotFoundException::class.java)
   }
 
@@ -116,7 +116,7 @@ class CryptoModuleTest {
     }.isInstanceOf(GeneralSecurityException::class.java)
   }
 
-  private fun getInjector(keyMap: List<Pair<String, KeysetHandle>>): Injector{
+  private fun getInjector(keyMap: List<Pair<String, KeysetHandle>>): Injector {
     val keys = keyMap.map {
       var keyType = KeyType.AEAD
       val keyTypeUrl = it.second.keysetInfo.getKeyInfo(0).typeUrl

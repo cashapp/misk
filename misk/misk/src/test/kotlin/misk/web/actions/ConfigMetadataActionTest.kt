@@ -65,9 +65,10 @@ class ConfigMetadataActionTest {
   data class TestConfig(
     val includedConfig: IncludedConfig,
     val overriddenConfig: OverriddenConfig,
-    val redactedConfig: RedactedConfig) : Config
+    val redactedConfig: RedactedConfig
+  ) : Config
 
-  data class IncludedConfig(val key: String): Config
-  data class OverriddenConfig(val key: String): Config
-  data class RedactedConfig(val password: String, val passphrase: String): Config
+  data class IncludedConfig(val key: String) : Config
+  data class OverriddenConfig(val key: String) : Config
+  data class RedactedConfig(val password: String, val passphrase: String) : Config
 }

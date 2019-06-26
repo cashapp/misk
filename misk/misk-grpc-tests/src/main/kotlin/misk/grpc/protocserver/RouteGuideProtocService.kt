@@ -19,7 +19,8 @@ internal class RouteGuideProtocService @Inject constructor() : RouteGuideImplBas
   }
 
   override fun routeChat(
-    responseObserver: StreamObserver<RouteGuideProto.RouteNote>):
+    responseObserver: StreamObserver<RouteGuideProto.RouteNote>
+  ):
       StreamObserver<RouteGuideProto.RouteNote> {
     return object : StreamObserver<RouteGuideProto.RouteNote> {
       override fun onNext(value: RouteGuideProto.RouteNote) {

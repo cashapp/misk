@@ -34,8 +34,8 @@ class ExponentialBackoff(
    * @param maxDelay The max amount of time to delay
    * @param jitter The amount of jitter to introduce
    */
-  constructor(baseDelay: Duration, maxDelay: Duration, jitter: Duration)
-      : this({ baseDelay }, { maxDelay }, { jitter })
+  constructor(baseDelay: Duration, maxDelay: Duration, jitter: Duration) :
+      this({ baseDelay }, { maxDelay }, { jitter })
 
   /**
    * Creates a new [ExponentialBackoff] from fixed delays, without jitter
@@ -43,8 +43,8 @@ class ExponentialBackoff(
    * @param baseDelay The base retry delay
    * @param maxDelay The max amount of time to delay
    */
-  constructor(baseDelay: Duration, maxDelay: Duration)
-      : this(baseDelay, maxDelay, Duration.ofMillis(0))
+  constructor(baseDelay: Duration, maxDelay: Duration) :
+      this(baseDelay, maxDelay, Duration.ofMillis(0))
 
   override fun reset() {
     consecutiveRetryCount = 0

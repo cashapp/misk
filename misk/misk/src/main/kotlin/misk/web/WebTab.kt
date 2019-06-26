@@ -12,10 +12,10 @@ abstract class WebTab(
 ) : ValidWebEntry(slug = slug, url_path_prefix = url_path_prefix) {
   fun isAuthenticated(caller: MiskCaller?): Boolean {
     return when {
-      capabilities.isEmpty() && services.isEmpty() -> true       // no capabilities/service requirement => unauthenticated requests allowed (including when caller is null)
-      caller == null -> false                             // role/service requirement present but caller null => assume authentication broken
-      capabilities.any { caller.allCapabilities.contains(it) } -> true     // matching role
-      services.any { caller.service == it } -> true       // matching service
+      capabilities.isEmpty() && services.isEmpty() -> true // no capabilities/service requirement => unauthenticated requests allowed (including when caller is null)
+      caller == null -> false // role/service requirement present but caller null => assume authentication broken
+      capabilities.any { caller.allCapabilities.contains(it) } -> true // matching role
+      services.any { caller.service == it } -> true // matching service
       else -> false
     }
   }

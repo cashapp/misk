@@ -34,12 +34,14 @@ class FakeScheduledExecutorService @Inject constructor(private val clock: Clock)
 
   override fun schedule(
     command: Runnable,
-    delay: Long, unit: TimeUnit
+    delay: Long,
+    unit: TimeUnit
   ) = scheduleTask(delay, unit) { command.run() }
 
   override fun <V> schedule(
     callable: Callable<V>,
-    delay: Long, unit: TimeUnit
+    delay: Long,
+    unit: TimeUnit
   ) = scheduleTask(delay, unit) { callable.call() }
 
   private fun <V> scheduleTask(delay: Long, unit: TimeUnit, task: () -> V): ScheduledFuture<V> {
@@ -52,20 +54,25 @@ class FakeScheduledExecutorService @Inject constructor(private val clock: Clock)
 
   override fun scheduleAtFixedRate(
     command: Runnable?,
-    initialDelay: Long, period: Long, unit: TimeUnit?
+    initialDelay: Long,
+    period: Long,
+    unit: TimeUnit?
   ): ScheduledFuture<*> {
     TODO("not implemented")
   }
 
   override fun scheduleWithFixedDelay(
     command: Runnable?,
-    initialDelay: Long, delay: Long, unit: TimeUnit?
+    initialDelay: Long,
+    delay: Long,
+    unit: TimeUnit?
   ): ScheduledFuture<*> {
     TODO("not implemented")
   }
 
   class ScheduledFutureTask<V>(
-    val executeAt: Long, val clock: Clock,
+    val executeAt: Long,
+    val clock: Clock,
     task: () -> V
   ) : FutureTask<V>(task), ScheduledFuture<V> {
     override fun compareTo(other: Delayed): Int =

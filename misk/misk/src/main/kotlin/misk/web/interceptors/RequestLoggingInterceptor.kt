@@ -19,7 +19,7 @@ private val logger = getLogger<RequestLoggingInterceptor>()
  * Logs request and response information for an action.
  * Timing information doesn't count time writing the response to the remote client.
  */
- class RequestLoggingInterceptor internal constructor(
+class RequestLoggingInterceptor internal constructor(
   private val action: Action,
   private val sampling: Double,
   private val includeBody: Boolean,
@@ -33,7 +33,7 @@ private val logger = getLogger<RequestLoggingInterceptor>()
     private val caller: @JvmSuppressWildcards ActionScoped<MiskCaller?>,
     private val ticker: Ticker,
     private val random: ThreadLocalRandom
-  ): ApplicationInterceptor.Factory {
+  ) : ApplicationInterceptor.Factory {
     override fun create(action: Action): ApplicationInterceptor? {
       val logRequestResponse = action.function.findAnnotation<LogRequestResponse>() ?: return null
       require(0.0 < logRequestResponse.sampling && logRequestResponse.sampling <= 1.0) {

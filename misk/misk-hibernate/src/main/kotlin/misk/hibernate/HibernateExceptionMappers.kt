@@ -15,11 +15,10 @@ import java.sql.SQLIntegrityConstraintViolationException
 import javax.inject.Inject
 import javax.persistence.OptimisticLockException
 
-internal class RetryTransactionExceptionMapper @Inject internal constructor(
-) : ExceptionMapper<RetryTransactionException> {
+internal class RetryTransactionExceptionMapper @Inject internal constructor() : ExceptionMapper<RetryTransactionException> {
 
-  override fun toResponse(th: RetryTransactionException): Response<ResponseBody>
-    = ConflictExceptionResponder.toResponse()
+  override fun toResponse(th: RetryTransactionException): Response<ResponseBody> =
+    ConflictExceptionResponder.toResponse()
 
   override fun canHandle(th: Throwable): Boolean {
     val rootCause = Throwables.getRootCause(th)
@@ -31,20 +30,18 @@ internal class RetryTransactionExceptionMapper @Inject internal constructor(
   override fun loggingLevel(th: RetryTransactionException) = Level.WARN
 }
 
-internal class ConstraintViolationExceptionMapper @Inject internal constructor(
-) : ExceptionMapper<ConstraintViolationException> {
-  override fun toResponse(th: ConstraintViolationException): Response<ResponseBody>
-    = ConflictExceptionResponder.toResponse()
+internal class ConstraintViolationExceptionMapper @Inject internal constructor() : ExceptionMapper<ConstraintViolationException> {
+  override fun toResponse(th: ConstraintViolationException): Response<ResponseBody> =
+    ConflictExceptionResponder.toResponse()
 
   override fun canHandle(th: Throwable): Boolean = th is ConstraintViolationException
 
   override fun loggingLevel(th: ConstraintViolationException) = Level.WARN
 }
 
-internal class OptimisticLockExceptionMapper @Inject internal constructor(
-) : ExceptionMapper<OptimisticLockException> {
-  override fun toResponse(th: OptimisticLockException): Response<ResponseBody>
-    = ConflictExceptionResponder.toResponse()
+internal class OptimisticLockExceptionMapper @Inject internal constructor() : ExceptionMapper<OptimisticLockException> {
+  override fun toResponse(th: OptimisticLockException): Response<ResponseBody> =
+    ConflictExceptionResponder.toResponse()
 
   override fun canHandle(th: Throwable): Boolean = th is OptimisticLockException
 

@@ -30,7 +30,7 @@ internal class ReturnADinosaurAction @Inject constructor() : WebAction {
       .build()
 }
 
-internal class DinoClientModule(private val jetty : JettyService) : KAbstractModule() {
+internal class DinoClientModule(private val jetty: JettyService) : KAbstractModule() {
   override fun configure() {
     install(TypedHttpClientModule.create<ReturnADinosaur>("dinosaur"))
     super.configure()

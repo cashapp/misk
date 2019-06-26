@@ -75,14 +75,14 @@ internal class RequestLoggingInterceptorTest {
 
   @Test
   fun notSampled() {
-    fakeRandom.nextDouble = 0.7;
+    fakeRandom.nextDouble = 0.7
     assertThat(invoke("/call/sampledRequestLogging/hello", "caller").isSuccessful).isTrue()
     assertThat(logCollector.takeMessages(RequestLoggingInterceptor::class)).isEmpty()
   }
 
   @Test
   fun sampled() {
-    fakeRandom.nextDouble = 0.2;
+    fakeRandom.nextDouble = 0.2
     assertThat(invoke("/call/sampledRequestLogging/hello", "caller").isSuccessful).isTrue()
     assertThat(logCollector.takeMessages(RequestLoggingInterceptor::class)).isNotEmpty()
   }
@@ -126,7 +126,7 @@ internal class RequestLoggingInterceptorTest {
     @Unauthenticated
     @ResponseContentType(MediaTypes.APPLICATION_JSON)
     @LogRequestResponse(sampling = 1.0, includeBody = true)
-    fun call(@PathParam message: String) : String = throw IllegalStateException(message)
+    fun call(@PathParam message: String): String = throw IllegalStateException(message)
   }
 
   internal class SampledRequestLoggingAction @Inject constructor() : WebAction {

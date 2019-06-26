@@ -103,7 +103,7 @@ internal class WebActionFactory @Inject constructor(
   ): BoundAction<A> {
     // NB: The response media type may be omitted; in this case only generic return types (String,
     // ByteString, ResponseBody, etc) are supported
-    val  action = function.asAction(dispatchMechanism)
+    val action = function.asAction(dispatchMechanism)
 
     // Ensure that default interceptors are called before any user provided interceptors
     val networkInterceptors =

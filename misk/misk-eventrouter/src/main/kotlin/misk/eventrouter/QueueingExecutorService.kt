@@ -3,13 +3,12 @@ package misk.eventrouter
 import java.util.concurrent.AbstractExecutorService
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.TimeUnit
-import javax.inject.Inject
 
 /**
  * An executor service that holds enqueued work until explicitly executed. Useful for making tests
  * deterministic.
  */
-internal class QueueingExecutorService: AbstractExecutorService() {
+internal class QueueingExecutorService : AbstractExecutorService() {
   private val queue = LinkedBlockingQueue<Runnable>()
   private var processing = false
 

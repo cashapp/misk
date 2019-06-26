@@ -17,8 +17,8 @@ class AwsKmsClientModule(private val credentialsPath: String? = null) : KAbstrac
   // TODO: Allow initializing an AWS KMS client with a credentials provider
   // once tink supports it: https://github.com/google/tink/pull/184
   @Provides @Singleton
-  fun getKmsClient(): KmsClient = credentialsPath?.let { AwsKmsClient().withCredentials(it) } ?:
-      AwsKmsClient().withDefaultCredentials()
+  fun getKmsClient(): KmsClient = credentialsPath?.let { AwsKmsClient().withCredentials(it) }
+      ?: AwsKmsClient().withDefaultCredentials()
 }
 
 /**
@@ -29,6 +29,6 @@ class AwsKmsClientModule(private val credentialsPath: String? = null) : KAbstrac
  */
 class GcpKmsClientModule(private val credentialsPath: String? = null) : KAbstractModule() {
   @Provides @Singleton
-  fun getKmsClient(): KmsClient = credentialsPath?.let { GcpKmsClient().withCredentials(it) } ?:
-      GcpKmsClient().withDefaultCredentials()
+  fun getKmsClient(): KmsClient = credentialsPath?.let { GcpKmsClient().withCredentials(it) }
+      ?: GcpKmsClient().withDefaultCredentials()
 }

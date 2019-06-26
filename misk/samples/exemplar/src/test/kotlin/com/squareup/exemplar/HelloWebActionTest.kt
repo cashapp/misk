@@ -6,7 +6,6 @@ import misk.testing.MiskTest
 import okhttp3.Headers
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import javax.inject.Inject
 
 @MiskTest
 class HelloWebActionTest {

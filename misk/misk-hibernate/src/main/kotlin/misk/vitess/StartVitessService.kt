@@ -368,7 +368,7 @@ class StartVitessService(
       return process.exitValue()
     } catch (e: IOException) {
       logger.warn("'$command' threw exception", e)
-      -1  // Failed
+      -1 // Failed
     }
   }
 
@@ -440,6 +440,5 @@ class StartVitessService(
       })
       dockerCluster.start()
     }
-
   }
 }

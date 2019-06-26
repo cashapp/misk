@@ -10,7 +10,7 @@ import misk.inject.KAbstractModule
 import misk.tasks.RepeatedTaskQueueConfig
 import misk.testing.MockTracingBackendModule
 
-class SqsJobQueueTestModule (
+class SqsJobQueueTestModule(
   private val credentials: AWSCredentialsProvider,
   private val client: AmazonSQS
 ) : KAbstractModule() {
