@@ -27,7 +27,7 @@ class WebActionMetadataActionTest {
     assertThat(customServiceActionMetadata.parameterTypes).isEmpty()
     assertThat(customServiceActionMetadata.pathPattern).isEqualTo("/custom_service_access")
     assertThat(customServiceActionMetadata.allowedServices).containsOnly("payments")
-    assertThat(customServiceActionMetadata.allowedRoles).isEmpty()
+    assertThat(customServiceActionMetadata.allowedCapabilities).isEmpty()
 
     val customRoleActionMetadata = response.webActionMetadata.find {
       it.name.equals(TestWebActionModule.CustomRoleAccessAction::class.simpleName)
@@ -35,9 +35,9 @@ class WebActionMetadataActionTest {
     assertThat(customRoleActionMetadata!!.requestMediaTypes).containsOnly("*/*")
     assertThat(customRoleActionMetadata.responseMediaType).isEqualTo(MediaTypes.TEXT_PLAIN_UTF8)
     assertThat(customRoleActionMetadata.parameterTypes).isEmpty()
-    assertThat(customRoleActionMetadata.pathPattern).isEqualTo("/custom_role_access")
+    assertThat(customRoleActionMetadata.pathPattern).isEqualTo("/custom_capability_access")
     assertThat(customRoleActionMetadata.allowedServices).isEmpty()
-    assertThat(customRoleActionMetadata.allowedRoles).containsOnly("admin")
+    assertThat(customRoleActionMetadata.allowedCapabilities).containsOnly("adminRole", "admin")
 
     val requestTypeAction = response.webActionMetadata.find {
       it.name.equals(TestWebActionModule.RequestTypeAction::class.simpleName)

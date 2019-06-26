@@ -6,7 +6,12 @@ package misk.security.authz
  */
 @Retention(AnnotationRetention.RUNTIME)
 @Target(AnnotationTarget.FUNCTION)
-annotation class Authenticated(val services: Array<String> = [], val roles: Array<String> = [])
+annotation class Authenticated(
+  val services: Array<String> = [],
+  // TODO(rhall): Deprecate this https://github.com/cashapp/misk/issues/1078
+  val roles: Array<String> = [],
+  val capabilities: Array<String> = []
+)
 
 /**
  * Annotation indicating that a given action supports unauthenticated access
