@@ -18,11 +18,6 @@ buildScan {
     termsOfServiceAgree = 'yes'
 }
 
-ext {
-  isCi = "true".equals(System.getenv('CI'))
-  rep = null
-}
-
 apply from: file("./dependencies.gradle")
 
 tasks.register("testShardNonHibernate") {
