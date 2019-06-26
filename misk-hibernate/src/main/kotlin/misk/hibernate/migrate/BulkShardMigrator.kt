@@ -197,7 +197,7 @@ class BulkShardMigrator<R : DbRoot<R>, C : DbChild<R, C>> private constructor(
     // When data is being transferred between two shards, to avoid losing data, first insert,
     // then delete. There is a potential for duplicate IDs being loaded between these calls but we
     // try to keep it short with small batches.
-    val idsToDelete = transacter.transaction{ session ->
+    val idsToDelete = transacter.transaction { session ->
       val sourceRecords = loadSourceRecords(session)
       if (sourceRecords.isEmpty()) {
         setOf()
@@ -205,11 +205,11 @@ class BulkShardMigrator<R : DbRoot<R>, C : DbChild<R, C>> private constructor(
         val existingIds = session.hibernateSession.createNativeQuery(
             "SELECT id FROM $tableName WHERE $rootColumnName = :target AND id IN (:ids)"
         ).setParameter("target", targetRoot!!.id)
-         .setParameterList("ids", sourceRecords.keys)
-         .list()
-         .stream()
-         .map { it as Long }
-         .collect(Collectors.toSet<Long>())
+          .setParameterList("ids", sourceRecords.keys)
+          .list()
+          .stream()
+          .map { it as Long }
+          .collect(Collectors.toSet<Long>())
 
         logger.info(
             "Bulk migrating (distinct shard) ${sourceRecords.size} entities for table $tableName"
@@ -322,8 +322,8 @@ class BulkShardMigrator<R : DbRoot<R>, C : DbChild<R, C>> private constructor(
           AND id IN (:ids)
         """.trimIndent()
     ).setParameter("source", sourceRoot!!.id)
-     .setParameterList("ids", idsToDelete)
-     .executeUpdate()
+      .setParameterList("ids", idsToDelete)
+      .executeUpdate()
     if (numRecords != idsToDelete.size) {
       logger.info("Deleted less records than expected from %s (%s < %s) after copying",
           tableName, numRecords, idsToDelete.size)
@@ -332,7 +332,9 @@ class BulkShardMigrator<R : DbRoot<R>, C : DbChild<R, C>> private constructor(
 
   @Throws(SQLException::class)
   private fun bindInsert(
-    columnName: String, insert: PreparedStatement, parameterIndex: Int,
+    columnName: String,
+    insert: PreparedStatement,
+    parameterIndex: Int,
     value: Any
   ): Int {
     val mutation = mutationNamed(columnName)

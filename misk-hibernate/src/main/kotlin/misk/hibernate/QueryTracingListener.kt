@@ -33,8 +33,8 @@ private val logger = getLogger<QueryTracingListener>()
  * {@see misk.hibernate.ReflectionQuery}.
  */
 @Singleton
-internal class QueryTracingListener @Inject constructor()
-  : PreInsertEventListener,
+internal class QueryTracingListener @Inject constructor() :
+  PreInsertEventListener,
     PostInsertEventListener,
     PreUpdateEventListener,
     PostUpdateEventListener,
@@ -83,7 +83,7 @@ internal class QueryTracingListener @Inject constructor()
 
     val lastScope = lastScopeInThread.get()
     lastScope?.let {
-      logger.info{ "lastScope wasn't closed" }
+      logger.info { "lastScope wasn't closed" }
       endLastSpan()
     }
 

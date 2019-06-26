@@ -64,4 +64,3 @@ internal class MDCScopeManager : ScopeManager {
     val allContextNames = listOf(MDC_TRACE_ID, MDC_SPAN_ID, MDC_PARENT_ID)
   }
 }
-

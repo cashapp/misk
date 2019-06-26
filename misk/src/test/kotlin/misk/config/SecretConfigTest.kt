@@ -2,7 +2,6 @@ package misk.config
 
 import com.google.inject.util.Modules
 import misk.environment.Environment
-import misk.environment.EnvironmentModule
 import misk.resources.FakeFilesModule
 import misk.resources.ResourceLoader
 import misk.resources.TestingResourceLoaderModule
@@ -13,7 +12,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import javax.inject.Inject
-import javax.inject.Named
 
 @MiskTest
 class SecretConfigTest {
@@ -30,7 +28,7 @@ class SecretConfigTest {
 
   private lateinit var secretConfig: SuperSecretConfig
   @Inject
-  private lateinit var resourceLoader : ResourceLoader
+  private lateinit var resourceLoader: ResourceLoader
 
   @BeforeEach
   fun setConfig() {
@@ -129,5 +127,3 @@ class SecretConfigTest {
         "No secret found at: classpath:/file_does_not_exist.")
   }
 }
-
-

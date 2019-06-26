@@ -101,7 +101,9 @@ fun Aead.decrypt(ciphertext: ByteString, aad: ByteArray? = null): ByteString {
  * Extension function for convenient encryption of [ByteString]s.
  * This function also makes sure that no extra copies of the plaintext data are kept in memory.
  */
-fun DeterministicAead.encryptDeterministically(plaintext: ByteString, aad: ByteArray? = null
+fun DeterministicAead.encryptDeterministically(
+  plaintext: ByteString,
+  aad: ByteArray? = null
 ): ByteString {
   val plaintextBytes = plaintext.toByteArray()
   val encrypted = this.encryptDeterministically(plaintextBytes, aad ?: byteArrayOf())
@@ -113,7 +115,9 @@ fun DeterministicAead.encryptDeterministically(plaintext: ByteString, aad: ByteA
  * Extension function for convenient decryption of [ByteString]s.
  * This function also makes sure that no extra copies of the plaintext data are kept in memory.
  */
-fun DeterministicAead.decryptDeterministically(ciphertext: ByteString, aad: ByteArray? = null
+fun DeterministicAead.decryptDeterministically(
+  ciphertext: ByteString,
+  aad: ByteArray? = null
 ): ByteString {
   val decryptedBytes = this.decryptDeterministically(ciphertext.toByteArray(), aad)
   val decrypted = decryptedBytes.toByteString()

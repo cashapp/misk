@@ -32,7 +32,7 @@ const val SHARED_DIR_PERMS = ZooDefs.Perms.READ or ZooDefs.Perms.WRITE or ZooDef
 internal class CuratorFrameworkProvider @Inject internal constructor(
   private val config: ZookeeperConfig,
   private val ensembleProvider: Provider<EnsembleProvider>,
-  private val hostProvider : Provider<HostProvider>
+  private val hostProvider: Provider<HostProvider>
 ) : Provider<CuratorFramework> {
 
   override fun get(): CuratorFramework {
@@ -66,7 +66,6 @@ internal class CuratorFrameworkProvider @Inject internal constructor(
             clientConfig.setProperty("zookeeper.ssl.trustStore.password", config.trust_store?.passphrase)
           }
           ZooKeeper(connectString, sessionTimeout, watcher, canBeReadOnly, hostProvider.get(), clientConfig)
-
         }
         .aclProvider(object : ACLProvider {
           override fun getDefaultAcl(): List<ACL> {

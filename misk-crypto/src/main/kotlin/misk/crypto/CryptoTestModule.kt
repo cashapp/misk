@@ -40,7 +40,7 @@ class CryptoTestModule(
         KeyType.AEAD -> {
           bind<Aead>()
               .annotatedWith(Names.named(key.key_name))
-              .toProvider(AeadEnvelopeProvider(key,null))
+              .toProvider(AeadEnvelopeProvider(key, null))
               .asEagerSingleton()
         }
         KeyType.DAEAD -> {
@@ -69,4 +69,3 @@ class CryptoTestModule(
       }
     }
 }
-

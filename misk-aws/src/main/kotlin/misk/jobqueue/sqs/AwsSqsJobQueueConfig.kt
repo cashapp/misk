@@ -27,4 +27,3 @@ class AwsSqsJobQueueConfig(
 
   val task_queue: RepeatedTaskQueueConfig = RepeatedTaskQueueConfig()
 ) : Config
-

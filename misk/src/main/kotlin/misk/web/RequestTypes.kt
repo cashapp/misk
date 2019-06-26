@@ -63,11 +63,12 @@ class RequestTypes {
   }
 
   private fun handleField(
-      fieldType: KType,
-      fieldName: String,
-      fields: MutableList<Field>,
-      stack: LinkedList<KClass<*>>,
-      repeated: Boolean = false) {
+    fieldType: KType,
+    fieldName: String,
+    fields: MutableList<Field>,
+    stack: LinkedList<KClass<*>>,
+    repeated: Boolean = false
+  ) {
     val fieldClass = fieldType.classifier as KClass<*>
     when (fieldClass) {
       String::class -> fields.add(Field(fieldName, String::class.simpleName!!, repeated))

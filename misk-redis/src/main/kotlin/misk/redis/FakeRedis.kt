@@ -12,7 +12,7 @@ class FakeRedis : Redis {
   @Inject lateinit var clock: FakeClock
 
   // The value type stored in our key-value store.
-  private data class Value (
+  private data class Value(
     val data: ByteString,
     val expiryInstant: Instant
   )

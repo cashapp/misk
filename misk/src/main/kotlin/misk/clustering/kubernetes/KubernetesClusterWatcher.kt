@@ -73,7 +73,7 @@ internal class KubernetesClusterWatcher @Inject internal constructor(
                 null, // timeoutSeconds
                 true, // watch
                 null, // progressListener
-                null  // progressRequestListener
+                null // progressRequestListener
             ),
             podType)
         // createWatch() throws an exception if the long poll fails. If we get here, it means

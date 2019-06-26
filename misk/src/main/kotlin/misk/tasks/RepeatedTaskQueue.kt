@@ -39,7 +39,9 @@ class RepeatedTaskQueue @VisibleForTesting internal constructor(
    * service background thread and executed via the provided [ExecutorService]
    */
   constructor(
-    name: String, clock: Clock, taskExecutor: ExecutorService,
+    name: String,
+    clock: Clock,
+    taskExecutor: ExecutorService,
     config: RepeatedTaskQueueConfig = RepeatedTaskQueueConfig()
   ) :
       this(name, clock, taskExecutor, null, DelayQueue<DelayedTask>(), config)
@@ -69,7 +71,6 @@ class RepeatedTaskQueue @VisibleForTesting internal constructor(
       override fun failed(from: Service.State, failure: Throwable) {
         log.error(failure) { "the background thread for repeated task queue $name failed" }
       }
-
     }, executor())
   }
 

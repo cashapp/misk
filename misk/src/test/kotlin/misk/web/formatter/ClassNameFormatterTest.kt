@@ -35,7 +35,7 @@ class ClassNameFormatterTest {
   }
 }
 
-class ValidQualifiedNameClass {}
+class ValidQualifiedNameClass
 
 class NoQualifiedNameFactory {
   fun create(): NetworkInterceptor {

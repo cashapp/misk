@@ -14,5 +14,5 @@ open class Random @Inject constructor() : java.util.Random()
  */
 @Singleton
 open class ThreadLocalRandom @Inject constructor() {
-  open fun current() : java.util.Random = java.util.concurrent.ThreadLocalRandom.current()
+  open fun current(): java.util.Random = java.util.concurrent.ThreadLocalRandom.current()
 }

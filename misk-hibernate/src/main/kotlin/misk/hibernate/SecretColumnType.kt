@@ -121,17 +121,17 @@ internal class AeadAdapter(typeConfig: TypeConfiguration, keyName: String) : Enc
     }
   }
 
-  override fun encrypt(plaintext: ByteArray, associatedData: ByteArray?) : ByteArray {
+  override fun encrypt(plaintext: ByteArray, associatedData: ByteArray?): ByteArray {
     return aead.encrypt(plaintext, associatedData)
   }
 
-  override fun decrypt(ciphertext: ByteArray, associatedData: ByteArray?) : ByteArray {
+  override fun decrypt(ciphertext: ByteArray, associatedData: ByteArray?): ByteArray {
     return aead.decrypt(ciphertext, associatedData)
   }
 }
 
-internal class DeterministicAeadAdapter(typeConfig: TypeConfiguration, keyName: String)
-  : EncryptionAdapter {
+internal class DeterministicAeadAdapter(typeConfig: TypeConfiguration, keyName: String) :
+  EncryptionAdapter {
 
   val daead: DeterministicAead
 
@@ -145,12 +145,12 @@ internal class DeterministicAeadAdapter(typeConfig: TypeConfiguration, keyName: 
     }
   }
 
-  override fun encrypt(plaintext: ByteArray, associatedData: ByteArray?) : ByteArray {
+  override fun encrypt(plaintext: ByteArray, associatedData: ByteArray?): ByteArray {
     // DeterministicAEAD throws if associatedData is null, so we pass an empty array if it is.
     return daead.encryptDeterministically(plaintext, associatedData ?: byteArrayOf())
   }
 
-  override fun decrypt(ciphertext: ByteArray, associatedData: ByteArray?) : ByteArray {
+  override fun decrypt(ciphertext: ByteArray, associatedData: ByteArray?): ByteArray {
     return daead.decryptDeterministically(ciphertext, associatedData ?: byteArrayOf())
   }
 }

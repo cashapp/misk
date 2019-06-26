@@ -32,7 +32,7 @@ class MoviesTestModule(
     })
   }
 
-  private fun selectDataSourceConfig(config: MoviesConfig) : DataSourceConfig {
+  private fun selectDataSourceConfig(config: MoviesConfig): DataSourceConfig {
     return if (useVitess)
       config.data_source
     else
@@ -40,6 +40,7 @@ class MoviesTestModule(
   }
 
   data class MoviesConfig(
-      val data_source: DataSourceConfig,
-      val mysql_data_source: DataSourceConfig) : Config
+    val data_source: DataSourceConfig,
+    val mysql_data_source: DataSourceConfig
+  ) : Config
 }

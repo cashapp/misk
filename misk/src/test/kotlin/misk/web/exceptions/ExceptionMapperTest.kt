@@ -78,7 +78,7 @@ internal class ExceptionMapperTest {
   class ThrowsUnmappedError @Inject constructor() : WebAction {
     @Get("/throws/unmapped-error")
     @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
-    fun throwsUnmappedException() : String {
+    fun throwsUnmappedException(): String {
       throw AssertionError("this was bad")
     }
   }

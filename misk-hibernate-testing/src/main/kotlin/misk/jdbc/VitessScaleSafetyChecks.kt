@@ -658,7 +658,7 @@ class VitessScaleSafetyChecks(
 
     private val EMPTY_LINE = "\n\n".encodeUtf8()
 
-    internal fun parseQueryPlans(moshi : Moshi, data: BufferedSource): Sequence<QueryPlan> {
+    internal fun parseQueryPlans(moshi: Moshi, data: BufferedSource): Sequence<QueryPlan> {
       // Read (and discard) the "Length" line
       data.readUtf8Line()
 

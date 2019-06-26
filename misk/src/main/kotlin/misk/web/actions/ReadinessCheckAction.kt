@@ -16,7 +16,7 @@ private val logger = getLogger<ReadinessCheckAction>()
 
 @Singleton
 class ReadinessCheckAction @Inject internal constructor(
-  private val serviceManagerProvider : Provider<ServiceManager>,
+  private val serviceManagerProvider: Provider<ServiceManager>,
   @JvmSuppressWildcards private val healthChecks: List<HealthCheck>
 ) : WebAction {
 

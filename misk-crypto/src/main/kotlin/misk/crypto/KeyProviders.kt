@@ -20,9 +20,7 @@ import com.google.crypto.tink.aead.KmsEnvelopeAead
 import com.google.crypto.tink.daead.DeterministicAeadFactory
 import com.google.inject.Inject
 import com.google.inject.Provider
-import misk.environment.Environment
 import misk.logging.getLogger
-import java.security.GeneralSecurityException
 
 val logger by lazy { getLogger<CryptoModule>() }
 
@@ -128,4 +126,3 @@ internal class DigitalSignatureVerifierProvider(
     return verifier
   }
 }
-

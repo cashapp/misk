@@ -14,8 +14,7 @@ class FakeFileLoaderTest {
   @MiskTestModule
   private val module = Modules.combine(TestingResourceLoaderModule(), FakeFilesModule())
 
-  @Inject private lateinit var loader : ResourceLoader
-
+  @Inject private lateinit var loader: ResourceLoader
 
   @Test fun loadFileFromMemory() {
     assertThat(loader.utf8("filesystem:/some/test/file")).contains("test data!")

@@ -13,7 +13,7 @@ class FakeClusterWeight : ClusterWeightProvider {
     return weight
   }
 
-  fun setClusterWeight(weight : Int) {
+  fun setClusterWeight(weight: Int) {
     this.weight = weight
   }
 }

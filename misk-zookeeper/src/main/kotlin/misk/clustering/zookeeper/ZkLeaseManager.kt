@@ -32,7 +32,7 @@ internal class ZkLeaseManager @Inject internal constructor(
   @ForZkLease private val taskQueue: RepeatedTaskQueue,
   internal val cluster: Cluster,
   @ForZkLease curator: CuratorFramework,
-  private val clusterWeight : ClusterWeightProvider
+  private val clusterWeight: ClusterWeightProvider
 ) : AbstractExecutionThreadService(), LeaseManager {
   internal val leaseNamespace = "$SERVICES_NODE/${appName.asZkNamespace}/leases"
   internal val client = lazy { curator.usingNamespace(leaseNamespace) }

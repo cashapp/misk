@@ -108,8 +108,8 @@ class ServiceGraphBuilderTest {
       addDependency(dependsOn = keyA, dependent = keyC)
       addDependency(dependsOn = unregistered, dependent = keyC) // Unregistered doesn't exist.
     }
-    assertThat(failure).hasMessage("Service C requires $unregistered but no such service was "
-        + "registered with the builder")
+    assertThat(failure).hasMessage("Service C requires $unregistered but no such service was " +
+        "registered with the builder")
   }
 
   @Test fun failuresPropagate() {

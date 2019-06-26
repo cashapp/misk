@@ -68,7 +68,6 @@ internal class SessionFactoryService(
         serviceRegistry: SessionFactoryServiceRegistry
       ) {
       }
-
     }
     val bootstrapRegistryBuilder = BootstrapServiceRegistryBuilder()
         .applyIntegrator(integrator)
@@ -100,7 +99,6 @@ internal class SessionFactoryService(
     // type before we call build, otherwise Id will be treated as a SerializableType instead.
     // See: Component#createIdentifierGenerator
     val metadataDraft = metadataDraftBuilder.build() as MetadataImplementor
-
 
     // Loop over all of the properties in all of the entities so we can set up UserTypes.
     val allPropertyTypes = mutableSetOf<KClass<*>>()

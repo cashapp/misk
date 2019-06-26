@@ -1,15 +1,11 @@
 package misk.clustering
 
-import com.google.common.hash.Funnel
 import com.google.common.hash.HashCode
 import com.google.common.hash.HashFunction
-import com.google.common.hash.Hasher
 import com.google.common.hash.Hashing
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import java.nio.ByteBuffer
-import java.nio.charset.Charset
 
 internal class ClusterHashRingTest {
   @Test fun singleNode() {
