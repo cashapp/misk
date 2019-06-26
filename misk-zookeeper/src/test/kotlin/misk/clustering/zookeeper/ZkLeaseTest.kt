@@ -35,7 +35,7 @@ internal class ZkLeaseTest {
   @Inject lateinit var cluster: FakeCluster
   @Inject lateinit var leaseManager: ZkLeaseManager
   @Inject @ForZkLease lateinit var curator: CuratorFramework
-  @Inject lateinit var clusterWeight : FakeClusterWeight
+  @Inject lateinit var clusterWeight: FakeClusterWeight
   lateinit var leaseNamespace: String
   lateinit var leasePath: String
 

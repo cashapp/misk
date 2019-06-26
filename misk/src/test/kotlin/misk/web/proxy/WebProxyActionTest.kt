@@ -13,7 +13,6 @@ import misk.web.jetty.JettyService
 import misk.web.mediatype.MediaTypes
 import misk.web.mediatype.asMediaType
 import misk.web.readUtf8
-import misk.web.resources.StaticResourceAction
 import misk.web.toMisk
 import okhttp3.MediaType
 import okhttp3.RequestBody

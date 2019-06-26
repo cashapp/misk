@@ -40,7 +40,7 @@ internal class ClientInvocationHandler(
   okHttpTemplate: OkHttpClient,
   networkInterceptorFactories: Provider<List<ClientNetworkInterceptor.Factory>>,
   applicationInterceptorFactories: Provider<List<ClientApplicationInterceptor.Factory>>,
-  eventListenerFactory : EventListener.Factory?,
+  eventListenerFactory: EventListener.Factory?,
   tracer: Tracer?,
   moshi: Moshi
 ) : InvocationHandler {

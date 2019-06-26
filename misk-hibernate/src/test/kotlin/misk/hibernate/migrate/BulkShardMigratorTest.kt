@@ -38,7 +38,7 @@ class BulkShardMigratorTest {
   @Inject lateinit var queryFactory: Query.Factory
 
   @BeforeEach fun setup() {
-    val movieShards = transacter.shards().filter{ it.keyspace.name.startsWith("movie") }
+    val movieShards = transacter.shards().filter { it.keyspace.name.startsWith("movie") }
     assertThat(movieShards).hasSize(2)
   }
 
@@ -300,7 +300,7 @@ class BulkShardMigratorTest {
 
   private fun assertRowCount(movieId: Id<DbMovie>, vararg names: String): IntegerAssert {
     return IntegerAssert(
-        transacter.transaction {session ->
+        transacter.transaction { session ->
           queryFactory.newQuery(CharacterQuery::class)
               .names(names.asList())
               .movieId(movieId)

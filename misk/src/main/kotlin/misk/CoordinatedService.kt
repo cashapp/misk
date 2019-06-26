@@ -8,10 +8,10 @@ import com.google.common.util.concurrent.Service.State
 import javax.inject.Provider
 
 internal class CoordinatedService(
-    private val serviceProvider : Provider<out Service>
+  private val serviceProvider: Provider<out Service>
 ) : AbstractService() {
 
-  val service : Service by lazy {
+  val service: Service by lazy {
     serviceProvider.get()
   }
 
@@ -196,7 +196,6 @@ internal class CoordinatedService(
     }
   }
 
-
   companion object {
     /**
      * CycleValidity provides states used to track dependency graph traversal and cycle detection.
@@ -214,6 +213,5 @@ internal class CoordinatedService(
     ) {
       check(state() == State.NEW) { message }
     }
-
   }
 }

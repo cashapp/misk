@@ -53,7 +53,6 @@ import org.eclipse.jetty.util.thread.QueuedThreadPool
 import javax.inject.Inject
 import javax.inject.Singleton
 import javax.servlet.http.HttpServletRequest
-import java.security.Provider as SecurityProvider
 
 class MiskWebModule(private val config: WebConfig) : KAbstractModule() {
   override fun configure() {
@@ -149,7 +148,7 @@ class MiskWebModule(private val config: WebConfig) : KAbstractModule() {
 
   class MiskCallerProvider @Inject constructor(
     private val authenticators: List<MiskCallerAuthenticator>
-  ): ActionScopedProvider<MiskCaller?> {
+  ) : ActionScopedProvider<MiskCaller?> {
     override fun get(): MiskCaller? {
       return authenticators.mapNotNull {
         it.getAuthenticatedCaller()

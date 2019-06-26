@@ -116,14 +116,14 @@ internal class SchemaMigratorTest {
     val mainSource = config.data_source.migrations_resources!![0]
     val librarySource = config.data_source.migrations_resources!![1]
 
-    resourceLoader.put("${mainSource}/v1002__movies.sql", """
+    resourceLoader.put("$mainSource/v1002__movies.sql", """
         |CREATE TABLE table_2 (name varchar(255))
         |""".trimMargin())
-    resourceLoader.put("${mainSource}/v1001__movies.sql", """
+    resourceLoader.put("$mainSource/v1001__movies.sql", """
         |CREATE TABLE table_1 (name varchar(255))
         |""".trimMargin())
 
-    resourceLoader.put("${librarySource}/name/space/v1001__actors.sql", """
+    resourceLoader.put("$librarySource/name/space/v1001__actors.sql", """
         |CREATE TABLE library_table (name varchar(255))
         |""".trimMargin())
 
@@ -166,13 +166,13 @@ internal class SchemaMigratorTest {
     schemaMigrator.requireAll()
 
     // When new migrations are added they can be applied.
-    resourceLoader.put("${mainSource}/v1003__movies.sql", """
+    resourceLoader.put("$mainSource/v1003__movies.sql", """
         |CREATE TABLE table_3 (name varchar(255))
         |""".trimMargin())
-    resourceLoader.put("${mainSource}/v1004__movies.sql", """
+    resourceLoader.put("$mainSource/v1004__movies.sql", """
         |CREATE TABLE table_4 (name varchar(255))
         |""".trimMargin())
-    resourceLoader.put("${mainSource}/namespace/v1001__props.sql", """
+    resourceLoader.put("$mainSource/namespace/v1001__props.sql", """
         |CREATE TABLE merged_library_table (name varchar(255))
         |""".trimMargin())
     schemaMigrator.applyAll("SchemaMigratorTest", sortedSetOf(

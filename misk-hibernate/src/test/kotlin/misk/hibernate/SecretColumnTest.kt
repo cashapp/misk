@@ -238,11 +238,11 @@ class SecretColumnTest {
     var length: Int = 0
 
     @Column(nullable = true)
-    @SecretColumn(keyName="albumKey", indexable=false)
+    @SecretColumn(keyName = "albumKey", indexable = false)
     var album: ByteArray?
 
     @Column(nullable = true)
-    @SecretColumn(keyName="reviewerKey")
+    @SecretColumn(keyName = "reviewerKey")
     var reviewer: ByteArray?
 
     constructor(title: String, length: Int, album: ByteArray? = null, reviewer: ByteArray? = null) {

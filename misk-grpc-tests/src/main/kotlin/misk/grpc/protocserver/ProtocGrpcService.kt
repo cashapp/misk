@@ -17,7 +17,7 @@ import javax.inject.Singleton
 class ProtocGrpcService @Inject constructor(
   private val services: List<BindableService>,
   private val resourceLoader: ResourceLoader
-): AbstractIdleService() {
+) : AbstractIdleService() {
 
   lateinit var server: Server
 

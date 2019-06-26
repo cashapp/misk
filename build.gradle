@@ -15,12 +15,11 @@ buildscript {
     classpath dep.junitGradlePlugin
     classpath dep.shadowJarPlugin
     classpath dep.mavenPublishGradlePlugin
+    classpath dep.spotlessPlugin
     classpath dep.wirePlugin
   }
 }
 
-apply plugin: 'kotlin'
-apply plugin: 'com.vanniktech.maven.publish'
 apply plugin: 'com.gradle.build-scan'
 
 buildScan {
@@ -43,6 +42,7 @@ tasks.register("testShardHibernate") {
 subprojects {
   apply plugin: 'java'
   apply plugin: 'kotlin'
+  apply plugin: 'com.diffplug.gradle.spotless'
 
   buildscript {
     repositories {
@@ -74,6 +74,13 @@ subprojects {
     main.java.srcDirs += 'src/main/kotlin/'
     test.java.srcDirs += 'src/test/kotlin/'
   }
+  spotless {
+    kotlin {
+      target "**/*.kt"
+      ktlint(dep.ktlintVersion).userData(['indent_size': '2', 'continuation_indent_size' : '2'])
+    }
+  }
+  compileKotlin.dependsOn 'spotlessKotlinApply'
 
   dependencies {
     testImplementation dep.junitApi

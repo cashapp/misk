@@ -70,7 +70,6 @@ internal class ZkClientTest {
 
     val data2 = curatorFramework2.data.forPath("/services/my-app/data/test-node-2")
     assertThat(String(data2)).isEqualTo("test-data")
-
   }
 
   @Qualifier
@@ -80,6 +79,4 @@ internal class ZkClientTest {
   @Qualifier
   @Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION, AnnotationTarget.VALUE_PARAMETER)
   annotation class Zk2
-
-
 }

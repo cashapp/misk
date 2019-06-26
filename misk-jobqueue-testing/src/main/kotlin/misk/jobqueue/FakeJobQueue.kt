@@ -39,7 +39,7 @@ class FakeJobQueue @Inject constructor(
     jobQueues.getOrPut(queueName, ::ConcurrentLinkedDeque).add(job)
   }
 
-  fun peekJobs(queueName: QueueName) : List<Job> {
+  fun peekJobs(queueName: QueueName): List<Job> {
     val jobs = jobQueues[queueName]
     return jobs?.toList() ?: listOf()
   }

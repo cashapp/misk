@@ -109,7 +109,7 @@ data class DataSourceConfig(
           require(!config.trust_certificate_key_store_password.isNullOrBlank()) {
             "must provide a trust_certificate_key_store_password"
           }
-          queryParams += "&trustCertificateKeyStoreUrl=${trustStoreUrl}"
+          queryParams += "&trustCertificateKeyStoreUrl=$trustStoreUrl"
           queryParams += "&trustCertificateKeyStorePassword=${config.trust_certificate_key_store_password}"
           queryParams += "&verifyServerCertificate=true"
           queryParams += "&useSSL=true"
@@ -138,7 +138,7 @@ data class DataSourceConfig(
             "must provide a trust_certificate_key_store_password if trust_certificate_key_store_url" +
                 " or trust_certificate_key_store_path is set"
           }
-          queryParams += "${if (queryParams.isEmpty()) "?" else "&"}trustStore=${trustStorePath}"
+          queryParams += "${if (queryParams.isEmpty()) "?" else "&"}trustStore=$trustStorePath"
           queryParams += "&trustStorePassword=${config.trust_certificate_key_store_password}"
           useSSL = true
         }
@@ -147,7 +147,7 @@ data class DataSourceConfig(
             "must provide a client_certificate_key_store_password if client_certificate_key_store_url" +
                 " or client_certificate_key_store_path is set"
           }
-          queryParams += "${if (queryParams.isEmpty()) "?" else "&"}keyStore=${certStorePath}"
+          queryParams += "${if (queryParams.isEmpty()) "?" else "&"}keyStore=$certStorePath"
           queryParams += "&keyStorePassword=${config.client_certificate_key_store_password}"
           useSSL = true
         }

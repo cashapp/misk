@@ -204,8 +204,8 @@ internal class ZkLease(
       log.warn { e.message }
       null
     }
-    return desiredLeaseOwner?.name == clusterSnapshot.self.name
-        && clusterWeight.get() > 0
+    return desiredLeaseOwner?.name == clusterSnapshot.self.name &&
+        clusterWeight.get() > 0
   }
 
   /** @return true if the lease node exists in zk */

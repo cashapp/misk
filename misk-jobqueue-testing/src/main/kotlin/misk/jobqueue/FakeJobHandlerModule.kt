@@ -4,9 +4,9 @@ import misk.inject.KAbstractModule
 import kotlin.reflect.KClass
 
 class FakeJobHandlerModule<T : JobHandler> private constructor(
-    private val queueName: QueueName,
-    private val handler: KClass<T>
-  ) : KAbstractModule() {
+  private val queueName: QueueName,
+  private val handler: KClass<T>
+) : KAbstractModule() {
 
   override fun configure() {
     newMapBinder<QueueName, JobHandler>().addBinding(queueName).to(handler.java)

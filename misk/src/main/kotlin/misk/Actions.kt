@@ -30,7 +30,7 @@ fun KFunction<*>.asAction(
       when (dispatchMechanism) {
         DispatchMechanism.GRPC -> {
           require(findAnnotation<RequestContentType>() == null) {
-            "@Grpc cannot be used with @RequestContentType on ${this}"
+            "@Grpc cannot be used with @RequestContentType on $this"
           }
           listOf(MediaRange.parse(MediaTypes.APPLICATION_GRPC))
         }
@@ -43,7 +43,7 @@ fun KFunction<*>.asAction(
       when (dispatchMechanism) {
         DispatchMechanism.GRPC -> {
           require(findAnnotation<ResponseContentType>() == null) {
-            "@Grpc cannot be used with @ResponseContentType on ${this}"
+            "@Grpc cannot be used with @ResponseContentType on $this"
           }
           MediaTypes.APPLICATION_GRPC_MEDIA_TYPE
         }
@@ -62,4 +62,3 @@ fun KFunction<*>.asAction(
       dispatchMechanism = dispatchMechanism
   )
 }
-

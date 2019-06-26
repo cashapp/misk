@@ -26,7 +26,6 @@ import org.eclipse.jetty.util.thread.QueuedThreadPool
 import java.net.InetAddress
 import javax.inject.Inject
 import javax.inject.Singleton
-import java.security.Provider as SecurityProvider
 
 private val logger = getLogger<JettyService>()
 

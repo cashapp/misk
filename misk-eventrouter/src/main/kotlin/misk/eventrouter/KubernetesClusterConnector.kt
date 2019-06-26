@@ -63,7 +63,7 @@ internal class KubernetesClusterConnector @Inject constructor() : ClusterConnect
             null, // timeoutSeconds
             true, // watch
             null, // progressListener
-            null  // progressRequestListener
+            null // progressRequestListener
         ),
         object : TypeToken<Watch.Response<V1Pod>>() {}.type)
 

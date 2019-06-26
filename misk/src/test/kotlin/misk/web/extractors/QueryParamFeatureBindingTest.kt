@@ -190,7 +190,8 @@ internal class QueryParamFeatureBindingTest {
     }
 
     fun unsupportedTest(
-      @QueryParam hashMap: Map<String, String>) {
+      @QueryParam hashMap: Map<String, String>
+    ) {
     }
 
     companion object {

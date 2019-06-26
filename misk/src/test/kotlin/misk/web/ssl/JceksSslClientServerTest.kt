@@ -83,7 +83,7 @@ internal class JceksSslClientServerTest {
 
   class HelloAction @Inject constructor(
     @ClientCertSubject private val clientCertSubjectDN: ActionScoped<X500Name?>
-  ): WebAction {
+  ) : WebAction {
     @Post("/hello")
     @RequestContentType(MediaTypes.APPLICATION_JSON)
     @ResponseContentType(MediaTypes.APPLICATION_JSON)

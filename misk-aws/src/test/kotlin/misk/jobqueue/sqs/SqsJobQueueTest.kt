@@ -30,7 +30,7 @@ internal class SqsJobQueueTest {
   @Inject private lateinit var queue: JobQueue
   @Inject private lateinit var consumer: JobConsumer
   @Inject private lateinit var sqsMetrics: SqsMetrics
-  @Inject @ForSqsConsumer lateinit var taskQueue : RepeatedTaskQueue
+  @Inject @ForSqsConsumer lateinit var taskQueue: RepeatedTaskQueue
 
   private lateinit var queueName: QueueName
   private lateinit var deadLetterQueueName: QueueName
