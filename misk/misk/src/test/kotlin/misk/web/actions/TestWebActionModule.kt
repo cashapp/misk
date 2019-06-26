@@ -33,7 +33,8 @@ class TestWebActionModule : KAbstractModule() {
     multibind<AccessAnnotationEntry>().toInstance(
         AccessAnnotationEntry<CustomServiceAccess>(services = listOf("payments")))
     multibind<AccessAnnotationEntry>().toInstance(
-        AccessAnnotationEntry<CustomRoleAccess>(roles = listOf("admin")))
+        AccessAnnotationEntry<CustomCapabilityAccess>(roles = listOf("adminRole"),
+            capabilities = listOf("admin")))
     multibind<MiskCallerAuthenticator>().to<FakeCallerAuthenticator>()
   }
 
@@ -55,15 +56,15 @@ class TestWebActionModule : KAbstractModule() {
     @Inject
     lateinit var scopedCaller: ActionScoped<MiskCaller?>
 
-    @Get("/custom_role_access")
+    @Get("/custom_capability_access")
     @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
-    @CustomRoleAccess
-    fun get() = "${scopedCaller.get()} authorized as custom role".toResponseBody()
+    @CustomCapabilityAccess
+    fun get() = "${scopedCaller.get()} authorized with custom capability".toResponseBody()
   }
 
   @Retention(AnnotationRetention.RUNTIME)
   @Target(AnnotationTarget.FUNCTION)
-  annotation class CustomRoleAccess
+  annotation class CustomCapabilityAccess
 
   class RequestTypeAction @Inject constructor() : WebAction {
     @Post("/request_type")

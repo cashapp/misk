@@ -17,11 +17,14 @@ import misk.jdbc.PingDatabaseService
 import misk.metrics.Metrics
 import misk.resources.ResourceLoader
 import misk.vitess.StartVitessService
+import misk.web.exceptions.ExceptionMapperModule
 import org.hibernate.SessionFactory
 import org.hibernate.event.spi.EventType
+import org.hibernate.exception.ConstraintViolationException
 import java.time.Clock
 import javax.inject.Inject
 import javax.inject.Provider
+import javax.persistence.OptimisticLockException
 import javax.sql.DataSource
 import kotlin.reflect.KClass
 
@@ -188,5 +191,9 @@ class HibernateModule(
         })
         .asSingleton()
     multibind<HealthCheck>().to(healthCheckKey)
+
+    install(ExceptionMapperModule.create<RetryTransactionException, RetryTransactionExceptionMapper>())
+    install(ExceptionMapperModule.create<ConstraintViolationException, ConstraintViolationExceptionMapper>())
+    install(ExceptionMapperModule.create<OptimisticLockException, OptimisticLockExceptionMapper>())
   }
 }
