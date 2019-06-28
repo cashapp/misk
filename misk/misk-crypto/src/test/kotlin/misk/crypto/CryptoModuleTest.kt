@@ -23,6 +23,7 @@ import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.Ignore
 import org.junit.Test
 import java.io.ByteArrayOutputStream
+import java.io.PrintStream
 import java.security.GeneralSecurityException
 
 @MiskTest
@@ -40,14 +41,6 @@ class CryptoModuleTest {
     val injector = getInjector(listOf(Pair("test", keyHandle)))
     val testKey = injector.getInstance(AeadKeyManager::class.java)["test"]
     assertThat(testKey).isNotNull()
-  }
-
-  @Test
-  fun testAeadIsEnvelopeKey() {
-    val keyHandle = KeysetHandle.generateNew(AeadKeyTemplates.AES256_GCM)
-    val injector = getInjector(listOf(Pair("test", keyHandle)))
-    val testKey = injector.getInstance(AeadKeyManager::class.java)["test"]
-    assertThat(testKey).isInstanceOf(KmsEnvelopeAead::class.java)
   }
 
   @Test
@@ -69,7 +62,7 @@ class CryptoModuleTest {
     val data = "sign this".toByteArray()
     val signature = signer.sign(data)
     assertThatCode { verifier.verify(signature, data) }
-        .doesNotThrowAnyException()
+            .doesNotThrowAnyException()
   }
 
   @Test
@@ -86,7 +79,7 @@ class CryptoModuleTest {
     val key1 = KeysetHandle.generateNew(AeadKeyTemplates.AES256_CTR_HMAC_SHA256)
     val key2 = KeysetHandle.generateNew(AeadKeyTemplates.AES256_CTR_HMAC_SHA256)
     assertThatThrownBy { getInjector(listOf(Pair("aead", key1), Pair("aead", key2))) }
-        .isInstanceOf(CreationException::class.java)
+            .isInstanceOf(CreationException::class.java)
   }
 
   @Test
@@ -98,7 +91,8 @@ class CryptoModuleTest {
             .isInstanceOf(KeyNotFoundException::class.java)
   }
 
-  @Ignore @Test // Currently disabled since the env check is as well
+  @Ignore
+  @Test // Currently disabled since the env check is as well
   fun testRaisesInWrongEnv() {
 
     val plainKey = Key("name", KeyType.AEAD, MiskConfig.RealSecret(""))
@@ -114,6 +108,37 @@ class CryptoModuleTest {
       // kr.env = Environment.PRODUCTION
       kr.readKey(plainKey, null, client)
     }.isInstanceOf(GeneralSecurityException::class.java)
+  }
+
+  @Test
+  fun testLogsWarningWithoutEnvelopeKey() {
+    val kh = KeysetHandle.generateNew(AeadKeyTemplates.AES256_CTR_HMAC_SHA256)
+    val encryptedKey = generateObsoleteEncryptedKey(kh)
+    val key = Key("name", KeyType.AEAD, encryptedKey)
+    val kr = KeyReader()
+    val client = FakeKmsClient()
+    val (out, _) = captureOutput {
+      kr.readKey(key, "aws-kms://some-uri", client)
+    }
+    assertThat(out).contains("WARN")
+    assertThat(out).contains("using obsolete key format")
+  }
+
+  // Run a block, capturing stdout and stderr; return as strings
+  private fun captureOutput(f: () -> Any?): Pair<String, String> {
+    val outContent = ByteArrayOutputStream()
+    val errContent = ByteArrayOutputStream()
+    val originalOut = System.out
+    val originalErr = System.err
+    System.setOut(PrintStream(outContent))
+    System.setErr(PrintStream(errContent))
+    try {
+      f()
+    } finally {
+      System.setOut(originalOut)
+      System.setErr(originalErr)
+    }
+    return Pair(outContent.toString(), errContent.toString())
   }
 
   private fun getInjector(keyMap: List<Pair<String, KeysetHandle>>): Injector {
@@ -133,6 +158,17 @@ class CryptoModuleTest {
   }
 
   private fun generateEncryptedKey(keyHandle: KeysetHandle): Secret<String> {
+    val masterKey = FakeMasterEncryptionKey()
+    val keyOutputStream = ByteArrayOutputStream()
+    val kek = KmsEnvelopeAead(KeyReader.KEK_TEMPLATE, masterKey)
+    keyHandle.write(JsonKeysetWriter.withOutputStream(keyOutputStream), kek)
+    return object : Secret<String> {
+      override val value: String
+        get() = keyOutputStream.toString()
+    }
+  }
+
+  private fun generateObsoleteEncryptedKey(keyHandle: KeysetHandle): Secret<String> {
     val masterKey = FakeMasterEncryptionKey()
     val keyOutputStream = ByteArrayOutputStream()
     keyHandle.write(JsonKeysetWriter.withOutputStream(keyOutputStream), masterKey)

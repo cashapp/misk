@@ -13,7 +13,6 @@ import com.google.crypto.tink.signature.PublicKeySignFactory
 import com.google.crypto.tink.signature.PublicKeyVerifyFactory
 import com.google.crypto.tink.JsonKeysetReader
 import com.google.crypto.tink.KeysetHandle
-import com.google.crypto.tink.KeysetReader
 import com.google.crypto.tink.aead.AeadFactory
 import com.google.crypto.tink.aead.AeadKeyTemplates
 import com.google.crypto.tink.aead.KmsEnvelopeAead
@@ -21,29 +20,41 @@ import com.google.crypto.tink.daead.DeterministicAeadFactory
 import com.google.inject.Inject
 import com.google.inject.Provider
 import misk.logging.getLogger
+import java.security.GeneralSecurityException
 
 val logger by lazy { getLogger<CryptoModule>() }
 
 open class KeyReader {
-  private fun readCleartextKey(reader: KeysetReader): KeysetHandle {
+  companion object {
+    val KEK_TEMPLATE : KeyTemplate = AeadKeyTemplates.AES256_GCM
+  }
+
+  private fun readCleartextKey(key: Key): KeysetHandle {
     // TODO: Implement a clean check to throw if we are running in prod or staging. Checking for
     // an injected Environment will fail if a test explicitly creates a staging/prod environment.
     logger.warn { "reading a plaintext key!" }
+    val reader = JsonKeysetReader.withString(key.encrypted_key.value)
     return CleartextKeysetHandle.read(reader)
   }
 
-  private fun readEncryptedKey(reader: KeysetReader, kmsUri: String, client: KmsClient): KeysetHandle {
+  private fun readEncryptedKey(key: Key, kmsUri: String, client: KmsClient): KeysetHandle {
     val masterKey = client.getAead(kmsUri)
-    return KeysetHandle.read(reader, masterKey)
+    return try {
+      val kek = KmsEnvelopeAead(KEK_TEMPLATE, masterKey)
+      val reader = JsonKeysetReader.withString(key.encrypted_key.value)
+      KeysetHandle.read(reader, kek)
+    } catch (ex: GeneralSecurityException) {
+      logger.warn { "using obsolete key format, rotate your keys when possible" }
+      val reader = JsonKeysetReader.withString(key.encrypted_key.value)
+      KeysetHandle.read(reader, masterKey)
+    }
   }
 
   fun readKey(key: Key, kmsUri: String?, kmsClient: KmsClient): KeysetHandle {
-    val keyJson = JsonKeysetReader.withString(key.encrypted_key.value)
-
     return if (kmsUri != null) {
-      readEncryptedKey(keyJson, kmsUri, kmsClient)
+      readEncryptedKey(key, kmsUri, kmsClient)
     } else {
-      readCleartextKey(keyJson)
+      readCleartextKey(key)
     }
   }
 }
@@ -58,14 +69,9 @@ internal class AeadEnvelopeProvider(val key: Key, val kmsUri: String?) : Provide
 
   override fun get(): Aead {
     val keysetHandle = readKey(key, kmsUri, kmsClient)
-    val kek = AeadFactory.getPrimitive(keysetHandle)
-    val envelopeKey = KmsEnvelopeAead(DEK_TEMPLATE, kek)
+    val aeadKey = AeadFactory.getPrimitive(keysetHandle)
 
-    return envelopeKey.also { keyManager[key.key_name] = it }
-  }
-
-  companion object {
-    val DEK_TEMPLATE: KeyTemplate = AeadKeyTemplates.AES128_GCM
+    return aeadKey.also { keyManager[key.key_name] = it }
   }
 }
 
