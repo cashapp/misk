@@ -28,7 +28,7 @@ open class KeyReader {
     val KEK_TEMPLATE : KeyTemplate = AeadKeyTemplates.AES256_GCM
   }
 
-  val logger = getLogger<KeyReader>()
+  val logger by lazy { getLogger<KeyReader>() }
 
   private fun readCleartextKey(key: Key): KeysetHandle {
     // TODO: Implement a clean check to throw if we are running in prod or staging. Checking for

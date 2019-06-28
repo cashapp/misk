@@ -3,17 +3,13 @@ package misk.crypto
 import com.google.crypto.tink.JsonKeysetWriter
 import com.google.crypto.tink.KeysetHandle
 import com.google.crypto.tink.KmsClient
-import com.google.crypto.tink.aead.AeadConfig
 import com.google.crypto.tink.aead.AeadKeyTemplates
 import com.google.crypto.tink.aead.KmsEnvelopeAead
-import com.google.crypto.tink.mac.MacConfig
 import com.google.crypto.tink.mac.MacKeyTemplates
-import com.google.crypto.tink.signature.SignatureConfig
 import com.google.crypto.tink.signature.SignatureKeyTemplates
 import com.google.inject.CreationException
 import com.google.inject.Guice
 import com.google.inject.Injector
-import com.google.inject.Module
 import misk.config.MiskConfig
 import misk.config.Secret
 import misk.environment.Environment
