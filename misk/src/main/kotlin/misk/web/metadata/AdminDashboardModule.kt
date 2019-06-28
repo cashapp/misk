@@ -87,6 +87,6 @@ class AdminDashboardTestingModule(val environment: Environment) : KAbstractModul
     multibind<AccessAnnotationEntry>()
         // Set dummy values for access, these shouldn't matter,
         // as test environments should prefer to use the FakeCallerAuthenticator.
-        .toInstance(AccessAnnotationEntry<AdminDashboardAccess>(roles = listOf("admin_access")))
+        .toInstance(AccessAnnotationEntry<AdminDashboardAccess>(capabilities = listOf("admin_access")))
   }
 }

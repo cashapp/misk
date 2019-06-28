@@ -26,14 +26,14 @@ class AccessInterceptor private constructor(
   }
 
   private fun isAllowed(caller: MiskCaller): Boolean {
-    // Allow if we don't have any requirements on service or role
+    // Allow if we don't have any requirements on service or capability
     if (allowedServices.isEmpty() && allowedCapabilities.isEmpty()) return true
 
     // Allow if the caller has provided an allowed service
     if (caller.service != null && allowedServices.contains(caller.service)) return true
 
-    // Allow if the caller has provided an allowed role
-    return caller.allCapabilities.any { allowedCapabilities.contains(it) }
+    // Allow if the caller has provided an allowed capability
+    return caller.capabilities.any { allowedCapabilities.contains(it) }
   }
 
   internal class Factory @Inject internal constructor(
@@ -62,21 +62,21 @@ class AccessInterceptor private constructor(
         // This action is explicitly marked as unauthenticated.
         actionEntries.size == 1 && action.hasAnnotation<Unauthenticated>() -> return null
         // Successfully return @Authenticated or custom Access Annotation
-        actionEntries.size == 1 -> return AccessInterceptor(actionEntries[0].services.toSet(), actionEntries[0].allCapabilities, caller)
+        actionEntries.size == 1 -> return AccessInterceptor(actionEntries[0].services.toSet(), actionEntries[0].capabilities.toSet(), caller)
         // Not exactly one access annotation. Fail with a useful message.
         else -> {
           val requiredAnnotations = mutableListOf<KClass<out Annotation>>()
           requiredAnnotations += Authenticated::class
           requiredAnnotations += Unauthenticated::class
           requiredAnnotations += registeredEntries.map { it.annotation }
-          throw IllegalStateException("""You need to register an AccessAnnotationEntry to tell the authorization system which roles and services are allowed to access ${action.name}::${action.function.name}(). You can either:
+          throw IllegalStateException("""You need to register an AccessAnnotationEntry to tell the authorization system which capabilities and services are allowed to access ${action.name}::${action.function.name}(). You can either:
           |
           |A) Add an AccessAnnotationEntry multibinding in a module for one of the annotations on ${action.name}::${action.function.name}():
           |   ${action.function.annotations}
           |
           |   AccessAnnotationEntry Example Multibinding:
           |   multibind<AccessAnnotationEntry>().toInstance(
-          |     AccessAnnotationEntry<${action.function.annotations.filter { it.annotationClass.simpleName.toString().endsWith("Access") }.firstOrNull()?.annotationClass?.simpleName ?: "{Access Annotation Class Simple Name}"}>(roles = ???, services = ???))
+          |     AccessAnnotationEntry<${action.function.annotations.filter { it.annotationClass.simpleName.toString().endsWith("Access") }.firstOrNull()?.annotationClass?.simpleName ?: "{Access Annotation Class Simple Name}"}>(capabilities = ???, services = ???))
           |
           |B) Add an AccessAnnotation to ${action.name}::${action.function.name}() that already has a matching AccessAnnotationEntry such as:
           |   $requiredAnnotations
@@ -88,7 +88,7 @@ class AccessInterceptor private constructor(
     }
 
     private fun Authenticated.toAccessAnnotationEntry() = AccessAnnotationEntry(
-        Authenticated::class, services.toList(), roles.toList(), capabilities.toList())
+        Authenticated::class, services.toList(), capabilities.toList())
 
     private fun Unauthenticated.toAccessAnnotationEntry() = AccessAnnotationEntry(
         Unauthenticated::class, listOf(), listOf())
