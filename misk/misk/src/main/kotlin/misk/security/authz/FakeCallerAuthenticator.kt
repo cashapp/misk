@@ -29,7 +29,7 @@ class FakeCallerAuthenticator @Inject constructor(
       !(user == null && service == null) -> MiskCaller(service = service, user = user,
           capabilities = capabilities ?: setOf())
       development != null -> MiskCaller(development.service, development.user,
-          capabilities = development.allCapabilities)
+          capabilities = development.capabilities)
       else -> null
     }
   }

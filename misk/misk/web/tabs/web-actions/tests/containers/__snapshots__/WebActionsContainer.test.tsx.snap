@@ -51,9 +51,9 @@ exports[`WebActionsContainer WebActionsContainer can render with redux loading (
             All Metadata
           </option>
           <option
-            value="Allowed Roles"
+            value="Allowed Capabilities"
           >
-            Allowed Roles
+            Allowed Capabilities
           </option>
           <option
             value="Allowed Services"
