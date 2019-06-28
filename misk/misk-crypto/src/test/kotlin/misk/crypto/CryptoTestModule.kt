@@ -9,7 +9,6 @@ import com.google.crypto.tink.aead.AeadConfig
 import com.google.crypto.tink.daead.DeterministicAeadConfig
 import com.google.crypto.tink.mac.MacConfig
 import com.google.crypto.tink.signature.SignatureConfig
-import misk.logging.LogCollector
 
 /**
  * Test module that binds [FakeKmsClient] to be used as the [KmsClient]
