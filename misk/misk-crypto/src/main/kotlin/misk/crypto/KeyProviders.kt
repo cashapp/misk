@@ -25,36 +25,25 @@ import misk.logging.getLogger
 val logger by lazy { getLogger<CryptoModule>() }
 
 open class KeyReader {
-  companion object {
-    val KEK_TEMPLATE : KeyTemplate = AeadKeyTemplates.AES256_GCM
-  }
-
-  private fun readCleartextKey(key: Key): KeysetHandle {
+  private fun readCleartextKey(reader: KeysetReader): KeysetHandle {
     // TODO: Implement a clean check to throw if we are running in prod or staging. Checking for
     // an injected Environment will fail if a test explicitly creates a staging/prod environment.
     logger.warn { "reading a plaintext key!" }
-    val reader = JsonKeysetReader.withString(key.encrypted_key.value)
     return CleartextKeysetHandle.read(reader)
   }
 
-  private fun readEncryptedKey(key: Key, kmsUri: String, client: KmsClient): KeysetHandle {
+  private fun readEncryptedKey(reader: KeysetReader, kmsUri: String, client: KmsClient): KeysetHandle {
     val masterKey = client.getAead(kmsUri)
-    return try {
-      val kek = KmsEnvelopeAead(KEK_TEMPLATE, masterKey)
-      val reader = JsonKeysetReader.withString(key.encrypted_key.value)
-      KeysetHandle.read(reader, kek)
-    } catch (ex: GeneralSecurityException) {
-      logger.warn { "using obsolete key format, rotate your keys when possible" }
-      val reader = JsonKeysetReader.withString(key.encrypted_key.value)
-      KeysetHandle.read(reader, masterKey)
-    }
+    return KeysetHandle.read(reader, masterKey)
   }
 
   fun readKey(key: Key, kmsUri: String?, kmsClient: KmsClient): KeysetHandle {
+    val keyJson = JsonKeysetReader.withString(key.encrypted_key.value)
+
     return if (kmsUri != null) {
-      readEncryptedKey(key, kmsUri, kmsClient)
+      readEncryptedKey(keyJson, kmsUri, kmsClient)
     } else {
-      readCleartextKey(key)
+      readCleartextKey(keyJson)
     }
   }
 }
@@ -69,9 +58,14 @@ internal class AeadEnvelopeProvider(val key: Key, val kmsUri: String?) : Provide
 
   override fun get(): Aead {
     val keysetHandle = readKey(key, kmsUri, kmsClient)
-    val aeadKey = AeadFactory.getPrimitive(keysetHandle)
+    val kek = AeadFactory.getPrimitive(keysetHandle)
+    val envelopeKey = KmsEnvelopeAead(DEK_TEMPLATE, kek)
 
-    return aeadKey.also { keyManager[key.key_name] = it }
+    return envelopeKey.also { keyManager[key.key_name] = it }
+  }
+
+  companion object {
+    val DEK_TEMPLATE: KeyTemplate = AeadKeyTemplates.AES128_GCM
   }
 }
 
