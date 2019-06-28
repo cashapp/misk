@@ -62,7 +62,7 @@ class CryptoModuleTest {
     val data = "sign this".toByteArray()
     val signature = signer.sign(data)
     assertThatCode { verifier.verify(signature, data) }
-            .doesNotThrowAnyException()
+        .doesNotThrowAnyException()
   }
 
   @Test
@@ -79,7 +79,7 @@ class CryptoModuleTest {
     val key1 = KeysetHandle.generateNew(AeadKeyTemplates.AES256_CTR_HMAC_SHA256)
     val key2 = KeysetHandle.generateNew(AeadKeyTemplates.AES256_CTR_HMAC_SHA256)
     assertThatThrownBy { getInjector(listOf(Pair("aead", key1), Pair("aead", key2))) }
-            .isInstanceOf(CreationException::class.java)
+        .isInstanceOf(CreationException::class.java)
   }
 
   @Test
@@ -91,8 +91,7 @@ class CryptoModuleTest {
             .isInstanceOf(KeyNotFoundException::class.java)
   }
 
-  @Ignore
-  @Test // Currently disabled since the env check is as well
+  @Ignore @Test // Currently disabled since the env check is as well
   fun testRaisesInWrongEnv() {
 
     val plainKey = Key("name", KeyType.AEAD, MiskConfig.RealSecret(""))
