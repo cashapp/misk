@@ -22,12 +22,13 @@ import com.google.inject.Provider
 import misk.logging.getLogger
 import java.security.GeneralSecurityException
 
-val logger by lazy { getLogger<CryptoModule>() }
 
 open class KeyReader {
   companion object {
     val KEK_TEMPLATE : KeyTemplate = AeadKeyTemplates.AES256_GCM
   }
+
+  val logger = getLogger<KeyReader>()
 
   private fun readCleartextKey(key: Key): KeysetHandle {
     // TODO: Implement a clean check to throw if we are running in prod or staging. Checking for

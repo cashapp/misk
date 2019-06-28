@@ -2,6 +2,7 @@ package misk.crypto
 
 import com.google.crypto.tink.JsonKeysetWriter
 import com.google.crypto.tink.KeysetHandle
+import com.google.crypto.tink.KmsClient
 import com.google.crypto.tink.aead.AeadConfig
 import com.google.crypto.tink.aead.AeadKeyTemplates
 import com.google.crypto.tink.aead.KmsEnvelopeAead
@@ -12,10 +13,13 @@ import com.google.crypto.tink.signature.SignatureKeyTemplates
 import com.google.inject.CreationException
 import com.google.inject.Guice
 import com.google.inject.Injector
+import com.google.inject.Module
 import misk.config.MiskConfig
 import misk.config.Secret
 import misk.environment.Environment
 import misk.environment.EnvironmentModule
+import misk.logging.LogCollector
+import misk.logging.LogCollectorService
 import misk.testing.MiskTest
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatCode
@@ -23,17 +27,10 @@ import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.Ignore
 import org.junit.Test
 import java.io.ByteArrayOutputStream
-import java.io.PrintStream
 import java.security.GeneralSecurityException
 
-@MiskTest
+@MiskTest(startService = true)
 class CryptoModuleTest {
-
-  init {
-    AeadConfig.register()
-    MacConfig.register()
-    SignatureConfig.register()
-  }
 
   @Test
   fun testImportAeadKey() {
@@ -76,6 +73,7 @@ class CryptoModuleTest {
 
   @Test
   fun testDuplicateNames() {
+    getInjector(listOf()) // Call without args first to initialize primitives
     val key1 = KeysetHandle.generateNew(AeadKeyTemplates.AES256_CTR_HMAC_SHA256)
     val key2 = KeysetHandle.generateNew(AeadKeyTemplates.AES256_CTR_HMAC_SHA256)
     assertThatThrownBy { getInjector(listOf(Pair("aead", key1), Pair("aead", key2))) }
@@ -91,9 +89,28 @@ class CryptoModuleTest {
             .isInstanceOf(KeyNotFoundException::class.java)
   }
 
-  @Ignore @Test // Currently disabled since the env check is as well
-  fun testRaisesInWrongEnv() {
+  @Test
+  fun testLogsWarningWithoutEnvelopeKey() {
+    val injector = getInjector(listOf())
+    val lcs = injector.getInstance(LogCollectorService::class.java)
+    lcs.startAsync()
+    lcs.awaitRunning()
 
+    val lc = injector.getInstance(LogCollector::class.java)
+
+    val kh = KeysetHandle.generateNew(AeadKeyTemplates.AES256_CTR_HMAC_SHA256)
+    val encryptedKey = generateObsoleteEncryptedKey(kh)
+    val key = Key("name", KeyType.AEAD, encryptedKey)
+    val client = injector.getInstance(KmsClient::class.java) //FakeKmsClient()
+    val kr = KeyReader()
+    kr.readKey(key, "aws-kms://some-uri", client)
+    val out = lc.takeMessage()
+    assertThat(out).contains("using obsolete key format")
+  }
+
+  @Ignore
+  @Test // Currently disabled since the env check is as well
+  fun testRaisesInWrongEnv() {
     val plainKey = Key("name", KeyType.AEAD, MiskConfig.RealSecret(""))
     val kr = KeyReader()
     val client = FakeKmsClient()
@@ -107,37 +124,6 @@ class CryptoModuleTest {
       // kr.env = Environment.PRODUCTION
       kr.readKey(plainKey, null, client)
     }.isInstanceOf(GeneralSecurityException::class.java)
-  }
-
-  @Test
-  fun testLogsWarningWithoutEnvelopeKey() {
-    val kh = KeysetHandle.generateNew(AeadKeyTemplates.AES256_CTR_HMAC_SHA256)
-    val encryptedKey = generateObsoleteEncryptedKey(kh)
-    val key = Key("name", KeyType.AEAD, encryptedKey)
-    val kr = KeyReader()
-    val client = FakeKmsClient()
-    val (out, _) = captureOutput {
-      kr.readKey(key, "aws-kms://some-uri", client)
-    }
-    assertThat(out).contains("WARN")
-    assertThat(out).contains("using obsolete key format")
-  }
-
-  // Run a block, capturing stdout and stderr; return as strings
-  private fun captureOutput(f: () -> Any?): Pair<String, String> {
-    val outContent = ByteArrayOutputStream()
-    val errContent = ByteArrayOutputStream()
-    val originalOut = System.out
-    val originalErr = System.err
-    System.setOut(PrintStream(outContent))
-    System.setErr(PrintStream(errContent))
-    try {
-      f()
-    } finally {
-      System.setOut(originalOut)
-      System.setErr(originalErr)
-    }
-    return Pair(outContent.toString(), errContent.toString())
   }
 
   private fun getInjector(keyMap: List<Pair<String, KeysetHandle>>): Injector {
