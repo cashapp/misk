@@ -68,7 +68,7 @@ const WebActionCardContainer = (
               tag={`${props.tag}::Services`}
             />
             <MetadataCollapse
-              content={props.action.allowedRoles}
+              content={props.action.allowedCapabilities}
               countLabel={true}
               label={"Roles"}
               tag={`${props.tag}::Roles`}
