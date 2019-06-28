@@ -49,7 +49,6 @@ data class WebActionMetadata(
   val networkInterceptors: List<String>,
   val dispatchMechanism: DispatchMechanism,
   val allowedServices: Set<String>,
-  val allowedRoles: Set<String>,
   val allowedCapabilities: Set<String>
 )
 
@@ -87,7 +86,6 @@ internal fun WebActionMetadata(
       networkInterceptors = networkInterceptors.map { ClassNameFormatter.format(it::class) },
       dispatchMechanism = dispatchMechanism,
       allowedServices = allowedServices,
-      allowedRoles = allowedCapabilities,
       allowedCapabilities = allowedCapabilities
   )
 }

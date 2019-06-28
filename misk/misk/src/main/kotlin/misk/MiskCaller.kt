@@ -8,10 +8,6 @@ data class MiskCaller(
   /** Present if the caller is a human user, typically from an SSO proxy */
   val user: String? = null,
 
-  /** Set of roles to which the human user belongs, typically provided by the SSO infrastructure */
-  // TODO(rhall): Deprecate this https://github.com/cashapp/misk/issues/1078
-  val roles: Set<String> = setOf(),
-
   /** Set of capabilities given to a human user, typically provided by the SSO infrastructure */
   val capabilities: Set<String> = setOf()
 ) {
@@ -22,7 +18,4 @@ data class MiskCaller(
 
   /** The identity of the calling principal, regardless of whether they are a service or a user */
   val principal: String get() = service ?: user!!
-
-  /** A concat of roles and capabilities to aid in the transition from roles to capabilities */
-  val allCapabilities = roles + capabilities
 }

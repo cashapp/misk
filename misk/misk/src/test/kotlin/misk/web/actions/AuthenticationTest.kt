@@ -53,12 +53,6 @@ class AuthenticationTest {
         .isEqualTo("$caller authorized with custom capability")
   }
 
-  @Test fun customCapabilityAccess_usingRole() {
-    val caller = MiskCaller(user = "sandy", capabilities = setOf("adminRole"))
-    assertThat(executeRequest(path = "/custom_capability_access", user = "sandy", capabilities = "adminRole"))
-        .isEqualTo("$caller authorized with custom capability")
-  }
-
   /** Executes a request and returns the response body as a string. */
   private fun executeRequest(
     path: String = "/",

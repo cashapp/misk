@@ -94,7 +94,7 @@ export const simpleForm = {
 }
 
 export const nonTypedActionAPI: IWebActionAPI = {
-  allowedRoles: [] as string[],
+  allowedCapabilities: [] as string[],
   allowedServices: [] as string[],
   applicationInterceptors: [] as string[],
   dispatchMechanism: HTTPMethod.GET,

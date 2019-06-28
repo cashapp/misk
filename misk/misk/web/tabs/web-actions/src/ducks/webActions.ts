@@ -74,7 +74,7 @@ export interface IActionTypes {
 
 export interface IWebActionAPI {
   allowedServices: string[]
-  allowedRoles: string[]
+  allowedCapabilities: string[]
   applicationInterceptors: string[]
   dispatchMechanism: HTTPMethod
   function: string
@@ -92,7 +92,7 @@ export interface IWebActionAPI {
 
 export interface IWebActionInternal {
   allFields: string
-  allowedRoles: string[]
+  allowedCapabilities: string[]
   allowedServices: string[]
   applicationInterceptors: string[]
   authFunctionAnnotations: string[]
@@ -148,7 +148,7 @@ export const padId = (id: string) => padStart(id, 10, "0")
  */
 export const WebActionInternalLabel: { [key: string]: string } = {
   "All Metadata": "allFields",
-  "Allowed Roles": "allowedRoles",
+  "Allowed Capabilities": "allowedCapabilities",
   "Allowed Services": "allowedServices",
   "Application Interceptor": "applicationInterceptors",
   "Dispatch Mechanism": "dispatchMechanism",
@@ -863,9 +863,9 @@ export const processMetadata = (webActionMetadata: IWebActionAPI[]): any =>
         authFunctionAnnotations[0].includes("Unauthenticated")
           ? "All"
           : "None"
-      const allowedRoles =
-        action.allowedRoles && action.allowedRoles.length > 0
-          ? action.allowedRoles
+      const allowedCapabilities =
+        action.allowedCapabilities && action.allowedCapabilities.length > 0
+          ? action.allowedCapabilities
           : [emptyAllowedArrayValue]
 
       const allowedServices =
@@ -875,7 +875,7 @@ export const processMetadata = (webActionMetadata: IWebActionAPI[]): any =>
       return {
         ...action,
         allFields: JSON.stringify(action),
-        allowedRoles,
+        allowedCapabilities,
         allowedServices,
         authFunctionAnnotations,
         dispatchMechanism: [action.dispatchMechanism],
