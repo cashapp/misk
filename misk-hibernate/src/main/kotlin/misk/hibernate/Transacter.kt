@@ -50,6 +50,28 @@ fun Transacter.shards() = transaction { it.shards() }
 
 fun Transacter.shards(keyspace: Keyspace) = transaction { it.shards(keyspace) }
 
+
+/**
+ * Commits a transaction with operations defined in the [lambda] block.
+ *
+ * New objects must be persisted with an explicit call to [Session.save].
+ * Updates are performed implicitly by modifying objects returned from a query.
+ *
+ * For example if we were to save a new movie to a movie database, and update the revenue of an
+ * existing movie:
+ * ```
+ * transacter.transaction { session ->
+ *   // Saving a new entity to the database needs an explicit call.
+ *   val starWars = DbMovie(name = "Star Wars", year = "1977", revenue = 775_400_000)
+ *   session.save(starWars)
+ *
+ *   // Updating a movie from the database is done by modifying the object.
+ *   // Changes are saved implicitly.
+ *   val movie: DbMovie = queryFactory.newQuery<MovieQuery>().id(id).uniqueResult(session)!!
+ *   movie.revenue = 100_000_000
+ * }
+ *
+ */
 fun <T> Transacter.transaction(shard: Shard, lambda: (session: Session) -> T): T =
     transaction { it.target(shard) { lambda(it) } }
 
