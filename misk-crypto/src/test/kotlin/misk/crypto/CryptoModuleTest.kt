@@ -97,7 +97,7 @@ class CryptoModuleTest {
     val kh = KeysetHandle.generateNew(AeadKeyTemplates.AES256_CTR_HMAC_SHA256)
     val encryptedKey = generateObsoleteEncryptedKey(kh)
     val key = Key("name", KeyType.AEAD, encryptedKey)
-    val client = injector.getInstance(KmsClient::class.java) // FakeKmsClient()
+    val client = injector.getInstance(KmsClient::class.java) //FakeKmsClient()
     val kr = KeyReader()
     kr.readKey(key, "aws-kms://some-uri", client)
     val out = lc.takeMessage()
