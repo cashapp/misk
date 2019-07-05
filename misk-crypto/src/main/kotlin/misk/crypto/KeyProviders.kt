@@ -30,6 +30,8 @@ open class KeyReader {
 
   val logger by lazy { getLogger<KeyReader>() }
 
+  val obsoleteKeys: MutableMap<String, Boolean> = mutableMapOf()
+
   private fun readCleartextKey(key: Key): KeysetHandle {
     // TODO: Implement a clean check to throw if we are running in prod or staging. Checking for
     // an injected Environment will fail if a test explicitly creates a staging/prod environment.
@@ -47,9 +49,12 @@ open class KeyReader {
     } catch (ex: GeneralSecurityException) {
       logger.warn { "using obsolete key format, rotate your keys when possible" }
       val reader = JsonKeysetReader.withString(key.encrypted_key.value)
+      obsoleteKeys[key.encrypted_key.value] = true
       KeysetHandle.read(reader, masterKey)
     }
   }
+
+  fun wasKeyObsolete(key: Key): Boolean = obsoleteKeys.getOrElse(key.encrypted_key.value) { false }
 
   fun readKey(key: Key, kmsUri: String?, kmsClient: KmsClient): KeysetHandle {
     return if (kmsUri != null) {
@@ -70,9 +75,17 @@ internal class AeadEnvelopeProvider(val key: Key, val kmsUri: String?) : Provide
 
   override fun get(): Aead {
     val keysetHandle = readKey(key, kmsUri, kmsClient)
-    val aeadKey = AeadFactory.getPrimitive(keysetHandle)
+    var aeadKey = AeadFactory.getPrimitive(keysetHandle)
 
-    return aeadKey.also { keyManager[key.key_name] = it }
+    return aeadKey.let {
+      if (wasKeyObsolete(key))
+        KmsEnvelopeAead(DEK_TEMPLATE, aeadKey)
+      else
+        aeadKey
+    }.also { keyManager[key.key_name] = it }
+  }
+  companion object {
+    val DEK_TEMPLATE: KeyTemplate = AeadKeyTemplates.AES128_GCM
   }
 }
 
