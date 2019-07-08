@@ -26,6 +26,9 @@ class HttpClientFactory @Inject constructor(
         TimeUnit.MILLISECONDS) }
     config.writeTimeout?.let { builder.writeTimeout(it.toMillis(),
         TimeUnit.MILLISECONDS) }
+    config.pingInterval?.let {
+      builder.pingInterval(it)
+    }
     config.ssl?.let {
       val trustStore = sslLoader.loadTrustStore(it.trust_store)!!
       val trustManagers = sslContextFactory.loadTrustManagers(trustStore.keyStore)
