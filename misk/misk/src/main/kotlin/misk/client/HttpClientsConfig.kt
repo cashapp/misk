@@ -10,6 +10,7 @@ data class HttpClientsConfig(
   private val defaultWriteTimeout: Duration? = null,
   private val defaultReadTimeout: Duration? = null,
   private val ssl: HttpClientSSLConfig? = null,
+  private val defaultPingInterval: Duration? = null,
   private val endpoints: Map<String, HttpClientEndpointConfig> = mapOf()
 ) : Config {
   /** @return The [HttpClientEndpointConfig] for the given client, populated with defaults as needed */
@@ -24,6 +25,7 @@ data class HttpClientsConfig(
         connectTimeout = endpointConfig.connectTimeout ?: defaultConnectTimeout,
         writeTimeout = endpointConfig.writeTimeout ?: defaultWriteTimeout,
         readTimeout = endpointConfig.readTimeout ?: defaultReadTimeout,
+        pingInterval = endpointConfig.pingInterval ?: defaultPingInterval,
         ssl = endpointConfig.ssl ?: ssl
     )
   }
@@ -40,6 +42,7 @@ data class HttpClientEndpointConfig(
   val connectTimeout: Duration? = null,
   val writeTimeout: Duration? = null,
   val readTimeout: Duration? = null,
+  val pingInterval: Duration? = null,
   val ssl: HttpClientSSLConfig? = null
 )
 
