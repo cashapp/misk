@@ -13,6 +13,8 @@ import okhttp3.OkHttpClient
 import java.security.cert.X509Certificate
 import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
+import javax.net.ssl.HostnameVerifier
+import javax.net.ssl.SSLSession
 
 /**
  * Binds a [PeerClientFactory] that calls peers on the HTTPS port of this process's server,
@@ -81,13 +83,15 @@ class PeerClientFactory(
           )
 
           return httpClientFactory.create(config).newBuilder()
-              .hostnameVerifier { _, session ->
-                val ou =
-                    (session.peerCertificates.firstOrNull() as? X509Certificate)?.let { peerCert ->
-                      X500Name.parse(peerCert.subjectX500Principal.name).organizationalUnit
-                    }
-                appName == ou
-              }
+              .hostnameVerifier(object : HostnameVerifier {
+                override fun verify(hostname: String?, session: SSLSession?): Boolean {
+                  val ou =
+                      (session!!.peerCertificates.firstOrNull() as? X509Certificate)?.let { peerCert ->
+                        X500Name.parse(peerCert.subjectX500Principal.name).organizationalUnit
+                      }
+                  return appName == ou
+                }
+              })
               .build()
         }
       })

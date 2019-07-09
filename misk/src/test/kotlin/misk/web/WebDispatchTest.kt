@@ -11,6 +11,7 @@ import misk.web.mediatype.MediaTypes
 import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import okhttp3.RequestBody.Companion.toRequestBody
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import javax.inject.Inject
@@ -36,8 +37,7 @@ internal class WebDispatchTest {
     val requestContent = helloByeJsonAdapter.toJson(HelloBye("my friend"))
     val httpClient = OkHttpClient()
     val request = Request.Builder()
-        .post(okhttp3.RequestBody.create(MediaTypes.APPLICATION_JSON_MEDIA_TYPE,
-            requestContent))
+        .post(requestContent.toRequestBody(MediaTypes.APPLICATION_JSON_MEDIA_TYPE))
         .url(serverUrlBuilder().encodedPath("/hello").build())
         .build()
 

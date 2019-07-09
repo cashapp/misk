@@ -31,7 +31,9 @@ internal class QueryParamFeatureBinding private constructor(
     private val name: String
   ) {
     fun bind(subject: Subject) {
-      val values = subject.httpCall.url.queryParameterValues(name)
+      val values = subject.httpCall.url.queryParameterValues(name).map {
+        it ?: throw IllegalArgumentException()
+      }
       val value = parameterValue(values)
       subject.setParameter(parameter, value)
     }

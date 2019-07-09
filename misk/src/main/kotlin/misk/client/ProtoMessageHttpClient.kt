@@ -6,7 +6,7 @@ import misk.web.mediatype.MediaTypes
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import okhttp3.RequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
 
 /**
  * This helper class is for making HTTP requests to an endpoint that handles protobuf Message
@@ -25,7 +25,7 @@ class ProtoMessageHttpClient constructor(
     val request = Request.Builder()
         .url(httpUrl.newBuilder().encodedPath(path).build())
         .addHeader("Accept", MediaTypes.APPLICATION_JSON)
-        .post(RequestBody.create(MediaTypes.APPLICATION_JSON_MEDIA_TYPE, requestJson))
+        .post(requestJson.toRequestBody(MediaTypes.APPLICATION_JSON_MEDIA_TYPE))
         .build()
     val response = okHttp.newCall(request).execute()
     if (response.code != 200) {

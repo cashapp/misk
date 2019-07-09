@@ -15,6 +15,7 @@ import misk.web.jetty.JettyService
 import misk.web.mediatype.MediaTypes
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import okhttp3.RequestBody.Companion.toRequestBody
 import okio.ByteString
 import okio.buffer
 import okio.source
@@ -94,8 +95,7 @@ internal class JsonRequestTest {
 
   private fun post(path: String, packet: Packet): Packet = call(Request.Builder()
       .url(jettyService.httpServerUrl.newBuilder().encodedPath(path).build())
-      .post(okhttp3.RequestBody.create(MediaTypes.APPLICATION_JSON_MEDIA_TYPE,
-          packetJsonAdapter.toJson(packet))))
+      .post(packetJsonAdapter.toJson(packet).toRequestBody(MediaTypes.APPLICATION_JSON_MEDIA_TYPE)))
 
   private fun call(request: Request.Builder): Packet {
     request.header("Accept", MediaTypes.APPLICATION_JSON)
