@@ -53,7 +53,7 @@ class JettyPortPeerClientModule : KAbstractModule() {
         appName = appName,
         httpClientsConfig = httpClientsConfig,
         httpClientFactory = httpClientFactory,
-        httpsPort = jetty.httpsServerUrl!!.port()
+        httpsPort = jetty.httpsServerUrl!!.port
     )
   }
 }

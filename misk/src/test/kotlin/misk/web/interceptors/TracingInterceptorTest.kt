@@ -21,8 +21,8 @@ import misk.web.WebActionModule
 import misk.web.WebTestingModule
 import misk.web.actions.WebAction
 import misk.web.jetty.JettyService
-import okhttp3.Headers
-import okhttp3.HttpUrl
+import okhttp3.Headers.Companion.headersOf
+import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.OkHttpClient
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -42,7 +42,7 @@ class TracingInterceptorTest {
   fun initiatesTrace() {
     val tracingInterceptor = tracingInterceptorFactory.create(
         TracingTestAction::call.asAction(DispatchMechanism.GET))!!
-    val httpCall = FakeHttpCall(url = HttpUrl.get("http://foo.bar"))
+    val httpCall = FakeHttpCall(url = "http://foo.bar".toHttpUrl())
     val chain = RealNetworkChain(TracingTestAction::call.asAction(DispatchMechanism.GET),
         tracingTestAction, httpCall, listOf(tracingInterceptor, TerminalInterceptor(200)))
 
@@ -62,8 +62,8 @@ class TracingInterceptorTest {
     val tracingInterceptor = tracingInterceptorFactory.create(
         TracingTestAction::call.asAction(DispatchMechanism.GET))!!
     val httpCall = FakeHttpCall(
-        url = HttpUrl.get("http://foo.bar"),
-        requestHeaders = Headers.of("spanid", "1", "traceid", "2")
+        url = "http://foo.bar".toHttpUrl(),
+        requestHeaders = headersOf("spanid", "1", "traceid", "2")
     )
     val chain = RealNetworkChain(TracingTestAction::call.asAction(DispatchMechanism.GET),
         tracingTestAction, httpCall, listOf(tracingInterceptor, TerminalInterceptor(200)))

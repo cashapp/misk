@@ -31,8 +31,8 @@ internal class ActionScopedWebDispatchTest {
         .addHeader("Security-ID", "Thor")
         .build())
         .execute()
-    assertThat(response.code()).isEqualTo(200)
-    assertThat(response.body()!!.string()).isEqualTo("hello Thor")
+    assertThat(response.code).isEqualTo(200)
+    assertThat(response.body!!.string()).isEqualTo("hello Thor")
   }
 
   @Singleton

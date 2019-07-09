@@ -8,7 +8,7 @@ import misk.web.PathPattern
 import misk.web.RequestBody
 import misk.web.marshal.GenericUnmarshallers
 import misk.web.marshal.Unmarshaller
-import okhttp3.MediaType
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.reflect.KParameter
@@ -19,7 +19,7 @@ internal class RequestBodyFeatureBinding(
   private val unmarshallerFactories: List<Unmarshaller.Factory>
 ) : FeatureBinding {
   override fun bind(subject: Subject) {
-    val mediaType = subject.httpCall.requestHeaders["Content-Type"]?.let { MediaType.parse(it) }
+    val mediaType = subject.httpCall.requestHeaders["Content-Type"]?.let { it.toMediaTypeOrNull() }
     val unmarshaller = mediaType?.let { type ->
       unmarshallerFactories.mapNotNull { it.create(type, parameter.type) }.firstOrNull()
     } ?: GenericUnmarshallers.into(parameter)

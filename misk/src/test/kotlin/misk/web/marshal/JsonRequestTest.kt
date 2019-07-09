@@ -102,8 +102,8 @@ internal class JsonRequestTest {
 
     val httpClient = OkHttpClient()
     val response = httpClient.newCall(request.build()).execute()
-    assertThat(response.code()).isEqualTo(200)
+    assertThat(response.code).isEqualTo(200)
     assertThat(response.header("Content-Type")).isEqualTo(MediaTypes.APPLICATION_JSON)
-    return packetJsonAdapter.fromJson(response.body()!!.source())!!
+    return packetJsonAdapter.fromJson(response.body!!.source())!!
   }
 }

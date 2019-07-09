@@ -3,7 +3,7 @@ package misk.client
 import com.squareup.moshi.Moshi
 import com.squareup.wire.Message
 import misk.web.mediatype.MediaTypes
-import okhttp3.HttpUrl
+import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody
@@ -17,7 +17,7 @@ class ProtoMessageHttpClient constructor(
   private val moshi: Moshi,
   private val okHttp: OkHttpClient
 ) {
-  private val httpUrl = HttpUrl.parse(baseUrl) ?: throw IllegalArgumentException(
+  private val httpUrl = baseUrl.toHttpUrlOrNull() ?: throw IllegalArgumentException(
       "could not parse $baseUrl")
 
   fun <O : Any> post(path: String, requestBody: Message<*, *>, responseType: Class<O>): O {
@@ -28,12 +28,12 @@ class ProtoMessageHttpClient constructor(
         .post(RequestBody.create(MediaTypes.APPLICATION_JSON_MEDIA_TYPE, requestJson))
         .build()
     val response = okHttp.newCall(request).execute()
-    if (response.code() != 200) {
+    if (response.code != 200) {
       throw RuntimeException(
-          "request failed (${response.code()} ${response.body()?.string()}")
+          "request failed (${response.code} ${response.body?.string()}")
     }
 
-    return response.body()?.string()?.let { moshi.adapter(responseType).fromJson(it) }
+    return response.body?.string()?.let { moshi.adapter(responseType).fromJson(it) }
         ?: throw IllegalStateException("could not parse response")
   }
 

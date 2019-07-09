@@ -15,5 +15,5 @@ class ProtocGrpcClientModule : KAbstractModule() {
   fun provideChannel(
     @Named("grpc server") url: HttpUrl,
     grpcChannelFactory: GrpcChannelFactory
-  ) = grpcChannelFactory.createClientChannel(InetSocketAddress(url.host(), url.port()))
+  ) = grpcChannelFactory.createClientChannel(InetSocketAddress(url.host, url.port))
 }

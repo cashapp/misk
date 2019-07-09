@@ -67,8 +67,8 @@ internal class PlainTextRequestTest {
 
     val httpClient = OkHttpClient()
     val response = httpClient.newCall(request.build()).execute()
-    assertThat(response.code()).isEqualTo(200)
+    assertThat(response.code).isEqualTo(200)
     assertThat(response.header("Content-Type")).isEqualTo(MediaTypes.TEXT_PLAIN_UTF8)
-    return response.body()?.string()!!
+    return response.body?.string()!!
   }
 }

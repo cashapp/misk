@@ -35,10 +35,10 @@ internal class RequestLogContextInterceptorTest {
 
   @Test fun setLogContext() {
     val response = invoke("caller")
-    assertThat(response.code()).isEqualTo(200)
+    assertThat(response.code).isEqualTo(200)
 
     val contextFields =
-        moshi.adapter<RequestContext>().fromJson(response.body()!!.string())!!.fields
+        moshi.adapter<RequestContext>().fromJson(response.body!!.string())!!.fields
     assertThat(contextFields[RequestLogContextInterceptor.MDC_ACTION])
         .isEqualTo("TestAction")
     assertThat(contextFields[RequestLogContextInterceptor.MDC_CALLING_PRINCIPAL])

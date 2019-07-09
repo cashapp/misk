@@ -42,9 +42,9 @@ internal class WebDispatchTest {
         .build()
 
     val response = httpClient.newCall(request).execute()
-    assertThat(response.code()).isEqualTo(200)
+    assertThat(response.code).isEqualTo(200)
 
-    val responseContent = response.body()!!.source()
+    val responseContent = response.body!!.source()
     assertThat(helloByeJsonAdapter.fromJson(responseContent)!!.message).isEqualTo(
         "post hello my friend")
   }
@@ -58,9 +58,9 @@ internal class WebDispatchTest {
         .build()
 
     val response = httpClient.newCall(request).execute()
-    assertThat(response.code()).isEqualTo(200)
+    assertThat(response.code).isEqualTo(200)
 
-    val responseContent = response.body()!!.source().readString(Charsets.UTF_8)
+    val responseContent = response.body!!.source().readString(Charsets.UTF_8)
     assertThat(helloByeJsonAdapter.fromJson(responseContent)!!.message)
         .isEqualTo("get hello my_friend")
   }
@@ -74,9 +74,9 @@ internal class WebDispatchTest {
         .build()
 
     val response = httpClient.newCall(request).execute()
-    assertThat(response.code()).isEqualTo(200)
+    assertThat(response.code).isEqualTo(200)
 
-    val responseContent = response.body()!!.source().readString(Charsets.UTF_8)
+    val responseContent = response.body!!.source().readString(Charsets.UTF_8)
     assertThat(helloByeJsonAdapter.fromJson(responseContent)!!.message)
         .isEqualTo("get hello my_friend")
   }
@@ -93,7 +93,7 @@ internal class WebDispatchTest {
 
     // we expect this to fail since we threw an error; what we are trying to avoid is a
     // binding time error due to missing marshaller
-    assertThat(response.code()).isEqualTo(500)
+    assertThat(response.code).isEqualTo(500)
   }
 
   @Test

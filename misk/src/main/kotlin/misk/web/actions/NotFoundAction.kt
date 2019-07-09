@@ -11,7 +11,7 @@ import misk.web.ResponseBody
 import misk.web.ResponseContentType
 import misk.web.mediatype.MediaTypes
 import misk.web.toResponseBody
-import okhttp3.Headers
+import okhttp3.Headers.Companion.headersOf
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -33,7 +33,7 @@ class NotFoundAction @Inject constructor() : WebAction {
       logger.info("Nothing found at /$path")
       return Response(
           body = "Nothing found at /$path".toResponseBody(),
-          headers = Headers.of("Content-Type", MediaTypes.TEXT_PLAIN_UTF8),
+          headers = headersOf("Content-Type", MediaTypes.TEXT_PLAIN_UTF8),
           statusCode = 404
       )
     }

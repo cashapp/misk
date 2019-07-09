@@ -5,7 +5,7 @@ import misk.web.RequestContentType
 import misk.web.ResponseContentType
 import misk.web.mediatype.MediaRange
 import misk.web.mediatype.MediaTypes
-import okhttp3.MediaType
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
 import kotlin.reflect.full.findAnnotation
@@ -48,7 +48,7 @@ fun KFunction<*>.asAction(
           MediaTypes.APPLICATION_GRPC_MEDIA_TYPE
         }
         else -> findAnnotation<ResponseContentType>()?.value?.let {
-          MediaType.parse(it)
+          it.toMediaTypeOrNull()
         }
       }
 

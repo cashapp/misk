@@ -168,8 +168,8 @@ internal class ContentBasedDispatchTest {
     val request = newRequest("/hello", contentType, content, acceptedMediaType)
     val response = httpClient.newCall(request)
         .execute()
-    assertThat(response.code()).isEqualTo(200)
-    return response.body()!!
+    assertThat(response.code).isEqualTo(200)
+    return response.body!!
   }
 
   private fun newRequest(
