@@ -6,6 +6,7 @@ import misk.web.mediatype.MediaRange
 import okhttp3.Headers
 import okhttp3.HttpUrl
 import okhttp3.MediaType
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody
 import okio.BufferedSink
 import okio.BufferedSource
@@ -92,7 +93,7 @@ interface HttpCall {
 
   fun contentType(): MediaType? {
     val contentType = requestHeaders.get("Content-Type") ?: return null
-    return MediaType.parse(contentType)
+    return contentType.toMediaTypeOrNull()
   }
 
   fun accepts(): List<MediaRange> {

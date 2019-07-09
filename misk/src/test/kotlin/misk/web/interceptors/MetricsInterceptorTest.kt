@@ -33,16 +33,16 @@ class MetricsInterceptorTest {
 
   @BeforeEach
   fun sendRequests() {
-    assertThat(invoke(200).code()).isEqualTo(200)
-    assertThat(invoke(200).code()).isEqualTo(200)
-    assertThat(invoke(202).code()).isEqualTo(202)
-    assertThat(invoke(404).code()).isEqualTo(404)
-    assertThat(invoke(403).code()).isEqualTo(403)
-    assertThat(invoke(403).code()).isEqualTo(403)
-    assertThat(invoke(200, "my-peer").code()).isEqualTo(200)
-    assertThat(invoke(200, "my-peer").code()).isEqualTo(200)
-    assertThat(invoke(200, "my-peer").code()).isEqualTo(200)
-    assertThat(invoke(200, "my-peer").code()).isEqualTo(200)
+    assertThat(invoke(200).code).isEqualTo(200)
+    assertThat(invoke(200).code).isEqualTo(200)
+    assertThat(invoke(202).code).isEqualTo(202)
+    assertThat(invoke(404).code).isEqualTo(404)
+    assertThat(invoke(403).code).isEqualTo(403)
+    assertThat(invoke(403).code).isEqualTo(403)
+    assertThat(invoke(200, "my-peer").code).isEqualTo(200)
+    assertThat(invoke(200, "my-peer").code).isEqualTo(200)
+    assertThat(invoke(200, "my-peer").code).isEqualTo(200)
+    assertThat(invoke(200, "my-peer").code).isEqualTo(200)
   }
 
   @Test

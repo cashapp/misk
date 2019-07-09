@@ -1,6 +1,7 @@
 package misk.web.mediatype
 
 import okhttp3.MediaType
+import okhttp3.MediaType.Companion.toMediaType
 
 object MediaTypes {
   const val APPLICATION_JSON = "application/json;charset=utf-8"
@@ -46,13 +47,13 @@ object MediaTypes {
   }
 }
 
-fun String.asMediaType() = MediaType.get(this)
+fun String.asMediaType() = this.toMediaType()
 fun String.asMediaRange() = MediaRange.parse(this)
 
 internal val MediaType.wildcardCount
   get() = when {
-    type() == "*" -> 2
-    subtype() == "*" -> 1
+    type == "*" -> 2
+    subtype == "*" -> 1
     else -> 0
   }
 

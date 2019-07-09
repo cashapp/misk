@@ -11,7 +11,8 @@ import misk.web.actions.WebActionMetadata
 import misk.web.mediatype.MediaTypes
 import okhttp3.Headers
 import okhttp3.HttpUrl
-import okhttp3.MediaType
+import okhttp3.HttpUrl.Companion.toHttpUrl
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okio.buffer
 import okio.sink
 import okio.source
@@ -87,7 +88,7 @@ internal class WebActionsServlet @Inject constructor(
   }
 }
 
-internal fun HttpServletRequest.contentType() = contentType?.let { MediaType.parse(it) }
+internal fun HttpServletRequest.contentType() = contentType?.let { it.toMediaTypeOrNull() }
 
 internal fun ServletUpgradeResponse.headers(): Headers {
   val result = Headers.Builder()
@@ -121,9 +122,9 @@ internal fun HttpServletResponse.headers(): Headers {
 
 internal fun HttpServletRequest.httpUrl(): HttpUrl {
   return if (queryString == null) {
-    HttpUrl.get("$requestURL")
+    "$requestURL".toHttpUrl()
   } else {
-    HttpUrl.get("$requestURL?$queryString")
+    "$requestURL?$queryString".toHttpUrl()
   }
 }
 

@@ -14,6 +14,7 @@ import misk.web.jetty.JettyService
 import misk.web.mediatype.MediaTypes
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import okhttp3.RequestBody.Companion.toRequestBody
 import okio.ByteString
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -60,15 +61,15 @@ internal class PlainTextRequestTest {
 
   private fun post(path: String, message: String): String = call(Request.Builder()
       .url(jettyService.httpServerUrl.newBuilder().encodedPath(path).build())
-      .post(okhttp3.RequestBody.create(MediaTypes.TEXT_PLAIN_UTF8_MEDIA_TYPE, message)))
+      .post(message.toRequestBody(MediaTypes.TEXT_PLAIN_UTF8_MEDIA_TYPE)))
 
   private fun call(request: Request.Builder): String {
     request.header("Accept", MediaTypes.TEXT_PLAIN_UTF8)
 
     val httpClient = OkHttpClient()
     val response = httpClient.newCall(request.build()).execute()
-    assertThat(response.code()).isEqualTo(200)
+    assertThat(response.code).isEqualTo(200)
     assertThat(response.header("Content-Type")).isEqualTo(MediaTypes.TEXT_PLAIN_UTF8)
-    return response.body()?.string()!!
+    return response.body?.string()!!
   }
 }

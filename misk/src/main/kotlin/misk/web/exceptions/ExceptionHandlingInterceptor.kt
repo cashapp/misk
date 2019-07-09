@@ -13,7 +13,7 @@ import misk.web.Response
 import misk.web.ResponseBody
 import misk.web.mediatype.MediaTypes
 import misk.web.toResponseBody
-import okhttp3.Headers
+import okhttp3.Headers.Companion.toHeaders
 import java.lang.reflect.InvocationTargetException
 import java.util.concurrent.ExecutionException
 import javax.inject.Inject
@@ -70,17 +70,17 @@ class ExceptionHandlingInterceptor(
     val log = getLogger<ExceptionHandlingInterceptor>()
 
     val INTERNAL_SERVER_ERROR_RESPONSE = Response("internal server error".toResponseBody(),
-        Headers.of(listOf("Content-Type" to MediaTypes.TEXT_PLAIN_UTF8).toMap()),
+        listOf("Content-Type" to MediaTypes.TEXT_PLAIN_UTF8).toMap().toHeaders(),
         StatusCode.INTERNAL_SERVER_ERROR.code
     )
 
     val UNAUTHENTICATED_RESPONSE = Response("unauthenticated".toResponseBody(),
-        Headers.of(listOf("Content-Type" to MediaTypes.TEXT_PLAIN_UTF8).toMap()),
+        listOf("Content-Type" to MediaTypes.TEXT_PLAIN_UTF8).toMap().toHeaders(),
         StatusCode.UNAUTHENTICATED.code
     )
 
     val UNAUTHORIZED_RESPONSE = Response("unauthorized".toResponseBody(),
-        Headers.of(listOf("Content-Type" to MediaTypes.TEXT_PLAIN_UTF8).toMap()),
+        listOf("Content-Type" to MediaTypes.TEXT_PLAIN_UTF8).toMap().toHeaders(),
         StatusCode.FORBIDDEN.code
     )
   }

@@ -76,11 +76,11 @@ class GrpcConnectivityTest {
     val call = client.newCall(request)
     val response = call.execute()
 
-    for (i in 0 until response.headers().size()) {
-      println("${response.headers().name(i)}: ${response.headers().value(i)}")
+    for (i in 0 until response.headers.size) {
+      println("${response.headers.name(i)}: ${response.headers.value(i)}")
     }
 
-    val reader = GrpcReader.get(response.body()!!.source(), HelloReply.ADAPTER,
+    val reader = GrpcReader.get(response.body!!.source(), HelloReply.ADAPTER,
         response.header("grpc-encoding"))
     while (true) {
       val message = reader.readMessage() ?: break

@@ -21,7 +21,7 @@ class PathPattern(
 
   /** Returns a Matcher if requestUrl can be matched, else null */
   fun matcher(requestUrl: HttpUrl): Matcher? {
-    val matcher = regex.matcher(requestUrl.encodedPath())
+    val matcher = regex.matcher(requestUrl.encodedPath)
     return if (matcher.matches()) matcher else null
   }
 

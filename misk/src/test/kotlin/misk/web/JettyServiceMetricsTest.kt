@@ -39,8 +39,8 @@ internal class JettyServiceMetricsTest {
         .build()
 
     val response = httpClient.newCall(request).execute()
-    assertThat(response.code()).isEqualTo(200)
-    assertThat(response.body()?.string()).isEqualTo("hi!")
+    assertThat(response.code).isEqualTo(200)
+    assertThat(response.body?.string()).isEqualTo("hi!")
 
     connectionMetricsCollector.refreshMetrics()
 
@@ -53,7 +53,7 @@ internal class JettyServiceMetricsTest {
     assertThat(connectionMetrics.messagesSent.labels(*labels).get()).isEqualTo(1.0)
 
     // Force close the okhttp connection
-    httpClient.connectionPool().evictAll()
+    httpClient.connectionPool.evictAll()
 
     // Wait for the active connections to go to zero. This is done by another thread (and we can't
     // control it) so we need to do a spin wait on time out
@@ -92,9 +92,9 @@ internal class JettyServiceMetricsTest {
 
     val adapter = moshi.adapter<PoolMetricsResponse>()
     val response = httpClient.newCall(request).execute()
-    assertThat(response.code()).isEqualTo(200)
+    assertThat(response.code).isEqualTo(200)
 
-    val metrics = adapter.fromJson(response.body()?.string()!!)!!
+    val metrics = adapter.fromJson(response.body?.string()!!)!!
     assertThat(metrics.queuedJobs).isEqualTo(0.0)
     assertThat(metrics.size).isEqualTo(10.0)
     assertThat(metrics.utilization).isCloseTo(0.5, Percentage.withPercentage(10.0))

@@ -40,22 +40,22 @@ internal class ExceptionMapperTest {
   @Test
   fun masksMessageOnServerError() {
     val response = get("/throws/action/SERVICE_UNAVAILABLE")
-    assertThat(response.code()).isEqualTo(StatusCode.SERVICE_UNAVAILABLE.code)
-    assertThat(response.body()?.string()).isEqualTo(StatusCode.SERVICE_UNAVAILABLE.name)
+    assertThat(response.code).isEqualTo(StatusCode.SERVICE_UNAVAILABLE.code)
+    assertThat(response.body?.string()).isEqualTo(StatusCode.SERVICE_UNAVAILABLE.name)
   }
 
   @Test
   fun returnsMessageOnClientErrors() {
     val response = get("/throws/action/FORBIDDEN")
-    assertThat(response.code()).isEqualTo(StatusCode.FORBIDDEN.code)
-    assertThat(response.body()?.string()).isEqualTo("you asked for an error")
+    assertThat(response.code).isEqualTo(StatusCode.FORBIDDEN.code)
+    assertThat(response.body?.string()).isEqualTo("you asked for an error")
   }
 
   @Test
   fun handlesUnmappedErrorsAsInternalServerError() {
     val response = get("/throws/unmapped-error")
-    assertThat(response.code()).isEqualTo(StatusCode.INTERNAL_SERVER_ERROR.code)
-    assertThat(response.body()?.string()).isEqualTo("internal server error")
+    assertThat(response.code).isEqualTo(StatusCode.INTERNAL_SERVER_ERROR.code)
+    assertThat(response.body?.string()).isEqualTo("internal server error")
   }
 
   fun get(path: String): okhttp3.Response {

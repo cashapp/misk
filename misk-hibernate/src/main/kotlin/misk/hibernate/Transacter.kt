@@ -50,7 +50,6 @@ fun Transacter.shards() = transaction { it.shards() }
 
 fun Transacter.shards(keyspace: Keyspace) = transaction { it.shards(keyspace) }
 
-
 /**
  * Commits a transaction with operations defined in the [lambda] block.
  *

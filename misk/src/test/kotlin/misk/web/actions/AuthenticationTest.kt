@@ -76,7 +76,7 @@ class AuthenticationTest {
     }
     val call = client.newCall(requestBuilder.build())
     val response = call.execute()
-    return response.body()!!.string()
+    return response.body!!.string()
   }
 
   private fun createOkHttpClient(): OkHttpClient {

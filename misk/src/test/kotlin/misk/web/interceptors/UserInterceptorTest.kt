@@ -34,39 +34,39 @@ class UserInterceptorTest {
   @Test
   fun stringResponse() {
     val response = get("/call/textResponse")
-    assertThat(response.code()).isEqualTo(418)
+    assertThat(response.code).isEqualTo(418)
     assertThat(response.header("Content-Type")).isEqualTo(MediaTypes.TEXT_PLAIN_UTF8)
-    assertThat(response.body()?.string()).isEqualTo("text response")
+    assertThat(response.body?.string()).isEqualTo("text response")
   }
 
   @Test
   fun rawStringResponse() {
     val response = get("/call/text")
-    assertThat(response.code()).isEqualTo(200)
+    assertThat(response.code).isEqualTo(200)
     assertThat(response.header("Content-Type")).isEqualTo(MediaTypes.TEXT_PLAIN_UTF8)
-    assertThat(response.body()?.string()).isEqualTo("text")
+    assertThat(response.body?.string()).isEqualTo("text")
   }
 
   @Test
   fun throwResponse() {
     val response = get("/call/throw")
-    assertThat(response.code()).isEqualTo(500)
-    assertThat(response.body()?.string()).isEqualTo("internal server error")
+    assertThat(response.code).isEqualTo(500)
+    assertThat(response.body?.string()).isEqualTo("internal server error")
   }
 
   @Test
   fun stringNetworkResponse() {
     val response = get("/call/textResponse", "text")
-    assertThat(response.code()).isEqualTo(410)
+    assertThat(response.code).isEqualTo(410)
     assertThat(response.header("Content-Type")).isEqualTo(MediaTypes.TEXT_PLAIN_UTF8)
-    assertThat(response.body()?.string()).isEqualTo("net text response")
+    assertThat(response.body?.string()).isEqualTo("net text response")
   }
 
   @Test
   fun throwNetworkResponse() {
     val response = get("/call/textResponse", "throw")
-    assertThat(response.code()).isEqualTo(500)
-    assertThat(response.body()?.string()).isEqualTo("internal server error")
+    assertThat(response.code).isEqualTo(500)
+    assertThat(response.body?.string()).isEqualTo("internal server error")
   }
 
   internal class UserCreatedNetworkInterceptor : NetworkInterceptor {

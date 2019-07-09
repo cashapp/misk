@@ -73,7 +73,7 @@ internal class JettyWebSocket(
     }
 
     override fun addHeaders(headers: Headers) {
-      for (i in 0 until headers.size()) {
+      for (i in 0 until headers.size) {
         response.addHeader(headers.name(i), headers.value(i))
       }
     }
