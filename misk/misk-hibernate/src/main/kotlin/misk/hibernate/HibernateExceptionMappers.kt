@@ -9,6 +9,7 @@ import misk.web.exceptions.ExceptionMapper
 import misk.web.mediatype.MediaTypes
 import misk.web.toResponseBody
 import okhttp3.Headers
+import okhttp3.Headers.Companion.headersOf
 import org.hibernate.StaleObjectStateException
 import org.hibernate.exception.ConstraintViolationException
 import org.hibernate.exception.GenericJDBCException
@@ -53,7 +54,7 @@ internal class OptimisticLockExceptionMapper @Inject internal constructor() : Ex
 
 internal class ResourceExhaustedExceptionMapper @Inject internal constructor() : ExceptionMapper<GenericJDBCException> {
   private val HEADERS: Headers =
-      Headers.of(listOf("Content-Type" to MediaTypes.TEXT_PLAIN_UTF8).toMap())
+      headersOf("Content-Type", MediaTypes.TEXT_PLAIN_UTF8)
 
   override fun toResponse(th: GenericJDBCException): Response<ResponseBody> =
       Response(StatusCode.TOO_MANY_REQUESTS.name.toResponseBody(), HEADERS,
@@ -74,7 +75,7 @@ internal class ResourceExhaustedExceptionMapper @Inject internal constructor() :
 
 internal object ConflictExceptionResponder {
   private val HEADERS: Headers =
-      Headers.of(listOf("Content-Type" to MediaTypes.TEXT_PLAIN_UTF8).toMap())
+      headersOf("Content-Type", MediaTypes.TEXT_PLAIN_UTF8)
   private val CONFLICT_EXCEPTION = ConflictException()
 
   fun toResponse(): Response<ResponseBody> {

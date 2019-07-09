@@ -2,6 +2,7 @@ package misk.web.proxy
 
 import misk.web.ValidWebEntry
 import okhttp3.HttpUrl
+import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 
 //  TODO(adrw) fix this documentation if forwarding rewrites are restricted or other conditions in place
 /**
@@ -27,8 +28,8 @@ class WebProxyEntry(
   val web_proxy_url: HttpUrl
 ) : ValidWebEntry(url_path_prefix = url_path_prefix) {
   init {
-    require(web_proxy_url.encodedPath().endsWith("/") &&
-        web_proxy_url.pathSegments().size == 1)
+    require(web_proxy_url.encodedPath.endsWith("/") &&
+        web_proxy_url.pathSegments.size == 1)
   }
 }
 
@@ -37,5 +38,5 @@ fun WebProxyEntry(
   web_proxy_url: String
 ): WebProxyEntry {
 //  TODO(adrw) update all HTTPUrl.parse -> get (no bang bang required) https://github.com/square/misk/issues/419
-  return WebProxyEntry(url_path_prefix, HttpUrl.parse(web_proxy_url)!!)
+  return WebProxyEntry(url_path_prefix, web_proxy_url.toHttpUrlOrNull()!!)
 }

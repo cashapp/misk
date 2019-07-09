@@ -22,10 +22,9 @@ import com.google.inject.Provider
 import misk.logging.getLogger
 import java.security.GeneralSecurityException
 
-
 open class KeyReader {
   companion object {
-    val KEK_TEMPLATE : KeyTemplate = AeadKeyTemplates.AES256_GCM
+    val KEK_TEMPLATE: KeyTemplate = AeadKeyTemplates.AES256_GCM
   }
 
   val logger by lazy { getLogger<KeyReader>() }

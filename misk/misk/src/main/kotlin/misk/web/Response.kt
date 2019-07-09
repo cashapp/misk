@@ -1,13 +1,14 @@
 package misk.web
 
 import okhttp3.Headers
+import okhttp3.Headers.Companion.headersOf
 import okio.Buffer
 import okio.BufferedSink
 
 /** An HTTP response body, headers, and status code. */
 data class Response<out T>(
   val body: T,
-  val headers: Headers = Headers.of(),
+  val headers: Headers = headersOf(),
   val statusCode: Int = 200
 )
 
@@ -31,13 +32,13 @@ fun Response<*>.readUtf8(): String {
 }
 
 fun okhttp3.Response.toMisk(): Response<ResponseBody> {
-  val miskBody = if (body() is okhttp3.ResponseBody) { object : ResponseBody {
+  val miskBody = if (body is okhttp3.ResponseBody) { object : ResponseBody {
       override fun writeTo(sink: BufferedSink) {
-        body()!!.use {
+        body!!.use {
           sink.writeAll(it.source())
         }
       }
     }
   } else "".toResponseBody()
-  return Response(miskBody, headers(), code())
+  return Response(miskBody, headers, code)
 }

@@ -3,15 +3,17 @@ package misk.web
 import misk.web.actions.WebSocket
 import misk.web.actions.WebSocketListener
 import okhttp3.Headers
+import okhttp3.Headers.Companion.headersOf
 import okhttp3.HttpUrl
+import okhttp3.HttpUrl.Companion.toHttpUrl
 import okio.Buffer
 import okio.BufferedSink
 import okio.BufferedSource
 
 data class FakeHttpCall(
-  override val url: HttpUrl = HttpUrl.get("https://example.com/"),
+  override val url: HttpUrl = "https://example.com/".toHttpUrl(),
   override val dispatchMechanism: DispatchMechanism = DispatchMechanism.GET,
-  override val requestHeaders: Headers = Headers.of(),
+  override val requestHeaders: Headers = headersOf(),
   override var statusCode: Int = 200,
   val headersBuilder: Headers.Builder = Headers.Builder(),
   var sendTrailers: Boolean = false,

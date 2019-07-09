@@ -43,7 +43,7 @@ internal class HttpClientEnvoyTest {
     val dinoRequest = Dinosaur.Builder().name("dinoRequest").build()
 
     val server = webServerService.server!!
-    server.setProtocols(Arrays.asList(Protocol.H2_PRIOR_KNOWLEDGE))
+    server.run { server.protocols = Arrays.asList(Protocol.H2_PRIOR_KNOWLEDGE) }
     server.enqueue(MockResponse())
 
     val response = client.postDinosaur(dinoRequest).execute()

@@ -65,7 +65,7 @@ internal class RequestLoggingInterceptorTest {
 
   @Test
   fun exceptionThrown() {
-    assertThat(invoke("/call/exceptionThrowingRequestLogging/fail", "caller").code()).isEqualTo(500)
+    assertThat(invoke("/call/exceptionThrowingRequestLogging/fail", "caller").code).isEqualTo(500)
     val messages = logCollector.takeMessages(RequestLoggingInterceptor::class)
     assertThat(messages).containsExactly(
       "ExceptionThrowingRequestLoggingAction principal=caller request=[fail]",

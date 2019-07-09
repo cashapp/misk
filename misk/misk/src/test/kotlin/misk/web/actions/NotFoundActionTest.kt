@@ -12,7 +12,7 @@ import misk.web.mediatype.asMediaType
 import okhttp3.MediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import okhttp3.RequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import javax.inject.Inject
@@ -40,49 +40,49 @@ class NotFoundActionTest {
     val requestContent = packetJsonAdapter.toJson(Packet("my friend"))
     val request = post("/unknown", jsonMediaType, requestContent, jsonMediaType)
     val response = httpClient.newCall(request).execute()
-    assertThat(response.code()).isEqualTo(404)
+    assertThat(response.code).isEqualTo(404)
   }
 
   @Test
   fun postTextExpectTextPathNotFound() {
     val request = post("/unknown", plainTextMediaType, "my friend", plainTextMediaType)
     val response = httpClient.newCall(request).execute()
-    assertThat(response.code()).isEqualTo(404)
+    assertThat(response.code).isEqualTo(404)
   }
 
   @Test
   fun postArbitraryExpectArbitraryPathNotFound() {
     val request = post("/unknown", weirdMediaType, "my friend", weirdMediaType)
     val response = httpClient.newCall(request).execute()
-    assertThat(response.code()).isEqualTo(404)
+    assertThat(response.code).isEqualTo(404)
   }
 
   @Test
   fun getJsonPathNotFound() {
     val request = get("/unknown", jsonMediaType)
     val response = httpClient.newCall(request).execute()
-    assertThat(response.code()).isEqualTo(404)
+    assertThat(response.code).isEqualTo(404)
   }
 
   @Test
   fun getTextPathNotFound() {
     val request = get("/unknown", plainTextMediaType)
     val response = httpClient.newCall(request).execute()
-    assertThat(response.code()).isEqualTo(404)
+    assertThat(response.code).isEqualTo(404)
   }
 
   @Test
   fun getArbitraryPathNotFound() {
     val request = get("/unknown", weirdMediaType)
     val response = httpClient.newCall(request).execute()
-    assertThat(response.code()).isEqualTo(404)
+    assertThat(response.code).isEqualTo(404)
   }
 
   @Test
   fun headPathNotFound() {
     val request = head("/unknown", weirdMediaType)
     val response = httpClient.newCall(request).execute()
-    assertThat(response.code()).isEqualTo(404)
+    assertThat(response.code).isEqualTo(404)
   }
 
   private fun head(path: String, acceptedMediaType: MediaType? = null): Request {
@@ -108,7 +108,7 @@ class NotFoundActionTest {
     acceptedMediaType: MediaType? = null
   ): Request {
     return Request.Builder()
-        .post(RequestBody.create(contentType, content))
+        .post(content.toRequestBody(contentType))
         .url(jettyService.httpServerUrl.newBuilder().encodedPath(path).build())
         .header("Accept", acceptedMediaType.toString())
         .build()

@@ -1,6 +1,6 @@
 package misk.web.mediatype
 
-import okhttp3.MediaType
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.containsExactly
 import org.assertj.core.data.Offset
@@ -147,40 +147,40 @@ internal class MediaRangeTest {
   @Test
   fun matchTypeWildcard() {
     val mediaRange = MediaRange.parse("*/*")
-    assertThat(mediaRange.matcher(MediaType.parse("text/html")!!)).isNotNull()
-    assertThat(mediaRange.matcher(MediaType.parse("text/plain")!!)).isNotNull()
-    assertThat(mediaRange.matcher(MediaType.parse("application/json")!!)).isNotNull()
+    assertThat(mediaRange.matcher("text/html".toMediaTypeOrNull()!!)).isNotNull()
+    assertThat(mediaRange.matcher("text/plain".toMediaTypeOrNull()!!)).isNotNull()
+    assertThat(mediaRange.matcher("application/json".toMediaTypeOrNull()!!)).isNotNull()
   }
 
   @Test
   fun matchSubtypeWildcard() {
     val mediaRange = MediaRange.parse("text/*")
-    assertThat(mediaRange.matcher(MediaType.parse("text/html")!!)).isNotNull()
-    assertThat(mediaRange.matcher(MediaType.parse("text/plain")!!)).isNotNull()
-    assertThat(mediaRange.matcher(MediaType.parse("application/json")!!)).isNull()
+    assertThat(mediaRange.matcher("text/html".toMediaTypeOrNull()!!)).isNotNull()
+    assertThat(mediaRange.matcher("text/plain".toMediaTypeOrNull()!!)).isNotNull()
+    assertThat(mediaRange.matcher("application/json".toMediaTypeOrNull()!!)).isNull()
   }
 
   @Test
   fun matchExactTypeSubtype() {
     val mediaRange = MediaRange.parse("text/html")
-    assertThat(mediaRange.matcher(MediaType.parse("text/html")!!)).isNotNull()
-    assertThat(mediaRange.matcher(MediaType.parse("text/plain")!!)).isNull()
-    assertThat(mediaRange.matcher(MediaType.parse("application/json")!!)).isNull()
+    assertThat(mediaRange.matcher("text/html".toMediaTypeOrNull()!!)).isNotNull()
+    assertThat(mediaRange.matcher("text/plain".toMediaTypeOrNull()!!)).isNull()
+    assertThat(mediaRange.matcher("application/json".toMediaTypeOrNull()!!)).isNull()
   }
 
   @Test
   fun matchWildcardsOnMediaType() {
     val mediaRange = MediaRange.parse("text/html")
-    assertThat(mediaRange.matcher(MediaType.parse("*/*")!!)).isNotNull()
-    assertThat(mediaRange.matcher(MediaType.parse("text/*")!!)).isNotNull()
-    assertThat(mediaRange.matcher(MediaType.parse("application/*")!!)).isNull()
-    assertThat(mediaRange.matcher(MediaType.parse("application/json")!!)).isNull()
+    assertThat(mediaRange.matcher("*/*".toMediaTypeOrNull()!!)).isNotNull()
+    assertThat(mediaRange.matcher("text/*".toMediaTypeOrNull()!!)).isNotNull()
+    assertThat(mediaRange.matcher("application/*".toMediaTypeOrNull()!!)).isNull()
+    assertThat(mediaRange.matcher("application/json".toMediaTypeOrNull()!!)).isNull()
   }
 
   @Test
   fun matchNoCharsetInMediaType() {
     val mediaRange = MediaRange.parse("text/html;charset=utf-8")
-    val mediaType = MediaType.parse("text/html")!!
+    val mediaType = "text/html".toMediaTypeOrNull()!!
     val matcher = mediaRange.matcher(mediaType)
 
     assertThat(matcher).isNotNull()
@@ -190,7 +190,7 @@ internal class MediaRangeTest {
   @Test
   fun matchNoCharsetInMediaRange() {
     val mediaRange = MediaRange.parse("text/html")
-    val mediaType = MediaType.parse("text/html;charset=utf-8")!!
+    val mediaType = "text/html;charset=utf-8".toMediaTypeOrNull()!!
     val matcher = mediaRange.matcher(mediaType)
 
     assertThat(matcher).isNotNull()
@@ -200,7 +200,7 @@ internal class MediaRangeTest {
   @Test
   fun charsetsDoNotMatch() {
     val mediaRange = MediaRange.parse("text/html;charset=us-ascii")
-    val mediaType = MediaType.parse("text/html;charset=utf-8")!!
+    val mediaType = "text/html;charset=utf-8".toMediaTypeOrNull()!!
     val matcher = mediaRange.matcher(mediaType)
 
     assertThat(matcher).isNull()
@@ -209,7 +209,7 @@ internal class MediaRangeTest {
   @Test
   fun charsetsMatch() {
     val mediaRange = MediaRange.parse("text/html;charset=us-ascii")
-    val mediaType = MediaType.parse("text/html;charset=us-ascii")!!
+    val mediaType = "text/html;charset=us-ascii".toMediaTypeOrNull()!!
     val matcher = mediaRange.matcher(mediaType)
 
     assertThat(matcher).isNotNull()

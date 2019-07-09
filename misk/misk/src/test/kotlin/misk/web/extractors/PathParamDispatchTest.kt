@@ -34,15 +34,15 @@ internal class PathParamDispatchTest {
   @Test
   fun pathParamsConvertToProperTypes() {
     val response = get("/objects/FILE/defaults/245")
-    assertThat(response.code()).isEqualTo(200)
-    assertThat(response.body()?.string()).isEqualTo("(type=FILE,name=defaults,version=245)")
+    assertThat(response.code).isEqualTo(200)
+    assertThat(response.body?.string()).isEqualTo("(type=FILE,name=defaults,version=245)")
   }
 
   @Test
   fun pathParamsSupportExplicitPathNames() {
     val response = get("/custom-named-route")
-    assertThat(response.code()).isEqualTo(200)
-    assertThat(response.body()?.string()).isEqualTo("routing to custom-named-route")
+    assertThat(response.code).isEqualTo(200)
+    assertThat(response.body?.string()).isEqualTo("routing to custom-named-route")
   }
 
   class TestModule : KAbstractModule() {

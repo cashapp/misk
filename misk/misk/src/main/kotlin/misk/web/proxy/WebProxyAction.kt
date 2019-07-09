@@ -18,7 +18,7 @@ import misk.web.resources.ResourceEntryFinder
 import misk.web.resources.StaticResourceAction
 import misk.web.toMisk
 import misk.web.toResponseBody
-import okhttp3.Headers
+import okhttp3.Headers.Companion.headersOf
 import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
 import java.io.IOException
@@ -63,8 +63,8 @@ class WebProxyAction @Inject constructor(
     val matchedEntry = resourceEntryFinder.webProxy(httpCall.url) as WebProxyEntry?
         ?: return NotFoundAction.response(httpCall.url.toString())
     val proxyUrl = matchedEntry.web_proxy_url.newBuilder()
-        .encodedPath(httpCall.url.encodedPath())
-        .query(httpCall.url.query())
+        .encodedPath(httpCall.url.encodedPath)
+        .query(httpCall.url.query)
         .build()
     return forwardRequestTo(proxyUrl)
   }
@@ -82,7 +82,7 @@ class WebProxyAction @Inject constructor(
   private fun fetchFailResponse(clientRequestUrl: HttpUrl): Response<ResponseBody> {
     return Response(
         "Failed to fetch upstream URL $clientRequestUrl".toResponseBody(),
-        Headers.of("Content-Type", MediaTypes.TEXT_PLAIN_UTF8.asMediaType().toString()),
+        headersOf("Content-Type", MediaTypes.TEXT_PLAIN_UTF8.asMediaType().toString()),
         HttpURLConnection.HTTP_UNAVAILABLE
     )
   }
@@ -91,9 +91,9 @@ class WebProxyAction @Inject constructor(
     // TODO(adrw) include the client URL/IP as the for= field for Forwarded
     return newBuilder()
         .addHeader("Forwarded", "for=; by=${HttpUrl.Builder()
-            .scheme(this.url().scheme())
-            .host(this.url().host())
-            .port(this.url().port())}")
+            .scheme(this.url.scheme)
+            .host(this.url.host)
+            .port(this.url.port)}")
         .url(newUrl)
         .build()
   }

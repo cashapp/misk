@@ -15,14 +15,13 @@ import misk.web.mediatype.asMediaType
 import misk.web.readUtf8
 import misk.web.toMisk
 import okhttp3.MediaType
-import okhttp3.RequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.lang.IllegalArgumentException
 import java.net.HttpURLConnection
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
@@ -120,7 +119,7 @@ class WebProxyActionTest {
 
     val upstreamReceivedRequest = upstreamServer.takeRequest(200, TimeUnit.MILLISECONDS)
     assertThat(
-        upstreamReceivedRequest.getHeader("Forwarded")).isEqualTo(
+        upstreamReceivedRequest!!.getHeader("Forwarded")).isEqualTo(
         "for=; by=${jettyService.httpServerUrl.newBuilder().encodedPath("/")}")
     assertThat(upstreamServer.requestCount).isNotZero()
     assertThat(upstreamReceivedRequest.path).isEqualTo("/local/prefix/tacos/")
@@ -146,7 +145,7 @@ class WebProxyActionTest {
         }
 
     val upstreamReceivedRequest = upstreamServer.takeRequest(200, TimeUnit.MILLISECONDS)
-    assertThat(upstreamReceivedRequest.getHeader("Forwarded")).isEqualTo(
+    assertThat(upstreamReceivedRequest!!.getHeader("Forwarded")).isEqualTo(
         "for=; by=${jettyService.httpServerUrl.newBuilder().encodedPath("/")}")
     assertThat(upstreamServer.requestCount).isNotZero()
     assertThat(upstreamReceivedRequest.path).isEqualTo("/local/prefix/tacos")
@@ -182,7 +181,7 @@ class WebProxyActionTest {
 
     val upstreamReceivedRequest = upstreamServer.takeRequest(200, TimeUnit.MILLISECONDS)
     assertThat(
-        upstreamReceivedRequest.getHeader("Forwarded")).isEqualTo(
+        upstreamReceivedRequest!!.getHeader("Forwarded")).isEqualTo(
         "for=; by=${jettyService.httpServerUrl.newBuilder().encodedPath("/")}")
     assertThat(upstreamServer.requestCount).isNotZero()
     assertThat(upstreamReceivedRequest.path).isEqualTo("/local/prefix/tacos/")
@@ -208,7 +207,7 @@ class WebProxyActionTest {
 
     val upstreamReceivedRequest = upstreamServer.takeRequest(200, TimeUnit.MILLISECONDS)
     assertThat(
-        upstreamReceivedRequest.getHeader("Forwarded")).isEqualTo(
+        upstreamReceivedRequest!!.getHeader("Forwarded")).isEqualTo(
         "for=; by=${jettyService.httpServerUrl.newBuilder().encodedPath("/")}")
     assertThat(upstreamServer.requestCount).isNotZero()
     assertThat(upstreamReceivedRequest.path).isEqualTo("/local/prefix/tacos")
@@ -266,7 +265,7 @@ class WebProxyActionTest {
 
     val upstreamReceivedRequest = upstreamServer.takeRequest(200, TimeUnit.MILLISECONDS)
     assertThat(
-        upstreamReceivedRequest.getHeader("Forwarded")).isEqualTo(
+        upstreamReceivedRequest!!.getHeader("Forwarded")).isEqualTo(
         "for=; by=${jettyService.httpServerUrl.newBuilder().encodedPath("/")}")
     assertThat(upstreamServer.requestCount).isNotZero()
     assertThat(upstreamReceivedRequest.path).isEqualTo(
@@ -293,7 +292,7 @@ class WebProxyActionTest {
 
     val upstreamReceivedRequest = upstreamServer.takeRequest(200, TimeUnit.MILLISECONDS)
     assertThat(
-        upstreamReceivedRequest.getHeader("Forwarded")).isEqualTo(
+        upstreamReceivedRequest!!.getHeader("Forwarded")).isEqualTo(
         "for=; by=${jettyService.httpServerUrl.newBuilder().encodedPath("/")}")
     assertThat(upstreamServer.requestCount).isNotZero()
     assertThat(upstreamReceivedRequest.path).isEqualTo("/local/prefix/tacos////see/if/forwards/")
@@ -320,7 +319,7 @@ class WebProxyActionTest {
 
     val upstreamReceivedRequest = upstreamServer.takeRequest(200, TimeUnit.MILLISECONDS)
     assertThat(
-        upstreamReceivedRequest.getHeader("Forwarded")).isEqualTo(
+        upstreamReceivedRequest!!.getHeader("Forwarded")).isEqualTo(
         "for=; by=${jettyService.httpServerUrl.newBuilder().encodedPath("/")}")
     assertThat(upstreamServer.requestCount).isNotZero()
     assertThat(upstreamReceivedRequest.path).isEqualTo(
@@ -340,7 +339,7 @@ class WebProxyActionTest {
     acceptedMediaType: MediaType? = null
   ): okhttp3.Request {
     return okhttp3.Request.Builder()
-        .post(RequestBody.create(contentType, content))
+        .post(content.toRequestBody(contentType))
         .url(jettyService.httpServerUrl.newBuilder().encodedPath(path).build())
         .header("Accept", acceptedMediaType.toString())
         .build()

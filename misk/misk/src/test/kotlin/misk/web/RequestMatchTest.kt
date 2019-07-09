@@ -1,7 +1,7 @@
 package misk.web
 
 import misk.web.mediatype.asMediaRange
-import okhttp3.MediaType
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import org.assertj.core.api.assertOrdering
 import org.junit.jupiter.api.Test
 
@@ -45,6 +45,6 @@ internal class RequestMatchTest {
         path,
         requestRange.asMediaRange(),
         false,
-        MediaType.parse(responseType)!!
+        responseType.toMediaTypeOrNull()!!
     )
 }
