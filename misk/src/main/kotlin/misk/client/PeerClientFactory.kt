@@ -86,7 +86,7 @@ class PeerClientFactory(
               .hostnameVerifier(object : HostnameVerifier {
                 override fun verify(hostname: String?, session: SSLSession?): Boolean {
                   val ou =
-                      (session!!.peerCertificates.firstOrNull() as? X509Certificate)?.let { peerCert ->
+                      (session?.peerCertificates?.firstOrNull() as? X509Certificate)?.let { peerCert ->
                         X500Name.parse(peerCert.subjectX500Principal.name).organizationalUnit
                       }
                   return appName == ou
