@@ -53,7 +53,7 @@ internal class JettyServiceMetricsTest {
     assertThat(connectionMetrics.messagesSent.labels(*labels).get()).isEqualTo(1.0)
 
     // Force close the okhttp connection
-    httpClient.connectionPool().evictAll()
+    httpClient.connectionPool.evictAll()
 
     // Wait for the active connections to go to zero. This is done by another thread (and we can't
     // control it) so we need to do a spin wait on time out

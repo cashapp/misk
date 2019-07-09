@@ -16,7 +16,9 @@ class MockWebServerService(val unixSocketFile: String?) : AbstractIdleService() 
 
     server = MockWebServer()
     unixSocketFile?.let {
-      server!!.setServerSocketFactory(UnixDomainServerSocketFactory(file))
+      server!!.run {
+        server!!.serverSocketFactory = UnixDomainServerSocketFactory(file)
+      }
     }
   }
 
