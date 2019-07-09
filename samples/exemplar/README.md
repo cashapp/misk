@@ -14,7 +14,7 @@ Build exemplar:
 Build a Docker image of Exemplar:
 
 ```
-  $ docker build -t exemplar-0.0.1 exemplar/  
+  $ docker build -t exemplar-image exemplar/
 ```
 
 ### Running locally
@@ -22,8 +22,10 @@ Visit [Docker for Mac](https://docs.docker.com/docker-for-mac/install/) to insta
 
 Run exemplar in Docker locally:
 ```
-  $ docker run -p 8080:8080 exemplar-0.0.1
+  $ docker run -p 8080:8080 exemplar-image
 ```
+
+Test the [HelloWebAction](http://localhost:8080/hello/world) in a browser.
 
 ### Running on GCP
 
