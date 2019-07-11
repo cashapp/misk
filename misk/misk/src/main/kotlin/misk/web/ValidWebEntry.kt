@@ -6,8 +6,8 @@ private val BlockedUrlPathPrefixes = listOf("/api/")
 
 abstract class ValidWebEntry(val slug: String = "", val url_path_prefix: String = "") {
   init {
-    // url_path_prefix must start and end with '/'
-    require(url_path_prefix.matches(Regex("(/[^/]+)*/"))) {
+    // internal link url_path_prefix must start and end with '/'
+    require(url_path_prefix.startsWith("http") || url_path_prefix.matches(Regex("(/[^/]+)*/"))) {
       "invalid or unexpected url path prefix: $url_path_prefix"
     }
 
