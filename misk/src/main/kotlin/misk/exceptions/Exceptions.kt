@@ -48,6 +48,9 @@ open class BadRequestException(message: String = "", cause: Throwable? = null) :
 open class ConflictException(message: String = "", cause: Throwable? = null) :
     ActionException(StatusCode.CONFLICT, message, cause)
 
+open class TooManyRequestsException(message: String = "", cause: Throwable? = null) :
+    ActionException(StatusCode.TOO_MANY_REQUESTS, message, cause)
+
 /** Similar to [kotlin.require], but throws [BadRequestException] if the check fails */
 inline fun requireRequest(check: Boolean, lazyMessage: () -> String) {
   if (!check) throw BadRequestException(lazyMessage())
