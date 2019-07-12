@@ -72,7 +72,7 @@ export const cssMetadataMenu = css`
 `
 
 export const cssWrapTextArea = css`
-  white-space: pre-line;
+  white-space: pre-line !important;
 `
 
 const definedOrDefault = (item: any, booleanIfUndefined: boolean) =>

@@ -9,6 +9,7 @@ import {
   ISimpleNetworkState,
   SimpleFormReducer,
   SimpleNetworkReducer,
+  SimpleReduxSaga,
   simpleRootSelector,
   watchSimpleFormSagas,
   watchSimpleNetworkSagas
@@ -20,7 +21,7 @@ import {
 } from "connected-react-router"
 import { History } from "history"
 import { AnyAction, combineReducers, Reducer } from "redux"
-import { all, AllEffect, fork } from "redux-saga/effects"
+import { all, fork } from "redux-saga/effects"
 
 /**
  * Redux Store State
@@ -70,6 +71,6 @@ export const rootReducer = (history: History): Reducer<any, AnyAction> =>
 /**
  * Sagas
  */
-export function* rootSaga(): IterableIterator<AllEffect> {
+export function* rootSaga(): SimpleReduxSaga {
   yield all([fork(watchSimpleFormSagas), fork(watchSimpleNetworkSagas)])
 }

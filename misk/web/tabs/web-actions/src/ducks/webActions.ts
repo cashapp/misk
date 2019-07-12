@@ -4,6 +4,7 @@ import {
   IAction,
   IRootState,
   ISimpleFormState,
+  SimpleReduxSaga,
   simpleSelect
 } from "@misk/simpleredux"
 import axios from "axios"
@@ -20,7 +21,7 @@ import {
   size,
   uniqueId
 } from "lodash"
-import { all, AllEffect, call, put, takeLatest } from "redux-saga/effects"
+import { all, call, put, takeLatest } from "redux-saga/effects"
 
 export const enum TypescriptBaseTypes {
   "any" = "any",
@@ -910,7 +911,7 @@ function* handleMetadata() {
   }
 }
 
-export function* watchWebActionsSagas(): IterableIterator<AllEffect> {
+export function* watchWebActionsSagas(): SimpleReduxSaga {
   yield all([
     takeLatest(WEBACTIONS.ADD_REPEATED_FIELD, handleAddRepeatedField),
     takeLatest(WEBACTIONS.SET_DIRTY_INPUT_FIELD, handleDirtyInputField),
