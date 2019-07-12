@@ -198,7 +198,9 @@ internal class SessionFactoryService(
   }
 
   override fun get(): SessionFactory {
-    return sessionFactory ?: throw IllegalStateException(
-        "@${qualifier.simpleName} Hibernate not connected: did you forget to start the service?")
+    return sessionFactory ?: throw IllegalStateException("""
+      |@${qualifier.simpleName} Hibernate not connected: did you forget to start the service?
+      |    If this is a test, then annotate your test class with @MiskTest(startService = true)
+      |""".trimMargin())
   }
 }
