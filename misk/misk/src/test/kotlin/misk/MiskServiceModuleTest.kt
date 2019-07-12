@@ -67,39 +67,24 @@ internal class MiskServiceModuleTest {
     override fun shutDown() {}
   }
 
-  @Test fun detectsNonSingletonServices() {
+  @Test fun multibindingServicesThrows() {
     assertThat(assertFailsWith<com.google.inject.ProvisionException> {
       val injector = Guice.createInjector(
           MiskTestingServiceModule(),
           object : KAbstractModule() {
             override fun configure() {
-              // Should be recognized as singletons
+              // Multibinding services is not supported. Expect that we throw for the first service
+              // that was bound.
               multibind<Service>().to<SingletonService1>()
               multibind<Service>().to<SingletonService2>()
-              multibind<Service>().to<ProvidesMethodService>()
-              multibind<Service>().toInstance(InstanceService())
-              multibind<Service>().to<ExplicitEagerSingletonService>().asEagerSingleton()
-              multibind<Service>().to<SingletonScopeService>()
-                  .`in`(Scopes.SINGLETON)
-              multibind<Service>().to<SingletonAnnotationService>()
-                  .`in`(com.google.inject.Singleton::class.java)
-              multibind<Service>().to<GoogleSingletonAnnotationService>()
-                  .`in`(com.google.inject.Singleton::class.java)
-
-              // Should be recognized as non-singletons
-              multibind<Service>().to<NonSingletonService2>()
-              multibind<Service>().to<NonSingletonService1>()
             }
-
-            @Provides @Singleton
-            fun providesSingletonService(): ProvidesMethodService = ProvidesMethodService()
           }
       )
 
       injector.getInstance<ServiceManager>()
-    }.message).contains("the following services are not marked as @Singleton: " +
-        "misk.MiskServiceModuleTest\$NonSingletonService1, " +
-        "misk.MiskServiceModuleTest\$NonSingletonService2")
+    }.message).contains("This doesn't work anymore! " +
+        "Instead of using `multibind<Service>().to(SingletonService1)`, " +
+        "use `install(ServiceModule<SingletonService1>())`.")
   }
 
   @Test fun detectsNonSingletonServiceEntries() {
