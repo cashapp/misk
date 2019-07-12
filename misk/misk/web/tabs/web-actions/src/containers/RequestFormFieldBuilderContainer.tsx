@@ -66,7 +66,7 @@ const repeatableFieldButtons = (
   const metadata = typesMetadata.get(id)
   const editRawButton = (
     <Tooltip
-      css={cssTooltip}
+      css={css(cssTooltip)}
       content={"Edit raw input"}
       key={`editRaw${id}`}
       lazy={true}
@@ -78,7 +78,7 @@ const repeatableFieldButtons = (
           "data",
           simpleType.boolean
         )}
-        css={cssButton}
+        css={css(cssButton)}
         icon={IconNames.MORE}
         onClick={onChangeToggleFnCall(
           props.simpleFormToggle,
@@ -91,7 +91,7 @@ const repeatableFieldButtons = (
   const dirtyInput = metadata.dirtyInput
   const dirtyInputButton = (
     <Tooltip
-      css={cssTooltip}
+      css={css(cssTooltip)}
       content={dirtyInput ? "Remove from request body" : "Add to request body"}
       key={`dirtyInput${id}`}
       lazy={true}
@@ -144,7 +144,7 @@ const repeatableFieldButtons = (
   } else if (metadata && metadata.id === "0") {
     return []
   } else {
-    return [<Button css={cssButton} icon={IconNames.WARNING_SIGN} />]
+    return [<Button css={css(cssButton)} icon={IconNames.WARNING_SIGN} />]
   }
 }
 
@@ -161,11 +161,10 @@ const EditRawInput = (
   if (editRawIsOpen) {
     return (
       <TextArea
-        css={cssWrapTextArea}
+        css={css(cssWrapTextArea)}
         fill={true}
         growVertically={true}
         onChange={onChangeFnCall(props.simpleFormInput, `${tag}::${padId(id)}`)}
-        value={simpleSelect(props.simpleForm, `${tag}::${padId(id)}`, "data")}
       />
     )
   } else {
@@ -217,14 +216,14 @@ const UnconnectedRequestFormFieldBuilderContainer = (
     if (typescriptType === TypescriptBaseTypes.boolean) {
       return (
         <FormGroup
-          css={cssFormGroup}
+          css={css(cssFormGroup)}
           label={formLabelFormatter(name, serverType)}
         >
           <ControlGroup>
             {...repeatableFieldButtons({ ...props, id })}
             <EditRawInput {...props} id={id} tag={tag}>
               <Button
-                css={cssButton}
+                css={css(cssButton)}
                 intent={
                   simpleSelect(
                     props.simpleForm,
@@ -256,7 +255,7 @@ const UnconnectedRequestFormFieldBuilderContainer = (
     } else if (typescriptType === TypescriptBaseTypes.number) {
       return (
         <FormGroup
-          css={cssFormGroup}
+          css={css(cssFormGroup)}
           label={formLabelFormatter(name, serverType)}
         >
           <ControlGroup>
@@ -269,11 +268,6 @@ const UnconnectedRequestFormFieldBuilderContainer = (
                   `${tag}::${padId(id)}`
                 )}
                 placeholder={serverType}
-                value={simpleSelect(
-                  props.simpleForm,
-                  `${tag}::${padId(id)}`,
-                  "data"
-                )}
               />
             </EditRawInput>
           </ControlGroup>
@@ -282,7 +276,7 @@ const UnconnectedRequestFormFieldBuilderContainer = (
     } else if (typescriptType === TypescriptBaseTypes.string) {
       return (
         <FormGroup
-          css={cssFormGroup}
+          css={css(cssFormGroup)}
           label={formLabelFormatter(name, serverType)}
         >
           <ControlGroup>
@@ -295,11 +289,6 @@ const UnconnectedRequestFormFieldBuilderContainer = (
                   `${tag}::${padId(id)}`
                 )}
                 placeholder={serverType}
-                value={simpleSelect(
-                  props.simpleForm,
-                  `${tag}::${padId(id)}`,
-                  "data"
-                )}
               />
             </EditRawInput>
           </ControlGroup>
@@ -383,7 +372,7 @@ const UnconnectedRequestFormFieldBuilderContainer = (
               <ControlGroup fill={true}>
                 <Button
                   active={whichFormData === "FORM"}
-                  css={cssButton}
+                  css={css(cssButton)}
                   icon={IconNames.FORM}
                   onClick={onChangeToggleFnCall(
                     props.simpleFormToggle,
@@ -394,7 +383,7 @@ const UnconnectedRequestFormFieldBuilderContainer = (
                 />
                 <Button
                   active={whichFormData === "RAW"}
-                  css={cssButton}
+                  css={css(cssButton)}
                   icon={IconNames.MORE}
                   onClick={onChangeToggleFnCall(
                     props.simpleFormToggle,
@@ -405,15 +394,15 @@ const UnconnectedRequestFormFieldBuilderContainer = (
                 />
               </ControlGroup>
               {whichFormData === "FORM" ? (
-                <Card css={cssCard}>
+                <Card css={css(cssCard)}>
                   {idChildren.map((child: string) =>
                     fieldGroup(child, serverType)
                   )}
                 </Card>
               ) : (
-                <Card css={cssCard}>
+                <Card css={css(cssCard)}>
                   <TextArea
-                    css={cssWrapTextArea}
+                    css={css(cssWrapTextArea)}
                     fill={true}
                     growVertically={true}
                     onClick={onClickFnCall(clickDirtyInputFns(props))}
@@ -431,7 +420,7 @@ const UnconnectedRequestFormFieldBuilderContainer = (
           )
         } else {
           return (
-            <Card css={cssCard}>
+            <Card css={css(cssCard)}>
               {idChildren.map((child: string) => fieldGroup(child, serverType))}
             </Card>
           )
@@ -440,13 +429,13 @@ const UnconnectedRequestFormFieldBuilderContainer = (
     } else {
       return (
         <FormGroup
-          css={cssFormGroup}
+          css={css(cssFormGroup)}
           label={formLabelFormatter(name, serverType)}
         >
           <ControlGroup>
             {...repeatableFieldButtons({ ...props, id })}
             <TextArea
-              css={cssWrapTextArea}
+              css={css(cssWrapTextArea)}
               fill={true}
               growVertically={true}
               onClick={onClickFnCall(clickDirtyInputFns(props))}
