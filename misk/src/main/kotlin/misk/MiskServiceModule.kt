@@ -2,28 +2,14 @@ package misk
 
 import com.google.common.util.concurrent.Service
 import com.google.common.util.concurrent.ServiceManager
-import com.google.inject.Binding
 import com.google.inject.Injector
-import com.google.inject.Key
 import com.google.inject.Provides
 import com.google.inject.Scopes
-import com.google.inject.multibindings.MapBinderBinding
-import com.google.inject.multibindings.MultibinderBinding
-import com.google.inject.multibindings.MultibindingsTargetVisitor
-import com.google.inject.multibindings.OptionalBinderBinding
-import com.google.inject.spi.ConstructorBinding
-import com.google.inject.spi.ConvertedConstantBinding
-import com.google.inject.spi.DefaultBindingTargetVisitor
-import com.google.inject.spi.InstanceBinding
-import com.google.inject.spi.LinkedKeyBinding
-import com.google.inject.spi.ProviderInstanceBinding
-import com.google.inject.util.Types
 import misk.concurrent.SleeperModule
 import misk.environment.RealEnvVarModule
 import misk.healthchecks.HealthCheck
 import misk.inject.KAbstractModule
 import misk.inject.asSingleton
-import misk.inject.toKey
 import misk.metrics.MetricsModule
 import misk.moshi.MoshiModule
 import misk.prometheus.PrometheusHistogramRegistryModule
@@ -92,19 +78,11 @@ class MiskCommonServiceModule : KAbstractModule() {
     dependencies: List<DependencyEdge>,
     enhancements: List<EnhancementEdge>
   ): ServiceManager {
-    // NB(mmihic): We get the binding for the Set<Service> because this uses a multibinder,
-    // which allows us to retrieve the bindings for the elements
-    val serviceListBinding = injector.getBinding(serviceSetKey)
-    val invalidServices = serviceListBinding
-        .acceptTargetVisitor(CheckServicesVisitor())
-        .sorted().toMutableList()
-
+    val invalidServices = mutableListOf<String>()
     val builder = ServiceGraphBuilder()
 
     // Support the new ServiceModule API.
     for (entry in serviceEntries) {
-      // Check that the bound ServiceEntry is Singleton. This does the same thing as the visitor for
-      // the legacy service binding.
       if (!Scopes.isSingleton(injector.getBinding(entry.key))) {
         invalidServices += entry.key.typeLiteral.type.typeName
       }
@@ -123,30 +101,11 @@ class MiskCommonServiceModule : KAbstractModule() {
       "the following services are not marked as @Singleton: ${invalidServices.joinToString(", ")}"
     }
 
-    // Support the deprecated DependantService interface.
-    if (services.isNotEmpty()) {
-      log.warn {
-        "There is a better way! " +
-            "Instead of using `multibind<Service>().to(${services.first()::class.simpleName})`, " +
-            "use `install(ServiceModule<${services.first()::class.simpleName}>())`. " +
-            "This will let you express nice service dependency graphs easily!"
-      }
-    }
-    @Suppress("DEPRECATION")
-    for (service in services) {
-      var key: Key<*>
-      when (service) {
-        is DependentService -> {
-          key = service.producedKeys.firstOrNull() ?: service::class.toKey()
-          for (consumedKey in service.consumedKeys) {
-            builder.addDependency(dependent = key, dependsOn = consumedKey)
-          }
-        }
-        else -> {
-          key = service::class.toKey()
-        }
-      }
-      builder.addService(key, service)
+    // Enforce that services are installed via a ServiceModule.
+    check(services.isEmpty()) {
+      "This doesn't work anymore! " +
+          "Instead of using `multibind<Service>().to(${services.first()::class.simpleName})`, " +
+          "use `install(ServiceModule<${services.first()::class.simpleName}>())`."
     }
 
     val serviceManager = builder.build()
@@ -154,40 +113,7 @@ class MiskCommonServiceModule : KAbstractModule() {
     return serviceManager
   }
 
-  private class CheckServicesVisitor :
-      DefaultBindingTargetVisitor<Set<Service>, List<String>>(),
-      MultibindingsTargetVisitor<Set<Service>, List<String>> {
-
-    override fun visit(multibinding: MultibinderBinding<out Set<Service>>): List<String> {
-      return multibinding.elements.asSequence()
-          .filter { !Scopes.isSingleton(it) }
-          .map { toHumanString(it) }
-          .toList()
-    }
-
-    override fun visit(mapbinding: MapBinderBinding<out Set<Service>>): List<String> {
-      return listOf()
-    }
-
-    override fun visit(optionalbinding: OptionalBinderBinding<out Set<Service>>): List<String> {
-      return listOf()
-    }
-
-    private fun toHumanString(binding: Binding<*>): String {
-      return when (binding) {
-        is InstanceBinding<*> -> binding.instance.javaClass.canonicalName
-        is ConstructorBinding<*> -> binding.constructor.declaringType.type.typeName
-        is LinkedKeyBinding<*> -> binding.linkedKey.typeLiteral.type.typeName
-        is ProviderInstanceBinding<*> -> binding.userSuppliedProvider.javaClass.canonicalName
-        is ConvertedConstantBinding<*> -> binding.value.toString()
-        else -> binding.provider.get().javaClass.canonicalName
-      }
-    }
-  }
-
   companion object {
-    @Suppress("UNCHECKED_CAST")
-    internal val serviceSetKey = Key.get(Types.setOf(Service::class.java)) as Key<Set<Service>>
     private val log = KotlinLogging.logger {}
   }
 }
