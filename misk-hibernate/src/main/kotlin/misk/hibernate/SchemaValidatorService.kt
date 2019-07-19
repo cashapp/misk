@@ -23,6 +23,9 @@ internal class SchemaValidatorService internal constructor(
     }
   }
 
+  override fun shutDown() {
+  }
+
   override fun status(): HealthStatus {
     val state = state()
     if (state != Service.State.RUNNING) {
@@ -32,9 +35,6 @@ internal class SchemaValidatorService internal constructor(
     return HealthStatus.healthy("SchemaValidatorService: ${qualifier.simpleName} is valid: " +
         "schemas=${report.schemas} tables=${report.tables} columnCount=${report.columns.size} " +
         "columns=${report.columns}")
-  }
-
-  override fun shutDown() {
   }
 
   companion object {
