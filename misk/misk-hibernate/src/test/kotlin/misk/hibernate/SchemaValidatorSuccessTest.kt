@@ -6,7 +6,6 @@ import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import javax.inject.Inject
-import javax.inject.Provider
 
 @MiskTest(startService = true)
 internal class SchemaValidatorSuccessTest {
@@ -14,13 +13,12 @@ internal class SchemaValidatorSuccessTest {
   val module = MoviesTestModule()
 
   @Inject @Movies lateinit var transacter: Transacter
-  @Inject @Movies lateinit var sessionFactoryService: Provider<SessionFactoryService>
+  @Inject @Movies lateinit var sessionFactoryService: SessionFactoryService
   @Inject @Movies lateinit var service: SchemaValidatorService
 
   @Test
   fun happyPath() {
-    val report = SchemaValidator()
-        .validate(transacter, sessionFactoryService.get().hibernateMetadata)
+    val report = SchemaValidator().validate(transacter, sessionFactoryService.hibernateMetadata)
     assertThat(report.schemas)
         .containsExactlyInAnyOrder("vt_actors_0", "vt_main_0", "vt_movies_-80", "vt_movies_80-")
     assertThat(report.tables)
