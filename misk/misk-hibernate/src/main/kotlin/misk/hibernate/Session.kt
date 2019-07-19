@@ -45,6 +45,11 @@ interface Session {
    * whatever is there currently.
    */
   fun <T> withoutChecks(vararg checks: Check, body: () -> T): T
+
+  /**
+   * @throws IllegalStateException when delete is called on a read only session.
+   */
+  fun <T : DbEntity<T>> delete(entity: T)
 }
 
 enum class Check {

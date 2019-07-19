@@ -77,6 +77,22 @@ class TransacterTest {
           ActorAndReleaseDate("Laura Dern", LocalDate.of(1977, 5, 25)),
           ActorAndReleaseDate("Carrie Fisher", LocalDate.of(1977, 5, 25)))
     }
+
+    // Delete some data.
+    transacter.transaction { session ->
+      val ianMalcolm = queryFactory.newQuery<CharacterQuery>()
+          .allowFullScatter().allowTableScan()
+          .name("Ian Malcolm")
+          .uniqueResult(session)!!
+
+      session.delete(ianMalcolm)
+
+      val afterDelete = queryFactory.newQuery<CharacterQuery>()
+          .allowFullScatter().allowTableScan()
+          .name("Ian Malcolm")
+          .uniqueResult(session)
+      assertThat(afterDelete).isNull()
+    }
   }
 
   @Test
@@ -239,6 +255,25 @@ class TransacterTest {
     transacter.transaction { session ->
       val movie: DbMovie? = queryFactory.newQuery<MovieQuery>().id(id).uniqueResult(session)
       assertThat(movie!!.name).isEqualTo("Star Wars")
+    }
+  }
+
+  @Test
+  fun readOnlyWontDelete() {
+    val id: Id<DbMovie> = transacter.transaction { session ->
+      session.save(DbMovie("Star Wars", LocalDate.of(1977, 5, 25)))
+    }
+
+    assertFailsWith<IllegalStateException> {
+      transacter.readOnly().transaction { session ->
+        val movie: DbMovie? = queryFactory.newQuery<MovieQuery>().id(id).uniqueResult(session)
+        session.delete(movie!!)
+      }
+    }
+
+    transacter.transaction { session ->
+      val movie: DbMovie? = queryFactory.newQuery<MovieQuery>().id(id).uniqueResult(session)
+      assertThat(movie).isNotNull()
     }
   }
 
