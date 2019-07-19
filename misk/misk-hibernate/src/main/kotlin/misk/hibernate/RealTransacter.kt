@@ -255,6 +255,13 @@ internal class RealTransacter private constructor(
       } as Id<T>
     }
 
+    override fun <T : DbEntity<T>> delete(entity: T) {
+      check(!readOnly) {
+        "Deleting isn't permitted in a read only session."
+      }
+      return session.delete(entity)
+    }
+
     override fun <T : DbEntity<T>> load(id: Id<T>, type: KClass<T>): T {
       return session.get(type.java, id)
     }
