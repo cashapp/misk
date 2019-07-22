@@ -7,6 +7,7 @@ import io.opentracing.Tracer
 import misk.ServiceModule
 import misk.config.AppName
 import misk.inject.KAbstractModule
+import misk.sampling.Sampler
 
 class JaegerBackendModule(val config: JaegerBackendConfig?) : KAbstractModule() {
   override fun configure() {
@@ -32,5 +33,14 @@ class JaegerBackendModule(val config: JaegerBackendConfig?) : KAbstractModule() 
         .tracerBuilder
         .withScopeManager(MDCScopeManager())
         .build()
+  }
+
+  @Provides
+  @Singleton
+  @Tracing
+  fun sampler(tracer: Tracer): Sampler {
+    val samplingRate = config?.sampler?.param ?: Configuration.SamplerConfiguration().param
+
+    return SpanSampler(tracer = tracer, samplingRate = samplingRate.toDouble())
   }
 }

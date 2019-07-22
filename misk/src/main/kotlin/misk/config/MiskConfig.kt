@@ -17,7 +17,6 @@ import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.kotlin.MissingKotlinParameterException
 import com.google.common.base.Joiner
 import misk.environment.Environment
-import misk.logging.getLogger
 import misk.resources.ResourceLoader
 import okio.buffer
 import okio.source
@@ -27,8 +26,6 @@ import java.io.FilenameFilter
 import java.net.URL
 
 object MiskConfig {
-  internal val logger = getLogger<Config>()
-
   @JvmStatic
   inline fun <reified T : Config> load(
     appName: String,
