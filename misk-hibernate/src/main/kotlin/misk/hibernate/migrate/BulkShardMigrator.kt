@@ -182,8 +182,8 @@ class BulkShardMigrator<R : DbRoot<R>, C : DbChild<R, C>> private constructor(
           if (sourceRecords.isEmpty()) {
             0
           } else {
-            logger.info("Bulk migrating (same shard) %s entities for table %s",
-                sourceRecords.size, tableName)
+            logger.info("Bulk migrating (same shard) ${sourceRecords.size} entities for table" +
+                " $tableName")
             delete(session, sourceRecords.keys)
             session.hibernateSession.doWork { connection ->
               insert(connection, sourceRecords, setOf(), insertIgnore)
