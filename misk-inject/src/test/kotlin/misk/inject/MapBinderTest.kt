@@ -15,7 +15,8 @@ class MapBinderTest {
   @Inject @TestAnnotation private lateinit var intToName: Map<Int, String>
   @Inject @TestAnnotation private lateinit var nameToShape: Map<String, Shape>
   @Inject @TestAnnotation private lateinit var shapeToName: Map<Shape, String>
-  @Inject @TestAnnotation private lateinit var shapeToColor: Map<Shape, Color>
+  @Inject @TestAnnotation
+  private lateinit var shapeToColor: Map<Shape, Color>
   @Inject private lateinit var unqualifiedShapeToColor: Map<Shape, Color>
 
   @Test
@@ -45,16 +46,24 @@ class TestModule : KAbstractModule() {
     newMapBinder<Int, String>(TestAnnotation::class).addBinding(1).toInstance("one")
     newMapBinder<Int, String>(TestAnnotation::class).addBinding(2).toInstance("two")
 
-    newMapBinder<String, Shape>(TestAnnotation::class).addBinding("square").toInstance(Square())
-    newMapBinder<String, Shape>(TestAnnotation::class).addBinding("circle").toInstance(Circle())
+    newMapBinder<String, Shape>(TestAnnotation::class).addBinding("square").toInstance(
+        Square())
+    newMapBinder<String, Shape>(TestAnnotation::class).addBinding("circle").toInstance(
+        Circle())
 
-    newMapBinder<Shape, String>(TestAnnotation::class).addBinding(Square()).toInstance("square")
-    newMapBinder<Shape, String>(TestAnnotation::class).addBinding(Circle()).toInstance("circle")
+    newMapBinder<Shape, String>(TestAnnotation::class).addBinding(
+        Square()).toInstance("square")
+    newMapBinder<Shape, String>(TestAnnotation::class).addBinding(
+        Circle()).toInstance("circle")
 
-    newMapBinder<Shape, Color>(TestAnnotation::class).addBinding(Square()).toInstance(Blue())
-    newMapBinder<Shape, Color>(TestAnnotation::class).addBinding(Circle()).toInstance(Red())
+    newMapBinder<Shape, Color>(TestAnnotation::class).addBinding(
+        Square()).toInstance(Blue())
+    newMapBinder<Shape, Color>(TestAnnotation::class).addBinding(
+        Circle()).toInstance(Red())
 
-    newMapBinder<Shape, Color>().addBinding(Square()).toInstance(Blue())
-    newMapBinder<Shape, Color>().addBinding(Circle()).toInstance(Red())
+    newMapBinder<Shape, Color>().addBinding(Square()).toInstance(
+        Blue())
+    newMapBinder<Shape, Color>().addBinding(Circle()).toInstance(
+        Red())
   }
 }

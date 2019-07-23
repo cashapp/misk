@@ -114,7 +114,8 @@ internal class SchemaValidatorTest {
             ValidationDb::class, Environment.TESTING, schemaMigratorProvider, config.data_source)
       }).asSingleton()
 
-      bind(keyOf<TransacterService>(qualifier)).to(keyOf<SessionFactoryService>(qualifier))
+      bind(keyOf<TransacterService>(qualifier)).to(
+          keyOf<SessionFactoryService>(qualifier))
       bind(keyOf<SessionFactoryService>(qualifier)).toProvider(Provider<SessionFactoryService> {
         SessionFactoryService(
             qualifier,
