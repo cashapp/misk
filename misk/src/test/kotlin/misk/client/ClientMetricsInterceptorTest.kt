@@ -61,7 +61,6 @@ internal class ClientMetricsInterceptorTest {
     assertThat(client.ping(AppRequest(404)).execute().code()).isEqualTo(404)
     assertThat(client.ping(AppRequest(503)).execute().code()).isEqualTo(503)
 
-
     SoftAssertions.assertSoftly { softly ->
       softly.assertThat(requestDuration.count("pinger.ping", "all")).isEqualTo(6)
       softly.assertThat(requestDuration.count("pinger.ping", "202")).isEqualTo(1)

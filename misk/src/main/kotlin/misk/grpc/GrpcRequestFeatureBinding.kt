@@ -7,7 +7,6 @@ import misk.web.FeatureBinding
 import misk.web.FeatureBinding.Claimer
 import misk.web.FeatureBinding.Subject
 import misk.web.PathPattern
-import okio.BufferedSource
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.reflect.jvm.javaType
@@ -18,28 +17,13 @@ internal class GrpcRequestFeatureBinding(
 ) : FeatureBinding {
   override fun bind(subject: Subject) {
     val requestBody = subject.takeRequestBody()
-    val receiveChannel = receiveChannel(requestBody)
+    val messageSource = GrpcMessageSource(requestBody, adapter)
 
     if (streaming) {
-      subject.setParameter(0, receiveChannel)
+      subject.setParameter(0, messageSource)
     } else {
-      val request = receiveChannel.receiveOrNull()!!
+      val request = messageSource.read()!!
       subject.setParameter(0, request)
-    }
-  }
-
-  private fun receiveChannel(source: BufferedSource): GrpcReceiveChannel<Any> {
-    val reader = GrpcReader.get(source, adapter)
-    return object : GrpcReceiveChannel<Any> {
-      override fun receiveOrNull(): Any? {
-        return reader.readMessage()
-      }
-
-      override fun close() {
-        reader.close()
-      }
-
-      override fun toString() = "GrpcReceiveChannel"
     }
   }
 

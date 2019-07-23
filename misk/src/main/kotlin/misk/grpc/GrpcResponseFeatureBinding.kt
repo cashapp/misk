@@ -6,7 +6,6 @@ import misk.web.DispatchMechanism
 import misk.web.FeatureBinding
 import misk.web.PathPattern
 import misk.web.mediatype.MediaTypes
-import okio.BufferedSink
 import java.lang.reflect.Type
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -26,35 +25,19 @@ internal class GrpcResponseFeatureBinding(
     // TODO(jwilson): permit non-identity GRPC encoding.
 
     val responseBody = subject.takeResponseBody()
-    val sendChannel = sendChannel(responseBody)
+    val messageSink = GrpcMessageSink(responseBody, adapter)
 
     subject.httpCall.setResponseHeader("Content-Type",
         MediaTypes.APPLICATION_GRPC_MEDIA_TYPE.toString())
 
     if (streaming) {
       // It's a streaming response, give the call a SendChannel to write to.
-      subject.setParameter(1, sendChannel)
+      subject.setParameter(1, messageSink)
     } else {
       // It's a single response, write the return value out.
       val returnValue = subject.takeReturnValue()!!
-      sendChannel.send(returnValue)
-      sendChannel.close()
-    }
-  }
-
-  private fun sendChannel(sink: BufferedSink): GrpcSendChannel<Any> {
-    val writer = GrpcWriter.get(sink, adapter)
-    return object : GrpcSendChannel<Any> {
-      override fun send(message: Any) {
-        writer.writeMessage(message)
-        writer.flush()
-      }
-
-      override fun close() {
-        writer.close()
-      }
-
-      override fun toString() = "GrpcSendChannel"
+      messageSink.write(returnValue)
+      messageSink.close()
     }
   }
 
@@ -76,7 +59,7 @@ internal class GrpcResponseFeatureBinding(
       if (action.parameters.size == 2) {
         claimer.claimParameter(1)
         val responseType: Type = action.parameters[1].type.streamElementType()
-            ?: error("@Grpc function's second parameter should be a GrpcReceiveChannel: $action")
+            ?: error("@Grpc function's second parameter should be a MessageSource: $action")
         @Suppress("UNCHECKED_CAST") // Assume it's a proto type.
         return GrpcResponseFeatureBinding(
             adapter = ProtoAdapter.get(responseType as Class<Any>),

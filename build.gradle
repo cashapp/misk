@@ -1,5 +1,9 @@
 buildscript {
   repositories {
+    maven { url 'https://oss.sonatype.org/content/repositories/snapshots' }
+    maven {
+      url "https://artifactory.global.square/artifactory/releases"
+    }
     mavenCentral()
     jcenter()
     maven {
@@ -46,6 +50,10 @@ subprojects {
 
   buildscript {
     repositories {
+      maven { url 'https://oss.sonatype.org/content/repositories/snapshots' }
+      maven {
+        url "https://artifactory.global.square/artifactory/releases"
+      }
       mavenCentral()
       jcenter()
     }
@@ -55,6 +63,10 @@ subprojects {
     }
   }
   repositories {
+    maven { url 'https://oss.sonatype.org/content/repositories/snapshots' }
+    maven {
+      url "https://artifactory.global.square/artifactory/releases"
+    }
     mavenCentral()
     jcenter()
   }
