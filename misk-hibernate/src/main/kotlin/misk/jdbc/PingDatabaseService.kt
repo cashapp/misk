@@ -27,23 +27,35 @@ class PingDatabaseService @Inject constructor(
     val dataSource = DriverDataSource(
         jdbcUrl, config.type.driverClassName, Properties(), config.username, config.password)
     retry(10, ExponentialBackoff(Duration.ofMillis(20), Duration.ofMillis(1000))) {
-      dataSource.connection.use { c ->
-        try {
-          val result =
-              c.createStatement().executeQuery("SELECT 1 FROM dual").uniqueInt()
-          check(result == 1)
-        } catch (e: Exception) {
-          logger.error(e) { "error attempting to ping the database" }
-          val message = e.message
-          if (message != null && message.contains("table dual not found")) {
-            throw RuntimeException(
-                "Something is wrong with your vschema and unfortunately vtcombo does not " +
-                    "currently have good error reporting on this. Please do an ocular inspection.",
-                e)
-          }
-          throw RuntimeException("Problem pinging url $jdbcUrl", e)
-        }
+      val connection = try {
+        dataSource.connect()
+      } catch (e: Exception) {
+        logger.error(e) { "failed to get a data source connection" }
+        throw RuntimeException("failed to get a data source connection $jdbcUrl", e)
       }
+      try {
+        connection.use { c ->
+          val result = c.createStatement().executeQuery("SELECT 1 FROM dual").uniqueInt()
+          check(result == 1)
+        }
+      } catch (e: Exception) {
+        logger.error(e) { "error attempting to ping the database" }
+        throw RuntimeException(e.describe(jdbcUrl), e)
+      }
+    }
+  }
+
+  /** Kotlin thinks getConnection() is a val but it's really a function. */
+  @Suppress("UsePropertyAccessSyntax")
+  private fun DriverDataSource.connect() = getConnection()
+
+  private fun Exception.describe(jdbcUrl: String): String {
+    return when {
+      message?.contains("table dual not found") ?: false -> {
+        "Something is wrong with your vschema and unfortunately vtcombo does not " +
+            "currently have good error reporting on this. Please do an ocular inspection."
+      }
+      else -> "Problem pinging url $jdbcUrl"
     }
   }
 

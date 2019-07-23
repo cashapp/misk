@@ -50,8 +50,8 @@ internal class SqsJobConsumer @Inject internal constructor(
 
     for (i in (0 until config.concurrent_receivers_per_queue)) {
       taskQueue.scheduleWithBackoff(Duration.ZERO) {
-        // Don't call handlers until all services are ready, otherwise handlers will crash because the
-        // services they might need (databases, etc.) won't be ready.
+        // Don't call handlers until all services are ready, otherwise handlers will crash because
+        // the services they might need (databases, etc.) won't be ready.
         serviceManagerProvider.get().awaitHealthy()
         receiver.runOnce()
       }
