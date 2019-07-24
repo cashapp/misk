@@ -34,8 +34,10 @@ class MultiBindingsModule : KAbstractModule() {
   override fun configure() {
     newMultibinder<Int>(TestAnnotation::class).addBinding().toInstance(1)
 
-    newMultibinder<Color>(TestAnnotation::class).addBinding().toInstance(Blue())
-    newMultibinder<Color>(TestAnnotation::class).addBinding().toInstance(Red())
+    newMultibinder<Color>(TestAnnotation::class).addBinding().toInstance(
+        Blue())
+    newMultibinder<Color>(TestAnnotation::class).addBinding().toInstance(
+        Red())
 
     newMultibinder<Color>().addBinding().toInstance(Blue())
   }

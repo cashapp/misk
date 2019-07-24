@@ -68,7 +68,7 @@ inline fun <reified T : Any> setOfType() = setOfType(T::class)
 inline fun <reified K : Any, reified V : Any> mapOfType() = mapOfType(K::class, V::class)
 
 fun <K : Any, V : Any> mapOfType(keyType: KClass<K>, valueType: KClass<V>) =
-  mapOfType(keyType.typeLiteral(), valueType.typeLiteral())
+    mapOfType(keyType.typeLiteral(), valueType.typeLiteral())
 
 @Suppress("UNCHECKED_CAST") // The type system isn't aware of constructed types.
 fun <K, V> mapOfType(keyType: TypeLiteral<K>, valueType: TypeLiteral<V>): TypeLiteral<Map<K, V>> =
