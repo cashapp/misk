@@ -15,7 +15,6 @@ import misk.web.mediatype.MediaTypes
 import misk.web.toResponseBody
 import okhttp3.Headers.Companion.toHeaders
 import java.lang.reflect.InvocationTargetException
-import java.util.concurrent.ExecutionException
 import javax.inject.Inject
 
 /**
@@ -46,7 +45,6 @@ class ExceptionHandlingInterceptor(
   private fun toResponse(th: Throwable): Response<*> = when (th) {
     is UnauthenticatedException -> UNAUTHENTICATED_RESPONSE
     is UnauthorizedException -> UNAUTHORIZED_RESPONSE
-    is ExecutionException -> toResponse(th.cause!!)
     is InvocationTargetException -> toResponse(th.targetException)
     is UncheckedExecutionException -> toResponse(th.cause!!)
     else -> mapperResolver.mapperFor(th)?.let {
