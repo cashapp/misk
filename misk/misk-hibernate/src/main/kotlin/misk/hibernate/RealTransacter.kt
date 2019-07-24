@@ -86,22 +86,21 @@ internal class RealTransacter private constructor(
         if (!isRetryable(e)) throw e
 
         if (attempt >= options.maxAttempts) {
-          logger.info(e) {
-            "${qualifier.simpleName} recoverable transaction exception (attempt: $attempt), max attempts exceeded"
+          logger.info {
+            "${qualifier.simpleName} recoverable transaction exception " +
+                "(attempt: $attempt), no more attempts"
           }
           throw e
         }
 
-        logger.info(e) {
-          "${qualifier.simpleName} recoverable transaction exception (attempt: $attempt), retrying"
-        }
         val sleepDuration = backoff.nextRetry()
+        logger.info(e) {
+          "${qualifier.simpleName} recoverable transaction exception " +
+              "(attempt: $attempt), will retry after a $sleepDuration delay"
+        }
+
         if (!sleepDuration.isZero) {
-          try {
-            Thread.sleep(sleepDuration.toMillis())
-          } catch (e: InterruptedException) {
-            throw e
-          }
+          Thread.sleep(sleepDuration.toMillis())
         }
       }
     }
@@ -135,7 +134,6 @@ internal class RealTransacter private constructor(
             e.addSuppressed(suppressed)
           }
         }
-        session.hibernateSession.close()
         throw e
       } finally {
         // For any reason if tracing was left open, end it.
@@ -238,9 +236,7 @@ internal class RealTransacter private constructor(
 
     @Suppress("UNCHECKED_CAST")
     override fun <T : DbEntity<T>> save(entity: T): Id<T> {
-      if (readOnly) {
-        throw IllegalStateException("Saving isn't permitted in a read only session.")
-      }
+      check(!readOnly) { "Saving isn't permitted in a read only session." }
       return when (entity) {
         is DbChild<*, *> -> (hibernateSession.save(entity) as Gid<*, *>).id
         is DbRoot<*> -> hibernateSession.save(entity)
