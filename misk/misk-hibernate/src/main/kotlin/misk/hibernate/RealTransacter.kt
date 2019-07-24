@@ -14,6 +14,7 @@ import org.hibernate.FlushMode
 import org.hibernate.SessionFactory
 import org.hibernate.StaleObjectStateException
 import org.hibernate.exception.LockAcquisitionException
+import java.io.Closeable
 import java.sql.Connection
 import java.sql.SQLRecoverableException
 import java.time.Duration
@@ -61,13 +62,13 @@ internal class RealTransacter private constructor(
     return session == null || !session.disabledChecks.contains(check)
   }
 
-  override fun <T> transaction(lambda: (session: Session) -> T): T {
+  override fun <T> transaction(block: (session: Session) -> T): T {
     return maybeWithTracing(APPLICATION_TRANSACTION_SPAN_NAME) {
-      transactionWithRetriesInternal(lambda)
+      transactionWithRetriesInternal(block)
     }
   }
 
-  private fun <T> transactionWithRetriesInternal(lambda: (session: Session) -> T): T {
+  private fun <T> transactionWithRetriesInternal(block: (session: Session) -> T): T {
     require(options.maxAttempts > 0)
 
     val backoff = ExponentialBackoff(
@@ -80,7 +81,7 @@ internal class RealTransacter private constructor(
     while (true) {
       try {
         attempt++
-        return transactionInternal(lambda)
+        return transactionInternal(block)
       } catch (e: Exception) {
         if (!isRetryable(e)) throw e
 
@@ -106,17 +107,17 @@ internal class RealTransacter private constructor(
     }
   }
 
-  private fun <T> transactionInternal(lambda: (session: Session) -> T): T {
-    return maybeWithTracing(DB_TRANSACTION_SPAN_NAME) { transactionInternalSession(lambda) }
+  private fun <T> transactionInternal(block: (session: Session) -> T): T {
+    return maybeWithTracing(DB_TRANSACTION_SPAN_NAME) { transactionInternalSession(block) }
   }
 
-  private fun <T> transactionInternalSession(lambda: (session: Session) -> T): T {
+  private fun <T> transactionInternalSession(block: (session: Session) -> T): T {
     return withSession { session ->
       val transaction = maybeWithTracing(DB_BEGIN_SPAN_NAME) {
         session.hibernateSession.beginTransaction()!!
       }
       try {
-        val result = lambda(session)
+        val result = block(session)
 
         // Flush any changes to the databased before commit
         session.hibernateSession.flush()
@@ -134,6 +135,7 @@ internal class RealTransacter private constructor(
             e.addSuppressed(suppressed)
           }
         }
+        session.hibernateSession.close()
         throw e
       } finally {
         // For any reason if tracing was left open, end it.
@@ -167,29 +169,23 @@ internal class RealTransacter private constructor(
           tracer
       )
 
-  private fun <T> withSession(lambda: (session: RealSession) -> T): T {
-    check(threadLocalSession.get() == null) { "Attempted to start a nested session" }
+  private fun <T> withSession(block: (session: RealSession) -> T): T {
+    val hibernateSession = sessionFactory.openSession()
+    val realSession = RealSession(
+        hibernateSession = hibernateSession,
+        config = config,
+        readOnly = options.readOnly,
+        disabledChecks = options.disabledChecks
+    )
 
-    val realSession = RealSession(sessionFactory.openSession(), config, options.readOnly,
-        options.disabledChecks)
-    threadLocalSession.set(realSession)
-
-    try {
-      return lambda(realSession)
-    } finally {
-      closeSession()
-    }
-  }
-
-  private fun closeSession() {
-    try {
-      threadLocalSession.get().hibernateSession.close()
-    } finally {
-      val localSession = threadLocalSession.get()
-      // Remove the session before calling session close hooks so that a new transaction can be
-      // allowed to be started as part of the close hook.
-      threadLocalSession.remove()
-      localSession.sessionClose()
+    // Note that the RealSession is closed last so that close hooks run after the thread locals and
+    // Hibernate Session have been released. This way close hooks can start their own transactions.
+    realSession.use {
+      hibernateSession.use {
+        threadLocalSession.withValue(realSession) {
+          return block(realSession)
+        }
+      }
     }
   }
 
@@ -224,12 +220,11 @@ internal class RealTransacter private constructor(
   }
 
   internal class RealSession(
-    val session: org.hibernate.Session,
+    override val hibernateSession: org.hibernate.Session,
     val config: DataSourceConfig,
-    val readOnly: Boolean,
+    private val readOnly: Boolean,
     var disabledChecks: EnumSet<Check>
-  ) : Session {
-    override val hibernateSession = session
+  ) : Session, Closeable {
     private val preCommitHooks = mutableListOf<() -> Unit>()
     private val postCommitHooks = mutableListOf<() -> Unit>()
     private val sessionCloseHooks = mutableListOf<() -> Unit>()
@@ -247,9 +242,9 @@ internal class RealTransacter private constructor(
         throw IllegalStateException("Saving isn't permitted in a read only session.")
       }
       return when (entity) {
-        is DbChild<*, *> -> (session.save(entity) as Gid<*, *>).id
-        is DbRoot<*> -> session.save(entity)
-        is DbUnsharded<*> -> session.save(entity)
+        is DbChild<*, *> -> (hibernateSession.save(entity) as Gid<*, *>).id
+        is DbRoot<*> -> hibernateSession.save(entity)
+        is DbUnsharded<*> -> hibernateSession.save(entity)
         else -> throw IllegalArgumentException(
             "You need to sub-class one of [DbChild, DbRoot, DbUnsharded]")
       } as Id<T>
@@ -259,22 +254,22 @@ internal class RealTransacter private constructor(
       check(!readOnly) {
         "Deleting isn't permitted in a read only session."
       }
-      return session.delete(entity)
+      return hibernateSession.delete(entity)
     }
 
     override fun <T : DbEntity<T>> load(id: Id<T>, type: KClass<T>): T {
-      return session.get(type.java, id)
+      return hibernateSession.get(type.java, id)
     }
 
     override fun <R : DbRoot<R>, T : DbSharded<R, T>> loadSharded(
       gid: Gid<R, T>,
       type: KClass<T>
     ): T {
-      return session.get(type.java, gid)
+      return hibernateSession.get(type.java, gid)
     }
 
     override fun <T : DbEntity<T>> loadOrNull(id: Id<T>, type: KClass<T>): T? {
-      return session.get(type.java, id)
+      return hibernateSession.get(type.java, id)
     }
 
     override fun shards(): Set<Shard> {
@@ -329,14 +324,14 @@ internal class RealTransacter private constructor(
     }
 
     override fun <T> useConnection(work: (Connection) -> T): T {
-      return session.doReturningWork(work)
+      return hibernateSession.doReturningWork(work)
     }
 
     internal fun preCommit() {
-      preCommitHooks.forEach {
+      preCommitHooks.forEach { preCommitHook ->
         // Propagate hook exceptions up to the transacter so that the the transaction is rolled
-        // back and the error gets returned to the applicatiob
-        it()
+        // back and the error gets returned to the application.
+        preCommitHook()
       }
     }
 
@@ -345,9 +340,9 @@ internal class RealTransacter private constructor(
     }
 
     internal fun postCommit() {
-      postCommitHooks.forEach {
+      postCommitHooks.forEach { postCommitHook ->
         try {
-          it()
+          postCommitHook()
         } catch (th: Throwable) {
           throw PostCommitHookFailedException(th)
         }
@@ -358,9 +353,9 @@ internal class RealTransacter private constructor(
       postCommitHooks.add(work)
     }
 
-    internal fun sessionClose() {
-      sessionCloseHooks.forEach {
-        it()
+    override fun close() {
+      sessionCloseHooks.forEach { sessionCloseHook ->
+        sessionCloseHook()
       }
     }
 
@@ -382,18 +377,25 @@ internal class RealTransacter private constructor(
         disabledChecks = previous
       }
     }
+  }
 
-    companion object {
-      private val log = getLogger<RealSession>()
+  private fun <T> maybeWithTracing(spanName: String, block: () -> T): T {
+    return if (tracer != null) tracer.traceWithSpan(spanName) { span ->
+      Tags.COMPONENT.set(span, TRANSACTER_SPAN_TAG)
+      block()
+    } else {
+      block()
     }
   }
 
-  private fun <T> maybeWithTracing(spanName: String, lambda: () -> T): T {
-    return if (tracer != null) tracer.traceWithSpan(spanName) { span ->
-      Tags.COMPONENT.set(span, TRANSACTER_SPAN_TAG)
-      lambda()
-    } else {
-      lambda()
+  private inline fun <T, R> ThreadLocal<T>.withValue(value: T, block: () -> R): R {
+    check(get() == null) { "Attempted to start a nested session" }
+
+    set(value)
+    try {
+      return block()
+    } finally {
+      remove()
     }
   }
 }

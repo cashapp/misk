@@ -16,6 +16,7 @@ import org.hibernate.exception.ConstraintViolationException
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import java.sql.Connection
 import java.time.LocalDate
 import java.util.concurrent.atomic.AtomicInteger
 import javax.inject.Inject
@@ -468,7 +469,7 @@ class TransacterTest {
   }
 
   @Test
-  fun sessionCloseHookInvokedEvenOnRollBak() {
+  fun sessionCloseHookInvokedEvenOnRollback() {
     val logs = mutableListOf<String>()
 
     assertThrows<NonRetryableException> {
@@ -483,7 +484,52 @@ class TransacterTest {
     assertThat(logs).containsExactly("hook invoked")
   }
 
-  fun tracingAssertions(committed: Boolean) {
+  @Disabled("TODO(jwilson): not sure if this is possible, but it would be nice behavior")
+  @Test
+  fun retriesRotateConnections() {
+    val logs = mutableListOf<String>()
+    val connectionsList = mutableListOf<Connection>()
+
+    val callCount = AtomicInteger()
+    transacter.retries(3).transaction { session ->
+      session.useConnection { connection ->
+
+        val rootConnection = connection.rootConnection()
+        var index = connectionsList.indexOf(rootConnection)
+        if (index == -1) {
+          index = connectionsList.size
+          connectionsList += rootConnection
+        }
+
+        logs += "transaction on connectionsList[$index]"
+      }
+
+      if (callCount.getAndIncrement() < 2) throw RetryTransactionException()
+    }
+
+    assertThat(callCount.get()).isEqualTo(3)
+    assertThat(logs).containsExactly(
+        "transaction on connectionsList[0]",
+        "transaction on connectionsList[1]",
+        "transaction on connectionsList[2]"
+    )
+  }
+
+  /**
+   * The JDBC connections we use are one-time-use wrappers around the real connections that talk to
+   * the database. This gets at those connections so we can differentiate them.
+   */
+  private fun Connection.rootConnection(): Connection {
+    var result = this
+    while (result.isWrapperFor(Connection::class.java)) {
+      val unwrapped = result.unwrap(Connection::class.java)
+      if (unwrapped == result) break
+      result = unwrapped
+    }
+    return result
+  }
+
+  private fun tracingAssertions(committed: Boolean) {
     // Assert on span, implicitly asserting that it's complete by looking at finished spans
     val orderedSpans = tracer.finishedSpans().sortedBy { it.context().spanId() }
     assertThat(orderedSpans).hasSize(4)
