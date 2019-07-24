@@ -1,0 +1,14 @@
+buildscript {
+  dependencies {
+    classpath dep.kotlinNoArgPlugin
+  }
+}
+
+dependencies {
+  compile dep.guice
+  compile dep.guiceMultibindings
+  compile dep.kotlinStdLib
+  compile dep.kotlinReflection
+
+  testCompile project(':misk-testing')
+}

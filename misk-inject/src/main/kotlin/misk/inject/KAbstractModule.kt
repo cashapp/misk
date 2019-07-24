@@ -70,7 +70,8 @@ abstract class KAbstractModule : AbstractModule() {
         parameterizedType<List<*>>(Types.subtypeOf(type.java)).typeLiteral() as TypeLiteral<List<T>>
     val listOfOutTKey = listOfOutT.toKey(annotation)
     val listOfTKey = listOfT.toKey(annotation)
-    bind(listOfOutTKey).toProvider(ListProvider(mutableSetOfTKey, getProvider(mutableSetOfTKey)))
+    bind(listOfOutTKey).toProvider(
+        ListProvider(mutableSetOfTKey, getProvider(mutableSetOfTKey)))
     bind(setOfOutTKey).to(setOfT.toKey(annotation))
     bind(listOfTKey).to(listOfOutTKey)
 

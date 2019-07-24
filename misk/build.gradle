@@ -49,6 +49,7 @@ dependencies {
   compile dep.prometheusClient
   compile dep.prometheusHotspot
   compile dep.jnrUnixsocket
+  compile project(':misk-inject')
 
   testCompile dep.kotlinxCoroutines
   testCompile dep.mockitoCore

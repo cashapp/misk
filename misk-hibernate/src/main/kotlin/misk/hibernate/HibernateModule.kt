@@ -83,7 +83,8 @@ class HibernateModule(
     // Bind DataSourceService.
     val dataSourceDecoratorsKey = setOfType(DataSourceDecorator::class).toKey(qualifier)
     val dataSourceDecoratorsProvider = getProvider(dataSourceDecoratorsKey)
-    bind(keyOf<DataSource>(qualifier)).toProvider(keyOf<DataSourceService>(qualifier)).asSingleton()
+    bind(keyOf<DataSource>(qualifier)).toProvider(
+        keyOf<DataSourceService>(qualifier)).asSingleton()
     bind(keyOf<DataSourceService>(qualifier)).toProvider(object : Provider<DataSourceService> {
       @com.google.inject.Inject(optional = true) var metrics: Metrics? = null
       override fun get() = DataSourceService(
@@ -135,7 +136,8 @@ class HibernateModule(
     install(ServiceModule<SchemaMigratorService>(qualifier))
 
     // Bind SchemaValidatorService.
-    val sessionFactoryServiceProvider = getProvider(keyOf<SessionFactoryService>(qualifier))
+    val sessionFactoryServiceProvider = getProvider(
+        keyOf<SessionFactoryService>(qualifier))
     val schemaValidatorServiceKey = keyOf<SchemaValidatorService>(qualifier)
     bind(schemaValidatorServiceKey)
         .toProvider(Provider<SchemaValidatorService> {
@@ -159,7 +161,8 @@ class HibernateModule(
     bind(keyOf<SessionFactory>(qualifier))
         .toProvider(keyOf<SessionFactoryService>(qualifier))
         .asSingleton()
-    bind(keyOf<TransacterService>(qualifier)).to(keyOf<SessionFactoryService>(qualifier))
+    bind(keyOf<TransacterService>(qualifier)).to(
+        keyOf<SessionFactoryService>(qualifier))
     bind(keyOf<SessionFactoryService>(qualifier)).toProvider(Provider<SessionFactoryService> {
       SessionFactoryService(qualifier, config, dataSourceProvider,
           hibernateInjectorAccessProvider.get(),
