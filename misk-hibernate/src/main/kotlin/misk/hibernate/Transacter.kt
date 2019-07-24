@@ -17,15 +17,15 @@ interface Transacter {
   fun isCheckEnabled(check: Check): Boolean
 
   /**
-   * Starts a transaction on the current thread, executes lambda, and commits the transaction.
-   * If lambda raises an exception the transaction will be rolled back instead of committed.
+   * Starts a transaction on the current thread, executes [block], and commits the transaction.
+   * If the block raises an exception the transaction will be rolled back instead of committed.
    *
    * If retries are permitted (the default), a failed but recoverable transaction will be
    * reattempted after rolling back.
    *
    * It is an error to start a transaction if another transaction is already in progress.
    */
-  fun <T> transaction(lambda: (session: Session) -> T): T
+  fun <T> transaction(block: (session: Session) -> T): T
 
   fun retries(maxAttempts: Int = 2): Transacter
 
@@ -51,7 +51,7 @@ fun Transacter.shards() = transaction { it.shards() }
 fun Transacter.shards(keyspace: Keyspace) = transaction { it.shards(keyspace) }
 
 /**
- * Commits a transaction with operations defined in the [lambda] block.
+ * Commits a transaction with operations of [block].
  *
  * New objects must be persisted with an explicit call to [Session.save].
  * Updates are performed implicitly by modifying objects returned from a query.
@@ -71,8 +71,8 @@ fun Transacter.shards(keyspace: Keyspace) = transaction { it.shards(keyspace) }
  * }
  *
  */
-fun <T> Transacter.transaction(shard: Shard, lambda: (session: Session) -> T): T =
-    transaction { it.target(shard) { lambda(it) } }
+fun <T> Transacter.transaction(shard: Shard, block: (session: Session) -> T): T =
+    transaction { it.target(shard) { block(it) } }
 
 /**
  * Thrown to explicitly trigger a retry, subject to retry limits and config such as noRetries().
