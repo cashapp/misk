@@ -6,6 +6,7 @@ import misk.Chain
 import misk.MiskCaller
 import misk.exceptions.UnauthenticatedException
 import misk.exceptions.UnauthorizedException
+import misk.logging.getLogger
 import misk.scope.ActionScoped
 import javax.inject.Inject
 import kotlin.reflect.KClass
@@ -19,6 +20,7 @@ class AccessInterceptor private constructor(
   override fun intercept(chain: Chain): Any {
     val caller = caller.get() ?: throw UnauthenticatedException()
     if (!isAllowed(caller)) {
+      logger.info { "$caller is not allowed to access ${chain.action}" }
       throw UnauthorizedException()
     }
 
@@ -95,5 +97,9 @@ class AccessInterceptor private constructor(
 
     private inline fun <reified T : Annotation> Action.hasAnnotation() =
         function.annotations.any { it.annotationClass == T::class }
+  }
+
+  companion object {
+    val logger = getLogger<AccessInterceptor>()
   }
 }
