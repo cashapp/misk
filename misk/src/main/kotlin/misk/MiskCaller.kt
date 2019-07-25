@@ -18,4 +18,13 @@ data class MiskCaller(
 
   /** The identity of the calling principal, regardless of whether they are a service or a user */
   val principal: String get() = service ?: user!!
+
+  /** We don't like to log usernames. */
+  override fun toString(): String {
+    return if (user != null) {
+      "user=${user.firstOrNull() ?: ""}███████, capabilities=$capabilities"
+    } else {
+      "service=$service"
+    }
+  }
 }
