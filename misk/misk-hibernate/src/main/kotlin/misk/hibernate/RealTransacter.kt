@@ -29,7 +29,7 @@ internal class RealTransacter private constructor(
   private val qualifier: KClass<out Annotation>,
   private val sessionFactoryProvider: Provider<SessionFactory>,
   private val config: DataSourceConfig,
-  private val threadLocalSession: ThreadLocal<RealSession>,
+  private val threadLatestSession: ThreadLocal<RealSession>,
   private val options: TransacterOptions,
   private val queryTracingListener: QueryTracingListener,
   private val tracer: Tracer?
@@ -55,11 +55,11 @@ internal class RealTransacter private constructor(
     get() = sessionFactoryProvider.get()
 
   override val inTransaction: Boolean
-    get() = threadLocalSession.get() != null
+    get() = threadLatestSession.get()?.inTransaction ?: false
 
   override fun isCheckEnabled(check: Check): Boolean {
-    val session = threadLocalSession.get()
-    return session == null || !session.disabledChecks.contains(check)
+    val session = threadLatestSession.get()
+    return session == null || !session.inTransaction || !session.disabledChecks.contains(check)
   }
 
   override fun <T> transaction(block: (session: Session) -> T): T {
@@ -81,14 +81,22 @@ internal class RealTransacter private constructor(
     while (true) {
       try {
         attempt++
-        return transactionInternal(block)
+        val result = transactionInternal(block)
+
+        if (attempt > 1) {
+          logger.info {
+            "retried ${qualifier.simpleName} transaction succeeded (${attemptNote(attempt)})"
+          }
+        }
+
+        return result
       } catch (e: Exception) {
         if (!isRetryable(e)) throw e
 
         if (attempt >= options.maxAttempts) {
           logger.info {
             "${qualifier.simpleName} recoverable transaction exception " +
-                "(attempt: $attempt), no more attempts"
+                "(${attemptNote(attempt)}), no more attempts"
           }
           throw e
         }
@@ -96,7 +104,7 @@ internal class RealTransacter private constructor(
         val sleepDuration = backoff.nextRetry()
         logger.info(e) {
           "${qualifier.simpleName} recoverable transaction exception " +
-              "(attempt: $attempt), will retry after a $sleepDuration delay"
+              "(${attemptNote(attempt)}), will retry after a $sleepDuration delay"
         }
 
         if (!sleepDuration.isZero) {
@@ -104,6 +112,17 @@ internal class RealTransacter private constructor(
         }
       }
     }
+  }
+
+  /**
+   * Returns a string describing the most recent attempt. This includes whether the attempt used the
+   * same connection which might help in diagnosing stale data problems.
+   */
+  private fun attemptNote(attempt: Int): String {
+    if (attempt == 1) return "attempt 1"
+    val latestSession = threadLatestSession.get()!!
+    if (latestSession.sameConnection) return "attempt $attempt, same connection"
+    return "attempt $attempt, different connection"
   }
 
   private fun <T> transactionInternal(block: (session: Session) -> T): T {
@@ -161,7 +180,7 @@ internal class RealTransacter private constructor(
           qualifier,
           sessionFactoryProvider,
           config,
-          threadLocalSession,
+          threadLatestSession,
           options,
           queryTracingListener,
           tracer
@@ -173,14 +192,15 @@ internal class RealTransacter private constructor(
         hibernateSession = hibernateSession,
         config = config,
         readOnly = options.readOnly,
-        disabledChecks = options.disabledChecks
+        disabledChecks = options.disabledChecks,
+        predecessor = threadLatestSession.get()
     )
 
     // Note that the RealSession is closed last so that close hooks run after the thread locals and
     // Hibernate Session have been released. This way close hooks can start their own transactions.
     realSession.use {
       hibernateSession.use {
-        threadLocalSession.withValue(realSession) {
+        useSession(realSession) {
           return block(realSession)
         }
       }
@@ -221,11 +241,15 @@ internal class RealTransacter private constructor(
     override val hibernateSession: org.hibernate.Session,
     val config: DataSourceConfig,
     private val readOnly: Boolean,
-    var disabledChecks: EnumSet<Check>
+    var disabledChecks: EnumSet<Check>,
+    predecessor: RealSession?
   ) : Session, Closeable {
     private val preCommitHooks = mutableListOf<() -> Unit>()
     private val postCommitHooks = mutableListOf<() -> Unit>()
     private val sessionCloseHooks = mutableListOf<() -> Unit>()
+    private val rootConnection = hibernateSession.rootConnection
+    internal val sameConnection = predecessor?.rootConnection == rootConnection
+    internal var inTransaction = false
 
     init {
       if (readOnly) {
@@ -373,6 +397,22 @@ internal class RealTransacter private constructor(
         disabledChecks = previous
       }
     }
+
+    /**
+     * Returns the physical JDBC connection of this session. Hibernate creates one-time-use wrappers
+     * around the physical connections that talk to the database. This unwraps those so we can
+     * tell when a connection is involved in a stale data problem.
+     */
+    private val org.hibernate.Session.rootConnection: Connection
+      get() {
+        var result: Connection = doReturningWork { connection -> connection }
+        while (result.isWrapperFor(Connection::class.java)) {
+          val unwrapped = result.unwrap(Connection::class.java)
+          if (unwrapped == result) break
+          result = unwrapped
+        }
+        return result
+      }
   }
 
   private fun <T> maybeWithTracing(spanName: String, block: () -> T): T {
@@ -384,14 +424,16 @@ internal class RealTransacter private constructor(
     }
   }
 
-  private inline fun <T, R> ThreadLocal<T>.withValue(value: T, block: () -> R): R {
-    check(get() == null) { "Attempted to start a nested session" }
+  private inline fun <R> useSession(session: RealSession, block: () -> R): R {
+    val previous = threadLatestSession.get()
+    check(previous == null || !previous.inTransaction) { "Attempted to start a nested session" }
 
-    set(value)
+    threadLatestSession.set(session)
+    session.inTransaction = true
     try {
       return block()
     } finally {
-      remove()
+      session.inTransaction = false
     }
   }
 }

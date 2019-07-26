@@ -9,6 +9,7 @@ import misk.hibernate.RealTransacter.Companion.DB_COMMIT_SPAN_NAME
 import misk.hibernate.RealTransacter.Companion.DB_ROLLBACK_SPAN_NAME
 import misk.hibernate.RealTransacter.Companion.DB_TRANSACTION_SPAN_NAME
 import misk.hibernate.RealTransacter.Companion.TRANSACTER_SPAN_TAG
+import misk.logging.LogCollector
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
@@ -16,7 +17,6 @@ import org.hibernate.exception.ConstraintViolationException
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import java.sql.Connection
 import java.time.LocalDate
 import java.util.concurrent.atomic.AtomicInteger
 import javax.inject.Inject
@@ -30,6 +30,7 @@ class TransacterTest {
   @Inject @Movies lateinit var transacter: Transacter
   @Inject lateinit var queryFactory: Query.Factory
   @Inject lateinit var tracer: MockTracer
+  @Inject lateinit var logCollector: LogCollector
 
   @Test
   fun happyPath() {
@@ -484,49 +485,23 @@ class TransacterTest {
     assertThat(logs).containsExactly("hook invoked")
   }
 
-  @Disabled("TODO(jwilson): not sure if this is possible, but it would be nice behavior")
   @Test
-  fun retriesRotateConnections() {
-    val logs = mutableListOf<String>()
-    val connectionsList = mutableListOf<Connection>()
+  fun retriesIncludeConnectionReuse() {
+    logCollector.takeMessages()
 
     val callCount = AtomicInteger()
-    transacter.retries(3).transaction { session ->
-      session.useConnection { connection ->
-
-        val rootConnection = connection.rootConnection()
-        var index = connectionsList.indexOf(rootConnection)
-        if (index == -1) {
-          index = connectionsList.size
-          connectionsList += rootConnection
-        }
-
-        logs += "transaction on connectionsList[$index]"
-      }
-
+    transacter.retries(3).transaction {
       if (callCount.getAndIncrement() < 2) throw RetryTransactionException()
     }
 
-    assertThat(callCount.get()).isEqualTo(3)
-    assertThat(logs).containsExactly(
-        "transaction on connectionsList[0]",
-        "transaction on connectionsList[1]",
-        "transaction on connectionsList[2]"
-    )
-  }
-
-  /**
-   * The JDBC connections we use are one-time-use wrappers around the real connections that talk to
-   * the database. This gets at those connections so we can differentiate them.
-   */
-  private fun Connection.rootConnection(): Connection {
-    var result = this
-    while (result.isWrapperFor(Connection::class.java)) {
-      val unwrapped = result.unwrap(Connection::class.java)
-      if (unwrapped == result) break
-      result = unwrapped
-    }
-    return result
+    val logs = logCollector.takeMessages(RealTransacter::class)
+    assertThat(logs).hasSize(3)
+    assertThat(logs[0]).matches("Movies recoverable transaction exception " +
+        "\\(attempt 1\\), will retry after a PT.*S delay")
+    assertThat(logs[1]).matches("Movies recoverable transaction exception " +
+        "\\(attempt 2, same connection\\), will retry after a PT.*S delay")
+    assertThat(logs[2]).matches(
+        "retried Movies transaction succeeded \\(attempt 3, same connection\\)")
   }
 
   private fun tracingAssertions(committed: Boolean) {
