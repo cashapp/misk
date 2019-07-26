@@ -15,11 +15,17 @@ import retrofit2.Retrofit
 import java.lang.reflect.Proxy
 import kotlin.reflect.KClass
 
-/** Creates a retrofit-backed typed client given an API interface and an HTTP configuration */
+/**
+ * Creates a retrofit-backed typed client given an API interface and an HTTP configuration.
+ *
+ * @param retrofitBuilderProvider Optional provider of a [Retrofit.Builder]. This provider should
+ * not return a singleton since the builder it returns will be mutated.
+ */
 class TypedHttpClientModule<T : Any>(
   private val kclass: KClass<T>,
   private val name: String,
-  private val annotation: Annotation? = null
+  private val annotation: Annotation? = null,
+  private val retrofitBuilderProvider: Provider<Retrofit.Builder>? = null
 ) : KAbstractModule() {
   private val httpClientAnnotation = annotation ?: Names.named(kclass.qualifiedName)
 
@@ -35,7 +41,8 @@ class TypedHttpClientModule<T : Any>(
 
     val httpClientProvider = binder().getProvider(httpClientKey)
     val key = if (annotation == null) Key.get(kclass.java) else Key.get(kclass.java, annotation)
-    bind(key).toProvider(TypedClientProvider(kclass, name, httpClientProvider))
+    bind(key).toProvider(
+        TypedClientProvider(kclass, name, httpClientProvider, retrofitBuilderProvider))
   }
 
   companion object {
@@ -50,8 +57,9 @@ class TypedHttpClientModule<T : Any>(
   private class TypedClientProvider<T : Any>(
     kclass: KClass<T>,
     private val name: String,
-    private val httpClientProvider: Provider<OkHttpClient>
-  ) : TypedClientFactory<T>(kclass, name), Provider<T> {
+    private val httpClientProvider: Provider<OkHttpClient>,
+    retrofitBuilderProvider: Provider<Retrofit.Builder>?
+  ) : TypedClientFactory<T>(kclass, name, retrofitBuilderProvider), Provider<T> {
 
     @Inject private lateinit var httpClientsConfig: HttpClientsConfig
     @Inject private lateinit var httpClientConfigUrlProvider: HttpClientConfigUrlProvider
@@ -80,10 +88,13 @@ interface TypedPeerClientFactory<T> {
  */
 class TypedPeerHttpClientModule<T : Any>(
   private val kclass: KClass<T>,
-  private val name: String
+  private val name: String,
+  private val retrofitBuilderProvider: Provider<Retrofit.Builder>? = null
 ) : KAbstractModule() {
 
   override fun configure() {
+    requireBinding(PeerClientFactory::class.java)
+
     // Initialize empty sets for our multibindings.
     newMultibinder<ClientNetworkInterceptor.Factory>()
     newMultibinder<ClientApplicationInterceptor.Factory>()
@@ -93,7 +104,7 @@ class TypedPeerHttpClientModule<T : Any>(
         Types.newParameterizedType(TypedPeerClientFactory::class.java,
             kclass.java)) as Key<TypedPeerClientFactory<T>>
 
-    bind(key).toProvider(PeerTypedClientProvider(kclass, name))
+    bind(key).toProvider(PeerTypedClientProvider(kclass, name, retrofitBuilderProvider))
   }
 
   companion object {
@@ -104,8 +115,10 @@ class TypedPeerHttpClientModule<T : Any>(
 
   private class PeerTypedClientProvider<T : Any>(
     kclass: KClass<T>,
-    name: String
-  ) : TypedClientFactory<T>(kclass, name), Provider<TypedPeerClientFactory<T>> {
+    name: String,
+    retrofitBuilderProvider: Provider<Retrofit.Builder>?
+  ) : TypedClientFactory<T>(kclass, name, retrofitBuilderProvider),
+      Provider<TypedPeerClientFactory<T>> {
 
     @Inject private lateinit var peerClientFactory: PeerClientFactory
 
@@ -121,7 +134,8 @@ class TypedPeerHttpClientModule<T : Any>(
 
 private abstract class TypedClientFactory<T : Any>(
   private val kclass: KClass<T>,
-  private val name: String
+  private val name: String,
+  private val retrofitBuilderProvider: Provider<Retrofit.Builder>?
 ) {
 
   @Inject
@@ -146,7 +160,7 @@ private abstract class TypedClientFactory<T : Any>(
   private val eventListenerFactory: EventListener.Factory? = null
 
   fun typedClient(client: OkHttpClient, baseUrl: String): T {
-    val retrofit = Retrofit.Builder()
+    val retrofit = (retrofitBuilderProvider?.get() ?: Retrofit.Builder())
         .baseUrl(baseUrl)
         .build()
 
