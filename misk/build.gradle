@@ -54,4 +54,5 @@ dependencies {
   testCompile dep.kotlinxCoroutines
   testCompile dep.mockitoCore
   testCompile project(':misk-testing')
+  testImplementation dep.junit4
 }

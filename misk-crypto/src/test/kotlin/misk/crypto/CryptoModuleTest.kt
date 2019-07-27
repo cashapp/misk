@@ -17,16 +17,20 @@ import misk.environment.EnvironmentModule
 import misk.logging.LogCollector
 import misk.logging.LogCollectorService
 import misk.testing.MiskTest
+import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatCode
 import org.assertj.core.api.Assertions.assertThatThrownBy
-import org.junit.Ignore
-import org.junit.Test
+import org.junit.jupiter.api.Disabled
+import org.junit.jupiter.api.Test
 import java.io.ByteArrayOutputStream
 import java.security.GeneralSecurityException
 
 @MiskTest(startService = true)
 class CryptoModuleTest {
+  @Suppress("unused")
+  @MiskTestModule
+  val module = CryptoTestModule()
 
   @Test
   fun testImportAeadKey() {
@@ -104,7 +108,7 @@ class CryptoModuleTest {
     assertThat(out).contains("using obsolete key format")
   }
 
-  @Ignore
+  @Disabled
   @Test // Currently disabled since the env check is as well
   fun testRaisesInWrongEnv() {
     val plainKey = Key("name", KeyType.AEAD, MiskConfig.RealSecret(""))
