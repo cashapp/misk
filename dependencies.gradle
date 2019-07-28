@@ -39,6 +39,7 @@ ext.dep = [
   "jettyWebsocketServer": "org.eclipse.jetty.websocket:websocket-server:9.4.18.v20190429",
   "jettyWebsocketServlet": "org.eclipse.jetty.websocket:websocket-servlet:9.4.18.v20190429",
   "jnrUnixsocket": "com.github.jnr:jnr-unixsocket:0.22",
+  "junit4": "junit:junit:4.12",
   "junitApi": "org.junit.jupiter:junit-jupiter-api:5.3.1",
   "junitEngine": "org.junit.jupiter:junit-jupiter-engine:5.3.1",
   "junitGradlePlugin": "org.junit.platform:junit-platform-gradle-plugin:1.0.2",
