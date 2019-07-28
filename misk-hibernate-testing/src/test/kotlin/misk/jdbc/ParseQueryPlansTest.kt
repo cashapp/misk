@@ -2,7 +2,7 @@ package misk.jdbc
 
 import com.squareup.moshi.Moshi
 import okio.Buffer
-import org.junit.Test
+import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
