@@ -193,10 +193,18 @@ class DockerVitessCluster(
         .exec()
         .firstOrNull()
     if (runningContainer != null) {
-      StartVitessService.logger.info("Existing Vitess cluster named $containerName found")
-      stopContainerOnExit = false
-      containerId = runningContainer.id
-    } else {
+      if (runningContainer.status != "running") {
+        StartVitessService.logger.info("Existing Vitess cluster named $containerName found in " +
+            "state ${runningContainer.status}, force removing and restarting")
+        docker.removeContainerCmd(runningContainer.id).withForce(true).exec()
+      } else {
+        StartVitessService.logger.info("Using existing Vitess cluster named $containerName")
+        stopContainerOnExit = false
+        containerId = runningContainer.id
+      }
+    }
+
+    if (containerId == null) {
       StartVitessService.logger.info(
           "Starting Vitess cluster with command: ${cmd.joinToString(" ")}")
       containerId = docker.createContainerCmd(VITESS_IMAGE)
