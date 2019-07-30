@@ -49,6 +49,7 @@ import misk.web.marshal.ProtobufUnmarshaller
 import misk.web.marshal.Unmarshaller
 import misk.web.proxy.WebProxyEntry
 import misk.web.resources.StaticResourceEntry
+import org.eclipse.jetty.server.handler.StatisticsHandler
 import org.eclipse.jetty.util.thread.QueuedThreadPool
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -144,6 +145,11 @@ class MiskWebModule(private val config: WebConfig) : KAbstractModule() {
   @Provides @Singleton
   fun provideJettyThreadPool(): QueuedThreadPool {
     return config.jetty_max_thread_pool_size?.let { QueuedThreadPool(it) } ?: QueuedThreadPool()
+  }
+
+  @Provides @Singleton
+  fun provideStatisticsHandler(): StatisticsHandler {
+    return StatisticsHandler()
   }
 
   class MiskCallerProvider @Inject constructor(

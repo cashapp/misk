@@ -16,6 +16,7 @@ import org.eclipse.jetty.server.HttpConnectionFactory
 import org.eclipse.jetty.server.NetworkConnector
 import org.eclipse.jetty.server.SecureRequestCustomizer
 import org.eclipse.jetty.server.Server
+import org.eclipse.jetty.server.ServerConnectionStatistics
 import org.eclipse.jetty.server.ServerConnector
 import org.eclipse.jetty.server.SslConnectionFactory
 import org.eclipse.jetty.server.handler.ContextHandler
@@ -26,6 +27,7 @@ import org.eclipse.jetty.util.thread.QueuedThreadPool
 import java.net.InetAddress
 import javax.inject.Inject
 import javax.inject.Singleton
+import org.eclipse.jetty.server.handler.StatisticsHandler
 
 private val logger = getLogger<JettyService>()
 
@@ -35,7 +37,8 @@ class JettyService @Inject internal constructor(
   private val webActionsServlet: WebActionsServlet,
   private val webConfig: WebConfig,
   threadPool: QueuedThreadPool,
-  private val connectionMetricsCollector: JettyConnectionMetricsCollector
+  private val connectionMetricsCollector: JettyConnectionMetricsCollector,
+  private val statisticsHandler: StatisticsHandler
 ) : AbstractIdleService() {
   private val server = Server(threadPool)
   val httpServerUrl: HttpUrl get() = server.httpUrl!!
@@ -120,9 +123,16 @@ class JettyService @Inject internal constructor(
     val servletContextHandler = ServletContextHandler()
     servletContextHandler.addServlet(ServletHolder(webActionsServlet), "/*")
     server.addManaged(servletContextHandler)
-    server.handler = servletContextHandler
+
+    statisticsHandler.handler = servletContextHandler
+    statisticsHandler.server = server
 
     server.stopAtShutdown = true
+    // Kubernetes sends a SIG_TERM and gives us 30 seconds to stop gracefully.
+    server.stopTimeout = 25_000
+    ServerConnectionStatistics.addToAllConnectors(server)
+
+    server.handler = statisticsHandler
 
     server.start()
 
