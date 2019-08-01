@@ -4,8 +4,6 @@ import io.opentracing.Tracer
 import io.opentracing.tag.Tags
 import misk.backoff.ExponentialBackoff
 import misk.hibernate.Shard.Companion.SINGLE_SHARD_SET
-import misk.jdbc.DataSourceConfig
-import misk.jdbc.DataSourceType
 import misk.jdbc.map
 import misk.jdbc.uniqueString
 import misk.logging.getLogger
@@ -14,6 +12,7 @@ import org.hibernate.FlushMode
 import org.hibernate.SessionFactory
 import org.hibernate.StaleObjectStateException
 import org.hibernate.exception.LockAcquisitionException
+import org.hibernate.exception.SQLGrammarException
 import java.io.Closeable
 import java.sql.Connection
 import java.sql.SQLRecoverableException
@@ -28,7 +27,6 @@ private val logger = getLogger<RealTransacter>()
 internal class RealTransacter private constructor(
   private val qualifier: KClass<out Annotation>,
   private val sessionFactoryProvider: Provider<SessionFactory>,
-  private val config: DataSourceConfig,
   private val threadLatestSession: ThreadLocal<RealSession>,
   private val options: TransacterOptions,
   private val queryTracingListener: QueryTracingListener,
@@ -38,13 +36,11 @@ internal class RealTransacter private constructor(
   constructor(
     qualifier: KClass<out Annotation>,
     sessionFactoryProvider: Provider<SessionFactory>,
-    config: DataSourceConfig,
     queryTracingListener: QueryTracingListener,
     tracer: Tracer?
   ) : this(
       qualifier,
       sessionFactoryProvider,
-      config,
       ThreadLocal(),
       TransacterOptions(),
       queryTracingListener,
@@ -179,7 +175,6 @@ internal class RealTransacter private constructor(
       RealTransacter(
           qualifier,
           sessionFactoryProvider,
-          config,
           threadLatestSession,
           options,
           queryTracingListener,
@@ -190,7 +185,6 @@ internal class RealTransacter private constructor(
     val hibernateSession = sessionFactory.openSession()
     val realSession = RealSession(
         hibernateSession = hibernateSession,
-        config = config,
         readOnly = options.readOnly,
         disabledChecks = options.disabledChecks,
         predecessor = threadLatestSession.get()
@@ -239,7 +233,6 @@ internal class RealTransacter private constructor(
 
   internal class RealSession(
     override val hibernateSession: org.hibernate.Session,
-    val config: DataSourceConfig,
     private val readOnly: Boolean,
     var disabledChecks: EnumSet<Check>,
     predecessor: RealSession?
@@ -293,15 +286,31 @@ internal class RealTransacter private constructor(
     }
 
     override fun shards(): Set<Shard> {
-      return if (config.type == DataSourceType.VITESS) {
-        useConnection { connection ->
-          connection.createStatement().use {
-            it.executeQuery("SHOW VITESS_SHARDS")
-                .map { parseShard(it.getString(1)) }
+      return useConnection { connection ->
+        if (connection.isVitess()) {
+          connection.createStatement().use { s ->
+            var shards = s.executeQuery("SHOW VITESS_SHARDS")
+                .map { rs -> parseShard(rs.getString(1)) }
                 .toSet()
+            if (shards.isEmpty()) {
+              // HACK It seems sometimes this fails to return shards,
+              // as a workaround we run it again to decrease the probability of this happening
+              // If we fail the second time as well we throw a recoverable exception
+              // TODO(jontirsen): Unhack this when this issue is fixed:
+              //   https://github.com/vitessio/vitess/issues/5038
+              shards = s.executeQuery("SHOW VITESS_SHARDS")
+                  .map { rs -> parseShard(rs.getString(1)) }
+                  .toSet()
+              if (shards.isEmpty()) {
+                throw SQLRecoverableException("Failed to load list of shards")
+              }
+            }
+            shards
           }
+        } else {
+          SINGLE_SHARD_SET
         }
-      } else SINGLE_SHARD_SET
+      }
     }
 
     private fun parseShard(string: String): Shard {
@@ -310,8 +319,8 @@ internal class RealTransacter private constructor(
     }
 
     override fun <T> target(shard: Shard, function: () -> T): T {
-      if (config.type == DataSourceType.VITESS) {
-        return useConnection { connection ->
+      return useConnection { connection ->
+        if (connection.isVitess()) {
           val previousTarget = withoutChecks {
             // TODO we need to parse out the tablet type (replica or master) from the current target and keep that when we target the new shard
             // We should only change the shard we're targeting, not the tablet type
@@ -337,9 +346,9 @@ internal class RealTransacter private constructor(
               connection.createStatement().use { it.execute(sql) }
             }
           }
+        } else {
+          function()
         }
-      } else {
-        return function()
       }
     }
 
@@ -435,5 +444,19 @@ internal class RealTransacter private constructor(
     } finally {
       session.inTransaction = false
     }
+  }
+}
+
+fun Connection.isVitess(): Boolean {
+  if (metaData.driverName.startsWith("Vitess")) {
+    return true
+  }
+  // If we're using the MySQL Driver we can check if the underlying connection
+  // uses some Vitess specific syntax
+  try {
+    this.createStatement().use { s -> s.executeQuery("SHOW VITESS_TARGET") }
+    return true
+  } catch (e: SQLGrammarException) {
+    return false
   }
 }

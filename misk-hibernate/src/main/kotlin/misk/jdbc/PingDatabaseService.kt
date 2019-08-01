@@ -5,6 +5,7 @@ import com.zaxxer.hikari.util.DriverDataSource
 import misk.backoff.ExponentialBackoff
 import misk.backoff.retry
 import misk.environment.Environment
+import misk.hibernate.isVitess
 import misk.logging.getLogger
 import java.time.Duration
 import java.util.Properties
@@ -35,8 +36,16 @@ class PingDatabaseService @Inject constructor(
       }
       try {
         connection.use { c ->
-          val result = c.createStatement().executeQuery("SELECT 1 FROM dual").uniqueInt()
-          check(result == 1)
+          check(c.createStatement().use { s ->
+            s.executeQuery("SELECT 1 FROM dual").uniqueInt()
+          } == 1)
+          // During cluster start up we sometimes have an empty list of shards so lets also
+          // wait until the shards are loaded (this is generally only an issue during tests)
+          if (connection.isVitess()) {
+            check(connection.createStatement().use { s ->
+              s.executeQuery("SHOW VITESS_SHARDS").map { rs -> rs.getString(1) }
+            }.isNotEmpty())
+          }
         }
       } catch (e: Exception) {
         logger.error(e) { "error attempting to ping the database" }
