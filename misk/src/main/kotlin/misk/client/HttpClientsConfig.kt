@@ -43,6 +43,8 @@ data class HttpClientEndpointConfig(
   val writeTimeout: Duration? = null,
   val readTimeout: Duration? = null,
   val pingInterval: Duration? = null,
+  val maxRequests: Int = 128,
+  val maxRequestsPerHost: Int = 32,
   val ssl: HttpClientSSLConfig? = null
 )
 
