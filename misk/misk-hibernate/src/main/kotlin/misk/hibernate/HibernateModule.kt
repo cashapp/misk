@@ -13,7 +13,9 @@ import misk.inject.toKey
 import misk.jdbc.DataSourceConfig
 import misk.jdbc.DataSourceDecorator
 import misk.jdbc.DataSourceService
+import misk.jdbc.DatabasePool
 import misk.jdbc.PingDatabaseService
+import misk.jdbc.RealDatabasePool
 import misk.metrics.Metrics
 import misk.resources.ResourceLoader
 import misk.vitess.StartVitessService
@@ -46,7 +48,8 @@ private const val ROW_COUNT_WARNING_LIMIT = 2000
 
 class HibernateModule(
   private val qualifier: KClass<out Annotation>,
-  config: DataSourceConfig
+  config: DataSourceConfig,
+  val databasePool: DatabasePool = RealDatabasePool
 ) : KAbstractModule() {
   val config = config.withDefaults()
 
@@ -88,11 +91,12 @@ class HibernateModule(
     bind(keyOf<DataSourceService>(qualifier)).toProvider(object : Provider<DataSourceService> {
       @com.google.inject.Inject(optional = true) var metrics: Metrics? = null
       override fun get() = DataSourceService(
-          qualifier,
-          config,
-          environmentProvider.get(),
-          dataSourceDecoratorsProvider.get(),
-          metrics
+          qualifier = qualifier,
+          baseConfig = config,
+          environment = environmentProvider.get(),
+          dataSourceDecorators = dataSourceDecoratorsProvider.get(),
+          databasePool = databasePool,
+          metrics = metrics
       )
     }).asSingleton()
     install(ServiceModule<DataSourceService>(qualifier)
@@ -113,11 +117,11 @@ class HibernateModule(
       @com.google.inject.Inject(optional = true) val tracer: Tracer? = null
       @Inject lateinit var queryTracingListener: QueryTracingListener
       override fun get(): RealTransacter = RealTransacter(
-          qualifier,
-          sessionFactoryProvider,
-          config,
-          queryTracingListener,
-          tracer
+          qualifier = qualifier,
+          sessionFactoryProvider = sessionFactoryProvider,
+          config = config,
+          queryTracingListener = queryTracingListener,
+          tracer = tracer
       )
     }).asSingleton()
 
@@ -126,10 +130,10 @@ class HibernateModule(
         .toProvider(object : Provider<SchemaMigratorService> {
           @Inject lateinit var environment: Environment
           override fun get(): SchemaMigratorService = SchemaMigratorService(
-              qualifier,
-              environment,
-              schemaMigratorProvider,
-              config
+              qualifier = qualifier,
+              environment = environment,
+              schemaMigratorProvider = schemaMigratorProvider,
+              config = config
           )
         }).asSingleton()
     multibind<HealthCheck>().to(schemaMigratorServiceKey)
@@ -142,9 +146,9 @@ class HibernateModule(
     bind(schemaValidatorServiceKey)
         .toProvider(Provider<SchemaValidatorService> {
           SchemaValidatorService(
-              qualifier,
-              sessionFactoryServiceProvider,
-              transacterProvider
+              qualifier = qualifier,
+              sessionFactoryServiceProvider = sessionFactoryServiceProvider,
+              transacterProvider = transacterProvider
           )
         }).asSingleton()
     multibind<HealthCheck>().to(schemaValidatorServiceKey)
@@ -161,8 +165,7 @@ class HibernateModule(
     bind(keyOf<SessionFactory>(qualifier))
         .toProvider(keyOf<SessionFactoryService>(qualifier))
         .asSingleton()
-    bind(keyOf<TransacterService>(qualifier)).to(
-        keyOf<SessionFactoryService>(qualifier))
+    bind(keyOf<TransacterService>(qualifier)).to(keyOf<SessionFactoryService>(qualifier))
     bind(keyOf<SessionFactoryService>(qualifier)).toProvider(Provider<SessionFactoryService> {
       SessionFactoryService(qualifier, config, dataSourceProvider,
           hibernateInjectorAccessProvider.get(),
