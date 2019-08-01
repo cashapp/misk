@@ -16,9 +16,15 @@ import javax.inject.Provider
 import kotlin.reflect.KClass
 
 /**
- * Installs a service to clear the test datasource before running tests.
+ * Installs a service to clear the test datasource before running tests. This module should be
+ * installed alongside the [HibernateModule].
  *
- * TODO(jwilson): also create the database if it doesn't exist?
+ * If you run your tests in parallel, you need to install the [HibernateModule] as follows to
+ * ensure that your test suites do not share databases concurrently:
+ *
+ *     install(HibernateModule(MyDatabase::class, dataSourceConfig, SHARED_TEST_DATABASE_POOL))
+ *
+ * See [misk.jdbc.SHARED_TEST_DATABASE_POOL].
  */
 class HibernateTestingModule(
   private val qualifier: KClass<out Annotation>,
@@ -41,7 +47,7 @@ class HibernateTestingModule(
 
     install(ServiceModule(truncateTablesServiceKey)
         .dependsOn<SchemaMigratorService>(qualifier))
-    bind(truncateTablesServiceKey).toProvider(Provider<TruncateTablesService> {
+    bind(truncateTablesServiceKey).toProvider(Provider {
       TruncateTablesService(
           qualifier = qualifier,
           config = configProvider.get(),
@@ -63,13 +69,13 @@ class HibernateTestingModule(
 
     val moshiProvider = getProvider(Moshi::class.java)
 
-    bind(vitessScaleSafetyChecksKey).toProvider(Provider<VitessScaleSafetyChecks> {
+    bind(vitessScaleSafetyChecksKey).toProvider(Provider {
       VitessScaleSafetyChecks(
-        config = configProvider.get(),
-        moshi = moshiProvider.get(),
-        okHttpClient = OkHttpClient(),
-        startVitessService = startVitessServiceProvider.get(),
-        transacter = transacterProvider.get()
+          config = configProvider.get(),
+          moshi = moshiProvider.get(),
+          okHttpClient = OkHttpClient(),
+          startVitessService = startVitessServiceProvider.get(),
+          transacter = transacterProvider.get()
       )
     }).asSingleton()
 

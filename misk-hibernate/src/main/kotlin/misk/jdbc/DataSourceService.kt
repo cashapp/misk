@@ -6,8 +6,8 @@ import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import com.zaxxer.hikari.metrics.prometheus.PrometheusMetricsTrackerFactory
 import misk.environment.Environment
+import misk.logging.getLogger
 import misk.metrics.Metrics
-import mu.KotlinLogging
 import javax.inject.Provider
 import javax.inject.Singleton
 import javax.sql.DataSource
@@ -15,15 +15,20 @@ import kotlin.reflect.KClass
 
 /**
  * Builds a connection pool to a JDBC database. Doesn't do any schema migration or validation.
+ *
+ * @param baseConfig the configuration to connect to. The actual database name used may vary as
+ *     the [databasePool] can pick an alternate database name for testing.
  */
 @Singleton
 internal class DataSourceService(
   private val qualifier: KClass<out Annotation>,
-  private val config: DataSourceConfig,
+  private val baseConfig: DataSourceConfig,
   private val environment: Environment,
   private val dataSourceDecorators: Set<DataSourceDecorator>,
+  private val databasePool: DatabasePool,
   private val metrics: Metrics? = null
 ) : AbstractIdleService(), Provider<DataSource> {
+  private lateinit var config: DataSourceConfig
   /** The backing connection pool */
   private var hikariDataSource: HikariDataSource? = null
   /** The decorated data source */
@@ -34,6 +39,14 @@ internal class DataSourceService(
     logger.info("Starting @${qualifier.simpleName} connection pool")
 
     require(dataSource == null)
+    createDataSource()
+
+    logger.info("Started @${qualifier.simpleName} connection pool in $stopwatch")
+  }
+
+  private fun createDataSource() {
+    // Rewrite the caller's config to get a database name like "movies__20190730__5" in tests.
+    this.config = databasePool.takeDatabase(baseConfig)
 
     val hikariConfig = HikariConfig()
     hikariConfig.driverClassName = config.type.driverClassName
@@ -69,12 +82,12 @@ internal class DataSourceService(
       hikariConfig.dataSourceProperties["maintainTimeStats"] = "false"
     }
 
-    metrics?.let { hikariConfig.metricsTrackerFactory = PrometheusMetricsTrackerFactory(it.registry) }
+    metrics?.let {
+      hikariConfig.metricsTrackerFactory = PrometheusMetricsTrackerFactory(it.registry)
+    }
 
     hikariDataSource = HikariDataSource(hikariConfig)
     dataSource = decorate(hikariDataSource!!)
-
-    logger.info("Started @${qualifier.simpleName} connection pool in $stopwatch")
   }
 
   private fun decorate(dataSource: DataSource): DataSource =
@@ -86,16 +99,17 @@ internal class DataSourceService(
 
     require(hikariDataSource != null)
     hikariDataSource!!.close()
+    databasePool.releaseDatabase(config)
 
     logger.info("Stopped @${qualifier.simpleName} connection pool in $stopwatch")
   }
 
   override fun get(): DataSource {
     return dataSource ?: throw IllegalStateException(
-        "@${qualifier.simpleName} DataSouce not created: did you forget to start the service?")
+        "@${qualifier.simpleName} DataSource not created: did you forget to start the service?")
   }
 
   companion object {
-    val logger = KotlinLogging.logger {}
+    val logger = getLogger<DataSourceService>()
   }
 }

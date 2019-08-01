@@ -14,6 +14,7 @@ import misk.inject.toKey
 import misk.jdbc.DataSourceConfig
 import misk.jdbc.DataSourceService
 import misk.jdbc.PingDatabaseService
+import misk.jdbc.RealDatabasePool
 import misk.resources.ResourceLoader
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
@@ -48,8 +49,13 @@ internal class SchemaValidatorTest {
 
       val qualifier = ValidationDb::class
 
-      val dataSourceService =
-          DataSourceService(qualifier, config.data_source, Environment.TESTING, emptySet())
+      val dataSourceService = DataSourceService(
+          qualifier = qualifier,
+          baseConfig = config.data_source,
+          environment = Environment.TESTING,
+          dataSourceDecorators = emptySet(),
+          databasePool = RealDatabasePool
+      )
 
       val injectorServiceProvider = getProvider(HibernateInjectorAccess::class.java)
 
