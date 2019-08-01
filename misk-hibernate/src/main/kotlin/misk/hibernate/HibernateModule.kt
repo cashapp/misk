@@ -25,8 +25,11 @@ import org.hibernate.SessionFactory
 import org.hibernate.event.spi.EventType
 import org.hibernate.exception.ConstraintViolationException
 import java.time.Clock
+import java.util.concurrent.Executors
+import java.util.concurrent.ScheduledExecutorService
 import javax.inject.Inject
 import javax.inject.Provider
+import javax.inject.Qualifier
 import javax.persistence.OptimisticLockException
 import javax.sql.DataSource
 import kotlin.reflect.KClass
@@ -55,6 +58,16 @@ class HibernateModule(
   val config = config.withDefaults()
 
   override fun configure() {
+    bind(keyOf<Timeouts>(TransactionTimeouts::class))
+        .toInstance(Timeouts(config.transaction_timeout_warning, config.transaction_timeout))
+    bind(keyOf<Timeouts>(QueryTimeouts::class))
+        .toInstance(Timeouts(config.query_timeout_warning, config.query_timeout))
+    bind(keyOf<Timeouts>(SlowQueryTimeouts::class))
+        .toInstance(Timeouts(config.slow_query_timeout_warning, config.slow_query_timeout))
+
+    bind(keyOf<ScheduledExecutorService>(ForHibernate::class))
+        .toInstance(Executors.newScheduledThreadPool(1))
+
     val sessionFactoryProvider = getProvider(keyOf<SessionFactory>(qualifier))
     val environmentProvider: Provider<Environment> = getProvider(keyOf<Environment>())
 
@@ -107,9 +120,27 @@ class HibernateModule(
     install(ServiceModule<DataSourceService>(qualifier)
         .dependsOn<PingDatabaseService>(qualifier))
 
-    // Bind SchemaMigratorService.
+    // Bind Transacter.
     val transacterKey = Transacter::class.toKey(qualifier)
     val transacterProvider = getProvider(transacterKey)
+    val transactionRunnerFactoryProvider = getProvider(TransactionRunner.Factory::class.java)
+    val querySniperFactoryProvider = getProvider(QuerySniper.Factory::class.java)
+    val timeoutsConfigProvider = getProvider(TimeoutsConfig::class.java)
+    bind(transacterKey).toProvider(object : Provider<Transacter> {
+      @com.google.inject.Inject(optional = true) val tracer: Tracer? = null
+      @Inject lateinit var queryTracingListener: QueryTracingListener
+      override fun get(): RealTransacter = RealTransacter(
+          qualifier = qualifier,
+          sessionFactoryProvider = sessionFactoryProvider,
+          queryTracingListener = queryTracingListener,
+          tracer = tracer,
+          transactionRunnerFactory = transactionRunnerFactoryProvider.get(),
+          querySniperFactory = querySniperFactoryProvider.get(),
+          timeoutsConfig = timeoutsConfigProvider.get()
+      )
+    }).asSingleton()
+
+    // Bind SchemaMigratorService.
     val schemaMigratorKey = SchemaMigrator::class.toKey(qualifier)
     val schemaMigratorProvider = getProvider(schemaMigratorKey)
 
@@ -120,16 +151,6 @@ class HibernateModule(
           resourceLoader = resourceLoader,
           transacter = transacterProvider,
           connector = connectorProvider.get()
-      )
-    }).asSingleton()
-    bind(transacterKey).toProvider(object : Provider<Transacter> {
-      @com.google.inject.Inject(optional = true) val tracer: Tracer? = null
-      @Inject lateinit var queryTracingListener: QueryTracingListener
-      override fun get(): RealTransacter = RealTransacter(
-          qualifier = qualifier,
-          sessionFactoryProvider = sessionFactoryProvider,
-          queryTracingListener = queryTracingListener,
-          tracer = tracer
       )
     }).asSingleton()
 
@@ -222,3 +243,7 @@ class HibernateModule(
         .create<OptimisticLockException, OptimisticLockExceptionMapper>())
   }
 }
+
+@Qualifier
+@Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION, AnnotationTarget.VALUE_PARAMETER)
+annotation class ForHibernate

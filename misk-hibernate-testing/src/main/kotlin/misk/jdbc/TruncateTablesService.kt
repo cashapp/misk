@@ -42,8 +42,8 @@ class TruncateTablesService(
   private fun truncateUserTables() {
     val stopwatch = Stopwatch.createStarted()
 
-    val truncatedTableNames = transacterProvider.get().shards().flatMap { shard ->
-      transacterProvider.get().transaction(shard) { session ->
+    val truncatedTableNames = transacterProvider.get().noTimeouts().shards().flatMap { shard ->
+      transacterProvider.get().noTimeouts().transaction(shard) { session ->
         session.withoutChecks {
           val config = connector.config()
           val tableNamesQuery = when (config.type) {
@@ -94,7 +94,7 @@ class TruncateTablesService(
   private fun executeStatements(statements: List<String>, name: String) {
     val stopwatch = Stopwatch.createStarted()
 
-    transacterProvider.get().transaction {
+    transacterProvider.get().noTimeouts().transaction {
       it.withoutChecks {
         it.useConnection { connection ->
           for (s in statements) {

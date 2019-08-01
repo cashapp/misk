@@ -18,6 +18,7 @@ import java.sql.SQLRecoverableException
 import java.sql.SQLSyntaxErrorException
 import java.time.Duration
 import java.util.EnumSet
+import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Provider
 import javax.persistence.OptimisticLockException
 import kotlin.reflect.KClass
@@ -28,23 +29,31 @@ internal class RealTransacter private constructor(
   private val qualifier: KClass<out Annotation>,
   private val sessionFactoryProvider: Provider<SessionFactory>,
   private val threadLatestSession: ThreadLocal<RealSession>,
-  private val options: TransacterOptions,
+  internal val options: TransacterOptions,
   private val queryTracingListener: QueryTracingListener,
-  private val tracer: Tracer?
+  private val tracer: Tracer?,
+  private val transactionRunnerFactory: TransactionRunner.Factory,
+  private val querySniperFactory: QuerySniper.Factory,
+  private val timeoutsConfig: TimeoutsConfig
 ) : Transacter {
-
   constructor(
     qualifier: KClass<out Annotation>,
     sessionFactoryProvider: Provider<SessionFactory>,
     queryTracingListener: QueryTracingListener,
-    tracer: Tracer?
+    tracer: Tracer?,
+    transactionRunnerFactory: TransactionRunner.Factory,
+    querySniperFactory: QuerySniper.Factory,
+    timeoutsConfig: TimeoutsConfig
   ) : this(
-      qualifier,
-      sessionFactoryProvider,
-      ThreadLocal(),
-      TransacterOptions(),
-      queryTracingListener,
-      tracer
+      qualifier = qualifier,
+      sessionFactoryProvider = sessionFactoryProvider,
+      threadLatestSession = ThreadLocal(),
+      options = TransacterOptions(),
+      queryTracingListener = queryTracingListener,
+      tracer = tracer,
+      transactionRunnerFactory = transactionRunnerFactory,
+      querySniperFactory = querySniperFactory,
+      timeoutsConfig = timeoutsConfig
   )
 
   private val sessionFactory
@@ -147,15 +156,26 @@ internal class RealTransacter private constructor(
     return "attempt $attempt, different connection"
   }
 
-  private fun <T> transactionInternalSession(block: (session: RealSession) -> T): T {
+  private fun <T> transactionInternalSession(block: (session: Session) -> T): T {
     return withSession { session ->
+      val transactionRunner = with(options) {
+        when {
+          disableTimeouts -> transactionRunnerFactory.create(session, Timeouts.NONE)
+          overriddenTimeouts != null -> transactionRunnerFactory.create(session, overriddenTimeouts)
+          else -> transactionRunnerFactory.create(session, timeoutsConfig.transaction)
+        }
+      }
+
       val transaction = maybeWithTracing(DB_BEGIN_SPAN_NAME) {
         session.hibernateSession.beginTransaction()!!
       }
-      try {
-        val result = block(session)
 
-        // Flush any changes to the databased before commit
+      try {
+        val result = synchronized(this) {
+          transactionRunner.doWork(block)
+        }
+
+        // Flush any changes to the database before commit.
         session.hibernateSession.flush()
         session.preCommit()
         maybeWithTracing(DB_COMMIT_SPAN_NAME) { transaction.commit() }
@@ -195,38 +215,74 @@ internal class RealTransacter private constructor(
     }
   }
 
-  override fun retries(maxAttempts: Int): Transacter = withOptions(
-      options.copy(maxAttempts = maxAttempts))
+  override fun retries(maxAttempts: Int): Transacter =
+      withOptions(options.copy(maxAttempts = maxAttempts))
 
   override fun allowCowrites(): Transacter {
     val disableChecks = options.disabledChecks.clone()
     disableChecks.add(Check.COWRITE)
-    return withOptions(
-        options.copy(disabledChecks = disableChecks))
+    return withOptions(options.copy(disabledChecks = disableChecks))
   }
 
   override fun noRetries(): Transacter = withOptions(options.copy(maxAttempts = 1))
 
+  internal fun withTimeouts(timeouts: TimeoutsConfig): Transacter {
+    return RealTransacter(
+        qualifier = qualifier,
+        sessionFactoryProvider = sessionFactoryProvider,
+        threadLatestSession = threadLatestSession,
+        options = options,
+        queryTracingListener = queryTracingListener,
+        tracer = tracer,
+        transactionRunnerFactory = transactionRunnerFactory,
+        querySniperFactory = querySniperFactory,
+        timeoutsConfig = timeouts
+    )
+  }
+
+  override fun withTimeouts(timeouts: Timeouts): Transacter {
+    return withTimeouts(timeoutsConfig.copy(transaction = timeouts))
+  }
+
+  override fun withQueryTimeouts(timeouts: Timeouts): Transacter {
+    return withTimeouts(timeoutsConfig.copy(query = timeouts))
+  }
+
+  override fun withSlowQueryTimeouts(timeouts: Timeouts): Transacter {
+    return withTimeouts(timeoutsConfig.copy(slowQuery = timeouts))
+  }
+
+  override fun noTimeouts(): Transacter = withOptions(options.copy(disableTimeouts = true))
+
   override fun readOnly(): Transacter = withOptions(options.copy(readOnly = true))
 
-  private fun withOptions(options: TransacterOptions): Transacter =
+  internal fun withOptions(options: TransacterOptions): Transacter =
       RealTransacter(
-          qualifier,
-          sessionFactoryProvider,
-          threadLatestSession,
-          options,
-          queryTracingListener,
-          tracer
+          qualifier = qualifier,
+          sessionFactoryProvider = sessionFactoryProvider,
+          threadLatestSession = threadLatestSession,
+          options = options,
+          queryTracingListener = queryTracingListener,
+          tracer = tracer,
+          transactionRunnerFactory = transactionRunnerFactory,
+          querySniperFactory = querySniperFactory,
+          timeoutsConfig = timeoutsConfig
       )
 
-  private fun <T> withSession(block: (session: RealSession) -> T): T {
+  internal fun <T> withSession(block: (session: RealSession) -> T): T {
     val hibernateSession = sessionFactory.openSession()
     val realSession = RealSession(
         hibernateSession = hibernateSession,
         readOnly = options.readOnly,
+        timeoutsConfig = timeoutsConfig,
         disabledChecks = options.disabledChecks,
         predecessor = threadLatestSession.get()
     )
+
+    querySniperFactory.create(
+        onWarn = options.sniperWarning,
+        onKill = options.sniperAction
+    ).watch(realSession)
 
     // Note that the RealSession is closed last so that close hooks run after the thread locals and
     // Hibernate Session have been released. This way close hooks can start their own transactions.
@@ -257,7 +313,11 @@ internal class RealTransacter private constructor(
     val minRetryDelayMillis: Long = 100,
     val maxRetryDelayMillis: Long = 200,
     val retryJitterMillis: Long = 400,
-    val readOnly: Boolean = false
+    val readOnly: Boolean = false,
+    val disableTimeouts: Boolean = false,
+    val overriddenTimeouts: Timeouts? = null,
+    val sniperWarning: (() -> Unit)? = null,
+    val sniperAction: (() -> Unit)? = null
   )
 
   companion object {
@@ -272,15 +332,19 @@ internal class RealTransacter private constructor(
   internal class RealSession(
     override val hibernateSession: org.hibernate.Session,
     private val readOnly: Boolean,
+    private val timeoutsConfig: TimeoutsConfig,
     var disabledChecks: EnumSet<Check>,
     predecessor: RealSession?
-  ) : Session, Closeable {
+  ) : CancellableSession, Closeable {
     private val preCommitHooks = mutableListOf<() -> Unit>()
     private val postCommitHooks = mutableListOf<() -> Unit>()
     private val sessionCloseHooks = mutableListOf<() -> Unit>()
     private val rootConnection = hibernateSession.rootConnection
     internal val sameConnection = predecessor?.rootConnection == rootConnection
     internal var inTransaction = false
+
+    private var timeouts = timeoutsConfig.query
+    private val isCancelled = AtomicBoolean(false)
 
     init {
       if (readOnly) {
@@ -289,8 +353,21 @@ internal class RealTransacter private constructor(
       }
     }
 
+    fun isCancelled(): Boolean = isCancelled.get()
+
+    private fun checkNotCancelled() {
+      check(!isCancelled()) { "This transaction session was cancelled." }
+    }
+
+    override fun cancel() {
+      isCancelled.set(true)
+    }
+
+    override fun timeouts(): Timeouts = timeouts
+
     @Suppress("UNCHECKED_CAST")
     override fun <T : DbEntity<T>> save(entity: T): Id<T> {
+      checkNotCancelled()
       check(!readOnly) { "Saving isn't permitted in a read only session." }
       return when (entity) {
         is DbChild<*, *> -> (hibernateSession.save(entity) as Gid<*, *>).id
@@ -302,6 +379,7 @@ internal class RealTransacter private constructor(
     }
 
     override fun <T : DbEntity<T>> delete(entity: T) {
+      checkNotCancelled()
       check(!readOnly) {
         "Deleting isn't permitted in a read only session."
       }
@@ -309,6 +387,7 @@ internal class RealTransacter private constructor(
     }
 
     override fun <T : DbEntity<T>> load(id: Id<T>, type: KClass<T>): T {
+      checkNotCancelled()
       return hibernateSession.get(type.java, id)
     }
 
@@ -316,10 +395,12 @@ internal class RealTransacter private constructor(
       gid: Gid<R, T>,
       type: KClass<T>
     ): T {
+      checkNotCancelled()
       return hibernateSession.get(type.java, gid)
     }
 
     override fun <T : DbEntity<T>> loadOrNull(id: Id<T>, type: KClass<T>): T? {
+      checkNotCancelled()
       return hibernateSession.get(type.java, id)
     }
 
@@ -395,10 +476,12 @@ internal class RealTransacter private constructor(
     }
 
     override fun <T> useConnection(work: (Connection) -> T): T {
+      checkNotCancelled()
       return hibernateSession.doReturningWork(work)
     }
 
     internal fun preCommit() {
+      checkNotCancelled()
       preCommitHooks.forEach { preCommitHook ->
         // Propagate hook exceptions up to the transacter so that the the transaction is rolled
         // back and the error gets returned to the application.
@@ -425,6 +508,7 @@ internal class RealTransacter private constructor(
     }
 
     override fun close() {
+      checkNotCancelled()
       sessionCloseHooks.forEach { sessionCloseHook ->
         sessionCloseHook()
       }
@@ -435,6 +519,7 @@ internal class RealTransacter private constructor(
     }
 
     override fun <T> withoutChecks(vararg checks: Check, body: () -> T): T {
+      checkNotCancelled()
       val previous = disabledChecks
       val actualChecks = if (checks.isEmpty()) {
         EnumSet.allOf(Check::class.java)
@@ -452,6 +537,15 @@ internal class RealTransacter private constructor(
     internal fun isVitess(): Boolean = useConnection { it.isVitess() }
 
     internal fun isReadOnly(): Boolean = readOnly
+
+    override fun <T> runSlowQuery(query: Session.() -> T): T {
+      timeouts = timeoutsConfig.slowQuery
+      try {
+        return query(this)
+      } finally {
+        timeouts = timeoutsConfig.query
+      }
+    }
 
     /**
      * Returns the physical JDBC connection of this session. Hibernate creates one-time-use wrappers

@@ -50,6 +50,20 @@ interface Session {
    * @throws IllegalStateException when delete is called on a read only session.
    */
   fun <T : DbEntity<T>> delete(entity: T)
+
+  /** Retrieve the current timeouts used by this. */
+  fun timeouts(): Timeouts
+
+  /**
+   * Marks a query as slow. If a [QuerySniper] is watching this session, then it will not warn
+   * or kill it.
+   */
+  fun <T> runSlowQuery(query: Session.() -> T): T
+}
+
+internal interface CancellableSession : Session {
+  /** Will cause any subsequent operations on this to throw. */
+  fun cancel()
 }
 
 enum class Check {

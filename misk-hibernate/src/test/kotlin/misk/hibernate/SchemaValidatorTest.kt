@@ -26,6 +26,8 @@ import org.hibernate.SessionFactory
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.time.Instant
+import java.util.concurrent.Executors
+import java.util.concurrent.ScheduledExecutorService
 import javax.inject.Inject
 import javax.inject.Provider
 import javax.inject.Qualifier
@@ -67,15 +69,26 @@ internal class SchemaValidatorTest {
           .annotatedWith<ValidationDb>()
           .toProvider(keyOf<SessionFactoryService>(qualifier))
 
+      bind(keyOf<Timeouts>(TransactionTimeouts::class)).toInstance(Timeouts.NONE)
+      bind(keyOf<Timeouts>(QueryTimeouts::class)).toInstance(Timeouts.NONE)
+      bind(keyOf<Timeouts>(SlowQueryTimeouts::class)).toInstance(Timeouts.NONE)
+      bind(keyOf<ScheduledExecutorService>(ForHibernate::class))
+          .toInstance(Executors.newScheduledThreadPool(1))
+      val transactionRunnerFactoryProvider = getProvider(TransactionRunner.Factory::class.java)
+      val querySniperFactoryProvider = getProvider(QuerySniper.Factory::class.java)
+      val timeoutsConfigProvider = getProvider(TimeoutsConfig::class.java)
       val transacterProvider = getProvider(keyOf<Transacter>(qualifier))
       bind(keyOf<Transacter>(qualifier)).toProvider(object : Provider<Transacter> {
         @Inject lateinit var queryTracingListener: QueryTracingListener
         @com.google.inject.Inject(optional = true) val tracer: Tracer? = null
         override fun get(): RealTransacter = RealTransacter(
-            qualifier,
-            sessionFactoryProvider,
-            queryTracingListener,
-            tracer
+            qualifier = qualifier,
+            sessionFactoryProvider = sessionFactoryProvider,
+            queryTracingListener = queryTracingListener,
+            tracer = tracer,
+            transactionRunnerFactory = transactionRunnerFactoryProvider.get(),
+            querySniperFactory = querySniperFactoryProvider.get(),
+            timeoutsConfig = timeoutsConfigProvider.get()
         )
       }).asSingleton()
 

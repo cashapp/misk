@@ -54,7 +54,14 @@ data class DataSourceConfig(
   // going forward
   val trust_certificate_key_store_path: String? = null,
   val client_certificate_key_store_path: String? = null,
-  val show_sql: String? = "false"
+  val show_sql: String? = "false",
+  // Default warn and kill timeouts for transactions and queries
+  val transaction_timeout: Duration = Duration.ZERO,
+  val transaction_timeout_warning: Duration = Duration.ZERO,
+  val query_timeout: Duration = Duration.ZERO,
+  val query_timeout_warning: Duration = Duration.ZERO,
+  val slow_query_timeout: Duration = Duration.ZERO,
+  val slow_query_timeout_warning: Duration = Duration.ZERO
 ) {
   fun withDefaults(): DataSourceConfig {
     return when (type) {

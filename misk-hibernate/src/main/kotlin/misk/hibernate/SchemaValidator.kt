@@ -25,9 +25,11 @@ internal class SchemaValidator {
 
     val allDbTables = LinkedHashSet<TableDeclaration>()
 
-    transacter.shards().forEach { shard ->
-      val dbSchema = transacter.transaction(shard) { s ->
-        s.withoutChecks { s.hibernateSession.doReturningWork { readDeclarationFromDatabase(it) } }
+    transacter.noTimeouts().shards().forEach { shard ->
+      val dbSchema = transacter.noTimeouts().transaction(shard) { session ->
+        session.withoutChecks {
+          session.hibernateSession.doReturningWork { readDeclarationFromDatabase(it) }
+        }
       }
 
       withDeclaration(path.copy(schema = dbSchema.name)) {

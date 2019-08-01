@@ -17,11 +17,15 @@ interface Transacter {
   fun isCheckEnabled(check: Check): Boolean
 
   /**
-   * Starts a transaction on the current thread, executes [block], and commits the transaction.
-   * If the block raises an exception the transaction will be rolled back instead of committed.
+   * Starts a transaction, blocks on the current thread until [block] has finished execution, and
+   * commits the transaction. If the block raises an exception the transaction will be rolled back
+   * instead of committed.
    *
    * If retries are permitted (the default), a failed but recoverable transaction will be
    * reattempted after rolling back.
+   *
+   * Unless the timeout is disabled, this transaction will be cancelled and rolled back if it
+   * exceeds the duration specified by [misk.jdbc.DataSourceConfig.transaction_timeout].
    *
    * It is an error to start a transaction if another transaction is already in progress.
    */
@@ -52,6 +56,21 @@ interface Transacter {
   fun retries(maxAttempts: Int = 2): Transacter
 
   fun noRetries(): Transacter
+
+  /** Overrides the timeouts for entire transactions created by this. */
+  fun withTimeouts(timeouts: Timeouts): Transacter
+
+  /** Overrides the timeouts for individual queries of a transaction created by this. */
+  fun withQueryTimeouts(timeouts: Timeouts): Transacter
+
+  /**
+   * Overrides the timeouts for queries run by [Session.runSlowQuery] in a transaction created by
+   * this.
+   */
+  fun withSlowQueryTimeouts(timeouts: Timeouts): Transacter
+
+  /** Disables the transaction timeouts for this transacter. */
+  fun noTimeouts(): Transacter
 
   /**
    * Creates a new transacter that produces read only sessions. This does not mean the underlying
