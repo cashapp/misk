@@ -74,7 +74,7 @@ class HibernateModule(
     }).asSingleton()
 
     // Bind PingDatabaseService.
-    bind(keyOf<PingDatabaseService>(qualifier)).toProvider(Provider<PingDatabaseService> {
+    bind(keyOf<PingDatabaseService>(qualifier)).toProvider(Provider {
       PingDatabaseService(config, environmentProvider.get())
     }).asSingleton()
     // TODO(rhall): depending on Vitess is a hack to simulate Vitess has already been started in the
@@ -119,7 +119,6 @@ class HibernateModule(
       override fun get(): RealTransacter = RealTransacter(
           qualifier = qualifier,
           sessionFactoryProvider = sessionFactoryProvider,
-          config = config,
           queryTracingListener = queryTracingListener,
           tracer = tracer
       )
@@ -144,7 +143,7 @@ class HibernateModule(
         keyOf<SessionFactoryService>(qualifier))
     val schemaValidatorServiceKey = keyOf<SchemaValidatorService>(qualifier)
     bind(schemaValidatorServiceKey)
-        .toProvider(Provider<SchemaValidatorService> {
+        .toProvider(Provider {
           SchemaValidatorService(
               qualifier = qualifier,
               sessionFactoryServiceProvider = sessionFactoryServiceProvider,
@@ -166,7 +165,7 @@ class HibernateModule(
         .toProvider(keyOf<SessionFactoryService>(qualifier))
         .asSingleton()
     bind(keyOf<TransacterService>(qualifier)).to(keyOf<SessionFactoryService>(qualifier))
-    bind(keyOf<SessionFactoryService>(qualifier)).toProvider(Provider<SessionFactoryService> {
+    bind(keyOf<SessionFactoryService>(qualifier)).toProvider(Provider {
       SessionFactoryService(qualifier, config, dataSourceProvider,
           hibernateInjectorAccessProvider.get(),
           entitiesProvider.get(), eventListenersProvider.get())

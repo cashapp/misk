@@ -39,7 +39,8 @@ import kotlin.concurrent.thread
 import kotlin.reflect.KClass
 import kotlin.streams.toList
 
-const val VITESS_IMAGE = "vitess/base@sha256:ad6d22aafa73c9bb64cebf6dffe5f82df7cfcded00cf801fd4e64d0f46dbab43"
+const val VITESS_SHA = "ad6d22aafa73c9bb64cebf6dffe5f82df7cfcded00cf801fd4e64d0f46dbab43"
+const val VITESS_IMAGE = "vitess/base@sha256:$VITESS_SHA"
 const val CONTAINER_NAME_PREFIX = "misk-vitess-testing"
 
 class Table
@@ -192,10 +193,18 @@ class DockerVitessCluster(
         .exec()
         .firstOrNull()
     if (runningContainer != null) {
-      StartVitessService.logger.info("Existing Vitess cluster named $containerName found")
-      stopContainerOnExit = false
-      containerId = runningContainer.id
-    } else {
+      if (runningContainer.status != "running") {
+        StartVitessService.logger.info("Existing Vitess cluster named $containerName found in " +
+            "state ${runningContainer.status}, force removing and restarting")
+        docker.removeContainerCmd(runningContainer.id).withForce(true).exec()
+      } else {
+        StartVitessService.logger.info("Using existing Vitess cluster named $containerName")
+        stopContainerOnExit = false
+        containerId = runningContainer.id
+      }
+    }
+
+    if (containerId == null) {
       StartVitessService.logger.info(
           "Starting Vitess cluster with command: ${cmd.joinToString(" ")}")
       containerId = docker.createContainerCmd(VITESS_IMAGE)
@@ -351,7 +360,7 @@ class StartVitessService(
     // We need to do this outside of the service start up because this takes a really long time
     // the first time you do it and can cause service manager to time out.
     if (shouldRunVitess() && imagePulled.compareAndSet(false, true)) {
-      if (runCommand("docker pull $VITESS_IMAGE") != 0) {
+      if (runCommand("docker images --digests | grep -q $VITESS_SHA || docker pull $VITESS_IMAGE") != 0) {
         logger.warn("Failed to pull Vitess docker image. Proceeding regardless.")
       }
     }
@@ -360,7 +369,7 @@ class StartVitessService(
   private fun runCommand(command: String): Int {
     logger.info(command)
     return try {
-      val process = ProcessBuilder(*command.split(" ").toTypedArray())
+      val process = ProcessBuilder("bash", "-c", command)
           .redirectOutput(ProcessBuilder.Redirect.INHERIT)
           .redirectError(ProcessBuilder.Redirect.INHERIT)
           .start()

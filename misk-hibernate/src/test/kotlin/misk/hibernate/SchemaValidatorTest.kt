@@ -73,7 +73,6 @@ internal class SchemaValidatorTest {
         override fun get(): RealTransacter = RealTransacter(
             qualifier,
             sessionFactoryProvider,
-            config.data_source,
             queryTracingListener,
             tracer
         )
