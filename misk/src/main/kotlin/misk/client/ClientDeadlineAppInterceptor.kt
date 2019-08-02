@@ -1,14 +1,14 @@
 package misk.client
 
 import com.google.inject.Inject
-import misk.Deadline
-import misk.DeadlineProvider
+import misk.ActionDeadline
+import misk.ActionDeadlineProvider
 import misk.exceptions.ActionException
 import misk.exceptions.StatusCode
 import misk.scope.ActionScoped
 import okhttp3.Response
 import retrofit2.Call
-import java.lang.Long.min
+import java.lang.Long.max
 import javax.inject.Provider
 
 /**
@@ -16,11 +16,11 @@ import javax.inject.Provider
  * action has been reached or passed.
  */
 class ClientDeadlineAppInterceptor(
-  private val deadlineProvider: Provider<ActionScoped<Deadline?>>
+  private val deadlineProvider: Provider<ActionScoped<ActionDeadline>>
 ) : ClientApplicationInterceptor {
 
   class Factory @Inject constructor(
-    private val deadlineProvider: Provider<ActionScoped<Deadline?>>
+    private val deadlineProvider: Provider<ActionScoped<ActionDeadline>>
   ) : ClientApplicationInterceptor.Factory {
     override fun create(action: ClientAction) =
         ClientDeadlineAppInterceptor(deadlineProvider)
@@ -28,12 +28,12 @@ class ClientDeadlineAppInterceptor(
 
   override fun interceptBeginCall(chain: BeginClientCallChain): Call<Any> {
     val deadline = deadlineProvider.get().get()
-    if (deadline == null) {
+
+    val remaining = deadline.remaining()
+    if (remaining == null) {
       return chain.proceed(chain.args)
     }
-
-    val remaining = deadline.remaining().toMillis()
-    if (remaining == 0L) {
+    if (remaining.isZero) {
       // TODO: Different status code?
       throw ActionException(StatusCode.SERVICE_UNAVAILABLE, "deadline exceeded; skipping call")
     }
@@ -50,31 +50,31 @@ class ClientDeadlineAppInterceptor(
  * Interceptor that propagates the remaining deadline to downstream services.
  */
 class ClientDeadlineNetworkInterceptor(
-  private val deadlineProvider: Provider<ActionScoped<Deadline?>>
+  private val deadlineProvider: Provider<ActionScoped<ActionDeadline>>
 ) : ClientNetworkInterceptor {
 
   class Factory @Inject constructor(
-    private val deadlineProvider: Provider<ActionScoped<Deadline?>>
+    private val deadlineProvider: Provider<ActionScoped<ActionDeadline>>
   ) : ClientNetworkInterceptor.Factory {
     override fun create(action: ClientAction): ClientNetworkInterceptor? =
         ClientDeadlineNetworkInterceptor(deadlineProvider)
   }
 
   override fun intercept(chain: ClientNetworkChain): Response {
-    if (chain.request.headers[DeadlineProvider.HTTP_HEADER] != null) {
+    if (chain.request.headers[ActionDeadlineProvider.HTTP_HEADER] != null) {
       return chain.proceed(chain.request)
     }
 
-    val deadline = deadlineProvider.get().get()
-    if (deadline == null) {
+    val remaining = deadlineProvider.get().get().remaining()
+    if (remaining == null) {
       return chain.proceed(chain.request)
     }
 
     // TODO(alec): Hacky for the time being. Deadline may have passed between early check.
     // This could return a 503 here, although that feels slightly weird.
-    val millisLeft = min(deadline.remaining().toMillis(), 1)
+    val millisLeft = max(remaining.toMillis(), 1)
     val request = chain.request.newBuilder()
-        .addHeader(DeadlineProvider.HTTP_HEADER, millisLeft.toString())
+        .addHeader(ActionDeadlineProvider.HTTP_HEADER, millisLeft.toString())
         .build()
     return chain.proceed(request)
   }

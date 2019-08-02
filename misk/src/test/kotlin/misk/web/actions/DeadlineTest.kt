@@ -1,7 +1,7 @@
 package misk.web.actions
 
-import misk.Deadline
-import misk.DeadlineProvider
+import misk.ActionDeadline
+import misk.ActionDeadlineProvider
 import misk.inject.KAbstractModule
 import misk.scope.ActionScoped
 import misk.testing.MiskTest
@@ -47,7 +47,7 @@ class DeadlineTest {
     val request = Request.Builder()
         .get()
         .url(serverUrlBuilder().encodedPath("/hello").build())
-        .addHeader(DeadlineProvider.HTTP_HEADER, "123")
+        .addHeader(ActionDeadlineProvider.HTTP_HEADER, "123")
         .build()
 
     val response = httpClient.newCall(request).execute()
@@ -65,7 +65,7 @@ class DeadlineTest {
       val request = Request.Builder()
           .get()
           .url(serverUrlBuilder().encodedPath("/hello").build())
-          .addHeader(DeadlineProvider.HTTP_HEADER, deadline)
+          .addHeader(ActionDeadlineProvider.HTTP_HEADER, deadline)
           .build()
 
       val response = httpClient.newCall(request).execute()
@@ -73,7 +73,7 @@ class DeadlineTest {
 
       val responseContent = response.body!!.source().readString(Charsets.UTF_8)
       assertThat(responseContent)
-          .contains("Invalid header value for ${DeadlineProvider.HTTP_HEADER}")
+          .contains("Invalid header value for ${ActionDeadlineProvider.HTTP_HEADER}")
     }
   }
 
@@ -92,11 +92,11 @@ class DeadlineTest {
   }
 
   class GetHello @Inject constructor(
-    val deadline: ActionScoped<Deadline?>
+    val deadline: ActionScoped<ActionDeadline>
   ) : WebAction {
     @Get("/hello")
     fun hello(): String {
-      return "${deadline.get()?.deadline?.toEpochMilli() ?: "no deadline"}"
+      return "${deadline.get().current()?.toEpochMilli() ?: "no deadline"}"
     }
   }
 }

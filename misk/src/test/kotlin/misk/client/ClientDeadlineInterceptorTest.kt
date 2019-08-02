@@ -4,7 +4,7 @@ import com.google.inject.Provides
 import com.google.inject.name.Named
 import com.google.inject.name.Names
 import helpers.protos.Dinosaur
-import misk.Deadline
+import misk.ActionDeadline
 import misk.MiskTestingServiceModule
 import misk.exceptions.ActionException
 import misk.inject.KAbstractModule
@@ -21,7 +21,9 @@ import org.junit.jupiter.api.assertThrows
 import retrofit2.Call
 import retrofit2.http.Body
 import retrofit2.http.POST
+import java.time.Clock
 import java.time.Duration
+import java.time.Instant
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -35,6 +37,8 @@ class ClientDeadlineInterceptorTest {
   @Inject private lateinit var mockWebServer: MockWebServer
   @Inject private lateinit var clock: FakeClock
 
+  @Inject private lateinit var actionDeadline: ActionScoped<ActionDeadline>
+
   @BeforeEach
   fun before() {
     mockWebServer.enqueue(MockResponse().setResponseCode(200).setBody("hello"))
@@ -45,34 +49,39 @@ class ClientDeadlineInterceptorTest {
   }
 
   @Test fun `within deadline`() {
-    TestModule.deadline = Deadline(clock, Duration.ofMillis(5))
-    assertThat(client.postDinosaur(Dinosaur.Builder().build()).execute().code()).isEqualTo(200)
+    val timeout = Duration.ofMillis(5)
+    actionDeadline.get().overriding(timeout) {
+      assertThat(client.postDinosaur(Dinosaur.Builder().build()).execute().code()).isEqualTo(200)
+    }
   }
 
   @Test fun `at deadline`() {
     val timeout = Duration.ofMillis(5)
-    TestModule.deadline = Deadline(clock, timeout)
-    clock.add(timeout)
 
-    assertThrows<ActionException> {
-      client.postDinosaur(Dinosaur.Builder().build()).execute()
+    actionDeadline.get().overriding(timeout) {
+      clock.add(timeout)
+
+      assertThrows<ActionException> {
+        client.postDinosaur(Dinosaur.Builder().build()).execute()
+      }
     }
   }
 
   @Test fun `after deadline`() {
     val timeout = Duration.ofMillis(5)
-    TestModule.deadline = Deadline(clock, timeout)
-    clock.add(timeout.plusMillis(1))
+    actionDeadline.get().overriding(timeout) {
+      clock.add(timeout.plusMillis(1))
 
-    assertThrows<ActionException> {
-      client.postDinosaur(Dinosaur.Builder().build()).execute()
+      assertThrows<ActionException> {
+        client.postDinosaur(Dinosaur.Builder().build()).execute()
+      }
     }
   }
 
   class TestModule : KAbstractModule() {
 
     companion object {
-      @Volatile var deadline: Deadline? = null
+      @Volatile var deadline: Instant? = null
     }
 
     override fun configure() {
@@ -83,9 +92,12 @@ class ClientDeadlineInterceptorTest {
       bind<MockWebServer>().toInstance(MockWebServer())
     }
 
-    @Provides
-    fun deadline(): ActionScoped<Deadline?> = object : ActionScoped<Deadline?> {
-      override fun get(): Deadline? = deadline
+    @Provides @Singleton
+    fun deadline(clock: Clock): ActionScoped<ActionDeadline> {
+      val deadline = ActionDeadline(clock = clock, deadline = null)
+      return object : ActionScoped<ActionDeadline> {
+        override fun get(): ActionDeadline = deadline
+      }
     }
 
     @Provides
