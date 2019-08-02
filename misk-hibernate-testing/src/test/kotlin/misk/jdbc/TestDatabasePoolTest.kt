@@ -10,7 +10,10 @@ import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
+import java.sql.SQLException
 import java.time.Clock
+import java.time.Duration
 import javax.inject.Inject
 import javax.persistence.PersistenceException
 
@@ -28,7 +31,12 @@ class TestDatabasePoolTest {
   @Inject private lateinit var clock: Clock
   @Inject private lateinit var backend: FakeDatabaseBackend
 
-  private val config = DataSourceConfig(type = DataSourceType.MYSQL, database = "test")
+  private val config = DataSourceConfig(
+      type = DataSourceType.MYSQL,
+      database = "test",
+      username = "root",
+      password = ""
+  )
 
   private lateinit var testDatabasePool: TestDatabasePool
 
@@ -101,6 +109,38 @@ class TestDatabasePoolTest {
         "test__20180101__1",
         "test__20180101__2"
     )
+  }
+
+  @Test fun releasesDatabaseNamesForReuse() {
+    assertThat(testDatabasePool.takeDatabase(config).database).isEqualTo("test__20180101__1")
+    assertThat(testDatabasePool.takeDatabase(config).database).isEqualTo("test__20180101__2")
+    testDatabasePool.releaseDatabase(config.copy(database = "test__20180101__1"))
+    assertThat(testDatabasePool.takeDatabase(config).database).isEqualTo("test__20180101__1")
+  }
+
+  @Test fun integrationTest() {
+    val realDatabasePool = TestDatabasePool(MySqlTestDatabasePoolBackend(config), clock)
+    realDatabasePool.getPool(config)
+    realDatabasePool.pruneOldDatabases(retention = Duration.ZERO)
+
+    // Create a database. This will be the first one that the pool tries to create.
+    realDatabasePool.backend.createDatabase("test__20180101__1")
+
+    // Demonstrate that attempting to create an existing database throws.
+    assertThrows<SQLException> {
+      realDatabasePool.backend.createDatabase("test__20180101__1")
+    }
+
+    // Assert that the database pool does not yet know about any database names.
+    assertThat(realDatabasePool.getPool(config).pool).isEmpty()
+
+    // At this point, the pool has tried to allocate "test__20180101__1", failed, and bumped the
+    // sequence number.
+    assertThat(realDatabasePool.takeDatabase(config).database).isEqualTo("test__20180101__2")
+
+    // If we return a name to the database pool, it will be the next database to be taken.
+    realDatabasePool.releaseDatabase(config.copy(database = "test__20180101__1"))
+    assertThat(realDatabasePool.takeDatabase(config).database).isEqualTo("test__20180101__1")
   }
 
   private fun backendHasDatabases() {
