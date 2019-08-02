@@ -12,10 +12,10 @@ import org.hibernate.FlushMode
 import org.hibernate.SessionFactory
 import org.hibernate.StaleObjectStateException
 import org.hibernate.exception.LockAcquisitionException
-import org.hibernate.exception.SQLGrammarException
 import java.io.Closeable
 import java.sql.Connection
 import java.sql.SQLRecoverableException
+import java.sql.SQLSyntaxErrorException
 import java.time.Duration
 import java.util.EnumSet
 import javax.inject.Provider
@@ -456,7 +456,7 @@ fun Connection.isVitess(): Boolean {
   try {
     this.createStatement().use { s -> s.executeQuery("SHOW VITESS_TARGET") }
     return true
-  } catch (e: SQLGrammarException) {
+  } catch (e: SQLSyntaxErrorException) {
     return false
   }
 }
