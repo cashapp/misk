@@ -262,12 +262,14 @@ class BulkShardMigrator<R : DbRoot<R>, C : DbChild<R, C>> private constructor(
     return sourceShard == targetShard
   }
 
-  private fun getShard(id: Id<R>): Shard =
-      transacter.shards().find {
-        (it.keyspace == keyspace || it.keyspace == SINGLE_KEYSPACE) && it.contains(id.shardKey())
-      } ?: throw NoSuchElementException(
-          "No shard found for [class=$rootClass][id=$id]" +
-              "[keyspace=$keyspace][shardKey=${id.shardKey()}]")
+  private fun getShard(id: Id<R>): Shard {
+    val shards = transacter.shards()
+    return shards.find {
+      (it.keyspace == keyspace || it.keyspace == SINGLE_KEYSPACE) && it.contains(id.shardKey())
+    } ?: throw NoSuchElementException(
+        "No shard found for [class=$rootClass][id=$id]" +
+            "[keyspace=$keyspace][shardKey=${id.shardKey()}] out of [shards=$shards]")
+  }
 
   private fun tableName(): String {
     return persistenceMetadata.getTableName(childClass)
