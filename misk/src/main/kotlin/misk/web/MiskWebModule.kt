@@ -2,6 +2,8 @@ package misk.web
 
 import com.google.inject.Provides
 import com.google.inject.TypeLiteral
+import misk.Deadline
+import misk.DeadlineProvider
 import misk.ApplicationInterceptor
 import misk.MiskCaller
 import misk.MiskDefault
@@ -70,6 +72,7 @@ class MiskWebModule(private val config: WebConfig) : KAbstractModule() {
         bindSeedData(HttpCall::class)
         bindSeedData(HttpServletRequest::class)
         bindProvider(miskCallerType, MiskCallerProvider::class)
+        bindProvider(actionDeadlineType, DeadlineProvider::class)
         newMultibinder<MiskCallerAuthenticator>()
       }
     })
@@ -164,5 +167,6 @@ class MiskWebModule(private val config: WebConfig) : KAbstractModule() {
 
   private companion object {
     val miskCallerType = object : TypeLiteral<MiskCaller?>() {}
+    val actionDeadlineType = object : TypeLiteral<Deadline?>() {}
   }
 }

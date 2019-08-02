@@ -22,7 +22,7 @@ open class ActionException(
   val statusCode: StatusCode,
   message: String = statusCode.name,
   cause: Throwable? = null
-) : Exception(message, cause)
+) : RuntimeException(message, cause)
 
 /** Base exception for when resources are not found */
 open class NotFoundException(message: String = "", cause: Throwable? = null) :
