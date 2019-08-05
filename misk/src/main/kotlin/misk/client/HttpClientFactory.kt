@@ -2,6 +2,7 @@ package misk.client
 
 import misk.security.ssl.SslContextFactory
 import misk.security.ssl.SslLoader
+import okhttp3.Dispatcher
 import okhttp3.OkHttpClient
 import okhttp3.Protocol
 import java.util.concurrent.TimeUnit
@@ -14,21 +15,17 @@ class HttpClientFactory @Inject constructor(
   private val sslLoader: SslLoader,
   private val sslContextFactory: SslContextFactory
 ) {
-  @com.google.inject.Inject(optional = true) lateinit var envoyClientEndpointProvider: EnvoyClientEndpointProvider
+  @com.google.inject.Inject(optional = true)
+  lateinit var envoyClientEndpointProvider: EnvoyClientEndpointProvider
 
   /** Returns a client initialized based on `config`. */
   fun create(config: HttpClientEndpointConfig): OkHttpClient {
     // TODO(mmihic): Cache, proxy, etc
     val builder = unconfiguredClient.newBuilder()
-    config.connectTimeout?.let { builder.connectTimeout(it.toMillis(),
-        TimeUnit.MILLISECONDS) }
-    config.readTimeout?.let { builder.readTimeout(it.toMillis(),
-        TimeUnit.MILLISECONDS) }
-    config.writeTimeout?.let { builder.writeTimeout(it.toMillis(),
-        TimeUnit.MILLISECONDS) }
-    config.pingInterval?.let {
-      builder.pingInterval(it)
-    }
+    config.connectTimeout?.let { builder.connectTimeout(it.toMillis(), TimeUnit.MILLISECONDS) }
+    config.readTimeout?.let { builder.readTimeout(it.toMillis(), TimeUnit.MILLISECONDS) }
+    config.writeTimeout?.let { builder.writeTimeout(it.toMillis(), TimeUnit.MILLISECONDS) }
+    config.pingInterval?.let { builder.pingInterval(it) }
     config.ssl?.let {
       val trustStore = sslLoader.loadTrustStore(it.trust_store)!!
       val trustManagers = sslContextFactory.loadTrustManagers(trustStore.keyStore)
@@ -47,6 +44,11 @@ class HttpClientFactory @Inject constructor(
       // negotiation is fine for non-Envoy sidecar (read: non-unix socket) traffic.
       builder.protocols(listOf(Protocol.H2_PRIOR_KNOWLEDGE))
     }
+
+    val dispatcher = Dispatcher()
+    dispatcher.maxRequests = config.maxRequests
+    dispatcher.maxRequestsPerHost = config.maxRequestsPerHost
+    builder.dispatcher(dispatcher)
 
     return builder.build()
   }
