@@ -2,6 +2,7 @@ package misk.web.actions
 
 import com.google.inject.Injector
 import com.google.inject.Provider
+import com.squareup.wire.WireRpc
 import misk.ApplicationInterceptor
 import misk.MiskDefault
 import misk.asAction
@@ -10,7 +11,6 @@ import misk.web.BoundAction
 import misk.web.ConnectWebSocket
 import misk.web.DispatchMechanism
 import misk.web.Get
-import misk.web.Grpc
 import misk.web.NetworkInterceptor
 import misk.web.PathPattern
 import misk.web.Post
@@ -19,7 +19,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
-import kotlin.reflect.full.findAnnotation
+import kotlin.reflect.full.functions
 
 @Singleton
 internal class WebActionFactory @Inject constructor(
@@ -39,11 +39,11 @@ internal class WebActionFactory @Inject constructor(
   ): List<BoundAction<A>> {
     // Find the function with Get, Post, or ConnectWebSocket annotation. Only one such function is
     // allowed.
-    val actionFunctions = webActionClass.members.mapNotNull {
-      if (it.findAnnotation<Get>() != null ||
-          it.findAnnotation<Post>() != null ||
-          it.findAnnotation<ConnectWebSocket>() != null ||
-          it.findAnnotation<Grpc>() != null) {
+    val actionFunctions = webActionClass.functions.mapNotNull {
+      if (it.findAnnotationWithOverrides<Get>() != null ||
+          it.findAnnotationWithOverrides<Post>() != null ||
+          it.findAnnotationWithOverrides<ConnectWebSocket>() != null ||
+          it.findAnnotationWithOverrides<WireRpc>() != null) {
         it as? KFunction<*>
             ?: throw IllegalArgumentException("expected $it to be a function")
       } else null
@@ -60,10 +60,10 @@ internal class WebActionFactory @Inject constructor(
 
     // Bind providers for each supported HTTP method.
     val actionFunction = actionFunctions.first()
-    val get = actionFunction.findAnnotation<Get>()
-    val post = actionFunction.findAnnotation<Post>()
-    val connectWebSocket = actionFunction.findAnnotation<ConnectWebSocket>()
-    val grpc = actionFunction.findAnnotation<Grpc>()
+    val get = actionFunction.findAnnotationWithOverrides<Get>()
+    val post = actionFunction.findAnnotationWithOverrides<Post>()
+    val connectWebSocket = actionFunction.findAnnotationWithOverrides<ConnectWebSocket>()
+    val grpc = actionFunction.findAnnotationWithOverrides<WireRpc>()
 
     // TODO(adrw) fix this using first provider below so that WebAction::class or WebAction can be passed in
     // val provider = Providers.of(theInstance)
@@ -89,7 +89,7 @@ internal class WebActionFactory @Inject constructor(
     }
     if (grpc != null) {
       result += newBoundAction(provider, actionFunction,
-          effectivePrefix + grpc.pathPattern, DispatchMechanism.GRPC)
+          effectivePrefix + grpc.path, DispatchMechanism.GRPC)
     }
 
     return result
