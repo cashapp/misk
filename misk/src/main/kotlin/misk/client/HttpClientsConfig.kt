@@ -49,5 +49,8 @@ data class HttpClientEndpointConfig(
 )
 
 data class HttpClientEnvoyConfig(
-  val app: String
+  val app: String,
+
+  /** Environment to target. If null, the same environment as the app is running in is assumed. */
+  val env: String? = null
 )
