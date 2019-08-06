@@ -4,6 +4,8 @@ import com.google.inject.Guice
 import com.google.inject.Provides
 import com.squareup.protos.test.grpc.HelloReply
 import com.squareup.protos.test.grpc.HelloRequest
+import com.squareup.wire.Service
+import com.squareup.wire.WireRpc
 import misk.MiskTestingServiceModule
 import misk.client.HttpClientEndpointConfig
 import misk.client.HttpClientModule
@@ -15,7 +17,6 @@ import misk.security.ssl.SslLoader
 import misk.security.ssl.TrustStoreConfig
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
-import misk.web.Grpc
 import misk.web.WebActionModule
 import misk.web.WebTestingModule
 import misk.web.actions.WebAction
@@ -67,8 +68,8 @@ class GrpcConnectivityTest {
           }
 
           override fun writeTo(sink: BufferedSink) {
-            val writer = GrpcWriter.get(sink, HelloRequest.ADAPTER)
-            writer.writeMessage(HelloRequest("jesse!"))
+            val writer = GrpcMessageSink(sink, HelloRequest.ADAPTER)
+            writer.write(HelloRequest("jesse!"))
           }
         })
         .build()
@@ -80,21 +81,29 @@ class GrpcConnectivityTest {
       println("${response.headers.name(i)}: ${response.headers.value(i)}")
     }
 
-    val reader = GrpcReader.get(response.body!!.source(), HelloReply.ADAPTER,
+    val reader = GrpcMessageSource(response.body!!.source(), HelloReply.ADAPTER,
         response.header("grpc-encoding"))
     while (true) {
-      val message = reader.readMessage() ?: break
+      val message = reader.read() ?: break
       println(message)
     }
   }
 
-  class HelloRpcAction @Inject constructor() : WebAction {
-    @Grpc("/helloworld.Greeter/SayHello")
-    fun sayHello(request: HelloRequest): HelloReply {
+  class HelloRpcAction @Inject constructor() : WebAction, GreeterSayHello {
+    override fun sayHello(request: HelloRequest): HelloReply {
       return HelloReply.Builder()
           .message("howdy, ${request.name}")
           .build()
     }
+  }
+
+  interface GreeterSayHello : Service {
+    @WireRpc(
+        path = "/helloworld.Greeter/SayHello",
+        requestAdapter = "com.squareup.protos.test.grpc.HelloRequest.ADAPTER",
+        responseAdapter = "com.squareup.protos.test.grpc.HelloReply.ADAPTER"
+    )
+    fun sayHello(request: HelloRequest): HelloReply
   }
 
   class TestModule : KAbstractModule() {

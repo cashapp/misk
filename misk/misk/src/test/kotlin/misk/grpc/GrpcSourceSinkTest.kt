@@ -7,40 +7,38 @@ import okio.ByteString.Companion.decodeHex
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
-class GrpcReaderWriterTest {
+class GrpcSourceSinkTest {
   @Test
-  fun grpcReaderHelloRequest() {
+  fun grpcMessageSourceHelloRequest() {
     val buffer = Buffer()
     buffer.write("000000000b0a096c6f63616c686f7374".decodeHex())
-    val reader = GrpcReader.get(buffer, HelloRequest.ADAPTER)
-    assertThat(reader.readMessage()).isEqualTo(HelloRequest("localhost"))
+    val reader = GrpcMessageSource(buffer, HelloRequest.ADAPTER)
+    assertThat(reader.read()).isEqualTo(HelloRequest("localhost"))
   }
 
   @Test
-  fun grpcReaderHelloReply() {
+  fun grpcMessageSourceHelloReply() {
     val buffer = Buffer()
     buffer.write("00000000110a0f48656c6c6f206c6f63616c686f7374".decodeHex())
-    val reader = GrpcReader.get(buffer, HelloReply.ADAPTER)
-    assertThat(reader.readMessage()).isEqualTo(HelloReply("Hello localhost"))
+    val reader = GrpcMessageSource(buffer, HelloReply.ADAPTER)
+    assertThat(reader.read()).isEqualTo(HelloReply("Hello localhost"))
   }
 
   @Test
-  fun grpcWriterHelloRequest() {
+  fun grpcMessageSinkHelloRequest() {
     val buffer = Buffer()
-    val writer = GrpcWriter.get(buffer, HelloRequest.ADAPTER)
-    writer.writeMessage(HelloRequest("localhost"))
-    writer.flush()
+    val writer = GrpcMessageSink(buffer, HelloRequest.ADAPTER)
+    writer.write(HelloRequest("localhost"))
     writer.close()
     assertThat(buffer.readByteString())
         .isEqualTo("000000000b0a096c6f63616c686f7374".decodeHex())
   }
 
   @Test
-  fun grpcWriterHelloReply() {
+  fun grpcMessageSinkHelloReply() {
     val buffer = Buffer()
-    val writer = GrpcWriter.get(buffer, HelloReply.ADAPTER)
-    writer.writeMessage(HelloReply("Hello localhost"))
-    writer.flush()
+    val writer = GrpcMessageSink(buffer, HelloReply.ADAPTER)
+    writer.write(HelloReply("Hello localhost"))
     writer.close()
     assertThat(buffer.readByteString()).isEqualTo(
         "00000000110a0f48656c6c6f206c6f63616c686f7374".decodeHex())

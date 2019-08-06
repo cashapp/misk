@@ -32,6 +32,14 @@ protobuf {
 wire {
   kotlin {
   }
+
+  // Generate service interfaces also.
+  kotlin {
+    includes = ['routeguide.RouteGuide']
+    exclusive = false
+    blockingServices = true
+    singleMethodServices = true
+  }
 }
 
 sourceSets {
@@ -49,6 +57,7 @@ dependencies {
   compile dep.grpcProtobuf
   compile dep.grpcStub
   compile dep.wireGrpcClient
+  compile dep.wireRuntime
   compile project(':misk')
   compile project(':misk-testing')
 }
