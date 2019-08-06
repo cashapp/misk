@@ -23,7 +23,7 @@ private val logger = getLogger<TruncateTablesService>()
  */
 class TruncateTablesService(
   private val qualifier: KClass<out Annotation>,
-  private val config: DataSourceConfig,
+  private val connector: DataSourceConnector,
   private val transacterProvider: Provider<Transacter>,
   private val startUpStatements: List<String> = listOf(),
   private val shutDownStatements: List<String> = listOf()
@@ -45,6 +45,7 @@ class TruncateTablesService(
     val truncatedTableNames = transacterProvider.get().shards().flatMap { shard ->
       transacterProvider.get().transaction(shard) { session ->
         session.withoutChecks {
+          val config = connector.config()
           val tableNamesQuery = when (config.type) {
             DataSourceType.MYSQL -> {
               "SELECT table_name FROM information_schema.tables where table_schema='${config.database}'"

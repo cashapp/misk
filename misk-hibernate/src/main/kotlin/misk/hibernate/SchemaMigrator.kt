@@ -3,7 +3,7 @@ package misk.hibernate
 import com.google.common.annotations.VisibleForTesting
 import com.google.common.base.Stopwatch
 import com.google.common.collect.ImmutableList
-import misk.jdbc.DataSourceConfig
+import misk.jdbc.DataSourceConnector
 import misk.logging.getLogger
 import misk.resources.ResourceLoader
 import org.hibernate.query.Query
@@ -96,10 +96,11 @@ internal class SchemaMigrator(
   private val qualifier: KClass<out Annotation>,
   private val resourceLoader: ResourceLoader,
   private val transacter: Provider<Transacter>,
-  private val config: DataSourceConfig
+  private val connector: DataSourceConnector
 ) {
 
   private fun getMigrationsResources(keyspace: Keyspace): List<String> {
+    val config = connector.config()
     val migrationsResources = ImmutableList.builder<String>()
     if (config.migrations_resource != null) {
       migrationsResources.add(config.migrations_resource)
