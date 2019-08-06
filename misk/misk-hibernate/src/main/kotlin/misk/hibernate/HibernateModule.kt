@@ -11,6 +11,7 @@ import misk.inject.keyOf
 import misk.inject.setOfType
 import misk.inject.toKey
 import misk.jdbc.DataSourceConfig
+import misk.jdbc.DataSourceConnector
 import misk.jdbc.DataSourceDecorator
 import misk.jdbc.DataSourceService
 import misk.jdbc.DatabasePool
@@ -86,8 +87,9 @@ class HibernateModule(
     // Bind DataSourceService.
     val dataSourceDecoratorsKey = setOfType(DataSourceDecorator::class).toKey(qualifier)
     val dataSourceDecoratorsProvider = getProvider(dataSourceDecoratorsKey)
-    bind(keyOf<DataSource>(qualifier)).toProvider(
-        keyOf<DataSourceService>(qualifier)).asSingleton()
+    bind(keyOf<DataSource>(qualifier))
+        .toProvider(keyOf<DataSourceService>(qualifier))
+        .asSingleton()
     bind(keyOf<DataSourceService>(qualifier)).toProvider(object : Provider<DataSourceService> {
       @com.google.inject.Inject(optional = true) var metrics: Metrics? = null
       override fun get() = DataSourceService(
@@ -99,6 +101,9 @@ class HibernateModule(
           metrics = metrics
       )
     }).asSingleton()
+    val dataSourceServiceProvider = getProvider(keyOf<DataSourceService>(qualifier))
+    bind(keyOf<DataSourceConnector>(qualifier)).toProvider(dataSourceServiceProvider)
+    val connectorProvider = getProvider(keyOf<DataSourceConnector>(qualifier))
     install(ServiceModule<DataSourceService>(qualifier)
         .dependsOn<PingDatabaseService>(qualifier))
 
@@ -110,8 +115,12 @@ class HibernateModule(
 
     bind(schemaMigratorKey).toProvider(object : Provider<SchemaMigrator> {
       @Inject lateinit var resourceLoader: ResourceLoader
-      override fun get(): SchemaMigrator = SchemaMigrator(qualifier, resourceLoader,
-          transacterProvider, config)
+      override fun get(): SchemaMigrator = SchemaMigrator(
+          qualifier = qualifier,
+          resourceLoader = resourceLoader,
+          transacter = transacterProvider,
+          connector = connectorProvider.get()
+      )
     }).asSingleton()
     bind(transacterKey).toProvider(object : Provider<Transacter> {
       @com.google.inject.Inject(optional = true) val tracer: Tracer? = null
@@ -132,15 +141,15 @@ class HibernateModule(
               qualifier = qualifier,
               environment = environment,
               schemaMigratorProvider = schemaMigratorProvider,
-              config = config
+              connectorProvider = connectorProvider
           )
         }).asSingleton()
     multibind<HealthCheck>().to(schemaMigratorServiceKey)
-    install(ServiceModule<SchemaMigratorService>(qualifier))
+    install(ServiceModule<SchemaMigratorService>(qualifier)
+        .dependsOn<DataSourceService>(qualifier))
 
     // Bind SchemaValidatorService.
-    val sessionFactoryServiceProvider = getProvider(
-        keyOf<SessionFactoryService>(qualifier))
+    val sessionFactoryServiceProvider = getProvider(keyOf<SessionFactoryService>(qualifier))
     val schemaValidatorServiceKey = keyOf<SchemaValidatorService>(qualifier)
     bind(schemaValidatorServiceKey)
         .toProvider(Provider {
@@ -166,9 +175,14 @@ class HibernateModule(
         .asSingleton()
     bind(keyOf<TransacterService>(qualifier)).to(keyOf<SessionFactoryService>(qualifier))
     bind(keyOf<SessionFactoryService>(qualifier)).toProvider(Provider {
-      SessionFactoryService(qualifier, config, dataSourceProvider,
-          hibernateInjectorAccessProvider.get(),
-          entitiesProvider.get(), eventListenersProvider.get())
+      SessionFactoryService(
+          qualifier = qualifier,
+          connector = dataSourceServiceProvider.get(),
+          dataSource = dataSourceProvider,
+          hibernateInjectorAccess = hibernateInjectorAccessProvider.get(),
+          entityClasses = entitiesProvider.get(),
+          listenerRegistrations = eventListenersProvider.get()
+      )
     }).asSingleton()
     install(ServiceModule<TransacterService>(qualifier)
         .enhancedBy<SchemaMigratorService>(qualifier)
@@ -200,8 +214,11 @@ class HibernateModule(
         .asSingleton()
     multibind<HealthCheck>().to(healthCheckKey)
 
-    install(ExceptionMapperModule.create<RetryTransactionException, RetryTransactionExceptionMapper>())
-    install(ExceptionMapperModule.create<ConstraintViolationException, ConstraintViolationExceptionMapper>())
-    install(ExceptionMapperModule.create<OptimisticLockException, OptimisticLockExceptionMapper>())
+    install(ExceptionMapperModule
+        .create<RetryTransactionException, RetryTransactionExceptionMapper>())
+    install(ExceptionMapperModule
+        .create<ConstraintViolationException, ConstraintViolationExceptionMapper>())
+    install(ExceptionMapperModule
+        .create<OptimisticLockException, OptimisticLockExceptionMapper>())
   }
 }

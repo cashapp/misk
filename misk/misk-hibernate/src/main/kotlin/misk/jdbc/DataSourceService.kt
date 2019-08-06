@@ -20,14 +20,14 @@ import kotlin.reflect.KClass
  *     the [databasePool] can pick an alternate database name for testing.
  */
 @Singleton
-internal class DataSourceService(
+class DataSourceService(
   private val qualifier: KClass<out Annotation>,
   private val baseConfig: DataSourceConfig,
   private val environment: Environment,
   private val dataSourceDecorators: Set<DataSourceDecorator>,
   private val databasePool: DatabasePool,
   private val metrics: Metrics? = null
-) : AbstractIdleService(), Provider<DataSource> {
+) : AbstractIdleService(), DataSourceConnector, Provider<DataSource> {
   private lateinit var config: DataSourceConfig
   /** The backing connection pool */
   private var hikariDataSource: HikariDataSource? = null
@@ -46,7 +46,7 @@ internal class DataSourceService(
 
   private fun createDataSource() {
     // Rewrite the caller's config to get a database name like "movies__20190730__5" in tests.
-    this.config = databasePool.takeDatabase(baseConfig)
+    config = databasePool.takeDatabase(baseConfig)
 
     val hikariConfig = HikariConfig()
     hikariConfig.driverClassName = config.type.driverClassName
@@ -92,6 +92,8 @@ internal class DataSourceService(
 
   private fun decorate(dataSource: DataSource): DataSource =
       dataSourceDecorators.fold(dataSource) { ds, decorator -> decorator.decorate(ds) }
+
+  override fun config(): DataSourceConfig = this.config
 
   override fun shutDown() {
     val stopwatch = Stopwatch.createStarted()

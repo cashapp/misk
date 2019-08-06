@@ -4,9 +4,12 @@ import com.squareup.moshi.Moshi
 import misk.ServiceModule
 import misk.inject.KAbstractModule
 import misk.inject.asSingleton
+import misk.inject.keyOf
 import misk.inject.toKey
 import misk.jdbc.DataSourceConfig
+import misk.jdbc.DataSourceConnector
 import misk.jdbc.DataSourceDecorator
+import misk.jdbc.DataSourceService
 import misk.jdbc.DataSourceType
 import misk.jdbc.TruncateTablesService
 import misk.jdbc.VitessScaleSafetyChecks
@@ -35,9 +38,6 @@ class HibernateTestingModule(
   override fun configure() {
     val truncateTablesServiceKey = TruncateTablesService::class.toKey(qualifier)
 
-    val configKey = DataSourceConfig::class.toKey(qualifier)
-    val configProvider = getProvider(configKey)
-
     val transacterKey = Transacter::class.toKey(qualifier)
     val transacterProvider = getProvider(transacterKey)
 
@@ -45,12 +45,13 @@ class HibernateTestingModule(
       bindVitessChecks(transacterProvider)
     }
 
+    val dataSourceConnector = getProvider(keyOf<DataSourceConnector>(qualifier))
     install(ServiceModule(truncateTablesServiceKey)
         .dependsOn<SchemaMigratorService>(qualifier))
     bind(truncateTablesServiceKey).toProvider(Provider {
       TruncateTablesService(
           qualifier = qualifier,
-          config = configProvider.get(),
+          connector = dataSourceConnector.get(),
           transacterProvider = transacterProvider,
           startUpStatements = startUpStatements,
           shutDownStatements = shutDownStatements
