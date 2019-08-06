@@ -2,7 +2,7 @@ package misk.hibernate
 
 import com.google.common.base.Stopwatch
 import com.google.common.util.concurrent.AbstractIdleService
-import misk.jdbc.DataSourceConfig
+import misk.jdbc.DataSourceConnector
 import misk.logging.getLogger
 import okio.ByteString
 import org.hibernate.SessionFactory
@@ -32,7 +32,7 @@ private val logger = getLogger<SessionFactoryService>()
  */
 internal class SessionFactoryService(
   private val qualifier: KClass<out Annotation>,
-  private val config: DataSourceConfig,
+  private val connector: DataSourceConnector,
   private val dataSource: Provider<DataSource>,
   private val hibernateInjectorAccess: HibernateInjectorAccess,
   private val entityClasses: Set<HibernateEntity> = setOf(),
@@ -75,6 +75,7 @@ internal class SessionFactoryService(
 
     val registryBuilder = StandardServiceRegistryBuilder(bootstrapRegistryBuilder)
     registryBuilder.addInitiator(hibernateInjectorAccess)
+    val config = connector.config()
     registryBuilder.run {
       applySetting(AvailableSettings.DATASOURCE, dataSource.get())
       applySetting(AvailableSettings.DIALECT, config.type.hibernateDialect)
@@ -141,8 +142,7 @@ internal class SessionFactoryService(
     persistentClass: Class<*>,
     property: Property
   ) {
-    val value = property.value
-    if (value !is SimpleValue) return
+    val value = property.value as? SimpleValue ?: return
 
     val field = field(persistentClass, property)
     if (field.isAnnotationPresent(JsonColumn::class.java)) {

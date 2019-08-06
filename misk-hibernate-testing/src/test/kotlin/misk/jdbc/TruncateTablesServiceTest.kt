@@ -24,9 +24,9 @@ internal class TruncateTablesServiceTest {
   @MiskTestModule
   val module = TestModule()
 
-  @Inject @TestDatasource lateinit var config: DataSourceConfig
   @Inject @TestDatasource lateinit var sessionFactory: SessionFactory
   @Inject @TestDatasource lateinit var transacter: Transacter
+  @Inject @TestDatasource lateinit var connector: DataSourceConnector
 
   @BeforeEach
   internal fun setUp() {
@@ -56,8 +56,7 @@ internal class TruncateTablesServiceTest {
     assertThat(rowCount("movies")).isGreaterThan(0)
 
     // Start up TruncateTablesService. The inserted data should be truncated.
-    val service = TruncateTablesService(TestDatasource::class, config,
-        Providers.of(transacter))
+    val service = TruncateTablesService(TestDatasource::class, connector, Providers.of(transacter))
     service.startAsync()
     service.awaitRunning()
     assertThat(rowCount("schema_version")).isGreaterThan(0)
@@ -68,9 +67,10 @@ internal class TruncateTablesServiceTest {
   fun startUpStatements() {
     val service = TruncateTablesService(
         TestDatasource::class,
-        config,
+        connector,
         Providers.of(transacter),
-        startUpStatements = listOf("INSERT INTO movies (name) VALUES ('Star Wars')"))
+        startUpStatements = listOf("INSERT INTO movies (name) VALUES ('Star Wars')")
+    )
 
     assertThat(rowCount("movies")).isEqualTo(0)
     service.startAsync()
@@ -82,9 +82,10 @@ internal class TruncateTablesServiceTest {
   fun shutDownStatements() {
     val service = TruncateTablesService(
         TestDatasource::class,
-        config,
+        connector,
         Providers.of(transacter),
-        shutDownStatements = listOf("INSERT INTO movies (name) VALUES ('Star Wars')"))
+        shutDownStatements = listOf("INSERT INTO movies (name) VALUES ('Star Wars')")
+    )
 
     service.startAsync()
     service.awaitRunning()
@@ -109,10 +110,8 @@ internal class TruncateTablesServiceTest {
       install(MiskTestingServiceModule())
 
       val config = MiskConfig.load<TestConfig>("test_truncatetables_app", Environment.TESTING)
-      install(HibernateModule(
-          TestDatasource::class, config.data_source))
-      install(object : HibernateEntityModule(
-          TestDatasource::class) {
+      install(HibernateModule(TestDatasource::class, config.data_source))
+      install(object : HibernateEntityModule(TestDatasource::class) {
         override fun configureHibernate() {
         }
       })
