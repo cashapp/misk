@@ -16,7 +16,7 @@ import javax.sql.DataSource
 internal class MySqlTestDatabasePoolBackend @Inject constructor(
   val config: DataSourceConfig
 ) : TestDatabasePool.Backend {
-  private val connection: Connection by lazy {
+  internal val connection: Connection by lazy {
     try {
       DriverDataSource(
           config.buildJdbcUrl(Environment.TESTING),

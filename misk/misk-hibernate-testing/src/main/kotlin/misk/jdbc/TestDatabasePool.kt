@@ -1,6 +1,7 @@
 package misk.jdbc
 
 import misk.logging.getLogger
+import java.sql.SQLException
 import java.time.Clock
 import java.time.Duration
 import java.time.LocalDate
@@ -66,7 +67,13 @@ class TestDatabasePool(
 
   /** Return a config-specific pool, creating it if necessary. */
   internal fun getPool(config: DataSourceConfig): ConfigSpecificPool {
-    val key = config.database!!
+    var key = config.database!!
+    for (pool in poolsByKey.values) {
+      if (key.startsWith(pool.key)) {
+        key = pool.key
+        break
+      }
+    }
     return poolsByKey.computeIfAbsent(key) { ConfigSpecificPool(key, config.type) }
   }
 
@@ -80,7 +87,7 @@ class TestDatabasePool(
     private val formatter = DateTimeFormatter.BASIC_ISO_DATE
 
     /** Database names that are available. */
-    private val pool = LinkedBlockingDeque<String>()
+    internal val pool = LinkedBlockingDeque<String>()
 
     /** Decodes a database name string. */
     fun decode(databaseName: String): DatabaseName? {
@@ -127,7 +134,7 @@ class TestDatabasePool(
         try {
           backend.createDatabase(databaseName.toString())
           break
-        } catch (_: PersistenceException) {
+        } catch (_: SQLException) {
           logger.info { "Lost a race trying to allocate a test database $databaseName" }
           databaseName = databaseName.copy(version = databaseName.version + 1)
         }
@@ -140,7 +147,11 @@ class TestDatabasePool(
       val evictBefore = LocalDate.now(clock).minus(Period.ofDays(retention.toDays().toInt()))
       val evictBeforeYearMonthDay = evictBefore.format(formatter).toLong()
 
-      val oldDatabases = getDatabases().filter { it.yearMonthDay < evictBeforeYearMonthDay }
+      val oldDatabases = if (retention.isZero) {
+        getDatabases()
+      } else {
+        getDatabases().filter { it.yearMonthDay < evictBeforeYearMonthDay }
+      }
 
       for (database in oldDatabases) {
         backend.dropDatabase("$database")
