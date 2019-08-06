@@ -69,7 +69,7 @@ class MiskClientMiskServerTest {
 
     // Confirm interceptors were invoked.
     assertThat(logCollector.takeMessage(RequestLoggingInterceptor::class)).isEqualTo(
-        "RouteChatGrpcAction principal=unknown request=[GrpcReceiveChannel, GrpcSendChannel]")
+        "RouteChatGrpcAction principal=unknown request=[GrpcMessageSource, GrpcMessageSink]")
     assertThat(logCollector.takeMessage(RequestLoggingInterceptor::class)).isEqualTo(
         "RouteChatGrpcAction principal=unknown time=0.000 ns response=kotlin.Unit")
   }
