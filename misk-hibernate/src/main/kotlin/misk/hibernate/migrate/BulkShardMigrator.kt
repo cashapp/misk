@@ -206,10 +206,9 @@ class BulkShardMigrator<R : DbRoot<R>, C : DbChild<R, C>> private constructor(
             "SELECT id FROM $tableName WHERE $rootColumnName = :target AND id IN (:ids)"
         ).setParameter("target", targetRoot!!.id)
           .setParameterList("ids", sourceRecords.keys)
-          .list()
-          .stream()
-          .map { it as Long }
-          .collect(Collectors.toSet<Long>())
+          .resultList
+          .map { (it as Id<*>).id }
+          .toSet()
 
         logger.info(
             "Bulk migrating (distinct shard) ${sourceRecords.size} entities for table $tableName"
