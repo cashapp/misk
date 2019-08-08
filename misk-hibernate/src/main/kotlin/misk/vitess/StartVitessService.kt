@@ -207,7 +207,9 @@ class DockerVitessCluster(
     if (containerId == null) {
       StartVitessService.logger.info(
           "Starting Vitess cluster with command: ${cmd.joinToString(" ")}")
-      containerId = docker.createContainerCmd(VITESS_IMAGE)
+      val vitessImage: String = System.getenv("VITESS_IMAGE") ?: VITESS_IMAGE
+
+      containerId = docker.createContainerCmd(vitessImage)
           .withCmd(cmd.toList())
           .withVolumes(schemaVolume)
           .withBinds(Bind(cluster.schemaDir.toAbsolutePath().toString(), schemaVolume))
