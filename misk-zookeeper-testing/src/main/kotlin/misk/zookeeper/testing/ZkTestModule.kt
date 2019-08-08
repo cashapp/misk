@@ -17,7 +17,8 @@ import javax.inject.Provider
 import kotlin.reflect.KClass
 
 class ZkTestModule(
-  private val qualifier: KClass<out Annotation>?
+  private val qualifier: KClass<out Annotation>?,
+  private val otherQualifier: KClass<out Annotation>? = null
 ) : KAbstractModule() {
   override fun configure() {
     val keystorePath = this::class.java.getResource("/zookeeper/keystore.jks").path
@@ -31,13 +32,27 @@ class ZkTestModule(
 
     install(ServiceModule<StartZookeeperService>(qualifier))
     bind(keyOf<StartZookeeperService>(qualifier)).toInstance(StartZookeeperService())
-    val curator = getProvider(keyOf<CuratorFramework>(qualifier))
-    bind(keyOf<ZkClientFactory>(qualifier)).toProvider(object : Provider<ZkClientFactory> {
-      @Inject @AppName private lateinit var app: String
-      override fun get(): ZkClientFactory {
-        return ZkClientFactory(app, curator.get())
-      }
-    })
+//    val curator = getProvider(keyOf<CuratorFramework>(qualifier))
+//    bind(keyOf<ZkClientFactory>(qualifier)).toProvider(object : Provider<ZkClientFactory> {
+//      @Inject @AppName private lateinit var app: String
+//      override fun get(): ZkClientFactory {
+//        return ZkClientFactory(app, curator.get())
+//      }
+//    })
+
+    if (otherQualifier != null) {
+      install(ZookeeperDefaultModule(config, otherQualifier))
+
+//      install(ServiceModule<StartZookeeperService>(qualifier))
+//      bind(keyOf<StartZookeeperService>(qualifier)).toInstance(StartZookeeperService())
+      val curatorz = getProvider(keyOf<CuratorFramework>(otherQualifier))
+      bind(keyOf<ZkClientFactory>(otherQualifier)).toProvider(object : Provider<ZkClientFactory> {
+        @Inject @AppName private lateinit var app: String
+        override fun get(): ZkClientFactory {
+          return ZkClientFactory(app, curatorz.get())
+        }
+      })
+    }
   }
 
   /**

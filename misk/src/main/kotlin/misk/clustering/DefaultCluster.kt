@@ -14,7 +14,7 @@ import javax.inject.Singleton
  * that need to be triggered as the cluster changes.
  */
 @Singleton
-internal class DefaultCluster(
+class DefaultCluster(
   self: Cluster.Member,
   private val newResourceMapperFn: (members: Set<Cluster.Member>) -> ClusterResourceMapper =
       { ClusterHashRing(it) }
