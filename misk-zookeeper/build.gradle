@@ -7,7 +7,9 @@ buildscript {
 apply plugin: 'kotlin-jpa'
 
 dependencies {
-  compile dep.curatorFramework
+  compile(dep.curatorFramework) {
+    exclude(group: 'org.slf4j', module: 'slf4j-log4j12')
+  }
   compile project(':misk')
   compile dep.zookeeper
 
