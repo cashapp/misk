@@ -7,7 +7,7 @@ import misk.inject.KAbstractModule
 import misk.web.metadata.AdminDashboardTestingModule
 
 // Common test module used to be able to test admin dashboard WebActions
-class TestAdminDashboardActionModule : KAbstractModule() {
+class AdminDashboardActionTestingModule : KAbstractModule() {
   override fun configure() {
     install(TestWebActionModule())
     install(AdminDashboardTestingModule(Environment.TESTING))

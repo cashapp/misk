@@ -11,7 +11,7 @@ import javax.inject.Inject
 @MiskTest(startService = true)
 class WebActionMetadataActionTest {
   @MiskTestModule
-  val module = TestAdminDashboardActionModule()
+  val module = AdminDashboardActionTestingModule()
 
   @Inject lateinit var webActionMetadataAction: WebActionMetadataAction
 
