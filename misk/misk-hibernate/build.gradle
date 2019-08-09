@@ -9,6 +9,14 @@ apply plugin: 'kotlin-jpa'
 dependencies {
   compile dep.datasourceProxy
   compile dep.docker
+  // The docker-java we use in tests depends on an old version of junixsocket that depends on
+  // log4j. We force it up a minor version in packages that use it.
+  compile('com.kohlschutter.junixsocket:junixsocket-native-common:2.1.1') {
+    force = true
+  }
+  compile('com.kohlschutter.junixsocket:junixsocket-common:2.1.1') {
+    force = true
+  }
   compile dep.hibernateCore
   compile dep.hikariCp
   compile dep.hsqldb
