@@ -43,10 +43,13 @@ internal class RequestLogContextInterceptorTest {
         .isEqualTo("TestAction")
     assertThat(contextFields[RequestLogContextInterceptor.MDC_CALLING_PRINCIPAL])
         .isEqualTo("caller")
+    assertThat(contextFields[RequestLogContextInterceptor.MDC_HTTP_METHOD])
+        .isEqualTo("GET")
+    assertThat(contextFields[RequestLogContextInterceptor.MDC_PROTOCOL])
+        .isEqualTo("HTTP/1.1")
     assertThat(contextFields[RequestLogContextInterceptor.MDC_REQUEST_URI])
         .isEqualTo("/call/me")
-    assertThat(contextFields[RequestLogContextInterceptor.MDC_REMOTE_IP]).isNotEmpty()
-    assertThat(contextFields[RequestLogContextInterceptor.MDC_REMOTE_PORT]).isNotEmpty()
+    assertThat(contextFields[RequestLogContextInterceptor.MDC_REMOTE_ADDR]).isNotEmpty()
   }
 
   fun invoke(asService: String? = null): okhttp3.Response {
