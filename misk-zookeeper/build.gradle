@@ -9,13 +9,20 @@ apply plugin: 'kotlin-jpa'
 dependencies {
   compile(dep.curatorFramework) {
     exclude(group: 'org.slf4j', module: 'slf4j-log4j12')
+    exclude(group: 'log4j', module: 'log4j')
   }
   compile project(':misk')
-  compile dep.zookeeper
+  compile(dep.zookeeper) {
+    exclude(group: 'org.slf4j', module: 'slf4j-log4j12')
+    exclude(group: 'log4j', module: 'log4j')
+  }
 
   testCompile dep.docker
   testCompile dep.junitApi
-  testCompile dep.zookeeper
+  testCompile(dep.zookeeper) {
+    exclude(group: 'org.slf4j', module: 'slf4j-log4j12')
+    exclude(group: 'log4j', module: 'log4j')
+  }
   testCompile project(':misk-testing')
   testCompile project(':misk-zookeeper-testing')
 }
