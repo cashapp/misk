@@ -7,8 +7,14 @@ buildscript {
 apply plugin: 'kotlin-jpa'
 
 dependencies {
-  compile dep.curatorFramework
-  compile dep.zookeeper
+  compile(dep.curatorFramework) {
+    exclude(group: 'org.slf4j', module: 'slf4j-log4j12')
+    exclude(group: 'log4j', module: 'log4j')
+  }
+  compile(dep.zookeeper) {
+    exclude(group: 'org.slf4j', module: 'slf4j-log4j12')
+    exclude(group: 'log4j', module: 'log4j')
+  }
   compile dep.docker
   compile project(':misk-testing')
   compile project(':misk-zookeeper')
