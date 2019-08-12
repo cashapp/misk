@@ -51,7 +51,7 @@ class LoaderContainer extends React.Component<IState & IDispatchProps> {
     if (!serviceMetadata) {
       unavailableEndpointUrls += serviceUrl + " "
     }
-    if (adminDashboardTabs && serviceMetadata) {
+    if (adminDashboardTabs != null && serviceMetadata) {
       return (
         <span>
           <Navbar
