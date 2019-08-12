@@ -9,7 +9,6 @@ import misk.inject.toKey
 import misk.jdbc.DataSourceConfig
 import misk.jdbc.DataSourceConnector
 import misk.jdbc.DataSourceDecorator
-import misk.jdbc.DataSourceService
 import misk.jdbc.DataSourceType
 import misk.jdbc.TruncateTablesService
 import misk.jdbc.VitessScaleSafetyChecks
