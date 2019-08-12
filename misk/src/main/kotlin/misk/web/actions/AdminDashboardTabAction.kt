@@ -32,12 +32,13 @@ class AdminDashboardTabAction @Inject constructor() : WebAction {
   @ResponseContentType(MediaTypes.APPLICATION_JSON)
   @Unauthenticated
   fun getAll(): Response {
-    val caller = callerProvider.get()
-    val authorizedAdminDashboardTabs = adminDashboardTabs.filter { it.isAuthenticated(caller) }
+    val caller = callerProvider.get() ?: return Response()
+    val authorizedAdminDashboardTabs =
+      adminDashboardTabs.filter { caller.isAllowed(it.capabilities, it.services) }
     return Response(adminDashboardTabs = authorizedAdminDashboardTabs)
   }
 
-  data class Response(val adminDashboardTabs: List<DashboardTab>)
+  data class Response(val adminDashboardTabs: List<DashboardTab> = listOf())
 }
 
 @Qualifier

@@ -27,4 +27,16 @@ data class MiskCaller(
       "service=$service"
     }
   }
+
+  /** Determine based on allowed capabilities/services if the caller is permitted */
+  fun isAllowed(allowedCapabilities: Set<String>, allowedServices: Set<String>): Boolean {
+    // Allow if we don't have any requirements on service or capability
+    if (allowedServices.isEmpty() && allowedCapabilities.isEmpty()) return true
+
+    // Allow if the caller has provided an allowed service
+    if (service != null && allowedServices.contains(service)) return true
+
+    // Allow if the caller has provided an allowed capability
+    return capabilities.any { allowedCapabilities.contains(it) }
+  }
 }
