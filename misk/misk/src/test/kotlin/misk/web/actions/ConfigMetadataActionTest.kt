@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test
 @MiskTest(startService = true)
 class ConfigMetadataActionTest {
   @MiskTestModule
-  val module = TestAdminDashboardActionModule()
+  val module = AdminDashboardActionTestingModule()
 
   val testConfig = TestConfig(
       IncludedConfig("foo"),
