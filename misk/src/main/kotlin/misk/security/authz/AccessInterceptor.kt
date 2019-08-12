@@ -19,23 +19,12 @@ class AccessInterceptor private constructor(
 
   override fun intercept(chain: Chain): Any {
     val caller = caller.get() ?: throw UnauthenticatedException()
-    if (!isAllowed(caller)) {
+    if (!caller.isAllowed(allowedCapabilities, allowedServices)) {
       logger.info { "$caller is not allowed to access ${chain.action}" }
       throw UnauthorizedException()
     }
 
     return chain.proceed(chain.args)
-  }
-
-  private fun isAllowed(caller: MiskCaller): Boolean {
-    // Allow if we don't have any requirements on service or capability
-    if (allowedServices.isEmpty() && allowedCapabilities.isEmpty()) return true
-
-    // Allow if the caller has provided an allowed service
-    if (caller.service != null && allowedServices.contains(caller.service)) return true
-
-    // Allow if the caller has provided an allowed capability
-    return caller.capabilities.any { allowedCapabilities.contains(it) }
   }
 
   internal class Factory @Inject internal constructor(
