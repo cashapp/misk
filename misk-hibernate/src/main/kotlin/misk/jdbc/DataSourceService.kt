@@ -63,7 +63,7 @@ class DataSourceService(
     hikariConfig.connectionTimeout = config.connection_timeout.toMillis()
     hikariConfig.maxLifetime = config.connection_max_lifetime.toMillis()
 
-    if (config.type == DataSourceType.MYSQL || config.type == DataSourceType.VITESS) {
+    if (config.type == DataSourceType.MYSQL || config.type == DataSourceType.VITESS || config.type == DataSourceType.VITESS_MYSQL) {
       hikariConfig.minimumIdle = 5
       if (config.type == DataSourceType.MYSQL) {
         hikariConfig.connectionInitSql = "SET time_zone = '+00:00'"
@@ -73,7 +73,11 @@ class DataSourceService(
       hikariConfig.dataSourceProperties["cachePrepStmts"] = "true"
       hikariConfig.dataSourceProperties["prepStmtCacheSize"] = "250"
       hikariConfig.dataSourceProperties["prepStmtCacheSqlLimit"] = "2048"
-      hikariConfig.dataSourceProperties["useServerPrepStmts"] = "true"
+      if (config.type == DataSourceType.MYSQL) {
+        // TODO(jontirsen): Try turning on server side prepared statements again when this issue
+        //  has been fixed: https://github.com/vitessio/vitess/issues/5075
+        hikariConfig.dataSourceProperties["useServerPrepStmts"] = "true"
+      }
       hikariConfig.dataSourceProperties["useLocalSessionState"] = "true"
       hikariConfig.dataSourceProperties["rewriteBatchedStatements"] = "true"
       hikariConfig.dataSourceProperties["cacheResultSetMetadata"] = "true"

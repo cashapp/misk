@@ -9,10 +9,10 @@ import misk.inject.toKey
 import misk.jdbc.DataSourceConfig
 import misk.jdbc.DataSourceConnector
 import misk.jdbc.DataSourceDecorator
-import misk.jdbc.DataSourceService
 import misk.jdbc.DataSourceType
 import misk.jdbc.TruncateTablesService
 import misk.jdbc.VitessScaleSafetyChecks
+import misk.time.ForceUtcTimeZoneService
 import misk.vitess.StartVitessService
 import okhttp3.OkHttpClient
 import javax.inject.Provider
@@ -36,12 +36,14 @@ class HibernateTestingModule(
   private val shutDownStatements: List<String> = listOf()
 ) : KAbstractModule() {
   override fun configure() {
+    install(ServiceModule<ForceUtcTimeZoneService>())
+
     val truncateTablesServiceKey = TruncateTablesService::class.toKey(qualifier)
 
     val transacterKey = Transacter::class.toKey(qualifier)
     val transacterProvider = getProvider(transacterKey)
 
-    if ((config == null || config.type == DataSourceType.VITESS)) {
+    if (config == null || config.type == DataSourceType.VITESS || config.type == DataSourceType.VITESS_MYSQL) {
       bindVitessChecks(transacterProvider)
     }
 

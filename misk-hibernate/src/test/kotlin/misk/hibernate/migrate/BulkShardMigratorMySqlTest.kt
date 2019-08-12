@@ -12,6 +12,7 @@ import misk.hibernate.Transacter
 import misk.hibernate.createInSameShard
 import misk.hibernate.shard
 import misk.hibernate.transaction
+import misk.jdbc.DataSourceType
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
@@ -23,7 +24,7 @@ import javax.inject.Inject
 @MiskTest(startService = true)
 class BulkShardMigratorMySqlTest {
   @MiskTestModule
-  val module = MoviesTestModule(useVitess = false)
+  val module = MoviesTestModule(DataSourceType.MYSQL)
 
   @Inject @Movies private lateinit var transacter: Transacter
   @Inject @Movies lateinit var sessionFactory: SessionFactory

@@ -22,7 +22,8 @@ class SchemaMigratorService internal constructor(
     val schemaMigrator = schemaMigratorProvider.get()
     val connector = connectorProvider.get()
     if (environment == Environment.TESTING || environment == Environment.DEVELOPMENT) {
-      if (connector.config().type != DataSourceType.VITESS) {
+      val type = connector.config().type
+      if (type != DataSourceType.VITESS && type != DataSourceType.VITESS_MYSQL) {
         val appliedMigrations = schemaMigrator.initialize()
         migrationState = schemaMigrator.applyAll("SchemaMigratorService", appliedMigrations)
       } else {
