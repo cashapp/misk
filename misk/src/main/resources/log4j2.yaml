@@ -10,7 +10,9 @@ Configuration:
       -
         name: misk
         level: debug
-
+      -
+        name: org.hibernate
+        level: error
     Root:
       level: info
       AppenderRef:
