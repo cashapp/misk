@@ -58,6 +58,7 @@ class VitessCluster(
   val moshi: Moshi = Moshi.Builder().build()
 ) {
   val schemaDir: Path
+  val configDir: Path
 
   init {
     if (config.vitess_schema_dir != null) {
@@ -85,6 +86,15 @@ class VitessCluster(
         schemaDir.toFile().deleteRecursively()
       })
     }
+
+    // Copy out all the resources from the current package
+    // We use the my.cnf configuration file to configure MySQL (e.g. the default time zone)
+    configDir = Paths.get("/tmp/vitess_conf_${System.currentTimeMillis()}")
+    Files.createDirectories(configDir)
+    resourceLoader.copyTo("classpath:/misk/vitess", configDir)
+    Runtime.getRuntime().addShutdownHook(thread(start = false) {
+      configDir.toFile().deleteRecursively()
+    })
   }
 
   val keyspaceAdapter = moshi.adapter<Keyspace>()
@@ -107,7 +117,7 @@ class VitessCluster(
   fun openMysqlConnection() = mysqlDataSource().connection
 
   private fun dataSource(): DriverDataSource {
-    val jdbcUrl = config.buildJdbcUrl(TESTING)
+    val jdbcUrl = config.withDefaults().buildJdbcUrl(TESTING)
     return DriverDataSource(
         jdbcUrl, config.type.driverClassName, Properties(), config.username, config.password)
   }
@@ -154,10 +164,19 @@ class DockerVitessCluster(
     val shardCounts = keyspaces.values.map { it.shardCount() }.joinToString(",")
 
     val schemaVolume = Volume("/vt/src/vitess.io/vitess/schema")
+    val confVolume = Volume("/vt/src/vitess.io/vitess/config/miskcnf")
     val httpPort = ExposedPort.tcp(cluster.httpPort)
-    if (cluster.config.port != null && cluster.config.port != cluster.grpcPort) {
-      throw RuntimeException(
-          "Config port ${cluster.config.port} has to match Vitess Docker container: ${cluster.grpcPort}")
+    if (cluster.config.type == DataSourceType.VITESS) {
+      if (cluster.config.port != null && cluster.config.port != cluster.grpcPort) {
+        throw RuntimeException(
+            "Config port ${cluster.config.port} has to match Vitess Docker container: ${cluster.grpcPort}")
+      }
+    }
+    if (cluster.config.type == DataSourceType.VITESS_MYSQL) {
+      if (cluster.config.port != null && cluster.config.port != cluster.vtgateMysqlPort) {
+        throw RuntimeException(
+            "Config port ${cluster.config.port} has to match Vitess Docker container: ${cluster.grpcPort}")
+      }
     }
     val grpcPort = ExposedPort.tcp(cluster.grpcPort)
     val mysqlPort = ExposedPort.tcp(cluster.mysqlPort)
@@ -180,7 +199,11 @@ class DockerVitessCluster(
         // Increase the transaction timeout so you can have a breakpoint
         // inside a transaction without it timing out
         "-queryserver-config-transaction-timeout=${Duration.ofHours(24).toMillis()}",
-        "-extra_my_cnf=/vt/src/vitess.io/vitess/config/mycnf/rbr.cnf",
+        "-extra_my_cnf=" +
+            listOf(
+              "/vt/src/vitess.io/vitess/config/mycnf/rbr.cnf",
+              "/vt/src/vitess.io/vitess/config/miskcnf/misk.cnf"
+            ).joinToString(":"),
         "-keyspaces=$keyspacesArg",
         "-num_shards=$shardCounts"
     )
@@ -209,8 +232,11 @@ class DockerVitessCluster(
           "Starting Vitess cluster with command: ${cmd.joinToString(" ")}")
       containerId = docker.createContainerCmd(VITESS_IMAGE)
           .withCmd(cmd.toList())
-          .withVolumes(schemaVolume)
-          .withBinds(Bind(cluster.schemaDir.toAbsolutePath().toString(), schemaVolume))
+          .withVolumes(schemaVolume, confVolume)
+          .withBinds(
+              Bind(cluster.schemaDir.toAbsolutePath().toString(), schemaVolume),
+              Bind(cluster.configDir.toAbsolutePath().toString(), confVolume)
+          )
           .withExposedPorts(httpPort, grpcPort, mysqlPort, vtgateMysqlPort)
           .withPortBindings(ports)
           .withTty(true)
@@ -236,7 +262,7 @@ class DockerVitessCluster(
   }
 
   private fun waitUntilHealthy() {
-    retry(10, ExponentialBackoff(Duration.ofMillis(20), Duration.ofMillis(1000))) {
+    retry(10, ExponentialBackoff(Duration.ofMillis(20), Duration.ofMillis(5000))) {
       cluster.openVtgateConnection().use { c ->
         try {
           val result =
@@ -351,7 +377,9 @@ class StartVitessService(
 
   fun cluster() = cluster?.cluster
 
-  fun shouldRunVitess() = config.type == DataSourceType.VITESS && (environment == TESTING || environment == DEVELOPMENT)
+  fun shouldRunVitess() =
+      (config.type == DataSourceType.VITESS || config.type == DataSourceType.VITESS_MYSQL) &&
+          (environment == TESTING || environment == DEVELOPMENT)
 
   override fun shutDown() {
   }

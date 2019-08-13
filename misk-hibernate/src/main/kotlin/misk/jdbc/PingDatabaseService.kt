@@ -28,21 +28,15 @@ class PingDatabaseService @Inject constructor(
     val dataSource = DriverDataSource(
         jdbcUrl, config.type.driverClassName, Properties(), config.username, config.password)
     retry(10, ExponentialBackoff(Duration.ofMillis(20), Duration.ofMillis(1000))) {
-      val connection = try {
-        dataSource.connect()
-      } catch (e: Exception) {
-        logger.error(e) { "failed to get a data source connection" }
-        throw RuntimeException("failed to get a data source connection $jdbcUrl", e)
-      }
       try {
-        connection.use { c ->
+        dataSource.connect().use { c ->
           check(c.createStatement().use { s ->
             s.executeQuery("SELECT 1 FROM dual").uniqueInt()
           } == 1)
           // During cluster start up we sometimes have an empty list of shards so lets also
           // wait until the shards are loaded (this is generally only an issue during tests)
-          if (connection.isVitess()) {
-            check(connection.createStatement().use { s ->
+          if (c.isVitess()) {
+            check(c.createStatement().use { s ->
               s.executeQuery("SHOW VITESS_SHARDS").map { rs -> rs.getString(1) }
             }.isNotEmpty())
           }
