@@ -451,6 +451,9 @@ fun Connection.isVitess(): Boolean {
   if (metaData.driverName.startsWith("Vitess")) {
     return true
   }
+  if (metaData.databaseProductVersion.endsWith("Vitess")) {
+    return true
+  }
   // If we're using the MySQL Driver we can check if the underlying connection
   // uses some Vitess specific syntax
   try {

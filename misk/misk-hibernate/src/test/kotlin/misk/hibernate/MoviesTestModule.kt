@@ -8,13 +8,14 @@ import misk.environment.Environment
 import misk.environment.EnvironmentModule
 import misk.inject.KAbstractModule
 import misk.jdbc.DataSourceConfig
+import misk.jdbc.DataSourceType
 import misk.logging.LogCollectorModule
 import misk.testing.MockTracingBackendModule
 import misk.time.FakeClockModule
 
 /** This module creates movies, actors, and characters tables for several Hibernate tests. */
 class MoviesTestModule(
-  private val useVitess: Boolean = true
+  private val type: DataSourceType = DataSourceType.VITESS_MYSQL
 ) : KAbstractModule() {
   override fun configure() {
     install(LogCollectorModule())
@@ -33,14 +34,17 @@ class MoviesTestModule(
   }
 
   private fun selectDataSourceConfig(config: MoviesConfig): DataSourceConfig {
-    return if (useVitess)
-      config.data_source
-    else
-      config.mysql_data_source
+    return when (type) {
+      DataSourceType.VITESS -> config.vitess_data_source
+      DataSourceType.VITESS_MYSQL -> config.vitess_mysql_data_source
+      DataSourceType.MYSQL -> config.mysql_data_source
+      DataSourceType.HSQLDB -> throw RuntimeException("Not supported (yet?)")
+    }
   }
 
   data class MoviesConfig(
-    val data_source: DataSourceConfig,
+    val vitess_data_source: DataSourceConfig,
+    val vitess_mysql_data_source: DataSourceConfig,
     val mysql_data_source: DataSourceConfig
   ) : Config
 }

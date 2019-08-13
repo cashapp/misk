@@ -369,7 +369,7 @@ class VitessScaleSafetyChecks(
   private var vtgate: Connection? = null
 
   override fun decorate(dataSource: DataSource): DataSource {
-    if (config.type != DataSourceType.VITESS) return dataSource
+    if (config.type != DataSourceType.VITESS && config.type != DataSourceType.VITESS_MYSQL) return dataSource
 
     val proxy = ProxyDataSource(dataSource)
     proxy.proxyConfig = ProxyConfig.Builder()

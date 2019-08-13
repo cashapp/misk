@@ -18,9 +18,11 @@ enum class DataSourceType(
       hibernateDialect = "org.hibernate.dialect.H2Dialect"
   ),
   VITESS(
-      // TODO: Switch back to mysql protocol when this issue is fixed: https://github.com/vitessio/vitess/issues/4100
-      // Find the correct buildJdbcUrl and port in the git history
       driverClassName = "io.vitess.jdbc.VitessDriver",
+      hibernateDialect = "misk.hibernate.VitessDialect"
+  ),
+  VITESS_MYSQL(
+      driverClassName = MYSQL.driverClassName,
       hibernateDialect = "misk.hibernate.VitessDialect"
   ),
 }
@@ -63,6 +65,13 @@ data class DataSourceConfig(
             database = database ?: ""
         )
       }
+      DataSourceType.VITESS_MYSQL -> {
+        copy(
+            port = port ?: 27003,
+            host = host ?: "127.0.0.1",
+            database = database ?: ""
+        )
+      }
       DataSourceType.HSQLDB -> {
         this
       }
@@ -88,10 +97,17 @@ data class DataSourceConfig(
     }
 
     return when (type) {
-      DataSourceType.MYSQL -> {
+      DataSourceType.MYSQL, DataSourceType.VITESS_MYSQL -> {
         var queryParams = "?useLegacyDatetimeCode=false"
         if (env == Environment.TESTING || env == Environment.DEVELOPMENT) {
           queryParams += "&createDatabaseIfNotExist=true"
+        }
+
+        if (type == DataSourceType.VITESS_MYSQL) {
+          // TODO(jontirsen): Try turning on server side prepared statements again when this issue
+          //  has been fixed: https://github.com/vitessio/vitess/issues/5075
+          queryParams += "&useServerPrepStmts=false"
+          queryParams += "&useUnicode=true"
         }
 
         var trustStoreUrl: String? = null
