@@ -10,7 +10,6 @@ import misk.testing.MiskTestModule
 import misk.web.jetty.JettyService
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import javax.inject.Inject
 import kotlin.test.assertEquals
