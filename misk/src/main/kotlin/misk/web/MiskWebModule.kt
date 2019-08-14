@@ -37,6 +37,7 @@ import misk.web.interceptors.RebalancingInterceptor
 import misk.web.interceptors.RequestLogContextInterceptor
 import misk.web.interceptors.RequestLoggingInterceptor
 import misk.web.interceptors.TracingInterceptor
+import misk.web.jetty.DrainService
 import misk.web.jetty.JettyConnectionMetricsCollector
 import misk.web.jetty.JettyService
 import misk.web.jetty.JettyThreadPoolMetricsCollector
@@ -60,7 +61,9 @@ class MiskWebModule(private val config: WebConfig) : KAbstractModule() {
     bind<WebConfig>().toInstance(config)
     bind<ActionExceptionLogLevelConfig>().toInstance(config.action_exception_log_level)
 
-    install(ServiceModule<JettyService>())
+    install(ServiceModule<DrainService>())
+    install(ServiceModule<JettyService>()
+        .dependsOn<DrainService>())
     install(ServiceModule<JettyThreadPoolMetricsCollector>())
     install(ServiceModule<JettyConnectionMetricsCollector>())
 

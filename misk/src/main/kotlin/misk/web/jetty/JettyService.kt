@@ -20,16 +20,40 @@ import org.eclipse.jetty.server.ServerConnectionStatistics
 import org.eclipse.jetty.server.ServerConnector
 import org.eclipse.jetty.server.SslConnectionFactory
 import org.eclipse.jetty.server.handler.ContextHandler
+import org.eclipse.jetty.server.handler.StatisticsHandler
 import org.eclipse.jetty.servlet.ServletContextHandler
 import org.eclipse.jetty.servlet.ServletHolder
 import org.eclipse.jetty.util.ssl.SslContextFactory
 import org.eclipse.jetty.util.thread.QueuedThreadPool
 import java.net.InetAddress
+import java.time.Duration
 import javax.inject.Inject
 import javax.inject.Singleton
-import org.eclipse.jetty.server.handler.StatisticsHandler
 
 private val logger = getLogger<JettyService>()
+
+@Singleton
+class DrainService @Inject constructor(
+  private val drains: Set<Drain>
+) : AbstractIdleService() {
+
+  interface Drain {
+    fun drain(): Duration
+  }
+
+  override fun startUp() {}
+
+  override fun shutDown() {
+    logger.info("starting to drain")
+    val wait = drains.map { it.drain() }.max()
+    wait?.let { logger.info("waiting to drain for ${wait.toMillis()} ms") }
+    wait?.let { Thread.sleep(wait.toMillis()) }
+  }
+
+  companion object {
+    private val logger = getLogger<DrainService>()
+  }
+}
 
 @Singleton
 class JettyService @Inject internal constructor(

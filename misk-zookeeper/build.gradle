@@ -8,6 +8,7 @@ apply plugin: 'kotlin-jpa'
 
 dependencies {
   compile dep.curatorFramework
+  compile dep.curatorRecipes
   compile project(':misk')
   compile dep.zookeeper
 
