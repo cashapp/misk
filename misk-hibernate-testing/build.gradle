@@ -10,3 +10,10 @@ test {
   // misk-hibernate-testing is made dependent on misk-hibernate
   dependsOn ':misk-hibernate:test'
 }
+
+afterEvaluate { project ->
+  project.tasks.dokka {
+    outputDirectory = "$rootDir/docs/0.x"
+    outputFormat = 'gfm'
+  }
+}
