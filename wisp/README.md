@@ -1,25 +1,14 @@
-<img src="misk.png" width="300">
+<img src="https://github.com/cashapp/misk/raw/master/misk.png" width="300">
 
-Misk is a new open source application container from Square.
+See the [project website][misk] for documentation and APIs.
 
-Looking for `@misk/` NPM Packages? **Check out [Misk-Web](https://github.com/square/misk-web)**
+Misk is a new open source application container from Cash App.
 
 Misk is not ready for use. The API is not stable.
 
-Quick Links
-===
+## Looking for Misk-Web?
+Misk-Web powers the Misk Admin Dashboard with modular Typescript + React powered tabs. 
+**Check out [Misk-Web][miskweb]!**
 
-Web
----
-- [General Info on Misk Admin Dashboard / Web](https://github.com/square/misk-web/blob/master/README.md)
-- [Developing a New Tab Guide](https://github.com/square/misk-web/blob/master/HOWTO.md)
-- [Template Exemplar Web Tab](https://github.com/square/misk-web/tree/master/examples)
-
-[Recommended Workflow](https://blog.scottlowe.org/2015/01/27/using-fork-branch-git-workflow/)
----
-1. Fork into your personal Github account
-1. Clone repo from your fork
-1. Add square as a remote with `git remote add cashapp git@github.com:cashapp/misk.git`
-1. Pull any new changes with `git pull cashapp master`
-1. Push any new changes to a new branch in your personal fork
-1. Open PR from personal fork -> cashapp/master
+[misk]: https://cashapp.github.io/misk/
+[miskweb]: https://cashapp.github.io/misk-web/
