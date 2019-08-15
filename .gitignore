@@ -21,3 +21,9 @@ dist
 .hash
 hooks.gradle
 repositories.gradle
+
+**/site/
+docs/0.x/*
+docs/index.md
+docs/changelog.md
+docs/releasing.md

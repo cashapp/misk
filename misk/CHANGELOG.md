@@ -4,7 +4,8 @@ Change Log
 Version 0.2.5 *(2018-06-11)*
 ----------------------------
 
-New:
+### New
+
 * Cluster interface and DataSourceCluster bindings
 * Add a JPAEntityModule for binding entities for a DataSource
 * Hook up raw Hibernate APIs
@@ -34,7 +35,8 @@ New:
 * Misk containers should not run as root
 * DbTimestampedEntity
 
-Fix:
+### Fix
+
 * Don't inject until after services are started.
 * Tidy up some test cases.
 * Fix a missing dependency in exemplar
@@ -43,7 +45,8 @@ Fix:
 Version 0.2.4 *(2018-05-14)*
 ----------------------------
 
-New:
+### New
+
 * Add support for protobuf over HTTP
 * Cloudwatch Trail logging support
 * Add retry() helper
@@ -52,7 +55,8 @@ New:
 * Adds a DataSourceModule
 * Add support for logging to StackDriver
 
-Fix:
+### Fix
+
 * Move static resources from web root into resources
 * Move web-specific NetworkInterceptor into web
 * Remove use of instance metadata endpoints
@@ -60,7 +64,8 @@ Fix:
 Version 0.2.3 *(2018-04-27)*
 ----------------------------
 
-New:
+### New
+
 * Add kubernetes java client so that hosts can know their peers
 * Use EventRouter for exemplarchat. Add a static resource mapper
 * Create a cluster wide admin healthcheck page
@@ -68,7 +73,8 @@ New:
 * Adds a healthcheck for the kubernetes client
 * Adds a local cluster connector so that development functions
 
-Fix:
+### Fix
+
 * Don't treat assembly as a release when running in CI
 * Fix tracing startup when none is configured
 * Various event router fixes and refactorings
@@ -76,7 +82,8 @@ Fix:
 Version 0.2.1 *(2018-03-26)*
 ----------------------------
 
-New:
+### New
+
 * Remove unnecessary check from uploadArchives task (#149)
 * Add a RELEASING.md to outline misk release process (#150)
 * Move chat into its own example project. (#146)
@@ -89,13 +96,15 @@ New:
 * More tests to exercise EventRouter behaviors. (#158)
 * Support loading keystores from combined private key and certificate chain PEM files (#157)
 
-Fix:
+### Fix
+
 * Fix event router tests (#159)
 
 Version 0.2.0 *(2018-03-13)*
 ----------------------------
 
-New:
+### New
+
 * Add \_status action
 * Split Interceptor into NetworkInterceptor and ApplicationInterceptor
 * Introduce websocket support in misk
@@ -115,7 +124,8 @@ New:
 * Allow customized exception mappings
 * Add support for query strings in urls
 
-Fix:
+### Fix
+
 * Eliminate redundant \_config suffix in config files
 * Support Web actions that return Nothing
 * Use proper snake-casing for default property names
