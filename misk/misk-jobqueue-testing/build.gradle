@@ -4,3 +4,10 @@ dependencies {
   compile project(':misk-testing')
   compile project(':misk-jobqueue')
 }
+
+afterEvaluate { project ->
+  project.tasks.dokka {
+    outputDirectory = "$rootDir/docs/0.x"
+    outputFormat = 'gfm'
+  }
+}

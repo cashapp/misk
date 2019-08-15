@@ -56,3 +56,10 @@ dependencies {
   testCompile project(':misk-testing')
   testImplementation dep.junit4
 }
+
+afterEvaluate { project ->
+  project.tasks.dokka {
+    outputDirectory = "$rootDir/docs/0.x"
+    outputFormat = 'gfm'
+  }
+}
