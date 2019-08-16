@@ -126,8 +126,11 @@ internal class ReflectionQuery<T : DbEntity<T>>(
   }
 
   private fun checkRowCount(returnList: Boolean, rowCount: Int) {
+    val disabledChecks = this.disabledChecks
     if (!returnList) {
       check(rowCount <= 1) { "query expected a unique result but was $rowCount" }
+    } else if (disabledChecks != null && disabledChecks.contains(Check.MAX_ROWS)) {
+      return
     } else if (maxRows == -1) {
       if (rowCount > queryLimitsConfig.maxMaxRows) {
         throw IllegalStateException("query truncated at $rowCount rows")

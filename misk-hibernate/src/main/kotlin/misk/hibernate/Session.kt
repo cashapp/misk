@@ -55,7 +55,8 @@ interface Session {
 enum class Check {
   FULL_SCATTER,
   TABLE_SCAN,
-  COWRITE
+  COWRITE,
+  MAX_ROWS
 }
 
 inline fun <reified T : DbEntity<T>> Session.load(id: Id<T>): T = load(id, T::class)
