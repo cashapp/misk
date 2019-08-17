@@ -1,8 +1,10 @@
 package misk.grpc
 
 import com.google.inject.util.Modules
+import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.runBlocking
 import misk.grpc.miskclient.MiskGrpcClientModule
+import misk.grpc.miskserver.RouteChatGrpcAction
 import misk.grpc.miskserver.RouteGuideMiskServiceModule
 import misk.logging.LogCollector
 import misk.logging.LogCollectorModule
@@ -28,6 +30,7 @@ class MiskClientMiskServerTest {
 
   @Inject lateinit var routeGuideProvider: Provider<RouteGuide>
   @Inject lateinit var logCollector: LogCollector
+  @Inject lateinit var routeChatGrpcAction: RouteChatGrpcAction
 
   @Test
   fun requestResponse() {
@@ -72,5 +75,18 @@ class MiskClientMiskServerTest {
         "RouteChatGrpcAction principal=unknown request=[GrpcMessageSource, GrpcMessageSink]")
     assertThat(logCollector.takeMessage(RequestLoggingInterceptor::class)).isEqualTo(
         "RouteChatGrpcAction principal=unknown time=0.000 ns response=kotlin.Unit")
+  }
+
+  @Test
+  fun duplexStreamingResponseFirst() {
+    routeChatGrpcAction.welcomeMessage = "welcome"
+
+    runBlocking {
+      val routeGuide = routeGuideProvider.get()
+
+      val (sendChannel, receiveChannel: ReceiveChannel<RouteNote>) = routeGuide.RouteChat()
+      assertThat(receiveChannel.receive()).isEqualTo(RouteNote(message = "welcome"))
+      sendChannel.close()
+    }
   }
 }
