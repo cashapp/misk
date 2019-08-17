@@ -20,6 +20,7 @@ import org.eclipse.jetty.server.ServerConnectionStatistics
 import org.eclipse.jetty.server.ServerConnector
 import org.eclipse.jetty.server.SslConnectionFactory
 import org.eclipse.jetty.server.handler.ContextHandler
+import org.eclipse.jetty.server.handler.StatisticsHandler
 import org.eclipse.jetty.servlet.ServletContextHandler
 import org.eclipse.jetty.servlet.ServletHolder
 import org.eclipse.jetty.util.ssl.SslContextFactory
@@ -27,7 +28,6 @@ import org.eclipse.jetty.util.thread.QueuedThreadPool
 import java.net.InetAddress
 import javax.inject.Inject
 import javax.inject.Singleton
-import org.eclipse.jetty.server.handler.StatisticsHandler
 
 private val logger = getLogger<JettyService>()
 
@@ -49,6 +49,7 @@ class JettyService @Inject internal constructor(
     logger.info("Starting Jetty")
 
     val httpConfig = HttpConfiguration()
+    httpConfig.customizeForGrpc()
     httpConfig.sendServerVersion = false
     if (webConfig.ssl != null) {
       httpConfig.securePort = webConfig.ssl.port
@@ -183,4 +184,12 @@ private fun NetworkConnector.toHttpUrl(): HttpUrl {
       .host(explicitHost ?: InetAddress.getLocalHost().hostAddress)
       .port(localPort)
       .build()
+}
+
+/**
+ * Configures this config so that it can carry gRPC calls. In particular, gRPC needs to write to
+ * the response stream before the request stream is completed. It also wants to send HTTP trailers.
+ */
+private fun HttpConfiguration.customizeForGrpc() {
+  isDelayDispatchUntilContent = false
 }
