@@ -57,11 +57,22 @@ internal class BoundAction<A : WebAction>(
     val requestCharsetMatch = requestContentTypeMatch?.matchesCharset ?: false
 
     return BoundActionMatch(
-        this,
-        pathMatcher,
-        acceptedMediaRange,
-        requestCharsetMatch,
-        action.responseContentType ?: MediaTypes.ALL_MEDIA_TYPE
+        action = this,
+        pathMatcher = pathMatcher,
+        acceptedMediaRange = acceptedMediaRange,
+        requestCharsetMatch = requestCharsetMatch,
+        responseContentType = action.responseContentType ?: MediaTypes.ALL_MEDIA_TYPE
+    )
+  }
+
+  fun matchByUrl(url: HttpUrl): BoundActionMatch? {
+    val patchMather = pathPattern.matcher(url) ?: return null
+    return BoundActionMatch(
+        action = this,
+        pathMatcher = patchMather,
+        acceptedMediaRange = MediaRange.ALL_MEDIA,
+        requestCharsetMatch = false,
+        responseContentType = MediaTypes.ALL_MEDIA_TYPE
     )
   }
 
@@ -108,7 +119,8 @@ internal class BoundAction<A : WebAction>(
         dispatchMechanism = action.dispatchMechanism,
         allowedServices = fetchAllowedCallers(
             applicationInterceptors, AccessInterceptor::allowedServices),
-        allowedCapabilities = fetchAllowedCallers(applicationInterceptors, AccessInterceptor::allowedCapabilities)
+        allowedCapabilities = fetchAllowedCallers(applicationInterceptors,
+            AccessInterceptor::allowedCapabilities)
     )
   }
 
