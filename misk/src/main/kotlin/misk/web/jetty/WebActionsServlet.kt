@@ -33,7 +33,7 @@ internal class WebActionsServlet @Inject constructor(
   webActionEntries: List<WebActionEntry>
 ) : WebSocketServlet() {
 
-  private val boundActions: MutableSet<BoundAction<out WebAction>> = mutableSetOf()
+  internal val boundActions: MutableSet<BoundAction<out WebAction>> = mutableSetOf()
 
   internal val webActionsMetadata: List<WebActionMetadata> by lazy { boundActions.map { it.metadata } }
 
@@ -88,7 +88,7 @@ internal class WebActionsServlet @Inject constructor(
   }
 }
 
-internal fun HttpServletRequest.contentType() = contentType?.let { it.toMediaTypeOrNull() }
+internal fun HttpServletRequest.contentType() = contentType?.toMediaTypeOrNull()
 
 internal fun ServletUpgradeResponse.headers(): Headers {
   val result = Headers.Builder()

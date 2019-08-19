@@ -68,8 +68,7 @@ class WebProxyActionTest {
   @Test
   internal fun entryLocalWithoutLeadingSlash() {
     assertFailsWith<IllegalArgumentException> {
-      WebProxyEntry("local/prefix",
-          upstreamServer.url("/"))
+      WebProxyEntry("local/prefix", upstreamServer.url("/"))
     }
   }
 
@@ -161,7 +160,13 @@ class WebProxyActionTest {
   internal fun getNotForwardedPathNoMatch() {
     val request = get("/local/notredirectedprefix/tacos", weirdMediaType)
     val response = optionalBinder.proxyClient.newCall(request).execute().toMisk()
-    assertThat(response.readUtf8()).isEqualTo("Nothing found at /local/notredirectedprefix/tacos")
+    assertThat(response.readUtf8()).isEqualTo("""
+      |Nothing found at /local/notredirectedprefix/tacos.
+      |
+      |Received:
+      |GET /local/notredirectedprefix/tacos
+      |Accept: application/weird
+      |""".trimMargin())
 
     assertThat(upstreamServer.requestCount).isZero()
   }
@@ -224,7 +229,14 @@ class WebProxyActionTest {
     val request =
         post("/local/notredirectedprefix/tacos", weirdMediaType, "my taco", weirdMediaType)
     val response = optionalBinder.proxyClient.newCall(request).execute().toMisk()
-    assertThat(response.readUtf8()).isEqualTo("Nothing found at /local/notredirectedprefix/tacos")
+    assertThat(response.readUtf8()).isEqualTo("""
+      |Nothing found at /local/notredirectedprefix/tacos.
+      |
+      |Received:
+      |POST /local/notredirectedprefix/tacos
+      |Accept: application/weird
+      |Content-Type: application/weird; charset=utf-8
+      |""".trimMargin())
 
     assertThat(upstreamServer.requestCount).isZero()
   }
@@ -240,14 +252,6 @@ class WebProxyActionTest {
         "Nothing found at /local/prefix/tacos")
     assertThat(response.statusCode).isEqualTo(HttpURLConnection.HTTP_NOT_FOUND)
     assertThat(response.headers["Content-Type"]).isEqualTo(plainTextMediaType.toString())
-  }
-
-  private fun get(path: String, acceptedMediaType: MediaType? = null): okhttp3.Request {
-    return okhttp3.Request.Builder()
-        .get()
-        .url(jettyService.httpServerUrl.newBuilder().encodedPath(path).build())
-        .header("Accept", acceptedMediaType.toString())
-        .build()
   }
 
   @Test
@@ -330,6 +334,14 @@ class WebProxyActionTest {
       assertThat(responseAsync.await().headers["UpstreamHeader"]).isEqualTo("UpstreamHeaderValue")
       assertThat(responseAsync.await().readUtf8()).isEqualTo("I am an intercepted response!")
     }
+  }
+
+  private fun get(path: String, acceptedMediaType: MediaType? = null): okhttp3.Request {
+    return okhttp3.Request.Builder()
+        .get()
+        .url(jettyService.httpServerUrl.newBuilder().encodedPath(path).build())
+        .header("Accept", acceptedMediaType.toString())
+        .build()
   }
 
   private fun post(
