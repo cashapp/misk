@@ -128,19 +128,25 @@ internal class RealTransacter private constructor(
   private fun <T> transactionInternalSession(block: (session: Session) -> T): T {
     return withSession { session ->
       val transaction = maybeWithTracing(DB_BEGIN_SPAN_NAME) {
-        session.hibernateSession.beginTransaction()!!
+        if (!options.replicaRead) {
+          session.hibernateSession.beginTransaction()!!
+        } else {
+          null
+        }
       }
       try {
         val result = block(session)
 
         // Flush any changes to the databased before commit
-        session.hibernateSession.flush()
+        if (!options.readOnly) {
+          session.hibernateSession.flush()
+        }
         session.preCommit()
-        maybeWithTracing(DB_COMMIT_SPAN_NAME) { transaction.commit() }
+        maybeWithTracing(DB_COMMIT_SPAN_NAME) { transaction?.commit() }
         session.postCommit()
         result
       } catch (e: Throwable) {
-        if (transaction.isActive) {
+        if (transaction?.isActive == true) {
           try {
             maybeWithTracing(DB_ROLLBACK_SPAN_NAME) {
               transaction.rollback()
@@ -192,10 +198,19 @@ internal class RealTransacter private constructor(
 
     // Note that the RealSession is closed last so that close hooks run after the thread locals and
     // Hibernate Session have been released. This way close hooks can start their own transactions.
-    realSession.use {
+    return realSession.use {
       hibernateSession.use {
         useSession(realSession) {
-          return block(realSession)
+          if (options.replicaRead) {
+            check(realSession.isVitess()) {
+              "When using MySQL you need to use a dedicated replica read Transacter instance"
+            }
+            realSession.target(Destination(TabletType.REPLICA)) {
+              block(realSession)
+            }
+          } else {
+            block(realSession)
+          }
         }
       }
     }
@@ -215,6 +230,7 @@ internal class RealTransacter private constructor(
   // NB: all options should be immutable types as copy() is shallow.
   internal data class TransacterOptions(
     val maxAttempts: Int = 2,
+    val replicaRead: Boolean = false,
     val disabledChecks: EnumSet<Check> = EnumSet.noneOf(Check::class.java),
     val minRetryDelayMillis: Long = 100,
     val maxRetryDelayMillis: Long = 200,
@@ -290,7 +306,7 @@ internal class RealTransacter private constructor(
         if (connection.isVitess()) {
           connection.createStatement().use { s ->
             var shards = s.executeQuery("SHOW VITESS_SHARDS")
-                .map { rs -> parseShard(rs.getString(1)) }
+                .map { rs -> Shard.parse(rs.getString(1)) }
                 .toSet()
             if (shards.isEmpty()) {
               // HACK It seems sometimes this fails to return shards,
@@ -299,7 +315,7 @@ internal class RealTransacter private constructor(
               // TODO(jontirsen): Unhack this when this issue is fixed:
               //   https://github.com/vitessio/vitess/issues/5038
               shards = s.executeQuery("SHOW VITESS_SHARDS")
-                  .map { rs -> parseShard(rs.getString(1)) }
+                  .map { rs -> Shard.parse(rs.getString(1)) }
                   .toSet()
               if (shards.isEmpty()) {
                 throw SQLRecoverableException("Failed to load list of shards")
@@ -313,41 +329,40 @@ internal class RealTransacter private constructor(
       }
     }
 
-    private fun parseShard(string: String): Shard {
-      val (keyspace, shard) = string.split('/', limit = 2)
-      return Shard(Keyspace(keyspace), shard)
+    override fun <T> target(shard: Shard, function: () -> T): T =
+        target(currentTarget().mergedWith(Destination(shard)), function)
+
+    internal fun <T> target(destination: Destination, function: () -> T): T {
+      return if (isVitess()) {
+        val previous = currentTarget()
+        use(previous.mergedWith(destination))
+        try {
+          function()
+        } finally {
+          use(previous)
+        }
+      } else {
+        function()
+      }
     }
 
-    override fun <T> target(shard: Shard, function: () -> T): T {
-      return useConnection { connection ->
-        if (connection.isVitess()) {
-          val previousTarget = withoutChecks {
-            // TODO we need to parse out the tablet type (replica or master) from the current target and keep that when we target the new shard
-            // We should only change the shard we're targeting, not the tablet type
-            val previousTarget =
-                connection.createStatement().use { statement ->
-                  statement.executeQuery("SHOW VITESS_TARGET").uniqueString()
-                }
-            connection.createStatement().use { statement ->
-              statement.execute("USE `$shard`")
-            }
+    private fun use(destination: Destination) = useConnection { connection ->
+      val sql = if (destination.isBlank()) {
+        "USE"
+      } else {
+        "USE `$destination`"
+      }
+      connection.createStatement().use { statement ->
+        withoutChecks {
+          statement.execute(sql)
+        }
+      }
+    }
 
-            previousTarget
-          }
-          try {
-            function()
-          } finally {
-            withoutChecks {
-              val sql = if (previousTarget.isBlank()) {
-                "USE"
-              } else {
-                "USE `$previousTarget`"
-              }
-              connection.createStatement().use { it.execute(sql) }
-            }
-          }
-        } else {
-          function()
+    private fun currentTarget(): Destination = useConnection { connection ->
+      connection.createStatement().use { statement ->
+        withoutChecks {
+          Destination.parse(statement.executeQuery("SHOW VITESS_TARGET").uniqueString())
         }
       }
     }
@@ -407,6 +422,8 @@ internal class RealTransacter private constructor(
       }
     }
 
+    internal fun isVitess(): Boolean = useConnection { it.isVitess() }
+
     /**
      * Returns the physical JDBC connection of this session. Hibernate creates one-time-use wrappers
      * around the physical connections that talk to the database. This unwraps those so we can
@@ -432,6 +449,12 @@ internal class RealTransacter private constructor(
       block()
     }
   }
+
+  override fun replicaRead(): Transacter =
+      withOptions(options.copy(
+          replicaRead = true,
+          readOnly = true,
+          disabledChecks = EnumSet.of(Check.FULL_SCATTER)))
 
   private inline fun <R> useSession(session: RealSession, block: () -> R): R {
     val previous = threadLatestSession.get()

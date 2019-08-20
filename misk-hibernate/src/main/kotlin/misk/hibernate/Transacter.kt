@@ -38,6 +38,28 @@ interface Transacter {
   fun readOnly(): Transacter
 
   /**
+   * Creates a new transacter that reads from the replica.
+   *
+   * TODO(jontirsen): Currently only available for Vitess connections as MySQL connections need to
+   *   use a reader Transacter instead.
+   *
+   * A few things that are different with replica reads:
+   * * Replica reads are (obviously?) read only.
+   * * Consistency is eventual. If your application thread just wrote something in a transaction
+   *   you may not see that write with a replica read as the write may not have replicated
+   *   to the replica yet.
+   * * There may be time jumping. As each query may end up at a separate replica that will likely
+   *   be at a separate point in the replica stream. That means each query can jump back or forward
+   *   in "time". (There is some support for internally consistent replica reads that peg a single
+   *   replica in Vitess but we're not using that. If you need that functionality reach out to
+   *   #vitess)
+   * * Full scatters are allowed since you can increase the availability of these by adding more
+   *   replicas.
+   *
+   */
+  fun replicaRead(): Transacter
+
+  /**
    * Disable cowrite checks for the duration of the session. Useful for quickly setting up test
    * data in testing.
    */
