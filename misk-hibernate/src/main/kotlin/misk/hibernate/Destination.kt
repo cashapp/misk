@@ -15,13 +15,15 @@ data class Destination(
 
   constructor(tabletType: TabletType) : this(null, null, tabletType)
 
+  constructor(shard: Shard, tabletType: TabletType) : this(shard.keyspace, shard, tabletType)
+
   override fun toString(): String {
     val tabletType = if (tabletType != null) "@$tabletType" else ""
     if (shard != null) {
       return "$shard$tabletType"
     }
     if (keyspace != null) {
-      return "$shard$tabletType"
+      return "$keyspace$tabletType"
     }
     return tabletType
   }
