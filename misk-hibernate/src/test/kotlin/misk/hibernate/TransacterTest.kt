@@ -81,6 +81,16 @@ class TransacterTest {
           ActorAndReleaseDate("Carrie Fisher", LocalDate.of(1977, 5, 25)))
     }
 
+    // Query with replica reads.
+    transacter.replicaRead().transaction { session ->
+      val ianMalcolm = queryFactory.newQuery<CharacterQuery>()
+          .allowTableScan()
+          .name("Ian Malcolm")
+          .uniqueResult(session)!!
+      assertThat(ianMalcolm.actor?.name).isEqualTo("Jeff Goldblum")
+      assertThat(ianMalcolm.movie.name).isEqualTo("Jurassic Park")
+    }
+
     // Delete some data.
     transacter.transaction { session ->
       val ianMalcolm = queryFactory.newQuery<CharacterQuery>()
