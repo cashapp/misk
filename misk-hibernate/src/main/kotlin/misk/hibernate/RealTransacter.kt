@@ -329,8 +329,13 @@ internal class RealTransacter private constructor(
       }
     }
 
-    override fun <T> target(shard: Shard, function: () -> T): T =
+    override fun <T> target(shard: Shard, function: () -> T): T {
+      return if (isVitess()) {
         target(currentTarget().mergedWith(Destination(shard)), function)
+      } else {
+        function()
+      }
+    }
 
     internal fun <T> target(destination: Destination, function: () -> T): T {
       return if (isVitess()) {
