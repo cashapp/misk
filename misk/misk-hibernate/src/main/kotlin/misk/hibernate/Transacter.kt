@@ -27,18 +27,8 @@ interface Transacter {
    */
   fun <T> transaction(block: (session: Session) -> T): T
 
-  fun retries(maxAttempts: Int = 2): Transacter
-
-  fun noRetries(): Transacter
-
   /**
-   * Creates a new transacter that produces read only sessions. This does not mean the underlying
-   * datasource is read only, only that the session produced won't modify the database.
-   */
-  fun readOnly(): Transacter
-
-  /**
-   * Creates a new transacter that reads from the replica.
+   * Runs a non-transactional session against a read replica.
    *
    * TODO(jontirsen): Currently only available for Vitess connections as MySQL connections need to
    *   use a reader Transacter instead.
@@ -57,7 +47,17 @@ interface Transacter {
    *   replicas.
    *
    */
-  fun replicaRead(): Transacter
+  fun <T> replicaRead(block: (session: Session) -> T): T
+
+  fun retries(maxAttempts: Int = 2): Transacter
+
+  fun noRetries(): Transacter
+
+  /**
+   * Creates a new transacter that produces read only sessions. This does not mean the underlying
+   * datasource is read only, only that the session produced won't modify the database.
+   */
+  fun readOnly(): Transacter
 
   /**
    * Disable cowrite checks for the duration of the session. Useful for quickly setting up test
