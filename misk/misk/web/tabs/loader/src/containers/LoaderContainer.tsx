@@ -36,9 +36,8 @@ class LoaderContainer extends React.Component<IState & IDispatchProps> {
   render() {
     const adminDashboardTabs = simpleSelect(
       this.props.simpleNetwork,
-      "adminDashboardTabs",
       "adminDashboardTabs"
-    )
+    ).adminDashboardTabs
     const serviceMetadata = simpleSelect(
       this.props.simpleNetwork,
       "serviceMetadata",

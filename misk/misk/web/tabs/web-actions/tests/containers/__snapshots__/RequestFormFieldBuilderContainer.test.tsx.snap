@@ -50,6 +50,7 @@ exports[`RequestFormFieldBuilderContainer Renders single body input 1`] = `
         <textarea
           class="bp3-input bp3-fill emotion-0"
           placeholder="Unparseable type. This input will return a string or JSON."
+          style="height: 0px;"
         />
       </div>
     </div>
@@ -79,6 +80,11 @@ exports[`RequestFormFieldBuilderContainer Renders typed form int field 1`] = `
   display: inherit !important;
 }
 
+.emotion-4 {
+  line-height: normal;
+  text-transform: inherit;
+}
+
 <div>
     <div
       class="bp3-control-group bp3-fill"
@@ -101,7 +107,7 @@ exports[`RequestFormFieldBuilderContainer Renders typed form int field 1`] = `
               form
             </desc>
             <path
-              d="M2 11v2h2v-2H2zM1 9h4c.55 0 1 .45 1 1v4c0 .55-.45 1-1 1H1c-.55 0-1-.45-1-1v-4c0-.55.45-1 1-1zm9-6h5c.55 0 1 .45 1 1s-.45 1-1 1h-5c-.55 0-1-.45-1-1s.45-1 1-1zM6 1a1.003 1.003 0 0 1 .71 1.71l-3 4C3.53 6.89 3.28 7 3 7s-.53-.11-.71-.29l-2-2a1.003 1.003 0 0 1 1.42-1.42L3 4.59l2.29-3.3C5.47 1.11 5.72 1 6 1zm4 10h5c.55 0 1 .45 1 1s-.45 1-1 1h-5c-.55 0-1-.45-1-1s.45-1 1-1z"
+              d="M2 11v2h2v-2H2zM1 9h4c.55 0 1 .45 1 1v4c0 .55-.45 1-1 1H1c-.55 0-1-.45-1-1v-4c0-.55.45-1 1-1zm9-6h5c.55 0 1 .45 1 1s-.45 1-1 1h-5c-.55 0-1-.45-1-1s.45-1 1-1zM6 1a1.003 1.003 0 01.71 1.71l-3 4C3.53 6.89 3.28 7 3 7s-.53-.11-.71-.29l-2-2a1.003 1.003 0 011.42-1.42L3 4.59l2.29-3.3C5.47 1.11 5.72 1 6 1zm4 10h5c.55 0 1 .45 1 1s-.45 1-1 1h-5c-.55 0-1-.45-1-1s.45-1 1-1z"
               fill-rule="evenodd"
             />
           </svg>
@@ -130,7 +136,7 @@ exports[`RequestFormFieldBuilderContainer Renders typed form int field 1`] = `
               more
             </desc>
             <path
-              d="M2 6.03a2 2 0 1 0 0 4 2 2 0 1 0 0-4zM14 6.03a2 2 0 1 0 0 4 2 2 0 1 0 0-4zM8 6.03a2 2 0 1 0 0 4 2 2 0 1 0 0-4z"
+              d="M2 6.03a2 2 0 100 4 2 2 0 100-4zM14 6.03a2 2 0 100 4 2 2 0 100-4zM8 6.03a2 2 0 100 4 2 2 0 100-4z"
               fill-rule="evenodd"
             />
           </svg>
@@ -208,7 +214,7 @@ exports[`RequestFormFieldBuilderContainer Renders typed form int field 1`] = `
                   class="bp3-popover-target"
                 >
                   <button
-                    class="bp3-button  emotion-0"
+                    class="bp3-button  emotion-4"
                     tabindex="0"
                     type="button"
                   >
@@ -226,7 +232,7 @@ exports[`RequestFormFieldBuilderContainer Renders typed form int field 1`] = `
                           more
                         </desc>
                         <path
-                          d="M2 6.03a2 2 0 1 0 0 4 2 2 0 1 0 0-4zM14 6.03a2 2 0 1 0 0 4 2 2 0 1 0 0-4zM8 6.03a2 2 0 1 0 0 4 2 2 0 1 0 0-4z"
+                          d="M2 6.03a2 2 0 100 4 2 2 0 100-4zM14 6.03a2 2 0 100 4 2 2 0 100-4zM8 6.03a2 2 0 100 4 2 2 0 100-4z"
                           fill-rule="evenodd"
                         />
                       </svg>
@@ -276,6 +282,11 @@ exports[`RequestFormFieldBuilderContainer Renders typed form multiple top level 
   display: inherit !important;
 }
 
+.emotion-4 {
+  line-height: normal;
+  text-transform: inherit;
+}
+
 <div>
     <div
       class="bp3-control-group bp3-fill"
@@ -298,7 +309,7 @@ exports[`RequestFormFieldBuilderContainer Renders typed form multiple top level 
               form
             </desc>
             <path
-              d="M2 11v2h2v-2H2zM1 9h4c.55 0 1 .45 1 1v4c0 .55-.45 1-1 1H1c-.55 0-1-.45-1-1v-4c0-.55.45-1 1-1zm9-6h5c.55 0 1 .45 1 1s-.45 1-1 1h-5c-.55 0-1-.45-1-1s.45-1 1-1zM6 1a1.003 1.003 0 0 1 .71 1.71l-3 4C3.53 6.89 3.28 7 3 7s-.53-.11-.71-.29l-2-2a1.003 1.003 0 0 1 1.42-1.42L3 4.59l2.29-3.3C5.47 1.11 5.72 1 6 1zm4 10h5c.55 0 1 .45 1 1s-.45 1-1 1h-5c-.55 0-1-.45-1-1s.45-1 1-1z"
+              d="M2 11v2h2v-2H2zM1 9h4c.55 0 1 .45 1 1v4c0 .55-.45 1-1 1H1c-.55 0-1-.45-1-1v-4c0-.55.45-1 1-1zm9-6h5c.55 0 1 .45 1 1s-.45 1-1 1h-5c-.55 0-1-.45-1-1s.45-1 1-1zM6 1a1.003 1.003 0 01.71 1.71l-3 4C3.53 6.89 3.28 7 3 7s-.53-.11-.71-.29l-2-2a1.003 1.003 0 011.42-1.42L3 4.59l2.29-3.3C5.47 1.11 5.72 1 6 1zm4 10h5c.55 0 1 .45 1 1s-.45 1-1 1h-5c-.55 0-1-.45-1-1s.45-1 1-1z"
               fill-rule="evenodd"
             />
           </svg>
@@ -327,7 +338,7 @@ exports[`RequestFormFieldBuilderContainer Renders typed form multiple top level 
               more
             </desc>
             <path
-              d="M2 6.03a2 2 0 1 0 0 4 2 2 0 1 0 0-4zM14 6.03a2 2 0 1 0 0 4 2 2 0 1 0 0-4zM8 6.03a2 2 0 1 0 0 4 2 2 0 1 0 0-4z"
+              d="M2 6.03a2 2 0 100 4 2 2 0 100-4zM14 6.03a2 2 0 100 4 2 2 0 100-4zM8 6.03a2 2 0 100 4 2 2 0 100-4z"
               fill-rule="evenodd"
             />
           </svg>
@@ -405,7 +416,7 @@ exports[`RequestFormFieldBuilderContainer Renders typed form multiple top level 
                   class="bp3-popover-target"
                 >
                   <button
-                    class="bp3-button  emotion-0"
+                    class="bp3-button  emotion-4"
                     tabindex="0"
                     type="button"
                   >
@@ -423,7 +434,7 @@ exports[`RequestFormFieldBuilderContainer Renders typed form multiple top level 
                           more
                         </desc>
                         <path
-                          d="M2 6.03a2 2 0 1 0 0 4 2 2 0 1 0 0-4zM14 6.03a2 2 0 1 0 0 4 2 2 0 1 0 0-4zM8 6.03a2 2 0 1 0 0 4 2 2 0 1 0 0-4z"
+                          d="M2 6.03a2 2 0 100 4 2 2 0 100-4zM14 6.03a2 2 0 100 4 2 2 0 100-4zM8 6.03a2 2 0 100 4 2 2 0 100-4z"
                           fill-rule="evenodd"
                         />
                       </svg>
@@ -509,7 +520,7 @@ exports[`RequestFormFieldBuilderContainer Renders typed form multiple top level 
                   class="bp3-popover-target"
                 >
                   <button
-                    class="bp3-button  emotion-0"
+                    class="bp3-button  emotion-4"
                     tabindex="0"
                     type="button"
                   >
@@ -527,7 +538,7 @@ exports[`RequestFormFieldBuilderContainer Renders typed form multiple top level 
                           more
                         </desc>
                         <path
-                          d="M2 6.03a2 2 0 1 0 0 4 2 2 0 1 0 0-4zM14 6.03a2 2 0 1 0 0 4 2 2 0 1 0 0-4zM8 6.03a2 2 0 1 0 0 4 2 2 0 1 0 0-4z"
+                          d="M2 6.03a2 2 0 100 4 2 2 0 100-4zM14 6.03a2 2 0 100 4 2 2 0 100-4zM8 6.03a2 2 0 100 4 2 2 0 100-4z"
                           fill-rule="evenodd"
                         />
                       </svg>
@@ -613,7 +624,7 @@ exports[`RequestFormFieldBuilderContainer Renders typed form multiple top level 
                   class="bp3-popover-target"
                 >
                   <button
-                    class="bp3-button  emotion-0"
+                    class="bp3-button  emotion-4"
                     tabindex="0"
                     type="button"
                   >
@@ -631,7 +642,7 @@ exports[`RequestFormFieldBuilderContainer Renders typed form multiple top level 
                           more
                         </desc>
                         <path
-                          d="M2 6.03a2 2 0 1 0 0 4 2 2 0 1 0 0-4zM14 6.03a2 2 0 1 0 0 4 2 2 0 1 0 0-4zM8 6.03a2 2 0 1 0 0 4 2 2 0 1 0 0-4z"
+                          d="M2 6.03a2 2 0 100 4 2 2 0 100-4zM14 6.03a2 2 0 100 4 2 2 0 100-4zM8 6.03a2 2 0 100 4 2 2 0 100-4z"
                           fill-rule="evenodd"
                         />
                       </svg>
@@ -717,7 +728,7 @@ exports[`RequestFormFieldBuilderContainer Renders typed form multiple top level 
                   class="bp3-popover-target"
                 >
                   <button
-                    class="bp3-button  emotion-0"
+                    class="bp3-button  emotion-4"
                     tabindex="0"
                     type="button"
                   >
@@ -735,7 +746,7 @@ exports[`RequestFormFieldBuilderContainer Renders typed form multiple top level 
                           more
                         </desc>
                         <path
-                          d="M2 6.03a2 2 0 1 0 0 4 2 2 0 1 0 0-4zM14 6.03a2 2 0 1 0 0 4 2 2 0 1 0 0-4zM8 6.03a2 2 0 1 0 0 4 2 2 0 1 0 0-4z"
+                          d="M2 6.03a2 2 0 100 4 2 2 0 100-4zM14 6.03a2 2 0 100 4 2 2 0 100-4zM8 6.03a2 2 0 100 4 2 2 0 100-4z"
                           fill-rule="evenodd"
                         />
                       </svg>
@@ -785,6 +796,11 @@ exports[`RequestFormFieldBuilderContainer Renders typed form nested int field 1`
   display: inherit !important;
 }
 
+.emotion-4 {
+  line-height: normal;
+  text-transform: inherit;
+}
+
 <div>
     <div
       class="bp3-control-group bp3-fill"
@@ -807,7 +823,7 @@ exports[`RequestFormFieldBuilderContainer Renders typed form nested int field 1`
               form
             </desc>
             <path
-              d="M2 11v2h2v-2H2zM1 9h4c.55 0 1 .45 1 1v4c0 .55-.45 1-1 1H1c-.55 0-1-.45-1-1v-4c0-.55.45-1 1-1zm9-6h5c.55 0 1 .45 1 1s-.45 1-1 1h-5c-.55 0-1-.45-1-1s.45-1 1-1zM6 1a1.003 1.003 0 0 1 .71 1.71l-3 4C3.53 6.89 3.28 7 3 7s-.53-.11-.71-.29l-2-2a1.003 1.003 0 0 1 1.42-1.42L3 4.59l2.29-3.3C5.47 1.11 5.72 1 6 1zm4 10h5c.55 0 1 .45 1 1s-.45 1-1 1h-5c-.55 0-1-.45-1-1s.45-1 1-1z"
+              d="M2 11v2h2v-2H2zM1 9h4c.55 0 1 .45 1 1v4c0 .55-.45 1-1 1H1c-.55 0-1-.45-1-1v-4c0-.55.45-1 1-1zm9-6h5c.55 0 1 .45 1 1s-.45 1-1 1h-5c-.55 0-1-.45-1-1s.45-1 1-1zM6 1a1.003 1.003 0 01.71 1.71l-3 4C3.53 6.89 3.28 7 3 7s-.53-.11-.71-.29l-2-2a1.003 1.003 0 011.42-1.42L3 4.59l2.29-3.3C5.47 1.11 5.72 1 6 1zm4 10h5c.55 0 1 .45 1 1s-.45 1-1 1h-5c-.55 0-1-.45-1-1s.45-1 1-1z"
               fill-rule="evenodd"
             />
           </svg>
@@ -836,7 +852,7 @@ exports[`RequestFormFieldBuilderContainer Renders typed form nested int field 1`
               more
             </desc>
             <path
-              d="M2 6.03a2 2 0 1 0 0 4 2 2 0 1 0 0-4zM14 6.03a2 2 0 1 0 0 4 2 2 0 1 0 0-4zM8 6.03a2 2 0 1 0 0 4 2 2 0 1 0 0-4z"
+              d="M2 6.03a2 2 0 100 4 2 2 0 100-4zM14 6.03a2 2 0 100 4 2 2 0 100-4zM8 6.03a2 2 0 100 4 2 2 0 100-4z"
               fill-rule="evenodd"
             />
           </svg>
@@ -918,7 +934,7 @@ exports[`RequestFormFieldBuilderContainer Renders typed form nested int field 1`
                       class="bp3-popover-target"
                     >
                       <button
-                        class="bp3-button  emotion-0"
+                        class="bp3-button  emotion-4"
                         tabindex="0"
                         type="button"
                       >
@@ -936,7 +952,7 @@ exports[`RequestFormFieldBuilderContainer Renders typed form nested int field 1`
                               more
                             </desc>
                             <path
-                              d="M2 6.03a2 2 0 1 0 0 4 2 2 0 1 0 0-4zM14 6.03a2 2 0 1 0 0 4 2 2 0 1 0 0-4zM8 6.03a2 2 0 1 0 0 4 2 2 0 1 0 0-4z"
+                              d="M2 6.03a2 2 0 100 4 2 2 0 100-4zM14 6.03a2 2 0 100 4 2 2 0 100-4zM8 6.03a2 2 0 100 4 2 2 0 100-4z"
                               fill-rule="evenodd"
                             />
                           </svg>
@@ -988,6 +1004,11 @@ exports[`RequestFormFieldBuilderContainer Renders typed form repeated nested int
   display: inherit !important;
 }
 
+.emotion-6 {
+  line-height: normal;
+  text-transform: inherit;
+}
+
 <div>
     <div
       class="bp3-control-group bp3-fill"
@@ -1010,7 +1031,7 @@ exports[`RequestFormFieldBuilderContainer Renders typed form repeated nested int
               form
             </desc>
             <path
-              d="M2 11v2h2v-2H2zM1 9h4c.55 0 1 .45 1 1v4c0 .55-.45 1-1 1H1c-.55 0-1-.45-1-1v-4c0-.55.45-1 1-1zm9-6h5c.55 0 1 .45 1 1s-.45 1-1 1h-5c-.55 0-1-.45-1-1s.45-1 1-1zM6 1a1.003 1.003 0 0 1 .71 1.71l-3 4C3.53 6.89 3.28 7 3 7s-.53-.11-.71-.29l-2-2a1.003 1.003 0 0 1 1.42-1.42L3 4.59l2.29-3.3C5.47 1.11 5.72 1 6 1zm4 10h5c.55 0 1 .45 1 1s-.45 1-1 1h-5c-.55 0-1-.45-1-1s.45-1 1-1z"
+              d="M2 11v2h2v-2H2zM1 9h4c.55 0 1 .45 1 1v4c0 .55-.45 1-1 1H1c-.55 0-1-.45-1-1v-4c0-.55.45-1 1-1zm9-6h5c.55 0 1 .45 1 1s-.45 1-1 1h-5c-.55 0-1-.45-1-1s.45-1 1-1zM6 1a1.003 1.003 0 01.71 1.71l-3 4C3.53 6.89 3.28 7 3 7s-.53-.11-.71-.29l-2-2a1.003 1.003 0 011.42-1.42L3 4.59l2.29-3.3C5.47 1.11 5.72 1 6 1zm4 10h5c.55 0 1 .45 1 1s-.45 1-1 1h-5c-.55 0-1-.45-1-1s.45-1 1-1z"
               fill-rule="evenodd"
             />
           </svg>
@@ -1039,7 +1060,7 @@ exports[`RequestFormFieldBuilderContainer Renders typed form repeated nested int
               more
             </desc>
             <path
-              d="M2 6.03a2 2 0 1 0 0 4 2 2 0 1 0 0-4zM14 6.03a2 2 0 1 0 0 4 2 2 0 1 0 0-4zM8 6.03a2 2 0 1 0 0 4 2 2 0 1 0 0-4z"
+              d="M2 6.03a2 2 0 100 4 2 2 0 100-4zM14 6.03a2 2 0 100 4 2 2 0 100-4zM8 6.03a2 2 0 100 4 2 2 0 100-4z"
               fill-rule="evenodd"
             />
           </svg>
@@ -1157,7 +1178,7 @@ exports[`RequestFormFieldBuilderContainer Renders typed form repeated nested int
                   class="bp3-popover-target"
                 >
                   <button
-                    class="bp3-button  emotion-0"
+                    class="bp3-button  emotion-6"
                     tabindex="0"
                     type="button"
                   >
@@ -1175,7 +1196,7 @@ exports[`RequestFormFieldBuilderContainer Renders typed form repeated nested int
                           more
                         </desc>
                         <path
-                          d="M2 6.03a2 2 0 1 0 0 4 2 2 0 1 0 0-4zM14 6.03a2 2 0 1 0 0 4 2 2 0 1 0 0-4zM8 6.03a2 2 0 1 0 0 4 2 2 0 1 0 0-4z"
+                          d="M2 6.03a2 2 0 100 4 2 2 0 100-4zM14 6.03a2 2 0 100 4 2 2 0 100-4zM8 6.03a2 2 0 100 4 2 2 0 100-4z"
                           fill-rule="evenodd"
                         />
                       </svg>
@@ -1190,7 +1211,7 @@ exports[`RequestFormFieldBuilderContainer Renders typed form repeated nested int
                   class="bp3-popover-target"
                 >
                   <button
-                    class="bp3-button  emotion-0"
+                    class="bp3-button  emotion-6"
                     tabindex="0"
                     type="button"
                   >
@@ -1333,7 +1354,7 @@ exports[`RequestFormFieldBuilderContainer Renders typed form repeated nested int
                               class="bp3-popover-target"
                             >
                               <button
-                                class="bp3-button  emotion-0"
+                                class="bp3-button  emotion-6"
                                 tabindex="0"
                                 type="button"
                               >
@@ -1351,7 +1372,7 @@ exports[`RequestFormFieldBuilderContainer Renders typed form repeated nested int
                                       more
                                     </desc>
                                     <path
-                                      d="M2 6.03a2 2 0 1 0 0 4 2 2 0 1 0 0-4zM14 6.03a2 2 0 1 0 0 4 2 2 0 1 0 0-4zM8 6.03a2 2 0 1 0 0 4 2 2 0 1 0 0-4z"
+                                      d="M2 6.03a2 2 0 100 4 2 2 0 100-4zM14 6.03a2 2 0 100 4 2 2 0 100-4zM8 6.03a2 2 0 100 4 2 2 0 100-4z"
                                       fill-rule="evenodd"
                                     />
                                   </svg>
@@ -1407,6 +1428,11 @@ exports[`RequestFormFieldBuilderContainer Renders typed form repeated nested rep
   display: inherit !important;
 }
 
+.emotion-6 {
+  line-height: normal;
+  text-transform: inherit;
+}
+
 <div>
     <div
       class="bp3-control-group bp3-fill"
@@ -1429,7 +1455,7 @@ exports[`RequestFormFieldBuilderContainer Renders typed form repeated nested rep
               form
             </desc>
             <path
-              d="M2 11v2h2v-2H2zM1 9h4c.55 0 1 .45 1 1v4c0 .55-.45 1-1 1H1c-.55 0-1-.45-1-1v-4c0-.55.45-1 1-1zm9-6h5c.55 0 1 .45 1 1s-.45 1-1 1h-5c-.55 0-1-.45-1-1s.45-1 1-1zM6 1a1.003 1.003 0 0 1 .71 1.71l-3 4C3.53 6.89 3.28 7 3 7s-.53-.11-.71-.29l-2-2a1.003 1.003 0 0 1 1.42-1.42L3 4.59l2.29-3.3C5.47 1.11 5.72 1 6 1zm4 10h5c.55 0 1 .45 1 1s-.45 1-1 1h-5c-.55 0-1-.45-1-1s.45-1 1-1z"
+              d="M2 11v2h2v-2H2zM1 9h4c.55 0 1 .45 1 1v4c0 .55-.45 1-1 1H1c-.55 0-1-.45-1-1v-4c0-.55.45-1 1-1zm9-6h5c.55 0 1 .45 1 1s-.45 1-1 1h-5c-.55 0-1-.45-1-1s.45-1 1-1zM6 1a1.003 1.003 0 01.71 1.71l-3 4C3.53 6.89 3.28 7 3 7s-.53-.11-.71-.29l-2-2a1.003 1.003 0 011.42-1.42L3 4.59l2.29-3.3C5.47 1.11 5.72 1 6 1zm4 10h5c.55 0 1 .45 1 1s-.45 1-1 1h-5c-.55 0-1-.45-1-1s.45-1 1-1z"
               fill-rule="evenodd"
             />
           </svg>
@@ -1458,7 +1484,7 @@ exports[`RequestFormFieldBuilderContainer Renders typed form repeated nested rep
               more
             </desc>
             <path
-              d="M2 6.03a2 2 0 1 0 0 4 2 2 0 1 0 0-4zM14 6.03a2 2 0 1 0 0 4 2 2 0 1 0 0-4zM8 6.03a2 2 0 1 0 0 4 2 2 0 1 0 0-4z"
+              d="M2 6.03a2 2 0 100 4 2 2 0 100-4zM14 6.03a2 2 0 100 4 2 2 0 100-4zM8 6.03a2 2 0 100 4 2 2 0 100-4z"
               fill-rule="evenodd"
             />
           </svg>
@@ -1576,7 +1602,7 @@ exports[`RequestFormFieldBuilderContainer Renders typed form repeated nested rep
                   class="bp3-popover-target"
                 >
                   <button
-                    class="bp3-button  emotion-0"
+                    class="bp3-button  emotion-6"
                     tabindex="0"
                     type="button"
                   >
@@ -1594,7 +1620,7 @@ exports[`RequestFormFieldBuilderContainer Renders typed form repeated nested rep
                           more
                         </desc>
                         <path
-                          d="M2 6.03a2 2 0 1 0 0 4 2 2 0 1 0 0-4zM14 6.03a2 2 0 1 0 0 4 2 2 0 1 0 0-4zM8 6.03a2 2 0 1 0 0 4 2 2 0 1 0 0-4z"
+                          d="M2 6.03a2 2 0 100 4 2 2 0 100-4zM14 6.03a2 2 0 100 4 2 2 0 100-4zM8 6.03a2 2 0 100 4 2 2 0 100-4z"
                           fill-rule="evenodd"
                         />
                       </svg>
@@ -1609,7 +1635,7 @@ exports[`RequestFormFieldBuilderContainer Renders typed form repeated nested rep
                   class="bp3-popover-target"
                 >
                   <button
-                    class="bp3-button  emotion-0"
+                    class="bp3-button  emotion-6"
                     tabindex="0"
                     type="button"
                   >
@@ -1753,7 +1779,7 @@ exports[`RequestFormFieldBuilderContainer Renders typed form repeated nested rep
                                 class="bp3-popover-target"
                               >
                                 <button
-                                  class="bp3-button  emotion-0"
+                                  class="bp3-button  emotion-6"
                                   tabindex="0"
                                   type="button"
                                 >
@@ -1771,7 +1797,7 @@ exports[`RequestFormFieldBuilderContainer Renders typed form repeated nested rep
                                         more
                                       </desc>
                                       <path
-                                        d="M2 6.03a2 2 0 1 0 0 4 2 2 0 1 0 0-4zM14 6.03a2 2 0 1 0 0 4 2 2 0 1 0 0-4zM8 6.03a2 2 0 1 0 0 4 2 2 0 1 0 0-4z"
+                                        d="M2 6.03a2 2 0 100 4 2 2 0 100-4zM14 6.03a2 2 0 100 4 2 2 0 100-4zM8 6.03a2 2 0 100 4 2 2 0 100-4z"
                                         fill-rule="evenodd"
                                       />
                                     </svg>
@@ -1786,7 +1812,7 @@ exports[`RequestFormFieldBuilderContainer Renders typed form repeated nested rep
                                 class="bp3-popover-target"
                               >
                                 <button
-                                  class="bp3-button  emotion-0"
+                                  class="bp3-button  emotion-6"
                                   tabindex="0"
                                   type="button"
                                 >
@@ -1861,6 +1887,11 @@ exports[`RequestFormFieldBuilderContainer Renders typed form repeated short fiel
   display: inherit !important;
 }
 
+.emotion-4 {
+  line-height: normal;
+  text-transform: inherit;
+}
+
 <div>
     <div
       class="bp3-control-group bp3-fill"
@@ -1883,7 +1914,7 @@ exports[`RequestFormFieldBuilderContainer Renders typed form repeated short fiel
               form
             </desc>
             <path
-              d="M2 11v2h2v-2H2zM1 9h4c.55 0 1 .45 1 1v4c0 .55-.45 1-1 1H1c-.55 0-1-.45-1-1v-4c0-.55.45-1 1-1zm9-6h5c.55 0 1 .45 1 1s-.45 1-1 1h-5c-.55 0-1-.45-1-1s.45-1 1-1zM6 1a1.003 1.003 0 0 1 .71 1.71l-3 4C3.53 6.89 3.28 7 3 7s-.53-.11-.71-.29l-2-2a1.003 1.003 0 0 1 1.42-1.42L3 4.59l2.29-3.3C5.47 1.11 5.72 1 6 1zm4 10h5c.55 0 1 .45 1 1s-.45 1-1 1h-5c-.55 0-1-.45-1-1s.45-1 1-1z"
+              d="M2 11v2h2v-2H2zM1 9h4c.55 0 1 .45 1 1v4c0 .55-.45 1-1 1H1c-.55 0-1-.45-1-1v-4c0-.55.45-1 1-1zm9-6h5c.55 0 1 .45 1 1s-.45 1-1 1h-5c-.55 0-1-.45-1-1s.45-1 1-1zM6 1a1.003 1.003 0 01.71 1.71l-3 4C3.53 6.89 3.28 7 3 7s-.53-.11-.71-.29l-2-2a1.003 1.003 0 011.42-1.42L3 4.59l2.29-3.3C5.47 1.11 5.72 1 6 1zm4 10h5c.55 0 1 .45 1 1s-.45 1-1 1h-5c-.55 0-1-.45-1-1s.45-1 1-1z"
               fill-rule="evenodd"
             />
           </svg>
@@ -1912,7 +1943,7 @@ exports[`RequestFormFieldBuilderContainer Renders typed form repeated short fiel
               more
             </desc>
             <path
-              d="M2 6.03a2 2 0 1 0 0 4 2 2 0 1 0 0-4zM14 6.03a2 2 0 1 0 0 4 2 2 0 1 0 0-4zM8 6.03a2 2 0 1 0 0 4 2 2 0 1 0 0-4z"
+              d="M2 6.03a2 2 0 100 4 2 2 0 100-4zM14 6.03a2 2 0 100 4 2 2 0 100-4zM8 6.03a2 2 0 100 4 2 2 0 100-4z"
               fill-rule="evenodd"
             />
           </svg>
@@ -1991,7 +2022,7 @@ exports[`RequestFormFieldBuilderContainer Renders typed form repeated short fiel
                     class="bp3-popover-target"
                   >
                     <button
-                      class="bp3-button  emotion-0"
+                      class="bp3-button  emotion-4"
                       tabindex="0"
                       type="button"
                     >
@@ -2009,7 +2040,7 @@ exports[`RequestFormFieldBuilderContainer Renders typed form repeated short fiel
                             more
                           </desc>
                           <path
-                            d="M2 6.03a2 2 0 1 0 0 4 2 2 0 1 0 0-4zM14 6.03a2 2 0 1 0 0 4 2 2 0 1 0 0-4zM8 6.03a2 2 0 1 0 0 4 2 2 0 1 0 0-4z"
+                            d="M2 6.03a2 2 0 100 4 2 2 0 100-4zM14 6.03a2 2 0 100 4 2 2 0 100-4zM8 6.03a2 2 0 100 4 2 2 0 100-4z"
                             fill-rule="evenodd"
                           />
                         </svg>
@@ -2024,7 +2055,7 @@ exports[`RequestFormFieldBuilderContainer Renders typed form repeated short fiel
                     class="bp3-popover-target"
                   >
                     <button
-                      class="bp3-button  emotion-0"
+                      class="bp3-button  emotion-4"
                       tabindex="0"
                       type="button"
                     >
