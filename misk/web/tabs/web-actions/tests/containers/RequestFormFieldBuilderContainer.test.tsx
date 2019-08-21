@@ -1,6 +1,6 @@
 import HTTPMethod from "http-method-enum"
 import React from "react"
-import { cleanup } from "react-testing-library"
+import { cleanup } from "@testing-library/react"
 import { RequestFormFieldBuilderContainer } from "../../src/containers"
 import { generateTypesMetadata } from "../../src/ducks"
 import {

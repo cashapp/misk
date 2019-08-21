@@ -1,5 +1,5 @@
 import React from "react"
-import { cleanup, render } from "react-testing-library"
+import { cleanup, render } from "@testing-library/react"
 import { SkeletonText, SkeletonWebActionsComponent } from "../../src/components"
 
 describe("SkeletonWebActionsComponent", () => {

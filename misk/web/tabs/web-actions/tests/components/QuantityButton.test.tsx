@@ -1,6 +1,6 @@
 import { IconNames } from "@blueprintjs/icons"
 import React from "react"
-import { cleanup, render } from "react-testing-library"
+import { cleanup, render } from "@testing-library/react"
 import { QuantityButton } from "../../src/components"
 import { dispatchWebActions } from "../../src/ducks"
 import { nonTypedActionInternal } from "../testUtilities"

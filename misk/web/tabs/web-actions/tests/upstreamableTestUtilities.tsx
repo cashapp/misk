@@ -1,7 +1,7 @@
 import { createBrowserHistory } from "history"
 import React from "react"
 import { Provider } from "react-redux"
-import { render } from "react-testing-library"
+import { render } from "@testing-library/react"
 import { createStore } from "redux"
 import { rootReducer } from "../src/ducks"
 
@@ -13,11 +13,11 @@ export const renderWithRedux = (
     any,
     | string
     | ((
-        props: any
-      ) => React.ReactElement<
-        any,
-        string | (new (props: any) => React.Component<any, any, any>)
-      >)
+      props: any
+    ) => React.ReactElement<
+      any,
+      string | (new (props: any) => React.Component<any, any, any>)
+    >)
     | (new (props: any) => React.Component<any, any, any>)
   >,
   {
