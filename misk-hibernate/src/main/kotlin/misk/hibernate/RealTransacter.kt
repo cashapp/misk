@@ -67,6 +67,9 @@ internal class RealTransacter private constructor(
   }
 
   override fun <T> replicaRead(block: (session: Session) -> T): T {
+    check(!inTransaction) {
+      "Can't do replica reads inside a transaction"
+    }
     if (!options.readOnly) {
       return readOnly().replicaRead(block)
     }
