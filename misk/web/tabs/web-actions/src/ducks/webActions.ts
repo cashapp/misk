@@ -937,8 +937,6 @@ export const WebActionsReducer = (
 ) => {
   switch (action.type) {
     case WEBACTIONS.ADD_REPEATED_FIELD:
-    case WEBACTIONS.SET_DIRTY_INPUT_FIELD:
-    case WEBACTIONS.UNSET_DIRTY_INPUT_FIELD:
     case WEBACTIONS.REMOVE_REPEATED_FIELD:
     case WEBACTIONS.FAILURE:
     case WEBACTIONS.METADATA:
