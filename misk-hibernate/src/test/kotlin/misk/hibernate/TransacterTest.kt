@@ -82,13 +82,19 @@ class TransacterTest {
     }
 
     // Query with replica reads.
-    transacter.replicaRead().transaction { session ->
-      val ianMalcolm = queryFactory.newQuery<CharacterQuery>()
+    transacter.replicaRead { session ->
+      val query = queryFactory.newQuery<CharacterQuery>()
           .allowTableScan()
           .name("Ian Malcolm")
-          .uniqueResult(session)!!
+      val ianMalcolm = query.uniqueResult(session)!!
       assertThat(ianMalcolm.actor?.name).isEqualTo("Jeff Goldblum")
       assertThat(ianMalcolm.movie.name).isEqualTo("Jurassic Park")
+
+      // Shard targeting works.
+      val shard = ianMalcolm.rootId.shard(session)
+      session.target(shard) {
+        assertThat(query.uniqueResult(session)!!.actor?.name).isEqualTo("Jeff Goldblum")
+      }
     }
 
     // Delete some data.
