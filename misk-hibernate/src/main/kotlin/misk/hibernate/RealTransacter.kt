@@ -60,11 +60,37 @@ internal class RealTransacter private constructor(
 
   override fun <T> transaction(block: (session: Session) -> T): T {
     return maybeWithTracing(APPLICATION_TRANSACTION_SPAN_NAME) {
-      transactionWithRetriesInternal(block)
+      transactionWithRetriesInternal {
+        maybeWithTracing(DB_TRANSACTION_SPAN_NAME) { transactionInternalSession(block) }
+      }
     }
   }
 
-  private fun <T> transactionWithRetriesInternal(block: (session: Session) -> T): T {
+  override fun <T> replicaRead(block: (session: Session) -> T): T {
+    if (!options.readOnly) {
+      return readOnly().replicaRead(block)
+    }
+    return maybeWithTracing(APPLICATION_TRANSACTION_SPAN_NAME) {
+      transactionWithRetriesInternal {
+        maybeWithTracing(DB_TRANSACTION_SPAN_NAME) {
+          readWithoutTransactionInternalSession { session ->
+            check(session.isVitess()) {
+              "When using MySQL you need to use a dedicated replica read Transacter instance"
+            }
+            session.target(Destination(TabletType.REPLICA)) {
+              // Full scatters are allowed on replica reads as you can increase availability by
+              // adding additional replicas.
+              session.withoutChecks(Check.FULL_SCATTER) {
+                block(session)
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  private fun <T> transactionWithRetriesInternal(block: () -> T): T {
     require(options.maxAttempts > 0)
 
     val backoff = ExponentialBackoff(
@@ -77,7 +103,7 @@ internal class RealTransacter private constructor(
     while (true) {
       try {
         attempt++
-        val result = transactionInternal(block)
+        val result = block()
 
         if (attempt > 1) {
           logger.info {
@@ -121,32 +147,22 @@ internal class RealTransacter private constructor(
     return "attempt $attempt, different connection"
   }
 
-  private fun <T> transactionInternal(block: (session: Session) -> T): T {
-    return maybeWithTracing(DB_TRANSACTION_SPAN_NAME) { transactionInternalSession(block) }
-  }
-
-  private fun <T> transactionInternalSession(block: (session: Session) -> T): T {
+  private fun <T> transactionInternalSession(block: (session: RealSession) -> T): T {
     return withSession { session ->
       val transaction = maybeWithTracing(DB_BEGIN_SPAN_NAME) {
-        if (!options.replicaRead) {
-          session.hibernateSession.beginTransaction()!!
-        } else {
-          null
-        }
+        session.hibernateSession.beginTransaction()!!
       }
       try {
         val result = block(session)
 
         // Flush any changes to the databased before commit
-        if (!options.readOnly) {
-          session.hibernateSession.flush()
-        }
+        session.hibernateSession.flush()
         session.preCommit()
-        maybeWithTracing(DB_COMMIT_SPAN_NAME) { transaction?.commit() }
+        maybeWithTracing(DB_COMMIT_SPAN_NAME) { transaction.commit() }
         session.postCommit()
         result
       } catch (e: Throwable) {
-        if (transaction?.isActive == true) {
+        if (transaction.isActive) {
           try {
             maybeWithTracing(DB_ROLLBACK_SPAN_NAME) {
               transaction.rollback()
@@ -155,6 +171,22 @@ internal class RealTransacter private constructor(
             e.addSuppressed(suppressed)
           }
         }
+        throw e
+      } finally {
+        // For any reason if tracing was left open, end it.
+        queryTracingListener.endLastSpan()
+      }
+    }
+  }
+
+  private fun <T> readWithoutTransactionInternalSession(block: (session: RealSession) -> T): T {
+    return withSession { session ->
+      check(session.isReadOnly()) {
+        "Reads should be in a read only session"
+      }
+      try {
+        block(session)
+      } catch (e: Throwable) {
         throw e
       } finally {
         // For any reason if tracing was left open, end it.
@@ -198,19 +230,10 @@ internal class RealTransacter private constructor(
 
     // Note that the RealSession is closed last so that close hooks run after the thread locals and
     // Hibernate Session have been released. This way close hooks can start their own transactions.
-    return realSession.use {
+    realSession.use {
       hibernateSession.use {
         useSession(realSession) {
-          if (options.replicaRead) {
-            check(realSession.isVitess()) {
-              "When using MySQL you need to use a dedicated replica read Transacter instance"
-            }
-            realSession.target(Destination(TabletType.REPLICA)) {
-              block(realSession)
-            }
-          } else {
-            block(realSession)
-          }
+          return block(realSession)
         }
       }
     }
@@ -230,7 +253,6 @@ internal class RealTransacter private constructor(
   // NB: all options should be immutable types as copy() is shallow.
   internal data class TransacterOptions(
     val maxAttempts: Int = 2,
-    val replicaRead: Boolean = false,
     val disabledChecks: EnumSet<Check> = EnumSet.noneOf(Check::class.java),
     val minRetryDelayMillis: Long = 100,
     val maxRetryDelayMillis: Long = 200,
@@ -429,6 +451,8 @@ internal class RealTransacter private constructor(
 
     internal fun isVitess(): Boolean = useConnection { it.isVitess() }
 
+    internal fun isReadOnly(): Boolean = readOnly
+
     /**
      * Returns the physical JDBC connection of this session. Hibernate creates one-time-use wrappers
      * around the physical connections that talk to the database. This unwraps those so we can
@@ -454,12 +478,6 @@ internal class RealTransacter private constructor(
       block()
     }
   }
-
-  override fun replicaRead(): Transacter =
-      withOptions(options.copy(
-          replicaRead = true,
-          readOnly = true,
-          disabledChecks = EnumSet.of(Check.FULL_SCATTER)))
 
   private inline fun <R> useSession(session: RealSession, block: () -> R): R {
     val previous = threadLatestSession.get()
