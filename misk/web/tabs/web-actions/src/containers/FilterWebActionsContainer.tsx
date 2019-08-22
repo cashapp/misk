@@ -1,4 +1,4 @@
-import { ControlGroup, HTMLSelect, InputGroup } from "@blueprintjs/core"
+import { ControlGroup, HTMLSelect, InputGroup, Spinner } from "@blueprintjs/core"
 import { onChangeFnCall } from "@misk/simpleredux"
 import * as React from "react"
 import { connect } from "react-redux"
@@ -9,12 +9,13 @@ import {
   WebActionInternalLabel
 } from "../ducks"
 
-const FilterWebActionsContainer = (props: { tag: string } & IDispatchProps) => {
+const FilterWebActionsContainer = (props: { disabled?: boolean, tag: string } & IDispatchProps) => {
   const FilterSelectOptions = [...Object.keys(WebActionInternalLabel)]
   const filterTag = `${props.tag}::Filter`
   return (
     <ControlGroup fill={true}>
       <HTMLSelect
+        disabled={props.disabled}
         large={true}
         onChange={onChangeFnCall(
           props.simpleFormInput,
@@ -23,9 +24,11 @@ const FilterWebActionsContainer = (props: { tag: string } & IDispatchProps) => {
         options={FilterSelectOptions}
       />
       <InputGroup
+        disabled={props.disabled}
         large={true}
         onChange={onChangeFnCall(props.simpleFormInput, `${filterTag}::Input`)}
-        placeholder={"Filter Web Actions"}
+        placeholder={props.disabled ? "Loading Web Actions..." : "Filter Web Actions"}
+        rightElement={props.disabled ? <Spinner size={20} /> : <span />}
       />
       {/* TODO(adrw) Use multiselect to do autocomplete filters */}
     </ControlGroup>
