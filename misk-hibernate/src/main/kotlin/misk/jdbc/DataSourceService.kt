@@ -68,6 +68,15 @@ class DataSourceService(
       if (config.type == DataSourceType.MYSQL) {
         hikariConfig.connectionInitSql = "SET time_zone = '+00:00'"
       }
+      // Shot in the dark HACK to see if we somehow leave the connection with a bad
+      // VITESS_TARGET after some replica reads
+      if (config.type == DataSourceType.VITESS || config.type == DataSourceType.VITESS_MYSQL) {
+        val database = config.database
+        if (database == null || database.isBlank()) {
+          // Reset the VITESS_TARGET
+          hikariConfig.connectionTestQuery = "USE"
+        }
+      }
 
       // https://github.com/brettwooldridge/HikariCP/wiki/MySQL-Configuration
       hikariConfig.dataSourceProperties["cachePrepStmts"] = "true"
