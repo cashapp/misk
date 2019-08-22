@@ -42,9 +42,11 @@ exports[`WebActionsContainer WebActionsContainer can render with redux loading (
       class="bp3-control-group bp3-fill"
     >
       <div
-        class="bp3-html-select bp3-large"
+        class="bp3-html-select bp3-disabled bp3-large"
       >
-        <select>
+        <select
+          disabled=""
+        >
           <option
             value="All Metadata"
           >
@@ -132,14 +134,45 @@ exports[`WebActionsContainer WebActionsContainer can render with redux loading (
         </span>
       </div>
       <div
-        class="bp3-input-group bp3-large"
+        class="bp3-input-group bp3-disabled bp3-large"
       >
         <input
           class="bp3-input"
-          placeholder="Filter Web Actions"
-          style="padding-right: 10px;"
+          disabled=""
+          placeholder="Loading Web Actions..."
+          style="padding-right: 0px;"
           type="text"
         />
+        <span
+          class="bp3-input-action"
+        >
+          <div
+            class="bp3-spinner"
+          >
+            <div
+              class="bp3-spinner-animation"
+            >
+              <svg
+                height="20"
+                stroke-width="16.00"
+                viewBox="-3.00 -3.00 106.00 106.00"
+                width="20"
+              >
+                <path
+                  class="bp3-spinner-track"
+                  d="M 50,50 m 0,-45 a 45,45 0 1 1 0,90 a 45,45 0 1 1 0,-90"
+                />
+                <path
+                  class="bp3-spinner-head"
+                  d="M 50,50 m 0,-45 a 45,45 0 1 1 0,90 a 45,45 0 1 1 0,-90"
+                  pathLength="280"
+                  stroke-dasharray="280 280"
+                  stroke-dashoffset="210"
+                />
+              </svg>
+            </div>
+          </div>
+        </span>
       </div>
     </div>
     <div

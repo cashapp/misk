@@ -101,9 +101,14 @@ exports[`FilterWebActionsContainer FilterWebActionsContainer can render with red
       <input
         class="bp3-input"
         placeholder="Filter Web Actions"
-        style="padding-right: 10px;"
+        style="padding-right: 0px;"
         type="text"
       />
+      <span
+        class="bp3-input-action"
+      >
+        <span />
+      </span>
     </div>
   </div>
 </DocumentFragment>

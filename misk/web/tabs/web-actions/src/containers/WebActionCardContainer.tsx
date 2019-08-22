@@ -30,7 +30,7 @@ const WebActionCardContainer = (
   props: { action: IWebActionInternal; tag: string } & IState & IDispatchProps
 ) => (
   <div>
-    <Card>
+    <Card interactive={true}>
       <div css={cssHeader}>
         {props.action.dispatchMechanism.map(m => (
           <MethodTag key={m} method={m} />

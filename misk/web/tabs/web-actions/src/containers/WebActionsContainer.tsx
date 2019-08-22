@@ -78,7 +78,7 @@ const WebActionsContainer = (
     // Displays mock of 5 Web Action cards which fill in when data is available
     return (
       <div>
-        <FilterWebActionsContainer tag={props.tag} />
+        <FilterWebActionsContainer disabled={true} tag={props.tag} />
         <SkeletonWebActionsComponent />
         <br />
         <SkeletonWebActionsComponent />
