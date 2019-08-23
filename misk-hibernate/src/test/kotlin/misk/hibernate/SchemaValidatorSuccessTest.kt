@@ -4,6 +4,7 @@ import com.google.common.collect.Iterables.getOnlyElement
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import javax.inject.Inject
 
@@ -17,6 +18,7 @@ internal class SchemaValidatorSuccessTest {
   @Inject @Movies lateinit var service: SchemaValidatorService
 
   @Test
+  @Disabled("https://github.com/cashapp/misk/issues/1171")
   fun happyPath() {
     val report = SchemaValidator().validate(transacter, sessionFactoryService.hibernateMetadata)
     assertThat(report.schemas)
