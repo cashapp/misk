@@ -377,22 +377,29 @@ internal class RealTransacter private constructor(
     }
 
     private fun use(destination: Destination) = useConnection { connection ->
-      val sql = if (destination.isBlank()) {
-        "USE"
-      } else {
-        "USE `$destination`"
-      }
       connection.createStatement().use { statement ->
-        withoutChecks {
-          statement.execute(sql)
+        if (isVitessMysql()) {
+          val catalog = if (destination.isBlank()) "@master" else destination.toString()
+          println("catalog = $catalog")
+          connection.catalog = catalog
+        } else {
+          withoutChecks {
+            val sql = if (destination.isBlank()) "USE" else "USE `$destination`"
+            statement.execute(sql)
+          }
         }
       }
     }
 
     private fun currentTarget(): Destination = useConnection { connection ->
       connection.createStatement().use { statement ->
+        val target = if (isVitessMysql()) {
+          connection.catalog
+        } else {
+          statement.executeQuery("SHOW VITESS_TARGET").uniqueString()
+        }
         withoutChecks {
-          Destination.parse(statement.executeQuery("SHOW VITESS_TARGET").uniqueString())
+          Destination.parse(target)
         }
       }
     }
@@ -454,6 +461,8 @@ internal class RealTransacter private constructor(
 
     internal fun isVitess(): Boolean = useConnection { it.isVitess() }
 
+    internal fun isVitessMysql(): Boolean = useConnection { it.isVitessMysql() }
+
     internal fun isReadOnly(): Boolean = readOnly
 
     /**
@@ -497,10 +506,10 @@ internal class RealTransacter private constructor(
 }
 
 fun Connection.isVitess(): Boolean {
-  if (metaData.driverName.startsWith("Vitess")) {
+  if (metaData.driverName.startsWith("vitess", ignoreCase = true)) {
     return true
   }
-  if (metaData.databaseProductVersion.endsWith("Vitess")) {
+  if (metaData.databaseProductVersion.endsWith("vitess", ignoreCase = true)) {
     return true
   }
   // If we're using the MySQL Driver we can check if the underlying connection
@@ -512,3 +521,6 @@ fun Connection.isVitess(): Boolean {
     return false
   }
 }
+
+fun Connection.isVitessMysql(): Boolean = isVitess() &&
+    metaData.driverName.contains("mysql", ignoreCase = true)
