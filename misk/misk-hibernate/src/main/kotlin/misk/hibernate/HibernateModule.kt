@@ -148,20 +148,7 @@ class HibernateModule(
     install(ServiceModule<SchemaMigratorService>(qualifier)
         .dependsOn<DataSourceService>(qualifier))
 
-    // Bind SchemaValidatorService.
     val sessionFactoryServiceProvider = getProvider(keyOf<SessionFactoryService>(qualifier))
-    val schemaValidatorServiceKey = keyOf<SchemaValidatorService>(qualifier)
-    bind(schemaValidatorServiceKey)
-        .toProvider(Provider {
-          SchemaValidatorService(
-              qualifier = qualifier,
-              sessionFactoryServiceProvider = sessionFactoryServiceProvider,
-              transacterProvider = transacterProvider
-          )
-        }).asSingleton()
-    multibind<HealthCheck>().to(schemaValidatorServiceKey)
-    install(ServiceModule<SchemaValidatorService>(qualifier)
-        .dependsOn<SchemaMigratorService>(qualifier))
 
     // Bind SessionFactoryService as implementation of TransacterService.
     val entitiesProvider = getProvider(setOfType(HibernateEntity::class).toKey(qualifier))
@@ -186,7 +173,6 @@ class HibernateModule(
     }).asSingleton()
     install(ServiceModule<TransacterService>(qualifier)
         .enhancedBy<SchemaMigratorService>(qualifier)
-        .enhancedBy<SchemaValidatorService>(qualifier)
         .dependsOn<DataSourceService>(qualifier))
 
     // Install other modules.
