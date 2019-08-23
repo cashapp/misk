@@ -139,6 +139,69 @@ class TransacterTest {
   }
 
   @Test
+  fun `shard targeting`() {
+    val jp = transacter.save(
+        DbMovie("Jurassic Park", LocalDate.of(1993, 6, 9)))
+    val sw = transacter.createInSeparateShard(jp) {
+      DbMovie("Star Wars", LocalDate.of(1977, 5, 25))
+    }
+
+    // Shard targeting works in replica reads
+    transacter.replicaRead { session ->
+      session.target(jp.shard(session)) {
+        assertThat(
+            queryFactory.newQuery<MovieQuery>().allowTableScan()
+                .name("Jurassic Park").uniqueResult(session)
+        ).isNotNull()
+
+        assertThat(
+            queryFactory.newQuery<MovieQuery>().allowTableScan()
+                .name("Star Wars").uniqueResult(session)
+        ).isNull()
+      }
+
+      session.target(sw.shard(session)) {
+        assertThat(
+            queryFactory.newQuery<MovieQuery>().allowTableScan()
+                .name("Jurassic Park").uniqueResult(session)
+        ).isNull()
+
+        assertThat(
+            queryFactory.newQuery<MovieQuery>().allowTableScan()
+                .name("Star Wars").uniqueResult(session)
+        ).isNotNull()
+      }
+    }
+
+      // Shard targeting works in transactions
+    transacter.transaction { session ->
+      session.target(jp.shard(session)) {
+        assertThat(
+            queryFactory.newQuery<MovieQuery>().allowTableScan()
+                .name("Jurassic Park").uniqueResult(session)
+        ).isNotNull()
+
+        assertThat(
+            queryFactory.newQuery<MovieQuery>().allowTableScan()
+                .name("Star Wars").uniqueResult(session)
+        ).isNull()
+      }
+
+      session.target(sw.shard(session)) {
+        assertThat(
+            queryFactory.newQuery<MovieQuery>().allowTableScan()
+                .name("Jurassic Park").uniqueResult(session)
+        ).isNull()
+
+        assertThat(
+            queryFactory.newQuery<MovieQuery>().allowTableScan()
+                .name("Star Wars").uniqueResult(session)
+        ).isNotNull()
+      }
+    }
+  }
+
+  @Test
   fun `can run consecutive replica reads and transactions`() {
     createTestData()
 

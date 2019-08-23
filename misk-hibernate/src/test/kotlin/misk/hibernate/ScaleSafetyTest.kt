@@ -223,7 +223,7 @@ class ScaleSafetyTest {
       }
 }
 
-private fun <T : DbEntity<T>> Transacter.save(entity: T): Id<T> = transaction { it.save(entity) }
+fun <T : DbEntity<T>> Transacter.save(entity: T): Id<T> = transaction { it.save(entity) }
 
 fun Transacter.createInSeparateShard(
   id: Id<DbMovie>,
