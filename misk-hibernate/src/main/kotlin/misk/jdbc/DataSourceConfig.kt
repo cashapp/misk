@@ -74,7 +74,7 @@ data class DataSourceConfig(
         copy(
             port = port ?: 27003,
             host = host ?: "127.0.0.1",
-            database = database ?: ""
+            database = database ?: "@master"
         )
       }
       DataSourceType.HSQLDB -> {
