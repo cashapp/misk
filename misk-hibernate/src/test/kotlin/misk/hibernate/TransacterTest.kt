@@ -209,7 +209,7 @@ class TransacterTest {
       // Make sure this doesn't trigger a transaction
       val target = session.useConnection { c -> c.createStatement().use {
         it.executeQuery("SHOW VITESS_TARGET").uniqueString() } }
-      assertThat(target).isEqualTo("@REPLICA")
+      assertThat(target).isEqualTo("@replica")
 
       queryFactory.newQuery<CharacterQuery>()
           .allowTableScan()
@@ -235,9 +235,9 @@ class TransacterTest {
     }
 
     transacter.replicaRead { session ->
-      queryFactory.newQuery<CharacterQuery>()
+      assertThat(queryFactory.newQuery<CharacterQuery>()
           .allowTableScan()
-          .name("Ian Malcolm 2").uniqueResult(session)!!
+          .name("Ian Malcolm 2").uniqueResult(session)).isNotNull()
     }
   }
 

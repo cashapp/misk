@@ -18,7 +18,7 @@ data class Destination(
   constructor(shard: Shard, tabletType: TabletType) : this(shard.keyspace, shard, tabletType)
 
   override fun toString(): String {
-    val tabletType = if (tabletType != null) "@$tabletType" else ""
+    val tabletType = (if (tabletType != null) "@$tabletType" else "").toLowerCase()
     if (shard != null) {
       return "$shard$tabletType"
     }
