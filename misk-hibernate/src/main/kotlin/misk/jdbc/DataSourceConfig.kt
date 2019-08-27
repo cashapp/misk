@@ -7,23 +7,28 @@ import java.time.Duration
 /** Defines a type of datasource */
 enum class DataSourceType(
   val driverClassName: String,
-  val hibernateDialect: String
+  val hibernateDialect: String,
+  val isVitess: Boolean
 ) {
   MYSQL(
       driverClassName = "io.opentracing.contrib.jdbc.TracingDriver",
-      hibernateDialect = "org.hibernate.dialect.MySQL57Dialect"
+      hibernateDialect = "org.hibernate.dialect.MySQL57Dialect",
+      isVitess = false
   ),
   HSQLDB(
       driverClassName = "org.hsqldb.jdbcDriver",
-      hibernateDialect = "org.hibernate.dialect.H2Dialect"
+      hibernateDialect = "org.hibernate.dialect.H2Dialect",
+      isVitess = false
   ),
   VITESS(
       driverClassName = "io.vitess.jdbc.VitessDriver",
-      hibernateDialect = "misk.hibernate.VitessDialect"
+      hibernateDialect = "misk.hibernate.VitessDialect",
+      isVitess = true
   ),
   VITESS_MYSQL(
       driverClassName = MYSQL.driverClassName,
-      hibernateDialect = "misk.hibernate.VitessDialect"
+      hibernateDialect = "misk.hibernate.VitessDialect",
+      isVitess = true
   ),
 }
 
@@ -69,7 +74,7 @@ data class DataSourceConfig(
         copy(
             port = port ?: 27003,
             host = host ?: "127.0.0.1",
-            database = database ?: ""
+            database = database ?: "@master"
         )
       }
       DataSourceType.HSQLDB -> {

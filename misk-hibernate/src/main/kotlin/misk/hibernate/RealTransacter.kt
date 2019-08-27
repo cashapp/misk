@@ -4,6 +4,8 @@ import io.opentracing.Tracer
 import io.opentracing.tag.Tags
 import misk.backoff.ExponentialBackoff
 import misk.hibernate.Shard.Companion.SINGLE_SHARD_SET
+import misk.jdbc.DataSourceConfig
+import misk.jdbc.DataSourceType
 import misk.jdbc.map
 import misk.jdbc.uniqueString
 import misk.logging.getLogger
@@ -27,6 +29,7 @@ private val logger = getLogger<RealTransacter>()
 internal class RealTransacter private constructor(
   private val qualifier: KClass<out Annotation>,
   private val sessionFactoryProvider: Provider<SessionFactory>,
+  private val config: DataSourceConfig,
   private val threadLatestSession: ThreadLocal<RealSession>,
   private val options: TransacterOptions,
   private val queryTracingListener: QueryTracingListener,
@@ -36,11 +39,13 @@ internal class RealTransacter private constructor(
   constructor(
     qualifier: KClass<out Annotation>,
     sessionFactoryProvider: Provider<SessionFactory>,
+    config: DataSourceConfig,
     queryTracingListener: QueryTracingListener,
     tracer: Tracer?
   ) : this(
       qualifier,
       sessionFactoryProvider,
+      config,
       ThreadLocal(),
       TransacterOptions(),
       queryTracingListener,
@@ -67,6 +72,9 @@ internal class RealTransacter private constructor(
   }
 
   override fun <T> replicaRead(block: (session: Session) -> T): T {
+    check(!inTransaction) {
+      "Can't do replica reads inside a transaction"
+    }
     if (!options.readOnly) {
       return readOnly().replicaRead(block)
     }
@@ -74,7 +82,7 @@ internal class RealTransacter private constructor(
       transactionWithRetriesInternal {
         maybeWithTracing(DB_TRANSACTION_SPAN_NAME) {
           readWithoutTransactionInternalSession { session ->
-            check(session.isVitess()) {
+            check(config.type.isVitess) {
               "When using MySQL you need to use a dedicated replica read Transacter instance"
             }
             session.target(Destination(TabletType.REPLICA)) {
@@ -211,12 +219,13 @@ internal class RealTransacter private constructor(
 
   private fun withOptions(options: TransacterOptions): Transacter =
       RealTransacter(
-          qualifier,
-          sessionFactoryProvider,
-          threadLatestSession,
-          options,
-          queryTracingListener,
-          tracer
+          qualifier = qualifier,
+          sessionFactoryProvider = sessionFactoryProvider,
+          threadLatestSession = threadLatestSession,
+          options = options,
+          queryTracingListener = queryTracingListener,
+          config = config,
+          tracer = tracer
       )
 
   private fun <T> withSession(block: (session: RealSession) -> T): T {
@@ -224,6 +233,7 @@ internal class RealTransacter private constructor(
     val realSession = RealSession(
         hibernateSession = hibernateSession,
         readOnly = options.readOnly,
+        config = config,
         disabledChecks = options.disabledChecks,
         predecessor = threadLatestSession.get()
     )
@@ -272,6 +282,7 @@ internal class RealTransacter private constructor(
   internal class RealSession(
     override val hibernateSession: org.hibernate.Session,
     private val readOnly: Boolean,
+    private val config: DataSourceConfig,
     var disabledChecks: EnumSet<Check>,
     predecessor: RealSession?
   ) : Session, Closeable {
@@ -325,7 +336,7 @@ internal class RealTransacter private constructor(
 
     override fun shards(): Set<Shard> {
       return useConnection { connection ->
-        if (connection.isVitess()) {
+        if (config.type.isVitess) {
           connection.createStatement().use { s ->
             var shards = s.executeQuery("SHOW VITESS_SHARDS")
                 .map { rs -> Shard.parse(rs.getString(1)) }
@@ -352,7 +363,7 @@ internal class RealTransacter private constructor(
     }
 
     override fun <T> target(shard: Shard, function: () -> T): T {
-      return if (isVitess()) {
+      return if (config.type.isVitess) {
         target(currentTarget().mergedWith(Destination(shard)), function)
       } else {
         function()
@@ -360,7 +371,7 @@ internal class RealTransacter private constructor(
     }
 
     internal fun <T> target(destination: Destination, function: () -> T): T {
-      return if (isVitess()) {
+      return if (config.type.isVitess) {
         val previous = currentTarget()
         use(previous.mergedWith(destination))
         try {
@@ -374,23 +385,31 @@ internal class RealTransacter private constructor(
     }
 
     private fun use(destination: Destination) = useConnection { connection ->
-      val sql = if (destination.isBlank()) {
-        "USE"
-      } else {
-        "USE `$destination`"
-      }
+      check(config.type.isVitess)
       connection.createStatement().use { statement ->
-        withoutChecks {
-          statement.execute(sql)
+        if (config.type == DataSourceType.VITESS_MYSQL) {
+          val catalog = if (destination.isBlank()) "@master" else destination.toString()
+          connection.catalog = catalog
+        } else {
+          withoutChecks {
+            val sql = if (destination.isBlank()) "USE" else "USE `$destination`"
+            statement.execute(sql)
+          }
         }
       }
     }
 
     private fun currentTarget(): Destination = useConnection { connection ->
+      check(config.type.isVitess)
       connection.createStatement().use { statement ->
-        withoutChecks {
-          Destination.parse(statement.executeQuery("SHOW VITESS_TARGET").uniqueString())
+        val target = if (config.type == DataSourceType.VITESS_MYSQL) {
+          connection.catalog
+        } else {
+          withoutChecks {
+            statement.executeQuery("SHOW VITESS_TARGET").uniqueString()
+          }
         }
+        Destination.parse(target)
       }
     }
 
@@ -449,8 +468,6 @@ internal class RealTransacter private constructor(
       }
     }
 
-    internal fun isVitess(): Boolean = useConnection { it.isVitess() }
-
     internal fun isReadOnly(): Boolean = readOnly
 
     /**
@@ -490,22 +507,5 @@ internal class RealTransacter private constructor(
     } finally {
       session.inTransaction = false
     }
-  }
-}
-
-fun Connection.isVitess(): Boolean {
-  if (metaData.driverName.startsWith("Vitess")) {
-    return true
-  }
-  if (metaData.databaseProductVersion.endsWith("Vitess")) {
-    return true
-  }
-  // If we're using the MySQL Driver we can check if the underlying connection
-  // uses some Vitess specific syntax
-  try {
-    this.createStatement().use { s -> s.executeQuery("SHOW VITESS_TARGET") }
-    return true
-  } catch (e: SQLSyntaxErrorException) {
-    return false
   }
 }

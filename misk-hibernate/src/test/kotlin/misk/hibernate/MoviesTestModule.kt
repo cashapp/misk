@@ -15,7 +15,8 @@ import misk.time.FakeClockModule
 
 /** This module creates movies, actors, and characters tables for several Hibernate tests. */
 class MoviesTestModule(
-  private val type: DataSourceType = DataSourceType.VITESS_MYSQL
+  // TODO(jontirsen): Make this VITESS_MYSQL when this is merged: https://github.com/vitessio/vitess/pull/5136
+  private val type: DataSourceType = DataSourceType.VITESS
 ) : KAbstractModule() {
   override fun configure() {
     install(LogCollectorModule())

@@ -5,7 +5,6 @@ import com.zaxxer.hikari.util.DriverDataSource
 import misk.backoff.ExponentialBackoff
 import misk.backoff.retry
 import misk.environment.Environment
-import misk.hibernate.isVitess
 import misk.logging.getLogger
 import java.time.Duration
 import java.util.Properties
@@ -24,7 +23,7 @@ class PingDatabaseService @Inject constructor(
   private val environment: Environment
 ) : AbstractIdleService() {
   override fun startUp() {
-    val jdbcUrl = this.config.buildJdbcUrl(environment)
+    val jdbcUrl = config.buildJdbcUrl(environment)
     val dataSource = DriverDataSource(
         jdbcUrl, config.type.driverClassName, Properties(), config.username, config.password)
     retry(10, ExponentialBackoff(Duration.ofMillis(20), Duration.ofMillis(1000))) {
@@ -35,7 +34,7 @@ class PingDatabaseService @Inject constructor(
           } == 1)
           // During cluster start up we sometimes have an empty list of shards so lets also
           // wait until the shards are loaded (this is generally only an issue during tests)
-          if (c.isVitess()) {
+          if (config.type.isVitess) {
             check(c.createStatement().use { s ->
               s.executeQuery("SHOW VITESS_SHARDS").map { rs -> rs.getString(1) }
             }.isNotEmpty())

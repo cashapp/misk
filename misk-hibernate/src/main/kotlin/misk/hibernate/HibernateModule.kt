@@ -128,6 +128,7 @@ class HibernateModule(
       override fun get(): RealTransacter = RealTransacter(
           qualifier = qualifier,
           sessionFactoryProvider = sessionFactoryProvider,
+          config = config,
           queryTracingListener = queryTracingListener,
           tracer = tracer
       )

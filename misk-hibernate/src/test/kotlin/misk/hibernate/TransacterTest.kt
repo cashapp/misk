@@ -10,6 +10,7 @@ import misk.hibernate.RealTransacter.Companion.DB_ROLLBACK_SPAN_NAME
 import misk.hibernate.RealTransacter.Companion.DB_TRANSACTION_SPAN_NAME
 import misk.hibernate.RealTransacter.Companion.TRANSACTER_SPAN_TAG
 import misk.jdbc.DataSourceType
+import misk.jdbc.uniqueString
 import misk.logging.LogCollector
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
@@ -26,7 +27,7 @@ import kotlin.test.assertFailsWith
 @MiskTest(startService = true)
 class TransacterTest {
   @MiskTestModule
-  val module = MoviesTestModule(DataSourceType.VITESS_MYSQL)
+  val module = MoviesTestModule()
 
   @Inject @Movies lateinit var transacter: Transacter
   @Inject lateinit var queryFactory: Query.Factory
@@ -35,25 +36,7 @@ class TransacterTest {
 
   @Test
   fun happyPath() {
-    // Insert some movies, characters and actors.
-    transacter.allowCowrites().transaction { session ->
-      val jp = session.save(DbMovie("Jurassic Park", LocalDate.of(1993, 6, 9)))
-      val sw = session.save(DbMovie("Star Wars", LocalDate.of(1977, 5, 25)))
-      val lx = session.save(DbMovie("Luxo Jr.", LocalDate.of(1986, 8, 17)))
-      assertThat(setOf(jp, sw)).hasSize(2) // Uniqueness check.
-
-      val ld = session.save(DbActor("Laura Dern", LocalDate.of(1967, 2, 10)))
-      val jg = session.save(DbActor("Jeff Goldblum", LocalDate.of(1952, 10, 22)))
-      val cf = session.save(DbActor("Carrie Fisher", null))
-      assertThat(setOf(ld, jg, cf)).hasSize(3) // Uniqueness check.
-
-      val ah = session.save(DbCharacter("Amilyn Holdo", session.load(sw), session.load(ld)))
-      val es = session.save(DbCharacter("Ellie Sattler", session.load(jp), session.load(ld)))
-      val im = session.save(DbCharacter("Ian Malcolm", session.load(jp), session.load(jg)))
-      val lo = session.save(DbCharacter("Leia Organa", session.load(sw), session.load(cf)))
-      val lj = session.save(DbCharacter("Luxo Jr.", session.load(lx), null))
-      assertThat(setOf(ah, es, im, lo, lj)).hasSize(5) // Uniqueness check.
-    }
+    createTestData()
 
     // Query that data.
     transacter.transaction { session ->
@@ -111,6 +94,150 @@ class TransacterTest {
           .name("Ian Malcolm")
           .uniqueResult(session)
       assertThat(afterDelete).isNull()
+    }
+  }
+
+  private fun createTestData() {
+    // Insert some movies, characters and actors.
+    transacter.allowCowrites().transaction { session ->
+      val jp = session.save(DbMovie("Jurassic Park", LocalDate.of(1993, 6, 9)))
+      val sw = session.save(DbMovie("Star Wars", LocalDate.of(1977, 5, 25)))
+      val lx = session.save(DbMovie("Luxo Jr.", LocalDate.of(1986, 8, 17)))
+      assertThat(setOf(jp, sw)).hasSize(2) // Uniqueness check.
+
+      val ld = session.save(DbActor("Laura Dern", LocalDate.of(1967, 2, 10)))
+      val jg = session.save(DbActor("Jeff Goldblum", LocalDate.of(1952, 10, 22)))
+      val cf = session.save(DbActor("Carrie Fisher", null))
+      assertThat(setOf(ld, jg, cf)).hasSize(3) // Uniqueness check.
+
+      val ah = session.save(DbCharacter("Amilyn Holdo", session.load(sw), session.load(ld)))
+      val es = session.save(DbCharacter("Ellie Sattler", session.load(jp), session.load(ld)))
+      val im = session.save(DbCharacter("Ian Malcolm", session.load(jp), session.load(jg)))
+      val lo = session.save(DbCharacter("Leia Organa", session.load(sw), session.load(cf)))
+      val lj = session.save(DbCharacter("Luxo Jr.", session.load(lx), null))
+      assertThat(setOf(ah, es, im, lo, lj)).hasSize(5) // Uniqueness check.
+    }
+  }
+
+  @Test
+  fun `cant nest replica reads`() {
+    createTestData()
+
+    transacter.replicaRead { session ->
+      queryFactory.newQuery<CharacterQuery>()
+          .allowTableScan()
+          .name("Ian Malcolm").uniqueResult(session)!!
+
+      assertThrows<IllegalStateException> {
+        transacter.replicaRead { session ->
+          queryFactory.newQuery<CharacterQuery>()
+              .allowTableScan()
+              .name("Ian Malcolm").uniqueResult(session)!!
+        }
+      }
+    }
+  }
+
+  @Test
+  fun `shard targeting`() {
+    val jp = transacter.save(
+        DbMovie("Jurassic Park", LocalDate.of(1993, 6, 9)))
+    val sw = transacter.createInSeparateShard(jp) {
+      DbMovie("Star Wars", LocalDate.of(1977, 5, 25))
+    }
+
+    // Shard targeting works in replica reads
+    transacter.replicaRead { session ->
+      session.target(jp.shard(session)) {
+        assertThat(
+            queryFactory.newQuery<MovieQuery>().allowTableScan()
+                .name("Jurassic Park").uniqueResult(session)
+        ).isNotNull()
+
+        assertThat(
+            queryFactory.newQuery<MovieQuery>().allowTableScan()
+                .name("Star Wars").uniqueResult(session)
+        ).isNull()
+      }
+
+      session.target(sw.shard(session)) {
+        assertThat(
+            queryFactory.newQuery<MovieQuery>().allowTableScan()
+                .name("Jurassic Park").uniqueResult(session)
+        ).isNull()
+
+        assertThat(
+            queryFactory.newQuery<MovieQuery>().allowTableScan()
+                .name("Star Wars").uniqueResult(session)
+        ).isNotNull()
+      }
+    }
+
+      // Shard targeting works in transactions
+    transacter.transaction { session ->
+      session.target(jp.shard(session)) {
+        assertThat(
+            queryFactory.newQuery<MovieQuery>().allowTableScan()
+                .name("Jurassic Park").uniqueResult(session)
+        ).isNotNull()
+
+        assertThat(
+            queryFactory.newQuery<MovieQuery>().allowTableScan()
+                .name("Star Wars").uniqueResult(session)
+        ).isNull()
+      }
+
+      session.target(sw.shard(session)) {
+        assertThat(
+            queryFactory.newQuery<MovieQuery>().allowTableScan()
+                .name("Jurassic Park").uniqueResult(session)
+        ).isNull()
+
+        assertThat(
+            queryFactory.newQuery<MovieQuery>().allowTableScan()
+                .name("Star Wars").uniqueResult(session)
+        ).isNotNull()
+      }
+    }
+  }
+
+  @Test
+  fun `can run consecutive replica reads and transactions`() {
+    createTestData()
+
+    transacter.replicaRead { session ->
+      // Make sure this doesn't trigger a transaction
+      val target = session.useConnection { c -> c.createStatement().use {
+        it.executeQuery("SHOW VITESS_TARGET").uniqueString() } }
+      assertThat(target).isEqualTo("@replica")
+
+      queryFactory.newQuery<CharacterQuery>()
+          .allowTableScan()
+          .name("Ian Malcolm").uniqueResult(session)!!
+    }
+
+    transacter.replicaRead { session ->
+      queryFactory.newQuery<CharacterQuery>()
+          .allowTableScan()
+          .name("Ian Malcolm").uniqueResult(session)!!
+    }
+
+    transacter.transaction { session ->
+      // Make sure this doesn't trigger a transaction
+      val target = session.useConnection { c -> c.createStatement().use {
+        it.executeQuery("SHOW VITESS_TARGET").uniqueString() } }
+      assertThat(target).isEqualTo("@master")
+
+      val character = queryFactory.newQuery<CharacterQuery>()
+          .allowTableScan()
+          .name("Ian Malcolm").uniqueResult(session)!!
+      character.name = "Ian Malcolm 2"
+    }
+
+    transacter.replicaRead { session ->
+      assertThat(queryFactory.newQuery<CharacterQuery>()
+          .allowTableScan()
+          .name("Ian Malcolm 2").uniqueResult(session)).isNotNull()
     }
   }
 

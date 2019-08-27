@@ -77,7 +77,7 @@ data class Shard(val keyspace: Keyspace, val name: String) {
     val SINGLE_SHARD_SET = ImmutableSet.of(SINGLE_SHARD)
 
     fun parse(string: String): Shard {
-      val (keyspace, shard) = string.split('/', limit = 2)
+      val (keyspace, shard) = string.split('/', ':', limit = 2)
       return Shard(Keyspace(keyspace), shard)
     }
   }
