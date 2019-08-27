@@ -19,7 +19,7 @@ class DestinationTest {
   fun testToString() {
     assertThat(Destination(null, null, null).toString()).isEqualTo("")
     assertThat(Destination(Shard(Keyspace("ks"), "-80")).toString()).isEqualTo("ks/-80")
-    assertThat(Destination(Shard(Keyspace("ks"), "-80"), TabletType.REPLICA).toString()).isEqualTo("ks/-80@REPLICA")
-    assertThat(Destination(Keyspace("ks"), null, TabletType.REPLICA).toString()).isEqualTo("ks@REPLICA")
+    assertThat(Destination(Shard(Keyspace("ks"), "-80"), TabletType.REPLICA).toString()).isEqualTo("ks/-80@replica")
+    assertThat(Destination(Keyspace("ks"), null, TabletType.REPLICA).toString()).isEqualTo("ks@replica")
   }
 }

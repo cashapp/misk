@@ -27,7 +27,7 @@ import kotlin.test.assertFailsWith
 @MiskTest(startService = true)
 class TransacterTest {
   @MiskTestModule
-  val module = MoviesTestModule(DataSourceType.VITESS_MYSQL)
+  val module = MoviesTestModule()
 
   @Inject @Movies lateinit var transacter: Transacter
   @Inject lateinit var queryFactory: Query.Factory
@@ -226,7 +226,7 @@ class TransacterTest {
       // Make sure this doesn't trigger a transaction
       val target = session.useConnection { c -> c.createStatement().use {
         it.executeQuery("SHOW VITESS_TARGET").uniqueString() } }
-      assertThat(target).isEqualTo("")
+      assertThat(target).isEqualTo("@master")
 
       val character = queryFactory.newQuery<CharacterQuery>()
           .allowTableScan()

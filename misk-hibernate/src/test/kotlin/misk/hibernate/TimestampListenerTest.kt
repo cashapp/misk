@@ -1,10 +1,12 @@
 package misk.hibernate
 
+import jnr.ffi.annotations.IgnoreError
 import misk.jdbc.DataSourceType
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.time.FakeClock
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.concurrent.TimeUnit
@@ -79,6 +81,8 @@ class MySQLTimestampListenerTest : TimestampListenerTest() {
 }
 
 @MiskTest(startService = true)
+// TODO(jontirsen): Re-enable this test when this has been merged: https://github.com/vitessio/vitess/pull/5136
+@Disabled
 class VitessMySQLTimestampListenerTest : TimestampListenerTest() {
   @MiskTestModule
   val module = MoviesTestModule(DataSourceType.VITESS_MYSQL)
