@@ -405,11 +405,11 @@ internal class RealTransacter private constructor(
         val target = if (config.type == DataSourceType.VITESS_MYSQL) {
           connection.catalog
         } else {
-          statement.executeQuery("SHOW VITESS_TARGET").uniqueString()
+          withoutChecks {
+            statement.executeQuery("SHOW VITESS_TARGET").uniqueString()
+          }
         }
-        withoutChecks {
-          Destination.parse(target)
-        }
+        Destination.parse(target)
       }
     }
 
