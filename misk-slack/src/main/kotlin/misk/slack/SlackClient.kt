@@ -1,7 +1,9 @@
 package misk.slack
 
+import javax.inject.Inject
+
 /** Dummy client that does nothing if SlackModule is not installed .*/
-open class SlackClient {
+open class SlackClient @Inject constructor() {
   /**
    * Post a message as the specified bot username and icon emoji in the channel.
    * If no channel is provided, the default channel configured by the service is used.
