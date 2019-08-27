@@ -388,7 +388,7 @@ internal class RealTransacter private constructor(
       check(config.type.isVitess)
       connection.createStatement().use { statement ->
         if (config.type == DataSourceType.VITESS_MYSQL) {
-          val catalog = if (destination.isBlank()) "" else destination.toString()
+          val catalog = if (destination.isBlank()) "@master" else destination.toString()
           connection.catalog = catalog
         } else {
           withoutChecks {
