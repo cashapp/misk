@@ -125,10 +125,6 @@ data class DataSourceConfig(
 
         var useSSL = false
 
-        // TODO(rhall): share this with DataSource config in SessionFactoryService.
-        // https://github.com/square/misk/issues/397
-        // Explicitly not updating VITESS below since this is a temporary hack until the above
-        // issue is resolved.
         if (!trustStoreUrl.isNullOrBlank()) {
           require(!config.trust_certificate_key_store_password.isNullOrBlank()) {
             "must provide a trust_certificate_key_store_password"
@@ -144,8 +140,8 @@ data class DataSourceConfig(
             "must provide a client_certificate_key_store_password if client_certificate_key_store_url" +
                 " or client_certificate_key_store_path is set"
           }
-          queryParams += "&keyStore=$certStorePath"
-          queryParams += "&keyStorePassword=${config.client_certificate_key_store_password}"
+          queryParams += "&clientCertificateKeyStoreUrl=$certStorePath"
+          queryParams += "&clientCertificateKeyStorePassword=${config.client_certificate_key_store_password}"
           useSSL = true
         }
 
