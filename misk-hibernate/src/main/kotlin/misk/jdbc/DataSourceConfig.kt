@@ -122,6 +122,10 @@ data class DataSourceConfig(
           trustStoreUrl = config.trust_certificate_key_store_url
         }
 
+        val certStorePath = getStorePath(config.client_certificate_key_store_url, config.client_certificate_key_store_path)
+
+        var useSSL = false
+
         // TODO(rhall): share this with DataSource config in SessionFactoryService.
         // https://github.com/square/misk/issues/397
         // Explicitly not updating VITESS below since this is a temporary hack until the above
@@ -133,9 +137,23 @@ data class DataSourceConfig(
           queryParams += "&trustCertificateKeyStoreUrl=$trustStoreUrl"
           queryParams += "&trustCertificateKeyStorePassword=${config.trust_certificate_key_store_password}"
           queryParams += "&verifyServerCertificate=true"
+          useSSL = true
+        }
+        if (!certStorePath.isNullOrBlank()) {
+          require(!config.client_certificate_key_store_password.isNullOrBlank()) {
+            "must provide a client_certificate_key_store_password if client_certificate_key_store_url" +
+                " or client_certificate_key_store_path is set"
+          }
+          queryParams += "${if (queryParams.isEmpty()) "?" else "&"}keyStore=$certStorePath"
+          queryParams += "&keyStorePassword=${config.client_certificate_key_store_password}"
+          useSSL = true
+        }
+
+        if (useSSL) {
           queryParams += "&useSSL=true"
           queryParams += "&requireSSL=true"
         }
+
         "jdbc:tracing:mysql://${config.host}:${config.port}/${config.database}$queryParams"
       }
       DataSourceType.HSQLDB -> {
