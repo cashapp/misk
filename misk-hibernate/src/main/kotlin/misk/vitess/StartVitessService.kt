@@ -39,7 +39,7 @@ import kotlin.concurrent.thread
 import kotlin.reflect.KClass
 import kotlin.streams.toList
 
-const val VITESS_SHA = "ad6d22aafa73c9bb64cebf6dffe5f82df7cfcded00cf801fd4e64d0f46dbab43"
+const val VITESS_SHA = "f3254d1287e526ce6cc1906b38862e4550bfdc110b44ef6e32905dc3ca2fb9bd"
 const val VITESS_IMAGE = "vitess/base@sha256:$VITESS_SHA"
 const val CONTAINER_NAME_PREFIX = "misk-vitess-testing"
 
@@ -377,7 +377,7 @@ class StartVitessService(
 
   fun cluster() = cluster?.cluster
 
-  fun shouldRunVitess() =
+  private fun shouldRunVitess() =
       (config.type == DataSourceType.VITESS || config.type == DataSourceType.VITESS_MYSQL) &&
           (environment == TESTING || environment == DEVELOPMENT)
 

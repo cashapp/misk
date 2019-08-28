@@ -81,8 +81,6 @@ class MySQLTimestampListenerTest : TimestampListenerTest() {
 }
 
 @MiskTest(startService = true)
-// TODO(jontirsen): Re-enable this test when this has been merged: https://github.com/vitessio/vitess/pull/5136
-@Disabled
 class VitessMySQLTimestampListenerTest : TimestampListenerTest() {
   @MiskTestModule
   val module = MoviesTestModule(DataSourceType.VITESS_MYSQL)
