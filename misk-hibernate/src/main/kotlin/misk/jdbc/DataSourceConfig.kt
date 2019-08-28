@@ -104,6 +104,7 @@ data class DataSourceConfig(
     return when (type) {
       DataSourceType.MYSQL, DataSourceType.VITESS_MYSQL -> {
         var queryParams = "?useLegacyDatetimeCode=false"
+
         if (env == Environment.TESTING || env == Environment.DEVELOPMENT) {
           queryParams += "&createDatabaseIfNotExist=true"
         }
@@ -122,8 +123,6 @@ data class DataSourceConfig(
           trustStoreUrl = config.trust_certificate_key_store_url
         }
 
-        val certStorePath = getStorePath(config.client_certificate_key_store_url, config.client_certificate_key_store_path)
-
         var useSSL = false
 
         // TODO(rhall): share this with DataSource config in SessionFactoryService.
@@ -139,12 +138,13 @@ data class DataSourceConfig(
           queryParams += "&verifyServerCertificate=true"
           useSSL = true
         }
+        val certStorePath = config.client_certificate_key_store_url
         if (!certStorePath.isNullOrBlank()) {
           require(!config.client_certificate_key_store_password.isNullOrBlank()) {
             "must provide a client_certificate_key_store_password if client_certificate_key_store_url" +
                 " or client_certificate_key_store_path is set"
           }
-          queryParams += "${if (queryParams.isEmpty()) "?" else "&"}keyStore=$certStorePath"
+          queryParams += "&keyStore=$certStorePath"
           queryParams += "&keyStorePassword=${config.client_certificate_key_store_password}"
           useSSL = true
         }
