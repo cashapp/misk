@@ -5,6 +5,7 @@ import misk.security.ssl.SslLoader
 import okhttp3.Dispatcher
 import okhttp3.OkHttpClient
 import okhttp3.Protocol
+import java.net.Proxy
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -39,10 +40,10 @@ class HttpClientFactory @Inject constructor(
           UnixDomainSocketFactory(envoyClientEndpointProvider.unixSocket(config.envoy)))
       // No DNS lookup needed since we're just sending the request over a socket.
       builder.dns(NoOpDns())
-      // In-flight Envoy requests do not get properly closed when those requests aren't done via HTTP/2.
-      // As such, ensure that communications via Envoy sidecar always happen over HTTP/2. Standard protocol
-      // negotiation is fine for non-Envoy sidecar (read: non-unix socket) traffic.
-      builder.protocols(listOf(Protocol.H2_PRIOR_KNOWLEDGE))
+      // Envoy is the proxy
+      builder.proxy(Proxy.NO_PROXY)
+      // OkHttp <=> envoy over h2 has bad interactions, and benefit is marginal
+      builder.protocols(listOf(Protocol.HTTP_1_1))
     }
 
     val dispatcher = Dispatcher()
