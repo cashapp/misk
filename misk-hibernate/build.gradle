@@ -24,6 +24,7 @@ dependencies {
   compile dep.openTracing
   compile dep.openTracingUtil
   compile dep.openTracingJdbc
+  compile dep.tracingJaeger
   compile dep.vitess
   compile dep.tink
   compile project(':misk')
