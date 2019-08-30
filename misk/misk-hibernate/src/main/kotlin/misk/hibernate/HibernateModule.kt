@@ -15,6 +15,7 @@ import misk.jdbc.DataSourceConnector
 import misk.jdbc.DataSourceDecorator
 import misk.jdbc.DataSourceService
 import misk.jdbc.DatabasePool
+import misk.jdbc.JaegerSpanInjector
 import misk.jdbc.PingDatabaseService
 import misk.jdbc.RealDatabasePool
 import misk.metrics.Metrics
@@ -175,6 +176,15 @@ class HibernateModule(
     install(ServiceModule<TransacterService>(qualifier)
         .enhancedBy<SchemaMigratorService>(qualifier)
         .dependsOn<DataSourceService>(qualifier))
+
+    val jaegerSpanInjectorDecoratorKey = JaegerSpanInjector::class.toKey(qualifier)
+    bind(jaegerSpanInjectorDecoratorKey)
+            .toProvider(object : Provider<JaegerSpanInjector> {
+              @Inject(optional = true) var tracer: Tracer? = null
+
+              override fun get(): JaegerSpanInjector =
+                      JaegerSpanInjector(tracer, config)
+            }).asSingleton()
 
     // Install other modules.
     install(object : HibernateEntityModule(qualifier) {
