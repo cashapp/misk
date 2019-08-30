@@ -116,12 +116,22 @@ data class DataSourceConfig(
           queryParams += "&useUnicode=true"
         }
 
-        var trustStoreUrl: String? = null
-        if (!config.trust_certificate_key_store_path.isNullOrBlank()) {
-          trustStoreUrl = "file://${config.trust_certificate_key_store_path}"
-        } else if (!config.trust_certificate_key_store_url.isNullOrBlank()) {
-          trustStoreUrl = config.trust_certificate_key_store_url
-        }
+        val trustStoreUrl: String? =
+            if (!config.trust_certificate_key_store_path.isNullOrBlank()) {
+              "file://${config.trust_certificate_key_store_path}"
+            } else if (!config.trust_certificate_key_store_url.isNullOrBlank()) {
+              config.trust_certificate_key_store_url
+            } else {
+              null
+            }
+        val certStoreUrl =
+            if (!config.client_certificate_key_store_path.isNullOrBlank()) {
+              "file://${config.client_certificate_key_store_path}"
+            } else if (!config.client_certificate_key_store_url.isNullOrBlank()) {
+              config.client_certificate_key_store_url
+            } else {
+              null
+            }
 
         var useSSL = false
 
@@ -134,13 +144,12 @@ data class DataSourceConfig(
           queryParams += "&verifyServerCertificate=true"
           useSSL = true
         }
-        val certStorePath = config.client_certificate_key_store_url
-        if (!certStorePath.isNullOrBlank()) {
+        if (!certStoreUrl.isNullOrBlank()) {
           require(!config.client_certificate_key_store_password.isNullOrBlank()) {
             "must provide a client_certificate_key_store_password if client_certificate_key_store_url" +
                 " or client_certificate_key_store_path is set"
           }
-          queryParams += "&clientCertificateKeyStoreUrl=$certStorePath"
+          queryParams += "&clientCertificateKeyStoreUrl=$certStoreUrl"
           queryParams += "&clientCertificateKeyStorePassword=${config.client_certificate_key_store_password}"
           useSSL = true
         }
