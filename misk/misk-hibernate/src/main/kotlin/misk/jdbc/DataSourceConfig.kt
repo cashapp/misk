@@ -114,6 +114,11 @@ data class DataSourceConfig(
           //  has been fixed: https://github.com/vitessio/vitess/issues/5075
           queryParams += "&useServerPrepStmts=false"
           queryParams += "&useUnicode=true"
+          // If we leave this as the default (true) the logs get spammed with the following errors:
+          // "Ignored inapplicable SET {sql_mode } = strict_trans_tables"
+          // Since Vitess always uses strict_trans_tables this makes no difference here except it
+          // stops spamming the logs
+          queryParams += "&jdbcCompliantTruncation=false"
         }
 
         val trustStoreUrl: String? =
