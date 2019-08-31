@@ -192,32 +192,34 @@ internal class RealTransacter private constructor(
 
   private fun <T> transactionInternalSession(block: (session: RealSession) -> T): T {
     return withSession { session ->
-      val transaction = maybeWithTracing(DB_BEGIN_SPAN_NAME) {
-        session.hibernateSession.beginTransaction()!!
-      }
-      try {
-        val result = block(session)
-
-        // Flush any changes to the databased before commit
-        session.hibernateSession.flush()
-        session.preCommit()
-        maybeWithTracing(DB_COMMIT_SPAN_NAME) { transaction.commit() }
-        session.postCommit()
-        result
-      } catch (e: Throwable) {
-        if (transaction.isActive) {
-          try {
-            maybeWithTracing(DB_ROLLBACK_SPAN_NAME) {
-              transaction.rollback()
-            }
-          } catch (suppressed: Exception) {
-            e.addSuppressed(suppressed)
-          }
+      session.target(Destination(TabletType.MASTER)) {
+        val transaction = maybeWithTracing(DB_BEGIN_SPAN_NAME) {
+          session.hibernateSession.beginTransaction()!!
         }
-        throw e
-      } finally {
-        // For any reason if tracing was left open, end it.
-        queryTracingListener.endLastSpan()
+        try {
+          val result = block(session)
+
+          // Flush any changes to the database before commit
+          session.hibernateSession.flush()
+          session.preCommit()
+          maybeWithTracing(DB_COMMIT_SPAN_NAME) { transaction.commit() }
+          session.postCommit()
+          result
+        } catch (e: Throwable) {
+          if (transaction.isActive) {
+            try {
+              maybeWithTracing(DB_ROLLBACK_SPAN_NAME) {
+                transaction.rollback()
+              }
+            } catch (suppressed: Exception) {
+              e.addSuppressed(suppressed)
+            }
+          }
+          throw e
+        } finally {
+          // For any reason if tracing was left open, end it.
+          queryTracingListener.endLastSpan()
+        }
       }
     }
   }
