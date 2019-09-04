@@ -1,4 +1,4 @@
-package misk.tracking.backends.datadog
+package misk.tracing.backends.datadog
 
 import datadog.trace.api.GlobalTracer
 import misk.inject.KAbstractModule
