@@ -1,9 +1,6 @@
 package misk.web
 
 import misk.inject.KAbstractModule
-import misk.security.ssl.CertStoreConfig
-import misk.security.ssl.SslLoader
-import misk.security.ssl.TrustStoreConfig
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.web.jetty.JettyService
@@ -38,22 +35,8 @@ abstract class AbstractRebalancingTest(
 
   inner class TestModule : KAbstractModule() {
     override fun configure() {
-      install(WebTestingModule(webConfig = WebConfig(
-          port = 0,
-          idle_timeout = 500000,
-          host = "127.0.0.1",
-          close_connection_percent = percent,
-          ssl = WebSslConfig(0,
-              cert_store = CertStoreConfig(
-                  resource = "classpath:/ssl/server_cert_key_combo.pem",
-                  passphrase = "serverpassword",
-                  format = SslLoader.FORMAT_PEM
-              ),
-              trust_store = TrustStoreConfig(
-                  resource = "classpath:/ssl/client_cert.pem",
-                  format = SslLoader.FORMAT_PEM
-              ),
-              mutual_auth = WebSslConfig.MutualAuth.REQUIRED)
+      install(WebTestingModule(webConfig = WebTestingModule.TESTING_WEB_CONFIG.copy(
+          close_connection_percent = percent
       )))
     }
   }
