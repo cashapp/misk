@@ -2,6 +2,7 @@ package misk.web.actions
 
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import java.lang.reflect.Method
 
 internal class ReflectTest {
   @Test
@@ -21,29 +22,33 @@ internal class ReflectTest {
     val polygon = Polygon::class.java
     val territory = Territory::class.java
     val shape = Shape::class.java
+    val void = Void::class.java
+    val boolean = Boolean::class.java
     val int = Int::class.java
+    val long = Long::class.java
+    val string = String::class.java
 
-    assertThat(square.getDeclaredMethod("area").overrides()).containsExactly(
-        square.getDeclaredMethod("area"),
-        territory.getDeclaredMethod("area"),
-        shape.getDeclaredMethod("area")
+    assertThat(square.declaredMethod("area", long).overrides()).containsExactly(
+        square.declaredMethod("area", void),
+        territory.declaredMethod("area", long),
+        shape.declaredMethod("area", long)
     )
-    assertThat(square.getDeclaredMethod("perimeter").overrides()).containsExactly(
-        square.getDeclaredMethod("perimeter"),
-        shape.getDeclaredMethod("perimeter")
+    assertThat(square.declaredMethod("perimeter", long).overrides()).containsExactly(
+        square.declaredMethod("perimeter", void),
+        shape.declaredMethod("perimeter", long)
     )
-    assertThat(square.getDeclaredMethod("contains", int, int).overrides()).containsExactly(
-        square.getDeclaredMethod("contains", int, int),
-        territory.getDeclaredMethod("contains", int, int)
+    assertThat(square.declaredMethod("contains", boolean, int, int).overrides()).containsExactly(
+        square.declaredMethod("contains", void, int, int),
+        territory.declaredMethod("contains", boolean, int, int)
     )
-    assertThat(square.getDeclaredMethod("edgeCount").overrides()).containsExactly(
-        square.getDeclaredMethod("edgeCount"),
-        polygon.getDeclaredMethod("edgeCount"),
-        shape.getDeclaredMethod("edgeCount")
+    assertThat(square.declaredMethod("edgeCount", int).overrides()).containsExactly(
+        square.declaredMethod("edgeCount", void),
+        polygon.declaredMethod("edgeCount", int),
+        shape.declaredMethod("edgeCount", int)
     )
-    assertThat(square.getDeclaredMethod("toString").overrides()).containsExactly(
-        square.getDeclaredMethod("toString"),
-        Object::class.java.getDeclaredMethod("toString")
+    assertThat(square.declaredMethod("toString", void).overrides()).containsExactly(
+        square.declaredMethod("toString", void),
+        Object::class.java.declaredMethod("toString", string)
     )
   }
 
@@ -82,4 +87,40 @@ internal class ReflectTest {
 
   @Target(AnnotationTarget.FUNCTION)
   annotation class Tag(val name: String)
+
+  @Test
+  internal fun preferNonSyntheticReturnsNonSynthetic() {
+    val methodsByReturnType = SquareGenerator::class.java.declaredMethods.associateBy {
+      it.returnType
+    }
+
+    val returnsAny = methodsByReturnType[Any::class.java]!!
+    assertThat(returnsAny.isSynthetic).isTrue()
+
+    val returnsSquare = methodsByReturnType[Square::class.java]!!
+    assertThat(returnsSquare.isSynthetic).isFalse()
+
+    assertThat(returnsAny.preferNonSynthetic()).isEqualTo(returnsSquare)
+    assertThat(returnsSquare.preferNonSynthetic()).isEqualTo(returnsSquare)
+  }
+
+  interface Generator<T : Any> {
+    fun generate(): T
+  }
+
+  class SquareGenerator : Generator<Square> {
+    override fun generate() = Square()
+  }
+
+  private fun Class<*>.declaredMethod(
+    name: String,
+    returnType: Class<*>,
+    vararg argumentTypes: Class<*>
+  ): Method {
+    return declaredMethods.first {
+      it.name == name &&
+          it.returnType == returnType &&
+          it.parameterTypes.contentEquals(argumentTypes)
+    }
+  }
 }
