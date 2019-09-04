@@ -25,7 +25,6 @@ import misk.web.RequestBody
 import misk.web.RequestContentType
 import misk.web.ResponseContentType
 import misk.web.WebActionModule
-import misk.web.WebConfig
 import misk.web.WebSslConfig
 import misk.web.WebTestingModule
 import misk.web.actions.WebAction
@@ -95,10 +94,7 @@ internal class JceksSslClientServerTest {
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(WebActionModule.create<HelloAction>())
-      install(WebTestingModule(WebConfig(
-          port = 0,
-          idle_timeout = 500000,
-          host = "127.0.0.1",
+      install(WebTestingModule(WebTestingModule.TESTING_WEB_CONFIG.copy(
           ssl = WebSslConfig(0,
               cert_store = CertStoreConfig(
                   resource = "classpath:/ssl/server_keystore.jceks",

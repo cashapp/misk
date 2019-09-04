@@ -11,6 +11,7 @@ import misk.web.WebSslConfig
 import okhttp3.HttpUrl
 import org.eclipse.jetty.alpn.server.ALPNServerConnectionFactory
 import org.eclipse.jetty.http2.server.HTTP2ServerConnectionFactory
+import org.eclipse.jetty.server.ConnectionFactory
 import org.eclipse.jetty.server.HttpConfiguration
 import org.eclipse.jetty.server.HttpConnectionFactory
 import org.eclipse.jetty.server.NetworkConnector
@@ -48,16 +49,26 @@ class JettyService @Inject internal constructor(
     val stopwatch = Stopwatch.createStarted()
     logger.info("Starting Jetty")
 
+    val httpConnectionFactories = mutableListOf<ConnectionFactory>()
+
     val httpConfig = HttpConfiguration()
     httpConfig.customizeForGrpc()
     httpConfig.sendServerVersion = false
     if (webConfig.ssl != null) {
       httpConfig.securePort = webConfig.ssl.port
     }
+    httpConnectionFactories += HttpConnectionFactory(httpConfig)
 
     // TODO(mmihic): Allow require running only on HTTPS?
-    val httpConnector = ServerConnector(server, null, null, null,
-        webConfig.acceptors ?: -1, webConfig.selectors ?: -1, HttpConnectionFactory(httpConfig))
+    val httpConnector = ServerConnector(
+        server,
+        null /* executor */,
+        null /* scheduler */,
+        null /* buffer pool */,
+        webConfig.acceptors ?: -1,
+        webConfig.selectors ?: -1,
+        httpConnectionFactories.toTypedArray()
+    )
     httpConnector.port = webConfig.port
     httpConnector.idleTimeout = webConfig.idle_timeout
     httpConnector.reuseAddress = true
@@ -87,6 +98,8 @@ class JettyService @Inject internal constructor(
         }
       }
 
+      val httpsConnectionFactories = mutableListOf<ConnectionFactory>()
+
       // By default, Jetty excludes a number of common cipher suites. This default set is too
       // restrictive. Clear the set of excluded suites and define the suites to include below.
       sslContextFactory.setExcludeCipherSuites()
@@ -96,16 +109,34 @@ class JettyService @Inject internal constructor(
       val httpsConfig = HttpConfiguration(httpConfig)
       httpsConfig.addCustomizer(SecureRequestCustomizer())
 
-      val alpn = ALPNServerConnectionFactory("h2", "http/1.1")
+      val ssl = SslConnectionFactory(sslContextFactory, "alpn")
+      httpsConnectionFactories += ssl
+
+      val alpnProtocols = if (webConfig.http2) listOf("h2", "http/1.1") else listOf("http/1.1")
+      val alpn = ALPNServerConnectionFactory(*alpnProtocols.toTypedArray())
       alpn.defaultProtocol = "http/1.1"
-      val ssl = SslConnectionFactory(sslContextFactory, alpn.protocol)
-      val http2 = HTTP2ServerConnectionFactory(httpsConfig)
-      if (webConfig.jetty_max_concurrent_streams != null) {
-        http2.maxConcurrentStreams = webConfig.jetty_max_concurrent_streams
+      httpsConnectionFactories += alpn
+
+      if (webConfig.http2) {
+        val http2 = HTTP2ServerConnectionFactory(httpsConfig)
+        if (webConfig.jetty_max_concurrent_streams != null) {
+          http2.maxConcurrentStreams = webConfig.jetty_max_concurrent_streams
+        }
+        httpsConnectionFactories += http2
       }
+
       val http1 = HttpConnectionFactory(httpsConfig)
-      val httpsConnector = ServerConnector(server, null, null, null,
-          webConfig.acceptors ?: -1, webConfig.selectors ?: -1, ssl, alpn, http2, http1)
+      httpsConnectionFactories += http1
+
+      val httpsConnector = ServerConnector(
+          server,
+          null /* executor */,
+          null /* scheduler */,
+          null /* buffer pool */,
+          webConfig.acceptors ?: -1,
+          webConfig.selectors ?: -1,
+          httpsConnectionFactories.toTypedArray()
+      )
       httpsConnector.port = webConfig.ssl.port
       httpsConnector.idleTimeout = webConfig.idle_timeout
       httpsConnector.reuseAddress = true
@@ -138,10 +169,11 @@ class JettyService @Inject internal constructor(
     server.start()
 
     logger.info {
-      if (webConfig.ssl != null)
+      if (webConfig.ssl != null) {
         "Started Jetty in $stopwatch on port ${webConfig.port}/${webConfig.ssl.port}"
-      else
+      } else {
         "Started Jetty in $stopwatch on port ${webConfig.port}"
+      }
     }
   }
 
