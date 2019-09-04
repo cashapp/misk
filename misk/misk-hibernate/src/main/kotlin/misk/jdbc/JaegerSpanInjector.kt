@@ -18,7 +18,7 @@ class JaegerSpanInjector(val tracer: Tracer?,
 
     override fun transformQuery(transformInfo: TransformInfo?): String {
         val activeSpan = this.tracer?.activeSpan()
-        return if (activeSpan == null /* if we want to only allow jaeger here `|| activeSpan !is com.uber.jaeger.Span`*/) {
+        return if (activeSpan == null) {
             transformInfo?.query!!
         } else {
             "/*VT_SPAN_CONTEXT=${activeSpan.context()}*/${transformInfo?.query!!}"

@@ -10,14 +10,7 @@ import misk.inject.asSingleton
 import misk.inject.keyOf
 import misk.inject.setOfType
 import misk.inject.toKey
-import misk.jdbc.DataSourceConfig
-import misk.jdbc.DataSourceConnector
-import misk.jdbc.DataSourceDecorator
-import misk.jdbc.DataSourceService
-import misk.jdbc.DatabasePool
-import misk.jdbc.JaegerSpanInjector
-import misk.jdbc.PingDatabaseService
-import misk.jdbc.RealDatabasePool
+import misk.jdbc.*
 import misk.metrics.Metrics
 import misk.resources.ResourceLoader
 import misk.vitess.StartVitessService
@@ -177,15 +170,18 @@ class HibernateModule(
         .enhancedBy<SchemaMigratorService>(qualifier)
         .dependsOn<DataSourceService>(qualifier))
 
-    val jaegerSpanInjectorDecoratorKey = JaegerSpanInjector::class.toKey(qualifier)
-    bind(jaegerSpanInjectorDecoratorKey)
-            .toProvider(object : Provider<JaegerSpanInjector> {
-              @Inject(optional = true) var tracer: Tracer? = null
+    if (config.type == DataSourceType.VITESS_MYSQL) {
+      val jaegerSpanInjectorDecoratorKey = JaegerSpanInjector::class.toKey(qualifier)
+      bind(jaegerSpanInjectorDecoratorKey)
+              .toProvider(object : Provider<JaegerSpanInjector> {
+                @Inject(optional = true)
+                var tracer: Tracer? = null
 
-              override fun get(): JaegerSpanInjector =
-                      JaegerSpanInjector(tracer, config)
-            }).asSingleton()
-
+                override fun get(): JaegerSpanInjector =
+                        JaegerSpanInjector(tracer, config)
+              }).asSingleton()
+    }
+    
     // Install other modules.
     install(object : HibernateEntityModule(qualifier) {
       override fun configureHibernate() {
