@@ -58,6 +58,18 @@ class Http2ConnectivityTest {
   }
 
   @Test
+  fun connectionShutdown() {
+    val call = client.newCall(Request.Builder()
+        .url(jetty.httpsServerUrl!!.resolve("/hello")!!)
+        .build())
+    val response = call.execute()
+    response.use {
+      assertThat(response.protocol).isEqualTo(Protocol.HTTP_2)
+      assertThat(response.body!!.string()).isEqualTo("hello")
+    }
+  }
+
+  @Test
   fun http1ForClientsThatPreferIt() {
     val http1Client = client.newBuilder()
         .protocols(listOf(Protocol.HTTP_1_1))

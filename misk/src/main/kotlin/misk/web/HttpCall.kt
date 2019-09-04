@@ -25,6 +25,12 @@ interface HttpCall {
   var statusCode: Int
   val responseHeaders: Headers
 
+  /**
+   * Gracefully shuts down the shared connection that carried this call so that the client must
+   * reconnect. By limiting the duration of connections we intend to reduce situations where load is
+   * unbalanced. See [WebConfig.close_connection_percent].
+   */
+  fun gracefullyShutDownConnection()
   fun setResponseHeader(name: String, value: String)
   fun addResponseHeaders(headers: Headers)
 

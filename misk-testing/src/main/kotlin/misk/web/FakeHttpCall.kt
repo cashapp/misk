@@ -17,6 +17,7 @@ data class FakeHttpCall(
   override var statusCode: Int = 200,
   val headersBuilder: Headers.Builder = Headers.Builder(),
   var sendTrailers: Boolean = false,
+  var gracefullyShutDownConnection: Boolean = false,
   val trailersBuilder: Headers.Builder = Headers.Builder(),
   var requestBody: BufferedSource? = Buffer(),
   var responseBody: BufferedSink? = Buffer(),
@@ -81,5 +82,10 @@ data class FakeHttpCall(
   override fun initWebSocketListener(webSocketListener: WebSocketListener) {
     check(this.webSocketListener == null) { "web socket listener already set" }
     this.webSocketListener = webSocketListener
+  }
+
+  override fun gracefullyShutDownConnection() {
+    check(dispatchMechanism != DispatchMechanism.WEBSOCKET)
+    gracefullyShutDownConnection = true
   }
 }

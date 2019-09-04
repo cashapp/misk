@@ -22,7 +22,7 @@ class RebalancingInterceptor @Inject constructor(
 ) : NetworkInterceptor {
   override fun intercept(chain: NetworkChain) {
     if (random.current().nextDouble() < probability) {
-      chain.httpCall.setResponseHeader("Connection", "close")
+      chain.httpCall.gracefullyShutDownConnection()
     }
 
     chain.proceed(chain.httpCall)

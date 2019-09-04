@@ -5,6 +5,7 @@ import misk.web.actions.WebSocketListener
 import okhttp3.Headers
 import okhttp3.Headers.Companion.headersOf
 import org.eclipse.jetty.http.HttpFields
+import org.eclipse.jetty.http2.server.HTTP2ServerConnection
 import org.eclipse.jetty.server.Response
 import java.util.function.Supplier
 
@@ -55,4 +56,13 @@ internal class JettyServletUpstreamResponse(
 
   override fun initWebSocketListener(webSocketListener: WebSocketListener) =
       error("no web socket listeners for servlets")
+
+  override fun gracefullyShutDownConnection() {
+    val connection = response.httpChannel.connection
+    if (connection is HTTP2ServerConnection) {
+      // TODO: do something once this lands: https://github.com/eclipse/jetty.project/pull/4052
+    } else {
+      response.setHeader("Connection", "close")
+    }
+  }
 }

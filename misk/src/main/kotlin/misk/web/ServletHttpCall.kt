@@ -33,6 +33,10 @@ internal data class ServletHttpCall(
     upstreamResponse.setHeader(name, value)
   }
 
+  override fun gracefullyShutDownConnection() {
+    upstreamResponse.gracefullyShutDownConnection()
+  }
+
   override fun addResponseHeaders(headers: Headers) {
     upstreamResponse.addHeaders(headers)
   }
@@ -91,6 +95,7 @@ internal data class ServletHttpCall(
     fun requireTrailers()
     fun setTrailer(name: String, value: String)
     fun initWebSocketListener(webSocketListener: WebSocketListener)
+    fun gracefullyShutDownConnection()
   }
 
   companion object {
