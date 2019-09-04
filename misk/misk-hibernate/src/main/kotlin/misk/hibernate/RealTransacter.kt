@@ -17,7 +17,6 @@ import org.hibernate.exception.LockAcquisitionException
 import java.io.Closeable
 import java.sql.Connection
 import java.sql.SQLRecoverableException
-import java.sql.SQLSyntaxErrorException
 import java.time.Duration
 import java.util.EnumSet
 import javax.inject.Provider

@@ -9,8 +9,10 @@ import javax.sql.DataSource
 /***
  * On the fly decorates queries with the span context, so the query call can be traced all the way through Vitess
  */
-class JaegerSpanInjector(val tracer: Tracer?,
-                         val config: DataSourceConfig) : QueryTransformer, DataSourceDecorator {
+class JaegerSpanInjector(
+  val tracer: Tracer?,
+  val config: DataSourceConfig
+) : QueryTransformer, DataSourceDecorator {
     override fun decorate(dataSource: DataSource): DataSource {
         if (config.type != DataSourceType.VITESS || tracer == null) return dataSource
         return ProxyDataSourceBuilder(dataSource).queryTransformer(this).build()

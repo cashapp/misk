@@ -181,7 +181,7 @@ class HibernateModule(
                         JaegerSpanInjector(tracer, config)
               }).asSingleton()
     }
-    
+
     // Install other modules.
     install(object : HibernateEntityModule(qualifier) {
       override fun configureHibernate() {
