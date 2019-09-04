@@ -3,6 +3,7 @@ package misk.jdbc
 import net.ttddyy.dsproxy.transform.TransformInfo
 import org.junit.jupiter.api.Test
 import io.opentracing.mock.MockTracer
+import org.assertj.core.api.Assertions.assertThat
 import kotlin.test.assertEquals
 
 class JaegerSpanInjectorTest {
@@ -19,7 +20,7 @@ class JaegerSpanInjectorTest {
        val transformInfo = TransformInfo(null, null, query, false, 0)
        val result = injector.transformQuery(transformInfo)
 
-       assertEquals("/*VT_SPAN_CONTEXT=$contextString*/$query", result)
+       assertThat(result).isEqualTo("/*VT_SPAN_CONTEXT=$contextString*/$query")
        scope.close()
    }
 }
