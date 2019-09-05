@@ -60,3 +60,4 @@ task compileWire {
 }
 
 compileKotlin.dependsOn compileWire
+compileTestKotlin.dependsOn compileWire
