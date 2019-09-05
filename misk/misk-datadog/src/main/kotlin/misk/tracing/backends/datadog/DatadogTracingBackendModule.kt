@@ -16,9 +16,8 @@ class DatadogTracingBackendModule : KAbstractModule() {
     if (tracer is Tracer) {
       bind<Tracer>().toInstance(tracer)
     } else {
-      logger.error("A DDTracer was unexpectedly not installed by the java agent. "
-          + "Are you missing this environment in your `dd_agent_env_whitelist` config in "
-          + "app-manifest.yaml?")
+      logger.error(
+          "A DDTracer was unexpectedly not installed by the java agent, binding a NoopTracer")
       bind(Tracer::class.java).toInstance(NoopTracerFactory.create())
     }
   }
