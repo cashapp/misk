@@ -43,7 +43,7 @@ afterEvaluate { project ->
 }
 
 def protosSrc = project.file("src/main/proto/")
-def protosGenerated = project.file("$buildDir/classes/java/main/")
+def protosGenerated = project.file("$buildDir/generated/sources/protos/main/java/")
 
 sourceSets {
   main.java.srcDirs += protosGenerated
@@ -51,9 +51,11 @@ sourceSets {
 
 task compileWire {
   doLast {
+    mkdir protosGenerated
     def args = [
       "--proto_path=" + protosSrc,
-      "--java_out=" + protosGenerated
+      "--java_out=" + protosGenerated,
+      "--excludes=google.protobuf.*"
     ]
     WireCompiler.main(args.toArray(new String[args.size()]))
   }
