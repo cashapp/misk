@@ -1,3 +1,5 @@
+import com.squareup.wire.WireCompiler
+
 buildscript {
   dependencies {
     classpath dep.kotlinNoArgPlugin
@@ -39,3 +41,22 @@ afterEvaluate { project ->
     outputFormat = 'gfm'
   }
 }
+
+def protosSrc = project.file("src/main/proto/")
+def protosGenerated = project.file("$buildDir/classes/java/main/")
+
+sourceSets {
+  main.java.srcDirs += protosGenerated
+}
+
+task compileWire {
+  doLast {
+    def args = [
+      "--proto_path=" + protosSrc,
+      "--java_out=" + protosGenerated
+    ]
+    WireCompiler.main(args.toArray(new String[args.size()]))
+  }
+}
+
+compileKotlin.dependsOn compileWire

@@ -18,6 +18,7 @@ import java.util.Properties
 import org.hibernate.type.spi.TypeConfiguration
 import org.hibernate.type.spi.TypeConfigurationAware
 import java.util.Objects
+import okio.ByteString.Companion.toByteString
 
 internal class SecretColumnType : UserType, ParameterizedType, TypeConfigurationAware {
   companion object {
@@ -78,7 +79,8 @@ internal class SecretColumnType : UserType, ParameterizedType, TypeConfiguration
       st.setNull(index, Types.VARBINARY)
     } else {
       val encrypted = encryptionAdapter.encrypt(value as ByteArray, null)
-      st.setBytes(index, encrypted)
+      val contents = SecretColumnContents(1, encrypted.toByteString())
+      st.setBytes(index, contents.encode())
     }
   }
 
@@ -90,9 +92,15 @@ internal class SecretColumnType : UserType, ParameterizedType, TypeConfiguration
   ): Any? {
     val result = rs?.getBytes(names[0])
     return result?.let { try {
-        encryptionAdapter.decrypt(it, null)
+        val contents = SecretColumnContents.ADAPTER.decode(it)
+        if (contents.version != 1) {
+          throw HibernateException("Bad column format")
+        }
+        encryptionAdapter.decrypt(contents.payload.toByteArray(), null)
       } catch (e: java.security.GeneralSecurityException) {
         throw HibernateException(e)
+      } catch (e: java.net.ProtocolException) {
+        throw HibernateException("Bad column format")
       }
     }
   }
