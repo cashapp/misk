@@ -9,7 +9,6 @@ import misk.hibernate.RealTransacter.Companion.DB_COMMIT_SPAN_NAME
 import misk.hibernate.RealTransacter.Companion.DB_ROLLBACK_SPAN_NAME
 import misk.hibernate.RealTransacter.Companion.DB_TRANSACTION_SPAN_NAME
 import misk.hibernate.RealTransacter.Companion.TRANSACTER_SPAN_TAG
-import misk.jdbc.DataSourceType
 import misk.jdbc.uniqueString
 import misk.logging.LogCollector
 import misk.testing.MiskTest
