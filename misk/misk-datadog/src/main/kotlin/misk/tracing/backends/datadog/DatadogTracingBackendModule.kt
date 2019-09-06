@@ -15,6 +15,7 @@ class DatadogTracingBackendModule : KAbstractModule() {
     val tracer = GlobalTracer.get()
     if (tracer is Tracer) {
       bind<Tracer>().toInstance(tracer)
+      tracer.addScopeListener(MDCScopeListener())
     } else {
       logger.error(
           "A DDTracer was unexpectedly not installed by the java agent, binding a NoopTracer")
