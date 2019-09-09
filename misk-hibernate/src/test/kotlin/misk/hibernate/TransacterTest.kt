@@ -79,6 +79,21 @@ class TransacterTest {
       }
     }
 
+    transacter.failSafeRead { session ->
+      val query = queryFactory.newQuery<CharacterQuery>()
+              .allowTableScan()
+              .name("Ian Malcolm")
+      val ianMalcolm = query.uniqueResult(session)!!
+      assertThat(ianMalcolm.actor?.name).isEqualTo("Jeff Goldblum")
+      assertThat(ianMalcolm.movie.name).isEqualTo("Jurassic Park")
+
+      // Shard targeting works.
+      val shard = ianMalcolm.rootId.shard(session)
+      session.target(shard) {
+        assertThat(query.uniqueResult(session)!!.actor?.name).isEqualTo("Jeff Goldblum")
+      }
+    }
+
     // Delete some data.
     transacter.transaction { session ->
       val ianMalcolm = queryFactory.newQuery<CharacterQuery>()
@@ -168,6 +183,33 @@ class TransacterTest {
         assertThat(
             queryFactory.newQuery<MovieQuery>().allowTableScan()
                 .name("Star Wars").uniqueResult(session)
+        ).isNotNull()
+      }
+    }
+
+    // Shard targeting works in fail safe reads
+    transacter.failSafeRead { session ->
+      session.target(jp.shard(session)) {
+        assertThat(
+                queryFactory.newQuery<MovieQuery>().allowTableScan()
+                        .name("Jurassic Park").uniqueResult(session)
+        ).isNotNull()
+
+        assertThat(
+                queryFactory.newQuery<MovieQuery>().allowTableScan()
+                        .name("Star Wars").uniqueResult(session)
+        ).isNull()
+      }
+
+      session.target(sw.shard(session)) {
+        assertThat(
+                queryFactory.newQuery<MovieQuery>().allowTableScan()
+                        .name("Jurassic Park").uniqueResult(session)
+        ).isNull()
+
+        assertThat(
+                queryFactory.newQuery<MovieQuery>().allowTableScan()
+                        .name("Star Wars").uniqueResult(session)
         ).isNotNull()
       }
     }
@@ -294,6 +336,24 @@ class TransacterTest {
 
     transacter.transaction {
       assertThat(transacter.inTransaction).isTrue()
+    }
+
+    assertThat(transacter.inTransaction).isFalse()
+  }
+
+  @Test
+  fun noFailSafeReadInTransaction() {
+    assertThat(transacter.inTransaction).isFalse()
+
+    transacter.transaction {
+      assertThat(transacter.inTransaction).isTrue()
+
+      assertFailsWith<IllegalStateException> {
+        transacter.failSafeRead {
+          queryFactory.newQuery<MovieQuery>().allowTableScan()
+                  .name("Jurassic Park").uniqueResult(it)
+        }
+      }
     }
 
     assertThat(transacter.inTransaction).isFalse()

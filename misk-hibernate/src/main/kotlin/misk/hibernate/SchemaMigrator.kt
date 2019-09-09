@@ -173,7 +173,7 @@ internal class SchemaMigrator(
    * if the migrations table has not been initialized.
    */
   fun appliedMigrations(shard: Shard): SortedSet<NamedspacedMigration> {
-    return transacter.get().transaction(shard) { session ->
+    return transacter.get().failSafeRead(shard) { session ->
       @Suppress("UNCHECKED_CAST") // createNativeQuery returns a raw Query.
       val query = session.hibernateSession.createNativeQuery(
           "SELECT version FROM schema_version") as Query<String>

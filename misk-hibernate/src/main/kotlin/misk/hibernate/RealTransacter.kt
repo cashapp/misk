@@ -1,6 +1,5 @@
 package misk.hibernate
 
-import com.google.common.base.Supplier
 import com.google.common.base.Suppliers
 import com.google.common.util.concurrent.ThreadFactoryBuilder
 import io.opentracing.Tracer
@@ -13,7 +12,6 @@ import misk.jdbc.map
 import misk.jdbc.uniqueString
 import misk.logging.getLogger
 import misk.tracing.traceWithSpan
-import okhttp3.internal.threadFactory
 import org.hibernate.FlushMode
 import org.hibernate.SessionFactory
 import org.hibernate.StaleObjectStateException
@@ -26,7 +24,6 @@ import java.util.EnumSet
 import java.util.concurrent.Callable
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.Executors
-import java.util.concurrent.Future
 import java.util.concurrent.TimeUnit
 import javax.inject.Provider
 import javax.persistence.OptimisticLockException
