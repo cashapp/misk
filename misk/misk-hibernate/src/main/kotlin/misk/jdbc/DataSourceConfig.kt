@@ -219,6 +219,35 @@ data class DataSourceConfig(
 
     return pathToUse
   }
+
+  fun asReplica(): DataSourceConfig {
+      if (this.type != DataSourceType.VITESS_MYSQL) {
+        throw Exception("Replica database config only available for VITESS_MYSQL type")
+      }
+
+      return DataSourceConfig(
+              this.type,
+              this.host,
+              this.port,
+              "@replica",
+              this.username,
+              this.password,
+              this.fixed_pool_size,
+              this.connection_timeout,
+              this.connection_max_lifetime,
+              this.migrations_resource,
+              this.migrations_resources,
+              this.vitess_schema_dir,
+              this.vitess_schema_resource_root,
+              this.trust_certificate_key_store_url,
+              this.trust_certificate_key_store_password,
+              this.client_certificate_key_store_url,
+              this.client_certificate_key_store_password,
+              this.trust_certificate_key_store_path,
+              this.client_certificate_key_store_path,
+              this.show_sql
+      )
+  }
 }
 
 /** Configuration element for a cluster of DataSources */

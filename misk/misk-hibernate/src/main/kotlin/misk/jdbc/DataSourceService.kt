@@ -39,12 +39,16 @@ class DataSourceService(
     logger.info("Starting @${qualifier.simpleName} connection pool")
 
     require(dataSource == null)
-    createDataSource()
-
+    try {
+      createDataSource(baseConfig)
+    } catch (e: Exception) {
+      logger.warn("Fail to start the data source to master tablet, trying to do it with replica")
+      createDataSource(baseConfig.asReplica())
+    }
     logger.info("Started @${qualifier.simpleName} connection pool in $stopwatch")
   }
 
-  private fun createDataSource() {
+  private fun createDataSource(baseConfig: DataSourceConfig) {
     // Rewrite the caller's config to get a database name like "movies__20190730__5" in tests.
     config = databasePool.takeDatabase(baseConfig)
 
