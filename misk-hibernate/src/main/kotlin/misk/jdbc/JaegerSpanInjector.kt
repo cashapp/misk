@@ -14,7 +14,7 @@ class JaegerSpanInjector(
   val config: DataSourceConfig
 ) : QueryTransformer, DataSourceDecorator {
     override fun decorate(dataSource: DataSource): DataSource {
-        if (config.type != DataSourceType.VITESS || tracer == null) return dataSource
+        if (config.type != DataSourceType.VITESS_MYSQL || tracer == null) return dataSource
         return ProxyDataSourceBuilder(dataSource).queryTransformer(this).build()
     }
 
