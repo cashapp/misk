@@ -18,7 +18,7 @@ data class WebConfig(
   val ssl: WebSslConfig? = null,
 
   /** HTTP/2 support is currently opt-in because we can't load balance it dynamically. */
-  val http2: Boolean = true,
+  val http2: Boolean = false,
 
   /** Number of NIO selector threads. */
   val selectors: Int? = null,
