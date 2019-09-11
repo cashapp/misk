@@ -1,6 +1,8 @@
 package misk.hibernate
 
 import com.google.common.annotations.VisibleForTesting
+import java.sql.SQLException
+import javax.persistence.PersistenceException
 
 /**
  * Provides explicit block-based transaction demarcation.
@@ -97,9 +99,48 @@ fun <T> Transacter.transaction(shard: Shard, block: (session: Session) -> T): T 
     transaction { it.target(shard) { block(it) } }
 
 /**
+ * Runs a read on master first then tries it on replicas on failure. This method is here only for
+ * health check purpose for standby regions.
+ */
+fun <T> Transacter.failSafeRead(block: (session: Session) -> T): T =
+  try {
+    transaction {
+      block(it)
+    }
+  } catch (e: PersistenceException) {
+    if (tabletDoesNotExists(e)) {
+      replicaRead {
+        block(it)
+      }
+    } else {
+      throw e
+    }
+  }
+
+fun <T> Transacter.failSafeRead(shard: Shard, block: (session: Session) -> T): T =
+        failSafeRead { it.target(shard) { block(it) } }
+
+/**
  * Thrown to explicitly trigger a retry, subject to retry limits and config such as noRetries().
  */
 class RetryTransactionException(
   message: String? = null,
   cause: Throwable? = null
 ) : Exception(message, cause)
+
+fun getRooCause(throwable: Throwable): Throwable {
+  var rootCause = throwable
+  while (rootCause.cause != null && rootCause.cause != rootCause) {
+    rootCause = rootCause.cause!!
+  }
+  return rootCause
+}
+
+fun tabletDoesNotExists(e: Exception): Boolean {
+  val rootCause = getRooCause(e)
+  val noMasterTabletRegex = ".*target:.*master.*no valid tablet:.*".toRegex(RegexOption.IGNORE_CASE)
+  val isSQLException = rootCause is SQLException
+  val isNoMasterTablet = noMasterTabletRegex.matches(rootCause.message!!)
+
+  return isSQLException && isNoMasterTablet
+}
