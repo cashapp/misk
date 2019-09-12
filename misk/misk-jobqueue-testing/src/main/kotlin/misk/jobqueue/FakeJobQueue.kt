@@ -58,7 +58,7 @@ class FakeJobQueue @Inject constructor(
   fun handleJobs() = jobQueues.keys.forEach { handleJobs(it) }
 }
 
-internal data class FakeJob(
+data class FakeJob(
   override val queueName: QueueName,
   override val id: String,
   override val body: String,
