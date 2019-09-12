@@ -10,7 +10,15 @@ import misk.inject.asSingleton
 import misk.inject.keyOf
 import misk.inject.setOfType
 import misk.inject.toKey
-import misk.jdbc.*
+import misk.jdbc.DataSourceConfig
+import misk.jdbc.DataSourceConnector
+import misk.jdbc.DataSourceDecorator
+import misk.jdbc.DataSourceService
+import misk.jdbc.DataSourceType
+import misk.jdbc.DatabasePool
+import misk.jdbc.JaegerSpanInjector
+import misk.jdbc.PingDatabaseService
+import misk.jdbc.RealDatabasePool
 import misk.metrics.Metrics
 import misk.resources.ResourceLoader
 import misk.vitess.StartVitessService
@@ -174,7 +182,7 @@ class HibernateModule(
       val jaegerSpanInjectorDecoratorKey = JaegerSpanInjector::class.toKey(qualifier)
       bind(jaegerSpanInjectorDecoratorKey)
               .toProvider(object : Provider<JaegerSpanInjector> {
-                @Inject(optional = true)
+                @com.google.inject.Inject(optional = true)
                 var tracer: Tracer? = null
 
                 override fun get(): JaegerSpanInjector =
