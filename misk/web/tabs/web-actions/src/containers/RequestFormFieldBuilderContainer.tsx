@@ -105,9 +105,9 @@ const repeatableFieldButtons = (
         icon={dirtyInput ? IconNames.REMOVE : IconNames.ADD_TO_ARTIFACT}
         onClick={(event: any) => {
           props.simpleFormInput(`${tag}::ButtonRequestBody`, true)
-            ; (dirtyInput
-              ? props.webActionsUnsetDirtyInput
-              : props.webActionsSetDirtyInput)(id, action, props.webActionsRaw)
+          ;(dirtyInput
+            ? props.webActionsUnsetDirtyInput
+            : props.webActionsSetDirtyInput)(id, action, props.webActionsRaw)
         }}
       />
     </Tooltip>
@@ -428,26 +428,26 @@ const UnconnectedRequestFormFieldBuilderContainer = (
                   )}
                 </Card>
               ) : (
-                  <Card css={css(cssCard)}>
-                    <TextArea
-                      css={css(cssWrapTextArea)}
-                      defaultValue={simpleSelect(
-                        props.simpleForm,
-                        `${tag}::RawRequestBody`,
-                        "data"
-                      )}
-                      fill={true}
-                      growVertically={true}
-                      onChange={onChangeFnCall(
-                        props.simpleFormInput,
-                        `${tag}::RawRequestBody`
-                      )}
-                      placeholder={
-                        "Raw request body. This input will return a string or JSON."
-                      }
-                    />
-                  </Card>
-                )}
+                <Card css={css(cssCard)}>
+                  <TextArea
+                    css={css(cssWrapTextArea)}
+                    defaultValue={simpleSelect(
+                      props.simpleForm,
+                      `${tag}::RawRequestBody`,
+                      "data"
+                    )}
+                    fill={true}
+                    growVertically={true}
+                    onChange={onChangeFnCall(
+                      props.simpleFormInput,
+                      `${tag}::RawRequestBody`
+                    )}
+                    placeholder={
+                      "Raw request body. This input will return a string or JSON."
+                    }
+                  />
+                </Card>
+              )}
             </div>
           )
         } else {
