@@ -1,18 +1,12 @@
 import {
-  dispatchSimpleForm,
-  dispatchSimpleNetwork,
-  IDispatchSimpleForm,
-  IDispatchSimpleNetwork,
-  ISimpleFormImmutableState,
-  ISimpleFormState,
-  ISimpleNetworkImmutableState,
-  ISimpleNetworkState,
-  SimpleFormReducer,
-  SimpleNetworkReducer,
+  dispatchSimpleRedux,
+  IDispatchSimpleRedux,
+  ISimpleReduxImmutableState,
+  ISimpleReduxState,
+  SimpleReduxReducer,
   SimpleReduxSaga,
   simpleRootSelector,
-  watchSimpleFormSagas,
-  watchSimpleNetworkSagas
+  watchSimpleReduxSagas
 } from "@misk/simpleredux"
 import {
   connectRouter,
@@ -37,8 +31,7 @@ export * from "./webActions"
  */
 export interface IState {
   router: Reducer<RouterState, LocationChangeAction>
-  simpleForm: ISimpleFormState
-  simpleNetwork: ISimpleNetworkState
+  simpleRedux: ISimpleReduxState
   webActions: IWebActionsState
   webActionsRaw: IWebActionsImmutableState
 }
@@ -47,13 +40,11 @@ export interface IState {
  * Dispatcher
  */
 export interface IDispatchProps
-  extends IDispatchSimpleForm,
-    IDispatchSimpleNetwork,
+  extends IDispatchSimpleRedux,
     IDispatchWebActions {}
 
 export const rootDispatcher: IDispatchProps = {
-  ...dispatchSimpleForm,
-  ...dispatchSimpleNetwork,
+  ...dispatchSimpleRedux,
   ...dispatchWebActions
 }
 
@@ -62,12 +53,8 @@ export const rootDispatcher: IDispatchProps = {
  */
 export const rootSelectors = (state: IState) => ({
   router: state.router,
-  simpleForm: simpleRootSelector<IState, ISimpleFormImmutableState>(
-    "simpleForm",
-    state
-  ),
-  simpleNetwork: simpleRootSelector<IState, ISimpleNetworkImmutableState>(
-    "simpleNetwork",
+  simpleRedux: simpleRootSelector<IState, ISimpleReduxImmutableState>(
+    "simpleRedux",
     state
   ),
   webActions: simpleRootSelector<IState, IWebActionsImmutableState>(
@@ -83,8 +70,7 @@ export const rootSelectors = (state: IState) => ({
 export const rootReducer = (history: History): Reducer<any, AnyAction> =>
   combineReducers({
     router: connectRouter(history),
-    simpleForm: SimpleFormReducer,
-    simpleNetwork: SimpleNetworkReducer,
+    simpleRedux: SimpleReduxReducer,
     webActions: WebActionsReducer,
     webActionsRaw: WebActionsReducer
   })
@@ -93,11 +79,7 @@ export const rootReducer = (history: History): Reducer<any, AnyAction> =>
  * Sagas
  */
 export function* rootSaga(): SimpleReduxSaga {
-  yield all([
-    fork(watchWebActionsSagas),
-    fork(watchSimpleFormSagas),
-    fork(watchSimpleNetworkSagas)
-  ])
+  yield all([fork(watchWebActionsSagas), fork(watchSimpleReduxSagas)])
 }
 
 /**

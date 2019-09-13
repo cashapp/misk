@@ -8,13 +8,12 @@ import {
   Menu
 } from "@blueprintjs/core"
 import { jsx } from "@emotion/core"
+import { CodePreContainer, FlexContainer, HTTPMethodIntent } from "@misk/core"
 import {
-  CodePreContainer,
-  FlexContainer,
   HTTPMethodDispatch,
-  HTTPMethodIntent
-} from "@misk/core"
-import { onChangeFnCall, simpleSelect, simpleType } from "@misk/simpleredux"
+  onChangeFnCall,
+  simpleSelectorGet
+} from "@misk/simpleredux"
 import { HTTPMethod } from "http-method-enum"
 import { connect } from "react-redux"
 import {
@@ -74,66 +73,88 @@ const SendRequestCollapseContainer = (
   props: { action: IWebActionInternal; tag: string } & IState & IDispatchProps
 ) => {
   const { action, tag } = props
+
   // Determine if Send Request form for the Web Action should be open
-  const isOpen = simpleSelect(
-    props.simpleForm,
+  const isOpen = simpleSelectorGet(props.simpleRedux, [
     `${tag}::ButtonSendRequest`,
     "data"
-  )
-  const url = simpleSelect(props.simpleForm, `${tag}::URL`, "data")
+  ])
+  const url = simpleSelectorGet(props.simpleRedux, [`${tag}::URL`, "data"])
+
   // Pre-populate the URL field with the action path pattern on open of request form
   if (isOpen && !url) {
-    props.simpleFormInput(`${tag}::URL`, action.pathPattern)
+    props.simpleMergeData(`${tag}::URL`, action.pathPattern)
   }
   const method: HTTPMethod =
-    simpleSelect(props.simpleForm, `${tag}::Method`, "data") ||
+    simpleSelectorGet(props.simpleRedux, [`${tag}::Method`, "data"]) ||
     action.dispatchMechanism.reverse()[0]
-  const response = simpleSelect(props.simpleNetwork, `${tag}::Response`)
-  const responseData = response.data
-  const whichFormData = simpleSelect(
-    props.simpleForm,
-    `${tag}::RequestBodyFormInputType`,
-    "data",
-    simpleType.boolean
+
+  // Response with fallback to error
+  const response = simpleSelectorGet(
+    props.simpleRedux,
+    [`${tag}::Response`, "data"],
+    simpleSelectorGet(props.simpleRedux, [`${tag}::Response`, "error"])
+  )
+
+  // Response.data with fallback to error.response
+  const responseData = simpleSelectorGet(
+    props.simpleRedux,
+    [`${tag}::Response`, "data", "data"],
+    simpleSelectorGet(props.simpleRedux, [
+      `${tag}::Response`,
+      "error",
+      "response"
+    ])
+  )
+
+  // Choose whether to use typed form or raw text field to generate request body
+  const whichFormData = simpleSelectorGet(
+    props.simpleRedux,
+    [`${tag}::RequestBodyFormInputType`, "data"],
+    false
   )
     ? "RAW"
     : "FORM"
   const formData =
     whichFormData === "RAW"
-      ? simpleSelect(props.simpleForm, `${tag}::RawRequestBody`, "data")
-      : getFormData(action, props.simpleForm, tag, props.webActionsRaw)
+      ? simpleSelectorGet(props.simpleRedux, [`${tag}::RawRequestBody`, "data"])
+      : getFormData(action, props.simpleRedux, tag, props.webActionsRaw)
+
+  // Open request section if method has a body
   if (
     methodHasBody(method) &&
-    typeof simpleSelect(
-      props.simpleForm,
+    simpleSelectorGet(props.simpleRedux, [
       `${tag}::ButtonRequestBody`,
       "data"
-    ) === "string"
+    ]) == undefined
   ) {
-    props.simpleFormInput(`${tag}::ButtonRequestBody`, true)
+    props.simpleMergeData(`${tag}::ButtonRequestBody`, true)
   }
+
+  // Open request body form section if method has body
   if (
     methodHasBody(method) &&
-    typeof simpleSelect(
-      props.simpleForm,
+    simpleSelectorGet(props.simpleRedux, [
       `${tag}::ButtonFormRequestBody`,
       "data"
-    ) === "string"
+    ]) == undefined
   ) {
-    props.simpleFormInput(`${tag}::ButtonFormRequestBody`, true)
+    props.simpleMergeData(`${tag}::ButtonFormRequestBody`, true)
   }
+
+  // Open the response section if request has been sent
   if (
-    typeof simpleSelect(props.simpleForm, `${tag}::ButtonResponse`, "data") ===
-      "string" &&
+    simpleSelectorGet(props.simpleRedux, [`${tag}::ButtonResponse`, "data"]) ==
+      undefined &&
     responseData
   ) {
-    props.simpleFormInput(`${tag}::ButtonResponse`, true)
+    props.simpleMergeData(`${tag}::ButtonResponse`, true)
   }
   return (
     <Collapse isOpen={isOpen}>
       <InputGroup
         defaultValue={action.pathPattern}
-        onChange={onChangeFnCall(props.simpleFormInput, `${tag}::URL`)}
+        onChange={onChangeFnCall(props.simpleMergeData, `${tag}::URL`)}
         placeholder={
           "Request URL: absolute ( http://your.url.com/to/send/a/request/to/ ) or internal service endpoint ( /service/web/action )"
         }
@@ -154,7 +175,7 @@ const SendRequestCollapseContainer = (
           <ControlGroup>
             <HTMLSelect
               large={true}
-              onChange={onChangeFnCall(props.simpleFormInput, `${tag}::Method`)}
+              onChange={onChangeFnCall(props.simpleMergeData, `${tag}::Method`)}
               options={action.dispatchMechanism.sort()}
               value={method}
             />
@@ -162,7 +183,7 @@ const SendRequestCollapseContainer = (
               css={cssButton}
               large={true}
               onClick={(event: any) => {
-                props.simpleFormInput(`${tag}::ButtonRequestBody`, false)
+                props.simpleMergeData(`${tag}::ButtonRequestBody`, false)
                 HTTPMethodDispatch(props)[method](
                   `${tag}::Response`,
                   url,
@@ -170,11 +191,10 @@ const SendRequestCollapseContainer = (
                 )
               }}
               intent={HTTPMethodIntent[method]}
-              loading={simpleSelect(
-                props.simpleNetwork,
+              loading={simpleSelectorGet(props.simpleRedux, [
                 `${tag}::Response`,
                 "loading"
-              )}
+              ])}
               text={"Submit"}
             />
           </ControlGroup>
@@ -204,10 +224,23 @@ const SendRequestCollapseContainer = (
             <MetadataCollapse
               labelElement={
                 <StatusTagComponent
-                  status={simpleSelect(
-                    props.simpleNetwork,
-                    `${props.tag}::Response`,
-                    "status"
+                  status={simpleSelectorGet(
+                    props.simpleRedux,
+                    [`${props.tag}::Response`, "data", "status"],
+                    simpleSelectorGet(
+                      props.simpleRedux,
+                      [`${props.tag}::Response`, "error", "status"],
+                      0
+                    )
+                  )}
+                  statusText={simpleSelectorGet(
+                    props.simpleRedux,
+                    [`${props.tag}::Response`, "data", "statusText"],
+                    simpleSelectorGet(
+                      props.simpleRedux,
+                      [`${props.tag}::Response`, "error", "statusText"],
+                      ""
+                    )
                   )}
                 />
               }

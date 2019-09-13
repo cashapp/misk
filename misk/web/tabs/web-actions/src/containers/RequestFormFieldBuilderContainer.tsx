@@ -18,8 +18,7 @@ import {
   onChangeFnCall,
   onChangeToggleFnCall,
   onClickFnCall,
-  simpleSelect,
-  simpleType
+  simpleSelectorGet
 } from "@misk/simpleredux"
 import { OrderedMap } from "immutable"
 import { connect } from "react-redux"
@@ -72,23 +71,21 @@ const repeatableFieldButtons = (
       lazy={true}
     >
       <Button
-        active={simpleSelect(
-          props.simpleForm,
-          `${tag}::EditRawButton:${padId(id)}`,
-          "data",
-          simpleType.boolean
+        active={simpleSelectorGet(
+          props.simpleRedux,
+          [`${tag}::EditRawButton:${padId(id)}`, "data"],
+          false
         )}
         css={css(cssButton)}
-        defaultValue={simpleSelect(
-          props.simpleForm,
+        defaultValue={simpleSelectorGet(props.simpleRedux, [
           `${tag}::${padId(id)}`,
           "data"
-        )}
+        ])}
         icon={IconNames.MORE}
         onClick={onChangeToggleFnCall(
-          props.simpleFormToggle,
+          props.simpleMergeToggle,
           `${tag}::EditRawButton:${padId(id)}`,
-          props.simpleForm
+          props.simpleRedux
         )}
       />
     </Tooltip>
@@ -104,7 +101,7 @@ const repeatableFieldButtons = (
       <Button
         icon={dirtyInput ? IconNames.REMOVE : IconNames.ADD_TO_ARTIFACT}
         onClick={(event: any) => {
-          props.simpleFormInput(`${tag}::ButtonRequestBody`, true)
+          props.simpleMergeData(`${tag}::ButtonRequestBody`, true)
           ;(dirtyInput
             ? props.webActionsUnsetDirtyInput
             : props.webActionsSetDirtyInput)(id, action, props.webActionsRaw)
@@ -157,24 +154,22 @@ const EditRawInput = (
   props: { children: any; id: string; tag: string } & IDispatchProps & IState
 ) => {
   const { children, id, tag } = props
-  const editRawIsOpen = simpleSelect(
-    props.simpleForm,
-    `${tag}::EditRawButton:${padId(id)}`,
-    "data",
-    simpleType.boolean
+  const editRawIsOpen = simpleSelectorGet(
+    props.simpleRedux,
+    [`${tag}::EditRawButton:${padId(id)}`, "data"],
+    false
   )
   if (editRawIsOpen) {
     return (
       <TextArea
         css={css(cssWrapTextArea)}
-        defaultValue={simpleSelect(
-          props.simpleForm,
+        defaultValue={simpleSelectorGet(props.simpleRedux, [
           `${tag}::${padId(id)}`,
           "data"
-        )}
+        ])}
         fill={true}
         growVertically={true}
-        onBlur={onChangeFnCall(props.simpleFormInput, `${tag}::${padId(id)}`)}
+        onBlur={onChangeFnCall(props.simpleMergeData, `${tag}::${padId(id)}`)}
       />
     )
   } else {
@@ -202,7 +197,7 @@ const clickDirtyInputFns = (
 ) => () => {
   const { action, id, tag } = props
   props.webActionsSetDirtyInput(id, action, props.webActionsRaw)
-  props.simpleFormInput(`${tag}::ButtonRequestBody`, true)
+  props.simpleMergeData(`${tag}::ButtonRequestBody`, true)
 }
 
 const UnconnectedRequestFormFieldBuilderContainer = (
@@ -234,35 +229,32 @@ const UnconnectedRequestFormFieldBuilderContainer = (
             <EditRawInput {...props} id={id} tag={tag}>
               <Button
                 css={css(cssButton)}
-                defaultValue={simpleSelect(
-                  props.simpleForm,
+                defaultValue={simpleSelectorGet(props.simpleRedux, [
                   `${tag}::${padId(id)}`,
                   "data"
-                )}
+                ])}
                 intent={
-                  simpleSelect(
-                    props.simpleForm,
-                    `${tag}::${padId(id)}`,
-                    "data",
-                    simpleType.boolean
+                  simpleSelectorGet(
+                    props.simpleRedux,
+                    [`${tag}::${padId(id)}`, "data"],
+                    false
                   )
                     ? Intent.PRIMARY
                     : Intent.WARNING
                 }
                 onChange={onChangeFnCall(clickDirtyInputFns(props))}
                 onClick={() => {
-                  props.simpleFormToggle(
+                  props.simpleMergeToggle(
                     `${tag}::${padId(id)}`,
-                    props.simpleForm
+                    props.simpleRedux
                   )
                   clickDirtyInputFns(props)()
                 }}
               >
-                {simpleSelect(
-                  props.simpleForm,
+                {simpleSelectorGet(props.simpleRedux, [
                   `${tag}::${padId(id)}`,
                   "data"
-                ).toString() || "unset"}
+                ]).toString() || "unset"}
               </Button>
             </EditRawInput>
           </ControlGroup>
@@ -278,15 +270,14 @@ const UnconnectedRequestFormFieldBuilderContainer = (
             {...repeatableFieldButtons({ ...props, id })}
             <EditRawInput {...props} id={id} tag={tag}>
               <InputGroup
-                defaultValue={simpleSelect(
-                  props.simpleForm,
+                defaultValue={simpleSelectorGet(props.simpleRedux, [
                   `${tag}::${padId(id)}`,
                   "data"
-                )}
+                ])}
                 onChange={onChangeFnCall(clickDirtyInputFns(props))}
                 onClick={onChangeFnCall(clickDirtyInputFns(props))}
                 onBlur={onChangeFnCall(
-                  props.simpleFormInput,
+                  props.simpleMergeData,
                   `${tag}::${padId(id)}`
                 )}
                 placeholder={serverType}
@@ -305,13 +296,12 @@ const UnconnectedRequestFormFieldBuilderContainer = (
             {...repeatableFieldButtons({ ...props, id })}
             <EditRawInput {...props} id={id} tag={tag}>
               <InputGroup
-                defaultValue={simpleSelect(
-                  props.simpleForm,
+                defaultValue={simpleSelectorGet(props.simpleRedux, [
                   `${tag}::${padId(id)}`,
                   "data"
-                )}
+                ])}
                 onBlur={onChangeFnCall(
-                  props.simpleFormInput,
+                  props.simpleMergeData,
                   `${tag}::${padId(id)}`
                 )}
                 onChange={onChangeFnCall(clickDirtyInputFns(props))}
@@ -325,7 +315,7 @@ const UnconnectedRequestFormFieldBuilderContainer = (
     } else if (typescriptType === null && idChildren.size > 0) {
       if (
         idChildren.first() &&
-        typesMetadata.get(idChildren.first()).typescriptType &&
+        typesMetadata.get(idChildren.first() as string).typescriptType &&
         BaseFieldTypes.hasOwnProperty(serverType)
       ) {
         return (
@@ -387,11 +377,10 @@ const UnconnectedRequestFormFieldBuilderContainer = (
           }
         }
         if (id === "0") {
-          const whichFormData = simpleSelect(
-            props.simpleForm,
-            `${tag}::RequestBodyFormInputType`,
-            "data",
-            simpleType.boolean
+          const whichFormData = simpleSelectorGet(
+            props.simpleRedux,
+            [`${tag}::RequestBodyFormInputType`, "data"],
+            false
           )
             ? "RAW"
             : "FORM"
@@ -403,9 +392,9 @@ const UnconnectedRequestFormFieldBuilderContainer = (
                   css={css(cssButton)}
                   icon={IconNames.FORM}
                   onClick={onChangeToggleFnCall(
-                    props.simpleFormToggle,
+                    props.simpleMergeToggle,
                     `${tag}::RequestBodyFormInputType`,
-                    props.simpleForm
+                    props.simpleRedux
                   )}
                   text={"Form"}
                 />
@@ -414,9 +403,9 @@ const UnconnectedRequestFormFieldBuilderContainer = (
                   css={css(cssButton)}
                   icon={IconNames.MORE}
                   onClick={onChangeToggleFnCall(
-                    props.simpleFormToggle,
+                    props.simpleMergeToggle,
                     `${tag}::RequestBodyFormInputType`,
-                    props.simpleForm
+                    props.simpleRedux
                   )}
                   text={"Raw"}
                 />
@@ -431,15 +420,14 @@ const UnconnectedRequestFormFieldBuilderContainer = (
                 <Card css={css(cssCard)}>
                   <TextArea
                     css={css(cssWrapTextArea)}
-                    defaultValue={simpleSelect(
-                      props.simpleForm,
+                    defaultValue={simpleSelectorGet(props.simpleRedux, [
                       `${tag}::RawRequestBody`,
                       "data"
-                    )}
+                    ])}
                     fill={true}
                     growVertically={true}
                     onChange={onChangeFnCall(
-                      props.simpleFormInput,
+                      props.simpleMergeData,
                       `${tag}::RawRequestBody`
                     )}
                     placeholder={
@@ -471,10 +459,9 @@ const UnconnectedRequestFormFieldBuilderContainer = (
               fill={true}
               growVertically={true}
               onBlur={(event: any) => {
-                props.simpleFormInput(
-                  `${tag}::${padId(id)}`,
-                  event.target.value
-                )
+                props.simpleMergeData(`${tag}::${padId(id)}`, {
+                  data: event.target.value
+                })
                 clickDirtyInputFns(props)()
               }}
               onChange={onClickFnCall(clickDirtyInputFns(props))}
