@@ -3,4 +3,4 @@ import * as Ducks from "./ducks"
 import routes from "./routes"
 export * from "./containers"
 
-createIndex("loader", createApp(routes), Ducks)
+createIndex("admin-dashboard", createApp(routes), Ducks)

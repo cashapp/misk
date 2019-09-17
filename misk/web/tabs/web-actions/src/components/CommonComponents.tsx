@@ -11,10 +11,10 @@ import { IconNames } from "@blueprintjs/icons"
 import { css, jsx } from "@emotion/core"
 import { HTTPMethodIntent, WrapTextContainer } from "@misk/core"
 import {
-  ISimpleFormState,
+  ISimpleReduxState,
   onChangeToggleFnCall,
   onClickFnCall,
-  simpleSelect
+  simpleSelectorGet
 } from "@misk/simpleredux"
 import copy from "copy-to-clipboard"
 import HTTPMethod from "http-method-enum"
@@ -156,9 +156,9 @@ export const MetadataCopyToClipboard = (props: {
  *
  * @param props : includes same props as Metadata with a few additional
  *  * children: any components to display when the Metadata is clicked
- *  * tag: string to use in @misk/SimpleRedux/SimpleForm to register Metadata clicks
+ *  * tag: string to use in @misk/SimpleRedux/SimpleRedux to register Metadata clicks
  *  * IDispatchProps: include connected dispatch object from parent container
- *      Provides access to @misk/SimpleRedux/SimpleForm input handlers
+ *      Provides access to @misk/SimpleRedux/SimpleRedux input handlers
  */
 
 const UnconnectedMetadataCollapse = (
@@ -171,14 +171,17 @@ const UnconnectedMetadataCollapse = (
     isOpen?: boolean
     label?: string
     labelElement?: JSX.Element
-    simpleForm: ISimpleFormState
+    simpleRedux: ISimpleReduxState
     tag: string
     text?: string | JSX.Element
     tooltip?: string | JSX.Element
   } & IDispatchProps
 ) => {
   const content = Array.isArray(props.content) ? props.content : [props.content]
-  const collapseIcon = simpleSelect(props.simpleForm, props.tag, "data") ? (
+  const collapseIcon = simpleSelectorGet(props.simpleRedux, [
+    props.tag,
+    "data"
+  ]) ? (
     <Icon icon={IconNames.CARET_DOWN} />
   ) : (
     <Icon icon={IconNames.CARET_RIGHT} />
@@ -204,12 +207,14 @@ const UnconnectedMetadataCollapse = (
         }
         labelElement={props.children ? props.labelElement : null}
         onClick={onChangeToggleFnCall(
-          props.simpleFormToggle,
+          props.simpleMergeToggle,
           props.tag,
-          props.simpleForm
+          props.simpleRedux
         )}
       />
-      <Collapse isOpen={simpleSelect(props.simpleForm, props.tag, "data")}>
+      <Collapse
+        isOpen={simpleSelectorGet(props.simpleRedux, [props.tag, "data"])}
+      >
         {props.children
           ? props.children
           : content.map(c => (

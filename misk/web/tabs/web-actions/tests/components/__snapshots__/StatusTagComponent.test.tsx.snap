@@ -2,9 +2,7 @@
 
 exports[`StatusTagComponent StatusTagComponent renders empty when no status given 1`] = `
 <DocumentFragment>
-  <span
-    class="bp3-tag"
-  />
+  <span />
 </DocumentFragment>
 `;
 
@@ -16,7 +14,7 @@ exports[`StatusTagComponent StatusTagComponent renders status 200 ok intent prim
     <span
       class="bp3-text-overflow-ellipsis bp3-fill"
     >
-      200 ok
+      200 OK
     </span>
   </span>
 </DocumentFragment>
@@ -30,7 +28,7 @@ exports[`StatusTagComponent StatusTagComponent renders status 404 not found inte
     <span
       class="bp3-text-overflow-ellipsis bp3-fill"
     >
-      404 not found
+      404 NOT FOUND
     </span>
   </span>
 </DocumentFragment>
@@ -44,7 +42,7 @@ exports[`StatusTagComponent StatusTagComponent renders status 500 internal error
     <span
       class="bp3-text-overflow-ellipsis bp3-fill"
     >
-      500 internal error
+      500 INTERNAL ERROR
     </span>
   </span>
 </DocumentFragment>

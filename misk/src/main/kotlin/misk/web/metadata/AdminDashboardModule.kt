@@ -27,29 +27,29 @@ class AdminDashboardModule(val environment: Environment) : KAbstractModule() {
     // Adds open CORS headers in development to allow through API calls from webpack servers
     multibind<NetworkInterceptor.Factory>().to<WideOpenDevelopmentInterceptorFactory>()
 
-    // Loader
+    // Admin Dashboard Tab
     install(WebActionModule.create<AdminDashboardTabAction>())
     install(WebActionModule.create<ServiceMetadataAction>())
     install(WebTabResourceModule(
       environment = environment,
-      slug = "loader",
+      slug = "admin-dashboard",
       web_proxy_url = "http://localhost:3100/"
     ))
     install(WebTabResourceModule(
       environment = environment,
-      slug = "loader",
+      slug = "admin-dashboard",
       web_proxy_url = "http://localhost:3100/",
       url_path_prefix = "/_admin/",
-      resourcePath = "classpath:/web/_tab/loader/"
+      resourcePath = "classpath:/web/_tab/admin-dashboard/"
     ))
 
     // @misk packages
     install(WebTabResourceModule(
       environment = environment,
       slug = "@misk",
-      web_proxy_url = "http://localhost:9100/",
+      web_proxy_url = "http://localhost:3100/",
       url_path_prefix = "/@misk/",
-      resourcePath = "classpath:/web/_tab/loader/@misk/"
+      resourcePath = "classpath:/web/_tab/admin-dashboard/@misk/"
     ))
 
     // Config

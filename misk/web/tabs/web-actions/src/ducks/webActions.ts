@@ -5,7 +5,7 @@ import {
   IRootState,
   ISimpleFormState,
   SimpleReduxSaga,
-  simpleSelect
+  simpleSelectorGet
 } from "@misk/simpleredux"
 import axios from "axios"
 import { HTTPMethod } from "http-method-enum"
@@ -399,7 +399,7 @@ export const getFieldData = (
     const parent = typesMetadata.get(idParent)
     if (id === "0" && idChildren.size === 0) {
       // root with no children
-      return simpleSelect(simpleForm, `${tag}::${padId(id)}`, "data")
+      return simpleSelectorGet(simpleForm, [`${tag}::${padId(id)}`, "data"])
     } else if (id === "0" && idChildren.size > 0) {
       // root with children, iterate over children
       const data = mapOverChildrenData(
@@ -430,14 +430,14 @@ export const getFieldData = (
       // leaf node of a repeated list
       const data = parseType(
         serverType,
-        simpleSelect(simpleForm, `${tag}::${padId(id)}`, "data")
+        simpleSelectorGet(simpleForm, [`${tag}::${padId(id)}`, "data"])
       )
       return dirtyInput === true ? data : undefined
     } else if (parent && parent.repeated === false && idChildren.size === 0) {
       // regular leaf node
       const data = parseType(
         serverType,
-        simpleSelect(simpleForm, `${tag}::${padId(id)}`, "data")
+        simpleSelectorGet(simpleForm, [`${tag}::${padId(id)}`, "data"])
       )
       return dirtyInput === true ? { [name]: data } : undefined
     } else if (repeated === true && idChildren.size > 0) {
@@ -901,8 +901,12 @@ export const processMetadata = (webActionMetadata: IWebActionAPI[]): any =>
     .value()
 
 function* handleMetadata() {
+  const useTestData = false
+  const url = useTestData
+    ? "https://cashapp.github.io/misk-web/examples/data/demo/webactions.json"
+    : "/api/webaction/metadata"
   try {
-    const { data } = yield call(axios.get, "/api/webaction/metadata")
+    const { data } = yield call(axios.get, url)
     const { webActionMetadata } = data
     const metadata = processMetadata(webActionMetadata)
     yield put(dispatchWebActions.webActionsSuccess({ metadata }))
