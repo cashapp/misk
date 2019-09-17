@@ -34,7 +34,6 @@ class SpanInjector(
 
     return carrier.toString()
   }
-
 }
 
 class StringBuilderCarrier : TextMap {
@@ -53,4 +52,3 @@ class StringBuilderCarrier : TextMap {
     return map.map { e -> e.key + "=" + e.value }.joinToString(separator = ":")
   }
 }
-
