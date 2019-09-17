@@ -1,1 +1,1 @@
-export { default as AdminDashboardContainer } from "./AdminDashboardContainer"
+export * from "./AdminDashboardContainer"
