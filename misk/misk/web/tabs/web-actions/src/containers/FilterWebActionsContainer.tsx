@@ -25,7 +25,7 @@ const FilterWebActionsContainer = (
         disabled={props.disabled}
         large={true}
         onChange={onChangeFnCall(
-          props.simpleFormInput,
+          props.simpleMergeData,
           `${filterTag}::HTMLSelect`
         )}
         options={FilterSelectOptions}
@@ -33,7 +33,7 @@ const FilterWebActionsContainer = (
       <InputGroup
         disabled={props.disabled}
         large={true}
-        onChange={onChangeFnCall(props.simpleFormInput, `${filterTag}::Input`)}
+        onChange={onChangeFnCall(props.simpleMergeData, `${filterTag}::Input`)}
         placeholder={
           props.disabled ? "Loading Web Actions..." : "Filter Web Actions"
         }

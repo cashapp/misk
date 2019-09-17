@@ -1,5 +1,5 @@
 {
-  "name": "misk-web-tab-loader",
+  "name": "misk-web-tab-admin-dashboard",
   "version": "0.0.3",
   "license": "SEE LICENSE IN https://github.com/cashapp/misk-web",
   "main": "src/index.tsx",
@@ -16,18 +16,18 @@
     "reinstall": "rm -rf node_modules && npm run-script install",
     "start": "npm run-script prebuild && cross-env NODE_ENV=development webpack-dev-server",
     "test": "jest --passWithNoTests",
-    "zip": "tar --exclude='.gitignore' --exclude='.old_build_files' --exclude='package.json' --exclude='package-lock.json' --exclude='prettier.config.js' --exclude='tsconfig.json' --exclude='tslint.json' --exclude='webpack.config.js' --exclude='yarn.lock' --exclude='demo' --exclude='lib' --exclude='.DS_Store' --exclude='*.log' --exclude='node_modules' --exclude='loader.tgz' -czvf loader.tgz ./"
+    "zip": "tar --exclude='.gitignore' --exclude='.old_build_files' --exclude='package.json' --exclude='package-lock.json' --exclude='prettier.config.js' --exclude='tsconfig.json' --exclude='tslint.json' --exclude='webpack.config.js' --exclude='yarn.lock' --exclude='demo' --exclude='lib' --exclude='.DS_Store' --exclude='*.log' --exclude='node_modules' --exclude='admin-dashboard.tgz' -czvf admin-dashboard.tgz ./"
   },
   "dependencies": {
-    "@misk/common": "0.1.18-5",
-    "@misk/core": "0.1.18-5",
-    "@misk/simpleredux": "0.1.18-5"
+    "@misk/common": "0.1.19",
+    "@misk/core": "0.1.19",
+    "@misk/simpleredux": "0.1.19"
   },
   "devDependencies": {
-    "@misk/dev": "0.1.18-5",
-    "@misk/tslint": "0.1.18-5",
-    "@misk/test": "0.1.18-5",
-    "@misk/prettier": "0.1.18-5"
+    "@misk/dev": "0.1.19",
+    "@misk/tslint": "0.1.19",
+    "@misk/test": "0.1.19",
+    "@misk/prettier": "0.1.19"
   },
   "jest": {
     "testEnvironment": "jsdom",

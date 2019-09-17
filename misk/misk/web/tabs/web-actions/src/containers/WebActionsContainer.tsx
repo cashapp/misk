@@ -1,4 +1,4 @@
-import { simpleSelect } from "@misk/simpleredux"
+import { simpleSelectorGet } from "@misk/simpleredux"
 import { chain } from "lodash"
 // todo good test of render is change this to the below. it compiles but fails in browser
 // import chain from "lodash/chain"
@@ -44,19 +44,22 @@ const WebActionsContainer = (
       tag: string
     }
 ) => {
-  const metadata = props.metadata || simpleSelect(props.webActions, "metadata")
+  const metadata =
+    props.metadata || simpleSelectorGet(props.webActions, "metadata", [])
   const filterTag = `${props.tag}::Filter`
   if (metadata.length > 0) {
     const filterKey =
       props.filterKey ||
       WebActionInternalLabel[
-        simpleSelect(props.simpleForm, `${filterTag}::HTMLSelect`, "data") ||
-          "All Metadata"
+        simpleSelectorGet(props.simpleRedux, [
+          `${filterTag}::HTMLSelect`,
+          "data"
+        ]) || "All Metadata"
       ]
-    const filterValue = simpleSelect(
-      props.simpleForm,
-      `${filterTag}::Input`,
-      "data"
+    const filterValue = simpleSelectorGet(
+      props.simpleRedux,
+      [`${filterTag}::Input`, "data"],
+      ""
     )
     return (
       <div>

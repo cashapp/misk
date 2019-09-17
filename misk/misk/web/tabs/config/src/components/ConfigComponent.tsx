@@ -1,5 +1,5 @@
 /** @jsx jsx */
-import { H1, H3 } from "@blueprintjs/core"
+import { H1, H3, Spinner } from "@blueprintjs/core"
 import { css, jsx } from "@emotion/core"
 import { CodePreContainer } from "@misk/core"
 import * as React from "react"
@@ -10,8 +10,10 @@ export interface IConfigResource {
 }
 
 export interface IConfigProps {
-  resources: string
+  resources?: string
 }
+
+const cssH3 = css({ fontFamily: "Fira Code, Menlo" })
 
 export default class ConfigComponent extends React.PureComponent<IConfigProps> {
   renderConfig(resource: IConfigResource) {
@@ -26,14 +28,32 @@ export default class ConfigComponent extends React.PureComponent<IConfigProps> {
 
   render() {
     const { resources } = this.props
-    return (
-      <div>
-        <H1>Config</H1>
-        {resources &&
-          Object.entries(resources).map(([name, file]) =>
-            this.renderConfig({ name, file })
-          )}
-      </div>
-    )
+    if (resources) {
+      return (
+        <div>
+          <H1>Config</H1>
+          {resources &&
+            Object.entries(resources).map(([name, file]) =>
+              this.renderConfig({ name, file })
+            )}
+        </div>
+      )
+    } else {
+      return (
+        <div>
+          <H1>Config</H1>
+          <br />
+          <H3 css={cssH3}>{"Effective Config"}</H3>
+          <CodePreContainer>{<Spinner />}</CodePreContainer>
+          <br />
+          <H3 css={cssH3}>{"classpath://common.yaml"}</H3>
+          <CodePreContainer>{<Spinner />}</CodePreContainer>
+          <H3 css={cssH3}>{"classpath://production.yaml"}</H3>
+          <CodePreContainer>{<Spinner />}</CodePreContainer>
+          <H3 css={cssH3}>{"classpath://staging.yaml"}</H3>
+          <CodePreContainer>{<Spinner />}</CodePreContainer>
+        </div>
+      )
+    }
   }
 }

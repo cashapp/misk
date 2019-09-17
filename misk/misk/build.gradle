@@ -1,8 +1,8 @@
 sourceSets {
   main.resources {
     srcDirs += [
+      'web/tabs/admin-dashboard/lib',
       'web/tabs/config/lib',
-      'web/tabs/loader/lib',
       'web/tabs/web-actions/lib',
     ]
     exclude '**/node_modules'
