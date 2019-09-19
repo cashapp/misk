@@ -16,7 +16,7 @@ import misk.jdbc.DataSourceDecorator
 import misk.jdbc.DataSourceService
 import misk.jdbc.DataSourceType
 import misk.jdbc.DatabasePool
-import misk.jdbc.JaegerSpanInjector
+import misk.jdbc.SpanInjector
 import misk.jdbc.PingDatabaseService
 import misk.jdbc.RealDatabasePool
 import misk.metrics.Metrics
@@ -179,14 +179,14 @@ class HibernateModule(
         .dependsOn<DataSourceService>(qualifier))
 
     if (config.type == DataSourceType.VITESS_MYSQL) {
-      val jaegerSpanInjectorDecoratorKey = JaegerSpanInjector::class.toKey(qualifier)
+      val jaegerSpanInjectorDecoratorKey = SpanInjector::class.toKey(qualifier)
       bind(jaegerSpanInjectorDecoratorKey)
-              .toProvider(object : Provider<JaegerSpanInjector> {
+              .toProvider(object : Provider<SpanInjector> {
                 @com.google.inject.Inject(optional = true)
                 var tracer: Tracer? = null
 
-                override fun get(): JaegerSpanInjector =
-                        JaegerSpanInjector(tracer, config)
+                override fun get(): SpanInjector =
+                        SpanInjector(tracer, config)
               }).asSingleton()
     }
 
