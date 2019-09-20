@@ -16,6 +16,7 @@ import {
   get,
   isBoolean,
   isObject,
+  omit,
   padStart,
   reduce,
   size,
@@ -737,8 +738,8 @@ const generateFieldTypesMetadata = (
         )
       )
     } else {
-      console.log(
-        `Valid Base Field Type ${type} has no handler for the corresponding Tyepscript Type ${BaseFieldTypes[type]}`
+      console.error(
+        `Web Action request body field ${field} with type ${type} has no handler for the corresponding Tyepscript Type ${BaseFieldTypes[type]}`
       )
       return typesMetadata
     }
@@ -791,48 +792,64 @@ const generateFieldTypesMetadata = (
   }
 }
 
+const jsonTypeMetadata = OrderedMap<string, ITypesFieldMetadata>().set(
+  "0",
+  buildTypeFieldMetadata(
+    OrderedSet(),
+    "0",
+    "",
+    false,
+    "",
+    ServerTypes.JSON,
+    null
+  )
+)
+
 export const generateTypesMetadata = (
   action: IWebActionAPI
 ): OrderedMap<string, ITypesFieldMetadata> => {
-  const { dispatchMechanism, requestType, types } = action
+  const { dispatchMechanism, pathPattern, requestType, types } = action
   let typesMetadata = OrderedMap<string, ITypesFieldMetadata>().set(
     "0",
     buildTypeFieldMetadata(OrderedSet(), "0")
   )
   if (requestType && types && get(types, requestType)) {
     const { fields } = get(types, requestType)
-    for (const field in fields) {
-      if (fields.hasOwnProperty(field)) {
-        const id = uniqueId()
-        typesMetadata = typesMetadata.mergeDeep(
-          generateFieldTypesMetadata(
-            fields[field],
-            types,
-            typesMetadata,
-            id,
-            "0"
+    try {
+      for (const field in fields) {
+        if (fields.hasOwnProperty(field)) {
+          const id = uniqueId()
+          typesMetadata = typesMetadata.mergeDeep(
+            generateFieldTypesMetadata(
+              fields[field],
+              types,
+              typesMetadata,
+              id,
+              "0"
+            )
           )
+          typesMetadata = typesMetadata.setIn(
+            ["0", "idChildren"],
+            typesMetadata.getIn(["0", "idChildren"]).add(id)
+          )
+        }
+      }
+    } catch (e) {
+      if (e.toString().startsWith("RangeError")) {
+        console.warn(
+          `Web Action proto type is too large to parse, reverting to raw JSON input for [action = ${dispatchMechanism} ${pathPattern}].\nTypes:`,
+          types,
+          "\n",
+          e
         )
-        typesMetadata = typesMetadata.setIn(
-          ["0", "idChildren"],
-          typesMetadata.getIn(["0", "idChildren"]).add(id)
-        )
+        return jsonTypeMetadata
+      } else {
+        throw e
       }
     }
     return typesMetadata
   } else if (methodHasBody(dispatchMechanism)) {
-    return OrderedMap<string, ITypesFieldMetadata>().set(
-      "0",
-      buildTypeFieldMetadata(
-        OrderedSet(),
-        "0",
-        "",
-        false,
-        "",
-        ServerTypes.JSON,
-        null
-      )
-    )
+    return jsonTypeMetadata
   } else {
     return OrderedMap<string, ITypesFieldMetadata>()
   }
@@ -873,9 +890,10 @@ export const processMetadata = (webActionMetadata: IWebActionAPI[]): any =>
         action.allowedServices && action.allowedServices.length > 0
           ? action.allowedServices
           : [emptyAllowedArrayValue]
+      // Don't include types in returned fields since they could be too large
       return {
-        ...action,
-        allFields: JSON.stringify(action),
+        ...omit(action, ["types"]),
+        allFields: JSON.stringify(omit(action, ["types"])),
         allowedCapabilities,
         allowedServices,
         authFunctionAnnotations,
