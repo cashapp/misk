@@ -459,9 +459,10 @@ const UnconnectedRequestFormFieldBuilderContainer = (
               fill={true}
               growVertically={true}
               onBlur={(event: any) => {
-                props.simpleMergeData(`${tag}::${padId(id)}`, {
-                  data: event.target.value
-                })
+                props.simpleMergeData(
+                  `${tag}::${padId(id)}`,
+                  event.target.value
+                )
                 clickDirtyInputFns(props)()
               }}
               onChange={onClickFnCall(clickDirtyInputFns(props))}
