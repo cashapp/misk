@@ -9,7 +9,7 @@ import misk.web.actions.WebAction
 import misk.web.actions.WebSocket
 import misk.web.actions.WebSocketListener
 import misk.web.interceptors.LogRequestResponse
-import misk.web.interceptors.RequestLoggingInterceptor
+import misk.web.interceptors.RequestBodyLoggingInterceptor
 import misk.web.jetty.JettyService
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -43,11 +43,11 @@ internal class WebSocketsTest {
     assertEquals("ACK hello", listener.takeMessage())
 
     // Confirm interceptors were invoked.
-    val (m0, m1) = logCollector.takeMessages(RequestLoggingInterceptor::class)
+    val (m0, m1) = logCollector.takeMessages(RequestBodyLoggingInterceptor::class)
     assertThat(m0)
         .matches("EchoWebSocket principal=unknown request=\\[JettyWebSocket\\[.* to /echo]]")
     assertThat(m1)
-        .isEqualTo("EchoWebSocket principal=unknown time=0.000 ns response=EchoListener")
+        .isEqualTo("EchoWebSocket principal=unknown response=EchoListener")
   }
 
   @Singleton
