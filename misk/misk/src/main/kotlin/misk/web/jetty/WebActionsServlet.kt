@@ -1,6 +1,7 @@
 package misk.web.jetty
 
 import misk.exceptions.StatusCode
+import misk.logging.getLogger
 import misk.web.BoundAction
 import misk.web.DispatchMechanism
 import misk.web.ServletHttpCall
@@ -32,6 +33,10 @@ internal class WebActionsServlet @Inject constructor(
   webActionFactory: WebActionFactory,
   webActionEntries: List<WebActionEntry>
 ) : WebSocketServlet() {
+
+  companion object {
+    val log = getLogger<WebActionsServlet>()
+  }
 
   internal val boundActions: MutableSet<BoundAction<out WebAction>> = mutableSetOf()
 
@@ -75,6 +80,14 @@ internal class WebActionsServlet @Inject constructor(
       }
     } catch (_: ProtocolException) {
       // Probably an unexpected HTTP method. Send a 404 below.
+    } catch (e: Throwable) {
+      log.error(e) { "Uncaught exception on ${request.dispatchMechanism()} ${request.httpUrl()}" }
+
+      response.status = StatusCode.INTERNAL_SERVER_ERROR.code
+      response.addHeader("Content-Type", MediaTypes.TEXT_PLAIN_UTF8)
+      response.writer.close()
+
+      return
     }
 
     response.status = StatusCode.NOT_FOUND.code
