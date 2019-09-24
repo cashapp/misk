@@ -9,6 +9,7 @@ import misk.hibernate.RealTransacter.Companion.DB_COMMIT_SPAN_NAME
 import misk.hibernate.RealTransacter.Companion.DB_ROLLBACK_SPAN_NAME
 import misk.hibernate.RealTransacter.Companion.DB_TRANSACTION_SPAN_NAME
 import misk.hibernate.RealTransacter.Companion.TRANSACTER_SPAN_TAG
+import misk.jdbc.DataSourceType
 import misk.jdbc.uniqueString
 import misk.logging.LogCollector
 import misk.testing.MiskTest
@@ -23,11 +24,7 @@ import java.util.concurrent.atomic.AtomicInteger
 import javax.inject.Inject
 import kotlin.test.assertFailsWith
 
-@MiskTest(startService = true)
-class TransacterTest {
-  @MiskTestModule
-  val module = MoviesTestModule()
-
+abstract class TransacterTest {
   @Inject @Movies lateinit var transacter: Transacter
   @Inject lateinit var queryFactory: Query.Factory
   @Inject lateinit var tracer: MockTracer
@@ -740,4 +737,22 @@ class TransacterTest {
   }
 
   class NonRetryableException : Exception()
+}
+
+@MiskTest(startService = true)
+class MySQLTransacterTest : TransacterTest() {
+  @MiskTestModule
+  val module = MoviesTestModule(DataSourceType.MYSQL)
+}
+
+@MiskTest(startService = true)
+class VitessMySQLTransacterTest : TransacterTest() {
+  @MiskTestModule
+  val module = MoviesTestModule(DataSourceType.VITESS_MYSQL)
+}
+
+@MiskTest(startService = true)
+class VitessTransacterTest : TransacterTest() {
+  @MiskTestModule
+  val module = MoviesTestModule(DataSourceType.VITESS)
 }
