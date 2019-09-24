@@ -35,6 +35,7 @@ import misk.web.interceptors.InternalErrorInterceptorFactory
 import misk.web.interceptors.MetricsInterceptor
 import misk.web.interceptors.RebalancingInterceptor
 import misk.web.interceptors.RequestLogContextInterceptor
+import misk.web.interceptors.RequestBodyLoggingInterceptor
 import misk.web.interceptors.RequestLoggingInterceptor
 import misk.web.interceptors.TracingInterceptor
 import misk.web.jetty.JettyConnectionMetricsCollector
@@ -114,8 +115,12 @@ class MiskWebModule(private val config: WebConfig) : KAbstractModule() {
         .to<ExceptionHandlingInterceptor.Factory>()
 
     // Optionally log request and response details
-    multibind<ApplicationInterceptor.Factory>(MiskDefault::class)
+    multibind<NetworkInterceptor.Factory>(MiskDefault::class)
         .to<RequestLoggingInterceptor.Factory>()
+
+    // Optionally log request and response body
+    multibind<ApplicationInterceptor.Factory>(MiskDefault::class)
+        .to<RequestBodyLoggingInterceptor.Factory>()
 
     install(ExceptionMapperModule.create<ActionException, ActionExceptionMapper>())
 

@@ -43,6 +43,7 @@ internal class RealLogCollector @Inject constructor() :
     minLevel: Level,
     pattern: Regex?
   ): List<ILoggingEvent> {
+    Thread.sleep(100) // Give the logger some time to flush events.
     val result = mutableListOf<ILoggingEvent>()
     while (queue.isNotEmpty()) {
       val event = takeOrNull(loggerClass, minLevel, pattern)

@@ -27,7 +27,7 @@ import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 @MiskTest(startService = true)
-internal class RequestLoggingInterceptorTest {
+internal class RequestBodyLoggingInterceptorTest {
 
   @MiskTestModule
   val module = TestModule()
@@ -46,10 +46,10 @@ internal class RequestLoggingInterceptorTest {
   @Test
   fun includesBody() {
     assertThat(invoke("/call/includeBodyRequestLogging/hello", "caller").isSuccessful).isTrue()
-    val messages = logCollector.takeMessages(RequestLoggingInterceptor::class)
+    val messages = logCollector.takeMessages(RequestBodyLoggingInterceptor::class)
     assertThat(messages).containsExactly(
       "IncludeBodyRequestLoggingAction principal=caller request=[hello]",
-      "IncludeBodyRequestLoggingAction principal=caller time=100.0 ms response=echo: hello"
+      "IncludeBodyRequestLoggingAction principal=caller response=echo: hello"
     )
   }
 
@@ -58,18 +58,19 @@ internal class RequestLoggingInterceptorTest {
     assertThat(invoke("/call/excludeBodyRequestLogging/hello", "caller").isSuccessful).isTrue()
     val messages = logCollector.takeMessages(RequestLoggingInterceptor::class)
     assertThat(messages).containsExactly(
-      "ExcludeBodyRequestLoggingAction principal=caller request=",
-      "ExcludeBodyRequestLoggingAction principal=caller time=100.0 ms response="
+      "ExcludeBodyRequestLoggingAction principal=caller",
+      "ExcludeBodyRequestLoggingAction principal=caller time=100.0 ms code=200"
     )
+    assertThat(logCollector.takeMessages(RequestBodyLoggingInterceptor::class)).isEmpty()
   }
 
   @Test
   fun exceptionThrown() {
     assertThat(invoke("/call/exceptionThrowingRequestLogging/fail", "caller").code).isEqualTo(500)
-    val messages = logCollector.takeMessages(RequestLoggingInterceptor::class)
+    val messages = logCollector.takeMessages(RequestBodyLoggingInterceptor::class)
     assertThat(messages).containsExactly(
       "ExceptionThrowingRequestLoggingAction principal=caller request=[fail]",
-      "ExceptionThrowingRequestLoggingAction principal=caller time=100.0 ms failed"
+      "ExceptionThrowingRequestLoggingAction principal=caller failed"
     )
   }
 
@@ -78,6 +79,7 @@ internal class RequestLoggingInterceptorTest {
     fakeRandom.nextDouble = 0.7
     assertThat(invoke("/call/sampledRequestLogging/hello", "caller").isSuccessful).isTrue()
     assertThat(logCollector.takeMessages(RequestLoggingInterceptor::class)).isEmpty()
+    assertThat(logCollector.takeMessages(RequestBodyLoggingInterceptor::class)).isEmpty()
   }
 
   @Test
@@ -91,6 +93,7 @@ internal class RequestLoggingInterceptorTest {
   fun noRequestLoggingIfMissingAnnotation() {
     assertThat(invoke("/call/noRequestLogging/hello", "caller").isSuccessful).isTrue()
     assertThat(logCollector.takeMessages(RequestLoggingInterceptor::class)).isEmpty()
+    assertThat(logCollector.takeMessages(RequestBodyLoggingInterceptor::class)).isEmpty()
   }
 
   fun invoke(path: String, asService: String? = null): okhttp3.Response {
