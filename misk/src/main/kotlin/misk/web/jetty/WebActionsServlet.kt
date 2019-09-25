@@ -46,6 +46,16 @@ internal class WebActionsServlet @Inject constructor(
     for (entry in webActionEntries) {
       boundActions += webActionFactory.newBoundAction(entry.actionClass, entry.url_path_prefix)
     }
+    // Verify no two Actions have identical routing annotations, which is most likely a bad
+    // copy/paste error and results in unexpected results for a developer. This fails the service
+    // startup, which should be caught with a unit test.
+    for (action in boundActions) {
+      for (other in boundActions) {
+        check(action === other || !action.hasIdenticalRouting(other)) {
+          "Actions [${action.action.name}, ${other.action.name}] have identical routing annotations."
+        }
+      }
+    }
   }
 
   override fun doGet(request: HttpServletRequest, response: HttpServletResponse) {

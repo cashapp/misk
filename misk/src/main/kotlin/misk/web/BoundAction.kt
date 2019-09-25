@@ -76,6 +76,26 @@ internal class BoundAction<A : WebAction>(
     )
   }
 
+  /**
+   * Returns true if this [BoundAction] has identical routing annotations as the provided
+   * [BoundAction].
+   */
+  fun hasIdenticalRouting(other: BoundAction<*>): Boolean {
+    if (pathPattern.pattern != other.pathPattern.pattern) {
+      return false
+    }
+    if (action.dispatchMechanism != other.action.dispatchMechanism) {
+      return false
+    }
+    if (action.acceptedMediaRanges != other.action.acceptedMediaRanges) {
+      return false
+    }
+    if (action.responseContentType != other.action.responseContentType) {
+      return false
+    }
+    return true
+  }
+
   internal fun scopeAndHandle(
     request: HttpServletRequest,
     httpCall: HttpCall,
