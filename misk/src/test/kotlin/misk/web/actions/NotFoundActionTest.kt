@@ -180,7 +180,6 @@ class NotFoundActionTest {
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(WebTestingModule())
-      install(WebActionModule.create<NotFoundAction>())
       install(WebActionModule.create<EchoAction>())
       install(WebActionModule.create<EchoFooAction>())
     }

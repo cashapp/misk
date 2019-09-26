@@ -11,7 +11,6 @@ import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.web.WebActionModule
 import misk.web.WebTestingModule
-import misk.web.actions.NotFoundAction
 import misk.web.jetty.JettyService
 import misk.web.resources.StaticResourceAction
 import misk.web.resources.StaticResourceEntry
@@ -216,8 +215,6 @@ class StaticResourceActionTest {
           ))))
       install(HttpClientModule("static_resource_action",
           Names.named("static_resource_action")))
-
-      install(WebActionModule.create<NotFoundAction>())
 
       install(WebActionModule.createWithPrefix<StaticResourceAction>("/hi/"))
       multibind<StaticResourceEntry>()
