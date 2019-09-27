@@ -14,6 +14,7 @@ import com.google.common.cache.CacheLoader
 import com.google.common.util.concurrent.AbstractIdleService
 import com.squareup.moshi.Moshi
 import com.zaxxer.hikari.util.DriverDataSource
+import misk.backoff.DontRetryException
 import misk.backoff.ExponentialBackoff
 import misk.backoff.retry
 import misk.environment.Environment
@@ -262,7 +263,7 @@ class DockerVitessCluster(
   }
 
   private fun waitUntilHealthy() {
-    retry(10, ExponentialBackoff(Duration.ofMillis(20), Duration.ofMillis(5000))) {
+    retry(20, ExponentialBackoff(Duration.ofSeconds(1), Duration.ofSeconds(5))) {
       cluster.openVtgateConnection().use { c ->
         try {
           val result =
@@ -271,7 +272,7 @@ class DockerVitessCluster(
         } catch (e: Exception) {
           val message = e.message
           if (message?.contains("table dual not found") == true) {
-            throw RuntimeException(
+            throw DontRetryException(
                 "Something is wrong with your vschema and unfortunately vtcombo does not " +
                     "currently have good error reporting on this. Please inspect the logs or your " +
                     "vschema to see if you can find the error.")

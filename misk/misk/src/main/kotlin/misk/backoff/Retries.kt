@@ -17,6 +17,8 @@ fun <A> retry(upTo: Int, withBackoff: Backoff, f: (retryCount: Int) -> A): A {
       val result = f(i)
       withBackoff.reset()
       return result
+    } catch (e: DontRetryException) {
+      throw e
     } catch (e: Exception) {
       lastException = e
 
@@ -32,3 +34,5 @@ fun <A> retry(upTo: Int, withBackoff: Backoff, f: (retryCount: Int) -> A): A {
 
   throw lastException!!
 }
+
+class DontRetryException(message: String) : Exception(message)
