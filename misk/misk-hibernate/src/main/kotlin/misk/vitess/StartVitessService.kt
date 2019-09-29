@@ -152,14 +152,27 @@ class DockerVitessCluster(
 
   private var isRunning = false
   private var stopContainerOnExit = true
+  private var startupFailure: Exception? = null
 
   fun start() {
+    val startupFailure = this.startupFailure
+    if (startupFailure != null) {
+      throw startupFailure
+    }
     if (isRunning) {
       return
     }
 
     isRunning = true
+    try {
+      doStart()
+    } catch (e: Exception) {
+      this.startupFailure = e
+      throw e
+    }
+  }
 
+  private fun doStart() {
     val keyspaces = cluster.keyspaces()
     val keyspacesArg = keyspaces.keys.map { it }.joinToString(",")
     val shardCounts = keyspaces.values.map { it.shardCount() }.joinToString(",")
@@ -263,24 +276,30 @@ class DockerVitessCluster(
   }
 
   private fun waitUntilHealthy() {
-    retry(20, ExponentialBackoff(Duration.ofSeconds(1), Duration.ofSeconds(5))) {
-      cluster.openVtgateConnection().use { c ->
-        try {
-          val result =
-              c.createStatement().executeQuery("SELECT 1 FROM dual").uniqueInt()
-          check(result == 1)
-        } catch (e: Exception) {
-          val message = e.message
-          if (message?.contains("table dual not found") == true) {
-            throw DontRetryException(
-                "Something is wrong with your vschema and unfortunately vtcombo does not " +
-                    "currently have good error reporting on this. Please inspect the logs or your " +
-                    "vschema to see if you can find the error.")
-          } else {
-            throw e
+    try {
+      retry(20, ExponentialBackoff(Duration.ofSeconds(1), Duration.ofSeconds(5))) {
+        cluster.openVtgateConnection().use { c ->
+          try {
+            val result =
+                c.createStatement().executeQuery("SELECT 1 FROM dual").uniqueInt()
+            check(result == 1)
+          } catch (e: Exception) {
+            val message = e.message
+            if (message?.contains("table dual not found") == true) {
+              throw DontRetryException(
+                  "Something is wrong with your vschema and unfortunately vtcombo does not " +
+                      "currently have good error reporting on this. Please inspect the logs or your " +
+                      "vschema to see if you can find the error.")
+            } else {
+              throw e
+            }
           }
         }
       }
+    } catch (e: DontRetryException) {
+      throw Exception(e.message)
+    } catch (e: Exception) {
+      throw Exception("Vitess cluster failed to start up in time", e)
     }
   }
 
