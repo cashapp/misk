@@ -9,10 +9,10 @@ interface FeatureFlags {
    * Calculates the value of an boolean feature flag for the given token and attributes.
    * @see [getEnum] for param details
    */
-  fun getBool(
+  fun getBoolean(
     feature: Feature,
     token: String,
-    attrs: Attrs? = null
+    attributes: Attributes = Attributes()
   ): Boolean
 
   /**
@@ -22,7 +22,7 @@ interface FeatureFlags {
   fun getInt(
     feature: Feature,
     token: String,
-    attrs: Attrs? = null
+    attributes: Attributes = Attributes()
   ): Int
 
   /**
@@ -32,7 +32,7 @@ interface FeatureFlags {
   fun getString(
     feature: Feature,
     token: String,
-    attrs: Attrs? = null
+    attributes: Attributes = Attributes()
   ): String
 
   /**
@@ -41,21 +41,21 @@ interface FeatureFlags {
    * @param token unique primary token for the entity the flag should be evaluated against.
    * @param default default value to return if there was an error evaluating the flag or the flag
    *   does not exist.
-   * @param attrs additional attributes to provide to flag evaluation.
+   * @param attributes additional attributes to provide to flag evaluation.
    */
   fun <T : Enum<T>> getEnum(
     feature: Feature,
     token: String,
     clazz: Class<T>,
-    attrs: Attrs? = null
+    attributes: Attributes = Attributes()
   ): T
 }
 
 inline fun <reified T : Enum<T>> FeatureFlags.getEnum(
   feature: Feature,
   token: String,
-  attrs: Attrs? = null
-): T = getEnum(feature, token, T::class.java, attrs)
+  attributes: Attributes = Attributes()
+): T = getEnum(feature, token, T::class.java, attributes)
 
 /**
  * Typed feature string.
@@ -65,10 +65,10 @@ data class Feature(val name: String)
 /**
  * Extra attributes to be used for evaluating features.
  */
-data class Attrs(
-  val stringAttrs: Map<String, String> = mapOf(),
+data class Attributes(
+  val text: Map<String, String> = mapOf(),
   // NB: LaunchDarkly uses typed Gson attributes. We could leak that through, but that could make
   // code unwieldly. Numerical attributes are likely to be rarely used, so we make it a separate,
   // optional field rather than trying to account for multiple possible attribute types.
-  val numberAttrs: Map<String, Number>? = null
+  val number: Map<String, Number>? = null
 )

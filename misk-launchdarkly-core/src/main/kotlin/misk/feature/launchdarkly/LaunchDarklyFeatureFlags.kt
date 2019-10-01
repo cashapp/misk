@@ -6,7 +6,7 @@ import com.launchdarkly.client.EvaluationReason
 import com.launchdarkly.client.LDClientInterface
 import com.launchdarkly.client.LDUser
 import com.launchdarkly.shaded.com.google.common.base.Preconditions.checkState
-import misk.feature.Attrs
+import misk.feature.Attributes
 import misk.feature.Feature
 import misk.feature.FeatureFlags
 import misk.feature.FeatureService
@@ -42,22 +42,22 @@ class LaunchDarklyFeatureFlags @Inject constructor(
     ldClient.close()
   }
 
-  override fun getBool(feature: Feature, token: String, attrs: Attrs?): Boolean {
-    val result = ldClient.boolVariationDetail(feature.name, buildUser(token, attrs), false)
+  override fun getBoolean(feature: Feature, token: String, attributes: Attributes): Boolean {
+    val result = ldClient.boolVariationDetail(feature.name, buildUser(token, attributes), false)
     checkDefaultNotUsed(feature, result)
     return result.value
   }
 
-  override fun getInt(feature: Feature, token: String, attrs: Attrs?): Int {
-    checkInitialized();
-    val result = ldClient.intVariationDetail(feature.name, buildUser(token, attrs), 0)
+  override fun getInt(feature: Feature, token: String, attributes: Attributes): Int {
+    checkInitialized()
+    val result = ldClient.intVariationDetail(feature.name, buildUser(token, attributes), 0)
     checkDefaultNotUsed(feature, result)
     return result.value
   }
 
-  override fun getString(feature: Feature, token: String, attrs: Attrs?): String {
-    checkInitialized();
-    val result = ldClient.stringVariationDetail(feature.name, buildUser(token, attrs), "")
+  override fun getString(feature: Feature, token: String, attributes: Attributes): String {
+    checkInitialized()
+    val result = ldClient.stringVariationDetail(feature.name, buildUser(token, attributes), "")
     checkDefaultNotUsed(feature, result)
     return result.value
   }
@@ -66,10 +66,10 @@ class LaunchDarklyFeatureFlags @Inject constructor(
     feature: Feature,
     token: String,
     clazz: Class<T>,
-    attrs: Attrs?
+    attributes: Attributes
   ): T {
-    checkInitialized();
-    val result = ldClient.stringVariationDetail(feature.name, buildUser(token, attrs), "")
+    checkInitialized()
+    val result = ldClient.stringVariationDetail(feature.name, buildUser(token, attributes), "")
     checkDefaultNotUsed(feature, result)
     return java.lang.Enum.valueOf(clazz, result.value.toUpperCase())
   }
@@ -91,27 +91,25 @@ class LaunchDarklyFeatureFlags @Inject constructor(
     throw IllegalStateException("Feature flag $feature is off but no off variation is specified")
   }
 
-  private fun buildUser(token: String, attrs: Attrs?): LDUser {
+  private fun buildUser(token: String, attributes: Attributes): LDUser {
     val builder = LDUser.Builder(token)
-    if (attrs != null) {
-      attrs.stringAttrs.forEach { (k, v) ->
-        when (k) {
-          // LaunchDarkly has some built-in keys that have to be initialized with their named
-          // methods.
-          "secondary" -> builder.secondary(k)
-          "ip" -> builder.ip(k)
-          "email" -> builder.email(k)
-          "name" -> builder.name(k)
-          "avatar" -> builder.avatar(k)
-          "firstName" -> builder.firstName(k)
-          "lastName" -> builder.lastName(k)
-          "country" -> builder.country(k)
-          else -> builder.privateCustom(k, v)
-        }
+    attributes.text.forEach { (k, v) ->
+      when (k) {
+        // LaunchDarkly has some built-in keys that have to be initialized with their named
+        // methods.
+        "secondary" -> builder.secondary(k)
+        "ip" -> builder.ip(k)
+        "email" -> builder.email(k)
+        "name" -> builder.name(k)
+        "avatar" -> builder.avatar(k)
+        "firstName" -> builder.firstName(k)
+        "lastName" -> builder.lastName(k)
+        "country" -> builder.country(k)
+        else -> builder.privateCustom(k, v)
       }
-      if (attrs.numberAttrs != null) {
-        attrs.numberAttrs!!.forEach { (k, v) -> builder.privateCustom(k, v) }
-      }
+    }
+    if (attributes.number != null) {
+      attributes.number!!.forEach { (k, v) -> builder.privateCustom(k, v) }
     }
     return builder.build()
   }

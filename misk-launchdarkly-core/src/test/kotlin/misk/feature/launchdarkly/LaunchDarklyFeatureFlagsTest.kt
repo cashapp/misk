@@ -5,7 +5,7 @@ import com.launchdarkly.client.EvaluationDetail
 import com.launchdarkly.client.EvaluationReason
 import com.launchdarkly.client.LDClientInterface
 import com.launchdarkly.client.LDUser
-import misk.feature.Attrs
+import misk.feature.Attributes
 import misk.feature.Feature
 import misk.feature.FeatureFlags
 import misk.feature.getEnum
@@ -40,7 +40,7 @@ internal class LaunchDarklyFeatureFlagsTest {
 
     val feature = featureFlags.getEnum<Dinosaur>(
         Feature("which-dinosaur"), "abcd",
-        Attrs(mapOf(
+        Attributes(mapOf(
             "continent" to "europa",
             "platform" to "lava"
         ), mapOf(

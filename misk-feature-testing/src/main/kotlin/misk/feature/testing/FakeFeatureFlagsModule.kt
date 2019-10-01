@@ -8,15 +8,15 @@ import misk.inject.toKey
 import kotlin.reflect.KClass
 
 /**
- * Binds a [TestFeatureFlags] that allows tests to override values.
+ * Binds a [FakeFeatureFlags] that allows tests to override values.
  */
-class TestFeatureFlagsModule(
+class FakeFeatureFlagsModule(
   private val qualifier: KClass<out Annotation>? = null
 ) : KAbstractModule() {
-  private val testFeatureFlags = TestFeatureFlags()
+  private val testFeatureFlags = FakeFeatureFlags()
 
   override fun configure() {
-    val key = TestFeatureFlags::class.toKey(qualifier)
+    val key = FakeFeatureFlags::class.toKey(qualifier)
     bind(key).toInstance(testFeatureFlags)
     bind<FeatureFlags>().to(key)
     bind<FeatureService>().to(key)
@@ -29,12 +29,12 @@ class TestFeatureFlagsModule(
    *
    * Usage:
    * ```
-   * install(TestFeatureFlagsModule().withOverrides { flags ->
+   * install(FakeFeatureFlagsModule().withOverrides { flags ->
    *   flags.overrideBool(Feature("foo"), true)
    * })
    * ```
    */
-  fun withOverrides(lambda: (TestFeatureFlags) -> Unit): TestFeatureFlagsModule {
+  fun withOverrides(lambda: (FakeFeatureFlags.() -> Unit)): FakeFeatureFlagsModule {
     lambda(testFeatureFlags)
     return this
   }

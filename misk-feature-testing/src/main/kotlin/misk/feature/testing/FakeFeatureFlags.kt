@@ -1,10 +1,11 @@
 package misk.feature.testing
 
 import com.google.common.util.concurrent.AbstractIdleService
-import misk.feature.Attrs
+import misk.feature.Attributes
 import misk.feature.Feature
 import misk.feature.FeatureFlags
 import misk.feature.FeatureService
+import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -12,35 +13,31 @@ import javax.inject.Singleton
  * In-memory test implementation of [FeatureFlags] that allows flags to be overridden.
  */
 @Singleton
-class TestFeatureFlags @Inject constructor() : AbstractIdleService(),
+class FakeFeatureFlags @Inject constructor() : AbstractIdleService(),
     FeatureFlags,
     FeatureService {
   override fun startUp() {}
   override fun shutDown() {}
 
-  private val overrides = mutableMapOf<Feature, Any>()
+  private val overrides = ConcurrentHashMap<Feature, Any>()
 
-  override fun getBool(feature: Feature, token: String, attrs: Attrs?): Boolean {
+  override fun getBoolean(feature: Feature, token: String, attributes: Attributes): Boolean {
     return overrides.getOrDefault(feature, false) as Boolean
   }
 
-  override fun getInt(feature: Feature, token: String, attrs: Attrs?): Int {
-    checkNotNull(
-        overrides[feature]) { "Int flag $feature must be overridden with override() before use" }
-    return overrides[feature] as Int
-  }
+  override fun getInt(feature: Feature, token: String, attributes: Attributes): Int =
+      overrides[feature] as? Int ?: throw IllegalArgumentException(
+          "Int flag $feature must be overridden with override() before use")
 
-  override fun getString(feature: Feature, token: String, attrs: Attrs?): String {
-    checkNotNull(
-        overrides[feature]) { "String flag $feature must be overridden with override() before use" }
-    return overrides[feature] as String
-  }
+  override fun getString(feature: Feature, token: String, attributes: Attributes): String =
+      overrides[feature] as? String ?: throw IllegalArgumentException(
+          "String flag $feature must be overridden with override() before use")
 
   override fun <T : Enum<T>> getEnum(
     feature: Feature,
     token: String,
     clazz: Class<T>,
-    attrs: Attrs?
+    attributes: Attributes
   ): T {
     @Suppress("unchecked_cast")
     return overrides.getOrDefault(feature, clazz.enumConstants[0]) as T

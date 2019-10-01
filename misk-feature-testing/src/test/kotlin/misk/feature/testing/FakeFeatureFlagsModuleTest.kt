@@ -6,11 +6,11 @@ import misk.feature.FeatureFlags
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 
-class TestFeatureFlagsModuleTest {
+class FakeFeatureFlagsModuleTest {
   @Test
   fun testModule() {
-    val injector = Guice.createInjector(TestFeatureFlagsModule().withOverrides {
-      it.override(Feature("foo"), 24)
+    val injector = Guice.createInjector(FakeFeatureFlagsModule().withOverrides {
+      override(Feature("foo"), 24)
     })
 
     val flags = injector.getInstance(FeatureFlags::class.java)

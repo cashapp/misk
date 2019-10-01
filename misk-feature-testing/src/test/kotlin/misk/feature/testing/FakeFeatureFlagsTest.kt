@@ -6,12 +6,12 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
-internal class TestFeatureFlagsTest {
+internal class FakeFeatureFlagsTest {
   val FEATURE = Feature("foo")
   val OTHER_FEATURE = Feature("bar")
   val TOKEN = "cust_abcdef123"
 
-  val subject = TestFeatureFlags()
+  val subject = FakeFeatureFlags()
 
   @Test
   fun getInt() {
