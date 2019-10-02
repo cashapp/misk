@@ -4,14 +4,14 @@ import com.google.inject.Provides
 import com.launchdarkly.client.LDClient
 import com.launchdarkly.client.LDClientInterface
 import com.launchdarkly.client.LDConfig
-import misk.feature.FeatureFlags
-import misk.feature.FeatureService
 import misk.ServiceModule
 import misk.client.HttpClientSSLConfig
 import misk.config.Config
-import misk.config.Secret
+import misk.feature.FeatureFlags
+import misk.feature.FeatureService
 import misk.inject.KAbstractModule
 import misk.inject.toKey
+import misk.resources.ResourceLoader
 import misk.security.ssl.SslContextFactory
 import misk.security.ssl.SslLoader
 import java.net.URI
@@ -35,7 +35,8 @@ class LaunchDarklyModule(
   @Provides
   fun provideLaunchDarklyClient(
     sslLoader: SslLoader,
-    sslContextFactory: SslContextFactory
+    sslContextFactory: SslContextFactory,
+    resourceLoader: ResourceLoader
   ): LDClientInterface {
     val baseUri = URI.create(config.base_uri)
     val ldConfig = LDConfig.Builder()
@@ -57,12 +58,12 @@ class LaunchDarklyModule(
       ldConfig.sslSocketFactory(sslContext.socketFactory, x509TrustManager)
     }
 
-    return LDClient(config.sdk_key.value.trim(), ldConfig.build())
+    return LDClient(resourceLoader.utf8(config.sdk_key)!!.trim(), ldConfig.build())
   }
 }
 
 data class LaunchDarklyConfig(
-  val sdk_key: Secret<String>,
+  val sdk_key: String,
   val base_uri: String,
   val ssl: HttpClientSSLConfig? = null
 ) : Config
