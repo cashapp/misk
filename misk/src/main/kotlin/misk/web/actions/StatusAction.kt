@@ -2,9 +2,9 @@ package misk.web.actions
 
 import com.google.common.util.concurrent.Service
 import com.google.common.util.concurrent.ServiceManager
-import misk.CoordinatedService
 import misk.healthchecks.HealthCheck
 import misk.healthchecks.HealthStatus
+import misk.name
 import misk.security.authz.Unauthenticated
 import misk.web.Get
 import misk.web.ResponseContentType
@@ -29,10 +29,7 @@ class StatusAction @Inject internal constructor(
   fun getStatus(): ServerStatus {
     val services = serviceManagerProvider.get().servicesByState().values().asList()
     val serviceStatus = services.map {
-      when (it) {
-        is CoordinatedService -> it.service.javaClass.simpleName to it.state()
-        else -> it.javaClass.simpleName to it.state()
-      }
+      it.name() to it.state()
     }.toMap()
     val healthCheckStatus = healthChecks.map { it.javaClass.simpleName to it.status() }.toMap()
     return ServerStatus(serviceStatus, healthCheckStatus)
