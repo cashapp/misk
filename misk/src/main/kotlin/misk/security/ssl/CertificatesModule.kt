@@ -10,7 +10,7 @@ import javax.inject.Inject
 import javax.servlet.http.HttpServletRequest
 
 /** Installs support for accessing client certificates */
-internal class CertificatesModule : ActionScopedProviderModule() {
+class CertificatesModule : ActionScopedProviderModule() {
   override fun configureProviders() {
     bindProvider(
         type = certificateArrayType,

@@ -15,4 +15,4 @@ import kotlin.annotation.AnnotationRetention.RUNTIME
     AnnotationTarget.VALUE_PARAMETER,
     AnnotationTarget.FIELD,
     AnnotationTarget.TYPE)
-internal annotation class MiskDefault
+annotation class MiskDefault

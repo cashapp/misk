@@ -29,7 +29,7 @@ class ConfigMetadataAction @Inject constructor(
     val yamlFilesRegex = Regex("(?<=(password|passphrase): )([^\n]*)")
 
     return Response(
-        resources = redact(resources, yamlFilesRegex)
+            resources = redact(resources, yamlFilesRegex)
     )
   }
 

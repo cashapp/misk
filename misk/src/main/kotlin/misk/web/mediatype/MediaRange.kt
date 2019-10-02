@@ -97,7 +97,7 @@ data class MediaRange(
       }
 
       val parametersAndExtensions = typeParametersAndExtensions.drop(1).map {
-        parseNameValue(it)
+          parseNameValue(it)
       }
       val parameters = LinkedHashMap<String, String>()
       val extensions = LinkedHashMap<String, String>()
@@ -128,13 +128,13 @@ data class MediaRange(
       }
 
       return MediaRange(
-          type,
-          subtype,
-          charset,
-          qualityFactor,
-          parameters.toMap(),
-          extensions.toMap(),
-          s
+              type,
+              subtype,
+              charset,
+              qualityFactor,
+              parameters.toMap(),
+              extensions.toMap(),
+              s
       )
     }
 

@@ -62,15 +62,15 @@ internal class GrpcResponseFeatureBinding(
             ?: error("@Grpc function's second parameter should be a MessageSource: $action")
         @Suppress("UNCHECKED_CAST") // Assume it's a proto type.
         return GrpcResponseFeatureBinding(
-            adapter = ProtoAdapter.get(responseType as Class<Any>),
-            streaming = true
+                adapter = ProtoAdapter.get(responseType as Class<Any>),
+                streaming = true
         )
       } else {
         claimer.claimReturnValue()
         @Suppress("UNCHECKED_CAST") // Assume it's a proto type.
         return GrpcResponseFeatureBinding(
-            adapter = ProtoAdapter.get(action.returnType.javaType as Class<Any>),
-            streaming = false
+                adapter = ProtoAdapter.get(action.returnType.javaType as Class<Any>),
+                streaming = false
         )
       }
     }

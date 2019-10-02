@@ -46,16 +46,16 @@ internal class GrpcRequestFeatureBinding(
 
       return if (streamingRequestType != null) {
         @Suppress("UNCHECKED_CAST") // Assume it's a proto type.
-        GrpcRequestFeatureBinding(
-            adapter = ProtoAdapter.get(streamingRequestType as Class<Any>),
-            streaming = true
-        )
+        (GrpcRequestFeatureBinding(
+                adapter = ProtoAdapter.get(streamingRequestType as Class<Any>),
+                streaming = true
+        ))
       } else {
         @Suppress("UNCHECKED_CAST") // Assume it's a proto type.
-        GrpcRequestFeatureBinding(
-            adapter = ProtoAdapter.get(action.parameters[0].type.javaType as Class<Any>),
-            streaming = false
-        )
+        (GrpcRequestFeatureBinding(
+                adapter = ProtoAdapter.get(action.parameters[0].type.javaType as Class<Any>),
+                streaming = false
+        ))
       }
     }
   }
