@@ -349,7 +349,8 @@ class ServiceGraphBuilderTest {
   ): ServiceGraphBuilder {
     val builder = ServiceGraphBuilder()
     for (service in services) {
-      builder.addService(service, AppendingService(target, service.name))
+      builder.addService(service,
+          AppendingService(target, service.name))
     }
     return builder
   }

@@ -135,7 +135,7 @@ class ServiceModule(
  * ```
  */
 inline fun <reified T : Service> ServiceModule(qualifier: KClass<out Annotation>? = null) =
-    ServiceModule(T::class.toKey(qualifier))
+    misk.ServiceModule(T::class.toKey(qualifier))
 
 internal data class EnhancementEdge(val toBeEnhanced: Key<*>, val enhancement: Key<*>)
 internal data class DependencyEdge(val dependent: Key<*>, val dependsOn: Key<*>)

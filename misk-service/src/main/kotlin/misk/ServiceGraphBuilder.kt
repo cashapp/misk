@@ -11,7 +11,7 @@ import javax.inject.Provider
  * Builds a graph of [CoordinatedService]s which defer start up and shut down until their dependent
  * services are ready.
  */
-class ServiceGraphBuilder {
+internal class ServiceGraphBuilder {
   private var serviceMap = mutableMapOf<Key<*>, CoordinatedService>()
   private val dependencyMap = LinkedHashMultimap.create<Key<*>, Key<*>>()
   private val enhancementMap = mutableMapOf<Key<*>, Key<*>>()
