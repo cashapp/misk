@@ -9,9 +9,9 @@ import javax.inject.Provider
 
 internal class CoordinatedService(
   private val serviceProvider: Provider<out Service>
-) : AbstractService() {
+) : AbstractService(), DelegatingService {
 
-  val service: Service by lazy {
+  override val service: Service by lazy {
     serviceProvider.get()
   }
 

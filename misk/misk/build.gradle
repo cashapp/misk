@@ -50,6 +50,7 @@ dependencies {
   compile dep.prometheusHotspot
   compile dep.jnrUnixsocket
   compile project(':misk-inject')
+  compile project(':misk-service')
 
   testCompile dep.kotlinxCoroutines
   testCompile dep.mockitoCore
