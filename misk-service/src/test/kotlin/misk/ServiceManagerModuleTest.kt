@@ -14,7 +14,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import kotlin.test.assertFailsWith
 
-internal class MiskServiceModuleTest {
+internal class ServiceManagerModuleTest {
   @com.google.inject.Singleton
   class SingletonService1 : AbstractIdleService() {
     override fun startUp() {}
@@ -98,8 +98,10 @@ internal class MiskServiceModuleTest {
               install(ServiceModule<SingletonService2>())
               install(ServiceModule<ProvidesMethodService>())
               install(ServiceModule<InstanceService>())
-              bind(keyOf<InstanceService>()).toInstance(InstanceService())
-              install(ServiceModule<ExplicitEagerSingletonService>())
+              bind(keyOf<InstanceService>()).toInstance(
+                  InstanceService())
+              install(
+                  ServiceModule<ExplicitEagerSingletonService>())
               bind(keyOf<ExplicitEagerSingletonService>()).asEagerSingleton()
               install(ServiceModule<SingletonScopeService>())
               bind(keyOf<SingletonScopeService>())
@@ -107,7 +109,8 @@ internal class MiskServiceModuleTest {
               install(ServiceModule<SingletonAnnotationService>())
               bind(keyOf<SingletonAnnotationService>())
                   .`in`(com.google.inject.Singleton::class.java)
-              install(ServiceModule<GoogleSingletonAnnotationService>())
+              install(
+                  ServiceModule<GoogleSingletonAnnotationService>())
               bind(keyOf<GoogleSingletonAnnotationService>())
                   .`in`(com.google.inject.Singleton::class.java)
 
@@ -123,7 +126,7 @@ internal class MiskServiceModuleTest {
 
       injector.getInstance<ServiceManager>()
     }.message).contains("the following services are not marked as @Singleton: " +
-        "misk.MiskServiceModuleTest\$NonSingletonService1, " +
-        "misk.MiskServiceModuleTest\$NonSingletonService2")
+        "misk.ServiceManagerModuleTest\$NonSingletonService1, " +
+        "misk.ServiceManagerModuleTest\$NonSingletonService2")
   }
 }

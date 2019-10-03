@@ -5,12 +5,12 @@ buildscript {
 }
 
 dependencies {
-  compile dep.guice
   compile dep.kotlinStdLib
-  compile dep.kotlinReflection
-  compile project(':misk-feature')
+  compile dep.javaxInject
+  compile dep.guava
+  compile dep.guice
+  compile dep.loggingApi
   compile project(':misk-inject')
-  compile project(':misk-service')
 
   testCompile project(':misk-testing')
 }

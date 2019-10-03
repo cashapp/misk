@@ -2,7 +2,7 @@ package misk.web.actions
 
 import com.google.common.util.concurrent.Service
 import com.google.common.util.concurrent.ServiceManager
-import misk.CoordinatedService
+import misk.DelegatingService
 import misk.healthchecks.HealthCheck
 import misk.healthchecks.HealthStatus
 import misk.security.authz.Unauthenticated
@@ -30,7 +30,7 @@ class StatusAction @Inject internal constructor(
     val services = serviceManagerProvider.get().servicesByState().values().asList()
     val serviceStatus = services.map {
       when (it) {
-        is CoordinatedService -> it.service.javaClass.simpleName to it.state()
+        is DelegatingService -> it.service.javaClass.simpleName to it.state()
         else -> it.javaClass.simpleName to it.state()
       }
     }.toMap()
