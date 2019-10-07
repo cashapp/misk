@@ -24,7 +24,7 @@ internal class TransformedColumnType : UserType, ParameterizedType, TypeConfigur
     val ARGUMENTS = "arguments"
   }
 
-  var retClass: KClass<*>? = null
+  lateinit var retClass: KClass<*>
 
   lateinit var transformer: Transformer
 
@@ -38,7 +38,7 @@ internal class TransformedColumnType : UserType, ParameterizedType, TypeConfigur
 
   override fun equals(x: Any?, y: Any?) = x == y
 
-  override fun returnedClass(): Class<*> = retClass!!.java
+  override fun returnedClass(): Class<*> = retClass.java
 
   override fun assemble(cached: Serializable, owner: Any): Any = transformer.assemble(owner, cached)
 
