@@ -15,7 +15,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import routeguide.Feature
 import routeguide.Point
-import routeguide.RouteGuide
+import routeguide.RouteGuideClient
 import routeguide.RouteNote
 import javax.inject.Inject
 import javax.inject.Provider
@@ -28,7 +28,7 @@ class MiskClientMiskServerTest {
       RouteGuideMiskServiceModule(),
       LogCollectorModule())
 
-  @Inject lateinit var routeGuideProvider: Provider<RouteGuide>
+  @Inject lateinit var routeGuideProvider: Provider<RouteGuideClient>
   @Inject lateinit var logCollector: LogCollector
   @Inject lateinit var routeChatGrpcAction: RouteChatGrpcAction
 
@@ -46,7 +46,7 @@ class MiskClientMiskServerTest {
     runBlocking {
       val routeGuide = routeGuideProvider.get()
 
-      val returnValue = routeGuide.GetFeature(point)
+      val returnValue = routeGuide.GetFeature().execute(point)
       assertThat(returnValue).isEqualTo(feature)
     }
 
@@ -62,7 +62,7 @@ class MiskClientMiskServerTest {
     runBlocking {
       val routeGuide = routeGuideProvider.get()
 
-      val (sendChannel, receiveChannel) = routeGuide.RouteChat()
+      val (sendChannel, receiveChannel) = routeGuide.RouteChat().execute()
       sendChannel.send(RouteNote(message = "a"))
       assertThat(receiveChannel.receive()).isEqualTo(RouteNote(message = "ACK: a"))
       sendChannel.send(RouteNote(message = "b"))
@@ -84,7 +84,8 @@ class MiskClientMiskServerTest {
     runBlocking {
       val routeGuide = routeGuideProvider.get()
 
-      val (sendChannel, receiveChannel: ReceiveChannel<RouteNote>) = routeGuide.RouteChat()
+      val (sendChannel, receiveChannel: ReceiveChannel<RouteNote>) =
+          routeGuide.RouteChat().execute()
       assertThat(receiveChannel.receive()).isEqualTo(RouteNote(message = "welcome"))
       sendChannel.close()
     }
