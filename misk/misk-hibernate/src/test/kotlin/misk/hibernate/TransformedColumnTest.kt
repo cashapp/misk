@@ -55,7 +55,6 @@ class TransformedColumnTest {
     swappableTransformer = xformer
     f()
     swappableTransformer = saved
-
   }
 
   @Test
@@ -264,15 +263,15 @@ class TransformedColumnTest {
     @GeneratedValue
     override lateinit var id: Id<DbManyTypes>
 
-    @Column(name = "int_field", nullable=false)
+    @Column(name = "int_field")
     @TransformedInt(amount=2)
     var intField: Int = 0
 
-    @Column(name = "double_field", nullable=false)
+    @Column(name = "double_field")
     @TransformedDouble
     var doubleField: Double = 0.0
 
-    @Column(name = "string_field", nullable=false)
+    @Column(name = "string_field")
     @TransformedString
     var stringField: String = ""
 
