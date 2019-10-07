@@ -11,7 +11,7 @@ import misk.security.ssl.SslLoader
 import misk.security.ssl.TrustStoreConfig
 import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
-import routeguide.RouteGuide
+import routeguide.RouteGuideClient
 import javax.inject.Named
 import javax.inject.Singleton
 
@@ -53,5 +53,6 @@ class MiskGrpcClientModule : KAbstractModule() {
 
   @Provides
   @Singleton
-  fun provideRouteGuide(grpcClient: GrpcClient): RouteGuide = grpcClient.create(RouteGuide::class)
+  fun provideRouteGuide(grpcClient: GrpcClient): RouteGuideClient =
+      grpcClient.create(RouteGuideClient::class)
 }

@@ -17,7 +17,8 @@ internal class GrpcRequestFeatureBinding(
 ) : FeatureBinding {
   override fun bind(subject: Subject) {
     val requestBody = subject.takeRequestBody()
-    val messageSource = GrpcMessageSource(requestBody, adapter)
+    val messageSource = GrpcMessageSource(requestBody, adapter,
+        subject.httpCall.requestHeaders["grpc-encoding"])
 
     if (streaming) {
       subject.setParameter(0, messageSource)

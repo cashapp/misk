@@ -1,15 +1,9 @@
 package misk
 
-import com.google.common.util.concurrent.Service
-import com.google.common.util.concurrent.ServiceManager
-import com.google.inject.Injector
-import com.google.inject.Provides
-import com.google.inject.Scopes
 import misk.concurrent.SleeperModule
 import misk.environment.RealEnvVarModule
 import misk.healthchecks.HealthCheck
 import misk.inject.KAbstractModule
-import misk.inject.asSingleton
 import misk.metrics.MetricsModule
 import misk.moshi.MoshiModule
 import misk.prometheus.PrometheusHistogramRegistryModule
@@ -17,9 +11,6 @@ import misk.resources.ResourceLoaderModule
 import misk.time.ClockModule
 import misk.time.TickerModule
 import misk.tokens.TokenGeneratorModule
-import mu.KotlinLogging
-import javax.inject.Provider
-import javax.inject.Singleton
 
 /**
  * Install this module in real environments.

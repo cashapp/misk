@@ -5,13 +5,13 @@ import com.squareup.wire.MessageSource
 import misk.grpc.consumeEachAndClose
 import misk.web.actions.WebAction
 import misk.web.interceptors.LogRequestResponse
-import routeguide.RouteGuideRouteChat
+import routeguide.RouteGuideRouteChatBlockingServer
 import routeguide.RouteNote
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class RouteChatGrpcAction @Inject constructor() : WebAction, RouteGuideRouteChat {
+class RouteChatGrpcAction @Inject constructor() : WebAction, RouteGuideRouteChatBlockingServer {
   var welcomeMessage: String? = null
 
   @LogRequestResponse(sampling = 1.0, includeBody = true)
