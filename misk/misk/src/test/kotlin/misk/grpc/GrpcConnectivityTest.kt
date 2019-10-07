@@ -62,13 +62,14 @@ class GrpcConnectivityTest {
         .url(jetty.httpsServerUrl!!.resolve("/helloworld.Greeter/SayHello")!!)
         .addHeader("grpc-trace-bin", "")
         .addHeader("grpc-accept-encoding", "gzip")
+        .addHeader("grpc-encoding", "gzip")
         .post(object : RequestBody() {
           override fun contentType(): MediaType? {
             return MediaTypes.APPLICATION_GRPC_MEDIA_TYPE
           }
 
           override fun writeTo(sink: BufferedSink) {
-            val writer = GrpcMessageSink(sink, HelloRequest.ADAPTER)
+            val writer = GrpcMessageSink(sink, HelloRequest.ADAPTER, "gzip")
             writer.write(HelloRequest("jesse!"))
           }
         })

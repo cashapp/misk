@@ -27,7 +27,7 @@ class GrpcSourceSinkTest {
   @Test
   fun grpcMessageSinkHelloRequest() {
     val buffer = Buffer()
-    val writer = GrpcMessageSink(buffer, HelloRequest.ADAPTER)
+    val writer = GrpcMessageSink(buffer, HelloRequest.ADAPTER, "identity")
     writer.write(HelloRequest("localhost"))
     writer.close()
     assertThat(buffer.readByteString())
@@ -37,7 +37,7 @@ class GrpcSourceSinkTest {
   @Test
   fun grpcMessageSinkHelloReply() {
     val buffer = Buffer()
-    val writer = GrpcMessageSink(buffer, HelloReply.ADAPTER)
+    val writer = GrpcMessageSink(buffer, HelloReply.ADAPTER, "identity")
     writer.write(HelloReply("Hello localhost"))
     writer.close()
     assertThat(buffer.readByteString()).isEqualTo(

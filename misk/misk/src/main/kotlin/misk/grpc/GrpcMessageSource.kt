@@ -12,7 +12,7 @@ import java.net.ProtocolException
  * Reads an HTTP/2 stream as a sequence of gRPC messages.
  *
  * This is derived from Wire's GrpcMessageSource.kt.
- * https://github.com/square/wire/blob/master/wire-grpc-client/src/main/java/com/squareup/wire/GrpcMessageSource.kt
+ * https://github.com/square/wire/search?q=GrpcMessageSource&type=Code
  *
  * @param source the HTTP/2 stream body.
  * @param messageAdapter a proto adapter for each message.
@@ -43,10 +43,11 @@ internal class GrpcMessageSource<T : Any>(
 
     val encodedLength = source.readInt().toLong() and 0xffffffffL
 
-    val encodedMessage = Buffer()
-    encodedMessage.write(source, encodedLength)
+    val encodedMessage = Buffer().write(source, encodedLength)
 
-    return messageAdapter.decode(messageDecoding.decode(encodedMessage).buffer())
+    return messageDecoding.decode(encodedMessage).buffer().use {
+      messageAdapter.decode(it)
+    }
   }
 
   override fun toString() = "GrpcMessageSource"

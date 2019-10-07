@@ -31,13 +31,15 @@ protobuf {
 
 wire {
   kotlin {
+    rpcRole = 'client'
   }
 
   // Generate service interfaces also.
   kotlin {
     includes = ['routeguide.RouteGuide']
     exclusive = false
-    blockingServices = true
+    rpcRole = 'server'
+    rpcCallStyle = 'blocking'
     singleMethodServices = true
   }
 }
@@ -47,7 +49,7 @@ sourceSets {
   main.java.srcDirs += 'build/generated/source/proto/main/java'
 
   // TODO(jwilson): we do this to make IntelliJ happy but the Wire Gradle plugin should do that.
-  main.java.srcDirs += 'build/generated/src/main/java'
+  main.java.srcDirs += 'build/generated/source/wire'
 }
 
 dependencies {
@@ -56,6 +58,7 @@ dependencies {
   compile dep.grpcNetty
   compile dep.grpcProtobuf
   compile dep.grpcStub
+  compile dep.kotlinxCoroutines
   compile dep.wireGrpcClient
   compile dep.wireRuntime
   compile project(':misk')

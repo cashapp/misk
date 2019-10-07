@@ -11,7 +11,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import routeguide.Feature
 import routeguide.Point
-import routeguide.RouteGuide
+import routeguide.RouteGuideClient
 import routeguide.RouteNote
 import javax.inject.Inject
 import javax.inject.Provider
@@ -24,16 +24,14 @@ class MiskClientProtocServerTest {
       RouteGuideProtocServiceModule(),
       MiskTestingServiceModule())
 
-  @Inject lateinit var routeGuideProvider: Provider<RouteGuide>
+  @Inject lateinit var routeGuideProvider: Provider<RouteGuideClient>
 
   @Test
   fun requestResponse() {
     runBlocking {
       val routeGuide = routeGuideProvider.get()
 
-      val feature = routeGuide.GetFeature(Point(
-          latitude = 43,
-          longitude = -80))
+      val feature = routeGuide.GetFeature().execute(Point(latitude = 43, longitude = -80))
       assertThat(feature).isEqualTo(Feature(
           name = "pine tree",
           location = Point(latitude = 43, longitude = -80)
@@ -46,7 +44,7 @@ class MiskClientProtocServerTest {
     runBlocking {
       val routeGuide = routeGuideProvider.get()
 
-      val (sendChannel, receiveChannel) = routeGuide.RouteChat()
+      val (sendChannel, receiveChannel) = routeGuide.RouteChat().execute()
       sendChannel.send(RouteNote(message = "Taco cat"))
       assertThat(receiveChannel.receive().message).isEqualTo("tac ocaT")
       sendChannel.send(RouteNote(message = "A nut for a jar of tuna"))

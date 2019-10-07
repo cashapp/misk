@@ -25,7 +25,7 @@ internal class GrpcResponseFeatureBinding(
     // TODO(jwilson): permit non-identity GRPC encoding.
 
     val responseBody = subject.takeResponseBody()
-    val messageSink = GrpcMessageSink(responseBody, adapter)
+    val messageSink = GrpcMessageSink(responseBody, adapter, grpcEncoding = "identity")
 
     subject.httpCall.setResponseHeader("Content-Type",
         MediaTypes.APPLICATION_GRPC_MEDIA_TYPE.toString())
