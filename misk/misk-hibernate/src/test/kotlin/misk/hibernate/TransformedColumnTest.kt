@@ -60,15 +60,15 @@ class TransformedColumnTest {
   @Test
   fun testBasicIncrement() {
     val incrementIntTransformer = object : SwappableTransformer {
-      override fun assemble(ctx: TransformerContext, owner: Any?, value: Serializable): Any = when (ctx.columnName) {
-        "int_field" -> value as Int - 2
-        else -> value
-      }
+        override fun assemble(ctx: TransformerContext, owner: Any?, value: Serializable): Any = when (ctx.columnName) {
+          "int_field" -> value as Int - 2
+          else -> value
+        }
 
-      override fun disassemble(ctx: TransformerContext, value: Any): Serializable = when (ctx.columnName) {
-        "int_field" -> value as Int + 2
-        else -> value as Serializable
-      }
+        override fun disassemble(ctx: TransformerContext, value: Any): Serializable = when (ctx.columnName) {
+          "int_field" -> value as Int + 2
+          else -> value as Serializable
+        }
     }
 
     withTransformer(incrementIntTransformer) {
@@ -148,11 +148,21 @@ class TransformedColumnTest {
       }
     }
 
-    withTransformer(incrementIntTransformer)
-    {
+    withTransformer(incrementIntTransformer) {
       transacter.transaction { session ->
         session.save(DbManyTypes(1, 1.2, "Test", "Bytes".toByteArray()))
+        session.hibernateSession.clear()
       }
+
+      transacter.transaction { session ->
+        val rows = queryFactory.newQuery<ManyTypesProjectionQuery>()
+                .intField(1)
+                .list(session)
+
+        assertThat(rows).hasSize(1)
+        assertThat(rows[0].intField).isEqualTo(1)
+      }
+
       transacter.transaction { session ->
         val rows = queryFactory.newQuery<ManyTypesRawQuery>()
                 .intField(3)
@@ -162,14 +172,6 @@ class TransformedColumnTest {
         assertThat(rows[0].intField).isEqualTo(3)
       }
 
-      transacter.transaction { session ->
-        val rows = queryFactory.newQuery<ManyTypesQuery>()
-                .intField(1)
-                .list(session)
-
-        assertThat(rows).hasSize(1)
-        assertThat(rows[0].intField).isEqualTo(1)
-      }
     }
   }
 
@@ -200,7 +202,7 @@ class TransformedColumnTest {
       }
 
       transacter.transaction { session ->
-        val rows = queryFactory.newQuery<ManyTypesQuery>()
+        val rows = queryFactory.newQuery<ManyTypesProjectionQuery>()
                 .intField(value)
                 .list(session)
         assertThat(rows).hasSize(1)
@@ -209,11 +211,11 @@ class TransformedColumnTest {
 
       transacter.transaction { session ->
         val rows = queryFactory.newQuery<ManyTypesRawQuery>()
-                .intField(3)
+                // .intField(3)
                 .list(session)
 
         val annotationForInt = DbManyTypes::class.declaredMemberProperties
-                .mapNotNull {prop -> prop.javaField?.getAnnotation(TransformedInt::class.java) }
+                .mapNotNull { prop -> prop.javaField?.getAnnotation(TransformedInt::class.java) }
                 .first()
         assertThat(rows).hasSize(1)
         assertThat(rows[0].intField).isEqualTo(value + annotationForInt.amount)
@@ -224,6 +226,20 @@ class TransformedColumnTest {
   interface ManyTypesQuery : Query<DbManyTypes> {
     @Constraint(path = "intField")
     fun intField(intField: Int): ManyTypesQuery
+
+    @Constraint(path = "doubleField")
+    fun doubleField(doubleField: Double): ManyTypesQuery
+
+    @Constraint(path = "stringField")
+    fun stringField(stringField: String): ManyTypesQuery
+
+    @Constraint(path = "byteArrayField")
+    fun byteArrayField(byteArrayField: ByteArray): ManyTypesQuery
+
+//    @Select
+//    @Select("int_field.double_field.string_field.byte_array_field")
+//    fun query(session: Session): List<DbManyTypes>
+//    fun query(session: Session): List<DbManyTypes>
   }
 
   interface ManyTypesRawQuery : Query<DbManyTypesRaw> {
@@ -234,6 +250,15 @@ class TransformedColumnTest {
   interface ManyTypesProjectionQuery : Query<DbManyTypes> {
     @Constraint(path = "intField")
     fun intField(intField: Int): ManyTypesProjectionQuery
+
+    @Constraint(path="doubleField")
+    fun doubleField(doubleField: Double): ManyTypesProjectionQuery
+
+    @Constraint(path = "stringField")
+    fun stringField(stringField: String): ManyTypesProjectionQuery
+
+    @Constraint(path = "byteArrayField")
+    fun byteArrayField(byteArrayField: ByteArray): ManyTypesProjectionQuery
 
     @Select
     fun query(session: Session): List<ManyTypesProjection>
@@ -264,7 +289,7 @@ class TransformedColumnTest {
     override lateinit var id: Id<DbManyTypes>
 
     @Column(name = "int_field")
-    @TransformedInt(amount=2)
+    @TransformedInt(amount = 2)
     var intField: Int = 0
 
     @Column(name = "double_field")
@@ -275,7 +300,7 @@ class TransformedColumnTest {
     @TransformedString
     var stringField: String = ""
 
-    @Column(name = "byte_array_field", nullable=false)
+    @Column(name = "byte_array_field", nullable = false)
     @TransformedByteArray
     var byteArrayField: ByteArray = byteArrayOf()
 
