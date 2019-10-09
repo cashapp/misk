@@ -13,11 +13,12 @@ import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.data.Percentage
 import org.junit.jupiter.api.Test
 import java.io.Serializable
-import java.util.Arrays
 import java.util.Objects
 import javax.inject.Inject
 import javax.inject.Qualifier
+import javax.persistence.AttributeConverter
 import javax.persistence.Column
+import javax.persistence.Convert
 import javax.persistence.Entity
 import javax.persistence.GeneratedValue
 import javax.persistence.Table
@@ -30,7 +31,7 @@ interface SwappableTransformer {
   fun disassemble(ctx: TransformerContext, value: Any): Serializable
 }
 
-class DelegatingTransformer(val ctx: TransformerContext) : Transformer(ctx) {
+class DelegatingTransformer(private val ctx: TransformerContext) : Transformer(ctx) {
   @Inject
   lateinit var transformer: SwappableTransformer
 
@@ -50,32 +51,46 @@ class TransformedColumnTest {
 
   var swappableTransformer: SwappableTransformer? = null
 
-  fun withTransformer(xformer: SwappableTransformer, f: () -> Unit) {
+  private fun withTransformer(assemble: (TransformerContext, Any?, Serializable) -> Any,
+                      disassemble: (TransformerContext, Any) -> Serializable,
+                      f: () -> Unit) {
     val saved = swappableTransformer
-    swappableTransformer = xformer
-    f()
-    swappableTransformer = saved
+
+    swappableTransformer = object : SwappableTransformer {
+      override fun assemble(ctx: TransformerContext, owner: Any?, value: Serializable) = assemble(ctx, owner, value)
+      override fun disassemble(ctx: TransformerContext, value: Any) = disassemble(ctx, value)
+    }
+
+    try {
+      f()
+    } finally {
+      swappableTransformer = saved
+    }
   }
 
   @Test
   fun testBasicIncrement() {
-    val incrementIntTransformer = object : SwappableTransformer {
-        override fun assemble(ctx: TransformerContext, owner: Any?, value: Serializable): Any = when (ctx.columnName) {
-          "int_field" -> value as Int - 2
-          else -> value
-        }
-
-        override fun disassemble(ctx: TransformerContext, value: Any): Serializable = when (ctx.columnName) {
-          "int_field" -> value as Int + 2
-          else -> value as Serializable
-        }
+    val assemble = { _: TransformerContext, _: Any?, value: Serializable ->
+      when (value) {
+        is Int -> value - 2
+        else -> value
+      }
     }
 
-    withTransformer(incrementIntTransformer) {
+    val disassemble = { _: TransformerContext, value: Any ->
+      when (value) {
+        is Int -> value + 2
+        else -> value as Serializable
+      }
+    }
+
+    withTransformer(assemble, disassemble) {
       transacter.transaction { session ->
         session.save(DbManyTypes(1, 1.2, "Test", "Bytes".toByteArray()))
       }
       transacter.transaction { session ->
+        session.hibernateSession.sessionFactory.sessionFactoryOptions.criteriaLiteralHandlingMode
+
         val rows = queryFactory.newQuery<ManyTypesRawQuery>().list(session)
 
         assertThat(rows).hasSize(1)
@@ -94,21 +109,23 @@ class TransformedColumnTest {
 
   @Test
   fun testMultipleTypes() {
-    val incrementIntTransformer = object : SwappableTransformer {
-      override fun assemble(ctx: TransformerContext, owner: Any?, value: Serializable): Any = when (ctx.columnName) {
+    val assemble = { ctx: TransformerContext, _: Any?, value: Serializable ->
+      when (ctx.columnName) {
         "int_field" -> value as Int - 2
         "double_field" -> value as Double - 2.0
         else -> value
       }
+    }
 
-      override fun disassemble(ctx: TransformerContext, value: Any): Serializable = when (ctx.columnName) {
+    val disassemble = { ctx: TransformerContext, value: Any ->
+      when (ctx.columnName) {
         "int_field" -> value as Int + 2
         "double_field" -> value as Double + 2.0
         else -> value as Serializable
       }
     }
 
-    withTransformer(incrementIntTransformer) {
+    withTransformer(assemble, disassemble) {
       transacter.transaction { session ->
         session.save(DbManyTypes(1, 1.2, "Test", "Bytes".toByteArray()))
       }
@@ -131,24 +148,66 @@ class TransformedColumnTest {
   }
 
   @Test
-  fun testTransformedQuery() {
-    val incrementIntTransformer = object : SwappableTransformer {
-      override fun assemble(ctx: TransformerContext, owner: Any?, value: Serializable): Any {
-        return when (ctx.columnName) {
-          "int_field" -> value as Int - 2
-          else -> value
-        }
-      }
+  fun testTransformedStringQuery() {
 
-      override fun disassemble(ctx: TransformerContext, value: Any): Serializable {
-        return when (ctx.columnName) {
-          "int_field" -> value as Int + 2
-          else -> value as Serializable
-        }
+    val suffix = "_modified"
+    val assemble = { _: TransformerContext, _: Any?, value: Serializable ->
+      when (value) {
+        is String -> value.removeSuffix(suffix)
+        else -> value
       }
     }
 
-    withTransformer(incrementIntTransformer) {
+    val disassemble = { _: TransformerContext, value: Any ->
+      when (value) {
+        is String -> "$value$suffix"
+        else -> value as Serializable
+      }
+    }
+
+    withTransformer(assemble, disassemble) {
+      transacter.transaction { session ->
+        session.save(DbManyTypes(1, 1.2, "Test", "Bytes".toByteArray()))
+        session.hibernateSession.clear()
+      }
+
+      transacter.transaction { session ->
+        val rows = queryFactory.newQuery<ManyTypesProjectionQuery>()
+                .stringField("Test")
+                .query(session)
+
+        assertThat(rows).hasSize(1)
+        assertThat(rows[0].stringField).isEqualTo("Test")
+      }
+
+      transacter.transaction { session ->
+        val rows = queryFactory.newQuery<ManyTypesRawQuery>()
+                .stringField("Test_modified")
+                .list(session)
+
+        assertThat(rows).hasSize(1)
+        assertThat(rows[0].stringField).isEqualTo("Test$suffix")
+      }
+    }
+  }
+
+  @Test
+  fun testTransformedQuery() {
+    val assemble = { ctx: TransformerContext, _: Any?, value: Serializable ->
+      when (ctx.columnName) {
+        "int_field" -> value as Int - 2
+        else -> value
+      }
+    }
+
+    val disassemble = { ctx: TransformerContext, value: Any ->
+      when (ctx.columnName) {
+        "int_field" -> value as Int + 2
+        else -> value as Serializable
+      }
+    }
+
+    withTransformer(assemble, disassemble) {
       transacter.transaction { session ->
         session.save(DbManyTypes(1, 1.2, "Test", "Bytes".toByteArray()))
         session.hibernateSession.clear()
@@ -157,7 +216,7 @@ class TransformedColumnTest {
       transacter.transaction { session ->
         val rows = queryFactory.newQuery<ManyTypesProjectionQuery>()
                 .intField(1)
-                .list(session)
+                .query(session)
 
         assertThat(rows).hasSize(1)
         assertThat(rows[0].intField).isEqualTo(1)
@@ -171,29 +230,26 @@ class TransformedColumnTest {
         assertThat(rows).hasSize(1)
         assertThat(rows[0].intField).isEqualTo(3)
       }
-
     }
   }
 
   @Test
   fun testTransformerArguments() {
-    val incrementByArgumentAmount = object : SwappableTransformer {
-      override fun assemble(ctx: TransformerContext, owner: Any?, value: Serializable): Any {
-        return when (ctx.columnName) {
-          "int_field" -> value as Int - ctx.arguments["amount"] as Int
-          else -> value
-        }
-      }
-
-      override fun disassemble(ctx: TransformerContext, value: Any): Serializable {
-        return when (ctx.columnName) {
-          "int_field" -> value as Int + ctx.arguments["amount"] as Int
-          else -> value as Serializable
-        }
+    val assemble = { ctx: TransformerContext, _: Any?, value: Serializable ->
+      when (ctx.columnName) {
+        "int_field" -> (value as Int) - (ctx.arguments["amount"] as Int)
+        else -> value
       }
     }
 
-    withTransformer(incrementByArgumentAmount)
+    val disassemble = { ctx: TransformerContext, value: Any ->
+      when (ctx.columnName) {
+        "int_field" -> (value as Int) + (ctx.arguments["amount"] as Int)
+        else -> value as Serializable
+      }
+    }
+
+    withTransformer(assemble, disassemble)
     {
       val value = 1
 
@@ -211,7 +267,6 @@ class TransformedColumnTest {
 
       transacter.transaction { session ->
         val rows = queryFactory.newQuery<ManyTypesRawQuery>()
-                // .intField(3)
                 .list(session)
 
         val annotationForInt = DbManyTypes::class.declaredMemberProperties
@@ -236,22 +291,21 @@ class TransformedColumnTest {
     @Constraint(path = "byteArrayField")
     fun byteArrayField(byteArrayField: ByteArray): ManyTypesQuery
 
-//    @Select
-//    @Select("int_field.double_field.string_field.byte_array_field")
-//    fun query(session: Session): List<DbManyTypes>
-//    fun query(session: Session): List<DbManyTypes>
   }
 
   interface ManyTypesRawQuery : Query<DbManyTypesRaw> {
     @Constraint(path = "intField")
     fun intField(intField: Int): ManyTypesRawQuery
+
+    @Constraint(path = "stringField")
+    fun stringField(stringField: String): ManyTypesRawQuery
   }
 
   interface ManyTypesProjectionQuery : Query<DbManyTypes> {
     @Constraint(path = "intField")
     fun intField(intField: Int): ManyTypesProjectionQuery
 
-    @Constraint(path="doubleField")
+    @Constraint(path = "doubleField")
     fun doubleField(doubleField: Double): ManyTypesProjectionQuery
 
     @Constraint(path = "stringField")
@@ -266,7 +320,7 @@ class TransformedColumnTest {
 
   @Target(AnnotationTarget.FIELD)
   @TransformedType(transformer = DelegatingTransformer::class, targetType = Int::class)
-  annotation class TransformedInt(val amount: Int = 0, val intVal: Int = 34)
+  annotation class TransformedInt(val amount: Int = 0)
 
   @Target(AnnotationTarget.FIELD)
   @TransformedType(transformer = DelegatingTransformer::class, targetType = Double::class)
@@ -281,6 +335,12 @@ class TransformedColumnTest {
   @TransformedType(transformer = DelegatingTransformer::class, targetType = ByteArray::class)
   annotation class TransformedByteArray
 
+  class Bumper : AttributeConverter<Int, Int> {
+    override fun convertToDatabaseColumn(attribute: Int): Int = attribute + 2
+    override fun convertToEntityAttribute(dbData: Int): Int = dbData - 2
+  }
+
+
   @Entity
   @Table(name = "manytypes")
   class DbManyTypes : DbUnsharded<DbManyTypes> {
@@ -290,6 +350,7 @@ class TransformedColumnTest {
 
     @Column(name = "int_field")
     @TransformedInt(amount = 2)
+    @Convert(converter = Bumper::class)
     var intField: Int = 0
 
     @Column(name = "double_field")
@@ -339,7 +400,6 @@ class TransformedColumnTest {
     }
   }
 
-
   data class ManyTypesProjection(
           @Property("intField") val intField: Int,
           @Property("doubleField") val doubleField: Double,
@@ -357,7 +417,7 @@ class TransformedColumnTest {
       return intField == other.intField &&
               doubleField == other.doubleField &&
               stringField == other.stringField &&
-              Arrays.equals(byteArrayField, other.byteArrayField)
+              byteArrayField contentEquals other.byteArrayField
     }
   }
 
