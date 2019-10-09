@@ -34,6 +34,12 @@ private val logger = getLogger<RealTransacter>()
 internal class RealTransacter private constructor(
   private val qualifier: KClass<out Annotation>,
   private val sessionFactoryProvider: Provider<SessionFactory>,
+  /**
+   * Replica reads are directed to this SessionFactory.
+   *
+   * If it's not been provided the writer SessionFactory will be used.
+   */
+  private val readerSessionFactoryProvider: Provider<SessionFactory>?,
   private val config: DataSourceConfig,
   private val threadLatestSession: ThreadLocal<RealSession>,
   private val options: TransacterOptions,
@@ -44,18 +50,22 @@ internal class RealTransacter private constructor(
   constructor(
     qualifier: KClass<out Annotation>,
     sessionFactoryProvider: Provider<SessionFactory>,
+    readerSessionFactoryProvider: Provider<SessionFactory>?,
     config: DataSourceConfig,
     queryTracingListener: QueryTracingListener,
     tracer: Tracer?
   ) : this(
-      qualifier,
-      sessionFactoryProvider,
-      config,
-      ThreadLocal(),
-      TransacterOptions(),
-      queryTracingListener,
-      tracer
+      qualifier = qualifier,
+      sessionFactoryProvider = sessionFactoryProvider,
+      readerSessionFactoryProvider = readerSessionFactoryProvider,
+      config = config,
+      threadLatestSession = ThreadLocal(),
+      options = TransacterOptions(),
+      queryTracingListener = queryTracingListener,
+      tracer = tracer
   )
+
+  override fun config(): DataSourceConfig = config
 
   private val shardListFetcher =
       Executors.newSingleThreadExecutor(
@@ -113,10 +123,7 @@ internal class RealTransacter private constructor(
     return maybeWithTracing(APPLICATION_TRANSACTION_SPAN_NAME) {
       transactionWithRetriesInternal {
         maybeWithTracing(DB_TRANSACTION_SPAN_NAME) {
-          readWithoutTransactionInternalSession { session ->
-            check(config.type.isVitess) {
-              "When using MySQL you need to use a dedicated replica read Transacter instance"
-            }
+          replicaReadWithoutTransactionInternalSession { session ->
             session.target(Destination(TabletType.REPLICA)) {
               // Full scatters are allowed on replica reads as you can increase availability by
               // adding additional replicas.
@@ -221,8 +228,8 @@ internal class RealTransacter private constructor(
     }
   }
 
-  private fun <T> readWithoutTransactionInternalSession(block: (session: RealSession) -> T): T {
-    return withSession { session ->
+  private fun <T> replicaReadWithoutTransactionInternalSession(block: (session: RealSession) -> T): T {
+    return withSession(reader()) { session ->
       check(session.isReadOnly()) {
         "Reads should be in a read only session"
       }
@@ -235,6 +242,18 @@ internal class RealTransacter private constructor(
         queryTracingListener.endLastSpan()
       }
     }
+  }
+
+  private fun reader(): SessionFactory {
+    if (readerSessionFactoryProvider != null) {
+      return readerSessionFactoryProvider.get()
+    }
+    if (config.type.isVitess) {
+      return sessionFactory
+    }
+    error("No reader is configured for replica reads, pass in both a writer and reader qualifier and the full " +
+        "DataSourceClustersConfig into HibernateModule, like this:\n" +
+        "\tinstall(HibernateModule(AppDb::class, AppReaderDb::class, config.data_source_clusters[\"name\"]))")
   }
 
   override fun retries(maxAttempts: Int): Transacter = withOptions(
@@ -255,6 +274,7 @@ internal class RealTransacter private constructor(
       RealTransacter(
           qualifier = qualifier,
           sessionFactoryProvider = sessionFactoryProvider,
+          readerSessionFactoryProvider = readerSessionFactoryProvider,
           threadLatestSession = threadLatestSession,
           options = options,
           queryTracingListener = queryTracingListener,
@@ -262,7 +282,10 @@ internal class RealTransacter private constructor(
           tracer = tracer
       )
 
-  private fun <T> withSession(block: (session: RealSession) -> T): T {
+  private fun <T> withSession(
+    sessionFactory: SessionFactory = this.sessionFactory,
+    block: (session: RealSession) -> T
+  ): T {
     val hibernateSession = sessionFactory.openSession()
     val realSession = RealSession(
         hibernateSession = hibernateSession,
