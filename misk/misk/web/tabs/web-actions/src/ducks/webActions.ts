@@ -39,7 +39,7 @@ export const enum ServerTypes {
   "ByteString" = "ByteString",
   "Char" = "Char",
   "Double" = "Double",
-  // "Enum" = "String",
+  "Enum" = "Enum",
   "Float" = "Float",
   "Int" = "Int",
   "JSON" = "JSON",
@@ -59,7 +59,8 @@ export const BaseFieldTypes: IBaseFieldTypes = {
   [ServerTypes.JSON]: TypescriptBaseTypes.string,
   [ServerTypes.Long]: TypescriptBaseTypes.number,
   [ServerTypes.ByteString]: TypescriptBaseTypes.string,
-  [ServerTypes.String]: TypescriptBaseTypes.string
+  [ServerTypes.String]: TypescriptBaseTypes.string,
+  [ServerTypes.Enum]: TypescriptBaseTypes.enum
 }
 
 export interface IFieldTypeMetadata {
@@ -375,6 +376,26 @@ export const parseType = (
     default:
       return value
   }
+}
+
+/**
+ * Parses for Enum server type
+ * Expects type to match format
+ * "Enum<qualified.class.name,enumValue1,enumValue2>"
+ */
+export interface IParseEnumType {
+  enumClassName: string
+  enumValues: string[]
+}
+
+export const parseEnumType = (serverType: string): IParseEnumType => {
+  const enumType = serverType
+    .split("<")[1]
+    .split(">")[0]
+    .split(",")
+  const enumClassName = enumType[0]
+  const enumValues = enumType.slice(1)
+  return { enumClassName, enumValues }
 }
 
 const isInput = (data: any) =>
@@ -717,7 +738,11 @@ const generateFieldTypesMetadata = (
           id
         )
       )
-  } else if (BaseFieldTypes.hasOwnProperty(type)) {
+  } else if (
+    BaseFieldTypes.hasOwnProperty(type) ||
+    // Check if it is a complex type such as Enum<className,value1,value2>
+    BaseFieldTypes.hasOwnProperty(type.split("<")[0])
+  ) {
     if (
       BaseFieldTypes[type] === TypescriptBaseTypes.boolean ||
       BaseFieldTypes[type] === TypescriptBaseTypes.number ||
@@ -734,6 +759,24 @@ const generateFieldTypesMetadata = (
             parent,
             type,
             BaseFieldTypes[type]
+          )
+        )
+      )
+    } else if (
+      // Handle enum type ie. Enum<className,value1,value2>
+      BaseFieldTypes[type.split("<")[0]] === TypescriptBaseTypes.enum
+    ) {
+      return typesMetadata.mergeDeep(
+        OrderedMap<string, ITypesFieldMetadata>().set(
+          id,
+          buildTypeFieldMetadata(
+            OrderedSet(),
+            id,
+            name,
+            repeated,
+            parent,
+            type,
+            TypescriptBaseTypes.enum
           )
         )
       )

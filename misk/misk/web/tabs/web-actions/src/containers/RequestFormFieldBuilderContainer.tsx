@@ -5,6 +5,7 @@ import {
   Card,
   ControlGroup,
   FormGroup,
+  HTMLSelect,
   InputGroup,
   Intent,
   Label,
@@ -38,7 +39,9 @@ import {
   mapDispatchToProps,
   mapStateToProps,
   padId,
-  TypescriptBaseTypes
+  parseEnumType,
+  TypescriptBaseTypes,
+  ServerTypes
 } from "../ducks"
 
 const cssCard = css`
@@ -178,9 +181,11 @@ const EditRawInput = (
 }
 
 const formLabelFormatter = (name: string, serverType: string) => {
-  if (name && serverType) {
-    const st = serverType.split(".").join(" ")
-    return <WrapTextContainer>{`${name} (${st})`}</WrapTextContainer>
+  if (name && serverType && serverType.startsWith(ServerTypes.Enum)) {
+    const { enumClassName } = parseEnumType(serverType)
+    return <WrapTextContainer>{`${name} (${enumClassName})`}</WrapTextContainer>
+  } else if (name && serverType) {
+    return <WrapTextContainer>{`${name} (${serverType})`}</WrapTextContainer>
   } else {
     return <span />
   }
@@ -307,6 +312,34 @@ const UnconnectedRequestFormFieldBuilderContainer = (
                 onChange={onChangeFnCall(clickDirtyInputFns(props))}
                 onClick={onChangeFnCall(clickDirtyInputFns(props))}
                 placeholder={serverType}
+              />
+            </EditRawInput>
+          </ControlGroup>
+        </FormGroup>
+      )
+    } else if (typescriptType === TypescriptBaseTypes.enum) {
+      const { enumValues } = parseEnumType(serverType)
+      return (
+        <FormGroup
+          css={css(cssFormGroup)}
+          label={formLabelFormatter(name, serverType)}
+        >
+          <ControlGroup>
+            {...repeatableFieldButtons({ ...props, id })}
+            <EditRawInput {...props} id={id} tag={tag}>
+              <HTMLSelect
+                large={true}
+                onChange={onChangeFnCall(
+                  props.simpleMergeData,
+                  `${tag}::${padId(id)}`
+                )}
+                onClick={onChangeFnCall(clickDirtyInputFns(props))}
+                onBlur={onChangeFnCall(
+                  props.simpleMergeData,
+                  `${tag}::${padId(id)}`
+                )}
+                // Show empty option to prompt selection since first option is not automatically persisted
+                options={[""].concat(enumValues)}
               />
             </EditRawInput>
           </ControlGroup>
