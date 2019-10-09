@@ -151,6 +151,11 @@ abstract class TransacterTest {
 
   @Test
   fun `shard targeting`() {
+    // This test only makes sense with Vitess
+    if (!transacter.config().type.isVitess) {
+      return
+    }
+
     val jp = transacter.save(
         DbMovie("Jurassic Park", LocalDate.of(1993, 6, 9)))
     val sw = transacter.createInSeparateShard(jp) {
@@ -244,10 +249,12 @@ abstract class TransacterTest {
     createTestData()
 
     transacter.replicaRead { session ->
-      // Make sure this doesn't trigger a transaction
-      val target = session.useConnection { c -> c.createStatement().use {
-        it.executeQuery("SHOW VITESS_TARGET").uniqueString() } }
-      assertThat(target).isEqualTo("@replica")
+      if (transacter.config().type.isVitess) {
+        // Make sure this doesn't trigger a transaction
+        val target = session.useConnection { c -> c.createStatement().use {
+          it.executeQuery("SHOW VITESS_TARGET").uniqueString() } }
+        assertThat(target).isEqualTo("@replica")
+      }
 
       queryFactory.newQuery<CharacterQuery>()
           .allowTableScan()
@@ -261,10 +268,11 @@ abstract class TransacterTest {
     }
 
     transacter.transaction { session ->
-      // Make sure this doesn't trigger a transaction
-      val target = session.useConnection { c -> c.createStatement().use {
-        it.executeQuery("SHOW VITESS_TARGET").uniqueString() } }
-      assertThat(target).isEqualTo("@master")
+      if (transacter.config().type.isVitess) {
+        val target = session.useConnection { c -> c.createStatement().use {
+          it.executeQuery("SHOW VITESS_TARGET").uniqueString() } }
+        assertThat(target).isEqualTo("@master")
+      }
 
       val character = queryFactory.newQuery<CharacterQuery>()
           .allowTableScan()
