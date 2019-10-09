@@ -93,15 +93,34 @@ class RequestTypes {
         // TODO: Support maps
         fields.add(Field(fieldName, fieldClass.qualifiedName!!, repeated))
       }
+      Enum::class -> {
+        handleEnumField(fieldClass, fields, fieldName, repeated)
+      }
       else -> {
         if (fieldClass.superclasses.contains(WireEnum::class)) {
-          // TODO: Communicate back enum values
-          fields.add(Field(fieldName, fieldClass.qualifiedName!!, repeated))
+          handleEnumField(fieldClass, fields, fieldName, repeated)
         } else {
           fields.add(Field(fieldName, fieldClass.qualifiedName!!, repeated))
           stack.push(fieldClass)
         }
       }
     }
+  }
+
+  /**
+   * Adds a field with a type that has the class name and enum values embedded
+   * Example: "Enum<app.cash.backfila.BackfillType,ISOLATED,PARALLEL>"
+   */
+  private fun handleEnumField(
+    fieldClass: KClass<*>,
+    fields: MutableList<Field>,
+    fieldName: String,
+    repeated: Boolean
+  ) {
+    val enumValues =
+      (fieldClass.members.find { it.name == "values" }?.call() as Array<*>).map { (it as Enum<*>).name }
+    fields.add(
+      Field(fieldName, "Enum<${fieldClass.qualifiedName!!},${enumValues.joinToString(",")}>",
+        repeated))
   }
 }
