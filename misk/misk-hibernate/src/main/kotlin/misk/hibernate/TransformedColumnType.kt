@@ -49,8 +49,8 @@ internal class TransformedColumnType : UserType, ParameterizedType, TypeConfigur
       // TODO: Replace this with actual class
       st.setNull(index, sqlTypes().first())
     } else {
-      val disassembled = disassemble(value)
-      st.setByType(index, retClass, disassembled)
+      val disassembled = transformer.disassemble(value)
+      st.setByType(retClass, index, disassembled)
     }
   }
 
@@ -61,17 +61,17 @@ internal class TransformedColumnType : UserType, ParameterizedType, TypeConfigur
 
   override fun isMutable() = false
 
-  override fun sqlTypes(): IntArray = when (retClass) {
-    ByteArray::class -> intArrayOf(Types.VARBINARY)
-    String::class -> intArrayOf(Types.VARCHAR)
-    Int::class -> intArrayOf(Types.INTEGER)
-    Long::class -> intArrayOf(Types.BIGINT)
-    Byte::class -> intArrayOf(Types.SMALLINT)
-    Boolean::class -> intArrayOf(Types.BOOLEAN)
-    Double::class -> intArrayOf(Types.DOUBLE)
-    Float::class -> intArrayOf(Types.FLOAT)
+  override fun sqlTypes(): IntArray = intArrayOf(when (retClass) {
+    ByteArray::class -> Types.VARBINARY
+    String::class -> Types.VARCHAR
+    Int::class -> Types.INTEGER
+    Long::class -> Types.BIGINT
+    Byte::class -> Types.SMALLINT
+    Boolean::class -> Types.BOOLEAN
+    Double::class -> Types.DOUBLE
+    Float::class -> Types.FLOAT
     else -> throw HibernateException("Unsupported sql type")
-  }
+  })
 
   override fun setParameterValues(parameters: Properties) {
     retClass = parameters[TARGET_TYPE] as KClass<*>
@@ -80,7 +80,7 @@ internal class TransformedColumnType : UserType, ParameterizedType, TypeConfigur
     @Suppress("UNCHECKED_CAST")
     val ctorArgs = parameters[ARGUMENTS] as? Map<String, *> ?: throw HibernateException("Bad Transformer arguments")
 
-    val context = TransformerContext( parameters[TABLE_NAME] as String, parameters[COLUMN_NAME] as String, ctorArgs, field.type.kotlin)
+    val context = TransformerContext(parameters[TABLE_NAME] as String, parameters[COLUMN_NAME] as String, ctorArgs, field.type.kotlin)
 
     @Suppress("UNCHECKED_CAST")
     val transformerClass = parameters[TRANSFORMER_CLASS] as KClass<out Transformer>
@@ -92,7 +92,6 @@ internal class TransformedColumnType : UserType, ParameterizedType, TypeConfigur
   }
 
   override fun setTypeConfiguration(typeConfiguration: TypeConfiguration) {
-    typeConfiguration.metadataBuildingContext
     typeConfig = typeConfiguration
   }
 
@@ -100,7 +99,7 @@ internal class TransformedColumnType : UserType, ParameterizedType, TypeConfigur
 
 }
 
-fun PreparedStatement.setByType(index: Int, klass: KClass<*>?, value: Any) = when (klass) {
+fun PreparedStatement.setByType(klass: KClass<*>?, index: Int, value: Any) = when (klass) {
   ByteArray::class -> setBytes(index, value as ByteArray)
   String::class -> setString(index, value as String)
   Int::class -> setInt(index, value as Int)
@@ -121,17 +120,3 @@ fun ResultSet.getByType(klass: KClass<*>?, columnLabel: String): Serializable? =
   Boolean::class -> getBoolean(columnLabel)
   else -> throw HibernateException("unsupported type ${klass?.qualifiedName}")
 }
-
-/**
-private fun nameToClass(name: String) = when (name) {
-  "byte" -> Byte::class
-  "short" -> Short::class
-  "int" -> Int::class
-  "long" -> Long::class
-  "float" -> Float::class
-  "double" -> Double::class
-  "boolean" -> Boolean::class
-  "char" -> Char::class
-  else -> Class.forName(name).kotlin
-}
-*/
