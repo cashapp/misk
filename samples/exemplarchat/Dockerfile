@@ -6,4 +6,4 @@ RUN groupadd -g 999 appuser && \
     useradd -r -u 999 -g appuser appuser
 USER 999
 
-CMD ["java", "-jar", "/usr/local/chat/exemplarchat-0.2.5-SNAPSHOT.jar"]
+CMD ["java", "-jar", "/usr/local/chat/exemplarchat-0.8.0-SNAPSHOT.jar"]

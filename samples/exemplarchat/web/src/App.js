@@ -13,7 +13,7 @@ class App extends Component {
   }
 
   componentDidMount() {
-    const href = window.location.href;
+    const href = window.location.href.replace(/\/$/, ''); // Remove optional trailing `/`
     const ws_protocol = (window.location.protocol === "https:") ? "wss:" : "ws:";
     const hostname = window.location.hostname;
     const port = window.location.port;
