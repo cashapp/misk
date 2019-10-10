@@ -48,25 +48,15 @@ class MetricsInterceptorTest {
   @Test
   fun responseCodes() {
     val requestDuration = metricsInterceptorFactory.requestDuration
-    requestDuration.record(1.0, "TestAction", "unknown", "all")
-    assertThat(requestDuration.count("TestAction", "unknown", "all")).isEqualTo(7)
-    requestDuration.record(1.0, "TestAction", "unknown", "2xx")
-    assertThat(requestDuration.count("TestAction", "unknown", "2xx")).isEqualTo(4)
     requestDuration.record(1.0, "TestAction", "unknown", "200")
     assertThat(requestDuration.count("TestAction", "unknown", "200")).isEqualTo(3)
     requestDuration.record(1.0, "TestAction", "unknown", "202")
     assertThat(requestDuration.count("TestAction", "unknown", "202")).isEqualTo(2)
-    requestDuration.record(1.0, "TestAction", "unknown", "4xx")
-    assertThat(requestDuration.count("TestAction", "unknown", "4xx")).isEqualTo(4)
     requestDuration.record(1.0, "TestAction", "unknown", "404")
     assertThat(requestDuration.count("TestAction", "unknown", "404")).isEqualTo(2)
     requestDuration.record(1.0, "TestAction", "unknown", "403")
     assertThat(requestDuration.count("TestAction", "unknown", "403")).isEqualTo(3)
 
-    requestDuration.record(1.0, "TestAction", "my-peer", "all")
-    assertThat(requestDuration.count("TestAction", "my-peer", "all")).isEqualTo(5)
-    requestDuration.record(1.0, "TestAction", "my-peer", "2xx")
-    assertThat(requestDuration.count("TestAction", "my-peer", "2xx")).isEqualTo(5)
     requestDuration.record(1.0, "TestAction", "my-peer", "200")
     assertThat(requestDuration.count("TestAction", "my-peer", "200")).isEqualTo(5)
   }
