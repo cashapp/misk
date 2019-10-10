@@ -6,11 +6,14 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class ConsistentHashing @Inject constructor(
-  private val hashFunction: HashFunction = Hashing.murmur3_32(),
-  private val mod: Long = 65536L,
-  private val virtualPoints: Int = 16
+class ConsistentHashing(
+  private val hashFunction: HashFunction,
+  private val mod: Long,
+  private val virtualPoints: Int
 ) : ClusterMapper {
+
+  @Inject constructor() : this(Hashing.murmur3_32(), 65536L, 16)
+
   // TODO(tso): make this more efficient
   override fun topicToHost(clusterSnapshot: ClusterSnapshot, topic: String): String {
     val hosts = clusterSnapshot.hosts.sorted()
