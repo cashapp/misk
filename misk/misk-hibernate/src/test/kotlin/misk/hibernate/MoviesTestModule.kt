@@ -7,6 +7,7 @@ import misk.config.MiskConfig
 import misk.environment.Environment
 import misk.environment.EnvironmentModule
 import misk.inject.KAbstractModule
+import misk.jdbc.DataSourceClusterConfig
 import misk.jdbc.DataSourceConfig
 import misk.jdbc.DataSourceType
 import misk.logging.LogCollectorModule
@@ -20,12 +21,15 @@ class MoviesTestModule(
   override fun configure() {
     install(LogCollectorModule())
     install(
-        Modules.override(MiskTestingServiceModule()).with(FakeClockModule(), MockTracingBackendModule()))
+        Modules.override(MiskTestingServiceModule()).with(FakeClockModule(),
+            MockTracingBackendModule()))
     install(EnvironmentModule(Environment.TESTING))
 
     val config = MiskConfig.load<MoviesConfig>("moviestestmodule", Environment.TESTING)
     install(HibernateTestingModule(Movies::class))
-    install(HibernateModule(Movies::class, selectDataSourceConfig(config)))
+    val dataSourceConfig = selectDataSourceConfig(config)
+    install(HibernateModule(Movies::class, MoviesReader::class,
+        DataSourceClusterConfig(writer = dataSourceConfig, reader = dataSourceConfig)))
     install(object : HibernateEntityModule(Movies::class) {
       override fun configureHibernate() {
         addEntities(DbMovie::class, DbActor::class, DbCharacter::class)

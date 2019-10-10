@@ -9,6 +9,7 @@ import misk.hibernate.RealTransacter.Companion.DB_COMMIT_SPAN_NAME
 import misk.hibernate.RealTransacter.Companion.DB_ROLLBACK_SPAN_NAME
 import misk.hibernate.RealTransacter.Companion.DB_TRANSACTION_SPAN_NAME
 import misk.hibernate.RealTransacter.Companion.TRANSACTER_SPAN_TAG
+import misk.jdbc.DataSourceType
 import misk.jdbc.uniqueString
 import misk.logging.LogCollector
 import misk.testing.MiskTest
@@ -23,11 +24,7 @@ import java.util.concurrent.atomic.AtomicInteger
 import javax.inject.Inject
 import kotlin.test.assertFailsWith
 
-@MiskTest(startService = true)
-class TransacterTest {
-  @MiskTestModule
-  val module = MoviesTestModule()
-
+abstract class TransacterTest {
   @Inject @Movies lateinit var transacter: Transacter
   @Inject lateinit var queryFactory: Query.Factory
   @Inject lateinit var tracer: MockTracer
@@ -154,6 +151,11 @@ class TransacterTest {
 
   @Test
   fun `shard targeting`() {
+    // This test only makes sense with Vitess
+    if (!transacter.config().type.isVitess) {
+      return
+    }
+
     val jp = transacter.save(
         DbMovie("Jurassic Park", LocalDate.of(1993, 6, 9)))
     val sw = transacter.createInSeparateShard(jp) {
@@ -247,10 +249,12 @@ class TransacterTest {
     createTestData()
 
     transacter.replicaRead { session ->
-      // Make sure this doesn't trigger a transaction
-      val target = session.useConnection { c -> c.createStatement().use {
-        it.executeQuery("SHOW VITESS_TARGET").uniqueString() } }
-      assertThat(target).isEqualTo("@replica")
+      if (transacter.config().type.isVitess) {
+        // Make sure this doesn't trigger a transaction
+        val target = session.useConnection { c -> c.createStatement().use {
+          it.executeQuery("SHOW VITESS_TARGET").uniqueString() } }
+        assertThat(target).isEqualTo("@replica")
+      }
 
       queryFactory.newQuery<CharacterQuery>()
           .allowTableScan()
@@ -264,10 +268,11 @@ class TransacterTest {
     }
 
     transacter.transaction { session ->
-      // Make sure this doesn't trigger a transaction
-      val target = session.useConnection { c -> c.createStatement().use {
-        it.executeQuery("SHOW VITESS_TARGET").uniqueString() } }
-      assertThat(target).isEqualTo("@master")
+      if (transacter.config().type.isVitess) {
+        val target = session.useConnection { c -> c.createStatement().use {
+          it.executeQuery("SHOW VITESS_TARGET").uniqueString() } }
+        assertThat(target).isEqualTo("@master")
+      }
 
       val character = queryFactory.newQuery<CharacterQuery>()
           .allowTableScan()
@@ -740,4 +745,22 @@ class TransacterTest {
   }
 
   class NonRetryableException : Exception()
+}
+
+@MiskTest(startService = true)
+class MySQLTransacterTest : TransacterTest() {
+  @MiskTestModule
+  val module = MoviesTestModule(DataSourceType.MYSQL)
+}
+
+@MiskTest(startService = true)
+class VitessMySQLTransacterTest : TransacterTest() {
+  @MiskTestModule
+  val module = MoviesTestModule(DataSourceType.VITESS_MYSQL)
+}
+
+@MiskTest(startService = true)
+class VitessTransacterTest : TransacterTest() {
+  @MiskTestModule
+  val module = MoviesTestModule(DataSourceType.VITESS)
 }
