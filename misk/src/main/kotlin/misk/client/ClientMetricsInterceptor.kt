@@ -20,13 +20,10 @@ class ClientMetricsInterceptor internal constructor(
     try {
       val result = chain.proceed(chain.request)
       val elapsedMillis = stopwatch.stop().elapsed(TimeUnit.MILLISECONDS).toDouble()
-      requestDuration.record(elapsedMillis, actionName, "all")
-      requestDuration.record(elapsedMillis, actionName, "${result.code / 100}xx")
       requestDuration.record(elapsedMillis, actionName, "${result.code}")
       return result
     } catch (e: SocketTimeoutException) {
       val elapsedMillis = stopwatch.stop().elapsed(TimeUnit.MILLISECONDS).toDouble()
-      requestDuration.record(elapsedMillis, actionName, "all")
       requestDuration.record(elapsedMillis, actionName, "timeout")
       throw e
     }
