@@ -51,6 +51,50 @@ internal class RepeatedTaskQueueTest {
     assertThat(scheduled.getDelay(TimeUnit.SECONDS)).isEqualTo(3)
   }
 
+  @Test fun scheduleMetrics() {
+    var counter = 0
+    taskQueue.schedule(Duration.ofSeconds(10)) {
+      val status = when (counter) {
+        0 -> Status.OK
+        1 -> Status.FAILED
+        2 -> Status.NO_RESCHEDULE
+        else -> Status.NO_WORK
+      }
+      counter++
+      Result(status, Duration.ofSeconds(5))
+    }
+    waitForNextPendingTask().task()
+    assertThat(taskQueue.taskDuration!!.count("my-task-queue", "ok")).isEqualTo(1)
+    waitForNextPendingTask().task()
+    assertThat(taskQueue.taskDuration!!.count("my-task-queue", "failed")).isEqualTo(1)
+    waitForNextPendingTask().task()
+    assertThat(taskQueue.taskDuration!!.count("my-task-queue", "no_reschedule")).isEqualTo(1)
+    waitForNextPendingTask().task()
+    assertThat(taskQueue.taskDuration!!.count("my-task-queue", "no_work")).isEqualTo(1)
+  }
+
+  @Test fun scheduleBackoffMetrics() {
+    var counter = 0
+    taskQueue.scheduleWithBackoff(Duration.ofSeconds(10)) {
+      val status = when (counter) {
+        0 -> Status.OK
+        1 -> Status.FAILED
+        2 -> Status.NO_RESCHEDULE
+        else -> Status.NO_WORK
+      }
+      counter++
+      status
+    }
+    waitForNextPendingTask().task()
+    assertThat(taskQueue.taskDuration!!.count("my-task-queue", "ok")).isEqualTo(1)
+    waitForNextPendingTask().task()
+    assertThat(taskQueue.taskDuration!!.count("my-task-queue", "failed")).isEqualTo(1)
+    waitForNextPendingTask().task()
+    assertThat(taskQueue.taskDuration!!.count("my-task-queue", "no_reschedule")).isEqualTo(1)
+    waitForNextPendingTask().task()
+    assertThat(taskQueue.taskDuration!!.count("my-task-queue", "no_work")).isEqualTo(1)
+  }
+
   @Test fun ordersTasksByInitialDelay() {
     taskQueue.schedule(Duration.ofSeconds(10)) {
       Result(Status.OK, Duration.ofSeconds(5))
@@ -495,10 +539,10 @@ internal class RepeatedTaskQueueTest {
 
     @Provides @Singleton
     fun repeatedTaskQueue(
-      clock: FakeClock,
+      queueFactory: RepeatedTaskQueueFactory,
       backingStorage: ExplicitReleaseDelayQueue<DelayedTask>
     ): RepeatedTaskQueue {
-      return RepeatedTaskQueue.forTesting("my-task-queue", clock, backingStorage)
+      return queueFactory.forTesting("my-task-queue", backingStorage)
     }
   }
 
