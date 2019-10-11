@@ -16,6 +16,7 @@ import java.util.concurrent.BlockingQueue
 import java.util.concurrent.DelayQueue
 import java.util.concurrent.Executor
 import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
 import java.util.concurrent.Executors.newSingleThreadExecutor
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
@@ -228,7 +229,7 @@ class RepeatedTaskQueueFactory @Inject constructor(
       RepeatedTaskQueue {
     return RepeatedTaskQueue(name,
         clock,
-        newSingleThreadExecutor(ThreadFactoryBuilder()
+        Executors.newFixedThreadPool(config.num_parallel_tasks, ThreadFactoryBuilder()
             .setNameFormat("$name-%d")
             .build()),
         null,
