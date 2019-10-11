@@ -11,7 +11,6 @@ import misk.tasks.DelayedTask
 import misk.tasks.RepeatedTaskQueue
 import misk.tasks.RepeatedTaskQueueFactory
 import misk.zookeeper.testing.ZkTestModule
-import java.time.Clock
 
 internal class ZkLeaseTestModule : KAbstractModule() {
   override fun configure() {

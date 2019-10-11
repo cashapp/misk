@@ -9,7 +9,6 @@ import misk.backoff.FlatBackoff
 import misk.backoff.retry
 import misk.concurrent.ExplicitReleaseDelayQueue
 import misk.inject.KAbstractModule
-import misk.metrics.Metrics
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.time.FakeClock
@@ -65,13 +64,13 @@ internal class RepeatedTaskQueueTest {
       Result(status, Duration.ofSeconds(5))
     }
     waitForNextPendingTask().task()
-    assertThat(taskQueue.taskLatency!!.count("my-task-queue", "ok")).isEqualTo(1)
+    assertThat(taskQueue.taskDuration!!.count("my-task-queue", "ok")).isEqualTo(1)
     waitForNextPendingTask().task()
-    assertThat(taskQueue.taskLatency!!.count("my-task-queue", "failed")).isEqualTo(1)
+    assertThat(taskQueue.taskDuration!!.count("my-task-queue", "failed")).isEqualTo(1)
     waitForNextPendingTask().task()
-    assertThat(taskQueue.taskLatency!!.count("my-task-queue", "no_reschedule")).isEqualTo(1)
+    assertThat(taskQueue.taskDuration!!.count("my-task-queue", "no_reschedule")).isEqualTo(1)
     waitForNextPendingTask().task()
-    assertThat(taskQueue.taskLatency!!.count("my-task-queue", "no_work")).isEqualTo(1)
+    assertThat(taskQueue.taskDuration!!.count("my-task-queue", "no_work")).isEqualTo(1)
   }
 
   @Test fun scheduleBackoffMetrics() {
@@ -87,13 +86,13 @@ internal class RepeatedTaskQueueTest {
       status
     }
     waitForNextPendingTask().task()
-    assertThat(taskQueue.taskLatency!!.count("my-task-queue", "ok")).isEqualTo(1)
+    assertThat(taskQueue.taskDuration!!.count("my-task-queue", "ok")).isEqualTo(1)
     waitForNextPendingTask().task()
-    assertThat(taskQueue.taskLatency!!.count("my-task-queue", "failed")).isEqualTo(1)
+    assertThat(taskQueue.taskDuration!!.count("my-task-queue", "failed")).isEqualTo(1)
     waitForNextPendingTask().task()
-    assertThat(taskQueue.taskLatency!!.count("my-task-queue", "no_reschedule")).isEqualTo(1)
+    assertThat(taskQueue.taskDuration!!.count("my-task-queue", "no_reschedule")).isEqualTo(1)
     waitForNextPendingTask().task()
-    assertThat(taskQueue.taskLatency!!.count("my-task-queue", "no_work")).isEqualTo(1)
+    assertThat(taskQueue.taskDuration!!.count("my-task-queue", "no_work")).isEqualTo(1)
   }
 
   @Test fun ordersTasksByInitialDelay() {
@@ -540,7 +539,7 @@ internal class RepeatedTaskQueueTest {
 
     @Provides @Singleton
     fun repeatedTaskQueue(
-      queueFactory : RepeatedTaskQueueFactory,
+      queueFactory: RepeatedTaskQueueFactory,
       backingStorage: ExplicitReleaseDelayQueue<DelayedTask>
     ): RepeatedTaskQueue {
       return queueFactory.forTesting("my-task-queue", backingStorage)

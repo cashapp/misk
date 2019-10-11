@@ -6,7 +6,6 @@ import com.google.common.util.concurrent.MoreExecutors.newDirectExecutorService
 import com.google.common.util.concurrent.Service
 import com.google.common.util.concurrent.ThreadFactoryBuilder
 import misk.backoff.Backoff
-import misk.backoff.FlatBackoff
 import misk.concurrent.ExplicitReleaseDelayQueue
 import misk.logging.getLogger
 import misk.metrics.Metrics
@@ -17,7 +16,6 @@ import java.util.concurrent.BlockingQueue
 import java.util.concurrent.DelayQueue
 import java.util.concurrent.Executor
 import java.util.concurrent.ExecutorService
-import java.util.concurrent.Executors
 import java.util.concurrent.Executors.newSingleThreadExecutor
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
@@ -46,7 +44,7 @@ class RepeatedTaskQueue @VisibleForTesting internal constructor(
    * Creates a [RepeatedTaskQueue] backed by a real [DelayQueue], with tasks dequeued on the
    * service background thread and executed via the provided [ExecutorService]
    */
-  @Deprecated("use the factory instead", replaceWith = ReplaceWith("RepeatedTaskQueueFactory"))
+  // TODO(rhall): remove when all callers are using the Factory
   constructor(
     name: String,
     clock: Clock,
@@ -56,11 +54,10 @@ class RepeatedTaskQueue @VisibleForTesting internal constructor(
       this(name, clock, taskExecutor, null, DelayQueue<DelayedTask>(), null, config)
 
   private val running = AtomicBoolean(false)
-  internal val taskLatency = metrics?.histogram(
-      "task_latency",
+  internal val taskDuration = metrics?.histogram(
+      "task_queue_task_duration",
       "count and duration in ms of periodic tasks",
       listOf("name", "result"))
-
 
   override fun startUp() {
     if (!running.compareAndSet(false, true)) return
@@ -139,7 +136,7 @@ class RepeatedTaskQueue @VisibleForTesting internal constructor(
           Result(Status.FAILED, retryDelayOnFailure ?: delay)
         }
       }
-      taskLatency?.record(timedResult.first.toMillis().toDouble(), name,
+      taskDuration?.record(timedResult.first.toMillis().toDouble(), name,
           timedResult.second.status.metricLabel())
       timedResult.second
     }
@@ -187,7 +184,7 @@ class RepeatedTaskQueue @VisibleForTesting internal constructor(
           Result(Status.FAILED, failureBackoff.nextRetry())
         }
       }
-      taskLatency?.record(timedResult.first.toMillis().toDouble(), name,
+      taskDuration?.record(timedResult.first.toMillis().toDouble(), name,
           timedResult.second.status.metricLabel())
       timedResult.second
     }
@@ -205,7 +202,7 @@ class RepeatedTaskQueue @VisibleForTesting internal constructor(
      * to explicitly control when tasks are released for execution. Tasks are executed in a single
      * thread in the order in which they expire
      */
-    @Deprecated("use the factory instead", replaceWith = ReplaceWith("RepeatedTaskQueueFactory"))
+    // TODO(rhall): remove when all callers are using the Factory
     @JvmStatic fun forTesting(
       name: String,
       clock: Clock,
@@ -220,14 +217,15 @@ class RepeatedTaskQueue @VisibleForTesting internal constructor(
 @Singleton
 class RepeatedTaskQueueFactory @Inject constructor(
   private val clock: Clock,
+    // TODO(rhall): make required when all callers are using the Factory
   private val metrics: Metrics?
 ) {
 
   /**
    * Builds a new instance of a [RepeatedTaskQueue]
    */
-  fun new(name: String, config: RepeatedTaskQueueConfig = RepeatedTaskQueueConfig())
-      : RepeatedTaskQueue {
+  fun new(name: String, config: RepeatedTaskQueueConfig = RepeatedTaskQueueConfig()):
+      RepeatedTaskQueue {
     return RepeatedTaskQueue(name,
         clock,
         newSingleThreadExecutor(ThreadFactoryBuilder()
@@ -242,8 +240,8 @@ class RepeatedTaskQueueFactory @Inject constructor(
   /**
    * Builds a new instance of a [RepeatedTaskQueue] for testing
    */
-  fun forTesting(name: String, backingStorage: ExplicitReleaseDelayQueue<DelayedTask>)
-      : RepeatedTaskQueue {
+  fun forTesting(name: String, backingStorage: ExplicitReleaseDelayQueue<DelayedTask>):
+      RepeatedTaskQueue {
     val queue = RepeatedTaskQueue(
         name,
         clock,
@@ -275,4 +273,3 @@ class RepeatedTaskQueueFactory @Inject constructor(
     return queue
   }
 }
-

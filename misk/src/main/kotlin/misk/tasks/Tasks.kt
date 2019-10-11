@@ -18,7 +18,7 @@ enum class Status(private val metricLabel: String) {
   /**
    * The metric label for the status. This is used instead of name() in case the code is refactored.
    */
-  fun metricLabel() : String {
+  fun metricLabel(): String {
     return metricLabel
   }
 }
