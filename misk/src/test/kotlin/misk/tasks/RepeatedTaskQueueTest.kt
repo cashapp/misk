@@ -23,6 +23,7 @@ import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicReference
 import java.util.concurrent.locks.ReentrantLock
 import javax.inject.Inject
+import javax.inject.Named
 import javax.inject.Singleton
 import kotlin.concurrent.withLock
 
@@ -32,6 +33,8 @@ internal class RepeatedTaskQueueTest {
 
   @Inject lateinit var clock: FakeClock
   @Inject lateinit var taskQueue: RepeatedTaskQueue
+  // Install another RepeatedTaskQueue to test guice is happy
+  @Inject @field:Named("another") lateinit var anotherTaskQueue: RepeatedTaskQueue
   @Inject lateinit var pendingTasks: ExplicitReleaseDelayQueue<DelayedTask>
 
   @BeforeEach fun initClock() {
@@ -64,13 +67,13 @@ internal class RepeatedTaskQueueTest {
       Result(status, Duration.ofSeconds(5))
     }
     waitForNextPendingTask().task()
-    assertThat(taskQueue.taskDuration!!.count("my-task-queue", "ok")).isEqualTo(1)
+    assertThat(taskQueue.metrics!!.taskDuration.count("my-task-queue", "ok")).isEqualTo(1)
     waitForNextPendingTask().task()
-    assertThat(taskQueue.taskDuration!!.count("my-task-queue", "failed")).isEqualTo(1)
+    assertThat(taskQueue.metrics!!.taskDuration.count("my-task-queue", "failed")).isEqualTo(1)
     waitForNextPendingTask().task()
-    assertThat(taskQueue.taskDuration!!.count("my-task-queue", "no_reschedule")).isEqualTo(1)
+    assertThat(taskQueue.metrics!!.taskDuration.count("my-task-queue", "no_reschedule")).isEqualTo(1)
     waitForNextPendingTask().task()
-    assertThat(taskQueue.taskDuration!!.count("my-task-queue", "no_work")).isEqualTo(1)
+    assertThat(taskQueue.metrics!!.taskDuration.count("my-task-queue", "no_work")).isEqualTo(1)
   }
 
   @Test fun scheduleBackoffMetrics() {
@@ -86,13 +89,13 @@ internal class RepeatedTaskQueueTest {
       status
     }
     waitForNextPendingTask().task()
-    assertThat(taskQueue.taskDuration!!.count("my-task-queue", "ok")).isEqualTo(1)
+    assertThat(taskQueue.metrics!!.taskDuration.count("my-task-queue", "ok")).isEqualTo(1)
     waitForNextPendingTask().task()
-    assertThat(taskQueue.taskDuration!!.count("my-task-queue", "failed")).isEqualTo(1)
+    assertThat(taskQueue.metrics!!.taskDuration.count("my-task-queue", "failed")).isEqualTo(1)
     waitForNextPendingTask().task()
-    assertThat(taskQueue.taskDuration!!.count("my-task-queue", "no_reschedule")).isEqualTo(1)
+    assertThat(taskQueue.metrics!!.taskDuration.count("my-task-queue", "no_reschedule")).isEqualTo(1)
     waitForNextPendingTask().task()
-    assertThat(taskQueue.taskDuration!!.count("my-task-queue", "no_work")).isEqualTo(1)
+    assertThat(taskQueue.metrics!!.taskDuration.count("my-task-queue", "no_work")).isEqualTo(1)
   }
 
   @Test fun ordersTasksByInitialDelay() {
@@ -543,6 +546,14 @@ internal class RepeatedTaskQueueTest {
       backingStorage: ExplicitReleaseDelayQueue<DelayedTask>
     ): RepeatedTaskQueue {
       return queueFactory.forTesting("my-task-queue", backingStorage)
+    }
+
+    @Provides @Singleton @Named("another")
+    fun anotherRepeatedTaskQueue(
+      queueFactory: RepeatedTaskQueueFactory,
+      backingStorage: ExplicitReleaseDelayQueue<DelayedTask>
+    ): RepeatedTaskQueue {
+      return queueFactory.forTesting("another-task-queue", backingStorage)
     }
   }
 

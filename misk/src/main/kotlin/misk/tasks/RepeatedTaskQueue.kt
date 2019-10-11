@@ -37,7 +37,7 @@ class RepeatedTaskQueue @VisibleForTesting internal constructor(
   private val dispatchExecutor: Executor?, // visible internally for testing only
   private val pendingTasks: BlockingQueue<DelayedTask>, // visible internally for testing only
   // TODO(rhall): make required when all callers are using the Factory
-  metrics: Metrics?,
+  internal val metrics: RepeatedTaskQueueMetrics?,
   private val config: RepeatedTaskQueueConfig = RepeatedTaskQueueConfig()
 
 ) : AbstractExecutionThreadService() {
@@ -55,10 +55,6 @@ class RepeatedTaskQueue @VisibleForTesting internal constructor(
       this(name, clock, taskExecutor, null, DelayQueue<DelayedTask>(), null, config)
 
   private val running = AtomicBoolean(false)
-  internal val taskDuration = metrics?.histogram(
-      "task_queue_task_duration",
-      "count and duration in ms of periodic tasks",
-      listOf("name", "result"))
 
   override fun startUp() {
     if (!running.compareAndSet(false, true)) return
@@ -137,7 +133,7 @@ class RepeatedTaskQueue @VisibleForTesting internal constructor(
           Result(Status.FAILED, retryDelayOnFailure ?: delay)
         }
       }
-      taskDuration?.record(timedResult.first.toMillis().toDouble(), name,
+      metrics?.taskDuration?.record(timedResult.first.toMillis().toDouble(), name,
           timedResult.second.status.metricLabel())
       timedResult.second
     }
@@ -185,7 +181,7 @@ class RepeatedTaskQueue @VisibleForTesting internal constructor(
           Result(Status.FAILED, failureBackoff.nextRetry())
         }
       }
-      taskDuration?.record(timedResult.first.toMillis().toDouble(), name,
+      metrics?.taskDuration?.record(timedResult.first.toMillis().toDouble(), name,
           timedResult.second.status.metricLabel())
       timedResult.second
     }
@@ -208,7 +204,7 @@ class RepeatedTaskQueue @VisibleForTesting internal constructor(
       name: String,
       clock: Clock,
       backingStorage: ExplicitReleaseDelayQueue<DelayedTask>,
-      metrics: Metrics? = null
+      metrics: RepeatedTaskQueueMetrics? = null
     ): RepeatedTaskQueue {
       return RepeatedTaskQueueFactory(clock, metrics).forTesting(name, backingStorage)
     }
@@ -216,10 +212,18 @@ class RepeatedTaskQueue @VisibleForTesting internal constructor(
 }
 
 @Singleton
+class RepeatedTaskQueueMetrics @Inject constructor(metrics : Metrics) {
+  internal val taskDuration = metrics.histogram(
+      "task_queue_task_duration",
+      "count and duration in ms of periodic tasks",
+      listOf("name", "result"))
+}
+
+@Singleton
 class RepeatedTaskQueueFactory @Inject constructor(
   private val clock: Clock,
     // TODO(rhall): make required when all callers are using the Factory
-  private val metrics: Metrics?
+  private val metrics: RepeatedTaskQueueMetrics?
 ) {
 
   /**
