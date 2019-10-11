@@ -9,6 +9,7 @@ import misk.config.AppName
 import misk.inject.KAbstractModule
 import misk.tasks.DelayedTask
 import misk.tasks.RepeatedTaskQueue
+import misk.tasks.RepeatedTaskQueueFactory
 import misk.zookeeper.testing.ZkTestModule
 import java.time.Clock
 
@@ -23,10 +24,10 @@ internal class ZkLeaseTestModule : KAbstractModule() {
 
   @Provides @ForZkLease @Singleton
   fun provideTaskQueue(
-    clock: Clock,
+    queueFactory: RepeatedTaskQueueFactory,
     @ForZkLease delayQueue: ExplicitReleaseDelayQueue<DelayedTask>
   ): RepeatedTaskQueue {
-    return RepeatedTaskQueue.forTesting("zk-lease-poller", clock, delayQueue)
+    return queueFactory.forTesting("zk-lease-poller", delayQueue)
   }
 
   @Provides @ForZkLease
