@@ -1,13 +1,9 @@
-import {
-  MiskNavbarContainer,
-  miskAdminDashboardTabsUrl,
-  miskServiceMetadataUrl
-} from "@misk/core"
+import { MiskNavbarContainer, miskServiceMetadataUrl } from "@misk/core"
 import * as React from "react"
 
 export const AdminDashboardContainer = () => (
   <MiskNavbarContainer
-    adminDashboardTabsUrl={miskAdminDashboardTabsUrl}
+    adminDashboardTabsUrl={"/api/dashboard/metadata/AdminDashboard"}
     serviceMetadataUrl={miskServiceMetadataUrl}
   />
 )

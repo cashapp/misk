@@ -16,23 +16,24 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 
 @MiskTest(startService = true)
-class AdminDashboardTabActionTest {
+class DashboardMetadataActionTest {
   @MiskTestModule
-  val module = AdminDashboardActionTestingModule()
+  val module = DashboardMetadataActionTestingModule()
 
   @Inject private lateinit var jetty: JettyService
   @Inject private lateinit var httpClientFactory: HttpClientFactory
 
-  val path = "/api/admindashboardtabs"
+  val defaultDashboard = "AdminDashboard"
+  val path = "/api/dashboard/metadata/"
 
   @Test fun customCapabilityAccess_unauthenticated() {
-    val response = executeRequest(path = path)
+    val response = executeRequest(path = path + defaultDashboard)
     assertEquals(0, response.adminDashboardTabs.size)
   }
 
   @Test fun customCapabilityAccess_unauthorized() {
     val response = executeRequest(
-      path = path,
+      path = path + defaultDashboard,
       user = "sandy",
       capabilities = "guest"
     )
@@ -41,7 +42,7 @@ class AdminDashboardTabActionTest {
 
   @Test fun customCapabilityAccess_authorized() {
     val response = executeRequest(
-      path = path,
+      path = path + defaultDashboard,
       user = "sandy",
       capabilities = "admin_access"
     )
@@ -50,12 +51,23 @@ class AdminDashboardTabActionTest {
     assertNotNull(response.adminDashboardTabs.find { it.name == "Web Actions" })
   }
 
+  @Test fun loadOtherDashboardTabs() {
+    val dashboard = DashboardMetadataActionTestDashboard::class.simpleName!!
+    val response = executeRequest(
+      path = path + dashboard,
+      user = "sandy",
+      capabilities = "admin_access"
+    )
+    assertEquals(1, response.adminDashboardTabs.size)
+    assertNotNull(response.adminDashboardTabs.find { it.name == "Test Dashboard Tab" })
+  }
+
   private fun executeRequest(
     path: String = "/",
     service: String? = null,
     user: String? = null,
     capabilities: String? = null
-  ): AdminDashboardTabAction.Response {
+  ): DashboardMetadataAction.Response {
     val client = createOkHttpClient()
 
     val baseUrl = jetty.httpServerUrl
@@ -74,7 +86,7 @@ class AdminDashboardTabActionTest {
     val response = call.execute()
 
     val moshi = Moshi.Builder().build()
-    val responseAdaptor = moshi.adapter<AdminDashboardTabAction.Response>()
+    val responseAdaptor = moshi.adapter<DashboardMetadataAction.Response>()
     return responseAdaptor.fromJson(response.body!!.source())!!
   }
 

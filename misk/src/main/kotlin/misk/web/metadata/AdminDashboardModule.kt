@@ -5,12 +5,13 @@ import misk.environment.Environment
 import misk.inject.KAbstractModule
 import misk.security.authz.AccessAnnotationEntry
 import misk.web.DashboardTab
-import misk.web.DashboardTabProvider
+import misk.web.DashboardTabAccessProvider
 import misk.web.NetworkInterceptor
 import misk.web.WebActionModule
-import misk.web.actions.AdminDashboardTab
-import misk.web.actions.AdminDashboardTabAction
+import misk.web.actions.AdminDashboard
+import misk.web.actions.DashboardMetadataAction
 import misk.web.actions.ServiceMetadataAction
+import misk.web.actions.ServiceMetadataNavbarItem
 import misk.web.actions.WebActionMetadataAction
 import misk.web.interceptors.WideOpenDevelopmentInterceptorFactory
 
@@ -24,11 +25,14 @@ import misk.web.interceptors.WideOpenDevelopmentInterceptorFactory
  */
 class AdminDashboardModule(val environment: Environment) : KAbstractModule() {
   override fun configure() {
+    newMultibinder<DashboardTab>()
     // Adds open CORS headers in development to allow through API calls from webpack servers
     multibind<NetworkInterceptor.Factory>().to<WideOpenDevelopmentInterceptorFactory>()
 
     // Admin Dashboard Tab
-    install(WebActionModule.create<AdminDashboardTabAction>())
+    install(WebActionModule.create<DashboardMetadataAction>())
+    // Allow binding of navbar_items that are passed through to the Admin Dashboard
+    newMultibinder<ServiceMetadataNavbarItem>()
     install(WebActionModule.create<ServiceMetadataAction>())
     install(WebTabResourceModule(
       environment = environment,
@@ -54,8 +58,8 @@ class AdminDashboardModule(val environment: Environment) : KAbstractModule() {
 
     // Config
     install(WebActionModule.create<ConfigMetadataAction>())
-    multibind<DashboardTab, AdminDashboardTab>().toProvider(
-      DashboardTabProvider<AdminDashboardAccess>(
+    multibind<DashboardTab>().toProvider(
+      DashboardTabAccessProvider<AdminDashboard, AdminDashboardAccess>(
         slug = "config",
         url_path_prefix = "/_admin/config/",
         name = "Config",
@@ -69,8 +73,8 @@ class AdminDashboardModule(val environment: Environment) : KAbstractModule() {
 
     // Web Actions
     install(WebActionModule.create<WebActionMetadataAction>())
-    multibind<DashboardTab, AdminDashboardTab>().toProvider(
-      DashboardTabProvider<AdminDashboardAccess>(
+    multibind<DashboardTab>().toProvider(
+      DashboardTabAccessProvider<AdminDashboard, AdminDashboardAccess>(
         slug = "web-actions",
         url_path_prefix = "/_admin/web-actions/",
         name = "Web Actions",
@@ -87,9 +91,9 @@ class AdminDashboardModule(val environment: Environment) : KAbstractModule() {
 // Module that allows testing/development environments to bind up the admin dashboard
 class AdminDashboardTestingModule(val environment: Environment) : KAbstractModule() {
   override fun configure() {
+    // Set dummy values for access, these shouldn't matter,
+    // as test environments should prefer to use the FakeCallerAuthenticator.
     multibind<AccessAnnotationEntry>()
-      // Set dummy values for access, these shouldn't matter,
-      // as test environments should prefer to use the FakeCallerAuthenticator.
       .toInstance(AccessAnnotationEntry<AdminDashboardAccess>(capabilities = listOf("admin_access")))
     install(AdminDashboardModule(environment))
   }
