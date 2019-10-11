@@ -17,6 +17,7 @@ import misk.jobqueue.JobQueue
 import misk.jobqueue.QueueName
 import misk.jobqueue.TransactionalJobQueue
 import misk.tasks.RepeatedTaskQueue
+import misk.tasks.RepeatedTaskQueueFactory
 import java.time.Clock
 import java.util.concurrent.Executors
 import javax.inject.Inject
@@ -68,13 +69,10 @@ class AwsSqsJobQueueModule(
   }
 
   @Provides @ForSqsConsumer @Singleton
-  fun consumerRepeatedTaskQueue(clock: Clock, config: AwsSqsJobQueueConfig): RepeatedTaskQueue {
-    return RepeatedTaskQueue(
+  fun consumerRepeatedTaskQueue(queueFactory: RepeatedTaskQueueFactory,
+    config: AwsSqsJobQueueConfig): RepeatedTaskQueue {
+    return queueFactory.new(
         "sqs-consumer-poller",
-        clock,
-        Executors.newCachedThreadPool(ThreadFactoryBuilder()
-            .setNameFormat("sqs-consumer-%d")
-            .build()),
         config.task_queue)
   }
 
