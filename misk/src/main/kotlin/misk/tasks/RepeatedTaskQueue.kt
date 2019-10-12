@@ -36,23 +36,10 @@ class RepeatedTaskQueue @VisibleForTesting internal constructor(
   private val taskExecutor: ExecutorService,
   private val dispatchExecutor: Executor?, // visible internally for testing only
   private val pendingTasks: BlockingQueue<DelayedTask>, // visible internally for testing only
-  // TODO(rhall): make required when all callers are using the Factory
-  internal val metrics: RepeatedTaskQueueMetrics?,
+  internal val metrics: RepeatedTaskQueueMetrics,
   private val config: RepeatedTaskQueueConfig = RepeatedTaskQueueConfig()
 
 ) : AbstractExecutionThreadService() {
-  /**
-   * Creates a [RepeatedTaskQueue] backed by a real [DelayQueue], with tasks dequeued on the
-   * service background thread and executed via the provided [ExecutorService]
-   */
-  // TODO(rhall): remove when all callers are using the Factory
-  constructor(
-    name: String,
-    clock: Clock,
-    taskExecutor: ExecutorService,
-    config: RepeatedTaskQueueConfig = RepeatedTaskQueueConfig()
-  ) :
-      this(name, clock, taskExecutor, null, DelayQueue<DelayedTask>(), null, config)
 
   private val running = AtomicBoolean(false)
 
@@ -133,7 +120,7 @@ class RepeatedTaskQueue @VisibleForTesting internal constructor(
           Result(Status.FAILED, retryDelayOnFailure ?: delay)
         }
       }
-      metrics?.taskDuration?.record(timedResult.first.toMillis().toDouble(), name,
+      metrics.taskDuration.record(timedResult.first.toMillis().toDouble(), name,
           timedResult.second.status.metricLabel())
       timedResult.second
     }
@@ -181,7 +168,7 @@ class RepeatedTaskQueue @VisibleForTesting internal constructor(
           Result(Status.FAILED, failureBackoff.nextRetry())
         }
       }
-      metrics?.taskDuration?.record(timedResult.first.toMillis().toDouble(), name,
+      metrics.taskDuration.record(timedResult.first.toMillis().toDouble(), name,
           timedResult.second.status.metricLabel())
       timedResult.second
     }
@@ -193,21 +180,6 @@ class RepeatedTaskQueue @VisibleForTesting internal constructor(
 
   companion object {
     private val log = getLogger<RepeatedTaskQueue>()
-
-    /**
-     * Creates a [RepeatedTaskQueue] backed by an [ExplicitReleaseDelayQueue], allowing tests
-     * to explicitly control when tasks are released for execution. Tasks are executed in a single
-     * thread in the order in which they expire
-     */
-    // TODO(rhall): remove when all callers are using the Factory
-    @JvmStatic fun forTesting(
-      name: String,
-      clock: Clock,
-      backingStorage: ExplicitReleaseDelayQueue<DelayedTask>,
-      metrics: RepeatedTaskQueueMetrics? = null
-    ): RepeatedTaskQueue {
-      return RepeatedTaskQueueFactory(clock, metrics).forTesting(name, backingStorage)
-    }
   }
 }
 
@@ -222,8 +194,7 @@ class RepeatedTaskQueueMetrics @Inject constructor(metrics : Metrics) {
 @Singleton
 class RepeatedTaskQueueFactory @Inject constructor(
   private val clock: Clock,
-    // TODO(rhall): make required when all callers are using the Factory
-  private val metrics: RepeatedTaskQueueMetrics?
+  private val metrics: RepeatedTaskQueueMetrics
 ) {
 
   /**
