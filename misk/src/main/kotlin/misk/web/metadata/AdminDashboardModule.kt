@@ -27,9 +27,14 @@ class AdminDashboardModule(val environment: Environment) : KAbstractModule() {
     // Adds open CORS headers in development to allow through API calls from webpack servers
     multibind<NetworkInterceptor.Factory>().to<WideOpenDevelopmentInterceptorFactory>()
 
-    // Admin Dashboard Tab
+    // Initialize DashboardTab multibinding list
+    newMultibinder<DashboardTab>()
+
+    // Add metadata actions to support dashboards
     install(WebActionModule.create<AdminDashboardTabAction>())
     install(WebActionModule.create<ServiceMetadataAction>())
+
+    // Admin Dashboard Tab
     install(WebTabResourceModule(
       environment = environment,
       slug = "admin-dashboard",
@@ -54,8 +59,8 @@ class AdminDashboardModule(val environment: Environment) : KAbstractModule() {
 
     // Config
     install(WebActionModule.create<ConfigMetadataAction>())
-    multibind<DashboardTab, AdminDashboardTab>().toProvider(
-      DashboardTabProvider<AdminDashboardAccess>(
+    multibind<DashboardTab>().toProvider(
+      DashboardTabProvider<AdminDashboardTab, AdminDashboardAccess>(
         slug = "config",
         url_path_prefix = "/_admin/config/",
         name = "Config",
@@ -69,8 +74,8 @@ class AdminDashboardModule(val environment: Environment) : KAbstractModule() {
 
     // Web Actions
     install(WebActionModule.create<WebActionMetadataAction>())
-    multibind<DashboardTab, AdminDashboardTab>().toProvider(
-      DashboardTabProvider<AdminDashboardAccess>(
+    multibind<DashboardTab>().toProvider(
+      DashboardTabProvider<AdminDashboardTab, AdminDashboardAccess>(
         slug = "web-actions",
         url_path_prefix = "/_admin/web-actions/",
         name = "Web Actions",
@@ -87,9 +92,9 @@ class AdminDashboardModule(val environment: Environment) : KAbstractModule() {
 // Module that allows testing/development environments to bind up the admin dashboard
 class AdminDashboardTestingModule(val environment: Environment) : KAbstractModule() {
   override fun configure() {
+    // Set dummy values for access, these shouldn't matter,
+    // as test environments should prefer to use the FakeCallerAuthenticator.
     multibind<AccessAnnotationEntry>()
-      // Set dummy values for access, these shouldn't matter,
-      // as test environments should prefer to use the FakeCallerAuthenticator.
       .toInstance(AccessAnnotationEntry<AdminDashboardAccess>(capabilities = listOf("admin_access")))
     install(AdminDashboardModule(environment))
   }

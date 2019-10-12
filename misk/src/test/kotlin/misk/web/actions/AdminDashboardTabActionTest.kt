@@ -7,6 +7,7 @@ import misk.moshi.adapter
 import misk.security.authz.FakeCallerAuthenticator
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
+import misk.web.DashboardTab
 import misk.web.jetty.JettyService
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -22,17 +23,19 @@ class AdminDashboardTabActionTest {
 
   @Inject private lateinit var jetty: JettyService
   @Inject private lateinit var httpClientFactory: HttpClientFactory
+  @Inject private lateinit var dashboardTabs: List<DashboardTab>
 
-  val path = "/api/admindashboardtabs"
+  val path = "/api/admindashboardtabs/"
+  val defaultDashboard = "AdminDashboardTab"
 
   @Test fun customCapabilityAccess_unauthenticated() {
-    val response = executeRequest(path = path)
+    val response = executeRequest(path = path + defaultDashboard)
     assertEquals(0, response.adminDashboardTabs.size)
   }
 
   @Test fun customCapabilityAccess_unauthorized() {
     val response = executeRequest(
-      path = path,
+      path = path + defaultDashboard,
       user = "sandy",
       capabilities = "guest"
     )
@@ -41,13 +44,24 @@ class AdminDashboardTabActionTest {
 
   @Test fun customCapabilityAccess_authorized() {
     val response = executeRequest(
-      path = path,
+      path = path + defaultDashboard,
       user = "sandy",
       capabilities = "admin_access"
     )
     assertEquals(2, response.adminDashboardTabs.size)
     assertNotNull(response.adminDashboardTabs.find { it.name == "Config" })
     assertNotNull(response.adminDashboardTabs.find { it.name == "Web Actions" })
+  }
+
+  @Test fun loadOtherDashboardTabs() {
+    val dashboard = DashboardMetadataActionTestDashboard::class.simpleName!!
+    val response = executeRequest(
+      path = path + dashboard,
+      user = "sandy",
+      capabilities = "test_admin_access"
+    )
+    assertEquals(1, response.adminDashboardTabs.size)
+    assertNotNull(response.adminDashboardTabs.find { it.name == "Test Dashboard Tab" })
   }
 
   private fun executeRequest(
