@@ -67,13 +67,13 @@ internal class RepeatedTaskQueueTest {
       Result(status, Duration.ofSeconds(5))
     }
     waitForNextPendingTask().task()
-    assertThat(taskQueue.metrics!!.taskDuration.count("my-task-queue", "ok")).isEqualTo(1)
+    assertThat(taskQueue.metrics.taskDuration.count("my-task-queue", "ok")).isEqualTo(1)
     waitForNextPendingTask().task()
-    assertThat(taskQueue.metrics!!.taskDuration.count("my-task-queue", "failed")).isEqualTo(1)
+    assertThat(taskQueue.metrics.taskDuration.count("my-task-queue", "failed")).isEqualTo(1)
     waitForNextPendingTask().task()
-    assertThat(taskQueue.metrics!!.taskDuration.count("my-task-queue", "no_reschedule")).isEqualTo(1)
+    assertThat(taskQueue.metrics.taskDuration.count("my-task-queue", "no_reschedule")).isEqualTo(1)
     waitForNextPendingTask().task()
-    assertThat(taskQueue.metrics!!.taskDuration.count("my-task-queue", "no_work")).isEqualTo(1)
+    assertThat(taskQueue.metrics.taskDuration.count("my-task-queue", "no_work")).isEqualTo(1)
   }
 
   @Test fun scheduleBackoffMetrics() {
@@ -89,13 +89,13 @@ internal class RepeatedTaskQueueTest {
       status
     }
     waitForNextPendingTask().task()
-    assertThat(taskQueue.metrics!!.taskDuration.count("my-task-queue", "ok")).isEqualTo(1)
+    assertThat(taskQueue.metrics.taskDuration.count("my-task-queue", "ok")).isEqualTo(1)
     waitForNextPendingTask().task()
-    assertThat(taskQueue.metrics!!.taskDuration.count("my-task-queue", "failed")).isEqualTo(1)
+    assertThat(taskQueue.metrics.taskDuration.count("my-task-queue", "failed")).isEqualTo(1)
     waitForNextPendingTask().task()
-    assertThat(taskQueue.metrics!!.taskDuration.count("my-task-queue", "no_reschedule")).isEqualTo(1)
+    assertThat(taskQueue.metrics.taskDuration.count("my-task-queue", "no_reschedule")).isEqualTo(1)
     waitForNextPendingTask().task()
-    assertThat(taskQueue.metrics!!.taskDuration.count("my-task-queue", "no_work")).isEqualTo(1)
+    assertThat(taskQueue.metrics.taskDuration.count("my-task-queue", "no_work")).isEqualTo(1)
   }
 
   @Test fun ordersTasksByInitialDelay() {
