@@ -26,7 +26,7 @@ class DashboardMetadataActionTest {
   @Inject private lateinit var dashboardTabs: List<DashboardTab>
 
   val path = "/api/admindashboardtabs/"
-  val defaultDashboard = "AdminDashboardTab"
+  val defaultDashboard = "AdminDashboard"
 
   @Test fun customCapabilityAccess_unauthenticated() {
     val response = executeRequest(path = path + defaultDashboard)

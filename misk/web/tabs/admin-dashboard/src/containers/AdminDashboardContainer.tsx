@@ -7,7 +7,7 @@ import * as React from "react"
 
 export const AdminDashboardContainer = () => (
   <MiskNavbarContainer
-    adminDashboardTabsUrl={`${miskAdminDashboardTabsUrl}/AdminDashboardTab`}
+    adminDashboardTabsUrl={`${miskAdminDashboardTabsUrl}/AdminDashboard`}
     serviceMetadataUrl={miskServiceMetadataUrl}
   />
 )
