@@ -25,7 +25,7 @@ class DashboardMetadataActionTest {
   @Inject private lateinit var httpClientFactory: HttpClientFactory
 
   val path = "/api/dashboard/metadata/"
-  val defaultDashboard = "AdminDashboardTab"
+  val defaultDashboard = AdminDashboard::class.simpleName!!
 
   @Test fun customCapabilityAccess_unauthenticated() {
     val response = executeRequest(path = path + defaultDashboard)

@@ -8,7 +8,7 @@ import * as React from "react"
 
 export const AdminDashboardContainer = () => (
   <MiskNavbarContainer
-    adminDashboardTabsUrl={`/api/dashboard/metadata/AdminDashboardTab`}
+    adminDashboardTabsUrl={`/api/dashboard/metadata/AdminDashboard`}
     serviceMetadataUrl={miskServiceMetadataUrl}
   />
 )
