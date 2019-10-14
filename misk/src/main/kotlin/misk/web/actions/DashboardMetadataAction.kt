@@ -28,7 +28,7 @@ class DashboardMetadataAction @Inject constructor() : WebAction {
   @Inject private lateinit var allDashboardTabs: List<DashboardTab>
   @Inject lateinit var callerProvider: @JvmSuppressWildcards ActionScoped<MiskCaller?>
 
-  @Get("/api/admindashboardtabs/{dashboard}")
+  @Get("/api/dashboard/metadata/{dashboard}")
   @RequestContentType(MediaTypes.APPLICATION_JSON)
   @ResponseContentType(MediaTypes.APPLICATION_JSON)
   @Unauthenticated
@@ -39,10 +39,10 @@ class DashboardMetadataAction @Inject constructor() : WebAction {
     val dashboardTabs = allDashboardTabs.filter { it.dashboard == dashboard }
     val authorizedDashboardTabs =
       dashboardTabs.filter { caller.isAllowed(it.capabilities, it.services) }
-    return Response(adminDashboardTabs = authorizedDashboardTabs)
+    return Response(tabs = authorizedDashboardTabs)
   }
 
-  data class Response(val adminDashboardTabs: List<DashboardTab> = listOf())
+  data class Response(val tabs: List<DashboardTab> = listOf())
 }
 
 @Qualifier
