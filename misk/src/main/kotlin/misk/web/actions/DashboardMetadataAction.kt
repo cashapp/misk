@@ -28,7 +28,7 @@ class DashboardMetadataAction @Inject constructor() : WebAction {
   @Inject private lateinit var allDashboardTabs: List<DashboardTab>
   @Inject lateinit var callerProvider: @JvmSuppressWildcards ActionScoped<MiskCaller?>
 
-  @Get("/api/admindashboardtabs/{dashboard}")
+  @Get("/api/dashboard/metadata/{dashboard}")
   @RequestContentType(MediaTypes.APPLICATION_JSON)
   @ResponseContentType(MediaTypes.APPLICATION_JSON)
   @Unauthenticated
