@@ -10,6 +10,7 @@ import misk.web.NetworkInterceptor
 import misk.web.WebActionModule
 import misk.web.actions.AdminDashboard
 import misk.web.actions.DashboardMetadataAction
+import misk.web.actions.DashboardMetadataAction.Companion.DashboardHomeUrl
 import misk.web.actions.ServiceMetadataAction
 import misk.web.actions.WebActionMetadataAction
 import misk.web.interceptors.WideOpenDevelopmentInterceptorFactory
@@ -27,14 +28,19 @@ class AdminDashboardModule(val environment: Environment) : KAbstractModule() {
     // Adds open CORS headers in development to allow through API calls from webpack servers
     multibind<NetworkInterceptor.Factory>().to<WideOpenDevelopmentInterceptorFactory>()
 
-    // Initialize DashboardTab multibinding list
     newMultibinder<DashboardTab>()
+    newMultibinder<DashboardMetadataAction.DashboardHomeUrl>()
+    newMultibinder<DashboardMetadataAction.DashboardNavbarItem>()
+    newMultibinder<DashboardMetadataAction.DashboardNavbarStatus>()
 
     // Add metadata actions to support dashboards
     install(WebActionModule.create<DashboardMetadataAction>())
     install(WebActionModule.create<ServiceMetadataAction>())
 
     // Admin Dashboard Tab
+    multibind<DashboardMetadataAction.DashboardHomeUrl>().toInstance(
+      DashboardHomeUrl<AdminDashboard>("/_admin/")
+    )
     install(WebTabResourceModule(
       environment = environment,
       slug = "admin-dashboard",
@@ -95,7 +101,8 @@ class AdminDashboardTestingModule(val environment: Environment) : KAbstractModul
     // Set dummy values for access, these shouldn't matter,
     // as test environments should prefer to use the FakeCallerAuthenticator.
     multibind<AccessAnnotationEntry>()
-      .toInstance(AccessAnnotationEntry<AdminDashboardAccess>(capabilities = listOf("admin_access")))
+      .toInstance(
+        AccessAnnotationEntry<AdminDashboardAccess>(capabilities = listOf("admin_access")))
     install(AdminDashboardModule(environment))
   }
 }
