@@ -8,7 +8,7 @@ import misk.web.DashboardTab
 import misk.web.DashboardTabProvider
 import misk.web.NetworkInterceptor
 import misk.web.WebActionModule
-import misk.web.actions.AdminDashboardTab
+import misk.web.actions.AdminDashboard
 import misk.web.actions.DashboardMetadataAction
 import misk.web.actions.ServiceMetadataAction
 import misk.web.actions.WebActionMetadataAction
@@ -60,7 +60,7 @@ class AdminDashboardModule(val environment: Environment) : KAbstractModule() {
     // Config
     install(WebActionModule.create<ConfigMetadataAction>())
     multibind<DashboardTab>().toProvider(
-      DashboardTabProvider<AdminDashboardTab, AdminDashboardAccess>(
+      DashboardTabProvider<AdminDashboard, AdminDashboardAccess>(
         slug = "config",
         url_path_prefix = "/_admin/config/",
         name = "Config",
@@ -75,7 +75,7 @@ class AdminDashboardModule(val environment: Environment) : KAbstractModule() {
     // Web Actions
     install(WebActionModule.create<WebActionMetadataAction>())
     multibind<DashboardTab>().toProvider(
-      DashboardTabProvider<AdminDashboardTab, AdminDashboardAccess>(
+      DashboardTabProvider<AdminDashboard, AdminDashboardAccess>(
         slug = "web-actions",
         url_path_prefix = "/_admin/web-actions/",
         name = "Web Actions",

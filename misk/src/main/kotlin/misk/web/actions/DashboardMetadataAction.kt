@@ -47,4 +47,4 @@ class DashboardMetadataAction @Inject constructor() : WebAction {
 
 @Qualifier
 @Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION)
-annotation class AdminDashboardTab
+annotation class AdminDashboard
