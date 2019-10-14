@@ -17,7 +17,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 
 @MiskTest(startService = true)
-class AdminDashboardTabActionTest {
+class DashboardMetadataActionTest {
   @MiskTestModule
   val module = AdminDashboardActionTestingModule()
 
@@ -69,7 +69,7 @@ class AdminDashboardTabActionTest {
     service: String? = null,
     user: String? = null,
     capabilities: String? = null
-  ): AdminDashboardTabAction.Response {
+  ): DashboardMetadataAction.Response {
     val client = createOkHttpClient()
 
     val baseUrl = jetty.httpServerUrl
@@ -88,7 +88,7 @@ class AdminDashboardTabActionTest {
     val response = call.execute()
 
     val moshi = Moshi.Builder().build()
-    val responseAdaptor = moshi.adapter<AdminDashboardTabAction.Response>()
+    val responseAdaptor = moshi.adapter<DashboardMetadataAction.Response>()
     return responseAdaptor.fromJson(response.body!!.source())!!
   }
 

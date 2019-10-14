@@ -24,7 +24,7 @@ import javax.inject.Singleton
  */
 
 @Singleton
-class AdminDashboardTabAction @Inject constructor() : WebAction {
+class DashboardMetadataAction @Inject constructor() : WebAction {
   @Inject private lateinit var allDashboardTabs: List<DashboardTab>
   @Inject lateinit var callerProvider: @JvmSuppressWildcards ActionScoped<MiskCaller?>
 
