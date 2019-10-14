@@ -9,7 +9,7 @@ import misk.web.DashboardTabProvider
 import misk.web.NetworkInterceptor
 import misk.web.WebActionModule
 import misk.web.actions.AdminDashboardTab
-import misk.web.actions.AdminDashboardTabAction
+import misk.web.actions.DashboardMetadataAction
 import misk.web.actions.ServiceMetadataAction
 import misk.web.actions.WebActionMetadataAction
 import misk.web.interceptors.WideOpenDevelopmentInterceptorFactory
@@ -31,7 +31,7 @@ class AdminDashboardModule(val environment: Environment) : KAbstractModule() {
     newMultibinder<DashboardTab>()
 
     // Add metadata actions to support dashboards
-    install(WebActionModule.create<AdminDashboardTabAction>())
+    install(WebActionModule.create<DashboardMetadataAction>())
     install(WebActionModule.create<ServiceMetadataAction>())
 
     // Admin Dashboard Tab
