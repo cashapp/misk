@@ -23,9 +23,8 @@ class DashboardMetadataActionTest {
 
   @Inject private lateinit var jetty: JettyService
   @Inject private lateinit var httpClientFactory: HttpClientFactory
-  @Inject private lateinit var dashboardTabs: List<DashboardTab>
 
-  val path = "/api/admindashboardtabs/"
+  val path = "/api/dashboard/metadata/"
   val defaultDashboard = "AdminDashboardTab"
 
   @Test fun customCapabilityAccess_unauthenticated() {
