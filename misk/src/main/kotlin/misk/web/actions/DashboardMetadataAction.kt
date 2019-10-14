@@ -25,7 +25,9 @@ import javax.inject.Singleton
 
 @Singleton
 class DashboardMetadataAction @Inject constructor() : WebAction {
-  @Inject private lateinit var allDashboardTabs: List<DashboardTab>
+  @Inject private lateinit var allTabs: List<DashboardTab>
+  @Inject private lateinit var allNavbarItems: List<DashboardNavbarItem>
+  @Inject private lateinit var allNavbarStatus: List<DashboardNavbarStatus>
   @Inject lateinit var callerProvider: @JvmSuppressWildcards ActionScoped<MiskCaller?>
 
   @Get("/api/dashboard/metadata/{dashboard}")
@@ -36,13 +38,46 @@ class DashboardMetadataAction @Inject constructor() : WebAction {
     @PathParam dashboard: String
   ): Response {
     val caller = callerProvider.get() ?: return Response()
-    val dashboardTabs = allDashboardTabs.filter { it.dashboard == dashboard }
+
+    val dashboardTabs = allTabs.filter { it.dashboard == dashboard }
     val authorizedDashboardTabs =
       dashboardTabs.filter { caller.isAllowed(it.capabilities, it.services) }
-    return Response(adminDashboardTabs = authorizedDashboardTabs)
+
+    val navbarItems = allNavbarItems
+      .filter { it.dashboard == dashboard }
+      .sortedBy { it.order }
+      .map {it.item}
+
+    val navbarStatus = allNavbarStatus.find { it.dashboard == dashboard }?.status ?: ""
+
+    return Response(navbar_items = navbarItems, navbar_status = navbarStatus, tabs = authorizedDashboardTabs)
   }
 
-  data class Response(val adminDashboardTabs: List<DashboardTab> = listOf())
+  data class DashboardNavbarItem(
+    val dashboard: String,
+    val item: String,
+    val order: Int
+  )
+
+  inline fun <reified DA : Annotation> DashboardNavbarItem(
+    item: String,
+    order: Int
+  ) = DashboardNavbarItem(
+    dashboard = DA::class.simpleName!!,
+    item = item,
+    order = order
+  )
+
+  data class DashboardNavbarStatus(
+    val dashboard: String,
+    val status: String
+  )
+
+  data class Response(
+    val navbar_items: List<String> = listOf(),
+    val navbar_status: String = "",
+    val tabs: List<DashboardTab> = listOf()
+  )
 }
 
 @Qualifier
