@@ -23,14 +23,13 @@ class DashboardMetadataActionTest {
 
   @Inject private lateinit var jetty: JettyService
   @Inject private lateinit var httpClientFactory: HttpClientFactory
-  @Inject private lateinit var dashboardTabs: List<DashboardTab>
 
-  val path = "/api/admindashboardtabs/"
+  val path = "/api/dashboard/metadata/"
   val defaultDashboard = "AdminDashboardTab"
 
   @Test fun customCapabilityAccess_unauthenticated() {
     val response = executeRequest(path = path + defaultDashboard)
-    assertEquals(0, response.adminDashboardTabs.size)
+    assertEquals(0, response.tabs.size)
   }
 
   @Test fun customCapabilityAccess_unauthorized() {
@@ -39,7 +38,7 @@ class DashboardMetadataActionTest {
       user = "sandy",
       capabilities = "guest"
     )
-    assertEquals(0, response.adminDashboardTabs.size)
+    assertEquals(0, response.tabs.size)
   }
 
   @Test fun customCapabilityAccess_authorized() {
@@ -48,9 +47,9 @@ class DashboardMetadataActionTest {
       user = "sandy",
       capabilities = "admin_access"
     )
-    assertEquals(2, response.adminDashboardTabs.size)
-    assertNotNull(response.adminDashboardTabs.find { it.name == "Config" })
-    assertNotNull(response.adminDashboardTabs.find { it.name == "Web Actions" })
+    assertEquals(2, response.tabs.size)
+    assertNotNull(response.tabs.find { it.name == "Config" })
+    assertNotNull(response.tabs.find { it.name == "Web Actions" })
   }
 
   @Test fun loadOtherDashboardTabs() {
@@ -60,8 +59,8 @@ class DashboardMetadataActionTest {
       user = "sandy",
       capabilities = "test_admin_access"
     )
-    assertEquals(1, response.adminDashboardTabs.size)
-    assertNotNull(response.adminDashboardTabs.find { it.name == "Test Dashboard Tab" })
+    assertEquals(1, response.tabs.size)
+    assertNotNull(response.tabs.find { it.name == "Test Dashboard Tab" })
   }
 
   private fun executeRequest(
