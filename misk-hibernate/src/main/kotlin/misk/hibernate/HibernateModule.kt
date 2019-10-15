@@ -270,7 +270,7 @@ class HibernateModule(
           @Inject lateinit var clock: Clock
 
           override fun get() = HibernateHealthCheck(
-              qualifier, sessionFactoryServiceProvider, sessionFactoryProvider, clock)
+              qualifier, sessionFactoryServiceProvider, sessionFactoryProvider, clock, config)
         })
         .asSingleton()
     multibind<HealthCheck>().to(healthCheckKey)

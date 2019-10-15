@@ -38,7 +38,7 @@ class HealthCheckTest {
     fakeClock.setNow(Instant.now())
 
     val status = HibernateHealthCheck(
-        Movies::class, serviceProvider, sessionFactory, fakeClock).status()
+        Movies::class, serviceProvider, sessionFactory, fakeClock, config).status()
     assertThat(status.isHealthy).isTrue()
   }
 
@@ -48,7 +48,7 @@ class HealthCheckTest {
     whenever(mockSessionFactory.openSession()).thenThrow(HibernateException("Cannot open session"))
 
     val status = HibernateHealthCheck(
-        Movies::class, serviceProvider, Provider { mockSessionFactory }, fakeClock).status()
+        Movies::class, serviceProvider, Provider { mockSessionFactory }, fakeClock, config).status()
     assertThat(status.isHealthy).isFalse()
     assertThat(status.messages).contains("Hibernate: failed to query Movies database")
   }
@@ -59,7 +59,7 @@ class HealthCheckTest {
     fakeClock.setNow(Instant.now().minus(skew))
 
     val status = HibernateHealthCheck(
-        Movies::class, serviceProvider, sessionFactory, fakeClock).status()
+        Movies::class, serviceProvider, sessionFactory, fakeClock, config).status()
     assertThat(status.isHealthy).isFalse()
     assertThat(status.messages).anyMatch {
       it.startsWith("Hibernate: host and Movies database clocks have drifted")
@@ -72,7 +72,7 @@ class HealthCheckTest {
     serviceProvider.get().awaitTerminated()
 
     val status = HibernateHealthCheck(
-        Movies::class, serviceProvider, sessionFactory, fakeClock).status()
+        Movies::class, serviceProvider, sessionFactory, fakeClock, config).status()
 
     assertThat(status.isHealthy).isFalse()
     assertThat(status.messages).contains("Hibernate: Movies database service is TERMINATED")
