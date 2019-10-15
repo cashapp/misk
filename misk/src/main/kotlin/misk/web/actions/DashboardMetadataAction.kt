@@ -31,7 +31,7 @@ class DashboardMetadataAction @Inject constructor() : WebAction {
   @Inject private lateinit var allHomeUrls: List<DashboardHomeUrl>
   @Inject lateinit var callerProvider: @JvmSuppressWildcards ActionScoped<MiskCaller?>
 
-  @Get("/api/dashboard/metadata/{dashboardId}")
+  @Get("/api/dashboard/{dashboardId}/metadata")
   @RequestContentType(MediaTypes.APPLICATION_JSON)
   @ResponseContentType(MediaTypes.APPLICATION_JSON)
   @Unauthenticated

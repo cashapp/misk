@@ -23,17 +23,16 @@ class DashboardMetadataActionTest {
   @Inject private lateinit var jetty: JettyService
   @Inject private lateinit var httpClientFactory: HttpClientFactory
 
-  val path = "/api/dashboard/metadata/"
-  val defaultDashboard = AdminDashboard::class.simpleName!!
+  private inline fun <reified A: Annotation>asDashboardPath() = "/api/dashboard/${A::class.simpleName!!}/metadata"
 
   @Test fun `admin dashboard unauthenticated tabs`() {
-    val response = executeRequest(path = path + defaultDashboard)
+    val response = executeRequest(path = asDashboardPath<AdminDashboard>())
     assertEquals(0, response.dashboardMetadata.tabs.size)
   }
 
   @Test fun `admin dashboard unauthorized tabs`() {
     val response = executeRequest(
-      path = path + defaultDashboard,
+      path = asDashboardPath<AdminDashboard>(),
       user = "sandy",
       capabilities = "guest"
     )
@@ -42,7 +41,7 @@ class DashboardMetadataActionTest {
 
   @Test fun `admin dashboard authorized tabs`() {
     val response = executeRequest(
-      path = path + defaultDashboard,
+      path = asDashboardPath<AdminDashboard>(),
       user = "sandy",
       capabilities = "admin_access"
     )
@@ -52,9 +51,8 @@ class DashboardMetadataActionTest {
   }
 
   @Test fun `test dashboard tabs`() {
-    val dashboard = DashboardMetadataActionTestDashboard::class.simpleName!!
     val response = executeRequest(
-      path = path + dashboard,
+      path = asDashboardPath<DashboardMetadataActionTestDashboard>(),
       user = "sandy",
       capabilities = "test_admin_access"
     )
@@ -63,9 +61,8 @@ class DashboardMetadataActionTest {
   }
 
   @Test fun `test dashboard navbar items`() {
-    val dashboard = DashboardMetadataActionTestDashboard::class.simpleName!!
     val response = executeRequest(
-      path = path + dashboard,
+      path = asDashboardPath<DashboardMetadataActionTestDashboard>(),
       user = "sandy",
       capabilities = "test_admin_access"
     )
@@ -75,9 +72,8 @@ class DashboardMetadataActionTest {
   }
 
   @Test fun `test dashboard navbar status`() {
-    val dashboard = DashboardMetadataActionTestDashboard::class.simpleName!!
     val response = executeRequest(
-      path = path + dashboard,
+      path = asDashboardPath<DashboardMetadataActionTestDashboard>(),
       user = "sandy",
       capabilities = "test_admin_access"
     )
@@ -85,9 +81,8 @@ class DashboardMetadataActionTest {
   }
 
   @Test fun `test dashboard home url`() {
-    val dashboard = DashboardMetadataActionTestDashboard::class.simpleName!!
     val response = executeRequest(
-      path = path + dashboard,
+      path = asDashboardPath<DashboardMetadataActionTestDashboard>(),
       user = "sandy",
       capabilities = "test_admin_access"
     )
