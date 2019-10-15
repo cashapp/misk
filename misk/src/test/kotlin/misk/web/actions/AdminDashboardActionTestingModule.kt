@@ -40,7 +40,7 @@ class AdminDashboardActionTestingModule : KAbstractModule() {
 
     multibind<DashboardMetadataAction.DashboardHomeUrl>().toInstance(
       DashboardMetadataAction.DashboardHomeUrl<DashboardMetadataActionTestDashboard>(
-        url = "/test-app/")
+        urlPathPrefix = "/test-app/")
     )
   }
 }

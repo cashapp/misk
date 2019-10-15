@@ -8,6 +8,7 @@ import misk.web.Get
 import misk.web.PathParam
 import misk.web.RequestContentType
 import misk.web.ResponseContentType
+import misk.web.ValidWebEntry
 import misk.web.mediatype.MediaTypes
 import javax.inject.Inject
 import javax.inject.Qualifier
@@ -45,7 +46,7 @@ class DashboardMetadataAction @Inject constructor() : WebAction {
       .filter { caller.isAllowed(it.capabilities, it.services) }
 
     val homeUrl = allHomeUrls
-      .find { it.dashboardId == dashboardId }?.url ?: ""
+      .find { it.dashboardId == dashboardId }?.urlPathPrefix ?: ""
 
     val navbarItems = allNavbarItems
       .filter { it.dashboardId == dashboardId }
@@ -66,8 +67,8 @@ class DashboardMetadataAction @Inject constructor() : WebAction {
 
   data class DashboardHomeUrl(
     val dashboardId: String,
-    val url: String
-  )
+    val urlPathPrefix: String
+  ): ValidWebEntry(url_path_prefix = urlPathPrefix)
 
   data class DashboardNavbarItem(
     val dashboardId: String,
@@ -91,10 +92,10 @@ class DashboardMetadataAction @Inject constructor() : WebAction {
 
   companion object {
     inline fun <reified DA : Annotation> DashboardHomeUrl(
-      url: String
+      urlPathPrefix: String
     ) = DashboardHomeUrl(
       dashboardId = DA::class.simpleName!!,
-      url = url
+      urlPathPrefix = urlPathPrefix
     )
 
     inline fun <reified DA : Annotation> DashboardNavbarItem(
