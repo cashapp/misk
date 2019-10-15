@@ -41,7 +41,7 @@ inline fun <reified DA : Annotation> DashboardTab(
 /**
  * Sets the tab's dashboardId by annotation and authentication by injected access annotation entry
  */
-class DashboardTabProviderBuilder(
+class DashboardTabProvider(
   val slug: String,
   val url_path_prefix: String,
   val name: String,
@@ -76,7 +76,7 @@ inline fun <reified DA : Annotation, reified AA : Annotation> DashboardTabProvid
   url_path_prefix: String,
   name: String,
   category: String = "Admin"
-) = DashboardTabProviderBuilder(
+) = DashboardTabProvider(
   slug = slug,
   url_path_prefix = url_path_prefix,
   name = name,
