@@ -5,16 +5,22 @@ import javax.inject.Inject
 import javax.inject.Provider
 import kotlin.reflect.KClass
 
+/**
+ * A [WebTab] with additional fields to bind to a specific DashboardId, with a menu name and category
+ */
 class DashboardTab(
   slug: String,
   url_path_prefix: String,
-  val dashboard: String,
+  val dashboardId: String,
   val name: String,
   val category: String = "Admin",
   capabilities: Set<String> = setOf(),
   services: Set<String> = setOf()
 ) : WebTab(slug, url_path_prefix, capabilities, services)
 
+/**
+ * Create a DashboardTab using the Dashboard Annotation class simple name as the DashboardId string
+ */
 inline fun <reified DA : Annotation> DashboardTab(
   slug: String,
   url_path_prefix: String,
@@ -25,7 +31,7 @@ inline fun <reified DA : Annotation> DashboardTab(
 ) = DashboardTab(
   slug = slug,
   url_path_prefix = url_path_prefix,
-  dashboard = DA::class.simpleName!!,
+  dashboardId = DA::class.simpleName!!,
   name = name,
   category = category,
   capabilities = capabilities,
@@ -33,14 +39,14 @@ inline fun <reified DA : Annotation> DashboardTab(
 )
 
 /**
- * Sets the tab's dashboard group by annotation and authentication by injected access annotation entry
+ * Sets the tab's dashboardId by annotation and authentication by injected access annotation entry
  */
 class DashboardTabProviderBuilder(
   val slug: String,
   val url_path_prefix: String,
   val name: String,
   val category: String = "Admin",
-  val dashboardAnnotation: KClass<out Annotation>,
+  val dashboardId: String,
   val accessAnnotation: KClass<out Annotation>? = null,
   val capabilities: Set<String> = setOf(),
   val services: Set<String> = setOf()
@@ -53,7 +59,7 @@ class DashboardTabProviderBuilder(
     return DashboardTab(
       slug = slug,
       url_path_prefix = url_path_prefix,
-      dashboard = dashboardAnnotation.simpleName!!,
+      dashboardId = dashboardId,
       name = name,
       category = category,
       capabilities = accessAnnotationEntry?.capabilities?.toSet() ?: capabilities,
@@ -62,7 +68,9 @@ class DashboardTabProviderBuilder(
   }
 }
 
-/** Binds a DashboardTab for Dashboard [DA] with access annotation [AA] */
+/**
+ * Binds a DashboardTab for Dashboard [DA] with access annotation [AA]
+ */
 inline fun <reified DA : Annotation, reified AA : Annotation> DashboardTabProvider(
   slug: String,
   url_path_prefix: String,
@@ -73,24 +81,6 @@ inline fun <reified DA : Annotation, reified AA : Annotation> DashboardTabProvid
   url_path_prefix = url_path_prefix,
   name = name,
   category = category,
-  dashboardAnnotation = DA::class,
+  dashboardId = DA::class.simpleName!!,
   accessAnnotation = AA::class
-)
-
-/** Binds a DashboardTab for Dashboard Group annotation [DA] */
-inline fun <reified DA : Annotation> DashboardTabProvider(
-  slug: String,
-  url_path_prefix: String,
-  name: String,
-  category: String = "Admin",
-  capabilities: Set<String> = setOf(),
-  services: Set<String> = setOf()
-) = DashboardTabProviderBuilder(
-  slug = slug,
-  url_path_prefix = url_path_prefix,
-  name = name,
-  category = category,
-  capabilities = capabilities,
-  services = services,
-  dashboardAnnotation = DA::class
 )

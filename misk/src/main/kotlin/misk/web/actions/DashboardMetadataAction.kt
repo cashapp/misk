@@ -25,24 +25,94 @@ import javax.inject.Singleton
 
 @Singleton
 class DashboardMetadataAction @Inject constructor() : WebAction {
-  @Inject private lateinit var allDashboardTabs: List<DashboardTab>
+  @Inject private lateinit var allTabs: List<DashboardTab>
+  @Inject private lateinit var allNavbarItems: List<DashboardNavbarItem>
+  @Inject private lateinit var allNavbarStatus: List<DashboardNavbarStatus>
+  @Inject private lateinit var allHomeUrls: List<DashboardHomeUrl>
   @Inject lateinit var callerProvider: @JvmSuppressWildcards ActionScoped<MiskCaller?>
 
-  @Get("/api/dashboard/metadata/{dashboard}")
+  @Get("/api/dashboard/metadata/{dashboardId}")
   @RequestContentType(MediaTypes.APPLICATION_JSON)
   @ResponseContentType(MediaTypes.APPLICATION_JSON)
   @Unauthenticated
   fun getAll(
-    @PathParam dashboard: String
+    @PathParam dashboardId: String
   ): Response {
     val caller = callerProvider.get() ?: return Response()
-    val dashboardTabs = allDashboardTabs.filter { it.dashboard == dashboard }
-    val authorizedDashboardTabs =
-      dashboardTabs.filter { caller.isAllowed(it.capabilities, it.services) }
-    return Response(tabs = authorizedDashboardTabs)
+
+    val authorizedDashboardTabs = allTabs
+      .filter { it.dashboardId == dashboardId }
+      .filter { caller.isAllowed(it.capabilities, it.services) }
+
+    val homeUrl = allHomeUrls
+      .find { it.dashboardId == dashboardId }?.url ?: ""
+
+    val navbarItems = allNavbarItems
+      .filter { it.dashboardId == dashboardId }
+      .sortedBy { it.order }
+      .map { it.item }
+
+    val navbarStatus = allNavbarStatus
+      .find { it.dashboardId == dashboardId }?.status ?: ""
+
+    val dashboardMetadata = DashboardMetadata(
+      home_url = homeUrl,
+      navbar_items = navbarItems,
+      navbar_status = navbarStatus,
+      tabs = authorizedDashboardTabs
+    )
+    return Response(dashboardMetadata = dashboardMetadata)
   }
 
-  data class Response(val tabs: List<DashboardTab> = listOf())
+  data class DashboardHomeUrl(
+    val dashboardId: String,
+    val url: String
+  )
+
+  data class DashboardNavbarItem(
+    val dashboardId: String,
+    val item: String,
+    val order: Int
+  )
+
+  data class DashboardNavbarStatus(
+    val dashboardId: String,
+    val status: String
+  )
+
+  data class DashboardMetadata(
+    val home_url: String = "",
+    val navbar_items: List<String> = listOf(),
+    val navbar_status: String = "",
+    val tabs: List<DashboardTab> = listOf()
+  )
+
+  data class Response(val dashboardMetadata: DashboardMetadata = DashboardMetadata())
+
+  companion object {
+    inline fun <reified DA : Annotation> DashboardHomeUrl(
+      url: String
+    ) = DashboardHomeUrl(
+      dashboardId = DA::class.simpleName!!,
+      url = url
+    )
+
+    inline fun <reified DA : Annotation> DashboardNavbarItem(
+      item: String,
+      order: Int
+    ) = DashboardNavbarItem(
+      dashboardId = DA::class.simpleName!!,
+      item = item,
+      order = order
+    )
+
+    inline fun <reified DA : Annotation> DashboardNavbarStatus(
+      status: String
+    ) = DashboardNavbarStatus(
+      dashboardId = DA::class.simpleName!!,
+      status = status
+    )
+  }
 }
 
 @Qualifier

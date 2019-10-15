@@ -11,9 +11,8 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * metadata to build navbar of admin dashboard
+ * Service Metadata used for front end dashboards including App Name and Misk.Environment
  */
-
 @Singleton
 class ServiceMetadataAction @Inject constructor(
   private val optionalBinder: OptionalBinder
@@ -35,11 +34,10 @@ class ServiceMetadataAction @Inject constructor(
 @Singleton
 class OptionalBinder @Inject constructor(@AppName val appName: String) {
   @com.google.inject.Inject(optional = true)
-  var serviceMetadata: ServiceMetadata = ServiceMetadata(appName, Environment.fromEnvironmentVariable(), "/_admin/")
+  var serviceMetadata: ServiceMetadata = ServiceMetadata(appName, Environment.fromEnvironmentVariable())
 }
 
 data class ServiceMetadata(
   val app_name: String,
-  val environment: Environment,
-  val admin_dashboard_url: String
+  val environment: Environment
 )
