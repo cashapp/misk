@@ -1,14 +1,13 @@
 import {
   MiskNavbarContainer,
-  //  TOOD use this after Misk-Web fix
-  // miskAdminDashboardTabsUrl,
+  miskDashboardMetadataUrl,
   miskServiceMetadataUrl
 } from "@misk/core"
 import * as React from "react"
 
 export const AdminDashboardContainer = () => (
   <MiskNavbarContainer
-    dashboardMetadataUrl={`/api/dashboard/metadata/AdminDashboard`}
+    dashboardMetadataUrl={miskDashboardMetadataUrl("AdminDashboard")}
     serviceMetadataUrl={miskServiceMetadataUrl}
   />
 )
