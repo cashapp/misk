@@ -184,7 +184,7 @@ class RepeatedTaskQueue @VisibleForTesting internal constructor(
 }
 
 @Singleton
-class RepeatedTaskQueueMetrics @Inject constructor(metrics : Metrics) {
+class RepeatedTaskQueueMetrics @Inject constructor(metrics: Metrics) {
   internal val taskDuration = metrics.histogram(
       "task_queue_task_duration",
       "count and duration in ms of periodic tasks",
