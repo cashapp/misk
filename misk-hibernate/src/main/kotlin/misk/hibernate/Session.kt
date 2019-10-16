@@ -43,8 +43,13 @@ interface Session {
    * Disable one or more checks for the duration of the execution of [body]. The passed in checks
    * will entirely replace the other ignored checks at this point, they will not be merged with
    * whatever is there currently.
+   *
+   * TODO: Deprecate. This can enable checks as a side-effect.
+   * Prefer disableChecks() which is cumulative
    */
   fun <T> withoutChecks(vararg checks: Check, body: () -> T): T
+
+  fun <T> disableChecks(checks: Collection<Check>, body: () -> T): T
 
   /**
    * @throws IllegalStateException when delete is called on a read only session.

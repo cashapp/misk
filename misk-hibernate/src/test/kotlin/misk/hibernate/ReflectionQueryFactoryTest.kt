@@ -509,6 +509,41 @@ class ReflectionQueryFactoryTest {
   }
 
   @Test
+  fun count() {
+    transacter.allowCowrites().transaction { session ->
+      session.save(DbMovie("Jurassic Park", LocalDate.of(1993, 6, 9)))
+      session.save(DbMovie("Rocky", LocalDate.of(1976, 11, 21)))
+      session.save(DbMovie("Star Wars", LocalDate.of(1977, 5, 25)))
+    }
+
+    // count all entities
+    val allCount = transacter.transaction { session ->
+      queryFactory.newQuery<OperatorsMovieQuery>()
+        .allowFullScatter().allowTableScan()
+        .count(session)
+    }
+    assertThat(allCount).isEqualTo(3)
+
+    // count with filter
+    transacter.transaction { session ->
+      val jurassicParkCount = queryFactory.newQuery<OperatorsMovieQuery>()
+        .allowFullScatter().allowTableScan()
+        .name("Jurassic Park")
+        .count(session)
+      assertThat(jurassicParkCount).isEqualTo(1)
+    }
+
+    // count beyond max results
+    transacter.transaction { session ->
+      assertThat(queryFactory.newQuery<OperatorsMovieQuery>()
+        .allowFullScatter().allowTableScan()
+        .apply { maxRows = 2 }
+        .count(session))
+        .isEqualTo(3)
+    }
+  }
+
+  @Test
   fun orOperator() {
     val m1 = NameAndReleaseDate("Rocky 1", LocalDate.of(2018, 1, 1))
     val m2 = NameAndReleaseDate("Rocky 2", LocalDate.of(2018, 1, 2))
