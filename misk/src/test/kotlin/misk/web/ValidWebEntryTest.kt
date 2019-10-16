@@ -10,6 +10,11 @@ class ValidWebEntryTest {
     TestWebEntry()
   }
 
+  @Test fun `empty happy path`() {
+    class TestWebEntry : ValidWebEntry()
+    TestWebEntry()
+  }
+
   @Test fun `fails on bad url path prefix missing trailing slash`() {
     val errMsg = assertFailsWith<IllegalArgumentException> {
       class TestWebEntry : ValidWebEntry(slug = "test-slug", url_path_prefix = "/test-path")

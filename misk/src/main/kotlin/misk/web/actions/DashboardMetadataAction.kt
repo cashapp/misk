@@ -9,6 +9,7 @@ import misk.web.PathParam
 import misk.web.RequestContentType
 import misk.web.ResponseContentType
 import misk.web.ValidWebEntry
+import misk.web.ValidWebEntry.Companion.slugify
 import misk.web.mediatype.MediaTypes
 import javax.inject.Inject
 import javax.inject.Qualifier
@@ -32,29 +33,29 @@ class DashboardMetadataAction @Inject constructor() : WebAction {
   @Inject private lateinit var allHomeUrls: List<DashboardHomeUrl>
   @Inject lateinit var callerProvider: @JvmSuppressWildcards ActionScoped<MiskCaller?>
 
-  @Get("/api/dashboard/{dashboardId}/metadata")
+  @Get("/api/dashboard/{dashboardSlug}/metadata")
   @RequestContentType(MediaTypes.APPLICATION_JSON)
   @ResponseContentType(MediaTypes.APPLICATION_JSON)
   @Unauthenticated
   fun getAll(
-    @PathParam dashboardId: String
+    @PathParam dashboardSlug: String
   ): Response {
     val caller = callerProvider.get() ?: return Response()
 
     val authorizedDashboardTabs = allTabs
-      .filter { it.dashboardId == dashboardId }
+      .filter { it.dashboardSlug == dashboardSlug }
       .filter { caller.isAllowed(it.capabilities, it.services) }
 
     val homeUrl = allHomeUrls
-      .find { it.dashboardId == dashboardId }?.urlPathPrefix ?: ""
+      .find { it.dashboardSlug == dashboardSlug }?.url ?: ""
 
     val navbarItems = allNavbarItems
-      .filter { it.dashboardId == dashboardId }
+      .filter { it.dashboardSlug == dashboardSlug }
       .sortedBy { it.order }
       .map { it.item }
 
     val navbarStatus = allNavbarStatus
-      .find { it.dashboardId == dashboardId }?.status ?: ""
+      .find { it.dashboardSlug == dashboardSlug }?.status ?: ""
 
     val dashboardMetadata = DashboardMetadata(
       home_url = homeUrl,
@@ -66,20 +67,20 @@ class DashboardMetadataAction @Inject constructor() : WebAction {
   }
 
   data class DashboardHomeUrl(
-    val dashboardId: String,
-    val urlPathPrefix: String
-  ): ValidWebEntry(url_path_prefix = urlPathPrefix)
+    val dashboardSlug: String,
+    val url: String
+  ): ValidWebEntry(slug = dashboardSlug, url_path_prefix = url)
 
   data class DashboardNavbarItem(
-    val dashboardId: String,
+    val dashboardSlug: String,
     val item: String,
     val order: Int
-  )
+  ): ValidWebEntry(slug = dashboardSlug)
 
   data class DashboardNavbarStatus(
-    val dashboardId: String,
+    val dashboardSlug: String,
     val status: String
-  )
+  ): ValidWebEntry(slug = dashboardSlug)
 
   data class DashboardMetadata(
     val home_url: String = "",
@@ -94,15 +95,15 @@ class DashboardMetadataAction @Inject constructor() : WebAction {
     inline fun <reified DA : Annotation> DashboardHomeUrl(
       urlPathPrefix: String
     ) = DashboardHomeUrl(
-      dashboardId = DA::class.simpleName!!,
-      urlPathPrefix = urlPathPrefix
+      dashboardSlug = slugify<DA>(),
+      url = urlPathPrefix
     )
 
     inline fun <reified DA : Annotation> DashboardNavbarItem(
       item: String,
       order: Int
     ) = DashboardNavbarItem(
-      dashboardId = DA::class.simpleName!!,
+      dashboardSlug = slugify<DA>(),
       item = item,
       order = order
     )
@@ -110,7 +111,7 @@ class DashboardMetadataAction @Inject constructor() : WebAction {
     inline fun <reified DA : Annotation> DashboardNavbarStatus(
       status: String
     ) = DashboardNavbarStatus(
-      dashboardId = DA::class.simpleName!!,
+      dashboardSlug = slugify<DA>(),
       status = status
     )
   }

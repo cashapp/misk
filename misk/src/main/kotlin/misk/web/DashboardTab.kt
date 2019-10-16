@@ -1,6 +1,7 @@
 package misk.web
 
 import misk.security.authz.AccessAnnotationEntry
+import misk.web.ValidWebEntry.Companion.slugify
 import javax.inject.Inject
 import javax.inject.Provider
 import kotlin.reflect.KClass
@@ -11,7 +12,7 @@ import kotlin.reflect.KClass
 class DashboardTab(
   slug: String,
   url_path_prefix: String,
-  val dashboardId: String,
+  val dashboardSlug: String,
   val name: String,
   val category: String = "Admin",
   capabilities: Set<String> = setOf(),
@@ -31,7 +32,7 @@ inline fun <reified DA : Annotation> DashboardTab(
 ) = DashboardTab(
   slug = slug,
   url_path_prefix = url_path_prefix,
-  dashboardId = DA::class.simpleName!!,
+  dashboardSlug = slugify<DA>(),
   name = name,
   category = category,
   capabilities = capabilities,
@@ -46,7 +47,7 @@ class DashboardTabProvider(
   val url_path_prefix: String,
   val name: String,
   val category: String = "Admin",
-  val dashboardId: String,
+  val dashboardSlug: String,
   val accessAnnotation: KClass<out Annotation>? = null,
   val capabilities: Set<String> = setOf(),
   val services: Set<String> = setOf()
@@ -59,7 +60,7 @@ class DashboardTabProvider(
     return DashboardTab(
       slug = slug,
       url_path_prefix = url_path_prefix,
-      dashboardId = dashboardId,
+      dashboardSlug = dashboardSlug,
       name = name,
       category = category,
       capabilities = accessAnnotationEntry?.capabilities?.toSet() ?: capabilities,
@@ -81,6 +82,6 @@ inline fun <reified DA : Annotation, reified AA : Annotation> DashboardTabProvid
   url_path_prefix = url_path_prefix,
   name = name,
   category = category,
-  dashboardId = DA::class.simpleName!!,
+  dashboardSlug = slugify<DA>(),
   accessAnnotation = AA::class
 )

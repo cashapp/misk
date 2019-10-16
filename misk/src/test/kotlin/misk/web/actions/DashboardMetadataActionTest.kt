@@ -7,6 +7,7 @@ import misk.moshi.adapter
 import misk.security.authz.FakeCallerAuthenticator
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
+import misk.web.ValidWebEntry.Companion.slugify
 import misk.web.jetty.JettyService
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -23,7 +24,7 @@ class DashboardMetadataActionTest {
   @Inject private lateinit var jetty: JettyService
   @Inject private lateinit var httpClientFactory: HttpClientFactory
 
-  private inline fun <reified A: Annotation>asDashboardPath() = "/api/dashboard/${A::class.simpleName!!}/metadata"
+  private inline fun <reified A: Annotation>asDashboardPath() = "/api/dashboard/${slugify<A>()}/metadata"
 
   @Test fun `admin dashboard unauthenticated tabs`() {
     val response = executeRequest(path = asDashboardPath<AdminDashboard>())
