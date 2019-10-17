@@ -55,12 +55,10 @@ internal class ReflectionQuery<T : DbEntity<T>>(
   private val constraints = mutableListOf<PredicateFactory>()
   private val orderFactories = mutableListOf<OrderFactory>()
 
-  private var disabledChecks: EnumSet<Check>? = null
+  private val disabledChecks: EnumSet<Check> = EnumSet.noneOf(Check::class.java)
 
   override fun disableCheck(check: Check) {
-    val checks = disabledChecks ?: EnumSet.noneOf(Check::class.java)
-    checks.add(check)
-    disabledChecks = checks
+    disabledChecks += check
   }
 
   override fun uniqueResult(session: Session): T? {
@@ -104,17 +102,34 @@ internal class ReflectionQuery<T : DbEntity<T>>(
     val typedQuery = session.hibernateSession.createQuery(query)
     typedQuery.maxResults = effectiveMaxRows(returnList)
     val rows = traceSelect {
-      val disableChecks = disabledChecks
-      if (disableChecks != null) {
-        session.withoutChecks(*disableChecks.toArray(emptyArray())) {
-          typedQuery.list()
-        }
-      } else {
+      session.disableChecks(disabledChecks) {
         typedQuery.list()
       }
     }
     checkRowCount(returnList, rows.size)
     return rows
+  }
+
+  override fun count(session: Session): Long {
+    check(!predicatesOnly) { "cannot select on this query" }
+
+    check(orderFactories.size == 0) { "orderBy shouldn't be used for a count" }
+
+    val criteriaBuilder = session.hibernateSession.criteriaBuilder
+    val query = criteriaBuilder.createQuery(Long::class.java)
+    val queryRoot = query.from(rootEntityType.java)
+
+    val predicate = buildWherePredicate(queryRoot, criteriaBuilder)
+    query.where(predicate)
+
+    query.select(criteriaBuilder.count(queryRoot))
+
+    val typedQuery = session.hibernateSession.createQuery(query)
+    return traceSelect {
+      session.disableChecks(disabledChecks) {
+        typedQuery.getSingleResult()
+      }
+    }
   }
 
   private fun effectiveMaxRows(returnList: Boolean): Int {
@@ -256,12 +271,7 @@ internal class ReflectionQuery<T : DbEntity<T>>(
       query.orderBy(reflectionQuery.buildOrderBys(root, criteriaBuilder))
       val typedQuery = session.hibernateSession.createQuery(query)
       typedQuery.maxResults = reflectionQuery.effectiveMaxRows(returnList)
-      val disableChecks = reflectionQuery.disabledChecks
-      val rows = if (disableChecks != null) {
-        session.withoutChecks(*disableChecks.toArray(emptyArray())) {
-          typedQuery.list()
-        }
-      } else {
+      val rows = session.disableChecks(reflectionQuery.disabledChecks) {
         typedQuery.list()
       }
       reflectionQuery.checkRowCount(returnList, rows.size)

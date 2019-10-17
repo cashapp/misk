@@ -342,7 +342,7 @@ internal class RealTransacter private constructor(
     private val readOnly: Boolean,
     private val config: DataSourceConfig,
     private val transacter: RealTransacter,
-    var disabledChecks: EnumSet<Check>,
+    var disabledChecks: Collection<Check>,
     predecessor: RealSession?
   ) : Session, Closeable {
     private val preCommitHooks = mutableListOf<() -> Unit>()
@@ -494,6 +494,16 @@ internal class RealTransacter private constructor(
         EnumSet.of(checks[0], *checks)
       }
       disabledChecks = actualChecks
+      return try {
+        body()
+      } finally {
+        disabledChecks = previous
+      }
+    }
+
+    override fun <T> disableChecks(checks: Collection<Check>, body: () -> T): T {
+      val previous = disabledChecks
+      disabledChecks = previous + checks
       return try {
         body()
       } finally {
