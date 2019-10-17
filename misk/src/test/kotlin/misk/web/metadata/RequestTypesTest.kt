@@ -1,14 +1,13 @@
-package misk.web
+package misk.web.metadata
 
 import com.squareup.protos.test.parsing.Shipment
 import com.squareup.protos.test.parsing.Warehouse
-import misk.web.actions.Field
+import misk.web.RequestTypes
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import kotlin.reflect.full.createType
 
 internal class RequestTypesTest {
-
   val requestTypes = RequestTypes()
 
   @Test fun handlesNull() {

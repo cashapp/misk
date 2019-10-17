@@ -1,4 +1,4 @@
-package misk.web.metadata
+package misk.web.dashboard
 
 @Retention(AnnotationRetention.RUNTIME)
 @Target(AnnotationTarget.FUNCTION)

@@ -6,8 +6,8 @@ import misk.inject.keyOf
 import misk.scope.ActionScope
 import misk.security.authz.AccessInterceptor
 import misk.web.actions.WebAction
-import misk.web.actions.WebActionMetadata
 import misk.web.actions.asChain
+import misk.web.metadata.WebActionMetadata
 import misk.web.mediatype.MediaRange
 import misk.web.mediatype.MediaTypes
 import misk.web.mediatype.compareTo
@@ -125,22 +125,22 @@ internal class BoundAction<A : WebAction>(
 
   internal val metadata: WebActionMetadata by lazy {
     WebActionMetadata(
-        name = action.name,
-        function = action.function,
-        functionAnnotations = action.function.annotations,
-        acceptedMediaRanges = action.acceptedMediaRanges,
-        responseContentType = action.responseContentType,
-        parameterTypes = action.parameterTypes,
-        requestType = action.requestType,
-        returnType = action.returnType,
-        pathPattern = pathPattern,
-        applicationInterceptors = applicationInterceptors,
-        networkInterceptors = networkInterceptors,
-        dispatchMechanism = action.dispatchMechanism,
-        allowedServices = fetchAllowedCallers(
-            applicationInterceptors, AccessInterceptor::allowedServices),
-        allowedCapabilities = fetchAllowedCallers(applicationInterceptors,
-            AccessInterceptor::allowedCapabilities)
+      name = action.name,
+      function = action.function,
+      functionAnnotations = action.function.annotations,
+      acceptedMediaRanges = action.acceptedMediaRanges,
+      responseContentType = action.responseContentType,
+      parameterTypes = action.parameterTypes,
+      requestType = action.requestType,
+      returnType = action.returnType,
+      pathPattern = pathPattern,
+      applicationInterceptors = applicationInterceptors,
+      networkInterceptors = networkInterceptors,
+      dispatchMechanism = action.dispatchMechanism,
+      allowedServices = fetchAllowedCallers(
+        applicationInterceptors, AccessInterceptor::allowedServices),
+      allowedCapabilities = fetchAllowedCallers(applicationInterceptors,
+        AccessInterceptor::allowedCapabilities)
     )
   }
 

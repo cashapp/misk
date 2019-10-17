@@ -8,8 +8,8 @@ import misk.web.ServletHttpCall
 import misk.web.actions.WebAction
 import misk.web.actions.WebActionEntry
 import misk.web.actions.WebActionFactory
-import misk.web.actions.WebActionMetadata
 import misk.web.mediatype.MediaTypes
+import misk.web.metadata.WebActionMetadata
 import okhttp3.Headers
 import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrl
