@@ -5,6 +5,7 @@ import misk.config.Config
 import misk.environment.Environment
 import misk.inject.KAbstractModule
 import misk.web.DashboardTab
+import misk.web.DashboardTabProvider
 import misk.web.metadata.AdminDashboardTestingModule
 import javax.inject.Qualifier
 
@@ -18,7 +19,7 @@ class AdminDashboardActionTestingModule : KAbstractModule() {
     bind<String>().annotatedWith<AppName>().toInstance("testApp")
 
     // Bind test dashboard tab, navbar_items, navbar_status
-    multibind<DashboardTab>().toInstance(DashboardTab<DashboardMetadataActionTestDashboard>(
+    multibind<DashboardTab>().toProvider(DashboardTabProvider<DashboardMetadataActionTestDashboard>(
       slug = "slug",
       url_path_prefix = "/url-path-prefix/",
       name = "Test Dashboard Tab",

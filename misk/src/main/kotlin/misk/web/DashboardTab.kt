@@ -20,26 +20,6 @@ class DashboardTab(
 ) : WebTab(slug, url_path_prefix, capabilities, services)
 
 /**
- * Create a DashboardTab using the Dashboard Annotation class simple name as the DashboardId string
- */
-inline fun <reified DA : Annotation> DashboardTab(
-  slug: String,
-  url_path_prefix: String,
-  name: String,
-  category: String = "Admin",
-  capabilities: Set<String> = setOf(),
-  services: Set<String> = setOf()
-) = DashboardTab(
-  slug = slug,
-  url_path_prefix = url_path_prefix,
-  dashboardSlug = slugify<DA>(),
-  name = name,
-  category = category,
-  capabilities = capabilities,
-  services = services
-)
-
-/**
  * Sets the tab's dashboardId by annotation and authentication by injected access annotation entry
  */
 class DashboardTabProvider(
@@ -68,6 +48,26 @@ class DashboardTabProvider(
     )
   }
 }
+
+/**
+ * Binds a DashboardTab for Dashboard [DA] with optional access capabilities and services
+ */
+inline fun <reified DA : Annotation> DashboardTabProvider(
+  slug: String,
+  url_path_prefix: String,
+  name: String,
+  category: String = "Admin",
+  capabilities: Set<String> = setOf(),
+  services: Set<String> = setOf()
+) = DashboardTabProvider(
+  slug = slug,
+  url_path_prefix = url_path_prefix,
+  name = name,
+  category = category,
+  dashboardSlug = slugify<DA>(),
+  capabilities = capabilities,
+  services = services
+)
 
 /**
  * Binds a DashboardTab for Dashboard [DA] with access annotation [AA]
