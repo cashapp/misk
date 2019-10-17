@@ -1,67 +1,67 @@
 package misk.web.actions
 
-import misk.web.DashboardTabProvider
+import misk.web.DashboardTab
 import org.junit.jupiter.api.Test
 import kotlin.test.assertFailsWith
 
 internal class DashboardTabTest {
   @Test
   internal fun tabGoodSlug() {
-    DashboardTabProvider<AdminDashboard>("good-1-slug-test", url_path_prefix = "/a/path/", name = "Name")
+    DashboardTab("good-1-slug-test", url_path_prefix = "/a/path/", name = "Name", dashboardSlug = "admin")
   }
 
   @Test
   internal fun tabSlugWithSpace() {
     assertFailsWith<IllegalArgumentException> {
-      DashboardTabProvider<AdminDashboard>("bad slug", url_path_prefix = "/a/path/", name = "Name")
+      DashboardTab("bad slug", url_path_prefix = "/a/path/", name = "Name", dashboardSlug = "admin")
     }
   }
 
   @Test
   internal fun tabSlugWithUpperCase() {
     assertFailsWith<IllegalArgumentException> {
-      DashboardTabProvider<AdminDashboard>("BadSlug", url_path_prefix = "/a/path/", name = "Name")
+      DashboardTab("BadSlug", url_path_prefix = "/a/path/", name = "Name", dashboardSlug = "admin")
     }
   }
 
   @Test
   internal fun tabGoodCategory() {
-    DashboardTabProvider<AdminDashboard>(slug = "slug", url_path_prefix = "/a/path/", name = "Name",
-      category = "@tea-pot_418")
+    DashboardTab(slug = "slug", url_path_prefix = "/a/path/", name = "Name",
+      category = "@tea-pot_418", dashboardSlug = "admin")
   }
 
   @Test
   internal fun tabCategoryWithSpace() {
     assertFailsWith<IllegalArgumentException> {
-      DashboardTabProvider<AdminDashboard>(slug = "bad slug", url_path_prefix = "/a/path/", name = "Name",
-        category = "bad icon")
+      DashboardTab(slug = "bad slug", url_path_prefix = "/a/path/", name = "Name",
+        category = "bad icon", dashboardSlug = "admin")
     }
   }
 
   @Test
   internal fun tabCategoryWithUpperCase() {
     assertFailsWith<IllegalArgumentException> {
-      DashboardTabProvider<AdminDashboard>(slug = "BadSlug", url_path_prefix = "/a/path/", name = "Name",
-        category = "Bad-Icon")
+      DashboardTab(slug = "BadSlug", url_path_prefix = "/a/path/", name = "Name",
+        category = "Bad-Icon", dashboardSlug = "admin")
     }
   }
 
   @Test
   internal fun tabGoodPath() {
-    DashboardTabProvider<AdminDashboard>(slug = "slug", url_path_prefix = "/a/path/", name = "Name")
+    DashboardTab(slug = "slug", url_path_prefix = "/a/path/", name = "Name", dashboardSlug = "admin")
   }
 
   @Test
   internal fun tabPathWithoutLeadingSlash() {
     assertFailsWith<IllegalArgumentException> {
-      DashboardTabProvider<AdminDashboard>(slug = "slug", url_path_prefix = "a/path/", name = "Name")
+      DashboardTab(slug = "slug", url_path_prefix = "a/path/", name = "Name", dashboardSlug = "admin")
     }
   }
 
   @Test
   internal fun tabPathWithoutTrailingSlash() {
     assertFailsWith<IllegalArgumentException> {
-      DashboardTabProvider<AdminDashboard>(slug = "slug", url_path_prefix = "/a/path", name = "Name")
+      DashboardTab(slug = "slug", url_path_prefix = "/a/path", name = "Name", dashboardSlug = "admin")
     }
   }
 }
