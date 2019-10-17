@@ -1,8 +1,9 @@
-package misk.web.actions
+package misk.web.metadata
 
 import com.squareup.protos.test.parsing.Shipment
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
+import misk.web.actions.TestWebActionModule
 import misk.web.mediatype.MediaTypes
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -11,7 +12,7 @@ import javax.inject.Inject
 @MiskTest(startService = true)
 class WebActionMetadataActionTest {
   @MiskTestModule
-  val module = AdminDashboardActionTestingModule()
+  val module = MetadataTestingModule()
 
   @Inject lateinit var webActionMetadataAction: WebActionMetadataAction
 

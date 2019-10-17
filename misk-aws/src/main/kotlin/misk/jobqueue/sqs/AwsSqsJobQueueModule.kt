@@ -3,7 +3,6 @@ package misk.jobqueue.sqs
 import com.amazonaws.auth.AWSCredentialsProvider
 import com.amazonaws.services.sqs.AmazonSQS
 import com.amazonaws.services.sqs.AmazonSQSClientBuilder
-import com.google.common.util.concurrent.ThreadFactoryBuilder
 import com.google.inject.Provider
 import com.google.inject.Provides
 import com.google.inject.Singleton
@@ -17,8 +16,7 @@ import misk.jobqueue.JobQueue
 import misk.jobqueue.QueueName
 import misk.jobqueue.TransactionalJobQueue
 import misk.tasks.RepeatedTaskQueue
-import java.time.Clock
-import java.util.concurrent.Executors
+import misk.tasks.RepeatedTaskQueueFactory
 import javax.inject.Inject
 
 /** [AwsSqsJobQueueModule] installs job queue support provided by SQS. */
@@ -68,13 +66,12 @@ class AwsSqsJobQueueModule(
   }
 
   @Provides @ForSqsConsumer @Singleton
-  fun consumerRepeatedTaskQueue(clock: Clock, config: AwsSqsJobQueueConfig): RepeatedTaskQueue {
-    return RepeatedTaskQueue(
+  fun consumerRepeatedTaskQueue(
+    queueFactory: RepeatedTaskQueueFactory,
+    config: AwsSqsJobQueueConfig
+  ): RepeatedTaskQueue {
+    return queueFactory.new(
         "sqs-consumer-poller",
-        clock,
-        Executors.newCachedThreadPool(ThreadFactoryBuilder()
-            .setNameFormat("sqs-consumer-%d")
-            .build()),
         config.task_queue)
   }
 

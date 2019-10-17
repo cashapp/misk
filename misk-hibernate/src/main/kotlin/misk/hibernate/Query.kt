@@ -18,6 +18,15 @@ interface Query<T> {
    */
   fun delete(session: Session): Int
 
+  /**
+   * Returns the number of rows that match the query.
+   *
+   * **Warning:** The performance of this operation is comparable to a SELECT. MySQL scans all of
+   * the counted rows. A query that returns a count of 5000 is typically 10 times slower than a
+   * query that returns a count of 500.
+   */
+  fun count(session: Session): Long
+
   fun <T : Query<*>> newOrBuilder(): OrBuilder<T>
 
   /** Creates instances of queries. */

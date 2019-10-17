@@ -1,7 +1,6 @@
-package misk.web.actions
+package misk.web.metadata
 
 import misk.config.Config
-import misk.config.ConfigMetadataAction
 import misk.environment.Environment
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
@@ -12,12 +11,12 @@ import org.junit.jupiter.api.Test
 @MiskTest(startService = true)
 class ConfigMetadataActionTest {
   @MiskTestModule
-  val module = AdminDashboardActionTestingModule()
+  val module = MetadataTestingModule()
 
   val testConfig = TestConfig(
-      IncludedConfig("foo"),
-      OverriddenConfig("bar"),
-      RedactedConfig("pass1", "phrase2"))
+    IncludedConfig("foo"),
+    OverriddenConfig("bar"),
+    RedactedConfig("pass1", "phrase2"))
 
   lateinit var configMetadataAction: ConfigMetadataAction
 

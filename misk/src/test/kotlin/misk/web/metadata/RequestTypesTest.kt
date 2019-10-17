@@ -1,14 +1,13 @@
-package misk.web
+package misk.web.metadata
 
 import com.squareup.protos.test.parsing.Shipment
 import com.squareup.protos.test.parsing.Warehouse
-import misk.web.actions.Field
+import misk.web.RequestTypes
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import kotlin.reflect.full.createType
 
 internal class RequestTypesTest {
-
   val requestTypes = RequestTypes()
 
   @Test fun handlesNull() {
@@ -37,5 +36,8 @@ internal class RequestTypesTest {
     // Check repeated types
     assertThat(shipmentType.fields).contains(Field("notes", "String", true))
     assertThat(warehouseType.fields).contains(Field("alternates", Warehouse::class.qualifiedName!!, true))
+
+    // Check enum types
+    assertThat(shipmentType.fields).contains(Field("status", "Enum<com.squareup.protos.test.parsing.Shipment.State,VALIDATING,PICKING_UP,DELIVERING,CONSUMING>", false))
   }
 }

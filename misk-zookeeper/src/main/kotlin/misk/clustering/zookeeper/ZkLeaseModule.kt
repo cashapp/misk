@@ -6,13 +6,11 @@ import misk.ServiceModule
 import misk.clustering.ClusterService
 import misk.clustering.lease.LeaseManager
 import misk.clustering.weights.ClusterWeightService
-import misk.concurrent.ExecutorServiceModule
 import misk.inject.KAbstractModule
 import misk.tasks.RepeatedTaskQueue
+import misk.tasks.RepeatedTaskQueueFactory
 import misk.zookeeper.ZkService
 import misk.zookeeper.ZookeeperDefaultModule
-import java.time.Clock
-import java.util.concurrent.ExecutorService
 import javax.inject.Singleton
 
 /**
@@ -22,7 +20,6 @@ import javax.inject.Singleton
 class ZkLeaseModule : KAbstractModule() {
   override fun configure() {
     install(ZkLeaseCommonModule())
-    install(ExecutorServiceModule.withFixedThreadPool(ForZkLease::class, "zk-lease-poller", 1))
   }
 
   companion object {
@@ -31,11 +28,8 @@ class ZkLeaseModule : KAbstractModule() {
   }
 
   @Provides @ForZkLease @Singleton
-  fun provideTaskQueue(
-    clock: Clock,
-    @ForZkLease executorService: ExecutorService
-  ): RepeatedTaskQueue {
-    return RepeatedTaskQueue("zk-lease-poller", clock, executorService)
+  fun provideTaskQueue(queueFactory: RepeatedTaskQueueFactory): RepeatedTaskQueue {
+    return queueFactory.new("zk-lease-poller")
   }
 }
 
