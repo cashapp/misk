@@ -1,44 +1,37 @@
-package misk.web.metadata
+package misk.web.dashboard
 
-import misk.config.ConfigMetadataAction
 import misk.environment.Environment
 import misk.inject.KAbstractModule
 import misk.security.authz.AccessAnnotationEntry
-import misk.web.DashboardTab
-import misk.web.DashboardTabProvider
 import misk.web.NetworkInterceptor
 import misk.web.WebActionModule
-import misk.web.actions.AdminDashboard
-import misk.web.actions.DashboardMetadataAction
-import misk.web.actions.DashboardMetadataAction.Companion.DashboardHomeUrl
-import misk.web.actions.ServiceMetadataAction
-import misk.web.actions.WebActionMetadataAction
 import misk.web.interceptors.WideOpenDevelopmentInterceptorFactory
+import misk.web.metadata.ConfigMetadataAction
+import misk.web.metadata.WebActionMetadataAction
+import javax.inject.Qualifier
 
 /**
- * Installs default Admin Dashboard that runs at passed in url_path_prefix
+ * Installs default Admin Dashboard that runs at multibound DashboardHomeUrl<AdminDashboard>
+ *
  * Each Misk included tab in dashboard is installed with the respective:
  *  - Multibindings for API endpoints
  *  - Multibindings for Dashboard Tab registration
- *  - Dashboard Tab Module that configures location of the tab compiled web code (classpath and web proxy)
- * Non-Misk tabs can be added by binding AdminDashboardTab entries which will be displayed in the dashboard menu
+ *  - [WebTabResourceModule] that configures location of the tab compiled web code (classpath and web proxy)
+ *
+ * To add tabs to the Misk Admin Dashboard, bind the [DashboardTab] with the
+ *   Dashboard Annotation [AdminDashboard]. Tabs are then included in the admin dashboard menu
+ *   grouping according to the [DashboardTab].category field and sorting by [DashboardTab].name
  */
 class AdminDashboardModule(val environment: Environment) : KAbstractModule() {
   override fun configure() {
+    // Install base dashboard support
+    install(DashboardModule())
+
     // Adds open CORS headers in development to allow through API calls from webpack servers
     multibind<NetworkInterceptor.Factory>().to<WideOpenDevelopmentInterceptorFactory>()
 
-    newMultibinder<DashboardTab>()
-    newMultibinder<DashboardMetadataAction.DashboardHomeUrl>()
-    newMultibinder<DashboardMetadataAction.DashboardNavbarItem>()
-    newMultibinder<DashboardMetadataAction.DashboardNavbarStatus>()
-
-    // Add metadata actions to support dashboards
-    install(WebActionModule.create<DashboardMetadataAction>())
-    install(WebActionModule.create<ServiceMetadataAction>())
-
     // Admin Dashboard Tab
-    multibind<DashboardMetadataAction.DashboardHomeUrl>().toInstance(
+    multibind<DashboardHomeUrl>().toInstance(
       DashboardHomeUrl<AdminDashboard>("/_admin/")
     )
     install(WebTabResourceModule(
@@ -106,3 +99,8 @@ class AdminDashboardTestingModule(val environment: Environment) : KAbstractModul
     install(AdminDashboardModule(environment))
   }
 }
+
+/** Dashboard Annotation used for all tabs bound in the Misk Admin Dashboard */
+@Qualifier
+@Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION)
+annotation class AdminDashboard

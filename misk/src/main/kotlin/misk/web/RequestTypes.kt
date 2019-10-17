@@ -4,8 +4,8 @@ import com.google.common.base.Preconditions
 import com.squareup.wire.Message
 import com.squareup.wire.WireEnum
 import com.squareup.wire.WireField
-import misk.web.actions.Field
-import misk.web.actions.Type
+import misk.web.metadata.Field
+import misk.web.metadata.Type
 import okio.ByteString
 import java.util.LinkedList
 import kotlin.reflect.KClass

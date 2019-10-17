@@ -1,6 +1,6 @@
 package misk.web.resources
 
-import misk.web.ValidWebEntry
+import misk.web.dashboard.ValidWebEntry
 import misk.web.proxy.WebProxyEntry
 import okhttp3.HttpUrl
 import javax.inject.Inject

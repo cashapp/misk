@@ -1,4 +1,4 @@
-package misk.web
+package misk.web.dashboard
 
 import com.google.common.base.CharMatcher
 

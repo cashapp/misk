@@ -1,4 +1,4 @@
-package misk.web
+package misk.web.dashboard
 
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals

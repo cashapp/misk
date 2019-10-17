@@ -1,4 +1,4 @@
-package misk.web.actions
+package misk.web.metadata
 
 import com.squareup.moshi.Moshi
 import misk.client.HttpClientEndpointConfig
@@ -7,8 +7,9 @@ import misk.moshi.adapter
 import misk.security.authz.FakeCallerAuthenticator
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
-import misk.web.ValidWebEntry.Companion.slugify
 import misk.web.jetty.JettyService
+import misk.web.dashboard.AdminDashboard
+import misk.web.dashboard.ValidWebEntry.Companion.slugify
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.junit.jupiter.api.Test
@@ -19,7 +20,7 @@ import kotlin.test.assertNotNull
 @MiskTest(startService = true)
 class DashboardMetadataActionTest {
   @MiskTestModule
-  val module = AdminDashboardActionTestingModule()
+  val module = MetadataTestingModule()
 
   @Inject private lateinit var jetty: JettyService
   @Inject private lateinit var httpClientFactory: HttpClientFactory

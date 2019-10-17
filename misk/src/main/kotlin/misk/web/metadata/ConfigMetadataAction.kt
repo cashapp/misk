@@ -1,14 +1,17 @@
-package misk.config
+package misk.web.metadata
 
 import com.google.inject.Inject
+import misk.config.AppName
+import misk.config.Config
+import misk.config.MiskConfig
 import misk.environment.Environment
 import misk.resources.ResourceLoader
 import misk.web.Get
 import misk.web.RequestContentType
 import misk.web.ResponseContentType
 import misk.web.actions.WebAction
+import misk.web.dashboard.AdminDashboardAccess
 import misk.web.mediatype.MediaTypes
-import misk.web.metadata.AdminDashboardAccess
 import javax.inject.Singleton
 
 @Singleton
@@ -17,7 +20,9 @@ class ConfigMetadataAction @Inject constructor(
   val environment: Environment,
   val config: Config
 ) : WebAction {
-  val resources: Map<String, String?> = generateConfigResources(appName, environment, config)
+  val resources: Map<String, String?> =
+    generateConfigResources(appName, environment,
+      config)
 
   @Get("/api/config/metadata")
   @RequestContentType(MediaTypes.APPLICATION_JSON)
@@ -29,7 +34,7 @@ class ConfigMetadataAction @Inject constructor(
     val yamlFilesRegex = Regex("(?<=(password|passphrase): )([^\n]*)")
 
     return Response(
-        resources = redact(resources, yamlFilesRegex)
+      resources = redact(resources, yamlFilesRegex)
     )
   }
 
@@ -50,7 +55,8 @@ class ConfigMetadataAction @Inject constructor(
       config: Config
     ): Map<String, String?> {
       val rawYamlFiles = MiskConfig.loadConfigYamlMap(appName, environment, listOf())
-      val yamlFiles = linkedMapOf<String, String?>("Effective Config" to MiskConfig.toYaml(config, ResourceLoader.SYSTEM))
+      val yamlFiles = linkedMapOf<String, String?>("Effective Config" to MiskConfig.toYaml(
+        config, ResourceLoader.SYSTEM))
       rawYamlFiles.map { yamlFiles.put("classpath:/${it.key}", it.value) }
       return yamlFiles
     }
