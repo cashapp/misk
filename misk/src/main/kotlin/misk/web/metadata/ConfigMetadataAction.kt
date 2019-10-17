@@ -30,6 +30,7 @@ class ConfigMetadataAction @Inject constructor(
   @AdminDashboardAccess
   fun getAll(): Response {
     // TODO(mmihic): Need to figure out how to get the overrides.
+    // TODO make this config variable specific redaction with an annotation, not just password/passphrase
     // Regex to match on password values for password redaction in output
     val yamlFilesRegex = Regex("(?<=(password|passphrase): )([^\n]*)")
 
