@@ -1,13 +1,11 @@
 package misk.web.proxy
 
-import misk.web.ValidWebEntry
+import misk.web.dashboard.ValidWebEntry
 import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 
 //  TODO(adrw) fix this documentation if forwarding rewrites are restricted or other conditions in place
 /**
- * WebProxyEntry
- *
  * Maps URLs requested against this server to URLs of servers to delegate to
  *
  * url_path_prefix: `/_admin/`

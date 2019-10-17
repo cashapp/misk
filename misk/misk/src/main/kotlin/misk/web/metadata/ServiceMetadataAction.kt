@@ -1,4 +1,4 @@
-package misk.web.actions
+package misk.web.metadata
 
 import misk.config.AppName
 import misk.environment.Environment
@@ -6,14 +6,14 @@ import misk.security.authz.Unauthenticated
 import misk.web.Get
 import misk.web.RequestContentType
 import misk.web.ResponseContentType
+import misk.web.actions.WebAction
 import misk.web.mediatype.MediaTypes
 import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * metadata to build navbar of admin dashboard
+ * Service Metadata used for front end dashboards including App Name and Misk.Environment
  */
-
 @Singleton
 class ServiceMetadataAction @Inject constructor(
   private val optionalBinder: OptionalBinder
@@ -23,7 +23,8 @@ class ServiceMetadataAction @Inject constructor(
   @ResponseContentType(MediaTypes.APPLICATION_JSON)
   @Unauthenticated
   fun getAll(): Response {
-    return Response(serviceMetadata = optionalBinder.serviceMetadata)
+    return Response(
+      serviceMetadata = optionalBinder.serviceMetadata)
   }
 
   data class Response(val serviceMetadata: ServiceMetadata)
@@ -35,11 +36,11 @@ class ServiceMetadataAction @Inject constructor(
 @Singleton
 class OptionalBinder @Inject constructor(@AppName val appName: String) {
   @com.google.inject.Inject(optional = true)
-  var serviceMetadata: ServiceMetadata = ServiceMetadata(appName, Environment.fromEnvironmentVariable(), "/_admin/")
+  var serviceMetadata: ServiceMetadata =
+    ServiceMetadata(appName, Environment.fromEnvironmentVariable())
 }
 
 data class ServiceMetadata(
   val app_name: String,
-  val environment: Environment,
-  val admin_dashboard_url: String
+  val environment: Environment
 )
