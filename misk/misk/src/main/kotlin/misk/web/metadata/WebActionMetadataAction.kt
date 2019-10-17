@@ -1,4 +1,4 @@
-package misk.web.actions
+package misk.web.metadata
 
 import misk.ApplicationInterceptor
 import misk.web.DispatchMechanism
@@ -8,11 +8,12 @@ import misk.web.PathPattern
 import misk.web.RequestContentType
 import misk.web.RequestTypes
 import misk.web.ResponseContentType
+import misk.web.actions.WebAction
+import misk.web.dashboard.AdminDashboardAccess
 import misk.web.formatter.ClassNameFormatter
 import misk.web.jetty.WebActionsServlet
 import misk.web.mediatype.MediaRange
 import misk.web.mediatype.MediaTypes
-import misk.web.metadata.AdminDashboardAccess
 import okhttp3.MediaType
 import javax.inject.Inject
 import javax.inject.Provider
@@ -28,7 +29,8 @@ class WebActionMetadataAction @Inject constructor() : WebAction {
   @ResponseContentType(MediaTypes.APPLICATION_JSON)
   @AdminDashboardAccess
   fun getAll(): Response {
-    return Response(webActionMetadata = servletProvider.get().webActionsMetadata)
+    return Response(
+      webActionMetadata = servletProvider.get().webActionsMetadata)
   }
 
   data class Response(val webActionMetadata: List<WebActionMetadata>)
@@ -72,20 +74,20 @@ internal fun WebActionMetadata(
   allowedCapabilities: Set<String>
 ): WebActionMetadata {
   return WebActionMetadata(
-      name = name,
-      function = function.toString(),
-      functionAnnotations = functionAnnotations.map { it.toString() },
-      requestMediaTypes = acceptedMediaRanges.map { it.toString() },
-      responseMediaType = responseContentType.toString(),
-      parameterTypes = parameterTypes.map { it.toString() },
-      requestType = requestType.toString(),
-      returnType = returnType.toString(),
-      types = RequestTypes().calculateTypes(requestType),
-      pathPattern = pathPattern.toString(),
-      applicationInterceptors = applicationInterceptors.map { ClassNameFormatter.format(it::class) },
-      networkInterceptors = networkInterceptors.map { ClassNameFormatter.format(it::class) },
-      dispatchMechanism = dispatchMechanism,
-      allowedServices = allowedServices,
-      allowedCapabilities = allowedCapabilities
+    name = name,
+    function = function.toString(),
+    functionAnnotations = functionAnnotations.map { it.toString() },
+    requestMediaTypes = acceptedMediaRanges.map { it.toString() },
+    responseMediaType = responseContentType.toString(),
+    parameterTypes = parameterTypes.map { it.toString() },
+    requestType = requestType.toString(),
+    returnType = returnType.toString(),
+    types = RequestTypes().calculateTypes(requestType),
+    pathPattern = pathPattern.toString(),
+    applicationInterceptors = applicationInterceptors.map { ClassNameFormatter.format(it::class) },
+    networkInterceptors = networkInterceptors.map { ClassNameFormatter.format(it::class) },
+    dispatchMechanism = dispatchMechanism,
+    allowedServices = allowedServices,
+    allowedCapabilities = allowedCapabilities
   )
 }

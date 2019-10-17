@@ -17,7 +17,12 @@ data class RepeatedTaskQueueConfig(
    *
    * Can be overridden when scheduling a task.
    */
-  val default_max_delay_sec: Long = 60
+  val default_max_delay_sec: Long = 60,
+
+  /**
+   * The number of parallel tasks to run.
+   */
+  val num_parallel_tasks: Int = 1
 
 ) {
 

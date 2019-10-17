@@ -62,9 +62,7 @@ internal class ClientMetricsInterceptorTest {
     assertThat(client.ping(AppRequest(503)).execute().code()).isEqualTo(503)
 
     SoftAssertions.assertSoftly { softly ->
-      softly.assertThat(requestDuration.count("pinger.ping", "all")).isEqualTo(6)
       softly.assertThat(requestDuration.count("pinger.ping", "202")).isEqualTo(1)
-      softly.assertThat(requestDuration.count("pinger.ping", "4xx")).isEqualTo(2)
       softly.assertThat(requestDuration.count("pinger.ping", "404")).isEqualTo(1)
       softly.assertThat(requestDuration.count("pinger.ping", "403")).isEqualTo(1)
       softly.assertThat(requestDuration.count("pinger.ping", "403")).isEqualTo(1)
@@ -79,7 +77,6 @@ internal class ClientMetricsInterceptorTest {
     }.withCauseInstanceOf(SocketTimeoutException::class.java)
 
     SoftAssertions.assertSoftly { softly ->
-      softly.assertThat(requestDuration.count("pinger.ping", "all")).isEqualTo(1)
       softly.assertThat(requestDuration.count("pinger.ping", "timeout")).isEqualTo(1)
     }
   }

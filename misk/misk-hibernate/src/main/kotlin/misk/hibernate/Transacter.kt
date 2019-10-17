@@ -1,6 +1,7 @@
 package misk.hibernate
 
 import com.google.common.annotations.VisibleForTesting
+import misk.jdbc.DataSourceConfig
 import java.sql.SQLException
 import javax.persistence.PersistenceException
 
@@ -68,6 +69,8 @@ interface Transacter {
   // TODO(jontirsen): Figure out a way to make this only available for test code
   @VisibleForTesting
   fun allowCowrites(): Transacter
+
+  fun config(): DataSourceConfig
 }
 
 fun Transacter.shards() = transaction { it.shards() }

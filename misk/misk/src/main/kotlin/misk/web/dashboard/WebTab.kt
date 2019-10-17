@@ -1,4 +1,4 @@
-package misk.web
+package misk.web.dashboard
 
 abstract class WebTab(
   slug: String,

@@ -23,9 +23,7 @@ internal class MetricsInterceptor internal constructor(
     val callingPrincipal = caller.get()?.principal ?: "unknown"
 
     val statusCode = chain.httpCall.statusCode
-    arrayOf("all", "${statusCode / 100}xx", "$statusCode").forEach { code ->
-      requestDuration.record(elapsedTimeMillis, actionName, callingPrincipal, code)
-    }
+    requestDuration.record(elapsedTimeMillis, actionName, callingPrincipal, statusCode.toString())
     return result
   }
 
