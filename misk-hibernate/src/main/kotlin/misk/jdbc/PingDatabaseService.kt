@@ -44,6 +44,7 @@ class PingDatabaseService @Inject constructor(
   }
 
   private fun connectToDataSource(dataSource: DriverDataSource) {
+    dataSource.setLoginTimeout((config.connection_timeout.toMillis() / 1000).toInt())
     dataSource.connect().use { c ->
       check(c.createStatement().use { s ->
         s.executeQuery("SELECT 1 FROM dual").uniqueInt()
