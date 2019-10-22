@@ -25,7 +25,7 @@ abstract class ValidWebEntry(val slug: String = "", val url_path_prefix: String 
 
   companion object {
     /** Generate a valid slug from an Annotation class */
-    inline fun <reified A: Annotation>slugify() = A::class.simpleName!!
+    inline fun <reified A : Annotation> slugify() = A::class.simpleName!!
       .toString()
       .slugify()
 

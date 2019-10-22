@@ -1,6 +1,5 @@
 package misk.web.dashboard
 
-import misk.web.dashboard.DashboardTab
 import org.junit.jupiter.api.Test
 import kotlin.test.assertFailsWith
 

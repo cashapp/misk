@@ -25,7 +25,7 @@ class DashboardMetadataActionTest {
   @Inject private lateinit var jetty: JettyService
   @Inject private lateinit var httpClientFactory: HttpClientFactory
 
-  private inline fun <reified A: Annotation>asDashboardPath() = "/api/dashboard/${slugify<A>()}/metadata"
+  private inline fun <reified A : Annotation> asDashboardPath() = "/api/dashboard/${slugify<A>()}/metadata"
 
   @Test fun `admin dashboard unauthenticated tabs`() {
     val response = executeRequest(path = asDashboardPath<AdminDashboard>())
