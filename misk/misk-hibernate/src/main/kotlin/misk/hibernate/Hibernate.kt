@@ -87,3 +87,10 @@ internal fun SimpleValue.setTypeParameter(name: String, field: Field) {
   }
   typeParameters.setField(name, field)
 }
+
+internal fun SimpleValue.setTypeParameter(key: String, value: Any) {
+  if (typeParameters == null) {
+    typeParameters = Properties()
+  }
+  typeParameters[key] = value
+}

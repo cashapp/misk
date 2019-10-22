@@ -21,8 +21,13 @@ import org.hibernate.mapping.Value
 import org.hibernate.service.spi.SessionFactoryServiceRegistry
 import org.hibernate.usertype.UserType
 import javax.inject.Provider
+import javax.persistence.Column
+import javax.persistence.Table
 import javax.sql.DataSource
 import kotlin.reflect.KClass
+import kotlin.reflect.KProperty1
+import kotlin.reflect.full.declaredMemberProperties
+import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.jvm.jvmName
 
 private val logger = getLogger<SessionFactoryService>()
@@ -160,7 +165,32 @@ internal class SessionFactoryService(
     } else if (BoxedStringType.isBoxedString(field.type.kotlin)) {
       value.typeName = BoxedStringType::class.java.name
       value.setTypeParameter("boxedStringField", field)
+    } else {
+      for (annotation : Annotation in field.annotations) {
+        val transformerAnnotation = annotation.annotationClass.findAnnotation<TransformedType>() ?: continue
+        value.typeName = TransformedColumnType::class.java.name
+
+        val transformer = transformerAnnotation.transformer
+        value.setTypeParameter(TransformedColumnType.TRANSFORMER_CLASS, transformer)
+
+        val tableName = persistentClass.getAnnotation(Table::class.java).name
+        value.setTypeParameter(TransformedColumnType.TABLE_NAME, tableName)
+
+        val columnName = field.getAnnotation(Column::class.java).name.ifEmpty { field.name }
+        value.setTypeParameter(TransformedColumnType.COLUMN_NAME, columnName)
+        value.setTypeParameter(TransformedColumnType.FIELD, field)
+        value.setTypeParameter(TransformedColumnType.TARGET_TYPE, transformerAnnotation.targetType)
+
+        val memberProperties = annotation.annotationClass.declaredMemberProperties
+        val argMap = memberProperties.mapNotNull { prop ->
+          @Suppress("UNCHECKED_CAST")
+          prop as? KProperty1<Annotation, Any> ?: return@mapNotNull null
+          prop.name to prop.get(annotation)
+        }.toMap()
+        value.setTypeParameter(TransformedColumnType.ARGUMENTS, argMap)
+      }
     }
+
   }
 
   /** Returns a custom user type for `propertyType`, or null if the user type should be built-in. */
