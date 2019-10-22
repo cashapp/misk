@@ -46,7 +46,6 @@ internal class TransformedColumnType : UserType, ParameterizedType, TypeConfigur
 
   override fun nullSafeSet(st: PreparedStatement, value: Any?, index: Int, session: SharedSessionContractImplementor?) {
     if (value == null) {
-      // TODO: Replace this with actual class
       st.setNull(index, sqlTypes().first())
     } else {
       val disassembled = transformer.disassemble(value)
