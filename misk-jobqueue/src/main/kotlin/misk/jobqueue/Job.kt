@@ -28,4 +28,9 @@ interface Job {
 
   /** Moves the job from the main queue onto the associated dead letter quque. May perform an RPC */
   fun deadLetter()
+
+
+  companion object {
+    const val IDEMPOTENCY_KEY_ATTR = "_misk_idempotency_key"
+  }
 }

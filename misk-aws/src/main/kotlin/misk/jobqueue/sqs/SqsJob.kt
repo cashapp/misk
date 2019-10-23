@@ -17,10 +17,10 @@ internal class SqsJob(
   override val body: String = message.body
   override val id: String = message.messageId
   override val idempotenceKey =
-      message.messageAttributes[IDEMPOTENCY_KEY_ATTR]?.stringValue ?: randomIdempotenceKey
+      message.messageAttributes[Job.IDEMPOTENCY_KEY_ATTR]?.stringValue ?: randomIdempotenceKey
   override val attributes: Map<String, String> = message.messageAttributes
       .map { (key, value) -> key to value.stringValue }
-      .filter { (key, _) -> key != IDEMPOTENCY_KEY_ATTR }
+      .filter { (key, _) -> key != Job.IDEMPOTENCY_KEY_ATTR }
       .toMap()
 
   private val queue: ResolvedQueue = queues[queueName]
@@ -46,6 +46,5 @@ internal class SqsJob(
 
   companion object {
     const val ORIGINAL_TRACE_ID_ATTR = "x-original-trace-id"
-    const val IDEMPOTENCY_KEY_ATTR = "idempotencey_key"
   }
 }

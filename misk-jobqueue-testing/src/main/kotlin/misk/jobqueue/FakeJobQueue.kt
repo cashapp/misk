@@ -42,6 +42,9 @@ class FakeJobQueue @Inject constructor(
     deliveryDelay: Duration?,
     attributes: Map<String, String>
   ) {
+    check(!attributes.keys.contains(Job.IDEMPOTENCY_KEY_ATTR)) {
+      "${Job.IDEMPOTENCY_KEY_ATTR} is a reserved attribute key"
+    }
     val id = tokenGenerator.generate("fakeJobQueue")
     val job = FakeJob(queueName, id, idempotenceKey, body, attributes)
     jobQueues.getOrPut(queueName, ::ConcurrentLinkedDeque).add(job)
