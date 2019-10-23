@@ -8,6 +8,12 @@ interface Job {
   /** system assigned globally unique id for the job */
   val id: String
 
+  /**
+   * idempotence key provided by the publisher to allow filtering duplicate jobs from the
+   * underlying job queueing system.
+   */
+  val idempotenceKey: String
+
   /** body of the job */
   val body: String
 

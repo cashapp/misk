@@ -29,11 +29,12 @@ internal class FakeJobQueueTest {
     assertThat(fakeJobQueue.peekJobs(GREEN_QUEUE)).isEmpty()
     assertThat(fakeJobQueue.peekJobs(RED_QUEUE)).isEmpty()
 
-    exampleJobEnqueuer.enqueueRed("stop sign")
+    exampleJobEnqueuer.enqueueRed("stop sign", "redKey")
+    exampleJobEnqueuer.enqueueRed("stop sign", "redKey")
     exampleJobEnqueuer.enqueueGreen("dinosaur")
     exampleJobEnqueuer.enqueueGreen("android")
 
-    assertThat(fakeJobQueue.peekJobs(RED_QUEUE)).hasSize(1)
+    assertThat(fakeJobQueue.peekJobs(RED_QUEUE)).hasSize(2)
     assertThat(fakeJobQueue.peekJobs(GREEN_QUEUE)).hasSize(2)
 
     fakeJobQueue.handleJobs()
@@ -161,6 +162,12 @@ private class ExampleJobEnqueuer @Inject private constructor(
     jobQueue.enqueue(RED_QUEUE, body = jobAdapter.toJson(job), attributes = mapOf("key" to "value"))
   }
 
+  fun enqueueRed(message: String, idempotenceKey: String) {
+    val job = ExampleJob(Color.RED, message)
+    jobQueue.enqueue(RED_QUEUE, idempotenceKey = idempotenceKey, body = jobAdapter.toJson(job),
+        attributes = mapOf("key" to "value"))
+  }
+
   fun enqueueGreen(message: String) {
     val job = ExampleJob(Color.GREEN, message)
     jobQueue.enqueue(GREEN_QUEUE, body = jobAdapter.toJson(job), attributes = mapOf("key" to "value"))
@@ -169,16 +176,19 @@ private class ExampleJobEnqueuer @Inject private constructor(
 
 private class ExampleJobHandler @Inject private constructor(moshi: Moshi) : JobHandler {
   private val jobAdapter = moshi.adapter<ExampleJob>()
+  private val idempotenceKeys = mutableSetOf<String>()
 
   override fun handleJob(job: Job) {
     val deserializedJob = jobAdapter.fromJson(job.body)!!
-    log.info { "received ${deserializedJob.color} job with message: ${deserializedJob.message}" }
+    if (idempotenceKeys.add(job.idempotenceKey)) {
+      log.info { "received ${deserializedJob.color} job with message: ${deserializedJob.message}" }
 
-    assertThat(job.attributes).containsEntry("key", "value")
+      assertThat(job.attributes).containsEntry("key", "value")
 
-    when (deserializedJob.message) {
-      "dont-ack" -> return
-      "throw" -> throw ColorException()
+      when (deserializedJob.message) {
+        "dont-ack" -> return
+        "throw" -> throw ColorException()
+      }
     }
 
     job.acknowledge()
