@@ -22,7 +22,7 @@ import org.junit.jupiter.api.Test
 import org.mockito.Mockito.reset
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
-import org.mockito.Mockito.verifyZeroInteractions
+import org.mockito.Mockito.verifyNoMoreInteractions
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
@@ -235,12 +235,12 @@ internal class ZkLeaseTest {
     val lease = leaseManager.requestLease(LEASE_NAME)
     lease.addListener(listenerMock)
     assertThat(lease.checkHeld()).isFalse()
-    verifyZeroInteractions(listenerMock)
+    verifyNoMoreInteractions(listenerMock)
 
     // Assign the lease to this node
     cluster.resourceMapper.addMapping(leasePath, self)
 
-    verifyZeroInteractions(listenerMock)
+    verifyNoMoreInteractions(listenerMock)
     // checkHeld() should trigger the lease to be acquired
     assertThat(lease.checkHeld()).isTrue()
     verify(listenerMock, times(1)).afterAcquire(lease)
@@ -249,7 +249,7 @@ internal class ZkLeaseTest {
     // Further calls to checkHeld() should not trigger events because the lease does not change
     assertThat(lease.checkHeld()).isTrue()
     assertThat(lease.checkHeld()).isTrue()
-    verifyZeroInteractions(listenerMock)
+    verifyNoMoreInteractions(listenerMock)
     reset(listenerMock)
 
     // Fake a cluster change which moves the lease to another process
