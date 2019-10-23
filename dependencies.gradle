@@ -1,6 +1,6 @@
 //Generated from polyrepo's master-dependencies.json
 ext.dep = [
-  "assertj": "org.assertj:assertj-core:3.9.0",
+  "assertj": "org.assertj:assertj-core:3.13.2",
   "awsApi": "com.amazonaws:aws-java-sdk:1.11.144",
   "awsSqs": "com.amazonaws:aws-java-sdk-sqs:1.11.144",
   "bouncycastle": "org.bouncycastle:bcprov-jdk15on:1.55",
