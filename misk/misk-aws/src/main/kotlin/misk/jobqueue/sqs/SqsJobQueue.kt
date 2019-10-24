@@ -3,9 +3,11 @@ package misk.jobqueue.sqs
 import com.amazonaws.services.sqs.model.MessageAttributeValue
 import com.amazonaws.services.sqs.model.SendMessageRequest
 import io.opentracing.Tracer
+import misk.jobqueue.Job
 import misk.jobqueue.JobQueue
 import misk.jobqueue.QueueName
 import misk.logging.getLogger
+import misk.tokens.TokenGenerator
 import misk.tracing.traceWithSpan
 import java.time.Duration
 import javax.inject.Inject
@@ -15,14 +17,27 @@ import javax.inject.Singleton
 internal class SqsJobQueue @Inject internal constructor(
   private val queues: QueueResolver,
   private val metrics: SqsMetrics,
-  private val tracer: Tracer
+  private val tracer: Tracer,
+  private val tokenGenerator: TokenGenerator
 ) : JobQueue {
+
   override fun enqueue(
     queueName: QueueName,
     body: String,
     deliveryDelay: Duration?,
     attributes: Map<String, String>
+  ) = enqueue(queueName, tokenGenerator.generate("sqs"), body, deliveryDelay, attributes)
+
+  override fun enqueue(
+    queueName: QueueName,
+    idempotenceKey: String,
+    body: String,
+    deliveryDelay: Duration?,
+    attributes: Map<String, String>
   ) {
+    check(!attributes.keys.contains(Job.IDEMPOTENCY_KEY_ATTR)) {
+      "${Job.IDEMPOTENCY_KEY_ATTR} is a reserved attribute key"
+    }
     tracer.traceWithSpan("enqueue-job-${queueName.value}") { span ->
       metrics.jobsEnqueued.labels(queueName.value).inc()
       try {
@@ -32,6 +47,9 @@ internal class SqsJobQueue @Inject internal constructor(
           client.sendMessage(SendMessageRequest().apply {
             queueUrl = queue.url
             messageBody = body
+            addMessageAttributesEntry(Job.IDEMPOTENCY_KEY_ATTR, MessageAttributeValue()
+                .withDataType("String")
+                .withStringValue(idempotenceKey))
             if (deliveryDelay != null) delaySeconds = (deliveryDelay.toMillis() / 1000).toInt()
             attributes.forEach { (key, value) ->
               addMessageAttributesEntry(key, MessageAttributeValue()
