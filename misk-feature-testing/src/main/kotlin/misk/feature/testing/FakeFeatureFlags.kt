@@ -21,21 +21,21 @@ class FakeFeatureFlags @Inject constructor() : AbstractIdleService(),
 
   private val overrides = ConcurrentHashMap<Feature, Any>()
 
-  override fun getBoolean(feature: Feature, token: String, attributes: Attributes): Boolean {
+  override fun getBoolean(feature: Feature, key: String, attributes: Attributes): Boolean {
     return overrides.getOrDefault(feature, false) as Boolean
   }
 
-  override fun getInt(feature: Feature, token: String, attributes: Attributes): Int =
+  override fun getInt(feature: Feature, key: String, attributes: Attributes): Int =
       overrides[feature] as? Int ?: throw IllegalArgumentException(
           "Int flag $feature must be overridden with override() before use")
 
-  override fun getString(feature: Feature, token: String, attributes: Attributes): String =
+  override fun getString(feature: Feature, key: String, attributes: Attributes): String =
       overrides[feature] as? String ?: throw IllegalArgumentException(
           "String flag $feature must be overridden with override() before use")
 
   override fun <T : Enum<T>> getEnum(
     feature: Feature,
-    token: String,
+    key: String,
     clazz: Class<T>,
     attributes: Attributes
   ): T {

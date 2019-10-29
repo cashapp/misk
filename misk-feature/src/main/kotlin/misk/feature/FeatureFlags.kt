@@ -6,46 +6,46 @@ package misk.feature
 interface FeatureFlags {
 
   /**
-   * Calculates the value of an boolean feature flag for the given token and attributes.
+   * Calculates the value of an boolean feature flag for the given key and attributes.
    * @see [getEnum] for param details
    */
   fun getBoolean(
     feature: Feature,
-    token: String,
+    key: String,
     attributes: Attributes = Attributes()
   ): Boolean
 
   /**
-   * Calculates the value of an integer feature flag for the given token and attributes.
+   * Calculates the value of an integer feature flag for the given key and attributes.
    * @see [getEnum] for param details
    */
   fun getInt(
     feature: Feature,
-    token: String,
+    key: String,
     attributes: Attributes = Attributes()
   ): Int
 
   /**
-   * Calculates the value of a string feature flag for the given token and attributes.
+   * Calculates the value of a string feature flag for the given key and attributes.
    * @see [getEnum] for param details
    */
   fun getString(
     feature: Feature,
-    token: String,
+    key: String,
     attributes: Attributes = Attributes()
   ): String
 
   /**
-   * Calculates the value of an enumerated feature flag for the given token and attributes.
+   * Calculates the value of an enumerated feature flag for the given key and attributes.
    * @param feature name of the feature flag to evaluate.
-   * @param token unique primary token for the entity the flag should be evaluated against.
+   * @param key unique primary key for the entity the flag should be evaluated against.
    * @param default default value to return if there was an error evaluating the flag or the flag
    *   does not exist.
    * @param attributes additional attributes to provide to flag evaluation.
    */
   fun <T : Enum<T>> getEnum(
     feature: Feature,
-    token: String,
+    key: String,
     clazz: Class<T>,
     attributes: Attributes = Attributes()
   ): T
