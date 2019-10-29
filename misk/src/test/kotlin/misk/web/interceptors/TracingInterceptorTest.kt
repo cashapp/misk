@@ -38,6 +38,12 @@ class TracingInterceptorTest {
   @Inject private lateinit var tracer: ConcurrentMockTracer
   @Inject private lateinit var jettyService: JettyService
 
+  companion object {
+    // Not exposed: https://github.com/opentracing/opentracing-java/blob/2df2a8983e35dff23c4fb894e5f5ae3f98f1cf7b/opentracing-mock/src/main/java/io/opentracing/mock/MockTracer.java#L228-L229
+    val SPAN_ID_KEY = "spanid"
+    val TRACE_ID_KEY = "traceid"
+  }
+
   @Test
   fun initiatesTrace() {
     val tracingInterceptor = tracingInterceptorFactory.create(
@@ -51,6 +57,7 @@ class TracingInterceptorTest {
     val span = tracer.take()
     assertThat(span.parentId()).isEqualTo(0)
     assertThat(span.tags()).isEqualTo(mapOf(
+        "resource.name" to "misk.web.interceptors.TracingInterceptorTest\$TracingTestAction",
         "http.method" to "GET",
         "http.status_code" to 200,
         "http.url" to "http://foo.bar/",
@@ -63,7 +70,7 @@ class TracingInterceptorTest {
         TracingTestAction::call.asAction(DispatchMechanism.GET))!!
     val httpCall = FakeHttpCall(
         url = "http://foo.bar".toHttpUrl(),
-        requestHeaders = headersOf("spanid", "1", "traceid", "2")
+        requestHeaders = headersOf(SPAN_ID_KEY, "1", TRACE_ID_KEY, "2")
     )
     val chain = RealNetworkChain(TracingTestAction::call.asAction(DispatchMechanism.GET),
         tracingTestAction, httpCall, listOf(tracingInterceptor, TerminalInterceptor(200)))
@@ -72,6 +79,31 @@ class TracingInterceptorTest {
 
     val span = tracer.take()
     assertThat(span.parentId()).isEqualTo(1)
+  }
+
+  @Test
+  fun looksForParentSpan() {
+    val tracingInterceptor = tracingInterceptorFactory.create(
+        TracingTestAction::call.asAction(DispatchMechanism.GET))!!
+    val httpCall = FakeHttpCall(
+        url = "http://foo.bar".toHttpUrl(),
+        requestHeaders = headersOf(SPAN_ID_KEY, "1", TRACE_ID_KEY, "2")
+    )
+    val chain = RealNetworkChain(TracingTestAction::call.asAction(DispatchMechanism.GET),
+        tracingTestAction, httpCall, listOf(object : NetworkInterceptor {
+      override fun intercept(chain: NetworkChain) {
+        tracer.buildSpan("parent-span-exists")
+            .startActive(true).use {
+              tracer.activeSpan().setBaggageItem("hello", "world")
+              chain.proceed(chain.httpCall)
+            }
+      }
+    }, tracingInterceptor, TerminalInterceptor(200)))
+
+    chain.proceed(chain.httpCall)
+
+    val span = tracer.take()
+    assertThat(span.getBaggageItem("hello")).isEqualTo("world")
   }
 
   @Test
