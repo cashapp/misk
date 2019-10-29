@@ -42,34 +42,34 @@ class LaunchDarklyFeatureFlags @Inject constructor(
     ldClient.close()
   }
 
-  override fun getBoolean(feature: Feature, token: String, attributes: Attributes): Boolean {
-    val result = ldClient.boolVariationDetail(feature.name, buildUser(token, attributes), false)
+  override fun getBoolean(feature: Feature, key: String, attributes: Attributes): Boolean {
+    val result = ldClient.boolVariationDetail(feature.name, buildUser(key, attributes), false)
     checkDefaultNotUsed(feature, result)
     return result.value
   }
 
-  override fun getInt(feature: Feature, token: String, attributes: Attributes): Int {
+  override fun getInt(feature: Feature, key: String, attributes: Attributes): Int {
     checkInitialized()
-    val result = ldClient.intVariationDetail(feature.name, buildUser(token, attributes), 0)
+    val result = ldClient.intVariationDetail(feature.name, buildUser(key, attributes), 0)
     checkDefaultNotUsed(feature, result)
     return result.value
   }
 
-  override fun getString(feature: Feature, token: String, attributes: Attributes): String {
+  override fun getString(feature: Feature, key: String, attributes: Attributes): String {
     checkInitialized()
-    val result = ldClient.stringVariationDetail(feature.name, buildUser(token, attributes), "")
+    val result = ldClient.stringVariationDetail(feature.name, buildUser(key, attributes), "")
     checkDefaultNotUsed(feature, result)
     return result.value
   }
 
   override fun <T : Enum<T>> getEnum(
     feature: Feature,
-    token: String,
+    key: String,
     clazz: Class<T>,
     attributes: Attributes
   ): T {
     checkInitialized()
-    val result = ldClient.stringVariationDetail(feature.name, buildUser(token, attributes), "")
+    val result = ldClient.stringVariationDetail(feature.name, buildUser(key, attributes), "")
     checkDefaultNotUsed(feature, result)
     return java.lang.Enum.valueOf(clazz, result.value.toUpperCase())
   }
