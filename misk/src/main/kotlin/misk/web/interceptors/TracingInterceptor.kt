@@ -31,7 +31,7 @@ internal class TracingInterceptor internal constructor(private val tracer: Trace
   }
 
   override fun intercept(chain: NetworkChain) {
-    val scopeBuilder = tracer.buildSpan(chain.webAction.javaClass.name)
+    val scopeBuilder = tracer.buildSpan("http.action")
         .withTag(Tags.HTTP_METHOD.key, chain.httpCall.dispatchMechanism.method.toString())
         .withTag(Tags.HTTP_URL.key, chain.httpCall.url.toString())
         .withTag(Tags.SPAN_KIND.key, SPAN_KIND_SERVER)
@@ -57,6 +57,9 @@ internal class TracingInterceptor internal constructor(private val tracer: Trace
     }
 
     val scope = scopeBuilder.startActive(true)
+    // This is a datadog convention. Must be set after span is created because otherwise it would
+    // be overwritten by the method/url
+    scope.span().setTag("resource.name", chain.webAction.javaClass.name)
     scope.use {
       try {
         chain.proceed(chain.httpCall)

@@ -39,7 +39,7 @@ class TracingInterceptorTest {
   @Inject private lateinit var jettyService: JettyService
 
   companion object {
-    // Not exposed: https://github.com/opentracing/opentracing-java/blob/master/opentracing-mock/src/main/java/io/opentracing/mock/MockTracer.java#L228-L229
+    // Not exposed: https://github.com/opentracing/opentracing-java/blob/2df2a8983e35dff23c4fb894e5f5ae3f98f1cf7b/opentracing-mock/src/main/java/io/opentracing/mock/MockTracer.java#L228-L229
     val SPAN_ID_KEY = "spanid"
     val TRACE_ID_KEY = "traceid"
   }
@@ -57,6 +57,7 @@ class TracingInterceptorTest {
     val span = tracer.take()
     assertThat(span.parentId()).isEqualTo(0)
     assertThat(span.tags()).isEqualTo(mapOf(
+        "resource.name" to "misk.web.interceptors.TracingInterceptorTest\$TracingTestAction",
         "http.method" to "GET",
         "http.status_code" to 200,
         "http.url" to "http://foo.bar/",
