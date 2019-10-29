@@ -70,5 +70,8 @@ data class Attributes(
   // NB: LaunchDarkly uses typed Gson attributes. We could leak that through, but that could make
   // code unwieldly. Numerical attributes are likely to be rarely used, so we make it a separate,
   // optional field rather than trying to account for multiple possible attribute types.
-  val number: Map<String, Number>? = null
+  val number: Map<String, Number>? = null,
+  // Indicates that the user is anonymous, which may have backend-specific behavior, like not
+  // including the user in analytics.
+  val anonymous: Boolean = false
 )
