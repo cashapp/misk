@@ -12,7 +12,7 @@ interface FeatureFlags {
   fun getBoolean(
     feature: Feature,
     key: String,
-    attributes: Attributes = Attributes()
+    attributes: Attributes
   ): Boolean
 
   /**
@@ -22,7 +22,7 @@ interface FeatureFlags {
   fun getInt(
     feature: Feature,
     key: String,
-    attributes: Attributes = Attributes()
+    attributes: Attributes
   ): Int
 
   /**
@@ -32,7 +32,7 @@ interface FeatureFlags {
   fun getString(
     feature: Feature,
     key: String,
-    attributes: Attributes = Attributes()
+    attributes: Attributes
   ): String
 
   /**
@@ -47,8 +47,30 @@ interface FeatureFlags {
     feature: Feature,
     key: String,
     clazz: Class<T>,
-    attributes: Attributes = Attributes()
+    attributes: Attributes
   ): T
+
+  // Overloaded functions for use in Java, because @JvmOverloads isn't supported for interfaces
+  fun getBoolean(
+    feature: Feature,
+    key: String
+  ) = getBoolean(feature, key, Attributes())
+
+  fun getInt(
+    feature: Feature,
+    key: String
+  ) = getInt(feature, key, Attributes())
+
+  fun getString(
+    feature: Feature,
+    key: String
+  ) = getString(feature, key, Attributes())
+
+  fun <T : Enum<T>> getEnum(
+    feature: Feature,
+    key: String,
+    clazz: Class<T>
+  ) = getString(feature, key, Attributes())
 }
 
 inline fun <reified T : Enum<T>> FeatureFlags.getEnum(
