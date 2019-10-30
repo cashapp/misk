@@ -111,6 +111,11 @@ class LaunchDarklyFeatureFlags @Inject constructor(
     if (attributes.number != null) {
       attributes.number!!.forEach { (k, v) -> builder.privateCustom(k, v) }
     }
+    if (attributes.anonymous) {
+      // This prevents the user from being stored in the LaunchDarkly dashboard, see
+      // https://docs.launchdarkly.com/docs/anonymous-users
+      builder.anonymous(true)
+    }
     return builder.build()
   }
 }
