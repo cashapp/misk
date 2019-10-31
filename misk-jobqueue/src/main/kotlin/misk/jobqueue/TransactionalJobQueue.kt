@@ -23,57 +23,10 @@ interface TransactionalJobQueue {
    * @param queueName the name of the queue on which to place the job
    * @param body The body of the job; can be any arbitrary string - it is up to the enqueuer and
    * consumer to agree on the format of the body
-   * @param idempotenceKey Allows consumers to filter duplicate messages if the underlying job
-   * queueing system provides at least once delivery.
    * @param deliveryDelay If specified, the job will only become visible to the consumer after
    * the provided duration. Used for jobs that should delay processing for a period of time.
    * @param attributes Arbitrary contextual attributes associated with the job
    */
-  fun enqueue(
-    session: Session,
-    gid: Gid<*, *>,
-    queueName: QueueName,
-    idempotenceKey: String,
-    body: String,
-    deliveryDelay: Duration? = null,
-    attributes: Map<String, String> = mapOf()
-  )
-
-  /**
-   * Enqueues a job to the primary (unaffiliated) database shard . Will throw an exception if the
-   * session is associated with an entity group.
-   * @param session The database session to use in writing the job
-   * @param queueName the name of the queue on which to place the job
-   * @param body The body of the job; can be any arbitrary string - it is up to the enqueuer and
-   * consumer to agree on the format of the body
-   * @param idempotenceKey Allows consumers to filter duplicate messages if the underlying job
-   * queueing system provides at least once delivery.
-   * @param deliveryDelay If specified, the job will only become visible to the consumer after
-   * the provided duration. Used for jobs that should delay processing for a period of time.
-   * @param attributes Arbitrary contextual attributes associated with the job
-   */
-  fun enqueue(
-    session: Session,
-    queueName: QueueName,
-    idempotenceKey: String,
-    body: String,
-    deliveryDelay: Duration? = null,
-    attributes: Map<String, String> = mapOf()
-  )
-
-  /**
-   * Enqueues a job to the database shard associated with the given entity group. Will
-   * throw an exception if the session is associated with a different entity group.
-   * @param session The database session to use in writing the job
-   * @param gid The id of the entity group with which the job should be associated
-   * @param queueName the name of the queue on which to place the job
-   * @param body The body of the job; can be any arbitrary string - it is up to the enqueuer and
-   * consumer to agree on the format of the body
-   * @param deliveryDelay If specified, the job will only become visible to the consumer after
-   * the provided duration. Used for jobs that should delay processing for a period of time.
-   * @param attributes Arbitrary contextual attributes associated with the job
-   */
-  // Deprecated. Provide an idempotenceKey.
   fun enqueue(
     session: Session,
     gid: Gid<*, *>,
@@ -94,7 +47,6 @@ interface TransactionalJobQueue {
    * the provided duration. Used for jobs that should delay processing for a period of time.
    * @param attributes Arbitrary contextual attributes associated with the job
    */
-  // Deprecated. Provide an idempotenceKey.
   fun enqueue(
     session: Session,
     queueName: QueueName,

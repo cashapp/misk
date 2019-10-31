@@ -33,20 +33,9 @@ class FakeJobQueue @Inject constructor(
     body: String,
     deliveryDelay: Duration?,
     attributes: Map<String, String>
-  ) = enqueue(queueName, tokenGenerator.generate("fjq"), body, deliveryDelay, attributes)
-
-  override fun enqueue(
-    queueName: QueueName,
-    idempotenceKey: String,
-    body: String,
-    deliveryDelay: Duration?,
-    attributes: Map<String, String>
   ) {
-    check(!attributes.keys.contains(Job.IDEMPOTENCY_KEY_ATTR)) {
-      "${Job.IDEMPOTENCY_KEY_ATTR} is a reserved attribute key"
-    }
     val id = tokenGenerator.generate("fakeJobQueue")
-    val job = FakeJob(queueName, id, idempotenceKey, body, attributes)
+    val job = FakeJob(queueName, id, body, attributes)
     jobQueues.getOrPut(queueName, ::ConcurrentLinkedDeque).add(job)
   }
 
@@ -72,7 +61,6 @@ class FakeJobQueue @Inject constructor(
 data class FakeJob(
   override val queueName: QueueName,
   override val id: String,
-  override val idempotenceKey: String,
   override val body: String,
   override val attributes: Map<String, String>,
   internal var acknowledged: Boolean = false

@@ -9,19 +9,13 @@ internal class SqsJob(
   override val queueName: QueueName,
   private val queues: QueueResolver,
   private val metrics: SqsMetrics,
-  private val message: Message,
-    // TODO: remove after this change has been deployed everywhere. This handles the case of existing
-    // queued jobs during the deploy.
-  randomIdempotenceKey: String
+  private val message: Message
 ) : Job {
   override val body: String = message.body
   override val id: String = message.messageId
-  override val idempotenceKey =
-      message.messageAttributes[Job.IDEMPOTENCY_KEY_ATTR]?.stringValue ?: randomIdempotenceKey
-  override val attributes: Map<String, String> = message.messageAttributes
-      .map { (key, value) -> key to value.stringValue }
-      .filter { (key, _) -> key != Job.IDEMPOTENCY_KEY_ATTR }
-      .toMap()
+  override val attributes: Map<String, String> = message.messageAttributes.map { (key, value) ->
+    key to value.stringValue
+  }.toMap()
 
   private val queue: ResolvedQueue = queues[queueName]
 
