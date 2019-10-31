@@ -12,7 +12,7 @@ interface FeatureFlags {
   fun getBoolean(
     feature: Feature,
     key: String,
-    attributes: Attributes
+    attributes: Attributes = Attributes()
   ): Boolean
 
   /**
@@ -22,7 +22,7 @@ interface FeatureFlags {
   fun getInt(
     feature: Feature,
     key: String,
-    attributes: Attributes
+    attributes: Attributes = Attributes()
   ): Int
 
   /**
@@ -32,7 +32,7 @@ interface FeatureFlags {
   fun getString(
     feature: Feature,
     key: String,
-    attributes: Attributes
+    attributes: Attributes = Attributes()
   ): String
 
   /**
@@ -47,7 +47,7 @@ interface FeatureFlags {
     feature: Feature,
     key: String,
     clazz: Class<T>,
-    attributes: Attributes
+    attributes: Attributes = Attributes()
   ): T
 
   // Overloaded functions for use in Java, because @JvmOverloads isn't supported for interfaces
