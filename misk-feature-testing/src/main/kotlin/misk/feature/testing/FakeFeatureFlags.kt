@@ -19,18 +19,18 @@ class FakeFeatureFlags @Inject constructor() : AbstractIdleService(),
   override fun startUp() {}
   override fun shutDown() {}
 
-  private val overrides = ConcurrentHashMap<Feature, Any>()
+  private val overrides = ConcurrentHashMap<MapKey, Any>()
 
   override fun getBoolean(feature: Feature, key: String, attributes: Attributes): Boolean {
-    return overrides.getOrDefault(feature, false) as Boolean
+    return getOrDefault(feature, key, false)
   }
 
   override fun getInt(feature: Feature, key: String, attributes: Attributes): Int =
-      overrides[feature] as? Int ?: throw IllegalArgumentException(
+      get(feature, key) as? Int ?: throw IllegalArgumentException(
           "Int flag $feature must be overridden with override() before use")
 
   override fun getString(feature: Feature, key: String, attributes: Attributes): String =
-      overrides[feature] as? String ?: throw IllegalArgumentException(
+      get(feature, key) as? String ?: throw IllegalArgumentException(
           "String flag $feature must be overridden with override() before use")
 
   override fun <T : Enum<T>> getEnum(
@@ -40,26 +40,57 @@ class FakeFeatureFlags @Inject constructor() : AbstractIdleService(),
     attributes: Attributes
   ): T {
     @Suppress("unchecked_cast")
-    return overrides.getOrDefault(feature, clazz.enumConstants[0]) as T
+    return getOrDefault(feature, key, clazz.enumConstants[0]) as T
+  }
+
+  private fun get(feature: Feature, key: String): Any? {
+    return overrides.getOrElse(MapKey(feature, key)) {
+      overrides[MapKey(feature)]
+    }
+  }
+
+  private fun <V> getOrDefault(feature: Feature, key: String, defaultValue: V): V {
+    @Suppress("unchecked_cast")
+    return overrides.getOrElse(MapKey(feature, key)) {
+      overrides.getOrDefault(MapKey(feature), defaultValue)
+    } as V
   }
 
   fun override(feature: Feature, value: Boolean) {
-    overrides[feature] = value
+    overrides[MapKey(feature)] = value
   }
 
   fun override(feature: Feature, value: Int) {
-    overrides[feature] = value
+    overrides[MapKey(feature)] = value
   }
 
   fun override(feature: Feature, value: String) {
-    overrides[feature] = value
+    overrides[MapKey(feature)] = value
   }
 
   fun override(feature: Feature, value: Enum<*>) {
-    overrides[feature] = value
+    overrides[MapKey(feature)] = value
+  }
+
+  fun overrideKey(feature: Feature, key: String, value: Boolean) {
+    overrides[MapKey(feature, key)] = value
+  }
+
+  fun overrideKey(feature: Feature, key: String, value: Int) {
+    overrides[MapKey(feature, key)] = value
+  }
+
+  fun overrideKey(feature: Feature, key: String, value: String) {
+    overrides[MapKey(feature, key)] = value
+  }
+
+  fun overrideKey(feature: Feature, key: String, value: Enum<*>) {
+    overrides[MapKey(feature, key)] = value
   }
 
   fun reset() {
     overrides.clear()
   }
+
+  private data class MapKey(val feature: Feature, val key: String? = null)
 }

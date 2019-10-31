@@ -25,6 +25,11 @@ internal class FakeFeatureFlagsTest {
     subject.override(OTHER_FEATURE, 5)
     assertThat(subject.getInt(FEATURE, TOKEN)).isEqualTo(3)
     assertThat(subject.getInt(OTHER_FEATURE, TOKEN)).isEqualTo(5)
+
+    // Can override with specific keys
+    subject.overrideKey(FEATURE, "joker", 42)
+    assertThat(subject.getInt(FEATURE, TOKEN)).isEqualTo(3)
+    assertThat(subject.getInt(FEATURE, "joker")).isEqualTo(42)
   }
 
   @Test
@@ -37,6 +42,13 @@ internal class FakeFeatureFlagsTest {
     subject.override(FEATURE, Dinosaur.TYRANNOSAURUS)
     assertThat(subject.getEnum<Dinosaur>(FEATURE, TOKEN))
         .isEqualTo(Dinosaur.TYRANNOSAURUS)
+
+    // Can override with specific keys
+    subject.overrideKey(FEATURE, "joker", Dinosaur.PTERODACTYL)
+    assertThat(subject.getEnum<Dinosaur>(FEATURE, TOKEN))
+        .isEqualTo(Dinosaur.TYRANNOSAURUS)
+    assertThat(subject.getEnum<Dinosaur>(FEATURE, "joker"))
+        .isEqualTo(Dinosaur.PTERODACTYL)
 
     subject.reset()
     assertThat(subject.getEnum<Dinosaur>(FEATURE, TOKEN))
