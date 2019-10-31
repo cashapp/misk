@@ -12,7 +12,6 @@ import misk.logging.getLogger
 import misk.tasks.RepeatedTaskQueue
 import misk.tasks.Status
 import misk.time.timed
-import misk.tokens.TokenGenerator
 import misk.tracing.traceWithSpan
 import java.time.Duration
 import java.util.concurrent.ConcurrentHashMap
@@ -26,7 +25,6 @@ import javax.inject.Singleton
 internal class SqsJobConsumer @Inject internal constructor(
   private val config: AwsSqsJobQueueConfig,
   private val queues: QueueResolver,
-  private val tokenGenerator: TokenGenerator,
   @ForSqsConsumer private val dispatchThreadPool: ExecutorService,
   @ForSqsConsumer private val taskQueue: RepeatedTaskQueue,
   private val tracer: Tracer,
@@ -41,7 +39,7 @@ internal class SqsJobConsumer @Inject internal constructor(
   private val subscriptions = ConcurrentHashMap<QueueName, QueueReceiver>()
 
   override fun subscribe(queueName: QueueName, handler: JobHandler) {
-    val receiver = QueueReceiver(queueName, handler, tokenGenerator)
+    val receiver = QueueReceiver(queueName, handler)
     if (subscriptions.putIfAbsent(queueName, receiver) != null) {
       throw IllegalStateException("already subscribed to queue ${queueName.value}")
     }
@@ -66,8 +64,7 @@ internal class SqsJobConsumer @Inject internal constructor(
 
   internal inner class QueueReceiver(
     private val queueName: QueueName,
-    private val handler: JobHandler,
-    private val tokenGenerator: TokenGenerator
+    private val handler: JobHandler
   ) {
     private val queue = queues[queueName]
 
@@ -85,9 +82,7 @@ internal class SqsJobConsumer @Inject internal constructor(
         return Status.NO_WORK
       }
 
-      val futures = messages
-          .map { SqsJob(queueName, queues, metrics, it, tokenGenerator.generate("sqs")) }
-          .map { message ->
+      val futures = messages.map { SqsJob(queueName, queues, metrics, it) }.map { message ->
         dispatchThreadPool.submit {
           metrics.jobsReceived.labels(queueName.value).inc()
 

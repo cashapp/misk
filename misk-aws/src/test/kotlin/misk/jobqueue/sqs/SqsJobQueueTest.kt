@@ -15,7 +15,6 @@ import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
@@ -51,27 +50,20 @@ internal class SqsJobQueueTest {
 
   @Test fun enqueueAndHandle() {
     val handledJobs = CopyOnWriteArrayList<Job>()
-    val allJobsComplete = CountDownLatch(10 * 2)
-    val idKeys = ConcurrentHashMap.newKeySet<String>()
+    val allJobsComplete = CountDownLatch(10)
     consumer.subscribe(queueName) {
-      if (idKeys.add(it.idempotenceKey)) {
-        handledJobs.add(it)
-      }
+      handledJobs.add(it)
       it.acknowledge()
       allJobsComplete.countDown()
     }
 
     for (i in (0 until 10)) {
-      queue.enqueue(queueName, "id_$i", "this is job $i",
-          attributes = mapOf("index" to i.toString()))
-      queue.enqueue(queueName, "id_$i", "this is job $i",
-          attributes = mapOf("index" to i.toString()))
+      queue.enqueue(queueName, "this is job $i", attributes = mapOf("index" to i.toString()))
     }
 
-    assertThat(allJobsComplete.await(100, TimeUnit.SECONDS)).isTrue()
+    assertThat(allJobsComplete.await(10, TimeUnit.SECONDS)).isTrue()
 
     val sortedJobs = handledJobs.sortedBy { it.body }
-    assertThat(handledJobs).hasSize(10)
     assertThat(sortedJobs.map { it.body }).containsExactly(
         "this is job 0",
         "this is job 1",
@@ -98,10 +90,10 @@ internal class SqsJobQueueTest {
     )
 
     // Confirm metrics
-    assertThat(sqsMetrics.jobsEnqueued.labels(queueName.value).get()).isEqualTo(20.0)
+    assertThat(sqsMetrics.jobsEnqueued.labels(queueName.value).get()).isEqualTo(10.0)
     assertThat(sqsMetrics.jobEnqueueFailures.labels(queueName.value).get()).isEqualTo(0.0)
-    assertThat(sqsMetrics.jobsReceived.labels(queueName.value).get()).isEqualTo(20.0)
-    assertThat(sqsMetrics.jobsAcknowledged.labels(queueName.value).get()).isEqualTo(20.0)
+    assertThat(sqsMetrics.jobsReceived.labels(queueName.value).get()).isEqualTo(10.0)
+    assertThat(sqsMetrics.jobsAcknowledged.labels(queueName.value).get()).isEqualTo(10.0)
     assertThat(sqsMetrics.handlerFailures.labels(queueName.value).get()).isEqualTo(0.0)
   }
 
