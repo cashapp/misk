@@ -7,6 +7,7 @@ import com.launchdarkly.client.LDConfig
 import misk.ServiceModule
 import misk.client.HttpClientSSLConfig
 import misk.config.Config
+import misk.feature.DynamicConfig
 import misk.feature.FeatureFlags
 import misk.feature.FeatureService
 import misk.inject.KAbstractModule
@@ -15,6 +16,7 @@ import misk.resources.ResourceLoader
 import misk.security.ssl.SslContextFactory
 import misk.security.ssl.SslLoader
 import java.net.URI
+import javax.inject.Provider
 import javax.net.ssl.X509TrustManager
 import kotlin.reflect.KClass
 
@@ -27,8 +29,11 @@ class LaunchDarklyModule(
 ) : KAbstractModule() {
   override fun configure() {
     val key = LaunchDarklyFeatureFlags::class.toKey(qualifier)
-    bind<FeatureFlags>().to(key)
-    bind<FeatureService>().to(key)
+    bind(FeatureFlags::class.toKey(qualifier)).to(key)
+    bind(FeatureService::class.toKey(qualifier)).to(key)
+    val featureFlagsProvider = getProvider(key)
+    bind(DynamicConfig::class.toKey(qualifier)).toProvider(
+        Provider<DynamicConfig> { LaunchDarklyDynamicConfig(featureFlagsProvider.get()) })
     install(ServiceModule(FeatureService::class.toKey(qualifier)))
   }
 
