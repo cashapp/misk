@@ -6,6 +6,7 @@ import io.opentracing.Tracer
 import misk.jobqueue.JobQueue
 import misk.jobqueue.QueueName
 import misk.logging.getLogger
+import misk.time.timed
 import misk.tracing.traceWithSpan
 import java.time.Duration
 import javax.inject.Inject
@@ -28,28 +29,32 @@ internal class SqsJobQueue @Inject internal constructor(
       try {
         val queue = queues[queueName]
 
-        queue.call { client ->
-          client.sendMessage(SendMessageRequest().apply {
+        val (sendDuration, _) = queue.call { client ->
+          val sendRequest = SendMessageRequest().apply {
             queueUrl = queue.url
             messageBody = body
             if (deliveryDelay != null) delaySeconds = (deliveryDelay.toMillis() / 1000).toInt()
             attributes.forEach { (key, value) ->
               addMessageAttributesEntry(key, MessageAttributeValue()
-                  .withDataType("String")
-                  .withStringValue(value))
+                .withDataType("String")
+                .withStringValue(value))
             }
 
             // Save the original trace id, if we can determine it
             // TODO(mmihic): Should put this case somewhere in the tracing modules
             (span as? com.uber.jaeger.Span)?.let {
               addMessageAttributesEntry(
-                  SqsJob.ORIGINAL_TRACE_ID_ATTR,
-                  MessageAttributeValue()
-                      .withDataType("String")
-                      .withStringValue(it.context().traceId.toString()))
+                SqsJob.ORIGINAL_TRACE_ID_ATTR,
+                MessageAttributeValue()
+                  .withDataType("String")
+                  .withStringValue(it.context().traceId.toString()))
             }
-          })
+          }
+
+          timed { client.sendMessage(sendRequest) }
         }
+
+        metrics.sqsSendTime.record(sendDuration.toMillis().toDouble(), queueName.value)
       } catch (th: Throwable) {
         log.error(th) { "failed to enqueue to ${queueName.value}" }
         metrics.jobEnqueueFailures.labels(queueName.value).inc()

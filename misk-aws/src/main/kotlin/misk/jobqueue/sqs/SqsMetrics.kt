@@ -47,4 +47,22 @@ internal class SqsMetrics @Inject internal constructor(metrics: Metrics) {
       "total # of jobs explicitly moved to the dead letter queueName",
       listOf("queueName")
   )
+
+  val sqsSendTime = metrics.histogram(
+    "jobs_sqs_send_latency",
+    "the round trip time to send messages to SQS",
+    listOf("queueName")
+  )
+
+  val sqsReceiveTime = metrics.histogram(
+    "jobs_sqs_receive_latency",
+    "the round trip time to receive messages from SQS",
+    listOf("queueName")
+  )
+
+  val sqsDeleteTime = metrics.histogram(
+    "jobs_sqs_delete_latency",
+    "the round trip time to delete messages from SQS",
+    listOf("queueName")
+  )
 }

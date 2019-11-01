@@ -4,6 +4,7 @@ import com.amazonaws.services.sqs.model.Message
 import com.amazonaws.services.sqs.model.SendMessageRequest
 import misk.jobqueue.Job
 import misk.jobqueue.QueueName
+import misk.time.timed
 
 internal class SqsJob(
   override val queueName: QueueName,
@@ -20,7 +21,7 @@ internal class SqsJob(
   private val queue: ResolvedQueue = queues[queueName]
 
   override fun acknowledge() {
-    queue.call { it.deleteMessage(queue.url, message.receiptHandle) }
+    deleteMessage(queue, message)
     metrics.jobsAcknowledged.labels(queueName.value).inc()
   }
 
@@ -34,8 +35,15 @@ internal class SqsJob(
           .withMessageBody(body)
           .withMessageAttributes(message.messageAttributes))
     }
-    queue.call { it.deleteMessage(queue.url, message.receiptHandle) }
+    deleteMessage(queue, message)
     metrics.jobsDeadLettered.labels(queueName.value).inc()
+  }
+
+  private fun deleteMessage(queue: ResolvedQueue, message: Message) {
+    val (deleteDuration, _) = queue.call {
+      timed { it.deleteMessage(queue.url, message.receiptHandle) }
+    }
+    metrics.sqsDeleteTime.record(deleteDuration.toMillis().toDouble(), queueName.value)
   }
 
   companion object {
