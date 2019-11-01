@@ -3,6 +3,7 @@ package misk.feature.testing
 import misk.feature.FeatureFlags
 import misk.feature.FeatureService
 import misk.ServiceModule
+import misk.feature.DynamicConfig
 import misk.inject.KAbstractModule
 import misk.inject.toKey
 import kotlin.reflect.KClass
@@ -18,8 +19,9 @@ class FakeFeatureFlagsModule(
   override fun configure() {
     val key = FakeFeatureFlags::class.toKey(qualifier)
     bind(key).toInstance(testFeatureFlags)
-    bind<FeatureFlags>().to(key)
-    bind<FeatureService>().to(key)
+    bind(FeatureFlags::class.toKey(qualifier)).to(key)
+    bind(FeatureService::class.toKey(qualifier)).to(key)
+    bind(DynamicConfig::class.toKey(qualifier)).to(key)
     install(ServiceModule(FeatureService::class.toKey(qualifier)))
   }
 
