@@ -2,6 +2,7 @@ package misk.feature.testing
 
 import com.google.common.util.concurrent.AbstractIdleService
 import misk.feature.Attributes
+import misk.feature.DynamicConfig
 import misk.feature.Feature
 import misk.feature.FeatureFlags
 import misk.feature.FeatureService
@@ -15,7 +16,13 @@ import javax.inject.Singleton
 @Singleton
 class FakeFeatureFlags @Inject constructor() : AbstractIdleService(),
     FeatureFlags,
-    FeatureService {
+    FeatureService,
+    DynamicConfig {
+
+  companion object {
+    const val KEY = "fake_dynamic_flag"
+  }
+
   override fun startUp() {}
   override fun shutDown() {}
 
@@ -42,6 +49,11 @@ class FakeFeatureFlags @Inject constructor() : AbstractIdleService(),
     @Suppress("unchecked_cast")
     return getOrDefault(feature, key, clazz.enumConstants[0]) as T
   }
+
+  override fun getBoolean(feature: Feature) = getBoolean(feature, KEY)
+  override fun getInt(feature: Feature) = getInt(feature, KEY)
+  override fun getString(feature: Feature) = getString(feature, KEY)
+  override fun <T : Enum<T>> getEnum(feature: Feature, clazz: Class<T>): T = getEnum(feature, KEY, clazz, Attributes())
 
   private fun get(feature: Feature, key: String): Any? {
     return overrides.getOrElse(MapKey(feature, key)) {

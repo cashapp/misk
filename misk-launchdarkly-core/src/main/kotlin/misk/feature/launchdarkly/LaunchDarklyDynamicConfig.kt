@@ -4,11 +4,10 @@ import misk.feature.Attributes
 import misk.feature.DynamicConfig
 import misk.feature.Feature
 import misk.feature.FeatureFlags
-import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class LaunchDarklyDynamicConfig @Inject constructor(val featureFlags: FeatureFlags) : DynamicConfig {
+class LaunchDarklyDynamicConfig(private val featureFlags: FeatureFlags) : DynamicConfig {
   companion object {
     const val KEY = "dynamic_flag"
     val ATTRIBUTES = Attributes(anonymous = true)
