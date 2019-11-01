@@ -40,8 +40,8 @@ internal class SqsJobConsumer @Inject internal constructor(
 
   override fun subscribe(queueName: QueueName, handler: JobHandler) {
     val receiver = QueueReceiver(queueName, handler)
-    if (subscriptions.putIfAbsent(queueName, receiver) != null) {
-      throw IllegalStateException("already subscribed to queue ${queueName.value}")
+    check(subscriptions.putIfAbsent(queueName, receiver) == null) {
+      "already subscribed to queue ${queueName.value}"
     }
 
     log.info {
@@ -69,14 +69,16 @@ internal class SqsJobConsumer @Inject internal constructor(
     private val queue = queues[queueName]
 
     fun runOnce(): Status {
-      val messages = queue.call { client ->
-        client.receiveMessage(ReceiveMessageRequest()
-            .withAttributeNames("All")
-            .withMessageAttributeNames("All")
-            .withQueueUrl(queue.url)
-            .withMaxNumberOfMessages(10))
-            .messages
+      val (receiveDuration, messages) = queue.call { client ->
+        val receiveRequest = ReceiveMessageRequest()
+          .withAttributeNames("All")
+          .withMessageAttributeNames("All")
+          .withQueueUrl(queue.url)
+          .withMaxNumberOfMessages(10)
+
+        timed { client.receiveMessage(receiveRequest).messages }
       }
+      metrics.sqsReceiveTime.record(receiveDuration.toMillis().toDouble(), queueName.value)
 
       if (messages.size == 0) {
         return Status.NO_WORK
