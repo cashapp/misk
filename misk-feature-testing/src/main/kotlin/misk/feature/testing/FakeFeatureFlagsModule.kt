@@ -29,8 +29,8 @@ class FakeFeatureFlagsModule(
    *
    * Usage:
    * ```
-   * install(FakeFeatureFlagsModule().withOverrides { flags ->
-   *   flags.overrideBool(Feature("foo"), true)
+   * install(FakeFeatureFlagsModule().withOverrides {
+   *   override(Feature("foo"), true)
    * })
    * ```
    */
