@@ -15,19 +15,19 @@
     "prebuild": "npm run-script lint",
     "reinstall": "rm -rf node_modules && npm run-script install",
     "start": "npm run-script prebuild && cross-env NODE_ENV=development webpack-dev-server",
-    "test": "jest --passWithNoTests",
+    "test": "jest --passWithNoTests --maxWorkers=2",
     "zip": "tar --exclude='.gitignore' --exclude='.old_build_files' --exclude='package.json' --exclude='package-lock.json' --exclude='prettier.config.js' --exclude='tsconfig.json' --exclude='tslint.json' --exclude='webpack.config.js' --exclude='yarn.lock' --exclude='demo' --exclude='lib' --exclude='.DS_Store' --exclude='*.log' --exclude='node_modules' --exclude='admin-dashboard.tgz' -czvf admin-dashboard.tgz ./"
   },
   "dependencies": {
-    "@misk/common": "0.1.23-2",
-    "@misk/core": "0.1.23-2",
-    "@misk/simpleredux": "0.1.23-2"
+    "@misk/common": "0.1.23",
+    "@misk/core": "0.1.23",
+    "@misk/simpleredux": "0.1.23"
   },
   "devDependencies": {
-    "@misk/dev": "0.1.23-2",
-    "@misk/tslint": "0.1.23-2",
-    "@misk/test": "0.1.23-2",
-    "@misk/prettier": "0.1.23-2"
+    "@misk/dev": "0.1.23",
+    "@misk/tslint": "0.1.23",
+    "@misk/test": "0.1.23",
+    "@misk/prettier": "0.1.23"
   },
   "jest": {
     "testEnvironment": "jsdom",
