@@ -1,6 +1,7 @@
 package misk.inject
 
 import com.google.inject.AbstractModule
+import com.google.inject.Binder
 import com.google.inject.Key
 import com.google.inject.TypeLiteral
 import com.google.inject.binder.AnnotatedBindingBuilder
@@ -114,6 +115,8 @@ abstract class KAbstractModule : AbstractModule() {
       else -> MapBinder.newMapBinder(binder(), keyType, valueType, annotation.java)
     }
   }
+
+  override fun binder(): Binder = super.binder().skipSources(KAbstractModule::class.java)
 
   @Suppress("UNCHECKED_CAST") // The type system isn't aware of constructed types.
   private fun <K, V> mapOfType(keyType: Type, valueType: Type): TypeLiteral<Map<K, V>> =
