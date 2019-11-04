@@ -1,5 +1,6 @@
 package misk.moshi
 
+import com.google.inject.Binder
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
@@ -10,6 +11,8 @@ class MoshiAdapterModule(private val jsonAdapter: Any) : KAbstractModule() {
   override fun configure() {
     multibind<Any>(MoshiJsonAdapter::class).toInstance(jsonAdapter)
   }
+
+  override fun binder(): Binder = super.binder().skipSources(MoshiAdapterModule::class.java)
 
   companion object {
     inline operator fun <reified T> invoke(adapter: JsonAdapter<T>): MoshiAdapterModule =
