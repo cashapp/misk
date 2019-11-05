@@ -65,7 +65,6 @@ class DataSourceService(
     hikariConfig.maximumPoolSize = config.fixed_pool_size
     hikariConfig.poolName = qualifier.simpleName
     hikariConfig.connectionTimeout = config.connection_timeout.toMillis()
-    hikariConfig.validationTimeout = config.validation_timeout.toMillis()
     hikariConfig.maxLifetime = config.connection_max_lifetime.toMillis()
 
     if (config.type == DataSourceType.MYSQL || config.type == DataSourceType.VITESS || config.type == DataSourceType.VITESS_MYSQL) {
