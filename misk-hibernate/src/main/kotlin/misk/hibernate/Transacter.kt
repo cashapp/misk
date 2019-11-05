@@ -15,6 +15,11 @@ interface Transacter {
   val inTransaction: Boolean
 
   /**
+   * Returns the active [Session] if one exists, null otherwise.
+   */
+  val session: Session?
+
+  /**
    * Is the scalability check currently enabled. Use [Session.withoutChecks] to disable checks.
    */
   fun isCheckEnabled(check: Check): Boolean

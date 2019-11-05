@@ -102,6 +102,15 @@ internal class RealTransacter private constructor(
   override val inTransaction: Boolean
     get() = threadLatestSession.get()?.inTransaction ?: false
 
+  override val session: Session?
+    get() {
+      val latestSession = threadLatestSession.get()
+      if (latestSession?.inTransaction == true) {
+        return latestSession
+      }
+      return null
+    }
+
   override fun isCheckEnabled(check: Check): Boolean {
     val session = threadLatestSession.get()
     return session == null || !session.inTransaction || !session.disabledChecks.contains(check)

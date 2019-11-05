@@ -347,6 +347,17 @@ abstract class TransacterTest {
   }
 
   @Test
+  fun session() {
+    assertThat(transacter.session).isNull()
+
+    transacter.transaction {
+      assertThat(transacter.session).isNotNull
+    }
+
+    assertThat(transacter.session).isNull()
+  }
+
+  @Test
   fun noFailSafeReadInTransaction() {
     assertThat(transacter.inTransaction).isFalse()
 
