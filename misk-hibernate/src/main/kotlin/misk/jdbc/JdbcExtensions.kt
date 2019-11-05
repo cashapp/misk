@@ -10,6 +10,12 @@ fun <T> ResultSet.map(function: (ResultSet) -> T): List<T> {
   return result
 }
 
+fun ResultSet.forEach(function: (ResultSet) -> Unit) {
+  while (this.next()) {
+    function(this)
+  }
+}
+
 fun <T> ResultSet.maybeResult(function: (ResultSet) -> T): T? = map(function).firstOrNull()
 
 fun <T> ResultSet.uniqueResult(function: (ResultSet) -> T): T = map(function).first()

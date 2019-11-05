@@ -23,7 +23,6 @@ class MDCScopeListener : ScopeListener {
     } catch (e: Exception) {
       log.debug("Exception setting log context context", e)
     }
-
   }
 
   override fun afterScopeClosed() {
@@ -33,6 +32,5 @@ class MDCScopeListener : ScopeListener {
     } catch (e: Exception) {
       log.debug("Exception removing log context context", e)
     }
-
   }
 }

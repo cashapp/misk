@@ -18,7 +18,9 @@ import org.hibernate.StaleObjectStateException
 import org.hibernate.exception.LockAcquisitionException
 import java.io.Closeable
 import java.sql.Connection
+import java.sql.SQLException
 import java.sql.SQLRecoverableException
+import java.sql.SQLTransientException
 import java.time.Duration
 import java.util.EnumSet
 import java.util.concurrent.Callable
@@ -313,10 +315,20 @@ internal class RealTransacter private constructor(
       is StaleObjectStateException,
       is LockAcquisitionException,
       is SQLRecoverableException,
+      is SQLTransientException,
       is OptimisticLockException -> true
-      else -> th.cause?.let { isRetryable(it) } ?: false
+      is SQLException -> if (isMessageRetryable(th)) true else isCauseRetryable(th)
+      else -> isCauseRetryable(th)
     }
   }
+
+  private fun isMessageRetryable(th: SQLException) =
+      // This is thrown as a raw SQLException from Hikari even though it is
+      // most certainly a recoverable exception
+      // See com/zaxxer/hikari/pool/ProxyConnection.java:493
+      th.message.equals("Connection is closed")
+
+  private fun isCauseRetryable(th: Throwable) = th.cause?.let { isRetryable(it) } ?: false
 
   // NB: all options should be immutable types as copy() is shallow.
   internal data class TransacterOptions(
