@@ -330,10 +330,10 @@ internal class RealTransacter private constructor(
 
   // NB: all options should be immutable types as copy() is shallow.
   internal data class TransacterOptions(
-    val maxAttempts: Int = 2,
+    val maxAttempts: Int = 3,
     val disabledChecks: EnumSet<Check> = EnumSet.noneOf(Check::class.java),
     val minRetryDelayMillis: Long = 100,
-    val maxRetryDelayMillis: Long = 200,
+    val maxRetryDelayMillis: Long = 500,
     val retryJitterMillis: Long = 400,
     val readOnly: Boolean = false
   )
