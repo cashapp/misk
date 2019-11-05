@@ -20,6 +20,7 @@ import java.io.Closeable
 import java.sql.Connection
 import java.sql.SQLException
 import java.sql.SQLRecoverableException
+import java.sql.SQLTransientException
 import java.time.Duration
 import java.util.EnumSet
 import java.util.concurrent.Callable
@@ -314,6 +315,7 @@ internal class RealTransacter private constructor(
       is StaleObjectStateException,
       is LockAcquisitionException,
       is SQLRecoverableException,
+      is SQLTransientException,
       is OptimisticLockException -> true
       is SQLException -> if (isMessageRetryable(th)) true else isCauseRetryable(th)
       else -> isCauseRetryable(th)
@@ -321,10 +323,32 @@ internal class RealTransacter private constructor(
   }
 
   private fun isMessageRetryable(th: SQLException) =
-      // This is thrown as a raw SQLException from Hikari even though it is
-      // most certainly a recoverable exception
-      // See com/zaxxer/hikari/pool/ProxyConnection.java:493
+      isConnectionClosed(th) || isVitessTransactionNotFound(th)
+
+  /**
+   * This is thrown as a raw SQLException from Hikari even though it is most certainly a
+   * recoverable exception.
+   * See com/zaxxer/hikari/pool/ProxyConnection.java:493
+   */
+  private fun isConnectionClosed(th: SQLException) =
       th.message.equals("Connection is closed")
+
+  /**
+   * We get this error as a MySQLQueryInterruptedException when a tablet gracefully terminates, we
+   * just need to retry the transaction and the new master should handle it.
+   *
+   * ```
+   * vttablet: rpc error: code = Aborted desc = transaction 1572922696317821557: not found (CallerID: )
+   * ```
+   */
+  private fun isVitessTransactionNotFound(th: SQLException): Boolean {
+    val message = th.message
+    return message != null &&
+        message.contains("vttablet: rpc error") &&
+        message.contains("code = Aborted") &&
+        message.contains("transaction") &&
+        message.contains("not found")
+  }
 
   private fun isCauseRetryable(th: Throwable) = th.cause?.let { isRetryable(it) } ?: false
 
