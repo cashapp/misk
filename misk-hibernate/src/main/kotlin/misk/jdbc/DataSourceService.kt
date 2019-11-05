@@ -63,6 +63,7 @@ class DataSourceService(
     }
     hikariConfig.minimumIdle = config.fixed_pool_size
     hikariConfig.maximumPoolSize = config.fixed_pool_size
+    hikariConfig.validationTimeout = config.validation_timeout.toMillis()
     hikariConfig.poolName = qualifier.simpleName
     hikariConfig.connectionTimeout = config.connection_timeout.toMillis()
     hikariConfig.maxLifetime = config.connection_max_lifetime.toMillis()
