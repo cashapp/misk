@@ -63,7 +63,7 @@ class LaunchDarklyModule(
       ldConfig.sslSocketFactory(sslContext.socketFactory, x509TrustManager)
     }
 
-    return LDClient(resourceLoader.utf8(config.sdk_key)!!.trim(), ldConfig.build())
+    return LDClient(resourceLoader.requireUtf8(config.sdk_key).trim(), ldConfig.build())
   }
 }
 

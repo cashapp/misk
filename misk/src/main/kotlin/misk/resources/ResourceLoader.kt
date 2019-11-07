@@ -116,6 +116,13 @@ class ResourceLoader @Inject constructor(
     return source.use { it.readUtf8() }
   }
 
+  /**
+   * Like [utf8], but throws [IllegalStateException] if the resource is missing.
+   */
+  fun requireUtf8(address: String): String {
+    return utf8(address) ?: error("could not load resource $address")
+  }
+
   private fun checkAddress(address: String) {
     require(address.matches(Regex("([^/:]+:)(/[^/]+)+/?"))) { "unexpected address $address" }
   }
