@@ -70,7 +70,7 @@ interface FeatureFlags {
     feature: Feature,
     key: String,
     clazz: Class<T>
-  ) = getString(feature, key, Attributes())
+  ) = getEnum(feature, key, clazz, Attributes())
 }
 
 inline fun <reified T : Enum<T>> FeatureFlags.getEnum(
