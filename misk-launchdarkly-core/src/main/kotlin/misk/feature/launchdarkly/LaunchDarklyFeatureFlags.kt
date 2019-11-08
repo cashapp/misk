@@ -8,6 +8,7 @@ import com.launchdarkly.client.LDUser
 import com.launchdarkly.shaded.com.google.common.base.Preconditions.checkState
 import misk.feature.Attributes
 import misk.feature.Feature
+import misk.feature.FeatureFlagValidation
 import misk.feature.FeatureFlags
 import misk.feature.FeatureService
 import javax.inject.Inject
@@ -43,21 +44,21 @@ class LaunchDarklyFeatureFlags @Inject constructor(
   }
 
   override fun getBoolean(feature: Feature, key: String, attributes: Attributes): Boolean {
-    val result = ldClient.boolVariationDetail(feature.name, buildUser(key, attributes), false)
+    val result = ldClient.boolVariationDetail(feature.name, buildUser(feature, key, attributes), false)
     checkDefaultNotUsed(feature, result)
     return result.value
   }
 
   override fun getInt(feature: Feature, key: String, attributes: Attributes): Int {
     checkInitialized()
-    val result = ldClient.intVariationDetail(feature.name, buildUser(key, attributes), 0)
+    val result = ldClient.intVariationDetail(feature.name, buildUser(feature, key, attributes), 0)
     checkDefaultNotUsed(feature, result)
     return result.value
   }
 
   override fun getString(feature: Feature, key: String, attributes: Attributes): String {
     checkInitialized()
-    val result = ldClient.stringVariationDetail(feature.name, buildUser(key, attributes), "")
+    val result = ldClient.stringVariationDetail(feature.name, buildUser(feature, key, attributes), "")
     checkDefaultNotUsed(feature, result)
     return result.value
   }
@@ -69,7 +70,7 @@ class LaunchDarklyFeatureFlags @Inject constructor(
     attributes: Attributes
   ): T {
     checkInitialized()
-    val result = ldClient.stringVariationDetail(feature.name, buildUser(key, attributes), "")
+    val result = ldClient.stringVariationDetail(feature.name, buildUser(feature, key, attributes), "")
     checkDefaultNotUsed(feature, result)
     return java.lang.Enum.valueOf(clazz, result.value.toUpperCase())
   }
@@ -91,8 +92,9 @@ class LaunchDarklyFeatureFlags @Inject constructor(
     throw IllegalStateException("Feature flag $feature is off but no off variation is specified")
   }
 
-  private fun buildUser(token: String, attributes: Attributes): LDUser {
-    val builder = LDUser.Builder(token)
+  private fun buildUser(feature: Feature, key: String, attributes: Attributes): LDUser {
+    FeatureFlagValidation.checkValidKey(feature, key)
+    val builder = LDUser.Builder(key)
     attributes.text.forEach { (k, v) ->
       when (k) {
         // LaunchDarkly has some built-in keys that have to be initialized with their named
