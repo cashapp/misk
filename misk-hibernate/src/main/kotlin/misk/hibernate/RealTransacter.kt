@@ -429,6 +429,15 @@ internal class RealTransacter private constructor(
 
     override fun shards(): Set<Shard> = transacter.shardList.get().get()
 
+    override fun shards(keyspace: Keyspace): Collection<Shard> {
+      return if (!config.type.isVitess) {
+        // We always return the single shard regardless what keyspace you want shards for
+        SINGLE_SHARD_SET
+      } else {
+        shards().filter { it.keyspace == keyspace }
+      }
+    }
+
     override fun <T> target(shard: Shard, function: () -> T): T {
       return if (config.type.isVitess) {
         target(currentTarget().mergedWith(Destination(shard)), function)

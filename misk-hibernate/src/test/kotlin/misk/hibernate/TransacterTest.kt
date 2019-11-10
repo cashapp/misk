@@ -150,6 +150,23 @@ abstract class TransacterTest {
   }
 
   @Test
+  fun `can do comparison query on ids`() {
+    createTestData()
+
+    transacter.replicaRead { session ->
+      val cb = session.hibernateSession.criteriaBuilder
+      val cr = cb.createQuery(DbCharacter::class.java)
+      val root = cr.from(DbCharacter::class.java)
+      val idProperty = root.get<Id<DbCharacter>>("id")
+      val characters = session.hibernateSession.createQuery(
+          cr.where(cb.greaterThan(idProperty, Id(0)))
+              .orderBy(cb.asc(idProperty))
+      ).resultList
+      assertThat(characters).hasSize(5)
+    }
+  }
+
+  @Test
   fun `shard targeting`() {
     // This test only makes sense with Vitess
     if (!transacter.config().type.isVitess) {
@@ -216,7 +233,7 @@ abstract class TransacterTest {
       }
     }
 
-      // Shard targeting works in transactions
+    // Shard targeting works in transactions
     transacter.transaction { session ->
       session.target(jp.shard(session)) {
         assertThat(
