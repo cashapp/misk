@@ -14,6 +14,7 @@ interface Session {
   fun <T : DbEntity<T>> loadOrNull(id: Id<T>, type: KClass<T>): T?
   fun <R : DbRoot<R>, T : DbSharded<R, T>> loadSharded(gid: Gid<R, T>, type: KClass<T>): T
   fun shards(): Set<Shard>
+  fun shards(keyspace: Keyspace): Collection<Shard>
   fun <T> target(shard: Shard, function: () -> T): T
   fun <T> useConnection(work: (Connection) -> T): T
 
@@ -64,7 +65,9 @@ enum class Check {
 }
 
 inline fun <reified T : DbEntity<T>> Session.load(id: Id<T>): T = load(id, T::class)
-inline fun <R : DbRoot<R>, reified S : DbSharded<R, S>> Session.loadSharded(gid: Gid<R, S>): S = loadSharded(gid, S::class)
+inline fun <R : DbRoot<R>, reified S : DbSharded<R, S>> Session.loadSharded(gid: Gid<R, S>): S = loadSharded(
+    gid, S::class)
+
 inline fun <reified T : DbEntity<T>> Session.loadOrNull(id: Id<T>): T? = loadOrNull(id, T::class)
 
 fun checkValidShardIdentifier(identifier: String) {
@@ -72,5 +75,3 @@ fun checkValidShardIdentifier(identifier: String) {
   check(!identifier.contains(' '))
   check(!identifier.contains('/'))
 }
-
-fun Session.shards(keyspace: Keyspace) = shards().filter { it.keyspace == keyspace }

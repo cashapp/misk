@@ -24,8 +24,8 @@ class DbCharacter() : DbChild<DbMovie, DbCharacter>, DbTimestampedEntity {
       parameters = [Parameter(name = "rootColumn", value = "movie_id")])
   override lateinit var gid: Gid<DbMovie, DbCharacter>
 
-  override val id: Id<DbCharacter>
-    get() = gid.id
+  @Column(updatable = false, insertable = false)
+  override lateinit var id: Id<DbCharacter>
 
   override val rootId: Id<DbMovie>
     get() = movie_id
