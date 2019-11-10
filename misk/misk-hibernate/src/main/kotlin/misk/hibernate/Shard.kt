@@ -2,6 +2,7 @@ package misk.hibernate
 
 import com.google.common.base.Strings
 import com.google.common.base.Suppliers
+import com.google.common.collect.ImmutableList
 import com.google.common.collect.ImmutableSet
 import com.google.common.collect.Range
 import okio.ByteString
