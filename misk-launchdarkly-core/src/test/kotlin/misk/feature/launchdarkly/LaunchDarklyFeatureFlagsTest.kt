@@ -21,6 +21,7 @@ import org.mockito.Mockito.anyString
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
+import java.lang.IllegalArgumentException
 
 internal class LaunchDarklyFeatureFlagsTest {
   private val client = mock(LDClientInterface::class.java)
@@ -97,6 +98,16 @@ internal class LaunchDarklyFeatureFlagsTest {
     assertThrows<RuntimeException> {
       featureFlags.getEnum<Dinosaur>(
           Feature("which-dinosaur"), "a-token")
+    }
+  }
+
+  @Test
+  fun invalidKeys() {
+    assertThrows<IllegalArgumentException> {
+      featureFlags.getString(Feature("which-dinosaur"), "bad(token)")
+    }
+    assertThrows<IllegalArgumentException> {
+      featureFlags.getEnum<Dinosaur>(Feature("which-dinosaur"), "")
     }
   }
 

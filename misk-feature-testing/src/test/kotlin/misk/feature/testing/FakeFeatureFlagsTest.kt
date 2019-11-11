@@ -5,6 +5,7 @@ import misk.feature.getEnum
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import java.lang.IllegalArgumentException
 
 internal class FakeFeatureFlagsTest {
   val FEATURE = Feature("foo")
@@ -53,6 +54,19 @@ internal class FakeFeatureFlagsTest {
     subject.reset()
     assertThat(subject.getEnum<Dinosaur>(FEATURE, TOKEN))
         .isEqualTo(Dinosaur.PTERODACTYL)
+  }
+
+  @Test
+  fun invalidKeys() {
+    assertThrows<IllegalArgumentException> {
+      subject.getString(Feature("which-dinosaur"), "bad(token)")
+    }
+    assertThrows<IllegalArgumentException> {
+      subject.getString(Feature("which-dinosaur"), "Bearer auth-token")
+    }
+    assertThrows<IllegalArgumentException> {
+      subject.getEnum<Dinosaur>(Feature("which-dinosaur"), "")
+    }
   }
 
   enum class Dinosaur {
