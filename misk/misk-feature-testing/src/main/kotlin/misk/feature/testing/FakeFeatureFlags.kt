@@ -4,6 +4,7 @@ import com.google.common.util.concurrent.AbstractIdleService
 import misk.feature.Attributes
 import misk.feature.DynamicConfig
 import misk.feature.Feature
+import misk.feature.FeatureFlagValidation
 import misk.feature.FeatureFlags
 import misk.feature.FeatureService
 import java.util.concurrent.ConcurrentHashMap
@@ -56,12 +57,14 @@ class FakeFeatureFlags @Inject constructor() : AbstractIdleService(),
   override fun <T : Enum<T>> getEnum(feature: Feature, clazz: Class<T>): T = getEnum(feature, KEY, clazz, Attributes())
 
   private fun get(feature: Feature, key: String): Any? {
+    FeatureFlagValidation.checkValidKey(feature, key)
     return overrides.getOrElse(MapKey(feature, key)) {
       overrides[MapKey(feature)]
     }
   }
 
   private fun <V> getOrDefault(feature: Feature, key: String, defaultValue: V): V {
+    FeatureFlagValidation.checkValidKey(feature, key)
     @Suppress("unchecked_cast")
     return overrides.getOrElse(MapKey(feature, key)) {
       overrides.getOrDefault(MapKey(feature), defaultValue)

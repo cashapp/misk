@@ -14,6 +14,6 @@ class FakeFeatureFlagsModuleTest {
     })
 
     val flags = injector.getInstance(FeatureFlags::class.java)
-    assertEquals(24, flags.getInt(Feature("foo"), ""))
+    assertEquals(24, flags.getInt(Feature("foo"), "bar"))
   }
 }
