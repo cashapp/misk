@@ -1,10 +1,10 @@
 package misk.feature.launchdarkly
 
-import com.google.gson.JsonElement
 import com.launchdarkly.client.EvaluationDetail
 import com.launchdarkly.client.EvaluationReason
 import com.launchdarkly.client.LDClientInterface
 import com.launchdarkly.client.LDUser
+import com.launchdarkly.client.value.LDValue
 import misk.feature.Attributes
 import misk.feature.Feature
 import misk.feature.FeatureFlags
@@ -21,7 +21,6 @@ import org.mockito.Mockito.anyString
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
-import java.lang.IllegalArgumentException
 
 internal class LaunchDarklyFeatureFlagsTest {
   private val client = mock(LDClientInterface::class.java)
@@ -61,16 +60,16 @@ internal class LaunchDarklyFeatureFlagsTest {
     val customField = LDUser::class.java.getDeclaredField("custom")
     customField.isAccessible = true
     @Suppress("unchecked_cast")
-    val customAttrs = customField.get(user) as Map<String, JsonElement>
+    val customAttrs = customField.get(user) as Map<String, LDValue>
 
     val privateAttrsField = LDUser::class.java.getDeclaredField("privateAttributeNames")
     privateAttrsField.isAccessible = true
     @Suppress("unchecked_cast")
     val privateAttrs = privateAttrsField.get(user) as Set<String>
 
-    assertThat(customAttrs.getValue("continent").asString).isEqualTo("europa")
-    assertThat(customAttrs.getValue("platform").asString).isEqualTo("lava")
-    assertThat(customAttrs.getValue("age").asNumber).isEqualTo(100000)
+    assertThat(customAttrs.getValue("continent").stringValue()).isEqualTo("europa")
+    assertThat(customAttrs.getValue("platform").stringValue()).isEqualTo("lava")
+    assertThat(customAttrs.getValue("age").intValue()).isEqualTo(100000)
     assertThat(privateAttrs).isEqualTo(setOf("continent", "platform", "age"))
   }
 
