@@ -30,6 +30,11 @@ enum class DataSourceType(
       hibernateDialect = "misk.hibernate.VitessDialect",
       isVitess = true
   ),
+  COCKROACHDB(
+      driverClassName = "org.postgresql.Driver",
+      hibernateDialect = "org.hibernate.dialect.PostgreSQL95Dialect",
+      isVitess = false
+  ),
 }
 
 /** Configuration element for an individual datasource */
@@ -84,6 +89,14 @@ data class DataSourceConfig(
       DataSourceType.VITESS -> {
         copy(
             port = port ?: 27001,
+            host = host ?: "127.0.0.1",
+            database = database ?: ""
+        )
+      }
+      DataSourceType.COCKROACHDB -> {
+        copy(
+            username = "root",
+            port = port ?: 26257,
             host = host ?: "127.0.0.1",
             database = database ?: ""
         )
@@ -206,6 +219,9 @@ data class DataSourceConfig(
         }
 
         "jdbc:vitess://${config.host}:${config.port}/${config.database}$queryParams"
+      }
+      DataSourceType.COCKROACHDB -> {
+        "jdbc:postgresql://${config.host}:${config.port}/${config.database}?ssl=false&user=${config.username}"
       }
     }
   }
