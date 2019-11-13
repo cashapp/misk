@@ -55,7 +55,8 @@ data class Event(
 ) {
   fun <A : Message<*, *>> bodyAs(adapter: ProtoAdapter<A>): A = adapter.decode(body)
 
-  inline fun <reified A : Message<*, *>> bodyAs(): A = bodyAs(ProtoAdapter.get(A::class.java))
+  inline fun <reified A : Message<*, *>> bodyAs(): A = bodyAs(
+      ProtoAdapter.get(A::class.java))
 
   fun <A : Message<*, *>> header(name: String, adapter: ProtoAdapter<A>): A? =
       headers[name]?.let { adapter.decode(it) }
