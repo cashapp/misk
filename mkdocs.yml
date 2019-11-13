@@ -44,6 +44,7 @@ nav:
       - 'misk-aws': 0.x/misk-aws/index.md
       - 'misk-crypto': 0.x/misk-crypto/index.md
       - 'misk-eventrouter': 0.x/misk-eventrouter/index.md
+      - 'misk-events-core': 0.x/misk-events-core/index.md
       - 'misk-events': 0.x/misk-events/index.md
       - 'misk-gcp': 0.x/misk-gcp/index.md
       - 'misk-gcp-testing': 0.x/misk-gcp-testing/index.md
