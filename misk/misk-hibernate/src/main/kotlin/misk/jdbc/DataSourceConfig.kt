@@ -65,7 +65,9 @@ data class DataSourceConfig(
   // going forward
   val trust_certificate_key_store_path: String? = null,
   val client_certificate_key_store_path: String? = null,
-  val show_sql: String? = "false"
+  val show_sql: String? = "false",
+  // Consider using this if you want Hibernate to automagically batch inserts/updates when it can.
+  val jdbc_statement_batch_size: Int? = null
 ) {
   fun withDefaults(): DataSourceConfig {
     return when (type) {
