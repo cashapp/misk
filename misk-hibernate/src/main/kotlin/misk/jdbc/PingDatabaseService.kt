@@ -47,7 +47,7 @@ class PingDatabaseService @Inject constructor(
     dataSource.setLoginTimeout((config.connection_timeout.toMillis() / 1000).toInt())
     dataSource.connect().use { c ->
       check(c.createStatement().use { s ->
-        s.executeQuery("SELECT 1 FROM dual").uniqueInt()
+        s.executeQuery("SELECT 1").uniqueInt()
       } == 1)
       // During cluster start up we sometimes have an empty list of shards so lets also
       // wait until the shards are loaded (this is generally only an issue during tests)

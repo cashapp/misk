@@ -1,4 +1,4 @@
-//Generated from polyrepo's master-dependencies.json
+// Auto-generated from polyrepo's master-dependencies.json. Update via polyrepo dep-add and polyrepo dep-upgrade.
 ext.dep = [
   "assertj": "org.assertj:assertj-core:3.13.2",
   "awsApi": "com.amazonaws:aws-java-sdk:1.11.144",
@@ -69,6 +69,7 @@ ext.dep = [
   "openTracingMock": "io.opentracing:opentracing-mock:0.31.0",
   "openTracingOkHttp": "io.opentracing.contrib:opentracing-okhttp3:0.1.0",
   "openTracingUtil": "io.opentracing:opentracing-util:0.31.0",
+  "postgresql": "org.postgresql:postgresql:42.2.8",
   "prometheusClient": "io.prometheus:simpleclient:0.4.0",
   "prometheusHotspot": "io.prometheus:simpleclient_hotspot:0.4.0",
   "prometheusHttpserver": "io.prometheus:simpleclient_httpserver:0.4.0",
@@ -85,11 +86,11 @@ ext.dep = [
   "tracingJaeger": "com.uber.jaeger:jaeger-core:0.24.0",
   "tracingZipkin": "io.opentracing.brave:brave-opentracing:0.29.0",
   "vitess": "io.vitess:vitess-jdbc:3.0.0",
-  "wireRuntime": "com.squareup.wire:wire-runtime:3.0.1",
   "wireGrpcClient": "com.squareup.wire:wire-grpc-client:3.0.1",
   "wirePlugin": "com.squareup.wire:wire-gradle-plugin:3.0.1",
+  "wireRuntime": "com.squareup.wire:wire-runtime:3.0.1",
   "zipkinBrave": "io.zipkin.brave:brave:4.17.2",
   "zipkinReporter": "io.zipkin.reporter2:zipkin-sender-okhttp3:2.4.1",
   "zookeeper": "org.apache.zookeeper:zookeeper:3.5.4-beta",
 ]
-//Generated from polyrepo's master-dependencies.json
+// Auto-generated from polyrepo's master-dependencies.json. Update via polyrepo dep-add and polyrepo dep-upgrade.
