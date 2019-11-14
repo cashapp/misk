@@ -56,6 +56,9 @@ class TruncateTablesService(
             DataSourceType.VITESS, DataSourceType.VITESS_MYSQL -> {
               "SHOW VSCHEMA TABLES"
             }
+            DataSourceType.COCKROACHDB -> {
+              "SELECT table_name FROM information_schema.tables WHERE table_catalog='${config.database}' AND table_schema='public'"
+            }
           }
 
           @Suppress("UNCHECKED_CAST") // createNativeQuery returns a raw Query.

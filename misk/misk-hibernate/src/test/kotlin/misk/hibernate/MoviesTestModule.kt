@@ -43,6 +43,7 @@ class MoviesTestModule(
       DataSourceType.VITESS_MYSQL -> config.vitess_mysql_data_source
       DataSourceType.MYSQL -> config.mysql_data_source
       DataSourceType.HSQLDB -> throw RuntimeException("Not supported (yet?)")
+      DataSourceType.COCKROACHDB -> throw RuntimeException("Not supported (yet?)")
     }
   }
 
