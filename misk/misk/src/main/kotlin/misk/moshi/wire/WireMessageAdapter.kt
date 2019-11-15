@@ -54,20 +54,11 @@ internal class WireMessageAdapter(
       writer.beginObject()
       fieldBindings.forEach { (fieldName, binding) ->
         val fieldValue = binding.get(value)
-        if (shouldEmitField(fieldValue)) {
-          writer.name(fieldName)
-          binding.adapter.toJson(writer, fieldValue)
-        }
+        writer.name(fieldName)
+        binding.adapter.toJson(writer, fieldValue)
       }
       writer.endObject()
     }
-  }
-
-  private fun shouldEmitField(value: Any?) = when (value) {
-    null -> false
-    is List<*> -> value.isNotEmpty()
-    is Map<*, *> -> value.isNotEmpty()
-    else -> true
   }
 
   class Factory @Inject constructor() : JsonAdapter.Factory {
