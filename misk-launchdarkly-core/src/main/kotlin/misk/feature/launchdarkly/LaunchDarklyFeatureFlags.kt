@@ -75,6 +75,27 @@ class LaunchDarklyFeatureFlags @Inject constructor(
     return java.lang.Enum.valueOf(clazz, result.value.toUpperCase())
   }
 
+  override fun getBoolean(
+    feature: Feature,
+    key: String
+  ) = getBoolean(feature, key, Attributes())
+
+  override fun getInt(
+    feature: Feature,
+    key: String
+  ) = getInt(feature, key, Attributes())
+
+  override fun getString(
+    feature: Feature,
+    key: String
+  ) = getString(feature, key, Attributes())
+
+  override fun <T : Enum<T>> getEnum(
+    feature: Feature,
+    key: String,
+    clazz: Class<T>
+  ) = getEnum(feature, key, clazz, Attributes())
+
   private fun checkInitialized() {
     checkState(ldClient.initialized(),
         "LaunchDarkly feature flags not initialized. Did you forget to make your service depend on [FeatureFlags]?")
