@@ -89,6 +89,10 @@ internal class SessionFactoryService(
       applySetting(AvailableSettings.USE_GET_GENERATED_KEYS, "true")
       applySetting(AvailableSettings.USE_NEW_ID_GENERATOR_MAPPINGS, "false")
       applySetting(AvailableSettings.JDBC_TIME_ZONE, "UTC")
+      if (config.query_timeout != null) {
+        applySetting("javax.persistence.query.timeout", Integer.valueOf(
+            config.query_timeout.toMillis().toInt()))
+      }
       if (config.jdbc_statement_batch_size != null) {
         require(config.jdbc_statement_batch_size > 0) {
           "Invalid jdbc_statement_batch_size: must be > 0."
