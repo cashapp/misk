@@ -49,6 +49,7 @@ data class DataSourceConfig(
   val connection_timeout: Duration = Duration.ofSeconds(10),
   val validation_timeout: Duration = Duration.ofSeconds(3),
   val connection_max_lifetime: Duration = Duration.ofMinutes(1),
+  val query_timeout: Duration? = Duration.ofMinutes(1),
   val migrations_resource: String? = null,
   val migrations_resources: List<String>? = null,
   val vitess_schema_dir: String? = null,
@@ -123,6 +124,13 @@ data class DataSourceConfig(
 
         if (env == Environment.TESTING || env == Environment.DEVELOPMENT) {
           queryParams += "&createDatabaseIfNotExist=true"
+        }
+
+
+        queryParams += "&connectTimeout=${config.connection_timeout.toMillis()}"
+
+        if (config.query_timeout != null) {
+          queryParams += "&socketTimeout=${config.query_timeout.toMillis()}"
         }
 
         if (type == DataSourceType.VITESS_MYSQL) {
@@ -255,6 +263,7 @@ data class DataSourceConfig(
               this.connection_timeout,
               this.validation_timeout,
               this.connection_max_lifetime,
+              this.query_timeout,
               this.migrations_resource,
               this.migrations_resources,
               this.vitess_schema_dir,
