@@ -120,6 +120,8 @@ data class DataSourceConfig(
     return when (type) {
       DataSourceType.MYSQL, DataSourceType.VITESS_MYSQL -> {
         var queryParams = "?useLegacyDatetimeCode=false"
+        queryParams += "&useUnicode=true"
+        queryParams += "&characterEncoding=utf8"
 
         if (env == Environment.TESTING || env == Environment.DEVELOPMENT) {
           queryParams += "&createDatabaseIfNotExist=true"
@@ -129,7 +131,6 @@ data class DataSourceConfig(
           // TODO(jontirsen): Try turning on server side prepared statements again when this issue
           //  has been fixed: https://github.com/vitessio/vitess/issues/5075
           queryParams += "&useServerPrepStmts=false"
-          queryParams += "&useUnicode=true"
           // If we leave this as the default (true) the logs get spammed with the following errors:
           // "Ignored inapplicable SET {sql_mode } = strict_trans_tables"
           // Since Vitess always uses strict_trans_tables this makes no difference here except it

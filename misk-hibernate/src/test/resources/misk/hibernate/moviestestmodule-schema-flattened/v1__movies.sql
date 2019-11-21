@@ -5,4 +5,4 @@ CREATE TABLE movies(
   name varchar(191) NOT NULL,
   release_date date NULL,
   UNIQUE KEY `unq_name` (`name`)
-);
+) CHARSET=utf8mb4;

@@ -729,6 +729,13 @@ abstract class TransacterTest {
         "retried Movies transaction succeeded \\(attempt 3, same connection\\)")
   }
 
+  @Test
+  fun emojisCanBeInserted() {
+    transacter.allowCowrites().transaction { session ->
+      session.save(DbMovie("Jurassic Park Part 5: \uD83E\uDD96", LocalDate.of(2019, 11, 21)))
+    }
+  }
+
   private fun tracingAssertions(committed: Boolean) {
     // Assert on span, implicitly asserting that it's complete by looking at finished spans
     val orderedSpans = tracer.finishedSpans().sortedBy { it.context().spanId() }
