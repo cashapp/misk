@@ -13,4 +13,4 @@ mysql_data_source:
   database: movies
   username: root
   password: ""
-  migrations_resource: classpath:/misk/hibernate/moviestestmodule-schema-flattened
+  migrations_resource: classpath:/misk/hibernate/moviestestmodule-schema
