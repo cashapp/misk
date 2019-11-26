@@ -20,7 +20,6 @@ lib
 dist
 .hash
 hooks.gradle
-repositories.gradle
 
 **/site/
 docs/0.x/*

@@ -5,7 +5,6 @@ import misk.feature.getEnum
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import java.lang.IllegalArgumentException
 
 internal class FakeFeatureFlagsTest {
   val FEATURE = Feature("foo")
@@ -58,15 +57,27 @@ internal class FakeFeatureFlagsTest {
 
   @Test
   fun invalidKeys() {
+    subject.override(FEATURE, 3)
     assertThrows<IllegalArgumentException> {
-      subject.getString(Feature("which-dinosaur"), "bad(token)")
+      subject.getInt(FEATURE, "bad(token)")
     }
     assertThrows<IllegalArgumentException> {
-      subject.getString(Feature("which-dinosaur"), "Bearer auth-token")
+      subject.getInt(FEATURE, "Bearer auth-token")
     }
     assertThrows<IllegalArgumentException> {
-      subject.getEnum<Dinosaur>(Feature("which-dinosaur"), "")
+      subject.getInt(FEATURE, "")
     }
+  }
+
+  @Test
+  fun validKeys() {
+    subject.override(FEATURE, 3)
+    subject.getInt(FEATURE, "hello")
+    subject.getInt(FEATURE, "09afAF") // hex.
+    subject.getInt(FEATURE, "AZ27=") // base32.
+    subject.getInt(FEATURE, "azAZ09+/=") // base64.
+    subject.getInt(FEATURE, "azAZ09-_=") // base64url.
+    subject.getInt(FEATURE, "azAZ09-_.~") // unreserved URL characters.
   }
 
   enum class Dinosaur {
