@@ -13,7 +13,7 @@ import misk.jdbc.DataSourceType
 import misk.jdbc.TruncateTablesService
 import misk.jdbc.VitessScaleSafetyChecks
 import misk.time.ForceUtcTimeZoneService
-import misk.vitess.StartVitessService
+import misk.vitess.StartDatabaseService
 import okhttp3.OkHttpClient
 import javax.inject.Provider
 import kotlin.reflect.KClass
@@ -62,7 +62,7 @@ class HibernateTestingModule(
   }
 
   private fun bindVitessChecks(transacterProvider: com.google.inject.Provider<Transacter>) {
-    val startVitessServiceKey = StartVitessService::class.toKey(qualifier)
+    val startVitessServiceKey = StartDatabaseService::class.toKey(qualifier)
     val startVitessServiceProvider = getProvider(startVitessServiceKey)
 
     val configKey = DataSourceConfig::class.toKey(qualifier)
@@ -77,7 +77,7 @@ class HibernateTestingModule(
           config = configProvider.get(),
           moshi = moshiProvider.get(),
           okHttpClient = OkHttpClient(),
-          startVitessService = startVitessServiceProvider.get(),
+          startDatabaseService = startVitessServiceProvider.get(),
           transacter = transacterProvider.get()
       )
     }).asSingleton()

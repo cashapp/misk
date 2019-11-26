@@ -42,14 +42,15 @@ class MoviesTestModule(
       DataSourceType.VITESS -> config.vitess_data_source
       DataSourceType.VITESS_MYSQL -> config.vitess_mysql_data_source
       DataSourceType.MYSQL -> config.mysql_data_source
+      DataSourceType.COCKROACHDB -> config.cockroachdb_data_source
       DataSourceType.HSQLDB -> throw RuntimeException("Not supported (yet?)")
-      DataSourceType.COCKROACHDB -> throw RuntimeException("Not supported (yet?)")
     }
   }
 
   data class MoviesConfig(
     val vitess_data_source: DataSourceConfig,
     val vitess_mysql_data_source: DataSourceConfig,
-    val mysql_data_source: DataSourceConfig
+    val mysql_data_source: DataSourceConfig,
+    val cockroachdb_data_source: DataSourceConfig
   ) : Config
 }

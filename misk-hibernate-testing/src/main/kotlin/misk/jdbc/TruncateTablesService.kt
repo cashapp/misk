@@ -75,7 +75,11 @@ class TruncateTablesService(
               if (persistentTables.contains(tableName.toLowerCase(Locale.ROOT))) continue
               if (tableName.endsWith("_seq") || tableName.equals("dual")) continue
 
-              statement.addBatch("DELETE FROM $tableName")
+              if (config.type == DataSourceType.COCKROACHDB) {
+                statement.addBatch("TRUNCATE $tableName CASCADE")
+              } else {
+                statement.addBatch("DELETE FROM $tableName")
+              }
               truncatedTableNames += tableName
             }
             statement.executeBatch()

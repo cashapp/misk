@@ -777,6 +777,12 @@ class VitessMySQLTransacterTest : TransacterTest() {
 }
 
 @MiskTest(startService = true)
+class CockroachTransacterTest : TransacterTest() {
+  @MiskTestModule
+  val module = MoviesTestModule(DataSourceType.COCKROACHDB)
+}
+
+@MiskTest(startService = true)
 class VitessTransacterTest : TransacterTest() {
   @MiskTestModule
   val module = MoviesTestModule(DataSourceType.VITESS)
