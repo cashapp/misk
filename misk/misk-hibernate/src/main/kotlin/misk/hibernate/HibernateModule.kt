@@ -22,7 +22,7 @@ import misk.jdbc.RealDatabasePool
 import misk.jdbc.SpanInjector
 import misk.metrics.Metrics
 import misk.resources.ResourceLoader
-import misk.vitess.StartVitessService
+import misk.vitess.StartDatabaseService
 import misk.web.exceptions.ExceptionMapperModule
 import org.hibernate.SessionFactory
 import org.hibernate.event.spi.EventType
@@ -85,11 +85,11 @@ class HibernateModule(
         .toInstance(QueryLimitsConfig(MAX_MAX_ROWS, ROW_COUNT_ERROR_LIMIT, ROW_COUNT_WARNING_LIMIT))
 
     // Bind StartVitessService.
-    install(ServiceModule<StartVitessService>(qualifier))
-    bind(keyOf<StartVitessService>(qualifier)).toProvider(object : Provider<StartVitessService> {
+    install(ServiceModule<StartDatabaseService>(qualifier))
+    bind(keyOf<StartDatabaseService>(qualifier)).toProvider(object : Provider<StartDatabaseService> {
       @Inject lateinit var environment: Environment
-      override fun get(): StartVitessService {
-        return StartVitessService(environment = environment, config = config, qualifier = qualifier)
+      override fun get(): StartDatabaseService {
+        return StartDatabaseService(environment = environment, config = config, qualifier = qualifier)
       }
     }).asSingleton()
 
@@ -196,7 +196,7 @@ class HibernateModule(
     // This should be replaced with an ExternalDependency that manages vitess.
     // TODO(jontirsen): I don't think this is needed anymore...
     install(ServiceModule<PingDatabaseService>(qualifier)
-        .dependsOn<StartVitessService>(this.qualifier))
+        .dependsOn<StartDatabaseService>(this.qualifier))
 
     // Bind DataSourceService.
     val dataSourceDecoratorsProvider = getProvider(dataSourceDecoratorsKey)

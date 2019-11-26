@@ -19,7 +19,7 @@ import misk.jdbc.RealDatabasePool
 import misk.resources.ResourceLoader
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
-import misk.vitess.StartVitessService
+import misk.vitess.StartDatabaseService
 import okio.ByteString
 import org.assertj.core.api.Assertions.assertThat
 import org.hibernate.SessionFactory
@@ -104,12 +104,12 @@ internal class SchemaValidatorTest {
         }
       })
 
-      install(ServiceModule<StartVitessService>(qualifier))
-      bind(keyOf<StartVitessService>(qualifier))
-          .toInstance(StartVitessService(qualifier, Environment.TESTING, config.data_source))
+      install(ServiceModule<StartDatabaseService>(qualifier))
+      bind(keyOf<StartDatabaseService>(qualifier))
+          .toInstance(StartDatabaseService(qualifier, Environment.TESTING, config.data_source))
 
       install(ServiceModule<PingDatabaseService>(qualifier)
-          .dependsOn<StartVitessService>(qualifier))
+          .dependsOn<StartDatabaseService>(qualifier))
       bind(keyOf<PingDatabaseService>(qualifier))
           .toInstance(PingDatabaseService(config.data_source, Environment.TESTING))
 

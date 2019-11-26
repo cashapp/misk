@@ -6,7 +6,8 @@ import misk.hibernate.Check
 import misk.hibernate.Transacter
 import misk.moshi.adapter
 import misk.okio.split
-import misk.vitess.StartVitessService
+import misk.vitess.DockerVitessCluster
+import misk.vitess.StartDatabaseService
 import mu.KotlinLogging
 import net.ttddyy.dsproxy.ExecutionInfo
 import net.ttddyy.dsproxy.QueryInfo
@@ -357,7 +358,7 @@ class VitessScaleSafetyChecks(
   val okHttpClient: OkHttpClient,
   val moshi: Moshi,
   val config: DataSourceConfig,
-  val startVitessService: StartVitessService,
+  val startDatabaseService: StartDatabaseService,
   val transacter: Transacter
 ) : DataSourceDecorator {
 
@@ -622,7 +623,7 @@ class VitessScaleSafetyChecks(
     return connection
   }
 
-  private fun cluster() = startVitessService.cluster()
+  private fun cluster() = startDatabaseService.server?.let { (it as DockerVitessCluster).cluster }
 
   /**
    * Figure out how many total full scatter queries we've executed so far.

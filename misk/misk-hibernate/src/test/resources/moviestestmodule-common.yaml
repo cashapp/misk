@@ -14,3 +14,9 @@ mysql_data_source:
   username: root
   password: ""
   migrations_resource: classpath:/misk/hibernate/moviestestmodule-schema
+cockroachdb_data_source:
+  type: COCKROACHDB
+  database: movies
+  username: root
+  password: ""
+  migrations_resource: classpath:/misk/hibernate/moviestestmodule-postgres

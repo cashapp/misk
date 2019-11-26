@@ -231,7 +231,11 @@ data class DataSourceConfig(
         "jdbc:vitess://${config.host}:${config.port}/${config.database}$queryParams"
       }
       DataSourceType.COCKROACHDB -> {
-        "jdbc:postgresql://${config.host}:${config.port}/${config.database}?ssl=false&user=${config.username}"
+        var params = "ssl=false&user=${config.username}"
+        if (env == Environment.TESTING || env == Environment.DEVELOPMENT) {
+          params += "&createDatabaseIfNotExist=true"
+        }
+        "jdbc:postgresql://${config.host}:${config.port}/${config.database}?$params"
       }
     }
   }
@@ -248,6 +252,11 @@ data class DataSourceConfig(
   }
 
   fun asReplica(): DataSourceConfig {
+      if (this.type == DataSourceType.COCKROACHDB) {
+        // Cockroach doesn't support replica reads
+        return this
+      }
+
       if (this.type != DataSourceType.VITESS_MYSQL) {
         throw Exception("Replica database config only available for VITESS_MYSQL type")
       }
