@@ -12,5 +12,5 @@ object FeatureFlagValidation {
     require(match.matches(key)) { "Key to flag $feature can only contain alphanumeric characters and [._~+/=-]" }
   }
 
-  private val match = Regex("[a-zA-Z0-9._~+/=-]+")
+  private val match = Regex("[a-zA-Z0-9._~+/$=-]+")
 }
