@@ -77,7 +77,7 @@ internal class FakeFeatureFlagsTest {
     subject.getInt(FEATURE, "AZ27=") // base32.
     subject.getInt(FEATURE, "azAZ09+/=") // base64.
     subject.getInt(FEATURE, "azAZ09-_=") // base64url.
-    subject.getInt(FEATURE, "azAZ09-_.~") // unreserved URL characters.
+    subject.getInt(FEATURE, "azAZ09-_.~$") // unreserved URL characters.
   }
 
   enum class Dinosaur {
