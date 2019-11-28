@@ -19,4 +19,10 @@ cockroachdb_data_source:
   database: movies
   username: root
   password: ""
-  migrations_resource: classpath:/misk/hibernate/moviestestmodule-postgres
+  migrations_resource: classpath:/misk/hibernate/moviestestmodule-cockroachdb
+tidb_data_source:
+  type: TIDB
+  database: movies
+  username: root
+  password: ""
+  migrations_resource: classpath:/misk/hibernate/moviestestmodule-tidb

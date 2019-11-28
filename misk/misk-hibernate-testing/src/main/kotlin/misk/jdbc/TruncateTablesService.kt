@@ -47,7 +47,7 @@ class TruncateTablesService(
         session.withoutChecks {
           val config = connector.config()
           val tableNamesQuery = when (config.type) {
-            DataSourceType.MYSQL -> {
+            DataSourceType.MYSQL, DataSourceType.TIDB -> {
               "SELECT table_name FROM information_schema.tables where table_schema='${config.database}'"
             }
             DataSourceType.HSQLDB -> {
