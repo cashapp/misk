@@ -34,6 +34,10 @@ abstract class TransacterTest {
   fun happyPath() {
     createTestData()
 
+    if (hasDateBug()) {
+      return
+    }
+
     // Query that data.
     transacter.transaction { session ->
       val ianMalcolm = queryFactory.newQuery<CharacterQuery>()
@@ -78,8 +82,8 @@ abstract class TransacterTest {
 
     transacter.failSafeRead { session ->
       val query = queryFactory.newQuery<CharacterQuery>()
-              .allowTableScan()
-              .name("Ian Malcolm")
+          .allowTableScan()
+          .name("Ian Malcolm")
       val ianMalcolm = query.uniqueResult(session)!!
       assertThat(ianMalcolm.actor?.name).isEqualTo("Jeff Goldblum")
       assertThat(ianMalcolm.movie.name).isEqualTo("Jurassic Park")
@@ -108,6 +112,9 @@ abstract class TransacterTest {
     }
   }
 
+  // TODO TiDB are working on fixing this bug: https://github.com/pingcap/tidb/issues/13791
+  private fun hasDateBug() = transacter.config().type == DataSourceType.TIDB
+
   private fun createTestData() {
     // Insert some movies, characters and actors.
     transacter.allowCowrites().transaction { session ->
@@ -127,6 +134,21 @@ abstract class TransacterTest {
       val lo = session.save(DbCharacter("Leia Organa", session.load(sw), session.load(cf)))
       val lj = session.save(DbCharacter("Luxo Jr.", session.load(lx), null))
       assertThat(setOf(ah, es, im, lo, lj)).hasSize(5) // Uniqueness check.
+    }
+  }
+
+  @Test
+  fun `saves dates properly`() {
+    if (hasDateBug()) {
+      return
+    }
+
+    val releaseDate = LocalDate.of(1993, 6, 9)
+    val jp = transacter.transaction { session ->
+      session.save(DbMovie("Jurassic Park", releaseDate))
+    }
+    transacter.transaction { session ->
+      assertThat(session.load(jp).release_date).isEqualTo(releaseDate)
     }
   }
 
@@ -210,25 +232,25 @@ abstract class TransacterTest {
     transacter.failSafeRead { session ->
       session.target(jp.shard(session)) {
         assertThat(
-                queryFactory.newQuery<MovieQuery>().allowTableScan()
-                        .name("Jurassic Park").uniqueResult(session)
+            queryFactory.newQuery<MovieQuery>().allowTableScan()
+                .name("Jurassic Park").uniqueResult(session)
         ).isNotNull()
 
         assertThat(
-                queryFactory.newQuery<MovieQuery>().allowTableScan()
-                        .name("Star Wars").uniqueResult(session)
+            queryFactory.newQuery<MovieQuery>().allowTableScan()
+                .name("Star Wars").uniqueResult(session)
         ).isNull()
       }
 
       session.target(sw.shard(session)) {
         assertThat(
-                queryFactory.newQuery<MovieQuery>().allowTableScan()
-                        .name("Jurassic Park").uniqueResult(session)
+            queryFactory.newQuery<MovieQuery>().allowTableScan()
+                .name("Jurassic Park").uniqueResult(session)
         ).isNull()
 
         assertThat(
-                queryFactory.newQuery<MovieQuery>().allowTableScan()
-                        .name("Star Wars").uniqueResult(session)
+            queryFactory.newQuery<MovieQuery>().allowTableScan()
+                .name("Star Wars").uniqueResult(session)
         ).isNotNull()
       }
     }
@@ -268,8 +290,11 @@ abstract class TransacterTest {
     transacter.replicaRead { session ->
       if (transacter.config().type.isVitess) {
         // Make sure this doesn't trigger a transaction
-        val target = session.useConnection { c -> c.createStatement().use {
-          it.executeQuery("SHOW VITESS_TARGET").uniqueString() } }
+        val target = session.useConnection { c ->
+          c.createStatement().use {
+            it.executeQuery("SHOW VITESS_TARGET").uniqueString()
+          }
+        }
         assertThat(target).isEqualTo("@replica")
       }
 
@@ -286,8 +311,11 @@ abstract class TransacterTest {
 
     transacter.transaction { session ->
       if (transacter.config().type.isVitess) {
-        val target = session.useConnection { c -> c.createStatement().use {
-          it.executeQuery("SHOW VITESS_TARGET").uniqueString() } }
+        val target = session.useConnection { c ->
+          c.createStatement().use {
+            it.executeQuery("SHOW VITESS_TARGET").uniqueString()
+          }
+        }
         assertThat(target).isEqualTo("@master")
       }
 
@@ -373,7 +401,7 @@ abstract class TransacterTest {
       assertFailsWith<IllegalStateException> {
         transacter.failSafeRead {
           queryFactory.newQuery<MovieQuery>().allowTableScan()
-                  .name("Jurassic Park").uniqueResult(it)
+              .name("Jurassic Park").uniqueResult(it)
         }
       }
     }
@@ -780,6 +808,12 @@ class VitessMySQLTransacterTest : TransacterTest() {
 class CockroachTransacterTest : TransacterTest() {
   @MiskTestModule
   val module = MoviesTestModule(DataSourceType.COCKROACHDB)
+}
+
+@MiskTest(startService = true)
+class TidbTransacterTest : TransacterTest() {
+  @MiskTestModule
+  val module = MoviesTestModule(DataSourceType.TIDB)
 }
 
 @MiskTest(startService = true)

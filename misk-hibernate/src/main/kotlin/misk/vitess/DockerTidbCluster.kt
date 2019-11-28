@@ -4,7 +4,9 @@ import com.github.dockerjava.api.DockerClient
 import com.github.dockerjava.api.model.ExposedPort
 import com.github.dockerjava.api.model.Frame
 import com.github.dockerjava.api.model.Ports
+import com.github.dockerjava.core.DockerClientBuilder
 import com.github.dockerjava.core.async.ResultCallbackTemplate
+import com.github.dockerjava.netty.NettyDockerCmdExecFactory
 import com.squareup.moshi.Moshi
 import com.zaxxer.hikari.util.DriverDataSource
 import misk.backoff.DontRetryException
@@ -14,15 +16,13 @@ import misk.environment.Environment
 import misk.jdbc.DataSourceConfig
 import misk.jdbc.DataSourceType
 import misk.jdbc.uniqueInt
-import misk.resources.ResourceLoader
 import mu.KotlinLogging
 import java.sql.Connection
 import java.time.Duration
 import java.util.Properties
 import java.util.concurrent.atomic.AtomicBoolean
 
-class CockroachCluster(
-  val name: String,
+class TidbCluster(
   val config: DataSourceConfig
 ) {
   /**
@@ -38,30 +38,22 @@ class CockroachCluster(
         config.username, config.password)
   }
 
-  val httpPort = 8080
-  val postgresPort = 26257
+  val httpPort = 10080
+  val mysqlPort = 4000
 }
 
-class DockerCockroachCluster(
-  val name: String,
+class DockerTidbCluster(
   val moshi: Moshi,
-  val resourceLoader: ResourceLoader,
   val config: DataSourceConfig,
   val docker: DockerClient
 ) : DatabaseServer {
-  val cluster: CockroachCluster
+  val cluster = TidbCluster(config = config)
 
   private var containerId: String? = null
 
   private var isRunning = false
   private var stopContainerOnExit = true
   private var startupFailure: Exception? = null
-
-  init {
-    cluster = CockroachCluster(
-        name = name,
-        config = config)
-  }
 
   override fun start() {
     val startupFailure = this.startupFailure
@@ -84,9 +76,9 @@ class DockerCockroachCluster(
   companion object {
     val logger = KotlinLogging.logger {}
 
-    const val SHA = "67f0547f1a989ebd119e5cbf903c8537556f574da20182454c036da63ea67c7d"
-    const val IMAGE = "cockroachdb/cockroach@sha256:$SHA"
-    const val CONTAINER_NAME = "misk-cockroach-testing"
+    const val SHA = "995053b0f94980e1a40d38efd208a1e8e7a659d1d48421367af57d243dc015a2"
+    const val IMAGE = "pingcap/tidb@sha256:$SHA"
+    const val CONTAINER_NAME = "misk-tidb-testing"
 
     fun pullImage() {
       if (imagePulled.get()) {
@@ -100,7 +92,7 @@ class DockerCockroachCluster(
 
         if (runCommand(
                 "docker images --digests | grep -q $SHA || docker pull $IMAGE") != 0) {
-          logger.warn("Failed to pull Cockroach docker image. Proceeding regardless.")
+          logger.warn("Failed to pull TiDB docker image. Proceeding regardless.")
         }
         imagePulled.set(true)
       }
@@ -110,26 +102,21 @@ class DockerCockroachCluster(
   }
 
   override fun pullImage() {
-    DockerCockroachCluster.pullImage()
+    DockerTidbCluster.pullImage()
   }
 
   private fun doStart() {
-    val httpPort = ExposedPort.tcp(cluster.httpPort)
-    if (cluster.config.type == DataSourceType.COCKROACHDB) {
-      if (cluster.config.port != null && cluster.config.port != cluster.postgresPort) {
+    if (cluster.config.type == DataSourceType.TIDB) {
+      if (cluster.config.port != null && cluster.config.port != cluster.mysqlPort) {
         throw RuntimeException(
-            "Config port ${cluster.config.port} has to match Cockroach Docker container: ${cluster.postgresPort}")
+            "Config port ${cluster.config.port} has to match Tidb Docker container: ${cluster.mysqlPort}")
       }
     }
-    val postgresPort = ExposedPort.tcp(cluster.postgresPort)
+    val httpPort = ExposedPort.tcp(cluster.httpPort)
+    val mysqlPort = ExposedPort.tcp(cluster.mysqlPort)
     val ports = Ports()
+    ports.bind(mysqlPort, Ports.Binding.bindPort(mysqlPort.port))
     ports.bind(httpPort, Ports.Binding.bindPort(httpPort.port))
-    ports.bind(postgresPort, Ports.Binding.bindPort(postgresPort.port))
-
-    val cmd = arrayOf(
-        "start-single-node",
-        "--insecure"
-    )
 
     val containerName = "$CONTAINER_NAME"
 
@@ -140,22 +127,20 @@ class DockerCockroachCluster(
         .firstOrNull()
     if (runningContainer != null) {
       if (runningContainer.status != "running") {
-        logger.info("Existing Cockroach cluster named $containerName found in " +
+        logger.info("Existing TiDB cluster named $containerName found in " +
             "state ${runningContainer.status}, force removing and restarting")
         docker.removeContainerCmd(runningContainer.id).withForce(true).exec()
       } else {
-        logger.info("Using existing Cockroach cluster named $containerName")
+        logger.info("Using existing TiDB cluster named $containerName")
         stopContainerOnExit = false
         containerId = runningContainer.id
       }
     }
 
     if (containerId == null) {
-      logger.info(
-          "Starting Cockroach cluster with command: ${cmd.joinToString(" ")}")
+      logger.info("Starting TiDB cluster")
       containerId = docker.createContainerCmd(IMAGE)
-          .withCmd(cmd.toList())
-          .withExposedPorts(httpPort, postgresPort)
+          .withExposedPorts(mysqlPort, httpPort)
           .withPortBindings(ports)
           .withTty(true)
           .withName(containerName)
@@ -170,10 +155,12 @@ class DockerCockroachCluster(
           .exec(LogContainerResultCallback())
           .awaitStarted()
     }
-    logger.info("Started Cockroach with container id $containerId")
+    logger.info("Started TiDB with container id $containerId")
 
     waitUntilHealthy()
-    createDatabase()
+    cluster.openConnection().use { c ->
+      c.createStatement().executeUpdate("SET GLOBAL time_zone = '+00:00'")
+    }
   }
 
   private fun waitUntilHealthy() {
@@ -190,23 +177,14 @@ class DockerCockroachCluster(
     } catch (e: DontRetryException) {
       throw Exception(e.message)
     } catch (e: Exception) {
-      throw Exception("Cockroach cluster failed to start up in time", e)
-    }
-  }
-
-  private fun createDatabase() {
-    cluster.openConnection().use { c ->
-      val statement = c.createStatement()
-      // TODO might need something like "does not exist" if we're reusing clusters
-      statement.addBatch("CREATE DATABASE ${config.database}")
-      statement.executeBatch()
+      throw Exception("TiDB cluster failed to start up in time", e)
     }
   }
 
   override fun stop() {
-    logger.info("Leaving Cockroach docker container running in the background. " +
+    logger.info("Leaving TiDB docker container running in the background. " +
         "If you need to kill it because you messed up migrations or something use:" +
-        "\n\tdocker kill $CONTAINER_NAME")
+        "\n\tdocker kill ${CONTAINER_NAME}")
   }
 
   class LogContainerResultCallback : ResultCallbackTemplate<LogContainerResultCallback, Frame>() {

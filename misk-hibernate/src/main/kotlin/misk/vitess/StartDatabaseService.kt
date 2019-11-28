@@ -52,6 +52,7 @@ class StartDatabaseService(
   config: DataSourceConfig
 ) : AbstractIdleService() {
   var server: DatabaseServer? = null
+  private var startupFailure: Throwable? = null
 
   init {
     val name = qualifier.simpleName!!
@@ -118,6 +119,12 @@ class StartDatabaseService(
                 moshi = moshi,
                 docker = docker)
           }
+          DataSourceType.TIDB -> {
+            DockerTidbCluster(
+                moshi = moshi,
+                config = config.config,
+                docker = docker)
+          }
           else -> null
         }
 
@@ -128,41 +135,6 @@ class StartDatabaseService(
       Runtime.getRuntime().addShutdownHook(Thread {
         servers.invalidateAll()
       })
-    }
-
-    /**
-     * A helper method to start the Vitess cluster outside of the dev server or test process, to
-     * enable rapid iteration. This should be called directly a `main()` function, for example:
-     *
-     * MyAppVitessDaemon.kt:
-     *
-     *  fun main() {
-     *    val config = MiskConfig.load<MyAppConfig>("myapp", Environment.TESTING)
-     *    startVitessDaemon(MyAppDb::class, config.data_source_clusters.values.first().writer)
-     *  }
-     *
-     */
-    fun startVitessDaemon(
-      /** The same qualifier passed into [HibernateModule], used to uniquely name the container */
-      qualifier: KClass<out Annotation>,
-      /** Config for the Vitess cluster */
-      config: DataSourceConfig
-    ) {
-      val docker: DockerClient = DockerClientBuilder.getInstance()
-          .withDockerCmdExecFactory(NettyDockerCmdExecFactory())
-          .build()
-      val moshi = Moshi.Builder().build()
-      val dockerCluster =
-          DockerVitessCluster(
-              name = qualifier.simpleName!!,
-              config = config,
-              resourceLoader = ResourceLoader.SYSTEM,
-              moshi = moshi,
-              docker = docker)
-      Runtime.getRuntime().addShutdownHook(Thread {
-        dockerCluster.stop()
-      })
-      dockerCluster.start()
     }
   }
 }

@@ -6,7 +6,9 @@ import com.github.dockerjava.api.model.ExposedPort
 import com.github.dockerjava.api.model.Frame
 import com.github.dockerjava.api.model.Ports
 import com.github.dockerjava.api.model.Volume
+import com.github.dockerjava.core.DockerClientBuilder
 import com.github.dockerjava.core.async.ResultCallbackTemplate
+import com.github.dockerjava.netty.NettyDockerCmdExecFactory
 import com.squareup.moshi.Moshi
 import com.zaxxer.hikari.util.DriverDataSource
 import misk.backoff.DontRetryException
@@ -28,6 +30,7 @@ import java.time.Duration
 import java.util.Properties
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.concurrent.thread
+import kotlin.reflect.KClass
 import kotlin.streams.toList
 
 class Table
@@ -413,4 +416,39 @@ class DockerVitessCluster(
       logger.info(String(item.payload).trim())
     }
   }
+}
+
+/**
+ * A helper method to start the Vitess cluster outside of the dev server or test process, to
+ * enable rapid iteration. This should be called directly a `main()` function, for example:
+ *
+ * MyAppVitessDaemon.kt:
+ *
+ *  fun main() {
+ *    val config = MiskConfig.load<MyAppConfig>("myapp", Environment.TESTING)
+ *    startVitessDaemon(MyAppDb::class, config.data_source_clusters.values.first().writer)
+ *  }
+ *
+ */
+fun startVitessDaemon(
+  /** The same qualifier passed into [HibernateModule], used to uniquely name the container */
+  qualifier: KClass<out Annotation>,
+  /** Config for the Vitess cluster */
+  config: DataSourceConfig
+) {
+  val docker: DockerClient = DockerClientBuilder.getInstance()
+      .withDockerCmdExecFactory(NettyDockerCmdExecFactory())
+      .build()
+  val moshi = Moshi.Builder().build()
+  val dockerCluster =
+      DockerVitessCluster(
+          name = qualifier.simpleName!!,
+          config = config,
+          resourceLoader = ResourceLoader.SYSTEM,
+          moshi = moshi,
+          docker = docker)
+  Runtime.getRuntime().addShutdownHook(Thread {
+    dockerCluster.stop()
+  })
+  dockerCluster.start()
 }
