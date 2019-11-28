@@ -51,6 +51,7 @@ import misk.web.marshal.Unmarshaller
 import misk.web.proxy.WebProxyEntry
 import misk.web.resources.StaticResourceEntry
 import org.eclipse.jetty.server.handler.StatisticsHandler
+import org.eclipse.jetty.server.handler.gzip.GzipHandler
 import org.eclipse.jetty.util.thread.QueuedThreadPool
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -155,6 +156,11 @@ class MiskWebModule(private val config: WebConfig) : KAbstractModule() {
   @Provides @Singleton
   fun provideStatisticsHandler(): StatisticsHandler {
     return StatisticsHandler()
+  }
+
+  @Provides @Singleton
+  fun provideGzipHandler(): GzipHandler {
+    return GzipHandler()
   }
 
   class MiskCallerProvider @Inject constructor(
