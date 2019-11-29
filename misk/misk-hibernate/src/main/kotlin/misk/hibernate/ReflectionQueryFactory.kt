@@ -13,6 +13,7 @@ import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Method
 import java.lang.reflect.ParameterizedType
 import java.lang.reflect.Proxy
+import java.util.Arrays
 import java.util.EnumSet
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -20,6 +21,7 @@ import javax.persistence.criteria.CriteriaBuilder
 import javax.persistence.criteria.Path
 import javax.persistence.criteria.Predicate
 import javax.persistence.criteria.Root
+import javax.persistence.criteria.Selection
 import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
 import kotlin.reflect.KParameter
@@ -52,6 +54,12 @@ internal class ReflectionQuery<T : DbEntity<T>>(
       field = value
     }
 
+  override var firstResult = 0
+    set(value) {
+      require(value >= 0) { "out of range: $value" }
+      field = value
+    }
+
   private val constraints = mutableListOf<PredicateFactory>()
   private val orderFactories = mutableListOf<OrderFactory>()
 
@@ -61,8 +69,90 @@ internal class ReflectionQuery<T : DbEntity<T>>(
     disabledChecks += check
   }
 
+  override fun dynamicAddConstraint(path: String, operator: Operator, value: Any?) {
+    val pathList = path.split('.')
+    addConstraint(pathList, operator, value)
+  }
+
+  @Suppress("UNCHECKED_CAST") // Comparison operands must be comparable!
+  fun addConstraint(path: List<String>, operator: Operator, value: Any?) {
+    when (operator) {
+      Operator.EQ -> {
+        addConstraint { root, builder ->
+          builder.equal(root.traverse<Any?>(path), value)
+        }
+      }
+      Operator.NE -> {
+        addConstraint { root, builder ->
+          builder.notEqual(root.traverse<Any?>(path), value)
+        }
+      }
+      Operator.LT -> {
+        val arg = value as Comparable<Comparable<*>?>?
+        addConstraint { root, builder ->
+          builder.lessThan(root.traverse(path), arg)
+        }
+      }
+      Operator.LE -> {
+        val arg = value as Comparable<Comparable<*>?>?
+        addConstraint { root, builder ->
+          builder.lessThanOrEqualTo(root.traverse(path), arg)
+        }
+      }
+      Operator.GE -> {
+        addConstraint { root, builder ->
+          val arg = value as Comparable<Comparable<*>?>?
+          builder.greaterThanOrEqualTo(root.traverse(path), arg)
+        }
+      }
+      Operator.GT -> {
+        addConstraint { root, builder ->
+          val arg = value as Comparable<Comparable<*>?>?
+          builder.greaterThan(root.traverse(path), arg)
+        }
+      }
+      Operator.IN -> {
+        val collection = value as Collection<*>
+        addConstraint { root, builder ->
+          builder.addInClause(root.traverse(path), collection)
+        }
+      }
+      Operator.IS_NOT_NULL -> {
+        addConstraint { root, builder ->
+          builder.isNotNull(root.traverse<Comparable<Comparable<*>>>(path))
+        }
+      }
+      Operator.IS_NULL -> {
+        addConstraint { root, builder ->
+          builder.isNull(root.traverse<Comparable<Comparable<*>>>(path))
+        }
+      }
+    }
+  }
+
+  override fun dynamicAddOrder(path: String, asc: Boolean) {
+    val pathList = path.split('.')
+    addOrderBy { root, builder ->
+      if (asc) {
+        builder.asc(root.traverse<Any?>(pathList))
+      } else {
+        builder.desc(root.traverse<Any?>(pathList))
+      }
+    }
+  }
+
   override fun uniqueResult(session: Session): T? {
     val list = select(false, session)
+    return list.firstOrNull()
+  }
+
+  override fun dynamicUniqueResult(session: Session, projectedPaths: List<String>): List<Any?>? {
+    val list = select(false, session, projectedPaths)
+    return list.firstOrNull()
+  }
+
+  override fun dynamicUniqueResult(session: Session, selection: (CriteriaBuilder, Root<T>) -> Selection<out Any>): List<Any?>? {
+    val list = select(false, session, selection)
     return list.firstOrNull()
   }
 
@@ -70,6 +160,7 @@ internal class ReflectionQuery<T : DbEntity<T>>(
     check(!predicatesOnly) { "cannot delete on this query" }
 
     check(orderFactories.size == 0) { "orderBy shouldn't be used for a delete" }
+    check(firstResult == 0) { "firstResult shouldn't be used for a delete" }
 
     val criteriaBuilder = session.hibernateSession.criteriaBuilder
     val query = criteriaBuilder.createCriteriaDelete(rootEntityType.java)
@@ -87,6 +178,60 @@ internal class ReflectionQuery<T : DbEntity<T>>(
     return select(true, session)
   }
 
+  override fun dynamicList(session: Session, projectedPaths: List<String>): List<List<Any?>> {
+    return select(true, session, projectedPaths)
+  }
+
+  override fun dynamicList(session: Session, selection: (CriteriaBuilder, Root<T>) -> Selection<out Any>): List<List<Any?>> {
+    return select(true, session, selection)
+  }
+
+  private fun select(returnList: Boolean, session: Session, projectedPaths: List<String>): List<List<Any?>> {
+    val splitProjectedPaths = projectedPaths.map { it.split('.') }
+    return select(returnList, session) { criteriaBuilder, queryRoot ->
+      criteriaBuilder.array(*splitProjectedPaths.map {
+        queryRoot.traverse<Any?>(it)
+      }.toTypedArray())
+    }
+  }
+
+  @Suppress("UNCHECKED_CAST")
+  private fun select(
+    returnList: Boolean,
+    session: Session,
+    selection: (CriteriaBuilder, Root<T>) -> Selection<out Any>
+  ): List<List<Any?>> {
+    check(!predicatesOnly) { "cannot select on this query" }
+
+    val criteriaBuilder = session.hibernateSession.criteriaBuilder
+    val query = criteriaBuilder.createQuery(Any::class.java)
+    val queryRoot = query.from(rootEntityType.java)
+
+    val predicate = buildWherePredicate(queryRoot, criteriaBuilder)
+    query.where(predicate)
+
+    query.orderBy(buildOrderBys(queryRoot, criteriaBuilder))
+
+    query.select(selection(criteriaBuilder, queryRoot))
+
+    val typedQuery = session.hibernateSession.createQuery(query)
+    typedQuery.firstResult = firstResult
+    typedQuery.maxResults = effectiveMaxRows(returnList)
+    val rows = traceSelect {
+      session.disableChecks(disabledChecks) {
+        typedQuery.list()
+      }
+    }
+    checkRowCount(returnList, rows.size)
+    val result = rows.map {
+      when (it) { // If there's exactly one cell per row, Hibernate doesn't wrap it in an array
+        is Array<*> -> listOf(*it)
+        else -> listOf(it)
+      }
+    }
+    return result
+  }
+
   private fun select(returnList: Boolean, session: Session): List<T> {
     check(!predicatesOnly) { "cannot select on this query" }
 
@@ -100,6 +245,7 @@ internal class ReflectionQuery<T : DbEntity<T>>(
     query.orderBy(buildOrderBys(queryRoot, criteriaBuilder))
 
     val typedQuery = session.hibernateSession.createQuery(query)
+    typedQuery.firstResult = firstResult
     typedQuery.maxResults = effectiveMaxRows(returnList)
     val rows = traceSelect {
       session.disableChecks(disabledChecks) {
@@ -114,6 +260,8 @@ internal class ReflectionQuery<T : DbEntity<T>>(
     check(!predicatesOnly) { "cannot select on this query" }
 
     check(orderFactories.size == 0) { "orderBy shouldn't be used for a count" }
+    check(firstResult == 0) { "firstResult shouldn't be used for a count" }
+    check(maxRows == -1) { "maxRows shouldn't be used for a count" }
 
     val criteriaBuilder = session.hibernateSession.criteriaBuilder
     val query = criteriaBuilder.createQuery(Long::class.java)
@@ -127,13 +275,14 @@ internal class ReflectionQuery<T : DbEntity<T>>(
     val typedQuery = session.hibernateSession.createQuery(query)
     return traceSelect {
       session.disableChecks(disabledChecks) {
-        typedQuery.getSingleResult()
+        typedQuery.singleResult
       }
     }
   }
 
   private fun effectiveMaxRows(returnList: Boolean): Int {
     return when {
+      (maxRows == 1) -> 1 // If specifically setting maxRows to 1 leave it so we can use unique
       !returnList -> 2 // Detect if the result wasn't actually unique.
       (maxRows != -1) -> maxRows
       else -> queryLimitsConfig.maxMaxRows + 1 // Detect if the result was truncated.
@@ -144,14 +293,18 @@ internal class ReflectionQuery<T : DbEntity<T>>(
     if (!returnList) {
       check(rowCount <= 1) { "query expected a unique result but was $rowCount" }
     } else if (maxRows == -1) {
-      if (rowCount > queryLimitsConfig.maxMaxRows) {
-        throw IllegalStateException("query truncated at $rowCount rows")
-      } else if (rowCount > queryLimitsConfig.rowCountErrorLimit) {
-        logger.error("Unbounded query returned $rowCount rows. " +
-            "(Specify maxRows to suppress this error)")
-      } else if (rowCount > queryLimitsConfig.rowCountWarningLimit) {
-        logger.warn("Unbounded query returned $rowCount rows. " +
-            "(Specify maxRows to suppress this warning)")
+      when {
+        rowCount > queryLimitsConfig.maxMaxRows -> {
+          throw IllegalStateException("query truncated at $rowCount rows")
+        }
+        rowCount > queryLimitsConfig.rowCountErrorLimit -> {
+          logger.error("Unbounded query returned $rowCount rows. " +
+              "(Specify maxRows to suppress this error)")
+        }
+        rowCount > queryLimitsConfig.rowCountWarningLimit -> {
+          logger.warn("Unbounded query returned $rowCount rows. " +
+              "(Specify maxRows to suppress this warning)")
+        }
       }
     }
   }
@@ -177,7 +330,7 @@ internal class ReflectionQuery<T : DbEntity<T>>(
   }
 
   private fun <T> traceSelect(lambda: () -> T): T {
-    return if (tracer != null) tracer.traceWithSpan(DB_SELECT) { _ ->
+    return if (tracer != null) tracer.traceWithSpan(DB_SELECT) {
       lambda()
     } else {
       lambda()
@@ -193,7 +346,7 @@ internal class ReflectionQuery<T : DbEntity<T>>(
   }
 
   @Singleton
-  internal class Factory @Inject internal constructor(var queryLimitsConfig: QueryLimitsConfig) :
+  internal class Factory @Inject internal constructor(private var queryLimitsConfig: QueryLimitsConfig) :
       Query.Factory {
     @com.google.inject.Inject(optional = true) var tracer: Tracer? = null
 
@@ -220,6 +373,17 @@ internal class ReflectionQuery<T : DbEntity<T>>(
       )
       @Suppress("UNCHECKED_CAST")
       return reflectionQuery.toProxy() as Q
+    }
+
+    override fun <E : DbEntity<E>> dynamicQuery(entityClass: KClass<E>): Query<E> {
+      val reflectionQuery = ReflectionQuery(
+          Query::class,
+          entityClass,
+          mapOf(),
+          tracer,
+          queryLimitsConfig
+      )
+      return reflectionQuery.toProxy()
     }
 
     private fun queryMethodHandlers(
@@ -270,6 +434,7 @@ internal class ReflectionQuery<T : DbEntity<T>>(
       query.where(reflectionQuery.buildWherePredicate(root, criteriaBuilder))
       query.orderBy(reflectionQuery.buildOrderBys(root, criteriaBuilder))
       val typedQuery = session.hibernateSession.createQuery(query)
+      typedQuery.firstResult = reflectionQuery.firstResult
       typedQuery.maxResults = reflectionQuery.effectiveMaxRows(returnList)
       val rows = session.disableChecks(reflectionQuery.disabledChecks) {
         typedQuery.list()
@@ -464,17 +629,7 @@ internal class ReflectionQuery<T : DbEntity<T>>(
               override fun invoke(reflectionQuery: ReflectionQuery<*>, args: Array<out Any>): Any? {
                 return reflectionQuery.addConstraint { root, builder ->
                   val collection = argToCollection(args[0])
-                  if (collection.isEmpty()) {
-                    // The JDBC API forbids empty IN clauses so we use `WHERE 1 = 0` instead to
-                    // achieve the same result.
-                    builder.equal(builder.literal(1), 0)
-                  } else {
-                    builder.`in`<Any>(root.traverse(path)).apply {
-                      for (option in collection) {
-                        value(option)
-                      }
-                    }
-                  }
+                  builder.addInClause(root.traverse(path), collection)
                 }
               }
             }
@@ -670,3 +825,23 @@ private fun KParameter.isAssignableTo(supertype: KClass<*>) = type.isAssignableT
 
 private fun KType.isAssignableTo(supertype: KClass<*>) =
     supertype.java.isAssignableFrom(typeLiteral().rawType)
+
+private fun CriteriaBuilder.addInClause(
+  expression: Path<Any>,
+  collection: Collection<Any?>
+): Predicate {
+  return when {
+    collection.isEmpty() -> {
+      // The JDBC API forbids empty IN clauses so we use `WHERE 1 = 0` instead to
+      // achieve the same result.
+      equal(literal(1), 0)
+    }
+    else -> {
+      `in`<Any>(expression).apply {
+        for (option in collection) {
+          value(option)
+        }
+      }
+    }
+  }
+}
