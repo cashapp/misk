@@ -47,7 +47,7 @@ class TruncateTablesService(
         session.withoutChecks {
           val config = connector.config()
           val tableNamesQuery = when (config.type) {
-            DataSourceType.MYSQL -> {
+            DataSourceType.MYSQL, DataSourceType.TIDB -> {
               "SELECT table_name FROM information_schema.tables where table_schema='${config.database}'"
             }
             DataSourceType.HSQLDB -> {
@@ -75,7 +75,11 @@ class TruncateTablesService(
               if (persistentTables.contains(tableName.toLowerCase(Locale.ROOT))) continue
               if (tableName.endsWith("_seq") || tableName.equals("dual")) continue
 
-              statement.addBatch("DELETE FROM $tableName")
+              if (config.type == DataSourceType.COCKROACHDB) {
+                statement.addBatch("TRUNCATE $tableName CASCADE")
+              } else {
+                statement.addBatch("DELETE FROM $tableName")
+              }
               truncatedTableNames += tableName
             }
             statement.executeBatch()

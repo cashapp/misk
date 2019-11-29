@@ -155,9 +155,8 @@ internal class SchemaMigrator(
             val statement = c.createStatement()
             statement.addBatch("""
             |CREATE TABLE schema_version (
-            |  version varchar(50) NOT NULL,
-            |  installed_by varchar(30) DEFAULT NULL,
-            |  UNIQUE KEY (version)
+            |  version varchar(50) PRIMARY KEY,
+            |  installed_by varchar(30) DEFAULT NULL
             |);
             |""".trimMargin())
             statement.executeBatch()

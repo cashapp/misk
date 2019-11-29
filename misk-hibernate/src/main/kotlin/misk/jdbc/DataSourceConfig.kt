@@ -35,6 +35,11 @@ enum class DataSourceType(
       hibernateDialect = "org.hibernate.dialect.PostgreSQL95Dialect",
       isVitess = false
   ),
+  TIDB(
+      driverClassName = "io.opentracing.contrib.jdbc.TracingDriver",
+      hibernateDialect = "org.hibernate.dialect.MySQL57Dialect",
+      isVitess = false
+  ),
 }
 
 /** Configuration element for an individual datasource */
@@ -79,6 +84,13 @@ data class DataSourceConfig(
             database = database ?: ""
         )
       }
+      DataSourceType.TIDB -> {
+        copy(
+            port = port ?: 4000,
+            host = host ?: "127.0.0.1",
+            database = database ?: ""
+        )
+      }
       DataSourceType.VITESS_MYSQL -> {
         copy(
             port = port ?: 27003,
@@ -119,7 +131,7 @@ data class DataSourceConfig(
     }
 
     return when (type) {
-      DataSourceType.MYSQL, DataSourceType.VITESS_MYSQL -> {
+      DataSourceType.MYSQL, DataSourceType.VITESS_MYSQL, DataSourceType.TIDB -> {
         var queryParams = "?useLegacyDatetimeCode=false"
 
         if (env == Environment.TESTING || env == Environment.DEVELOPMENT) {
@@ -231,7 +243,11 @@ data class DataSourceConfig(
         "jdbc:vitess://${config.host}:${config.port}/${config.database}$queryParams"
       }
       DataSourceType.COCKROACHDB -> {
-        "jdbc:postgresql://${config.host}:${config.port}/${config.database}?ssl=false&user=${config.username}"
+        var params = "ssl=false&user=${config.username}"
+        if (env == Environment.TESTING || env == Environment.DEVELOPMENT) {
+          params += "&createDatabaseIfNotExist=true"
+        }
+        "jdbc:postgresql://${config.host}:${config.port}/${config.database}?$params"
       }
     }
   }
@@ -248,6 +264,11 @@ data class DataSourceConfig(
   }
 
   fun asReplica(): DataSourceConfig {
+      if (this.type == DataSourceType.COCKROACHDB || this.type == DataSourceType.TIDB) {
+        // Cockroach doesn't support replica reads
+        return this
+      }
+
       if (this.type != DataSourceType.VITESS_MYSQL) {
         throw Exception("Replica database config only available for VITESS_MYSQL type")
       }
