@@ -2,7 +2,8 @@ package misk.hibernate
 
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
-import misk.vitess.StartVitessService
+import misk.vitess.DockerVitessCluster
+import misk.vitess.StartDatabaseService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -18,7 +19,7 @@ internal class VitessSchemaMigratorTest {
   @Inject @Movies lateinit var transacter: Transacter
   @Inject lateinit var queryFactory: Query.Factory
   @Inject @Movies lateinit var schemaMigrator: SchemaMigrator
-  @Inject @Movies lateinit var vitessService: StartVitessService
+  @Inject @Movies lateinit var databaseService: StartDatabaseService
 
   private val shard = Shard(Keyspace("movies"), "-80")
 
@@ -74,7 +75,7 @@ internal class VitessSchemaMigratorTest {
 
   /** Open a direct connection to the Vitess MySQL instance. */
   private fun openDirectConnection(): Connection? {
-    val cluster = vitessService.cluster()
+    val cluster = databaseService.server?.let { (it as DockerVitessCluster).cluster }
     return cluster?.openMysqlConnection()
   }
 }
