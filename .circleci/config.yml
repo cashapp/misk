@@ -66,7 +66,8 @@ jobs:
           command: |
             # Only run MySQL for the hibernate tests.
             if [ "$CIRCLE_NODE_INDEX" -eq 1 ]; then
-              docker run -d -p 3306:3306 --name mysql -e MYSQL_ALLOW_EMPTY_PASSWORD=1 mysql:5.7
+              docker run -d -p 3306:3306 --name mysql -e MYSQL_ALLOW_EMPTY_PASSWORD=1 mysql:5.7 character-set-server=utf8mb4 collation-server=utf8mb4_unicode_ci skip-character-set-client-handshake
+
             else
               echo "Not starting MySQL"
             fi

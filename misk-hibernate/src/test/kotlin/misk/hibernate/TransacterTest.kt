@@ -305,6 +305,19 @@ abstract class TransacterTest {
   }
 
   @Test
+  fun `can save and load emojis`() {
+    val bear = "🐻"
+    // Insert some movies, characters and actors.
+    val id = transacter.transaction { session ->
+      session.save(DbMovie(bear, LocalDate.of(2017, 7, 23)))
+    }
+    transacter.transaction { session ->
+      val movie = session.load(id)
+      assertThat(movie.name).isEqualTo(bear)
+    }
+  }
+
+  @Test
   fun loadOrNullReturnsEntity() {
     transacter.transaction { session ->
       val ld = session.save(DbActor("Laura Dern", LocalDate.of(1967, 2, 10)))
