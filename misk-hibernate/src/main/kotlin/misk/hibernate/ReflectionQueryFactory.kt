@@ -17,6 +17,7 @@ import java.util.EnumSet
 import javax.inject.Inject
 import javax.inject.Singleton
 import javax.persistence.criteria.CriteriaBuilder
+import javax.persistence.criteria.JoinType
 import javax.persistence.criteria.Path
 import javax.persistence.criteria.Predicate
 import javax.persistence.criteria.Root
@@ -54,6 +55,7 @@ internal class ReflectionQuery<T : DbEntity<T>>(
 
   private val constraints = mutableListOf<PredicateFactory>()
   private val orderFactories = mutableListOf<OrderFactory>()
+  private val fetchEagerlySpecs = mutableListOf<FetchEagerlySpec>()
 
   private val disabledChecks: EnumSet<Check> = EnumSet.noneOf(Check::class.java)
 
@@ -68,6 +70,7 @@ internal class ReflectionQuery<T : DbEntity<T>>(
 
   override fun delete(session: Session): Int {
     check(!predicatesOnly) { "cannot delete on this query" }
+    check(fetchEagerlySpecs.isEmpty()) { "cannot fetch eagerly on deletes" }
 
     check(orderFactories.size == 0) { "orderBy shouldn't be used for a delete" }
 
@@ -97,6 +100,7 @@ internal class ReflectionQuery<T : DbEntity<T>>(
     val predicate = buildWherePredicate(queryRoot, criteriaBuilder)
     query.where(predicate)
 
+    applyFetchEagerly(queryRoot)
     query.orderBy(buildOrderBys(queryRoot, criteriaBuilder))
 
     val typedQuery = session.hibernateSession.createQuery(query)
@@ -108,6 +112,12 @@ internal class ReflectionQuery<T : DbEntity<T>>(
     }
     checkRowCount(returnList, rows.size)
     return rows
+  }
+
+  fun applyFetchEagerly(root: Root<*>) {
+    for (fetchEagerlySpec in fetchEagerlySpecs) {
+      root.fetch<Any, Any>(fetchEagerlySpec.property, fetchEagerlySpec.joinType)
+    }
   }
 
   override fun count(session: Session): Long {
@@ -268,6 +278,7 @@ internal class ReflectionQuery<T : DbEntity<T>>(
 
       query.select(select(criteriaBuilder, root))
       query.where(reflectionQuery.buildWherePredicate(root, criteriaBuilder))
+      reflectionQuery.applyFetchEagerly(root)
       query.orderBy(reflectionQuery.buildOrderBys(root, criteriaBuilder))
       val typedQuery = session.hibernateSession.createQuery(query)
       typedQuery.maxResults = reflectionQuery.effectiveMaxRows(returnList)
@@ -306,8 +317,10 @@ internal class ReflectionQuery<T : DbEntity<T>>(
         val constraint = function.findAnnotation<Constraint>()
         val select = function.findAnnotation<Select>()
         val order = function.findAnnotation<Order>()
+        val fetchEagerly = function.findAnnotation<FetchEagerly>()
 
-        if (constraint != null && select != null) {
+        val annotations = listOf(constraint, select, order, fetchEagerly)
+        if (annotations.filterNotNull().count() > 1) {
           errors.add("${function.name}() has too many annotations")
           return
         }
@@ -324,6 +337,11 @@ internal class ReflectionQuery<T : DbEntity<T>>(
 
         if (select != null) {
           createSelect(errors, function, result, select)
+          return
+        }
+
+        if (fetchEagerly != null) {
+          createFetchEagerly(errors, function, result, fetchEagerly)
           return
         }
 
@@ -361,6 +379,33 @@ internal class ReflectionQuery<T : DbEntity<T>>(
                 builder.desc(root.traverse<Any?>(path))
               }
             }
+          }
+        }
+      }
+
+      private fun createFetchEagerly(
+        errors: MutableList<String>,
+        function: KFunction<*>,
+        result: MutableMap<Method, QueryMethodHandler>,
+        fetchEagerly: FetchEagerly
+      ) {
+        if (!fetchEagerly.property.matches(PROPERTY_PATTERN)) {
+          errors.add("${function.name}() property is not valid: '${fetchEagerly.property}'")
+          return
+        }
+
+        val javaMethod = function.javaMethod ?: throw UnsupportedOperationException()
+        if (javaMethod.returnType != javaMethod.declaringClass) {
+          errors.add("${function.name}() returns ${javaMethod.returnType.name} but " +
+              "@FetchEagerly methods must return this (${javaMethod.declaringClass.name})")
+          return
+        }
+
+        result[function.javaMethod!!] = object : QueryMethodHandler {
+          override fun invoke(reflectionQuery: ReflectionQuery<*>, args: Array<out Any>): Any? {
+            reflectionQuery.fetchEagerlySpecs += FetchEagerlySpec(fetchEagerly.property,
+                fetchEagerly.strategy)
+            return reflectionQuery
           }
         }
       }
@@ -649,6 +694,14 @@ internal class ReflectionQuery<T : DbEntity<T>>(
 private typealias PredicateFactory = (root: Root<*>, criteriaBuilder: CriteriaBuilder) -> Predicate
 
 private typealias OrderFactory = (root: Root<*>, criteriaBuilder: CriteriaBuilder) -> javax.persistence.criteria.Order
+
+data class FetchEagerlySpec(
+  val property: String,
+  val strategy: EagerFetchStrategy,
+  val joinType: JoinType = JoinType.LEFT
+)
+
+private val PROPERTY_PATTERN = Regex("""\w+""")
 
 private val PATH_PATTERN = Regex("""\w+(\.\w+)*""")
 

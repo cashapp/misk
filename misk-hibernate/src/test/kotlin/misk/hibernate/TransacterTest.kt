@@ -78,8 +78,8 @@ abstract class TransacterTest {
 
     transacter.failSafeRead { session ->
       val query = queryFactory.newQuery<CharacterQuery>()
-              .allowTableScan()
-              .name("Ian Malcolm")
+          .allowTableScan()
+          .name("Ian Malcolm")
       val ianMalcolm = query.uniqueResult(session)!!
       assertThat(ianMalcolm.actor?.name).isEqualTo("Jeff Goldblum")
       assertThat(ianMalcolm.movie.name).isEqualTo("Jurassic Park")
@@ -210,25 +210,25 @@ abstract class TransacterTest {
     transacter.failSafeRead { session ->
       session.target(jp.shard(session)) {
         assertThat(
-                queryFactory.newQuery<MovieQuery>().allowTableScan()
-                        .name("Jurassic Park").uniqueResult(session)
+            queryFactory.newQuery<MovieQuery>().allowTableScan()
+                .name("Jurassic Park").uniqueResult(session)
         ).isNotNull()
 
         assertThat(
-                queryFactory.newQuery<MovieQuery>().allowTableScan()
-                        .name("Star Wars").uniqueResult(session)
+            queryFactory.newQuery<MovieQuery>().allowTableScan()
+                .name("Star Wars").uniqueResult(session)
         ).isNull()
       }
 
       session.target(sw.shard(session)) {
         assertThat(
-                queryFactory.newQuery<MovieQuery>().allowTableScan()
-                        .name("Jurassic Park").uniqueResult(session)
+            queryFactory.newQuery<MovieQuery>().allowTableScan()
+                .name("Jurassic Park").uniqueResult(session)
         ).isNull()
 
         assertThat(
-                queryFactory.newQuery<MovieQuery>().allowTableScan()
-                        .name("Star Wars").uniqueResult(session)
+            queryFactory.newQuery<MovieQuery>().allowTableScan()
+                .name("Star Wars").uniqueResult(session)
         ).isNotNull()
       }
     }
@@ -268,8 +268,11 @@ abstract class TransacterTest {
     transacter.replicaRead { session ->
       if (transacter.config().type.isVitess) {
         // Make sure this doesn't trigger a transaction
-        val target = session.useConnection { c -> c.createStatement().use {
-          it.executeQuery("SHOW VITESS_TARGET").uniqueString() } }
+        val target = session.useConnection { c ->
+          c.createStatement().use {
+            it.executeQuery("SHOW VITESS_TARGET").uniqueString()
+          }
+        }
         assertThat(target).isEqualTo("@replica")
       }
 
@@ -286,8 +289,11 @@ abstract class TransacterTest {
 
     transacter.transaction { session ->
       if (transacter.config().type.isVitess) {
-        val target = session.useConnection { c -> c.createStatement().use {
-          it.executeQuery("SHOW VITESS_TARGET").uniqueString() } }
+        val target = session.useConnection { c ->
+          c.createStatement().use {
+            it.executeQuery("SHOW VITESS_TARGET").uniqueString()
+          }
+        }
         assertThat(target).isEqualTo("@master")
       }
 
@@ -373,7 +379,7 @@ abstract class TransacterTest {
       assertFailsWith<IllegalStateException> {
         transacter.failSafeRead {
           queryFactory.newQuery<MovieQuery>().allowTableScan()
-                  .name("Jurassic Park").uniqueResult(it)
+              .name("Jurassic Park").uniqueResult(it)
         }
       }
     }
@@ -727,6 +733,28 @@ abstract class TransacterTest {
         "\\(attempt 2, same connection\\), will retry after a PT.*S delay")
     assertThat(logs[2]).matches(
         "retried Movies transaction succeeded \\(attempt 3, same connection\\)")
+  }
+
+  @Test fun `test prefetch`() {
+    createTestData()
+    transacter.transaction { session ->
+      val statistics = session.hibernateSession.sessionFactory.statistics
+      statistics.isStatisticsEnabled = true
+      queryFactory.newQuery<CharacterQuery>()
+          .allowFullScatter().allowTableScan()
+          .name("Ian Malcolm")
+          .uniqueResult(session)!!
+      val query = statistics.queries.first().toLowerCase()
+      assertThat(query).doesNotContain("join")
+      assertThat(query).doesNotContain("fetch")
+
+      queryFactory.newQuery<CharacterQuery>()
+          .allowFullScatter().allowTableScan()
+          .name("Ian Malcolm")
+          .prefetchActor()
+          .uniqueResult(session)!!
+      assertThat(statistics.queries.first()).containsIgnoringCase("LEFT JOIN FETCH")
+    }
   }
 
   private fun tracingAssertions(committed: Boolean) {

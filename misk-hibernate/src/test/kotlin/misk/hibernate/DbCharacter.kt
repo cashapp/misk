@@ -83,6 +83,9 @@ interface CharacterQuery : Query<DbCharacter> {
 
   @Select
   fun listAsActorAndReleaseDate(session: Session): List<ActorAndReleaseDate>
+
+  @FetchEagerly(property = "actor")
+  fun prefetchActor(): CharacterQuery
 }
 
 data class NameAndReleaseDate(

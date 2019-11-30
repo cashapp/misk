@@ -130,3 +130,17 @@ annotation class Order(
   val path: String,
   val asc: Boolean = true
 )
+
+/**
+ * Annotates a function on a subinterface of [Query] to indicate a relationship to fetch eagerly.
+ * Currently the only strategy to do this uses a LEFT JOIN, so the relationship will be fetched in
+ * a single query.
+ */
+annotation class FetchEagerly(
+  val property: String,
+  val strategy: EagerFetchStrategy = EagerFetchStrategy.LEFT_JOIN
+)
+
+enum class EagerFetchStrategy {
+  LEFT_JOIN,
+}
