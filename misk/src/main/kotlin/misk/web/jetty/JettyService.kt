@@ -21,7 +21,9 @@ import org.eclipse.jetty.server.ServerConnectionStatistics
 import org.eclipse.jetty.server.ServerConnector
 import org.eclipse.jetty.server.SslConnectionFactory
 import org.eclipse.jetty.server.handler.ContextHandler
+import org.eclipse.jetty.server.handler.HandlerCollection
 import org.eclipse.jetty.server.handler.StatisticsHandler
+import org.eclipse.jetty.server.handler.gzip.GzipHandler
 import org.eclipse.jetty.servlet.ServletContextHandler
 import org.eclipse.jetty.servlet.ServletHolder
 import org.eclipse.jetty.util.ssl.SslContextFactory
@@ -39,7 +41,8 @@ class JettyService @Inject internal constructor(
   private val webConfig: WebConfig,
   threadPool: QueuedThreadPool,
   private val connectionMetricsCollector: JettyConnectionMetricsCollector,
-  private val statisticsHandler: StatisticsHandler
+  private val statisticsHandler: StatisticsHandler,
+  private val gzipHandler: GzipHandler
 ) : AbstractIdleService() {
   private val server = Server(threadPool)
   val httpServerUrl: HttpUrl get() = server.httpUrl!!
@@ -163,6 +166,13 @@ class JettyService @Inject internal constructor(
     // Kubernetes sends a SIG_TERM and gives us 30 seconds to stop gracefully.
     server.stopTimeout = 25_000
     ServerConnectionStatistics.addToAllConnectors(server)
+
+    if (webConfig.gzip) {
+      gzipHandler.server = server
+      gzipHandler.minGzipSize = webConfig.minGzipSize
+      gzipHandler.addIncludedMethods("POST")
+      servletContextHandler.gzipHandler = gzipHandler
+    }
 
     server.handler = statisticsHandler
 
