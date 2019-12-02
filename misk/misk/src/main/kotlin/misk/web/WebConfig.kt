@@ -39,7 +39,12 @@ data class WebConfig(
 
   /** A value in [0.0..100.0]. Include 'Connection: close' in this percentage of responses. */
   // TODO(jayestrella): Add a sane default value to this.
-  val close_connection_percent: Double = 0.0
+  val close_connection_percent: Double = 0.0,
+
+  /** If true responses which are larger than the minGzipSize will be compressed. */
+  val gzip: Boolean = false,
+  /** The minimum size in bytes before the response will be compressed. */
+  val minGzipSize: Int = 1024
 ) : Config
 
 data class WebSslConfig(
