@@ -54,8 +54,8 @@ internal class WebActionBindingTest {
       webActionBindingFactory.create(TestAction::fakeApiCall.asAction(DispatchMechanism.POST),
           pathPattern)
     }
-    assertThat(e).hasMessage(
-        "${TestAction::fakeApiCall.asAction(DispatchMechanism.POST)} parameter 1 not claimed")
+    assertThat(e).hasMessage("${TestAction::fakeApiCall.asAction(
+        DispatchMechanism.POST)} parameter 1 not claimed (did you forget @RequestBody ?)")
   }
 
   @Test
