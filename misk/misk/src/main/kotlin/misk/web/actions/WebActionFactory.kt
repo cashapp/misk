@@ -3,6 +3,7 @@ package misk.web.actions
 import com.google.inject.Injector
 import com.google.inject.Provider
 import com.squareup.wire.WireRpc
+import misk.Action
 import misk.ApplicationInterceptor
 import misk.MiskDefault
 import misk.asAction
@@ -15,6 +16,8 @@ import misk.web.NetworkInterceptor
 import misk.web.PathPattern
 import misk.web.Post
 import misk.web.WebActionBinding
+import misk.web.mediatype.MediaRange
+import misk.web.mediatype.MediaTypes
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.reflect.KClass
@@ -76,35 +79,68 @@ internal class WebActionFactory @Inject constructor(
     val effectivePrefix = pathPrefix.dropLast(1)
 
     if (get != null) {
-      result += newBoundAction(provider, actionFunction,
+      collectBoundActions(result, provider, actionFunction,
           effectivePrefix + get.pathPattern, DispatchMechanism.GET)
     }
     if (post != null) {
-      result += newBoundAction(provider, actionFunction,
+      collectBoundActions(result, provider, actionFunction,
           effectivePrefix + post.pathPattern, DispatchMechanism.POST)
     }
     if (connectWebSocket != null) {
-      result += newBoundAction(provider, actionFunction,
+      collectBoundActions(result, provider, actionFunction,
           effectivePrefix + connectWebSocket.pathPattern, DispatchMechanism.WEBSOCKET)
     }
     if (grpc != null) {
-      result += newBoundAction(provider, actionFunction,
+      collectBoundActions(result, provider, actionFunction,
           effectivePrefix + grpc.path, DispatchMechanism.GRPC)
     }
 
     return result
   }
 
-  private fun <A : WebAction> newBoundAction(
+  private fun <A : WebAction> collectBoundActions(
+    result: MutableList<BoundAction<A>>,
     provider: Provider<A>,
     function: KFunction<*>,
     pathPattern: String,
     dispatchMechanism: DispatchMechanism
-  ): BoundAction<A> {
+  ) {
     // NB: The response media type may be omitted; in this case only generic return types (String,
     // ByteString, ResponseBody, etc) are supported
     val action = function.asAction(dispatchMechanism)
+    result += newBoundAction(provider, pathPattern, action)
 
+    // If we can create a synthetic action with a different media type, do it. This means all
+    // protobuf actions are also published as JSON actions.
+    val jsonVariant = transformActionIntoJson(action)
+    if (jsonVariant != null) {
+      result += newBoundAction(provider, pathPattern, jsonVariant)
+    }
+  }
+
+  /**
+   * Returns a copy of [action] that pretends JSON was the request and response content types.
+   * Returns null if neither of the input action's content types were protobuf.
+   */
+  private fun transformActionIntoJson(action: Action): Action? {
+    var jsonVariant = action
+
+    if (action.acceptedMediaRanges == protobufMediaRanges) {
+      jsonVariant = jsonVariant.copy(acceptedMediaRanges = jsonMediaRanges)
+    }
+    if (action.responseContentType == protobufMediaType) {
+      jsonVariant = jsonVariant.copy(responseContentType = jsonMediaType)
+    }
+
+    if (jsonVariant === action) return null
+    return jsonVariant
+  }
+
+  private fun <A : WebAction> newBoundAction(
+    provider: Provider<A>,
+    pathPattern: String,
+    action: Action
+  ): BoundAction<A> {
     // Ensure that default interceptors are called before any user provided interceptors
     val networkInterceptors =
         miskNetworkInterceptorFactories.mapNotNull { it.create(action) } +
@@ -127,5 +163,12 @@ internal class WebActionFactory @Inject constructor(
         parsedPathPattern,
         action
     )
+  }
+
+  companion object {
+    private val protobufMediaRanges = MediaRange.parseRanges(MediaTypes.APPLICATION_PROTOBUF)
+    private val jsonMediaRanges = MediaRange.parseRanges(MediaTypes.APPLICATION_JSON)
+    private val protobufMediaType = MediaTypes.APPLICATION_PROTOBUF_MEDIA_TYPE
+    private val jsonMediaType = MediaTypes.APPLICATION_JSON_MEDIA_TYPE
   }
 }

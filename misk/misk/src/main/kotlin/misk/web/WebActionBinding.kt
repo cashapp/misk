@@ -180,7 +180,9 @@ internal class WebActionBinding @Inject constructor(
 
       val nonNullParameters = mutableListOf<FeatureBinding>()
       for (i in 0 until parameters.size) {
-        nonNullParameters += checkNotNull(parameters[i]) { "$action parameter $i not claimed" }
+        nonNullParameters += checkNotNull(parameters[i]) {
+          "$action parameter $i not claimed (did you forget @RequestBody ?)"
+        }
       }
 
       if (action.dispatchMechanism != DispatchMechanism.WEBSOCKET) {
