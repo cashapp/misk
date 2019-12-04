@@ -30,7 +30,10 @@ data class WebConfig(
   val queue_size: Int? = null,
 
   /** Maximum number of threads in Jetty's thread pool. */
-  val jetty_max_thread_pool_size: Int? = null,
+  val jetty_max_thread_pool_size: Int = 200,
+
+  /** Maximum number of items in the queue for Jetty's thread pool. */
+  val jetty_max_thread_pool_queue_size: Int = 300,
 
   val action_exception_log_level: ActionExceptionLogLevelConfig = ActionExceptionLogLevelConfig(),
 
@@ -38,8 +41,7 @@ data class WebConfig(
   val jetty_max_concurrent_streams: Int? = null,
 
   /** A value in [0.0..100.0]. Include 'Connection: close' in this percentage of responses. */
-  // TODO(jayestrella): Add a sane default value to this.
-  val close_connection_percent: Double = 0.0,
+  val close_connection_percent: Double = 0.01,
 
   /** If true responses which are larger than the minGzipSize will be compressed. */
   val gzip: Boolean = false,
