@@ -55,20 +55,18 @@ class StartDatabaseService(
   private var startupFailure: Throwable? = null
 
   init {
-    val name = qualifier.simpleName!!
-    server = servers[CacheKey(name, config, environment)].orElse(null)
-
-    // We need to do this outside of the service start up because this takes a really long time
-    // the first time you do it and can cause service manager to time out.
     if (shouldStartServer()) {
+      val name = qualifier.simpleName!!
+      server = servers[CacheKey(name, config, environment)].orElse(null)
+
+      // We need to do this outside of the service start up because this takes a really long time
+      // the first time you do it and can cause service manager to time out.
       server?.pullImage()
     }
   }
 
   override fun startUp() {
-    if (shouldStartServer()) {
-      server?.start()
-    }
+    this.server?.start()
   }
 
   private fun shouldStartServer() = environment == TESTING || environment == DEVELOPMENT
@@ -94,7 +92,8 @@ class StartDatabaseService(
      */
     val servers: LoadingCache<CacheKey, Optional<DatabaseServer>> = CacheBuilder.newBuilder()
         .removalListener<CacheKey, Optional<DatabaseServer>> { entry ->
-          entry.value.ifPresent { it.stop() } }
+          entry.value.ifPresent { it.stop() }
+        }
         .build(CacheLoader.from { config: CacheKey? ->
           Optional.ofNullable(config?.let {
             createDatabaseServer(it)
