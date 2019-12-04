@@ -53,6 +53,7 @@ import misk.web.resources.StaticResourceEntry
 import org.eclipse.jetty.server.handler.StatisticsHandler
 import org.eclipse.jetty.server.handler.gzip.GzipHandler
 import org.eclipse.jetty.util.thread.QueuedThreadPool
+import java.util.concurrent.ArrayBlockingQueue
 import javax.inject.Inject
 import javax.inject.Singleton
 import javax.servlet.http.HttpServletRequest
@@ -150,7 +151,17 @@ class MiskWebModule(private val config: WebConfig) : KAbstractModule() {
 
   @Provides @Singleton
   fun provideJettyThreadPool(): QueuedThreadPool {
-    return config.jetty_max_thread_pool_size?.let { QueuedThreadPool(it) } ?: QueuedThreadPool()
+    val maxThreads = config.jetty_max_thread_pool_size
+    val minThreads = Math.min(8, maxThreads)
+    val idleTimeout = 60_000
+
+    val threadPool = QueuedThreadPool(
+        maxThreads,
+        minThreads,
+        idleTimeout,
+        ArrayBlockingQueue(config.jetty_max_thread_pool_queue_size))
+    threadPool.name = "jetty-thread"
+    return threadPool
   }
 
   @Provides @Singleton
