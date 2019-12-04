@@ -34,10 +34,6 @@ abstract class TransacterTest {
   fun happyPath() {
     createTestData()
 
-    if (hasDateBug()) {
-      return
-    }
-
     // Query that data.
     transacter.transaction { session ->
       val ianMalcolm = queryFactory.newQuery<CharacterQuery>()
@@ -112,9 +108,6 @@ abstract class TransacterTest {
     }
   }
 
-  // TODO TiDB are working on fixing this bug: https://github.com/pingcap/tidb/issues/13791
-  private fun hasDateBug() = transacter.config().type == DataSourceType.TIDB
-
   private fun createTestData() {
     // Insert some movies, characters and actors.
     transacter.allowCowrites().transaction { session ->
@@ -139,10 +132,6 @@ abstract class TransacterTest {
 
   @Test
   fun `saves dates properly`() {
-    if (hasDateBug()) {
-      return
-    }
-
     val releaseDate = LocalDate.of(1993, 6, 9)
     val jp = transacter.transaction { session ->
       session.save(DbMovie("Jurassic Park", releaseDate))

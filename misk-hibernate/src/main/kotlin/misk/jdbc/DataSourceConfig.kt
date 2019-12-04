@@ -138,6 +138,7 @@ data class DataSourceConfig(
           queryParams += "&createDatabaseIfNotExist=true"
         }
 
+        queryParams += "&sessionVariables=time_zone='-00:00'"
 
         queryParams += "&connectTimeout=${config.connection_timeout.toMillis()}"
 

@@ -70,9 +70,6 @@ class DataSourceService(
 
     if (config.type == DataSourceType.MYSQL || config.type == DataSourceType.VITESS || config.type == DataSourceType.VITESS_MYSQL || config.type == DataSourceType.TIDB) {
       hikariConfig.minimumIdle = 5
-      if (config.type == DataSourceType.MYSQL || config.type == DataSourceType.TIDB) {
-        hikariConfig.connectionInitSql = "SET time_zone = '+00:00'"
-      }
 
       // https://github.com/brettwooldridge/HikariCP/wiki/MySQL-Configuration
       hikariConfig.dataSourceProperties["cachePrepStmts"] = "true"

@@ -4,9 +4,7 @@ import com.github.dockerjava.api.DockerClient
 import com.github.dockerjava.api.model.ExposedPort
 import com.github.dockerjava.api.model.Frame
 import com.github.dockerjava.api.model.Ports
-import com.github.dockerjava.core.DockerClientBuilder
 import com.github.dockerjava.core.async.ResultCallbackTemplate
-import com.github.dockerjava.netty.NettyDockerCmdExecFactory
 import com.squareup.moshi.Moshi
 import com.zaxxer.hikari.util.DriverDataSource
 import misk.backoff.DontRetryException
@@ -31,11 +29,12 @@ class TidbCluster(
   fun openConnection(): Connection = dataSource().connection
 
   private fun dataSource(): DriverDataSource {
-    val jdbcUrl = config.withDefaults().buildJdbcUrl(
-        Environment.TESTING)
+    val config = config.withDefaults().copy(database = "")
+    val jdbcUrl = config.buildJdbcUrl(Environment.TESTING)
+    println("jdbcUrl = ${jdbcUrl}")
     return DriverDataSource(
-        jdbcUrl, config.type.driverClassName, Properties(),
-        config.username, config.password)
+        jdbcUrl, this.config.type.driverClassName, Properties(),
+        "root", "")
   }
 
   val httpPort = 10080
@@ -126,9 +125,10 @@ class DockerTidbCluster(
         .exec()
         .firstOrNull()
     if (runningContainer != null) {
-      if (runningContainer.status != "running") {
+      val state = runningContainer.state
+      if (state != "running") {
         logger.info("Existing TiDB cluster named $containerName found in " +
-            "state ${runningContainer.status}, force removing and restarting")
+            "state $state, force removing and restarting")
         docker.removeContainerCmd(runningContainer.id).withForce(true).exec()
       } else {
         logger.info("Using existing TiDB cluster named $containerName")
@@ -159,7 +159,7 @@ class DockerTidbCluster(
 
     waitUntilHealthy()
     cluster.openConnection().use { c ->
-      c.createStatement().executeUpdate("SET GLOBAL time_zone = '+00:00'")
+      c.prepareStatement("SET GLOBAL time_zone = '+00:00'").executeUpdate()
     }
   }
 
