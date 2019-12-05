@@ -4,6 +4,7 @@ import com.google.common.util.concurrent.ServiceManager
 import misk.healthchecks.HealthCheck
 import misk.logging.getLogger
 import misk.security.authz.Unauthenticated
+import misk.web.AvailableWhenDegraded
 import misk.web.Get
 import misk.web.Response
 import misk.web.ResponseContentType
@@ -23,6 +24,7 @@ class ReadinessCheckAction @Inject internal constructor(
   @Get("/_readiness")
   @ResponseContentType(MediaTypes.APPLICATION_JSON)
   @Unauthenticated
+  @AvailableWhenDegraded
   fun readinessCheck(): Response<String> {
     val servicesNotRunning = serviceManagerProvider.get().servicesByState().values().asList()
         .filterNot { it.isRunning }
