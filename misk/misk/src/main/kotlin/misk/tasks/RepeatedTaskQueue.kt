@@ -202,11 +202,17 @@ class RepeatedTaskQueueFactory @Inject constructor(
    */
   fun new(name: String, config: RepeatedTaskQueueConfig = RepeatedTaskQueueConfig()):
       RepeatedTaskQueue {
+    val threadFactory = ThreadFactoryBuilder()
+        .setNameFormat("$name-%d")
+        .build()
+    val executor = if (config.num_parallel_tasks == -1) {
+      Executors.newCachedThreadPool(threadFactory)
+    } else {
+      Executors.newFixedThreadPool(config.num_parallel_tasks, threadFactory)
+    }
     return RepeatedTaskQueue(name,
         clock,
-        Executors.newFixedThreadPool(config.num_parallel_tasks, ThreadFactoryBuilder()
-            .setNameFormat("$name-%d")
-            .build()),
+        executor,
         null,
         DelayQueue<DelayedTask>(),
         metrics,

@@ -20,7 +20,11 @@ data class RepeatedTaskQueueConfig(
   val default_max_delay_sec: Long = 60,
 
   /**
-   * The number of parallel tasks to run.
+   * The fixed number of parallel tasks to run.
+   *
+   * If -1 then an unbounded number of parallel tasks are allowed. An unbounded number of tasks can
+   * be useful for an App that needs to dynamically compute the number of tasks at runtime. However,
+   * the App is then responsible for ensuring an upper bound for the number of tasks submitted.
    */
   val num_parallel_tasks: Int = 1
 
