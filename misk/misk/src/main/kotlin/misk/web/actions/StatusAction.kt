@@ -6,6 +6,7 @@ import misk.DelegatingService
 import misk.healthchecks.HealthCheck
 import misk.healthchecks.HealthStatus
 import misk.security.authz.Unauthenticated
+import misk.web.AvailableWhenDegraded
 import misk.web.Get
 import misk.web.ResponseContentType
 import misk.web.mediatype.MediaTypes
@@ -26,6 +27,7 @@ class StatusAction @Inject internal constructor(
   @Get("/_status")
   @ResponseContentType(MediaTypes.APPLICATION_JSON)
   @Unauthenticated
+  @AvailableWhenDegraded
   fun getStatus(): ServerStatus {
     val services = serviceManagerProvider.get().servicesByState().values().asList()
     val serviceStatus = services.map {
