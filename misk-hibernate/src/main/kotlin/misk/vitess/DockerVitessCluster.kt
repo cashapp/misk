@@ -207,6 +207,41 @@ class DockerVitessCluster(
     }
 
     private val imagePulled = AtomicBoolean()
+
+    /**
+     * A helper method to start the Vitess cluster outside of the dev server or test process, to
+     * enable rapid iteration. This should be called directly a `main()` function, for example:
+     *
+     * MyAppVitessDaemon.kt:
+     *
+     *  fun main() {
+     *    val config = MiskConfig.load<MyAppConfig>("myapp", Environment.TESTING)
+     *    startVitessDaemon(MyAppDb::class, config.data_source_clusters.values.first().writer)
+     *  }
+     *
+     */
+    fun startVitessDaemon(
+      /** The same qualifier passed into [HibernateModule], used to uniquely name the container */
+      qualifier: KClass<out Annotation>,
+      /** Config for the Vitess cluster */
+      config: DataSourceConfig
+    ) {
+      val docker: DockerClient = DockerClientBuilder.getInstance()
+          .withDockerCmdExecFactory(NettyDockerCmdExecFactory())
+          .build()
+      val moshi = Moshi.Builder().build()
+      val dockerCluster =
+          DockerVitessCluster(
+              name = qualifier.simpleName!!,
+              config = config,
+              resourceLoader = ResourceLoader.SYSTEM,
+              moshi = moshi,
+              docker = docker)
+      Runtime.getRuntime().addShutdownHook(Thread {
+        dockerCluster.stop()
+      })
+      dockerCluster.start()
+    }
   }
 
   override fun pullImage() {
@@ -416,39 +451,4 @@ class DockerVitessCluster(
       logger.info(String(item.payload).trim())
     }
   }
-}
-
-/**
- * A helper method to start the Vitess cluster outside of the dev server or test process, to
- * enable rapid iteration. This should be called directly a `main()` function, for example:
- *
- * MyAppVitessDaemon.kt:
- *
- *  fun main() {
- *    val config = MiskConfig.load<MyAppConfig>("myapp", Environment.TESTING)
- *    startVitessDaemon(MyAppDb::class, config.data_source_clusters.values.first().writer)
- *  }
- *
- */
-fun startVitessDaemon(
-  /** The same qualifier passed into [HibernateModule], used to uniquely name the container */
-  qualifier: KClass<out Annotation>,
-  /** Config for the Vitess cluster */
-  config: DataSourceConfig
-) {
-  val docker: DockerClient = DockerClientBuilder.getInstance()
-      .withDockerCmdExecFactory(NettyDockerCmdExecFactory())
-      .build()
-  val moshi = Moshi.Builder().build()
-  val dockerCluster =
-      DockerVitessCluster(
-          name = qualifier.simpleName!!,
-          config = config,
-          resourceLoader = ResourceLoader.SYSTEM,
-          moshi = moshi,
-          docker = docker)
-  Runtime.getRuntime().addShutdownHook(Thread {
-    dockerCluster.stop()
-  })
-  dockerCluster.start()
 }
