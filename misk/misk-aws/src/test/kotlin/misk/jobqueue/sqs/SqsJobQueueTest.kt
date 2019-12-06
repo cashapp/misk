@@ -24,7 +24,8 @@ import javax.inject.Inject
 @MiskTest(startService = true)
 internal class SqsJobQueueTest {
   @MiskExternalDependency private val dockerSqs = DockerSqs
-  @MiskTestModule private val module = SqsJobQueueTestModule(dockerSqs.credentials, dockerSqs.client)
+  @MiskTestModule private val module =
+      SqsJobQueueTestModule(dockerSqs.credentials, dockerSqs.client)
 
   @Inject private lateinit var sqs: AmazonSQS
   @Inject private lateinit var queue: JobQueue
@@ -103,6 +104,85 @@ internal class SqsJobQueueTest {
     assertThat(sqsMetrics.sqsDeleteTime.count(queueName.value)).isEqualTo(10)
 
     assertThat(sqsMetrics.handlerFailures.labels(queueName.value).get()).isEqualTo(0.0)
+  }
+
+  @Test fun enqueueAndHandlePrioritized() {
+    val handledJobs = CopyOnWriteArrayList<Job>()
+    val allJobsComplete = CountDownLatch(3)
+
+    val queueName2 = QueueName("sqs_job_queue_test2")
+    val queueName3 = QueueName("sqs_job_queue_test3")
+
+    // Create extra queues
+    listOf(queueName2, queueName3).forEach { queueName ->
+      val deadLetterQueueName = queueName.deadLetterQueue
+      sqs.createQueue(deadLetterQueueName.value)
+      sqs.createQueue(CreateQueueRequest()
+          .withQueueName(queueName.value)
+          .withAttributes(mapOf(
+              // 1 second visibility timeout
+              "VisibilityTimeout" to 1.toString())
+          ))
+    }
+
+    val queues = listOf(queueName, queueName2, queueName3)
+    // Create new queues
+    queues.filter { it != queueName }.forEach { queueName ->
+      val deadLetterQueueName = queueName.deadLetterQueue
+      sqs.createQueue(deadLetterQueueName.value)
+      sqs.createQueue(CreateQueueRequest()
+          .withQueueName(queueName.value)
+          .withAttributes(mapOf(
+              // 1 second visibility timeout
+              "VisibilityTimeout" to 1.toString())
+          ))
+    }
+    // Set up handler on queuess
+    queues.forEach { queueName ->
+      consumer.subscribe(queueName) { job ->
+        handledJobs.add(job)
+        job.acknowledge()
+        allJobsComplete.countDown()
+      }
+    }
+    // Put the jobs on the queues in reverse order to verify that they still get processed in
+    // priority order.
+    queues.reversed().forEachIndexed { index, queueName ->
+      queue.enqueue(queueName, "this is job $index",
+          attributes = mapOf("index" to index.toString()))
+    }
+
+    // Process all events
+    assertThat(allJobsComplete.await(10, TimeUnit.SECONDS)).isTrue()
+
+    val sortedJobs = handledJobs.sortedBy { it.body }
+    assertThat(sortedJobs.map { it.body }).containsExactly(
+        "this is job 0",
+        "this is job 1",
+        "this is job 2"
+    )
+    assertThat(sortedJobs.map { it.attributes }).containsExactly(
+        mapOf("index" to "0"),
+        mapOf("index" to "1"),
+        mapOf("index" to "2")
+    )
+
+    // Confirm metrics
+    queues.forEach { queueName ->
+      assertThat(sqsMetrics.jobsEnqueued.labels(queueName.value).get()).isEqualTo(1.0)
+      assertThat(sqsMetrics.jobEnqueueFailures.labels(queueName.value).get()).isEqualTo(0.0)
+      assertThat(sqsMetrics.sqsSendTime.count(queueName.value)).isEqualTo(1)
+
+      assertThat(sqsMetrics.jobsReceived.labels(queueName.value).get()).isEqualTo(1.0)
+      // Can't predict how many times we'll receive have since consumers may get 0 messages and retry, or may get many
+      // messages in varying batches
+      assertThat(sqsMetrics.sqsReceiveTime.count(queueName.value)).isNotZero()
+
+      assertThat(sqsMetrics.jobsAcknowledged.labels(queueName.value).get()).isEqualTo(1.0)
+      assertThat(sqsMetrics.sqsDeleteTime.count(queueName.value)).isEqualTo(1)
+
+      assertThat(sqsMetrics.handlerFailures.labels(queueName.value).get()).isEqualTo(0.0)
+    }
   }
 
   @Test fun retriesIfNotAcknowledged() {

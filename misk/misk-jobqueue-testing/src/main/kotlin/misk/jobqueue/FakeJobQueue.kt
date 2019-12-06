@@ -23,10 +23,15 @@ import javax.inject.Singleton
  */
 @Singleton
 class FakeJobQueue @Inject constructor(
-  private val jobHandlers: Map<QueueName, JobHandler>,
+  jobHandlers: Map<QueuesKey, JobHandler>,
   private val tokenGenerator: TokenGenerator
 ) : JobQueue {
   private val jobQueues = ConcurrentHashMap<QueueName, ConcurrentLinkedDeque<FakeJob>>()
+  private val jobHandlers = jobHandlers.flatMap { keyValue ->
+    keyValue.key.names.map { queueName ->
+      queueName to keyValue.value
+    }
+  }.toMap()
 
   override fun enqueue(
     queueName: QueueName,
