@@ -49,6 +49,7 @@ dependencies {
   compile dep.prometheusClient
   compile dep.prometheusHotspot
   compile dep.jnrUnixsocket
+  compile dep.concurrencyLimitsCore
   compile project(':misk-inject')
   compile project(':misk-service')
 

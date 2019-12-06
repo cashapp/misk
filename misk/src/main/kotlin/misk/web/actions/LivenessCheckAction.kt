@@ -4,6 +4,7 @@ import com.google.common.util.concurrent.Service.State
 import com.google.common.util.concurrent.ServiceManager
 import misk.logging.getLogger
 import misk.security.authz.Unauthenticated
+import misk.web.AvailableWhenDegraded
 import misk.web.Get
 import misk.web.Response
 import misk.web.ResponseContentType
@@ -22,6 +23,7 @@ class LivenessCheckAction @Inject internal constructor(
   @Get("/_liveness")
   @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
   @Unauthenticated
+  @AvailableWhenDegraded
   fun livenessCheck(): Response<String> {
     val serviceManager = serviceManagerProvider.get()
     val failedServices = serviceManager.servicesByState().get(State.FAILED) +

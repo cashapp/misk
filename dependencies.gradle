@@ -4,6 +4,7 @@ ext.dep = [
   "awsApi": "com.amazonaws:aws-java-sdk:1.11.144",
   "awsSqs": "com.amazonaws:aws-java-sdk-sqs:1.11.144",
   "bouncycastle": "org.bouncycastle:bcprov-jdk15on:1.55",
+  "concurrencyLimitsCore": "com.netflix.concurrency-limits:concurrency-limits-core:0.3.6",
   "curatorFramework": "org.apache.curator:curator-framework:4.0.1",
   "datasourceProxy": "net.ttddyy:datasource-proxy:1.4.9",
   "docker": "com.github.docker-java:docker-java:3.1.0-rc-5",
