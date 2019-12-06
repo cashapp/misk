@@ -57,7 +57,6 @@ data class DataSourceConfig(
   val query_timeout: Duration? = Duration.ofMinutes(1),
   val migrations_resource: String? = null,
   val migrations_resources: List<String>? = null,
-  val vitess_schema_dir: String? = null,
   val vitess_schema_resource_root: String? = null,
     /*
        See https://dev.mysql.com/doc/connector-j/8.0/en/connector-j-reference-using-ssl.html for
@@ -287,7 +286,6 @@ data class DataSourceConfig(
               this.query_timeout,
               this.migrations_resource,
               this.migrations_resources,
-              this.vitess_schema_dir,
               this.vitess_schema_resource_root,
               this.trust_certificate_key_store_url,
               this.trust_certificate_key_store_password,

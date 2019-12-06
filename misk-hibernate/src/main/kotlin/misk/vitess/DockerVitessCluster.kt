@@ -50,33 +50,23 @@ class VitessCluster(
   val configDir: Path
 
   init {
-    if (config.vitess_schema_dir != null) {
-      schemaDir = Paths.get(config.vitess_schema_dir)
-      DockerVitessCluster.logger.warn {
-        "vitess_schema_dir is deprecated, use vitess_schema_resource_root instead"
-      }
-      check(Files.isDirectory(schemaDir)) {
-        "can't find directory $schemaDir"
-      }
-    } else {
-      val root = config.vitess_schema_resource_root
-          ?: throw IllegalStateException("vitess_schema_resource_root must be specified")
-      val hasVschema = resourceLoader.walk(config.vitess_schema_resource_root)
-          .any { it.endsWith("vschema.json") }
-      check(hasVschema) {
-        "schema root not valid, does not contain any vschema.json: ${config.vitess_schema_resource_root}"
-      }
-      // We can't use Files::createTempDirectory because it creates a directory under the path
-      // /var/folders that is not possible to mount in Docker
-      schemaDir = Paths.get(
-          "/tmp/vitess_schema_${System.currentTimeMillis()}")
-      Files.createDirectories(schemaDir)
-      resourceLoader.copyTo(root, schemaDir)
-      Runtime.getRuntime().addShutdownHook(
-          thread(start = false) {
-            schemaDir.toFile().deleteRecursively()
-          })
+    val root = config.vitess_schema_resource_root
+        ?: throw IllegalStateException("vitess_schema_resource_root must be specified")
+    val hasVschema = resourceLoader.walk(config.vitess_schema_resource_root)
+        .any { it.endsWith("vschema.json") }
+    check(hasVschema) {
+      "schema root not valid, does not contain any vschema.json: ${config.vitess_schema_resource_root}"
     }
+    // We can't use Files::createTempDirectory because it creates a directory under the path
+    // /var/folders that is not possible to mount in Docker
+    schemaDir = Paths.get(
+        "/tmp/vitess_schema_${System.currentTimeMillis()}")
+    Files.createDirectories(schemaDir)
+    resourceLoader.copyTo(root, schemaDir)
+    Runtime.getRuntime().addShutdownHook(
+        thread(start = false) {
+          schemaDir.toFile().deleteRecursively()
+        })
 
     // Copy out all the resources from the current package
     // We use the my.cnf configuration file to configure MySQL (e.g. the default time zone)
