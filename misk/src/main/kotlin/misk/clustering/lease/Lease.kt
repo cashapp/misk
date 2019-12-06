@@ -24,6 +24,12 @@ interface Lease {
    */
   fun addListener(listener: StateChangeListener)
 
+  /**
+   * Release the lease if it is owned by this process instance. This may involve remote calls,
+   * so it is marked as a function rather than a property to make the potential expense clearer.
+   */
+  fun close()
+
   interface StateChangeListener {
     /**
      * Called immediately after the lease is acquired. Also called immediately if the lease is
