@@ -31,11 +31,12 @@ import misk.web.extractors.RequestHeadersFeatureBinding
 import misk.web.extractors.ResponseBodyFeatureBinding
 import misk.web.extractors.WebSocketFeatureBinding
 import misk.web.extractors.WebSocketListenerFeatureBinding
+import misk.web.interceptors.ConcurrencyLimitsInterceptor
 import misk.web.interceptors.InternalErrorInterceptorFactory
 import misk.web.interceptors.MetricsInterceptor
 import misk.web.interceptors.RebalancingInterceptor
-import misk.web.interceptors.RequestLogContextInterceptor
 import misk.web.interceptors.RequestBodyLoggingInterceptor
+import misk.web.interceptors.RequestLogContextInterceptor
 import misk.web.interceptors.RequestLoggingInterceptor
 import misk.web.interceptors.TracingInterceptor
 import misk.web.jetty.JettyConnectionMetricsCollector
@@ -107,6 +108,10 @@ class MiskWebModule(private val config: WebConfig) : KAbstractModule() {
     // Collect metrics on the status of results and response times of requests
     multibind<NetworkInterceptor.Factory>(MiskDefault::class)
         .to<MetricsInterceptor.Factory>()
+
+    // Shed calls when we're degraded.
+    multibind<NetworkInterceptor.Factory>(MiskDefault::class)
+        .to<ConcurrencyLimitsInterceptor.Factory>()
 
     // Traces requests as they work their way through the system.
     multibind<NetworkInterceptor.Factory>(MiskDefault::class)
