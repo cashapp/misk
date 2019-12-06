@@ -1,6 +1,7 @@
 package misk.time
 
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.data.Offset
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import java.io.InterruptedIOException
@@ -100,8 +101,8 @@ internal class FakeResourcePoolTest {
           failureCount++
         }
       }
-      assertThat(successCount).isEqualTo(6)
-      assertThat(failureCount).isEqualTo(3)
+      assertThat(successCount).isCloseTo(6, Offset.offset(1))
+      assertThat(failureCount).isCloseTo(3, Offset.offset(1))
     }
   }
 }
