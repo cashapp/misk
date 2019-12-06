@@ -90,9 +90,9 @@ internal class DegradedHealthStressTest {
 
     // Expect 125 successful calls, most of the rest shed, and the remainder failed.
     println("successCount=$successCount, shedCount=$shedCount, failureCount=$failureCount")
-    assertThat(successCount.get().toDouble()).isCloseTo(125.0, Offset.offset(50.0))
-    assertThat(shedCount.get().toDouble()).isCloseTo(125.0, Offset.offset(50.0))
-    assertThat(failureCount.get().toDouble()).isCloseTo(0.0, Offset.offset(50.0))
+    assertThat(successCount.get()).isCloseTo(125, Offset.offset(50))
+    assertThat(shedCount.get()).isCloseTo(125, Offset.offset(50))
+    assertThat(failureCount.get()).isCloseTo(0, Offset.offset(50))
   }
 
   class UseConstrainedResourceAction @Inject constructor(
