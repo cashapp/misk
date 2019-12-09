@@ -49,12 +49,6 @@ class FakeLeaseManager @Inject constructor() : LeaseManager {
       }
     }
 
-    override fun close() {
-      if (checkHeld()) {
-        manager.markLeaseHeldElsewhere(name)
-      }
-    }
-
     fun notifyAfterAcquire() {
       listeners.forEach {
         it.afterAcquire(this)
