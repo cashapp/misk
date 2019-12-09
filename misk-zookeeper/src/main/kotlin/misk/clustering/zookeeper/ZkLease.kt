@@ -102,7 +102,7 @@ internal class ZkLease(
     }
   }
 
-  override fun close() {
+  fun close() {
     lock.withLock {
       if (status != Status.NOT_HELD) release()
       status = Status.CLOSED

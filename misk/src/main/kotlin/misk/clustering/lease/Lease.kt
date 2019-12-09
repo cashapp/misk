@@ -1,7 +1,5 @@
 package misk.clustering.lease
 
-import java.io.Closeable
-
 /**
  * A [Lease] is a cluster-wide time-based lock on a given resource. Leases are retrieved via
  * [LeaseManager.requestLease]. A ready service instance will automatically attempt to acquire
@@ -11,7 +9,7 @@ import java.io.Closeable
  * flapping, service lease owners may want to delay releasing leases until they've been not ready
  * for a particular amount of time.
  */
-interface Lease : Closeable {
+interface Lease {
   /** @property String the name of the resource being leased */
   val name: String
 
@@ -25,12 +23,6 @@ interface Lease : Closeable {
    * Registers a listener that is called on lease state changes.
    */
   fun addListener(listener: StateChangeListener)
-
-  /**
-   * Release the lease if it is owned by this process instance. This may involve remote calls,
-   * so it is marked as a function rather than a property to make the potential expense clearer.
-   */
-  override fun close()
 
   interface StateChangeListener {
     /**
