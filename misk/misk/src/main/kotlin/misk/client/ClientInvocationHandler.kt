@@ -102,7 +102,9 @@ internal class ClientInvocationHandler(
     }.filterNot { it == MediaTypes.APPLICATION_JSON }
   }
 
-  override fun invoke(proxy: Any, method: Method, args: Array<out Any>): Any {
+  override fun invoke(proxy: Any, method: Method, args: Array<out Any>?): Any {
+    val argsList = args?.toList() ?: listOf()
+
     val action = actionsByMethod[method.name] ?: throw IllegalStateException(
         "no action corresponding to ${interfaceType.qualifiedName}#${method.name}"
     )
@@ -113,11 +115,11 @@ internal class ClientInvocationHandler(
     val interceptors = (interceptorsByMethod[method.name] ?: listOf())
 
     val beginCallInterceptors = interceptors + RetrofitCallInterceptor(retrofitProxy, method)
-    val beginCallChain = RealBeginClientCallChain(action, args.toList(), beginCallInterceptors)
+    val beginCallChain = RealBeginClientCallChain(action, argsList, beginCallInterceptors)
     val wrappedCall = beginCallChain.proceed(beginCallChain.args)
 
     val requestInterceptors = interceptors + RetrofitRequestInterceptor(wrappedCall)
-    return InterceptedCall(action, requestInterceptors, args.toList(), wrappedCall)
+    return InterceptedCall(action, requestInterceptors, argsList, wrappedCall)
   }
 
   /** Wraps a retrofit [Call] to invoke interceptors before handing off to Retrofit */
