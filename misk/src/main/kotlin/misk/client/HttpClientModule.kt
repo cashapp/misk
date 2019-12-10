@@ -6,6 +6,7 @@ import com.squareup.moshi.Moshi
 import misk.inject.KAbstractModule
 import okhttp3.OkHttpClient
 import javax.inject.Inject
+import javax.inject.Singleton
 
 /** Provides an [OkHttpClient] and [ProtoMessageHttpClient] for a peer service */
 class HttpClientModule constructor(
@@ -19,9 +20,12 @@ class HttpClientModule constructor(
     val protoMessageHttpClientKey =
         if (annotation == null) Key.get(ProtoMessageHttpClient::class.java)
         else Key.get(ProtoMessageHttpClient::class.java, annotation)
-    bind(httpClientKey).toProvider(HttpClientProvider(name))
+    bind(httpClientKey)
+        .toProvider(HttpClientProvider(name))
+        .`in`(Singleton::class.java)
     bind(protoMessageHttpClientKey)
         .toProvider(ProtoMessageHttpClientProvider(name, getProvider(httpClientKey)))
+        .`in`(Singleton::class.java)
   }
 
   private class HttpClientProvider(private val name: String) : Provider<OkHttpClient> {
