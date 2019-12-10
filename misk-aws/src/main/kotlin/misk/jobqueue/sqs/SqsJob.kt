@@ -22,7 +22,7 @@ internal class SqsJob(
 
   override fun acknowledge() {
     deleteMessage(queue, message)
-    metrics.jobsAcknowledged.labels(queueName.value).inc()
+    metrics.jobsAcknowledged.labels(queueName.value, queueName.value).inc()
   }
 
   override fun deadLetter() {
@@ -36,14 +36,14 @@ internal class SqsJob(
           .withMessageAttributes(message.messageAttributes))
     }
     deleteMessage(queue, message)
-    metrics.jobsDeadLettered.labels(queueName.value).inc()
+    metrics.jobsDeadLettered.labels(queueName.value, queueName.value).inc()
   }
 
   private fun deleteMessage(queue: ResolvedQueue, message: Message) {
     val (deleteDuration, _) = queue.call {
       timed { it.deleteMessage(queue.url, message.receiptHandle) }
     }
-    metrics.sqsDeleteTime.record(deleteDuration.toMillis().toDouble(), queueName.value)
+    metrics.sqsDeleteTime.record(deleteDuration.toMillis().toDouble(), queueName.value, queueName.value)
   }
 
   companion object {

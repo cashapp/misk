@@ -25,7 +25,7 @@ internal class SqsJobQueue @Inject internal constructor(
     attributes: Map<String, String>
   ) {
     tracer.traceWithSpan("enqueue-job-${queueName.value}") { span ->
-      metrics.jobsEnqueued.labels(queueName.value).inc()
+      metrics.jobsEnqueued.labels(queueName.value, queueName.value).inc()
       try {
         val queue = queues[queueName]
 
@@ -54,10 +54,10 @@ internal class SqsJobQueue @Inject internal constructor(
           timed { client.sendMessage(sendRequest) }
         }
 
-        metrics.sqsSendTime.record(sendDuration.toMillis().toDouble(), queueName.value)
+        metrics.sqsSendTime.record(sendDuration.toMillis().toDouble(), queueName.value, queueName.value)
       } catch (th: Throwable) {
         log.error(th) { "failed to enqueue to ${queueName.value}" }
-        metrics.jobEnqueueFailures.labels(queueName.value).inc()
+        metrics.jobEnqueueFailures.labels(queueName.value, queueName.value).inc()
         throw th
       }
     }
