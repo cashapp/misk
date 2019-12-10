@@ -38,8 +38,12 @@ internal class SqsJobConsumer @Inject internal constructor(
 ) : JobConsumer {
   private val subscriptions = ConcurrentHashMap<QueueName, QueueReceiver>()
 
-  override fun subscribe(queueName: QueueName, handler: JobHandler) {
-    val receiver = QueueReceiver(queueName, handler)
+  override fun subscribe(queueNames: List<QueueName>, handler: JobHandler) {
+    val receiver = QueueReceiver(queueNames, handler)
+    queueNames.forEach { subscribe(it, receiver) }
+  }
+
+  private fun subscribe(queueName: QueueName, receiver: QueueReceiver) {
     check(subscriptions.putIfAbsent(queueName, receiver) == null) {
       "already subscribed to queue ${queueName.value}"
     }
@@ -63,12 +67,22 @@ internal class SqsJobConsumer @Inject internal constructor(
   }
 
   internal inner class QueueReceiver(
-    private val queueName: QueueName,
+    queueNames: List<QueueName>,
     private val handler: JobHandler
   ) {
-    private val queue = queues[queueName]
+    private val prioritizedQueues = queueNames.map { queues[it] }
 
     fun runOnce(): Status {
+      prioritizedQueues.forEach { resolvedQueue ->
+        val status = runOnce(resolvedQueue)
+        if (status != Status.NO_WORK) {
+          return@runOnce status
+        }
+      }
+      return Status.NO_WORK
+    }
+
+    private fun runOnce(queue: ResolvedQueue): Status {
       val (receiveDuration, messages) = queue.call { client ->
         val receiveRequest = ReceiveMessageRequest()
           .withAttributeNames("All")
@@ -78,6 +92,9 @@ internal class SqsJobConsumer @Inject internal constructor(
 
         timed { client.receiveMessage(receiveRequest).messages }
       }
+
+      val queueName = queue.name
+
       metrics.sqsReceiveTime.record(receiveDuration.toMillis().toDouble(), queueName.value)
 
       if (messages.size == 0) {
