@@ -95,7 +95,7 @@ internal class SqsJobConsumer @Inject internal constructor(
 
       val queueName = queue.name
 
-      metrics.sqsReceiveTime.record(receiveDuration.toMillis().toDouble(), queueName.value)
+      metrics.sqsReceiveTime.record(receiveDuration.toMillis().toDouble(), queueName.value, queueName.value)
 
       if (messages.size == 0) {
         return Status.NO_WORK
@@ -103,7 +103,7 @@ internal class SqsJobConsumer @Inject internal constructor(
 
       val futures = messages.map { SqsJob(queueName, queues, metrics, it) }.map { message ->
         dispatchThreadPool.submit {
-          metrics.jobsReceived.labels(queueName.value).inc()
+          metrics.jobsReceived.labels(queueName.value, queueName.value).inc()
 
           tracer.traceWithSpan("handle-job-${queueName.value}") { span ->
             // If the incoming job has an original trace id, set that as a tag on the new span.
@@ -117,10 +117,10 @@ internal class SqsJobConsumer @Inject internal constructor(
             // Run the handler and record timing
             try {
               val (duration, _) = timed { handler.handleJob(message) }
-              metrics.handlerDispatchTime.record(duration.toMillis().toDouble(), queueName.value)
+              metrics.handlerDispatchTime.record(duration.toMillis().toDouble(), queueName.value, queueName.value)
             } catch (th: Throwable) {
               log.error(th) { "error handling job from ${queueName.value}" }
-              metrics.handlerFailures.labels(queueName.value).inc()
+              metrics.handlerFailures.labels(queueName.value, queueName.value).inc()
               Tags.ERROR.set(span, true)
               throw th
             }
