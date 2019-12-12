@@ -39,7 +39,7 @@ class HttpClientFactory @Inject constructor(
       builder.socketFactory(
           UnixDomainSocketFactory(envoyClientEndpointProvider.unixSocket(config.envoy)))
       // No DNS lookup needed since we're just sending the request over a socket.
-      builder.dns(NoOpDns())
+      builder.dns(NoOpDns)
       // Envoy is the proxy
       builder.proxy(Proxy.NO_PROXY)
       // OkHttp <=> envoy over h2 has bad interactions, and benefit is marginal
