@@ -1,5 +1,7 @@
 package misk.clustering
 
+import com.google.common.collect.LinkedHashMultimap
+import com.google.common.collect.Multimaps
 import com.google.common.hash.HashCode
 import com.google.common.hash.HashFunction
 import com.google.common.hash.Hashing
@@ -42,6 +44,78 @@ internal class ClusterHashRingTest {
         hashFn = Hashing.murmur3_32(0))
     assertThat(listOf("foo", "bar", "zed", "abadidea").map { hashRing3[it] })
         .containsExactly(zork, quark, zork, zork)
+  }
+
+  @Test fun multipleNodes2() {
+    // pod names
+    val pods = setOf(
+        Cluster.Member("newswriter-6c4d9d49-mvm75", "192.49.168.23"),
+        Cluster.Member("newswriter-6c4d9d49-sfs6g", "192.49.168.23"),
+        Cluster.Member("newswriter-6c4d9d49-nmp2x", "192.49.168.23"),
+        Cluster.Member("newswriter-6c4d9d49-m6gpq", "192.49.168.23"),
+        Cluster.Member("newswriter-6c4d9d49-wbk94", "192.49.168.23"),
+        Cluster.Member("newswriter-6c4d9d49-sbkbn", "192.49.168.23"),
+        Cluster.Member("newswriter-6c4d9d49-f6m2l", "192.49.168.23"),
+        Cluster.Member("newswriter-6c4d9d49-9nxd9", "192.49.168.23"),
+        Cluster.Member("newswriter-6c4d9d49-kn82g", "192.49.168.23"),
+        Cluster.Member("newswriter-6c4d9d49-b87xd", "192.49.168.23"),
+        Cluster.Member("newswriter-6c4d9d49-nntwg", "192.49.168.23"),
+        Cluster.Member("newswriter-6c4d9d49-8lk28", "192.49.168.23"),
+        Cluster.Member("newswriter-6c4d9d49-dshd4", "192.49.168.23"),
+        Cluster.Member("newswriter-6c4d9d49-556np", "192.49.168.23"),
+        Cluster.Member("newswriter-6c4d9d49-xc67k", "192.49.168.23"),
+        Cluster.Member("newswriter-6c4d9d49-hhjxd", "192.49.168.23"),
+        Cluster.Member("newswriter-6c4d9d49-q2cs4", "192.49.168.23"),
+        Cluster.Member("newswriter-6c4d9d49-6pc76", "192.49.168.23"),
+        Cluster.Member("newswriter-6c4d9d49-tmqdx", "192.49.168.23"),
+        Cluster.Member("newswriter-6c4d9d49-jwswq", "192.49.168.23")
+    )
+    // resource names
+    val resources = listOf(
+        "evently-consumer-legacy_transaction_events_2-08808004100218d6daf5ac022029",
+        "evently-consumer-legacy_transaction_events_2-08808004100218d6daf5ac022019",
+        "evently-consumer-legacy_transaction_events_2-08808004100218d6daf5ac022012",
+        "evently-consumer-legacy_transaction_events_2-08808004100218d6daf5ac02201b",
+        "evently-consumer-legacy_transaction_events_2-08808004100218d6daf5ac02201d",
+        "evently-consumer-legacy_transaction_events_2-08808004100218d6daf5ac02201a",
+        "evently-consumer-legacy_transaction_events_2-08808004100218d6daf5ac022028",
+        "evently-consumer-legacy_transaction_events_2-08808004100218d6daf5ac022027",
+        "evently-consumer-legacy_transaction_events_2-08808004100218d6daf5ac022024",
+        "evently-consumer-legacy_transaction_events_2-08808004100218d6daf5ac022026",
+        "evently-consumer-legacy_transaction_events_2-08808004100218d6daf5ac022023",
+        "evently-consumer-legacy_transaction_events_2-08808004100218d6daf5ac022020",
+        "evently-consumer-legacy_transaction_events_2-08808004100218d6daf5ac022025",
+        "evently-consumer-legacy_transaction_events_2-08808004100218d6daf5ac022022",
+        "evently-consumer-legacy_transaction_events_2-08808004100218d6daf5ac022021",
+        "evently-consumer-legacy_transaction_events_2-08808004100218d6daf5ac02202d",
+        "evently-consumer-legacy_transaction_events_2-08808004100218d6daf5ac02202f",
+        "evently-consumer-legacy_transaction_events_2-08808004100218d6daf5ac02202c",
+        "evently-consumer-legacy_transaction_events_2-08808004100218d6daf5ac02202e",
+        "evently-consumer-legacy_transaction_events_2-08808004100218d6daf5ac02202b",
+        "evently-consumer-legacy_transaction_events_2-08808004100218d6daf5ac02202a",
+        "evently-consumer-legacy_transaction_events_2-08808004100218d6daf5ac022017",
+        "evently-consumer-legacy_transaction_events_2-08808004100218d6daf5ac022016",
+        "evently-consumer-legacy_transaction_events_2-08808004100218d6daf5ac022013",
+        "evently-consumer-legacy_transaction_events_2-08808004100218d6daf5ac022018",
+        "evently-consumer-legacy_transaction_events_2-08808004100218d6daf5ac022015",
+        "evently-consumer-legacy_transaction_events_2-08808004100218d6daf5ac022031",
+        "evently-consumer-legacy_transaction_events_2-08808004100218d6daf5ac022014",
+        "evently-consumer-legacy_transaction_events_2-08808004100218d6daf5ac022030",
+        "evently-consumer-legacy_transaction_events_2-08808004100218d6daf5ac02201f",
+        "evently-consumer-legacy_transaction_events_2-08808004100218d6daf5ac02201c",
+        "evently-consumer-legacy_transaction_events_2-08808004100218d6daf5ac02201e"
+    )
+    val hashRing = ClusterHashRing(
+        members = pods,
+        hashFn = Hashing.murmur3_32())
+    val mappings = resources.map {
+      hashRing[it] to it
+    }
+    val assignments = LinkedHashMultimap.create<Cluster.Member, String>()
+    for ((member, resource) in mappings) {
+      assignments.put(member, resource)
+    }
+    print(assignments)
   }
 
   @Test fun zeroNodes() {
