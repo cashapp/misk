@@ -15,8 +15,8 @@ import misk.time.timed
 import misk.tracing.traceWithSpan
 import java.time.Duration
 import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.ExecutionException
 import java.util.concurrent.ExecutorService
+import java.util.concurrent.Semaphore
 import javax.inject.Inject
 import javax.inject.Provider
 import javax.inject.Singleton
@@ -57,7 +57,7 @@ internal class SqsJobConsumer @Inject internal constructor(
         // Don't call handlers until all services are ready, otherwise handlers will crash because
         // the services they might need (databases, etc.) won't be ready.
         serviceManagerProvider.get().awaitHealthy()
-        receiver.runOnce()
+        if (receiver.runOnce()) Status.OK else Status.NO_WORK
       }
     }
   }
@@ -71,18 +71,24 @@ internal class SqsJobConsumer @Inject internal constructor(
     private val handler: JobHandler
   ) {
     private val prioritizedQueues = queueNames.map { queues[it] }
+    private val availableThreadSemaphore: Semaphore = Semaphore(config.consumer_thread_pool_size)
 
-    fun runOnce(): Status {
+    /**
+     * Pulls a batch of messages from one of the queues (in priority order), and process them using
+     * the thread pool. This method does not block waiting for the tasks to complete processing.
+     *
+     * @return true if there were messages to be processed.
+     */
+    fun runOnce(): Boolean {
       prioritizedQueues.forEach { resolvedQueue ->
-        val status = runOnce(resolvedQueue)
-        if (status != Status.NO_WORK) {
-          return@runOnce status
+        if (runOnce(resolvedQueue)) {
+          return@runOnce true
         }
       }
-      return Status.NO_WORK
+      return false
     }
 
-    private fun runOnce(queue: ResolvedQueue): Status {
+    private fun runOnce(queue: ResolvedQueue): Boolean {
       val (receiveDuration, messages) = queue.call { client ->
         val receiveRequest = ReceiveMessageRequest()
           .withAttributeNames("All")
@@ -98,46 +104,41 @@ internal class SqsJobConsumer @Inject internal constructor(
       metrics.sqsReceiveTime.record(receiveDuration.toMillis().toDouble(), queueName.value, queueName.value)
 
       if (messages.size == 0) {
-        return Status.NO_WORK
+        return false
       }
 
-      val futures = messages.map { SqsJob(queueName, queues, metrics, it) }.map { message ->
-        dispatchThreadPool.submit {
-          metrics.jobsReceived.labels(queueName.value, queueName.value).inc()
+      messages.map { SqsJob(queueName, queues, metrics, it) }.forEach { message ->
+        availableThreadSemaphore.acquire()
+        try {
+          dispatchThreadPool.submit {
+            metrics.jobsReceived.labels(queueName.value, queueName.value).inc()
 
-          tracer.traceWithSpan("handle-job-${queueName.value}") { span ->
-            // If the incoming job has an original trace id, set that as a tag on the new span.
-            // We don't turn that into the parent of the current span because that would
-            // incorrectly include the execution time of the job in the execution time of the
-            // action that triggered the job        q
-            message.attributes[SqsJob.ORIGINAL_TRACE_ID_ATTR]?.let {
-              ORIGINAL_TRACE_ID_TAG.set(span, it)
-            }
+            tracer.traceWithSpan("handle-job-${queueName.value}") { span ->
+              // If the incoming job has an original trace id, set that as a tag on the new span.
+              // We don't turn that into the parent of the current span because that would
+              // incorrectly include the execution time of the job in the execution time of the
+              // action that triggered the job        q
+              message.attributes[SqsJob.ORIGINAL_TRACE_ID_ATTR]?.let {
+                ORIGINAL_TRACE_ID_TAG.set(span, it)
+              }
 
-            // Run the handler and record timing
-            try {
-              val (duration, _) = timed { handler.handleJob(message) }
-              metrics.handlerDispatchTime.record(duration.toMillis().toDouble(), queueName.value, queueName.value)
-            } catch (th: Throwable) {
-              log.error(th) { "error handling job from ${queueName.value}" }
-              metrics.handlerFailures.labels(queueName.value, queueName.value).inc()
-              Tags.ERROR.set(span, true)
-              throw th
+              // Run the handler and record timing
+              try {
+                val (duration, _) = timed { handler.handleJob(message) }
+                metrics.handlerDispatchTime.record(duration.toMillis().toDouble(), queueName.value)
+              } catch (th: Throwable) {
+                log.error(th) { "error handling job from ${queueName.value}" }
+                metrics.handlerFailures.labels(queueName.value).inc()
+                Tags.ERROR.set(span, true)
+                throw th
+              }
             }
           }
+        } finally {
+          availableThreadSemaphore.release()
         }
       }
-
-      for (future in futures) {
-        try {
-          future.get()
-        } catch (e: ExecutionException) {
-          // the exception was already logged when the dispatched task failed above
-          return Status.FAILED
-        }
-      }
-
-      return Status.OK
+      return true
     }
   }
 

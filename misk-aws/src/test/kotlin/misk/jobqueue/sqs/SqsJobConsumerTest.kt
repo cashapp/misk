@@ -6,7 +6,6 @@ import misk.jobqueue.Job
 import misk.jobqueue.JobHandler
 import misk.jobqueue.JobQueue
 import misk.jobqueue.QueueName
-import misk.tasks.Status
 import misk.testing.MiskExternalDependency
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
@@ -14,6 +13,8 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.concurrent.CopyOnWriteArrayList
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 @MiskTest(startService = true)
@@ -54,8 +55,8 @@ internal class SqsJobConsumerTest {
     }
   }
 
-  @Test fun emptyQueuesReturnsNoWork() {
-    assertThat(consumer.QueueReceiver(queueNames, handler).runOnce()).isEqualTo(Status.NO_WORK)
+  @Test fun emptyQueuesReturnsFalse() {
+    assertThat(consumer.QueueReceiver(queueNames, handler).runOnce()).isFalse()
     assertThat(handledJobs).isEmpty()
   }
 
@@ -66,10 +67,10 @@ internal class SqsJobConsumerTest {
     enqueue(1, 1)
     enqueue(0, 2)
 
-    assertThat(receiver.runOnce()).isEqualTo(Status.OK)
-    assertThat(receiver.runOnce()).isEqualTo(Status.OK)
-    assertThat(receiver.runOnce()).isEqualTo(Status.OK)
-    assertThat(receiver.runOnce()).isEqualTo(Status.NO_WORK)
+    assertThat(receiver.runOnce()).isTrue()
+    assertThat(receiver.runOnce()).isTrue()
+    assertThat(receiver.runOnce()).isTrue()
+    assertThat(receiver.runOnce()).isFalse()
 
     assertThat(handledJobs.map { it.body }).containsExactly(
         "this is job 2",
@@ -91,17 +92,17 @@ internal class SqsJobConsumerTest {
     // enqueue 11 jobs on low priority queue (batch size is ten)
     (1..11).forEach { enqueue(1, it) }
 
-    assertThat(receiver.runOnce()).isEqualTo(Status.OK)
-    assertThat(receiver.runOnce()).isEqualTo(Status.OK)
+    assertThat(receiver.runOnce()).isTrue()
+    assertThat(receiver.runOnce()).isTrue()
 
     // enqueue another job on the high priority queue. this should be processed before the 3rd job.
     enqueue(0, 12)
 
     // process the high priority job
-    assertThat(receiver.runOnce()).isEqualTo(Status.OK)
+    assertThat(receiver.runOnce()).isTrue()
     // process the low priority job
-    assertThat(receiver.runOnce()).isEqualTo(Status.OK)
-    assertThat(receiver.runOnce()).isEqualTo(Status.NO_WORK)
+    assertThat(receiver.runOnce()).isTrue()
+    assertThat(receiver.runOnce()).isFalse()
 
     val jobNames = handledJobs.map { it.body }
 
@@ -110,6 +111,56 @@ internal class SqsJobConsumerTest {
     assertThat(jobNames.slice(1..10)).containsAll((1..10).map(name))
     assertThat(jobNames[11]).isEqualTo(name(12))
     assertThat(jobNames[12]).isEqualTo(name(11))
+  }
+
+  @Test fun doesNotBlockOnProcessing() {
+    val countDownLatch = CountDownLatch(1)
+    val countDownLatch2 = CountDownLatch(4)
+    handler = object : JobHandler {
+      override fun handleJob(job: Job) {
+        assertThat(countDownLatch.await(100, TimeUnit.MILLISECONDS)).isTrue()
+        handledJobs.add(job)
+        job.acknowledge()
+        countDownLatch2.countDown()
+      }
+    }
+    val receiver = consumer.QueueReceiver(queueNames, handler)
+
+    (0..3).forEach { enqueue(0, it) }
+    assertThat(receiver.runOnce()).isTrue()
+    assertThat(handledJobs).isEmpty()
+    countDownLatch.countDown()
+    assertThat(countDownLatch2.await(100, TimeUnit.MILLISECONDS)).isTrue()
+    assertThat(handledJobs).hasSize(4)
+  }
+
+  @Test fun waitsForThreadToBeAvailable() {
+    val startJobLatch = CountDownLatch(1)
+    val fourJobsFinishedLatch = CountDownLatch(4)
+    val allJobsFinishedLatch = CountDownLatch(5)
+    val finishJobLatch = CountDownLatch(1)
+
+    handler = object : JobHandler {
+      override fun handleJob(job: Job) {
+        assertThat(startJobLatch.await(10, TimeUnit.SECONDS)).isTrue()
+        handledJobs.add(job)
+        job.acknowledge()
+        fourJobsFinishedLatch.countDown()
+        allJobsFinishedLatch.countDown()
+        assertThat(finishJobLatch.await(10, TimeUnit.SECONDS)).isTrue()
+      }
+    }
+    val receiver = consumer.QueueReceiver(queueNames, handler)
+
+    (0..4).forEach { enqueue(0, it) }
+    assertThat(receiver.runOnce()).isTrue()
+    assertThat(handledJobs).isEmpty()
+    startJobLatch.countDown()
+    assertThat(fourJobsFinishedLatch.await(100, TimeUnit.MILLISECONDS)).isTrue()
+    assertThat(handledJobs).hasSize(4)
+    finishJobLatch.countDown()
+    assertThat(allJobsFinishedLatch.await(100, TimeUnit.MILLISECONDS)).isTrue()
+    assertThat(handledJobs).hasSize(5)
   }
 
   private fun enqueue(queueId: Int, jobId: Int) {
