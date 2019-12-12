@@ -13,6 +13,7 @@ import okhttp3.EventListener
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import java.lang.reflect.Proxy
+import javax.inject.Singleton
 import kotlin.reflect.KClass
 
 /**
@@ -41,8 +42,9 @@ class TypedHttpClientModule<T : Any>(
 
     val httpClientProvider = binder().getProvider(httpClientKey)
     val key = if (annotation == null) Key.get(kclass.java) else Key.get(kclass.java, annotation)
-    bind(key).toProvider(
-        TypedClientProvider(kclass, name, httpClientProvider, retrofitBuilderProvider))
+    bind(key)
+        .toProvider(TypedClientProvider(kclass, name, httpClientProvider, retrofitBuilderProvider))
+        .`in`(Singleton::class.java)
   }
 
   companion object {
@@ -104,7 +106,9 @@ class TypedPeerHttpClientModule<T : Any>(
         Types.newParameterizedType(TypedPeerClientFactory::class.java,
             kclass.java)) as Key<TypedPeerClientFactory<T>>
 
-    bind(key).toProvider(PeerTypedClientProvider(kclass, name, retrofitBuilderProvider))
+    bind(key)
+        .toProvider(PeerTypedClientProvider(kclass, name, retrofitBuilderProvider))
+        .`in`(Singleton::class.java)
   }
 
   companion object {
