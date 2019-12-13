@@ -20,7 +20,8 @@ dependencies {
   compile dep.okHttp
   compile dep.okio
   compile dep.kotlinReflection
-  compile dep.moshi
+  compile dep.moshiCore
+  compile dep.moshiKotlin
   compile dep.moshiAdapters
   compile dep.jettyHttp2
   compile dep.jettyServer

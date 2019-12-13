@@ -24,6 +24,7 @@ class DashboardMetadataActionTest {
 
   @Inject private lateinit var jetty: JettyService
   @Inject private lateinit var httpClientFactory: HttpClientFactory
+  @Inject private lateinit var moshi: Moshi
 
   private inline fun <reified A: Annotation>asDashboardPath() = "/api/dashboard/${slugify<A>()}/metadata"
 
@@ -114,7 +115,6 @@ class DashboardMetadataActionTest {
     val call = client.newCall(requestBuilder.build())
     val response = call.execute()
 
-    val moshi = Moshi.Builder().build()
     val responseAdaptor = moshi.adapter<DashboardMetadataAction.Response>()
     return responseAdaptor.fromJson(response.body!!.source())!!
   }
