@@ -1,16 +1,16 @@
 package misk.clustering.fake
 
 import misk.clustering.Cluster
-import misk.clustering.ClusterResourceMapper
+import misk.clustering.partition.Partitioner
 import misk.clustering.NoMembersAvailableException
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicReference
 
 /**
- * An [ExplicitClusterResourceMapper] is a [ClusterResourceMapper] where the mapping
+ * An [ExplicitPartitioner] is a [Partitioner] where the mapping
  * is explicit managed.
  */
-class ExplicitClusterResourceMapper : ClusterResourceMapper {
+class ExplicitPartitioner : Partitioner {
   private val mappings = ConcurrentHashMap<String, Cluster.Member>()
   private val defaultMapping = AtomicReference<Cluster.Member>()
 

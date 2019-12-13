@@ -1,6 +1,8 @@
 package misk.clustering
 
 import com.google.common.util.concurrent.AbstractExecutionThreadService
+import misk.clustering.partition.ClusterHashRing
+import misk.clustering.partition.Partitioner
 import misk.logging.getLogger
 import org.eclipse.jetty.util.BlockingArrayQueue
 import java.util.concurrent.atomic.AtomicBoolean
@@ -16,14 +18,14 @@ import javax.inject.Singleton
 @Singleton
 internal class DefaultCluster(
   self: Cluster.Member,
-  private val newResourceMapperFn: (members: Set<Cluster.Member>) -> ClusterResourceMapper =
+  private val newPartitionerFn: (members: Set<Cluster.Member>) -> Partitioner =
       { ClusterHashRing(it) }
 ) : AbstractExecutionThreadService(), Cluster, ClusterService {
   private val snapshotRef = AtomicReference<Cluster.Snapshot>(Cluster.Snapshot(
       self = self,
       selfReady = false,
       readyMembers = setOf(),
-      resourceMapper = newResourceMapper(setOf())
+      partitioner = newPartitioner(setOf())
   ))
   private val running = AtomicBoolean(false)
   private val actions = BlockingArrayQueue<(MutableSet<ClusterWatch>) -> Unit>()
@@ -103,8 +105,8 @@ internal class DefaultCluster(
     actions.add { _ -> callback() }
   }
 
-  override fun newResourceMapper(readyMembers: Set<Cluster.Member>) =
-      newResourceMapperFn(readyMembers)
+  override fun newPartitioner(readyMembers: Set<Cluster.Member>) =
+      newPartitionerFn(readyMembers)
 
   /**
    * [ClusterChangeTracker] is an internal helper class used to track diffs to a cluster as
@@ -141,7 +143,7 @@ internal class DefaultCluster(
           self = snapshot.self,
           selfReady = readyMembers.containsKey(snapshot.self.name),
           readyMembers = newReadyMembers,
-          resourceMapper = cluster.newResourceMapper(newReadyMembers)
+          partitioner = cluster.newPartitioner(newReadyMembers)
       ), added = membersAdded.toSet(), removed = membersRemoved.toSet())
     }
   }

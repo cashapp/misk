@@ -3,6 +3,7 @@ package misk.clustering
 import com.google.common.hash.HashCode
 import com.google.common.hash.HashFunction
 import com.google.common.hash.Hashing
+import misk.clustering.partition.ClusterHashRing
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -11,7 +12,8 @@ internal class ClusterHashRingTest {
   @Test fun singleNode() {
     val zork = Cluster.Member("zork", "192.49.168.23")
     val hashRing =
-        ClusterHashRing(members = setOf(zork), hashFn = Hashing.murmur3_32(0))
+        ClusterHashRing(members = setOf(zork),
+            hashFn = Hashing.murmur3_32(0))
     assertThat(listOf("foo", "bar", "zed").map { hashRing[it] }).containsExactly(zork, zork, zork)
   }
 
@@ -46,7 +48,8 @@ internal class ClusterHashRingTest {
 
   @Test fun zeroNodes() {
     val hashRing =
-        ClusterHashRing(members = setOf(), hashFn = Hashing.murmur3_32(0))
+        ClusterHashRing(members = setOf(),
+            hashFn = Hashing.murmur3_32(0))
     assertThrows<NoMembersAvailableException> {
       hashRing["foo"]
     }
@@ -70,13 +73,13 @@ internal class ClusterHashRingTest {
     val hashRing = ClusterHashRing(
         members = setOf(a, b, c),
         hashFn = FakeHashFn(mapOf(
-          "a 0" to 100,
-          "b 0" to 200,
-          "c 0" to 300,
-          "foo" to 50,
-          "bar" to 150,
-          "zed" to 250,
-          "zork" to 350
+            "a 0" to 100,
+            "b 0" to 200,
+            "c 0" to 300,
+            "foo" to 50,
+            "bar" to 150,
+            "zed" to 250,
+            "zork" to 350
         )),
         vnodesCount = 1)
     assertThat(listOf("foo", "bar", "zed", "zork").map { hashRing[it] })

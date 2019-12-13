@@ -20,13 +20,13 @@ import javax.inject.Singleton
  */
 @Singleton
 class FakeCluster internal constructor(
-  val resourceMapper: ExplicitClusterResourceMapper,
+  val partitioner: ExplicitPartitioner,
   private val delegate: DefaultCluster
 ) : ClusterService by delegate, Cluster by delegate {
-  constructor(resourceMapper: ExplicitClusterResourceMapper) :
-      this(resourceMapper, DefaultCluster(self) { resourceMapper })
+  constructor(partitioner: ExplicitPartitioner) :
+      this(partitioner, DefaultCluster(self) { partitioner })
 
-  @Inject constructor() : this(ExplicitClusterResourceMapper().apply {
+  @Inject constructor() : this(ExplicitPartitioner().apply {
     setDefaultMapping(self)
   })
 

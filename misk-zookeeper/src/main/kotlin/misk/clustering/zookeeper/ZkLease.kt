@@ -13,7 +13,7 @@ import kotlin.concurrent.withLock
 /**
  * Zookeeper based load balanced lease.
  *
- * <p>Multiple servers use a [misk.clustering.ClusterResourceMapper] to determine which process should
+ * <p>Multiple servers use a [misk.clustering.Partitioner] to determine which process should
  * own a lease. As long as each process has the same view of the cluster, this mapping will be
  * consistent and processes will not actively compete for the same lease.
  *
@@ -199,7 +199,7 @@ internal class ZkLease(
   private fun shouldHoldLease(): Boolean {
     val clusterSnapshot = manager.cluster.snapshot
     val desiredLeaseOwner = try {
-      clusterSnapshot.resourceMapper[leaseResourceName]
+      clusterSnapshot.partitioner[leaseResourceName]
     } catch (e: NoMembersAvailableException) {
       log.warn { e.message }
       null

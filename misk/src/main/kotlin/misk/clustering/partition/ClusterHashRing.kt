@@ -1,7 +1,9 @@
-package misk.clustering
+package misk.clustering.partition
 
 import com.google.common.hash.HashFunction
 import com.google.common.hash.Hashing
+import misk.clustering.Cluster
+import misk.clustering.NoMembersAvailableException
 import java.util.Arrays
 import java.util.Objects
 
@@ -10,7 +12,7 @@ class ClusterHashRing(
   members: Collection<Cluster.Member>,
   private val hashFn: HashFunction = Hashing.murmur3_32(),
   private val vnodesCount: Int = 16
-) : ClusterResourceMapper {
+) : Partitioner {
   private val vnodes: IntArray
   private val vnodesToMembers: Map<Int, Cluster.Member>
 

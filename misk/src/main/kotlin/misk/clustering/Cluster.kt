@@ -1,5 +1,8 @@
 package misk.clustering
 
+import misk.clustering.partition.ClusterHashRing
+import misk.clustering.partition.Partitioner
+
 /** A [ClusterWatch] is a callback function triggered when cluster membership changes */
 typealias ClusterWatch = (Cluster.Changes) -> Unit
 
@@ -29,8 +32,8 @@ interface Cluster {
     /** true if the current service instance is ready as perceived by the cluster manager */
     val selfReady: Boolean = readyMembers.any { it.name == self.name },
 
-    /** A [ClusterResourceMapper] built from the ready members of this cluster */
-    val resourceMapper: ClusterResourceMapper
+    /** A [Partitioner] built from the ready members of this cluster */
+    val partitioner: Partitioner
   ) {
     /** The of the ready peers; basically all of the ready cluster members except sel */
     val readyPeers: Set<Member> = readyMembers - self
@@ -42,7 +45,7 @@ interface Cluster {
   /** Registers interest in cluster changes */
   fun watch(watch: ClusterWatch)
 
-  /** @return A new [ClusterResourceMapper] for the given set of ready members */
-  fun newResourceMapper(readyMembers: Set<Cluster.Member>): ClusterResourceMapper =
+  /** @return A new [Partitioner] for the given set of ready members */
+  fun newPartitioner(readyMembers: Set<Cluster.Member>): Partitioner =
       ClusterHashRing(readyMembers)
 }

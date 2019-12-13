@@ -42,7 +42,7 @@ internal class ZkLeaseTest {
   @BeforeEach
   fun initCurator() {
     // By default, map all resources to another process
-    cluster.resourceMapper.setDefaultMapping(Cluster.Member("not-me", "10.0.0.3"))
+    cluster.partitioner.setDefaultMapping(Cluster.Member("not-me", "10.0.0.3"))
 
     leaseNamespace = leaseManager.leaseNamespace
     leasePath = "$leaseNamespace/$LEASE_NAME"
@@ -57,7 +57,7 @@ internal class ZkLeaseTest {
   }
 
   @Test fun acquiresLeaseIfMappedToSelf() {
-    cluster.resourceMapper.addMapping(leasePath, self)
+    cluster.partitioner.addMapping(leasePath, self)
 
     val lease = leaseManager.requestLease(LEASE_NAME)
     assertThat(lease.checkHeld()).isTrue()
@@ -86,7 +86,7 @@ internal class ZkLeaseTest {
   }
 
   @Test fun releasesLeaseAfterClusterWeightChanges() {
-    cluster.resourceMapper.addMapping(leasePath, self)
+    cluster.partitioner.addMapping(leasePath, self)
 
     val lease = leaseManager.requestLease(LEASE_NAME)
     assertThat(lease.checkHeld()).isTrue()
@@ -98,13 +98,13 @@ internal class ZkLeaseTest {
   }
 
   @Test fun releasesAcquiredLeaseIfMappingChangesAwayFromSelf() {
-    cluster.resourceMapper.addMapping(leasePath, self)
+    cluster.partitioner.addMapping(leasePath, self)
 
     val lease = leaseManager.requestLease(LEASE_NAME)
     assertThat(lease.checkHeld()).isTrue()
 
     // Fake a cluster change which moves the lease to another process
-    cluster.resourceMapper.removeMapping(leasePath)
+    cluster.partitioner.removeMapping(leasePath)
     leaseManager.checkAllLeases()
 
     // Should no longer own the lease and should have deleted the lease node
@@ -113,7 +113,7 @@ internal class ZkLeaseTest {
   }
 
   @Test fun doesNotAcquireLeaseIfManagerShutdown() {
-    cluster.resourceMapper.addMapping(leasePath, self)
+    cluster.partitioner.addMapping(leasePath, self)
 
     leaseManager.stopAsync()
     leaseManager.awaitTerminated(5, TimeUnit.SECONDS)
@@ -126,7 +126,7 @@ internal class ZkLeaseTest {
   }
 
   @Test fun failsAcquireLeaseIfOwnedByAnotherProcess() {
-    cluster.resourceMapper.addMapping(leasePath, self)
+    cluster.partitioner.addMapping(leasePath, self)
 
     curator.usingNamespace(leaseNamespace.asZkNamespace)
         .create()
@@ -139,7 +139,7 @@ internal class ZkLeaseTest {
   }
 
   @Test fun doesNotHoldLeaseIfZkDisconnected() {
-    cluster.resourceMapper.addMapping(leasePath, self)
+    cluster.partitioner.addMapping(leasePath, self)
 
     val lease = leaseManager.requestLease(LEASE_NAME)
     assertThat(lease.checkHeld()).isTrue()
@@ -151,7 +151,7 @@ internal class ZkLeaseTest {
   }
 
   @Test fun reacquiresLeaseIfZkDisconnectedWhileLeaseOwned() {
-    cluster.resourceMapper.addMapping(leasePath, self)
+    cluster.partitioner.addMapping(leasePath, self)
 
     val lease = leaseManager.requestLease(LEASE_NAME)
     assertThat(lease.checkHeld()).isTrue()
@@ -168,7 +168,7 @@ internal class ZkLeaseTest {
   }
 
   @Test fun releaseLeasesAtShutdown() {
-    cluster.resourceMapper.addMapping(leasePath, self)
+    cluster.partitioner.addMapping(leasePath, self)
 
     val lease = leaseManager.requestLease(LEASE_NAME)
     assertThat(lease.checkHeld()).isTrue()
@@ -195,7 +195,7 @@ internal class ZkLeaseTest {
   }
 
   @Test fun doesNotReleaseLeaseIfHeldByAnotherProcess() {
-    cluster.resourceMapper.addMapping(leasePath, self)
+    cluster.partitioner.addMapping(leasePath, self)
 
     val lease = leaseManager.requestLease(LEASE_NAME)
     assertThat(lease.checkHeld()).isTrue()
@@ -215,7 +215,7 @@ internal class ZkLeaseTest {
   }
 
   @Test fun neverExitsClosedState() {
-    cluster.resourceMapper.addMapping(leasePath, self)
+    cluster.partitioner.addMapping(leasePath, self)
 
     val lease = leaseManager.requestLease(LEASE_NAME)
     assertThat(lease.checkHeld()).isTrue()
@@ -238,7 +238,7 @@ internal class ZkLeaseTest {
     verifyNoMoreInteractions(listenerMock)
 
     // Assign the lease to this node
-    cluster.resourceMapper.addMapping(leasePath, self)
+    cluster.partitioner.addMapping(leasePath, self)
 
     verifyNoMoreInteractions(listenerMock)
     // checkHeld() should trigger the lease to be acquired
@@ -253,7 +253,7 @@ internal class ZkLeaseTest {
     reset(listenerMock)
 
     // Fake a cluster change which moves the lease to another process
-    cluster.resourceMapper.removeMapping(leasePath)
+    cluster.partitioner.removeMapping(leasePath)
 
     // Should no longer own the lease and should have deleted the lease node
     assertThat(lease.checkHeld()).isFalse()
@@ -263,7 +263,7 @@ internal class ZkLeaseTest {
   @Test fun listenerLateRegistrationGetsNotified() {
     val listenerMock = Mockito.mock<Lease.StateChangeListener>()
 
-    cluster.resourceMapper.addMapping(leasePath, self)
+    cluster.partitioner.addMapping(leasePath, self)
     val lease = leaseManager.requestLease(LEASE_NAME)
     assertThat(lease.checkHeld()).isTrue()
 
@@ -272,7 +272,7 @@ internal class ZkLeaseTest {
   }
 
   @Test fun checkLeaseInListenerDoesNotDeadlock() {
-    cluster.resourceMapper.addMapping(leasePath, self)
+    cluster.partitioner.addMapping(leasePath, self)
     val lease = leaseManager.requestLease(LEASE_NAME)
     assertThat(lease.checkHeld()).isTrue()
 
