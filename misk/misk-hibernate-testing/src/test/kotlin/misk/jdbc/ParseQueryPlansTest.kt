@@ -1,6 +1,7 @@
 package misk.jdbc
 
 import com.squareup.moshi.Moshi
+import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import okio.Buffer
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
@@ -54,8 +55,11 @@ class ParseQueryPlansTest {
 """
 
   @Test fun parseQueryPlans() {
+    val moshi = Moshi.Builder()
+        .add(KotlinJsonAdapterFactory())
+        .build()
     val plans = VitessScaleSafetyChecks.parseQueryPlans(
-        Moshi.Builder().build(),
+        moshi,
         Buffer().writeUtf8(queryPlans)
     ).toList()
     assertEquals(2, plans.count())

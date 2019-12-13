@@ -8,6 +8,7 @@ import com.google.common.cache.CacheLoader
 import com.google.common.cache.LoadingCache
 import com.google.common.util.concurrent.AbstractIdleService
 import com.squareup.moshi.Moshi
+import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import misk.environment.Environment
 import misk.environment.Environment.DEVELOPMENT
 import misk.environment.Environment.TESTING
@@ -85,7 +86,9 @@ class StartDatabaseService(
     val docker: DockerClient = DockerClientBuilder.getInstance()
         .withDockerCmdExecFactory(NettyDockerCmdExecFactory())
         .build()
-    val moshi = Moshi.Builder().build()
+    val moshi = Moshi.Builder()
+        .add(KotlinJsonAdapterFactory())
+        .build()
 
     /**
      * Global cache of running database servers.
