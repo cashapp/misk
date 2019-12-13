@@ -38,7 +38,8 @@ class CockroachCluster(
         config.username, config.password)
   }
 
-  val httpPort = 8080
+  val externalHttpPort = 26258
+  val internalHttpPort = 8080
   val postgresPort = 26257
 }
 
@@ -114,7 +115,7 @@ class DockerCockroachCluster(
   }
 
   private fun doStart() {
-    val httpPort = ExposedPort.tcp(cluster.httpPort)
+    val httpPort = ExposedPort.tcp(cluster.internalHttpPort)
     if (cluster.config.type == DataSourceType.COCKROACHDB) {
       if (cluster.config.port != null && cluster.config.port != cluster.postgresPort) {
         throw RuntimeException(
@@ -123,7 +124,7 @@ class DockerCockroachCluster(
     }
     val postgresPort = ExposedPort.tcp(cluster.postgresPort)
     val ports = Ports()
-    ports.bind(httpPort, Ports.Binding.bindPort(httpPort.port))
+    ports.bind(httpPort, Ports.Binding.bindPort(cluster.externalHttpPort))
     ports.bind(postgresPort, Ports.Binding.bindPort(postgresPort.port))
 
     val cmd = arrayOf(
