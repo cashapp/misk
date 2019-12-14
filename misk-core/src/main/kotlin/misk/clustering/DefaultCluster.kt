@@ -14,17 +14,18 @@ import javax.inject.Singleton
  * that need to be triggered as the cluster changes.
  */
 @Singleton
-internal class DefaultCluster(
+class DefaultCluster(
   self: Cluster.Member,
   private val newResourceMapperFn: (members: Set<Cluster.Member>) -> ClusterResourceMapper =
       { ClusterHashRing(it) }
 ) : AbstractExecutionThreadService(), Cluster, ClusterService {
-  private val snapshotRef = AtomicReference<Cluster.Snapshot>(Cluster.Snapshot(
-      self = self,
-      selfReady = false,
-      readyMembers = setOf(),
-      resourceMapper = newResourceMapper(setOf())
-  ))
+  private val snapshotRef = AtomicReference<Cluster.Snapshot>(
+      Cluster.Snapshot(
+          self = self,
+          selfReady = false,
+          readyMembers = setOf(),
+          resourceMapper = newResourceMapper(setOf())
+      ))
   private val running = AtomicBoolean(false)
   private val actions = LinkedBlockingQueue<(MutableSet<ClusterWatch>) -> Unit>()
 
@@ -99,7 +100,7 @@ internal class DefaultCluster(
    * Triggers a callback once all of the actions on the queue have been processed. Useful
    * for writing deterministic tests
    */
-  internal fun syncPoint(callback: () -> Unit) {
+  fun syncPoint(callback: () -> Unit) {
     actions.add { _ -> callback() }
   }
 
