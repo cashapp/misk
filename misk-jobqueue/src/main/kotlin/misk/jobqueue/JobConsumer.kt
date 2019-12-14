@@ -17,6 +17,8 @@ interface JobConsumer {
    * will be starved.
    */
   fun subscribe(queueNames: List<QueueName>, handler: JobHandler)
+
+  fun subscribe(queueName: QueueName, handler: JobHandler) = subscribe(listOf(queueName), handler)
 }
 
 inline fun JobConsumer.subscribe(queueName: QueueName, crossinline handler: (Job) -> Unit) =
