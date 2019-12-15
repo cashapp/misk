@@ -348,7 +348,7 @@ internal class SqsJobQueueTest {
     }
     queue.enqueue(queueName, "fail away")
     val receiver = (consumer as SqsJobConsumer).getReceiver(queueName)
-    assertThat(receiver.runOnce()).isEqualTo(Status.FAILED)
+    assertThat(receiver.runOnce()).isTrue()
   }
 
   @Test fun noWork() {
@@ -357,7 +357,7 @@ internal class SqsJobQueueTest {
       throw IllegalStateException("boom!")
     }
     val receiver = (consumer as SqsJobConsumer).getReceiver(queueName)
-    assertThat(receiver.runOnce()).isEqualTo(Status.NO_WORK)
+    assertThat(receiver.runOnce()).isFalse()
   }
 
   private fun turnOffTaskQueue() {
