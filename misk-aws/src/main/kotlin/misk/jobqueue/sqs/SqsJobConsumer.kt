@@ -125,10 +125,11 @@ internal class SqsJobConsumer @Inject internal constructor(
               // Run the handler and record timing
               try {
                 val (duration, _) = timed { handler.handleJob(message) }
-                metrics.handlerDispatchTime.record(duration.toMillis().toDouble(), queueName.value)
+                metrics.handlerDispatchTime.record(duration.toMillis().toDouble(), queueName.value,
+                    queueName.value)
               } catch (th: Throwable) {
                 log.error(th) { "error handling job from ${queueName.value}" }
-                metrics.handlerFailures.labels(queueName.value).inc()
+                metrics.handlerFailures.labels(queueName.value, queueName.value).inc()
                 Tags.ERROR.set(span, true)
                 throw th
               }
