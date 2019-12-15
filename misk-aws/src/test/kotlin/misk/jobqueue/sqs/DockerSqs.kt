@@ -21,7 +21,7 @@ import misk.testing.ExternalDependency
 internal object DockerSqs : ExternalDependency {
 
   private val log = getLogger<DockerSqs>()
-  private const val clientPort = 4100
+  private const val clientPort = 9324
 
   override fun beforeEach() {
     // noop
@@ -39,9 +39,8 @@ internal object DockerSqs : ExternalDependency {
     // NB(mmihic): Because the client port is embedded directly into the queue URLs, we have to use
     // the same external port as we do for the internal port
     val exposedClientPort = ExposedPort.tcp(clientPort)
-    withImage("pafortin/goaws")
-        .withName("sqs")
-        .withCmd(listOf("goaws"))
+    withImage("roribio16/alpine-sqs")
+        .withName("alpine-sqs")
         .withExposedPorts(exposedClientPort)
         .withPortBindings(
             Ports().apply { bind(exposedClientPort, Ports.Binding.bindPort(clientPort)) })
