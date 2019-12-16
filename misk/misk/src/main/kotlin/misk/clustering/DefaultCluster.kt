@@ -2,7 +2,7 @@ package misk.clustering
 
 import com.google.common.util.concurrent.AbstractExecutionThreadService
 import misk.logging.getLogger
-import org.eclipse.jetty.util.BlockingArrayQueue
+import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicReference
 import javax.inject.Singleton
@@ -26,7 +26,7 @@ internal class DefaultCluster(
       resourceMapper = newResourceMapper(setOf())
   ))
   private val running = AtomicBoolean(false)
-  private val actions = BlockingArrayQueue<(MutableSet<ClusterWatch>) -> Unit>()
+  private val actions = LinkedBlockingQueue<(MutableSet<ClusterWatch>) -> Unit>()
 
   override val snapshot: Cluster.Snapshot get() = snapshotRef.get()
 
