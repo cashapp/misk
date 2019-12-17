@@ -116,13 +116,6 @@ internal class FakeFeatureFlagsTest {
 
   @Test
   fun invalidKeys() {
-    subject.override(FEATURE, 3)
-    assertThrows<IllegalArgumentException> {
-      subject.getInt(FEATURE, "bad(token)")
-    }
-    assertThrows<IllegalArgumentException> {
-      subject.getInt(FEATURE, "Bearer auth-token")
-    }
     assertThrows<IllegalArgumentException> {
       subject.getInt(FEATURE, "")
     }

@@ -10,7 +10,6 @@ import com.launchdarkly.shaded.com.google.common.base.Preconditions.checkState
 import com.squareup.moshi.Moshi
 import misk.feature.Attributes
 import misk.feature.Feature
-import misk.feature.FeatureFlagValidation
 import misk.feature.FeatureFlags
 import misk.feature.FeatureService
 import misk.feature.fromSafeJson
@@ -114,7 +113,7 @@ class LaunchDarklyFeatureFlags @Inject constructor(
   }
 
   private fun buildUser(feature: Feature, key: String, attributes: Attributes): LDUser {
-    FeatureFlagValidation.checkValidKey(feature, key)
+    require(key.isNotEmpty()) { "Key to flag $feature must not be empty" }
     val builder = LDUser.Builder(key)
     attributes.text.forEach { (k, v) ->
       when (k) {

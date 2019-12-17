@@ -129,12 +129,9 @@ internal class LaunchDarklyFeatureFlagsTest {
   }
 
   @Test
-  fun invalidKeys() {
+  fun emptyKey() {
     assertThrows<IllegalArgumentException> {
-      featureFlags.getString(Feature("which-dinosaur"), "bad(token)")
-    }
-    assertThrows<IllegalArgumentException> {
-      featureFlags.getEnum<Dinosaur>(Feature("which-dinosaur"), "")
+      featureFlags.getString(Feature("which-dinosaur"), "")
     }
   }
 

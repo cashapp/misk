@@ -5,7 +5,6 @@ import com.squareup.moshi.Moshi
 import misk.feature.Attributes
 import misk.feature.DynamicConfig
 import misk.feature.Feature
-import misk.feature.FeatureFlagValidation
 import misk.feature.FeatureFlags
 import misk.feature.FeatureService
 import misk.feature.fromSafeJson
@@ -78,14 +77,15 @@ class FakeFeatureFlags @Inject constructor(private val moshi : Provider<Moshi>) 
   override fun <T> getJson(feature: Feature, clazz: Class<T>): T = getJson(feature, KEY, clazz)
 
   private fun get(feature: Feature, key: String): Any? {
-    FeatureFlagValidation.checkValidKey(feature, key)
+    require(key.isNotEmpty()) { "Key to flag $feature must not be empty" }
+
     return overrides.getOrElse(MapKey(feature, key)) {
       overrides[MapKey(feature)]
     }
   }
 
   private fun <V> getOrDefault(feature: Feature, key: String, defaultValue: V): V {
-    FeatureFlagValidation.checkValidKey(feature, key)
+    require(key.isNotEmpty()) { "Key to flag $feature must not be empty" }
     @Suppress("unchecked_cast")
     return overrides.getOrElse(MapKey(feature, key)) {
       overrides.getOrDefault(MapKey(feature), defaultValue)
