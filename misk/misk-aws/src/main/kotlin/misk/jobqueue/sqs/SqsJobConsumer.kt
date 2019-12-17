@@ -88,7 +88,7 @@ internal class SqsJobConsumer @Inject internal constructor(
           .withAttributeNames("All")
           .withMessageAttributeNames("All")
           .withQueueUrl(queue.url)
-          .withMaxNumberOfMessages(10)
+          .withMaxNumberOfMessages(config.message_batch_size)
 
         timed { client.receiveMessage(receiveRequest).messages }
       }
