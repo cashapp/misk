@@ -323,7 +323,7 @@ internal class RealTransacter private constructor(
   }
 
   private fun isMessageRetryable(th: SQLException) =
-      isConnectionClosed(th) || isVitessTransactionNotFound(th)
+      isConnectionClosed(th) || isVitessTransactionNotFound(th) || isCockroachRestartTransaction(th)
 
   /**
    * This is thrown as a raw SQLException from Hikari even though it is most certainly a
@@ -348,6 +348,18 @@ internal class RealTransacter private constructor(
         message.contains("code = Aborted") &&
         message.contains("transaction") &&
         message.contains("not found")
+  }
+
+  /**
+   * "Messages with the error code 40001 and the string restart transaction indicate that a
+   * transaction failed because it conflicted with another concurrent or recent transaction
+   * accessing the same data. The transaction needs to be retried by the client."
+   * https://www.cockroachlabs.com/docs/stable/common-errors.html#restart-transaction
+   */
+  private fun isCockroachRestartTransaction(th: SQLException): Boolean {
+    val message = th.message
+    return th.errorCode == 40001 && message != null &&
+        message.contains("restart transaction")
   }
 
   private fun isCauseRetryable(th: Throwable) = th.cause?.let { isRetryable(it) } ?: false
