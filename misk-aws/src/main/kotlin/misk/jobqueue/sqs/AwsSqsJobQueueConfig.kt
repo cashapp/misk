@@ -25,5 +25,10 @@ class AwsSqsJobQueueConfig(
    */
   val consumer_thread_pool_size: Int = 4,
 
+  /**
+   * Max number of messages to pull from SQS with each request.
+   */
+  val message_batch_size: Int = 10,
+
   val task_queue: RepeatedTaskQueueConfig = RepeatedTaskQueueConfig()
 ) : Config
