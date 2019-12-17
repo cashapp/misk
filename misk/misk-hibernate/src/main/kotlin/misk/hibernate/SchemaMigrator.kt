@@ -111,12 +111,6 @@ internal class SchemaMigrator(
     if (config.vitess_schema_resource_root != null) {
       migrationsResources.add(config.vitess_schema_resource_root + "/" + keyspace.name)
     }
-    if (config.vitess_schema_dir != null) {
-      logger.warn {
-        "vitess_schema_dir config property is deprecated! " +
-            "Use vitess_schema_resource_root instead to make schema migration checks works."
-      }
-    }
     return migrationsResources.build()
   }
 
