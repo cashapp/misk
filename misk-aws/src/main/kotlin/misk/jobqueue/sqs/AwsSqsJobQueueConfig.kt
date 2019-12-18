@@ -30,5 +30,9 @@ class AwsSqsJobQueueConfig(
    */
   val message_batch_size: Int = 10,
 
-  val task_queue: RepeatedTaskQueueConfig = RepeatedTaskQueueConfig()
+  /**
+   * Task queue configuration, which should have a `num_parallel_tasks` equal or greater than the
+   * number of consumed queues. If undefined, an unbounded number of parallel tasks will be used.
+   */
+  val task_queue: RepeatedTaskQueueConfig?
 ) : Config
