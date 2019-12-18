@@ -16,6 +16,7 @@ import misk.jobqueue.JobQueue
 import misk.jobqueue.QueueName
 import misk.jobqueue.TransactionalJobQueue
 import misk.tasks.RepeatedTaskQueue
+import misk.tasks.RepeatedTaskQueueConfig
 import misk.tasks.RepeatedTaskQueueFactory
 import javax.inject.Inject
 
@@ -72,8 +73,11 @@ class AwsSqsJobQueueModule(
   ): RepeatedTaskQueue {
     return queueFactory.new(
         "sqs-consumer-poller",
-        config.task_queue)
+        repeatedTaskQueueConfig(config))
   }
+
+  private fun repeatedTaskQueueConfig(config: AwsSqsJobQueueConfig) =
+      config.task_queue ?: RepeatedTaskQueueConfig(num_parallel_tasks = -1)
 
   private class AmazonSQSProvider(val region: AwsRegion) : Provider<AmazonSQS> {
     @Inject lateinit var credentials: AWSCredentialsProvider
