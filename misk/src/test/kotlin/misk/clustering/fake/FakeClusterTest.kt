@@ -33,15 +33,15 @@ internal class FakeClusterTest {
     cluster.resourceMapper.setDefaultMapping(Cluster.Member("zork", "192.168.12.0"))
     cluster.resourceMapper.addMapping("my-object", Cluster.Member("bork", "192.168.12.1"))
 
-    assertThat(cluster.snapshot.resourceMapper["my-object"].name).isEqualTo("bork")
-    assertThat(cluster.snapshot.resourceMapper["other-object"].name).isEqualTo("zork")
+    assertThat(cluster.resourceMapper["my-object"].name).isEqualTo("bork")
+    assertThat(cluster.resourceMapper["other-object"].name).isEqualTo("zork")
 
     // Ensure resource mapper remains the same even through cluster changes
     cluster.clusterChanged(membersBecomingReady = setOf(Cluster.Member("blerp", "192.168.12.3")))
-    assertThat(cluster.snapshot.resourceMapper["my-object"].name).isEqualTo("bork")
-    assertThat(cluster.snapshot.resourceMapper["other-object"].name).isEqualTo("zork")
+    assertThat(cluster.resourceMapper["my-object"].name).isEqualTo("bork")
+    assertThat(cluster.resourceMapper["other-object"].name).isEqualTo("zork")
 
     cluster.resourceMapper.removeMapping("my-object")
-    assertThat(cluster.snapshot.resourceMapper["my-object"].name).isEqualTo("zork")
+    assertThat(cluster.resourceMapper["my-object"].name).isEqualTo("zork")
   }
 }

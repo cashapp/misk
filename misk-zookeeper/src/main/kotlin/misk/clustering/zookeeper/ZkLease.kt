@@ -1,5 +1,6 @@
 package misk.clustering.zookeeper
 
+import misk.clustering.ClusterResourceMapper
 import misk.clustering.NoMembersAvailableException
 import misk.clustering.lease.Lease
 import misk.clustering.weights.ClusterWeightProvider
@@ -39,6 +40,7 @@ internal class ZkLease(
   private val manager: ZkLeaseManager,
   private val leaseResourceName: String,
   private val clusterWeight: ClusterWeightProvider,
+  private val clusterResourceMapper: ClusterResourceMapper.Provider,
   override val name: String
 ) : Lease {
 
@@ -199,7 +201,7 @@ internal class ZkLease(
   private fun shouldHoldLease(): Boolean {
     val clusterSnapshot = manager.cluster.snapshot
     val desiredLeaseOwner = try {
-      clusterSnapshot.resourceMapper[leaseResourceName]
+      clusterResourceMapper.get()[leaseResourceName]
     } catch (e: NoMembersAvailableException) {
       log.warn { e.message }
       null

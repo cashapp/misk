@@ -5,6 +5,8 @@ import misk.clustering.ClusterResourceMapper
 import misk.clustering.NoMembersAvailableException
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicReference
+import javax.inject.Inject
+import javax.inject.Singleton
 
 /**
  * An [ExplicitClusterResourceMapper] is a [ClusterResourceMapper] where the mapping
@@ -36,5 +38,14 @@ class ExplicitClusterResourceMapper : ClusterResourceMapper {
     }
     return mappings[resourceId] ?: defaultMapping.get() ?: throw IllegalStateException(
         "no mapping for $resourceId")
+  }
+
+  @Singleton
+  class Provider @Inject constructor(): ClusterResourceMapper.Provider {
+    private val mapper = ExplicitClusterResourceMapper()
+
+    override fun get(): ExplicitClusterResourceMapper {
+      return mapper
+    }
   }
 }

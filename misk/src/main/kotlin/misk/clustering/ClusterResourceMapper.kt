@@ -12,4 +12,8 @@ interface ClusterResourceMapper {
    * @return The [Cluster.Member] that should own the given resource id
    */
   operator fun get(resourceId: String): Cluster.Member
+
+  interface Provider {
+    fun get(): ClusterResourceMapper
+  }
 }

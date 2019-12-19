@@ -27,10 +27,7 @@ interface Cluster {
     val readyMembers: Set<Cluster.Member>,
 
     /** true if the current service instance is ready as perceived by the cluster manager */
-    val selfReady: Boolean = readyMembers.any { it.name == self.name },
-
-    /** A [ClusterResourceMapper] built from the ready members of this cluster */
-    val resourceMapper: ClusterResourceMapper
+    val selfReady: Boolean = readyMembers.any { it.name == self.name }
   ) {
     /** The of the ready peers; basically all of the ready cluster members except sel */
     val readyPeers: Set<Member> = readyMembers - self
@@ -42,7 +39,4 @@ interface Cluster {
   /** Registers interest in cluster changes */
   fun watch(watch: ClusterWatch)
 
-  /** @return A new [ClusterResourceMapper] for the given set of ready members */
-  fun newResourceMapper(readyMembers: Set<Cluster.Member>): ClusterResourceMapper =
-      ClusterHashRing(readyMembers)
 }

@@ -9,7 +9,6 @@ import helpers.protos.Dinosaur
 import misk.MiskTestingServiceModule
 import misk.clustering.Cluster
 import misk.clustering.ClusterWatch
-import misk.clustering.fake.ExplicitClusterResourceMapper
 import misk.config.AppName
 import misk.inject.KAbstractModule
 import misk.security.ssl.CertStoreConfig
@@ -87,15 +86,10 @@ internal class TypedPeerHttpClientTest {
 
     init {
       val self = Cluster.Member(name = "self-name", ipAddress = memberIp)
-      val resourceMapper = ExplicitClusterResourceMapper()
-
-      resourceMapper.setDefaultMapping(self)
-
       snapshot = Cluster.Snapshot(
           self = self,
           readyMembers = setOf(),
-          selfReady = true,
-          resourceMapper = resourceMapper
+          selfReady = true
       )
     }
 

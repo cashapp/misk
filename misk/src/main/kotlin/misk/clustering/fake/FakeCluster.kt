@@ -23,12 +23,10 @@ class FakeCluster internal constructor(
   val resourceMapper: ExplicitClusterResourceMapper,
   private val delegate: DefaultCluster
 ) : ClusterService by delegate, Cluster by delegate {
-  constructor(resourceMapper: ExplicitClusterResourceMapper) :
-      this(resourceMapper, DefaultCluster(self) { resourceMapper })
-
-  @Inject constructor() : this(ExplicitClusterResourceMapper().apply {
-    setDefaultMapping(self)
-  })
+  @Inject constructor(resourceMapper: ExplicitClusterResourceMapper.Provider) :
+      this(resourceMapper.get(), DefaultCluster(self)) {
+    resourceMapper.get().setDefaultMapping(self)
+  }
 
   override fun watch(watch: ClusterWatch) {
     waitFor {

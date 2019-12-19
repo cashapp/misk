@@ -4,6 +4,8 @@ import com.google.common.hash.HashFunction
 import com.google.common.hash.Hashing
 import java.util.Arrays
 import java.util.Objects
+import javax.inject.Inject
+import javax.inject.Singleton
 
 /** A [ClusterHashRing] maps resources to cluster members based on a consistent hash */
 class ClusterHashRing(
@@ -54,5 +56,15 @@ class ClusterHashRing(
 
   override fun hashCode(): Int {
     return Objects.hash(vnodesCount, vnodesToMembers, Arrays.hashCode(vnodes))
+  }
+
+  @Singleton
+  class Provider @Inject constructor(
+    private val cluster: Cluster
+  ): ClusterResourceMapper.Provider {
+
+    override fun get(): ClusterResourceMapper {
+      return ClusterHashRing(cluster.snapshot.readyMembers)
+    }
   }
 }

@@ -9,7 +9,6 @@ import io.kubernetes.client.models.V1PodStatus
 import io.kubernetes.client.util.Watches
 import misk.MiskTestingServiceModule
 import misk.clustering.Cluster
-import misk.clustering.ClusterHashRing
 import misk.clustering.DefaultCluster
 import misk.clustering.kubernetes.KubernetesClusterWatcher.Companion.CHANGE_TYPE_ADDED
 import misk.clustering.kubernetes.KubernetesClusterWatcher.Companion.CHANGE_TYPE_DELETED
@@ -65,20 +64,17 @@ internal class KubernetesClusterTest {
         Cluster.Changes(snapshot = Cluster.Snapshot(
             self = expectedSelf,
             selfReady = false,
-            readyMembers = setOf(),
-            resourceMapper = ClusterHashRing(setOf())
+            readyMembers = setOf()
         )),
         Cluster.Changes(snapshot = Cluster.Snapshot(
             self = expectedSelf,
             selfReady = true,
-            readyMembers = setOf(expectedSelf),
-            resourceMapper = ClusterHashRing(setOf(expectedSelf))
+            readyMembers = setOf(expectedSelf)
         ), added = setOf(expectedSelf)),
         Cluster.Changes(snapshot = Cluster.Snapshot(
             self = expectedSelf,
             selfReady = false,
-            readyMembers = setOf(),
-            resourceMapper = ClusterHashRing(setOf())
+            readyMembers = setOf()
         ), removed = setOf(expectedSelf))
     )
   }
@@ -97,25 +93,19 @@ internal class KubernetesClusterTest {
         Cluster.Changes(snapshot = Cluster.Snapshot(
             self = expectedSelf,
             selfReady = false,
-            readyMembers = setOf(),
-            resourceMapper = ClusterHashRing(setOf())
+            readyMembers = setOf()
         )),
         Cluster.Changes(snapshot = Cluster.Snapshot(
             self = expectedSelf,
             selfReady = false,
-            readyMembers = setOf(Cluster.Member("larry-blerp", "10.0.0.3")),
-            resourceMapper = ClusterHashRing(setOf(Cluster.Member("larry-blerp", "10.0.0.3")))
+            readyMembers = setOf(Cluster.Member("larry-blerp", "10.0.0.3"))
         ), added = setOf(Cluster.Member("larry-blerp", "10.0.0.3"))),
         Cluster.Changes(snapshot = Cluster.Snapshot(
             self = expectedSelf,
             selfReady = false,
             readyMembers = setOf(
                 Cluster.Member("larry-blerp", "10.0.0.3"),
-                Cluster.Member("larry-blerp2", "10.0.0.4")),
-            resourceMapper = ClusterHashRing(setOf(
-                Cluster.Member("larry-blerp", "10.0.0.3"),
                 Cluster.Member("larry-blerp2", "10.0.0.4"))
-            )
         ), added = setOf(Cluster.Member("larry-blerp2", "10.0.0.4"))))
   }
 
@@ -139,19 +129,12 @@ internal class KubernetesClusterTest {
             selfReady = false,
             readyMembers = setOf(
                 Cluster.Member("larry-blerp", "10.0.0.3"),
-                Cluster.Member("larry-blerp2", "10.0.0.4")),
-            resourceMapper = ClusterHashRing(setOf(
-                Cluster.Member("larry-blerp", "10.0.0.3"),
-                Cluster.Member("larry-blerp2", "10.0.0.4"))
-            ))
+                Cluster.Member("larry-blerp2", "10.0.0.4")))
         ),
         Cluster.Changes(snapshot = Cluster.Snapshot(
             self = expectedSelf,
             selfReady = false,
-            readyMembers = setOf(Cluster.Member("larry-blerp2", "10.0.0.4")),
-            resourceMapper = ClusterHashRing(setOf(
-                Cluster.Member("larry-blerp2", "10.0.0.4")
-            ))
+            readyMembers = setOf(Cluster.Member("larry-blerp2", "10.0.0.4"))
         ), removed = setOf(Cluster.Member("larry-blerp", ""))))
   }
 
@@ -169,8 +152,7 @@ internal class KubernetesClusterTest {
         Cluster.Changes(snapshot = Cluster.Snapshot(
             self = expectedSelf,
             selfReady = false,
-            readyMembers = setOf(),
-            resourceMapper = ClusterHashRing(setOf())
+            readyMembers = setOf()
         )))
   }
 
@@ -188,8 +170,7 @@ internal class KubernetesClusterTest {
         Cluster.Changes(snapshot = Cluster.Snapshot(
             self = expectedSelf,
             selfReady = false,
-            readyMembers = setOf(),
-            resourceMapper = ClusterHashRing(setOf())
+            readyMembers = setOf()
         )))
   }
 
@@ -213,19 +194,12 @@ internal class KubernetesClusterTest {
             selfReady = false,
             readyMembers = setOf(
                 Cluster.Member("larry-blerp", "10.0.0.3"),
-                Cluster.Member("larry-blerp2", "10.0.0.4")),
-            resourceMapper = ClusterHashRing(setOf(
-                Cluster.Member("larry-blerp", "10.0.0.3"),
-                Cluster.Member("larry-blerp2", "10.0.0.4"))
-            ))
+                Cluster.Member("larry-blerp2", "10.0.0.4")))
         ),
         Cluster.Changes(snapshot = Cluster.Snapshot(
             self = expectedSelf,
             selfReady = false,
-            readyMembers = setOf(Cluster.Member("larry-blerp2", "10.0.0.4")),
-            resourceMapper = ClusterHashRing(setOf(
-                Cluster.Member("larry-blerp2", "10.0.0.4")
-            ))
+            readyMembers = setOf(Cluster.Member("larry-blerp2", "10.0.0.4"))
         ), removed = setOf(Cluster.Member("larry-blerp", "10.0.0.3"))))
   }
 
@@ -249,19 +223,12 @@ internal class KubernetesClusterTest {
             selfReady = false,
             readyMembers = setOf(
                 Cluster.Member("larry-blerp", "10.0.0.3"),
-                Cluster.Member("larry-blerp2", "10.0.0.4")),
-            resourceMapper = ClusterHashRing(setOf(
-                Cluster.Member("larry-blerp", "10.0.0.3"),
-                Cluster.Member("larry-blerp2", "10.0.0.4"))
-            ))
+                Cluster.Member("larry-blerp2", "10.0.0.4")))
         ),
         Cluster.Changes(snapshot = Cluster.Snapshot(
             self = expectedSelf,
             selfReady = false,
-            readyMembers = setOf(Cluster.Member("larry-blerp2", "10.0.0.4")),
-            resourceMapper = ClusterHashRing(setOf(
-                Cluster.Member("larry-blerp2", "10.0.0.4")
-            ))
+            readyMembers = setOf(Cluster.Member("larry-blerp2", "10.0.0.4"))
         ), removed = setOf(Cluster.Member("larry-blerp", ""))))
   }
 
