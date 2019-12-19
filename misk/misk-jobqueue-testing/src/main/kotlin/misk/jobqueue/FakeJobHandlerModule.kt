@@ -9,7 +9,7 @@ class FakeJobHandlerModule<T : JobHandler> private constructor(
 ) : KAbstractModule() {
 
   override fun configure() {
-    newMapBinder<QueuesKey, JobHandler>().addBinding(QueuesKey(listOf(queueName))).to(handler.java)
+    newMapBinder<QueueName, JobHandler>().addBinding(queueName).to(handler.java)
   }
 
   companion object {
