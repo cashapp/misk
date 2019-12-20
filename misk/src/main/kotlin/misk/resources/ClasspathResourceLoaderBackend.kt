@@ -17,7 +17,9 @@ internal object ClasspathResourceLoaderBackend : ResourceLoader.Backend() {
   init {
     val classLoader = ClasspathResourceLoaderBackend::class.java.classLoader
     val classPath = ClassPath.from(classLoader)
-    resourcesByPath = TreeMap(classPath.resources.associateBy { "/${it.resourceName}" })
+    resourcesByPath = TreeMap(classPath.resources.filter {
+      it !is ClassPath.ClassInfo
+    }.associateBy { "/${it.resourceName}" })
   }
 
   override fun open(path: String): BufferedSource? {
