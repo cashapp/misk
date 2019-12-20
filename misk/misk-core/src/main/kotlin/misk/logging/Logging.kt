@@ -36,7 +36,7 @@ fun KLogger.debug(th: Throwable, vararg tags: Tag, message: () -> Any?) =
     log(Level.DEBUG, th, tags = *tags, message = message)
 
 fun KLogger.log(level: Level, vararg tags: Tag, message: () -> Any?) {
-  withTags(*tags) {
+  misk.logging.withTags(*tags) {
     when (level) {
       Level.ERROR -> error(message)
       Level.WARN -> warn(message)
@@ -48,7 +48,7 @@ fun KLogger.log(level: Level, vararg tags: Tag, message: () -> Any?) {
 }
 
 fun KLogger.log(level: Level, th: Throwable, vararg tags: Tag, message: () -> Any?) {
-  withTags(*tags) {
+  misk.logging.withTags(*tags) {
     when (level) {
       Level.ERROR -> error(th, message)
       Level.INFO -> info(th, message)

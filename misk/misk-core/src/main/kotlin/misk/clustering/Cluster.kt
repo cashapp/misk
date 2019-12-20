@@ -24,7 +24,7 @@ interface Cluster {
     val self: Member,
 
     /** All of the members of the cluster that are up and reporting as ready to handle traffic */
-    val readyMembers: Set<Cluster.Member>,
+    val readyMembers: Set<Member>,
 
     /** true if the current service instance is ready as perceived by the cluster manager */
     val selfReady: Boolean = readyMembers.any { it.name == self.name },
@@ -43,6 +43,6 @@ interface Cluster {
   fun watch(watch: ClusterWatch)
 
   /** @return A new [ClusterResourceMapper] for the given set of ready members */
-  fun newResourceMapper(readyMembers: Set<Cluster.Member>): ClusterResourceMapper =
+  fun newResourceMapper(readyMembers: Set<Member>): ClusterResourceMapper =
       ClusterHashRing(readyMembers)
 }
