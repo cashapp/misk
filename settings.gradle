@@ -1,5 +1,6 @@
 include ':misk'
 include ':misk-aws'
+include ':misk-core'
 include ':misk-crypto'
 include ':misk-datadog'
 include ':misk-eventrouter'
