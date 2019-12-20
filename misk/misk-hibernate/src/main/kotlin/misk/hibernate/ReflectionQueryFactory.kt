@@ -117,6 +117,12 @@ internal class ReflectionQuery<T : DbEntity<T>>(
           builder.addInClause(root.traverse(path), collection)
         }
       }
+      Operator.NOT_IN -> {
+        val collection = value as Collection<*>
+        addConstraint { root, builder ->
+          builder.not(builder.addInClause(root.traverse(path), collection))
+        }
+      }
       Operator.IS_NOT_NULL -> {
         addConstraint { root, builder ->
           builder.isNotNull(root.traverse<Comparable<Comparable<*>>>(path))
@@ -630,6 +636,27 @@ internal class ReflectionQuery<T : DbEntity<T>>(
                 return reflectionQuery.addConstraint { root, builder ->
                   val collection = argToCollection(args[0])
                   builder.addInClause(root.traverse(path), collection)
+                }
+              }
+            }
+          }
+          Operator.NOT_IN -> {
+            val parameter = function.parameters[1]
+
+            val argToCollection: (Any) -> Collection<Any?> = when {
+              parameter.isVararg -> { arg -> (arg as Array<*>).toList() }
+              parameter.isAssignableTo(Collection::class) -> { arg -> (arg as Collection<*>) }
+              else -> {
+                errors.add("${function.name}() parameter must be a vararg or a collection")
+                return
+              }
+            }
+
+            object : QueryMethodHandler {
+              override fun invoke(reflectionQuery: ReflectionQuery<*>, args: Array<out Any>): Any? {
+                return reflectionQuery.addConstraint { root, builder ->
+                  val collection = argToCollection(args[0])
+                  builder.not(builder.addInClause(root.traverse(path), collection))
                 }
               }
             }

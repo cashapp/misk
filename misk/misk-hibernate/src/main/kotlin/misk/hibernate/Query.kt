@@ -15,19 +15,29 @@ interface Query<T> {
 
   /** Constrain a query using a path known only at runtime. */
   fun dynamicAddConstraint(path: String, operator: Operator, value: Any? = null)
+
   fun dynamicAddOrder(path: String, asc: Boolean)
 
   fun disableCheck(check: Check)
 
   /** Asserts that there is either zero or one results. */
   fun uniqueResult(session: Session): T?
+
   /** Manual projections are returned as a list of cells. Returns null if there were no results. */
-  fun dynamicUniqueResult(session: Session, selection: (CriteriaBuilder, Root<T>) -> Selection<out Any>): List<Any?>?
+  fun dynamicUniqueResult(
+    session: Session,
+    selection: (CriteriaBuilder, Root<T>) -> Selection<out Any>
+  ): List<Any?>?
+
   fun dynamicUniqueResult(session: Session, projectedPaths: List<String>): List<Any?>?
 
   fun list(session: Session): List<T>
   /** Manual projections are returned as a list of rows containing a list of cells. */
-  fun dynamicList(session: Session, selection: (CriteriaBuilder, Root<T>) -> Selection<out Any>): List<List<Any?>>
+  fun dynamicList(
+    session: Session,
+    selection: (CriteriaBuilder, Root<T>) -> Selection<out Any>
+  ): List<List<Any?>>
+
   fun dynamicList(session: Session, projectedPaths: List<String>): List<List<Any?>>
 
   /**
@@ -123,6 +133,9 @@ enum class Operator {
 
   /** `a IN (b1, b2, b3, ...)` */
   IN,
+
+  /** `a NOT IN (b1, b2, b3, ...)` */
+  NOT_IN,
 
   /** `a IS NOT NULL` */
   IS_NOT_NULL,
