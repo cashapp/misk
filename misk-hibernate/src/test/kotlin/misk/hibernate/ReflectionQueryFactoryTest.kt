@@ -197,6 +197,31 @@ class ReflectionQueryFactoryTest {
   }
 
   @Test
+  fun notInOperator() {
+    val m1 = NameAndReleaseDate("Rocky 1", LocalDate.of(2018, 1, 1))
+    val m2 = NameAndReleaseDate("Rocky 2", LocalDate.of(2018, 1, 2))
+    val m3 = NameAndReleaseDate("Rocky 3", LocalDate.of(2018, 1, 3))
+
+    transacter.allowCowrites().transaction { session ->
+      session.save(DbMovie(m1.name, m1.releaseDate))
+      session.save(DbMovie(m2.name, m2.releaseDate))
+      session.save(DbMovie(m3.name, m3.releaseDate))
+
+      assertThat(queryFactory.newQuery<OperatorsMovieQuery>()
+          .releaseDateNotInVararg(m1.releaseDate, m3.releaseDate)
+          .allowFullScatter().allowTableScan()
+          .listAsNameAndReleaseDate(session))
+          .containsExactlyInAnyOrder(m2)
+
+      assertThat(queryFactory.newQuery<OperatorsMovieQuery>()
+          .releaseDateNotInCollection(listOf(m1.releaseDate, m3.releaseDate))
+          .allowFullScatter().allowTableScan()
+          .listAsNameAndReleaseDate(session))
+          .containsExactlyInAnyOrder(m2)
+    }
+  }
+
+  @Test
   fun inOperatorWithNull() {
     val m1 = NameAndReleaseDate("Rocky 1", LocalDate.of(2018, 1, 1))
     val m2 = NameAndReleaseDate("Rocky 2", null)
@@ -888,8 +913,14 @@ class ReflectionQueryFactoryTest {
     @Constraint(path = "release_date", operator = Operator.IN)
     fun releaseDateInVararg(vararg upperBounds: LocalDate?): OperatorsMovieQuery
 
+    @Constraint(path = "release_date", operator = Operator.NOT_IN)
+    fun releaseDateNotInVararg(vararg upperBounds: LocalDate?): OperatorsMovieQuery
+
     @Constraint(path = "release_date", operator = Operator.IN)
     fun releaseDateInCollection(upperBounds: Collection<LocalDate?>): OperatorsMovieQuery
+
+    @Constraint(path = "release_date", operator = Operator.NOT_IN)
+    fun releaseDateNotInCollection(upperBounds: Collection<LocalDate?>): OperatorsMovieQuery
 
     @Constraint(path = "release_date", operator = Operator.IS_NOT_NULL)
     fun releaseDateIsNotNull(): OperatorsMovieQuery
