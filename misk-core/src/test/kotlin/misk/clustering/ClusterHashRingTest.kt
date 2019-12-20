@@ -70,13 +70,13 @@ internal class ClusterHashRingTest {
     val hashRing = ClusterHashRing(
         members = setOf(a, b, c),
         hashFn = FakeHashFn(mapOf(
-          "a 0" to 100,
-          "b 0" to 200,
-          "c 0" to 300,
-          "foo" to 50,
-          "bar" to 150,
-          "zed" to 250,
-          "zork" to 350
+            "a 0" to 100,
+            "b 0" to 200,
+            "c 0" to 300,
+            "foo" to 50,
+            "bar" to 150,
+            "zed" to 250,
+            "zork" to 350
         )),
         vnodesCount = 1)
     assertThat(listOf("foo", "bar", "zed", "zork").map { hashRing[it] })

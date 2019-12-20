@@ -28,7 +28,7 @@ class PingDatabaseService @Inject constructor(
 
     retry(10, ExponentialBackoff(Duration.ofMillis(20), Duration.ofMillis(1000))) {
       try {
-          connectToDataSource(dataSource)
+        connectToDataSource(dataSource)
       } catch (e: Exception) {
         if (config.type == DataSourceType.VITESS_MYSQL && config.database == "@master") {
           logger.warn("ping master database unsuccessful, trying to ping the replica")
