@@ -2,6 +2,7 @@ package misk.jobqueue.sqs
 
 import com.amazonaws.services.sqs.AmazonSQS
 import com.amazonaws.services.sqs.model.CreateQueueRequest
+import misk.clustering.fake.lease.FakeLeaseManager
 import misk.jobqueue.Job
 import misk.jobqueue.JobConsumer
 import misk.jobqueue.JobQueue
@@ -30,7 +31,8 @@ internal class SqsJobQueueTest {
   @Inject private lateinit var queue: JobQueue
   @Inject private lateinit var consumer: JobConsumer
   @Inject private lateinit var sqsMetrics: SqsMetrics
-  @Inject @ForSqsConsumer lateinit var taskQueue: RepeatedTaskQueue
+  @Inject @ForSqsHandling lateinit var taskQueue: RepeatedTaskQueue
+  @Inject private lateinit var fakeLeaseManager: FakeLeaseManager
 
   private lateinit var queueName: QueueName
   private lateinit var deadLetterQueueName: QueueName
@@ -268,7 +270,7 @@ internal class SqsJobQueueTest {
     }
     queue.enqueue(queueName, "fail away")
     val receiver = (consumer as SqsJobConsumer).getReceiver(queueName)
-    assertThat(receiver.runOnce()).isEqualTo(Status.FAILED)
+    assertThat(receiver.run()).isEqualTo(Status.FAILED)
   }
 
   @Test fun noWork() {
@@ -277,8 +279,36 @@ internal class SqsJobQueueTest {
       throw IllegalStateException("boom!")
     }
     val receiver = (consumer as SqsJobConsumer).getReceiver(queueName)
-    assertThat(receiver.runOnce()).isEqualTo(Status.NO_WORK)
+    assertThat(receiver.run()).isEqualTo(Status.NO_WORK)
   }
+
+
+  @Test fun okIfAtLeastMessageWasConsumed() {
+    turnOffTaskQueue()
+    consumer.subscribe(queueName) {
+      it.acknowledge()
+    }
+    queue.enqueue(queueName, "ok")
+    val receiver = (consumer as SqsJobConsumer).getReceiver(queueName)
+    assertThat(receiver.run()).isEqualTo(Status.OK)
+  }
+
+  @Test fun worksIfDoesntHoldAnyLease() {
+    fakeLeaseManager.markLeaseHeldElsewhere("sqs-job-consumer-sqs_job_queue_test-0")
+    fakeLeaseManager.markLeaseHeldElsewhere("sqs-job-consumer-sqs_job_queue_test-1")
+    fakeLeaseManager.markLeaseHeldElsewhere("sqs-job-consumer-sqs_job_queue_test-2")
+    fakeLeaseManager.markLeaseHeldElsewhere("sqs-job-consumer-sqs_job_queue_test-3")
+    fakeLeaseManager.markLeaseHeldElsewhere("sqs-job-consumer-sqs_job_queue_test-4")
+    fakeLeaseManager.markLeaseHeldElsewhere("sqs-job-consumer-sqs_job_queue_test-5")
+    turnOffTaskQueue()
+    consumer.subscribe(queueName) {
+      it.acknowledge()
+    }
+    queue.enqueue(queueName, "ok")
+    val receiver = (consumer as SqsJobConsumer).getReceiver(queueName)
+    assertThat(receiver.run()).isEqualTo(Status.NO_WORK)
+  }
+
 
   private fun turnOffTaskQueue() {
     taskQueue.stopAsync()

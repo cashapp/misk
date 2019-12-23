@@ -4,6 +4,7 @@ dependencies {
   compile dep.tracingJaeger
   compile project(':misk')
   compile project(':misk-jobqueue')
+  compile project(':misk-feature')
 
   testCompile dep.assertj
   testCompile dep.junitApi
@@ -11,6 +12,7 @@ dependencies {
   testCompile dep.junitParams
   testCompile dep.docker
   testCompile project(':misk-testing')
+  testCompile project(':misk-feature-testing')
 }
 
 afterEvaluate { project ->
