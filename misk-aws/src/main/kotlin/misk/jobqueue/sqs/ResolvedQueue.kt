@@ -16,6 +16,9 @@ internal class ResolvedQueue(
   val client: AmazonSQS
 ) {
 
+  val queueName: String
+    get() = name.value
+
   /**
    * Invokes the lambda with this queue's [AmazonSQS] client. Exceptions thrown by the client
    * are wrapped in a [SQSException].

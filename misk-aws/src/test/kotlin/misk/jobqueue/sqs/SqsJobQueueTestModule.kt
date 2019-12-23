@@ -6,6 +6,8 @@ import com.google.inject.util.Modules
 import misk.MiskTestingServiceModule
 import misk.cloud.aws.AwsEnvironmentModule
 import misk.cloud.aws.FakeAwsEnvironmentModule
+import misk.clustering.fake.lease.FakeLeaseModule
+import misk.feature.testing.FakeFeatureFlagsModule
 import misk.inject.KAbstractModule
 import misk.tasks.RepeatedTaskQueueConfig
 import misk.testing.MockTracingBackendModule
@@ -19,6 +21,10 @@ class SqsJobQueueTestModule(
     install(MockTracingBackendModule())
     install(AwsEnvironmentModule())
     install(FakeAwsEnvironmentModule())
+    install(FakeLeaseModule())
+    install(FakeFeatureFlagsModule().withOverrides {
+      override(SqsJobConsumer.CONSUMERS_PER_QUEUE, 5)
+    })
     install(
         Modules.override(
             AwsSqsJobQueueModule(
