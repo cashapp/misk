@@ -140,9 +140,9 @@ class DockerCockroachCluster(
         .exec()
         .firstOrNull()
     if (runningContainer != null) {
-      if (runningContainer.status != "running") {
+      if (runningContainer.state != "running") {
         logger.info("Existing Cockroach cluster named $containerName found in " +
-            "state ${runningContainer.status}, force removing and restarting")
+            "state ${runningContainer.state}, force removing and restarting")
         docker.removeContainerCmd(runningContainer.id).withForce(true).exec()
       } else {
         logger.info("Using existing Cockroach cluster named $containerName")
