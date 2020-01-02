@@ -126,9 +126,9 @@ class DockerTidbCluster(
         .exec()
         .firstOrNull()
     if (runningContainer != null) {
-      if (runningContainer.status != "running") {
+      if (runningContainer.state != "running") {
         logger.info("Existing TiDB cluster named $containerName found in " +
-            "state ${runningContainer.status}, force removing and restarting")
+            "state ${runningContainer.state}, force removing and restarting")
         docker.removeContainerCmd(runningContainer.id).withForce(true).exec()
       } else {
         logger.info("Using existing TiDB cluster named $containerName")
