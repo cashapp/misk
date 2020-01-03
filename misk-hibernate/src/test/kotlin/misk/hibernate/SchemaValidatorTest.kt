@@ -19,6 +19,7 @@ import misk.jdbc.RealDatabasePool
 import misk.resources.ResourceLoader
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
+import misk.tokens.TokenGenerator
 import misk.vitess.StartDatabaseService
 import okio.ByteString
 import org.assertj.core.api.Assertions.assertThat
@@ -71,12 +72,14 @@ internal class SchemaValidatorTest {
       bind(keyOf<Transacter>(qualifier)).toProvider(object : Provider<Transacter> {
         @Inject lateinit var queryTracingListener: QueryTracingListener
         @com.google.inject.Inject(optional = true) val tracer: Tracer? = null
+        @Inject lateinit var tokenGenerator: TokenGenerator
         override fun get(): RealTransacter = RealTransacter(
             qualifier = qualifier,
             sessionFactoryProvider = sessionFactoryProvider,
             readerSessionFactoryProvider = null,
             config = config.data_source,
             queryTracingListener = queryTracingListener,
+            tokenGenerator = tokenGenerator,
             tracer = tracer
         )
       }).asSingleton()

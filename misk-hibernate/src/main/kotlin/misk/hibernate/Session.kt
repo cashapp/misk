@@ -5,6 +5,9 @@ import kotlin.reflect.KClass
 
 interface Session {
   val hibernateSession: org.hibernate.Session
+  // Token to identify a session. Tokens stay the same across transaction retries.
+  val transactionToken: String
+
   /**
    * @throws IllegalStateException when save is called on a read only session.
    */

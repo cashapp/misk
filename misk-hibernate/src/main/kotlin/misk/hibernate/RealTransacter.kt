@@ -11,6 +11,7 @@ import misk.jdbc.DataSourceType
 import misk.jdbc.map
 import misk.jdbc.uniqueString
 import misk.logging.getLogger
+import misk.tokens.TokenGenerator
 import misk.tracing.traceWithSpan
 import org.hibernate.FlushMode
 import org.hibernate.SessionFactory
@@ -46,6 +47,7 @@ internal class RealTransacter private constructor(
   private val threadLatestSession: ThreadLocal<RealSession>,
   private val options: TransacterOptions,
   private val queryTracingListener: QueryTracingListener,
+  private val tokenGenerator: TokenGenerator,
   private val tracer: Tracer?
 ) : Transacter {
 
@@ -55,6 +57,7 @@ internal class RealTransacter private constructor(
     readerSessionFactoryProvider: Provider<SessionFactory>?,
     config: DataSourceConfig,
     queryTracingListener: QueryTracingListener,
+    tokenGenerator: TokenGenerator,
     tracer: Tracer?
   ) : this(
       qualifier = qualifier,
@@ -64,6 +67,7 @@ internal class RealTransacter private constructor(
       threadLatestSession = ThreadLocal(),
       options = TransacterOptions(),
       queryTracingListener = queryTracingListener,
+      tokenGenerator = tokenGenerator,
       tracer = tracer
   )
 
@@ -109,8 +113,10 @@ internal class RealTransacter private constructor(
 
   override fun <T> transaction(block: (session: Session) -> T): T {
     return maybeWithTracing(APPLICATION_TRANSACTION_SPAN_NAME) {
-      transactionWithRetriesInternal {
-        maybeWithTracing(DB_TRANSACTION_SPAN_NAME) { transactionInternalSession(block) }
+      transactionWithRetriesInternal { transactionToken ->
+        maybeWithTracing(DB_TRANSACTION_SPAN_NAME) {
+          transactionInternalSession(transactionToken, block)
+        }
       }
     }
   }
@@ -123,9 +129,9 @@ internal class RealTransacter private constructor(
       return readOnly().replicaRead(block)
     }
     return maybeWithTracing(APPLICATION_TRANSACTION_SPAN_NAME) {
-      transactionWithRetriesInternal {
+      transactionWithRetriesInternal { transactionToken ->
         maybeWithTracing(DB_TRANSACTION_SPAN_NAME) {
-          replicaReadWithoutTransactionInternalSession { session ->
+          replicaReadWithoutTransactionInternalSession(transactionToken) { session ->
             session.target(Destination(TabletType.REPLICA)) {
               // Full scatters are allowed on replica reads as you can increase availability by
               // adding additional replicas.
@@ -139,7 +145,7 @@ internal class RealTransacter private constructor(
     }
   }
 
-  private fun <T> transactionWithRetriesInternal(block: () -> T): T {
+  private fun <T> transactionWithRetriesInternal(block: (transactionToken: String) -> T): T {
     require(options.maxAttempts > 0)
 
     val backoff = ExponentialBackoff(
@@ -148,11 +154,12 @@ internal class RealTransacter private constructor(
         Duration.ofMillis(options.retryJitterMillis)
     )
     var attempt = 0
+    val transactionToken = tokenGenerator.generate()
 
     while (true) {
       try {
         attempt++
-        val result = block()
+        val result = block(transactionToken)
 
         if (attempt > 1) {
           logger.info {
@@ -196,8 +203,11 @@ internal class RealTransacter private constructor(
     return "attempt $attempt, different connection"
   }
 
-  private fun <T> transactionInternalSession(block: (session: RealSession) -> T): T {
-    return withSession { session ->
+  private fun <T> transactionInternalSession(
+    transactionToken: String,
+    block: (session: RealSession) -> T
+  ): T {
+    return withSession(transactionToken = transactionToken) { session ->
       session.target(Destination(TabletType.MASTER)) {
         val transaction = maybeWithTracing(DB_BEGIN_SPAN_NAME) {
           session.hibernateSession.beginTransaction()!!
@@ -230,8 +240,11 @@ internal class RealTransacter private constructor(
     }
   }
 
-  private fun <T> replicaReadWithoutTransactionInternalSession(block: (session: RealSession) -> T): T {
-    return withSession(reader()) { session ->
+  private fun <T> replicaReadWithoutTransactionInternalSession(
+    transactionToken: String,
+    block: (session: RealSession) -> T
+  ): T {
+    return withSession(reader(), transactionToken) { session ->
       check(session.isReadOnly()) {
         "Reads should be in a read only session"
       }
@@ -277,20 +290,23 @@ internal class RealTransacter private constructor(
           qualifier = qualifier,
           sessionFactoryProvider = sessionFactoryProvider,
           readerSessionFactoryProvider = readerSessionFactoryProvider,
+          config = config,
           threadLatestSession = threadLatestSession,
           options = options,
           queryTracingListener = queryTracingListener,
-          config = config,
+          tokenGenerator = tokenGenerator,
           tracer = tracer
       )
 
   private fun <T> withSession(
     sessionFactory: SessionFactory = this.sessionFactory,
+    transactionToken: String,
     block: (session: RealSession) -> T
   ): T {
     val hibernateSession = sessionFactory.openSession()
     val realSession = RealSession(
         hibernateSession = hibernateSession,
+        transactionToken = transactionToken,
         readOnly = options.readOnly,
         config = config,
         disabledChecks = options.disabledChecks,
@@ -385,6 +401,7 @@ internal class RealTransacter private constructor(
 
   internal class RealSession(
     override val hibernateSession: org.hibernate.Session,
+    override val transactionToken: String,
     private val readOnly: Boolean,
     private val config: DataSourceConfig,
     private val transacter: RealTransacter,

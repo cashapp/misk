@@ -757,6 +757,31 @@ abstract class TransacterTest {
         "retried Movies transaction succeeded \\(attempt 3, same connection\\)")
   }
 
+  @Test
+  fun sessionHasTransactionTokens() {
+
+    val firstToken = transacter.transaction { session -> session.transactionToken }
+    transacter.transaction { session ->
+      assertThat(session.transactionToken).isNotEqualTo(firstToken)
+    }
+
+    var initialToken: String? = null
+    var retryToken: String? = null
+    transacter.retries(2).transaction { session ->
+      if (initialToken == null) {
+        initialToken = session.transactionToken
+        throw RetryTransactionException()
+      } else {
+        retryToken = session.transactionToken
+      }
+    }
+
+    assertThat(initialToken).isNotNull()
+    assertThat(retryToken).isNotNull()
+    assertThat(initialToken).isEqualTo(retryToken)
+
+  }
+
   private fun tracingAssertions(committed: Boolean) {
     // Assert on span, implicitly asserting that it's complete by looking at finished spans
     val orderedSpans = tracer.finishedSpans().sortedBy { it.context().spanId() }

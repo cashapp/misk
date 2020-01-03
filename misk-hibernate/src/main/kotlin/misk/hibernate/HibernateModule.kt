@@ -22,6 +22,7 @@ import misk.jdbc.RealDatabasePool
 import misk.jdbc.SpanInjector
 import misk.metrics.Metrics
 import misk.resources.ResourceLoader
+import misk.tokens.TokenGenerator
 import misk.vitess.StartDatabaseService
 import misk.web.exceptions.ExceptionMapperModule
 import org.hibernate.SessionFactory
@@ -139,12 +140,14 @@ class HibernateModule(
     bind(transacterKey).toProvider(object : Provider<Transacter> {
       @com.google.inject.Inject(optional = true) val tracer: Tracer? = null
       @Inject lateinit var queryTracingListener: QueryTracingListener
+      @Inject lateinit var tokenGenerator: TokenGenerator
       override fun get(): RealTransacter = RealTransacter(
           qualifier = qualifier,
           sessionFactoryProvider = sessionFactoryProvider,
           readerSessionFactoryProvider = readerSessionFactoryProvider,
           config = config,
           queryTracingListener = queryTracingListener,
+          tokenGenerator = tokenGenerator,
           tracer = tracer
       )
     }).asSingleton()
