@@ -102,6 +102,7 @@ class Composer(private val name: String, private vararg val containers: Containe
 
       log.info { "starting $name container" }
 
+      @Suppress("DEPRECATION") // This is what testcontainers uses.
       val id = create
           .withNetworkMode(network.id())
           .withLabels(mapOf("name" to name))

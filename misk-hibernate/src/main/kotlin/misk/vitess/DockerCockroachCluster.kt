@@ -132,7 +132,7 @@ class DockerCockroachCluster(
         "--insecure"
     )
 
-    val containerName = "$CONTAINER_NAME"
+    val containerName = CONTAINER_NAME
 
     val runningContainer = docker.listContainersCmd()
         .withNameFilter(listOf(containerName))
@@ -154,6 +154,7 @@ class DockerCockroachCluster(
     if (containerId == null) {
       logger.info(
           "Starting Cockroach cluster with command: ${cmd.joinToString(" ")}")
+      @Suppress("DEPRECATION") // This is what testcontainers uses.
       containerId = docker.createContainerCmd(IMAGE)
           .withCmd(cmd.toList())
           .withExposedPorts(httpPort, postgresPort)

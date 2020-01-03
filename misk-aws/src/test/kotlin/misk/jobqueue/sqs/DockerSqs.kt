@@ -39,6 +39,7 @@ internal object DockerSqs : ExternalDependency {
     // NB(mmihic): Because the client port is embedded directly into the queue URLs, we have to use
     // the same external port as we do for the internal port
     val exposedClientPort = ExposedPort.tcp(clientPort)
+    @Suppress("DEPRECATION") // This is what testcontainers uses.
     withImage("pafortin/goaws")
         .withName("sqs")
         .withCmd(listOf("goaws"))

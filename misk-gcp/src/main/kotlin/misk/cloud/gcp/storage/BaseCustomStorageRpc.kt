@@ -21,6 +21,10 @@ abstract class BaseCustomStorageRpc : StorageRpc {
     throw UnsupportedOperationException()
   }
 
+  override fun open(signedURL: String): String {
+    throw UnsupportedOperationException()
+  }
+
   override fun patch(bucket: Bucket, options: Map<StorageRpc.Option, *>): Bucket? {
     throw UnsupportedOperationException()
   }
@@ -175,6 +179,10 @@ abstract class BaseCustomStorageRpc : StorageRpc {
   }
 
   override fun deleteNotification(bucket: String?, notification: String?): Boolean {
+    throw UnsupportedOperationException()
+  }
+
+  override fun lockRetentionPolicy(bucket: Bucket, options: Map<StorageRpc.Option, *>): Bucket? {
     throw UnsupportedOperationException()
   }
 }

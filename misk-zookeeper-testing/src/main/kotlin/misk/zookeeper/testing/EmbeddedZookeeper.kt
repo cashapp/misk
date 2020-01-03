@@ -11,6 +11,7 @@ class EmbeddedZookeeper(val basePort: Int) {
   private val peerPort = ExposedPort.tcp(PEER_PORT)
   private val leaderPort = ExposedPort.tcp(LEADER_PORT)
   private val composer = Composer("e-zk", Container({
+    @Suppress("DEPRECATION") // This is what testcontainers uses.
     withImage("zookeeper:3.5.4-beta")
         .withName("zookeeper")
         .withCmd(listOf("zkServer.sh", "start-foreground"))

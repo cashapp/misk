@@ -16,6 +16,7 @@ import okio.source
 import java.io.FileNotFoundException
 import java.io.IOException
 import java.io.InputStream
+import java.io.OutputStream
 import java.math.BigInteger
 import java.nio.ByteBuffer
 import java.nio.channels.FileChannel
@@ -245,6 +246,17 @@ class LocalStorageRpc(root: Path, moshi: Moshi = Moshi.Builder().build()) : Base
     }
   } catch (e: IOException) {
     throw StorageException(e)
+  }
+
+  override fun read(
+    from: StorageObject,
+    options: Map<StorageRpc.Option, *>,
+    zposition: Long,
+    outputStream: OutputStream
+  ): Long {
+    val etagAndData = read(from, options, zposition, Int.MAX_VALUE)
+    outputStream.write(etagAndData.y())
+    return etagAndData.y().size.toLong()
   }
 
   override fun open(obj: StorageObject, options: Map<StorageRpc.Option, *>): String =

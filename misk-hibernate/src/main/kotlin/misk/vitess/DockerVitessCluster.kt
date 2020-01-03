@@ -322,6 +322,7 @@ class DockerVitessCluster(
     if (containerId == null) {
       logger.info(
           "Starting Vitess cluster with command: ${cmd.joinToString(" ")}")
+      @Suppress("DEPRECATION") // This is what testcontainers uses.
       containerId = docker.createContainerCmd(VITESS_IMAGE)
           .withCmd(cmd.toList())
           .withVolumes(schemaVolume, confVolume)

@@ -4,9 +4,7 @@ import com.github.dockerjava.api.DockerClient
 import com.github.dockerjava.api.model.ExposedPort
 import com.github.dockerjava.api.model.Frame
 import com.github.dockerjava.api.model.Ports
-import com.github.dockerjava.core.DockerClientBuilder
 import com.github.dockerjava.core.async.ResultCallbackTemplate
-import com.github.dockerjava.netty.NettyDockerCmdExecFactory
 import com.squareup.moshi.Moshi
 import com.zaxxer.hikari.util.DriverDataSource
 import misk.backoff.DontRetryException
@@ -118,7 +116,7 @@ class DockerTidbCluster(
     ports.bind(mysqlPort, Ports.Binding.bindPort(mysqlPort.port))
     ports.bind(httpPort, Ports.Binding.bindPort(httpPort.port))
 
-    val containerName = "$CONTAINER_NAME"
+    val containerName = CONTAINER_NAME
 
     val runningContainer = docker.listContainersCmd()
         .withNameFilter(listOf(containerName))
@@ -139,6 +137,7 @@ class DockerTidbCluster(
 
     if (containerId == null) {
       logger.info("Starting TiDB cluster")
+      @Suppress("DEPRECATION") // This is what testcontainers uses.
       containerId = docker.createContainerCmd(IMAGE)
           .withExposedPorts(mysqlPort, httpPort)
           .withPortBindings(ports)
