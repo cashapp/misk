@@ -34,13 +34,14 @@ class SpanInjectorTest {
   @Test
   fun testDatadog() {
     DDTracer(NoopWriter()).use { tracer ->
-      tracer.buildSpan("operation").startActive(true).use { scope ->
+      val span = tracer.buildSpan("operation").start()
+      tracer.activateSpan(span).use { _ ->
         val config = DataSourceConfig(DataSourceType.VITESS_MYSQL)
         val injector = SpanInjector(tracer, config)
         val query = "SELECT * FROM table"
         val transformInfo = TransformInfo(null, null, query, false, 0)
         val result = injector.transformQuery(transformInfo)
-        assertThat(result).contains((scope.span() as DDSpan).traceId)
+        assertThat(result).contains((span as DDSpan).traceId)
       }
     }
   }
