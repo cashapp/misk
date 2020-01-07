@@ -5,7 +5,9 @@ import com.launchdarkly.client.EvaluationDetail
 import com.launchdarkly.client.EvaluationReason
 import com.launchdarkly.client.LDClientInterface
 import com.launchdarkly.client.LDUser
+import com.launchdarkly.client.value.LDValue
 import com.launchdarkly.shaded.com.google.common.base.Preconditions.checkState
+import com.squareup.moshi.Moshi
 import misk.feature.Attributes
 import misk.feature.Feature
 import misk.feature.FeatureFlagValidation
@@ -20,7 +22,8 @@ import javax.inject.Singleton
  */
 @Singleton
 class LaunchDarklyFeatureFlags @Inject constructor(
-  private val ldClient: LDClientInterface
+  private val ldClient: LDClientInterface,
+  private val moshi: Moshi
 ) : AbstractIdleService(), FeatureFlags, FeatureService {
   override fun startUp() {
     var attempts = 50
@@ -73,6 +76,22 @@ class LaunchDarklyFeatureFlags @Inject constructor(
     val result = ldClient.stringVariationDetail(feature.name, buildUser(feature, key, attributes), "")
     checkDefaultNotUsed(feature, result)
     return java.lang.Enum.valueOf(clazz, result.value.toUpperCase())
+  }
+
+  override fun <T> getJson(
+    feature: Feature,
+    key: String,
+    clazz: Class<T>,
+    attributes: Attributes
+  ): T {
+    checkInitialized()
+    val result = ldClient.jsonValueVariationDetail(
+        feature.name,
+        buildUser(feature, key, attributes),
+        LDValue.ofNull())
+    checkDefaultNotUsed(feature, result)
+    return moshi.adapter(clazz).fromJson(result.value.toJsonString())
+        ?: throw IllegalArgumentException("null value deserialized from $feature")
   }
 
   private fun checkInitialized() {

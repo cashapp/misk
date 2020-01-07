@@ -1,6 +1,7 @@
 package misk.feature.testing
 
 import com.google.common.util.concurrent.AbstractIdleService
+import com.squareup.moshi.Moshi
 import misk.feature.Attributes
 import misk.feature.DynamicConfig
 import misk.feature.Feature
@@ -9,13 +10,14 @@ import misk.feature.FeatureFlags
 import misk.feature.FeatureService
 import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
+import javax.inject.Provider
 import javax.inject.Singleton
 
 /**
  * In-memory test implementation of [FeatureFlags] that allows flags to be overridden.
  */
 @Singleton
-class FakeFeatureFlags @Inject constructor() : AbstractIdleService(),
+class FakeFeatureFlags @Inject constructor(private val moshi : Provider<Moshi>) : AbstractIdleService(),
     FeatureFlags,
     FeatureService,
     DynamicConfig {
@@ -51,10 +53,23 @@ class FakeFeatureFlags @Inject constructor() : AbstractIdleService(),
     return getOrDefault(feature, key, clazz.enumConstants[0]) as T
   }
 
+  override fun <T> getJson(
+    feature: Feature,
+    key: String,
+    clazz: Class<T>,
+    attributes: Attributes
+  ): T {
+    val json = get(feature, key) as? String ?: throw IllegalArgumentException(
+        "JSON flag $feature must be overridden with override() before use")
+    return moshi.get().adapter(clazz).fromJson(json)
+        ?: throw IllegalArgumentException("null value deserialized from $feature")
+  }
+
   override fun getBoolean(feature: Feature) = getBoolean(feature, KEY)
   override fun getInt(feature: Feature) = getInt(feature, KEY)
   override fun getString(feature: Feature) = getString(feature, KEY)
-  override fun <T : Enum<T>> getEnum(feature: Feature, clazz: Class<T>): T = getEnum(feature, KEY, clazz, Attributes())
+  override fun <T : Enum<T>> getEnum(feature: Feature, clazz: Class<T>): T = getEnum(feature, KEY, clazz)
+  override fun <T> getJson(feature: Feature, clazz: Class<T>): T = getJson(feature, KEY, clazz)
 
   private fun get(feature: Feature, key: String): Any? {
     FeatureFlagValidation.checkValidKey(feature, key)
@@ -87,6 +102,14 @@ class FakeFeatureFlags @Inject constructor() : AbstractIdleService(),
     overrides[MapKey(feature)] = value
   }
 
+  fun <T> override(feature: Feature, value: T, clazz: Class<T>) {
+    overrides[MapKey(feature)] = moshi.get().adapter(clazz).toJson(value)
+  }
+
+  inline fun <reified T> overrideJson(feature: Feature, value: T) {
+    override(feature, value, T::class.java)
+  }
+
   fun overrideKey(feature: Feature, key: String, value: Boolean) {
     overrides[MapKey(feature, key)] = value
   }
@@ -101,6 +124,14 @@ class FakeFeatureFlags @Inject constructor() : AbstractIdleService(),
 
   fun overrideKey(feature: Feature, key: String, value: Enum<*>) {
     overrides[MapKey(feature, key)] = value
+  }
+
+  fun <T> overrideKey(feature: Feature, key: String, value: T, clazz : Class<T>) {
+    overrides[MapKey(feature, key)] = moshi.get().adapter(clazz).toJson(value)
+  }
+
+  inline fun <reified T> overrideKeyJson(feature: Feature, key: String, value: T) {
+    overrideKey(feature, key, value, T::class.java)
   }
 
   fun reset() {

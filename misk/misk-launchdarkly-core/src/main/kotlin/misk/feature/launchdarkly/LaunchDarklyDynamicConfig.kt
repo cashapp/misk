@@ -28,4 +28,8 @@ class LaunchDarklyDynamicConfig(private val featureFlags: FeatureFlags) : Dynami
   override fun <T : Enum<T>> getEnum(feature: Feature, clazz: Class<T>): T {
     return featureFlags.getEnum(feature, KEY, clazz, ATTRIBUTES)
   }
+
+  override fun <T> getJson(feature: Feature, clazz: Class<T>): T {
+    return featureFlags.getJson(feature, KEY, clazz, ATTRIBUTES)
+  }
 }
