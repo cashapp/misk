@@ -805,6 +805,7 @@ class VitessMySQLTransacterTest : TransacterTest() {
 }
 
 @MiskTest(startService = true)
+@Disabled // TODO these are flaky, trying to resolve that with Cockroach
 class CockroachTransacterTest : TransacterTest() {
   @MiskTestModule
   val module = MoviesTestModule(DataSourceType.COCKROACHDB)
