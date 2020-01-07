@@ -8,7 +8,9 @@ import com.google.inject.Provides
 import com.google.inject.Singleton
 import misk.ServiceModule
 import misk.cloud.aws.AwsRegion
+import misk.clustering.lease.LeaseManager
 import misk.concurrent.ExecutorServiceModule
+import misk.feature.FeatureFlags
 import misk.inject.KAbstractModule
 import misk.inject.keyOf
 import misk.jobqueue.JobConsumer
@@ -25,8 +27,10 @@ class AwsSqsJobQueueModule(
   private val config: AwsSqsJobQueueConfig
 ) : KAbstractModule() {
   override fun configure() {
-    requireBinding(AWSCredentialsProvider::class.java)
-    requireBinding(AwsRegion::class.java)
+    requireBinding<AWSCredentialsProvider>()
+    requireBinding<AwsRegion>()
+    requireBinding<LeaseManager>()
+    requireBinding<FeatureFlags>()
 
     bind<AwsSqsJobQueueConfig>().toInstance(config)
 
@@ -34,12 +38,19 @@ class AwsSqsJobQueueModule(
     bind<JobQueue>().to<SqsJobQueue>()
     bind<TransactionalJobQueue>().to<SqsTransactionalJobQueue>()
 
-    install(ServiceModule(keyOf<RepeatedTaskQueue>(ForSqsConsumer::class)))
+    install(ServiceModule(keyOf<RepeatedTaskQueue>(ForSqsHandling::class)))
 
-    install(ExecutorServiceModule.withFixedThreadPool(
-        ForSqsConsumer::class,
-        "sqs-consumer-%d",
-        config.consumer_thread_pool_size))
+    // We use an unbounded thread pool for the number of consumers, as we want to process
+    // the messages received as fast a possible.
+    install(ExecutorServiceModule.withUnboundThreadPool(
+        ForSqsHandling::class,
+        "sqs-consumer-%d"))
+
+    // We use an unbounded thread pool for number of receivers, as this will be controlled dynamically
+    // using a feature flag.
+    install(ExecutorServiceModule.withUnboundThreadPool(
+        ForSqsReceiving::class,
+        "sqs-receiver"))
 
     // Bind a map of AmazonSQS clients for each external region that we need to contact
     val regionSpecificClientBinder = newMapBinder<AwsRegion, AmazonSQS>()
@@ -66,7 +77,7 @@ class AwsSqsJobQueueModule(
         .build()
   }
 
-  @Provides @ForSqsConsumer @Singleton
+  @Provides @ForSqsHandling @Singleton
   fun consumerRepeatedTaskQueue(
     queueFactory: RepeatedTaskQueueFactory,
     config: AwsSqsJobQueueConfig
