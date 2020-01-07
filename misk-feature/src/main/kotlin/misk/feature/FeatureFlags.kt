@@ -39,11 +39,24 @@ interface FeatureFlags {
    * Calculates the value of an enumerated feature flag for the given key and attributes.
    * @param feature name of the feature flag to evaluate.
    * @param key unique primary key for the entity the flag should be evaluated against.
-   * @param default default value to return if there was an error evaluating the flag or the flag
-   *   does not exist.
+   * @param clazz the enum type
    * @param attributes additional attributes to provide to flag evaluation.
    */
   fun <T : Enum<T>> getEnum(
+    feature: Feature,
+    key: String,
+    clazz: Class<T>,
+    attributes: Attributes = Attributes()
+  ): T
+
+  /**
+   * Calculates the value of a JSON feature flag for the given key and attributes.
+   *
+   * @param clazz the type to convert the JSON string into. It is expected the a Moshi type adapter
+   * is registered with the impl.
+   * @see [getEnum] for param details
+   */
+  fun <T> getJson(
     feature: Feature,
     key: String,
     clazz: Class<T>,
@@ -71,6 +84,9 @@ interface FeatureFlags {
     key: String,
     clazz: Class<T>
   ) = getEnum(feature, key, clazz, Attributes())
+
+  fun <T> getJson(feature: Feature, key: String, clazz: Class<T>)
+      = getJson(feature, key, clazz, Attributes())
 }
 
 inline fun <reified T : Enum<T>> FeatureFlags.getEnum(
@@ -78,6 +94,12 @@ inline fun <reified T : Enum<T>> FeatureFlags.getEnum(
   token: String,
   attributes: Attributes = Attributes()
 ): T = getEnum(feature, token, T::class.java, attributes)
+
+inline fun <reified T> FeatureFlags.getJson(
+  feature: Feature,
+  token: String,
+  attributes: Attributes = Attributes()
+): T = getJson(feature, token, T::class.java, attributes)
 
 /**
  * Typed feature string.
