@@ -1,5 +1,8 @@
 package misk.feature.testing
 
+import com.google.inject.Provides
+import com.google.inject.Singleton
+import com.squareup.moshi.Moshi
 import misk.feature.FeatureFlags
 import misk.feature.FeatureService
 import misk.ServiceModule
@@ -14,7 +17,7 @@ import kotlin.reflect.KClass
 class FakeFeatureFlagsModule(
   private val qualifier: KClass<out Annotation>? = null
 ) : KAbstractModule() {
-  private val testFeatureFlags = FakeFeatureFlags()
+  private val testFeatureFlags = FakeFeatureFlags(getProvider(Moshi::class.java))
 
   override fun configure() {
     val key = FakeFeatureFlags::class.toKey(qualifier)
@@ -36,7 +39,7 @@ class FakeFeatureFlagsModule(
    * })
    * ```
    */
-  fun withOverrides(lambda: (FakeFeatureFlags.() -> Unit)): FakeFeatureFlagsModule {
+  fun withOverrides(lambda: FakeFeatureFlags.() -> Unit): FakeFeatureFlagsModule {
     lambda(testFeatureFlags)
     return this
   }

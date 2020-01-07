@@ -1,14 +1,17 @@
 package misk.feature.launchdarkly
 
+import com.google.gson.Gson
 import com.launchdarkly.client.EvaluationDetail
 import com.launchdarkly.client.EvaluationReason
 import com.launchdarkly.client.LDClientInterface
 import com.launchdarkly.client.LDUser
 import com.launchdarkly.client.value.LDValue
+import com.squareup.moshi.Moshi
 import misk.feature.Attributes
 import misk.feature.Feature
 import misk.feature.FeatureFlags
 import misk.feature.getEnum
+import misk.feature.getJson
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -24,8 +27,8 @@ import org.mockito.Mockito.verify
 
 internal class LaunchDarklyFeatureFlagsTest {
   private val client = mock(LDClientInterface::class.java)
-  private val featureFlags: FeatureFlags =
-      LaunchDarklyFeatureFlags(client)
+  private val moshi = Moshi.Builder().build()
+  private val featureFlags: FeatureFlags = LaunchDarklyFeatureFlags(client, moshi)
 
   @BeforeEach
   fun beforeEach() {
@@ -98,6 +101,28 @@ internal class LaunchDarklyFeatureFlagsTest {
       featureFlags.getEnum<Dinosaur>(
           Feature("which-dinosaur"), "a-token")
     }
+  }
+
+  data class JsonFeature(val value: String)
+
+  @Test
+  fun getJson() {
+    val json = """{
+      "value" : "dino"
+    }""".trimIndent()
+    // LD uses Gson internally, so we need to do the same for mocking.
+    val gson = Gson()
+    val jsonElement = gson.toJsonTree(gson.fromJson(json, JsonFeature::class.java))
+    @Suppress("DEPRECATION")
+    Mockito
+        .`when`(client.jsonValueVariationDetail(anyString(), any(LDUser::class.java),
+            any(LDValue::class.java)))
+        .thenReturn(EvaluationDetail(
+            EvaluationReason.targetMatch(), 1, LDValue.fromJsonElement(jsonElement)))
+
+    val feature = featureFlags.getJson<JsonFeature>(Feature("which-dinosaur"), "abcd")
+
+    assertThat(feature).isEqualTo(JsonFeature("dino"))
   }
 
   @Test

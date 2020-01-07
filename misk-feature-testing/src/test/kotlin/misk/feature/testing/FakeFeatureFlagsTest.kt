@@ -1,7 +1,10 @@
 package misk.feature.testing
 
+import com.google.inject.util.Providers
+import com.squareup.moshi.Moshi
 import misk.feature.Feature
 import misk.feature.getEnum
+import misk.feature.getJson
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -11,7 +14,7 @@ internal class FakeFeatureFlagsTest {
   val OTHER_FEATURE = Feature("bar")
   val TOKEN = "cust_abcdef123"
 
-  val subject = FakeFeatureFlags()
+  val subject = FakeFeatureFlags(Providers.of(Moshi.Builder().build()))
 
   @Test
   fun getInt() {
@@ -53,6 +56,26 @@ internal class FakeFeatureFlagsTest {
     subject.reset()
     assertThat(subject.getEnum<Dinosaur>(FEATURE, TOKEN))
         .isEqualTo(Dinosaur.PTERODACTYL)
+  }
+
+  data class JsonFeature(val value : String)
+  
+  @Test
+  fun getJson() {
+    // Default throws.
+    assertThrows<RuntimeException> { subject.getJson<JsonFeature>(FEATURE, TOKEN) }
+
+    // Can be overridden
+    subject.overrideJson(FEATURE, JsonFeature("test"))
+    subject.overrideJson(OTHER_FEATURE, JsonFeature("other"))
+    assertThat(subject.getJson<JsonFeature>(FEATURE, TOKEN)).isEqualTo(JsonFeature("test"))
+    assertThat(subject.getJson<JsonFeature>(OTHER_FEATURE, TOKEN))
+        .isEqualTo(JsonFeature("other"))
+
+    // Can override with specific keys
+    subject.overrideKeyJson(FEATURE, "joker", JsonFeature("joker"))
+    assertThat(subject.getJson<JsonFeature>(FEATURE, TOKEN)).isEqualTo(JsonFeature("test"))
+    assertThat(subject.getJson<JsonFeature>(FEATURE, "joker")).isEqualTo(JsonFeature("joker"))
   }
 
   @Test
