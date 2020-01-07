@@ -26,5 +26,15 @@ class ExecutorServiceModule(
               nThreads,
               ThreadFactoryBuilder().setNameFormat(nameFormat).build()))
     }
+
+    fun withUnboundThreadPool(
+      annotation: KClass<out Annotation>,
+      nameFormat: String
+    ): ExecutorServiceModule {
+      return ExecutorServiceModule(
+          annotation,
+          Executors.newCachedThreadPool(
+              ThreadFactoryBuilder().setNameFormat(nameFormat).build()))
+    }
   }
 }

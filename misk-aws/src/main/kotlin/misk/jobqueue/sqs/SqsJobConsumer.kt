@@ -1,10 +1,15 @@
 package misk.jobqueue.sqs
 
+import com.amazonaws.http.timers.client.ClientExecutionTimeoutException
+import com.amazonaws.services.sqs.model.Message
 import com.amazonaws.services.sqs.model.ReceiveMessageRequest
 import com.google.common.util.concurrent.ServiceManager
 import io.opentracing.Tracer
 import io.opentracing.tag.StringTag
 import io.opentracing.tag.Tags
+import misk.clustering.lease.LeaseManager
+import misk.feature.Feature
+import misk.feature.FeatureFlags
 import misk.jobqueue.JobConsumer
 import misk.jobqueue.JobHandler
 import misk.jobqueue.QueueName
@@ -14,9 +19,10 @@ import misk.tasks.Status
 import misk.time.timed
 import misk.tracing.traceWithSpan
 import java.time.Duration
+import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.ExecutionException
 import java.util.concurrent.ExecutorService
+import java.util.function.Supplier
 import javax.inject.Inject
 import javax.inject.Provider
 import javax.inject.Singleton
@@ -25,10 +31,13 @@ import javax.inject.Singleton
 internal class SqsJobConsumer @Inject internal constructor(
   private val config: AwsSqsJobQueueConfig,
   private val queues: QueueResolver,
-  @ForSqsConsumer private val dispatchThreadPool: ExecutorService,
-  @ForSqsConsumer private val taskQueue: RepeatedTaskQueue,
+  @ForSqsHandling private val handlingThreads: ExecutorService,
+  @ForSqsHandling private val taskQueue: RepeatedTaskQueue,
   private val tracer: Tracer,
   private val metrics: SqsMetrics,
+  private val featureFlags: FeatureFlags,
+  @ForSqsReceiving private val receivingThreads: ExecutorService,
+  private val leaseManager: LeaseManager,
   /**
    * [SqsJobConsumer] is itself a [Service], but it needs the [ServiceManager] in order to check
    * that all services are running and the system is in a healthy state before it starts handling
@@ -45,16 +54,13 @@ internal class SqsJobConsumer @Inject internal constructor(
     }
 
     log.info {
-      "subscribing to queue ${queueName.value} with ${config.concurrent_receivers_per_queue} receivers"
+      "subscribing to queue ${queueName.value}"
     }
-
-    for (i in (0 until config.concurrent_receivers_per_queue)) {
-      taskQueue.scheduleWithBackoff(Duration.ZERO) {
-        // Don't call handlers until all services are ready, otherwise handlers will crash because
-        // the services they might need (databases, etc.) won't be ready.
-        serviceManagerProvider.get().awaitHealthy()
-        receiver.runOnce()
-      }
+    taskQueue.scheduleWithBackoff(Duration.ZERO) {
+      // Don't call handlers until all services are ready, otherwise handlers will crash because
+      // the services they might need (databases, etc.) won't be ready.
+      serviceManagerProvider.get().awaitHealthy()
+      receiver.run()
     }
   }
 
@@ -63,39 +69,90 @@ internal class SqsJobConsumer @Inject internal constructor(
   }
 
   internal inner class QueueReceiver(
-    private val queueName: QueueName,
+    queueName: QueueName,
     private val handler: JobHandler
   ) {
     private val queue = queues[queueName]
 
-    fun runOnce(): Status {
-      val (receiveDuration, messages) = queue.call { client ->
-        val receiveRequest = ReceiveMessageRequest()
-          .withAttributeNames("All")
-          .withMessageAttributeNames("All")
-          .withQueueUrl(queue.url)
-          .withMaxNumberOfMessages(config.message_batch_size)
+    fun run(): Status {
+      // Receive messages in parallel. Default to 1 if feature flag is not defined.
+      val numReceivers = receiversForQueue()
+      val futures = (1..numReceivers)
+          .filter { num ->
+            val lease = leaseManager.requestLease("sqs-job-consumer-${queue.name.value}-$num")
+            !config.clustered_consumers || lease.checkHeld()
+          }
+          .map {
+            CompletableFuture.supplyAsync(Supplier {
+              receive()
+            }, receivingThreads)
+          }
 
-        timed { client.receiveMessage(receiveRequest).messages }
+      // Either all messages are consumed and processed successfully, or we signal failure.
+      // If none of the received consume any messages, return NO_WORK for backoff.
+      return CompletableFuture.allOf(*futures.toTypedArray()).thenApply {
+        futures.flatMap { it.join() }
+            .onEach { check( it in listOf(Status.FAILED, Status.OK, Status.NO_WORK)) }
+            .fold(Status.NO_WORK) { finalStatus, status ->
+              when {
+                status == Status.FAILED -> status
+                status == Status.OK && finalStatus != Status.FAILED -> status
+                status == Status.NO_WORK && finalStatus == Status.NO_WORK -> status
+                else -> finalStatus
+              }
+            }
+      }.join()
+    }
+
+    private fun receiversForQueue(): Int {
+      return featureFlags.getInt(CONSUMERS_PER_QUEUE, queue.queueName)
+    }
+
+    private fun fetchMessages(): List<SqsJob> {
+      val messages = try {
+        metrics.sqsReceiveTime.timedMills(queue.queueName, queue.queueName) {
+          queue.call { client ->
+            val receiveRequest = ReceiveMessageRequest()
+                .withAttributeNames("All")
+                .withMessageAttributeNames("All")
+                .withQueueUrl(queue.url)
+                .withMaxNumberOfMessages(config.message_batch_size)
+
+            client.receiveMessage(receiveRequest).messages
+          }
+        }
+      } catch (e: ClientExecutionTimeoutException) {
+        log.info("timed out long polling for messages from ${queue.queueName}")
+        emptyList<Message>()
       }
 
-      val queueName = queue.name
+      return messages.map { SqsJob(queue.name, queues, metrics, it) }
+    }
 
-      metrics.sqsReceiveTime.record(receiveDuration.toMillis().toDouble(), queueName.value, queueName.value)
+    private fun receive(): List<Status> {
+      val messages = fetchMessages()
 
       if (messages.size == 0) {
-        return Status.NO_WORK
+        return listOf(Status.NO_WORK)
       }
 
-      val futures = messages.map { SqsJob(queueName, queues, metrics, it) }.map { message ->
-        dispatchThreadPool.submit {
-          metrics.jobsReceived.labels(queueName.value, queueName.value).inc()
+      val futures = handleMessages(messages)
 
-          tracer.traceWithSpan("handle-job-${queueName.value}") { span ->
+      return CompletableFuture.allOf(*futures.toTypedArray()).thenApply {
+        futures.map { it.join() }
+      }.join()
+    }
+
+    private fun handleMessages(messages: List<SqsJob>): List<CompletableFuture<Status>> {
+      return messages.map { message ->
+        CompletableFuture.supplyAsync(Supplier {
+          metrics.jobsReceived.labels(queue.queueName, queue.queueName).inc()
+
+          tracer.traceWithSpan("handle-job-${queue.queueName}") { span ->
             // If the incoming job has an original trace id, set that as a tag on the new span.
             // We don't turn that into the parent of the current span because that would
             // incorrectly include the execution time of the job in the execution time of the
-            // action that triggered the job        q
+            // action that triggered the job
             message.attributes[SqsJob.ORIGINAL_TRACE_ID_ATTR]?.let {
               ORIGINAL_TRACE_ID_TAG.set(span, it)
             }
@@ -103,33 +160,24 @@ internal class SqsJobConsumer @Inject internal constructor(
             // Run the handler and record timing
             try {
               val (duration, _) = timed { handler.handleJob(message) }
-              metrics.handlerDispatchTime.record(duration.toMillis().toDouble(), queueName.value, queueName.value)
+              metrics.handlerDispatchTime.record(duration.toMillis().toDouble(), queue.queueName,
+                  queue.queueName)
+              Status.OK
             } catch (th: Throwable) {
-              log.error(th) { "error handling job from ${queueName.value}" }
-              metrics.handlerFailures.labels(queueName.value, queueName.value).inc()
+              log.error(th) { "error handling job from ${queue.queueName}" }
+              metrics.handlerFailures.labels(queue.queueName, queue.queueName).inc()
               Tags.ERROR.set(span, true)
-              throw th
+              Status.FAILED
             }
           }
-        }
+        }, handlingThreads)
       }
-
-      for (future in futures) {
-        try {
-          future.get()
-        } catch (e: ExecutionException) {
-          // the exception was already logged when the dispatched task failed above
-          return Status.FAILED
-        }
-      }
-
-      return Status.OK
     }
   }
 
   companion object {
     private val log = getLogger<SqsJobConsumer>()
-
+    internal val CONSUMERS_PER_QUEUE = Feature("jobqueue-consumers")
     private val ORIGINAL_TRACE_ID_TAG = StringTag("original.trace_id")
   }
 }
