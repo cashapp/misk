@@ -32,6 +32,8 @@ import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.concurrent.thread
 import kotlin.reflect.KClass
 import kotlin.streams.toList
+import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
+import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 
 class Table
 class Keyspace(val sharded: Boolean, val tables: Map<String, Table>) {
@@ -44,7 +46,9 @@ class VitessCluster(
   val name: String,
   resourceLoader: ResourceLoader,
   val config: DataSourceConfig,
-  val moshi: Moshi = Moshi.Builder().build()
+  val moshi: Moshi = Moshi.Builder()
+      .add(KotlinJsonAdapterFactory()) // Added last for lowest precedence.
+      .build()
 ) {
   val schemaDir: Path
   val configDir: Path
@@ -219,7 +223,9 @@ class DockerVitessCluster(
       val docker: DockerClient = DockerClientBuilder.getInstance()
           .withDockerCmdExecFactory(NettyDockerCmdExecFactory())
           .build()
-      val moshi = Moshi.Builder().build()
+      val moshi = Moshi.Builder()
+          .add(KotlinJsonAdapterFactory()) // Added last for lowest precedence.
+          .build()
       val dockerCluster =
           DockerVitessCluster(
               name = qualifier.simpleName!!,

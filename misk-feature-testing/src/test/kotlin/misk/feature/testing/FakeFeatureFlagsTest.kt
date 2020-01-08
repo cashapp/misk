@@ -8,13 +8,16 @@ import misk.feature.getJson
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 
 internal class FakeFeatureFlagsTest {
   val FEATURE = Feature("foo")
   val OTHER_FEATURE = Feature("bar")
   val TOKEN = "cust_abcdef123"
 
-  val subject = FakeFeatureFlags(Providers.of(Moshi.Builder().build()))
+  val subject = FakeFeatureFlags(Providers.of(Moshi.Builder()
+      .add(KotlinJsonAdapterFactory()) // Added last for lowest precedence.
+      .build()))
 
   @Test
   fun getInt() {
