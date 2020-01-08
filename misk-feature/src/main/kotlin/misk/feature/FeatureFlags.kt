@@ -52,7 +52,7 @@ interface FeatureFlags {
   /**
    * Calculates the value of a JSON feature flag for the given key and attributes.
    *
-   * @param clazz the type to convert the JSON string into. It is expected the a Moshi type adapter
+   * @param clazz the type to convert the JSON string into. It is expected that a Moshi type adapter
    * is registered with the impl.
    * @see [getEnum] for param details
    */

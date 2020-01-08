@@ -13,6 +13,7 @@ import misk.feature.Feature
 import misk.feature.FeatureFlagValidation
 import misk.feature.FeatureFlags
 import misk.feature.FeatureService
+import misk.feature.fromSafeJson
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -90,7 +91,7 @@ class LaunchDarklyFeatureFlags @Inject constructor(
         buildUser(feature, key, attributes),
         LDValue.ofNull())
     checkDefaultNotUsed(feature, result)
-    return moshi.adapter(clazz).fromJson(result.value.toJsonString())
+    return moshi.adapter(clazz).fromSafeJson(result.value.toJsonString())
         ?: throw IllegalArgumentException("null value deserialized from $feature")
   }
 
