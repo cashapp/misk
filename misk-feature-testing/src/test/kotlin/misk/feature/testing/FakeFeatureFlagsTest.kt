@@ -58,7 +58,7 @@ internal class FakeFeatureFlagsTest {
         .isEqualTo(Dinosaur.PTERODACTYL)
   }
 
-  data class JsonFeature(val value : String)
+  data class JsonFeature(val value : String, val optional : String? = null)
   
   @Test
   fun getJson() {
@@ -76,6 +76,27 @@ internal class FakeFeatureFlagsTest {
     subject.overrideKeyJson(FEATURE, "joker", JsonFeature("joker"))
     assertThat(subject.getJson<JsonFeature>(FEATURE, TOKEN)).isEqualTo(JsonFeature("test"))
     assertThat(subject.getJson<JsonFeature>(FEATURE, "joker")).isEqualTo(JsonFeature("joker"))
+  }
+
+  @Test
+  fun `skip unknown field in json parsing`() {
+    val json = """
+      {
+        "value" : "dino",
+        "unknown_key": "unknown"
+      }
+    """.trimIndent()
+    subject.overrideJsonString(FEATURE, json)
+    assertThat(subject.getJson<JsonFeature>(FEATURE, TOKEN)).isEqualTo(JsonFeature("dino"))
+  }
+
+  @Test
+  fun `sets null for missing fields`() {
+    subject.overrideJsonString(FEATURE, "{}")
+    val feature = subject.getJson<JsonFeature>(FEATURE, TOKEN)
+    assertThat(feature.value).isNull()
+    assertThat(feature.optional).isNull()
+    assertThrows<NullPointerException> { feature.value.length }
   }
 
   @Test
