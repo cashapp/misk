@@ -15,7 +15,7 @@ buildscript {
     classpath dep.junitGradlePlugin
     classpath dep.shadowJarPlugin
     classpath dep.mavenPublishGradlePlugin
-    classpath dep.wirePlugin
+    classpath dep.wireGradlePlugin
   }
 }
 
