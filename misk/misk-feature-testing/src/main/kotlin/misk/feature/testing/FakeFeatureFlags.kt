@@ -108,6 +108,10 @@ class FakeFeatureFlags @Inject constructor(private val moshi : Provider<Moshi>) 
     overrides[MapKey(feature)] = moshi.get().adapter(clazz).toSafeJson(value)
   }
 
+  fun overrideJsonString(feature: Feature, json : String) {
+    overrides[MapKey(feature)] = json
+  }
+
   inline fun <reified T> overrideJson(feature: Feature, value: T) {
     override(feature, value, T::class.java)
   }
