@@ -2,6 +2,7 @@ package misk.feature.testing
 
 import com.google.inject.Guice
 import com.squareup.moshi.Moshi
+import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import misk.feature.Feature
 import misk.feature.FeatureFlags
 import misk.inject.KAbstractModule
@@ -18,7 +19,9 @@ class FakeFeatureFlagsModuleTest {
       override fun configure() {
         // Misk services automatically get this binding, but no need to depend on all of misk to
         // test this.
-        bind<Moshi>().toInstance(Moshi.Builder().build())
+        bind<Moshi>().toInstance(Moshi.Builder()
+            .add(KotlinJsonAdapterFactory())
+            .build())
       }
     })
 

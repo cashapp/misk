@@ -8,6 +8,8 @@ import misk.feature.Feature
 import misk.feature.FeatureFlagValidation
 import misk.feature.FeatureFlags
 import misk.feature.FeatureService
+import misk.feature.fromSafeJson
+import misk.feature.toSafeJson
 import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 import javax.inject.Provider
@@ -61,7 +63,7 @@ class FakeFeatureFlags @Inject constructor(private val moshi : Provider<Moshi>) 
   ): T {
     val json = get(feature, key) as? String ?: throw IllegalArgumentException(
         "JSON flag $feature must be overridden with override() before use")
-    return moshi.get().adapter(clazz).fromJson(json)
+    return moshi.get().adapter(clazz).fromSafeJson(json)
         ?: throw IllegalArgumentException("null value deserialized from $feature")
   }
 
@@ -103,7 +105,7 @@ class FakeFeatureFlags @Inject constructor(private val moshi : Provider<Moshi>) 
   }
 
   fun <T> override(feature: Feature, value: T, clazz: Class<T>) {
-    overrides[MapKey(feature)] = moshi.get().adapter(clazz).toJson(value)
+    overrides[MapKey(feature)] = moshi.get().adapter(clazz).toSafeJson(value)
   }
 
   inline fun <reified T> overrideJson(feature: Feature, value: T) {
@@ -127,7 +129,7 @@ class FakeFeatureFlags @Inject constructor(private val moshi : Provider<Moshi>) 
   }
 
   fun <T> overrideKey(feature: Feature, key: String, value: T, clazz : Class<T>) {
-    overrides[MapKey(feature, key)] = moshi.get().adapter(clazz).toJson(value)
+    overrides[MapKey(feature, key)] = moshi.get().adapter(clazz).toSafeJson(value)
   }
 
   inline fun <reified T> overrideKeyJson(feature: Feature, key: String, value: T) {
