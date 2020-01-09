@@ -5,6 +5,8 @@ import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import misk.feature.Feature
 import misk.feature.FeatureFlags
+import misk.feature.getJson
+import misk.feature.testing.FakeFeatureFlagsTest.JsonFeature
 import misk.inject.KAbstractModule
 import misk.moshi.MoshiAdapterModule
 import org.junit.jupiter.api.Test
@@ -15,17 +17,11 @@ class FakeFeatureFlagsModuleTest {
   fun testModule() {
     val injector = Guice.createInjector(FakeFeatureFlagsModule().withOverrides {
       override(Feature("foo"), 24)
-    }, object : KAbstractModule() {
-      override fun configure() {
-        // Misk services automatically get this binding, but no need to depend on all of misk to
-        // test this.
-        bind<Moshi>().toInstance(Moshi.Builder()
-            .add(KotlinJsonAdapterFactory())
-            .build())
-      }
-    })
+      overrideJson(Feature("jsonFeature"), JsonFeature("testValue"))
+    }, MoshiTestingModule())
 
     val flags = injector.getInstance(FeatureFlags::class.java)
     assertEquals(24, flags.getInt(Feature("foo"), "bar"))
+    assertEquals("testValue", flags.getJson<JsonFeature>(Feature("jsonFeature"), "key").value)
   }
 }
