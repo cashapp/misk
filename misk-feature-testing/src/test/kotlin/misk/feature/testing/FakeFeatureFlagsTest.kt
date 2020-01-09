@@ -1,6 +1,7 @@
 package misk.feature.testing
 
 import com.google.inject.util.Providers
+import com.squareup.moshi.JsonDataException
 import com.squareup.moshi.Moshi
 import misk.feature.Feature
 import misk.feature.getEnum
@@ -94,12 +95,14 @@ internal class FakeFeatureFlagsTest {
   }
 
   @Test
-  fun `sets null for missing fields`() {
-    subject.overrideJsonString(FEATURE, "{}")
-    val feature = subject.getJson<JsonFeature>(FEATURE, TOKEN)
-    assertThat(feature.value).isNull()
-    assertThat(feature.optional).isNull()
-    assertThrows<NullPointerException> { feature.value.length }
+  fun `fails for missing required fields`() {
+    subject.overrideJsonString(FEATURE, """
+      {
+        "optional" : "value"
+      }
+    """.trimIndent())
+
+    assertThrows<JsonDataException> { subject.getJson<JsonFeature>(FEATURE, TOKEN) }
   }
 
   @Test
