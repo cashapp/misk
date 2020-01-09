@@ -1,6 +1,7 @@
 package misk.feature.testing
 
 import com.google.inject.util.Providers
+import com.squareup.moshi.JsonDataException
 import com.squareup.moshi.Moshi
 import misk.feature.Feature
 import misk.feature.getEnum
@@ -8,13 +9,16 @@ import misk.feature.getJson
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 
 internal class FakeFeatureFlagsTest {
   val FEATURE = Feature("foo")
   val OTHER_FEATURE = Feature("bar")
   val TOKEN = "cust_abcdef123"
 
-  val subject = FakeFeatureFlags(Providers.of(Moshi.Builder().build()))
+  val subject = FakeFeatureFlags(Providers.of(Moshi.Builder()
+      .add(KotlinJsonAdapterFactory()) // Added last for lowest precedence.
+      .build()))
 
   @Test
   fun getInt() {
@@ -91,12 +95,14 @@ internal class FakeFeatureFlagsTest {
   }
 
   @Test
-  fun `sets null for missing fields`() {
-    subject.overrideJsonString(FEATURE, "{}")
-    val feature = subject.getJson<JsonFeature>(FEATURE, TOKEN)
-    assertThat(feature.value).isNull()
-    assertThat(feature.optional).isNull()
-    assertThrows<NullPointerException> { feature.value.length }
+  fun `fails for missing required fields`() {
+    subject.overrideJsonString(FEATURE, """
+      {
+        "optional" : "value"
+      }
+    """.trimIndent())
+
+    assertThrows<JsonDataException> { subject.getJson<JsonFeature>(FEATURE, TOKEN) }
   }
 
   @Test
