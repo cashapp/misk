@@ -309,19 +309,6 @@ internal class SqsJobQueueTest {
     assertThat(receiver.run()).isEqualTo(Status.NO_WORK)
   }
 
-  @Test fun subscribeToMetrics() {
-    consumer.subscribeToMetrics(queueName)
-    queue.enqueue(queueName, "ok")
-    queue.enqueue(queueName, "ok")
-    queue.enqueue(queueName, "ok")
-    queue.enqueue(queueName, "ok")
-
-    Thread.sleep(100)
-    assertThat(sqsMetrics.sqsApproxNumberOfMessages.labels(queueName.value,
-        queueName.value).get()).isEqualTo(4.0)
-  }
-
-
   private fun turnOffTaskQueue() {
     taskQueue.stopAsync()
     taskQueue.awaitTerminated()

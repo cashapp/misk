@@ -75,13 +75,13 @@ internal class SqsMetrics @Inject internal constructor(metrics: Metrics) {
   )
 
   val sqsApproxNumberOfMessages = metrics.gauge(
-      "jobs_sqs_aproximate_number_of_messages",
+      "ApproximateNumberOfMessagesVisible",
       "the approximate number of messages available for retrieval from SQS",
       listOf("queueName", "QueueName")
   )
 
   val sqsApproxNumberOfMessagesNotVisible = metrics.gauge(
-      "jobs_sqs_aproximate_number_of_messages_not_visible",
+          "ApproximateNumberOfMessagesNotVisible",
       "the  approximate number of messages that are in flight. Messages are considered to " +
           "be in flight if they have been sent to a client but have not yet been deleted or have " +
           "not yet reached the end of their visibility window.",
