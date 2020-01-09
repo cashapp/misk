@@ -10,6 +10,7 @@ import com.github.dockerjava.core.DockerClientBuilder
 import com.github.dockerjava.core.async.ResultCallbackTemplate
 import com.github.dockerjava.netty.NettyDockerCmdExecFactory
 import com.squareup.moshi.Moshi
+import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import com.zaxxer.hikari.util.DriverDataSource
 import misk.backoff.DontRetryException
 import misk.backoff.ExponentialBackoff
@@ -32,8 +33,6 @@ import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.concurrent.thread
 import kotlin.reflect.KClass
 import kotlin.streams.toList
-import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
-import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 
 class Table
 class Keyspace(val sharded: Boolean, val tables: Map<String, Table>) {
