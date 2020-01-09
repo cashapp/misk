@@ -34,6 +34,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock
 import kotlin.concurrent.read
 import kotlin.concurrent.write
 import kotlin.streams.asSequence
+import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 
 /**
  * Implementation of [StorageRpc] that is backed by local disk storage. Useful for running
@@ -92,7 +93,12 @@ import kotlin.streams.asSequence
  * as the etag value.
  *
  */
-class LocalStorageRpc(root: Path, moshi: Moshi = Moshi.Builder().build()) : BaseCustomStorageRpc() {
+class LocalStorageRpc(
+  root: Path,
+  moshi: Moshi = Moshi.Builder()
+      .add(KotlinJsonAdapterFactory()) // Added last for lowest precedence.
+      .build()
+) : BaseCustomStorageRpc() {
   // Handles in-process synchronization; cross-process synchronization is handled by file locks
   private val internalLock = ReentrantReadWriteLock()
   private val locksRoot = root.resolve("locks")

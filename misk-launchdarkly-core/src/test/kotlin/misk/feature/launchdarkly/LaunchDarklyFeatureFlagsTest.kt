@@ -24,10 +24,13 @@ import org.mockito.Mockito.anyString
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
+import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 
 internal class LaunchDarklyFeatureFlagsTest {
   private val client = mock(LDClientInterface::class.java)
-  private val moshi = Moshi.Builder().build()
+  private val moshi = Moshi.Builder()
+      .add(KotlinJsonAdapterFactory()) // Added last for lowest precedence.
+      .build()
   private val featureFlags: FeatureFlags = LaunchDarklyFeatureFlags(client, moshi)
 
   @BeforeEach
