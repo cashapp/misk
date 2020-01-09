@@ -1,7 +1,9 @@
 package misk.jobqueue.sqs
 
 import com.amazonaws.http.timers.client.ClientExecutionTimeoutException
+import com.amazonaws.services.sqs.model.GetQueueAttributesRequest
 import com.amazonaws.services.sqs.model.Message
+import com.amazonaws.services.sqs.model.QueueAttributeName
 import com.amazonaws.services.sqs.model.ReceiveMessageRequest
 import com.google.common.util.concurrent.ServiceManager
 import io.opentracing.Tracer
@@ -61,6 +63,50 @@ internal class SqsJobConsumer @Inject internal constructor(
       // the services they might need (databases, etc.) won't be ready.
       serviceManagerProvider.get().awaitHealthy()
       receiver.run()
+    }
+  }
+
+  /**
+   * Spawn a new thread that will consume the [queueName] SQS attributes and record them as metrics
+   *
+   * The metric recorded are:
+   * - jobs_sqs_aproximate_number_of_messages
+   * - jobs_sqs_aproximate_number_of_messages_not_visible
+   */
+  fun subscribeToMetrics(queueName: QueueName) {
+    log.info {
+      "recording metrics for queue ${queueName.value}"
+    }
+
+    taskQueue.scheduleWithBackoff(Duration.ZERO) {
+      val queue = queues[queueName]
+      val lease = leaseManager.requestLease("sqs-queue-attributes-${queue.queueName}")
+      if (lease.checkHeld()) {
+        val attributes = try {
+          queue.call { client ->
+            val request = GetQueueAttributesRequest()
+                .withQueueUrl(queue.url)
+                .withAttributeNames(
+                    QueueAttributeName.ApproximateNumberOfMessages,
+                    QueueAttributeName.ApproximateNumberOfMessagesNotVisible)
+            val response = client.getQueueAttributes(request)
+            response.attributes
+          }
+        } catch (e: ClientExecutionTimeoutException) {
+          log.info("timed out long polling for queue attributes: ${queue.queueName}")
+          return@scheduleWithBackoff Status.FAILED
+        }
+
+        attributes[QueueAttributeName.ApproximateNumberOfMessages.toString()]?.let {
+          metrics.sqsApproxNumberOfMessages.labels(queue.queueName, queue.queueName)
+              .set(it.toDouble())
+        }
+        attributes[QueueAttributeName.ApproximateNumberOfMessagesNotVisible.toString()]?.let {
+          metrics.sqsApproxNumberOfMessagesNotVisible.labels(queue.queueName, queue.queueName)
+              .set(it.toDouble())
+        }
+      }
+      Status.OK
     }
   }
 

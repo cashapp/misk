@@ -69,8 +69,22 @@ internal class SqsMetrics @Inject internal constructor(metrics: Metrics) {
   )
 
   val sqsDeleteTime = metrics.histogram(
-    "jobs_sqs_delete_latency",
-    "the round trip time to delete messages from SQS",
-    listOf("queueName", "QueueName")
+      "jobs_sqs_delete_latency",
+      "the round trip time to delete messages from SQS",
+      listOf("queueName", "QueueName")
+  )
+
+  val sqsApproxNumberOfMessages = metrics.gauge(
+      "jobs_sqs_aproximate_number_of_messages",
+      "the approximate number of messages available for retrieval from SQS",
+      listOf("queueName", "QueueName")
+  )
+
+  val sqsApproxNumberOfMessagesNotVisible = metrics.gauge(
+      "jobs_sqs_aproximate_number_of_messages_not_visible",
+      "the  approximate number of messages that are in flight. Messages are considered to " +
+          "be in flight if they have been sent to a client but have not yet been deleted or have " +
+          "not yet reached the end of their visibility window.",
+      listOf("queueName", "QueueName")
   )
 }

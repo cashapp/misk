@@ -48,10 +48,12 @@ class AwsSqsJobHandlerModule<T : JobHandler> private constructor(
 @Singleton
 internal class AwsSqsJobHandlerSubscriptionService @Inject constructor(
   private val consumer: SqsJobConsumer,
-  private val consumerMapping: Map<QueueName, JobHandler>
+  private val consumerMapping: Map<QueueName, JobHandler>,
+  private val externalQueues: Map<QueueName, AwsSqsQueueConfig>
 ) : AbstractIdleService() {
   override fun startUp() {
     consumerMapping.forEach { consumer.subscribe(it.key, it.value) }
+    externalQueues.forEach { consumer.subscribeToMetrics(it.key) }
   }
 
   override fun shutDown() {}
