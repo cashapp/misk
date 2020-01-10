@@ -29,7 +29,7 @@ internal class SqsJobQueueTest {
 
   @Inject private lateinit var sqs: AmazonSQS
   @Inject private lateinit var queue: JobQueue
-  @Inject private lateinit var consumer: JobConsumer
+  @Inject private lateinit var consumer: SqsJobConsumer
   @Inject private lateinit var sqsMetrics: SqsMetrics
   @Inject @ForSqsHandling lateinit var taskQueue: RepeatedTaskQueue
   @Inject private lateinit var fakeLeaseManager: FakeLeaseManager
@@ -269,7 +269,7 @@ internal class SqsJobQueueTest {
       throw IllegalStateException("boom!")
     }
     queue.enqueue(queueName, "fail away")
-    val receiver = (consumer as SqsJobConsumer).getReceiver(queueName)
+    val receiver = consumer.getReceiver(queueName)
     assertThat(receiver.run()).isEqualTo(Status.FAILED)
   }
 
@@ -278,7 +278,7 @@ internal class SqsJobQueueTest {
     consumer.subscribe(queueName) {
       throw IllegalStateException("boom!")
     }
-    val receiver = (consumer as SqsJobConsumer).getReceiver(queueName)
+    val receiver = consumer.getReceiver(queueName)
     assertThat(receiver.run()).isEqualTo(Status.NO_WORK)
   }
 
@@ -289,7 +289,7 @@ internal class SqsJobQueueTest {
       it.acknowledge()
     }
     queue.enqueue(queueName, "ok")
-    val receiver = (consumer as SqsJobConsumer).getReceiver(queueName)
+    val receiver = consumer.getReceiver(queueName)
     assertThat(receiver.run()).isEqualTo(Status.OK)
   }
 
@@ -305,10 +305,9 @@ internal class SqsJobQueueTest {
       it.acknowledge()
     }
     queue.enqueue(queueName, "ok")
-    val receiver = (consumer as SqsJobConsumer).getReceiver(queueName)
+    val receiver = consumer.getReceiver(queueName)
     assertThat(receiver.run()).isEqualTo(Status.NO_WORK)
   }
-
 
   private fun turnOffTaskQueue() {
     taskQueue.stopAsync()
