@@ -7,9 +7,10 @@ import misk.jobqueue.QueueName
 import misk.testing.MiskExternalDependency
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
-import org.assertj.core.api.Assertions
+import org.awaitility.Awaitility.await
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 @MiskTest(startService = true)
@@ -42,8 +43,14 @@ internal class AwsSqsQueueAttributeImporterTest {
     queue.enqueue(queueName, "ok")
     queue.enqueue(queueName, "ok")
 
-    Thread.sleep(100)
-    Assertions.assertThat(sqsMetrics.sqsApproxNumberOfMessages.labels(queueName.value,
-        queueName.value).get()).isEqualTo(4.0)
+    await()
+        .atMost(1, TimeUnit.SECONDS)
+        .until {
+          sqsMetrics.sqsApproxNumberOfMessages.labels(
+              AwsSqsQueueAttributeImporter.metricNamespace,
+              AwsSqsQueueAttributeImporter.metricStat,
+              queueName.value,
+              queueName.value).get() == 4.0
+        }
   }
 }

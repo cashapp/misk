@@ -1,6 +1,7 @@
 // Auto-generated from polyrepo's master-dependencies.json. Update via polyrepo dep-add and polyrepo dep-upgrade.
 ext.dep = [
   "assertj": "org.assertj:assertj-core:3.13.2",
+  "awaitility": "org.awaitility:awaitility-kotlin:4.0.2",
   "awsApi": "com.amazonaws:aws-java-sdk:1.11.144",
   "awsSqs": "com.amazonaws:aws-java-sdk-sqs:1.11.144",
   "bouncycastle": "org.bouncycastle:bcprov-jdk15on:1.55",

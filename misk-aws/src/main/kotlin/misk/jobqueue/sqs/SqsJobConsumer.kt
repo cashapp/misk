@@ -1,9 +1,7 @@
 package misk.jobqueue.sqs
 
 import com.amazonaws.http.timers.client.ClientExecutionTimeoutException
-import com.amazonaws.services.sqs.model.GetQueueAttributesRequest
 import com.amazonaws.services.sqs.model.Message
-import com.amazonaws.services.sqs.model.QueueAttributeName
 import com.amazonaws.services.sqs.model.ReceiveMessageRequest
 import com.google.common.util.concurrent.ServiceManager
 import io.opentracing.Tracer

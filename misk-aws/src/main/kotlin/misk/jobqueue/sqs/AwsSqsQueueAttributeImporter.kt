@@ -22,8 +22,8 @@ internal class AwsSqsQueueAttributeImporter @Inject constructor(
    * Spawn a new thread that will consume the [queueName] SQS attributes and record them as metrics
    *
    * The metric recorded are:
-   * - jobs_sqs_aproximate_number_of_messages
-   * - jobs_sqs_aproximate_number_of_messages_not_visible
+   * - ApproximateNumberOfMessagesVisible
+   * - ApproximateNumberOfMessagesNotVisible
    */
   fun import(queueName: QueueName) {
     val frequency = Duration.ofMillis(config.queue_attribute_importer_frequency_ms)
@@ -31,7 +31,10 @@ internal class AwsSqsQueueAttributeImporter @Inject constructor(
     taskQueue.scheduleWithBackoff(frequency) {
       val queue = queues[queueName]
       val lease = leaseManager.requestLease("sqs-queue-attributes-${queue.queueName}")
-      if (lease.checkHeld()) {
+      if (!lease.checkHeld()) {
+        metrics.sqsApproxNumberOfMessages.clear()
+        metrics.sqsApproxNumberOfMessagesNotVisible.clear()
+      } else {
         log.info {
           "recording metrics for queue ${queueName.value}"
         }
@@ -46,11 +49,11 @@ internal class AwsSqsQueueAttributeImporter @Inject constructor(
         }
 
         attributes[QueueAttributeName.ApproximateNumberOfMessages.toString()]?.let {
-          metrics.sqsApproxNumberOfMessages.labels(queue.queueName, queue.queueName)
+          metrics.sqsApproxNumberOfMessages.labels(metricNamespace, metricStat, queue.queueName, queue.queueName)
               .set(it.toDouble())
         }
         attributes[QueueAttributeName.ApproximateNumberOfMessagesNotVisible.toString()]?.let {
-          metrics.sqsApproxNumberOfMessagesNotVisible.labels(queue.queueName, queue.queueName)
+          metrics.sqsApproxNumberOfMessagesNotVisible.labels(metricNamespace, metricStat, queue.queueName, queue.queueName)
               .set(it.toDouble())
         }
       }
@@ -60,5 +63,7 @@ internal class AwsSqsQueueAttributeImporter @Inject constructor(
 
   companion object {
     private val log = getLogger<AwsSqsQueueAttributeImporter>()
+    internal const val metricNamespace = "AWS/SQS"
+    internal const val metricStat = "sum"
   }
 }
