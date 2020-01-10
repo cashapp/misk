@@ -61,8 +61,12 @@ class FakeFeatureFlags @Inject constructor(private val moshi : Provider<Moshi>) 
     clazz: Class<T>,
     attributes: Attributes
   ): T {
-    val json = get(feature, key) as? String ?: throw IllegalArgumentException(
-        "JSON flag $feature must be overridden with override() before use")
+    val jsonFn = get(feature, key) as? Function0<*> ?: throw IllegalArgumentException(
+        "JSON flag $feature must be overridden with override() before use: ${get(feature, key)}")
+    // The JSON is lazily provided to handle the case where the override is provided by the
+    // FakeFeatureFlagModule and the Moshi instance cannot be accessed inside the module.
+    val json = jsonFn.invoke() as? String ?: throw IllegalArgumentException(
+        "JSON function did not provide a string")
     return moshi.get().adapter(clazz).fromSafeJson(json)
         ?: throw IllegalArgumentException("null value deserialized from $feature")
   }
@@ -105,11 +109,11 @@ class FakeFeatureFlags @Inject constructor(private val moshi : Provider<Moshi>) 
   }
 
   fun <T> override(feature: Feature, value: T, clazz: Class<T>) {
-    overrides[MapKey(feature)] = moshi.get().adapter(clazz).toSafeJson(value)
+    overrides[MapKey(feature)] = { moshi.get().adapter(clazz).toSafeJson(value) }
   }
 
   fun overrideJsonString(feature: Feature, json : String) {
-    overrides[MapKey(feature)] = json
+    overrides[MapKey(feature)] = { json }
   }
 
   inline fun <reified T> overrideJson(feature: Feature, value: T) {
@@ -133,7 +137,7 @@ class FakeFeatureFlags @Inject constructor(private val moshi : Provider<Moshi>) 
   }
 
   fun <T> overrideKey(feature: Feature, key: String, value: T, clazz : Class<T>) {
-    overrides[MapKey(feature, key)] = moshi.get().adapter(clazz).toSafeJson(value)
+    overrides[MapKey(feature, key)] = { moshi.get().adapter(clazz).toSafeJson(value) }
   }
 
   inline fun <reified T> overrideKeyJson(feature: Feature, key: String, value: T) {
