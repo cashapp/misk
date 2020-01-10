@@ -28,7 +28,9 @@ class SqsJobQueueTestModule(
     install(
         Modules.override(
             AwsSqsJobQueueModule(
-                AwsSqsJobQueueConfig(task_queue = RepeatedTaskQueueConfig(default_jitter_ms = 0))))
+                AwsSqsJobQueueConfig(
+                    task_queue = RepeatedTaskQueueConfig(default_jitter_ms = 0),
+                    queue_attribute_importer_frequency_ms = 0)))
             .with(SqsTestModule(credentials, client))
     )
   }

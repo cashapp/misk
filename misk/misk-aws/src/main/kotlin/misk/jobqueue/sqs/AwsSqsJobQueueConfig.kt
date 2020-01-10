@@ -31,5 +31,10 @@ class AwsSqsJobQueueConfig(
    *
    * The number of receivers is configured by [Feature("jobqueue-consumers")].
    */
-  val clustered_consumers: Boolean = true
+  val clustered_consumers: Boolean = true,
+
+  /**
+   * Frequency used to import Queue Attributes in milliseconds.
+   */
+  val queue_attribute_importer_frequency_ms: Long = 1000
 ) : Config

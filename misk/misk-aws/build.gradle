@@ -11,6 +11,7 @@ dependencies {
   testCompile dep.junitEngine
   testCompile dep.junitParams
   testCompile dep.docker
+  testCompile dep.awaitility
   testCompile project(':misk-testing')
   testCompile project(':misk-feature-testing')
 }
