@@ -77,6 +77,15 @@ subprojects {
   dependencies {
     testImplementation dep.junitApi
     testRuntimeOnly dep.junitEngine
+
+    // Platform/BOM dependencies constrain versions only.
+    api enforcedPlatform(dep.grpcBom)
+    api enforcedPlatform(dep.jacksonBom)
+    api enforcedPlatform(dep.jerseyBom)
+    api enforcedPlatform(dep.jettyBom)
+    api enforcedPlatform(dep.junitBom)
+    api enforcedPlatform(dep.kotlinBom)
+    api enforcedPlatform(dep.nettyBom)
   }
 
   // We have to set the dokka configuration after evaluation since the com.vanniktech.maven.publish
