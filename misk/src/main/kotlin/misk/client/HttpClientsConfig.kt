@@ -45,6 +45,8 @@ data class HttpClientEndpointConfig(
   val pingInterval: Duration? = null,
   val maxRequests: Int = 128,
   val maxRequestsPerHost: Int = 32,
+  val maxIdleConnections: Int = 100,
+  val keepAliveDuration: Duration = Duration.ofMinutes(5),
   val ssl: HttpClientSSLConfig? = null
 )
 

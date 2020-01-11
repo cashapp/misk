@@ -2,6 +2,7 @@ package misk.client
 
 import misk.security.ssl.SslContextFactory
 import misk.security.ssl.SslLoader
+import okhttp3.ConnectionPool
 import okhttp3.Dispatcher
 import okhttp3.OkHttpClient
 import okhttp3.Protocol
@@ -50,6 +51,12 @@ class HttpClientFactory @Inject constructor(
     dispatcher.maxRequests = config.maxRequests
     dispatcher.maxRequestsPerHost = config.maxRequestsPerHost
     builder.dispatcher(dispatcher)
+
+    val connectionPool = ConnectionPool(
+        config.maxIdleConnections,
+        config.keepAliveDuration.toMillis(),
+        TimeUnit.MILLISECONDS)
+    builder.connectionPool(connectionPool)
 
     return builder.build()
   }
