@@ -31,7 +31,4 @@ const mapDispatchToProps = {
   ...rootDispatcher
 }
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(TabContainer)
+export default connect(mapStateToProps, mapDispatchToProps)(TabContainer)
