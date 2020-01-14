@@ -24,7 +24,4 @@ class TabContainer extends React.Component<IState & IDispatchProps, IState> {
   }
 }
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(TabContainer)
+export default connect(mapStateToProps, mapDispatchToProps)(TabContainer)
