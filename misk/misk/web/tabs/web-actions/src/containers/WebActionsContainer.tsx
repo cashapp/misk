@@ -96,7 +96,4 @@ const WebActionsContainer = (
   }
 }
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(WebActionsContainer)
+export default connect(mapStateToProps, mapDispatchToProps)(WebActionsContainer)
