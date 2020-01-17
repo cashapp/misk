@@ -59,7 +59,7 @@ ext.dep = [
   "kotlinTest": "org.jetbrains.kotlin:kotlin-test:1.3.21",
   "kotlinxCoroutines": "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.3",
   "kubernetesClient": "io.kubernetes:client-java:1.0.0",
-  "launchDarkly": "com.launchdarkly:launchdarkly-java-server-sdk:4.10.0",
+  "launchDarkly": "com.launchdarkly:launchdarkly-java-server-sdk:4.11.0",
   "logbackClassic": "ch.qos.logback:logback-classic:1.2.3",
   "logbackJsonCore": "ch.qos.logback.contrib:logback-json-core:0.1.5",
   "loggingApi": "io.github.microutils:kotlin-logging:1.4.9",

@@ -106,7 +106,8 @@ class LaunchDarklyFeatureFlags @Inject constructor(
     }
 
     if (detail.reason.kind == EvaluationReason.Kind.ERROR) {
-      throw RuntimeException("Feature flag $feature evaluation failed: ${detail.reason}")
+      val reason = detail.reason as EvaluationReason.Error
+      throw RuntimeException("Feature flag $feature evaluation failed: ${detail.reason}", reason.exception)
     }
 
     throw IllegalStateException("Feature flag $feature is off but no off variation is specified")
