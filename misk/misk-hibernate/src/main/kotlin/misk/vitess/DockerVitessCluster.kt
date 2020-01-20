@@ -177,7 +177,7 @@ class DockerVitessCluster(
   companion object {
     val logger = KotlinLogging.logger {}
 
-    const val VITESS_SHA = "f3254d1287e526ce6cc1906b38862e4550bfdc110b44ef6e32905dc3ca2fb9bd"
+    const val VITESS_SHA = "5ab282b99cd5f8d6a8a6f60f0b956f2905ffa3db84ba9aabac7df6425516b3fe"
     const val VITESS_IMAGE = "vitess/base@sha256:$VITESS_SHA"
     const val CONTAINER_NAME_PREFIX = "misk-vitess-testing"
 
@@ -276,15 +276,12 @@ class DockerVitessCluster(
         "/vt/bin/vttestserver",
         "-alsologtostderr",
         "-port=" + httpPort.port,
-        "-web_dir=web/vtctld/app",
-        "-web_dir2=web/vtctld2/app",
         "-mysql_bind_host=0.0.0.0",
         "-data_dir=/vt/vtdataroot",
         "-schema_dir=schema",
         // Increase the transaction timeout so you can have a breakpoint
         // inside a transaction without it timing out
-        "-queryserver-config-transaction-timeout=${Duration.ofHours(
-            24).toMillis()}",
+        "-queryserver-config-transaction-timeout=${Duration.ofHours(24).toMillis()}",
         "-extra_my_cnf=" +
             listOf(
                 "/vt/src/vitess.io/vitess/config/mycnf/rbr.cnf",
