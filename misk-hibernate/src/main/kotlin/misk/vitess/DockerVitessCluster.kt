@@ -305,11 +305,11 @@ class DockerVitessCluster(
     // Kill and remove Vitess containers that doesn't match our requirements
     var matchingContainer : Container? = null
     vitessContainers.forEach { container ->
-      val mismatch = containerMismatch(container)
-      if (mismatch != null) {
+      val mismatches = containerMismatches(container)
+      if (!mismatches.isEmpty()) {
         logger.info {
           "Vitess container named ${container.name()} does not match our requirements, " +
-              "force removing and starting a new one: $mismatch"
+              "force removing and starting a new one: ${mismatches.joinToString(", ")}"
         }
         docker.removeContainerCmd(container.id).withForce(true).exec()
       } else {
@@ -342,7 +342,7 @@ class DockerVitessCluster(
       this.containerId = containerId
       logger.info("Started Vitess with container id $containerId")
     } else {
-      logger.info("Using existing Vitess cluster named $containerId")
+      logger.info("Using existing Vitess cluster $containerId")
     }
 
     docker.logContainerCmd(containerId!!)
@@ -366,18 +366,18 @@ class DockerVitessCluster(
    * Check if the container is a container that we can use for our tests. If it is not return a
    * description of the mismatch.
    */
-  private fun containerMismatch(container: Container): String? {
-    if (container.name() != containerName()) {
-      return "container name ${container.name()} does not match ${containerName()}"
-    }
-    if (container.state != "running") {
-      return "container state ${container.state} does not match \"running\""
-    }
-    if (container.imageId != VITESS_IMAGE) {
-      return "container image ${container.imageId} does not match $VITESS_IMAGE"
-    }
-    return null
-  }
+  private fun containerMismatches(container: Container): List<String> = listOfNotNull(
+      shouldMatch("container name", container.name(), containerName()),
+      shouldMatch("container state", container.state, "running"),
+      shouldMatch("container image", container.image, VITESS_IMAGE)
+  )
+
+  private fun shouldMatch(description: String, actual: Any, expected: Any): String? =
+      if (expected != actual) {
+        "$description \"${actual}\" does not match \"${expected}\""
+      } else {
+        null
+      }
 
   /**
    * Return the single name of a container and strip away the prefix /
