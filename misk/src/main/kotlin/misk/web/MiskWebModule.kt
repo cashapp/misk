@@ -42,6 +42,9 @@ import misk.web.interceptors.TracingInterceptor
 import misk.web.jetty.JettyConnectionMetricsCollector
 import misk.web.jetty.JettyService
 import misk.web.jetty.JettyThreadPoolMetricsCollector
+import misk.web.jetty.ThreadPoolQueueMetrics
+import misk.queuing.TimedBlockingQueue
+import misk.queuing.TimedQueueItem
 import misk.web.marshal.JsonMarshaller
 import misk.web.marshal.JsonUnmarshaller
 import misk.web.marshal.Marshaller
@@ -55,6 +58,7 @@ import org.eclipse.jetty.server.handler.StatisticsHandler
 import org.eclipse.jetty.server.handler.gzip.GzipHandler
 import org.eclipse.jetty.util.thread.QueuedThreadPool
 import java.util.concurrent.ArrayBlockingQueue
+import java.util.concurrent.BlockingQueue
 import javax.inject.Inject
 import javax.inject.Singleton
 import javax.servlet.http.HttpServletRequest
@@ -155,7 +159,7 @@ class MiskWebModule(private val config: WebConfig) : KAbstractModule() {
   }
 
   @Provides @Singleton
-  fun provideJettyThreadPool(): QueuedThreadPool {
+  fun provideJettyThreadPool(metrics: ThreadPoolQueueMetrics): QueuedThreadPool {
     val maxThreads = config.jetty_max_thread_pool_size
     val minThreads = Math.min(8, maxThreads)
     val idleTimeout = 60_000
@@ -164,7 +168,7 @@ class MiskWebModule(private val config: WebConfig) : KAbstractModule() {
         maxThreads,
         minThreads,
         idleTimeout,
-        ArrayBlockingQueue(config.jetty_max_thread_pool_queue_size))
+        provideThreadPoolQueue(metrics))
     threadPool.name = "jetty-thread"
     return threadPool
   }
@@ -177,6 +181,17 @@ class MiskWebModule(private val config: WebConfig) : KAbstractModule() {
   @Provides @Singleton
   fun provideGzipHandler(): GzipHandler {
     return GzipHandler()
+  }
+
+  private fun provideThreadPoolQueue(metrics: ThreadPoolQueueMetrics): BlockingQueue<Runnable> {
+    return if (config.enable_thread_pool_queue_metrics) {
+      TimedBlockingQueue(
+          config.jetty_max_thread_pool_queue_size,
+          metrics::recordQueueLatency
+      )
+    } else {
+      ArrayBlockingQueue<Runnable>(config.jetty_max_thread_pool_queue_size)
+    }
   }
 
   class MiskCallerProvider @Inject constructor(
