@@ -2,6 +2,7 @@ package misk.vitess
 
 import com.github.dockerjava.api.DockerClient
 import com.github.dockerjava.api.model.Bind
+import com.github.dockerjava.api.model.Container
 import com.github.dockerjava.api.model.ExposedPort
 import com.github.dockerjava.api.model.Frame
 import com.github.dockerjava.api.model.Ports
@@ -248,12 +249,9 @@ class DockerVitessCluster(
     val keyspacesArg = keyspaces.keys.map { it }.joinToString(",")
     val shardCounts = keyspaces.values.map { it.shardCount() }.joinToString(",")
 
-    val schemaVolume =
-        Volume("/vt/src/vitess.io/vitess/schema")
-    val confVolume = Volume(
-        "/vt/src/vitess.io/vitess/config/miskcnf")
-    val httpPort =
-        ExposedPort.tcp(cluster.httpPort)
+    val schemaVolume = Volume("/vt/src/vitess.io/vitess/schema")
+    val confVolume = Volume("/vt/src/vitess.io/vitess/config/miskcnf")
+    val httpPort = ExposedPort.tcp(cluster.httpPort)
     if (cluster.config.type == DataSourceType.VITESS) {
       if (cluster.config.port != null && cluster.config.port != cluster.grpcPort) {
         throw RuntimeException(
@@ -266,22 +264,14 @@ class DockerVitessCluster(
             "Config port ${cluster.config.port} has to match Vitess Docker container: ${cluster.grpcPort}")
       }
     }
-    val grpcPort =
-        ExposedPort.tcp(cluster.grpcPort)
-    val mysqlPort =
-        ExposedPort.tcp(cluster.mysqlPort)
-    val vtgateMysqlPort =
-        ExposedPort.tcp(cluster.vtgateMysqlPort)
+    val grpcPort = ExposedPort.tcp(cluster.grpcPort)
+    val mysqlPort = ExposedPort.tcp(cluster.mysqlPort)
+    val vtgateMysqlPort = ExposedPort.tcp(cluster.vtgateMysqlPort)
     val ports = Ports()
-    ports.bind(grpcPort,
-        Ports.Binding.bindPort(grpcPort.port))
-    ports.bind(httpPort,
-        Ports.Binding.bindPort(httpPort.port))
-    ports.bind(mysqlPort,
-        Ports.Binding.bindPort(mysqlPort.port))
-    ports.bind(vtgateMysqlPort,
-        Ports.Binding.bindPort(
-            vtgateMysqlPort.port))
+    ports.bind(grpcPort, Ports.Binding.bindPort(grpcPort.port))
+    ports.bind(httpPort, Ports.Binding.bindPort(httpPort.port))
+    ports.bind(mysqlPort, Ports.Binding.bindPort(mysqlPort.port))
+    ports.bind(vtgateMysqlPort, Ports.Binding.bindPort(vtgateMysqlPort.port))
 
     val cmd = arrayOf(
         "/vt/bin/vttestserver",
@@ -307,27 +297,53 @@ class DockerVitessCluster(
 
     val containerName = "$CONTAINER_NAME_PREFIX-${cluster.name}"
 
-    val runningContainer = docker.listContainersCmd()
-        .withNameFilter(listOf(containerName))
-        .withLimit(1)
-        .exec()
-        .firstOrNull()
-    if (runningContainer != null) {
-      if (runningContainer.state != "running") {
-        logger.info("Existing Vitess cluster named $containerName found in " +
-            "state ${runningContainer.state}, force removing and restarting")
-        docker.removeContainerCmd(runningContainer.id).withForce(true).exec()
-      } else {
-        logger.info("Using existing Vitess cluster named $containerName")
-        stopContainerOnExit = false
-        containerId = runningContainer.id
+    val prefixes = listOf(
+        "docker-vitess-testing", // These are the prefixes of banklin/franklin containers
+        CONTAINER_NAME_PREFIX // These are misk containers
+    )
+    val allContainers = docker.listContainersCmd().exec()
+    val vitessContainers = prefixes.flatMap { prefix ->
+      allContainers.filter { container ->
+        container.name().startsWith(prefix)
       }
     }
+    // Kill and remove Vitess containers for other apps
+    val (myContainers, otherContainers) =
+        vitessContainers.partition { container -> container.name() == containerName }
+    otherContainers.forEach { container ->
+      logger.info {
+        "Existing Vitess container ${container.name()} for another app found, " +
+            "force killing to free up the port"
+      }
+      docker.removeContainerCmd(container.id).withForce(true).exec()
+    }
 
+    // Kill and remove Vitess containers that aren't running
+    val (runningContainers, deadContainers) =
+        myContainers.partition { container -> container.state == "running" }
+    deadContainers.forEach { container ->
+      logger.info {
+        "Existing Vitess container named ${container.name()} found in " +
+            "state ${container.state}, force removing and restarting"
+      }
+      docker.removeContainerCmd(container.id).withForce(true).exec()
+    }
+    vitessContainers.filter { container -> container.name().contains(containerName) }
+
+    // If there's any left we'll use that one
+    val runningContainer = runningContainers.firstOrNull()
+    if (runningContainer != null) {
+      logger.info("Using existing Vitess cluster named $containerName")
+      stopContainerOnExit = false
+      containerId = runningContainer.id
+    }
+
+    // Otherwise we start a new one
     if (containerId == null) {
-      logger.info(
-          "Starting Vitess cluster with command: ${cmd.joinToString(" ")}")
-      containerId = docker.createContainerCmd(VITESS_IMAGE)
+      logger.info {
+        "Starting Vitess cluster with command: ${cmd.joinToString(" ")}"
+      }
+      val containerId = docker.createContainerCmd(VITESS_IMAGE)
           .withCmd(cmd.toList())
           .withVolumes(schemaVolume, confVolume)
           .withBinds(
@@ -341,7 +357,6 @@ class DockerVitessCluster(
           .withTty(true)
           .withName(containerName)
           .exec().id!!
-      val containerId = containerId!!
       docker.startContainerCmd(containerId).exec()
       docker.logContainerCmd(containerId)
           .withStdErr(true)
@@ -350,6 +365,7 @@ class DockerVitessCluster(
           .withSince(0)
           .exec(LogContainerResultCallback())
           .awaitStarted()
+      this.containerId = containerId
     }
     logger.info("Started Vitess with container id $containerId")
 
@@ -358,6 +374,14 @@ class DockerVitessCluster(
     grantExternalAccessToDbaUser()
 
     turnOnGeneralLog()
+  }
+
+  /**
+   * Return the single name of a container and strip away the prefix /
+   */
+  private fun Container.name(): String {
+    val name = names.single()
+    return if (name.startsWith("/")) name.substring(1) else name
   }
 
   private fun waitUntilHealthy() {
@@ -428,17 +452,6 @@ class DockerVitessCluster(
   }
 
   override fun stop() {
-    if (!isRunning) {
-      return
-    }
-    isRunning = false
-
-    if (!stopContainerOnExit) {
-      return
-    }
-
-    docker.removeContainerCmd(containerId!!).withForce(true).withRemoveVolumes(true).exec()
-    logger.info("Killed Vitess cluster with container id $containerId")
   }
 
   class LogContainerResultCallback : ResultCallbackTemplate<LogContainerResultCallback, Frame>() {
