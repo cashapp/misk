@@ -146,7 +146,6 @@ class DockerVitessCluster(
   private var containerId: String? = null
 
   private var isRunning = false
-  private var stopContainerOnExit = true
   private var startupFailure: Exception? = null
 
   init {
@@ -295,48 +294,33 @@ class DockerVitessCluster(
         "-num_shards=$shardCounts"
     )
 
-    val containerName = "$CONTAINER_NAME_PREFIX-${cluster.name}"
-
     val prefixes = listOf(
         "docker-vitess-testing", // These are the prefixes of banklin/franklin containers
         CONTAINER_NAME_PREFIX // These are misk containers
     )
-    val allContainers = docker.listContainersCmd().exec()
+    val allContainers = docker.listContainersCmd().withShowAll(true).exec()
     val vitessContainers = prefixes.flatMap { prefix ->
       allContainers.filter { container ->
         container.name().startsWith(prefix)
       }
     }
-    // Kill and remove Vitess containers for other apps
-    val (myContainers, otherContainers) =
-        vitessContainers.partition { container -> container.name() == containerName }
-    otherContainers.forEach { container ->
-      logger.info {
-        "Existing Vitess container ${container.name()} for another app found, " +
-            "force killing to free up the port"
+
+    // Kill and remove Vitess containers that doesn't match our requirements
+    var matchingContainer : Container? = null
+    vitessContainers.forEach { container ->
+      val mismatch = containerMismatch(container)
+      if (mismatch != null) {
+        logger.info {
+          "Vitess container named ${container.name()} does not match our requirements, " +
+              "force removing and starting a new one: $mismatch"
+        }
+        docker.removeContainerCmd(container.id).withForce(true).exec()
+      } else {
+        matchingContainer = container
       }
-      docker.removeContainerCmd(container.id).withForce(true).exec()
     }
 
-    // Kill and remove Vitess containers that aren't running
-    val (runningContainers, deadContainers) =
-        myContainers.partition { container -> container.state == "running" }
-    deadContainers.forEach { container ->
-      logger.info {
-        "Existing Vitess container named ${container.name()} found in " +
-            "state ${container.state}, force removing and restarting"
-      }
-      docker.removeContainerCmd(container.id).withForce(true).exec()
-    }
-    vitessContainers.filter { container -> container.name().contains(containerName) }
-
-    // If there's any left we'll use that one
-    val runningContainer = runningContainers.firstOrNull()
-    if (runningContainer != null) {
-      logger.info("Using existing Vitess cluster named $containerName")
-      stopContainerOnExit = false
-      containerId = runningContainer.id
-    }
+    containerId = matchingContainer?.id
 
     // Otherwise we start a new one
     if (containerId == null) {
@@ -355,25 +339,47 @@ class DockerVitessCluster(
           .withExposedPorts(httpPort, grpcPort, mysqlPort, vtgateMysqlPort)
           .withPortBindings(ports)
           .withTty(true)
-          .withName(containerName)
+          .withName(containerName())
           .exec().id!!
       docker.startContainerCmd(containerId).exec()
-      docker.logContainerCmd(containerId)
-          .withStdErr(true)
-          .withStdOut(true)
-          .withFollowStream(true)
-          .withSince(0)
-          .exec(LogContainerResultCallback())
-          .awaitStarted()
       this.containerId = containerId
+      logger.info("Started Vitess with container id $containerId")
+    } else {
+      logger.info("Using existing Vitess cluster named $containerId")
     }
-    logger.info("Started Vitess with container id $containerId")
+
+    docker.logContainerCmd(containerId!!)
+        .withStdErr(true)
+        .withStdOut(true)
+        .withFollowStream(true)
+        .withSince(0)
+        .exec(LogContainerResultCallback())
+        .awaitStarted()
 
     waitUntilHealthy()
 
     grantExternalAccessToDbaUser()
 
     turnOnGeneralLog()
+  }
+
+  private fun containerName() = "$CONTAINER_NAME_PREFIX-${cluster.name}"
+
+  /**
+   * Check if the container is a container that we can use for our tests. If it is not return a
+   * description of the mismatch.
+   */
+  private fun containerMismatch(container: Container): String? {
+    if (container.name() != containerName()) {
+      return "container name ${container.name()} does not match ${containerName()}"
+    }
+    if (container.state != "running") {
+      return "container state ${container.state} does not match \"running\""
+    }
+    if (container.imageId != VITESS_IMAGE) {
+      return "container image ${container.imageId} does not match $VITESS_IMAGE"
+    }
+    return null
   }
 
   /**
