@@ -1,0 +1,23 @@
+dependencies {
+  implementation dep.tracingJaeger
+  implementation dep.grpcNetty
+  implementation dep.grpcProtobuf
+  implementation dep.grpcStub
+  implementation dep.kotlinxCoroutines
+  implementation dep.wireGrpcClient
+  implementation dep.wireRuntime
+  implementation project(':misk')
+
+  testImplementation dep.assertj
+  testImplementation dep.junitApi
+  testImplementation dep.junitEngine
+  testImplementation dep.junitParams
+  testImplementation project(':misk-testing')
+}
+
+afterEvaluate { project ->
+  project.tasks.dokka {
+    outputDirectory = "$rootDir/docs/0.x"
+    outputFormat = 'gfm'
+  }
+}
