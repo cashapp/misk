@@ -1,6 +1,7 @@
 package misk.web.jetty
 
 import misk.metrics.Metrics
+import java.time.Duration
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -14,7 +15,7 @@ class ThreadPoolQueueMetrics @Inject internal constructor(
       listOf("latency")
   )
 
-  fun recordQueueLatency(latency: Long) {
-    queueLatencyHistogram.record(latency.toDouble(), "latency")
+  fun recordQueueLatency(latency: Duration) {
+    queueLatencyHistogram.record(latency.toMillis().toDouble(), "latency")
   }
 }

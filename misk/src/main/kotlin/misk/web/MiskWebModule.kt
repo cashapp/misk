@@ -10,6 +10,7 @@ import misk.exceptions.ActionException
 import misk.grpc.GrpcRequestFeatureBinding
 import misk.grpc.GrpcResponseFeatureBinding
 import misk.inject.KAbstractModule
+import misk.queuing.TimedBlockingQueue
 import misk.scope.ActionScopedProvider
 import misk.scope.ActionScopedProviderModule
 import misk.security.authz.MiskCallerAuthenticator
@@ -43,8 +44,6 @@ import misk.web.jetty.JettyConnectionMetricsCollector
 import misk.web.jetty.JettyService
 import misk.web.jetty.JettyThreadPoolMetricsCollector
 import misk.web.jetty.ThreadPoolQueueMetrics
-import misk.queuing.TimedBlockingQueue
-import misk.queuing.TimedQueueItem
 import misk.web.marshal.JsonMarshaller
 import misk.web.marshal.JsonUnmarshaller
 import misk.web.marshal.Marshaller

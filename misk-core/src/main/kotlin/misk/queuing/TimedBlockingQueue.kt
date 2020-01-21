@@ -1,5 +1,6 @@
 package misk.queuing
 
+import java.time.Duration
 import java.util.concurrent.ArrayBlockingQueue
 import java.util.concurrent.BlockingQueue
 import java.util.concurrent.TimeUnit
@@ -7,18 +8,15 @@ import java.util.concurrent.TimeUnit
 /**
  * This BlockingQueue implementation allows measuring how long dequeued items have been
  * in the queue. It requires a delayHandler which consumes the latency every time an item is
- * removed from the queue by {@link BlockingQueue#take()},
- * {@link BlockingQueue#poll(long, TimeUnit)},
- * {@link BlockingQueue#poll()} or
- * {@link BlockingQueue#remove()}.
- * The operations
- * {@link BlockingQueue#drainTo(Collection)} and
- * {@link BlockingQueue#drainTo(Collection, int)} are not supported
+ * removed from the queue.
+ * Note that the the actual removal of an item from the queue and the delayHandler invocation
+ * are not atomic, hence it may not be appropriate for applications which require
+ * a higher level of accuracy.
  * @param <T> The type of the elements held in this queue
  */
 class TimedBlockingQueue<T>(
   maxQueueSize: Int,
-  private val delayHandler: (Long) -> Unit
+  private val delayHandler: (Duration) -> Unit
 ) : BlockingQueue<T> {
   private val queue: BlockingQueue<TimedQueueItem<T>> =
       ArrayBlockingQueue<TimedQueueItem<T>>(maxQueueSize)
@@ -50,6 +48,7 @@ class TimedBlockingQueue<T>(
   }
 
   override fun clear() {
+    invokeDelayHandlerOnAll(queue)
     queue.clear()
   }
 
@@ -58,7 +57,8 @@ class TimedBlockingQueue<T>(
   }
 
   override fun removeAll(elements: Collection<T>): Boolean {
-    return queue.removeAll(wrapCollection(elements))
+    val numRemoved = removeItems(elements)
+    return numRemoved > 0
   }
 
   override fun add(element: T): Boolean {
@@ -77,8 +77,12 @@ class TimedBlockingQueue<T>(
     return queue.map(this::unwrap).toMutableList().iterator()
   }
 
-  override fun peek(): T {
-    return unwrap(queue.peek())
+  override fun peek(): T? {
+    val item = queue.peek()
+    if (item != null) {
+      return unwrap(item)
+    }
+    return null
   }
 
   override fun put(e: T) {
@@ -90,7 +94,7 @@ class TimedBlockingQueue<T>(
   }
 
   override fun remove(element: T): Boolean {
-    return queue.remove(wrap(element))
+    return removeItems(listOf(element)) > 0
   }
 
   override fun containsAll(elements: Collection<T>): Boolean {
@@ -98,7 +102,9 @@ class TimedBlockingQueue<T>(
   }
 
   override fun retainAll(elements: Collection<T>): Boolean {
-    return queue.retainAll(wrapCollection(elements))
+    val toRemove = queue.filter {wrappedItem -> !elements.contains(wrappedItem.value)}
+        .map(this::unwrap)
+    return removeItems(toRemove) > 0
   }
 
   override fun remainingCapacity(): Int {
@@ -106,11 +112,17 @@ class TimedBlockingQueue<T>(
   }
 
   override fun drainTo(c: MutableCollection<in T>): Int {
-    throw UnsupportedOperationException()
+    val collection = mutableListOf<TimedQueueItem<T>>()
+    val result = queue.drainTo(collection)
+    invokeDelayHandlerOnAll(collection)
+    return result
   }
 
   override fun drainTo(c: MutableCollection<in T>, maxElements: Int): Int {
-    throw UnsupportedOperationException()
+    val collection = mutableListOf<TimedQueueItem<T>>()
+    val result = queue.drainTo(collection, maxElements)
+    invokeDelayHandlerOnAll(collection)
+    return result
   }
 
   override val size: Int
@@ -124,13 +136,34 @@ class TimedBlockingQueue<T>(
     return item.value
   }
 
+  private fun invokeDelayHandler(item: TimedQueueItem<T>) {
+    delayHandler(Duration.ofMillis(System.currentTimeMillis() - item.startTime))
+  }
+
   private fun handleRemoved(item: TimedQueueItem<T>): T {
-    delayHandler(System.currentTimeMillis() - item.startTime)
+    invokeDelayHandler(item)
     return unwrap(item)
   }
 
   private fun wrapCollection(collection: Collection<T>): Collection<TimedQueueItem<T>> {
     return collection.map(this::wrap)
+  }
+
+  private fun find(collection: Collection<T>): Collection<TimedQueueItem<T>> {
+    return queue
+        .filter {wrappedItem -> collection.contains(wrappedItem.value)}
+        .toList()
+  }
+
+  private fun invokeDelayHandlerOnAll(collection: Collection<TimedQueueItem<T>>) {
+    collection.forEach {item -> invokeDelayHandler(item)}
+  }
+
+  private fun removeItems(collection: Collection<T>): Int {
+    val itemsToRemove = find(collection)
+    queue.removeAll(wrapCollection(collection))
+    invokeDelayHandlerOnAll(itemsToRemove)
+    return itemsToRemove.size
   }
 
 }
