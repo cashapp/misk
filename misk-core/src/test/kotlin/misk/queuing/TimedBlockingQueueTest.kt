@@ -125,4 +125,20 @@ internal class TimedBlockingQueueTest {
     assertEquals(arrayQueue.poll(), timedQueue.poll())
     assertEquals(arrayQueue.poll(1, TimeUnit.SECONDS), timedQueue.poll(1, TimeUnit.SECONDS))
   }
+
+  @Test fun draintToShouldAppendToInput() {
+    val values = listOf(1, 2, 3)
+    val queue = TimedBlockingQueue<Int>(queueSize){ }
+    queue.addAll(values)
+    val mutableList = mutableListOf<Int>()
+    queue.drainTo(mutableList)
+    assertTrue(queue.isEmpty())
+    assertEquals(values, mutableList)
+
+    mutableList.clear()
+    queue.addAll(values)
+    queue.drainTo(mutableList, 2)
+    assertEquals(1, queue.size)
+    assertEquals(listOf(1, 2), mutableList)
+  }
 }

@@ -57,7 +57,7 @@ class TimedBlockingQueue<T>(
   }
 
   override fun removeAll(elements: Collection<T>): Boolean {
-    return removeItems(elements) > 0
+    return removeItems(elements)
   }
 
   override fun add(element: T): Boolean {
@@ -93,7 +93,7 @@ class TimedBlockingQueue<T>(
   }
 
   override fun remove(element: T): Boolean {
-    return removeItems(listOf(element)) > 0
+    return removeItems(listOf(element))
   }
 
   override fun containsAll(elements: Collection<T>): Boolean {
@@ -102,8 +102,9 @@ class TimedBlockingQueue<T>(
 
   override fun retainAll(elements: Collection<T>): Boolean {
     val toRemove = queue.filter {wrappedItem -> !elements.contains(wrappedItem.value)}
-        .map(this::unwrap)
-    return removeItems(toRemove) > 0
+    val result = queue.retainAll(wrapCollection(elements))
+    invokeDelayHandlerOnAll(toRemove)
+    return result
   }
 
   override fun remainingCapacity(): Int {
@@ -113,6 +114,7 @@ class TimedBlockingQueue<T>(
   override fun drainTo(c: MutableCollection<in T>): Int {
     val collection = mutableListOf<TimedQueueItem<T>>()
     val result = queue.drainTo(collection)
+    c.addAll(collection.map(this::unwrap))
     invokeDelayHandlerOnAll(collection)
     return result
   }
@@ -120,6 +122,7 @@ class TimedBlockingQueue<T>(
   override fun drainTo(c: MutableCollection<in T>, maxElements: Int): Int {
     val collection = mutableListOf<TimedQueueItem<T>>()
     val result = queue.drainTo(collection, maxElements)
+    c.addAll(collection.map(this::unwrap))
     invokeDelayHandlerOnAll(collection)
     return result
   }
@@ -158,11 +161,11 @@ class TimedBlockingQueue<T>(
     collection.forEach {item -> invokeDelayHandler(item)}
   }
 
-  private fun removeItems(collection: Collection<T>): Int {
+  private fun removeItems(collection: Collection<T>): Boolean {
     val itemsToRemove = find(collection)
-    queue.removeAll(wrapCollection(collection))
+    val result = queue.removeAll(wrapCollection(collection))
     invokeDelayHandlerOnAll(itemsToRemove)
-    return itemsToRemove.size
+    return result
   }
 
 }
