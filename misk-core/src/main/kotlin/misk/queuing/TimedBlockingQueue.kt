@@ -57,8 +57,7 @@ class TimedBlockingQueue<T>(
   }
 
   override fun removeAll(elements: Collection<T>): Boolean {
-    val numRemoved = removeItems(elements)
-    return numRemoved > 0
+    return removeItems(elements) > 0
   }
 
   override fun add(element: T): Boolean {

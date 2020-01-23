@@ -3,12 +3,13 @@ package misk.queuing
 import org.junit.jupiter.api.Test
 import java.time.Duration
 import java.util.ArrayList
+import java.util.NoSuchElementException
 import java.util.concurrent.ArrayBlockingQueue
 import java.util.concurrent.TimeUnit
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
-import kotlin.test.fail
 
 internal class TimedBlockingQueueTest {
   private val queueSize = 10
@@ -119,18 +120,9 @@ internal class TimedBlockingQueueTest {
     assertEquals(arrayQueue.isEmpty(), timedQueue.isEmpty())
     assertEquals(arrayQueue.remainingCapacity(), timedQueue.remainingCapacity())
     assertEquals(arrayQueue.peek(), timedQueue.peek())
-    shouldThrowException({ timedQueue.element() }, "Exception expected")
-    shouldThrowException({ timedQueue.remove() }, "Exception expected")
+    assertFailsWith(NoSuchElementException::class) { timedQueue.element() }
+    assertFailsWith(NoSuchElementException::class) { timedQueue.remove() }
     assertEquals(arrayQueue.poll(), timedQueue.poll())
     assertEquals(arrayQueue.poll(1, TimeUnit.SECONDS), timedQueue.poll(1, TimeUnit.SECONDS))
-  }
-
-  private fun shouldThrowException(lambda: () -> Unit, failureMsg: String) {
-    try {
-      lambda()
-      fail(failureMsg)
-    } catch (t: Throwable) {
-      // do nothing
-    }
   }
 }
