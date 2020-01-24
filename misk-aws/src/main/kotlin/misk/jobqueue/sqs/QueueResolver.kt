@@ -66,5 +66,16 @@ val QueueName.isDeadLetterQueue get() = value.endsWith(deadLetterQueueSuffix)
 val QueueName.deadLetterQueue
   get() = if (isDeadLetterQueue) this else QueueName(value + deadLetterQueueSuffix)
 
+internal const val retryQueueSuffix = "_retryq"
+val QueueName.isRetryQueue get() = value.endsWith(retryQueueSuffix)
+val QueueName.retryQueue
+  get() = if (isRetryQueue) this else QueueName(value + retryQueueSuffix)
+
 val QueueName.parentQueue
-  get() = if (isDeadLetterQueue) QueueName(value.removeSuffix(deadLetterQueueSuffix)) else this
+  get() = if (isDeadLetterQueue) {
+    QueueName(value.removeSuffix(deadLetterQueueSuffix))
+  } else if (isRetryQueue) {
+    QueueName(value.removeSuffix(retryQueueSuffix))
+  } else {
+    this
+  }
