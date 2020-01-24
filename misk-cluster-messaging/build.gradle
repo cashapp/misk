@@ -1,3 +1,31 @@
+buildscript {
+  dependencies {
+    classpath dep.protobufGradlePlugin
+  }
+}
+
+apply plugin: 'com.squareup.wire'
+
+wire {
+  kotlin {
+    rpcRole = 'client'
+  }
+
+  // Generate service interfaces also.
+  kotlin {
+    includes = ['clustermessaging.ClusterMessaging']
+    exclusive = false
+    rpcRole = 'server'
+    rpcCallStyle = 'suspending'
+    singleMethodServices = true
+  }
+}
+
+sourceSets {
+  // TODO(jwilson): we do this to make IntelliJ happy but the Wire Gradle plugin should do that.
+  main.java.srcDirs += 'build/generated/source/wire'
+}
+
 dependencies {
   implementation dep.tracingJaeger
   implementation dep.grpcNetty

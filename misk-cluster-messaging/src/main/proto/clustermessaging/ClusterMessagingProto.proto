@@ -1,0 +1,44 @@
+syntax = "proto2";
+
+package clustermessaging;
+
+service ClusterMessaging {
+
+  rpc ClusterOp(stream Op) returns (stream Op) {}
+}
+
+message Op {
+  optional string sender = 1;
+
+  oneof type {
+    SubscribeTopic subscribe_topic = 3;
+    UnsubscribeTopic unsubscribe_topic = 4;
+    DeliverMessage deliver_message = 5;
+    DeliverClusterBroadcast deliver_cluster_broadcast = 6;
+  }
+
+  message SubscribeTopic {
+    optional string topic = 1;
+  }
+
+  message UnsubscribeTopic {
+    optional string topic = 1;
+  }
+
+  message DeliverMessage {
+    optional string topic = 1;
+    optional bytes payload = 2;
+  }
+
+  message DeliverClusterBroadcast {
+    optional ClusterBroadcast broadcast = 1;
+  }
+}
+
+message ClusterBroadcast {
+  repeated ClusterMember cluster_members = 1;
+}
+
+message ClusterMember {
+  optional string host = 1;
+}
