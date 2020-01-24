@@ -131,7 +131,7 @@ data class DataSourceConfig(
 
     return when (type) {
       DataSourceType.MYSQL, DataSourceType.VITESS_MYSQL, DataSourceType.TIDB -> {
-        var queryParams = "?useLegacyDatetimeCode=false"
+        var queryParams = "?useLegacyDatetimeCode=false&characterEncoding=utf8"
 
         if (env == Environment.TESTING || env == Environment.DEVELOPMENT) {
           queryParams += "&createDatabaseIfNotExist=true"
