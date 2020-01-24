@@ -18,7 +18,7 @@ class ClusterMemberNetwork(
   private val mailroomScope: CoroutineScope,
   private val self: SelfClusterMember,
   private val remoteClusterMemberPool: ClusterMemberPool,
-  private val transportPool: TransportPool,
+  private val localTopicRouter: LocalTopicRouter,
   private val clusterMemberDiscoverer: ClusterMemberDiscoverer
 ) {
 
@@ -71,11 +71,11 @@ class ClusterMemberNetwork(
 
   private fun setupClusterMember(clusterMember: ClusterMember) {
     mailroomScope.launch {
-      for (topic in transportPool.getAllTopics()) {
+      for (topic in localTopicRouter.getAllTopics()) {
         clusterMember.receiveSubscribe(topic)
       }
       for (incomingMessage in clusterMember.messageInbox) {
-        transportPool.get(incomingMessage.topic)?.outbox?.send(incomingMessage.payload)
+        localTopicRouter.get(incomingMessage.topic)?.outbox?.send(incomingMessage.payload)
       }
       for (broadcast in clusterMember.clusterBroadcastInbox) {
         for (member in broadcast.cluster_members) {
