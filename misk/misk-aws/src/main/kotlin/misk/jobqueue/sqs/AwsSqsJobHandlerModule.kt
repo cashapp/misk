@@ -10,7 +10,8 @@ import javax.inject.Singleton
 import kotlin.reflect.KClass
 
 /**
- * Install this module to register a handler for an SQS queue.
+ * Install this module to register a handler for an SQS queue,
+ * along with its corresponding retry queue
  */
 class AwsSqsJobHandlerModule<T : JobHandler> private constructor(
   private val queueName: QueueName,
@@ -18,6 +19,7 @@ class AwsSqsJobHandlerModule<T : JobHandler> private constructor(
 ) : KAbstractModule() {
   override fun configure() {
     newMapBinder<QueueName, JobHandler>().addBinding(queueName).to(handler.java)
+    newMapBinder<QueueName, JobHandler>().addBinding(queueName.retryQueue).to(handler.java)
     install(ServiceModule<AwsSqsJobHandlerSubscriptionService>())
   }
 
