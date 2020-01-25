@@ -10,6 +10,7 @@ enum class DispatchMechanism {
   GET,
   GRPC,
   POST,
+  DELETE,
   WEBSOCKET;
 
   /**
@@ -27,6 +28,7 @@ enum class DispatchMechanism {
         GRPC -> HttpMethod.POST
 
         POST -> HttpMethod.POST
+        DELETE -> HttpMethod.DELETE
 
         // WebSocket upgrades from GET.
         // https://developer.mozilla.org/en-US/docs/Web/HTTP/Protocol_upgrade_mechanism
