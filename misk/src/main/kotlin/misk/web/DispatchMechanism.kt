@@ -8,9 +8,9 @@ import org.eclipse.jetty.http.HttpMethod
  */
 enum class DispatchMechanism {
   GET,
-  GRPC,
   POST,
   DELETE,
+  GRPC,
   WEBSOCKET;
 
   /**
@@ -23,12 +23,11 @@ enum class DispatchMechanism {
     get() {
       return when (this) {
         GET -> HttpMethod.GET
+        POST -> HttpMethod.POST
+        DELETE -> HttpMethod.DELETE
 
         // gRPC layers over POST. https://github.com/grpc/grpc/blob/master/doc/PROTOCOL-HTTP2.md
         GRPC -> HttpMethod.POST
-
-        POST -> HttpMethod.POST
-        DELETE -> HttpMethod.DELETE
 
         // WebSocket upgrades from GET.
         // https://developer.mozilla.org/en-US/docs/Web/HTTP/Protocol_upgrade_mechanism
