@@ -86,7 +86,7 @@ internal class WebActionsServlet @Inject constructor(
       val candidateActions = boundActions.mapNotNull {
         it.match(httpCall.dispatchMechanism, requestContentType, requestAccepts, httpCall.url)
       }
-      val bestAction = candidateActions.sorted().firstOrNull()
+      val bestAction = candidateActions.min()
 
       if (bestAction != null) {
         bestAction.action.scopeAndHandle(request, httpCall, bestAction.pathMatcher)
