@@ -10,6 +10,7 @@ import misk.asAction
 import misk.scope.ActionScope
 import misk.web.BoundAction
 import misk.web.ConnectWebSocket
+import misk.web.Delete
 import misk.web.DispatchMechanism
 import misk.web.Get
 import misk.web.NetworkInterceptor
@@ -40,11 +41,12 @@ internal class WebActionFactory @Inject constructor(
     webActionClass: KClass<A>,
     pathPrefix: String = "/"
   ): List<BoundAction<A>> {
-    // Find the function with Get, Post, or ConnectWebSocket annotation. Only one such function is
-    // allowed.
+    // Find the function with Get, Post, Delete or ConnectWebSocket annotation.
+    // Only one such function is allowed.
     val actionFunctions = webActionClass.functions.mapNotNull {
       if (it.findAnnotationWithOverrides<Get>() != null ||
           it.findAnnotationWithOverrides<Post>() != null ||
+          it.findAnnotationWithOverrides<Delete>() != null ||
           it.findAnnotationWithOverrides<ConnectWebSocket>() != null ||
           it.findAnnotationWithOverrides<WireRpc>() != null) {
         it as? KFunction<*>
@@ -53,7 +55,7 @@ internal class WebActionFactory @Inject constructor(
     }
 
     require(actionFunctions.isNotEmpty()) {
-      "no @Get, @Post, @ConnectWebSocket, or @Grpc annotations on ${webActionClass.simpleName}"
+      "no @Get, @Post, @Delete, @ConnectWebSocket, or @Grpc annotations on ${webActionClass.simpleName}"
     }
 
     require(actionFunctions.size == 1) {
@@ -65,6 +67,7 @@ internal class WebActionFactory @Inject constructor(
     val actionFunction = actionFunctions.first()
     val get = actionFunction.findAnnotationWithOverrides<Get>()
     val post = actionFunction.findAnnotationWithOverrides<Post>()
+    val delete = actionFunction.findAnnotationWithOverrides<Delete>()
     val connectWebSocket = actionFunction.findAnnotationWithOverrides<ConnectWebSocket>()
     val grpc = actionFunction.findAnnotationWithOverrides<WireRpc>()
 
@@ -85,6 +88,10 @@ internal class WebActionFactory @Inject constructor(
     if (post != null) {
       collectBoundActions(result, provider, actionFunction,
           effectivePrefix + post.pathPattern, DispatchMechanism.POST)
+    }
+    if (delete != null) {
+      collectBoundActions(result, provider, actionFunction,
+          effectivePrefix + delete.pathPattern, DispatchMechanism.DELETE)
     }
     if (connectWebSocket != null) {
       collectBoundActions(result, provider, actionFunction,

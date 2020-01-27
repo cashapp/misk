@@ -66,6 +66,10 @@ internal class WebActionsServlet @Inject constructor(
     handleCall(request, response)
   }
 
+  override fun doDelete(request: HttpServletRequest, response: HttpServletResponse) {
+    handleCall(request, response)
+  }
+
   private fun handleCall(request: HttpServletRequest, response: HttpServletResponse) {
     try {
       val httpCall = ServletHttpCall.create(
@@ -82,7 +86,7 @@ internal class WebActionsServlet @Inject constructor(
       val candidateActions = boundActions.mapNotNull {
         it.match(httpCall.dispatchMechanism, requestContentType, requestAccepts, httpCall.url)
       }
-      val bestAction = candidateActions.sorted().firstOrNull()
+      val bestAction = candidateActions.min()
 
       if (bestAction != null) {
         bestAction.action.scopeAndHandle(request, httpCall, bestAction.pathMatcher)
@@ -159,6 +163,7 @@ internal fun HttpServletRequest.dispatchMechanism(): DispatchMechanism {
       MediaTypes.APPLICATION_GRPC_MEDIA_TYPE -> DispatchMechanism.GRPC
       else -> DispatchMechanism.POST
     }
+    HttpMethod.DELETE.name -> DispatchMechanism.DELETE
     else -> throw ProtocolException("unexpected method: $method")
   }
 }
