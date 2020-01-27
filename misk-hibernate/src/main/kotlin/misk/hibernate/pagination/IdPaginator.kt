@@ -5,34 +5,33 @@ import misk.hibernate.Id
 import misk.hibernate.Operator
 import misk.hibernate.Query
 
-/** Pages through entities by descending ID. */
-fun <T : DbEntity<T>> idDescPaginator(idPath: String = "id"): Paginator<T, Query<T>> {
-  return IdPaginator(idPath, false)
-}
-
 /** Pages through entities by ascending ID. */
 fun <T : DbEntity<T>> idAscPaginator(idPath: String = "id"): Paginator<T, Query<T>> {
-  return IdPaginator(idPath, true)
+  return IdPaginator(idPath, Operator.GT)
+}
+
+/** Pages through entities by descending ID. */
+fun <T : DbEntity<T>> idDescPaginator(idPath: String = "id"): Paginator<T, Query<T>> {
+  return IdPaginator(idPath, Operator.LT)
 }
 
 internal class IdPaginator<T : DbEntity<T>>(
   private val idPath: String,
-  private val asc: Boolean
+  private val operator: Operator
 ) : Paginator<T, Query<T>> {
+
+  init {
+    require(operator == Operator.GT || operator == Operator.LT)
+  }
 
   override fun getOffset(row: T): Offset {
     return encodeOffset(row.id)
   }
 
   override fun applyOffset(query: Query<T>, offset: Offset?) {
-    query.dynamicAddOrder(idPath, asc)
+    query.dynamicAddOrder(idPath, asc = operator == Operator.GT)
     if (offset == null) {
       return
-    }
-    val operator = if (asc) {
-      Operator.GT
-    } else {
-      Operator.LT
     }
     query.dynamicAddConstraint(idPath, operator, decodeOffset(offset))
   }

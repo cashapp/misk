@@ -3,6 +3,7 @@ package misk.hibernate.pagination
 import misk.hibernate.DbEntity
 import misk.hibernate.Query
 import misk.hibernate.Session
+import misk.hibernate.Transacter
 
 interface Pager<T> {
   /** Returns null when there are no more pages. */
@@ -13,19 +14,20 @@ interface Pager<T> {
 fun <T : DbEntity<T>, Q : Query<T>> Q.newPager(
   paginator: Paginator<T, Q>,
   initialOffset: Offset? = null,
-  pageSize: Int = 50
+  pageSize: Int = 100
 ): Pager<T> {
   return RealPager(this, paginator, initialOffset, pageSize)
 }
 
 fun <T : DbEntity<T>, R> Pager<T>.listAll(
-  session: Session,
+  transacter: Transacter,
   transform: (T) -> R
 ): List<R> {
   val results = mutableListOf<R>()
   var offset: Offset?
   do {
-    val (pageContents, nextOffset) = nextPage(session) ?: Page.empty()
+    val nextPage = transacter.transaction { session -> nextPage(session) }
+    val (pageContents, nextOffset) = nextPage ?: Page.empty()
     results.addAll(pageContents.map(transform))
     offset = nextOffset
   } while (offset != null)
