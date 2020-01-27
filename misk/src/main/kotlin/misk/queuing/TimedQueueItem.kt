@@ -6,7 +6,7 @@ import java.util.Objects
  * A wrapper class around any queued type which provides a startTime field for computing
  * the time it spent in the queue
  */
-data class TimedQueueItem<T>(
+internal data class TimedQueueItem<T>(
   val value: T,
   val startTime: Long
 ) {

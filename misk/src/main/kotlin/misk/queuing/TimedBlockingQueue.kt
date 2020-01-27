@@ -9,12 +9,14 @@ import java.util.concurrent.TimeUnit
  * This BlockingQueue implementation allows measuring how long dequeued items have been
  * in the queue. It requires a delayHandler which consumes the latency every time an item is
  * removed from the queue.
- * Note that the the actual removal of an item from the queue and the delayHandler invocation
- * are not atomic, hence it may not be appropriate for applications which require
- * a higher level of accuracy.
+ *
+ * Caveat: The operations remove(element), removeAll() and retainAll() are supported but may not
+ * always invoke the delayHandler in a multithreaded environment. For removing items, poll(),
+ * take() and remove() should be used instead.
+ *
  * @param <T> The type of the elements held in this queue
  */
-class TimedBlockingQueue<T>(
+internal class TimedBlockingQueue<T>(
   maxQueueSize: Int,
   private val delayHandler: (Duration) -> Unit
 ) : BlockingQueue<T> {
@@ -48,8 +50,10 @@ class TimedBlockingQueue<T>(
   }
 
   override fun clear() {
-    invokeDelayHandlerOnAll(queue)
-    queue.clear()
+    var result = poll()
+    while (result != null) {
+      result = poll()
+    }
   }
 
   override fun element(): T {
@@ -57,7 +61,7 @@ class TimedBlockingQueue<T>(
   }
 
   override fun removeAll(elements: Collection<T>): Boolean {
-    return removeItems(elements)
+    return removeItems(elements) > 0
   }
 
   override fun add(element: T): Boolean {
@@ -93,7 +97,7 @@ class TimedBlockingQueue<T>(
   }
 
   override fun remove(element: T): Boolean {
-    return removeItems(listOf(element))
+    return removeItem(element)
   }
 
   override fun containsAll(elements: Collection<T>): Boolean {
@@ -101,10 +105,10 @@ class TimedBlockingQueue<T>(
   }
 
   override fun retainAll(elements: Collection<T>): Boolean {
-    val toRemove = queue.filter {wrappedItem -> !elements.contains(wrappedItem.value)}
-    val result = queue.retainAll(wrapCollection(elements))
-    invokeDelayHandlerOnAll(toRemove)
-    return result
+    val toRemove = queue
+        .filter { wrappedItem -> !elements.contains(wrappedItem.value)}
+        .map { item -> item.value }
+    return removeItems(toRemove) > 0
   }
 
   override fun remainingCapacity(): Int {
@@ -131,7 +135,7 @@ class TimedBlockingQueue<T>(
     get() = queue.size
 
   private fun <E> wrap(obj: E): TimedQueueItem<E> {
-    return TimedQueueItem(obj, System.currentTimeMillis())
+    return TimedQueueItem(obj, System.nanoTime())
   }
 
   private fun unwrap(item: TimedQueueItem<T>): T {
@@ -139,7 +143,7 @@ class TimedBlockingQueue<T>(
   }
 
   private fun invokeDelayHandler(item: TimedQueueItem<T>) {
-    delayHandler(Duration.ofMillis(System.currentTimeMillis() - item.startTime))
+    delayHandler(Duration.ofNanos(System.nanoTime() - item.startTime))
   }
 
   private fun handleRemoved(item: TimedQueueItem<T>): T {
@@ -151,21 +155,28 @@ class TimedBlockingQueue<T>(
     return collection.map(this::wrap)
   }
 
-  private fun find(collection: Collection<T>): Collection<TimedQueueItem<T>> {
-    return queue
-        .filter {wrappedItem -> collection.contains(wrappedItem.value)}
-        .toList()
-  }
-
   private fun invokeDelayHandlerOnAll(collection: Collection<TimedQueueItem<T>>) {
     collection.forEach {item -> invokeDelayHandler(item)}
   }
 
-  private fun removeItems(collection: Collection<T>): Boolean {
-    val itemsToRemove = find(collection)
-    val result = queue.removeAll(wrapCollection(collection))
-    invokeDelayHandlerOnAll(itemsToRemove)
-    return result
+  private fun removeItems(collection: Collection<T>): Int {
+    var count = 0
+    for (element in collection) {
+      if (removeItem(element)) {
+        count++
+      }
+    }
+    return count
   }
 
+  private fun removeItem(element: T): Boolean {
+    val foundItem = queue.find { item -> item == wrap(element) }
+    // if 'element' was added after find() and before remove(), the delayHandler will
+    // not be invoked
+    val removed = queue.remove(wrap(element))
+    if (removed && foundItem != null) {
+      invokeDelayHandler(foundItem)
+    }
+    return removed
+  }
 }

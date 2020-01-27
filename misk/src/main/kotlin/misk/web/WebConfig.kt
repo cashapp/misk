@@ -36,6 +36,7 @@ data class WebConfig(
   val jetty_max_thread_pool_queue_size: Int = 300,
 
   /** Flag to enable thread pool queue metrics */
+  // TODO make this true by default
   val enable_thread_pool_queue_metrics: Boolean = false,
 
   val action_exception_log_level: ActionExceptionLogLevelConfig = ActionExceptionLogLevelConfig(),
