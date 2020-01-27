@@ -66,6 +66,12 @@ interface CharacterQuery : Query<DbCharacter> {
   @Constraint("name")
   fun name(name: String): CharacterQuery
 
+  @Constraint("name", operator = Operator.LT)
+  fun nameLessThan(name: String): CharacterQuery
+
+  @Constraint("id", operator = Operator.GT)
+  fun idMoreThan(id: Id<DbCharacter>): CharacterQuery
+
   @Constraint("actor.name")
   fun actorName(name: String): CharacterQuery
 
@@ -83,6 +89,15 @@ interface CharacterQuery : Query<DbCharacter> {
 
   @Select
   fun listAsActorAndReleaseDate(session: Session): List<ActorAndReleaseDate>
+
+  @Order(path = "id", asc = true)
+  fun idAsc(): CharacterQuery
+
+  @Order(path = "id", asc = false)
+  fun idDesc(): CharacterQuery
+
+  @Order(path = "name", asc = false)
+  fun nameDesc(): CharacterQuery
 }
 
 data class NameAndReleaseDate(
