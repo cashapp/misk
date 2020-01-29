@@ -415,12 +415,6 @@ internal class ReflectionQuery<T : DbEntity<T>>(
     }
   }
 
-  data class QueryLimitsConfig(
-    var maxMaxRows: Int,
-    var rowCountErrorLimit: Int,
-    var rowCountWarningLimit: Int
-  )
-
   class SelectMethodHandler(
     private val returnList: Boolean,
     private val constructor: KFunction<*>?,
@@ -872,3 +866,9 @@ private fun CriteriaBuilder.addInClause(
     }
   }
 }
+
+data class QueryLimitsConfig(
+    var maxMaxRows: Int,
+    var rowCountErrorLimit: Int,
+    var rowCountWarningLimit: Int
+)

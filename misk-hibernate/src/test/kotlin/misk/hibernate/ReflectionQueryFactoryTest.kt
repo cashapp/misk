@@ -22,7 +22,7 @@ class ReflectionQueryFactoryTest {
   val maxMaxRows = 40
   val rowCountErrorLimit = 30
   val rowCountWarningLimit = 20
-  private val queryFactory = ReflectionQuery.Factory(ReflectionQuery.QueryLimitsConfig(
+  private val queryFactory = ReflectionQuery.Factory(QueryLimitsConfig(
       maxMaxRows, rowCountErrorLimit, rowCountWarningLimit))
 
   @Inject @Movies lateinit var transacter: Transacter

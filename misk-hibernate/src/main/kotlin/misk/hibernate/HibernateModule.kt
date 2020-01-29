@@ -4,7 +4,6 @@ import io.opentracing.Tracer
 import misk.ServiceModule
 import misk.environment.Environment
 import misk.healthchecks.HealthCheck
-import misk.hibernate.ReflectionQuery.QueryLimitsConfig
 import misk.inject.KAbstractModule
 import misk.inject.asSingleton
 import misk.inject.keyOf
