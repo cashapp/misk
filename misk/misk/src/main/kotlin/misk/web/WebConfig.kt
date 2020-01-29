@@ -35,6 +35,10 @@ data class WebConfig(
   /** Maximum number of items in the queue for Jetty's thread pool. */
   val jetty_max_thread_pool_queue_size: Int = 300,
 
+  /** Flag to enable thread pool queue metrics */
+  // TODO make this true by default
+  val enable_thread_pool_queue_metrics: Boolean = false,
+
   val action_exception_log_level: ActionExceptionLogLevelConfig = ActionExceptionLogLevelConfig(),
 
   /** The maximum number of streams per HTTP/2 connection. */
