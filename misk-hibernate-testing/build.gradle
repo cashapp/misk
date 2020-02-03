@@ -6,12 +6,6 @@ dependencies {
   testImplementation dep.openTracingDatadog
 }
 
-test {
-  // To help that with parallel execution by reusing test setup,
-  // misk-hibernate-testing is made dependent on misk-hibernate
-  dependsOn ':misk-hibernate:test'
-}
-
 afterEvaluate { project ->
   project.tasks.dokka {
     outputDirectory = "$rootDir/docs/0.x"
