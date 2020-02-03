@@ -5,12 +5,14 @@ buildscript {
 }
 
 dependencies {
+  compile dep.bouncycastle
   compile dep.guice
   compile dep.guiceMultibindings
   compile dep.kotlinStdLib
   compile dep.kotlinReflection
   compile dep.loggingApi
   compile dep.logbackClassic
+  compile dep.okio
   compile dep.slf4jApi
 
   compile project(':misk-inject')

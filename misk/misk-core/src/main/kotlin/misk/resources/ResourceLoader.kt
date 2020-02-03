@@ -197,7 +197,7 @@ class ResourceLoader @Inject constructor(
   companion object {
     @Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN", "UNCHECKED_CAST")
     val SYSTEM = ResourceLoader(mapOf(
-      "classpath:" to ClasspathResourceLoaderBackend,
-      "filesystem:" to FilesystemLoaderBackend) as java.util.Map<String, Backend>)
+        "classpath:" to ClasspathResourceLoaderBackend,
+        "filesystem:" to FilesystemLoaderBackend) as java.util.Map<String, Backend>)
   }
 }
