@@ -364,8 +364,12 @@ abstract class TransacterTest {
   }
 
   @Test
-  @Disabled("Uniqueness constraints aren't reliably enforced on Vitess")
   fun constraintViolationCausesTransactionToRollback() {
+    // Uniqueness constraints aren't reliably enforced on Vitess
+    if (transacter.config().type.isVitess) {
+      return
+    }
+
     transacter.transaction { session ->
       session.save(DbMovie("Cinderella", LocalDate.of(1950, 3, 4)))
     }
