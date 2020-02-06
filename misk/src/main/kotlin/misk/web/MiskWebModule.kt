@@ -183,7 +183,7 @@ class MiskWebModule(private val config: WebConfig) : KAbstractModule() {
   }
 
   private fun provideThreadPoolQueue(metrics: ThreadPoolQueueMetrics): BlockingQueue<Runnable> {
-    return if (config.enable_thread_pool_queue_metrics) {
+    return if (config.enable_thread_pool_queue_latency_metrics) {
       TimedBlockingQueue(
           config.jetty_max_thread_pool_queue_size,
           metrics::recordQueueLatency
