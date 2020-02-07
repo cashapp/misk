@@ -2,6 +2,7 @@ package misk.web.dashboard
 
 import misk.environment.Environment
 import misk.inject.KAbstractModule
+import misk.inject.KInstallOnceModule
 import misk.security.authz.AccessAnnotationEntry
 import misk.web.NetworkInterceptor
 import misk.web.WebActionModule
@@ -22,7 +23,7 @@ import javax.inject.Qualifier
  *   Dashboard Annotation [AdminDashboard]. Tabs are then included in the admin dashboard menu
  *   grouping according to the [DashboardTab].category field and sorting by [DashboardTab].name
  */
-class AdminDashboardModule(val environment: Environment) : KAbstractModule() {
+class AdminDashboardModule(val environment: Environment) : KInstallOnceModule() {
   override fun configure() {
     // Install base dashboard support
     install(DashboardModule())
