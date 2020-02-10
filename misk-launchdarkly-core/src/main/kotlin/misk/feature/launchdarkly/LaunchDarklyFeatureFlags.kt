@@ -27,7 +27,7 @@ class LaunchDarklyFeatureFlags @Inject constructor(
   private val moshi: Moshi
 ) : AbstractIdleService(), FeatureFlags, FeatureService {
   override fun startUp() {
-    var attempts = 50
+    var attempts = 300
     val intervalMillis = 100L
 
     // LaunchDarkly has its own threads for initialization. We just need to keep checking until
@@ -38,7 +38,7 @@ class LaunchDarklyFeatureFlags @Inject constructor(
     }
 
     if (attempts == 0 && !ldClient.initialized()) {
-      throw Exception("LaunchDarkly did not initialize in 5 seconds")
+      throw Exception("LaunchDarkly did not initialize in 30 seconds")
     }
   }
 
