@@ -4,7 +4,6 @@ import com.squareup.moshi.JsonDataException
 import misk.feature.Feature
 import misk.feature.getEnum
 import misk.feature.getJson
-import misk.inject.KAbstractModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
@@ -17,13 +16,6 @@ internal class FakeFeatureFlagsTest {
   val FEATURE = Feature("foo")
   val OTHER_FEATURE = Feature("bar")
   val TOKEN = "cust_abcdef123"
-
-  class TestModule : KAbstractModule() {
-    override fun configure() {
-      install(FakeFeatureFlagsModule())
-      install(MoshiTestingModule())
-    }
-  }
 
   @MiskTestModule val module = TestModule()
 
