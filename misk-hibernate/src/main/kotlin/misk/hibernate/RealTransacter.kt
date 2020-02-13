@@ -149,7 +149,7 @@ internal class RealTransacter private constructor(
       transactionWithRetriesInternal {
         maybeWithTracing(DB_TRANSACTION_SPAN_NAME) {
           replicaReadWithoutTransactionInternalSession { session ->
-            session.target(Destination(TabletType.REPLICA)) {
+            session.targetReplica {
               // Full scatters are allowed on replica reads as you can increase availability by
               // adding additional replicas.
               session.withoutChecks(Check.FULL_SCATTER) {
@@ -491,6 +491,37 @@ internal class RealTransacter private constructor(
         }
       } else {
         function()
+      }
+    }
+
+    internal fun <T> targetReplica(function: () -> T): T {
+      return when {
+        config.type.isVitess -> {
+          target(Destination(TabletType.REPLICA), function)
+        }
+        config.type == DataSourceType.TIDB -> {
+          targetReplicaTiDB(function);
+        }
+        else -> {
+          function();
+        }
+      }
+    }
+
+    private fun <T> targetReplicaTiDB(function: () -> T): T {
+      try {
+        useConnection { connection ->
+          connection.createStatement().use { s ->
+            s.execute("set @@tidb_replica_read = 'follower'")
+          }
+        }
+        return function();
+      } finally {
+        useConnection { connection ->
+          connection.createStatement().use { s ->
+            s.execute("set @@tidb_replica_read = ''")
+          }
+        }
       }
     }
 
