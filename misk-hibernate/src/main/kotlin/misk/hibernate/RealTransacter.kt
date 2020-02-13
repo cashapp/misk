@@ -253,6 +253,9 @@ internal class RealTransacter private constructor(
     if (config.type.isVitess) {
       return sessionFactory
     }
+    if (config.type == DataSourceType.COCKROACHDB || config.type == DataSourceType.TIDB) {
+      return sessionFactory
+    }
     error("No reader is configured for replica reads, pass in both a writer and reader qualifier and the full " +
         "DataSourceClustersConfig into HibernateModule, like this:\n" +
         "\tinstall(HibernateModule(AppDb::class, AppReaderDb::class, config.data_source_clusters[\"name\"]))")
