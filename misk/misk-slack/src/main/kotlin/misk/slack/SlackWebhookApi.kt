@@ -1,5 +1,6 @@
 package misk.slack
 
+import com.squareup.moshi.JsonClass
 import retrofit2.Call
 import retrofit2.http.Body
 import retrofit2.http.POST
@@ -10,6 +11,7 @@ interface SlackWebhookApi {
   fun post(@Url url: String, @Body request: SlackWebhookRequest): Call<Void>
 }
 
+@JsonClass(generateAdapter = true)
 data class SlackWebhookRequest(
   val channel: String,
   val username: String,
@@ -17,6 +19,7 @@ data class SlackWebhookRequest(
   val icon_emoji: String
 )
 
+@JsonClass(generateAdapter = true)
 enum class SlackWebhookResponse {
   ok,
   invalid_payload,
