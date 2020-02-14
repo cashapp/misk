@@ -3,6 +3,8 @@ package misk.slack
 import misk.config.Secret
 
 data class SlackConfig(
+  val baseUrl: String = "https://hooks.slack.com/",
+
   /**
    * The full webhook path, i.e. /services/...
    * Ideally this is not stored plaintext in the config file, but in a secret.
