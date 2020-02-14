@@ -379,14 +379,6 @@ class DockerVitessCluster(
         null
       }
 
-  /**
-   * Return the single name of a container and strip away the prefix /
-   */
-  private fun Container.name(): String {
-    val name = names.single()
-    return if (name.startsWith("/")) name.substring(1) else name
-  }
-
   private fun waitUntilHealthy() {
     try {
       retry(20, ExponentialBackoff(
@@ -462,4 +454,12 @@ class DockerVitessCluster(
       logger.info(String(item.payload).trim())
     }
   }
+}
+
+/**
+ * Return the single name of a container and strip away the prefix /
+ */
+fun Container.name(): String {
+  val name = names.single()
+  return if (name.startsWith("/")) name.substring(1) else name
 }

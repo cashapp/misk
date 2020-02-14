@@ -1,12 +1,11 @@
 package misk.vitess
 
 import com.github.dockerjava.api.DockerClient
+import com.github.dockerjava.api.model.Container
 import com.github.dockerjava.api.model.ExposedPort
 import com.github.dockerjava.api.model.Frame
 import com.github.dockerjava.api.model.Ports
-import com.github.dockerjava.core.DockerClientBuilder
 import com.github.dockerjava.core.async.ResultCallbackTemplate
-import com.github.dockerjava.netty.NettyDockerCmdExecFactory
 import com.squareup.moshi.Moshi
 import com.zaxxer.hikari.util.DriverDataSource
 import misk.backoff.DontRetryException
@@ -120,20 +119,22 @@ class DockerTidbCluster(
 
     val containerName = "$CONTAINER_NAME"
 
-    val runningContainer = docker.listContainersCmd()
-        .withNameFilter(listOf(containerName))
-        .withLimit(1)
-        .exec()
-        .firstOrNull()
-    if (runningContainer != null) {
-      if (runningContainer.state != "running") {
-        logger.info("Existing TiDB cluster named $containerName found in " +
-            "state ${runningContainer.state}, force removing and restarting")
-        docker.removeContainerCmd(runningContainer.id).withForce(true).exec()
+    val allContainers = docker.listContainersCmd().withShowAll(true).exec()
+    val matchingContainer = allContainers.filter { container ->
+      container.name() == containerName
+    }.singleOrNull()
+
+    // Kill and remove container that don't match our requirements
+    if (matchingContainer != null) {
+      val mismatches = containerMismatches(matchingContainer)
+      if (mismatches.isNotEmpty()) {
+        DockerVitessCluster.logger.info {
+          "Container named ${matchingContainer.name()} does not match our requirements, " +
+              "force removing and starting a new one: ${mismatches.joinToString(", ")}"
+        }
+        docker.removeContainerCmd(matchingContainer.id).withForce(true).exec()
       } else {
-        logger.info("Using existing TiDB cluster named $containerName")
-        stopContainerOnExit = false
-        containerId = runningContainer.id
+        containerId = matchingContainer.id
       }
     }
 
@@ -162,6 +163,23 @@ class DockerTidbCluster(
       c.createStatement().executeUpdate("SET GLOBAL time_zone = '+00:00'")
     }
   }
+
+  /**
+   * Check if the container is a container that we can use for our tests. If it is not return a
+   * description of the mismatch.
+   */
+  private fun containerMismatches(container: Container): List<String> = listOfNotNull(
+      shouldMatch("container name", container.name(), CONTAINER_NAME),
+      shouldMatch("container state", container.state, "running"),
+      shouldMatch("container image", container.image, IMAGE)
+  )
+
+  private fun shouldMatch(description: String, actual: Any, expected: Any): String? =
+      if (expected != actual) {
+        "$description \"${actual}\" does not match \"${expected}\""
+      } else {
+        null
+      }
 
   private fun waitUntilHealthy() {
     try {
