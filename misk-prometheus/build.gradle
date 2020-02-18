@@ -2,10 +2,6 @@ dependencies {
   compile dep.prometheusHttpserver
   compile project(':misk')
 
-  testCompile dep.assertj
-  testCompile dep.junitApi
-  testCompile dep.junitEngine
-  testCompile dep.junitParams
   testCompile project(':misk-testing')
   testCompile project(':misk-gcp-testing')
 }

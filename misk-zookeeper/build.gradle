@@ -17,7 +17,6 @@ dependencies {
     exclude(group: 'log4j', module: 'log4j')
   }
 
-  testCompile dep.docker
   testCompile dep.junitApi
   testCompile(dep.zookeeper) {
     exclude(group: 'org.slf4j', module: 'slf4j-log4j12')

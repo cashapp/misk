@@ -1,11 +1,8 @@
 apply plugin: 'com.github.johnrengelman.shadow'
 
 dependencies {
-  compile dep.kotlinStdLib
-  compile dep.kotlinTest
   compile dep.guava
   compile dep.guice
-  compile dep.logbackClassic
   compile project(':misk')
   compile project(':misk-prometheus')
 

@@ -7,14 +7,6 @@ buildscript {
 apply plugin: 'kotlin-jpa'
 
 dependencies {
-  compile dep.hibernateCore
-  compile dep.hikariCp
-  compile dep.hsqldb
-  compile dep.mysql
-  compile dep.openTracing
-  compile dep.openTracingUtil
-  compile dep.openTracingJdbc
-  compile dep.vitess
   compile project(':misk')
   compile project(':misk-events-core')
   compile project(':misk-hibernate')

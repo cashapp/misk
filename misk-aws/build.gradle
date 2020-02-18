@@ -8,8 +8,6 @@ dependencies {
 
   testCompile dep.assertj
   testCompile dep.junitApi
-  testCompile dep.junitEngine
-  testCompile dep.junitParams
   testCompile dep.docker
   testCompile dep.awaitility
   testCompile project(':misk-testing')

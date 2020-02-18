@@ -5,9 +5,8 @@ buildscript {
 }
 
 dependencies {
-  compile dep.kotlinStdLib
   compile dep.guava
-  compile dep.moshiKotlin
+  compile dep.moshiAdapters
   compile project(':misk-core')
 
   testCompile project(':misk-testing')

@@ -1,6 +1,7 @@
 dependencies {
   compile dep.assertj
   compile dep.junitApi
+  compile dep.kotlinTest
   compile project(':misk')
   compile project(':misk-gcp')
   compile project(':misk-testing')

@@ -3,7 +3,9 @@ dependencies {
   implementation project(':misk-testing')
   implementation project(':misk-hibernate')
   testImplementation dep.junitApi
+  testImplementation dep.kotlinTest
   testImplementation dep.openTracingDatadog
+
 }
 
 afterEvaluate { project ->
