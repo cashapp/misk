@@ -11,6 +11,7 @@ import mu.KotlinLogging
 import javax.inject.Provider
 import javax.inject.Singleton
 
+@Suppress("UnstableApiUsage") // Guava's Service is @Beta.
 class ServiceManagerModule : KAbstractModule() {
   companion object {
     private val log = KotlinLogging.logger {}
@@ -31,6 +32,7 @@ class ServiceManagerModule : KAbstractModule() {
     newMultibinder<DependencyEdge>()
     newMultibinder<EnhancementEdge>()
   }
+
   @Provides
   @Singleton
   internal fun provideServiceManager(

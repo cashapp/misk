@@ -2,6 +2,7 @@ package misk.hibernate
 
 import io.opentracing.Tracer
 import misk.ServiceModule
+import misk.concurrent.ExecutorServiceFactory
 import misk.environment.Environment
 import misk.healthchecks.HealthCheck
 import misk.hibernate.ReflectionQuery.QueryLimitsConfig
@@ -137,14 +138,16 @@ class HibernateModule(
     multibind<HealthCheck>().to(schemaMigratorServiceKey)
 
     bind(transacterKey).toProvider(object : Provider<Transacter> {
-      @com.google.inject.Inject(optional = true) val tracer: Tracer? = null
       @Inject lateinit var queryTracingListener: QueryTracingListener
+      @Inject lateinit var executorServiceFactory: ExecutorServiceFactory
+      @com.google.inject.Inject(optional = true) val tracer: Tracer? = null
       override fun get(): RealTransacter = RealTransacter(
           qualifier = qualifier,
           sessionFactoryProvider = sessionFactoryProvider,
           readerSessionFactoryProvider = readerSessionFactoryProvider,
           config = config,
           queryTracingListener = queryTracingListener,
+          executorServiceFactory = executorServiceFactory,
           tracer = tracer
       )
     }).asSingleton()
