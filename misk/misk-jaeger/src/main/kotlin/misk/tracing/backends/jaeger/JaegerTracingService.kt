@@ -7,16 +7,15 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
+@Suppress("UnstableApiUsage") // Guava's Service is @Beta.
 internal class JaegerTracingService @Inject internal constructor(
   private val tracer: Tracer
 ) : AbstractIdleService() {
   override fun startUp() {
-    // In case startUp is called multiple times, ensure tracer is only registered once
-    if (!GlobalTracer.isRegistered()) {
-      GlobalTracer.register(tracer)
-    }
+    GlobalTracer.registerIfAbsent(tracer)
   }
 
   override fun shutDown() {
+    tracer.close()
   }
 }

@@ -2,7 +2,7 @@ package misk.tracing.backends.jaeger
 
 import com.google.inject.Provides
 import com.google.inject.Singleton
-import com.uber.jaeger.Configuration
+import io.jaegertracing.Configuration
 import io.opentracing.Tracer
 import misk.ServiceModule
 import misk.config.AppName
@@ -19,17 +19,25 @@ class JaegerBackendModule(val config: JaegerBackendConfig?) : KAbstractModule() 
   fun jaegerTracer(@AppName appName: String): Tracer {
     val reporter =
         if (config?.reporter == null) Configuration.ReporterConfiguration()
-        else Configuration.ReporterConfiguration(
-            config.reporter.log_spans, config.reporter.agent_host,
-            config.reporter.agent_port, config.reporter.flush_interval_ms,
-            config.reporter.max_queue_size)
+        else Configuration.ReporterConfiguration()
+            .withLogSpans(config.reporter.log_spans)
+            .withSender(Configuration.SenderConfiguration()
+                .withAgentHost(config.reporter.agent_host)
+                .withAgentPort(config.reporter.agent_port)
+            )
+            .withFlushInterval(config.reporter.flush_interval_ms)
+            .withMaxQueueSize(config.reporter.max_queue_size)
 
     val sampler =
         if (config?.sampler == null) Configuration.SamplerConfiguration()
-        else Configuration.SamplerConfiguration(
-            config.sampler.type, config.sampler.param, config.sampler.manager_host_port)
+        else Configuration.SamplerConfiguration()
+            .withType(config.sampler.type)
+            .withParam(config.sampler.param)
+            .withManagerHostPort(config.sampler.manager_host_port)
 
-    return Configuration(appName, sampler, reporter)
+    return Configuration(appName)
+        .withSampler(sampler)
+        .withReporter(reporter)
         .tracerBuilder
         .withScopeManager(MDCScopeManager())
         .build()
