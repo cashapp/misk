@@ -89,13 +89,16 @@ internal class QueryTracingListener @Inject constructor() :
 
     val spanBuilder = tracer!!.buildSpan(spanName)
     tracer!!.activeSpan()?.let { spanBuilder.asChildOf(it) }
-    val scope = spanBuilder.startActive(true)
+    val span = spanBuilder.start()
+    val scope = tracer!!.activateSpan(span)
     lastScopeInThread.set(scope)
   }
 
   fun endLastSpan() {
+    val activeSpan = tracer?.activeSpan()
     val lastScope = lastScopeInThread.get()
     lastScope?.close()
+    activeSpan?.finish()
     lastScopeInThread.set(null)
   }
 }

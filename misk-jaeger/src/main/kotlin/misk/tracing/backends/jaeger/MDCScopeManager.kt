@@ -1,5 +1,6 @@
 package misk.tracing.backends.jaeger
 
+import io.jaegertracing.internal.JaegerSpan
 import io.opentracing.Scope
 import io.opentracing.ScopeManager
 import io.opentracing.Span
@@ -13,14 +14,16 @@ import org.slf4j.MDC
 internal class MDCScopeManager : ScopeManager {
   private val threadLocalStorage = ThreadLocal<MDCScope>()
 
-  override fun active(): Scope? = threadLocalStorage.get()
-
-  override fun activate(span: Span, finishSpanOnClose: Boolean): Scope {
+  override fun activate(span: Span): Scope {
     val parentScope = threadLocalStorage.get()
-    val newScope = MDCScope(this, parentScope, span, finishSpanOnClose)
+    val newScope = MDCScope(this, parentScope, span)
     threadLocalStorage.set(newScope)
-    putToMDC(newScope.span())
+    putToMDC(newScope)
     return newScope
+  }
+
+  override fun activeSpan(): Span? {
+    return threadLocalStorage.get()?.span
   }
 
   private fun close(scope: MDCScope) {
@@ -29,30 +32,25 @@ internal class MDCScopeManager : ScopeManager {
       allContextNames.forEach { MDC.remove(it) }
       threadLocalStorage.remove()
     } else {
-      putToMDC(parentScope.span())
+      putToMDC(parentScope)
       threadLocalStorage.set(parentScope)
     }
   }
 
-  private fun putToMDC(span: Span) {
-    (span as? com.uber.jaeger.Span)?.let {
-      MDC.put(MDC_TRACE_ID, String.format("%x", it.context().traceId))
-      MDC.put(MDC_SPAN_ID, String.format("%x", it.context().spanId))
-      MDC.put(MDC_PARENT_ID, String.format("%x", it.context().parentId))
-    }
+  private fun putToMDC(mdcScope: MDCScope) {
+    val span = mdcScope.span as? JaegerSpan ?: return
+    MDC.put(MDC_TRACE_ID, span.context().traceId)
+    MDC.put(MDC_SPAN_ID, String.format("%x", span.context().spanId))
+    MDC.put(MDC_PARENT_ID, String.format("%x", span.context().parentId))
   }
 
   private class MDCScope(
     private val scopeManager: MDCScopeManager,
     internal val parentScope: MDCScope?,
-    private val span: Span,
-    private val finishSpanOnClose: Boolean
+    internal val span: Span
   ) : Scope {
-    override fun span() = span
-
     override fun close() {
       scopeManager.close(this)
-      if (finishSpanOnClose) span.finish()
     }
   }
 

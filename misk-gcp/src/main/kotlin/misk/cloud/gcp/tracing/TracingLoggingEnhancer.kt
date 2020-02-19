@@ -3,7 +3,7 @@ package misk.cloud.gcp.tracing
 import brave.opentracing.BraveSpan
 import com.google.cloud.logging.LogEntry
 import com.google.cloud.logging.LoggingEnhancer
-import com.uber.jaeger.Span
+import io.jaegertracing.internal.JaegerSpan
 import io.opentracing.Tracer
 import io.opentracing.util.GlobalTracer
 
@@ -25,10 +25,10 @@ class TracingLoggingEnhancer : LoggingEnhancer {
         traceId = traceContext.traceIdString()
         // TODO(nb): figure out why traceIdString differs from string representation in StackDriver
         if (traceContext.traceIdHigh() == 0L) {
-          traceId = "0000000000000000" + traceId
+          traceId = "0000000000000000$traceId"
         }
       }
-      is Span -> traceId = activeSpan.context().traceId.toString()
+      is JaegerSpan -> traceId = activeSpan.context().toTraceId()
     }
 
     if (traceId != null) {
