@@ -11,6 +11,7 @@ import javax.inject.Provider
  * Builds a graph of [CoordinatedService]s which defer start up and shut down until their dependent
  * services are ready.
  */
+@Suppress("UnstableApiUsage") // Guava's Service is @Beta.
 internal class ServiceGraphBuilder {
   private var serviceMap = mutableMapOf<Key<*>, CoordinatedService>()
   private val dependencyMap = LinkedHashMultimap.create<Key<*>, Key<*>>()
