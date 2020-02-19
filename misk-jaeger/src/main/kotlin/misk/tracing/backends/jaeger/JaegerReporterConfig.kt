@@ -1,10 +1,11 @@
 package misk.tracing.backends.jaeger
 
+import io.jaegertracing.Configuration
 import misk.config.Config
 
 /**
  * Configuration for Jaeger's reporter. If values are left null then Jaeger will provide defaults.
- * See [com.uber.jaeger.Configuration.ReporterConfiguration] for default values.
+ * See [Configuration.ReporterConfiguration] for default values.
  */
 data class JaegerReporterConfig(
   val log_spans: Boolean?,
