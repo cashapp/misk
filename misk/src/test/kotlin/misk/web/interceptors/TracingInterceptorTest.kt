@@ -10,6 +10,7 @@ import misk.testing.ConcurrentMockTracer
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.testing.MockTracingBackendModule
+import misk.tracing.traceWithSpan
 import misk.web.DispatchMechanism
 import misk.web.FakeHttpCall
 import misk.web.Get
@@ -92,11 +93,10 @@ class TracingInterceptorTest {
     val chain = RealNetworkChain(TracingTestAction::call.asAction(DispatchMechanism.GET),
         tracingTestAction, httpCall, listOf(object : NetworkInterceptor {
       override fun intercept(chain: NetworkChain) {
-        tracer.buildSpan("parent-span-exists")
-            .startActive(true).use {
-              tracer.activeSpan().setBaggageItem("hello", "world")
-              chain.proceed(chain.httpCall)
-            }
+        tracer.traceWithSpan("parent-span-exists") {
+          tracer.activeSpan().setBaggageItem("hello", "world")
+          chain.proceed(chain.httpCall)
+        }
       }
     }, tracingInterceptor, TerminalInterceptor(200)))
 

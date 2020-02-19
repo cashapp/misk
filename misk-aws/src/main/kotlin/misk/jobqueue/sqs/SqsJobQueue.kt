@@ -2,6 +2,7 @@ package misk.jobqueue.sqs
 
 import com.amazonaws.services.sqs.model.MessageAttributeValue
 import com.amazonaws.services.sqs.model.SendMessageRequest
+import io.jaegertracing.internal.JaegerSpan
 import io.opentracing.Tracer
 import misk.jobqueue.JobQueue
 import misk.jobqueue.QueueName
@@ -42,7 +43,7 @@ internal class SqsJobQueue @Inject internal constructor(
 
             // Save the original trace id, if we can determine it
             // TODO(mmihic): Should put this case somewhere in the tracing modules
-            (span as? com.uber.jaeger.Span)?.let {
+            (span as? JaegerSpan)?.let {
               addMessageAttributesEntry(
                 SqsJob.ORIGINAL_TRACE_ID_ATTR,
                 MessageAttributeValue()

@@ -19,13 +19,15 @@ fun <T : Any?> Tracer.traceWithSpan(
 
   activeSpan()?.let { spanBuilder.asChildOf(it) }
 
-  val scope = spanBuilder.startActive(true)
+  val span = spanBuilder.start()
+  val scope = scopeManager().activate(span)
   return try {
-    f(scope.span())
-  } catch (th: Throwable) {
-    Tags.ERROR.set(scope.span(), true)
-    throw th
+    f(span)
+  } catch (t: Throwable) {
+    Tags.ERROR.set(span, true)
+    throw t
   } finally {
     scope.close()
+    span.finish()
   }
 }

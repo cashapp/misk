@@ -1,10 +1,10 @@
 package misk.tracing.backends.jaeger
 
-import com.uber.jaeger.samplers.ProbabilisticSampler
+import io.jaegertracing.internal.JaegerSpan
+import io.jaegertracing.internal.samplers.ProbabilisticSampler
 import io.opentracing.Span
 import io.opentracing.Tracer
 import misk.sampling.Sampler
-import com.uber.jaeger.Span as JaegerSpan
 
 /**
  * A sampler that deterministically samples based on the current tracing span ID.

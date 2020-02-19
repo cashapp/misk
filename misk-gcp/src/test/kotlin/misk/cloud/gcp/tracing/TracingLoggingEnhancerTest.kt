@@ -4,21 +4,25 @@ import brave.Tracing
 import brave.opentracing.BraveTracer
 import com.google.cloud.logging.LogEntry
 import com.google.cloud.logging.Payload
-import com.uber.jaeger.Span
-import com.uber.jaeger.Tracer
-import com.uber.jaeger.reporters.NoopReporter
-import com.uber.jaeger.samplers.ConstSampler
+import io.jaegertracing.internal.JaegerTracer
+import io.jaegertracing.internal.reporters.NoopReporter
+import io.jaegertracing.internal.samplers.ConstSampler
+import io.opentracing.Span
 import io.opentracing.noop.NoopTracerFactory
 import misk.testing.MiskTest
+import misk.tracing.traceWithSpan
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
 @MiskTest
 class TracingLoggingEnhancerTest {
   @Test fun enhanceJaegerTracer() {
-    val tracer = Tracer.Builder("jaegerbombs", NoopReporter(), ConstSampler(true)).build()
-    val scope = tracer.buildSpan("test span").startActive(true)
-    scope.use {
+    val tracer = JaegerTracer.Builder("jaegerbombs")
+        .withReporter(NoopReporter())
+        .withSampler(ConstSampler(true))
+        .build()
+
+    tracer.traceWithSpan("test span") {
       val logEntryBuilder = LogEntry.newBuilder(Payload.StringPayload.of("payload"))
 
       TracingLoggingEnhancer().enhanceLogEntry(tracer, logEntryBuilder)
@@ -26,14 +30,13 @@ class TracingLoggingEnhancerTest {
       val logEntry = logEntryBuilder.build()
       assertThat(logEntry.labels).isEqualTo(mapOf(
           "appengine.googleapis.com/trace_id" to
-              (tracer.activeSpan() as Span).context().traceId.toString()))
+              (tracer.activeSpan() as Span).context().toTraceId()))
     }
   }
 
   @Test fun enhanceBraveTracer() {
     val tracer = BraveTracer.newBuilder(Tracing.newBuilder().build()).build()
-    val scope = tracer.buildSpan("test span").startActive(true)
-    scope.use {
+    tracer.traceWithSpan("test span") {
       val logEntryBuilder = LogEntry.newBuilder(Payload.StringPayload.of("payload"))
 
       TracingLoggingEnhancer().enhanceLogEntry(tracer, logEntryBuilder)
