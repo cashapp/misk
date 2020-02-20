@@ -16,7 +16,7 @@ import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.data.Offset
+import org.assertj.core.data.Percentage
 import org.eclipse.jetty.util.thread.QueuedThreadPool
 import org.junit.jupiter.api.Test
 import javax.inject.Inject
@@ -97,8 +97,8 @@ internal class JettyServiceMetricsTest {
     val metrics = adapter.fromJson(response.body?.string()!!)!!
     assertThat(metrics.queuedJobs).isEqualTo(0.0)
     assertThat(metrics.size).isEqualTo(10.0)
-    assertThat(metrics.utilization).isCloseTo(0.5, Offset.offset(0.2))
-    assertThat(metrics.utilization_max).isCloseTo(0.5, Offset.offset(0.2))
+    assertThat(metrics.utilization).isCloseTo(0.5, Percentage.withPercentage(10.0))
+    assertThat(metrics.utilization_max).isCloseTo(0.5, Percentage.withPercentage(10.0))
   }
 
   internal class HelloAction @Inject constructor() : WebAction {

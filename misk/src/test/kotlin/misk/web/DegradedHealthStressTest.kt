@@ -1,7 +1,6 @@
 package misk.web
 
 import com.google.inject.util.Modules
-import misk.concurrent.ExecutorServiceFactory
 import misk.inject.KAbstractModule
 import misk.inject.asSingleton
 import misk.testing.MiskTest
@@ -22,6 +21,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.io.IOException
 import java.time.Duration
+import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
@@ -34,7 +34,6 @@ internal class DegradedHealthStressTest {
 
   @Inject lateinit var jettyService: JettyService
   @Inject lateinit var fakeResourcePool: FakeResourcePool
-  @Inject lateinit var executorServiceFactory: ExecutorServiceFactory
 
   private lateinit var executorService: ScheduledExecutorService
   private lateinit var httpClient: OkHttpClient
@@ -45,7 +44,7 @@ internal class DegradedHealthStressTest {
 
   @BeforeEach
   internal fun setUp() {
-    executorService = executorServiceFactory.scheduled(1)
+    executorService = Executors.newScheduledThreadPool(1)
     httpClient = OkHttpClient()
     httpClient.dispatcher.maxRequestsPerHost = 100
     httpClient.dispatcher.maxRequests = 100
@@ -53,6 +52,7 @@ internal class DegradedHealthStressTest {
 
   @AfterEach
   fun tearDown() {
+    executorService.shutdown()
     httpClient.dispatcher.executorService.shutdown()
   }
 
