@@ -1,27 +1,17 @@
 package misk.concurrent
 
-import com.google.inject.Provider
+import com.google.common.util.concurrent.ThreadFactoryBuilder
 import misk.inject.KAbstractModule
 import java.util.concurrent.ExecutorService
-import javax.inject.Inject
+import java.util.concurrent.Executors
 import kotlin.reflect.KClass
 
-/**
- * Install this to bind an executor service with [annotation]. The executor service will be
- * automatically shut down when the service shuts down.
- */
-class ExecutorServiceModule private constructor(
+class ExecutorServiceModule(
   private val annotation: KClass<out Annotation>,
-  private val createFunction: (ExecutorServiceFactory) -> ExecutorService
+  private val executorService: ExecutorService
 ) : KAbstractModule() {
   override fun configure() {
-    bind<ExecutorService>()
-        .annotatedWith(annotation.java)
-        .toProvider(object : Provider<ExecutorService> {
-          @Inject lateinit var executorServiceFactory: ExecutorServiceFactory
-
-          override fun get() = createFunction(executorServiceFactory)
-        })
+    bind<ExecutorService>().annotatedWith(annotation.java).toInstance(executorService)
   }
 
   companion object {
@@ -29,11 +19,22 @@ class ExecutorServiceModule private constructor(
       annotation: KClass<out Annotation>,
       nameFormat: String,
       nThreads: Int
-    ) = ExecutorServiceModule(annotation) { it.named(nameFormat).fixed(nThreads) }
+    ): ExecutorServiceModule {
+      return ExecutorServiceModule(
+          annotation,
+          Executors.newFixedThreadPool(
+              nThreads,
+              ThreadFactoryBuilder().setNameFormat(nameFormat).build()))
+    }
 
     fun withUnboundThreadPool(
       annotation: KClass<out Annotation>,
       nameFormat: String
-    ) = ExecutorServiceModule(annotation) { it.named(nameFormat).unbounded() }
+    ): ExecutorServiceModule {
+      return ExecutorServiceModule(
+          annotation,
+          Executors.newCachedThreadPool(
+              ThreadFactoryBuilder().setNameFormat(nameFormat).build()))
+    }
   }
 }
