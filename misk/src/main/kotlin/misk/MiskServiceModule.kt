@@ -1,5 +1,6 @@
 package misk
 
+import misk.concurrent.ExecutorsModule
 import misk.concurrent.SleeperModule
 import misk.environment.RealEnvVarModule
 import misk.healthchecks.HealthCheck
@@ -37,6 +38,7 @@ class MiskCommonServiceModule : KAbstractModule() {
   override fun configure() {
     binder().disableCircularProxies()
     binder().requireExactBindingAnnotations()
+    install(ExecutorsModule())
     install(ServiceManagerModule())
     install(MetricsModule())
     install(MoshiModule())
