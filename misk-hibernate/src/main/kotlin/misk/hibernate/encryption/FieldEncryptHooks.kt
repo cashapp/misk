@@ -27,6 +27,7 @@ import org.hibernate.event.spi.PreInsertEventListener
 import org.hibernate.event.spi.PreUpdateEvent
 import org.hibernate.event.spi.PreUpdateEventListener
 import org.hibernate.persister.entity.EntityPersister
+import java.lang.reflect.AccessibleObject
 
 typealias ContextT = Map<String, String>
 
@@ -163,8 +164,11 @@ class FieldEncryptHooks @Inject constructor() :
         continue
       }
 
-      if (!field.trySetAccessible())
+      try {
+        AccessibleObject.setAccessible(arrayOf(field), true)
+      } catch (e: SecurityException) {
         throw HibernateException("Can not access EncryptedField property (${field.name})")
+      }
 
       val userContext = contextFuncs.getOrElse(field.name) { { _ -> mapOf() } }.invoke(entity)
 
