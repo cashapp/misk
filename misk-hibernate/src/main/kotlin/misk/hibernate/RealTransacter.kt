@@ -222,9 +222,6 @@ internal class RealTransacter private constructor(
             }
           }
           throw e
-        } finally {
-          // For any reason if tracing was left open, end it.
-          queryTracingListener.endLastSpan()
         }
       }
     }
@@ -239,9 +236,6 @@ internal class RealTransacter private constructor(
         block(session)
       } catch (e: Throwable) {
         throw e
-      } finally {
-        // For any reason if tracing was left open, end it.
-        queryTracingListener.endLastSpan()
       }
     }
   }
@@ -589,11 +583,13 @@ internal class RealTransacter private constructor(
   }
 
   private fun <T> maybeWithTracing(spanName: String, block: () -> T): T {
-    return if (tracer != null) tracer.traceWithSpan(spanName) { span ->
-      Tags.COMPONENT.set(span, TRANSACTER_SPAN_TAG)
-      block()
+    if (tracer != null) {
+      return tracer.traceWithSpan(spanName) { span ->
+        Tags.COMPONENT.set(span, TRANSACTER_SPAN_TAG)
+        return@traceWithSpan block()
+      }
     } else {
-      block()
+      return block()
     }
   }
 
