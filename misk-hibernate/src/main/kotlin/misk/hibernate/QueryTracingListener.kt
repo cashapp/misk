@@ -1,6 +1,7 @@
 package misk.hibernate
 
 import io.opentracing.Scope
+import io.opentracing.Span
 import io.opentracing.Tracer
 import misk.hibernate.QueryTracingSpanNames.Companion.DB_DELETE
 import misk.hibernate.QueryTracingSpanNames.Companion.DB_INSERT
@@ -43,7 +44,7 @@ internal class QueryTracingListener @Inject constructor() :
 
   @com.google.inject.Inject(optional = true) var tracer: Tracer? = null
 
-  private val lastScopeInThread: ThreadLocal<Scope?> = ThreadLocal.withInitial { null }
+  private val threadLocalQuerySpan: ThreadLocal<QuerySpan?> = ThreadLocal.withInitial { null }
 
   override fun onPreInsert(event: PreInsertEvent?): Boolean {
     startSpan(DB_INSERT)
@@ -51,7 +52,7 @@ internal class QueryTracingListener @Inject constructor() :
   }
 
   override fun onPostInsert(event: PostInsertEvent?) {
-    endLastSpan()
+    finishSpan()
   }
 
   override fun onPreUpdate(event: PreUpdateEvent?): Boolean {
@@ -60,7 +61,7 @@ internal class QueryTracingListener @Inject constructor() :
   }
 
   override fun onPostUpdate(event: PostUpdateEvent?) {
-    endLastSpan()
+    finishSpan()
   }
 
   override fun onPreDelete(event: PreDeleteEvent?): Boolean {
@@ -69,7 +70,7 @@ internal class QueryTracingListener @Inject constructor() :
   }
 
   override fun onPostDelete(event: PostDeleteEvent?) {
-    endLastSpan()
+    finishSpan()
   }
 
   override fun requiresPostCommitHanding(persister: EntityPersister?): Boolean {
@@ -77,28 +78,30 @@ internal class QueryTracingListener @Inject constructor() :
   }
 
   private fun startSpan(spanName: String) {
-    if (tracer == null) {
-      return
+    val tracer = tracer ?: return
+
+    // If queries fail we might not get a matching an onPost call.
+    val activeSpan = threadLocalQuerySpan.get()
+    activeSpan?.let {
+      logger.info { "lastScope ${activeSpan.spanName} wasn't closed" }
+      finishSpan()
     }
 
-    val lastScope = lastScopeInThread.get()
-    lastScope?.let {
-      logger.info { "lastScope wasn't closed" }
-      endLastSpan()
-    }
-
-    val spanBuilder = tracer!!.buildSpan(spanName)
-    tracer!!.activeSpan()?.let { spanBuilder.asChildOf(it) }
+    val spanBuilder = tracer.buildSpan(spanName)
+    tracer.activeSpan()?.let { spanBuilder.asChildOf(it) }
     val span = spanBuilder.start()
-    val scope = tracer!!.activateSpan(span)
-    lastScopeInThread.set(scope)
+    val scope = tracer.activateSpan(span)
+    threadLocalQuerySpan.set(QuerySpan(spanName, span, scope))
   }
 
-  fun endLastSpan() {
-    val activeSpan = tracer?.activeSpan()
-    val lastScope = lastScopeInThread.get()
-    lastScope?.close()
-    activeSpan?.finish()
-    lastScopeInThread.set(null)
+  private fun finishSpan() {
+    val querySpan = threadLocalQuerySpan.get()
+    if (querySpan != null) {
+      threadLocalQuerySpan.set(null)
+      querySpan.scope.close()
+      querySpan.span.finish()
+    }
   }
+
+  data class QuerySpan(val spanName: String, val span: Span, val scope: Scope)
 }
