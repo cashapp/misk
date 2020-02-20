@@ -1,4 +1,5 @@
 dependencies {
+  compile dep.apacheCommonsCollections4
   compile dep.tink
   compile project(':misk')
 

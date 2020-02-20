@@ -5,6 +5,7 @@ import misk.ServiceModule
 import misk.environment.Environment
 import misk.healthchecks.HealthCheck
 import misk.hibernate.ReflectionQuery.QueryLimitsConfig
+import misk.hibernate.encryption.FieldEncryptHooks
 import misk.inject.KAbstractModule
 import misk.inject.asSingleton
 import misk.inject.keyOf
@@ -160,6 +161,11 @@ class HibernateModule(
         bindListener(EventType.POST_UPDATE).to<QueryTracingListener>()
         bindListener(EventType.PRE_DELETE).to<QueryTracingListener>()
         bindListener(EventType.POST_DELETE).to<QueryTracingListener>()
+        bindListener(EventType.PRE_INSERT).to<FieldEncryptHooks>()
+        bindListener(EventType.POST_INSERT).to<FieldEncryptHooks>()
+        bindListener(EventType.PRE_UPDATE).to<FieldEncryptHooks>()
+        bindListener(EventType.POST_UPDATE).to<FieldEncryptHooks>()
+        bindListener(EventType.POST_LOAD).to<FieldEncryptHooks>()
       }
     })
 
