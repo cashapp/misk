@@ -47,6 +47,11 @@ internal class FakeDynamoDbModule(
     return dynamoDb
   }
 
+  @Provides @Singleton
+  fun providesDynamoDBmapper(dynamoDb: AmazonDynamoDB): DynamoDBMapper {
+    return RealDynamoDbModule.dynamoDbMapper(dynamoDb)
+  }
+
   companion object {
     fun createTableForEntity(
       amazonDynamoDB: AmazonDynamoDB,
