@@ -1,0 +1,15 @@
+data_source:
+  type: MYSQL
+  username: root
+  password: ""
+  database: encryptedfield
+  migrations_resource: classpath:/misk/hibernate/encryptedfield-migrations
+crypto:
+  kms_uri: "not_relevant"
+  keys:
+    - key_name: addressKey
+      key_type: AEAD
+      encrypted_key: "classpath:/secrets/addressKey.txt"
+    - key_name: ssnKey
+      key_type: DAEAD
+      encrypted_key: "classpath:/secrets/ssnKey.txt"

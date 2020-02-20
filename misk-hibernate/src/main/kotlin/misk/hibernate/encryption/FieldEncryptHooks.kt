@@ -167,7 +167,7 @@ class FieldEncryptHooks @Inject constructor() :
       try {
         AccessibleObject.setAccessible(arrayOf(field), true)
       } catch (e: SecurityException) {
-        throw HibernateException("Can not access EncryptedField property (${field.name})")
+        throw HibernateException("Can not access EncryptedField property (${field.name})", e)
       }
 
       val userContext = contextFuncs.getOrElse(field.name) { { _ -> mapOf() } }.invoke(entity)
