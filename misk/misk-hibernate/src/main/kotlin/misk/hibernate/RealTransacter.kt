@@ -1,10 +1,10 @@
 package misk.hibernate
 
 import com.google.common.base.Suppliers
+import com.google.common.util.concurrent.ThreadFactoryBuilder
 import io.opentracing.Tracer
 import io.opentracing.tag.Tags
 import misk.backoff.ExponentialBackoff
-import misk.concurrent.ExecutorServiceFactory
 import misk.hibernate.Shard.Companion.SINGLE_SHARD_SET
 import misk.jdbc.DataSourceConfig
 import misk.jdbc.DataSourceType
@@ -25,6 +25,7 @@ import java.time.Duration
 import java.util.EnumSet
 import java.util.concurrent.Callable
 import java.util.concurrent.CompletableFuture
+import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import javax.inject.Provider
 import javax.persistence.OptimisticLockException
@@ -45,7 +46,6 @@ internal class RealTransacter private constructor(
   private val threadLatestSession: ThreadLocal<RealSession>,
   private val options: TransacterOptions,
   private val queryTracingListener: QueryTracingListener,
-  private val executorServiceFactory: ExecutorServiceFactory,
   private val tracer: Tracer?
 ) : Transacter {
 
@@ -55,7 +55,6 @@ internal class RealTransacter private constructor(
     readerSessionFactoryProvider: Provider<SessionFactory>?,
     config: DataSourceConfig,
     queryTracingListener: QueryTracingListener,
-    executorServiceFactory: ExecutorServiceFactory,
     tracer: Tracer?
   ) : this(
       qualifier = qualifier,
@@ -65,13 +64,14 @@ internal class RealTransacter private constructor(
       threadLatestSession = ThreadLocal(),
       options = TransacterOptions(),
       queryTracingListener = queryTracingListener,
-      executorServiceFactory = executorServiceFactory,
       tracer = tracer
   )
 
   override fun config(): DataSourceConfig = config
 
-  private val shardListFetcher = executorServiceFactory.named("shard-list-fetcher-%d").single()
+  private val shardListFetcher =
+      Executors.newSingleThreadExecutor(
+          ThreadFactoryBuilder().setNameFormat("shard-list-fetcher-%d").build())
 
   private val shardList = Suppliers.memoizeWithExpiration({
     if (!config.type.isVitess) {
@@ -284,7 +284,6 @@ internal class RealTransacter private constructor(
           options = options,
           queryTracingListener = queryTracingListener,
           config = config,
-          executorServiceFactory = executorServiceFactory,
           tracer = tracer
       )
 
