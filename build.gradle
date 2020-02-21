@@ -19,13 +19,6 @@ buildscript {
   }
 }
 
-apply plugin: 'com.gradle.build-scan'
-
-buildScan {
-    termsOfServiceUrl = 'https://gradle.com/terms-of-service'
-    termsOfServiceAgree = 'yes'
-}
-
 tasks.register("testShardNonHibernate") {
   group = "Continuous integration"
   description = "Runs all tests that don't depend on misk-hibernate. " +
