@@ -1,0 +1,21 @@
+dependencies {
+  compile dep.awsApi
+  compile dep.awsSqs
+  compile dep.tracingJaeger
+  compile project(':misk')
+  compile project(':misk-aws')
+
+  testCompile dep.assertj
+  testCompile dep.junitApi
+  testCompile dep.junitEngine
+  testCompile dep.junitParams
+  testCompile dep.docker
+  testCompile dep.awaitility
+}
+
+afterEvaluate { project ->
+  project.tasks.dokka {
+    outputDirectory = "$rootDir/docs/0.x"
+    outputFormat = 'gfm'
+  }
+}

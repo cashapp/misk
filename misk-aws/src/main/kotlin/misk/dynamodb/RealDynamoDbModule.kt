@@ -10,7 +10,7 @@ import misk.cloud.aws.AwsRegion
 import misk.inject.KAbstractModule
 import javax.inject.Singleton
 
-internal class RealDynamoDbModule : KAbstractModule() {
+class RealDynamoDbModule : KAbstractModule() {
   override fun configure() {
     requireBinding<AWSCredentialsProvider>()
     requireBinding<AwsRegion>()
@@ -26,21 +26,5 @@ internal class RealDynamoDbModule : KAbstractModule() {
         .withRegion(awsRegion.name)
         .withCredentials(awsCredentialsProvider)
         .build()
-  }
-
-  @Provides @Singleton
-  fun providesDynamoDBmapper(dynamoDb: AmazonDynamoDB): DynamoDBMapper {
-    return dynamoDbMapper(dynamoDb)
-  }
-
-  companion object {
-    internal fun dynamoDbMapper(dynamoDb: AmazonDynamoDB): DynamoDBMapper {
-      return DynamoDBMapper(
-          dynamoDb,
-          DynamoDBMapperConfig.Builder()
-              .withSaveBehavior(DynamoDBMapperConfig.SaveBehavior.CLOBBER)
-              .build()
-      )
-    }
   }
 }
