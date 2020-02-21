@@ -13,6 +13,7 @@ dependencies {
   compile dep.loggingApi
   compile dep.logbackClassic
   compile dep.okio
+  compile dep.okHttp
   compile dep.slf4jApi
 
   compile project(':misk-inject')
