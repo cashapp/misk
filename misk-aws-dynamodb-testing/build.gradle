@@ -1,16 +1,15 @@
 dependencies {
-  compile dep.awsApi
-  compile dep.awsSqs
-  compile dep.tracingJaeger
-  compile project(':misk')
-  compile project(':misk-aws')
+  implementation dep.awsApi
+  implementation dep.tracingJaeger
+  implementation project(':misk')
+  implementation project(':misk-aws')
 
-  testCompile dep.assertj
-  testCompile dep.junitApi
-  testCompile dep.junitEngine
-  testCompile dep.junitParams
-  testCompile dep.docker
-  testCompile dep.awaitility
+  testImplementation dep.assertj
+  testImplementation dep.junitApi
+  testImplementation dep.junitEngine
+  testImplementation dep.junitParams
+  testImplementation dep.docker
+  testImplementation dep.awaitility
 }
 
 afterEvaluate { project ->
