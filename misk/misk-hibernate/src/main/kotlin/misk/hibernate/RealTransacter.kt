@@ -25,6 +25,7 @@ import java.time.Duration
 import java.util.EnumSet
 import java.util.concurrent.Callable
 import java.util.concurrent.CompletableFuture
+import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import javax.inject.Provider
@@ -69,9 +70,10 @@ internal class RealTransacter private constructor(
 
   override fun config(): DataSourceConfig = config
 
-  private val shardListFetcher =
+  private val shardListFetcher: ExecutorService by lazy {
       Executors.newSingleThreadExecutor(
           ThreadFactoryBuilder().setNameFormat("shard-list-fetcher-%d").build())
+  }
 
   private val shardList = Suppliers.memoizeWithExpiration({
     if (!config.type.isVitess) {
