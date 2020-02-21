@@ -1,4 +1,4 @@
-package misk.dynamodb
+package misk.aws.dynamodb.testing
 
 import com.amazonaws.auth.AWSStaticCredentialsProvider
 import com.amazonaws.auth.BasicAWSCredentials
@@ -16,7 +16,7 @@ import misk.inject.KAbstractModule
 import javax.inject.Singleton
 import kotlin.reflect.KClass
 
-internal class FakeDynamoDbModule(
+class DockerDynamoDbModule(
   private val entities: List<Pair<String, KClass<*>>>
 ) : KAbstractModule() {
   override fun configure() {
@@ -47,13 +47,8 @@ internal class FakeDynamoDbModule(
     return dynamoDb
   }
 
-  @Provides @Singleton
-  fun providesDynamoDBmapper(dynamoDb: AmazonDynamoDB): DynamoDBMapper {
-    return RealDynamoDbModule.dynamoDbMapper(dynamoDb)
-  }
-
   companion object {
-    fun createTableForEntity(
+    private fun createTableForEntity(
       amazonDynamoDB: AmazonDynamoDB,
       entity: KClass<*>,
       tableName: String
