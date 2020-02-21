@@ -10,6 +10,10 @@ import misk.cloud.aws.AwsRegion
 import misk.inject.KAbstractModule
 import javax.inject.Singleton
 
+/**
+ * Install this module to have access to an AmazonDynamoDB client. This can be
+ * used to create a DynamoDbMapper for querying of a DynamoDb table.
+ */
 class RealDynamoDbModule : KAbstractModule() {
   override fun configure() {
     requireBinding<AWSCredentialsProvider>()

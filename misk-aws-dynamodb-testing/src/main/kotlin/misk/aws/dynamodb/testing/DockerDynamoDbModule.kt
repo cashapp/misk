@@ -11,16 +11,19 @@ import com.amazonaws.services.dynamodbv2.document.DynamoDB
 import com.amazonaws.services.dynamodbv2.model.ProvisionedThroughput
 import com.amazonaws.services.dynamodbv2.model.ResourceInUseException
 import com.google.inject.Provides
-import misk.cloud.aws.FakeAwsEnvironmentModule
 import misk.inject.KAbstractModule
 import javax.inject.Singleton
 import kotlin.reflect.KClass
 
+/**
+ * Temporary module to allow setting up DynamoDb for testing, with a
+ * DockerDynamoDb external dependency running. Support for this will be short
+ * lived, as soo there will be a dn embedded DynamoDb (in memory) module available.
+ */
 class DockerDynamoDbModule(
   private val entities: List<Pair<String, KClass<*>>>
 ) : KAbstractModule() {
   override fun configure() {
-    install(FakeAwsEnvironmentModule())
   }
 
   @Provides @Singleton
