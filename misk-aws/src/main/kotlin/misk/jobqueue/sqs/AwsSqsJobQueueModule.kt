@@ -51,7 +51,7 @@ class AwsSqsJobQueueModule(
     // using a feature flag.
     install(ExecutorServiceModule.withUnboundThreadPool(
         ForSqsReceiving::class,
-        "sqs-receiver"))
+        "sqs-receiver-%d"))
 
     // Bind a map of AmazonSQS clients for each external region that we need to contact
     val regionSpecificClientBinder = newMapBinder<AwsRegion, AmazonSQS>()

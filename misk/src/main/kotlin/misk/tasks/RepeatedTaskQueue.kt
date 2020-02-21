@@ -225,7 +225,7 @@ class RepeatedTaskQueueFactory @Inject constructor(
         name,
         clock,
         newDirectExecutorService(),
-        executorServiceFactory.single("$name-%d"),
+        executorServiceFactory.single(name),
         backingStorage,
         metrics,
         RepeatedTaskQueueConfig()

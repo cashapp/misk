@@ -93,7 +93,7 @@ internal class RealTransacter private constructor(
       if (!config.type.isVitess) {
         this.supplier = Suppliers.ofInstance(CompletableFuture.completedFuture(SINGLE_SHARD_SET))
       } else {
-        val executorService = executorServiceFactory.single("shard-list-fetcher-%d")
+        val executorService = executorServiceFactory.single("shard-list-fetcher")
         this.supplier = Suppliers.memoizeWithExpiration({
           // Needs to be fetched on a separate thread to avoid nested transactions
           executorService.submit(Callable<Set<Shard>> {

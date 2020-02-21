@@ -16,7 +16,7 @@ internal class RealExecutorServiceFactoryTest {
     val log = mutableListOf<String>()
     val factory = RealExecutorServiceFactory(FakeClock())
     factory.tracer = tracer
-    val executorService = factory.single("happy-%d")
+    val executorService = factory.fixed("happy-%d", 1)
 
     executorService.execute {
       log += "running ${Thread.currentThread().name} run 1"
@@ -43,7 +43,7 @@ internal class RealExecutorServiceFactoryTest {
 
   @Test fun cannotSubmitAfterShutdown() {
     val factory = RealExecutorServiceFactory(FakeClock())
-    val executorService = factory.single("executor-service-factory-test-%d")
+    val executorService = factory.unbounded("executor-service-factory-test-%d")
     factory.startAsync().awaitRunning()
     factory.stopAsync().awaitTerminated()
 
@@ -65,11 +65,11 @@ internal class RealExecutorServiceFactoryTest {
 
   @Test fun cannotCreateMultipleExecutorsWithTheSameName() {
     val factory = RealExecutorServiceFactory(FakeClock())
-    factory.single("foo-%d")
-    factory.single("bar-%d")
+    factory.unbounded("foo-%d")
+    factory.unbounded("bar-%d")
 
     val exception = assertFailsWith<IllegalStateException> {
-      factory.single("foo-%d")
+      factory.unbounded("foo-%d")
     }
     assertThat(exception).hasMessageContaining("multiple executor services named foo")
   }
@@ -77,7 +77,7 @@ internal class RealExecutorServiceFactoryTest {
   @Test fun executorDoesNotShutDownPromptly() {
     val latch = CountDownLatch(1)
     val factory = RealExecutorServiceFactory(FakeClock())
-    val executorService = factory.single("executor-service-factory-test-%d")
+    val executorService = factory.unbounded("executor-service-factory-test-%d")
 
     // This will keep the executor service from shutting down...
     executorService.execute {
@@ -96,5 +96,21 @@ internal class RealExecutorServiceFactoryTest {
 
     // ...let the executor service finally shut down.
     latch.countDown()
+  }
+
+  @Test fun placeholderRequiredButAbsent() {
+    val factory = RealExecutorServiceFactory(FakeClock())
+    val exception = assertFailsWith<IllegalStateException> {
+      factory.unbounded("no-placeholder")
+    }
+    assertThat(exception).hasMessage("thread index %d placeholder missing: no-placeholder")
+  }
+
+  @Test fun placeholderForbiddenButPresent() {
+    val factory = RealExecutorServiceFactory(FakeClock())
+    val exception = assertFailsWith<IllegalStateException> {
+      factory.single("unexpected-%d")
+    }
+    assertThat(exception).hasMessage("thread index %d placeholder unexpected: unexpected-%d")
   }
 }

@@ -88,7 +88,11 @@ internal class RealExecutorServiceFactory @Inject constructor(
       }
 
   override fun single(nameFormat: String): ExecutorService {
+    check(!nameFormat.contains("%d")) {
+      "thread index %d placeholder unexpected: $nameFormat"
+    }
     checkCreate()
+
     val threadFactory = threadFactory(nameFormat)
     return maybeTrace(Executors.newSingleThreadExecutor(threadFactory))
         .also { executors[nameFormat] = it }
@@ -96,6 +100,10 @@ internal class RealExecutorServiceFactory @Inject constructor(
 
   override fun fixed(nameFormat: String, threadCount: Int): ExecutorService {
     checkCreate()
+    check(threadCount == 1 || nameFormat.contains("%d")) {
+      "thread index %d placeholder missing: $nameFormat"
+    }
+
     val threadFactory = threadFactory(nameFormat)
     return maybeTrace(Executors.newFixedThreadPool(threadCount, threadFactory))
         .also { executors[nameFormat] = it }
@@ -103,6 +111,10 @@ internal class RealExecutorServiceFactory @Inject constructor(
 
   override fun unbounded(nameFormat: String): ExecutorService {
     checkCreate()
+    check(nameFormat.contains("%d")) {
+      "thread index %d placeholder missing: $nameFormat"
+    }
+
     val threadFactory = threadFactory(nameFormat)
     return maybeTrace(Executors.newCachedThreadPool(threadFactory))
         .also { executors[nameFormat] = it }
@@ -110,6 +122,10 @@ internal class RealExecutorServiceFactory @Inject constructor(
 
   override fun scheduled(nameFormat: String, threadCount: Int): ScheduledExecutorService {
     checkCreate()
+    check(threadCount == 1 || nameFormat.contains("%d")) {
+      "thread index %d placeholder missing: $nameFormat"
+    }
+
     val threadFactory = threadFactory(nameFormat)
     return maybeTraceScheduled(Executors.newScheduledThreadPool(threadCount, threadFactory))
         .also { executors[nameFormat] = it }
