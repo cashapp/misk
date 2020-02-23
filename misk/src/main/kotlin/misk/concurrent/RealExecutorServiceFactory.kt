@@ -2,15 +2,15 @@ package misk.concurrent
 
 import com.google.common.util.concurrent.AbstractService
 import com.google.common.util.concurrent.Service.State
-import com.google.common.util.concurrent.ThreadFactoryBuilder
 import java.time.Clock
 import java.time.Duration
-import java.util.concurrent.CopyOnWriteArrayList
+import java.util.Collections
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.ThreadFactory
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicLong
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -20,14 +20,10 @@ import javax.inject.Singleton
  */
 @Singleton
 @Suppress("UnstableApiUsage") // Guava's Service is @Beta.
-internal class RealExecutorServiceFactory private constructor(
-  private val clock: Clock,
-  private val executors: CopyOnWriteArrayList<ExecutorService>,
-  private val threadFactory: ThreadFactory
+internal class RealExecutorServiceFactory @Inject constructor(
+  private val clock: Clock
 ) : AbstractService(), ExecutorServiceFactory {
-
-  @Inject constructor(clock: Clock)
-      : this(clock, CopyOnWriteArrayList(), Executors.defaultThreadFactory())
+  private val executors = Collections.synchronizedMap(mutableMapOf<String, ExecutorService>())
 
   override fun doStart() {
     notifyStarted()
@@ -38,11 +34,11 @@ internal class RealExecutorServiceFactory private constructor(
   }
 
   internal fun doStop(timeout: Duration) {
-    for (executor in executors) {
+    for ((_, executor) in executors) {
       executor.shutdown()
     }
 
-    if (executors.all { it.isTerminated }) {
+    if (executors.all { it.value.isTerminated }) {
       notifyStopped()
       return
     }
@@ -51,10 +47,10 @@ internal class RealExecutorServiceFactory private constructor(
     val awaitAllTerminated = object : Thread("RealExecutorServiceFactory") {
       override fun run() {
         try {
-          for (executorService in executors) {
+          for ((nameFormat, executor) in executors) {
             val timeoutLeftMs = deadlineMs - clock.millis()
-            check(executorService.awaitTermination(timeoutLeftMs, TimeUnit.MILLISECONDS)) {
-              "$executorService took longer than $timeout to terminate"
+            check(executor.awaitTermination(timeoutLeftMs, TimeUnit.MILLISECONDS)) {
+              "$nameFormat took longer than $timeout to terminate"
             }
           }
           notifyStopped()
@@ -66,34 +62,46 @@ internal class RealExecutorServiceFactory private constructor(
     awaitAllTerminated.start()
   }
 
-  override fun withThreadFactory(threadFactory: ThreadFactory) =
-      RealExecutorServiceFactory(clock, executors, threadFactory)
-
-  override fun named(nameFormat: String) =
-      withThreadFactory(ThreadFactoryBuilder().setNameFormat(nameFormat).build())
-
-  override fun single(): ExecutorService {
+  override fun single(nameFormat: String): ExecutorService {
     checkCreate()
+    val threadFactory = threadFactory(nameFormat)
     return Executors.newSingleThreadExecutor(threadFactory)
-        .also { executors += it }
+        .also { executors[nameFormat] = it }
   }
 
-  override fun fixed(threadCount: Int): ExecutorService {
+  override fun fixed(nameFormat: String, threadCount: Int): ExecutorService {
     checkCreate()
+    val threadFactory = threadFactory(nameFormat)
     return Executors.newFixedThreadPool(threadCount, threadFactory)
-        .also { executors += it }
+        .also { executors[nameFormat] = it }
   }
 
-  override fun unbounded(): ExecutorService {
+  override fun unbounded(nameFormat: String): ExecutorService {
     checkCreate()
+    val threadFactory = threadFactory(nameFormat)
     return Executors.newCachedThreadPool(threadFactory)
-        .also { executors += it }
+        .also { executors[nameFormat] = it }
   }
 
-  override fun scheduled(threadCount: Int): ScheduledExecutorService {
+  override fun scheduled(nameFormat: String, threadCount: Int): ScheduledExecutorService {
     checkCreate()
+    val threadFactory = threadFactory(nameFormat)
     return Executors.newScheduledThreadPool(threadCount, threadFactory)
-        .also { executors += it }
+        .also { executors[nameFormat] = it }
+  }
+
+  private fun threadFactory(nameFormat: String): ThreadFactory {
+    check(!executors.containsKey(nameFormat)) {
+      "multiple executor services named $nameFormat - this could be a thread leak!"
+    }
+
+    return object : ThreadFactory {
+      val nextId = AtomicLong(0)
+      override fun newThread(runnable: Runnable): Thread {
+        val name = String.format(nameFormat, nextId.getAndIncrement())
+        return Thread(runnable, name)
+      }
+    }
   }
 
   private fun checkCreate() {

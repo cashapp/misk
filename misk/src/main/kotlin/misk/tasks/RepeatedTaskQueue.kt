@@ -203,9 +203,9 @@ class RepeatedTaskQueueFactory @Inject constructor(
   fun new(name: String, config: RepeatedTaskQueueConfig = RepeatedTaskQueueConfig()):
       RepeatedTaskQueue {
     val executor = if (config.num_parallel_tasks == -1) {
-      executorServiceFactory.named("$name-%d").unbounded()
+      executorServiceFactory.unbounded("$name-%d")
     } else {
-      executorServiceFactory.named("$name-%d").fixed(config.num_parallel_tasks)
+      executorServiceFactory.fixed("$name-%d", config.num_parallel_tasks)
     }
     return RepeatedTaskQueue(name,
         clock,
@@ -225,7 +225,7 @@ class RepeatedTaskQueueFactory @Inject constructor(
         name,
         clock,
         newDirectExecutorService(),
-        executorServiceFactory.single(),
+        executorServiceFactory.single("$name-%d"),
         backingStorage,
         metrics,
         RepeatedTaskQueueConfig()

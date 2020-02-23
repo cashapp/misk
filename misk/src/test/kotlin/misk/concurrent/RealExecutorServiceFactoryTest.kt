@@ -8,11 +8,12 @@ import java.util.concurrent.CountDownLatch
 import java.util.concurrent.RejectedExecutionException
 import kotlin.test.assertFailsWith
 
+@Suppress("UnstableApiUsage") // Guava's Service is @Beta.
 internal class RealExecutorServiceFactoryTest {
   @Test fun happyPath() {
     val log = mutableListOf<String>()
     val factory = RealExecutorServiceFactory(FakeClock())
-    val executorService = factory.named("happy-%d").single()
+    val executorService = factory.single("happy-%d")
 
     executorService.execute {
       log += "running ${Thread.currentThread().name} run 1"
@@ -35,7 +36,7 @@ internal class RealExecutorServiceFactoryTest {
 
   @Test fun cannotSubmitAfterShutdown() {
     val factory = RealExecutorServiceFactory(FakeClock())
-    val executorService = factory.single()
+    val executorService = factory.single("executor-service-factory-test-%d")
     factory.startAsync().awaitRunning()
     factory.stopAsync().awaitTerminated()
 
@@ -51,14 +52,25 @@ internal class RealExecutorServiceFactoryTest {
     factory.stopAsync().awaitTerminated()
 
     assertFailsWith<IllegalStateException> {
-      factory.single()
+      factory.single("executor-service-factory-test-%d")
     }
+  }
+
+  @Test fun cannotCreateMultipleExecutorsWithTheSameName() {
+    val factory = RealExecutorServiceFactory(FakeClock())
+    factory.single("foo-%d")
+    factory.single("bar-%d")
+
+    val exception = assertFailsWith<IllegalStateException> {
+      factory.single("foo-%d")
+    }
+    assertThat(exception).hasMessageContaining("multiple executor services named foo")
   }
 
   @Test fun executorDoesNotShutDownPromptly() {
     val latch = CountDownLatch(1)
     val factory = RealExecutorServiceFactory(FakeClock())
-    val executorService = factory.named("happy-%d").single()
+    val executorService = factory.single("executor-service-factory-test-%d")
 
     // This will keep the executor service from shutting down...
     executorService.execute {

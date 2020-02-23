@@ -10,7 +10,7 @@ import kotlin.reflect.KClass
  * Install this to bind an executor service with [annotation]. The executor service will be
  * automatically shut down when the service shuts down.
  */
-class ExecutorServiceModule private constructor(
+class ExecutorServiceModule(
   private val annotation: KClass<out Annotation>,
   private val createFunction: (ExecutorServiceFactory) -> ExecutorService
 ) : KAbstractModule() {
@@ -29,11 +29,11 @@ class ExecutorServiceModule private constructor(
       annotation: KClass<out Annotation>,
       nameFormat: String,
       nThreads: Int
-    ) = ExecutorServiceModule(annotation) { it.named(nameFormat).fixed(nThreads) }
+    ) = ExecutorServiceModule(annotation) { it.fixed(nameFormat, nThreads) }
 
     fun withUnboundThreadPool(
       annotation: KClass<out Annotation>,
       nameFormat: String
-    ) = ExecutorServiceModule(annotation) { it.named(nameFormat).unbounded() }
+    ) = ExecutorServiceModule(annotation) { it.unbounded(nameFormat) }
   }
 }

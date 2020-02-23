@@ -1,5 +1,6 @@
 package misk.hibernate
 
+import com.google.common.base.Supplier
 import com.google.common.base.Suppliers
 import io.opentracing.Tracer
 import io.opentracing.tag.Tags
@@ -25,6 +26,7 @@ import java.time.Duration
 import java.util.EnumSet
 import java.util.concurrent.Callable
 import java.util.concurrent.CompletableFuture
+import java.util.concurrent.Future
 import java.util.concurrent.TimeUnit
 import javax.inject.Provider
 import javax.persistence.OptimisticLockException
@@ -46,7 +48,8 @@ internal class RealTransacter private constructor(
   private val options: TransacterOptions,
   private val queryTracingListener: QueryTracingListener,
   private val executorServiceFactory: ExecutorServiceFactory,
-  private val tracer: Tracer?
+  private val tracer: Tracer?,
+  private val shardListFetcher: ShardListFetcher
 ) : Transacter {
 
   constructor(
@@ -66,35 +69,55 @@ internal class RealTransacter private constructor(
       options = TransacterOptions(),
       queryTracingListener = queryTracingListener,
       executorServiceFactory = executorServiceFactory,
-      tracer = tracer
-  )
+      tracer = tracer,
+      shardListFetcher = ShardListFetcher()
+  ) {
+    shardListFetcher.init(this, config, executorServiceFactory)
+  }
 
   override fun config(): DataSourceConfig = config
 
-  private val shardListFetcher = executorServiceFactory.named("shard-list-fetcher-%d").single()
+  /**
+   * Uses a dedicated thread to query Vitess for the database's current shards. This caches the
+   * set of shards for 5 minutes.
+   */
+  class ShardListFetcher {
+    private lateinit var supplier: Supplier<Future<out Set<Shard>>>
 
-  private val shardList = Suppliers.memoizeWithExpiration({
-    if (!config.type.isVitess) {
-      CompletableFuture.completedFuture(SINGLE_SHARD_SET)
-    } else {
-      // Needs to be fetched on a separate thread to avoid nested transactions
-      shardListFetcher.submit(Callable<Set<Shard>> {
-        transaction { session ->
-          session.useConnection { connection ->
-            connection.createStatement().use { s ->
-              val shards = s.executeQuery("SHOW VITESS_SHARDS")
-                  .map { rs -> Shard.parse(rs.getString(1)) }
-                  .toSet()
-              if (shards.isEmpty()) {
-                throw SQLRecoverableException("Failed to load list of shards")
+    fun init(
+      transacter: Transacter,
+      config: DataSourceConfig,
+      executorServiceFactory: ExecutorServiceFactory
+    ) {
+      check(!this::supplier.isInitialized)
+
+      if (!config.type.isVitess) {
+        this.supplier = Suppliers.ofInstance(CompletableFuture.completedFuture(SINGLE_SHARD_SET))
+      } else {
+        val executorService = executorServiceFactory.single("shard-list-fetcher-%d")
+        this.supplier = Suppliers.memoizeWithExpiration({
+          // Needs to be fetched on a separate thread to avoid nested transactions
+          executorService.submit(Callable<Set<Shard>> {
+            transacter.transaction { session ->
+              session.useConnection { connection ->
+                connection.createStatement().use { s ->
+                  val shards = s.executeQuery("SHOW VITESS_SHARDS")
+                      .map { rs -> Shard.parse(rs.getString(1)) }
+                      .toSet()
+                  if (shards.isEmpty()) {
+                    throw SQLRecoverableException("Failed to load list of shards")
+                  }
+                  shards
+                }
               }
-              shards
             }
-          }
-        }
-      })
+          })
+        }, 5, TimeUnit.MINUTES)
+      }
     }
-  }, 5, TimeUnit.MINUTES)
+
+    fun cachedShards(): Set<Shard> = supplier.get().get()
+  }
 
   private val sessionFactory
     get() = sessionFactoryProvider.get()
@@ -222,9 +245,6 @@ internal class RealTransacter private constructor(
             }
           }
           throw e
-        } finally {
-          // For any reason if tracing was left open, end it.
-          queryTracingListener.endLastSpan()
         }
       }
     }
@@ -239,9 +259,6 @@ internal class RealTransacter private constructor(
         block(session)
       } catch (e: Throwable) {
         throw e
-      } finally {
-        // For any reason if tracing was left open, end it.
-        queryTracingListener.endLastSpan()
       }
     }
   }
@@ -285,7 +302,8 @@ internal class RealTransacter private constructor(
           queryTracingListener = queryTracingListener,
           config = config,
           executorServiceFactory = executorServiceFactory,
-          tracer = tracer
+          tracer = tracer,
+          shardListFetcher = shardListFetcher
       )
 
   private fun <T> withSession(
@@ -443,7 +461,7 @@ internal class RealTransacter private constructor(
       return hibernateSession.get(type.java, id)
     }
 
-    override fun shards(): Set<Shard> = transacter.shardList.get().get()
+    override fun shards(): Set<Shard> = transacter.shardListFetcher.cachedShards()
 
     override fun shards(keyspace: Keyspace): Collection<Shard> {
       return if (!config.type.isVitess) {
@@ -590,11 +608,13 @@ internal class RealTransacter private constructor(
   }
 
   private fun <T> maybeWithTracing(spanName: String, block: () -> T): T {
-    return if (tracer != null) tracer.traceWithSpan(spanName) { span ->
-      Tags.COMPONENT.set(span, TRANSACTER_SPAN_TAG)
-      block()
+    if (tracer != null) {
+      return tracer.traceWithSpan(spanName) { span ->
+        Tags.COMPONENT.set(span, TRANSACTER_SPAN_TAG)
+        return@traceWithSpan block()
+      }
     } else {
-      block()
+      return block()
     }
   }
 

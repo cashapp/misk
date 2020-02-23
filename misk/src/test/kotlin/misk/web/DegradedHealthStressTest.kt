@@ -45,7 +45,7 @@ internal class DegradedHealthStressTest {
 
   @BeforeEach
   internal fun setUp() {
-    executorService = executorServiceFactory.scheduled(1)
+    executorService = executorServiceFactory.scheduled("DegradedHealthStressTest-%d", 1)
     httpClient = OkHttpClient()
     httpClient.dispatcher.maxRequestsPerHost = 100
     httpClient.dispatcher.maxRequests = 100
