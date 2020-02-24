@@ -2,6 +2,7 @@ package misk.concurrent
 
 import com.google.inject.Provider
 import misk.inject.KAbstractModule
+import misk.inject.asSingleton
 import java.util.concurrent.ExecutorService
 import javax.inject.Inject
 import kotlin.reflect.KClass
@@ -22,6 +23,7 @@ class ExecutorServiceModule(
 
           override fun get() = createFunction(executorServiceFactory)
         })
+        .asSingleton()
   }
 
   companion object {
