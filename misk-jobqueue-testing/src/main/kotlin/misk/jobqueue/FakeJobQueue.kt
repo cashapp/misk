@@ -5,6 +5,7 @@ import java.time.Duration
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentLinkedDeque
 import javax.inject.Inject
+import javax.inject.Provider
 import javax.inject.Singleton
 
 /**
@@ -23,7 +24,7 @@ import javax.inject.Singleton
  */
 @Singleton
 class FakeJobQueue @Inject constructor(
-  private val jobHandlers: Map<QueueName, JobHandler>,
+  private val jobHandlers: Provider<Map<QueueName, JobHandler>>,
   private val tokenGenerator: TokenGenerator
 ) : JobQueue {
   private val jobQueues = ConcurrentHashMap<QueueName, ConcurrentLinkedDeque<FakeJob>>()
@@ -45,7 +46,7 @@ class FakeJobQueue @Inject constructor(
   }
 
   fun handleJobs(queueName: QueueName) {
-    val jobHandler = jobHandlers[queueName]!!
+    val jobHandler = jobHandlers.get()[queueName]!!
     val jobs = jobQueues[queueName] ?: return
 
     while (true) {

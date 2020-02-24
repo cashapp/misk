@@ -125,6 +125,16 @@ internal class FakeJobQueueTest {
 
     assertThat(e.message).isEqualTo("Expected ${jobs.first()} to be acknowledged after handling")
   }
+
+  @Test
+  fun allowsJobsToEnqueueOtherJobs() {
+    assertThat(fakeJobQueue.peekJobs(GREEN_QUEUE)).isEmpty()
+
+    exampleJobEnqueuer.enqueueEnqueuer()
+    fakeJobQueue.handleJobs()
+
+    assertThat(fakeJobQueue.peekJobs(GREEN_QUEUE)).hasSize(1)
+  }
 }
 
 private class TestModule : KAbstractModule() {
@@ -134,12 +144,15 @@ private class TestModule : KAbstractModule() {
     install(LogCollectorModule())
     install(FakeJobHandlerModule.create<ExampleJobHandler>(RED_QUEUE))
     install(FakeJobHandlerModule.create<ExampleJobHandler>(GREEN_QUEUE))
+    install(FakeJobHandlerModule.create<EnqueuerJobHandler>(ENQUEUER_QUEUE))
     install(FakeJobQueueModule())
   }
 }
 
 private val RED_QUEUE = QueueName("red_queue")
 private val GREEN_QUEUE = QueueName("green_queue")
+private val ENQUEUER_QUEUE = QueueName("first_step_queue")
+
 
 private enum class Color {
   RED,
@@ -165,6 +178,10 @@ private class ExampleJobEnqueuer @Inject private constructor(
     val job = ExampleJob(Color.GREEN, message)
     jobQueue.enqueue(GREEN_QUEUE, body = jobAdapter.toJson(job), attributes = mapOf("key" to "value"))
   }
+
+  fun enqueueEnqueuer() {
+    jobQueue.enqueue(ENQUEUER_QUEUE, body = "")
+  }
 }
 
 private class ExampleJobHandler @Inject private constructor(moshi: Moshi) : JobHandler {
@@ -186,5 +203,20 @@ private class ExampleJobHandler @Inject private constructor(moshi: Moshi) : JobH
 
   companion object {
     private val log = getLogger<ExampleJobHandler>()
+  }
+}
+
+private class EnqueuerJobHandler @Inject private constructor(
+  private val jobQueue: JobQueue,
+    moshi: Moshi
+): JobHandler {
+  private val jobAdapter = moshi.adapter<ExampleJob>()
+
+  override fun handleJob(job: Job) {
+    jobQueue.enqueue(
+        queueName = GREEN_QUEUE,
+        body = jobAdapter.toJson(ExampleJob(color = Color.GREEN, message = "We made it!"))
+    )
+    job.acknowledge()
   }
 }
