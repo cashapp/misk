@@ -81,7 +81,7 @@ Cutting a Release
       "s/VERSION_NAME=.*/VERSION_NAME=$RELEASE_VERSION/g" \
       gradle.properties
     sed -i "" \
-      "s/\"misk:\([^\:]*\):[^\"]*\"/\"misk:\1:$RELEASE_VERSION\"/g" \
+      "s/\"com.squareup.misk:\([^\:]*\):[^\"]*\"/\"com.squareup.misk:\1:$RELEASE_VERSION\"/g" \
       `find . -name "README.md"`
     miskweb ci-build -e
     ./gradlew clean uploadArchives
