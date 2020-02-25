@@ -38,9 +38,12 @@ internal class WireMessageAdapter(
     reader.beginObject()
     while (reader.hasNext()) {
       val fieldName = reader.nextName()
-      fieldBindings[fieldName]?.let { binding ->
+      val binding = fieldBindings[fieldName]
+      if (binding != null) {
         binding.adapter.fromJson(reader)?.let { binding.set(builder, it) }
-      } ?: reader.skipValue()
+      } else {
+        reader.skipValue()
+      }
     }
 
     reader.endObject()
