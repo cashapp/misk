@@ -83,7 +83,6 @@ subprojects {
     api enforcedPlatform(dep.jacksonBom)
     api enforcedPlatform(dep.jerseyBom)
     api enforcedPlatform(dep.jettyBom)
-    api enforcedPlatform(dep.junitBom)
     api enforcedPlatform(dep.kotlinBom)
     api enforcedPlatform(dep.nettyBom)
   }

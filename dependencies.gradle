@@ -45,7 +45,6 @@ ext.dep = [
   "jettyWebsocketServer": "org.eclipse.jetty.websocket:websocket-server:9.4.20.v20190813",
   "jettyWebsocketServlet": "org.eclipse.jetty.websocket:websocket-servlet:9.4.20.v20190813",
   "jnrUnixsocket": "com.github.jnr:jnr-unixsocket:0.22",
-  "junitBom": "org.junit:junit-bom:5.6.0",
   "junit4Api": "junit:junit:4.13",
   "junitApi": "org.junit.jupiter:junit-jupiter-api:5.6.0",
   "junitEngine": "org.junit.jupiter:junit-jupiter-engine:5.6.0",
