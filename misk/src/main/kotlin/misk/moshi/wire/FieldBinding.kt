@@ -37,7 +37,7 @@ internal class FieldBinding(
       val valueAdapter = jsonAdapter(moshi, wireField.adapter) as JsonAdapter<Any?>
       MapAdapter(keyConverter, valueAdapter) as JsonAdapter<Any?>
     }
-    else -> moshi.adapter(messageField.type) as JsonAdapter<Any?>
+    else -> moshi.adapter(messageField.type).nullSafe() as JsonAdapter<Any?>
   }
 
   @Suppress("UNCHECKED_CAST")
