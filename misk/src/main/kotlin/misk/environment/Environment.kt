@@ -7,6 +7,7 @@ import misk.logging.getLogger
 enum class Environment {
   TESTING,
   DEVELOPMENT,
+  PLATFORM_STAGING,
   STAGING,
   PRODUCTION;
 
@@ -26,7 +27,8 @@ enum class Environment {
     fun fromEnvironmentVariable(): Environment {
       // The system variable should always take precedence
       val environmentName = System.getenv(ENV_ENVIRONMENT)
-      val environment = environmentName?.let { Environment.valueOf(it) } ?: {
+
+      val environment = environmentName?.let { it.replace("-", "_") }?.let { valueOf(it) } ?: {
         if (::env.isInitialized) {
           env
         } else {
