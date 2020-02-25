@@ -312,6 +312,31 @@ internal class WireMessageAdapterTest {
         |""".trimMargin())
   }
 
+  @Test fun explicitNull() {
+    val warehouseAdapter = moshi.adapter(Warehouse::class.java)
+
+    val expected = Warehouse.Builder()
+        .alternates(listOf(
+            Warehouse.Builder()
+                .warehouse_id(1014L)
+                .build()
+        ))
+        .build()
+
+    val json = """
+        |{
+        |  "alternates": [
+        |    {
+        |      "warehouse_id": 1014,
+        |      "warehouse_token": null
+        |    }
+        |  ]
+        |}
+        |""".trimMargin()
+
+    assertThat(warehouseAdapter.fromJson(json)).isEqualTo(expected)
+  }
+
   @Test
   fun byteStringsAreBase64() {
     val shipmentAdapter = moshi.adapter(Shipment::class.java)
