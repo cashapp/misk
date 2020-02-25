@@ -10,20 +10,12 @@ buildscript {
   apply from: new File("./dependencies.gradle")
 
   dependencies {
-    classpath dep.gradleBuildScan
     classpath dep.kotlinGradlePlugin
     classpath dep.junitGradlePlugin
     classpath dep.shadowJarPlugin
     classpath dep.mavenPublishGradlePlugin
     classpath dep.wireGradlePlugin
   }
-}
-
-apply plugin: 'com.gradle.build-scan'
-
-buildScan {
-    termsOfServiceUrl = 'https://gradle.com/terms-of-service'
-    termsOfServiceAgree = 'yes'
 }
 
 tasks.register("testShardNonHibernate") {
@@ -38,7 +30,7 @@ tasks.register("testShardHibernate") {
           "This target is intended for manually sharding tests to make CI faster."
 }
 
-subprojects {
+subprojects { subProject ->
   apply plugin: 'java'
   apply plugin: 'kotlin'
   apply plugin: 'org.jetbrains.dokka'
@@ -116,5 +108,13 @@ subprojects {
 
   if (!name.startsWith("samples:")) {
     apply plugin: 'com.vanniktech.maven.publish'
+  }
+
+  // Workaround the Gradle bug resolving multiplatform dependencies.
+  // https://github.com/square/okio/issues/647
+  configurations.all { configuration ->
+    if (name.contains('kapt') || name.contains("wire") || name.contains("proto") || name.contains("Proto")) {
+      attributes.attribute(Usage.USAGE_ATTRIBUTE, subProject.objects.named(Usage.class, Usage.JAVA_RUNTIME))
+    }
   }
 }
