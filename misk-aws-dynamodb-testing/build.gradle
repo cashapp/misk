@@ -1,5 +1,12 @@
+repositories {
+  maven {
+    url "https://s3-us-west-2.amazonaws.com/dynamodb-local/release"
+  }
+}
+
 dependencies {
   implementation dep.awsApi
+  implementation dep.awsDynamoDbLocal
   implementation dep.tracingJaeger
   implementation project(':misk')
   implementation project(':misk-aws')
