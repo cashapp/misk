@@ -3,7 +3,7 @@ package misk.dynamodb
 /**
  * This version field is used for optimistic locking.
  */
-interface DyEntity {
+interface DyVersionedEntity {
 
   /**
    * This version field can be used to do optimistic locking on updates.
