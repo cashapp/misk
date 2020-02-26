@@ -1,0 +1,19 @@
+repositories {
+  maven {
+    url 'https://oss.sonatype.org/content/repositories/snapshots/'
+  }
+}
+
+apply plugin: 'kotlin'
+
+dependencies {
+  api(dep.hibernateCore) {
+    because("MiskDriver takes SessionFactory in its constructor")
+  }
+
+  api("com.squareup.sqldelight:runtime-jvm:1.3.0-SNAPSHOT") {
+    because("MiskDriver extends JdbcDriver")
+  }
+
+  implementation dep.kotlinStdLib
+}

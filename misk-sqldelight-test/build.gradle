@@ -1,0 +1,39 @@
+buildscript {
+  repositories {
+    google()
+    maven {
+      url 'https://oss.sonatype.org/content/repositories/snapshots/'
+    }
+  }
+  dependencies {
+    classpath "com.squareup.sqldelight:gradle-plugin:1.3.0-SNAPSHOT"
+  }
+}
+
+repositories {
+  maven {
+    url 'https://oss.sonatype.org/content/repositories/snapshots/'
+  }
+}
+
+apply plugin: 'kotlin'
+apply plugin: "com.squareup.sqldelight"
+
+sqldelight {
+  TestDatabase {
+    packageName = "com.squareup.misk.sqldelight.test"
+    dialect = "mysql"
+  }
+}
+
+dependencies {
+  implementation dep.kotlinStdLib
+
+  testImplementation project(':misk-sqldelight')
+  testImplementation project(':misk-testing')
+  testImplementation project(':misk-hibernate-testing')
+  testImplementation project(':misk-hibernate')
+
+  testImplementation dep.junit4Api
+  testImplementation 'com.google.truth:truth:0.42'
+}
