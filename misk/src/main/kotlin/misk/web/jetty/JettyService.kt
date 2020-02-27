@@ -21,7 +21,6 @@ import org.eclipse.jetty.server.ServerConnectionStatistics
 import org.eclipse.jetty.server.ServerConnector
 import org.eclipse.jetty.server.SslConnectionFactory
 import org.eclipse.jetty.server.handler.ContextHandler
-import org.eclipse.jetty.server.handler.HandlerCollection
 import org.eclipse.jetty.server.handler.StatisticsHandler
 import org.eclipse.jetty.server.handler.gzip.GzipHandler
 import org.eclipse.jetty.servlet.ServletContextHandler
@@ -167,12 +166,16 @@ class JettyService @Inject internal constructor(
     server.stopTimeout = 25_000
     ServerConnectionStatistics.addToAllConnectors(server)
 
+    gzipHandler.server = server
     if (webConfig.gzip) {
-      gzipHandler.server = server
       gzipHandler.minGzipSize = webConfig.minGzipSize
       gzipHandler.addIncludedMethods("POST")
-      servletContextHandler.gzipHandler = gzipHandler
+    } else {
+      // GET is enabled by default for gzipHandler.
+      gzipHandler.addExcludedMethods("GET")
     }
+    gzipHandler.inflateBufferSize = 8192
+    servletContextHandler.gzipHandler = gzipHandler
 
     server.handler = statisticsHandler
 
