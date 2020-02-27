@@ -55,7 +55,7 @@ class ConfigMetadataAction @Inject constructor(
       environment: Environment,
       config: Config
     ): Map<String, String?> {
-      val rawYamlFiles = MiskConfig.loadConfigYamlMap(appName, environment, listOf())
+      val rawYamlFiles = MiskConfig.loadConfigYamlMap(appName, environment.name, listOf())
       val yamlFiles = linkedMapOf<String, String?>("Effective Config" to MiskConfig.toYaml(
         config, ResourceLoader.SYSTEM))
       rawYamlFiles.map { yamlFiles.put("classpath:/${it.key}", it.value) }

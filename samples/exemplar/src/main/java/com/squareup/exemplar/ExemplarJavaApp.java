@@ -14,7 +14,7 @@ public class ExemplarJavaApp {
   public static void main(String[] args) {
     Environment environment = Environment.fromEnvironmentVariable();
     ExemplarJavaConfig config = MiskConfig.load(ExemplarJavaConfig.class, "exemplar",
-        environment, ImmutableList.of(), ResourceLoader.Companion.getSYSTEM());
+        environment.name(), ImmutableList.of(), ResourceLoader.Companion.getSYSTEM());
 
     new MiskApplication(
         new MiskRealServiceModule(),

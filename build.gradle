@@ -52,13 +52,17 @@ subprojects { subProject ->
   compileKotlin {
     kotlinOptions {
       jvmTarget = "1.8"
-      allWarningsAsErrors = true
+
+      // TODO(alec): Enable again once Environment enum is deleted
+       allWarningsAsErrors = false
     }
   }
   compileTestKotlin {
     kotlinOptions {
       jvmTarget = "1.8"
-      allWarningsAsErrors = true
+
+      // TODO(alec): Enable again once Environment enum is deleted
+       allWarningsAsErrors = false
     }
   }
   sourceSets {
