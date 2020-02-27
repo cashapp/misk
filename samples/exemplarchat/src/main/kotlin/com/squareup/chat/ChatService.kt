@@ -12,7 +12,7 @@ import misk.web.MiskWebModule
 
 fun main(args: Array<String>) {
   val environment = Environment.fromEnvironmentVariable()
-  val config = MiskConfig.load<ChatConfig>("chat", environment)
+  val config = MiskConfig.load<ChatConfig>("chat", environment.name)
 
   MiskApplication(
       MiskRealServiceModule(),
