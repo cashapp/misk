@@ -2,7 +2,6 @@ package misk.web.metadata
 
 import misk.config.AppName
 import misk.config.Config
-import misk.environment.Environment
 import misk.inject.KAbstractModule
 import misk.web.actions.TestWebActionModule
 import misk.web.dashboard.AdminDashboardTestingModule
@@ -17,7 +16,7 @@ import javax.inject.Qualifier
 class MetadataTestingModule : KAbstractModule() {
   override fun configure() {
     install(TestWebActionModule())
-    install(AdminDashboardTestingModule(Environment.TESTING))
+    install(AdminDashboardTestingModule())
     bind<Config>().toInstance(TestAdminDashboardConfig())
     // TODO(wesley): Remove requirement for AppName to bind AdminDashboard APIs
     bind<String>().annotatedWith<AppName>().toInstance("testApp")

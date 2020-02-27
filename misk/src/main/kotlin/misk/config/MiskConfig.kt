@@ -24,12 +24,13 @@ import org.apache.commons.lang3.StringUtils
 import java.io.File
 import java.io.FilenameFilter
 import java.net.URL
+import java.util.Locale
 
 object MiskConfig {
   @JvmStatic
   inline fun <reified T : Config> load(
     appName: String,
-    environment: Environment,
+    environment: String,
     overrideFiles: List<File> = listOf(),
     resourceLoader: ResourceLoader = ResourceLoader.SYSTEM
   ): T {
@@ -37,10 +38,21 @@ object MiskConfig {
   }
 
   @JvmStatic
+  @Deprecated("the Environment enum is deprecated")
+  inline fun <reified T : Config> load(
+    appName: String,
+    environment: Environment,
+    overrideFiles: List<File> = listOf(),
+    resourceLoader: ResourceLoader = ResourceLoader.SYSTEM
+  ): T {
+    return load(T::class.java, appName, environment.name, overrideFiles, resourceLoader)
+  }
+
+  @JvmStatic
   fun <T : Config> load(
     configClass: Class<out Config>,
     appName: String,
-    environment: Environment,
+    environment: String,
     overrideFiles: List<File> = listOf(),
     resourceLoader: ResourceLoader = ResourceLoader.SYSTEM
   ): T {
@@ -57,7 +69,7 @@ object MiskConfig {
 
     val jsonNode = flattenYamlMap(configYamls)
 
-    val configFile = "$appName-${environment.name.toLowerCase()}.yaml"
+    val configFile = "$appName-${environment.toLowerCase(Locale.US)}.yaml"
     try {
       @Suppress("UNCHECKED_CAST")
       return mapper.readValue(jsonNode.toString(), configClass) as T
@@ -134,7 +146,7 @@ object MiskConfig {
    */
   fun loadConfigYamlMap(
     appName: String,
-    environment: Environment,
+    environment: String,
     overrideFiles: List<File>
   ): Map<String, String?> {
     // Load from jar files first, starting with the common config and then env specific config
@@ -157,8 +169,8 @@ object MiskConfig {
   }
 
   /** @return the list of config file names in the order they should be read */
-  private fun embeddedConfigFileNames(appName: String, environment: Environment) =
-      listOf("common", environment.name.toLowerCase()).map { "$appName-$it.yaml" }
+  private fun embeddedConfigFileNames(appName: String, environment: String) =
+      listOf("common", environment.toLowerCase(Locale.US)).map { "$appName-$it.yaml" }
 
   class SecretJacksonModule(val resourceLoader: ResourceLoader, val mapper: ObjectMapper) :
       SimpleModule() {
