@@ -32,3 +32,10 @@ shadowJar {
 artifacts {
   archives shadowJar
 }
+
+compileKotlin {
+  kotlinOptions {
+    // TODO(alec): Enable again once Environment enum is deleted
+    allWarningsAsErrors = false
+  }
+}

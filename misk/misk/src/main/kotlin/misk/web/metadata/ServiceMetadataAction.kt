@@ -37,10 +37,10 @@ class ServiceMetadataAction @Inject constructor(
 class OptionalBinder @Inject constructor(@AppName val appName: String) {
   @com.google.inject.Inject(optional = true)
   var serviceMetadata: ServiceMetadata =
-    ServiceMetadata(appName, Environment.fromEnvironmentVariable())
+    ServiceMetadata(appName, Environment.fromEnvironmentVariable().name)
 }
 
 data class ServiceMetadata(
   val app_name: String,
-  val environment: Environment
+  val environment: String
 )
