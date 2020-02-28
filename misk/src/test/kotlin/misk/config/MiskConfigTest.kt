@@ -1,8 +1,8 @@
 package misk.config
 
 import com.google.inject.util.Modules
+import misk.environment.DeploymentModule
 import misk.environment.Environment
-import misk.environment.EnvironmentModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.web.WebConfig
@@ -23,7 +23,7 @@ class MiskConfigTest {
   @MiskTestModule
   val module = Modules.combine(
       ConfigModule.create("test_app", config),
-      EnvironmentModule(defaultEnv)
+      DeploymentModule.forTesting()
       // @TODO(jwilson) https://github.com/square/misk/issues/272
   )
 
