@@ -4,6 +4,7 @@ import com.google.inject.Inject
 import misk.config.AppName
 import misk.config.Config
 import misk.config.MiskConfig
+import misk.environment.Env
 import misk.environment.Environment
 import misk.resources.ResourceLoader
 import misk.web.Get
@@ -55,7 +56,7 @@ class ConfigMetadataAction @Inject constructor(
       environment: Environment,
       config: Config
     ): Map<String, String?> {
-      val rawYamlFiles = MiskConfig.loadConfigYamlMap(appName, environment.name, listOf())
+      val rawYamlFiles = MiskConfig.loadConfigYamlMap(appName, Env(environment.name), listOf())
       val yamlFiles = linkedMapOf<String, String?>("Effective Config" to MiskConfig.toYaml(
         config, ResourceLoader.SYSTEM))
       rawYamlFiles.map { yamlFiles.put("classpath:/${it.key}", it.value) }
