@@ -16,6 +16,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.kotlin.MissingKotlinParameterException
 import com.google.common.base.Joiner
+import misk.environment.Env
 import misk.environment.Environment
 import misk.resources.ResourceLoader
 import okio.buffer
@@ -30,7 +31,7 @@ object MiskConfig {
   @JvmStatic
   inline fun <reified T : Config> load(
     appName: String,
-    environment: String,
+    environment: Env,
     overrideFiles: List<File> = listOf(),
     resourceLoader: ResourceLoader = ResourceLoader.SYSTEM
   ): T {
@@ -45,14 +46,14 @@ object MiskConfig {
     overrideFiles: List<File> = listOf(),
     resourceLoader: ResourceLoader = ResourceLoader.SYSTEM
   ): T {
-    return load(T::class.java, appName, environment.name, overrideFiles, resourceLoader)
+    return load(T::class.java, appName, Env(environment.name), overrideFiles, resourceLoader)
   }
 
   @JvmStatic
   fun <T : Config> load(
     configClass: Class<out Config>,
     appName: String,
-    environment: String,
+    environment: Env,
     overrideFiles: List<File> = listOf(),
     resourceLoader: ResourceLoader = ResourceLoader.SYSTEM
   ): T {
@@ -69,7 +70,7 @@ object MiskConfig {
 
     val jsonNode = flattenYamlMap(configYamls)
 
-    val configFile = "$appName-${environment.toLowerCase(Locale.US)}.yaml"
+    val configFile = "$appName-${environment.name.toLowerCase(Locale.US)}.yaml"
     try {
       @Suppress("UNCHECKED_CAST")
       return mapper.readValue(jsonNode.toString(), configClass) as T
@@ -80,7 +81,8 @@ object MiskConfig {
     } catch (e: UnrecognizedPropertyException) {
       val path = Joiner.on('.').join(e.path.map { it.fieldName })
       throw IllegalStateException(
-          "error in $configFile: '$path' not found in '${configClass.simpleName}' ${suggestSpelling(e)}", e)
+          "error in $configFile: '$path' not found in '${configClass.simpleName}' ${suggestSpelling(
+              e)}", e)
     } catch (e: Exception) {
       throw IllegalStateException(
           "failed to load configuration for $appName $environment: ${e.message}", e)
@@ -109,6 +111,7 @@ object MiskConfig {
     mapper.registerModule(SecretJacksonModule(resourceLoader, mapper))
     return mapper
   }
+
   @JvmStatic
   fun filesInDir(
     dir: String,
@@ -146,7 +149,7 @@ object MiskConfig {
    */
   fun loadConfigYamlMap(
     appName: String,
-    environment: String,
+    environment: Env,
     overrideFiles: List<File>
   ): Map<String, String?> {
     // Load from jar files first, starting with the common config and then env specific config
@@ -169,8 +172,8 @@ object MiskConfig {
   }
 
   /** @return the list of config file names in the order they should be read */
-  private fun embeddedConfigFileNames(appName: String, environment: String) =
-      listOf("common", environment.toLowerCase(Locale.US)).map { "$appName-$it.yaml" }
+  private fun embeddedConfigFileNames(appName: String, environment: Env) =
+      listOf("common", environment.name.toLowerCase(Locale.US)).map { "$appName-$it.yaml" }
 
   class SecretJacksonModule(val resourceLoader: ResourceLoader, val mapper: ObjectMapper) :
       SimpleModule() {
