@@ -1,5 +1,7 @@
 package misk.environment
 
+import com.google.inject.util.Modules
+import com.google.inject.Module
 import misk.inject.KAbstractModule
 
 /** Binds [Deployment] and [Env] to make them available to services and actions */
@@ -10,5 +12,21 @@ class DeploymentModule(
   override fun configure() {
     bind<Deployment>().toInstance(deployment)
     bind<Env>().toInstance(env)
+  }
+
+  companion object {
+    /**
+     * Return a Module that binds a [Deployment] and [Env] for a test environment.
+     *
+     * Until [Environment] is deleted, this also installs an [EnvironmentModule]
+     */
+    fun forTesting(): Module {
+      return Modules.combine(
+          DeploymentModule(
+              deployment = Deployment(name = "testing", isTest = true),
+              env = Env("TESTING")),
+          EnvironmentModule(Environment.TESTING)
+      )
+    }
   }
 }
