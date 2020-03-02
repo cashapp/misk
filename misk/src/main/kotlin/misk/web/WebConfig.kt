@@ -17,6 +17,10 @@ data class WebConfig(
 
   val ssl: WebSslConfig? = null,
 
+  /** Configuration to enable Jetty to listen for traffic on a unix domain socket being proxied through a sidecar
+   * (like Envoy). */
+  val unix_domain_socket: WebUnixDomainSocketConfig? = null,
+
   /** HTTP/2 support is currently opt-in because we can't load balance it dynamically. */
   val http2: Boolean = false,
 
@@ -70,3 +74,8 @@ data class WebSslConfig(
     DESIRED
   }
 }
+
+data class WebUnixDomainSocketConfig(
+  /** The Unix Domain Socket to listen on. */
+  val path: String
+)

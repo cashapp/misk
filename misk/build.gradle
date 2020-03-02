@@ -25,6 +25,7 @@ dependencies {
   compile dep.moshiAdapters
   compile dep.jettyHttp2
   compile dep.jettyServer
+  compile dep.jettyUnixSocket
   compile dep.servletApi
   compile dep.jettyAlpnJava
   compile dep.jettyServlet
