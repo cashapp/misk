@@ -3,6 +3,7 @@ dependencies {
   implementation dep.tracingJaeger
   implementation project(':misk')
   implementation project(':misk-aws')
+  implementation project(':misk-testing')
 
   testImplementation dep.assertj
   testImplementation dep.junitApi
