@@ -76,8 +76,8 @@ class DataSourceConfigTest {
     assertEquals("jdbc:tracing:mysql://127.0.0.1:3306/?useLegacyDatetimeCode=false&" +
         "createDatabaseIfNotExist=true&connectTimeout=10000&socketTimeout=60000&" +
         "trustCertificateKeyStoreUrl=file://path/to/truststore&" +
-        "trustCertificateKeyStorePassword=changeit&verifyServerCertificate=true&" +
-        "useSSL=true&requireSSL=true", config.buildJdbcUrl(Environment.TESTING))
+        "trustCertificateKeyStorePassword=changeit&sslMode=VERIFY_CA",
+        config.buildJdbcUrl(Environment.TESTING))
   }
 
   @Test
@@ -88,15 +88,33 @@ class DataSourceConfigTest {
     assertEquals("jdbc:tracing:mysql://127.0.0.1:3306/?useLegacyDatetimeCode=false&" +
         "createDatabaseIfNotExist=true&connectTimeout=10000&socketTimeout=60000&" +
         "trustCertificateKeyStoreUrl=file://path/to/truststore&" +
-        "trustCertificateKeyStorePassword=changeit&verifyServerCertificate=true&useSSL=true&" +
-        "requireSSL=true", config.buildJdbcUrl(Environment.TESTING))
+        "trustCertificateKeyStorePassword=changeit&sslMode=VERIFY_CA",
+        config.buildJdbcUrl(Environment.TESTING))
+  }
+
+  @Test
+  fun buildMysqlJDBCUrlWithKeystoreAndTruststoreUrlsAndVerifyIdentity() {
+    val config = DataSourceConfig(DataSourceType.MYSQL,
+        trust_certificate_key_store_url = "file://path/to/truststore",
+        trust_certificate_key_store_password = "changeit",
+        client_certificate_key_store_url = "file://path/to/keystore",
+        client_certificate_key_store_password = "changeit",
+        verify_server_identity = true)
+    assertEquals("jdbc:tracing:mysql://127.0.0.1:3306/?useLegacyDatetimeCode=false&" +
+        "createDatabaseIfNotExist=true&connectTimeout=10000&socketTimeout=60000&" +
+        "trustCertificateKeyStoreUrl=file://path/to/truststore&" +
+        "trustCertificateKeyStorePassword=changeit&" +
+        "clientCertificateKeyStoreUrl=file://path/to/keystore&" +
+        "clientCertificateKeyStorePassword=changeit&" +
+        "sslMode=VERIFY_IDENTITY",
+        config.buildJdbcUrl(Environment.TESTING))
   }
 
   @Test
   fun buildMysqlJDBCUrlWithNoTls() {
     val config = DataSourceConfig(DataSourceType.MYSQL)
     assertEquals("jdbc:tracing:mysql://127.0.0.1:3306/?useLegacyDatetimeCode=false&" +
-        "createDatabaseIfNotExist=true&connectTimeout=10000&socketTimeout=60000",
+        "createDatabaseIfNotExist=true&connectTimeout=10000&socketTimeout=60000&sslMode=PREFERRED",
         config.buildJdbcUrl(Environment.TESTING))
   }
 }

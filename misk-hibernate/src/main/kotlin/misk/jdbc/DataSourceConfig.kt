@@ -70,6 +70,7 @@ data class DataSourceConfig(
   // going forward
   val trust_certificate_key_store_path: String? = null,
   val client_certificate_key_store_path: String? = null,
+  val verify_server_identity: Boolean = false,
   val show_sql: String? = "false",
   // Consider using this if you want Hibernate to automagically batch inserts/updates when it can.
   val jdbc_statement_batch_size: Int? = null
@@ -181,7 +182,6 @@ data class DataSourceConfig(
           }
           queryParams += "&trustCertificateKeyStoreUrl=$trustStoreUrl"
           queryParams += "&trustCertificateKeyStorePassword=${config.trust_certificate_key_store_password}"
-          queryParams += "&verifyServerCertificate=true"
           useSSL = true
         }
         if (!certStoreUrl.isNullOrBlank()) {
@@ -194,10 +194,14 @@ data class DataSourceConfig(
           useSSL = true
         }
 
-        if (useSSL) {
-          queryParams += "&useSSL=true"
-          queryParams += "&requireSSL=true"
+        val sslMode = if (useSSL && verify_server_identity) {
+          "VERIFY_IDENTITY"
+        } else if (useSSL) {
+          "VERIFY_CA"
+        } else {
+          "PREFERRED"
         }
+        queryParams += "&sslMode=$sslMode"
 
         "jdbc:tracing:mysql://${config.host}:${config.port}/${config.database}$queryParams"
       }
@@ -293,6 +297,7 @@ data class DataSourceConfig(
               this.client_certificate_key_store_password,
               this.trust_certificate_key_store_path,
               this.client_certificate_key_store_path,
+              this.verify_server_identity,
               this.show_sql
       )
   }
