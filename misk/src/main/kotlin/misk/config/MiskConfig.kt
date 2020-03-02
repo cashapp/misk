@@ -39,6 +39,17 @@ object MiskConfig {
   }
 
   @JvmStatic
+  @Deprecated("Use load function that takes Env")
+  inline fun <reified T : Config> load(
+    appName: String,
+    environment: String,
+    overrideFiles: List<File> = listOf(),
+    resourceLoader: ResourceLoader = ResourceLoader.SYSTEM
+  ): T {
+    return load(appName, Env(environment), overrideFiles, resourceLoader)
+  }
+
+  @JvmStatic
   @Deprecated("the Environment enum is deprecated")
   inline fun <reified T : Config> load(
     appName: String,
@@ -87,6 +98,18 @@ object MiskConfig {
       throw IllegalStateException(
           "failed to load configuration for $appName $environment: ${e.message}", e)
     }
+  }
+
+  @JvmStatic
+  @Deprecated("Use load function that takes Env")
+  fun <T : Config> load(
+    configClass: Class<out Config>,
+    appName: String,
+    environment: String,
+    overrideFiles: List<File> = listOf(),
+    resourceLoader: ResourceLoader = ResourceLoader.SYSTEM
+  ): T {
+    return load(configClass, appName, Env(environment), overrideFiles, resourceLoader)
   }
 
   private fun suggestSpelling(e: UnrecognizedPropertyException): String {
