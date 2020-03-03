@@ -11,8 +11,6 @@ sourceSets {
 
 dependencies {
   compile dep.kotlinStdLib
-  compile dep.kotlinTest
-  compile dep.bouncycastle
   compile dep.guava
   compile dep.guice
   compile dep.guiceMultibindings
@@ -29,7 +27,6 @@ dependencies {
   compile dep.jettyAlpnJava
   compile dep.jettyServlet
   compile dep.jettyWebsocketServlet
-  compile dep.jettyWebsocketServer
   compile dep.kubernetesClient
   compile dep.wireRuntime
   compile dep.jacksonDatabind
@@ -38,12 +35,10 @@ dependencies {
   compile dep.jacksonJsr310
   compile dep.jCommander
   compile dep.openTracing
-  compile dep.openTracingUtil
   compile dep.openTracingOkHttp
   compile dep.retrofit
   compile dep.retrofitMoshi
   compile dep.retrofitWire
-  compile dep.jaxbApi
   compile dep.prometheusClient
   compile dep.prometheusHotspot
   compile dep.jnrUnixsocket
@@ -52,8 +47,8 @@ dependencies {
   compile project(':misk-core')
   compile project(':misk-service')
 
+  testCompile dep.kotlinTest
   testCompile dep.kotlinxCoroutines
-  testCompile dep.mockitoCore
   testCompile project(':misk-testing')
   testImplementation dep.junit4Api
 }

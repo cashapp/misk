@@ -4,6 +4,7 @@ dependencies {
   compile project(':misk')
   compile project(':misk-gcp')
   compile project(':misk-testing')
+  compile dep.kotlinTest
 }
 
 afterEvaluate { project ->

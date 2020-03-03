@@ -5,7 +5,6 @@ buildscript {
 }
 
 dependencies {
-  compile dep.kotlinStdLib
   compile dep.javaxInject
   compile dep.guava
   compile dep.guice

@@ -7,8 +7,6 @@ buildscript {
 dependencies {
   compile dep.guice
   compile dep.guiceMultibindings
-  compile dep.kotlinStdLib
-  compile dep.kotlinReflection
   compile dep.launchDarkly
   compile project(':misk')
   compile project(':misk-feature')

@@ -2,6 +2,7 @@ dependencies {
   implementation project(':misk')
   implementation project(':misk-testing')
   implementation project(':misk-jobqueue')
+  testImplementation dep.kotlinTest
   testImplementation dep.junitApi
 }
 

@@ -8,10 +8,7 @@ dependencies {
   compile dep.bouncycastle
   compile dep.guice
   compile dep.guiceMultibindings
-  compile dep.kotlinStdLib
-  compile dep.kotlinReflection
   compile dep.loggingApi
-  compile dep.logbackClassic
   compile dep.okio
   compile dep.okHttp
   compile dep.slf4jApi
@@ -19,6 +16,7 @@ dependencies {
   compile project(':misk-inject')
   compile project(':misk-service')
 
+  testCompile dep.kotlinTest
   testCompile project(':misk-testing')
 }
 

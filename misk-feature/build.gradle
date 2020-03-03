@@ -5,7 +5,6 @@ buildscript {
 }
 
 dependencies {
-  compile dep.kotlinStdLib
   compile dep.guava
   compile dep.moshiKotlin
   compile project(':misk-core')

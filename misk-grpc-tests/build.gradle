@@ -53,16 +53,16 @@ sourceSets {
 }
 
 dependencies {
-  compile dep.junitApi
-  compile dep.docker
   compile dep.grpcNetty
   compile dep.grpcProtobuf
   compile dep.grpcStub
-  compile dep.kotlinxCoroutines
+  compile dep.kotlinTest
   compile dep.wireGrpcClient
   compile dep.wireRuntime
   compile project(':misk')
   compile project(':misk-testing')
+
+  testCompile dep.kotlinxCoroutines
 }
 
 afterEvaluate { project ->

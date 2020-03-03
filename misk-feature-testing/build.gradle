@@ -7,12 +7,12 @@ buildscript {
 dependencies {
   compile dep.guice
   compile dep.kotlinStdLib
-  compile dep.kotlinReflection
   compile dep.moshiCore
   compile project(':misk-feature')
   compile project(':misk-inject')
   compile project(':misk-service')
 
+  testCompile dep.kotlinTest
   testCompile project(':misk-testing')
 }
 
