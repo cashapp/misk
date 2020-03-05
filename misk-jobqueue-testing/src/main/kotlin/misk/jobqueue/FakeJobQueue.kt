@@ -32,11 +32,12 @@ class FakeJobQueue @Inject constructor(
   override fun enqueue(
     queueName: QueueName,
     body: String,
+    idempotenceKey: String,
     deliveryDelay: Duration?,
     attributes: Map<String, String>
   ) {
     val id = tokenGenerator.generate("fakeJobQueue")
-    val job = FakeJob(queueName, id, body, attributes)
+    val job = FakeJob(queueName, id, idempotenceKey, body, attributes)
     jobQueues.getOrPut(queueName, ::ConcurrentLinkedDeque).add(job)
   }
 
@@ -62,6 +63,7 @@ class FakeJobQueue @Inject constructor(
 data class FakeJob(
   override val queueName: QueueName,
   override val id: String,
+  override val idempotenceKey: String,
   override val body: String,
   override val attributes: Map<String, String>,
   internal var acknowledged: Boolean = false

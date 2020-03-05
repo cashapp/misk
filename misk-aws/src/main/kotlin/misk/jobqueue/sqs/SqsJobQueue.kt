@@ -2,11 +2,13 @@ package misk.jobqueue.sqs
 
 import com.amazonaws.services.sqs.model.MessageAttributeValue
 import com.amazonaws.services.sqs.model.SendMessageRequest
+import com.squareup.moshi.Moshi
 import io.jaegertracing.internal.JaegerSpan
 import io.opentracing.Tracer
 import misk.jobqueue.JobQueue
 import misk.jobqueue.QueueName
 import misk.logging.getLogger
+import misk.moshi.adapter
 import misk.time.timed
 import misk.tracing.traceWithSpan
 import java.time.Duration
@@ -17,14 +19,21 @@ import javax.inject.Singleton
 internal class SqsJobQueue @Inject internal constructor(
   private val queues: QueueResolver,
   private val metrics: SqsMetrics,
+  private val moshi: Moshi,
   private val tracer: Tracer
 ) : JobQueue {
   override fun enqueue(
     queueName: QueueName,
     body: String,
+    idempotenceKey: String,
     deliveryDelay: Duration?,
     attributes: Map<String, String>
   ) {
+    // Ensure there are at most 8 attributes; AWS SQS enforces a limit of 10 custom attributes
+    // per message, 2 of which are reserved for this library (trace id and jobqueue metadata).
+    // https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-message-attributes.html
+    check(attributes.size <= 8) { "a maximum of 8 attributes are supported (got ${attributes.size})" }
+
     tracer.traceWithSpan("enqueue-job-${queueName.value}") { span ->
       metrics.jobsEnqueued.labels(queueName.value, queueName.value).inc()
       try {
@@ -40,6 +49,14 @@ internal class SqsJobQueue @Inject internal constructor(
                 .withDataType("String")
                 .withStringValue(value))
             }
+
+            // Add the internal metadata dictionary, encoded as JSON.
+            val metadata = mapOf(
+                SqsJob.JOBQUEUE_METADATA_ORIGIN_QUEUE to queueName.parentQueue.value,
+                SqsJob.JOBQUEUE_METADATA_IDEMPOTENCE_KEY to idempotenceKey)
+            addMessageAttributesEntry(SqsJob.JOBQUEUE_METADATA_ATTR, MessageAttributeValue()
+                .withDataType("String")
+                .withStringValue(moshi.adapter<Map<String, String>>().toJson(metadata)))
 
             // Save the original trace id, if we can determine it
             // TODO(mmihic): Should put this case somewhere in the tracing modules
