@@ -18,7 +18,7 @@ internal class SqsJob(
     key to value.stringValue
   }.toMap()
 
-  private val queue: ResolvedQueue = queues[queueName]
+  private val queue: ResolvedQueue = queues.getForReceiving(queueName)
 
   override fun acknowledge() {
     deleteMessage(queue, message)
@@ -28,7 +28,7 @@ internal class SqsJob(
   override fun deadLetter() {
     if (queueName.isDeadLetterQueue) return
 
-    val dlq = queues[queueName.deadLetterQueue]
+    val dlq = queues.getForReceiving(queueName.deadLetterQueue)
     dlq.call { client ->
       client.sendMessage(SendMessageRequest()
           .withQueueUrl(dlq.url)
