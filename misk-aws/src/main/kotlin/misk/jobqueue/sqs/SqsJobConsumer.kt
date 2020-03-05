@@ -4,6 +4,7 @@ import com.amazonaws.http.timers.client.ClientExecutionTimeoutException
 import com.amazonaws.services.sqs.model.Message
 import com.amazonaws.services.sqs.model.ReceiveMessageRequest
 import com.google.common.util.concurrent.ServiceManager
+import com.squareup.moshi.Moshi
 import io.opentracing.Tracer
 import io.opentracing.tag.StringTag
 import io.opentracing.tag.Tags
@@ -33,6 +34,7 @@ internal class SqsJobConsumer @Inject internal constructor(
   private val queues: QueueResolver,
   @ForSqsHandling private val handlingThreads: ExecutorService,
   @ForSqsHandling private val taskQueue: RepeatedTaskQueue,
+  private val moshi: Moshi,
   private val tracer: Tracer,
   private val metrics: SqsMetrics,
   private val featureFlags: FeatureFlags,
@@ -126,7 +128,7 @@ internal class SqsJobConsumer @Inject internal constructor(
         emptyList<Message>()
       }
 
-      return messages.map { SqsJob(queue.name, queues, metrics, it) }
+      return messages.map { SqsJob(queue.name, queues, metrics, moshi, it) }
     }
 
     private fun receive(): List<Status> {
