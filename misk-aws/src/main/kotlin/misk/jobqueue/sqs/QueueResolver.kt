@@ -17,17 +17,24 @@ internal class QueueResolver @Inject internal constructor(
   private val currentAccount: AwsAccountId,
   private val defaultSQS: AmazonSQS,
   private val crossRegionSQS: Map<AwsRegion, AmazonSQS>,
+  @ForSqsReceiving private val defaultForReceivingSQS: AmazonSQS,
+  @ForSqsReceiving private val crossRegionForReceivingSQS: Map<AwsRegion, AmazonSQS>,
   private val externalQueues: Map<QueueName, AwsSqsQueueConfig>
 ) {
-  private val mapping = ConcurrentHashMap<QueueName, ResolvedQueue>()
+  private val forSendingMapping = ConcurrentHashMap<QueueName, ResolvedQueue>()
+  private val forReceivingMapping = ConcurrentHashMap<QueueName, ResolvedQueue>()
 
-  operator fun get(q: QueueName): ResolvedQueue {
-    return mapping.computeIfAbsent(q) { resolve(it) }
+  fun getForSending(q: QueueName): ResolvedQueue {
+    return forSendingMapping.computeIfAbsent(q) { resolve(it, false) }
   }
 
-  private fun resolve(q: QueueName): ResolvedQueue {
+  fun getForReceiving(q: QueueName): ResolvedQueue {
+    return forReceivingMapping.computeIfAbsent(q) { resolve(it, true) }
+  }
+
+  private fun resolve(q: QueueName, forSqsReceiving: Boolean): ResolvedQueue {
     if (q.isDeadLetterQueue) {
-      return resolveDeadLetterQueue(q)
+      return resolveDeadLetterQueue(q, forSqsReceiving)
     }
 
     val queueConfig = externalQueues[q] ?: AwsSqsQueueConfig()
@@ -35,7 +42,11 @@ internal class QueueResolver @Inject internal constructor(
     val region = queueConfig.region?.let { AwsRegion(it) } ?: currentRegion
     val accountId = queueConfig.account_id?.let { AwsAccountId(it) } ?: currentAccount
 
-    val sqs = if (region == currentRegion) defaultSQS else crossRegionSQS[region]
+    val sqs = if (region == currentRegion) {
+      if (forSqsReceiving) defaultForReceivingSQS else defaultSQS
+    } else {
+      if (forSqsReceiving) crossRegionForReceivingSQS[region] else crossRegionSQS[region]
+    }
 
     checkNotNull(sqs) { "could not find SQS client for ${region.name}" }
 
@@ -52,8 +63,8 @@ internal class QueueResolver @Inject internal constructor(
     return ResolvedQueue(q, sqsQueueName, queueUrl, region, accountId, sqs)
   }
 
-  private fun resolveDeadLetterQueue(q: QueueName): ResolvedQueue {
-    val parentQueue = resolve(q.parentQueue)
+  private fun resolveDeadLetterQueue(q: QueueName, forSqsReceiving: Boolean): ResolvedQueue {
+    val parentQueue = resolve(q.parentQueue, forSqsReceiving)
     val sqsQueueName = QueueName(parentQueue.sqsQueueName.value + deadLetterQueueSuffix)
     val queueUrl = parentQueue.call { client ->
       client.getQueueUrl(GetQueueUrlRequest().apply {

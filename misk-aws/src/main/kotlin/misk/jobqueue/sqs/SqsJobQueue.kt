@@ -28,7 +28,7 @@ internal class SqsJobQueue @Inject internal constructor(
     tracer.traceWithSpan("enqueue-job-${queueName.value}") { span ->
       metrics.jobsEnqueued.labels(queueName.value, queueName.value).inc()
       try {
-        val queue = queues[queueName]
+        val queue = queues.getForSending(queueName)
 
         val (sendDuration, _) = queue.call { client ->
           val sendRequest = SendMessageRequest().apply {

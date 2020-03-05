@@ -29,7 +29,7 @@ internal class AwsSqsQueueAttributeImporter @Inject constructor(
     val frequency = Duration.ofMillis(config.queue_attribute_importer_frequency_ms)
 
     taskQueue.scheduleWithBackoff(frequency) {
-      val queue = queues[queueName]
+      val queue = queues.getForSending(queueName)
       val lease = leaseManager.requestLease("sqs-queue-attributes-${queue.queueName}")
       if (!lease.checkHeld()) {
         metrics.sqsApproxNumberOfMessages.clear()

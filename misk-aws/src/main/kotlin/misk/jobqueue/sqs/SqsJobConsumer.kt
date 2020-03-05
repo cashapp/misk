@@ -72,7 +72,7 @@ internal class SqsJobConsumer @Inject internal constructor(
     queueName: QueueName,
     private val handler: JobHandler
   ) {
-    private val queue = queues[queueName]
+    private val queue = queues.getForReceiving(queueName)
 
     fun run(): Status {
       // Receive messages in parallel. Default to 1 if feature flag is not defined.
