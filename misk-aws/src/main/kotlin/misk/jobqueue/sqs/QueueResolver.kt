@@ -94,10 +94,8 @@ val QueueName.retryQueue
   get() = if (isRetryQueue) this else QueueName(value + retryQueueSuffix)
 
 val QueueName.parentQueue
-  get() = if (isDeadLetterQueue) {
-    QueueName(value.removeSuffix(deadLetterQueueSuffix))
-  } else if (isRetryQueue) {
-    QueueName(value.removeSuffix(retryQueueSuffix))
-  } else {
-    this
+  get() = when {
+    isDeadLetterQueue -> QueueName(value.removeSuffix(deadLetterQueueSuffix))
+    isRetryQueue -> QueueName(value.removeSuffix(retryQueueSuffix))
+    else -> this
   }
