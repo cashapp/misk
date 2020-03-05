@@ -43,5 +43,6 @@ class SqsTestModule(
   override fun configure() {
     bind<AWSCredentialsProvider>().toInstance(credentials)
     bind<AmazonSQS>().toInstance(client)
+    bind<AmazonSQS>().annotatedWith<ForSqsReceiving>().toInstance(client)
   }
 }
