@@ -25,6 +25,7 @@ import org.eclipse.jetty.server.handler.StatisticsHandler
 import org.eclipse.jetty.server.handler.gzip.GzipHandler
 import org.eclipse.jetty.servlet.ServletContextHandler
 import org.eclipse.jetty.servlet.ServletHolder
+import org.eclipse.jetty.unixsocket.UnixSocketConnector
 import org.eclipse.jetty.util.ssl.SslContextFactory
 import org.eclipse.jetty.util.thread.QueuedThreadPool
 import java.net.InetAddress
@@ -151,6 +152,20 @@ class JettyService @Inject internal constructor(
           webConfig.ssl.port
       ))
       server.addConnector(httpsConnector)
+    }
+
+    if (webConfig.unix_domain_socket != null) {
+      val udsConnector = UnixSocketConnector(
+        server,
+        null /* executor */,
+        null /* scheduler */,
+        null /* buffer pool */,
+        webConfig.selectors ?: -1,
+        listOf(HttpConnectionFactory(httpConfig)).toTypedArray()
+      )
+      udsConnector.setUnixSocket(webConfig.unix_domain_socket.path)
+      udsConnector.addBean(connectionMetricsCollector.newConnectionListener("http", 0))
+      server.addConnector(udsConnector)
     }
 
     // TODO(mmihic): Force security handler?

@@ -32,7 +32,11 @@ class WebTestingModule(
                 passphrase = "serverpassword",
                 format = SslLoader.FORMAT_PEM
             ),
-            mutual_auth = WebSslConfig.MutualAuth.NONE)
+            mutual_auth = WebSslConfig.MutualAuth.NONE
+        ),
+        unix_domain_socket = WebUnixDomainSocketConfig(
+            path = "@test"
+        )
     )
   }
 }
