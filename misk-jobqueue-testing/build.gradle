@@ -2,6 +2,9 @@ dependencies {
   implementation project(':misk')
   implementation project(':misk-testing')
   implementation project(':misk-jobqueue')
+
+  testImplementation project(':misk-hibernate')
+  testImplementation project(':misk-hibernate-testing')
   testImplementation dep.junitApi
 }
 
