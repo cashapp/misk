@@ -33,7 +33,7 @@ internal class SqsJob(
     // NB: old/in-flight jobs enqueued prior to the introduction of _jobqueue-metadata won't have this property. In
     // order to not change the contract later on (optional to non-optional), synthesize a reasonable replacement.
     if (metadata == null) {
-      // TODO(bruno): drop fallback; error out if metadata is not set.
+      // TODO(bruno): drop fallback after rollout; error when metadata is not set.
       mapOf(
           JOBQUEUE_METADATA_ORIGIN_QUEUE to queueName.parentQueue.value,
           // If the job had no metadata, there was no app-specified idempotence key;
@@ -83,5 +83,6 @@ internal class SqsJob(
     const val JOBQUEUE_METADATA_ORIGIN_QUEUE = "origin_queue"
     /** Client-assigned identifier, useful to detect duplicate messages. */
     const val JOBQUEUE_METADATA_IDEMPOTENCE_KEY = "idempotence_key"
+    const val JOBQUEUE_METADATA_ORIGINAL_TRACE_ID = "original_trace_id"
   }
 }

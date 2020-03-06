@@ -32,6 +32,7 @@ internal class SqsJobQueue @Inject internal constructor(
     // Ensure there are at most 8 attributes; AWS SQS enforces a limit of 10 custom attributes
     // per message, 2 of which are reserved for this library (trace id and jobqueue metadata).
     // https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-message-attributes.html
+    // TODO(bruno): change to 9 once we drop trace id
     check(attributes.size <= 8) { "a maximum of 8 attributes are supported (got ${attributes.size})" }
 
     tracer.traceWithSpan("enqueue-job-${queueName.value}") { span ->
@@ -50,23 +51,24 @@ internal class SqsJobQueue @Inject internal constructor(
                 .withStringValue(value))
             }
 
-            // Add the internal metadata dictionary, encoded as JSON.
-            val metadata = mapOf(
+            val metadata = mutableMapOf(
                 SqsJob.JOBQUEUE_METADATA_ORIGIN_QUEUE to queueName.parentQueue.value,
                 SqsJob.JOBQUEUE_METADATA_IDEMPOTENCE_KEY to idempotenceKey)
+
+            // Preserve original trace id, if available.
+            (span as? JaegerSpan)?.let {
+              val traceId = it.context().traceId.toString()
+              metadata[SqsJob.JOBQUEUE_METADATA_ORIGINAL_TRACE_ID] = traceId
+              // TODO(bruno): drop this attribute after rollout; moved to metadata
+              addMessageAttributesEntry(
+                SqsJob.ORIGINAL_TRACE_ID_ATTR,
+                MessageAttributeValue().withDataType("String").withStringValue(traceId))
+            }
+
+            // Add the internal metadata dictionary, encoded as JSON.
             addMessageAttributesEntry(SqsJob.JOBQUEUE_METADATA_ATTR, MessageAttributeValue()
                 .withDataType("String")
                 .withStringValue(moshi.adapter<Map<String, String>>().toJson(metadata)))
-
-            // Save the original trace id, if we can determine it
-            // TODO(mmihic): Should put this case somewhere in the tracing modules
-            (span as? JaegerSpan)?.let {
-              addMessageAttributesEntry(
-                SqsJob.ORIGINAL_TRACE_ID_ATTR,
-                MessageAttributeValue()
-                  .withDataType("String")
-                  .withStringValue(it.context().traceId.toString()))
-            }
           }
 
           timed { client.sendMessage(sendRequest) }
