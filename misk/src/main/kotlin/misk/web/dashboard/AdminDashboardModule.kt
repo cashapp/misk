@@ -74,6 +74,10 @@ class AdminDashboardModule(private val isDevelopment: Boolean) : KAbstractModule
         slug = "config",
         web_proxy_url = "http://localhost:3200/"
     ))
+    multibind<DashboardNavbarItem>().toInstance(DashboardNavbarItem<AdminDashboard>(
+      item = "<a href=\"/_admin/config/\">Config</a>",
+      order = 105
+    ))
 
     // Web Actions
     install(WebActionModule.create<WebActionMetadataAction>())
@@ -88,6 +92,10 @@ class AdminDashboardModule(private val isDevelopment: Boolean) : KAbstractModule
         isDevelopment = isDevelopment,
         slug = "web-actions",
         web_proxy_url = "http://localhost:3201/"
+    ))
+    multibind<DashboardNavbarItem>().toInstance(DashboardNavbarItem<AdminDashboard>(
+      item = "<a href=\"/_admin/web-actions/\">Web Actions</a>",
+      order = 100
     ))
   }
 }
