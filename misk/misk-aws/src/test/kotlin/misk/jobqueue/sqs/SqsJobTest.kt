@@ -43,7 +43,8 @@ internal class SqsJobTest {
       addMessageAttributesEntry(SqsJob.JOBQUEUE_METADATA_ATTR,
           MessageAttributeValue().withDataType("String").withStringValue("""{
                 |  "${SqsJob.JOBQUEUE_METADATA_ORIGIN_QUEUE}":"test",
-                |  "${SqsJob.JOBQUEUE_METADATA_IDEMPOTENCE_KEY}": "ik-0"
+                |  "${SqsJob.JOBQUEUE_METADATA_IDEMPOTENCE_KEY}": "ik-0",
+                |  "${SqsJob.JOBQUEUE_METADATA_ORIGINAL_TRACE_ID}": "oti-0"
                 |}""".trimMargin()))
     }
     val job = SqsJob(QueueName("test"), queueResolver, sqsMetrics, moshi, message)
@@ -59,8 +60,7 @@ internal class SqsJobTest {
     val message = Message().apply {
       messageId = "id-0"
       body = "body-0"
-      addMessageAttributesEntry("foo",
-          MessageAttributeValue().withDataType("String").withStringValue("bar"))
+      addMessageAttributesEntry("foo", MessageAttributeValue().withDataType("String").withStringValue("bar"))
     }
 
     val job = SqsJob(QueueName("test"), queueResolver, sqsMetrics, moshi, message)
