@@ -1,0 +1,6 @@
+data_source:
+  type: MYSQL
+  database: starcraft
+  username: root
+  password: ""
+  migrations_resource: classpath:/migrations
