@@ -19,14 +19,30 @@ data class HttpClientsConfig(
     val endpointConfig = endpoints[clientName] ?: throw IllegalArgumentException(
         "no client configuration for endpoint $clientName")
 
+    return endpointConfigWithDefault(endpointConfig)
+  }
+
+  fun getWithOverride(
+    clientName: String, httpClientEndpointConfig: HttpClientEndpointConfig?
+  ): HttpClientEndpointConfig {
+    return if (httpClientEndpointConfig != null) {
+      endpointConfigWithDefault(httpClientEndpointConfig)
+    } else {
+      get(clientName)
+    }
+  }
+
+  private fun endpointConfigWithDefault(
+    httpClientEndpointConfig: HttpClientEndpointConfig
+  ): HttpClientEndpointConfig {
     return HttpClientEndpointConfig(
-        endpointConfig.url,
-        endpointConfig.envoy,
-        connectTimeout = endpointConfig.connectTimeout ?: defaultConnectTimeout,
-        writeTimeout = endpointConfig.writeTimeout ?: defaultWriteTimeout,
-        readTimeout = endpointConfig.readTimeout ?: defaultReadTimeout,
-        pingInterval = endpointConfig.pingInterval ?: defaultPingInterval,
-        ssl = endpointConfig.ssl ?: ssl
+        httpClientEndpointConfig.url,
+        httpClientEndpointConfig.envoy,
+        connectTimeout = httpClientEndpointConfig.connectTimeout ?: defaultConnectTimeout,
+        writeTimeout = httpClientEndpointConfig.writeTimeout ?: defaultWriteTimeout,
+        readTimeout = httpClientEndpointConfig.readTimeout ?: defaultReadTimeout,
+        pingInterval = httpClientEndpointConfig.pingInterval ?: defaultPingInterval,
+        ssl = httpClientEndpointConfig.ssl ?: ssl
     )
   }
 }

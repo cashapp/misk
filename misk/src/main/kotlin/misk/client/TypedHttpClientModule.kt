@@ -21,12 +21,15 @@ import kotlin.reflect.KClass
  *
  * @param retrofitBuilderProvider Optional provider of a [Retrofit.Builder]. This provider should
  * not return a singleton since the builder it returns will be mutated.
+ * @param httpClientEndpointConfig Optional override for endpoint config. This is useful if you want
+ * to bind up a client that isn't otherwise present in your HttpClientsConfig.
  */
 class TypedHttpClientModule<T : Any>(
   private val kclass: KClass<T>,
   private val name: String,
   private val annotation: Annotation? = null,
-  private val retrofitBuilderProvider: Provider<Retrofit.Builder>? = null
+  private val retrofitBuilderProvider: Provider<Retrofit.Builder>? = null,
+  private val httpClientEndpointConfig: HttpClientEndpointConfig? = null
 ) : KAbstractModule() {
   private val httpClientAnnotation = annotation ?: Names.named(kclass.qualifiedName)
 
@@ -36,23 +39,31 @@ class TypedHttpClientModule<T : Any>(
     newMultibinder<ClientApplicationInterceptor.Factory>()
 
     // Install raw HTTP client support
-    install(HttpClientModule(name, httpClientAnnotation))
+    install(HttpClientModule(name, httpClientAnnotation, httpClientEndpointConfig))
 
     val httpClientKey = Key.get(OkHttpClient::class.java, httpClientAnnotation)
 
     val httpClientProvider = binder().getProvider(httpClientKey)
     val key = if (annotation == null) Key.get(kclass.java) else Key.get(kclass.java, annotation)
     bind(key)
-        .toProvider(TypedClientProvider(kclass, name, httpClientProvider, retrofitBuilderProvider))
-        .`in`(Singleton::class.java)
+        .toProvider(TypedClientProvider(
+            kclass, name, httpClientProvider, retrofitBuilderProvider, httpClientEndpointConfig
+        )).`in`(Singleton::class.java)
   }
 
   companion object {
     inline fun <reified T : Any> create(
       name: String,
-      annotation: Annotation? = null
+      annotation: Annotation? = null,
+      httpClientEndpointConfig: HttpClientEndpointConfig? = null
     ): TypedHttpClientModule<T> {
-      return TypedHttpClientModule(T::class, name, annotation)
+      return TypedHttpClientModule(
+          kclass = T::class,
+          name = name,
+          annotation = annotation,
+          retrofitBuilderProvider = null,
+          httpClientEndpointConfig = httpClientEndpointConfig
+      )
     }
   }
 
@@ -60,7 +71,8 @@ class TypedHttpClientModule<T : Any>(
     kclass: KClass<T>,
     private val name: String,
     private val httpClientProvider: Provider<OkHttpClient>,
-    retrofitBuilderProvider: Provider<Retrofit.Builder>?
+    retrofitBuilderProvider: Provider<Retrofit.Builder>?,
+    val httpClientEndpointConfig: HttpClientEndpointConfig?
   ) : TypedClientFactory<T>(kclass, name, retrofitBuilderProvider), Provider<T> {
 
     @Inject private lateinit var httpClientsConfig: HttpClientsConfig
@@ -68,7 +80,7 @@ class TypedHttpClientModule<T : Any>(
 
     override fun get(): T {
       val client = httpClientProvider.get()
-      val endpointConfig = httpClientsConfig[name]
+      val endpointConfig = httpClientsConfig.getWithOverride(name, httpClientEndpointConfig)
       val baseUrl = httpClientConfigUrlProvider.getUrl(endpointConfig)
 
       return typedClient(client, baseUrl)
@@ -141,9 +153,6 @@ private abstract class TypedClientFactory<T : Any>(
   private val name: String,
   private val retrofitBuilderProvider: Provider<Retrofit.Builder>?
 ) {
-
-  @Inject
-  private lateinit var httpClientsConfig: HttpClientsConfig
 
   // Use Providers for the interceptors so Guice can properly detect cycles when apps inject
   // an HTTP Client in an Interceptor.

@@ -54,6 +54,15 @@ internal class TypedHttpClientTest {
   }
 
   @Test
+  fun useTypedClientOverride() {
+    val client: ReturnADinosaur = clientInjector.getInstance(Names.named("dinosaurOverride"))
+    val response = client.getDinosaur(Dinosaur.Builder().name("trex").build()).execute()
+    assertThat(response.code()).isEqualTo(200)
+    assertThat(response.body()).isNotNull()
+    assertThat(response.body()?.name!!).isEqualTo("supertrex")
+  }
+
+  @Test
   fun useTypedClientWithWire() {
     val client: ReturnAProtoDinosaur = clientInjector.getInstance(Names.named("protoDino"))
     val response = client.getDinosaur(Dinosaur.Builder().name("trex").build()).execute()
@@ -103,6 +112,11 @@ internal class TypedHttpClientTest {
     override fun configure() {
       install(MiskTestingServiceModule())
       install(TypedHttpClientModule.create<ReturnADinosaur>("dinosaur", Names.named("dinosaur")))
+      install(TypedHttpClientModule.create<ReturnADinosaur>(
+          "dinosaurOverride",
+          Names.named("dinosaurOverride"),
+          HttpClientEndpointConfig(jetty.httpServerUrl.toString())
+      ))
       install(
           TypedHttpClientModule.create<ReturnAProtoDinosaur>("protoDino", Names.named("protoDino")))
     }
