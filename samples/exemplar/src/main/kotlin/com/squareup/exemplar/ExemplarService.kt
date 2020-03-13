@@ -8,7 +8,6 @@ import misk.environment.Deployment
 import misk.environment.DeploymentModule
 import misk.environment.Env
 import misk.environment.Environment
-import misk.environment.EnvironmentModule
 import misk.metrics.backends.prometheus.PrometheusMetricsModule
 import misk.web.MiskWebModule
 

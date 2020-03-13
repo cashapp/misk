@@ -4,6 +4,7 @@ import com.google.common.util.concurrent.AbstractIdleService
 import io.prometheus.client.CollectorRegistry
 import io.prometheus.client.exporter.HTTPServer
 import misk.logging.getLogger
+import java.io.IOException
 import java.net.InetSocketAddress
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -21,7 +22,11 @@ internal class PrometheusHttpService @Inject internal constructor(
 
     val socketAddr = if (config.hostname == null) InetSocketAddress(config.http_port)
     else InetSocketAddress(config.hostname, config.http_port)
-    httpServer = HTTPServer(socketAddr, registry)
+    try {
+      httpServer = HTTPServer(socketAddr, registry)
+    } catch (e: IOException) {
+      throw IOException("failed to expose prometheus metrics on port ${config.http_port}", e)
+    }
   }
 
   override fun shutDown() {
