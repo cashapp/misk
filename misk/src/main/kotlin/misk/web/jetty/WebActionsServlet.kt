@@ -18,6 +18,7 @@ import okio.buffer
 import okio.sink
 import okio.source
 import org.eclipse.jetty.http.HttpMethod
+import org.eclipse.jetty.http2.HTTP2Connection
 import org.eclipse.jetty.server.Response
 import org.eclipse.jetty.websocket.servlet.ServletUpgradeResponse
 import org.eclipse.jetty.websocket.servlet.WebSocketServlet
@@ -90,6 +91,7 @@ internal class WebActionsServlet @Inject constructor(
 
       if (bestAction != null) {
         bestAction.action.scopeAndHandle(request, httpCall, bestAction.pathMatcher)
+        response.handleHttp2ConnectionClose()
         return
       }
     } catch (_: ProtocolException) {
@@ -108,6 +110,17 @@ internal class WebActionsServlet @Inject constructor(
     response.addHeader("Content-Type", MediaTypes.TEXT_PLAIN_UTF8)
     response.writer.print("Nothing found at ${request.httpUrl()}")
     response.writer.close()
+  }
+
+  /**
+   * Jetty 9.x doesn't honor the "Connection: close" header for HTTP/2, so we do it ourselves.
+   * https://github.com/eclipse/jetty.project/issues/2788
+   */
+  private fun Response.handleHttp2ConnectionClose() {
+    val connectionHeader = getHeader("Connection")
+    if ("close".equals(connectionHeader, ignoreCase = true)) {
+      (httpChannel.connection as? HTTP2Connection)?.close()
+    }
   }
 
   override fun configure(factory: WebSocketServletFactory) {
