@@ -10,6 +10,13 @@ import java.util.UUID
  * atomically with a local database transaction should use the [TransactionalJobQueue] interface
  */
 interface JobQueue {
+  fun enqueue(
+    queueName: QueueName,
+    body: String,
+    deliveryDelay: Duration? = null,
+    attributes: Map<String, String> = mapOf()) =
+      enqueue(queueName, body, UUID.randomUUID().toString(), deliveryDelay, attributes)
+
   /**
    * Enqueue a job onto the given queue, along with a set of job attributes.
    *
@@ -30,6 +37,5 @@ interface JobQueue {
     body: String,
     idempotenceKey: String = UUID.randomUUID().toString(),
     deliveryDelay: Duration? = null,
-    attributes: Map<String, String> = mapOf()
-  )
+    attributes: Map<String, String> = mapOf())
 }
