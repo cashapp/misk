@@ -13,6 +13,9 @@ import kotlin.reflect.KClass
 class DockerDynamoDbModule(
   private val tables: List<KClass<*>>
 ) : KAbstractModule() {
+
+  constructor(vararg tables: KClass<*>) : this(tables.toList())
+
   override fun configure() {
     for (table in tables) {
       multibind<DynamoDbTable>().toInstance(DynamoDbTable(table))
