@@ -42,7 +42,7 @@ internal class SqsJobTest {
       addMessageAttributesEntry("foo", MessageAttributeValue().withDataType("String").withStringValue("bar"))
       addMessageAttributesEntry(SqsJob.JOBQUEUE_METADATA_ATTR,
           MessageAttributeValue().withDataType("String").withStringValue("""{
-                |  "${SqsJob.JOBQUEUE_METADATA_ORIGIN_QUEUE}":"test",
+                |  "${SqsJob.JOBQUEUE_METADATA_ORIGIN_QUEUE}": "test",
                 |  "${SqsJob.JOBQUEUE_METADATA_IDEMPOTENCE_KEY}": "ik-0",
                 |  "${SqsJob.JOBQUEUE_METADATA_ORIGINAL_TRACE_ID}": "oti-0"
                 |}""".trimMargin()))
