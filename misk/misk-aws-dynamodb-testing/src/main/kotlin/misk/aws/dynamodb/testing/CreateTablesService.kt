@@ -42,6 +42,11 @@ internal class CreateTablesService @Inject constructor(
         // when you call CreateTable and UpdateTable have no effect. In addition, DynamoDB Local
         // does not throttle read or write activity.
         .withProvisionedThroughput(ProvisionedThroughput(1L, 1L))
+    val globalSecondaryIndexes = tableRequest.globalSecondaryIndexes ?: emptyList()
+    for (globalSecondaryIndex in globalSecondaryIndexes) {
+      // Provisioned throughput needs to be specified when creating the table.
+      globalSecondaryIndex.provisionedThroughput = ProvisionedThroughput(1L, 1L)
+    }
     DynamoDB(this).createTable(tableRequest).waitForActive()
   }
 }
