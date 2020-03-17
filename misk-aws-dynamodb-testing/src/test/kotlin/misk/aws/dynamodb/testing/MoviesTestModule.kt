@@ -11,6 +11,6 @@ class MoviesTestModule: KAbstractModule() {
     install(MiskTestingServiceModule())
     install(EnvironmentModule(Environment.TESTING))
 
-    install(DockerDynamoDbModule(listOf(DyMovie::class, DyCharacter::class)))
+    install(DockerDynamoDbModule(DyMovie::class, DyCharacter::class))
   }
 }
