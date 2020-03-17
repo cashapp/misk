@@ -27,6 +27,7 @@ import retrofit2.http.Body
 import retrofit2.http.Headers
 import retrofit2.http.POST
 import javax.inject.Inject
+import javax.inject.Provider
 import javax.inject.Singleton
 
 @MiskTest(startService = true)
@@ -34,8 +35,7 @@ internal class TypedHttpClientTest {
   @MiskTestModule
   val module = TestModule()
 
-  @Inject
-  private lateinit var jetty: JettyService
+  @Inject private lateinit var jetty: JettyService
 
   private lateinit var clientInjector: Injector
 
@@ -60,6 +60,31 @@ internal class TypedHttpClientTest {
     assertThat(response.code()).isEqualTo(200)
     assertThat(response.body()).isNotNull()
     assertThat(response.body()?.name!!).isEqualTo("supertrex")
+  }
+
+  @Test
+  fun buildDynamicClients() {
+    val typedClientFactory = clientInjector.getInstance(TypedClientFactory::class.java)
+
+    val dinoClient = typedClientFactory.build<ReturnADinosaur>(
+        HttpClientEndpointConfig(jetty.httpServerUrl.toString()),
+        "dynamicDino"
+    )
+    val response = dinoClient.getDinosaur(Dinosaur.Builder().name("trex").build()).execute()
+    assertThat(response.code()).isEqualTo(200)
+    assertThat(response.body()).isNotNull()
+    assertThat(response.body()?.name!!).isEqualTo("supertrex")
+
+    val protoDinoClient = typedClientFactory.build<ReturnAProtoDinosaur>(
+        HttpClientEndpointConfig(jetty.httpServerUrl.toString()),
+        "dynamicProtoDino"
+    )
+    val protoResponse = protoDinoClient.getDinosaur(
+        Dinosaur.Builder().name("trex").build()
+    ).execute()
+    assertThat(protoResponse.code()).isEqualTo(200)
+    assertThat(protoResponse.body()).isNotNull()
+    assertThat(protoResponse.body()?.name!!).isEqualTo("supertrex")
   }
 
   interface ReturnADinosaur {
