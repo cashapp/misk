@@ -30,6 +30,22 @@ data class HttpClientsConfig(
         ssl = endpointConfig.ssl ?: ssl
     )
   }
+
+  /**
+   * Returns a default config with no url/envoy config specified.
+   * Used to build up endpoint config for clients dynamically.
+   */
+  fun getDefault(): HttpClientEndpointConfig {
+    return HttpClientEndpointConfig(
+        url = null,
+        envoy = null,
+        connectTimeout = defaultConnectTimeout,
+        writeTimeout = defaultWriteTimeout,
+        readTimeout = defaultReadTimeout,
+        pingInterval = defaultPingInterval,
+        ssl = ssl
+    )
+  }
 }
 
 data class HttpClientSSLConfig @Inject constructor(
