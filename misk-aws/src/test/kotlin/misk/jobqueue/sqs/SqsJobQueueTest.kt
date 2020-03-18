@@ -60,7 +60,7 @@ internal class SqsJobQueueTest {
     }
 
     for (i in (0 until 10)) {
-      queue.enqueue(queueName, "this is job $i", attributes = mapOf("index" to i.toString()))
+      queue.enqueue(queueName, "this is job $i", "ik-$i", attributes = mapOf("index" to i.toString()))
     }
 
     assertThat(allJobsComplete.await(10, TimeUnit.SECONDS)).isTrue()
@@ -77,6 +77,18 @@ internal class SqsJobQueueTest {
         "this is job 7",
         "this is job 8",
         "this is job 9"
+    )
+    assertThat(sortedJobs.map { it.idempotenceKey }).containsExactly(
+        "ik-0",
+        "ik-1",
+        "ik-2",
+        "ik-3",
+        "ik-4",
+        "ik-5",
+        "ik-6",
+        "ik-7",
+        "ik-8",
+        "ik-9"
     )
     assertThat(sortedJobs.map { it.attributes }).containsExactly(
         mapOf("index" to "0"),
