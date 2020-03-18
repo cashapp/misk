@@ -4,6 +4,7 @@ import misk.config.Config
 import misk.security.ssl.CertStoreConfig
 import misk.security.ssl.TrustStoreConfig
 import java.time.Duration
+import javax.inject.Inject
 
 data class HttpClientsConfig(
   private val defaultConnectTimeout: Duration? = null,
@@ -31,12 +32,12 @@ data class HttpClientsConfig(
   }
 }
 
-data class HttpClientSSLConfig(
+data class HttpClientSSLConfig @Inject constructor(
   val cert_store: CertStoreConfig?,
   val trust_store: TrustStoreConfig
 )
 
-data class HttpClientEndpointConfig(
+data class HttpClientEndpointConfig @Inject constructor(
   val url: String? = null,
   val envoy: HttpClientEnvoyConfig? = null,
   val connectTimeout: Duration? = null,
@@ -50,7 +51,7 @@ data class HttpClientEndpointConfig(
   val ssl: HttpClientSSLConfig? = null
 )
 
-data class HttpClientEnvoyConfig(
+data class HttpClientEnvoyConfig @Inject constructor(
   val app: String,
 
   /** Environment to target. If null, the same environment as the app is running in is assumed. */
