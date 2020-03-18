@@ -1,6 +1,8 @@
 package misk.security.ssl
 
-data class CertStoreConfig(
+import javax.inject.Inject
+
+data class CertStoreConfig @Inject constructor(
   val resource: String,
   val passphrase: String? = null,
   val format: String = SslLoader.FORMAT_JCEKS
