@@ -37,22 +37,30 @@ class FakeTransactionalJobQueue @Inject constructor(
     gid: Gid<*, *>,
     queueName: QueueName,
     body: String,
+    idempotenceKey: String,
     deliveryDelay: Duration?,
     attributes: Map<String, String>
   ) {
-    enqueue(session, queueName, body, deliveryDelay, attributes)
+    enqueue(session, queueName, body, idempotenceKey, deliveryDelay, attributes)
   }
 
   override fun enqueue(
     session: Session,
     queueName: QueueName,
     body: String,
+    idempotenceKey: String,
     deliveryDelay: Duration?,
     attributes: Map<String, String>
   ) {
     session.onPostCommit {
       val id = tokenGenerator.generate("fakeJobQueue")
-      val job = FakeJob(queueName, id, body, attributes)
+      val job = FakeJob(
+          queueName = queueName,
+          id = id,
+          idempotenceKey = idempotenceKey,
+          body = body,
+          attributes = attributes
+      )
       jobQueues.getOrPut(queueName, ::ConcurrentLinkedDeque).add(job)
     }
   }
