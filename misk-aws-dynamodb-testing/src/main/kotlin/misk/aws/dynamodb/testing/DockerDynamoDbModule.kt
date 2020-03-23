@@ -42,6 +42,6 @@ class DockerDynamoDbModule(
  */
 data class DynamoDbTable(
   val tableClass: KClass<*>,
-  val customizeRequest: (CreateTableRequest) -> CreateTableRequest =
-      CreateTablesService.customizeRequestNoop
+  val configureTable: (CreateTableRequest) -> CreateTableRequest =
+      CreateTablesService.configureTableNoop
 )

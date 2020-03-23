@@ -46,13 +46,13 @@ internal class CreateTablesService @Inject constructor(
       // Provisioned throughput needs to be specified when creating the table.
       globalSecondaryIndex.provisionedThroughput = ProvisionedThroughput(1L, 1L)
     }
-    tableRequest = table.customizeRequest(tableRequest)
+    tableRequest = table.configureTable(tableRequest)
 
     DynamoDB(this).createTable(tableRequest).waitForActive()
   }
 
   companion object {
-    val customizeRequestNoop: (CreateTableRequest) -> CreateTableRequest = {
+    val configureTableNoop: (CreateTableRequest) -> CreateTableRequest = {
       it
     }
   }
