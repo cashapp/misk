@@ -52,7 +52,7 @@ internal class CreateTablesService @Inject constructor(
   }
 
   companion object {
-    val configureTableNoop: (CreateTableRequest) -> CreateTableRequest = {
+    val CONFIGURE_TABLE_NOOP: (CreateTableRequest) -> CreateTableRequest = {
       it
     }
   }

@@ -18,7 +18,7 @@ class DockerDynamoDbModule(
   constructor(vararg tables: DynamoDbTable) : this(tables.toList())
   constructor(vararg tables: KClass<*>) :
     this(
-        tables.toList().map { DynamoDbTable(it) }
+        tables.map { DynamoDbTable(it) }
     )
 
   override fun configure() {
@@ -43,5 +43,5 @@ class DockerDynamoDbModule(
 data class DynamoDbTable(
   val tableClass: KClass<*>,
   val configureTable: (CreateTableRequest) -> CreateTableRequest =
-      CreateTablesService.configureTableNoop
+      CreateTablesService.CONFIGURE_TABLE_NOOP
 )
