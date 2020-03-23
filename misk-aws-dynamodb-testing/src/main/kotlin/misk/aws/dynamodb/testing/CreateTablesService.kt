@@ -3,13 +3,12 @@ package misk.aws.dynamodb.testing
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper
 import com.amazonaws.services.dynamodbv2.document.DynamoDB
+import com.amazonaws.services.dynamodbv2.model.CreateTableRequest
 import com.amazonaws.services.dynamodbv2.model.ProvisionedThroughput
-import com.amazonaws.services.dynamodbv2.model.ResourceInUseException
 import com.google.common.util.concurrent.AbstractIdleService
 import misk.logging.getLogger
 import javax.inject.Inject
 import javax.inject.Singleton
-import kotlin.reflect.KClass
 
 @Singleton
 internal class CreateTablesService @Inject constructor(
@@ -24,7 +23,7 @@ internal class CreateTablesService @Inject constructor(
     }
 
     for (table in tables) {
-      dynamoDbClient.createTable(table.tableClass)
+      dynamoDbClient.createTable(table)
     }
   }
 
@@ -33,10 +32,10 @@ internal class CreateTablesService @Inject constructor(
   }
 
   private fun AmazonDynamoDB.createTable(
-    table: KClass<*>
+    table: DynamoDbTable
   ) {
-    val tableRequest = DynamoDBMapper(this)
-        .generateCreateTableRequest(table.java)
+    var tableRequest = DynamoDBMapper(this)
+        .generateCreateTableRequest(table.tableClass.java)
         // Provisioned throughput needs to be specified when creating the table. However,
         // DynamoDB Local ignores your provisioned throughput settings. The values that you specify
         // when you call CreateTable and UpdateTable have no effect. In addition, DynamoDB Local
@@ -47,7 +46,15 @@ internal class CreateTablesService @Inject constructor(
       // Provisioned throughput needs to be specified when creating the table.
       globalSecondaryIndex.provisionedThroughput = ProvisionedThroughput(1L, 1L)
     }
+    tableRequest = table.customizeRequest(tableRequest)
+
     DynamoDB(this).createTable(tableRequest).waitForActive()
+  }
+
+  companion object {
+    val customizeRequestNoop: (CreateTableRequest) -> CreateTableRequest = {
+      it
+    }
   }
 }
 

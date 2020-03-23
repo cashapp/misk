@@ -1,6 +1,7 @@
 package misk.aws.dynamodb.testing
 
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
+import com.amazonaws.services.dynamodbv2.model.CreateTableRequest
 import com.google.inject.Provides
 import misk.ServiceModule
 import misk.inject.KAbstractModule
@@ -11,14 +12,18 @@ import kotlin.reflect.KClass
  * Spins up a docker container for testing. It clears the table content before each test starts.
  */
 class DockerDynamoDbModule(
-  private val tables: List<KClass<*>>
+  private val tables: List<DynamoDbTable>
 ) : KAbstractModule() {
 
-  constructor(vararg tables: KClass<*>) : this(tables.toList())
+  constructor(vararg tables: DynamoDbTable) : this(tables.toList())
+  constructor(vararg tables: KClass<*>) :
+    this(
+        tables.toList().map { DynamoDbTable(it) }
+    )
 
   override fun configure() {
     for (table in tables) {
-      multibind<DynamoDbTable>().toInstance(DynamoDbTable(table))
+      multibind<DynamoDbTable>().toInstance(table)
     }
     install(ServiceModule<CreateTablesService>())
   }
@@ -30,7 +35,13 @@ class DockerDynamoDbModule(
 }
 
 /**
- * [DynamoDbTable] is a wrapper class that allows for unqualified binding of dynamo table classes
- * without collision.
+ * [DynamoDbTable] is a wrapper class that allows for unqualified binding of
+ * dynamo table classes without collision. It also provides the ability to
+ * customize the table creation request for testing (ie. if a secondary index
+ * required ProjectionType.ALL).
  */
-data class DynamoDbTable(val tableClass: KClass<*>)
+data class DynamoDbTable(
+  val tableClass: KClass<*>,
+  val customizeRequest: (CreateTableRequest) -> CreateTableRequest =
+      CreateTablesService.customizeRequestNoop
+)
