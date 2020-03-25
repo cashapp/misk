@@ -67,7 +67,7 @@ internal class KubernetesClusterWatcher @Inject internal constructor(
                 null, // _continue
                 null, // fieldSelector
                 false, // includeUninitialized
-                null, // labelSelector
+                config.clustering_pod_label_selector, // labelSelector
                 null, // limit
                 null, // resourceVersion
                 null, // timeoutSeconds
