@@ -24,6 +24,7 @@ import misk.web.exceptions.ActionExceptionLogLevelConfig
 import misk.web.exceptions.ActionExceptionMapper
 import misk.web.exceptions.ExceptionHandlingInterceptor
 import misk.web.exceptions.ExceptionMapperModule
+import misk.web.exceptions.IOExceptionMapper
 import misk.web.extractors.FormValueFeatureBinding
 import misk.web.extractors.PathParamFeatureBinding
 import misk.web.extractors.QueryParamFeatureBinding
@@ -56,6 +57,7 @@ import misk.web.resources.StaticResourceEntry
 import org.eclipse.jetty.server.handler.StatisticsHandler
 import org.eclipse.jetty.server.handler.gzip.GzipHandler
 import org.eclipse.jetty.util.thread.QueuedThreadPool
+import java.io.IOException
 import java.util.concurrent.ArrayBlockingQueue
 import java.util.concurrent.BlockingQueue
 import javax.inject.Inject
@@ -133,6 +135,7 @@ class MiskWebModule(private val config: WebConfig) : KAbstractModule() {
         .to<RequestBodyLoggingInterceptor.Factory>()
 
     install(ExceptionMapperModule.create<ActionException, ActionExceptionMapper>())
+    install(ExceptionMapperModule.create<IOException, IOExceptionMapper>())
 
     // Register built-in feature bindings.
     multibind<FeatureBinding.Factory>().toInstance(PathParamFeatureBinding.Factory)
