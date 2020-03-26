@@ -127,6 +127,21 @@ internal class FakeJobQueueTest {
   }
 
   @Test
+  fun expectedMissingAcknowledge() {
+    assertThat(fakeJobQueue.peekJobs(GREEN_QUEUE)).isEmpty()
+
+    exampleJobEnqueuer.enqueueGreen("dont-ack")
+
+    val jobs = fakeJobQueue.peekJobs(GREEN_QUEUE)
+    assertThat(jobs).hasSize(1)
+
+    val handledJobs = fakeJobQueue.handleJobs(assertAcknowledged = false)
+    val onlyJob = handledJobs.single()
+    assertThat(onlyJob.acknowledged).isFalse()
+    assertThat(onlyJob.deadLettered).isFalse()
+  }
+
+  @Test
   fun allowsJobsToEnqueueOtherJobs() {
     assertThat(fakeJobQueue.peekJobs(GREEN_QUEUE)).isEmpty()
 

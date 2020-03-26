@@ -70,16 +70,33 @@ class FakeTransactionalJobQueue @Inject constructor(
     return jobs?.toList() ?: listOf()
   }
 
-  fun handleJobs(queueName: QueueName) {
+  /** Returns all jobs that were handled. */
+  fun handleJobs(
+    queueName: QueueName,
+    assertAcknowledged: Boolean = true
+  ): List<FakeJob> {
     val jobHandler = jobHandlers.get()[queueName]!!
-    val jobs = jobQueues[queueName] ?: return
+    val jobs = jobQueues[queueName] ?: return listOf()
 
+    val result = mutableListOf<FakeJob>()
     while (true) {
       val job = jobs.poll() ?: break
       jobHandler.handleJob(job)
-      check(job.acknowledged) { "Expected $job to be acknowledged after handling" }
+      result += job
+      if (assertAcknowledged) {
+        check(job.acknowledged) { "Expected $job to be acknowledged after handling" }
+      }
     }
+
+    return result
   }
 
-  fun handleJobs() = jobQueues.keys.forEach { handleJobs(it) }
+  /** Returns all jobs that were handled. */
+  fun handleJobs(assertAcknowledged: Boolean = true): List<FakeJob> {
+    val result = mutableListOf<FakeJob>()
+    for (queueName in jobQueues.keys) {
+      result += handleJobs(queueName, assertAcknowledged)
+    }
+    return result
+  }
 }
