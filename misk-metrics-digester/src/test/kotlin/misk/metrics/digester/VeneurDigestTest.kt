@@ -8,8 +8,8 @@ class VeneurDigestTest {
   @Test
   fun testVeneurDigest() {
     val digest = VeneurDigest()
-    assertThat(digest.mergingDigest().quantile(0.5)).isEqualTo(Double.NaN)
-    assertThat(digest.sum()).isEqualTo(Double.NaN)
+    assertThat(digest.mergingDigest().quantile(0.5)).isEqualToHonorNan(Double.NaN)
+    assertThat(digest.sum()).isEqualToHonorNan(Double.NaN)
     assertThat(digest.count()).isEqualTo(0)
 
     digest.add(10.0)
@@ -68,13 +68,13 @@ class VeneurDigestTest {
       src.mergeInto(dest)
 
       // Check that src is unchanged
-      assertThat(srcMedian).isEqualTo(src.mergingDigest().quantile(0.5))
-      assertThat(srcSum).isEqualTo(src.sum())
+      assertThat(srcMedian).isEqualToHonorNan(src.mergingDigest().quantile(0.5))
+      assertThat(srcSum).isEqualToHonorNan(src.sum())
       assertThat(srcCount).isEqualTo(src.count())
 
       // Check dest
-      assertThat(tc.expectedMedian).isEqualTo(dest.mergingDigest().quantile(0.5))
-      assertThat(tc.expectedSum).isEqualTo(dest.sum())
+      assertThat(tc.expectedMedian).isEqualToHonorNan(dest.mergingDigest().quantile(0.5))
+      assertThat(tc.expectedSum).isEqualToHonorNan(dest.sum())
       assertThat((tc.sourceVals.size + tc.destVals.size).toLong()).isEqualTo(dest.count())
     }
   }

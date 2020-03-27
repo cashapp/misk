@@ -97,8 +97,8 @@ internal class JettyServiceMetricsTest {
     val metrics = adapter.fromJson(response.body?.string()!!)!!
     assertThat(metrics.queuedJobs).isEqualTo(0.0)
     assertThat(metrics.size).isEqualTo(10.0)
-    assertThat(metrics.utilization).isCloseTo(0.5, Offset.offset(0.2))
-    assertThat(metrics.utilization_max).isCloseTo(0.5, Offset.offset(0.2))
+    assertThat(metrics.utilization).isCloseTo(0.5, Offset.offset(0.35))
+    assertThat(metrics.utilization_max).isCloseTo(0.5, Offset.offset(0.35))
   }
 
   internal class HelloAction @Inject constructor() : WebAction {

@@ -6,6 +6,7 @@ import com.google.cloud.storage.StorageException
 import com.google.cloud.storage.spi.v1.StorageRpc
 import com.google.common.io.ByteStreams.toByteArray
 import java.io.InputStream
+import java.io.OutputStream
 import java.math.BigInteger
 import java.nio.file.FileAlreadyExistsException
 import java.util.concurrent.locks.ReentrantReadWriteLock
@@ -104,17 +105,18 @@ class InMemoryStorageRpc : BaseCustomStorageRpc() {
     from: StorageObject,
     options: Map<StorageRpc.Option, *>,
     zposition: Long,
-    zbytes: Int
-  ): Tuple<String, ByteArray> = lock.read {
+    outputStream: OutputStream
+  ): Long = lock.read {
     options.check(metadata[from.path])
     val bytes = content[from.path]
-        ?: throw StorageException(404, "fild not found ${from.path}")
+        ?: throw StorageException(404, "file not found ${from.path}")
 
     val position = if (zposition >= 0) zposition.toInt() else 0
-    val amtRead = if (position + zbytes > bytes.size) bytes.size - position else zbytes
-    if (amtRead <= 0) return Tuple.of("etag-goes-here", ByteArray(0))
+    val amtRead = bytes.size - position
+    if (amtRead <= 0) return 0L
     val result = bytes.copyOfRange(position, position + amtRead)
-    return Tuple.of("etag-goes-here", result)
+    outputStream.write(result)
+    return amtRead.toLong()
   }
 
   override fun open(obj: StorageObject, options: Map<StorageRpc.Option, *>): String = lock.write {
