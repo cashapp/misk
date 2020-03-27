@@ -10,9 +10,11 @@ import misk.logging.getLogger
 import misk.moshi.adapter
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
+import misk.time.FakeClock
 import misk.tokens.FakeTokenGeneratorModule
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import java.time.Duration
 import javax.inject.Inject
 import kotlin.test.assertFailsWith
 
@@ -20,6 +22,7 @@ import kotlin.test.assertFailsWith
 internal class FakeJobQueueTest {
   @MiskTestModule private val module = TestModule()
 
+  @Inject private lateinit var fakeClock: FakeClock
   @Inject private lateinit var fakeJobQueue: FakeJobQueue
   @Inject private lateinit var exampleJobEnqueuer: ExampleJobEnqueuer
   @Inject private lateinit var logCollector: LogCollector
@@ -142,6 +145,41 @@ internal class FakeJobQueueTest {
   }
 
   @Test
+  fun handlesJobsInDeliveryDelayPriorityOrder() {
+    assertThat(fakeJobQueue.peekJobs(RED_QUEUE)).isEmpty()
+
+    exampleJobEnqueuer.enqueueRed("two-second-delay", deliveryDelay = Duration.ofSeconds(2))
+    exampleJobEnqueuer.enqueueRed("one-second-delay", deliveryDelay = Duration.ofSeconds(1))
+
+    val jobs = fakeJobQueue.peekJobs(RED_QUEUE)
+    assertThat(jobs).hasSize(2)
+
+    val handledJobs = fakeJobQueue.handleJobs()
+    assertThat(handledJobs[0].id).isEqualTo("fakej0bqee000000000000002")
+    assertThat(handledJobs[1].id).isEqualTo("fakej0bqee000000000000001")
+  }
+
+  @Test
+  fun handlesJobsScheduledWithDelay() {
+    assertThat(fakeJobQueue.peekJobs(RED_QUEUE)).isEmpty()
+
+    exampleJobEnqueuer.enqueueRed("two-second-delay", deliveryDelay = Duration.ofSeconds(2))
+    exampleJobEnqueuer.enqueueRed("one-second-delay", deliveryDelay = Duration.ofSeconds(1))
+
+    val jobs = fakeJobQueue.peekJobs(RED_QUEUE)
+    assertThat(jobs).hasSize(2)
+
+    val noJobs = fakeJobQueue.handleJobs(executeImmediately = false)
+    assertThat(noJobs).hasSize(0)
+
+    fakeClock.add(Duration.ofSeconds(2))
+    val handledJobs = fakeJobQueue.handleJobs(executeImmediately = false)
+    assertThat(handledJobs).hasSize(2)
+    assertThat(handledJobs[0].id).isEqualTo("fakej0bqee000000000000002")
+    assertThat(handledJobs[1].id).isEqualTo("fakej0bqee000000000000001")
+  }
+
+  @Test
   fun allowsJobsToEnqueueOtherJobs() {
     assertThat(fakeJobQueue.peekJobs(GREEN_QUEUE)).isEmpty()
 
@@ -184,14 +222,16 @@ private class ExampleJobEnqueuer @Inject private constructor(
 ) {
   private val jobAdapter = moshi.adapter<ExampleJob>()
 
-  fun enqueueRed(message: String) {
+  fun enqueueRed(message: String, deliveryDelay: Duration = Duration.ZERO) {
     val job = ExampleJob(Color.RED, message)
-    jobQueue.enqueue(RED_QUEUE, body = jobAdapter.toJson(job), attributes = mapOf("key" to "value"))
+    jobQueue.enqueue(RED_QUEUE, body = jobAdapter.toJson(job), deliveryDelay = deliveryDelay,
+      attributes = mapOf("key" to "value"))
   }
 
   fun enqueueGreen(message: String) {
     val job = ExampleJob(Color.GREEN, message)
-    jobQueue.enqueue(GREEN_QUEUE, body = jobAdapter.toJson(job), attributes = mapOf("key" to "value"))
+    jobQueue.enqueue(GREEN_QUEUE, body = jobAdapter.toJson(job),
+      attributes = mapOf("key" to "value"))
   }
 
   fun enqueueEnqueuer() {
