@@ -33,7 +33,7 @@ import kotlin.test.assertFailsWith
 internal class FakeTransactionalJobQueueTest {
   @MiskTestModule private val module = TransactionalJobQueueTestModule()
 
-  @Inject private lateinit var fakeTransactionalJobQueue: FakeTransactionalJobQueue
+  @Inject private lateinit var fakeTransactionalJobQueue: FakeJobQueue
   @Inject private lateinit var unitEnqueuer: UnitEnqueuer
   @Inject private lateinit var logCollector: LogCollector
   @Inject @StarCraftDb private lateinit var transacter: Transacter
