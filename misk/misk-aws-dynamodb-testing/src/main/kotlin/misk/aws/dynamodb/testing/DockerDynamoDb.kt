@@ -21,19 +21,23 @@ import okhttp3.HttpUrl
 object DockerDynamoDb : ExternalDependency {
   private val logger = getLogger<DockerDynamoDb>()
 
+  private val pid = ProcessHandle.current().pid()
+  override val id = "dynamodb-local-$pid"
+
   private val url = HttpUrl.Builder()
       .scheme("http")
       .host("localhost")
-      .port(58000)
+      // There is a tolerable chance of flaky tests caused by port collision.
+      .port(58000 + (pid % 1000).toInt())
       .build()
 
-  private val composer = Composer("e-dynamodb-local", Container {
+  private val composer = Composer("e-$id", Container {
     // DynamoDB Local listens on port 8000 by default.
     val exposedClientPort = ExposedPort.tcp(8000)
     val portBindings =
         Ports().apply { bind(exposedClientPort, Ports.Binding.bindPort(url.port)) }
     withImage("amazon/dynamodb-local")
-        .withName("dynamodb-local")
+        .withName(id)
         .withExposedPorts(exposedClientPort)
         .withPortBindings(portBindings)
   })
