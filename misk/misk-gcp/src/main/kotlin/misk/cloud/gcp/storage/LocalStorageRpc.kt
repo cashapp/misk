@@ -35,6 +35,7 @@ import kotlin.concurrent.read
 import kotlin.concurrent.write
 import kotlin.streams.asSequence
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
+import java.io.OutputStream
 
 /**
  * Implementation of [StorageRpc] that is backed by local disk storage. Useful for running
@@ -231,8 +232,8 @@ class LocalStorageRpc(
     from: StorageObject,
     options: Map<StorageRpc.Option, *>,
     zposition: Long,
-    zbytes: Int
-  ): Tuple<String, ByteArray> = try {
+    outputStream: OutputStream
+  ): Long = try {
     withReadLock(from.blobId) {
       val metadata = getMetadataForReading(from.blobId, options)
           ?: throw StorageException(404, "${from.blobId.fullName} not found")
@@ -240,14 +241,15 @@ class LocalStorageRpc(
       val contentPath = contentRoot.resolve(from.blobId.toPath(metadata.generation))
       val contentChannel = Files.newByteChannel(contentPath, READ)
       val contents = contentChannel.use {
-        val toRead = Math.min((it.size() - zposition).toInt(), zbytes)
-        val bytes = ByteArray(toRead)
+        val toRead = it.size() - zposition
+        val bytes = ByteArray(toRead.toInt())
         it.position(zposition)
         it.read(ByteBuffer.wrap(bytes))
         bytes
       }
 
-      Tuple.of(metadata.generation.toString(), contents)
+      outputStream.write(contents)
+      contents.size.toLong()
     }
   } catch (e: IOException) {
     throw StorageException(e)

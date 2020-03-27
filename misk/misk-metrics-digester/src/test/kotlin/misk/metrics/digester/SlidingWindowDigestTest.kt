@@ -13,10 +13,10 @@ class SlidingWindowDigestTest {
   @Test
   fun slidingWindowDigestEmpty() {
     val digest = SlidingWindowDigestTestingSuite()
-    assertThat(digest.slidingWindowDigest.quantile(0.5)).isEqualTo(Double.NaN)
+    assertThat(digest.slidingWindowDigest.quantile(0.5)).isEqualToHonorNan(Double.NaN)
     digest.expectQuantiles(0, Double.NaN, sortedMapOf())
     digest.advanceWindows(1)
-    assertThat(digest.slidingWindowDigest.quantile(0.5)).isEqualTo(Double.NaN)
+    assertThat(digest.slidingWindowDigest.quantile(0.5)).isEqualToHonorNan(Double.NaN)
     digest.expectQuantiles(0, Double.NaN, sortedMapOf())
   }
 
@@ -36,7 +36,7 @@ class SlidingWindowDigestTest {
         )
     )
     // No windows have closed yet so there is no reportable data yet
-    assertThat(digest.slidingWindowDigest.quantile(0.5)).isEqualTo(Double.NaN)
+    assertThat(digest.slidingWindowDigest.quantile(0.5)).isEqualToHonorNan(Double.NaN)
     // Advance time so that one window is now closed
     digest.advanceWindows(1)
     assertThat(digest.slidingWindowDigest.quantile(0.5)).isEqualTo(30.0)
@@ -222,7 +222,7 @@ class SlidingWindowDigestTestingSuite {
     val snapshot =
         slidingWindowDigest.snapshot(quantileVals.keys.toList())
     assertThat(snapshot.count).isEqualTo(count)
-    assertThat(snapshot.sum).isEqualTo(sum)
+    assertThat(snapshot.sum).isEqualToHonorNan(sum)
     assertThat(snapshot.quantileVals).isEqualTo(quantileVals.values.toList())
   }
 }
