@@ -169,8 +169,11 @@ internal class SchemaMigrator(
     return transacter.get().failSafeRead(shard) { session ->
       @Suppress("UNCHECKED_CAST") // createNativeQuery returns a raw Query.
       val query = session.hibernateSession.createNativeQuery(
-          "SELECT version FROM schema_version") as Query<String>
-      query.list().map { NamedspacedMigration.fromNamespacedVersion(it) }.toSortedSet()
+        "SELECT version FROM schema_version") as Query<String>
+
+      session.disableChecks(listOf(Check.TABLE_SCAN)) {
+        query.list().map { NamedspacedMigration.fromNamespacedVersion(it) }.toSortedSet()
+      }
     }
   }
 

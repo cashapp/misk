@@ -35,6 +35,7 @@ class JsonColumnTest {
     }
     transacter.transaction { session ->
       val movie = queryFactory.newQuery(WillFerrellMovieQuery::class)
+          .allowTableScan()
           .name("Anchorman")
           .nameAndCameosAndSetting(session)[0]
       assertThat(movie.name).isEqualTo("Anchorman")
@@ -66,6 +67,7 @@ class JsonColumnTest {
     }
     transacter.transaction { session ->
       val movie = queryFactory.newQuery(WillFerrellMovieQuery::class)
+          .allowTableScan()
           .name("Anchorman")
           .nameAndCameosAndSetting(session)[0]
       assertThat(movie.name).isEqualTo("Anchorman")

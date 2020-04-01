@@ -13,7 +13,6 @@ import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Method
 import java.lang.reflect.ParameterizedType
 import java.lang.reflect.Proxy
-import java.util.Arrays
 import java.util.EnumSet
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -169,15 +168,18 @@ internal class ReflectionQuery<T : DbEntity<T>>(
     check(firstResult == 0) { "firstResult shouldn't be used for a delete" }
 
     val criteriaBuilder = session.hibernateSession.criteriaBuilder
-    val query = criteriaBuilder.createCriteriaDelete(rootEntityType.java)
-    val queryRoot = query.from(rootEntityType.java)
-
+    val criteria = criteriaBuilder.createCriteriaDelete(rootEntityType.java)
+    val queryRoot = criteria.from(rootEntityType.java)
     val predicate = buildWherePredicate(queryRoot, criteriaBuilder)
-    query.where(predicate)
+    criteria.where(predicate)
 
-    return session.hibernateSession
-        .createQuery(query)
-        .executeUpdate()
+    val query = session.hibernateSession
+      .createQuery(criteria)
+
+    return session.disableChecks(disabledChecks) {
+      query.executeUpdate()
+    }
+
   }
 
   override fun list(session: Session): List<T> {
