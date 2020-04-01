@@ -1,5 +1,6 @@
 package misk.concurrent
 
+import io.opentracing.mock.MockTracer
 import misk.time.FakeClock
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -11,8 +12,10 @@ import kotlin.test.assertFailsWith
 @Suppress("UnstableApiUsage") // Guava's Service is @Beta.
 internal class RealExecutorServiceFactoryTest {
   @Test fun happyPath() {
+    val tracer = MockTracer()
     val log = mutableListOf<String>()
     val factory = RealExecutorServiceFactory(FakeClock())
+    factory.tracer = tracer
     val executorService = factory.single("happy-%d")
 
     executorService.execute {
@@ -31,6 +34,10 @@ internal class RealExecutorServiceFactoryTest {
     assertThat(log).containsExactly(
         "running happy-0 run 1",
         "running happy-0 run 2"
+    )
+    assertThat(tracer.finishedSpans().map { it.operationName() }).containsExactly(
+        "execute",
+        "execute"
     )
   }
 
