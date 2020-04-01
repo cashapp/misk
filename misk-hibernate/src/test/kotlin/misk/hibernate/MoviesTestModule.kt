@@ -26,8 +26,8 @@ class MoviesTestModule(
     install(DeploymentModule.forTesting())
 
     val config = MiskConfig.load<MoviesConfig>("moviestestmodule", Environment.TESTING)
-    install(HibernateTestingModule(Movies::class))
     val dataSourceConfig = selectDataSourceConfig(config)
+    install(HibernateTestingModule(Movies::class, dataSourceConfig))
     install(HibernateModule(Movies::class, MoviesReader::class,
         DataSourceClusterConfig(writer = dataSourceConfig, reader = dataSourceConfig)))
     install(object : HibernateEntityModule(Movies::class) {

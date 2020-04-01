@@ -20,7 +20,7 @@ import javax.inject.Inject
  * Verifies that we're constraining a few things that makes apps hard to scale out.
  */
 @MiskTest(startService = true)
-class ScaleSafetyTest {
+class VitessScaleSafetyTest {
   @MiskTestModule
   val module = MoviesTestModule()
 

@@ -47,6 +47,7 @@ class ProtoColumnTest {
     }
     transacter.transaction { session ->
       val movie = queryFactory.newQuery(DbAvengersMovieQuery::class)
+          .allowTableScan()
           .name("CivilWar")
           .nameAndHero(session)[0]
       assertThat(movie.name).isEqualTo("CivilWar")
@@ -74,8 +75,9 @@ class ProtoColumnTest {
     }
     transacter.transaction { session ->
       val movie = queryFactory.newQuery(DbAvengersMovieQuery::class)
-          .name("IronMan")
-          .nameAndHero(session)[0]
+        .allowTableScan()
+        .name("IronMan")
+        .nameAndHero(session)[0]
       assertThat(movie.name).isEqualTo("IronMan")
       assertThat(movie.hero).isEqualTo(SuperHero.Builder()
           .civilian_name("Tony Stark")

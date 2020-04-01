@@ -769,18 +769,22 @@ class ReflectionQueryFactoryTest {
       session.save(DbMovie("Star Wars", LocalDate.of(1977, 5, 25)))
     }
 
-    val deleted = transacter.transaction { session ->
-      queryFactory.newQuery<OperatorsMovieQuery>()
-          .releaseDateLessThanOrEqualTo(LocalDate.of(1978, 1, 1))
-          .allowFullScatter().allowTableScan()
-          .delete(session)
+    transacter.transaction { session ->
+      val deleted = queryFactory.newQuery<OperatorsMovieQuery>()
+        .allowFullScatter()
+        .allowTableScan()
+        .releaseDateLessThanOrEqualTo(LocalDate.of(1978, 1, 1))
+        .delete(session)
+
+      assertThat(deleted).isEqualTo(2)
     }
-    assertThat(deleted).isEqualTo(2)
 
     transacter.transaction { session ->
       val jurassicPark = queryFactory.newQuery<OperatorsMovieQuery>()
-          .allowFullScatter().allowTableScan()
-          .uniqueName(session)
+        .allowFullScatter()
+        .allowTableScan()
+        .uniqueName(session)
+
       assertThat(jurassicPark).isEqualTo("Jurassic Park")
     }
   }
