@@ -356,8 +356,6 @@ class DockerVitessCluster(
     waitUntilHealthy()
 
     grantExternalAccessToDbaUser()
-
-    turnOnGeneralLog()
   }
 
   private fun containerName() = "$CONTAINER_NAME_PREFIX-${cluster.name}"
@@ -439,18 +437,6 @@ class DockerVitessCluster(
     val exitCode = docker.inspectExecCmd(exec.id).exec().exitCode
     if (exitCode != 0) {
       throw RuntimeException("Command failed, see log for details")
-    }
-  }
-
-  /**
-   * Turn on MySQL general_log so that we can inspect it in the VitessScaleSafetyChecks detectors.
-   */
-  private fun turnOnGeneralLog() {
-    cluster.openMysqlConnection().use { connection ->
-      connection.createStatement().use { statement ->
-        statement.execute("SET GLOBAL log_output = 'TABLE'")
-        statement.execute("SET GLOBAL general_log = 1")
-      }
     }
   }
 

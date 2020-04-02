@@ -10,6 +10,7 @@ import misk.jdbc.DataSourceConfig
 import misk.jdbc.DataSourceConnector
 import misk.jdbc.DataSourceDecorator
 import misk.jdbc.DataSourceType
+import misk.jdbc.MySqlScaleSafetyChecks
 import misk.jdbc.TruncateTablesService
 import misk.jdbc.VitessScaleSafetyChecks
 import misk.time.ForceUtcTimeZoneService
@@ -43,9 +44,7 @@ class HibernateTestingModule(
     val transacterKey = Transacter::class.toKey(qualifier)
     val transacterProvider = getProvider(transacterKey)
 
-    if (config == null || config.type == DataSourceType.VITESS || config.type == DataSourceType.VITESS_MYSQL) {
-      bindVitessChecks(transacterProvider)
-    }
+    bindScaleSafetyChecks(transacterProvider)
 
     val dataSourceConnector = getProvider(keyOf<DataSourceConnector>(qualifier))
     install(ServiceModule(truncateTablesServiceKey)
@@ -61,27 +60,37 @@ class HibernateTestingModule(
     }).asSingleton()
   }
 
-  private fun bindVitessChecks(transacterProvider: com.google.inject.Provider<Transacter>) {
-    val startVitessServiceKey = StartDatabaseService::class.toKey(qualifier)
-    val startVitessServiceProvider = getProvider(startVitessServiceKey)
-
+  private fun bindScaleSafetyChecks(transacterProvider: com.google.inject.Provider<Transacter>) {
     val configKey = DataSourceConfig::class.toKey(qualifier)
     val configProvider = getProvider(configKey)
-
-    val vitessScaleSafetyChecksKey = VitessScaleSafetyChecks::class.toKey(qualifier)
-
     val moshiProvider = getProvider(Moshi::class.java)
 
-    bind(vitessScaleSafetyChecksKey).toProvider(Provider {
-      VitessScaleSafetyChecks(
+    if (config == null || config.type == DataSourceType.VITESS || config.type == DataSourceType.VITESS_MYSQL) {
+      val startVitessServiceKey = StartDatabaseService::class.toKey(qualifier)
+      val startVitessServiceProvider = getProvider(startVitessServiceKey)
+      val vitessScaleSafetyChecksKey = VitessScaleSafetyChecks::class.toKey(qualifier)
+
+      bind(vitessScaleSafetyChecksKey).toProvider(Provider {
+        VitessScaleSafetyChecks(
           config = configProvider.get(),
           moshi = moshiProvider.get(),
           okHttpClient = OkHttpClient(),
           startDatabaseService = startVitessServiceProvider.get(),
           transacter = transacterProvider.get()
-      )
-    }).asSingleton()
+        )
+      }).asSingleton()
 
-    multibind<DataSourceDecorator>(qualifier).to(vitessScaleSafetyChecksKey)
+      multibind<DataSourceDecorator>(qualifier).to(vitessScaleSafetyChecksKey)
+    } else if (config.type == DataSourceType.MYSQL) {
+      val mySqlScaleSafetyChecks = MySqlScaleSafetyChecks::class.toKey(qualifier)
+      bind(mySqlScaleSafetyChecks).toProvider(Provider {
+        MySqlScaleSafetyChecks(
+          config = configProvider.get(),
+          transacter = transacterProvider.get()
+        )
+      }).asSingleton()
+
+      multibind<DataSourceDecorator>(qualifier).to(mySqlScaleSafetyChecks)
+    }
   }
 }
