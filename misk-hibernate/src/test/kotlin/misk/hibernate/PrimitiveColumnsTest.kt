@@ -34,6 +34,7 @@ class PrimitiveColumnsTest {
     }
     transacter.transaction { session ->
       val primitiveTour = queryFactory.newQuery(PrimitiveTourQuery::class)
+          .allowTableScan()
           .i1(true)
           .listAsPrimitiveTour(session)
       assertThat(primitiveTour).containsExactly(PrimitiveTour(true, 2, 3, 4, 5, '6', 7.0f, 8.0))

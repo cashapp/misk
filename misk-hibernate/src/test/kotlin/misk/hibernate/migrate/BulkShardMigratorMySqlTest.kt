@@ -9,6 +9,7 @@ import misk.hibernate.MoviesTestModule
 import misk.hibernate.Query
 import misk.hibernate.Shard
 import misk.hibernate.Transacter
+import misk.hibernate.allowTableScan
 import misk.hibernate.createInSameShard
 import misk.hibernate.shard
 import misk.hibernate.transaction
@@ -61,10 +62,11 @@ class BulkShardMigratorMySqlTest {
   private fun assertMovieNamesInShard(shard: Shard): ListAssert<String> {
     return transacter.transaction(shard) { session ->
       ListAssert(
-          queryFactory.newQuery(MovieQuery::class)
-              .list(session)
-              .map { it.name }
-              .toList()
+        queryFactory.newQuery(MovieQuery::class)
+          .allowTableScan()
+          .list(session)
+          .map { it.name }
+          .toList()
       )
     }
   }
@@ -72,10 +74,11 @@ class BulkShardMigratorMySqlTest {
   private fun assertCharacterNamesInShard(shard: Shard): ListAssert<String> {
     return transacter.transaction(shard) { session ->
       ListAssert(
-          queryFactory.newQuery(CharacterQuery::class)
-              .list(session)
-              .map { it.name }
-              .toList()
+        queryFactory.newQuery(CharacterQuery::class)
+          .allowTableScan()
+          .list(session)
+          .map { it.name }
+          .toList()
       )
     }
   }
