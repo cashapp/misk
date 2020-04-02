@@ -39,6 +39,8 @@ dependencies {
   compile dep.jacksonJsr310
   compile dep.jCommander
   compile dep.openTracing
+  compile dep.openTracingDatadog
+  compile dep.tracingDatadog
   compile dep.openTracingUtil
   compile dep.openTracingOkHttp
   compile dep.retrofit

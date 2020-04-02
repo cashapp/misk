@@ -1,8 +1,10 @@
 package misk.web.interceptors
 
 import com.google.inject.Guice
+import com.google.inject.Provides
 import io.opentracing.tag.Tags
 import misk.asAction
+import misk.config.AppName
 import misk.exceptions.ActionException
 import misk.exceptions.StatusCode
 import misk.inject.KAbstractModule
@@ -58,6 +60,7 @@ class TracingInterceptorTest {
     val span = tracer.take()
     assertThat(span.parentId()).isEqualTo(0)
     assertThat(span.tags()).isEqualTo(mapOf(
+        "service.name" to "Server",
         "resource.name" to "misk.web.interceptors.TracingInterceptorTest\$TracingTestAction",
         "http.method" to "GET",
         "http.status_code" to 200,
@@ -181,5 +184,10 @@ class TracingInterceptorTest {
 
       bind<TracingInterceptor.Factory>()
     }
+
+    @Provides
+    @AppName
+    fun appName() = "Server"
+
   }
 }

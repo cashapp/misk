@@ -9,6 +9,7 @@ import io.opentracing.propagation.Format
 import io.opentracing.tag.Tags
 import io.opentracing.tag.Tags.SPAN_KIND_SERVER
 import misk.Action
+import misk.config.AppName
 import misk.logging.getLogger
 import misk.tracing.interceptors.TextMultimapExtractAdapter
 import misk.web.NetworkChain
@@ -19,15 +20,19 @@ private val logger = getLogger<TracingInterceptor>()
 /**
  * Enables distributed tracing on all web actions, if a client has installed a tracer.
  */
-internal class TracingInterceptor internal constructor(private val tracer: Tracer) :
+internal class TracingInterceptor @Inject internal constructor(
+        val tracer: Tracer,
+        val appName: String?) :
     NetworkInterceptor {
+
   @Singleton
-  class Factory @Inject constructor() : NetworkInterceptor.Factory {
+  class Factory @Inject internal constructor() : NetworkInterceptor.Factory {
+    @Inject(optional = true) @AppName var appName: String? = null
     @Inject(optional = true) var tracer: Tracer? = null
 
     // NOTE(nb): returning null ensures interceptor is filtered out when generating interceptors to
     // apply for a specific action. See WebActionModule for implementation details
-    override fun create(action: Action) = tracer?.let { TracingInterceptor(it) }
+    override fun create(action: Action) = tracer?.let { TracingInterceptor(it, appName) }
   }
 
   override fun intercept(chain: NetworkChain) {
@@ -61,6 +66,7 @@ internal class TracingInterceptor internal constructor(private val tracer: Trace
     // This is a datadog convention. Must be set after span is created because otherwise it would
     // be overwritten by the method/url
     span.setTag("resource.name", chain.webAction.javaClass.name)
+    span.setTag("service.name", appName)
     try {
       chain.proceed(chain.httpCall)
       Tags.HTTP_STATUS.set(span, chain.httpCall.statusCode)

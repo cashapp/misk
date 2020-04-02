@@ -32,6 +32,8 @@ dependencies {
   compile dep.openTracing
   compile dep.openTracingUtil
   compile dep.openTracingJdbc
+  compile dep.tracingDatadog
+  compile dep.openTracingDatadog
   compile dep.postgresql
   compile dep.vitess
   compile dep.tink
