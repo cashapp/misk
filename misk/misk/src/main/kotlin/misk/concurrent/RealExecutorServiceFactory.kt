@@ -2,6 +2,10 @@ package misk.concurrent
 
 import com.google.common.util.concurrent.AbstractService
 import com.google.common.util.concurrent.Service.State
+import com.google.inject.Inject
+import io.opentracing.Tracer
+import io.opentracing.contrib.concurrent.TracedExecutorService
+import io.opentracing.contrib.concurrent.TracedScheduledExecutorService
 import java.time.Clock
 import java.time.Duration
 import java.util.Collections
@@ -11,7 +15,6 @@ import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.ThreadFactory
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicLong
-import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
@@ -23,6 +26,8 @@ import javax.inject.Singleton
 internal class RealExecutorServiceFactory @Inject constructor(
   private val clock: Clock
 ) : AbstractService(), ExecutorServiceFactory {
+  @Inject(optional = true) var tracer: Tracer? = null
+
   private val executors = Collections.synchronizedMap(mutableMapOf<String, ExecutorService>())
 
   override fun doStart() {
@@ -62,31 +67,51 @@ internal class RealExecutorServiceFactory @Inject constructor(
     awaitAllTerminated.start()
   }
 
+  // The traceWithActiveSpanOnly=false flag below means we will create a new root span if there is
+  // not an ongoing active span at the point of handing over a task to the ExecutorService. This
+  // means we run the risk of having too many root spans but I prefer to err on the side of too much
+  // visibility. This may cause unnecessary noise though so we may need to change this as we try it
+  // out in production.
+
+  internal fun maybeTrace(executorService: ExecutorService): ExecutorService =
+      if (tracer != null) {
+        TracedExecutorService(executorService, tracer, /*traceWithActiveSpanOnly=*/false)
+      } else {
+        executorService
+      }
+
+  internal fun maybeTraceScheduled(executorService: ScheduledExecutorService): ScheduledExecutorService =
+      if (tracer != null) {
+        TracedScheduledExecutorService(executorService, tracer, /*traceWithActiveSpanOnly=*/false)
+      } else {
+        executorService
+      }
+
   override fun single(nameFormat: String): ExecutorService {
     checkCreate()
     val threadFactory = threadFactory(nameFormat)
-    return Executors.newSingleThreadExecutor(threadFactory)
+    return maybeTrace(Executors.newSingleThreadExecutor(threadFactory))
         .also { executors[nameFormat] = it }
   }
 
   override fun fixed(nameFormat: String, threadCount: Int): ExecutorService {
     checkCreate()
     val threadFactory = threadFactory(nameFormat)
-    return Executors.newFixedThreadPool(threadCount, threadFactory)
+    return maybeTrace(Executors.newFixedThreadPool(threadCount, threadFactory))
         .also { executors[nameFormat] = it }
   }
 
   override fun unbounded(nameFormat: String): ExecutorService {
     checkCreate()
     val threadFactory = threadFactory(nameFormat)
-    return Executors.newCachedThreadPool(threadFactory)
+    return maybeTrace(Executors.newCachedThreadPool(threadFactory))
         .also { executors[nameFormat] = it }
   }
 
   override fun scheduled(nameFormat: String, threadCount: Int): ScheduledExecutorService {
     checkCreate()
     val threadFactory = threadFactory(nameFormat)
-    return Executors.newScheduledThreadPool(threadCount, threadFactory)
+    return maybeTraceScheduled(Executors.newScheduledThreadPool(threadCount, threadFactory))
         .also { executors[nameFormat] = it }
   }
 
