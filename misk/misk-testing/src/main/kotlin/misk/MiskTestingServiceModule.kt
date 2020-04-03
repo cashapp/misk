@@ -6,6 +6,7 @@ import misk.random.FakeRandomModule
 import misk.resources.TestingResourceLoaderModule
 import misk.time.FakeClockModule
 import misk.time.FakeTickerModule
+import misk.tokens.FakeTokenGeneratorModule
 
 /**
  * [MiskTestingServiceModule] should be installed in unit testing environments.
@@ -21,6 +22,7 @@ class MiskTestingServiceModule : KAbstractModule() {
     install(FakeClockModule())
     install(FakeTickerModule())
     install(FakeRandomModule())
+    install(FakeTokenGeneratorModule())
     install(MiskCommonServiceModule())
   }
 }

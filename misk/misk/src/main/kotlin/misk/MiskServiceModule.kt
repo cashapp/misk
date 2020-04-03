@@ -27,6 +27,7 @@ class MiskRealServiceModule : KAbstractModule() {
     install(ClockModule())
     install(SleeperModule())
     install(TickerModule())
+    install(TokenGeneratorModule())
     install(MiskCommonServiceModule())
   }
 }
@@ -42,7 +43,6 @@ class MiskCommonServiceModule : KAbstractModule() {
     install(ServiceManagerModule())
     install(MetricsModule())
     install(MoshiModule())
-    install(TokenGeneratorModule())
     install(PrometheusHistogramRegistryModule())
 
     // Initialize empty sets for our multibindings.
