@@ -20,7 +20,7 @@ import misk.jdbc.RealDatabasePool
 import misk.resources.ResourceLoader
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
-import misk.vitess.StartDatabaseService
+import misk.database.StartDatabaseService
 import okio.ByteString
 import org.assertj.core.api.Assertions.assertThat
 import org.hibernate.SessionFactory
