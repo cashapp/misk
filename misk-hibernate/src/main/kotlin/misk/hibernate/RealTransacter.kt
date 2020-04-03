@@ -6,6 +6,7 @@ import io.opentracing.Tracer
 import io.opentracing.tag.Tags
 import misk.backoff.ExponentialBackoff
 import misk.concurrent.ExecutorServiceFactory
+import misk.config.AppName
 import misk.hibernate.Shard.Companion.SINGLE_SHARD_SET
 import misk.jdbc.DataSourceConfig
 import misk.jdbc.DataSourceType
@@ -28,6 +29,7 @@ import java.util.concurrent.Callable
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.Future
 import java.util.concurrent.TimeUnit
+import javax.inject.Inject
 import javax.inject.Provider
 import javax.persistence.OptimisticLockException
 import kotlin.reflect.KClass
@@ -48,17 +50,19 @@ internal class RealTransacter private constructor(
   private val options: TransacterOptions,
   private val queryTracingListener: QueryTracingListener,
   private val executorServiceFactory: ExecutorServiceFactory,
+  @Inject @AppName private val appName: String,
   private val tracer: Tracer?,
   private val shardListFetcher: ShardListFetcher
 ) : Transacter {
 
   constructor(
-    qualifier: KClass<out Annotation>,
-    sessionFactoryProvider: Provider<SessionFactory>,
-    readerSessionFactoryProvider: Provider<SessionFactory>?,
-    config: DataSourceConfig,
-    queryTracingListener: QueryTracingListener,
-    executorServiceFactory: ExecutorServiceFactory,
+          qualifier: KClass<out Annotation>,
+          sessionFactoryProvider: Provider<SessionFactory>,
+          readerSessionFactoryProvider: Provider<SessionFactory>?,
+          config: DataSourceConfig,
+          queryTracingListener: QueryTracingListener,
+          executorServiceFactory: ExecutorServiceFactory,
+          @AppName appName: String,
     tracer: Tracer?
   ) : this(
       qualifier = qualifier,
@@ -69,6 +73,7 @@ internal class RealTransacter private constructor(
       options = TransacterOptions(),
       queryTracingListener = queryTracingListener,
       executorServiceFactory = executorServiceFactory,
+      appName = appName,
       tracer = tracer,
       shardListFetcher = ShardListFetcher()
   ) {
@@ -302,6 +307,7 @@ internal class RealTransacter private constructor(
           queryTracingListener = queryTracingListener,
           config = config,
           executorServiceFactory = executorServiceFactory,
+          appName = appName,
           tracer = tracer,
           shardListFetcher = shardListFetcher
       )
@@ -608,9 +614,13 @@ internal class RealTransacter private constructor(
   }
 
   private fun <T> maybeWithTracing(spanName: String, block: () -> T): T {
+//    logger.info { "[DEBUG2] appName is ${appName}"}
+
     if (tracer != null) {
       return tracer.traceWithSpan(spanName) { span ->
         Tags.COMPONENT.set(span, TRANSACTER_SPAN_TAG)
+        span.setTag("service.name", appName + "hibernate")
+//        logger.info{ "[DEBUG2] span is ${span}" }
         return@traceWithSpan block()
       }
     } else {

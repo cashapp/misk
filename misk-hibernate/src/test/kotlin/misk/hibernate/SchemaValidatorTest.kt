@@ -72,6 +72,7 @@ internal class SchemaValidatorTest {
       bind(keyOf<Transacter>(qualifier)).toProvider(object : Provider<Transacter> {
         @Inject lateinit var queryTracingListener: QueryTracingListener
         @Inject lateinit var executorServiceFactory: ExecutorServiceFactory
+        @Inject lateinit var appName: String
         @com.google.inject.Inject(optional = true) val tracer: Tracer? = null
         override fun get(): RealTransacter = RealTransacter(
             qualifier = qualifier,
@@ -80,6 +81,7 @@ internal class SchemaValidatorTest {
             config = config.data_source,
             queryTracingListener = queryTracingListener,
             executorServiceFactory = executorServiceFactory,
+            appName = appName,
             tracer = tracer
         )
       }).asSingleton()

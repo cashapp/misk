@@ -1,7 +1,9 @@
 package misk.hibernate
 
+import com.google.inject.Provides
 import com.google.inject.util.Modules
 import misk.MiskTestingServiceModule
+import misk.config.AppName
 import misk.config.Config
 import misk.config.MiskConfig
 import misk.environment.DeploymentModule
@@ -55,4 +57,9 @@ class MoviesTestModule(
     val cockroachdb_data_source: DataSourceConfig,
     val tidb_data_source: DataSourceConfig
   ) : Config
+
+  // "Server" is the OU of the cert used by the test server
+  @Provides
+  @AppName
+  fun appName() = "Server"
 }
