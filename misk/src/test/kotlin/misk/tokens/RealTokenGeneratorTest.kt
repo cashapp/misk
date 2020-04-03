@@ -1,5 +1,6 @@
 package misk.tokens
 
+import com.google.inject.util.Modules
 import misk.MiskTestingServiceModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
@@ -11,7 +12,7 @@ import kotlin.test.assertFailsWith
 @MiskTest
 class RealTokenGeneratorTest {
   @MiskTestModule
-  val module = MiskTestingServiceModule()
+  val module = Modules.override(MiskTestingServiceModule()).with(TokenGeneratorModule())
 
   @Inject lateinit var tokenGenerator: TokenGenerator
 

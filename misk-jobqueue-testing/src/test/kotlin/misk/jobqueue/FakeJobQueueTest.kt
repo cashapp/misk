@@ -1,6 +1,5 @@
 package misk.jobqueue
 
-import com.google.inject.util.Modules
 import com.squareup.moshi.Moshi
 import misk.MiskTestingServiceModule
 import misk.inject.KAbstractModule
@@ -10,7 +9,6 @@ import misk.logging.getLogger
 import misk.moshi.adapter
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
-import misk.tokens.FakeTokenGeneratorModule
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import javax.inject.Inject
@@ -154,8 +152,7 @@ internal class FakeJobQueueTest {
 
 private class TestModule : KAbstractModule() {
   override fun configure() {
-    install(Modules.override(MiskTestingServiceModule()).with(FakeTokenGeneratorModule()))
-
+    install(MiskTestingServiceModule())
     install(LogCollectorModule())
     install(FakeJobHandlerModule.create<ExampleJobHandler>(RED_QUEUE))
     install(FakeJobHandlerModule.create<ExampleJobHandler>(GREEN_QUEUE))
