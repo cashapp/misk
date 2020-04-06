@@ -14,7 +14,7 @@ import misk.jdbc.MySqlScaleSafetyChecks
 import misk.jdbc.TruncateTablesService
 import misk.jdbc.VitessScaleSafetyChecks
 import misk.time.ForceUtcTimeZoneService
-import misk.vitess.StartDatabaseService
+import misk.database.StartDatabaseService
 import okhttp3.OkHttpClient
 import javax.inject.Provider
 import kotlin.reflect.KClass

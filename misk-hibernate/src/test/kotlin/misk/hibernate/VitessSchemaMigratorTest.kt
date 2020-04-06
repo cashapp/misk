@@ -2,8 +2,8 @@ package misk.hibernate
 
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
-import misk.vitess.DockerVitessCluster
-import misk.vitess.StartDatabaseService
+import misk.database.DockerVitessCluster
+import misk.database.StartDatabaseService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach

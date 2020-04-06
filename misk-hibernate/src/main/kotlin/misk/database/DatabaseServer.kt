@@ -1,4 +1,4 @@
-package misk.vitess
+package misk.database
 
 /**
  * Represents a database server for development/testing generally running in Docker.

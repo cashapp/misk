@@ -1,4 +1,4 @@
-package misk.vitess
+package misk.database
 
 import com.github.dockerjava.api.DockerClient
 import com.github.dockerjava.core.DockerClientBuilder

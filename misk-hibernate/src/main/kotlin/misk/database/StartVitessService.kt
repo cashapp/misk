@@ -1,4 +1,4 @@
-package misk.vitess
+package misk.database
 
 import misk.jdbc.DataSourceConfig
 import kotlin.reflect.KClass

@@ -23,7 +23,7 @@ import misk.jdbc.RealDatabasePool
 import misk.jdbc.SpanInjector
 import misk.metrics.Metrics
 import misk.resources.ResourceLoader
-import misk.vitess.StartDatabaseService
+import misk.database.StartDatabaseService
 import misk.web.exceptions.ExceptionMapperModule
 import org.hibernate.SessionFactory
 import org.hibernate.event.spi.EventType
