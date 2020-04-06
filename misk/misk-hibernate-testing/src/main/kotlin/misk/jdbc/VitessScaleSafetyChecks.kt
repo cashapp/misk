@@ -4,8 +4,8 @@ import com.squareup.moshi.Moshi
 import misk.hibernate.Check
 import misk.hibernate.Transacter
 import misk.moshi.adapter
-import misk.vitess.DockerVitessCluster
-import misk.vitess.StartDatabaseService
+import misk.database.DockerVitessCluster
+import misk.database.StartDatabaseService
 import net.ttddyy.dsproxy.proxy.ProxyConfig
 import net.ttddyy.dsproxy.support.ProxyDataSource
 import okhttp3.OkHttpClient
