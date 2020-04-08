@@ -29,10 +29,11 @@ class HttpClientModule constructor(
   }
 
   private class HttpClientProvider(private val name: String) : Provider<OkHttpClient> {
-    @Inject lateinit var httpClientsConfig: HttpClientsConfig
+    /** Use a provider because we don't know the test client's URL until its test server starts. */
+    @Inject lateinit var httpClientsConfigProvider: Provider<HttpClientsConfig>
     @Inject lateinit var httpClientFactory: HttpClientFactory
 
-    override fun get() = httpClientFactory.create(httpClientsConfig[name])
+    override fun get() = httpClientFactory.create(httpClientsConfigProvider.get()[name])
   }
 
   private class ProtoMessageHttpClientProvider(
@@ -40,11 +41,12 @@ class HttpClientModule constructor(
     private val httpClientProvider: Provider<OkHttpClient>
   ) : Provider<ProtoMessageHttpClient> {
     @Inject lateinit var moshi: Moshi
-    @Inject lateinit var httpClientsConfig: HttpClientsConfig
+    /** Use a provider because we don't know the test client's URL until its test server starts. */
+    @Inject lateinit var httpClientsConfigProvider: Provider<HttpClientsConfig>
     @Inject lateinit var httpClientConfigUrlProvider: HttpClientConfigUrlProvider
 
     override fun get(): ProtoMessageHttpClient {
-      val endpointConfig = httpClientsConfig[name]
+      val endpointConfig = httpClientsConfigProvider.get()[name]
       val httpClient = httpClientProvider.get()
 
       return ProtoMessageHttpClient(

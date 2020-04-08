@@ -5,6 +5,6 @@ import okhttp3.Response
 
 interface ClientNetworkChain {
   val action: ClientAction
-  val request: okhttp3.Request
+  val request: Request
   fun proceed(request: Request): Response
 }
