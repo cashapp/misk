@@ -19,10 +19,12 @@ internal class QueueResolver @Inject internal constructor(
   private val crossRegionSQS: Map<AwsRegion, AmazonSQS>,
   @ForSqsReceiving private val defaultForReceivingSQS: AmazonSQS,
   @ForSqsReceiving private val crossRegionForReceivingSQS: Map<AwsRegion, AmazonSQS>,
-  private val externalQueues: Map<QueueName, AwsSqsQueueConfig>
+  private val externalQueues: Map<QueueName, AwsSqsQueueConfig>,
+  config: AwsSqsJobQueueConfig
 ) {
   private val forSendingMapping = ConcurrentHashMap<QueueName, ResolvedQueue>()
   private val forReceivingMapping = ConcurrentHashMap<QueueName, ResolvedQueue>()
+  private val globalDlq = config.global_dead_letter_queue_name?.let { QueueName(it) }
 
   fun getForSending(q: QueueName): ResolvedQueue {
     return forSendingMapping.computeIfAbsent(q) { resolve(it, false) }
@@ -32,11 +34,19 @@ internal class QueueResolver @Inject internal constructor(
     return forReceivingMapping.computeIfAbsent(q) { resolve(it, true) }
   }
 
-  private fun resolve(q: QueueName, forSqsReceiving: Boolean): ResolvedQueue {
-    if (q.isDeadLetterQueue) {
-      return resolveDeadLetterQueue(q, forSqsReceiving)
+  fun getDeadLetter(q: QueueName): ResolvedQueue {
+    // If a global DLQ is configured, use it; otherwise revert to a queue named after the parent queue.
+    val dlq = when {
+      globalDlq != null -> globalDlq
+      q.isDeadLetterQueue -> q
+      else -> q.deadLetterQueue
     }
 
+    // Dead-letter queue is always used for sending, never for receiving.
+    return resolve(dlq, false)
+  }
+
+  private fun resolve(q: QueueName, forSqsReceiving: Boolean): ResolvedQueue {
     val queueConfig = externalQueues[q] ?: AwsSqsQueueConfig()
     val sqsQueueName = queueConfig.sqs_queue_name?.let { QueueName(it) } ?: q
     val region = queueConfig.region?.let { AwsRegion(it) } ?: currentRegion
@@ -63,20 +73,6 @@ internal class QueueResolver @Inject internal constructor(
     return ResolvedQueue(q, sqsQueueName, queueUrl, region, accountId, sqs)
   }
 
-  private fun resolveDeadLetterQueue(q: QueueName, forSqsReceiving: Boolean): ResolvedQueue {
-    val parentQueue = resolve(q.parentQueue, forSqsReceiving)
-    val sqsQueueName = QueueName(parentQueue.sqsQueueName.value + deadLetterQueueSuffix)
-    val queueUrl = parentQueue.call { client ->
-      client.getQueueUrl(GetQueueUrlRequest().apply {
-        queueName = sqsQueueName.value
-        queueOwnerAWSAccountId = parentQueue.accountId.value
-      })
-    }.queueUrl
-
-    return ResolvedQueue(
-        q, sqsQueueName, queueUrl, parentQueue.region, parentQueue.accountId, parentQueue.client)
-  }
-
   companion object {
     val log = getLogger<QueueResolver>()
   }
@@ -84,8 +80,8 @@ internal class QueueResolver @Inject internal constructor(
 
 internal const val deadLetterQueueSuffix = "_dlq"
 
-val QueueName.isDeadLetterQueue get() = value.endsWith(deadLetterQueueSuffix)
-val QueueName.deadLetterQueue
+internal val QueueName.isDeadLetterQueue get() = value.endsWith(deadLetterQueueSuffix)
+internal val QueueName.deadLetterQueue
   get() = if (isDeadLetterQueue) this else QueueName(value + deadLetterQueueSuffix)
 
 internal const val retryQueueSuffix = "_retryq"
