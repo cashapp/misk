@@ -50,9 +50,7 @@ internal class SqsJob(
   }
 
   override fun deadLetter() {
-    if (queueName.isDeadLetterQueue) return
-
-    val dlq = queues.getForReceiving(queueName.deadLetterQueue)
+    val dlq = queues.getDeadLetter(queueName)
     dlq.call { client ->
       client.sendMessage(SendMessageRequest()
           .withQueueUrl(dlq.url)
