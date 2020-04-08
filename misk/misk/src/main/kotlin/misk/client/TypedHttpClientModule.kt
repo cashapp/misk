@@ -39,8 +39,8 @@ class TypedHttpClientModule<T : Any>(
     install(HttpClientModule(name, httpClientAnnotation))
 
     val httpClientKey = Key.get(OkHttpClient::class.java, httpClientAnnotation)
-
     val httpClientProvider = binder().getProvider(httpClientKey)
+
     val key = if (annotation == null) Key.get(kclass.java) else Key.get(kclass.java, annotation)
     bind(key)
         .toProvider(TypedClientProvider(kclass, name, httpClientProvider, retrofitBuilderProvider))
