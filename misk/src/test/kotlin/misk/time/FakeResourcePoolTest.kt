@@ -101,8 +101,8 @@ internal class FakeResourcePoolTest {
           failureCount++
         }
       }
-      assertThat(successCount).isCloseTo(6, Offset.offset(1))
-      assertThat(failureCount).isCloseTo(3, Offset.offset(1))
+      assertThat(successCount).isCloseTo(6, Offset.offset(2))
+      assertThat(failureCount).isCloseTo(3, Offset.offset(2))
     }
   }
 }
