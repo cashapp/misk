@@ -1,22 +1,19 @@
 package misk.jdbc
 
-import com.squareup.moshi.Moshi
-import misk.moshi.adapter
-import misk.okio.split
+import misk.backoff.FlatBackoff
+import misk.backoff.retry
 import mu.KotlinLogging
-import okio.BufferedSource
 import okio.ByteString.Companion.encodeUtf8
-import java.io.EOFException
 import java.sql.Connection
 import java.sql.SQLException
 import java.sql.SQLSyntaxErrorException
 import java.sql.Timestamp
+import java.time.Duration
 
 object ScaleSafetyChecks {
   private val logger = KotlinLogging.logger {}
   private val COMMENT_PATTERN = "/\\*+[^*]*\\*+(?:[^/*][^*]*\\*+)*/".toRegex()
   private val DML = setOf("insert", "delete", "update")
-  private val EMPTY_LINE = "\n\n".encodeUtf8()
 
   fun getLastLoggedCommand(connection: Connection): Timestamp? {
     return connection.createStatement().use { session ->
@@ -31,12 +28,14 @@ object ScaleSafetyChecks {
 
     val explanations = connection.createStatement().use { statement ->
       try {
-        statement.executeQuery("EXPLAIN ${query.replace("\n", " ")}")
-          .map { Explanation.fromResultSet(it) }
+        retry(5, FlatBackoff(Duration.ofMillis(100))) {
+          statement.executeQuery("EXPLAIN ${query.replace("\n", " ")}")
+              .map { Explanation.fromResultSet(it) }
+        }
       } catch (e: SQLSyntaxErrorException) {
         // TODO(jontirsen): This happens during multi threaded tests, let's ignore it for
         //   now. Implement proper support for multi-threading at some point (it's hard).
-        logger.debug { e }
+        logger.warn(e) { "Failed to check for table scans in \"$query\"" }
         null
       } catch (e: SQLException) {
         val message = e.message
