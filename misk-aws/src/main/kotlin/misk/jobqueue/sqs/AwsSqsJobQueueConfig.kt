@@ -36,5 +36,19 @@ class AwsSqsJobQueueConfig(
   /**
    * Frequency used to import Queue Attributes in milliseconds.
    */
-  val queue_attribute_importer_frequency_ms: Long = 1000
+  val queue_attribute_importer_frequency_ms: Long = 1000,
+
+  /**
+   * Name of the global dead-letter queue. Optional; when set, explicitly dead-lettered jobs are
+   * sent to the specified queue, regardless of which queue they were originally submitted to/read
+   * from. When undefined, explicitly dead-lettered jobs are sent to a dead-letter queue named after
+   * the parent queue, with a "_dlq" suffix (e.g. "barb-queue" -> "barb-queue_dlq").
+   *
+   * All jobs contain a `_jobqueue-metadata` custom attribute. Any jobs sent to the global
+   * dead-letter queue can be traced to their original main queue by inspecting this property.
+   *
+   * Make sure this property is set or unset according to the AWS redrive policy for queues used
+   * by your app.
+   */
+  val global_dead_letter_queue_name: String? = null
 ) : Config
