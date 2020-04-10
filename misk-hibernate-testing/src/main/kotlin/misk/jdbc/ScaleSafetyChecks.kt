@@ -3,7 +3,6 @@ package misk.jdbc
 import misk.backoff.FlatBackoff
 import misk.backoff.retry
 import mu.KotlinLogging
-import okio.ByteString.Companion.encodeUtf8
 import java.sql.Connection
 import java.sql.SQLException
 import java.sql.SQLSyntaxErrorException

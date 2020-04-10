@@ -5,6 +5,7 @@ import misk.jdbc.TableScanException
 import misk.jdbc.uniqueLong
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
@@ -21,6 +22,7 @@ class MySqlScaleSafetyTest {
   @Inject @Movies lateinit var transacter: Transacter
 
   @Test
+  @Disabled("flaky test, see https://github.com/cashapp/misk/issues/1464")
   fun tableScansDetected() {
     transacter.transaction { session ->
       val cf = session.save(DbActor("Carrie Fisher", null))
