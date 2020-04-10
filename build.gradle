@@ -12,7 +12,6 @@ buildscript {
   dependencies {
     classpath dep.kotlinGradlePlugin
     classpath dep.junitGradlePlugin
-    classpath dep.shadowJarPlugin
     classpath dep.mavenPublishGradlePlugin
     classpath dep.wireGradlePlugin
   }
@@ -39,10 +38,6 @@ subprojects { subProject ->
     repositories {
       mavenCentral()
       jcenter()
-    }
-
-    dependencies {
-      classpath dep.shadowJarPlugin
     }
   }
   repositories {
