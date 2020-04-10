@@ -1,5 +1,3 @@
-apply plugin: 'com.github.johnrengelman.shadow'
-
 dependencies {
   compile dep.kotlinStdLib
   compile dep.kotlinTest
@@ -18,19 +16,6 @@ jar {
     attributes 'Main-Class': 'com.squareup.chat.ChatServiceKt'
   }
   classifier = 'unshaded'
-}
-
-
-shadowJar {
-  exclude('module-info.class') // https://github.com/johnrengelman/shadow/issues/352
-  mergeServiceFiles()
-  into("web/exemplarchat") {
-    from("web/build")
-  }
-}
-
-artifacts {
-  archives shadowJar
 }
 
 compileKotlin {
