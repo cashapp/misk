@@ -98,6 +98,7 @@ subprojects { subProject ->
     testLogging {
       events "started", "passed", "skipped", "failed"
       exceptionFormat = 'full'
+      showStandardStreams = false
     }
   }
   if (rootProject.file("hooks.gradle").exists()) {
