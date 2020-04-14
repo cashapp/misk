@@ -3,6 +3,7 @@ package misk.web.jetty
 import misk.web.BoundAction
 import misk.web.DispatchMechanism
 import misk.web.ServletHttpCall
+import misk.web.SocketAddress
 import misk.web.actions.WebAction
 import misk.web.actions.WebSocket
 import misk.web.actions.WebSocketListener
@@ -10,6 +11,8 @@ import okhttp3.Headers
 import okio.ByteString
 import okio.ByteString.Companion.toByteString
 import okio.utf8Size
+import org.eclipse.jetty.server.ServerConnector
+import org.eclipse.jetty.unixsocket.UnixSocketConnector
 import org.eclipse.jetty.websocket.api.Session
 import org.eclipse.jetty.websocket.api.WebSocketAdapter
 import org.eclipse.jetty.websocket.api.WriteCallback
