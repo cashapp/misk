@@ -23,10 +23,16 @@ class DeploymentModule(
     fun forTesting(): Module {
       return Modules.combine(
           DeploymentModule(
-              deployment = Deployment(name = "testing", isTest = true),
+              deployment = TEST_DEPLOYMENT,
               env = Env("TESTING")),
           EnvironmentModule(Environment.TESTING)
       )
     }
+
+    /**
+     * A [Deployment] that can be used in tests.
+     * [DeploymentModule.forTesting] will bind this instance.
+     */
+    val TEST_DEPLOYMENT = Deployment(name = "testing", isTest = true)
   }
 }
