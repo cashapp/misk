@@ -5,6 +5,7 @@ import misk.logging.getLogger
 import misk.web.BoundAction
 import misk.web.DispatchMechanism
 import misk.web.ServletHttpCall
+import misk.web.SocketAddress
 import misk.web.actions.WebAction
 import misk.web.actions.WebActionEntry
 import misk.web.actions.WebActionFactory
@@ -20,6 +21,8 @@ import okio.source
 import org.eclipse.jetty.http.HttpMethod
 import org.eclipse.jetty.http2.HTTP2Connection
 import org.eclipse.jetty.server.Response
+import org.eclipse.jetty.server.ServerConnector
+import org.eclipse.jetty.unixsocket.UnixSocketConnector
 import org.eclipse.jetty.websocket.servlet.ServletUpgradeResponse
 import org.eclipse.jetty.websocket.servlet.WebSocketServlet
 import org.eclipse.jetty.websocket.servlet.WebSocketServletFactory
@@ -75,6 +78,13 @@ internal class WebActionsServlet @Inject constructor(
     try {
       val httpCall = ServletHttpCall.create(
           request = request,
+          linkLayerAddress = with ((request as? org.eclipse.jetty.server.Request)?.httpChannel?.connector) {
+            when (this) {
+              is UnixSocketConnector -> SocketAddress.Unix(this.unixSocket)
+              is ServerConnector -> SocketAddress.Network(this.host, this.localPort)
+              else -> throw IllegalStateException("Unknown socket connector.")
+            }
+          },
           dispatchMechanism = request.dispatchMechanism(),
           upstreamResponse = JettyServletUpstreamResponse(response as Response),
           requestBody = request.inputStream.source().buffer(),

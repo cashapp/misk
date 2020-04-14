@@ -12,6 +12,7 @@ import javax.servlet.http.HttpServletRequest
 
 internal data class ServletHttpCall(
   override val url: HttpUrl,
+  override val linkLayerAddress: SocketAddress? = null,
   override val dispatchMechanism: DispatchMechanism,
   override val requestHeaders: Headers,
   var requestBody: BufferedSource? = null,
@@ -98,6 +99,7 @@ internal data class ServletHttpCall(
       request: HttpServletRequest,
       dispatchMechanism: DispatchMechanism,
       upstreamResponse: UpstreamResponse,
+      linkLayerAddress: SocketAddress? = null,
       webSocket: WebSocket? = null,
       requestBody: BufferedSource? = null,
       responseBody: BufferedSink? = null
@@ -108,6 +110,7 @@ internal data class ServletHttpCall(
 
       return ServletHttpCall(
           url = request.httpUrl(),
+          linkLayerAddress = linkLayerAddress,
           dispatchMechanism = dispatchMechanism,
           requestHeaders = request.headers(),
           upstreamResponse = upstreamResponse,
