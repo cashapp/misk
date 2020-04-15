@@ -79,7 +79,7 @@ export interface IWebActionAPI {
   allowedServices: string[]
   allowedCapabilities: string[]
   applicationInterceptors: string[]
-  dispatchMechanism: HTTPMethod
+  httpMethod: HTTPMethod
   function: string
   functionAnnotations: string[]
   name: string
@@ -99,7 +99,7 @@ export interface IWebActionInternal {
   allowedServices: string[]
   applicationInterceptors: string[]
   authFunctionAnnotations: string[]
-  dispatchMechanism: HTTPMethod[]
+  httpMethod: HTTPMethod[]
   function: string
   functionAnnotations: string[]
   name: string
@@ -154,7 +154,7 @@ export const WebActionInternalLabel: { [key: string]: string } = {
   "Allowed Capabilities": "allowedCapabilities",
   "Allowed Services": "allowedServices",
   "Application Interceptor": "applicationInterceptors",
-  "Dispatch Mechanism": "dispatchMechanism",
+  "HTTP Method": "httpMethod",
   Function: "function",
   "Function Annotations": "functionAnnotations",
   Name: "name",
@@ -670,8 +670,8 @@ function* handleDirtyInputField(
 
 /**
  * hash for groupBy that provides a string hash that uses an aggregate of
- * non-dispatchMechanism metadata. This allows coalescing of web action entries
- * that only differ by dispatchMechanism (GET, POST, PUT...)
+ * non-httpMethod metadata. This allows coalescing of web action entries
+ * that only differ by HTTP method (GET, POST, PUT...)
  */
 const groupByWebActionHash = (
   action: IWebActionInternal | IWebActionAPI | any
@@ -851,7 +851,7 @@ const jsonTypeMetadata = OrderedMap<string, ITypesFieldMetadata>().set(
 export const generateTypesMetadata = (
   action: IWebActionAPI
 ): OrderedMap<string, ITypesFieldMetadata> => {
-  const { dispatchMechanism, pathPattern, requestType, types } = action
+  const { httpMethod, pathPattern, requestType, types } = action
   let typesMetadata = OrderedMap<string, ITypesFieldMetadata>().set(
     "0",
     buildTypeFieldMetadata(OrderedSet(), "0")
@@ -880,7 +880,7 @@ export const generateTypesMetadata = (
     } catch (e) {
       if (e.toString().startsWith("RangeError")) {
         console.warn(
-          `Web Action proto type is too large to parse, reverting to raw JSON input for [action = ${dispatchMechanism} ${pathPattern}].\nTypes:`,
+          `Web Action proto type is too large to parse, reverting to raw JSON input for [action = ${httpMethod} ${pathPattern}].\nTypes:`,
           types,
           "\n",
           e
@@ -891,7 +891,7 @@ export const generateTypesMetadata = (
       }
     }
     return typesMetadata
-  } else if (methodHasBody(dispatchMechanism)) {
+  } else if (methodHasBody(httpMethod)) {
     return jsonTypeMetadata
   } else {
     return OrderedMap<string, ITypesFieldMetadata>()
@@ -940,7 +940,7 @@ export const processMetadata = (webActionMetadata: IWebActionAPI[]): any =>
         allowedCapabilities,
         allowedServices,
         authFunctionAnnotations,
-        dispatchMechanism: [action.dispatchMechanism],
+        httpMethod: [action.httpMethod],
         function: action.function.split("fun ").pop(),
         nonAccessOrTypeFunctionAnnotations,
         typesMetadata: generateTypesMetadata(action)
@@ -948,14 +948,14 @@ export const processMetadata = (webActionMetadata: IWebActionAPI[]): any =>
     })
     .groupBy(groupByWebActionHash)
     .map((actions: IWebActionInternal[]) => {
-      const dispatchMechanism = chain(actions)
-        .flatMap(action => action.dispatchMechanism)
-        // remove duplicate identical dispatchMechanisms that come from
+      const httpMethod = chain(actions)
+        .flatMap(action => action.httpMethod)
+        // remove duplicate identical HTTP method that come from
         // duplicate installation of the same webAction
         .uniq()
         .value()
       const mergedAction = actions[0]
-      mergedAction.dispatchMechanism = dispatchMechanism.sort().reverse()
+      mergedAction.httpMethod = httpMethod.sort().reverse()
       return mergedAction
     })
     .sortBy(["name", "pathPattern"])

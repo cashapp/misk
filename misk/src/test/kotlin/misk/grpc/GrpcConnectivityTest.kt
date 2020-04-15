@@ -1,20 +1,11 @@
 package misk.grpc
 
 import com.google.inject.Guice
-import com.google.inject.Provides
 import com.squareup.protos.test.grpc.HelloReply
 import com.squareup.protos.test.grpc.HelloRequest
 import com.squareup.wire.Service
 import com.squareup.wire.WireRpc
-import misk.MiskTestingServiceModule
-import misk.client.HttpClientEndpointConfig
-import misk.client.HttpClientModule
-import misk.client.HttpClientSSLConfig
-import misk.client.HttpClientsConfig
 import misk.inject.KAbstractModule
-import misk.inject.getInstance
-import misk.security.ssl.SslLoader
-import misk.security.ssl.TrustStoreConfig
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.web.WebActionModule
@@ -30,7 +21,6 @@ import okio.BufferedSink
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import javax.inject.Inject
-import javax.inject.Singleton
 
 /**
  * This test gets Misk running as a GRPC server and then acts as a basic GRPC client to send a
@@ -52,8 +42,8 @@ class GrpcConnectivityTest {
 
   @BeforeEach
   fun createClient() {
-    val clientInjector = Guice.createInjector(ClientModule(jetty))
-    client = clientInjector.getInstance()
+    val clientInjector = Guice.createInjector(Http2ClientTestingModule(jetty))
+    client = clientInjector.getInstance(OkHttpClient::class.java)
   }
 
   @Test
@@ -113,34 +103,6 @@ class GrpcConnectivityTest {
           http2 = true
       )))
       install(WebActionModule.create<HelloRpcAction>())
-    }
-  }
-
-  // NB: The server doesn't get a port until after it starts so we create the client module
-  // _after_ we start the services
-  class ClientModule(val jetty: JettyService) : KAbstractModule() {
-    override fun configure() {
-      install(MiskTestingServiceModule())
-      install(HttpClientModule("default"))
-    }
-
-    @Provides
-    @Singleton
-    fun provideHttpClientsConfig(): HttpClientsConfig {
-      return HttpClientsConfig(
-          endpoints = mapOf(
-              "default" to HttpClientEndpointConfig(
-                  "http://example.com/",
-                  ssl = HttpClientSSLConfig(
-                      cert_store = null,
-                      trust_store = TrustStoreConfig(
-                          resource = "classpath:/ssl/server_cert.pem",
-                          format = SslLoader.FORMAT_PEM
-                      )
-                  )
-              )
-          )
-      )
     }
   }
 }

@@ -4,10 +4,10 @@ import com.squareup.protos.test.parsing.Shipment
 import com.squareup.protos.test.parsing.Warehouse
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
-import misk.web.DispatchMechanism
 import misk.web.actions.TestWebActionModule
 import misk.web.mediatype.MediaTypes
 import org.assertj.core.api.Assertions.assertThat
+import org.eclipse.jetty.http.HttpMethod
 import org.junit.jupiter.api.Test
 import javax.inject.Inject
 
@@ -62,7 +62,7 @@ class WebActionMetadataActionTest {
     val metadata = response.webActionMetadata.find {
       it.name == TestWebActionModule.GrpcAction::class.simpleName
     }!!
-    assertThat(metadata.dispatchMechanism).isEqualTo(DispatchMechanism.GRPC)
+    assertThat(metadata.httpMethod).isEqualTo(HttpMethod.POST)
     assertThat(metadata.requestType).isEqualTo(Shipment::class.qualifiedName)
     assertThat(metadata.returnType).isEqualTo(Warehouse::class.qualifiedName)
     assertThat(metadata.types).isNotEmpty

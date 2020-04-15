@@ -32,7 +32,7 @@ const WebActionCardContainer = (
   <div>
     <Card interactive={true}>
       <div css={cssHeader}>
-        {props.action.dispatchMechanism.map(m => (
+        {props.action.httpMethod.map(m => (
           <MethodTag key={m} method={m} />
         ))}
         <span css={cssFloatLeft}>
