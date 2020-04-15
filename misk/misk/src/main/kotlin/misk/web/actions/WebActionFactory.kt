@@ -16,6 +16,7 @@ import misk.web.Get
 import misk.web.NetworkInterceptor
 import misk.web.PathPattern
 import misk.web.Post
+import misk.web.RequestBody
 import misk.web.WebActionBinding
 import misk.web.mediatype.MediaRange
 import misk.web.mediatype.MediaTypes
@@ -23,6 +24,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
+import kotlin.reflect.KParameter
 import kotlin.reflect.full.functions
 
 @Singleton
@@ -130,8 +132,20 @@ internal class WebActionFactory @Inject constructor(
    * Returns null if neither of the input action's content types were protobuf.
    */
   private fun transformActionIntoJson(action: Action): Action? {
-    var jsonVariant = action
+    // Map gRPC actions to the equivalent JSON actions. This changes the dispatch mechanism from
+    // gRPC to POST which prevents gRPC framing from being used.
+    if (action.dispatchMechanism == DispatchMechanism.GRPC && action.parameters.size == 1) {
+      val mappedParameters = action.parameters.toMutableList()
+      mappedParameters[0] = mappedParameters[0].withAnnotations(listOf(requestBodyAnnotation()))
+      return action.copy(
+          dispatchMechanism = DispatchMechanism.POST,
+          acceptedMediaRanges = jsonMediaRanges,
+          responseContentType = jsonMediaType,
+          parameters = mappedParameters
+      )
+    }
 
+    var jsonVariant = action
     if (action.acceptedMediaRanges == protobufMediaRanges) {
       jsonVariant = jsonVariant.copy(acceptedMediaRanges = jsonMediaRanges)
     }
@@ -172,10 +186,32 @@ internal class WebActionFactory @Inject constructor(
     )
   }
 
+  /** Returns a copy of this that overrides the current annotations with [annotations]. */
+  private fun KParameter.withAnnotations(annotations: List<Annotation>): KParameter {
+    return object : KParameter by this {
+      override val annotations: List<Annotation> = annotations
+    }
+  }
+
+  /** Kotlin doesn't have a way create an instance of an annotation so we get one reflectively. */
+  private fun requestBodyAnnotation(): Annotation {
+    return WebActionFactory::class.functions
+        .first { it.name == "requestBodyAnnotationFun" }
+        .parameters[1]
+        .annotations[0]
+  }
+
+  @Suppress("unused", "UNUSED_PARAMETER") // Used reflectively in the function above.
+  private fun requestBodyAnnotationFun(@RequestBody any: Any) {
+    error("unexpected call")
+  }
+
   companion object {
     private val protobufMediaRanges = MediaRange.parseRanges(MediaTypes.APPLICATION_PROTOBUF)
+    private val grpcMediaRanges = MediaRange.parseRanges(MediaTypes.APPLICATION_GRPC)
     private val jsonMediaRanges = MediaRange.parseRanges(MediaTypes.APPLICATION_JSON)
     private val protobufMediaType = MediaTypes.APPLICATION_PROTOBUF_MEDIA_TYPE
+    private val grpcMediaType = MediaTypes.APPLICATION_GRPC_MEDIA_TYPE
     private val jsonMediaType = MediaTypes.APPLICATION_JSON_MEDIA_TYPE
   }
 }
