@@ -15,7 +15,7 @@ describe("Build typesMetadata from a raw WebActionMetadata", () => {
   it("get non-typed POST", () => {
     const typesMetadata = generateTypesMetadata({
       ...nonTypedActionAPI,
-      dispatchMechanism: HTTPMethod.POST
+      httpMethod: HTTPMethod.POST
     })
     expect(typesMetadata.size).toBe(1)
     const tmRoot = typesMetadata.get("0")
@@ -26,7 +26,7 @@ describe("Build typesMetadata from a raw WebActionMetadata", () => {
   it("get non-repeated int", () => {
     const typesMetadata = generateTypesMetadata({
       ...nonTypedActionAPI,
-      dispatchMechanism: HTTPMethod.POST,
+      httpMethod: HTTPMethod.POST,
       requestType: "noRepeatedInt",
       types: testTypes
     })
@@ -36,7 +36,7 @@ describe("Build typesMetadata from a raw WebActionMetadata", () => {
   it("get nested int", () => {
     const typesMetadata = generateTypesMetadata({
       ...nonTypedActionAPI,
-      dispatchMechanism: HTTPMethod.POST,
+      httpMethod: HTTPMethod.POST,
       requestType: "nestedNoRepeatedInt",
       types: testTypes
     })
@@ -53,7 +53,7 @@ describe("Build typesMetadata from a raw WebActionMetadata", () => {
   it("get repeated short", () => {
     const typesMetadata = generateTypesMetadata({
       ...nonTypedActionAPI,
-      dispatchMechanism: HTTPMethod.POST,
+      httpMethod: HTTPMethod.POST,
       requestType: "repeatedShort",
       types: testTypes
     })
@@ -73,7 +73,7 @@ describe("Build typesMetadata from a raw WebActionMetadata", () => {
   it("get repeated nested int", () => {
     const typesMetadata = generateTypesMetadata({
       ...nonTypedActionAPI,
-      dispatchMechanism: HTTPMethod.POST,
+      httpMethod: HTTPMethod.POST,
       requestType: "repeatedNestedNoRepeatedInt",
       types: testTypes
     })
@@ -101,7 +101,7 @@ describe("Build typesMetadata from a raw WebActionMetadata", () => {
   it("get repeated nested repeated short", () => {
     const typesMetadata = generateTypesMetadata({
       ...nonTypedActionAPI,
-      dispatchMechanism: HTTPMethod.POST,
+      httpMethod: HTTPMethod.POST,
       requestType: "repeatedNestedRepeatedShort",
       types: testTypes
     })
@@ -133,7 +133,7 @@ describe("Build typesMetadata from a raw WebActionMetadata", () => {
   it("generate multiple top level fields", () => {
     const typesMetadata = generateTypesMetadata({
       ...nonTypedActionAPI,
-      dispatchMechanism: HTTPMethod.POST,
+      httpMethod: HTTPMethod.POST,
       requestType: "multipleFlatFields",
       types: testTypes
     })
