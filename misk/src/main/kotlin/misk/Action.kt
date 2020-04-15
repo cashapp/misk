@@ -28,9 +28,14 @@ data class Action(
 
   val requestType: KType?
       get() {
-        return parameters.filter { it.annotations.any { it is RequestBody } }
-            .map { it.type }
-            .firstOrNull()
+        if (dispatchMechanism == DispatchMechanism.GRPC) {
+          // TODO: support gRPC streaming on the web dashboard.
+          return if (parameters.size == 1) parameters[0].type else null
+        } else {
+          return parameters.filter { it.annotations.any { it is RequestBody } }
+              .map { it.type }
+              .firstOrNull()
+        }
       }
 
   internal inline fun <reified T : Annotation> parameterAnnotatedOrNull(): KParameter? {
