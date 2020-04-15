@@ -10,7 +10,7 @@ describe("Remove a repeated field", () => {
   it("removeRepeated", () => {
     let typesMetadata = generateTypesMetadata({
       ...nonTypedActionAPI,
-      dispatchMechanism: HTTPMethod.POST,
+      httpMethod: HTTPMethod.POST,
       requestType: "repeatedShort",
       types: testTypes
     })
@@ -27,7 +27,7 @@ describe("Remove a repeated field", () => {
   it("removeNestedRepeated", () => {
     let typesMetadata = generateTypesMetadata({
       ...nonTypedActionAPI,
-      dispatchMechanism: HTTPMethod.POST,
+      httpMethod: HTTPMethod.POST,
       requestType: "repeatedNestedRepeatedShort",
       types: testTypes
     })

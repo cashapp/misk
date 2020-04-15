@@ -15,6 +15,7 @@ import misk.web.jetty.WebActionsServlet
 import misk.web.mediatype.MediaRange
 import misk.web.mediatype.MediaTypes
 import okhttp3.MediaType
+import org.eclipse.jetty.http.HttpMethod
 import javax.inject.Inject
 import javax.inject.Provider
 import javax.inject.Singleton
@@ -49,7 +50,7 @@ data class WebActionMetadata(
   val pathPattern: String,
   val applicationInterceptors: List<String>,
   val networkInterceptors: List<String>,
-  val dispatchMechanism: DispatchMechanism,
+  val httpMethod: HttpMethod,
   val allowedServices: Set<String>,
   val allowedCapabilities: Set<String>
 )
@@ -86,7 +87,7 @@ internal fun WebActionMetadata(
     pathPattern = pathPattern.toString(),
     applicationInterceptors = applicationInterceptors.map { ClassNameFormatter.format(it::class) },
     networkInterceptors = networkInterceptors.map { ClassNameFormatter.format(it::class) },
-    dispatchMechanism = dispatchMechanism,
+    httpMethod = dispatchMechanism.method,
     allowedServices = allowedServices,
     allowedCapabilities = allowedCapabilities
   )

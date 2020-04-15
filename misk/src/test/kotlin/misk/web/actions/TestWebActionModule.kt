@@ -90,9 +90,9 @@ class TestWebActionModule : KAbstractModule() {
   // TODO(jwilson): get Wire to generate this interface.
   interface ShippingGetDestinationWarehouseBlockingServer : Service {
     @WireRpc(
-        path = "/sample.Shipping/GetDestinationWarehouse",
-        requestAdapter = "routeguide.Point#ADAPTER",
-        responseAdapter = "routeguide.Feature#ADAPTER"
+        path = "/test/GetDestinationWarehouse",
+        requestAdapter = "com.squareup.protos.test.parsing.Shipment#ADAPTER",
+        responseAdapter = "com.squareup.protos.test.parsing.Warehouse#ADAPTER"
     )
     fun GetDestinationWarehouse(requestType: Shipment): Warehouse
   }

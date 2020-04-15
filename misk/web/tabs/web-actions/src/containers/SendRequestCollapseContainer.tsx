@@ -87,7 +87,7 @@ const SendRequestCollapseContainer = (
   }
   const method: HTTPMethod =
     simpleSelectorGet(props.simpleRedux, [`${tag}::Method`, "data"]) ||
-    action.dispatchMechanism.reverse()[0]
+    action.httpMethod.reverse()[0]
 
   // Response with fallback to error
   const response = simpleSelectorGet(
@@ -176,7 +176,7 @@ const SendRequestCollapseContainer = (
             <HTMLSelect
               large={true}
               onChange={onChangeFnCall(props.simpleMergeData, `${tag}::Method`)}
-              options={action.dispatchMechanism.sort()}
+              options={action.httpMethod.sort()}
               value={method}
             />
             <Button
