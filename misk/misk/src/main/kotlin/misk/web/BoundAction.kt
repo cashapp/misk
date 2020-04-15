@@ -155,6 +155,8 @@ internal class BoundAction<A : WebAction>(
     }
     return setOf()
   }
+
+  override fun toString() = "BoundAction[$action]"
 }
 
 /** Matches a request. Can be sorted to pick the most specific match amongst a set of candidates. */
