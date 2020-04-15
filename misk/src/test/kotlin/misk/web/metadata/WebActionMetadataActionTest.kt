@@ -1,8 +1,10 @@
 package misk.web.metadata
 
 import com.squareup.protos.test.parsing.Shipment
+import com.squareup.protos.test.parsing.Warehouse
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
+import misk.web.DispatchMechanism
 import misk.web.actions.TestWebActionModule
 import misk.web.mediatype.MediaTypes
 import org.assertj.core.api.Assertions.assertThat
@@ -16,34 +18,53 @@ class WebActionMetadataActionTest {
 
   @Inject lateinit var webActionMetadataAction: WebActionMetadataAction
 
-  @Test fun webActionMetadata() {
+  @Test fun `custom service access`() {
     val response = webActionMetadataAction.getAll()
 
-    val customServiceActionMetadata = response.webActionMetadata.find {
-      it.name.equals(TestWebActionModule.CustomServiceAccessAction::class.simpleName)
-    }
-    assertThat(customServiceActionMetadata).isNotNull()
-    assertThat(customServiceActionMetadata!!.requestMediaTypes).containsOnly("*/*")
-    assertThat(customServiceActionMetadata.responseMediaType).isEqualTo(MediaTypes.TEXT_PLAIN_UTF8)
-    assertThat(customServiceActionMetadata.parameterTypes).isEmpty()
-    assertThat(customServiceActionMetadata.pathPattern).isEqualTo("/custom_service_access")
-    assertThat(customServiceActionMetadata.allowedServices).containsOnly("payments")
-    assertThat(customServiceActionMetadata.allowedCapabilities).isEmpty()
+    val metadata = response.webActionMetadata.find {
+      it.name == TestWebActionModule.CustomServiceAccessAction::class.simpleName
+    }!!
+    assertThat(metadata.requestMediaTypes).containsOnly("*/*")
+    assertThat(metadata.responseMediaType).isEqualTo(MediaTypes.TEXT_PLAIN_UTF8)
+    assertThat(metadata.parameterTypes).isEmpty()
+    assertThat(metadata.pathPattern).isEqualTo("/custom_service_access")
+    assertThat(metadata.allowedServices).containsOnly("payments")
+    assertThat(metadata.allowedCapabilities).isEmpty()
+  }
 
-    val customCapabilityActionMetadata = response.webActionMetadata.find {
-      it.name.equals(TestWebActionModule.CustomCapabilityAccessAction::class.simpleName)
-    }
-    assertThat(customCapabilityActionMetadata!!.requestMediaTypes).containsOnly("*/*")
-    assertThat(customCapabilityActionMetadata.responseMediaType).isEqualTo(MediaTypes.TEXT_PLAIN_UTF8)
-    assertThat(customCapabilityActionMetadata.parameterTypes).isEmpty()
-    assertThat(customCapabilityActionMetadata.pathPattern).isEqualTo("/custom_capability_access")
-    assertThat(customCapabilityActionMetadata.allowedServices).isEmpty()
-    assertThat(customCapabilityActionMetadata.allowedCapabilities).containsOnly("admin")
+  @Test fun `custom capability access`() {
+    val response = webActionMetadataAction.getAll()
 
-    val requestTypeAction = response.webActionMetadata.find {
-      it.name.equals(TestWebActionModule.RequestTypeAction::class.simpleName)
-    }
-    assertThat(requestTypeAction!!.requestType).isEqualTo(Shipment::class.qualifiedName)
-    assertThat(requestTypeAction.types).isNotEmpty
+    val metadata = response.webActionMetadata.find {
+      it.name == TestWebActionModule.CustomCapabilityAccessAction::class.simpleName
+    }!!
+    assertThat(metadata.requestMediaTypes).containsOnly("*/*")
+    assertThat(metadata.responseMediaType).isEqualTo(MediaTypes.TEXT_PLAIN_UTF8)
+    assertThat(metadata.parameterTypes).isEmpty()
+    assertThat(metadata.pathPattern).isEqualTo("/custom_capability_access")
+    assertThat(metadata.allowedServices).isEmpty()
+    assertThat(metadata.allowedCapabilities).containsOnly("admin")
+  }
+
+  @Test fun `request type`() {
+    val response = webActionMetadataAction.getAll()
+
+    val metadata = response.webActionMetadata.find {
+      it.name == TestWebActionModule.GrpcAction::class.simpleName
+    }!!
+    assertThat(metadata.requestType).isEqualTo(Shipment::class.qualifiedName)
+    assertThat(metadata.types).isNotEmpty
+  }
+
+  @Test fun `grpc`() {
+    val response = webActionMetadataAction.getAll()
+
+    val metadata = response.webActionMetadata.find {
+      it.name == TestWebActionModule.GrpcAction::class.simpleName
+    }!!
+    assertThat(metadata.dispatchMechanism).isEqualTo(DispatchMechanism.GRPC)
+    assertThat(metadata.requestType).isEqualTo(Shipment::class.qualifiedName)
+    assertThat(metadata.returnType).isEqualTo(Warehouse::class.qualifiedName)
+    assertThat(metadata.types).isNotEmpty
   }
 }
