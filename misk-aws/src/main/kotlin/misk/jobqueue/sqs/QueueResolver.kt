@@ -20,11 +20,10 @@ internal class QueueResolver @Inject internal constructor(
   @ForSqsReceiving private val defaultForReceivingSQS: AmazonSQS,
   @ForSqsReceiving private val crossRegionForReceivingSQS: Map<AwsRegion, AmazonSQS>,
   private val externalQueues: Map<QueueName, AwsSqsQueueConfig>,
-  config: AwsSqsJobQueueConfig
+  private val dlqProvider: DeadLetterQueueProvider
 ) {
   private val forSendingMapping = ConcurrentHashMap<QueueName, ResolvedQueue>()
   private val forReceivingMapping = ConcurrentHashMap<QueueName, ResolvedQueue>()
-  private val globalDlq = config.global_dead_letter_queue_name?.let { QueueName(it) }
 
   fun getForSending(q: QueueName): ResolvedQueue {
     return forSendingMapping.computeIfAbsent(q) { resolve(it, false) }
@@ -35,15 +34,8 @@ internal class QueueResolver @Inject internal constructor(
   }
 
   fun getDeadLetter(q: QueueName): ResolvedQueue {
-    // If a global DLQ is configured, use it; otherwise revert to a queue named after the parent queue.
-    val dlq = when {
-      globalDlq != null -> globalDlq
-      q.isDeadLetterQueue -> q
-      else -> q.deadLetterQueue
-    }
-
     // Dead-letter queue is always used for sending, never for receiving.
-    return resolve(dlq, false)
+    return resolve(dlqProvider.deadLetterQueueFor(q), false)
   }
 
   private fun resolve(q: QueueName, forSqsReceiving: Boolean): ResolvedQueue {
@@ -82,12 +74,12 @@ internal const val deadLetterQueueSuffix = "_dlq"
 
 internal val QueueName.isDeadLetterQueue get() = value.endsWith(deadLetterQueueSuffix)
 internal val QueueName.deadLetterQueue
-  get() = if (isDeadLetterQueue) this else QueueName(value + deadLetterQueueSuffix)
+  get() = if (isDeadLetterQueue) this else QueueName(parentQueue.value + deadLetterQueueSuffix)
 
 internal const val retryQueueSuffix = "_retryq"
 val QueueName.isRetryQueue get() = value.endsWith(retryQueueSuffix)
 val QueueName.retryQueue
-  get() = if (isRetryQueue) this else QueueName(value + retryQueueSuffix)
+  get() = if (isRetryQueue) this else QueueName(parentQueue.value + retryQueueSuffix)
 
 val QueueName.parentQueue
   get() = when {
