@@ -124,6 +124,7 @@ class StartDatabaseService(
           DataSourceType.TIDB -> {
             DockerTidbCluster(
                 moshi = moshi,
+                resourceLoader = ResourceLoader.SYSTEM,
                 config = config.config,
                 docker = docker)
           }
