@@ -1,12 +1,15 @@
 package misk.database
 
 import com.github.dockerjava.api.DockerClient
+import com.github.dockerjava.api.model.Bind
 import com.github.dockerjava.api.model.ExposedPort
 import com.github.dockerjava.api.model.Frame
 import com.github.dockerjava.api.model.Ports
+import com.github.dockerjava.api.model.Volume
 import com.github.dockerjava.core.DockerClientBuilder
 import com.github.dockerjava.core.async.ResultCallbackTemplate
 import com.github.dockerjava.netty.NettyDockerCmdExecFactory
+import com.google.common.collect.Lists
 import com.squareup.moshi.Moshi
 import com.zaxxer.hikari.util.DriverDataSource
 import misk.backoff.DontRetryException
@@ -16,15 +19,36 @@ import misk.environment.Environment
 import misk.jdbc.DataSourceConfig
 import misk.jdbc.DataSourceType
 import misk.jdbc.uniqueInt
+import misk.resources.ResourceLoader
 import mu.KotlinLogging
+import java.nio.file.Files
+import java.nio.file.Path
+import java.nio.file.Paths
 import java.sql.Connection
 import java.time.Duration
 import java.util.Properties
 import java.util.concurrent.atomic.AtomicBoolean
+import kotlin.concurrent.thread
 
 class TidbCluster(
+  val resourceLoader: ResourceLoader,
   val config: DataSourceConfig
 ) {
+  val httpPort = 10080
+  val mysqlPort = 4000
+  val configDir: Path
+
+  init {
+    configDir =
+        Paths.get("/tmp/tidb_conf_${System.currentTimeMillis()}")
+    Files.createDirectories(configDir)
+    resourceLoader.copyTo("classpath:/misk/tidb", configDir)
+    Runtime.getRuntime().addShutdownHook(
+        thread(start = false) {
+          configDir.toFile().deleteRecursively()
+        })
+  }
+
   /**
    * Connect to vtgate.
    */
@@ -37,17 +61,15 @@ class TidbCluster(
         jdbcUrl, config.type.driverClassName, Properties(),
         config.username, config.password)
   }
-
-  val httpPort = 10080
-  val mysqlPort = 4000
 }
 
 class DockerTidbCluster(
   val moshi: Moshi,
+  val resourceLoader: ResourceLoader,
   val config: DataSourceConfig,
   val docker: DockerClient
 ) : DatabaseServer {
-  val cluster = TidbCluster(config = config)
+  val cluster = TidbCluster(resourceLoader = resourceLoader, config = config)
 
   private var containerId: String? = null
 
@@ -76,7 +98,7 @@ class DockerTidbCluster(
   companion object {
     val logger = KotlinLogging.logger {}
 
-    const val SHA = "995053b0f94980e1a40d38efd208a1e8e7a659d1d48421367af57d243dc015a2"
+    const val SHA = "8974fa7e6080bf417c1db24da1c9599e1edbfc997d49b44bece759334229e685"
     const val IMAGE = "pingcap/tidb@sha256:$SHA"
     const val CONTAINER_NAME = "misk-tidb-testing"
 
@@ -112,6 +134,8 @@ class DockerTidbCluster(
             "Config port ${cluster.config.port} has to match Tidb Docker container: ${cluster.mysqlPort}")
       }
     }
+    val confVolume = Volume("/etc/tidb")
+    val cmd = arrayOf("-config=/etc/tidb/tidb.toml", "-config-strict")
     val httpPort = ExposedPort.tcp(cluster.httpPort)
     val mysqlPort = ExposedPort.tcp(cluster.mysqlPort)
     val ports = Ports()
@@ -140,6 +164,9 @@ class DockerTidbCluster(
     if (containerId == null) {
       logger.info("Starting TiDB cluster")
       containerId = docker.createContainerCmd(IMAGE)
+          .withCmd(cmd.toList())
+          .withVolumes(confVolume)
+          .withBinds(Bind(cluster.configDir.toAbsolutePath().toString(), confVolume))
           .withExposedPorts(mysqlPort, httpPort)
           .withPortBindings(ports)
           .withTty(true)
