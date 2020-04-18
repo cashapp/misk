@@ -3,7 +3,13 @@ package misk.web.actions
 import misk.inject.KAbstractModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
-import misk.web.*
+import misk.web.Delete
+import misk.web.Get
+import misk.web.Patch
+import misk.web.Post
+import misk.web.Response
+import misk.web.WebActionModule
+import misk.web.WebTestingModule
 import misk.web.jetty.JettyService
 import misk.web.mediatype.MediaTypes
 import okhttp3.OkHttpClient

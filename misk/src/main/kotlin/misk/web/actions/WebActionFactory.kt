@@ -8,8 +8,16 @@ import misk.ApplicationInterceptor
 import misk.MiskDefault
 import misk.asAction
 import misk.scope.ActionScope
-import misk.web.*
 import misk.web.BoundAction
+import misk.web.ConnectWebSocket
+import misk.web.Delete
+import misk.web.DispatchMechanism
+import misk.web.Get
+import misk.web.NetworkInterceptor
+import misk.web.Patch
+import misk.web.PathPattern
+import misk.web.Post
+import misk.web.RequestBody
 import misk.web.WebActionBinding
 import misk.web.mediatype.MediaRange
 import misk.web.mediatype.MediaTypes
