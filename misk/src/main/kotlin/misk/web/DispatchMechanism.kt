@@ -18,7 +18,6 @@ enum class DispatchMechanism {
    * This can be misleading: web sockets don't behave like normal GETs (they are upgraded), and GRPC
    * calls don't behave like normal POSTS (they are duplex).
    */
-  // TODO(jeff) - Make this an enum?
   val method: String
     get() {
       return when (this) {
