@@ -62,6 +62,7 @@ internal class WebActionsServlet @Inject constructor(
   override fun service(request: HttpServletRequest?, response: HttpServletResponse?) {
     if (request?.method == "PATCH" && response != null) {
       doPatch(request, response)
+      return
     }
     super.service(request, response)
   }
