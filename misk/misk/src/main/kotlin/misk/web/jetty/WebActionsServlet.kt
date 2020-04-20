@@ -59,11 +59,23 @@ internal class WebActionsServlet @Inject constructor(
     }
   }
 
+  override fun service(request: HttpServletRequest?, response: HttpServletResponse?) {
+    if (request?.method == "PATCH" && response != null) {
+      doPatch(request, response)
+      return
+    }
+    super.service(request, response)
+  }
+
   override fun doGet(request: HttpServletRequest, response: HttpServletResponse) {
     handleCall(request, response)
   }
 
   override fun doPost(request: HttpServletRequest, response: HttpServletResponse) {
+    handleCall(request, response)
+  }
+
+  fun doPatch(request: HttpServletRequest, response: HttpServletResponse) {
     handleCall(request, response)
   }
 
@@ -176,6 +188,7 @@ internal fun HttpServletRequest.dispatchMechanism(): DispatchMechanism {
       MediaTypes.APPLICATION_GRPC_MEDIA_TYPE -> DispatchMechanism.GRPC
       else -> DispatchMechanism.POST
     }
+    "PATCH" -> DispatchMechanism.PATCH
     HttpMethod.DELETE.name -> DispatchMechanism.DELETE
     else -> throw ProtocolException("unexpected method: $method")
   }
