@@ -10,6 +10,9 @@ annotation class Post(val pathPattern: String)
 annotation class Delete(val pathPattern: String)
 
 @Target(AnnotationTarget.FUNCTION)
+annotation class Patch(val pathPattern: String)
+
+@Target(AnnotationTarget.FUNCTION)
 annotation class ConnectWebSocket(val pathPattern: String)
 
 @Target(AnnotationTarget.VALUE_PARAMETER)

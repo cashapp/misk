@@ -50,7 +50,7 @@ data class WebActionMetadata(
   val pathPattern: String,
   val applicationInterceptors: List<String>,
   val networkInterceptors: List<String>,
-  val httpMethod: HttpMethod,
+  val httpMethod: String,
   val allowedServices: Set<String>,
   val allowedCapabilities: Set<String>
 )

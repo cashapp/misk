@@ -62,7 +62,7 @@ class WebActionMetadataActionTest {
     val metadata = response.webActionMetadata.find {
       it.name == TestWebActionModule.GrpcAction::class.simpleName
     }!!
-    assertThat(metadata.httpMethod).isEqualTo(HttpMethod.POST)
+    assertThat(metadata.httpMethod).isEqualTo("POST")
     assertThat(metadata.requestType).isEqualTo(Shipment::class.qualifiedName)
     assertThat(metadata.returnType).isEqualTo(Warehouse::class.qualifiedName)
     assertThat(metadata.types).isNotEmpty

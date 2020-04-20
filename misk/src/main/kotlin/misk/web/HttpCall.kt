@@ -122,7 +122,7 @@ interface HttpCall {
 
     return okhttp3.Request.Builder()
         .url(url)
-        .method(dispatchMechanism.method.toString(), okRequestBody)
+        .method(dispatchMechanism.method, okRequestBody)
         .headers(requestHeaders)
         .build()
   }
