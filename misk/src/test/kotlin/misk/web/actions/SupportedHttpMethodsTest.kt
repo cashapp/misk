@@ -7,6 +7,7 @@ import misk.web.Delete
 import misk.web.Get
 import misk.web.Patch
 import misk.web.Post
+import misk.web.Put
 import misk.web.Response
 import misk.web.WebActionModule
 import misk.web.WebTestingModule
@@ -66,6 +67,18 @@ class SupportedHttpMethodsTest {
   }
 
   @Test
+  fun put() {
+    val request = Request.Builder()
+        .put("update resource".toRequestBody(MediaTypes.TEXT_PLAIN_UTF8_MEDIA_TYPE))
+        .url(jettyService.httpServerUrl.newBuilder().encodedPath("/resources/id").build())
+        .build()
+
+    val response = httpClient.newCall(request).execute()
+    assertThat(response.isSuccessful).isTrue()
+    assertThat(response.body?.string()).isEqualTo("updated")
+  }
+
+  @Test
   fun delete() {
     val request = Request.Builder()
         .delete()
@@ -83,6 +96,7 @@ class SupportedHttpMethodsTest {
       install(WebActionModule.create<PostAction>())
       install(WebActionModule.create<PatchAction>())
       install(WebActionModule.create<DeleteAction>())
+      install(WebActionModule.create<PutAction>())
     }
   }
 
@@ -99,6 +113,11 @@ class SupportedHttpMethodsTest {
   internal class PatchAction @Inject constructor() : WebAction {
     @Patch("/resources/id")
     fun patch(): String = "updated"
+  }
+
+  internal class PutAction @Inject constructor() : WebAction {
+    @Put("/resources/id")
+    fun put(): String = "updated"
   }
 
   internal class DeleteAction @Inject constructor() : WebAction {
