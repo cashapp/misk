@@ -55,7 +55,7 @@ data class WebConfig(
    * If true responses which are larger than the minGzipSize will be compressed. Gzip compression
    * always enabled for requests and cannot be turned off.
    */
-  val gzip: Boolean = false,
+  val gzip: Boolean = true,
 
   /** The minimum size in bytes before the response body will be compressed. */
   val minGzipSize: Int = 1024
