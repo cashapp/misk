@@ -14,6 +14,7 @@ import misk.web.Delete
 import misk.web.DispatchMechanism
 import misk.web.Get
 import misk.web.NetworkInterceptor
+import misk.web.Patch
 import misk.web.PathPattern
 import misk.web.Post
 import misk.web.RequestBody
@@ -48,6 +49,7 @@ internal class WebActionFactory @Inject constructor(
     val actionFunctions = webActionClass.functions.mapNotNull {
       if (it.findAnnotationWithOverrides<Get>() != null ||
           it.findAnnotationWithOverrides<Post>() != null ||
+          it.findAnnotationWithOverrides<Patch>() != null ||
           it.findAnnotationWithOverrides<Delete>() != null ||
           it.findAnnotationWithOverrides<ConnectWebSocket>() != null ||
           it.findAnnotationWithOverrides<WireRpc>() != null) {
@@ -57,7 +59,7 @@ internal class WebActionFactory @Inject constructor(
     }
 
     require(actionFunctions.isNotEmpty()) {
-      "no @Get, @Post, @Delete, @ConnectWebSocket, or @Grpc annotations on ${webActionClass.simpleName}"
+      "no @Get, @Post, @Patch, @Delete, @ConnectWebSocket, or @Grpc annotations on ${webActionClass.simpleName}"
     }
 
     require(actionFunctions.size == 1) {
@@ -69,6 +71,7 @@ internal class WebActionFactory @Inject constructor(
     val actionFunction = actionFunctions.first()
     val get = actionFunction.findAnnotationWithOverrides<Get>()
     val post = actionFunction.findAnnotationWithOverrides<Post>()
+    val patch = actionFunction.findAnnotationWithOverrides<Patch>()
     val delete = actionFunction.findAnnotationWithOverrides<Delete>()
     val connectWebSocket = actionFunction.findAnnotationWithOverrides<ConnectWebSocket>()
     val grpc = actionFunction.findAnnotationWithOverrides<WireRpc>()
@@ -90,6 +93,10 @@ internal class WebActionFactory @Inject constructor(
     if (post != null) {
       collectBoundActions(result, provider, actionFunction,
           effectivePrefix + post.pathPattern, DispatchMechanism.POST)
+    }
+    if (patch != null) {
+      collectBoundActions(result, provider, actionFunction,
+          effectivePrefix + patch.pathPattern, DispatchMechanism.PATCH)
     }
     if (delete != null) {
       collectBoundActions(result, provider, actionFunction,
