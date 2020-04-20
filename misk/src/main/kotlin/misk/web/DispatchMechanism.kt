@@ -8,6 +8,7 @@ enum class DispatchMechanism {
   GET,
   POST,
   PATCH,
+  PUT,
   DELETE,
   GRPC,
   WEBSOCKET;
@@ -24,6 +25,7 @@ enum class DispatchMechanism {
         GET -> "GET"
         POST -> "POST"
         PATCH -> "PATCH"
+        PUT -> "PUT"
         DELETE -> "DELETE"
 
         // gRPC layers over POST. https://github.com/grpc/grpc/blob/master/doc/PROTOCOL-HTTP2.md

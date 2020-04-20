@@ -83,6 +83,10 @@ internal class WebActionsServlet @Inject constructor(
     handleCall(request, response)
   }
 
+  override fun doPut(request: HttpServletRequest, response: HttpServletResponse) {
+    handleCall(request, response)
+  }
+
   private fun handleCall(request: HttpServletRequest, response: HttpServletResponse) {
     try {
       val httpCall = ServletHttpCall.create(
@@ -189,6 +193,7 @@ internal fun HttpServletRequest.dispatchMechanism(): DispatchMechanism {
       else -> DispatchMechanism.POST
     }
     "PATCH" -> DispatchMechanism.PATCH
+    HttpMethod.PUT.name -> DispatchMechanism.PUT
     HttpMethod.DELETE.name -> DispatchMechanism.DELETE
     else -> throw ProtocolException("unexpected method: $method")
   }
