@@ -7,6 +7,9 @@ annotation class Get(val pathPattern: String)
 annotation class Post(val pathPattern: String)
 
 @Target(AnnotationTarget.FUNCTION)
+annotation class Put(val pathPattern: String)
+
+@Target(AnnotationTarget.FUNCTION)
 annotation class Delete(val pathPattern: String)
 
 @Target(AnnotationTarget.FUNCTION)
