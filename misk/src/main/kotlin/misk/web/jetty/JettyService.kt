@@ -8,6 +8,7 @@ import misk.security.ssl.SslLoader
 import misk.security.ssl.TlsProtocols
 import misk.web.WebConfig
 import misk.web.WebSslConfig
+import misk.web.mediatype.MediaTypes
 import okhttp3.HttpUrl
 import org.eclipse.jetty.alpn.server.ALPNServerConnectionFactory
 import org.eclipse.jetty.http2.server.HTTP2ServerConnectionFactory
@@ -185,6 +186,7 @@ class JettyService @Inject internal constructor(
     if (webConfig.gzip) {
       gzipHandler.minGzipSize = webConfig.minGzipSize
       gzipHandler.addIncludedMethods("POST")
+      gzipHandler.addExcludedMimeTypes(MediaTypes.APPLICATION_GRPC)
     } else {
       // GET is enabled by default for gzipHandler.
       gzipHandler.addExcludedMethods("GET")
