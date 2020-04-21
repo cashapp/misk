@@ -20,6 +20,7 @@ import okio.sink
 import okio.source
 import org.eclipse.jetty.http.HttpMethod
 import org.eclipse.jetty.http2.HTTP2Connection
+import org.eclipse.jetty.server.Request
 import org.eclipse.jetty.server.Response
 import org.eclipse.jetty.server.ServerConnector
 import org.eclipse.jetty.unixsocket.UnixSocketConnector
@@ -94,10 +95,10 @@ internal class WebActionsServlet @Inject constructor(
     try {
       val httpCall = ServletHttpCall.create(
           request = request,
-          linkLayerAddress = with ((request as? org.eclipse.jetty.server.Request)?.httpChannel?.connector) {
+          linkLayerLocalAddress = with((request as? Request)?.httpChannel?.connector) {
             when (this) {
               is UnixSocketConnector -> SocketAddress.Unix(this.unixSocket)
-              is ServerConnector -> SocketAddress.Network(this.host, this.localPort)
+              is ServerConnector -> SocketAddress.Network(this.host ?: "0.0.0.0", this.localPort)
               else -> throw IllegalStateException("Unknown socket connector.")
             }
           },

@@ -26,7 +26,7 @@ interface HttpCall {
 
   /** Immutable information about the incoming HTTP request. */
   val url: HttpUrl
-  val linkLayerAddress: SocketAddress?
+  val linkLayerLocalAddress: SocketAddress?
   val dispatchMechanism: DispatchMechanism
   val requestHeaders: Headers
 
