@@ -6,6 +6,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.util.concurrent.atomic.AtomicLong
 import javax.inject.Inject
+import kotlin.concurrent.thread
 import kotlin.test.assertFailsWith
 
 @MiskTest
@@ -49,6 +50,14 @@ class FakeTokenGeneratorTest {
     assertThat(token1).isEqualTo("payment000000000000000001")
     assertThat(token2).isEqualTo("cst0mer000000000000000002")
     assertThat(token3).isEqualTo("payment000000000000000002")
+  }
+
+  @Test
+  fun generationIsThreadSafe() {
+    (1..30).map {
+      thread { (1..100).forEach { tokenGenerator.generate() } }
+    }.forEach { it.join() }
+    assertThat(tokenGenerator.generate()).isEqualTo("0000000000000000000003001")
   }
 
   @Test
