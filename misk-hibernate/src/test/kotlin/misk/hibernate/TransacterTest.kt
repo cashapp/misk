@@ -380,7 +380,7 @@ abstract class TransacterTest {
       }
     }
     transacter.transaction { session ->
-      assertThat(queryFactory.newQuery<MovieQuery>().list(session)).hasSize(1)
+      assertThat(queryFactory.newQuery<MovieQuery>().allowTableScan().list(session)).hasSize(1)
     }
   }
 
