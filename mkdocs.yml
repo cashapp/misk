@@ -52,7 +52,6 @@ nav:
       - 'misk-hibernate': 0.x/misk-hibernate/index.md
       - 'misk-hibernate-testing': 0.x/misk-hibernate-testing/index.md
       - 'misk-inject': 0.x/misk-inject/index.md
-      - 'misk-jaeger': 0.x/misk-jaeger/index.md
       - 'misk-jobqueue': 0.x/misk-jobqueue/index.md
       - 'misk-jobqueue-testing': 0.x/misk-jobqueue-testing/index.md
       - 'misk-metrics-digester': 0.x/misk-metrics-digester/index.md

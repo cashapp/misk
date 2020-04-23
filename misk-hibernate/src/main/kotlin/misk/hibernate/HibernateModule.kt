@@ -3,27 +3,14 @@ package misk.hibernate
 import io.opentracing.Tracer
 import misk.ServiceModule
 import misk.concurrent.ExecutorServiceFactory
+import misk.database.StartDatabaseService
 import misk.environment.Environment
 import misk.healthchecks.HealthCheck
 import misk.hibernate.ReflectionQuery.QueryLimitsConfig
-import misk.inject.KAbstractModule
-import misk.inject.asSingleton
-import misk.inject.keyOf
-import misk.inject.setOfType
-import misk.inject.toKey
-import misk.jdbc.DataSourceClusterConfig
-import misk.jdbc.DataSourceConfig
-import misk.jdbc.DataSourceConnector
-import misk.jdbc.DataSourceDecorator
-import misk.jdbc.DataSourceService
-import misk.jdbc.DataSourceType
-import misk.jdbc.DatabasePool
-import misk.jdbc.PingDatabaseService
-import misk.jdbc.RealDatabasePool
-import misk.jdbc.SpanInjector
+import misk.inject.*
+import misk.jdbc.*
 import misk.metrics.Metrics
 import misk.resources.ResourceLoader
-import misk.database.StartDatabaseService
 import misk.web.exceptions.ExceptionMapperModule
 import org.hibernate.SessionFactory
 import org.hibernate.event.spi.EventType
@@ -253,18 +240,6 @@ class HibernateModule(
     } else {
       install(ServiceModule<TransacterService>(qualifier)
           .dependsOn<DataSourceService>(qualifier))
-    }
-
-    if (config.type == DataSourceType.VITESS_MYSQL) {
-      val jaegerSpanInjectorDecoratorKey = SpanInjector::class.toKey(qualifier)
-      bind(jaegerSpanInjectorDecoratorKey)
-          .toProvider(object : Provider<SpanInjector> {
-            @com.google.inject.Inject(optional = true)
-            var tracer: Tracer? = null
-
-            override fun get(): SpanInjector =
-                SpanInjector(tracer, config)
-          }).asSingleton()
     }
 
     val healthCheckKey = keyOf<HealthCheck>(qualifier)

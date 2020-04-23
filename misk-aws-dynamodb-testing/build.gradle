@@ -1,6 +1,5 @@
 dependencies {
   implementation dep.awsApi
-  implementation dep.tracingJaeger
   implementation project(':misk')
   implementation project(':misk-aws')
   implementation project(':misk-testing')

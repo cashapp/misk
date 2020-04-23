@@ -3,7 +3,6 @@ package misk.jobqueue.sqs
 import com.amazonaws.services.sqs.model.MessageAttributeValue
 import com.amazonaws.services.sqs.model.SendMessageRequest
 import com.squareup.moshi.Moshi
-import io.jaegertracing.internal.JaegerSpan
 import io.opentracing.Tracer
 import misk.jobqueue.JobQueue
 import misk.jobqueue.QueueName
@@ -54,16 +53,6 @@ internal class SqsJobQueue @Inject internal constructor(
             val metadata = mutableMapOf(
                 SqsJob.JOBQUEUE_METADATA_ORIGIN_QUEUE to queueName.parentQueue.value,
                 SqsJob.JOBQUEUE_METADATA_IDEMPOTENCE_KEY to idempotenceKey)
-
-            // Preserve original trace id, if available.
-            (span as? JaegerSpan)?.let {
-              val traceId = it.context().traceId.toString()
-              metadata[SqsJob.JOBQUEUE_METADATA_ORIGINAL_TRACE_ID] = traceId
-              // TODO(bruno): drop this attribute after rollout; moved to metadata
-              addMessageAttributesEntry(
-                SqsJob.ORIGINAL_TRACE_ID_ATTR,
-                MessageAttributeValue().withDataType("String").withStringValue(traceId))
-            }
 
             // Add the internal metadata dictionary, encoded as JSON.
             addMessageAttributesEntry(SqsJob.JOBQUEUE_METADATA_ATTR, MessageAttributeValue()

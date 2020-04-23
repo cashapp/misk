@@ -1,5 +1,4 @@
 dependencies {
-  compile dep.tracingJaeger
   compile project(':misk')
 
   testCompile dep.assertj
