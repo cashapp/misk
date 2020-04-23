@@ -1,14 +1,14 @@
 package misk.tokens
 
 import misk.tokens.TokenGenerator.Companion.canonicalize
-import java.util.concurrent.ConcurrentHashMap
+import java.util.Collections
 import java.util.concurrent.atomic.AtomicLong
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class FakeTokenGenerator @Inject constructor() : TokenGenerator {
-  internal val nextByLabel = ConcurrentHashMap<String, AtomicLong>()
+  internal val nextByLabel = Collections.synchronizedMap<String, AtomicLong>(mutableMapOf())
 
   override fun generate(label: String?, length: Int): String {
     require(length in 4..25) { "unexpected length: $length" }
