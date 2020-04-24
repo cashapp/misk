@@ -43,6 +43,7 @@ class MoviesTestModule(
       DataSourceType.VITESS_MYSQL -> config.vitess_mysql_data_source
       DataSourceType.MYSQL -> config.mysql_data_source
       DataSourceType.COCKROACHDB -> config.cockroachdb_data_source
+      DataSourceType.POSTGRESQL -> config.postgresql_data_source
       DataSourceType.TIDB -> config.tidb_data_source
       DataSourceType.HSQLDB -> throw RuntimeException("Not supported (yet?)")
     }
@@ -53,6 +54,7 @@ class MoviesTestModule(
     val vitess_mysql_data_source: DataSourceConfig,
     val mysql_data_source: DataSourceConfig,
     val cockroachdb_data_source: DataSourceConfig,
+    val postgresql_data_source: DataSourceConfig,
     val tidb_data_source: DataSourceConfig
   ) : Config
 }
