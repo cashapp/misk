@@ -72,6 +72,11 @@ class DataSourceService(
       hikariConfig.minimumIdle = 5
       if (config.type == DataSourceType.MYSQL || config.type == DataSourceType.TIDB) {
         hikariConfig.connectionInitSql = "SET time_zone = '+00:00'"
+        if (config.type == DataSourceType.TIDB) {
+          // This should be the default in all TiDB 3.1+ clusters but we run this just to make sure
+          // as misk application do rely on this behavior
+          hikariConfig.connectionInitSql += "; set @@tidb_txn_mode = 'pessimistic'"
+        }
       }
 
       // https://github.com/brettwooldridge/HikariCP/wiki/MySQL-Configuration
