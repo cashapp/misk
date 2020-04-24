@@ -13,6 +13,9 @@ import okhttp3.Request
 import java.sql.Connection
 import java.sql.Timestamp
 import java.util.ArrayDeque
+import java.util.Collections
+import java.util.regex.Matcher
+import java.util.regex.Pattern
 import javax.inject.Singleton
 import javax.sql.DataSource
 
@@ -103,6 +106,8 @@ class VitessScaleSafetyChecks(
   }
 
   inner class TableScanDetector : ExtendedQueryExecutionListener() {
+    private val tablePattern = Collections.synchronizedMap<String, Pattern>(mutableMapOf())
+
     private val mysqlTimeBeforeQuery: ThreadLocal<Timestamp?> =
       ThreadLocal.withInitial { null }
 
@@ -123,7 +128,7 @@ class VitessScaleSafetyChecks(
         for (rawQuery in queries) {
           // Find the keyspaces where this query could potentially belong
           val potentialKeyspaces = cluster()!!.keyspaces().filter { keyspace ->
-            keyspace.value.tables.keys.any { table -> rawQuery.contains(table) }
+            keyspace.value.tables.keys.any { table -> containsTable(rawQuery, table) }
           }
 
           for ((name, keyspace) in potentialKeyspaces) {
@@ -138,6 +143,16 @@ class VitessScaleSafetyChecks(
           }
         }
       }
+    }
+
+    private fun containsTable(query: String, table: String): Boolean {
+      val pattern = tablePattern.computeIfAbsent(table) {
+        val pattern = "\\b$it\\b"
+        Pattern.compile(pattern)
+      }
+
+      val m: Matcher = pattern.matcher(query)
+      return m.find()
     }
   }
 
