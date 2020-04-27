@@ -61,7 +61,7 @@ class BulkShardMigrator<R : DbRoot<R>, C : DbChild<R, C>> private constructor(
   private var rootColumnName = "customer_id"
   private var sourceRoot: Id<R>? = null
   private var targetRoot: Id<R>? = null
-  private var batched: Boolean = false
+  private var batched: Boolean = true
   private var latestBatchOnly: Boolean = false
   private var batchSize = 100
   private var mutationsByColumnName: Map<String, Mutation>? = null
