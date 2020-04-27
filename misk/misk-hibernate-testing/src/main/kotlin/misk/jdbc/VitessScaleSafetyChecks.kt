@@ -137,9 +137,8 @@ class VitessScaleSafetyChecks(
             } else {
               "vt_${name}_0"
             }
-            connection!!.createStatement().use { s -> s.execute("USE `$database`") }
 
-            ScaleSafetyChecks.checkQueryForTableScan(c, rawQuery)
+            ScaleSafetyChecks.checkQueryForTableScan(c, database, rawQuery)
           }
         }
       }
