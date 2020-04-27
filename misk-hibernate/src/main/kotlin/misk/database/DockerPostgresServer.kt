@@ -131,9 +131,7 @@ class DockerPostgresServer(
     logger.info("Started Postgres with container id $containerId")
 
     waitUntilHealthy()
-    if (runningContainer != null) {
-      createDatabase()
-    }
+    createDatabase()
   }
 
   private fun waitUntilHealthy() {
@@ -142,8 +140,9 @@ class DockerPostgresServer(
           Duration.ofSeconds(1),
           Duration.ofSeconds(5))) {
         server.openConnection().use { c ->
-          val result = c.createStatement().executeQuery("SELECT 1").uniqueInt()
-          check(result == 1)
+          val resultSet = c.createStatement().executeQuery("SELECT COUNT(*) as count FROM pg_catalog.pg_database")
+          resultSet.next()
+          check(resultSet.getInt("count") > 0)
         }
       }
     } catch (e: DontRetryException) {
