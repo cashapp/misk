@@ -30,5 +30,5 @@ postgresql_data_source:
   type: POSTGRESQL
   database: movies
   username: postgres
-  password: ""
+  password: password
   migrations_resource: classpath:/misk/hibernate/moviestestmodule-cockroachdb
