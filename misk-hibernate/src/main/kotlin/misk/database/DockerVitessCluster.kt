@@ -91,7 +91,10 @@ class VitessCluster(
         .toList().filter { Files.isDirectory(it) }
     return keyspaceDirs.associateBy(
         { it.fileName.toString() },
-        { keyspaceAdapter.fromJson(it.resolve("vschema.json").source().buffer())!! })
+        {
+          val source = it.resolve("vschema.json").source()
+          source.use { keyspaceAdapter.fromJson(source.buffer())!! }
+        })
   }
 
   /**
