@@ -23,7 +23,7 @@ object ScaleSafetyChecks {
   }
 
   fun checkQueryForTableScan(connection: Connection, query: String) {
-    if (isDml(query)) return
+    if (isDml(query) || query.startsWith("EXPLAIN", true)) return
 
     val explanations = connection.createStatement().use { statement ->
       try {
