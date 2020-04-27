@@ -22,11 +22,12 @@ object ScaleSafetyChecks {
     }
   }
 
-  fun checkQueryForTableScan(connection: Connection, query: String) {
+  fun checkQueryForTableScan(connection: Connection, database: String?, query: String) {
     if (isDml(query) || query.startsWith("EXPLAIN", true)) return
 
     val explanations = connection.createStatement().use { statement ->
       try {
+        database?.let { statement.execute("USE `$it`") }
         retry(5, FlatBackoff(Duration.ofMillis(100))) {
           statement.executeQuery("EXPLAIN ${query.replace("\n", " ")}")
               .map { Explanation.fromResultSet(it) }
