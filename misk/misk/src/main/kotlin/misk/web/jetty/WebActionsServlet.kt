@@ -181,7 +181,7 @@ internal fun HttpServletResponse.headers(): Headers {
   val result = Headers.Builder()
   for (name in headerNames) {
     for (value in getHeaders(name)) {
-      result.add(name, value)
+      result.addUnsafeNonAscii(name, value)
     }
   }
   return result.build()
