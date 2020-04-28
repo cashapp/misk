@@ -6,6 +6,7 @@ import com.squareup.protos.test.parsing.Shipment
 import com.squareup.protos.test.parsing.Warehouse
 import com.squareup.wire.GrpcCall
 import com.squareup.wire.GrpcClient
+import com.squareup.wire.GrpcMethod
 import com.squareup.wire.Service
 import com.squareup.wire.WireRpc
 import misk.grpc.Http2ClientTestingModule
@@ -133,7 +134,7 @@ internal class JsonForProtoEndpointsTest {
         .baseUrl(jettyService.httpsServerUrl!!)
         .client(httpClient)
         .build()
-    val shippingClient = grpcClient.create(ShippingClient::class)
+    val shippingClient = GrpcShippingClient(grpcClient)
 
     val responseBody = shippingClient.GetDestinationWarehouse().executeBlocking(requestBody)
     assertThat(responseBody).isEqualTo(expectedResponseBody)
@@ -180,13 +181,17 @@ internal class JsonForProtoEndpointsTest {
   }
 
   // TODO(jwilson): get Wire to generate this interface.
-  interface ShippingClient : Service {
+  class GrpcShippingClient(private val client: GrpcClient) : Service {
     @WireRpc(
         path = "/test/GetDestinationWarehouse",
         requestAdapter = "com.squareup.protos.test.parsing.Shipment#ADAPTER",
         responseAdapter = "com.squareup.protos.test.parsing.Warehouse#ADAPTER"
     )
-    fun GetDestinationWarehouse(): GrpcCall<Shipment, Warehouse>
+    fun GetDestinationWarehouse(): GrpcCall<Shipment, Warehouse>  = client.newCall(GrpcMethod(
+        path = "/test/GetDestinationWarehouse",
+        requestAdapter = Shipment.ADAPTER,
+        responseAdapter = Warehouse.ADAPTER
+    ))
   }
 
   private fun serverUrlBuilder(): HttpUrl.Builder {

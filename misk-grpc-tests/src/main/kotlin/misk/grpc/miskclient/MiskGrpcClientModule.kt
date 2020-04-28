@@ -9,13 +9,14 @@ import misk.inject.KAbstractModule
 import misk.security.ssl.SslLoader
 import misk.security.ssl.TrustStoreConfig
 import okhttp3.HttpUrl
+import routeguide.GrpcRouteGuideClient
 import routeguide.RouteGuideClient
 import javax.inject.Named
 import javax.inject.Singleton
 
 class MiskGrpcClientModule : KAbstractModule() {
   override fun configure() {
-    install(GrpcClientModule.create<RouteGuideClient>("default"))
+    install(GrpcClientModule.create<RouteGuideClient, GrpcRouteGuideClient>("default"))
   }
 
   @Provides

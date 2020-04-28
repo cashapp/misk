@@ -14,9 +14,12 @@ import kotlin.reflect.KClass
 /**
  * Creates a gRPC client given a Wire-generated interface and HTTP configuration.
  */
-class GrpcClientModule<T : Service>(
+class GrpcClientModule<T : Service, G : T>(
   /** The Wire-generated service interface. */
   private val kclass: KClass<T>,
+
+  /** The gRpc client implementation of the service interface */
+  private val grpcClientClass: KClass<G>,
 
   /** Name of the OkHttpClient in the application's [HttpClientsConfig]. */
   private val name: String,
@@ -34,19 +37,19 @@ class GrpcClientModule<T : Service>(
 
     val key = if (annotation == null) Key.get(kclass.java) else Key.get(kclass.java, annotation)
     bind(key)
-        .toProvider(GrpcClientProvider(kclass, name, httpClientProvider))
+        .toProvider(GrpcClientProvider(grpcClientClass, name, httpClientProvider))
         .`in`(Singleton::class.java)
   }
 
   companion object {
-    inline fun <reified T : Service> create(
+    inline fun <reified T : Service, reified G : T> create(
       name: String,
       annotation: Annotation? = null
-    ) = GrpcClientModule(T::class, name, annotation)
+    ) = GrpcClientModule(T::class, G::class, name, annotation)
   }
 
-  private class GrpcClientProvider<T : Service>(
-    private val kclass: KClass<T>,
+  private class GrpcClientProvider<T : Service, G : T>(
+    private val grpcClientClass: KClass<G>,
     private val name: String,
     private val httpClientProvider: Provider<OkHttpClient>
   ) : Provider<T> {
@@ -64,7 +67,8 @@ class GrpcClientModule<T : Service>(
           .baseUrl(baseUrl)
           .build()
 
-      return grpcClient.create(kclass)
+      // There should be *exactly one constructor* that takes in a grpcClient
+      return grpcClientClass.constructors.first().call(grpcClient)
     }
   }
 }
