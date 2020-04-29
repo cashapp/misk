@@ -120,14 +120,14 @@ class LaunchDarklyFeatureFlags @Inject constructor(
       when (k) {
         // LaunchDarkly has some built-in keys that have to be initialized with their named
         // methods.
-        "secondary" -> builder.secondary(k)
-        "ip" -> builder.ip(k)
-        "email" -> builder.email(k)
-        "name" -> builder.name(k)
-        "avatar" -> builder.avatar(k)
-        "firstName" -> builder.firstName(k)
-        "lastName" -> builder.lastName(k)
-        "country" -> builder.country(k)
+        "secondary" -> builder.secondary(v)
+        "ip" -> builder.ip(v)
+        "email" -> builder.email(v)
+        "name" -> builder.name(v)
+        "avatar" -> builder.avatar(v)
+        "firstName" -> builder.firstName(v)
+        "lastName" -> builder.lastName(v)
+        "country" -> builder.country(v)
         else -> builder.privateCustom(k, v)
       }
     }
