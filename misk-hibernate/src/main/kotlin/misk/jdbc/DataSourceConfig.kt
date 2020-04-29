@@ -35,6 +35,11 @@ enum class DataSourceType(
       hibernateDialect = "org.hibernate.dialect.PostgreSQL95Dialect",
       isVitess = false
   ),
+  POSTGRESQL(
+      driverClassName = "org.postgresql.Driver",
+      hibernateDialect = "org.hibernate.dialect.PostgreSQL95Dialect",
+      isVitess = false
+  ),
   TIDB(
       driverClassName = "io.opentracing.contrib.jdbc.TracingDriver",
       hibernateDialect = "org.hibernate.dialect.MySQL57Dialect",
@@ -112,6 +117,13 @@ data class DataSourceConfig(
         copy(
             username = "root",
             port = port ?: 26257,
+            host = host ?: "127.0.0.1",
+            database = database ?: ""
+        )
+      }
+      DataSourceType.POSTGRESQL -> {
+        copy(
+            port = port ?: 5432,
             host = host ?: "127.0.0.1",
             database = database ?: ""
         )
@@ -245,7 +257,7 @@ data class DataSourceConfig(
 
         "jdbc:vitess://${config.host}:${config.port}/${config.database}$queryParams"
       }
-      DataSourceType.COCKROACHDB -> {
+      DataSourceType.COCKROACHDB, DataSourceType.POSTGRESQL -> {
         var params = "ssl=false&user=${config.username}"
         if (env == Environment.TESTING || env == Environment.DEVELOPMENT) {
           params += "&createDatabaseIfNotExist=true"

@@ -56,7 +56,7 @@ class TruncateTablesService(
             DataSourceType.VITESS, DataSourceType.VITESS_MYSQL -> {
               "SHOW VSCHEMA TABLES"
             }
-            DataSourceType.COCKROACHDB -> {
+            DataSourceType.COCKROACHDB, DataSourceType.POSTGRESQL -> {
               "SELECT table_name FROM information_schema.tables WHERE table_catalog='${config.database}' AND table_schema='public'"
             }
           }
@@ -75,7 +75,7 @@ class TruncateTablesService(
               if (persistentTables.contains(tableName.toLowerCase(Locale.ROOT))) continue
               if (tableName.endsWith("_seq") || tableName.equals("dual")) continue
 
-              if (config.type == DataSourceType.COCKROACHDB) {
+              if (config.type == DataSourceType.COCKROACHDB || config.type == DataSourceType.POSTGRESQL) {
                 statement.addBatch("TRUNCATE $tableName CASCADE")
               } else {
                 statement.addBatch("DELETE FROM $tableName")
