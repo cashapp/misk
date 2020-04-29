@@ -123,7 +123,6 @@ data class DataSourceConfig(
       }
       DataSourceType.POSTGRESQL -> {
         copy(
-            username = "postgres",
             port = port ?: 5432,
             host = host ?: "127.0.0.1",
             database = database ?: ""
