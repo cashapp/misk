@@ -61,7 +61,7 @@ class MySqlScaleSafetyChecks(
       val queries = ScaleSafetyChecks.extractQueriesSince(connection, mysqlTime)
 
       for (rawQuery in queries) {
-        ScaleSafetyChecks.checkQueryForTableScan(connection, rawQuery)
+        ScaleSafetyChecks.checkQueryForTableScan(connection, null, rawQuery)
       }
     }
   }
