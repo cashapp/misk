@@ -128,6 +128,12 @@ class StartDatabaseService(
                 config = config.config,
                 docker = docker)
           }
+          DataSourceType.POSTGRESQL -> {
+            DockerPostgresServer(
+                config = config.config,
+                docker = docker
+            )
+          }
           else -> null
         }
 
