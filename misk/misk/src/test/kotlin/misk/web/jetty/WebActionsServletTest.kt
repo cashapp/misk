@@ -43,6 +43,15 @@ class WebActionsServletTest {
   }
 
   @Test
+  fun parseNonAsciiHeaders() {
+    val response = get("/potato", false, Headers.Builder()
+        .addUnsafeNonAscii("X-device-name", "Walé Iphone")
+        .build())
+
+    assertThat(response.code).isEqualTo(200)
+  }
+
+  @Test
   fun udsSocketSuccess() {
     val response = get("/potato", true)
     assertThat(response.header("ActualSocketName")).isEqualTo(socketName)
@@ -80,13 +89,16 @@ class WebActionsServletTest {
 
   internal data class TestActionResponse(val text: String)
 
-  private fun get(path: String, viaUDS: Boolean): okhttp3.Response =
-    with (Request.Builder().url(jettyService.httpServerUrl.newBuilder().encodedPath(path).build())) {
-      when {
-        viaUDS -> {udsCall(get())}
-        else -> {call(get())}
+  private fun get(path: String, viaUDS: Boolean, headers: Headers = Headers.headersOf()): okhttp3.Response =
+      with(Request.Builder()
+          .headers(headers)
+          .url(jettyService.httpServerUrl.newBuilder().encodedPath(path)
+              .build())) {
+        when {
+          viaUDS -> { udsCall(get()) }
+          else -> { call(get()) }
+        }
       }
-    }
 
   private fun call(request: Request.Builder): okhttp3.Response {
     return OkHttpClient().newCall(request.build()).execute()
