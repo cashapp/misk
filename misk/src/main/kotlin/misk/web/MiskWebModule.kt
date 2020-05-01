@@ -22,6 +22,7 @@ import misk.web.actions.ReadinessCheckAction
 import misk.web.actions.StatusAction
 import misk.web.exceptions.ActionExceptionLogLevelConfig
 import misk.web.exceptions.ActionExceptionMapper
+import misk.web.exceptions.EofExceptionMapper
 import misk.web.exceptions.ExceptionHandlingInterceptor
 import misk.web.exceptions.ExceptionMapperModule
 import misk.web.exceptions.IOExceptionMapper
@@ -54,6 +55,7 @@ import misk.web.marshal.ProtobufUnmarshaller
 import misk.web.marshal.Unmarshaller
 import misk.web.proxy.WebProxyEntry
 import misk.web.resources.StaticResourceEntry
+import org.eclipse.jetty.io.EofException
 import org.eclipse.jetty.server.handler.StatisticsHandler
 import org.eclipse.jetty.server.handler.gzip.GzipHandler
 import org.eclipse.jetty.util.thread.QueuedThreadPool
@@ -136,6 +138,7 @@ class MiskWebModule(private val config: WebConfig) : KAbstractModule() {
 
     install(ExceptionMapperModule.create<ActionException, ActionExceptionMapper>())
     install(ExceptionMapperModule.create<IOException, IOExceptionMapper>())
+    install(ExceptionMapperModule.create<EofException, EofExceptionMapper>())
 
     // Register built-in feature bindings.
     multibind<FeatureBinding.Factory>().toInstance(PathParamFeatureBinding.Factory)

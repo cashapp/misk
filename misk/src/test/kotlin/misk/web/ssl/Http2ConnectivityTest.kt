@@ -3,6 +3,7 @@ package misk.web.ssl
 import ch.qos.logback.classic.Level
 import com.google.inject.Guice
 import com.google.inject.Provides
+import misk.MiskDefault
 import misk.MiskTestingServiceModule
 import misk.client.HttpClientEndpointConfig
 import misk.client.HttpClientModule
@@ -18,23 +19,31 @@ import misk.security.ssl.TrustStoreConfig
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.web.Get
+import misk.web.NetworkInterceptor
+import misk.web.Post
 import misk.web.Response
 import misk.web.ResponseBody
 import misk.web.ResponseContentType
 import misk.web.WebActionModule
 import misk.web.WebTestingModule
 import misk.web.actions.WebAction
+import misk.web.interceptors.MetricsInterceptor
 import misk.web.jetty.JettyService
 import misk.web.mediatype.MediaTypes
+import okhttp3.MediaType
+import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Protocol
 import okhttp3.Request
+import okhttp3.RequestBody
 import okio.BufferedSink
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.io.IOException
+import java.net.SocketTimeoutException
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
 import javax.servlet.http.HttpServletRequest
@@ -47,6 +56,7 @@ class Http2ConnectivityTest {
 
   @Inject private lateinit var jetty: JettyService
   @Inject private lateinit var logCollector: LogCollector
+  @Inject private lateinit var metricsInterceptorFactory: MetricsInterceptor.Factory
 
   private lateinit var client: OkHttpClient
 
@@ -129,6 +139,33 @@ class Http2ConnectivityTest {
     }
   }
 
+  /** Confirm we don't page oncall and we record a 499 in the metrics. **/
+  @Test
+  fun clientTimeoutWritingTheRequest() {
+    val http1Client = client.newBuilder()
+        .protocols(listOf(Protocol.HTTP_1_1))
+        .writeTimeout(1, TimeUnit.MILLISECONDS)
+        .build()
+    val requestBody = object : RequestBody() {
+      override fun contentType() = "text/plain;charset=utf-8".toMediaType()
+
+      override fun writeTo(sink: BufferedSink) {
+        for (i in 0 until 1024 * 1024) {
+          sink.writeUtf8("impossible\n")
+        }
+      }
+    }
+
+    val call = http1Client.newCall(Request.Builder()
+        .url(jetty.httpsServerUrl!!.resolve("/large/request")!!)
+        .post(requestBody)
+        .build())
+
+    assertFailsWith<SocketTimeoutException> {
+      call.execute()
+    }
+  }
+
   class HelloAction @Inject constructor() : WebAction {
     @Get("/hello")
     @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
@@ -168,6 +205,16 @@ class Http2ConnectivityTest {
     }
   }
 
+  /** Large requests fail later. */
+  class DisconnectWithLargeRequestAction @Inject constructor(
+  ) : WebAction {
+    @Post("/large/request")
+    @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
+    fun disconnect(@misk.web.RequestBody body: String): Response<String> {
+      return Response(body = "bye")
+    }
+  }
+
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(LogCollectorModule())
@@ -177,6 +224,7 @@ class Http2ConnectivityTest {
       install(WebActionModule.create<HelloAction>())
       install(WebActionModule.create<DisconnectWithEmptyResponseAction>())
       install(WebActionModule.create<DisconnectWithLargeResponseAction>())
+      install(WebActionModule.create<DisconnectWithLargeRequestAction>())
     }
   }
 
