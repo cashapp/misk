@@ -109,6 +109,25 @@ subprojects { subProject ->
   if (!name.startsWith("samples")) {
     apply plugin: 'com.vanniktech.maven.publish'
   }
+  apply plugin: 'maven-publish'
+
+  publishing {
+    repositories {
+      maven {
+        name = "GitHubPackages"
+        url = uri("https://maven.pkg.github.com/cashapp/misk")
+        credentials {
+          username = 'cashapp'
+          password = System.getenv('GITHUB_TOKEN')
+        }
+      }
+    }
+    publications {
+      gpr(MavenPublication) {
+        from(components.java)
+      }
+    }
+  }
 
   // Workaround the Gradle bug resolving multiplatform dependencies.
   // https://github.com/square/okio/issues/647
