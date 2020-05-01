@@ -15,6 +15,15 @@ enum class Environment {
 
   fun isReal(): Boolean = !isFake()
 
+  fun toDeployment(): Deployment {
+    return Deployment(
+        name = name,
+        isProduction = this == Environment.PRODUCTION || this == Environment.STAGING,
+        isTest =  this == Environment.TESTING,
+        isLocalDevelopment = this == Environment.DEVELOPMENT
+    )
+  }
+
   companion object {
     internal val logger = getLogger<Environment>()
     private const val ENV_ENVIRONMENT = "ENVIRONMENT"

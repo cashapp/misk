@@ -16,6 +16,7 @@ import com.zaxxer.hikari.util.DriverDataSource
 import misk.backoff.DontRetryException
 import misk.backoff.ExponentialBackoff
 import misk.backoff.retry
+import misk.environment.DeploymentModule.Companion.TEST_DEPLOYMENT
 import misk.environment.Environment
 import misk.jdbc.DataSourceConfig
 import misk.jdbc.DataSourceType
@@ -108,8 +109,7 @@ class VitessCluster(
   fun openMysqlConnection() = mysqlDataSource().connection
 
   private fun dataSource(): DriverDataSource {
-    val jdbcUrl = config.withDefaults().buildJdbcUrl(
-        Environment.TESTING)
+    val jdbcUrl = config.withDefaults().buildJdbcUrl(TEST_DEPLOYMENT)
     return DriverDataSource(
         jdbcUrl, config.type.driverClassName, Properties(),
         config.username, config.password)
@@ -125,7 +125,7 @@ class VitessCluster(
 
   private fun mysqlDataSource(): DriverDataSource {
     val config = mysqlConfig()
-    val jdbcUrl = config.buildJdbcUrl(Environment.TESTING)
+    val jdbcUrl = config.buildJdbcUrl(TEST_DEPLOYMENT)
     return DriverDataSource(
         jdbcUrl, config.type.driverClassName, Properties(),
         config.username, config.password)

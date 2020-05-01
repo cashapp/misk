@@ -1,7 +1,7 @@
 package misk.jdbc
 
 import misk.config.Config
-import misk.environment.Environment
+import misk.environment.Deployment
 import java.time.Duration
 
 /** Defines a type of datasource */
@@ -131,7 +131,7 @@ data class DataSourceConfig(
     }
   }
 
-  fun buildJdbcUrl(env: Environment): String {
+  fun buildJdbcUrl(deployment: Deployment): String {
     val config = withDefaults()
 
     require(config.client_certificate_key_store_path.isNullOrBlank() || config.client_certificate_key_store_url.isNullOrBlank()) {
@@ -146,7 +146,7 @@ data class DataSourceConfig(
       DataSourceType.MYSQL, DataSourceType.VITESS_MYSQL, DataSourceType.TIDB -> {
         var queryParams = "?useLegacyDatetimeCode=false"
 
-        if (env == Environment.TESTING || env == Environment.DEVELOPMENT) {
+        if (deployment.isFake) {
           queryParams += "&createDatabaseIfNotExist=true"
         }
 
@@ -259,7 +259,7 @@ data class DataSourceConfig(
       }
       DataSourceType.COCKROACHDB, DataSourceType.POSTGRESQL -> {
         var params = "ssl=false&user=${config.username}"
-        if (env == Environment.TESTING || env == Environment.DEVELOPMENT) {
+        if (deployment.isFake) {
           params += "&createDatabaseIfNotExist=true"
         }
         "jdbc:postgresql://${config.host}:${config.port}/${config.database}?$params"

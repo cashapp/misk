@@ -1,6 +1,8 @@
 package misk.jdbc
 
 import com.zaxxer.hikari.util.DriverDataSource
+import misk.environment.Deployment
+import misk.environment.DeploymentModule.Companion.TEST_DEPLOYMENT
 import misk.environment.Environment
 import misk.hibernate.Check
 import misk.hibernate.Transacter
@@ -35,7 +37,7 @@ class MySqlScaleSafetyChecks(
   fun connect(): Connection {
     return try {
       DriverDataSource(
-        config.buildJdbcUrl(Environment.TESTING),
+        config.buildJdbcUrl(TEST_DEPLOYMENT),
         config.type.driverClassName,
         Properties(),
         config.username,

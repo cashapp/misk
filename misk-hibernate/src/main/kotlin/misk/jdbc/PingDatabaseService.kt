@@ -4,6 +4,7 @@ import com.google.common.util.concurrent.AbstractIdleService
 import com.zaxxer.hikari.util.DriverDataSource
 import misk.backoff.ExponentialBackoff
 import misk.backoff.retry
+import misk.environment.Deployment
 import misk.environment.Environment
 import misk.logging.getLogger
 import java.time.Duration
@@ -20,10 +21,10 @@ private val logger = getLogger<PingDatabaseService>()
 @Singleton
 class PingDatabaseService @Inject constructor(
   private val config: DataSourceConfig,
-  private val environment: Environment
+  private val deployment: Deployment
 ) : AbstractIdleService() {
   override fun startUp() {
-    val jdbcUrl = config.buildJdbcUrl(environment)
+    val jdbcUrl = config.buildJdbcUrl(deployment)
     val dataSource = createDataSource(jdbcUrl)
 
     retry(10, ExponentialBackoff(Duration.ofMillis(20), Duration.ofMillis(1000))) {
@@ -32,7 +33,7 @@ class PingDatabaseService @Inject constructor(
       } catch (e: Exception) {
         if (config.type == DataSourceType.VITESS_MYSQL && config.database == "@master") {
           logger.warn("ping master database unsuccessful, trying to ping the replica")
-          val replicaDataSource = createDataSource(config.asReplica().buildJdbcUrl(environment))
+          val replicaDataSource = createDataSource(config.asReplica().buildJdbcUrl(deployment))
 
           connectToDataSource(replicaDataSource)
         } else {

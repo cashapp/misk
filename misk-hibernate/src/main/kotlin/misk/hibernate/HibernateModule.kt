@@ -24,6 +24,7 @@ import misk.jdbc.SpanInjector
 import misk.metrics.Metrics
 import misk.resources.ResourceLoader
 import misk.database.StartDatabaseService
+import misk.environment.Deployment
 import misk.web.exceptions.ExceptionMapperModule
 import org.hibernate.SessionFactory
 import org.hibernate.event.spi.EventType
@@ -185,14 +186,14 @@ class HibernateModule(
     val dataSourceDecoratorsKey = setOfType(DataSourceDecorator::class).toKey(this.qualifier)
     val eventListenersProvider = getProvider(setOfType(ListenerRegistration::class).toKey(this.qualifier))
 
-    val environmentProvider: Provider<Environment> = getProvider(keyOf<Environment>())
+    val deploymentProvider: Provider<Deployment> = getProvider(keyOf<Deployment>())
     val sessionFactoryProvider = getProvider(keyOf<SessionFactory>(qualifier))
 
     bind(keyOf<DataSourceConfig>(qualifier)).toInstance(config)
 
     // Bind PingDatabaseService.
     bind(keyOf<PingDatabaseService>(qualifier)).toProvider(Provider {
-      PingDatabaseService(config, environmentProvider.get())
+      PingDatabaseService(config, deploymentProvider.get())
     }).asSingleton()
     // TODO(rhall): depending on Vitess is a hack to simulate Vitess has already been started in the
     // env. This is to remove flakiness in tests that are not waiting until Vitess is ready.
@@ -212,7 +213,7 @@ class HibernateModule(
         return DataSourceService(
             qualifier = qualifier,
             baseConfig = config,
-            environment = environmentProvider.get(),
+            deployment = deploymentProvider.get(),
             dataSourceDecorators = dataSourceDecoratorsProvider.get(),
             databasePool = databasePool,
             // TODO provide metrics to the reader pool but need a different metric key prefix

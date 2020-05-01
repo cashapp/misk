@@ -1,6 +1,8 @@
 package misk.jdbc
 
 import com.zaxxer.hikari.util.DriverDataSource
+import misk.environment.Deployment
+import misk.environment.DeploymentModule.Companion.TEST_DEPLOYMENT
 import misk.environment.Environment
 import java.sql.Connection
 import java.sql.SQLException
@@ -19,7 +21,7 @@ internal class MySqlTestDatabasePoolBackend @Inject constructor(
   internal val connection: Connection by lazy {
     try {
       DriverDataSource(
-          config.buildJdbcUrl(Environment.TESTING),
+          config.buildJdbcUrl(TEST_DEPLOYMENT),
           config.type.driverClassName,
           Properties(),
           config.username,

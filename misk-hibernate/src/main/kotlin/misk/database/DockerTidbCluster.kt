@@ -15,6 +15,7 @@ import com.zaxxer.hikari.util.DriverDataSource
 import misk.backoff.DontRetryException
 import misk.backoff.ExponentialBackoff
 import misk.backoff.retry
+import misk.environment.DeploymentModule.Companion.TEST_DEPLOYMENT
 import misk.environment.Environment
 import misk.jdbc.DataSourceConfig
 import misk.jdbc.DataSourceType
@@ -55,8 +56,7 @@ class TidbCluster(
   fun openConnection(): Connection = dataSource().connection
 
   private fun dataSource(): DriverDataSource {
-    val jdbcUrl = config.withDefaults().buildJdbcUrl(
-        Environment.TESTING)
+    val jdbcUrl = config.withDefaults().buildJdbcUrl(TEST_DEPLOYMENT)
     return DriverDataSource(
         jdbcUrl, config.type.driverClassName, Properties(),
         config.username, config.password)

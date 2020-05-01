@@ -9,6 +9,7 @@ import com.zaxxer.hikari.util.DriverDataSource
 import misk.backoff.DontRetryException
 import misk.backoff.ExponentialBackoff
 import misk.backoff.retry
+import misk.environment.DeploymentModule.Companion.TEST_DEPLOYMENT
 import misk.environment.Environment
 import misk.jdbc.DataSourceConfig
 import misk.jdbc.uniqueInt
@@ -185,7 +186,7 @@ class DockerPostgresServer(
     fun openConnection(): Connection = dataSource().connection
 
     private fun dataSource(): DriverDataSource {
-      val jdbcUrl = config.withDefaults().copy(database = "postgres").buildJdbcUrl(Environment.TESTING)
+      val jdbcUrl = config.withDefaults().copy(database = "postgres").buildJdbcUrl(TEST_DEPLOYMENT)
       return DriverDataSource(
           jdbcUrl,
           config.type.driverClassName,

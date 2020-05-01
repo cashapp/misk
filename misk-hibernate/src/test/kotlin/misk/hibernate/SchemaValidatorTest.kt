@@ -21,6 +21,8 @@ import misk.resources.ResourceLoader
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.database.StartDatabaseService
+import misk.environment.Deployment
+import misk.environment.DeploymentModule
 import okio.ByteString
 import org.assertj.core.api.Assertions.assertThat
 import org.hibernate.SessionFactory
@@ -54,7 +56,7 @@ internal class SchemaValidatorTest {
       val dataSourceService = DataSourceService(
           qualifier = qualifier,
           baseConfig = config.data_source,
-          environment = Environment.TESTING,
+          deployment = DeploymentModule.TEST_DEPLOYMENT,
           dataSourceDecorators = emptySet(),
           databasePool = RealDatabasePool
       )
@@ -114,7 +116,7 @@ internal class SchemaValidatorTest {
       install(ServiceModule<PingDatabaseService>(qualifier)
           .dependsOn<StartDatabaseService>(qualifier))
       bind(keyOf<PingDatabaseService>(qualifier))
-          .toInstance(PingDatabaseService(config.data_source, Environment.TESTING))
+          .toInstance(PingDatabaseService(config.data_source, DeploymentModule.TEST_DEPLOYMENT))
 
       install(ServiceModule<DataSourceService>(qualifier)
           .dependsOn<PingDatabaseService>(qualifier))

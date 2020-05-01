@@ -5,6 +5,7 @@ import com.google.common.util.concurrent.AbstractIdleService
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import com.zaxxer.hikari.metrics.prometheus.PrometheusMetricsTrackerFactory
+import misk.environment.Deployment
 import misk.environment.Environment
 import misk.logging.getLogger
 import misk.metrics.Metrics
@@ -23,7 +24,7 @@ import kotlin.reflect.KClass
 class DataSourceService(
   private val qualifier: KClass<out Annotation>,
   private val baseConfig: DataSourceConfig,
-  private val environment: Environment,
+  private val deployment: Deployment,
   private val dataSourceDecorators: Set<DataSourceDecorator>,
   private val databasePool: DatabasePool,
   private val metrics: Metrics? = null
@@ -54,7 +55,7 @@ class DataSourceService(
 
     val hikariConfig = HikariConfig()
     hikariConfig.driverClassName = config.type.driverClassName
-    hikariConfig.jdbcUrl = config.buildJdbcUrl(environment)
+    hikariConfig.jdbcUrl = config.buildJdbcUrl(deployment)
     if (config.username != null) {
       hikariConfig.username = config.username
     }

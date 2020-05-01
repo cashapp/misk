@@ -1,5 +1,6 @@
 package misk.jdbc
 
+import misk.environment.DeploymentModule
 import misk.environment.Environment
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
@@ -8,7 +9,7 @@ class DataSourceConfigTest {
   @Test
   fun buildVitessJDBCUrlNoSSL() {
     val config = DataSourceConfig(DataSourceType.VITESS)
-    assertEquals("jdbc:vitess://127.0.0.1:27001/", config.buildJdbcUrl(Environment.TESTING))
+    assertEquals("jdbc:vitess://127.0.0.1:27001/", config.buildJdbcUrl(DeploymentModule.TEST_DEPLOYMENT))
   }
 
   @Test
@@ -18,7 +19,7 @@ class DataSourceConfigTest {
         trust_certificate_key_store_password = "changeit")
     assertEquals("jdbc:vitess://127.0.0.1:27001/?trustStore=path/to/truststore&" +
         "trustStorePassword=changeit&useSSL=true",
-        config.buildJdbcUrl(Environment.TESTING))
+        config.buildJdbcUrl(DeploymentModule.TEST_DEPLOYMENT))
   }
 
   @Test
@@ -28,7 +29,7 @@ class DataSourceConfigTest {
         client_certificate_key_store_password = "changeit")
     assertEquals("jdbc:vitess://127.0.0.1:27001/?keyStore=path/to/keystore&" +
         "keyStorePassword=changeit&useSSL=true",
-        config.buildJdbcUrl(Environment.TESTING))
+        config.buildJdbcUrl(DeploymentModule.TEST_DEPLOYMENT))
   }
 
   @Test
@@ -41,7 +42,7 @@ class DataSourceConfigTest {
     assertEquals("jdbc:vitess://127.0.0.1:27001/?trustStore=path/to/truststore&" +
         "trustStorePassword=changeit&keyStore=path/to/keystore&" +
         "keyStorePassword=changeit&useSSL=true",
-        config.buildJdbcUrl(Environment.TESTING))
+        config.buildJdbcUrl(DeploymentModule.TEST_DEPLOYMENT))
   }
 
   @Test
@@ -53,7 +54,7 @@ class DataSourceConfigTest {
         client_certificate_key_store_password = "changeit")
     assertEquals("jdbc:vitess://127.0.0.1:27001/?trustStore=path/to/truststore&" +
         "trustStorePassword=changeit&keyStore=path/to/keystore&" +
-        "keyStorePassword=changeit&useSSL=true", config.buildJdbcUrl(Environment.TESTING))
+        "keyStorePassword=changeit&useSSL=true", config.buildJdbcUrl(DeploymentModule.TEST_DEPLOYMENT))
   }
 
   @Test
@@ -65,7 +66,7 @@ class DataSourceConfigTest {
         client_certificate_key_store_password = "changeit")
     assertEquals("jdbc:vitess://127.0.0.1:27001/?trustStore=path/to/truststore&" +
         "trustStorePassword=changeit&keyStore=path/to/keystore&" +
-        "keyStorePassword=changeit&useSSL=true", config.buildJdbcUrl(Environment.TESTING))
+        "keyStorePassword=changeit&useSSL=true", config.buildJdbcUrl(DeploymentModule.TEST_DEPLOYMENT))
   }
 
   @Test
@@ -77,7 +78,7 @@ class DataSourceConfigTest {
         "createDatabaseIfNotExist=true&connectTimeout=10000&socketTimeout=60000&" +
         "trustCertificateKeyStoreUrl=file://path/to/truststore&" +
         "trustCertificateKeyStorePassword=changeit&sslMode=VERIFY_CA",
-        config.buildJdbcUrl(Environment.TESTING))
+        config.buildJdbcUrl(DeploymentModule.TEST_DEPLOYMENT))
   }
 
   @Test
@@ -89,7 +90,7 @@ class DataSourceConfigTest {
         "createDatabaseIfNotExist=true&connectTimeout=10000&socketTimeout=60000&" +
         "trustCertificateKeyStoreUrl=file://path/to/truststore&" +
         "trustCertificateKeyStorePassword=changeit&sslMode=VERIFY_CA",
-        config.buildJdbcUrl(Environment.TESTING))
+        config.buildJdbcUrl(DeploymentModule.TEST_DEPLOYMENT))
   }
 
   @Test
@@ -107,7 +108,7 @@ class DataSourceConfigTest {
         "clientCertificateKeyStoreUrl=file://path/to/keystore&" +
         "clientCertificateKeyStorePassword=changeit&" +
         "sslMode=VERIFY_IDENTITY",
-        config.buildJdbcUrl(Environment.TESTING))
+        config.buildJdbcUrl(DeploymentModule.TEST_DEPLOYMENT))
   }
 
   @Test
@@ -115,6 +116,6 @@ class DataSourceConfigTest {
     val config = DataSourceConfig(DataSourceType.MYSQL)
     assertEquals("jdbc:tracing:mysql://127.0.0.1:3306/?useLegacyDatetimeCode=false&" +
         "createDatabaseIfNotExist=true&connectTimeout=10000&socketTimeout=60000&sslMode=PREFERRED",
-        config.buildJdbcUrl(Environment.TESTING))
+        config.buildJdbcUrl(DeploymentModule.TEST_DEPLOYMENT))
   }
 }
