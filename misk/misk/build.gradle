@@ -50,8 +50,9 @@ dependencies {
   compile dep.prometheusHotspot
   compile dep.jnrUnixsocket
   compile dep.concurrencyLimitsCore
-  compile project(':misk-inject')
+  compile project(':misk-actions')
   compile project(':misk-core')
+  compile project(':misk-inject')
   compile project(':misk-service')
 
   testCompile dep.kotlinxCoroutines

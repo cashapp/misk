@@ -1,4 +1,5 @@
 include ':misk'
+include ':misk-actions'
 include ':misk-aws'
 include ':misk-aws-dynamodb-testing'
 include ':misk-core'
