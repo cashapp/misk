@@ -11,6 +11,7 @@ import misk.web.WebSslConfig
 import misk.web.mediatype.MediaTypes
 import okhttp3.HttpUrl
 import org.eclipse.jetty.alpn.server.ALPNServerConnectionFactory
+import org.eclipse.jetty.http2.server.HTTP2CServerConnectionFactory
 import org.eclipse.jetty.http2.server.HTTP2ServerConnectionFactory
 import org.eclipse.jetty.server.ConnectionFactory
 import org.eclipse.jetty.server.HttpConfiguration
@@ -156,13 +157,18 @@ class JettyService @Inject internal constructor(
     }
 
     if (webConfig.unix_domain_socket != null) {
+      val udsConnFactories = httpConnectionFactories.toMutableList()
+      if (webConfig.unix_domain_socket.h2c == true) {
+        udsConnFactories.add(HTTP2CServerConnectionFactory(httpConfig))
+      }
+
       val udsConnector = UnixSocketConnector(
-        server,
-        null /* executor */,
-        null /* scheduler */,
-        null /* buffer pool */,
-        webConfig.selectors ?: -1,
-        listOf(HttpConnectionFactory(httpConfig)).toTypedArray()
+          server,
+          null /* executor */,
+          null /* scheduler */,
+          null /* buffer pool */,
+          webConfig.selectors ?: -1,
+          udsConnFactories.toTypedArray()
       )
       udsConnector.setUnixSocket(webConfig.unix_domain_socket.path)
       udsConnector.addBean(connectionMetricsCollector.newConnectionListener("http", 0))
