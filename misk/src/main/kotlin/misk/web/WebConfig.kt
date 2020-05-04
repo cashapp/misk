@@ -77,5 +77,7 @@ data class WebSslConfig(
 
 data class WebUnixDomainSocketConfig(
   /** The Unix Domain Socket to listen on. */
-  val path: String
+  val path: String,
+  /** If true, the listener will support H2C. */
+  val h2c: Boolean? = true
 )
