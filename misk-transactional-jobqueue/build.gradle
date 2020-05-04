@@ -1,8 +1,7 @@
 dependencies {
-  compile dep.guava
-  compile dep.guice
-  compile dep.guiceMultibindings
   compile project(':misk-core')
+  compile project(':misk-jobqueue')
+  compile project(':misk-hibernate')
 
   testCompile project(':misk-testing')
 }
