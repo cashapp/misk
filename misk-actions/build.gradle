@@ -1,0 +1,5 @@
+dependencies {
+  implementation dep.kotlinStdLib
+  implementation dep.okHttp
+  implementation dep.okio
+}
