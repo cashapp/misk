@@ -7,6 +7,7 @@ import com.squareup.wire.GrpcClient
 import com.squareup.wire.Service
 import misk.inject.KAbstractModule
 import okhttp3.OkHttpClient
+import okhttp3.Protocol
 import javax.inject.Provider
 import javax.inject.Singleton
 import kotlin.reflect.KClass
@@ -58,9 +59,18 @@ class GrpcClientModule<T : Service, G : T>(
     @Inject private lateinit var httpClientConfigUrlProvider: HttpClientConfigUrlProvider
 
     override fun get(): T {
-      val client = httpClientProvider.get()
       val endpointConfig = httpClientsConfigProvider.get()[name]
       val baseUrl = httpClientConfigUrlProvider.getUrl(endpointConfig)
+
+      // Since gRPC uses HTTP/2, force h2c when calling an unencrypted endpoint
+      val protocols = when {
+        baseUrl.startsWith("http://") -> listOf(Protocol.H2_PRIOR_KNOWLEDGE)
+        else -> listOf(Protocol.HTTP_2, Protocol.HTTP_1_1)
+      }
+
+      val client = httpClientProvider.get().newBuilder()
+          .protocols(protocols)
+          .build()
 
       val grpcClient = GrpcClient.Builder()
           .client(client)
@@ -71,4 +81,5 @@ class GrpcClientModule<T : Service, G : T>(
       return grpcClientClass.constructors.first().call(grpcClient)
     }
   }
+
 }
