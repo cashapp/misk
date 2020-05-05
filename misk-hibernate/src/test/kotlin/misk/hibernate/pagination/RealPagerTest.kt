@@ -84,6 +84,58 @@ class RealPagerTest {
     assertThat(actualCharacterNames).containsExactlyElementsOf(expectedCharacterNames)
   }
 
+  @Test fun `hasNext always true on first page`() {
+    val movieId = givenStarWarsMovie()
+    val emptyListPager = queryFactory.newQuery(CharacterQuery::class)
+        .movieId(movieId)
+        .newPager(idDescPaginator(), pageSize = 4)
+
+    // Even when the the first page is empty.
+    assertThat(emptyListPager.hasNext()).isTrue()
+
+    // Add some entries.
+    givenStormtrooperCharacters(movieId, count = 3)
+    val pagerWithContents = queryFactory.newQuery(CharacterQuery::class)
+        .movieId(movieId)
+        .newPager(idDescPaginator(), pageSize = 4)
+    assertThat(pagerWithContents.hasNext()).isTrue()
+  }
+
+  @Test fun `hasNext true when there are more pages`() {
+    val pageSize = 4
+    val pageCount = 3
+    val movieId = givenStarWarsMovie()
+    givenStormtrooperCharacters(movieId, count = pageCount * pageSize)
+
+    val pager = queryFactory.newQuery(CharacterQuery::class)
+        .movieId(movieId)
+        .newPager(idDescPaginator(), pageSize = pageSize)
+
+    transacter.transaction { session -> pager.nextPage(session) }
+    // 2 pages left
+    assertThat(pager.hasNext()).isTrue()
+
+    transacter.transaction { session -> pager.nextPage(session) }
+    // 1 page left
+    assertThat(pager.hasNext()).isTrue()
+  }
+
+  @Test fun `hasNext is false where there are no pages left`() {
+    val pageSize = 4
+    val pageCount = 3
+    val movieId = givenStarWarsMovie()
+    givenStormtrooperCharacters(movieId, count = pageCount * pageSize)
+
+    val pager = queryFactory.newQuery(CharacterQuery::class)
+        .movieId(movieId)
+        .newPager(idDescPaginator(), pageSize = pageSize)
+    // Go through all the pages.
+    repeat(pageCount) {
+      transacter.transaction { session -> pager.nextPage(session) }
+    }
+    assertThat(pager.hasNext()).isFalse()
+  }
+
   private fun givenStarWarsMovie(): Id<DbMovie> {
     return transacter.transaction { session ->
       val movie = DbMovie("Star Wars: The Force Awakens", LocalDate.of(2015, 12, 14))
