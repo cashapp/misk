@@ -26,7 +26,7 @@ internal class RequestBodyFeatureBinding(
     ?: throw IllegalArgumentException("no generic unmarshaller for ${parameter.type}")
 
     val requestBody = subject.httpCall.takeRequestBody()!!
-    val value = unmarshaller.unmarshal(requestBody)
+    val value = unmarshaller.unmarshal(subject.httpCall.requestHeaders, requestBody)
     subject.setParameter(parameter, value)
   }
 
