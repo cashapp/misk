@@ -3,6 +3,7 @@ package misk.web.marshal
 import misk.inject.typeLiteral
 import misk.web.ResponseBody
 import misk.web.marshal.Marshaller.Companion.actualResponseType
+import okhttp3.Headers
 import okhttp3.MediaType
 import okio.BufferedSink
 import okio.BufferedSource
@@ -24,15 +25,17 @@ object GenericUnmarshallers {
   )
 
   private object ToString : Unmarshaller {
-    override fun unmarshal(source: BufferedSource): Any? = source.readUtf8()
+    override fun unmarshal(requestHeaders: Headers, source: BufferedSource): Any? =
+      source.readUtf8()
   }
 
   private object ToBufferedSource : Unmarshaller {
-    override fun unmarshal(source: BufferedSource): Any? = source
+    override fun unmarshal(requestHeaders: Headers, source: BufferedSource): Any? = source
   }
 
   private object ToByteString : Unmarshaller {
-    override fun unmarshal(source: BufferedSource): Any? = source.readByteString()
+    override fun unmarshal(requestHeaders: Headers, source: BufferedSource): Any? =
+      source.readByteString()
   }
 
   fun into(parameter: KParameter): Unmarshaller? {

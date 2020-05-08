@@ -4,6 +4,7 @@ import com.squareup.wire.ProtoAdapter
 import misk.web.ResponseBody
 import misk.web.marshal.Marshaller.Companion.actualResponseType
 import misk.web.mediatype.MediaTypes
+import okhttp3.Headers
 import okhttp3.MediaType
 import okio.BufferedSink
 import okio.BufferedSource
@@ -38,7 +39,7 @@ class ProtobufMarshaller<T>(val adapter: ProtoAdapter<T>) : Marshaller<T> {
 }
 
 class ProtobufUnmarshaller(val adapter: ProtoAdapter<Any>) : Unmarshaller {
-  override fun unmarshal(source: BufferedSource) = adapter.decode(source)
+  override fun unmarshal(requestHeaders: Headers, source: BufferedSource) = adapter.decode(source)
 
   @Singleton
   class Factory @Inject constructor() : Unmarshaller.Factory {
