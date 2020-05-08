@@ -2,14 +2,12 @@ package misk.database
 
 import com.github.dockerjava.api.DockerClient
 import com.github.dockerjava.api.model.Bind
+import com.github.dockerjava.api.model.Container
 import com.github.dockerjava.api.model.ExposedPort
 import com.github.dockerjava.api.model.Frame
 import com.github.dockerjava.api.model.Ports
 import com.github.dockerjava.api.model.Volume
-import com.github.dockerjava.core.DockerClientBuilder
 import com.github.dockerjava.core.async.ResultCallbackTemplate
-import com.github.dockerjava.netty.NettyDockerCmdExecFactory
-import com.google.common.collect.Lists
 import com.squareup.moshi.Moshi
 import com.zaxxer.hikari.util.DriverDataSource
 import misk.backoff.DontRetryException
@@ -98,7 +96,7 @@ class DockerTidbCluster(
   companion object {
     val logger = KotlinLogging.logger {}
 
-    const val SHA = "8974fa7e6080bf417c1db24da1c9599e1edbfc997d49b44bece759334229e685"
+    const val SHA = "8fdd4033cbd879593e968dd0e044286c23c66418798da686526bfa162db9cad0"
     const val IMAGE = "pingcap/tidb@sha256:$SHA"
     const val CONTAINER_NAME = "misk-tidb-testing"
 
@@ -142,24 +140,28 @@ class DockerTidbCluster(
     ports.bind(mysqlPort, Ports.Binding.bindPort(mysqlPort.port))
     ports.bind(httpPort, Ports.Binding.bindPort(httpPort.port))
 
-    val containerName = "$CONTAINER_NAME"
-
+    // Kill and remove container that don't match our requirements
+    var matchingContainer : Container? = null
     val runningContainer = docker.listContainersCmd()
-        .withNameFilter(listOf(containerName))
+        .withNameFilter(listOf(containerName()))
         .withLimit(1)
         .exec()
         .firstOrNull()
     if (runningContainer != null) {
-      if (runningContainer.state != "running") {
-        logger.info("Existing TiDB cluster named $containerName found in " +
-            "state ${runningContainer.state}, force removing and restarting")
+      val mismatches = containerMismatches(runningContainer)
+      if (!mismatches.isEmpty()) {
+        logger.info {
+          "container named ${runningContainer.name()} does not match our requirements, " +
+              "force removing and starting a new one: ${mismatches.joinToString(", ")}"
+        }
         docker.removeContainerCmd(runningContainer.id).withForce(true).exec()
       } else {
-        logger.info("Using existing TiDB cluster named $containerName")
-        stopContainerOnExit = false
-        containerId = runningContainer.id
+        matchingContainer = runningContainer
       }
     }
+
+
+    containerId = matchingContainer?.id
 
     if (containerId == null) {
       logger.info("Starting TiDB cluster")
@@ -170,7 +172,7 @@ class DockerTidbCluster(
           .withExposedPorts(mysqlPort, httpPort)
           .withPortBindings(ports)
           .withTty(true)
-          .withName(containerName)
+          .withName(containerName())
           .exec().id!!
       val containerId = containerId!!
       docker.startContainerCmd(containerId).exec()
@@ -188,6 +190,33 @@ class DockerTidbCluster(
     cluster.openConnection().use { c ->
       c.createStatement().executeUpdate("SET GLOBAL time_zone = '+00:00'")
     }
+  }
+
+  private fun containerName() = CONTAINER_NAME
+
+  /**
+   * Check if the container is a container that we can use for our tests. If it is not return a
+   * description of the mismatch.
+   */
+  private fun containerMismatches(container: Container): List<String> = listOfNotNull(
+      shouldMatch("container name", container.name(), containerName()),
+      shouldMatch("container state", container.state, "running"),
+      shouldMatch("container image", container.image, IMAGE)
+  )
+
+  private fun shouldMatch(description: String, actual: Any, expected: Any): String? =
+      if (expected != actual) {
+        "$description \"${actual}\" does not match \"${expected}\""
+      } else {
+        null
+      }
+
+  /**
+   * Return the single name of a container and strip away the prefix /
+   */
+  private fun Container.name(): String {
+    val name = names.single()
+    return if (name.startsWith("/")) name.substring(1) else name
   }
 
   private fun waitUntilHealthy() {

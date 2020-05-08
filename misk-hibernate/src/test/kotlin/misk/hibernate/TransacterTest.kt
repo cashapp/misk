@@ -16,6 +16,7 @@ import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
 import org.hibernate.exception.ConstraintViolationException
+import org.junit.jupiter.api.Assumptions.assumeTrue
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -364,8 +365,10 @@ abstract class TransacterTest {
   }
 
   @Test
-  @Disabled("Uniqueness constraints aren't reliably enforced on Vitess")
   fun constraintViolationCausesTransactionToRollback() {
+    // Uniqueness constraints aren't reliably enforced on Vitess
+    assumeTrue(!transacter.config().type.isVitess)
+
     transacter.transaction { session ->
       session.save(DbMovie("Cinderella", LocalDate.of(1950, 3, 4)))
     }
@@ -376,7 +379,7 @@ abstract class TransacterTest {
       }
     }
     transacter.transaction { session ->
-      assertThat(queryFactory.newQuery<MovieQuery>().list(session)).hasSize(1)
+      assertThat(queryFactory.newQuery<MovieQuery>().allowTableScan().list(session)).hasSize(1)
     }
   }
 
