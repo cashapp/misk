@@ -1,5 +1,6 @@
 package misk
 
+import misk.concurrent.FakeSleeperModule
 import misk.environment.FakeEnvVarModule
 import misk.inject.KAbstractModule
 import misk.random.FakeRandomModule
@@ -20,6 +21,7 @@ class MiskTestingServiceModule : KAbstractModule() {
     install(TestingResourceLoaderModule())
     install(FakeEnvVarModule())
     install(FakeClockModule())
+    install(FakeSleeperModule())
     install(FakeTickerModule())
     install(FakeRandomModule())
     install(FakeTokenGeneratorModule())
