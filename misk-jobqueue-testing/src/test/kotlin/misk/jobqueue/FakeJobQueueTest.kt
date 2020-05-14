@@ -11,6 +11,8 @@ import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import java.time.Duration
+import java.time.temporal.ChronoUnit
 import javax.inject.Inject
 import kotlin.test.assertFailsWith
 
@@ -37,9 +39,9 @@ internal class FakeJobQueueTest {
     fakeJobQueue.handleJobs()
 
     assertThat(logCollector.takeMessages(ExampleJobHandler::class)).containsExactlyInAnyOrder(
-      "received GREEN job with message: dinosaur",
-      "received GREEN job with message: android",
-      "received RED job with message: stop sign"
+        "received GREEN job with message: dinosaur",
+        "received GREEN job with message: android",
+        "received RED job with message: stop sign"
     )
 
     assertThat(fakeJobQueue.peekJobs(GREEN_QUEUE)).isEmpty()
@@ -148,6 +150,41 @@ internal class FakeJobQueueTest {
 
     assertThat(fakeJobQueue.peekJobs(GREEN_QUEUE)).hasSize(1)
   }
+
+  @Test
+  fun includeDeliveryDelayInFakeJob() {
+    assertThat(fakeJobQueue.peekJobs(GREEN_QUEUE)).isEmpty()
+    assertThat(fakeJobQueue.peekJobs(RED_QUEUE)).isEmpty()
+
+    val oneSecondDeliveryDelay = Duration.of(1000L, ChronoUnit.MILLIS)
+    exampleJobEnqueuer.enqueueRed("stop sign", oneSecondDeliveryDelay)
+    exampleJobEnqueuer.enqueueGreen("dinosaur", oneSecondDeliveryDelay)
+    exampleJobEnqueuer.enqueueGreen("android")
+
+    val redJobs = fakeJobQueue.peekJobs(RED_QUEUE)
+    assertThat(redJobs).hasSize(1)
+   
+    val redJob = redJobs.first() as FakeJob
+    assertThat(redJob.deliveryDelay).isEqualTo(oneSecondDeliveryDelay)
+
+    val greenJobs = fakeJobQueue.peekJobs(GREEN_QUEUE)
+    assertThat(greenJobs).hasSize(2)
+    val greenJob1 = greenJobs[0] as FakeJob
+    val greenJob2 = greenJobs[1] as FakeJob
+    assertThat(greenJob1.deliveryDelay).isEqualTo(oneSecondDeliveryDelay)
+    assertThat(greenJob2.deliveryDelay).isNull()
+
+    fakeJobQueue.handleJobs()
+
+    assertThat(logCollector.takeMessages(ExampleJobHandler::class)).containsExactlyInAnyOrder(
+        "received GREEN job with message: dinosaur",
+        "received GREEN job with message: android",
+        "received RED job with message: stop sign"
+    )
+
+    assertThat(fakeJobQueue.peekJobs(GREEN_QUEUE)).isEmpty()
+    assertThat(fakeJobQueue.peekJobs(RED_QUEUE)).isEmpty()
+  }
 }
 
 private class TestModule : KAbstractModule() {
@@ -165,7 +202,6 @@ private val RED_QUEUE = QueueName("red_queue")
 private val GREEN_QUEUE = QueueName("green_queue")
 private val ENQUEUER_QUEUE = QueueName("first_step_queue")
 
-
 private enum class Color {
   RED,
   GREEN
@@ -181,14 +217,16 @@ private class ExampleJobEnqueuer @Inject private constructor(
 ) {
   private val jobAdapter = moshi.adapter<ExampleJob>()
 
-  fun enqueueRed(message: String) {
+  fun enqueueRed(message: String, deliveryDelay: Duration? = null) {
     val job = ExampleJob(Color.RED, message)
-    jobQueue.enqueue(RED_QUEUE, body = jobAdapter.toJson(job), attributes = mapOf("key" to "value"))
+    jobQueue.enqueue(RED_QUEUE, body = jobAdapter.toJson(job), deliveryDelay = deliveryDelay,
+        attributes = mapOf("key" to "value"))
   }
 
-  fun enqueueGreen(message: String) {
+  fun enqueueGreen(message: String, deliveryDelay: Duration? = null) {
     val job = ExampleJob(Color.GREEN, message)
-    jobQueue.enqueue(GREEN_QUEUE, body = jobAdapter.toJson(job), attributes = mapOf("key" to "value"))
+    jobQueue.enqueue(GREEN_QUEUE, body = jobAdapter.toJson(job), deliveryDelay = deliveryDelay,
+        attributes = mapOf("key" to "value"))
   }
 
   fun enqueueEnqueuer() {
@@ -220,8 +258,8 @@ private class ExampleJobHandler @Inject private constructor(moshi: Moshi) : JobH
 
 private class EnqueuerJobHandler @Inject private constructor(
   private val jobQueue: JobQueue,
-    moshi: Moshi
-): JobHandler {
+  moshi: Moshi
+) : JobHandler {
   private val jobAdapter = moshi.adapter<ExampleJob>()
 
   override fun handleJob(job: Job) {
