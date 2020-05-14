@@ -2,19 +2,24 @@ package misk.crypto
 
 import com.google.crypto.tink.Aead
 import com.google.crypto.tink.DeterministicAead
+import com.google.crypto.tink.HybridDecrypt
+import com.google.crypto.tink.HybridEncrypt
 import com.google.crypto.tink.KmsClient
-import com.google.crypto.tink.aead.AeadConfig
-import com.google.crypto.tink.mac.MacConfig
-import com.google.crypto.tink.signature.SignatureConfig
-import misk.inject.KAbstractModule
 import com.google.crypto.tink.Mac
 import com.google.crypto.tink.PublicKeySign
 import com.google.crypto.tink.PublicKeyVerify
+import com.google.crypto.tink.aead.AeadConfig
 import com.google.crypto.tink.daead.DeterministicAeadConfig
+import com.google.crypto.tink.hybrid.HybridConfig
+import com.google.crypto.tink.mac.MacConfig
+import com.google.crypto.tink.signature.SignatureConfig
 import com.google.inject.Singleton
 import com.google.inject.name.Names
+import misk.inject.KAbstractModule
 import okio.ByteString
 import okio.ByteString.Companion.toByteString
+import java.lang.IllegalArgumentException
+import java.security.GeneralSecurityException
 import java.util.Base64
 
 /**
@@ -33,9 +38,10 @@ class CryptoModule(
     DeterministicAeadConfig.register()
     MacConfig.register()
     SignatureConfig.register()
+    HybridConfig.register()
 
     val keyNames = config.keys.map { it.key_name }
-    val duplicateNames = keyNames - config.keys.map { it.key_name }.distinct().toList()
+    val duplicateNames = keyNames - keyNames.distinct().toList()
     check(duplicateNames.isEmpty()) {
       "Found duplicate keys: [$duplicateNames]"
     }
@@ -68,6 +74,22 @@ class CryptoModule(
           bind<PublicKeyVerify>()
               .annotatedWith(Names.named(key.key_name))
               .toProvider(DigitalSignatureVerifierProvider(key, config.kms_uri))
+              .`in`(Singleton::class.java)
+        }
+        KeyType.HYBRID_ENCRYPT -> {
+          bind<HybridEncrypt>()
+              .annotatedWith(Names.named(key.key_name))
+              .toProvider(HybridEncryptProvider(key, config.kms_uri))
+              .`in`(Singleton::class.java)
+        }
+        KeyType.HYBRID_ENCRYPT_DECRYPT -> {
+          bind<HybridDecrypt>()
+              .annotatedWith(Names.named(key.key_name))
+              .toProvider(HybridDecryptProvider(key, config.kms_uri))
+              .`in`(Singleton::class.java)
+          bind<HybridEncrypt>()
+              .annotatedWith(Names.named(key.key_name))
+              .toProvider(HybridEncryptProvider(key, config.kms_uri))
               .`in`(Singleton::class.java)
         }
       }
@@ -125,7 +147,7 @@ fun Aead.decrypt(ciphertext: ByteString, aad: ByteArray? = null): ByteString {
 fun DeterministicAead.encryptDeterministically(
   plaintext: ByteString,
   aad: ByteArray? = null
-): ByteString {
+) : ByteString {
   val plaintextBytes = plaintext.toByteArray()
   val encrypted = this.encryptDeterministically(plaintextBytes, aad ?: byteArrayOf())
   plaintextBytes.fill(0)
@@ -146,7 +168,7 @@ fun DeterministicAead.encryptDeterministically(
 fun DeterministicAead.decryptDeterministically(
   ciphertext: ByteString,
   aad: ByteArray? = null
-): ByteString {
+) : ByteString {
   val decryptedBytes = this.decryptDeterministically(ciphertext.toByteArray(), aad)
   val decrypted = decryptedBytes.toByteString()
   decryptedBytes.fill(0)
@@ -165,6 +187,10 @@ fun Mac.computeMac(data: String): String {
  * This function expects the [tag] string variable to contain a [Base64] encoded array of bytes.
  */
 fun Mac.verifyMac(tag: String, data: String) {
-  val decodedTag = Base64.getDecoder().decode(tag)
+  val decodedTag = try {
+    Base64.getDecoder().decode(tag)
+  } catch (e: IllegalArgumentException) {
+    throw GeneralSecurityException(String.format("invalid tag: %s", tag), e)
+  }
   this.verifyMac(decodedTag, data.toByteArray())
 }
