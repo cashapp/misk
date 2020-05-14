@@ -37,7 +37,7 @@ class FakeJobQueue @Inject constructor(
     attributes: Map<String, String>
   ) {
     val id = tokenGenerator.generate("fakeJobQueue")
-    val job = FakeJob(queueName, id, idempotenceKey, body, attributes)
+    val job = FakeJob(queueName, id, idempotenceKey, body, attributes, deliveryDelay)
     jobQueues.getOrPut(queueName, ::ConcurrentLinkedDeque).add(job)
   }
 
@@ -82,7 +82,8 @@ data class FakeJob(
   override val id: String,
   override val idempotenceKey: String,
   override val body: String,
-  override val attributes: Map<String, String>
+  override val attributes: Map<String, String>,
+  val deliveryDelay: Duration? = null
 ) : Job {
   var acknowledged: Boolean = false
     private set
