@@ -16,7 +16,8 @@ import misk.time.FakeClockModule
 
 /** This module creates movies, actors, and characters tables for several Hibernate tests. */
 class MoviesTestModule(
-  private val type: DataSourceType = DataSourceType.VITESS_MYSQL
+  private val type: DataSourceType = DataSourceType.VITESS_MYSQL,
+  private val scaleSafetyChecks: Boolean = false
 ) : KAbstractModule() {
   override fun configure() {
     install(LogCollectorModule())
@@ -27,7 +28,7 @@ class MoviesTestModule(
 
     val config = MiskConfig.load<MoviesConfig>("moviestestmodule", Environment.TESTING)
     val dataSourceConfig = selectDataSourceConfig(config)
-    install(HibernateTestingModule(Movies::class, dataSourceConfig))
+    install(HibernateTestingModule(Movies::class, dataSourceConfig, scaleSafetyChecks = scaleSafetyChecks))
     install(HibernateModule(Movies::class, MoviesReader::class,
         DataSourceClusterConfig(writer = dataSourceConfig, reader = dataSourceConfig)))
     install(object : HibernateEntityModule(Movies::class) {
