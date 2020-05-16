@@ -34,7 +34,9 @@ class HibernateTestingModule(
   private val qualifier: KClass<out Annotation>,
   private val config: DataSourceConfig? = null,
   private val startUpStatements: List<String> = listOf(),
-  private val shutDownStatements: List<String> = listOf()
+  private val shutDownStatements: List<String> = listOf(),
+  // TODO: default to opt-out once these are ready for prime time.
+  private val scaleSafetyChecks: Boolean = false
 ) : KAbstractModule() {
   override fun configure() {
     install(ServiceModule<ForceUtcTimeZoneService>())
@@ -44,7 +46,7 @@ class HibernateTestingModule(
     val transacterKey = Transacter::class.toKey(qualifier)
     val transacterProvider = getProvider(transacterKey)
 
-    bindScaleSafetyChecks(transacterProvider)
+    if (scaleSafetyChecks) bindScaleSafetyChecks(transacterProvider)
 
     val dataSourceConnector = getProvider(keyOf<DataSourceConnector>(qualifier))
     install(ServiceModule(truncateTablesServiceKey)
