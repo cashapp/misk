@@ -22,7 +22,7 @@ import javax.inject.Inject
 @MiskTest(startService = true)
 class VitessScaleSafetyTest {
   @MiskTestModule
-  val module = MoviesTestModule()
+  val module = MoviesTestModule(scaleSafetyChecks = true)
 
   @Inject @Movies lateinit var sessionFactory: SessionFactory
   @Inject @Movies lateinit var transacter: Transacter
