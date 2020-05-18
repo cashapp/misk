@@ -11,7 +11,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-internal class CreateTablesService @Inject constructor(
+class CreateTablesService @Inject constructor(
   private val dynamoDbClient: AmazonDynamoDB,
   private val tables: Set<DynamoDbTable>
 ) : AbstractIdleService() {
