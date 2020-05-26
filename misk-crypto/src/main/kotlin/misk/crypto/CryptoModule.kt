@@ -79,6 +79,13 @@ class CryptoModule(
  * Extension function for convenient encryption of [ByteString]s.
  * This function also makes sure that no extra copies of the plaintext data are kept in memory.
  */
+@Deprecated(
+    message = "This method is marked for deletion, for now use the raw interface provided by Tink",
+    replaceWith = ReplaceWith(
+        expression = "aead.encrypt(ByteArray, ByteArray)"
+    ),
+    level = DeprecationLevel.HIDDEN
+)
 fun Aead.encrypt(plaintext: ByteString, aad: ByteArray? = null): ByteString {
   val plaintextBytes = plaintext.toByteArray()
   val encrypted = this.encrypt(plaintextBytes, aad)
@@ -90,6 +97,13 @@ fun Aead.encrypt(plaintext: ByteString, aad: ByteArray? = null): ByteString {
  * Extension function for convenient decryption of [ByteString]s.
  * This function also makes sure that no extra copies of the plaintext data are kept in memory.
  */
+@Deprecated(
+    message = "This method is marked for deletion, for now use the raw interface provided by Tink",
+    replaceWith = ReplaceWith(
+        expression = "aead.decrypt(ByteArray, ByteArray)"
+    ),
+    level = DeprecationLevel.HIDDEN
+)
 fun Aead.decrypt(ciphertext: ByteString, aad: ByteArray? = null): ByteString {
   val decryptedBytes = this.decrypt(ciphertext.toByteArray(), aad)
   val decrypted = decryptedBytes.toByteString()
@@ -101,6 +115,13 @@ fun Aead.decrypt(ciphertext: ByteString, aad: ByteArray? = null): ByteString {
  * Extension function for convenient encryption of [ByteString]s.
  * This function also makes sure that no extra copies of the plaintext data are kept in memory.
  */
+@Deprecated(
+    message = "This method is marked for deletion, for now use the raw interface provided by Tink",
+    replaceWith = ReplaceWith(
+        expression = "daead.encryptDeterministically(ByteArray, ByteArray)"
+    ),
+    level = DeprecationLevel.HIDDEN
+)
 fun DeterministicAead.encryptDeterministically(
   plaintext: ByteString,
   aad: ByteArray? = null
@@ -115,6 +136,13 @@ fun DeterministicAead.encryptDeterministically(
  * Extension function for convenient decryption of [ByteString]s.
  * This function also makes sure that no extra copies of the plaintext data are kept in memory.
  */
+@Deprecated(
+    message = "This method is marked for deletion, for now use the raw interface provided by Tink",
+    replaceWith = ReplaceWith(
+        expression = "daead.decryptDeterministically(ByteArray, ByteArray)"
+    ),
+    level = DeprecationLevel.HIDDEN
+)
 fun DeterministicAead.decryptDeterministically(
   ciphertext: ByteString,
   aad: ByteArray? = null
