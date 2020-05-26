@@ -7,8 +7,8 @@ dependencies {
   }
   compile dep.gcpKms
   compile dep.gcpLogback
+  compile dep.tracingJaeger
   compile project(':misk')
-  compile project(':misk-jaeger')
   compile project(':misk-zipkin')
 
   testCompile project(':misk-testing')
