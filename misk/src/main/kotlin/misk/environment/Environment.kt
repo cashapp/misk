@@ -31,7 +31,9 @@ enum class Environment {
     @JvmStatic
     fun fromEnvironmentVariable(): Environment {
       val rawEnvName = when (val rawEnv = rawEnvironment()) {
-        "PLATFORM-STAGING" -> STAGING.name // Special case during deprecation of Environment
+        "PLATFORM-STAGING", "PLAT-OPS-STAGING" -> STAGING.name
+        "PLAT-OPS-PRODUCTION" -> PRODUCTION.name
+        // ^^^ Special cases during deprecation of Environment
         else -> rawEnv
       }
       return valueOf(rawEnvName)
