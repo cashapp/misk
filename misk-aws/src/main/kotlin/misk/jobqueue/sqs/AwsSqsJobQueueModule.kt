@@ -60,7 +60,7 @@ class AwsSqsJobQueueModule(
         .map { AwsRegion(it) }
         .distinct()
         .forEach {
-          regionSpecificClientBinder.addBinding(it).toProvider(AmazonSQSProvider(it, false))
+          regionSpecificClientBinder.addBinding(it).toProvider(AmazonSQSProvider(config, it, false))
         }
     val regionSpecificClientBinderForReceiving = newMapBinder<AwsRegion, AmazonSQS>(ForSqsReceiving::class)
     config.external_queues
@@ -68,7 +68,7 @@ class AwsSqsJobQueueModule(
         .map { AwsRegion(it) }
         .distinct()
         .forEach {
-          regionSpecificClientBinderForReceiving.addBinding(it).toProvider(AmazonSQSProvider(it, true))
+          regionSpecificClientBinderForReceiving.addBinding(it).toProvider(AmazonSQSProvider(config, it, true))
         }
 
     // Bind the configs for external queues
@@ -80,12 +80,12 @@ class AwsSqsJobQueueModule(
 
   @Provides @Singleton
   fun provideSQSClient(region: AwsRegion, credentials: AWSCredentialsProvider): AmazonSQS {
-    return buildClient(credentials, region, false)
+    return buildClient(config, credentials, region, false)
   }
 
   @Provides @Singleton @ForSqsReceiving
   fun provideSQSClientForReceiving(region: AwsRegion, credentials: AWSCredentialsProvider): AmazonSQS {
-    return buildClient(credentials, region, true)
+    return buildClient(config, credentials, region, true)
   }
 
   @Provides @ForSqsHandling @Singleton
@@ -102,21 +102,21 @@ class AwsSqsJobQueueModule(
       config.task_queue ?: RepeatedTaskQueueConfig(num_parallel_tasks = -1)
 
   private class AmazonSQSProvider(
-    val region: AwsRegion, val forSqsReceiving: Boolean
+    val config: AwsSqsJobQueueConfig, val region: AwsRegion, val forSqsReceiving: Boolean
   ) : Provider<AmazonSQS> {
     @Inject lateinit var credentials: AWSCredentialsProvider
 
-    override fun get() = buildClient(credentials, region, forSqsReceiving)
+    override fun get() = buildClient(config, credentials, region, forSqsReceiving)
   }
 
   companion object {
     private fun buildClient(
-      credentials: AWSCredentialsProvider, region: AwsRegion, forSqsReceiving: Boolean
+      config: AwsSqsJobQueueConfig, credentials: AWSCredentialsProvider, region: AwsRegion, forSqsReceiving: Boolean
     ): AmazonSQS {
-      // Defaults from SDK
       val clientConfiguration = ClientConfiguration()
-          .withSocketTimeout(25000)
-          .withConnectionTimeout(1000)
+          .withSocketTimeout(config.sqs_socket_timeout_ms)
+          .withConnectionTimeout(config.sqs_connect_timeout_ms)
+          .withRequestTimeout(config.sqs_request_timeout_ms)
 
       val builder = AmazonSQSClientBuilder.standard()
           .withCredentials(credentials)
