@@ -40,14 +40,16 @@ class AwsSqsJobQueueConfig(
   val queue_attribute_importer_frequency_ms: Long = 1000,
 
   /**
-   * Socket timeout to reach SQS with, not including retries.
+   * Socket timeout to reach SQS with for *sending*, not including retries.
+   * We only apply this for sending because receiving uses long-polling,
+   * which explicitly leverages a longer request time.
    * We use the default retry strategy with SQS, which retries 3 times.
    * As a result, your app could potentially spend 3 x this timeout talking to SQS.
    */
-  val sqs_socket_timeout_ms: Int = 20000,
+  val sqs_sending_socket_timeout_ms: Int = 25000,
 
-  /** Connect timeout to reach SQS with */
-  val sqs_connect_timeout_ms: Int = 1000,
+  /** Connect timeout to reach SQS with for *sending*. */
+  val sqs_sending_connect_timeout_ms: Int = 1000,
 
   /**
    * Request timeout to reach SQS with for *sending*, not including retries.
@@ -56,5 +58,5 @@ class AwsSqsJobQueueConfig(
    * We use the default retry strategy with SQS, which retries 3 times.
    * As a result, your app could potentially spend 3 x this timeout talking to SQS.
    */
-  val sqs_sending_request_timeout_ms: Int = 20000
+  val sqs_sending_request_timeout_ms: Int = ClientConfiguration.DEFAULT_REQUEST_TIMEOUT
 ) : Config
