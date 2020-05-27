@@ -116,7 +116,6 @@ class AwsSqsJobQueueModule(
       val clientConfiguration = ClientConfiguration()
           .withSocketTimeout(config.sqs_socket_timeout_ms)
           .withConnectionTimeout(config.sqs_connect_timeout_ms)
-          .withRequestTimeout(config.sqs_request_timeout_ms)
 
       val builder = AmazonSQSClientBuilder.standard()
           .withCredentials(credentials)
@@ -127,7 +126,9 @@ class AwsSqsJobQueueModule(
         // We only do this for receiving, as sending does not have equivalent knobs.
         builder.withClientConfiguration(clientConfiguration.withMaxConnections(Int.MAX_VALUE))
       } else {
-        builder.withClientConfiguration(clientConfiguration)
+        builder.withClientConfiguration(
+            clientConfiguration.withRequestTimeout(config.sqs_sending_request_timeout_ms)
+        )
       }
       return builder.build()
     }
