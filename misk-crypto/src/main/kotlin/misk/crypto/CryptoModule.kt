@@ -17,6 +17,7 @@ import com.google.crypto.tink.signature.SignatureConfig
 import com.google.crypto.tink.streamingaead.StreamingAeadConfig
 import com.google.inject.Singleton
 import com.google.inject.name.Names
+import misk.crypto.CiphertextFormat.InvalidCiphertextFormatException
 import misk.inject.KAbstractModule
 import okio.ByteString
 import okio.ByteString.Companion.toByteString
@@ -124,6 +125,14 @@ fun Aead.encrypt(plaintext: ByteString, aad: ByteArray? = null): ByteString {
   return encrypted.toByteString()
 }
 
+fun Aead.encrypt(plaintext : ByteString, encryptionContext : Map<String, String>?) : ByteString {
+  val plaintextBytes = plaintext.toByteArray()
+  val aad = CiphertextFormat.serializeEncryptionContext(encryptionContext)
+  val encrypted = this.encrypt(plaintextBytes, aad)
+  plaintextBytes.fill(0)
+  return CiphertextFormat.serialize(encrypted, aad).toByteString()
+}
+
 /**
  * Extension function for convenient decryption of [ByteString]s.
  * This function also makes sure that no extra copies of the plaintext data are kept in memory.
@@ -137,6 +146,18 @@ fun Aead.encrypt(plaintext: ByteString, aad: ByteArray? = null): ByteString {
 )
 fun Aead.decrypt(ciphertext: ByteString, aad: ByteArray? = null): ByteString {
   val decryptedBytes = this.decrypt(ciphertext.toByteArray(), aad)
+  val decrypted = decryptedBytes.toByteString()
+  decryptedBytes.fill(0)
+  return decrypted
+}
+
+fun Aead.decrypt(ciphertext : ByteString, encryptionContext: Map<String, String>?) : ByteString {
+  val (payload, aad) = try {
+    CiphertextFormat.deserialize(ciphertext.toByteArray(), encryptionContext)
+  } catch (e: InvalidCiphertextFormatException) {
+    Pair(ciphertext.toByteArray(), CiphertextFormat.serializeEncryptionContext(encryptionContext))
+  }
+  val decryptedBytes = this.decrypt(payload, aad)
   val decrypted = decryptedBytes.toByteString()
   decryptedBytes.fill(0)
   return decrypted
@@ -163,6 +184,17 @@ fun DeterministicAead.encryptDeterministically(
   return encrypted.toByteString()
 }
 
+fun DeterministicAead.encryptDeterministically(
+  plaintext: ByteString,
+  encryptionContext: Map<String, String>?
+): ByteString {
+  val plaintextBytes = plaintext.toByteArray()
+  val aad = CiphertextFormat.serializeEncryptionContext(encryptionContext)
+  val encrypted = this.encryptDeterministically(plaintextBytes, aad ?: byteArrayOf())
+  plaintextBytes.fill(0)
+  return CiphertextFormat.serialize(encrypted, aad).toByteString()
+}
+
 /**
  * Extension function for convenient decryption of [ByteString]s.
  * This function also makes sure that no extra copies of the plaintext data are kept in memory.
@@ -179,6 +211,22 @@ fun DeterministicAead.decryptDeterministically(
   aad: ByteArray? = null
 ) : ByteString {
   val decryptedBytes = this.decryptDeterministically(ciphertext.toByteArray(), aad)
+  val decrypted = decryptedBytes.toByteString()
+  decryptedBytes.fill(0)
+  return decrypted
+}
+
+fun DeterministicAead.decryptDeterministically(
+  ciphertext: ByteString,
+  encryptionContext: Map<String, String>?
+): ByteString {
+  val bytes = ciphertext.toByteArray()
+  val (payload, aad) = try {
+    CiphertextFormat.deserialize(bytes, encryptionContext)
+  } catch(e: InvalidCiphertextFormatException) {
+    Pair(bytes, CiphertextFormat.serializeEncryptionContext(encryptionContext))
+  }
+  val decryptedBytes = this.decryptDeterministically(payload, aad ?: byteArrayOf())
   val decrypted = decryptedBytes.toByteString()
   decryptedBytes.fill(0)
   return decrypted
@@ -202,4 +250,30 @@ fun Mac.verifyMac(tag: String, data: String) {
     throw GeneralSecurityException(String.format("invalid tag: %s", tag), e)
   }
   this.verifyMac(decodedTag, data.toByteArray())
+}
+
+fun HybridEncrypt.encrypt(
+  plaintext: ByteString,
+  encryptionContext: Map<String, String>?
+): ByteString {
+  val plaintextBytes = plaintext.toByteArray()
+  val aad = CiphertextFormat.serializeEncryptionContext(encryptionContext)
+  val ciphertext = this.encrypt(plaintextBytes, aad)
+  plaintextBytes.fill(0)
+  return CiphertextFormat.serialize(ciphertext, aad).toByteString()
+}
+
+fun HybridDecrypt.decrypt(
+  ciphertext: ByteString,
+  encryptionContext: Map<String, String>?
+): ByteString {
+  val (ciphertextBytes, aad) = try {
+    CiphertextFormat.deserialize(ciphertext.toByteArray(), encryptionContext)
+  } catch (e: InvalidCiphertextFormatException) {
+    Pair(ciphertext.toByteArray(), CiphertextFormat.serializeEncryptionContext(encryptionContext))
+  }
+  val plaintextBytes = this.decrypt(ciphertextBytes, aad)
+  val plaintext = plaintextBytes.toByteString()
+  plaintextBytes.fill(0)
+  return plaintext
 }
