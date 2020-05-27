@@ -1,5 +1,6 @@
 package misk.jobqueue.sqs
 
+import com.amazonaws.ClientConfiguration
 import misk.config.Config
 import misk.tasks.RepeatedTaskQueueConfig
 
@@ -36,5 +37,22 @@ class AwsSqsJobQueueConfig(
   /**
    * Frequency used to import Queue Attributes in milliseconds.
    */
-  val queue_attribute_importer_frequency_ms: Long = 1000
+  val queue_attribute_importer_frequency_ms: Long = 1000,
+
+  /**
+   * Socket timeout to reach SQS with, not including retries.
+   * We use the default retry strategy with SQS, which retries 3 times.
+   * As a result, your app could potentially spend 3 x this timeout talking to SQS.
+   */
+  val sqs_socket_timeout_ms: Int = 20000,
+
+  /** Connect timeout to reach SQS with */
+  val sqs_connect_timeout_ms: Int = 1000,
+
+  /**
+   * Request timeout to reach SQS with, not including retries.
+   * We use the default retry strategy with SQS, which retries 3 times.
+   * As a result, your app could potentially spend 3 x this timeout talking to SQS.
+   */
+  val sqs_request_timeout_ms: Int = 20000
 ) : Config
