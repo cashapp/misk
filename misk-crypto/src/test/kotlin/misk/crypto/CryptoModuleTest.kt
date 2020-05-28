@@ -147,7 +147,7 @@ class CryptoModuleTest {
     val keyHandle = KeysetHandle.generateNew(AeadKeyTemplates.AES256_GCM)
     val injector = getInjector(listOf(Pair("test", keyHandle)))
     val aead = injector.getInstance(AeadKeyManager::class.java)["test"]
-    val plaintext = "plaintext".encodeUtf8()
+    val plaintext = "plaintext".toByteArray(Charsets.UTF_8)
     val encryptionContext = "additional context data".toByteArray()
     // with encryption context
     var ciphertext = aead.encrypt(plaintext, encryptionContext)
@@ -177,7 +177,7 @@ class CryptoModuleTest {
     val keyHandle = KeysetHandle.generateNew(DeterministicAeadKeyTemplates.AES256_SIV)
     val injector = getInjector(listOf(Pair("test", keyHandle)))
     val daead = injector.getInstance(DeterministicAeadKeyManager::class.java)["test"]
-    val plaintext = "plaintext".encodeUtf8()
+    val plaintext = "plaintext".toByteArray(Charsets.UTF_8)
     val encryptionContext = "additional context data".toByteArray()
     // with encryption context
     var ciphertext = daead.encryptDeterministically(plaintext, encryptionContext)
