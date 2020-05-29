@@ -10,7 +10,7 @@ sourceSets {
 }
 
 dependencies {
-  compile dep.kotlinStdLib
+  compile dep.kotlinStdLibJdk8
   compile dep.kotlinTest
   compile dep.bouncycastle
   compile dep.guava
