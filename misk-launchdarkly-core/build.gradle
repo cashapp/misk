@@ -6,7 +6,7 @@ buildscript {
 
 dependencies {
   compile dep.guice
-  compile dep.kotlinStdLib
+  compile dep.kotlinStdLibJdk8
   compile dep.launchDarkly
   compile dep.moshiCore
   compile project(':misk-feature')
