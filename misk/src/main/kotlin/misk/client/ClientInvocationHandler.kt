@@ -9,6 +9,7 @@ import okhttp3.EventListener
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import okio.Timeout
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -145,6 +146,7 @@ internal class ClientInvocationHandler(
     override fun clone() = InterceptedCall(action, interceptors, args, wrapped.clone())
     override fun cancel() = wrapped.cancel()
     override fun request(): Request = wrapped.request()
+    override fun timeout(): Timeout = wrapped.timeout()
   }
 
   /** Interceptor that builds the call through Retrofit */

@@ -8,7 +8,7 @@ dependencies {
   compile dep.bouncycastle
   compile dep.guice
   compile dep.guiceMultibindings
-  compile dep.kotlinStdLib
+  compile dep.kotlinStdLibJdk8
   compile dep.kotlinReflection
   compile dep.loggingApi
   compile dep.logbackClassic
