@@ -46,7 +46,7 @@ class AwsSqsJobQueueConfig(
    * We use the default retry strategy with SQS, which retries 3 times.
    * As a result, your app could potentially spend 3 x this timeout talking to SQS.
    */
-  val sqs_sending_socket_timeout_ms: Int = 25000,
+  val sqs_sending_socket_timeout_ms: Int = 5000,
 
   /** Connect timeout to reach SQS with for *sending*. */
   val sqs_sending_connect_timeout_ms: Int = 1000,
@@ -58,5 +58,5 @@ class AwsSqsJobQueueConfig(
    * We use the default retry strategy with SQS, which retries 3 times.
    * As a result, your app could potentially spend 3 x this timeout talking to SQS.
    */
-  val sqs_sending_request_timeout_ms: Int = ClientConfiguration.DEFAULT_REQUEST_TIMEOUT
+  val sqs_sending_request_timeout_ms: Int = 5000
 ) : Config
