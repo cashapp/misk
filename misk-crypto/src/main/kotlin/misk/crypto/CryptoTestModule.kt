@@ -2,12 +2,15 @@ package misk.crypto
 
 import com.google.crypto.tink.Aead
 import com.google.crypto.tink.DeterministicAead
+import com.google.crypto.tink.HybridDecrypt
+import com.google.crypto.tink.HybridEncrypt
 import com.google.crypto.tink.KmsClient
 import com.google.crypto.tink.Mac
 import com.google.crypto.tink.PublicKeySign
 import com.google.crypto.tink.PublicKeyVerify
 import com.google.crypto.tink.aead.AeadConfig
 import com.google.crypto.tink.daead.DeterministicAeadConfig
+import com.google.crypto.tink.hybrid.HybridConfig
 import com.google.crypto.tink.mac.MacConfig
 import com.google.crypto.tink.signature.SignatureConfig
 import com.google.inject.name.Names
@@ -32,6 +35,7 @@ class CryptoTestModule(
     DeterministicAeadConfig.register()
     MacConfig.register()
     SignatureConfig.register()
+    HybridConfig.register()
 
     bind<KmsClient>().toInstance(FakeKmsClient())
 
@@ -64,8 +68,24 @@ class CryptoTestModule(
               .annotatedWith(Names.named(key.key_name))
               .toProvider(DigitalSignatureVerifierProvider(key, null))
               .asEagerSingleton()
-          }
+        }
+        KeyType.HYBRID_ENCRYPT -> {
+          bind<HybridEncrypt>()
+              .annotatedWith(Names.named(key.key_name))
+              .toProvider(HybridEncryptProvider(key, null))
+              .asEagerSingleton()
+        }
+        KeyType.HYBRID_ENCRYPT_DECRYPT -> {
+          bind<HybridDecrypt>()
+              .annotatedWith(Names.named(key.key_name))
+              .toProvider(HybridDecryptProvider(key, null))
+              .asEagerSingleton()
+          bind<HybridEncrypt>()
+              .annotatedWith(Names.named(key.key_name))
+              .toProvider(HybridEncryptProvider(key, null))
+              .asEagerSingleton()
         }
       }
     }
+  }
 }

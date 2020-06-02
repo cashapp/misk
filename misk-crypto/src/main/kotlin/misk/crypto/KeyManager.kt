@@ -2,6 +2,8 @@ package misk.crypto
 
 import com.google.crypto.tink.Aead
 import com.google.crypto.tink.DeterministicAead
+import com.google.crypto.tink.HybridDecrypt
+import com.google.crypto.tink.HybridEncrypt
 import com.google.crypto.tink.Mac
 import com.google.crypto.tink.PublicKeySign
 import com.google.crypto.tink.PublicKeyVerify
@@ -38,16 +40,16 @@ sealed class MappedKeyManager<KeyT> constructor(
 
 /**
  * Holds a map of every [Aead] key name to its primitive listed in the configuration for this app.
- * Users may use this object to obtain an [Aead] dynamically:
  *
+ * Users may use this object to obtain an [Aead] dynamically:
  * ```
  * val myKey: Aead = aeadKeyManager["myKey"]
  * ```
- *
- * Note, that Aead instances provided by this module are envelope Aead instances. This means that
- * all data is encrypted with an ephemeral data encryption key (DEK), which is then protected by a key-encryption
- * key (KEK) and stored inline with ciphertext. This effectively means that ciphertext will be a bit larger than
- * the plaintext, and that migrating keys (KEKs) should not require the re-encryption of stored data.
+ * Note: [Aead] instances provided by this module are **envelope Aead** instances.
+ * This means that all data is encrypted with an ephemeral data encryption key (DEK),
+ * which is then protected by a key-encryption key (KEK) and stored inline with ciphertext.
+ * This effectively means that ciphertext will be a bit larger than the plaintext,
+ * and that migrating keys (KEKs) should not require the re-encryption of stored data.
  */
 @Singleton
 class AeadKeyManager @Inject internal constructor(
@@ -56,12 +58,11 @@ class AeadKeyManager @Inject internal constructor(
 
 /**
  * Holds a map of every [DeterministicAead] key name to its primitive listed in the configuration for this app.
- * Users may use this object to obtain an [DeterministicAead] dynamically:
  *
+ * Users may use this object to obtain an [DeterministicAead] dynamically:
  * ```
  * val myKey: DeterministicAead = deterministicAeadKeyManager["myKey"]
  * ```
- *
  * Note, that DeterministicAead objects do not provide secrecy to the same level as AEAD do, since
  * multiple plaintexts encrypted with the same key will produce identical ciphertext. This behavior
  * is desirable when querying data via its ciphertext (i.e. equality will hold), but an attacker can
@@ -74,6 +75,7 @@ class DeterministicAeadKeyManager @Inject internal constructor(
 
 /**
  * Holds a map of every [Mac] key name to its primitive listed in the configuration for this app.
+ *
  * Users may use this class to obtain a [Mac] object dynamically:
  * ```
  * val hmac: Mac = macKeyManager["myHmac"]
@@ -86,6 +88,7 @@ class MacKeyManager @Inject internal constructor(
 
 /**
  * Holds a map of every key name to its corresponding [PublicKeySign] and [PublicKeyVerify] primitives.
+ *
  * Users may use this class to obtain a [PublicKeySign] to sign data
  * or [PublicKeyVerify] to verify the integrity of a message dynamically:
  * ```
@@ -111,6 +114,39 @@ class DigitalSignatureKeyManager @Inject internal constructor(
 }
 
 data class DigitalSignature(val signer: PublicKeySign, val verifier: PublicKeyVerify)
+
+/**
+ * Holds a map of every [HybridEncrypt] key name to its corresponding primitive listed
+ * in the configuration for this app.
+ *
+ * Users may use this class to obtain a [HybridEncrypt] object dynamically:
+ * ```
+ * val hybridEncrypt: HybridEncrypt = hybridKeyManager["myHybridKey"]
+ * ```
+ * Note: Hybrid encryption is intentionally divided to 2 separate key managers,
+ * [HybridEncryptKeyManager] and [HybridDecryptKeyManager], so that the public portion of the keyset
+ * could be exported to other services.
+ * This configuration helps achieve the goal of allowing some services to **encrypt only**
+ * and other services to both encrypt and decrypt.
+ */
+@Singleton
+class HybridEncryptKeyManager @Inject internal constructor(
+  injector: Injector
+) : MappedKeyManager<HybridEncrypt>(injector, HybridEncrypt::class.java)
+
+/**
+ * Holds a map of every [HybridDecrypt] key name to its corresponding primitive listed
+ * in the configuration for this app.
+ *
+ * Users may this class to obtain a [HybridDecrypt] object dynamically:
+ * ```
+ * val hybridDecrypt: HybridDecrypt = hybridKeyManager["myHybridKey"]
+ * ```
+ */
+@Singleton
+class HybridDecryptKeyManager @Inject internal constructor(
+  injector: Injector
+) : MappedKeyManager<HybridDecrypt>(injector, HybridDecrypt::class.java)
 
 class KeyNotFoundException(
   message: String? = null,
