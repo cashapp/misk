@@ -72,7 +72,7 @@ internal class FakeFeatureFlagsTest {
   }
 
   data class JsonFeature(val value : String, val optional : String? = null)
-  
+
   @Test
   fun getJson() {
     // Default throws.
@@ -117,12 +117,6 @@ internal class FakeFeatureFlagsTest {
   @Test
   fun invalidKeys() {
     subject.override(FEATURE, 3)
-    assertThrows<IllegalArgumentException> {
-      subject.getInt(FEATURE, "bad(token)")
-    }
-    assertThrows<IllegalArgumentException> {
-      subject.getInt(FEATURE, "Bearer auth-token")
-    }
     assertThrows<IllegalArgumentException> {
       subject.getInt(FEATURE, "")
     }
