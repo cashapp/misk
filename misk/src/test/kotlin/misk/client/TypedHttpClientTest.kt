@@ -6,6 +6,7 @@ import com.google.inject.Provides
 import com.google.inject.name.Names
 import helpers.protos.Dinosaur
 import misk.MiskTestingServiceModule
+import misk.endpoints.buildClientEndpointConfig
 import misk.inject.KAbstractModule
 import misk.inject.getInstance
 import misk.testing.MiskTest
@@ -27,7 +28,6 @@ import retrofit2.http.Body
 import retrofit2.http.Headers
 import retrofit2.http.POST
 import javax.inject.Inject
-import javax.inject.Provider
 import javax.inject.Singleton
 
 @MiskTest(startService = true)
@@ -67,7 +67,7 @@ internal class TypedHttpClientTest {
     val typedClientFactory = clientInjector.getInstance(TypedClientFactory::class.java)
 
     val dinoClient = typedClientFactory.build<ReturnADinosaur>(
-        HttpClientEndpointConfig(jetty.httpServerUrl.toString()),
+        jetty.httpServerUrl.buildClientEndpointConfig(),
         "dynamicDino"
     )
     val response = dinoClient.getDinosaur(Dinosaur.Builder().name("trex").build()).execute()
@@ -76,7 +76,7 @@ internal class TypedHttpClientTest {
     assertThat(response.body()?.name!!).isEqualTo("supertrex")
 
     val protoDinoClient = typedClientFactory.build<ReturnAProtoDinosaur>(
-        HttpClientEndpointConfig(jetty.httpServerUrl.toString()),
+        jetty.httpServerUrl.buildClientEndpointConfig(),
         "dynamicProtoDino"
     )
     val protoResponse = protoDinoClient.getDinosaur(
@@ -134,12 +134,9 @@ internal class TypedHttpClientTest {
 
     @Provides
     @Singleton
-    fun provideHttpClientConfig(): HttpClientsConfig {
-      return HttpClientsConfig(
-          endpoints = mapOf(
-              "dinosaur" to HttpClientEndpointConfig(jetty.httpServerUrl.toString()),
-              "protoDino" to HttpClientEndpointConfig(jetty.httpServerUrl.toString())
-          ))
-    }
+    fun provideHttpClientConfig() = HttpClientsConfig(
+        "dinosaur" to jetty.httpServerUrl.buildClientEndpointConfig(),
+        "protoDino" to jetty.httpServerUrl.buildClientEndpointConfig()
+    )
   }
 }

@@ -1,15 +1,15 @@
 package misk.web.metadata
 
 import com.squareup.moshi.Moshi
-import misk.client.HttpClientEndpointConfig
 import misk.client.HttpClientFactory
+import misk.endpoints.buildClientEndpointConfig
 import misk.moshi.adapter
 import misk.security.authz.FakeCallerAuthenticator
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
-import misk.web.jetty.JettyService
 import misk.web.dashboard.AdminDashboard
 import misk.web.dashboard.ValidWebEntry.Companion.slugify
+import misk.web.jetty.JettyService
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.junit.jupiter.api.Test
@@ -120,7 +120,7 @@ class DashboardMetadataActionTest {
   }
 
   private fun createOkHttpClient(): OkHttpClient {
-    val config = HttpClientEndpointConfig(jetty.httpServerUrl.toString())
+    val config = jetty.httpServerUrl.buildClientEndpointConfig()
     return httpClientFactory.create(config)
   }
 }

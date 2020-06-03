@@ -5,8 +5,8 @@ import com.launchdarkly.client.LDClient
 import com.launchdarkly.client.LDClientInterface
 import com.launchdarkly.client.LDConfig
 import misk.ServiceModule
-import misk.client.HttpClientSSLConfig
 import misk.config.Config
+import misk.endpoints.HttpClientSSLConfig
 import misk.feature.DynamicConfig
 import misk.feature.FeatureFlags
 import misk.feature.FeatureService

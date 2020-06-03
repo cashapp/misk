@@ -3,8 +3,9 @@ package misk.slack
 import com.google.inject.Provides
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
-import misk.client.HttpClientEndpointConfig
 import misk.client.HttpClientFactory
+import misk.endpoints.HttpEndpoint
+import misk.endpoints.buildClientEndpointConfig
 import misk.inject.KAbstractModule
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
@@ -27,7 +28,8 @@ class SlackModule(private val config: SlackConfig) : KAbstractModule() {
     @Named("misk-slack") moshi: Moshi
   ): SlackWebhookApi {
     val okHttpClient = httpClientFactory.create(
-        HttpClientEndpointConfig(url = config.baseUrl))
+        HttpEndpoint.Url(config.baseUrl).buildClientEndpointConfig()
+    )
     val retrofit = Retrofit.Builder()
         .baseUrl(config.baseUrl)
         .addConverterFactory(MoshiConverterFactory.create(moshi))

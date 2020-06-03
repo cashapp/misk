@@ -3,10 +3,10 @@ package misk.web.uds
 import com.google.inject.Guice
 import com.google.inject.Provides
 import misk.MiskTestingServiceModule
-import misk.client.HttpClientEndpointConfig
 import misk.client.HttpClientModule
 import misk.client.HttpClientsConfig
 import misk.client.UnixDomainSocketFactory
+import misk.endpoints.buildClientEndpointConfig
 import misk.inject.KAbstractModule
 import misk.inject.getInstance
 import misk.testing.MiskTest
@@ -14,8 +14,8 @@ import misk.testing.MiskTestModule
 import misk.web.Get
 import misk.web.ResponseContentType
 import misk.web.WebActionModule
-import misk.web.WebUnixDomainSocketConfig
 import misk.web.WebTestingModule
+import misk.web.WebUnixDomainSocketConfig
 import misk.web.actions.WebAction
 import misk.web.jetty.JettyService
 import misk.web.mediatype.MediaTypes
@@ -26,6 +26,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.io.File
+import java.net.URL
 import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -89,12 +90,8 @@ class UDSHttp2ConnectivityTest {
 
     @Provides
     @Singleton
-    fun provideHttpClientsConfig(): HttpClientsConfig {
-      return HttpClientsConfig(
-          endpoints = mapOf(
-              "default" to HttpClientEndpointConfig("http://example.com/")
-          )
-      )
-    }
+    fun provideHttpClientsConfig() = HttpClientsConfig(
+        "default" to URL("http://example.com/").buildClientEndpointConfig()
+    )
   }
 }

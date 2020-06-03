@@ -8,6 +8,7 @@ import com.google.inject.util.Types
 import com.squareup.moshi.Moshi
 import io.opentracing.Tracer
 import misk.clustering.Cluster
+import misk.endpoints.HttpClientEndpointConfig
 import misk.inject.KAbstractModule
 import okhttp3.EventListener
 import okhttp3.OkHttpClient

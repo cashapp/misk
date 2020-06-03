@@ -1,0 +1,10 @@
+dependencies {
+    compile project(':misk-core')
+}
+
+afterEvaluate { project ->
+    project.tasks.dokka {
+        outputDirectory = "$rootDir/docs/0.x"
+        outputFormat = 'gfm'
+    }
+}

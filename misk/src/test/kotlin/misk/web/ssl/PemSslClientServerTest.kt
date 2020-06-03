@@ -5,11 +5,12 @@ import com.google.inject.Provides
 import com.google.inject.name.Names
 import helpers.protos.Dinosaur
 import misk.MiskTestingServiceModule
-import misk.client.HttpClientEndpointConfig
 import misk.client.HttpClientModule
-import misk.client.HttpClientSSLConfig
 import misk.client.HttpClientsConfig
 import misk.client.ProtoMessageHttpClient
+import misk.endpoints.HttpClientConfig
+import misk.endpoints.HttpClientSSLConfig
+import misk.endpoints.buildClientEndpointConfig
 import misk.inject.KAbstractModule
 import misk.inject.getInstance
 import misk.scope.ActionScoped
@@ -128,45 +129,45 @@ internal class PemSslClientServerTest {
 
     @Provides
     @Singleton
-    fun provideHttpClientConfig(): HttpClientsConfig {
-      return HttpClientsConfig(
-          endpoints = mapOf(
-              "cert-and-trust" to HttpClientEndpointConfig(
-                  jetty.httpsServerUrl!!.toString(),
-                  ssl = HttpClientSSLConfig(
-                      cert_store = CertStoreConfig(
-                          resource = "classpath:/ssl/client_cert_key_combo.pem",
-                          passphrase = "clientpassword",
-                          format = SslLoader.FORMAT_PEM
-                      ),
-                      trust_store = TrustStoreConfig(
-                          resource = "classpath:/ssl/server_cert.pem",
-                          format = SslLoader.FORMAT_PEM
-                      )
-                  )),
-              "no-cert" to HttpClientEndpointConfig(
-                  jetty.httpsServerUrl!!.toString(),
-                  ssl = HttpClientSSLConfig(
-                      cert_store = null,
-                      trust_store = TrustStoreConfig(
-                          resource = "classpath:/ssl/server_cert.pem",
-                          format = SslLoader.FORMAT_PEM
-                      )
-                  )),
-              "no-trust" to HttpClientEndpointConfig(
-                  jetty.httpsServerUrl!!.toString(),
-                  ssl = HttpClientSSLConfig(
-                      cert_store = CertStoreConfig(
-                          resource = "classpath:/ssl/client_cert_key_combo.pem",
-                          passphrase = "clientpassword",
-                          format = SslLoader.FORMAT_PEM
-                      ),
-                      trust_store = TrustStoreConfig(
-                          resource = "classpath:/ssl/client_cert.pem",
-                          format = SslLoader.FORMAT_PEM
-                      )
-                  ))
-          ))
-    }
+    fun provideHttpClientConfig() = HttpClientsConfig(
+        "cert-and-trust" to jetty.httpsServerUrl!!.buildClientEndpointConfig(
+            HttpClientConfig(
+                ssl = HttpClientSSLConfig(
+                    cert_store = CertStoreConfig(
+                        resource = "classpath:/ssl/client_cert_key_combo.pem",
+                        passphrase = "clientpassword",
+                        format = SslLoader.FORMAT_PEM
+                    ),
+                    trust_store = TrustStoreConfig(
+                        resource = "classpath:/ssl/server_cert.pem",
+                        format = SslLoader.FORMAT_PEM
+                    )
+                ))
+        ),
+        "no-cert" to jetty.httpsServerUrl!!.buildClientEndpointConfig(
+            HttpClientConfig(
+                ssl = HttpClientSSLConfig(
+                    cert_store = null,
+                    trust_store = TrustStoreConfig(
+                        resource = "classpath:/ssl/server_cert.pem",
+                        format = SslLoader.FORMAT_PEM
+                    )
+                ))
+        ),
+        "no-trust" to jetty.httpsServerUrl!!.buildClientEndpointConfig(
+            HttpClientConfig(
+                ssl = HttpClientSSLConfig(
+                    cert_store = CertStoreConfig(
+                        resource = "classpath:/ssl/client_cert_key_combo.pem",
+                        passphrase = "clientpassword",
+                        format = SslLoader.FORMAT_PEM
+                    ),
+                    trust_store = TrustStoreConfig(
+                        resource = "classpath:/ssl/client_cert.pem",
+                        format = SslLoader.FORMAT_PEM
+                    )
+                ))
+        )
+    )
   }
 }

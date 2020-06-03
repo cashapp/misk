@@ -2,9 +2,10 @@ package misk.grpc.miskclient
 
 import com.google.inject.Provides
 import misk.client.GrpcClientModule
-import misk.client.HttpClientEndpointConfig
-import misk.client.HttpClientSSLConfig
 import misk.client.HttpClientsConfig
+import misk.endpoints.HttpClientConfig
+import misk.endpoints.HttpClientSSLConfig
+import misk.endpoints.buildClientEndpointConfig
 import misk.inject.KAbstractModule
 import misk.security.ssl.SslLoader
 import misk.security.ssl.TrustStoreConfig
@@ -21,20 +22,17 @@ class MiskGrpcClientModule : KAbstractModule() {
 
   @Provides
   @Singleton
-  fun provideHttpClientsConfig(@Named("grpc server") url: HttpUrl): HttpClientsConfig {
-    return HttpClientsConfig(
-        endpoints = mapOf(
-            "default" to HttpClientEndpointConfig(
-                url.toString(),
-                ssl = HttpClientSSLConfig(
-                    cert_store = null,
-                    trust_store = TrustStoreConfig(
-                        resource = "classpath:/ssl/server_cert.pem",
-                        format = SslLoader.FORMAT_PEM
-                    )
-                )
-            )
-        )
-    )
-  }
+  fun provideHttpClientsConfig(@Named("grpc server") url: HttpUrl) = HttpClientsConfig(
+      "default" to url.buildClientEndpointConfig(defaultHttpClientConfig)
+  )
+
+  private val defaultHttpClientConfig = HttpClientConfig(
+      ssl = HttpClientSSLConfig(
+          cert_store = null,
+          trust_store = TrustStoreConfig(
+              resource = "classpath:/ssl/server_cert.pem",
+              format = SslLoader.FORMAT_PEM
+          )
+      )
+  )
 }

@@ -8,10 +8,10 @@ import io.opentracing.Tracer
 import io.opentracing.mock.MockSpan
 import io.opentracing.mock.MockTracer
 import misk.MiskTestingServiceModule
-import misk.client.HttpClientEndpointConfig
 import misk.client.HttpClientsConfig
 import misk.client.HttpClientsConfigModule
 import misk.client.TypedHttpClientModule
+import misk.endpoints.buildClientEndpointConfig
 import misk.inject.KAbstractModule
 import misk.inject.getInstance
 import misk.inject.keyOf
@@ -184,10 +184,9 @@ internal class ClientServerTraceTest {
       install(TypedHttpClientModule.create<ReturnADinosaur>("dinosaur", Names.named("dinosaur")))
       install(TypedHttpClientModule.create<RoarLikeDinosaur>("roar", Names.named("roar")))
       install(HttpClientsConfigModule(HttpClientsConfig(
-          endpoints = mapOf(
-              "dinosaur" to HttpClientEndpointConfig(jetty.httpServerUrl.toString()),
-              "roar" to HttpClientEndpointConfig(jetty.httpServerUrl.toString())
-          ))))
+          "dinosaur" to jetty.httpServerUrl.buildClientEndpointConfig(),
+          "roar" to jetty.httpServerUrl.buildClientEndpointConfig()
+      )))
     }
   }
 }

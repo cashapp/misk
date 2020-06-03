@@ -4,6 +4,8 @@ import com.google.inject.Provides
 import com.google.inject.name.Named
 import com.google.inject.name.Names
 import misk.MiskTestingServiceModule
+import misk.endpoints.HttpClientConfig
+import misk.endpoints.buildClientEndpointConfig
 import misk.inject.KAbstractModule
 import misk.metrics.Histogram
 import misk.prometheus.PrometheusHistogramRegistryModule
@@ -93,14 +95,11 @@ internal class ClientMetricsInterceptorTest {
 
     @Provides
     @Singleton
-    fun provideHttpClientConfig(server: MockWebServer): HttpClientsConfig {
-      val url = server.url("/")
-      return HttpClientsConfig(
-          endpoints = mapOf("pinger" to HttpClientEndpointConfig(
-              url = url.toString(),
-              readTimeout = Duration.ofMillis(100)
-          )))
-    }
+    fun provideHttpClientConfig(server: MockWebServer) = HttpClientsConfig(
+        "pinger" to server.url("/").buildClientEndpointConfig(HttpClientConfig(
+            readTimeout = Duration.ofMillis(100)
+        ))
+    )
   }
 
   interface Pinger {

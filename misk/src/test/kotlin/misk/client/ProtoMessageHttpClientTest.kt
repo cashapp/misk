@@ -5,6 +5,7 @@ import com.google.inject.Provides
 import com.google.inject.name.Names
 import helpers.protos.Dinosaur
 import misk.MiskTestingServiceModule
+import misk.endpoints.buildClientEndpointConfig
 import misk.inject.KAbstractModule
 import misk.inject.getInstance
 import misk.testing.MiskTest
@@ -83,11 +84,8 @@ class ProtoMessageHttpClientTest {
 
     @Provides
     @Singleton
-    fun provideHttpClientConfig(): HttpClientsConfig {
-      return HttpClientsConfig(
-          endpoints = mapOf(
-              "dinosaur" to HttpClientEndpointConfig(jetty.httpServerUrl.toString())
-          ))
-    }
+    fun provideHttpClientConfig() = HttpClientsConfig(
+        "dinosaur" to jetty.httpServerUrl.buildClientEndpointConfig()
+    )
   }
 }

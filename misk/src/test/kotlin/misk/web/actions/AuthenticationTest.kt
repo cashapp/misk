@@ -1,8 +1,8 @@
 package misk.web.actions
 
 import misk.MiskCaller
-import misk.client.HttpClientEndpointConfig
 import misk.client.HttpClientFactory
+import misk.endpoints.buildClientEndpointConfig
 import misk.security.authz.FakeCallerAuthenticator
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
@@ -79,8 +79,6 @@ class AuthenticationTest {
     return response.body!!.string()
   }
 
-  private fun createOkHttpClient(): OkHttpClient {
-    val config = HttpClientEndpointConfig(jetty.httpServerUrl.toString())
-    return httpClientFactory.create(config)
-  }
+  private fun createOkHttpClient(): OkHttpClient =
+      httpClientFactory.create(jetty.httpServerUrl.buildClientEndpointConfig())
 }

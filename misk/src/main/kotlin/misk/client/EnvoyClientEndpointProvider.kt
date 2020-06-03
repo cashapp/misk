@@ -1,5 +1,6 @@
 package misk.client
 
+import misk.endpoints.HttpEndpoint
 import java.io.File
 
 /**
@@ -7,7 +8,7 @@ import java.io.File
  */
 interface EnvoyClientEndpointProvider {
   /** Host header that will be used to route the request. */
-  fun url(httpClientEnvoyConfig: HttpClientEnvoyConfig): String
+  fun url(httpClientEnvoyConfig: HttpEndpoint.Envoy): String
   /** Unix socket file to be used to communicate to the local Envoy sidecar. */
-  fun unixSocket(httpClientEnvoyConfig: HttpClientEnvoyConfig): File
+  fun unixSocket(httpClientEnvoyConfig: HttpEndpoint.Envoy): File
 }

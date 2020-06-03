@@ -1,7 +1,5 @@
 package misk.resources
 
-import com.google.common.collect.ImmutableList
-import com.google.common.collect.ImmutableSet
 import misk.resources.ResourceLoader.Backend
 import okio.BufferedSource
 import okio.ByteString
@@ -94,17 +92,14 @@ class ResourceLoader @Inject constructor(
     return backend.list(path).map { scheme + it }
   }
 
-  fun walk(address: String): List<String> {
-    val resourcesResult = ImmutableList.builder<String>()
-    for (resource in list(address)) {
-      if (list(resource).isEmpty()) {
-        resourcesResult.add(resource)
-      } else {
-        resourcesResult.addAll(walk(resource))
+  fun walk(address: String): List<String> =
+      list(address).flatMap { resource ->
+        if (list(resource).isEmpty()) {
+          listOf(resource)
+        } else {
+          walk(resource)
+        }
       }
-    }
-    return resourcesResult.build()
-  }
 
   /**
    * Return the contents of `address` as a string, or null if no such resource exists. Note that
@@ -180,17 +175,18 @@ class ResourceLoader @Inject constructor(
 
     open fun list(path: String): List<String> {
       val prefix = if (path.endsWith("/")) path else "$path/"
-      val result = ImmutableSet.builder<String>()
-      for (key in all()) {
-        if (!key.startsWith(prefix)) continue
-        val slash = key.indexOf('/', prefix.length)
-        if (slash == -1) {
-          result.add(key)
-        } else {
-          result.add(key.substring(0, slash))
-        }
-      }
-      return result.build().toList()
+
+      return all()
+          .filter { it.startsWith(prefix) }
+          .map { key ->
+            val slash = key.indexOf('/', prefix.length)
+            if (slash == -1) {
+              key
+            } else {
+              key.substring(0, slash)
+            }
+          }
+          .distinct()
     }
   }
 

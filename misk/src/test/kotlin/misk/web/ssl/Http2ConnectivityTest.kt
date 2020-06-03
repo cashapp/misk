@@ -3,12 +3,12 @@ package misk.web.ssl
 import ch.qos.logback.classic.Level
 import com.google.inject.Guice
 import com.google.inject.Provides
-import misk.MiskDefault
 import misk.MiskTestingServiceModule
-import misk.client.HttpClientEndpointConfig
 import misk.client.HttpClientModule
-import misk.client.HttpClientSSLConfig
 import misk.client.HttpClientsConfig
+import misk.endpoints.HttpClientConfig
+import misk.endpoints.HttpClientSSLConfig
+import misk.endpoints.buildClientEndpointConfig
 import misk.inject.KAbstractModule
 import misk.inject.getInstance
 import misk.logging.LogCollector
@@ -19,7 +19,6 @@ import misk.security.ssl.TrustStoreConfig
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.web.Get
-import misk.web.NetworkInterceptor
 import misk.web.Post
 import misk.web.Response
 import misk.web.ResponseBody
@@ -30,7 +29,6 @@ import misk.web.actions.WebAction
 import misk.web.interceptors.MetricsInterceptor
 import misk.web.jetty.JettyService
 import misk.web.mediatype.MediaTypes
-import okhttp3.MediaType
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Protocol
@@ -43,6 +41,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.io.IOException
 import java.net.SocketTimeoutException
+import java.net.URL
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -195,7 +194,7 @@ class Http2ConnectivityTest {
       val request = actionScopedServletRequest.get() as org.eclipse.jetty.server.Request
       request.httpChannel.abort(Exception("boom")) // Synthesize a connectivity failure.
 
-      return object: ResponseBody {
+      return object : ResponseBody {
         override fun writeTo(sink: BufferedSink) {
           for (i in 0 until 1024 * 1024) {
             sink.writeUtf8("impossible\n")
@@ -238,21 +237,18 @@ class Http2ConnectivityTest {
 
     @Provides
     @Singleton
-    fun provideHttpClientsConfig(): HttpClientsConfig {
-      return HttpClientsConfig(
-          endpoints = mapOf(
-              "default" to HttpClientEndpointConfig(
-                  "http://example.com/",
-                  ssl = HttpClientSSLConfig(
-                      cert_store = null,
-                      trust_store = TrustStoreConfig(
-                          resource = "classpath:/ssl/server_cert.pem",
-                          format = SslLoader.FORMAT_PEM
-                      )
-                  )
-              )
-          )
-      )
-    }
+    fun provideHttpClientsConfig() = HttpClientsConfig(
+        "default" to URL("http://example.com/").buildClientEndpointConfig(httpClientConfig)
+    )
+
+    private val httpClientConfig = HttpClientConfig(
+        ssl = HttpClientSSLConfig(
+            cert_store = null,
+            trust_store = TrustStoreConfig(
+                resource = "classpath:/ssl/server_cert.pem",
+                format = SslLoader.FORMAT_PEM
+            )
+        )
+    )
   }
 }

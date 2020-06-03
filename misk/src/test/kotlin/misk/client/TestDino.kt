@@ -2,6 +2,7 @@ package misk.client
 
 import com.google.inject.Provides
 import helpers.protos.Dinosaur
+import misk.endpoints.buildClientEndpointConfig
 import misk.inject.KAbstractModule
 import misk.web.Post
 import misk.web.RequestBody
@@ -38,10 +39,7 @@ internal class DinoClientModule(private val jetty: JettyService) : KAbstractModu
 
   @Provides
   @Singleton
-  fun provideHttpClientConfig(): HttpClientsConfig {
-    return HttpClientsConfig(
-        endpoints = mapOf(
-            "dinosaur" to HttpClientEndpointConfig(jetty.httpServerUrl.toString())
-        ))
-  }
+  fun provideHttpClientConfig() = HttpClientsConfig(
+      "dinosaur" to jetty.httpServerUrl.buildClientEndpointConfig()
+  )
 }

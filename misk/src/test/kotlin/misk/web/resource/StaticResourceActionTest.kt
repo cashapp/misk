@@ -1,10 +1,10 @@
 package misk.web.resource
 
 import com.google.inject.name.Names
-import misk.client.HttpClientEndpointConfig
 import misk.client.HttpClientModule
 import misk.client.HttpClientsConfig
 import misk.client.HttpClientsConfigModule
+import misk.endpoints.buildClientEndpointConfig
 import misk.inject.KAbstractModule
 import misk.resources.ResourceLoader
 import misk.testing.MiskTest
@@ -18,6 +18,7 @@ import okhttp3.OkHttpClient
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.net.URL
 import javax.inject.Inject
 import javax.inject.Named
 import kotlin.test.assertFailsWith
@@ -210,9 +211,8 @@ class StaticResourceActionTest {
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(HttpClientsConfigModule(HttpClientsConfig(
-          endpoints = mapOf(
-              "static_resource_action" to HttpClientEndpointConfig("http://example.com/")
-          ))))
+              "static_resource_action" to URL("http://example.com/").buildClientEndpointConfig()
+          )))
       install(HttpClientModule("static_resource_action",
           Names.named("static_resource_action")))
 

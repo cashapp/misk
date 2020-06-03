@@ -1,10 +1,11 @@
 package misk.web
 
 import com.google.inject.Provides
-import misk.client.HttpClientEndpointConfig
 import misk.client.HttpClientModule
-import misk.client.HttpClientSSLConfig
 import misk.client.HttpClientsConfig
+import misk.endpoints.HttpClientConfig
+import misk.endpoints.HttpClientSSLConfig
+import misk.endpoints.buildClientEndpointConfig
 import misk.inject.KAbstractModule
 import misk.security.ssl.SslLoader
 import misk.security.ssl.TrustStoreConfig
@@ -18,6 +19,7 @@ import okhttp3.Request
 import okhttp3.Response
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import java.net.URL
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -98,22 +100,19 @@ abstract class AbstractRebalancingTest(
 
     @Provides
     @Singleton
-    fun provideHttpClientsConfig(): HttpClientsConfig {
-      return HttpClientsConfig(
-          endpoints = mapOf(
-              "default" to HttpClientEndpointConfig(
-                  "http://example.com/",
-                  ssl = HttpClientSSLConfig(
-                      cert_store = null,
-                      trust_store = TrustStoreConfig(
-                          resource = "classpath:/ssl/server_cert.pem",
-                          format = SslLoader.FORMAT_PEM
-                      )
-                  )
-              )
-          )
-      )
-    }
+    fun provideHttpClientsConfig() = HttpClientsConfig(
+        "default" to URL("http://example.com/").buildClientEndpointConfig(httpClientConfig)
+    )
+
+    private val httpClientConfig = HttpClientConfig(
+        ssl = HttpClientSSLConfig(
+            cert_store = null,
+            trust_store = TrustStoreConfig(
+                resource = "classpath:/ssl/server_cert.pem",
+                format = SslLoader.FORMAT_PEM
+            )
+        )
+    )
   }
 }
 

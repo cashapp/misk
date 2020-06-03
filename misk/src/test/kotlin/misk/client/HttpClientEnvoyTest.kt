@@ -6,6 +6,8 @@ import com.google.inject.name.Names
 import helpers.protos.Dinosaur
 import misk.MiskTestingServiceModule
 import misk.ServiceModule
+import misk.endpoints.HttpEndpoint
+import misk.endpoints.buildClientEndpointConfig
 import misk.inject.KAbstractModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
@@ -62,11 +64,11 @@ internal class HttpClientEnvoyTest {
   class TestEnvoyClientEndpointProvider : EnvoyClientEndpointProvider {
     @Inject private lateinit var webServerService: MockWebServerService
 
-    override fun url(httpClientEnvoyConfig: HttpClientEnvoyConfig): String {
+    override fun url(httpClientEnvoyConfig: HttpEndpoint.Envoy): String {
       return webServerService.server!!.url("").toString()
     }
 
-    override fun unixSocket(httpClientEnvoyConfig: HttpClientEnvoyConfig): File {
+    override fun unixSocket(httpClientEnvoyConfig: HttpEndpoint.Envoy): File {
       return File("@socket")
     }
   }
@@ -83,10 +85,8 @@ internal class HttpClientEnvoyTest {
       install(TypedHttpClientModule.create<DinosaurService>("dinosaur", Names.named("dinosaur")))
     }
 
-    @Provides @Singleton fun provideHttpClientConfig(): HttpClientsConfig {
-      return HttpClientsConfig(
-          endpoints = mapOf(
-              "dinosaur" to HttpClientEndpointConfig(envoy = HttpClientEnvoyConfig("dinosaur"))))
-    }
+    @Provides @Singleton fun provideHttpClientConfig() = HttpClientsConfig(
+        "dinosaur" to HttpEndpoint.Envoy("dinosaur").buildClientEndpointConfig()
+    )
   }
 }

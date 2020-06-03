@@ -52,6 +52,7 @@ dependencies {
   compile dep.concurrencyLimitsCore
   compile project(':misk-actions')
   compile project(':misk-core')
+  compile project(':misk-endpoints')
   compile project(':misk-inject')
   compile project(':misk-service')
 

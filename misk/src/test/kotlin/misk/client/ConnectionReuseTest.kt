@@ -2,6 +2,7 @@ package misk.client
 
 import com.google.inject.Provides
 import misk.MiskTestingServiceModule
+import misk.endpoints.buildClientEndpointConfig
 import misk.inject.KAbstractModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
@@ -59,14 +60,9 @@ internal class ConnectionReuseTest {
 
     @Provides
     @Singleton
-    fun provideHttpClientConfig(server: MockWebServer): HttpClientsConfig {
-      val url = server.url("/")
-      return HttpClientsConfig(
-          endpoints = mapOf("hello" to HttpClientEndpointConfig(
-              url = url.toString()
-          ))
-      )
-    }
+    fun provideHttpClientConfig(server: MockWebServer) = HttpClientsConfig(
+        "hello" to server.url("/").buildClientEndpointConfig()
+    )
   }
 
   interface HelloService {

@@ -1,78 +1,60 @@
 package misk.client
 
 import misk.config.Config
-import misk.security.ssl.CertStoreConfig
-import misk.security.ssl.TrustStoreConfig
+import misk.endpoints.HttpClientConfig
+import misk.endpoints.HttpClientEndpointConfig
+import misk.endpoints.HttpClientSSLConfig
 import java.time.Duration
 
 data class HttpClientsConfig(
-  private val defaultConnectTimeout: Duration? = null,
-  private val defaultWriteTimeout: Duration? = null,
-  private val defaultReadTimeout: Duration? = null,
-  private val ssl: HttpClientSSLConfig? = null,
-  private val defaultPingInterval: Duration? = null,
-  private val defaultCallTimeout: Duration? = null,
-  private val endpoints: Map<String, HttpClientEndpointConfig> = mapOf()
+  private val endpoints: Map<String, HttpClientEndpointConfig> = mapOf(),
+  private val defaultClientConfig: HttpClientConfig = HttpClientConfig()
 ) : Config {
+
+  constructor(
+    vararg endpoints: Pair<String, HttpClientEndpointConfig>,
+    defaultClientConfig: HttpClientConfig = HttpClientConfig()
+  ) : this(endpoints.toMap(), defaultClientConfig)
+
+  @Deprecated(
+      "Kept for backwards compatibility",
+      replaceWith = ReplaceWith("::HttpClientsConfig(defaultClientConfig, endpoints)")
+  )
+  constructor(
+    defaultConnectTimeout: Duration? = null,
+    defaultWriteTimeout: Duration? = null,
+    defaultReadTimeout: Duration? = null,
+    ssl: HttpClientSSLConfig? = null,
+    defaultPingInterval: Duration? = null,
+    defaultCallTimeout: Duration? = null,
+    endpoints: Map<String, HttpClientEndpointConfig> = mapOf()
+  ) : this(
+      endpoints,
+      HttpClientConfig(
+          connectTimeout = defaultConnectTimeout,
+          writeTimeout = defaultWriteTimeout,
+          readTimeout = defaultReadTimeout,
+          ssl = ssl,
+          pingInterval = defaultPingInterval,
+          callTimeout = defaultCallTimeout
+      )
+  )
+
   /** @return The [HttpClientEndpointConfig] for the given client, populated with defaults as needed */
-  operator fun get(clientName: String): HttpClientEndpointConfig {
-    // TODO(mmihic): Cache, proxy, etc
-    val endpointConfig = endpoints[clientName] ?: throw IllegalArgumentException(
-        "no client configuration for endpoint $clientName")
-
-    return HttpClientEndpointConfig(
-        endpointConfig.url,
-        endpointConfig.envoy,
-        connectTimeout = endpointConfig.connectTimeout ?: defaultConnectTimeout,
-        writeTimeout = endpointConfig.writeTimeout ?: defaultWriteTimeout,
-        readTimeout = endpointConfig.readTimeout ?: defaultReadTimeout,
-        pingInterval = endpointConfig.pingInterval ?: defaultPingInterval,
-        callTimeout = endpointConfig.callTimeout ?: defaultCallTimeout,
-        ssl = endpointConfig.ssl ?: ssl
-    )
-  }
-
-  /**
-   * Returns a default config with no url/envoy config specified.
-   * Used to build up endpoint config for clients dynamically.
-   */
-  fun getDefault(): HttpClientEndpointConfig {
-    return HttpClientEndpointConfig(
-        url = null,
-        envoy = null,
-        connectTimeout = defaultConnectTimeout,
-        writeTimeout = defaultWriteTimeout,
-        readTimeout = defaultReadTimeout,
-        pingInterval = defaultPingInterval,
-        callTimeout = defaultCallTimeout,
-        ssl = ssl
-    )
-  }
+  operator fun get(clientName: String): HttpClientEndpointConfig =
+      // TODO(mmihic): Cache, proxy, etc
+      requireNotNull(endpoints[clientName]) { "no client configuration for endpoint $clientName" }
+          .withDefaults(defaultClientConfig)
 }
 
-data class HttpClientSSLConfig(
-  val cert_store: CertStoreConfig?,
-  val trust_store: TrustStoreConfig
+@Deprecated(
+    "Use misk.endpoints.HttpClientSSLConfig",
+    replaceWith = ReplaceWith("misk.endpoints.HttpClientSSLConfig")
 )
+typealias HttpClientSSLConfig = misk.endpoints.HttpClientSSLConfig
 
-data class HttpClientEndpointConfig(
-  val url: String? = null,
-  val envoy: HttpClientEnvoyConfig? = null,
-  val connectTimeout: Duration? = null,
-  val writeTimeout: Duration? = null,
-  val readTimeout: Duration? = null,
-  val pingInterval: Duration? = null,
-  val callTimeout: Duration? = null,
-  val maxRequests: Int = 128,
-  val maxRequestsPerHost: Int = 32,
-  val maxIdleConnections: Int = 100,
-  val keepAliveDuration: Duration = Duration.ofMinutes(5),
-  val ssl: HttpClientSSLConfig? = null
+@Deprecated(
+    "Use misk.endpoints.HttpClientEndpointConfig",
+    replaceWith = ReplaceWith("misk.endpoints.HttpClientEndpointConfig")
 )
-
-data class HttpClientEnvoyConfig(
-  val app: String,
-
-  /** Environment to target. If null, the same environment as the app is running in is assumed. */
-  val env: String? = null
-)
+typealias HttpClientEndpointConfig = HttpClientEndpointConfig

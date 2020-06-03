@@ -11,6 +11,9 @@ import misk.clustering.Cluster
 import misk.clustering.ClusterWatch
 import misk.clustering.fake.ExplicitClusterResourceMapper
 import misk.config.AppName
+import misk.endpoints.HttpClientConfig
+import misk.endpoints.HttpClientSSLConfig
+import misk.endpoints.buildClientEndpointConfig
 import misk.inject.KAbstractModule
 import misk.security.ssl.CertStoreConfig
 import misk.security.ssl.SslLoader
@@ -144,23 +147,22 @@ internal class TypedPeerHttpClientTest {
 
     @Provides
     @Singleton
-    fun provideHttpClientConfig(): HttpClientsConfig {
-      return HttpClientsConfig(
-          endpoints = mapOf(
-              "Server" to HttpClientEndpointConfig(
-                  jetty.httpsServerUrl!!.toString(),
-                  ssl = HttpClientSSLConfig(
-                      cert_store = CertStoreConfig(
-                          resource = "classpath:/ssl/client_cert_key_combo.pem",
-                          passphrase = "clientpassword",
-                          format = SslLoader.FORMAT_PEM
-                      ),
-                      trust_store = TrustStoreConfig(
-                          resource = "classpath:/ssl/server_cert.pem",
-                          format = SslLoader.FORMAT_PEM
-                      )
-                  ))
-          ))
-    }
+    fun provideHttpClientConfig() = HttpClientsConfig(
+        "Server" to jetty.httpsServerUrl!!.buildClientEndpointConfig(httpClientConfig)
+    )
+
+    private val httpClientConfig = HttpClientConfig(
+        ssl = HttpClientSSLConfig(
+            cert_store = CertStoreConfig(
+                resource = "classpath:/ssl/client_cert_key_combo.pem",
+                passphrase = "clientpassword",
+                format = SslLoader.FORMAT_PEM
+            ),
+            trust_store = TrustStoreConfig(
+                resource = "classpath:/ssl/server_cert.pem",
+                format = SslLoader.FORMAT_PEM
+            )
+        )
+    )
   }
 }

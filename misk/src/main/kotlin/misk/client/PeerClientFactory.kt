@@ -5,6 +5,7 @@ import com.google.common.cache.CacheLoader
 import com.google.inject.Provides
 import misk.clustering.Cluster
 import misk.config.AppName
+import misk.endpoints.HttpEndpoint
 import misk.inject.KAbstractModule
 import misk.security.cert.X500Name
 import misk.web.WebConfig
@@ -14,7 +15,6 @@ import java.security.cert.X509Certificate
 import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
 import javax.net.ssl.HostnameVerifier
-import javax.net.ssl.SSLSession
 
 /**
  * Binds a [PeerClientFactory] that calls peers on the HTTPS port of this process's server,
@@ -72,25 +72,21 @@ class PeerClientFactory(
   private val httpClientFactory: HttpClientFactory,
   private val httpsPort: Int
 ) {
-
   private val cache = CacheBuilder.newBuilder()
       .expireAfterAccess(5, TimeUnit.MINUTES)
-      .build<Cluster.Member, OkHttpClient>(object : CacheLoader<Cluster.Member, OkHttpClient>() {
+      .build(object : CacheLoader<Cluster.Member, OkHttpClient>() {
         override fun load(peer: Cluster.Member): OkHttpClient {
           val config = httpClientsConfig[appName].copy(
-              url = baseUrl(peer),
-              envoy = null
+              endpoint = HttpEndpoint.Url(baseUrl(peer))
           )
 
           return httpClientFactory.create(config).newBuilder()
-              .hostnameVerifier(object : HostnameVerifier {
-                override fun verify(hostname: String?, session: SSLSession?): Boolean {
-                  val ou =
-                      (session?.peerCertificates?.firstOrNull() as? X509Certificate)?.let { peerCert ->
-                        X500Name.parse(peerCert.subjectX500Principal.name).organizationalUnit
-                      }
-                  return appName == ou
-                }
+              .hostnameVerifier(HostnameVerifier { _, session ->
+                val ou =
+                    (session?.peerCertificates?.firstOrNull() as? X509Certificate)?.let { peerCert ->
+                      X500Name.parse(peerCert.subjectX500Principal.name).organizationalUnit
+                    }
+                appName == ou
               })
               .build()
         }
