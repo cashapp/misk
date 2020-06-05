@@ -432,10 +432,7 @@ internal class RealTransacter private constructor(
       check(!readOnly) { "Saving isn't permitted in a read only session." }
       return when (entity) {
         is DbChild<*, *> -> (hibernateSession.save(entity) as Gid<*, *>).id
-        is DbRoot<*> -> hibernateSession.save(entity)
-        is DbUnsharded<*> -> hibernateSession.save(entity)
-        else -> throw IllegalArgumentException(
-            "You need to sub-class one of [DbChild, DbRoot, DbUnsharded]")
+        else -> hibernateSession.save(entity)
       } as Id<T>
     }
 
