@@ -1,7 +1,7 @@
 dependencies {
   compile dep.awsApi
   compile dep.awsSqs
-  compile dep.tracingJaeger
+  compile dep.openTracingDatadog
   compile project(':misk')
   compile project(':misk-jobqueue')
   compile project(':misk-feature')
