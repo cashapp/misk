@@ -1,6 +1,5 @@
 package misk.cloud.gcp.tracing
 
-import brave.opentracing.BraveSpan
 import com.google.cloud.logging.LogEntry
 import com.google.cloud.logging.LoggingEnhancer
 import datadog.opentracing.DDSpan
@@ -20,14 +19,6 @@ class TracingLoggingEnhancer : LoggingEnhancer {
     val activeSpan = tracer.activeSpan()
     var traceId: String? = null
     when (activeSpan) {
-      is BraveSpan -> {
-        val traceContext = activeSpan.unwrap().context()
-        traceId = traceContext.traceIdString()
-        // TODO(nb): figure out why traceIdString differs from string representation in StackDriver
-        if (traceContext.traceIdHigh() == 0L) {
-          traceId = "0000000000000000$traceId"
-        }
-      }
       is DDSpan -> traceId = activeSpan.context().toTraceId()
     }
 

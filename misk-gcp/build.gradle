@@ -10,7 +10,6 @@ dependencies {
   compile dep.openTracingDatadog
 
   compile project(':misk')
-  compile project(':misk-zipkin')
 
   testCompile project(':misk-testing')
   testCompile project(':misk-gcp-testing')

@@ -58,7 +58,6 @@ nav:
       - 'misk-prometheus': 0.x/misk-prometheus/index.md
       - 'misk-redis': 0.x/misk-redis/index.md
       - 'misk-testing': 0.x/misk-testing/index.md
-      - 'misk-zipkin': 0.x/misk-zipkin/index.md
       - 'misk-zookeeper': 0.x/misk-zookeeper/index.md
       - 'misk-zoopkeeper-testing': 0.x/misk-zoopkeeper-testing/index.md
   - 'Change Log': changelog.md
