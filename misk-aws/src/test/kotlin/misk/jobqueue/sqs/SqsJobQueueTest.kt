@@ -4,7 +4,6 @@ import com.amazonaws.services.sqs.AmazonSQS
 import com.amazonaws.services.sqs.model.CreateQueueRequest
 import misk.clustering.fake.lease.FakeLeaseManager
 import misk.jobqueue.Job
-import misk.jobqueue.JobConsumer
 import misk.jobqueue.JobQueue
 import misk.jobqueue.QueueName
 import misk.jobqueue.subscribe

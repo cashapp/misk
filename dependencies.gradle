@@ -92,13 +92,10 @@ ext.dep = [
   "slf4jApi": "org.slf4j:slf4j-api:1.7.28",
   "tink": "com.google.crypto.tink:tink:1.2.0",
   "tracingDatadog": "com.datadoghq:dd-trace-api:0.49.0",
-  "tracingZipkin": "io.opentracing.brave:brave-opentracing:0.35.1",
   "vitess": "io.vitess:vitess-jdbc:3.0.0",
   "wireGradlePlugin": "com.squareup.wire:wire-gradle-plugin:3.2.0",
   "wireGrpcClient": "com.squareup.wire:wire-grpc-client:3.2.0",
   "wireRuntime": "com.squareup.wire:wire-runtime:3.2.0",
-  "zipkinBrave": "io.zipkin.brave:brave:5.9.5",
-  "zipkinReporter": "io.zipkin.reporter2:zipkin-sender-okhttp3:2.12.1",
   "zookeeper": "org.apache.zookeeper:zookeeper:3.5.4-beta",
 ]
 // Auto-generated from polyrepo's master-dependencies.json. Update via polyrepo dep-add and polyrepo dep-upgrade.
