@@ -256,8 +256,8 @@ class HibernateModule(
     }
 
     if (config.type == DataSourceType.VITESS_MYSQL) {
-      val jaegerSpanInjectorDecoratorKey = SpanInjector::class.toKey(qualifier)
-      bind(jaegerSpanInjectorDecoratorKey)
+      val spanInjectorDecoratorKey = SpanInjector::class.toKey(qualifier)
+      bind(spanInjectorDecoratorKey)
           .toProvider(object : Provider<SpanInjector> {
             @com.google.inject.Inject(optional = true)
             var tracer: Tracer? = null
