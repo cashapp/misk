@@ -4,9 +4,9 @@ import brave.Tracing
 import brave.opentracing.BraveTracer
 import com.google.cloud.logging.LogEntry
 import com.google.cloud.logging.Payload
-import io.jaegertracing.internal.JaegerTracer
-import io.jaegertracing.internal.reporters.NoopReporter
-import io.jaegertracing.internal.samplers.ConstSampler
+import datadog.opentracing.DDSpan
+import datadog.opentracing.DDTracer
+import datadog.trace.common.writer.Writer
 import io.opentracing.Span
 import io.opentracing.noop.NoopTracerFactory
 import misk.testing.MiskTest
@@ -16,12 +16,10 @@ import org.junit.jupiter.api.Test
 
 @MiskTest
 class TracingLoggingEnhancerTest {
-  @Test fun enhanceJaegerTracer() {
-    val tracer = JaegerTracer.Builder("jaegerbombs")
-        .withReporter(NoopReporter())
-        .withSampler(ConstSampler(true))
-        .build()
-
+  @Test fun enhanceDatadogTracer() {
+    val tracer = DDTracer.builder()
+            .writer(NoopWriter())
+            .build();
     tracer.traceWithSpan("test span") {
       val logEntryBuilder = LogEntry.newBuilder(Payload.StringPayload.of("payload"))
 
@@ -55,5 +53,19 @@ class TracingLoggingEnhancerTest {
     val logEntry = logEntryBuilder.build()
 
     assertThat(logEntry.labels).isEmpty()
+  }
+}
+
+class NoopWriter : Writer {
+  override fun start() {
+  }
+
+  override fun write(trace: MutableList<DDSpan>?) {
+  }
+
+  override fun close() {
+  }
+
+  override fun incrementTraceCount() {
   }
 }
