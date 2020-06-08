@@ -3,7 +3,7 @@ package misk.jobqueue.sqs
 import com.amazonaws.services.sqs.model.MessageAttributeValue
 import com.amazonaws.services.sqs.model.SendMessageRequest
 import com.squareup.moshi.Moshi
-import io.jaegertracing.internal.JaegerSpan
+import datadog.opentracing.DDSpan
 import io.opentracing.Tracer
 import misk.jobqueue.JobQueue
 import misk.jobqueue.QueueName
@@ -56,7 +56,7 @@ internal class SqsJobQueue @Inject internal constructor(
                 SqsJob.JOBQUEUE_METADATA_IDEMPOTENCE_KEY to idempotenceKey)
 
             // Preserve original trace id, if available.
-            (span as? JaegerSpan)?.let {
+            (span as? DDSpan)?.let {
               val traceId = it.context().traceId.toString()
               metadata[SqsJob.JOBQUEUE_METADATA_ORIGINAL_TRACE_ID] = traceId
               // TODO(bruno): drop this attribute after rollout; moved to metadata

@@ -3,7 +3,7 @@ package misk.cloud.gcp.tracing
 import brave.opentracing.BraveSpan
 import com.google.cloud.logging.LogEntry
 import com.google.cloud.logging.LoggingEnhancer
-import io.jaegertracing.internal.JaegerSpan
+import datadog.opentracing.DDSpan
 import io.opentracing.Tracer
 import io.opentracing.util.GlobalTracer
 
@@ -28,7 +28,7 @@ class TracingLoggingEnhancer : LoggingEnhancer {
           traceId = "0000000000000000$traceId"
         }
       }
-      is JaegerSpan -> traceId = activeSpan.context().toTraceId()
+      is DDSpan -> traceId = activeSpan.context().toTraceId()
     }
 
     if (traceId != null) {
