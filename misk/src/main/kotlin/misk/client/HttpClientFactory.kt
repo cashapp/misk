@@ -24,12 +24,12 @@ class HttpClientFactory @Inject constructor(
   fun create(config: HttpClientEndpointConfig): OkHttpClient {
     // TODO(mmihic): Cache, proxy, etc
     val builder = unconfiguredClient.newBuilder()
-    config.connectTimeout?.let { builder.connectTimeout(it.toMillis(), TimeUnit.MILLISECONDS) }
-    config.readTimeout?.let { builder.readTimeout(it.toMillis(), TimeUnit.MILLISECONDS) }
-    config.writeTimeout?.let { builder.writeTimeout(it.toMillis(), TimeUnit.MILLISECONDS) }
-    config.pingInterval?.let { builder.pingInterval(it) }
-    config.callTimeout?.let { builder.callTimeout(it) }
-    config.ssl?.let {
+    config.clientConfig.connectTimeout?.let { builder.connectTimeout(it.toMillis(), TimeUnit.MILLISECONDS) }
+    config.clientConfig.readTimeout?.let { builder.readTimeout(it.toMillis(), TimeUnit.MILLISECONDS) }
+    config.clientConfig.writeTimeout?.let { builder.writeTimeout(it.toMillis(), TimeUnit.MILLISECONDS) }
+    config.clientConfig.pingInterval?.let { builder.pingInterval(it) }
+    config.clientConfig.callTimeout?.let { builder.callTimeout(it) }
+    config.clientConfig.ssl?.let {
       val trustStore = sslLoader.loadTrustStore(it.trust_store)!!
       val trustManagers = sslContextFactory.loadTrustManagers(trustStore.keyStore)
       val x509TrustManager = trustManagers.mapNotNull { it as? X509TrustManager }.firstOrNull()
@@ -49,13 +49,13 @@ class HttpClientFactory @Inject constructor(
     }
 
     val dispatcher = Dispatcher()
-    dispatcher.maxRequests = config.maxRequests
-    dispatcher.maxRequestsPerHost = config.maxRequestsPerHost
+    dispatcher.maxRequests = config.clientConfig.maxRequests
+    dispatcher.maxRequestsPerHost = config.clientConfig.maxRequestsPerHost
     builder.dispatcher(dispatcher)
 
     val connectionPool = ConnectionPool(
-        config.maxIdleConnections,
-        config.keepAliveDuration.toMillis(),
+        config.clientConfig.maxIdleConnections,
+        config.clientConfig.keepAliveDuration.toMillis(),
         TimeUnit.MILLISECONDS)
     builder.connectionPool(connectionPool)
 

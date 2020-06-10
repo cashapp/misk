@@ -2,6 +2,7 @@ package misk.grpc
 
 import com.google.inject.Provides
 import misk.MiskTestingServiceModule
+import misk.client.HttpClientConfig
 import misk.client.HttpClientEndpointConfig
 import misk.client.HttpClientModule
 import misk.client.HttpClientSSLConfig
@@ -30,12 +31,14 @@ class Http2ClientTestingModule(val jetty: JettyService) : KAbstractModule() {
     return HttpClientsConfig(
         endpoints = mapOf(
             "default" to HttpClientEndpointConfig(
-                "http://example.com/",
-                ssl = HttpClientSSLConfig(
-                    cert_store = null,
-                    trust_store = TrustStoreConfig(
-                        resource = "classpath:/ssl/server_cert.pem",
-                        format = SslLoader.FORMAT_PEM
+                url = "http://example.com/",
+                clientConfig = HttpClientConfig(
+                    ssl = HttpClientSSLConfig(
+                        cert_store = null,
+                        trust_store = TrustStoreConfig(
+                            resource = "classpath:/ssl/server_cert.pem",
+                            format = SslLoader.FORMAT_PEM
+                        )
                     )
                 )
             )

@@ -2,6 +2,7 @@ package misk.grpc.miskclient
 
 import com.google.inject.Provides
 import misk.client.GrpcClientModule
+import misk.client.HttpClientConfig
 import misk.client.HttpClientEndpointConfig
 import misk.client.HttpClientSSLConfig
 import misk.client.HttpClientsConfig
@@ -25,12 +26,14 @@ class MiskGrpcClientModule : KAbstractModule() {
     return HttpClientsConfig(
         endpoints = mapOf(
             "default" to HttpClientEndpointConfig(
-                url.toString(),
-                ssl = HttpClientSSLConfig(
-                    cert_store = null,
-                    trust_store = TrustStoreConfig(
-                        resource = "classpath:/ssl/server_cert.pem",
-                        format = SslLoader.FORMAT_PEM
+                url = url.toString(),
+                clientConfig = HttpClientConfig(
+                    ssl = HttpClientSSLConfig(
+                        cert_store = null,
+                        trust_store = TrustStoreConfig(
+                            resource = "classpath:/ssl/server_cert.pem",
+                            format = SslLoader.FORMAT_PEM
+                        )
                     )
                 )
             )

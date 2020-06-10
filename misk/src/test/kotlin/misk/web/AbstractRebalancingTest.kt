@@ -1,6 +1,7 @@
 package misk.web
 
 import com.google.inject.Provides
+import misk.client.HttpClientConfig
 import misk.client.HttpClientEndpointConfig
 import misk.client.HttpClientModule
 import misk.client.HttpClientSSLConfig
@@ -102,12 +103,14 @@ abstract class AbstractRebalancingTest(
       return HttpClientsConfig(
           endpoints = mapOf(
               "default" to HttpClientEndpointConfig(
-                  "http://example.com/",
-                  ssl = HttpClientSSLConfig(
-                      cert_store = null,
-                      trust_store = TrustStoreConfig(
-                          resource = "classpath:/ssl/server_cert.pem",
-                          format = SslLoader.FORMAT_PEM
+                  url = "http://example.com/",
+                  clientConfig = HttpClientConfig(
+                      ssl = HttpClientSSLConfig(
+                          cert_store = null,
+                          trust_store = TrustStoreConfig(
+                              resource = "classpath:/ssl/server_cert.pem",
+                              format = SslLoader.FORMAT_PEM
+                          )
                       )
                   )
               )

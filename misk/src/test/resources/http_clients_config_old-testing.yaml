@@ -1,0 +1,6 @@
+endpoints:
+  irs:
+    url: https://google.com/
+    connectTimeout: PT30S
+    readTimeout: PT30S
+    writeTimeout: PT30S

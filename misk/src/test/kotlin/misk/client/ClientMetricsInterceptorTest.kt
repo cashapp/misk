@@ -98,7 +98,9 @@ internal class ClientMetricsInterceptorTest {
       return HttpClientsConfig(
           endpoints = mapOf("pinger" to HttpClientEndpointConfig(
               url = url.toString(),
-              readTimeout = Duration.ofMillis(100)
+              clientConfig = HttpClientConfig(
+                  readTimeout = Duration.ofMillis(100)
+              )
           )))
     }
   }

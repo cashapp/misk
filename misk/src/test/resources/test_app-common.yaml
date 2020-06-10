@@ -18,3 +18,11 @@ action_exception_log_level:
 nested:
   child_nested:
     nested_value: nested value
+
+http_clients:
+  endpoints:
+    irs:
+      url: https://la.www4.irs.gov/
+      connectTimeout: PT30S
+      readTimeout: PT30S
+      writeTimeout: PT30S

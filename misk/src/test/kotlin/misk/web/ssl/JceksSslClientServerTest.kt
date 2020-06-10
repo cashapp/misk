@@ -5,6 +5,7 @@ import com.google.inject.Provides
 import com.google.inject.name.Names
 import helpers.protos.Dinosaur
 import misk.MiskTestingServiceModule
+import misk.client.HttpClientConfig
 import misk.client.HttpClientEndpointConfig
 import misk.client.HttpClientModule
 import misk.client.HttpClientSSLConfig
@@ -124,38 +125,47 @@ internal class JceksSslClientServerTest {
       return HttpClientsConfig(
           endpoints = mapOf(
               "cert-and-trust" to HttpClientEndpointConfig(
-                  jetty.httpsServerUrl!!.toString(),
-                  ssl = HttpClientSSLConfig(
-                      cert_store = CertStoreConfig(
-                          resource = "classpath:/ssl/client_keystore.jceks",
-                          passphrase = "clientpassword"
-                      ),
-                      trust_store = TrustStoreConfig(
-                          resource = "classpath:/ssl/server_cert.pem",
-                          format = SslLoader.FORMAT_PEM
+                  url = jetty.httpsServerUrl!!.toString(),
+                  clientConfig = HttpClientConfig(
+                      ssl = HttpClientSSLConfig(
+                          cert_store = CertStoreConfig(
+                              resource = "classpath:/ssl/client_keystore.jceks",
+                              passphrase = "clientpassword"
+                          ),
+                          trust_store = TrustStoreConfig(
+                              resource = "classpath:/ssl/server_cert.pem",
+                              format = SslLoader.FORMAT_PEM
+                          )
                       )
-                  )),
+                  )
+              ),
               "no-cert" to HttpClientEndpointConfig(
-                  jetty.httpsServerUrl!!.toString(),
-                  ssl = HttpClientSSLConfig(
-                      cert_store = null,
-                      trust_store = TrustStoreConfig(
-                          resource = "classpath:/ssl/server_cert.pem",
-                          format = SslLoader.FORMAT_PEM
+                  url = jetty.httpsServerUrl!!.toString(),
+                  clientConfig = HttpClientConfig(
+                      ssl = HttpClientSSLConfig(
+                          cert_store = null,
+                          trust_store = TrustStoreConfig(
+                              resource = "classpath:/ssl/server_cert.pem",
+                              format = SslLoader.FORMAT_PEM
+                          )
                       )
-                  )),
+                  )
+              ),
               "no-trust" to HttpClientEndpointConfig(
-                  jetty.httpsServerUrl!!.toString(),
-                  ssl = HttpClientSSLConfig(
-                      cert_store = CertStoreConfig(
-                          resource = "classpath:/ssl/client_keystore.jceks",
-                          passphrase = "clientpassword"
-                      ),
-                      trust_store = TrustStoreConfig(
-                          resource = "classpath:/ssl/client_cert.pem",
-                          format = SslLoader.FORMAT_PEM
+                  url = jetty.httpsServerUrl!!.toString(),
+                  clientConfig = HttpClientConfig(
+                      ssl = HttpClientSSLConfig(
+                          cert_store = CertStoreConfig(
+                              resource = "classpath:/ssl/client_keystore.jceks",
+                              passphrase = "clientpassword"
+                          ),
+                          trust_store = TrustStoreConfig(
+                              resource = "classpath:/ssl/client_cert.pem",
+                              format = SslLoader.FORMAT_PEM
+                          )
                       )
-                  ))
+                  )
+              )
           ))
     }
   }
