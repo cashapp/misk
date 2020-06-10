@@ -7,8 +7,7 @@ import misk.MiskCaller
 import misk.MiskDefault
 import misk.ServiceModule
 import misk.exceptions.ActionException
-import misk.grpc.GrpcRequestFeatureBinding
-import misk.grpc.GrpcResponseFeatureBinding
+import misk.grpc.GrpcFeatureBinding
 import misk.inject.KAbstractModule
 import misk.queuing.TimedBlockingQueue
 import misk.scope.ActionScopedProvider
@@ -151,8 +150,7 @@ class MiskWebModule(private val config: WebConfig) : KAbstractModule() {
     multibind<FeatureBinding.Factory>().toInstance(WebSocketListenerFeatureBinding.Factory)
     multibind<FeatureBinding.Factory>().to<RequestBodyFeatureBinding.Factory>()
     multibind<FeatureBinding.Factory>().to<ResponseBodyFeatureBinding.Factory>()
-    multibind<FeatureBinding.Factory>().to<GrpcRequestFeatureBinding.Factory>()
-    multibind<FeatureBinding.Factory>().to<GrpcResponseFeatureBinding.Factory>()
+    multibind<FeatureBinding.Factory>().to<GrpcFeatureBinding.Factory>()
 
     // Install infrastructure support
     install(CertificatesModule())

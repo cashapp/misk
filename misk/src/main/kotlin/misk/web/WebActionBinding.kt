@@ -25,7 +25,7 @@ internal class WebActionBinding @Inject constructor(
     pathMatcher: Matcher
   ): List<Any?> {
     val execution = Execution(beforeCallBindings, webAction, httpCall, pathMatcher)
-    execution.execute()
+    execution.executeBeforeCall()
     return execution.parameters.toList()
   }
 
@@ -38,7 +38,7 @@ internal class WebActionBinding @Inject constructor(
   ) {
     val execution = Execution(afterCallBindings, webAction, httpCall, pathMatcher)
     execution.returnValue = returnValue
-    execution.execute()
+    execution.executeAfterCall()
   }
 
   /** Performs bindings before (for parameters) or after a call (for the return value). */
@@ -54,11 +54,22 @@ internal class WebActionBinding @Inject constructor(
     /** Whichever binding is currently executing; used to enforce claims. */
     private var current: FeatureBinding? = null
 
-    internal fun execute() {
+    internal fun executeBeforeCall() {
       for (binding in bindings) {
         try {
           current = binding
-          binding.bind(this)
+          binding.beforeCall(this)
+        } finally {
+          current = null
+        }
+      }
+    }
+
+    internal fun executeAfterCall() {
+      for (binding in bindings) {
+        try {
+          current = binding
+          binding.afterCall(this)
         } finally {
           current = null
         }
@@ -92,7 +103,8 @@ internal class WebActionBinding @Inject constructor(
   class RealClaimer(val action: Action) : FeatureBinding.Claimer {
     /** Claims are taken by this placeholder until we get the actual FeatureBinding. */
     private object Placeholder : FeatureBinding {
-      override fun bind(subject: FeatureBinding.Subject) = throw AssertionError()
+      override fun beforeCall(subject: FeatureBinding.Subject) = throw AssertionError()
+      override fun afterCall(subject: FeatureBinding.Subject) = throw AssertionError()
     }
 
     /** Claims by who made them. */
@@ -154,7 +166,6 @@ internal class WebActionBinding @Inject constructor(
 
       if (returnValue == Placeholder) {
         check(binding != null) { "$factory returned null after making a claim" }
-        check(!claimedParameter) { "$factory claimed a parameter and the return value of $action" }
         returnValue = binding
       }
 
@@ -162,10 +173,9 @@ internal class WebActionBinding @Inject constructor(
         if (binding == returnValue) {
           // Bindings that claim the return value run after the call.
           afterCallBindings += binding
-        } else {
-          // Everything else runs before the call.
-          beforeCallBindings += binding
         }
+        // Everything runs before the call.
+        beforeCallBindings += binding
       }
     }
 
