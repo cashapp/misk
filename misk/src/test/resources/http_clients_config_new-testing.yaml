@@ -1,0 +1,7 @@
+endpoints:
+  irs:
+    url: https://google.com/
+    clientConfig:
+      connectTimeout: PT30S
+      readTimeout: PT30S
+      writeTimeout: PT30S

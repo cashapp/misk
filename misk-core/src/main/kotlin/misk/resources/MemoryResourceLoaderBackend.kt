@@ -14,7 +14,7 @@ import javax.inject.Singleton
  * This uses the scheme `memory:`.
  */
 @Singleton
-internal class MemoryResourceLoaderBackend @Inject constructor() : ResourceLoader.Backend() {
+class MemoryResourceLoaderBackend @Inject constructor() : ResourceLoader.Backend() {
   private val resources = TreeMap<String, ByteString>()
 
   override fun open(path: String): BufferedSource? {
