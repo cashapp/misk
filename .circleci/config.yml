@@ -111,13 +111,11 @@ jobs:
       - run: sudo npm install -g @misk/cli && miskweb ci-build -e
   docs:
     machine:
-      image: circleci/classic:latest
+      image: circleci/python:3.6.4
     parallelism: 1
     steps:
       - checkout # check out source code to working directory
-      - run: | # mkdocs wants to be run with Python 3, force the path to prioritize pyenv 3.5.2
-          pyenv global 3.5.2
-          export PATH="/opt/circleci/.pyenv/versions/3.5.2/lib/:$PATH"
+      - run: |
           pip install mkdocs mkdocs-material
       - run: |
           ./gradlew dokka
