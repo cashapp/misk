@@ -110,8 +110,8 @@ jobs:
       - checkout
       - run: sudo npm install -g @misk/cli && miskweb ci-build -e
   docs:
-    machine:
-      image: circleci/python:3.8.3
+    docker:
+      - image: circleci/python:3.8.3
     parallelism: 1
     steps:
       - checkout # check out source code to working directory
