@@ -3,8 +3,8 @@ package misk.web.ssl
 import ch.qos.logback.classic.Level
 import com.google.inject.Guice
 import com.google.inject.Provides
-import misk.MiskDefault
 import misk.MiskTestingServiceModule
+import misk.client.HttpClientConfig
 import misk.client.HttpClientEndpointConfig
 import misk.client.HttpClientModule
 import misk.client.HttpClientSSLConfig
@@ -19,7 +19,6 @@ import misk.security.ssl.TrustStoreConfig
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.web.Get
-import misk.web.NetworkInterceptor
 import misk.web.Post
 import misk.web.Response
 import misk.web.ResponseBody
@@ -30,7 +29,6 @@ import misk.web.actions.WebAction
 import misk.web.interceptors.MetricsInterceptor
 import misk.web.jetty.JettyService
 import misk.web.mediatype.MediaTypes
-import okhttp3.MediaType
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Protocol
@@ -242,12 +240,14 @@ class Http2ConnectivityTest {
       return HttpClientsConfig(
           endpoints = mapOf(
               "default" to HttpClientEndpointConfig(
-                  "http://example.com/",
-                  ssl = HttpClientSSLConfig(
-                      cert_store = null,
-                      trust_store = TrustStoreConfig(
-                          resource = "classpath:/ssl/server_cert.pem",
-                          format = SslLoader.FORMAT_PEM
+                  url = "http://example.com/",
+                  clientConfig = HttpClientConfig(
+                      ssl = HttpClientSSLConfig(
+                          cert_store = null,
+                          trust_store = TrustStoreConfig(
+                              resource = "classpath:/ssl/server_cert.pem",
+                              format = SslLoader.FORMAT_PEM
+                          )
                       )
                   )
               )
