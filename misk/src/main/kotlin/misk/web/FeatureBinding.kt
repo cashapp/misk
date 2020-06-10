@@ -23,8 +23,8 @@ import kotlin.reflect.KParameter
  *  * The request marshaller decodes the request body and sets it as @RequestBody parameter 3.
  *  * The response marshaller takes the return value and encodes it as the response stream.
  *
- * A binding can claim multiple features. But it cannot claim both parameters and the return value
- * because the binding must execute either before or after the function call.
+ * A binding can claim multiple features. [beforeCall] is invoked if any features are claimed, and
+ * [afterCall] is only invoked if the return value is claimed.
  *
  * ## Creating Bindings
  *
@@ -40,14 +40,14 @@ import kotlin.reflect.KParameter
  *
  * ## Binding Execution
  *
- * Once a functions bindings have been created and validated, each binding will be executed once for
- * every each HTTP call. In this method it must bind the features it claimed by providing
- * parameters, reading the request body, writing the response body, or taking the return value.
+ * Once a functions bindings have been created and validated, each binding will be executed once
+ * before and once after every each HTTP call. In this method it must bind the features it claimed
+ * by providing parameters, reading the request body, writing the response body, or taking the
+ * return value.
  */
-internal interface FeatureBinding {
-  // TODO: replace bind() with beforeCall/afterCall so we can combine
-  //     GrpcRequestFeatureBinding, GrpcResponseFeatureBinding
-  fun bind(subject: Subject)
+interface FeatureBinding {
+  fun beforeCall(subject: Subject) {}
+  fun afterCall(subject: Subject) {}
 
   interface Subject {
     val webAction: WebAction

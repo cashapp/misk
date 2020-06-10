@@ -9,7 +9,7 @@ import misk.web.actions.WebSocketListener
 
 /** Binds return values of type [WebSocketListener]. */
 internal class WebSocketListenerFeatureBinding : FeatureBinding {
-  override fun bind(subject: Subject) {
+  override fun afterCall(subject: Subject) {
     val webSocketListener = subject.takeReturnValue() as WebSocketListener
     subject.httpCall.initWebSocketListener(webSocketListener)
   }

@@ -14,7 +14,7 @@ internal class FormValueFeatureBinding<T : Any>(
   private val parameter: KParameter,
   private val formAdapter: FormAdapter<T>
 ) : FeatureBinding {
-  override fun bind(subject: Subject) {
+  override fun beforeCall(subject: Subject) {
     val requestBody = subject.httpCall.takeRequestBody()!!
     val formData = FormData.decode(requestBody)
     subject.setParameter(parameter, formAdapter.fromFormData(formData))

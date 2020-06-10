@@ -13,7 +13,7 @@ import kotlin.reflect.full.findAnnotation
 internal class PathParamFeatureBinding private constructor(
   private val parameters: List<ParameterBinding>
 ) : FeatureBinding {
-  override fun bind(subject: Subject) {
+  override fun beforeCall(subject: Subject) {
     for (element in parameters) {
       element.bind(subject)
     }

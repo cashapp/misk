@@ -15,7 +15,7 @@ import javax.inject.Singleton
 internal class ResponseBodyFeatureBinding(
   private val responseBodyMarshaller: Marshaller<Any>
 ) : FeatureBinding {
-  override fun bind(subject: Subject) {
+  override fun afterCall(subject: Subject) {
     val returnValue = subject.takeReturnValue()!!
     val httpCall = subject.httpCall
     subject.takeResponseBody().use { sink ->

@@ -12,7 +12,7 @@ import kotlin.reflect.KParameter
 internal class RequestHeadersFeatureBinding(
   val parameter: KParameter
 ) : FeatureBinding {
-  override fun bind(subject: Subject) {
+  override fun beforeCall(subject: Subject) {
     subject.setParameter(parameter, subject.httpCall.requestHeaders)
   }
 

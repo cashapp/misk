@@ -12,7 +12,7 @@ import kotlin.reflect.KParameter
 internal class WebSocketFeatureBinding(
   private val parameter: KParameter
 ) : FeatureBinding {
-  override fun bind(subject: Subject) {
+  override fun beforeCall(subject: Subject) {
     val webSocket = subject.httpCall.takeWebSocket()
     subject.setParameter(parameter, webSocket)
   }
