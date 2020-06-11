@@ -18,7 +18,7 @@ internal class RequestBodyFeatureBinding(
   private val parameter: KParameter,
   private val unmarshallerFactories: List<Unmarshaller.Factory>
 ) : FeatureBinding {
-  override fun bind(subject: Subject) {
+  override fun beforeCall(subject: Subject) {
     val mediaType = subject.httpCall.requestHeaders["Content-Type"]?.let { it.toMediaTypeOrNull() }
     val unmarshaller = mediaType?.let { type ->
       unmarshallerFactories.mapNotNull { it.create(type, parameter.type) }.firstOrNull()
