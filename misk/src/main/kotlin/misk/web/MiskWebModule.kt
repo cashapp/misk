@@ -59,10 +59,15 @@ import misk.web.resources.StaticResourceEntry
 import org.eclipse.jetty.io.EofException
 import org.eclipse.jetty.server.handler.StatisticsHandler
 import org.eclipse.jetty.server.handler.gzip.GzipHandler
+import org.eclipse.jetty.util.thread.ExecutorThreadPool
 import org.eclipse.jetty.util.thread.QueuedThreadPool
+import org.eclipse.jetty.util.thread.ThreadPool
 import java.io.IOException
 import java.util.concurrent.ArrayBlockingQueue
 import java.util.concurrent.BlockingQueue
+import java.util.concurrent.SynchronousQueue
+import java.util.concurrent.ThreadPoolExecutor
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
 import javax.servlet.http.HttpServletRequest
@@ -166,18 +171,29 @@ class MiskWebModule(private val config: WebConfig) : KAbstractModule() {
   }
 
   @Provides @Singleton
-  fun provideJettyThreadPool(metrics: ThreadPoolQueueMetrics): QueuedThreadPool {
+  fun provideJettyThreadPool(metrics: ThreadPoolQueueMetrics): ThreadPool {
     val maxThreads = config.jetty_max_thread_pool_size
     val minThreads = Math.min(8, maxThreads)
     val idleTimeout = 60_000
 
-    val threadPool = QueuedThreadPool(
-        maxThreads,
-        minThreads,
-        idleTimeout,
-        provideThreadPoolQueue(metrics))
-    threadPool.name = "jetty-thread"
-    return threadPool
+    return if (config.jetty_max_thread_pool_queue_size > 0) {
+      val threadPool = QueuedThreadPool(
+          maxThreads,
+          minThreads,
+          idleTimeout,
+          provideThreadPoolQueue(metrics))
+      threadPool.name = "jetty-thread"
+      threadPool
+    } else {
+      val threadPool = ExecutorThreadPool(ThreadPoolExecutor(
+          minThreads,
+          maxThreads,
+          idleTimeout.toLong(),
+          TimeUnit.MILLISECONDS,
+          SynchronousQueue()))
+      threadPool.name = "jetty-thread"
+      threadPool
+    }
   }
 
   @Provides @Singleton
