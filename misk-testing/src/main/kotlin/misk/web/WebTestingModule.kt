@@ -25,6 +25,10 @@ class WebTestingModule(
         // 0 results in a random port
         port = 0,
         health_port = 0,
+        // use a deterministic number for selector/acceptor threads since the dynamic number can
+        // vary local vs CI. this allows writing thread exhaustion tests.
+        acceptors = 1,
+        selectors = 1,
         idle_timeout = 500000,
         host = "127.0.0.1",
         ssl = WebSslConfig(

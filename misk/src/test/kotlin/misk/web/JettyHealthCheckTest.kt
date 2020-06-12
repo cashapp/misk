@@ -94,12 +94,13 @@ internal class JettyHealthCheckTest {
       install(Modules.override(WebTestingModule()).with(
           object : KAbstractModule() {
             override fun configure() {
-              // jetty reserves 5 threads
-              val threadSize = parallelRequests + 5
-              val pool = ExecutorThreadPool(
-                  ThreadPoolExecutor(threadSize, threadSize, 0, TimeUnit.MILLISECONDS,
-                      SynchronousQueue())
-              )
+              // jetty needs 4 additional threads for other things
+              val threadSize = parallelRequests + 4
+              val pool = ExecutorThreadPool(ThreadPoolExecutor(
+                  threadSize,
+                  threadSize,
+                  0, TimeUnit.MILLISECONDS,
+                  SynchronousQueue()), 0)
               bind<ThreadPool>().toInstance(pool)
             }
           }
