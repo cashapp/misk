@@ -1,14 +1,13 @@
 package misk.web.jetty
 
 import misk.metrics.Metrics
-import org.eclipse.jetty.util.thread.QueuedThreadPool
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 internal class ThreadPoolMetrics @Inject internal constructor(
   metrics: Metrics,
-  private val threadPool: QueuedThreadPool
+  private val threadPool: MeasuredThreadPool
 ) {
   val utilization = metrics.gauge(
       "jetty_thread_pool_utilization",
@@ -36,11 +35,11 @@ internal class ThreadPoolMetrics @Inject internal constructor(
   )
 
   fun refresh() {
-    utilization.set(ratio(threadPool.busyThreads.toDouble(), threadPool.threads.toDouble()))
-    utilizationMax.set(ratio(threadPool.busyThreads.toDouble(), threadPool.maxThreads.toDouble()))
-    size.set(threadPool.threads.toDouble())
-    busyThreads.set(threadPool.busyThreads.toDouble())
-    queuedJobs.set(threadPool.queueSize.toDouble())
+    utilization.set(ratio(threadPool.activeCount().toDouble(), threadPool.poolSize().toDouble()))
+    utilizationMax.set(ratio(threadPool.activeCount().toDouble(), threadPool.maxPoolSize().toDouble()))
+    size.set(threadPool.poolSize().toDouble())
+    busyThreads.set(threadPool.activeCount().toDouble())
+    queuedJobs.set(threadPool.queueSize().toDouble())
   }
 
   private fun ratio(numerator: Double, denominator: Double) =

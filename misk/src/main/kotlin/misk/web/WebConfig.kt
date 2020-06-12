@@ -36,7 +36,14 @@ data class WebConfig(
   /** Maximum number of threads in Jetty's thread pool. */
   val jetty_max_thread_pool_size: Int = 200,
 
-  /** Maximum number of items in the queue for Jetty's thread pool. */
+  /**
+   * Maximum number of items in the queue for Jetty's thread pool.
+   *
+   * If 0, no queueing is used and requests are directly handed off to the thread pool. If a
+   * thread is not available (i.e max threads in use) the request is rejected. Unfortunately Jetty
+   * rejects requests by closing the socket instead of returning a 429. This can lead to confusing
+   * EOFExceptions for the client.
+   */
   val jetty_max_thread_pool_queue_size: Int = 300,
 
   /** Flag to enable thread pool queue metrics */

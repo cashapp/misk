@@ -1,5 +1,6 @@
 package misk.web
 
+import com.google.inject.Provider
 import com.google.inject.Provides
 import com.google.inject.TypeLiteral
 import misk.ApplicationInterceptor
@@ -44,6 +45,9 @@ import misk.web.interceptors.TracingInterceptor
 import misk.web.jetty.JettyConnectionMetricsCollector
 import misk.web.jetty.JettyService
 import misk.web.jetty.JettyThreadPoolMetricsCollector
+import misk.web.jetty.MeasuredQueuedThreadPool
+import misk.web.jetty.MeasuredThreadPool
+import misk.web.jetty.MeasuredThreadPoolExecutor
 import misk.web.jetty.ThreadPoolQueueMetrics
 import misk.web.marshal.JsonMarshaller
 import misk.web.marshal.JsonUnmarshaller
@@ -58,10 +62,15 @@ import misk.web.resources.StaticResourceEntry
 import org.eclipse.jetty.io.EofException
 import org.eclipse.jetty.server.handler.StatisticsHandler
 import org.eclipse.jetty.server.handler.gzip.GzipHandler
+import org.eclipse.jetty.util.thread.ExecutorThreadPool
 import org.eclipse.jetty.util.thread.QueuedThreadPool
+import org.eclipse.jetty.util.thread.ThreadPool
 import java.io.IOException
 import java.util.concurrent.ArrayBlockingQueue
 import java.util.concurrent.BlockingQueue
+import java.util.concurrent.SynchronousQueue
+import java.util.concurrent.ThreadPoolExecutor
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
 import javax.servlet.http.HttpServletRequest
@@ -161,21 +170,31 @@ class MiskWebModule(private val config: WebConfig) : KAbstractModule() {
     install(WebActionModule.create<ReadinessCheckAction>())
     install(WebActionModule.create<LivenessCheckAction>())
     install(WebActionModule.create<NotFoundAction>())
-  }
 
-  @Provides @Singleton
-  fun provideJettyThreadPool(metrics: ThreadPoolQueueMetrics): QueuedThreadPool {
     val maxThreads = config.jetty_max_thread_pool_size
     val minThreads = Math.min(8, maxThreads)
     val idleTimeout = 60_000
-
-    val threadPool = QueuedThreadPool(
-        maxThreads,
-        minThreads,
-        idleTimeout,
-        provideThreadPoolQueue(metrics))
-    threadPool.name = "jetty-thread"
-    return threadPool
+    if (config.jetty_max_thread_pool_queue_size > 0) {
+      val threadPool = QueuedThreadPool(
+          maxThreads,
+          minThreads,
+          idleTimeout,
+          provideThreadPoolQueue(getProvider(ThreadPoolQueueMetrics::class.java)))
+      threadPool.name = "jetty-thread"
+      bind<ThreadPool>().toInstance(threadPool)
+      bind<MeasuredThreadPool>().toInstance(MeasuredQueuedThreadPool(threadPool))
+    } else {
+      val executor = ThreadPoolExecutor(
+          minThreads,
+          maxThreads,
+          idleTimeout.toLong(),
+          TimeUnit.MILLISECONDS,
+          SynchronousQueue())
+      val threadPool = ExecutorThreadPool(executor)
+      threadPool.name = "jetty-thread"
+      bind<ThreadPool>().toInstance(threadPool)
+      bind<MeasuredThreadPool>().toInstance(MeasuredThreadPoolExecutor(executor))
+    }
   }
 
   @Provides @Singleton
@@ -188,12 +207,11 @@ class MiskWebModule(private val config: WebConfig) : KAbstractModule() {
     return GzipHandler()
   }
 
-  private fun provideThreadPoolQueue(metrics: ThreadPoolQueueMetrics): BlockingQueue<Runnable> {
+  private fun provideThreadPoolQueue(metrics: Provider<ThreadPoolQueueMetrics>): BlockingQueue<Runnable> {
     return if (config.enable_thread_pool_queue_metrics) {
       TimedBlockingQueue(
-          config.jetty_max_thread_pool_queue_size,
-          metrics::recordQueueLatency
-      )
+          config.jetty_max_thread_pool_queue_size
+      ) { d -> metrics.get().recordQueueLatency(d) }
     } else {
       ArrayBlockingQueue<Runnable>(config.jetty_max_thread_pool_queue_size)
     }
