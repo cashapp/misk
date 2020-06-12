@@ -29,7 +29,7 @@ import org.eclipse.jetty.servlet.ServletContextHandler
 import org.eclipse.jetty.servlet.ServletHolder
 import org.eclipse.jetty.unixsocket.UnixSocketConnector
 import org.eclipse.jetty.util.ssl.SslContextFactory
-import org.eclipse.jetty.util.thread.QueuedThreadPool
+import org.eclipse.jetty.util.thread.ThreadPool
 import java.net.InetAddress
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -41,7 +41,7 @@ class JettyService @Inject internal constructor(
   private val sslLoader: SslLoader,
   private val webActionsServlet: WebActionsServlet,
   private val webConfig: WebConfig,
-  threadPool: QueuedThreadPool,
+  threadPool: ThreadPool,
   private val connectionMetricsCollector: JettyConnectionMetricsCollector,
   private val statisticsHandler: StatisticsHandler,
   private val gzipHandler: GzipHandler
