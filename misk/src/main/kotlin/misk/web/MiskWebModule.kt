@@ -1,5 +1,6 @@
 package misk.web
 
+import com.google.inject.Provider
 import com.google.inject.Provides
 import com.google.inject.TypeLiteral
 import misk.ApplicationInterceptor
@@ -45,6 +46,9 @@ import misk.web.interceptors.TracingInterceptor
 import misk.web.jetty.JettyConnectionMetricsCollector
 import misk.web.jetty.JettyService
 import misk.web.jetty.JettyThreadPoolMetricsCollector
+import misk.web.jetty.MeasuredQueuedThreadPool
+import misk.web.jetty.MeasuredThreadPool
+import misk.web.jetty.MeasuredThreadPoolExecutor
 import misk.web.jetty.ThreadPoolQueueMetrics
 import misk.web.marshal.JsonMarshaller
 import misk.web.marshal.JsonUnmarshaller
@@ -168,31 +172,30 @@ class MiskWebModule(private val config: WebConfig) : KAbstractModule() {
     install(WebActionModule.create<ReadinessCheckAction>())
     install(WebActionModule.create<LivenessCheckAction>())
     install(WebActionModule.create<NotFoundAction>())
-  }
 
-  @Provides @Singleton
-  fun provideJettyThreadPool(metrics: ThreadPoolQueueMetrics): ThreadPool {
     val maxThreads = config.jetty_max_thread_pool_size
     val minThreads = Math.min(8, maxThreads)
     val idleTimeout = 60_000
-
-    return if (config.jetty_max_thread_pool_queue_size > 0) {
+    if (config.jetty_max_thread_pool_queue_size > 0) {
       val threadPool = QueuedThreadPool(
           maxThreads,
           minThreads,
           idleTimeout,
-          provideThreadPoolQueue(metrics))
+          provideThreadPoolQueue(getProvider(ThreadPoolQueueMetrics::class.java)))
       threadPool.name = "jetty-thread"
-      threadPool
+      bind<ThreadPool>().toInstance(threadPool)
+      bind<MeasuredThreadPool>().toInstance(MeasuredQueuedThreadPool(threadPool))
     } else {
-      val threadPool = ExecutorThreadPool(ThreadPoolExecutor(
+      val executor = ThreadPoolExecutor(
           minThreads,
           maxThreads,
           idleTimeout.toLong(),
           TimeUnit.MILLISECONDS,
-          SynchronousQueue()))
+          SynchronousQueue())
+      val threadPool = ExecutorThreadPool(executor)
       threadPool.name = "jetty-thread"
-      threadPool
+      bind<ThreadPool>().toInstance(threadPool)
+      bind<MeasuredThreadPool>().toInstance(MeasuredThreadPoolExecutor(executor))
     }
   }
 
@@ -206,12 +209,11 @@ class MiskWebModule(private val config: WebConfig) : KAbstractModule() {
     return GzipHandler()
   }
 
-  private fun provideThreadPoolQueue(metrics: ThreadPoolQueueMetrics): BlockingQueue<Runnable> {
+  private fun provideThreadPoolQueue(metrics: Provider<ThreadPoolQueueMetrics>): BlockingQueue<Runnable> {
     return if (config.enable_thread_pool_queue_metrics) {
       TimedBlockingQueue(
-          config.jetty_max_thread_pool_queue_size,
-          metrics::recordQueueLatency
-      )
+          config.jetty_max_thread_pool_queue_size
+      ) { d -> metrics.get().recordQueueLatency(d) }
     } else {
       ArrayBlockingQueue<Runnable>(config.jetty_max_thread_pool_queue_size)
     }
