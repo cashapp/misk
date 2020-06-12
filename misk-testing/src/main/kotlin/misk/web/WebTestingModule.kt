@@ -22,7 +22,9 @@ class WebTestingModule(
 
   companion object {
     val TESTING_WEB_CONFIG = WebConfig(
+        // 0 results in a random port
         port = 0,
+        health_port = 0,
         idle_timeout = 500000,
         host = "127.0.0.1",
         ssl = WebSslConfig(
