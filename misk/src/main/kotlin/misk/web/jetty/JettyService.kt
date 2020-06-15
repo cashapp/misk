@@ -2,6 +2,8 @@ package misk.web.jetty
 
 import com.google.common.base.Stopwatch
 import com.google.common.util.concurrent.AbstractIdleService
+import com.google.common.util.concurrent.ThreadFactoryBuilder
+import misk.concurrent.ExecutorServiceFactory
 import misk.logging.getLogger
 import misk.security.ssl.CipherSuites
 import misk.security.ssl.SslLoader
@@ -31,6 +33,10 @@ import org.eclipse.jetty.unixsocket.UnixSocketConnector
 import org.eclipse.jetty.util.ssl.SslContextFactory
 import org.eclipse.jetty.util.thread.ThreadPool
 import java.net.InetAddress
+import java.util.concurrent.SynchronousQueue
+import java.util.concurrent.ThreadFactory
+import java.util.concurrent.ThreadPoolExecutor
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -47,6 +53,7 @@ class JettyService @Inject internal constructor(
   private val gzipHandler: GzipHandler
 ) : AbstractIdleService() {
   private val server = Server(threadPool)
+  val healthServerUrl: HttpUrl? get() = server.healthUrl
   val httpServerUrl: HttpUrl get() = server.httpUrl!!
   val httpsServerUrl: HttpUrl? get() = server.httpsUrl
 
@@ -54,8 +61,28 @@ class JettyService @Inject internal constructor(
     val stopwatch = Stopwatch.createStarted()
     logger.info("Starting Jetty")
 
-    val httpConnectionFactories = mutableListOf<ConnectionFactory>()
+    if (webConfig.health_port >= 0) {
+      // 4 threads total. 2 for jetty acceptor and selector. 2 for k8s liveness and readiness
+      val healthExecutor = ThreadPoolExecutor(4, 4,
+          0L, TimeUnit.MILLISECONDS,
+          SynchronousQueue(),
+          ThreadFactoryBuilder()
+              .setNameFormat("jetty-health-%d")
+              .build())
+      val healthConnector = ServerConnector(
+          server,
+          healthExecutor,
+          null, /* scheduler */
+          null /* buffer pool */,
+          -1,
+          1,
+          HttpConnectionFactory())
+      healthConnector.port = webConfig.health_port
+      healthConnector.name = "health"
+      server.addConnector(healthConnector)
+    }
 
+    val httpConnectionFactories = mutableListOf<ConnectionFactory>()
     val httpConfig = HttpConfiguration()
     httpConfig.customizeForGrpc()
     httpConfig.sendServerVersion = false
@@ -77,6 +104,7 @@ class JettyService @Inject internal constructor(
     httpConnector.port = webConfig.port
     httpConnector.idleTimeout = webConfig.idle_timeout
     httpConnector.reuseAddress = true
+    httpConnector.name = "http"
     if (webConfig.queue_size != null) {
       httpConnector.acceptQueueSize = webConfig.queue_size
     }
@@ -153,6 +181,7 @@ class JettyService @Inject internal constructor(
           "https",
           webConfig.ssl.port
       ))
+      httpsConnector.name = "https"
       server.addConnector(httpsConnector)
     }
 
@@ -172,6 +201,7 @@ class JettyService @Inject internal constructor(
       )
       udsConnector.setUnixSocket(webConfig.unix_domain_socket.path)
       udsConnector.addBean(connectionMetricsCollector.newConnectionListener("http", 0))
+      udsConnector.name = "uds"
       server.addConnector(udsConnector)
     }
 
@@ -223,11 +253,19 @@ class JettyService @Inject internal constructor(
   }
 }
 
+private val Server.healthUrl: HttpUrl?
+  get() {
+    return connectors
+        .mapNotNull { it as? NetworkConnector }
+        .firstOrNull { it.name == "health" }
+        ?.toHttpUrl()
+  }
+
 private val Server.httpUrl: HttpUrl?
   get() {
     return connectors
         .mapNotNull { it as? NetworkConnector }
-        .firstOrNull { it.defaultConnectionFactory is HttpConnectionFactory }
+        .firstOrNull { it.name == "http" }
         ?.toHttpUrl()
   }
 
@@ -235,7 +273,7 @@ private val Server.httpsUrl: HttpUrl?
   get() {
     return connectors
         .mapNotNull { it as? NetworkConnector }
-        .firstOrNull { it.defaultConnectionFactory is SslConnectionFactory }
+        .firstOrNull { it.name == "https" }
         ?.toHttpUrl()
   }
 

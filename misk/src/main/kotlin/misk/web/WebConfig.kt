@@ -65,7 +65,20 @@ data class WebConfig(
   val gzip: Boolean = true,
 
   /** The minimum size in bytes before the response body will be compressed. */
-  val minGzipSize: Int = 1024
+  val minGzipSize: Int = 1024,
+
+  /**
+   * If >= 0, run a dedicated jetty instance on this port for health checking.
+   *
+   * A dedicated instance ensures that health checks are not queued or rejected when the service
+   * is saturated and queueing requests. If health checks are rejected and/or queued, the health
+   * checks may fail and k8s will kill the container, even though it might be perfectly healthy. This
+   * can cause cascading failures by sending more requests to other containers, resulting in longer
+   * queues and more health checks failures.
+   *
+   * TODO(rhall): make this required
+   */
+  val health_port : Int = -1
 ) : Config
 
 data class WebSslConfig(
