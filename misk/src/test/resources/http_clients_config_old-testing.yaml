@@ -1,6 +1,6 @@
 endpoints:
-  irs:
+  test_client:
     url: https://google.com/
-    connectTimeout: PT30S
-    readTimeout: PT30S
-    writeTimeout: PT30S
+    connectTimeout: PT41S
+    readTimeout: PT42S
+    writeTimeout: PT43S
