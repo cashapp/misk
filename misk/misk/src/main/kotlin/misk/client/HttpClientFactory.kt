@@ -6,6 +6,7 @@ import okhttp3.ConnectionPool
 import okhttp3.Dispatcher
 import okhttp3.OkHttpClient
 import okhttp3.Protocol
+import java.io.File
 import java.net.Proxy
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
@@ -37,13 +38,33 @@ class HttpClientFactory @Inject constructor(
       val sslContext = sslContextFactory.create(it.cert_store, it.trust_store)
       builder.sslSocketFactory(sslContext.socketFactory, x509TrustManager)
     }
+    // Proxy config not supported
+    builder.proxy(Proxy.NO_PROXY)
+    // Dns config not supported
+    builder.dns(NoOpDns)
+
+    require(config.envoy == null || config.clientConfig.unixSocketFile == null) {
+      "Setting both `envoy` and `unixSocketFile` on `HttpClientEndpointConfig` is not supported!"
+    }
+
+    require(config.envoy == null || config.clientConfig.protocols == null) {
+      "Setting both `envoy` and `protocols` on `HttpClientEndpointConfig` is not supported!"
+    }
+
+    config.clientConfig.unixSocketFile?.let {
+      builder.socketFactory(UnixDomainSocketFactory(it))
+    }
+
+    config.clientConfig.unixSocketFile?.let {
+      builder.protocols(
+          config.clientConfig.protocols?.map { Protocol.get(it) }
+              ?: listOf(Protocol.HTTP_1_1) //Safe default
+      )
+    }
+
     config.envoy?.let {
       builder.socketFactory(
           UnixDomainSocketFactory(envoyClientEndpointProvider.unixSocket(config.envoy)))
-      // No DNS lookup needed since we're just sending the request over a socket.
-      builder.dns(NoOpDns)
-      // Envoy is the proxy
-      builder.proxy(Proxy.NO_PROXY)
       // OkHttp <=> envoy over h2 has bad interactions, and benefit is marginal
       builder.protocols(listOf(Protocol.HTTP_1_1))
     }
