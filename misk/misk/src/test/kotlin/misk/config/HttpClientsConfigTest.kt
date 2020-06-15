@@ -15,28 +15,19 @@ import java.io.File
 import java.time.Duration
 import kotlin.test.assertFailsWith
 
-fun buildMemoryResourceLoader(resourceName: String, resourceContent: String) =
-    ResourceLoader(
-        mapOf<String, ResourceLoader.Backend>(
-            "mem:" to MemoryResourceLoaderBackend().apply {
-              put(resourceName, ByteString.of(*(resourceContent.toByteArray())))
-            }
-        ) as java.util.Map<String, ResourceLoader.Backend>
-    )
-
 class HttpClientsConfigTest {
   @Test
   fun canParseOldConfig() {
     val config =
         MiskConfig.load<HttpClientsConfig>("http_clients_config_old", Env("TESTING"))
 
-    assertThat(config["irs"])
+    assertThat(config["test_client"])
         .isEqualTo(HttpClientEndpointConfig(
             url = "https://google.com/",
             clientConfig = HttpClientConfig(
-                connectTimeout = Duration.ofSeconds(30),
-                readTimeout = Duration.ofSeconds(30),
-                writeTimeout = Duration.ofSeconds(30)
+                connectTimeout = Duration.ofSeconds(41),
+                readTimeout = Duration.ofSeconds(42),
+                writeTimeout = Duration.ofSeconds(43)
             )
         ))
   }
@@ -46,13 +37,13 @@ class HttpClientsConfigTest {
     val config =
         MiskConfig.load<HttpClientsConfig>("http_clients_config_new", Env("TESTING"))
 
-    assertThat(config["irs"])
+    assertThat(config["test_client"])
         .isEqualTo(HttpClientEndpointConfig(
             url = "https://google.com/",
             clientConfig = HttpClientConfig(
-                connectTimeout = Duration.ofSeconds(30),
-                readTimeout = Duration.ofSeconds(30),
-                writeTimeout = Duration.ofSeconds(30)
+                connectTimeout = Duration.ofSeconds(31),
+                readTimeout = Duration.ofSeconds(32),
+                writeTimeout = Duration.ofSeconds(33)
             )
         ))
   }
