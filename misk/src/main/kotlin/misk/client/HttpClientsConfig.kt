@@ -79,16 +79,17 @@ data class HttpClientsConfig(
     val endpointConfig = endpoints[clientName] ?: throw IllegalArgumentException(
         "no client configuration for endpoint $clientName")
 
+    val clientConfig = endpointConfig.clientConfig
     return HttpClientEndpointConfig(
         url = endpointConfig.url,
         envoy = endpointConfig.envoy,
-        clientConfig = HttpClientConfig(
-            connectTimeout = endpointConfig.clientConfig.connectTimeout ?: defaultConnectTimeout,
-            writeTimeout = endpointConfig.clientConfig.writeTimeout ?: defaultWriteTimeout,
-            readTimeout = endpointConfig.clientConfig.readTimeout ?: defaultReadTimeout,
-            pingInterval = endpointConfig.clientConfig.pingInterval ?: defaultPingInterval,
-            callTimeout = endpointConfig.clientConfig.callTimeout ?: defaultCallTimeout,
-            ssl = endpointConfig.clientConfig.ssl ?: ssl
+        clientConfig = clientConfig.copy(
+            connectTimeout = clientConfig.connectTimeout ?: defaultConnectTimeout,
+            writeTimeout = clientConfig.writeTimeout ?: defaultWriteTimeout,
+            readTimeout = clientConfig.readTimeout ?: defaultReadTimeout,
+            pingInterval = clientConfig.pingInterval ?: defaultPingInterval,
+            callTimeout = clientConfig.callTimeout ?: defaultCallTimeout,
+            ssl = clientConfig.ssl ?: ssl
         )
     )
   }
@@ -129,7 +130,8 @@ data class HttpClientConfig(
   val maxIdleConnections: Int = 100,
   val keepAliveDuration: Duration = Duration.ofMinutes(5),
   val ssl: HttpClientSSLConfig? = null,
-  val unixSocketFile: File? = null
+  val unixSocketFile: File? = null,
+  val protocols: List<String>? = null
 )
 
 @Deprecated("Use default constructor")

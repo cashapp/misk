@@ -1,6 +1,12 @@
 endpoints:
-  test_client:
+  test_client_url:
     url: https://google.com/
     connectTimeout: PT41S
     readTimeout: PT42S
     writeTimeout: PT43S
+  test_client_envoy:
+    envoy:
+      app: test_app
+      env: test_env
+    clientConfig:
+      connectTimeout: PT44S
