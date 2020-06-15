@@ -21,6 +21,7 @@ import java.io.IOException
 import java.util.concurrent.Callable
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.Future
+import java.util.concurrent.Phaser
 import java.util.concurrent.SynchronousQueue
 import java.util.concurrent.ThreadPoolExecutor
 import java.util.concurrent.TimeUnit
@@ -30,17 +31,12 @@ import javax.inject.Qualifier
 @MiskTest(startService = true)
 internal class JettyHealthCheckTest {
 
-  companion object {
-    const val parallelRequests = 2
-  }
-
   @MiskTestModule val module = TestModule()
   @Inject lateinit var jettyService: JettyService
-  @Inject @field:Blocking lateinit var blocking: CountDownLatch
-  @Inject @field:Waiting lateinit var waiting: CountDownLatch
-  @Inject @field:HealthBlocking lateinit var healthBlocking: CountDownLatch
-  @Inject @field:HealthWaiting lateinit var healthWaiting: CountDownLatch
+  @Inject @field:Requests lateinit var requestsPhaser: Phaser
+  @Inject @field:Health lateinit var healthPhaser: Phaser
   @Inject lateinit var executorFactory: ExecutorServiceFactory
+  @Inject lateinit var threadPool: ThreadPool
 
   @Test fun health() {
     val executor = executorFactory.unbounded("testing")
@@ -56,10 +52,13 @@ internal class JettyHealthCheckTest {
 
     // exhaust the thread pool
     val responses = mutableListOf<Future<Response>>()
+    val parallelRequests = (threadPool as ExecutorThreadPool).maxThreads - threadPool.threads + threadPool.idleThreads
+    requestsPhaser.bulkRegister(parallelRequests + 1)
     for (i in 1..parallelRequests) {
       responses.add(executor.submit(Callable { httpClient.newCall(request).execute() }))
     }
-    waiting.await(5, TimeUnit.SECONDS)
+    requestsPhaser.arrive()
+    requestsPhaser.awaitAdvanceInterruptibly(0, 5, TimeUnit.SECONDS)
 
     // all threads are busy
     assertThatThrownBy { httpClient.newCall(request).execute() }
@@ -67,10 +66,10 @@ internal class JettyHealthCheckTest {
 
     val healthResponses = mutableListOf<Future<Response>>()
     // make sure we can check liveness and readiness in parallel
+    healthPhaser.bulkRegister(2 + 1)
     healthResponses.add(executor.submit(Callable { httpClient.newCall(healthRequest).execute() }))
     healthResponses.add(executor.submit(Callable { httpClient.newCall(healthRequest).execute() }))
-    healthWaiting.await(5, TimeUnit.SECONDS)
-    healthBlocking.countDown()
+    healthPhaser.arriveAndDeregister()
 
     healthResponses.forEach {
       val r = it.get(5, TimeUnit.SECONDS)
@@ -79,7 +78,7 @@ internal class JettyHealthCheckTest {
     }
 
     // release the blocking threads
-    blocking.countDown()
+    requestsPhaser.arrive()
 
     // double check these requests were successfully processed
     responses.forEach {
@@ -94,11 +93,9 @@ internal class JettyHealthCheckTest {
       install(Modules.override(WebTestingModule()).with(
           object : KAbstractModule() {
             override fun configure() {
-              // jetty needs 4 additional threads for other things
-              val threadSize = parallelRequests + 4
               val pool = ExecutorThreadPool(ThreadPoolExecutor(
-                  threadSize,
-                  threadSize,
+                  10,
+                  10,
                   0, TimeUnit.MILLISECONDS,
                   SynchronousQueue()), 0)
               bind<ThreadPool>().toInstance(pool)
@@ -107,15 +104,13 @@ internal class JettyHealthCheckTest {
       ))
       install(WebActionModule.create<BlockingAction>())
       install(WebActionModule.create<HealthAction>())
-      bind<CountDownLatch>().annotatedWith<Blocking>().toInstance(CountDownLatch(1))
-      bind<CountDownLatch>().annotatedWith<Waiting>().toInstance(CountDownLatch(parallelRequests))
-      bind<CountDownLatch>().annotatedWith<HealthBlocking>().toInstance(CountDownLatch(1))
-      bind<CountDownLatch>().annotatedWith<HealthWaiting>().toInstance(CountDownLatch(2))
+      bind<Phaser>().annotatedWith<Requests>().toInstance(Phaser())
+      bind<Phaser>().annotatedWith<Health>().toInstance(Phaser())
     }
   }
 
   @Qualifier
-  internal annotation class Blocking
+  internal annotation class Requests
 
   @Qualifier
   internal annotation class Waiting
@@ -124,29 +119,29 @@ internal class JettyHealthCheckTest {
   internal annotation class HealthBlocking
 
   @Qualifier
-  internal annotation class HealthWaiting
+  internal annotation class Health
 
   internal class BlockingAction @Inject constructor(
-    @Blocking private val blocking: CountDownLatch,
-    @Waiting private val waiting: CountDownLatch
+    @Requests private val phaser: Phaser
   ) : WebAction {
     @Get("/block")
     @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
     fun block(): String {
-      waiting.countDown()
-      blocking.await(5, TimeUnit.SECONDS)
+      phaser.arrive()
+      phaser.awaitAdvanceInterruptibly(0, 5, TimeUnit.SECONDS)
+      phaser.arrive()
+      phaser.awaitAdvanceInterruptibly(1, 5, TimeUnit.SECONDS)
       return "done"
     }
   }
 
   internal class HealthAction @Inject constructor(
-    @HealthBlocking private val blocking: CountDownLatch,
-    @HealthWaiting private val waiting: CountDownLatch) : WebAction {
+    @Health private val phaser: Phaser) : WebAction {
     @Get("/health")
     @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
     fun check(): String {
-      waiting.countDown()
-      blocking.await(5, TimeUnit.SECONDS)
+      phaser.arrive()
+      phaser.awaitAdvanceInterruptibly(0, 5, TimeUnit.SECONDS)
       return "healthy"
     }
   }

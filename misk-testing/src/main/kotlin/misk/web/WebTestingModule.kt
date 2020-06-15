@@ -6,6 +6,7 @@ import misk.environment.EnvironmentModule
 import misk.inject.KAbstractModule
 import misk.security.ssl.CertStoreConfig
 import misk.security.ssl.SslLoader
+import org.eclipse.jetty.util.ProcessorUtils
 
 /**
  * A module that starts an embedded Jetty web server configured for testing. The server supports
