@@ -19,7 +19,6 @@ import org.eclipse.jetty.util.thread.ThreadPool
 import org.junit.jupiter.api.Test
 import java.io.IOException
 import java.util.concurrent.Callable
-import java.util.concurrent.CountDownLatch
 import java.util.concurrent.Future
 import java.util.concurrent.Phaser
 import java.util.concurrent.SynchronousQueue
@@ -52,15 +51,18 @@ internal class JettyHealthCheckTest {
 
     // exhaust the thread pool
     val responses = mutableListOf<Future<Response>>()
+    // Unfortunately the # of threads vary locally vs CI and it's not clear why, so dynamically compute.
     val parallelRequests = (threadPool as ExecutorThreadPool).maxThreads - threadPool.threads + threadPool.idleThreads
     requestsPhaser.bulkRegister(parallelRequests + 1)
-    for (i in 1..parallelRequests) {
+    // Jetty can be flaky on rejecting a request, so ensure we have exhausted the thread pool.
+    while (requestsPhaser.arrivedParties < parallelRequests) {
       responses.add(executor.submit(Callable { httpClient.newCall(request).execute() }))
+      Thread.sleep(10)
     }
     requestsPhaser.arrive()
     requestsPhaser.awaitAdvanceInterruptibly(0, 5, TimeUnit.SECONDS)
 
-    // all threads are busy
+    // verify all threads are busy
     assertThatThrownBy { httpClient.newCall(request).execute() }
         .isInstanceOf(IOException::class.java)
 
@@ -81,11 +83,23 @@ internal class JettyHealthCheckTest {
     requestsPhaser.arrive()
 
     // double check these requests were successfully processed
-    responses.forEach {
-      val r = it.get(5, TimeUnit.SECONDS)
-      assertThat(r.code).isEqualTo(200)
-      assertThat(r.body?.string()).isEqualTo("done")
+    val successes = responses.mapNotNull {
+      try {
+        it.get(5, TimeUnit.SECONDS)
+      } catch (e: Exception) {
+        // Jetty can be flaky on rejecting a request, so just ensure we have the expected #
+        // of successful responses, not a specific order.
+        null
+      }
     }
+
+    successes.forEach {
+      assertThat(it.code).isEqualTo(200)
+      assertThat(it.body?.string()).isEqualTo("done")
+    }
+    assertThat(successes).hasSize(parallelRequests)
+
+    executor.shutdown()
   }
 
   internal class TestModule : KAbstractModule() {
@@ -94,9 +108,11 @@ internal class JettyHealthCheckTest {
           object : KAbstractModule() {
             override fun configure() {
               val pool = ExecutorThreadPool(ThreadPoolExecutor(
+                  // There is some flakiness in Jetty startup when it eagerly creates core threads
+                  // and those core threads are not available to be used. Just lazily create for tests.
+                  0,
                   10,
-                  10,
-                  0, TimeUnit.MILLISECONDS,
+                  60, TimeUnit.SECONDS,
                   SynchronousQueue()), 0)
               bind<ThreadPool>().toInstance(pool)
             }
@@ -136,7 +152,8 @@ internal class JettyHealthCheckTest {
   }
 
   internal class HealthAction @Inject constructor(
-    @Health private val phaser: Phaser) : WebAction {
+    @Health private val phaser: Phaser
+  ) : WebAction {
     @Get("/health")
     @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
     fun check(): String {

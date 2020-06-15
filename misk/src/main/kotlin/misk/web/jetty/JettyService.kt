@@ -62,9 +62,12 @@ class JettyService @Inject internal constructor(
     logger.info("Starting Jetty")
 
     if (webConfig.health_port >= 0) {
-      // 4 threads total. 2 for jetty acceptor and selector. 2 for k8s liveness and readiness
-      val healthExecutor = ThreadPoolExecutor(4, 4,
-          0L, TimeUnit.MILLISECONDS,
+      val healthExecutor = ThreadPoolExecutor(
+          // 2 threads for jetty acceptor and selector. 2 threads for k8s liveness/readiness.
+          4,
+          // Jetty can be flaky about rejecting near full capacity, so allow some growth.
+          8,
+          60L, TimeUnit.SECONDS,
           SynchronousQueue(),
           ThreadFactoryBuilder()
               .setNameFormat("jetty-health-%d")
@@ -74,7 +77,7 @@ class JettyService @Inject internal constructor(
           healthExecutor,
           null, /* scheduler */
           null /* buffer pool */,
-          -1,
+          1,
           1,
           HttpConnectionFactory())
       healthConnector.port = webConfig.health_port
