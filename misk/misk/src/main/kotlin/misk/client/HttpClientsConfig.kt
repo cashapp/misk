@@ -1,18 +1,77 @@
 package misk.client
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize
+import com.fasterxml.jackson.databind.type.TypeFactory
 import misk.config.Config
 import misk.security.ssl.CertStoreConfig
 import misk.security.ssl.TrustStoreConfig
+import java.io.File
 import java.time.Duration
 
+data class BackwardsCompatibleEndpointConfig(
+    //Common fields
+  val url: String? = null,
+  val envoy: HttpClientEnvoyConfig? = null,
+
+    //Legacy fields
+  val connectTimeout: Duration? = null,
+  val writeTimeout: Duration? = null,
+  val readTimeout: Duration? = null,
+  val pingInterval: Duration? = null,
+  val callTimeout: Duration? = null,
+  val maxRequests: Int = 128,
+  val maxRequestsPerHost: Int = 32,
+  val maxIdleConnections: Int = 100,
+  val keepAliveDuration: Duration = Duration.ofMinutes(5),
+  val ssl: HttpClientSSLConfig? = null,
+
+    //New fields
+  val clientConfig: HttpClientConfig? = null
+)
+
+class BackwardsCompatibleEndpointConfigConverter : com.fasterxml.jackson.databind.util.Converter<BackwardsCompatibleEndpointConfig, HttpClientEndpointConfig> {
+  override fun getInputType(typeFactory: TypeFactory) =
+      typeFactory.constructType(BackwardsCompatibleEndpointConfig::class.java)
+
+  override fun getOutputType(typeFactory: TypeFactory) =
+      typeFactory.constructType(HttpClientEndpointConfig::class.java)
+
+  override fun convert(value: BackwardsCompatibleEndpointConfig) =
+      //http://%s.%s.gns.square
+      if (value.clientConfig == null)
+        HttpClientEndpointConfig(
+            url = value.url,
+            envoy = value.envoy,
+            clientConfig = HttpClientConfig(
+                value.connectTimeout,
+                value.writeTimeout,
+                value.readTimeout,
+                value.pingInterval,
+                value.callTimeout,
+                value.maxRequests,
+                value.maxRequestsPerHost,
+                value.maxIdleConnections,
+                value.keepAliveDuration,
+                value.ssl
+            )
+        )
+      else
+        HttpClientEndpointConfig(
+            url = value.url,
+            envoy = value.envoy,
+            clientConfig = value.clientConfig
+        )
+}
+
 data class HttpClientsConfig(
-  private val defaultConnectTimeout: Duration? = null,
-  private val defaultWriteTimeout: Duration? = null,
-  private val defaultReadTimeout: Duration? = null,
-  private val ssl: HttpClientSSLConfig? = null,
-  private val defaultPingInterval: Duration? = null,
-  private val defaultCallTimeout: Duration? = null,
-  private val endpoints: Map<String, HttpClientEndpointConfig> = mapOf()
+  val defaultConnectTimeout: Duration? = null,
+  val defaultWriteTimeout: Duration? = null,
+  val defaultReadTimeout: Duration? = null,
+  val ssl: HttpClientSSLConfig? = null,
+  val defaultPingInterval: Duration? = null,
+  val defaultCallTimeout: Duration? = null,
+  @JsonDeserialize(contentConverter = BackwardsCompatibleEndpointConfigConverter::class)
+  val endpoints: Map<String, HttpClientEndpointConfig> = mapOf()
 ) : Config {
   /** @return The [HttpClientEndpointConfig] for the given client, populated with defaults as needed */
   operator fun get(clientName: String): HttpClientEndpointConfig {
@@ -20,15 +79,18 @@ data class HttpClientsConfig(
     val endpointConfig = endpoints[clientName] ?: throw IllegalArgumentException(
         "no client configuration for endpoint $clientName")
 
+    val clientConfig = endpointConfig.clientConfig
     return HttpClientEndpointConfig(
-        endpointConfig.url,
-        endpointConfig.envoy,
-        connectTimeout = endpointConfig.connectTimeout ?: defaultConnectTimeout,
-        writeTimeout = endpointConfig.writeTimeout ?: defaultWriteTimeout,
-        readTimeout = endpointConfig.readTimeout ?: defaultReadTimeout,
-        pingInterval = endpointConfig.pingInterval ?: defaultPingInterval,
-        callTimeout = endpointConfig.callTimeout ?: defaultCallTimeout,
-        ssl = endpointConfig.ssl ?: ssl
+        url = endpointConfig.url,
+        envoy = endpointConfig.envoy,
+        clientConfig = clientConfig.copy(
+            connectTimeout = clientConfig.connectTimeout ?: defaultConnectTimeout,
+            writeTimeout = clientConfig.writeTimeout ?: defaultWriteTimeout,
+            readTimeout = clientConfig.readTimeout ?: defaultReadTimeout,
+            pingInterval = clientConfig.pingInterval ?: defaultPingInterval,
+            callTimeout = clientConfig.callTimeout ?: defaultCallTimeout,
+            ssl = clientConfig.ssl ?: ssl
+        )
     )
   }
 
@@ -40,12 +102,14 @@ data class HttpClientsConfig(
     return HttpClientEndpointConfig(
         url = null,
         envoy = null,
-        connectTimeout = defaultConnectTimeout,
-        writeTimeout = defaultWriteTimeout,
-        readTimeout = defaultReadTimeout,
-        pingInterval = defaultPingInterval,
-        callTimeout = defaultCallTimeout,
-        ssl = ssl
+        clientConfig = HttpClientConfig(
+            connectTimeout = defaultConnectTimeout,
+            writeTimeout = defaultWriteTimeout,
+            readTimeout = defaultReadTimeout,
+            pingInterval = defaultPingInterval,
+            callTimeout = defaultCallTimeout,
+            ssl = ssl
+        )
     )
   }
 }
@@ -55,9 +119,7 @@ data class HttpClientSSLConfig(
   val trust_store: TrustStoreConfig
 )
 
-data class HttpClientEndpointConfig(
-  val url: String? = null,
-  val envoy: HttpClientEnvoyConfig? = null,
+data class HttpClientConfig(
   val connectTimeout: Duration? = null,
   val writeTimeout: Duration? = null,
   val readTimeout: Duration? = null,
@@ -67,8 +129,107 @@ data class HttpClientEndpointConfig(
   val maxRequestsPerHost: Int = 32,
   val maxIdleConnections: Int = 100,
   val keepAliveDuration: Duration = Duration.ofMinutes(5),
-  val ssl: HttpClientSSLConfig? = null
+  val ssl: HttpClientSSLConfig? = null,
+  val unixSocketFile: File? = null,
+  val protocols: List<String>? = null
 )
+
+@Deprecated("Use default constructor")
+fun HttpClientEndpointConfig(
+  url: String? = null,
+  envoy: HttpClientEnvoyConfig? = null,
+  connectTimeout: Duration? = null,
+  writeTimeout: Duration? = null,
+  readTimeout: Duration? = null,
+  pingInterval: Duration? = null,
+  callTimeout: Duration? = null,
+  maxRequests: Int = 128,
+  maxRequestsPerHost: Int = 32,
+  maxIdleConnections: Int = 100,
+  keepAliveDuration: Duration = Duration.ofMinutes(5),
+  ssl: HttpClientSSLConfig? = null
+) = HttpClientEndpointConfig(
+    url = url,
+    envoy = envoy,
+    clientConfig = HttpClientConfig(
+        connectTimeout,
+        writeTimeout,
+        readTimeout,
+        pingInterval,
+        callTimeout,
+        maxRequests,
+        maxRequestsPerHost,
+        maxIdleConnections,
+        keepAliveDuration,
+        ssl
+    )
+)
+
+data class HttpClientEndpointConfig(
+  val url: String? = null,
+  val envoy: HttpClientEnvoyConfig? = null,
+  val clientConfig: HttpClientConfig = HttpClientConfig()
+) {
+  @Deprecated(
+      "Use clientConfig property",
+      replaceWith = ReplaceWith("clientConfig.connectTimeout"))
+  val connectTimeout
+    get() = clientConfig.connectTimeout
+
+  @Deprecated(
+      "Use clientConfig property",
+      replaceWith = ReplaceWith("clientConfig.writeTimeout"))
+  val writeTimeout
+    get() = clientConfig.writeTimeout
+
+  @Deprecated(
+      "Use clientConfig property",
+      replaceWith = ReplaceWith("clientConfig.readTimeout"))
+  val readTimeout
+    get() = clientConfig.readTimeout
+
+  @Deprecated(
+      "Use clientConfig property",
+      replaceWith = ReplaceWith("clientConfig.pingInterval"))
+  val pingInterval
+    get() = clientConfig.pingInterval
+
+  @Deprecated(
+      "Use clientConfig property",
+      replaceWith = ReplaceWith("clientConfig.callTimeout"))
+  val callTimeout
+    get() = clientConfig.callTimeout
+
+  @Deprecated(
+      "Use clientConfig property",
+      replaceWith = ReplaceWith("clientConfig.maxRequests"))
+  val maxRequests
+    get() = clientConfig.maxRequests
+
+  @Deprecated(
+      "Use clientConfig property",
+      replaceWith = ReplaceWith("clientConfig.maxRequestsPerHost"))
+  val maxRequestsPerHost
+    get() = clientConfig.maxRequestsPerHost
+
+  @Deprecated(
+      "Use clientConfig property",
+      replaceWith = ReplaceWith("clientConfig.maxIdleConnections"))
+  val maxIdleConnections
+    get() = clientConfig.maxIdleConnections
+
+  @Deprecated(
+      "Use clientConfig property",
+      replaceWith = ReplaceWith("clientConfig.keepAliveDuration"))
+  val keepAliveDuration
+    get() = clientConfig.keepAliveDuration
+
+  @Deprecated(
+      "Use clientConfig property",
+      replaceWith = ReplaceWith("clientConfig.ssl"))
+  val ssl
+    get() = clientConfig.ssl
+}
 
 data class HttpClientEnvoyConfig(
   val app: String,

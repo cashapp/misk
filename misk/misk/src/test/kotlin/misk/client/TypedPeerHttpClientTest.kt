@@ -148,18 +148,21 @@ internal class TypedPeerHttpClientTest {
       return HttpClientsConfig(
           endpoints = mapOf(
               "Server" to HttpClientEndpointConfig(
-                  jetty.httpsServerUrl!!.toString(),
-                  ssl = HttpClientSSLConfig(
-                      cert_store = CertStoreConfig(
-                          resource = "classpath:/ssl/client_cert_key_combo.pem",
-                          passphrase = "clientpassword",
-                          format = SslLoader.FORMAT_PEM
-                      ),
-                      trust_store = TrustStoreConfig(
-                          resource = "classpath:/ssl/server_cert.pem",
-                          format = SslLoader.FORMAT_PEM
+                  url = jetty.httpsServerUrl!!.toString(),
+                  clientConfig = HttpClientConfig(
+                      ssl = HttpClientSSLConfig(
+                          cert_store = CertStoreConfig(
+                              resource = "classpath:/ssl/client_cert_key_combo.pem",
+                              passphrase = "clientpassword",
+                              format = SslLoader.FORMAT_PEM
+                          ),
+                          trust_store = TrustStoreConfig(
+                              resource = "classpath:/ssl/server_cert.pem",
+                              format = SslLoader.FORMAT_PEM
+                          )
                       )
-                  ))
+                  )
+              )
           ))
     }
   }
