@@ -5,16 +5,10 @@ import misk.client.HttpClientEndpointConfig
 import misk.client.HttpClientEnvoyConfig
 import misk.client.HttpClientsConfig
 import misk.environment.Env
-import misk.environment.Environment
-import misk.resources.MemoryResourceLoaderBackend
-import misk.resources.ResourceLoader
-import misk.web.WebConfig
-import okio.ByteString
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.io.File
 import java.time.Duration
-import kotlin.test.assertFailsWith
 
 class HttpClientsConfigBackwardsCompatibilityTest {
   @Test
