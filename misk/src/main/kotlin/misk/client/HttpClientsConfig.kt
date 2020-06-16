@@ -1,115 +1,75 @@
 package misk.client
 
+import com.fasterxml.jackson.annotation.JsonAlias
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
-import com.fasterxml.jackson.databind.type.TypeFactory
 import misk.config.Config
+import misk.logging.getLogger
 import misk.security.ssl.CertStoreConfig
 import misk.security.ssl.TrustStoreConfig
 import java.io.File
+import java.net.URL
 import java.time.Duration
 
-data class BackwardsCompatibleEndpointConfig(
-    //Common fields
-  val url: String? = null,
-  val envoy: HttpClientEnvoyConfig? = null,
-
-    //Legacy fields
-  val connectTimeout: Duration? = null,
-  val writeTimeout: Duration? = null,
-  val readTimeout: Duration? = null,
-  val pingInterval: Duration? = null,
-  val callTimeout: Duration? = null,
-  val maxRequests: Int = 128,
-  val maxRequestsPerHost: Int = 32,
-  val maxIdleConnections: Int = 100,
-  val keepAliveDuration: Duration = Duration.ofMinutes(5),
-  val ssl: HttpClientSSLConfig? = null,
-
-    //New fields
-  val clientConfig: HttpClientConfig? = null
-)
-
-class BackwardsCompatibleEndpointConfigConverter : com.fasterxml.jackson.databind.util.Converter<BackwardsCompatibleEndpointConfig, HttpClientEndpointConfig> {
-  override fun getInputType(typeFactory: TypeFactory) =
-      typeFactory.constructType(BackwardsCompatibleEndpointConfig::class.java)
-
-  override fun getOutputType(typeFactory: TypeFactory) =
-      typeFactory.constructType(HttpClientEndpointConfig::class.java)
-
-  override fun convert(value: BackwardsCompatibleEndpointConfig) =
-      //http://%s.%s.gns.square
-      if (value.clientConfig == null)
-        HttpClientEndpointConfig(
-            url = value.url,
-            envoy = value.envoy,
-            clientConfig = HttpClientConfig(
-                value.connectTimeout,
-                value.writeTimeout,
-                value.readTimeout,
-                value.pingInterval,
-                value.callTimeout,
-                value.maxRequests,
-                value.maxRequestsPerHost,
-                value.maxIdleConnections,
-                value.keepAliveDuration,
-                value.ssl
-            )
-        )
-      else
-        HttpClientEndpointConfig(
-            url = value.url,
-            envoy = value.envoy,
-            clientConfig = value.clientConfig
-        )
-}
-
+@JsonDeserialize(converter = BackwardsCompatibleClientsConfigConverter::class)
 data class HttpClientsConfig(
-  val defaultConnectTimeout: Duration? = null,
-  val defaultWriteTimeout: Duration? = null,
-  val defaultReadTimeout: Duration? = null,
-  val ssl: HttpClientSSLConfig? = null,
-  val defaultPingInterval: Duration? = null,
-  val defaultCallTimeout: Duration? = null,
-  @JsonDeserialize(contentConverter = BackwardsCompatibleEndpointConfigConverter::class)
+  @JsonAlias("hosts")
+  //Need to retain ordering, hence LinkedHashMap
+  val hostConfigs: LinkedHashMap<String, HttpClientConfig> = linkedMapOf(),
   val endpoints: Map<String, HttpClientEndpointConfig> = mapOf()
 ) : Config {
-  /** @return The [HttpClientEndpointConfig] for the given client, populated with defaults as needed */
-  operator fun get(clientName: String): HttpClientEndpointConfig {
-    // TODO(mmihic): Cache, proxy, etc
-    val endpointConfig = endpoints[clientName] ?: throw IllegalArgumentException(
-        "no client configuration for endpoint $clientName")
+  init {
+    validatePatterns()
+  }
 
-    val clientConfig = endpointConfig.clientConfig
-    return HttpClientEndpointConfig(
-        url = endpointConfig.url,
-        envoy = endpointConfig.envoy,
-        clientConfig = clientConfig.copy(
-            connectTimeout = clientConfig.connectTimeout ?: defaultConnectTimeout,
-            writeTimeout = clientConfig.writeTimeout ?: defaultWriteTimeout,
-            readTimeout = clientConfig.readTimeout ?: defaultReadTimeout,
-            pingInterval = clientConfig.pingInterval ?: defaultPingInterval,
-            callTimeout = clientConfig.callTimeout ?: defaultCallTimeout,
-            ssl = clientConfig.ssl ?: ssl
-        )
+  private fun validatePatterns() = try {
+    endpoints.keys
+        .map { it.toRegex(RegexOption.IGNORE_CASE) }
+        .forEach { it.matches("") }
+  } catch (e: Exception) {
+    throw IllegalArgumentException(
+        "Failed to initialize HttpClientsConfig, failed to parse Regexp patterns!",
+        e
     )
   }
 
-  /**
-   * Returns a default config with no url/envoy config specified.
-   * Used to build up endpoint config for clients dynamically.
-   */
-  fun getDefault(): HttpClientEndpointConfig {
+  /** @return The [HttpClientEndpointConfig] for the given client, populated with defaults as needed */
+  operator fun get(clientName: String): HttpClientEndpointConfig {
+    val endpointConfig = requireNotNull(endpoints[clientName]) {
+        "no client configuration for endpoint $clientName"
+    }
+
+    val allMatchingConfigs = sequence {
+      yield(httpClientConfigDefaults)
+      yieldAll(
+          endpointConfig.url?.let { url ->
+            findUrlMatchingConfigs(url)
+          } ?: findWildcardConfigs()
+      )
+      yield(endpointConfig.clientConfig)
+    }.reduce { prev, cur -> cur.applyDefaults(prev) }
+
     return HttpClientEndpointConfig(
-        url = null,
-        envoy = null,
-        clientConfig = HttpClientConfig(
-            connectTimeout = defaultConnectTimeout,
-            writeTimeout = defaultWriteTimeout,
-            readTimeout = defaultReadTimeout,
-            pingInterval = defaultPingInterval,
-            callTimeout = defaultCallTimeout,
-            ssl = ssl
-        )
+        url = endpointConfig.url,
+        envoy = endpointConfig.envoy,
+        clientConfig = allMatchingConfigs
+    )
+  }
+
+  private fun findWildcardConfigs() =
+      hostConfigs.filter { (k, _) -> k == ".*" }.values
+
+  private fun findUrlMatchingConfigs(url: String) =
+      hostConfigs.filter { (k, _) ->
+        k.toRegex(RegexOption.IGNORE_CASE).matches(URL(url).host)
+      }.values
+
+  companion object {
+    val logger = getLogger<HttpClientsConfig>()
+    val httpClientConfigDefaults = HttpClientConfig(
+        maxRequests = 128,
+        maxRequestsPerHost = 32,
+        maxIdleConnections = 100,
+        keepAliveDuration = Duration.ofMinutes(5)
     )
   }
 
@@ -128,45 +88,30 @@ data class HttpClientConfig(
   val readTimeout: Duration? = null,
   val pingInterval: Duration? = null,
   val callTimeout: Duration? = null,
-  val maxRequests: Int = 128,
-  val maxRequestsPerHost: Int = 32,
-  val maxIdleConnections: Int = 100,
-  val keepAliveDuration: Duration = Duration.ofMinutes(5),
+  val maxRequests: Int? = null,
+  val maxRequestsPerHost: Int? = null,
+  val maxIdleConnections: Int? = null,
+  val keepAliveDuration: Duration? = null,
   val ssl: HttpClientSSLConfig? = null,
-  val unixSocketFile: File? = null,
+  val unixSocketFile: String? = null,
   val protocols: List<String>? = null
 )
 
-@Deprecated("Use default constructor")
-fun HttpClientEndpointConfig(
-  url: String? = null,
-  envoy: HttpClientEnvoyConfig? = null,
-  connectTimeout: Duration? = null,
-  writeTimeout: Duration? = null,
-  readTimeout: Duration? = null,
-  pingInterval: Duration? = null,
-  callTimeout: Duration? = null,
-  maxRequests: Int = 128,
-  maxRequestsPerHost: Int = 32,
-  maxIdleConnections: Int = 100,
-  keepAliveDuration: Duration = Duration.ofMinutes(5),
-  ssl: HttpClientSSLConfig? = null
-) = HttpClientEndpointConfig(
-    url = url,
-    envoy = envoy,
-    clientConfig = HttpClientConfig(
-        connectTimeout,
-        writeTimeout,
-        readTimeout,
-        pingInterval,
-        callTimeout,
-        maxRequests,
-        maxRequestsPerHost,
-        maxIdleConnections,
-        keepAliveDuration,
-        ssl
+fun HttpClientConfig.applyDefaults(other: HttpClientConfig) =
+    HttpClientConfig(
+        connectTimeout = this.connectTimeout ?: other.connectTimeout,
+        writeTimeout = this.writeTimeout ?: other.writeTimeout,
+        readTimeout = this.readTimeout ?: other.readTimeout,
+        pingInterval = this.pingInterval ?: other.pingInterval,
+        callTimeout = this.callTimeout ?: other.callTimeout,
+        maxRequests = this.maxRequests ?: other.maxRequests,
+        maxRequestsPerHost = this.maxRequestsPerHost ?: other.maxRequestsPerHost,
+        maxIdleConnections = this.maxIdleConnections ?: other.maxIdleConnections,
+        keepAliveDuration = this.keepAliveDuration ?: other.keepAliveDuration,
+        ssl = this.ssl ?: other.ssl,
+        unixSocketFile = this.unixSocketFile ?: other.unixSocketFile,
+        protocols = this.protocols ?: other.protocols
     )
-)
 
 data class HttpClientEndpointConfig(
   val url: String? = null,

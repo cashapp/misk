@@ -4,10 +4,10 @@ import misk.client.HttpClientConfig
 import misk.client.HttpClientEndpointConfig
 import misk.client.HttpClientEnvoyConfig
 import misk.client.HttpClientsConfig
+import misk.client.applyDefaults
 import misk.environment.Env
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import java.io.File
 import java.time.Duration
 
 class HttpClientsConfigBackwardsCompatibilityTest {
@@ -23,7 +23,7 @@ class HttpClientsConfigBackwardsCompatibilityTest {
                 connectTimeout = Duration.ofSeconds(41),
                 readTimeout = Duration.ofSeconds(42),
                 writeTimeout = Duration.ofSeconds(43)
-            )
+            ).applyDefaults(HttpClientsConfig.httpClientConfigDefaults)
         ))
 
     assertThat(config["test_client_envoy"])
@@ -33,8 +33,9 @@ class HttpClientsConfigBackwardsCompatibilityTest {
                 env = "test_env"
             ),
             clientConfig = HttpClientConfig(
-                connectTimeout = Duration.ofSeconds(44)
-            )
+                connectTimeout = Duration.ofSeconds(44),
+                readTimeout = Duration.ofSeconds(60) //From defaults
+            ).applyDefaults(HttpClientsConfig.httpClientConfigDefaults)
         ))
   }
 
@@ -45,14 +46,16 @@ class HttpClientsConfigBackwardsCompatibilityTest {
 
     assertThat(config["test_client_url"])
         .isEqualTo(HttpClientEndpointConfig(
-            url = "https://google.com/",
+            url = "https://test.google.com/",
             clientConfig = HttpClientConfig(
                 connectTimeout = Duration.ofSeconds(31),
                 readTimeout = Duration.ofSeconds(32),
                 writeTimeout = Duration.ofSeconds(33),
-                unixSocketFile = File("file.socket"),
-                protocols = listOf("http1", "http2", "http3")
-            )
+                unixSocketFile = "\u0000egress.sock",
+                protocols = listOf("http1", "http2", "http3"),
+                maxRequests = 199, //From defaults section
+                maxRequestsPerHost = 50 //From hosts section
+            ).applyDefaults(HttpClientsConfig.httpClientConfigDefaults)
         ))
 
     assertThat(config["test_client_envoy"])
@@ -62,8 +65,10 @@ class HttpClientsConfigBackwardsCompatibilityTest {
                 env = "test_env"
             ),
             clientConfig = HttpClientConfig(
-                connectTimeout = Duration.ofSeconds(34)
-            )
+                connectTimeout = Duration.ofSeconds(34),
+                maxRequests = 200, //From endpoints section
+                maxRequestsPerHost = 100 //From defaults section
+            ).applyDefaults(HttpClientsConfig.httpClientConfigDefaults)
         ))
   }
 }
