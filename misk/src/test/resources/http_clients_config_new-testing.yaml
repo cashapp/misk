@@ -1,11 +1,18 @@
+hosts:
+  .*:
+    maxRequests: 199
+    maxRequestsPerHost: 100
+  .*\.google\.com:
+    maxRequestsPerHost: 50
+
 endpoints:
   test_client_url:
-    url: https://google.com/
+    url: https://test.google.com/
     clientConfig:
       connectTimeout: PT31S
       readTimeout: PT32S
       writeTimeout: PT33S
-      unixSocketFile: file.socket
+      unixSocketFile: "\u0000egress.sock"
       protocols:
         - http1
         - http2
@@ -16,3 +23,4 @@ endpoints:
       env: test_env
     clientConfig:
       connectTimeout: PT34S
+      maxRequests: 200
