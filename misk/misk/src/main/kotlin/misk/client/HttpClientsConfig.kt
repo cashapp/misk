@@ -112,6 +112,9 @@ data class HttpClientsConfig(
         )
     )
   }
+
+  /** Names of configured endpoints, all of which can be fetched using [get] */
+  fun endpointNames(): Set<String> = endpoints.keys
 }
 
 data class HttpClientSSLConfig(
