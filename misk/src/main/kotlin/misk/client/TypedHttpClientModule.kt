@@ -10,6 +10,7 @@ import io.opentracing.Tracer
 import misk.clustering.Cluster
 import misk.inject.KAbstractModule
 import okhttp3.EventListener
+import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import java.lang.reflect.Proxy

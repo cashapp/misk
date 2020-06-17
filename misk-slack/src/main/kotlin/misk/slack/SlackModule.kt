@@ -5,7 +5,9 @@ import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import misk.client.HttpClientEndpointConfig
 import misk.client.HttpClientFactory
+import misk.client.HttpClientModule
 import misk.inject.KAbstractModule
+import okhttp3.Interceptor
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 import javax.inject.Named

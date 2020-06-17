@@ -4,12 +4,13 @@ import misk.security.ssl.SslContextFactory
 import misk.security.ssl.SslLoader
 import okhttp3.ConnectionPool
 import okhttp3.Dispatcher
+import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.Protocol
-import java.io.File
 import java.net.Proxy
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
+import javax.inject.Provider
 import javax.inject.Singleton
 import javax.net.ssl.X509TrustManager
 
@@ -20,6 +21,9 @@ class HttpClientFactory @Inject constructor(
 ) {
   @com.google.inject.Inject(optional = true)
   lateinit var envoyClientEndpointProvider: EnvoyClientEndpointProvider
+
+  @com.google.inject.Inject(optional = true)
+  var okhttpInterceptors: Provider<List<Interceptor>>? = null
 
   /** Returns a client initialized based on `config`. */
   fun create(config: HttpClientEndpointConfig): OkHttpClient {
@@ -83,6 +87,10 @@ class HttpClientFactory @Inject constructor(
         config.clientConfig.keepAliveDuration.toMillis(),
         TimeUnit.MILLISECONDS)
     builder.connectionPool(connectionPool)
+
+    okhttpInterceptors?.let {
+      builder.interceptors().addAll(it.get())
+    }
 
     return builder.build()
   }
