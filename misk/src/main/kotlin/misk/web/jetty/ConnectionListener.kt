@@ -4,7 +4,6 @@ import org.eclipse.jetty.io.Connection
 import org.eclipse.jetty.util.component.AbstractLifeCycle
 import java.util.Collections
 import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.atomic.AtomicLong
 
 internal class ConnectionListener(
@@ -19,28 +18,24 @@ internal class ConnectionListener(
   private val totalMessagesSent = AtomicLong()
 
   private val connections = Collections.newSetFromMap(ConcurrentHashMap<ConnectionKey, Boolean>())
-  private val openedConnections = ConcurrentLinkedQueue<ConnectionKey>()
-  private val closedConnections = ConcurrentLinkedQueue<ConnectionKey>()
   private val labels = ConnectionMetrics.forPort(protocol, port)
 
-  // Updating prometheus metrics requires monitor locks and its best to avoid acquiring those
-  // with the high number of jetty threads. Instead we queue up changes to the connection and
-  // process the changes when metrics are refreshed by a single background thread.
   override fun onOpened(connection: Connection) {
-    openedConnections.add(ConnectionKey(connection))
+    connections.add(ConnectionKey(connection))
+    metrics.activeConnections.labels(*labels).inc()
+    metrics.acceptedConnections.labels(*labels).inc()
   }
 
   override fun onClosed(connection: Connection) {
-    closedConnections.add(ConnectionKey(connection))
+    // Force a refresh so that we gather the final stats on the connection
+    refreshMetrics()
+
+    if (connections.remove(ConnectionKey(connection))) {
+      metrics.activeConnections.labels(*labels).dec()
+    }
   }
 
   fun refreshMetrics() {
-    while (openedConnections.isNotEmpty()) {
-      connections.add(openedConnections.remove())
-      metrics.activeConnections.labels(*labels).inc()
-      metrics.acceptedConnections.labels(*labels).inc()
-    }
-
     var bytesReceivedSnapshot = 0L
     var bytesSentSnapshot = 0L
     var messagesReceivedSnapshot = 0L
@@ -88,11 +83,6 @@ internal class ConnectionListener(
 
     if (messagesReceivedDiff > 0) {
       metrics.messagesReceived.labels(*labels).inc(messagesReceivedDiff.toDouble())
-    }
-
-    while (closedConnections.isNotEmpty()) {
-      connections.remove(closedConnections.remove())
-      metrics.activeConnections.labels(*labels).dec()
     }
   }
 
