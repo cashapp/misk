@@ -5,11 +5,11 @@ import com.fasterxml.jackson.databind.type.TypeFactory
 import java.time.Duration
 
 data class BackwardsCompatibleEndpointConfig(
-    //Common fields
+    // Common fields
   val url: String? = null,
   val envoy: HttpClientEnvoyConfig? = null,
 
-    //Legacy fields
+    // Legacy fields
   val connectTimeout: Duration? = null,
   val writeTimeout: Duration? = null,
   val readTimeout: Duration? = null,
@@ -21,12 +21,12 @@ data class BackwardsCompatibleEndpointConfig(
   val keepAliveDuration: Duration = Duration.ofMinutes(5),
   val ssl: HttpClientSSLConfig? = null,
 
-    //New fields
+    // New fields
   val clientConfig: HttpClientConfig? = null
 )
 
 data class BackwardsCompatibleClientsConfig(
-    //Legacy fields
+    // Legacy fields
   val defaultConnectTimeout: Duration? = null,
   val defaultWriteTimeout: Duration? = null,
   val defaultReadTimeout: Duration? = null,
@@ -34,10 +34,10 @@ data class BackwardsCompatibleClientsConfig(
   val defaultPingInterval: Duration? = null,
   val defaultCallTimeout: Duration? = null,
 
-    //Shared fields
+    // Shared fields
   val endpoints: Map<String, BackwardsCompatibleEndpointConfig> = mapOf(),
 
-    //New fields
+    // New fields
   @JsonAlias("hosts")
   val hostConfigs: LinkedHashMap<String, HttpClientConfig> = linkedMapOf()
 )
@@ -88,7 +88,6 @@ class BackwardsCompatibleClientsConfigConverter : com.fasterxml.jackson.databind
   }
 
   private fun convert(value: BackwardsCompatibleEndpointConfig) =
-      //http://%s.%s.gns.square
       if (value.clientConfig == null)
         HttpClientEndpointConfig(
             url = value.url,
