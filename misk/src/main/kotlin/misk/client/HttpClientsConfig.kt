@@ -6,7 +6,6 @@ import misk.config.Config
 import misk.logging.getLogger
 import misk.security.ssl.CertStoreConfig
 import misk.security.ssl.TrustStoreConfig
-import java.io.File
 import java.net.URL
 import java.time.Duration
 
@@ -19,17 +18,6 @@ data class HttpClientsConfig(
 ) : Config {
   init {
     validatePatterns()
-  }
-
-  private fun validatePatterns() = try {
-    endpoints.keys
-        .map { it.toRegex(RegexOption.IGNORE_CASE) }
-        .forEach { it.matches("") }
-  } catch (e: Exception) {
-    throw IllegalArgumentException(
-        "Failed to initialize HttpClientsConfig, failed to parse Regexp patterns!",
-        e
-    )
   }
 
   /** @return The [HttpClientEndpointConfig] for the given client, populated with defaults as needed */
@@ -52,6 +40,17 @@ data class HttpClientsConfig(
         url = endpointConfig.url,
         envoy = endpointConfig.envoy,
         clientConfig = allMatchingConfigs
+    )
+  }
+
+  private fun validatePatterns() = try {
+    endpoints.keys
+        .map { it.toRegex(RegexOption.IGNORE_CASE) }
+        .forEach { it.matches("") }
+  } catch (e: Exception) {
+    throw IllegalArgumentException(
+        "Failed to initialize HttpClientsConfig, failed to parse Regexp patterns!",
+        e
     )
   }
 
