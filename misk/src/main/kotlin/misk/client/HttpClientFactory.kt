@@ -7,6 +7,7 @@ import okhttp3.Dispatcher
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.Protocol
+import java.io.File
 import java.net.Proxy
 import java.time.Duration
 import java.util.concurrent.TimeUnit
@@ -73,11 +74,9 @@ class HttpClientFactory @Inject constructor(
       builder.proxy(Proxy.NO_PROXY)
     }
 
-    config.clientConfig.protocols?.let {
-      builder.protocols(
-          config.clientConfig.protocols.map { Protocol.get(it) }
-      )
-    }
+    config.clientConfig.protocols
+        ?.map { Protocol.get(it) }
+        ?.let { builder.protocols(it) }
 
     config.envoy?.let {
       builder.socketFactory(
