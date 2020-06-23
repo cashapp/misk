@@ -1,3 +1,5 @@
+defaultReadTimeout: PT60S
+
 endpoints:
   test_client_url:
     url: https://google.com/
