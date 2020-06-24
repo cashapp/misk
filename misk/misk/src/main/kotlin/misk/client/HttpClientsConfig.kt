@@ -43,6 +43,21 @@ data class HttpClientsConfig(
     )
   }
 
+  /** @return The [HttpClientEndpointConfig] for the given URL, populated with defaults as needed */
+  operator fun get(url: URL): HttpClientEndpointConfig {
+    val allMatchingConfigs = sequence {
+      yield(httpClientConfigDefaults)
+      yieldAll(
+          findUrlMatchingConfigs(url.toString())
+      )
+    }.reduce { prev, cur -> cur.applyDefaults(prev) }
+
+    return HttpClientEndpointConfig(
+        url = url.toString(),
+        clientConfig = allMatchingConfigs
+    )
+  }
+
   private fun validatePatterns() = try {
     endpoints.keys
         .map { it.toRegex(RegexOption.IGNORE_CASE) }
