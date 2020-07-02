@@ -1,0 +1,18 @@
+dependencies {
+  compile dep.kotlinStdLibJdk8
+  compile dep.kotlinTest
+  compile dep.guava
+  compile dep.guice
+  compile dep.logbackClassic
+  compile project(':misk')
+  compile project(':misk-prometheus')
+
+  testCompile project(':misk-testing')
+}
+
+jar {
+  manifest {
+    attributes 'Main-Class': 'com.squareup.exemplar.ExemplarServiceKt'
+  }
+  classifier = 'unshaded'
+}
