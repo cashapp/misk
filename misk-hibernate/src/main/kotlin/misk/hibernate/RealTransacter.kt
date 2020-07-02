@@ -46,7 +46,6 @@ internal class RealTransacter private constructor(
   private val config: DataSourceConfig,
   private val threadLatestSession: ThreadLocal<RealSession>,
   private val options: TransacterOptions,
-  private val queryTracingListener: QueryTracingListener,
   private val executorServiceFactory: ExecutorServiceFactory,
   private val tracer: Tracer?,
   private val shardListFetcher: ShardListFetcher
@@ -57,7 +56,6 @@ internal class RealTransacter private constructor(
     sessionFactoryProvider: Provider<SessionFactory>,
     readerSessionFactoryProvider: Provider<SessionFactory>?,
     config: DataSourceConfig,
-    queryTracingListener: QueryTracingListener,
     executorServiceFactory: ExecutorServiceFactory,
     tracer: Tracer?
   ) : this(
@@ -67,7 +65,6 @@ internal class RealTransacter private constructor(
       config = config,
       threadLatestSession = ThreadLocal(),
       options = TransacterOptions(),
-      queryTracingListener = queryTracingListener,
       executorServiceFactory = executorServiceFactory,
       tracer = tracer,
       shardListFetcher = ShardListFetcher()
@@ -299,7 +296,6 @@ internal class RealTransacter private constructor(
           readerSessionFactoryProvider = readerSessionFactoryProvider,
           threadLatestSession = threadLatestSession,
           options = options,
-          queryTracingListener = queryTracingListener,
           config = config,
           executorServiceFactory = executorServiceFactory,
           tracer = tracer,
