@@ -10,7 +10,22 @@ package misk.web.interceptors
  *
  * If arguments and responses may include sensitive information, it is expected that the toString()
  * methods of these objects will redact it.
+ *
+ * Rate limiting is used to sample the number of requests logged. The value specified is the
+ * log events per sec allotted per caller per action.
+ *
+ * By default we set rate limiting for both successes and errors to 1 log event per sec,
+ * enough to show things are happening without sending too many logs.
+ *
+ * If you would like to turn off rate limiting and emit all logs, set rateLimiting and/or
+ * errorRateLimiting to 0.
  */
 @Retention(AnnotationRetention.RUNTIME)
-@Target(AnnotationTarget.FUNCTION)
-annotation class LogRequestResponse(val sampling: Double, val includeBody: Boolean)
+@Target(AnnotationTarget.FUNCTION, AnnotationTarget.CLASS)
+annotation class LogRequestResponse(
+  // TODO(isabel): Remove sampling and includeBody. Will be replaced with rate limiting
+  val sampling: Double,
+  val includeBody: Boolean,
+  // Currently unused
+  val rateLimiting: Long = 1,
+  val errorRateLimiting: Long = 1)
