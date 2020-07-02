@@ -138,7 +138,6 @@ class HibernateModule(
     multibind<HealthCheck>().to(schemaMigratorServiceKey)
 
     bind(transacterKey).toProvider(object : Provider<Transacter> {
-      @Inject lateinit var queryTracingListener: QueryTracingListener
       @Inject lateinit var executorServiceFactory: ExecutorServiceFactory
       @com.google.inject.Inject(optional = true) val tracer: Tracer? = null
       override fun get(): RealTransacter = RealTransacter(
@@ -146,7 +145,6 @@ class HibernateModule(
           sessionFactoryProvider = sessionFactoryProvider,
           readerSessionFactoryProvider = readerSessionFactoryProvider,
           config = config,
-          queryTracingListener = queryTracingListener,
           executorServiceFactory = executorServiceFactory,
           tracer = tracer
       )
@@ -157,12 +155,6 @@ class HibernateModule(
       override fun configureHibernate() {
         bindListener(EventType.PRE_INSERT).to<TimestampListener>()
         bindListener(EventType.PRE_UPDATE).to<TimestampListener>()
-        bindListener(EventType.PRE_INSERT).to<QueryTracingListener>()
-        bindListener(EventType.POST_INSERT).to<QueryTracingListener>()
-        bindListener(EventType.PRE_UPDATE).to<QueryTracingListener>()
-        bindListener(EventType.POST_UPDATE).to<QueryTracingListener>()
-        bindListener(EventType.PRE_DELETE).to<QueryTracingListener>()
-        bindListener(EventType.POST_DELETE).to<QueryTracingListener>()
       }
     })
 
