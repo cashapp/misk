@@ -1,7 +1,6 @@
 package misk.web.interceptors
 
 import misk.inject.KAbstractModule
-import misk.prometheus.PrometheusHistogramRegistryModule
 import misk.security.authz.AccessControlModule
 import misk.security.authz.FakeCallerAuthenticator
 import misk.security.authz.FakeCallerAuthenticator.Companion.SERVICE_HEADER
@@ -86,7 +85,6 @@ class MetricsInterceptorTest {
       install(AccessControlModule())
       install(WebTestingModule())
       multibind<MiskCallerAuthenticator>().to<FakeCallerAuthenticator>()
-      install(PrometheusHistogramRegistryModule())
       install(WebActionModule.create<TestAction>())
 
       bind<MetricsInterceptor.Factory>()

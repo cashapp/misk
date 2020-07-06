@@ -1,5 +1,6 @@
 package misk.jdbc
 
+import io.prometheus.client.CollectorRegistry
 import misk.hibernate.MoviesTestModule
 import misk.metrics.Metrics
 import misk.testing.MiskTest
@@ -15,10 +16,11 @@ class HikariMetricsTest {
   val module = MoviesTestModule()
 
   @Inject lateinit var metrics: Metrics
+  @Inject lateinit var registry: CollectorRegistry
 
   @Test
   fun metricsExist() {
-    val metrics = Collections.list(metrics.registry.metricFamilySamples())
+    val metrics = Collections.list(registry.metricFamilySamples())
     assertThat(metrics).filteredOn { m -> m.name.startsWith("hikaricp") }.isNotEmpty()
   }
 }
