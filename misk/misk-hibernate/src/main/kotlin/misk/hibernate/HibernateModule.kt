@@ -1,6 +1,7 @@
 package misk.hibernate
 
 import io.opentracing.Tracer
+import io.prometheus.client.CollectorRegistry
 import misk.ServiceModule
 import misk.concurrent.ExecutorServiceFactory
 import misk.environment.Environment
@@ -199,7 +200,7 @@ class HibernateModule(
         .toProvider(keyOf<DataSourceService>(qualifier))
         .asSingleton()
     bind(keyOf<DataSourceService>(qualifier)).toProvider(object : Provider<DataSourceService> {
-      @com.google.inject.Inject(optional = true) var metrics: Metrics? = null
+      @com.google.inject.Inject(optional = true) var registry: CollectorRegistry? = null
       override fun get(): DataSourceService {
         return DataSourceService(
             qualifier = qualifier,
@@ -208,7 +209,7 @@ class HibernateModule(
             dataSourceDecorators = dataSourceDecoratorsProvider.get(),
             databasePool = databasePool,
             // TODO provide metrics to the reader pool but need a different metric key prefix
-            metrics = if (isWriter) metrics else null
+            collectorRegistry = if (isWriter) registry else null
         )
       }
     }).asSingleton()
