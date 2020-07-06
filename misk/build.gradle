@@ -53,6 +53,8 @@ dependencies {
   compile project(':misk-actions')
   compile project(':misk-core')
   compile project(':misk-inject')
+  compile project(':misk-metrics')
+  compile project(':misk-prometheus')
   compile project(':misk-service')
 
   testCompile dep.kotlinxCoroutines

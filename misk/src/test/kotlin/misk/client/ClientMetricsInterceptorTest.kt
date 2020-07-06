@@ -6,7 +6,6 @@ import com.google.inject.name.Names
 import misk.MiskTestingServiceModule
 import misk.inject.KAbstractModule
 import misk.metrics.Histogram
-import misk.prometheus.PrometheusHistogramRegistryModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.web.mediatype.MediaTypes
@@ -84,8 +83,6 @@ internal class ClientMetricsInterceptorTest {
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(MiskTestingServiceModule())
-      install(PrometheusHistogramRegistryModule())
-      install(PrometheusHistogramRegistryModule())
       install(TypedHttpClientModule.create<Pinger>("pinger", Names.named("pinger")))
       multibind<ClientNetworkInterceptor.Factory>().to<ClientMetricsInterceptor.Factory>()
       bind<MockWebServer>().toInstance(MockWebServer())

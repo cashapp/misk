@@ -5,9 +5,9 @@ import com.google.common.util.concurrent.AbstractIdleService
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import com.zaxxer.hikari.metrics.prometheus.PrometheusMetricsTrackerFactory
+import io.prometheus.client.CollectorRegistry
 import misk.environment.Environment
 import misk.logging.getLogger
-import misk.metrics.Metrics
 import javax.inject.Provider
 import javax.inject.Singleton
 import javax.sql.DataSource
@@ -26,7 +26,7 @@ class DataSourceService(
   private val environment: Environment,
   private val dataSourceDecorators: Set<DataSourceDecorator>,
   private val databasePool: DatabasePool,
-  private val metrics: Metrics? = null
+  private val collectorRegistry: CollectorRegistry? = null
 ) : AbstractIdleService(), DataSourceConnector, Provider<DataSource> {
   private lateinit var config: DataSourceConfig
   /** The backing connection pool */
@@ -97,8 +97,8 @@ class DataSourceService(
       hikariConfig.dataSourceProperties["characterEncoding"] = "UTF-8"
     }
 
-    metrics?.let {
-      hikariConfig.metricsTrackerFactory = PrometheusMetricsTrackerFactory(it.registry)
+    collectorRegistry?.let {
+      hikariConfig.metricsTrackerFactory = PrometheusMetricsTrackerFactory(it)
     }
 
     hikariDataSource = HikariDataSource(hikariConfig)
