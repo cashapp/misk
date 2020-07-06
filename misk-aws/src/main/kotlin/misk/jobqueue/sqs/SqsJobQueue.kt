@@ -3,7 +3,7 @@ package misk.jobqueue.sqs
 import com.amazonaws.services.sqs.model.MessageAttributeValue
 import com.amazonaws.services.sqs.model.SendMessageRequest
 import com.squareup.moshi.Moshi
-import datadog.trace.core.DDSpan
+import datadog.opentracing.DDSpan
 import io.opentracing.Tracer
 import misk.jobqueue.JobQueue
 import misk.jobqueue.QueueName
