@@ -1,9 +1,8 @@
 package misk.jdbc
 
+import datadog.opentracing.DDSpan
 import datadog.opentracing.DDTracer
 import datadog.trace.common.writer.Writer
-import datadog.trace.core.DDSpan
-import io.opentracing.Span
 import net.ttddyy.dsproxy.transform.TransformInfo
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito
@@ -44,7 +43,7 @@ class SpanInjectorTest {
       val query = "SELECT * FROM table"
       val transformInfo = TransformInfo(null, null, query, false, 0)
       val result = injector.transformQuery(transformInfo)
-      assertThat(result).contains((span as Span).context().toTraceId())
+      assertThat(result).contains((span as DDSpan).traceId.toString())
     }
   }
 }
