@@ -758,8 +758,12 @@ internal class ReflectionQuery<T : DbEntity<T>>(
     }
   }
 
-  internal fun addConstraint(predicateFactory: PredicateFactory): ReflectionQuery<T> {
-    constraints.add(predicateFactory)
+  override fun addJpaConstraint(block: PredicateFactory) {
+    addConstraint(block)
+  }
+
+  internal fun addConstraint(block: PredicateFactory): ReflectionQuery<T> {
+    constraints.add(block)
     return this
   }
 

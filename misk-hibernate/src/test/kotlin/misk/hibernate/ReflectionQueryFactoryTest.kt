@@ -892,6 +892,24 @@ class ReflectionQueryFactoryTest {
     }
   }
 
+  @Test
+  fun customConstraint() {
+    transacter.allowCowrites().transaction { session ->
+      session.save(DbMovie("Jurassic Park", LocalDate.of(1993, 6, 9)))
+      session.save(DbMovie("Jurassic Park: The Lost World", LocalDate.of(1997, 5, 19)))
+      session.save(DbMovie("Star Wars", LocalDate.of(1977, 5, 25)))
+    }
+
+    val jurassicCount = transacter.transaction { session ->
+      queryFactory.newQuery<OperatorsMovieQuery>()
+          .allowFullScatter()
+          .allowTableScan()
+          .constraint { root -> like(root.get("name"), "Jurassic%") }
+          .count(session)
+    }
+    assertThat(jurassicCount).isEqualTo(2)
+  }
+
   interface OperatorsMovieQuery : Query<DbMovie> {
     @Constraint(path = "name")
     fun name(name: String): OperatorsMovieQuery
