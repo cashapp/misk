@@ -18,6 +18,7 @@ import misk.logging.getLogger
 import misk.tasks.RepeatedTaskQueue
 import misk.tasks.Status
 import misk.time.timed
+import misk.tracing.traceWithNewRootSpan
 import misk.tracing.traceWithSpan
 import java.time.Duration
 import java.util.concurrent.CompletableFuture
@@ -150,7 +151,7 @@ internal class SqsJobConsumer @Inject internal constructor(
         CompletableFuture.supplyAsync(Supplier {
           metrics.jobsReceived.labels(queue.queueName, queue.queueName).inc()
 
-          tracer.traceWithSpan("handle-job-${queue.queueName}") { span ->
+          tracer.traceWithNewRootSpan("handle-job-${queue.queueName}") { span ->
             // If the incoming job has an original trace id, set that as a tag on the new span.
             // We don't turn that into the parent of the current span because that would
             // incorrectly include the execution time of the job in the execution time of the
