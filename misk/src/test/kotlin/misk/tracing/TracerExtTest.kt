@@ -68,4 +68,21 @@ class TracerExtTest {
     assertThat(childContext.traceId()).isEqualTo(parentContext.traceId())
     assertThat((childSpan as MockSpan).parentId()).isEqualTo(parentContext.spanId())
   }
+
+  @Test
+  fun nonNestedTracing() {
+    assertThat(tracer.finishedSpans().size).isEqualTo(0)
+    val (parentSpan, childSpan) = tracer.traceWithSpan("parent") { span1 ->
+      span1 to tracer.traceWithNewRootSpan("child") { span2 -> span2 }
+    }
+    val span0 = tracer.take()
+    val span1 = tracer.take()
+    assertThat(span0).isEqualTo(childSpan)
+    assertThat(span1).isEqualTo(parentSpan)
+
+    val parentContext = parentSpan.context() as MockSpan.MockContext
+    val childContext = childSpan.context() as MockSpan.MockContext
+    assertThat(childContext.traceId()).isNotEqualTo(parentContext.traceId())
+    assertThat((childSpan as MockSpan).parentId()).isNotEqualTo(parentContext.spanId())
+  }
 }
