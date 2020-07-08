@@ -6,6 +6,7 @@ import misk.environment.RealEnvVarModule
 import misk.healthchecks.HealthCheck
 import misk.inject.KAbstractModule
 import misk.metrics.MetricsModule
+import misk.metrics.backends.prometheus.PrometheusMetricsClientModule
 import misk.moshi.MoshiModule
 import misk.resources.ResourceLoaderModule
 import misk.time.ClockModule
@@ -40,7 +41,7 @@ class MiskCommonServiceModule : KAbstractModule() {
     binder().requireExactBindingAnnotations()
     install(ExecutorsModule())
     install(ServiceManagerModule())
-    install(MetricsModule())
+    install(PrometheusMetricsClientModule())
     install(MoshiModule())
 
     // Initialize empty sets for our multibindings.
