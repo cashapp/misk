@@ -23,6 +23,8 @@ import javax.inject.Inject
  * represented to clients; for example by setting the status code appropriately, or by returning
  * a specialized response format specific to the error. Components can control how exceptions are
  * mapped by installing [ExceptionMapper] via the [ExceptionMapperModule]
+ *
+ * TODO(isabel): Set the response body in a ThreadLocal to log in [RequestLoggingInterceptor]
  */
 class ExceptionHandlingInterceptor(
   private val actionName: String,

@@ -5,7 +5,6 @@ import misk.ApplicationInterceptor
 import misk.Chain
 import misk.MiskCaller
 import misk.logging.getLogger
-import misk.random.ThreadLocalRandom
 import misk.scope.ActionScoped
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -14,20 +13,21 @@ import kotlin.reflect.full.findAnnotation
 private val logger = getLogger<RequestBodyLoggingInterceptor>()
 
 /**
- * Logs request and response information for an action.
+ * Stores request and response information for an action in a ThreadLocal, to be logged
+ * in [RequestLoggingInterceptor]
+ *
  * Timing information doesn't count time writing the response to the remote client.
  */
-class RequestBodyLoggingInterceptor internal constructor(
+class RequestBodyLoggingInterceptor @Inject internal constructor(
   private val action: Action,
-  private val sampling: Double,
   private val caller: ActionScoped<MiskCaller?>,
-  private val random: ThreadLocalRandom
+  private val bodyCapture: RequestResponseCapture
 ) : ApplicationInterceptor {
 
   @Singleton
   class Factory @Inject internal constructor(
     private val caller: @JvmSuppressWildcards ActionScoped<MiskCaller?>,
-    private val random: ThreadLocalRandom
+    private val bodyCapture: RequestResponseCapture
   ) : ApplicationInterceptor.Factory {
     override fun create(action: Action): ApplicationInterceptor? {
       val logRequestResponse = action.function.findAnnotation<LogRequestResponse>() ?: return null
@@ -40,26 +40,20 @@ class RequestBodyLoggingInterceptor internal constructor(
 
       return RequestBodyLoggingInterceptor(
         action,
-        logRequestResponse.sampling,
         caller,
-        random
+        bodyCapture
       )
     }
   }
 
   override fun intercept(chain: Chain): Any {
-    val randomDouble = random.current().nextDouble()
-    if (randomDouble >= sampling) {
-      return chain.proceed(chain.args)
-    }
-
     val principal = caller.get()?.principal ?: "unknown"
 
-    logger.info { "${action.name} principal=$principal request=${chain.args}" }
+    bodyCapture.set(RequestResponseBody(chain.args, null))
 
     try {
       val result = chain.proceed(chain.args)
-      logger.info { "${action.name} principal=$principal response=$result" }
+      bodyCapture.set(RequestResponseBody(chain.args, result))
       return result
     } catch (t: Throwable) {
       logger.info { "${action.name} principal=$principal failed" }
@@ -68,3 +62,22 @@ class RequestBodyLoggingInterceptor internal constructor(
   }
 }
 
+internal class RequestResponseCapture @Inject constructor() {
+  companion object {
+    private val capture = ThreadLocal<RequestResponseBody>()
+  }
+
+  fun get(): RequestResponseBody {
+    return capture.get()
+  }
+
+  fun set(value: RequestResponseBody) {
+    capture.set(value)
+  }
+
+  fun clear() {
+    return capture.remove()
+  }
+}
+
+internal data class RequestResponseBody(val request: Any?, val response: Any?)
