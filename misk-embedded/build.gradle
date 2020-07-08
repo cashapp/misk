@@ -1,0 +1,21 @@
+dependencies {
+  implementation dep.kotlinStdLibJdk8
+  implementation dep.guava
+  implementation dep.guice
+  implementation dep.okio
+
+  testImplementation dep.assertj
+  testImplementation dep.junitApi
+  testImplementation dep.junitEngine
+  testImplementation dep.junitParams
+  testImplementation project(':misk-testing')
+  testImplementation project(':misk-embedded-sample:client')
+  testImplementation project(':misk-embedded-sample:embedded')
+}
+
+afterEvaluate { project ->
+  project.tasks.dokka {
+    outputDirectory = "$rootDir/docs/0.x"
+    outputFormat = 'gfm'
+  }
+}
