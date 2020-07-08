@@ -8,16 +8,37 @@ import io.opentracing.tag.Tags
 fun <T : Any?> Tracer.trace(spanName: String, tags: Map<String, String> = mapOf(), f: () -> T): T =
     traceWithSpan(spanName, tags) { f() }
 
-/** [trace] traces the given function, passing the span into the function */
+/** [traceWithSpan] traces the given function, passing the span into the function.
+ *  If a span is already active, the new span is made a child of the existing. */
 fun <T : Any?> Tracer.traceWithSpan(
   spanName: String,
   tags: Map<String, String> = mapOf(),
   f: (Span) -> T
 ): T {
-  val spanBuilder = buildSpan(spanName)
-  tags.forEach { k, v -> spanBuilder.withTag(k, v) }
+  return traceWithSpanInternal(spanName, tags, true, f)
+}
 
-  activeSpan()?.let { spanBuilder.asChildOf(it) }
+/** [traceWithNewRootSpan] traces the given function, always starting a new root span */
+fun <T : Any?> Tracer.traceWithNewRootSpan(
+  spanName: String,
+  tags: Map<String, String> = mapOf(),
+  f: (Span) -> T
+): T {
+  return traceWithSpanInternal(spanName, tags, false, f)
+}
+
+private fun <T : Any?> Tracer.traceWithSpanInternal(
+  spanName: String,
+  tags: Map<String, String> = mapOf(),
+  asChild: Boolean,
+  f: (Span) -> T
+): T {
+  var spanBuilder = buildSpan(spanName)
+  tags.forEach { (k, v) -> spanBuilder.withTag(k, v) }
+
+  if (!asChild) {
+    spanBuilder = spanBuilder.ignoreActiveSpan()
+  }
 
   val span = spanBuilder.start()
   val scope = scopeManager().activate(span)
