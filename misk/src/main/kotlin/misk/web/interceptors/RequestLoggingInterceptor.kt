@@ -14,6 +14,7 @@ import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.reflect.full.findAnnotation
+import kotlin.text.StringBuilder
 
 private val logger = getLogger<RequestLoggingInterceptor>()
 
@@ -24,15 +25,18 @@ private val logger = getLogger<RequestLoggingInterceptor>()
 class RequestLoggingInterceptor internal constructor(
   private val action: Action,
   private val sampling: Double,
+  private val includeBody: Boolean,
   private val caller: ActionScoped<MiskCaller?>,
   private val ticker: Ticker,
-  private val random: ThreadLocalRandom
+  private val random: ThreadLocalRandom,
+  private val bodyCapture: RequestResponseCapture
 ) : NetworkInterceptor {
   @Singleton
   class Factory @Inject internal constructor(
     private val caller: @JvmSuppressWildcards ActionScoped<MiskCaller?>,
     private val ticker: Ticker,
-    private val random: ThreadLocalRandom
+    private val random: ThreadLocalRandom,
+    private val bodyCapture: RequestResponseCapture
   ) : NetworkInterceptor.Factory {
     override fun create(action: Action): NetworkInterceptor? {
       val logRequestResponse = action.function.findAnnotation<LogRequestResponse>() ?: return null
@@ -43,9 +47,11 @@ class RequestLoggingInterceptor internal constructor(
       return RequestLoggingInterceptor(
         action,
         logRequestResponse.sampling,
+        logRequestResponse.includeBody,
         caller,
         ticker,
-        random
+        random,
+        bodyCapture
       )
     }
   }
@@ -58,20 +64,48 @@ class RequestLoggingInterceptor internal constructor(
 
     val principal = caller.get()?.principal ?: "unknown"
 
-    logger.info { "${action.name} principal=$principal" }
+    bodyCapture.clear()
 
     val stopwatch = Stopwatch.createStarted(ticker)
+
     try {
       val result = chain.proceed(chain.httpCall)
       stopwatch.stop()
-      logger.info(
-          "response_code" to chain.httpCall.statusCode,
-          "response_time_millis" to stopwatch.elapsed(TimeUnit.MILLISECONDS)
-      ) { "${action.name} principal=$principal time=$stopwatch code=${chain.httpCall.statusCode}" }
+
+      logRequestResponse(principal, stopwatch, chain.httpCall.statusCode)
+
       return result
     } catch (t: Throwable) {
-      logger.info { "${action.name} principal=$principal time=$stopwatch failed" }
+      logRequestResponse(principal, stopwatch, null)
       throw t
     }
+  }
+
+  fun logRequestResponse(principal: String, stopwatch: Stopwatch, statusCode: Int?) {
+    val builder = StringBuilder()
+    builder.append("${action.name} principal=$principal time=$stopwatch")
+
+    if (statusCode == null) {
+      builder.append(" failed")
+    } else {
+      builder.append(" code=${statusCode}")
+    }
+
+    if (includeBody) {
+      val requestResponseBody = bodyCapture.get()
+      requestResponseBody?.let {
+        requestResponseBody.request?.let {
+          builder.append(" request=${requestResponseBody.request}")
+        }
+        requestResponseBody.response?.let {
+          builder.append(" response=${requestResponseBody.response}")
+        }
+      }
+    }
+
+    logger.info(
+      "response_code" to statusCode,
+      "response_time_millis" to stopwatch.elapsed(TimeUnit.MILLISECONDS)
+    ) { builder.toString() }
   }
 }
