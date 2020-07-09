@@ -10,7 +10,7 @@ import misk.logging.LogCollector
 import misk.logging.LogCollectorModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
-import misk.web.interceptors.RequestBodyLoggingInterceptor
+import misk.web.interceptors.RequestLoggingInterceptor
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import routeguide.Feature
@@ -51,10 +51,9 @@ class MiskClientMiskServerTest {
     }
 
     // Confirm interceptors were invoked.
-    assertThat(logCollector.takeMessage(RequestBodyLoggingInterceptor::class)).isEqualTo(
-        "GetFeatureGrpcAction principal=unknown request=[$point]")
-    assertThat(logCollector.takeMessage(RequestBodyLoggingInterceptor::class)).isEqualTo(
-        "GetFeatureGrpcAction principal=unknown response=$feature")
+    assertThat(logCollector.takeMessages(RequestLoggingInterceptor::class)).containsExactly(
+      "GetFeatureGrpcAction principal=unknown time=0.000 ns code=200 request=[Point{latitude=43, longitude=-80}] response=Feature{name=maple tree, location=Point{latitude=43, longitude=-80}}"
+    )
   }
 
   @Test
@@ -71,10 +70,9 @@ class MiskClientMiskServerTest {
     }
 
     // Confirm interceptors were invoked.
-    assertThat(logCollector.takeMessage(RequestBodyLoggingInterceptor::class)).isEqualTo(
-        "RouteChatGrpcAction principal=unknown request=[GrpcMessageSource, GrpcMessageSink]")
-    assertThat(logCollector.takeMessage(RequestBodyLoggingInterceptor::class)).isEqualTo(
-        "RouteChatGrpcAction principal=unknown response=kotlin.Unit")
+    assertThat(logCollector.takeMessages(RequestLoggingInterceptor::class)).containsExactly(
+      "RouteChatGrpcAction principal=unknown time=0.000 ns code=200 request=[GrpcMessageSource, GrpcMessageSink] response=kotlin.Unit"
+    )
   }
 
   @Test
