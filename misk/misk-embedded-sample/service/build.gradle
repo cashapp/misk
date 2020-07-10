@@ -1,0 +1,14 @@
+dependencies {
+  implementation dep.kotlinStdLibJdk8
+  implementation dep.guava
+  implementation dep.guice
+  implementation project(':misk-embedded')
+  implementation project(':misk-embedded-sample:client')
+  implementation project(':misk-inject')
+
+  testImplementation dep.assertj
+  testImplementation dep.junitApi
+  testImplementation dep.junitEngine
+  testImplementation dep.junitParams
+  testImplementation project(':misk-testing')
+}

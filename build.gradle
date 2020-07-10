@@ -106,7 +106,7 @@ subprojects { subProject ->
     rootProject.getTasksByName("testShardNonHibernate", false).first().dependsOn.add(test)
   }
 
-  if (!path.startsWith(":samples")) {
+  if (!path.startsWith(":samples") && !path.startsWith(":misk-embedded-sample")) {
     apply plugin: 'com.vanniktech.maven.publish'
   }
 
