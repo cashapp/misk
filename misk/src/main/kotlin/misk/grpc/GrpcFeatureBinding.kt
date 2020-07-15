@@ -31,29 +31,20 @@ internal class GrpcFeatureBinding(
       subject.setParameter(0, request)
     }
 
-    subject.httpCall.setResponseHeader("grpc-encoding", "identity")
-    subject.httpCall.setResponseHeader("grpc-accept-encoding", "gzip")
-
-    subject.httpCall.requireTrailers()
-    // TODO(jwilson): permit non-0 GRPC statuses.
-    subject.httpCall.setResponseTrailer("grpc-status", "0")
-    // TODO(jwilson): permit non-identity GRPC encoding.
-
-    subject.httpCall.setResponseHeader(
-        "Content-Type",
-        MediaTypes.APPLICATION_GRPC_MEDIA_TYPE.toString())
-
     if (streamingResponse) {
       val responseBody = subject.takeResponseBody()
       val messageSink = GrpcMessageSink(responseBody, responseAdapter, grpcEncoding = "identity")
 
       // It's a streaming response, give the call a SendChannel to write to.
       subject.setParameter(1, messageSink)
+      setResponseHeaders(subject)
     }
   }
 
   override fun afterCall(subject: Subject) {
     check(!streamingResponse)
+
+    setResponseHeaders(subject)
 
     val responseBody = subject.takeResponseBody()
     val messageSink = GrpcMessageSink(responseBody, responseAdapter, grpcEncoding = "identity")
@@ -62,6 +53,18 @@ internal class GrpcFeatureBinding(
     val returnValue = subject.takeReturnValue()!!
     messageSink.write(returnValue)
     messageSink.close()
+  }
+
+  private fun setResponseHeaders(subject: Subject) {
+    subject.httpCall.requireTrailers()
+
+    // TODO(jwilson): permit non-identity GRPC encoding.
+    subject.httpCall.setResponseHeader("grpc-encoding", "identity")
+    subject.httpCall.setResponseHeader("grpc-accept-encoding", "gzip")
+    subject.httpCall.setResponseHeader("Content-Type", MediaTypes.APPLICATION_GRPC)
+
+    // TODO(jwilson): permit non-0 GRPC statuses.
+    subject.httpCall.setResponseTrailer("grpc-status", "0")
   }
 
   @Singleton
