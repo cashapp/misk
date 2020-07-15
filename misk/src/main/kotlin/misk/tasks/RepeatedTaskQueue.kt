@@ -232,20 +232,16 @@ class RepeatedTaskQueueFactory @Inject constructor(
     )
 
     // Install a status listener that will explicitly release all of the tasks from the
-    // underlying delay queue at shutdown, ensuring that the termination action runs and
-    // allowing the task queue itself to shutdown
-    val fullyTerminated = AtomicBoolean(false)
+    // underlying delay queue backing storage at shutdown, ensuring that the termination
+    // action runs and allowing the task queue itself to shutdown
     queue.addListener(object : Service.Listener() {
       override fun stopping(from: Service.State) {
-        // Keep kicking the storage until the task queue finally shuts down
-        while (!fullyTerminated.get()) {
+        // Keep kicking the storage until backing storage is empty
+        while (true) {
           backingStorage.releaseAll()
+          if (backingStorage.isEmpty()) break
           Thread.sleep(500)
         }
-      }
-
-      override fun terminated(from: Service.State) {
-        fullyTerminated.set(true)
       }
     }, newSingleThreadExecutor())
 

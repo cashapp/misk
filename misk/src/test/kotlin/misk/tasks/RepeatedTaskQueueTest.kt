@@ -1,5 +1,6 @@
 package misk.tasks
 
+import com.google.common.util.concurrent.Service
 import com.google.inject.Provides
 import com.google.inject.util.Modules
 import misk.MiskTestingServiceModule
@@ -9,6 +10,7 @@ import misk.backoff.FlatBackoff
 import misk.backoff.retry
 import misk.concurrent.ExplicitReleaseDelayQueue
 import misk.inject.KAbstractModule
+import misk.logging.getLogger
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.time.FakeClock
@@ -26,16 +28,20 @@ import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Singleton
 import kotlin.concurrent.withLock
+import kotlin.test.assertEquals
 
 @MiskTest(startService = true)
 internal class RepeatedTaskQueueTest {
   @MiskTestModule val module = TestModule()
+
+  private val logger = getLogger<RepeatedTaskQueueTest>()
 
   @Inject lateinit var clock: FakeClock
   @Inject lateinit var taskQueue: RepeatedTaskQueue
   // Install another RepeatedTaskQueue to test guice is happy
   @Inject @field:Named("another") lateinit var anotherTaskQueue: RepeatedTaskQueue
   @Inject lateinit var pendingTasks: ExplicitReleaseDelayQueue<DelayedTask>
+  @Inject lateinit var repeatedTaskQueueFactory: RepeatedTaskQueueFactory
 
   @BeforeEach fun initClock() {
     clock.add(Duration.ofDays(365 * 12))
@@ -527,6 +533,45 @@ internal class RepeatedTaskQueueTest {
 
     val nextScheduled = waitForNextPendingTask()
     assertThat(nextScheduled.getDelay(TimeUnit.SECONDS)).isEqualTo(5)
+  }
+
+  @Test fun `terminates when it is shut down`() {
+    val queues = mutableListOf(taskQueue)
+    val numberOfNewQueues = 10
+    for (i in 0..numberOfNewQueues) {
+      queues.add(i, repeatedTaskQueueFactory.forTesting(
+          name = "queue-$i",
+          backingStorage = pendingTasks
+      ))
+    }
+
+    for (i in 0..queues.lastIndex) {
+      if (Service.State.RUNNING != queues[i].state()) queues[i].startAsync()
+    }
+
+    for (i in 0..queues.lastIndex) {
+      queues[i].schedule(Duration.ZERO, Duration.ofMillis(100L)) {
+        Result(Status.OK, Duration.ofMillis(100))
+      }
+    }
+
+    for (i in 0..queues.lastIndex) {
+      queues[i].stopAsync()
+    }
+
+    var waitToTerminate = true
+    while (waitToTerminate) {
+      Thread.sleep(500)
+      for (i in 0..queues.lastIndex) {
+        if (Service.State.TERMINATED == queues[i].state()) {
+          waitToTerminate = false
+        }
+      }
+    }
+
+    for (i in 0..queues.lastIndex) {
+      assertEquals(Service.State.TERMINATED, queues[i].state())
+    }
   }
 
   class TestModule : KAbstractModule() {
