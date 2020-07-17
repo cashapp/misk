@@ -31,6 +31,6 @@ annotation class LogRequestResponse(
   val errorBodySampling: Double = 0.0,
   // TODO(isabel): Remove sampling and includeBody once
   // all services move over to using above parameters
-  val sampling: Double,
-  val includeBody: Boolean
+  val sampling: Double = 0.0,
+  val includeBody: Boolean = false
 )
