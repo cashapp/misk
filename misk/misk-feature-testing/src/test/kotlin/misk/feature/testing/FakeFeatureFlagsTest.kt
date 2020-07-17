@@ -1,7 +1,6 @@
 package misk.feature.testing
 
 import com.squareup.moshi.JsonDataException
-import misk.feature.Attributes
 import misk.feature.Feature
 import misk.feature.getEnum
 import misk.feature.getJson
@@ -47,16 +46,6 @@ internal class FakeFeatureFlagsTest {
     subject.overrideKey(FEATURE, "joker", 42)
     assertThat(subject.getInt(FEATURE, TOKEN)).isEqualTo(3)
     assertThat(subject.getInt(FEATURE, "joker")).isEqualTo(42)
-
-    // Can override with specific keys and attributes
-    val attributes = Attributes(mapOf("type" to "bad"))
-    subject.overrideKey(FEATURE, "joker", 55, attributes)
-    assertThat(subject.getInt(FEATURE, TOKEN)).isEqualTo(3)
-    assertThat(subject.getInt(FEATURE, "joker")).isEqualTo(42)
-    assertThat(subject.getInt(FEATURE, "joker", attributes)).isEqualTo(55)
-    //Provides the key level override when there is no match on attributes
-    assertThat(subject.getInt(FEATURE, "joker", Attributes(mapOf("don't" to "exist"))))
-        .isEqualTo(42)
   }
 
   @Test
@@ -77,21 +66,9 @@ internal class FakeFeatureFlagsTest {
     assertThat(subject.getEnum<Dinosaur>(FEATURE, "joker"))
         .isEqualTo(Dinosaur.PTERODACTYL)
 
-    // Can override with specific keys and attributes
-    val attributes = Attributes(mapOf("type" to "bad"))
-    subject.overrideKey(FEATURE, "joker", Dinosaur.TALARURUS, attributes)
-    assertThat(subject.getEnum<Dinosaur>(FEATURE, TOKEN))
-        .isEqualTo(Dinosaur.TYRANNOSAURUS)
-    assertThat(subject.getEnum<Dinosaur>(FEATURE, "joker"))
-        .isEqualTo(Dinosaur.PTERODACTYL)
-    assertThat(subject.getEnum<Dinosaur>(FEATURE, "joker", attributes))
-        .isEqualTo(Dinosaur.TALARURUS)
-    //Provides the key level override when there is no match on attributes
-    assertThat(subject.getEnum<Dinosaur>(
-        FEATURE, "joker", Attributes(mapOf("don't" to "exist")))).isEqualTo(Dinosaur.PTERODACTYL)
-
     subject.reset()
-    assertThat(subject.getEnum<Dinosaur>(FEATURE, TOKEN)).isEqualTo(Dinosaur.PTERODACTYL)
+    assertThat(subject.getEnum<Dinosaur>(FEATURE, TOKEN))
+        .isEqualTo(Dinosaur.PTERODACTYL)
   }
 
   data class JsonFeature(val value : String, val optional : String? = null)
@@ -112,38 +89,6 @@ internal class FakeFeatureFlagsTest {
     subject.overrideKeyJson(FEATURE, "joker", JsonFeature("joker"))
     assertThat(subject.getJson<JsonFeature>(FEATURE, TOKEN)).isEqualTo(JsonFeature("test"))
     assertThat(subject.getJson<JsonFeature>(FEATURE, "joker")).isEqualTo(JsonFeature("joker"))
-
-    // Can override with specific attributes
-    val goodJokerAttributes = Attributes(mapOf("type" to "good"))
-    val badJokerAttributes = Attributes(mapOf("type" to "bad"))
-    val sleepyBadJokerAttributes = Attributes(mapOf("type" to "bad", "state" to "sleepy"))
-    subject.overrideKeyJson(FEATURE, "joker", JsonFeature("bad-joker"), badJokerAttributes)
-
-    assertThat(subject.getJson<JsonFeature>(FEATURE, TOKEN))
-        .isEqualTo(JsonFeature("test"))
-    assertThat(subject.getJson<JsonFeature>(FEATURE, "joker"))
-        .isEqualTo(JsonFeature("joker"))
-    assertThat(subject.getJson<JsonFeature>(FEATURE, "joker", badJokerAttributes))
-        .isEqualTo(JsonFeature("bad-joker"))
-    assertThat(subject.getJson<JsonFeature>(FEATURE, "joker", sleepyBadJokerAttributes))
-        .isEqualTo(JsonFeature("bad-joker"))
-    //Provides the key level override when there is no match on attributes
-    assertThat(subject.getJson<JsonFeature>(FEATURE, "joker", goodJokerAttributes))
-        .isEqualTo(JsonFeature("joker"))
-  }
-
-  @Test
-  fun `provides the latest override in case two or more attributes are a match`() {
-    val typeAttribute = Attributes(mapOf("type" to "bad"))
-    subject.overrideKey(FEATURE, "joker", 55, typeAttribute)
-    assertThat(subject.getInt(FEATURE, "joker", typeAttribute)).isEqualTo(55)
-
-    val stateAttribute = Attributes(mapOf("state" to "sleepy"))
-    subject.overrideKey(FEATURE, "joker", 75, stateAttribute)
-    assertThat(subject.getInt(FEATURE, "joker", stateAttribute)).isEqualTo(75)
-
-    val combinedAttributes = Attributes(typeAttribute.text + stateAttribute.text)
-    assertThat(subject.getInt(FEATURE, "joker", combinedAttributes)).isEqualTo(75)
   }
 
   @Test
@@ -190,7 +135,6 @@ internal class FakeFeatureFlagsTest {
 
   enum class Dinosaur {
     PTERODACTYL,
-    TYRANNOSAURUS,
-    TALARURUS
+    TYRANNOSAURUS
   }
 }
