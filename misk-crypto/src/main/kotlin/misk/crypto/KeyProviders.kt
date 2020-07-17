@@ -16,12 +16,14 @@ import com.google.crypto.tink.signature.PublicKeyVerifyFactory
 import com.google.crypto.tink.JsonKeysetReader
 import com.google.crypto.tink.KeysetHandle
 import com.google.crypto.tink.KeysetManager
+import com.google.crypto.tink.StreamingAead
 import com.google.crypto.tink.aead.AeadFactory
 import com.google.crypto.tink.aead.AeadKeyTemplates
 import com.google.crypto.tink.aead.KmsEnvelopeAead
 import com.google.crypto.tink.daead.DeterministicAeadFactory
 import com.google.crypto.tink.hybrid.HybridDecryptFactory
 import com.google.crypto.tink.hybrid.HybridEncryptFactory
+import com.google.crypto.tink.streamingaead.StreamingAeadFactory
 import com.google.inject.Inject
 import com.google.inject.Provider
 import misk.logging.getLogger
@@ -176,5 +178,18 @@ internal class HybridDecryptProvider(
         HybridEncryptFactory.getPrimitive(keysetHandle.publicKeysetHandle)
     return HybridDecryptFactory.getPrimitive(keysetHandle)
         .also { keyDecryptManager[key.key_name] = it }
+  }
+}
+
+internal class StreamingAeadProvider(
+  val key:Key,
+  private val kmsUri: String?
+) : Provider<StreamingAead>, KeyReader() {
+  @Inject lateinit var streamingAeadKeyManager: StreamingAeadKeyManager
+  @Inject lateinit var kmsClient: KmsClient
+  override fun get(): StreamingAead {
+    val keysetHandle = readKey(key, kmsUri, kmsClient)
+    return StreamingAeadFactory.getPrimitive(keysetHandle)
+        .also { streamingAeadKeyManager[key.key_name] = it }
   }
 }

@@ -10,6 +10,7 @@ import com.google.crypto.tink.daead.DeterministicAeadConfig
 import com.google.crypto.tink.hybrid.HybridConfig
 import com.google.crypto.tink.mac.MacConfig
 import com.google.crypto.tink.signature.SignatureConfig
+import com.google.crypto.tink.streamingaead.StreamingAeadConfig
 import misk.MiskTestingServiceModule
 
 /**
@@ -31,5 +32,6 @@ class CryptoTestModule : KAbstractModule() {
     MacConfig.register()
     SignatureConfig.register()
     HybridConfig.register()
+    StreamingAeadConfig.register()
   }
 }

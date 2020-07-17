@@ -8,11 +8,13 @@ import com.google.crypto.tink.KmsClient
 import com.google.crypto.tink.Mac
 import com.google.crypto.tink.PublicKeySign
 import com.google.crypto.tink.PublicKeyVerify
+import com.google.crypto.tink.StreamingAead
 import com.google.crypto.tink.aead.AeadConfig
 import com.google.crypto.tink.daead.DeterministicAeadConfig
 import com.google.crypto.tink.hybrid.HybridConfig
 import com.google.crypto.tink.mac.MacConfig
 import com.google.crypto.tink.signature.SignatureConfig
+import com.google.crypto.tink.streamingaead.StreamingAeadConfig
 import com.google.inject.Singleton
 import com.google.inject.name.Names
 import misk.inject.KAbstractModule
@@ -39,6 +41,7 @@ class CryptoModule(
     MacConfig.register()
     SignatureConfig.register()
     HybridConfig.register()
+    StreamingAeadConfig.register()
 
     val keyNames = config.keys.map { it.key_name }
     val duplicateNames = keyNames - keyNames.distinct().toList()
@@ -90,6 +93,12 @@ class CryptoModule(
           bind<HybridEncrypt>()
               .annotatedWith(Names.named(key.key_name))
               .toProvider(HybridEncryptProvider(key, config.kms_uri))
+              .`in`(Singleton::class.java)
+        }
+        KeyType.STREAMING_AEAD -> {
+          bind<StreamingAead>()
+              .annotatedWith(Names.named(key.key_name))
+              .toProvider(StreamingAeadProvider(key, config.kms_uri))
               .`in`(Singleton::class.java)
         }
       }

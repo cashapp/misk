@@ -9,6 +9,7 @@ import com.google.crypto.tink.daead.DeterministicAeadKeyTemplates
 import com.google.crypto.tink.hybrid.HybridKeyTemplates
 import com.google.crypto.tink.mac.MacKeyTemplates
 import com.google.crypto.tink.signature.SignatureKeyTemplates
+import com.google.crypto.tink.streamingaead.StreamingAeadKeyTemplates
 import com.google.inject.CreationException
 import com.google.inject.Guice
 import com.google.inject.Injector
@@ -28,6 +29,8 @@ import java.io.ByteArrayOutputStream
 import java.security.GeneralSecurityException
 import okio.ByteString.Companion.encodeUtf8
 import okio.ByteString.Companion.toByteString
+import java.io.ByteArrayInputStream
+import java.nio.ByteBuffer
 import java.util.Base64
 
 @MiskTest(startService = true)
@@ -232,6 +235,38 @@ class CryptoModuleTest {
     }.hasMessage("invalid MAC")
   }
 
+  @Test
+  fun testStreamingAead() {
+    val keysetHandle = KeysetHandle.generateNew(StreamingAeadKeyTemplates.AES256_GCM_HKDF_4KB)
+    val injector = getInjector(listOf(Pair("test", keysetHandle)))
+    val streamingAead = injector.getInstance(StreamingAeadKeyManager::class.java)["test"]
+    val aad = byteArrayOf(1, 2, 3, 4)
+
+    val encryptedBytesOutput = ByteArrayOutputStream()
+    val ciphertextOutput = streamingAead.newEncryptingStream(encryptedBytesOutput, aad)
+    ciphertextOutput.write("this is a very ".toByteArray(Charsets.UTF_8))
+    ciphertextOutput.write("very very very ".toByteArray(Charsets.UTF_8))
+    ciphertextOutput.write("long message".toByteArray(Charsets.UTF_8))
+    ciphertextOutput.close()
+    val ciphertext = encryptedBytesOutput.toByteArray()
+    assertThat(ciphertext).isNotEmpty()
+    assertThat(ciphertext.toByteString().utf8()).doesNotContain("long message")
+
+    var decrypted = byteArrayOf()
+    val decryptionByteArray = ByteArrayInputStream(ciphertext)
+    val decryptionStream = streamingAead.newDecryptingStream(decryptionByteArray, aad)
+    val buffer = ByteArray(8)
+    var readBytes = decryptionStream.read(buffer)
+    while (readBytes > 0) {
+      decrypted = decrypted.plus(buffer.copyOfRange(0, readBytes))
+      buffer.fill(0)
+      readBytes = decryptionStream.read(buffer)
+    }
+    decryptionStream.close()
+    assertThat(decrypted).isNotEmpty()
+    assertThat(decrypted.toByteString().utf8()).contains("long message")
+  }
+
   @Disabled
   @Test // Currently disabled since the env check is as well
   fun testRaisesInWrongEnv() {
@@ -264,6 +299,8 @@ class CryptoModuleTest {
         keyType = KeyType.HYBRID_ENCRYPT
       } else if (keyTypeUrl.endsWith("AesSivKey")) {
         keyType = KeyType.DAEAD
+      } else if (keyTypeUrl.endsWith("AesGcmHkdfStreamingKey")) {
+        keyType = KeyType.STREAMING_AEAD
       }
       Key(it.first, keyType, generateEncryptedKey(it.second))
     }
