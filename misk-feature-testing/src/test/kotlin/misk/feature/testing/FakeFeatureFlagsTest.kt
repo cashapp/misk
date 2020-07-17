@@ -130,6 +130,69 @@ internal class FakeFeatureFlagsTest {
     //Provides the key level override when there is no match on attributes
     assertThat(subject.getJson<JsonFeature>(FEATURE, "joker", goodJokerAttributes))
         .isEqualTo(JsonFeature("joker"))
+
+    subject.reset()
+    subject.override(FEATURE, JsonFeature("test-class"), JsonFeature::class.java)
+    subject.overrideKey(FEATURE, "joker", JsonFeature("test-key-class"), JsonFeature::class.java)
+    assertThat(subject.getJson<JsonFeature>(FEATURE))
+        .isEqualTo(JsonFeature("test-class"))
+    assertThat(subject.getJson<JsonFeature>(FEATURE, "joker"))
+        .isEqualTo(JsonFeature("test-key-class"))
+  }
+
+  @Test
+  fun getBoolean() {
+    // Default returns false and not throw as the other variants.
+    assertThat(subject.getBoolean(FEATURE, TOKEN)).isEqualTo(false)
+
+    // Can be overridden
+    subject.override(FEATURE, true)
+    subject.override(OTHER_FEATURE, false)
+    assertThat(subject.getBoolean(FEATURE, TOKEN)).isEqualTo(true)
+    assertThat(subject.getBoolean(OTHER_FEATURE, TOKEN)).isEqualTo(false)
+
+    // Can override with specific keys
+    subject.overrideKey(FEATURE, "joker", false)
+    assertThat(subject.getBoolean(FEATURE, TOKEN)).isEqualTo(true)
+    assertThat(subject.getBoolean(FEATURE, "joker")).isEqualTo(false)
+
+    // Can override with specific keys and attributes
+    val attributes = Attributes(mapOf("type" to "bad"))
+    subject.overrideKey(FEATURE, "joker", false, attributes)
+    assertThat(subject.getBoolean(FEATURE, TOKEN)).isEqualTo(true)
+    assertThat(subject.getBoolean(FEATURE, "joker")).isEqualTo(false)
+    assertThat(subject.getBoolean(FEATURE, "joker", attributes)).isEqualTo(false)
+    //Provides the key level override when there is no match on attributes
+    assertThat(subject.getBoolean(FEATURE, "joker", Attributes(mapOf("don't" to "exist"))))
+        .isEqualTo(false)
+  }
+
+  @Test
+  fun getString() {
+    // Default returns false and not throw as the other variants.
+    assertThrows<RuntimeException> { subject.getString(FEATURE, TOKEN) }
+
+    // Can be overridden
+    subject.override(FEATURE, "feature")
+    subject.override(OTHER_FEATURE, "other-feature")
+    assertThat(subject.getString(FEATURE, TOKEN)).isEqualTo("feature")
+    assertThat(subject.getString(OTHER_FEATURE, TOKEN)).isEqualTo("other-feature")
+
+    // Can override with specific keys
+    subject.overrideKey(FEATURE, "joker", "feature-joker")
+    assertThat(subject.getString(FEATURE, TOKEN)).isEqualTo("feature")
+    assertThat(subject.getString(FEATURE, "joker")).isEqualTo("feature-joker")
+
+    // Can override with specific keys and attributes
+    val attributes = Attributes(mapOf("type" to "bad"))
+    subject.overrideKey(FEATURE, "joker", "feature-joker-with-attrs", attributes)
+    assertThat(subject.getString(FEATURE, TOKEN)).isEqualTo("feature")
+    assertThat(subject.getString(FEATURE, "joker")).isEqualTo("feature-joker")
+    assertThat(subject.getString(FEATURE, "joker", attributes))
+        .isEqualTo("feature-joker-with-attrs")
+    //Provides the key level override when there is no match on attributes
+    assertThat(subject.getString(FEATURE, "joker", Attributes(mapOf("don't" to "exist"))))
+        .isEqualTo("feature-joker")
   }
 
   @Test

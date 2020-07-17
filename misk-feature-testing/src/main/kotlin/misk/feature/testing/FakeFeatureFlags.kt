@@ -34,7 +34,7 @@ class FakeFeatureFlags @Inject constructor(
   private val overrides = ConcurrentHashMap<MapKey, PriorityQueue<MapValue>>()
 
   override fun getBoolean(feature: Feature, key: String, attributes: Attributes): Boolean {
-    return getOrDefault(feature, key, false)
+    return getOrDefault(feature, key, false, attributes)
   }
 
   override fun getInt(feature: Feature, key: String, attributes: Attributes): Int =
@@ -42,7 +42,7 @@ class FakeFeatureFlags @Inject constructor(
           "Int flag $feature must be overridden with override() before use")
 
   override fun getString(feature: Feature, key: String, attributes: Attributes): String =
-      get(feature, key) as? String ?: throw IllegalArgumentException(
+      get(feature, key, attributes) as? String ?: throw IllegalArgumentException(
           "String flag $feature must be overridden with override() before use")
 
   override fun <T : Enum<T>> getEnum(
@@ -107,7 +107,7 @@ class FakeFeatureFlags @Inject constructor(
 
     val overrideMapValuesCopy = PriorityQueue(overrideMapValues)
     var currentMapValue = overrideMapValuesCopy.poll()
-    while (overrideMapValuesCopy.isNotEmpty() || currentMapValue != null) {
+    while(overrideMapValuesCopy.isNotEmpty()) {
       if (attributes.text.entries.containsAll(currentMapValue.attributes.text.entries)) { break }
       currentMapValue = overrideMapValuesCopy.poll()
     }
@@ -139,6 +139,15 @@ class FakeFeatureFlags @Inject constructor(
     value: T
   ) = overrideKey(feature, KEY, value, defaultAttributes)
 
+  fun <T> override(
+    feature: Feature,
+    value: T,
+    clazz: Class<T>
+  ) {
+    val jsonValue = { moshi.get().adapter(clazz).toSafeJson(value) }
+    overrideKey(feature, KEY, jsonValue, defaultAttributes)
+  }
+
   fun overrideJsonString(feature: Feature, json : String) {
     overrideKey(feature, KEY, { json }, defaultAttributes)
   }
@@ -153,7 +162,6 @@ class FakeFeatureFlags @Inject constructor(
     value: Boolean,
     attributes: Attributes = defaultAttributes
   ) = overrideKey<Boolean>(feature, key, value, attributes)
-
 
   fun overrideKey(
     feature: Feature,
@@ -180,14 +188,25 @@ class FakeFeatureFlags @Inject constructor(
     feature: Feature,
     key: String,
     value: T,
-    attributes: Attributes = Attributes()
+    clazz: Class<T>
+  ) {
+    val jsonValue = { moshi.get().adapter(clazz).toSafeJson(value) }
+    overrideKey(feature, key, jsonValue, defaultAttributes)
+  }
+
+  fun <T> overrideKey(
+    feature: Feature,
+    key: String,
+    value: T,
+    attributes: Attributes = defaultAttributes
   ) {
     val mapKey = MapKey(feature, key)
-    overrides[mapKey] = overrides[mapKey] ?: PriorityQueue()
-    overrides[mapKey]!!.add(MapValue(
-        order = overrides[mapKey]!!.size + 1,
-        attributes = attributes,
-        value = value as Any))
+    overrides
+        .computeIfAbsent(mapKey) { PriorityQueue() }
+        .add(MapValue(
+            order = overrides[mapKey]!!.size + 1,
+            attributes = attributes,
+            value = value as Any))
   }
 
   inline fun <reified T> overrideKeyJson(
@@ -196,7 +215,7 @@ class FakeFeatureFlags @Inject constructor(
     value: T,
     attributes: Attributes = defaultAttributes
   ) {
-    val jsonValue = { moshi.get().adapter(T::class.java).toSafeJson(value) } as Any
+    val jsonValue = { moshi.get().adapter(T::class.java).toSafeJson(value) }
     overrideKey(feature, key, jsonValue, attributes)
   }
 
