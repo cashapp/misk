@@ -10,6 +10,7 @@ import misk.testing.MiskTestModule
 import misk.time.FakeClock
 import misk.time.FakeClockModule
 import misk.web.ConcurrencyLimitsOptIn
+import misk.web.ConcurrencyLimitsOptOut
 import misk.web.DispatchMechanism
 import misk.web.FakeHttpCall
 import misk.web.Get
@@ -65,6 +66,18 @@ class ConcurrencyLimitsInterceptorTest {
     assertThat(factory.create(getStatus)).isNull()
   }
 
+  @Test
+  fun limitsOnOptInEndpoints() {
+    val optInAction = OptInAction::call.asAction(DispatchMechanism.GET)
+    assertThat(factory.create(optInAction)).isNotNull()
+  }
+
+  @Test
+  fun noLimitsOnOptOutEndpoints() {
+    val optOutAction = OptOutAction::call.asAction(DispatchMechanism.GET)
+    assertThat(factory.create(optOutAction)).isNull()
+  }
+
   private fun call(
     action: Action,
     interceptor: NetworkInterceptor,
@@ -115,5 +128,17 @@ class ConcurrencyLimitsInterceptorTest {
     @Get("/hello")
     @ConcurrencyLimitsOptIn
     fun call(): String = "hello"
+  }
+
+  internal class OptInAction : WebAction {
+    @Get("/chill")
+    @ConcurrencyLimitsOptIn
+    fun call(): String = "chill"
+  }
+
+  internal class OptOutAction : WebAction {
+    @Get("/important")
+    @ConcurrencyLimitsOptOut
+    fun call(): String = "important"
   }
 }
