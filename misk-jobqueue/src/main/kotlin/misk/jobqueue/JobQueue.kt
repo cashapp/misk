@@ -29,6 +29,9 @@ interface JobQueue {
    * [JobHandler]s). Defaults to a randomly generated UUID when not explicitly set.
    * @param deliveryDelay If specified, the job will only become visible to the consumer after
    * the provided duration. Used for jobs that should delay processing for a period of time.
+   * Note that depending on implementation, there may be an upper limit to this value. For instance, SQS implementation
+   * limits `deliveryDelay` to 900s (15m). If a longer delay is required by applications, use the
+   * [TransactionalJobQueue] interface instead.
    * @param attributes Arbitrary contextual attributes associated with the job. Implementations may limit the number of
    * attributes per message.
    */
