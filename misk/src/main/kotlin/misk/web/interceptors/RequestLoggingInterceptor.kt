@@ -46,16 +46,16 @@ class RequestLoggingInterceptor internal constructor(
     override fun create(action: Action): NetworkInterceptor? {
       val logRequestResponse = action.function.findAnnotation<LogRequestResponse>() ?: return null
       require(logRequestResponse.ratePerSecond >= 0L) {
-        "${action.name} @LogRequestResponse rateLimiting must be >= 0"
+        "${action.name} @LogRequestResponse ratePerSecond must be >= 0"
       }
       require(logRequestResponse.errorRatePerSecond >= 0L) {
-        "${action.name} @LogRequestResponse errorRateLimiting must be >= 0"
+        "${action.name} @LogRequestResponse errorRatePerSecond must be >= 0"
       }
       require(logRequestResponse.bodySampling in 0.0..1.0) {
-        "${action.name} @LogRequestResponse sampling must be in the range (0.0, 1.0]"
+        "${action.name} @LogRequestResponse bodySampling must be in the range (0.0, 1.0]"
       }
       require(logRequestResponse.errorBodySampling in 0.0..1.0) {
-        "${action.name} @LogRequestResponse sampling must be in the range (0.0, 1.0]"
+        "${action.name} @LogRequestResponse errorBodySampling must be in the range (0.0, 1.0]"
       }
 
       return RequestLoggingInterceptor(
