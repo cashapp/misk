@@ -1,4 +1,4 @@
-package misk.ratelimit
+package misk.sampling
 
 import com.google.common.base.Ticker
 import misk.concurrent.Sleeper

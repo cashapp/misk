@@ -1,6 +1,6 @@
 package misk.web.interceptors
 
-import misk.ratelimit.RateLimiter
+import misk.sampling.RateLimiter
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject

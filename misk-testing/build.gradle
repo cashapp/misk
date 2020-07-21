@@ -23,6 +23,7 @@ dependencies {
     exclude group: 'junit'
   }
   compile project(':misk')
+  compile project(':misk-core')
 }
 
 afterEvaluate { project ->

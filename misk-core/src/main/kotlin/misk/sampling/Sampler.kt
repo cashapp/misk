@@ -1,6 +1,7 @@
 package misk.sampling
 
 import java.util.concurrent.ThreadLocalRandom
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -26,6 +27,23 @@ class PercentSampler(
 
   override fun sample(): Boolean = random() < samplePercentage()
 }
+
+class RateLimitingSampler(
+  val rateLimiter: RateLimiter
+) : Sampler {
+  override fun sample(): Boolean {
+    return rateLimiter.tryAcquire(1L, 0, TimeUnit.SECONDS)
+  }
+
+  class Factory @Inject constructor(
+    private val rateLimiterFactory: RateLimiter.Factory
+  ) {
+    fun createSampler(ratePerSecond: Long): RateLimitingSampler {
+      return RateLimitingSampler(rateLimiterFactory.create(ratePerSecond))
+    }
+  }
+}
+
 
 /** Sampler that always invokes an action */
 @Singleton

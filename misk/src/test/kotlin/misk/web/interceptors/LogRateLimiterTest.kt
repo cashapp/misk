@@ -2,9 +2,9 @@ package misk.web.interceptors
 
 import com.google.common.base.Ticker
 import misk.ServiceManagerModule
+import misk.concurrent.FakeTicker
 import misk.concurrent.Sleeper
 import misk.inject.KAbstractModule
-import misk.ratelimit.FakeTicker
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.web.interceptors.LogRateLimiter.LogBucketId
