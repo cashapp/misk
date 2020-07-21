@@ -1,5 +1,6 @@
-package misk.ratelimit
+package misk.sampling
 
+import misk.concurrent.FakeTicker
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.util.concurrent.TimeUnit
