@@ -1,5 +1,6 @@
 package misk.logging
 
+import misk.sampling.Sampler
 import mu.KLogger
 import mu.KotlinLogging
 import org.slf4j.MDC
@@ -14,26 +15,51 @@ inline fun <reified T> getLogger(): KLogger {
 fun KLogger.info(vararg tags: Tag, message: () -> Any?) =
     log(Level.INFO, tags = *tags, message = message)
 
+fun KLogger.info(sampler: Sampler, vararg tags: Tag, message: () -> Any?) {
+    sample(sampler, Level.INFO, tags = *tags, message = message)
+}
+
 fun KLogger.warn(vararg tags: Tag, message: () -> Any?) =
     log(Level.WARN, tags = *tags, message = message)
+
+fun KLogger.warn(sampler: Sampler, vararg tags: Tag, message: () -> Any?) =
+    sample(sampler, Level.WARN, tags = *tags, message = message)
 
 fun KLogger.error(vararg tags: Tag, message: () -> Any?) =
     log(Level.ERROR, tags = *tags, message = message)
 
+fun KLogger.error(sampler: Sampler, vararg tags: Tag, message: () -> Any?) =
+    sample(sampler, Level.ERROR, tags = *tags, message = message)
+
 fun KLogger.debug(vararg tags: Tag, message: () -> Any?) =
     log(Level.DEBUG, tags = *tags, message = message)
+
+fun KLogger.debug(sampler: Sampler, vararg tags: Tag, message: () -> Any?) =
+    sample(sampler, Level.DEBUG, tags = *tags, message = message)
 
 fun KLogger.info(th: Throwable, vararg tags: Tag, message: () -> Any?) =
     log(Level.INFO, th, tags = *tags, message = message)
 
+fun KLogger.info(sampler: Sampler, th: Throwable, vararg tags: Tag, message: () -> Any?) =
+    sample(sampler, Level.INFO, th, tags = *tags, message = message)
+
 fun KLogger.warn(th: Throwable, vararg tags: Tag, message: () -> Any?) =
     log(Level.WARN, th, tags = *tags, message = message)
+
+fun KLogger.warn(sampler: Sampler, th: Throwable, vararg tags: Tag, message: () -> Any?) =
+    sample(sampler, Level.WARN, th, tags = *tags, message = message)
 
 fun KLogger.error(th: Throwable, vararg tags: Tag, message: () -> Any?) =
     log(Level.ERROR, th, tags = *tags, message = message)
 
+fun KLogger.error(sampler: Sampler, th: Throwable, vararg tags: Tag, message: () -> Any?) =
+    sample(sampler, Level.ERROR, th, tags = *tags, message = message)
+
 fun KLogger.debug(th: Throwable, vararg tags: Tag, message: () -> Any?) =
     log(Level.DEBUG, th, tags = *tags, message = message)
+
+fun KLogger.debug(sampler: Sampler, th: Throwable, vararg tags: Tag, message: () -> Any?) =
+    sample(sampler, Level.DEBUG, th, tags = *tags, message = message)
 
 fun KLogger.log(level: Level, vararg tags: Tag, message: () -> Any?) {
   misk.logging.withTags(*tags) {
@@ -55,6 +81,34 @@ fun KLogger.log(level: Level, th: Throwable, vararg tags: Tag, message: () -> An
       Level.WARN -> warn(th, message)
       Level.DEBUG -> debug(th, message)
       Level.TRACE -> trace(th, message)
+    }
+  }
+}
+
+fun KLogger.sample(sampler: Sampler, level: Level, vararg  tags: Tag, message: () -> Any?) {
+  if (sampler.sample()) {
+    misk.logging.withTags(*tags) {
+      when (level) {
+        Level.ERROR -> error(message)
+        Level.WARN -> warn(message)
+        Level.INFO -> info(message)
+        Level.DEBUG -> debug(message)
+        Level.TRACE -> trace(message)
+      }
+    }
+  }
+}
+
+fun KLogger.sample(sampler: Sampler, level: Level, th: Throwable, vararg tags: Tag, message: () -> Any?) {
+  if (sampler.sample()) {
+    misk.logging.withTags(*tags) {
+      when (level) {
+        Level.ERROR -> error(th, message)
+        Level.INFO -> info(th, message)
+        Level.WARN -> warn(th, message)
+        Level.DEBUG -> debug(th, message)
+        Level.TRACE -> trace(th, message)
+      }
     }
   }
 }
