@@ -27,7 +27,7 @@ import java.util.Base64
 
 /**
  * Configures and registers the keys listed in the configuration file.
- * Each key is read, decrypted, and then bound via Google Guice and added to the [KeyManager].
+ * Each key is read, decrypted, and then bound via Google Guice and added to a [MappedKeyManager].
  */
 class CryptoModule(
   private val config: CryptoConfig
