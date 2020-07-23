@@ -137,7 +137,7 @@ internal class RequestLoggingInterceptorTest {
     @Get("/call/rateLimitingRequestLogging/{message}")
     @Unauthenticated
     @ResponseContentType(MediaTypes.APPLICATION_JSON)
-    @LogRequestResponse(ratePerSecond = 1L, errorRatePerSecond = 2L, /** unused in code path **/ sampling = 1.0, /** unused in code path **/ includeBody = false)
+    @LogRequestResponse(ratePerSecond = 1L, errorRatePerSecond = 2L)
     fun call(@PathParam message: String) = "echo: $message"
   }
 
@@ -145,7 +145,7 @@ internal class RequestLoggingInterceptorTest {
     @Get("/call/rateLimitingIncludesBodyRequestLogging/{message}")
     @Unauthenticated
     @ResponseContentType(MediaTypes.APPLICATION_JSON)
-    @LogRequestResponse(ratePerSecond = 1L, errorRatePerSecond = 2L, bodySampling = 0.5, errorBodySampling = 1.0, /** unused in code path **/ sampling = 1.0, /** unused in code path **/ includeBody = false)
+    @LogRequestResponse(ratePerSecond = 1L, errorRatePerSecond = 2L, bodySampling = 0.5, errorBodySampling = 1.0)
     fun call(@PathParam message: String) = "echo: $message"
   }
 
@@ -153,7 +153,7 @@ internal class RequestLoggingInterceptorTest {
     @Get("/call/noRateLimitingRequestLogging/{message}")
     @Unauthenticated
     @ResponseContentType(MediaTypes.APPLICATION_JSON)
-    @LogRequestResponse(ratePerSecond = 0L, errorRatePerSecond = 0L, bodySampling = 0.5, errorBodySampling = 0.5, /** unused in code path **/ sampling = 1.0, /** unused in code path **/ includeBody = false)
+    @LogRequestResponse(ratePerSecond = 0L, errorRatePerSecond = 0L, bodySampling = 0.5, errorBodySampling = 0.5)
     fun call(@PathParam message: String) = "echo: $message"
   }
 
@@ -161,7 +161,7 @@ internal class RequestLoggingInterceptorTest {
     @Get("/call/exceptionThrowingRequestLogging/{message}")
     @Unauthenticated
     @ResponseContentType(MediaTypes.APPLICATION_JSON)
-    @LogRequestResponse(ratePerSecond = 1L, errorRatePerSecond = 2L, bodySampling = 0.1, errorBodySampling = 1.0, /** unused in code path **/ sampling = 1.0, /** unused in code path **/ includeBody = false)
+    @LogRequestResponse(ratePerSecond = 1L, errorRatePerSecond = 2L, bodySampling = 0.1, errorBodySampling = 1.0)
     fun call(@PathParam message: String): String = throw IllegalStateException(message)
   }
 
