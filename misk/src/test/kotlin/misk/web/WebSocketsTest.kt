@@ -51,6 +51,7 @@ internal class WebSocketsTest {
   @Singleton
   class EchoWebSocket @Inject constructor() : WebAction {
     @ConnectWebSocket("/echo")
+    @ConcurrencyLimitsOptOut // TODO: Remove after 2020-08-01 (or use @AvailableWhenDegraded).
     @LogRequestResponse(bodySampling = 1.0, errorBodySampling = 1.0)
     fun echo(@Suppress("UNUSED_PARAMETER") webSocket: WebSocket): WebSocketListener {
       return object : WebSocketListener() {

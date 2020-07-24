@@ -36,6 +36,7 @@ class InvalidActionsTest {
 
   class SomeAction @Inject constructor() : WebAction {
     @Post("/hello")
+    @ConcurrencyLimitsOptOut // TODO: Remove after 2020-08-01 (or use @AvailableWhenDegraded).
     @RequestContentType("application/json")
     @ResponseContentType("application/json")
     fun hello() = "hello"
@@ -43,6 +44,7 @@ class InvalidActionsTest {
 
   class IdenticalAction @Inject constructor() : WebAction {
     @Post("/hello")
+    @ConcurrencyLimitsOptOut // TODO: Remove after 2020-08-01 (or use @AvailableWhenDegraded).
     @RequestContentType("application/json")
     @ResponseContentType("application/json")
     fun hello() = "hello"

@@ -4,6 +4,7 @@ import misk.config.AppName
 import misk.environment.Environment
 import misk.security.authz.Unauthenticated
 import misk.web.Get
+import misk.web.ConcurrencyLimitsOptOut
 import misk.web.RequestContentType
 import misk.web.ResponseContentType
 import misk.web.actions.WebAction
@@ -19,6 +20,7 @@ class ServiceMetadataAction @Inject constructor(
   private val optionalBinder: OptionalBinder
 ) : WebAction {
   @Get("/api/service/metadata")
+  @ConcurrencyLimitsOptOut // TODO: Remove after 2020-08-01 (or use @AvailableWhenDegraded).
   @RequestContentType(MediaTypes.APPLICATION_JSON)
   @ResponseContentType(MediaTypes.APPLICATION_JSON)
   @Unauthenticated

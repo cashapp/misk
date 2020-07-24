@@ -5,6 +5,7 @@ import misk.inject.KAbstractModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.web.Post
+import misk.web.ConcurrencyLimitsOptOut
 import misk.web.RequestBody
 import misk.web.RequestContentType
 import misk.web.ResponseContentType
@@ -52,6 +53,7 @@ internal class JsonRequestTest {
 
   class PassAsObject @Inject constructor() : WebAction {
     @Post("/as-object")
+    @ConcurrencyLimitsOptOut // TODO: Remove after 2020-08-01 (or use @AvailableWhenDegraded).
     @RequestContentType(MediaTypes.APPLICATION_JSON)
     @ResponseContentType(MediaTypes.APPLICATION_JSON)
     fun call(@RequestBody packet: Packet) = Packet("${packet.message} as-object")
@@ -62,6 +64,7 @@ internal class JsonRequestTest {
     private val packetJsonAdapter get() = moshi.adapter(Packet::class.java)
 
     @Post("/as-string")
+    @ConcurrencyLimitsOptOut // TODO: Remove after 2020-08-01 (or use @AvailableWhenDegraded).
     @RequestContentType(MediaTypes.APPLICATION_JSON)
     @ResponseContentType(MediaTypes.APPLICATION_JSON)
     fun call(@RequestBody encodedPacket: String): Packet {
@@ -75,6 +78,7 @@ internal class JsonRequestTest {
     private val packetJsonAdapter get() = moshi.adapter(Packet::class.java)
 
     @Post("/as-byte-string")
+    @ConcurrencyLimitsOptOut // TODO: Remove after 2020-08-01 (or use @AvailableWhenDegraded).
     @RequestContentType(MediaTypes.APPLICATION_JSON)
     @ResponseContentType(MediaTypes.APPLICATION_JSON)
     fun call(@RequestBody encodedPacket: ByteString): Packet {

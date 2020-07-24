@@ -2,6 +2,7 @@ package com.squareup.chat.actions
 
 import com.squareup.chat.healthchecks.ManualHealthCheck
 import misk.web.Post
+import misk.web.ConcurrencyLimitsOptOut
 import misk.web.QueryParam
 import misk.web.Response
 import misk.web.actions.WebAction
@@ -13,6 +14,7 @@ class ToggleManualHealthCheckAction @Inject constructor() : WebAction {
   @Inject lateinit var manualHealthCheck: ManualHealthCheck
 
   @Post("/health/manual")
+  @ConcurrencyLimitsOptOut // TODO: Remove after 2020-08-01 (or use @AvailableWhenDegraded).
   fun setManualHealthCheck(@QueryParam status: String?): Response<String> {
     when (status) {
       "healthy" -> manualHealthCheck.setHealth()

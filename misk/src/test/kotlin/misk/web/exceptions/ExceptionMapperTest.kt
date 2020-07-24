@@ -7,6 +7,7 @@ import misk.inject.KAbstractModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.web.Get
+import misk.web.ConcurrencyLimitsOptOut
 import misk.web.PathParam
 import misk.web.ResponseContentType
 import misk.web.WebActionModule
@@ -69,6 +70,7 @@ internal class ExceptionMapperTest {
 
   class ThrowsActionException @Inject constructor() : WebAction {
     @Get("/throws/action/{statusCode}")
+    @ConcurrencyLimitsOptOut // TODO: Remove after 2020-08-01 (or use @AvailableWhenDegraded).
     @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
     fun throwsActionException(@PathParam statusCode: StatusCode): String {
       throw ActionException(statusCode, "you asked for an error")
@@ -77,6 +79,7 @@ internal class ExceptionMapperTest {
 
   class ThrowsUnmappedError @Inject constructor() : WebAction {
     @Get("/throws/unmapped-error")
+    @ConcurrencyLimitsOptOut // TODO: Remove after 2020-08-01 (or use @AvailableWhenDegraded).
     @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
     fun throwsUnmappedException(): String {
       throw AssertionError("this was bad")

@@ -3,6 +3,7 @@ package misk.web.metadata
 import misk.ApplicationInterceptor
 import misk.web.DispatchMechanism
 import misk.web.Get
+import misk.web.ConcurrencyLimitsOptOut
 import misk.web.NetworkInterceptor
 import misk.web.PathPattern
 import misk.web.RequestContentType
@@ -26,6 +27,7 @@ class WebActionMetadataAction @Inject constructor() : WebAction {
   @Inject internal lateinit var servletProvider: Provider<WebActionsServlet>
 
   @Get("/api/webaction/metadata")
+  @ConcurrencyLimitsOptOut // TODO: Remove after 2020-08-01 (or use @AvailableWhenDegraded).
   @RequestContentType(MediaTypes.APPLICATION_JSON)
   @ResponseContentType(MediaTypes.APPLICATION_JSON)
   @AdminDashboardAccess

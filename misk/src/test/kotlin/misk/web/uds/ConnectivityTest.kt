@@ -12,6 +12,7 @@ import misk.inject.getInstance
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.web.Get
+import misk.web.ConcurrencyLimitsOptOut
 import misk.web.ResponseContentType
 import misk.web.WebActionModule
 import misk.web.WebUnixDomainSocketConfig
@@ -65,6 +66,7 @@ class UDSHttp2ConnectivityTest {
 
   class HelloAction @Inject constructor() : WebAction {
     @Get("/hello")
+    @ConcurrencyLimitsOptOut // TODO: Remove after 2020-08-01 (or use @AvailableWhenDegraded).
     @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
     fun sayHello() = "hello"
   }

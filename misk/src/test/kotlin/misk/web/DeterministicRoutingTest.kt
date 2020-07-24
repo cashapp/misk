@@ -31,30 +31,35 @@ internal class DeterministicRoutingTest {
 
   class SpecificPathAction @Inject constructor() : WebAction {
     @Get("/org/admin/users")
+    @ConcurrencyLimitsOptOut // TODO: Remove after 2020-08-01 (or use @AvailableWhenDegraded).
     @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
     fun handle() = "specific-path-action"
   }
 
   class SubsectionAction @Inject constructor() : WebAction {
     @Get("/org/admin/{subsection}")
+    @ConcurrencyLimitsOptOut // TODO: Remove after 2020-08-01 (or use @AvailableWhenDegraded).
     @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
     fun handle() = "subsection-action"
   }
 
   class SectionAction @Inject constructor() : WebAction {
     @Get("/org/{section}/{subsection}")
+    @ConcurrencyLimitsOptOut // TODO: Remove after 2020-08-01 (or use @AvailableWhenDegraded).
     @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
     fun handle() = "section-action"
   }
 
   class RemainderPathAction @Inject constructor() : WebAction {
     @Get("/org/admin/{path:.*}")
+    @ConcurrencyLimitsOptOut // TODO: Remove after 2020-08-01 (or use @AvailableWhenDegraded).
     @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
     fun handle() = "remainder-path-action"
   }
 
   class WholePathAction @Inject constructor() : WebAction {
     @Get("/{path:.*}")
+    @ConcurrencyLimitsOptOut // TODO: Remove after 2020-08-01 (or use @AvailableWhenDegraded).
     @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
     fun handle() = "whole-path"
   }

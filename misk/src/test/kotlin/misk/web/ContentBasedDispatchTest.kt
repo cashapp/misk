@@ -109,6 +109,7 @@ internal class ContentBasedDispatchTest {
 
   class PostJsonReturnJson @Inject constructor() : WebAction {
     @Post("/hello")
+    @ConcurrencyLimitsOptOut // TODO: Remove after 2020-08-01 (or use @AvailableWhenDegraded).
     @RequestContentType("application/json")
     @ResponseContentType("application/json")
     fun hello(@misk.web.RequestBody request: Packet) = Packet("json->json ${request.message}")
@@ -116,6 +117,7 @@ internal class ContentBasedDispatchTest {
 
   class PostPlainTextReturnJson @Inject constructor() : WebAction {
     @Post("/hello")
+    @ConcurrencyLimitsOptOut // TODO: Remove after 2020-08-01 (or use @AvailableWhenDegraded).
     @RequestContentType("text/plain")
     @ResponseContentType("application/json")
     fun hello(@misk.web.RequestBody message: String) = Packet("text->json $message")
@@ -123,6 +125,7 @@ internal class ContentBasedDispatchTest {
 
   class PostPlainTextReturnPlainText @Inject constructor() : WebAction {
     @Post("/hello")
+    @ConcurrencyLimitsOptOut // TODO: Remove after 2020-08-01 (or use @AvailableWhenDegraded).
     @RequestContentType("text/plain")
     @ResponseContentType("text/plain")
     fun hello(@misk.web.RequestBody message: String) = "text->text $message"
@@ -130,6 +133,7 @@ internal class ContentBasedDispatchTest {
 
   class PostAnyTextReturnPlainText @Inject constructor() : WebAction {
     @Post("/hello")
+    @ConcurrencyLimitsOptOut // TODO: Remove after 2020-08-01 (or use @AvailableWhenDegraded).
     @RequestContentType("text/*")
     @ResponseContentType("text/plain")
     fun hello(@misk.web.RequestBody message: String) = "text*->text $message"
@@ -137,6 +141,7 @@ internal class ContentBasedDispatchTest {
 
   class PostPlainTextReturnAnyText @Inject constructor() : WebAction {
     @Post("/hello")
+    @ConcurrencyLimitsOptOut // TODO: Remove after 2020-08-01 (or use @AvailableWhenDegraded).
     @RequestContentType("text/plain")
     @ResponseContentType("text/*")
     fun hello(@misk.web.RequestBody message: String) = "text->text* $message"
@@ -144,6 +149,7 @@ internal class ContentBasedDispatchTest {
 
   class PostJsonReturnPlainText @Inject constructor() : WebAction {
     @Post("/hello")
+    @ConcurrencyLimitsOptOut // TODO: Remove after 2020-08-01 (or use @AvailableWhenDegraded).
     @RequestContentType("application/json")
     @ResponseContentType("text/plain")
     fun hello(@misk.web.RequestBody request: Packet) = "json->text ${request.message}"
@@ -151,12 +157,14 @@ internal class ContentBasedDispatchTest {
 
   class PostAnythingReturnJson @Inject constructor() : WebAction {
     @Post("/hello")
+    @ConcurrencyLimitsOptOut // TODO: Remove after 2020-08-01 (or use @AvailableWhenDegraded).
     @ResponseContentType("application/json")
     fun hello(@misk.web.RequestBody message: String) = Packet("*->json $message")
   }
 
   class PostAnythingReturnAnything @Inject constructor() : WebAction {
     @Post("/hello")
+    @ConcurrencyLimitsOptOut // TODO: Remove after 2020-08-01 (or use @AvailableWhenDegraded).
     fun hello(@misk.web.RequestBody message: String) = "*->* $message"
   }
 

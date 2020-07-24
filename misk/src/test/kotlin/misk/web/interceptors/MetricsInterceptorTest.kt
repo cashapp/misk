@@ -9,6 +9,7 @@ import misk.security.authz.Unauthenticated
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.web.Get
+import misk.web.ConcurrencyLimitsOptOut
 import misk.web.PathParam
 import misk.web.Response
 import misk.web.WebActionModule
@@ -74,6 +75,7 @@ class MetricsInterceptorTest {
 
   internal class TestAction @Inject constructor() : WebAction {
     @Get("/call/{desiredStatusCode}")
+    @ConcurrencyLimitsOptOut // TODO: Remove after 2020-08-01 (or use @AvailableWhenDegraded).
     @Unauthenticated
     fun call(@PathParam desiredStatusCode: Int): Response<String> {
       return Response("foo", statusCode = desiredStatusCode)

@@ -14,6 +14,7 @@ import misk.web.ConcurrencyLimitsOptOut
 import misk.web.DispatchMechanism
 import misk.web.FakeHttpCall
 import misk.web.Get
+import misk.web.ConcurrencyLimitsOptOut
 import misk.web.NetworkChain
 import misk.web.NetworkInterceptor
 import misk.web.RealNetworkChain
@@ -126,18 +127,21 @@ class ConcurrencyLimitsInterceptorTest {
 
   internal class HelloAction : WebAction {
     @Get("/hello")
+    @ConcurrencyLimitsOptOut // TODO: Remove after 2020-08-01 (or use @AvailableWhenDegraded).
     @ConcurrencyLimitsOptIn
     fun call(): String = "hello"
   }
 
   internal class OptInAction : WebAction {
     @Get("/chill")
+    @ConcurrencyLimitsOptOut // TODO: Remove after 2020-08-01 (or use @AvailableWhenDegraded).
     @ConcurrencyLimitsOptIn
     fun call(): String = "chill"
   }
 
   internal class OptOutAction : WebAction {
     @Get("/important")
+    @ConcurrencyLimitsOptOut // TODO: Remove after 2020-08-01 (or use @AvailableWhenDegraded).
     @ConcurrencyLimitsOptOut
     fun call(): String = "important"
   }

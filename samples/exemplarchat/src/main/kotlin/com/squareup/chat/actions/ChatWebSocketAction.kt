@@ -4,6 +4,7 @@ import misk.eventrouter.EventRouter
 import misk.eventrouter.Listener
 import misk.eventrouter.Subscription
 import misk.web.ConnectWebSocket
+import misk.web.ConcurrencyLimitsOptOut
 import misk.web.PathParam
 import misk.web.actions.WebAction
 import misk.web.actions.WebSocket
@@ -18,6 +19,7 @@ class ChatWebSocketAction @Inject constructor() : WebAction {
   @Inject lateinit var eventRouter: EventRouter
 
   @ConnectWebSocket("/room/{name}")
+  @ConcurrencyLimitsOptOut // TODO: Remove after 2020-08-01 (or use @AvailableWhenDegraded).
   fun chat(@PathParam name: String, webSocket: WebSocket): WebSocketListener {
     val topic = eventRouter.getTopic<String>(name)
     webSocket.send("Welcome to $name!")

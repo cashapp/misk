@@ -183,6 +183,7 @@ internal class WebActionBinding @Inject constructor(
     internal fun newWebActionBinder(): WebActionBinding {
       // TODO(jwilson): require request body handlers. Add a DiscardRequestBodyFeatureHandler that
       //     discards the request body for method annotated with both @Post and @Get.
+ @ConcurrencyLimitsOptOut // TODO: Remove after 2020-08-01 (or use @AvailableWhenDegraded).
       if (false) {
         if (action.dispatchMechanism != DispatchMechanism.GET) {
           check(requestBody != null) { "$action request body not claimed" }

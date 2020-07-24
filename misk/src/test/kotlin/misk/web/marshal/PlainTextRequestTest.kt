@@ -4,6 +4,7 @@ import misk.inject.KAbstractModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.web.Post
+import misk.web.ConcurrencyLimitsOptOut
 import misk.web.RequestBody
 import misk.web.RequestContentType
 import misk.web.ResponseContentType
@@ -39,6 +40,7 @@ internal class PlainTextRequestTest {
 
   class PassAsString @Inject constructor() : WebAction {
     @Post("/as-string")
+    @ConcurrencyLimitsOptOut // TODO: Remove after 2020-08-01 (or use @AvailableWhenDegraded).
     @RequestContentType(MediaTypes.TEXT_PLAIN_UTF8)
     @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
     fun call(@RequestBody message: String): String = "$message as-string"
@@ -46,6 +48,7 @@ internal class PlainTextRequestTest {
 
   class PassAsByteString @Inject constructor() : WebAction {
     @Post("/as-byte-string")
+    @ConcurrencyLimitsOptOut // TODO: Remove after 2020-08-01 (or use @AvailableWhenDegraded).
     @RequestContentType(MediaTypes.TEXT_PLAIN_UTF8)
     @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
     fun call(@RequestBody messageBytes: ByteString): String = "${messageBytes.utf8()} as-byte-string"

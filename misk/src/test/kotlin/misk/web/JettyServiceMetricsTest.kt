@@ -106,6 +106,7 @@ internal class JettyServiceMetricsTest {
 
   internal class HelloAction @Inject constructor() : WebAction {
     @Get("/hello")
+    @ConcurrencyLimitsOptOut // TODO: Remove after 2020-08-01 (or use @AvailableWhenDegraded).
     @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
     fun hi(): String {
       return "hi!"
@@ -123,6 +124,7 @@ internal class JettyServiceMetricsTest {
     @Inject lateinit var threadPoolMetrics: ThreadPoolMetrics
 
     @Get("/current-pool-metrics")
+    @ConcurrencyLimitsOptOut // TODO: Remove after 2020-08-01 (or use @AvailableWhenDegraded).
     @ResponseContentType(MediaTypes.APPLICATION_JSON)
     fun getCurrentPoolMetrics(): PoolMetricsResponse {
       threadPoolMetrics.refresh()

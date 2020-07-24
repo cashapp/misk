@@ -20,6 +20,7 @@ import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.testing.MockTracingBackendModule
 import misk.web.Post
+import misk.web.ConcurrencyLimitsOptOut
 import misk.web.RequestBody
 import misk.web.RequestContentType
 import misk.web.ResponseContentType
@@ -144,6 +145,7 @@ internal class ClientServerTraceTest {
 
   class ReturnADinosaurAction @Inject constructor() : WebAction {
     @Post("/cooldinos")
+    @ConcurrencyLimitsOptOut // TODO: Remove after 2020-08-01 (or use @AvailableWhenDegraded).
     @RequestContentType(MediaTypes.APPLICATION_JSON)
     @ResponseContentType(MediaTypes.APPLICATION_JSON)
     fun getDinosaur(@RequestBody request: Dinosaur):
@@ -164,6 +166,7 @@ internal class ClientServerTraceTest {
     }
 
     @Post("/roar")
+    @ConcurrencyLimitsOptOut // TODO: Remove after 2020-08-01 (or use @AvailableWhenDegraded).
     @RequestContentType(MediaTypes.APPLICATION_JSON)
     @ResponseContentType(MediaTypes.APPLICATION_JSON)
     fun doRoar(@RequestBody request: Dinosaur):

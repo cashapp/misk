@@ -4,6 +4,7 @@ import misk.inject.KAbstractModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.web.Get
+import misk.web.ConcurrencyLimitsOptOut
 import misk.web.PathParam
 import misk.web.ResponseContentType
 import misk.web.WebActionModule
@@ -55,6 +56,7 @@ internal class PathParamDispatchTest {
 
   class GetObjectDetails @Inject constructor() : WebAction {
     @Get("/objects/{resourceType}/{name}/{version}")
+    @ConcurrencyLimitsOptOut // TODO: Remove after 2020-08-01 (or use @AvailableWhenDegraded).
     @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
     fun getObjectDetails(
       @PathParam resourceType: ResourceType,
@@ -65,6 +67,7 @@ internal class PathParamDispatchTest {
 
   class CustomPathParamName @Inject constructor() : WebAction {
     @Get("/{router}")
+    @ConcurrencyLimitsOptOut // TODO: Remove after 2020-08-01 (or use @AvailableWhenDegraded).
     @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
     fun router(@PathParam("router") routeName: String) = "routing to $routeName"
   }

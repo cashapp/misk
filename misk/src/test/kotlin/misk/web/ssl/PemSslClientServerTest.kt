@@ -22,6 +22,7 @@ import misk.security.ssl.TrustStoreConfig
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.web.Post
+import misk.web.ConcurrencyLimitsOptOut
 import misk.web.RequestBody
 import misk.web.RequestContentType
 import misk.web.ResponseContentType
@@ -91,6 +92,7 @@ internal class PemSslClientServerTest {
     @Inject @ClientCertSubject private lateinit var clientCertSubjectDN: ActionScoped<X500Name?>
 
     @Post("/hello")
+    @ConcurrencyLimitsOptOut // TODO: Remove after 2020-08-01 (or use @AvailableWhenDegraded).
     @RequestContentType(MediaTypes.APPLICATION_JSON)
     @ResponseContentType(MediaTypes.APPLICATION_JSON)
     fun sayHello(@RequestBody request: Dinosaur):

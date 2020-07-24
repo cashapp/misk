@@ -4,6 +4,7 @@ import misk.inject.KAbstractModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.web.Get
+import misk.web.ConcurrencyLimitsOptOut
 import misk.web.Response
 import misk.web.ResponseContentType
 import misk.web.WebActionModule
@@ -69,48 +70,56 @@ internal class PlainTextResponseTest {
 
   class ReturnAsObject @Inject constructor() : WebAction {
     @Get("/response/as-object")
+    @ConcurrencyLimitsOptOut // TODO: Remove after 2020-08-01 (or use @AvailableWhenDegraded).
     @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
     fun call() = MessageWrapper("as-object")
   }
 
   class ReturnAsString @Inject constructor() : WebAction {
     @Get("/response/as-string")
+    @ConcurrencyLimitsOptOut // TODO: Remove after 2020-08-01 (or use @AvailableWhenDegraded).
     @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
     fun call() = "as-string"
   }
 
   class ReturnAsByteString @Inject constructor() : WebAction {
     @Get("/response/as-byte-string")
+    @ConcurrencyLimitsOptOut // TODO: Remove after 2020-08-01 (or use @AvailableWhenDegraded).
     @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
     fun call(): ByteString = "as-byte-string".encodeUtf8()
   }
 
   class ReturnAsResponseBody @Inject constructor() : WebAction {
     @Get("/response/as-response-body")
+    @ConcurrencyLimitsOptOut // TODO: Remove after 2020-08-01 (or use @AvailableWhenDegraded).
     @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
     fun call() = "as-response-body".toResponseBody()
   }
 
   class ReturnAsObjectResponse @Inject constructor() : WebAction {
     @Get("/response/as-wrapped-object")
+    @ConcurrencyLimitsOptOut // TODO: Remove after 2020-08-01 (or use @AvailableWhenDegraded).
     @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
     fun call(): Response<MessageWrapper> = Response(MessageWrapper("as-object"))
   }
 
   class ReturnAsStringResponse @Inject constructor() : WebAction {
     @Get("/response/as-wrapped-string")
+    @ConcurrencyLimitsOptOut // TODO: Remove after 2020-08-01 (or use @AvailableWhenDegraded).
     @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
     fun call() = Response("as-string")
   }
 
   class ReturnAsByteStringResponse @Inject constructor() : WebAction {
     @Get("/response/as-wrapped-byte-string")
+    @ConcurrencyLimitsOptOut // TODO: Remove after 2020-08-01 (or use @AvailableWhenDegraded).
     @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
     fun call() = Response("as-byte-string".encodeUtf8())
   }
 
   class ReturnAsResponseBodyResponse @Inject constructor() : WebAction {
     @Get("/response/as-wrapped-response-body")
+    @ConcurrencyLimitsOptOut // TODO: Remove after 2020-08-01 (or use @AvailableWhenDegraded).
     @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
     fun call() = Response("as-response-body".encodeUtf8())
   }

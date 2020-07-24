@@ -4,9 +4,11 @@ import misk.logging.getLogger
 import misk.scope.ActionScoped
 import misk.security.authz.Unauthenticated
 import misk.web.Get
+import misk.web.ConcurrencyLimitsOptOut
 import misk.web.HttpCall
 import misk.web.PathParam
 import misk.web.Post
+import misk.web.ConcurrencyLimitsOptOut
 import misk.web.RequestContentType
 import misk.web.Response
 import misk.web.ResponseBody
@@ -26,7 +28,9 @@ class NotFoundAction @Inject constructor(
   @Inject internal lateinit var servletProvider: Provider<WebActionsServlet>
 
   @Get("/{path:.*}")
+  @ConcurrencyLimitsOptOut // TODO: Remove after 2020-08-01 (or use @AvailableWhenDegraded).
   @Post("/{path:.*}")
+  @ConcurrencyLimitsOptOut // TODO: Remove after 2020-08-01 (or use @AvailableWhenDegraded).
   @RequestContentType(MediaTypes.ALL)
   @ResponseContentType(MediaTypes.ALL)
   @Unauthenticated

@@ -141,6 +141,7 @@ internal class JettyHealthCheckTest {
     @Requests private val phaser: Phaser
   ) : WebAction {
     @Get("/block")
+    @ConcurrencyLimitsOptOut // TODO: Remove after 2020-08-01 (or use @AvailableWhenDegraded).
     @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
     fun block(): String {
       phaser.arrive()
@@ -155,6 +156,7 @@ internal class JettyHealthCheckTest {
     @Health private val phaser: Phaser
   ) : WebAction {
     @Get("/health")
+    @ConcurrencyLimitsOptOut // TODO: Remove after 2020-08-01 (or use @AvailableWhenDegraded).
     @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
     fun check(): String {
       phaser.arrive()

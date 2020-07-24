@@ -14,6 +14,7 @@ import misk.tracing.traceWithSpan
 import misk.web.DispatchMechanism
 import misk.web.FakeHttpCall
 import misk.web.Get
+import misk.web.ConcurrencyLimitsOptOut
 import misk.web.NetworkChain
 import misk.web.NetworkInterceptor
 import misk.web.RealNetworkChain
@@ -146,6 +147,7 @@ class TracingInterceptorTest {
 
   internal class TracingTestAction @Inject constructor() : WebAction {
     @Get("/trace")
+    @ConcurrencyLimitsOptOut // TODO: Remove after 2020-08-01 (or use @AvailableWhenDegraded).
     fun call(): Response<String> {
       return Response("success")
     }
@@ -153,6 +155,7 @@ class TracingInterceptorTest {
 
   internal class FailedTracingTestAction @Inject constructor() : WebAction {
     @Get("/failed_trace")
+    @ConcurrencyLimitsOptOut // TODO: Remove after 2020-08-01 (or use @AvailableWhenDegraded).
     fun call(): Response<String> {
       return Response("no good", statusCode = StatusCode.BAD_REQUEST.code)
     }
@@ -160,6 +163,7 @@ class TracingInterceptorTest {
 
   internal class ExceptionThrowingTracingTestAction @Inject constructor() : WebAction {
     @Get("/exception_trace")
+    @ConcurrencyLimitsOptOut // TODO: Remove after 2020-08-01 (or use @AvailableWhenDegraded).
     fun call(): Response<String> {
       throw ActionException(StatusCode.ENHANCE_YOUR_CALM, "Chill, man")
     }

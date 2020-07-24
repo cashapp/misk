@@ -4,6 +4,7 @@ import misk.MiskCaller
 import misk.scope.ActionScoped
 import misk.security.authz.Unauthenticated
 import misk.web.Get
+import misk.web.ConcurrencyLimitsOptOut
 import misk.web.PathParam
 import misk.web.RequestContentType
 import misk.web.ResponseContentType
@@ -37,6 +38,7 @@ class DashboardMetadataAction @Inject constructor() : WebAction {
   @Inject lateinit var callerProvider: @JvmSuppressWildcards ActionScoped<MiskCaller?>
 
   @Get("/api/dashboard/{dashboard_slug}/metadata")
+  @ConcurrencyLimitsOptOut // TODO: Remove after 2020-08-01 (or use @AvailableWhenDegraded).
   @RequestContentType(MediaTypes.APPLICATION_JSON)
   @ResponseContentType(MediaTypes.APPLICATION_JSON)
   @Unauthenticated

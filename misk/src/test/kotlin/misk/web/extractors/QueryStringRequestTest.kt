@@ -4,6 +4,7 @@ import misk.inject.KAbstractModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.web.Get
+import misk.web.ConcurrencyLimitsOptOut
 import misk.web.QueryParam
 import misk.web.ResponseContentType
 import misk.web.WebActionModule
@@ -59,6 +60,7 @@ internal class QueryStringRequestTest {
 
   class BasicParamsAction @Inject constructor() : WebAction {
     @Get("/basic-params")
+    @ConcurrencyLimitsOptOut // TODO: Remove after 2020-08-01 (or use @AvailableWhenDegraded).
     fun call(
       @QueryParam str: String,
       @QueryParam("something") other: String,
@@ -69,11 +71,13 @@ internal class QueryStringRequestTest {
 
   class OptionalParamsAction @Inject constructor() : WebAction {
     @Get("/optional-params")
+    @ConcurrencyLimitsOptOut // TODO: Remove after 2020-08-01 (or use @AvailableWhenDegraded).
     fun call(@QueryParam str: String?, @QueryParam int: Int?) = "$str $int optional-params"
   }
 
   class DefaultParamsAction @Inject constructor() : WebAction {
     @Get("/default-params")
+    @ConcurrencyLimitsOptOut // TODO: Remove after 2020-08-01 (or use @AvailableWhenDegraded).
     fun call(
       @QueryParam str: String = "square",
       @QueryParam int: Int = 23,
@@ -83,6 +87,7 @@ internal class QueryStringRequestTest {
 
   class ListParamsAction @Inject constructor() : WebAction {
     @Get("/list-params")
+    @ConcurrencyLimitsOptOut // TODO: Remove after 2020-08-01 (or use @AvailableWhenDegraded).
     @ResponseContentType(MediaTypes.APPLICATION_JSON)
     fun call(@QueryParam strs: List<String>, @QueryParam ints: List<Int>) = "${strs.joinToString(
         separator = " ")} " +

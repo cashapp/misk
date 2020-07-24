@@ -10,14 +10,20 @@ import misk.asAction
 import misk.scope.ActionScope
 import misk.web.BoundAction
 import misk.web.ConnectWebSocket
+import misk.web.ConcurrencyLimitsOptOut
 import misk.web.Delete
+import misk.web.ConcurrencyLimitsOptOut
 import misk.web.DispatchMechanism
 import misk.web.Get
+import misk.web.ConcurrencyLimitsOptOut
 import misk.web.NetworkInterceptor
 import misk.web.Patch
+import misk.web.ConcurrencyLimitsOptOut
 import misk.web.PathPattern
 import misk.web.Post
+import misk.web.ConcurrencyLimitsOptOut
 import misk.web.Put
+import misk.web.ConcurrencyLimitsOptOut
 import misk.web.RequestBody
 import misk.web.WebActionBinding
 import misk.web.mediatype.MediaRange
@@ -62,6 +68,7 @@ internal class WebActionFactory @Inject constructor(
 
     require(actionFunctions.isNotEmpty()) {
       "no @Get, @Post, @Patch, @Put, @Delete, @ConnectWebSocket, or @Grpc annotations on ${webActionClass.simpleName}"
+ @ConcurrencyLimitsOptOut // TODO: Remove after 2020-08-01 (or use @AvailableWhenDegraded).
     }
 
     require(actionFunctions.size == 1) {

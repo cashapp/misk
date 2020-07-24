@@ -7,6 +7,7 @@ import javax.inject.Inject;
 import misk.testing.MiskTest;
 import misk.testing.MiskTestModule;
 import misk.web.Get;
+import misk.web.ConcurrencyLimitsOptOut;
 import misk.web.PathParam;
 import misk.web.ResponseContentType;
 import misk.web.WebActionModule;
@@ -46,6 +47,7 @@ public class JavaPathParamDispatchTest {
     }
 
     @Get(pathPattern = "/objects/{resourceType}/{name}/{version}")
+    @ConcurrencyLimitsOptOut // TODO: Remove after 2020-08-01 (or use @AvailableWhenDegraded).
     @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
     public String getObjectDetails(
         @PathParam("resourceType") ResourceType resourceType,

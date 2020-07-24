@@ -10,6 +10,7 @@ import misk.inject.getInstance
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.web.Post
+import misk.web.ConcurrencyLimitsOptOut
 import misk.web.RequestBody
 import misk.web.RequestContentType
 import misk.web.ResponseContentType
@@ -60,6 +61,7 @@ class ProtoMessageHttpClientTest {
 
   class ReturnADinosaur @Inject constructor() : WebAction {
     @Post("/cooldinos")
+    @ConcurrencyLimitsOptOut // TODO: Remove after 2020-08-01 (or use @AvailableWhenDegraded).
     @RequestContentType(MediaTypes.APPLICATION_JSON)
     @ResponseContentType(MediaTypes.APPLICATION_JSON)
     fun getDinosaur(@RequestBody requestBody: Dinosaur):

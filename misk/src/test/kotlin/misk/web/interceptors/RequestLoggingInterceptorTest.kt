@@ -12,6 +12,7 @@ import misk.security.authz.Unauthenticated
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.web.Get
+import misk.web.ConcurrencyLimitsOptOut
 import misk.web.PathParam
 import misk.web.ResponseContentType
 import misk.web.WebActionModule
@@ -135,6 +136,7 @@ internal class RequestLoggingInterceptorTest {
 
   internal class RateLimitingRequestLoggingAction @Inject constructor() : WebAction {
     @Get("/call/rateLimitingRequestLogging/{message}")
+    @ConcurrencyLimitsOptOut // TODO: Remove after 2020-08-01 (or use @AvailableWhenDegraded).
     @Unauthenticated
     @ResponseContentType(MediaTypes.APPLICATION_JSON)
     @LogRequestResponse(ratePerSecond = 1L, errorRatePerSecond = 2L)
@@ -143,6 +145,7 @@ internal class RequestLoggingInterceptorTest {
 
   internal class RateLimitingIncludesBodyRequestLoggingAction @Inject constructor() : WebAction {
     @Get("/call/rateLimitingIncludesBodyRequestLogging/{message}")
+    @ConcurrencyLimitsOptOut // TODO: Remove after 2020-08-01 (or use @AvailableWhenDegraded).
     @Unauthenticated
     @ResponseContentType(MediaTypes.APPLICATION_JSON)
     @LogRequestResponse(ratePerSecond = 1L, errorRatePerSecond = 2L, bodySampling = 0.5, errorBodySampling = 1.0)
@@ -151,6 +154,7 @@ internal class RequestLoggingInterceptorTest {
 
   internal class NoRateLimitingRequestLoggingAction @Inject constructor() : WebAction {
     @Get("/call/noRateLimitingRequestLogging/{message}")
+    @ConcurrencyLimitsOptOut // TODO: Remove after 2020-08-01 (or use @AvailableWhenDegraded).
     @Unauthenticated
     @ResponseContentType(MediaTypes.APPLICATION_JSON)
     @LogRequestResponse(ratePerSecond = 0L, errorRatePerSecond = 0L, bodySampling = 0.5, errorBodySampling = 0.5)
@@ -159,6 +163,7 @@ internal class RequestLoggingInterceptorTest {
 
   internal class ExceptionThrowingRequestLoggingAction @Inject constructor() : WebAction {
     @Get("/call/exceptionThrowingRequestLogging/{message}")
+    @ConcurrencyLimitsOptOut // TODO: Remove after 2020-08-01 (or use @AvailableWhenDegraded).
     @Unauthenticated
     @ResponseContentType(MediaTypes.APPLICATION_JSON)
     @LogRequestResponse(ratePerSecond = 1L, errorRatePerSecond = 2L, bodySampling = 0.1, errorBodySampling = 1.0)
@@ -167,6 +172,7 @@ internal class RequestLoggingInterceptorTest {
 
   internal class NoRequestLoggingAction @Inject constructor() : WebAction {
     @Get("/call/noRequestLogging/{message}")
+    @ConcurrencyLimitsOptOut // TODO: Remove after 2020-08-01 (or use @AvailableWhenDegraded).
     @Unauthenticated
     @ResponseContentType(MediaTypes.APPLICATION_JSON)
     fun call(@PathParam message: String) = "echo: $message"

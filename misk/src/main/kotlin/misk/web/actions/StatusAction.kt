@@ -8,6 +8,7 @@ import misk.healthchecks.HealthStatus
 import misk.security.authz.Unauthenticated
 import misk.web.AvailableWhenDegraded
 import misk.web.Get
+import misk.web.ConcurrencyLimitsOptOut
 import misk.web.ResponseContentType
 import misk.web.mediatype.MediaTypes
 import javax.inject.Inject
@@ -25,6 +26,7 @@ class StatusAction @Inject internal constructor(
 ) : WebAction {
 
   @Get("/_status")
+  @ConcurrencyLimitsOptOut // TODO: Remove after 2020-08-01 (or use @AvailableWhenDegraded).
   @ResponseContentType(MediaTypes.APPLICATION_JSON)
   @Unauthenticated
   @AvailableWhenDegraded

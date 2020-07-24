@@ -19,7 +19,9 @@ import misk.security.ssl.TrustStoreConfig
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.web.Get
+import misk.web.ConcurrencyLimitsOptOut
 import misk.web.Post
+import misk.web.ConcurrencyLimitsOptOut
 import misk.web.Response
 import misk.web.ResponseBody
 import misk.web.ResponseContentType
@@ -166,6 +168,7 @@ class Http2ConnectivityTest {
 
   class HelloAction @Inject constructor() : WebAction {
     @Get("/hello")
+    @ConcurrencyLimitsOptOut // TODO: Remove after 2020-08-01 (or use @AvailableWhenDegraded).
     @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
     fun sayHello() = "hello"
   }
@@ -174,6 +177,7 @@ class Http2ConnectivityTest {
     private val actionScopedServletRequest: ActionScoped<HttpServletRequest>
   ) : WebAction {
     @Get("/disconnect/empty")
+    @ConcurrencyLimitsOptOut // TODO: Remove after 2020-08-01 (or use @AvailableWhenDegraded).
     @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
     fun disconnect(): Response<String> {
       val request = actionScopedServletRequest.get() as org.eclipse.jetty.server.Request
@@ -188,6 +192,7 @@ class Http2ConnectivityTest {
     private val actionScopedServletRequest: ActionScoped<HttpServletRequest>
   ) : WebAction {
     @Get("/disconnect/large")
+    @ConcurrencyLimitsOptOut // TODO: Remove after 2020-08-01 (or use @AvailableWhenDegraded).
     @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
     fun disconnect(): ResponseBody {
       val request = actionScopedServletRequest.get() as org.eclipse.jetty.server.Request
@@ -207,6 +212,7 @@ class Http2ConnectivityTest {
   class DisconnectWithLargeRequestAction @Inject constructor(
   ) : WebAction {
     @Post("/large/request")
+    @ConcurrencyLimitsOptOut // TODO: Remove after 2020-08-01 (or use @AvailableWhenDegraded).
     @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
     fun disconnect(@misk.web.RequestBody body: String): Response<String> {
       return Response(body = "bye")

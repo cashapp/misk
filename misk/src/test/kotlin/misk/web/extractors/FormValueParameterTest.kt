@@ -6,6 +6,7 @@ import misk.testing.MiskTestModule
 import misk.web.FormField
 import misk.web.FormValue
 import misk.web.Post
+import misk.web.ConcurrencyLimitsOptOut
 import misk.web.WebActionModule
 import misk.web.WebTestingModule
 import misk.web.actions.WebAction
@@ -99,6 +100,7 @@ internal class FormValueParameterTest {
 
   class BasicParamsAction @Inject constructor() : WebAction {
     @Post("/basic-params")
+    @ConcurrencyLimitsOptOut // TODO: Remove after 2020-08-01 (or use @AvailableWhenDegraded).
     fun call(@FormValue basicForm: BasicForm) = "$basicForm"
 
     data class BasicForm(
@@ -111,6 +113,7 @@ internal class FormValueParameterTest {
 
   class OptionalParamsAction @Inject constructor() : WebAction {
     @Post("/optional-params")
+    @ConcurrencyLimitsOptOut // TODO: Remove after 2020-08-01 (or use @AvailableWhenDegraded).
     fun call(@FormValue optionalForm: OptionalForm) = "$optionalForm"
 
     data class OptionalForm(
@@ -121,6 +124,7 @@ internal class FormValueParameterTest {
 
   class DefaultParamsAction @Inject constructor() : WebAction {
     @Post("/default-params")
+    @ConcurrencyLimitsOptOut // TODO: Remove after 2020-08-01 (or use @AvailableWhenDegraded).
     fun call(@FormValue defaultForm: DefaultForm) = "$defaultForm"
 
     data class DefaultForm(
@@ -132,6 +136,7 @@ internal class FormValueParameterTest {
 
   class ListParamsAction @Inject constructor() : WebAction {
     @Post("/list-params")
+    @ConcurrencyLimitsOptOut // TODO: Remove after 2020-08-01 (or use @AvailableWhenDegraded).
     fun call(@FormValue listForm: ListForm) = "$listForm"
 
     data class ListForm(
@@ -142,6 +147,7 @@ internal class FormValueParameterTest {
 
   class FormValueAnnotationAction @Inject constructor() : WebAction {
     @Post("/form-value-annotation")
+    @ConcurrencyLimitsOptOut // TODO: Remove after 2020-08-01 (or use @AvailableWhenDegraded).
     fun call(@FormValue annotationForm: AnnotationForm) = "$annotationForm"
 
     data class AnnotationForm(

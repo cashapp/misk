@@ -4,6 +4,7 @@ import com.google.inject.Provides
 import helpers.protos.Dinosaur
 import misk.inject.KAbstractModule
 import misk.web.Post
+import misk.web.ConcurrencyLimitsOptOut
 import misk.web.RequestBody
 import misk.web.RequestContentType
 import misk.web.ResponseContentType
@@ -23,6 +24,7 @@ internal interface ReturnADinosaur {
 
 internal class ReturnADinosaurAction @Inject constructor() : WebAction {
   @Post("/cooldinos")
+  @ConcurrencyLimitsOptOut // TODO: Remove after 2020-08-01 (or use @AvailableWhenDegraded).
   @RequestContentType(MediaTypes.APPLICATION_JSON)
   @ResponseContentType(MediaTypes.APPLICATION_JSON)
   fun getDinosaur(@RequestBody request: Dinosaur): Dinosaur = request.newBuilder()

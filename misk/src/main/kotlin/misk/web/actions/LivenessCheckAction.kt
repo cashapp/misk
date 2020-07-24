@@ -6,6 +6,7 @@ import misk.logging.getLogger
 import misk.security.authz.Unauthenticated
 import misk.web.AvailableWhenDegraded
 import misk.web.Get
+import misk.web.ConcurrencyLimitsOptOut
 import misk.web.Response
 import misk.web.ResponseContentType
 import misk.web.mediatype.MediaTypes
@@ -21,6 +22,7 @@ class LivenessCheckAction @Inject internal constructor(
 ) : WebAction {
 
   @Get("/_liveness")
+  @ConcurrencyLimitsOptOut // TODO: Remove after 2020-08-01 (or use @AvailableWhenDegraded).
   @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
   @Unauthenticated
   @AvailableWhenDegraded

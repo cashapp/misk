@@ -152,6 +152,7 @@ internal class JsonForProtoEndpointsTest {
 
   class ProtoEchoShipmentToken @Inject constructor() : WebAction {
     @Post("/get_destination_warehouse")
+    @ConcurrencyLimitsOptOut // TODO: Remove after 2020-08-01 (or use @AvailableWhenDegraded).
     @RequestContentType(MediaTypes.APPLICATION_PROTOBUF)
     @ResponseContentType(MediaTypes.APPLICATION_PROTOBUF)
     fun getDestinationWarehouse(@RequestBody shipment: Shipment) =

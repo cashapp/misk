@@ -49,6 +49,7 @@ internal class ActionScopedWebDispatchTest {
     private val principal: @JvmSuppressWildcards ActionScoped<Principal>
   ) : WebAction {
     @Get("/hello")
+    @ConcurrencyLimitsOptOut // TODO: Remove after 2020-08-01 (or use @AvailableWhenDegraded).
     @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
     fun hello(): String = "hello ${principal.get().name}"
   }

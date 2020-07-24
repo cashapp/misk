@@ -10,6 +10,7 @@ import misk.security.authz.FakeCallerAuthenticator
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.web.Get
+import misk.web.ConcurrencyLimitsOptOut
 import misk.web.ResponseContentType
 import misk.web.WebActionModule
 import misk.web.WebTestingModule
@@ -66,6 +67,7 @@ internal class RequestLogContextInterceptorTest {
 
   internal class TestAction @Inject constructor() : WebAction {
     @Get("/call/me")
+    @ConcurrencyLimitsOptOut // TODO: Remove after 2020-08-01 (or use @AvailableWhenDegraded).
     @Unauthenticated
     @ResponseContentType(MediaTypes.APPLICATION_JSON)
     fun call() = RequestContext(MDC.getCopyOfContextMap())

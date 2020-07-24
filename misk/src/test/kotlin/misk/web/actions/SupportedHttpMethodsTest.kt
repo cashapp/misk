@@ -4,10 +4,15 @@ import misk.inject.KAbstractModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.web.Delete
+import misk.web.ConcurrencyLimitsOptOut
 import misk.web.Get
+import misk.web.ConcurrencyLimitsOptOut
 import misk.web.Patch
+import misk.web.ConcurrencyLimitsOptOut
 import misk.web.Post
+import misk.web.ConcurrencyLimitsOptOut
 import misk.web.Put
+import misk.web.ConcurrencyLimitsOptOut
 import misk.web.Response
 import misk.web.WebActionModule
 import misk.web.WebTestingModule
@@ -102,26 +107,31 @@ class SupportedHttpMethodsTest {
 
   internal class GetAction @Inject constructor() : WebAction {
     @Get("/resources/id")
+    @ConcurrencyLimitsOptOut // TODO: Remove after 2020-08-01 (or use @AvailableWhenDegraded).
     fun get(): String = "content"
   }
 
   internal class PostAction @Inject constructor() : WebAction {
     @Post("/resources")
+    @ConcurrencyLimitsOptOut // TODO: Remove after 2020-08-01 (or use @AvailableWhenDegraded).
     fun post(): String = "created"
   }
 
   internal class PatchAction @Inject constructor() : WebAction {
     @Patch("/resources/id")
+    @ConcurrencyLimitsOptOut // TODO: Remove after 2020-08-01 (or use @AvailableWhenDegraded).
     fun patch(): String = "updated"
   }
 
   internal class PutAction @Inject constructor() : WebAction {
     @Put("/resources/id")
+    @ConcurrencyLimitsOptOut // TODO: Remove after 2020-08-01 (or use @AvailableWhenDegraded).
     fun put(): String = "updated"
   }
 
   internal class DeleteAction @Inject constructor() : WebAction {
     @Delete("/resources/id")
+    @ConcurrencyLimitsOptOut // TODO: Remove after 2020-08-01 (or use @AvailableWhenDegraded).
     fun delete() = Response("")
   }
 }

@@ -6,6 +6,7 @@ import misk.logging.getLogger
 import misk.security.authz.Unauthenticated
 import misk.web.AvailableWhenDegraded
 import misk.web.Get
+import misk.web.ConcurrencyLimitsOptOut
 import misk.web.Response
 import misk.web.ResponseContentType
 import misk.web.mediatype.MediaTypes
@@ -22,6 +23,7 @@ class ReadinessCheckAction @Inject internal constructor(
 ) : WebAction {
 
   @Get("/_readiness")
+  @ConcurrencyLimitsOptOut // TODO: Remove after 2020-08-01 (or use @AvailableWhenDegraded).
   @ResponseContentType(MediaTypes.APPLICATION_JSON)
   @Unauthenticated
   @AvailableWhenDegraded

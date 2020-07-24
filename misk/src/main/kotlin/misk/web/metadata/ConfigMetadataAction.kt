@@ -8,6 +8,7 @@ import misk.environment.Env
 import misk.environment.Environment
 import misk.resources.ResourceLoader
 import misk.web.Get
+import misk.web.ConcurrencyLimitsOptOut
 import misk.web.RequestContentType
 import misk.web.ResponseContentType
 import misk.web.actions.WebAction
@@ -26,6 +27,7 @@ class ConfigMetadataAction @Inject constructor(
       config)
 
   @Get("/api/config/metadata")
+  @ConcurrencyLimitsOptOut // TODO: Remove after 2020-08-01 (or use @AvailableWhenDegraded).
   @RequestContentType(MediaTypes.APPLICATION_JSON)
   @ResponseContentType(MediaTypes.APPLICATION_JSON)
   @AdminDashboardAccess

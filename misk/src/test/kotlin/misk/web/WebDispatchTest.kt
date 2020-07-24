@@ -129,6 +129,7 @@ internal class WebDispatchTest {
 
   class PostHello @Inject constructor() : WebAction {
     @Post("/hello")
+    @ConcurrencyLimitsOptOut // TODO: Remove after 2020-08-01 (or use @AvailableWhenDegraded).
     @RequestContentType(MediaTypes.APPLICATION_JSON)
     @ResponseContentType(MediaTypes.APPLICATION_JSON)
     fun hello(@misk.web.RequestBody request: HelloBye) =
@@ -137,6 +138,7 @@ internal class WebDispatchTest {
 
   class GetHello @Inject constructor() : WebAction {
     @Get("/hello/{message}")
+    @ConcurrencyLimitsOptOut // TODO: Remove after 2020-08-01 (or use @AvailableWhenDegraded).
     @ResponseContentType(MediaTypes.APPLICATION_JSON)
     fun hello(@PathParam("message") message: String) =
         HelloBye("get hello $message")
@@ -144,6 +146,7 @@ internal class WebDispatchTest {
 
   class PostBye @Inject constructor() : WebAction {
     @Post("/bye")
+    @ConcurrencyLimitsOptOut // TODO: Remove after 2020-08-01 (or use @AvailableWhenDegraded).
     @RequestContentType(MediaTypes.APPLICATION_JSON)
     @ResponseContentType(MediaTypes.APPLICATION_JSON)
     fun bye(@misk.web.RequestBody request: HelloBye) =
@@ -152,6 +155,7 @@ internal class WebDispatchTest {
 
   class GetBye @Inject constructor() : WebAction {
     @Get("/bye/{message}")
+    @ConcurrencyLimitsOptOut // TODO: Remove after 2020-08-01 (or use @AvailableWhenDegraded).
     @ResponseContentType(MediaTypes.APPLICATION_JSON)
     fun bye(@PathParam("message") message: String) =
         HelloBye("get bye $message")
@@ -159,6 +163,7 @@ internal class WebDispatchTest {
 
   class GetNothing @Inject constructor() : WebAction {
     @Get("/nothing")
+    @ConcurrencyLimitsOptOut // TODO: Remove after 2020-08-01 (or use @AvailableWhenDegraded).
     fun doNothing(): Nothing {
       throw UnsupportedOperationException("we did nothing")
     }

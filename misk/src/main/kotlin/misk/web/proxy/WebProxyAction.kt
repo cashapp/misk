@@ -4,7 +4,9 @@ import com.google.inject.Inject
 import misk.scope.ActionScoped
 import misk.security.authz.Unauthenticated
 import misk.web.Get
+import misk.web.ConcurrencyLimitsOptOut
 import misk.web.Post
+import misk.web.ConcurrencyLimitsOptOut
 import misk.web.HttpCall
 import misk.web.RequestContentType
 import misk.web.Response
@@ -54,7 +56,9 @@ class WebProxyAction @Inject constructor(
 ) : WebAction {
 
   @Get("/{path:.*}")
+  @ConcurrencyLimitsOptOut // TODO: Remove after 2020-08-01 (or use @AvailableWhenDegraded).
   @Post("/{path:.*}")
+  @ConcurrencyLimitsOptOut // TODO: Remove after 2020-08-01 (or use @AvailableWhenDegraded).
   @RequestContentType(MediaTypes.ALL)
   @ResponseContentType(MediaTypes.ALL)
   @Unauthenticated

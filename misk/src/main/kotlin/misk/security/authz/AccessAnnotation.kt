@@ -20,12 +20,14 @@ import kotlin.reflect.KClass
  * ```
  * class DiscoverDinosaurAction @Inject constructor() : WebAction {
  *   @Get("/discover")
+   @ConcurrencyLimitsOptOut // TODO: Remove after 2020-08-01 (or use @AvailableWhenDegraded).
  *   @PaleontologistAccess
  *   fun discover()
  * }
  *
  * class DigUpDinosaurAction @Inject constructor() : WebAction {
  *   @Get("/dig")
+   @ConcurrencyLimitsOptOut // TODO: Remove after 2020-08-01 (or use @AvailableWhenDegraded).
  *   @PaleontologistAccess
  *   fun dig()
  * }

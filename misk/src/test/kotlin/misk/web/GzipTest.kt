@@ -81,18 +81,21 @@ abstract class AbstractGzipTest {
 
   class MiskHypeGetAction @Inject constructor() : WebAction {
     @Get("/miskhype/{times}")
+    @ConcurrencyLimitsOptOut // TODO: Remove after 2020-08-01 (or use @AvailableWhenDegraded).
     @ResponseContentType(MediaTypes.APPLICATION_JSON)
     fun getMiskHype(@PathParam times: Int) = miskHype(times)
   }
 
   class MiskHypePostAction @Inject constructor() : WebAction {
     @Post("/miskhype/{times}")
+    @ConcurrencyLimitsOptOut // TODO: Remove after 2020-08-01 (or use @AvailableWhenDegraded).
     @ResponseContentType(MediaTypes.APPLICATION_JSON)
     fun postMiskHype(@PathParam times: Int) = miskHype(times)
   }
 
   class CountHypeAction @Inject constructor() : WebAction {
     @Post("/count")
+    @ConcurrencyLimitsOptOut // TODO: Remove after 2020-08-01 (or use @AvailableWhenDegraded).
     @RequestContentType(MediaTypes.APPLICATION_JSON)
     @ResponseContentType(MediaTypes.APPLICATION_JSON)
     fun postMiskHype(@RequestBody request: List<String>): Int = request.count { it == "miskhype" }

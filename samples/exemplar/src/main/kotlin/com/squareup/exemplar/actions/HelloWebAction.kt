@@ -1,6 +1,7 @@
 package com.squareup.exemplar.actions
 
 import misk.web.Get
+import misk.web.ConcurrencyLimitsOptOut
 import misk.web.PathParam
 import misk.web.QueryParam
 import misk.web.RequestHeaders
@@ -14,6 +15,7 @@ import javax.inject.Singleton
 @Singleton
 class HelloWebAction @Inject constructor() : WebAction {
   @Get("/hello/{name}")
+  @ConcurrencyLimitsOptOut // TODO: Remove after 2020-08-01 (or use @AvailableWhenDegraded).
   @ResponseContentType(MediaTypes.APPLICATION_JSON)
   fun hello(
     @PathParam name: String,

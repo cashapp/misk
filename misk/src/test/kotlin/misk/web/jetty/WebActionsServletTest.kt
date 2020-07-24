@@ -6,6 +6,7 @@ import misk.inject.KAbstractModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.web.Get
+import misk.web.ConcurrencyLimitsOptOut
 import misk.web.NetworkChain
 import misk.web.NetworkInterceptor
 import misk.web.ResponseContentType
@@ -81,6 +82,7 @@ class WebActionsServletTest {
 
   internal class TestAction @Inject constructor() : WebAction {
     @Get("/potato")
+    @ConcurrencyLimitsOptOut // TODO: Remove after 2020-08-01 (or use @AvailableWhenDegraded).
     @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
     fun call(): TestActionResponse {
       return TestActionResponse("foo")

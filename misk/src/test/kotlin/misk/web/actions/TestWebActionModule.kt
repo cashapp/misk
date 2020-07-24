@@ -13,7 +13,9 @@ import misk.security.authz.FakeCallerAuthenticator
 import misk.security.authz.MiskCallerAuthenticator
 import misk.security.authz.Unauthenticated
 import misk.web.Get
+import misk.web.ConcurrencyLimitsOptOut
 import misk.web.Post
+import misk.web.ConcurrencyLimitsOptOut
 import misk.web.RequestBody
 import misk.web.RequestContentType
 import misk.web.ResponseContentType
@@ -46,6 +48,7 @@ class TestWebActionModule : KAbstractModule() {
     lateinit var scopedCaller: ActionScoped<MiskCaller?>
 
     @Get("/custom_service_access")
+    @ConcurrencyLimitsOptOut // TODO: Remove after 2020-08-01 (or use @AvailableWhenDegraded).
     @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
     @CustomServiceAccess
     fun get() = "${scopedCaller.get()} authorized as custom service".toResponseBody()
@@ -60,6 +63,7 @@ class TestWebActionModule : KAbstractModule() {
     lateinit var scopedCaller: ActionScoped<MiskCaller?>
 
     @Get("/custom_capability_access")
+    @ConcurrencyLimitsOptOut // TODO: Remove after 2020-08-01 (or use @AvailableWhenDegraded).
     @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
     @CustomCapabilityAccess
     fun get() = "${scopedCaller.get()} authorized with custom capability".toResponseBody()
@@ -71,6 +75,7 @@ class TestWebActionModule : KAbstractModule() {
 
   class RequestTypeAction @Inject constructor() : WebAction {
     @Post("/request_type")
+    @ConcurrencyLimitsOptOut // TODO: Remove after 2020-08-01 (or use @AvailableWhenDegraded).
     @RequestContentType(MediaTypes.APPLICATION_JSON)
     @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
     @Unauthenticated
