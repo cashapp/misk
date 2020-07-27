@@ -99,7 +99,6 @@ internal class DegradedHealthStressTest {
     private val fakeResourcePool: FakeResourcePool
   ) : WebAction {
     @Get("/use_constrained_resource")
-    @ConcurrencyLimitsOptIn
     fun get(): String {
       fakeResourcePool.useResource(Duration.ofMillis(50), Duration.ofMillis(200))
       return "success"
