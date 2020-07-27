@@ -54,20 +54,4 @@ internal class SqsJobTest {
         .containsEntry("foo", "bar")
         .doesNotContainKey(SqsJob.JOBQUEUE_METADATA_ATTR)
   }
-
-  @Test
-  fun getIdempotenceKey_withNoJobqueueMetadata() {
-    val message = Message().apply {
-      messageId = "id-0"
-      body = "body-0"
-      addMessageAttributesEntry("foo", MessageAttributeValue().withDataType("String").withStringValue("bar"))
-    }
-
-    val job = SqsJob(QueueName("test"), queueResolver, sqsMetrics, moshi, message)
-
-    assertThat(job.idempotenceKey).isEqualTo(job.id)
-    assertThat(job.attributes)
-        .containsEntry("foo", "bar")
-        .doesNotContainKey(SqsJob.JOBQUEUE_METADATA_ATTR)
-  }
 }
