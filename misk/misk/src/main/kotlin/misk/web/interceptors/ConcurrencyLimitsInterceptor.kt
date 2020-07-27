@@ -6,7 +6,6 @@ import misk.Action
 import misk.exceptions.StatusCode
 import misk.logging.getLogger
 import misk.web.AvailableWhenDegraded
-import misk.web.ConcurrencyLimitsOptIn
 import misk.web.ConcurrencyLimitsOptOut
 import misk.web.NetworkChain
 import misk.web.NetworkInterceptor
@@ -17,8 +16,9 @@ import kotlin.reflect.full.findAnnotation
 
 /**
  * Detects degraded behavior and sheds requests accordingly. Internally this uses adaptive limiting
- * as implemented by Netflix's [concurrency-limits][concurrency_limits] library. See
- * [AvailableWhenDegraded] for further documentation.
+ * as implemented by Netflix's [concurrency-limits][concurrency_limits] library.
+ *
+ * This annotation is applied to all actions by default. Opt-out with [AvailableWhenDegraded].
  *
  * [concurrency_limits]: https://github.com/Netflix/concurrency-limits/
  */
@@ -64,9 +64,6 @@ internal class ConcurrencyLimitsInterceptor internal constructor(
     override fun create(action: Action): NetworkInterceptor? {
       if (action.function.findAnnotation<AvailableWhenDegraded>() != null) return null
       if (action.function.findAnnotation<ConcurrencyLimitsOptOut>() != null) return null
-
-      // TODO(jwilson): make this the default behavior and remove this annotation.
-      if (action.function.findAnnotation<ConcurrencyLimitsOptIn>() == null) return null
 
       val limiter = SimpleLimiter.Builder()
           .clock { clock.millis() }
