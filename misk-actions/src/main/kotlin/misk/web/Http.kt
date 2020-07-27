@@ -60,12 +60,8 @@ annotation class AvailableWhenDegraded
 /**
  * Opt-in to concurrency limits. If the service is overloaded permit Misk to shed calls to this
  * endpoint by returning "HTTP 503 Service Unavailable".
- *
- * In a future release of Misk this will be unnecessary because concurrency limits will be on by
- * default.
- *
- * TODO(jwilson): deprecate this when it becomes unnecessary.
  */
+@Deprecated(message = "this annotation is not necessary; concurrency limits are on by default")
 @Retention(AnnotationRetention.RUNTIME)
 @Target(AnnotationTarget.FUNCTION)
 annotation class ConcurrencyLimitsOptIn
