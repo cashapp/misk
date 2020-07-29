@@ -93,6 +93,13 @@ class JettyService @Inject internal constructor(
       httpConfig.securePort = webConfig.ssl.port
     }
     httpConnectionFactories += HttpConnectionFactory(httpConfig)
+    if (webConfig.http2) {
+      val http2 = HTTP2ServerConnectionFactory(httpConfig)
+      if (webConfig.jetty_max_concurrent_streams != null) {
+        http2.maxConcurrentStreams = webConfig.jetty_max_concurrent_streams
+      }
+      httpConnectionFactories += HTTP2CServerConnectionFactory(httpConfig)
+    }
 
     // TODO(mmihic): Allow require running only on HTTPS?
     val httpConnector = ServerConnector(
@@ -189,7 +196,8 @@ class JettyService @Inject internal constructor(
     }
 
     if (webConfig.unix_domain_socket != null) {
-      val udsConnFactories = httpConnectionFactories.toMutableList()
+      val udsConnFactories = mutableListOf<ConnectionFactory>()
+      udsConnFactories.add(HttpConnectionFactory(httpConfig))
       if (webConfig.unix_domain_socket.h2c == true) {
         udsConnFactories.add(HTTP2CServerConnectionFactory(httpConfig))
       }
