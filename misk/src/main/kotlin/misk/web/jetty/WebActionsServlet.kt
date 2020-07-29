@@ -1,5 +1,6 @@
 package misk.web.jetty
 
+import jnr.unixsocket.UnixSocket
 import misk.exceptions.StatusCode
 import misk.logging.getLogger
 import misk.web.BoundAction
@@ -95,10 +96,15 @@ internal class WebActionsServlet @Inject constructor(
     try {
       val httpCall = ServletHttpCall.create(
           request = request,
-          linkLayerLocalAddress = with((request as? Request)?.httpChannel?.connector) {
-            when (this) {
-              is UnixSocketConnector -> SocketAddress.Unix(this.unixSocket)
-              is ServerConnector -> SocketAddress.Network(this.host ?: "0.0.0.0", this.localPort)
+          linkLayerLocalAddress = with((request as? Request)?.httpChannel) {
+            when (this?.connector) {
+              is UnixSocketConnector -> SocketAddress.Unix(
+                  (this.connector as UnixSocketConnector).unixSocket
+              )
+              is ServerConnector -> SocketAddress.Network(
+                  this.endPoint.remoteAddress.address.hostAddress,
+                  (this.connector as ServerConnector).localPort
+              )
               else -> throw IllegalStateException("Unknown socket connector.")
             }
           },
