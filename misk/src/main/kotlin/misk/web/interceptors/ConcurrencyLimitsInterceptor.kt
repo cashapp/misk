@@ -6,7 +6,6 @@ import misk.Action
 import misk.exceptions.StatusCode
 import misk.logging.getLogger
 import misk.web.AvailableWhenDegraded
-import misk.web.ConcurrencyLimitsOptOut
 import misk.web.NetworkChain
 import misk.web.NetworkInterceptor
 import java.time.Clock
