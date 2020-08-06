@@ -96,7 +96,8 @@ class DockerTidbCluster(
   companion object {
     val logger = KotlinLogging.logger {}
 
-    const val SHA = "5d4eef28ae1024712015a846db9312d8f477f8bed40f7f9a410c62def8342f96"
+    // TiDB version 4.0.4
+    const val SHA = "431e8e71d3a02134297b4370abbb40b0bd2bc5aec0c42f12e4d4e03943b50910"
     const val IMAGE = "pingcap/tidb@sha256:$SHA"
     const val CONTAINER_NAME = "misk-tidb-testing"
 
