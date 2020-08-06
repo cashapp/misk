@@ -189,10 +189,15 @@ class BulkShardMigrator<R : DbRoot<R>, C : DbChild<R, C>> private constructor(
           WHERE $where
         """.trimIndent()
           val updateStatement = connection.prepareStatement(update)
-          mutations.forEachIndexed { index, mutation ->
-            mutation.bindUpdate(updateStatement, index)
-          }
-          updateStatement.setObject(updateStatement.parameterMetaData.parameterCount, sourceRoot!!.id)
+          var setParametersCount = 0
+          mutations
+              .filter { it.isParameterized() }
+              .forEachIndexed { index, mutation ->
+                // statements indexes start from 1
+                mutation.bindUpdate(updateStatement, index + 1)
+                setParametersCount += 1
+              }
+          bindWhereClause(updateStatement, setParametersCount)
           updateStatement.executeUpdate()
         }
       }
@@ -408,8 +413,13 @@ class BulkShardMigrator<R : DbRoot<R>, C : DbChild<R, C>> private constructor(
 
   @Throws(SQLException::class)
   private fun bindWhereClause(select: PreparedStatement) {
+    bindWhereClause(select, 0)
+  }
+
+  @Throws(SQLException::class)
+  private fun bindWhereClause(select: PreparedStatement, startIndex: Int) {
     for (i in parameters!!.indices) {
-      select.setObject(i + 1, parameters!![i])
+      select.setObject(startIndex + i + 1, parameters!![i])
     }
   }
 
@@ -429,6 +439,10 @@ class BulkShardMigrator<R : DbRoot<R>, C : DbChild<R, C>> private constructor(
 
     open fun updateSql(): String {
       return "${columnName()} = ?"
+    }
+
+    internal fun isParameterized(): Boolean {
+      return updateSql().contains('?')
     }
   }
 

@@ -62,6 +62,8 @@ abstract class BulkShardMigratorTest {
         .rootColumn("movie_id")
         .source(sourceId)
         .target(targetId)
+        .now("updated_at")
+        .set("movie_id", targetId.id)
         .execute()
 
     // Movie remained in the same shard
