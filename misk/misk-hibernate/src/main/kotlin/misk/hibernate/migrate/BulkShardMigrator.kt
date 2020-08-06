@@ -186,7 +186,7 @@ class BulkShardMigrator<R : DbRoot<R>, C : DbChild<R, C>> private constructor(
           val update = """
           UPDATE ${tableName()}
           SET $setColumns
-          WHERE $rootColumnName = ?
+          WHERE $where
         """.trimIndent()
           val updateStatement = connection.prepareStatement(update)
           mutations.forEachIndexed { index, mutation ->
