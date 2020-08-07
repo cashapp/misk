@@ -109,7 +109,7 @@ data class Feature(val name: String)
 /**
  * Extra attributes to be used for evaluating features.
  */
-data class Attributes(
+data class Attributes @JvmOverloads constructor(
   val text: Map<String, String> = mapOf(),
   // NB: LaunchDarkly uses typed Gson attributes. We could leak that through, but that could make
   // code unwieldly. Numerical attributes are likely to be rarely used, so we make it a separate,

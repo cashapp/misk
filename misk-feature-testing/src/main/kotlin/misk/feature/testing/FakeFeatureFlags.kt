@@ -103,7 +103,7 @@ class FakeFeatureFlags @Inject constructor(
     //       all the attributes of the given attributes.
     //   2.2 If there is no match, return the override value defined at the key level.
     val overrideMapValues = overrides[MapKey(feature, key)]
-        ?: return overrides[MapKey(feature)]?.let { it.first().value }
+        ?: return overrides[MapKey(feature)]?.first()?.value
 
     val overrideMapValuesCopy = PriorityQueue(overrideMapValues)
     var currentMapValue = overrideMapValuesCopy.poll()
@@ -156,6 +156,7 @@ class FakeFeatureFlags @Inject constructor(
     overrideKeyJson(feature, KEY, value, defaultAttributes)
   }
 
+  @JvmOverloads
   fun overrideKey(
     feature: Feature,
     key: String,
@@ -163,6 +164,7 @@ class FakeFeatureFlags @Inject constructor(
     attributes: Attributes = defaultAttributes
   ) = overrideKey<Boolean>(feature, key, value, attributes)
 
+  @JvmOverloads
   fun overrideKey(
     feature: Feature,
     key: String,
@@ -170,6 +172,7 @@ class FakeFeatureFlags @Inject constructor(
     attributes: Attributes = defaultAttributes
   ) = overrideKey<Int>(feature, key, value, attributes)
 
+  @JvmOverloads
   fun overrideKey(
     feature: Feature,
     key: String,
@@ -177,6 +180,7 @@ class FakeFeatureFlags @Inject constructor(
     attributes: Attributes = defaultAttributes
   ) = overrideKey<String>(feature, key, value, attributes)
 
+  @JvmOverloads
   fun overrideKey(
     feature: Feature,
     key: String,
@@ -194,6 +198,7 @@ class FakeFeatureFlags @Inject constructor(
     overrideKey(feature, key, jsonValue, defaultAttributes)
   }
 
+  @JvmOverloads
   fun <T> overrideKey(
     feature: Feature,
     key: String,
@@ -209,6 +214,7 @@ class FakeFeatureFlags @Inject constructor(
             value = value as Any))
   }
 
+  @JvmOverloads
   inline fun <reified T> overrideKeyJson(
     feature: Feature,
     key: String,
