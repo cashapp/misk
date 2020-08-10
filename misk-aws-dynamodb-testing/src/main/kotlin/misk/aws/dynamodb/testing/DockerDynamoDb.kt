@@ -1,5 +1,6 @@
 package misk.aws.dynamodb.testing
 
+import com.amazonaws.auth.AWSCredentialsProvider
 import com.amazonaws.auth.AWSStaticCredentialsProvider
 import com.amazonaws.auth.BasicAWSCredentials
 import com.amazonaws.client.builder.AwsClientBuilder
@@ -16,7 +17,9 @@ import misk.testing.ExternalDependency
 import okhttp3.HttpUrl
 
 /**
- * A test DynamoDb Local service. Tests can connect to the service at 127.0.0.1:58000.
+ * A test DynamoDb Local service. Tests can connect to the service at 127.0.0.1:<random_port>.
+ * Use endpointConfiguration to get the service endpoint address:
+ *  DockerDynamoDb.endpointConfiguration.serviceEndpoint
  */
 object DockerDynamoDb : ExternalDependency {
   private val logger = getLogger<DockerDynamoDb>()
@@ -30,6 +33,16 @@ object DockerDynamoDb : ExternalDependency {
       // There is a tolerable chance of flaky tests caused by port collision.
       .port(58000 + (pid % 1000).toInt())
       .build()
+
+  val awsCredentialsProvider: AWSCredentialsProvider =
+      AWSStaticCredentialsProvider(
+          BasicAWSCredentials("key", "secret")
+      )
+
+  val endpointConfiguration = AwsClientBuilder.EndpointConfiguration(
+      url.toString(),
+      Regions.US_WEST_2.toString()
+  )
 
   private val composer = Composer("e-$id", Container {
     // DynamoDB Local listens on port 8000 by default.
@@ -70,19 +83,15 @@ object DockerDynamoDb : ExternalDependency {
 
   override fun shutdown() {
     composer.stop()
+    endpointConfiguration.serviceEndpoint
   }
 
   fun connect(): AmazonDynamoDB {
     return AmazonDynamoDBClientBuilder
         .standard()
         // The values that you supply for the AWS access key and the Region are only used to name the database file.
-        .withCredentials(AWSStaticCredentialsProvider(BasicAWSCredentials("key", "secret")))
-        .withEndpointConfiguration(
-            AwsClientBuilder.EndpointConfiguration(
-                url.toString(),
-                Regions.US_WEST_2.toString()
-            )
-        )
+        .withCredentials(awsCredentialsProvider)
+        .withEndpointConfiguration(endpointConfiguration)
         .build()
   }
 
