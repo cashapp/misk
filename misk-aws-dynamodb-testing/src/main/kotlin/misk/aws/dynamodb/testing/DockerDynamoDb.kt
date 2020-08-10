@@ -83,7 +83,6 @@ object DockerDynamoDb : ExternalDependency {
 
   override fun shutdown() {
     composer.stop()
-    endpointConfiguration.serviceEndpoint
   }
 
   fun connect(): AmazonDynamoDB {
