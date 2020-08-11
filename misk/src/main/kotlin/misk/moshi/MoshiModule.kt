@@ -6,6 +6,7 @@ import com.squareup.moshi.Moshi
 import com.squareup.moshi.adapters.Rfc3339DateJsonAdapter
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import misk.inject.KAbstractModule
+import misk.moshi.adapters.BigDecimalAdapter
 import misk.moshi.okio.ByteStringAdapter
 import misk.moshi.time.InstantAdapter
 import misk.moshi.wire.WireMessageAdapter
@@ -18,6 +19,7 @@ internal class MoshiModule : KAbstractModule() {
     install(MoshiAdapterModule(ByteStringAdapter))
     install(MoshiAdapterModule<Date>(Rfc3339DateJsonAdapter()))
     install(MoshiAdapterModule(InstantAdapter))
+    install(MoshiAdapterModule(BigDecimalAdapter))
   }
 
   @Provides
