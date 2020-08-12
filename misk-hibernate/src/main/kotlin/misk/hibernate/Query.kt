@@ -24,6 +24,8 @@ interface Query<T> {
 
   fun disableCheck(check: Check)
 
+  fun addQueryHint(queryHint: String)
+
   /** Asserts that there is either zero or one results. */
   fun uniqueResult(session: Session): T?
 
@@ -103,6 +105,19 @@ inline fun <T, reified Q : Query<T>> Q.allowTableScan(): Q {
 
 inline fun <T, reified Q : Query<T>> Q.allowFullScatter(): Q {
   this.disableCheck(Check.FULL_SCATTER)
+  return this
+}
+
+/**
+ * Equivalent to Query.addQueryHint, but takes the hint String and returns this. This may be easier
+ * to use with method chaining.
+ *
+ * Passes a query hint with the generated query where possible.
+ * Hints should be used sparingly; generally the optimizer is smart enough without hints.
+ * In general, hints are ignored if they are not applicable to the vendor DB type, or invalid.
+ */
+inline fun <T, reified Q : Query<T>> Q.withQueryHint(hint: String): Q {
+  addQueryHint(hint)
   return this
 }
 

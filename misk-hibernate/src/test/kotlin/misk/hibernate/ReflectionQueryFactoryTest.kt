@@ -910,6 +910,29 @@ class ReflectionQueryFactoryTest {
     assertThat(jurassicCount).isEqualTo(2)
   }
 
+  @Test
+  fun selectWithIndexHints() {
+    val movieId = transacter.allowCowrites().transaction { session ->
+      val jp = DbMovie("Jurassic Park", LocalDate.of(1993, 6, 9))
+      session.save(jp)
+      val jg = DbActor("Jeff Goldblum")
+      session.save(jg)
+      session.save(DbCharacter("Ian Malcolm", jp, jg))
+
+      jp.id
+    }
+
+    val selectResult = transacter.readOnly().transaction { session ->
+      queryFactory.newQuery<CharacterQuery>()
+          .allowFullScatter()
+          .movieId(movieId)
+          .withQueryHint("movie_id_idx")
+          .uniqueResult(session)
+    }
+
+    assertThat(selectResult!!.name).isEqualTo("Ian Malcolm")
+  }
+
   interface OperatorsMovieQuery : Query<DbMovie> {
     @Constraint(path = "name")
     fun name(name: String): OperatorsMovieQuery

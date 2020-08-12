@@ -17,6 +17,7 @@ import java.util.EnumSet
 import javax.inject.Inject
 import javax.inject.Singleton
 import javax.persistence.criteria.CriteriaBuilder
+import javax.persistence.criteria.CriteriaQuery
 import javax.persistence.criteria.Path
 import javax.persistence.criteria.Predicate
 import javax.persistence.criteria.Root
@@ -63,9 +64,14 @@ internal class ReflectionQuery<T : DbEntity<T>>(
   private val orderFactories = mutableListOf<OrderFactory>()
 
   private val disabledChecks: EnumSet<Check> = EnumSet.noneOf(Check::class.java)
+  private val queryHints: MutableSet<String> = mutableSetOf()
 
   override fun disableCheck(check: Check) {
     disabledChecks += check
+  }
+
+  override fun addQueryHint(hintString: String) {
+    queryHints.add(hintString)
   }
 
   override fun dynamicAddConstraint(path: String, operator: Operator, value: Any?) {
@@ -166,6 +172,7 @@ internal class ReflectionQuery<T : DbEntity<T>>(
 
     check(orderFactories.size == 0) { "orderBy shouldn't be used for a delete" }
     check(firstResult == 0) { "firstResult shouldn't be used for a delete" }
+    check(queryHints.isEmpty()) { "queryHints shouldn't be used for a delete" }
 
     val criteriaBuilder = session.hibernateSession.criteriaBuilder
     val criteria = criteriaBuilder.createCriteriaDelete(rootEntityType.java)
@@ -222,7 +229,7 @@ internal class ReflectionQuery<T : DbEntity<T>>(
 
     query.select(selection(criteriaBuilder, queryRoot))
 
-    val typedQuery = session.hibernateSession.createQuery(query)
+    val typedQuery = createTypedQueryWithHint(session, query)
     typedQuery.firstResult = firstResult
     typedQuery.maxResults = effectiveMaxRows(returnList)
     val rows = traceSelect {
@@ -252,7 +259,7 @@ internal class ReflectionQuery<T : DbEntity<T>>(
 
     query.orderBy(buildOrderBys(queryRoot, criteriaBuilder))
 
-    val typedQuery = session.hibernateSession.createQuery(query)
+    val typedQuery = createTypedQueryWithHint(session, query)
     typedQuery.firstResult = firstResult
     typedQuery.maxResults = effectiveMaxRows(returnList)
     val rows = traceSelect {
@@ -262,6 +269,17 @@ internal class ReflectionQuery<T : DbEntity<T>>(
     }
     checkRowCount(returnList, rows.size)
     return rows
+  }
+
+  private fun <T> createTypedQueryWithHint(
+    session: Session,
+    query: CriteriaQuery<T>
+  ): org.hibernate.query.Query<T> {
+    val typedQuery = session.hibernateSession.createQuery(query)
+    for (queryHint in queryHints) {
+      typedQuery.addQueryHint(queryHint)
+    }
+    return typedQuery
   }
 
   override fun count(session: Session): Long {
@@ -280,7 +298,7 @@ internal class ReflectionQuery<T : DbEntity<T>>(
 
     query.select(criteriaBuilder.count(queryRoot))
 
-    val typedQuery = session.hibernateSession.createQuery(query)
+    val typedQuery = createTypedQueryWithHint(session, query)
     return traceSelect {
       session.disableChecks(disabledChecks) {
         typedQuery.singleResult
@@ -441,7 +459,7 @@ internal class ReflectionQuery<T : DbEntity<T>>(
       query.select(select(criteriaBuilder, root))
       query.where(reflectionQuery.buildWherePredicate(root, criteriaBuilder))
       query.orderBy(reflectionQuery.buildOrderBys(root, criteriaBuilder))
-      val typedQuery = session.hibernateSession.createQuery(query)
+      val typedQuery = reflectionQuery.createTypedQueryWithHint(session, query)
       typedQuery.firstResult = reflectionQuery.firstResult
       typedQuery.maxResults = reflectionQuery.effectiveMaxRows(returnList)
       val rows = session.disableChecks(reflectionQuery.disabledChecks) {
