@@ -1,4 +1,4 @@
-name: build
+name: release
 
 on:
   push:
@@ -15,7 +15,7 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: 11
-      - name: install misk-web
+      - name: run misk-web
         run: |
           mkdir ~/.npm-global
           npm config set prefix '~/.npm-global'
@@ -29,9 +29,16 @@ jobs:
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
           restore-keys: ${{ runner.os }}-gradle
       - name: Set gradle version
-        run: echo "version=String.valueOf(project.version).replace(\"-SNAPSHOT\", \"\") + '-$(date +%Y%m%d)-$(git rev-parse --short HEAD)-SNAPSHOT'" > hooks.gradle
+        run: echo "version=String.valueOf(project.version).replace(\"-SNAPSHOT\", \"\") + '-$(date +%Y%m%d.%H%M)-$(git rev-parse --short HEAD)-SNAPSHOT'" > hooks.gradle
       - name: Publish packages
         run: ./gradlew clean uploadArchives
         env:
           ORG_GRADLE_PROJECT_SONATYPE_NEXUS_USERNAME: ${{ secrets.SONATYPE_NEXUS_USERNAME }}
           ORG_GRADLE_PROJECT_SONATYPE_NEXUS_PASSWORD: ${{ secrets.SONATYPE_NEXUS_PASSWORD }}
+          ORG_GRADLE_PROJECT_signingKey: ${{ secrets.ARTIFACT_SIGNING_PRIVATE_KEY }}
+      - name: Close and Promote packages
+        run: ./gradlew closeAndReleaseRepository
+        env:
+          ORG_GRADLE_PROJECT_SONATYPE_NEXUS_USERNAME: ${{ secrets.SONATYPE_NEXUS_USERNAME }}
+          ORG_GRADLE_PROJECT_SONATYPE_NEXUS_PASSWORD: ${{ secrets.SONATYPE_NEXUS_PASSWORD }}
+          ORG_GRADLE_PROJECT_signingKey: ${{ secrets.ARTIFACT_SIGNING_PRIVATE_KEY }}
