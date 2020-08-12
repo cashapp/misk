@@ -63,7 +63,7 @@ ext.dep = [
   "logbackClassic": "ch.qos.logback:logback-classic:1.2.3",
   "logbackJsonCore": "ch.qos.logback.contrib:logback-json-core:0.1.5",
   "loggingApi": "io.github.microutils:kotlin-logging:1.7.9",
-  "mavenPublishGradlePlugin": "com.vanniktech:gradle-maven-publish-plugin:0.9.0",
+  "mavenPublishGradlePlugin": "com.vanniktech:gradle-maven-publish-plugin:0.12.0",
   "mockitoCore": "org.mockito:mockito-core:3.2.4",
   "moshiAdapters": "com.squareup.moshi:moshi-adapters:1.9.2",
   "moshiCore": "com.squareup.moshi:moshi:1.9.2",

@@ -96,9 +96,6 @@ subprojects { subProject ->
       showStandardStreams = false
     }
   }
-  if (rootProject.file("hooks.gradle").exists()) {
-    apply from: rootProject.file("hooks.gradle")
-  }
 
   if (["misk-aws","misk-events","misk-jobqueue","misk-jobqueue-testing","misk-hibernate","misk-hibernate-testing"].contains(name)) {
     rootProject.getTasksByName("testShardHibernate", false).first().dependsOn.add(test)
@@ -108,6 +105,10 @@ subprojects { subProject ->
 
   if (!path.startsWith(":samples") && !path.startsWith(":misk-embedded-sample")) {
     apply plugin: 'com.vanniktech.maven.publish'
+  }
+
+  if (rootProject.file("hooks.gradle").exists()) {
+    apply from: rootProject.file("hooks.gradle")
   }
 
   // Workaround the Gradle bug resolving multiplatform dependencies.
