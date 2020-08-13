@@ -105,6 +105,13 @@ subprojects { subProject ->
 
   if (!path.startsWith(":samples") && !path.startsWith(":misk-embedded-sample")) {
     apply plugin: 'com.vanniktech.maven.publish'
+
+    // Override signing plugin details that maven-publish will use.
+    signing {
+      def signingKey = findProperty("signingKey")
+      def signingPassword = ""
+      useInMemoryPgpKeys(signingKey, signingPassword)
+    }
   }
 
   if (rootProject.file("hooks.gradle").exists()) {
