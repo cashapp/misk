@@ -18,7 +18,6 @@ jobs:
           java-version: 11
       - name: run misk-web
         run: |
-          echo ${{ secrets.SONATYPE_NEXUS_USERNAME }}
           mkdir ~/.npm-global
           npm config set prefix '~/.npm-global'
           PATH=~/.npm-global/bin:$PATH
