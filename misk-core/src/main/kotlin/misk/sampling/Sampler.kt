@@ -1,5 +1,7 @@
 package misk.sampling
 
+import com.google.common.base.Ticker
+import misk.concurrent.Sleeper
 import java.util.concurrent.ThreadLocalRandom
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
@@ -29,21 +31,14 @@ class PercentSampler(
 }
 
 class RateLimitingSampler(
-  val rateLimiter: RateLimiter
+  private val rateLimiter: RateLimiter
 ) : Sampler {
+  constructor(ratePerSecond: Long) : this(RateLimiter.Factory(Ticker.systemTicker(), Sleeper.DEFAULT).create(1))
+
   override fun sample(): Boolean {
     return rateLimiter.tryAcquire(1L, 0, TimeUnit.SECONDS)
   }
-
-  class Factory @Inject constructor(
-    private val rateLimiterFactory: RateLimiter.Factory
-  ) {
-    fun createSampler(ratePerSecond: Long): RateLimitingSampler {
-      return RateLimitingSampler(rateLimiterFactory.create(ratePerSecond))
-    }
-  }
 }
-
 
 /** Sampler that always invokes an action */
 @Singleton
