@@ -33,6 +33,7 @@ class RebalancingInterceptor @Inject constructor(
     }
 
     if (random.current().nextDouble() < probability) {
+      logger.info { "sending 'connection: close' response header for cluster balance" }
       chain.httpCall.setResponseHeader("Connection", "close")
     }
 
