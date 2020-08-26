@@ -6,7 +6,6 @@ import misk.Action
 import misk.exceptions.StatusCode
 import misk.logging.getLogger
 import misk.web.AvailableWhenDegraded
-import misk.web.ConcurrencyLimitsOptOut
 import misk.web.NetworkChain
 import misk.web.NetworkInterceptor
 import java.time.Clock
@@ -63,7 +62,6 @@ internal class ConcurrencyLimitsInterceptor internal constructor(
   class Factory @Inject constructor(val clock: Clock) : NetworkInterceptor.Factory {
     override fun create(action: Action): NetworkInterceptor? {
       if (action.function.findAnnotation<AvailableWhenDegraded>() != null) return null
-      if (action.function.findAnnotation<ConcurrencyLimitsOptOut>() != null) return null
 
       val limiter = SimpleLimiter.Builder()
           .clock { clock.millis() }
