@@ -9,7 +9,7 @@ import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.time.FakeClock
 import misk.time.FakeClockModule
-import misk.web.ConcurrencyLimitsOptOut
+import misk.web.AvailableWhenDegraded
 import misk.web.DispatchMechanism
 import misk.web.FakeHttpCall
 import misk.web.Get
@@ -135,7 +135,7 @@ class ConcurrencyLimitsInterceptorTest {
 
   internal class OptOutAction : WebAction {
     @Get("/important")
-    @ConcurrencyLimitsOptOut
+    @AvailableWhenDegraded
     fun call(): String = "important"
   }
 }
