@@ -52,6 +52,7 @@ object DockerDynamoDb : ExternalDependency {
     withImage("amazon/dynamodb-local")
         .withName(id)
         .withExposedPorts(exposedClientPort)
+        .withCmd("-jar", "DynamoDBLocal.jar", "-sharedDb")
         .withPortBindings(portBindings)
   })
 
