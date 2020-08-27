@@ -127,6 +127,10 @@ internal class SessionFactoryService(
       }
     }
 
+    // Hibernate's TypeConfigurations are heavyweight objects that need to be released when we're
+    // done using them. We found this out the hard way!
+    metadataDraft.typeConfiguration.sessionFactoryClosed(null)
+
     val metadataBuilder = metadataSources.metadataBuilder
 
     // Register custom type adapters so we can have columns for ByteString, Id, etc. This needs to
