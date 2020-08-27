@@ -52,6 +52,8 @@ object DockerDynamoDb : ExternalDependency {
     withImage("amazon/dynamodb-local")
         .withName(id)
         .withExposedPorts(exposedClientPort)
+        // allowing developers to enable dynamoDB streams,
+        // see https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DynamoDBLocal.UsageNotes.html#DynamoDBLocal.CommandLineOptions
         .withCmd("-jar", "DynamoDBLocal.jar", "-sharedDb")
         .withPortBindings(portBindings)
   })
