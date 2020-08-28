@@ -20,7 +20,6 @@ import misk.logging.LogCollector
 import misk.logging.LogCollectorService
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
-import okio.ByteString.Companion.encodeUtf8
 import okio.ByteString.Companion.toByteString
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatCode
@@ -151,37 +150,32 @@ class CryptoModuleTest {
     val testKey = injector.getInstance(AeadKeyManager::class.java)["test"]
 
     // test with encryption context
-    var encryptionContext: Map<String, String>? = mapOf("key1" to "value1")
-    val plaintext = "Hello world!".encodeUtf8()
+    var encryptionContext: ByteArray? = byteArrayOf(1, 2, 3, 4)
+    val plaintext = "Hello world!".toByteArray(Charsets.UTF_8)
     var ciphertext = testKey.encrypt(plaintext, encryptionContext)
     assertThat(testKey.decrypt(ciphertext, encryptionContext)).isEqualTo(plaintext)
-    assertThatThrownBy { testKey.decrypt(ciphertext, emptyMap()) }
-        .hasMessage("expected a non empty map of strings")
+    assertThatThrownBy { testKey.decrypt(ciphertext, byteArrayOf()) }
+        .hasMessage("decryption failed")
     assertThatThrownBy { testKey.decrypt(ciphertext, null) }
-        .hasMessage("expected a non empty map of strings")
-    assertThatThrownBy { testKey.decrypt(ciphertext, mapOf("wrong key" to "wrong value")) }
-        .hasMessage("encryption context doesn't match")
+        .hasMessage("decryption failed")
+    assertThatThrownBy { testKey.decrypt(ciphertext, byteArrayOf(4, 3, 2, 1)) }
+        .hasMessage("decryption failed")
 
     // test with empty encryption context
-    encryptionContext = emptyMap()
+    encryptionContext = byteArrayOf()
     ciphertext = testKey.encrypt(plaintext, encryptionContext)
     assertThat(testKey.decrypt(ciphertext, encryptionContext)).isEqualTo(plaintext)
     assertThat(testKey.decrypt(ciphertext, null)).isEqualTo(plaintext)
-    assertThatThrownBy { testKey.decrypt(ciphertext, mapOf("wrong key" to "wrong value")) }
-        .hasMessage("expected null as encryption context")
+    assertThatThrownBy { testKey.decrypt(ciphertext, byteArrayOf(4, 3, 2, 1)) }
+        .hasMessage("decryption failed")
 
     // test with no encryption context
     encryptionContext = null
     ciphertext = testKey.encrypt(plaintext, encryptionContext)
     assertThat(testKey.decrypt(ciphertext, encryptionContext)).isEqualTo(plaintext)
-    assertThat(testKey.decrypt(ciphertext, emptyMap())).isEqualTo(plaintext)
-    assertThatThrownBy { testKey.decrypt(ciphertext, mapOf("wrong key" to "wrong value")) }
-        .hasMessage("expected null as encryption context")
-
-    // test compatibility with old schema
-    val aad = byteArrayOf()
-    val oldCiphertext = testKey.encrypt(plaintext.toByteArray(), aad)
-    assertThat(testKey.decrypt(oldCiphertext.toByteString(), emptyMap())).isEqualTo(plaintext)
+    assertThat(testKey.decrypt(ciphertext, byteArrayOf())).isEqualTo(plaintext)
+    assertThatThrownBy { testKey.decrypt(ciphertext, byteArrayOf(4, 3, 2, 1)) }
+        .hasMessage("decryption failed")
   }
 
   @Test
@@ -189,38 +183,22 @@ class CryptoModuleTest {
     val keyHandle = KeysetHandle.generateNew(DeterministicAeadKeyTemplates.AES256_SIV)
     val injector = getInjector(listOf(Pair("test", keyHandle)))
     val daead = injector.getInstance(DeterministicAeadKeyManager::class.java)["test"]
-    val plaintext = "plaintext".encodeUtf8()
+    val plaintext = "plaintext".toByteArray(Charsets.UTF_8)
     // with encryption context
-    var encryptionContext: Map<String, String>? = mapOf("key1" to "value1")
+    var encryptionContext: ByteArray? = byteArrayOf(1, 2, 3, 4)
     var ciphertext = daead.encryptDeterministically(plaintext, encryptionContext)
     assertThat(daead.decryptDeterministically(ciphertext, encryptionContext)).isEqualTo(plaintext)
-    assertThatThrownBy { daead.decryptDeterministically(ciphertext, emptyMap())}
-        .hasMessage("expected a non empty map of strings")
-    assertThatThrownBy { daead.decryptDeterministically(ciphertext, null)}
-        .hasMessage("expected a non empty map of strings")
-    assertThatThrownBy { daead.decryptDeterministically(ciphertext, mapOf("wrong key" to "wrong value"))}
-        .hasMessage("encryption context doesn't match")
+    assertThatThrownBy { daead.decryptDeterministically(ciphertext, byteArrayOf())}
+        .hasMessage("decryption failed")
+    assertThatThrownBy { daead.decryptDeterministically(ciphertext, byteArrayOf(4, 3, 2, 1))}
+        .hasMessage("decryption failed")
 
     // test with empty encryption context
-    encryptionContext = emptyMap()
+    encryptionContext = byteArrayOf()
     ciphertext = daead.encryptDeterministically(plaintext, encryptionContext)
     assertThat(daead.decryptDeterministically(ciphertext, encryptionContext)).isEqualTo(plaintext)
-    assertThat(daead.decryptDeterministically(ciphertext, null)).isEqualTo(plaintext)
-    assertThatThrownBy { daead.decryptDeterministically(ciphertext, mapOf("wrong key" to "wrong value")) }
-        .hasMessage("expected null as encryption context")
-
-    // test with no encryption context
-    encryptionContext = null
-    ciphertext = daead.encryptDeterministically(plaintext, encryptionContext)
-    assertThat(daead.decryptDeterministically(ciphertext, encryptionContext)).isEqualTo(plaintext)
-    assertThat(daead.decryptDeterministically(ciphertext, emptyMap())).isEqualTo(plaintext)
-    assertThatThrownBy { daead.decryptDeterministically(ciphertext, mapOf("wrong key" to "wrong value")) }
-        .hasMessage("expected null as encryption context")
-
-    // test compatibility with old schema
-    val aad = byteArrayOf()
-    val oldCiphertext = daead.encryptDeterministically(plaintext.toByteArray(), aad)
-    assertThat(daead.decryptDeterministically(oldCiphertext.toByteString(), emptyMap())).isEqualTo(plaintext)
+    assertThatThrownBy { daead.decryptDeterministically(ciphertext, byteArrayOf(4, 3, 2, 1)) }
+        .hasMessage("decryption failed")
   }
 
   @Test
@@ -229,38 +207,33 @@ class CryptoModuleTest {
     val injector = getInjector(listOf(Pair("test", keyHandle)))
     val hybridEncrypt = injector.getInstance(HybridEncryptKeyManager::class.java)["test"]
     val hybridDecrypt = injector.getInstance(HybridDecryptKeyManager::class.java)["test"]
-    val plaintext = "plaintext".encodeUtf8()
+    val plaintext = "plaintext".toByteArray(Charsets.UTF_8)
     // with encryption context
-    var encryptionContext: Map<String, String>? = mapOf("key1" to "value1")
+    var encryptionContext: ByteArray? = byteArrayOf(1, 2, 3, 4)
     var ciphertext = hybridEncrypt.encrypt(plaintext, encryptionContext)
     assertThat(hybridDecrypt.decrypt(ciphertext, encryptionContext)).isEqualTo(plaintext)
-    assertThatThrownBy { hybridDecrypt.decrypt(ciphertext, emptyMap())}
-        .hasMessage("expected a non empty map of strings")
+    assertThatThrownBy { hybridDecrypt.decrypt(ciphertext, byteArrayOf())}
+        .hasMessage("decryption failed")
     assertThatThrownBy { hybridDecrypt.decrypt(ciphertext, null)}
-        .hasMessage("expected a non empty map of strings")
-    assertThatThrownBy { hybridDecrypt.decrypt(ciphertext, mapOf("wrong key" to "wrong value"))}
-        .hasMessage("encryption context doesn't match")
+        .hasMessage("decryption failed")
+    assertThatThrownBy { hybridDecrypt.decrypt(ciphertext, byteArrayOf(4, 3, 2, 1))}
+        .hasMessage("decryption failed")
 
     // test with empty encryption context
-    encryptionContext = emptyMap()
+    encryptionContext = byteArrayOf()
     ciphertext = hybridEncrypt.encrypt(plaintext, encryptionContext)
     assertThat(hybridDecrypt.decrypt(ciphertext, encryptionContext)).isEqualTo(plaintext)
     assertThat(hybridDecrypt.decrypt(ciphertext, null)).isEqualTo(plaintext)
-    assertThatThrownBy { hybridDecrypt.decrypt(ciphertext, mapOf("wrong key" to "wrong value")) }
-        .hasMessage("expected null as encryption context")
+    assertThatThrownBy { hybridDecrypt.decrypt(ciphertext, byteArrayOf(4, 3, 2, 1)) }
+        .hasMessage("decryption failed")
 
     // test with no encryption context
     encryptionContext = null
     ciphertext = hybridEncrypt.encrypt(plaintext, encryptionContext)
     assertThat(hybridDecrypt.decrypt(ciphertext, encryptionContext)).isEqualTo(plaintext)
-    assertThat(hybridDecrypt.decrypt(ciphertext, emptyMap())).isEqualTo(plaintext)
-    assertThatThrownBy { hybridDecrypt.decrypt(ciphertext, mapOf("wrong key" to "wrong value")) }
-        .hasMessage("expected null as encryption context")
-
-    // test compatibility with old schema
-    val aad = byteArrayOf()
-    val oldCiphertext = hybridEncrypt.encrypt(plaintext.toByteArray(), aad)
-    assertThat(hybridDecrypt.decrypt(oldCiphertext.toByteString(), emptyMap())).isEqualTo(plaintext)
+    assertThat(hybridDecrypt.decrypt(ciphertext, byteArrayOf())).isEqualTo(plaintext)
+    assertThatThrownBy { hybridDecrypt.decrypt(ciphertext, byteArrayOf(4, 3, 2, 1)) }
+        .hasMessage("decryption failed")
   }
 
   @Test
