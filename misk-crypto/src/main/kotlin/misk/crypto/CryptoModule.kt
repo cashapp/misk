@@ -17,6 +17,7 @@ import com.google.crypto.tink.signature.SignatureConfig
 import com.google.crypto.tink.streamingaead.StreamingAeadConfig
 import com.google.inject.Singleton
 import com.google.inject.name.Names
+import misk.crypto.CiphertextFormat.InvalidCiphertextFormatException
 import misk.inject.KAbstractModule
 import okio.ByteString
 import okio.ByteString.Companion.toByteString
@@ -26,7 +27,7 @@ import java.util.Base64
 
 /**
  * Configures and registers the keys listed in the configuration file.
- * Each key is read, decrypted, and then bound via Google Guice and added to the [KeyManager].
+ * Each key is read, decrypted, and then bound via Google Guice and added to a [MappedKeyManager].
  */
 class CryptoModule(
   private val config: CryptoConfig
