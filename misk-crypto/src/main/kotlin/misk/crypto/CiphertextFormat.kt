@@ -5,8 +5,6 @@ import com.google.common.io.ByteStreams
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.DataInputStream
-import java.nio.BufferOverflowException
-import java.nio.ByteBuffer
 import java.security.GeneralSecurityException
 
 /**
@@ -113,32 +111,38 @@ class CiphertextFormat private constructor() {
         return null
       }
 
-      val buffer = ByteBuffer.allocate(Short.MAX_VALUE.toInt())
-      try {
-        buffer.put(encodeVarInt(context.size))
-        context.toSortedMap(compareBy { it }).forEach { (k, v) ->
-          if (k.isEmpty() || v.isEmpty()) {
-            throw InvalidEncryptionContextException("empty key or value")
-          }
-          val key = k.toByteArray(Charsets.UTF_8)
-          val value = v.toByteArray(Charsets.UTF_8)
-          if (key.size >= Short.MAX_VALUE) {
-            throw InvalidEncryptionContextException("key is too long")
-          }
-          if (value.size >= Short.MAX_VALUE) {
-            throw InvalidEncryptionContextException("value is too long")
-          }
-          buffer.put(encodeVarInt(key.size))
-          buffer.put(key)
-          buffer.put(encodeVarInt(value.size))
-          buffer.put(value)
+      val buff = ByteStreams.newDataOutput()
+      val contextSize = encodeVarInt(context.size)
+      var bytesWritten = 0
+      buff.write(contextSize)
+      bytesWritten +=  contextSize.size
+      context.toSortedMap(compareBy { it }).forEach { (k, v) ->
+        if (k.isEmpty() || v.isEmpty()) {
+          throw InvalidEncryptionContextException("empty key or value")
         }
-      } catch (e: BufferOverflowException) {
-        throw InvalidEncryptionContextException("encryption context is too long")
+        val key = k.toByteArray(Charsets.UTF_8)
+        val value = v.toByteArray(Charsets.UTF_8)
+        if (key.size >= Short.MAX_VALUE) {
+          throw InvalidEncryptionContextException("key is too long")
+        }
+        if (value.size >= Short.MAX_VALUE) {
+          throw InvalidEncryptionContextException("value is too long")
+        }
+        val keySize = encodeVarInt(key.size)
+        buff.write(keySize)
+        bytesWritten += keySize.size
+        buff.write(key)
+        bytesWritten += key.size
+        val valueSize = encodeVarInt(value.size)
+        buff.write(valueSize)
+        bytesWritten += valueSize.size
+        buff.write(value)
+        bytesWritten += value.size
+        if (bytesWritten >= Short.MAX_VALUE.toInt()) {
+          throw InvalidEncryptionContextException("encryption context is too long")
+        }
       }
-      val aad = ByteArray(buffer.position())
-      buffer.flip()
-      buffer.get(aad)
+      val aad = buff.toByteArray()
       return aad
     }
 
@@ -178,14 +182,14 @@ class CiphertextFormat private constructor() {
 
     private fun encodeVarInt(integer: Int): ByteArray {
       val list = mutableListOf<Byte>()
-      var int = integer
-      var byte = int and SEPTET
-      while(int shr 7 > 0) {
+      var intValue = integer
+      var byte = intValue and SEPTET
+      while(intValue shr 7 > 0) {
         list.add((byte or HAS_MORE_BIT).toByte())
-        int = int shr 7
-        byte = int and SEPTET
+        intValue = intValue shr 7
+        byte = intValue and SEPTET
       }
-      list.add(int.toByte())
+      list.add(intValue.toByte())
 
       return list.toByteArray()
     }
