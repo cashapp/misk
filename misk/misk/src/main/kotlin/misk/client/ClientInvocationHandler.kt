@@ -15,6 +15,7 @@ import retrofit2.Callback
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
+import retrofit2.converter.protobuf.ProtoConverterFactory
 import retrofit2.converter.wire.WireConverterFactory
 import retrofit2.http.DELETE
 import retrofit2.http.GET
@@ -73,11 +74,13 @@ internal class ClientInvocationHandler(
     val retrofitBuilder = retrofit.newBuilder()
         .client(actionSpecificClient)
 
-    if (tracer != null) retrofitBuilder.callFactory(TracingCallFactory(actionSpecificClient, tracer))
+    if (tracer != null) retrofitBuilder.callFactory(
+        TracingCallFactory(actionSpecificClient, tracer))
 
     val mediaTypes = getEndpointMediaTypes(methodName)
     if (mediaTypes.contains(MediaTypes.APPLICATION_PROTOBUF)) {
       retrofitBuilder.addConverterFactory(WireConverterFactory.create())
+      retrofitBuilder.addConverterFactory(ProtoConverterFactory.create())
     }
     // Always add JSON as default. Ensure it's added last so that other converters get a chance since
     // JSON converter will accept any object.
