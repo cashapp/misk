@@ -44,6 +44,7 @@ dependencies {
   compile dep.openTracingOkHttp
   compile dep.retrofit
   compile dep.retrofitMoshi
+  compile dep.retrofitProtobuf
   compile dep.retrofitWire
   compile dep.jaxbApi
   compile dep.prometheusClient

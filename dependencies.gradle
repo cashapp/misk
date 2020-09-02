@@ -87,6 +87,7 @@ ext.dep = [
   "protoc": "com.google.protobuf:protoc:3.6.1",
   "retrofit": "com.squareup.retrofit2:retrofit:2.8.1",
   "retrofitMoshi": "com.squareup.retrofit2:converter-moshi:2.8.1",
+  "retrofitProtobuf": "com.squareup.retrofit2:converter-protobuf:2.8.1",
   "retrofitWire": "com.squareup.retrofit2:converter-wire:2.8.1",
   "servletApi": "javax.servlet:javax.servlet-api:3.1.0",
   "shadowJarPlugin": "com.github.jengelman.gradle.plugins:shadow:5.1.0",
