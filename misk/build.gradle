@@ -29,6 +29,7 @@ dependencies {
   compile dep.servletApi
   compile dep.jettyAlpnJava
   compile dep.jettyServlet
+  compile dep.jettyServlets
   compile dep.jettyWebsocketServlet
   compile dep.jettyWebsocketServer
   compile dep.kubernetesClient
