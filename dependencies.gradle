@@ -41,6 +41,7 @@ ext.dep = [
   "jettyHttp2": "org.eclipse.jetty.http2:http2-server:9.4.28.v20200408",
   "jettyServer": "org.eclipse.jetty:jetty-server:9.4.28.v20200408",
   "jettyServlet": "org.eclipse.jetty:jetty-servlet:9.4.28.v20200408",
+  "jettyServlets": "org.eclipse.jetty:jetty-servlets:9.4.28.v20200408",
   "jettyUnixSocket": "org.eclipse.jetty:jetty-unixsocket:9.4.28.v20200408",
   "jettyWebsocketServer": "org.eclipse.jetty.websocket:websocket-server:9.4.28.v20200408",
   "jettyWebsocketServlet": "org.eclipse.jetty.websocket:websocket-servlet:9.4.28.v20200408",
