@@ -1,5 +1,6 @@
 package misk.crypto
 
+import com.google.crypto.tink.CleartextKeysetHandle
 import com.google.crypto.tink.JsonKeysetWriter
 import com.google.crypto.tink.KeysetHandle
 import com.google.crypto.tink.KmsClient
@@ -92,6 +93,23 @@ class CryptoModuleTest {
   fun testImportOnlyPublicHybridKey() {
     val keysetHandle = KeysetHandle.generateNew(HybridKeyTemplates.ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM).publicKeysetHandle
     val injector = getInjector(listOf(Pair("test-hybrid", keysetHandle)))
+    val hybridEncryptKeyManager = injector.getInstance(HybridEncryptKeyManager::class.java)
+    assertThat(hybridEncryptKeyManager).isNotNull
+    assertThat(hybridEncryptKeyManager["test-hybrid"]).isNotNull
+  }
+
+  @Test
+  fun testImportUnencryptedHybridPublicKey() {
+    val keysetHandle = KeysetHandle.generateNew(HybridKeyTemplates.ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM).publicKeysetHandle
+    val keyStream = ByteArrayOutputStream()
+    val writer = JsonKeysetWriter.withOutputStream(keyStream)
+    CleartextKeysetHandle.write(keysetHandle, writer)
+    val key = Key("test-hybrid", KeyType.HYBRID_ENCRYPT, object : Secret<String> {
+      override val value: String
+        get() = keyStream.toString(Charsets.UTF_8)
+    })
+    val config = CryptoConfig(listOf(key), "irrelevant")
+    val injector = Guice.createInjector(CryptoTestModule(), CryptoModule(config), DeploymentModule.forTesting())
     val hybridEncryptKeyManager = injector.getInstance(HybridEncryptKeyManager::class.java)
     assertThat(hybridEncryptKeyManager).isNotNull
     assertThat(hybridEncryptKeyManager["test-hybrid"]).isNotNull
