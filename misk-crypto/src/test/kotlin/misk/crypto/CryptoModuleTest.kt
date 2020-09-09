@@ -108,7 +108,7 @@ class CryptoModuleTest {
       override val value: String
         get() = keyStream.toString(Charsets.UTF_8)
     })
-    val config = CryptoConfig(listOf(key), "irrelevant")
+    val config = CryptoConfig(listOf(key), "")
     val injector = Guice.createInjector(CryptoTestModule(), CryptoModule(config), DeploymentModule.forTesting())
     val hybridEncryptKeyManager = injector.getInstance(HybridEncryptKeyManager::class.java)
     assertThat(hybridEncryptKeyManager).isNotNull
@@ -153,10 +153,9 @@ class CryptoModuleTest {
 
     val kh = KeysetHandle.generateNew(AeadKeyTemplates.AES256_CTR_HMAC_SHA256)
     val encryptedKey = generateObsoleteEncryptedKey(kh)
-    val key = Key("name", KeyType.AEAD, encryptedKey)
-    val client = injector.getInstance(KmsClient::class.java) // FakeKmsClient()
-    val kr = KeyReader()
-    kr.readKey(key, "aws-kms://some-uri", client)
+    val key = Key("name", KeyType.AEAD, encryptedKey) // FakeKmsClient()
+    val kr = injector.getInstance(KeyReader::class.java)
+    kr.readKey(key, "aws-kms://some-uri")
     val out = lc.takeMessage()
     assertThat(out).contains("using obsolete key format")
   }
@@ -304,18 +303,18 @@ class CryptoModuleTest {
   @Disabled
   @Test // Currently disabled since the env check is as well
   fun testRaisesInWrongEnv() {
+    val injector = getInjector(listOf())
     val plainKey = Key("name", KeyType.AEAD, MiskConfig.RealSecret(""))
-    val kr = KeyReader()
-    val client = FakeKmsClient()
+    val kr = injector.getInstance(KeyReader::class.java)
 
     assertThatThrownBy {
       // kr.env = Environment.STAGING
-      kr.readKey(plainKey, null, client)
+      kr.readKey(plainKey, null)
     }.isInstanceOf(GeneralSecurityException::class.java)
 
     assertThatThrownBy {
       // kr.env = Environment.PRODUCTION
-      kr.readKey(plainKey, null, client)
+      kr.readKey(plainKey, null)
     }.isInstanceOf(GeneralSecurityException::class.java)
   }
 
