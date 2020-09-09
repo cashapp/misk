@@ -27,6 +27,7 @@ import com.google.crypto.tink.streamingaead.StreamingAeadFactory
 import com.google.inject.Inject
 import com.google.inject.Provider
 import misk.logging.getLogger
+import okio.IOException
 import java.security.GeneralSecurityException
 
 open class KeyReader {
@@ -57,8 +58,8 @@ open class KeyReader {
     }
   }
 
-  fun readKey(key: Key, kmsUri: String?, kmsClient: KmsClient): KeysetHandle {
-    return if (kmsUri != null) {
+  fun readKey(key: Key, kmsUri: String?, kmsClient: KmsClient?): KeysetHandle {
+    return if (kmsUri != null && kmsClient != null) {
       readEncryptedKey(key, kmsUri, kmsClient)
     } else {
       readCleartextKey(key)
@@ -153,7 +154,11 @@ internal class HybridEncryptProvider(
   @Inject lateinit var kmsClient: KmsClient
 
   override fun get(): HybridEncrypt {
-    val keysetHandle = readKey(key, kmsUri, kmsClient)
+    val keysetHandle = try {
+      readKey(key, kmsUri, kmsClient)
+    } catch (e: IOException) {
+      readKey(key, kmsUri = null, kmsClient =  null)
+    }
     val publicKeysetHandle = try {
       keysetHandle.publicKeysetHandle
     } catch (e: GeneralSecurityException) {
