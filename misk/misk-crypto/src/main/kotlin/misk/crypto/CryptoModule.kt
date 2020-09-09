@@ -17,7 +17,6 @@ import com.google.crypto.tink.signature.SignatureConfig
 import com.google.crypto.tink.streamingaead.StreamingAeadConfig
 import com.google.inject.Singleton
 import com.google.inject.name.Names
-import misk.crypto.CiphertextFormat.InvalidCiphertextFormatException
 import misk.inject.KAbstractModule
 import okio.ByteString
 import okio.ByteString.Companion.toByteString
