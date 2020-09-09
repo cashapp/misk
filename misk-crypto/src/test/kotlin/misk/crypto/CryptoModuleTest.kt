@@ -1,5 +1,6 @@
 package misk.crypto
 
+import com.google.crypto.tink.CleartextKeysetHandle
 import com.google.crypto.tink.JsonKeysetWriter
 import com.google.crypto.tink.KeysetHandle
 import com.google.crypto.tink.KmsClient
@@ -98,6 +99,23 @@ class CryptoModuleTest {
   }
 
   @Test
+  fun testImportUnencryptedHybridPublicKey() {
+    val keysetHandle = KeysetHandle.generateNew(HybridKeyTemplates.ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM).publicKeysetHandle
+    val keyStream = ByteArrayOutputStream()
+    val writer = JsonKeysetWriter.withOutputStream(keyStream)
+    CleartextKeysetHandle.write(keysetHandle, writer)
+    val key = Key("test-hybrid", KeyType.HYBRID_ENCRYPT, object : Secret<String> {
+      override val value: String
+        get() = keyStream.toString(Charsets.UTF_8)
+    })
+    val config = CryptoConfig(listOf(key), "")
+    val injector = Guice.createInjector(CryptoTestModule(), CryptoModule(config), DeploymentModule.forTesting())
+    val hybridEncryptKeyManager = injector.getInstance(HybridEncryptKeyManager::class.java)
+    assertThat(hybridEncryptKeyManager).isNotNull
+    assertThat(hybridEncryptKeyManager["test-hybrid"]).isNotNull
+  }
+
+  @Test
   fun testMultipleKeys() {
     val aeadHandle = KeysetHandle.generateNew(AeadKeyTemplates.AES256_GCM)
     val macHandle = KeysetHandle.generateNew(MacKeyTemplates.HMAC_SHA256_256BITTAG)
@@ -135,10 +153,9 @@ class CryptoModuleTest {
 
     val kh = KeysetHandle.generateNew(AeadKeyTemplates.AES256_CTR_HMAC_SHA256)
     val encryptedKey = generateObsoleteEncryptedKey(kh)
-    val key = Key("name", KeyType.AEAD, encryptedKey)
-    val client = injector.getInstance(KmsClient::class.java) // FakeKmsClient()
-    val kr = KeyReader()
-    kr.readKey(key, "aws-kms://some-uri", client)
+    val key = Key("name", KeyType.AEAD, encryptedKey) // FakeKmsClient()
+    val kr = injector.getInstance(KeyReader::class.java)
+    kr.readKey(key, "aws-kms://some-uri")
     val out = lc.takeMessage()
     assertThat(out).contains("using obsolete key format")
   }
@@ -286,18 +303,18 @@ class CryptoModuleTest {
   @Disabled
   @Test // Currently disabled since the env check is as well
   fun testRaisesInWrongEnv() {
+    val injector = getInjector(listOf())
     val plainKey = Key("name", KeyType.AEAD, MiskConfig.RealSecret(""))
-    val kr = KeyReader()
-    val client = FakeKmsClient()
+    val kr = injector.getInstance(KeyReader::class.java)
 
     assertThatThrownBy {
       // kr.env = Environment.STAGING
-      kr.readKey(plainKey, null, client)
+      kr.readKey(plainKey, null)
     }.isInstanceOf(GeneralSecurityException::class.java)
 
     assertThatThrownBy {
       // kr.env = Environment.PRODUCTION
-      kr.readKey(plainKey, null, client)
+      kr.readKey(plainKey, null)
     }.isInstanceOf(GeneralSecurityException::class.java)
   }
 
