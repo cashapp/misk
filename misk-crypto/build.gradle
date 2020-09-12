@@ -1,5 +1,6 @@
 dependencies {
   compile dep.tink
+  compile dep.awsS3
   compile project(':misk')
 
   testCompile project(':misk-testing')

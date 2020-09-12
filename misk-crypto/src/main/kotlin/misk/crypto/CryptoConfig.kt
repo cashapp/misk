@@ -15,9 +15,28 @@ data class CryptoConfig(
    * For AWS users that the Key URI looks like:
    * aws-kms://arn:aws:kms:<region>:<account-id>:key/<key-id>
    */
-  val kms_uri: String
+  val kms_uri: String,
+  /**
+   * The key aliases we want to use from an external key manager
+   */
+  val external_data_keys: Map<KeyAlias, KeyType>?
 ) : Config
 
+/**
+ * external_keys:
+ *   AEAD:
+ *     - key_name_1
+ *     - key_name_2
+ *    HYBRID:
+ *      - key_name_3
+ *
+ *
+ *  external_keys:
+ *     db_key: AEAD
+ *
+ *     event_key: AEAD
+ *     event_post_key: HYBRID
+ */
 /**
  * Describes a specific key
  */
@@ -37,7 +56,11 @@ data class Key(
   /**
    * Path to a file containing the encrypted key material in Tink's JSON format.
    */
-  val encrypted_key: Secret<String>
+  val encrypted_key: Secret<String>,
+  /**
+   * A key-specific KMS uri
+   */
+  val kms_uri: String? = null
 ) : Config
 
 /**

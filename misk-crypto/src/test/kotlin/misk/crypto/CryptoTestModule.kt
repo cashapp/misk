@@ -1,31 +1,45 @@
 package misk.crypto
 
+import com.google.crypto.tink.Aead
+import com.google.crypto.tink.DeterministicAead
+import com.google.crypto.tink.HybridDecrypt
+import com.google.crypto.tink.HybridEncrypt
 import com.google.crypto.tink.KmsClient
-import com.google.inject.Provides
-import com.google.inject.Singleton
-import misk.inject.KAbstractModule
-import misk.logging.LogCollectorModule
+import com.google.crypto.tink.Mac
+import com.google.crypto.tink.PublicKeySign
+import com.google.crypto.tink.PublicKeyVerify
+import com.google.crypto.tink.StreamingAead
 import com.google.crypto.tink.aead.AeadConfig
 import com.google.crypto.tink.daead.DeterministicAeadConfig
 import com.google.crypto.tink.hybrid.HybridConfig
 import com.google.crypto.tink.mac.MacConfig
 import com.google.crypto.tink.signature.SignatureConfig
 import com.google.crypto.tink.streamingaead.StreamingAeadConfig
+import com.google.inject.Singleton
+import com.google.inject.name.Names
+import com.squareup.skim.crypto.FakeExternalKeyManager
 import misk.MiskTestingServiceModule
+import misk.inject.KAbstractModule
+import misk.logging.LogCollectorModule
 
 /**
- * Test module that binds [FakeKmsClient] to be used as the [KmsClient]
+ * This module should be used for testing purposes only.
+ * It generates random keys for each key name specified in the configuration
+ * and uses [FakeKmsClient] instead of a real KMS service.
+ *
+ * This module **will** read the exact same configuration files as the real application,
+ * but **will not** use the key material specified in the configuration.
+ * Instead, it'll generate a random keyset handle for each named key.
  */
-class CryptoTestModule : KAbstractModule() {
+class CryptoTestModule(
+  private val config: CryptoConfig
+) : KAbstractModule() {
+
   override fun configure() {
     install(MiskTestingServiceModule())
     install(LogCollectorModule())
-    install(object : KAbstractModule() {
-      @Provides @Singleton
-      fun getKmsClient(): KmsClient {
-        return FakeKmsClient()
-      }
-    })
+
+    bind<KmsClient>().toInstance(FakeKmsClient())
 
     AeadConfig.register()
     DeterministicAeadConfig.register()
@@ -33,5 +47,68 @@ class CryptoTestModule : KAbstractModule() {
     SignatureConfig.register()
     HybridConfig.register()
     StreamingAeadConfig.register()
+
+    val keys = config.keys ?: return
+
+    val keyManagerBinder = newMultibinder(ExternalKeyManager::class)
+    keyManagerBinder.addBinding().toInstance(FakeExternalKeyManager(keys))
+    config.external_data_keys?.let {
+      keyManagerBinder.addBinding().toInstance(FakeExternalKeyManager(it))
+
+    }
+
+    keys.forEach { key ->
+      when (key.key_type) {
+        KeyType.AEAD -> {
+          bind<Aead>()
+              .annotatedWith(Names.named(key.key_name))
+              .toProvider(AeadEnvelopeProvider(key.key_name))
+              .asEagerSingleton()
+        }
+        KeyType.DAEAD -> {
+          bind<DeterministicAead>()
+              .annotatedWith(Names.named(key.key_name))
+              .toProvider(DeterministicAeadProvider(key.key_name))
+              .asEagerSingleton()
+        }
+        KeyType.MAC -> {
+          bind<Mac>()
+              .annotatedWith(Names.named(key.key_name))
+              .toProvider(MacProvider(key.key_name))
+              .asEagerSingleton()
+        }
+        KeyType.DIGITAL_SIGNATURE -> {
+          bind<PublicKeySign>()
+              .annotatedWith(Names.named(key.key_name))
+              .toProvider(DigitalSignatureSignerProvider(key.key_name))
+              .asEagerSingleton()
+          bind<PublicKeyVerify>()
+              .annotatedWith(Names.named(key.key_name))
+              .toProvider(DigitalSignatureVerifierProvider(key.key_name))
+              .asEagerSingleton()
+        }
+        KeyType.HYBRID_ENCRYPT -> {
+          bind<HybridEncrypt>()
+              .annotatedWith(Names.named(key.key_name))
+              .toProvider(HybridEncryptProvider(key.key_name))
+              .asEagerSingleton()
+        }
+        KeyType.HYBRID_ENCRYPT_DECRYPT -> {
+          bind<HybridDecrypt>()
+              .annotatedWith(Names.named(key.key_name))
+              .toProvider(HybridDecryptProvider(key.key_name))
+              .asEagerSingleton()
+          bind<HybridEncrypt>()
+              .annotatedWith(Names.named(key.key_name))
+              .toProvider(HybridEncryptProvider(key.key_name))
+              .asEagerSingleton()
+        }
+        KeyType.STREAMING_AEAD ->
+          bind<StreamingAead>()
+              .annotatedWith(Names.named(key.key_name))
+              .toProvider(StreamingAeadProvider(key.key_name))
+              .`in`(Singleton::class.java)
+      }
+    }
   }
 }
