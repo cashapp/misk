@@ -18,9 +18,7 @@ import com.google.crypto.tink.streamingaead.StreamingAeadConfig
 import com.google.inject.Singleton
 import com.google.inject.name.Names
 import com.squareup.skim.crypto.FakeExternalKeyManager
-import misk.MiskTestingServiceModule
 import misk.inject.KAbstractModule
-import misk.logging.LogCollectorModule
 
 /**
  * This module should be used for testing purposes only.
@@ -36,8 +34,6 @@ class CryptoTestModule(
 ) : KAbstractModule() {
 
   override fun configure() {
-    install(MiskTestingServiceModule())
-    install(LogCollectorModule())
 
     bind<KmsClient>().toInstance(FakeKmsClient())
 
