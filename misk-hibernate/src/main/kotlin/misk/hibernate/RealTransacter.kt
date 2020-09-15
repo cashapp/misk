@@ -16,10 +16,12 @@ import misk.tracing.traceWithSpan
 import org.hibernate.FlushMode
 import org.hibernate.SessionFactory
 import org.hibernate.StaleObjectStateException
+import org.hibernate.exception.ConstraintViolationException
 import org.hibernate.exception.LockAcquisitionException
 import java.io.Closeable
 import java.sql.Connection
 import java.sql.SQLException
+import java.sql.SQLIntegrityConstraintViolationException
 import java.sql.SQLRecoverableException
 import java.sql.SQLTransientException
 import java.time.Duration
@@ -232,16 +234,25 @@ internal class RealTransacter private constructor(
           session.postCommit()
           result
         } catch (e: Throwable) {
+          var rethrow = e
+          if (config.type == DataSourceType.TIDB && e.cause is SQLIntegrityConstraintViolationException) {
+            // TiDB in optimistic transaction mode enforces uniqueness constraints at COMMIT rather
+            // than INSERT. Hibernate doesn't know how to interpret this exception, so we unwrap
+            // it manually.
+            val sqlException = e.cause as SQLIntegrityConstraintViolationException
+            rethrow = ConstraintViolationException(sqlException.message, sqlException, "")
+          }
+
           if (transaction.isActive) {
             try {
               maybeWithTracing(DB_ROLLBACK_SPAN_NAME) {
                 transaction.rollback()
               }
             } catch (suppressed: Exception) {
-              e.addSuppressed(suppressed)
+              rethrow.addSuppressed(suppressed)
             }
           }
-          throw e
+          throw rethrow
         }
       }
     }
