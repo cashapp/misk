@@ -2,6 +2,7 @@ package misk.events
 
 import misk.hibernate.Gid
 import misk.hibernate.Session
+import java.sql.Connection
 
 /**
  * A [SpooledProducer] is a producer that writes events to a local spool stored within a
@@ -28,4 +29,11 @@ interface SpooledProducer {
    * @param session Session for the database transaction the event should be spooled in.
    */
   fun publishUnsharded(session: Session, topic: Topic, vararg event: Event)
+
+  /**
+   * Publishes events to an unsharded spool.
+   *
+   * @param connection Connection for the database transaction the event should be spooled in.
+   */
+  fun publishUnsharded(connection: Connection, topic: Topic, vararg event: Event)
 }
