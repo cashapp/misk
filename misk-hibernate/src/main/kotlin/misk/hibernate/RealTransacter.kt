@@ -352,7 +352,8 @@ internal class RealTransacter private constructor(
   }
 
   private fun isMessageRetryable(th: SQLException) =
-      isConnectionClosed(th) || isVitessTransactionNotFound(th) || isCockroachRestartTransaction(th)
+      isConnectionClosed(th) || isVitessTransactionNotFound(th) ||
+          isCockroachRestartTransaction(th) || isTidbWriteConflict(th)
 
   /**
    * This is thrown as a raw SQLException from Hikari even though it is most certainly a
@@ -389,6 +390,15 @@ internal class RealTransacter private constructor(
     val message = th.message
     return th.errorCode == 40001 && message != null &&
         message.contains("restart transaction")
+  }
+
+  /**
+   * "Transactions in TiKV encounter write conflicts". This can happen when optimistic transaction
+   * mode is on. Conflicts are detected during transaction commit
+   * https://docs.pingcap.com/tidb/dev/tidb-faq#error-9007-hy000-write-conflict
+   */
+  private fun isTidbWriteConflict(th: SQLException): Boolean {
+    return th.errorCode == 9007
   }
 
   private fun isCauseRetryable(th: Throwable) = th.cause?.let { isRetryable(it) } ?: false
