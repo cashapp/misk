@@ -267,7 +267,7 @@ internal class RealTransacter private constructor(
       // write-write conflicts fail at COMMIT rather than waiting on a lock.
       e.cause is SQLException && isTidbWriteConflict(e.cause as SQLException) -> {
         val sqlException = e.cause as SQLException
-        return ConstraintViolationException(sqlException.message, sqlException, "")
+        return OptimisticLockException(sqlException.message, sqlException, "")
       }
       else -> return e
     }
@@ -367,8 +367,7 @@ internal class RealTransacter private constructor(
   }
 
   private fun isMessageRetryable(th: SQLException) =
-      isConnectionClosed(th) || isVitessTransactionNotFound(th) ||
-          isCockroachRestartTransaction(th) || isTidbWriteConflict(th)
+      isConnectionClosed(th) || isVitessTransactionNotFound(th) || isCockroachRestartTransaction(th)
 
   /**
    * This is thrown as a raw SQLException from Hikari even though it is most certainly a
