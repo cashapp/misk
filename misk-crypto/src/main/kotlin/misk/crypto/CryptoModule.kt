@@ -39,8 +39,7 @@ class CryptoModule(
 ) : KAbstractModule() {
 
   override fun configure() {
-    // no keys? no worries! exit early
-    requireBinding(KmsClient::class.java)
+    requireBinding<KmsClient>()
 
     AeadConfig.register()
     DeterministicAeadConfig.register()
@@ -51,14 +50,16 @@ class CryptoModule(
 
     var keyNames = listOf<KeyAlias>()
 
+    // Various key providers should exist in the same namespace
     val keyManagerBinder = newMultibinder(ExternalKeyManager::class)
 
     // Parse and include all local keys first
     config.keys?.let { keys ->
-
       keyManagerBinder.addBinding().toInstance(LocalConfigKeyProvider(keys, config.kms_uri))
 
-      keys.forEach { bindKeyToProvider(it.key_name, it.key_type) }
+      keys.forEach {
+        bindKeyToProvider(it.key_name, it.key_type)
+      }
 
       keyNames = keys.map { it.key_name }
       val duplicateNames = keyNames - keyNames.distinct().toList()
@@ -69,6 +70,8 @@ class CryptoModule(
 
     // Include all configured remote keys
     config.external_data_keys?.let { external_data_keys ->
+      requireBinding<AmazonS3>()
+
       keyManagerBinder.addBinding().toProvider(object : Provider<ExternalKeyManager> {
         @Inject lateinit var env: Deployment
         @Inject lateinit var s3: AmazonS3
@@ -76,18 +79,16 @@ class CryptoModule(
           return S3ExternalKeyManager(env, s3, external_data_keys)
         }
       })
-    }
 
-    config.external_data_keys?.let { external_data_keys ->
       val internalAndExternal = keyNames.intersect(external_data_keys.keys)
       check(internalAndExternal.isEmpty()) {
         "Found keys that are marked as both provided in resources, and provided externally: [$internalAndExternal]"
       }
-    }
 
-    // External keys use a KMS key per keyset
-    config.external_data_keys?.forEach { alias, type ->
-      bindKeyToProvider(alias, type)
+      external_data_keys.forEach { (alias, type) ->
+        // External keys use a KMS key per keyset
+        bindKeyToProvider(alias, type)
+      }
     }
 
   }

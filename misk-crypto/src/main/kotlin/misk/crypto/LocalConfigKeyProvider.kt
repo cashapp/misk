@@ -2,8 +2,15 @@ package misk.crypto
 
 import com.google.crypto.tink.KeysetHandle
 
-class LocalConfigKeyProvider(private val keys: List<Key>, private val kmsUri: String) :
-    ExternalKeyManager {
+/**
+ * [LocalConfigKeyProvider] provides keys that are stored locally and proetcted by a single KMS
+ * key.
+ */
+class LocalConfigKeyProvider(
+  private val keys: List<Key>,
+  private val kmsUri: String
+) : ExternalKeyManager {
+
   override val allKeyAliases: Map<KeyAlias, KeyType> =
       keys.map { key -> key.key_name to key.key_type }.toMap()
 

@@ -294,6 +294,7 @@ class CryptoModuleTest {
   @Test
   fun testBasicExternal() {
     val name = "extern"
+    val keysetHandle = KeysetHandle.generateNew(StreamingAeadKeyTemplates.AES256_GCM_HKDF_4KB)
     val injector = getInjector(listOf(), mapOf(name to KeyType.DAEAD))
     val kr = injector.getInstance(KeyReader::class.java)
     assertThat(kr.readKey(name)).isNotNull

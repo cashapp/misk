@@ -50,7 +50,6 @@ class CryptoTestModule(
     keyManagerBinder.addBinding().toInstance(FakeExternalKeyManager(keys))
     config.external_data_keys?.let {
       keyManagerBinder.addBinding().toInstance(FakeExternalKeyManager(it))
-
     }
 
     keys.forEach { key ->

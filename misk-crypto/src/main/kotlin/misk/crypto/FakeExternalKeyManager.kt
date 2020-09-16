@@ -23,6 +23,7 @@ class FakeExternalKeyManager : ExternalKeyManager {
   override val allKeyAliases: Map<KeyAlias, KeyType>
     get() = returnedKeysets.map { it.key to it.value.key_type }.toMap()
 
+  // Mock remote keys
   constructor(aliases: Map<KeyAlias, KeyType>) {
     aliases.forEach { (alias, type) ->
       val template = when (type) {
@@ -33,7 +34,6 @@ class FakeExternalKeyManager : ExternalKeyManager {
         KeyType.DIGITAL_SIGNATURE -> SignatureKeyTemplates.ECDSA_P256
         KeyType.HYBRID_ENCRYPT -> HybridKeyTemplates.ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM
         KeyType.HYBRID_ENCRYPT_DECRYPT -> HybridKeyTemplates.ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM
-        else -> DeterministicAeadKeyTemplates.AES256_SIV
       }
       val handle = KeysetHandle.generateNew(template)
 
@@ -46,6 +46,7 @@ class FakeExternalKeyManager : ExternalKeyManager {
     }
   }
 
+  // Mock local keys
   constructor(rawKeys: List<Key>) {
     rawKeys.forEach {
       returnedKeysets[it.key_name] = it

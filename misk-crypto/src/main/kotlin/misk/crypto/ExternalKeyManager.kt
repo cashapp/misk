@@ -29,6 +29,8 @@ interface ExternalKeyManager {
   /**
    * Register a callback to be invoked when a key is updated, such in the case of key rotations or
    * new keys.
+   *
+   * Returns true if the callback was registered, or false if the operation is unsupported
    */
   fun onKeyUpdated(cb: (KeyAlias, KeysetHandle) -> Unit): Boolean
 }

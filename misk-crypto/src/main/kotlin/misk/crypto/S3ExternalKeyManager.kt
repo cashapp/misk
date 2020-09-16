@@ -36,9 +36,10 @@ class S3ExternalKeyManager(
   override val allKeyAliases: Map<KeyAlias, KeyType>
 ) : ExternalKeyManager {
 
-  // By default, this will look for a bucket with the same name as the deployment environment.
-  // Bind a new namer to give it a different name
-  @Inject(optional = true) private var bucketNamer: BucketNameSource = object : BucketNameSource {
+  // By default, look for a bucket with the same name as the deployment environment.
+  // Bind a new name source to give it a different name
+  @Inject(optional = true)
+  private var bucketNamer: BucketNameSource = object : BucketNameSource {
     override fun getBucketName(deployment: Deployment) = deployment.name.toLowerCase()
   }
 
@@ -79,8 +80,6 @@ class S3ExternalKeyManager(
       }
     }
   }
-
-//  override fun allKeyAliases(): List<KeyAlias> = keyAliases
 
   override fun getKeyByAlias(alias: KeyAlias) = keys[alias]
 

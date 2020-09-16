@@ -35,7 +35,7 @@ open class KeyReader {
 
   @Inject lateinit var kmsClient: KmsClient
 
-  @Inject lateinit var externalKeyManager: Set<ExternalKeyManager>
+  @Inject lateinit var keySources: Set<ExternalKeyManager>
 
   private val logger by lazy { getLogger<KeyReader>() }
 
@@ -61,7 +61,7 @@ open class KeyReader {
   }
 
   fun readKey(alias: KeyAlias): KeysetHandle {
-    val key = externalKeyManager.mapNotNull { it.getKeyByAlias(alias) }.first()
+    val key = keySources.mapNotNull { it.getKeyByAlias(alias) }.first()
     return if (key.kms_uri != null) {
       readEncryptedKey(key)
     } else {
