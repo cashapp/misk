@@ -21,6 +21,9 @@ import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
+import java.util.concurrent.Callable
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicInteger
 import javax.inject.Inject
 import kotlin.test.assertFailsWith
@@ -758,6 +761,39 @@ abstract class TransacterTest {
         "\\(attempt 2, same connection\\), will retry after a PT.*S delay")
     assertThat(logs[2]).matches(
         "retried Movies transaction succeeded \\(attempt 3, same connection\\)")
+  }
+
+  @Test
+  fun concurrentUpdates() {
+    transacter.transaction { session ->
+      session.save(DbMovie("Star Wars", LocalDate.of(1975, 5, 25)))
+    }
+
+    val txnEntryLatch = CountDownLatch(2)
+    val txnExitLatch = CountDownLatch(2)
+
+    val asyncWrite = Callable {
+      transacter.transaction { session ->
+        txnEntryLatch.countDown()
+        val movie = queryFactory.newQuery(MovieQuery::class)
+            .name("Star Wars")
+            .uniqueResult(session)!!
+        movie.release_date = LocalDate.of(movie.release_date!!.year + 1, 5, 25)
+        txnExitLatch.countDown()
+      }
+    }
+
+    val futureResults = Executors.newFixedThreadPool(2)
+        .invokeAll(listOf(asyncWrite, asyncWrite))
+        .map { it.get() }
+
+    assertThat(futureResults).hasSize(2)
+
+    val movies = transacter.transaction { session ->
+      queryFactory.newQuery(MovieQuery::class).list(session)
+    }
+    assertThat(movies.size).isEqualTo(1)
+    assertThat(movies[0].release_date == LocalDate.of(1977, 5, 25))
   }
 
   private fun tracingAssertions(committed: Boolean) {
