@@ -235,12 +235,8 @@ internal class RealTransacter private constructor(
           result
         } catch (e: Throwable) {
           var rethrow = e
-          if (config.type == DataSourceType.TIDB && e.cause is SQLIntegrityConstraintViolationException) {
-            // TiDB in optimistic transaction mode enforces uniqueness constraints at COMMIT rather
-            // than INSERT. Hibernate doesn't know how to interpret this exception, so we unwrap
-            // it manually.
-            val sqlException = e.cause as SQLIntegrityConstraintViolationException
-            rethrow = ConstraintViolationException(sqlException.message, sqlException, "")
+          if (config.type == DataSourceType.TIDB) {
+            rethrow = mapTidbException(e)
           }
 
           if (transaction.isActive) {
@@ -255,6 +251,25 @@ internal class RealTransacter private constructor(
           throw rethrow
         }
       }
+    }
+  }
+
+  private fun mapTidbException(e: Throwable): Throwable {
+    // Special handling for TiDB in optimistic transaction mode, because some queries that would
+    // fail or wait would succeed in this mode, only to fail on COMMIT instead. Hibernate doesn't
+    // know how to interpret these exceptions coming from COMMIT, so we unwrap manually.
+    when {
+      // uniqueness constraints are enforced at COMMIT rather than INSERT.
+      e.cause is SQLIntegrityConstraintViolationException -> {
+        val sqlException = e.cause as SQLIntegrityConstraintViolationException
+        return ConstraintViolationException(sqlException.message, sqlException, "")
+      }
+      // write-write conflicts fail at COMMIT rather than waiting on a lock.
+      e.cause is SQLException && isTidbWriteConflict(e.cause as SQLException) -> {
+        val sqlException = e.cause as SQLException
+        return ConstraintViolationException(sqlException.message, sqlException, "")
+      }
+      else -> return e
     }
   }
 
@@ -352,7 +367,8 @@ internal class RealTransacter private constructor(
   }
 
   private fun isMessageRetryable(th: SQLException) =
-      isConnectionClosed(th) || isVitessTransactionNotFound(th) || isCockroachRestartTransaction(th)
+      isConnectionClosed(th) || isVitessTransactionNotFound(th) ||
+          isCockroachRestartTransaction(th) || isTidbWriteConflict(th)
 
   /**
    * This is thrown as a raw SQLException from Hikari even though it is most certainly a
@@ -389,6 +405,15 @@ internal class RealTransacter private constructor(
     val message = th.message
     return th.errorCode == 40001 && message != null &&
         message.contains("restart transaction")
+  }
+
+  /**
+   * "Transactions in TiKV encounter write conflicts". This can happen when optimistic transaction
+   * mode is on. Conflicts are detected during transaction commit
+   * https://docs.pingcap.com/tidb/dev/tidb-faq#error-9007-hy000-write-conflict
+   */
+  private fun isTidbWriteConflict(th: SQLException): Boolean {
+    return th.errorCode == 9007
   }
 
   private fun isCauseRetryable(th: Throwable) = th.cause?.let { isRetryable(it) } ?: false
