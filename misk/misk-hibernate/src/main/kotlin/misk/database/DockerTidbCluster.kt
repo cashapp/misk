@@ -166,6 +166,7 @@ class DockerTidbCluster(
 
     if (containerId == null) {
       logger.info("Starting TiDB cluster")
+      stopContainerOnExit = true
       containerId = docker.createContainerCmd(IMAGE)
           .withCmd(cmd.toList())
           .withVolumes(confVolume)
@@ -239,9 +240,15 @@ class DockerTidbCluster(
   }
 
   override fun stop() {
-    logger.info("Leaving TiDB docker container running in the background. " +
-        "If you need to kill it because you messed up migrations or something use:" +
-        "\n\tdocker kill ${CONTAINER_NAME}")
+    if (stopContainerOnExit) {
+      logger.info("Stopping container because I started it, " +
+          "if you want to leave tidb running in the background run:\n" +
+          "\tdocker run -d -p 4000:4000 -p 10080:10080 $IMAGE")
+      val containerId = containerId
+      if (containerId != null) {
+        docker.killContainerCmd(containerId);
+      }
+    }
   }
 
   class LogContainerResultCallback : ResultCallbackTemplate<LogContainerResultCallback, Frame>() {
