@@ -8,7 +8,7 @@ import misk.cloud.aws.AwsRegion
 import misk.inject.KAbstractModule
 import javax.inject.Singleton
 
-class RealS3Module constructor() : KAbstractModule() {
+class RealS3Module: KAbstractModule() {
   override fun configure() {
     requireBinding<AWSCredentialsProvider>()
     requireBinding<AwsRegion>()

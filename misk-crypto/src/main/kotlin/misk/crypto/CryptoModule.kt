@@ -20,6 +20,7 @@ import com.google.crypto.tink.streamingaead.StreamingAeadConfig
 import com.google.inject.Singleton
 import com.google.inject.Inject
 import com.google.inject.Provider
+import com.google.inject.TypeLiteral
 import com.google.inject.name.Named
 import com.google.inject.name.Names
 import misk.environment.Deployment
@@ -72,13 +73,11 @@ class CryptoModule(
     config.external_data_keys?.let { external_data_keys ->
       requireBinding<AmazonS3>()
 
-      keyManagerBinder.addBinding().toProvider(object : Provider<ExternalKeyManager> {
-        @Inject lateinit var env: Deployment
-        @Inject lateinit var s3: AmazonS3
-        override fun get(): ExternalKeyManager {
-          return S3ExternalKeyManager(env, s3, external_data_keys)
-        }
-      })
+      bind(object : TypeLiteral<Map<KeyAlias, KeyType>>() {})
+          .annotatedWith(Names.named("all key aliases"))
+          .toInstance(external_data_keys)
+
+      keyManagerBinder.addBinding().to<S3ExternalKeyManager>()
 
       val internalAndExternal = keyNames.intersect(external_data_keys.keys)
       check(internalAndExternal.isEmpty()) {
@@ -247,3 +246,4 @@ fun Mac.verifyMac(tag: String, data: String) {
   }
   this.verifyMac(decodedTag, data.toByteArray())
 }
+

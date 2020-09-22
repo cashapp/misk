@@ -4,8 +4,9 @@ import com.amazonaws.services.s3.AmazonS3
 import com.amazonaws.services.s3.model.AmazonS3Exception
 import com.google.crypto.tink.KeysetHandle
 import com.google.inject.Inject
+import com.google.inject.name.Named
 import misk.config.MiskConfig
-import misk.environment.Deployment
+import misk.environment.Env
 import misk.logging.getLogger
 
 /**
@@ -30,18 +31,19 @@ import misk.logging.getLogger
  *
  *  If a requested key alias does not exist, this will raise a [ExternalKeyManagerException]
  */
-class S3ExternalKeyManager(
-  private val env: Deployment,
-  private val s3: AmazonS3,
-  override val allKeyAliases: Map<KeyAlias, KeyType>
-) : ExternalKeyManager {
+class S3ExternalKeyManager @Inject constructor(
+  private val env: Env,
 
-  // By default, look for a bucket with the same name as the deployment environment.
-  // Bind a new name source to give it a different name
+  private val s3: AmazonS3,
+
+  @Named("all key aliases")
+  override val allKeyAliases: Map<KeyAlias, KeyType>,
+
   @Inject(optional = true)
-  private var bucketNamer: BucketNameSource = object : BucketNameSource {
-    override fun getBucketName(deployment: Deployment) = deployment.name.toLowerCase()
+  private var bucketNameSource: BucketNameSource = object : BucketNameSource {
+    override fun getBucketName(env: Env) = env.name.toLowerCase()
   }
+) : ExternalKeyManager {
 
   private val logger by lazy { getLogger<S3ExternalKeyManager>() }
 
@@ -51,34 +53,36 @@ class S3ExternalKeyManager(
 
   private fun objectPath(alias: String) = "$alias/${s3.regionName.toLowerCase()}"
 
-  private var keys: LinkedHashMap<String, Key> = linkedMapOf()
+  private fun getRemoteKey(alias: KeyAlias, type: KeyType): Key {
+    val path = objectPath(alias)
+    val name = bucketNameSource.getBucketName(env)
+    try {
+      val obj = s3.getObject(name, path)
 
-  private fun makeKmsUri(arn: String) = "aws-kms://$arn"
+      val kmsArn = obj.objectMetadata.getUserMetaDataOf(metadataKeyKmsArn)
+      val keyTypeDescription = obj.objectMetadata.getUserMetaDataOf(metadataKeyKeyType)
 
-  init {
-    allKeyAliases.forEach { (alias, type) ->
-      try {
-        val path = objectPath(alias)
-        val obj = s3.getObject(bucketNamer.getBucketName(env), path)
-
-        val kmsUri = makeKmsUri(obj.objectMetadata.getUserMetaDataOf(metadataKeyKmsArn))
-        val keyTypeDescription = obj.objectMetadata.getUserMetaDataOf(metadataKeyKeyType)
-
-        val keyType = KeyType.valueOf(keyTypeDescription.toUpperCase())
-        if (keyType != type) {
-          throw ExternalKeyManagerException("type provided does not match type of remote key")
-        }
-
-        val keyContents = obj.objectContent.readAllBytes().toString(Charsets.UTF_8)
-        val key = Key(alias, keyType, MiskConfig.RealSecret(keyContents), kmsUri)
-
-        keys[alias] = key
-
-        logger.info { "registered external key $alias" }
-      } catch (ex: AmazonS3Exception) {
-        throw ExternalKeyManagerException("key alias not accessible: $alias ($ex)")
+      val keyType = KeyType.valueOf(keyTypeDescription.toUpperCase())
+      if (keyType != type) {
+        throw ExternalKeyManagerException("type provided does not match type of remote key")
       }
+
+      val keyContents = obj.objectContent.readAllBytes().toString(Charsets.UTF_8)
+      return Key(alias, keyType, MiskConfig.RealSecret(keyContents), kmsArn)
+    } catch (ex: AmazonS3Exception) {
+      throw ExternalKeyManagerException("key alias not accessible: $alias (bucket '$name', $ex)")
     }
+  }
+
+  // Injector tests initialize key managers in non-native environments, so we delegate creation
+  // until needed.
+  private val keys: LinkedHashMap<String, Key> by lazy {
+    val retrievedKeys = linkedMapOf<String,Key>()
+    allKeyAliases.mapValues { (alias, type) ->
+      logger.info { "registering external key: $alias" }
+      getRemoteKey(alias, type)
+    }.toMap(retrievedKeys)
+    retrievedKeys
   }
 
   override fun getKeyByAlias(alias: KeyAlias) = keys[alias]

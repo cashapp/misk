@@ -1,10 +1,10 @@
 package misk.crypto
 
-import misk.environment.Deployment
+import misk.environment.Env
 
 /**
  * Bind this to an instance to control how external buckets are referenced.
  */
 interface BucketNameSource {
-  fun getBucketName(deployment: Deployment): String
+  fun getBucketName(env: Env): String
 }
