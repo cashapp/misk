@@ -1,7 +1,6 @@
 package misk.crypto
 
 import com.google.inject.Provides
-import com.squareup.skim.crypto.FakeExternalKeyManager
 import misk.environment.Deployment
 import misk.inject.KAbstractModule
 
