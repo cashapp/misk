@@ -60,25 +60,6 @@ class AdminDashboardModule(private val isDevelopment: Boolean) : KAbstractModule
         resourcePath = "classpath:/web/_tab/admin-dashboard/@misk/"
     ))
 
-    // Config
-    install(WebActionModule.create<ConfigMetadataAction>())
-    multibind<DashboardTab>().toProvider(
-        DashboardTabProvider<AdminDashboard, AdminDashboardAccess>(
-            slug = "config",
-            url_path_prefix = "/_admin/config/",
-            name = "Config",
-            category = "Container Admin"
-        ))
-    install(WebTabResourceModule(
-        isDevelopment = isDevelopment,
-        slug = "config",
-        web_proxy_url = "http://localhost:3200/"
-    ))
-    multibind<DashboardNavbarItem>().toInstance(DashboardNavbarItem<AdminDashboard>(
-      item = "<a href=\"/_admin/config/\">Config</a>",
-      order = 105
-    ))
-
     // Web Actions
     install(WebActionModule.create<WebActionMetadataAction>())
     multibind<DashboardTab>().toProvider(
