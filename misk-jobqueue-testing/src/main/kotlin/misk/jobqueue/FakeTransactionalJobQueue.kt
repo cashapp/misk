@@ -1,5 +1,7 @@
 package misk.jobqueue
 
+import misk.backoff.FlatBackoff
+import misk.backoff.retry
 import misk.hibernate.Gid
 import misk.hibernate.Session
 import misk.tokens.TokenGenerator
@@ -73,7 +75,8 @@ class FakeTransactionalJobQueue @Inject constructor(
   /** Returns all jobs that were handled. */
   fun handleJobs(
     queueName: QueueName,
-    assertAcknowledged: Boolean = true
+    assertAcknowledged: Boolean = true,
+    retries: Int = 1
   ): List<FakeJob> {
     val jobHandler = jobHandlers.get()[queueName]!!
     val jobs = jobQueues[queueName] ?: return listOf()
@@ -81,7 +84,7 @@ class FakeTransactionalJobQueue @Inject constructor(
     val result = mutableListOf<FakeJob>()
     while (true) {
       val job = jobs.poll() ?: break
-      jobHandler.handleJob(job)
+      retry(retries, FlatBackoff(Duration.ofMillis(20))) { jobHandler.handleJob(job) }
       result += job
       if (assertAcknowledged) {
         check(job.acknowledged) { "Expected $job to be acknowledged after handling" }
