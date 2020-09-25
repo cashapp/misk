@@ -13,7 +13,12 @@ import com.google.crypto.tink.daead.DeterministicAeadConfig
 import com.google.crypto.tink.hybrid.HybridConfig
 import com.google.crypto.tink.mac.MacConfig
 import com.google.crypto.tink.signature.SignatureConfig
+import com.google.inject.Singleton
 import com.google.inject.name.Names
+import misk.crypto.pgp.PgpDecrypter
+import misk.crypto.pgp.PgpDecrypterProvider
+import misk.crypto.pgp.PgpEncrypter
+import misk.crypto.pgp.PgpEncrypterProvider
 import misk.inject.KAbstractModule
 
 /**
@@ -84,6 +89,18 @@ class CryptoTestModule(
               .annotatedWith(Names.named(key.key_name))
               .toProvider(HybridEncryptProvider(key, null))
               .asEagerSingleton()
+        }
+        KeyType.PGP_DECRYPT -> {
+          bind<PgpDecrypter>()
+              .annotatedWith(Names.named(key.key_name))
+              .toProvider(PgpDecrypterProvider(key, null))
+              .`in`(Singleton::class.java)
+        }
+        KeyType.PGP_ENCRYPT -> {
+          bind<PgpEncrypter>()
+              .annotatedWith(Names.named(key.key_name))
+              .toProvider(PgpEncrypterProvider(key))
+              .`in`(Singleton::class.java)
         }
       }
     }
