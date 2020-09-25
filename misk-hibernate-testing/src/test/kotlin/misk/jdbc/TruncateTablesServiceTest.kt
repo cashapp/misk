@@ -50,7 +50,6 @@ internal class TruncateTablesServiceTest {
         connection.createStatement().use { statement ->
           statement.execute("INSERT INTO movies (name) VALUES ('Star Wars')")
           statement.execute("INSERT INTO movies (name) VALUES ('Jurassic Park')")
-          statement.execute("COMMIT")
         }
       }
     }
