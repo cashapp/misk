@@ -31,11 +31,10 @@ internal class TruncateTablesServiceTest {
   @BeforeEach
   internal fun setUp() {
     // Manually truncate because we don't use TruncateTablesService to test itself!
-    sessionFactory.openSession().use { session ->
-      session.doReturningWork { connection ->
+    transacter.transaction { session ->
+      session.useConnection { connection ->
         val statement = connection.createStatement()
-        statement.addBatch("DELETE FROM movies")
-        statement.executeBatch()
+        statement.execute("DELETE FROM movies")
       }
     }
   }
@@ -46,10 +45,13 @@ internal class TruncateTablesServiceTest {
     assertThat(rowCount("movies")).isEqualTo(0)
 
     // Insert some data.
-    sessionFactory.openSession().doWork { connection ->
-      connection.createStatement().use { statement ->
-        statement.execute("INSERT INTO movies (name) VALUES ('Star Wars')")
-        statement.execute("INSERT INTO movies (name) VALUES ('Jurassic Park')")
+    transacter.transaction {session ->
+      session.useConnection { connection ->
+        connection.createStatement().use { statement ->
+          statement.execute("INSERT INTO movies (name) VALUES ('Star Wars')")
+          statement.execute("INSERT INTO movies (name) VALUES ('Jurassic Park')")
+          statement.execute("COMMIT")
+        }
       }
     }
     assertThat(rowCount("schema_version")).isGreaterThan(0)
