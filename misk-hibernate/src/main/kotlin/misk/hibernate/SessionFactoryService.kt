@@ -3,6 +3,7 @@ package misk.hibernate
 import com.google.common.base.Stopwatch
 import com.google.common.util.concurrent.AbstractIdleService
 import misk.jdbc.DataSourceConnector
+import misk.jdbc.DataSourceType
 import misk.logging.getLogger
 import okio.ByteString
 import org.hibernate.SessionFactory
@@ -89,6 +90,13 @@ internal class SessionFactoryService(
       applySetting(AvailableSettings.USE_GET_GENERATED_KEYS, "true")
       applySetting(AvailableSettings.USE_NEW_ID_GENERATOR_MAPPINGS, "false")
       applySetting(AvailableSettings.JDBC_TIME_ZONE, "UTC")
+      if (config.type != DataSourceType.VITESS && config.type != DataSourceType.VITESS_MYSQL) {
+        // This tells Hibernate that autocommit is always false, so Hibernate won't try to set it
+        // for every transaction.
+        // https://vladmihalcea.com/why-you-should-always-use-hibernate-connection-provider_disables_autocommit-for-resource-local-jpa-transactions/
+        // This setting doesn't seem to work with Vitess though...
+        applySetting(AvailableSettings.CONNECTION_PROVIDER_DISABLES_AUTOCOMMIT, "true")
+      }
       if (config.query_timeout != null) {
         applySetting("javax.persistence.query.timeout", Integer.valueOf(
             config.query_timeout.toMillis().toInt()))
