@@ -94,7 +94,7 @@ object ScaleSafetyChecks {
   /**
    * Turn on MySQL general_log so that we can inspect it in the detectors.
    */
-  internal fun turnOnSqlGeneralLogging(connection: Connection) {
+  fun turnOnSqlGeneralLogging(connection: Connection) {
     connection.createStatement().use { statement ->
       statement.execute("SET GLOBAL log_output = 'TABLE'")
       statement.execute("SET GLOBAL general_log = 1")
