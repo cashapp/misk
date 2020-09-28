@@ -68,6 +68,28 @@ internal class ReflectionQuery<T : DbEntity<T>>(
     disabledChecks += check
   }
 
+  override fun <Q: Query<*>> clone(): Q {
+    val copy = ReflectionQuery(
+        this.queryClass,
+        this.rootEntityType,
+        this.queryMethodHandlers,
+        this.tracer,
+        this.queryLimitsConfig
+    )
+    if (copy.maxRows != -1) {
+      copy.maxRows = this.maxRows
+    }
+    if (copy.firstResult != 0) {
+      copy.firstResult = this.firstResult
+    }
+    copy.constraints.addAll(this.constraints)
+    copy.orderFactories.addAll(this.orderFactories)
+    copy.disabledChecks.addAll(this.disabledChecks)
+
+    @Suppress("UNCHECKED_CAST")
+    return copy.toProxy() as Q
+  }
+
   override fun dynamicAddConstraint(path: String, operator: Operator, value: Any?) {
     val pathList = path.split('.')
     addConstraint(pathList, operator, value)
