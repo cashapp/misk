@@ -2,6 +2,7 @@ package misk.hibernate
 
 import ch.qos.logback.classic.Level
 import com.google.common.collect.Iterables.getOnlyElement
+import io.netty.handler.proxy.ProxyHandler
 import misk.hibernate.Operator.LT
 import misk.logging.LogCollector
 import misk.testing.MiskTest
@@ -9,6 +10,7 @@ import misk.testing.MiskTestModule
 import misk.time.FakeClock
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import java.lang.reflect.Proxy
 import java.time.Duration.ofSeconds
 import java.time.LocalDate
 import javax.inject.Inject
@@ -908,6 +910,39 @@ class ReflectionQueryFactoryTest {
           .count(session)
     }
     assertThat(jurassicCount).isEqualTo(2)
+  }
+
+  @Test
+  fun queryCanBeCloned() {
+    transacter.allowCowrites().transaction { session ->
+      session.save(DbMovie("Jurassic Park", LocalDate.of(1993, 6, 9)))
+      session.save(DbMovie("Jurassic Park: The Lost World", LocalDate.of(1997, 5, 19)))
+      session.save(DbMovie("Star Wars", LocalDate.of(1977, 5, 25)))
+    }
+
+    val original = queryFactory.newQuery<OperatorsMovieQuery>()
+        .allowFullScatter()
+        .allowTableScan()
+        .constraint { root -> like(root.get("name"), "Jurassic%") }
+
+    val clone = original.clone<OperatorsMovieQuery>()
+
+    // Original and cloned queries should provide the same result
+    assertThat(transacter.transaction { session ->
+      original.count(session)
+    }).isEqualTo(2)
+    assertThat(transacter.transaction { session ->
+      clone.count(session)
+    }).isEqualTo(2)
+
+    // Modify the cloned query. The original query should be unchanged
+    clone.constraint { root -> like(root.get("name"), "%World") }
+    assertThat(transacter.transaction { session ->
+      original.count(session)
+    }).isEqualTo(2)
+    assertThat(transacter.transaction { session ->
+      clone.count(session)
+    }).isEqualTo(1)
   }
 
   interface OperatorsMovieQuery : Query<DbMovie> {

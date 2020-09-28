@@ -2,6 +2,7 @@ package misk.hibernate.pagination
 
 import misk.hibernate.DbEntity
 import misk.hibernate.Query
+import misk.hibernate.ReflectionQuery
 import misk.hibernate.Session
 
 internal class RealPager<T : DbEntity<T>, Q: Query<T>>(
@@ -19,6 +20,8 @@ internal class RealPager<T : DbEntity<T>, Q: Query<T>>(
   }
 
   override fun nextPage(session: Session): Page<T>? {
+    @Suppress("UNCHECKED_CAST")
+    val query = query.clone<Q>()
     paginator.applyOffset(query, nextOffset)
     val (contents, hasNext) = query.listWithHasNext(session, pageSize)
     nextOffset = if (hasNext) {
