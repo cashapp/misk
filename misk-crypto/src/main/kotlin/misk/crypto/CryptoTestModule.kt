@@ -16,7 +16,12 @@ import com.google.crypto.tink.mac.MacConfig
 import com.google.crypto.tink.signature.SignatureConfig
 import com.google.crypto.tink.streamingaead.StreamingAeadConfig
 import com.google.inject.Singleton
+import com.google.inject.Singleton
 import com.google.inject.name.Names
+import misk.crypto.pgp.PgpDecrypter
+import misk.crypto.pgp.PgpDecrypterProvider
+import misk.crypto.pgp.PgpEncrypter
+import misk.crypto.pgp.PgpEncrypterProvider
 import misk.inject.KAbstractModule
 
 /**
@@ -97,11 +102,24 @@ class CryptoTestModule(
               .toProvider(HybridEncryptProvider(key.key_name))
               .asEagerSingleton()
         }
-        KeyType.STREAMING_AEAD ->
+        KeyType.STREAMING_AEAD -> {
           bind<StreamingAead>()
               .annotatedWith(Names.named(key.key_name))
               .toProvider(StreamingAeadProvider(key.key_name))
               .`in`(Singleton::class.java)
+        }
+        KeyType.PGP_DECRYPT -> {
+          bind<PgpDecrypter>()
+              .annotatedWith(Names.named(key.key_name))
+              .toProvider(PgpDecrypterProvider(key.key_name))
+              .`in`(Singleton::class.java)
+        }
+        KeyType.PGP_ENCRYPT -> {
+          bind<PgpEncrypter>()
+              .annotatedWith(Names.named(key.key_name))
+              .toProvider(PgpEncrypterProvider(key.key_name))
+              .`in`(Singleton::class.java)
+        }
       }
     }
   }

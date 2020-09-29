@@ -5,7 +5,6 @@ import com.google.crypto.tink.Aead
 import com.google.crypto.tink.DeterministicAead
 import com.google.crypto.tink.HybridDecrypt
 import com.google.crypto.tink.HybridEncrypt
-import com.google.crypto.tink.KeysetHandle
 import com.google.crypto.tink.KmsClient
 import com.google.crypto.tink.Mac
 import com.google.crypto.tink.PublicKeySign
@@ -23,12 +22,16 @@ import com.google.inject.Provider
 import com.google.inject.TypeLiteral
 import com.google.inject.name.Named
 import com.google.inject.name.Names
-import misk.environment.Deployment
+import misk.crypto.pgp.PgpDecrypter
+import misk.crypto.pgp.PgpDecrypterProvider
+import misk.crypto.pgp.PgpEncrypter
+import misk.crypto.pgp.PgpEncrypterProvider
 import misk.inject.KAbstractModule
 import okio.ByteString
 import okio.ByteString.Companion.toByteString
-import java.lang.IllegalArgumentException
+import org.bouncycastle.jce.provider.BouncyCastleProvider
 import java.security.GeneralSecurityException
+import java.security.Security
 import java.util.Base64
 
 /**
@@ -48,6 +51,7 @@ class CryptoModule(
     SignatureConfig.register()
     HybridConfig.register()
     StreamingAeadConfig.register()
+    Security.addProvider(BouncyCastleProvider())
 
     var keyNames = listOf<KeyAlias>()
 
@@ -144,9 +148,20 @@ class CryptoModule(
             .toProvider(StreamingAeadProvider(alias))
             .`in`(Singleton::class.java)
       }
+      KeyType.PGP_DECRYPT -> {
+        bind<PgpDecrypter>()
+            .annotatedWith(Names.named(alias))
+            .toProvider(PgpDecrypterProvider(alias))
+            .`in`(Singleton::class.java)
+      }
+      KeyType.PGP_ENCRYPT -> {
+        bind<PgpEncrypter>()
+            .annotatedWith(Names.named(alias))
+            .toProvider(PgpEncrypterProvider(alias))
+            .`in`(Singleton::class.java)
+      }
     }
   }
-
 }
 
 /**
@@ -246,4 +261,3 @@ fun Mac.verifyMac(tag: String, data: String) {
   }
   this.verifyMac(decodedTag, data.toByteArray())
 }
-

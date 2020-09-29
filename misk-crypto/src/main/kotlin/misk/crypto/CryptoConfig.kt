@@ -54,7 +54,8 @@ data class Key(
    */
   val key_type: KeyType,
   /**
-   * Path to a file containing the encrypted key material in Tink's JSON format.
+   * In config it's the path to a file containing the encrypted key material in Tink's JSON format.
+   * However MiskConfig will read the contents of the file, so this variable is file's contents.
    */
   val encrypted_key: Secret<String>,
   /**
@@ -73,5 +74,7 @@ enum class KeyType {
   DIGITAL_SIGNATURE,
   HYBRID_ENCRYPT,
   HYBRID_ENCRYPT_DECRYPT,
-  STREAMING_AEAD
+  STREAMING_AEAD,
+  PGP_DECRYPT,
+  PGP_ENCRYPT
 }

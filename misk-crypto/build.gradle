@@ -1,4 +1,5 @@
 dependencies {
+  compile dep.bouncycastlePgp
   compile dep.tink
   compile dep.awsS3
   compile project(':misk')
