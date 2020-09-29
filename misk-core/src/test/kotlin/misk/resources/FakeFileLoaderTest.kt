@@ -21,8 +21,7 @@ class FakeFileLoaderTest {
   }
 
   @Test fun fileDoesNotExist() {
-    assertThat(loader.exists("filesystem:/does/not/exist"))
-        .isFalse()
+    assertThat(loader.exists("filesystem:/does/not/exist")).isFalse()
     assertThat(loader.utf8("filesystem:/does/not/exist")).isNull()
   }
 

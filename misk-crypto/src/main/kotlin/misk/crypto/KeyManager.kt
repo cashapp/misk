@@ -13,6 +13,8 @@ import com.google.inject.Inject
 import com.google.inject.Injector
 import com.google.inject.Key
 import com.google.inject.name.Names
+import misk.crypto.pgp.PgpDecrypter
+import misk.crypto.pgp.PgpEncrypter
 import java.security.GeneralSecurityException
 import javax.inject.Singleton
 
@@ -168,3 +170,31 @@ class KeyNotFoundException(
 class StreamingAeadKeyManager @Inject constructor(
   injector: Injector
 ) : MappedKeyManager<StreamingAead>(injector, StreamingAead::class.java)
+
+/**
+ * Holds a map of every [PgpEncrypter] key name to its primitive listed in the
+ * configuration for this app.
+ *
+ * * Users may use this object to obtain an [PgpEncrypter] dynamically:
+ * ```
+ * val myKey: PgpEncrypter = pgpEncrypterManager["myKey"]
+ * ```
+ */
+@Singleton
+class PgpEncrypterManager @Inject constructor(
+  injector: Injector
+) : MappedKeyManager<PgpEncrypter>(injector, PgpEncrypter::class.java)
+
+/**
+ * Holds a map of every [PgpDecrypter] key name to its primitive listed in the
+ * configuration for this app.
+ *
+ * * Users may use this object to obtain an [PgpDecrypter] dynamically:
+ * ```
+ * val myKey: PgpDecrypter = pgpDecrypterManager["myKey"]
+ * ```
+ */
+@Singleton
+class PgpDecrypterManager @Inject constructor(
+  injector: Injector
+) : MappedKeyManager<PgpDecrypter>(injector, PgpDecrypter::class.java)

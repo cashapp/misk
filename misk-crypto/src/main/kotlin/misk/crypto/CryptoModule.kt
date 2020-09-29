@@ -17,11 +17,16 @@ import com.google.crypto.tink.signature.SignatureConfig
 import com.google.crypto.tink.streamingaead.StreamingAeadConfig
 import com.google.inject.Singleton
 import com.google.inject.name.Names
+import misk.crypto.pgp.PgpDecrypter
+import misk.crypto.pgp.PgpDecrypterProvider
+import misk.crypto.pgp.PgpEncrypter
+import misk.crypto.pgp.PgpEncrypterProvider
 import misk.inject.KAbstractModule
 import okio.ByteString
 import okio.ByteString.Companion.toByteString
-import java.lang.IllegalArgumentException
+import org.bouncycastle.jce.provider.BouncyCastleProvider
 import java.security.GeneralSecurityException
+import java.security.Security
 import java.util.Base64
 
 /**
@@ -42,6 +47,7 @@ class CryptoModule(
     SignatureConfig.register()
     HybridConfig.register()
     StreamingAeadConfig.register()
+    Security.addProvider(BouncyCastleProvider())
 
     val keyNames = config.keys.map { it.key_name }
     val duplicateNames = keyNames - keyNames.distinct().toList()
@@ -101,6 +107,18 @@ class CryptoModule(
               .toProvider(StreamingAeadProvider(key, config.kms_uri))
               .`in`(Singleton::class.java)
         }
+        KeyType.PGP_DECRYPT -> {
+          bind<PgpDecrypter>()
+              .annotatedWith(Names.named(key.key_name))
+              .toProvider(PgpDecrypterProvider(key, config.kms_uri))
+              .`in`(Singleton::class.java)
+        }
+        KeyType.PGP_ENCRYPT -> {
+          bind<PgpEncrypter>()
+              .annotatedWith(Names.named(key.key_name))
+              .toProvider(PgpEncrypterProvider(key))
+              .`in`(Singleton::class.java)
+        }
       }
     }
   }
@@ -156,7 +174,7 @@ fun Aead.decrypt(ciphertext: ByteString, aad: ByteArray? = null): ByteString {
 fun DeterministicAead.encryptDeterministically(
   plaintext: ByteString,
   aad: ByteArray? = null
-) : ByteString {
+): ByteString {
   val plaintextBytes = plaintext.toByteArray()
   val encrypted = this.encryptDeterministically(plaintextBytes, aad ?: byteArrayOf())
   plaintextBytes.fill(0)
@@ -177,7 +195,7 @@ fun DeterministicAead.encryptDeterministically(
 fun DeterministicAead.decryptDeterministically(
   ciphertext: ByteString,
   aad: ByteArray? = null
-) : ByteString {
+): ByteString {
   val decryptedBytes = this.decryptDeterministically(ciphertext.toByteArray(), aad)
   val decrypted = decryptedBytes.toByteString()
   decryptedBytes.fill(0)

@@ -1,4 +1,5 @@
 dependencies {
+  compile dep.bouncycastlePgp
   compile dep.tink
   compile project(':misk')
 
