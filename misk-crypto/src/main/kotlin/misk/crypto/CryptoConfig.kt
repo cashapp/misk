@@ -23,21 +23,6 @@ data class CryptoConfig(
 ) : Config
 
 /**
- * external_keys:
- *   AEAD:
- *     - key_name_1
- *     - key_name_2
- *    HYBRID:
- *      - key_name_3
- *
- *
- *  external_keys:
- *     db_key: AEAD
- *
- *     event_key: AEAD
- *     event_post_key: HYBRID
- */
-/**
  * Describes a specific key
  */
 data class Key(

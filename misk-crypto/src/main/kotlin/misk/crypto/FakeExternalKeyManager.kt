@@ -11,6 +11,7 @@ import com.google.crypto.tink.signature.SignatureKeyTemplates
 import com.google.crypto.tink.streamingaead.StreamingAeadKeyTemplates
 import misk.config.MiskConfig
 import java.io.ByteArrayOutputStream
+import java.lang.UnsupportedOperationException
 import java.nio.charset.Charset
 
 class FakeExternalKeyManager : ExternalKeyManager {
@@ -30,6 +31,8 @@ class FakeExternalKeyManager : ExternalKeyManager {
         KeyType.DIGITAL_SIGNATURE -> SignatureKeyTemplates.ECDSA_P256
         KeyType.HYBRID_ENCRYPT -> HybridKeyTemplates.ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM
         KeyType.HYBRID_ENCRYPT_DECRYPT -> HybridKeyTemplates.ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM
+        KeyType.PGP_DECRYPT, KeyType.PGP_ENCRYPT ->
+          throw UnsupportedOperationException("fake manager doesn't support pgp keys")
       }
       val handle = KeysetHandle.generateNew(template)
 

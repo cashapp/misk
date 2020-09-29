@@ -5,16 +5,10 @@ import com.google.crypto.tink.CleartextKeysetHandle
 import com.google.crypto.tink.DeterministicAead
 import com.google.crypto.tink.HybridDecrypt
 import com.google.crypto.tink.HybridEncrypt
-import com.google.crypto.tink.JsonKeysetReader
-import com.google.crypto.tink.KeysetHandle
 import com.google.crypto.tink.KmsClient
 import com.google.crypto.tink.Mac
 import com.google.crypto.tink.PublicKeySign
 import com.google.crypto.tink.PublicKeyVerify
-import com.google.crypto.tink.mac.MacFactory
-import com.google.crypto.tink.proto.KeyTemplate
-import com.google.crypto.tink.signature.PublicKeySignFactory
-import com.google.crypto.tink.signature.PublicKeyVerifyFactory
 import com.google.crypto.tink.JsonKeysetReader
 import com.google.crypto.tink.KeysetHandle
 import com.google.crypto.tink.StreamingAead
@@ -32,7 +26,6 @@ import com.google.crypto.tink.streamingaead.StreamingAeadFactory
 import com.google.inject.Inject
 import com.google.inject.Provider
 import misk.logging.getLogger
-import okio.IOException
 import java.security.GeneralSecurityException
 
 open class KeyReader {
@@ -68,12 +61,16 @@ open class KeyReader {
   }
 
   fun readKey(alias: KeyAlias): KeysetHandle {
-    val key = keySources.mapNotNull { it.getKeyByAlias(alias) }.first()
+    val key = getRawKey(alias)
     return if (key.kms_uri != null) {
       readEncryptedKey(key)
     } else {
       readCleartextKey(key)
     }
+  }
+
+  protected fun getRawKey(alias: KeyAlias): Key {
+    return keySources.mapNotNull { it.getKeyByAlias(alias) }.first()
   }
 }
 

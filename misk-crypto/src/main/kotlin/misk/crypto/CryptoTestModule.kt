@@ -15,14 +15,14 @@ import com.google.crypto.tink.hybrid.HybridConfig
 import com.google.crypto.tink.mac.MacConfig
 import com.google.crypto.tink.signature.SignatureConfig
 import com.google.crypto.tink.streamingaead.StreamingAeadConfig
-import com.google.inject.Singleton
-import com.google.inject.Singleton
 import com.google.inject.name.Names
 import misk.crypto.pgp.PgpDecrypter
 import misk.crypto.pgp.PgpDecrypterProvider
 import misk.crypto.pgp.PgpEncrypter
 import misk.crypto.pgp.PgpEncrypterProvider
 import misk.inject.KAbstractModule
+import org.bouncycastle.jce.provider.BouncyCastleProvider
+import java.security.Security
 
 /**
  * This module should be used for testing purposes only.
@@ -34,7 +34,7 @@ import misk.inject.KAbstractModule
  * Instead, it'll generate a random keyset handle for each named key.
  */
 class CryptoTestModule(
-  private val config: CryptoConfig
+  private val config: CryptoConfig? = null
 ) : KAbstractModule() {
 
   override fun configure() {
@@ -47,7 +47,9 @@ class CryptoTestModule(
     SignatureConfig.register()
     HybridConfig.register()
     StreamingAeadConfig.register()
+    Security.addProvider(BouncyCastleProvider())
 
+    config ?: return
     val keys = config.keys ?: return
 
     val keyManagerBinder = newMultibinder(ExternalKeyManager::class)
@@ -106,19 +108,19 @@ class CryptoTestModule(
           bind<StreamingAead>()
               .annotatedWith(Names.named(key.key_name))
               .toProvider(StreamingAeadProvider(key.key_name))
-              .`in`(Singleton::class.java)
+              .asEagerSingleton()
         }
         KeyType.PGP_DECRYPT -> {
           bind<PgpDecrypter>()
               .annotatedWith(Names.named(key.key_name))
               .toProvider(PgpDecrypterProvider(key.key_name))
-              .`in`(Singleton::class.java)
+              .asEagerSingleton()
         }
         KeyType.PGP_ENCRYPT -> {
           bind<PgpEncrypter>()
               .annotatedWith(Names.named(key.key_name))
               .toProvider(PgpEncrypterProvider(key.key_name))
-              .`in`(Singleton::class.java)
+              .asEagerSingleton()
         }
       }
     }

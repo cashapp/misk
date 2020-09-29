@@ -38,9 +38,8 @@ import java.util.Base64
 class CryptoModuleTest {
   @Suppress("unused")
   @MiskTestModule
-  val module: Module? = Modules.combine(
-      MiskTestingServiceModule(),
-      CryptoTestModule(CryptoConfig(null, "", null)))
+  val module: Module? = Modules.combine(MiskTestingServiceModule(),
+      CryptoTestModule())
 
   @Test
   fun testImportAeadKey() {
@@ -294,7 +293,6 @@ class CryptoModuleTest {
   @Test
   fun testBasicExternal() {
     val name = "extern"
-    val keysetHandle = KeysetHandle.generateNew(StreamingAeadKeyTemplates.AES256_GCM_HKDF_4KB)
     val injector = getInjector(listOf(), mapOf(name to KeyType.DAEAD))
     val kr = injector.getInstance(KeyReader::class.java)
     assertThat(kr.readKey(name)).isNotNull
@@ -341,8 +339,7 @@ class CryptoModuleTest {
       Key(it.first, keyType, generateEncryptedKey(it.second), "aws-kms://uri")
     }
     val config = CryptoConfig(keys, "test_master_key", external.orEmpty())
-    return Guice.createInjector(
-        DeploymentModule.forTesting(), CryptoTestModule(config))
+    return Guice.createInjector( DeploymentModule.forTesting(), CryptoTestModule(config))
   }
 
   private fun getInjectorWithKeys(keys: List<Key>): Injector {
