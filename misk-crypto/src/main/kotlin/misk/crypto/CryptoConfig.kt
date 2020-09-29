@@ -19,7 +19,7 @@ data class CryptoConfig(
   /**
    * The key aliases we want to use from an external key manager
    */
-  val external_data_keys: Map<KeyAlias, KeyType>?
+  val external_data_keys: Map<KeyAlias, KeyType>? = null
 ) : Config
 
 /**

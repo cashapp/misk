@@ -3,7 +3,7 @@ package misk.crypto
 import com.google.crypto.tink.KeysetHandle
 
 /**
- * [LocalConfigKeyProvider] provides keys that are stored locally and proetcted by a single KMS
+ * [LocalConfigKeyProvider] provides keys that are stored locally and protected by a single KMS
  * key.
  */
 class LocalConfigKeyProvider(
