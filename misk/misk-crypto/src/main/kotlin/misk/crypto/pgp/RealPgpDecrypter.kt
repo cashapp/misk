@@ -12,6 +12,14 @@ import org.bouncycastle.openpgp.jcajce.JcaPGPObjectFactory
 import org.bouncycastle.openpgp.operator.jcajce.JcePublicKeyDataDecryptorFactoryBuilder
 import org.bouncycastle.util.io.Streams
 
+/**
+ * RealPgpDecrypter is a simple PGP decryption helper.
+ * The implementation makes a  couple key assumptions:
+ * - The input data is public key encrypted.
+ * - The input data contains only ONE encrypted payload.
+ * - The first OR second packet in the input must be the encryption method packet.
+ * - No signature verification.
+ */
 internal class RealPgpDecrypter(
   private val privateKeys: Map<Long, PGPPrivateKey>
 ) : PgpDecrypter {
@@ -26,6 +34,7 @@ internal class RealPgpDecrypter(
       else -> jcaPGPObjectFactory.nextObject() as PGPEncryptedDataList
     }
 
+    // Assuming that the first element in the EncryptedDataList is public key encrypted.
     val pgpPublicKeyEncryptedData =
         pgpEncryptedDataList.encryptedDataObjects.next() as PGPPublicKeyEncryptedData
 
