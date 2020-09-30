@@ -56,5 +56,4 @@ class FakeExternalKeyManager : ExternalKeyManager {
     return returnedKeysets[alias]
   }
 
-  override fun onKeyUpdated(cb: (KeyAlias, KeysetHandle) -> Unit) = false
 }

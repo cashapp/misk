@@ -2,7 +2,6 @@ package misk.crypto
 
 import com.amazonaws.services.s3.AmazonS3
 import com.amazonaws.services.s3.model.AmazonS3Exception
-import com.google.crypto.tink.KeysetHandle
 import com.google.inject.Inject
 import com.google.inject.name.Named
 import misk.config.MiskConfig
@@ -87,5 +86,4 @@ class S3ExternalKeyManager @Inject constructor(
 
   override fun getKeyByAlias(alias: KeyAlias) = keys[alias]
 
-  override fun onKeyUpdated(cb: (KeyAlias, KeysetHandle) -> Unit) = false
 }
