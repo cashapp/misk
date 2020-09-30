@@ -49,8 +49,7 @@ internal class RealPgpEncrypter(
 
     val pgpEncryptedDataGenerator = PGPEncryptedDataGenerator(jcePGPDataEncryptorBuilder)
     val keyEncryptionMethodGenerator = JcePublicKeyKeyEncryptionMethodGenerator(encryptionKey)
-        .setProvider(BouncyCastleProvider())
-        .setSecureRandom(SecureRandom())
+        .setProvider("BC")
     pgpEncryptedDataGenerator.addMethod(keyEncryptionMethodGenerator)
 
     val bytes = byteArrayOutputStream.toByteArray()
