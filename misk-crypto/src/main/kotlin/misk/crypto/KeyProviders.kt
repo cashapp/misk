@@ -37,7 +37,7 @@ open class KeyReader {
 
   @Inject lateinit var keySources: Set<ExternalKeyManager>
 
-  private val logger by lazy { getLogger<KeyReader>() }
+  private val logger = getLogger<KeyReader>()
 
   private fun readCleartextKey(key: Key): KeysetHandle {
     // TODO: Implement a clean check to throw if we are running in prod or staging. Checking for

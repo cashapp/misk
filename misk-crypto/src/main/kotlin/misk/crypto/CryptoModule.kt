@@ -55,10 +55,13 @@ class CryptoModule(
 
     var keyNames = listOf<KeyAlias>()
 
-    // Various key providers should exist in the same namespace
+    /* All the key providers in this multibinder share a namespace. For example, a key with a given
+     * name can only exist in one of the providers. This makes migrating keys between stores less
+     * error-prone.
+     */
     val keyManagerBinder = newMultibinder(ExternalKeyManager::class)
 
-    // Parse and include all local keys first
+    /* Parse and include all local keys first. */
     config.keys?.let { keys ->
       keyManagerBinder.addBinding().toInstance(LocalConfigKeyProvider(keys, config.kms_uri))
 
@@ -73,12 +76,12 @@ class CryptoModule(
       }
     }
 
-    // Include all configured remote keys
+    /* Include all configured remotely-provided keys. */
     config.external_data_keys?.let { external_data_keys ->
       requireBinding<AmazonS3>()
 
       bind(object : TypeLiteral<Map<KeyAlias, KeyType>>() {})
-          .annotatedWith(Names.named("all key aliases"))
+          .annotatedWith(Names.named("all_key_aliases"))
           .toInstance(external_data_keys)
 
       keyManagerBinder.addBinding().to<S3ExternalKeyManager>()

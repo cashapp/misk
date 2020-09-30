@@ -17,7 +17,8 @@ data class CryptoConfig(
    */
   val kms_uri: String,
   /**
-   * The key aliases we want to use from an external key manager
+   * The key references (map of alias to type) of keys we want to use that are loaded from an
+   * external key source, such as an S3 bucket.
    */
   val external_data_keys: Map<KeyAlias, KeyType>? = null
 ) : Config
@@ -34,17 +35,20 @@ data class Key(
    * ```
    */
   val key_name: String,
+
   /**
-   * Type of Tink primitive to initialize
+   * Type of Tink primitive to initialize.
    */
   val key_type: KeyType,
+
   /**
    * In config it's the path to a file containing the encrypted key material in Tink's JSON format.
    * However MiskConfig will read the contents of the file, so this variable is file's contents.
    */
   val encrypted_key: Secret<String>,
+
   /**
-   * A key-specific KMS uri
+   * A key-specific, and region-specific KMS uri that was used to encrypt this key.
    */
   val kms_uri: String? = null
 ) : Config

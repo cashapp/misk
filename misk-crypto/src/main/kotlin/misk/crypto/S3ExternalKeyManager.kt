@@ -36,7 +36,7 @@ class S3ExternalKeyManager @Inject constructor(
 
   private val s3: AmazonS3,
 
-  @Named("all key aliases")
+  @Named("all_key_aliases")
   override val allKeyAliases: Map<KeyAlias, KeyType>,
 
   @Inject(optional = true)
