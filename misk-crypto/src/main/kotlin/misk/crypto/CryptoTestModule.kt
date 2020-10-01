@@ -20,6 +20,8 @@ import misk.crypto.pgp.PgpDecrypterProvider
 import misk.crypto.pgp.PgpEncrypter
 import misk.crypto.pgp.PgpEncrypterProvider
 import misk.inject.KAbstractModule
+import org.bouncycastle.jce.provider.BouncyCastleProvider
+import java.security.Security
 
 /**
  * This module should be used for testing purposes only.
@@ -41,6 +43,7 @@ class CryptoTestModule(
     MacConfig.register()
     SignatureConfig.register()
     HybridConfig.register()
+    Security.addProvider(BouncyCastleProvider())
 
     bind<KmsClient>().toInstance(FakeKmsClient())
 
