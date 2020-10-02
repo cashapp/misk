@@ -10,12 +10,12 @@ import io.opentracing.Tracer
 import misk.clustering.Cluster
 import misk.inject.KAbstractModule
 import okhttp3.EventListener
-import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import java.lang.reflect.Proxy
 import javax.inject.Singleton
 import kotlin.reflect.KClass
+import kotlin.reflect.cast
 
 /**
  * Creates a retrofit-backed typed client given an API interface and an HTTP configuration.
@@ -214,12 +214,11 @@ class TypedClientFactory @Inject constructor() {
         tracer,
         moshi)
 
-    @Suppress("UNCHECKED_CAST")
-    return Proxy.newProxyInstance(
+    return kclass.cast(Proxy.newProxyInstance(
         ClassLoader.getSystemClassLoader(),
         arrayOf(kclass.java),
         invocationHandler
-    ) as T
+    ))
   }
 }
 

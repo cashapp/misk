@@ -1,6 +1,7 @@
 package misk.grpc.miskclient
 
 import com.google.inject.Provides
+import misk.client.ClientNetworkInterceptor
 import misk.client.GrpcClientModule
 import misk.client.HttpClientConfig
 import misk.client.HttpClientEndpointConfig
@@ -18,6 +19,7 @@ import javax.inject.Singleton
 class MiskGrpcClientModule : KAbstractModule() {
   override fun configure() {
     install(GrpcClientModule.create<RouteGuideClient, GrpcRouteGuideClient>("default"))
+    multibind<ClientNetworkInterceptor.Factory>().to<RouteGuideCallCounter>()
   }
 
   @Provides

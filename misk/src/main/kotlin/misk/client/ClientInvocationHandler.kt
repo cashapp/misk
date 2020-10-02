@@ -190,7 +190,7 @@ internal class ClientInvocationHandler(
   }
 }
 
-private class NetworkInterceptorWrapper(
+internal class NetworkInterceptorWrapper(
   val action: ClientAction,
   val interceptor: ClientNetworkInterceptor
 ) : okhttp3.Interceptor {
