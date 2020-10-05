@@ -339,7 +339,7 @@ class SecretColumnTest {
       install(EnvironmentModule(Environment.TESTING))
 
       val config = MiskConfig.load<AppConfig>("encryptedcolumn", Environment.TESTING)
-      install(CryptoTestModule(config.crypto.keys!!))
+      install(CryptoTestModule(config.crypto))
       install(HibernateTestingModule(JerryGarciaDb::class, config.data_source))
       install(HibernateModule(JerryGarciaDb::class, config.data_source))
       install(object : HibernateEntityModule(JerryGarciaDb::class) {

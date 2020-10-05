@@ -25,6 +25,7 @@ internal class SecretColumnType : UserType, ParameterizedType, TypeConfiguration
     const val FIELD_ENCRYPTION_INDEXABLE: String = "indexable"
     val logger = getLogger<SecretColumnType>()
   }
+
   private lateinit var encryptionAdapter: EncryptionAdapter
   private lateinit var keyName: String
   private lateinit var _typeConfiguration: TypeConfiguration
@@ -108,14 +109,13 @@ internal interface EncryptionAdapter {
 }
 
 internal class AeadAdapter(typeConfig: TypeConfiguration, keyName: String) : EncryptionAdapter {
+  private val keyManager =
+      typeConfig.metadataBuildingContext.bootstrapContext.serviceRegistry.injector
+          .getInstance(AeadKeyManager::class.java)
 
-  val aead: Aead
-
-  init {
-    val keyManager = typeConfig.metadataBuildingContext.bootstrapContext.serviceRegistry.injector
-            .getInstance(AeadKeyManager::class.java)
+  val aead: Aead by lazy {
     try {
-      aead = keyManager[keyName]
+      keyManager[keyName]
     } catch (ex: KeyNotFoundException) {
       throw HibernateException("Cannot set field, key $keyName not found")
     }
@@ -131,15 +131,13 @@ internal class AeadAdapter(typeConfig: TypeConfiguration, keyName: String) : Enc
 }
 
 internal class DeterministicAeadAdapter(typeConfig: TypeConfiguration, keyName: String) :
-  EncryptionAdapter {
+    EncryptionAdapter {
 
-  val daead: DeterministicAead
-
-  init {
-    val keyManager = typeConfig.metadataBuildingContext.bootstrapContext.serviceRegistry.injector
-            .getInstance(DeterministicAeadKeyManager::class.java)
+  private val keyManager = typeConfig.metadataBuildingContext.bootstrapContext.serviceRegistry.injector
+      .getInstance(DeterministicAeadKeyManager::class.java)
+  val daead: DeterministicAead by lazy {
     try {
-      daead = keyManager[keyName]
+      keyManager[keyName]
     } catch (ex: KeyNotFoundException) {
       throw HibernateException("Cannot set field, key $keyName not found")
     }
