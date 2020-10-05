@@ -4,10 +4,13 @@ import com.google.crypto.tink.KmsClient
 import com.google.crypto.tink.aead.KmsEnvelopeAead
 import com.google.inject.Guice
 import com.google.inject.Injector
+import com.google.inject.util.Modules
 import com.squareup.moshi.Moshi
+import misk.MiskTestingServiceModule
 import misk.config.MiskConfig.RealSecret
 import misk.crypto.pgp.PgpKeyJsonFile
 import misk.environment.DeploymentModule
+import misk.logging.LogCollectorModule
 import misk.moshi.adapter
 import misk.resources.ResourceLoader
 import misk.testing.MiskTest
@@ -23,7 +26,7 @@ import javax.inject.Inject
 class PgpKeyTest {
   @Suppress("unused")
   @MiskTestModule
-  val module = CryptoTestModule()
+  val module = Modules.combine(MiskTestingServiceModule(), LogCollectorModule(), CryptoTestModule())
 
   @Inject private lateinit var kmsClient: KmsClient
   @Inject private lateinit var moshi: Moshi
@@ -188,11 +191,13 @@ class PgpKeyTest {
 
     val config = CryptoConfig(listOf(encryptKey, decryptKey), "test_master_key")
     return Guice.createInjector(
-        CryptoTestModule(),
-        CryptoModule(config),
+        CryptoTestModule(config),
+        MiskTestingServiceModule(), LogCollectorModule(),
         DeploymentModule.forTesting()
     )
   }
+
+
 
   companion object {
     internal const val publicKeyPath = "classpath:/misk-crypto-example-unencrypted-public-pgp.pgp"
