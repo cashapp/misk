@@ -1,7 +1,7 @@
 package misk.crypto.pgp
 
 import com.google.inject.Provider
-import misk.crypto.Key
+import misk.crypto.KeyAlias
 import misk.crypto.KeyReader
 import misk.crypto.PgpEncrypterManager
 import org.bouncycastle.openpgp.PGPPublicKey
@@ -12,11 +12,12 @@ import java.io.BufferedInputStream
 import javax.inject.Inject
 
 internal class PgpEncrypterProvider(
-  private val key: Key
+  private val alias: KeyAlias
 ) : Provider<PgpEncrypter>, KeyReader() {
   @Inject private lateinit var pgpEncrypterManager: PgpEncrypterManager
 
   override fun get(): PgpEncrypter {
+    val key = getRawKey(alias)
     val keyIn = BufferedInputStream(key.encrypted_key.value.byteInputStream())
     val pgpPub =
         PGPPublicKeyRingCollection(PGPUtil.getDecoderStream(keyIn), JcaKeyFingerprintCalculator())
