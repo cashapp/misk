@@ -36,6 +36,9 @@ class GrpcClientModule<T : Service, G : T>(
     bind(key)
         .toProvider(GrpcClientProvider(kclass, grpcClientClass, name, httpClientProvider))
         .`in`(Singleton::class.java)
+
+    // Initialize empty sets for our multibindings.
+    newMultibinder<ClientNetworkInterceptor.Factory>()
   }
 
   companion object {
