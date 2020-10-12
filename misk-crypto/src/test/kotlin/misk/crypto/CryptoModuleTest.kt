@@ -116,7 +116,11 @@ class CryptoModuleTest {
     })
     val config = CryptoConfig(listOf(key), "test_master_key")
     val injector = Guice.createInjector(CryptoTestModule(config), DeploymentModule.forTesting())
+    val externalKeyManager = LocalConfigKeyProvider(config.keys!!, config.kms_uri)
     val hybridEncryptKeyManager = injector.getInstance(HybridEncryptKeyManager::class.java)
+    assertThat(externalKeyManager.getKeyByAlias("test-hybrid"))
+        .extracting("kms_uri")
+        .isNull()
     assertThat(hybridEncryptKeyManager).isNotNull
     assertThat(hybridEncryptKeyManager["test-hybrid"]).isNotNull
   }
