@@ -47,9 +47,7 @@ class FakeExternalKeyManager : ExternalKeyManager {
 
   // Mock local keys
   constructor(rawKeys: List<Key>) {
-    rawKeys.forEach {
-      returnedKeysets[it.key_name] = it
-    }
+    rawKeys.forEach { key -> returnedKeysets[key.key_name] = key }
   }
 
   override fun getKeyByAlias(alias: KeyAlias): Key? {
