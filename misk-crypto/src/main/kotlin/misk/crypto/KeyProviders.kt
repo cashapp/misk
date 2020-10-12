@@ -26,7 +26,6 @@ import com.google.crypto.tink.streamingaead.StreamingAeadFactory
 import com.google.inject.Inject
 import com.google.inject.Provider
 import misk.logging.getLogger
-import java.io.IOException
 import java.security.GeneralSecurityException
 
 open class KeyReader {

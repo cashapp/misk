@@ -46,9 +46,13 @@ class FakeExternalKeyManager : ExternalKeyManager {
   }
 
   // Mock local keys
-  constructor(rawKeys: List<Key>) {
-    rawKeys.forEach {
-      returnedKeysets[it.key_name] = it
+  constructor(rawKeys: List<Key>, kmsUri: String) {
+    rawKeys.forEach {key ->
+      if (key.key_type != KeyType.HYBRID_ENCRYPT) {
+        returnedKeysets[key.key_name] = key.copy(kms_uri = kmsUri)
+      } else {
+        returnedKeysets[key.key_name] = key
+      }
     }
   }
 

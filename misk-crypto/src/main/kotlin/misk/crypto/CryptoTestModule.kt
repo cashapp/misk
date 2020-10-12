@@ -53,7 +53,7 @@ class CryptoTestModule(
     val keys = config.keys ?: return
 
     val keyManagerBinder = newMultibinder(ExternalKeyManager::class)
-    keyManagerBinder.addBinding().toInstance(FakeExternalKeyManager(keys))
+    keyManagerBinder.addBinding().toInstance(FakeExternalKeyManager(keys, config.kms_uri))
     config.external_data_keys?.let {
       keyManagerBinder.addBinding().toInstance(FakeExternalKeyManager(it))
     }
