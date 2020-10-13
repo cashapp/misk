@@ -15,6 +15,7 @@ dependencies {
   compile dep.okio
   compile dep.okHttp
   compile dep.slf4jApi
+  compile dep.snappy
 
   compile project(':misk-inject')
   compile project(':misk-service')
