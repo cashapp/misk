@@ -357,6 +357,7 @@ internal class RealTransacter private constructor(
     return when (th) {
       is RetryTransactionException,
       is StaleObjectStateException,
+      is ConstraintViolationException,
       is LockAcquisitionException,
       is SQLRecoverableException,
       is SQLTransientException,
