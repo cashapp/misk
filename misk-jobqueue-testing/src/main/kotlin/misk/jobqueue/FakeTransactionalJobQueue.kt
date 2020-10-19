@@ -33,6 +33,7 @@ class FakeTransactionalJobQueue @Inject constructor(
   private val tokenGenerator: TokenGenerator
 ) : TransactionalJobQueue {
   private val jobQueues = ConcurrentHashMap<QueueName, ConcurrentLinkedDeque<FakeJob>>()
+  private val deadletteredJobs = ConcurrentHashMap<QueueName, ConcurrentLinkedDeque<FakeJob>>()
 
   override fun enqueue(
     session: Session,
@@ -72,19 +73,51 @@ class FakeTransactionalJobQueue @Inject constructor(
     return jobs?.toList() ?: listOf()
   }
 
+  fun peekDeadlettered(queueName: QueueName): List<Job> {
+    val jobs = deadletteredJobs[queueName]
+    return jobs?.toList() ?: listOf()
+  }
+
   /** Returns all jobs that were handled. */
   fun handleJobs(
     queueName: QueueName,
     assertAcknowledged: Boolean = true,
     retries: Int = 1
   ): List<FakeJob> {
+    return processJobs(queueName, assertAcknowledged, retries, false)
+  }
+
+  /** Returns all jobs that were handled. */
+  fun reprocessDeadlettered(
+    queueName: QueueName,
+    assertAcknowledged: Boolean = true,
+    retries: Int = 1
+  ): List<FakeJob> {
+    return processJobs(queueName, assertAcknowledged, retries, true)
+  }
+
+  private fun processJobs(
+    queueName: QueueName,
+    assertAcknowledged: Boolean = true,
+    retries: Int,
+    deadletter: Boolean
+  ): List<FakeJob> {
     val jobHandler = jobHandlers.get()[queueName]!!
-    val jobs = jobQueues[queueName] ?: return listOf()
+    val jobs = when (deadletter) {
+      true -> deadletteredJobs[queueName] ?: return listOf()
+      else -> jobQueues[queueName] ?: return listOf()
+    }
 
     val result = mutableListOf<FakeJob>()
     while (true) {
       val job = jobs.poll() ?: break
-      retry(retries, FlatBackoff(Duration.ofMillis(20))) { jobHandler.handleJob(job) }
+      try {
+        retry(retries, FlatBackoff(Duration.ofMillis(20))) { jobHandler.handleJob(job) }
+      } catch (e: Throwable) {
+        deadletteredJobs.getOrPut(queueName, ::ConcurrentLinkedDeque).add(job)
+        throw e
+      }
+
       result += job
       if (assertAcknowledged) {
         check(job.acknowledged) { "Expected $job to be acknowledged after handling" }
