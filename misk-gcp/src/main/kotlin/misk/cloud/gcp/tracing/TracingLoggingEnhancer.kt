@@ -2,7 +2,7 @@ package misk.cloud.gcp.tracing
 
 import com.google.cloud.logging.LogEntry
 import com.google.cloud.logging.LoggingEnhancer
-import datadog.opentracing.DDSpan
+import datadog.opentracing.DDTracer
 import io.opentracing.Tracer
 import io.opentracing.util.GlobalTracer
 
@@ -16,14 +16,8 @@ class TracingLoggingEnhancer : LoggingEnhancer {
   }
 
   fun enhanceLogEntry(tracer: Tracer, builder: LogEntry.Builder) {
-    val activeSpan = tracer.activeSpan()
-    var traceId: String? = null
-    when (activeSpan) {
-      is DDSpan -> traceId = activeSpan.context().toTraceId()
-    }
-
-    if (traceId != null) {
-      builder.addLabel("appengine.googleapis.com/trace_id", traceId)
+    if (tracer.activeSpan().context().toTraceId().isNotEmpty()) {
+      builder.addLabel("appengine.googleapis.com/trace_id", tracer.activeSpan().context().toTraceId())
     }
   }
 }
