@@ -155,13 +155,32 @@ internal class FakeTransactionalJobQueueTest {
     assertThat(fakeTransactionalJobQueue.peekJobs(CRASHER_QUEUE)).isEmpty()
 
     // If we retry at least once, it will complete the job the second time around.
-    assertThat(fakeTransactionalJobQueue.peekJobs(CRASHER_QUEUE)).isEmpty()
     transacter.transaction { session ->
       unitEnqueuer.enqueue(session, Unit.MEDIVAC, CRASHER_QUEUE)
     }
     assertThat(fakeTransactionalJobQueue.peekJobs(CRASHER_QUEUE)).hasSize(1)
     fakeTransactionalJobQueue.handleJobs(CRASHER_QUEUE, assertAcknowledged = true, retries = 2)
     assertThat(fakeTransactionalJobQueue.peekJobs(CRASHER_QUEUE)).isEmpty()
+  }
+
+  @Test fun deadletteredJobs() {
+    // The job will fail on its first run.
+    assertThat(fakeTransactionalJobQueue.peekJobs(CRASHER_QUEUE)).isEmpty()
+    transacter.transaction { session ->
+      unitEnqueuer.enqueue(session, Unit.MEDIVAC, CRASHER_QUEUE)
+    }
+    assertThat(fakeTransactionalJobQueue.peekJobs(CRASHER_QUEUE)).hasSize(1)
+    assertThat(fakeTransactionalJobQueue.peekDeadlettered(CRASHER_QUEUE)).hasSize(0)
+    assertFailsWith<UnitException> {
+      fakeTransactionalJobQueue.handleJobs(CRASHER_QUEUE, assertAcknowledged = true, retries = 1)
+    }
+    assertThat(fakeTransactionalJobQueue.peekJobs(CRASHER_QUEUE)).isEmpty()
+    assertThat(fakeTransactionalJobQueue.peekDeadlettered(CRASHER_QUEUE)).hasSize(1)
+
+    // If we retry at least once, it will complete the job the second time around.
+    fakeTransactionalJobQueue.reprocessDeadlettered(CRASHER_QUEUE, assertAcknowledged = true)
+    assertThat(fakeTransactionalJobQueue.peekJobs(CRASHER_QUEUE)).isEmpty()
+    assertThat(fakeTransactionalJobQueue.peekDeadlettered(CRASHER_QUEUE)).isEmpty()
   }
 }
 
@@ -240,8 +259,9 @@ private class Starport @Inject private constructor(moshi: Moshi) : JobHandler {
   }
 }
 
-private class Crasher @Inject private constructor(val tokenGenerator: TokenGenerator) : JobHandler {
-
+private class Crasher @Inject private constructor(
+  val tokenGenerator: TokenGenerator
+) : JobHandler {
   override fun handleJob(job: Job) {
     // Tokens are generated once per test run, starting from 1.
     if (tokenGenerator.generate().endsWith("1")) {
