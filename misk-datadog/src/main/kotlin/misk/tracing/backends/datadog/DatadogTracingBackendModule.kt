@@ -1,29 +1,18 @@
 package misk.tracing.backends.datadog
 
-import datadog.trace.api.GlobalTracer
-import misk.inject.KAbstractModule
 import io.opentracing.Tracer
-import io.opentracing.noop.NoopTracerFactory
-import misk.logging.getLogger
+import misk.inject.KAbstractModule
 
 /**
  * Binds the datadog tracer to opentracing's [Tracer]
  */
 class DatadogTracingBackendModule : KAbstractModule() {
   override fun configure() {
-    // A DDTracer is installed by the DataDog Java agent, which runs before the app's main() method.
-    val tracer = GlobalTracer.get()
-    if (tracer is Tracer) {
-      bind<Tracer>().toInstance(tracer)
-      tracer.addScopeListener(MDCScopeListener())
-    } else {
-      logger.error(
-          "A DDTracer was unexpectedly not installed by the java agent, binding a NoopTracer")
-      bind(Tracer::class.java).toInstance(NoopTracerFactory.create())
-    }
-  }
-
-  companion object {
-    val logger = getLogger<DatadogTracingBackendModule>()
+    // A DDTracer is installed by the dd-java-agent in TracerInstaller, which runs before the app's main() method.
+    // Otherwise, the GlobalTracer in both libraries would return a noop tracer and tracing would be effectively disabled.
+    // See https://docs.datadoghq.com/tracing/custom_instrumentation/java/
+    // See https://github.com/DataDog/dd-trace-java/tree/v0.65.0/dd-smoke-tests/opentracing/src/main/java/datadog/smoketest/opentracing
+    bind<Tracer>().toInstance(io.opentracing.util.GlobalTracer.get())
+    datadog.trace.api.GlobalTracer.get().addScopeListener(MDCScopeListener())
   }
 }

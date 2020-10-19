@@ -1,6 +1,7 @@
 package misk.jdbc
 
-import datadog.opentracing.DDSpan
+import datadog.trace.core.DDSpan
+import io.opentracing.Span
 import datadog.opentracing.DDTracer
 import datadog.trace.common.writer.Writer
 import net.ttddyy.dsproxy.transform.TransformInfo
@@ -43,7 +44,7 @@ class SpanInjectorTest {
       val query = "SELECT * FROM table"
       val transformInfo = TransformInfo(null, null, query, false, 0)
       val result = injector.transformQuery(transformInfo)
-      assertThat(result).contains((span as DDSpan).traceId.toString())
+      assertThat(result).contains(span.context().toTraceId())
     }
   }
 }
@@ -56,6 +57,10 @@ class NoopWriter : Writer {
   }
 
   override fun close() {
+  }
+
+  override fun flush() : Boolean {
+    return true
   }
 
   override fun incrementTraceCount() {

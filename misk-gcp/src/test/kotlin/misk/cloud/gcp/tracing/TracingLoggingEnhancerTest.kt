@@ -2,9 +2,9 @@ package misk.cloud.gcp.tracing
 
 import com.google.cloud.logging.LogEntry
 import com.google.cloud.logging.Payload
-import datadog.opentracing.DDSpan
 import datadog.opentracing.DDTracer
 import datadog.trace.common.writer.Writer
+import datadog.trace.core.DDSpan
 import io.opentracing.Span
 import io.opentracing.noop.NoopTracerFactory
 import misk.testing.MiskTest
@@ -26,11 +26,11 @@ class TracingLoggingEnhancerTest {
       val logEntry = logEntryBuilder.build()
       assertThat(logEntry.labels).isEqualTo(mapOf(
           "appengine.googleapis.com/trace_id" to
-              (tracer.activeSpan() as Span).context().toTraceId()))
+              tracer.activeSpan().context().toTraceId()))
     }
   }
 
-  @Test fun ignoreEnhancement() {
+  @Test fun noopTracer() {
     val logEntryBuilder = LogEntry.newBuilder(Payload.StringPayload.of("payload"))
     TracingLoggingEnhancer()
         .enhanceLogEntry(NoopTracerFactory.create(), logEntryBuilder)
@@ -48,6 +48,10 @@ class NoopWriter : Writer {
   }
 
   override fun close() {
+  }
+
+  override fun flush() : Boolean {
+    return true
   }
 
   override fun incrementTraceCount() {
