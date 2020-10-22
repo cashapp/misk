@@ -163,7 +163,7 @@ internal class FakeTransactionalJobQueueTest {
     assertThat(fakeTransactionalJobQueue.peekJobs(CRASHER_QUEUE)).isEmpty()
   }
 
-  @Test fun deadletteredJobs() {
+  @Test fun exceptionsGoToDeadletter() {
     // The job will fail on its first run.
     assertThat(fakeTransactionalJobQueue.peekJobs(CRASHER_QUEUE)).isEmpty()
     transacter.transaction { session ->
@@ -182,6 +182,19 @@ internal class FakeTransactionalJobQueueTest {
     assertThat(fakeTransactionalJobQueue.peekJobs(CRASHER_QUEUE)).isEmpty()
     assertThat(fakeTransactionalJobQueue.peekDeadlettered(CRASHER_QUEUE)).isEmpty()
   }
+
+  @Test fun deadletterGoesToDeadletter() {
+    assertThat(fakeTransactionalJobQueue.peekJobs(DEADLETTER_QUEUE)).isEmpty()
+    transacter.transaction { session ->
+      unitEnqueuer.enqueue(session, Unit.MEDIVAC, DEADLETTER_QUEUE)
+    }
+    assertThat(fakeTransactionalJobQueue.peekJobs(DEADLETTER_QUEUE)).hasSize(1)
+    assertThat(fakeTransactionalJobQueue.peekDeadlettered(DEADLETTER_QUEUE)).hasSize(0)
+    fakeTransactionalJobQueue.handleJobs(DEADLETTER_QUEUE, assertAcknowledged = false, retries = 1)
+
+    assertThat(fakeTransactionalJobQueue.peekJobs(DEADLETTER_QUEUE)).isEmpty()
+    assertThat(fakeTransactionalJobQueue.peekDeadlettered(DEADLETTER_QUEUE)).hasSize(1)
+  }
 }
 
 private class TransactionalJobQueueTestModule : KAbstractModule() {
@@ -195,6 +208,7 @@ private class TransactionalJobQueueTestModule : KAbstractModule() {
     install(FakeJobHandlerModule.create<Factory>(FACTORY_QUEUE))
     install(FakeJobHandlerModule.create<Starport>(STARPORT_QUEUE))
     install(FakeJobHandlerModule.create<Crasher>(CRASHER_QUEUE))
+    install(FakeJobHandlerModule.create<Deadletter>(DEADLETTER_QUEUE))
     install(FakeJobQueueModule())
   }
 }
@@ -202,6 +216,7 @@ private class TransactionalJobQueueTestModule : KAbstractModule() {
 private val FACTORY_QUEUE = QueueName("factory_queue")
 private val STARPORT_QUEUE = QueueName("starport_queue")
 private val CRASHER_QUEUE = QueueName("crasher_queue")
+private val DEADLETTER_QUEUE = QueueName("deadletter_queue")
 
 private enum class Unit {
   HELLION,
@@ -268,6 +283,12 @@ private class Crasher @Inject private constructor(
       throw UnitException()
     }
     job.acknowledge()
+  }
+}
+
+private class Deadletter @Inject private constructor() : JobHandler {
+  override fun handleJob(job: Job) {
+    job.deadLetter()
   }
 }
 
