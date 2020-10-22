@@ -122,6 +122,9 @@ class FakeTransactionalJobQueue @Inject constructor(
       if (assertAcknowledged) {
         check(job.acknowledged) { "Expected $job to be acknowledged after handling" }
       }
+      if (job.deadLettered) {
+        deadletteredJobs.getOrPut(queueName, ::ConcurrentLinkedDeque).add(job)
+      }
     }
 
     return result
