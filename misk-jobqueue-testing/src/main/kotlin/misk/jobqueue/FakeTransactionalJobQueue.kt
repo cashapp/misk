@@ -111,6 +111,11 @@ class FakeTransactionalJobQueue @Inject constructor(
     val result = mutableListOf<FakeJob>()
     while (true) {
       val job = jobs.poll() ?: break
+      if (deadletter) {
+        // If we don't reset whether it's deadlettered we'll always add it back to the queue.
+        job.deadLettered = false
+      }
+
       try {
         retry(retries, FlatBackoff(Duration.ofMillis(20))) { jobHandler.handleJob(job) }
       } catch (e: Throwable) {
@@ -122,6 +127,9 @@ class FakeTransactionalJobQueue @Inject constructor(
       if (assertAcknowledged) {
         check(job.acknowledged) { "Expected $job to be acknowledged after handling" }
       }
+    }
+
+    result.forEach { job ->
       if (job.deadLettered) {
         deadletteredJobs.getOrPut(queueName, ::ConcurrentLinkedDeque).add(job)
       }

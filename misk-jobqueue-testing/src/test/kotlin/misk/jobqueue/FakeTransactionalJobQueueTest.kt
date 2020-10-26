@@ -194,6 +194,7 @@ internal class FakeTransactionalJobQueueTest {
 
     assertThat(fakeTransactionalJobQueue.peekJobs(DEADLETTER_QUEUE)).isEmpty()
     assertThat(fakeTransactionalJobQueue.peekDeadlettered(DEADLETTER_QUEUE)).hasSize(1)
+    assertThat(fakeTransactionalJobQueue.reprocessDeadlettered(DEADLETTER_QUEUE, false)).hasSize(1)
   }
 }
 

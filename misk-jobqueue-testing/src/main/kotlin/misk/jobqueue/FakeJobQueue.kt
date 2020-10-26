@@ -88,7 +88,7 @@ data class FakeJob(
   var acknowledged: Boolean = false
     private set
   var deadLettered: Boolean = false
-    private set
+    internal set
 
   override fun acknowledge() {
     acknowledged = true
