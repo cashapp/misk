@@ -1,15 +1,6 @@
 package misk.jobqueue
 
-import misk.backoff.FlatBackoff
-import misk.backoff.retry
-import misk.hibernate.Gid
-import misk.hibernate.Session
-import misk.tokens.TokenGenerator
-import java.time.Duration
-import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.ConcurrentLinkedDeque
 import javax.inject.Inject
-import javax.inject.Provider
 import javax.inject.Singleton
 
 /**
@@ -28,54 +19,16 @@ import javax.inject.Singleton
  * ```
  */
 @Singleton
+@Deprecated("Please use FakeJobQueue instead")
 class FakeTransactionalJobQueue @Inject constructor(
-  private val jobHandlers: Provider<Map<QueueName, JobHandler>>,
-  private val tokenGenerator: TokenGenerator
-) : TransactionalJobQueue {
-  private val jobQueues = ConcurrentHashMap<QueueName, ConcurrentLinkedDeque<FakeJob>>()
-  private val deadletteredJobs = ConcurrentHashMap<QueueName, ConcurrentLinkedDeque<FakeJob>>()
-
-  override fun enqueue(
-    session: Session,
-    gid: Gid<*, *>,
-    queueName: QueueName,
-    body: String,
-    idempotenceKey: String,
-    deliveryDelay: Duration?,
-    attributes: Map<String, String>
-  ) {
-    enqueue(session, queueName, body, idempotenceKey, deliveryDelay, attributes)
-  }
-
-  override fun enqueue(
-    session: Session,
-    queueName: QueueName,
-    body: String,
-    idempotenceKey: String,
-    deliveryDelay: Duration?,
-    attributes: Map<String, String>
-  ) {
-    session.onPostCommit {
-      val id = tokenGenerator.generate("fakeJobQueue")
-      val job = FakeJob(
-          queueName = queueName,
-          id = id,
-          idempotenceKey = idempotenceKey,
-          body = body,
-          attributes = attributes
-      )
-      jobQueues.getOrPut(queueName, ::ConcurrentLinkedDeque).add(job)
-    }
-  }
-
+  private val fakeJobQueue: FakeJobQueue
+) : TransactionalJobQueue by fakeJobQueue {
   fun peekJobs(queueName: QueueName): List<Job> {
-    val jobs = jobQueues[queueName]
-    return jobs?.toList() ?: listOf()
+    return fakeJobQueue.peekJobs(queueName)
   }
 
   fun peekDeadlettered(queueName: QueueName): List<Job> {
-    val jobs = deadletteredJobs[queueName]
-    return jobs?.toList() ?: listOf()
+    return fakeJobQueue.peekDeadlettered(queueName)
   }
 
   /** Returns all jobs that were handled. */
@@ -84,7 +37,7 @@ class FakeTransactionalJobQueue @Inject constructor(
     assertAcknowledged: Boolean = true,
     retries: Int = 1
   ): List<FakeJob> {
-    return processJobs(queueName, assertAcknowledged, retries, false)
+    return fakeJobQueue.handleJobs(queueName, assertAcknowledged, retries)
   }
 
   /** Returns all jobs that were handled. */
@@ -93,57 +46,11 @@ class FakeTransactionalJobQueue @Inject constructor(
     assertAcknowledged: Boolean = true,
     retries: Int = 1
   ): List<FakeJob> {
-    return processJobs(queueName, assertAcknowledged, retries, true)
-  }
-
-  private fun processJobs(
-    queueName: QueueName,
-    assertAcknowledged: Boolean = true,
-    retries: Int,
-    deadletter: Boolean
-  ): List<FakeJob> {
-    val jobHandler = jobHandlers.get()[queueName]!!
-    val jobs = when (deadletter) {
-      true -> deadletteredJobs[queueName] ?: return listOf()
-      else -> jobQueues[queueName] ?: return listOf()
-    }
-
-    val result = mutableListOf<FakeJob>()
-    while (true) {
-      val job = jobs.poll() ?: break
-      if (deadletter) {
-        // If we don't reset whether it's deadlettered we'll always add it back to the queue.
-        job.deadLettered = false
-      }
-
-      try {
-        retry(retries, FlatBackoff(Duration.ofMillis(20))) { jobHandler.handleJob(job) }
-      } catch (e: Throwable) {
-        deadletteredJobs.getOrPut(queueName, ::ConcurrentLinkedDeque).add(job)
-        throw e
-      }
-
-      result += job
-      if (assertAcknowledged) {
-        check(job.acknowledged) { "Expected $job to be acknowledged after handling" }
-      }
-    }
-
-    result.forEach { job ->
-      if (job.deadLettered) {
-        deadletteredJobs.getOrPut(queueName, ::ConcurrentLinkedDeque).add(job)
-      }
-    }
-
-    return result
+    return fakeJobQueue.reprocessDeadlettered(queueName, assertAcknowledged, retries)
   }
 
   /** Returns all jobs that were handled. */
   fun handleJobs(assertAcknowledged: Boolean = true): List<FakeJob> {
-    val result = mutableListOf<FakeJob>()
-    for (queueName in jobQueues.keys) {
-      result += handleJobs(queueName, assertAcknowledged)
-    }
-    return result
+    return fakeJobQueue.handleJobs(assertAcknowledged)
   }
 }
