@@ -22,7 +22,7 @@ internal class MetricsInterceptor internal constructor(
     val elapsedTimeMillis = elapsedTime.toMillis().toDouble()
     val callingPrincipal = when {
       caller.get()?.service != null -> caller.get()?.service!!
-      caller.get()?.user != null -> "user"
+      caller.get()?.user != null -> "<user>"
       else -> "unknown"
     }
 

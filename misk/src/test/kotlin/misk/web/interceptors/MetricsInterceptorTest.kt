@@ -61,8 +61,8 @@ class MetricsInterceptorTest {
     requestDuration.record(1.0, "TestAction", "my-peer", "200")
     assertThat(requestDuration.count("TestAction", "my-peer", "200")).isEqualTo(5)
 
-    requestDuration.record(1.0, "TestAction", "user", "200")
-    assertThat(requestDuration.count("TestAction", "user", "200")).isEqualTo(2)
+    requestDuration.record(1.0, "TestAction", "<user>", "200")
+    assertThat(requestDuration.count("TestAction", "<user>", "200")).isEqualTo(2)
   }
 
   fun invoke(
