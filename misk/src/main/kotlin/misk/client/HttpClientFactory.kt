@@ -44,6 +44,7 @@ class HttpClientFactory @Inject constructor(
   fun create(config: HttpClientEndpointConfig): OkHttpClient {
     // TODO(mmihic): Cache, proxy, etc
     val builder = unconfiguredClient.newBuilder()
+    builder.retryOnConnectionFailure(false)
     config.clientConfig.connectTimeout?.let { builder.connectTimeout(it.toMillis(), TimeUnit.MILLISECONDS) }
     config.clientConfig.readTimeout?.let { builder.readTimeout(it.toMillis(), TimeUnit.MILLISECONDS) }
     config.clientConfig.writeTimeout?.let { builder.writeTimeout(it.toMillis(), TimeUnit.MILLISECONDS) }
