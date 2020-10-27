@@ -20,10 +20,10 @@ internal class MetricsInterceptor internal constructor(
     val (elapsedTime, result) = timed { chain.proceed(chain.httpCall) }
 
     val elapsedTimeMillis = elapsedTime.toMillis().toDouble()
-    val callingPrincipal = caller.get()?.principal ?: "unknown"
+    val callingService = caller.get()?.service ?: "unknown"
 
     val statusCode = chain.httpCall.statusCode
-    requestDuration.record(elapsedTimeMillis, actionName, callingPrincipal, statusCode.toString())
+    requestDuration.record(elapsedTimeMillis, actionName, callingService, statusCode.toString())
     return result
   }
 
