@@ -27,8 +27,8 @@ import retrofit2.http.Body
 import retrofit2.http.Headers
 import retrofit2.http.POST
 import javax.inject.Inject
-import javax.inject.Provider
 import javax.inject.Singleton
+import kotlin.test.assertFailsWith
 
 @MiskTest(startService = true)
 internal class TypedHttpClientTest {
@@ -87,6 +87,20 @@ internal class TypedHttpClientTest {
     assertThat(protoResponse.body()?.name!!).isEqualTo("supertrex")
   }
 
+  @Test
+  fun mustBeRetrofitInterface() {
+    val typedClientFactory = clientInjector.getInstance(TypedClientFactory::class.java)
+
+    val exception = assertFailsWith<IllegalArgumentException> {
+      typedClientFactory.build<NotARetrofitInterface>(
+          HttpClientEndpointConfig(jetty.httpServerUrl.toString()),
+          "notARetrofitInterface"
+      )
+    }
+    assertThat(exception).hasMessage(
+        "${NotARetrofitInterface::class} is not a Retrofit interface (no @POST or @GET methods)")
+  }
+
   interface ReturnADinosaur {
     @POST("/cooldinos")
     fun getDinosaur(@Body request: Dinosaur): Call<Dinosaur>
@@ -114,6 +128,10 @@ internal class TypedHttpClientTest {
     @ResponseContentType(MediaTypes.APPLICATION_PROTOBUF)
     fun getDinosaur(@RequestBody request: Dinosaur): Dinosaur =
         request.newBuilder().name("super${request.name}").build()
+  }
+
+  interface NotARetrofitInterface {
+    fun getDinosaur(request: Dinosaur): Call<Dinosaur>
   }
 
   class TestModule : KAbstractModule() {
