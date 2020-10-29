@@ -1,6 +1,8 @@
 package misk.aws.dynamodb.testing
 
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
+import com.amazonaws.services.dynamodbv2.AmazonDynamoDBStreams
+import com.amazonaws.services.dynamodbv2.AmazonDynamoDBStreamsClientBuilder
 import com.amazonaws.services.dynamodbv2.model.CreateTableRequest
 import com.google.inject.Provides
 import misk.ServiceModule
@@ -31,6 +33,11 @@ class DockerDynamoDbModule(
   @Provides @Singleton
   fun providesAmazonDynamoDB(): AmazonDynamoDB {
     return DockerDynamoDb.connect()
+  }
+
+  @Provides @Singleton
+  fun providesAmazonDynamoDBStreams(): AmazonDynamoDBStreams {
+    return DockerDynamoDb.connectToStreams()
   }
 }
 

@@ -4,6 +4,8 @@ import com.amazonaws.ClientConfiguration
 import com.amazonaws.auth.AWSCredentialsProvider
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder
+import com.amazonaws.services.dynamodbv2.AmazonDynamoDBStreams
+import com.amazonaws.services.dynamodbv2.AmazonDynamoDBStreamsClientBuilder
 import com.google.inject.Provides
 import misk.cloud.aws.AwsRegion
 import misk.inject.KAbstractModule
@@ -26,6 +28,19 @@ class RealDynamoDbModule constructor(private val clientConfig: ClientConfigurati
     awsCredentialsProvider: AWSCredentialsProvider
   ): AmazonDynamoDB {
     return AmazonDynamoDBClientBuilder
+        .standard()
+        .withRegion(awsRegion.name)
+        .withCredentials(awsCredentialsProvider)
+        .withClientConfiguration(clientConfig)
+        .build()
+  }
+
+  @Provides @Singleton
+  fun providesAmazonDynamoDBStreams(
+    awsRegion: AwsRegion,
+    awsCredentialsProvider: AWSCredentialsProvider
+  ): AmazonDynamoDBStreams {
+    return AmazonDynamoDBStreamsClientBuilder
         .standard()
         .withRegion(awsRegion.name)
         .withCredentials(awsCredentialsProvider)
