@@ -91,6 +91,12 @@ internal class ClientInvocationHandler(
         .create(interfaceType.java)
   }.toMap()
 
+  init {
+    require(actionsByMethod.isNotEmpty()) {
+      "$interfaceType is not a Retrofit interface (no @POST or @GET methods)"
+    }
+  }
+
   private fun getEndpointMediaTypes(methodName: String): List<String> {
     val headers =
         interfaceType.memberFunctions.find { it.name == methodName }?.findAnnotation<Headers>()
