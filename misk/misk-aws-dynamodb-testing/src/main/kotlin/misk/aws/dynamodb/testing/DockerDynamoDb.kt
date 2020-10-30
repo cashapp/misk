@@ -7,6 +7,8 @@ import com.amazonaws.client.builder.AwsClientBuilder
 import com.amazonaws.regions.Regions
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder
+import com.amazonaws.services.dynamodbv2.AmazonDynamoDBStreams
+import com.amazonaws.services.dynamodbv2.AmazonDynamoDBStreamsClientBuilder
 import com.amazonaws.services.dynamodbv2.model.AmazonDynamoDBException
 import com.github.dockerjava.api.model.ExposedPort
 import com.github.dockerjava.api.model.Ports
@@ -95,6 +97,13 @@ object DockerDynamoDb : ExternalDependency {
         .build()
   }
 
+  fun connectToStreams(): AmazonDynamoDBStreams {
+    return AmazonDynamoDBStreamsClientBuilder
+        .standard()
+        .withCredentials(awsCredentialsProvider)
+        .withEndpointConfiguration(endpointConfiguration)
+        .build()
+  }
 }
 
 fun main(args: Array<String>) {
