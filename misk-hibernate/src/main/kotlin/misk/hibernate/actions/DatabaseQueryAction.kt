@@ -39,4 +39,3 @@ class DatabaseQueryAction @Inject constructor(
     val rows: List<List<String>>
   )
 }
-
