@@ -37,7 +37,13 @@ import {
   mapStateToProps,
   methodHasBody
 } from "../ducks"
-import { IDatabaseQueryMetadataAPI } from "./DatabaseQueryInterfaces"
+import {
+  IConstraintMetadata,
+  IDatabaseQueryMetadataAPI,
+  IOrderMetadata,
+  ISelectMetadata
+} from "./DatabaseQueryInterfaces"
+import { select } from "redux-saga/effects"
 
 /**
  * Collapse wrapped Send a Request form for each Web Action card
@@ -131,24 +137,33 @@ const RunQueryCollapseContainer = (
       <FlexContainer>
         <div css={cssColumn}>
           <Menu css={cssMetadataMenu}>
-            <H5>{"Constraints"}</H5>
-            <FormBuilderContainer
-              formType={"root form type goes here"}
-              noFormIdentifier={`${databaseQuery.queryClass} Constraints`}
-              types={databaseQuery.constraints}
-            />
-            <H5>{"Orders"}</H5>
-            <FormBuilderContainer
-              formType={"root form type goes here"}
-              noFormIdentifier={`${databaseQuery.queryClass} Orders`}
-              types={databaseQuery.orders}
-            />
-            <H5>{"Selects"}</H5>
-            <FormBuilderContainer
-              formType={"root form type goes here"}
-              noFormIdentifier={`${databaseQuery.queryClass} Selects`}
-              types={databaseQuery.selects}
-            />
+            {databaseQuery.constraints.length > 0 && <H5>{"Constraints"}</H5>}
+            {databaseQuery.constraints.map(
+              (constraint: IConstraintMetadata) => (
+                <FormBuilderContainer
+                  formType={constraint.parametersType}
+                  noFormIdentifier={`${databaseQuery.queryClass} ${constraint.name}`}
+                  types={databaseQuery.types}
+                />
+              )
+            )}
+
+            {databaseQuery.orders.length > 0 && <H5>{"Orders"}</H5>}
+            {databaseQuery.orders.map((order: IOrderMetadata) => (
+              <FormBuilderContainer
+                formType={order.parametersType}
+                noFormIdentifier={`${databaseQuery.queryClass} ${order.name}`}
+                types={databaseQuery.types}
+              />
+            ))}
+            {databaseQuery.selects.length > 0 && <H5>{"Selects"}</H5>}
+            {databaseQuery.selects.map((select: ISelectMetadata) => (
+              <FormBuilderContainer
+                formType={select.parametersType}
+                noFormIdentifier={`${databaseQuery.queryClass} ${select.name}`}
+                types={databaseQuery.types}
+              />
+            ))}
           </Menu>
         </div>
         <div css={cssColumn}>

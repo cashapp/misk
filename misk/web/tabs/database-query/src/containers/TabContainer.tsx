@@ -26,41 +26,85 @@ class TabContainer extends React.Component<IState & IDispatchProps, IState> {
         entityClass: "DbMovie",
         queryClass: "MovieQueries",
         types: {
-          token: {
+          "constraint::name": {
             fields: [
               {
-                name: "token",
+                name: "name",
                 repeated: false,
                 type: ServerTypes.String
               }
             ]
           },
-        },
-        constraints: {
-          ""
-        },
-        orders: {
-          another: {
+          "constraint::releaseDateLessThan": {
             fields: [
               {
-                name: "name",
+                name: "upperBound",
                 repeated: false,
+                // TODO change to LocalDate
                 type: ServerTypes.String
               }
             ]
+          },
+          "order::releaseDateAsc": {
+            fields: []
+          },
+          "order::releaseDateDesc": {
+            fields: []
+          },
+          "select::listAsNameAndReleaseDate": {
+            fields: []
+          },
+          "select::uniqueName": {
+            fields: []
+          },
+          "select::listAsNames": {
+            fields: []
           }
         },
-        selects: {
-          another: {
-            fields: [
-              {
-                name: "name",
-                repeated: false,
-                type: ServerTypes.String
-              }
-            ]
+        constraints: [
+          {
+            name: "name",
+            parametersType: "constraint::name",
+            path: "name"
+          },
+          {
+            name: "releaseDateLessThan",
+            parametersType: "constraint::releaseDateLessThan",
+            path: "release_date",
+            operator: "LT"
           }
-        }
+        ],
+        orders: [
+          {
+            name: "releaseDateAsc",
+            parametersType: "order::releaseDateAsc",
+            path: "release_date",
+            ascending: false
+          },
+          {
+            name: "releaseDateDesc",
+            parametersType: "order::releaseDateDesc",
+            path: "release_date",
+            ascending: true
+          }
+        ],
+        selects: [
+          {
+            name: "listAsNameAndReleaseDate",
+            parametersType: "select::listAsNameAndReleaseDate",
+            paths: ["name", "release_date"]
+          },
+          {
+            name: "uniqueName",
+            parametersType: "select::uniqueName",
+            paths: ["name"]
+          },
+          {
+            name: "listAsNames",
+            parametersType: "select::listAsNames",
+            paths: ["name"]
+          }
+        ]
       },
       {
         allowedCapabilities: ["adrw", "maacosta"],
@@ -69,8 +113,8 @@ class TabContainer extends React.Component<IState & IDispatchProps, IState> {
         table: "albums",
         entityClass: "DbAlbum",
         queryClass: "AlbumQueries",
-        constraints: {
-          another: {
+        types: {
+          "constraint::name": {
             fields: [
               {
                 name: "name",
@@ -78,30 +122,77 @@ class TabContainer extends React.Component<IState & IDispatchProps, IState> {
                 type: ServerTypes.String
               }
             ]
+          },
+          "constraint::releaseDateLessThan": {
+            fields: [
+              {
+                name: "upperBound",
+                repeated: false,
+                // TODO change to LocalDate
+                type: ServerTypes.String
+              }
+            ]
+          },
+          "order::releaseDateAsc": {
+            fields: []
+          },
+          "order::releaseDateDesc": {
+            fields: []
+          },
+          "select::listAsNameAndReleaseDate": {
+            fields: []
+          },
+          "select::uniqueName": {
+            fields: []
+          },
+          "select::listAsNames": {
+            fields: []
           }
         },
-        orders: {
-          another: {
-            fields: [
-              {
-                name: "name",
-                repeated: false,
-                type: ServerTypes.String
-              }
-            ]
+        constraints: [
+          {
+            name: "name",
+            parametersType: "constraint::name",
+            path: "name"
+          },
+          {
+            name: "releaseDateLessThan",
+            parametersType: "constraint::releaseDateLessThan",
+            path: "release_date",
+            operator: "LT"
           }
-        },
-        selects: {
-          another: {
-            fields: [
-              {
-                name: "name",
-                repeated: false,
-                type: ServerTypes.String
-              }
-            ]
+        ],
+        orders: [
+          {
+            name: "releaseDateAsc",
+            parametersType: "order::releaseDateAsc",
+            path: "release_date",
+            ascending: false
+          },
+          {
+            name: "releaseDateDesc",
+            parametersType: "order::releaseDateDesc",
+            path: "release_date",
+            ascending: true
           }
-        }
+        ],
+        selects: [
+          {
+            name: "listAsNameAndReleaseDate",
+            parametersType: "select::listAsNameAndReleaseDate",
+            paths: ["name", "release_date"]
+          },
+          {
+            name: "uniqueName",
+            parametersType: "select::uniqueName",
+            paths: ["name"]
+          },
+          {
+            name: "listAsNames",
+            parametersType: "select::listAsNames",
+            paths: ["name"]
+          }
+        ]
       }
     ]
 

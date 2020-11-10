@@ -1,5 +1,5 @@
 import { OrderedMap, OrderedSet } from "immutable"
-import { get, uniqueId } from "lodash"
+import { get, padStart, uniqueId } from "lodash"
 import {
   BaseFieldTypes,
   IActionTypes,
@@ -8,6 +8,38 @@ import {
   ServerTypes,
   TypescriptBaseTypes
 } from "."
+
+export const padId = (id: string) => padStart(id, 10, "0")
+
+export const parseType = (
+  serverType: ServerTypes,
+  value: string
+): boolean | number | string => {
+  switch (serverType) {
+    case ServerTypes.Boolean:
+      return value
+    case ServerTypes.Byte:
+      return value
+    case ServerTypes.ByteString:
+      return value
+    case ServerTypes.Char:
+      return value
+    case ServerTypes.Double:
+      return value
+    case ServerTypes.Float:
+      return parseFloat(value)
+    case ServerTypes.Int:
+      return parseInt(value, 10)
+    case ServerTypes.JSON:
+      return value
+    case ServerTypes.Long:
+      return parseInt(value, 10)
+    case ServerTypes.Short:
+      return parseInt(value, 10)
+    default:
+      return value
+  }
+}
 
 export const buildTypeFieldMetadata = (
   idChildren: OrderedSet<string> = OrderedSet(),

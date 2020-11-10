@@ -8,7 +8,7 @@ export interface IFunctionMetadata {
 
 export interface IConstraintMetadata extends IFunctionMetadata {
   path: string
-  operator: string
+  operator?: string
 }
 
 export interface IOrderMetadata extends IFunctionMetadata {
@@ -29,6 +29,6 @@ export interface IDatabaseQueryMetadataAPI {
   queryClass: string
   constraints: IConstraintMetadata[]
   orders: IOrderMetadata[]
-  selects: IFunctionMetadata[]
+  selects: ISelectMetadata[]
   types?: IActionTypes
 }
