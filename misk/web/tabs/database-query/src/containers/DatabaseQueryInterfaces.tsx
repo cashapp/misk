@@ -1,52 +1,23 @@
-export const enum TypescriptBaseTypes {
-  "any" = "any",
-  "boolean" = "boolean",
-  "enum" = "enum",
-  "null" = "null",
-  "number" = "number",
-  "string" = "string"
-}
+import { IActionTypes } from "src/form-builder"
 
-export const enum ServerTypes {
-  "Boolean" = "Boolean",
-  "Byte" = "Byte",
-  "ByteString" = "ByteString",
-  "Char" = "Char",
-  "Double" = "Double",
-  "Enum" = "Enum",
-  "Float" = "Float",
-  "Int" = "Int",
-  "JSON" = "JSON",
-  "Long" = "Long",
-  "Short" = "Short",
-  "String" = "String"
-}
-
-export interface IBaseFieldTypes {
-  [serverType: string]: TypescriptBaseTypes
-}
-
-export const BaseFieldTypes: IBaseFieldTypes = {
-  [ServerTypes.Boolean]: TypescriptBaseTypes.boolean,
-  [ServerTypes.Short]: TypescriptBaseTypes.number,
-  [ServerTypes.Int]: TypescriptBaseTypes.number,
-  [ServerTypes.JSON]: TypescriptBaseTypes.string,
-  [ServerTypes.Long]: TypescriptBaseTypes.number,
-  [ServerTypes.ByteString]: TypescriptBaseTypes.string,
-  [ServerTypes.String]: TypescriptBaseTypes.string,
-  [ServerTypes.Enum]: TypescriptBaseTypes.enum
-}
-
-export interface IFieldTypeMetadata {
+// Maps from a functionName for the constraint, order, or select to the return Type string identifier
+export interface IFunctionMetadata {
   name: string
-  repeated: boolean
-  type: IBaseFieldTypes | any
+  parametersType: string
 }
 
-export interface IQueryParameters {
-  [type: string]: {
-    fields: IFieldTypeMetadata[]
-  }
+export interface IConstraintMetadata extends IFunctionMetadata {
+  path: string
+  operator: string
+}
+
+export interface IOrderMetadata extends IFunctionMetadata {
+  path: string
+  ascending: boolean
+}
+
+export interface ISelectMetadata extends IFunctionMetadata {
+  paths: string[]
 }
 
 export interface IDatabaseQueryMetadataAPI {
@@ -56,7 +27,8 @@ export interface IDatabaseQueryMetadataAPI {
   table: string
   entityClass: string
   queryClass: string
-  constraints?: IQueryParameters
-  orders?: IQueryParameters
-  selects?: IQueryParameters
+  constraints: IConstraintMetadata[]
+  orders: IOrderMetadata[]
+  selects: IFunctionMetadata[]
+  types?: IActionTypes
 }

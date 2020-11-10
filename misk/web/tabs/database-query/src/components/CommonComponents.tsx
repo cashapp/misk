@@ -18,6 +18,7 @@ import {
 } from "@misk/simpleredux"
 import copy from "copy-to-clipboard"
 import HTTPMethod from "http-method-enum"
+import { Dispatch, SetStateAction } from "react"
 import { connect } from "react-redux"
 import { IDispatchProps, mapDispatchToProps, mapStateToProps } from "../ducks"
 
@@ -161,7 +162,66 @@ export const MetadataCopyToClipboard = (props: {
  *      Provides access to @misk/SimpleRedux/SimpleRedux input handlers
  */
 
-const UnconnectedMetadataCollapse = (
+export const MetadataCollapse = (props: {
+  clipboardLabelElement?: boolean
+  children?: any
+  content?: string | string[] | JSX.Element | JSX.Element[]
+  countLabel?: boolean
+  data?: string
+  isOpen: boolean
+  label?: string
+  labelElement?: JSX.Element
+  setIsOpen: Dispatch<SetStateAction<boolean>>
+  text?: string | JSX.Element
+  tooltip?: string | JSX.Element
+}) => {
+  const content = Array.isArray(props.content) ? props.content : [props.content]
+  const collapseIcon = (props.isOpen && (
+    <Icon icon={IconNames.CARET_DOWN} />
+  )) || <Icon icon={IconNames.CARET_RIGHT} />
+  return (
+    <div>
+      <Metadata
+        content={
+          <span>
+            {props.children || content.length > 0 ? (
+              collapseIcon
+            ) : (
+              <Icon color={Colors.LIGHT_GRAY1} icon={IconNames.CARET_RIGHT} />
+            )}
+            {props.text || props.children || content.join(", ")}
+          </span>
+        }
+        data-testid={"metadata-collapse"}
+        label={
+          props.children || !props.countLabel
+            ? props.label
+            : `${props.label} (${content.length})`
+        }
+        labelElement={props.children ? props.labelElement : null}
+        onClick={() => props.setIsOpen(!props.isOpen)}
+      />
+      <Collapse isOpen={props.isOpen}>
+        {props.children
+          ? props.children
+          : content.map(c => (
+              <MetadataCopyToClipboard
+                clipboardLabelElement={definedOrDefault(
+                  props.clipboardLabelElement,
+                  true
+                )}
+                content={<WrapTextContainer>{c}</WrapTextContainer>}
+                data={props.data || c}
+                key={c.toString()}
+                labelElement={props.labelElement}
+              />
+            ))}
+      </Collapse>
+    </div>
+  )
+}
+
+const UnconnectedReduxMetadataCollapse = (
   props: {
     clipboardLabelElement?: boolean
     children?: any
@@ -234,7 +294,7 @@ const UnconnectedMetadataCollapse = (
   )
 }
 
-export const MetadataCollapse = connect(
+export const ReduxMetadataCollapse = connect(
   mapStateToProps,
   mapDispatchToProps
-)(UnconnectedMetadataCollapse)
+)(UnconnectedReduxMetadataCollapse)

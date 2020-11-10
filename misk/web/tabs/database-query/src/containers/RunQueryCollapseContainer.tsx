@@ -3,6 +3,7 @@ import {
   Button,
   Collapse,
   ControlGroup,
+  H5,
   HTMLSelect,
   InputGroup,
   Menu
@@ -15,17 +16,18 @@ import {
   simpleSelectorGet
 } from "@misk/simpleredux"
 import { HTTPMethod } from "http-method-enum"
+import { Dispatch, useState, SetStateAction } from "react"
 import { connect } from "react-redux"
 import {
   cssButton,
   cssColumn,
   cssMetadataMenu,
   Metadata,
-  MetadataCollapse,
+  ReduxMetadataCollapse,
   MetadataCopyToClipboard,
   StatusTagComponent
 } from "../components"
-import { RequestFormContainer } from "."
+import { FormBuilderContainer } from "../form-builder"
 import {
   getFormData,
   IDispatchProps,
@@ -35,60 +37,31 @@ import {
   mapStateToProps,
   methodHasBody
 } from "../ducks"
-
-const RequestBodyForm = (
-  props: {
-    action: IWebActionInternal
-    method: HTTPMethod
-    tag: string
-  } & IState &
-    IDispatchProps
-) => {
-  const { method, tag } = props
-  if (methodHasBody(props.method)) {
-    return (
-      <MetadataCollapse
-        label={"Input"}
-        tag={`${tag}::ButtonFormRequestBody`}
-        text={"Request Body"}
-      >
-        <RequestFormContainer {...props} tag={tag} />
-      </MetadataCollapse>
-    )
-  } else {
-    return (
-      <Metadata
-        {...props}
-        content={"Request Body"}
-        label={`${method} does not have a Body`}
-      />
-    )
-  }
-}
+import { IDatabaseQueryMetadataAPI } from "./DatabaseQueryInterfaces"
 
 /**
  * Collapse wrapped Send a Request form for each Web Action card
  */
-const SendQueryCollapseContainer = (
-  props: { databaseQuery: IWebActionInternal; tag: string } & IState &
+const RunQueryCollapseContainer = (
+  props: {
+    databaseQuery: IDatabaseQueryMetadataAPI
+    isOpen: boolean
+    tag: string
+  } & IState &
     IDispatchProps
 ) => {
-  const { databaseQuery: action, tag } = props
+  const { databaseQuery, tag } = props
+  const MISK_RUN_QUERY_ENDPOINT = "/api/database/query/run......"
+  const url = simpleSelectorGet(props.simpleRedux, [`${tag}::URL`, "data"])
 
   // Determine if Send Request form for the Web Action should be open
-  const isOpen = simpleSelectorGet(props.simpleRedux, [
-    `${tag}::ButtonSendRequest`,
-    "data"
-  ])
-  const url = simpleSelectorGet(props.simpleRedux, [`${tag}::URL`, "data"])
+  const isOpen = props.isOpen
 
   // Pre-populate the URL field with the action path pattern on open of request form
   if (isOpen && !url) {
-    props.simpleMergeData(`${tag}::URL`, action.pathPattern)
+    props.simpleMergeData(`${tag}::URL`, MISK_RUN_QUERY_ENDPOINT)
   }
-  const method: HTTPMethod =
-    simpleSelectorGet(props.simpleRedux, [`${tag}::Method`, "data"]) ||
-    action.httpMethod.reverse()[0]
+  const method: HTTPMethod = HTTPMethod.POST
 
   // Response with fallback to error
   const response = simpleSelectorGet(
@@ -119,7 +92,9 @@ const SendQueryCollapseContainer = (
   const formData =
     whichFormData === "RAW"
       ? simpleSelectorGet(props.simpleRedux, [`${tag}::RawRequestBody`, "data"])
-      : getFormData(action, props.simpleRedux, tag, props.webActionsRaw)
+      : {}
+  // TODO fix
+  // getFormData(databaseQuery, props.simpleRedux, tag, props.webActionsRaw)
 
   // Open request section if method has a body
   if (
@@ -153,33 +128,31 @@ const SendQueryCollapseContainer = (
   }
   return (
     <Collapse isOpen={isOpen}>
-      <InputGroup
-        defaultValue={action.pathPattern}
-        onChange={onChangeFnCall(props.simpleMergeData, `${tag}::URL`)}
-        placeholder={
-          "Request URL: absolute ( http://your.url.com/to/send/a/request/to/ ) or internal service endpoint ( /service/web/action )"
-        }
-        type={"url"}
-      />
       <FlexContainer>
         <div css={cssColumn}>
           <Menu css={cssMetadataMenu}>
-            <RequestBodyForm
-              action={action}
-              method={method}
-              tag={tag}
-              {...props}
+            <H5>{"Constraints"}</H5>
+            <FormBuilderContainer
+              formType={"root form type goes here"}
+              noFormIdentifier={`${databaseQuery.queryClass} Constraints`}
+              types={databaseQuery.constraints}
+            />
+            <H5>{"Orders"}</H5>
+            <FormBuilderContainer
+              formType={"root form type goes here"}
+              noFormIdentifier={`${databaseQuery.queryClass} Orders`}
+              types={databaseQuery.orders}
+            />
+            <H5>{"Selects"}</H5>
+            <FormBuilderContainer
+              formType={"root form type goes here"}
+              noFormIdentifier={`${databaseQuery.queryClass} Selects`}
+              types={databaseQuery.selects}
             />
           </Menu>
         </div>
         <div css={cssColumn}>
           <ControlGroup>
-            <HTMLSelect
-              large={true}
-              onChange={onChangeFnCall(props.simpleMergeData, `${tag}::Method`)}
-              options={action.httpMethod.sort()}
-              value={method}
-            />
             <Button
               css={cssButton}
               large={true}
@@ -196,12 +169,12 @@ const SendQueryCollapseContainer = (
                 `${tag}::Response`,
                 "loading"
               ])}
-              text={"Submit"}
+              text={"Run Query"}
             />
           </ControlGroup>
           <Menu css={cssMetadataMenu}>
             {methodHasBody(method) ? (
-              <MetadataCollapse
+              <ReduxMetadataCollapse
                 label={`${url}`}
                 tag={`${tag}::ButtonRequestBody`}
                 text={"Request"}
@@ -213,16 +186,16 @@ const SendQueryCollapseContainer = (
                 <CodePreContainer>
                   {JSON.stringify(isOpen && formData, null, 2)}
                 </CodePreContainer>
-              </MetadataCollapse>
+              </ReduxMetadataCollapse>
             ) : (
-              <MetadataCollapse
+              <ReduxMetadataCollapse
                 content={[]}
                 label={`${url}`}
                 tag={`${tag}::ButtonRequestBody`}
                 text={"Request"}
               />
             )}
-            <MetadataCollapse
+            <ReduxMetadataCollapse
               labelElement={
                 <StatusTagComponent
                   status={simpleSelectorGet(
@@ -256,7 +229,7 @@ const SendQueryCollapseContainer = (
                 <CodePreContainer>
                   {JSON.stringify(responseData, null, 2)}
                 </CodePreContainer>
-                <MetadataCollapse
+                <ReduxMetadataCollapse
                   label={"Redux State"}
                   tag={`${tag}::ButtonRawResponse`}
                   text={"Raw Response"}
@@ -268,9 +241,9 @@ const SendQueryCollapseContainer = (
                   <CodePreContainer>
                     {JSON.stringify(response, null, 2)}
                   </CodePreContainer>
-                </MetadataCollapse>
+                </ReduxMetadataCollapse>
               </div>
-            </MetadataCollapse>
+            </ReduxMetadataCollapse>
           </Menu>
         </div>
       </FlexContainer>
@@ -281,4 +254,4 @@ const SendQueryCollapseContainer = (
 export default connect(
   mapStateToProps,
   mapDispatchToProps
-)(SendQueryCollapseContainer)
+)(RunQueryCollapseContainer)

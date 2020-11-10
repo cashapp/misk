@@ -6,7 +6,7 @@ import { SkeletonWebActionsComponent } from "../components"
 import {
   IDatabaseQueryMetadataAPI,
   FilterDatabaseQueryContainer,
-  DatabaseQueryCardContainer,
+  DatabaseQueryCardContainer
 } from "."
 import {
   IDispatchProps,
@@ -41,15 +41,15 @@ const DatabaseQueryContainer = (
           tag={props.tag}
         />
         <div>
-          {chain(filteredMetadata).sortBy(["table", "queryClass"]).map(
-            (databaseQuery: IDatabaseQueryMetadataAPI, index: number) => (
+          {chain(filteredMetadata)
+            .sortBy(["table", "queryClass"])
+            .map((databaseQuery: IDatabaseQueryMetadataAPI, index: number) => (
               <DatabaseQueryCardContainer
                 databaseQuery={databaseQuery}
                 key={index}
                 tag={createTag(databaseQuery, "DatabaseQuery")}
               />
-            )
-          )}
+            ))}
         </div>
       </div>
     )

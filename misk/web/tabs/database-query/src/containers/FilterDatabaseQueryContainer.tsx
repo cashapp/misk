@@ -1,14 +1,8 @@
-import {
-  ControlGroup,
-  InputGroup,
-  Spinner
-} from "@blueprintjs/core"
+import { ControlGroup, InputGroup, Spinner } from "@blueprintjs/core"
 import { parseOnChangeArgs } from "@misk/simpleredux"
 import { chain } from "lodash"
 import React, { Dispatch, useState, SetStateAction } from "react"
-import {
-  IDatabaseQueryMetadataAPI
-} from "./DatabaseQueryInterfaces"
+import { IDatabaseQueryMetadataAPI } from "./DatabaseQueryInterfaces"
 
 export const FilterDatabaseQueryContainer = (props: {
   disabled?: boolean
@@ -24,10 +18,11 @@ export const FilterDatabaseQueryContainer = (props: {
     filterValue: string
   ): any =>
     chain(metadata)
-      .filter((dashboardQuery: IDatabaseQueryMetadataAPI) => (JSON.stringify(dashboardQuery) || "")
-        .toString()
-        .toLowerCase()
-        .includes(filterValue.toLowerCase())
+      .filter((dashboardQuery: IDatabaseQueryMetadataAPI) =>
+        (JSON.stringify(dashboardQuery) || "")
+          .toString()
+          .toLowerCase()
+          .includes(filterValue.toLowerCase())
       )
       .value()
 
@@ -35,7 +30,7 @@ export const FilterDatabaseQueryContainer = (props: {
     setFilterText(update)
     // If filter text reset, load all metadata
     if (update == "") {
-        props.setFilteredMetadata(props.metadata)
+      props.setFilteredMetadata(props.metadata)
     } else {
       props.setFilteredMetadata(filterMetadata(props.metadata, filterText))
     }
@@ -46,7 +41,11 @@ export const FilterDatabaseQueryContainer = (props: {
       <InputGroup
         disabled={props.disabled}
         large={true}
-        onChange={(event: any) => updateFilterText(event.target.value && parseOnChangeArgs(event) || "")}
+        onChange={(event: any) =>
+          updateFilterText(
+            (event.target.value && parseOnChangeArgs(event)) || ""
+          )
+        }
         placeholder={
           props.disabled
             ? "Loading Database Queries..."

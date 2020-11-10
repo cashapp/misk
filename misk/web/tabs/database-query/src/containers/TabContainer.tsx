@@ -1,6 +1,7 @@
 import { H1 } from "@blueprintjs/core"
 import * as React from "react"
 import { connect } from "react-redux"
+import { ServerTypes } from "src/form-builder"
 import { DatabaseQueryContainer } from "../containers"
 import {
   IDispatchProps,
@@ -8,10 +9,7 @@ import {
   mapDispatchToProps,
   mapStateToProps
 } from "../ducks"
-import {
-  IDatabaseQueryMetadataAPI,
-  ServerTypes
-} from "./DatabaseQueryInterfaces"
+import { IDatabaseQueryMetadataAPI } from "./DatabaseQueryInterfaces"
 
 class TabContainer extends React.Component<IState & IDispatchProps, IState> {
   componentDidMount() {
@@ -27,16 +25,19 @@ class TabContainer extends React.Component<IState & IDispatchProps, IState> {
         table: "movies",
         entityClass: "DbMovie",
         queryClass: "MovieQueries",
-        constraints: {
-          another: {
+        types: {
+          token: {
             fields: [
               {
-                name: "name",
+                name: "token",
                 repeated: false,
                 type: ServerTypes.String
               }
             ]
-          }
+          },
+        },
+        constraints: {
+          ""
         },
         orders: {
           another: {
