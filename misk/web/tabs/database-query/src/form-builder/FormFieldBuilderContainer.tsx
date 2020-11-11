@@ -9,44 +9,28 @@ import {
   InputGroup,
   Intent,
   Label,
-  TextArea,
-  Tooltip
+  TextArea
 } from "@blueprintjs/core"
-import { IconNames } from "@blueprintjs/icons"
 import { css, jsx } from "@emotion/core"
-import { CodePreContainer, WrapTextContainer } from "@misk/core"
-import {
-  onChangeFnCall,
-  onChangeToggleFnCall,
-  onClickFnCall,
-  simpleSelectorGet
-} from "@misk/simpleredux"
+import { WrapTextContainer } from "@misk/core"
 import { OrderedMap } from "immutable"
-import { Dispatch, SetStateAction } from "react"
-import { connect } from "react-redux"
+import { Dispatch, useState, SetStateAction } from "react"
 import {
   BaseFieldTypes,
+  EditRawInput,
   handler,
   ITypesFieldMetadata,
-  padId,
+  repeatableFieldButtons,
   ServerTypes,
   TypescriptBaseTypes
 } from "."
+import { cssButton, cssWrapTextArea, Metadata } from "../components"
 import {
-  cssButton,
-  cssTooltip,
-  cssWrapTextArea,
-  Metadata,
-  QuantityButton
-} from "../components"
-import {
-  IDispatchProps,
-  IState,
-  IWebActionInternal,
-  mapDispatchToProps,
-  mapStateToProps,
-  parseEnumType
-} from "../ducks"
+  getFieldData,
+  parseEnumType,
+  recursivelySetDirtyInput
+} from "./FormBuilderStore"
+import { IActionTypes } from "./Interfaces"
 
 const cssCard = css`
   box-shadow: none !important;
@@ -59,118 +43,6 @@ const cssFormGroup = css`
   margin: 0px !important;
 `
 
-const repeatableFieldButtons = (
-  props: {
-    noFormIdentifier: string
-    id: string
-    valueEditRawButton: boolean
-    setEditRawButton: Dispatch<SetStateAction<boolean>>
-    typesMetadata: OrderedMap<string, ITypesFieldMetadata>
-  }
-) => {
-  const { id, valueEditRawButton, setEditRawButton, typesMetadata } = props
-  const metadata = typesMetadata.get(id)
-  const editRawButton = (
-    <Tooltip
-      css={css(cssTooltip)}
-      content={"Edit raw input"}
-      key={`editRaw${id}`}
-      lazy={true}
-    >
-      <Button
-        active={valueEditRawButton}
-        css={css(cssButton)}
-        defaultValue={simpleSelectorGet(props.simpleRedux, [
-          `${tag}::${padId(id)}`,
-          "data"
-        ])}
-        icon={IconNames.MORE}
-        onClick={handler.handle(setEditRawButton, { overrideArgs: !valueEditRawButton } )}
-      />
-    </Tooltip>
-  )
-  const dirtyInput = metadata.dirtyInput
-  const dirtyInputButton = (
-    <Tooltip
-      css={css(cssTooltip)}
-      content={dirtyInput ? "Remove from request body" : "Add to request body"}
-      key={`dirtyInput${id}`}
-      lazy={true}
-    >
-      <Button
-        icon={dirtyInput ? IconNames.REMOVE : IconNames.ADD_TO_ARTIFACT}
-        onClick={(event: any) => {
-          props.simpleMergeData(`${tag}::ButtonRequestBody`, true)
-          ;(dirtyInput
-            ? props.webActionsUnsetDirtyInput
-            : props.webActionsSetDirtyInput)(id, action, props.webActionsRaw)
-        }}
-      />
-    </Tooltip>
-  )
-  if (
-    metadata &&
-    metadata.id !== "0" &&
-    typesMetadata.get(metadata.idParent).repeated
-  ) {
-    const { idParent } = metadata
-    const { idChildren } = typesMetadata.get(idParent)
-    const addButton = (
-      <QuantityButton
-        action={action}
-        changeFn={props.webActionsAdd}
-        content={"Add Field"}
-        icon={IconNames.PLUS}
-        id={idParent}
-        key={`Add${id}`}
-        oldState={props.webActionsRaw}
-      />
-    )
-    const removeButton = idChildren.size > 1 && (
-      <QuantityButton
-        action={action}
-        changeFn={props.webActionsRemove}
-        content={"Remove Field"}
-        icon={IconNames.CROSS}
-        id={id}
-        key={`Remove${id}`}
-        oldState={props.webActionsRaw}
-      />
-    )
-    return [dirtyInputButton, editRawButton, addButton, removeButton]
-  } else if (metadata && !metadata.repeated && metadata.typescriptType) {
-    return [dirtyInputButton, editRawButton]
-  } else if (metadata && id !== "0") {
-    return [dirtyInputButton]
-  } else if (metadata && metadata.id === "0") {
-    return []
-  } else {
-    return [<Button css={css(cssButton)} icon={IconNames.WARNING_SIGN} />]
-  }
-}
-
-const EditRawInput = (props: {
-  children: any
-  isOpen: boolean
-  rawInput: string
-  setRawInput: Dispatch<SetStateAction<string>>
-}) => {
-  const { children, isOpen, rawInput, setRawInput } = props
-  if (isOpen) {
-    return (
-      <TextArea
-        css={css(cssWrapTextArea)}
-        defaultValue={rawInput}
-        fill={true}
-        growVertically={true}
-        onBlur={handler.handle(setRawInput)}
-      />
-    )
-  } else {
-    return children
-  }
-}
-
 const formLabelFormatter = (name: string, serverType: string) => {
   if (name && serverType && serverType.startsWith(ServerTypes.Enum)) {
     const { enumClassName } = parseEnumType(serverType)
@@ -182,29 +54,72 @@ const formLabelFormatter = (name: string, serverType: string) => {
   }
 }
 
-const clickDirtyInputFns = (
-  props: {
-    action: IWebActionInternal
-    id: string
-    tag: string
-    typesMetadata: OrderedMap<string, ITypesFieldMetadata>
-  } & IState &
-    IDispatchProps
-) => () => {
-  const { action, id, tag } = props
-  props.webActionsSetDirtyInput(id, action, props.webActionsRaw)
-  props.simpleMergeData(`${tag}::ButtonRequestBody`, true)
+const clickDirtyInputFns = (props: {
+  id: string
+  setIsOpenRequestBodyPreview: Dispatch<SetStateAction<boolean>>
+  typesMetadata: OrderedMap<string, ITypesFieldMetadata>
+  setTypesMetadata: Dispatch<
+    SetStateAction<OrderedMap<string, ITypesFieldMetadata>>
+  >
+}) => () => {
+  const {
+    id,
+    setIsOpenRequestBodyPreview,
+    setTypesMetadata,
+    typesMetadata
+  } = props
+  setTypesMetadata(recursivelySetDirtyInput(typesMetadata, id, true))
+  setIsOpenRequestBodyPreview(true)
+}
+
+const updateFieldValue = (
+  id: string,
+  fieldValueStore: OrderedMap<string, any>,
+  setFieldValueStore: Dispatch<SetStateAction<OrderedMap<string, any>>>
+) => (value: any) => {
+  setFieldValueStore(fieldValueStore.set(id, value))
 }
 
 export const FormFieldBuilderContainer = (props: {
   id: string
   noFormIdentifier: string
+  fieldValueStore: OrderedMap<string, any>
+  setFieldValueStore: Dispatch<SetStateAction<OrderedMap<string, any>>>
+  types: IActionTypes
   setTypesMetadata: Dispatch<
     SetStateAction<OrderedMap<string, ITypesFieldMetadata>>
   >
   typesMetadata: OrderedMap<string, ITypesFieldMetadata>
+  setIsOpenRequestBodyPreview: Dispatch<SetStateAction<boolean>>
+  requestBodyFormInputType: boolean
+  setRequestBodyFormInputType: Dispatch<SetStateAction<boolean>>
+  rawRequestBody: string
+  setRawRequestBody: Dispatch<SetStateAction<string>>
 }) => {
-  const { id, noFormIdentifier, setTypesMetadata, typesMetadata } = props
+  const {
+    id,
+    fieldValueStore,
+    setFieldValueStore,
+    noFormIdentifier,
+    setTypesMetadata,
+    typesMetadata,
+    types,
+    setIsOpenRequestBodyPreview,
+    requestBodyFormInputType,
+    setRequestBodyFormInputType,
+    rawRequestBody,
+    setRawRequestBody
+  } = props
+  const fieldValue = fieldValueStore.get(id)
+  const setFieldValue = updateFieldValue(
+    id,
+    fieldValueStore,
+    setFieldValueStore
+  )
+
+  // Field block state
+  const [isOpenEditRawInput, setIsOpenEditRawInput] = useState(false)
+
   const metadata = typesMetadata.get(id)
   if (metadata) {
     // return <CodePreContainer>{metadata}</CodePreContainer>
@@ -221,36 +136,46 @@ export const FormFieldBuilderContainer = (props: {
           label={formLabelFormatter(name, serverType)}
         >
           <ControlGroup>
-            {...repeatableFieldButtons({ ...props, id })}
-            <EditRawInput {...props} id={id} tag={tag}>
+            {...repeatableFieldButtons({
+              noFormIdentifier,
+              id,
+              fieldValue,
+              isOpenEditRawInput,
+              setIsOpenEditRawInput,
+              types,
+              typesMetadata,
+              setTypesMetadata
+            })}
+            <EditRawInput
+              isOpen={isOpenEditRawInput}
+              rawInput={fieldValue}
+              setRawInput={setFieldValue}
+            >
               <Button
                 css={css(cssButton)}
-                defaultValue={simpleSelectorGet(props.simpleRedux, [
-                  `${tag}::${padId(id)}`,
-                  "data"
-                ])}
+                defaultValue={fieldValue}
                 intent={
-                  simpleSelectorGet(
-                    props.simpleRedux,
-                    [`${tag}::${padId(id)}`, "data"],
-                    false
-                  )
+                  (fieldValue == null && false) || fieldValue
                     ? Intent.PRIMARY
                     : Intent.WARNING
                 }
-                onChange={onChangeFnCall(clickDirtyInputFns(props))}
+                onChange={clickDirtyInputFns({
+                  id,
+                  setIsOpenRequestBodyPreview,
+                  setTypesMetadata,
+                  typesMetadata
+                })}
                 onClick={() => {
-                  props.simpleMergeToggle(
-                    `${tag}::${padId(id)}`,
-                    props.simpleRedux
-                  )
-                  clickDirtyInputFns(props)()
+                  setFieldValue(!fieldValue)
+                  clickDirtyInputFns({
+                    id,
+                    setIsOpenRequestBodyPreview,
+                    setTypesMetadata,
+                    typesMetadata
+                  })()
                 }}
               >
-                {simpleSelectorGet(props.simpleRedux, [
-                  `${tag}::${padId(id)}`,
-                  "data"
-                ]).toString() || "unset"}
+                {((fieldValue == null && "unset") || fieldValue).toString()}
               </Button>
             </EditRawInput>
           </ControlGroup>
@@ -263,19 +188,36 @@ export const FormFieldBuilderContainer = (props: {
           label={formLabelFormatter(name, serverType)}
         >
           <ControlGroup>
-            {...repeatableFieldButtons({ ...props, id })}
-            <EditRawInput {...props} id={id} tag={tag}>
+            {...repeatableFieldButtons({
+              noFormIdentifier,
+              id,
+              fieldValue,
+              isOpenEditRawInput,
+              setIsOpenEditRawInput,
+              types,
+              typesMetadata,
+              setTypesMetadata
+            })}
+            <EditRawInput
+              isOpen={isOpenEditRawInput}
+              rawInput={fieldValue}
+              setRawInput={setFieldValue}
+            >
               <InputGroup
-                defaultValue={simpleSelectorGet(props.simpleRedux, [
-                  `${tag}::${padId(id)}`,
-                  "data"
-                ])}
-                onChange={onChangeFnCall(clickDirtyInputFns(props))}
-                onClick={onChangeFnCall(clickDirtyInputFns(props))}
-                onBlur={onChangeFnCall(
-                  props.simpleMergeData,
-                  `${tag}::${padId(id)}`
-                )}
+                defaultValue={fieldValue}
+                onChange={clickDirtyInputFns({
+                  id,
+                  setIsOpenRequestBodyPreview,
+                  setTypesMetadata,
+                  typesMetadata
+                })}
+                onClick={clickDirtyInputFns({
+                  id,
+                  setIsOpenRequestBodyPreview,
+                  setTypesMetadata,
+                  typesMetadata
+                })}
+                onBlur={handler.handle(setFieldValue)}
                 placeholder={serverType}
               />
             </EditRawInput>
@@ -289,19 +231,36 @@ export const FormFieldBuilderContainer = (props: {
           label={formLabelFormatter(name, serverType)}
         >
           <ControlGroup>
-            {...repeatableFieldButtons({ ...props, id })}
-            <EditRawInput {...props} id={id} tag={tag}>
+            {...repeatableFieldButtons({
+              noFormIdentifier,
+              id,
+              fieldValue,
+              isOpenEditRawInput,
+              setIsOpenEditRawInput,
+              types,
+              typesMetadata,
+              setTypesMetadata
+            })}
+            <EditRawInput
+              isOpen={isOpenEditRawInput}
+              rawInput={fieldValue}
+              setRawInput={setFieldValue}
+            >
               <InputGroup
-                defaultValue={simpleSelectorGet(props.simpleRedux, [
-                  `${tag}::${padId(id)}`,
-                  "data"
-                ])}
-                onBlur={onChangeFnCall(
-                  props.simpleMergeData,
-                  `${tag}::${padId(id)}`
-                )}
-                onChange={onChangeFnCall(clickDirtyInputFns(props))}
-                onClick={onChangeFnCall(clickDirtyInputFns(props))}
+                defaultValue={fieldValue}
+                onBlur={handler.handle(setFieldValue)}
+                onChange={clickDirtyInputFns({
+                  id,
+                  setIsOpenRequestBodyPreview,
+                  setTypesMetadata,
+                  typesMetadata
+                })}
+                onClick={clickDirtyInputFns({
+                  id,
+                  setIsOpenRequestBodyPreview,
+                  setTypesMetadata,
+                  typesMetadata
+                })}
                 placeholder={serverType}
               />
             </EditRawInput>
@@ -316,19 +275,31 @@ export const FormFieldBuilderContainer = (props: {
           label={formLabelFormatter(name, serverType)}
         >
           <ControlGroup>
-            {...repeatableFieldButtons({ ...props, id })}
-            <EditRawInput {...props} id={id} tag={tag}>
+            {...repeatableFieldButtons({
+              noFormIdentifier,
+              id,
+              fieldValue,
+              isOpenEditRawInput,
+              setIsOpenEditRawInput,
+              types,
+              typesMetadata,
+              setTypesMetadata
+            })}
+            <EditRawInput
+              isOpen={isOpenEditRawInput}
+              rawInput={fieldValue}
+              setRawInput={setFieldValue}
+            >
               <HTMLSelect
                 large={true}
-                onChange={onChangeFnCall(
-                  props.simpleMergeData,
-                  `${tag}::${padId(id)}`
-                )}
-                onClick={onChangeFnCall(clickDirtyInputFns(props))}
-                onBlur={onChangeFnCall(
-                  props.simpleMergeData,
-                  `${tag}::${padId(id)}`
-                )}
+                onChange={handler.handle(setFieldValue)}
+                onClick={clickDirtyInputFns({
+                  id,
+                  setIsOpenRequestBodyPreview,
+                  setTypesMetadata,
+                  typesMetadata
+                })}
+                onBlur={handler.handle(setFieldValue)}
                 // Show empty option to prompt selection since first option is not automatically persisted
                 options={[""].concat(enumValues)}
               />
@@ -346,11 +317,19 @@ export const FormFieldBuilderContainer = (props: {
           <div>
             {idChildren.map((child: string) => (
               <FormFieldBuilderContainer
-                action={action}
+                noFormIdentifier={noFormIdentifier}
                 id={child}
                 key={child}
-                tag={tag}
+                fieldValueStore={fieldValueStore}
+                setFieldValueStore={setFieldValueStore}
+                types={types}
                 typesMetadata={typesMetadata}
+                setTypesMetadata={setTypesMetadata}
+                setIsOpenRequestBodyPreview={setIsOpenRequestBodyPreview}
+                requestBodyFormInputType={requestBodyFormInputType}
+                setRequestBodyFormInputType={setRequestBodyFormInputType}
+                rawRequestBody={rawRequestBody}
+                setRawRequestBody={setRawRequestBody}
               />
             ))}
           </div>
@@ -376,10 +355,19 @@ export const FormFieldBuilderContainer = (props: {
             return (
               <div key={child}>
                 <FormFieldBuilderContainer
-                  action={action}
+                  noFormIdentifier={noFormIdentifier}
                   id={child}
-                  tag={tag}
+                  key={child}
+                  fieldValueStore={fieldValueStore}
+                  setFieldValueStore={setFieldValueStore}
+                  types={types}
                   typesMetadata={typesMetadata}
+                  setTypesMetadata={setTypesMetadata}
+                  setIsOpenRequestBodyPreview={setIsOpenRequestBodyPreview}
+                  requestBodyFormInputType={requestBodyFormInputType}
+                  setRequestBodyFormInputType={setRequestBodyFormInputType}
+                  rawRequestBody={rawRequestBody}
+                  setRawRequestBody={setRawRequestBody}
                 />
               </div>
             )
@@ -388,78 +376,77 @@ export const FormFieldBuilderContainer = (props: {
               <div key={child}>
                 <Label>{formLabelFormatter(childName, childServerType)}</Label>
                 <ButtonGroup>
-                  {...repeatableFieldButtons({ ...props, id: child })}
+                  {...repeatableFieldButtons({
+                    noFormIdentifier,
+                    id: child,
+                    fieldValue,
+                    isOpenEditRawInput,
+                    setIsOpenEditRawInput,
+                    types,
+                    typesMetadata,
+                    setTypesMetadata
+                  })}
                 </ButtonGroup>
-                <FormFieldBuilderContainer
-                  action={action}
-                  id={child}
-                  tag={tag}
-                  typesMetadata={typesMetadata}
-                />
+                {/* Allow editing raw an entire message block */}
+                <EditRawInput
+                  isOpen={isOpenEditRawInput}
+                  rawInput={JSON.stringify(
+                    getFieldData(fieldValueStore, typesMetadata, id)
+                  )}
+                  // tODO fix
+                  setRawInput={setFieldValue}
+                >
+                  <FormFieldBuilderContainer
+                    noFormIdentifier={noFormIdentifier}
+                    id={child}
+                    key={child}
+                    fieldValueStore={fieldValueStore}
+                    setFieldValueStore={setFieldValueStore}
+                    types={types}
+                    typesMetadata={typesMetadata}
+                    setTypesMetadata={setTypesMetadata}
+                    setIsOpenRequestBodyPreview={setIsOpenRequestBodyPreview}
+                    requestBodyFormInputType={requestBodyFormInputType}
+                    setRequestBodyFormInputType={setRequestBodyFormInputType}
+                    rawRequestBody={rawRequestBody}
+                    setRawRequestBody={setRawRequestBody}
+                  />
+                </EditRawInput>
               </div>
             )
           }
         }
+        // Custom logic for root
         if (id === "0") {
-          const whichFormData = simpleSelectorGet(
-            props.simpleRedux,
-            [`${tag}::RequestBodyFormInputType`, "data"],
-            false
-          )
-            ? "RAW"
-            : "FORM"
           return (
             <div>
-              <ControlGroup fill={true}>
-                <Button
-                  active={whichFormData === "FORM"}
-                  css={css(cssButton)}
-                  icon={IconNames.FORM}
-                  onClick={onChangeToggleFnCall(
-                    props.simpleMergeToggle,
-                    `${tag}::RequestBodyFormInputType`,
-                    props.simpleRedux
-                  )}
-                  text={"Form"}
-                />
-                <Button
-                  active={whichFormData === "RAW"}
-                  css={css(cssButton)}
-                  icon={IconNames.MORE}
-                  onClick={onChangeToggleFnCall(
-                    props.simpleMergeToggle,
-                    `${tag}::RequestBodyFormInputType`,
-                    props.simpleRedux
-                  )}
-                  text={"Raw"}
-                />
-              </ControlGroup>
-              {whichFormData === "FORM" ? (
+              <ButtonGroup>
+                {...repeatableFieldButtons({
+                  noFormIdentifier,
+                  id,
+                  fieldValue,
+                  isOpenEditRawInput,
+                  setIsOpenEditRawInput,
+                  types,
+                  typesMetadata,
+                  setTypesMetadata
+                })}
+              </ButtonGroup>
+              {/* Allow editing raw an entire message block */}
+              <EditRawInput
+                isOpen={isOpenEditRawInput}
+                rawInput={JSON.stringify(
+                  getFieldData(fieldValueStore, typesMetadata, id)
+                )}
+                // tODO fix
+                setRawInput={setFieldValue}
+              >
                 <Card css={css(cssCard)}>
                   {idChildren.map((child: string) =>
                     fieldGroup(child, serverType)
                   )}
                 </Card>
-              ) : (
-                <Card css={css(cssCard)}>
-                  <TextArea
-                    css={css(cssWrapTextArea)}
-                    defaultValue={simpleSelectorGet(props.simpleRedux, [
-                      `${tag}::RawRequestBody`,
-                      "data"
-                    ])}
-                    fill={true}
-                    growVertically={true}
-                    onChange={onChangeFnCall(
-                      props.simpleMergeData,
-                      `${tag}::RawRequestBody`
-                    )}
-                    placeholder={
-                      "Raw request body. This input will return a string or JSON."
-                    }
-                  />
-                </Card>
-              )}
+              </EditRawInput>
             </div>
           )
         } else {
@@ -477,20 +464,41 @@ export const FormFieldBuilderContainer = (props: {
           label={formLabelFormatter(name, serverType)}
         >
           <ControlGroup>
-            {...repeatableFieldButtons({ ...props, id })}
+            {...repeatableFieldButtons({
+              noFormIdentifier,
+              id,
+              fieldValue,
+              isOpenEditRawInput,
+              setIsOpenEditRawInput,
+              types,
+              typesMetadata,
+              setTypesMetadata
+            })}
             <TextArea
               css={css(cssWrapTextArea)}
               fill={true}
               growVertically={true}
-              onBlur={(event: any) => {
-                props.simpleMergeData(
-                  `${tag}::${padId(id)}`,
-                  event.target.value
-                )
-                clickDirtyInputFns(props)()
-              }}
-              onChange={onClickFnCall(clickDirtyInputFns(props))}
-              onClick={onClickFnCall(clickDirtyInputFns(props))}
+              onBlur={handler.handle((value: any) => {
+                setFieldValue(value)
+                clickDirtyInputFns({
+                  id,
+                  setIsOpenRequestBodyPreview,
+                  setTypesMetadata,
+                  typesMetadata
+                })()
+              })}
+              onChange={clickDirtyInputFns({
+                id,
+                setIsOpenRequestBodyPreview,
+                setTypesMetadata,
+                typesMetadata
+              })}
+              onClick={clickDirtyInputFns({
+                id,
+                setIsOpenRequestBodyPreview,
+                setTypesMetadata,
+                typesMetadata
+              })}
               placeholder={
                 "Unparseable type. This input will return a string or JSON."
               }

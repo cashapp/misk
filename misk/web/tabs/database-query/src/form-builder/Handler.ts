@@ -52,7 +52,7 @@ export const isSyntheticEvent = (obj: any): boolean => {
 export const parseOnChangeArgs = (args: any) => {
   const debugLogs = false
   debugLogs && console.log("PARSING ARGS YOO", args)
-  if (args[0] && (typeof args[0] === "object") && ('target' in args[0])) {
+  if (args[0] && typeof args[0] === "object" && "target" in args[0]) {
     // onChange=(event: [{ target: { value: any } }] ) => ... }
     debugLogs && console.log("PARSED: arg[] target val", args)
     return args[0].target.value
@@ -91,7 +91,8 @@ export const parseOnChangeArgs = (args: any) => {
     typeof args === "string"
   ) {
     // args are an object, number, or string
-    debugLogs && console.log("PARSED: args are an object, number, or string", args)
+    debugLogs &&
+      console.log("PARSED: args are an object, number, or string", args)
     return args
   } else {
     debugLogs && console.log("PARSED: null", args)

@@ -27,8 +27,8 @@ export interface IDatabaseQueryMetadataAPI {
   table: string
   entityClass: string
   queryClass: string
-  constraints: IConstraintMetadata[]
-  orders: IOrderMetadata[]
-  selects: ISelectMetadata[]
+  // constraints: IConstraintMetadata[]
+  // orders: IOrderMetadata[]
+  // selects: ISelectMetadata[]
   types?: IActionTypes
 }

@@ -1,12 +1,14 @@
 import { FilterDatabaseQueryContainer } from "./FilterDatabaseQueryContainer"
-import RunQueryCollapseContainer from "./RunQueryCollapseContainer"
+export * from "./RunQueryCollapseContainer"
 import TabContainer from "./TabContainer"
 import { DatabaseQueryCardContainer } from "./DatabaseQueryCardContainer"
 import DatabaseQueryContainer from "./DatabaseQueryContainer"
 export * from "./DatabaseQueryInterfaces"
+export * from "./QueryFormContainer"
+import SendQueryContainer from "./SendQueryContainer"
 export {
   FilterDatabaseQueryContainer,
-  RunQueryCollapseContainer,
+  SendQueryContainer,
   TabContainer,
   DatabaseQueryCardContainer,
   DatabaseQueryContainer
