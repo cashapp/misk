@@ -1,4 +1,4 @@
-import React, { Dispatch, SetStateAction, useState } from "react"
+import React, { Dispatch, SetStateAction, useEffect, useState } from "react"
 import {
   FormFieldBuilderContainer,
   generateTypesMetadata,
@@ -36,7 +36,8 @@ export const FormBuilderContainer = (props: {
 
   // Return back the form request body
   const formData = getFormData(fieldValueStore, typesMetadata)
-  
+  console.log("FORM DATA", formData)
+
   return (
     <FormFieldBuilderContainer
       id={"0"}

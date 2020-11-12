@@ -14,7 +14,7 @@ import {
 import { css, jsx } from "@emotion/core"
 import { WrapTextContainer } from "@misk/core"
 import { OrderedMap } from "immutable"
-import { Dispatch, useState, SetStateAction } from "react"
+import React, { Dispatch, useState, SetStateAction } from "react"
 import {
   BaseFieldTypes,
   EditRawInput,
@@ -136,16 +136,20 @@ export const FormFieldBuilderContainer = (props: {
           label={formLabelFormatter(name, serverType)}
         >
           <ControlGroup>
-            {...repeatableFieldButtons({
-              noFormIdentifier,
-              id,
-              fieldValue,
-              isOpenEditRawInput,
-              setIsOpenEditRawInput,
-              types,
-              typesMetadata,
-              setTypesMetadata
-            })}
+            {...React.useMemo(
+              () =>
+                repeatableFieldButtons({
+                  noFormIdentifier,
+                  id,
+                  fieldValue,
+                  isOpenEditRawInput,
+                  setIsOpenEditRawInput,
+                  types,
+                  typesMetadata,
+                  setTypesMetadata
+                }),
+              [id, isOpenEditRawInput, typesMetadata]
+            )}
             <EditRawInput
               isOpen={isOpenEditRawInput}
               rawInput={fieldValue}

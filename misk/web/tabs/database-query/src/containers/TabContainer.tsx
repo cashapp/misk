@@ -26,51 +26,58 @@ class TabContainer extends React.Component<IState & IDispatchProps, IState> {
         entityClass: "DbMovie",
         queryClass: "MovieQueries",
         types: {
-          "QueryRequest": {
-            fields:[
-              {name: "constraint::name",
-              repeated: false,
-              type: "constraint::name"
-            },
-            {name: "constraint::releaseDateLessThan",
-            repeated: false,
-            type: "constraint::releaseDateLessThan"
-          }
+          QueryRequest: {
+            fields: [
+              {
+                name: "constraint::name",
+                repeated: false,
+                type: "constraint::name"
+              },
+              {
+                name: "constraint::releaseDateLessThan",
+                repeated: false,
+                type: "constraint::releaseDateLessThan"
+              },
+              {
+                name: "constraint::kitchenSink",
+                repeated: false,
+                type: "constraint::kitchenSink"
+              }
             ]
           },
-          // "constraint::kitchenSink": {
-          //   fields: [
-          //     {
-          //       name: "strings",
-          //       repeated: true,
-          //       type: ServerTypes.String
-          //     },
-          //     {
-          //       name: "numbers",
-          //       repeated: true,
-          //       type: ServerTypes.Int
-          //     },
-          //     {
-          //       name: "booleans",
-          //       repeated: true,
-          //       type: ServerTypes.Boolean
-          //     },
-          //     {
-          //       name: "enums",
-          //       repeated: true,
-          //       type: "Enum<app.cash.common.AlphaEnum,Alpha,Bravo,Delta>"
-          //     }
-          //   ]
-          // },
-          // "constraint::kitchenSinkTheSinkening": {
-          //   fields: [
-          //     {
-          //       name: "sinkly",
-          //       repeated: true,
-          //       type: "constraint::kitchenSink"
-          //     }
-          //   ]
-          // },
+          "constraint::kitchenSink": {
+            fields: [
+              {
+                name: "strings",
+                repeated: true,
+                type: ServerTypes.String
+              },
+              {
+                name: "numbers",
+                repeated: true,
+                type: ServerTypes.Int
+              },
+              {
+                name: "booleans",
+                repeated: true,
+                type: ServerTypes.Boolean
+              },
+              {
+                name: "enums",
+                repeated: true,
+                type: "Enum<app.cash.common.AlphaEnum,Alpha,Bravo,Delta>"
+              }
+            ]
+          },
+          "constraint::kitchenSinkTheSinkening": {
+            fields: [
+              {
+                name: "sinkly",
+                repeated: true,
+                type: "constraint::kitchenSink"
+              }
+            ]
+          },
           "constraint::name": {
             fields: [
               {
@@ -105,7 +112,7 @@ class TabContainer extends React.Component<IState & IDispatchProps, IState> {
           "select::listAsNames": {
             fields: []
           }
-        },
+        }
         // constraints: [
         //   // {
         //   //   name: "kitchenSink",
@@ -164,16 +171,18 @@ class TabContainer extends React.Component<IState & IDispatchProps, IState> {
         entityClass: "DbAlbum",
         queryClass: "AlbumQueries",
         types: {
-          "QueryRequest": {
-            fields:[
-              {name: "constraint::name",
-              repeated: false,
-              type: "constraint::name"
-            },
-            {name: "constraint::releaseDateLessThan",
-            repeated: false,
-            type: "constraint::releaseDateLessThan"
-          }
+          QueryRequest: {
+            fields: [
+              {
+                name: "constraint::name",
+                repeated: false,
+                type: "constraint::name"
+              },
+              {
+                name: "constraint::releaseDateLessThan",
+                repeated: false,
+                type: "constraint::releaseDateLessThan"
+              }
             ]
           },
           "constraint::name": {
