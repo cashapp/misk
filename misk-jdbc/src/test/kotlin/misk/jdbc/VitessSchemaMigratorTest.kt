@@ -1,23 +1,37 @@
-package misk.hibernate
+package misk.jdbc
 
-import misk.testing.MiskTest
-import misk.testing.MiskTestModule
+import com.google.inject.util.Modules
+import misk.MiskTestingServiceModule
+import misk.config.Config
+import misk.config.MiskConfig
 import misk.database.DockerVitessCluster
 import misk.database.StartDatabaseService
+import misk.environment.Environment
+import misk.environment.EnvironmentModule
+import misk.testing.MiskTest
+import misk.testing.MiskTestModule
+import misk.vitess.Keyspace
+import misk.vitess.Shard
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.sql.Connection
 import javax.inject.Inject
+import javax.inject.Qualifier
 
 @MiskTest(startService = true)
 internal class VitessSchemaMigratorTest {
-  @MiskTestModule
-  val module = MoviesTestModule()
+  val config =
+      MiskConfig.load<MoviesConfig>("test_schemamigrator_vitess_app", Environment.TESTING)
 
-  @Inject @Movies lateinit var transacter: Transacter
-  @Inject lateinit var queryFactory: Query.Factory
+  @MiskTestModule
+  val module = Modules.combine(
+      EnvironmentModule(Environment.TESTING),
+      MiskTestingServiceModule(),
+      JdbcModule(Movies::class, config.data_source)
+  )
+
   @Inject @Movies lateinit var schemaMigrator: SchemaMigrator
   @Inject @Movies lateinit var databaseService: StartDatabaseService
 
@@ -79,3 +93,11 @@ internal class VitessSchemaMigratorTest {
     return cluster?.openMysqlConnection()
   }
 }
+
+@Qualifier
+@Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION)
+internal annotation class Movies
+
+internal data class MoviesConfig(
+  val data_source: DataSourceConfig,
+) : Config

@@ -1,5 +1,7 @@
 package misk.hibernate
 
+import misk.vitess.Keyspace
+import misk.vitess.Shard
 import java.sql.Connection
 import kotlin.reflect.KClass
 
@@ -69,9 +71,3 @@ inline fun <R : DbRoot<R>, reified S : DbSharded<R, S>> Session.loadSharded(gid:
     gid, S::class)
 
 inline fun <reified T : DbEntity<T>> Session.loadOrNull(id: Id<T>): T? = loadOrNull(id, T::class)
-
-fun checkValidShardIdentifier(identifier: String) {
-  check(!identifier.isBlank())
-  check(!identifier.contains(' '))
-  check(!identifier.contains('/'))
-}

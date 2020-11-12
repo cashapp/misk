@@ -15,6 +15,7 @@ import misk.jdbc.TruncateTablesService
 import misk.jdbc.VitessScaleSafetyChecks
 import misk.time.ForceUtcTimeZoneService
 import misk.database.StartDatabaseService
+import misk.jdbc.SchemaMigratorService
 import okhttp3.OkHttpClient
 import javax.inject.Provider
 import kotlin.reflect.KClass

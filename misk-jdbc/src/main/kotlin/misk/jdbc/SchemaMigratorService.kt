@@ -1,12 +1,10 @@
-package misk.hibernate
+package misk.jdbc
 
 import com.google.common.util.concurrent.AbstractIdleService
 import com.google.common.util.concurrent.Service
 import misk.environment.Environment
 import misk.healthchecks.HealthCheck
 import misk.healthchecks.HealthStatus
-import misk.jdbc.DataSourceConnector
-import misk.jdbc.DataSourceType
 import javax.inject.Provider
 import kotlin.reflect.KClass
 

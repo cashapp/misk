@@ -9,6 +9,7 @@ import misk.jdbc.TableScanException
 import misk.jdbc.uniqueLong
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
+import misk.vitess.Shard
 import org.hibernate.SessionFactory
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
