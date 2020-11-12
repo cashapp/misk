@@ -1,13 +1,12 @@
 package misk.web.metadata
 
-import misk.web.formatter.ClassNameFormatter
 import kotlin.reflect.KClass
 
 /** Metadata front end model for Database Query Misk-Web Tab */
 data class DatabaseQueryMetadata(
   val allowedCapabilities: Set<String> = setOf(),
   val allowedServices: Set<String> = setOf(),
-  val accessAnnotation: String,
+  val accessAnnotation: String?,
   /** SQL table name */
   val table: String,
   /** DbTable entity class */
@@ -26,7 +25,7 @@ data class DatabaseQueryMetadata(
   constructor(
     allowedCapabilities: Set<String> = setOf(),
     allowedServices: Set<String> = setOf(),
-    accessAnnotation: Annotation,
+    accessAnnotation: Annotation?,
     table: String,
     entityClass: KClass<*>,
     queryClass: KClass<*>,
@@ -37,10 +36,10 @@ data class DatabaseQueryMetadata(
   ) : this(
       allowedCapabilities = allowedCapabilities,
       allowedServices = allowedServices,
-      accessAnnotation = accessAnnotation.toString(),
+      accessAnnotation = accessAnnotation?.toString(),
       table = table,
-      entityClass = ClassNameFormatter.format(entityClass::class),
-      queryClass = ClassNameFormatter.format(queryClass::class),
+      entityClass = entityClass.simpleName!!, // Assert not null, since this shouldn't be anonymous.
+      queryClass = queryClass.simpleName!!, // Assert not null, since this shouldn't be anonymous.
       constraints = constraints,
       orders = orders,
       selects = selects,

@@ -69,18 +69,12 @@ class RequestTypes {
     stack: LinkedList<KClass<*>>,
     repeated: Boolean = false
   ) {
+
     val fieldClass = fieldType.classifier as KClass<*>
-    when (fieldClass) {
-      String::class -> fields.add(Field(fieldName, String::class.simpleName!!, repeated))
-      ByteString::class -> fields.add(Field(fieldName, ByteString::class.simpleName!!, repeated))
-      Char::class -> fields.add(Field(fieldName, Char::class.simpleName!!, repeated))
-      Byte::class -> fields.add(Field(fieldName, Byte::class.simpleName!!, repeated))
-      Short::class -> fields.add(Field(fieldName, Short::class.simpleName!!, repeated))
-      Int::class -> fields.add(Field(fieldName, Int::class.simpleName!!, repeated))
-      Long::class -> fields.add(Field(fieldName, Long::class.simpleName!!, repeated))
-      Double::class -> fields.add(Field(fieldName, Double::class.simpleName!!, repeated))
-      Boolean::class -> fields.add(Field(fieldName, Boolean::class.simpleName!!, repeated))
-      List::class -> {
+    val maybePrimitiveType = maybeCreatePrimitiveField(fieldClass, fieldName, repeated)
+    when {
+      maybePrimitiveType != null -> fields.add(maybePrimitiveType)
+      fieldClass == List::class -> {
         val fieldClassParameters = fieldType.arguments
         Preconditions.checkState(
             fieldClassParameters.size == 1,
@@ -89,38 +83,58 @@ class RequestTypes {
         val listType = fieldClassParameters[0].type!!
         handleField(listType, fieldName, fields, stack, true)
       }
-      Map::class -> {
+      fieldClass == Map::class -> {
         // TODO: Support maps
         fields.add(Field(fieldName, fieldClass.qualifiedName!!, repeated))
       }
-      Enum::class -> {
-        handleEnumField(fieldClass, fields, fieldName, repeated)
-      }
       else -> {
-        if (fieldClass.superclasses.contains(WireEnum::class)) {
-          handleEnumField(fieldClass, fields, fieldName, repeated)
-        } else {
-          fields.add(Field(fieldName, fieldClass.qualifiedName!!, repeated))
-          stack.push(fieldClass)
-        }
+        fields.add(Field(fieldName, fieldClass.qualifiedName!!, repeated))
+        stack.push(fieldClass)
       }
     }
   }
 
-  /**
-   * Adds a field with a type that has the class name and enum values embedded
-   * Example: "Enum<app.cash.backfila.BackfillType,ISOLATED,PARALLEL>"
-   */
-  private fun handleEnumField(
-    fieldClass: KClass<*>,
-    fields: MutableList<Field>,
-    fieldName: String,
-    repeated: Boolean
-  ) {
-    val enumValues =
-      (fieldClass.members.find { it.name == "values" }?.call() as Array<*>).map { (it as Enum<*>).name }
-    fields.add(
-      Field(fieldName, "Enum<${fieldClass.qualifiedName!!},${enumValues.joinToString(",")}>",
-        repeated))
+  companion object {
+    /**
+     * Create misk-web [Field]s for primitives and enum types.
+     * Returns null if the type cannot be mapped.
+     */
+    fun maybeCreatePrimitiveField(
+      fieldClass: KClass<*>,
+      fieldName: String,
+      repeated: Boolean
+    ): Field? {
+      return when {
+        fieldClass == String::class -> Field(fieldName, String::class.simpleName!!, repeated)
+        fieldClass == ByteString::class -> Field(fieldName, ByteString::class.simpleName!!, repeated)
+        fieldClass == Char::class -> Field(fieldName, Char::class.simpleName!!, repeated)
+        fieldClass == Byte::class -> Field(fieldName, Byte::class.simpleName!!, repeated)
+        fieldClass == Short::class -> Field(fieldName, Short::class.simpleName!!, repeated)
+        fieldClass == Int::class -> Field(fieldName, Int::class.simpleName!!, repeated)
+        fieldClass == Long::class -> Field(fieldName, Long::class.simpleName!!, repeated)
+        fieldClass == Double::class -> Field(fieldName, Double::class.simpleName!!, repeated)
+        fieldClass == Boolean::class -> Field(fieldName, Boolean::class.simpleName!!, repeated)
+        fieldClass == Enum::class -> createEnumField(fieldClass, fieldName, repeated)
+        fieldClass.superclasses.contains(WireEnum::class) -> {
+          createEnumField(fieldClass, fieldName, repeated)
+        }
+        else -> null
+      }
+    }
+
+    /**
+     * Adds a field with a type that has the class name and enum values embedded
+     * Example: "Enum<app.cash.backfila.BackfillType,ISOLATED,PARALLEL>"
+     */
+    private fun createEnumField(
+      fieldClass: KClass<*>,
+      fieldName: String,
+      repeated: Boolean
+    ): Field {
+      val enumValues =
+          (fieldClass.members.find { it.name == "values" }?.call() as Array<*>).map { (it as Enum<*>).name }
+      return Field(fieldName, "Enum<${fieldClass.qualifiedName!!},${enumValues.joinToString(",")}>",
+          repeated)
+    }
   }
 }
