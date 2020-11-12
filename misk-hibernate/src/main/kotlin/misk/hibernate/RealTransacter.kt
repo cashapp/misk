@@ -2,8 +2,6 @@ package misk.hibernate
 
 import com.google.common.base.Supplier
 import com.google.common.base.Suppliers
-import io.opentracing.Tracer
-import io.opentracing.tag.Tags
 import misk.backoff.ExponentialBackoff
 import misk.concurrent.ExecutorServiceFactory
 import misk.hibernate.Shard.Companion.SINGLE_SHARD_SET
@@ -12,7 +10,6 @@ import misk.jdbc.DataSourceType
 import misk.jdbc.map
 import misk.jdbc.uniqueString
 import misk.logging.getLogger
-import misk.tracing.traceWithSpan
 import org.hibernate.FlushMode
 import org.hibernate.SessionFactory
 import org.hibernate.StaleObjectStateException
@@ -49,7 +46,6 @@ internal class RealTransacter private constructor(
   private val threadLatestSession: ThreadLocal<RealSession>,
   private val options: TransacterOptions,
   private val executorServiceFactory: ExecutorServiceFactory,
-  private val tracer: Tracer?,
   private val shardListFetcher: ShardListFetcher
 ) : Transacter {
 
@@ -58,8 +54,7 @@ internal class RealTransacter private constructor(
     sessionFactoryProvider: Provider<SessionFactory>,
     readerSessionFactoryProvider: Provider<SessionFactory>?,
     config: DataSourceConfig,
-    executorServiceFactory: ExecutorServiceFactory,
-    tracer: Tracer?
+    executorServiceFactory: ExecutorServiceFactory
   ) : this(
       qualifier = qualifier,
       sessionFactoryProvider = sessionFactoryProvider,
@@ -68,7 +63,6 @@ internal class RealTransacter private constructor(
       threadLatestSession = ThreadLocal(),
       options = TransacterOptions(),
       executorServiceFactory = executorServiceFactory,
-      tracer = tracer,
       shardListFetcher = ShardListFetcher()
   ) {
     shardListFetcher.init(this, config, executorServiceFactory)
@@ -130,10 +124,8 @@ internal class RealTransacter private constructor(
   }
 
   override fun <T> transaction(block: (session: Session) -> T): T {
-    return maybeWithTracing(APPLICATION_TRANSACTION_SPAN_NAME) {
-      transactionWithRetriesInternal {
-        maybeWithTracing(DB_TRANSACTION_SPAN_NAME) { transactionInternalSession(block) }
-      }
+    return transactionWithRetriesInternal {
+      transactionInternalSession(block)
     }
   }
 
@@ -144,17 +136,13 @@ internal class RealTransacter private constructor(
     if (!options.readOnly) {
       return readOnly().replicaRead(block)
     }
-    return maybeWithTracing(APPLICATION_TRANSACTION_SPAN_NAME) {
-      transactionWithRetriesInternal {
-        maybeWithTracing(DB_TRANSACTION_SPAN_NAME) {
-          replicaReadWithoutTransactionInternalSession { session ->
-            session.target(Destination(TabletType.REPLICA)) {
-              // Full scatters are allowed on replica reads as you can increase availability by
-              // adding additional replicas.
-              session.withoutChecks(Check.FULL_SCATTER) {
-                block(session)
-              }
-            }
+    return transactionWithRetriesInternal {
+      replicaReadWithoutTransactionInternalSession { session ->
+        session.target(Destination(TabletType.REPLICA)) {
+          // Full scatters are allowed on replica reads as you can increase availability by
+          // adding additional replicas.
+          session.withoutChecks(Check.FULL_SCATTER) {
+            block(session)
           }
         }
       }
@@ -221,16 +209,14 @@ internal class RealTransacter private constructor(
   private fun <T> transactionInternalSession(block: (session: RealSession) -> T): T {
     return withSession { session ->
       session.target(Destination(TabletType.MASTER)) {
-        val transaction = maybeWithTracing(DB_BEGIN_SPAN_NAME) {
-          session.hibernateSession.beginTransaction()!!
-        }
+        val transaction = session.hibernateSession.beginTransaction()!!
         try {
           val result = block(session)
 
           // Flush any changes to the database before commit
           session.hibernateSession.flush()
           session.preCommit()
-          maybeWithTracing(DB_COMMIT_SPAN_NAME) { transaction.commit() }
+          transaction.commit()
           session.postCommit()
           result
         } catch (e: Throwable) {
@@ -241,9 +227,7 @@ internal class RealTransacter private constructor(
 
           if (transaction.isActive) {
             try {
-              maybeWithTracing(DB_ROLLBACK_SPAN_NAME) {
-                transaction.rollback()
-              }
+              transaction.rollback()
             } catch (suppressed: Exception) {
               rethrow.addSuppressed(suppressed)
             }
@@ -296,9 +280,10 @@ internal class RealTransacter private constructor(
     if (config.type == DataSourceType.COCKROACHDB || config.type == DataSourceType.TIDB) {
       return sessionFactory
     }
-    error("No reader is configured for replica reads, pass in both a writer and reader qualifier and the full " +
-        "DataSourceClustersConfig into HibernateModule, like this:\n" +
-        "\tinstall(HibernateModule(AppDb::class, AppReaderDb::class, config.data_source_clusters[\"name\"]))")
+    error(
+        "No reader is configured for replica reads, pass in both a writer and reader qualifier and the full " +
+            "DataSourceClustersConfig into HibernateModule, like this:\n" +
+            "\tinstall(HibernateModule(AppDb::class, AppReaderDb::class, config.data_source_clusters[\"name\"]))")
   }
 
   override fun retries(maxAttempts: Int): Transacter = withOptions(
@@ -324,7 +309,6 @@ internal class RealTransacter private constructor(
           options = options,
           config = config,
           executorServiceFactory = executorServiceFactory,
-          tracer = tracer,
           shardListFetcher = shardListFetcher
       )
 
@@ -427,15 +411,6 @@ internal class RealTransacter private constructor(
     val retryJitterMillis: Long = 400,
     val readOnly: Boolean = false
   )
-
-  companion object {
-    const val APPLICATION_TRANSACTION_SPAN_NAME = "app-db-transaction"
-    const val DB_TRANSACTION_SPAN_NAME = "db-session"
-    const val DB_BEGIN_SPAN_NAME = "db-begin"
-    const val DB_COMMIT_SPAN_NAME = "db-commit"
-    const val DB_ROLLBACK_SPAN_NAME = "db-rollback"
-    const val TRANSACTER_SPAN_TAG = "hibernate-transacter"
-  }
 
   internal class RealSession(
     override val hibernateSession: org.hibernate.Session,
@@ -634,17 +609,6 @@ internal class RealTransacter private constructor(
         }
         return result
       }
-  }
-
-  private fun <T> maybeWithTracing(spanName: String, block: () -> T): T {
-    if (tracer != null) {
-      return tracer.traceWithSpan(spanName) { span ->
-        Tags.COMPONENT.set(span, TRANSACTER_SPAN_TAG)
-        return@traceWithSpan block()
-      }
-    } else {
-      return block()
-    }
   }
 
   private inline fun <R> useSession(session: RealSession, block: () -> R): R {

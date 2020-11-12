@@ -1,6 +1,5 @@
 package misk.hibernate
 
-import io.opentracing.Tracer
 import misk.MiskTestingServiceModule
 import misk.ServiceModule
 import misk.concurrent.ExecutorServiceFactory
@@ -71,14 +70,12 @@ internal class SchemaValidatorTest {
       val transacterProvider = getProvider(keyOf<Transacter>(qualifier))
       bind(keyOf<Transacter>(qualifier)).toProvider(object : Provider<Transacter> {
         @Inject lateinit var executorServiceFactory: ExecutorServiceFactory
-        @com.google.inject.Inject(optional = true) val tracer: Tracer? = null
         override fun get(): RealTransacter = RealTransacter(
             qualifier = qualifier,
             sessionFactoryProvider = sessionFactoryProvider,
             readerSessionFactoryProvider = null,
             config = config.data_source,
-            executorServiceFactory = executorServiceFactory,
-            tracer = tracer
+            executorServiceFactory = executorServiceFactory
         )
       }).asSingleton()
 

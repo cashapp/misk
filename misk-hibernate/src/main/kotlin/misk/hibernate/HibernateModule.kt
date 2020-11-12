@@ -140,14 +140,12 @@ class HibernateModule(
 
     bind(transacterKey).toProvider(object : Provider<Transacter> {
       @Inject lateinit var executorServiceFactory: ExecutorServiceFactory
-      @com.google.inject.Inject(optional = true) val tracer: Tracer? = null
       override fun get(): RealTransacter = RealTransacter(
           qualifier = qualifier,
           sessionFactoryProvider = sessionFactoryProvider,
           readerSessionFactoryProvider = readerSessionFactoryProvider,
           config = config,
           executorServiceFactory = executorServiceFactory,
-          tracer = tracer
       )
     }).asSingleton()
 
