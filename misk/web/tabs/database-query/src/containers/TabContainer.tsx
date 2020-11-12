@@ -112,56 +112,56 @@ class TabContainer extends React.Component<IState & IDispatchProps, IState> {
           "select::listAsNames": {
             fields: []
           }
-        }
-        // constraints: [
-        //   // {
-        //   //   name: "kitchenSink",
-        //   //   parametersType: "constraint::kitchenSinkTheSinkening",
-        //   //   path: "kitchen_sink"
-        //   // },
-        //   {
-        //     name: "name",
-        //     parametersType: "constraint::name",
-        //     path: "name"
-        //   },
-        //   {
-        //     name: "releaseDateLessThan",
-        //     parametersType: "constraint::releaseDateLessThan",
-        //     path: "release_date",
-        //     operator: "LT"
-        //   }
-        // ],
-        // orders: [
-        //   {
-        //     name: "releaseDateAsc",
-        //     parametersType: "order::releaseDateAsc",
-        //     path: "release_date",
-        //     ascending: false
-        //   },
-        //   {
-        //     name: "releaseDateDesc",
-        //     parametersType: "order::releaseDateDesc",
-        //     path: "release_date",
-        //     ascending: true
-        //   }
-        // ],
-        // selects: [
-        //   {
-        //     name: "listAsNameAndReleaseDate",
-        //     parametersType: "select::listAsNameAndReleaseDate",
-        //     paths: ["name", "release_date"]
-        //   },
-        //   {
-        //     name: "uniqueName",
-        //     parametersType: "select::uniqueName",
-        //     paths: ["name"]
-        //   },
-        //   {
-        //     name: "listAsNames",
-        //     parametersType: "select::listAsNames",
-        //     paths: ["name"]
-        //   }
-        // ]
+        },
+        constraints: [
+          // {
+          //   name: "kitchenSink",
+          //   parametersType: "constraint::kitchenSinkTheSinkening",
+          //   path: "kitchen_sink"
+          // },
+          {
+            name: "name",
+            parametersType: "constraint::name",
+            path: "name"
+          },
+          {
+            name: "releaseDateLessThan",
+            parametersType: "constraint::releaseDateLessThan",
+            path: "release_date",
+            operator: "LT"
+          }
+        ],
+        orders: [
+          {
+            name: "releaseDateAsc",
+            parametersType: "order::releaseDateAsc",
+            path: "release_date",
+            ascending: false
+          },
+          {
+            name: "releaseDateDesc",
+            parametersType: "order::releaseDateDesc",
+            path: "release_date",
+            ascending: true
+          }
+        ],
+        selects: [
+          {
+            name: "listAsNameAndReleaseDate",
+            parametersType: "select::listAsNameAndReleaseDate",
+            paths: ["name", "release_date"]
+          },
+          {
+            name: "uniqueName",
+            parametersType: "select::uniqueName",
+            paths: ["name"]
+          },
+          {
+            name: "listAsNames",
+            parametersType: "select::listAsNames",
+            paths: ["name"]
+          }
+        ]
       },
       {
         allowedCapabilities: ["adrw", "maacosta"],
@@ -219,51 +219,51 @@ class TabContainer extends React.Component<IState & IDispatchProps, IState> {
           "select::listAsNames": {
             fields: []
           }
-        }
-        // constraints: [
-        //   {
-        //     name: "name",
-        //     parametersType: "constraint::name",
-        //     path: "name"
-        //   },
-        //   {
-        //     name: "releaseDateLessThan",
-        //     parametersType: "constraint::releaseDateLessThan",
-        //     path: "release_date",
-        //     operator: "LT"
-        //   }
-        // ],
-        // orders: [
-        //   {
-        //     name: "releaseDateAsc",
-        //     parametersType: "order::releaseDateAsc",
-        //     path: "release_date",
-        //     ascending: false
-        //   },
-        //   {
-        //     name: "releaseDateDesc",
-        //     parametersType: "order::releaseDateDesc",
-        //     path: "release_date",
-        //     ascending: true
-        //   }
-        // ],
-        // selects: [
-        //   {
-        //     name: "listAsNameAndReleaseDate",
-        //     parametersType: "select::listAsNameAndReleaseDate",
-        //     paths: ["name", "release_date"]
-        //   },
-        //   {
-        //     name: "uniqueName",
-        //     parametersType: "select::uniqueName",
-        //     paths: ["name"]
-        //   },
-        //   {
-        //     name: "listAsNames",
-        //     parametersType: "select::listAsNames",
-        //     paths: ["name"]
-        //   }
-        // ]
+        },
+        constraints: [
+          {
+            name: "name",
+            parametersType: "constraint::name",
+            path: "name"
+          },
+          {
+            name: "releaseDateLessThan",
+            parametersType: "constraint::releaseDateLessThan",
+            path: "release_date",
+            operator: "LT"
+          }
+        ],
+        orders: [
+          {
+            name: "releaseDateAsc",
+            parametersType: "order::releaseDateAsc",
+            path: "release_date",
+            ascending: false
+          },
+          {
+            name: "releaseDateDesc",
+            parametersType: "order::releaseDateDesc",
+            path: "release_date",
+            ascending: true
+          }
+        ],
+        selects: [
+          {
+            name: "listAsNameAndReleaseDate",
+            parametersType: "select::listAsNameAndReleaseDate",
+            paths: ["name", "release_date"]
+          },
+          {
+            name: "uniqueName",
+            parametersType: "select::uniqueName",
+            paths: ["name"]
+          },
+          {
+            name: "listAsNames",
+            parametersType: "select::listAsNames",
+            paths: ["name"]
+          }
+        ]
       }
     ]
 

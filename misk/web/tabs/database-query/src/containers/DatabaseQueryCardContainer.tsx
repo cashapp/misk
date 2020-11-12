@@ -1,5 +1,6 @@
 /** @jsx jsx */
 import { Card, H3, Intent, Menu, Tag } from "@blueprintjs/core"
+import {IconNames} from "@blueprintjs/icons"
 import { jsx } from "@emotion/core"
 import { FlexContainer } from "@misk/core"
 import { useState } from "react"
@@ -13,6 +14,7 @@ import {
   MetadataCollapse
 } from "../components"
 import { IDatabaseQueryMetadataAPI, RunQueryCollapseContainer } from "."
+import { IConstraintMetadata } from './DatabaseQueryInterfaces'
 
 /**
  * Web Action Card rendered for each bound Web Action
@@ -24,6 +26,9 @@ export const DatabaseQueryCardContainer = (props: {
   const [isOpenServices, setIsOpenServices] = useState(false)
   const [isOpenRoles, setIsOpenRoles] = useState(false)
   const [isOpenAccess, setIsOpenAccess] = useState(false)
+  const [isOpenConstraints, setIsOpenConstraints] = useState(false)
+  const [isOpenOrders, setIsOpenOrders] = useState(false)
+  const [isOpenSelects, setIsOpenSelects] = useState(false)
   const [isOpenRunQuery, setIsOpenRunQuery] = useState(false)
 
   return (
@@ -74,6 +79,27 @@ export const DatabaseQueryCardContainer = (props: {
           </div>
           <div css={cssColumn}>
             <Menu css={cssMetadataMenu}>
+            <MetadataCollapse
+                content={props.databaseQuery.constraints.map((constraint: IConstraintMetadata) => <span>{constraint.name}{" "}<Tag icon={IconNames.TH_FILTERED}>{constraint.path}</Tag>{constraint.operator && <span>{" "}<Tag icon={IconNames.FUNCTION}>{constraint.operator}</Tag></span>}</span>)}
+                countLabel={true}
+                clipboardLabelElement={false}
+                label={""}
+                isOpen={isOpenConstraints}
+                setIsOpen={setIsOpenConstraints}
+                text={"Constraints"}
+              />
+              <MetadataCollapse
+                content={props.databaseQuery.accessAnnotation}
+                label={"Access"}
+                isOpen={isOpenAccess}
+                setIsOpen={setIsOpenAccess}
+              />
+              <MetadataCollapse
+                content={props.databaseQuery.accessAnnotation}
+                label={"Access"}
+                isOpen={isOpenAccess}
+                setIsOpen={setIsOpenAccess}
+              />
               <MetadataCollapse
                 children={<span />}
                 isOpen={isOpenRunQuery}
