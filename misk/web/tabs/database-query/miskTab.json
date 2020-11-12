@@ -1,0 +1,18 @@
+{
+  "name": "Database Query",
+  "output_path": "lib/web/_tab/database-query",
+  "port": "3202",
+  "rawGitginore": "",
+  "rawIndex": false,
+  "rawPackageJson": {},
+  "rawTsconfig": {},
+  "rawTslint": {},
+  "rawWebpackConfig": {},
+  "relative_path_prefix": "",
+  "slug": "database-query",
+  "useWebpackBundleAnalyzer": false,
+  "useWebpackExternals": true,
+  "version": "0.1.26",
+  "zipOnBuild": false,
+  "___DeprecatedKeys": "Any keys below this point in your miskTab.json are deprecated and can be safely removed."
+}
