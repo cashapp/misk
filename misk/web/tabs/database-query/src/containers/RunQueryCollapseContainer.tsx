@@ -26,6 +26,9 @@ export const RunQueryCollapseContainer = (props: {
   const [] = useState(false)
   const [] = useState("{}")
   const [formData, setFormData] = useState({} as any)
+  const [isOpenRequestBodyPreview, setIsOpenRequestBodyPreview] = useState(false)
+
+  console.log("the big one", formData)
 
   return (
     <Collapse isOpen={isOpen}>
@@ -35,7 +38,9 @@ export const RunQueryCollapseContainer = (props: {
         </SetFormData.Provider>
         <SendQueryContainer
           databaseQuery={databaseQuery}
-          // formData={formData}
+          formData={formData}
+          isOpenRequestBodyPreview={isOpenRequestBodyPreview}
+          setIsOpenRequestBodyPreview={setIsOpenRequestBodyPreview}
           tag={tag}
         />
       </FlexContainer>

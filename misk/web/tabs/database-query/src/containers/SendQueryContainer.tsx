@@ -4,7 +4,7 @@ import { jsx } from "@emotion/core"
 import { CodePreContainer, HTTPMethodIntent } from "@misk/core"
 import { HTTPMethodDispatch, simpleSelectorGet } from "@misk/simpleredux"
 import { HTTPMethod } from "http-method-enum"
-import React, { useState } from "react"
+import React, { Dispatch, useState, SetStateAction } from "react"
 import { connect } from "react-redux"
 import {
   cssButton,
@@ -30,17 +30,15 @@ import { IDatabaseQueryMetadataAPI } from "./DatabaseQueryInterfaces"
 const SendQueryContainer = (
   props: {
     databaseQuery: IDatabaseQueryMetadataAPI
+    formData: any
+    isOpenRequestBodyPreview: boolean
+    setIsOpenRequestBodyPreview: Dispatch<SetStateAction<boolean>>
     tag: string
   } & IState &
     IDispatchProps
 ) => {
-  const { tag } = props
-  const formData = {}
+  const { formData, isOpenRequestBodyPreview, setIsOpenRequestBodyPreview, tag } = props
   const url = "/api/.../database/query/run"
-
-  const [isOpenRequestBodyPreview, setIsOpenRequestBodyPreview] = useState(
-    false
-  )
 
   const method: HTTPMethod = HTTPMethod.POST
 
@@ -100,8 +98,7 @@ const SendQueryContainer = (
   ) {
     props.simpleMergeData(`${tag}::ButtonResponse`, true)
   }
-  return React.useMemo(
-    () => (
+  return (
       <div css={cssColumn}>
         <ControlGroup>
           <Button
@@ -198,9 +195,7 @@ const SendQueryContainer = (
           </ReduxMetadataCollapse>
         </Menu>
       </div>
-    ),
-    [formData]
-  )
+    )
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(SendQueryContainer)
