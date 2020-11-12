@@ -34,7 +34,11 @@ export const RunQueryCollapseContainer = (props: {
     <Collapse isOpen={isOpen}>
       <FlexContainer>
         <SetFormData.Provider value={setFormData}>
-          <QueryFormContainer databaseQuery={databaseQuery} />
+          <QueryFormContainer
+          databaseQuery={databaseQuery}
+          isOpenRequestBodyPreview={isOpenRequestBodyPreview}
+          setIsOpenRequestBodyPreview={setIsOpenRequestBodyPreview}
+          />
         </SetFormData.Provider>
         <SendQueryContainer
           databaseQuery={databaseQuery}
