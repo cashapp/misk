@@ -16,25 +16,40 @@ import misk.time.FakeClockModule
 /** This module creates movies, actors, and characters tables for several Hibernate tests. */
 class MoviesTestModule(
   private val type: DataSourceType = DataSourceType.VITESS_MYSQL,
-  private val scaleSafetyChecks: Boolean = false
+  private val scaleSafetyChecks: Boolean = false,
+  private val entitiesModule: HibernateEntityModule = object :
+    HibernateEntityModule(Movies::class) {
+    override fun configureHibernate() {
+      addEntities(DbMovie::class, DbActor::class, DbCharacter::class)
+    }
+  }
 ) : KAbstractModule() {
   override fun configure() {
     install(LogCollectorModule())
     install(
-        Modules.override(MiskTestingServiceModule()).with(FakeClockModule(),
-            MockTracingBackendModule()))
+      Modules.override(MiskTestingServiceModule()).with(
+        FakeClockModule(),
+        MockTracingBackendModule()
+      )
+    )
     install(DeploymentModule.forTesting())
 
     val config = MiskConfig.load<MoviesConfig>("moviestestmodule", Environment.TESTING)
     val dataSourceConfig = selectDataSourceConfig(config)
-    install(HibernateTestingModule(Movies::class, dataSourceConfig, scaleSafetyChecks = scaleSafetyChecks))
-    install(HibernateModule(Movies::class, MoviesReader::class,
-        DataSourceClusterConfig(writer = dataSourceConfig, reader = dataSourceConfig)))
-    install(object : HibernateEntityModule(Movies::class) {
-      override fun configureHibernate() {
-        addEntities(DbMovie::class, DbActor::class, DbCharacter::class)
-      }
-    })
+    install(
+      HibernateTestingModule(
+        Movies::class,
+        dataSourceConfig,
+        scaleSafetyChecks = scaleSafetyChecks
+      )
+    )
+    install(
+      HibernateModule(
+        Movies::class, MoviesReader::class,
+        DataSourceClusterConfig(writer = dataSourceConfig, reader = dataSourceConfig)
+      )
+    )
+    install(entitiesModule)
   }
 
   private fun selectDataSourceConfig(config: MoviesConfig): DataSourceConfig {
@@ -48,5 +63,4 @@ class MoviesTestModule(
       DataSourceType.HSQLDB -> throw RuntimeException("Not supported (yet?)")
     }
   }
-
 }
