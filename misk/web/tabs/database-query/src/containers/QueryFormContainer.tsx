@@ -13,7 +13,7 @@ import { SetFormData } from "../containers"
 export const QueryFormContainer = (props: {
   databaseQuery: IDatabaseQueryMetadataAPI
   isOpenRequestBodyPreview: boolean
-    setIsOpenRequestBodyPreview: Dispatch<SetStateAction<boolean>>
+  setIsOpenRequestBodyPreview: Dispatch<SetStateAction<boolean>>
 }) => {
   const { databaseQuery, setIsOpenRequestBodyPreview } = props
   const setFormData = useContext(SetFormData)

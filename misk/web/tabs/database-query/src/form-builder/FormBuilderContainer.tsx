@@ -36,11 +36,10 @@ export const FormBuilderContainer = (props: {
 
   useEffect(() => {
     // Return back the form request body
-  const formData = getFormData(fieldValueStore, typesMetadata)
+    const formData = getFormData(fieldValueStore, typesMetadata)
     setFormData(formData)
     console.log("FORM DATA", formData)
-  }, [fieldValueStore, typesMetadata]
-  )
+  }, [fieldValueStore, typesMetadata])
 
   return (
     <FormFieldBuilderContainer

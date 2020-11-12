@@ -4,7 +4,7 @@ import { jsx } from "@emotion/core"
 import { CodePreContainer, HTTPMethodIntent } from "@misk/core"
 import { HTTPMethodDispatch, simpleSelectorGet } from "@misk/simpleredux"
 import { HTTPMethod } from "http-method-enum"
-import React, { Dispatch, useState, SetStateAction } from "react"
+import { Dispatch, SetStateAction } from "react"
 import { connect } from "react-redux"
 import {
   cssButton,
@@ -37,7 +37,12 @@ const SendQueryContainer = (
   } & IState &
     IDispatchProps
 ) => {
-  const { formData, isOpenRequestBodyPreview, setIsOpenRequestBodyPreview, tag } = props
+  const {
+    formData,
+    isOpenRequestBodyPreview,
+    setIsOpenRequestBodyPreview,
+    tag
+  } = props
   const url = "/api/.../database/query/run"
 
   const method: HTTPMethod = HTTPMethod.POST
@@ -99,103 +104,99 @@ const SendQueryContainer = (
     props.simpleMergeData(`${tag}::ButtonResponse`, true)
   }
   return (
-      <div css={cssColumn}>
-        <ControlGroup>
-          <Button
-            css={cssButton}
-            large={true}
-            onClick={() => {
-              props.simpleMergeData(`${tag}::ButtonRequestBody`, false)
-              HTTPMethodDispatch(props)[method](
-                `${tag}::Response`,
-                url,
-                formData
-              )
-            }}
-            intent={HTTPMethodIntent[method]}
-            loading={simpleSelectorGet(props.simpleRedux, [
-              `${tag}::Response`,
-              "loading"
-            ])}
-            text={"Run Query"}
+    <div css={cssColumn}>
+      <ControlGroup>
+        <Button
+          css={cssButton}
+          large={true}
+          onClick={() => {
+            props.simpleMergeData(`${tag}::ButtonRequestBody`, false)
+            HTTPMethodDispatch(props)[method](`${tag}::Response`, url, formData)
+          }}
+          intent={HTTPMethodIntent[method]}
+          loading={simpleSelectorGet(props.simpleRedux, [
+            `${tag}::Response`,
+            "loading"
+          ])}
+          text={"Run Query"}
+        />
+      </ControlGroup>
+      <Menu css={cssMetadataMenu}>
+        {methodHasBody(method) ? (
+          <MetadataCollapse
+            label={`${url}`}
+            isOpen={isOpenRequestBodyPreview}
+            setIsOpen={setIsOpenRequestBodyPreview}
+            text={"Request"}
+          >
+            <MetadataCopyToClipboard
+              data={formData}
+              description={"Request Body"}
+            />
+            <CodePreContainer>
+              {JSON.stringify(formData, null, 2)}
+            </CodePreContainer>
+          </MetadataCollapse>
+        ) : (
+          <ReduxMetadataCollapse
+            content={[]}
+            label={`${url}`}
+            tag={`${tag}::ButtonRequestBody`}
+            text={"Request"}
           />
-        </ControlGroup>
-        <Menu css={cssMetadataMenu}>
-          {methodHasBody(method) ? (
-            <MetadataCollapse
-              label={`${url}`}
-              isOpen={isOpenRequestBodyPreview}
-              setIsOpen={setIsOpenRequestBodyPreview}
-              text={"Request"}
+        )}
+        <ReduxMetadataCollapse
+          labelElement={
+            <StatusTagComponent
+              status={simpleSelectorGet(
+                props.simpleRedux,
+                [`${props.tag}::Response`, "data", "status"],
+                simpleSelectorGet(
+                  props.simpleRedux,
+                  [`${props.tag}::Response`, "error", "status"],
+                  0
+                )
+              )}
+              statusText={simpleSelectorGet(
+                props.simpleRedux,
+                [`${props.tag}::Response`, "data", "statusText"],
+                simpleSelectorGet(
+                  props.simpleRedux,
+                  [`${props.tag}::Response`, "error", "statusText"],
+                  ""
+                )
+              )}
+            />
+          }
+          tag={`${tag}::ButtonResponse`}
+          text={"Response"}
+        >
+          <div>
+            <MetadataCopyToClipboard
+              data={responseData}
+              description={"Raw Response"}
+            />
+            <CodePreContainer>
+              {JSON.stringify(responseData, null, 2)}
+            </CodePreContainer>
+            <ReduxMetadataCollapse
+              label={"Redux State"}
+              tag={`${tag}::ButtonRawResponse`}
+              text={"Raw Response"}
             >
               <MetadataCopyToClipboard
-                data={formData}
-                description={"Request Body"}
+                data={response}
+                description={"Response"}
               />
               <CodePreContainer>
-                {JSON.stringify(formData, null, 2)}
+                {JSON.stringify(response, null, 2)}
               </CodePreContainer>
-            </MetadataCollapse>
-          ) : (
-            <ReduxMetadataCollapse
-              content={[]}
-              label={`${url}`}
-              tag={`${tag}::ButtonRequestBody`}
-              text={"Request"}
-            />
-          )}
-          <ReduxMetadataCollapse
-            labelElement={
-              <StatusTagComponent
-                status={simpleSelectorGet(
-                  props.simpleRedux,
-                  [`${props.tag}::Response`, "data", "status"],
-                  simpleSelectorGet(
-                    props.simpleRedux,
-                    [`${props.tag}::Response`, "error", "status"],
-                    0
-                  )
-                )}
-                statusText={simpleSelectorGet(
-                  props.simpleRedux,
-                  [`${props.tag}::Response`, "data", "statusText"],
-                  simpleSelectorGet(
-                    props.simpleRedux,
-                    [`${props.tag}::Response`, "error", "statusText"],
-                    ""
-                  )
-                )}
-              />
-            }
-            tag={`${tag}::ButtonResponse`}
-            text={"Response"}
-          >
-            <div>
-              <MetadataCopyToClipboard
-                data={responseData}
-                description={"Raw Response"}
-              />
-              <CodePreContainer>
-                {JSON.stringify(responseData, null, 2)}
-              </CodePreContainer>
-              <ReduxMetadataCollapse
-                label={"Redux State"}
-                tag={`${tag}::ButtonRawResponse`}
-                text={"Raw Response"}
-              >
-                <MetadataCopyToClipboard
-                  data={response}
-                  description={"Response"}
-                />
-                <CodePreContainer>
-                  {JSON.stringify(response, null, 2)}
-                </CodePreContainer>
-              </ReduxMetadataCollapse>
-            </div>
-          </ReduxMetadataCollapse>
-        </Menu>
-      </div>
-    )
+            </ReduxMetadataCollapse>
+          </div>
+        </ReduxMetadataCollapse>
+      </Menu>
+    </div>
+  )
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(SendQueryContainer)
