@@ -38,13 +38,13 @@ const SendQueryContainer = (
     IDispatchProps
 ) => {
   const {
+    databaseQuery,
     formData,
     isOpenRequestBodyPreview,
     setIsOpenRequestBodyPreview,
     tag
   } = props
-  const url = "/api/.../database/query/run"
-
+  const url = databaseQuery.queryWebActionPath
   const method: HTTPMethod = HTTPMethod.POST
 
   // Response with fallback to error
@@ -111,7 +111,10 @@ const SendQueryContainer = (
           large={true}
           onClick={() => {
             props.simpleMergeData(`${tag}::ButtonRequestBody`, false)
-            HTTPMethodDispatch(props)[method](`${tag}::Response`, url, formData)
+            HTTPMethodDispatch(props)[method](`${tag}::Response`, url, {
+              queryClass: databaseQuery.queryClass,
+              query: formData || {}
+            })
           }}
           intent={HTTPMethodIntent[method]}
           loading={simpleSelectorGet(props.simpleRedux, [

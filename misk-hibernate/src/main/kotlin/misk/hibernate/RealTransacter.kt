@@ -74,7 +74,7 @@ internal class RealTransacter private constructor(
   override fun config(): DataSourceConfig = config
 
   override fun hibernateEntityTypes(): Set<KClass<*>> {
-    return hibernateEntities.map { it::class }.toSet()
+    return hibernateEntities.map { it.entity }.toSet()
   }
 
   /**

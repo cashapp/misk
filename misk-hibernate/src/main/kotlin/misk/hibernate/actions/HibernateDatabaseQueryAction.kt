@@ -4,6 +4,7 @@ import com.google.inject.Injector
 import misk.MiskCaller
 import misk.exceptions.BadRequestException
 import misk.exceptions.UnauthorizedException
+import misk.hibernate.DbEntity
 import misk.hibernate.Query
 import misk.hibernate.ReflectionQuery
 import misk.hibernate.Transacter
@@ -24,7 +25,7 @@ import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
 import kotlin.reflect.full.functions
 
-/** Runs query against DB and returns results */
+/** Runs query from Database Query dashboard tab against DB and returns results */
 @Singleton
 class HibernateDatabaseQueryAction @Inject constructor(
   @JvmSuppressWildcards private val callerProvider: ActionScoped<MiskCaller?>,
@@ -51,9 +52,8 @@ class HibernateDatabaseQueryAction @Inject constructor(
             "Invalid Query Class")
 
     // Find the transacter for the query class
-    val query =
-        queries.map{ it.query }.find { it::class.simpleName!! == metadata.queryClass } ?: throw BadRequestException(
-            "[query=${metadata.queryClass}] does not exist")
+    val query = queries.map { it.query }.find { it.simpleName == metadata.queryClass }
+        ?: throw BadRequestException("[query=${metadata.queryClass}] does not exist")
     val transacterBindings = injector.findBindingsByType(Transacter::class.typeLiteral())
     val transacter = transacterBindings.find { transacterBinding ->
       transacterBinding.provider.get().hibernateEntityTypes().map { it.simpleName!! }
@@ -61,12 +61,12 @@ class HibernateDatabaseQueryAction @Inject constructor(
     }?.provider?.get() ?: throw BadRequestException(
         "[dbEntity=${metadata.entityClass}] has no associated Transacter")
 
-    val typedQuery = ((query.typeLiteral().getSupertype(
-        Query::class.java).type as ParameterizedType).actualTypeArguments.first() as Class<Query<*>>).kotlin
+    val dbEntity = ((query.typeLiteral().getSupertype(
+        Query::class.java).type as ParameterizedType).actualTypeArguments.first() as Class<DbEntity<*>>).kotlin
 
     val results = if (caller.isAllowed(metadata.allowedCapabilities, metadata.allowedServices)) {
       transacter.transaction { session ->
-        queryFactory.newQuery(typedQuery).apply {
+        queryFactory.newQuery(query).apply {
           var selectFunction: KFunction<*>? = null
 
           request.query.forEach { (key, value) ->

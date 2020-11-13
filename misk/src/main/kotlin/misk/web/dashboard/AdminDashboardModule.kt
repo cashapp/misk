@@ -72,6 +72,11 @@ class AdminDashboardModule(private val isDevelopment: Boolean) : KAbstractModule
             name = "Database Query",
             category = "Container Admin"
         ))
+    install(WebTabResourceModule(
+        isDevelopment = isDevelopment,
+        slug = "database-query",
+        web_proxy_url = "http://localhost:3202/"
+    ))
 
     // Web Actions
     install(WebActionModule.create<WebActionMetadataAction>())
@@ -96,7 +101,9 @@ class AdminDashboardTestingModule : KAbstractModule() {
     // Set dummy values for access, these shouldn't matter,
     // as test environments should prefer to use the FakeCallerAuthenticator.
     multibind<AccessAnnotationEntry>().toInstance(
-        AccessAnnotationEntry<AdminDashboardAccess>(capabilities = listOf("admin_access")))
+        AccessAnnotationEntry<AdminDashboardAccess>(capabilities = listOf(
+            "admin_access", "admin_console", "users"
+        )))
     install(AdminDashboardModule(true))
   }
 }

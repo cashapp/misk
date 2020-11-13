@@ -29,8 +29,8 @@ export const QueryFormContainer = (props: {
         <H5>{"Query"}</H5>
         {
           <FormBuilderContainer
-            formType={"QueryRequest"}
-            noFormIdentifier={`QueryRequest`}
+            formType={"queryType"}
+            noFormIdentifier={`Query Request`}
             types={databaseQuery.types}
             rawRequestBody={rawRequestBody}
             setRawRequestBody={setRawRequestBody}

@@ -1,5 +1,7 @@
 import { IActionTypes } from "src/form-builder"
 
+export const HIBERNATE_QUERY_WEBACTION_PATH = "/api/database/query/hibernate"
+
 // Maps from a functionName for the constraint, order, or select to the return Type string identifier
 export interface IFunctionMetadata {
   name: string
@@ -26,6 +28,7 @@ export interface IRunQueryAPIRequest {
 }
 
 export interface IDatabaseQueryMetadataAPI {
+  queryWebActionPath: string
   allowedCapabilities: string[]
   allowedServices: string[]
   accessAnnotation: string

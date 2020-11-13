@@ -1,5 +1,4 @@
-import { simpleSelectorGet } from "@misk/simpleredux"
-import { chain } from "lodash"
+import { chain, filter } from "lodash"
 import React, { useState } from "react"
 import { connect } from "react-redux"
 import { SkeletonWebActionsComponent } from "../components"
@@ -27,12 +26,13 @@ const DatabaseQueryContainer = (
       tag: string
     }
 ) => {
-  const metadata =
-    props.metadata || simpleSelectorGet(props.webActions, "metadata", [])
+  const metadata = props.metadata || []
   const [filteredMetadata, setFilteredMetadata] = useState(
     metadata as IDatabaseQueryMetadataAPI[]
   )
   if (metadata.length > 0) {
+    console.log("METADATA", metadata)
+    console.log("METADATA", filteredMetadata)
     return (
       <div>
         <FilterDatabaseQueryContainer
@@ -41,7 +41,8 @@ const DatabaseQueryContainer = (
           tag={props.tag}
         />
         <div>
-          {chain(filteredMetadata)
+          {/* {chain(filteredMetadata) */}
+          {chain(metadata)
             .sortBy(["table", "queryClass"])
             .map((databaseQuery: IDatabaseQueryMetadataAPI, index: number) => (
               <DatabaseQueryCardContainer
