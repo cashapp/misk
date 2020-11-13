@@ -37,6 +37,7 @@ dependencies {
   compile dep.tink
   compile project(':misk')
   compile project(':misk-crypto')
+  compile project(':misk-actions')
 
   testCompile project(':misk-testing')
   testCompile project(':misk-hibernate-testing')

@@ -1,5 +1,6 @@
 package misk.hibernate
 
+import com.google.inject.Injector
 import io.opentracing.Tracer
 import io.prometheus.client.CollectorRegistry
 import misk.ServiceModule
@@ -25,6 +26,7 @@ import misk.jdbc.SpanInjector
 import misk.metrics.Metrics
 import misk.resources.ResourceLoader
 import misk.database.StartDatabaseService
+import misk.inject.typeLiteral
 import misk.web.exceptions.ExceptionMapperModule
 import org.hibernate.SessionFactory
 import org.hibernate.event.spi.EventType
@@ -138,19 +140,6 @@ class HibernateModule(
 
     multibind<HealthCheck>().to(schemaMigratorServiceKey)
 
-    bind(transacterKey).toProvider(object : Provider<Transacter> {
-      @Inject lateinit var executorServiceFactory: ExecutorServiceFactory
-      @Inject lateinit var hibernateEntities: Set<HibernateEntity>
-      override fun get(): RealTransacter = RealTransacter(
-          qualifier = qualifier,
-          sessionFactoryProvider = sessionFactoryProvider,
-          readerSessionFactoryProvider = readerSessionFactoryProvider,
-          config = config,
-          executorServiceFactory = executorServiceFactory,
-          hibernateEntities = hibernateEntities
-      )
-    }).asSingleton()
-
     // Install other modules.
     install(object : HibernateEntityModule(qualifier) {
       override fun configureHibernate() {
@@ -158,6 +147,21 @@ class HibernateModule(
         bindListener(EventType.PRE_UPDATE).to<TimestampListener>()
       }
     })
+
+    bind(transacterKey).toProvider(object : Provider<Transacter> {
+      @Inject lateinit var executorServiceFactory: ExecutorServiceFactory
+      @Inject lateinit var injector: Injector
+      override fun get(): RealTransacter = RealTransacter(
+          qualifier = qualifier,
+          sessionFactoryProvider = sessionFactoryProvider,
+          readerSessionFactoryProvider = readerSessionFactoryProvider,
+          config = config,
+          executorServiceFactory = executorServiceFactory,
+          hibernateEntities = injector.findBindingsByType(HibernateEntity::class.typeLiteral()).map {
+            it.provider.get()
+          }.toSet()
+      )
+    }).asSingleton()
 
     install(ExceptionMapperModule
         .create<RetryTransactionException, RetryTransactionExceptionMapper>())

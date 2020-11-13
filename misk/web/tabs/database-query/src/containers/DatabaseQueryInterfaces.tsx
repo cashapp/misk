@@ -20,6 +20,11 @@ export interface ISelectMetadata extends IFunctionMetadata {
   paths: string[]
 }
 
+export interface IRunQueryAPIRequest {
+  queryClass: String
+  query: any
+}
+
 export interface IDatabaseQueryMetadataAPI {
   allowedCapabilities: string[]
   allowedServices: string[]

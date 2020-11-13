@@ -7,6 +7,7 @@ import misk.web.NetworkInterceptor
 import misk.web.WebActionModule
 import misk.web.interceptors.WideOpenDevelopmentInterceptorFactory
 import misk.web.metadata.ConfigMetadataAction
+import misk.web.metadata.DatabaseQueryMetadata
 import misk.web.metadata.DatabaseQueryMetadataAction
 import misk.web.metadata.WebActionMetadataAction
 import javax.inject.Qualifier
@@ -62,6 +63,7 @@ class AdminDashboardModule(private val isDevelopment: Boolean) : KAbstractModule
     ))
 
     // Database Query
+    newMultibinder<DatabaseQueryMetadata>()
     install(WebActionModule.create<DatabaseQueryMetadataAction>())
     multibind<DashboardTab>().toProvider(
         DashboardTabProvider<AdminDashboard, AdminDashboardAccess>(
@@ -89,8 +91,7 @@ class AdminDashboardModule(private val isDevelopment: Boolean) : KAbstractModule
 }
 
 // Module that allows testing/development environments to bind up the admin dashboard
-class AdminDashboardTestingModule() : KAbstractModule() {
-
+class AdminDashboardTestingModule : KAbstractModule() {
   override fun configure() {
     // Set dummy values for access, these shouldn't matter,
     // as test environments should prefer to use the FakeCallerAuthenticator.

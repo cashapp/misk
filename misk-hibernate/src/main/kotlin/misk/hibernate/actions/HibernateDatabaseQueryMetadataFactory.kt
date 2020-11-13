@@ -9,11 +9,13 @@ import misk.hibernate.Property
 import misk.hibernate.Query
 import misk.hibernate.Select
 import misk.hibernate.Session
+import misk.hibernate.actions.HibernateDatabaseQueryAction.Companion.HIBERNATE_QUERY_WEBACTION_PATH
 import misk.security.authz.AccessAnnotationEntry
 import misk.web.RequestTypes.Companion.maybeCreatePrimitiveField
 import misk.web.metadata.DatabaseQueryMetadata
 import misk.web.metadata.Field
 import misk.web.metadata.Type
+import javax.inject.Inject
 import javax.inject.Singleton
 import javax.persistence.Table
 import kotlin.reflect.KClass
@@ -24,7 +26,7 @@ import kotlin.reflect.full.declaredMemberFunctions
 import kotlin.reflect.full.findAnnotation
 
 @Singleton
-class HibernateDatabaseQueryMetadataFactory(
+class HibernateDatabaseQueryMetadataFactory @Inject constructor(
   val accessAnnotationEntries: List<AccessAnnotationEntry>
 ) {
   fun <T : DbEntity<T>> fromQuery(
@@ -65,6 +67,7 @@ class HibernateDatabaseQueryMetadataFactory(
     })
 
     return DatabaseQueryMetadata(
+        queryWebActionPath = HIBERNATE_QUERY_WEBACTION_PATH,
         allowedCapabilities = allowedCapabilities,
         allowedServices = allowedServices,
         accessAnnotation = accessAnnotationClass,
@@ -91,7 +94,7 @@ class HibernateDatabaseQueryMetadataFactory(
       createField(onlyParameter.type, name, onlyParameter.isVararg)
     } ?: Field(name = "Add Constraint", type = Boolean::class.simpleName!!, repeated = false)
     return Type(
-        fields = field.let { listOf(field) } ?: listOf()
+        fields = listOf(field)
     ) to DatabaseQueryMetadata.ConstraintMetadata(
         name = function.name,
         parametersTypeName = "Constraint/${queryClass.simpleName}/${function.name}",
@@ -123,7 +126,7 @@ class HibernateDatabaseQueryMetadataFactory(
       createField(onlyParameter.type, name, onlyParameter.isVararg)
     } ?: Field(name = "Add Order", type = Boolean::class.simpleName!!, repeated = false)
     return Type(
-        fields = field.let { listOf(field) } ?: listOf()
+        fields = listOf(field)
     ) to DatabaseQueryMetadata.OrderMetadata(
         name = function.name,
         parametersTypeName = "Order/${queryClass.simpleName}/${function.name}",

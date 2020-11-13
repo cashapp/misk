@@ -11,6 +11,7 @@ import misk.hibernate.Property
 import misk.hibernate.Query
 import misk.hibernate.Select
 import misk.hibernate.Session
+import misk.hibernate.actions.HibernateDatabaseQueryAction.Companion.HIBERNATE_QUERY_WEBACTION_PATH
 import misk.web.metadata.DatabaseQueryMetadata
 import misk.web.metadata.Field
 import misk.web.metadata.Type
@@ -21,7 +22,6 @@ import java.time.LocalDate
 import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.GeneratedValue
-import javax.persistence.GenerationType
 import javax.persistence.Table
 
 class HibernateDatabaseQueryMetadataFactoryTest {
@@ -32,6 +32,7 @@ class HibernateDatabaseQueryMetadataFactoryTest {
   @Test
   fun happy() {
     val metadata = converter.fromQuery(DbMovie::class, MovieQuery::class)
+    assertThat(metadata.queryWebActionPath).isEqualTo(HIBERNATE_QUERY_WEBACTION_PATH)
     assertThat(metadata.allowedCapabilities).isEmpty()
     assertThat(metadata.allowedServices).isEmpty()
     assertThat(metadata.accessAnnotation).isNull()

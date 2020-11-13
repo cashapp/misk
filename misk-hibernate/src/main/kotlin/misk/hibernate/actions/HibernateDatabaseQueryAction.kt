@@ -10,6 +10,7 @@ import misk.hibernate.Transacter
 import misk.inject.typeLiteral
 import misk.scope.ActionScoped
 import misk.web.Post
+import misk.web.RequestBody
 import misk.web.RequestContentType
 import misk.web.ResponseContentType
 import misk.web.actions.WebAction
@@ -25,10 +26,10 @@ import kotlin.reflect.full.functions
 
 /** Runs query against DB and returns results */
 @Singleton
-class DatabaseQueryAction @Inject constructor(
+class HibernateDatabaseQueryAction @Inject constructor(
   @JvmSuppressWildcards private val callerProvider: ActionScoped<MiskCaller?>,
   val databaseQueryMetadata: List<DatabaseQueryMetadata>,
-  val queries: List<KClass<out Query<*>>>,
+  val queries: List<HibernateQuery>,
   val injector: Injector,
 ) : WebAction {
 
@@ -38,11 +39,11 @@ class DatabaseQueryAction @Inject constructor(
   private val queryFactory = ReflectionQuery.Factory(ReflectionQuery.QueryLimitsConfig(
       maxMaxRows, rowCountErrorLimit, rowCountWarningLimit))
 
-  @Post("/api/database/query/hibernate")
+  @Post(HIBERNATE_QUERY_WEBACTION_PATH)
   @RequestContentType(MediaTypes.APPLICATION_JSON)
   @ResponseContentType(MediaTypes.APPLICATION_JSON)
   @AdminDashboardAccess
-  fun getAll(request: Request): Response {
+  fun getAll(@RequestBody request: Request): Response {
     val caller = callerProvider.get()!!
     val queryClass = request.queryClass
     val metadata =
@@ -51,7 +52,7 @@ class DatabaseQueryAction @Inject constructor(
 
     // Find the transacter for the query class
     val query =
-        queries.find { it::class.simpleName!! == metadata.queryClass } ?: throw BadRequestException(
+        queries.map{ it.query }.find { it::class.simpleName!! == metadata.queryClass } ?: throw BadRequestException(
             "[query=${metadata.queryClass}] does not exist")
     val transacterBindings = injector.findBindingsByType(Transacter::class.typeLiteral())
     val transacter = transacterBindings.find { transacterBinding ->
@@ -115,4 +116,8 @@ class DatabaseQueryAction @Inject constructor(
 //    val headers: List<String>,
 //    val rows: List<List<String>>
   )
+
+  companion object {
+    const val HIBERNATE_QUERY_WEBACTION_PATH = "/api/database/query/hibernate"
+  }
 }

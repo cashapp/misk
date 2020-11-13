@@ -1,9 +1,13 @@
 package misk.web.metadata
 
+import misk.security.authz.AccessAnnotationEntry
+import javax.inject.Inject
+import javax.inject.Provider
 import kotlin.reflect.KClass
 
 /** Metadata front end model for Database Query Misk-Web Tab */
 data class DatabaseQueryMetadata(
+  val queryWebActionPath: String,
   val allowedCapabilities: Set<String> = setOf(),
   val allowedServices: Set<String> = setOf(),
   val accessAnnotation: String?,
@@ -23,6 +27,7 @@ data class DatabaseQueryMetadata(
   val types: Map<String, Type>
 ) {
   constructor(
+    queryWebActionPath: String,
     allowedCapabilities: Set<String> = setOf(),
     allowedServices: Set<String> = setOf(),
     accessAnnotation: KClass<out Annotation>? = null,
@@ -34,6 +39,7 @@ data class DatabaseQueryMetadata(
     selects: List<SelectMetadata>,
     types: Map<String, Type>
   ) : this(
+      queryWebActionPath = queryWebActionPath,
       allowedCapabilities = allowedCapabilities,
       allowedServices = allowedServices,
       accessAnnotation = accessAnnotation?.simpleName,
