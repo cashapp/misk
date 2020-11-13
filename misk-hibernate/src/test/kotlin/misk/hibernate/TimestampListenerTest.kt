@@ -1,20 +1,16 @@
 package misk.hibernate
 
+import misk.jdbc.DataSourceType
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.time.FakeClock
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
-import java.time.ZoneOffset
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
-@MiskTest(startService = true)
-class TimestampListenerTest {
-  @MiskTestModule
-  val module = MoviesTestModule(disableCrossShardQueryDetector = true)
-
+abstract class TimestampListenerTest {
   @Inject @Movies lateinit var transacter: Transacter
   @Inject lateinit var queryFactory: Query.Factory
   @Inject lateinit var clock: FakeClock
@@ -41,7 +37,9 @@ class TimestampListenerTest {
 
     val updatedAt = clock.instant()
     transacter.transaction { session ->
-      val movie = queryFactory.newQuery<MovieQuery>().uniqueResult(session)!!
+      val movie = queryFactory.newQuery<MovieQuery>()
+          .allowFullScatter().allowTableScan()
+          .uniqueResult(session)!!
       movie.name = "A New Hope"
       session.hibernateSession.update(movie) // TODO(jwilson): expose session.update() directly.
       session.hibernateSession.flush() // TODO(jwilson): expose session.flush() directly.
@@ -65,11 +63,35 @@ class TimestampListenerTest {
           s.setLong(1, movie.id.id)
           s.executeQuery().use { rs ->
             rs.next()
-            assertThat(rs.getTimestamp(1).toLocalDateTime().toInstant(ZoneOffset.UTC))
-                .isEqualTo(clock.instant())
+            assertThat(rs.getTimestamp(1).time)
+                .isEqualTo(clock.instant().toEpochMilli())
           }
         }
       }
     }
   }
+}
+
+@MiskTest(startService = true)
+class MySQLTimestampListenerTest : TimestampListenerTest() {
+  @MiskTestModule
+  val module = MoviesTestModule(DataSourceType.MYSQL)
+}
+
+@MiskTest(startService = true)
+class VitessMySQLTimestampListenerTest : TimestampListenerTest() {
+  @MiskTestModule
+  val module = MoviesTestModule(DataSourceType.VITESS_MYSQL)
+}
+
+@MiskTest(startService = true)
+class VitessTimestampListenerTest : TimestampListenerTest() {
+  @MiskTestModule
+  val module = MoviesTestModule(DataSourceType.VITESS)
+}
+
+@MiskTest(startService = true)
+class PostgreSQLTimestampListenerTest : TimestampListenerTest() {
+  @MiskTestModule
+  val module = MoviesTestModule(DataSourceType.POSTGRESQL)
 }

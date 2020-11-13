@@ -1,9 +1,9 @@
 package misk.eventrouter
 
 import com.google.common.util.concurrent.AbstractIdleService
-import com.google.common.util.concurrent.Service
 import com.google.inject.Provides
 import com.squareup.moshi.Moshi
+import misk.ServiceModule
 import misk.inject.KAbstractModule
 import misk.inject.asSingleton
 import misk.moshi.MoshiAdapterModule
@@ -23,7 +23,7 @@ class EventRouterTestingModule internal constructor(val distributed: Boolean) : 
   private val subscriberExecutor = QueueingExecutorService()
 
   @Singleton
-  private class TestingService : AbstractIdleService() {
+  private class TestingService @Inject constructor() : AbstractIdleService() {
     @Inject private lateinit var eventRouter: RealEventRouter
     @Inject private lateinit var eventRouterTester: EventRouterTester
     @Inject private lateinit var clusterMapper: FakeClusterMapper
@@ -44,7 +44,7 @@ class EventRouterTestingModule internal constructor(val distributed: Boolean) : 
     } else {
       bind<EventRouter>().to<RealEventRouter>().asSingleton()
       bind<RealEventRouter>().asSingleton()
-      multibind<Service>().to<TestingService>()
+      install(ServiceModule<TestingService>())
     }
 
     bind<ClusterConnector>().to<FakeClusterConnector>()

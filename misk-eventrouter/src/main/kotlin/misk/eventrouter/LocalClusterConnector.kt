@@ -7,7 +7,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-internal class LocalClusterConnector : ClusterConnector {
+internal class LocalClusterConnector @Inject constructor() : ClusterConnector {
   @Inject lateinit var kubernetesConfig: KubernetesConfig
 
   override fun joinCluster(topicPeer: TopicPeer) {

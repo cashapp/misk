@@ -14,9 +14,10 @@ import javax.inject.Singleton
  * does gRPC, but it should be useful to confirm interoperability.
  */
 @Singleton
-class ProtocGrpcService : AbstractIdleService() {
-  @Inject lateinit var services: List<BindableService>
-  @Inject lateinit var resourceLoader: ResourceLoader
+class ProtocGrpcService @Inject constructor(
+  private val services: List<BindableService>,
+  private val resourceLoader: ResourceLoader
+) : AbstractIdleService() {
 
   lateinit var server: Server
 

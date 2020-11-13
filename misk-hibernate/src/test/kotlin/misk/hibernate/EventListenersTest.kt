@@ -13,7 +13,7 @@ import javax.inject.Inject
 class EventListenersTest {
   @MiskTestModule
   val module = Modules.combine(
-      MoviesTestModule(disableCrossShardQueryDetector = true),
+      MoviesTestModule(),
       object : HibernateEntityModule(Movies::class) {
         override fun configureHibernate() {
           bindListener(EventType.PRE_LOAD).to<FakeEventListener>()
@@ -42,7 +42,8 @@ class EventListenersTest {
     }
 
     transacter.transaction { session ->
-      val movie = queryFactory.newQuery<MovieQuery>().uniqueResult(session)!!
+      val movie = queryFactory.newQuery<MovieQuery>().allowFullScatter().allowTableScan()
+          .uniqueResult(session)!!
       assertThat(eventListener.takeEvents()).containsExactly("preload")
 
       session.hibernateSession.delete(movie) // TODO(jwilson): expose session.delete() directly.

@@ -8,13 +8,12 @@ import javax.inject.Named
 import javax.inject.Singleton
 
 class ProtocGrpcClientModule : KAbstractModule() {
-  override fun configure() {
-  }
+  override fun configure() {}
 
   @Provides
   @Singleton
   fun provideChannel(
     @Named("grpc server") url: HttpUrl,
     grpcChannelFactory: GrpcChannelFactory
-  ) = grpcChannelFactory.createClientChannel(InetSocketAddress(url.host(), url.port()))
+  ) = grpcChannelFactory.createClientChannel(InetSocketAddress(url.host, url.port))
 }

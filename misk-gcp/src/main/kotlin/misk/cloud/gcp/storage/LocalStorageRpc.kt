@@ -34,6 +34,8 @@ import java.util.concurrent.locks.ReentrantReadWriteLock
 import kotlin.concurrent.read
 import kotlin.concurrent.write
 import kotlin.streams.asSequence
+import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
+import java.io.OutputStream
 
 /**
  * Implementation of [StorageRpc] that is backed by local disk storage. Useful for running
@@ -92,7 +94,12 @@ import kotlin.streams.asSequence
  * as the etag value.
  *
  */
-class LocalStorageRpc(root: Path, moshi: Moshi = Moshi.Builder().build()) : BaseCustomStorageRpc() {
+class LocalStorageRpc(
+  root: Path,
+  moshi: Moshi = Moshi.Builder()
+      .add(KotlinJsonAdapterFactory()) // Added last for lowest precedence.
+      .build()
+) : BaseCustomStorageRpc() {
   // Handles in-process synchronization; cross-process synchronization is handled by file locks
   private val internalLock = ReentrantReadWriteLock()
   private val locksRoot = root.resolve("locks")
@@ -225,8 +232,8 @@ class LocalStorageRpc(root: Path, moshi: Moshi = Moshi.Builder().build()) : Base
     from: StorageObject,
     options: Map<StorageRpc.Option, *>,
     zposition: Long,
-    zbytes: Int
-  ): Tuple<String, ByteArray> = try {
+    outputStream: OutputStream
+  ): Long = try {
     withReadLock(from.blobId) {
       val metadata = getMetadataForReading(from.blobId, options)
           ?: throw StorageException(404, "${from.blobId.fullName} not found")
@@ -234,14 +241,15 @@ class LocalStorageRpc(root: Path, moshi: Moshi = Moshi.Builder().build()) : Base
       val contentPath = contentRoot.resolve(from.blobId.toPath(metadata.generation))
       val contentChannel = Files.newByteChannel(contentPath, READ)
       val contents = contentChannel.use {
-        val toRead = Math.min((it.size() - zposition).toInt(), zbytes)
-        val bytes = ByteArray(toRead)
+        val toRead = it.size() - zposition
+        val bytes = ByteArray(toRead.toInt())
         it.position(zposition)
         it.read(ByteBuffer.wrap(bytes))
         bytes
       }
 
-      Tuple.of(metadata.generation.toString(), contents)
+      outputStream.write(contents)
+      contents.size.toLong()
     }
   } catch (e: IOException) {
     throw StorageException(e)

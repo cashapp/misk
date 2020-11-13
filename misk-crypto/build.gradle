@@ -1,0 +1,15 @@
+dependencies {
+  compile dep.bouncycastlePgp
+  compile dep.tink
+  compile dep.awsS3
+  compile project(':misk')
+
+  testCompile project(':misk-testing')
+}
+
+afterEvaluate { project ->
+  project.tasks.dokka {
+    outputDirectory = "$rootDir/docs/0.x"
+    outputFormat = 'gfm'
+  }
+}

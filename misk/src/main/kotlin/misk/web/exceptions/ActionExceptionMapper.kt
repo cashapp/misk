@@ -7,13 +7,14 @@ import misk.web.ResponseBody
 import misk.web.mediatype.MediaTypes
 import misk.web.toResponseBody
 import okhttp3.Headers
+import okhttp3.Headers.Companion.toHeaders
 import org.slf4j.event.Level
 import javax.inject.Inject
 
 /**
  * Maps [ActionException]s into the appropriate status code. [ActionException]s corresponding
  * to client-errors (bad requests, resource not found, etc) are returned with full messages
- * allowing the client to deterine what went wrong; exceptions representing server errors
+ * allowing the client to determine what went wrong; exceptions representing server errors
  * are returned with just a status code and minimal messaging, to avoid leaking internal
  * implementation details and possible vulnerabilities
  */
@@ -34,7 +35,7 @@ internal class ActionExceptionMapper @Inject internal constructor(
 
   private companion object {
     val HEADERS: Headers =
-      Headers.of(listOf("Content-Type" to MediaTypes.TEXT_PLAIN_UTF8).toMap())
+        listOf("Content-Type" to MediaTypes.TEXT_PLAIN_UTF8).toMap().toHeaders()
   }
 }
 

@@ -1,7 +1,5 @@
-apply plugin: 'com.github.johnrengelman.shadow'
-
 dependencies {
-  compile dep.kotlinStdLib
+  compile dep.kotlinStdLibJdk8
   compile dep.kotlinTest
   compile dep.guava
   compile dep.guice
@@ -20,15 +18,9 @@ jar {
   classifier = 'unshaded'
 }
 
-
-shadowJar {
-  exclude('module-info.class') // https://github.com/johnrengelman/shadow/issues/352
-  mergeServiceFiles()
-  into("web/exemplarchat") {
-    from("web/build")
+compileKotlin {
+  kotlinOptions {
+    // TODO(alec): Enable again once Environment enum is deleted
+    allWarningsAsErrors = false
   }
-}
-
-artifacts {
-  archives shadowJar
 }

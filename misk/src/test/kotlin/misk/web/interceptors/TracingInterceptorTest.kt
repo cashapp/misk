@@ -1,31 +1,30 @@
 package misk.web.interceptors
 
 import com.google.inject.Guice
-import io.opentracing.Tracer
-import io.opentracing.mock.MockTracer
 import io.opentracing.tag.Tags
 import misk.asAction
 import misk.exceptions.ActionException
 import misk.exceptions.StatusCode
 import misk.inject.KAbstractModule
+import misk.testing.ConcurrentMockTracer
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.testing.MockTracingBackendModule
+import misk.tracing.traceWithSpan
 import misk.web.DispatchMechanism
+import misk.web.FakeHttpCall
 import misk.web.Get
 import misk.web.NetworkChain
 import misk.web.NetworkInterceptor
-import misk.web.Request
+import misk.web.RealNetworkChain
 import misk.web.Response
+import misk.web.WebActionModule
 import misk.web.WebTestingModule
 import misk.web.actions.WebAction
-import misk.web.actions.WebActionEntry
-import misk.web.actions.asNetworkChain
 import misk.web.jetty.JettyService
-import okhttp3.Headers
-import okhttp3.HttpUrl
+import okhttp3.Headers.Companion.headersOf
+import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.OkHttpClient
-import okio.Buffer
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import javax.inject.Inject
@@ -37,28 +36,29 @@ class TracingInterceptorTest {
 
   @Inject private lateinit var tracingInterceptorFactory: TracingInterceptor.Factory
   @Inject private lateinit var tracingTestAction: TracingTestAction
-  @Inject private lateinit var tracer: Tracer
+  @Inject private lateinit var tracer: ConcurrentMockTracer
   @Inject private lateinit var jettyService: JettyService
+
+  companion object {
+    // Not exposed: https://github.com/opentracing/opentracing-java/blob/2df2a8983e35dff23c4fb894e5f5ae3f98f1cf7b/opentracing-mock/src/main/java/io/opentracing/mock/MockTracer.java#L228-L229
+    val SPAN_ID_KEY = "spanid"
+    val TRACE_ID_KEY = "traceid"
+  }
 
   @Test
   fun initiatesTrace() {
-    val tracingInterceptor = tracingInterceptorFactory.create(TracingTestAction::call.asAction())!!
-    val request = Request(
-        HttpUrl.parse("http://foo.bar/")!!,
-        DispatchMechanism.GET,
-        body = Buffer()
-    )
-    val chain = tracingTestAction.asNetworkChain(TracingTestAction::call, request,
-        tracingInterceptor, TerminalInterceptor(200))
+    val tracingInterceptor = tracingInterceptorFactory.create(
+        TracingTestAction::call.asAction(DispatchMechanism.GET))!!
+    val httpCall = FakeHttpCall(url = "http://foo.bar".toHttpUrl())
+    val chain = RealNetworkChain(TracingTestAction::call.asAction(DispatchMechanism.GET),
+        tracingTestAction, httpCall, listOf(tracingInterceptor, TerminalInterceptor(200)))
 
-    chain.proceed(chain.request)
+    chain.proceed(chain.httpCall)
 
-    val mockTracer = tracer as MockTracer
-    assertThat(mockTracer.finishedSpans().size).isEqualTo(1)
-    assertThat(mockTracer.finishedSpans().first().parentId()).isEqualTo(0)
-    val span = mockTracer.finishedSpans().first()
+    val span = tracer.take()
     assertThat(span.parentId()).isEqualTo(0)
     assertThat(span.tags()).isEqualTo(mapOf(
+        "resource.name" to "misk.web.interceptors.TracingInterceptorTest\$TracingTestAction",
         "http.method" to "GET",
         "http.status_code" to 200,
         "http.url" to "http://foo.bar/",
@@ -67,31 +67,50 @@ class TracingInterceptorTest {
 
   @Test
   fun looksForParentContext() {
-    val tracingInterceptor = tracingInterceptorFactory.create(TracingTestAction::call.asAction())!!
-    val request = Request(
-        HttpUrl.parse("http://foo.bar/")!!,
-        DispatchMechanism.GET,
-        Headers.Builder().add("spanid", "1").add("traceid", "2").build(),
-        body = Buffer()
+    val tracingInterceptor = tracingInterceptorFactory.create(
+        TracingTestAction::call.asAction(DispatchMechanism.GET))!!
+    val httpCall = FakeHttpCall(
+        url = "http://foo.bar".toHttpUrl(),
+        requestHeaders = headersOf(SPAN_ID_KEY, "1", TRACE_ID_KEY, "2")
     )
-    val chain = tracingTestAction.asNetworkChain(TracingTestAction::call, request,
-        tracingInterceptor, TerminalInterceptor(200))
+    val chain = RealNetworkChain(TracingTestAction::call.asAction(DispatchMechanism.GET),
+        tracingTestAction, httpCall, listOf(tracingInterceptor, TerminalInterceptor(200)))
 
-    chain.proceed(chain.request)
+    chain.proceed(chain.httpCall)
 
-    val mockTracer = tracer as MockTracer
-    assertThat(mockTracer.finishedSpans().size).isEqualTo(1)
-    assertThat(mockTracer.finishedSpans().first().parentId()).isEqualTo(1)
+    val span = tracer.take()
+    assertThat(span.parentId()).isEqualTo(1)
+  }
+
+  @Test
+  fun looksForParentSpan() {
+    val tracingInterceptor = tracingInterceptorFactory.create(
+        TracingTestAction::call.asAction(DispatchMechanism.GET))!!
+    val httpCall = FakeHttpCall(
+        url = "http://foo.bar".toHttpUrl(),
+        requestHeaders = headersOf(SPAN_ID_KEY, "1", TRACE_ID_KEY, "2")
+    )
+    val chain = RealNetworkChain(TracingTestAction::call.asAction(DispatchMechanism.GET),
+        tracingTestAction, httpCall, listOf(object : NetworkInterceptor {
+      override fun intercept(chain: NetworkChain) {
+        tracer.traceWithSpan("parent-span-exists") {
+          tracer.activeSpan().setBaggageItem("hello", "world")
+          chain.proceed(chain.httpCall)
+        }
+      }
+    }, tracingInterceptor, TerminalInterceptor(200)))
+
+    chain.proceed(chain.httpCall)
+
+    val span = tracer.take()
+    assertThat(span.getBaggageItem("hello")).isEqualTo("world")
   }
 
   @Test
   fun failedTrace() {
     get("/failed_trace")
 
-    val mockTracer = tracer as MockTracer
-    assertThat(mockTracer.finishedSpans().size).isEqualTo(1)
-
-    val span = mockTracer.finishedSpans().first()
+    val span = tracer.take()
     assertThat(span.tags().get(Tags.ERROR.key)).isEqualTo(true)
     assertThat(span.tags().get(Tags.HTTP_STATUS.key)).isEqualTo(400)
   }
@@ -100,10 +119,7 @@ class TracingInterceptorTest {
   fun failedTraceWithException() {
     get("/exception_trace")
 
-    val mockTracer = tracer as MockTracer
-    assertThat(mockTracer.finishedSpans().size).isEqualTo(1)
-
-    val span = mockTracer.finishedSpans().first()
+    val span = tracer.take()
     assertThat(span.tags().get(Tags.ERROR.key)).isEqualTo(true)
     assertThat(span.tags().get(Tags.HTTP_STATUS.key)).isEqualTo(420)
   }
@@ -115,7 +131,8 @@ class TracingInterceptorTest {
     val tracingInterceptorFactory: TracingInterceptor.Factory =
         injector.getInstance(TracingInterceptor.Factory::class.java)
 
-    assertThat(tracingInterceptorFactory.create(TracingTestAction::call.asAction())).isNull()
+    assertThat(tracingInterceptorFactory.create(
+        TracingTestAction::call.asAction(DispatchMechanism.GET))).isNull()
   }
 
   private fun get(path: String) {
@@ -127,37 +144,42 @@ class TracingInterceptorTest {
     httpClient.newCall(request).execute()
   }
 
-  internal class TracingTestAction : WebAction {
+  internal class TracingTestAction @Inject constructor() : WebAction {
     @Get("/trace")
     fun call(): Response<String> {
       return Response("success")
     }
   }
 
-  internal class FailedTracingTestAction : WebAction {
+  internal class FailedTracingTestAction @Inject constructor() : WebAction {
     @Get("/failed_trace")
     fun call(): Response<String> {
       return Response("no good", statusCode = StatusCode.BAD_REQUEST.code)
     }
   }
 
-  internal class ExceptionThrowingTracingTestAction : WebAction {
+  internal class ExceptionThrowingTracingTestAction @Inject constructor() : WebAction {
     @Get("/exception_trace")
     fun call(): Response<String> {
       throw ActionException(StatusCode.ENHANCE_YOUR_CALM, "Chill, man")
     }
   }
 
-  internal class TerminalInterceptor(val status: Int) : NetworkInterceptor {
-    override fun intercept(chain: NetworkChain): Response<*> = Response("foo", statusCode = status)
+  internal class TerminalInterceptor(private val status: Int) : NetworkInterceptor {
+    override fun intercept(chain: NetworkChain) {
+      chain.httpCall.statusCode = status
+    }
   }
 
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(WebTestingModule())
       install(MockTracingBackendModule())
-      multibind<WebActionEntry>().toInstance(WebActionEntry<FailedTracingTestAction>())
-      multibind<WebActionEntry>().toInstance(WebActionEntry<ExceptionThrowingTracingTestAction>())
+      install(WebActionModule.create<TracingTestAction>())
+      install(WebActionModule.create<FailedTracingTestAction>())
+      install(WebActionModule.create<ExceptionThrowingTracingTestAction>())
+
+      bind<TracingInterceptor.Factory>()
     }
   }
 }

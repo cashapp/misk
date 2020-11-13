@@ -4,12 +4,12 @@ import com.squareup.exemplar.actions.EchoFormAction
 import com.squareup.exemplar.actions.HelloWebAction
 import com.squareup.exemplar.actions.HelloWebPostAction
 import misk.inject.KAbstractModule
-import misk.web.actions.WebActionEntry
+import misk.web.WebActionModule
 
 class ExemplarModule : KAbstractModule() {
   override fun configure() {
-    multibind<WebActionEntry>().toInstance(WebActionEntry<HelloWebAction>())
-    multibind<WebActionEntry>().toInstance(WebActionEntry<HelloWebPostAction>())
-    multibind<WebActionEntry>().toInstance(WebActionEntry<EchoFormAction>())
+    install(WebActionModule.create<HelloWebAction>())
+    install(WebActionModule.create<HelloWebPostAction>())
+    install(WebActionModule.create<EchoFormAction>())
   }
 }
