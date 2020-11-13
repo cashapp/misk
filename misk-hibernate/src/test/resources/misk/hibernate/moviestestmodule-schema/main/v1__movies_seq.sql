@@ -3,6 +3,4 @@ CREATE TABLE `movies_seq` (
   `next_id` bigint DEFAULT NULL,
   `cache` bigint DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='vitess_sequence';
-
-INSERT INTO `movies_seq` (id, next_id, cache) VALUES (0, 1, 100);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='vitess_sequence';

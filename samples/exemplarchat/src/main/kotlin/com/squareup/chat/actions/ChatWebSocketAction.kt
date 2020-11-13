@@ -9,14 +9,12 @@ import misk.web.actions.WebAction
 import misk.web.actions.WebSocket
 import misk.web.actions.WebSocketListener
 import javax.inject.Inject
-import javax.inject.Singleton
 
 /**
  * ChatWebSocketAction is a basic chat program which supports multiple chat rooms and their
  * histories through web socket connections.
  */
-@Singleton
-class ChatWebSocketAction : WebAction {
+class ChatWebSocketAction @Inject constructor() : WebAction {
   @Inject lateinit var eventRouter: EventRouter
 
   @ConnectWebSocket("/room/{name}")

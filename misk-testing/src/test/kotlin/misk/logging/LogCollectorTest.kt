@@ -8,6 +8,7 @@ import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import javax.inject.Inject
+import kotlin.test.assertFailsWith
 
 @MiskTest(startService = true)
 class LogCollectorTest {
@@ -70,5 +71,29 @@ class LogCollectorTest {
     logger.info("this is a log message!")
     assertThat(logCollector.takeMessages(minLevel = Level.ERROR)).isEmpty()
     assertThat(logCollector.takeMessages()).isEmpty()
+  }
+
+  @Test
+  fun takeTimeout() {
+    val exception = assertFailsWith<IllegalArgumentException> {
+      logCollector.takeEvent()
+    }
+    assertThat(exception).hasMessage("no events to take!")
+  }
+
+  /** Confirm that take works even if the log isn't made until after takeEvent() is called. */
+  @Test
+  fun takeWaits() {
+    val logger = getLogger<LogCollectorTest>()
+
+    val thread = object : Thread() {
+      override fun run() {
+        sleep(100)
+        logger.info("this is a log message!")
+      }
+    }
+    thread.start()
+
+    assertThat(logCollector.takeMessage()).isEqualTo("this is a log message!")
   }
 }

@@ -34,6 +34,7 @@ class PrimitiveColumnsTest {
     }
     transacter.transaction { session ->
       val primitiveTour = queryFactory.newQuery(PrimitiveTourQuery::class)
+          .allowTableScan()
           .i1(true)
           .listAsPrimitiveTour(session)
       assertThat(primitiveTour).containsExactly(PrimitiveTour(true, 2, 3, 4, 5, '6', 7.0f, 8.0))
@@ -46,7 +47,7 @@ class PrimitiveColumnsTest {
       install(EnvironmentModule(Environment.TESTING))
 
       val config = MiskConfig.load<RootConfig>("primitivecolumns", Environment.TESTING)
-      install(HibernateTestingModule(PrimitivesDb::class))
+      install(HibernateTestingModule(PrimitivesDb::class, config.data_source))
       install(HibernateModule(PrimitivesDb::class, config.data_source))
       install(object : HibernateEntityModule(PrimitivesDb::class) {
         override fun configureHibernate() {

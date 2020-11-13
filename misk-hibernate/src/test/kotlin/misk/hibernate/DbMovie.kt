@@ -5,6 +5,7 @@ import java.time.LocalDate
 import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.GeneratedValue
+import javax.persistence.GenerationType
 import javax.persistence.Table
 
 @Entity
@@ -12,7 +13,7 @@ import javax.persistence.Table
 @Table(name = "movies")
 class DbMovie() : DbRoot<DbMovie>, DbTimestampedEntity {
   @javax.persistence.Id
-  @GeneratedValue
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
   override lateinit var id: Id<DbMovie>
 
   @Column
@@ -27,7 +28,7 @@ class DbMovie() : DbRoot<DbMovie>, DbTimestampedEntity {
   @Column(nullable = true)
   var release_date: LocalDate? = null
 
-  constructor(name: String, releaseDate: LocalDate?) : this() {
+  constructor(name: String, releaseDate: LocalDate? = null) : this() {
     this.name = name
     this.release_date = releaseDate
   }

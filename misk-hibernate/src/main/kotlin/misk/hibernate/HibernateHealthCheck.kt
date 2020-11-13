@@ -1,6 +1,6 @@
 package misk.hibernate
 
-import misk.jdbc.DataSourceConfig
+import com.google.common.util.concurrent.Service
 import misk.healthchecks.HealthCheck
 import misk.healthchecks.HealthStatus
 import misk.logging.getLogger
@@ -11,25 +11,30 @@ import java.time.Duration
 import javax.inject.Provider
 import kotlin.reflect.KClass
 
-private val logger = getLogger<HibernateHealthCheck>()
-
 /**
  * HealthCheck to confirm database connectivity and defend against clock skew.
  */
-class HibernateHealthCheck(
+internal class HibernateHealthCheck(
   private val qualifier: KClass<out Annotation>,
   // Lazily provide since the SessionFactory construction relies on Service startup.
-  private val sessionFactory: Provider<SessionFactory>,
-  private val config: DataSourceConfig,
+  private val serviceProvider: Provider<out Service>,
+  private val sessionFactoryProvider: Provider<SessionFactory>,
   private val clock: Clock
 ) : HealthCheck {
 
   override fun status(): HealthStatus {
+    val state = serviceProvider.get().state()
+    if (state != Service.State.RUNNING) {
+      return HealthStatus.unhealthy("Hibernate: ${qualifier.simpleName} database service is $state")
+    }
+
     val databaseInstant = try {
-      sessionFactory.get().openSession().use { session ->
+      val sessionFactory = sessionFactoryProvider.get()
+      sessionFactory.openSession().use { session ->
         session.createNativeQuery("SELECT NOW()").uniqueResult() as Timestamp
       }.toInstant()
     } catch (e: Exception) {
+      logger.error(e) { "error performing hibernate health check" }
       return HealthStatus.unhealthy("Hibernate: failed to query ${qualifier.simpleName} database")
     }
 
@@ -51,7 +56,8 @@ class HibernateHealthCheck(
   }
 
   companion object {
-    val CLOCK_SKEW_WARN_THRESHOLD = Duration.ofSeconds(10)
-    val CLOCK_SKEW_UNHEALTHY_THRESHOLD = Duration.ofSeconds(30)
+    val logger = getLogger<HibernateHealthCheck>()
+    val CLOCK_SKEW_WARN_THRESHOLD: Duration = Duration.ofSeconds(10)
+    val CLOCK_SKEW_UNHEALTHY_THRESHOLD: Duration = Duration.ofSeconds(30)
   }
 }

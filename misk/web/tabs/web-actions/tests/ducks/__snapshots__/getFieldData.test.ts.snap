@@ -1,0 +1,67 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Get formatted form data get data but no field input 1`] = `undefined`;
+
+exports[`Get formatted form data get nested int 1`] = `
+Object {
+  "Nested Int Field": Object {
+    "Int Field": 123456,
+  },
+}
+`;
+
+exports[`Get formatted form data get non-repeated int 1`] = `
+Object {
+  "Int Field": 123456,
+}
+`;
+
+exports[`Get formatted form data get non-typed POST 1`] = `"Alpha"`;
+
+exports[`Get formatted form data get repeated nested int 1`] = `
+Object {
+  "Repeated Nested Int Field": Array [
+    Object {
+      "Nested Int Field": Object {
+        "Int Field": -123456,
+      },
+    },
+    Object {
+      "Nested Int Field": Object {
+        "Int Field": 456789,
+      },
+    },
+  ],
+}
+`;
+
+exports[`Get formatted form data get repeated nested repeated short 1`] = `
+Object {
+  "Nested Repeated Short Field": Array [
+    Object {
+      "Nested Short Field": Object {
+        "Repeated Short Field": Array [
+          -123,
+        ],
+      },
+    },
+    Object {
+      "Nested Short Field": Object {
+        "Repeated Short Field": Array [
+          456,
+          -789,
+        ],
+      },
+    },
+  ],
+}
+`;
+
+exports[`Get formatted form data get repeated short 1`] = `
+Object {
+  "Repeated Short Field": Array [
+    -123,
+    456,
+  ],
+}
+`;

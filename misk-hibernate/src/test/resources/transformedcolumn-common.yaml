@@ -1,0 +1,6 @@
+data_source:
+  type: MYSQL
+  username: root
+  password: ""
+  database: transformedcolumn
+  migrations_resource: classpath:/misk/hibernate/transformedcolumn-migrations

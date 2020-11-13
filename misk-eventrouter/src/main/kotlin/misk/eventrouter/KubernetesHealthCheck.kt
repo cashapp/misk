@@ -6,7 +6,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class KubernetesHealthCheck : HealthCheck {
+class KubernetesHealthCheck @Inject constructor() : HealthCheck {
   @Inject private lateinit var kubernetesClusterConnector: KubernetesClusterConnector
 
   override fun status(): HealthStatus {

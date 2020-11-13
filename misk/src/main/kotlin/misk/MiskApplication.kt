@@ -60,6 +60,7 @@ class MiskApplication(private val modules: List<Module>, commands: List<MiskComm
       val injector = Guice.createInjector(object : KAbstractModule() {
         override fun configure() {
           bind<JCommander>().toInstance(jc)
+          binder().requireAtInjectOnConstructors()
         }
       }, *command.modules.toTypedArray())
 

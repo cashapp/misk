@@ -6,7 +6,7 @@ import misk.testing.MiskTestModule
 import misk.web.Get
 import misk.web.Response
 import misk.web.ResponseContentType
-import misk.web.actions.WebActionEntry
+import misk.web.WebActionModule
 import misk.web.WebTestingModule
 import misk.web.actions.WebAction
 import misk.web.jetty.JettyService
@@ -67,49 +67,49 @@ internal class PlainTextResponseTest {
     assertThat(get("/response/as-wrapped-response-body")).isEqualTo("as-response-body")
   }
 
-  class ReturnAsObject : WebAction {
+  class ReturnAsObject @Inject constructor() : WebAction {
     @Get("/response/as-object")
     @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
     fun call() = MessageWrapper("as-object")
   }
 
-  class ReturnAsString : WebAction {
+  class ReturnAsString @Inject constructor() : WebAction {
     @Get("/response/as-string")
     @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
     fun call() = "as-string"
   }
 
-  class ReturnAsByteString : WebAction {
+  class ReturnAsByteString @Inject constructor() : WebAction {
     @Get("/response/as-byte-string")
     @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
     fun call(): ByteString = "as-byte-string".encodeUtf8()
   }
 
-  class ReturnAsResponseBody : WebAction {
+  class ReturnAsResponseBody @Inject constructor() : WebAction {
     @Get("/response/as-response-body")
     @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
     fun call() = "as-response-body".toResponseBody()
   }
 
-  class ReturnAsObjectResponse : WebAction {
+  class ReturnAsObjectResponse @Inject constructor() : WebAction {
     @Get("/response/as-wrapped-object")
     @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
     fun call(): Response<MessageWrapper> = Response(MessageWrapper("as-object"))
   }
 
-  class ReturnAsStringResponse : WebAction {
+  class ReturnAsStringResponse @Inject constructor() : WebAction {
     @Get("/response/as-wrapped-string")
     @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
     fun call() = Response("as-string")
   }
 
-  class ReturnAsByteStringResponse : WebAction {
+  class ReturnAsByteStringResponse @Inject constructor() : WebAction {
     @Get("/response/as-wrapped-byte-string")
     @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
     fun call() = Response("as-byte-string".encodeUtf8())
   }
 
-  class ReturnAsResponseBodyResponse : WebAction {
+  class ReturnAsResponseBodyResponse @Inject constructor() : WebAction {
     @Get("/response/as-wrapped-response-body")
     @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
     fun call() = Response("as-response-body".encodeUtf8())
@@ -118,14 +118,14 @@ internal class PlainTextResponseTest {
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(WebTestingModule())
-      multibind<WebActionEntry>().toInstance(WebActionEntry<ReturnAsObject>())
-      multibind<WebActionEntry>().toInstance(WebActionEntry<ReturnAsString>())
-      multibind<WebActionEntry>().toInstance(WebActionEntry<ReturnAsByteString>())
-      multibind<WebActionEntry>().toInstance(WebActionEntry<ReturnAsResponseBody>())
-      multibind<WebActionEntry>().toInstance(WebActionEntry<ReturnAsObjectResponse>())
-      multibind<WebActionEntry>().toInstance(WebActionEntry<ReturnAsStringResponse>())
-      multibind<WebActionEntry>().toInstance(WebActionEntry<ReturnAsByteStringResponse>())
-      multibind<WebActionEntry>().toInstance(WebActionEntry<ReturnAsResponseBodyResponse>())
+      install(WebActionModule.create<ReturnAsObject>())
+      install(WebActionModule.create<ReturnAsString>())
+      install(WebActionModule.create<ReturnAsByteString>())
+      install(WebActionModule.create<ReturnAsResponseBody>())
+      install(WebActionModule.create<ReturnAsObjectResponse>())
+      install(WebActionModule.create<ReturnAsStringResponse>())
+      install(WebActionModule.create<ReturnAsByteStringResponse>())
+      install(WebActionModule.create<ReturnAsResponseBodyResponse>())
     }
   }
 
@@ -142,8 +142,8 @@ internal class PlainTextResponseTest {
 
     val httpClient = OkHttpClient()
     val response = httpClient.newCall(request.build()).execute()
-    assertThat(response.code()).isEqualTo(200)
+    assertThat(response.code).isEqualTo(200)
     assertThat(response.header("Content-Type")).isEqualTo(MediaTypes.TEXT_PLAIN_UTF8)
-    return response.body()!!.string()
+    return response.body!!.string()
   }
 }

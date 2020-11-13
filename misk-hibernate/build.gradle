@@ -1,14 +1,30 @@
 buildscript {
   dependencies {
+    classpath dep.kotlinAllOpenPlugin
     classpath dep.kotlinNoArgPlugin
   }
 }
 
+apply plugin: 'kotlin-allopen'
 apply plugin: 'kotlin-jpa'
+
+allOpen {
+  annotation("javax.persistence.Entity")
+  annotation("javax.persistence.Embeddable")
+  annotation("javax.persistence.MappedSuperclass")
+}
 
 dependencies {
   compile dep.datasourceProxy
   compile dep.docker
+  // The docker-java we use in tests depends on an old version of junixsocket that depends on
+  // log4j. We force it up a minor version in packages that use it.
+  compile('com.kohlschutter.junixsocket:junixsocket-native-common:2.1.1') {
+    force = true
+  }
+  compile('com.kohlschutter.junixsocket:junixsocket-common:2.1.1') {
+    force = true
+  }
   compile dep.hibernateCore
   compile dep.hikariCp
   compile dep.hsqldb
@@ -16,9 +32,19 @@ dependencies {
   compile dep.openTracing
   compile dep.openTracingUtil
   compile dep.openTracingJdbc
+  compile dep.postgresql
   compile dep.vitess
+  compile dep.tink
   compile project(':misk')
+  compile project(':misk-crypto')
 
   testCompile project(':misk-testing')
   testCompile project(':misk-hibernate-testing')
+}
+
+afterEvaluate { project ->
+  project.tasks.dokka {
+    outputDirectory = "$rootDir/docs/0.x"
+    outputFormat = 'gfm'
+  }
 }

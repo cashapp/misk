@@ -8,13 +8,14 @@ import misk.web.Post
 import misk.web.RequestBody
 import misk.web.RequestContentType
 import misk.web.ResponseContentType
-import misk.web.actions.WebActionEntry
+import misk.web.WebActionModule
 import misk.web.WebTestingModule
 import misk.web.actions.WebAction
 import misk.web.jetty.JettyService
 import misk.web.mediatype.MediaTypes
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import okhttp3.RequestBody.Companion.toRequestBody
 import okio.ByteString
 import okio.buffer
 import okio.source
@@ -49,14 +50,14 @@ internal class JsonRequestTest {
     assertThat(post("/as-byte-string", Packet("foo")).message).isEqualTo("foo as-byte-string")
   }
 
-  class PassAsObject : WebAction {
+  class PassAsObject @Inject constructor() : WebAction {
     @Post("/as-object")
     @RequestContentType(MediaTypes.APPLICATION_JSON)
     @ResponseContentType(MediaTypes.APPLICATION_JSON)
     fun call(@RequestBody packet: Packet) = Packet("${packet.message} as-object")
   }
 
-  class PassAsString : WebAction {
+  class PassAsString @Inject constructor() : WebAction {
     @Inject lateinit var moshi: Moshi
     private val packetJsonAdapter get() = moshi.adapter(Packet::class.java)
 
@@ -69,7 +70,7 @@ internal class JsonRequestTest {
     }
   }
 
-  class PassAsByteString : WebAction {
+  class PassAsByteString @Inject constructor() : WebAction {
     @Inject lateinit var moshi: Moshi
     private val packetJsonAdapter get() = moshi.adapter(Packet::class.java)
 
@@ -86,24 +87,23 @@ internal class JsonRequestTest {
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(WebTestingModule())
-      multibind<WebActionEntry>().toInstance(WebActionEntry<PassAsObject>())
-      multibind<WebActionEntry>().toInstance(WebActionEntry<PassAsString>())
-      multibind<WebActionEntry>().toInstance(WebActionEntry<PassAsByteString>())
+      install(WebActionModule.create<PassAsObject>())
+      install(WebActionModule.create<PassAsString>())
+      install(WebActionModule.create<PassAsByteString>())
     }
   }
 
   private fun post(path: String, packet: Packet): Packet = call(Request.Builder()
       .url(jettyService.httpServerUrl.newBuilder().encodedPath(path).build())
-      .post(okhttp3.RequestBody.create(MediaTypes.APPLICATION_JSON_MEDIA_TYPE,
-          packetJsonAdapter.toJson(packet))))
+      .post(packetJsonAdapter.toJson(packet).toRequestBody(MediaTypes.APPLICATION_JSON_MEDIA_TYPE)))
 
   private fun call(request: Request.Builder): Packet {
     request.header("Accept", MediaTypes.APPLICATION_JSON)
 
     val httpClient = OkHttpClient()
     val response = httpClient.newCall(request.build()).execute()
-    assertThat(response.code()).isEqualTo(200)
+    assertThat(response.code).isEqualTo(200)
     assertThat(response.header("Content-Type")).isEqualTo(MediaTypes.APPLICATION_JSON)
-    return packetJsonAdapter.fromJson(response.body()!!.source())!!
+    return packetJsonAdapter.fromJson(response.body!!.source())!!
   }
 }

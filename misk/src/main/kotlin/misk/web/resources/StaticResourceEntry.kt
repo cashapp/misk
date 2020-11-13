@@ -1,6 +1,6 @@
 package misk.web.resources
 
-import misk.web.ValidWebEntry
+import misk.web.dashboard.ValidWebEntry
 
 /**
  * This data class is used with Guice multibindings. Register instances by calling `multibind()`

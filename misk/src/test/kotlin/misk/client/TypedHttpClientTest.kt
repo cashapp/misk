@@ -14,7 +14,7 @@ import misk.web.Post
 import misk.web.RequestBody
 import misk.web.RequestContentType
 import misk.web.ResponseContentType
-import misk.web.actions.WebActionEntry
+import misk.web.WebActionModule
 import misk.web.WebTestingModule
 import misk.web.actions.WebAction
 import misk.web.jetty.JettyService
@@ -28,14 +28,14 @@ import retrofit2.http.Headers
 import retrofit2.http.POST
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.test.assertFailsWith
 
 @MiskTest(startService = true)
 internal class TypedHttpClientTest {
   @MiskTestModule
   val module = TestModule()
 
-  @Inject
-  private lateinit var jetty: JettyService
+  @Inject private lateinit var jetty: JettyService
 
   private lateinit var clientInjector: Injector
 
@@ -62,12 +62,51 @@ internal class TypedHttpClientTest {
     assertThat(response.body()?.name!!).isEqualTo("supertrex")
   }
 
+  @Test
+  fun buildDynamicClients() {
+    val typedClientFactory = clientInjector.getInstance(TypedClientFactory::class.java)
+
+    val dinoClient = typedClientFactory.build<ReturnADinosaur>(
+        HttpClientEndpointConfig(jetty.httpServerUrl.toString()),
+        "dynamicDino"
+    )
+    val response = dinoClient.getDinosaur(Dinosaur.Builder().name("trex").build()).execute()
+    assertThat(response.code()).isEqualTo(200)
+    assertThat(response.body()).isNotNull()
+    assertThat(response.body()?.name!!).isEqualTo("supertrex")
+
+    val protoDinoClient = typedClientFactory.build<ReturnAProtoDinosaur>(
+        HttpClientEndpointConfig(jetty.httpServerUrl.toString()),
+        "dynamicProtoDino"
+    )
+    val protoResponse = protoDinoClient.getDinosaur(
+        Dinosaur.Builder().name("trex").build()
+    ).execute()
+    assertThat(protoResponse.code()).isEqualTo(200)
+    assertThat(protoResponse.body()).isNotNull()
+    assertThat(protoResponse.body()?.name!!).isEqualTo("supertrex")
+  }
+
+  @Test
+  fun mustBeRetrofitInterface() {
+    val typedClientFactory = clientInjector.getInstance(TypedClientFactory::class.java)
+
+    val exception = assertFailsWith<IllegalArgumentException> {
+      typedClientFactory.build<NotARetrofitInterface>(
+          HttpClientEndpointConfig(jetty.httpServerUrl.toString()),
+          "notARetrofitInterface"
+      )
+    }
+    assertThat(exception).hasMessage(
+        "${NotARetrofitInterface::class} is not a Retrofit interface (no @POST or @GET methods)")
+  }
+
   interface ReturnADinosaur {
     @POST("/cooldinos")
     fun getDinosaur(@Body request: Dinosaur): Call<Dinosaur>
   }
 
-  class ReturnADinosaurAction : WebAction {
+  class ReturnADinosaurAction @Inject constructor() : WebAction {
     @Post("/cooldinos")
     @RequestContentType(MediaTypes.APPLICATION_JSON)
     @ResponseContentType(MediaTypes.APPLICATION_JSON)
@@ -83,7 +122,7 @@ internal class TypedHttpClientTest {
     fun getDinosaur(@Body request: Dinosaur): Call<Dinosaur>
   }
 
-  class ReturnAProtoDinosaurAction : WebAction {
+  class ReturnAProtoDinosaurAction @Inject constructor() : WebAction {
     @Post("/protodinos")
     @RequestContentType(MediaTypes.APPLICATION_PROTOBUF)
     @ResponseContentType(MediaTypes.APPLICATION_PROTOBUF)
@@ -91,11 +130,15 @@ internal class TypedHttpClientTest {
         request.newBuilder().name("super${request.name}").build()
   }
 
+  interface NotARetrofitInterface {
+    fun getDinosaur(request: Dinosaur): Call<Dinosaur>
+  }
+
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(WebTestingModule())
-      multibind<WebActionEntry>().toInstance(WebActionEntry<ReturnADinosaurAction>())
-      multibind<WebActionEntry>().toInstance(WebActionEntry<ReturnAProtoDinosaurAction>())
+      install(WebActionModule.create<ReturnADinosaurAction>())
+      install(WebActionModule.create<ReturnAProtoDinosaurAction>())
     }
   }
 

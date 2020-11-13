@@ -1,0 +1,298 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`SkeletonWebActionsComponent SkeletonText glowing text block used as loading screen 1`] = `
+<DocumentFragment>
+  <span
+    class="bp3-skeleton"
+  >
+    Lorem ipsum
+  </span>
+</DocumentFragment>
+`;
+
+exports[`SkeletonWebActionsComponent SkeletonWebActionsComponent single Web Actions Card used as loading screen 1`] = `
+<DocumentFragment>
+  .emotion-3 {
+  display: inline-block;
+}
+
+.emotion-0 {
+  float: right;
+  margin: 5px 0 0 10px;
+}
+
+.emotion-1 {
+  float: left;
+  margin: 5px 10px 0 0;
+}
+
+.emotion-2 {
+  float: left;
+  margin: 5px 10px 0 0;
+  font-family: monospace;
+}
+
+.emotion-5 {
+  -webkit-box-flex: 1;
+  -webkit-flex-grow: 1;
+  -ms-flex-positive: 1;
+  flex-grow: 1;
+  -webkit-flex-basis: 0;
+  -ms-flex-preferred-size: 0;
+  flex-basis: 0;
+  min-width: 320px;
+}
+
+.emotion-4 li {
+  margin-bottom: 0;
+}
+
+<div
+    class="bp3-card bp3-elevation-0"
+  >
+    <div
+      class="emotion-3"
+    >
+      <span
+        class="bp3-tag bp3-intent-primary bp3-large emotion-0"
+      >
+        <span
+          class="bp3-text-overflow-ellipsis bp3-fill"
+        >
+          GET
+        </span>
+      </span>
+      <h3
+        class="bp3-heading bp3-skeleton emotion-1"
+      >
+        AnotherSimpleWebAction
+      </h3>
+      <span
+        class="bp3-tag bp3-large emotion-2"
+      >
+        <span
+          class="bp3-text-overflow-ellipsis bp3-fill"
+        >
+          <span
+            class="bp3-skeleton"
+          >
+            Lorem ipsum
+          </span>
+        </span>
+      </span>
+    </div>
+    <div
+      class="emotion-8"
+    >
+      <div
+        class="emotion-5"
+      >
+        <ul
+          class="bp3-menu emotion-4"
+        >
+          <li
+            class=""
+          >
+            <a
+              class="bp3-menu-item bp3-popover-dismiss"
+              content="[object Object]"
+              label="Function"
+            >
+              <div
+                class="bp3-text-overflow-ellipsis bp3-fill"
+              >
+                <span
+                  class="bp3-skeleton"
+                >
+                  Lorem ipsum
+                </span>
+              </div>
+              <span
+                class="bp3-menu-item-label"
+              >
+                Function
+              </span>
+            </a>
+          </li>
+          <li
+            class=""
+          >
+            <a
+              class="bp3-menu-item bp3-popover-dismiss"
+              content="[object Object]"
+              label="Services"
+            >
+              <div
+                class="bp3-text-overflow-ellipsis bp3-fill"
+              >
+                <span
+                  class="bp3-skeleton"
+                >
+                  Lorem ipsum
+                </span>
+              </div>
+              <span
+                class="bp3-menu-item-label"
+              >
+                Services
+              </span>
+            </a>
+          </li>
+          <li
+            class=""
+          >
+            <a
+              class="bp3-menu-item bp3-popover-dismiss"
+              content="[object Object]"
+              label="Roles"
+            >
+              <div
+                class="bp3-text-overflow-ellipsis bp3-fill"
+              >
+                <span
+                  class="bp3-skeleton"
+                >
+                  Lorem ipsum
+                </span>
+              </div>
+              <span
+                class="bp3-menu-item-label"
+              >
+                Roles
+              </span>
+            </a>
+          </li>
+          <li
+            class=""
+          >
+            <a
+              class="bp3-menu-item bp3-popover-dismiss"
+              content="[object Object]"
+              label="Access"
+            >
+              <div
+                class="bp3-text-overflow-ellipsis bp3-fill"
+              >
+                <span
+                  class="bp3-skeleton"
+                >
+                  Lorem ipsum
+                </span>
+              </div>
+              <span
+                class="bp3-menu-item-label"
+              >
+                Access
+              </span>
+            </a>
+          </li>
+        </ul>
+      </div>
+      <div
+        class="emotion-5"
+      >
+        <ul
+          class="bp3-menu emotion-4"
+        >
+          <li
+            class=""
+          >
+            <a
+              class="bp3-menu-item bp3-popover-dismiss"
+              content="[object Object]"
+              label="Content Types"
+            >
+              <div
+                class="bp3-text-overflow-ellipsis bp3-fill"
+              >
+                <span
+                  class="bp3-skeleton"
+                >
+                  Lorem ipsum
+                </span>
+              </div>
+              <span
+                class="bp3-menu-item-label"
+              >
+                Content Types
+              </span>
+            </a>
+          </li>
+          <li
+            class=""
+          >
+            <a
+              class="bp3-menu-item bp3-popover-dismiss"
+              content="[object Object]"
+              label="Application Interceptors"
+            >
+              <div
+                class="bp3-text-overflow-ellipsis bp3-fill"
+              >
+                <span
+                  class="bp3-skeleton"
+                >
+                  Lorem ipsum
+                </span>
+              </div>
+              <span
+                class="bp3-menu-item-label"
+              >
+                Application Interceptors
+              </span>
+            </a>
+          </li>
+          <li
+            class=""
+          >
+            <a
+              class="bp3-menu-item bp3-popover-dismiss"
+              content="[object Object]"
+              label="Network Interceptors"
+            >
+              <div
+                class="bp3-text-overflow-ellipsis bp3-fill"
+              >
+                <span
+                  class="bp3-skeleton"
+                >
+                  Lorem ipsum
+                </span>
+              </div>
+              <span
+                class="bp3-menu-item-label"
+              >
+                Network Interceptors
+              </span>
+            </a>
+          </li>
+          <li
+            class=""
+          >
+            <a
+              class="bp3-menu-item bp3-popover-dismiss"
+              content="[object Object]"
+              label="Send a Request"
+            >
+              <div
+                class="bp3-text-overflow-ellipsis bp3-fill"
+              >
+                <span
+                  class="bp3-skeleton"
+                >
+                  Lorem ipsum
+                </span>
+              </div>
+              <span
+                class="bp3-menu-item-label"
+              >
+                Send a Request
+              </span>
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</DocumentFragment>
+`;

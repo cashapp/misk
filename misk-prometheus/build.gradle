@@ -1,6 +1,9 @@
 dependencies {
   compile dep.prometheusHttpserver
-  compile project(':misk')
+  compile project(':misk-core')
+  compile project(':misk-inject')
+  compile project(':misk-metrics')
+  compile project(':misk-service')
 
   testCompile dep.assertj
   testCompile dep.junitApi
@@ -8,4 +11,11 @@ dependencies {
   testCompile dep.junitParams
   testCompile project(':misk-testing')
   testCompile project(':misk-gcp-testing')
+}
+
+afterEvaluate { project ->
+  project.tasks.dokka {
+    outputDirectory = "$rootDir/docs/0.x"
+    outputFormat = 'gfm'
+  }
 }

@@ -9,7 +9,7 @@ import misk.testing.MiskTestModule
 import misk.web.Get
 import misk.web.PathParam
 import misk.web.ResponseContentType
-import misk.web.actions.WebActionEntry
+import misk.web.WebActionModule
 import misk.web.WebTestingModule
 import misk.web.actions.WebAction
 import misk.web.jetty.JettyService
@@ -40,22 +40,22 @@ internal class ExceptionMapperTest {
   @Test
   fun masksMessageOnServerError() {
     val response = get("/throws/action/SERVICE_UNAVAILABLE")
-    assertThat(response.code()).isEqualTo(StatusCode.SERVICE_UNAVAILABLE.code)
-    assertThat(response.body()?.string()).isEqualTo(StatusCode.SERVICE_UNAVAILABLE.name)
+    assertThat(response.code).isEqualTo(StatusCode.SERVICE_UNAVAILABLE.code)
+    assertThat(response.body?.string()).isEqualTo(StatusCode.SERVICE_UNAVAILABLE.name)
   }
 
   @Test
   fun returnsMessageOnClientErrors() {
     val response = get("/throws/action/FORBIDDEN")
-    assertThat(response.code()).isEqualTo(StatusCode.FORBIDDEN.code)
-    assertThat(response.body()?.string()).isEqualTo("you asked for an error")
+    assertThat(response.code).isEqualTo(StatusCode.FORBIDDEN.code)
+    assertThat(response.body?.string()).isEqualTo("you asked for an error")
   }
 
   @Test
   fun handlesUnmappedErrorsAsInternalServerError() {
     val response = get("/throws/unmapped-error")
-    assertThat(response.code()).isEqualTo(StatusCode.INTERNAL_SERVER_ERROR.code)
-    assertThat(response.body()?.string()).isEqualTo("internal server error")
+    assertThat(response.code).isEqualTo(StatusCode.INTERNAL_SERVER_ERROR.code)
+    assertThat(response.body?.string()).isEqualTo("internal server error")
   }
 
   fun get(path: String): okhttp3.Response {
@@ -67,18 +67,18 @@ internal class ExceptionMapperTest {
     return httpClient.newCall(request).execute()
   }
 
-  class ThrowsActionException : WebAction {
+  class ThrowsActionException @Inject constructor() : WebAction {
     @Get("/throws/action/{statusCode}")
     @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
-    fun throwsActionException(@PathParam statusCode: StatusCode): Nothing {
+    fun throwsActionException(@PathParam statusCode: StatusCode): String {
       throw ActionException(statusCode, "you asked for an error")
     }
   }
 
-  class ThrowsUnmappedError : WebAction {
+  class ThrowsUnmappedError @Inject constructor() : WebAction {
     @Get("/throws/unmapped-error")
     @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
-    fun throwsUnmappedException() {
+    fun throwsUnmappedException(): String {
       throw AssertionError("this was bad")
     }
   }
@@ -86,8 +86,8 @@ internal class ExceptionMapperTest {
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(WebTestingModule())
-      multibind<WebActionEntry>().toInstance(WebActionEntry<ThrowsActionException>())
-      multibind<WebActionEntry>().toInstance(WebActionEntry<ThrowsUnmappedError>())
+      install(WebActionModule.create<ThrowsActionException>())
+      install(WebActionModule.create<ThrowsUnmappedError>())
     }
   }
 }

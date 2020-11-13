@@ -5,18 +5,21 @@ import com.google.common.util.concurrent.AbstractExecutionThreadService
 import com.google.common.util.concurrent.MoreExecutors.newDirectExecutorService
 import com.google.common.util.concurrent.Service
 import misk.backoff.Backoff
-import misk.backoff.ExponentialBackoff
+import misk.concurrent.ExecutorServiceFactory
 import misk.concurrent.ExplicitReleaseDelayQueue
 import misk.logging.getLogger
+import misk.metrics.Metrics
+import misk.time.timed
 import java.time.Clock
 import java.time.Duration
 import java.util.concurrent.BlockingQueue
 import java.util.concurrent.DelayQueue
 import java.util.concurrent.Executor
 import java.util.concurrent.ExecutorService
-import java.util.concurrent.Executors
 import java.util.concurrent.Executors.newSingleThreadExecutor
 import java.util.concurrent.atomic.AtomicBoolean
+import javax.inject.Inject
+import javax.inject.Singleton
 
 /**
  * A [RepeatedTaskQueue] runs repeated tasks at a user controlled rate. Internally it uses
@@ -31,21 +34,38 @@ class RepeatedTaskQueue @VisibleForTesting internal constructor(
   private val clock: Clock,
   private val taskExecutor: ExecutorService,
   private val dispatchExecutor: Executor?, // visible internally for testing only
-  private val pendingTasks: BlockingQueue<DelayedTask> // visible internally for testing only
+  private val pendingTasks: BlockingQueue<DelayedTask>, // visible internally for testing only
+  internal val metrics: RepeatedTaskQueueMetrics,
+  private val config: RepeatedTaskQueueConfig = RepeatedTaskQueueConfig()
+
 ) : AbstractExecutionThreadService() {
-  /**
-   * Creates a [RepeatedTaskQueue] backed by a real [DelayQueue], with tasks dequeued on the
-   * service background thread and executed via the provided [ExecutorService]
-   */
-  constructor(name: String, clock: Clock, taskExecutor: ExecutorService) :
-      this(name, clock, taskExecutor, null, DelayQueue<DelayedTask>())
 
   private val running = AtomicBoolean(false)
 
   override fun startUp() {
     if (!running.compareAndSet(false, true)) return
 
-    log.info { "starting repeated task queue $name" }
+    addListener(object : Service.Listener() {
+      override fun starting() {
+        log.info { "the background thread for repeated task queue $name is starting" }
+      }
+
+      override fun running() {
+        log.info { "the background thread for repeated task queue $name is running" }
+      }
+
+      override fun stopping(from: Service.State) {
+        log.info { "the background thread for repeated task queue $name is stopping" }
+      }
+
+      override fun terminated(from: Service.State) {
+        log.info { "the background thread for repeated task queue $name terminated" }
+      }
+
+      override fun failed(from: Service.State, failure: Throwable) {
+        log.error(failure) { "the background thread for repeated task queue $name failed" }
+      }
+    }, executor())
   }
 
   override fun triggerShutdown() {
@@ -65,6 +85,8 @@ class RepeatedTaskQueue @VisibleForTesting internal constructor(
    * executor for dispatching
    */
   override fun run() {
+    // N.B - If any exception escapes this method the background thread driving the repeated
+    // tasks is terminated.
     while (running.get()) {
       // Fetch the next task, bailing out if we've shutdown
       val task = pendingTasks.take().task
@@ -76,16 +98,35 @@ class RepeatedTaskQueue @VisibleForTesting internal constructor(
       // task requests rescheduling
       taskExecutor.submit {
         val result = task()
-        if (result.status != Status.NO_RESCHEDULE) schedule(result.nextDelay, task)
+        // Reschedule using enqueue so as to not repeatedly wrap the task in try-catch blocks
+        if (result.status != Status.NO_RESCHEDULE) enqueue(result.nextDelay, task)
       }
     }
   }
 
   /**
    * Schedules a task to run repeatedly after an initial delay. The task itself determines the
-   * next execution time
+   * next execution time. Provide an optional retryDelayOnFailure parameter to determine when
+   * the job should be retried in the case of an unhandled exception by the client
    */
-  fun schedule(delay: Duration, task: () -> Result) {
+  fun schedule(delay: Duration, retryDelayOnFailure: Duration? = null, task: () -> Result) {
+    val wrappedTask: () -> Result = {
+      val timedResult = timed {
+        try {
+          task()
+        } catch (th: Throwable) {
+          log.error(th) { "error running repeated task on queue $name" }
+          Result(Status.FAILED, retryDelayOnFailure ?: delay)
+        }
+      }
+      metrics.taskDuration.record(timedResult.first.toMillis().toDouble(), name,
+          timedResult.second.status.metricLabel())
+      timedResult.second
+    }
+    enqueue(delay, wrappedTask)
+  }
+
+  private fun enqueue(delay: Duration, task: () -> Result) {
     pendingTasks.add(DelayedTask(clock, clock.instant().plus(delay), task))
   }
 
@@ -96,38 +137,40 @@ class RepeatedTaskQueue @VisibleForTesting internal constructor(
   fun scheduleWithBackoff(
     timeBetweenRuns: Duration,
     initialDelay: Duration = timeBetweenRuns,
-    noWorkBackoff: Backoff = ExponentialBackoff(timeBetweenRuns, defaultMaxDelay, defaultJitter),
-    failureBackoff: Backoff = ExponentialBackoff(timeBetweenRuns, defaultMaxDelay, defaultJitter),
+    noWorkBackoff: Backoff = config.defaultBackoff(timeBetweenRuns),
+    failureBackoff: Backoff = config.defaultBackoff(timeBetweenRuns),
     task: () -> Status
   ) {
-    val wrappedTask: () -> Result = {
-      try {
-        val status = task()
-        when (status) {
-          Status.OK -> {
-            noWorkBackoff.reset()
-            failureBackoff.reset()
-            Result(status, timeBetweenRuns)
+    enqueue(delay = initialDelay) {
+      val timedResult = timed {
+        try {
+          when (val status = task()) {
+            Status.OK -> {
+              noWorkBackoff.reset()
+              failureBackoff.reset()
+              Result(status, timeBetweenRuns)
+            }
+            Status.NO_WORK -> {
+              failureBackoff.reset()
+              Result(status, noWorkBackoff.nextRetry())
+            }
+            Status.FAILED -> {
+              noWorkBackoff.reset()
+              Result(status, failureBackoff.nextRetry())
+            }
+            Status.NO_RESCHEDULE -> // NB(mmihic): The delay doesn't matter since we aren't rescheduling
+              Result(status, Duration.ofMillis(0))
           }
-          Status.NO_WORK -> {
-            failureBackoff.reset()
-            Result(status, noWorkBackoff.nextRetry())
-          }
-          Status.FAILED -> {
-            noWorkBackoff.reset()
-            Result(status, failureBackoff.nextRetry())
-          }
-          Status.NO_RESCHEDULE -> // NB(mmihic): The delay doesn't matter since we aren't rescheduling
-            Result(status, Duration.ofMillis(0))
+        } catch (th: Throwable) {
+          log.error(th) { "error running repeated task on queue $name" }
+          noWorkBackoff.reset()
+          Result(Status.FAILED, failureBackoff.nextRetry())
         }
-      } catch (th: Throwable) {
-        log.error(th) { "error running repeated task on queue $name" }
-        noWorkBackoff.reset()
-        Result(Status.FAILED, failureBackoff.nextRetry())
       }
+      metrics.taskDuration.record(timedResult.first.toMillis().toDouble(), name,
+          timedResult.second.status.metricLabel())
+      timedResult.second
     }
-
-    schedule(initialDelay, wrappedTask)
   }
 
   override fun serviceName() = name
@@ -135,47 +178,77 @@ class RepeatedTaskQueue @VisibleForTesting internal constructor(
   override fun executor(): Executor = dispatchExecutor ?: super.executor()
 
   companion object {
-    private val defaultMaxDelay = Duration.ofMinutes(1)
-    private val defaultJitter = Duration.ofMillis(50)
     private val log = getLogger<RepeatedTaskQueue>()
+  }
+}
 
-    /**
-     * Creates a [RepeatedTaskQueue] backed by an [ExplicitReleaseDelayQueue], allowing tests
-     * to explicitly control when tasks are released for execution. Tasks are executed in a single
-     * thread in the order in which they expire
-     */
-    @JvmStatic fun forTesting(
-      name: String,
-      clock: Clock,
-      backingStorage: ExplicitReleaseDelayQueue<DelayedTask>
-    ): RepeatedTaskQueue {
-      val queue = RepeatedTaskQueue(
-          name,
-          clock,
-          newDirectExecutorService(),
-          newSingleThreadExecutor(),
-          backingStorage
-      )
+@Singleton
+class RepeatedTaskQueueMetrics @Inject constructor(metrics: Metrics) {
+  internal val taskDuration = metrics.histogram(
+      "task_queue_task_duration",
+      "count and duration in ms of periodic tasks",
+      listOf("name", "result"))
+}
 
-      // Install a status listener that will explicitly release all of the tasks from the
-      // underlying delay queue at shutdown, ensuring that the termination action runs and
-      // allowing the task queue itself to shutdown
-      val fullyTerminated = AtomicBoolean(false)
-      queue.addListener(object : Service.Listener() {
-        override fun stopping(from: Service.State) {
-          // Keep kicking the storage until the task queue finally shuts down
-          while (!fullyTerminated.get()) {
-            backingStorage.releaseAll()
-            Thread.sleep(500)
-          }
-        }
+@Singleton
+class RepeatedTaskQueueFactory @Inject constructor(
+  private val clock: Clock,
+  private val metrics: RepeatedTaskQueueMetrics,
+  private val executorServiceFactory: ExecutorServiceFactory
+) {
 
-        override fun terminated(from: Service.State) {
-          fullyTerminated.set(true)
-        }
-      }, Executors.newSingleThreadExecutor())
-
-      return queue
+  /**
+   * Builds a new instance of a [RepeatedTaskQueue]
+   */
+  fun new(name: String, config: RepeatedTaskQueueConfig = RepeatedTaskQueueConfig()):
+      RepeatedTaskQueue {
+    val executor = if (config.num_parallel_tasks == -1) {
+      executorServiceFactory.unbounded("$name-%d")
+    } else {
+      executorServiceFactory.fixed("$name-%d", config.num_parallel_tasks)
     }
+    return RepeatedTaskQueue(name,
+        clock,
+        executor,
+        null,
+        DelayQueue<DelayedTask>(),
+        metrics,
+        config)
+  }
+
+  /**
+   * Builds a new instance of a [RepeatedTaskQueue] for testing
+   */
+  fun forTesting(name: String, backingStorage: ExplicitReleaseDelayQueue<DelayedTask>):
+      RepeatedTaskQueue {
+    val queue = RepeatedTaskQueue(
+        name,
+        clock,
+        newDirectExecutorService(),
+        executorServiceFactory.single("$name-%d"),
+        backingStorage,
+        metrics,
+        RepeatedTaskQueueConfig()
+    )
+
+    // Install a status listener that will explicitly release all of the tasks from the
+    // underlying delay queue at shutdown, ensuring that the termination action runs and
+    // allowing the task queue itself to shutdown
+    val fullyTerminated = AtomicBoolean(false)
+    queue.addListener(object : Service.Listener() {
+      override fun stopping(from: Service.State) {
+        // Keep kicking the storage until the task queue finally shuts down
+        while (!fullyTerminated.get()) {
+          backingStorage.releaseAll()
+          Thread.sleep(500)
+        }
+      }
+
+      override fun terminated(from: Service.State) {
+        fullyTerminated.set(true)
+      }
+    }, newSingleThreadExecutor())
+
+    return queue
   }
 }

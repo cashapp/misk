@@ -1,0 +1,15 @@
+data_source:
+  type: MYSQL
+  username: root
+  password: ""
+  database: encryptedcolumn
+  migrations_resource: classpath:/misk/hibernate/encryptedcolumn-migrations
+crypto:
+  kms_uri: "not_relevant"
+  keys:
+    - key_name: albumKey
+      key_type: AEAD
+      encrypted_key: "classpath:/secrets/albumKey.txt"
+    - key_name: reviewerKey
+      key_type: DAEAD
+      encrypted_key: "classpath:/secrets/reviewerKey.txt"

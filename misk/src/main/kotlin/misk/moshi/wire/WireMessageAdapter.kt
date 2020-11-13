@@ -7,6 +7,7 @@ import com.squareup.moshi.Moshi
 import com.squareup.wire.Message
 import com.squareup.wire.WireField
 import java.lang.reflect.Type
+import javax.inject.Inject
 
 /** Json marshaling for Wire messages, correctly using Builders to construct properly formed type */
 internal class WireMessageAdapter(
@@ -37,9 +38,12 @@ internal class WireMessageAdapter(
     reader.beginObject()
     while (reader.hasNext()) {
       val fieldName = reader.nextName()
-      fieldBindings[fieldName]?.let { binding ->
+      val binding = fieldBindings[fieldName]
+      if (binding != null) {
         binding.adapter.fromJson(reader)?.let { binding.set(builder, it) }
-      } ?: reader.skipValue()
+      } else {
+        reader.skipValue()
+      }
     }
 
     reader.endObject()
@@ -53,23 +57,14 @@ internal class WireMessageAdapter(
       writer.beginObject()
       fieldBindings.forEach { (fieldName, binding) ->
         val fieldValue = binding.get(value)
-        if (shouldEmitField(fieldValue)) {
-          writer.name(fieldName)
-          binding.adapter.toJson(writer, fieldValue)
-        }
+        writer.name(fieldName)
+        binding.adapter.toJson(writer, fieldValue)
       }
       writer.endObject()
     }
   }
 
-  private fun shouldEmitField(value: Any?) = when (value) {
-    null -> false
-    is List<*> -> value.isNotEmpty()
-    is Map<*, *> -> value.isNotEmpty()
-    else -> true
-  }
-
-  class Factory : JsonAdapter.Factory {
+  class Factory @Inject constructor() : JsonAdapter.Factory {
     override fun create(
       type: Type,
       annotations: Set<Annotation>,

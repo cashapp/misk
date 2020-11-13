@@ -1,0 +1,115 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`FilterWebActionsContainer FilterWebActionsContainer can render with redux 1`] = `
+<DocumentFragment>
+  <div
+    class="bp3-control-group bp3-fill"
+  >
+    <div
+      class="bp3-html-select bp3-large"
+    >
+      <select>
+        <option
+          value="All Metadata"
+        >
+          All Metadata
+        </option>
+        <option
+          value="Allowed Capabilities"
+        >
+          Allowed Capabilities
+        </option>
+        <option
+          value="Allowed Services"
+        >
+          Allowed Services
+        </option>
+        <option
+          value="Application Interceptor"
+        >
+          Application Interceptor
+        </option>
+        <option
+          value="HTTP Method"
+        >
+          HTTP Method
+        </option>
+        <option
+          value="Function"
+        >
+          Function
+        </option>
+        <option
+          value="Function Annotations"
+        >
+          Function Annotations
+        </option>
+        <option
+          value="Name"
+        >
+          Name
+        </option>
+        <option
+          value="Network Interceptor"
+        >
+          Network Interceptor
+        </option>
+        <option
+          value="Parameter Types"
+        >
+          Parameter Types
+        </option>
+        <option
+          value="Path Pattern"
+        >
+          Path Pattern
+        </option>
+        <option
+          value="Request Type"
+        >
+          Request Type
+        </option>
+        <option
+          value="Response Type"
+        >
+          Response Type
+        </option>
+      </select>
+      <span
+        class="bp3-icon bp3-icon-double-caret-vertical"
+        icon="double-caret-vertical"
+      >
+        <svg
+          data-icon="double-caret-vertical"
+          height="16"
+          viewBox="0 0 16 16"
+          width="16"
+        >
+          <desc>
+            double-caret-vertical
+          </desc>
+          <path
+            d="M5 7h6a1.003 1.003 0 00.71-1.71l-3-3C8.53 2.11 8.28 2 8 2s-.53.11-.71.29l-3 3A1.003 1.003 0 005 7zm6 2H5a1.003 1.003 0 00-.71 1.71l3 3c.18.18.43.29.71.29s.53-.11.71-.29l3-3A1.003 1.003 0 0011 9z"
+            fill-rule="evenodd"
+          />
+        </svg>
+      </span>
+    </div>
+    <div
+      class="bp3-input-group bp3-large"
+    >
+      <input
+        class="bp3-input"
+        placeholder="Filter Web Actions"
+        style="padding-right: 0px;"
+        type="text"
+      />
+      <span
+        class="bp3-input-action"
+      >
+        <span />
+      </span>
+    </div>
+  </div>
+</DocumentFragment>
+`;

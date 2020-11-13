@@ -7,6 +7,7 @@ import misk.eventrouter.EventRouterTester
 import misk.eventrouter.EventRouterTestingModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
+import misk.web.WebActionModule
 import misk.web.actions.FakeWebSocket
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -15,7 +16,11 @@ import javax.inject.Inject
 @MiskTest(startService = true)
 class ChatWebSocketActionTest {
   @MiskTestModule
-  val module = Modules.combine(MiskTestingServiceModule(), EventRouterTestingModule())
+  val module = Modules.combine(
+      MiskTestingServiceModule(),
+      EventRouterTestingModule(),
+      WebActionModule.create<ChatWebSocketAction>()
+  )
 
   @Inject lateinit var chatWebSocketAction: ChatWebSocketAction
   @Inject lateinit var eventRouterTester: EventRouterTester
