@@ -77,7 +77,7 @@ class HibernateDatabaseQueryAction @Inject constructor(
                     "No function on [query=${metadata.queryClass}] with [name=${queryMethodFunctionName}]")
 
             when {
-              queryMethodType != "Select" -> {
+              queryMethodType == "Select" -> {
                 selectFunction = function
               }
               function.parameters.isEmpty() -> {
@@ -89,14 +89,14 @@ class HibernateDatabaseQueryAction @Inject constructor(
             }
           }
 
-          if (selectFunction == null) {
-            throw BadRequestException(
-                "No select function on [query=${metadata.queryClass}], add a select function")
-          }
+//          if (selectFunction == null) {
+//            throw BadRequestException(
+//                "No select function on [query=${metadata.queryClass}], add a select function")
+//          }
 
-          selectFunction!!.call(session)
-        }
-      } as Any
+//          selectFunction!!.call(session)
+        }.list(session)
+      }
     } else {
       throw UnauthorizedException("Unauthorized to query [dbEntity=${metadata.entityClass}]")
     }
