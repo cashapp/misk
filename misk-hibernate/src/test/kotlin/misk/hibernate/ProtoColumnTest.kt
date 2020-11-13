@@ -47,6 +47,7 @@ class ProtoColumnTest {
     }
     transacter.transaction { session ->
       val movie = queryFactory.newQuery(DbAvengersMovieQuery::class)
+          .allowTableScan()
           .name("CivilWar")
           .nameAndHero(session)[0]
       assertThat(movie.name).isEqualTo("CivilWar")
@@ -74,8 +75,9 @@ class ProtoColumnTest {
     }
     transacter.transaction { session ->
       val movie = queryFactory.newQuery(DbAvengersMovieQuery::class)
-          .name("IronMan")
-          .nameAndHero(session)[0]
+        .allowTableScan()
+        .name("IronMan")
+        .nameAndHero(session)[0]
       assertThat(movie.name).isEqualTo("IronMan")
       assertThat(movie.hero).isEqualTo(SuperHero.Builder()
           .civilian_name("Tony Stark")
@@ -91,7 +93,7 @@ class ProtoColumnTest {
       install(EnvironmentModule(Environment.TESTING))
 
       val config = MiskConfig.load<RootConfig>("protocolumn", Environment.TESTING)
-      install(HibernateTestingModule(SuperHeroMoviesDb::class))
+      install(HibernateTestingModule(SuperHeroMoviesDb::class, config.data_source))
       install(HibernateModule(SuperHeroMoviesDb::class, config.data_source))
       install(object : HibernateEntityModule(SuperHeroMoviesDb::class) {
         override fun configureHibernate() {

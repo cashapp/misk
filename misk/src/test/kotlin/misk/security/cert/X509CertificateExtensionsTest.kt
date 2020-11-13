@@ -4,7 +4,7 @@ import misk.security.ssl.PemComboFile
 import okio.buffer
 import okio.source
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.Test
+import org.junit.jupiter.api.Test
 import java.security.cert.X509Certificate
 
 internal class X509CertificateExtensionsTest {

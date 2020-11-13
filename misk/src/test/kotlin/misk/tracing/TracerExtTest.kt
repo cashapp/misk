@@ -1,11 +1,10 @@
 package misk.tracing
 
-import io.opentracing.Tracer
 import io.opentracing.mock.MockSpan
-import io.opentracing.mock.MockTracer
 import io.opentracing.tag.Tags
 import misk.exceptions.ActionException
 import misk.exceptions.StatusCode
+import misk.testing.ConcurrentMockTracer
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.testing.MockTracingBackendModule
@@ -19,62 +18,71 @@ class TracerExtTest {
   @MiskTestModule
   val module = MockTracingBackendModule()
 
-  @Inject private lateinit var tracer: Tracer
+  @Inject private lateinit var tracer: ConcurrentMockTracer
 
   @Test
   fun traceTracedMethod() {
-    val mockTracer = tracer as MockTracer
-
-    assertThat(mockTracer.finishedSpans().size).isEqualTo(0)
+    assertThat(tracer.finishedSpans().size).isEqualTo(0)
     val spanUsed = tracer.traceWithSpan("traceMe") { span -> span }
-    assertThat(mockTracer.finishedSpans().size).isEqualTo(1)
-    assertThat(spanUsed).isEqualTo(mockTracer.finishedSpans().first())
-    assertThat(mockTracer.finishedSpans().first().tags()).isEmpty()
+    val span = tracer.take()
+    assertThat(spanUsed).isEqualTo(span)
+    assertThat(span.tags()).isEmpty()
   }
 
   @Test
   fun traceTracedMethodWithTags() {
-    val mockTracer = tracer as MockTracer
-
     val tags = mapOf("a" to "b", "x" to "y")
 
-    assertThat(mockTracer.finishedSpans().size).isEqualTo(0)
+    assertThat(tracer.finishedSpans().size).isEqualTo(0)
     val spanUsed = tracer.traceWithSpan("traceMe", tags) { span -> span }
-    assertThat(mockTracer.finishedSpans().size).isEqualTo(1)
-    assertThat(spanUsed).isEqualTo(mockTracer.finishedSpans().first())
-
-    assertThat(mockTracer.finishedSpans().first().tags()).isEqualTo(tags)
+    val span = tracer.take()
+    assertThat(spanUsed).isEqualTo(span)
+    assertThat(span.tags()).isEqualTo(tags)
   }
 
   @Test
   fun tagTracingFailures() {
-    val mockTracer = tracer as MockTracer
-
-    assertThat(mockTracer.finishedSpans().size).isEqualTo(0)
+    assertThat(tracer.finishedSpans().size).isEqualTo(0)
     assertFailsWith<ActionException> {
       tracer.trace("failedTrace") {
         throw ActionException(StatusCode.BAD_REQUEST, "sadness")
       }
     }
-    assertThat(mockTracer.finishedSpans().size).isEqualTo(1)
-    assertThat(mockTracer.finishedSpans().get(0).tags().get(Tags.ERROR.key)).isEqualTo(true)
+    val span = tracer.take()
+    assertThat(span.tags()[Tags.ERROR.key]).isEqualTo(true)
   }
 
   @Test
   fun nestedTracing() {
-    val mockTracer = tracer as MockTracer
-
-    assertThat(mockTracer.finishedSpans().size).isEqualTo(0)
+    assertThat(tracer.finishedSpans().size).isEqualTo(0)
     val (parentSpan, childSpan) = tracer.traceWithSpan("parent") { span1 ->
       span1 to tracer.traceWithSpan("child") { span2 -> span2 }
     }
-    assertThat(mockTracer.finishedSpans().size).isEqualTo(2)
-    assertThat(mockTracer.finishedSpans()[0]).isEqualTo(childSpan)
-    assertThat(mockTracer.finishedSpans()[1]).isEqualTo(parentSpan)
+    val span0 = tracer.take()
+    val span1 = tracer.take()
+    assertThat(span0).isEqualTo(childSpan)
+    assertThat(span1).isEqualTo(parentSpan)
 
     val parentContext = parentSpan.context() as MockSpan.MockContext
     val childContext = childSpan.context() as MockSpan.MockContext
     assertThat(childContext.traceId()).isEqualTo(parentContext.traceId())
     assertThat((childSpan as MockSpan).parentId()).isEqualTo(parentContext.spanId())
+  }
+
+  @Test
+  fun nonNestedTracing() {
+    assertThat(tracer.finishedSpans().size).isEqualTo(0)
+    val (parentSpan, childSpan) = tracer.traceWithSpan("parent") { span1 ->
+      span1 to tracer.traceWithNewRootSpan("child") { span2 -> span2 }
+    }
+    val span0 = tracer.take()
+    val span1 = tracer.take()
+    assertThat(span0).isEqualTo(childSpan)
+    assertThat(span1).isEqualTo(parentSpan)
+
+    val parentContext = parentSpan.context() as MockSpan.MockContext
+    val childContext = childSpan.context() as MockSpan.MockContext
+    assertThat(childContext.traceId()).isNotEqualTo(parentContext.traceId())
+    assertThat((childSpan as MockSpan).parentId()).isNotEqualTo(parentContext.spanId())
   }
 }

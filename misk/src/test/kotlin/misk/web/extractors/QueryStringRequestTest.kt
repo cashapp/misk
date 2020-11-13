@@ -6,7 +6,7 @@ import misk.testing.MiskTestModule
 import misk.web.Get
 import misk.web.QueryParam
 import misk.web.ResponseContentType
-import misk.web.actions.WebActionEntry
+import misk.web.WebActionModule
 import misk.web.WebTestingModule
 import misk.web.actions.WebAction
 import misk.web.jetty.JettyService
@@ -57,7 +57,7 @@ internal class QueryStringRequestTest {
     TWO
   }
 
-  class BasicParamsAction : WebAction {
+  class BasicParamsAction @Inject constructor() : WebAction {
     @Get("/basic-params")
     fun call(
       @QueryParam str: String,
@@ -67,12 +67,12 @@ internal class QueryStringRequestTest {
     ) = "$str $other $int $testEnum basic-params"
   }
 
-  class OptionalParamsAction : WebAction {
+  class OptionalParamsAction @Inject constructor() : WebAction {
     @Get("/optional-params")
     fun call(@QueryParam str: String?, @QueryParam int: Int?) = "$str $int optional-params"
   }
 
-  class DefaultParamsAction : WebAction {
+  class DefaultParamsAction @Inject constructor() : WebAction {
     @Get("/default-params")
     fun call(
       @QueryParam str: String = "square",
@@ -81,7 +81,7 @@ internal class QueryStringRequestTest {
     ) = "$str $int $testEnum default-params"
   }
 
-  class ListParamsAction : WebAction {
+  class ListParamsAction @Inject constructor() : WebAction {
     @Get("/list-params")
     @ResponseContentType(MediaTypes.APPLICATION_JSON)
     fun call(@QueryParam strs: List<String>, @QueryParam ints: List<Int>) = "${strs.joinToString(
@@ -92,10 +92,10 @@ internal class QueryStringRequestTest {
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(WebTestingModule())
-      multibind<WebActionEntry>().toInstance(WebActionEntry<BasicParamsAction>())
-      multibind<WebActionEntry>().toInstance(WebActionEntry<OptionalParamsAction>())
-      multibind<WebActionEntry>().toInstance(WebActionEntry<DefaultParamsAction>())
-      multibind<WebActionEntry>().toInstance(WebActionEntry<ListParamsAction>())
+      install(WebActionModule.create<BasicParamsAction>())
+      install(WebActionModule.create<OptionalParamsAction>())
+      install(WebActionModule.create<DefaultParamsAction>())
+      install(WebActionModule.create<ListParamsAction>())
     }
   }
 
@@ -106,7 +106,7 @@ internal class QueryStringRequestTest {
   private fun call(request: Request.Builder): String {
     val httpClient = OkHttpClient()
     val response = httpClient.newCall(request.build()).execute()
-    assertThat(response.code()).isEqualTo(200)
-    return response.body()!!.source().readUtf8()
+    assertThat(response.code).isEqualTo(200)
+    return response.body!!.source().readUtf8()
   }
 }

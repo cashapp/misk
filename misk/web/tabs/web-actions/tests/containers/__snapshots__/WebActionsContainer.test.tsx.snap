@@ -1,0 +1,1419 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`WebActionsContainer WebActionsContainer can render with redux loading (no data) 1`] = `
+<DocumentFragment>
+  .emotion-3 {
+  display: inline-block;
+}
+
+.emotion-0 {
+  float: right;
+  margin: 5px 0 0 10px;
+}
+
+.emotion-1 {
+  float: left;
+  margin: 5px 10px 0 0;
+}
+
+.emotion-2 {
+  float: left;
+  margin: 5px 10px 0 0;
+  font-family: monospace;
+}
+
+.emotion-5 {
+  -webkit-box-flex: 1;
+  -webkit-flex-grow: 1;
+  -ms-flex-positive: 1;
+  flex-grow: 1;
+  -webkit-flex-basis: 0;
+  -ms-flex-preferred-size: 0;
+  flex-basis: 0;
+  min-width: 320px;
+}
+
+.emotion-4 li {
+  margin-bottom: 0;
+}
+
+<div>
+    <div
+      class="bp3-control-group bp3-fill"
+    >
+      <div
+        class="bp3-html-select bp3-disabled bp3-large"
+      >
+        <select
+          disabled=""
+        >
+          <option
+            value="All Metadata"
+          >
+            All Metadata
+          </option>
+          <option
+            value="Allowed Capabilities"
+          >
+            Allowed Capabilities
+          </option>
+          <option
+            value="Allowed Services"
+          >
+            Allowed Services
+          </option>
+          <option
+            value="Application Interceptor"
+          >
+            Application Interceptor
+          </option>
+          <option
+            value="HTTP Method"
+          >
+            HTTP Method
+          </option>
+          <option
+            value="Function"
+          >
+            Function
+          </option>
+          <option
+            value="Function Annotations"
+          >
+            Function Annotations
+          </option>
+          <option
+            value="Name"
+          >
+            Name
+          </option>
+          <option
+            value="Network Interceptor"
+          >
+            Network Interceptor
+          </option>
+          <option
+            value="Parameter Types"
+          >
+            Parameter Types
+          </option>
+          <option
+            value="Path Pattern"
+          >
+            Path Pattern
+          </option>
+          <option
+            value="Request Type"
+          >
+            Request Type
+          </option>
+          <option
+            value="Response Type"
+          >
+            Response Type
+          </option>
+        </select>
+        <span
+          class="bp3-icon bp3-icon-double-caret-vertical"
+          icon="double-caret-vertical"
+        >
+          <svg
+            data-icon="double-caret-vertical"
+            height="16"
+            viewBox="0 0 16 16"
+            width="16"
+          >
+            <desc>
+              double-caret-vertical
+            </desc>
+            <path
+              d="M5 7h6a1.003 1.003 0 00.71-1.71l-3-3C8.53 2.11 8.28 2 8 2s-.53.11-.71.29l-3 3A1.003 1.003 0 005 7zm6 2H5a1.003 1.003 0 00-.71 1.71l3 3c.18.18.43.29.71.29s.53-.11.71-.29l3-3A1.003 1.003 0 0011 9z"
+              fill-rule="evenodd"
+            />
+          </svg>
+        </span>
+      </div>
+      <div
+        class="bp3-input-group bp3-disabled bp3-large"
+      >
+        <input
+          class="bp3-input"
+          disabled=""
+          placeholder="Loading Web Actions..."
+          style="padding-right: 0px;"
+          type="text"
+        />
+        <span
+          class="bp3-input-action"
+        >
+          <div
+            class="bp3-spinner"
+          >
+            <div
+              class="bp3-spinner-animation"
+            >
+              <svg
+                height="20"
+                stroke-width="16.00"
+                viewBox="-3.00 -3.00 106.00 106.00"
+                width="20"
+              >
+                <path
+                  class="bp3-spinner-track"
+                  d="M 50,50 m 0,-45 a 45,45 0 1 1 0,90 a 45,45 0 1 1 0,-90"
+                />
+                <path
+                  class="bp3-spinner-head"
+                  d="M 50,50 m 0,-45 a 45,45 0 1 1 0,90 a 45,45 0 1 1 0,-90"
+                  pathLength="280"
+                  stroke-dasharray="280 280"
+                  stroke-dashoffset="210"
+                />
+              </svg>
+            </div>
+          </div>
+        </span>
+      </div>
+    </div>
+    <div
+      class="bp3-card bp3-elevation-0"
+    >
+      <div
+        class="emotion-3"
+      >
+        <span
+          class="bp3-tag bp3-intent-primary bp3-large emotion-0"
+        >
+          <span
+            class="bp3-text-overflow-ellipsis bp3-fill"
+          >
+            GET
+          </span>
+        </span>
+        <h3
+          class="bp3-heading bp3-skeleton emotion-1"
+        >
+          AnotherSimpleWebAction
+        </h3>
+        <span
+          class="bp3-tag bp3-large emotion-2"
+        >
+          <span
+            class="bp3-text-overflow-ellipsis bp3-fill"
+          >
+            <span
+              class="bp3-skeleton"
+            >
+              Lorem ipsum
+            </span>
+          </span>
+        </span>
+      </div>
+      <div
+        class="emotion-8"
+      >
+        <div
+          class="emotion-5"
+        >
+          <ul
+            class="bp3-menu emotion-4"
+          >
+            <li
+              class=""
+            >
+              <a
+                class="bp3-menu-item bp3-popover-dismiss"
+                content="[object Object]"
+                label="Function"
+              >
+                <div
+                  class="bp3-text-overflow-ellipsis bp3-fill"
+                >
+                  <span
+                    class="bp3-skeleton"
+                  >
+                    Lorem ipsum
+                  </span>
+                </div>
+                <span
+                  class="bp3-menu-item-label"
+                >
+                  Function
+                </span>
+              </a>
+            </li>
+            <li
+              class=""
+            >
+              <a
+                class="bp3-menu-item bp3-popover-dismiss"
+                content="[object Object]"
+                label="Services"
+              >
+                <div
+                  class="bp3-text-overflow-ellipsis bp3-fill"
+                >
+                  <span
+                    class="bp3-skeleton"
+                  >
+                    Lorem ipsum
+                  </span>
+                </div>
+                <span
+                  class="bp3-menu-item-label"
+                >
+                  Services
+                </span>
+              </a>
+            </li>
+            <li
+              class=""
+            >
+              <a
+                class="bp3-menu-item bp3-popover-dismiss"
+                content="[object Object]"
+                label="Roles"
+              >
+                <div
+                  class="bp3-text-overflow-ellipsis bp3-fill"
+                >
+                  <span
+                    class="bp3-skeleton"
+                  >
+                    Lorem ipsum
+                  </span>
+                </div>
+                <span
+                  class="bp3-menu-item-label"
+                >
+                  Roles
+                </span>
+              </a>
+            </li>
+            <li
+              class=""
+            >
+              <a
+                class="bp3-menu-item bp3-popover-dismiss"
+                content="[object Object]"
+                label="Access"
+              >
+                <div
+                  class="bp3-text-overflow-ellipsis bp3-fill"
+                >
+                  <span
+                    class="bp3-skeleton"
+                  >
+                    Lorem ipsum
+                  </span>
+                </div>
+                <span
+                  class="bp3-menu-item-label"
+                >
+                  Access
+                </span>
+              </a>
+            </li>
+          </ul>
+        </div>
+        <div
+          class="emotion-5"
+        >
+          <ul
+            class="bp3-menu emotion-4"
+          >
+            <li
+              class=""
+            >
+              <a
+                class="bp3-menu-item bp3-popover-dismiss"
+                content="[object Object]"
+                label="Content Types"
+              >
+                <div
+                  class="bp3-text-overflow-ellipsis bp3-fill"
+                >
+                  <span
+                    class="bp3-skeleton"
+                  >
+                    Lorem ipsum
+                  </span>
+                </div>
+                <span
+                  class="bp3-menu-item-label"
+                >
+                  Content Types
+                </span>
+              </a>
+            </li>
+            <li
+              class=""
+            >
+              <a
+                class="bp3-menu-item bp3-popover-dismiss"
+                content="[object Object]"
+                label="Application Interceptors"
+              >
+                <div
+                  class="bp3-text-overflow-ellipsis bp3-fill"
+                >
+                  <span
+                    class="bp3-skeleton"
+                  >
+                    Lorem ipsum
+                  </span>
+                </div>
+                <span
+                  class="bp3-menu-item-label"
+                >
+                  Application Interceptors
+                </span>
+              </a>
+            </li>
+            <li
+              class=""
+            >
+              <a
+                class="bp3-menu-item bp3-popover-dismiss"
+                content="[object Object]"
+                label="Network Interceptors"
+              >
+                <div
+                  class="bp3-text-overflow-ellipsis bp3-fill"
+                >
+                  <span
+                    class="bp3-skeleton"
+                  >
+                    Lorem ipsum
+                  </span>
+                </div>
+                <span
+                  class="bp3-menu-item-label"
+                >
+                  Network Interceptors
+                </span>
+              </a>
+            </li>
+            <li
+              class=""
+            >
+              <a
+                class="bp3-menu-item bp3-popover-dismiss"
+                content="[object Object]"
+                label="Send a Request"
+              >
+                <div
+                  class="bp3-text-overflow-ellipsis bp3-fill"
+                >
+                  <span
+                    class="bp3-skeleton"
+                  >
+                    Lorem ipsum
+                  </span>
+                </div>
+                <span
+                  class="bp3-menu-item-label"
+                >
+                  Send a Request
+                </span>
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <br />
+    <div
+      class="bp3-card bp3-elevation-0"
+    >
+      <div
+        class="emotion-3"
+      >
+        <span
+          class="bp3-tag bp3-intent-primary bp3-large emotion-0"
+        >
+          <span
+            class="bp3-text-overflow-ellipsis bp3-fill"
+          >
+            GET
+          </span>
+        </span>
+        <h3
+          class="bp3-heading bp3-skeleton emotion-1"
+        >
+          AnotherSimpleWebAction
+        </h3>
+        <span
+          class="bp3-tag bp3-large emotion-2"
+        >
+          <span
+            class="bp3-text-overflow-ellipsis bp3-fill"
+          >
+            <span
+              class="bp3-skeleton"
+            >
+              Lorem ipsum
+            </span>
+          </span>
+        </span>
+      </div>
+      <div
+        class="emotion-8"
+      >
+        <div
+          class="emotion-5"
+        >
+          <ul
+            class="bp3-menu emotion-4"
+          >
+            <li
+              class=""
+            >
+              <a
+                class="bp3-menu-item bp3-popover-dismiss"
+                content="[object Object]"
+                label="Function"
+              >
+                <div
+                  class="bp3-text-overflow-ellipsis bp3-fill"
+                >
+                  <span
+                    class="bp3-skeleton"
+                  >
+                    Lorem ipsum
+                  </span>
+                </div>
+                <span
+                  class="bp3-menu-item-label"
+                >
+                  Function
+                </span>
+              </a>
+            </li>
+            <li
+              class=""
+            >
+              <a
+                class="bp3-menu-item bp3-popover-dismiss"
+                content="[object Object]"
+                label="Services"
+              >
+                <div
+                  class="bp3-text-overflow-ellipsis bp3-fill"
+                >
+                  <span
+                    class="bp3-skeleton"
+                  >
+                    Lorem ipsum
+                  </span>
+                </div>
+                <span
+                  class="bp3-menu-item-label"
+                >
+                  Services
+                </span>
+              </a>
+            </li>
+            <li
+              class=""
+            >
+              <a
+                class="bp3-menu-item bp3-popover-dismiss"
+                content="[object Object]"
+                label="Roles"
+              >
+                <div
+                  class="bp3-text-overflow-ellipsis bp3-fill"
+                >
+                  <span
+                    class="bp3-skeleton"
+                  >
+                    Lorem ipsum
+                  </span>
+                </div>
+                <span
+                  class="bp3-menu-item-label"
+                >
+                  Roles
+                </span>
+              </a>
+            </li>
+            <li
+              class=""
+            >
+              <a
+                class="bp3-menu-item bp3-popover-dismiss"
+                content="[object Object]"
+                label="Access"
+              >
+                <div
+                  class="bp3-text-overflow-ellipsis bp3-fill"
+                >
+                  <span
+                    class="bp3-skeleton"
+                  >
+                    Lorem ipsum
+                  </span>
+                </div>
+                <span
+                  class="bp3-menu-item-label"
+                >
+                  Access
+                </span>
+              </a>
+            </li>
+          </ul>
+        </div>
+        <div
+          class="emotion-5"
+        >
+          <ul
+            class="bp3-menu emotion-4"
+          >
+            <li
+              class=""
+            >
+              <a
+                class="bp3-menu-item bp3-popover-dismiss"
+                content="[object Object]"
+                label="Content Types"
+              >
+                <div
+                  class="bp3-text-overflow-ellipsis bp3-fill"
+                >
+                  <span
+                    class="bp3-skeleton"
+                  >
+                    Lorem ipsum
+                  </span>
+                </div>
+                <span
+                  class="bp3-menu-item-label"
+                >
+                  Content Types
+                </span>
+              </a>
+            </li>
+            <li
+              class=""
+            >
+              <a
+                class="bp3-menu-item bp3-popover-dismiss"
+                content="[object Object]"
+                label="Application Interceptors"
+              >
+                <div
+                  class="bp3-text-overflow-ellipsis bp3-fill"
+                >
+                  <span
+                    class="bp3-skeleton"
+                  >
+                    Lorem ipsum
+                  </span>
+                </div>
+                <span
+                  class="bp3-menu-item-label"
+                >
+                  Application Interceptors
+                </span>
+              </a>
+            </li>
+            <li
+              class=""
+            >
+              <a
+                class="bp3-menu-item bp3-popover-dismiss"
+                content="[object Object]"
+                label="Network Interceptors"
+              >
+                <div
+                  class="bp3-text-overflow-ellipsis bp3-fill"
+                >
+                  <span
+                    class="bp3-skeleton"
+                  >
+                    Lorem ipsum
+                  </span>
+                </div>
+                <span
+                  class="bp3-menu-item-label"
+                >
+                  Network Interceptors
+                </span>
+              </a>
+            </li>
+            <li
+              class=""
+            >
+              <a
+                class="bp3-menu-item bp3-popover-dismiss"
+                content="[object Object]"
+                label="Send a Request"
+              >
+                <div
+                  class="bp3-text-overflow-ellipsis bp3-fill"
+                >
+                  <span
+                    class="bp3-skeleton"
+                  >
+                    Lorem ipsum
+                  </span>
+                </div>
+                <span
+                  class="bp3-menu-item-label"
+                >
+                  Send a Request
+                </span>
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <br />
+    <div
+      class="bp3-card bp3-elevation-0"
+    >
+      <div
+        class="emotion-3"
+      >
+        <span
+          class="bp3-tag bp3-intent-primary bp3-large emotion-0"
+        >
+          <span
+            class="bp3-text-overflow-ellipsis bp3-fill"
+          >
+            GET
+          </span>
+        </span>
+        <h3
+          class="bp3-heading bp3-skeleton emotion-1"
+        >
+          AnotherSimpleWebAction
+        </h3>
+        <span
+          class="bp3-tag bp3-large emotion-2"
+        >
+          <span
+            class="bp3-text-overflow-ellipsis bp3-fill"
+          >
+            <span
+              class="bp3-skeleton"
+            >
+              Lorem ipsum
+            </span>
+          </span>
+        </span>
+      </div>
+      <div
+        class="emotion-8"
+      >
+        <div
+          class="emotion-5"
+        >
+          <ul
+            class="bp3-menu emotion-4"
+          >
+            <li
+              class=""
+            >
+              <a
+                class="bp3-menu-item bp3-popover-dismiss"
+                content="[object Object]"
+                label="Function"
+              >
+                <div
+                  class="bp3-text-overflow-ellipsis bp3-fill"
+                >
+                  <span
+                    class="bp3-skeleton"
+                  >
+                    Lorem ipsum
+                  </span>
+                </div>
+                <span
+                  class="bp3-menu-item-label"
+                >
+                  Function
+                </span>
+              </a>
+            </li>
+            <li
+              class=""
+            >
+              <a
+                class="bp3-menu-item bp3-popover-dismiss"
+                content="[object Object]"
+                label="Services"
+              >
+                <div
+                  class="bp3-text-overflow-ellipsis bp3-fill"
+                >
+                  <span
+                    class="bp3-skeleton"
+                  >
+                    Lorem ipsum
+                  </span>
+                </div>
+                <span
+                  class="bp3-menu-item-label"
+                >
+                  Services
+                </span>
+              </a>
+            </li>
+            <li
+              class=""
+            >
+              <a
+                class="bp3-menu-item bp3-popover-dismiss"
+                content="[object Object]"
+                label="Roles"
+              >
+                <div
+                  class="bp3-text-overflow-ellipsis bp3-fill"
+                >
+                  <span
+                    class="bp3-skeleton"
+                  >
+                    Lorem ipsum
+                  </span>
+                </div>
+                <span
+                  class="bp3-menu-item-label"
+                >
+                  Roles
+                </span>
+              </a>
+            </li>
+            <li
+              class=""
+            >
+              <a
+                class="bp3-menu-item bp3-popover-dismiss"
+                content="[object Object]"
+                label="Access"
+              >
+                <div
+                  class="bp3-text-overflow-ellipsis bp3-fill"
+                >
+                  <span
+                    class="bp3-skeleton"
+                  >
+                    Lorem ipsum
+                  </span>
+                </div>
+                <span
+                  class="bp3-menu-item-label"
+                >
+                  Access
+                </span>
+              </a>
+            </li>
+          </ul>
+        </div>
+        <div
+          class="emotion-5"
+        >
+          <ul
+            class="bp3-menu emotion-4"
+          >
+            <li
+              class=""
+            >
+              <a
+                class="bp3-menu-item bp3-popover-dismiss"
+                content="[object Object]"
+                label="Content Types"
+              >
+                <div
+                  class="bp3-text-overflow-ellipsis bp3-fill"
+                >
+                  <span
+                    class="bp3-skeleton"
+                  >
+                    Lorem ipsum
+                  </span>
+                </div>
+                <span
+                  class="bp3-menu-item-label"
+                >
+                  Content Types
+                </span>
+              </a>
+            </li>
+            <li
+              class=""
+            >
+              <a
+                class="bp3-menu-item bp3-popover-dismiss"
+                content="[object Object]"
+                label="Application Interceptors"
+              >
+                <div
+                  class="bp3-text-overflow-ellipsis bp3-fill"
+                >
+                  <span
+                    class="bp3-skeleton"
+                  >
+                    Lorem ipsum
+                  </span>
+                </div>
+                <span
+                  class="bp3-menu-item-label"
+                >
+                  Application Interceptors
+                </span>
+              </a>
+            </li>
+            <li
+              class=""
+            >
+              <a
+                class="bp3-menu-item bp3-popover-dismiss"
+                content="[object Object]"
+                label="Network Interceptors"
+              >
+                <div
+                  class="bp3-text-overflow-ellipsis bp3-fill"
+                >
+                  <span
+                    class="bp3-skeleton"
+                  >
+                    Lorem ipsum
+                  </span>
+                </div>
+                <span
+                  class="bp3-menu-item-label"
+                >
+                  Network Interceptors
+                </span>
+              </a>
+            </li>
+            <li
+              class=""
+            >
+              <a
+                class="bp3-menu-item bp3-popover-dismiss"
+                content="[object Object]"
+                label="Send a Request"
+              >
+                <div
+                  class="bp3-text-overflow-ellipsis bp3-fill"
+                >
+                  <span
+                    class="bp3-skeleton"
+                  >
+                    Lorem ipsum
+                  </span>
+                </div>
+                <span
+                  class="bp3-menu-item-label"
+                >
+                  Send a Request
+                </span>
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <br />
+    <div
+      class="bp3-card bp3-elevation-0"
+    >
+      <div
+        class="emotion-3"
+      >
+        <span
+          class="bp3-tag bp3-intent-primary bp3-large emotion-0"
+        >
+          <span
+            class="bp3-text-overflow-ellipsis bp3-fill"
+          >
+            GET
+          </span>
+        </span>
+        <h3
+          class="bp3-heading bp3-skeleton emotion-1"
+        >
+          AnotherSimpleWebAction
+        </h3>
+        <span
+          class="bp3-tag bp3-large emotion-2"
+        >
+          <span
+            class="bp3-text-overflow-ellipsis bp3-fill"
+          >
+            <span
+              class="bp3-skeleton"
+            >
+              Lorem ipsum
+            </span>
+          </span>
+        </span>
+      </div>
+      <div
+        class="emotion-8"
+      >
+        <div
+          class="emotion-5"
+        >
+          <ul
+            class="bp3-menu emotion-4"
+          >
+            <li
+              class=""
+            >
+              <a
+                class="bp3-menu-item bp3-popover-dismiss"
+                content="[object Object]"
+                label="Function"
+              >
+                <div
+                  class="bp3-text-overflow-ellipsis bp3-fill"
+                >
+                  <span
+                    class="bp3-skeleton"
+                  >
+                    Lorem ipsum
+                  </span>
+                </div>
+                <span
+                  class="bp3-menu-item-label"
+                >
+                  Function
+                </span>
+              </a>
+            </li>
+            <li
+              class=""
+            >
+              <a
+                class="bp3-menu-item bp3-popover-dismiss"
+                content="[object Object]"
+                label="Services"
+              >
+                <div
+                  class="bp3-text-overflow-ellipsis bp3-fill"
+                >
+                  <span
+                    class="bp3-skeleton"
+                  >
+                    Lorem ipsum
+                  </span>
+                </div>
+                <span
+                  class="bp3-menu-item-label"
+                >
+                  Services
+                </span>
+              </a>
+            </li>
+            <li
+              class=""
+            >
+              <a
+                class="bp3-menu-item bp3-popover-dismiss"
+                content="[object Object]"
+                label="Roles"
+              >
+                <div
+                  class="bp3-text-overflow-ellipsis bp3-fill"
+                >
+                  <span
+                    class="bp3-skeleton"
+                  >
+                    Lorem ipsum
+                  </span>
+                </div>
+                <span
+                  class="bp3-menu-item-label"
+                >
+                  Roles
+                </span>
+              </a>
+            </li>
+            <li
+              class=""
+            >
+              <a
+                class="bp3-menu-item bp3-popover-dismiss"
+                content="[object Object]"
+                label="Access"
+              >
+                <div
+                  class="bp3-text-overflow-ellipsis bp3-fill"
+                >
+                  <span
+                    class="bp3-skeleton"
+                  >
+                    Lorem ipsum
+                  </span>
+                </div>
+                <span
+                  class="bp3-menu-item-label"
+                >
+                  Access
+                </span>
+              </a>
+            </li>
+          </ul>
+        </div>
+        <div
+          class="emotion-5"
+        >
+          <ul
+            class="bp3-menu emotion-4"
+          >
+            <li
+              class=""
+            >
+              <a
+                class="bp3-menu-item bp3-popover-dismiss"
+                content="[object Object]"
+                label="Content Types"
+              >
+                <div
+                  class="bp3-text-overflow-ellipsis bp3-fill"
+                >
+                  <span
+                    class="bp3-skeleton"
+                  >
+                    Lorem ipsum
+                  </span>
+                </div>
+                <span
+                  class="bp3-menu-item-label"
+                >
+                  Content Types
+                </span>
+              </a>
+            </li>
+            <li
+              class=""
+            >
+              <a
+                class="bp3-menu-item bp3-popover-dismiss"
+                content="[object Object]"
+                label="Application Interceptors"
+              >
+                <div
+                  class="bp3-text-overflow-ellipsis bp3-fill"
+                >
+                  <span
+                    class="bp3-skeleton"
+                  >
+                    Lorem ipsum
+                  </span>
+                </div>
+                <span
+                  class="bp3-menu-item-label"
+                >
+                  Application Interceptors
+                </span>
+              </a>
+            </li>
+            <li
+              class=""
+            >
+              <a
+                class="bp3-menu-item bp3-popover-dismiss"
+                content="[object Object]"
+                label="Network Interceptors"
+              >
+                <div
+                  class="bp3-text-overflow-ellipsis bp3-fill"
+                >
+                  <span
+                    class="bp3-skeleton"
+                  >
+                    Lorem ipsum
+                  </span>
+                </div>
+                <span
+                  class="bp3-menu-item-label"
+                >
+                  Network Interceptors
+                </span>
+              </a>
+            </li>
+            <li
+              class=""
+            >
+              <a
+                class="bp3-menu-item bp3-popover-dismiss"
+                content="[object Object]"
+                label="Send a Request"
+              >
+                <div
+                  class="bp3-text-overflow-ellipsis bp3-fill"
+                >
+                  <span
+                    class="bp3-skeleton"
+                  >
+                    Lorem ipsum
+                  </span>
+                </div>
+                <span
+                  class="bp3-menu-item-label"
+                >
+                  Send a Request
+                </span>
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <br />
+    <div
+      class="bp3-card bp3-elevation-0"
+    >
+      <div
+        class="emotion-3"
+      >
+        <span
+          class="bp3-tag bp3-intent-primary bp3-large emotion-0"
+        >
+          <span
+            class="bp3-text-overflow-ellipsis bp3-fill"
+          >
+            GET
+          </span>
+        </span>
+        <h3
+          class="bp3-heading bp3-skeleton emotion-1"
+        >
+          AnotherSimpleWebAction
+        </h3>
+        <span
+          class="bp3-tag bp3-large emotion-2"
+        >
+          <span
+            class="bp3-text-overflow-ellipsis bp3-fill"
+          >
+            <span
+              class="bp3-skeleton"
+            >
+              Lorem ipsum
+            </span>
+          </span>
+        </span>
+      </div>
+      <div
+        class="emotion-8"
+      >
+        <div
+          class="emotion-5"
+        >
+          <ul
+            class="bp3-menu emotion-4"
+          >
+            <li
+              class=""
+            >
+              <a
+                class="bp3-menu-item bp3-popover-dismiss"
+                content="[object Object]"
+                label="Function"
+              >
+                <div
+                  class="bp3-text-overflow-ellipsis bp3-fill"
+                >
+                  <span
+                    class="bp3-skeleton"
+                  >
+                    Lorem ipsum
+                  </span>
+                </div>
+                <span
+                  class="bp3-menu-item-label"
+                >
+                  Function
+                </span>
+              </a>
+            </li>
+            <li
+              class=""
+            >
+              <a
+                class="bp3-menu-item bp3-popover-dismiss"
+                content="[object Object]"
+                label="Services"
+              >
+                <div
+                  class="bp3-text-overflow-ellipsis bp3-fill"
+                >
+                  <span
+                    class="bp3-skeleton"
+                  >
+                    Lorem ipsum
+                  </span>
+                </div>
+                <span
+                  class="bp3-menu-item-label"
+                >
+                  Services
+                </span>
+              </a>
+            </li>
+            <li
+              class=""
+            >
+              <a
+                class="bp3-menu-item bp3-popover-dismiss"
+                content="[object Object]"
+                label="Roles"
+              >
+                <div
+                  class="bp3-text-overflow-ellipsis bp3-fill"
+                >
+                  <span
+                    class="bp3-skeleton"
+                  >
+                    Lorem ipsum
+                  </span>
+                </div>
+                <span
+                  class="bp3-menu-item-label"
+                >
+                  Roles
+                </span>
+              </a>
+            </li>
+            <li
+              class=""
+            >
+              <a
+                class="bp3-menu-item bp3-popover-dismiss"
+                content="[object Object]"
+                label="Access"
+              >
+                <div
+                  class="bp3-text-overflow-ellipsis bp3-fill"
+                >
+                  <span
+                    class="bp3-skeleton"
+                  >
+                    Lorem ipsum
+                  </span>
+                </div>
+                <span
+                  class="bp3-menu-item-label"
+                >
+                  Access
+                </span>
+              </a>
+            </li>
+          </ul>
+        </div>
+        <div
+          class="emotion-5"
+        >
+          <ul
+            class="bp3-menu emotion-4"
+          >
+            <li
+              class=""
+            >
+              <a
+                class="bp3-menu-item bp3-popover-dismiss"
+                content="[object Object]"
+                label="Content Types"
+              >
+                <div
+                  class="bp3-text-overflow-ellipsis bp3-fill"
+                >
+                  <span
+                    class="bp3-skeleton"
+                  >
+                    Lorem ipsum
+                  </span>
+                </div>
+                <span
+                  class="bp3-menu-item-label"
+                >
+                  Content Types
+                </span>
+              </a>
+            </li>
+            <li
+              class=""
+            >
+              <a
+                class="bp3-menu-item bp3-popover-dismiss"
+                content="[object Object]"
+                label="Application Interceptors"
+              >
+                <div
+                  class="bp3-text-overflow-ellipsis bp3-fill"
+                >
+                  <span
+                    class="bp3-skeleton"
+                  >
+                    Lorem ipsum
+                  </span>
+                </div>
+                <span
+                  class="bp3-menu-item-label"
+                >
+                  Application Interceptors
+                </span>
+              </a>
+            </li>
+            <li
+              class=""
+            >
+              <a
+                class="bp3-menu-item bp3-popover-dismiss"
+                content="[object Object]"
+                label="Network Interceptors"
+              >
+                <div
+                  class="bp3-text-overflow-ellipsis bp3-fill"
+                >
+                  <span
+                    class="bp3-skeleton"
+                  >
+                    Lorem ipsum
+                  </span>
+                </div>
+                <span
+                  class="bp3-menu-item-label"
+                >
+                  Network Interceptors
+                </span>
+              </a>
+            </li>
+            <li
+              class=""
+            >
+              <a
+                class="bp3-menu-item bp3-popover-dismiss"
+                content="[object Object]"
+                label="Send a Request"
+              >
+                <div
+                  class="bp3-text-overflow-ellipsis bp3-fill"
+                >
+                  <span
+                    class="bp3-skeleton"
+                  >
+                    Lorem ipsum
+                  </span>
+                </div>
+                <span
+                  class="bp3-menu-item-label"
+                >
+                  Send a Request
+                </span>
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</DocumentFragment>
+`;

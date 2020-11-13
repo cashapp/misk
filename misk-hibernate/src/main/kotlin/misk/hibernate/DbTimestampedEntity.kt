@@ -47,6 +47,8 @@ import java.time.Instant
  * ```
  *
  * The timestamp listener will automatically populate these values on save and update.
+ * (Incidentally, the `@Columns` are not marked `nullable = false` because the timestamp listener is
+ * triggered _after_ the nullability check.)
  */
 interface DbTimestampedEntity {
   var created_at: Instant

@@ -6,6 +6,7 @@ import com.squareup.moshi.Moshi
 import misk.inject.KAbstractModule
 import okhttp3.OkHttpClient
 import javax.inject.Inject
+import javax.inject.Singleton
 
 /** Provides an [OkHttpClient] and [ProtoMessageHttpClient] for a peer service */
 class HttpClientModule constructor(
@@ -19,16 +20,20 @@ class HttpClientModule constructor(
     val protoMessageHttpClientKey =
         if (annotation == null) Key.get(ProtoMessageHttpClient::class.java)
         else Key.get(ProtoMessageHttpClient::class.java, annotation)
-    bind(httpClientKey).toProvider(HttpClientProvider(name))
+    bind(httpClientKey)
+        .toProvider(HttpClientProvider(name))
+        .`in`(Singleton::class.java)
     bind(protoMessageHttpClientKey)
         .toProvider(ProtoMessageHttpClientProvider(name, getProvider(httpClientKey)))
+        .`in`(Singleton::class.java)
   }
 
   private class HttpClientProvider(private val name: String) : Provider<OkHttpClient> {
-    @Inject lateinit var httpClientsConfig: HttpClientsConfig
+    /** Use a provider because we don't know the test client's URL until its test server starts. */
+    @Inject lateinit var httpClientsConfigProvider: Provider<HttpClientsConfig>
     @Inject lateinit var httpClientFactory: HttpClientFactory
 
-    override fun get() = httpClientFactory.create(httpClientsConfig[name])
+    override fun get() = httpClientFactory.create(httpClientsConfigProvider.get()[name])
   }
 
   private class ProtoMessageHttpClientProvider(
@@ -36,11 +41,12 @@ class HttpClientModule constructor(
     private val httpClientProvider: Provider<OkHttpClient>
   ) : Provider<ProtoMessageHttpClient> {
     @Inject lateinit var moshi: Moshi
-    @Inject lateinit var httpClientsConfig: HttpClientsConfig
+    /** Use a provider because we don't know the test client's URL until its test server starts. */
+    @Inject lateinit var httpClientsConfigProvider: Provider<HttpClientsConfig>
     @Inject lateinit var httpClientConfigUrlProvider: HttpClientConfigUrlProvider
 
     override fun get(): ProtoMessageHttpClient {
-      val endpointConfig = httpClientsConfig[name]
+      val endpointConfig = httpClientsConfigProvider.get()[name]
       val httpClient = httpClientProvider.get()
 
       return ProtoMessageHttpClient(

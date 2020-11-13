@@ -12,7 +12,7 @@ import javax.inject.Inject
 
 private val logger = getLogger<RealEventRouter>()
 
-internal class RealEventRouter : EventRouter {
+internal class RealEventRouter @Inject constructor() : EventRouter {
   @Inject lateinit var clusterConnector: ClusterConnector
   @Inject lateinit var eventJsonAdapter: JsonAdapter<SocketEvent>
   @Inject lateinit var clusterMapper: ClusterMapper

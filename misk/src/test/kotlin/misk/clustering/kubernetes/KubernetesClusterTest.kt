@@ -29,12 +29,11 @@ internal class KubernetesClusterTest {
       MiskTestingServiceModule(),
       object : KAbstractModule() {
         override fun configure() {
-          install(KubernetesClusterModule())
-          bind<KubernetesConfig>().toInstance(KubernetesConfig(
+          install(KubernetesClusterModule(KubernetesConfig(
               my_pod_namespace = TEST_NAMESPACE,
               my_pod_name = TEST_SELF_NAME,
               my_pod_ip = TEST_SELF_IP
-          ))
+          )))
         }
       })
 

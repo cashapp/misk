@@ -4,23 +4,19 @@ import misk.Action
 import misk.environment.Environment
 import misk.web.NetworkChain
 import misk.web.NetworkInterceptor
-import misk.web.Response
 import javax.inject.Inject
 
-internal class WideOpenDevelopmentInterceptor : NetworkInterceptor {
-  override fun intercept(chain: NetworkChain): Response<*> {
-    val response = chain.proceed(chain.request)
-    return response.copy(
-        headers = response.headers.newBuilder()
-            .add("Access-Control-Allow-Origin", "*")
-            .build()
-    )
+internal class WideOpenDevelopmentInterceptor @Inject constructor() : NetworkInterceptor {
+  override fun intercept(chain: NetworkChain) {
+    chain.httpCall.setResponseHeader("Access-Control-Allow-Origin", "*")
+    chain.proceed(chain.httpCall)
   }
 }
 
-internal class WideOpenDevelopmentInterceptorFactory : NetworkInterceptor.Factory {
-  @Inject lateinit var wideOpenDevelopmentInterceptor: WideOpenDevelopmentInterceptor
-  @Inject lateinit var environment: Environment
+internal class WideOpenDevelopmentInterceptorFactory @Inject constructor(
+  private val wideOpenDevelopmentInterceptor: WideOpenDevelopmentInterceptor,
+  private val environment: Environment
+) : NetworkInterceptor.Factory {
 
   override fun create(action: Action): NetworkInterceptor? {
     if (environment == Environment.DEVELOPMENT) {

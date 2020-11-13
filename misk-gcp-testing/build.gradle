@@ -5,3 +5,10 @@ dependencies {
   compile project(':misk-gcp')
   compile project(':misk-testing')
 }
+
+afterEvaluate { project ->
+  project.tasks.dokka {
+    outputDirectory = "$rootDir/docs/0.x"
+    outputFormat = 'gfm'
+  }
+}

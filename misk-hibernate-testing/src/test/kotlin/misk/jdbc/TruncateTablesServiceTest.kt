@@ -1,7 +1,6 @@
 package misk.jdbc
 
 import com.google.inject.util.Providers
-import com.squareup.moshi.Moshi
 import misk.MiskTestingServiceModule
 import misk.config.Config
 import misk.config.MiskConfig
@@ -12,8 +11,6 @@ import misk.hibernate.Transacter
 import misk.inject.KAbstractModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
-import misk.vitess.StartVitessService
-import okhttp3.OkHttpClient
 import org.assertj.core.api.Assertions.assertThat
 import org.hibernate.SessionFactory
 import org.hibernate.query.Query
@@ -27,26 +24,17 @@ internal class TruncateTablesServiceTest {
   @MiskTestModule
   val module = TestModule()
 
-  @Inject @TestDatasource lateinit var config: DataSourceConfig
   @Inject @TestDatasource lateinit var sessionFactory: SessionFactory
   @Inject @TestDatasource lateinit var transacter: Transacter
-
-  // Just a dummy
-  val vitessScatterDetector: VitessScaleSafetyChecks
-    get() = VitessScaleSafetyChecks(
-        OkHttpClient(),
-        Moshi.Builder().build(),
-        config,
-        StartVitessService(Movies::class, Environment.TESTING, config))
+  @Inject @TestDatasource lateinit var connector: DataSourceConnector
 
   @BeforeEach
   internal fun setUp() {
     // Manually truncate because we don't use TruncateTablesService to test itself!
-    sessionFactory.openSession().use { session ->
-      session.doReturningWork { connection ->
+    transacter.transaction { session ->
+      session.useConnection { connection ->
         val statement = connection.createStatement()
-        statement.addBatch("DELETE FROM movies")
-        statement.executeBatch()
+        statement.execute("DELETE FROM movies")
       }
     }
   }
@@ -57,19 +45,19 @@ internal class TruncateTablesServiceTest {
     assertThat(rowCount("movies")).isEqualTo(0)
 
     // Insert some data.
-    sessionFactory.openSession().doWork { connection ->
-      connection.createStatement().use { statement ->
-        statement.execute("INSERT INTO movies (name) VALUES ('Star Wars')")
-        statement.execute("INSERT INTO movies (name) VALUES ('Jurassic Park')")
+    transacter.transaction {session ->
+      session.useConnection { connection ->
+        connection.createStatement().use { statement ->
+          statement.execute("INSERT INTO movies (name) VALUES ('Star Wars')")
+          statement.execute("INSERT INTO movies (name) VALUES ('Jurassic Park')")
+        }
       }
     }
     assertThat(rowCount("schema_version")).isGreaterThan(0)
     assertThat(rowCount("movies")).isGreaterThan(0)
 
     // Start up TruncateTablesService. The inserted data should be truncated.
-    val service = TruncateTablesService(TestDatasource::class, config,
-        Providers.of(transacter),
-        vitessScatterDetector)
+    val service = TruncateTablesService(TestDatasource::class, connector, Providers.of(transacter))
     service.startAsync()
     service.awaitRunning()
     assertThat(rowCount("schema_version")).isGreaterThan(0)
@@ -80,10 +68,10 @@ internal class TruncateTablesServiceTest {
   fun startUpStatements() {
     val service = TruncateTablesService(
         TestDatasource::class,
-        config,
+        connector,
         Providers.of(transacter),
-        vitessScatterDetector,
-        startUpStatements = listOf("INSERT INTO movies (name) VALUES ('Star Wars')"))
+        startUpStatements = listOf("INSERT INTO movies (name) VALUES ('Star Wars')")
+    )
 
     assertThat(rowCount("movies")).isEqualTo(0)
     service.startAsync()
@@ -95,10 +83,10 @@ internal class TruncateTablesServiceTest {
   fun shutDownStatements() {
     val service = TruncateTablesService(
         TestDatasource::class,
-        config,
+        connector,
         Providers.of(transacter),
-        vitessScatterDetector,
-        shutDownStatements = listOf("INSERT INTO movies (name) VALUES ('Star Wars')"))
+        shutDownStatements = listOf("INSERT INTO movies (name) VALUES ('Star Wars')")
+    )
 
     service.startAsync()
     service.awaitRunning()
@@ -123,10 +111,8 @@ internal class TruncateTablesServiceTest {
       install(MiskTestingServiceModule())
 
       val config = MiskConfig.load<TestConfig>("test_truncatetables_app", Environment.TESTING)
-      install(HibernateModule(
-          TestDatasource::class, config.data_source))
-      install(object : HibernateEntityModule(
-          TestDatasource::class) {
+      install(HibernateModule(TestDatasource::class, config.data_source))
+      install(object : HibernateEntityModule(TestDatasource::class) {
         override fun configureHibernate() {
         }
       })

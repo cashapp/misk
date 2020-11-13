@@ -1,11 +1,18 @@
 buildscript {
   dependencies {
+    classpath dep.kotlinAllOpenPlugin
     classpath dep.kotlinNoArgPlugin
   }
 }
 
+apply plugin: 'kotlin-allopen'
 apply plugin: 'kotlin-jpa'
-apply plugin: "com.vanniktech.maven.publish"
+
+allOpen {
+  annotation("javax.persistence.Entity")
+  annotation("javax.persistence.Embeddable")
+  annotation("javax.persistence.MappedSuperclass")
+}
 
 dependencies {
   compile dep.guava
@@ -16,4 +23,11 @@ dependencies {
   compile project(':misk-testing')
 
   testCompile project(':misk-testing')
+}
+
+afterEvaluate { project ->
+  project.tasks.dokka {
+    outputDirectory = "$rootDir/docs/0.x"
+    outputFormat = 'gfm'
+  }
 }

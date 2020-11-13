@@ -12,7 +12,7 @@ import misk.web.NetworkInterceptor
 import misk.web.PathParam
 import misk.web.Response
 import misk.web.ResponseContentType
-import misk.web.actions.WebActionEntry
+import misk.web.WebActionModule
 import misk.web.WebTestingModule
 import misk.web.actions.WebAction
 import misk.web.jetty.JettyService
@@ -34,47 +34,54 @@ class UserInterceptorTest {
   @Test
   fun stringResponse() {
     val response = get("/call/textResponse")
-    assertThat(response.code()).isEqualTo(418)
+    assertThat(response.code).isEqualTo(418)
     assertThat(response.header("Content-Type")).isEqualTo(MediaTypes.TEXT_PLAIN_UTF8)
-    assertThat(response.body()?.string()).isEqualTo("text response")
+    assertThat(response.body?.string()).isEqualTo("text response")
   }
 
   @Test
   fun rawStringResponse() {
     val response = get("/call/text")
-    assertThat(response.code()).isEqualTo(200)
+    assertThat(response.code).isEqualTo(200)
     assertThat(response.header("Content-Type")).isEqualTo(MediaTypes.TEXT_PLAIN_UTF8)
-    assertThat(response.body()?.string()).isEqualTo("text")
+    assertThat(response.body?.string()).isEqualTo("text")
   }
 
   @Test
   fun throwResponse() {
     val response = get("/call/throw")
-    assertThat(response.code()).isEqualTo(500)
-    assertThat(response.body()?.string()).isEqualTo("internal server error")
+    assertThat(response.code).isEqualTo(500)
+    assertThat(response.body?.string()).isEqualTo("internal server error")
   }
 
   @Test
   fun stringNetworkResponse() {
     val response = get("/call/textResponse", "text")
-    assertThat(response.code()).isEqualTo(410)
+    assertThat(response.code).isEqualTo(410)
     assertThat(response.header("Content-Type")).isEqualTo(MediaTypes.TEXT_PLAIN_UTF8)
-    assertThat(response.body()?.string()).isEqualTo("net text response")
+    assertThat(response.body?.string()).isEqualTo("net text response")
   }
 
   @Test
   fun throwNetworkResponse() {
     val response = get("/call/textResponse", "throw")
-    assertThat(response.code()).isEqualTo(500)
-    assertThat(response.body()?.string()).isEqualTo("internal server error")
+    assertThat(response.code).isEqualTo(500)
+    assertThat(response.body?.string()).isEqualTo("internal server error")
   }
 
   internal class UserCreatedNetworkInterceptor : NetworkInterceptor {
-    override fun intercept(chain: NetworkChain): Response<*> = when (chain.request.headers.get(
-        "mode")) {
-      "text" -> Response("net text response", UserInterceptorTest.TEXT_HEADERS, 410)
-      "throw" -> throw Exception("Don't throw exceptions like this")
-      else -> chain.proceed(chain.request)
+    override fun intercept(chain: NetworkChain) {
+      when (chain.httpCall.requestHeaders.get("mode")) {
+        "text" -> {
+          chain.httpCall.statusCode = 410
+          chain.httpCall.addResponseHeaders(TEXT_HEADERS)
+          chain.httpCall.takeResponseBody()!!.use {
+            it.writeUtf8("net text response")
+          }
+        }
+        "throw" -> throw Exception("Don't throw exceptions like this")
+        else -> chain.proceed(chain.httpCall)
+      }
     }
 
     class Factory : NetworkInterceptor.Factory {
@@ -95,7 +102,7 @@ class UserInterceptorTest {
     }
   }
 
-  internal class TestAction : WebAction {
+  internal class TestAction @Inject constructor() : WebAction {
     @Get("/call/{responseType}")
     @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
     fun call(@Suppress("UNUSED_PARAMETER") @PathParam responseType: String): TestActionResponse {
@@ -122,7 +129,7 @@ class UserInterceptorTest {
       multibind<NetworkInterceptor.Factory>().toInstance(UserCreatedNetworkInterceptor.Factory())
       multibind<ApplicationInterceptor.Factory>().toInstance(UserCreatedInterceptor.Factory())
 
-      multibind<WebActionEntry>().toInstance(WebActionEntry<TestAction>())
+      install(WebActionModule.create<TestAction>())
     }
   }
 

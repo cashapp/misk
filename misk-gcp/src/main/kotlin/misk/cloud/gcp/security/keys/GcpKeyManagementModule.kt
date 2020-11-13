@@ -10,8 +10,9 @@ import misk.inject.asSingleton
 import misk.security.keys.KeyService
 import javax.inject.Singleton
 
-class GcpKeyManagementModule : KAbstractModule() {
+class GcpKeyManagementModule(private val config: GcpKmsConfig) : KAbstractModule() {
   override fun configure() {
+    bind<GcpKmsConfig>().toInstance(config)
     bind<KeyService>().to<GcpKeyService>().asSingleton()
   }
 

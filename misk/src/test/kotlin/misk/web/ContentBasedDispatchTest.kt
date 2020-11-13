@@ -5,14 +5,13 @@ import misk.inject.KAbstractModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.web.actions.WebAction
-import misk.web.actions.WebActionEntry
 import misk.web.jetty.JettyService
 import misk.web.mediatype.MediaTypes
 import misk.web.mediatype.asMediaType
 import okhttp3.MediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import okhttp3.RequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import javax.inject.Inject
@@ -97,66 +96,66 @@ internal class ContentBasedDispatchTest {
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(WebTestingModule())
-      multibind<WebActionEntry>().toInstance(WebActionEntry<PostPlainTextReturnAnyText>())
-      multibind<WebActionEntry>().toInstance(WebActionEntry<PostAnyTextReturnPlainText>())
-      multibind<WebActionEntry>().toInstance(WebActionEntry<PostPlainTextReturnPlainText>())
-      multibind<WebActionEntry>().toInstance(WebActionEntry<PostJsonReturnJson>())
-      multibind<WebActionEntry>().toInstance(WebActionEntry<PostPlainTextReturnJson>())
-      multibind<WebActionEntry>().toInstance(WebActionEntry<PostJsonReturnPlainText>())
-      multibind<WebActionEntry>().toInstance(WebActionEntry<PostAnythingReturnJson>())
-      multibind<WebActionEntry>().toInstance(WebActionEntry<PostAnythingReturnAnything>())
+      install(WebActionModule.create<PostPlainTextReturnAnyText>())
+      install(WebActionModule.create<PostAnyTextReturnPlainText>())
+      install(WebActionModule.create<PostPlainTextReturnPlainText>())
+      install(WebActionModule.create<PostJsonReturnJson>())
+      install(WebActionModule.create<PostPlainTextReturnJson>())
+      install(WebActionModule.create<PostJsonReturnPlainText>())
+      install(WebActionModule.create<PostAnythingReturnJson>())
+      install(WebActionModule.create<PostAnythingReturnAnything>())
     }
   }
 
-  class PostJsonReturnJson : WebAction {
+  class PostJsonReturnJson @Inject constructor() : WebAction {
     @Post("/hello")
     @RequestContentType("application/json")
     @ResponseContentType("application/json")
     fun hello(@misk.web.RequestBody request: Packet) = Packet("json->json ${request.message}")
   }
 
-  class PostPlainTextReturnJson : WebAction {
+  class PostPlainTextReturnJson @Inject constructor() : WebAction {
     @Post("/hello")
     @RequestContentType("text/plain")
     @ResponseContentType("application/json")
     fun hello(@misk.web.RequestBody message: String) = Packet("text->json $message")
   }
 
-  class PostPlainTextReturnPlainText : WebAction {
+  class PostPlainTextReturnPlainText @Inject constructor() : WebAction {
     @Post("/hello")
     @RequestContentType("text/plain")
     @ResponseContentType("text/plain")
     fun hello(@misk.web.RequestBody message: String) = "text->text $message"
   }
 
-  class PostAnyTextReturnPlainText : WebAction {
+  class PostAnyTextReturnPlainText @Inject constructor() : WebAction {
     @Post("/hello")
     @RequestContentType("text/*")
     @ResponseContentType("text/plain")
     fun hello(@misk.web.RequestBody message: String) = "text*->text $message"
   }
 
-  class PostPlainTextReturnAnyText : WebAction {
+  class PostPlainTextReturnAnyText @Inject constructor() : WebAction {
     @Post("/hello")
     @RequestContentType("text/plain")
     @ResponseContentType("text/*")
     fun hello(@misk.web.RequestBody message: String) = "text->text* $message"
   }
 
-  class PostJsonReturnPlainText : WebAction {
+  class PostJsonReturnPlainText @Inject constructor() : WebAction {
     @Post("/hello")
     @RequestContentType("application/json")
     @ResponseContentType("text/plain")
     fun hello(@misk.web.RequestBody request: Packet) = "json->text ${request.message}"
   }
 
-  class PostAnythingReturnJson : WebAction {
+  class PostAnythingReturnJson @Inject constructor() : WebAction {
     @Post("/hello")
     @ResponseContentType("application/json")
     fun hello(@misk.web.RequestBody message: String) = Packet("*->json $message")
   }
 
-  class PostAnythingReturnAnything : WebAction {
+  class PostAnythingReturnAnything @Inject constructor() : WebAction {
     @Post("/hello")
     fun hello(@misk.web.RequestBody message: String) = "*->* $message"
   }
@@ -169,8 +168,8 @@ internal class ContentBasedDispatchTest {
     val request = newRequest("/hello", contentType, content, acceptedMediaType)
     val response = httpClient.newCall(request)
         .execute()
-    assertThat(response.code()).isEqualTo(200)
-    return response.body()!!
+    assertThat(response.code).isEqualTo(200)
+    return response.body!!
   }
 
   private fun newRequest(
@@ -180,7 +179,7 @@ internal class ContentBasedDispatchTest {
     acceptedMediaType: MediaType? = null
   ): Request {
     val request = Request.Builder()
-        .post(RequestBody.create(contentType, content))
+        .post(content.toRequestBody(contentType))
         .url(jettyService.httpServerUrl.newBuilder().encodedPath(path).build())
 
     if (acceptedMediaType != null) {

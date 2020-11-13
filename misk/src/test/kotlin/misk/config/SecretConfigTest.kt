@@ -2,36 +2,38 @@ package misk.config
 
 import com.google.inject.util.Modules
 import misk.environment.Environment
-import misk.environment.EnvironmentModule
+import misk.resources.FakeFilesModule
+import misk.resources.ResourceLoader
+import misk.resources.TestingResourceLoaderModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import javax.inject.Inject
-import javax.inject.Named
 
 @MiskTest
 class SecretConfigTest {
-  val environment = Environment.TESTING
-  val config = MiskConfig.load<SuperSecretConfig>("secret_config_app", environment)
+  private val environment = Environment.TESTING
 
   @MiskTestModule
-  val module = Modules.combine(
-      ConfigModule.create("secret_app", config),
-      EnvironmentModule(environment))
+  private val module = Modules.combine(
+      TestingResourceLoaderModule(),
+      FakeFilesModule(mapOf("/misk/resources/secrets/secret_information_values.yaml"
+          to """
+            |answer_to_universe: 42
+            |limit: 5
+          """.trimMargin())))
 
-  @Inject
   private lateinit var secretConfig: SuperSecretConfig
-
   @Inject
-  lateinit var secretInformationConfig: SecretInformationConfig
+  private lateinit var resourceLoader: ResourceLoader
 
-  @field:[Inject Named("consumer_a")]
-  private lateinit var consumerA: SecretInformationConfig
-
-  @field:[Inject Named("consumer_b")]
-  private lateinit var consumerB: SecretInformationConfig
+  @BeforeEach
+  fun setConfig() {
+    secretConfig = MiskConfig.load("secret_config_app", Environment.TESTING, listOf(), resourceLoader)
+  }
 
   @Test
   fun topLevelSecretsLoaded() {
@@ -59,6 +61,10 @@ class SecretConfigTest {
         "42")
     assertThat(
         secretConfig.nested_secret.value.nested_nested.secret_information.value.limit).isEqualTo(5)
+
+    // A non-supported extension should work if the secret is a String
+    assertThat(secretConfig.secret_string.value).contains("\"answer_to_universe\"")
+    assertThat(secretConfig.secret_bytearray.value).containsSubsequence(*"\"answer_to_universe\"".toByteArray())
   }
 
   @Test
@@ -67,18 +73,6 @@ class SecretConfigTest {
         .isEqualTo("nothing")
     assertThat(
         secretConfig.secret_information_wrapper.secret_information.value.limit).isEqualTo(73)
-  }
-
-  @Test
-  fun injectSecretValue() {
-    assertThat(secretInformationConfig.answer_to_universe).isEqualTo("42")
-    assertThat(secretInformationConfig.limit).isEqualTo(5)
-  }
-
-  @Test
-  fun subSecretConfigsWithCustomNamesAreBoundWithNamedQualifiers() {
-    assertThat(consumerA.answer_to_universe).isEqualTo("this is consumer A")
-    assertThat(consumerB.answer_to_universe).isEqualTo("this is consumer B")
   }
 
   @Test
@@ -133,5 +127,3 @@ class SecretConfigTest {
         "No secret found at: classpath:/file_does_not_exist.")
   }
 }
-
-

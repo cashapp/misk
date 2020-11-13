@@ -1,11 +1,11 @@
 package misk.client
 
-import com.google.common.util.concurrent.Service
 import com.google.inject.Provides
 import com.google.inject.name.Named
 import com.google.inject.name.Names
 import helpers.protos.Dinosaur
 import misk.MiskTestingServiceModule
+import misk.ServiceModule
 import misk.inject.KAbstractModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
@@ -43,7 +43,7 @@ internal class HttpClientEnvoyTest {
     val dinoRequest = Dinosaur.Builder().name("dinoRequest").build()
 
     val server = webServerService.server!!
-    server.setProtocols(Arrays.asList(Protocol.H2_PRIOR_KNOWLEDGE))
+    server.run { server.protocols = Arrays.asList(Protocol.H2_PRIOR_KNOWLEDGE) }
     server.enqueue(MockResponse())
 
     val response = client.postDinosaur(dinoRequest).execute()
@@ -76,7 +76,7 @@ internal class HttpClientEnvoyTest {
       install(MiskTestingServiceModule())
 
       bind<MockWebServerService>().toInstance(MockWebServerService("@socket"))
-      multibind<Service>().to<MockWebServerService>()
+      install(ServiceModule<MockWebServerService>())
 
       bind<EnvoyClientEndpointProvider>().to<TestEnvoyClientEndpointProvider>()
 

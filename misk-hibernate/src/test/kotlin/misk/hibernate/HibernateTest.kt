@@ -26,7 +26,7 @@ internal class HibernateTest {
     lateinit var parentVal: String
   }
 
-  class Child: Parent() {
+  class Child : Parent() {
     lateinit var childVal: String
   }
 }

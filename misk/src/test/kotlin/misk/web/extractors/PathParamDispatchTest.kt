@@ -6,7 +6,7 @@ import misk.testing.MiskTestModule
 import misk.web.Get
 import misk.web.PathParam
 import misk.web.ResponseContentType
-import misk.web.actions.WebActionEntry
+import misk.web.WebActionModule
 import misk.web.WebTestingModule
 import misk.web.actions.WebAction
 import misk.web.jetty.JettyService
@@ -34,26 +34,26 @@ internal class PathParamDispatchTest {
   @Test
   fun pathParamsConvertToProperTypes() {
     val response = get("/objects/FILE/defaults/245")
-    assertThat(response.code()).isEqualTo(200)
-    assertThat(response.body()?.string()).isEqualTo("(type=FILE,name=defaults,version=245)")
+    assertThat(response.code).isEqualTo(200)
+    assertThat(response.body?.string()).isEqualTo("(type=FILE,name=defaults,version=245)")
   }
 
   @Test
   fun pathParamsSupportExplicitPathNames() {
     val response = get("/custom-named-route")
-    assertThat(response.code()).isEqualTo(200)
-    assertThat(response.body()?.string()).isEqualTo("routing to custom-named-route")
+    assertThat(response.code).isEqualTo(200)
+    assertThat(response.body?.string()).isEqualTo("routing to custom-named-route")
   }
 
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(WebTestingModule())
-      multibind<WebActionEntry>().toInstance(WebActionEntry<GetObjectDetails>())
-      multibind<WebActionEntry>().toInstance(WebActionEntry<CustomPathParamName>())
+      install(WebActionModule.create<GetObjectDetails>())
+      install(WebActionModule.create<CustomPathParamName>())
     }
   }
 
-  class GetObjectDetails : WebAction {
+  class GetObjectDetails @Inject constructor() : WebAction {
     @Get("/objects/{resourceType}/{name}/{version}")
     @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
     fun getObjectDetails(
@@ -63,7 +63,7 @@ internal class PathParamDispatchTest {
     ): String = "(type=$resourceType,name=$name,version=$version)"
   }
 
-  class CustomPathParamName : WebAction {
+  class CustomPathParamName @Inject constructor() : WebAction {
     @Get("/{router}")
     @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
     fun router(@PathParam("router") routeName: String) = "routing to $routeName"

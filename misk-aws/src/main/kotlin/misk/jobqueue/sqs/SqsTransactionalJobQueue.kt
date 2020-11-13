@@ -22,12 +22,13 @@ internal class SqsTransactionalJobQueue @Inject internal constructor(
     session: Session,
     queueName: QueueName,
     body: String,
+    idempotenceKey: String,
     deliveryDelay: Duration?,
     attributes: Map<String, String>
   ) {
     session.onPostCommit {
       log.info { "forwarding to ${queueName.value}" }
-      jobQueue.enqueue(queueName, body, deliveryDelay, attributes)
+      jobQueue.enqueue(queueName, body, idempotenceKey, deliveryDelay, attributes)
     }
   }
 
@@ -36,9 +37,10 @@ internal class SqsTransactionalJobQueue @Inject internal constructor(
     gid: Gid<*, *>,
     queueName: QueueName,
     body: String,
+    idempotenceKey: String,
     deliveryDelay: Duration?,
     attributes: Map<String, String>
-  ) = enqueue(session, queueName, body, deliveryDelay, attributes)
+  ) = enqueue(session, queueName, body, idempotenceKey, deliveryDelay, attributes)
 
   companion object {
     private val log = getLogger<SqsTransactionalJobQueue>()

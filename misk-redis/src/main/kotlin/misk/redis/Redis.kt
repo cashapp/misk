@@ -1,5 +1,6 @@
 package misk.redis
 
+import okio.ByteString
 import java.time.Duration
 
 /** A Redis client. */
@@ -8,7 +9,7 @@ interface Redis {
    * Deletes a single key.
    *
    * @param key the key to delete
-   * @return 0 if the key was not deleted, 1 if the key was deleted
+   * @return false if the key was not deleted, true if the key was deleted
    */
   fun del(key: String): Boolean
 
@@ -22,29 +23,43 @@ interface Redis {
   fun del(vararg keys: String): Int
 
   /**
-   * Retrieves a key.
+   * Retrieves the values for the given list of keys.
    *
-   * @param key the key to retrieve
-   * @return a string value if the key was found, null if the key was not found
+   * @param keys the keys to retrieve
+   * @return a list of String in the same order as the specified list of keys.
+   * For each key, a value will be returned if a key was found, otherwise null is returned.
    */
-  operator fun get(key: String): String?
+  fun mget(vararg keys: String): List<ByteString?>
 
   /**
-   * Sets a value for a key.
+   * Sets the key value pairs.
+   *
+   * @param keyValues the list of keys and values in alternating order.
+   */
+  fun mset(vararg keyValues: ByteString)
+
+  /**
+   * Retrieves the value for the given key as a [ByteString].
+   *
+   * @param key the key to retrieve
+   * @return a [ByteString] if the key was found, null if the key was not found
+   */
+  operator fun get(key: String): ByteString?
+
+  /**
+   * Sets the [ByteString] value for the given key.
    *
    * @param key the key to set
    * @param value the value to set
-   * @return the value that was set
    */
-  operator fun set(key: String, value: String): String
+  operator fun set(key: String, value: ByteString)
 
   /**
-   * Sets a key with an expiration date.
+   * Sets the [ByteString] value for a key with an expiration date.
    *
    * @param key the key to set
    * @param expiryDuration the amount of time before the key expires
    * @param value the value to set
-   * @return the value that was set
    */
-  fun set(key: String, expiryDuration: Duration, value: String): String
+  operator fun set(key: String, expiryDuration: Duration, value: ByteString)
 }

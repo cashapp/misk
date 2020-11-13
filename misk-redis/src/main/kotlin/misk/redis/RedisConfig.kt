@@ -2,9 +2,9 @@ package misk.redis
 
 import misk.config.Config
 
-class RedisConfig: java.util.LinkedHashMap<String, RedisReplicationGroupConfig>, Config {
-  constructor(): super()
-  constructor(m: Map<String, RedisReplicationGroupConfig>): super(m)
+class RedisConfig : java.util.LinkedHashMap<String, RedisReplicationGroupConfig>, Config {
+  constructor() : super()
+  constructor(m: Map<String, RedisReplicationGroupConfig>) : super(m)
 }
 
 data class RedisReplicationGroupConfig(

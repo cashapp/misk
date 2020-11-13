@@ -1,6 +1,0 @@
-{
-  "extends": "../../node_modules/@misk/dev/tsconfig.base",
-  "compilerOptions": {
-    "outDir": "./lib/web/_tab/config"
-  }
-}

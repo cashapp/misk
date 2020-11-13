@@ -1,10 +1,18 @@
 buildscript {
   dependencies {
+    classpath dep.kotlinAllOpenPlugin
     classpath dep.kotlinNoArgPlugin
   }
 }
 
+apply plugin: 'kotlin-allopen'
 apply plugin: 'kotlin-jpa'
+
+allOpen {
+  annotation("javax.persistence.Entity")
+  annotation("javax.persistence.Embeddable")
+  annotation("javax.persistence.MappedSuperclass")
+}
 
 dependencies {
   compile dep.hibernateCore
@@ -16,8 +24,16 @@ dependencies {
   compile dep.openTracingJdbc
   compile dep.vitess
   compile project(':misk')
+  compile project(':misk-events-core')
   compile project(':misk-hibernate')
 
   testCompile project(':misk-testing')
   testCompile project(':misk-hibernate-testing')
+}
+
+afterEvaluate { project ->
+  project.tasks.dokka {
+    outputDirectory = "$rootDir/docs/0.x"
+    outputFormat = 'gfm'
+  }
 }

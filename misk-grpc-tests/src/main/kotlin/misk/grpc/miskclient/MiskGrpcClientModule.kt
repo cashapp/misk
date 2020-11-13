@@ -1,47 +1,45 @@
 package misk.grpc.miskclient
 
 import com.google.inject.Provides
+import misk.client.ClientNetworkInterceptor
+import misk.client.GrpcClientModule
+import misk.client.HttpClientConfig
 import misk.client.HttpClientEndpointConfig
-import misk.client.HttpClientModule
 import misk.client.HttpClientSSLConfig
 import misk.client.HttpClientsConfig
-import misk.grpc.GrpcClient
 import misk.inject.KAbstractModule
 import misk.security.ssl.SslLoader
 import misk.security.ssl.TrustStoreConfig
 import okhttp3.HttpUrl
-import okhttp3.OkHttpClient
+import routeguide.GrpcRouteGuideClient
+import routeguide.RouteGuideClient
 import javax.inject.Named
 import javax.inject.Singleton
 
 class MiskGrpcClientModule : KAbstractModule() {
   override fun configure() {
-    install(HttpClientModule("default"))
+    install(GrpcClientModule.create<RouteGuideClient, GrpcRouteGuideClient>("default"))
+    multibind<ClientNetworkInterceptor.Factory>().to<RouteGuideCallCounter>()
   }
 
   @Provides
   @Singleton
-  fun provideHttpClientsConfig(): HttpClientsConfig {
+  fun provideHttpClientsConfig(@Named("grpc server") url: HttpUrl): HttpClientsConfig {
     return HttpClientsConfig(
         endpoints = mapOf(
             "default" to HttpClientEndpointConfig(
-                "http://example.com/",
-                ssl = HttpClientSSLConfig(
-                    cert_store = null,
-                    trust_store = TrustStoreConfig(
-                        resource = "classpath:/ssl/server_cert.pem",
-                        format = SslLoader.FORMAT_PEM
+                url = url.toString(),
+                clientConfig = HttpClientConfig(
+                    ssl = HttpClientSSLConfig(
+                        cert_store = null,
+                        trust_store = TrustStoreConfig(
+                            resource = "classpath:/ssl/server_cert.pem",
+                            format = SslLoader.FORMAT_PEM
+                        )
                     )
                 )
             )
         )
     )
   }
-
-  @Provides
-  @Singleton
-  fun provideGrpcClient(
-    client: OkHttpClient,
-    @Named("grpc server") url: HttpUrl
-  ) = GrpcClient(client, url)
 }
