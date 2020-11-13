@@ -140,12 +140,14 @@ class HibernateModule(
 
     bind(transacterKey).toProvider(object : Provider<Transacter> {
       @Inject lateinit var executorServiceFactory: ExecutorServiceFactory
+      @Inject lateinit var hibernateEntities: Set<HibernateEntity>
       override fun get(): RealTransacter = RealTransacter(
           qualifier = qualifier,
           sessionFactoryProvider = sessionFactoryProvider,
           readerSessionFactoryProvider = readerSessionFactoryProvider,
           config = config,
           executorServiceFactory = executorServiceFactory,
+          hibernateEntities = hibernateEntities
       )
     }).asSingleton()
 

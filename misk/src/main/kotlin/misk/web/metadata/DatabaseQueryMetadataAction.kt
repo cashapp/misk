@@ -12,7 +12,7 @@ import javax.inject.Singleton
 /** Display available queries and their types */
 @Singleton
 class DatabaseQueryMetadataAction @Inject constructor(
-  val queries: Set<DatabaseQueryMetadata>
+  val metadata: List<DatabaseQueryMetadata>
 ) : WebAction {
 
   @Get("/api/database/query/metadata")
@@ -20,7 +20,7 @@ class DatabaseQueryMetadataAction @Inject constructor(
   @ResponseContentType(MediaTypes.APPLICATION_JSON)
   @AdminDashboardAccess
   fun getAll(): Response {
-    return Response(databaseQueryMetadata = listOf())
+    return Response(databaseQueryMetadata = metadata)
   }
 
   data class Response(

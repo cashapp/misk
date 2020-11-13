@@ -4,6 +4,7 @@ import com.google.common.annotations.VisibleForTesting
 import misk.jdbc.DataSourceConfig
 import java.sql.SQLException
 import javax.persistence.PersistenceException
+import kotlin.reflect.KClass
 
 /**
  * Provides explicit block-based transaction demarcation.
@@ -71,6 +72,9 @@ interface Transacter {
   fun allowCowrites(): Transacter
 
   fun config(): DataSourceConfig
+
+  /** Returns KClasses for the bound DbEntities for the transacter */
+  fun hibernateEntityTypes(): Set<KClass<*>>
 }
 
 fun Transacter.shards() = transaction { it.shards() }

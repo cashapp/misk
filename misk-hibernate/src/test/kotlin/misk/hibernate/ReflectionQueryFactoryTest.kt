@@ -14,6 +14,8 @@ import java.lang.reflect.Proxy
 import java.time.Duration.ofSeconds
 import java.time.LocalDate
 import javax.inject.Inject
+import kotlin.reflect.KClass
+import kotlin.reflect.full.functions
 import kotlin.test.assertFailsWith
 
 @MiskTest(startService = true)
@@ -49,6 +51,9 @@ class ReflectionQueryFactoryTest {
       session.save(DbMovie(m5.name, m5.releaseDate))
       session.save(DbMovie(m98.name, m98.releaseDate))
       session.save(DbMovie(m99.name, m99.releaseDate))
+
+      OperatorsMovieQuery::class.functions
+
 
       assertThat(queryFactory.newQuery<OperatorsMovieQuery>()
           .releaseDateLessThan(m3.releaseDate)

@@ -25,7 +25,7 @@ data class DatabaseQueryMetadata(
   constructor(
     allowedCapabilities: Set<String> = setOf(),
     allowedServices: Set<String> = setOf(),
-    accessAnnotation: Annotation?,
+    accessAnnotation: KClass<out Annotation>? = null,
     table: String,
     entityClass: KClass<*>,
     queryClass: KClass<*>,
@@ -36,7 +36,7 @@ data class DatabaseQueryMetadata(
   ) : this(
       allowedCapabilities = allowedCapabilities,
       allowedServices = allowedServices,
-      accessAnnotation = accessAnnotation?.toString(),
+      accessAnnotation = accessAnnotation?.simpleName,
       table = table,
       entityClass = entityClass.simpleName!!, // Assert not null, since this shouldn't be anonymous.
       queryClass = queryClass.simpleName!!, // Assert not null, since this shouldn't be anonymous.
@@ -48,22 +48,21 @@ data class DatabaseQueryMetadata(
 
   data class ConstraintMetadata(
     override val name: String,
-    override val parametersType: String,
+    override val parametersTypeName: String,
     val path: String,
     val operator: String
   ) : FunctionMetadata
 
   data class OrderMetadata(
     override val name: String,
-    override val parametersType: String,
+    override val parametersTypeName: String,
     val path: String,
-    val operator: String
+    val ascending: Boolean
   ) : FunctionMetadata
 
   data class SelectMetadata(
     override val name: String,
-    override val parametersType: String,
-    val path: String,
-    val operator: String
+    override val parametersTypeName: String,
+    val paths: List<String>,
   ) : FunctionMetadata
 }

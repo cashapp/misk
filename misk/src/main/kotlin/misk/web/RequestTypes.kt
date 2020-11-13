@@ -7,6 +7,9 @@ import com.squareup.wire.WireField
 import misk.web.metadata.Field
 import misk.web.metadata.Type
 import okio.ByteString
+import java.time.Duration
+import java.time.Instant
+import java.time.LocalDate
 import java.util.LinkedList
 import kotlin.reflect.KClass
 import kotlin.reflect.KType
@@ -115,6 +118,9 @@ class RequestTypes {
         fieldClass == Double::class -> Field(fieldName, Double::class.simpleName!!, repeated)
         fieldClass == Boolean::class -> Field(fieldName, Boolean::class.simpleName!!, repeated)
         fieldClass == Enum::class -> createEnumField(fieldClass, fieldName, repeated)
+        fieldClass == Instant::class -> Field(fieldName, Instant::class.simpleName!!, repeated)
+        fieldClass == Duration::class -> Field(fieldName, Duration::class.simpleName!!, repeated)
+        fieldClass == LocalDate::class -> Field(fieldName, LocalDate::class.simpleName!!, repeated)
         fieldClass.superclasses.contains(WireEnum::class) -> {
           createEnumField(fieldClass, fieldName, repeated)
         }

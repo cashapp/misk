@@ -7,6 +7,7 @@ import misk.web.NetworkInterceptor
 import misk.web.WebActionModule
 import misk.web.interceptors.WideOpenDevelopmentInterceptorFactory
 import misk.web.metadata.ConfigMetadataAction
+import misk.web.metadata.DatabaseQueryMetadataAction
 import misk.web.metadata.WebActionMetadataAction
 import javax.inject.Qualifier
 
@@ -60,6 +61,16 @@ class AdminDashboardModule(private val isDevelopment: Boolean) : KAbstractModule
         resourcePath = "classpath:/web/_tab/admin-dashboard/@misk/"
     ))
 
+    // Database Query
+    install(WebActionModule.create<DatabaseQueryMetadataAction>())
+    multibind<DashboardTab>().toProvider(
+        DashboardTabProvider<AdminDashboard, AdminDashboardAccess>(
+            slug = "database-query",
+            url_path_prefix = "/_admin/database-query/",
+            name = "Database Query",
+            category = "Container Admin"
+        ))
+
     // Web Actions
     install(WebActionModule.create<WebActionMetadataAction>())
     multibind<DashboardTab>().toProvider(
@@ -73,10 +84,6 @@ class AdminDashboardModule(private val isDevelopment: Boolean) : KAbstractModule
         isDevelopment = isDevelopment,
         slug = "web-actions",
         web_proxy_url = "http://localhost:3201/"
-    ))
-    multibind<DashboardNavbarItem>().toInstance(DashboardNavbarItem<AdminDashboard>(
-      item = "<a href=\"/_admin/web-actions/\">Web Actions</a>",
-      order = 100
     ))
   }
 }
