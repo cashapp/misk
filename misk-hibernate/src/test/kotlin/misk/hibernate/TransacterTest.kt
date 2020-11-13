@@ -1,7 +1,6 @@
 package misk.hibernate
 
 import io.opentracing.mock.MockTracer
-import io.opentracing.tag.Tags
 import misk.exceptions.UnauthorizedException
 import misk.jdbc.DataSourceType
 import misk.jdbc.uniqueString

@@ -1,6 +1,6 @@
 package misk.hibernate.annotation
 
-import misk.hibernate.Keyspace
+import misk.vitess.Keyspace
 
 @Target(AnnotationTarget.CLASS)
 annotation class Keyspace(val value: String)
