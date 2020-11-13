@@ -9,7 +9,7 @@ import misk.hibernate.Movies
 import misk.hibernate.MoviesTestModule
 import misk.hibernate.Query
 import misk.hibernate.Session
-import misk.hibernate.Shard
+import misk.vitess.Shard
 import misk.hibernate.Transacter
 import misk.hibernate.allowTableScan
 import misk.hibernate.createInSameShard

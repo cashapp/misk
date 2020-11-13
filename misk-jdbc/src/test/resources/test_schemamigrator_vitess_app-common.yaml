@@ -1,0 +1,5 @@
+data_source:
+  type: VITESS_MYSQL
+  username: vt_app
+  password: whatever
+  vitess_schema_resource_root: classpath:/misk/jdbc/vitess-schema

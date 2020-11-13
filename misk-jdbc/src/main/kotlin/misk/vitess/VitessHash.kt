@@ -1,4 +1,4 @@
-package misk.hibernate
+package misk.vitess
 
 import com.google.common.primitives.Longs
 import java.security.GeneralSecurityException

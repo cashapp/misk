@@ -1,4 +1,4 @@
-package misk.hibernate
+package misk.vitess
 
 data class Keyspace(val name: String) {
   init {

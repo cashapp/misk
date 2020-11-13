@@ -2,7 +2,9 @@ package misk.hibernate
 
 import com.google.common.annotations.VisibleForTesting
 import misk.jdbc.DataSourceConfig
-import java.sql.SQLException
+import misk.vitess.Keyspace
+import misk.vitess.Shard
+import misk.vitess.tabletDoesNotExists
 import javax.persistence.PersistenceException
 
 /**
@@ -130,20 +132,3 @@ class RetryTransactionException(
   message: String? = null,
   cause: Throwable? = null
 ) : Exception(message, cause)
-
-fun getRooCause(throwable: Throwable): Throwable {
-  var rootCause = throwable
-  while (rootCause.cause != null && rootCause.cause != rootCause) {
-    rootCause = rootCause.cause!!
-  }
-  return rootCause
-}
-
-fun tabletDoesNotExists(e: Exception): Boolean {
-  val rootCause = getRooCause(e)
-  val noMasterTabletRegex = ".*target:.*master.*no valid tablet:.*".toRegex(RegexOption.IGNORE_CASE)
-  val isSQLException = rootCause is SQLException
-  val isNoMasterTablet = noMasterTabletRegex.matches(rootCause.message!!)
-
-  return isSQLException && isNoMasterTablet
-}

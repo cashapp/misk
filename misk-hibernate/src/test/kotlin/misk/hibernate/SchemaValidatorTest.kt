@@ -6,6 +6,7 @@ import misk.concurrent.ExecutorServiceFactory
 import misk.config.Config
 import misk.config.MiskConfig
 import misk.environment.Environment
+import misk.environment.EnvironmentModule
 import misk.inject.KAbstractModule
 import misk.inject.asSingleton
 import misk.inject.keyOf
@@ -14,12 +15,10 @@ import misk.inject.toKey
 import misk.jdbc.DataSourceConfig
 import misk.jdbc.DataSourceConnector
 import misk.jdbc.DataSourceService
-import misk.jdbc.PingDatabaseService
-import misk.jdbc.RealDatabasePool
-import misk.resources.ResourceLoader
+import misk.jdbc.JdbcModule
+import misk.jdbc.SchemaMigratorService
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
-import misk.database.StartDatabaseService
 import okio.ByteString
 import org.assertj.core.api.Assertions.assertThat
 import org.hibernate.SessionFactory
@@ -46,20 +45,12 @@ internal class SchemaValidatorTest {
 
   inner class TestModule : KAbstractModule() {
     override fun configure() {
+      install(EnvironmentModule(Environment.TESTING))
       install(MiskTestingServiceModule())
 
       val qualifier = ValidationDb::class
 
-      val dataSourceService = DataSourceService(
-          qualifier = qualifier,
-          baseConfig = config.data_source,
-          environment = Environment.TESTING,
-          dataSourceDecorators = emptySet(),
-          databasePool = RealDatabasePool
-      )
-
       val injectorServiceProvider = getProvider(HibernateInjectorAccess::class.java)
-
       val entitiesProvider = getProvider(setOfType(HibernateEntity::class).toKey(qualifier))
 
       val sessionFactoryProvider = getProvider(keyOf<SessionFactory>(qualifier))
@@ -67,7 +58,6 @@ internal class SchemaValidatorTest {
           .annotatedWith<ValidationDb>()
           .toProvider(keyOf<SessionFactoryService>(qualifier))
 
-      val transacterProvider = getProvider(keyOf<Transacter>(qualifier))
       bind(keyOf<Transacter>(qualifier)).toProvider(object : Provider<Transacter> {
         @Inject lateinit var executorServiceFactory: ExecutorServiceFactory
         override fun get(): RealTransacter = RealTransacter(
@@ -79,18 +69,9 @@ internal class SchemaValidatorTest {
         )
       }).asSingleton()
 
-      val schemaMigratorProvider = getProvider(keyOf<SchemaMigrator>(qualifier))
-      val connectorProvider = getProvider(keyOf<DataSourceConnector>(qualifier))
+      install(JdbcModule(qualifier, config.data_source))
 
-      bind(keyOf<SchemaMigrator>(qualifier)).toProvider(object : Provider<SchemaMigrator> {
-        @Inject lateinit var resourceLoader: ResourceLoader
-        override fun get(): SchemaMigrator = SchemaMigrator(
-            qualifier = qualifier,
-            resourceLoader = resourceLoader,
-            transacter = transacterProvider,
-            connector = connectorProvider.get()
-        )
-      }).asSingleton()
+      val connectorProvider = getProvider(keyOf<DataSourceConnector>(qualifier))
 
       install(object : HibernateEntityModule(qualifier) {
         override fun configureHibernate() {
@@ -102,38 +83,13 @@ internal class SchemaValidatorTest {
         }
       })
 
-      install(ServiceModule<StartDatabaseService>(qualifier))
-      bind(keyOf<StartDatabaseService>(qualifier))
-          .toInstance(StartDatabaseService(qualifier, Environment.TESTING, config.data_source))
-
-      install(ServiceModule<PingDatabaseService>(qualifier)
-          .dependsOn<StartDatabaseService>(qualifier))
-      bind(keyOf<PingDatabaseService>(qualifier))
-          .toInstance(PingDatabaseService(config.data_source, Environment.TESTING))
-
-      install(ServiceModule<DataSourceService>(qualifier)
-          .dependsOn<PingDatabaseService>(qualifier))
-      bind(keyOf<DataSourceService>(qualifier)).toInstance(dataSourceService)
-      bind(keyOf<DataSource>(qualifier)).toProvider(dataSourceService)
-
-      bind(keyOf<DataSourceConnector>(qualifier))
-          .toProvider(getProvider(keyOf<DataSourceService>(qualifier)))
-      install(ServiceModule<SchemaMigratorService>(qualifier))
-      bind(keyOf<SchemaMigratorService>(qualifier)).toProvider(Provider {
-        SchemaMigratorService(
-            qualifier = ValidationDb::class,
-            environment = Environment.TESTING,
-            schemaMigratorProvider = schemaMigratorProvider,
-            connectorProvider = connectorProvider
-        )
-      }).asSingleton()
-
+      val dataSourceProvider = getProvider(keyOf<DataSource>(qualifier))
       bind(keyOf<TransacterService>(qualifier)).to(keyOf<SessionFactoryService>(qualifier))
       bind(keyOf<SessionFactoryService>(qualifier)).toProvider(Provider {
         SessionFactoryService(
             qualifier = qualifier,
             connector = connectorProvider.get(),
-            dataSource = dataSourceService,
+            dataSource = dataSourceProvider,
             hibernateInjectorAccess = injectorServiceProvider.get(),
             entityClasses = entitiesProvider.get())
       }).asSingleton()

@@ -1,0 +1,49 @@
+{
+  "sharded": true,
+  "vindexes": {
+    "hash": {
+      "type": "hash"
+    },
+    "character_name_lookup": {
+      "type": "lookup_hash",
+      "params": {
+        "table": "main.character_name_lookup",
+        "from": "name",
+        "to": "movie_id",
+
+        "autocommit": "true"
+      },
+      "owner": "characters"
+    }
+  },
+  "tables": {
+    "movies": {
+      "column_vindexes": [
+        {
+          "column": "id",
+          "name": "hash"
+        }
+      ],
+      "auto_increment": {
+        "column": "id",
+        "sequence": "main.movies_seq"
+      }
+    },
+    "characters": {
+      "column_vindexes": [
+        {
+          "column": "movie_id",
+          "name": "hash"
+        },
+        {
+          "column": "name",
+          "name": "character_name_lookup"
+        }
+      ],
+      "auto_increment": {
+        "column": "id",
+        "sequence": "main.characters_seq"
+      }
+    }
+  }
+}

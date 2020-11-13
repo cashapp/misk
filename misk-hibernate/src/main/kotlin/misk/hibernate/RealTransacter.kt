@@ -4,12 +4,16 @@ import com.google.common.base.Supplier
 import com.google.common.base.Suppliers
 import misk.backoff.ExponentialBackoff
 import misk.concurrent.ExecutorServiceFactory
-import misk.hibernate.Shard.Companion.SINGLE_SHARD_SET
+import misk.vitess.Shard.Companion.SINGLE_SHARD_SET
 import misk.jdbc.DataSourceConfig
 import misk.jdbc.DataSourceType
 import misk.jdbc.map
 import misk.jdbc.uniqueString
 import misk.logging.getLogger
+import misk.vitess.Destination
+import misk.vitess.Keyspace
+import misk.vitess.Shard
+import misk.vitess.TabletType
 import org.hibernate.FlushMode
 import org.hibernate.SessionFactory
 import org.hibernate.StaleObjectStateException

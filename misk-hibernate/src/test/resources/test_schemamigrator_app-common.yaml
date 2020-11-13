@@ -1,8 +1,0 @@
-data_source:
-  type: MYSQL
-  username: root
-  password: ""
-  database: schemamigrator
-  migrations_resources:
-    - memory:/migrations/sql
-    - memory:/migrations/library

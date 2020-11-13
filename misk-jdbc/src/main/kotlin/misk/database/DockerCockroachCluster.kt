@@ -17,6 +17,7 @@ import misk.jdbc.uniqueInt
 import misk.resources.ResourceLoader
 import mu.KotlinLogging
 import java.sql.Connection
+import java.sql.SQLException
 import java.time.Duration
 import java.util.Properties
 import java.util.concurrent.atomic.AtomicBoolean
@@ -197,10 +198,18 @@ class DockerCockroachCluster(
 
   private fun createDatabase() {
     cluster.openConnection().use { c ->
-      val statement = c.createStatement()
-      // TODO might need something like "does not exist" if we're reusing clusters
-      statement.addBatch("CREATE DATABASE ${config.database}")
-      statement.executeBatch()
+      c.createStatement().use { statement ->
+        try {
+          // TODO might need something like "does not exist" if we're reusing clusters
+          statement.addBatch("CREATE DATABASE ${config.database}")
+          statement.executeBatch()
+        } catch (e: SQLException) {
+          if (!e.message!!.contains("already exists")) {
+            throw e
+          }
+          Unit
+        }
+      }
     }
   }
 

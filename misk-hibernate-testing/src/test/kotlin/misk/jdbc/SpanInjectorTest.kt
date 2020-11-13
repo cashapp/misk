@@ -1,7 +1,6 @@
 package misk.jdbc
 
 import datadog.trace.core.DDSpan
-import io.opentracing.Span
 import datadog.opentracing.DDTracer
 import datadog.trace.common.writer.Writer
 import net.ttddyy.dsproxy.transform.TransformInfo

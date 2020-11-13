@@ -2,7 +2,6 @@ package misk.hibernate
 
 import com.google.inject.util.Modules
 import misk.MiskTestingServiceModule
-import misk.config.Config
 import misk.config.MiskConfig
 import misk.environment.DeploymentModule
 import misk.environment.Environment
@@ -50,12 +49,4 @@ class MoviesTestModule(
     }
   }
 
-  data class MoviesConfig(
-    val vitess_data_source: DataSourceConfig,
-    val vitess_mysql_data_source: DataSourceConfig,
-    val mysql_data_source: DataSourceConfig,
-    val cockroachdb_data_source: DataSourceConfig,
-    val postgresql_data_source: DataSourceConfig,
-    val tidb_data_source: DataSourceConfig
-  ) : Config
 }

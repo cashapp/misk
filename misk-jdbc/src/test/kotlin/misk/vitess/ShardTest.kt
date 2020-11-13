@@ -1,5 +1,7 @@
-package misk.hibernate
+package misk.vitess
 
+import misk.vitess.Keyspace
+import misk.vitess.Shard
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 

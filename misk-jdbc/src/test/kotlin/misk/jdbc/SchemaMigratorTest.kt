@@ -1,74 +1,105 @@
-package misk.hibernate
+package misk.jdbc
 
 import com.google.common.collect.Iterables.getOnlyElement
 import com.google.inject.util.Modules
 import misk.MiskTestingServiceModule
 import misk.config.Config
 import misk.config.MiskConfig
+import misk.database.StartDatabaseService
 import misk.environment.Environment
 import misk.environment.EnvironmentModule
-import misk.jdbc.DataSourceConfig
-import misk.jdbc.DataSourceService
 import misk.resources.ResourceLoader
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
+import misk.vitess.Shard
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.sql.SQLException
 import javax.inject.Inject
-import javax.inject.Provider
-import javax.persistence.PersistenceException
 import kotlin.test.assertFailsWith
 
 @MiskTest(startService = false)
-internal class SchemaMigratorTest {
+internal class MySQLSchemaMigratorTest : SchemaMigratorTest(DataSourceType.MYSQL)
+
+@MiskTest(startService = false)
+internal class PostgreSQLSchemaMigratorTest : SchemaMigratorTest(DataSourceType.POSTGRESQL)
+
+@MiskTest(startService = false)
+internal class CockroachdbSchemaMigratorTest : SchemaMigratorTest(DataSourceType.COCKROACHDB)
+
+@MiskTest(startService = false)
+internal class TidbSchemaMigratorTest : SchemaMigratorTest(DataSourceType.TIDB)
+
+internal abstract class SchemaMigratorTest(val type: DataSourceType) {
   val defaultEnv = Environment.TESTING
-  val config = MiskConfig.load<RootConfig>("test_schemamigrator_app", defaultEnv)
+
+  val appConfig = MiskConfig.load<RootConfig>("test_schemamigrator_app", defaultEnv)
+  val config = selectDataSourceConfig(appConfig)
 
   @MiskTestModule
   val module = Modules.combine(
       EnvironmentModule(Environment.TESTING),
       MiskTestingServiceModule(),
-      HibernateModule(Movies::class, config.data_source)
+      JdbcModule(Movies::class, config)
   )
 
+  private fun selectDataSourceConfig(config: RootConfig): DataSourceConfig {
+    return when (type) {
+      DataSourceType.MYSQL -> config.mysql_data_source
+      DataSourceType.COCKROACHDB -> config.cockroachdb_data_source
+      DataSourceType.POSTGRESQL -> config.postgresql_data_source
+      DataSourceType.TIDB -> config.tidb_data_source
+      DataSourceType.HSQLDB -> throw RuntimeException("Not supported (yet?)")
+      else -> throw java.lang.RuntimeException("unexpected data source type $type")
+    }
+  }
+
   @Inject lateinit var resourceLoader: ResourceLoader
-  @Inject @Movies lateinit var transacter: Provider<Transacter>
   @Inject @Movies lateinit var dataSourceService: DataSourceService
-  @Inject @Movies lateinit var sessionFactoryService: SessionFactoryService
   @Inject @Movies lateinit var schemaMigrator: SchemaMigrator
   @Inject @Movies lateinit var schemaMigratorService: SchemaMigratorService
+  @Inject @Movies lateinit var startDatabaseService: StartDatabaseService
 
   @AfterEach
   internal fun tearDown() {
-    if (sessionFactoryService.isRunning) {
-      sessionFactoryService.get().openSession().use { session ->
-        session.doReturningWork { connection ->
-          val statement = connection.createStatement()
-          statement.addBatch("DROP TABLE IF EXISTS schema_version")
-          statement.addBatch("DROP TABLE IF EXISTS table_1")
-          statement.addBatch("DROP TABLE IF EXISTS table_2")
-          statement.addBatch("DROP TABLE IF EXISTS table_3")
-          statement.addBatch("DROP TABLE IF EXISTS table_4")
-          statement.addBatch("DROP TABLE IF EXISTS library_table")
-          statement.addBatch("DROP TABLE IF EXISTS merged_library_table")
-          statement.executeBatch()
-        }
-      }
+    if (dataSourceService.isRunning) {
+      dropTables()
+    }
+    if (startDatabaseService.isRunning) {
+      startDatabaseService.stopAsync()
+      startDatabaseService.awaitTerminated()
     }
   }
 
   @BeforeEach internal fun setUp() {
+    startDatabaseService.startAsync()
+    startDatabaseService.awaitRunning()
     dataSourceService.startAsync()
     dataSourceService.awaitRunning()
-    sessionFactoryService.startAsync()
-    sessionFactoryService.awaitRunning()
+
+    dropTables()
+  }
+
+  private fun dropTables() {
+    dataSourceService.get().connection.use { connection ->
+      val statement = connection.createStatement()
+      statement.addBatch("DROP TABLE IF EXISTS schema_version")
+      statement.addBatch("DROP TABLE IF EXISTS table_1")
+      statement.addBatch("DROP TABLE IF EXISTS table_2")
+      statement.addBatch("DROP TABLE IF EXISTS table_3")
+      statement.addBatch("DROP TABLE IF EXISTS table_4")
+      statement.addBatch("DROP TABLE IF EXISTS library_table")
+      statement.addBatch("DROP TABLE IF EXISTS merged_library_table")
+      statement.addBatch("COMMIT")
+      statement.executeBatch()
+    }
   }
 
   @Test fun initializeAndMigrate() {
-    val mainSource = config.data_source.migrations_resources!![0]
-    val librarySource = config.data_source.migrations_resources!![1]
+    val mainSource = config.migrations_resources!![0]
+    val librarySource = config.migrations_resources!![1]
 
     resourceLoader.put("$mainSource/v1002__movies.sql", """
         |CREATE TABLE table_2 (name varchar(255))
@@ -89,7 +120,7 @@ internal class SchemaMigratorTest {
     assertThat(tableExists("table_4")).isFalse()
     assertThat(tableExists("library_table")).isFalse()
     assertThat(tableExists("merged_library_table")).isFalse()
-    assertFailsWith<PersistenceException> {
+    assertFailsWith<SQLException> {
       schemaMigrator.appliedMigrations(Shard.SINGLE_SHARD)
     }
 
@@ -153,10 +184,10 @@ internal class SchemaMigratorTest {
   @Test fun requireAllWithMissingMigrations() {
     schemaMigrator.initialize()
 
-    resourceLoader.put("${config.data_source.migrations_resources!![0]}/v1001__foo.sql", """
+    resourceLoader.put("${config.migrations_resources!![0]}/v1001__foo.sql", """
         |CREATE TABLE table_1 (name varchar(255))
         |""".trimMargin())
-    resourceLoader.put("${config.data_source.migrations_resources!![1]}/v1002__foo.sql", """
+    resourceLoader.put("${config.migrations_resources!![1]}/v1002__foo.sql", """
         |CREATE TABLE table_1 (name varchar(255))
         |""".trimMargin())
 
@@ -164,15 +195,15 @@ internal class SchemaMigratorTest {
       schemaMigrator.requireAll()
     }).hasMessage("""
           |Movies is missing migrations:
-          |  ${config.data_source.migrations_resources!![0]}/v1001__foo.sql
-          |  ${config.data_source.migrations_resources!![1]}/v1002__foo.sql""".trimMargin())
+          |  ${config.migrations_resources!![0]}/v1001__foo.sql
+          |  ${config.migrations_resources!![1]}/v1002__foo.sql""".trimMargin())
   }
 
   @Test fun errorOnDuplicateMigrations() {
-    resourceLoader.put("${config.data_source.migrations_resources!![0]}/v1001__foo.sql", """
+    resourceLoader.put("${config.migrations_resources!![0]}/v1001__foo.sql", """
         |CREATE TABLE table_1 (name varchar(255))
         |""".trimMargin())
-    resourceLoader.put("${config.data_source.migrations_resources!![0]}/v1001__bar.sql", """
+    resourceLoader.put("${config.migrations_resources!![0]}/v1001__bar.sql", """
         |CREATE TABLE table_2 (name varchar(255))
         |""".trimMargin())
 
@@ -181,6 +212,44 @@ internal class SchemaMigratorTest {
     }).hasMessageContaining("Duplicate migrations found")
   }
 
+  @Test fun healthChecks() {
+    resourceLoader.put("${config.migrations_resources!![0]}/v1002__movies.sql", """
+        |CREATE TABLE table_2 (name varchar(255))
+        |""".trimMargin())
+    resourceLoader.put("${config.migrations_resources!![0]}/v1001__movies.sql", """
+        |CREATE TABLE table_1 (name varchar(255))
+        |""".trimMargin())
+
+    schemaMigratorService.startAsync()
+    schemaMigratorService.awaitRunning()
+
+    assertThat(getOnlyElement(schemaMigratorService.status().messages)).isEqualTo(
+        "SchemaMigratorService: Movies is migrated: " +
+            "MigrationState(shards={keyspace/0=(all 2 migrations applied)})")
+  }
+
+  private fun tableExists(table: String): Boolean {
+    try {
+      dataSourceService.get().connection.use { connection ->
+        connection.createStatement().use {
+          it.execute("SELECT * FROM $table LIMIT 1")
+        }
+      }
+      return true
+    } catch (e: SQLException) {
+      return false
+    }
+  }
+
+  data class RootConfig(
+    val mysql_data_source: DataSourceConfig,
+    val cockroachdb_data_source: DataSourceConfig,
+    val postgresql_data_source: DataSourceConfig,
+    val tidb_data_source: DataSourceConfig
+  ) : Config
+}
+
+internal class NamedspacedMigrationTest {
   @Test fun resourceVersionParsing() {
     assertThat(namespacedMigrationOrNull("foo/migrations/v100__bar.sql")).isEqualTo(
         NamedspacedMigration(100, "foo/migrations/"))
@@ -199,33 +268,6 @@ internal class SchemaMigratorTest {
     assertThat(namespacedMigrationOrNull("foo/luv1__franklin.sql")).isNull()
   }
 
-  @Test fun healthChecks() {
-    resourceLoader.put("${config.data_source.migrations_resources!![0]}/v1002__movies.sql", """
-        |CREATE TABLE table_2 (name varchar(255))
-        |""".trimMargin())
-    resourceLoader.put("${config.data_source.migrations_resources!![0]}/v1001__movies.sql", """
-        |CREATE TABLE table_1 (name varchar(255))
-        |""".trimMargin())
-
-    schemaMigratorService.startAsync()
-    schemaMigratorService.awaitRunning()
-
-    assertThat(getOnlyElement(schemaMigratorService.status().messages)).isEqualTo(
-        "SchemaMigratorService: Movies is migrated: " +
-            "MigrationState(shards={keyspace/0=(all 2 migrations applied)})")
-  }
-
-  private fun tableExists(table: String): Boolean {
-    try {
-      transacter.get().transaction { session ->
-        session.hibernateSession.createNativeQuery("SELECT * FROM $table LIMIT 1").list()
-      }
-      return true
-    } catch (e: PersistenceException) {
-      return false
-    }
-  }
-
   private fun namespacedMigrationOrNull(resource: String): NamedspacedMigration? {
     try {
       return NamedspacedMigration.fromResourcePath(resource, "")
@@ -233,6 +275,4 @@ internal class SchemaMigratorTest {
       return null
     }
   }
-
-  data class RootConfig(val data_source: DataSourceConfig) : Config
 }

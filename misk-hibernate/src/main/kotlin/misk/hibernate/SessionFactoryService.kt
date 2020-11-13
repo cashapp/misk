@@ -99,10 +99,10 @@ internal class SessionFactoryService(
       }
       if (config.query_timeout != null) {
         applySetting("javax.persistence.query.timeout", Integer.valueOf(
-            config.query_timeout.toMillis().toInt()))
+            config.query_timeout!!.toMillis().toInt()))
       }
       if (config.jdbc_statement_batch_size != null) {
-        require(config.jdbc_statement_batch_size > 0) {
+        require(config.jdbc_statement_batch_size!! > 0) {
           "Invalid jdbc_statement_batch_size: must be > 0."
         }
         applySetting(AvailableSettings.STATEMENT_BATCH_SIZE, config.jdbc_statement_batch_size)

@@ -2,7 +2,6 @@ package misk.hibernate
 
 import ch.qos.logback.classic.Level
 import com.google.common.collect.Iterables.getOnlyElement
-import io.netty.handler.proxy.ProxyHandler
 import misk.hibernate.Operator.LT
 import misk.logging.LogCollector
 import misk.testing.MiskTest
@@ -10,7 +9,6 @@ import misk.testing.MiskTestModule
 import misk.time.FakeClock
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import java.lang.reflect.Proxy
 import java.time.Duration.ofSeconds
 import java.time.LocalDate
 import javax.inject.Inject

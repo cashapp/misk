@@ -1,8 +1,7 @@
-package misk.hibernate
+package misk.vitess
 
 import com.google.common.base.Strings
 import com.google.common.base.Suppliers
-import com.google.common.collect.ImmutableList
 import com.google.common.collect.ImmutableSet
 import com.google.common.collect.Range
 import okio.ByteString
@@ -82,4 +81,10 @@ data class Shard(val keyspace: Keyspace, val name: String) {
       return Shard(Keyspace(keyspace), shard)
     }
   }
+}
+
+fun checkValidShardIdentifier(identifier: String) {
+  check(!identifier.isBlank())
+  check(!identifier.contains(' '))
+  check(!identifier.contains('/'))
 }

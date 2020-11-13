@@ -1,17 +1,25 @@
-package misk.hibernate
+package misk.jdbc
 
 import com.google.common.annotations.VisibleForTesting
 import com.google.common.base.Stopwatch
+import com.google.common.base.Supplier
+import com.google.common.base.Suppliers
 import com.google.common.collect.ImmutableList
-import misk.jdbc.DataSourceConnector
 import misk.logging.getLogger
 import misk.resources.ResourceLoader
-import org.hibernate.query.Query
+import misk.vitess.Keyspace
+import misk.vitess.Shard
+import misk.vitess.Shard.Companion.SINGLE_SHARD_SET
+import misk.vitess.failSafeRead
+import misk.vitess.target
+import java.sql.Connection
+import java.sql.SQLException
+import java.sql.SQLRecoverableException
 import java.util.SortedSet
 import java.util.TreeSet
 import java.util.regex.Pattern
 import javax.inject.Provider
-import javax.persistence.PersistenceException
+import javax.sql.DataSource
 import kotlin.reflect.KClass
 
 private val logger = getLogger<SchemaMigrator>()
@@ -95,7 +103,8 @@ internal data class NamedspacedMigration(
 internal class SchemaMigrator(
   private val qualifier: KClass<out Annotation>,
   private val resourceLoader: ResourceLoader,
-  private val transacter: Provider<Transacter>,
+  private val dataSourceConfig: DataSourceConfig,
+  private val dataSource: Provider<DataSource>,
   private val connector: DataSourceConnector
 ) {
 
@@ -131,11 +140,11 @@ internal class SchemaMigrator(
   /** Creates the `schema_version` table if it does not exist. Returns the applied migrations. */
   fun initialize(): SortedSet<NamedspacedMigration> {
     val noMigrations =
-        transacter.get().shards().all { shard -> getMigrationsResources(shard.keyspace).isEmpty() }
+        shards.get().all { shard -> getMigrationsResources(shard.keyspace).isEmpty() }
     if (noMigrations) {
       return sortedSetOf()
     }
-    return transacter.get().shards().flatMapTo(TreeSet()) { shard ->
+    return shards.get().flatMapTo(TreeSet()) { shard ->
       try {
         val result = appliedMigrations(shard)
         logger.info {
@@ -143,17 +152,20 @@ internal class SchemaMigrator(
               " latest is ${result.lastOrNull()}"
         }
         return result
-      } catch (e: PersistenceException) {
-        transacter.get().transaction(shard) { s ->
-          s.useConnection { c ->
-            val statement = c.createStatement()
-            statement.addBatch("""
-            |CREATE TABLE schema_version (
-            |  version varchar(50) PRIMARY KEY,
-            |  installed_by varchar(30) DEFAULT NULL
-            |);
-            |""".trimMargin())
-            statement.executeBatch()
+      } catch (e: SQLException) {
+        dataSource.get().connection.use {
+          it.target(shard) { c ->
+            c.createStatement().use { statement ->
+              statement.execute("""
+                |CREATE TABLE schema_version (
+                |  version varchar(50) PRIMARY KEY,
+                |  installed_by varchar(30) DEFAULT NULL
+                |);
+                |""".trimMargin())
+            }
+            c.createStatement().use { statement ->
+              statement.execute("COMMIT")
+            }
           }
           sortedSetOf<NamedspacedMigration>()
         }
@@ -161,18 +173,48 @@ internal class SchemaMigrator(
     }
   }
 
+  val shards: Supplier<Set<Shard>> = Suppliers.memoize {
+    if (!dataSourceConfig.type.isVitess) {
+      SINGLE_SHARD_SET
+    } else {
+      dataSource.get().connection.use { connection ->
+        connection.createStatement().use { s ->
+          val shards = s.executeQuery("SHOW VITESS_SHARDS")
+              .map { rs -> Shard.parse(rs.getString(1)) }
+              .toSet()
+          if (shards.isEmpty()) {
+            throw SQLRecoverableException("Failed to load list of shards")
+          }
+          shards
+        }
+      }
+    }
+  }
+
   /**
-   * Returns the versions of applied migrations. Throws a [javax.persistence.PersistenceException]
+   * Returns the versions of applied migrations. Throws a [java.sql.SQLException]
    * if the migrations table has not been initialized.
    */
   fun appliedMigrations(shard: Shard): SortedSet<NamedspacedMigration> {
-    return transacter.get().failSafeRead(shard) { session ->
-      @Suppress("UNCHECKED_CAST") // createNativeQuery returns a raw Query.
-      val query = session.hibernateSession.createNativeQuery(
-        "SELECT version FROM schema_version") as Query<String>
+    val listMigrations = { conn: Connection ->
+      conn.createStatement().use { stmt ->
+        val results = mutableSetOf<String>()
+        stmt.executeQuery("SELECT version FROM schema_version").use { resultSet ->
+          while (resultSet.next()) {
+            results.add(resultSet.getString(1))
+          }
+        }
+        results.map { NamedspacedMigration.fromNamespacedVersion(it) }.toSortedSet()
+      }
+    }
 
-      session.disableChecks(listOf(Check.TABLE_SCAN)) {
-        query.list().map { NamedspacedMigration.fromNamespacedVersion(it) }.toSortedSet()
+    if (dataSourceConfig.type.isVitess) {
+      return dataSource.get().connection.use {
+        it.failSafeRead(shard, listMigrations)
+      }
+    } else {
+      return dataSource.get().connection.use {
+        listMigrations(it)
       }
     }
   }
@@ -182,29 +224,33 @@ internal class SchemaMigrator(
     require(author.matches(Regex("\\w+"))) // Prevent SQL injection.
 
     val result = mutableMapOf<Shard, ShardMigrationState>()
-    for (shard in transacter.get().shards()) {
+    for (shard in shards.get()) {
       val availableMigrations = availableMigrations(shard.keyspace)
       val shardMigrationState = ShardMigrationState(availableMigrations, appliedMigrations)
       for (migration in shardMigrationState.missingMigrations()) {
         val migrationSql = resourceLoader.utf8(migration.path)
         val stopwatch = Stopwatch.createStarted()
 
-        transacter.get().transaction(shard) { s ->
-          s.useConnection { c ->
-            val migrationStatement = c.createStatement()
-            migrationStatement.addBatch(migrationSql)
-            migrationStatement.executeBatch()
+        dataSource.get().connection.use {
+          it.target(shard) { c ->
+            c.createStatement().use { migrationStatement ->
+              migrationStatement.addBatch(migrationSql)
+              migrationStatement.executeBatch()
+            }
 
-            val schemaVersion = c.prepareStatement("""
+            c.prepareStatement("""
             |INSERT INTO schema_version (version, installed_by) VALUES (?, ?);
-            |""".trimMargin())
-            schemaVersion.setString(1, migration.toNamespacedVersion())
-            schemaVersion.setString(2, author)
-            schemaVersion.executeUpdate()
-          }
-        }
+            |""".trimMargin()).use { schemaVersion ->
+              schemaVersion.setString(1, migration.toNamespacedVersion())
+              schemaVersion.setString(2, author)
+              schemaVersion.executeUpdate()
+            }
 
-        logger.info { "${qualifier.simpleName} applied $migration in $stopwatch" }
+            c.createStatement().use { stmt -> stmt.execute("COMMIT") }
+          }
+
+          logger.info { "${qualifier.simpleName} applied $migration in $stopwatch" }
+        }
       }
 
       // All available migrations are applied, so use availableMigrations for both properties.
@@ -218,11 +264,11 @@ internal class SchemaMigrator(
   fun requireAll(): MigrationState {
     try {
       val result = mutableMapOf<Shard, ShardMigrationState>()
-      for (it in transacter.get().shards()) {
+      for (it in shards.get()) {
         result[it] = requireAll(it)
       }
       return MigrationState(result)
-    } catch (e: PersistenceException) {
+    } catch (e: SQLException) {
       throw IllegalStateException("${qualifier.simpleName} is not ready", e)
     }
   }

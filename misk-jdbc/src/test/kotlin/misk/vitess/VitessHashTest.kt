@@ -1,4 +1,4 @@
-package misk.hibernate
+package misk.vitess
 
 import okio.ByteString.Companion.decodeHex
 import org.assertj.core.api.Assertions.assertThat
