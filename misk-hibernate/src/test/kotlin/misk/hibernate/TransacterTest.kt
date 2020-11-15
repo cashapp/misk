@@ -794,12 +794,6 @@ class TidbTransacterTest : TransacterTest() {
 }
 
 @MiskTest(startService = true)
-class VitessTransacterTest : TransacterTest() {
-  @MiskTestModule
-  val module = MoviesTestModule(DataSourceType.VITESS)
-}
-
-@MiskTest(startService = true)
 class PostgresqlTransacterTest : TransacterTest() {
   @MiskTestModule
   val module = MoviesTestModule(DataSourceType.POSTGRESQL)

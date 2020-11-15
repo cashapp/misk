@@ -13,7 +13,7 @@ class SchemaMigratorService internal constructor(
   private val environment: Environment,
   private val schemaMigratorProvider: Provider<SchemaMigrator>, // Lazy!
   private val connectorProvider: Provider<DataSourceConnector>
-) : AbstractIdleService(), HealthCheck {
+) : AbstractIdleService(), HealthCheck, DatabaseReadyService {
   private lateinit var migrationState: MigrationState
 
   override fun startUp() {

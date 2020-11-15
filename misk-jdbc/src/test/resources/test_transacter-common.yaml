@@ -1,0 +1,24 @@
+mysql_data_source:
+  type: MYSQL
+  database: movies
+  username: root
+  password: ""
+  migrations_resource: classpath:/misk/jdbc/test_transacter-mysql-migrations
+tidb_data_source:
+  type: TIDB
+  database: movies
+  username: root
+  password: ""
+  migrations_resource: classpath:/misk/jdbc/test_transacter-mysql-migrations
+postgresql_data_source:
+  type: POSTGRESQL
+  database: movies
+  username: postgres
+  password: password
+  migrations_resource: classpath:/misk/jdbc/test_transacter-postgres-migrations
+cockroachdb_data_source:
+  type: COCKROACHDB
+  database: movies
+  username: root
+  password: ""
+  migrations_resource: classpath:/misk/jdbc/test_transacter-postgres-migrations

@@ -10,7 +10,6 @@ import java.time.format.DateTimeFormatter
 import java.util.Collections
 import java.util.concurrent.LinkedBlockingDeque
 import java.util.regex.Pattern
-import javax.persistence.PersistenceException
 
 /**
  * A [DatabasePool] that is used in tests to get a unique database for each test suite.
@@ -58,7 +57,6 @@ class TestDatabasePool(
    *
    * @param retention Must be longer than any test could possibly run for.
    */
-  @Throws(PersistenceException::class)
   fun pruneOldDatabases(retention: Duration = Duration.ofDays(2)) {
     for (pool in poolsByKey.values) {
       pool.pruneOldDatabases(retention)
@@ -169,7 +167,6 @@ class TestDatabasePool(
      *
      * Throws [PersistenceException] if the database cannot be dropped (i.e. it does not exist).
      */
-    @Throws(PersistenceException::class)
     fun dropDatabase(name: String)
 
     /**
@@ -177,7 +174,6 @@ class TestDatabasePool(
      *
      * Throws [PersistenceException] if the database already exists.
      */
-    @Throws(PersistenceException::class)
     fun createDatabase(name: String)
   }
 

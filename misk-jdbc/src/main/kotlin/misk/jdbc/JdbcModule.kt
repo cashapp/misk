@@ -72,15 +72,15 @@ class JdbcModule(
     val schemaMigratorKey = SchemaMigrator::class.toKey(qualifier)
     val schemaMigratorProvider = getProvider(schemaMigratorKey)
     val connectorProvider = getProvider(keyOf<DataSourceConnector>(qualifier))
-    val dataSourceProvider = getProvider(keyOf<DataSource>(qualifier))
 
+    val dataSourceServiceProvider = getProvider(keyOf<DataSourceService>(qualifier))
     bind(schemaMigratorKey).toProvider(object : Provider<SchemaMigrator> {
       @Inject lateinit var resourceLoader: ResourceLoader
       override fun get(): SchemaMigrator = SchemaMigrator(
           qualifier = qualifier,
           resourceLoader = resourceLoader,
           dataSourceConfig = config,
-          dataSource = dataSourceProvider,
+          dataSource = dataSourceServiceProvider.get(),
           connector = connectorProvider.get()
       )
     }).asSingleton()
@@ -147,9 +147,13 @@ class JdbcModule(
       }
     }).asSingleton()
     val dataSourceServiceProvider = getProvider(keyOf<DataSourceService>(qualifier))
+    val dataSourceProvider = getProvider(keyOf<DataSource>(qualifier))
+
     bind(keyOf<DataSourceConnector>(qualifier)).toProvider(dataSourceServiceProvider)
     install(ServiceModule<DataSourceService>(qualifier)
         .dependsOn<PingDatabaseService>(qualifier))
+    bind(keyOf<Transacter>(qualifier))
+      .toProvider(Provider<Transacter> { RealTransacter(dataSourceProvider.get()) })
 
     if (config.type == DataSourceType.VITESS_MYSQL) {
       val spanInjectorDecoratorKey = SpanInjector::class.toKey(qualifier)

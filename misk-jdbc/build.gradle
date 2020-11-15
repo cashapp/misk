@@ -20,6 +20,9 @@ dependencies {
   compile project(':misk')
 
   testCompile project(':misk-testing')
+  testCompile project(':misk-jdbc-testing')
+  testCompile dep.tracingDatadog
+  testCompile dep.openTracingDatadog
 }
 
 afterEvaluate { project ->
