@@ -3,4 +3,4 @@ data_source:
   username: root
   password: ""
   database: truncatetables
-  migrations_resource: classpath:/misk/hibernate/truncatetables-migrations
+  migrations_resource: classpath:/misk/jdbc/truncatetables-migrations

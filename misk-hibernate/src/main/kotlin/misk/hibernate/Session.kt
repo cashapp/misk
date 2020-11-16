@@ -1,5 +1,6 @@
 package misk.hibernate
 
+import misk.jdbc.Check
 import misk.vitess.Keyspace
 import misk.vitess.Shard
 import java.sql.Connection
@@ -58,12 +59,6 @@ interface Session {
    * @throws IllegalStateException when delete is called on a read only session.
    */
   fun <T : DbEntity<T>> delete(entity: T)
-}
-
-enum class Check {
-  FULL_SCATTER,
-  TABLE_SCAN,
-  COWRITE
 }
 
 inline fun <reified T : DbEntity<T>> Session.load(id: Id<T>): T = load(id, T::class)

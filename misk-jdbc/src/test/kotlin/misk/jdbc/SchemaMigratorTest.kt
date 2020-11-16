@@ -66,6 +66,8 @@ internal abstract class SchemaMigratorTest(val type: DataSourceType) {
   internal fun tearDown() {
     if (dataSourceService.isRunning) {
       dropTables()
+      dataSourceService.stopAsync()
+      dataSourceService.awaitTerminated()
     }
     if (startDatabaseService.isRunning) {
       startDatabaseService.stopAsync()
@@ -92,8 +94,8 @@ internal abstract class SchemaMigratorTest(val type: DataSourceType) {
       statement.addBatch("DROP TABLE IF EXISTS table_4")
       statement.addBatch("DROP TABLE IF EXISTS library_table")
       statement.addBatch("DROP TABLE IF EXISTS merged_library_table")
-      statement.addBatch("COMMIT")
       statement.executeBatch()
+      connection.commit()
     }
   }
 
