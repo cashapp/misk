@@ -2,7 +2,7 @@ package misk.hibernate.migrate
 
 import com.google.common.collect.ImmutableList
 import com.google.common.collect.ImmutableSet
-import misk.hibernate.Check
+import misk.jdbc.Check
 import misk.hibernate.DbChild
 import misk.hibernate.DbRoot
 import misk.hibernate.DbTimestampedEntity

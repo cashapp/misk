@@ -1,11 +1,17 @@
-package misk.jdbc
+package misk.vitess
 
 import com.squareup.moshi.Moshi
-import misk.hibernate.Check
-import misk.hibernate.Transacter
-import misk.moshi.adapter
 import misk.database.DockerVitessCluster
 import misk.database.StartDatabaseService
+import misk.jdbc.Check
+import misk.jdbc.CheckDisabler
+import misk.jdbc.DataSourceConfig
+import misk.jdbc.DataSourceDecorator
+import misk.jdbc.DataSourceType
+import misk.jdbc.ExtendedQueryExecutionListener
+import misk.jdbc.ScaleSafetyChecks
+import misk.jdbc.uniqueString
+import misk.moshi.adapter
 import net.ttddyy.dsproxy.proxy.ProxyConfig
 import net.ttddyy.dsproxy.support.ProxyDataSource
 import okhttp3.OkHttpClient
@@ -52,7 +58,6 @@ class VitessScaleSafetyChecks(
   val config: DataSourceConfig,
   val okHttpClient: OkHttpClient,
   val moshi: Moshi,
-  val transacter: Transacter,
   val startDatabaseService: StartDatabaseService
 ) : DataSourceDecorator {
   private var connection: Connection? = null
@@ -84,13 +89,13 @@ class VitessScaleSafetyChecks(
     private val count: ThreadLocal<Int> = ThreadLocal.withInitial { 0 }
 
     override fun beforeQuery(query: String) {
-      if (!transacter.isCheckEnabled(Check.FULL_SCATTER)) return
+      if (!CheckDisabler.isCheckEnabled(Check.FULL_SCATTER)) return
 
       count.set(extractScatterQueryCount())
     }
 
     override fun afterQuery(query: String) {
-      if (!transacter.isCheckEnabled(Check.FULL_SCATTER)) return
+      if (!CheckDisabler.isCheckEnabled(Check.FULL_SCATTER)) return
 
       val newScatterQueryCount = extractScatterQueryCount()
       if (newScatterQueryCount > count.get()) {
@@ -112,7 +117,7 @@ class VitessScaleSafetyChecks(
       ThreadLocal.withInitial { null }
 
     override fun beforeQuery(query: String) {
-      if (!transacter.isCheckEnabled(Check.TABLE_SCAN)) return
+      if (!CheckDisabler.isCheckEnabled(Check.TABLE_SCAN)) return
 
       connect()?.let { connection ->
         mysqlTimeBeforeQuery.set(ScaleSafetyChecks.getLastLoggedCommand(connection))
@@ -120,7 +125,7 @@ class VitessScaleSafetyChecks(
     }
 
     override fun afterQuery(query: String) {
-      if (!transacter.isCheckEnabled(Check.TABLE_SCAN)) return
+      if (!CheckDisabler.isCheckEnabled(Check.TABLE_SCAN)) return
       val mysqlTime = mysqlTimeBeforeQuery.get() ?: return
 
       connect()?.let { c ->
@@ -169,7 +174,7 @@ class VitessScaleSafetyChecks(
     }
 
     override fun afterQuery(query: String) {
-      if (!transacter.isCheckEnabled(Check.COWRITE)) return
+      if (!CheckDisabler.isCheckEnabled(Check.COWRITE)) return
       if (!ScaleSafetyChecks.isDml(query)) return
 
       val queryInDatabase = extractLastDmlQuery() ?: return
@@ -234,7 +239,8 @@ class VitessScaleSafetyChecks(
   private fun extractLastDmlQuery(): String? {
     return connect()?.let { c ->
       c.createStatement().use { s ->
-        s.executeQuery("""
+        s.executeQuery(
+          """
                   SELECT argument
                   FROM mysql.general_log
                   WHERE command_type = 'Query'
@@ -246,7 +252,8 @@ class VitessScaleSafetyChecks(
                   AND NOT argument LIKE 'SELECT argument%'
                   ORDER BY event_time DESC
                   LIMIT 1
-                """.trimIndent())
+                """.trimIndent()
+        )
           .uniqueString()
       }
     }
