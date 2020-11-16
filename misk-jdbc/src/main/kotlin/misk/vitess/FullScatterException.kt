@@ -1,6 +1,6 @@
-package misk.jdbc
+package misk.vitess
 
-import javax.persistence.PersistenceException
+import misk.jdbc.CheckException
 
 /**
  * Exception thrown if we use a scatter query that is too wide in the wrong context.
@@ -17,4 +17,4 @@ import javax.persistence.PersistenceException
 class FullScatterException(
   message: String? = null,
   cause: Throwable? = null
-) : PersistenceException(message, cause)
+) : CheckException(message, cause)

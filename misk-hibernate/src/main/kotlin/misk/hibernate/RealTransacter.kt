@@ -4,6 +4,7 @@ import com.google.common.base.Supplier
 import com.google.common.base.Suppliers
 import misk.backoff.ExponentialBackoff
 import misk.concurrent.ExecutorServiceFactory
+import misk.jdbc.CheckDisabler
 import misk.vitess.Shard.Companion.SINGLE_SHARD_SET
 import misk.jdbc.DataSourceConfig
 import misk.jdbc.DataSourceType
@@ -36,6 +37,9 @@ import javax.persistence.OptimisticLockException
 import kotlin.reflect.KClass
 
 private val logger = getLogger<RealTransacter>()
+
+// Check was moved to misk.jdbc, keeping a type alias to prevent compile breakage for usages.
+typealias Check = misk.jdbc.Check
 
 internal class RealTransacter private constructor(
   private val qualifier: KClass<out Annotation>,
@@ -123,8 +127,7 @@ internal class RealTransacter private constructor(
     get() = threadLatestSession.get()?.inTransaction ?: false
 
   override fun isCheckEnabled(check: Check): Boolean {
-    val session = threadLatestSession.get()
-    return session == null || !session.inTransaction || !session.disabledChecks.contains(check)
+    return CheckDisabler.isCheckEnabled(check)
   }
 
   override fun <T> transaction(block: (session: Session) -> T): T {
@@ -572,28 +575,11 @@ internal class RealTransacter private constructor(
     }
 
     override fun <T> withoutChecks(vararg checks: Check, body: () -> T): T {
-      val previous = disabledChecks
-      val actualChecks = if (checks.isEmpty()) {
-        EnumSet.allOf(Check::class.java)
-      } else {
-        EnumSet.of(checks[0], *checks)
-      }
-      disabledChecks = actualChecks
-      return try {
-        body()
-      } finally {
-        disabledChecks = previous
-      }
+      return CheckDisabler.withoutChecks(*checks) { body() }
     }
 
     override fun <T> disableChecks(checks: Collection<Check>, body: () -> T): T {
-      val previous = disabledChecks
-      disabledChecks = previous + checks
-      return try {
-        body()
-      } finally {
-        disabledChecks = previous
-      }
+      return CheckDisabler.disableChecks(checks) { body() }
     }
 
     internal fun isReadOnly(): Boolean = readOnly

@@ -1,6 +1,6 @@
-package misk.jdbc
+package misk.vitess
 
-import javax.persistence.PersistenceException
+import misk.jdbc.CheckException
 
 /**
  * Thrown when a transaction that writes to multiple entity groups is detected.
@@ -17,4 +17,4 @@ import javax.persistence.PersistenceException
 class CowriteException(
   message: String? = null,
   cause: Throwable? = null
-) : PersistenceException(message, cause)
+) : CheckException(message, cause)

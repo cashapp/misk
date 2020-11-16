@@ -15,7 +15,6 @@ import java.sql.SQLException
 import java.time.Clock
 import java.time.Duration
 import javax.inject.Inject
-import javax.persistence.PersistenceException
 
 @MiskTest(startService = false)
 class TestDatabasePoolTest {
@@ -176,7 +175,7 @@ private class FakeDatabaseBackend @Inject constructor() : TestDatabasePool.Backe
   }
 
   override fun createDatabase(name: String) {
-    if (name in databases) throw PersistenceException()
+    if (name in databases) throw SQLException()
     databases.add(name)
   }
 }

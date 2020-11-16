@@ -5,15 +5,10 @@ import misk.MiskTestingServiceModule
 import misk.config.Config
 import misk.config.MiskConfig
 import misk.environment.Environment
-import misk.hibernate.HibernateEntityModule
-import misk.hibernate.HibernateModule
-import misk.hibernate.Transacter
 import misk.inject.KAbstractModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
-import org.hibernate.SessionFactory
-import org.hibernate.query.Query
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import javax.inject.Inject
@@ -24,18 +19,15 @@ internal class TruncateTablesServiceTest {
   @MiskTestModule
   val module = TestModule()
 
-  @Inject @TestDatasource lateinit var sessionFactory: SessionFactory
   @Inject @TestDatasource lateinit var transacter: Transacter
-  @Inject @TestDatasource lateinit var connector: DataSourceConnector
+  @Inject @TestDatasource lateinit var dataSourceProvider: DataSourceService
 
   @BeforeEach
   internal fun setUp() {
     // Manually truncate because we don't use TruncateTablesService to test itself!
-    transacter.transaction { session ->
-      session.useConnection { connection ->
-        val statement = connection.createStatement()
-        statement.execute("DELETE FROM movies")
-      }
+    transacter.transaction { connection ->
+      val statement = connection.createStatement()
+      statement.execute("DELETE FROM movies")
     }
   }
 
@@ -45,19 +37,17 @@ internal class TruncateTablesServiceTest {
     assertThat(rowCount("movies")).isEqualTo(0)
 
     // Insert some data.
-    transacter.transaction {session ->
-      session.useConnection { connection ->
-        connection.createStatement().use { statement ->
-          statement.execute("INSERT INTO movies (name) VALUES ('Star Wars')")
-          statement.execute("INSERT INTO movies (name) VALUES ('Jurassic Park')")
-        }
+    transacter.transaction { connection ->
+      connection.createStatement().use { statement ->
+        statement.execute("INSERT INTO movies (name) VALUES ('Star Wars')")
+        statement.execute("INSERT INTO movies (name) VALUES ('Jurassic Park')")
       }
     }
     assertThat(rowCount("schema_version")).isGreaterThan(0)
     assertThat(rowCount("movies")).isGreaterThan(0)
 
     // Start up TruncateTablesService. The inserted data should be truncated.
-    val service = TruncateTablesService(TestDatasource::class, connector, Providers.of(transacter))
+    val service = TruncateTablesService(TestDatasource::class, dataSourceProvider, Providers.of(transacter))
     service.startAsync()
     service.awaitRunning()
     assertThat(rowCount("schema_version")).isGreaterThan(0)
@@ -67,10 +57,10 @@ internal class TruncateTablesServiceTest {
   @Test
   fun startUpStatements() {
     val service = TruncateTablesService(
-        TestDatasource::class,
-        connector,
-        Providers.of(transacter),
-        startUpStatements = listOf("INSERT INTO movies (name) VALUES ('Star Wars')")
+      TestDatasource::class,
+      dataSourceProvider,
+      Providers.of(transacter),
+      startUpStatements = listOf("INSERT INTO movies (name) VALUES ('Star Wars')")
     )
 
     assertThat(rowCount("movies")).isEqualTo(0)
@@ -82,10 +72,10 @@ internal class TruncateTablesServiceTest {
   @Test
   fun shutDownStatements() {
     val service = TruncateTablesService(
-        TestDatasource::class,
-        connector,
-        Providers.of(transacter),
-        shutDownStatements = listOf("INSERT INTO movies (name) VALUES ('Star Wars')")
+      TestDatasource::class,
+      dataSourceProvider,
+      Providers.of(transacter),
+      shutDownStatements = listOf("INSERT INTO movies (name) VALUES ('Star Wars')")
     )
 
     service.startAsync()
@@ -98,10 +88,12 @@ internal class TruncateTablesServiceTest {
   }
 
   private fun rowCount(table: String): Int {
-    sessionFactory.openSession().use { session ->
-      @Suppress("UNCHECKED_CAST") // createNativeQuery returns a raw Query.
-      val query = session.createNativeQuery("SELECT count(*) FROM $table") as Query<Number>
-      return query.list()[0].toInt()
+    return transacter.transaction { connection ->
+      connection.createStatement().use { statement ->
+        statement.executeQuery("SELECT count(*) FROM $table").map {
+          it.getInt(1)
+        }[0]
+      }
     }
   }
 
@@ -111,11 +103,7 @@ internal class TruncateTablesServiceTest {
       install(MiskTestingServiceModule())
 
       val config = MiskConfig.load<TestConfig>("test_truncatetables_app", Environment.TESTING)
-      install(HibernateModule(TestDatasource::class, config.data_source))
-      install(object : HibernateEntityModule(TestDatasource::class) {
-        override fun configureHibernate() {
-        }
-      })
+      install(JdbcModule(TestDatasource::class, config.data_source))
     }
   }
 

@@ -2,24 +2,18 @@ package misk.jdbc
 
 import com.google.common.annotations.VisibleForTesting
 import com.google.common.base.Stopwatch
-import com.google.common.base.Supplier
-import com.google.common.base.Suppliers
 import com.google.common.collect.ImmutableList
 import misk.logging.getLogger
 import misk.resources.ResourceLoader
 import misk.vitess.Keyspace
 import misk.vitess.Shard
-import misk.vitess.Shard.Companion.SINGLE_SHARD_SET
 import misk.vitess.failSafeRead
 import misk.vitess.target
 import java.sql.Connection
 import java.sql.SQLException
-import java.sql.SQLRecoverableException
 import java.util.SortedSet
 import java.util.TreeSet
 import java.util.regex.Pattern
-import javax.inject.Provider
-import javax.sql.DataSource
 import kotlin.reflect.KClass
 
 private val logger = getLogger<SchemaMigrator>()
@@ -104,9 +98,11 @@ internal class SchemaMigrator(
   private val qualifier: KClass<out Annotation>,
   private val resourceLoader: ResourceLoader,
   private val dataSourceConfig: DataSourceConfig,
-  private val dataSource: Provider<DataSource>,
+  private val dataSource: DataSourceService,
   private val connector: DataSourceConnector
 ) {
+
+  val shards = misk.vitess.shards(dataSource)
 
   private fun getMigrationsResources(keyspace: Keyspace): List<String> {
     val config = connector.config()
@@ -173,24 +169,6 @@ internal class SchemaMigrator(
     }
   }
 
-  val shards: Supplier<Set<Shard>> = Suppliers.memoize {
-    if (!dataSourceConfig.type.isVitess) {
-      SINGLE_SHARD_SET
-    } else {
-      dataSource.get().connection.use { connection ->
-        connection.createStatement().use { s ->
-          val shards = s.executeQuery("SHOW VITESS_SHARDS")
-              .map { rs -> Shard.parse(rs.getString(1)) }
-              .toSet()
-          if (shards.isEmpty()) {
-            throw SQLRecoverableException("Failed to load list of shards")
-          }
-          shards
-        }
-      }
-    }
-  }
-
   /**
    * Returns the versions of applied migrations. Throws a [java.sql.SQLException]
    * if the migrations table has not been initialized.
@@ -246,7 +224,7 @@ internal class SchemaMigrator(
               schemaVersion.executeUpdate()
             }
 
-            c.createStatement().use { stmt -> stmt.execute("COMMIT") }
+            c.commit()
           }
 
           logger.info { "${qualifier.simpleName} applied $migration in $stopwatch" }
