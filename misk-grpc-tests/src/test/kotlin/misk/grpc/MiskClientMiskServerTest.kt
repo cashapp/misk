@@ -56,8 +56,8 @@ class MiskClientMiskServerTest {
     assertThat(logCollector.takeMessages(RequestLoggingInterceptor::class)).containsExactly(
       "GetFeatureGrpcAction principal=unknown time=0.000 ns code=200 request=[Point{latitude=43, longitude=-80}] response=Feature{name=maple tree, location=Point{latitude=43, longitude=-80}}"
     )
-    assertThat(callCounter.actionNameToCount["GetFeature"]!!.get()).isEqualTo(1)
-    assertThat(callCounter.actionNameToCount["RouteChat"]!!.get()).isEqualTo(0)
+    assertThat(callCounter.actionNameToCount["default.GetFeature"]!!.get()).isEqualTo(1)
+    assertThat(callCounter.actionNameToCount["default.RouteChat"]!!.get()).isEqualTo(0)
   }
 
   @Test
@@ -77,8 +77,8 @@ class MiskClientMiskServerTest {
     assertThat(logCollector.takeMessages(RequestLoggingInterceptor::class)).containsExactly(
       "RouteChatGrpcAction principal=unknown time=0.000 ns code=200 request=[GrpcMessageSource, GrpcMessageSink] response=kotlin.Unit"
     )
-    assertThat(callCounter.actionNameToCount["GetFeature"]!!.get()).isEqualTo(0)
-    assertThat(callCounter.actionNameToCount["RouteChat"]!!.get()).isEqualTo(1)
+    assertThat(callCounter.actionNameToCount["default.GetFeature"]!!.get()).isEqualTo(0)
+    assertThat(callCounter.actionNameToCount["default.RouteChat"]!!.get()).isEqualTo(1)
   }
 
   @Test

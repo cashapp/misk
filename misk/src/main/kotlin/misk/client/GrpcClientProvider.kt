@@ -110,19 +110,19 @@ internal class GrpcClientProvider<T : Service, G : T>(
     ))
   }
 
-  private fun Method.toClientAction(): ClientAction? {
-    if (returnType !== GrpcCall::class.java && returnType !== GrpcStreamingCall::class.java) {
+  private fun toClientAction(method: Method): ClientAction? {
+    if (method.returnType !== GrpcCall::class.java && method.returnType !== GrpcStreamingCall::class.java) {
       return null
     }
 
-    val genericReturnType = genericReturnType as? ParameterizedType ?: return null
+    val genericReturnType = method.genericReturnType as? ParameterizedType ?: return null
     val requestType = genericReturnType.actualTypeArguments[0] as Class<*>
     val responseType = genericReturnType.actualTypeArguments[1] as Class<*>
 
-    val kotlinFunction = kotlinFunction ?: return null
+    val kotlinFunction = method.kotlinFunction ?: return null
 
     return ClientAction(
-        name = name,
+        name = "${name}.${method.name}",
         function = kotlinFunction,
         parameterTypes = listOf(requestType.kotlin.createType()),
         returnType = responseType.kotlin.createType()
@@ -135,7 +135,7 @@ internal class GrpcClientProvider<T : Service, G : T>(
     baseUrl: String,
     interceptorFactories: List<ClientNetworkInterceptor.Factory>
   ): MethodInvocationHandler<T, G>? {
-    val action = method.toClientAction() ?: return null
+    val action = toClientAction(method) ?: return null
 
     val clientBuilder = clientPrototype.newBuilder()
     for (factory in interceptorFactories) {
