@@ -35,9 +35,6 @@ interface Transacter {
   /**
    * Runs a non-transactional session against a read replica.
    *
-   * TODO(jontirsen): Currently only available for Vitess connections as MySQL connections need to
-   *   use a reader Transacter instead.
-   *
    * A few things that are different with replica reads:
    * * Replica reads are (obviously?) read only.
    * * Consistency is eventual. If your application thread just wrote something in a transaction
@@ -50,6 +47,8 @@ interface Transacter {
    *   #vitess)
    * * Full scatters are allowed since you can increase the availability of these by adding more
    *   replicas.
+   * * If no reader is configured for replica reads when installing the [HibernateModule], this
+   *   method will throw an [IllegalStateException].
    *
    */
   fun <T> replicaRead(block: (session: Session) -> T): T
