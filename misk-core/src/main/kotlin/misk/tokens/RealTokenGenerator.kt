@@ -7,7 +7,7 @@ import javax.inject.Singleton
 import kotlin.experimental.and
 
 @Singleton
-internal class RealTokenGenerator @Inject constructor() : TokenGenerator {
+class RealTokenGenerator @Inject constructor() : TokenGenerator {
   private val random = SecureRandom()
 
   override fun generate(label: String?, length: Int): String {
