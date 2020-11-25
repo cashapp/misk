@@ -100,8 +100,8 @@ ext.dep = [
   "tracingDatadog": "com.datadoghq:dd-trace-api:0.65.0",
   "vitess": "io.vitess:vitess-jdbc:3.0.0",
   "wireGradlePlugin": "com.squareup.wire:wire-gradle-plugin:3.6.0-square05",
-  "wireGrpcClient": "com.squareup.wire:wire-grpc-client:3.6.0-square05",
-  "wireRuntime": "com.squareup.wire:wire-runtime:3.6.0-square05",
+  "wireGrpcClient": "com.squareup.wire:wire-grpc-client:3.5.0",
+  "wireRuntime": "com.squareup.wire:wire-runtime:3.5.0",
   "zookeeper": "org.apache.zookeeper:zookeeper:3.5.4-beta",
 ]
 // Auto-generated from polyrepo's master-dependencies.json. Update via polyrepo dep-add and polyrepo dep-upgrade.
