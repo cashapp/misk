@@ -1,6 +1,5 @@
 package misk.hibernate
 
-import io.opentracing.mock.MockTracer
 import misk.exceptions.UnauthorizedException
 import misk.jdbc.DataSourceType
 import misk.jdbc.uniqueString
@@ -24,7 +23,6 @@ import kotlin.test.assertFailsWith
 abstract class TransacterTest {
   @Inject @Movies lateinit var transacter: Transacter
   @Inject lateinit var queryFactory: Query.Factory
-  @Inject lateinit var tracer: MockTracer
   @Inject lateinit var logCollector: LogCollector
 
   @Test
@@ -110,9 +108,9 @@ abstract class TransacterTest {
   }
 
   // TODO TiDB are working on fixing this bug: https://github.com/pingcap/tidb/issues/13791
-  private fun hasDateBug() = transacter.config().type == DataSourceType.TIDB
+  protected fun hasDateBug() = transacter.config().type == DataSourceType.TIDB
 
-  private fun createTestData() {
+  protected fun createTestData() {
     // Insert some movies, characters and actors.
     transacter.allowCowrites().transaction { session ->
       val jp = session.save(DbMovie("Jurassic Park", LocalDate.of(1993, 6, 9)))
