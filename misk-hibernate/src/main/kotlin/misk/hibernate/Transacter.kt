@@ -49,6 +49,8 @@ interface Transacter {
    *   replicas.
    * * If no reader is configured for replica reads when installing the [HibernateModule], this
    *   method will throw an [IllegalStateException].
+   * * Note: You can do it another way, where you annotate the [Transacter] with the readerQualifer
+   *   defined by [HibernateModule], which will use the read only replica as the datasource.
    *
    */
   fun <T> replicaRead(block: (session: Session) -> T): T
