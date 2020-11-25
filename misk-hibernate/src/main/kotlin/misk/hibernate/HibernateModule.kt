@@ -106,6 +106,20 @@ class HibernateModule(
       )
     }).asSingleton()
 
+    if (readerQualifier != null) {
+      val readerTransacterKey = Transacter::class.toKey(readerQualifier)
+      bind(readerTransacterKey).toProvider(object : Provider<Transacter> {
+        @Inject lateinit var executorServiceFactory: ExecutorServiceFactory
+        override fun get(): RealTransacter = RealTransacter(
+            qualifier = readerQualifier,
+            sessionFactoryProvider = readerSessionFactoryProvider!!,
+            readerSessionFactoryProvider = readerSessionFactoryProvider,
+            config = config,
+            executorServiceFactory = executorServiceFactory,
+        )
+      }).asSingleton()
+    }
+
     // Install other modules.
     install(object : HibernateEntityModule(qualifier) {
       override fun configureHibernate() {

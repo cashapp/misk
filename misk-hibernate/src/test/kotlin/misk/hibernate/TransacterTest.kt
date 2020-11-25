@@ -23,6 +23,7 @@ import kotlin.test.assertFailsWith
 
 abstract class TransacterTest {
   @Inject @Movies lateinit var transacter: Transacter
+  @Inject @MoviesReader lateinit var readerTransacter: Transacter
   @Inject lateinit var queryFactory: Query.Factory
   @Inject lateinit var tracer: MockTracer
   @Inject lateinit var logCollector: LogCollector
@@ -63,6 +64,20 @@ abstract class TransacterTest {
 
     // Query with replica reads.
     transacter.replicaRead { session ->
+      val query = queryFactory.newQuery<CharacterQuery>()
+          .allowTableScan()
+          .name("Ian Malcolm")
+      val ianMalcolm = query.uniqueResult(session)!!
+      assertThat(ianMalcolm.actor?.name).isEqualTo("Jeff Goldblum")
+      assertThat(ianMalcolm.movie.name).isEqualTo("Jurassic Park")
+
+      // Shard targeting works.
+      val shard = ianMalcolm.rootId.shard(session)
+      session.target(shard) {
+        assertThat(query.uniqueResult(session)!!.actor?.name).isEqualTo("Jeff Goldblum")
+      }
+    }
+    readerTransacter.transaction { session ->
       val query = queryFactory.newQuery<CharacterQuery>()
           .allowTableScan()
           .name("Ian Malcolm")
