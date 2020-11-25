@@ -1,5 +1,5 @@
 dependencies {
-  implementation dep.awsApi
+  implementation dep.awsDynamodb
   implementation project(':misk')
   implementation project(':misk-aws')
   implementation project(':misk-testing')
