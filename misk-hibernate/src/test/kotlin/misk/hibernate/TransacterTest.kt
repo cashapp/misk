@@ -1,6 +1,5 @@
 package misk.hibernate
 
-import io.opentracing.mock.MockTracer
 import misk.exceptions.UnauthorizedException
 import misk.jdbc.DataSourceType
 import misk.jdbc.uniqueString
@@ -23,9 +22,7 @@ import kotlin.test.assertFailsWith
 
 abstract class TransacterTest {
   @Inject @Movies lateinit var transacter: Transacter
-  @Inject @MoviesReader lateinit var readerTransacter: Transacter
   @Inject lateinit var queryFactory: Query.Factory
-  @Inject lateinit var tracer: MockTracer
   @Inject lateinit var logCollector: LogCollector
 
   @Test
@@ -77,20 +74,6 @@ abstract class TransacterTest {
         assertThat(query.uniqueResult(session)!!.actor?.name).isEqualTo("Jeff Goldblum")
       }
     }
-    readerTransacter.transaction { session ->
-      val query = queryFactory.newQuery<CharacterQuery>()
-          .allowTableScan()
-          .name("Ian Malcolm")
-      val ianMalcolm = query.uniqueResult(session)!!
-      assertThat(ianMalcolm.actor?.name).isEqualTo("Jeff Goldblum")
-      assertThat(ianMalcolm.movie.name).isEqualTo("Jurassic Park")
-
-      // Shard targeting works.
-      val shard = ianMalcolm.rootId.shard(session)
-      session.target(shard) {
-        assertThat(query.uniqueResult(session)!!.actor?.name).isEqualTo("Jeff Goldblum")
-      }
-    }
 
     transacter.failSafeRead { session ->
       val query = queryFactory.newQuery<CharacterQuery>()
@@ -125,9 +108,9 @@ abstract class TransacterTest {
   }
 
   // TODO TiDB are working on fixing this bug: https://github.com/pingcap/tidb/issues/13791
-  private fun hasDateBug() = transacter.config().type == DataSourceType.TIDB
+  protected fun hasDateBug() = transacter.config().type == DataSourceType.TIDB
 
-  private fun createTestData() {
+  protected fun createTestData() {
     // Insert some movies, characters and actors.
     transacter.allowCowrites().transaction { session ->
       val jp = session.save(DbMovie("Jurassic Park", LocalDate.of(1993, 6, 9)))
@@ -495,55 +478,6 @@ abstract class TransacterTest {
       }
     }
     assertThat(callCount.get()).isEqualTo(1)
-  }
-
-  @Test
-  fun readerTransacterWontSave() {
-    assertFailsWith<IllegalStateException> {
-      readerTransacter.transaction { session ->
-        session.save(DbMovie("Star Wars", LocalDate.of(1977, 5, 25)))
-      }
-    }
-    transacter.transaction { session ->
-      assertThat(queryFactory.newQuery<MovieQuery>().allowFullScatter().allowTableScan()
-          .list(session)).isEmpty()
-    }
-  }
-
-  @Test
-  fun readTransacterWontUpdate() {
-    val id: Id<DbMovie> = transacter.transaction { session ->
-      session.save(DbMovie("Star Wars", LocalDate.of(1977, 5, 25)))
-    }
-
-    readerTransacter.transaction { session ->
-      val movie: DbMovie? = queryFactory.newQuery<MovieQuery>().id(id).uniqueResult(session)
-      movie!!.name = "Not Star Wars"
-    }
-
-    transacter.transaction { session ->
-      val movie: DbMovie? = queryFactory.newQuery<MovieQuery>().id(id).uniqueResult(session)
-      assertThat(movie!!.name).isEqualTo("Star Wars")
-    }
-  }
-
-  @Test
-  fun readTransacterWontDelete() {
-    val id: Id<DbMovie> = transacter.transaction { session ->
-      session.save(DbMovie("Star Wars", LocalDate.of(1977, 5, 25)))
-    }
-
-    assertFailsWith<IllegalStateException> {
-      readerTransacter.transaction { session ->
-        val movie: DbMovie? = queryFactory.newQuery<MovieQuery>().id(id).uniqueResult(session)
-        session.delete(movie!!)
-      }
-    }
-
-    transacter.transaction { session ->
-      val movie: DbMovie? = queryFactory.newQuery<MovieQuery>().id(id).uniqueResult(session)
-      assertThat(movie).isNotNull()
-    }
   }
 
   @Test

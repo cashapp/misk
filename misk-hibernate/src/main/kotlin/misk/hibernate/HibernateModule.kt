@@ -14,6 +14,7 @@ import misk.jdbc.DataSourceConfig
 import misk.jdbc.DataSourceDecorator
 import misk.jdbc.JdbcModule
 import misk.jdbc.DataSourceService
+import misk.jdbc.DataSourceType
 import misk.jdbc.DatabasePool
 import misk.jdbc.RealDatabasePool
 import misk.jdbc.SchemaMigratorService
@@ -108,7 +109,11 @@ class HibernateModule(
       )
     }).asSingleton()
 
-    if (readerQualifier != null) {
+    /**
+     * Reader transacter is only supported for MySQL for now. TiDB and Vitess replica read works
+     * a bit differently than MySQL.
+     */
+    if (readerQualifier != null && config.type == DataSourceType.MYSQL) {
       val readerTransacterKey = Transacter::class.toKey(readerQualifier)
       bind(readerTransacterKey).toProvider(object : Provider<Transacter> {
         @Inject lateinit var executorServiceFactory: ExecutorServiceFactory
@@ -117,27 +122,7 @@ class HibernateModule(
             sessionFactoryProvider = readerSessionFactoryProvider!!,
             readerSessionFactoryProvider = readerSessionFactoryProvider,
             config = config,
-            executorServiceFactory = object : ExecutorServiceFactory {
-              override fun single(nameFormat: String): ExecutorService {
-                return executorServiceFactory.single("reader-$nameFormat")
-              }
-
-              override fun fixed(nameFormat: String, threadCount: Int): ExecutorService {
-                return executorServiceFactory.fixed("reader-$nameFormat", threadCount)
-              }
-
-              override fun unbounded(nameFormat: String): ExecutorService {
-                return executorServiceFactory.unbounded("reader-$nameFormat")
-              }
-
-              override fun scheduled(
-                nameFormat: String,
-                threadCount: Int
-              ): ScheduledExecutorService {
-                return executorServiceFactory.scheduled("reader-$nameFormat", threadCount)
-              }
-
-            }
+            executorServiceFactory = executorServiceFactory
         ).readOnly()
       }).asSingleton()
     }
