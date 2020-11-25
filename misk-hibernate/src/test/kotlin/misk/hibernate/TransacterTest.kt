@@ -498,6 +498,55 @@ abstract class TransacterTest {
   }
 
   @Test
+  fun readerTransacterWontSave() {
+    assertFailsWith<IllegalStateException> {
+      readerTransacter.transaction { session ->
+        session.save(DbMovie("Star Wars", LocalDate.of(1977, 5, 25)))
+      }
+    }
+    transacter.transaction { session ->
+      assertThat(queryFactory.newQuery<MovieQuery>().allowFullScatter().allowTableScan()
+          .list(session)).isEmpty()
+    }
+  }
+
+  @Test
+  fun readTransacterWontUpdate() {
+    val id: Id<DbMovie> = transacter.transaction { session ->
+      session.save(DbMovie("Star Wars", LocalDate.of(1977, 5, 25)))
+    }
+
+    readerTransacter.transaction { session ->
+      val movie: DbMovie? = queryFactory.newQuery<MovieQuery>().id(id).uniqueResult(session)
+      movie!!.name = "Not Star Wars"
+    }
+
+    transacter.transaction { session ->
+      val movie: DbMovie? = queryFactory.newQuery<MovieQuery>().id(id).uniqueResult(session)
+      assertThat(movie!!.name).isEqualTo("Star Wars")
+    }
+  }
+
+  @Test
+  fun readTransacterWontDelete() {
+    val id: Id<DbMovie> = transacter.transaction { session ->
+      session.save(DbMovie("Star Wars", LocalDate.of(1977, 5, 25)))
+    }
+
+    assertFailsWith<IllegalStateException> {
+      readerTransacter.transaction { session ->
+        val movie: DbMovie? = queryFactory.newQuery<MovieQuery>().id(id).uniqueResult(session)
+        session.delete(movie!!)
+      }
+    }
+
+    transacter.transaction { session ->
+      val movie: DbMovie? = queryFactory.newQuery<MovieQuery>().id(id).uniqueResult(session)
+      assertThat(movie).isNotNull()
+    }
+  }
+
+  @Test
   fun readOnlyWontSave() {
     assertFailsWith<IllegalStateException> {
       transacter.readOnly().transaction { session ->

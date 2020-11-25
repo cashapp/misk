@@ -110,13 +110,13 @@ class HibernateModule(
       val readerTransacterKey = Transacter::class.toKey(readerQualifier)
       bind(readerTransacterKey).toProvider(object : Provider<Transacter> {
         @Inject lateinit var executorServiceFactory: ExecutorServiceFactory
-        override fun get(): RealTransacter = RealTransacter(
+        override fun get(): Transacter = RealTransacter(
             qualifier = readerQualifier,
             sessionFactoryProvider = readerSessionFactoryProvider!!,
             readerSessionFactoryProvider = readerSessionFactoryProvider,
             config = config,
             executorServiceFactory = executorServiceFactory,
-        )
+        ).readOnly()
       }).asSingleton()
     }
 
