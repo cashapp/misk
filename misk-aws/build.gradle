@@ -1,5 +1,5 @@
 dependencies {
-  compile dep.awsApi
+  compile dep.awsDynamodb
   compile dep.awsSqs
   compile dep.openTracingDatadog
   compile project(':misk')
