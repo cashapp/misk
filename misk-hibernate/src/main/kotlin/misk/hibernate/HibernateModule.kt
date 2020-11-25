@@ -22,6 +22,8 @@ import org.hibernate.SessionFactory
 import org.hibernate.event.spi.EventType
 import org.hibernate.exception.ConstraintViolationException
 import java.time.Clock
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.ScheduledExecutorService
 import javax.inject.Inject
 import javax.inject.Provider
 import javax.persistence.OptimisticLockException
@@ -115,7 +117,27 @@ class HibernateModule(
             sessionFactoryProvider = readerSessionFactoryProvider!!,
             readerSessionFactoryProvider = readerSessionFactoryProvider,
             config = config,
-            executorServiceFactory = executorServiceFactory,
+            executorServiceFactory = object : ExecutorServiceFactory {
+              override fun single(nameFormat: String): ExecutorService {
+                return executorServiceFactory.single("reader-$nameFormat")
+              }
+
+              override fun fixed(nameFormat: String, threadCount: Int): ExecutorService {
+                return executorServiceFactory.fixed("reader-$nameFormat", threadCount)
+              }
+
+              override fun unbounded(nameFormat: String): ExecutorService {
+                return executorServiceFactory.unbounded("reader-$nameFormat")
+              }
+
+              override fun scheduled(
+                nameFormat: String,
+                threadCount: Int
+              ): ScheduledExecutorService {
+                return executorServiceFactory.scheduled("reader-$nameFormat", threadCount)
+              }
+
+            }
         ).readOnly()
       }).asSingleton()
     }
