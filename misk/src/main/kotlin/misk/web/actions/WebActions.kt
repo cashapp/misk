@@ -5,10 +5,12 @@ import misk.Chain
 import misk.web.RealChain
 import kotlin.reflect.KFunction
 import kotlin.reflect.KParameter
+import misk.web.HttpCall
 
 fun WebAction.asChain(
   function: KFunction<*>,
   args: List<Any?>,
+  httpCall: HttpCall,
   interceptors: List<ApplicationInterceptor>
 ): Chain {
   val callFunctionInterceptor = object : ApplicationInterceptor {
@@ -28,5 +30,5 @@ fun WebAction.asChain(
     }
   }
   val realChainInterceptors = interceptors + callFunctionInterceptor
-  return RealChain(this, args, realChainInterceptors, function, 0)
+  return RealChain(this, args, httpCall, realChainInterceptors, function, 0)
 }

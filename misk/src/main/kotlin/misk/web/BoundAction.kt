@@ -219,7 +219,7 @@ private class RequestBridgeInterceptor(
     val arguments = webActionBinding.beforeCall(chain.webAction, httpCall, pathMatcher)
 
     val applicationChain = chain.webAction.asChain(
-        chain.action.function, arguments, applicationInterceptors)
+        chain.action.function, arguments, httpCall, applicationInterceptors)
 
     var returnValue = applicationChain.proceed(applicationChain.args)
 
