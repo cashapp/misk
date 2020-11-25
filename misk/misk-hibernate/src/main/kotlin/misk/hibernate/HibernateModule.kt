@@ -14,6 +14,7 @@ import misk.jdbc.DataSourceConfig
 import misk.jdbc.DataSourceDecorator
 import misk.jdbc.JdbcModule
 import misk.jdbc.DataSourceService
+import misk.jdbc.DataSourceType
 import misk.jdbc.DatabasePool
 import misk.jdbc.RealDatabasePool
 import misk.jdbc.SchemaMigratorService
@@ -22,6 +23,8 @@ import org.hibernate.SessionFactory
 import org.hibernate.event.spi.EventType
 import org.hibernate.exception.ConstraintViolationException
 import java.time.Clock
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.ScheduledExecutorService
 import javax.inject.Inject
 import javax.inject.Provider
 import javax.persistence.OptimisticLockException
@@ -105,6 +108,24 @@ class HibernateModule(
           executorServiceFactory = executorServiceFactory,
       )
     }).asSingleton()
+
+    /**
+     * Reader transacter is only supported for MySQL for now. TiDB and Vitess replica read works
+     * a bit differently than MySQL.
+     */
+    if (readerQualifier != null && config.type == DataSourceType.MYSQL) {
+      val readerTransacterKey = Transacter::class.toKey(readerQualifier)
+      bind(readerTransacterKey).toProvider(object : Provider<Transacter> {
+        @Inject lateinit var executorServiceFactory: ExecutorServiceFactory
+        override fun get(): Transacter = RealTransacter(
+            qualifier = readerQualifier,
+            sessionFactoryProvider = readerSessionFactoryProvider!!,
+            readerSessionFactoryProvider = readerSessionFactoryProvider,
+            config = config,
+            executorServiceFactory = executorServiceFactory
+        ).readOnly()
+      }).asSingleton()
+    }
 
     // Install other modules.
     install(object : HibernateEntityModule(qualifier) {
