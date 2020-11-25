@@ -1,0 +1,6 @@
+data_source:
+  type: MYSQL
+  username: root
+  password: ""
+  database: externalcolumn
+  migrations_resource: classpath:/misk/hibernate/externalcolumn-migrations
