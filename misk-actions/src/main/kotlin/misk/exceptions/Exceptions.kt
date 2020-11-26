@@ -9,6 +9,7 @@ enum class StatusCode(val code: Int) {
   NOT_ACCEPTABLE(406),
   CONFLICT(409),
   ENHANCE_YOUR_CALM(420),
+  UNPROCESSABLE_ENTITY(422),
   TOO_MANY_REQUESTS(429),
   CLIENT_CLOSED_REQUEST(499),
   INTERNAL_SERVER_ERROR(500),
@@ -48,6 +49,9 @@ open class BadRequestException(message: String = "", cause: Throwable? = null) :
 /** Base exception for when a request causes a conflict */
 open class ConflictException(message: String = "", cause: Throwable? = null) :
     ActionException(StatusCode.CONFLICT, message, cause)
+
+open class UnprocessableEntityException(message: String = "", cause: Throwable? = null) :
+    ActionException(StatusCode.UNPROCESSABLE_ENTITY, message, cause)
 
 open class TooManyRequestsException(message: String = "", cause: Throwable? = null) :
     ActionException(StatusCode.TOO_MANY_REQUESTS, message, cause)
