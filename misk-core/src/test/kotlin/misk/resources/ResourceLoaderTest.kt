@@ -1,6 +1,9 @@
 package misk.resources
 
 import com.google.inject.util.Modules
+import java.io.File
+import javax.inject.Inject
+import kotlin.test.assertFailsWith
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.testing.TemporaryFolder
@@ -9,9 +12,6 @@ import okio.buffer
 import okio.sink
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import java.io.File
-import javax.inject.Inject
-import kotlin.test.assertFailsWith
 
 @MiskTest
 class ResourceLoaderTest {
@@ -42,6 +42,12 @@ class ResourceLoaderTest {
   fun listDoesNotContainChildOfChild() {
     assertThat(resourceLoader.list("classpath:/misk/"))
         .doesNotContain("classpath:/misk/resources/ResourceLoaderTest.txt")
+  }
+
+  @Test
+  fun listContainsResourcesFromJar() {
+    assertThat(resourceLoader.list("classpath:/META-INF/"))
+        .contains("classpath:/META-INF/MANIFEST.MF")
   }
 
   @Test
