@@ -2,16 +2,16 @@ package misk.resources
 
 import com.google.common.collect.ImmutableList
 import com.google.common.collect.ImmutableSet
+import java.nio.file.Files
+import java.nio.file.Path
+import javax.inject.Inject
+import javax.inject.Singleton
 import misk.resources.ResourceLoader.Backend
 import okio.BufferedSource
 import okio.ByteString
 import okio.ByteString.Companion.encodeUtf8
 import okio.buffer
 import okio.sink
-import java.nio.file.Files
-import java.nio.file.Path
-import javax.inject.Inject
-import javax.inject.Singleton
 
 /**
  * ResourceLoader is a testable API for loading resources from the classpath, from the filesystem,
@@ -141,12 +141,10 @@ class ResourceLoader @Inject constructor(
    * Copies all resources with [root] as a prefix to the directory [dir].
    */
   fun copyTo(root: String, dir: Path) {
-    val (scheme, path) = parseAddress(root)
-    val prefix = if (path.endsWith("/")) path else "$path/"
-    for (resource in backends[scheme].all()) {
-      if (resource.startsWith(prefix)) {
-        copyResource("$scheme$resource", dir.resolve(resource.substring(prefix.length)))
-      }
+    val prefix = if (root.endsWith("/")) root else "$root/"
+    for (resource in walk(root)) {
+      val destination = dir.resolve(resource.substring(prefix.length))
+      copyResource(resource, destination)
     }
   }
 
