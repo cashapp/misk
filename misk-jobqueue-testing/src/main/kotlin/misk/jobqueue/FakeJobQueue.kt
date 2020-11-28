@@ -5,9 +5,13 @@ import misk.backoff.retry
 import misk.hibernate.Gid
 import misk.hibernate.Session
 import misk.tokens.TokenGenerator
+import java.time.Clock
 import java.time.Duration
+import java.time.Instant
+import java.util.Queue
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentLinkedDeque
+import java.util.concurrent.PriorityBlockingQueue
 import javax.inject.Inject
 import javax.inject.Provider
 import javax.inject.Singleton
@@ -28,10 +32,11 @@ import javax.inject.Singleton
  */
 @Singleton
 class FakeJobQueue @Inject constructor(
+  private val clock: Clock,
   private val jobHandlers: Provider<Map<QueueName, JobHandler>>,
   private val tokenGenerator: TokenGenerator
 ) : JobQueue, TransactionalJobQueue {
-  private val jobQueues = ConcurrentHashMap<QueueName, ConcurrentLinkedDeque<FakeJob>>()
+  private val jobQueues = ConcurrentHashMap<QueueName, PriorityBlockingQueue<FakeJob>>()
   private val deadletteredJobs = ConcurrentHashMap<QueueName, ConcurrentLinkedDeque<FakeJob>>()
 
   override fun enqueue(
@@ -55,15 +60,7 @@ class FakeJobQueue @Inject constructor(
     attributes: Map<String, String>
   ) {
     session.onPostCommit {
-      val id = tokenGenerator.generate("fakeJobQueue")
-      val job = FakeJob(
-          queueName = queueName,
-          id = id,
-          idempotenceKey = idempotenceKey,
-          body = body,
-          attributes = attributes
-      )
-      jobQueues.getOrPut(queueName, ::ConcurrentLinkedDeque).add(job)
+      enqueue(queueName, body, idempotenceKey, deliveryDelay, attributes)
     }
   }
 
@@ -75,13 +72,14 @@ class FakeJobQueue @Inject constructor(
     attributes: Map<String, String>
   ) {
     val id = tokenGenerator.generate("fakeJobQueue")
-    val job = FakeJob(queueName, id, idempotenceKey, body, attributes, deliveryDelay)
-    jobQueues.getOrPut(queueName, ::ConcurrentLinkedDeque).add(job)
+    val job =
+        FakeJob(queueName, id, idempotenceKey, body, attributes, clock.instant(), deliveryDelay)
+    jobQueues.getOrPut(queueName, ::PriorityBlockingQueue).add(job)
   }
 
   fun peekJobs(queueName: QueueName): List<Job> {
     val jobs = jobQueues[queueName]
-    return jobs?.toList() ?: listOf()
+    return jobs?.sortedBy { it.id } ?: listOf()
   }
 
   fun peekDeadlettered(queueName: QueueName): List<Job> {
@@ -93,18 +91,36 @@ class FakeJobQueue @Inject constructor(
   fun handleJobs(
     queueName: QueueName,
     assertAcknowledged: Boolean = true,
-    retries: Int = 1
+    retries: Int = 1,
+    considerDelays: Boolean = false
   ): List<FakeJob> {
-    return processJobs(queueName, assertAcknowledged, retries, false)
+    val jobs = jobQueues[queueName] ?: return listOf()
+    return processJobs(assertAcknowledged, retries, false) {
+      pollNextJob(jobs, considerDelays)
+    }
   }
 
   /** Returns all jobs that were handled. */
-  fun handleJobs(assertAcknowledged: Boolean = true): List<FakeJob> {
+  fun handleJobs(
+    assertAcknowledged: Boolean = true,
+    considerDelays: Boolean = false
+  ): List<FakeJob> {
     val result = mutableListOf<FakeJob>()
     for (queueName in jobQueues.keys) {
-      result += handleJobs(queueName, assertAcknowledged)
+      result += handleJobs(queueName, assertAcknowledged, considerDelays = considerDelays)
     }
     return result
+  }
+
+  /** Returns true if job was handled. */
+  fun handleJob(
+    job: Job,
+    assertAcknowledged: Boolean = true,
+    retries: Int = 1
+  ): Boolean {
+    return processJobs(assertAcknowledged, retries, false) {
+      if (jobQueues[job.queueName]?.remove(job) == true) job as FakeJob else null
+    }.isNotEmpty()
   }
 
   /** Returns all jobs that were handled. */
@@ -113,34 +129,50 @@ class FakeJobQueue @Inject constructor(
     assertAcknowledged: Boolean = true,
     retries: Int = 1
   ): List<FakeJob> {
-    return processJobs(queueName, assertAcknowledged, retries, true)
+    val jobs = deadletteredJobs[queueName] ?: return listOf()
+    return processJobs(assertAcknowledged, retries, true) {
+      pollNextJob(jobs, false)
+    }
   }
 
-  private fun processJobs(
-    queueName: QueueName,
+  /** Returns true if job was handled. */
+  fun reprocessDeadlettered(
+    job: Job,
     assertAcknowledged: Boolean = true,
-    retries: Int,
-    deadletter: Boolean
-  ): List<FakeJob> {
-    val jobHandler = jobHandlers.get()[queueName]!!
-    val jobs = when (deadletter) {
-      true -> deadletteredJobs[queueName] ?: return listOf()
-      else -> jobQueues[queueName] ?: return listOf()
-    }
+    retries: Int = 1
+  ): Boolean {
+    return processJobs(assertAcknowledged, retries, true) {
+      if (deadletteredJobs[job.queueName]?.remove(job) == true) job as FakeJob else null
+    }.isNotEmpty()
+  }
 
+  /** jobsSupplier must remove jobs from the underlying deque. */
+  private fun processJobs(
+    assertAcknowledged: Boolean,
+    retries: Int,
+    deadletter: Boolean,
+    jobsSupplier: () -> FakeJob?
+  ): List<FakeJob> {
+    val jobHandlers = jobHandlers.get()
     val result = mutableListOf<FakeJob>()
+    // Used to prevent an infinite loop by mistake in supplier.
+    val touchedJobs = mutableSetOf<FakeJob>()
     while (true) {
-      val job = jobs.poll() ?: break
+      val job = jobsSupplier.invoke() ?: break
+      check(touchedJobs.add(job))
+
       if (deadletter) {
         // If we don't reset whether it's deadlettered we'll always add it back to the queue.
         job.deadLettered = false
         job.acknowledged = false
       }
 
+      val jobHandler = jobHandlers[job.queueName]!!
       try {
         retry(retries, FlatBackoff(Duration.ofMillis(20))) { jobHandler.handleJob(job) }
       } catch (e: Throwable) {
-        deadletteredJobs.getOrPut(queueName, ::ConcurrentLinkedDeque).add(job)
+        deadletteredJobs.getOrPut(job.queueName, ::ConcurrentLinkedDeque).add(job)
+        // Re-throwing also ensures that we won't cause an infinite loop.
         throw e
       }
 
@@ -150,13 +182,29 @@ class FakeJobQueue @Inject constructor(
       }
     }
 
+    // Reenqueue deadlettered jobs outside of the main loop to prevent an infinite loop.
     result.forEach { job ->
       if (job.deadLettered) {
-        deadletteredJobs.getOrPut(queueName, ::ConcurrentLinkedDeque).add(job)
+        deadletteredJobs.getOrPut(job.queueName, ::ConcurrentLinkedDeque).add(job)
       }
     }
-
     return result
+  }
+
+  private fun pollNextJob(jobs: Queue<FakeJob>, considerDelays: Boolean): FakeJob? {
+    if (!considerDelays) {
+      return jobs.poll()
+    }
+    val now = clock.instant()!!
+    while (true) {
+      val job = jobs.firstOrNull {
+        it.deliveryDelay == null || !it.enqueuedAt.plus(it.deliveryDelay).isAfter(now)
+      }
+      // If remove() is false, then we lost race to another worker and should retry.
+      if (job == null || jobs.remove(job)) {
+        return job
+      }
+    }
   }
 }
 
@@ -166,8 +214,14 @@ data class FakeJob(
   override val idempotenceKey: String,
   override val body: String,
   override val attributes: Map<String, String>,
+  val enqueuedAt: Instant,
   val deliveryDelay: Duration? = null
-) : Job {
+) : Job, Comparable<FakeJob> {
+  val deliverAt: Instant
+    get() = when (deliveryDelay) {
+      null -> enqueuedAt
+      else -> enqueuedAt.plus(deliveryDelay)
+    }
   var acknowledged: Boolean = false
     internal set
   var deadLettered: Boolean = false
@@ -179,5 +233,29 @@ data class FakeJob(
 
   override fun deadLetter() {
     deadLettered = true
+  }
+
+  override fun equals(other: Any?): Boolean {
+    if (this === other) return true
+    if (javaClass != other?.javaClass) return false
+
+    other as FakeJob
+
+    if (id != other.id) return false
+
+    return true
+  }
+
+  override fun hashCode(): Int {
+    return id.hashCode()
+  }
+
+  override fun compareTo(other: FakeJob): Int {
+    val result = deliverAt.compareTo(other.deliverAt)
+    if (result == 0) {
+      // FakeTokenGenerator generates tokens incrementally.
+      return id.compareTo(other.id)
+    }
+    return result
   }
 }
