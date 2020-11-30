@@ -131,7 +131,9 @@ internal class SessionFactoryService(
 
       val value: Value? = property.value
       if (value is SimpleValue) {
-        allPropertyTypes += kClassForName(value.typeName)
+        val typeName = value.typeName
+            ?: continue // This doesn't have a physical column; it's mapped to another table.
+        allPropertyTypes += kClassForName(typeName)
       }
     }
 
