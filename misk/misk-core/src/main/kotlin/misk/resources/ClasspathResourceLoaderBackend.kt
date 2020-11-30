@@ -16,7 +16,7 @@ internal object ClasspathResourceLoaderBackend : ResourceLoader.Backend() {
     require(path.startsWith("/"))
     val path = path.removePrefix("/").removeSuffix("/")
 
-    val classLoader = ClasspathResourceLoaderBackend::class.java.classLoader
+    val classLoader = Thread.currentThread().contextClassLoader
     val result = mutableSetOf<String>()
     for (url in classLoader.getResources(path)) {
       val urlString = url.toString()
@@ -80,13 +80,13 @@ internal object ClasspathResourceLoaderBackend : ResourceLoader.Backend() {
   }
 
   override fun open(path: String): BufferedSource? {
-    val classLoader = ClasspathResourceLoaderBackend::class.java.classLoader
+    val classLoader = Thread.currentThread().contextClassLoader
     val resourceAsStream = classLoader.getResourceAsStream(path.removePrefix("/")) ?: return null
     return resourceAsStream.source().buffer()
   }
 
   override fun exists(path: String): Boolean {
-    val classLoader = ClasspathResourceLoaderBackend::class.java.classLoader
+    val classLoader = Thread.currentThread().contextClassLoader
     return classLoader.getResource(path.removePrefix("/")) != null
   }
 }
