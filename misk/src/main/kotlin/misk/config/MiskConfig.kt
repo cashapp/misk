@@ -16,16 +16,13 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.kotlin.MissingKotlinParameterException
 import com.google.common.base.Joiner
+import java.io.File
+import java.io.FilenameFilter
+import java.util.Locale
 import misk.environment.Env
 import misk.environment.Environment
 import misk.resources.ResourceLoader
-import okio.buffer
-import okio.source
 import org.apache.commons.lang3.StringUtils
-import java.io.File
-import java.io.FilenameFilter
-import java.net.URL
-import java.util.Locale
 
 object MiskConfig {
   @JvmStatic
@@ -74,7 +71,7 @@ object MiskConfig {
 
     val mapper = newObjectMapper(resourceLoader)
 
-    val configYamls = loadConfigYamlMap(appName, environment, overrideFiles)
+    val configYamls = loadConfigYamlMap(appName, environment, overrideFiles, resourceLoader)
     check(configYamls.values.any { it != null }) {
       "could not find configuration files - checked ${configYamls.keys}"
     }
@@ -173,25 +170,22 @@ object MiskConfig {
   fun loadConfigYamlMap(
     appName: String,
     environment: Env,
-    overrideFiles: List<File>
+    overrideFiles: List<File>,
+    resourceLoader: ResourceLoader = ResourceLoader.SYSTEM
   ): Map<String, String?> {
+
     // Load from jar files first, starting with the common config and then env specific config
     val embeddedConfigUrls = embeddedConfigFileNames(appName, environment)
-        .map { it to Config::class.java.classLoader.getResource(it) }
+        .map { "classpath:/$it" }
 
     // Load from override files second, in the order specified, only if they exist
-    val overrideFileUrls = overrideFiles
-        .filter { it.exists() }
-        .map { it.toURI().toURL().toString() to it.toURI().toURL() }
+    val overrideFileUrls = overrideFiles.map { "filesystem:${it.absoluteFile}" }
+        .filter { resourceLoader.exists(it) }
 
     // Produce a combined map of all of the results
-    return (embeddedConfigUrls + overrideFileUrls).map { it.first to it.second?.readUtf8() }.toMap()
-  }
-
-  private fun URL.readUtf8(): String {
-    return openStream().use {
-      it.source().buffer().readUtf8()
-    }
+    return (embeddedConfigUrls + overrideFileUrls)
+        .map { it to resourceLoader.utf8(it) }
+        .toMap()
   }
 
   /** @return the list of config file names in the order they should be read */

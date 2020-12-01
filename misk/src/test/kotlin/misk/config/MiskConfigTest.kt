@@ -58,7 +58,7 @@ class MiskConfigTest {
     }
 
     assertThat(exception).hasMessageContaining("could not find configuration files -" +
-        " checked [missing-common.yaml, missing-testing.yaml]")
+        " checked [classpath:/missing-common.yaml, classpath:/missing-testing.yaml]")
   }
 
   @Test
@@ -77,7 +77,7 @@ class MiskConfigTest {
       MiskConfig.load<TestConfig>("unparsable", defaultEnv)
     }
 
-    assertThat(exception).hasMessageContaining("could not parse unparsable-common.yaml")
+    assertThat(exception).hasMessageContaining("could not parse classpath:/unparsable-common.yaml")
   }
 
   @Test
