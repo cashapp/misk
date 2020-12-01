@@ -175,6 +175,7 @@ internal class FakeJobQueueTest {
     assertThat(fakeJobQueue.peekJobs(GREEN_QUEUE)).isEmpty()
     assertThat(fakeJobQueue.peekJobs(RED_QUEUE)).isEmpty()
 
+    val now = fakeClock.instant()
     val oneSecondDeliveryDelay = Duration.of(1000L, ChronoUnit.MILLIS)
     exampleJobEnqueuer.enqueueRed("stop sign", oneSecondDeliveryDelay)
     exampleJobEnqueuer.enqueueGreen("dinosaur", oneSecondDeliveryDelay)
@@ -182,7 +183,7 @@ internal class FakeJobQueueTest {
 
     val redJobs = fakeJobQueue.peekJobs(RED_QUEUE)
     assertThat(redJobs).hasSize(1)
-   
+
     val redJob = redJobs.first() as FakeJob
     assertThat(redJob.deliveryDelay).isEqualTo(oneSecondDeliveryDelay)
 
@@ -190,8 +191,12 @@ internal class FakeJobQueueTest {
     assertThat(greenJobs).hasSize(2)
     val greenJob1 = greenJobs[0] as FakeJob
     val greenJob2 = greenJobs[1] as FakeJob
+    assertThat(greenJob1.enqueuedAt).isEqualTo(now)
     assertThat(greenJob1.deliveryDelay).isEqualTo(oneSecondDeliveryDelay)
+    assertThat(greenJob1.deliverAt).isEqualTo(now.plus(oneSecondDeliveryDelay))
+    assertThat(greenJob2.enqueuedAt).isEqualTo(now)
     assertThat(greenJob2.deliveryDelay).isNull()
+    assertThat(greenJob2.deliverAt).isEqualTo(now)
 
     fakeJobQueue.handleJobs()
 
@@ -206,72 +211,74 @@ internal class FakeJobQueueTest {
   }
 
   @Test
-  fun considerDeliveryDelaysInFakeJob() {
+  fun jobsDoNotStartUntilDeliveryDelayElapses() {
     assertThat(fakeJobQueue.peekJobs(GREEN_QUEUE)).isEmpty()
 
     // Setup jobs.
-    val instant0 = fakeClock.instant()
     exampleJobEnqueuer.enqueueGreen("J1:0s")
     exampleJobEnqueuer.enqueueGreen("J2:0s+10s", Duration.ofSeconds(10))
     exampleJobEnqueuer.enqueueGreen("J3:0s")
-    exampleJobEnqueuer.enqueueGreen("J4:0s+5s", Duration.ofSeconds(5))
-    exampleJobEnqueuer.enqueueGreen("J5:0s")
-
     fakeClock.add(Duration.ofSeconds(4))
-    val instant4 = fakeClock.instant()
-    exampleJobEnqueuer.enqueueGreen("J6:4s+1s", Duration.ofSeconds(1))
-    exampleJobEnqueuer.enqueueGreen("J7:4s+5s", Duration.ofSeconds(5))
-    exampleJobEnqueuer.enqueueGreen("J8:4s")
-
-    // Verify [FakeJob] fields [enqueuedAt] and [deliveryDelay].
-    val greenJobs = fakeJobQueue.peekJobs(GREEN_QUEUE)
-    assertThat(greenJobs).hasSize(8)
-    val job1 = greenJobs[0] as FakeJob
-    val job2 = greenJobs[1] as FakeJob
-    val job6 = greenJobs[5] as FakeJob
-    val job8 = greenJobs[7] as FakeJob
-    assertThat(job1.enqueuedAt).isEqualTo(instant0)
-    assertThat(job1.deliveryDelay).isNull()
-    assertThat(job2.enqueuedAt).isEqualTo(instant0)
-    assertThat(job2.deliveryDelay).isEqualTo(Duration.ofSeconds(10))
-    assertThat(job6.enqueuedAt).isEqualTo(instant4)
-    assertThat(job6.deliveryDelay).isEqualTo(Duration.ofSeconds(1))
-    assertThat(job8.enqueuedAt).isEqualTo(instant4)
-    assertThat(job8.deliveryDelay).isNull()
+    exampleJobEnqueuer.enqueueGreen("J4:4s+5s", Duration.ofSeconds(5))
+    exampleJobEnqueuer.enqueueGreen("J5:4s")
 
     // Handle jobs 4s after test start.
     fakeJobQueue.handleJobs(considerDelays = true)
-    assertThat(fakeJobQueue.peekJobs(GREEN_QUEUE)).hasSize(4)
-    assertThat(logCollector.takeMessages(ExampleJobHandler::class)).containsExactlyInAnyOrder(
+    assertThat(fakeJobQueue.peekJobs(GREEN_QUEUE)).hasSize(2)
+    assertThat(logCollector.takeMessages(ExampleJobHandler::class)).containsExactly(
         "received GREEN job with message: J1:0s",
         "received GREEN job with message: J3:0s",
-        "received GREEN job with message: J5:0s",
-        "received GREEN job with message: J8:4s",
+        "received GREEN job with message: J5:4s",
     )
 
-    // Handle jobs 5s after test start.
-    fakeClock.add(Duration.ofSeconds(1))
+    // Repeating processing does not change anything.
     fakeJobQueue.handleJobs(considerDelays = true)
     assertThat(fakeJobQueue.peekJobs(GREEN_QUEUE)).hasSize(2)
-    assertThat(logCollector.takeMessages(ExampleJobHandler::class)).containsExactlyInAnyOrder(
-        "received GREEN job with message: J4:0s+5s",
-        "received GREEN job with message: J6:4s+1s",
-    )
+  }
 
-    // Handle jobs 9s after test start.
-    fakeClock.add(Duration.ofSeconds(4))
+  @Test
+  fun jobsStartOnDeliveryDelayPassed() {
+    assertThat(fakeJobQueue.peekJobs(GREEN_QUEUE)).isEmpty()
+
+    // Setup jobs.
+    exampleJobEnqueuer.enqueueGreen("J1:0s")
+    exampleJobEnqueuer.enqueueGreen("J2:0s+10s", Duration.ofSeconds(10))
+    fakeClock.add(Duration.ofSeconds(5))
+    exampleJobEnqueuer.enqueueGreen("J3:5s+5s", Duration.ofSeconds(5))
+
+    // Handle jobs 5s after test start: jobs with the delay stay in the queue.
     fakeJobQueue.handleJobs(considerDelays = true)
-    assertThat(fakeJobQueue.peekJobs(GREEN_QUEUE)).hasSize(1)
-    assertThat(logCollector.takeMessages(ExampleJobHandler::class)).containsExactlyInAnyOrder(
-        "received GREEN job with message: J7:4s+5s",
+    assertThat(fakeJobQueue.peekJobs(GREEN_QUEUE)).hasSize(2)
+    assertThat(logCollector.takeMessages(ExampleJobHandler::class)).containsExactly(
+        "received GREEN job with message: J1:0s",
     )
 
     // Handle jobs 10s after test start.
-    fakeClock.add(Duration.ofSeconds(1))
+    fakeClock.add(Duration.ofSeconds(5))
     fakeJobQueue.handleJobs(considerDelays = true)
     assertThat(fakeJobQueue.peekJobs(GREEN_QUEUE)).isEmpty()
-    assertThat(logCollector.takeMessages(ExampleJobHandler::class)).containsExactlyInAnyOrder(
+    assertThat(logCollector.takeMessages(ExampleJobHandler::class)).containsExactly(
         "received GREEN job with message: J2:0s+10s",
+        "received GREEN job with message: J3:5s+5s",
+    )
+  }
+
+  @Test
+  fun jobsStartAfterDeliveryDelayPassed() {
+    assertThat(fakeJobQueue.peekJobs(GREEN_QUEUE)).isEmpty()
+
+    // Setup jobs.
+    exampleJobEnqueuer.enqueueGreen("J1:0s+10s", Duration.ofSeconds(10))
+    fakeClock.add(Duration.ofSeconds(5))
+    exampleJobEnqueuer.enqueueGreen("J2:5s+5s", Duration.ofSeconds(5))
+
+    // Handle jobs 20s after test start.
+    fakeClock.add(Duration.ofSeconds(15))
+    fakeJobQueue.handleJobs(considerDelays = true)
+    assertThat(fakeJobQueue.peekJobs(GREEN_QUEUE)).isEmpty()
+    assertThat(logCollector.takeMessages(ExampleJobHandler::class)).containsExactly(
+        "received GREEN job with message: J1:0s+10s",
+        "received GREEN job with message: J2:5s+5s",
     )
   }
 

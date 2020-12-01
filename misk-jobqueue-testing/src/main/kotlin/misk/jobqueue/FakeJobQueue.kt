@@ -8,7 +8,6 @@ import misk.tokens.TokenGenerator
 import java.time.Clock
 import java.time.Duration
 import java.time.Instant
-import java.util.Queue
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentLinkedDeque
 import java.util.concurrent.PriorityBlockingQueue
@@ -131,7 +130,7 @@ class FakeJobQueue @Inject constructor(
   ): List<FakeJob> {
     val jobs = deadletteredJobs[queueName] ?: return listOf()
     return processJobs(assertAcknowledged, retries, true) {
-      pollNextJob(jobs, false)
+      jobs.poll()
     }
   }
 
@@ -191,17 +190,20 @@ class FakeJobQueue @Inject constructor(
     return result
   }
 
-  private fun pollNextJob(jobs: Queue<FakeJob>, considerDelays: Boolean): FakeJob? {
+  private fun pollNextJob(jobs: PriorityBlockingQueue<FakeJob>, considerDelays: Boolean): FakeJob? {
     if (!considerDelays) {
       return jobs.poll()
     }
     val now = clock.instant()!!
     while (true) {
-      val job = jobs.firstOrNull {
-        it.deliveryDelay == null || !it.enqueuedAt.plus(it.deliveryDelay).isAfter(now)
+      // [jobs] queue is sorted by [deliverAt].
+      val job = jobs.peek()
+      if (job == null
+          || (job.deliveryDelay != null && job.deliverAt.isAfter(now))) {
+        return null
       }
       // If remove() is false, then we lost race to another worker and should retry.
-      if (job == null || jobs.remove(job)) {
+      if (jobs.remove(job)) {
         return job
       }
     }
@@ -233,21 +235,6 @@ data class FakeJob(
 
   override fun deadLetter() {
     deadLettered = true
-  }
-
-  override fun equals(other: Any?): Boolean {
-    if (this === other) return true
-    if (javaClass != other?.javaClass) return false
-
-    other as FakeJob
-
-    if (id != other.id) return false
-
-    return true
-  }
-
-  override fun hashCode(): Int {
-    return id.hashCode()
   }
 
   override fun compareTo(other: FakeJob): Int {
