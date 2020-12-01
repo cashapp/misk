@@ -16,7 +16,7 @@ internal class WireMessageAdapter(
 ) : JsonAdapter<Any?>() {
   @Suppress("UNCHECKED_CAST")
   private val builderType = try {
-    Class.forName("${messageType.name}\$Builder")
+    Class.forName("${messageType.name}\$Builder", true, messageType.classLoader)
   } catch (e: ClassNotFoundException) {
     throw AssertionError("no builder for ${messageType.name}")
   } as Class<Message.Builder<*, *>>
