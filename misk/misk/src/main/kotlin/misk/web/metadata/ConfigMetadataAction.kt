@@ -1,6 +1,7 @@
 package misk.web.metadata
 
 import com.google.inject.Inject
+import javax.inject.Singleton
 import misk.config.AppName
 import misk.config.Config
 import misk.config.MiskConfig
@@ -13,7 +14,6 @@ import misk.web.ResponseContentType
 import misk.web.actions.WebAction
 import misk.web.dashboard.AdminDashboardAccess
 import misk.web.mediatype.MediaTypes
-import javax.inject.Singleton
 
 @Singleton
 class ConfigMetadataAction @Inject constructor(
@@ -59,7 +59,7 @@ class ConfigMetadataAction @Inject constructor(
       val rawYamlFiles = MiskConfig.loadConfigYamlMap(appName, Env(environment.name), listOf())
       val yamlFiles = linkedMapOf<String, String?>("Effective Config" to MiskConfig.toYaml(
         config, ResourceLoader.SYSTEM))
-      rawYamlFiles.map { yamlFiles.put("classpath:/${it.key}", it.value) }
+      rawYamlFiles.map { yamlFiles.put(it.key, it.value) }
       return yamlFiles
     }
   }
