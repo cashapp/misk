@@ -1,8 +1,7 @@
 package misk.redis
 
-import misk.time.FakeClock
 import okio.ByteString
-import okio.ByteString.Companion.encodeUtf8
+import java.time.Clock
 import java.time.Duration
 import java.time.Instant
 import java.util.concurrent.ConcurrentHashMap
@@ -10,7 +9,7 @@ import javax.inject.Inject
 
 /** Mimics a Redis instance for testing. */
 class FakeRedis : Redis {
-  @Inject lateinit var clock: FakeClock
+  @Inject lateinit var clock: Clock
 
   // The value type stored in our key-value store.
   private data class Value(
