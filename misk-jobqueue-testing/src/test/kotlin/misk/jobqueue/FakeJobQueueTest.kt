@@ -191,12 +191,10 @@ internal class FakeJobQueueTest {
     assertThat(greenJobs).hasSize(2)
     val greenJob1 = greenJobs[0] as FakeJob
     val greenJob2 = greenJobs[1] as FakeJob
-    assertThat(greenJob1.enqueuedAt).isEqualTo(now)
+    assertThat(greenJob1.availableAt).isEqualTo(now.plus(oneSecondDeliveryDelay))
     assertThat(greenJob1.deliveryDelay).isEqualTo(oneSecondDeliveryDelay)
-    assertThat(greenJob1.deliverAt).isEqualTo(now.plus(oneSecondDeliveryDelay))
-    assertThat(greenJob2.enqueuedAt).isEqualTo(now)
+    assertThat(greenJob2.availableAt).isEqualTo(now)
     assertThat(greenJob2.deliveryDelay).isNull()
-    assertThat(greenJob2.deliverAt).isEqualTo(now)
 
     fakeJobQueue.handleJobs()
 
@@ -395,7 +393,7 @@ internal class FakeJobQueueTest {
     // Process an unknown job.
     assertThat(fakeJobQueue.peekJobs(GREEN_QUEUE)).hasSize(2)
     val unknownJob =
-        FakeJob(GREEN_QUEUE, "unknown", "idempotenceKey", "body", mapOf(), fakeClock.instant())
+        FakeJob(GREEN_QUEUE, "unknown", "idempotenceKey", "body", mapOf(), 0, fakeClock.instant())
     assertThat(fakeJobQueue.handleJob(unknownJob)).isFalse()
     assertThat(logCollector.takeMessages(ExampleJobHandler::class)).isEmpty()
 
