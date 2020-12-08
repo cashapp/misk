@@ -7,7 +7,6 @@ dependencies {
   compile project(':misk-prometheus')
   compile project(':misk-eventrouter')
 
-  testCompile dep.kotlinTest
   testCompile project(':misk-testing')
 }
 

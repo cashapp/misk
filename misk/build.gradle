@@ -58,7 +58,6 @@ dependencies {
   compile project(':misk-prometheus')
   compile project(':misk-service')
 
-  testCompile dep.kotlinTest
   testCompile dep.kotlinxCoroutines
   testCompile dep.mockitoCore
   testCompile project(':misk-testing')

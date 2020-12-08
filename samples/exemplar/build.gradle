@@ -6,7 +6,6 @@ dependencies {
   compile project(':misk')
   compile project(':misk-prometheus')
 
-  testCompile dep.kotlinTest
   testCompile project(':misk-testing')
 }
 

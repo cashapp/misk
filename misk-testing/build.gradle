@@ -12,6 +12,7 @@ dependencies {
   compile dep.junitParams
   compile dep.junitEngine
   compile dep.assertj
+  compile dep.kotlinTest
   compile dep.logbackClassic
   compile (dep.okHttpMockWebServer) {
     exclude group: 'junit'

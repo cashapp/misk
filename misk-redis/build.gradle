@@ -21,7 +21,6 @@ dependencies {
   compile dep.jedis
   compile project(':misk')
 
-  testCompile dep.kotlinTest
   testCompile project(':misk-testing')
 }
 
