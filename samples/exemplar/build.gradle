@@ -1,12 +1,12 @@
 dependencies {
   compile dep.kotlinStdLibJdk8
-  compile dep.kotlinTest
   compile dep.guava
   compile dep.guice
   compile dep.logbackClassic
   compile project(':misk')
   compile project(':misk-prometheus')
 
+  testCompile dep.kotlinTest
   testCompile project(':misk-testing')
 }
 

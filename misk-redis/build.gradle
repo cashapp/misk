@@ -20,8 +20,8 @@ dependencies {
   compile dep.guiceMultibindings
   compile dep.jedis
   compile project(':misk')
-  compile project(':misk-testing')
 
+  testCompile dep.kotlinTest
   testCompile project(':misk-testing')
 }
 
