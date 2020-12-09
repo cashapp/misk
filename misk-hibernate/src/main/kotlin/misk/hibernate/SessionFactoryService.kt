@@ -90,7 +90,7 @@ internal class SessionFactoryService(
       applySetting(AvailableSettings.USE_GET_GENERATED_KEYS, "true")
       applySetting(AvailableSettings.USE_NEW_ID_GENERATOR_MAPPINGS, "false")
       applySetting(AvailableSettings.JDBC_TIME_ZONE, "UTC")
-      if (config.type != DataSourceType.VITESS && config.type != DataSourceType.VITESS_MYSQL) {
+      if (config.type != DataSourceType.VITESS_MYSQL) {
         // This tells Hibernate that autocommit is always false, so Hibernate won't try to set it
         // for every transaction.
         // https://vladmihalcea.com/why-you-should-always-use-hibernate-connection-provider_disables_autocommit-for-resource-local-jpa-transactions/
