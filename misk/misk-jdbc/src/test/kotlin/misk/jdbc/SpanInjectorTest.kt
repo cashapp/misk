@@ -1,26 +1,16 @@
 package misk.jdbc
 
-import datadog.trace.core.DDSpan
 import datadog.opentracing.DDTracer
 import datadog.trace.common.writer.Writer
+import datadog.trace.core.DDSpan
+import io.opentracing.mock.MockTracer
 import net.ttddyy.dsproxy.transform.TransformInfo
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito
-import io.opentracing.mock.MockTracer
-import org.assertj.core.api.Assertions.assertThat
 import javax.sql.DataSource
 
 class SpanInjectorTest {
-  @Test
-  fun testNotDecorateIfItsVitess() {
-    val tracer = MockTracer()
-    val config = DataSourceConfig(DataSourceType.VITESS)
-    val injector = SpanInjector(tracer, config)
-    val ds = Mockito.mock(DataSource::class.java)
-
-    assertThat(injector.decorate(ds)).isSameAs(ds)
-  }
-
   @Test
   fun testDecoratesIfItsVitessMysql() {
     val tracer = MockTracer()

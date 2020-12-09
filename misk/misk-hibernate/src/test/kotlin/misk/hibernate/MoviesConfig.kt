@@ -4,7 +4,6 @@ import misk.config.Config
 import misk.jdbc.DataSourceConfig
 
 internal data class MoviesConfig(
-  val vitess_data_source: DataSourceConfig,
   val vitess_mysql_data_source: DataSourceConfig,
   val mysql_data_source: DataSourceConfig,
   val cockroachdb_data_source: DataSourceConfig,
