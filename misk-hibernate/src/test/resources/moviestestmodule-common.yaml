@@ -1,8 +1,3 @@
-vitess_data_source:
-  type: VITESS
-  username: vt_app
-  password: whatever
-  vitess_schema_resource_root: classpath:/misk/hibernate/moviestestmodule-schema
 vitess_mysql_data_source:
   type: VITESS_MYSQL
   username: vt_app

@@ -68,13 +68,13 @@ class DataSourceService(
     hikariConfig.validationTimeout = config.validation_timeout.toMillis()
     hikariConfig.maxLifetime = config.connection_max_lifetime.toMillis()
 
-    if (config.type != DataSourceType.VITESS && config.type != DataSourceType.VITESS_MYSQL) {
+    if (config.type != DataSourceType.VITESS_MYSQL) {
       // Our Hibernate settings expect autocommit to be disabled, see
       // CONNECTION_PROVIDER_DISABLES_AUTOCOMMIT in SessionFactoryService
       hikariConfig.isAutoCommit = false
     }
 
-    if (config.type == DataSourceType.MYSQL || config.type == DataSourceType.VITESS || config.type == DataSourceType.VITESS_MYSQL || config.type == DataSourceType.TIDB) {
+    if (config.type == DataSourceType.MYSQL || config.type == DataSourceType.VITESS_MYSQL || config.type == DataSourceType.TIDB) {
       hikariConfig.minimumIdle = 5
       if (config.type == DataSourceType.MYSQL) {
         hikariConfig.connectionInitSql = "SET time_zone = '+00:00'"

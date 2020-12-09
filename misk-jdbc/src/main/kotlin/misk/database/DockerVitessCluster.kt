@@ -254,12 +254,6 @@ class DockerVitessCluster(
     val schemaVolume = Volume("/vt/src/vitess.io/vitess/schema")
     val confVolume = Volume("/vt/src/vitess.io/vitess/config/miskcnf")
     val httpPort = ExposedPort.tcp(cluster.httpPort)
-    if (cluster.config.type == DataSourceType.VITESS) {
-      if (cluster.config.port != null && cluster.config.port != cluster.grpcPort) {
-        throw RuntimeException(
-            "Config port ${cluster.config.port} has to match Vitess Docker container: ${cluster.grpcPort}")
-      }
-    }
     if (cluster.config.type == DataSourceType.VITESS_MYSQL) {
       if (cluster.config.port != null && cluster.config.port != cluster.vtgateMysqlPort) {
         throw RuntimeException(

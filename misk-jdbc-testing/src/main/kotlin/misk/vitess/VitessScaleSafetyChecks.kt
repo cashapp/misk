@@ -67,7 +67,7 @@ class VitessScaleSafetyChecks(
   private val fullTableScanDetector = TableScanDetector()
 
   override fun decorate(dataSource: DataSource): DataSource {
-    if (config.type != DataSourceType.VITESS && config.type != DataSourceType.VITESS_MYSQL) return dataSource
+    if (config.type != DataSourceType.VITESS_MYSQL) return dataSource
 
     connect()?.let {
       ScaleSafetyChecks.turnOnSqlGeneralLogging(it)

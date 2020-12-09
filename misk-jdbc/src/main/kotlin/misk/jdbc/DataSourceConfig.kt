@@ -20,11 +20,6 @@ enum class DataSourceType(
       hibernateDialect = "org.hibernate.dialect.H2Dialect",
       isVitess = false
   ),
-  VITESS(
-      driverClassName = "io.vitess.jdbc.VitessDriver",
-      hibernateDialect = "misk.hibernate.VitessDialect",
-      isVitess = true
-  ),
   VITESS_MYSQL(
       driverClassName = MYSQL.driverClassName,
       hibernateDialect = "misk.hibernate.VitessDialect",
@@ -105,13 +100,6 @@ data class DataSourceConfig(
       }
       DataSourceType.HSQLDB -> {
         this
-      }
-      DataSourceType.VITESS -> {
-        copy(
-            port = port ?: 27001,
-            host = host ?: "127.0.0.1",
-            database = database ?: ""
-        )
       }
       DataSourceType.COCKROACHDB -> {
         copy(
@@ -219,43 +207,6 @@ data class DataSourceConfig(
       }
       DataSourceType.HSQLDB -> {
         "jdbc:hsqldb:mem:${database!!};sql.syntax_mys=true"
-      }
-      DataSourceType.VITESS -> {
-        var queryParams = ""
-        var useSSL = false
-
-        // NOTE(nb): still support url properties in Vitess for backwards compatibility.
-        val trustStorePath = getStorePath(config.trust_certificate_key_store_url, config.trust_certificate_key_store_path)
-        val certStorePath = getStorePath(config.client_certificate_key_store_url, config.client_certificate_key_store_path)
-
-        /**
-         * Query params for VitessJDBC driver look like default MySQL JDBC driver query params
-         * but are named slightly differently and a smaller subset are supported. See
-         * [io.vitess.jdbc.VitessJDBCUrl] for the complete list
-         */
-        if (!trustStorePath.isNullOrBlank()) {
-          require(!config.trust_certificate_key_store_password.isNullOrBlank()) {
-            "must provide a trust_certificate_key_store_password if trust_certificate_key_store_url" +
-                " or trust_certificate_key_store_path is set"
-          }
-          queryParams += "${if (queryParams.isEmpty()) "?" else "&"}trustStore=$trustStorePath"
-          queryParams += "&trustStorePassword=${config.trust_certificate_key_store_password}"
-          useSSL = true
-        }
-        if (!certStorePath.isNullOrBlank()) {
-          require(!config.client_certificate_key_store_password.isNullOrBlank()) {
-            "must provide a client_certificate_key_store_password if client_certificate_key_store_url" +
-                " or client_certificate_key_store_path is set"
-          }
-          queryParams += "${if (queryParams.isEmpty()) "?" else "&"}keyStore=$certStorePath"
-          queryParams += "&keyStorePassword=${config.client_certificate_key_store_password}"
-          useSSL = true
-        }
-        if (useSSL) {
-          queryParams += "&useSSL=true"
-        }
-
-        "jdbc:vitess://${config.host}:${config.port}/${config.database}$queryParams"
       }
       DataSourceType.COCKROACHDB, DataSourceType.POSTGRESQL -> {
         var params = "ssl=false&user=${config.username}"

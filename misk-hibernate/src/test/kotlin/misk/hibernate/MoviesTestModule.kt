@@ -39,7 +39,6 @@ class MoviesTestModule(
 
   private fun selectDataSourceConfig(config: MoviesConfig): DataSourceConfig {
     return when (type) {
-      DataSourceType.VITESS -> config.vitess_data_source
       DataSourceType.VITESS_MYSQL -> config.vitess_mysql_data_source
       DataSourceType.MYSQL -> config.mysql_data_source
       DataSourceType.COCKROACHDB -> config.cockroachdb_data_source
@@ -48,5 +47,4 @@ class MoviesTestModule(
       DataSourceType.HSQLDB -> throw RuntimeException("Not supported (yet?)")
     }
   }
-
 }
