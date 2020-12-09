@@ -53,7 +53,7 @@ class TruncateTablesService(
               DataSourceType.HSQLDB -> {
                 "SELECT TABLE_NAME FROM INFORMATION_SCHEMA.SYSTEM_TABLES WHERE TABLE_TYPE='TABLE'"
               }
-              DataSourceType.VITESS, DataSourceType.VITESS_MYSQL -> {
+              DataSourceType.VITESS_MYSQL -> {
                 "SHOW VSCHEMA TABLES"
               }
               DataSourceType.COCKROACHDB, DataSourceType.POSTGRESQL -> {
