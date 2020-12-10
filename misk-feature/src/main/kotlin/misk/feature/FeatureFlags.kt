@@ -26,6 +26,17 @@ interface FeatureFlags {
   ): Int
 
   /**
+   * Calculates the value of an integer feature flag for the given key and attributes, or returns
+   * null if the flag is set to nothing.
+   * @see [getEnum] for param details
+   */
+  fun getIntOrNull(
+    feature: Feature,
+    key: String,
+    attributes: Attributes = Attributes()
+  ): Int?
+
+  /**
    * Calculates the value of a string feature flag for the given key and attributes.
    * @see [getEnum] for param details
    */
@@ -36,11 +47,24 @@ interface FeatureFlags {
   ): String
 
   /**
+   * Calculates the value of a string feature flag for the given key and attributes, or returns
+   * null if the flag is set to nothing.
+   * @see [getEnum] for param details
+   */
+  fun getStringOrNull(
+    feature: Feature,
+    key: String,
+    attributes: Attributes = Attributes()
+  ): String?
+
+  /**
    * Calculates the value of an enumerated feature flag for the given key and attributes.
    * @param feature name of the feature flag to evaluate.
    * @param key unique primary key for the entity the flag should be evaluated against.
-   * @param clazz the enum type
+   * @param clazz the enum type.
    * @param attributes additional attributes to provide to flag evaluation.
+   * @throws [RuntimeException] if the service is unavailable.
+   * @throws [IllegalStateException] if the flag is off with no default value.
    */
   fun <T : Enum<T>> getEnum(
     feature: Feature,

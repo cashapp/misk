@@ -9,6 +9,7 @@ import misk.inject.KAbstractModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import javax.inject.Inject
@@ -57,6 +58,11 @@ internal class FakeFeatureFlagsTest {
     //Provides the key level override when there is no match on attributes
     assertThat(subject.getInt(FEATURE, "joker", Attributes(mapOf("don't" to "exist"))))
         .isEqualTo(42)
+
+    // Can override with null
+    subject.reset()
+    assertThatThrownBy { subject.getInt(FEATURE, TOKEN) }.hasSameClassAs(IllegalArgumentException())
+    assertThat(subject.getIntOrNull(FEATURE, TOKEN)).isNull()
   }
 
   @Test

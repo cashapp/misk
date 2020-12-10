@@ -41,9 +41,15 @@ class FakeFeatureFlags @Inject constructor(
       get(feature, key, attributes) as? Int ?: throw IllegalArgumentException(
           "Int flag $feature must be overridden with override() before use")
 
+  override fun getIntOrNull(feature: Feature, key: String, attributes: Attributes): Int? =
+      get(feature, key, attributes) as Int?
+
   override fun getString(feature: Feature, key: String, attributes: Attributes): String =
       get(feature, key, attributes) as? String ?: throw IllegalArgumentException(
           "String flag $feature must be overridden with override() before use")
+
+  override fun getStringOrNull(feature: Feature, key: String, attributes: Attributes): String? =
+      get(feature, key, attributes) as String?
 
   override fun <T : Enum<T>> getEnum(
     feature: Feature,
