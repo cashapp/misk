@@ -36,6 +36,7 @@ dependencies {
   compile dep.vitess
   compile dep.tink
   compile project(':misk')
+  compile project(':misk-actions')
   compile project(':misk-crypto')
   compile project(':misk-jdbc')
 
