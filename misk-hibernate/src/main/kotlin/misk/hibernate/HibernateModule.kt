@@ -1,5 +1,6 @@
 package misk.hibernate
 
+import com.google.inject.Injector
 import misk.ServiceModule
 import misk.concurrent.ExecutorServiceFactory
 import misk.healthchecks.HealthCheck
@@ -9,13 +10,14 @@ import misk.inject.asSingleton
 import misk.inject.keyOf
 import misk.inject.setOfType
 import misk.inject.toKey
+import misk.inject.typeLiteral
 import misk.jdbc.DataSourceClusterConfig
 import misk.jdbc.DataSourceConfig
 import misk.jdbc.DataSourceDecorator
-import misk.jdbc.JdbcModule
 import misk.jdbc.DataSourceService
 import misk.jdbc.DataSourceType
 import misk.jdbc.DatabasePool
+import misk.jdbc.JdbcModule
 import misk.jdbc.RealDatabasePool
 import misk.jdbc.SchemaMigratorService
 import misk.web.exceptions.ExceptionMapperModule
@@ -100,12 +102,16 @@ class HibernateModule(
 
     bind(transacterKey).toProvider(object : Provider<Transacter> {
       @Inject lateinit var executorServiceFactory: ExecutorServiceFactory
+      @Inject lateinit var injector: Injector
       override fun get(): RealTransacter = RealTransacter(
           qualifier = qualifier,
           sessionFactoryProvider = sessionFactoryProvider,
           readerSessionFactoryProvider = readerSessionFactoryProvider,
           config = config,
           executorServiceFactory = executorServiceFactory,
+          hibernateEntities = injector.findBindingsByType(HibernateEntity::class.typeLiteral()).map {
+            it.provider.get()
+          }.toSet()
       )
     }).asSingleton()
 
@@ -117,12 +123,16 @@ class HibernateModule(
       val readerTransacterKey = Transacter::class.toKey(readerQualifier)
       bind(readerTransacterKey).toProvider(object : Provider<Transacter> {
         @Inject lateinit var executorServiceFactory: ExecutorServiceFactory
+        @Inject lateinit var injector: Injector
         override fun get(): Transacter = RealTransacter(
             qualifier = readerQualifier,
             sessionFactoryProvider = readerSessionFactoryProvider!!,
             readerSessionFactoryProvider = readerSessionFactoryProvider,
             config = config,
-            executorServiceFactory = executorServiceFactory
+            executorServiceFactory = executorServiceFactory,
+            hibernateEntities = injector.findBindingsByType(HibernateEntity::class.typeLiteral()).map {
+              it.provider.get()
+            }.toSet()
         ).readOnly()
       }).asSingleton()
     }

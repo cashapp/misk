@@ -3,6 +3,7 @@ sourceSets {
     srcDirs += [
       'web/tabs/admin-dashboard/lib',
       'web/tabs/config/lib',
+      'web/tabs/database-query/lib',
       'web/tabs/web-actions/lib',
     ]
     exclude '**/node_modules'

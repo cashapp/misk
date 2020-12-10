@@ -42,11 +42,10 @@ class DashboardTabProvider(
   val capabilities: Set<String> = setOf(),
   val services: Set<String> = setOf()
 ) : Provider<DashboardTab> {
-  @Inject
-  lateinit var registeredEntries: List<AccessAnnotationEntry>
+  @Inject lateinit var accessAnnotationEntries: List<AccessAnnotationEntry>
 
   override fun get(): DashboardTab {
-    val accessAnnotationEntry = registeredEntries.find { it.annotation == accessAnnotation }
+    val accessAnnotationEntry = accessAnnotationEntries.find { it.annotation == accessAnnotation }
     return DashboardTab(
       slug = slug,
       url_path_prefix = url_path_prefix,

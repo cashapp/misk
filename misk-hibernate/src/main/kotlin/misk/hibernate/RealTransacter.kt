@@ -54,7 +54,8 @@ internal class RealTransacter private constructor(
   private val threadLatestSession: ThreadLocal<RealSession>,
   private val options: TransacterOptions,
   private val executorServiceFactory: ExecutorServiceFactory,
-  private val shardListFetcher: ShardListFetcher
+  private val shardListFetcher: ShardListFetcher,
+  private val hibernateEntities: Set<HibernateEntity>
 ) : Transacter {
 
   constructor(
@@ -62,7 +63,8 @@ internal class RealTransacter private constructor(
     sessionFactoryProvider: Provider<SessionFactory>,
     readerSessionFactoryProvider: Provider<SessionFactory>?,
     config: DataSourceConfig,
-    executorServiceFactory: ExecutorServiceFactory
+    executorServiceFactory: ExecutorServiceFactory,
+    hibernateEntities: Set<HibernateEntity>
   ) : this(
       qualifier = qualifier,
       sessionFactoryProvider = sessionFactoryProvider,
@@ -71,12 +73,17 @@ internal class RealTransacter private constructor(
       threadLatestSession = ThreadLocal(),
       options = TransacterOptions(),
       executorServiceFactory = executorServiceFactory,
-      shardListFetcher = ShardListFetcher()
+      shardListFetcher = ShardListFetcher(),
+      hibernateEntities = hibernateEntities
   ) {
     shardListFetcher.init(this, config, executorServiceFactory)
   }
 
   override fun config(): DataSourceConfig = config
+
+  override fun entities(): Set<KClass<out DbEntity<*>>> {
+    return hibernateEntities.map { it.entity }.toSet()
+  }
 
   /**
    * Uses a dedicated thread to query Vitess for the database's current shards. This caches the
@@ -316,7 +323,8 @@ internal class RealTransacter private constructor(
           options = options,
           config = config,
           executorServiceFactory = executorServiceFactory,
-          shardListFetcher = shardListFetcher
+          shardListFetcher = shardListFetcher,
+          hibernateEntities = hibernateEntities
       )
 
   private fun <T> withSession(
