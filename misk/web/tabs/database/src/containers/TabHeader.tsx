@@ -29,7 +29,7 @@ export const TabHeader = () => {
         <div css={cssTableScroll}>
           <Callout
             title={
-              "1. Enable the Database tab Web Actions for Hibernate with installHibernateAdminDashboardWebActions() in your misk-hibernate.HibernateEntityModule"
+              "1. Enable the Database tab Web Actions for Hibernate with installHibernateAdminDashboardWebActions()"
             }
           >
             <CodePreContainer>
