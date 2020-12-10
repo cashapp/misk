@@ -38,7 +38,6 @@ export const FormBuilderContainer = (props: {
     // Return back the form request body
     const formData = getFormData(fieldValueStore, typesMetadata)
     setFormData(formData)
-    console.log("FORM DATA", formData)
   }, [fieldValueStore, typesMetadata])
 
   return (

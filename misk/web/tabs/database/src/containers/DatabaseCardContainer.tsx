@@ -219,11 +219,14 @@ export const DatabaseCardContainer = (props: {
             </Menu>
           </div>
         </FlexContainer>
-        <RunQueryCollapseContainer
-          databaseQuery={props.databaseQuery}
-          isOpen={isOpenRunQuery}
-          tag={props.tag}
-        />
+        {props.databaseQuery.accessAnnotation !=
+          NoAdminDashboardDatabaseAccess && (
+          <RunQueryCollapseContainer
+            databaseQuery={props.databaseQuery}
+            isOpen={isOpenRunQuery}
+            tag={props.tag}
+          />
+        )}
       </Card>
       <br />
     </div>

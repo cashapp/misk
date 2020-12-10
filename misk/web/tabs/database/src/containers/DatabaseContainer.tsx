@@ -15,7 +15,7 @@ import {
 } from "../ducks"
 
 const createTag = (databaseQuery: IDatabaseQueryMetadataAPI, tag: string) =>
-  `${tag}::${databaseQuery.queryClass}`
+  `${tag}::${databaseQuery.entityClass}::${databaseQuery.queryClass}`
 
 const DatabaseContainer = (
   props: IState &
@@ -47,7 +47,7 @@ const DatabaseContainer = (
               <DatabaseCardContainer
                 databaseQuery={databaseQuery}
                 key={index}
-                tag={createTag(databaseQuery, "DatabaseQuery")}
+                tag={createTag(databaseQuery, "Database")}
               />
             ))}
         </div>

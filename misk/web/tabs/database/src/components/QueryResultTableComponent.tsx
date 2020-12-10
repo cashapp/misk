@@ -22,18 +22,34 @@ export const QueryResultTableComponent = (props: {
 
   const { response } = props
   if (response && "results" in response) {
-    const data = response.results.map(row => {
-      const keys = Object.keys(row)
-      const sanitized: { [key: string]: string } = {}
-      keys.forEach(key => {
-        sanitized[key] = JSON.stringify(row[key], null, 2)
+    const columnLengthMap: { [key: string]: number } = {}
+    const data = response.results
+      .map(row => {
+        const keys = Object.keys(row)
+        const sanitized: { [key: string]: string } = {}
+        keys.forEach(key => {
+          sanitized[key] = JSON.stringify(row[key], null, 2)
+          const cellLength = JSON.stringify(row[key], null, 2).length
+          if (!(key in columnLengthMap) || columnLengthMap[key] < cellLength) {
+            columnLengthMap[key] = cellLength
+          }
+        })
+        return sanitized
       })
-      return sanitized
-    })
+      .map(row => {
+        // Reorder row keys so that the shorter cell-length columns appear first in the table
+        const sortedRow: { [key: string]: string } = {}
+        const sortedColumns = Object.entries(columnLengthMap).sort(
+          (entry1, entry2) => entry1[1] - entry2[1]
+        )
+        sortedColumns.forEach(column => (sortedRow[column[0]] = row[column[0]]))
+        return sortedRow
+      })
+
     return (
       <div>
         <Metadata
-          content={"View Query Results in Table"}
+          content={`View Query Results in Table (${data.length} Rows)`}
           labelElement={<Icon icon={IconNames.PANEL_TABLE} />}
           onClick={() => setIsOpenTableDrawer(!isOpenTableDrawer)}
         />

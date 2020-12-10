@@ -13,7 +13,9 @@ export const FilterDatabaseContainer = (props: {
   // Initialize input state
   const [filterText, setFilterText] = useState("")
   // Initialize the filtered set as the entire metadata[] only when it changes
-  useEffect(() => props.setFilteredMetadata(props.metadata), [props.metadata])
+  useEffect(() => props.setFilteredMetadata(props.metadata), [
+    props.metadata.length
+  ])
 
   const filterMetadata = (
     metadata: IDatabaseQueryMetadataAPI[],
