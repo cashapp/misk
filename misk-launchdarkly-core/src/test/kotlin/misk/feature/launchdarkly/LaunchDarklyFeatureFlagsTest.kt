@@ -18,6 +18,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.mockito.ArgumentCaptor
+import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.ArgumentMatchers.eq
 import org.mockito.Mockito
 import org.mockito.Mockito.any
@@ -184,5 +185,47 @@ internal class LaunchDarklyFeatureFlagsTest {
   enum class Dinosaur {
     PTERODACTYL,
     TYRANNOSAURUS
+  }
+
+  @Test
+  fun `getString throws on default value`() {
+    Mockito
+      .`when`(client.stringVariationDetail(anyString(), any(LDUser::class.java), anyString()))
+      .thenReturn(EvaluationDetail(EvaluationReason.off(), null, "PTERODACTYL"))
+
+    assertThrows<IllegalStateException> {
+      featureFlags.getString(Feature("which-dinosaur"), "a-token")
+    }
+  }
+
+  @Test
+  fun `getStringOrNull returns null on default value`() {
+    Mockito
+      .`when`(client.stringVariationDetail(anyString(), any(LDUser::class.java), anyString()))
+      .thenReturn(EvaluationDetail(EvaluationReason.off(), null, "PTERODACTYL"))
+
+    assertThat(featureFlags.getStringOrNull(Feature("which-dinosaur"), "a-token"))
+      .isNull()
+  }
+
+  @Test
+  fun `getInt throws on default value`() {
+    Mockito
+      .`when`(client.intVariationDetail(anyString(), any(LDUser::class.java), anyInt()))
+      .thenReturn(EvaluationDetail(EvaluationReason.off(), null, 999))
+
+    assertThrows<IllegalStateException> {
+      featureFlags.getInt(Feature("which-dinosaur"), "a-token")
+    }
+  }
+
+  @Test
+  fun `getIntOrNull returns null on default value`() {
+    Mockito
+      .`when`(client.intVariationDetail(anyString(), any(LDUser::class.java), anyInt()))
+      .thenReturn(EvaluationDetail(EvaluationReason.off(), null, 999))
+
+    assertThat(featureFlags.getIntOrNull(Feature("which-dinosaur"), "a-token"))
+      .isNull()
   }
 }
