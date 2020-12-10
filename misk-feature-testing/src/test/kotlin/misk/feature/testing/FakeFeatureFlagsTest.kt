@@ -4,7 +4,9 @@ import com.squareup.moshi.JsonDataException
 import misk.feature.Attributes
 import misk.feature.Feature
 import misk.feature.getEnum
+import misk.feature.getEnumOrNull
 import misk.feature.getJson
+import misk.feature.getJsonOrNull
 import misk.inject.KAbstractModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
@@ -100,6 +102,14 @@ internal class FakeFeatureFlagsTest {
     assertThat(subject.getEnum<Dinosaur>(FEATURE, TOKEN)).isEqualTo(Dinosaur.PTERODACTYL)
   }
 
+  @Test
+  fun `getEnumOrNull is null if feature flag is not overridden`() {
+    assertThat(subject.getEnumOrNull<Dinosaur>(FEATURE, TOKEN)).isNull()
+    subject.override(FEATURE, Dinosaur.TYRANNOSAURUS)
+    assertThat(subject.getEnumOrNull<Dinosaur>(FEATURE, TOKEN))
+      .isEqualTo(Dinosaur.TYRANNOSAURUS)
+  }
+
   data class JsonFeature(val value : String, val optional : String? = null)
 
   @Test
@@ -144,6 +154,13 @@ internal class FakeFeatureFlagsTest {
         .isEqualTo(JsonFeature("test-class"))
     assertThat(subject.getJson<JsonFeature>(FEATURE, "joker"))
         .isEqualTo(JsonFeature("test-key-class"))
+  }
+
+  @Test
+  fun `getJsonOrNull is null if not overridden`() {
+    assertThat(subject.getJsonOrNull<JsonFeature>(FEATURE, TOKEN)).isNull()
+    subject.overrideJson(FEATURE, JsonFeature("test"))
+    assertThat(subject.getJsonOrNull<JsonFeature>(FEATURE, TOKEN)).isEqualTo(JsonFeature("test"))
   }
 
   @Test

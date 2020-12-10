@@ -97,6 +97,20 @@ class LaunchDarklyFeatureFlags @Inject constructor(
     return java.lang.Enum.valueOf(clazz, result.value.toUpperCase())
   }
 
+  override fun <T : Enum<T>> getEnumOrNull(
+    feature: Feature,
+    key: String,
+    clazz: Class<T>,
+    attributes: Attributes
+  ): T? {
+    checkInitialized()
+    val result = ldClient.stringVariationDetail(feature.name, buildUser(feature, key, attributes), "")
+    checkEvaluationSucceeded(feature, result)
+    if (result.isDefaultValue) return null
+    if (result.value == "") return null
+    return java.lang.Enum.valueOf(clazz, result.value.toUpperCase())
+  }
+
   override fun <T> getJson(
     feature: Feature,
     key: String,
@@ -112,6 +126,22 @@ class LaunchDarklyFeatureFlags @Inject constructor(
     checkEvaluationSucceeded(feature, result)
     return moshi.adapter(clazz).fromSafeJson(result.value.toJsonString())
         ?: throw IllegalArgumentException("null value deserialized from $feature")
+  }
+
+  override fun <T> getJsonOrNull(
+    feature: Feature,
+    key: String,
+    clazz: Class<T>,
+    attributes: Attributes
+  ): T? {
+    checkInitialized()
+    val result = ldClient.jsonValueVariationDetail(
+      feature.name,
+      buildUser(feature, key, attributes),
+      LDValue.ofNull())
+    checkEvaluationSucceeded(feature, result)
+    if (result.isDefaultValue) return null
+    return moshi.adapter(clazz).fromSafeJson(result.value.toJsonString())
   }
 
   private fun checkInitialized() {
