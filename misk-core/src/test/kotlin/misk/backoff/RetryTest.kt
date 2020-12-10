@@ -64,4 +64,24 @@ internal class RetryTest {
     // Backoff should be reset to base delay after success
     assertThat(backoff.nextRetry()).isEqualTo(Duration.ofMillis(10))
   }
+
+  @Test fun onlyRetryExceptionIfInOnlyRetryList() {
+    val backoff = ExponentialBackoff(Duration.ofMillis(10), Duration.ofMillis(100))
+    val result = retry(3, backoff, listOf(IllegalStateException())) { retry ->
+      if (retry < 2) throw IllegalStateException("this failed")
+      "hello"
+    }
+
+    assertThat(result).isEqualTo("hello")
+  }
+
+  @Test fun notRetryExceptionIfNotInOnlyRetryList() {
+    val backoff = ExponentialBackoff(Duration.ofMillis(10), Duration.ofMillis(100))
+    assertFailsWith<IllegalStateException> {
+      retry(3, backoff, listOf(IndexOutOfBoundsException())) { retry ->
+        if (retry < 2) throw IllegalStateException("this failed")
+        "hello"
+      }
+    }
+  }
 }
