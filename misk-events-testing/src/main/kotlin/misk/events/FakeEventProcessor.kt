@@ -27,6 +27,7 @@ import javax.inject.Singleton
  * corresponding consumers. Note that no call to [Consumer.subscribe] is necessary.
  */
 @Singleton
+@Deprecated("This API is no longer supported and replaced by the new event system's client library")
 class FakeEventProcessor @Inject constructor(
   private val consumers: Map<Topic, Consumer.Handler>
 ) : Producer {
