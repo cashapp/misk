@@ -1,6 +1,5 @@
 package misk.web.jetty
 
-import jnr.unixsocket.UnixSocket
 import misk.exceptions.StatusCode
 import misk.logging.getLogger
 import misk.web.BoundAction
@@ -11,7 +10,8 @@ import misk.web.actions.WebAction
 import misk.web.actions.WebActionEntry
 import misk.web.actions.WebActionFactory
 import misk.web.mediatype.MediaTypes
-import misk.web.metadata.WebActionMetadata
+import misk.web.metadata.webaction.WebActionMetadata
+import misk.web.metadata.webaction.WebActionMetadataAction
 import okhttp3.Headers
 import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrl

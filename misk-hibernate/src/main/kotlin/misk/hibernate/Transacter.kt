@@ -6,6 +6,7 @@ import misk.vitess.Keyspace
 import misk.vitess.Shard
 import misk.vitess.tabletDoesNotExists
 import javax.persistence.PersistenceException
+import kotlin.reflect.KClass
 
 /**
  * Provides explicit block-based transaction demarcation.
@@ -74,6 +75,9 @@ interface Transacter {
   fun allowCowrites(): Transacter
 
   fun config(): DataSourceConfig
+
+  /** Returns KClasses for the bound DbEntities for the transacter */
+  fun entities(): Set<KClass<out DbEntity<*>>>
 }
 
 fun Transacter.shards() = transaction { it.shards() }
