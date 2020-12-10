@@ -3,6 +3,7 @@ package misk.events
 /**
  * A [Producer] is used to send events to an event stream.
  */
+@Deprecated("This API is no longer supported and replaced by the new event system's client library")
 interface Producer {
   /**
    * Publishes an event to an event stream.
