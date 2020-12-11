@@ -6,6 +6,7 @@ import okio.ByteString
 import okio.ByteString.Companion.encodeUtf8
 import java.time.Instant
 
+@Deprecated("This API is no longer supported and replaced by the new event system's client library")
 data class Event(
   /** The type of event */
   val type: String,
