@@ -1,0 +1,43 @@
+name: Publish the mkdocs to gh-pages
+
+on:
+  release:
+    types: [published]
+
+env:
+  GRADLE_OPTS: -Dorg.gradle.configureondemand=true -Dorg.gradle.parallel=true -Dkotlin.incremental=false -Dorg.gradle.jvmargs="-Xmx3g -XX:MaxPermSize=2048m -XX:+HeapDumpOnOutOfMemoryError -Dfile.encoding=UTF-8"
+
+jobs:
+  deploy-website:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout the repo
+        uses: actions/checkout@v2
+
+      - name: Set up Python 3.8
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+
+      - name: Configure JDK
+        uses: actions/setup-java@v1
+        with:
+          java-version: 14
+
+      - name: Prep mkdocs
+        run: .github/workflows/prepare_mkdocs.sh
+
+      - name: Build mkdocs
+        run: |
+          pip3 install mkdocs-macros-plugin
+          mkdocs build
+
+      - name: Deploy 🚀
+        if: success()
+        uses: JamesIves/github-pages-deploy-action@releases/v3
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BRANCH: gh-pages # The branch the action should deploy to.
+          FOLDER: site # The folder the action should deploy.
+          SINGLE_COMMIT: true
