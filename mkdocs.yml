@@ -5,7 +5,7 @@ site_description: "Misk: Microservice Container for Kotlin"
 site_author: Square, Inc.
 remote_branch: gh-pages
 
-copyright: 'Copyright &copy; 2019 Square, Inc.'
+copyright: 'Copyright &copy; 2018-2021 Square, Inc.'
 
 theme:
   name: 'material'
@@ -62,4 +62,6 @@ nav:
       - 'misk-zoopkeeper-testing': 0.x/misk-zoopkeeper-testing/index.md
   - 'Change Log': changelog.md
   - 'Releasing': releasing.md
+  - 'Manual Releasing': releasing-manual.md
+  - 'Contributing': contributing.md
   - 'Stack Overflow ⏏': https://stackoverflow.com/questions/tagged/misk?sort=active
