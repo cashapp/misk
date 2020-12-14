@@ -43,64 +43,69 @@ class FakeEventProcessor @Inject constructor(
   /** Handle unhandled events by adding them to the dropped queue. */
   private val defaultConsumer = object : Consumer.Handler {
     override fun handleEvents(ctx: Consumer.Context, vararg events: Event) {
-      droppedQueue += events.map { PublishedEvent(ctx.topic, it) }
+      droppedQueue += events.map { PublishedEvent(ctx.topic, it, isRetry = ctx.isRetry) }
     }
   }
 
   override fun publish(topic: Topic, vararg events: Event) {
     for (event in events) {
-      queue.addLast(PublishedEvent(topic, event))
+      queue.addLast(PublishedEvent(topic, event, isRetry = false))
     }
   }
 
-  fun deliverAll(batchSize: Int = 100) {
-    deliverAll(batchSize, queue, isRetry = false)
-  }
-
-  fun deliverRetries(batchSize: Int = 100) {
-    deliverAll(batchSize, retryQueue, isRetry = true)
-  }
-
-  private fun deliverAll(batchSize: Int, queue: BlockingDeque<PublishedEvent>, isRetry: Boolean) {
+  /**
+   * Deliver all enqueued events including retries.
+   */
+  fun deliverAll(batchSize: Int = 100, allowRetries: Boolean = false) {
+    retryQueue.drainTo(queue)
     while (true) {
-      val batch = queue.pollBatch(batchSize, isRetry) ?: break
+      val batch = queue.pollBatch(batchSize, allowRetries) ?: break
       val consumer = consumers[batch.topic] ?: defaultConsumer
       consumer.handleEvents(batch, *batch.events.toTypedArray())
     }
   }
 
-  private fun BlockingDeque<PublishedEvent>.pollBatch(batchSize: Int, isRetry: Boolean): Batch? {
+  private fun BlockingDeque<PublishedEvent>.pollBatch(
+    batchSize: Int,
+    allowRetries: Boolean
+  ): Batch? {
     require(batchSize >= 1)
 
     val first = poll() ?: return null
     val topic = first.topic
+    val isRetry = first.isRetry
     val events = mutableListOf(first.event)
 
     val i = iterator()
     while (events.size < batchSize && i.hasNext()) {
       val candidate = i.next()
-      if (candidate.topic == topic) {
+      if (candidate.topic == topic && candidate.isRetry == isRetry) {
         i.remove()
         events += candidate.event
       }
     }
 
-    return Batch(topic, events, isRetry)
+    return Batch(topic, events, isRetry, allowRetries)
   }
 
   data class PublishedEvent(
     val topic: Topic,
     val event: Event,
+    val isRetry: Boolean
   )
 
   private inner class Batch(
     override val topic: Topic,
     val events: List<Event>,
-    override val isRetry: Boolean
+    override val isRetry: Boolean,
+    val allowRetries: Boolean
   ) : Consumer.Context {
     override fun retryLater(vararg events: Event) {
+      check(allowRetries) {
+        "unexpected retry! use allowRetries=true if that is expected"
+      }
       for (event in events) {
-        retryQueue += PublishedEvent(topic, event)
+        retryQueue += PublishedEvent(topic, event, isRetry = true)
       }
     }
   }
