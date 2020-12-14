@@ -66,6 +66,9 @@ internal class RealActionRequestExecuter<RQ : Any, RS : Any> @Inject constructor
       response.isSuccessful -> {
         responseAdaptor.fromJson(response.body!!.source())!!
       }
+      response.code == 400 -> {
+        throw BadRequestException(response.message)
+      }
       response.code == 403 -> {
        throw UnauthorizedException(response.message)
       }

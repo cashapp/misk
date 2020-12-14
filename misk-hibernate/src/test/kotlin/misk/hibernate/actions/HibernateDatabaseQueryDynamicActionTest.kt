@@ -1,11 +1,13 @@
 package misk.hibernate.actions
 
+import misk.exceptions.BadRequestException
 import misk.exceptions.UnauthorizedException
 import misk.hibernate.DbActor
 import misk.hibernate.DbCharacter
 import misk.hibernate.DbMovie
 import misk.hibernate.Movies
 import misk.hibernate.Operator
+import misk.hibernate.ReflectionQuery
 import misk.hibernate.Transacter
 import misk.hibernate.load
 import misk.testing.MiskTest
@@ -16,6 +18,7 @@ import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import javax.inject.Inject
+import kotlin.reflect.full.declaredMemberProperties
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 
@@ -65,8 +68,6 @@ class HibernateDatabaseQueryDynamicActionTest {
     }
   }
 
-  // TODO (adrw) re-enable once LocalDate Moshi adapter is written/bound to support DbMovie.release_date
-  @Disabled
   @Test
   fun `default request`() {
     val results = realActionRequestExecuter.executeRequest(
@@ -79,12 +80,9 @@ class HibernateDatabaseQueryDynamicActionTest {
       user = "joey",
       capabilities = AUTHORIZED_CAPABILITIES
     )
-    assertThat(results.results).containsAll(
-      listOf(
-        mapOf("name" to "Jurassic Park", "created_at" to "2018-01-01T00:00:00.000Z"),
-        mapOf("name" to "Pulp Fiction", "created_at" to "2018-01-01T00:00:00.000Z"),
-        mapOf("name" to "Die Hard", "created_at" to "2018-01-01T00:00:00.000Z"),
-      )
+    assertEquals(3, results.results.size)
+    assertThat(results.results.map { (it as Map<String, Any>).keys }.first()).containsAll(
+      DbMovie::class.declaredMemberProperties.map { it.name }
     )
   }
 
@@ -110,6 +108,25 @@ class HibernateDatabaseQueryDynamicActionTest {
         mapOf("name" to "Die Hard", "created_at" to "2018-01-01T00:00:00.000Z"),
       )
     )
+  }
+
+  @Test
+  fun `dynamic select invalid path throws bad request`() {
+    assertFailsWith<BadRequestException> {
+      realActionRequestExecuter.executeRequest(
+        HibernateDatabaseQueryDynamicAction.Request(
+          entityClass = DbMovie::class.simpleName!!,
+          queryClass = "DbMovieDynamicQuery",
+          query = HibernateDatabaseQueryMetadataFactory.Companion.DynamicQuery(
+            select = HibernateDatabaseQueryMetadataFactory.Companion.DynamicQuerySelect(
+              paths = listOf("name", "created_at", "rootId")
+            )
+          )
+        ),
+        user = "joey",
+        capabilities = AUTHORIZED_CAPABILITIES
+      )
+    }
   }
 
   @Test
