@@ -28,7 +28,7 @@ dependencies {
   testImplementation('com.kohlschutter.junixsocket:junixsocket-native-common:2.1.1') {
     force = true
   }
-  testImplementation('com.kohlschutter.junixsocket:junixsocket-common:2.1.1') {
+  testImplementation('com.kohlschutter.junixsocket:junixsocket-common:2.3.2') {
     force = true
   }
   testImplementation project(':misk-testing')
