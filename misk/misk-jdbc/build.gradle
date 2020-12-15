@@ -6,7 +6,7 @@ dependencies {
   compile('com.kohlschutter.junixsocket:junixsocket-native-common:2.1.1') {
     force = true
   }
-  compile('com.kohlschutter.junixsocket:junixsocket-common:2.1.1') {
+  compile('com.kohlschutter.junixsocket:junixsocket-common:2.3.2') {
     force = true
   }
   compile dep.hikariCp
