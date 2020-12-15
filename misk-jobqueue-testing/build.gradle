@@ -1,5 +1,6 @@
 dependencies {
   implementation project(':misk')
+  implementation project(':misk-jdbc')
   implementation project(':misk-testing')
   implementation project(':misk-jobqueue')
   implementation project(':misk-transactional-jobqueue')
