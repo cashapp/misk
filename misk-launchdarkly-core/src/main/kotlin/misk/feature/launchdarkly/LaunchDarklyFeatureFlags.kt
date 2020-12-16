@@ -50,7 +50,6 @@ class LaunchDarklyFeatureFlags @Inject constructor(
   override fun getBoolean(feature: Feature, key: String, attributes: Attributes): Boolean {
     val result = ldClient.boolVariationDetail(feature.name, buildUser(feature, key, attributes), false)
     checkDefaultNotUsed(feature, result)
-    checkEvaluationSucceeded(feature, result)
     return result.value
   }
 
@@ -58,30 +57,14 @@ class LaunchDarklyFeatureFlags @Inject constructor(
     checkInitialized()
     val result = ldClient.intVariationDetail(feature.name, buildUser(feature, key, attributes), 0)
     checkDefaultNotUsed(feature, result)
-    checkEvaluationSucceeded(feature, result)
     return result.value
-  }
-
-  override fun getIntOrNull(feature: Feature, key: String, attributes: Attributes): Int? {
-    checkInitialized()
-    val result = ldClient.intVariationDetail(feature.name, buildUser(feature, key, attributes), 0)
-    checkEvaluationSucceeded(feature, result)
-    return if (result.isDefaultValue) null else result.value
   }
 
   override fun getString(feature: Feature, key: String, attributes: Attributes): String {
     checkInitialized()
     val result = ldClient.stringVariationDetail(feature.name, buildUser(feature, key, attributes), "")
     checkDefaultNotUsed(feature, result)
-    checkEvaluationSucceeded(feature, result)
     return result.value
-  }
-
-  override fun getStringOrNull(feature: Feature, key: String, attributes: Attributes): String? {
-    checkInitialized()
-    val result = ldClient.stringVariationDetail(feature.name, buildUser(feature, key, attributes), "")
-    checkEvaluationSucceeded(feature, result)
-    return if (result.isDefaultValue) null else result.value
   }
 
   override fun <T : Enum<T>> getEnum(
@@ -93,21 +76,6 @@ class LaunchDarklyFeatureFlags @Inject constructor(
     checkInitialized()
     val result = ldClient.stringVariationDetail(feature.name, buildUser(feature, key, attributes), "")
     checkDefaultNotUsed(feature, result)
-    checkEvaluationSucceeded(feature, result)
-    return java.lang.Enum.valueOf(clazz, result.value.toUpperCase())
-  }
-
-  override fun <T : Enum<T>> getEnumOrNull(
-    feature: Feature,
-    key: String,
-    clazz: Class<T>,
-    attributes: Attributes
-  ): T? {
-    checkInitialized()
-    val result = ldClient.stringVariationDetail(feature.name, buildUser(feature, key, attributes), "")
-    checkEvaluationSucceeded(feature, result)
-    if (result.isDefaultValue) return null
-    if (result.value == "") return null
     return java.lang.Enum.valueOf(clazz, result.value.toUpperCase())
   }
 
@@ -123,25 +91,8 @@ class LaunchDarklyFeatureFlags @Inject constructor(
         buildUser(feature, key, attributes),
         LDValue.ofNull())
     checkDefaultNotUsed(feature, result)
-    checkEvaluationSucceeded(feature, result)
     return moshi.adapter(clazz).fromSafeJson(result.value.toJsonString())
         ?: throw IllegalArgumentException("null value deserialized from $feature")
-  }
-
-  override fun <T> getJsonOrNull(
-    feature: Feature,
-    key: String,
-    clazz: Class<T>,
-    attributes: Attributes
-  ): T? {
-    checkInitialized()
-    val result = ldClient.jsonValueVariationDetail(
-      feature.name,
-      buildUser(feature, key, attributes),
-      LDValue.ofNull())
-    checkEvaluationSucceeded(feature, result)
-    if (result.isDefaultValue) return null
-    return moshi.adapter(clazz).fromSafeJson(result.value.toJsonString())
   }
 
   private fun checkInitialized() {
@@ -149,16 +100,14 @@ class LaunchDarklyFeatureFlags @Inject constructor(
         "LaunchDarkly feature flags not initialized. Did you forget to make your service depend on [FeatureFlags]?")
   }
 
-  private fun <T> checkEvaluationSucceeded(feature: Feature, detail: EvaluationDetail<T>) {
-    if (detail.reason.kind == EvaluationReason.Kind.ERROR) {
-      val reason = detail.reason as EvaluationReason.Error
-      throw RuntimeException("Feature flag $feature evaluation failed: ${detail.reason}", reason.exception)
-    }
-  }
-
   private fun <T> checkDefaultNotUsed(feature: Feature, detail: EvaluationDetail<T>) {
     if (!detail.isDefaultValue) {
       return
+    }
+
+    if (detail.reason.kind == EvaluationReason.Kind.ERROR) {
+      val reason = detail.reason as EvaluationReason.Error
+      throw RuntimeException("Feature flag $feature evaluation failed: ${detail.reason}", reason.exception)
     }
 
     throw IllegalStateException("Feature flag $feature is off but no off variation is specified")
