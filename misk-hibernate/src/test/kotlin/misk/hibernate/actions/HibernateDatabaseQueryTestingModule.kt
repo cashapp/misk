@@ -21,8 +21,9 @@ class HibernateDatabaseQueryTestingModule : KAbstractModule() {
       override fun configureHibernate() {
         installHibernateAdminDashboardWebActions()
 
-        addEntities(DbActor::class, DbCharacter::class)
+        addEntities(DbActor::class)
         addEntityWithDynamicQuery<DbMovie, DynamicMovieQueryAccess>()
+        addEntityWithDynamicQuery<DbCharacter, DynamicMovieQueryAccess>()
         addEntityWithStaticQuery<DbMovie, OperatorsMovieQuery, OperatorsMovieQueryAccess>()
       }
     }))
