@@ -10,9 +10,10 @@ import misk.hibernate.Query
 import misk.hibernate.ReflectionQuery
 import misk.hibernate.Session
 import misk.hibernate.Transacter
-import misk.hibernate.actions.HibernateDatabaseQueryWebActionModule.Companion.checkDynamicQuery
+import misk.hibernate.actions.HibernateDatabaseQueryWebActionModule.Companion.checkQueryMatchesAction
 import misk.hibernate.actions.HibernateDatabaseQueryWebActionModule.Companion.findDatabaseQueryMetadata
 import misk.hibernate.actions.HibernateDatabaseQueryWebActionModule.Companion.getTransacterForDatabaseQueryAction
+import misk.hibernate.actions.HibernateDatabaseQueryWebActionModule.Companion.validateSelectPathsOrDefault
 import misk.inject.typeLiteral
 import misk.scope.ActionScoped
 import misk.web.Post
@@ -21,13 +22,13 @@ import misk.web.RequestContentType
 import misk.web.ResponseContentType
 import misk.web.actions.WebAction
 import misk.web.dashboard.AdminDashboardAccess
+import misk.web.interceptors.LogRequestResponse
 import misk.web.mediatype.MediaTypes
 import misk.web.metadata.database.DatabaseQueryMetadata
 import java.lang.reflect.ParameterizedType
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.reflect.KClass
-import kotlin.reflect.full.declaredMemberProperties
 
 /** Runs query from Database Query dashboard tab against DB and returns results */
 @Singleton
@@ -42,12 +43,13 @@ internal class HibernateDatabaseQueryStaticAction @Inject constructor(
   @Post(HIBERNATE_QUERY_STATIC_WEBACTION_PATH)
   @RequestContentType(MediaTypes.APPLICATION_JSON)
   @ResponseContentType(MediaTypes.APPLICATION_JSON)
+  @LogRequestResponse
   @AdminDashboardAccess
   fun query(@RequestBody request: Request): Response {
     val caller = callerProvider.get()!!
     val queryClass = request.queryClass
 
-    checkDynamicQuery(queryClass, false)
+    checkQueryMatchesAction(queryClass, false)
 
     val metadata = findDatabaseQueryMetadata(databaseQueryMetadata, queryClass)
     val transacter = getTransacterForDatabaseQueryAction(injector, metadata)
@@ -80,10 +82,13 @@ internal class HibernateDatabaseQueryStaticAction @Inject constructor(
     metadata: DatabaseQueryMetadata
   ): Pair<List<String>, List<List<Any?>>> {
     val query = queries.map { it.query }.find { it.simpleName == metadata.queryClass }
-        ?: throw BadRequestException("[query=${metadata.queryClass}] does not exist")
+      ?: throw BadRequestException("[query=${metadata.queryClass}] does not exist")
     val dbEntity = ((query.typeLiteral().getSupertype(
-        Query::class.java).type as ParameterizedType).actualTypeArguments.first() as Class<DbEntity<*>>).kotlin
-    val configuredQuery = ReflectionQuery.Factory(queryConfig).newQuery(query).configureStatic(request, metadata)
+      Query::class.java
+    ).type as ParameterizedType).actualTypeArguments.first() as Class<DbEntity<*>>).kotlin
+    val configuredQuery = ReflectionQuery.Factory(queryConfig)
+      .newQuery(query)
+      .configureStatic(request, metadata)
 
     val selectPaths = getStaticSelectPaths(request, metadata, dbEntity)
     val rows = configuredQuery.dynamicList(session, selectPaths)
@@ -96,13 +101,15 @@ internal class HibernateDatabaseQueryStaticAction @Inject constructor(
     dbEntity: KClass<DbEntity<*>>
   ): List<String> {
     val selectMetadata: DatabaseQueryMetadata.SelectMetadata? =
-        request.query.entries.firstOrNull { (key, _) ->
-          key.split("/").first() == "Select"
-        }?.let { (key, _) ->
-          metadata.selects.find { it.parametersTypeName == key }
-        }
-    val selectPaths = selectMetadata?.paths ?: dbEntity.declaredMemberProperties.map { it.name }
-    return selectPaths
+      request.query.entries.firstOrNull { (key, _) ->
+        key.split("/").first() == "Select"
+      }?.let { (key, _) ->
+        metadata.selects.find { it.parametersTypeName == key }
+      }
+    return validateSelectPathsOrDefault(
+      dbEntity,
+      selectMetadata?.paths
+    )
   }
 
   private fun Query<out DbEntity<*>>.configureStatic(
@@ -114,9 +121,9 @@ internal class HibernateDatabaseQueryStaticAction @Inject constructor(
         "Constraint" -> {
           metadata.constraints.find { it.parametersTypeName == key }?.let {
             dynamicAddConstraint(
-                path = it.path,
-                operator = Operator.valueOf(it.operator),
-                value = (value as Map<String, String>)[it.name]
+              path = it.path,
+              operator = Operator.valueOf(it.operator),
+              value = (value as Map<String, String>)[it.name]
             )
           }
         }

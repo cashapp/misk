@@ -2,11 +2,14 @@ package misk.hibernate.actions
 
 import com.google.inject.Injector
 import misk.exceptions.BadRequestException
+import misk.hibernate.DbEntity
 import misk.hibernate.Transacter
 import misk.inject.KAbstractModule
 import misk.inject.typeLiteral
 import misk.web.WebActionModule
 import misk.web.metadata.database.DatabaseQueryMetadata
+import kotlin.reflect.KClass
+import kotlin.reflect.full.declaredMemberProperties
 
 /** Install Hibernate specific Web Actions to support Database Query admin dashboard tab */
 internal class HibernateDatabaseQueryWebActionModule : KAbstractModule() {
@@ -17,7 +20,7 @@ internal class HibernateDatabaseQueryWebActionModule : KAbstractModule() {
 
   companion object {
     /** Throw a readable error if a Dynamic Query is sent to the Static Web Action or vice versa */
-    fun checkDynamicQuery(queryClass: String, isDynamicAction: Boolean) {
+    fun checkQueryMatchesAction(queryClass: String, isDynamicAction: Boolean) {
       val isDynamicQuery = queryClass.endsWith(DatabaseQueryMetadata.DYNAMIC_QUERY_KCLASS_SUFFIX)
       val status = if (isDynamicQuery) "is" else "is not"
       val action = if (isDynamicAction) {
@@ -28,7 +31,7 @@ internal class HibernateDatabaseQueryWebActionModule : KAbstractModule() {
 
       if ((isDynamicAction && !isDynamicQuery) || (!isDynamicAction && isDynamicQuery)) {
         throw BadRequestException(
-            "[queryClass=$queryClass] $status a DynamicQuery and should be handled by $action"
+          "[queryClass=$queryClass] $status a DynamicQuery and should be handled by $action"
         )
       }
     }
@@ -46,10 +49,31 @@ internal class HibernateDatabaseQueryWebActionModule : KAbstractModule() {
       injector: Injector,
       metadata: DatabaseQueryMetadata
     ): Transacter = injector.findBindingsByType(Transacter::class.typeLiteral())
-        .find { transacterBinding ->
-          transacterBinding.provider.get().entities().map { it.simpleName!! }
-              .contains(metadata.entityClass)
-        }?.provider?.get() ?: throw BadRequestException(
-        "[dbEntity=${metadata.entityClass}] has no associated Transacter")
+      .find { transacterBinding ->
+        transacterBinding.provider.get().entities().map { it.simpleName!! }
+          .contains(metadata.entityClass)
+      }?.provider?.get() ?: throw BadRequestException(
+      "[dbEntity=${metadata.entityClass}] has no associated Transacter"
+    )
+
+    /** Validate provided Select paths or include all (ignoring some that we can't query on like rootId) */
+    fun validateSelectPathsOrDefault(
+      dbEntity: KClass<out DbEntity<*>>,
+      paths: List<String>?,
+    ): List<String> {
+      val invalidSelectPaths = setOf("rootId")
+      val dbEntityDeclaredMemberProperties =
+        dbEntity.declaredMemberProperties.map { it.name }.filter {
+          !invalidSelectPaths.contains(it)
+        }
+      return if (paths?.isNotEmpty() == true) {
+        if (!dbEntityDeclaredMemberProperties.containsAll(paths)) {
+          throw BadRequestException("Invalid Select path does not exist on [dbEntity=$dbEntity][invalidPaths=${paths - dbEntityDeclaredMemberProperties}]")
+        }
+        paths
+      } else {
+        dbEntityDeclaredMemberProperties
+      }
+    }
   }
 }
