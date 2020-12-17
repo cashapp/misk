@@ -17,8 +17,8 @@ Releasing
       "s/VERSION_NAME=.*/VERSION_NAME=$RELEASE_VERSION/g" \
       gradle.properties
     sed -i "" \
-      "s/\"com.squareup.misk:misk:\([^\:]*\):[^\"]*\"/\"com.squareup.misk:misk:\1:$RELEASE_VERSION\"/g" \
-      `find . -name "README.md"`
+      "s/\"com.squareup.misk:\([^\:]*\):[^\"]*\"/\"com.squareup.misk:\1:$RELEASE_VERSION\"/g" \
+      `find . -maxdepth 2 -name "README.md"`
     ```
 
 4. Tag the release and push to GitHub. Merge PR.
