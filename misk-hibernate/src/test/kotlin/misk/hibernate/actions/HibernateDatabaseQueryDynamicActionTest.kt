@@ -111,6 +111,32 @@ class HibernateDatabaseQueryDynamicActionTest {
   }
 
   @Test
+  fun `dynamic select with maxRows`() {
+    val results = realActionRequestExecuter.executeRequest(
+      HibernateDatabaseQueryDynamicAction.Request(
+        entityClass = DbMovie::class.simpleName!!,
+        queryClass = "DbMovieDynamicQuery",
+        query = HibernateDatabaseQueryMetadataFactory.Companion.DynamicQuery(
+          queryConfig = HibernateDatabaseQueryMetadataFactory.Companion.QueryConfig(
+            maxRows = 2
+          ),
+          select = HibernateDatabaseQueryMetadataFactory.Companion.DynamicQuerySelect(
+            paths = listOf("name", "created_at")
+          )
+        )
+      ),
+      user = "joey",
+      capabilities = AUTHORIZED_CAPABILITIES
+    )
+    assertThat(results.results).containsAll(
+      listOf(
+        mapOf("name" to "Jurassic Park", "created_at" to "2018-01-01T00:00:00.000Z"),
+        mapOf("name" to "Pulp Fiction", "created_at" to "2018-01-01T00:00:00.000Z"),
+      )
+    )
+  }
+
+  @Test
   fun `dynamic select invalid path throws bad request`() {
     assertFailsWith<BadRequestException> {
       realActionRequestExecuter.executeRequest(
