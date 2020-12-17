@@ -29,8 +29,8 @@ class FakeExternalKeyManager : ExternalKeyManager {
         KeyType.STREAMING_AEAD -> StreamingAeadKeyTemplates.AES128_GCM_HKDF_4KB
         KeyType.MAC -> MacKeyTemplates.HMAC_SHA256_128BITTAG
         KeyType.DIGITAL_SIGNATURE -> SignatureKeyTemplates.ECDSA_P256
-        KeyType.HYBRID_ENCRYPT -> HybridKeyTemplates.ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM
-        KeyType.HYBRID_ENCRYPT_DECRYPT -> HybridKeyTemplates.ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM
+        KeyType.HYBRID_ENCRYPT, KeyType.HYBRID_ENCRYPT_DECRYPT ->
+          HybridKeyTemplates.ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM
         KeyType.PGP_DECRYPT, KeyType.PGP_ENCRYPT ->
           throw UnsupportedOperationException("fake manager doesn't support pgp keys")
       }
