@@ -1,0 +1,74 @@
+buildscript {
+  dependencies {
+    classpath dep.protobufGradlePlugin
+  }
+}
+
+apply plugin: 'com.google.protobuf'
+apply plugin: 'com.squareup.wire'
+
+protobuf {
+  plugins {
+    grpc {
+      artifact = dep.grpcGenJava
+    }
+  }
+
+  protoc {
+    artifact = dep.protoc
+  }
+
+  generateProtoTasks {
+    ofSourceSet('main')*.plugins {
+      // Apply the "grpc" plugin whose spec is defined above, without
+      // options.  Note the braces cannot be omitted, otherwise the
+      // plugin will not be added. This is because of the implicit way
+      // NamedDomainObjectContainer binds the methods.
+      grpc {}
+    }
+  }
+}
+
+wire {
+  kotlin {
+    rpcRole = 'client'
+    javaInterop = true
+  }
+
+  // Generate service interfaces also.
+  kotlin {
+    includes = ['routeguide.RouteGuide']
+    exclusive = false
+    rpcRole = 'server'
+    rpcCallStyle = 'blocking'
+    singleMethodServices = true
+  }
+}
+
+sourceSets {
+  main.java.srcDirs += 'build/generated/source/proto/main/grpc'
+  main.java.srcDirs += 'build/generated/source/proto/main/java'
+
+  // TODO(jwilson): we do this to make IntelliJ happy but the Wire Gradle plugin should do that.
+  main.java.srcDirs += 'build/generated/source/wire'
+}
+
+dependencies {
+  compile dep.junitApi
+  compile dep.docker
+  compile dep.grpcNetty
+  compile dep.grpcProtobuf
+  compile dep.grpcStub
+  compile dep.kotlinxCoroutines
+  compile dep.wireGrpcClient
+  compile dep.wireRuntime
+  compile project(':misk')
+  compile project(':misk-testing')
+}
+
+afterEvaluate { project ->
+  project.tasks.dokka {
+    outputDirectory = "$rootDir/docs/0.x"
+    outputFormat = 'gfm'
+  }
+}
