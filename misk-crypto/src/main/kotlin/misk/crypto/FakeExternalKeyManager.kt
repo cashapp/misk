@@ -41,7 +41,7 @@ class FakeExternalKeyManager : ExternalKeyManager {
 
       CleartextKeysetHandle.write(handle, writer)
       returnedKeysets[alias] =
-          Key(alias, KeyType.DAEAD, MiskConfig.RealSecret(baos.toString(Charset.defaultCharset())))
+          Key(alias, type, MiskConfig.RealSecret(baos.toString(Charset.defaultCharset())))
     }
   }
 
