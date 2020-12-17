@@ -55,7 +55,7 @@ internal class HibernateDatabaseQueryMetadataFactory @Inject constructor(
 
     val queryTypesDynamicToInclude = if (queryClass != null) {
       addStaticQueryMethodMetadata(queryClass, constraintsResult, ordersResult, selectsResult)
-      listOf()
+      getQueryConfigType() + listOf()
     } else {
       makeDynamicQueryTypes(dbEntityClass)
     }
@@ -65,8 +65,10 @@ internal class HibernateDatabaseQueryMetadataFactory @Inject constructor(
         ordersResult.map { it.second.parametersTypeName to it.first } +
         selectsResult.map { it.second.parametersTypeName to it.first }
 
-    val isDynamic =
-        queryClass == null && constraintsResult.isEmpty() && ordersResult.isEmpty() && selectsResult.isEmpty()
+    val isDynamic = queryClass == null &&
+        constraintsResult.isEmpty() &&
+        ordersResult.isEmpty() &&
+        selectsResult.isEmpty()
     val queryType = if (isDynamic) {
       makeDynamicQueryTypes(dbEntityClass).toMap()[QUERY_TYPE]!!
     } else {
@@ -273,58 +275,86 @@ internal class HibernateDatabaseQueryMetadataFactory @Inject constructor(
       val paths: List<String>? = listOf()
     )
 
-    // TODO(adrw) add a QueryConfig data class with maxRows etc.
+    data class QueryConfig(
+      val maxRows: Int?
+    )
 
     data class DynamicQuery(
+      val queryConfig: QueryConfig? = null,
       val constraints: List<DynamicQueryConstraint>? = null,
       val orders: List<DynamicQueryOrder>? = null,
       val select: DynamicQuerySelect? = null,
     )
 
+    const val QUERY_CONFIG_TYPE_NAME = "Config/Query"
     private const val DYNAMIC_CONSTRAINT_TYPE_NAME = "Constraint/Dynamic"
     private const val DYNAMIC_ORDER_TYPE_NAME = "Order/Dynamic"
     private const val DYNAMIC_SELECT_TYPE_NAME = "Select/Dynamic"
     private const val QUERY_TYPE = "queryType"
+    private const val QUERY_CONFIG_KEY = "queryConfig"
     private const val DYNAMIC_CONSTRAINTS_KEY = "constraints"
     private const val DYNAMIC_ORDERS_KEY = "orders"
     private const val DYNAMIC_SELECT_KEY = "select"
 
+    private fun getQueryConfigType() = listOf(
+      QUERY_CONFIG_TYPE_NAME to Type(
+        fields = listOf(
+          Field(name = "maxRows", repeated = false, type = "Int"),
+        )
+      ))
+
     val DYNAMIC_TYPES = MiskWebFormBuilder().calculateTypes(DynamicQuery::class.createType())
 
-    fun makeDynamicQueryTypes(dbEntityClass: KClass<out DbEntity<*>>) = listOf(
-        DYNAMIC_CONSTRAINT_TYPE_NAME to Type(fields = listOf(
+    fun makeDynamicQueryTypes(dbEntityClass: KClass<out DbEntity<*>>): List<Pair<String, Type>> =
+      getQueryConfigType() + listOf(
+        DYNAMIC_CONSTRAINT_TYPE_NAME to Type(
+          fields = listOf(
             createSyntheticEnumField(
-                fieldClassName = "${dbEntityClass.simpleName!!}Paths",
-                fieldName = "path",
-                enumValues = dbEntityClass.memberProperties.map { it.name },
-                repeated = false
+              fieldClassName = "${dbEntityClass.simpleName!!}Paths",
+              fieldName = "path",
+              enumValues = dbEntityClass.memberProperties.map { it.name },
+              repeated = false
             ),
             createEnumField(Operator::class, "operator", false),
             Field(name = "value", repeated = false, type = "String"),
-        )),
-        DYNAMIC_ORDER_TYPE_NAME to Type(fields = listOf(
+          )
+        ),
+        DYNAMIC_ORDER_TYPE_NAME to Type(
+          fields = listOf(
             createSyntheticEnumField(
-                fieldClassName = "${dbEntityClass.simpleName!!}Paths",
-                fieldName = "path",
-                enumValues = dbEntityClass.memberProperties.map { it.name },
-                repeated = false
+              fieldClassName = "${dbEntityClass.simpleName!!}Paths",
+              fieldName = "path",
+              enumValues = dbEntityClass.memberProperties.map { it.name },
+              repeated = false
             ),
             Field(name = "ascending", repeated = false, type = "Boolean"),
-        )),
-        DYNAMIC_SELECT_TYPE_NAME to Type(fields = listOf(
+          )
+        ),
+        DYNAMIC_SELECT_TYPE_NAME to Type(
+          fields = listOf(
             createSyntheticEnumField(
-                fieldClassName = "${dbEntityClass.simpleName!!}Paths",
-                fieldName = "paths",
-                enumValues = dbEntityClass.memberProperties.map { it.name },
-                repeated = true
+              fieldClassName = "${dbEntityClass.simpleName!!}Paths",
+              fieldName = "paths",
+              enumValues = dbEntityClass.memberProperties.map { it.name },
+              repeated = true
             )
-        )),
-        QUERY_TYPE to Type(fields = listOf(
-            Field(name = DYNAMIC_CONSTRAINTS_KEY, repeated = true,
-                type = DYNAMIC_CONSTRAINT_TYPE_NAME),
+          )
+        ),
+        QUERY_TYPE to Type(
+          fields = listOf(
+            Field(
+              name = QUERY_CONFIG_KEY,
+              repeated = false,
+              type = QUERY_CONFIG_TYPE_NAME
+            ),
+            Field(
+              name = DYNAMIC_CONSTRAINTS_KEY, repeated = true,
+              type = DYNAMIC_CONSTRAINT_TYPE_NAME
+            ),
             Field(name = DYNAMIC_ORDERS_KEY, repeated = true, type = DYNAMIC_ORDER_TYPE_NAME),
             Field(name = DYNAMIC_SELECT_KEY, repeated = false, type = DYNAMIC_SELECT_TYPE_NAME),
-        )),
-    )
+          )
+        ),
+      )
   }
 }

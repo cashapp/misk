@@ -100,6 +100,30 @@ class HibernateDatabaseQueryStaticActionTest {
   }
 
   @Test
+  fun `static select with maxRows`() {
+    val results = realActionRequestExecuter.executeRequest(
+      HibernateDatabaseQueryStaticAction.Request(
+        entityClass = DbMovie::class.simpleName!!,
+        queryClass = OperatorsMovieQuery::class.simpleName!!,
+        query = mapOf(
+          "Query/Config" to mapOf(
+            "maxRows" to 2
+          ),
+          "Select/OperatorsMovieQuery/uniqueName" to true
+        )
+      ),
+      user = "joey",
+      capabilities = AUTHORIZED_CAPABILITIES
+    )
+    assertThat(results.results).containsAll(
+      listOf(
+        mapOf("name" to "Jurassic Park"),
+        mapOf("name" to "Pulp Fiction"),
+      )
+    )
+  }
+
+  @Test
   fun `static constraints`() {
     val results = realActionRequestExecuter.executeRequest(
       HibernateDatabaseQueryStaticAction.Request(
