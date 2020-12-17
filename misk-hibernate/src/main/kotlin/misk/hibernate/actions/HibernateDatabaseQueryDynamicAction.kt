@@ -46,7 +46,6 @@ internal class HibernateDatabaseQueryDynamicAction @Inject constructor(
     val queryClass = request.queryClass
 
     checkQueryMatchesAction(queryClass, true)
-    logger.info("Query sent from dashboard [principal=$caller][dbEntity=${request.entityClass}] ${request.query}")
 
     val metadata = findDatabaseQueryMetadata(databaseQueryMetadata, queryClass)
     val transacter = getTransacterForDatabaseQueryAction(injector, metadata)
