@@ -16,6 +16,8 @@ import com.google.crypto.tink.mac.MacConfig
 import com.google.crypto.tink.signature.SignatureConfig
 import com.google.crypto.tink.streamingaead.StreamingAeadConfig
 import com.google.inject.name.Names
+import misk.config.MiskConfig
+import misk.config.Secret
 import misk.crypto.pgp.PgpDecrypter
 import misk.crypto.pgp.PgpDecrypterProvider
 import misk.crypto.pgp.PgpEncrypter
@@ -50,11 +52,15 @@ class CryptoTestModule(
     Security.addProvider(BouncyCastleProvider())
 
     config ?: return
-    val keys = config.keys ?: return
+    val keys = config.keys as MutableList<Key>? ?: return
 
     val keyManagerBinder = newMultibinder(ExternalKeyManager::class)
     keyManagerBinder.addBinding().toInstance(FakeExternalKeyManager(keys))
     config.external_data_keys?.let {
+      it.entries.forEach {entry ->
+        val fakeFake = Key(entry.key, entry.value, MiskConfig.RealSecret(""))
+        keys.add(fakeFake)
+      }
       keyManagerBinder.addBinding().toInstance(FakeExternalKeyManager(it))
     }
 
