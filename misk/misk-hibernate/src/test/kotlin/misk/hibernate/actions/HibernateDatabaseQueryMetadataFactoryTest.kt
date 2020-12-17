@@ -29,12 +29,13 @@ import javax.persistence.Table
 
 class HibernateDatabaseQueryMetadataFactoryTest {
   private val converter = HibernateDatabaseQueryMetadataFactory(
-      listOf()
+    listOf()
   )
 
   @Test
   fun `static happy path`() {
-    val metadata = converter.fromQuery(DbMovie::class, MovieQuery::class, NoAdminDashboardDatabaseAccess::class)
+    val metadata =
+      converter.fromQuery(DbMovie::class, MovieQuery::class, NoAdminDashboardDatabaseAccess::class)
     assertThat(metadata.queryWebActionPath).isEqualTo(HIBERNATE_QUERY_STATIC_WEBACTION_PATH)
     assertThat(metadata.allowedCapabilities).isEmpty()
     assertThat(metadata.allowedServices).isEmpty()
@@ -43,65 +44,149 @@ class HibernateDatabaseQueryMetadataFactoryTest {
     assertThat(metadata.entityClass).isEqualTo(DbMovie::class.simpleName)
     assertThat(metadata.queryClass).isEqualTo(MovieQuery::class.simpleName)
     assertThat(metadata.constraints).containsExactly(
-        DatabaseQueryMetadata.ConstraintMetadata(name = "name",
-            parametersTypeName = "Constraint/MovieQuery/name", path = "name", operator = "EQ"),
-        DatabaseQueryMetadata.ConstraintMetadata(name = "releaseDateIsNull",
-            parametersTypeName = "Constraint/MovieQuery/releaseDateIsNull", path = "release_date",
-            operator = "IS_NULL"),
-        DatabaseQueryMetadata.ConstraintMetadata(name = "releaseDateLessThan",
-            parametersTypeName = "Constraint/MovieQuery/releaseDateLessThan", path = "release_date",
-            operator = "LT")
+      DatabaseQueryMetadata.ConstraintMetadata(
+        name = "name",
+        parametersTypeName = "Constraint/MovieQuery/name", path = "name", operator = "EQ"
+      ),
+      DatabaseQueryMetadata.ConstraintMetadata(
+        name = "releaseDateIsNull",
+        parametersTypeName = "Constraint/MovieQuery/releaseDateIsNull", path = "release_date",
+        operator = "IS_NULL"
+      ),
+      DatabaseQueryMetadata.ConstraintMetadata(
+        name = "releaseDateLessThan",
+        parametersTypeName = "Constraint/MovieQuery/releaseDateLessThan", path = "release_date",
+        operator = "LT"
+      )
     )
     assertThat(metadata.orders).containsExactly(
-        DatabaseQueryMetadata.OrderMetadata(name = "releaseDateAsc",
-            parametersTypeName = "Order/MovieQuery/releaseDateAsc", path = "release_date",
-            ascending = true),
-        DatabaseQueryMetadata.OrderMetadata(name = "releaseDateDesc",
-            parametersTypeName = "Order/MovieQuery/releaseDateDesc", path = "release_date",
-            ascending = false)
+      DatabaseQueryMetadata.OrderMetadata(
+        name = "releaseDateAsc",
+        parametersTypeName = "Order/MovieQuery/releaseDateAsc", path = "release_date",
+        ascending = true
+      ),
+      DatabaseQueryMetadata.OrderMetadata(
+        name = "releaseDateDesc",
+        parametersTypeName = "Order/MovieQuery/releaseDateDesc", path = "release_date",
+        ascending = false
+      )
     )
     assertThat(metadata.selects).containsExactly(
-        DatabaseQueryMetadata.SelectMetadata(name = "listAsNameAndReleaseDate",
-            parametersTypeName = "Select/MovieQuery/listAsNameAndReleaseDate", paths = listOf()),
-        DatabaseQueryMetadata.SelectMetadata(name = "listAsNames",
-            parametersTypeName = "Select/MovieQuery/listAsNames", paths = listOf("name")),
-        DatabaseQueryMetadata.SelectMetadata(name = "uniqueName",
-            parametersTypeName = "Select/MovieQuery/uniqueName", paths = listOf("name")),
+      DatabaseQueryMetadata.SelectMetadata(
+        name = "listAsNameAndReleaseDate",
+        parametersTypeName = "Select/MovieQuery/listAsNameAndReleaseDate", paths = listOf()
+      ),
+      DatabaseQueryMetadata.SelectMetadata(
+        name = "listAsNames",
+        parametersTypeName = "Select/MovieQuery/listAsNames", paths = listOf("name")
+      ),
+      DatabaseQueryMetadata.SelectMetadata(
+        name = "uniqueName",
+        parametersTypeName = "Select/MovieQuery/uniqueName", paths = listOf("name")
+      ),
     )
-    assertThat(metadata.types).containsExactlyEntriesOf(mapOf(
+    assertThat(metadata.types).containsExactlyEntriesOf(
+      mapOf(
+        "Config/Query" to Type(
+          fields = listOf(
+            Field(
+              name = "maxRows",
+              repeated = false,
+              type = "Int"
+            )
+          )
+        ),
         "Constraint/MovieQuery/name" to Type(
-            fields = listOf(Field(name = "name", type = "String", repeated = false))),
+          fields = listOf(Field(name = "name", type = "String", repeated = false))
+        ),
         "Constraint/MovieQuery/releaseDateIsNull" to Type(
-            fields = listOf(Field(name = "Add Constraint", type = "Boolean", repeated = false))),
+          fields = listOf(Field(name = "Add Constraint", type = "Boolean", repeated = false))
+        ),
         "Constraint/MovieQuery/releaseDateLessThan" to Type(
-            fields = listOf(Field(name = "upperBound", type = "LocalDate", repeated = false))),
+          fields = listOf(Field(name = "upperBound", type = "LocalDate", repeated = false))
+        ),
         "Order/MovieQuery/releaseDateAsc" to Type(
-            fields = listOf(Field(name = "Add Order (path=release_date, asc=true)", type = "Boolean", repeated = false))),
+          fields = listOf(
+            Field(
+              name = "Add Order (path=release_date, asc=true)",
+              type = "Boolean",
+              repeated = false
+            )
+          )
+        ),
         "Order/MovieQuery/releaseDateDesc" to Type(
-            fields = listOf(Field(name = "Add Order (path=release_date, asc=false)", type = "Boolean", repeated = false))),
+          fields = listOf(
+            Field(
+              name = "Add Order (path=release_date, asc=false)",
+              type = "Boolean",
+              repeated = false
+            )
+          )
+        ),
         "Select/MovieQuery/listAsNameAndReleaseDate" to Type(
-            fields = listOf(Field(name = "Add Select (paths=[])", type = "Boolean", repeated = false))),
+          fields = listOf(Field(name = "Add Select (paths=[])", type = "Boolean", repeated = false))
+        ),
         "Select/MovieQuery/listAsNames" to Type(
-            fields = listOf(Field(name = "Add Select (paths=[name])", type = "Boolean", repeated = false))),
+          fields = listOf(
+            Field(
+              name = "Add Select (paths=[name])",
+              type = "Boolean",
+              repeated = false
+            )
+          )
+        ),
         "Select/MovieQuery/uniqueName" to Type(
-            fields = listOf(Field(name = "Add Select (paths=[name])", type = "Boolean", repeated = false))),
-        "queryType" to Type(fields = listOf(
-            Field(name = "Constraint/MovieQuery/name", type = "Constraint/MovieQuery/name", repeated = false),
-            Field(name = "Constraint/MovieQuery/releaseDateIsNull", type = "Constraint/MovieQuery/releaseDateIsNull",
-                repeated = false),
-            Field(name = "Constraint/MovieQuery/releaseDateLessThan", type = "Constraint/MovieQuery/releaseDateLessThan",
-                repeated = false),
-            Field(name = "Order/MovieQuery/releaseDateAsc", type = "Order/MovieQuery/releaseDateAsc",
-                repeated = false),
-            Field(name = "Order/MovieQuery/releaseDateDesc", type = "Order/MovieQuery/releaseDateDesc",
-                repeated = false),
-            Field(name = "Select/MovieQuery/listAsNameAndReleaseDate",
-                type = "Select/MovieQuery/listAsNameAndReleaseDate", repeated = false),
-            Field(name = "Select/MovieQuery/listAsNames", type = "Select/MovieQuery/listAsNames",
-                repeated = false),
-            Field(name = "Select/MovieQuery/uniqueName", type = "Select/MovieQuery/uniqueName", repeated = false),
-        )),
-    ))
+          fields = listOf(
+            Field(
+              name = "Add Select (paths=[name])",
+              type = "Boolean",
+              repeated = false
+            )
+          )
+        ),
+        "queryType" to Type(
+          fields = listOf(
+            Field(name = "Config/Query", type = "Config/Query", repeated = false),
+            Field(
+              name = "Constraint/MovieQuery/name",
+              type = "Constraint/MovieQuery/name",
+              repeated = false
+            ),
+            Field(
+              name = "Constraint/MovieQuery/releaseDateIsNull",
+              type = "Constraint/MovieQuery/releaseDateIsNull",
+              repeated = false
+            ),
+            Field(
+              name = "Constraint/MovieQuery/releaseDateLessThan",
+              type = "Constraint/MovieQuery/releaseDateLessThan",
+              repeated = false
+            ),
+            Field(
+              name = "Order/MovieQuery/releaseDateAsc", type = "Order/MovieQuery/releaseDateAsc",
+              repeated = false
+            ),
+            Field(
+              name = "Order/MovieQuery/releaseDateDesc", type = "Order/MovieQuery/releaseDateDesc",
+              repeated = false
+            ),
+            Field(
+              name = "Select/MovieQuery/listAsNameAndReleaseDate",
+              type = "Select/MovieQuery/listAsNameAndReleaseDate", repeated = false
+            ),
+            Field(
+              name = "Select/MovieQuery/listAsNames", type = "Select/MovieQuery/listAsNames",
+              repeated = false
+            ),
+            Field(
+              name = "Select/MovieQuery/uniqueName",
+              type = "Select/MovieQuery/uniqueName",
+              repeated = false
+            ),
+          )
+        ),
+      )
+    )
   }
 
   @Test
@@ -117,28 +202,61 @@ class HibernateDatabaseQueryMetadataFactoryTest {
     assertThat(metadata.constraints).isEmpty()
     assertThat(metadata.orders).isEmpty()
     assertThat(metadata.selects).isEmpty()
-    assertThat(metadata.types).containsExactlyEntriesOf(mapOf(
-      "Constraint/Dynamic" to Type(
-        fields = listOf(
-          Field(name = "path", type = "Enum<DbMoviePaths,created_at,id,name,release_date,updated_at,gid,rootId>", repeated = false),
-          Field(name = "operator", type = "Enum<misk.hibernate.Operator,LT,LE,EQ,GE,GT,NE,IN,NOT_IN,IS_NOT_NULL,IS_NULL>", repeated = false),
-          Field(name = "value", type = "String", repeated = false),
-        )
-      ),
-      "Order/Dynamic" to Type(
-        fields = listOf(
-          Field(name = "path", type = "Enum<DbMoviePaths,created_at,id,name,release_date,updated_at,gid,rootId>", repeated = false),
-          Field(name = "ascending", type = "Boolean", repeated = false)
-        )
-      ),
-      "Select/Dynamic" to Type(
-        fields = listOf(Field(name = "paths", type = "Enum<DbMoviePaths,created_at,id,name,release_date,updated_at,gid,rootId>", repeated = true))),
-      "queryType" to Type(fields = listOf(
-        Field(name = "constraints", type = "Constraint/Dynamic", repeated = true),
-        Field(name = "orders", type = "Order/Dynamic", repeated = true),
-        Field(name = "select", type = "Select/Dynamic", repeated = false),
-      )),
-    ))
+    assertThat(metadata.types).containsExactlyEntriesOf(
+      mapOf(
+        "Config/Query" to Type(
+          fields = listOf(
+            Field(
+              name = "maxRows",
+              repeated = false,
+              type = "Int"
+            )
+          )
+        ),
+        "Constraint/Dynamic" to Type(
+          fields = listOf(
+            Field(
+              name = "path",
+              type = "Enum<DbMoviePaths,created_at,id,name,release_date,updated_at,gid,rootId>",
+              repeated = false
+            ),
+            Field(
+              name = "operator",
+              type = "Enum<misk.hibernate.Operator,LT,LE,EQ,GE,GT,NE,IN,NOT_IN,IS_NOT_NULL,IS_NULL>",
+              repeated = false
+            ),
+            Field(name = "value", type = "String", repeated = false),
+          )
+        ),
+        "Order/Dynamic" to Type(
+          fields = listOf(
+            Field(
+              name = "path",
+              type = "Enum<DbMoviePaths,created_at,id,name,release_date,updated_at,gid,rootId>",
+              repeated = false
+            ),
+            Field(name = "ascending", type = "Boolean", repeated = false)
+          )
+        ),
+        "Select/Dynamic" to Type(
+          fields = listOf(
+            Field(
+              name = "paths",
+              type = "Enum<DbMoviePaths,created_at,id,name,release_date,updated_at,gid,rootId>",
+              repeated = true
+            )
+          )
+        ),
+        "queryType" to Type(
+          fields = listOf(
+            Field(name = "queryConfig", type = "Config/Query", repeated = false),
+            Field(name = "constraints", type = "Constraint/Dynamic", repeated = true),
+            Field(name = "orders", type = "Order/Dynamic", repeated = true),
+            Field(name = "select", type = "Select/Dynamic", repeated = false),
+          )
+        ),
+      )
+    )
   }
 
   @Entity
