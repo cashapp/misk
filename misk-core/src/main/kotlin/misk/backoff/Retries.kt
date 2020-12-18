@@ -35,4 +35,4 @@ fun <A> retry(upTo: Int, withBackoff: Backoff, f: (retryCount: Int) -> A): A {
   throw lastException!!
 }
 
-class DontRetryException(message: String) : Exception(message)
+class DontRetryException(message: String, cause: Throwable? = null) : Exception(message, cause)
