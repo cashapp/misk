@@ -27,7 +27,7 @@ jobs:
           java-version: 14
 
       - name: Set gradle publish version
-        run: echo "version=String.valueOf(project.version).replace(\"-SNAPSHOT\", \"\") + '-$(date +%Y%m%d.%H%M)-$(git rev-parse --short HEAD)-SNAPSHOT'" > hooks.gradle
+        run: echo "version=String.valueOf(project.version).replace(\"-SNAPSHOT\", \"\") + '-$(date +%Y%m%d.%H%M)-$(git rev-parse --short HEAD)-SNAPSHOT'" > hooks.gradle && cat hooks.gradle
 
       - name: Publish the artifacts
         env:
