@@ -10,9 +10,9 @@ import misk.backoff.retry
 object DynamoDbHelpers {
   fun getDefaultBackoff(): ExponentialBackoff {
     return ExponentialBackoff(
-        baseDelay = Duration.ofMillis(10),
-        maxDelay = Duration.ofMillis(500),
-        jitter = Duration.ofMillis(5)
+        baseDelay = Duration.ofMillis(100),
+        maxDelay = Duration.ofSeconds(10),
+        jitter = Duration.ofMillis(200)
     )
   }
 
