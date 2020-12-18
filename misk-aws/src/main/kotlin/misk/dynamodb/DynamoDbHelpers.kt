@@ -8,11 +8,13 @@ import misk.backoff.ExponentialBackoff
 import misk.backoff.retry
 
 object DynamoDbHelpers {
-  val DEFAULT_BACKOFF = ExponentialBackoff(
-      baseDelay = Duration.ofMillis(10),
-      maxDelay = Duration.ofMillis(500),
-      jitter = Duration.ofMillis(5)
-  )
+  fun getDefaultBackoff(): ExponentialBackoff {
+    return ExponentialBackoff(
+        baseDelay = Duration.ofMillis(10),
+        maxDelay = Duration.ofMillis(500),
+        jitter = Duration.ofMillis(5)
+    )
+  }
 
   /**
    * Retries any [AmazonDynamoDBException] or [PleaseRetryException]. [DontRetryException] will
@@ -20,7 +22,7 @@ object DynamoDbHelpers {
    */
   fun <T> dynamoDbRetry(
     retries: Int = 3,
-    backoff: Backoff = DEFAULT_BACKOFF,
+    backoff: Backoff = getDefaultBackoff(),
     action: (Int) -> T
   ): T {
     return retry(retries, backoff) { retryNumber: Int ->
