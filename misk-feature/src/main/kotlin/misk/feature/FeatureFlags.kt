@@ -26,17 +26,6 @@ interface FeatureFlags {
   ): Int
 
   /**
-   * Calculates the value of an integer feature flag for the given key and attributes, or returns
-   * null if the flag is set to nothing.
-   * @see [getEnum] for param details
-   */
-  fun getIntOrNull(
-    feature: Feature,
-    key: String,
-    attributes: Attributes = Attributes()
-  ): Int?
-
-  /**
    * Calculates the value of a string feature flag for the given key and attributes.
    * @see [getEnum] for param details
    */
@@ -45,17 +34,6 @@ interface FeatureFlags {
     key: String,
     attributes: Attributes = Attributes()
   ): String
-
-  /**
-   * Calculates the value of a string feature flag for the given key and attributes, or returns
-   * null if the flag is set to nothing.
-   * @see [getEnum] for param details
-   */
-  fun getStringOrNull(
-    feature: Feature,
-    key: String,
-    attributes: Attributes = Attributes()
-  ): String?
 
   /**
    * Calculates the value of an enumerated feature flag for the given key and attributes.
@@ -73,13 +51,6 @@ interface FeatureFlags {
     attributes: Attributes = Attributes()
   ): T
 
-  fun <T : Enum<T>> getEnumOrNull(
-    feature: Feature,
-    key: String,
-    clazz: Class<T>,
-    attributes: Attributes = Attributes()
-  ): T?
-
   /**
    * Calculates the value of a JSON feature flag for the given key and attributes.
    *
@@ -94,13 +65,6 @@ interface FeatureFlags {
     attributes: Attributes = Attributes()
   ): T
 
-  fun <T> getJsonOrNull(
-    feature: Feature,
-    key: String,
-    clazz: Class<T>,
-    attributes: Attributes = Attributes()
-  ): T?
-
   // Overloaded functions for use in Java, because @JvmOverloads isn't supported for interfaces
   fun getBoolean(
     feature: Feature,
@@ -112,20 +76,10 @@ interface FeatureFlags {
     key: String
   ) = getInt(feature, key, Attributes())
 
-  fun getIntOrNull(
-    feature: Feature,
-    key: String
-  ) = getIntOrNull(feature, key, Attributes())
-
   fun getString(
     feature: Feature,
     key: String
   ) = getString(feature, key, Attributes())
-
-  fun getStringOrNull(
-    feature: Feature,
-    key: String
-  ) = getStringOrNull(feature, key, Attributes())
 
   fun <T : Enum<T>> getEnum(
     feature: Feature,
@@ -133,17 +87,8 @@ interface FeatureFlags {
     clazz: Class<T>
   ) = getEnum(feature, key, clazz, Attributes())
 
-  fun <T : Enum<T>> getEnumOrNull(
-    feature: Feature,
-    key: String,
-    clazz: Class<T>
-  ) = getEnumOrNull(feature, key, clazz, Attributes())
-
   fun <T> getJson(feature: Feature, key: String, clazz: Class<T>)
       = getJson(feature, key, clazz, Attributes())
-
-  fun <T> getJsonOrNull(feature: Feature, key: String, clazz: Class<T>)
-      = getJsonOrNull(feature, key, clazz, Attributes())
 }
 
 inline fun <reified T : Enum<T>> FeatureFlags.getEnum(
@@ -152,23 +97,11 @@ inline fun <reified T : Enum<T>> FeatureFlags.getEnum(
   attributes: Attributes = Attributes()
 ): T = getEnum(feature, key, T::class.java, attributes)
 
-inline fun <reified T : Enum<T>> FeatureFlags.getEnumOrNull(
-  feature: Feature,
-  key: String,
-  attributes: Attributes = Attributes()
-): T? = getEnumOrNull(feature, key, T::class.java, attributes)
-
 inline fun <reified T> FeatureFlags.getJson(
   feature: Feature,
   key: String,
   attributes: Attributes = Attributes()
 ): T = getJson(feature, key, T::class.java, attributes)
-
-inline fun <reified T> FeatureFlags.getJsonOrNull(
-  feature: Feature,
-  key: String,
-  attributes: Attributes = Attributes()
-): T? = getJsonOrNull(feature, key, T::class.java, attributes)
 
 /**
  * Typed feature string.

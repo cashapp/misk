@@ -41,15 +41,9 @@ class FakeFeatureFlags @Inject constructor(
       get(feature, key, attributes) as? Int ?: throw IllegalArgumentException(
           "Int flag $feature must be overridden with override() before use")
 
-  override fun getIntOrNull(feature: Feature, key: String, attributes: Attributes): Int? =
-      get(feature, key, attributes) as Int?
-
   override fun getString(feature: Feature, key: String, attributes: Attributes): String =
       get(feature, key, attributes) as? String ?: throw IllegalArgumentException(
           "String flag $feature must be overridden with override() before use")
-
-  override fun getStringOrNull(feature: Feature, key: String, attributes: Attributes): String? =
-      get(feature, key, attributes) as String?
 
   override fun <T : Enum<T>> getEnum(
     feature: Feature,
@@ -60,13 +54,6 @@ class FakeFeatureFlags @Inject constructor(
     @Suppress("unchecked_cast")
     return getOrDefault(feature, key, clazz.enumConstants[0], attributes) as T
   }
-
-  override fun <T : Enum<T>> getEnumOrNull(
-    feature: Feature,
-    key: String,
-    clazz: Class<T>,
-    attributes: Attributes
-  ): T? = getOrDefault(feature, key, null, attributes)
 
   override fun <T> getJson(
     feature: Feature,
@@ -82,19 +69,6 @@ class FakeFeatureFlags @Inject constructor(
         "JSON function did not provide a string")
     return moshi.get().adapter(clazz).fromSafeJson(json)
         ?: throw IllegalArgumentException("null value deserialized from $feature")
-  }
-
-  override fun <T> getJsonOrNull(
-    feature: Feature,
-    key: String,
-    clazz: Class<T>,
-    attributes: Attributes
-  ): T? {
-    val jsonFn = getOrDefault(feature, key, { null }, attributes) as Function0<*>
-    // The JSON is lazily provided to handle the case where the override is provided by the
-    // FakeFeatureFlagModule and the Moshi instance cannot be accessed inside the module.
-    val json = jsonFn.invoke() as? String ?: return null
-    return moshi.get().adapter(clazz).fromSafeJson(json)
   }
 
   override fun getBoolean(feature: Feature) = getBoolean(feature, KEY)
