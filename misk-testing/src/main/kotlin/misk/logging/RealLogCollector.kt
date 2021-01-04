@@ -6,12 +6,12 @@ import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.UnsynchronizedAppenderBase
 import com.google.common.util.concurrent.AbstractIdleService
 import com.google.common.util.concurrent.Service.State.NEW
-import org.slf4j.LoggerFactory
 import java.util.concurrent.LinkedBlockingDeque
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.reflect.KClass
+import org.slf4j.LoggerFactory
 
 @Singleton
 internal class RealLogCollector @Inject constructor() :
@@ -79,11 +79,15 @@ internal class RealLogCollector @Inject constructor() :
 
   override fun startUp() {
     appender.start()
-    (LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME) as Logger).addAppender(appender)
+
+    val rootLogger = LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME)
+    (rootLogger as? Logger)?.addAppender(appender)
   }
 
   override fun shutDown() {
-    (LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME) as Logger).detachAppender(appender)
+    val rootLogger = LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME)
+    (rootLogger as? Logger)?.detachAppender(appender)
+
     appender.stop()
   }
 }
