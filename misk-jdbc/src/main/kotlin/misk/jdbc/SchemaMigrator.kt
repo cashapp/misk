@@ -264,8 +264,11 @@ internal class SchemaMigrator(
       } else {
         ""
       }
+      val qualifiedAppliedMigrations = availableMigrations - missingMigrations
       return@check """
-          |${qualifier.simpleName}$shardMessage is missing migrations:
+          |${qualifier.simpleName}$shardMessage has applied migrations:
+          |  ${qualifiedAppliedMigrations.joinToString(separator = "\n  ") { it.path }}
+	        |${qualifier.simpleName}$shardMessage is missing migrations:
           |  ${missingMigrations.joinToString(separator = "\n  ") { it.path }}
           """.trimMargin()
     }

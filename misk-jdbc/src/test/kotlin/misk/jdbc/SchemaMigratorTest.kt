@@ -196,8 +196,31 @@ internal abstract class SchemaMigratorTest(val type: DataSourceType) {
     assertThat(assertFailsWith<IllegalStateException> {
       schemaMigrator.requireAll()
     }).hasMessage("""
+          |Movies has applied migrations:
+          |  
           |Movies is missing migrations:
           |  ${config.migrations_resources!![0]}/v1001__foo.sql
+          |  ${config.migrations_resources!![1]}/v1002__foo.sql""".trimMargin())
+  }
+
+  @Test fun haveOneMissingOneMigration() {
+    schemaMigrator.initialize()
+
+    resourceLoader.put("${config.migrations_resources!![0]}/v1001__foo.sql", """
+        |CREATE TABLE table_1 (name varchar(255))
+        |""".trimMargin())
+    schemaMigrator.applyAll("SchemaMigratorTest", sortedSetOf())
+
+    resourceLoader.put("${config.migrations_resources!![1]}/v1002__foo.sql", """
+        |CREATE TABLE table_1 (name varchar(255))
+        |""".trimMargin())
+
+    assertThat(assertFailsWith<IllegalStateException> {
+      schemaMigrator.requireAll()
+    }).hasMessage("""
+          |Movies has applied migrations:
+          |  ${config.migrations_resources!![0]}/v1001__foo.sql
+          |Movies is missing migrations:
           |  ${config.migrations_resources!![1]}/v1002__foo.sql""".trimMargin())
   }
 
