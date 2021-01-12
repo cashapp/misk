@@ -74,9 +74,9 @@ jobs:
           name: "Build and test"
           command: |
             if [ "$CIRCLE_NODE_INDEX" -eq 1 ]; then
-              ./gradlew testShardHibernate -i --scan --build-cache
+              ./gradlew testShardHibernate -i --scan
             else
-              ./gradlew testShardNonHibernate -i --scan --parallel --build-cache
+              ./gradlew testShardNonHibernate -i --scan --parallel
             fi
       - run:
           name: Collect test results
