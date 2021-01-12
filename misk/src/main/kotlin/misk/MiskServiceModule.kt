@@ -1,12 +1,13 @@
 package misk
 
+import misk.concurrent.ExecutorsModule
 import misk.concurrent.SleeperModule
 import misk.environment.RealEnvVarModule
 import misk.healthchecks.HealthCheck
 import misk.inject.KAbstractModule
 import misk.metrics.MetricsModule
+import misk.metrics.backends.prometheus.PrometheusMetricsClientModule
 import misk.moshi.MoshiModule
-import misk.prometheus.PrometheusHistogramRegistryModule
 import misk.resources.ResourceLoaderModule
 import misk.time.ClockModule
 import misk.time.TickerModule
@@ -26,6 +27,7 @@ class MiskRealServiceModule : KAbstractModule() {
     install(ClockModule())
     install(SleeperModule())
     install(TickerModule())
+    install(TokenGeneratorModule())
     install(MiskCommonServiceModule())
   }
 }
@@ -37,11 +39,10 @@ class MiskCommonServiceModule : KAbstractModule() {
   override fun configure() {
     binder().disableCircularProxies()
     binder().requireExactBindingAnnotations()
+    install(ExecutorsModule())
     install(ServiceManagerModule())
-    install(MetricsModule())
+    install(PrometheusMetricsClientModule())
     install(MoshiModule())
-    install(TokenGeneratorModule())
-    install(PrometheusHistogramRegistryModule())
 
     // Initialize empty sets for our multibindings.
     newMultibinder<HealthCheck>()

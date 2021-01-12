@@ -12,6 +12,7 @@ import okio.BufferedSource
 
 data class FakeHttpCall(
   override val url: HttpUrl = "https://example.com/".toHttpUrl(),
+  override val linkLayerLocalAddress: SocketAddress = SocketAddress.Network("1.2.3.4", 56789),
   override val dispatchMechanism: DispatchMechanism = DispatchMechanism.GET,
   override val requestHeaders: Headers = headersOf(),
   override var statusCode: Int = 200,

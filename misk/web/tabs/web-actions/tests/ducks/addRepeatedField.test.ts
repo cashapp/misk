@@ -6,7 +6,7 @@ describe("Add a repeated field", () => {
   it("addRepeated", () => {
     let typesMetadata = generateTypesMetadata({
       ...nonTypedActionAPI,
-      dispatchMechanism: HTTPMethod.POST,
+      httpMethod: HTTPMethod.POST,
       requestType: "repeatedShort",
       types: testTypes
     })
@@ -21,7 +21,7 @@ describe("Add a repeated field", () => {
   it("addNestedRepeated", () => {
     let typesMetadata = generateTypesMetadata({
       ...nonTypedActionAPI,
-      dispatchMechanism: HTTPMethod.POST,
+      httpMethod: HTTPMethod.POST,
       requestType: "repeatedNestedRepeatedShort",
       types: testTypes
     })

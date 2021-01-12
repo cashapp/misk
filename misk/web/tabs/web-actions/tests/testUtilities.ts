@@ -97,7 +97,7 @@ export const nonTypedActionAPI: IWebActionAPI = {
   allowedCapabilities: [] as string[],
   allowedServices: [] as string[],
   applicationInterceptors: [] as string[],
-  dispatchMechanism: HTTPMethod.GET,
+  httpMethod: HTTPMethod.GET,
   function:
     "fun misk.web.actions.LivenessCheckAction.livenessCheck(): misk.web.Response<kotlin.String>",
   functionAnnotations: [

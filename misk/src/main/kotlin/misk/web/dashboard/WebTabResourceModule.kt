@@ -1,5 +1,6 @@
 package misk.web.dashboard
 
+import misk.environment.Deployment
 import misk.environment.Environment
 import misk.inject.KAbstractModule
 import misk.web.WebActionModule
@@ -26,24 +27,44 @@ import misk.web.resources.StaticResourceEntry
  * @property resourcePath JVM path for non-Development environment static resources (includes `classpath:/` prefix)
  */
 class WebTabResourceModule(
-  val environment: Environment,
+  private val isDevelopment: Boolean,
   val slug: String,
   val web_proxy_url: String,
   val url_path_prefix: String = "/_tab/$slug/",
   val resourcePath: String = "classpath:/web/_tab/$slug/"
 ) : KAbstractModule() {
+
+  constructor(
+    deployment: Deployment,
+    slug: String,
+    web_proxy_url: String,
+    url_path_prefix: String = "/_tab/$slug/",
+    resourcePath: String = "classpath:/web/_tab/$slug/"
+  ) : this(deployment.isLocalDevelopment, slug, web_proxy_url, url_path_prefix, resourcePath)
+
+  @Deprecated("the Environment enum is deprecated")
+  constructor(
+    environment: Environment,
+    slug: String,
+    web_proxy_url: String,
+    url_path_prefix: String = "/_tab/$slug/",
+    resourcePath: String = "classpath:/web/_tab/$slug/"
+  ) : this(environment == Environment.DEVELOPMENT, slug, web_proxy_url, url_path_prefix,
+      resourcePath)
+
   override fun configure() {
     // Environment Dependent WebProxyAction or StaticResourceAction bindings
     multibind<StaticResourceEntry>()
         .toInstance(
             StaticResourceEntry(url_path_prefix = url_path_prefix, resourcePath = resourcePath))
 
-    if (environment == Environment.DEVELOPMENT) {
+    if (isDevelopment) {
       install(WebActionModule.createWithPrefix<WebProxyAction>(url_path_prefix = url_path_prefix))
       multibind<WebProxyEntry>().toInstance(
           WebProxyEntry(url_path_prefix = url_path_prefix, web_proxy_url = web_proxy_url))
     } else {
-      install(WebActionModule.createWithPrefix<StaticResourceAction>(url_path_prefix = url_path_prefix))
+      install(
+          WebActionModule.createWithPrefix<StaticResourceAction>(url_path_prefix = url_path_prefix))
     }
   }
 }

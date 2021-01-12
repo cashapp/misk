@@ -1,106 +1,52 @@
 Releasing
 =========
 
-### Prerequisite: Sonatype (Maven Central) Account
-
-Create an account on the [Sonatype issues site][sonatype_issues]. Ask an existing publisher to open
-an issue requesting publishing permissions for `misk` projects.
-
-### Prerequisite: GPG Keys
-
-Generate a GPG key (RSA, 4096 bit, 3650 day) expiry, or use an existing one. You should leave the
-password empty for this key.
-
-```
-$ gpg --full-generate-key 
-```
-
-Upload the GPG keys to public servers:
-
-```
-$ gpg --list-keys --keyid-format LONG
-/Users/johnbarber/.gnupg/pubring.kbx
-------------------------------
-pub   rsa4096/XXXXXXXXXXXXXXXX 2019-07-16 [SC] [expires: 2029-07-13]
-      YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY
-uid           [ultimate] John Barber <jbarber@cash.app>
-sub   rsa4096/ZZZZZZZZZZZZZZZZ 2019-07-16 [E] [expires: 2029-07-13]
-
-$ gpg --send-keys --keyserver keyserver.ubuntu.com XXXXXXXXXXXXXXXX
-```
-
-### Prerequisite: Gradle Properties
-
-Define publishing properties in `~/.gradle/gradle.properties`:
-
-```
-signing.keyId=1A2345F8
-signing.password=
-signing.secretKeyRingFile=/Users/jwilson/.gnupg/secring.gpg
-```
-
-`signing.keyId` is the GPG key's ID. Get it with this:
-
-   ```
-   $ gpg --list-keys --keyid-format SHORT
-   ```
-
-`signing.password` is the password for this key. This might be empty!
-
-`signing.secretKeyRingFile` is the absolute path for `secring.gpg`. You may need to export this
-file manually with the following command where `XXXXXXXX` is the `keyId` above:
-
-   ```
-   $ gpg --keyring secring.gpg --export-secret-key XXXXXXXX > ~/.gnupg/secring.gpg
-   ```
-
-
-Cutting a Release
------------------
-
 1. Update `CHANGELOG.md`.
 
 2. Set versions:
 
     ```
-    export RELEASE_VERSION=X.Y.Z
-    export NEXT_VERSION=X.Y.Z-SNAPSHOT
+    export RELEASE_VERSION=A.B.C
+    export NEXT_VERSION=A.B.D-SNAPSHOT
     ```
 
-3. Set environment variables with your [Sonatype credentials][sonatype_issues].
-
-    ```
-    export SONATYPE_NEXUS_USERNAME=johnbarber
-    export SONATYPE_NEXUS_PASSWORD=`pbpaste`
-    ```
-
-4. Update, build, and upload:
+3. Update documentation and Gradle properties with `RELEASE_VERSION`
 
     ```
     sed -i "" \
       "s/VERSION_NAME=.*/VERSION_NAME=$RELEASE_VERSION/g" \
       gradle.properties
     sed -i "" \
-      "s/\"misk:\([^\:]*\):[^\"]*\"/\"misk:\1:$RELEASE_VERSION\"/g" \
-      `find . -name "README.md"`
-    miskweb ci-build -e
-    ./gradlew clean uploadArchives
+      "s/\"com.squareup.misk:\([^\:]*\):[^\"]*\"/\"com.squareup.misk:\1:$RELEASE_VERSION\"/g" \
+      `find . -maxdepth 2 -name "README.md"`
     ```
 
-5. Visit [Sonatype Nexus][sonatype_nexus] to promote (close then release) the artifact. Or drop it
-   if there is a problem!
-
-6. Tag the release, prepare for the next one, and push to GitHub.
+4. Tag the release and push to GitHub. Merge PR.
 
     ```
     git commit -am "Prepare for release $RELEASE_VERSION."
     git tag -a misk-$RELEASE_VERSION -m "Version $RELEASE_VERSION"
+    git push && git push --tags
+    ``` 
+
+5. Wait until the "Publish a release" action completes, then visit [Sonatype Nexus][sonatype_nexus] to promote (close then release) the artifact. Or drop it if there is a problem!
+
+    ![Sonatype Release](/img/sonatype-release.gif)
+
+6. Prepare for the next release and push to GitHub. Merge PR.
+
+    ```
     sed -i "" \
       "s/VERSION_NAME=.*/VERSION_NAME=$NEXT_VERSION/g" \
       gradle.properties
     git commit -am "Prepare next development version."
-    git push && git push --tags
+    git push
     ```
 
- [sonatype_issues]: https://issues.sonatype.org/
- [sonatype_nexus]: https://oss.sonatype.org/
+7. Draft a new [release](https://docs.github.com/en/github/administering-a-repository/managing-releases-in-a-repository) of `A.B.C` to trigger the "Publish the mkdocs to gh-pages" action.
+
+## Troubleshooting
+
+If the github action fails, drop the artifacts from Sonatype and re run the job. You might need to delete the plugin off the JetBrains plugin portal first if the ubuntu job which publishes it already succeeded.
+
+[sonatype_nexus]: https://oss.sonatype.org/

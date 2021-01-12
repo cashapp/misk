@@ -1,0 +1,32 @@
+mysql_data_source:
+  type: MYSQL
+  username: root
+  password: ""
+  database: schemamigrator
+  migrations_resources:
+    - memory:/migrations/sql
+    - memory:/migrations/library
+cockroachdb_data_source:
+  type: COCKROACHDB
+  database: schemamigrator
+  username: root
+  password: ""
+  migrations_resources:
+    - memory:/migrations/sql
+    - memory:/migrations/library
+tidb_data_source:
+  type: TIDB
+  database: schemamigrator
+  username: root
+  password: ""
+  migrations_resources:
+    - memory:/migrations/sql
+    - memory:/migrations/library
+postgresql_data_source:
+  type: POSTGRESQL
+  database: schemamigrator
+  username: postgres
+  password: password
+  migrations_resources:
+    - memory:/migrations/sql
+    - memory:/migrations/library

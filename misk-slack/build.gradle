@@ -1,7 +1,9 @@
 dependencies {
   compile project(':misk')
+  compile dep.moshiKotlin
 
   testCompile dep.assertj
+  testCompile dep.junit4Api
   testCompile dep.junitApi
   testCompile dep.junitEngine
   testCompile dep.junitParams
@@ -15,3 +17,5 @@ afterEvaluate { project ->
     outputFormat = 'gfm'
   }
 }
+
+apply from: "$rootDir/gradle-mvn-publish.gradle"

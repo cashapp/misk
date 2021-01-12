@@ -10,11 +10,15 @@ import misk.hibernate.Query
 import misk.hibernate.Transacter
 import misk.hibernate.load
 import misk.hibernate.or
+import misk.jdbc.DataSourceType
+import misk.jdbc.ScaleSafetyChecks
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
 import org.hibernate.SessionFactory
 import org.junit.jupiter.api.Test
+import java.sql.Timestamp
+import java.time.Instant
 import java.time.LocalDate
 import javax.inject.Inject
 
@@ -22,7 +26,7 @@ import javax.inject.Inject
 class RealPagerTest {
 
   @MiskTestModule
-  val module = MoviesTestModule()
+  val module = MoviesTestModule(DataSourceType.MYSQL)
 
   @Inject @Movies private lateinit var transacter: Transacter
   @Inject @Movies lateinit var sessionFactory: SessionFactory
@@ -77,11 +81,119 @@ class RealPagerTest {
           .list(session)
           .map { it.name }
     }
-      val actualCharacterNames = queryFactory.newQuery(CharacterQuery::class)
-          .movieId(movieId)
-          .newPager(CharacterNameDescIdAscPaginator, pageSize = 5)
-          .listAll(transacter) { it.name }
+    val actualCharacterNames = queryFactory.newQuery(CharacterQuery::class)
+        .movieId(movieId)
+        .newPager(CharacterNameDescIdAscPaginator, pageSize = 5)
+        .listAll(transacter) { it.name }
     assertThat(actualCharacterNames).containsExactlyElementsOf(expectedCharacterNames)
+  }
+
+  @Test fun `hasNext always true on first page`() {
+    val movieId = givenStarWarsMovie()
+    val emptyListPager = queryFactory.newQuery(CharacterQuery::class)
+        .movieId(movieId)
+        .newPager(idDescPaginator(), pageSize = 4)
+
+    // Even when the the first page is empty.
+    assertThat(emptyListPager.hasNext()).isTrue()
+
+    // Add some entries.
+    givenStormtrooperCharacters(movieId, count = 3)
+    val pagerWithContents = queryFactory.newQuery(CharacterQuery::class)
+        .movieId(movieId)
+        .newPager(idDescPaginator(), pageSize = 4)
+    assertThat(pagerWithContents.hasNext()).isTrue()
+  }
+
+  @Test fun `hasNext true when there are more pages`() {
+    val pageSize = 4
+    val pageCount = 3
+    val movieId = givenStarWarsMovie()
+    givenStormtrooperCharacters(movieId, count = pageCount * pageSize)
+
+    val pager = queryFactory.newQuery(CharacterQuery::class)
+        .movieId(movieId)
+        .newPager(idDescPaginator(), pageSize = pageSize)
+
+    transacter.transaction { session -> pager.nextPage(session) }
+    // 2 pages left
+    assertThat(pager.hasNext()).isTrue()
+
+    transacter.transaction { session -> pager.nextPage(session) }
+    // 1 page left
+    assertThat(pager.hasNext()).isTrue()
+  }
+
+  @Test fun `paging does not generate duplicate constraints and order by`() {
+    val pageSize = 4
+    val pageCount = 3
+    val movieId = givenStarWarsMovie()
+    givenStormtrooperCharacters(movieId, count = pageCount * pageSize)
+
+    val pager = queryFactory.newQuery(CharacterQuery::class)
+        .movieId(movieId)
+        .newPager(idDescPaginator(), pageSize = pageSize)
+
+    sessionFactory.openSession().use { session ->
+      session.doWork { connection ->
+        ScaleSafetyChecks.turnOnSqlGeneralLogging(connection)
+      }
+    }
+
+    val start = Timestamp.from(Instant.now())
+
+    transacter.transaction { session ->
+      pager.nextPage(session)
+      pager.nextPage(session)
+      pager.nextPage(session)
+    }
+
+    val queries = sessionFactory.openSession().use { session ->
+      session.doReturningWork { connection ->
+        ScaleSafetyChecks.extractQueriesSince(connection, start)
+      }
+    }
+
+    val pageQueries = queries.reversed().filter { it.contains("select") }.map {
+      Regex("""/\* (.*) \*/""").find(it)!!.groups[1]!!.value
+    }
+    assertThat(pageQueries).hasSize(3)
+    // The first page doesn't have an (id > ?) condition
+    assertThat(countClauses(pageQueries[0])).isEqualTo(Clauses(1, 1))
+    // The second page each have exactly one (id > ?) condition and one ORDER BY column
+    assertThat(countClauses(pageQueries[1])).isEqualTo(Clauses(2, 1))
+    assertThat(countClauses(pageQueries[2])).isEqualTo(Clauses(2, 1))
+  }
+
+  private fun countClauses(query: String): Clauses {
+    val whereMatches = Regex("where (.*) order by").find(query)
+    val whereCount = if (whereMatches != null) {
+      whereMatches.groups[1]!!.value.split(" and ").size
+    } else 0
+    val orderByMatches = Regex("order by (.*)").find(query)
+    val orderByCount = if (orderByMatches != null) {
+      orderByMatches.groups[1]!!.value.split(",").size
+    } else 0
+
+    return Clauses(whereCount, orderByCount)
+  }
+
+  private data class Clauses(val where: Int, val orderBy: Int)
+
+  @Test fun `hasNext is false where there are no pages left`() {
+    val pageSize = 4
+    val pageCount = 3
+    val movieId = givenStarWarsMovie()
+    givenStormtrooperCharacters(movieId, count = pageCount * pageSize)
+
+    val pager = queryFactory.newQuery(CharacterQuery::class)
+        .movieId(movieId)
+        .newPager(idDescPaginator(), pageSize = pageSize)
+    // Go through all the pages.
+    repeat(pageCount) {
+      transacter.transaction { session -> pager.nextPage(session) }
+    }
+    assertThat(pager.hasNext()).isFalse()
   }
 
   private fun givenStarWarsMovie(): Id<DbMovie> {

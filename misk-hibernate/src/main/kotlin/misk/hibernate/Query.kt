@@ -1,6 +1,7 @@
 package misk.hibernate
 
 import javax.persistence.criteria.CriteriaBuilder
+import javax.persistence.criteria.Predicate
 import javax.persistence.criteria.Root
 import javax.persistence.criteria.Selection
 import kotlin.reflect.KClass
@@ -12,6 +13,9 @@ interface Query<T> {
 
   /** How many rows to return. Must be -1 or in range 1..10_000. */
   var maxRows: Int
+
+  /** Constrain a query by operating directly on the JPA criteria builder. */
+  fun addJpaConstraint(block: (root: Root<*>, builder: CriteriaBuilder) -> Predicate)
 
   /** Constrain a query using a path known only at runtime. */
   fun dynamicAddConstraint(path: String, operator: Operator, value: Any? = null)
@@ -32,6 +36,7 @@ interface Query<T> {
   fun dynamicUniqueResult(session: Session, projectedPaths: List<String>): List<Any?>?
 
   fun list(session: Session): List<T>
+
   /** Manual projections are returned as a list of rows containing a list of cells. */
   fun dynamicList(
     session: Session,
@@ -40,9 +45,7 @@ interface Query<T> {
 
   fun dynamicList(session: Session, projectedPaths: List<String>): List<List<Any?>>
 
-  /**
-   * the number of entities deleted
-   */
+  /** Returns the number of entities deleted. */
   fun delete(session: Session): Int
 
   /**
@@ -55,6 +58,8 @@ interface Query<T> {
   fun count(session: Session): Long
 
   fun <T : Query<*>> newOrBuilder(): OrBuilder<T>
+
+  fun <Q : Query<*>> clone(): Q
 
   /** Creates instances of queries. */
   interface Factory {
@@ -100,6 +105,27 @@ inline fun <T, reified Q : Query<T>> Q.allowTableScan(): Q {
 
 inline fun <T, reified Q : Query<T>> Q.allowFullScatter(): Q {
   this.disableCheck(Check.FULL_SCATTER)
+  return this
+}
+
+/**
+ * Equivalent to Query.addConstraint, but takes the [CriteriaBuilder] as a receiver and returns
+ * this. This may be easier to use with method chaining.
+ *
+ * The root parameter should be used to select which property of the target entity to match against.
+ *
+ * ```
+ * queryFactory.newQuery<OperatorsMovieQuery>()
+ *     .constraint { root -> like(root.get("name"), "Jurassic%") }
+ *     .count(session)
+ * ```
+ */
+fun <T, Q : Query<T>> Q.constraint(
+  block: CriteriaBuilder.(root: Root<*>) -> Predicate
+): Q {
+  addJpaConstraint { root, criteriaBuilder ->
+    criteriaBuilder.block(root)
+  }
   return this
 }
 

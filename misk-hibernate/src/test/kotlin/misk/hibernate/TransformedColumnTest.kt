@@ -91,14 +91,18 @@ class TransformedColumnTest {
       transacter.transaction { session ->
         session.hibernateSession.sessionFactory.sessionFactoryOptions.criteriaLiteralHandlingMode
 
-        val rows = queryFactory.newQuery<ManyTypesRawQuery>().list(session)
+        val rows = queryFactory.newQuery<ManyTypesRawQuery>()
+          .allowTableScan()
+          .list(session)
 
         assertThat(rows).hasSize(1)
         assertThat(rows[0].intField).isEqualTo(3)
       }
 
       transacter.transaction { session ->
-        val rows = queryFactory.newQuery<ManyTypesQuery>().list(session)
+        val rows = queryFactory.newQuery<ManyTypesQuery>()
+          .allowTableScan()
+          .list(session)
 
         assertThat(rows).hasSize(1)
         assertThat(rows[0].intField).isEqualTo(1)
@@ -130,7 +134,9 @@ class TransformedColumnTest {
         session.save(DbManyTypes(1, 1.2, "Test", "Bytes".toByteArray()))
       }
       transacter.transaction { session ->
-        val rows = queryFactory.newQuery<ManyTypesRawQuery>().list(session)
+        val rows = queryFactory.newQuery<ManyTypesRawQuery>()
+          .allowTableScan()
+          .list(session)
 
         assertThat(rows).hasSize(1)
         assertThat(rows[0].intField).isEqualTo(3)
@@ -138,7 +144,9 @@ class TransformedColumnTest {
       }
 
       transacter.transaction { session ->
-        val rows = queryFactory.newQuery<ManyTypesQuery>().list(session)
+        val rows = queryFactory.newQuery<ManyTypesQuery>()
+          .allowTableScan()
+          .list(session)
 
         assertThat(rows).hasSize(1)
         assertThat(rows[0].intField).isEqualTo(1)
@@ -173,8 +181,9 @@ class TransformedColumnTest {
 
       transacter.transaction { session ->
         val rows = queryFactory.newQuery<ManyTypesProjectionQuery>()
-                .stringField("Test")
-                .query(session)
+          .allowTableScan()
+          .stringField("Test")
+          .query(session)
 
         assertThat(rows).hasSize(1)
         assertThat(rows[0].stringField).isEqualTo("Test")
@@ -182,8 +191,9 @@ class TransformedColumnTest {
 
       transacter.transaction { session ->
         val rows = queryFactory.newQuery<ManyTypesRawQuery>()
-                .stringField("Test_modified")
-                .list(session)
+          .allowTableScan()
+          .stringField("Test_modified")
+          .list(session)
 
         assertThat(rows).hasSize(1)
         assertThat(rows[0].stringField).isEqualTo("Test$suffix")
@@ -215,8 +225,9 @@ class TransformedColumnTest {
 
       transacter.transaction { session ->
         val rows = queryFactory.newQuery<ManyTypesProjectionQuery>()
-                .intField(1)
-                .query(session)
+          .allowTableScan()
+          .intField(1)
+          .query(session)
 
         assertThat(rows).hasSize(1)
         assertThat(rows[0].intField).isEqualTo(1)
@@ -224,8 +235,9 @@ class TransformedColumnTest {
 
       transacter.transaction { session ->
         val rows = queryFactory.newQuery<ManyTypesRawQuery>()
-                .intField(3)
-                .list(session)
+          .allowTableScan()
+          .intField(3)
+          .list(session)
 
         assertThat(rows).hasSize(1)
         assertThat(rows[0].intField).isEqualTo(3)
@@ -259,15 +271,17 @@ class TransformedColumnTest {
 
       transacter.transaction { session ->
         val rows = queryFactory.newQuery<ManyTypesProjectionQuery>()
-                .intField(value)
-                .list(session)
+          .allowTableScan()
+          .intField(value)
+          .list(session)
         assertThat(rows).hasSize(1)
         assertThat(rows.first().intField).isEqualTo(value)
       }
 
       transacter.transaction { session ->
         val rows = queryFactory.newQuery<ManyTypesRawQuery>()
-                .list(session)
+          .allowTableScan()
+          .list(session)
 
         val annotationForInt = DbManyTypes::class.declaredMemberProperties
                 .mapNotNull { prop -> prop.javaField?.getAnnotation(TransformedInt::class.java) }

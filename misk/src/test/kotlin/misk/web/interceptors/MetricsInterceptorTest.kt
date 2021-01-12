@@ -1,10 +1,10 @@
 package misk.web.interceptors
 
 import misk.inject.KAbstractModule
-import misk.prometheus.PrometheusHistogramRegistryModule
 import misk.security.authz.AccessControlModule
 import misk.security.authz.FakeCallerAuthenticator
 import misk.security.authz.FakeCallerAuthenticator.Companion.SERVICE_HEADER
+import misk.security.authz.FakeCallerAuthenticator.Companion.USER_HEADER
 import misk.security.authz.MiskCallerAuthenticator
 import misk.security.authz.Unauthenticated
 import misk.testing.MiskTest
@@ -43,6 +43,7 @@ class MetricsInterceptorTest {
     assertThat(invoke(200, "my-peer").code).isEqualTo(200)
     assertThat(invoke(200, "my-peer").code).isEqualTo(200)
     assertThat(invoke(200, "my-peer").code).isEqualTo(200)
+    assertThat(invoke(200, user = "some-user").code).isEqualTo(200)
   }
 
   @Test
@@ -59,9 +60,16 @@ class MetricsInterceptorTest {
 
     requestDuration.record(1.0, "TestAction", "my-peer", "200")
     assertThat(requestDuration.count("TestAction", "my-peer", "200")).isEqualTo(5)
+
+    requestDuration.record(1.0, "TestAction", "<user>", "200")
+    assertThat(requestDuration.count("TestAction", "<user>", "200")).isEqualTo(2)
   }
 
-  fun invoke(desiredStatusCode: Int, service: String? = null): okhttp3.Response {
+  fun invoke(
+    desiredStatusCode: Int,
+    service: String? = null,
+    user: String? = null
+  ): okhttp3.Response {
     val url = jettyService.httpServerUrl.newBuilder()
         .encodedPath("/call/$desiredStatusCode")
         .build()
@@ -70,6 +78,7 @@ class MetricsInterceptorTest {
         .url(url)
         .get()
     service?.let { request.addHeader(SERVICE_HEADER, it) }
+    user?.let { request.addHeader(USER_HEADER, it) }
     return httpClient.newCall(request.build()).execute()
   }
 
@@ -86,7 +95,6 @@ class MetricsInterceptorTest {
       install(AccessControlModule())
       install(WebTestingModule())
       multibind<MiskCallerAuthenticator>().to<FakeCallerAuthenticator>()
-      install(PrometheusHistogramRegistryModule())
       install(WebActionModule.create<TestAction>())
 
       bind<MetricsInterceptor.Factory>()

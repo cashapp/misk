@@ -1,6 +1,9 @@
 dependencies {
   compile dep.prometheusHttpserver
-  compile project(':misk')
+  compile project(':misk-core')
+  compile project(':misk-inject')
+  compile project(':misk-metrics')
+  compile project(':misk-service')
 
   testCompile dep.assertj
   testCompile dep.junitApi
@@ -16,3 +19,5 @@ afterEvaluate { project ->
     outputFormat = 'gfm'
   }
 }
+
+apply from: "$rootDir/gradle-mvn-publish.gradle"

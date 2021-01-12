@@ -10,14 +10,17 @@ import misk.web.actions.WebAction
 import misk.web.jetty.ConnectionMetrics
 import misk.web.jetty.JettyConnectionMetricsCollector
 import misk.web.jetty.JettyService
+import misk.web.jetty.MeasuredQueuedThreadPool
+import misk.web.jetty.MeasuredThreadPool
 import misk.web.jetty.ThreadPoolMetrics
 import misk.web.mediatype.MediaTypes
 import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.data.Percentage
+import org.assertj.core.data.Offset
 import org.eclipse.jetty.util.thread.QueuedThreadPool
+import org.eclipse.jetty.util.thread.ThreadPool
 import org.junit.jupiter.api.Test
 import javax.inject.Inject
 
@@ -48,7 +51,7 @@ internal class JettyServiceMetricsTest {
     assertThat(connectionMetrics.acceptedConnections.labels(*labels).get()).isEqualTo(1.0)
     assertThat(connectionMetrics.activeConnections.labels(*labels).get()).isEqualTo(1.0)
     assertThat(connectionMetrics.bytesReceived.labels(*labels).get()).isEqualTo(130.0)
-    assertThat(connectionMetrics.bytesSent.labels(*labels).get()).isEqualTo(118.0)
+    assertThat(connectionMetrics.bytesSent.labels(*labels).get()).isEqualTo(153.0)
     assertThat(connectionMetrics.messagesReceived.labels(*labels).get()).isEqualTo(1.0)
     assertThat(connectionMetrics.messagesSent.labels(*labels).get()).isEqualTo(1.0)
 
@@ -69,7 +72,7 @@ internal class JettyServiceMetricsTest {
     assertThat(connectionMetrics.acceptedConnections.labels(*labels).get()).isEqualTo(1.0)
     assertThat(connectionMetrics.activeConnections.labels(*labels).get()).isEqualTo(0.0)
     assertThat(connectionMetrics.bytesReceived.labels(*labels).get()).isEqualTo(130.0)
-    assertThat(connectionMetrics.bytesSent.labels(*labels).get()).isEqualTo(118.0)
+    assertThat(connectionMetrics.bytesSent.labels(*labels).get()).isEqualTo(153.0)
     assertThat(connectionMetrics.messagesReceived.labels(*labels).get()).isEqualTo(1.0)
     assertThat(connectionMetrics.messagesSent.labels(*labels).get()).isEqualTo(1.0)
 
@@ -78,7 +81,7 @@ internal class JettyServiceMetricsTest {
     assertThat(connectionMetrics.acceptedConnections.labels(*labels).get()).isEqualTo(1.0)
     assertThat(connectionMetrics.activeConnections.labels(*labels).get()).isEqualTo(0.0)
     assertThat(connectionMetrics.bytesReceived.labels(*labels).get()).isEqualTo(130.0)
-    assertThat(connectionMetrics.bytesSent.labels(*labels).get()).isEqualTo(118.0)
+    assertThat(connectionMetrics.bytesSent.labels(*labels).get()).isEqualTo(153.0)
     assertThat(connectionMetrics.messagesReceived.labels(*labels).get()).isEqualTo(1.0)
     assertThat(connectionMetrics.messagesSent.labels(*labels).get()).isEqualTo(1.0)
   }
@@ -97,8 +100,8 @@ internal class JettyServiceMetricsTest {
     val metrics = adapter.fromJson(response.body?.string()!!)!!
     assertThat(metrics.queuedJobs).isEqualTo(0.0)
     assertThat(metrics.size).isEqualTo(10.0)
-    assertThat(metrics.utilization).isCloseTo(0.5, Percentage.withPercentage(10.0))
-    assertThat(metrics.utilization_max).isCloseTo(0.5, Percentage.withPercentage(10.0))
+    assertThat(metrics.utilization).isCloseTo(0.5, Offset.offset(0.35))
+    assertThat(metrics.utilization_max).isCloseTo(0.5, Offset.offset(0.35))
   }
 
   internal class HelloAction @Inject constructor() : WebAction {
@@ -138,9 +141,11 @@ internal class JettyServiceMetricsTest {
       install(Modules.override(WebTestingModule()).with(
           object : KAbstractModule() {
             override fun configure() {
-              bind<QueuedThreadPool>().toInstance(QueuedThreadPool(
+              val pool = QueuedThreadPool(
                   10, 10 // Fixed # of threads
-              ))
+              )
+              bind<ThreadPool>().toInstance(pool)
+              bind<MeasuredThreadPool>().toInstance(MeasuredQueuedThreadPool(pool))
             }
           }
       ))

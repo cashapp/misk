@@ -85,7 +85,7 @@ class VitessMySQLTimestampListenerTest : TimestampListenerTest() {
 }
 
 @MiskTest(startService = true)
-class VitessTimestampListenerTest : TimestampListenerTest() {
+class PostgreSQLTimestampListenerTest : TimestampListenerTest() {
   @MiskTestModule
-  val module = MoviesTestModule(DataSourceType.VITESS)
+  val module = MoviesTestModule(DataSourceType.POSTGRESQL)
 }

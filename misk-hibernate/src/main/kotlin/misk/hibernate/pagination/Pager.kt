@@ -8,6 +8,9 @@ import misk.hibernate.Transacter
 interface Pager<T> {
   /** Returns null when there are no more pages. */
   fun nextPage(session: Session): Page<T>?
+
+  /** Returns true when there are more pages to load. */
+  fun hasNext(): Boolean
 }
 
 /** Use a null [initialOffset] to start at the beginning. */
@@ -24,12 +27,10 @@ fun <T : DbEntity<T>, R> Pager<T>.listAll(
   transform: (T) -> R
 ): List<R> {
   val results = mutableListOf<R>()
-  var offset: Offset?
-  do {
+  while(hasNext()) {
     val nextPage = transacter.transaction { session -> nextPage(session) }
-    val (pageContents, nextOffset) = nextPage ?: Page.empty()
+    val pageContents = nextPage?.contents ?: emptyList()
     results.addAll(pageContents.map(transform))
-    offset = nextOffset
-  } while (offset != null)
+  }
   return results
 }

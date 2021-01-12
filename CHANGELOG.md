@@ -1,6 +1,42 @@
 Change Log
 ==========
 
+Version 0.16.0 *(2020-12-17)*
+----------------------------
+
+Unstable public release.
+
+
+Version 0.15.0 *(2020-12-03)*
+----------------------------
+
+Unstable public release.
+
+
+Version 0.14.0 *(2020-11-12)*
+----------------------------
+
+Unstable public release.
+
+
+Version 0.13.0 *(2020-07-16)*
+----------------------------
+
+Unstable public release.
+
+
+Version 0.12.0 *(2020-05-06)*
+----------------------------
+
+Unstable public release.
+
+
+Version 0.11.0 *(2020-02-25)*
+----------------------------
+
+Unstable public release.
+
+
 Version 0.10.0 *(2019-01-21)*
 ----------------------------
 

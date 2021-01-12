@@ -7,7 +7,7 @@ buildscript {
 dependencies {
   compile dep.guice
   compile dep.guiceMultibindings
-  compile dep.kotlinStdLib
+  compile dep.kotlinStdLibJdk8
   compile dep.kotlinReflection
 
   testCompile project(':misk-testing')
@@ -19,3 +19,5 @@ afterEvaluate { project ->
     outputFormat = 'gfm'
   }
 }
+
+apply from: "$rootDir/gradle-mvn-publish.gradle"

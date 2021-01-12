@@ -17,7 +17,7 @@ describe("Get formatted form data", () => {
   it("get non-typed POST", () => {
     const typesMetadata = generateTypesMetadata({
       ...nonTypedActionAPI,
-      dispatchMechanism: HTTPMethod.POST
+      httpMethod: HTTPMethod.POST
     })
     const data = "Alpha"
     const getData = getFieldData(
@@ -32,7 +32,7 @@ describe("Get formatted form data", () => {
   it("get non-repeated int", () => {
     let typesMetadata = generateTypesMetadata({
       ...nonTypedActionAPI,
-      dispatchMechanism: HTTPMethod.POST,
+      httpMethod: HTTPMethod.POST,
       requestType: "noRepeatedInt",
       types: testTypes
     })
@@ -57,7 +57,7 @@ describe("Get formatted form data", () => {
   it("get nested int", () => {
     let typesMetadata = generateTypesMetadata({
       ...nonTypedActionAPI,
-      dispatchMechanism: HTTPMethod.POST,
+      httpMethod: HTTPMethod.POST,
       requestType: "nestedNoRepeatedInt",
       types: testTypes
     })
@@ -83,7 +83,7 @@ describe("Get formatted form data", () => {
   it("get repeated short", () => {
     let typesMetadata = generateTypesMetadata({
       ...nonTypedActionAPI,
-      dispatchMechanism: HTTPMethod.POST,
+      httpMethod: HTTPMethod.POST,
       requestType: "repeatedShort",
       types: testTypes
     })
@@ -125,7 +125,7 @@ describe("Get formatted form data", () => {
   it("get repeated nested int", () => {
     let typesMetadata = generateTypesMetadata({
       ...nonTypedActionAPI,
-      dispatchMechanism: HTTPMethod.POST,
+      httpMethod: HTTPMethod.POST,
       requestType: "repeatedNestedNoRepeatedInt",
       types: testTypes
     })
@@ -175,7 +175,7 @@ describe("Get formatted form data", () => {
   it("get repeated nested repeated short", () => {
     let typesMetadata = generateTypesMetadata({
       ...nonTypedActionAPI,
-      dispatchMechanism: HTTPMethod.POST,
+      httpMethod: HTTPMethod.POST,
       requestType: "repeatedNestedRepeatedShort",
       types: testTypes
     })
@@ -240,7 +240,7 @@ describe("Get formatted form data", () => {
   it("get data but no field input", () => {
     let typesMetadata = generateTypesMetadata({
       ...nonTypedActionAPI,
-      dispatchMechanism: HTTPMethod.POST,
+      httpMethod: HTTPMethod.POST,
       requestType: "repeatedNestedRepeatedShort",
       types: testTypes
     })

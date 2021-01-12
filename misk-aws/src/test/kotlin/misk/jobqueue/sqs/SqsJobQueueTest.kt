@@ -3,10 +3,12 @@ package misk.jobqueue.sqs
 import com.amazonaws.services.sqs.AmazonSQS
 import com.amazonaws.services.sqs.model.CreateQueueRequest
 import misk.clustering.fake.lease.FakeLeaseManager
+import misk.feature.testing.FakeFeatureFlags
 import misk.jobqueue.Job
-import misk.jobqueue.JobConsumer
 import misk.jobqueue.JobQueue
 import misk.jobqueue.QueueName
+import misk.jobqueue.sqs.SqsJobConsumer.Companion.CONSUMERS_PER_QUEUE
+import misk.jobqueue.sqs.SqsJobConsumer.Companion.POD_CONSUMERS_PER_QUEUE
 import misk.jobqueue.subscribe
 import misk.tasks.RepeatedTaskQueue
 import misk.tasks.Status
@@ -16,6 +18,8 @@ import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.ValueSource
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
@@ -32,6 +36,7 @@ internal class SqsJobQueueTest {
   @Inject private lateinit var consumer: SqsJobConsumer
   @Inject private lateinit var sqsMetrics: SqsMetrics
   @Inject @ForSqsHandling lateinit var taskQueue: RepeatedTaskQueue
+  @Inject private lateinit var fakeFeatureFlags: FakeFeatureFlags
   @Inject private lateinit var fakeLeaseManager: FakeLeaseManager
 
   private lateinit var queueName: QueueName
@@ -50,7 +55,15 @@ internal class SqsJobQueueTest {
         ))
   }
 
-  @Test fun enqueueAndHandle() {
+  @ParameterizedTest
+  @ValueSource(booleans = [true, false])
+  fun enqueueAndHandle(perPodConsumers: Boolean) {
+    if (perPodConsumers) {
+      enablePerPodConsumers()
+    } else {
+      enablePerQueueConsumers()
+    }
+
     val handledJobs = CopyOnWriteArrayList<Job>()
     val allJobsComplete = CountDownLatch(10)
     consumer.subscribe(queueName) {
@@ -60,7 +73,7 @@ internal class SqsJobQueueTest {
     }
 
     for (i in (0 until 10)) {
-      queue.enqueue(queueName, "this is job $i", attributes = mapOf("index" to i.toString()))
+      queue.enqueue(queueName, "this is job $i", "ik-$i", attributes = mapOf("index" to i.toString()))
     }
 
     assertThat(allJobsComplete.await(10, TimeUnit.SECONDS)).isTrue()
@@ -77,6 +90,18 @@ internal class SqsJobQueueTest {
         "this is job 7",
         "this is job 8",
         "this is job 9"
+    )
+    assertThat(sortedJobs.map { it.idempotenceKey }).containsExactly(
+        "ik-0",
+        "ik-1",
+        "ik-2",
+        "ik-3",
+        "ik-4",
+        "ik-5",
+        "ik-6",
+        "ik-7",
+        "ik-8",
+        "ik-9"
     )
     assertThat(sortedJobs.map { it.attributes }).containsExactly(
         mapOf("index" to "0"),
@@ -307,6 +332,16 @@ internal class SqsJobQueueTest {
     queue.enqueue(queueName, "ok")
     val receiver = consumer.getReceiver(queueName)
     assertThat(receiver.run()).isEqualTo(Status.NO_WORK)
+  }
+
+  private fun enablePerPodConsumers() {
+    fakeFeatureFlags.override(CONSUMERS_PER_QUEUE, -1)
+    fakeFeatureFlags.override(POD_CONSUMERS_PER_QUEUE, 5)
+  }
+
+  private fun enablePerQueueConsumers() {
+    fakeFeatureFlags.override(CONSUMERS_PER_QUEUE, 5)
+    fakeFeatureFlags.override(POD_CONSUMERS_PER_QUEUE, -1)
   }
 
   private fun turnOffTaskQueue() {

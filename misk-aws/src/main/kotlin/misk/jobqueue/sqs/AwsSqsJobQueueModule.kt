@@ -1,5 +1,6 @@
 package misk.jobqueue.sqs
 
+import com.amazonaws.ClientConfiguration
 import com.amazonaws.auth.AWSCredentialsProvider
 import com.amazonaws.services.sqs.AmazonSQS
 import com.amazonaws.services.sqs.AmazonSQSClientBuilder
@@ -59,7 +60,15 @@ class AwsSqsJobQueueModule(
         .map { AwsRegion(it) }
         .distinct()
         .forEach {
-          regionSpecificClientBinder.addBinding(it).toProvider(AmazonSQSProvider(it))
+          regionSpecificClientBinder.addBinding(it).toProvider(AmazonSQSProvider(config, it, false))
+        }
+    val regionSpecificClientBinderForReceiving = newMapBinder<AwsRegion, AmazonSQS>(ForSqsReceiving::class)
+    config.external_queues
+        .mapNotNull { (_, config) -> config.region }
+        .map { AwsRegion(it) }
+        .distinct()
+        .forEach {
+          regionSpecificClientBinderForReceiving.addBinding(it).toProvider(AmazonSQSProvider(config, it, true))
         }
 
     // Bind the configs for external queues
@@ -71,10 +80,12 @@ class AwsSqsJobQueueModule(
 
   @Provides @Singleton
   fun provideSQSClient(region: AwsRegion, credentials: AWSCredentialsProvider): AmazonSQS {
-    return AmazonSQSClientBuilder.standard()
-        .withCredentials(credentials)
-        .withRegion(region.name)
-        .build()
+    return buildClient(config, credentials, region, false)
+  }
+
+  @Provides @Singleton @ForSqsReceiving
+  fun provideSQSClientForReceiving(region: AwsRegion, credentials: AWSCredentialsProvider): AmazonSQS {
+    return buildClient(config, credentials, region, true)
   }
 
   @Provides @ForSqsHandling @Singleton
@@ -90,12 +101,39 @@ class AwsSqsJobQueueModule(
   private fun repeatedTaskQueueConfig(config: AwsSqsJobQueueConfig) =
       config.task_queue ?: RepeatedTaskQueueConfig(num_parallel_tasks = -1)
 
-  private class AmazonSQSProvider(val region: AwsRegion) : Provider<AmazonSQS> {
+  private class AmazonSQSProvider(
+    val config: AwsSqsJobQueueConfig, val region: AwsRegion, val forSqsReceiving: Boolean
+  ) : Provider<AmazonSQS> {
     @Inject lateinit var credentials: AWSCredentialsProvider
 
-    override fun get() = AmazonSQSClientBuilder.standard()
-        .withCredentials(credentials)
-        .withRegion(region.name)
-        .build()
+    override fun get() = buildClient(config, credentials, region, forSqsReceiving)
+  }
+
+  companion object {
+    private fun buildClient(
+      config: AwsSqsJobQueueConfig, credentials: AWSCredentialsProvider, region: AwsRegion, forSqsReceiving: Boolean
+    ): AmazonSQS {
+      // Defaults from SDK
+      val clientConfiguration = ClientConfiguration()
+          .withSocketTimeout(25000)
+          .withConnectionTimeout(1000)
+
+      val builder = AmazonSQSClientBuilder.standard()
+          .withCredentials(credentials)
+          .withRegion(region.name)
+      if (forSqsReceiving) {
+        // Do not artificially constrain the # of connections to SQS. Instead we rely on higher
+        // level resource limiting knobs (e.g # of parallel receivers).
+        // We only do this for receiving, as sending does not have equivalent knobs.
+        builder.withClientConfiguration(clientConfiguration.withMaxConnections(Int.MAX_VALUE))
+      } else {
+        builder.withClientConfiguration(clientConfiguration
+            .withSocketTimeout(config.sqs_sending_socket_timeout_ms)
+            .withConnectionTimeout(config.sqs_sending_connect_timeout_ms)
+            .withRequestTimeout(config.sqs_sending_request_timeout_ms)
+        )
+      }
+      return builder.build()
+    }
   }
 }

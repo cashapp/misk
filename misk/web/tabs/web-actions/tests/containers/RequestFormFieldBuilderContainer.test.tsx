@@ -27,7 +27,7 @@ describe("RequestFormFieldBuilderContainer", () => {
   it("Renders single body input", () => {
     const typesMetadata = generateTypesMetadata({
       ...nonTypedActionAPI,
-      dispatchMechanism: HTTPMethod.POST
+      httpMethod: HTTPMethod.POST
     })
     const { asFragment } = renderWithRedux(
       <RequestFormFieldBuilderContainer
@@ -42,7 +42,7 @@ describe("RequestFormFieldBuilderContainer", () => {
   it("Renders typed form int field", () => {
     const typesMetadata = generateTypesMetadata({
       ...nonTypedActionAPI,
-      dispatchMechanism: HTTPMethod.POST,
+      httpMethod: HTTPMethod.POST,
       requestType: "noRepeatedInt",
       types: testTypes
     })
@@ -59,7 +59,7 @@ describe("RequestFormFieldBuilderContainer", () => {
   it("Renders typed form nested int field", () => {
     const typesMetadata = generateTypesMetadata({
       ...nonTypedActionAPI,
-      dispatchMechanism: HTTPMethod.POST,
+      httpMethod: HTTPMethod.POST,
       requestType: "nestedNoRepeatedInt",
       types: testTypes
     })
@@ -76,7 +76,7 @@ describe("RequestFormFieldBuilderContainer", () => {
   it("Renders typed form repeated short field", () => {
     const typesMetadata = generateTypesMetadata({
       ...nonTypedActionAPI,
-      dispatchMechanism: HTTPMethod.POST,
+      httpMethod: HTTPMethod.POST,
       requestType: "repeatedShort",
       types: testTypes
     })
@@ -93,7 +93,7 @@ describe("RequestFormFieldBuilderContainer", () => {
   it("Renders typed form repeated nested int field", () => {
     const typesMetadata = generateTypesMetadata({
       ...nonTypedActionAPI,
-      dispatchMechanism: HTTPMethod.POST,
+      httpMethod: HTTPMethod.POST,
       requestType: "repeatedNestedNoRepeatedInt",
       types: testTypes
     })
@@ -110,7 +110,7 @@ describe("RequestFormFieldBuilderContainer", () => {
   it("Renders typed form repeated nested repeated short field", () => {
     const typesMetadata = generateTypesMetadata({
       ...nonTypedActionAPI,
-      dispatchMechanism: HTTPMethod.POST,
+      httpMethod: HTTPMethod.POST,
       requestType: "repeatedNestedRepeatedShort",
       types: testTypes
     })
@@ -127,7 +127,7 @@ describe("RequestFormFieldBuilderContainer", () => {
   it("Renders typed form multiple top level fields", () => {
     const typesMetadata = generateTypesMetadata({
       ...nonTypedActionAPI,
-      dispatchMechanism: HTTPMethod.POST,
+      httpMethod: HTTPMethod.POST,
       requestType: "multipleFlatFields",
       types: testTypes
     })

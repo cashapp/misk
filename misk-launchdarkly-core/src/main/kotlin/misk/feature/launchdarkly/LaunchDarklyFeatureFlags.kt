@@ -27,7 +27,7 @@ class LaunchDarklyFeatureFlags @Inject constructor(
   private val moshi: Moshi
 ) : AbstractIdleService(), FeatureFlags, FeatureService {
   override fun startUp() {
-    var attempts = 50
+    var attempts = 300
     val intervalMillis = 100L
 
     // LaunchDarkly has its own threads for initialization. We just need to keep checking until
@@ -38,7 +38,7 @@ class LaunchDarklyFeatureFlags @Inject constructor(
     }
 
     if (attempts == 0 && !ldClient.initialized()) {
-      throw Exception("LaunchDarkly did not initialize in 5 seconds")
+      throw Exception("LaunchDarkly did not initialize in 30 seconds")
     }
   }
 
@@ -120,14 +120,14 @@ class LaunchDarklyFeatureFlags @Inject constructor(
       when (k) {
         // LaunchDarkly has some built-in keys that have to be initialized with their named
         // methods.
-        "secondary" -> builder.secondary(k)
-        "ip" -> builder.ip(k)
-        "email" -> builder.email(k)
-        "name" -> builder.name(k)
-        "avatar" -> builder.avatar(k)
-        "firstName" -> builder.firstName(k)
-        "lastName" -> builder.lastName(k)
-        "country" -> builder.country(k)
+        "secondary" -> builder.secondary(v)
+        "ip" -> builder.ip(v)
+        "email" -> builder.email(v)
+        "name" -> builder.name(v)
+        "avatar" -> builder.avatar(v)
+        "firstName" -> builder.firstName(v)
+        "lastName" -> builder.lastName(v)
+        "country" -> builder.country(v)
         else -> builder.privateCustom(k, v)
       }
     }

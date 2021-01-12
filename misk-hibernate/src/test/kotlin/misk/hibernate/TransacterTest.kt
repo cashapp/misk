@@ -1,14 +1,6 @@
 package misk.hibernate
 
-import io.opentracing.mock.MockTracer
-import io.opentracing.tag.Tags
 import misk.exceptions.UnauthorizedException
-import misk.hibernate.RealTransacter.Companion.APPLICATION_TRANSACTION_SPAN_NAME
-import misk.hibernate.RealTransacter.Companion.DB_BEGIN_SPAN_NAME
-import misk.hibernate.RealTransacter.Companion.DB_COMMIT_SPAN_NAME
-import misk.hibernate.RealTransacter.Companion.DB_ROLLBACK_SPAN_NAME
-import misk.hibernate.RealTransacter.Companion.DB_TRANSACTION_SPAN_NAME
-import misk.hibernate.RealTransacter.Companion.TRANSACTER_SPAN_TAG
 import misk.jdbc.DataSourceType
 import misk.jdbc.uniqueString
 import misk.logging.LogCollector
@@ -16,10 +8,14 @@ import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
 import org.hibernate.exception.ConstraintViolationException
+import org.junit.jupiter.api.Assumptions.assumeTrue
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
+import java.util.concurrent.Callable
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicInteger
 import javax.inject.Inject
 import kotlin.test.assertFailsWith
@@ -27,7 +23,6 @@ import kotlin.test.assertFailsWith
 abstract class TransacterTest {
   @Inject @Movies lateinit var transacter: Transacter
   @Inject lateinit var queryFactory: Query.Factory
-  @Inject lateinit var tracer: MockTracer
   @Inject lateinit var logCollector: LogCollector
 
   @Test
@@ -113,9 +108,9 @@ abstract class TransacterTest {
   }
 
   // TODO TiDB are working on fixing this bug: https://github.com/pingcap/tidb/issues/13791
-  private fun hasDateBug() = transacter.config().type == DataSourceType.TIDB
+  protected fun hasDateBug() = transacter.config().type == DataSourceType.TIDB
 
-  private fun createTestData() {
+  protected fun createTestData() {
     // Insert some movies, characters and actors.
     transacter.allowCowrites().transaction { session ->
       val jp = session.save(DbMovie("Jurassic Park", LocalDate.of(1993, 6, 9)))
@@ -364,8 +359,10 @@ abstract class TransacterTest {
   }
 
   @Test
-  @Disabled("Uniqueness constraints aren't reliably enforced on Vitess")
   fun constraintViolationCausesTransactionToRollback() {
+    // Uniqueness constraints aren't reliably enforced on Vitess
+    assumeTrue(!transacter.config().type.isVitess)
+
     transacter.transaction { session ->
       session.save(DbMovie("Cinderella", LocalDate.of(1950, 3, 4)))
     }
@@ -376,7 +373,7 @@ abstract class TransacterTest {
       }
     }
     transacter.transaction { session ->
-      assertThat(queryFactory.newQuery<MovieQuery>().list(session)).hasSize(1)
+      assertThat(queryFactory.newQuery<MovieQuery>().allowTableScan().list(session)).hasSize(1)
     }
   }
 
@@ -530,30 +527,6 @@ abstract class TransacterTest {
       val movie: DbMovie? = queryFactory.newQuery<MovieQuery>().id(id).uniqueResult(session)
       assertThat(movie).isNotNull()
     }
-  }
-
-  @Test
-  fun committedTransactionsTraceSuccess() {
-    tracer.reset()
-
-    transacter.transaction {
-      // No need to do anything
-    }
-
-    tracingAssertions(true)
-  }
-
-  @Test
-  fun rolledbackTransactionsTraceError() {
-    tracer.reset()
-
-    assertFailsWith<NonRetryableException> {
-      transacter.transaction {
-        throw NonRetryableException()
-      }
-    }
-
-    tracingAssertions(false)
   }
 
   @Test
@@ -757,36 +730,37 @@ abstract class TransacterTest {
         "retried Movies transaction succeeded \\(attempt 3, same connection\\)")
   }
 
-  private fun tracingAssertions(committed: Boolean) {
-    // Assert on span, implicitly asserting that it's complete by looking at finished spans
-    val orderedSpans = tracer.finishedSpans().sortedBy { it.context().spanId() }
-    assertThat(orderedSpans).hasSize(4)
-
-    assertThat(orderedSpans.get(0).operationName())
-        .isEqualTo(APPLICATION_TRANSACTION_SPAN_NAME)
-    assertThat(orderedSpans.get(0).tags())
-        .containsEntry(Tags.COMPONENT.getKey(), TRANSACTER_SPAN_TAG)
-
-    assertThat(orderedSpans.get(1).operationName())
-        .isEqualTo(DB_TRANSACTION_SPAN_NAME)
-    assertThat(orderedSpans.get(1).tags())
-        .containsEntry(Tags.COMPONENT.getKey(), TRANSACTER_SPAN_TAG)
-
-    assertThat(orderedSpans.get(2).operationName())
-        .isEqualTo(DB_BEGIN_SPAN_NAME)
-    assertThat(orderedSpans.get(2).tags())
-        .containsEntry(Tags.COMPONENT.getKey(), TRANSACTER_SPAN_TAG)
-
-    if (committed) {
-      assertThat(orderedSpans.get(3).operationName()).isEqualTo(DB_COMMIT_SPAN_NAME)
-    } else {
-      assertThat(orderedSpans.get(3).operationName()).isEqualTo(DB_ROLLBACK_SPAN_NAME)
+  @Test
+  fun concurrentUpdates() {
+    transacter.transaction { session ->
+      session.save(DbMovie("Star Wars", LocalDate.of(1975, 5, 25)))
     }
-    assertThat(orderedSpans.get(3).tags())
-        .containsEntry(Tags.COMPONENT.getKey(), TRANSACTER_SPAN_TAG)
 
-    // There should be no on-going span
-    assertThat(tracer.activeSpan()).isNull()
+    val txnEntryLatch = CountDownLatch(2)
+    val txnExitLatch = CountDownLatch(2)
+
+    val asyncWrite = Callable {
+      transacter.transaction { session ->
+        txnEntryLatch.countDown()
+        val movie = queryFactory.newQuery(MovieQuery::class)
+            .name("Star Wars")
+            .uniqueResult(session)!!
+        movie.release_date = LocalDate.of(movie.release_date!!.year + 1, 5, 25)
+        txnExitLatch.countDown()
+      }
+    }
+
+    val futureResults = Executors.newFixedThreadPool(2)
+        .invokeAll(listOf(asyncWrite, asyncWrite))
+        .map { it.get() }
+
+    assertThat(futureResults).hasSize(2)
+
+    val movies = transacter.transaction { session ->
+      queryFactory.newQuery(MovieQuery::class).list(session)
+    }
+    assertThat(movies.size).isEqualTo(1)
+    assertThat(movies[0].release_date == LocalDate.of(1977, 5, 25))
   }
 
   class NonRetryableException : Exception()
@@ -818,7 +792,7 @@ class TidbTransacterTest : TransacterTest() {
 }
 
 @MiskTest(startService = true)
-class VitessTransacterTest : TransacterTest() {
+class PostgresqlTransacterTest : TransacterTest() {
   @MiskTestModule
-  val module = MoviesTestModule(DataSourceType.VITESS)
+  val module = MoviesTestModule(DataSourceType.POSTGRESQL)
 }

@@ -1,5 +1,6 @@
 package misk.web
 
+import com.google.inject.Provider
 import com.google.inject.Provides
 import com.google.inject.TypeLiteral
 import misk.ApplicationInterceptor
@@ -7,9 +8,9 @@ import misk.MiskCaller
 import misk.MiskDefault
 import misk.ServiceModule
 import misk.exceptions.ActionException
-import misk.grpc.GrpcRequestFeatureBinding
-import misk.grpc.GrpcResponseFeatureBinding
+import misk.grpc.GrpcFeatureBinding
 import misk.inject.KAbstractModule
+import misk.queuing.TimedBlockingQueue
 import misk.scope.ActionScopedProvider
 import misk.scope.ActionScopedProviderModule
 import misk.security.authz.MiskCallerAuthenticator
@@ -21,8 +22,10 @@ import misk.web.actions.ReadinessCheckAction
 import misk.web.actions.StatusAction
 import misk.web.exceptions.ActionExceptionLogLevelConfig
 import misk.web.exceptions.ActionExceptionMapper
+import misk.web.exceptions.EofExceptionMapper
 import misk.web.exceptions.ExceptionHandlingInterceptor
 import misk.web.exceptions.ExceptionMapperModule
+import misk.web.exceptions.IOExceptionMapper
 import misk.web.extractors.FormValueFeatureBinding
 import misk.web.extractors.PathParamFeatureBinding
 import misk.web.extractors.QueryParamFeatureBinding
@@ -42,19 +45,32 @@ import misk.web.interceptors.TracingInterceptor
 import misk.web.jetty.JettyConnectionMetricsCollector
 import misk.web.jetty.JettyService
 import misk.web.jetty.JettyThreadPoolMetricsCollector
+import misk.web.jetty.MeasuredQueuedThreadPool
+import misk.web.jetty.MeasuredThreadPool
+import misk.web.jetty.MeasuredThreadPoolExecutor
+import misk.web.jetty.ThreadPoolQueueMetrics
 import misk.web.marshal.JsonMarshaller
 import misk.web.marshal.JsonUnmarshaller
 import misk.web.marshal.Marshaller
+import misk.web.marshal.MultipartUnmarshaller
 import misk.web.marshal.PlainTextMarshaller
 import misk.web.marshal.ProtobufMarshaller
 import misk.web.marshal.ProtobufUnmarshaller
 import misk.web.marshal.Unmarshaller
 import misk.web.proxy.WebProxyEntry
 import misk.web.resources.StaticResourceEntry
+import org.eclipse.jetty.io.EofException
 import org.eclipse.jetty.server.handler.StatisticsHandler
 import org.eclipse.jetty.server.handler.gzip.GzipHandler
+import org.eclipse.jetty.util.thread.ExecutorThreadPool
 import org.eclipse.jetty.util.thread.QueuedThreadPool
+import org.eclipse.jetty.util.thread.ThreadPool
+import java.io.IOException
 import java.util.concurrent.ArrayBlockingQueue
+import java.util.concurrent.BlockingQueue
+import java.util.concurrent.SynchronousQueue
+import java.util.concurrent.ThreadPoolExecutor
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
 import javax.servlet.http.HttpServletRequest
@@ -84,6 +100,7 @@ class MiskWebModule(private val config: WebConfig) : KAbstractModule() {
     multibind<Marshaller.Factory>().to<ProtobufMarshaller.Factory>()
     multibind<Unmarshaller.Factory>().to<JsonUnmarshaller.Factory>()
     multibind<Unmarshaller.Factory>().to<ProtobufUnmarshaller.Factory>()
+    multibind<Unmarshaller.Factory>().to<MultipartUnmarshaller.Factory>()
 
     // Initialize empty sets for our multibindings.
     newMultibinder<NetworkInterceptor.Factory>()
@@ -130,6 +147,8 @@ class MiskWebModule(private val config: WebConfig) : KAbstractModule() {
         .to<RequestBodyLoggingInterceptor.Factory>()
 
     install(ExceptionMapperModule.create<ActionException, ActionExceptionMapper>())
+    install(ExceptionMapperModule.create<IOException, IOExceptionMapper>())
+    install(ExceptionMapperModule.create<EofException, EofExceptionMapper>())
 
     // Register built-in feature bindings.
     multibind<FeatureBinding.Factory>().toInstance(PathParamFeatureBinding.Factory)
@@ -140,8 +159,7 @@ class MiskWebModule(private val config: WebConfig) : KAbstractModule() {
     multibind<FeatureBinding.Factory>().toInstance(WebSocketListenerFeatureBinding.Factory)
     multibind<FeatureBinding.Factory>().to<RequestBodyFeatureBinding.Factory>()
     multibind<FeatureBinding.Factory>().to<ResponseBodyFeatureBinding.Factory>()
-    multibind<FeatureBinding.Factory>().to<GrpcRequestFeatureBinding.Factory>()
-    multibind<FeatureBinding.Factory>().to<GrpcResponseFeatureBinding.Factory>()
+    multibind<FeatureBinding.Factory>().to<GrpcFeatureBinding.Factory>()
 
     // Install infrastructure support
     install(CertificatesModule())
@@ -152,21 +170,31 @@ class MiskWebModule(private val config: WebConfig) : KAbstractModule() {
     install(WebActionModule.create<ReadinessCheckAction>())
     install(WebActionModule.create<LivenessCheckAction>())
     install(WebActionModule.create<NotFoundAction>())
-  }
 
-  @Provides @Singleton
-  fun provideJettyThreadPool(): QueuedThreadPool {
     val maxThreads = config.jetty_max_thread_pool_size
     val minThreads = Math.min(8, maxThreads)
     val idleTimeout = 60_000
-
-    val threadPool = QueuedThreadPool(
-        maxThreads,
-        minThreads,
-        idleTimeout,
-        ArrayBlockingQueue(config.jetty_max_thread_pool_queue_size))
-    threadPool.name = "jetty-thread"
-    return threadPool
+    if (config.jetty_max_thread_pool_queue_size > 0) {
+      val threadPool = QueuedThreadPool(
+          maxThreads,
+          minThreads,
+          idleTimeout,
+          provideThreadPoolQueue(getProvider(ThreadPoolQueueMetrics::class.java)))
+      threadPool.name = "jetty-thread"
+      bind<ThreadPool>().toInstance(threadPool)
+      bind<MeasuredThreadPool>().toInstance(MeasuredQueuedThreadPool(threadPool))
+    } else {
+      val executor = ThreadPoolExecutor(
+          minThreads,
+          maxThreads,
+          idleTimeout.toLong(),
+          TimeUnit.MILLISECONDS,
+          SynchronousQueue())
+      val threadPool = ExecutorThreadPool(executor)
+      threadPool.name = "jetty-thread"
+      bind<ThreadPool>().toInstance(threadPool)
+      bind<MeasuredThreadPool>().toInstance(MeasuredThreadPoolExecutor(executor))
+    }
   }
 
   @Provides @Singleton
@@ -177,6 +205,16 @@ class MiskWebModule(private val config: WebConfig) : KAbstractModule() {
   @Provides @Singleton
   fun provideGzipHandler(): GzipHandler {
     return GzipHandler()
+  }
+
+  private fun provideThreadPoolQueue(metrics: Provider<ThreadPoolQueueMetrics>): BlockingQueue<Runnable> {
+    return if (config.enable_thread_pool_queue_metrics) {
+      TimedBlockingQueue(
+          config.jetty_max_thread_pool_queue_size
+      ) { d -> metrics.get().recordQueueLatency(d) }
+    } else {
+      ArrayBlockingQueue<Runnable>(config.jetty_max_thread_pool_queue_size)
+    }
   }
 
   class MiskCallerProvider @Inject constructor(

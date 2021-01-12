@@ -19,16 +19,16 @@
     "zip": "tar --exclude='.gitignore' --exclude='.old_build_files' --exclude='package.json' --exclude='package-lock.json' --exclude='prettier.config.js' --exclude='tsconfig.json' --exclude='tslint.json' --exclude='webpack.config.js' --exclude='yarn.lock' --exclude='demo' --exclude='lib' --exclude='.DS_Store' --exclude='*.log' --exclude='node_modules' --exclude='web-actions.tgz' -czvf web-actions.tgz ./"
   },
   "dependencies": {
-    "@misk/common": "0.1.24",
-    "@misk/core": "0.1.24",
-    "@misk/simpleredux": "0.1.24",
+    "@misk/common": "0.1.26",
+    "@misk/core": "0.1.26",
+    "@misk/simpleredux": "0.1.26",
     "copy-to-clipboard": "^3.1.0"
   },
   "devDependencies": {
-    "@misk/dev": "0.1.24",
-    "@misk/tslint": "0.1.24",
-    "@misk/test": "0.1.24",
-    "@misk/prettier": "0.1.24"
+    "@misk/dev": "0.1.26",
+    "@misk/tslint": "0.1.26",
+    "@misk/test": "0.1.26",
+    "@misk/prettier": "0.1.26"
   },
   "jest": {
     "testEnvironment": "jsdom",

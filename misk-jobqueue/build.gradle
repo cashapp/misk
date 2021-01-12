@@ -1,17 +1,8 @@
-buildscript {
-  dependencies {
-    classpath dep.kotlinNoArgPlugin
-  }
-}
-
-apply plugin: 'kotlin-jpa'
-
 dependencies {
   compile dep.guava
   compile dep.guice
   compile dep.guiceMultibindings
-  compile project(':misk')
-  compile project(':misk-hibernate')
+  compile project(':misk-core')
 
   testCompile project(':misk-testing')
 }
@@ -22,3 +13,5 @@ afterEvaluate { project ->
     outputFormat = 'gfm'
   }
 }
+
+apply from: "$rootDir/gradle-mvn-publish.gradle"

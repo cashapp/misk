@@ -5,7 +5,7 @@ buildscript {
 }
 
 dependencies {
-  compile dep.kotlinStdLib
+  compile dep.kotlinStdLibJdk8
   compile dep.guava
   compile dep.moshiKotlin
   compile project(':misk-core')
@@ -19,3 +19,5 @@ afterEvaluate { project ->
     outputFormat = 'gfm'
   }
 }
+
+apply from: "$rootDir/gradle-mvn-publish.gradle"

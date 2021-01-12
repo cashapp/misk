@@ -49,15 +49,17 @@ class SecretColumnTest {
     // make sure the data in the database is not the same as the plaintext data
     transacter.transaction { session ->
       val songRaw = queryFactory.newQuery(JerryGarciaSongRawQuery::class)
-          .title("Dark Star")
-          .query(session)[0]
+        .allowTableScan()
+        .title("Dark Star")
+        .query(session)[0]
       assertThat(songRaw.album).isNotEqualTo(album)
     }
     // test that when retrieving from the database we get the plaintext value
     transacter.transaction { session ->
       val song = queryFactory.newQuery(JerryGarciaSongQuery::class)
-          .title("Dark Star")
-          .query(session)[0]
+        .allowTableScan()
+        .title("Dark Star")
+        .query(session)[0]
       assertThat(song.title).isEqualTo(title)
       assertThat(song.length).isEqualTo(length)
       assertThat(song.album).isEqualTo(album)
@@ -74,8 +76,9 @@ class SecretColumnTest {
     }
     transacter.transaction { session ->
       val song = queryFactory.newQuery(JerryGarciaSongQuery::class)
-          .title("Ripple")
-          .query(session)[0]
+        .allowTableScan()
+        .title("Ripple")
+        .query(session)[0]
       assertThat(song.title).isEqualTo(title)
       assertThat(song.length).isEqualTo(length)
       assertNull(song.album)
@@ -160,8 +163,9 @@ class SecretColumnTest {
 
       assertThatThrownBy {
         queryFactory.newQuery<JerryGarciaSongQuery>()
-            .title(title)
-            .query(session)[0]
+          .allowTableScan()
+          .title(title)
+          .query(session)[0]
       }.isInstanceOf(javax.persistence.PersistenceException::class.java)
     }
   }
@@ -175,8 +179,9 @@ class SecretColumnTest {
     transacter.transaction { session ->
       session.save(DbJerryGarciaSong(title, length, album, reviewer))
       val songs = queryFactory.newQuery<JerryGarciaSongQuery>()
-              .reviewer(reviewer)
-              .query(session)
+        .allowTableScan()
+        .reviewer(reviewer)
+        .query(session)
       assertThat(songs.size).isEqualTo(1)
     }
   }
@@ -188,8 +193,9 @@ class SecretColumnTest {
     transacter.transaction { session ->
       session.save(DbJerryGarciaSong(title, length, album))
       val songs = queryFactory.newQuery<JerryGarciaSongQuery>()
-          .album(album)
-          .query(session)
+        .allowTableScan()
+        .album(album)
+        .query(session)
       assertThat(songs.size).isEqualTo(0)
     }
   }
@@ -203,13 +209,15 @@ class SecretColumnTest {
         session.save(DbJerryGarciaSong("Eyes of the World", 125, "Wake of the Flood".toByteArray(), reviewer))
 
         val songs = queryFactory.newQuery<JerryGarciaSongQuery>()
-                .reviewer(reviewer)
-                .query(session)
+          .allowTableScan()
+          .reviewer(reviewer)
+          .query(session)
 
         assertThat(songs.size).isEqualTo(3)
 
         val songRaw = queryFactory.newQuery(JerryGarciaSongRawQuery::class)
-                .query(session)
+          .allowTableScan()
+          .query(session)
 
         // Make sure that all reviewer ciphertexts are equivalent
         val oneReviewer = songRaw[0].reviewer
@@ -331,7 +339,7 @@ class SecretColumnTest {
       install(EnvironmentModule(Environment.TESTING))
 
       val config = MiskConfig.load<AppConfig>("encryptedcolumn", Environment.TESTING)
-      install(CryptoTestModule(config.crypto.keys!!))
+      install(CryptoTestModule(config.crypto))
       install(HibernateTestingModule(JerryGarciaDb::class, config.data_source))
       install(HibernateModule(JerryGarciaDb::class, config.data_source))
       install(object : HibernateEntityModule(JerryGarciaDb::class) {

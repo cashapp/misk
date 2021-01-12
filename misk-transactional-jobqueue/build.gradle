@@ -1,0 +1,16 @@
+dependencies {
+  compile project(':misk-core')
+  compile project(':misk-jobqueue')
+  compile project(':misk-hibernate')
+
+  testCompile project(':misk-testing')
+}
+
+afterEvaluate { project ->
+  project.tasks.dokka {
+    outputDirectory = "$rootDir/docs/0.x"
+    outputFormat = 'gfm'
+  }
+}
+
+apply from: "$rootDir/gradle-mvn-publish.gradle"

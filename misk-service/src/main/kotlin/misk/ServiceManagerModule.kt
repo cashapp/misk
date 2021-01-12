@@ -1,5 +1,6 @@
 package misk
 
+import com.google.common.util.concurrent.MoreExecutors.directExecutor
 import com.google.common.util.concurrent.Service
 import com.google.common.util.concurrent.ServiceManager
 import com.google.inject.Injector
@@ -11,6 +12,7 @@ import mu.KotlinLogging
 import javax.inject.Provider
 import javax.inject.Singleton
 
+@Suppress("UnstableApiUsage") // Guava's Service is @Beta.
 class ServiceManagerModule : KAbstractModule() {
   companion object {
     private val log = KotlinLogging.logger {}
@@ -31,6 +33,7 @@ class ServiceManagerModule : KAbstractModule() {
     newMultibinder<DependencyEdge>()
     newMultibinder<EnhancementEdge>()
   }
+
   @Provides
   @Singleton
   internal fun provideServiceManager(
@@ -72,7 +75,7 @@ class ServiceManagerModule : KAbstractModule() {
     }
 
     val serviceManager = builder.build()
-    listeners.forEach { serviceManager.addListener(it) }
+    listeners.forEach { serviceManager.addListener(it, directExecutor()) }
     return serviceManager
   }
 }

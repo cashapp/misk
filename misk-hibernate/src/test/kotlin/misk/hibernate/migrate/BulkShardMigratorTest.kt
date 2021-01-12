@@ -9,7 +9,7 @@ import misk.hibernate.Movies
 import misk.hibernate.MoviesTestModule
 import misk.hibernate.Query
 import misk.hibernate.Session
-import misk.hibernate.Shard
+import misk.vitess.Shard
 import misk.hibernate.Transacter
 import misk.hibernate.allowTableScan
 import misk.hibernate.createInSameShard
@@ -17,6 +17,7 @@ import misk.hibernate.createInSeparateShard
 import misk.hibernate.shard
 import misk.hibernate.shards
 import misk.hibernate.transaction
+import misk.jdbc.DataSourceType
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
@@ -27,15 +28,99 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import javax.inject.Inject
 
-@MiskTest(startService = true)
-class BulkShardMigratorTest {
-  @MiskTestModule
-  val module = MoviesTestModule()
-
-  @Inject @Movies private lateinit var transacter: Transacter
+abstract class BulkShardMigratorTest {
+  @Inject @Movies lateinit var transacter: Transacter
   @Inject @Movies lateinit var sessionFactory: SessionFactory
-  @Inject private lateinit var bulkShardMigratorFactory: BulkShardMigrator.Factory
+  @Inject lateinit var bulkShardMigratorFactory: BulkShardMigrator.Factory
   @Inject lateinit var queryFactory: Query.Factory
+
+  @Test fun sameShardMigrate() {
+    val sourceId = transacter.transaction { session ->
+      val movie = DbMovie("Jurassic Park")
+      session.save(movie)
+      session.save(DbCharacter("Ellie Sattler", movie))
+      session.save(DbCharacter("Ian Malcolm", movie))
+      movie.id
+    }
+
+    val targetId = transacter.createInSameShard(sourceId) { DbMovie("Star Wars") }
+
+    val sourceShard = transacter.transaction { sourceId.shard(it) }
+    val targetShard = transacter.transaction { targetId.shard(it) }
+
+    assertThat(sourceShard).isEqualTo(targetShard)
+
+    assertMovieNamesInShard(sourceShard).containsExactlyInAnyOrder("Jurassic Park", "Star Wars")
+    assertCharacterNamesInShard(sourceShard).containsExactly("Ellie Sattler", "Ian Malcolm")
+
+    assertRowCount(sourceId, "Ellie Sattler", "Ian Malcolm").isEqualTo(2)
+    assertRowCount(targetId, "Ellie Sattler", "Ian Malcolm").isEqualTo(0)
+
+    // It is expected that we would work on two root entities while merging though on the same shard
+    // for this case. The vitess safey checks throw, disabling it for now.
+    bulkShardMigratorFactory.create(transacter, sessionFactory, DbMovie::class, DbCharacter::class)
+        .rootColumn("movie_id")
+        .source(sourceId)
+        .target(targetId)
+        .now("updated_at")
+        .set("movie_id", targetId.id)
+        .execute()
+
+    // Movie remained in the same shard
+    assertMovieNamesInShard(targetShard).containsExactlyInAnyOrder("Jurassic Park", "Star Wars")
+    assertCharacterNamesInShard(targetShard).containsExactly("Ellie Sattler", "Ian Malcolm")
+
+    assertRowCount(sourceId, "Ellie Sattler", "Ian Malcolm").isEqualTo(0)
+    assertRowCount(targetId, "Ellie Sattler", "Ian Malcolm").isEqualTo(2)
+  }
+
+  fun executeStatement(session: Session, sql: String): Boolean {
+    return session.hibernateSession.doReturningWork {
+      connection -> connection.prepareStatement(sql).execute()
+    }
+  }
+
+  fun assertMovieNamesInShard(shard: Shard): ListAssert<String> {
+    return transacter.transaction(shard) { session ->
+      ListAssert(
+          queryFactory.newQuery(MovieQuery::class)
+              .allowTableScan()
+              .list(session)
+              .map { it.name }
+              .toList()
+      )
+    }
+  }
+
+  fun assertCharacterNamesInShard(shard: Shard): ListAssert<String> {
+    return transacter.transaction(shard) { session ->
+      ListAssert(
+          queryFactory.newQuery(CharacterQuery::class)
+              .allowTableScan()
+              .list(session)
+              .map { it.name }
+              .toList()
+      )
+    }
+  }
+
+  fun assertRowCount(movieId: Id<DbMovie>, vararg names: String): IntegerAssert {
+    return IntegerAssert(
+        transacter.transaction { session ->
+          queryFactory.newQuery(CharacterQuery::class)
+              .names(names.asList())
+              .movieId(movieId)
+              .list(session)
+              .size
+        }
+    )
+  }
+}
+
+@MiskTest(startService = true)
+class BulkShardMigratorVitessMySqlTest: BulkShardMigratorTest() {
+  @MiskTestModule
+  val module = MoviesTestModule(DataSourceType.VITESS_MYSQL)
 
   @BeforeEach fun setup() {
     val movieShards = transacter.shards().filter { it.keyspace.name.startsWith("movie") }
@@ -82,44 +167,6 @@ class BulkShardMigratorTest {
 
     // Characters were moved
     assertCharacterNamesInShard(sourceShard).isEmpty()
-    assertCharacterNamesInShard(targetShard).containsExactly("Ellie Sattler", "Ian Malcolm")
-
-    assertRowCount(sourceId, "Ellie Sattler", "Ian Malcolm").isEqualTo(0)
-    assertRowCount(targetId, "Ellie Sattler", "Ian Malcolm").isEqualTo(2)
-  }
-
-  @Test fun sameShardMigrate() {
-    val sourceId = transacter.transaction { session ->
-      val movie = DbMovie("Jurassic Park")
-      session.save(movie)
-      session.save(DbCharacter("Ellie Sattler", movie))
-      session.save(DbCharacter("Ian Malcolm", movie))
-      movie.id
-    }
-
-    val targetId = transacter.createInSameShard(sourceId) { DbMovie("Star Wars") }
-
-    val sourceShard = transacter.transaction { sourceId.shard(it) }
-    val targetShard = transacter.transaction { targetId.shard(it) }
-
-    assertThat(sourceShard).isEqualTo(targetShard)
-
-    assertMovieNamesInShard(sourceShard).containsExactly("Jurassic Park", "Star Wars")
-    assertCharacterNamesInShard(sourceShard).containsExactly("Ellie Sattler", "Ian Malcolm")
-
-    assertRowCount(sourceId, "Ellie Sattler", "Ian Malcolm").isEqualTo(2)
-    assertRowCount(targetId, "Ellie Sattler", "Ian Malcolm").isEqualTo(0)
-
-    // It is expected that we would work on two root entities while merging though on the same shard
-    // for this case. The vitess safey checks throw, disabling it for now.
-    bulkShardMigratorFactory.create(transacter, sessionFactory, DbMovie::class, DbCharacter::class)
-        .rootColumn("movie_id")
-        .source(sourceId)
-        .target(targetId)
-        .execute()
-
-    // Movie remained in the same shard
-    assertMovieNamesInShard(targetShard).containsExactly("Jurassic Park", "Star Wars")
     assertCharacterNamesInShard(targetShard).containsExactly("Ellie Sattler", "Ian Malcolm")
 
     assertRowCount(sourceId, "Ellie Sattler", "Ian Malcolm").isEqualTo(0)
@@ -267,46 +314,16 @@ class BulkShardMigratorTest {
     assertRowCount(sourceId, "Ellie Sattler", "Ian Malcolm").isEqualTo(0)
     assertRowCount(targetId, "Ellie Sattler", "Ian Malcolm").isEqualTo(2)
   }
+}
 
-  private fun executeStatement(session: Session, sql: String): Boolean {
-    return session.hibernateSession.doReturningWork {
-      connection -> connection.prepareStatement(sql).execute()
-    }
-  }
+@MiskTest(startService = true)
+class BulkShardMigratorMySqlTest: BulkShardMigratorTest() {
+  @MiskTestModule
+  val module = MoviesTestModule(type = DataSourceType.MYSQL)
+}
 
-  private fun assertMovieNamesInShard(shard: Shard): ListAssert<String> {
-    return transacter.transaction(shard) { session ->
-      ListAssert(
-          queryFactory.newQuery(MovieQuery::class)
-              .allowTableScan()
-              .list(session)
-              .map { it.name }
-              .toList()
-      )
-    }
-  }
-
-  private fun assertCharacterNamesInShard(shard: Shard): ListAssert<String> {
-    return transacter.transaction(shard) { session ->
-      ListAssert(
-          queryFactory.newQuery(CharacterQuery::class)
-              .allowTableScan()
-              .list(session)
-              .map { it.name }
-              .toList()
-      )
-    }
-  }
-
-  private fun assertRowCount(movieId: Id<DbMovie>, vararg names: String): IntegerAssert {
-    return IntegerAssert(
-        transacter.transaction { session ->
-          queryFactory.newQuery(CharacterQuery::class)
-              .names(names.asList())
-              .movieId(movieId)
-              .list(session)
-              .size
-        }
-    )
-  }
+@MiskTest(startService = true)
+class BulkShardMigratorTidbTest: BulkShardMigratorTest() {
+  @MiskTestModule
+  val module = MoviesTestModule(type = DataSourceType.TIDB)
 }

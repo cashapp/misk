@@ -1,15 +1,18 @@
 package misk.web.interceptors
 
+import ch.qos.logback.classic.Level
 import com.netflix.concurrency.limits.limit.SettableLimit
 import com.netflix.concurrency.limits.limiter.SimpleLimiter
 import misk.Action
+import misk.MiskTestingServiceModule
 import misk.asAction
 import misk.inject.KAbstractModule
+import misk.logging.LogCollector
+import misk.logging.LogCollectorModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.time.FakeClock
-import misk.time.FakeClockModule
-import misk.web.ConcurrencyLimitsOptIn
+import misk.web.AvailableWhenDegraded
 import misk.web.DispatchMechanism
 import misk.web.FakeHttpCall
 import misk.web.Get
@@ -24,15 +27,17 @@ import okhttp3.HttpUrl.Companion.toHttpUrl
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.time.Duration
+import java.time.temporal.ChronoUnit
 import javax.inject.Inject
 
-@MiskTest
+@MiskTest(startService = true)
 class ConcurrencyLimitsInterceptorTest {
   @MiskTestModule
   val module = TestModule()
 
   @Inject private lateinit var factory: ConcurrencyLimitsInterceptor.Factory
   @Inject private lateinit var clock: FakeClock
+  @Inject lateinit var logCollector: LogCollector
 
   @Test
   fun happyPath() {
@@ -40,6 +45,7 @@ class ConcurrencyLimitsInterceptorTest {
     val interceptor = factory.create(action)!!
     assertThat(call(action, interceptor, callDuration = Duration.ofMillis(100), statusCode = 200))
         .isEqualTo(CallResult(callWasShed = false, statusCode = 200))
+    assertThat(logCollector.takeMessages()).isEmpty()
   }
 
   @Test
@@ -48,7 +54,7 @@ class ConcurrencyLimitsInterceptorTest {
     val limitZero = SimpleLimiter.Builder()
         .limit(SettableLimit(0))
         .build<String>()
-    val interceptor = ConcurrencyLimitsInterceptor(action.name, limitZero)
+    val interceptor = ConcurrencyLimitsInterceptor(action.name, limitZero, clock)
     assertThat(call(action, interceptor, callDuration = Duration.ofMillis(100), statusCode = 200))
         .isEqualTo(CallResult(callWasShed = true, statusCode = 503))
   }
@@ -63,6 +69,41 @@ class ConcurrencyLimitsInterceptorTest {
 
     val getStatus = StatusAction::getStatus.asAction(DispatchMechanism.GET)
     assertThat(factory.create(getStatus)).isNull()
+  }
+
+  @Test
+  fun limitsOnForUnannotatedEndpoints() {
+    val optInAction = UnannotatedAction::call.asAction(DispatchMechanism.GET)
+    assertThat(factory.create(optInAction)).isNotNull()
+  }
+
+  @Test
+  fun noLimitsOnOptOutEndpoints() {
+    val optOutAction = OptOutAction::call.asAction(DispatchMechanism.GET)
+    assertThat(factory.create(optOutAction)).isNull()
+  }
+
+  @Test
+  fun atMostOneErrorLoggedPerMinute() {
+    val action = HelloAction::call.asAction(DispatchMechanism.GET)
+    val limitZero = SimpleLimiter.Builder()
+        .limit(SettableLimit(0))
+        .build<String>()
+    val interceptor = ConcurrencyLimitsInterceptor(action.name, limitZero, clock)
+    // First call logs an error.
+    call(action, interceptor, callDuration = Duration.ofMillis(100), statusCode = 200)
+    assertThat(logCollector.takeMessages(minLevel = Level.ERROR))
+        .containsExactly("concurrency limits interceptor shedding HelloAction")
+
+    // Subsequent calls don't.
+    call(action, interceptor, callDuration = Duration.ofMillis(100), statusCode = 200)
+    assertThat(logCollector.takeMessages(minLevel = Level.ERROR)).isEmpty()
+
+    // One minute later we get errors again.
+    clock.setNow(clock.instant().plus(1, ChronoUnit.MINUTES))
+    call(action, interceptor, callDuration = Duration.ofMillis(100), statusCode = 200)
+    assertThat(logCollector.takeMessages(minLevel = Level.ERROR))
+        .containsExactly("concurrency limits interceptor shedding HelloAction")
   }
 
   private fun call(
@@ -88,7 +129,8 @@ class ConcurrencyLimitsInterceptorTest {
 
   class TestModule : KAbstractModule() {
     override fun configure() {
-      install(FakeClockModule())
+      install(LogCollectorModule())
+      install(MiskTestingServiceModule())
     }
   }
 
@@ -113,7 +155,17 @@ class ConcurrencyLimitsInterceptorTest {
 
   internal class HelloAction : WebAction {
     @Get("/hello")
-    @ConcurrencyLimitsOptIn
     fun call(): String = "hello"
+  }
+
+  internal class UnannotatedAction : WebAction {
+    @Get("/chill")
+    fun call(): String = "chill"
+  }
+
+  internal class OptOutAction : WebAction {
+    @Get("/important")
+    @AvailableWhenDegraded
+    fun call(): String = "important"
   }
 }
