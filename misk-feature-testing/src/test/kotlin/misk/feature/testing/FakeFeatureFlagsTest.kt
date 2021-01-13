@@ -4,14 +4,11 @@ import com.squareup.moshi.JsonDataException
 import misk.feature.Attributes
 import misk.feature.Feature
 import misk.feature.getEnum
-import misk.feature.getEnumOrNull
 import misk.feature.getJson
-import misk.feature.getJsonOrNull
 import misk.inject.KAbstractModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import javax.inject.Inject
@@ -60,11 +57,6 @@ internal class FakeFeatureFlagsTest {
     //Provides the key level override when there is no match on attributes
     assertThat(subject.getInt(FEATURE, "joker", Attributes(mapOf("don't" to "exist"))))
         .isEqualTo(42)
-
-    // Can override with null
-    subject.reset()
-    assertThatThrownBy { subject.getInt(FEATURE, TOKEN) }.hasSameClassAs(IllegalArgumentException())
-    assertThat(subject.getIntOrNull(FEATURE, TOKEN)).isNull()
   }
 
   @Test
@@ -100,14 +92,6 @@ internal class FakeFeatureFlagsTest {
 
     subject.reset()
     assertThat(subject.getEnum<Dinosaur>(FEATURE, TOKEN)).isEqualTo(Dinosaur.PTERODACTYL)
-  }
-
-  @Test
-  fun `getEnumOrNull is null if feature flag is not overridden`() {
-    assertThat(subject.getEnumOrNull<Dinosaur>(FEATURE, TOKEN)).isNull()
-    subject.override(FEATURE, Dinosaur.TYRANNOSAURUS)
-    assertThat(subject.getEnumOrNull<Dinosaur>(FEATURE, TOKEN))
-      .isEqualTo(Dinosaur.TYRANNOSAURUS)
   }
 
   data class JsonFeature(val value : String, val optional : String? = null)
@@ -154,13 +138,6 @@ internal class FakeFeatureFlagsTest {
         .isEqualTo(JsonFeature("test-class"))
     assertThat(subject.getJson<JsonFeature>(FEATURE, "joker"))
         .isEqualTo(JsonFeature("test-key-class"))
-  }
-
-  @Test
-  fun `getJsonOrNull is null if not overridden`() {
-    assertThat(subject.getJsonOrNull<JsonFeature>(FEATURE, TOKEN)).isNull()
-    subject.overrideJson(FEATURE, JsonFeature("test"))
-    assertThat(subject.getJsonOrNull<JsonFeature>(FEATURE, TOKEN)).isEqualTo(JsonFeature("test"))
   }
 
   @Test

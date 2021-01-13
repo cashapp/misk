@@ -199,7 +199,7 @@ internal class ClientInvocationHandler(
 internal class NetworkInterceptorWrapper(
   val action: ClientAction,
   val interceptor: ClientNetworkInterceptor
-) : okhttp3.Interceptor {
+) : Interceptor {
   override fun intercept(chain: Interceptor.Chain): okhttp3.Response {
     return interceptor.intercept(RealClientNetworkChain(chain, action))
   }
