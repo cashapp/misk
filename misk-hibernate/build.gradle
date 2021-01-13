@@ -16,6 +16,10 @@ allOpen {
 
 dependencies {
   api dep.hibernateCore
+  implementation dep.moshiCore
+  implementation dep.moshiKotlin
+  implementation dep.moshiAdapters
+  implementation dep.wireRuntime
   implementation dep.tink
   implementation project(':misk')
   implementation project(':misk-actions')
