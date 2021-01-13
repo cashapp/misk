@@ -4,7 +4,6 @@ import com.squareup.moshi.Moshi
 import misk.client.HttpClientEndpointConfig
 import misk.client.HttpClientFactory
 import misk.exceptions.BadRequestException
-import misk.exceptions.StatusCode
 import misk.exceptions.UnauthorizedException
 import misk.security.authz.FakeCallerAuthenticator
 import misk.web.jetty.JettyService
@@ -13,7 +12,6 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
-import org.eclipse.jetty.http.HttpStatus.isClientError
 import javax.inject.Inject
 import kotlin.reflect.KClass
 
