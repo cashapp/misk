@@ -3,6 +3,7 @@ sourceSets {
     srcDirs += [
       'web/tabs/admin-dashboard/lib',
       'web/tabs/config/lib',
+      'web/tabs/database/lib',
       'web/tabs/web-actions/lib',
     ]
     exclude '**/node_modules'
@@ -11,7 +12,6 @@ sourceSets {
 
 dependencies {
   compile dep.kotlinStdLibJdk8
-  compile dep.kotlinTest
   compile dep.bouncycastle
   compile dep.guava
   compile dep.guice
@@ -71,3 +71,5 @@ afterEvaluate { project ->
     outputFormat = 'gfm'
   }
 }
+
+apply from: "$rootDir/gradle-mvn-publish.gradle"

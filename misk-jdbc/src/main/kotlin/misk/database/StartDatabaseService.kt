@@ -105,7 +105,7 @@ class StartDatabaseService(
 
     private fun createDatabaseServer(config: CacheKey): DatabaseServer? =
         when (config.config.type) {
-          DataSourceType.VITESS_MYSQL, DataSourceType.VITESS -> {
+          DataSourceType.VITESS_MYSQL -> {
             DockerVitessCluster(
                 name = config.name,
                 config = config.config,

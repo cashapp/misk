@@ -1,0 +1,23 @@
+apply plugin: "com.vanniktech.maven.publish"
+
+mavenPublish {
+  releaseSigningEnabled = !getGpgKey().isEmpty()
+
+  targets {
+    installArchives {
+      releaseRepositoryUrl = file("${rootProject.buildDir}/localMaven").toURI().toString()
+      snapshotRepositoryUrl = file("${rootProject.buildDir}/localMaven").toURI().toString()
+    }
+  }
+}
+
+def getGpgKey() {
+  return hasProperty('signingKey') ? signingKey : ""
+}
+
+signing {
+  def signingKey = getGpgKey()
+  if (!signingKey.isEmpty()) {
+    useInMemoryPgpKeys(signingKey, "")
+  }
+}

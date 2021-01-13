@@ -1,7 +1,10 @@
 dependencies {
   implementation dep.awsDynamodb
+  implementation dep.awsDynamodbLocal
   implementation project(':misk')
   implementation project(':misk-aws')
+  implementation project(':misk-inject')
+  implementation project(':misk-service')
   implementation project(':misk-testing')
 
   testImplementation dep.assertj
@@ -18,3 +21,5 @@ afterEvaluate { project ->
     outputFormat = 'gfm'
   }
 }
+
+apply from: "$rootDir/gradle-mvn-publish.gradle"
