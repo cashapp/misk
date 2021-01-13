@@ -1,4 +1,7 @@
 dependencies {
+  implementation dep.moshiCore
+  implementation dep.moshiKotlin
+  implementation dep.moshiAdapters
   compile dep.bouncycastlePgp
   compile dep.tink
   compile dep.awsS3
