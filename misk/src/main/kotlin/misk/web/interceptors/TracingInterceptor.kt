@@ -31,8 +31,8 @@ internal class TracingInterceptor internal constructor(private val tracer: Trace
   }
 
   override fun intercept(chain: NetworkChain) {
-    val scopeBuilder = tracer.buildSpan("http.action")
-        .withTag(Tags.HTTP_METHOD.key, chain.httpCall.dispatchMechanism.method.toString())
+    val spanBuilder = tracer.buildSpan("http.action")
+        .withTag(Tags.HTTP_METHOD.key, chain.httpCall.dispatchMechanism.method)
         .withTag(Tags.HTTP_URL.key, chain.httpCall.url.toString())
         .withTag(Tags.SPAN_KIND.key, SPAN_KIND_SERVER)
 
@@ -40,7 +40,7 @@ internal class TracingInterceptor internal constructor(private val tracer: Trace
     if (parentSpan != null) {
       // Certain tracing implementations (Datadog) do their own header extraction. Skip our custom
       // one if that happened.
-      scopeBuilder.asChildOf(parentSpan)
+      spanBuilder.asChildOf(parentSpan)
     } else {
       val parentContext: SpanContext? = try {
         tracer.extract(Format.Builtin.HTTP_HEADERS,
@@ -52,25 +52,27 @@ internal class TracingInterceptor internal constructor(private val tracer: Trace
       }
 
       if (parentContext != null) {
-        scopeBuilder.asChildOf(parentContext)
+        spanBuilder.asChildOf(parentContext)
       }
     }
 
-    val scope = scopeBuilder.startActive(true)
+    val span = spanBuilder.start()
+    val scope = tracer.scopeManager().activate(span)
     // This is a datadog convention. Must be set after span is created because otherwise it would
     // be overwritten by the method/url
-    scope.span().setTag("resource.name", chain.webAction.javaClass.name)
-    scope.use {
-      try {
-        chain.proceed(chain.httpCall)
-        Tags.HTTP_STATUS.set(scope.span(), chain.httpCall.statusCode)
-        if (chain.httpCall.statusCode > 399) {
-          Tags.ERROR.set(scope.span(), true)
-        }
-      } catch (e: Exception) {
-        Tags.ERROR.set(scope.span(), true)
-        throw e
+    span.setTag("resource.name", chain.webAction.javaClass.name)
+    try {
+      chain.proceed(chain.httpCall)
+      Tags.HTTP_STATUS.set(span, chain.httpCall.statusCode)
+      if (chain.httpCall.statusCode > 399) {
+        Tags.ERROR.set(span, true)
       }
+    } catch (t: Throwable) {
+      Tags.ERROR.set(span, true)
+      throw t
+    } finally {
+      scope.close()
+      span.finish()
     }
   }
 }

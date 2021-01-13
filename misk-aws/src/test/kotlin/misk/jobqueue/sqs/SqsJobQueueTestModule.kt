@@ -24,6 +24,7 @@ class SqsJobQueueTestModule(
     install(FakeLeaseModule())
     install(FakeFeatureFlagsModule().withOverrides {
       override(SqsJobConsumer.CONSUMERS_PER_QUEUE, 5)
+      override(SqsJobConsumer.POD_CONSUMERS_PER_QUEUE, -1)
     })
     install(
         Modules.override(
@@ -43,5 +44,6 @@ class SqsTestModule(
   override fun configure() {
     bind<AWSCredentialsProvider>().toInstance(credentials)
     bind<AmazonSQS>().toInstance(client)
+    bind<AmazonSQS>().annotatedWith<ForSqsReceiving>().toInstance(client)
   }
 }

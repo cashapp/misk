@@ -30,9 +30,9 @@ exports[`FilterWebActionsContainer FilterWebActionsContainer can render with red
           Application Interceptor
         </option>
         <option
-          value="Dispatch Mechanism"
+          value="HTTP Method"
         >
-          Dispatch Mechanism
+          HTTP Method
         </option>
         <option
           value="Function"

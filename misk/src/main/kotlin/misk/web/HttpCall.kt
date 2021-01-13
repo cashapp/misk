@@ -12,12 +12,21 @@ import okio.BufferedSink
 import okio.BufferedSource
 
 /**
+ * Information about the socket on which a HTTP call arrived.
+ */
+sealed class SocketAddress {
+  class Network(val ipAddress: String, val port: Int) : SocketAddress()
+  class Unix(val path: String) : SocketAddress()
+}
+
+/**
  * A live HTTP call from a client for use by a chain of network interceptors.
  */
 interface HttpCall {
 
   /** Immutable information about the incoming HTTP request. */
   val url: HttpUrl
+  val linkLayerLocalAddress: SocketAddress?
   val dispatchMechanism: DispatchMechanism
   val requestHeaders: Headers
 
@@ -122,7 +131,7 @@ interface HttpCall {
 
     return okhttp3.Request.Builder()
         .url(url)
-        .method(dispatchMechanism.method.toString(), okRequestBody)
+        .method(dispatchMechanism.method, okRequestBody)
         .headers(requestHeaders)
         .build()
   }

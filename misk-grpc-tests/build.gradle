@@ -32,6 +32,7 @@ protobuf {
 wire {
   kotlin {
     rpcRole = 'client'
+    javaInterop = true
   }
 
   // Generate service interfaces also.
@@ -71,3 +72,5 @@ afterEvaluate { project ->
     outputFormat = 'gfm'
   }
 }
+
+apply from: "$rootDir/gradle-mvn-publish.gradle"

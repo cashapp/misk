@@ -1,10 +1,18 @@
 buildscript {
   dependencies {
+    classpath dep.kotlinAllOpenPlugin
     classpath dep.kotlinNoArgPlugin
   }
 }
 
+apply plugin: 'kotlin-allopen'
 apply plugin: 'kotlin-jpa'
+
+allOpen {
+  annotation("javax.persistence.Entity")
+  annotation("javax.persistence.Embeddable")
+  annotation("javax.persistence.MappedSuperclass")
+}
 
 dependencies {
   compile(dep.curatorFramework) {
@@ -41,3 +49,5 @@ afterEvaluate { project ->
     outputFormat = 'gfm'
   }
 }
+
+apply from: "$rootDir/gradle-mvn-publish.gradle"

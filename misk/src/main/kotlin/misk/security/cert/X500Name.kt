@@ -1,16 +1,21 @@
 package misk.security.cert
 
-class X500Name(private val components: Map<String, String>) {
-  val commonName = get("CN")
-  val organization = get("O")
-  val organizationalUnit = get("OU")
-  val state = get("ST")
-  val locality = get("L")
-  val country = get("C")
-
-  operator fun get(componentName: String) = components[componentName.toUpperCase()]
-
-  fun asMap() = components
+data class X500Name(
+  val commonName: String?,
+  val organizationalUnit: String?,
+  val organization: String?,
+  val locality: String?,
+  val state: String?,
+  val country: String?
+) {
+  constructor(components: Map<String, String>) : this(
+      commonName = components.get("CN"),
+      organizationalUnit = components.get("OU"),
+      organization = components.get("O"),
+      locality = components.get("L"),
+      state = components.get("ST"),
+      country = components.get("C")
+  )
 
   companion object {
     fun parse(dnString: String): X500Name {

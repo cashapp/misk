@@ -69,19 +69,28 @@ internal class WebActionBindingTest {
     assertThat(e).hasMessage("FakeFactory returned null after making a claim")
   }
 
-  /** Bindings need to run entirely before, or entirely after target actions. */
   @Test
   internal fun claimParameterAndReturnValue() {
     returnValueFactory.claimReturnValue = false
     parametersFactory.claimReturnValue = true
+    parametersFactory.result!!.claimReturnValue = true
 
-    val e = assertFailsWith<IllegalStateException> {
-      webActionBindingFactory.create(TestAction::fakeApiCall.asAction(DispatchMechanism.POST),
-          pathPattern)
-    }
-    assertThat(e).hasMessage(
-        "FakeFactory claimed a parameter and the return value of ${TestAction::fakeApiCall.asAction(
-            DispatchMechanism.POST)}")
+    val binding = webActionBindingFactory.create(
+        TestAction::fakeApiCall.asAction(DispatchMechanism.POST), pathPattern)
+    val httpCall = FakeHttpCall()
+    val matcher = pathPattern.matcher(httpCall.url)!!
+
+    // Request and response bodies are consumed and parameters are provided.
+    val parameters = binding.beforeCall(TestAction(), httpCall, matcher)
+    assertThat(parameters).containsExactly("zero", "one")
+    assertThat(httpCall.takeRequestBody()).isNull()
+    assertThat(requestBodyFactory.result?.requestBody).isNotNull()
+    assertThat(httpCall.takeResponseBody()).isNull()
+    assertThat(responseBodyFactory.result?.responseBody).isNotNull()
+
+    // Return value is consumed.
+    binding.afterCall(TestAction(), httpCall, matcher, "hello")
+    assertThat(parametersFactory.result?.returnValue).isEqualTo("hello")
   }
 
   @Test
@@ -118,6 +127,15 @@ internal class WebActionBindingTest {
   }
 
   @Test
+  internal fun claimDeleteRequestBody() {
+    val e = assertFailsWith<IllegalStateException> {
+      webActionBindingFactory.create(
+          TestAction::fakeApiCall.asAction(DispatchMechanism.DELETE), pathPattern)
+    }
+    assertThat(e).hasMessage("cannot claim request body of DELETE")
+  }
+
+  @Test
   internal fun claimReturnValueOnActionThatReturnsUnit() {
     val e = assertFailsWith<IllegalStateException> {
       webActionBindingFactory.create(voidApiCallAction, pathPattern)
@@ -141,7 +159,7 @@ internal class WebActionBindingTest {
     var responseBody: BufferedSink? = null
     var returnValue: Any? = null
 
-    override fun bind(subject: FeatureBinding.Subject) {
+    override fun beforeCall(subject: FeatureBinding.Subject) {
       if (claimRequestBody) {
         requestBody = subject.takeRequestBody()
       }
@@ -151,6 +169,9 @@ internal class WebActionBindingTest {
       if (claimResponseBody) {
         responseBody = subject.takeResponseBody()
       }
+    }
+
+    override fun afterCall(subject: FeatureBinding.Subject) {
       if (claimReturnValue) {
         returnValue = subject.takeReturnValue()
       }

@@ -1,5 +1,8 @@
 package misk.hibernate
 
+import misk.jdbc.Check
+import misk.vitess.Keyspace
+import misk.vitess.Shard
 import java.sql.Connection
 import kotlin.reflect.KClass
 
@@ -58,20 +61,8 @@ interface Session {
   fun <T : DbEntity<T>> delete(entity: T)
 }
 
-enum class Check {
-  FULL_SCATTER,
-  TABLE_SCAN,
-  COWRITE
-}
-
 inline fun <reified T : DbEntity<T>> Session.load(id: Id<T>): T = load(id, T::class)
 inline fun <R : DbRoot<R>, reified S : DbSharded<R, S>> Session.loadSharded(gid: Gid<R, S>): S = loadSharded(
     gid, S::class)
 
 inline fun <reified T : DbEntity<T>> Session.loadOrNull(id: Id<T>): T? = loadOrNull(id, T::class)
-
-fun checkValidShardIdentifier(identifier: String) {
-  check(!identifier.isBlank())
-  check(!identifier.contains(' '))
-  check(!identifier.contains('/'))
-}

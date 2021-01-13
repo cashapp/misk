@@ -7,6 +7,7 @@ import com.launchdarkly.client.LDClientInterface
 import com.launchdarkly.client.LDUser
 import com.launchdarkly.client.value.LDValue
 import com.squareup.moshi.Moshi
+import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import misk.feature.Attributes
 import misk.feature.Feature
 import misk.feature.FeatureFlags
@@ -24,7 +25,6 @@ import org.mockito.Mockito.anyString
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
-import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 
 internal class LaunchDarklyFeatureFlagsTest {
   private val client = mock(LDClientInterface::class.java)
@@ -131,9 +131,6 @@ internal class LaunchDarklyFeatureFlagsTest {
   @Test
   fun invalidKeys() {
     assertThrows<IllegalArgumentException> {
-      featureFlags.getString(Feature("which-dinosaur"), "bad(token)")
-    }
-    assertThrows<IllegalArgumentException> {
       featureFlags.getEnum<Dinosaur>(Feature("which-dinosaur"), "")
     }
   }
@@ -141,5 +138,51 @@ internal class LaunchDarklyFeatureFlagsTest {
   enum class Dinosaur {
     PTERODACTYL,
     TYRANNOSAURUS
+  }
+
+  @Test
+  fun attributes() {
+    Mockito
+        .`when`(client.stringVariationDetail(anyString(), any(LDUser::class.java), anyString()))
+        .thenReturn(EvaluationDetail(EvaluationReason.targetMatch(), 1, "value"))
+
+    val attributes = Attributes(mapOf(
+        "secondary" to "secondary value",
+        "ip" to "127.0.0.1",
+        "email" to "email@value.com",
+        "name" to "name value",
+        "avatar" to "avatar value",
+        "firstName" to "firstName value",
+        "lastName" to "lastName value",
+        "country" to "US",
+        "custom1" to "custom1 value",
+        "custom2" to "custom2 value"))
+    val feature = featureFlags.getString(Feature("key"), "user", attributes)
+    assertThat(feature).isEqualTo("value")
+
+    val userCaptor = ArgumentCaptor.forClass(LDUser::class.java)
+    verify(client, times(1))
+        .stringVariationDetail(eq("key"), userCaptor.capture(), eq(""))
+
+    val user = userCaptor.value
+    // NB: LDUser properties are package-local so we can't read them here.
+    // Create expected user and compare against actual.
+    val expected = LDUser.Builder("user")
+        .secondary("secondary value")
+        .ip("127.0.0.1")
+        .email("email@value.com")
+        .name("name value")
+        .avatar("avatar value")
+        .firstName("firstName value")
+        .lastName("lastName value")
+        .country("US")
+        .privateCustom("custom1", "custom1 value")
+        .privateCustom("custom2", "custom2 value")
+        .build()
+
+    // isEqualTo() would be more appropriate, since LDUser overrides equals(). However, failures would offer no
+    // meaningful output, given that LDUser does not override toString. Doing a field-by-field comparison is overkill
+    // for the test to pass but produces output that identifies the problematic attribute(s) when the test fails.
+    assertThat(user).isEqualToComparingFieldByField(expected)
   }
 }

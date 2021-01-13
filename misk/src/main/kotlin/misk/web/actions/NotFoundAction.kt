@@ -74,7 +74,7 @@ class NotFoundAction @Inject constructor(
       val alternative = alternativeActions[i]
       val metadata = alternative.action.metadata
       append("Alternative:\n")
-      append("${metadata.dispatchMechanism.method} ${metadata.pathPattern}\n")
+      append("${metadata.httpMethod} ${metadata.pathPattern}\n")
       append("Accept: ${metadata.responseMediaType}\n")
       for (requestContentType in metadata.requestMediaTypes) {
         append("Content-Type: $requestContentType\n")

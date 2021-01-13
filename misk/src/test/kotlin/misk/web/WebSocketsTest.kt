@@ -9,7 +9,7 @@ import misk.web.actions.WebAction
 import misk.web.actions.WebSocket
 import misk.web.actions.WebSocketListener
 import misk.web.interceptors.LogRequestResponse
-import misk.web.interceptors.RequestBodyLoggingInterceptor
+import misk.web.interceptors.RequestLoggingInterceptor
 import misk.web.jetty.JettyService
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -43,17 +43,15 @@ internal class WebSocketsTest {
     assertEquals("ACK hello", listener.takeMessage())
 
     // Confirm interceptors were invoked.
-    val (m0, m1) = logCollector.takeMessages(RequestBodyLoggingInterceptor::class)
-    assertThat(m0)
-        .matches("EchoWebSocket principal=unknown request=\\[JettyWebSocket\\[.* to /echo]]")
-    assertThat(m1)
-        .isEqualTo("EchoWebSocket principal=unknown response=EchoListener")
+    assertThat(logCollector.takeMessage(RequestLoggingInterceptor::class)).matches(
+      "EchoWebSocket principal=unknown time=0.000 ns code=200 request=\\[JettyWebSocket\\[.* to /echo]] response=EchoListener"
+    )
   }
 
   @Singleton
   class EchoWebSocket @Inject constructor() : WebAction {
     @ConnectWebSocket("/echo")
-    @LogRequestResponse(sampling = 1.0, includeBody = true)
+    @LogRequestResponse(bodySampling = 1.0, errorBodySampling = 1.0)
     fun echo(@Suppress("UNUSED_PARAMETER") webSocket: WebSocket): WebSocketListener {
       return object : WebSocketListener() {
         override fun onMessage(webSocket: WebSocket, text: String) {

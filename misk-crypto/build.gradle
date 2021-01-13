@@ -1,5 +1,7 @@
 dependencies {
+  compile dep.bouncycastlePgp
   compile dep.tink
+  compile dep.awsS3
   compile project(':misk')
 
   testCompile project(':misk-testing')
@@ -11,3 +13,5 @@ afterEvaluate { project ->
     outputFormat = 'gfm'
   }
 }
+
+apply from: "$rootDir/gradle-mvn-publish.gradle"

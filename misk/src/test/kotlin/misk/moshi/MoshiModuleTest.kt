@@ -12,6 +12,7 @@ import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import java.math.BigDecimal
 import javax.inject.Inject
 
 @MiskTest(startService = false)
@@ -50,6 +51,16 @@ internal class MoshiModuleTest {
     assertThat(jsonAdapter.toJson(value)).isEqualTo(json.trimMargin())
     assertThat(jsonAdapter.fromJson(json)).isEqualTo(value)
   }
+
+  @Test
+  fun `BigDecimal adapter converts from and to json`() {
+    val json = "\"5.5\""
+    val value = BigDecimal("5.5")
+    val jsonAdapter = moshi.adapter<BigDecimal>()
+    assertThat(jsonAdapter.toJson(value)).isEqualTo(json)
+    assertThat(jsonAdapter.fromJson(json)).isEqualTo(value)
+  }
+
 
   class TestModule : KAbstractModule() {
     override fun configure() {

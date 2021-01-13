@@ -3,6 +3,7 @@ sourceSets {
     srcDirs += [
       'web/tabs/admin-dashboard/lib',
       'web/tabs/config/lib',
+      'web/tabs/database/lib',
       'web/tabs/web-actions/lib',
     ]
     exclude '**/node_modules'
@@ -10,8 +11,7 @@ sourceSets {
 }
 
 dependencies {
-  compile dep.kotlinStdLib
-  compile dep.kotlinTest
+  compile dep.kotlinStdLibJdk8
   compile dep.bouncycastle
   compile dep.guava
   compile dep.guice
@@ -25,12 +25,15 @@ dependencies {
   compile dep.moshiAdapters
   compile dep.jettyHttp2
   compile dep.jettyServer
+  compile dep.jettyUnixSocket
   compile dep.servletApi
   compile dep.jettyAlpnJava
   compile dep.jettyServlet
+  compile dep.jettyServlets
   compile dep.jettyWebsocketServlet
   compile dep.jettyWebsocketServer
   compile dep.kubernetesClient
+  compile dep.wireGrpcClient
   compile dep.wireRuntime
   compile dep.jacksonDatabind
   compile dep.jacksonDataformatYaml
@@ -42,20 +45,24 @@ dependencies {
   compile dep.openTracingOkHttp
   compile dep.retrofit
   compile dep.retrofitMoshi
+  compile dep.retrofitProtobuf
   compile dep.retrofitWire
   compile dep.jaxbApi
   compile dep.prometheusClient
   compile dep.prometheusHotspot
   compile dep.jnrUnixsocket
   compile dep.concurrencyLimitsCore
-  compile project(':misk-inject')
+  compile project(':misk-actions')
   compile project(':misk-core')
+  compile project(':misk-inject')
+  compile project(':misk-metrics')
+  compile project(':misk-prometheus')
   compile project(':misk-service')
 
   testCompile dep.kotlinxCoroutines
   testCompile dep.mockitoCore
   testCompile project(':misk-testing')
-  testImplementation dep.junit4
+  testImplementation dep.junit4Api
 }
 
 afterEvaluate { project ->
@@ -64,3 +71,5 @@ afterEvaluate { project ->
     outputFormat = 'gfm'
   }
 }
+
+apply from: "$rootDir/gradle-mvn-publish.gradle"

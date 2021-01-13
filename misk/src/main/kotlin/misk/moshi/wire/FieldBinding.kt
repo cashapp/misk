@@ -5,12 +5,12 @@ import com.squareup.moshi.Moshi
 import com.squareup.wire.Message
 import com.squareup.wire.ProtoAdapter
 import com.squareup.wire.WireField
-import misk.moshi.adapter
-import okio.ByteString
-import okio.ByteString.Companion.decodeBase64
 import java.lang.reflect.Field
 import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Method
+import misk.moshi.adapter
+import okio.ByteString
+import okio.ByteString.Companion.decodeBase64
 
 internal class FieldBinding(
   wireField: WireField,
@@ -29,15 +29,15 @@ internal class FieldBinding(
   @Suppress("UNCHECKED_CAST")
   val adapter: JsonAdapter<Any?> = when {
     isList -> {
-      val elementAdapter = jsonAdapter(moshi, wireField.adapter) as JsonAdapter<Any?>
+      val elementAdapter = jsonAdapter(moshi, wireField.adapter, builderType) as JsonAdapter<Any?>
       ListAdapter(elementAdapter) as JsonAdapter<Any?>
     }
     isMap -> {
       val keyConverter = fromString(wireField.keyAdapter)
-      val valueAdapter = jsonAdapter(moshi, wireField.adapter) as JsonAdapter<Any?>
+      val valueAdapter = jsonAdapter(moshi, wireField.adapter, builderType) as JsonAdapter<Any?>
       MapAdapter(keyConverter, valueAdapter) as JsonAdapter<Any?>
     }
-    else -> moshi.adapter(messageField.type) as JsonAdapter<Any?>
+    else -> moshi.adapter(messageField.type).nullSafe() as JsonAdapter<Any?>
   }
 
   @Suppress("UNCHECKED_CAST")
@@ -141,7 +141,11 @@ internal class FieldBinding(
       }
     }
 
-    private fun jsonAdapter(moshi: Moshi, protoAdapterName: String): JsonAdapter<*> {
+    private fun jsonAdapter(
+      moshi: Moshi,
+      protoAdapterName: String,
+      declaringClass: Class<Message.Builder<*, *>>
+    ): JsonAdapter<*> {
       val typeName = protoAdapterName.substringBefore("#")
       val adapterFieldName = protoAdapterName.substringAfter("#")
       return if (typeName == ProtoAdapter::class.java.name) when (adapterFieldName) {
@@ -153,7 +157,7 @@ internal class FieldBinding(
         "STRING" -> moshi.adapter<String>()
         "BYTES" -> moshi.adapter<ByteString>()
         else -> throw IllegalStateException("unknown type $adapterFieldName")
-      } else moshi.adapter(Class.forName(typeName))
+      } else moshi.adapter(Class.forName(typeName, true, declaringClass.classLoader))
     }
   }
 }

@@ -1,5 +1,6 @@
 package misk.jobqueue.sqs
 
+import com.amazonaws.ClientConfiguration
 import misk.config.Config
 import misk.tasks.RepeatedTaskQueueConfig
 
@@ -26,15 +27,28 @@ class AwsSqsJobQueueConfig(
   val task_queue: RepeatedTaskQueueConfig? = null,
 
   /**
-   * The number of receivers will be distributed among the app cluster If [clustered_consumers] is
-   * true. Otherwise, each app in the cluster will run the number of receivers.
-   *
-   * The number of receivers is configured by [Feature("jobqueue-consumers")].
-   */
-  val clustered_consumers: Boolean = true,
-
-  /**
    * Frequency used to import Queue Attributes in milliseconds.
    */
-  val queue_attribute_importer_frequency_ms: Long = 1000
+  val queue_attribute_importer_frequency_ms: Long = 1000,
+
+  /**
+   * Socket timeout to reach SQS with for *sending*, not including retries.
+   * We only apply this for sending because receiving uses long-polling,
+   * which explicitly leverages a longer request time.
+   * We use the default retry strategy with SQS, which retries 3 times.
+   * As a result, your app could potentially spend 3 x this timeout talking to SQS.
+   */
+  val sqs_sending_socket_timeout_ms: Int = 5000,
+
+  /** Connect timeout to reach SQS with for *sending*. */
+  val sqs_sending_connect_timeout_ms: Int = 1000,
+
+  /**
+   * Request timeout to reach SQS with for *sending*, not including retries.
+   * We only apply this for sending because receiving uses long-polling,
+   * which explicitly leverages a longer request time.
+   * We use the default retry strategy with SQS, which retries 3 times.
+   * As a result, your app could potentially spend 3 x this timeout talking to SQS.
+   */
+  val sqs_sending_request_timeout_ms: Int = 5000
 ) : Config

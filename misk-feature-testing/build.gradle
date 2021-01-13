@@ -6,7 +6,7 @@ buildscript {
 
 dependencies {
   compile dep.guice
-  compile dep.kotlinStdLib
+  compile dep.kotlinStdLibJdk8
   compile dep.kotlinReflection
   compile dep.moshiCore
   compile project(':misk-feature')
@@ -22,3 +22,5 @@ afterEvaluate { project ->
     outputFormat = 'gfm'
   }
 }
+
+apply from: "$rootDir/gradle-mvn-publish.gradle"

@@ -4,8 +4,8 @@ import com.google.common.annotations.VisibleForTesting
 import com.google.common.util.concurrent.AbstractExecutionThreadService
 import com.google.common.util.concurrent.MoreExecutors.newDirectExecutorService
 import com.google.common.util.concurrent.Service
-import com.google.common.util.concurrent.ThreadFactoryBuilder
 import misk.backoff.Backoff
+import misk.concurrent.ExecutorServiceFactory
 import misk.concurrent.ExplicitReleaseDelayQueue
 import misk.logging.getLogger
 import misk.metrics.Metrics
@@ -16,7 +16,6 @@ import java.util.concurrent.BlockingQueue
 import java.util.concurrent.DelayQueue
 import java.util.concurrent.Executor
 import java.util.concurrent.ExecutorService
-import java.util.concurrent.Executors
 import java.util.concurrent.Executors.newSingleThreadExecutor
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
@@ -194,7 +193,8 @@ class RepeatedTaskQueueMetrics @Inject constructor(metrics: Metrics) {
 @Singleton
 class RepeatedTaskQueueFactory @Inject constructor(
   private val clock: Clock,
-  private val metrics: RepeatedTaskQueueMetrics
+  private val metrics: RepeatedTaskQueueMetrics,
+  private val executorServiceFactory: ExecutorServiceFactory
 ) {
 
   /**
@@ -202,13 +202,10 @@ class RepeatedTaskQueueFactory @Inject constructor(
    */
   fun new(name: String, config: RepeatedTaskQueueConfig = RepeatedTaskQueueConfig()):
       RepeatedTaskQueue {
-    val threadFactory = ThreadFactoryBuilder()
-        .setNameFormat("$name-%d")
-        .build()
     val executor = if (config.num_parallel_tasks == -1) {
-      Executors.newCachedThreadPool(threadFactory)
+      executorServiceFactory.unbounded("$name-%d")
     } else {
-      Executors.newFixedThreadPool(config.num_parallel_tasks, threadFactory)
+      executorServiceFactory.fixed("$name-%d", config.num_parallel_tasks)
     }
     return RepeatedTaskQueue(name,
         clock,
@@ -228,7 +225,7 @@ class RepeatedTaskQueueFactory @Inject constructor(
         name,
         clock,
         newDirectExecutorService(),
-        newSingleThreadExecutor(),
+        executorServiceFactory.single("$name-%d"),
         backingStorage,
         metrics,
         RepeatedTaskQueueConfig()

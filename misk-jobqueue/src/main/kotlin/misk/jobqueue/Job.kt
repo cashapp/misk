@@ -8,6 +8,13 @@ interface Job {
   /** system assigned globally unique id for the job */
   val id: String
 
+  /**
+   * Application assigned key for a job.
+   *
+   * @see JobQueue.enqueue
+   */
+  val idempotenceKey: String
+
   /** body of the job */
   val body: String
 
@@ -20,6 +27,6 @@ interface Job {
    */
   fun acknowledge()
 
-  /** Moves the job from the main queue onto the associated dead letter quque. May perform an RPC */
+  /** Moves the job from the main queue onto the associated dead letter queue. May perform an RPC */
   fun deadLetter()
 }

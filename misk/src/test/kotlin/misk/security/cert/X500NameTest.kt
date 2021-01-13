@@ -8,34 +8,32 @@ internal class X500NameTest {
   @Test fun parse() {
     val name = X500Name.parse(
         "CN=Marshall T. Rose, O=Dover Beach Consulting Ltd., L=Santa Clara, ST=California, OU=Sales, C=US\n")
-    assertThat(name.asMap()).isEqualTo(mapOf(
-        "CN" to "Marshall T. Rose",
-        "OU" to "Sales",
-        "O" to "Dover Beach Consulting Ltd.",
-        "L" to "Santa Clara",
-        "ST" to "California",
-        "C" to "US"
+    assertThat(name).isEqualTo(X500Name(
+        "Marshall T. Rose",
+        "Sales",
+        "Dover Beach Consulting Ltd.",
+        "Santa Clara",
+        "California",
+        "US"
     ))
   }
 
   @Test fun parseWithEscaping() {
     val name = X500Name.parse(
         """CN=Marshall T. Rose\, Esq., O="Dover Beach Consulting, Ltd."; L = Santa Clara; OU=Sales, ST=California, C=US""")
-    assertThat(name.asMap()).isEqualTo(mapOf(
-        "CN" to "Marshall T. Rose, Esq.",
-        "OU" to "Sales",
-        "O" to "Dover Beach Consulting, Ltd.",
-        "L" to "Santa Clara",
-        "ST" to "California",
-        "C" to "US"
+    assertThat(name).isEqualTo(X500Name(
+        "Marshall T. Rose, Esq.",
+        "Sales",
+        "Dover Beach Consulting, Ltd.",
+        "Santa Clara",
+        "California",
+        "US"
     ))
   }
 
   @Test fun handlesTrailingWhitespace() {
     val name = X500Name.parse("CN=Marshall T. Rose\n  \t")
-    assertThat(name.asMap()).isEqualTo(mapOf(
-        "CN" to "Marshall T. Rose"
-    ))
+    assertThat(name).isEqualTo(X500Name(mapOf("CN" to "Marshall T. Rose")))
   }
 
   @Test fun endsInAttributeName() {

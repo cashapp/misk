@@ -12,6 +12,12 @@ import javax.servlet.http.HttpServletRequest
 
 internal data class ServletHttpCall(
   override val url: HttpUrl,
+  /**
+   * The local address that received this inbound request. This is the network interface and port or
+   * unix socket that Misk was listening on when this request arrived. The host will be '0.0.0.0' if
+   * listening on all local interfaces.
+   */
+  override val linkLayerLocalAddress: SocketAddress? = null,
   override val dispatchMechanism: DispatchMechanism,
   override val requestHeaders: Headers,
   var requestBody: BufferedSource? = null,
@@ -98,6 +104,7 @@ internal data class ServletHttpCall(
       request: HttpServletRequest,
       dispatchMechanism: DispatchMechanism,
       upstreamResponse: UpstreamResponse,
+      linkLayerLocalAddress: SocketAddress? = null,
       webSocket: WebSocket? = null,
       requestBody: BufferedSource? = null,
       responseBody: BufferedSink? = null
@@ -108,6 +115,7 @@ internal data class ServletHttpCall(
 
       return ServletHttpCall(
           url = request.httpUrl(),
+          linkLayerLocalAddress = linkLayerLocalAddress,
           dispatchMechanism = dispatchMechanism,
           requestHeaders = request.headers(),
           upstreamResponse = upstreamResponse,

@@ -1,0 +1,25 @@
+dependencies {
+  implementation dep.awsDynamodb
+  implementation dep.awsDynamodbLocal
+  implementation project(':misk')
+  implementation project(':misk-aws')
+  implementation project(':misk-inject')
+  implementation project(':misk-service')
+  implementation project(':misk-testing')
+
+  testImplementation dep.assertj
+  testImplementation dep.junitApi
+  testImplementation dep.junitEngine
+  testImplementation dep.junitParams
+  testImplementation dep.docker
+  testImplementation dep.awaitility
+}
+
+afterEvaluate { project ->
+  project.tasks.dokka {
+    outputDirectory = "$rootDir/docs/0.x"
+    outputFormat = 'gfm'
+  }
+}
+
+apply from: "$rootDir/gradle-mvn-publish.gradle"

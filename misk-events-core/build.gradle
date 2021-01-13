@@ -1,11 +1,3 @@
-buildscript {
-  dependencies {
-    classpath dep.kotlinNoArgPlugin
-  }
-}
-
-apply plugin: 'kotlin-jpa'
-
 dependencies {
   compile dep.wireRuntime
 }
@@ -16,3 +8,5 @@ afterEvaluate { project ->
     outputFormat = 'gfm'
   }
 }
+
+apply from: "$rootDir/gradle-mvn-publish.gradle"

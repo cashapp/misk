@@ -9,7 +9,7 @@ describe("Set dirty input for a field", () => {
   it("Set dirty input for a field", () => {
     let typesMetadata = generateTypesMetadata({
       ...nonTypedActionAPI,
-      dispatchMechanism: HTTPMethod.POST,
+      httpMethod: HTTPMethod.POST,
       requestType: "repeatedShort",
       types: testTypes
     })
@@ -26,7 +26,7 @@ describe("Set dirty input for a field", () => {
   it("Set dirty input for a nested repeated field", () => {
     let typesMetadata = generateTypesMetadata({
       ...nonTypedActionAPI,
-      dispatchMechanism: HTTPMethod.POST,
+      httpMethod: HTTPMethod.POST,
       requestType: "repeatedNestedRepeatedShort",
       types: testTypes
     })

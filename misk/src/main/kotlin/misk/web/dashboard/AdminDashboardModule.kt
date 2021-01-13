@@ -6,8 +6,10 @@ import misk.security.authz.AccessAnnotationEntry
 import misk.web.NetworkInterceptor
 import misk.web.WebActionModule
 import misk.web.interceptors.WideOpenDevelopmentInterceptorFactory
-import misk.web.metadata.ConfigMetadataAction
-import misk.web.metadata.WebActionMetadataAction
+import misk.web.metadata.database.DatabaseQueryMetadata
+import misk.web.metadata.database.DatabaseQueryMetadataAction
+import misk.web.metadata.database.NoAdminDashboardDatabaseAccess
+import misk.web.metadata.webaction.WebActionMetadataAction
 import javax.inject.Qualifier
 
 /**
@@ -22,7 +24,11 @@ import javax.inject.Qualifier
  *   Dashboard Annotation [AdminDashboard]. Tabs are then included in the admin dashboard menu
  *   grouping according to the [DashboardTab].category field and sorting by [DashboardTab].name
  */
-class AdminDashboardModule(val environment: Environment) : KAbstractModule() {
+class AdminDashboardModule(private val isDevelopment: Boolean) : KAbstractModule() {
+
+  @Deprecated("Environment is deprecated")
+  constructor(env: Environment) : this(env == Environment.TESTING || env == Environment.DEVELOPMENT)
+
   override fun configure() {
     // Install base dashboard support
     install(DashboardModule())
@@ -32,71 +38,87 @@ class AdminDashboardModule(val environment: Environment) : KAbstractModule() {
 
     // Admin Dashboard Tab
     multibind<DashboardHomeUrl>().toInstance(
-      DashboardHomeUrl<AdminDashboard>("/_admin/")
+        DashboardHomeUrl<AdminDashboard>("/_admin/")
     )
     install(WebTabResourceModule(
-      environment = environment,
-      slug = "admin-dashboard",
-      web_proxy_url = "http://localhost:3100/"
+        isDevelopment = isDevelopment,
+        slug = "admin-dashboard",
+        web_proxy_url = "http://localhost:3100/"
     ))
     install(WebTabResourceModule(
-      environment = environment,
-      slug = "admin-dashboard",
-      web_proxy_url = "http://localhost:3100/",
-      url_path_prefix = "/_admin/",
-      resourcePath = "classpath:/web/_tab/admin-dashboard/"
+        isDevelopment = isDevelopment,
+        slug = "admin-dashboard",
+        web_proxy_url = "http://localhost:3100/",
+        url_path_prefix = "/_admin/",
+        resourcePath = "classpath:/web/_tab/admin-dashboard/"
     ))
 
     // @misk packages
     install(WebTabResourceModule(
-      environment = environment,
-      slug = "@misk",
-      web_proxy_url = "http://localhost:3100/",
-      url_path_prefix = "/@misk/",
-      resourcePath = "classpath:/web/_tab/admin-dashboard/@misk/"
+        isDevelopment = isDevelopment,
+        slug = "@misk",
+        web_proxy_url = "http://localhost:3100/",
+        url_path_prefix = "/@misk/",
+        resourcePath = "classpath:/web/_tab/admin-dashboard/@misk/"
     ))
 
-    // Config
-    install(WebActionModule.create<ConfigMetadataAction>())
+    // Database Query
+    newMultibinder<DatabaseQueryMetadata>()
+    install(WebActionModule.create<DatabaseQueryMetadataAction>())
     multibind<DashboardTab>().toProvider(
-      DashboardTabProvider<AdminDashboard, AdminDashboardAccess>(
-        slug = "config",
-        url_path_prefix = "/_admin/config/",
-        name = "Config",
-        category = "Container Admin"
-      ))
+        DashboardTabProvider<AdminDashboard, AdminDashboardAccess>(
+            slug = "database",
+            url_path_prefix = "/_admin/database/",
+            name = "Database",
+            category = "Container Admin"
+        ))
     install(WebTabResourceModule(
-      environment = environment,
-      slug = "config",
-      web_proxy_url = "http://localhost:3200/"
+        isDevelopment = isDevelopment,
+        slug = "database",
+        web_proxy_url = "http://localhost:3202/"
+    ))
+    // Default access that doesn't allow any queries for unconfigured DbEntities
+    multibind<AccessAnnotationEntry>().toInstance(
+        AccessAnnotationEntry<NoAdminDashboardDatabaseAccess>(
+            capabilities = listOf("no_admin_dashboard_database_access")
+        )
+    )
+    multibind<DashboardNavbarItem>().toInstance(DashboardNavbarItem<AdminDashboard>(
+        item = "<a href=\"/_admin/database/\">Database</a>",
+        order = 100
     ))
 
     // Web Actions
     install(WebActionModule.create<WebActionMetadataAction>())
     multibind<DashboardTab>().toProvider(
-      DashboardTabProvider<AdminDashboard, AdminDashboardAccess>(
-        slug = "web-actions",
-        url_path_prefix = "/_admin/web-actions/",
-        name = "Web Actions",
-        category = "Container Admin"
-      ))
+        DashboardTabProvider<AdminDashboard, AdminDashboardAccess>(
+            slug = "web-actions",
+            url_path_prefix = "/_admin/web-actions/",
+            name = "Web Actions",
+            category = "Container Admin"
+        ))
     install(WebTabResourceModule(
-      environment = environment,
-      slug = "web-actions",
-      web_proxy_url = "http://localhost:3201/"
+        isDevelopment = isDevelopment,
+        slug = "web-actions",
+        web_proxy_url = "http://localhost:3201/"
+    ))
+    multibind<DashboardNavbarItem>().toInstance(DashboardNavbarItem<AdminDashboard>(
+        item = "<a href=\"/_admin/web-actions/\">Web Actions</a>",
+        order = 101
     ))
   }
 }
 
 // Module that allows testing/development environments to bind up the admin dashboard
-class AdminDashboardTestingModule(val environment: Environment) : KAbstractModule() {
+class AdminDashboardTestingModule : KAbstractModule() {
   override fun configure() {
     // Set dummy values for access, these shouldn't matter,
     // as test environments should prefer to use the FakeCallerAuthenticator.
-    multibind<AccessAnnotationEntry>()
-      .toInstance(
-        AccessAnnotationEntry<AdminDashboardAccess>(capabilities = listOf("admin_access")))
-    install(AdminDashboardModule(environment))
+    multibind<AccessAnnotationEntry>().toInstance(
+        AccessAnnotationEntry<AdminDashboardAccess>(capabilities = listOf(
+            "admin_access", "admin_console", "users"
+        )))
+    install(AdminDashboardModule(true))
   }
 }
 

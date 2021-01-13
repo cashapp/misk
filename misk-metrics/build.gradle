@@ -1,0 +1,22 @@
+dependencies {
+  compile dep.prometheusClient
+  compile dep.prometheusHotspot
+  compile dep.kotlinStdLibJdk8
+  compile dep.guava
+  compile dep.guice
+
+  testCompile dep.assertj
+  testCompile dep.junitApi
+  testCompile dep.junitEngine
+  testCompile dep.junitParams
+  testCompile project(':misk-testing')
+}
+
+afterEvaluate { project ->
+  project.tasks.dokka {
+    outputDirectory = "$rootDir/docs/0.x"
+    outputFormat = 'gfm'
+  }
+}
+
+apply from: "$rootDir/gradle-mvn-publish.gradle"
