@@ -52,12 +52,12 @@ dependencies {
   implementation dep.prometheusHotspot
   implementation dep.jnrUnixsocket
   implementation dep.concurrencyLimitsCore
-  compile project(':misk-actions')
-  compile project(':misk-core')
-  compile project(':misk-inject')
-  compile project(':misk-metrics')
-  compile project(':misk-prometheus')
-  compile project(':misk-service')
+  implementation project(':misk-actions')
+  implementation project(':misk-core')
+  implementation project(':misk-inject')
+  implementation project(':misk-metrics')
+  implementation project(':misk-prometheus')
+  implementation project(':misk-service')
 
   testCompile dep.kotlinxCoroutines
   testCompile dep.mockitoCore

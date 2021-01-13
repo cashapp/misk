@@ -2,6 +2,8 @@ dependencies {
   compile dep.tracingDatadog
   compile dep.openTracingDatadog
   compile project(':misk')
+  compile project(':misk-core')
+  compile project(':misk-inject')
 
   testCompile dep.assertj
   testCompile dep.junitApi
