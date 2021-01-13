@@ -14,11 +14,11 @@ import okio.source
 internal object ClasspathResourceLoaderBackend : ResourceLoader.Backend() {
   override fun list(path: String): List<String> {
     require(path.startsWith("/"))
-    val path = path.removePrefix("/").removeSuffix("/")
+    val checkPath = path.removePrefix("/").removeSuffix("/")
 
     val classLoader = Thread.currentThread().contextClassLoader
     val result = mutableSetOf<String>()
-    for (url in classLoader.getResources(path)) {
+    for (url in classLoader.getResources(checkPath)) {
       val urlString = url.toString()
       when {
         urlString.startsWith("file:") -> {
@@ -27,7 +27,7 @@ internal object ClasspathResourceLoaderBackend : ResourceLoader.Backend() {
         }
         urlString.startsWith("jar:file:") -> {
           val file = jarFile(urlString)
-          result += jarFileChildren(file, "$path/")
+          result += jarFileChildren(file, "$checkPath/")
         }
         else -> {
           // Silently ignore unexpected URLs.
@@ -37,7 +37,7 @@ internal object ClasspathResourceLoaderBackend : ResourceLoader.Backend() {
 
     return result
         .filter { !it.endsWith(".class") }
-        .map { "/$path/$it" }
+        .map { "/$checkPath/$it" }
         .toList()
   }
 

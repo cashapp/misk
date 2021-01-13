@@ -29,31 +29,31 @@ fun KLogger.sampled(sampler: Sampler): KLogger {
 }
 
 fun KLogger.info(vararg tags: Tag, message: () -> Any?) =
-    log(Level.INFO, tags = *tags, message = message)
+    log(Level.INFO, tags = tags, message = message)
 
 fun KLogger.warn(vararg tags: Tag, message: () -> Any?) =
-    log(Level.WARN, tags = *tags, message = message)
+    log(Level.WARN, tags = tags, message = message)
 
 fun KLogger.error(vararg tags: Tag, message: () -> Any?) =
-    log(Level.ERROR, tags = *tags, message = message)
+    log(Level.ERROR, tags = tags, message = message)
 
 fun KLogger.debug(vararg tags: Tag, message: () -> Any?) =
-    log(Level.DEBUG, tags = *tags, message = message)
+    log(Level.DEBUG, tags = tags, message = message)
 
 fun KLogger.info(th: Throwable, vararg tags: Tag, message: () -> Any?) =
-    log(Level.INFO, th, tags = *tags, message = message)
+    log(Level.INFO, th, tags = tags, message = message)
 
 fun KLogger.warn(th: Throwable, vararg tags: Tag, message: () -> Any?) =
-    log(Level.WARN, th, tags = *tags, message = message)
+    log(Level.WARN, th, tags = tags, message = message)
 
 fun KLogger.error(th: Throwable, vararg tags: Tag, message: () -> Any?) =
-    log(Level.ERROR, th, tags = *tags, message = message)
+    log(Level.ERROR, th, tags = tags, message = message)
 
 fun KLogger.debug(th: Throwable, vararg tags: Tag, message: () -> Any?) =
-    log(Level.DEBUG, th, tags = *tags, message = message)
+    log(Level.DEBUG, th, tags = tags, message = message)
 
 fun KLogger.log(level: Level, vararg tags: Tag, message: () -> Any?) {
-  misk.logging.withTags(*tags) {
+  withTags(*tags) {
     when (level) {
       Level.ERROR -> error(message)
       Level.WARN -> warn(message)
@@ -65,7 +65,7 @@ fun KLogger.log(level: Level, vararg tags: Tag, message: () -> Any?) {
 }
 
 fun KLogger.log(level: Level, th: Throwable, vararg tags: Tag, message: () -> Any?) {
-  misk.logging.withTags(*tags) {
+  withTags(*tags) {
     when (level) {
       Level.ERROR -> error(th, message)
       Level.INFO -> info(th, message)
