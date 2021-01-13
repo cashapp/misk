@@ -1,4 +1,8 @@
 dependencies {
+  implementation dep.retrofit
+  implementation dep.retrofitMoshi
+  implementation dep.retrofitProtobuf
+  implementation dep.retrofitWire
   compile project(':misk')
   compile dep.moshiKotlin
 
