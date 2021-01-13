@@ -20,7 +20,10 @@ dependencies {
   implementation dep.moshiCore
   implementation dep.moshiKotlin
   implementation dep.moshiAdapters
-  compile project(':misk')
+  implementation dep.prometheusClient
+  implementation project(':misk')
+  implementation project(':misk-core')
+  implementation project(':misk-inject')
 
   testCompile project(':misk-testing')
   testCompile project(':misk-jdbc-testing')

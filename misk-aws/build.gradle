@@ -3,6 +3,7 @@ dependencies {
   implementation dep.awsSqs
   implementation dep.openTracingDatadog
   implementation project(':misk')
+  implementation project(':misk-metrics')
   implementation project(':misk-jobqueue')
   implementation project(':misk-feature')
   implementation project(':misk-transactional-jobqueue')
