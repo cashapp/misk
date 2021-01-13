@@ -3,8 +3,10 @@ dependencies {
   implementation dep.retrofitMoshi
   implementation dep.retrofitProtobuf
   implementation dep.retrofitWire
-  compile project(':misk')
-  compile dep.moshiKotlin
+  implementation dep.moshiKotlin
+  implementation project(':misk')
+  implementation project(':misk-core')
+  implementation project(':misk-inject')
 
   testCompile dep.assertj
   testCompile dep.junit4Api

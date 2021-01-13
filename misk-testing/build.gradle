@@ -24,6 +24,7 @@ dependencies {
     exclude group: 'junit'
   }
   compile project(':misk')
+  compile project(':misk-actions')
   compile project(':misk-core')
 }
 

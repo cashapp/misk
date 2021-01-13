@@ -3,9 +3,10 @@ dependencies {
   compile dep.guava
   compile dep.guice
   compile dep.logbackClassic
-  compile project(':misk')
-  compile project(':misk-prometheus')
-  compile project(':misk-eventrouter')
+  implementation project(':misk')
+  implementation project(':misk-actions')
+  implementation project(':misk-prometheus')
+  implementation project(':misk-eventrouter')
 
   testCompile project(':misk-testing')
 }

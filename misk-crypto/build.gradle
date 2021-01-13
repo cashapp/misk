@@ -6,6 +6,8 @@ dependencies {
   compile dep.tink
   compile dep.awsS3
   compile project(':misk')
+  implementation project(':misk-core')
+  implementation project(':misk-inject')
 
   testCompile project(':misk-testing')
 }
