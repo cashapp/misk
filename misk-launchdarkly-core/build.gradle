@@ -5,13 +5,18 @@ buildscript {
 }
 
 dependencies {
-  compile dep.guice
-  compile dep.kotlinStdLibJdk8
-  compile dep.launchDarkly
-  compile dep.moshiCore
-  compile project(':misk-feature')
+  implementation dep.guice
+  implementation dep.kotlinStdLibJdk8
+  implementation dep.launchDarkly
+  implementation dep.moshiCore
+  implementation project(':misk-feature')
 
-  testCompile project(':misk-testing')
+  testImplementation project(':misk-testing')
+  testImplementation dep.assertj
+  testImplementation dep.kotlinTest
+  testImplementation dep.mockitoCore
+  testImplementation dep.moshiKotlin
+  testImplementation dep.moshiAdapters
 }
 
 afterEvaluate { project ->

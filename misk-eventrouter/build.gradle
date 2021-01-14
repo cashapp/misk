@@ -1,6 +1,8 @@
 dependencies {
+  implementation dep.guice
   implementation dep.okHttp
   implementation dep.kubernetesClient
+  implementation dep.loggingApi
   implementation dep.moshiCore
   implementation dep.moshiKotlin
   implementation dep.moshiAdapters
@@ -8,6 +10,7 @@ dependencies {
   implementation project(':misk-actions')
   implementation project(':misk-core')
   implementation project(':misk-inject')
+  implementation project(':misk-service')
 
   testCompile dep.assertj
   testCompile dep.junitApi

@@ -5,12 +5,13 @@ buildscript {
 }
 
 dependencies {
-  compile dep.kotlinStdLibJdk8
-  compile dep.guava
-  compile dep.moshiKotlin
-  compile project(':misk-core')
+  implementation dep.kotlinStdLibJdk8
+  implementation dep.guava
+  implementation dep.moshiKotlin
+  implementation dep.loggingApi
+  implementation project(':misk-core')
 
-  testCompile project(':misk-testing')
+  testImplementation project(':misk-testing')
 }
 
 afterEvaluate { project ->

@@ -5,14 +5,16 @@ buildscript {
 }
 
 dependencies {
-  compile dep.kotlinStdLibJdk8
-  compile dep.javaxInject
-  compile dep.guava
-  compile dep.guice
-  compile dep.loggingApi
-  compile project(':misk-inject')
+  implementation dep.kotlinStdLibJdk8
+  implementation dep.javaxInject
+  implementation dep.guava
+  implementation dep.guice
+  implementation dep.loggingApi
+  implementation project(':misk-inject')
 
-  testCompile project(':misk-testing')
+  testImplementation project(':misk-testing')
+  testImplementation dep.assertj
+  testImplementation dep.kotlinTest
 }
 
 afterEvaluate { project ->

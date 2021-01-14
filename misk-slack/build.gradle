@@ -1,4 +1,6 @@
 dependencies {
+  implementation dep.guice
+  implementation dep.loggingApi
   implementation dep.retrofit
   implementation dep.retrofitMoshi
   implementation dep.retrofitProtobuf
@@ -8,13 +10,16 @@ dependencies {
   implementation project(':misk-core')
   implementation project(':misk-inject')
 
-  testCompile dep.assertj
-  testCompile dep.junit4Api
-  testCompile dep.junitApi
-  testCompile dep.junitEngine
-  testCompile dep.junitParams
-  testCompile project(':misk-testing')
-  testCompile project(':misk-gcp-testing')
+  testImplementation dep.assertj
+  testImplementation dep.junit4Api
+  testImplementation dep.junitApi
+  testImplementation dep.junitEngine
+  testImplementation dep.junitParams
+  testImplementation project(':misk-testing')
+  testImplementation project(':misk-gcp-testing')
+  testImplementation (dep.okHttpMockWebServer) {
+    exclude group: 'junit'
+  }
 }
 
 afterEvaluate { project ->

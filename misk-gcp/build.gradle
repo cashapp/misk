@@ -1,25 +1,30 @@
 dependencies {
-  compile dep.gcpCloudStorage
-  compile(dep.gcpDatastore) {
+  implementation dep.gcpCloudStorage
+  implementation(dep.gcpDatastore) {
     exclude group: 'com.google.protobuf'
     exclude group: 'com.google.api.grpc'
     exclude group: 'io.grpc'
   }
-  compile dep.gcpKms
-  compile dep.gcpLogback
-  compile dep.openTracingDatadog
+  implementation dep.gcpKms
+  implementation dep.gcpLogback
+  implementation dep.guice
+  implementation dep.loggingApi
+  implementation dep.openTracingDatadog
 
   implementation dep.moshiCore
   implementation dep.moshiKotlin
   implementation dep.moshiAdapters
   implementation dep.wireGrpcClient
   implementation dep.wireRuntime
-  compile project(':misk')
-  compile project(':misk-core')
-  compile project(':misk-inject')
+  implementation project(':misk')
+  implementation project(':misk-core')
+  implementation project(':misk-inject')
+  implementation project(':misk-service')
 
-  testCompile project(':misk-testing')
-  testCompile project(':misk-gcp-testing')
+  testImplementation dep.assertj
+  testImplementation dep.kotlinTest
+  testImplementation project(':misk-testing')
+  testImplementation project(':misk-gcp-testing')
 }
 
 afterEvaluate { project ->
