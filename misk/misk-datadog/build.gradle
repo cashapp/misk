@@ -1,15 +1,17 @@
 dependencies {
-  compile dep.tracingDatadog
-  compile dep.openTracingDatadog
-  compile project(':misk')
-  compile project(':misk-core')
-  compile project(':misk-inject')
+  implementation dep.guice
+  implementation dep.loggingApi
+  implementation dep.tracingDatadog
+  implementation dep.openTracingDatadog
+  implementation project(':misk')
+  implementation project(':misk-core')
+  implementation project(':misk-inject')
 
-  testCompile dep.assertj
-  testCompile dep.junitApi
-  testCompile dep.junitEngine
-  testCompile dep.junitParams
-  testCompile project(':misk-testing')
+  testImplementation dep.assertj
+  testImplementation dep.junitApi
+  testImplementation dep.junitEngine
+  testImplementation dep.junitParams
+  testImplementation project(':misk-testing')
 }
 
 afterEvaluate { project ->

@@ -33,6 +33,7 @@ dependencies {
   implementation dep.jettyWebsocketServlet
   implementation dep.jettyWebsocketServer
   implementation dep.kubernetesClient
+  implementation dep.loggingApi
   implementation dep.wireGrpcClient
   implementation dep.wireRuntime
   implementation dep.jacksonDatabind
@@ -63,6 +64,12 @@ dependencies {
   testImplementation dep.mockitoCore
   testImplementation project(':misk-testing')
   testImplementation dep.junit4Api
+  testImplementation dep.assertj
+  testImplementation dep.kotlinTest
+  testImplementation (dep.okHttpMockWebServer) {
+    exclude group: 'junit'
+  }
+  testImplementation dep.openTracingMock
 }
 
 afterEvaluate { project ->

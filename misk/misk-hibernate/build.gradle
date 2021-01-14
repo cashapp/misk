@@ -16,6 +16,10 @@ allOpen {
 
 dependencies {
   api dep.hibernateCore
+  implementation dep.guice
+  implementation dep.okio
+  implementation dep.okHttp
+  implementation dep.loggingApi
   implementation dep.moshiCore
   implementation dep.moshiKotlin
   implementation dep.moshiAdapters
@@ -26,6 +30,7 @@ dependencies {
   implementation project(':misk-core')
   implementation project(':misk-crypto')
   implementation project(':misk-inject')
+  implementation project(':misk-service')
   api project(':misk-jdbc')
 
   testImplementation dep.docker
@@ -38,6 +43,10 @@ dependencies {
     force = true
   }
   testImplementation dep.prometheusClient
+  testImplementation dep.assertj
+  testImplementation dep.kotlinTest
+  testImplementation dep.mockitoCore
+  testImplementation dep.logbackClassic
   testImplementation project(':misk-metrics')
   testImplementation project(':misk-testing')
   testImplementation project(':misk-hibernate-testing')
