@@ -70,6 +70,7 @@ dependencies {
     exclude group: 'junit'
   }
   testImplementation dep.openTracingMock
+  testImplementation dep.guavaTestLib
 }
 
 afterEvaluate { project ->

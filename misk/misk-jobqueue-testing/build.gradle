@@ -1,4 +1,5 @@
 dependencies {
+  implementation dep.guice
   implementation dep.moshiCore
   implementation dep.moshiKotlin
   implementation dep.moshiAdapters
@@ -7,6 +8,7 @@ dependencies {
   implementation project(':misk-inject')
   implementation project(':misk-jdbc')
   implementation project(':misk-testing')
+  implementation project(':misk-hibernate')
   implementation project(':misk-jobqueue')
   implementation project(':misk-transactional-jobqueue')
 
