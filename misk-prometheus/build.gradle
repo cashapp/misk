@@ -1,6 +1,8 @@
 dependencies {
+  implementation dep.guice
   implementation dep.loggingApi
   implementation dep.prometheusHttpserver
+  implementation dep.prometheusHotspot
   implementation project(':misk-core')
   implementation project(':misk-inject')
   implementation project(':misk-metrics')

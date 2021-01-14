@@ -22,7 +22,7 @@ dependencies {
   implementation dep.okio
   implementation dep.openTracingMock
   implementation dep.mockitoCore
-  compile(dep.guavaTestLib) {
+  implementation(dep.guavaTestLib) {
     exclude group: 'junit'
   }
   implementation dep.javaxInject

@@ -1,5 +1,5 @@
 dependencies {
-  compile dep.wireRuntime
+  implementation dep.wireRuntime
 }
 
 afterEvaluate { project ->
