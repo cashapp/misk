@@ -1,16 +1,19 @@
 dependencies {
-  compile dep.prometheusHttpserver
-  compile project(':misk-core')
-  compile project(':misk-inject')
-  compile project(':misk-metrics')
-  compile project(':misk-service')
+  implementation dep.guice
+  implementation dep.loggingApi
+  implementation dep.prometheusHttpserver
+  implementation dep.prometheusHotspot
+  implementation project(':misk-core')
+  implementation project(':misk-inject')
+  implementation project(':misk-metrics')
+  implementation project(':misk-service')
 
-  testCompile dep.assertj
-  testCompile dep.junitApi
-  testCompile dep.junitEngine
-  testCompile dep.junitParams
-  testCompile project(':misk-testing')
-  testCompile project(':misk-gcp-testing')
+  testImplementation dep.assertj
+  testImplementation dep.junitApi
+  testImplementation dep.junitEngine
+  testImplementation dep.junitParams
+  testImplementation project(':misk-testing')
+  testImplementation project(':misk-gcp-testing')
 }
 
 afterEvaluate { project ->

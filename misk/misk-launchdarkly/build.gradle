@@ -5,17 +5,19 @@ buildscript {
 }
 
 dependencies {
-  compile dep.guice
-  compile dep.guiceMultibindings
-  compile dep.kotlinStdLibJdk8
-  compile dep.kotlinReflection
-  compile dep.launchDarkly
-  compile project(':misk')
-  compile project(':misk-feature')
-  compile project(':misk-inject')
-  compile project(':misk-launchdarkly-core')
+  implementation dep.guice
+  implementation dep.guiceMultibindings
+  implementation dep.kotlinStdLibJdk8
+  implementation dep.kotlinReflection
+  implementation dep.launchDarkly
+  implementation project(':misk')
+  implementation project(':misk-core')
+  implementation project(':misk-feature')
+  implementation project(':misk-inject')
+  implementation project(':misk-launchdarkly-core')
+  implementation project(':misk-service')
 
-  testCompile project(':misk-testing')
+  testImplementation project(':misk-testing')
 }
 
 afterEvaluate { project ->

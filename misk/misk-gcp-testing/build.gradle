@@ -1,9 +1,23 @@
 dependencies {
-  compile dep.assertj
-  compile dep.junitApi
-  compile project(':misk')
-  compile project(':misk-gcp')
-  compile project(':misk-testing')
+  implementation dep.guice
+  implementation dep.gcpCloudStorage
+  implementation(dep.gcpDatastore) {
+    exclude group: 'com.google.protobuf'
+    exclude group: 'com.google.api.grpc'
+    exclude group: 'io.grpc'
+  }
+  implementation dep.moshiCore
+  implementation dep.moshiKotlin
+  implementation dep.moshiAdapters
+  implementation dep.assertj
+  implementation dep.junitApi
+  implementation dep.kotlinTest
+  implementation project(':misk')
+  implementation project(':misk-core')
+  implementation project(':misk-gcp')
+  implementation project(':misk-inject')
+  implementation project(':misk-service')
+  implementation project(':misk-testing')
 }
 
 afterEvaluate { project ->
