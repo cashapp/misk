@@ -1,13 +1,19 @@
 dependencies {
-  compile dep.kotlinStdLibJdk8
-  compile dep.guava
-  compile dep.guice
-  compile dep.logbackClassic
-  compile project(':misk')
-  compile project(':misk-prometheus')
-  compile project(':misk-eventrouter')
+  implementation dep.kotlinStdLibJdk8
+  implementation dep.guava
+  implementation dep.guice
+  implementation dep.logbackClassic
+  implementation dep.okHttp
+  implementation project(':misk')
+  implementation project(':misk-actions')
+  implementation project(':misk-core')
+  implementation project(':misk-inject')
+  implementation project(':misk-prometheus')
+  implementation project(':misk-eventrouter')
 
-  testCompile project(':misk-testing')
+  testImplementation project(':misk-testing')
+  testImplementation dep.assertj
+  testImplementation dep.kotlinTest
 }
 
 jar {
