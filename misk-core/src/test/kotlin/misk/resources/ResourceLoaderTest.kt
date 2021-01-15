@@ -1,6 +1,10 @@
 package misk.resources
 
 import com.google.inject.util.Modules
+import java.io.File
+import java.net.URLClassLoader
+import javax.inject.Inject
+import kotlin.test.assertFailsWith
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.testing.TemporaryFolder
@@ -8,10 +12,8 @@ import misk.testing.TemporaryFolderModule
 import okio.buffer
 import okio.sink
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.io.File
-import javax.inject.Inject
-import kotlin.test.assertFailsWith
 
 @MiskTest
 class ResourceLoaderTest {
@@ -20,6 +22,14 @@ class ResourceLoaderTest {
 
   @Inject lateinit var resourceLoader: ResourceLoader
   @Inject lateinit var tempFolder: TemporaryFolder
+
+  lateinit var tempRoot: File
+
+  @BeforeEach
+  internal fun setUp() {
+    tempRoot = tempFolder.root.toAbsolutePath().toFile()
+    assertThat(tempRoot.toString()).startsWith("/") // Tests below require this.
+  }
 
   @Test
   fun loadResource() {
@@ -42,6 +52,12 @@ class ResourceLoaderTest {
   fun listDoesNotContainChildOfChild() {
     assertThat(resourceLoader.list("classpath:/misk/"))
         .doesNotContain("classpath:/misk/resources/ResourceLoaderTest.txt")
+  }
+
+  @Test
+  fun listContainsResourcesFromJar() {
+    assertThat(resourceLoader.list("classpath:/META-INF/"))
+        .contains("classpath:/META-INF/MANIFEST.MF")
   }
 
   @Test
@@ -94,9 +110,6 @@ class ResourceLoaderTest {
 
   @Test
   fun filesystemResources() {
-    val tempRoot = tempFolder.root.toAbsolutePath().toFile()
-    assertThat(tempRoot.toString()).startsWith("/") // Tests below require this.
-
     val resource1 = "filesystem:$tempRoot/data1.txt"
     File(tempRoot, "data1.txt").sink().buffer().use {
       it.writeUtf8("foo")
@@ -161,5 +174,75 @@ class ResourceLoaderTest {
         .isEqualTo("69e0753934d2838d1953602ca7722444\n")
     assertThat(resourceLoader.utf8("$prefix/nested/nested.txt")!!)
         .isEqualTo("I am nested\n")
+  }
+
+  @Test
+  fun classpathSchemeUsesContextClassLoader() {
+    File(tempRoot, "context_class_loader_resource.txt").sink().buffer().use {
+      it.writeUtf8("hello, context class loader")
+    }
+    val tempDirClassLoader = URLClassLoader(arrayOf(tempRoot.toURI().toURL()))
+
+    // Confirm the resource isn't available in the app class loader.
+    assertThat(resourceLoader.utf8("classpath:/context_class_loader_resource.txt"))
+        .isNull()
+
+    // But when the context class loader changes, the resource becomes visible.
+    withContextClassLoader(tempDirClassLoader) {
+      assertThat(resourceLoader.utf8("classpath:/context_class_loader_resource.txt"))
+          .isEqualTo("hello, context class loader")
+    }
+
+    // The resource is not cached in the resource loader.
+    assertThat(resourceLoader.utf8("classpath:/context_class_loader_resource.txt"))
+        .isNull()
+  }
+
+  @Test
+  fun contextClassLoaderForList() {
+    val directory = File(tempRoot, "context_class_loader")
+    directory.mkdirs()
+    File(directory, "a.txt").sink().buffer().use {
+      it.writeUtf8("A")
+    }
+    File(directory, "b.txt").sink().buffer().use {
+      it.writeUtf8("B")
+    }
+    val tempDirClassLoader = URLClassLoader(arrayOf(tempRoot.toURI().toURL()))
+
+    withContextClassLoader(tempDirClassLoader) {
+      assertThat(resourceLoader.list("classpath:/context_class_loader")).contains(
+          "classpath:/context_class_loader/a.txt",
+          "classpath:/context_class_loader/b.txt"
+      )
+    }
+
+    assertThat(resourceLoader.list("classpath:/context_class_loader")).isEmpty()
+  }
+
+  @Test
+  fun contextClassLoaderForExists() {
+    File(tempRoot, "context_class_loader_exists_resource.txt").sink().buffer().use {
+      it.writeUtf8("hello, I exist")
+    }
+    val tempDirClassLoader = URLClassLoader(arrayOf(tempRoot.toURI().toURL()))
+
+    withContextClassLoader(tempDirClassLoader) {
+      assertThat(resourceLoader.exists("classpath:/context_class_loader_exists_resource.txt"))
+          .isTrue()
+    }
+
+    assertThat(resourceLoader.exists("classpath:/context_class_loader_exists_resource.txt"))
+        .isFalse()
+  }
+
+  private fun <T> withContextClassLoader(classLoader: ClassLoader, block: () -> T): T {
+    val previousContextClassLoader = Thread.currentThread().contextClassLoader
+    Thread.currentThread().contextClassLoader = classLoader
+    try {
+      return block()
+    } finally {
+      Thread.currentThread().contextClassLoader = previousContextClassLoader
+    }
   }
 }

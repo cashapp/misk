@@ -1,0 +1,6 @@
+data_source:
+  type: MYSQL
+  username: root
+  password: ""
+  database: truncatetables
+  migrations_resource: classpath:/misk/jdbc/truncatetables-migrations

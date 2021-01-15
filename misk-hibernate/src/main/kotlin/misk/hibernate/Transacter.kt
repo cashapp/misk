@@ -2,8 +2,11 @@ package misk.hibernate
 
 import com.google.common.annotations.VisibleForTesting
 import misk.jdbc.DataSourceConfig
-import java.sql.SQLException
+import misk.vitess.Keyspace
+import misk.vitess.Shard
+import misk.vitess.tabletDoesNotExists
 import javax.persistence.PersistenceException
+import kotlin.reflect.KClass
 
 /**
  * Provides explicit block-based transaction demarcation.
@@ -33,9 +36,6 @@ interface Transacter {
   /**
    * Runs a non-transactional session against a read replica.
    *
-   * TODO(jontirsen): Currently only available for Vitess connections as MySQL connections need to
-   *   use a reader Transacter instead.
-   *
    * A few things that are different with replica reads:
    * * Replica reads are (obviously?) read only.
    * * Consistency is eventual. If your application thread just wrote something in a transaction
@@ -48,6 +48,10 @@ interface Transacter {
    *   #vitess)
    * * Full scatters are allowed since you can increase the availability of these by adding more
    *   replicas.
+   * * If no reader is configured for replica reads when installing the [HibernateModule], this
+   *   method will throw an [IllegalStateException].
+   * * Note: You can do it another way, where you annotate the [Transacter] with the readerQualifer
+   *   defined by [HibernateModule], which will use the read only replica as the datasource.
    *
    */
   fun <T> replicaRead(block: (session: Session) -> T): T
@@ -71,6 +75,9 @@ interface Transacter {
   fun allowCowrites(): Transacter
 
   fun config(): DataSourceConfig
+
+  /** Returns KClasses for the bound DbEntities for the transacter */
+  fun entities(): Set<KClass<out DbEntity<*>>>
 }
 
 fun Transacter.shards() = transaction { it.shards() }
@@ -130,20 +137,3 @@ class RetryTransactionException(
   message: String? = null,
   cause: Throwable? = null
 ) : Exception(message, cause)
-
-fun getRooCause(throwable: Throwable): Throwable {
-  var rootCause = throwable
-  while (rootCause.cause != null && rootCause.cause != rootCause) {
-    rootCause = rootCause.cause!!
-  }
-  return rootCause
-}
-
-fun tabletDoesNotExists(e: Exception): Boolean {
-  val rootCause = getRooCause(e)
-  val noMasterTabletRegex = ".*target:.*master.*no valid tablet:.*".toRegex(RegexOption.IGNORE_CASE)
-  val isSQLException = rootCause is SQLException
-  val isNoMasterTablet = noMasterTabletRegex.matches(rootCause.message!!)
-
-  return isSQLException && isNoMasterTablet
-}

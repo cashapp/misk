@@ -4,8 +4,8 @@ import misk.resources.ResourceLoader
 import misk.scope.ActionScoped
 import misk.security.authz.Unauthenticated
 import misk.web.Get
-import misk.web.Post
 import misk.web.HttpCall
+import misk.web.Post
 import misk.web.RequestContentType
 import misk.web.Response
 import misk.web.ResponseBody
@@ -66,9 +66,10 @@ class StaticResourceAction @Inject constructor(
       return when (exists(urlPath)) {
         Kind.NO_MATCH -> when {
           !urlPath.endsWith("/") -> redirectResponse(normalizePathWithQuery(httpCall.url))
-        // actually return the resource, don't redirect. Path must stay the same since this will be handled by React router
+          // actually return the resource, don't redirect. Path must stay the same since this will be handled by React router
           urlPath.endsWith("/") -> resourceResponse(
-              normalizePath(matchedEntry.url_path_prefix))
+              normalizePath(matchedEntry.url_path_prefix)
+          )
           else -> null
         }
         Kind.RESOURCE -> resourceResponse(urlPath)
@@ -79,9 +80,13 @@ class StaticResourceAction @Inject constructor(
     /** Returns true if the mapped path exists on either the resource path or file system. */
     private fun exists(urlPath: String): Kind {
       val resourcePath = matchedEntry.resourcePath(urlPath)
-      if (resourceLoader.exists(resourcePath)) return Kind.RESOURCE
-      if (resourceLoader.list(resourcePath).isNotEmpty()) return Kind.RESOURCE_DIRECTORY
-      return Kind.NO_MATCH
+      return when {
+        // Check if path is a directory before checking if it is a single resource
+        resourceLoader.list(resourcePath).isNotEmpty() -> Kind.RESOURCE_DIRECTORY
+        // If not a directory, check if resource 
+        resourceLoader.exists(resourcePath) -> Kind.RESOURCE
+        else -> Kind.NO_MATCH
+      }
     }
 
     /** Returns a source to the mapped path, or null if it doesn't exist. */
@@ -101,17 +106,17 @@ class StaticResourceAction @Inject constructor(
       }
     }
 
-    private fun normalizePathWithQuery(url: HttpUrl): String {
-      return if (url.encodedQuery.isNullOrEmpty()) normalizePath(url.encodedPath)
-      else normalizePath(url.encodedPath) + "?" + url.encodedQuery
+    private fun normalizePathWithQuery(url: HttpUrl): String = when {
+      url.encodedQuery.isNullOrEmpty() -> normalizePath(url.encodedPath)
+      else -> normalizePath(url.encodedPath) + "?" + url.encodedQuery
     }
 
-    private fun resourceResponse(resourcePath: String): Response<ResponseBody>? {
-      return when (exists(resourcePath)) {
+    private fun resourceResponse(urlPath: String): Response<ResponseBody>? {
+      return when (exists(urlPath)) {
         Kind.RESOURCE -> {
           val responseBody = object : ResponseBody {
             override fun writeTo(sink: BufferedSink) {
-              open(resourcePath)!!.use {
+              open(urlPath)!!.use {
                 sink.writeAll(it)
               }
             }
@@ -119,7 +124,7 @@ class StaticResourceAction @Inject constructor(
           Response(
               body = responseBody,
               headers = headersOf("Content-Type", MediaTypes.fromFileExtension(
-        resourcePath.substring(resourcePath.lastIndexOf('.') + 1)).toString()))
+                  urlPath.substring(urlPath.lastIndexOf('.') + 1)).toString()))
         }
         else -> null
       }

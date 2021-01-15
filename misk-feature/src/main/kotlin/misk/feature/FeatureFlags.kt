@@ -39,8 +39,10 @@ interface FeatureFlags {
    * Calculates the value of an enumerated feature flag for the given key and attributes.
    * @param feature name of the feature flag to evaluate.
    * @param key unique primary key for the entity the flag should be evaluated against.
-   * @param clazz the enum type
+   * @param clazz the enum type.
    * @param attributes additional attributes to provide to flag evaluation.
+   * @throws [RuntimeException] if the service is unavailable.
+   * @throws [IllegalStateException] if the flag is off with no default value.
    */
   fun <T : Enum<T>> getEnum(
     feature: Feature,
@@ -91,15 +93,15 @@ interface FeatureFlags {
 
 inline fun <reified T : Enum<T>> FeatureFlags.getEnum(
   feature: Feature,
-  token: String,
+  key: String,
   attributes: Attributes = Attributes()
-): T = getEnum(feature, token, T::class.java, attributes)
+): T = getEnum(feature, key, T::class.java, attributes)
 
 inline fun <reified T> FeatureFlags.getJson(
   feature: Feature,
-  token: String,
+  key: String,
   attributes: Attributes = Attributes()
-): T = getJson(feature, token, T::class.java, attributes)
+): T = getJson(feature, key, T::class.java, attributes)
 
 /**
  * Typed feature string.

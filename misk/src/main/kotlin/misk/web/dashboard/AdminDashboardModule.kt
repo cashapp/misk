@@ -6,8 +6,10 @@ import misk.security.authz.AccessAnnotationEntry
 import misk.web.NetworkInterceptor
 import misk.web.WebActionModule
 import misk.web.interceptors.WideOpenDevelopmentInterceptorFactory
-import misk.web.metadata.ConfigMetadataAction
-import misk.web.metadata.WebActionMetadataAction
+import misk.web.metadata.database.DatabaseQueryMetadata
+import misk.web.metadata.database.DatabaseQueryMetadataAction
+import misk.web.metadata.database.NoAdminDashboardDatabaseAccess
+import misk.web.metadata.webaction.WebActionMetadataAction
 import javax.inject.Qualifier
 
 /**
@@ -60,23 +62,30 @@ class AdminDashboardModule(private val isDevelopment: Boolean) : KAbstractModule
         resourcePath = "classpath:/web/_tab/admin-dashboard/@misk/"
     ))
 
-    // Config
-    install(WebActionModule.create<ConfigMetadataAction>())
+    // Database Query
+    newMultibinder<DatabaseQueryMetadata>()
+    install(WebActionModule.create<DatabaseQueryMetadataAction>())
     multibind<DashboardTab>().toProvider(
         DashboardTabProvider<AdminDashboard, AdminDashboardAccess>(
-            slug = "config",
-            url_path_prefix = "/_admin/config/",
-            name = "Config",
+            slug = "database",
+            url_path_prefix = "/_admin/database/",
+            name = "Database",
             category = "Container Admin"
         ))
     install(WebTabResourceModule(
         isDevelopment = isDevelopment,
-        slug = "config",
-        web_proxy_url = "http://localhost:3200/"
+        slug = "database",
+        web_proxy_url = "http://localhost:3202/"
     ))
+    // Default access that doesn't allow any queries for unconfigured DbEntities
+    multibind<AccessAnnotationEntry>().toInstance(
+        AccessAnnotationEntry<NoAdminDashboardDatabaseAccess>(
+            capabilities = listOf("no_admin_dashboard_database_access")
+        )
+    )
     multibind<DashboardNavbarItem>().toInstance(DashboardNavbarItem<AdminDashboard>(
-      item = "<a href=\"/_admin/config/\">Config</a>",
-      order = 105
+        item = "<a href=\"/_admin/database/\">Database</a>",
+        order = 100
     ))
 
     // Web Actions
@@ -94,20 +103,21 @@ class AdminDashboardModule(private val isDevelopment: Boolean) : KAbstractModule
         web_proxy_url = "http://localhost:3201/"
     ))
     multibind<DashboardNavbarItem>().toInstance(DashboardNavbarItem<AdminDashboard>(
-      item = "<a href=\"/_admin/web-actions/\">Web Actions</a>",
-      order = 100
+        item = "<a href=\"/_admin/web-actions/\">Web Actions</a>",
+        order = 101
     ))
   }
 }
 
 // Module that allows testing/development environments to bind up the admin dashboard
-class AdminDashboardTestingModule() : KAbstractModule() {
-
+class AdminDashboardTestingModule : KAbstractModule() {
   override fun configure() {
     // Set dummy values for access, these shouldn't matter,
     // as test environments should prefer to use the FakeCallerAuthenticator.
     multibind<AccessAnnotationEntry>().toInstance(
-        AccessAnnotationEntry<AdminDashboardAccess>(capabilities = listOf("admin_access")))
+        AccessAnnotationEntry<AdminDashboardAccess>(capabilities = listOf(
+            "admin_access", "admin_console", "users"
+        )))
     install(AdminDashboardModule(true))
   }
 }

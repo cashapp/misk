@@ -3,11 +3,8 @@ package misk.hibernate
 import com.google.common.cache.CacheBuilder
 import com.google.common.cache.CacheLoader
 import com.google.inject.TypeLiteral
-import io.opentracing.Tracer
-import misk.hibernate.QueryTracingSpanNames.Companion.DB_SELECT
 import misk.inject.typeLiteral
 import misk.logging.getLogger
-import misk.tracing.traceWithSpan
 import java.lang.reflect.InvocationHandler
 import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Method
@@ -41,7 +38,6 @@ internal class ReflectionQuery<T : DbEntity<T>>(
   private val queryClass: KClass<*>,
   private val rootEntityType: KClass<T>,
   private val queryMethodHandlers: Map<Method, QueryMethodHandler>,
-  private val tracer: Tracer?,
   private val queryLimitsConfig: QueryLimitsConfig,
 
   /** True if this query only exists to collect predicates for an OR clause. */
@@ -66,6 +62,27 @@ internal class ReflectionQuery<T : DbEntity<T>>(
 
   override fun disableCheck(check: Check) {
     disabledChecks += check
+  }
+
+  override fun <Q : Query<*>> clone(): Q {
+    val copy = ReflectionQuery(
+        this.queryClass,
+        this.rootEntityType,
+        this.queryMethodHandlers,
+        this.queryLimitsConfig
+    )
+    if (copy.maxRows != -1) {
+      copy.maxRows = this.maxRows
+    }
+    if (copy.firstResult != 0) {
+      copy.firstResult = this.firstResult
+    }
+    copy.constraints.addAll(this.constraints)
+    copy.orderFactories.addAll(this.orderFactories)
+    copy.disabledChecks.addAll(this.disabledChecks)
+
+    @Suppress("UNCHECKED_CAST")
+    return copy.toProxy() as Q
   }
 
   override fun dynamicAddConstraint(path: String, operator: Operator, value: Any?) {
@@ -156,7 +173,10 @@ internal class ReflectionQuery<T : DbEntity<T>>(
     return list.firstOrNull()
   }
 
-  override fun dynamicUniqueResult(session: Session, selection: (CriteriaBuilder, Root<T>) -> Selection<out Any>): List<Any?>? {
+  override fun dynamicUniqueResult(
+    session: Session,
+    selection: (CriteriaBuilder, Root<T>) -> Selection<out Any>
+  ): List<Any?>? {
     val list = select(false, session, selection)
     return list.firstOrNull()
   }
@@ -174,7 +194,7 @@ internal class ReflectionQuery<T : DbEntity<T>>(
     criteria.where(predicate)
 
     val query = session.hibernateSession
-      .createQuery(criteria)
+        .createQuery(criteria)
 
     return session.disableChecks(disabledChecks) {
       query.executeUpdate()
@@ -190,11 +210,18 @@ internal class ReflectionQuery<T : DbEntity<T>>(
     return select(true, session, projectedPaths)
   }
 
-  override fun dynamicList(session: Session, selection: (CriteriaBuilder, Root<T>) -> Selection<out Any>): List<List<Any?>> {
+  override fun dynamicList(
+    session: Session,
+    selection: (CriteriaBuilder, Root<T>) -> Selection<out Any>
+  ): List<List<Any?>> {
     return select(true, session, selection)
   }
 
-  private fun select(returnList: Boolean, session: Session, projectedPaths: List<String>): List<List<Any?>> {
+  private fun select(
+    returnList: Boolean,
+    session: Session,
+    projectedPaths: List<String>
+  ): List<List<Any?>> {
     val splitProjectedPaths = projectedPaths.map { it.split('.') }
     return select(returnList, session) { criteriaBuilder, queryRoot ->
       criteriaBuilder.array(*splitProjectedPaths.map {
@@ -225,10 +252,8 @@ internal class ReflectionQuery<T : DbEntity<T>>(
     val typedQuery = session.hibernateSession.createQuery(query)
     typedQuery.firstResult = firstResult
     typedQuery.maxResults = effectiveMaxRows(returnList)
-    val rows = traceSelect {
-      session.disableChecks(disabledChecks) {
-        typedQuery.list()
-      }
+    val rows = session.disableChecks(disabledChecks) {
+      typedQuery.list()
     }
     checkRowCount(returnList, rows.size)
     val result = rows.map {
@@ -255,10 +280,8 @@ internal class ReflectionQuery<T : DbEntity<T>>(
     val typedQuery = session.hibernateSession.createQuery(query)
     typedQuery.firstResult = firstResult
     typedQuery.maxResults = effectiveMaxRows(returnList)
-    val rows = traceSelect {
-      session.disableChecks(disabledChecks) {
-        typedQuery.list()
-      }
+    val rows = session.disableChecks(disabledChecks) {
+      typedQuery.list()
     }
     checkRowCount(returnList, rows.size)
     return rows
@@ -281,10 +304,8 @@ internal class ReflectionQuery<T : DbEntity<T>>(
     query.select(criteriaBuilder.count(queryRoot))
 
     val typedQuery = session.hibernateSession.createQuery(query)
-    return traceSelect {
-      session.disableChecks(disabledChecks) {
-        typedQuery.singleResult
-      }
+    return session.disableChecks(disabledChecks) {
+      typedQuery.singleResult
     }
   }
 
@@ -337,14 +358,6 @@ internal class ReflectionQuery<T : DbEntity<T>>(
     }
   }
 
-  private fun <T> traceSelect(lambda: () -> T): T {
-    return if (tracer != null) tracer.traceWithSpan(DB_SELECT) {
-      lambda()
-    } else {
-      lambda()
-    }
-  }
-
   private fun toProxy(): Query<T> {
     val classLoader = queryClass.java.classLoader
 
@@ -356,8 +369,6 @@ internal class ReflectionQuery<T : DbEntity<T>>(
   @Singleton
   internal class Factory @Inject internal constructor(private var queryLimitsConfig: QueryLimitsConfig) :
       Query.Factory {
-    @com.google.inject.Inject(optional = true) var tracer: Tracer? = null
-
     private val queryMethodHandlersCache = CacheBuilder.newBuilder()
         .build(object : CacheLoader<KClass<*>, Map<Method, QueryMethodHandler>>() {
           override fun load(key: KClass<*>) = queryMethodHandlers(key)
@@ -376,7 +387,6 @@ internal class ReflectionQuery<T : DbEntity<T>>(
           queryClass as KClass<DbPlaceholder>,
           entityType.kotlin,
           queryMethodHandlers,
-          tracer,
           queryLimitsConfig
       )
       @Suppress("UNCHECKED_CAST")
@@ -388,7 +398,6 @@ internal class ReflectionQuery<T : DbEntity<T>>(
           Query::class,
           entityClass,
           mapOf(),
-          tracer,
           queryLimitsConfig
       )
       return reflectionQuery.toProxy()
@@ -812,7 +821,6 @@ internal class ReflectionQuery<T : DbEntity<T>>(
           queryClass,
           rootEntityType,
           queryMethodHandlers,
-          tracer,
           queryLimitsConfig,
           predicatesOnly = true
       )

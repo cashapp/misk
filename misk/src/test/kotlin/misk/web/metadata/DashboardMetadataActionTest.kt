@@ -49,7 +49,7 @@ class DashboardMetadataActionTest {
       capabilities = "admin_access"
     )
     assertEquals(2, response.dashboardMetadata.tabs.size)
-    assertNotNull(response.dashboardMetadata.tabs.find { it.name == "Config" })
+    assertNotNull(response.dashboardMetadata.tabs.find { it.name == "Database" })
     assertNotNull(response.dashboardMetadata.tabs.find { it.name == "Web Actions" })
   }
 

@@ -15,7 +15,12 @@ data class CryptoConfig(
    * For AWS users that the Key URI looks like:
    * aws-kms://arn:aws:kms:<region>:<account-id>:key/<key-id>
    */
-  val kms_uri: String
+  val kms_uri: String,
+  /**
+   * The key references (map of alias to type) of keys we want to use that are loaded from an
+   * external key source, such as an S3 bucket.
+   */
+  val external_data_keys: Map<KeyAlias, KeyType>? = null
 ) : Config
 
 /**
@@ -30,14 +35,22 @@ data class Key(
    * ```
    */
   val key_name: String,
+
   /**
-   * Type of Tink primitive to initialize
+   * Type of Tink primitive to initialize.
    */
   val key_type: KeyType,
+
   /**
-   * Path to a file containing the encrypted key material in Tink's JSON format.
+   * In config it's the path to a file containing the encrypted key material in Tink's JSON format.
+   * However MiskConfig will read the contents of the file, so this variable is file's contents.
    */
-  val encrypted_key: Secret<String>
+  val encrypted_key: Secret<String>,
+
+  /**
+   * A key-specific, and region-specific KMS uri that was used to encrypt this key.
+   */
+  val kms_uri: String? = null
 ) : Config
 
 /**
@@ -50,5 +63,7 @@ enum class KeyType {
   DIGITAL_SIGNATURE,
   HYBRID_ENCRYPT,
   HYBRID_ENCRYPT_DECRYPT,
-  STREAMING_AEAD
+  STREAMING_AEAD,
+  PGP_DECRYPT,
+  PGP_ENCRYPT
 }

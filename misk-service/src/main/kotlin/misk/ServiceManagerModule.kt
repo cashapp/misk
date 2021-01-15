@@ -1,5 +1,6 @@
 package misk
 
+import com.google.common.util.concurrent.MoreExecutors.directExecutor
 import com.google.common.util.concurrent.Service
 import com.google.common.util.concurrent.ServiceManager
 import com.google.inject.Injector
@@ -74,7 +75,7 @@ class ServiceManagerModule : KAbstractModule() {
     }
 
     val serviceManager = builder.build()
-    listeners.forEach { serviceManager.addListener(it) }
+    listeners.forEach { serviceManager.addListener(it, directExecutor()) }
     return serviceManager
   }
 }

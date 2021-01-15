@@ -5,21 +5,23 @@ buildscript {
 }
 
 dependencies {
-  compile dep.bouncycastle
-  compile dep.guice
-  compile dep.guiceMultibindings
-  compile dep.kotlinStdLibJdk8
-  compile dep.kotlinReflection
-  compile dep.loggingApi
-  compile dep.logbackClassic
-  compile dep.okio
-  compile dep.okHttp
-  compile dep.slf4jApi
+  implementation dep.bouncycastle
+  implementation dep.guice
+  implementation dep.guiceMultibindings
+  implementation dep.kotlinStdLibJdk8
+  implementation dep.kotlinReflection
+  implementation dep.loggingApi
+  implementation dep.logbackClassic
+  implementation dep.okio
+  implementation dep.okHttp
+  implementation dep.slf4jApi
 
-  compile project(':misk-inject')
-  compile project(':misk-service')
+  implementation project(':misk-inject')
+  implementation project(':misk-service')
 
-  testCompile project(':misk-testing')
+  testImplementation dep.assertj
+  testImplementation dep.kotlinTest
+  testImplementation project(':misk-testing')
 }
 
 afterEvaluate { project ->
@@ -28,3 +30,5 @@ afterEvaluate { project ->
     outputFormat = 'gfm'
   }
 }
+
+apply from: "$rootDir/gradle-mvn-publish.gradle"

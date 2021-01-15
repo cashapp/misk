@@ -1,5 +1,6 @@
 package misk.crypto
 
+import com.amazonaws.services.s3.AmazonS3
 import com.google.crypto.tink.Aead
 import com.google.crypto.tink.DeterministicAead
 import com.google.crypto.tink.HybridDecrypt
@@ -16,12 +17,18 @@ import com.google.crypto.tink.mac.MacConfig
 import com.google.crypto.tink.signature.SignatureConfig
 import com.google.crypto.tink.streamingaead.StreamingAeadConfig
 import com.google.inject.Singleton
+import com.google.inject.TypeLiteral
 import com.google.inject.name.Names
+import misk.crypto.pgp.PgpDecrypter
+import misk.crypto.pgp.PgpDecrypterProvider
+import misk.crypto.pgp.PgpEncrypter
+import misk.crypto.pgp.PgpEncrypterProvider
 import misk.inject.KAbstractModule
 import okio.ByteString
 import okio.ByteString.Companion.toByteString
-import java.lang.IllegalArgumentException
+import org.bouncycastle.jce.provider.BouncyCastleProvider
 import java.security.GeneralSecurityException
+import java.security.Security
 import java.util.Base64
 
 /**
@@ -33,74 +40,125 @@ class CryptoModule(
 ) : KAbstractModule() {
 
   override fun configure() {
-    // no keys? no worries! exit early
-    config.keys ?: return
-    requireBinding(KmsClient::class.java)
+    requireBinding<KmsClient>()
+
     AeadConfig.register()
     DeterministicAeadConfig.register()
     MacConfig.register()
     SignatureConfig.register()
     HybridConfig.register()
     StreamingAeadConfig.register()
+    Security.addProvider(BouncyCastleProvider())
 
-    val keyNames = config.keys.map { it.key_name }
-    val duplicateNames = keyNames - keyNames.distinct().toList()
-    check(duplicateNames.isEmpty()) {
-      "Found duplicate keys: [$duplicateNames]"
+    var keyNames = listOf<KeyAlias>()
+
+    /* All the key providers in this multibinder share a namespace. For example, a key with a given
+     * name can only exist in one of the providers. This makes migrating keys between stores less
+     * error-prone.
+     */
+    val keyManagerBinder = newMultibinder(ExternalKeyManager::class)
+
+    /* Parse and include all local keys first. */
+    config.keys?.let { keys ->
+      keyManagerBinder.addBinding().toInstance(LocalConfigKeyProvider(keys, config.kms_uri))
+
+      keys.forEach {
+        bindKeyToProvider(it.key_name, it.key_type)
+      }
+
+      keyNames = keys.map { it.key_name }
+      val duplicateNames = keyNames - keyNames.distinct().toList()
+      check(duplicateNames.isEmpty()) {
+        "Found duplicate keys: [$duplicateNames]"
+      }
     }
 
-    config.keys.forEach { key ->
-      when (key.key_type) {
-        KeyType.AEAD -> {
-          bind<Aead>()
-              .annotatedWith(Names.named(key.key_name))
-              .toProvider(AeadEnvelopeProvider(key, config.kms_uri))
-              .`in`(Singleton::class.java)
-        }
-        KeyType.DAEAD -> {
-          bind<DeterministicAead>()
-              .annotatedWith(Names.named(key.key_name))
-              .toProvider(DeterministicAeadProvider(key, config.kms_uri))
-              .`in`(Singleton::class.java)
-        }
-        KeyType.MAC -> {
-          bind<Mac>()
-              .annotatedWith(Names.named(key.key_name))
-              .toProvider(MacProvider(key, config.kms_uri))
-              .`in`(Singleton::class.java)
-        }
-        KeyType.DIGITAL_SIGNATURE -> {
-          bind<PublicKeySign>()
-              .annotatedWith(Names.named(key.key_name))
-              .toProvider(DigitalSignatureSignerProvider(key, config.kms_uri))
-              .`in`(Singleton::class.java)
-          bind<PublicKeyVerify>()
-              .annotatedWith(Names.named(key.key_name))
-              .toProvider(DigitalSignatureVerifierProvider(key, config.kms_uri))
-              .`in`(Singleton::class.java)
-        }
-        KeyType.HYBRID_ENCRYPT -> {
-          bind<HybridEncrypt>()
-              .annotatedWith(Names.named(key.key_name))
-              .toProvider(HybridEncryptProvider(key, config.kms_uri))
-              .`in`(Singleton::class.java)
-        }
-        KeyType.HYBRID_ENCRYPT_DECRYPT -> {
-          bind<HybridDecrypt>()
-              .annotatedWith(Names.named(key.key_name))
-              .toProvider(HybridDecryptProvider(key, config.kms_uri))
-              .`in`(Singleton::class.java)
-          bind<HybridEncrypt>()
-              .annotatedWith(Names.named(key.key_name))
-              .toProvider(HybridEncryptProvider(key, config.kms_uri))
-              .`in`(Singleton::class.java)
-        }
-        KeyType.STREAMING_AEAD -> {
-          bind<StreamingAead>()
-              .annotatedWith(Names.named(key.key_name))
-              .toProvider(StreamingAeadProvider(key, config.kms_uri))
-              .`in`(Singleton::class.java)
-        }
+    /* Include all configured remotely-provided keys. */
+    config.external_data_keys?.let { external_data_keys ->
+      requireBinding<AmazonS3>()
+
+      bind(object : TypeLiteral<Map<KeyAlias, KeyType>>() {})
+          .annotatedWith(Names.named("all_key_aliases"))
+          .toInstance(external_data_keys)
+
+      keyManagerBinder.addBinding().to<S3ExternalKeyManager>()
+
+      val internalAndExternal = keyNames.intersect(external_data_keys.keys)
+      check(internalAndExternal.isEmpty()) {
+        "Found keys that are marked as both provided in resources, and provided externally: [$internalAndExternal]"
+      }
+
+      external_data_keys.forEach { (alias, type) ->
+        // External keys use a KMS key per keyset
+        bindKeyToProvider(alias, type)
+      }
+    }
+
+  }
+
+  private fun bindKeyToProvider(alias: KeyAlias, type: KeyType) {
+    when (type) {
+      KeyType.AEAD -> {
+        bind<Aead>()
+            .annotatedWith(Names.named(alias))
+            .toProvider(AeadEnvelopeProvider(alias))
+            .`in`(Singleton::class.java)
+      }
+      KeyType.DAEAD -> {
+        bind<DeterministicAead>()
+            .annotatedWith(Names.named(alias))
+            .toProvider(DeterministicAeadProvider(alias))
+            .`in`(Singleton::class.java)
+      }
+      KeyType.MAC -> {
+        bind<Mac>()
+            .annotatedWith(Names.named(alias))
+            .toProvider(MacProvider(alias))
+            .`in`(Singleton::class.java)
+      }
+      KeyType.DIGITAL_SIGNATURE -> {
+        bind<PublicKeySign>()
+            .annotatedWith(Names.named(alias))
+            .toProvider(DigitalSignatureSignerProvider(alias))
+            .`in`(Singleton::class.java)
+        bind<PublicKeyVerify>()
+            .annotatedWith(Names.named(alias))
+            .toProvider(DigitalSignatureVerifierProvider(alias))
+            .`in`(Singleton::class.java)
+      }
+      KeyType.HYBRID_ENCRYPT -> {
+        bind<HybridEncrypt>()
+            .annotatedWith(Names.named(alias))
+            .toProvider(HybridEncryptProvider(alias))
+            .`in`(Singleton::class.java)
+      }
+      KeyType.HYBRID_ENCRYPT_DECRYPT -> {
+        bind<HybridDecrypt>()
+            .annotatedWith(Names.named(alias))
+            .toProvider(HybridDecryptProvider(alias))
+            .`in`(Singleton::class.java)
+        bind<HybridEncrypt>()
+            .annotatedWith(Names.named(alias))
+            .toProvider(HybridEncryptProvider(alias))
+            .`in`(Singleton::class.java)
+      }
+      KeyType.STREAMING_AEAD -> {
+        bind<StreamingAead>()
+            .annotatedWith(Names.named(alias))
+            .toProvider(StreamingAeadProvider(alias))
+            .`in`(Singleton::class.java)
+      }
+      KeyType.PGP_DECRYPT -> {
+        bind<PgpDecrypter>()
+            .annotatedWith(Names.named(alias))
+            .toProvider(PgpDecrypterProvider(alias))
+            .`in`(Singleton::class.java)
+      }
+      KeyType.PGP_ENCRYPT -> {
+        bind<PgpEncrypter>()
+            .annotatedWith(Names.named(alias))
+            .toProvider(PgpEncrypterProvider(alias))
+            .`in`(Singleton::class.java)
       }
     }
   }
@@ -156,7 +214,7 @@ fun Aead.decrypt(ciphertext: ByteString, aad: ByteArray? = null): ByteString {
 fun DeterministicAead.encryptDeterministically(
   plaintext: ByteString,
   aad: ByteArray? = null
-) : ByteString {
+): ByteString {
   val plaintextBytes = plaintext.toByteArray()
   val encrypted = this.encryptDeterministically(plaintextBytes, aad ?: byteArrayOf())
   plaintextBytes.fill(0)
@@ -177,7 +235,7 @@ fun DeterministicAead.encryptDeterministically(
 fun DeterministicAead.decryptDeterministically(
   ciphertext: ByteString,
   aad: ByteArray? = null
-) : ByteString {
+): ByteString {
   val decryptedBytes = this.decryptDeterministically(ciphertext.toByteArray(), aad)
   val decrypted = decryptedBytes.toByteString()
   decryptedBytes.fill(0)

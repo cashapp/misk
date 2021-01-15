@@ -24,6 +24,7 @@ class SqsJobQueueTestModule(
     install(FakeLeaseModule())
     install(FakeFeatureFlagsModule().withOverrides {
       override(SqsJobConsumer.CONSUMERS_PER_QUEUE, 5)
+      override(SqsJobConsumer.POD_CONSUMERS_PER_QUEUE, -1)
     })
     install(
         Modules.override(

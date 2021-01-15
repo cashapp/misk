@@ -15,20 +15,20 @@ allOpen {
 }
 
 dependencies {
-  compile dep.hibernateCore
-  compile dep.hikariCp
-  compile dep.hsqldb
-  compile dep.mysql
-  compile dep.openTracing
-  compile dep.openTracingUtil
-  compile dep.openTracingJdbc
-  compile dep.vitess
-  compile project(':misk')
-  compile project(':misk-events-core')
-  compile project(':misk-hibernate')
+  implementation dep.hibernateCore
+  implementation dep.hikariCp
+  implementation dep.hsqldb
+  implementation dep.mysql
+  implementation dep.openTracing
+  implementation dep.openTracingUtil
+  implementation dep.openTracingJdbc
+  implementation dep.vitess
+  implementation project(':misk')
+  implementation project(':misk-events-core')
+  implementation project(':misk-hibernate')
 
-  testCompile project(':misk-testing')
-  testCompile project(':misk-hibernate-testing')
+  testImplementation project(':misk-testing')
+  testImplementation project(':misk-hibernate-testing')
 }
 
 afterEvaluate { project ->
@@ -37,3 +37,5 @@ afterEvaluate { project ->
     outputFormat = 'gfm'
   }
 }
+
+apply from: "$rootDir/gradle-mvn-publish.gradle"

@@ -91,6 +91,12 @@ internal class ClientInvocationHandler(
         .create(interfaceType.java)
   }.toMap()
 
+  init {
+    require(actionsByMethod.isNotEmpty()) {
+      "$interfaceType is not a Retrofit interface (no @POST or @GET methods)"
+    }
+  }
+
   private fun getEndpointMediaTypes(methodName: String): List<String> {
     val headers =
         interfaceType.memberFunctions.find { it.name == methodName }?.findAnnotation<Headers>()
@@ -190,10 +196,10 @@ internal class ClientInvocationHandler(
   }
 }
 
-private class NetworkInterceptorWrapper(
+internal class NetworkInterceptorWrapper(
   val action: ClientAction,
   val interceptor: ClientNetworkInterceptor
-) : okhttp3.Interceptor {
+) : Interceptor {
   override fun intercept(chain: Interceptor.Chain): okhttp3.Response {
     return interceptor.intercept(RealClientNetworkChain(chain, action))
   }

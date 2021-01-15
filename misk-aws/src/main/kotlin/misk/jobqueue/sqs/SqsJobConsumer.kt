@@ -19,7 +19,6 @@ import misk.tasks.RepeatedTaskQueue
 import misk.tasks.Status
 import misk.time.timed
 import misk.tracing.traceWithNewRootSpan
-import misk.tracing.traceWithSpan
 import java.time.Duration
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ConcurrentHashMap
@@ -79,13 +78,7 @@ internal class SqsJobConsumer @Inject internal constructor(
 
     fun run(): Status {
       // Receive messages in parallel. Default to 1 if feature flag is not defined.
-      val numReceivers = receiversForQueue()
-      val futures = (1..numReceivers)
-          .filter { num ->
-            val lease = leaseManager.requestLease("sqs-job-consumer-${queue.name.value}-$num")
-            !config.clustered_consumers || lease.checkHeld()
-          }
-          .map {
+      val futures = receiverIds().map {
             CompletableFuture.supplyAsync(Supplier {
               receive()
             }, receivingThreads)
@@ -105,6 +98,26 @@ internal class SqsJobConsumer @Inject internal constructor(
               }
             }
       }.join()
+    }
+
+    /**
+     * List containing arbitrary numbers. The size of the list is the number of receivers to use.
+     */
+    private fun receiverIds(): List<Int> {
+      val numReceiversPerPodForQueue = receiversPerPodForQueue()
+      val shouldUsePerPodConfig = numReceiversPerPodForQueue >= 0
+      if (shouldUsePerPodConfig) {
+        return (1..numReceiversPerPodForQueue).toList()
+      }
+      return (1..receiversForQueue())
+          .filter { num ->
+            val lease = leaseManager.requestLease("sqs-job-consumer-${queue.name.value}-$num")
+            lease.checkHeld()
+          }
+    }
+
+    private fun receiversPerPodForQueue(): Int {
+      return featureFlags.getInt(POD_CONSUMERS_PER_QUEUE, queue.queueName)
     }
 
     private fun receiversForQueue(): Int {
@@ -180,6 +193,7 @@ internal class SqsJobConsumer @Inject internal constructor(
 
   companion object {
     private val log = getLogger<SqsJobConsumer>()
+    internal val POD_CONSUMERS_PER_QUEUE = Feature("pod-jobqueue-consumers")
     internal val CONSUMERS_PER_QUEUE = Feature("jobqueue-consumers")
     private val ORIGINAL_TRACE_ID_TAG = StringTag("original.trace_id")
   }

@@ -2,16 +2,16 @@ package misk.hibernate.migrate
 
 import com.google.common.collect.ImmutableList
 import com.google.common.collect.ImmutableSet
-import misk.hibernate.Check
+import misk.jdbc.Check
 import misk.hibernate.DbChild
 import misk.hibernate.DbRoot
 import misk.hibernate.DbTimestampedEntity
 import misk.hibernate.Id
-import misk.hibernate.Keyspace
+import misk.vitess.Keyspace
 import misk.hibernate.PersistenceMetadata
 import misk.hibernate.Session
-import misk.hibernate.Shard
-import misk.hibernate.Shard.Companion.SINGLE_KEYSPACE
+import misk.vitess.Shard
+import misk.vitess.Shard.Companion.SINGLE_KEYSPACE
 import misk.hibernate.Transacter
 import misk.hibernate.shards
 import misk.jdbc.DataSourceType
