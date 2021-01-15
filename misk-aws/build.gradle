@@ -22,6 +22,7 @@ dependencies {
   testImplementation dep.docker
   testImplementation dep.awaitility
   testImplementation project(':misk-testing')
+  testImplementation project(':misk-aws-testing')
   testImplementation project(':misk-feature-testing')
 }
 
