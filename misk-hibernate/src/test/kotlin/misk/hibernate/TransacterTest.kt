@@ -1,14 +1,6 @@
 package misk.hibernate
 
-import io.opentracing.mock.MockTracer
-import io.opentracing.tag.Tags
 import misk.exceptions.UnauthorizedException
-import misk.hibernate.RealTransacter.Companion.APPLICATION_TRANSACTION_SPAN_NAME
-import misk.hibernate.RealTransacter.Companion.DB_BEGIN_SPAN_NAME
-import misk.hibernate.RealTransacter.Companion.DB_COMMIT_SPAN_NAME
-import misk.hibernate.RealTransacter.Companion.DB_ROLLBACK_SPAN_NAME
-import misk.hibernate.RealTransacter.Companion.DB_TRANSACTION_SPAN_NAME
-import misk.hibernate.RealTransacter.Companion.TRANSACTER_SPAN_TAG
 import misk.jdbc.DataSourceType
 import misk.jdbc.uniqueString
 import misk.logging.LogCollector
@@ -31,7 +23,6 @@ import kotlin.test.assertFailsWith
 abstract class TransacterTest {
   @Inject @Movies lateinit var transacter: Transacter
   @Inject lateinit var queryFactory: Query.Factory
-  @Inject lateinit var tracer: MockTracer
   @Inject lateinit var logCollector: LogCollector
 
   @Test
@@ -117,9 +108,9 @@ abstract class TransacterTest {
   }
 
   // TODO TiDB are working on fixing this bug: https://github.com/pingcap/tidb/issues/13791
-  private fun hasDateBug() = transacter.config().type == DataSourceType.TIDB
+  protected fun hasDateBug() = transacter.config().type == DataSourceType.TIDB
 
-  private fun createTestData() {
+  protected fun createTestData() {
     // Insert some movies, characters and actors.
     transacter.allowCowrites().transaction { session ->
       val jp = session.save(DbMovie("Jurassic Park", LocalDate.of(1993, 6, 9)))
@@ -539,30 +530,6 @@ abstract class TransacterTest {
   }
 
   @Test
-  fun committedTransactionsTraceSuccess() {
-    tracer.reset()
-
-    transacter.transaction {
-      // No need to do anything
-    }
-
-    tracingAssertions(true)
-  }
-
-  @Test
-  fun rolledbackTransactionsTraceError() {
-    tracer.reset()
-
-    assertFailsWith<NonRetryableException> {
-      transacter.transaction {
-        throw NonRetryableException()
-      }
-    }
-
-    tracingAssertions(false)
-  }
-
-  @Test
   fun preCommitHooksCalledPriorToCommit() {
     val preCommitHooksTriggered = mutableListOf<String>()
     lateinit var cid: Id<DbMovie>
@@ -796,38 +763,6 @@ abstract class TransacterTest {
     assertThat(movies[0].release_date == LocalDate.of(1977, 5, 25))
   }
 
-  private fun tracingAssertions(committed: Boolean) {
-    // Assert on span, implicitly asserting that it's complete by looking at finished spans
-    val orderedSpans = tracer.finishedSpans().sortedBy { it.context().spanId() }
-    assertThat(orderedSpans).hasSize(4)
-
-    assertThat(orderedSpans.get(0).operationName())
-        .isEqualTo(APPLICATION_TRANSACTION_SPAN_NAME)
-    assertThat(orderedSpans.get(0).tags())
-        .containsEntry(Tags.COMPONENT.getKey(), TRANSACTER_SPAN_TAG)
-
-    assertThat(orderedSpans.get(1).operationName())
-        .isEqualTo(DB_TRANSACTION_SPAN_NAME)
-    assertThat(orderedSpans.get(1).tags())
-        .containsEntry(Tags.COMPONENT.getKey(), TRANSACTER_SPAN_TAG)
-
-    assertThat(orderedSpans.get(2).operationName())
-        .isEqualTo(DB_BEGIN_SPAN_NAME)
-    assertThat(orderedSpans.get(2).tags())
-        .containsEntry(Tags.COMPONENT.getKey(), TRANSACTER_SPAN_TAG)
-
-    if (committed) {
-      assertThat(orderedSpans.get(3).operationName()).isEqualTo(DB_COMMIT_SPAN_NAME)
-    } else {
-      assertThat(orderedSpans.get(3).operationName()).isEqualTo(DB_ROLLBACK_SPAN_NAME)
-    }
-    assertThat(orderedSpans.get(3).tags())
-        .containsEntry(Tags.COMPONENT.getKey(), TRANSACTER_SPAN_TAG)
-
-    // There should be no on-going span
-    assertThat(tracer.activeSpan()).isNull()
-  }
-
   class NonRetryableException : Exception()
 }
 
@@ -854,12 +789,6 @@ class CockroachTransacterTest : TransacterTest() {
 class TidbTransacterTest : TransacterTest() {
   @MiskTestModule
   val module = MoviesTestModule(DataSourceType.TIDB)
-}
-
-@MiskTest(startService = true)
-class VitessTransacterTest : TransacterTest() {
-  @MiskTestModule
-  val module = MoviesTestModule(DataSourceType.VITESS)
 }
 
 @MiskTest(startService = true)

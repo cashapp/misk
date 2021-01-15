@@ -59,6 +59,7 @@ abstract class AbstractRebalancingTest(
     }
 
     val httpClient = okHttpClient.newBuilder()
+        .retryOnConnectionFailure(true)
         .protocols(protocolsList)
         .addNetworkInterceptor {
           connections += it.connection()!!

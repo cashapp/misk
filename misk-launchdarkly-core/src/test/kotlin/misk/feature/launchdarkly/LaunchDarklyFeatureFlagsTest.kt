@@ -135,6 +135,11 @@ internal class LaunchDarklyFeatureFlagsTest {
     }
   }
 
+  enum class Dinosaur {
+    PTERODACTYL,
+    TYRANNOSAURUS
+  }
+
   @Test
   fun attributes() {
     Mockito
@@ -179,10 +184,5 @@ internal class LaunchDarklyFeatureFlagsTest {
     // meaningful output, given that LDUser does not override toString. Doing a field-by-field comparison is overkill
     // for the test to pass but produces output that identifies the problematic attribute(s) when the test fails.
     assertThat(user).isEqualToComparingFieldByField(expected)
-  }
-
-  enum class Dinosaur {
-    PTERODACTYL,
-    TYRANNOSAURUS
   }
 }

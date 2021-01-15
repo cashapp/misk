@@ -43,6 +43,9 @@ subprojects { subProject ->
   repositories {
     mavenCentral()
     jcenter()
+    maven {
+      url "https://s3-us-west-2.amazonaws.com/dynamodb-local/release"
+    }
   }
   compileKotlin {
     kotlinOptions {
@@ -100,7 +103,7 @@ subprojects { subProject ->
     apply from: rootProject.file("hooks.gradle")
   }
 
-  if (["misk-aws","misk-events","misk-jobqueue","misk-jobqueue-testing","misk-hibernate","misk-hibernate-testing"].contains(name)) {
+  if (["misk-aws","misk-events","misk-jobqueue","misk-jobqueue-testing","misk-jdbc","misk-jdbc-testing","misk-hibernate","misk-hibernate-testing"].contains(name)) {
     rootProject.getTasksByName("testShardHibernate", false).first().dependsOn.add(test)
   } else {
     rootProject.getTasksByName("testShardNonHibernate", false).first().dependsOn.add(test)

@@ -11,6 +11,7 @@ import misk.hibernate.Session
  * any events published to the spool. Events are asynchronously forwarded from the spool
  * to the event stream, and are done so through a [Producer] transaction.
  */
+@Deprecated("This API is no longer supported and replaced by the new event system's client library")
 interface SpooledProducer {
   /**
    * Publishes events to a sharded spool.

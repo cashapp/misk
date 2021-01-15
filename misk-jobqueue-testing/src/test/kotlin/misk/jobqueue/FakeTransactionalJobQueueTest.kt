@@ -155,13 +155,49 @@ internal class FakeTransactionalJobQueueTest {
     assertThat(fakeTransactionalJobQueue.peekJobs(CRASHER_QUEUE)).isEmpty()
 
     // If we retry at least once, it will complete the job the second time around.
-    assertThat(fakeTransactionalJobQueue.peekJobs(CRASHER_QUEUE)).isEmpty()
     transacter.transaction { session ->
       unitEnqueuer.enqueue(session, Unit.MEDIVAC, CRASHER_QUEUE)
     }
     assertThat(fakeTransactionalJobQueue.peekJobs(CRASHER_QUEUE)).hasSize(1)
     fakeTransactionalJobQueue.handleJobs(CRASHER_QUEUE, assertAcknowledged = true, retries = 2)
     assertThat(fakeTransactionalJobQueue.peekJobs(CRASHER_QUEUE)).isEmpty()
+  }
+
+  @Test fun exceptionsGoToDeadletter() {
+    // The job will fail on its first run.
+    assertThat(fakeTransactionalJobQueue.peekJobs(CRASHER_QUEUE)).isEmpty()
+    transacter.transaction { session ->
+      unitEnqueuer.enqueue(session, Unit.MEDIVAC, CRASHER_QUEUE)
+    }
+    assertThat(fakeTransactionalJobQueue.peekJobs(CRASHER_QUEUE)).hasSize(1)
+    assertThat(fakeTransactionalJobQueue.peekDeadlettered(CRASHER_QUEUE)).hasSize(0)
+    assertFailsWith<UnitException> {
+      fakeTransactionalJobQueue.handleJobs(CRASHER_QUEUE, assertAcknowledged = true, retries = 1)
+    }
+    assertThat(fakeTransactionalJobQueue.peekJobs(CRASHER_QUEUE)).isEmpty()
+    assertThat(fakeTransactionalJobQueue.peekDeadlettered(CRASHER_QUEUE)).hasSize(1)
+
+    // If we retry at least once, it will complete the job the second time around.
+    fakeTransactionalJobQueue.reprocessDeadlettered(CRASHER_QUEUE, assertAcknowledged = true)
+    assertThat(fakeTransactionalJobQueue.peekJobs(CRASHER_QUEUE)).isEmpty()
+    assertThat(fakeTransactionalJobQueue.peekDeadlettered(CRASHER_QUEUE)).isEmpty()
+  }
+
+  @Test fun deadletterGoesToDeadletter() {
+    assertThat(fakeTransactionalJobQueue.peekJobs(DEADLETTER_QUEUE)).isEmpty()
+    transacter.transaction { session ->
+      unitEnqueuer.enqueue(session, Unit.MEDIVAC, DEADLETTER_QUEUE)
+    }
+    assertThat(fakeTransactionalJobQueue.peekJobs(DEADLETTER_QUEUE)).hasSize(1)
+    assertThat(fakeTransactionalJobQueue.peekDeadlettered(DEADLETTER_QUEUE)).hasSize(0)
+    fakeTransactionalJobQueue.handleJobs(DEADLETTER_QUEUE, assertAcknowledged = false, retries = 1)
+
+    assertThat(fakeTransactionalJobQueue.peekJobs(DEADLETTER_QUEUE)).isEmpty()
+    assertThat(fakeTransactionalJobQueue.peekDeadlettered(DEADLETTER_QUEUE)).hasSize(1)
+    assertThat(fakeTransactionalJobQueue.reprocessDeadlettered(DEADLETTER_QUEUE, false)).hasSize(1)
+
+    // After reprocessing, all jobs returned to the deadletter queue again.
+    assertThat(fakeTransactionalJobQueue.peekDeadlettered(DEADLETTER_QUEUE)).hasSize(1)
   }
 }
 
@@ -176,6 +212,7 @@ private class TransactionalJobQueueTestModule : KAbstractModule() {
     install(FakeJobHandlerModule.create<Factory>(FACTORY_QUEUE))
     install(FakeJobHandlerModule.create<Starport>(STARPORT_QUEUE))
     install(FakeJobHandlerModule.create<Crasher>(CRASHER_QUEUE))
+    install(FakeJobHandlerModule.create<Deadletter>(DEADLETTER_QUEUE))
     install(FakeJobQueueModule())
   }
 }
@@ -183,6 +220,7 @@ private class TransactionalJobQueueTestModule : KAbstractModule() {
 private val FACTORY_QUEUE = QueueName("factory_queue")
 private val STARPORT_QUEUE = QueueName("starport_queue")
 private val CRASHER_QUEUE = QueueName("crasher_queue")
+private val DEADLETTER_QUEUE = QueueName("deadletter_queue")
 
 private enum class Unit {
   HELLION,
@@ -240,14 +278,21 @@ private class Starport @Inject private constructor(moshi: Moshi) : JobHandler {
   }
 }
 
-private class Crasher @Inject private constructor(val tokenGenerator: TokenGenerator) : JobHandler {
-
+private class Crasher @Inject private constructor(
+  val tokenGenerator: TokenGenerator
+) : JobHandler {
   override fun handleJob(job: Job) {
     // Tokens are generated once per test run, starting from 1.
     if (tokenGenerator.generate().endsWith("1")) {
       throw UnitException()
     }
     job.acknowledge()
+  }
+}
+
+private class Deadletter @Inject private constructor() : JobHandler {
+  override fun handleJob(job: Job) {
+    job.deadLetter()
   }
 }
 

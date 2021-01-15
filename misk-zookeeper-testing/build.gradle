@@ -15,17 +15,22 @@ allOpen {
 }
 
 dependencies {
-  compile(dep.curatorFramework) {
+  implementation(dep.curatorFramework) {
     exclude(group: 'org.slf4j', module: 'slf4j-log4j12')
     exclude(group: 'log4j', module: 'log4j')
   }
-  compile(dep.zookeeper) {
+  implementation(dep.zookeeper) {
     exclude(group: 'org.slf4j', module: 'slf4j-log4j12')
     exclude(group: 'log4j', module: 'log4j')
   }
-  compile dep.docker
-  compile project(':misk-testing')
-  compile project(':misk-zookeeper')
+  implementation dep.docker
+  implementation dep.guice
+  implementation project(':misk')
+  implementation project(':misk-core')
+  implementation project(':misk-inject')
+  implementation project(':misk-service')
+  implementation project(':misk-testing')
+  implementation project(':misk-zookeeper')
 }
 
 afterEvaluate { project ->
@@ -34,3 +39,5 @@ afterEvaluate { project ->
     outputFormat = 'gfm'
   }
 }
+
+apply from: "$rootDir/gradle-mvn-publish.gradle"

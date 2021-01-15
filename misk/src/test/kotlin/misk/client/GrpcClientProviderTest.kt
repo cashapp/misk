@@ -1,5 +1,6 @@
 package misk.client
 
+import com.google.inject.Guice
 import com.google.inject.Provides
 import com.google.inject.name.Names
 import com.squareup.protos.test.grpc.HelloReply
@@ -11,7 +12,9 @@ import com.squareup.wire.GrpcClient
 import com.squareup.wire.GrpcMethod
 import com.squareup.wire.Service
 import com.squareup.wire.WireRpc
+import misk.MiskTestingServiceModule
 import misk.inject.KAbstractModule
+import misk.inject.getInstance
 import misk.security.ssl.SslLoader
 import misk.security.ssl.TrustStoreConfig
 import misk.testing.MiskTest
@@ -20,14 +23,12 @@ import misk.web.WebActionModule
 import misk.web.WebTestingModule
 import misk.web.actions.WebAction
 import misk.web.jetty.JettyService
-import okhttp3.OkHttpClient
 import okhttp3.Response
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.concurrent.LinkedBlockingDeque
 import javax.inject.Inject
-import javax.inject.Named
-import javax.inject.Provider
 import javax.inject.Singleton
 
 @MiskTest(startService = true)
@@ -35,19 +36,21 @@ internal class GrpcClientProviderTest {
   @MiskTestModule
   val module = TestModule()
 
-  @Inject @field:Named("robots") lateinit var httpClientProvider: Provider<OkHttpClient>
-  @Inject lateinit var httpClientsConfigProvider: Provider<HttpClientsConfig>
-  @Inject lateinit var httpClientConfigUrlProvider: HttpClientConfigUrlProvider
-
+  @Inject private lateinit var jetty: JettyService
+  private lateinit var robotLocator: RobotLocator
   val log = LinkedBlockingDeque<String>()
+
+  @BeforeEach
+  private fun beforeEach() {
+    val clientInjector = Guice.createInjector(ClientModule(jetty))
+    robotLocator = clientInjector.getInstance()
+  }
 
   @Test
   fun happyPath() {
-    val robotLocator = newClient(listOf(SimpleInterceptorFactory()))
-
     assertThat(log).containsExactlyInAnyOrder(
-        "create Locate[${Robot::class.qualifiedName}]: ${Warehouse::class.qualifiedName}",
-        "create SayHello[${HelloRequest::class.qualifiedName}]: ${HelloReply::class.qualifiedName}"
+        "create robots.Locate[${Robot::class.qualifiedName}]: ${Warehouse::class.qualifiedName}",
+        "create robots.SayHello[${HelloRequest::class.qualifiedName}]: ${HelloReply::class.qualifiedName}"
     )
     log.clear()
 
@@ -58,8 +61,8 @@ internal class GrpcClientProviderTest {
         .message("boop r2d2")
         .build())
     assertThat(log).containsExactly(
-        ">> SayHello /RobotLocator/SayHello",
-        "<< SayHello /RobotLocator/SayHello 200"
+        ">> robots.SayHello /RobotLocator/SayHello",
+        "<< robots.SayHello /RobotLocator/SayHello 200"
     )
     log.clear()
 
@@ -72,30 +75,33 @@ internal class GrpcClientProviderTest {
         .robots(mapOf(3 to request2))
         .build())
     assertThat(log).containsExactly(
-        ">> Locate /RobotLocator/Locate",
-        "<< Locate /RobotLocator/Locate 200"
+        ">> robots.Locate /RobotLocator/Locate",
+        "<< robots.Locate /RobotLocator/Locate 200"
     )
   }
+
 
   @Test
   fun proxyToString() {
-    val robotLocator = newClient(listOf(SimpleInterceptorFactory()))
     assertThat(robotLocator.toString()).isEqualTo("GrpcClient:${RobotLocator::class.qualifiedName}")
   }
 
-  private fun newClient(interceptorFactories: List<SimpleInterceptorFactory>): RobotLocator {
-    val grpcClientProvider = GrpcClientProvider(
-        kclass = RobotLocator::class,
-        grpcClientClass = GrpcRobotLocator::class,
-        name = "robots",
-        httpClientProvider = httpClientProvider
-    )
+  inner class ClientModule(val jetty: JettyService) : KAbstractModule() {
+    override fun configure() {
+      install(MiskTestingServiceModule())
+      install(GrpcClientModule.create<RobotLocator, GrpcRobotLocator>("robots"))
+      install(ClientNetworkInterceptorsModule())
+      multibind<ClientNetworkInterceptor.Factory>().toInstance(SimpleInterceptorFactory())
+    }
 
-    return grpcClientProvider.get(
-        baseUrl = httpClientConfigUrlProvider.getUrl(httpClientsConfigProvider.get()["robots"]),
-        httpClient = httpClientProvider.get(),
-        interceptorFactories = interceptorFactories
-    )
+    @Provides
+    @Singleton
+    fun provideHttpClientConfig(): HttpClientsConfig {
+      return HttpClientsConfig(
+          endpoints = mapOf(
+              "robots" to HttpClientEndpointConfig(jetty.httpServerUrl.toString())
+          ))
+    }
   }
 
   inner class SimpleInterceptorFactory : ClientNetworkInterceptor.Factory {

@@ -3,16 +3,18 @@ package misk.hibernate
 import misk.backoff.FlatBackoff
 import misk.backoff.retry
 import misk.hibernate.annotation.keyspace
-import misk.jdbc.CowriteException
-import misk.jdbc.FullScatterException
+import misk.jdbc.Check
+import misk.vitess.CowriteException
 import misk.jdbc.TableScanException
 import misk.jdbc.uniqueLong
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
+import misk.vitess.Shard
 import org.hibernate.SessionFactory
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import java.lang.reflect.UndeclaredThrowableException
 import java.time.LocalDate
 import javax.inject.Inject
 
@@ -150,7 +152,7 @@ class VitessScaleSafetyTest {
 
   @Test
   fun crossShardQueriesAreDetected() {
-    assertThrows<FullScatterException> {
+    assertThrows<UndeclaredThrowableException> {
       transacter.transaction { session ->
         queryFactory.newQuery<MovieQuery>()
             .releaseDateBefore(LocalDate.of(1977, 6, 15))

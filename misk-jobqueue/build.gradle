@@ -1,10 +1,10 @@
 dependencies {
-  compile dep.guava
-  compile dep.guice
-  compile dep.guiceMultibindings
-  compile project(':misk-core')
+  implementation dep.guava
+  implementation dep.guice
+  implementation dep.guiceMultibindings
+  implementation project(':misk-core')
 
-  testCompile project(':misk-testing')
+  testImplementation project(':misk-testing')
 }
 
 afterEvaluate { project ->
@@ -13,3 +13,5 @@ afterEvaluate { project ->
     outputFormat = 'gfm'
   }
 }
+
+apply from: "$rootDir/gradle-mvn-publish.gradle"
