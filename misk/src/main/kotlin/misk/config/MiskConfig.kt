@@ -16,23 +16,19 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.kotlin.MissingKotlinParameterException
 import com.google.common.base.Joiner
-import misk.environment.Environment
-import misk.logging.getLogger
-import misk.resources.ResourceLoader
-import okio.buffer
-import okio.source
-import org.apache.commons.lang3.StringUtils
 import java.io.File
 import java.io.FilenameFilter
-import java.net.URL
+import java.util.Locale
+import misk.environment.Env
+import misk.environment.Environment
+import misk.resources.ResourceLoader
+import org.apache.commons.lang3.StringUtils
 
 object MiskConfig {
-  internal val logger = getLogger<Config>()
-
   @JvmStatic
   inline fun <reified T : Config> load(
     appName: String,
-    environment: Environment,
+    environment: Env,
     overrideFiles: List<File> = listOf(),
     resourceLoader: ResourceLoader = ResourceLoader.SYSTEM
   ): T {
@@ -40,10 +36,32 @@ object MiskConfig {
   }
 
   @JvmStatic
+  @Deprecated("Use load function that takes Env")
+  inline fun <reified T : Config> load(
+    appName: String,
+    environment: String,
+    overrideFiles: List<File> = listOf(),
+    resourceLoader: ResourceLoader = ResourceLoader.SYSTEM
+  ): T {
+    return load(appName, Env(environment), overrideFiles, resourceLoader)
+  }
+
+  @JvmStatic
+  @Deprecated("the Environment enum is deprecated")
+  inline fun <reified T : Config> load(
+    appName: String,
+    environment: Environment,
+    overrideFiles: List<File> = listOf(),
+    resourceLoader: ResourceLoader = ResourceLoader.SYSTEM
+  ): T {
+    return load(T::class.java, appName, Env(environment.name), overrideFiles, resourceLoader)
+  }
+
+  @JvmStatic
   fun <T : Config> load(
     configClass: Class<out Config>,
     appName: String,
-    environment: Environment,
+    environment: Env,
     overrideFiles: List<File> = listOf(),
     resourceLoader: ResourceLoader = ResourceLoader.SYSTEM
   ): T {
@@ -53,14 +71,14 @@ object MiskConfig {
 
     val mapper = newObjectMapper(resourceLoader)
 
-    val configYamls = loadConfigYamlMap(appName, environment, overrideFiles)
+    val configYamls = loadConfigYamlMap(appName, environment, overrideFiles, resourceLoader)
     check(configYamls.values.any { it != null }) {
       "could not find configuration files - checked ${configYamls.keys}"
     }
 
     val jsonNode = flattenYamlMap(configYamls)
 
-    val configFile = "$appName-${environment.name.toLowerCase()}.yaml"
+    val configFile = "$appName-${environment.name.toLowerCase(Locale.US)}.yaml"
     try {
       @Suppress("UNCHECKED_CAST")
       return mapper.readValue(jsonNode.toString(), configClass) as T
@@ -71,11 +89,24 @@ object MiskConfig {
     } catch (e: UnrecognizedPropertyException) {
       val path = Joiner.on('.').join(e.path.map { it.fieldName })
       throw IllegalStateException(
-          "error in $configFile: '$path' not found in '${configClass.simpleName}' ${suggestSpelling(e)}", e)
+          "error in $configFile: '$path' not found in '${configClass.simpleName}' ${suggestSpelling(
+              e)}", e)
     } catch (e: Exception) {
       throw IllegalStateException(
           "failed to load configuration for $appName $environment: ${e.message}", e)
     }
+  }
+
+  @JvmStatic
+  @Deprecated("Use load function that takes Env")
+  fun <T : Config> load(
+    configClass: Class<out Config>,
+    appName: String,
+    environment: String,
+    overrideFiles: List<File> = listOf(),
+    resourceLoader: ResourceLoader = ResourceLoader.SYSTEM
+  ): T {
+    return load(configClass, appName, Env(environment), overrideFiles, resourceLoader)
   }
 
   private fun suggestSpelling(e: UnrecognizedPropertyException): String {
@@ -90,7 +121,7 @@ object MiskConfig {
     return newObjectMapper(resourceLoader).writeValueAsString(config)
   }
 
-  private fun newObjectMapper(resourceLoader: ResourceLoader) : ObjectMapper {
+  private fun newObjectMapper(resourceLoader: ResourceLoader): ObjectMapper {
     val mapper = ObjectMapper(YAMLFactory()).registerModules(
         KotlinModule(),
         JavaTimeModule())
@@ -100,6 +131,7 @@ object MiskConfig {
     mapper.registerModule(SecretJacksonModule(resourceLoader, mapper))
     return mapper
   }
+
   @JvmStatic
   fun filesInDir(
     dir: String,
@@ -137,31 +169,28 @@ object MiskConfig {
    */
   fun loadConfigYamlMap(
     appName: String,
-    environment: Environment,
-    overrideFiles: List<File>
+    environment: Env,
+    overrideFiles: List<File>,
+    resourceLoader: ResourceLoader = ResourceLoader.SYSTEM
   ): Map<String, String?> {
+
     // Load from jar files first, starting with the common config and then env specific config
     val embeddedConfigUrls = embeddedConfigFileNames(appName, environment)
-        .map { it to Config::class.java.classLoader.getResource(it) }
+        .map { "classpath:/$it" }
 
     // Load from override files second, in the order specified, only if they exist
-    val overrideFileUrls = overrideFiles
-        .filter { it.exists() }
-        .map { it.toURI().toURL().toString() to it.toURI().toURL() }
+    val overrideFileUrls = overrideFiles.map { "filesystem:${it.absoluteFile}" }
+        .filter { resourceLoader.exists(it) }
 
     // Produce a combined map of all of the results
-    return (embeddedConfigUrls + overrideFileUrls).map { it.first to it.second?.readUtf8() }.toMap()
-  }
-
-  private fun URL.readUtf8(): String {
-    return openStream().use {
-      it.source().buffer().readUtf8()
-    }
+    return (embeddedConfigUrls + overrideFileUrls)
+        .map { it to resourceLoader.utf8(it) }
+        .toMap()
   }
 
   /** @return the list of config file names in the order they should be read */
-  private fun embeddedConfigFileNames(appName: String, environment: Environment) =
-      listOf("common", environment.name.toLowerCase()).map { "$appName-$it.yaml" }
+  private fun embeddedConfigFileNames(appName: String, environment: Env) =
+      listOf("common", environment.name.toLowerCase(Locale.US)).map { "$appName-$it.yaml" }
 
   class SecretJacksonModule(val resourceLoader: ResourceLoader, val mapper: ObjectMapper) :
       SimpleModule() {
@@ -214,6 +243,13 @@ object MiskConfig {
           source
         }
         else -> {
+          // Ignore extension if we're requesting a string or a bytearray
+          if (type.rawClass == String::class.java) {
+            return source
+          } else if (type.isArrayType && type.contentType.rawClass == Byte::class.java) {
+            return source.toByteArray()
+          }
+
           check(referenceFileExtension.isNotBlank()) {
             "Secret [$reference] needs a file extension for parsing."
           }

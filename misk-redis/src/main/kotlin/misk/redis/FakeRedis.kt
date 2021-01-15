@@ -1,7 +1,7 @@
 package misk.redis
 
-import misk.time.FakeClock
 import okio.ByteString
+import java.time.Clock
 import java.time.Duration
 import java.time.Instant
 import java.util.concurrent.ConcurrentHashMap
@@ -9,10 +9,10 @@ import javax.inject.Inject
 
 /** Mimics a Redis instance for testing. */
 class FakeRedis : Redis {
-  @Inject lateinit var clock: FakeClock
+  @Inject lateinit var clock: Clock
 
   // The value type stored in our key-value store.
-  private data class Value (
+  private data class Value(
     val data: ByteString,
     val expiryInstant: Instant
   )
@@ -31,6 +31,18 @@ class FakeRedis : Redis {
   override fun del(vararg keys: String): Int {
     // Call delete on each key and count how many were successful
     return keys.count { del(it) }
+  }
+
+  override fun mget(vararg keys: String): List<ByteString?> {
+    return keys.map { get(it) }
+  }
+
+  override fun mset(vararg keyValues: ByteString) {
+    require(keyValues.size % 2 == 0) { "Wrong number of arguments to mset" }
+
+    (0 until keyValues.size step 2).forEach {
+      set(keyValues[it].utf8(), keyValues[it + 1])
+    }
   }
 
   override fun get(key: String): ByteString? {

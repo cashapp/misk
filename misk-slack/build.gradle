@@ -1,0 +1,32 @@
+dependencies {
+  implementation dep.guice
+  implementation dep.loggingApi
+  implementation dep.retrofit
+  implementation dep.retrofitMoshi
+  implementation dep.retrofitProtobuf
+  implementation dep.retrofitWire
+  implementation dep.moshiKotlin
+  implementation project(':misk')
+  implementation project(':misk-core')
+  implementation project(':misk-inject')
+
+  testImplementation dep.assertj
+  testImplementation dep.junit4Api
+  testImplementation dep.junitApi
+  testImplementation dep.junitEngine
+  testImplementation dep.junitParams
+  testImplementation project(':misk-testing')
+  testImplementation project(':misk-gcp-testing')
+  testImplementation (dep.okHttpMockWebServer) {
+    exclude group: 'junit'
+  }
+}
+
+afterEvaluate { project ->
+  project.tasks.dokka {
+    outputDirectory = "$rootDir/docs/0.x"
+    outputFormat = 'gfm'
+  }
+}
+
+apply from: "$rootDir/gradle-mvn-publish.gradle"

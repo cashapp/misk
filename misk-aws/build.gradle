@@ -1,14 +1,35 @@
 dependencies {
-  compile dep.awsApi
-  compile dep.awsSqs
-  compile dep.tracingJaeger
-  compile project(':misk')
-  compile project(':misk-jobqueue')
+  implementation dep.guice
+  implementation dep.loggingApi
+  implementation dep.awsDynamodb
+  implementation dep.awsSqs
+  implementation dep.openTracingDatadog
+  implementation dep.prometheusClient
+  implementation project(':misk')
+  implementation project(':misk-core')
+  implementation project(':misk-inject')
+  implementation project(':misk-metrics')
+  implementation project(':misk-hibernate')
+  implementation project(':misk-jobqueue')
+  implementation project(':misk-feature')
+  implementation project(':misk-service')
+  implementation project(':misk-transactional-jobqueue')
 
-  testCompile dep.assertj
-  testCompile dep.junitApi
-  testCompile dep.junitEngine
-  testCompile dep.junitParams
-  testCompile dep.docker
-  testCompile project(':misk-testing')
+  testImplementation dep.assertj
+  testImplementation dep.junitApi
+  testImplementation dep.junitEngine
+  testImplementation dep.junitParams
+  testImplementation dep.docker
+  testImplementation dep.awaitility
+  testImplementation project(':misk-testing')
+  testImplementation project(':misk-feature-testing')
 }
+
+afterEvaluate { project ->
+  project.tasks.dokka {
+    outputDirectory = "$rootDir/docs/0.x"
+    outputFormat = 'gfm'
+  }
+}
+
+apply from: "$rootDir/gradle-mvn-publish.gradle"

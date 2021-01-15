@@ -1,10 +1,9 @@
-apply from: rootProject.file("gradle/localdb.gradle")
-
 sourceSets {
   main.resources {
     srcDirs += [
+      'web/tabs/admin-dashboard/lib',
       'web/tabs/config/lib',
-      'web/tabs/loader/lib',
+      'web/tabs/database/lib',
       'web/tabs/web-actions/lib',
     ]
     exclude '**/node_modules'
@@ -12,46 +11,73 @@ sourceSets {
 }
 
 dependencies {
-  compile dep.kotlinStdLib
-  compile dep.kotlinTest
-  compile dep.bouncycastle
-  compile dep.guava
-  compile dep.guice
-  compile dep.guiceMultibindings
-  compile dep.javaxInject
-  compile dep.okHttp
-  compile dep.okio
-  compile dep.kotlinReflection
-  compile dep.moshi
-  compile dep.jettyHttp2
-  compile dep.jettyServer
-  compile dep.servletApi
-  compile dep.jettyAlpnJava
-  compile dep.jettyServlet
-  compile dep.jettyWebsocketServlet
-  compile dep.jettyWebsocketServer
-  compile dep.kubernetesClient
-  compile dep.wireRuntime
-  compile dep.loggingApi
-  compile dep.jacksonDatabind
-  compile dep.jacksonDataformatYaml
-  compile dep.jacksonKotlin
-  compile dep.jacksonJsr310
-  compile dep.jCommander
-  compile dep.openTracing
-  compile dep.openTracingUtil
-  compile dep.openTracingOkHttp
-  compile dep.retrofit
-  compile dep.retrofitMoshi
-  compile dep.retrofitWire
-  compile dep.logbackClassic
-  compile dep.slf4jApi
-  compile dep.jaxbApi
-  compile dep.prometheusClient
-  compile dep.prometheusHotspot
-  compile dep.jnrUnixsocket
+  implementation dep.kotlinStdLibJdk8
+  implementation dep.bouncycastle
+  implementation dep.guava
+  implementation dep.guice
+  implementation dep.guiceMultibindings
+  implementation dep.javaxInject
+  implementation dep.okHttp
+  implementation dep.okio
+  implementation dep.kotlinReflection
+  implementation dep.moshiCore
+  implementation dep.moshiKotlin
+  implementation dep.moshiAdapters
+  implementation dep.jettyHttp2
+  implementation dep.jettyServer
+  implementation dep.jettyUnixSocket
+  implementation dep.servletApi
+  implementation dep.jettyAlpnJava
+  implementation dep.jettyServlet
+  implementation dep.jettyServlets
+  implementation dep.jettyWebsocketServlet
+  implementation dep.jettyWebsocketServer
+  implementation dep.kubernetesClient
+  implementation dep.loggingApi
+  implementation dep.wireGrpcClient
+  implementation dep.wireRuntime
+  implementation dep.jacksonDatabind
+  implementation dep.jacksonDataformatYaml
+  implementation dep.jacksonKotlin
+  implementation dep.jacksonJsr310
+  implementation dep.jCommander
+  implementation dep.openTracing
+  implementation dep.openTracingUtil
+  implementation dep.openTracingOkHttp
+  implementation dep.retrofit
+  implementation dep.retrofitMoshi
+  implementation dep.retrofitProtobuf
+  implementation dep.retrofitWire
+  implementation dep.jaxbApi
+  implementation dep.prometheusClient
+  implementation dep.prometheusHotspot
+  implementation dep.jnrUnixsocket
+  implementation dep.concurrencyLimitsCore
+  implementation project(':misk-actions')
+  implementation project(':misk-core')
+  implementation project(':misk-inject')
+  implementation project(':misk-metrics')
+  implementation project(':misk-prometheus')
+  implementation project(':misk-service')
 
-  testCompile dep.kotlinxCoroutines
-  testCompile dep.mockitoCore
-  testCompile project(':misk-testing')
+  testImplementation dep.kotlinxCoroutines
+  testImplementation dep.mockitoCore
+  testImplementation project(':misk-testing')
+  testImplementation dep.junit4Api
+  testImplementation dep.assertj
+  testImplementation dep.kotlinTest
+  testImplementation (dep.okHttpMockWebServer) {
+    exclude group: 'junit'
+  }
+  testImplementation dep.openTracingMock
+  testImplementation dep.guavaTestLib
 }
+
+afterEvaluate { project ->
+  project.tasks.dokka {
+    outputDirectory = "$rootDir/docs/0.x"
+    outputFormat = 'gfm'
+  }
+}
+
+apply from: "$rootDir/gradle-mvn-publish.gradle"

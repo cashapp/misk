@@ -6,6 +6,7 @@ import misk.MiskTestingServiceModule
 import misk.clustering.Cluster
 import misk.clustering.fake.FakeCluster
 import misk.clustering.lease.Lease
+import misk.clustering.weights.FakeClusterWeight
 import misk.mockito.Mockito
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
@@ -21,7 +22,7 @@ import org.junit.jupiter.api.Test
 import org.mockito.Mockito.reset
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
-import org.mockito.Mockito.verifyZeroInteractions
+import org.mockito.Mockito.verifyNoMoreInteractions
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
@@ -29,11 +30,12 @@ import javax.inject.Inject
 
 @MiskTest(startService = true)
 internal class ZkLeaseTest {
-  @MiskTestModule private val module = Modules.combine(MiskTestingServiceModule(), ZkTestModule())
+  @MiskTestModule private val module = Modules.combine(MiskTestingServiceModule(), ZkLeaseTestModule())
 
   @Inject lateinit var cluster: FakeCluster
   @Inject lateinit var leaseManager: ZkLeaseManager
-  @Inject lateinit var curator: CuratorFramework
+  @Inject @ForZkLease lateinit var curator: CuratorFramework
+  @Inject lateinit var clusterWeight: FakeClusterWeight
   lateinit var leaseNamespace: String
   lateinit var leasePath: String
 
@@ -83,6 +85,18 @@ internal class ZkLeaseTest {
     assertThat(curator.checkExists().forPath(leasePath.asZkPath)).isNull()
   }
 
+  @Test fun releasesLeaseAfterClusterWeightChanges() {
+    cluster.resourceMapper.addMapping(leasePath, self)
+
+    val lease = leaseManager.requestLease(LEASE_NAME)
+    assertThat(lease.checkHeld()).isTrue()
+
+    clusterWeight.setClusterWeight(0)
+    leaseManager.checkAllLeases()
+
+    assertThat(lease.checkHeld()).isFalse()
+  }
+
   @Test fun releasesAcquiredLeaseIfMappingChangesAwayFromSelf() {
     cluster.resourceMapper.addMapping(leasePath, self)
 
@@ -130,8 +144,7 @@ internal class ZkLeaseTest {
     val lease = leaseManager.requestLease(LEASE_NAME)
     assertThat(lease.checkHeld()).isTrue()
 
-    // Fake a disconnect from zk
-    leaseManager.handleConnectionStateChanged(false)
+    curator.close()
 
     // Should no longer hold the lease
     assertThat(lease.checkHeld()).isFalse()
@@ -143,14 +156,12 @@ internal class ZkLeaseTest {
     val lease = leaseManager.requestLease(LEASE_NAME)
     assertThat(lease.checkHeld()).isTrue()
 
-    // Fake a disconnect from zk
-    leaseManager.handleConnectionStateChanged(false)
+    curator.zookeeperClient.reset()
 
     // Should no longer hold the lease
     assertThat(lease.checkHeld()).isFalse()
 
-    // Reconnect to zk
-    leaseManager.handleConnectionStateChanged(true)
+    curator.zookeeperClient.blockUntilConnectedOrTimedOut()
 
     // Should reacquire the lease
     assertThat(lease.checkHeld()).isTrue()
@@ -224,12 +235,12 @@ internal class ZkLeaseTest {
     val lease = leaseManager.requestLease(LEASE_NAME)
     lease.addListener(listenerMock)
     assertThat(lease.checkHeld()).isFalse()
-    verifyZeroInteractions(listenerMock)
+    verifyNoMoreInteractions(listenerMock)
 
     // Assign the lease to this node
     cluster.resourceMapper.addMapping(leasePath, self)
 
-    verifyZeroInteractions(listenerMock)
+    verifyNoMoreInteractions(listenerMock)
     // checkHeld() should trigger the lease to be acquired
     assertThat(lease.checkHeld()).isTrue()
     verify(listenerMock, times(1)).afterAcquire(lease)
@@ -238,7 +249,7 @@ internal class ZkLeaseTest {
     // Further calls to checkHeld() should not trigger events because the lease does not change
     assertThat(lease.checkHeld()).isTrue()
     assertThat(lease.checkHeld()).isTrue()
-    verifyZeroInteractions(listenerMock)
+    verifyNoMoreInteractions(listenerMock)
     reset(listenerMock)
 
     // Fake a cluster change which moves the lease to another process

@@ -12,8 +12,8 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class FakeEventListener @Inject constructor()
-  : PreLoadEventListener, PreInsertEventListener, PreUpdateEventListener, PreDeleteEventListener {
+class FakeEventListener @Inject constructor() :
+  PreLoadEventListener, PreInsertEventListener, PreUpdateEventListener, PreDeleteEventListener {
   private val eventLog = mutableListOf<String>()
 
   override fun onPreLoad(event: PreLoadEvent) {

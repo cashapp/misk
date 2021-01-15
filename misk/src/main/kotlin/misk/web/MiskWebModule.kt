@@ -1,13 +1,16 @@
 package misk.web
 
-import com.google.common.util.concurrent.Service
+import com.google.inject.Provider
 import com.google.inject.Provides
 import com.google.inject.TypeLiteral
 import misk.ApplicationInterceptor
 import misk.MiskCaller
 import misk.MiskDefault
+import misk.ServiceModule
 import misk.exceptions.ActionException
+import misk.grpc.GrpcFeatureBinding
 import misk.inject.KAbstractModule
+import misk.queuing.TimedBlockingQueue
 import misk.scope.ActionScopedProvider
 import misk.scope.ActionScopedProviderModule
 import misk.security.authz.MiskCallerAuthenticator
@@ -19,54 +22,72 @@ import misk.web.actions.ReadinessCheckAction
 import misk.web.actions.StatusAction
 import misk.web.exceptions.ActionExceptionLogLevelConfig
 import misk.web.exceptions.ActionExceptionMapper
+import misk.web.exceptions.EofExceptionMapper
 import misk.web.exceptions.ExceptionHandlingInterceptor
 import misk.web.exceptions.ExceptionMapperModule
-import misk.web.extractors.FormValueParameterExtractorFactory
-import misk.web.extractors.HeadersParameterExtractorFactory
-import misk.web.extractors.ParameterExtractor
-import misk.web.extractors.PathPatternParameterExtractorFactory
-import misk.web.extractors.QueryStringParameterExtractorFactory
-import misk.web.extractors.RequestBodyParameterExtractor
-import misk.web.extractors.WebSocketParameterExtractorFactory
+import misk.web.exceptions.IOExceptionMapper
+import misk.web.extractors.FormValueFeatureBinding
+import misk.web.extractors.PathParamFeatureBinding
+import misk.web.extractors.QueryParamFeatureBinding
+import misk.web.extractors.RequestBodyFeatureBinding
+import misk.web.extractors.RequestHeadersFeatureBinding
+import misk.web.extractors.ResponseBodyFeatureBinding
+import misk.web.extractors.WebSocketFeatureBinding
+import misk.web.extractors.WebSocketListenerFeatureBinding
+import misk.web.interceptors.ConcurrencyLimitsInterceptor
 import misk.web.interceptors.InternalErrorInterceptorFactory
-import misk.web.interceptors.MarshallerInterceptor
 import misk.web.interceptors.MetricsInterceptor
+import misk.web.interceptors.RebalancingInterceptor
+import misk.web.interceptors.RequestBodyLoggingInterceptor
 import misk.web.interceptors.RequestLogContextInterceptor
 import misk.web.interceptors.RequestLoggingInterceptor
 import misk.web.interceptors.TracingInterceptor
 import misk.web.jetty.JettyConnectionMetricsCollector
 import misk.web.jetty.JettyService
 import misk.web.jetty.JettyThreadPoolMetricsCollector
-import misk.web.marshal.GrpcMarshaller
-import misk.web.marshal.GrpcUnmarshaller
+import misk.web.jetty.MeasuredQueuedThreadPool
+import misk.web.jetty.MeasuredThreadPool
+import misk.web.jetty.MeasuredThreadPoolExecutor
+import misk.web.jetty.ThreadPoolQueueMetrics
 import misk.web.marshal.JsonMarshaller
 import misk.web.marshal.JsonUnmarshaller
 import misk.web.marshal.Marshaller
+import misk.web.marshal.MultipartUnmarshaller
 import misk.web.marshal.PlainTextMarshaller
 import misk.web.marshal.ProtobufMarshaller
 import misk.web.marshal.ProtobufUnmarshaller
 import misk.web.marshal.Unmarshaller
 import misk.web.proxy.WebProxyEntry
 import misk.web.resources.StaticResourceEntry
+import org.eclipse.jetty.io.EofException
+import org.eclipse.jetty.server.handler.StatisticsHandler
+import org.eclipse.jetty.server.handler.gzip.GzipHandler
+import org.eclipse.jetty.util.thread.ExecutorThreadPool
 import org.eclipse.jetty.util.thread.QueuedThreadPool
+import org.eclipse.jetty.util.thread.ThreadPool
+import java.io.IOException
+import java.util.concurrent.ArrayBlockingQueue
+import java.util.concurrent.BlockingQueue
+import java.util.concurrent.SynchronousQueue
+import java.util.concurrent.ThreadPoolExecutor
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
 import javax.servlet.http.HttpServletRequest
-import java.security.Provider as SecurityProvider
 
 class MiskWebModule(private val config: WebConfig) : KAbstractModule() {
   override fun configure() {
     bind<WebConfig>().toInstance(config)
     bind<ActionExceptionLogLevelConfig>().toInstance(config.action_exception_log_level)
 
-    multibind<Service>().to<JettyService>()
-    multibind<Service>().to<JettyThreadPoolMetricsCollector>()
-    multibind<Service>().to<JettyConnectionMetricsCollector>()
+    install(ServiceModule<JettyService>())
+    install(ServiceModule<JettyThreadPoolMetricsCollector>())
+    install(ServiceModule<JettyConnectionMetricsCollector>())
 
     // Install support for accessing the current request and caller as ActionScoped types
     install(object : ActionScopedProviderModule() {
       override fun configureProviders() {
-        bindSeedData(Request::class)
+        bindSeedData(HttpCall::class)
         bindSeedData(HttpServletRequest::class)
         bindProvider(miskCallerType, MiskCallerProvider::class)
         newMultibinder<MiskCallerAuthenticator>()
@@ -77,10 +98,9 @@ class MiskWebModule(private val config: WebConfig) : KAbstractModule() {
     multibind<Marshaller.Factory>().to<PlainTextMarshaller.Factory>()
     multibind<Marshaller.Factory>().to<JsonMarshaller.Factory>()
     multibind<Marshaller.Factory>().to<ProtobufMarshaller.Factory>()
-    multibind<Marshaller.Factory>().to<GrpcMarshaller.Factory>()
     multibind<Unmarshaller.Factory>().to<JsonUnmarshaller.Factory>()
     multibind<Unmarshaller.Factory>().to<ProtobufUnmarshaller.Factory>()
-    multibind<Unmarshaller.Factory>().to<GrpcUnmarshaller.Factory>()
+    multibind<Unmarshaller.Factory>().to<MultipartUnmarshaller.Factory>()
 
     // Initialize empty sets for our multibindings.
     newMultibinder<NetworkInterceptor.Factory>()
@@ -90,6 +110,9 @@ class MiskWebModule(private val config: WebConfig) : KAbstractModule() {
 
     // Register built-in interceptors. Interceptors run in the order in which they are
     // installed, and the order of these interceptors is critical.
+
+    multibind<NetworkInterceptor.Factory>(MiskDefault::class)
+        .to<RebalancingInterceptor.Factory>()
 
     // Handle all unexpected errors that occur during dispatch
     multibind<NetworkInterceptor.Factory>(MiskDefault::class)
@@ -103,6 +126,10 @@ class MiskWebModule(private val config: WebConfig) : KAbstractModule() {
     multibind<NetworkInterceptor.Factory>(MiskDefault::class)
         .to<MetricsInterceptor.Factory>()
 
+    // Shed calls when we're degraded.
+    multibind<NetworkInterceptor.Factory>(MiskDefault::class)
+        .to<ConcurrencyLimitsInterceptor.Factory>()
+
     // Traces requests as they work their way through the system.
     multibind<NetworkInterceptor.Factory>(MiskDefault::class)
         .to<TracingInterceptor.Factory>()
@@ -111,24 +138,28 @@ class MiskWebModule(private val config: WebConfig) : KAbstractModule() {
     multibind<NetworkInterceptor.Factory>(MiskDefault::class)
         .to<ExceptionHandlingInterceptor.Factory>()
 
-    // Convert typed responses into a ResponseBody that can marshal the response according to
-    // the client's requested content-type
-    multibind<NetworkInterceptor.Factory>(MiskDefault::class)
-        .to<MarshallerInterceptor.Factory>()
-
     // Optionally log request and response details
-    multibind<ApplicationInterceptor.Factory>(MiskDefault::class)
+    multibind<NetworkInterceptor.Factory>(MiskDefault::class)
         .to<RequestLoggingInterceptor.Factory>()
 
-    install(ExceptionMapperModule.create<ActionException, ActionExceptionMapper>())
+    // Optionally log request and response body
+    multibind<ApplicationInterceptor.Factory>(MiskDefault::class)
+        .to<RequestBodyLoggingInterceptor.Factory>()
 
-    // Register built-in parameter extractors
-    multibind<ParameterExtractor.Factory>().toInstance(PathPatternParameterExtractorFactory)
-    multibind<ParameterExtractor.Factory>().toInstance(QueryStringParameterExtractorFactory)
-    multibind<ParameterExtractor.Factory>().toInstance(FormValueParameterExtractorFactory)
-    multibind<ParameterExtractor.Factory>().toInstance(HeadersParameterExtractorFactory)
-    multibind<ParameterExtractor.Factory>().toInstance(WebSocketParameterExtractorFactory)
-    multibind<ParameterExtractor.Factory>().to<RequestBodyParameterExtractor.Factory>()
+    install(ExceptionMapperModule.create<ActionException, ActionExceptionMapper>())
+    install(ExceptionMapperModule.create<IOException, IOExceptionMapper>())
+    install(ExceptionMapperModule.create<EofException, EofExceptionMapper>())
+
+    // Register built-in feature bindings.
+    multibind<FeatureBinding.Factory>().toInstance(PathParamFeatureBinding.Factory)
+    multibind<FeatureBinding.Factory>().toInstance(QueryParamFeatureBinding.Factory)
+    multibind<FeatureBinding.Factory>().toInstance(FormValueFeatureBinding.Factory)
+    multibind<FeatureBinding.Factory>().toInstance(RequestHeadersFeatureBinding.Factory)
+    multibind<FeatureBinding.Factory>().toInstance(WebSocketFeatureBinding.Factory)
+    multibind<FeatureBinding.Factory>().toInstance(WebSocketListenerFeatureBinding.Factory)
+    multibind<FeatureBinding.Factory>().to<RequestBodyFeatureBinding.Factory>()
+    multibind<FeatureBinding.Factory>().to<ResponseBodyFeatureBinding.Factory>()
+    multibind<FeatureBinding.Factory>().to<GrpcFeatureBinding.Factory>()
 
     // Install infrastructure support
     install(CertificatesModule())
@@ -139,16 +170,56 @@ class MiskWebModule(private val config: WebConfig) : KAbstractModule() {
     install(WebActionModule.create<ReadinessCheckAction>())
     install(WebActionModule.create<LivenessCheckAction>())
     install(WebActionModule.create<NotFoundAction>())
+
+    val maxThreads = config.jetty_max_thread_pool_size
+    val minThreads = Math.min(8, maxThreads)
+    val idleTimeout = 60_000
+    if (config.jetty_max_thread_pool_queue_size > 0) {
+      val threadPool = QueuedThreadPool(
+          maxThreads,
+          minThreads,
+          idleTimeout,
+          provideThreadPoolQueue(getProvider(ThreadPoolQueueMetrics::class.java)))
+      threadPool.name = "jetty-thread"
+      bind<ThreadPool>().toInstance(threadPool)
+      bind<MeasuredThreadPool>().toInstance(MeasuredQueuedThreadPool(threadPool))
+    } else {
+      val executor = ThreadPoolExecutor(
+          minThreads,
+          maxThreads,
+          idleTimeout.toLong(),
+          TimeUnit.MILLISECONDS,
+          SynchronousQueue())
+      val threadPool = ExecutorThreadPool(executor)
+      threadPool.name = "jetty-thread"
+      bind<ThreadPool>().toInstance(threadPool)
+      bind<MeasuredThreadPool>().toInstance(MeasuredThreadPoolExecutor(executor))
+    }
   }
 
   @Provides @Singleton
-  fun provideJettyThreadPool(): QueuedThreadPool {
-    return config.jetty_max_thread_pool_size?.let { QueuedThreadPool(it) } ?: QueuedThreadPool()
+  fun provideStatisticsHandler(): StatisticsHandler {
+    return StatisticsHandler()
+  }
+
+  @Provides @Singleton
+  fun provideGzipHandler(): GzipHandler {
+    return GzipHandler()
+  }
+
+  private fun provideThreadPoolQueue(metrics: Provider<ThreadPoolQueueMetrics>): BlockingQueue<Runnable> {
+    return if (config.enable_thread_pool_queue_metrics) {
+      TimedBlockingQueue(
+          config.jetty_max_thread_pool_queue_size
+      ) { d -> metrics.get().recordQueueLatency(d) }
+    } else {
+      ArrayBlockingQueue<Runnable>(config.jetty_max_thread_pool_queue_size)
+    }
   }
 
   class MiskCallerProvider @Inject constructor(
     private val authenticators: List<MiskCallerAuthenticator>
-  ): ActionScopedProvider<MiskCaller?> {
+  ) : ActionScopedProvider<MiskCaller?> {
     override fun get(): MiskCaller? {
       return authenticators.mapNotNull {
         it.getAuthenticatedCaller()

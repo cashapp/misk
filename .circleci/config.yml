@@ -14,7 +14,7 @@ jobs:
       - run:
           name: "Download and extract OpenJDK 11"
           command: |
-            mkdir -p ~/openjdk-11 && cd ~/openjdk-11 && curl -sSL https://download.java.net/java/GA/jdk11/9/GPL/openjdk-11.0.2_linux-x64_bin.tar.gz | tar -xz --strip-components 1
+            mkdir -p ~/openjdk-11 && cd ~/openjdk-11 && curl -sSL https://download.oracle.com/java/GA/jdk11/9/GPL/openjdk-11.0.2_linux-x64_bin.tar.gz | tar -xz --strip-components 1
             echo '
               export PATH="$JAVA_HOME/bin:$PATH"
               export JAVA_HOME="$HOME/openjdk-11"
@@ -74,9 +74,9 @@ jobs:
           name: "Build and test"
           command: |
             if [ "$CIRCLE_NODE_INDEX" -eq 1 ]; then
-              ./gradlew testShardHibernate -i --scan --parallel --build-cache
+              ./gradlew testShardHibernate -i --scan
             else
-              ./gradlew testShardNonHibernate -i --scan --parallel --build-cache
+              ./gradlew testShardNonHibernate -i --scan --parallel
             fi
       - run:
           name: Collect test results
@@ -109,6 +109,29 @@ jobs:
     steps:
       - checkout
       - run: sudo npm install -g @misk/cli && miskweb ci-build -e
+  docs:
+    docker:
+      - image: circleci/python:3.8.3
+    parallelism: 1
+    steps:
+      - run:
+          name: "Download and extract OpenJDK 11"
+          command: |
+            mkdir -p ~/openjdk-11 && cd ~/openjdk-11 && curl -sSL https://download.java.net/java/GA/jdk11/9/GPL/openjdk-11.0.2_linux-x64_bin.tar.gz | tar -xz --strip-components 1
+            echo '
+              export PATH="$JAVA_HOME/bin:$PATH"
+              export JAVA_HOME="$HOME/openjdk-11"
+            ' >> $BASH_ENV
+      - checkout # check out source code to working directory
+      - run: |
+          pip install mkdocs mkdocs-material
+      - run: |
+          ./gradlew dokka
+      - run: |
+          cat README.md | grep -v 'project website' > docs/index.md
+          cp CHANGELOG.md docs/changelog.md
+          cp RELEASING.md docs/releasing.md
+      - run: mkdocs build
 workflows:
   version: 2
   on_commit:
@@ -119,10 +142,12 @@ workflows:
               only: master
       - java
       - node
+      - docs
   nightly:
     jobs:
       - java
       - node
+      - docs
     triggers:
       - schedule:
           # midnight mountain time in UTC

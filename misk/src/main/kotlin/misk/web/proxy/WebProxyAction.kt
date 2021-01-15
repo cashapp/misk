@@ -5,7 +5,7 @@ import misk.scope.ActionScoped
 import misk.security.authz.Unauthenticated
 import misk.web.Get
 import misk.web.Post
-import misk.web.Request
+import misk.web.HttpCall
 import misk.web.RequestContentType
 import misk.web.Response
 import misk.web.ResponseBody
@@ -18,7 +18,7 @@ import misk.web.resources.ResourceEntryFinder
 import misk.web.resources.StaticResourceAction
 import misk.web.toMisk
 import misk.web.toResponseBody
-import okhttp3.Headers
+import okhttp3.Headers.Companion.headersOf
 import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
 import java.io.IOException
@@ -40,15 +40,15 @@ import javax.inject.Singleton
  *
  * Expected Functionality
  * - Entries following above rules are injected into action
- * - Action attempts to findEntryFromUrl incoming clientRequest paths against entries
- * - If findEntryFromUrl found, incoming clientRequest path is appended to host + port of StaticResourceEntry.server_url
+ * - Action attempts to findEntryFromUrl incoming request paths against entries
+ * - If findEntryFromUrl found, incoming request path is appended to host + port of StaticResourceEntry.server_url
  * - Else, 404
  */
 
 @Singleton
 class WebProxyAction @Inject constructor(
   private val optionalBinder: OptionalBinder,
-  @JvmSuppressWildcards private val clientRequest: ActionScoped<Request>,
+  @JvmSuppressWildcards private val clientHttpCall: ActionScoped<HttpCall>,
   private val staticResourceAction: StaticResourceAction,
   private val resourceEntryFinder: ResourceEntryFinder
 ) : WebAction {
@@ -59,30 +59,30 @@ class WebProxyAction @Inject constructor(
   @ResponseContentType(MediaTypes.ALL)
   @Unauthenticated
   fun action(): Response<ResponseBody> {
-    val request = clientRequest.get()
-    val matchedEntry = resourceEntryFinder.webProxy(request.url) as WebProxyEntry?
-        ?: return NotFoundAction.response(request.url.toString())
+    val httpCall = clientHttpCall.get()
+    val matchedEntry = resourceEntryFinder.webProxy(httpCall.url) as WebProxyEntry?
+        ?: return NotFoundAction.response(httpCall.url.toString())
     val proxyUrl = matchedEntry.web_proxy_url.newBuilder()
-        .encodedPath(request.url.encodedPath())
-        .query(request.url.query())
+        .encodedPath(httpCall.url.encodedPath)
+        .query(httpCall.url.query)
         .build()
     return forwardRequestTo(proxyUrl)
   }
 
   private fun forwardRequestTo(proxyUrl: HttpUrl): Response<ResponseBody> {
-    val request = clientRequest.get()
-    val proxyRequest = request.toOkHttp3().forwardedWithUrl(proxyUrl)
+    val httpCall = clientHttpCall.get()
+    val proxyRequest = httpCall.asOkHttpRequest().forwardedWithUrl(proxyUrl)
     return try {
       optionalBinder.proxyClient.newCall(proxyRequest).execute().toMisk()
     } catch (e: IOException) {
-      staticResourceAction.getResponse(request)
+      staticResourceAction.getResponse(httpCall)
     }
   }
 
   private fun fetchFailResponse(clientRequestUrl: HttpUrl): Response<ResponseBody> {
     return Response(
         "Failed to fetch upstream URL $clientRequestUrl".toResponseBody(),
-        Headers.of("Content-Type", MediaTypes.TEXT_PLAIN_UTF8.asMediaType().toString()),
+        headersOf("Content-Type", MediaTypes.TEXT_PLAIN_UTF8.asMediaType().toString()),
         HttpURLConnection.HTTP_UNAVAILABLE
     )
   }
@@ -91,9 +91,9 @@ class WebProxyAction @Inject constructor(
     // TODO(adrw) include the client URL/IP as the for= field for Forwarded
     return newBuilder()
         .addHeader("Forwarded", "for=; by=${HttpUrl.Builder()
-            .scheme(this.url().scheme())
-            .host(this.url().host())
-            .port(this.url().port())}")
+            .scheme(this.url.scheme)
+            .host(this.url.host)
+            .port(this.url.port)}")
         .url(newUrl)
         .build()
   }

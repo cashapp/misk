@@ -1,0 +1,25 @@
+buildscript {
+  dependencies {
+    classpath dep.kotlinNoArgPlugin
+  }
+}
+
+dependencies {
+  implementation dep.guice
+  implementation dep.guiceMultibindings
+  implementation dep.kotlinStdLibJdk8
+  implementation dep.kotlinReflection
+  implementation dep.assertj
+  implementation dep.kotlinTest
+
+  testImplementation project(':misk-testing')
+}
+
+afterEvaluate { project ->
+  project.tasks.dokka {
+    outputDirectory = "$rootDir/docs/0.x"
+    outputFormat = 'gfm'
+  }
+}
+
+apply from: "$rootDir/gradle-mvn-publish.gradle"

@@ -83,6 +83,6 @@ internal class DeterministicRoutingTest {
   private fun call(request: Request.Builder): String {
     val httpClient = OkHttpClient()
     val response = httpClient.newCall(request.build()).execute()
-    return response.body()!!.string()
+    return response.body!!.string()
   }
 }

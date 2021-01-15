@@ -9,7 +9,6 @@ import misk.web.actions.WebAction
 import misk.web.actions.WebSocket
 import misk.web.actions.WebSocketListener
 import javax.inject.Inject
-import javax.inject.Singleton
 
 /**
  * ChatWebSocketAction is a basic chat program which supports multiple chat rooms and their

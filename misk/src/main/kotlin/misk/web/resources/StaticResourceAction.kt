@@ -4,8 +4,8 @@ import misk.resources.ResourceLoader
 import misk.scope.ActionScoped
 import misk.security.authz.Unauthenticated
 import misk.web.Get
+import misk.web.HttpCall
 import misk.web.Post
-import misk.web.Request
 import misk.web.RequestContentType
 import misk.web.Response
 import misk.web.ResponseBody
@@ -14,7 +14,7 @@ import misk.web.actions.NotFoundAction
 import misk.web.actions.WebAction
 import misk.web.mediatype.MediaTypes
 import misk.web.toResponseBody
-import okhttp3.Headers
+import okhttp3.Headers.Companion.headersOf
 import okhttp3.HttpUrl
 import okio.BufferedSink
 import okio.BufferedSource
@@ -32,7 +32,7 @@ import javax.inject.Singleton
  */
 @Singleton
 class StaticResourceAction @Inject constructor(
-  @JvmSuppressWildcards private val clientRequest: ActionScoped<Request>,
+  @JvmSuppressWildcards private val clientHttpCall: ActionScoped<HttpCall>,
   private val resourceLoader: ResourceLoader,
   private val resourceEntryFinder: ResourceEntryFinder
 ) : WebAction {
@@ -43,15 +43,15 @@ class StaticResourceAction @Inject constructor(
   @ResponseContentType(MediaTypes.ALL)
   @Unauthenticated // TODO(adrw) https://github.com/square/misk/issues/429
   fun action(): Response<ResponseBody> {
-    val request = clientRequest.get()
-    return getResponse(request)
+    val httpCall = clientHttpCall.get()
+    return getResponse(httpCall)
   }
 
-  fun getResponse(request: Request): Response<ResponseBody> {
+  fun getResponse(httpCall: HttpCall): Response<ResponseBody> {
     val entry =
-        (resourceEntryFinder.staticResource(request.url) as StaticResourceEntry?
-            ?: return NotFoundAction.response(request.url.encodedPath().drop(1)))
-    return MatchedResource(entry).getResponse(request)
+        (resourceEntryFinder.staticResource(httpCall.url) as StaticResourceEntry?
+            ?: return NotFoundAction.response(httpCall.url.encodedPath.drop(1)))
+    return MatchedResource(entry).getResponse(httpCall)
   }
 
   private enum class Kind {
@@ -61,27 +61,32 @@ class StaticResourceAction @Inject constructor(
   }
 
   private inner class MatchedResource(var matchedEntry: StaticResourceEntry) {
-    fun getResponse(request: Request): Response<ResponseBody> {
-      val urlPath = request.url.encodedPath()
+    fun getResponse(httpCall: HttpCall): Response<ResponseBody> {
+      val urlPath = httpCall.url.encodedPath
       return when (exists(urlPath)) {
         Kind.NO_MATCH -> when {
-          !urlPath.endsWith("/") -> redirectResponse(normalizePathWithQuery(request.url))
-        // actually return the resource, don't redirect. Path must stay the same since this will be handled by React router
+          !urlPath.endsWith("/") -> redirectResponse(normalizePathWithQuery(httpCall.url))
+          // actually return the resource, don't redirect. Path must stay the same since this will be handled by React router
           urlPath.endsWith("/") -> resourceResponse(
-              normalizePath(matchedEntry.url_path_prefix))
+              normalizePath(matchedEntry.url_path_prefix)
+          )
           else -> null
         }
         Kind.RESOURCE -> resourceResponse(urlPath)
-        Kind.RESOURCE_DIRECTORY -> resourceResponse(normalizePathWithQuery(request.url))
-      } ?: NotFoundAction.response(request.url.encodedPath().drop(1))
+        Kind.RESOURCE_DIRECTORY -> resourceResponse(normalizePathWithQuery(httpCall.url))
+      } ?: NotFoundAction.response(httpCall.url.encodedPath.drop(1))
     }
 
     /** Returns true if the mapped path exists on either the resource path or file system. */
     private fun exists(urlPath: String): Kind {
       val resourcePath = matchedEntry.resourcePath(urlPath)
-      if (resourceLoader.exists(resourcePath)) return Kind.RESOURCE
-      if (resourceLoader.list(resourcePath).isNotEmpty()) return Kind.RESOURCE_DIRECTORY
-      return Kind.NO_MATCH
+      return when {
+        // Check if path is a directory before checking if it is a single resource
+        resourceLoader.list(resourcePath).isNotEmpty() -> Kind.RESOURCE_DIRECTORY
+        // If not a directory, check if resource 
+        resourceLoader.exists(resourcePath) -> Kind.RESOURCE
+        else -> Kind.NO_MATCH
+      }
     }
 
     /** Returns a source to the mapped path, or null if it doesn't exist. */
@@ -101,25 +106,25 @@ class StaticResourceAction @Inject constructor(
       }
     }
 
-    private fun normalizePathWithQuery(url: HttpUrl): String {
-      return if (url.encodedQuery().isNullOrEmpty()) normalizePath(url.encodedPath())
-      else normalizePath(url.encodedPath()) + "?" + url.encodedQuery()
+    private fun normalizePathWithQuery(url: HttpUrl): String = when {
+      url.encodedQuery.isNullOrEmpty() -> normalizePath(url.encodedPath)
+      else -> normalizePath(url.encodedPath) + "?" + url.encodedQuery
     }
 
-    private fun resourceResponse(resourcePath: String): Response<ResponseBody>? {
-      return when (exists(resourcePath)) {
+    private fun resourceResponse(urlPath: String): Response<ResponseBody>? {
+      return when (exists(urlPath)) {
         Kind.RESOURCE -> {
           val responseBody = object : ResponseBody {
             override fun writeTo(sink: BufferedSink) {
-              open(resourcePath)!!.use {
+              open(urlPath)!!.use {
                 sink.writeAll(it)
               }
             }
           }
           Response(
               body = responseBody,
-              headers = Headers.of("Content-Type", MediaTypes.fromFileExtension(
-                  resourcePath.substring(resourcePath.lastIndexOf('.') + 1)).toString()))
+              headers = headersOf("Content-Type", MediaTypes.fromFileExtension(
+                  urlPath.substring(urlPath.lastIndexOf('.') + 1)).toString()))
         }
         else -> null
       }
@@ -129,7 +134,7 @@ class StaticResourceAction @Inject constructor(
       return Response(
           body = "".toResponseBody(),
           statusCode = HttpURLConnection.HTTP_MOVED_TEMP,
-          headers = Headers.of("Location", urlPath))
+          headers = headersOf("Location", urlPath))
     }
   }
 }

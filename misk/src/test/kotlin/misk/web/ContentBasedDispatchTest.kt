@@ -11,7 +11,7 @@ import misk.web.mediatype.asMediaType
 import okhttp3.MediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import okhttp3.RequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import javax.inject.Inject
@@ -168,8 +168,8 @@ internal class ContentBasedDispatchTest {
     val request = newRequest("/hello", contentType, content, acceptedMediaType)
     val response = httpClient.newCall(request)
         .execute()
-    assertThat(response.code()).isEqualTo(200)
-    return response.body()!!
+    assertThat(response.code).isEqualTo(200)
+    return response.body!!
   }
 
   private fun newRequest(
@@ -179,7 +179,7 @@ internal class ContentBasedDispatchTest {
     acceptedMediaType: MediaType? = null
   ): Request {
     val request = Request.Builder()
-        .post(RequestBody.create(contentType, content))
+        .post(content.toRequestBody(contentType))
         .url(jettyService.httpServerUrl.newBuilder().encodedPath(path).build())
 
     if (acceptedMediaType != null) {

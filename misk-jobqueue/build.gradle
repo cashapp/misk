@@ -1,17 +1,17 @@
-buildscript {
-  dependencies {
-    classpath dep.kotlinNoArgPlugin
+dependencies {
+  implementation dep.guava
+  implementation dep.guice
+  implementation dep.guiceMultibindings
+  implementation project(':misk-core')
+
+  testImplementation project(':misk-testing')
+}
+
+afterEvaluate { project ->
+  project.tasks.dokka {
+    outputDirectory = "$rootDir/docs/0.x"
+    outputFormat = 'gfm'
   }
 }
 
-apply plugin: 'kotlin-jpa'
-
-dependencies {
-  compile dep.guava
-  compile dep.guice
-  compile dep.guiceMultibindings
-  compile project(':misk')
-  compile project(':misk-hibernate')
-
-  testCompile project(':misk-testing')
-}
+apply from: "$rootDir/gradle-mvn-publish.gradle"

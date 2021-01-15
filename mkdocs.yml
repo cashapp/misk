@@ -1,0 +1,67 @@
+site_name: Misk
+repo_name: Misk
+repo_url: https://github.com/cashapp/misk
+site_description: "Misk: Microservice Container for Kotlin"
+site_author: Square, Inc.
+remote_branch: gh-pages
+
+copyright: 'Copyright &copy; 2018-2021 Square, Inc.'
+
+theme:
+  name: 'material'
+  favicon: img/favicon.ico
+  logo: img/cashapp.png
+  feature:
+    tabs: false
+  palette:
+    primary: 'grey'
+    accent: 'green'
+
+extra_css:
+  - 'css/app.css'
+
+markdown_extensions:
+  - smarty
+  - codehilite:
+      guess_lang: false
+  - footnotes
+  - meta
+  - toc:
+      permalink: true
+  - pymdownx.betterem:
+      smart_enable: all
+  - pymdownx.caret
+  - pymdownx.inlinehilite
+  - pymdownx.magiclink
+  - pymdownx.smartsymbols
+  - pymdownx.superfences
+  - tables
+
+nav:
+  - 'Overview': index.md
+  - '0.x API':
+      - 'misk': 0.x/misk/index.md
+      - 'misk-aws': 0.x/misk-aws/index.md
+      - 'misk-crypto': 0.x/misk-crypto/index.md
+      - 'misk-eventrouter': 0.x/misk-eventrouter/index.md
+      - 'misk-events-core': 0.x/misk-events-core/index.md
+      - 'misk-events': 0.x/misk-events/index.md
+      - 'misk-gcp': 0.x/misk-gcp/index.md
+      - 'misk-gcp-testing': 0.x/misk-gcp-testing/index.md
+      - 'misk-grpc-tests': 0.x/misk-grpc-tests/index.md
+      - 'misk-hibernate': 0.x/misk-hibernate/index.md
+      - 'misk-hibernate-testing': 0.x/misk-hibernate-testing/index.md
+      - 'misk-inject': 0.x/misk-inject/index.md
+      - 'misk-jobqueue': 0.x/misk-jobqueue/index.md
+      - 'misk-jobqueue-testing': 0.x/misk-jobqueue-testing/index.md
+      - 'misk-metrics-digester': 0.x/misk-metrics-digester/index.md
+      - 'misk-prometheus': 0.x/misk-prometheus/index.md
+      - 'misk-redis': 0.x/misk-redis/index.md
+      - 'misk-testing': 0.x/misk-testing/index.md
+      - 'misk-zookeeper': 0.x/misk-zookeeper/index.md
+      - 'misk-zoopkeeper-testing': 0.x/misk-zoopkeeper-testing/index.md
+  - 'Change Log': changelog.md
+  - 'Releasing': releasing.md
+  - 'Manual Releasing': releasing-manual.md
+  - 'Contributing': contributing.md
+  - 'Stack Overflow ⏏': https://stackoverflow.com/questions/tagged/misk?sort=active

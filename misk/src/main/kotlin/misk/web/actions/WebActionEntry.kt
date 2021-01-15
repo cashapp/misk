@@ -1,6 +1,6 @@
 package misk.web.actions
 
-import misk.web.ValidWebEntry
+import misk.web.dashboard.ValidWebEntry
 import kotlin.reflect.KClass
 
 /**

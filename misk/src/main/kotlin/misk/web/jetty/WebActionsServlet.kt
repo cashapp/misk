@@ -1,25 +1,31 @@
 package misk.web.jetty
 
 import misk.exceptions.StatusCode
-import misk.inject.keyOf
-import misk.scope.ActionScope
+import misk.logging.getLogger
 import misk.web.BoundAction
 import misk.web.DispatchMechanism
-import misk.web.Request
+import misk.web.ServletHttpCall
+import misk.web.SocketAddress
 import misk.web.actions.WebAction
 import misk.web.actions.WebActionEntry
 import misk.web.actions.WebActionFactory
-import misk.web.actions.WebActionMetadata
-import misk.web.mediatype.MediaRange
 import misk.web.mediatype.MediaTypes
+import misk.web.metadata.webaction.WebActionMetadata
+import misk.web.metadata.webaction.WebActionMetadataAction
 import okhttp3.Headers
 import okhttp3.HttpUrl
-import okhttp3.MediaType
-import okio.Buffer
+import okhttp3.HttpUrl.Companion.toHttpUrl
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okio.buffer
+import okio.sink
 import okio.source
 import org.eclipse.jetty.http.HttpMethod
-import org.eclipse.jetty.websocket.servlet.WebSocketCreator
+import org.eclipse.jetty.http2.HTTP2Connection
+import org.eclipse.jetty.server.Request
+import org.eclipse.jetty.server.Response
+import org.eclipse.jetty.server.ServerConnector
+import org.eclipse.jetty.unixsocket.UnixSocketConnector
+import org.eclipse.jetty.websocket.servlet.ServletUpgradeResponse
 import org.eclipse.jetty.websocket.servlet.WebSocketServlet
 import org.eclipse.jetty.websocket.servlet.WebSocketServletFactory
 import java.net.ProtocolException
@@ -31,11 +37,14 @@ import javax.servlet.http.HttpServletResponse
 @Singleton
 internal class WebActionsServlet @Inject constructor(
   webActionFactory: WebActionFactory,
-  webActionEntries: List<WebActionEntry>,
-  private val scope: ActionScope
+  webActionEntries: List<WebActionEntry>
 ) : WebSocketServlet() {
 
-  private val boundActions: MutableSet<BoundAction<out WebAction>> = mutableSetOf()
+  companion object {
+    val log = getLogger<WebActionsServlet>()
+  }
+
+  internal val boundActions: MutableSet<BoundAction<out WebAction>> = mutableSetOf()
 
   internal val webActionsMetadata: List<WebActionMetadata> by lazy { boundActions.map { it.metadata } }
 
@@ -43,6 +52,24 @@ internal class WebActionsServlet @Inject constructor(
     for (entry in webActionEntries) {
       boundActions += webActionFactory.newBoundAction(entry.actionClass, entry.url_path_prefix)
     }
+    // Verify no two Actions have identical routing annotations, which is most likely a bad
+    // copy/paste error and results in unexpected results for a developer. This fails the service
+    // startup, which should be caught with a unit test.
+    for (action in boundActions) {
+      for (other in boundActions) {
+        check(action === other || !action.hasIdenticalRouting(other)) {
+          "Actions [${action.action.name}, ${other.action.name}] have identical routing annotations."
+        }
+      }
+    }
+  }
+
+  override fun service(request: HttpServletRequest?, response: HttpServletResponse?) {
+    if (request?.method == "PATCH" && response != null) {
+      doPatch(request, response)
+      return
+    }
+    super.service(request, response)
   }
 
   override fun doGet(request: HttpServletRequest, response: HttpServletResponse) {
@@ -53,87 +80,125 @@ internal class WebActionsServlet @Inject constructor(
     handleCall(request, response)
   }
 
+  fun doPatch(request: HttpServletRequest, response: HttpServletResponse) {
+    handleCall(request, response)
+  }
+
+  override fun doDelete(request: HttpServletRequest, response: HttpServletResponse) {
+    handleCall(request, response)
+  }
+
+  override fun doPut(request: HttpServletRequest, response: HttpServletResponse) {
+    handleCall(request, response)
+  }
+
   private fun handleCall(request: HttpServletRequest, response: HttpServletResponse) {
     try {
-      val asRequest = request.asRequest()
-      val seedData = mapOf(
-          keyOf<HttpServletRequest>() to request,
-          keyOf<Request>() to asRequest)
+      val httpCall = ServletHttpCall.create(
+          request = request,
+          linkLayerLocalAddress = with((request as? Request)?.httpChannel) {
+            when (this?.connector) {
+              is UnixSocketConnector -> SocketAddress.Unix(
+                  (this.connector as UnixSocketConnector).unixSocket
+              )
+              is ServerConnector -> SocketAddress.Network(
+                  this.endPoint.remoteAddress.address.hostAddress,
+                  (this.connector as ServerConnector).localPort
+              )
+              else -> throw IllegalStateException("Unknown socket connector.")
+            }
+          },
+          dispatchMechanism = request.dispatchMechanism(),
+          upstreamResponse = JettyServletUpstreamResponse(response as Response),
+          requestBody = request.inputStream.source().buffer(),
+          responseBody = response.outputStream.sink().buffer()
+      )
 
-      val requestContentType = request.contentType()
-      val requestAccepts = request.accepts()
-      scope.enter(seedData).use {
-        val candidateActions = boundActions.mapNotNull {
-          it.match(asRequest.dispatchMechanism, requestContentType, requestAccepts, asRequest.url)
-        }
+      val requestContentType = httpCall.contentType()
+      val requestAccepts = httpCall.accepts()
 
-        val bestAction = candidateActions.sorted().firstOrNull()
-        if (bestAction != null) {
-          bestAction.handle(asRequest, response)
-          return
-        }
+      val candidateActions = boundActions.mapNotNull {
+        it.match(httpCall.dispatchMechanism, requestContentType, requestAccepts, httpCall.url)
       }
-    } catch (e: ProtocolException) {
+      val bestAction = candidateActions.min()
+
+      if (bestAction != null) {
+        bestAction.action.scopeAndHandle(request, httpCall, bestAction.pathMatcher)
+        response.handleHttp2ConnectionClose()
+        return
+      }
+    } catch (_: ProtocolException) {
       // Probably an unexpected HTTP method. Send a 404 below.
+    } catch (e: Throwable) {
+      log.error(e) { "Uncaught exception on ${request.dispatchMechanism()} ${request.httpUrl()}" }
+
+      response.status = StatusCode.INTERNAL_SERVER_ERROR.code
+      response.addHeader("Content-Type", MediaTypes.TEXT_PLAIN_UTF8)
+      response.writer.close()
+
+      return
     }
 
     response.status = StatusCode.NOT_FOUND.code
     response.addHeader("Content-Type", MediaTypes.TEXT_PLAIN_UTF8)
-    response.writer.print("Nothing found at ${request.urlString()}")
+    response.writer.print("Nothing found at ${request.httpUrl()}")
     response.writer.close()
   }
 
-  override fun configure(factory: WebSocketServletFactory) {
-    factory.creator = WebSocketCreator { servletUpgradeRequest, _ ->
-      val realWebSocket = RealWebSocket()
-      val request = servletUpgradeRequest.httpServletRequest
-      val asRequest = Request(
-          request.urlString()!!,
-          DispatchMechanism.WEBSOCKET,
-          request.headers(),
-          Buffer(), // Empty body.
-          realWebSocket
-      )
-
-      val candidateActions = boundActions.mapNotNull {
-        it.match(DispatchMechanism.WEBSOCKET, null, listOf(), asRequest.url)
-      }
-
-      val bestAction = candidateActions.sorted().firstOrNull() ?: return@WebSocketCreator null
-      val webSocketListener = bestAction.handleWebSocket(asRequest)
-      realWebSocket.listener = webSocketListener
-      realWebSocket.adapter
+  /**
+   * Jetty 9.x doesn't honor the "Connection: close" header for HTTP/2, so we do it ourselves.
+   * https://github.com/eclipse/jetty.project/issues/2788
+   */
+  private fun Response.handleHttp2ConnectionClose() {
+    val connectionHeader = getHeader("Connection")
+    if ("close".equals(connectionHeader, ignoreCase = true)) {
+      (httpChannel.connection as? HTTP2Connection)?.close()
     }
+  }
+
+  override fun configure(factory: WebSocketServletFactory) {
+    factory.creator = JettyWebSocket.Creator(boundActions)
   }
 }
 
-internal fun HttpServletRequest.contentType() = contentType?.let { MediaType.parse(it) }
+internal fun HttpServletRequest.contentType() = contentType?.toMediaTypeOrNull()
+
+internal fun ServletUpgradeResponse.headers(): Headers {
+  val result = Headers.Builder()
+  for (name in headerNames) {
+    for (value in getHeaders(name)) {
+      result.add(name, value)
+    }
+  }
+  return result.build()
+}
 
 internal fun HttpServletRequest.headers(): Headers {
-  val headersBuilder = Headers.Builder()
-  val headerNames = headerNames
-  for (headerName in headerNames) {
-    val headerValues = getHeaders(headerName)
-    for (headerValue in headerValues) {
-      headersBuilder.add(headerName, headerValue)
+  val result = Headers.Builder()
+  for (name in headerNames) {
+    for (value in getHeaders(name)) {
+      result.addUnsafeNonAscii(name, value)
     }
   }
-  return headersBuilder.build()
+  return result.build()
 }
 
-private fun HttpServletRequest.urlString(): HttpUrl? {
-  return if (queryString == null)
-    HttpUrl.parse(requestURL.toString()) else
-    HttpUrl.parse(requestURL.toString() + "?" + queryString)
+internal fun HttpServletResponse.headers(): Headers {
+  val result = Headers.Builder()
+  for (name in headerNames) {
+    for (value in getHeaders(name)) {
+      result.addUnsafeNonAscii(name, value)
+    }
+  }
+  return result.build()
 }
 
-private fun HttpServletRequest.asRequest(): Request {
-  return Request(
-      urlString()!!,
-      dispatchMechanism(),
-      headers(),
-      inputStream.source().buffer()
-  )
+internal fun HttpServletRequest.httpUrl(): HttpUrl {
+  return if (queryString == null) {
+    "$requestURL".toHttpUrl()
+  } else {
+    "$requestURL?$queryString".toHttpUrl()
+  }
 }
 
 /** @throws ProtocolException on unexpected methods. */
@@ -144,19 +209,9 @@ internal fun HttpServletRequest.dispatchMechanism(): DispatchMechanism {
       MediaTypes.APPLICATION_GRPC_MEDIA_TYPE -> DispatchMechanism.GRPC
       else -> DispatchMechanism.POST
     }
+    "PATCH" -> DispatchMechanism.PATCH
+    HttpMethod.PUT.name -> DispatchMechanism.PUT
+    HttpMethod.DELETE.name -> DispatchMechanism.DELETE
     else -> throw ProtocolException("unexpected method: $method")
-  }
-}
-
-private fun HttpServletRequest.accepts(): List<MediaRange> {
-  // TODO(mmihic): Don't blow up if one of the accept headers can't be parsed
-  val accepts = getHeaders("Accept")?.toList()?.flatMap {
-    MediaRange.parseRanges(it)
-  }
-
-  return if (accepts == null || accepts.isEmpty()) {
-    listOf(MediaRange.ALL_MEDIA)
-  } else {
-    accepts
   }
 }

@@ -21,10 +21,28 @@ class RealRedis(private val jedisPool: JedisPool) : Redis {
     }
   }
 
+  // Get multiple key values
+  override fun mget(vararg keys: String): List<ByteString?> {
+    val byteArrays = keys.map { it.toByteArray(charset) }.toTypedArray()
+    jedisPool.resource.use { jedis ->
+      return jedis.mget(*byteArrays).map { it?.toByteString() }
+    }
+  }
+
+  // Set multiple key values
+  override fun mset(vararg keyValues: ByteString) {
+    require(keyValues.size % 2 == 0) { "Wrong number of arguments to mset" }
+
+    val byteArrays = keyValues.map { it.toByteArray() }.toTypedArray()
+    jedisPool.resource.use { jedis ->
+      jedis.mset(*byteArrays)
+    }
+  }
+
   // Get a ByteString value
   override fun get(key: String): ByteString? {
     jedisPool.resource.use { jedis ->
-      return jedis.get(key.toByteArray(charset)).toByteString()
+      return jedis.get(key.toByteArray(charset))?.toByteString()
     }
   }
 

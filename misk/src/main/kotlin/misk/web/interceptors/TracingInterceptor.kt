@@ -2,6 +2,7 @@ package misk.web.interceptors
 
 import com.google.inject.Inject
 import com.google.inject.Singleton
+import io.opentracing.Span
 import io.opentracing.SpanContext
 import io.opentracing.Tracer
 import io.opentracing.propagation.Format
@@ -12,7 +13,6 @@ import misk.logging.getLogger
 import misk.tracing.interceptors.TextMultimapExtractAdapter
 import misk.web.NetworkChain
 import misk.web.NetworkInterceptor
-import misk.web.Response
 
 private val logger = getLogger<TracingInterceptor>()
 
@@ -30,38 +30,49 @@ internal class TracingInterceptor internal constructor(private val tracer: Trace
     override fun create(action: Action) = tracer?.let { TracingInterceptor(it) }
   }
 
-  override fun intercept(chain: NetworkChain): Response<*> {
-    val parentContext: SpanContext? = try {
-      tracer.extract(Format.Builtin.HTTP_HEADERS,
-          TextMultimapExtractAdapter(chain.request.headers.toMultimap()))
-    } catch (e: Exception) {
-      logger.warn("Failure attempting to extract span context. Existing context, if any," +
-          " will be ignored in creation of span", e)
-      null
-    }
-
-    val scopeBuilder = tracer.buildSpan(chain.action.javaClass.name)
-        .withTag(Tags.HTTP_METHOD.key, chain.request.dispatchMechanism.method.toString())
-        .withTag(Tags.HTTP_URL.key, chain.request.url.toString())
+  override fun intercept(chain: NetworkChain) {
+    val spanBuilder = tracer.buildSpan("http.action")
+        .withTag(Tags.HTTP_METHOD.key, chain.httpCall.dispatchMechanism.method)
+        .withTag(Tags.HTTP_URL.key, chain.httpCall.url.toString())
         .withTag(Tags.SPAN_KIND.key, SPAN_KIND_SERVER)
 
-    if (parentContext != null) {
-      scopeBuilder.asChildOf(parentContext)
+    val parentSpan: Span? = tracer.activeSpan()
+    if (parentSpan != null) {
+      // Certain tracing implementations (Datadog) do their own header extraction. Skip our custom
+      // one if that happened.
+      spanBuilder.asChildOf(parentSpan)
+    } else {
+      val parentContext: SpanContext? = try {
+        tracer.extract(Format.Builtin.HTTP_HEADERS,
+            TextMultimapExtractAdapter(chain.httpCall.requestHeaders.toMultimap()))
+      } catch (e: Exception) {
+        logger.warn("Failure attempting to extract span context. Existing context, if any," +
+            " will be ignored in creation of span", e)
+        null
+      }
+
+      if (parentContext != null) {
+        spanBuilder.asChildOf(parentContext)
+      }
     }
 
-    val scope = scopeBuilder.startActive(true)
-    return scope.use {
-      try {
-        val result = chain.proceed(chain.request)
-        Tags.HTTP_STATUS.set(scope.span(), result.statusCode)
-        if (result.statusCode > 399) {
-          Tags.ERROR.set(scope.span(), true)
-        }
-        result
-      } catch (e: Exception) {
-        Tags.ERROR.set(scope.span(), true)
-        throw e
+    val span = spanBuilder.start()
+    val scope = tracer.scopeManager().activate(span)
+    // This is a datadog convention. Must be set after span is created because otherwise it would
+    // be overwritten by the method/url
+    span.setTag("resource.name", chain.webAction.javaClass.name)
+    try {
+      chain.proceed(chain.httpCall)
+      Tags.HTTP_STATUS.set(span, chain.httpCall.statusCode)
+      if (chain.httpCall.statusCode > 399) {
+        Tags.ERROR.set(span, true)
       }
+    } catch (t: Throwable) {
+      Tags.ERROR.set(span, true)
+      throw t
+    } finally {
+      scope.close()
+      span.finish()
     }
   }
 }

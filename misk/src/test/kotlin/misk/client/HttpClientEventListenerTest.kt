@@ -50,8 +50,8 @@ internal class HttpClientEventListenerTest {
     assertThat(testListener.started()).isTrue()
   }
 
-  class ClientModule(val jetty: JettyService, val eventListener : TestEventListener)
-    : KAbstractModule() {
+  class ClientModule(val jetty: JettyService, val eventListener: TestEventListener) :
+    KAbstractModule() {
     override fun configure() {
       install(MiskTestingServiceModule())
       install(DinoClientModule(jetty))
@@ -60,8 +60,8 @@ internal class HttpClientEventListenerTest {
     }
   }
 
-  class TestEventListenerFactory @Inject constructor(private val listener : TestEventListener)
-    : EventListener.Factory {
+  class TestEventListenerFactory @Inject constructor(private val listener: TestEventListener) :
+    EventListener.Factory {
     override fun create(call: Call): EventListener {
       return listener
     }
@@ -74,7 +74,7 @@ internal class HttpClientEventListenerTest {
       started = true
     }
 
-    fun started() : Boolean {
+    fun started(): Boolean {
       return started
     }
   }

@@ -1,0 +1,27 @@
+buildscript {
+  dependencies {
+    classpath dep.kotlinNoArgPlugin
+  }
+}
+
+dependencies {
+  implementation dep.kotlinStdLibJdk8
+  implementation dep.javaxInject
+  implementation dep.guava
+  implementation dep.guice
+  implementation dep.loggingApi
+  implementation project(':misk-inject')
+
+  testImplementation project(':misk-testing')
+  testImplementation dep.assertj
+  testImplementation dep.kotlinTest
+}
+
+afterEvaluate { project ->
+  project.tasks.dokka {
+    outputDirectory = "$rootDir/docs/0.x"
+    outputFormat = 'gfm'
+  }
+}
+
+apply from: "$rootDir/gradle-mvn-publish.gradle"

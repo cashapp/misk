@@ -1,5 +1,6 @@
 package misk
 
+import misk.web.DispatchMechanism
 import misk.web.RequestBody
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -8,7 +9,7 @@ import kotlin.test.assertFailsWith
 
 internal class ActionsTest {
   @Test fun methodAsAction() {
-    val action = TestAction::myActionMethod.asAction()
+    val action = TestAction::myActionMethod.asAction(DispatchMechanism.GET)
     assertThat(action.name).isEqualTo("TestAction")
     assertThat(action.parameterTypes).hasSize(2)
     assertThat(action.parameterTypes[0]).isEqualTo(Int::class.createType())
@@ -18,7 +19,7 @@ internal class ActionsTest {
   }
 
   @Test fun noRequestBodyAction() {
-    val action = NoRequestBodyAction::myActionMethod.asAction()
+    val action = NoRequestBodyAction::myActionMethod.asAction(DispatchMechanism.GET)
     assertThat(action.name).isEqualTo("NoRequestBodyAction")
     assertThat(action.parameterTypes).hasSize(1)
     assertThat(action.parameterTypes[0]).isEqualTo(Int::class.createType())
@@ -28,13 +29,13 @@ internal class ActionsTest {
   @Test fun methodReferenceNotAllowedAsAction() {
     assertFailsWith<IllegalArgumentException> {
       val t = TestAction()
-      t::myActionMethod.asAction()
+      t::myActionMethod.asAction(DispatchMechanism.GET)
     }
   }
 
   @Test fun freeStandingFunctionNotAllowedAsAction() {
     assertFailsWith<IllegalArgumentException> {
-      ::myActionHandler.asAction()
+      ::myActionHandler.asAction(DispatchMechanism.GET)
     }
   }
 

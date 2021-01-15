@@ -1,5 +1,6 @@
 package misk.web
 
+import com.google.inject.Binder
 import misk.inject.KAbstractModule
 import misk.web.actions.WebAction
 import misk.web.actions.WebActionEntry
@@ -12,8 +13,10 @@ class WebActionModule<A : WebAction> private constructor(
   override fun configure() {
     multibind<WebActionEntry>().toInstance(WebActionEntry(actionClass, url_path_prefix))
     // Ensures that the action has an @Inject annotation and that its dependencies are satisfied
-    binder().skipSources(WebActionModule::class.java).getProvider(actionClass.java)
+    binder().getProvider(actionClass.java)
   }
+
+  override fun binder(): Binder = super.binder().skipSources(WebActionModule::class.java)
 
   companion object {
     inline fun <reified A : WebAction> create(): WebActionModule<A> = create(A::class)

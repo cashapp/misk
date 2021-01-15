@@ -31,4 +31,3 @@ interface ExternalDependency {
    */
   val id: String get() = javaClass.name
 }
-

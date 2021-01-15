@@ -9,11 +9,13 @@ import okhttp3.EventListener
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import okio.Timeout
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
+import retrofit2.converter.protobuf.ProtoConverterFactory
 import retrofit2.converter.wire.WireConverterFactory
 import retrofit2.http.DELETE
 import retrofit2.http.GET
@@ -40,7 +42,7 @@ internal class ClientInvocationHandler(
   okHttpTemplate: OkHttpClient,
   networkInterceptorFactories: Provider<List<ClientNetworkInterceptor.Factory>>,
   applicationInterceptorFactories: Provider<List<ClientApplicationInterceptor.Factory>>,
-  eventListenerFactory : EventListener.Factory?,
+  eventListenerFactory: EventListener.Factory?,
   tracer: Tracer?,
   moshi: Moshi
 ) : InvocationHandler {
@@ -72,11 +74,13 @@ internal class ClientInvocationHandler(
     val retrofitBuilder = retrofit.newBuilder()
         .client(actionSpecificClient)
 
-    if (tracer != null) retrofitBuilder.callFactory(TracingCallFactory(actionSpecificClient, tracer))
+    if (tracer != null) retrofitBuilder.callFactory(
+        TracingCallFactory(actionSpecificClient, tracer))
 
     val mediaTypes = getEndpointMediaTypes(methodName)
     if (mediaTypes.contains(MediaTypes.APPLICATION_PROTOBUF)) {
       retrofitBuilder.addConverterFactory(WireConverterFactory.create())
+      retrofitBuilder.addConverterFactory(ProtoConverterFactory.create())
     }
     // Always add JSON as default. Ensure it's added last so that other converters get a chance since
     // JSON converter will accept any object.
@@ -86,6 +90,12 @@ internal class ClientInvocationHandler(
         .build()
         .create(interfaceType.java)
   }.toMap()
+
+  init {
+    require(actionsByMethod.isNotEmpty()) {
+      "$interfaceType is not a Retrofit interface (no @POST or @GET methods)"
+    }
+  }
 
   private fun getEndpointMediaTypes(methodName: String): List<String> {
     val headers =
@@ -102,7 +112,9 @@ internal class ClientInvocationHandler(
     }.filterNot { it == MediaTypes.APPLICATION_JSON }
   }
 
-  override fun invoke(proxy: Any, method: Method, args: Array<out Any>): Any {
+  override fun invoke(proxy: Any, method: Method, args: Array<out Any>?): Any {
+    val argsList = args?.toList() ?: listOf()
+
     val action = actionsByMethod[method.name] ?: throw IllegalStateException(
         "no action corresponding to ${interfaceType.qualifiedName}#${method.name}"
     )
@@ -113,11 +125,11 @@ internal class ClientInvocationHandler(
     val interceptors = (interceptorsByMethod[method.name] ?: listOf())
 
     val beginCallInterceptors = interceptors + RetrofitCallInterceptor(retrofitProxy, method)
-    val beginCallChain = RealBeginClientCallChain(action, args.toList(), beginCallInterceptors)
+    val beginCallChain = RealBeginClientCallChain(action, argsList, beginCallInterceptors)
     val wrappedCall = beginCallChain.proceed(beginCallChain.args)
 
     val requestInterceptors = interceptors + RetrofitRequestInterceptor(wrappedCall)
-    return InterceptedCall(action, requestInterceptors, args.toList(), wrappedCall)
+    return InterceptedCall(action, requestInterceptors, argsList, wrappedCall)
   }
 
   /** Wraps a retrofit [Call] to invoke interceptors before handing off to Retrofit */
@@ -143,6 +155,7 @@ internal class ClientInvocationHandler(
     override fun clone() = InterceptedCall(action, interceptors, args, wrapped.clone())
     override fun cancel() = wrapped.cancel()
     override fun request(): Request = wrapped.request()
+    override fun timeout(): Timeout = wrapped.timeout()
   }
 
   /** Interceptor that builds the call through Retrofit */
@@ -183,10 +196,10 @@ internal class ClientInvocationHandler(
   }
 }
 
-private class NetworkInterceptorWrapper(
+internal class NetworkInterceptorWrapper(
   val action: ClientAction,
   val interceptor: ClientNetworkInterceptor
-) : okhttp3.Interceptor {
+) : Interceptor {
   override fun intercept(chain: Interceptor.Chain): okhttp3.Response {
     return interceptor.intercept(RealClientNetworkChain(chain, action))
   }

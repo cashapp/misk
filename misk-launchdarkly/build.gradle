@@ -1,0 +1,30 @@
+buildscript {
+  dependencies {
+    classpath dep.kotlinNoArgPlugin
+  }
+}
+
+dependencies {
+  implementation dep.guice
+  implementation dep.guiceMultibindings
+  implementation dep.kotlinStdLibJdk8
+  implementation dep.kotlinReflection
+  implementation dep.launchDarkly
+  implementation project(':misk')
+  implementation project(':misk-core')
+  implementation project(':misk-feature')
+  implementation project(':misk-inject')
+  implementation project(':misk-launchdarkly-core')
+  implementation project(':misk-service')
+
+  testImplementation project(':misk-testing')
+}
+
+afterEvaluate { project ->
+  project.tasks.dokka {
+    outputDirectory = "$rootDir/docs/0.x"
+    outputFormat = 'gfm'
+  }
+}
+
+apply from: "$rootDir/gradle-mvn-publish.gradle"

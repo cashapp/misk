@@ -12,7 +12,7 @@ import javax.inject.Inject
 @MiskTest(startService = true)
 class ChildEntityTest {
   @MiskTestModule
-  val module = MoviesTestModule(disableCrossShardQueryDetector = true)
+  val module = MoviesTestModule()
 
   @Inject @Movies lateinit var transacter: Transacter
   @Inject lateinit var queryFactory: Query.Factory
@@ -28,6 +28,7 @@ class ChildEntityTest {
 
     transacter.transaction { session ->
       val ianMalcolm = queryFactory.newQuery<CharacterQuery>()
+          .allowFullScatter().allowTableScan()
           .name("Ian Malcolm")
           .uniqueResult(session)!!
       val ianMalcolmByGid = session.loadSharded(ianMalcolm.gid)

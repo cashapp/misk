@@ -1,7 +1,7 @@
 package misk.hibernate
 
 import com.google.common.base.CaseFormat
-import org.hibernate.SessionFactory
+import com.google.common.collect.LinkedHashMultiset
 import org.hibernate.boot.Metadata
 import org.hibernate.mapping.Column
 import java.sql.Connection
@@ -13,23 +13,24 @@ import java.sql.Connection
  */
 internal class SchemaValidator {
   private val messages = mutableListOf<Message>()
-  private var pathBreadcrumbs = mutableListOf<String>()
+  private var path = Path(schema = null, table = null, column = null)
+  private val validatedPaths = LinkedHashMultiset.create<Path>()
 
   /** Compares the Database's Schema against Hibernate's Schema and throws errors if there are problems. */
   internal fun validate(
     transacter: Transacter,
     hibernateMetadata: Metadata
-  ) {
+  ): ValidationReport {
     val hibernateSchema = readDeclarationFromHibernate(hibernateMetadata)
 
     val allDbTables = LinkedHashSet<TableDeclaration>()
 
     transacter.shards().forEach { shard ->
       val dbSchema = transacter.transaction(shard) { s ->
-        s.hibernateSession.doReturningWork { readDeclarationFromDatabase(it) }
+        s.withoutChecks { s.hibernateSession.doReturningWork { readDeclarationFromDatabase(it) } }
       }
 
-      withDeclaration(dbSchema.name) {
+      withDeclaration(path.copy(schema = dbSchema.name)) {
         validateDatabase(dbSchema, hibernateSchema)
       }
       allDbTables.addAll(dbSchema.tables)
@@ -47,6 +48,15 @@ internal class SchemaValidator {
     }
 
     throwIfErrorsFound()
+
+    return ValidationReport(
+        schemas = validatedPaths.mapNotNull { it.schema }.toSet(),
+        tables = validatedPaths.mapNotNull { it.table }.toSet(),
+        columns = validatedPaths.asSequence()
+            .filter { it.column != null }
+            .map { "${it.table}.${it.column}" }
+            .toSet()
+    )
   }
 
   private fun throwIfErrorsFound() {
@@ -64,7 +74,7 @@ internal class SchemaValidator {
           "SELECT * FROM information_schema.tables WHERE table_schema = database()")
 
       val schemaTables = mutableListOf<TableDeclaration>()
-      var tableSchema : String? = null
+      var tableSchema: String? = null
 
       while (tablesRs.next()) {
         val tableName = tablesRs.getString("TABLE_NAME")
@@ -83,7 +93,8 @@ internal class SchemaValidator {
             columns += ColumnDeclaration(
                 name = columnResultSet.getString("COLUMN_NAME"),
                 nullable = columnResultSet.getString("IS_NULLABLE") == "YES",
-                hasDefaultValue = columnResultSet.getString("COLUMN_DEFAULT")?.isNotBlank() ?: false)
+                hasDefaultValue = columnResultSet.getString("COLUMN_DEFAULT")?.isNotBlank()
+                    ?: false)
           }
 
           columns
@@ -120,7 +131,7 @@ internal class SchemaValidator {
     val errorReport = StringBuilder("Failed Schema Validation: \n\n")
     for (message in messages) {
       if (message.error) errorReport.append("ERROR ") else errorReport.append("WARNING ")
-      errorReport.append("at ${message.path.joinToString(separator = ".")}:\n")
+      errorReport.append("at ${message.path}:\n")
       errorReport.append("  ${message.text.replace("\n", "\n  ")}\n")
       errorReport.append("\n")
     }
@@ -135,7 +146,7 @@ internal class SchemaValidator {
         dbSchema.tables, hibernateSchema.tables)
 
     for ((dbTable, hibernateTable) in intersectionPairs) {
-      withDeclaration(hibernateTable.snakeCaseName) {
+      withDeclaration(path.copy(table = hibernateTable.snakeCaseName)) {
         validateTables(dbTable, hibernateTable)
       }
     }
@@ -162,7 +173,7 @@ internal class SchemaValidator {
     }
 
     for ((dbColumn, hibernateColumn) in intersectionPairs) {
-      withDeclaration(hibernateColumn.snakeCaseName) {
+      withDeclaration(path.copy(column = hibernateColumn.snakeCaseName)) {
         validateColumns(dbTable, dbColumn, hibernateColumn)
       }
     }
@@ -246,37 +257,45 @@ internal class SchemaValidator {
    */
   private fun validate(expression: Boolean, lambda: () -> String) {
     if (!expression) {
-      messages += Message(pathBreadcrumbs.toList(), lambda(), true)
+      messages += Message(path, lambda(), true)
     }
   }
 
   private fun checkWarning(expression: Boolean, lambda: () -> String) {
     if (!expression) {
-      messages += Message(pathBreadcrumbs.toList(), lambda(), false)
+      messages += Message(path, lambda(), false)
     }
   }
 
-  private fun withDeclaration(name: String, lambda: () -> Unit) {
-    pathBreadcrumbs.add(name)
+  private fun withDeclaration(path: Path, lambda: () -> Unit) {
+    validatedPaths += path
+
+    val oldPath = path
+    this.path = path
     try {
       lambda()
     } finally {
-      pathBreadcrumbs.removeAt(pathBreadcrumbs.size - 1)
+      this.path = oldPath
     }
   }
+}
 
-  /**
-   * Adds a message that may be useful for the developer to debug. Should not register an error.
-   */
-  private fun info(message: String) {
-    messages += Message(pathBreadcrumbs.toList(), message, false)
-  }
+data class ValidationReport(
+  val schemas: Set<String>,
+  val tables: Set<String>,
+  val columns: Set<String>
+)
 
-  private fun <R> SessionFactory.doWork(lambda: Connection.() -> R): R {
-    openSession().use { session ->
-      return session.doReturningWork { connection ->
-        connection.lambda()
-      }
+data class Path(
+  val schema: String?,
+  val table: String?,
+  val column: String?
+) {
+  override fun toString(): String {
+    return buildString {
+      if (schema != null) append(schema)
+      if (table != null) append(".").append(table)
+      if (column != null) append(".").append(column)
     }
   }
 }
@@ -308,7 +327,7 @@ internal data class ColumnDeclaration(
 ) : Declaration()
 
 internal data class Message(
-  val path: List<String>,
+  val path: Path,
   val text: String,
   val error: Boolean = true
 )

@@ -1,15 +1,13 @@
 package misk.config
 
 import com.google.inject.util.Modules
+import misk.environment.DeploymentModule
 import misk.environment.Environment
-import misk.environment.EnvironmentModule
-import misk.resources.ResourceLoader
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.web.WebConfig
 import misk.web.exceptions.ActionExceptionLogLevelConfig
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.slf4j.event.Level
 import java.io.File
@@ -25,7 +23,7 @@ class MiskConfigTest {
   @MiskTestModule
   val module = Modules.combine(
       ConfigModule.create("test_app", config),
-      EnvironmentModule(defaultEnv)
+      DeploymentModule.forTesting()
       // @TODO(jwilson) https://github.com/square/misk/issues/272
   )
 
@@ -60,7 +58,7 @@ class MiskConfigTest {
     }
 
     assertThat(exception).hasMessageContaining("could not find configuration files -" +
-        " checked [missing-common.yaml, missing-testing.yaml]")
+        " checked [classpath:/missing-common.yaml, classpath:/missing-testing.yaml]")
   }
 
   @Test
@@ -79,7 +77,7 @@ class MiskConfigTest {
       MiskConfig.load<TestConfig>("unparsable", defaultEnv)
     }
 
-    assertThat(exception).hasMessageContaining("could not parse unparsable-common.yaml")
+    assertThat(exception).hasMessageContaining("could not parse classpath:/unparsable-common.yaml")
   }
 
   @Test

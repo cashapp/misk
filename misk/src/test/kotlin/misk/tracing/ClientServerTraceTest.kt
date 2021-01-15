@@ -15,6 +15,7 @@ import misk.client.TypedHttpClientModule
 import misk.inject.KAbstractModule
 import misk.inject.getInstance
 import misk.inject.keyOf
+import misk.testing.ConcurrentMockTracer
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.testing.MockTracingBackendModule
@@ -45,7 +46,7 @@ internal class ClientServerTraceTest {
   private lateinit var jetty: JettyService
 
   @Inject
-  private lateinit var tracer: Tracer
+  private lateinit var serverTracer: ConcurrentMockTracer
 
   @Inject
   private lateinit var serverInjector: Injector
@@ -65,14 +66,11 @@ internal class ClientServerTraceTest {
     val client = clientInjector.getInstance<ReturnADinosaur>(Names.named("dinosaur"))
     client.getDinosaur(dinosaurRequest).execute()
 
-    val serverTracer = tracer as MockTracer
-    assertThat(serverTracer.finishedSpans().size).isEqualTo(1)
-
-    val serverSpan = serverTracer.finishedSpans().first()
+    val serverSpan = serverTracer.take()
     // Parent ID of 0 means there is no parent span
     assertThat(serverSpan.parentId()).isGreaterThan(0)
 
-    val clientTracer = clientInjector.getInstance(Tracer::class.java) as MockTracer
+    val clientTracer = clientInjector.getInstance(MockTracer::class.java)
     // Two spans here because one is created at the app level and another at the network interceptor
     // level.
     assertThat(clientTracer.finishedSpans().size).isEqualTo(2)
@@ -89,9 +87,8 @@ internal class ClientServerTraceTest {
 
     client.getDinosaur(dinosaurRequest).execute()
 
-    val serverTracer = tracer as MockTracer
-    assertThat(serverTracer.finishedSpans().size).isEqualTo(1)
-    assertThat(serverTracer.finishedSpans().first().parentId()).isEqualTo(0)
+    val span = serverTracer.take()
+    assertThat(span.parentId()).isEqualTo(0)
 
     assertThat(clientInjector.allBindings.filter { it.key == keyOf<Tracer>() }).isEmpty()
   }
@@ -105,21 +102,26 @@ internal class ClientServerTraceTest {
     val client = clientInjector.getInstance<RoarLikeDinosaur>(Names.named("roar"))
     client.doRoar(dinosaurRequest).execute()
 
-    val serverTracer = tracer as MockTracer
-    assertThat(serverTracer.finishedSpans().size).isEqualTo(4)
+    // Expect 4 spans on the server.
+    val serverSpans = listOf(
+        serverTracer.take(),
+        serverTracer.take(),
+        serverTracer.take(),
+        serverTracer.take()
+    )
 
-    val spanIds = serverTracer.finishedSpans().map { it.context().spanId() }.toSet()
-    val traceId = serverTracer.finishedSpans().first().context().traceId()
+    val spanIds = serverSpans.map { it.context().spanId() }.toSet()
+    val traceId = serverSpans[0].context().traceId()
 
     var initialServerSpan: MockSpan? = null
-    serverTracer.finishedSpans().forEach {
+    for (span in serverSpans) {
       // Parent ID of 0 means there is no parent span
-      assertThat(it.parentId()).isGreaterThan(0)
+      assertThat(span.parentId()).isGreaterThan(0)
 
       // Assert trace IDs are all the same (i.e. no new traces, new spans added as children)
-      assertThat(it.context().traceId()).isEqualTo(traceId)
+      assertThat(span.context().traceId()).isEqualTo(traceId)
 
-      if (!spanIds.contains(it.parentId())) initialServerSpan = it
+      if (!spanIds.contains(span.parentId())) initialServerSpan = span
     }
 
     assertThat(initialServerSpan).isNotNull()

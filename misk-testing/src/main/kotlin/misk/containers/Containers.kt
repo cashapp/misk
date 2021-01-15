@@ -27,8 +27,9 @@ import java.util.concurrent.atomic.AtomicBoolean
  */
 data class Container(
   val createCmd: CreateContainerCmd.() -> Unit,
-  val beforeStartHook: (docker: DockerClient, id: String) -> Unit) {
-  constructor(createCmd: CreateContainerCmd.() -> Unit): this(createCmd, { _, _ -> })
+  val beforeStartHook: (docker: DockerClient, id: String) -> Unit
+) {
+  constructor(createCmd: CreateContainerCmd.() -> Unit) : this(createCmd, { _, _ -> })
 }
 
 /**
@@ -212,4 +213,3 @@ private class DockerNetwork(private val name: String, private val docker: Docker
     private val log = getLogger<DockerNetwork>()
   }
 }
-

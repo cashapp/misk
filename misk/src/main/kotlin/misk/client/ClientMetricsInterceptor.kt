@@ -1,9 +1,12 @@
 package misk.client
 
+import com.google.common.base.Stopwatch
+import com.google.common.base.Ticker
 import misk.metrics.Histogram
 import misk.metrics.Metrics
-import misk.time.timed
 import okhttp3.Response
+import java.net.SocketTimeoutException
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -13,14 +16,17 @@ class ClientMetricsInterceptor internal constructor(
 ) : ClientNetworkInterceptor {
 
   override fun intercept(chain: ClientNetworkChain): Response {
-    val (elapsedTime, result) = timed { chain.proceed(chain.request) }
-    val elapsedMillis = elapsedTime.toMillis().toDouble()
-
-    requestDuration.record(elapsedMillis, actionName, "all")
-    requestDuration.record(elapsedMillis, actionName, "${result.code() / 100}xx")
-    requestDuration.record(elapsedMillis, actionName, "${result.code()}")
-
-    return result
+    val stopwatch = Stopwatch.createStarted(Ticker.systemTicker())
+    try {
+      val result = chain.proceed(chain.request)
+      val elapsedMillis = stopwatch.stop().elapsed(TimeUnit.MILLISECONDS).toDouble()
+      requestDuration.record(elapsedMillis, actionName, "${result.code}")
+      return result
+    } catch (e: SocketTimeoutException) {
+      val elapsedMillis = stopwatch.stop().elapsed(TimeUnit.MILLISECONDS).toDouble()
+      requestDuration.record(elapsedMillis, actionName, "timeout")
+      throw e
+    }
   }
 
   @Singleton

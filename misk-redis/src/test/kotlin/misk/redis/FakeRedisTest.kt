@@ -7,7 +7,10 @@ import misk.testing.MiskTestModule
 import misk.time.FakeClock
 import misk.time.FakeClockModule
 import okio.ByteString.Companion.encodeUtf8
+import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
+import java.lang.IllegalArgumentException
 import java.time.Duration
 import javax.inject.Inject
 import kotlin.test.assertEquals
@@ -42,6 +45,39 @@ class FakeRedisTest {
 
     // Get a key that hasn't been set
     assertNull(redis[unknownKey], "Key should not exist")
+  }
+
+  @Test
+  fun batchGetAndSet() {
+    val key = "key"
+    val key2 = "key2"
+    val firstValue = "firstValue".encodeUtf8()
+    val value = "value".encodeUtf8()
+    val value2 = "value2".encodeUtf8()
+    val unknownKey = "this key doesn't exist"
+
+    assertThat(redis.mget(key)).isEqualTo(listOf(null))
+    assertThat(redis.mget(key, key2)).isEqualTo(listOf(null, null))
+
+    redis.mset(key.encodeUtf8(), firstValue)
+    assertThat(redis.mget(key)).isEqualTo(listOf(firstValue))
+
+    redis.mset(key.encodeUtf8(), value, key2.encodeUtf8(), value2)
+    assertThat(redis.mget(key)).isEqualTo(listOf(value))
+    assertThat(redis.mget(key, key2)).isEqualTo(listOf(value, value2))
+    assertThat(redis.mget(key2, key)).isEqualTo(listOf(value2, value))
+    assertThat(redis.mget(key, unknownKey, key2, key)).isEqualTo(listOf(value, null, value2, value))
+
+    assertThat(redis[key]).isEqualTo(value)
+    assertThat(redis[key2]).isEqualTo(value2)
+    assertThat(redis[unknownKey]).isNull()
+  }
+
+  @Test
+  fun badArgumentsToBatchSet() {
+    assertThatThrownBy {
+      redis.mset("key".encodeUtf8())
+    }.isInstanceOf(IllegalArgumentException::class.java)
   }
 
   @Test fun setWithExpiry() {

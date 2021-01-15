@@ -5,6 +5,7 @@ import misk.MiskApplication;
 import misk.MiskRealServiceModule;
 import misk.config.ConfigModule;
 import misk.config.MiskConfig;
+import misk.environment.Env;
 import misk.environment.Environment;
 import misk.environment.EnvironmentModule;
 import misk.resources.ResourceLoader;
@@ -14,7 +15,7 @@ public class ExemplarJavaApp {
   public static void main(String[] args) {
     Environment environment = Environment.fromEnvironmentVariable();
     ExemplarJavaConfig config = MiskConfig.load(ExemplarJavaConfig.class, "exemplar",
-        environment, ImmutableList.of(), ResourceLoader.Companion.getSYSTEM());
+        new Env(environment.name()), ImmutableList.of(), ResourceLoader.Companion.getSYSTEM());
 
     new MiskApplication(
         new MiskRealServiceModule(),

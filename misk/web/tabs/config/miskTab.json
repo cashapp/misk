@@ -1,8 +1,19 @@
 {
+  "name": "Config",
   "output_path": "lib/web/_tab/config",
   "port": "3200",
-  "version": "0.1.5-29",
+  "rawGitginore": "",
+  "rawIndex": false,
+  "rawPackageJson": {},
+  "rawTsconfig": {},
+  "rawTsconfigInclude": [],
+  "rawTslint": {},
+  "rawWebpackConfig": {},
+  "relative_path_prefix": "",
+  "slug": "config",
+  "useWebpackBundleAnalyzer": false,
+  "useWebpackExternals": true,
+  "version": "0.1.26",
   "zipOnBuild": false,
-  "name": "Config",
-  "slug": "config"
+  "___DeprecatedKeys": "Any keys below this point in your miskTab.json are deprecated and can be safely removed."
 }

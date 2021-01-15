@@ -1,39 +1,118 @@
 package misk.hibernate
 
-import io.opentracing.mock.MockTracer
-import io.opentracing.tag.Tags
 import misk.exceptions.UnauthorizedException
-import misk.hibernate.RealTransacter.Companion.APPLICATION_TRANSACTION_SPAN_NAME
-import misk.hibernate.RealTransacter.Companion.DB_BEGIN_SPAN_NAME
-import misk.hibernate.RealTransacter.Companion.DB_COMMIT_SPAN_NAME
-import misk.hibernate.RealTransacter.Companion.DB_ROLLBACK_SPAN_NAME
-import misk.hibernate.RealTransacter.Companion.DB_TRANSACTION_SPAN_NAME
-import misk.hibernate.RealTransacter.Companion.TRANSACTER_SPAN_TAG
+import misk.jdbc.DataSourceType
+import misk.jdbc.uniqueString
+import misk.logging.LogCollector
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
 import org.hibernate.exception.ConstraintViolationException
+import org.junit.jupiter.api.Assumptions.assumeTrue
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
+import java.util.concurrent.Callable
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicInteger
 import javax.inject.Inject
 import kotlin.test.assertFailsWith
 
-@MiskTest(startService = true)
-class TransacterTest {
-  @MiskTestModule
-  val module = MoviesTestModule(disableCrossShardQueryDetector = true)
-
+abstract class TransacterTest {
   @Inject @Movies lateinit var transacter: Transacter
   @Inject lateinit var queryFactory: Query.Factory
-  @Inject lateinit var tracer: MockTracer
+  @Inject lateinit var logCollector: LogCollector
 
   @Test
   fun happyPath() {
-    // Insert some movies, characters and actors.
+    createTestData()
+
+    if (hasDateBug()) {
+      return
+    }
+
+    // Query that data.
     transacter.transaction { session ->
+      val ianMalcolm = queryFactory.newQuery<CharacterQuery>()
+          .allowFullScatter().allowTableScan()
+          .name("Ian Malcolm")
+          .uniqueResult(session)!!
+      assertThat(ianMalcolm.actor?.name).isEqualTo("Jeff Goldblum")
+      assertThat(ianMalcolm.movie.name).isEqualTo("Jurassic Park")
+
+      val lauraDernMovies = queryFactory.newQuery<CharacterQuery>()
+          .allowFullScatter().allowTableScan()
+          .actorName("Laura Dern")
+          .listAsMovieNameAndReleaseDate(session)
+      assertThat(lauraDernMovies).containsExactlyInAnyOrder(
+          NameAndReleaseDate("Star Wars", LocalDate.of(1977, 5, 25)),
+          NameAndReleaseDate("Jurassic Park", LocalDate.of(1993, 6, 9)))
+
+      val actorsInOldMovies = queryFactory.newQuery<CharacterQuery>()
+          .allowFullScatter().allowTableScan()
+          .movieReleaseDateBefore(LocalDate.of(1980, 1, 1))
+          .listAsActorAndReleaseDate(session)
+      assertThat(actorsInOldMovies).containsExactlyInAnyOrder(
+          ActorAndReleaseDate("Laura Dern", LocalDate.of(1977, 5, 25)),
+          ActorAndReleaseDate("Carrie Fisher", LocalDate.of(1977, 5, 25)))
+    }
+
+    // Query with replica reads.
+    transacter.replicaRead { session ->
+      val query = queryFactory.newQuery<CharacterQuery>()
+          .allowTableScan()
+          .name("Ian Malcolm")
+      val ianMalcolm = query.uniqueResult(session)!!
+      assertThat(ianMalcolm.actor?.name).isEqualTo("Jeff Goldblum")
+      assertThat(ianMalcolm.movie.name).isEqualTo("Jurassic Park")
+
+      // Shard targeting works.
+      val shard = ianMalcolm.rootId.shard(session)
+      session.target(shard) {
+        assertThat(query.uniqueResult(session)!!.actor?.name).isEqualTo("Jeff Goldblum")
+      }
+    }
+
+    transacter.failSafeRead { session ->
+      val query = queryFactory.newQuery<CharacterQuery>()
+          .allowTableScan()
+          .name("Ian Malcolm")
+      val ianMalcolm = query.uniqueResult(session)!!
+      assertThat(ianMalcolm.actor?.name).isEqualTo("Jeff Goldblum")
+      assertThat(ianMalcolm.movie.name).isEqualTo("Jurassic Park")
+
+      // Shard targeting works.
+      val shard = ianMalcolm.rootId.shard(session)
+      session.target(shard) {
+        assertThat(query.uniqueResult(session)!!.actor?.name).isEqualTo("Jeff Goldblum")
+      }
+    }
+
+    // Delete some data.
+    transacter.transaction { session ->
+      val ianMalcolm = queryFactory.newQuery<CharacterQuery>()
+          .allowFullScatter().allowTableScan()
+          .name("Ian Malcolm")
+          .uniqueResult(session)!!
+
+      session.delete(ianMalcolm)
+
+      val afterDelete = queryFactory.newQuery<CharacterQuery>()
+          .allowFullScatter().allowTableScan()
+          .name("Ian Malcolm")
+          .uniqueResult(session)
+      assertThat(afterDelete).isNull()
+    }
+  }
+
+  // TODO TiDB are working on fixing this bug: https://github.com/pingcap/tidb/issues/13791
+  protected fun hasDateBug() = transacter.config().type == DataSourceType.TIDB
+
+  protected fun createTestData() {
+    // Insert some movies, characters and actors.
+    transacter.allowCowrites().transaction { session ->
       val jp = session.save(DbMovie("Jurassic Park", LocalDate.of(1993, 6, 9)))
       val sw = session.save(DbMovie("Star Wars", LocalDate.of(1977, 5, 25)))
       val lx = session.save(DbMovie("Luxo Jr.", LocalDate.of(1986, 8, 17)))
@@ -51,28 +130,215 @@ class TransacterTest {
       val lj = session.save(DbCharacter("Luxo Jr.", session.load(lx), null))
       assertThat(setOf(ah, es, im, lo, lj)).hasSize(5) // Uniqueness check.
     }
+  }
 
-    // Query that data.
+  @Test
+  fun `saves dates properly`() {
+    if (hasDateBug()) {
+      return
+    }
+
+    val releaseDate = LocalDate.of(1993, 6, 9)
+    val jp = transacter.transaction { session ->
+      session.save(DbMovie("Jurassic Park", releaseDate))
+    }
     transacter.transaction { session ->
-      val ianMalcolm = queryFactory.newQuery<CharacterQuery>()
-          .name("Ian Malcolm")
-          .uniqueResult(session)!!
-      assertThat(ianMalcolm.actor?.name).isEqualTo("Jeff Goldblum")
-      assertThat(ianMalcolm.movie.name).isEqualTo("Jurassic Park")
+      assertThat(session.load(jp).release_date).isEqualTo(releaseDate)
+    }
+  }
 
-      val lauraDernMovies = queryFactory.newQuery<CharacterQuery>()
-          .actorName("Laura Dern")
-          .listAsMovieNameAndReleaseDate(session)
-      assertThat(lauraDernMovies).containsExactlyInAnyOrder(
-          NameAndReleaseDate("Star Wars", LocalDate.of(1977, 5, 25)),
-          NameAndReleaseDate("Jurassic Park", LocalDate.of(1993, 6, 9)))
+  @Test
+  fun `cant nest replica reads`() {
+    createTestData()
 
-      val actorsInOldMovies = queryFactory.newQuery<CharacterQuery>()
-          .movieReleaseDateBefore(LocalDate.of(1980, 1, 1))
-          .listAsActorAndReleaseDate(session)
-      assertThat(actorsInOldMovies).containsExactlyInAnyOrder(
-          ActorAndReleaseDate("Laura Dern", LocalDate.of(1977, 5, 25)),
-          ActorAndReleaseDate("Carrie Fisher", LocalDate.of(1977, 5, 25)))
+    transacter.replicaRead { session ->
+      queryFactory.newQuery<CharacterQuery>()
+          .allowTableScan()
+          .name("Ian Malcolm").uniqueResult(session)!!
+
+      assertThrows<IllegalStateException> {
+        transacter.replicaRead { session ->
+          queryFactory.newQuery<CharacterQuery>()
+              .allowTableScan()
+              .name("Ian Malcolm").uniqueResult(session)!!
+        }
+      }
+    }
+  }
+
+  @Test
+  fun `can do comparison query on ids`() {
+    createTestData()
+
+    transacter.replicaRead { session ->
+      val cb = session.hibernateSession.criteriaBuilder
+      val cr = cb.createQuery(DbCharacter::class.java)
+      val root = cr.from(DbCharacter::class.java)
+      val idProperty = root.get<Id<DbCharacter>>("id")
+      val characters = session.hibernateSession.createQuery(
+          cr.where(cb.greaterThan(idProperty, Id(0)))
+              .orderBy(cb.asc(idProperty))
+      ).resultList
+      assertThat(characters).hasSize(5)
+    }
+  }
+
+  @Test
+  fun `shard targeting`() {
+    // This test only makes sense with Vitess
+    if (!transacter.config().type.isVitess) {
+      return
+    }
+
+    val jp = transacter.save(
+        DbMovie("Jurassic Park", LocalDate.of(1993, 6, 9)))
+    val sw = transacter.createInSeparateShard(jp) {
+      DbMovie("Star Wars", LocalDate.of(1977, 5, 25))
+    }
+
+    // Shard targeting works in replica reads
+    transacter.replicaRead { session ->
+      session.target(jp.shard(session)) {
+        assertThat(
+            queryFactory.newQuery<MovieQuery>().allowTableScan()
+                .name("Jurassic Park").uniqueResult(session)
+        ).isNotNull()
+
+        assertThat(
+            queryFactory.newQuery<MovieQuery>().allowTableScan()
+                .name("Star Wars").uniqueResult(session)
+        ).isNull()
+      }
+
+      session.target(sw.shard(session)) {
+        assertThat(
+            queryFactory.newQuery<MovieQuery>().allowTableScan()
+                .name("Jurassic Park").uniqueResult(session)
+        ).isNull()
+
+        assertThat(
+            queryFactory.newQuery<MovieQuery>().allowTableScan()
+                .name("Star Wars").uniqueResult(session)
+        ).isNotNull()
+      }
+    }
+
+    // Shard targeting works in fail safe reads
+    transacter.failSafeRead { session ->
+      session.target(jp.shard(session)) {
+        assertThat(
+            queryFactory.newQuery<MovieQuery>().allowTableScan()
+                .name("Jurassic Park").uniqueResult(session)
+        ).isNotNull()
+
+        assertThat(
+            queryFactory.newQuery<MovieQuery>().allowTableScan()
+                .name("Star Wars").uniqueResult(session)
+        ).isNull()
+      }
+
+      session.target(sw.shard(session)) {
+        assertThat(
+            queryFactory.newQuery<MovieQuery>().allowTableScan()
+                .name("Jurassic Park").uniqueResult(session)
+        ).isNull()
+
+        assertThat(
+            queryFactory.newQuery<MovieQuery>().allowTableScan()
+                .name("Star Wars").uniqueResult(session)
+        ).isNotNull()
+      }
+    }
+
+    // Shard targeting works in transactions
+    transacter.transaction { session ->
+      session.target(jp.shard(session)) {
+        assertThat(
+            queryFactory.newQuery<MovieQuery>().allowTableScan()
+                .name("Jurassic Park").uniqueResult(session)
+        ).isNotNull()
+
+        assertThat(
+            queryFactory.newQuery<MovieQuery>().allowTableScan()
+                .name("Star Wars").uniqueResult(session)
+        ).isNull()
+      }
+
+      session.target(sw.shard(session)) {
+        assertThat(
+            queryFactory.newQuery<MovieQuery>().allowTableScan()
+                .name("Jurassic Park").uniqueResult(session)
+        ).isNull()
+
+        assertThat(
+            queryFactory.newQuery<MovieQuery>().allowTableScan()
+                .name("Star Wars").uniqueResult(session)
+        ).isNotNull()
+      }
+    }
+  }
+
+  @Test
+  fun `can run consecutive replica reads and transactions`() {
+    createTestData()
+
+    transacter.replicaRead { session ->
+      if (transacter.config().type.isVitess) {
+        // Make sure this doesn't trigger a transaction
+        val target = session.useConnection { c ->
+          c.createStatement().use {
+            it.executeQuery("SHOW VITESS_TARGET").uniqueString()
+          }
+        }
+        assertThat(target).isEqualTo("@replica")
+      }
+
+      queryFactory.newQuery<CharacterQuery>()
+          .allowTableScan()
+          .name("Ian Malcolm").uniqueResult(session)!!
+    }
+
+    transacter.replicaRead { session ->
+      queryFactory.newQuery<CharacterQuery>()
+          .allowTableScan()
+          .name("Ian Malcolm").uniqueResult(session)!!
+    }
+
+    transacter.transaction { session ->
+      if (transacter.config().type.isVitess) {
+        val target = session.useConnection { c ->
+          c.createStatement().use {
+            it.executeQuery("SHOW VITESS_TARGET").uniqueString()
+          }
+        }
+        assertThat(target).isEqualTo("@master")
+      }
+
+      val character = queryFactory.newQuery<CharacterQuery>()
+          .allowTableScan()
+          .name("Ian Malcolm").uniqueResult(session)!!
+      character.name = "Ian Malcolm 2"
+    }
+
+    transacter.replicaRead { session ->
+      assertThat(queryFactory.newQuery<CharacterQuery>()
+          .allowTableScan()
+          .name("Ian Malcolm 2").uniqueResult(session)).isNotNull()
+    }
+  }
+
+  @Test
+  fun loadOrNullReturnsEntity() {
+    transacter.transaction { session ->
+      val ld = session.save(DbActor("Laura Dern", LocalDate.of(1967, 2, 10)))
+      assertThat(session.loadOrNull(ld)).isNotNull()
+    }
+  }
+
+  @Test
+  fun loadOrNullMissingEntityReturnsNull() {
+    transacter.transaction { session ->
+      assertThat(session.loadOrNull(Id<DbActor>(123))).isNull()
     }
   }
 
@@ -81,18 +347,22 @@ class TransacterTest {
     assertFailsWith<UnauthorizedException> {
       transacter.transaction { session ->
         session.save(DbMovie("Star Wars", LocalDate.of(1977, 5, 25)))
-        assertThat(queryFactory.newQuery<MovieQuery>().list(session)).isNotEmpty()
+        assertThat(queryFactory.newQuery<MovieQuery>()
+            .allowFullScatter().allowTableScan().list(session)).isNotEmpty()
         throw UnauthorizedException("boom!")
       }
     }
     transacter.transaction { session ->
-      assertThat(queryFactory.newQuery<MovieQuery>().list(session)).isEmpty()
+      assertThat(queryFactory.newQuery<MovieQuery>().allowFullScatter().allowTableScan()
+          .list(session)).isEmpty()
     }
   }
 
   @Test
-  @Disabled("Uniqueness constraints aren't reliably enforced on Vitess")
   fun constraintViolationCausesTransactionToRollback() {
+    // Uniqueness constraints aren't reliably enforced on Vitess
+    assumeTrue(!transacter.config().type.isVitess)
+
     transacter.transaction { session ->
       session.save(DbMovie("Cinderella", LocalDate.of(1950, 3, 4)))
     }
@@ -103,7 +373,7 @@ class TransacterTest {
       }
     }
     transacter.transaction { session ->
-      assertThat(queryFactory.newQuery<MovieQuery>().list(session)).hasSize(1)
+      assertThat(queryFactory.newQuery<MovieQuery>().allowTableScan().list(session)).hasSize(1)
     }
   }
 
@@ -113,6 +383,24 @@ class TransacterTest {
 
     transacter.transaction {
       assertThat(transacter.inTransaction).isTrue()
+    }
+
+    assertThat(transacter.inTransaction).isFalse()
+  }
+
+  @Test
+  fun noFailSafeReadInTransaction() {
+    assertThat(transacter.inTransaction).isFalse()
+
+    transacter.transaction {
+      assertThat(transacter.inTransaction).isTrue()
+
+      assertFailsWith<IllegalStateException> {
+        transacter.failSafeRead {
+          queryFactory.newQuery<MovieQuery>().allowTableScan()
+              .name("Jurassic Park").uniqueResult(it)
+        }
+      }
     }
 
     assertThat(transacter.inTransaction).isFalse()
@@ -156,13 +444,15 @@ class TransacterTest {
     val callCount = AtomicInteger()
     transacter.transaction { session ->
       session.save(DbMovie("Star Wars", LocalDate.of(1977, 5, 25)))
-      assertThat(queryFactory.newQuery<MovieQuery>().list(session)).isNotEmpty()
+      assertThat(queryFactory.newQuery<MovieQuery>().allowFullScatter().allowTableScan()
+          .list(session)).isNotEmpty()
 
       if (callCount.getAndIncrement() == 0) throw RetryTransactionException()
     }
     assertThat(callCount.get()).isEqualTo(2)
     transacter.transaction { session ->
-      assertThat(queryFactory.newQuery<MovieQuery>().list(session)).hasSize(1)
+      assertThat(queryFactory.newQuery<MovieQuery>().allowFullScatter().allowTableScan()
+          .list(session)).hasSize(1)
     }
   }
 
@@ -198,7 +488,8 @@ class TransacterTest {
       }
     }
     transacter.transaction { session ->
-      assertThat(queryFactory.newQuery<MovieQuery>().list(session)).isEmpty()
+      assertThat(queryFactory.newQuery<MovieQuery>().allowFullScatter().allowTableScan()
+          .list(session)).isEmpty()
     }
   }
 
@@ -220,27 +511,22 @@ class TransacterTest {
   }
 
   @Test
-  fun committedTransactionsTraceSuccess() {
-    tracer.reset()
-
-    transacter.transaction {
-      // No need to do anything
+  fun readOnlyWontDelete() {
+    val id: Id<DbMovie> = transacter.transaction { session ->
+      session.save(DbMovie("Star Wars", LocalDate.of(1977, 5, 25)))
     }
 
-    tracingAssertions(true)
-  }
-
-  @Test
-  fun rolledbackTransactionsTraceError() {
-    tracer.reset()
-
-    assertFailsWith<NonRetryableException> {
-      transacter.transaction {
-        throw NonRetryableException()
+    assertFailsWith<IllegalStateException> {
+      transacter.readOnly().transaction { session ->
+        val movie: DbMovie? = queryFactory.newQuery<MovieQuery>().id(id).uniqueResult(session)
+        session.delete(movie!!)
       }
     }
 
-    tracingAssertions(false)
+    transacter.transaction { session ->
+      val movie: DbMovie? = queryFactory.newQuery<MovieQuery>().id(id).uniqueResult(session)
+      assertThat(movie).isNotNull()
+    }
   }
 
   @Test
@@ -250,7 +536,7 @@ class TransacterTest {
     lateinit var bbid: Id<DbMovie>
     lateinit var swid: Id<DbMovie>
 
-    transacter.transaction { session ->
+    transacter.allowCowrites().transaction { session ->
       session.onPreCommit {
         preCommitHooksTriggered.add("first")
         cid = session.save(DbMovie("Cinderella", LocalDate.of(1950, 3, 4)))
@@ -410,7 +696,7 @@ class TransacterTest {
   }
 
   @Test
-  fun sessionCloseHookInvokedEvenOnRollBak() {
+  fun sessionCloseHookInvokedEvenOnRollback() {
     val logs = mutableListOf<String>()
 
     assertThrows<NonRetryableException> {
@@ -425,37 +711,88 @@ class TransacterTest {
     assertThat(logs).containsExactly("hook invoked")
   }
 
-  fun tracingAssertions(committed: Boolean) {
-    // Assert on span, implicitly asserting that it's complete by looking at finished spans
-    val orderedSpans = tracer.finishedSpans().sortedBy { it.context().spanId() }
-    assertThat(orderedSpans).hasSize(4)
+  @Test
+  fun retriesIncludeConnectionReuse() {
+    logCollector.takeMessages()
 
-    assertThat(orderedSpans.get(0).operationName())
-        .isEqualTo(APPLICATION_TRANSACTION_SPAN_NAME)
-    assertThat(orderedSpans.get(0).tags())
-        .containsEntry(Tags.COMPONENT.getKey(), TRANSACTER_SPAN_TAG)
-
-    assertThat(orderedSpans.get(1).operationName())
-        .isEqualTo(DB_TRANSACTION_SPAN_NAME)
-    assertThat(orderedSpans.get(1).tags())
-        .containsEntry(Tags.COMPONENT.getKey(), TRANSACTER_SPAN_TAG)
-
-    assertThat(orderedSpans.get(2).operationName())
-        .isEqualTo(DB_BEGIN_SPAN_NAME)
-    assertThat(orderedSpans.get(2).tags())
-        .containsEntry(Tags.COMPONENT.getKey(), TRANSACTER_SPAN_TAG)
-
-    if (committed) {
-      assertThat(orderedSpans.get(3).operationName()).isEqualTo(DB_COMMIT_SPAN_NAME)
-    } else {
-      assertThat(orderedSpans.get(3).operationName()).isEqualTo(DB_ROLLBACK_SPAN_NAME)
+    val callCount = AtomicInteger()
+    transacter.retries(3).transaction {
+      if (callCount.getAndIncrement() < 2) throw RetryTransactionException()
     }
-    assertThat(orderedSpans.get(3).tags())
-        .containsEntry(Tags.COMPONENT.getKey(), TRANSACTER_SPAN_TAG)
 
-    // There should be no on-going span
-    assertThat(tracer.activeSpan()).isNull()
+    val logs = logCollector.takeMessages(RealTransacter::class)
+    assertThat(logs).hasSize(3)
+    assertThat(logs[0]).matches("Movies recoverable transaction exception " +
+        "\\(attempt 1\\), will retry after a PT.*S delay")
+    assertThat(logs[1]).matches("Movies recoverable transaction exception " +
+        "\\(attempt 2, same connection\\), will retry after a PT.*S delay")
+    assertThat(logs[2]).matches(
+        "retried Movies transaction succeeded \\(attempt 3, same connection\\)")
+  }
+
+  @Test
+  fun concurrentUpdates() {
+    transacter.transaction { session ->
+      session.save(DbMovie("Star Wars", LocalDate.of(1975, 5, 25)))
+    }
+
+    val txnEntryLatch = CountDownLatch(2)
+    val txnExitLatch = CountDownLatch(2)
+
+    val asyncWrite = Callable {
+      transacter.transaction { session ->
+        txnEntryLatch.countDown()
+        val movie = queryFactory.newQuery(MovieQuery::class)
+            .name("Star Wars")
+            .uniqueResult(session)!!
+        movie.release_date = LocalDate.of(movie.release_date!!.year + 1, 5, 25)
+        txnExitLatch.countDown()
+      }
+    }
+
+    val futureResults = Executors.newFixedThreadPool(2)
+        .invokeAll(listOf(asyncWrite, asyncWrite))
+        .map { it.get() }
+
+    assertThat(futureResults).hasSize(2)
+
+    val movies = transacter.transaction { session ->
+      queryFactory.newQuery(MovieQuery::class).list(session)
+    }
+    assertThat(movies.size).isEqualTo(1)
+    assertThat(movies[0].release_date == LocalDate.of(1977, 5, 25))
   }
 
   class NonRetryableException : Exception()
+}
+
+@MiskTest(startService = true)
+class MySQLTransacterTest : TransacterTest() {
+  @MiskTestModule
+  val module = MoviesTestModule(DataSourceType.MYSQL)
+}
+
+@MiskTest(startService = true)
+class VitessMySQLTransacterTest : TransacterTest() {
+  @MiskTestModule
+  val module = MoviesTestModule(DataSourceType.VITESS_MYSQL)
+}
+
+@MiskTest(startService = true)
+@Disabled // TODO these are flaky, trying to resolve that with Cockroach
+class CockroachTransacterTest : TransacterTest() {
+  @MiskTestModule
+  val module = MoviesTestModule(DataSourceType.COCKROACHDB)
+}
+
+@MiskTest(startService = true)
+class TidbTransacterTest : TransacterTest() {
+  @MiskTestModule
+  val module = MoviesTestModule(DataSourceType.TIDB)
+}
+
+@MiskTest(startService = true)
+class PostgresqlTransacterTest : TransacterTest() {
+  @MiskTestModule
+  val module = MoviesTestModule(DataSourceType.POSTGRESQL)
 }

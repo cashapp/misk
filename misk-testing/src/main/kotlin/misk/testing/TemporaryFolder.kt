@@ -45,7 +45,7 @@ class TemporaryFolderModule : KAbstractModule() {
 
   class DeleteTempFolder @Inject constructor(
     private val tempDir: TemporaryFolder
-  ): AfterEachCallback {
+  ) : AfterEachCallback {
     override fun afterEach(context: ExtensionContext) {
       tempDir.delete()
     }

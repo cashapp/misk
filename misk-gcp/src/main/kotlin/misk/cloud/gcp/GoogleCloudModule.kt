@@ -9,9 +9,9 @@ import com.google.cloud.http.HttpTransportOptions
 import com.google.cloud.storage.Storage
 import com.google.cloud.storage.StorageOptions
 import com.google.common.util.concurrent.AbstractIdleService
-import com.google.common.util.concurrent.Service
 import com.google.inject.Provides
 import com.google.inject.Singleton
+import misk.ServiceModule
 import misk.cloud.gcp.datastore.DatastoreConfig
 import misk.cloud.gcp.storage.LocalStorageRpc
 import misk.cloud.gcp.storage.StorageConfig
@@ -29,7 +29,7 @@ class GoogleCloudModule(
   override fun configure() {
     bind<DatastoreConfig>().toInstance(datastoreConfig)
     bind<StorageConfig>().toInstance(storageConfig)
-    multibind<Service>().to<GoogleCloud>()
+    install(ServiceModule<GoogleCloud>())
   }
 
   @Provides

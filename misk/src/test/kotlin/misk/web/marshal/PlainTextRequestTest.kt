@@ -8,12 +8,10 @@ import misk.web.RequestBody
 import misk.web.RequestContentType
 import misk.web.ResponseContentType
 import misk.web.WebActionModule
+import misk.web.WebTestClient
 import misk.web.WebTestingModule
 import misk.web.actions.WebAction
-import misk.web.jetty.JettyService
 import misk.web.mediatype.MediaTypes
-import okhttp3.OkHttpClient
-import okhttp3.Request
 import okio.ByteString
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -24,7 +22,7 @@ internal class PlainTextRequestTest {
   @MiskTestModule
   val module = TestModule()
 
-  @Inject private lateinit var jettyService: JettyService
+  @Inject private lateinit var webTestClient: WebTestClient
 
   @Test
   fun passAsString() {
@@ -47,7 +45,8 @@ internal class PlainTextRequestTest {
     @Post("/as-byte-string")
     @RequestContentType(MediaTypes.TEXT_PLAIN_UTF8)
     @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
-    fun call(@RequestBody messageBytes: ByteString): String = "${messageBytes.utf8()} as-byte-string"
+    fun call(@RequestBody messageBytes: ByteString): String =
+      "${messageBytes.utf8()} as-byte-string"
   }
 
   class TestModule : KAbstractModule() {
@@ -58,17 +57,10 @@ internal class PlainTextRequestTest {
     }
   }
 
-  private fun post(path: String, message: String): String = call(Request.Builder()
-      .url(jettyService.httpServerUrl.newBuilder().encodedPath(path).build())
-      .post(okhttp3.RequestBody.create(MediaTypes.TEXT_PLAIN_UTF8_MEDIA_TYPE, message)))
-
-  private fun call(request: Request.Builder): String {
-    request.header("Accept", MediaTypes.TEXT_PLAIN_UTF8)
-
-    val httpClient = OkHttpClient()
-    val response = httpClient.newCall(request.build()).execute()
-    assertThat(response.code()).isEqualTo(200)
-    assertThat(response.header("Content-Type")).isEqualTo(MediaTypes.TEXT_PLAIN_UTF8)
-    return response.body()?.string()!!
-  }
+  private fun post(path: String, message: String): String = webTestClient
+    .post(path, message, MediaTypes.TEXT_PLAIN_UTF8_MEDIA_TYPE)
+    .apply {
+      assertThat(response.code).isEqualTo(200)
+      assertThat(response.header("Content-Type")).isEqualTo(MediaTypes.TEXT_PLAIN_UTF8)
+    }.response.body?.string()!!
 }

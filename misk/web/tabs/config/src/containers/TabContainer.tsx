@@ -1,5 +1,4 @@
-import { OfflineComponent } from "@misk/core"
-import { simpleSelect } from "@misk/simpleredux"
+import { simpleSelectorGet } from "@misk/simpleredux"
 import * as React from "react"
 import { connect } from "react-redux"
 import { ConfigComponent } from "../components"
@@ -13,25 +12,16 @@ const apiUrl = "/api/config/metadata"
 
 class TabContainer extends React.Component<IState & IDispatchProps, IState> {
   componentDidMount() {
-    this.props.simpleNetworkGet("config", apiUrl)
+    this.props.simpleHttpGet("config", apiUrl)
   }
 
   render() {
-    const { error, resources } = simpleSelect(
-      this.props.simpleNetwork,
-      "config"
-    )
-    if (resources) {
-      return <ConfigComponent resources={resources} />
-    } else {
-      return (
-        <OfflineComponent
-          error={error}
-          title={"Error Loading Config Data"}
-          endpoint={apiUrl}
-        />
-      )
-    }
+    const resources = simpleSelectorGet(this.props.simpleRedux, [
+      "config",
+      "data",
+      "resources"
+    ])
+    return <ConfigComponent resources={resources} />
   }
 }
 
@@ -41,7 +31,4 @@ const mapDispatchToProps = {
   ...rootDispatcher
 }
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(TabContainer)
+export default connect(mapStateToProps, mapDispatchToProps)(TabContainer)

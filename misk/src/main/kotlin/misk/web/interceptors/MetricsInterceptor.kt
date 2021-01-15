@@ -8,7 +8,6 @@ import misk.scope.ActionScoped
 import misk.time.timed
 import misk.web.NetworkChain
 import misk.web.NetworkInterceptor
-import misk.web.Response
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -17,15 +16,18 @@ internal class MetricsInterceptor internal constructor(
   private val requestDuration: Histogram,
   private val caller: ActionScoped<MiskCaller?>
 ) : NetworkInterceptor {
-  override fun intercept(chain: NetworkChain): Response<*> {
-    val (elapsedTime, result) = timed { chain.proceed(chain.request) }
+  override fun intercept(chain: NetworkChain) {
+    val (elapsedTime, result) = timed { chain.proceed(chain.httpCall) }
 
     val elapsedTimeMillis = elapsedTime.toMillis().toDouble()
-    val callingPrincipal = caller.get()?.principal ?: "unknown"
-
-    arrayOf("all", "${result.statusCode / 100}xx", "${result.statusCode}").forEach { code ->
-      requestDuration.record(elapsedTimeMillis, actionName, callingPrincipal, code)
+    val callingPrincipal = when {
+      caller.get()?.service != null -> caller.get()?.service!!
+      caller.get()?.user != null -> "<user>"
+      else -> "unknown"
     }
+
+    val statusCode = chain.httpCall.statusCode
+    requestDuration.record(elapsedTimeMillis, actionName, callingPrincipal, statusCode.toString())
     return result
   }
 

@@ -1,24 +1,24 @@
 package misk.cloud.gcp.tracing
 
-import brave.Tracing
-import brave.opentracing.BraveTracer
 import com.google.cloud.logging.LogEntry
 import com.google.cloud.logging.Payload
-import com.uber.jaeger.Span
-import com.uber.jaeger.Tracer
-import com.uber.jaeger.reporters.NoopReporter
-import com.uber.jaeger.samplers.ConstSampler
+import datadog.opentracing.DDTracer
+import datadog.trace.common.writer.Writer
+import datadog.trace.core.DDSpan
+import io.opentracing.Span
 import io.opentracing.noop.NoopTracerFactory
 import misk.testing.MiskTest
+import misk.tracing.traceWithSpan
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
 @MiskTest
 class TracingLoggingEnhancerTest {
-  @Test fun enhanceJaegerTracer() {
-    val tracer = Tracer.Builder("jaegerbombs", NoopReporter(), ConstSampler(true)).build()
-    val scope = tracer.buildSpan("test span").startActive(true)
-    scope.use {
+  @Test fun enhanceDatadogTracer() {
+    val tracer = DDTracer.builder()
+            .writer(NoopWriter())
+            .build();
+    tracer.traceWithSpan("test span") {
       val logEntryBuilder = LogEntry.newBuilder(Payload.StringPayload.of("payload"))
 
       TracingLoggingEnhancer().enhanceLogEntry(tracer, logEntryBuilder)
@@ -26,31 +26,34 @@ class TracingLoggingEnhancerTest {
       val logEntry = logEntryBuilder.build()
       assertThat(logEntry.labels).isEqualTo(mapOf(
           "appengine.googleapis.com/trace_id" to
-              (tracer.activeSpan() as Span).context().traceId.toString()))
+              tracer.activeSpan().context().toTraceId()))
     }
   }
 
-  @Test fun enhanceBraveTracer() {
-    val tracer = BraveTracer.newBuilder(Tracing.newBuilder().build()).build()
-    val scope = tracer.buildSpan("test span").startActive(true)
-    scope.use {
-      val logEntryBuilder = LogEntry.newBuilder(Payload.StringPayload.of("payload"))
-
-      TracingLoggingEnhancer().enhanceLogEntry(tracer, logEntryBuilder)
-
-      val logEntry = logEntryBuilder.build()
-      assertThat(logEntry.labels).isEqualTo(mapOf(
-          "appengine.googleapis.com/trace_id" to
-              "0000000000000000" + tracer.activeSpan().unwrap().context().traceIdString()))
-    }
-  }
-
-  @Test fun ignoreEnhancement() {
+  @Test fun noopTracer() {
     val logEntryBuilder = LogEntry.newBuilder(Payload.StringPayload.of("payload"))
     TracingLoggingEnhancer()
         .enhanceLogEntry(NoopTracerFactory.create(), logEntryBuilder)
     val logEntry = logEntryBuilder.build()
 
     assertThat(logEntry.labels).isEmpty()
+  }
+}
+
+class NoopWriter : Writer {
+  override fun start() {
+  }
+
+  override fun write(trace: MutableList<DDSpan>?) {
+  }
+
+  override fun close() {
+  }
+
+  override fun flush() : Boolean {
+    return true
+  }
+
+  override fun incrementTraceCount() {
   }
 }

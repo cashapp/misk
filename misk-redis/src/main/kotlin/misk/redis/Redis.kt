@@ -23,6 +23,22 @@ interface Redis {
   fun del(vararg keys: String): Int
 
   /**
+   * Retrieves the values for the given list of keys.
+   *
+   * @param keys the keys to retrieve
+   * @return a list of String in the same order as the specified list of keys.
+   * For each key, a value will be returned if a key was found, otherwise null is returned.
+   */
+  fun mget(vararg keys: String): List<ByteString?>
+
+  /**
+   * Sets the key value pairs.
+   *
+   * @param keyValues the list of keys and values in alternating order.
+   */
+  fun mset(vararg keyValues: ByteString)
+
+  /**
    * Retrieves the value for the given key as a [ByteString].
    *
    * @param key the key to retrieve

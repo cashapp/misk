@@ -1,8 +1,8 @@
 package misk.web
 
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.assertOrdering
 import org.junit.jupiter.api.Test
-import java.util.Collections.shuffle
 
 internal class PathPatternTest {
   @Test
@@ -96,17 +96,12 @@ internal class PathPatternTest {
 
   @Test
   fun ordering() {
-    val p1 = PathPattern.parse("/org/{folder}/{type}")
-    val p2 = PathPattern.parse("/org/admin/{type}")
-    val p3 = PathPattern.parse("/org/admin/users")
-    val p4 = PathPattern.parse("/org/admin/{path:.*}")
-    val p5 = PathPattern.parse("/org/admin/{type:.*}/values")
-
-    val patterns = mutableListOf(p1, p2, p3, p4, p5)
-    shuffle(patterns)
-
-    val sortedBySpecificity = patterns.sorted()
-    assertThat(sortedBySpecificity).containsExactly(p5, p3, p2, p1, p4)
+    assertOrdering(
+        PathPattern.parse("/org/admin/{type:.*}/values"),
+        PathPattern.parse("/org/admin/users"),
+        PathPattern.parse("/org/admin/{type}"),
+        PathPattern.parse("/org/{folder}/{type}"),
+        PathPattern.parse("/org/admin/{path:.*}")
+    )
   }
 }
-

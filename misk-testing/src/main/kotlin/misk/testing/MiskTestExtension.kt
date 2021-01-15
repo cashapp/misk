@@ -4,7 +4,6 @@ import com.google.common.util.concurrent.ServiceManager
 import com.google.inject.Guice
 import com.google.inject.Injector
 import com.google.inject.Module
-import io.netty.util.internal.ConcurrentSet
 import misk.environment.Environment
 import misk.inject.KAbstractModule
 import misk.inject.getInstance
@@ -13,6 +12,7 @@ import misk.logging.getLogger
 import org.junit.jupiter.api.extension.AfterEachCallback
 import org.junit.jupiter.api.extension.BeforeEachCallback
 import org.junit.jupiter.api.extension.ExtensionContext
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -20,7 +20,7 @@ import javax.inject.Singleton
 internal class MiskTestExtension : BeforeEachCallback, AfterEachCallback {
 
   companion object {
-    private val runningDependencies = ConcurrentSet<String>()
+    private val runningDependencies = ConcurrentHashMap.newKeySet<String>()
     private val log = getLogger<MiskTestExtension>()
   }
 
@@ -78,7 +78,17 @@ internal class MiskTestExtension : BeforeEachCallback, AfterEachCallback {
 
     override fun beforeEach(context: ExtensionContext) {
       if (context.startService()) {
-        serviceManager.startAsync().awaitHealthy(60, TimeUnit.SECONDS)
+        try {
+          serviceManager.startAsync().awaitHealthy(60, TimeUnit.SECONDS)
+        } catch (e: IllegalStateException) {
+          // Unwrap and throw the real service failure
+          val suppressed = e.suppressed.firstOrNull()
+          val cause = suppressed?.cause
+          if (cause != null) {
+            throw cause
+          }
+          throw e
+        }
       }
     }
   }

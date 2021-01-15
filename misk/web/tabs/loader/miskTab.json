@@ -1,9 +1,0 @@
-{
-  "output_path": "lib/web/_tab/loader",
-  "port": "3100",
-  "version": "0.1.5-29",
-  "zipOnBuild": false,
-  "name": "Loader",
-  "relative_path_prefix": "_admin/",
-  "slug": "loader"
-}

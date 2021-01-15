@@ -5,11 +5,11 @@ import javax.inject.Singleton
 
 @Singleton
 class FakeRandom @Inject constructor() : Random() {
-  var nextBoolean : Boolean? = null
-  var nextInt : Int? = null
-  var nextLong : Long? = null
-  var nextFloat : Float? = null
-  var nextDouble : Double? = null
+  var nextBoolean: Boolean? = null
+  var nextInt: Int? = null
+  var nextLong: Long? = null
+  var nextFloat: Float? = null
+  var nextDouble: Double? = null
 
   override fun nextBoolean(): Boolean = nextBoolean ?: super.nextBoolean()
   override fun nextInt(): Int = nextInt ?: super.nextInt()

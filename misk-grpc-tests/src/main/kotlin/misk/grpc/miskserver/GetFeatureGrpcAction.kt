@@ -1,18 +1,15 @@
 package misk.grpc.miskserver
 
-import misk.web.Grpc
-import misk.web.RequestBody
 import misk.web.actions.WebAction
+import misk.web.interceptors.LogRequestResponse
 import routeguide.Feature
 import routeguide.Point
+import routeguide.RouteGuideGetFeatureBlockingServer
 import javax.inject.Inject
 
-class GetFeatureGrpcAction @Inject constructor() : WebAction {
-  @Grpc("/routeguide.RouteGuide/GetFeature")
-  fun sayHello(@RequestBody point: Point): Feature {
-    return Feature.Builder()
-        .name("maple tree")
-        .location(point)
-        .build()
+class GetFeatureGrpcAction @Inject constructor() : WebAction, RouteGuideGetFeatureBlockingServer {
+  @LogRequestResponse(bodySampling = 1.0, errorBodySampling = 1.0)
+  override fun GetFeature(request: Point): Feature {
+    return Feature(name = "maple tree", location = request)
   }
 }

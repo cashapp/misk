@@ -1,8 +1,8 @@
 package misk.eventrouter
 
-import com.google.common.util.concurrent.Service
 import com.google.inject.Provides
 import com.squareup.moshi.Moshi
+import misk.ServiceModule
 import misk.environment.Environment
 import misk.healthchecks.HealthCheck
 import misk.inject.KAbstractModule
@@ -21,7 +21,7 @@ class RealEventRouterModule(val environment: Environment) : KAbstractModule() {
   override fun configure() {
     bind<EventRouter>().to<RealEventRouter>().asSingleton()
     bind<RealEventRouter>().asSingleton()
-    multibind<Service>().to<EventRouterService>()
+    install(ServiceModule<EventRouterService>())
     if (environment == Environment.DEVELOPMENT) {
       bind<ClusterConnector>().to<LocalClusterConnector>()
     } else {

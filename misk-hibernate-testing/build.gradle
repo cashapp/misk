@@ -1,12 +1,20 @@
 dependencies {
-  compile dep.junitApi
-  compile project(':misk')
-  compile project(':misk-testing')
-  compile project(':misk-hibernate')
+  implementation dep.guice
+  api project(':misk-jdbc-testing')
+  implementation project(':misk')
+  implementation project(':misk-core')
+  implementation project(':misk-inject')
+  implementation project(':misk-jdbc')
+  implementation project(':misk-testing')
+  implementation project(':misk-hibernate')
+  testImplementation dep.junitApi
 }
 
-test {
-  // To help that with parallel execution by reusing test setup,
-  // misk-hibernate-testing is made dependent on misk-hibernate
-  dependsOn ':misk-hibernate:test'
+afterEvaluate { project ->
+  project.tasks.dokka {
+    outputDirectory = "$rootDir/docs/0.x"
+    outputFormat = 'gfm'
+  }
 }
+
+apply from: "$rootDir/gradle-mvn-publish.gradle"

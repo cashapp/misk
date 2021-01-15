@@ -1,15 +1,18 @@
-apply plugin: 'com.github.johnrengelman.shadow'
-
 dependencies {
-  compile dep.kotlinStdLib
-  compile dep.kotlinTest
-  compile dep.guava
-  compile dep.guice
-  compile dep.logbackClassic
-  compile project(':misk')
-  compile project(':misk-prometheus')
+  implementation dep.kotlinStdLibJdk8
+  implementation dep.guava
+  implementation dep.guice
+  implementation dep.logbackClassic
+  implementation dep.okHttp
+  implementation project(':misk')
+  implementation project(':misk-actions')
+  implementation project(':misk-core')
+  implementation project(':misk-inject')
+  implementation project(':misk-prometheus')
 
-  testCompile project(':misk-testing')
+  testImplementation project(':misk-testing')
+  testImplementation dep.assertj
+  testImplementation dep.kotlinTest
 }
 
 jar {
@@ -17,14 +20,4 @@ jar {
     attributes 'Main-Class': 'com.squareup.exemplar.ExemplarServiceKt'
   }
   classifier = 'unshaded'
-}
-
-
-shadowJar {
-  exclude('module-info.class') // https://github.com/johnrengelman/shadow/issues/352
-  mergeServiceFiles()
-}
-
-artifacts {
-  archives shadowJar
 }

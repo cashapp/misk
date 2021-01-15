@@ -61,6 +61,10 @@ abstract class BaseCustomStorageRpc : StorageRpc {
     throw UnsupportedOperationException()
   }
 
+  override fun lockRetentionPolicy(bucket: Bucket?, options: Map<StorageRpc.Option, *>?): Bucket {
+    throw UnsupportedOperationException()
+  }
+
   override fun getServiceAccount(projectId: String?): ServiceAccount {
     throw UnsupportedOperationException()
   }
@@ -147,6 +151,19 @@ abstract class BaseCustomStorageRpc : StorageRpc {
     target: StorageObject?,
     targetOptions: Map<StorageRpc.Option, *>?
   ): StorageObject {
+    throw UnsupportedOperationException()
+  }
+
+  override fun read(
+    from: StorageObject?,
+    options: Map<StorageRpc.Option, *>?,
+    position: Long,
+    bytes: Int
+  ): Tuple<String, ByteArray> {
+    throw UnsupportedOperationException()
+  }
+
+  override fun open(signedURL: String?): String {
     throw UnsupportedOperationException()
   }
 

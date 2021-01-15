@@ -1,6 +1,21 @@
 dependencies {
-    compile dep.tracingJaeger
-    compile project(':misk')
+  implementation dep.wireGrpcClient
+  implementation dep.wireRuntime
+  implementation dep.moshiCore
+  implementation dep.moshiKotlin
+  implementation dep.moshiAdapters
+  implementation project(':misk')
 
-    testCompile project(':misk-testing')
+  testImplementation project(':misk-testing')
+  testImplementation dep.assertj
+  testImplementation dep.kotlinTest
 }
+
+afterEvaluate { project ->
+  project.tasks.dokka {
+    outputDirectory = "$rootDir/docs/0.x"
+    outputFormat = 'gfm'
+  }
+}
+
+apply from: "$rootDir/gradle-mvn-publish.gradle"

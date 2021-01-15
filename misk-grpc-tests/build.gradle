@@ -5,6 +5,7 @@ buildscript {
 }
 
 apply plugin: 'com.google.protobuf'
+apply plugin: 'com.squareup.wire'
 
 protobuf {
   plugins {
@@ -28,17 +29,57 @@ protobuf {
   }
 }
 
+wire {
+  kotlin {
+    rpcRole = 'client'
+    javaInterop = true
+  }
+
+  // Generate service interfaces also.
+  kotlin {
+    includes = ['routeguide.RouteGuide']
+    exclusive = false
+    rpcRole = 'server'
+    rpcCallStyle = 'blocking'
+    singleMethodServices = true
+  }
+}
+
 sourceSets {
   main.java.srcDirs += 'build/generated/source/proto/main/grpc'
   main.java.srcDirs += 'build/generated/source/proto/main/java'
+
+  // TODO(jwilson): we do this to make IntelliJ happy but the Wire Gradle plugin should do that.
+  main.java.srcDirs += 'build/generated/source/wire'
 }
 
 dependencies {
-  compile dep.junitApi
-  compile dep.docker
-  compile dep.grpcNetty
-  compile dep.grpcProtobuf
-  compile dep.grpcStub
-  compile project(':misk')
-  compile project(':misk-testing')
+  implementation dep.assertj
+  implementation dep.junitApi
+  implementation dep.kotlinTest
+  implementation dep.docker
+  implementation dep.guice
+  implementation dep.grpcNetty
+  implementation dep.grpcProtobuf
+  implementation dep.grpcStub
+  implementation dep.kotlinxCoroutines
+  implementation dep.wireGrpcClient
+  implementation dep.wireRuntime
+  implementation project(':misk')
+  implementation project(':misk-actions')
+  implementation project(':misk-core')
+  implementation project(':misk-inject')
+  implementation project(':misk-service')
+  implementation project(':misk-testing')
+
+  testImplementation dep.logbackClassic
 }
+
+afterEvaluate { project ->
+  project.tasks.dokka {
+    outputDirectory = "$rootDir/docs/0.x"
+    outputFormat = 'gfm'
+  }
+}
+
+apply from: "$rootDir/gradle-mvn-publish.gradle"

@@ -1,17 +1,12 @@
 import {
-  dispatchSimpleForm,
-  dispatchSimpleNetwork,
-  IDispatchSimpleForm,
-  IDispatchSimpleNetwork,
-  ISimpleFormImmutableState,
-  ISimpleFormState,
-  ISimpleNetworkImmutableState,
-  ISimpleNetworkState,
-  SimpleFormReducer,
-  SimpleNetworkReducer,
+  dispatchSimpleRedux,
+  IDispatchSimpleRedux,
+  ISimpleReduxImmutableState,
+  ISimpleReduxState,
+  SimpleReduxReducer,
+  SimpleReduxSaga,
   simpleRootSelector,
-  watchSimpleFormSagas,
-  watchSimpleNetworkSagas
+  watchSimpleReduxSagas
 } from "@misk/simpleredux"
 import {
   connectRouter,
@@ -20,7 +15,7 @@ import {
 } from "connected-react-router"
 import { History } from "history"
 import { AnyAction, combineReducers, Reducer } from "redux"
-import { all, AllEffect, fork } from "redux-saga/effects"
+import { all, fork } from "redux-saga/effects"
 import {
   dispatchWebActions,
   IDispatchWebActions,
@@ -35,23 +30,21 @@ export * from "./webActions"
  * Redux Store State
  */
 export interface IState {
-  webActions: IWebActionsState
   router: Reducer<RouterState, LocationChangeAction>
-  simpleForm: ISimpleFormState
-  simpleNetwork: ISimpleNetworkState
+  simpleRedux: ISimpleReduxState
+  webActions: IWebActionsState
+  webActionsRaw: IWebActionsImmutableState
 }
 
 /**
  * Dispatcher
  */
 export interface IDispatchProps
-  extends IDispatchSimpleForm,
-    IDispatchSimpleNetwork,
+  extends IDispatchSimpleRedux,
     IDispatchWebActions {}
 
 export const rootDispatcher: IDispatchProps = {
-  ...dispatchSimpleForm,
-  ...dispatchSimpleNetwork,
+  ...dispatchSimpleRedux,
   ...dispatchWebActions
 }
 
@@ -59,18 +52,16 @@ export const rootDispatcher: IDispatchProps = {
  * State Selectors
  */
 export const rootSelectors = (state: IState) => ({
+  router: state.router,
+  simpleRedux: simpleRootSelector<IState, ISimpleReduxImmutableState>(
+    "simpleRedux",
+    state
+  ),
   webActions: simpleRootSelector<IState, IWebActionsImmutableState>(
     "webActions",
     state
   ),
-  simpleForm: simpleRootSelector<IState, ISimpleFormImmutableState>(
-    "simpleForm",
-    state
-  ),
-  simpleNetwork: simpleRootSelector<IState, ISimpleNetworkImmutableState>(
-    "simpleNetwork",
-    state
-  )
+  webActionsRaw: state.webActionsRaw
 })
 
 /**
@@ -78,19 +69,24 @@ export const rootSelectors = (state: IState) => ({
  */
 export const rootReducer = (history: History): Reducer<any, AnyAction> =>
   combineReducers({
-    webActions: WebActionsReducer,
     router: connectRouter(history),
-    simpleForm: SimpleFormReducer,
-    simpleNetwork: SimpleNetworkReducer
+    simpleRedux: SimpleReduxReducer,
+    webActions: WebActionsReducer,
+    webActionsRaw: WebActionsReducer
   })
 
 /**
  * Sagas
  */
-export function* rootSaga(): IterableIterator<AllEffect> {
-  yield all([
-    fork(watchWebActionsSagas),
-    fork(watchSimpleFormSagas),
-    fork(watchSimpleNetworkSagas)
-  ])
+export function* rootSaga(): SimpleReduxSaga {
+  yield all([fork(watchWebActionsSagas), fork(watchSimpleReduxSagas)])
+}
+
+/**
+ * Map Dispatch/State to Props
+ */
+export const mapStateToProps = (state: IState) => rootSelectors(state)
+
+export const mapDispatchToProps: IDispatchProps = {
+  ...rootDispatcher
 }

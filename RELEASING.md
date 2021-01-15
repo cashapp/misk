@@ -1,44 +1,52 @@
 Releasing
--------------
+=========
 
-The upload isn't idempotent, so if you're uploading multiple artifacts and it fails partway,
-you'll need to invoke the uploadArchives command for each remaining artifact.
+1. Update `CHANGELOG.md`.
 
-Release the base `misk/misk` subproject with command below from the main `cash/misk` directory.
+2. Set versions:
 
-  ```
-  $ ./gradlew misk:uploadArchives -Pinternal
+    ```
+    export RELEASE_VERSION=A.B.C
+    export NEXT_VERSION=A.B.D-SNAPSHOT
+    ```
 
-  ```
+3. Update documentation and Gradle properties with `RELEASE_VERSION`
 
-Release a specific misk subproject with `./gradlew { misk-subproject }:uploadArchives -Pinternal`. Example for `misk-aws` below.
+    ```
+    sed -i "" \
+      "s/VERSION_NAME=.*/VERSION_NAME=$RELEASE_VERSION/g" \
+      gradle.properties
+    sed -i "" \
+      "s/\"com.squareup.misk:\([^\:]*\):[^\"]*\"/\"com.squareup.misk:\1:$RELEASE_VERSION\"/g" \
+      `find . -maxdepth 2 -name "README.md"`
+    ```
 
-  ```
-  $ ./gradlew misk-aws:uploadArchives -Pinternal
+4. Tag the release and push to GitHub. Merge PR.
 
-  ```
+    ```
+    git commit -am "Prepare for release $RELEASE_VERSION."
+    git tag -a misk-$RELEASE_VERSION -m "Version $RELEASE_VERSION"
+    git push && git push --tags
+    ``` 
 
-Release all misk subprojects with command below from the main `cash/misk` directory.
+5. Wait until the "Publish a release" action completes, then visit [Sonatype Nexus][sonatype_nexus] to promote (close then release) the artifact. Or drop it if there is a problem!
 
-  ```
-  $ ./gradlew uploadArchives -Pinternal
-  ```
+    ![Sonatype Release](/img/sonatype-release.gif)
 
-If base `misk/misk` subproject or other artifacts have already been published, any of the above commands will fail. You will then need to manually `uploadArchives` for all subprojects.
-Note: the below command may not be up to date with all of the current Misk subprojects.
+6. Prepare for the next release and push to GitHub. Merge PR.
 
-  ```
-  $ ./gradlew misk:uploadArchives -Pinternal && \
-      ./gradlew misk-aws:uploadArchives -Pinternal && \
-      ./gradlew misk-eventrouter:uploadArchives -Pinternal && \
-      ./gradlew misk-events:uploadArchives -Pinternal && \
-      ./gradlew misk-gcp:uploadArchives -Pinternal && \
-      ./gradlew misk-gcp-testing:uploadArchives -Pinternal && \
-      ./gradlew misk-grpc-tests:uploadArchives -Pinternal && \
-      ./gradlew misk-hibernate:uploadArchives -Pinternal && \
-      ./gradlew misk-hibernate-testing:uploadArchives -Pinternal && \
-      ./gradlew misk-jaeger:uploadArchives -Pinternal && \
-      ./gradlew misk-prometheus:uploadArchives -Pinternal && \
-      ./gradlew misk-testing:uploadArchives -Pinternal && \
-      ./gradlew misk-zipkin:uploadArchives -Pinternal
-  ```
+    ```
+    sed -i "" \
+      "s/VERSION_NAME=.*/VERSION_NAME=$NEXT_VERSION/g" \
+      gradle.properties
+    git commit -am "Prepare next development version."
+    git push
+    ```
+
+7. Draft a new [release](https://docs.github.com/en/github/administering-a-repository/managing-releases-in-a-repository) of `A.B.C` to trigger the "Publish the mkdocs to gh-pages" action.
+
+## Troubleshooting
+
+If the github action fails, drop the artifacts from Sonatype and re run the job. You might need to delete the plugin off the JetBrains plugin portal first if the ubuntu job which publishes it already succeeded.
+
+[sonatype_nexus]: https://oss.sonatype.org/

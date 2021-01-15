@@ -7,6 +7,7 @@ import misk.web.Get
 import misk.web.Response
 import misk.web.ResponseContentType
 import misk.web.WebActionModule
+import misk.web.WebTestClient
 import misk.web.WebTestingModule
 import misk.web.actions.WebAction
 import misk.web.jetty.JettyService
@@ -25,7 +26,7 @@ internal class PlainTextResponseTest {
   @MiskTestModule
   val module = TestModule()
 
-  @Inject private lateinit var jettyService: JettyService
+  @Inject private lateinit var webTestClient: WebTestClient
 
   @Test
   fun returnAsObject() {
@@ -129,21 +130,13 @@ internal class PlainTextResponseTest {
     }
   }
 
-  fun get(path: String): String = call(Request.Builder()
-      .url(jettyService.httpServerUrl.newBuilder().encodedPath(path).build())
-      .get())
+  fun get(path: String): String = webTestClient.get(path)
+    .apply {
+      assertThat(response.code).isEqualTo(200)
+      assertThat(response.header("Content-Type")).isEqualTo(MediaTypes.TEXT_PLAIN_UTF8)
+    }.response.body!!.string()
 
   class MessageWrapper(private val message: String) {
     override fun toString() = message
-  }
-
-  private fun call(request: Request.Builder): String {
-    request.header("Accept", MediaTypes.TEXT_PLAIN_UTF8)
-
-    val httpClient = OkHttpClient()
-    val response = httpClient.newCall(request.build()).execute()
-    assertThat(response.code()).isEqualTo(200)
-    assertThat(response.header("Content-Type")).isEqualTo(MediaTypes.TEXT_PLAIN_UTF8)
-    return response.body()!!.string()
   }
 }

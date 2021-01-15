@@ -1,16 +1,10 @@
 package misk.client
 
-import java.net.InetAddress
-import java.util.Collections
-import javax.annotation.Nonnull
 import okhttp3.Dns
+import java.net.InetAddress
 
-class NoOpDns : Dns {
-  override fun lookup(@Nonnull hostname: String): List<InetAddress> {
-    return loopback
-  }
+internal object NoOpDns : Dns {
+  private val loopback = listOf(InetAddress.getLoopbackAddress())
 
-  companion object {
-    private val loopback = Collections.singletonList(InetAddress.getLoopbackAddress())
-  }
+  override fun lookup(hostname: String) = loopback
 }

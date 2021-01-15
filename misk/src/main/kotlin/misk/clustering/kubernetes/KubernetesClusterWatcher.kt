@@ -3,19 +3,16 @@ package misk.clustering.kubernetes
 import com.google.common.base.Stopwatch
 import com.google.common.reflect.TypeToken
 import com.google.common.util.concurrent.AbstractIdleService
-import com.google.inject.Key
 import io.kubernetes.client.apis.CoreV1Api
 import io.kubernetes.client.models.V1Pod
 import io.kubernetes.client.util.Config
 import io.kubernetes.client.util.Watch
-import misk.DependentService
 import misk.backoff.ExponentialBackoff
 import misk.clustering.Cluster
 import misk.clustering.DefaultCluster
 import misk.clustering.kubernetes.KubernetesClusterWatcher.Companion.CHANGE_TYPE_ADDED
 import misk.clustering.kubernetes.KubernetesClusterWatcher.Companion.CHANGE_TYPE_DELETED
 import misk.clustering.kubernetes.KubernetesClusterWatcher.Companion.CHANGE_TYPE_MODIFIED
-import misk.inject.keyOf
 import misk.logging.getLogger
 import java.time.Duration
 import java.util.concurrent.TimeUnit
@@ -34,12 +31,9 @@ import kotlin.concurrent.thread
 internal class KubernetesClusterWatcher @Inject internal constructor(
   private val cluster: DefaultCluster,
   private val config: KubernetesConfig
-) : AbstractIdleService(), DependentService {
+) : AbstractIdleService() {
   private val running = AtomicBoolean(false)
   private val watchFailedTimer = Stopwatch.createUnstarted()
-
-  override val consumedKeys: Set<Key<*>> = setOf(keyOf<Cluster>())
-  override val producedKeys: Set<Key<*>> = setOf()
 
   override fun startUp() {
     log.info { "starting k8s cluster watch" }
@@ -64,7 +58,7 @@ internal class KubernetesClusterWatcher @Inject internal constructor(
 
     while (running.get()) {
       try {
-        log.info { "preparing watch for namespace ${config.my_pod_namespace}" }
+        log.debug { "preparing watch for namespace ${config.my_pod_namespace}" }
         val watch = Watch.createWatch<V1Pod>(
             client,
             api.listNamespacedPodCall(
@@ -73,13 +67,13 @@ internal class KubernetesClusterWatcher @Inject internal constructor(
                 null, // _continue
                 null, // fieldSelector
                 false, // includeUninitialized
-                null, // labelSelector
+                config.clustering_pod_label_selector, // labelSelector
                 null, // limit
                 null, // resourceVersion
                 null, // timeoutSeconds
                 true, // watch
                 null, // progressListener
-                null  // progressRequestListener
+                null // progressRequestListener
             ),
             podType)
         // createWatch() throws an exception if the long poll fails. If we get here, it means
@@ -89,7 +83,7 @@ internal class KubernetesClusterWatcher @Inject internal constructor(
 
         watch.use {
           for (response in watch) {
-            log.info { "received watch in namespace ${config.my_pod_namespace}" }
+            log.debug { "received watch in namespace ${config.my_pod_namespace}" }
             connectBackoff.reset()
             if (!running.get()) {
               watch.close()
