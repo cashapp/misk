@@ -15,6 +15,7 @@ import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.LinkedBlockingDeque
@@ -46,6 +47,7 @@ internal class SqsJobQueueServiceTest {
     serviceManager.awaitStopped(20, TimeUnit.SECONDS)
   }
 
+  @Disabled("Are manual services real?")
   @Test fun `jobs are not handled until all services are running`() {
     val log = LinkedBlockingDeque<String>()
     val jobRan = CountDownLatch(1)

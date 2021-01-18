@@ -25,7 +25,6 @@ class LivenessCheckActionTest {
 
   @Test
   fun livenessDependsOnServiceState() {
-    serviceManager.startAsync()
     serviceManager.awaitHealthy()
     assertThat(livenessCheckAction.livenessCheck().statusCode).isEqualTo(200)
     serviceManager.stopAsync()

@@ -20,7 +20,12 @@ import org.junit.jupiter.api.extension.ExtendWith
  * multibind<AfterEachCallback>().to<MyAfterEach>()
  * ```
  */
-annotation class MiskTest(val startService: Boolean = false)
+
+annotation class MiskTest(
+  @Deprecated(
+    "startService is being ignored as Services will always be started"
+  ) val startService: Boolean = false
+)
 
 @Target(AnnotationTarget.FIELD)
 annotation class MiskTestModule

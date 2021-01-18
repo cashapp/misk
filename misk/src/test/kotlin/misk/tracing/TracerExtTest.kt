@@ -2,8 +2,10 @@ package misk.tracing
 
 import io.opentracing.mock.MockSpan
 import io.opentracing.tag.Tags
+import misk.ServiceManagerModule
 import misk.exceptions.ActionException
 import misk.exceptions.StatusCode
+import misk.inject.KAbstractModule
 import misk.testing.ConcurrentMockTracer
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
@@ -16,7 +18,14 @@ import kotlin.test.assertFailsWith
 @MiskTest
 class TracerExtTest {
   @MiskTestModule
-  val module = MockTracingBackendModule()
+  val module = TestModule()
+
+  class TestModule : KAbstractModule() {
+    override fun configure() {
+      install(ServiceManagerModule())
+      install(MockTracingBackendModule())
+    }
+  }
 
   @Inject private lateinit var tracer: ConcurrentMockTracer
 

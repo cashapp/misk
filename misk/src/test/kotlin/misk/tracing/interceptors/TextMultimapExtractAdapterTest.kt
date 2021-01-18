@@ -1,11 +1,9 @@
 package misk.tracing.interceptors
 
-import misk.testing.MiskTest
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
-@MiskTest
-class TextMultimapExtractAdapterTest {
+internal class TextMultimapExtractAdapterTest {
 
   @Test
   fun flattensMultimap() {
@@ -15,10 +13,13 @@ class TextMultimapExtractAdapterTest {
     val pairs: MutableList<Pair<String, String>> = mutableListOf()
     adapter.iterator().forEach { pairs.add(Pair(it.key, it.value)) }
 
-    assertThat(pairs).isEqualTo(listOf(
+    assertThat(pairs).isEqualTo(
+      listOf(
         Pair("a", "1"),
         Pair("a", "2"),
-        Pair("b", "3")))
+        Pair("b", "3")
+      )
+    )
   }
 
   @Test

@@ -1,7 +1,6 @@
 package misk.web.formatter
 
 import com.google.common.base.CharMatcher
-import misk.testing.MiskTest
 import misk.web.NetworkChain
 import misk.web.NetworkInterceptor
 import org.junit.jupiter.api.Test
@@ -10,7 +9,6 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
-@MiskTest(startService = false)
 class ClassNameFormatterTest {
   fun isValid(className: String) {
     assertTrue(className.isNotBlank())

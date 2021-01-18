@@ -31,7 +31,6 @@ class StatusActionTest {
 
   @Test
   fun readinessDependsOnServiceStateAndHealthChecksPassing() {
-    serviceManager.startAsync()
     serviceManager.awaitHealthy()
 
     var status = statusAction.getStatus()
