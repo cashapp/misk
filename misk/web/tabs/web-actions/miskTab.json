@@ -13,7 +13,7 @@
   "slug": "web-actions",
   "useWebpackBundleAnalyzer": false,
   "useWebpackExternals": true,
-  "version": "0.1.26",
+  "version": "0.1.27-94",
   "zipOnBuild": false,
   "___DeprecatedKeys": "Any keys below this point in your miskTab.json are deprecated and can be safely removed."
 }
