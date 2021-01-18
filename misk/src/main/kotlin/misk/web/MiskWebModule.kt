@@ -126,9 +126,11 @@ class MiskWebModule(private val config: WebConfig) : KAbstractModule() {
     multibind<NetworkInterceptor.Factory>(MiskDefault::class)
         .to<MetricsInterceptor.Factory>()
 
-    // Shed calls when we're degraded.
-    multibind<NetworkInterceptor.Factory>(MiskDefault::class)
-        .to<ConcurrencyLimitsInterceptor.Factory>()
+    if (!config.concurrency_limiter_disabled) {
+      // Shed calls when we're degraded.
+      multibind<NetworkInterceptor.Factory>(MiskDefault::class)
+          .to<ConcurrencyLimitsInterceptor.Factory>()
+    }
 
     // Traces requests as they work their way through the system.
     multibind<NetworkInterceptor.Factory>(MiskDefault::class)
