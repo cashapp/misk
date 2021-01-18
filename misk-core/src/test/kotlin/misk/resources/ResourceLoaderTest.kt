@@ -1,6 +1,7 @@
 package misk.resources
 
 import com.google.inject.util.Modules
+import misk.ServiceManagerModule
 import java.io.File
 import java.net.URLClassLoader
 import javax.inject.Inject
@@ -18,7 +19,11 @@ import org.junit.jupiter.api.Test
 @MiskTest
 class ResourceLoaderTest {
   @MiskTestModule
-  val module = Modules.combine(ResourceLoaderModule(), TemporaryFolderModule())
+  val module = Modules.combine(
+    ServiceManagerModule(),
+    ResourceLoaderModule(),
+    TemporaryFolderModule()
+  )
 
   @Inject lateinit var resourceLoader: ResourceLoader
   @Inject lateinit var tempFolder: TemporaryFolder
@@ -45,34 +50,37 @@ class ResourceLoaderTest {
   @Test
   fun listContainsImmediateChild() {
     assertThat(resourceLoader.list("classpath:/misk/resources/"))
-        .contains("classpath:/misk/resources/ResourceLoaderTest.txt")
+      .contains("classpath:/misk/resources/ResourceLoaderTest.txt")
   }
 
   @Test
   fun listDoesNotContainChildOfChild() {
     assertThat(resourceLoader.list("classpath:/misk/"))
-        .doesNotContain("classpath:/misk/resources/ResourceLoaderTest.txt")
+      .doesNotContain("classpath:/misk/resources/ResourceLoaderTest.txt")
   }
 
   @Test
   fun listContainsResourcesFromJar() {
     assertThat(resourceLoader.list("classpath:/META-INF/"))
-        .contains("classpath:/META-INF/MANIFEST.MF")
+      .contains("classpath:/META-INF/MANIFEST.MF")
   }
 
   @Test
   fun walk() {
     val resourcesBaseDir = "classpath:/misk/resources"
     assertThat(resourceLoader.walk("$resourcesBaseDir/nested/deeper")).isEqualTo(
-        listOf("$resourcesBaseDir/nested/deeper/nested2.txt"))
+      listOf("$resourcesBaseDir/nested/deeper/nested2.txt")
+    )
 
     assertThat(resourceLoader.walk("$resourcesBaseDir/nested")).containsExactlyInAnyOrder(
-        "$resourcesBaseDir/nested/nested.txt",
-        "$resourcesBaseDir/nested/deeper/nested2.txt")
+      "$resourcesBaseDir/nested/nested.txt",
+      "$resourcesBaseDir/nested/deeper/nested2.txt"
+    )
 
     assertThat(resourceLoader.walk("$resourcesBaseDir/")).contains(
-        "$resourcesBaseDir/nested/nested.txt",
-        "$resourcesBaseDir/nested/deeper/nested2.txt")
+      "$resourcesBaseDir/nested/nested.txt",
+      "$resourcesBaseDir/nested/deeper/nested2.txt"
+    )
   }
 
   @Test
@@ -100,12 +108,16 @@ class ResourceLoaderTest {
     assertThat(resourceLoader.list("memory:/misk/resources")).containsExactly(data1, data2)
     assertThat(resourceLoader.list("memory:/misk/resources/")).containsExactly(data1, data2)
     assertThat(resourceLoader.list("memory:/misk")).containsExactlyInAnyOrder(
-        "memory:/misk/resources", "memory:/misk/tmp", data3)
+      "memory:/misk/resources", "memory:/misk/tmp", data3
+    )
     assertThat(resourceLoader.list("memory:/misk/")).containsExactlyInAnyOrder(
-        "memory:/misk/resources", "memory:/misk/tmp", data3)
+      "memory:/misk/resources", "memory:/misk/tmp", data3
+    )
 
-    assertThat(resourceLoader.walk("memory:/misk")).containsExactlyInAnyOrder(data1, data2, data3,
-        data4)
+    assertThat(resourceLoader.walk("memory:/misk")).containsExactlyInAnyOrder(
+      data1, data2, data3,
+      data4
+    )
   }
 
   @Test
@@ -171,9 +183,9 @@ class ResourceLoaderTest {
     resourceLoader.copyTo("classpath:/misk/resources", tempRoot)
     val prefix = "filesystem:$tempRoot"
     assertThat(resourceLoader.utf8("$prefix/ResourceLoaderTest.txt")!!)
-        .isEqualTo("69e0753934d2838d1953602ca7722444\n")
+      .isEqualTo("69e0753934d2838d1953602ca7722444\n")
     assertThat(resourceLoader.utf8("$prefix/nested/nested.txt")!!)
-        .isEqualTo("I am nested\n")
+      .isEqualTo("I am nested\n")
   }
 
   @Test
@@ -185,17 +197,17 @@ class ResourceLoaderTest {
 
     // Confirm the resource isn't available in the app class loader.
     assertThat(resourceLoader.utf8("classpath:/context_class_loader_resource.txt"))
-        .isNull()
+      .isNull()
 
     // But when the context class loader changes, the resource becomes visible.
     withContextClassLoader(tempDirClassLoader) {
       assertThat(resourceLoader.utf8("classpath:/context_class_loader_resource.txt"))
-          .isEqualTo("hello, context class loader")
+        .isEqualTo("hello, context class loader")
     }
 
     // The resource is not cached in the resource loader.
     assertThat(resourceLoader.utf8("classpath:/context_class_loader_resource.txt"))
-        .isNull()
+      .isNull()
   }
 
   @Test
@@ -212,8 +224,8 @@ class ResourceLoaderTest {
 
     withContextClassLoader(tempDirClassLoader) {
       assertThat(resourceLoader.list("classpath:/context_class_loader")).contains(
-          "classpath:/context_class_loader/a.txt",
-          "classpath:/context_class_loader/b.txt"
+        "classpath:/context_class_loader/a.txt",
+        "classpath:/context_class_loader/b.txt"
       )
     }
 
@@ -229,11 +241,11 @@ class ResourceLoaderTest {
 
     withContextClassLoader(tempDirClassLoader) {
       assertThat(resourceLoader.exists("classpath:/context_class_loader_exists_resource.txt"))
-          .isTrue()
+        .isTrue()
     }
 
     assertThat(resourceLoader.exists("classpath:/context_class_loader_exists_resource.txt"))
-        .isFalse()
+      .isFalse()
   }
 
   private fun <T> withContextClassLoader(classLoader: ClassLoader, block: () -> T): T {

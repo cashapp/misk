@@ -8,6 +8,7 @@ dependencies {
   testImplementation dep.junitApi
   testImplementation dep.kotlinTest
   testImplementation dep.okio
+  testImplementation project(':misk-service')
   testImplementation project(':misk-testing')
 }
 

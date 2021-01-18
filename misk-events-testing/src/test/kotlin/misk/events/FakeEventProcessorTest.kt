@@ -1,5 +1,6 @@
 package misk.events
 
+import misk.ServiceManagerModule
 import misk.events.FakeEventProcessor.PublishedEvent
 import misk.inject.KAbstractModule
 import misk.testing.MiskTest
@@ -97,7 +98,7 @@ class FakeEventProcessorTest {
     fakeEventProcessor.deliverAll()
     assertThat(fakeEventProcessor.queue).hasSize(0)
     assertThat(fakeEventProcessor.droppedQueue)
-        .containsExactly(PublishedEvent(NO_CONSUMER_TOPIC, event, isRetry = false))
+      .containsExactly(PublishedEvent(NO_CONSUMER_TOPIC, event, isRetry = false))
   }
 
   @Test
@@ -107,7 +108,7 @@ class FakeEventProcessorTest {
     fakeEventProcessor.deliverAll(batchSize = 3)
     assertThat(fakeEventProcessor.queue).hasSize(0)
     assertThat(simpleConsumer.receivedEvents)
-        .containsExactly(newEvent("a"), newEvent("b"), newEvent("c"), newEvent("d"))
+      .containsExactly(newEvent("a"), newEvent("b"), newEvent("c"), newEvent("d"))
     assertThat(simpleConsumer.batchCount).isEqualTo(2)
   }
 
@@ -122,24 +123,25 @@ class FakeEventProcessorTest {
     fakeEventProcessor.deliverAll(batchSize = 3, allowRetries = true)
     assertThat(fakeEventProcessor.queue).hasSize(0)
     assertThat(simpleConsumer.receivedEvents)
-        .containsExactly(newEvent("a"), newEvent("c"), newEvent("e"))
+      .containsExactly(newEvent("a"), newEvent("c"), newEvent("e"))
     assertThat(simpleConsumer.batchCount).isEqualTo(1)
     assertThat(retryOnceConsumer.receivedEvents)
-        .containsExactly(newEvent("b"), newEvent("d"))
+      .containsExactly(newEvent("b"), newEvent("d"))
   }
 
   class TestModule : KAbstractModule() {
     override fun configure() {
+      install(ServiceManagerModule())
       install(FakeEventProcessorModule)
       newMapBinder<Topic, Consumer.Handler>()
-          .addBinding(SIMPLE_TOPIC)
-          .to<SimpleConsumer>()
+        .addBinding(SIMPLE_TOPIC)
+        .to<SimpleConsumer>()
       newMapBinder<Topic, Consumer.Handler>()
-          .addBinding(RETRY_ONCE_TOPIC)
-          .to<RetryOnceConsumer>()
+        .addBinding(RETRY_ONCE_TOPIC)
+        .to<RetryOnceConsumer>()
       newMapBinder<Topic, Consumer.Handler>()
-          .addBinding(RETRY_ALWAYS_TOPIC)
-          .to<RetryAlwaysConsumer>()
+        .addBinding(RETRY_ALWAYS_TOPIC)
+        .to<RetryAlwaysConsumer>()
     }
   }
 
@@ -174,10 +176,11 @@ class FakeEventProcessorTest {
   }
 
   private fun newEvent(body: String): Event {
-    return Event(type = "TEST",
-        body = body.encodeUtf8(),
-        occurredAt = Instant.EPOCH,
-        id = "1".encodeUtf8()
+    return Event(
+      type = "TEST",
+      body = body.encodeUtf8(),
+      occurredAt = Instant.EPOCH,
+      id = "1".encodeUtf8()
     )
   }
 

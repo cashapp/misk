@@ -1,6 +1,7 @@
 package misk.feature.testing
 
 import com.squareup.moshi.JsonDataException
+import misk.ServiceManagerModule
 import misk.feature.Attributes
 import misk.feature.Feature
 import misk.feature.getEnum
@@ -21,6 +22,7 @@ internal class FakeFeatureFlagsTest {
 
   class TestModule : KAbstractModule() {
     override fun configure() {
+      install(ServiceManagerModule())
       install(FakeFeatureFlagsModule())
       install(MoshiTestingModule())
     }

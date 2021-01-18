@@ -1,6 +1,7 @@
 package misk.resources
 
 import com.google.inject.util.Modules
+import misk.ServiceManagerModule
 import misk.inject.KAbstractModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
@@ -12,7 +13,11 @@ import javax.inject.Inject
 class FakeFileLoaderTest {
 
   @MiskTestModule
-  private val module = Modules.combine(TestingResourceLoaderModule(), FakeFilesModule())
+  private val module = Modules.combine(
+    ServiceManagerModule(),
+    TestingResourceLoaderModule(),
+    FakeFilesModule()
+  )
 
   @Inject private lateinit var loader: ResourceLoader
 
@@ -28,8 +33,8 @@ class FakeFileLoaderTest {
   private class FakeFilesModule : KAbstractModule() {
     override fun configure() {
       newMapBinder<String, String>(ForFakeFiles::class)
-          .addBinding("/some/test/file")
-          .toInstance("test data!")
+        .addBinding("/some/test/file")
+        .toInstance("test data!")
     }
   }
 }

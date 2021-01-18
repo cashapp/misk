@@ -1,6 +1,5 @@
 package misk.crypto
 
-import misk.testing.MiskTest
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatCode
 import org.assertj.core.api.Assertions.assertThatThrownBy
@@ -9,7 +8,6 @@ import java.io.ByteArrayOutputStream
 import java.nio.ByteBuffer
 import java.util.UUID
 
-@MiskTest
 class CiphertextFormatTest {
 
   companion object {

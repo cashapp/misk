@@ -12,6 +12,7 @@ dependencies {
   implementation dep.assertj
   implementation dep.kotlinTest
 
+  testImplementation project(':misk-service')
   testImplementation project(':misk-testing')
 }
 

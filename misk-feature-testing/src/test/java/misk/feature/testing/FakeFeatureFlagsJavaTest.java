@@ -2,6 +2,7 @@ package misk.feature.testing;
 
 import java.util.Map;
 import javax.inject.Inject;
+import misk.ServiceManagerModule;
 import misk.feature.Attributes;
 import misk.feature.Feature;
 import misk.inject.KAbstractModule;
@@ -17,6 +18,7 @@ public class FakeFeatureFlagsJavaTest {
 
   static class TestModule extends KAbstractModule {
     public void configure() {
+      install(new ServiceManagerModule());
       install(new FakeFeatureFlagsModule());
       install(new MoshiTestingModule());
     }

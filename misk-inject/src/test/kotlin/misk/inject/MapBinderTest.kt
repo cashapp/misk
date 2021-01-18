@@ -1,5 +1,6 @@
 package misk.inject
 
+import misk.ServiceManagerModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
@@ -43,6 +44,7 @@ class Red : Color
 
 class TestModule : KAbstractModule() {
   override fun configure() {
+    install(ServiceManagerModule())
     newMapBinder<Int, String>(TestAnnotation::class).addBinding(1).toInstance("one")
     newMapBinder<Int, String>(TestAnnotation::class).addBinding(2).toInstance("two")
 

@@ -1,5 +1,8 @@
 package misk.tokens
 
+import com.google.inject.util.Modules
+import misk.ServiceManagerModule
+import misk.ServiceModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
@@ -12,7 +15,10 @@ import kotlin.test.assertFailsWith
 @MiskTest
 class FakeTokenGeneratorTest {
   @MiskTestModule
-  val module = FakeTokenGeneratorModule()
+  val module = Modules.combine(
+    ServiceManagerModule(),
+    FakeTokenGeneratorModule()
+  )
 
   @Inject lateinit var tokenGenerator: TokenGenerator
 

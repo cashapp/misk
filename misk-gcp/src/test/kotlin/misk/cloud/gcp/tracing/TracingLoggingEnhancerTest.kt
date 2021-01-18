@@ -5,14 +5,11 @@ import com.google.cloud.logging.Payload
 import datadog.opentracing.DDTracer
 import datadog.trace.common.writer.Writer
 import datadog.trace.core.DDSpan
-import io.opentracing.Span
 import io.opentracing.noop.NoopTracerFactory
-import misk.testing.MiskTest
 import misk.tracing.traceWithSpan
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
-@MiskTest
 class TracingLoggingEnhancerTest {
   @Test fun enhanceDatadogTracer() {
     val tracer = DDTracer.builder()

@@ -2,6 +2,7 @@ package misk.redis
 
 import com.google.inject.Module
 import com.google.inject.util.Modules
+import misk.ServiceManagerModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.time.FakeClock
@@ -23,7 +24,11 @@ import kotlin.test.assertTrue
 class FakeRedisTest {
   @Suppress("unused")
   @MiskTestModule
-  val module: Module = Modules.combine(FakeClockModule(), RedisTestModule())
+  val module: Module = Modules.combine(
+    ServiceManagerModule(),
+    FakeClockModule(),
+    RedisTestModule()
+  )
 
   @Inject lateinit var clock: FakeClock
   @Inject lateinit var redis: Redis

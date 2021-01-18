@@ -1,5 +1,6 @@
 package misk.inject
 
+import misk.ServiceManagerModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
@@ -32,6 +33,7 @@ class MultiBinderTest {
 
 class MultiBindingsModule : KAbstractModule() {
   override fun configure() {
+    install(ServiceManagerModule())
     newMultibinder<Int>(TestAnnotation::class).addBinding().toInstance(1)
 
     newMultibinder<Color>(TestAnnotation::class).addBinding().toInstance(
