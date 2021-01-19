@@ -35,6 +35,7 @@ dependencies {
   implementation dep.kubernetesClient
   implementation dep.loggingApi
   implementation dep.wireGrpcClient
+  implementation dep.wireMoshiAdapter
   implementation dep.wireRuntime
   implementation dep.jacksonDatabind
   implementation dep.jacksonDataformatYaml

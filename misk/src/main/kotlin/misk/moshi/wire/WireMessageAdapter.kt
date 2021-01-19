@@ -10,6 +10,7 @@ import java.lang.reflect.Type
 import javax.inject.Inject
 
 /** Json marshaling for Wire messages, correctly using Builders to construct properly formed type */
+@Deprecated("Use WireJsonAdapterFactory instead")
 internal class WireMessageAdapter(
   messageType: Class<Message<*, *>>,
   moshi: Moshi
