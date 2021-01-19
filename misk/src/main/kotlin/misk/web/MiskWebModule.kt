@@ -34,6 +34,7 @@ import misk.web.extractors.RequestHeadersFeatureBinding
 import misk.web.extractors.ResponseBodyFeatureBinding
 import misk.web.extractors.WebSocketFeatureBinding
 import misk.web.extractors.WebSocketListenerFeatureBinding
+import misk.web.interceptors.ConcurrencyLimiterFactory
 import misk.web.interceptors.ConcurrencyLimitsInterceptor
 import misk.web.interceptors.InternalErrorInterceptorFactory
 import misk.web.interceptors.MetricsInterceptor
@@ -126,6 +127,7 @@ class MiskWebModule(private val config: WebConfig) : KAbstractModule() {
     multibind<NetworkInterceptor.Factory>(MiskDefault::class)
         .to<MetricsInterceptor.Factory>()
 
+    newMultibinder<ConcurrencyLimiterFactory>()
     if (!config.concurrency_limiter_disabled) {
       // Shed calls when we're degraded.
       multibind<NetworkInterceptor.Factory>(MiskDefault::class)
