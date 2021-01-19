@@ -34,6 +34,7 @@ dependencies {
   compile dep.jettyWebsocketServer
   compile dep.kubernetesClient
   compile dep.wireGrpcClient
+  compile dep.wireMoshiAdapter
   compile dep.wireRuntime
   compile dep.jacksonDatabind
   compile dep.jacksonDataformatYaml
