@@ -99,9 +99,9 @@ ext.dep = [
   "tink": "com.google.crypto.tink:tink:1.2.0",
   "tracingDatadog": "com.datadoghq:dd-trace-api:0.70.0",
   "vitess": "io.vitess:vitess-jdbc:3.0.0",
-  "wireGradlePlugin": "com.squareup.wire:wire-gradle-plugin:3.6.0-square08",
-  "wireGrpcClient": "com.squareup.wire:wire-grpc-client:3.6.0-square08",
-  "wireMoshiAdapter": "com.squareup.wire:wire-moshi-adapter:3.6.0-square08",
+  "wireGradlePlugin": "com.squareup.wire:wire-gradle-plugin:3.2.0",
+  "wireGrpcClient": "com.squareup.wire:wire-grpc-client:3.2.0",
+  "wireMoshiAdapter": "com.squareup.wire:wire-moshi-adapter:3.2.0",
   "wireRuntime": "com.squareup.wire:wire-runtime:3.2.0",
   "zookeeper": "org.apache.zookeeper:zookeeper:3.5.4-beta",
 ]
