@@ -1,30 +1,39 @@
 dependencies {
-  compile dep.docker
+  implementation dep.docker
   // The docker-java we use in tests depends on an old version of junixsocket that depends on
   // log4j. We force it up a minor version in packages that use it.
-  compile('com.kohlschutter.junixsocket:junixsocket-native-common:2.1.1') {
+  implementation('com.kohlschutter.junixsocket:junixsocket-native-common:2.3.2') {
     force = true
   }
-  compile('com.kohlschutter.junixsocket:junixsocket-common:2.1.1') {
+  implementation('com.kohlschutter.junixsocket:junixsocket-common:2.3.2') {
     force = true
   }
-  compile dep.junitApi
-  compile dep.junitParams
-  compile dep.junitEngine
-  compile dep.assertj
-  compile dep.kotlinTest
-  compile dep.logbackClassic
-  compile (dep.okHttpMockWebServer) {
+  implementation dep.guice
+  implementation dep.junitApi
+  implementation dep.junitParams
+  implementation dep.junitEngine
+  implementation dep.assertj
+  implementation dep.kotlinTest
+  implementation dep.loggingApi
+  implementation dep.logbackClassic
+  implementation (dep.okHttpMockWebServer) {
     exclude group: 'junit'
   }
-  compile dep.okio
-  compile dep.openTracingMock
-  compile dep.mockitoCore
-  compile(dep.guavaTestLib) {
+  implementation dep.moshiCore
+  implementation dep.moshiKotlin
+  implementation dep.moshiAdapters
+  implementation dep.okio
+  implementation dep.openTracingMock
+  implementation dep.mockitoCore
+  implementation(dep.guavaTestLib) {
     exclude group: 'junit'
   }
-  compile project(':misk')
-  compile project(':misk-core')
+  implementation dep.javaxInject
+  implementation project(':misk')
+  implementation project(':misk-actions')
+  implementation project(':misk-core')
+  implementation project(':misk-inject')
+  implementation project(':misk-service')
 }
 
 afterEvaluate { project ->
