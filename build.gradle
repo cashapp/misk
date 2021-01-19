@@ -1,3 +1,4 @@
+
 buildscript {
   repositories {
     mavenCentral()
@@ -33,6 +34,23 @@ subprojects { subProject ->
   apply plugin: 'java'
   apply plugin: 'kotlin'
   apply plugin: 'org.jetbrains.dokka'
+  apply plugin: 'maven-publish'
+
+  publishing {
+    publications {
+      mavenJava(MavenPublication) {
+        from components.java
+        versionMapping {
+          usage('java-api') {
+            fromResolutionOf('runtimeClasspath')
+          }
+          usage('java-runtime') {
+            fromResolutionResult()
+          }
+        }
+      }
+    }
+  }
 
   buildscript {
     repositories {
