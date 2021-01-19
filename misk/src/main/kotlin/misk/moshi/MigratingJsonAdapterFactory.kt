@@ -11,6 +11,7 @@ internal class MigratingJsonAdapterFactory(
   val writer: JsonAdapter.Factory
 ) : JsonAdapter.Factory {
 
+  @Suppress("UNCHECKED_CAST")
   override fun create(
     type: Type,
     annotations: MutableSet<out Annotation>,
@@ -31,7 +32,10 @@ internal class MigratingJsonAdapterFactory(
       writerDelegate = moshi.nextAdapter<Any>(this, type, annotations)
     }
 
-    return MigratingJsonAdapter(readerDelegate as JsonAdapter<Any>, writerDelegate as JsonAdapter<Any>)
+    return MigratingJsonAdapter(
+      readerAdapter = readerDelegate as JsonAdapter<Any>,
+      writerAdapter = writerDelegate as JsonAdapter<Any>
+    )
   }
 
   private class MigratingJsonAdapter<T>(

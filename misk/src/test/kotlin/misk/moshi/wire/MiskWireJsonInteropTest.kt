@@ -6,7 +6,6 @@ import kotlin.reflect.KClass
 import misk.moshi.MoshiModule
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import squareup.proto2.keywords.KeywordKotlin
 
 /**
  * Migration phases:
@@ -65,14 +64,18 @@ internal class MiskWireJsonInteropTest {
   }
 
   private fun <T : Any> testAllPhases(message: T, type: KClass<T>) {
-    phaseTransitioningToWireReads(message, type, miskOnlyMoshi, miskOnlyMoshi)
-    phaseTransitioningToWireReads(message, type, miskOnlyMoshi, wireReadsMoshi)
-    phaseTransitioningToWireReads(message, type, wireReadsMoshi, wireReadsMoshi)
-    phaseTransitioningToWireReads(message, type, wireReadsMoshi, wireOnlyMoshi)
-    phaseTransitioningToWireReads(message, type, wireOnlyMoshi, wireOnlyMoshi)
+    // Currently misk services use the misk adapter.
+    testTransitioningToWirePhase(message, type, miskOnlyMoshi, miskOnlyMoshi)
+    // Services being deployed will momentarily have both adapters running.
+    testTransitioningToWirePhase(message, type, miskOnlyMoshi, wireReadsMoshi)
+    // Phase: WIRE_READS
+    testTransitioningToWirePhase(message, type, wireReadsMoshi, wireReadsMoshi)
+    testTransitioningToWirePhase(message, type, wireReadsMoshi, wireOnlyMoshi)
+    // Phase: WIRE_ONLY
+    testTransitioningToWirePhase(message, type, wireOnlyMoshi, wireOnlyMoshi)
   }
 
-  private fun <T : Any> phaseTransitioningToWireReads(
+  private fun <T : Any> testTransitioningToWirePhase(
     message: T, type: KClass<T>, a: Moshi, b: Moshi
   ) {
     val aAdapter = a.adapter(type.java)
@@ -80,7 +83,6 @@ internal class MiskWireJsonInteropTest {
     val aWritesJson = aAdapter.toJson(message)
     assertThat(bAdapter.fromJson(aWritesJson)).isEqualTo(message)
     val bWritesJson = bAdapter.toJson(message)
-    println(bWritesJson)
     assertThat(aAdapter.fromJson(bWritesJson)).isEqualTo(message)
   }
 }

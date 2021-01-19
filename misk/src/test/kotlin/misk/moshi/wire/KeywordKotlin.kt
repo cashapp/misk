@@ -1,4 +1,4 @@
-package squareup.proto2.keywords
+package misk.moshi.wire
 
 import com.squareup.wire.EnumAdapter
 import com.squareup.wire.FieldEncoding
@@ -16,6 +16,7 @@ import com.squareup.wire.internal.missingRequiredFields
 import com.squareup.wire.internal.sanitize
 import okio.ByteString
 
+// This class is a copy of a generated Wire class.
 public class KeywordKotlin(
   @field:WireField(
     tag = 1,
@@ -57,7 +58,7 @@ public class KeywordKotlin(
 
   @field:WireField(
     tag = 5,
-    adapter = "squareup.proto2.keywords.KeywordKotlin${'$'}KeywordKotlinEnum#ADAPTER",
+    adapter = "misk.moshi.wire.KeywordKotlin${'$'}KeywordKotlinEnum#ADAPTER",
     label = WireField.Label.REPEATED
   )
   @JvmField
@@ -177,7 +178,7 @@ public class KeywordKotlin(
     public val ADAPTER: ProtoAdapter<KeywordKotlin> = object : ProtoAdapter<KeywordKotlin>(
       FieldEncoding.LENGTH_DELIMITED,
       KeywordKotlin::class,
-      "type.googleapis.com/squareup.proto2.keywords.KeywordKotlin",
+      "type.googleapis.com/misk.moshi.wire.KeywordKotlin",
       Syntax.PROTO_2,
       null
     ) {
@@ -262,7 +263,7 @@ public class KeywordKotlin(
       public val ADAPTER: ProtoAdapter<KeywordKotlinEnum> = object : EnumAdapter<KeywordKotlinEnum>(
         KeywordKotlinEnum::class,
         Syntax.PROTO_2,
-        KeywordKotlinEnum.object_
+        object_
       ) {
         public override fun fromValue(value: Int): KeywordKotlinEnum? =
           KeywordKotlinEnum.fromValue(value)
