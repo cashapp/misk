@@ -149,7 +149,7 @@ class Http2ConnectivityTest {
 
       override fun writeTo(sink: BufferedSink) {
         for (i in 0 until 1024 * 1024) {
-          sink.writeUtf8("impossible\n")
+          sink.writeUtf8("impossible: $i\n")
         }
       }
     }

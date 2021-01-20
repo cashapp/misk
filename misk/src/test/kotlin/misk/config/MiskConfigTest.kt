@@ -112,8 +112,8 @@ class MiskConfigTest {
       .map { File(it.file) }
 
     val config = MiskConfig.load<TestConfig>("test_app", defaultEnv, overrides)
-    assertThat(config.consumer_a).isEqualTo(ConsumerConfig(14, 1))
-    assertThat(config.consumer_b).isEqualTo(ConsumerConfig(34, 79))
+    assertThat(config.consumer_a).isEqualTo(ConsumerConfig(14, 27))
+    assertThat(config.consumer_b).isEqualTo(ConsumerConfig(34, 122))
   }
 
   @Test
@@ -136,7 +136,7 @@ class MiskConfigTest {
       .map { File(it.file) }
 
     val config = MiskConfig.load<TestConfig>("test_app", defaultEnv, overrides)
-    assertThat(config.consumer_a).isEqualTo(ConsumerConfig(14, 1))
+    assertThat(config.consumer_a).isEqualTo(ConsumerConfig(14, 27))
     assertThat(config.consumer_b).isEqualTo(ConsumerConfig(34, 79))
   }
 
