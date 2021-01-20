@@ -81,7 +81,10 @@ data class WebConfig(
   /** The minimum size in bytes before the response body will be compressed. */
   val minGzipSize: Int = 1024,
 
-  val cors: Map<String, CorsConfig> = mapOf()
+  val cors: Map<String, CorsConfig> = mapOf(),
+
+  /** If true, disables automatic load shedding when degraded. */
+  val concurrency_limiter_disabled: Boolean = false,
 ) : Config
 
 data class WebSslConfig(
