@@ -15,24 +15,32 @@ allOpen {
 }
 
 dependencies {
-  compile(dep.curatorFramework) {
+  implementation dep.guice
+  implementation dep.loggingApi
+  implementation(dep.curatorFramework) {
     exclude(group: 'org.slf4j', module: 'slf4j-log4j12')
     exclude(group: 'log4j', module: 'log4j')
   }
-  compile project(':misk')
-  compile(dep.zookeeper) {
+  implementation(dep.zookeeper) {
     exclude(group: 'org.slf4j', module: 'slf4j-log4j12')
     exclude(group: 'log4j', module: 'log4j')
   }
+  implementation project(':misk')
+  implementation project(':misk-core')
+  implementation project(':misk-inject')
+  implementation project(':misk-service')
 
-  testCompile dep.docker
-  testCompile dep.junitApi
-  testCompile(dep.zookeeper) {
+  testImplementation dep.docker
+  testImplementation dep.junitApi
+  testImplementation(dep.zookeeper) {
     exclude(group: 'org.slf4j', module: 'slf4j-log4j12')
     exclude(group: 'log4j', module: 'log4j')
   }
-  testCompile project(':misk-testing')
-  testCompile project(':misk-zookeeper-testing')
+  testImplementation project(':misk-testing')
+  testImplementation project(':misk-zookeeper-testing')
+  testImplementation dep.assertj
+  testImplementation dep.kotlinTest
+  testImplementation dep.mockitoCore
 }
 
 sourceSets {

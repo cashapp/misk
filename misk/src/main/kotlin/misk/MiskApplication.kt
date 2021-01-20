@@ -84,8 +84,10 @@ class MiskApplication(private val modules: List<Module>, commands: List<MiskComm
     val serviceManager = injector.getInstance<ServiceManager>()
     Runtime.getRuntime().addShutdownHook(object : Thread() {
       override fun run() {
+        log.info { "received a shutdown hook! performing an orderly shutdown" }
         serviceManager.stopAsync()
         serviceManager.awaitStopped()
+        log.info { "orderly shutdown complete" }
       }
     })
 

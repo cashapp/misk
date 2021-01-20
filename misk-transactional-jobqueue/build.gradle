@@ -1,9 +1,9 @@
 dependencies {
-  compile project(':misk-core')
-  compile project(':misk-jobqueue')
-  compile project(':misk-hibernate')
+  implementation project(':misk-core')
+  implementation project(':misk-jobqueue')
+  implementation project(':misk-hibernate')
 
-  testCompile project(':misk-testing')
+  testImplementation project(':misk-testing')
 }
 
 afterEvaluate { project ->
