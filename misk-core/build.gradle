@@ -22,6 +22,7 @@ dependencies {
 
   testImplementation dep.assertj
   testImplementation dep.kotlinTest
+  testImplementation dep.kotlinxCoroutines
   testImplementation project(':misk-testing')
 }
 
