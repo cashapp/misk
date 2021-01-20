@@ -80,13 +80,19 @@ internal class ConcurrencyLimitsInterceptor internal constructor(
   }
 
   @Singleton
-  class Factory @Inject constructor(val clock: Clock) : NetworkInterceptor.Factory {
+  class Factory @Inject constructor(
+    private val clock: Clock,
+    private val limiterFactories: List<ConcurrencyLimiterFactory>,
+  ) : NetworkInterceptor.Factory {
     override fun create(action: Action): NetworkInterceptor? {
       if (action.function.findAnnotation<AvailableWhenDegraded>() != null) return null
 
-      val limiter = SimpleLimiter.Builder()
-          .clock { clock.millis() }
-          .build<String>()
+      val limiter = limiterFactories.asSequence()
+          .mapNotNull { it.create(action) }
+          .firstOrNull()
+          ?: SimpleLimiter.Builder()
+              .clock { clock.millis() }
+              .build()
 
       return ConcurrencyLimitsInterceptor(action.name, limiter, clock)
     }
@@ -96,3 +102,4 @@ internal class ConcurrencyLimitsInterceptor internal constructor(
     val logger = getLogger<ConcurrencyLimitsInterceptor>()
   }
 }
+
