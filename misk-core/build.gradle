@@ -10,6 +10,7 @@ dependencies {
   compile dep.guiceMultibindings
   compile dep.kotlinStdLibJdk8
   compile dep.kotlinReflection
+  compile dep.kotlinRetry
   compile dep.loggingApi
   compile dep.logbackClassic
   compile dep.okio
