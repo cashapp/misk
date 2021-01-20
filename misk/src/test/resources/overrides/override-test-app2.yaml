@@ -1,2 +1,4 @@
 consumer_a:
   min_items: 14
+consumer_b:
+  max_items: 122
