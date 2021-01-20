@@ -21,7 +21,7 @@ import routeguide.RouteNote
 import javax.inject.Inject
 import javax.inject.Provider
 
-@MiskTest(startService = true)
+@MiskTest
 class MiskClientMiskServerTest {
   @MiskTestModule
   val module = Modules.combine(

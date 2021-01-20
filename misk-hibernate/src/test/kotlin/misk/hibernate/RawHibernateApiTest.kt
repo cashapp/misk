@@ -9,7 +9,7 @@ import java.time.LocalDate
 import javax.inject.Inject
 
 /** Test that we can access Hibernate's SessionFactory directly. */
-@MiskTest(startService = true)
+@MiskTest
 class RawHibernateApiTest {
   @MiskTestModule
   val module = MoviesTestModule()

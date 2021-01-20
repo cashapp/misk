@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import javax.inject.Inject
 
-@MiskTest(startService = true)
+@MiskTest
 class EventListenersTest {
   @MiskTestModule
   val module = Modules.combine(

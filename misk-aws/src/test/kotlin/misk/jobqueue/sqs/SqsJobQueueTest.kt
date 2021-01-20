@@ -26,7 +26,7 @@ import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
 import javax.inject.Inject
 
-@MiskTest(startService = true)
+@MiskTest
 internal class SqsJobQueueTest {
   @MiskExternalDependency private val dockerSqs = DockerSqs
   @MiskTestModule private val module = SqsJobQueueTestModule(dockerSqs.credentials, dockerSqs.client)

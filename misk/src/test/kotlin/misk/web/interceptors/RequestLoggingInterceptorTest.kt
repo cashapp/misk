@@ -26,7 +26,7 @@ import org.junit.jupiter.api.Test
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
-@MiskTest(startService = true)
+@MiskTest
 internal class RequestLoggingInterceptorTest {
   @MiskTestModule
   val module = TestModule()

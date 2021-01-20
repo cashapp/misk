@@ -15,7 +15,7 @@ import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 import javax.inject.Inject
 
-@MiskTest(startService = false)
+@MiskTest
 internal class MoshiModuleTest {
   @MiskTestModule
   val module = TestModule()

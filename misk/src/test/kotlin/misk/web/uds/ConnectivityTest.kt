@@ -30,7 +30,7 @@ import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
 
-@MiskTest(startService = true)
+@MiskTest
 class UDSHttp2ConnectivityTest {
   @MiskTestModule
   val module = TestModule()

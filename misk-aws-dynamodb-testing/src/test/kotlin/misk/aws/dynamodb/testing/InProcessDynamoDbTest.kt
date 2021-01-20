@@ -6,7 +6,7 @@ import misk.inject.KAbstractModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 
-@MiskTest(startService = true)
+@MiskTest
 class InProcessDynamoDbTest : AbstractDynamoDbTest() {
 
   @MiskTestModule

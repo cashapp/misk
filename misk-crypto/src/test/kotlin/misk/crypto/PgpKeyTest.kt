@@ -22,7 +22,7 @@ import org.junit.jupiter.api.assertThrows
 import java.util.Base64
 import javax.inject.Inject
 
-@MiskTest(startService = true)
+@MiskTest
 class PgpKeyTest {
   @Suppress("unused")
   @MiskTestModule

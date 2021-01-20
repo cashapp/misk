@@ -37,7 +37,7 @@ import retrofit2.http.POST
 import javax.inject.Inject
 import javax.inject.Singleton
 
-@MiskTest(startService = true)
+@MiskTest
 internal class ClientServerTraceTest {
   @MiskTestModule
   val module = TestModule()

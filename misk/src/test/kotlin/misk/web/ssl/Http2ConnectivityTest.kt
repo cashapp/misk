@@ -47,7 +47,7 @@ import javax.inject.Singleton
 import javax.servlet.http.HttpServletRequest
 import kotlin.test.assertFailsWith
 
-@MiskTest(startService = true)
+@MiskTest
 class Http2ConnectivityTest {
   @MiskTestModule
   val module = TestModule()

@@ -21,7 +21,7 @@ import retrofit2.Call
 import retrofit2.Callback
 import javax.inject.Inject
 
-@MiskTest(startService = true)
+@MiskTest
 internal class TypedHttpClientInterceptorTest {
   @MiskTestModule
   val module = TestModule()

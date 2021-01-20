@@ -21,7 +21,7 @@ import java.net.Proxy
 import javax.inject.Inject
 import javax.inject.Singleton
 
-@MiskTest(startService = true)
+@MiskTest
 internal class HttpClientEventListenerTest {
 
   @MiskTestModule

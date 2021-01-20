@@ -31,7 +31,7 @@ import java.time.Duration
 import java.time.temporal.ChronoUnit
 import javax.inject.Inject
 
-@MiskTest(startService = true)
+@MiskTest
 class ConcurrencyLimitsInterceptorTest {
   @MiskTestModule
   val module = TestModule()

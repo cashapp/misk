@@ -39,7 +39,7 @@ import javax.inject.Singleton
 import javax.net.ssl.SSLHandshakeException
 import kotlin.test.assertFailsWith
 
-@MiskTest(startService = true)
+@MiskTest
 internal class PemSslClientServerTest {
   @MiskTestModule
   val module = TestModule()

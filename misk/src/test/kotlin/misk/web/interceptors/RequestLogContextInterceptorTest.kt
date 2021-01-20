@@ -22,7 +22,7 @@ import org.junit.jupiter.api.Test
 import org.slf4j.MDC
 import javax.inject.Inject
 
-@MiskTest(startService = true)
+@MiskTest
 internal class RequestLogContextInterceptorTest {
   data class RequestContext(val fields: Map<String, String>)
 

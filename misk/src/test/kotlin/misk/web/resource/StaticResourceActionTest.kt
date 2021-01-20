@@ -26,7 +26,7 @@ import javax.inject.Inject
 import javax.inject.Named
 import kotlin.test.assertFailsWith
 
-@MiskTest(startService = true)
+@MiskTest
 class StaticResourceActionTest {
   @MiskTestModule
   val module = TestModule()

@@ -7,7 +7,7 @@ import misk.testing.MiskExternalDependency
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 
-@MiskTest(startService = true)
+@MiskTest
 class DockerDynamoDbTest : AbstractDynamoDbTest() {
 
   @MiskTestModule

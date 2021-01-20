@@ -24,7 +24,7 @@ import org.eclipse.jetty.util.thread.ThreadPool
 import org.junit.jupiter.api.Test
 import javax.inject.Inject
 
-@MiskTest(startService = true)
+@MiskTest
 internal class JettyServiceMetricsTest {
   @MiskTestModule val module = TestModule()
 

@@ -13,7 +13,7 @@ import org.assertj.core.api.containsExactly
 import org.junit.jupiter.api.Test
 import javax.inject.Inject
 
-@MiskTest(startService = true)
+@MiskTest
 class SampledLoggerTest {
   @MiskTestModule
   val testModule = Modules.combine(MiskTestingServiceModule(), LogCollectorModule())

@@ -21,7 +21,7 @@ import org.junit.jupiter.api.Test
 import javax.inject.Inject
 
 // Tests all supported HTTP methods.
-@MiskTest(startService = true)
+@MiskTest
 class SupportedHttpMethodsTest {
   @MiskTestModule
   val module = TestModule()

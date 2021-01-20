@@ -27,7 +27,7 @@ import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
 import javax.inject.Inject
 
-@MiskTest(startService = true)
+@MiskTest
 internal class DegradedHealthStressTest {
   @MiskTestModule
   val module = TestModule()

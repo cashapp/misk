@@ -15,7 +15,7 @@ import routeguide.RouteGuideProto.Point
 import javax.inject.Inject
 import javax.inject.Provider
 
-@MiskTest(startService = true)
+@MiskTest
 class ProtocClientProtocServerTest {
   @MiskTestModule
   val module = Modules.combine(

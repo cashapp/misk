@@ -19,7 +19,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.test.assertFailsWith
 
-@MiskTest(startService = true)
+@MiskTest
 internal class FakeJobQueueTest {
   @MiskTestModule private val module = TestModule()
 

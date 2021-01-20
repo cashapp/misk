@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory
 import org.slf4j.MDC
 import javax.inject.Inject
 
-@MiskTest(startService = true)
+@MiskTest
 class LoggingTest {
   @MiskTestModule
   val testModule = Modules.combine(MiskTestingServiceModule(), LogCollectorModule())

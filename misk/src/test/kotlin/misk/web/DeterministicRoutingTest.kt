@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Test
 import java.util.Collections.shuffle
 import javax.inject.Inject
 
-@MiskTest(startService = true)
+@MiskTest
 internal class DeterministicRoutingTest {
   @MiskTestModule
   val module = TestModule()

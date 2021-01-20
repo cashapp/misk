@@ -9,7 +9,7 @@ import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
 import javax.inject.Inject
 
-@MiskTest(startService = true)
+@MiskTest
 class ChildEntityTest {
   @MiskTestModule
   val module = MoviesTestModule()

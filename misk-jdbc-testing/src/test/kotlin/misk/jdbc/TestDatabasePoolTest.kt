@@ -16,7 +16,7 @@ import java.time.Clock
 import java.time.Duration
 import javax.inject.Inject
 
-@MiskTest(startService = false)
+@MiskTest
 class TestDatabasePoolTest {
   @Suppress("unused")
   @MiskTestModule val module: Module = Modules.combine(

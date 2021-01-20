@@ -15,7 +15,7 @@ import kotlin.reflect.KClass
  * Use WebTestClient to test calls to the application at the integration level.
  *
  * To use:
- * * Add `@MiskTest(startService = true)` to the test class
+ * * Add `@MiskTest` to the test class
  * * Add a module under test: `@MiskTestModule val module = TestModule()`
  * * Add `WebTestingModule` to the module under test: `install(WebTestingModule())`
  * * Inject `WebTestClient` in the test class

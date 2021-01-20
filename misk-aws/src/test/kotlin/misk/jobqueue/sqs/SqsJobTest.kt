@@ -16,7 +16,7 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import javax.inject.Inject
 
-@MiskTest(startService = true)
+@MiskTest
 internal class SqsJobTest {
   @MiskExternalDependency private val dockerSqs = DockerSqs
   @MiskTestModule private val module = SqsJobQueueTestModule(dockerSqs.credentials, dockerSqs.client)

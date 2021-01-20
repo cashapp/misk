@@ -28,7 +28,7 @@ import javax.inject.Inject
 import javax.inject.Provider
 import kotlin.test.assertFailsWith
 
-@MiskTest(startService = true)
+@MiskTest
 class WebProxyActionTest {
   private val upstreamServer = MockWebServer()
 

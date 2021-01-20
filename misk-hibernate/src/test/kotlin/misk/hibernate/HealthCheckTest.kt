@@ -17,7 +17,7 @@ import java.time.Instant
 import javax.inject.Inject
 import javax.inject.Provider
 
-@MiskTest(startService = true)
+@MiskTest
 class HealthCheckTest {
   @MiskTestModule
   val module = MoviesTestModule()

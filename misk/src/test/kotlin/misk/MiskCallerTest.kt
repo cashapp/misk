@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test
 import javax.inject.Inject
 import javax.inject.Qualifier
 
-@MiskTest(startService = false)
+@MiskTest
 internal class MiskCallerTest {
   @MiskTestModule val module = MiskCallerTestModule()
   @Inject @TestUser lateinit var testUser: MiskCaller

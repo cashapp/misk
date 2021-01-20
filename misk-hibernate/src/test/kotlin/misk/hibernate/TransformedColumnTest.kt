@@ -39,7 +39,7 @@ class DelegatingTransformer(private val ctx: TransformerContext) : Transformer(c
   override fun disassemble(value: Any): Serializable = transformer.disassemble(ctx, value)
 }
 
-@MiskTest(startService = true)
+@MiskTest
 class TransformedColumnTest {
 
   @Inject

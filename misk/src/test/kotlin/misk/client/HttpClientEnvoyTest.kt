@@ -23,7 +23,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /** Demonstrates ability to bind up an envoy-based http client and connect via unix sockets. */
-@MiskTest(startService = true)
+@MiskTest
 internal class HttpClientEnvoyTest {
   @MiskTestModule val module = TestModule()
 

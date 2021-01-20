@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test
 import java.util.Collections
 import javax.inject.Inject
 
-@MiskTest(startService = true)
+@MiskTest
 class HikariMetricsTest {
   @MiskTestModule
   val module = MoviesTestModule()

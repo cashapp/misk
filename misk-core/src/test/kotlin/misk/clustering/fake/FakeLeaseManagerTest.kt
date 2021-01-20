@@ -9,7 +9,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import javax.inject.Inject
 
-@MiskTest(startService = true)
+@MiskTest
 internal class FakeLeaseManagerTest {
   @MiskTestModule val module = Modules.combine(
       MiskTestingServiceModule(),

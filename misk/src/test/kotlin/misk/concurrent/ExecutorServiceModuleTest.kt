@@ -13,7 +13,7 @@ import java.util.concurrent.ThreadPoolExecutor
 import javax.inject.Inject
 import javax.inject.Qualifier
 
-@MiskTest(startService = true)
+@MiskTest
 internal class ExecutorServiceModuleTest {
   @MiskTestModule val module = TestModule()
 

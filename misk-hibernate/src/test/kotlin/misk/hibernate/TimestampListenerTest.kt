@@ -72,19 +72,19 @@ abstract class TimestampListenerTest {
   }
 }
 
-@MiskTest(startService = true)
+@MiskTest
 class MySQLTimestampListenerTest : TimestampListenerTest() {
   @MiskTestModule
   val module = MoviesTestModule(DataSourceType.MYSQL)
 }
 
-@MiskTest(startService = true)
+@MiskTest
 class VitessMySQLTimestampListenerTest : TimestampListenerTest() {
   @MiskTestModule
   val module = MoviesTestModule(DataSourceType.VITESS_MYSQL)
 }
 
-@MiskTest(startService = true)
+@MiskTest
 class PostgreSQLTimestampListenerTest : TimestampListenerTest() {
   @MiskTestModule
   val module = MoviesTestModule(DataSourceType.POSTGRESQL)

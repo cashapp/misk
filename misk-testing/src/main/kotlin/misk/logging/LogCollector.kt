@@ -15,7 +15,7 @@ import kotlin.reflect.KClass
  * to verify that the expected logs were emitted:
  *
  * ```
- * @MiskTest(startService = true)
+ * @MiskTest
  * class MyTest {
  *   @MiskTestModule
  *   val module = Modules.combine(

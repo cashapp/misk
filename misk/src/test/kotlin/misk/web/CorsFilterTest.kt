@@ -14,7 +14,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import javax.inject.Inject
 
-@MiskTest(startService = true)
+@MiskTest
 class CorsFilterTest {
   @MiskTestModule val module = TestModule()
 

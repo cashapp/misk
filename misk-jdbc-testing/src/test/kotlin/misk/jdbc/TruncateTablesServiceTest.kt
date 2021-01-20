@@ -14,7 +14,7 @@ import org.junit.jupiter.api.Test
 import javax.inject.Inject
 import javax.inject.Qualifier
 
-@MiskTest(startService = true)
+@MiskTest
 internal class TruncateTablesServiceTest {
   @MiskTestModule
   val module = TestModule()

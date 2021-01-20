@@ -121,7 +121,7 @@ abstract class AbstractRebalancingTest(
   }
 }
 
-@MiskTest(startService = true)
+@MiskTest
 class RebalancingEnabledTest : AbstractRebalancingTest(100.0) {
   override fun checkResponse(response: Response, connections: Set<Connection>) {
     // Only HTTP/1 can carry the 'Connection: close' header.
@@ -132,7 +132,7 @@ class RebalancingEnabledTest : AbstractRebalancingTest(100.0) {
   }
 }
 
-@MiskTest(startService = true)
+@MiskTest
 class RebalancingDisabledTest : AbstractRebalancingTest(0.0) {
   override fun checkResponse(response: Response, connections: Set<Connection>) {
     assertThat(response.header("Connection")).isNull()

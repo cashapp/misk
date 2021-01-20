@@ -20,7 +20,7 @@ import java.sql.Connection
 import javax.inject.Inject
 import javax.inject.Qualifier
 
-@MiskTest(startService = true)
+@MiskTest
 internal class VitessSchemaMigratorTest {
   val config =
       MiskConfig.load<MoviesConfig>("test_schemamigrator_vitess_app", Environment.TESTING)

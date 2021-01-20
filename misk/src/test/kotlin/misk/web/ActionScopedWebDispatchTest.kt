@@ -16,7 +16,7 @@ import java.security.Principal
 import javax.inject.Inject
 import javax.inject.Singleton
 
-@MiskTest(startService = true)
+@MiskTest
 internal class ActionScopedWebDispatchTest {
   @MiskTestModule
   val module = TestModule()

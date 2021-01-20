@@ -35,7 +35,7 @@ import java.security.GeneralSecurityException
 import java.io.ByteArrayInputStream
 import java.util.Base64
 
-@MiskTest(startService = true)
+@MiskTest
 class CryptoModuleTest {
   @Suppress("unused")
   @MiskTestModule

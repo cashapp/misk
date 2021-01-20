@@ -36,7 +36,7 @@ import javax.persistence.GeneratedValue
 import javax.persistence.Table
 import javax.sql.DataSource
 
-@MiskTest(startService = true)
+@MiskTest
 internal class SchemaValidatorTest {
   @MiskTestModule
   val module = TestModule()

@@ -24,7 +24,7 @@ import org.junit.jupiter.api.Test
 import javax.inject.Inject
 import javax.inject.Singleton
 
-@MiskTest(startService = true)
+@MiskTest
 class ProtoMessageHttpClientTest {
   @MiskTestModule
   val module = TestModule()

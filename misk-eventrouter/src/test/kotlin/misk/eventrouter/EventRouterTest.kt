@@ -8,7 +8,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import javax.inject.Inject
 
-@MiskTest(startService = false)
+@MiskTest
 internal class EventRouterTest {
   @MiskTestModule
   val module = Modules.combine(MiskTestingServiceModule(),

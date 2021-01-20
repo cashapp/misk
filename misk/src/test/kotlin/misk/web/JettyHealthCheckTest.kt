@@ -27,7 +27,7 @@ import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Qualifier
 
-@MiskTest(startService = true)
+@MiskTest
 internal class JettyHealthCheckTest {
 
   @MiskTestModule val module = TestModule()

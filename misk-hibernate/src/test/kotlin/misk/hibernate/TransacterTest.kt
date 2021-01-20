@@ -766,32 +766,32 @@ abstract class TransacterTest {
   class NonRetryableException : Exception()
 }
 
-@MiskTest(startService = true)
+@MiskTest
 class MySQLTransacterTest : TransacterTest() {
   @MiskTestModule
   val module = MoviesTestModule(DataSourceType.MYSQL)
 }
 
-@MiskTest(startService = true)
+@MiskTest
 class VitessMySQLTransacterTest : TransacterTest() {
   @MiskTestModule
   val module = MoviesTestModule(DataSourceType.VITESS_MYSQL)
 }
 
-@MiskTest(startService = true)
+@MiskTest
 @Disabled // TODO these are flaky, trying to resolve that with Cockroach
 class CockroachTransacterTest : TransacterTest() {
   @MiskTestModule
   val module = MoviesTestModule(DataSourceType.COCKROACHDB)
 }
 
-@MiskTest(startService = true)
+@MiskTest
 class TidbTransacterTest : TransacterTest() {
   @MiskTestModule
   val module = MoviesTestModule(DataSourceType.TIDB)
 }
 
-@MiskTest(startService = true)
+@MiskTest
 class PostgresqlTransacterTest : TransacterTest() {
   @MiskTestModule
   val module = MoviesTestModule(DataSourceType.POSTGRESQL)

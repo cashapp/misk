@@ -30,7 +30,7 @@ import javax.inject.Inject
 /**
  * Test that we can send JSON to proto and gRPC endpoints.
  */
-@MiskTest(startService = true)
+@MiskTest
 internal class JsonForProtoEndpointsTest {
   @MiskTestModule
   val module = TestModule()

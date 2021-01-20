@@ -27,7 +27,7 @@ import javax.inject.Named
 import javax.inject.Singleton
 import kotlin.concurrent.withLock
 
-@MiskTest(startService = true)
+@MiskTest
 internal class RepeatedTaskQueueTest {
   @MiskTestModule val module = TestModule()
 

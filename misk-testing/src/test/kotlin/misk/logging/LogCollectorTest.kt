@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test
 import javax.inject.Inject
 import kotlin.test.assertFailsWith
 
-@MiskTest(startService = true)
+@MiskTest
 class LogCollectorTest {
   @MiskTestModule
   val module = Modules.combine(

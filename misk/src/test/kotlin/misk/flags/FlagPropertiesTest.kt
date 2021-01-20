@@ -12,7 +12,7 @@ import org.assertj.core.data.Offset
 import org.junit.jupiter.api.Test
 import javax.inject.Inject
 
-@MiskTest(startService = false)
+@MiskTest
 class FlagPropertiesTest {
 
   data class JsonData(val message: String)

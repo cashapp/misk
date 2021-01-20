@@ -19,7 +19,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import javax.inject.Inject
 
-@MiskTest(startService = true)
+@MiskTest
 internal class GzipTest : AbstractGzipTest() {
   @MiskTestModule val module = TestModule(true)
 
@@ -34,7 +34,7 @@ internal class GzipTest : AbstractGzipTest() {
   }
 }
 
-@MiskTest(startService = true)
+@MiskTest
 internal class GzipDisabledTest : AbstractGzipTest() {
   @MiskTestModule val module = TestModule(false)
 

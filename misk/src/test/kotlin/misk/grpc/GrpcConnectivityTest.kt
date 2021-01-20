@@ -35,7 +35,7 @@ import javax.inject.Singleton
  * That sample includes a client and a server that connect to each other. You can also connect this
  * test's client to that sample server, or that sample client to this test's server.
  */
-@MiskTest(startService = true)
+@MiskTest
 class GrpcConnectivityTest {
   @MiskTestModule
   val module = TestModule()

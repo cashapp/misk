@@ -21,16 +21,16 @@ import java.sql.SQLException
 import javax.inject.Inject
 import kotlin.test.assertFailsWith
 
-@MiskTest(startService = false)
+@MiskTest
 internal class MySQLSchemaMigratorTest : SchemaMigratorTest(DataSourceType.MYSQL)
 
-@MiskTest(startService = false)
+@MiskTest
 internal class PostgreSQLSchemaMigratorTest : SchemaMigratorTest(DataSourceType.POSTGRESQL)
 
-@MiskTest(startService = false)
+@MiskTest
 internal class CockroachdbSchemaMigratorTest : SchemaMigratorTest(DataSourceType.COCKROACHDB)
 
-@MiskTest(startService = false)
+@MiskTest
 internal class TidbSchemaMigratorTest : SchemaMigratorTest(DataSourceType.TIDB)
 
 internal abstract class SchemaMigratorTest(val type: DataSourceType) {

@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import javax.inject.Inject
 
-@MiskTest(startService = true)
+@MiskTest
 internal class SchemaValidatorSuccessTest {
   @MiskTestModule
   val module = MoviesTestModule()

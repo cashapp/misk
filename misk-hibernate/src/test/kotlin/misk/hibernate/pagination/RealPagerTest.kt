@@ -22,7 +22,7 @@ import java.time.Instant
 import java.time.LocalDate
 import javax.inject.Inject
 
-@MiskTest(startService = true)
+@MiskTest
 class RealPagerTest {
 
   @MiskTestModule

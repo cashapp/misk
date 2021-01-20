@@ -25,7 +25,7 @@ import org.junit.jupiter.api.Test
  * Confirm we do the right thing when an entity is linked to another entity via a column in that
  * other entity's table.
  */
-@MiskTest(startService = true)
+@MiskTest
 class ExternalColumnTest {
   @MiskTestModule
   val module = TestModule()

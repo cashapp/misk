@@ -20,7 +20,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@MiskTest(startService = true)
+@MiskTest
 public class JavaPathParamDispatchTest {
   @MiskTestModule final Module module = new TestModule();
 

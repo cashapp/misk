@@ -24,7 +24,7 @@ import java.io.File
 import java.util.UUID
 import javax.inject.Inject
 
-@MiskTest(startService = true)
+@MiskTest
 class WebActionsServletTest {
   @MiskTestModule
   val module = TestModule()

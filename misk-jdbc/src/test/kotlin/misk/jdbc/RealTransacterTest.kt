@@ -135,25 +135,25 @@ abstract class RealTransacterTest {
   }
 }
 
-@MiskTest(startService = true)
+@MiskTest
 class MySQLRealTransacterTest : RealTransacterTest() {
   @MiskTestModule
   val module = RealTransacterTestModule(DataSourceType.MYSQL)
 }
 
-@MiskTest(startService = true)
+@MiskTest
 class TiDBRealTransacterTest : RealTransacterTest() {
   @MiskTestModule
   val module = RealTransacterTestModule(DataSourceType.TIDB)
 }
 
-@MiskTest(startService = true)
+@MiskTest
 class PostgreSQLRealTransacterTest : RealTransacterTest() {
   @MiskTestModule
   val module = RealTransacterTestModule(DataSourceType.POSTGRESQL)
 }
 
-@MiskTest(startService = true)
+@MiskTest
 class CockroachDbRealTransacterTest : RealTransacterTest() {
   @MiskTestModule
   val module = RealTransacterTestModule(DataSourceType.COCKROACHDB)

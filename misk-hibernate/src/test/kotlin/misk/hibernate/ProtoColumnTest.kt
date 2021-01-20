@@ -20,7 +20,7 @@ import javax.persistence.GeneratedValue
 import javax.persistence.Table
 import kotlin.test.assertNull
 
-@MiskTest(startService = true)
+@MiskTest
 class ProtoColumnTest {
   @MiskTestModule
   val module = TestModule()

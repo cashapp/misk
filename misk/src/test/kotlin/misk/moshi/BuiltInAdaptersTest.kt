@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test
 import java.time.Instant
 import javax.inject.Inject
 
-@MiskTest(startService = false)
+@MiskTest
 internal class BuiltInAdaptersTest {
   @MiskTestModule
   val module = MiskTestingServiceModule()

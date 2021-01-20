@@ -9,7 +9,7 @@ import java.time.LocalDate
 import javax.inject.Inject
 import kotlin.test.assertFailsWith
 
-@MiskTest(startService = true)
+@MiskTest
 class MySQLReaderTransacterTest {
   @MiskTestModule
   val module = MoviesTestModule(DataSourceType.MYSQL)

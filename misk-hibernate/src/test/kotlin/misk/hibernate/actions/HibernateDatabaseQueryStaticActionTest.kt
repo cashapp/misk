@@ -21,7 +21,7 @@ import kotlin.reflect.full.declaredMemberProperties
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 
-@MiskTest(startService = true)
+@MiskTest
 class HibernateDatabaseQueryStaticActionTest {
   @MiskTestModule
   val module = HibernateDatabaseQueryTestingModule()

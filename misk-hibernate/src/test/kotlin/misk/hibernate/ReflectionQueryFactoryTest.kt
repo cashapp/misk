@@ -17,7 +17,7 @@ import kotlin.reflect.full.functions
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 
-@MiskTest(startService = true)
+@MiskTest
 class ReflectionQueryFactoryTest {
   @MiskTestModule
   val module = MoviesTestModule()

@@ -24,7 +24,7 @@ import java.util.Arrays
 import java.util.Objects
 import kotlin.test.assertNull
 
-@MiskTest(startService = true)
+@MiskTest
 class SecretColumnTest {
 
   @MiskTestModule

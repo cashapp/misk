@@ -17,7 +17,7 @@ import javax.inject.Inject
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 
-@MiskTest(startService = true)
+@MiskTest
 class DashboardMetadataActionTest {
   @MiskTestModule
   val module = MetadataTestingModule()

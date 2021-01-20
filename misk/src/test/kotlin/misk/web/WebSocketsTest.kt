@@ -19,7 +19,7 @@ import org.junit.jupiter.api.Test
 import javax.inject.Inject
 import javax.inject.Singleton
 
-@MiskTest(startService = true)
+@MiskTest
 internal class WebSocketsTest {
   @MiskTestModule
   val module = TestModule()

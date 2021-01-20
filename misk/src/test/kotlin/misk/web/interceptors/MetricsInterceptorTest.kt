@@ -22,7 +22,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import javax.inject.Inject
 
-@MiskTest(startService = true)
+@MiskTest
 class MetricsInterceptorTest {
   @MiskTestModule
   val module = TestModule()

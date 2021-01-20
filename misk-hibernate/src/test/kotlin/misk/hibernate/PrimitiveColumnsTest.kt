@@ -18,7 +18,7 @@ import javax.persistence.Entity
 import javax.persistence.GeneratedValue
 import javax.persistence.Table
 
-@MiskTest(startService = true)
+@MiskTest
 class PrimitiveColumnsTest {
   @MiskTestModule
   val module = TestModule()

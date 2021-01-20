@@ -9,7 +9,7 @@ import misk.testing.MiskTestModule
 import org.junit.jupiter.api.Test
 import javax.inject.Inject
 
-@MiskTest(startService = true)
+@MiskTest
 internal class DefaultActionsWorkWithAccessControlModuleTest {
   @MiskTestModule
   val module = object : KAbstractModule() {

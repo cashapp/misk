@@ -21,7 +21,7 @@ import org.junit.jupiter.api.Test
 import java.io.ByteArrayInputStream
 import javax.inject.Inject
 
-@MiskTest(startService = true)
+@MiskTest
 internal class JsonRequestTest {
   data class Packet(val message: String)
 

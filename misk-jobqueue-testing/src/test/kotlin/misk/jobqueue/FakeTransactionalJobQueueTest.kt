@@ -28,7 +28,7 @@ import kotlin.Throwable
 import kotlin.error
 import kotlin.test.assertFailsWith
 
-@MiskTest(startService = true)
+@MiskTest
 internal class FakeTransactionalJobQueueTest {
   @MiskTestModule private val module = TransactionalJobQueueTestModule()
 

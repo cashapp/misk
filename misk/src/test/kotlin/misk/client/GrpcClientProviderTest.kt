@@ -31,7 +31,7 @@ import java.util.concurrent.LinkedBlockingDeque
 import javax.inject.Inject
 import javax.inject.Singleton
 
-@MiskTest(startService = true)
+@MiskTest
 internal class GrpcClientProviderTest {
   @MiskTestModule
   val module = TestModule()

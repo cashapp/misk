@@ -17,7 +17,7 @@ import org.junit.jupiter.api.Test
 import javax.inject.Inject
 import kotlin.test.assertFailsWith
 
-@MiskTest(startService = true)
+@MiskTest
 internal class WebDispatchTest {
   @MiskTestModule
   val module = TestModule()

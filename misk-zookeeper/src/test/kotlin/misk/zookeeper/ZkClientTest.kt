@@ -16,7 +16,7 @@ import org.junit.jupiter.api.Test
 import javax.inject.Inject
 import javax.inject.Qualifier
 
-@MiskTest(startService = true)
+@MiskTest
 internal class ZkClientTest {
   @MiskTestModule private val module = Modules.combine(
       MiskTestingServiceModule(),

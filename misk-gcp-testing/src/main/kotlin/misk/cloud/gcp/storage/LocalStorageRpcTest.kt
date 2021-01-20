@@ -8,7 +8,7 @@ import misk.testing.TemporaryFolderModule
 import javax.inject.Inject
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 
-@MiskTest(startService = false)
+@MiskTest
 internal class LocalStorageRpcTest : CustomStorageRpcTestCases<LocalStorageRpc>() {
   @MiskTestModule
   val module = TemporaryFolderModule()

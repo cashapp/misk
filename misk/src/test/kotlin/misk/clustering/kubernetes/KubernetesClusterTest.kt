@@ -23,7 +23,7 @@ import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
-@MiskTest(startService = true)
+@MiskTest
 internal class KubernetesClusterTest {
   @MiskTestModule val module: Module = Modules.combine(
       MiskTestingServiceModule(),

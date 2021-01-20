@@ -30,7 +30,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.test.assertFailsWith
 
-@MiskTest(startService = true)
+@MiskTest
 internal class TypedHttpClientTest {
   @MiskTestModule
   val module = TestModule()

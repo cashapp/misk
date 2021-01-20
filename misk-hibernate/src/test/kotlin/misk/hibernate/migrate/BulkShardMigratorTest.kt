@@ -117,7 +117,7 @@ abstract class BulkShardMigratorTest {
   }
 }
 
-@MiskTest(startService = true)
+@MiskTest
 class BulkShardMigratorVitessMySqlTest : BulkShardMigratorTest() {
   @MiskTestModule
   val module = MoviesTestModule(DataSourceType.VITESS_MYSQL)
@@ -332,13 +332,13 @@ class BulkShardMigratorVitessMySqlTest : BulkShardMigratorTest() {
   }
 }
 
-@MiskTest(startService = true)
+@MiskTest
 class BulkShardMigratorMySqlTest : BulkShardMigratorTest() {
   @MiskTestModule
   val module = MoviesTestModule(type = DataSourceType.MYSQL)
 }
 
-@MiskTest(startService = true)
+@MiskTest
 class BulkShardMigratorTidbTest : BulkShardMigratorTest() {
   @MiskTestModule
   val module = MoviesTestModule(type = DataSourceType.TIDB)

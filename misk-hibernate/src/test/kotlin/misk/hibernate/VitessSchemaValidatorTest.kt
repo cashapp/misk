@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test
 import javax.inject.Inject
 import javax.inject.Provider
 
-@MiskTest(startService = true)
+@MiskTest
 class VitessSchemaValidatorTest {
   @MiskTestModule
   val module = MoviesTestModule()

@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Test
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
-@MiskTest(startService = true)
+@MiskTest
 internal class AwsSqsQueueAttributeImporterTest {
   @MiskExternalDependency private val dockerSqs = DockerSqs
   @MiskTestModule private val module = SqsJobQueueTestModule(dockerSqs.credentials, dockerSqs.client)
