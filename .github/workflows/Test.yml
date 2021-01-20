@@ -26,8 +26,9 @@ jobs:
     strategy:
       matrix:
         include:
-          - shard: ./gradlew testShardHibernate -i --scan --build-cache
-          - shard: ./gradlew testShardNonHibernate -i --scan --build-cache
+          # These builds consistently break. Use the circleci build instead for now.
+#          - shard: ./gradlew testShardHibernate -i --scan
+#          - shard: ./gradlew testShardNonHibernate -i --scan
           - shard: sudo npm install -g @misk/cli && miskweb ci-build -e
 
     steps:
