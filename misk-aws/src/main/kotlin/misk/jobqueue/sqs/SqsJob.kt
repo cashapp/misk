@@ -25,6 +25,7 @@ internal class SqsJob(
     message.messageAttributes
         .filter { (key, _) -> key != JOBQUEUE_METADATA_ATTR }
         .map { (key, value) -> key to value.stringValue }.toMap()
+        .plus(message.attributes)
   }
 
   private val queue: ResolvedQueue = queues.getForReceiving(queueName)
