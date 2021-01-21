@@ -2,30 +2,29 @@ package misk.retries
 
 import com.github.michaelbull.retry.ContinueRetrying
 import com.github.michaelbull.retry.policy.RetryPolicy
+import com.github.michaelbull.retry.retry
 
 /**
- * This is a retry helper function that calls [reader] on retries, but not on the first attempt.
+ * This is a retry helper function with some hooks.
+ * - [beforeRetryHook] is called before retries, but not before the first attempt.
  * Use cases:
  * - Optimistic locking where the state needs to be reloaded on retries
  * - Re-establishing a connection when a request fails due to a connection dropping
  */
-suspend fun <T> readWriteRetry(
+suspend fun <T> retryWithHooks(
   /**
-   * [reader] is called on retries, before [writer].
+   * [beforeRetryHook] is called on retries, before [op].
    */
-  retryPolicy: RetryPolicy<Throwable>,
-  reader: () -> Unit,
-  writer: () -> T
-    /**
-     * These values are recommended by @zhxnlai.
-     */
+  policy: RetryPolicy<Throwable>,
+  beforeRetryHook: () -> Unit,
+  op: () -> T
 ): T {
   var numExecutions = 0
-  return com.github.michaelbull.retry.retry(retryPolicy) {
+  return retry(policy) {
     if (numExecutions++ > 0) {
-      reader()
+      beforeRetryHook()
     }
-    writer()
+    op()
   }
 }
 

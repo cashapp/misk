@@ -22,11 +22,11 @@ internal class RetriesTest {
 
     assertThrows<Exception> {
       runBlocking {
-        readWriteRetry(policy,
-            reader = {
+        retryWithHooks(policy,
+            beforeRetryHook = {
               reads++
             },
-            writer = {
+            op = {
               writes++
               throw DummyException()
             }
@@ -47,11 +47,11 @@ internal class RetriesTest {
 
     assertThrows<Exception> {
       runBlocking {
-        readWriteRetry(policy,
-            reader = {
+        retryWithHooks(policy,
+            beforeRetryHook = {
               reads++
             },
-            writer = {
+            op = {
               writes++
               throw DummyException()
             }
