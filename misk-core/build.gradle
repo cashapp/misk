@@ -10,6 +10,7 @@ dependencies {
   implementation dep.guiceMultibindings
   implementation dep.kotlinStdLibJdk8
   implementation dep.kotlinReflection
+  api dep.kotlinRetry
   implementation dep.loggingApi
   implementation dep.logbackClassic
   implementation dep.okio
@@ -21,6 +22,7 @@ dependencies {
 
   testImplementation dep.assertj
   testImplementation dep.kotlinTest
+  testImplementation dep.kotlinxCoroutines
   testImplementation project(':misk-testing')
 }
 
