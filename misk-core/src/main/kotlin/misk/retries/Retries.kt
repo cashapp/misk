@@ -12,9 +12,6 @@ import com.github.michaelbull.retry.retry
  * - Re-establishing a connection when a request fails due to a connection dropping
  */
 suspend fun <T> retryWithHooks(
-  /**
-   * [beforeRetryHook] is called on retries, before [op].
-   */
   policy: RetryPolicy<Throwable>,
   beforeRetryHook: () -> Unit,
   op: () -> T
