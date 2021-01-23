@@ -103,17 +103,17 @@ internal class SqsJobQueueTest {
         "ik-8",
         "ik-9"
     )
-    assertThat(sortedJobs.map { it.attributes }).containsExactly(
-        mapOf("index" to "0"),
-        mapOf("index" to "1"),
-        mapOf("index" to "2"),
-        mapOf("index" to "3"),
-        mapOf("index" to "4"),
-        mapOf("index" to "5"),
-        mapOf("index" to "6"),
-        mapOf("index" to "7"),
-        mapOf("index" to "8"),
-        mapOf("index" to "9")
+    assertThat(sortedJobs.map { it.attributes["index"] }).containsExactly(
+        "0",
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9"
     )
 
     // Confirm metrics
