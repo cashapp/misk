@@ -1,8 +1,11 @@
 package misk.retries
 
 import com.github.michaelbull.retry.ContinueRetrying
+import com.github.michaelbull.retry.StopRetrying
 import com.github.michaelbull.retry.policy.RetryPolicy
 import com.github.michaelbull.retry.retry
+import kotlin.reflect.KClass
+import kotlin.reflect.full.isSubclassOf
 
 /**
  * This is a retry helper function with some hooks.
@@ -26,8 +29,8 @@ suspend fun <T> retryWithHooks(
 }
 
 /**
- * Returns a [RetryPolicy] that will throw the error that triggered the retry if it is type [T].
- * Otherwise, it voices no objection to retrying.
+ * Returns a [RetryPolicy] that will stops retries the error that triggered the retry if it is type
+ * [T]. Otherwise, it voices no objection to retrying.
  */
 inline fun <reified T : Exception> doNotRetry(): RetryPolicy<Throwable> {
   return {
@@ -35,6 +38,23 @@ inline fun <reified T : Exception> doNotRetry(): RetryPolicy<Throwable> {
       throw this.reason
     }
 
-    ContinueRetrying
+    StopRetrying
+  }
+}
+
+/**
+ * Returns a [RetryPolicy] that will stop retries if the error that triggered the retry if it is not
+ * one of the classes listed in [classes], or a subtype of one of the listed classes.
+ * If the error is one of the listed classes, it voices no objection to retrying.
+ */
+fun onlyRetry(vararg classes: KClass<out Throwable>): RetryPolicy<Throwable> {
+  return policy@ {
+    for (clazz in classes) {
+      if (this.reason::class.isSubclassOf(clazz)) {
+        return@policy ContinueRetrying
+      }
+    }
+
+    return@policy StopRetrying
   }
 }
