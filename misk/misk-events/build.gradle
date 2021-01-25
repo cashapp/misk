@@ -24,7 +24,7 @@ dependencies {
   implementation dep.openTracingJdbc
   implementation dep.vitess
   implementation project(':misk')
-  implementation project(':misk-events-core')
+  api project(':misk-events-core')
   implementation project(':misk-hibernate')
 
   testImplementation project(':misk-testing')
