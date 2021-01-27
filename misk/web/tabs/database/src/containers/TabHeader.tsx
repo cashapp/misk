@@ -1,6 +1,6 @@
 /** @jsx jsx */
 import { Button, Callout, Drawer, H1, H5 } from "@blueprintjs/core"
-import { jsx } from "@emotion/core"
+import { jsx } from "@emotion/react"
 import { CodePreContainer, WrapTextContainer } from "@misk/core"
 import { useState } from "react"
 import { cssFloatLeft, cssTableScroll, cssHeader } from "../components"

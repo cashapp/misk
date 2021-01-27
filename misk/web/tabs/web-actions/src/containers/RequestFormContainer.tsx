@@ -7,7 +7,7 @@ import {
   IState,
   IWebActionInternal,
   mapDispatchToProps,
-  mapStateToProps
+  mapStateToProps,
 } from "../ducks"
 
 export const RequestFormContainer = (
