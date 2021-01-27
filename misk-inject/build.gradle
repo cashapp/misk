@@ -5,8 +5,8 @@ buildscript {
 }
 
 dependencies {
-  implementation dep.guice
-  implementation dep.guiceMultibindings
+  api dep.guice
+  api dep.guiceMultibindings
   implementation dep.kotlinStdLibJdk8
   implementation dep.kotlinReflection
   implementation dep.assertj
