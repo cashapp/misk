@@ -1,5 +1,5 @@
 dependencies {
-  implementation dep.prometheusClient
+  api dep.prometheusClient
   implementation dep.prometheusHotspot
   implementation dep.kotlinStdLibJdk8
   implementation dep.guava
