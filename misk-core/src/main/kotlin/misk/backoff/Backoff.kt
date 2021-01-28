@@ -3,6 +3,7 @@ package misk.backoff
 import java.time.Duration
 
 /** Calculates how long to backoff on a retry. [Backoff]s are stateful and not thread-safe */
+@Deprecated("Use kotlinRetry instead")
 interface Backoff {
   /** Resets the backoff, typically when a request has succeeded  */
   fun reset()
