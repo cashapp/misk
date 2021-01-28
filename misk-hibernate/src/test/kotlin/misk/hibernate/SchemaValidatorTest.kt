@@ -35,6 +35,7 @@ import javax.persistence.Entity
 import javax.persistence.GeneratedValue
 import javax.persistence.Table
 import javax.sql.DataSource
+import kotlin.test.assertTrue
 
 @MiskTest(startService = true)
 internal class SchemaValidatorTest {
@@ -212,9 +213,10 @@ internal class SchemaValidatorTest {
 
   @Test
   fun catchNotReallyUniqueColumnNames() {
-    assertThat(schemaValidationErrorMessage).contains(
-      "Duplicate identifiers: [[tbl6NotReallyUnique, tbl6_not_really_unique]]"
-    )
+    val duplicateIds = schemaValidationErrorMessage.contains("Duplicate identifiers: [[tbl6NotReallyUnique, tbl6_not_really_unique]]") ||
+      schemaValidationErrorMessage.contains("Duplicate identifiers: [[tbl6_not_really_unique, tbl6NotReallyUnique]]")
+
+    assertTrue(duplicateIds, "Expected duplicate ids for: [[tbl6_not_really_unique, tbl6NotReallyUnique]]")
 
     assertThat(schemaValidationErrorMessage).contains(
       "Duplicate identifiers: " +
