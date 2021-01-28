@@ -1,6 +1,6 @@
 /** @jsx jsx */
 import { TextArea } from "@blueprintjs/core"
-import { css, jsx } from "@emotion/core"
+import { css, jsx } from "@emotion/react"
 import { cssWrapTextArea } from "src/components"
 import { handler } from "."
 

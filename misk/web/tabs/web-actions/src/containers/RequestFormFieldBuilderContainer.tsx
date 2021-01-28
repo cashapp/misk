@@ -10,16 +10,16 @@ import {
   Intent,
   Label,
   TextArea,
-  Tooltip
+  Tooltip,
 } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
-import { css, jsx } from "@emotion/core"
+import { css, jsx } from "@emotion/react"
 import { WrapTextContainer } from "@misk/core"
 import {
   onChangeFnCall,
   onChangeToggleFnCall,
   onClickFnCall,
-  simpleSelectorGet
+  simpleSelectorGet,
 } from "@misk/simpleredux"
 import { OrderedMap } from "immutable"
 import { connect } from "react-redux"
@@ -28,7 +28,7 @@ import {
   cssTooltip,
   cssWrapTextArea,
   Metadata,
-  QuantityButton
+  QuantityButton,
 } from "../components"
 import {
   BaseFieldTypes,
@@ -41,7 +41,7 @@ import {
   padId,
   parseEnumType,
   TypescriptBaseTypes,
-  ServerTypes
+  ServerTypes,
 } from "../ducks"
 
 const cssCard = css`
@@ -82,7 +82,7 @@ const repeatableFieldButtons = (
         css={css(cssButton)}
         defaultValue={simpleSelectorGet(props.simpleRedux, [
           `${tag}::${padId(id)}`,
-          "data"
+          "data",
         ])}
         icon={IconNames.MORE}
         onClick={onChangeToggleFnCall(
@@ -168,7 +168,7 @@ const EditRawInput = (
         css={css(cssWrapTextArea)}
         defaultValue={simpleSelectorGet(props.simpleRedux, [
           `${tag}::${padId(id)}`,
-          "data"
+          "data",
         ])}
         fill={true}
         growVertically={true}
@@ -221,7 +221,7 @@ const UnconnectedRequestFormFieldBuilderContainer = (
       name,
       idChildren,
       serverType,
-      typescriptType
+      typescriptType,
     } = metadata as ITypesFieldMetadata
     if (typescriptType === TypescriptBaseTypes.boolean) {
       return (
@@ -236,7 +236,7 @@ const UnconnectedRequestFormFieldBuilderContainer = (
                 css={css(cssButton)}
                 defaultValue={simpleSelectorGet(props.simpleRedux, [
                   `${tag}::${padId(id)}`,
-                  "data"
+                  "data",
                 ])}
                 intent={
                   simpleSelectorGet(
@@ -258,7 +258,7 @@ const UnconnectedRequestFormFieldBuilderContainer = (
               >
                 {simpleSelectorGet(props.simpleRedux, [
                   `${tag}::${padId(id)}`,
-                  "data"
+                  "data",
                 ]).toString() || "unset"}
               </Button>
             </EditRawInput>
@@ -277,7 +277,7 @@ const UnconnectedRequestFormFieldBuilderContainer = (
               <InputGroup
                 defaultValue={simpleSelectorGet(props.simpleRedux, [
                   `${tag}::${padId(id)}`,
-                  "data"
+                  "data",
                 ])}
                 onChange={onChangeFnCall(clickDirtyInputFns(props))}
                 onClick={onChangeFnCall(clickDirtyInputFns(props))}
@@ -303,7 +303,7 @@ const UnconnectedRequestFormFieldBuilderContainer = (
               <InputGroup
                 defaultValue={simpleSelectorGet(props.simpleRedux, [
                   `${tag}::${padId(id)}`,
-                  "data"
+                  "data",
                 ])}
                 onBlur={onChangeFnCall(
                   props.simpleMergeData,
@@ -369,7 +369,7 @@ const UnconnectedRequestFormFieldBuilderContainer = (
           const {
             idChildren: grandChildren,
             name: childName,
-            serverType: childServerType
+            serverType: childServerType,
           } = typesMetadata.get(child)
           const parentOfLeaf =
             grandChildren.reduce(
@@ -455,7 +455,7 @@ const UnconnectedRequestFormFieldBuilderContainer = (
                     css={css(cssWrapTextArea)}
                     defaultValue={simpleSelectorGet(props.simpleRedux, [
                       `${tag}::RawRequestBody`,
-                      "data"
+                      "data",
                     ])}
                     fill={true}
                     growVertically={true}

@@ -5,13 +5,13 @@ import { SkeletonDatabaseCardComponent } from "../components"
 import {
   IDatabaseQueryMetadataAPI,
   FilterDatabaseContainer,
-  DatabaseCardContainer
+  DatabaseCardContainer,
 } from "../containers"
 import {
   IDispatchProps,
   IState,
   mapDispatchToProps,
-  mapStateToProps
+  mapStateToProps,
 } from "../ducks"
 
 const createTag = (databaseQuery: IDatabaseQueryMetadataAPI, tag: string) =>
