@@ -1,6 +1,6 @@
 /** @jsx jsx */
 import { Card, Classes, H3, Menu, Tag } from "@blueprintjs/core"
-import { jsx } from "@emotion/core"
+import { jsx } from "@emotion/react"
 import { FlexContainer } from "@misk/core"
 import { HTTPMethod } from "http-method-enum"
 import {
@@ -9,7 +9,7 @@ import {
   cssFloatLeft,
   cssHeader,
   Metadata,
-  MethodTag
+  MethodTag,
 } from "."
 import { cssMetadataMenu } from "./CommonComponents"
 

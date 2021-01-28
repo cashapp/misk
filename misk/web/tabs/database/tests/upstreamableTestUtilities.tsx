@@ -13,16 +13,16 @@ export const renderWithRedux = (
     any,
     | string
     | ((
-      props: any
-    ) => React.ReactElement<
-      any,
-      string | (new (props: any) => React.Component<any, any, any>)
-    >)
+        props: any
+      ) => React.ReactElement<
+        any,
+        string | (new (props: any) => React.Component<any, any, any>)
+      >)
     | (new (props: any) => React.Component<any, any, any>)
   >,
   {
     initialState,
-    store = createStore(rootReducer(createBrowserHistory()), initialState)
+    store = createStore(rootReducer(createBrowserHistory()), initialState),
   }: any = {}
 ) => {
   return {
@@ -30,6 +30,6 @@ export const renderWithRedux = (
     // adding `store` to the returned utilities to allow us
     // to reference it in our tests (just try to avoid using
     // this to test implementation details).
-    store
+    store,
   }
 }

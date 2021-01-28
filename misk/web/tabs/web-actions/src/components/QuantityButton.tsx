@@ -1,7 +1,7 @@
 /** @jsx jsx */
 import { Button, Tooltip } from "@blueprintjs/core"
 import { IconName } from "@blueprintjs/icons"
-import { jsx } from "@emotion/core"
+import { jsx } from "@emotion/react"
 import { onChangeFnCall } from "@misk/simpleredux"
 import { IWebActionInternal } from "../ducks"
 import { cssButton, cssTooltip } from "./CommonComponents"

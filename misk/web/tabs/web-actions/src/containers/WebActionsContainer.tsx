@@ -7,7 +7,7 @@ import { connect } from "react-redux"
 import { SkeletonWebActionsComponent } from "../components"
 import {
   FilterWebActionsContainer,
-  WebActionCardContainer
+  WebActionCardContainer,
 } from "../containers"
 import {
   IDispatchProps,
@@ -15,7 +15,7 @@ import {
   IWebActionInternal,
   mapDispatchToProps,
   mapStateToProps,
-  WebActionInternalLabel
+  WebActionInternalLabel,
 } from "../ducks"
 
 const createTag = (action: IWebActionInternal, tag: string) =>
@@ -53,7 +53,7 @@ const WebActionsContainer = (
       WebActionInternalLabel[
         simpleSelectorGet(props.simpleRedux, [
           `${filterTag}::HTMLSelect`,
-          "data"
+          "data",
         ]) || "All Metadata"
       ]
     const filterValue = simpleSelectorGet(

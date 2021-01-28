@@ -1,6 +1,6 @@
 /** @jsx jsx */
 import { H5, Menu } from "@blueprintjs/core"
-import { jsx } from "@emotion/core"
+import { jsx } from "@emotion/react"
 import { Dispatch, SetStateAction, useContext, useState } from "react"
 import { cssColumn, cssMetadataMenu } from "../components"
 import { FormBuilderContainer } from "../form-builder"

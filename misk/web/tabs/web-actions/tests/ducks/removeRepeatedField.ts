@@ -2,7 +2,7 @@ import HTTPMethod from "http-method-enum"
 import {
   addRepeatedField,
   generateTypesMetadata,
-  removeRepeatedField
+  removeRepeatedField,
 } from "../../src/ducks"
 import { nonTypedActionAPI, testTypes } from "../testUtilities"
 
@@ -12,7 +12,7 @@ describe("Remove a repeated field", () => {
       ...nonTypedActionAPI,
       httpMethod: HTTPMethod.POST,
       requestType: "repeatedShort",
-      types: testTypes
+      types: testTypes,
     })
     const parentId = typesMetadata.get("0").idChildren.first() as string
     typesMetadata = addRepeatedField(testTypes, typesMetadata, parentId)
@@ -29,7 +29,7 @@ describe("Remove a repeated field", () => {
       ...nonTypedActionAPI,
       httpMethod: HTTPMethod.POST,
       requestType: "repeatedNestedRepeatedShort",
-      types: testTypes
+      types: testTypes,
     })
     const parentId = typesMetadata.get("0").idChildren.first() as string
     expect(typesMetadata.size).toBe(6)

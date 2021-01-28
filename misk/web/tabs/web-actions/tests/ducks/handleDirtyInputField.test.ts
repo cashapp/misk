@@ -1,7 +1,7 @@
 import HTTPMethod from "http-method-enum"
 import {
   generateTypesMetadata,
-  recursivelySetDirtyInput
+  recursivelySetDirtyInput,
 } from "../../src/ducks"
 import { nonTypedActionAPI, testTypes } from "../testUtilities"
 
@@ -11,7 +11,7 @@ describe("Set dirty input for a field", () => {
       ...nonTypedActionAPI,
       httpMethod: HTTPMethod.POST,
       requestType: "repeatedShort",
-      types: testTypes
+      types: testTypes,
     })
     const parentId = typesMetadata.get("0").idChildren.first() as string
     expect(typesMetadata.get(parentId).idChildren.size).toBe(1)
@@ -28,7 +28,7 @@ describe("Set dirty input for a field", () => {
       ...nonTypedActionAPI,
       httpMethod: HTTPMethod.POST,
       requestType: "repeatedNestedRepeatedShort",
-      types: testTypes
+      types: testTypes,
     })
     const parentId = typesMetadata.get("0").idChildren.first() as string
     expect(typesMetadata.get(parentId).idChildren.size).toBe(1)

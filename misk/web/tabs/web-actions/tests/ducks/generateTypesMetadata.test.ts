@@ -2,7 +2,7 @@ import HTTPMethod from "http-method-enum"
 import {
   generateTypesMetadata,
   ServerTypes,
-  TypescriptBaseTypes
+  TypescriptBaseTypes,
 } from "../../src/ducks"
 import { nonTypedActionAPI, testTypes } from "../testUtilities"
 
@@ -15,7 +15,7 @@ describe("Build typesMetadata from a raw WebActionMetadata", () => {
   it("get non-typed POST", () => {
     const typesMetadata = generateTypesMetadata({
       ...nonTypedActionAPI,
-      httpMethod: HTTPMethod.POST
+      httpMethod: HTTPMethod.POST,
     })
     expect(typesMetadata.size).toBe(1)
     const tmRoot = typesMetadata.get("0")
@@ -28,7 +28,7 @@ describe("Build typesMetadata from a raw WebActionMetadata", () => {
       ...nonTypedActionAPI,
       httpMethod: HTTPMethod.POST,
       requestType: "noRepeatedInt",
-      types: testTypes
+      types: testTypes,
     })
     expect(typesMetadata.size).toBe(2)
     expect(typesMetadata).toMatchSnapshot()
@@ -38,7 +38,7 @@ describe("Build typesMetadata from a raw WebActionMetadata", () => {
       ...nonTypedActionAPI,
       httpMethod: HTTPMethod.POST,
       requestType: "nestedNoRepeatedInt",
-      types: testTypes
+      types: testTypes,
     })
     expect(typesMetadata.size).toBe(3)
     const tmRoot = typesMetadata.get("0")
@@ -55,7 +55,7 @@ describe("Build typesMetadata from a raw WebActionMetadata", () => {
       ...nonTypedActionAPI,
       httpMethod: HTTPMethod.POST,
       requestType: "repeatedShort",
-      types: testTypes
+      types: testTypes,
     })
     expect(typesMetadata.size).toBe(3)
     const tmRoot = typesMetadata.get("0")
@@ -75,7 +75,7 @@ describe("Build typesMetadata from a raw WebActionMetadata", () => {
       ...nonTypedActionAPI,
       httpMethod: HTTPMethod.POST,
       requestType: "repeatedNestedNoRepeatedInt",
-      types: testTypes
+      types: testTypes,
     })
     expect(typesMetadata.size).toBe(5)
     const tmRoot = typesMetadata.get("0")
@@ -103,7 +103,7 @@ describe("Build typesMetadata from a raw WebActionMetadata", () => {
       ...nonTypedActionAPI,
       httpMethod: HTTPMethod.POST,
       requestType: "repeatedNestedRepeatedShort",
-      types: testTypes
+      types: testTypes,
     })
     expect(typesMetadata.size).toBe(6)
     const tmRoot = typesMetadata.get("0")
@@ -135,7 +135,7 @@ describe("Build typesMetadata from a raw WebActionMetadata", () => {
       ...nonTypedActionAPI,
       httpMethod: HTTPMethod.POST,
       requestType: "multipleFlatFields",
-      types: testTypes
+      types: testTypes,
     })
     expect(typesMetadata.size).toBe(5)
     expect(typesMetadata).toMatchSnapshot()

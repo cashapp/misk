@@ -5,14 +5,14 @@ import {
   ControlGroup,
   HTMLSelect,
   InputGroup,
-  Menu
+  Menu,
 } from "@blueprintjs/core"
-import { jsx } from "@emotion/core"
+import { jsx } from "@emotion/react"
 import { CodePreContainer, FlexContainer, HTTPMethodIntent } from "@misk/core"
 import {
   HTTPMethodDispatch,
   onChangeFnCall,
-  simpleSelectorGet
+  simpleSelectorGet,
 } from "@misk/simpleredux"
 import { HTTPMethod } from "http-method-enum"
 import { connect } from "react-redux"
@@ -23,7 +23,7 @@ import {
   Metadata,
   MetadataCollapse,
   MetadataCopyToClipboard,
-  StatusTagComponent
+  StatusTagComponent,
 } from "../components"
 import { RequestFormContainer } from "../containers"
 import {
@@ -33,7 +33,7 @@ import {
   IWebActionInternal,
   mapDispatchToProps,
   mapStateToProps,
-  methodHasBody
+  methodHasBody,
 } from "../ducks"
 
 const RequestBodyForm = (
@@ -77,7 +77,7 @@ const SendRequestCollapseContainer = (
   // Determine if Send Request form for the Web Action should be open
   const isOpen = simpleSelectorGet(props.simpleRedux, [
     `${tag}::ButtonSendRequest`,
-    "data"
+    "data",
   ])
   const url = simpleSelectorGet(props.simpleRedux, [`${tag}::URL`, "data"])
 
@@ -103,7 +103,7 @@ const SendRequestCollapseContainer = (
     simpleSelectorGet(props.simpleRedux, [
       `${tag}::Response`,
       "error",
-      "response"
+      "response",
     ])
   )
 
@@ -125,7 +125,7 @@ const SendRequestCollapseContainer = (
     methodHasBody(method) &&
     simpleSelectorGet(props.simpleRedux, [
       `${tag}::ButtonRequestBody`,
-      "data"
+      "data",
     ]) == undefined
   ) {
     props.simpleMergeData(`${tag}::ButtonRequestBody`, true)
@@ -136,7 +136,7 @@ const SendRequestCollapseContainer = (
     methodHasBody(method) &&
     simpleSelectorGet(props.simpleRedux, [
       `${tag}::ButtonFormRequestBody`,
-      "data"
+      "data",
     ]) == undefined
   ) {
     props.simpleMergeData(`${tag}::ButtonFormRequestBody`, true)
@@ -193,7 +193,7 @@ const SendRequestCollapseContainer = (
               intent={HTTPMethodIntent[method]}
               loading={simpleSelectorGet(props.simpleRedux, [
                 `${tag}::Response`,
-                "loading"
+                "loading",
               ])}
               text={"Submit"}
             />

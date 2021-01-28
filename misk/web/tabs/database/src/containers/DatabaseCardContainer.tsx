@@ -1,7 +1,7 @@
 /** @jsx jsx */
 import { Card, H3, Icon, Intent, Menu, Tag, Tooltip } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
-import { jsx } from "@emotion/core"
+import { jsx } from "@emotion/react"
 import { FlexContainer, Table } from "@misk/core"
 import { useState } from "react"
 import {
@@ -13,17 +13,17 @@ import {
   cssTableScroll,
   cssTooltip,
   MetadataCollapse,
-  MetadataCopyToClipboard
+  MetadataCopyToClipboard,
 } from "../components"
 import {
   IDatabaseQueryMetadataAPI,
-  RunQueryCollapseContainer
+  RunQueryCollapseContainer,
 } from "../containers"
 import {
   IConstraintMetadata,
   IOrderMetadata,
   ISelectMetadata,
-  NoAdminDashboardDatabaseAccess
+  NoAdminDashboardDatabaseAccess,
 } from "./DatabaseInterfaces"
 
 /**

@@ -7,13 +7,12 @@
   "rawPackageJson": {},
   "rawTsconfig": {},
   "rawTsconfigInclude": [],
-  "rawTslint": {},
   "rawWebpackConfig": {},
   "relative_path_prefix": "",
   "slug": "config",
   "useWebpackBundleAnalyzer": false,
   "useWebpackExternals": true,
-  "version": "0.1.26",
+  "version": "0.2.0-12",
   "zipOnBuild": false,
   "___DeprecatedKeys": "Any keys below this point in your miskTab.json are deprecated and can be safely removed."
 }

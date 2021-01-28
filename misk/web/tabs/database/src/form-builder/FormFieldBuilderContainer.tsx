@@ -9,9 +9,9 @@ import {
   InputGroup,
   Intent,
   Label,
-  TextArea
+  TextArea,
 } from "@blueprintjs/core"
-import { css, jsx } from "@emotion/core"
+import { css, jsx } from "@emotion/react"
 import { WrapTextContainer } from "@misk/core"
 import { OrderedMap } from "immutable"
 import React, { Dispatch, useState, SetStateAction } from "react"
@@ -22,13 +22,13 @@ import {
   ITypesFieldMetadata,
   repeatableFieldButtons,
   ServerTypes,
-  TypescriptBaseTypes
+  TypescriptBaseTypes,
 } from "../form-builder"
 import { cssButton, cssWrapTextArea, Metadata } from "../components"
 import {
   getFieldData,
   parseEnumType,
-  recursivelySetDirtyInput
+  recursivelySetDirtyInput,
 } from "./FormBuilderStore"
 import { IActionTypes } from "./Interfaces"
 
@@ -66,7 +66,7 @@ const clickDirtyInputFns = (props: {
     id,
     setIsOpenRequestBodyPreview,
     setTypesMetadata,
-    typesMetadata
+    typesMetadata,
   } = props
   setTypesMetadata(recursivelySetDirtyInput(typesMetadata, id, true))
   setIsOpenRequestBodyPreview(true)
@@ -108,7 +108,7 @@ export const FormFieldBuilderContainer = (props: {
     requestBodyFormInputType,
     setRequestBodyFormInputType,
     rawRequestBody,
-    setRawRequestBody
+    setRawRequestBody,
   } = props
   const fieldValue = fieldValueStore.get(id)
   const setFieldValue = updateFieldValue(
@@ -127,7 +127,7 @@ export const FormFieldBuilderContainer = (props: {
       name,
       idChildren,
       serverType,
-      typescriptType
+      typescriptType,
     } = metadata as ITypesFieldMetadata
     if (typescriptType === TypescriptBaseTypes.boolean) {
       return (
@@ -146,7 +146,7 @@ export const FormFieldBuilderContainer = (props: {
                   setIsOpenEditRawInput,
                   types,
                   typesMetadata,
-                  setTypesMetadata
+                  setTypesMetadata,
                 }),
               [id, isOpenEditRawInput, typesMetadata]
             )}
@@ -167,7 +167,7 @@ export const FormFieldBuilderContainer = (props: {
                   id,
                   setIsOpenRequestBodyPreview,
                   setTypesMetadata,
-                  typesMetadata
+                  typesMetadata,
                 })}
                 onClick={() => {
                   setFieldValue(!fieldValue)
@@ -175,7 +175,7 @@ export const FormFieldBuilderContainer = (props: {
                     id,
                     setIsOpenRequestBodyPreview,
                     setTypesMetadata,
-                    typesMetadata
+                    typesMetadata,
                   })()
                 }}
               >
@@ -200,7 +200,7 @@ export const FormFieldBuilderContainer = (props: {
               setIsOpenEditRawInput,
               types,
               typesMetadata,
-              setTypesMetadata
+              setTypesMetadata,
             })}
             <EditRawInput
               isOpen={isOpenEditRawInput}
@@ -213,13 +213,13 @@ export const FormFieldBuilderContainer = (props: {
                   id,
                   setIsOpenRequestBodyPreview,
                   setTypesMetadata,
-                  typesMetadata
+                  typesMetadata,
                 })}
                 onClick={clickDirtyInputFns({
                   id,
                   setIsOpenRequestBodyPreview,
                   setTypesMetadata,
-                  typesMetadata
+                  typesMetadata,
                 })}
                 onBlur={handler.handle(setFieldValue)}
                 placeholder={serverType}
@@ -243,7 +243,7 @@ export const FormFieldBuilderContainer = (props: {
               setIsOpenEditRawInput,
               types,
               typesMetadata,
-              setTypesMetadata
+              setTypesMetadata,
             })}
             <EditRawInput
               isOpen={isOpenEditRawInput}
@@ -257,13 +257,13 @@ export const FormFieldBuilderContainer = (props: {
                   id,
                   setIsOpenRequestBodyPreview,
                   setTypesMetadata,
-                  typesMetadata
+                  typesMetadata,
                 })}
                 onClick={clickDirtyInputFns({
                   id,
                   setIsOpenRequestBodyPreview,
                   setTypesMetadata,
-                  typesMetadata
+                  typesMetadata,
                 })}
                 placeholder={serverType}
               />
@@ -287,7 +287,7 @@ export const FormFieldBuilderContainer = (props: {
               setIsOpenEditRawInput,
               types,
               typesMetadata,
-              setTypesMetadata
+              setTypesMetadata,
             })}
             <EditRawInput
               isOpen={isOpenEditRawInput}
@@ -301,7 +301,7 @@ export const FormFieldBuilderContainer = (props: {
                   id,
                   setIsOpenRequestBodyPreview,
                   setTypesMetadata,
-                  typesMetadata
+                  typesMetadata,
                 })}
                 onBlur={handler.handle(setFieldValue)}
                 // Show empty option to prompt selection since first option is not automatically persisted
@@ -347,7 +347,7 @@ export const FormFieldBuilderContainer = (props: {
           const {
             idChildren: grandChildren,
             name: childName,
-            serverType: childServerType
+            serverType: childServerType,
           } = typesMetadata.get(child)
           const parentOfLeaf =
             grandChildren.reduce(
@@ -394,7 +394,7 @@ export const FormFieldBuilderContainer = (props: {
                     setIsOpenEditRawInput,
                     types,
                     typesMetadata,
-                    setTypesMetadata
+                    setTypesMetadata,
                   })}
                 </ButtonGroup>
                 {/* Allow editing raw an entire message block */}
@@ -439,7 +439,7 @@ export const FormFieldBuilderContainer = (props: {
                   setIsOpenEditRawInput,
                   types,
                   typesMetadata,
-                  setTypesMetadata
+                  setTypesMetadata,
                 })}
               </ButtonGroup>
               {/* Allow editing raw an entire message block */}
@@ -484,7 +484,7 @@ export const FormFieldBuilderContainer = (props: {
               setIsOpenEditRawInput,
               types,
               typesMetadata,
-              setTypesMetadata
+              setTypesMetadata,
             })}
             <TextArea
               css={css(cssWrapTextArea)}
@@ -496,20 +496,20 @@ export const FormFieldBuilderContainer = (props: {
                   id,
                   setIsOpenRequestBodyPreview,
                   setTypesMetadata,
-                  typesMetadata
+                  typesMetadata,
                 })()
               })}
               onChange={clickDirtyInputFns({
                 id,
                 setIsOpenRequestBodyPreview,
                 setTypesMetadata,
-                typesMetadata
+                typesMetadata,
               })}
               onClick={clickDirtyInputFns({
                 id,
                 setIsOpenRequestBodyPreview,
                 setTypesMetadata,
-                typesMetadata
+                typesMetadata,
               })}
               placeholder={
                 "Unparseable type. This input will return a string or JSON."

@@ -2,7 +2,7 @@ import {
   ControlGroup,
   HTMLSelect,
   InputGroup,
-  Spinner
+  Spinner,
 } from "@blueprintjs/core"
 import { onChangeFnCall } from "@misk/simpleredux"
 import * as React from "react"
@@ -11,7 +11,7 @@ import {
   IDispatchProps,
   mapDispatchToProps,
   mapStateToProps,
-  WebActionInternalLabel
+  WebActionInternalLabel,
 } from "../ducks"
 
 const FilterWebActionsContainer = (

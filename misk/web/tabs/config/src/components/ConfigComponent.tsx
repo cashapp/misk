@@ -1,6 +1,6 @@
 /** @jsx jsx */
 import { H1, H3, Spinner } from "@blueprintjs/core"
-import { css, jsx } from "@emotion/core"
+import { css, jsx } from "@emotion/react"
 import { CodePreContainer } from "@misk/core"
 import * as React from "react"
 

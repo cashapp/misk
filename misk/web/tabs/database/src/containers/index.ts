@@ -12,5 +12,5 @@ export {
   SendQueryContainer,
   TabContainer,
   DatabaseCardContainer,
-  DatabaseContainer
+  DatabaseContainer,
 }
