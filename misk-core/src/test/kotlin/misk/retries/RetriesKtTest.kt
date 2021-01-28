@@ -3,14 +3,12 @@ package misk.retries
 import com.github.michaelbull.retry.policy.limitAttempts
 import com.github.michaelbull.retry.policy.plus
 import kotlinx.coroutines.runBlocking
-import misk.testing.MiskTest
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
 internal class DummyException: Exception("Testing exception")
 
-@MiskTest
 internal class RetriesTest {
 
   @Test
