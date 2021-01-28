@@ -2,24 +2,45 @@
 
 exports[`WebActionsContainer WebActionsContainer can render with redux loading (no data) 1`] = `
 <DocumentFragment>
-  .emotion-3 {
+  .emotion-0 {
   display: inline-block;
 }
 
-.emotion-0 {
+.emotion-1 {
   float: right;
   margin: 5px 0 0 10px;
-}
-
-.emotion-1 {
-  float: left;
-  margin: 5px 10px 0 0;
 }
 
 .emotion-2 {
   float: left;
   margin: 5px 10px 0 0;
+}
+
+.emotion-3 {
+  float: left;
+  margin: 5px 10px 0 0;
   font-family: monospace;
+}
+
+.emotion-4 {
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -webkit-box-flex-wrap: wrap;
+  -webkit-flex-wrap: wrap;
+  -ms-flex-wrap: wrap;
+  flex-wrap: wrap;
+}
+
+.emotion-4 * {
+  -webkit-box-flex: 1;
+  -webkit-flex-grow: 1;
+  -ms-flex-positive: 1;
+  flex-grow: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .emotion-5 {
@@ -33,7 +54,7 @@ exports[`WebActionsContainer WebActionsContainer can render with redux loading (
   min-width: 320px;
 }
 
-.emotion-4 li {
+.emotion-6 li {
   margin-bottom: 0;
 }
 
@@ -179,10 +200,10 @@ exports[`WebActionsContainer WebActionsContainer can render with redux loading (
       class="bp3-card bp3-elevation-0"
     >
       <div
-        class="emotion-3"
+        class="emotion-0"
       >
         <span
-          class="bp3-tag bp3-intent-primary bp3-large emotion-0"
+          class="bp3-tag bp3-intent-primary bp3-large emotion-1"
         >
           <span
             class="bp3-text-overflow-ellipsis bp3-fill"
@@ -191,12 +212,12 @@ exports[`WebActionsContainer WebActionsContainer can render with redux loading (
           </span>
         </span>
         <h3
-          class="bp3-heading bp3-skeleton emotion-1"
+          class="bp3-heading bp3-skeleton emotion-2"
         >
           AnotherSimpleWebAction
         </h3>
         <span
-          class="bp3-tag bp3-large emotion-2"
+          class="bp3-tag bp3-large emotion-3"
         >
           <span
             class="bp3-text-overflow-ellipsis bp3-fill"
@@ -210,13 +231,13 @@ exports[`WebActionsContainer WebActionsContainer can render with redux loading (
         </span>
       </div>
       <div
-        class="emotion-8"
+        class="emotion-4"
       >
         <div
           class="emotion-5"
         >
           <ul
-            class="bp3-menu emotion-4"
+            class="bp3-menu emotion-6"
           >
             <li
               class=""
@@ -320,7 +341,7 @@ exports[`WebActionsContainer WebActionsContainer can render with redux loading (
           class="emotion-5"
         >
           <ul
-            class="bp3-menu emotion-4"
+            class="bp3-menu emotion-6"
           >
             <li
               class=""
@@ -427,10 +448,10 @@ exports[`WebActionsContainer WebActionsContainer can render with redux loading (
       class="bp3-card bp3-elevation-0"
     >
       <div
-        class="emotion-3"
+        class="emotion-0"
       >
         <span
-          class="bp3-tag bp3-intent-primary bp3-large emotion-0"
+          class="bp3-tag bp3-intent-primary bp3-large emotion-1"
         >
           <span
             class="bp3-text-overflow-ellipsis bp3-fill"
@@ -439,12 +460,12 @@ exports[`WebActionsContainer WebActionsContainer can render with redux loading (
           </span>
         </span>
         <h3
-          class="bp3-heading bp3-skeleton emotion-1"
+          class="bp3-heading bp3-skeleton emotion-2"
         >
           AnotherSimpleWebAction
         </h3>
         <span
-          class="bp3-tag bp3-large emotion-2"
+          class="bp3-tag bp3-large emotion-3"
         >
           <span
             class="bp3-text-overflow-ellipsis bp3-fill"
@@ -458,13 +479,13 @@ exports[`WebActionsContainer WebActionsContainer can render with redux loading (
         </span>
       </div>
       <div
-        class="emotion-8"
+        class="emotion-4"
       >
         <div
           class="emotion-5"
         >
           <ul
-            class="bp3-menu emotion-4"
+            class="bp3-menu emotion-6"
           >
             <li
               class=""
@@ -568,7 +589,7 @@ exports[`WebActionsContainer WebActionsContainer can render with redux loading (
           class="emotion-5"
         >
           <ul
-            class="bp3-menu emotion-4"
+            class="bp3-menu emotion-6"
           >
             <li
               class=""
@@ -675,10 +696,10 @@ exports[`WebActionsContainer WebActionsContainer can render with redux loading (
       class="bp3-card bp3-elevation-0"
     >
       <div
-        class="emotion-3"
+        class="emotion-0"
       >
         <span
-          class="bp3-tag bp3-intent-primary bp3-large emotion-0"
+          class="bp3-tag bp3-intent-primary bp3-large emotion-1"
         >
           <span
             class="bp3-text-overflow-ellipsis bp3-fill"
@@ -687,12 +708,12 @@ exports[`WebActionsContainer WebActionsContainer can render with redux loading (
           </span>
         </span>
         <h3
-          class="bp3-heading bp3-skeleton emotion-1"
+          class="bp3-heading bp3-skeleton emotion-2"
         >
           AnotherSimpleWebAction
         </h3>
         <span
-          class="bp3-tag bp3-large emotion-2"
+          class="bp3-tag bp3-large emotion-3"
         >
           <span
             class="bp3-text-overflow-ellipsis bp3-fill"
@@ -706,13 +727,13 @@ exports[`WebActionsContainer WebActionsContainer can render with redux loading (
         </span>
       </div>
       <div
-        class="emotion-8"
+        class="emotion-4"
       >
         <div
           class="emotion-5"
         >
           <ul
-            class="bp3-menu emotion-4"
+            class="bp3-menu emotion-6"
           >
             <li
               class=""
@@ -816,7 +837,7 @@ exports[`WebActionsContainer WebActionsContainer can render with redux loading (
           class="emotion-5"
         >
           <ul
-            class="bp3-menu emotion-4"
+            class="bp3-menu emotion-6"
           >
             <li
               class=""
@@ -923,10 +944,10 @@ exports[`WebActionsContainer WebActionsContainer can render with redux loading (
       class="bp3-card bp3-elevation-0"
     >
       <div
-        class="emotion-3"
+        class="emotion-0"
       >
         <span
-          class="bp3-tag bp3-intent-primary bp3-large emotion-0"
+          class="bp3-tag bp3-intent-primary bp3-large emotion-1"
         >
           <span
             class="bp3-text-overflow-ellipsis bp3-fill"
@@ -935,12 +956,12 @@ exports[`WebActionsContainer WebActionsContainer can render with redux loading (
           </span>
         </span>
         <h3
-          class="bp3-heading bp3-skeleton emotion-1"
+          class="bp3-heading bp3-skeleton emotion-2"
         >
           AnotherSimpleWebAction
         </h3>
         <span
-          class="bp3-tag bp3-large emotion-2"
+          class="bp3-tag bp3-large emotion-3"
         >
           <span
             class="bp3-text-overflow-ellipsis bp3-fill"
@@ -954,13 +975,13 @@ exports[`WebActionsContainer WebActionsContainer can render with redux loading (
         </span>
       </div>
       <div
-        class="emotion-8"
+        class="emotion-4"
       >
         <div
           class="emotion-5"
         >
           <ul
-            class="bp3-menu emotion-4"
+            class="bp3-menu emotion-6"
           >
             <li
               class=""
@@ -1064,7 +1085,7 @@ exports[`WebActionsContainer WebActionsContainer can render with redux loading (
           class="emotion-5"
         >
           <ul
-            class="bp3-menu emotion-4"
+            class="bp3-menu emotion-6"
           >
             <li
               class=""
@@ -1171,10 +1192,10 @@ exports[`WebActionsContainer WebActionsContainer can render with redux loading (
       class="bp3-card bp3-elevation-0"
     >
       <div
-        class="emotion-3"
+        class="emotion-0"
       >
         <span
-          class="bp3-tag bp3-intent-primary bp3-large emotion-0"
+          class="bp3-tag bp3-intent-primary bp3-large emotion-1"
         >
           <span
             class="bp3-text-overflow-ellipsis bp3-fill"
@@ -1183,12 +1204,12 @@ exports[`WebActionsContainer WebActionsContainer can render with redux loading (
           </span>
         </span>
         <h3
-          class="bp3-heading bp3-skeleton emotion-1"
+          class="bp3-heading bp3-skeleton emotion-2"
         >
           AnotherSimpleWebAction
         </h3>
         <span
-          class="bp3-tag bp3-large emotion-2"
+          class="bp3-tag bp3-large emotion-3"
         >
           <span
             class="bp3-text-overflow-ellipsis bp3-fill"
@@ -1202,13 +1223,13 @@ exports[`WebActionsContainer WebActionsContainer can render with redux loading (
         </span>
       </div>
       <div
-        class="emotion-8"
+        class="emotion-4"
       >
         <div
           class="emotion-5"
         >
           <ul
-            class="bp3-menu emotion-4"
+            class="bp3-menu emotion-6"
           >
             <li
               class=""
@@ -1312,7 +1333,7 @@ exports[`WebActionsContainer WebActionsContainer can render with redux loading (
           class="emotion-5"
         >
           <ul
-            class="bp3-menu emotion-4"
+            class="bp3-menu emotion-6"
           >
             <li
               class=""

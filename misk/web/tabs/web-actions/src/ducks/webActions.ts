@@ -5,7 +5,7 @@ import {
   IRootState,
   ISimpleFormState,
   SimpleReduxSaga,
-  simpleSelectorGet
+  simpleSelectorGet,
 } from "@misk/simpleredux"
 import axios from "axios"
 import { HTTPMethod } from "http-method-enum"
@@ -20,7 +20,7 @@ import {
   padStart,
   reduce,
   size,
-  uniqueId
+  uniqueId,
 } from "lodash"
 import { all, call, put, takeLatest } from "redux-saga/effects"
 
@@ -30,7 +30,7 @@ export const enum TypescriptBaseTypes {
   "enum" = "enum",
   "null" = "null",
   "number" = "number",
-  "string" = "string"
+  "string" = "string",
 }
 
 export const enum ServerTypes {
@@ -45,7 +45,7 @@ export const enum ServerTypes {
   "JSON" = "JSON",
   "Long" = "Long",
   "Short" = "Short",
-  "String" = "String"
+  "String" = "String",
 }
 
 export interface IBaseFieldTypes {
@@ -60,7 +60,7 @@ export const BaseFieldTypes: IBaseFieldTypes = {
   [ServerTypes.Long]: TypescriptBaseTypes.number,
   [ServerTypes.ByteString]: TypescriptBaseTypes.string,
   [ServerTypes.String]: TypescriptBaseTypes.string,
-  [ServerTypes.Enum]: TypescriptBaseTypes.enum
+  [ServerTypes.Enum]: TypescriptBaseTypes.enum,
 }
 
 export interface IFieldTypeMetadata {
@@ -162,7 +162,7 @@ export const WebActionInternalLabel: { [key: string]: string } = {
   "Parameter Types": "parameterTypes",
   "Path Pattern": "pathPattern",
   "Request Type": "requestMediaTypes",
-  "Response Type": "responseMediaType"
+  "Response Type": "responseMediaType",
 }
 
 /**
@@ -176,7 +176,7 @@ export enum WEBACTIONS {
   SET_DIRTY_INPUT_FIELD = "WEBACTIONS_SET_DIRTY_INPUT_FIELD",
   UNSET_DIRTY_INPUT_FIELD = "WEBACTIONS_UNSET_DIRTY_INPUT_FIELD",
   SUCCESS = "WEBACTIONS_SUCCESS",
-  FAILURE = "WEBACTIONS_FAILURE"
+  FAILURE = "WEBACTIONS_FAILURE",
 }
 
 /**
@@ -240,7 +240,7 @@ export const dispatchWebActions: IDispatchWebActions = {
         loading: true,
         oldState,
         success: false,
-        webAction
+        webAction,
       }
     ),
 
@@ -248,13 +248,13 @@ export const dispatchWebActions: IDispatchWebActions = {
     createAction<WEBACTIONS.FAILURE, IWebActionsPayload>(WEBACTIONS.FAILURE, {
       ...error,
       loading: false,
-      success: false
+      success: false,
     }),
   webActionsMetadata: () =>
     createAction<WEBACTIONS.METADATA, IWebActionsPayload>(WEBACTIONS.METADATA, {
       error: null,
       loading: true,
-      success: false
+      success: false,
     }),
   webActionsRemove: (
     id: string,
@@ -269,7 +269,7 @@ export const dispatchWebActions: IDispatchWebActions = {
         loading: true,
         oldState,
         success: false,
-        webAction
+        webAction,
       }
     ),
   webActionsSetDirtyInput: (
@@ -286,7 +286,7 @@ export const dispatchWebActions: IDispatchWebActions = {
         loading: true,
         oldState,
         success: false,
-        webAction
+        webAction,
       }
     ),
   webActionsSuccess: (data: any) =>
@@ -294,7 +294,7 @@ export const dispatchWebActions: IDispatchWebActions = {
       ...data,
       error: null,
       loading: false,
-      success: true
+      success: true,
     }),
   webActionsUnsetDirtyInput: (
     id: string,
@@ -310,9 +310,9 @@ export const dispatchWebActions: IDispatchWebActions = {
         loading: true,
         oldState,
         success: false,
-        webAction
+        webAction,
       }
-    )
+    ),
 }
 
 /**
@@ -389,10 +389,7 @@ export interface IParseEnumType {
 }
 
 export const parseEnumType = (serverType: string): IParseEnumType => {
-  const enumType = serverType
-    .split("<")[1]
-    .split(">")[0]
-    .split(",")
+  const enumType = serverType.split("<")[1].split(">")[0].split(",")
   const enumClassName = enumType[0]
   const enumValues = enumType.slice(1)
   return { enumClassName, enumValues }
@@ -416,7 +413,7 @@ export const getFieldData = (
       idParent,
       name,
       repeated,
-      serverType
+      serverType,
     } = typesMetadata.get(id)
     const parent = typesMetadata.get(idParent)
     if (id === "0" && idChildren.size === 0) {
@@ -512,7 +509,7 @@ export const addRepeatedField = (
         {
           name: parentMetadata.name,
           repeated: false,
-          type: parentMetadata.serverType
+          type: parentMetadata.serverType,
         },
         types,
         newTypesMetadata,
@@ -533,12 +530,12 @@ function* handleAddRepeatedField(
     const { types, typesMetadata } = webActionMetadata[webActionIndex]
     const newWebAction = {
       ...webActionMetadata[webActionIndex],
-      typesMetadata: addRepeatedField(types, typesMetadata, parentId)
+      typesMetadata: addRepeatedField(types, typesMetadata, parentId),
     }
     webActionMetadata[webActionIndex] = newWebAction
     yield put(
       dispatchWebActions.webActionsSuccess({
-        metadata: webActionMetadata
+        metadata: webActionMetadata,
       })
     )
   } catch (e) {
@@ -590,12 +587,12 @@ function* handleRemoveRepeatedField(
     const newWebactionMetadata = webActionMetadata
     const newWebAction = {
       ...newWebactionMetadata[webActionIndex],
-      typesMetadata: removeRepeatedField(childId, typesMetadata)
+      typesMetadata: removeRepeatedField(childId, typesMetadata),
     }
     newWebactionMetadata[webActionIndex] = newWebAction
     yield put(
       dispatchWebActions.webActionsSuccess({
-        metadata: newWebactionMetadata
+        metadata: newWebactionMetadata,
       })
     )
   } catch (e) {
@@ -624,7 +621,7 @@ export const recursivelySetDirtyInput = (
   while (parent !== "0") {
     const {
       idChildren: parentChildren,
-      idParent: newParent
+      idParent: newParent,
     } = newTypesMetadata.get(parent)
     const otherDirtyInputChildren = parentChildren
       .map(
@@ -655,12 +652,12 @@ function* handleDirtyInputField(
     const { typesMetadata } = webActionMetadata[webActionIndex]
     const newWebAction = {
       ...webActionMetadata[webActionIndex],
-      typesMetadata: recursivelySetDirtyInput(id, typesMetadata, dirtyInput)
+      typesMetadata: recursivelySetDirtyInput(id, typesMetadata, dirtyInput),
     }
     webActionMetadata[webActionIndex] = newWebAction
     yield put(
       dispatchWebActions.webActionsSuccess({
-        metadata: webActionMetadata
+        metadata: webActionMetadata,
       })
     )
   } catch (e) {
@@ -704,7 +701,7 @@ export const buildTypeFieldMetadata = (
   name,
   repeated,
   serverType,
-  typescriptType
+  typescriptType,
 })
 
 const generateFieldTypesMetadata = (
@@ -943,7 +940,7 @@ export const processMetadata = (webActionMetadata: IWebActionAPI[]): any =>
         httpMethod: [action.httpMethod],
         function: action.function.split("fun ").pop(),
         nonAccessOrTypeFunctionAnnotations,
-        typesMetadata: generateTypesMetadata(action)
+        typesMetadata: generateTypesMetadata(action),
       }
     })
     .groupBy(groupByWebActionHash)
@@ -982,7 +979,7 @@ export function* watchWebActionsSagas(): SimpleReduxSaga {
     takeLatest(WEBACTIONS.SET_DIRTY_INPUT_FIELD, handleDirtyInputField),
     takeLatest(WEBACTIONS.UNSET_DIRTY_INPUT_FIELD, handleDirtyInputField),
     takeLatest(WEBACTIONS.REMOVE_REPEATED_FIELD, handleRemoveRepeatedField),
-    takeLatest(WEBACTIONS.METADATA, handleMetadata)
+    takeLatest(WEBACTIONS.METADATA, handleMetadata),
   ])
 }
 

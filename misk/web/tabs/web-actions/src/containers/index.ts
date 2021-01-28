@@ -12,5 +12,5 @@ export {
   SendRequestCollapseContainer,
   TabContainer,
   WebActionCardContainer,
-  WebActionsContainer
+  WebActionsContainer,
 }
