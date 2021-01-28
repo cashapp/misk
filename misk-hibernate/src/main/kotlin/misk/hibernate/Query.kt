@@ -59,6 +59,8 @@ interface Query<T> {
 
   fun <T : Query<*>> newOrBuilder(): OrBuilder<T>
 
+  fun <Q : Query<*>> clone(): Q
+
   /** Creates instances of queries. */
   interface Factory {
     fun <Q : Query<*>> newQuery(queryClass: KClass<Q>): Q

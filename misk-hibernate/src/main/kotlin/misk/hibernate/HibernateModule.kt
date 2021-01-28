@@ -1,10 +1,8 @@
 package misk.hibernate
 
-import io.opentracing.Tracer
-import io.prometheus.client.CollectorRegistry
+import com.google.inject.Injector
 import misk.ServiceModule
 import misk.concurrent.ExecutorServiceFactory
-import misk.environment.Environment
 import misk.healthchecks.HealthCheck
 import misk.hibernate.ReflectionQuery.QueryLimitsConfig
 import misk.inject.KAbstractModule
@@ -12,24 +10,23 @@ import misk.inject.asSingleton
 import misk.inject.keyOf
 import misk.inject.setOfType
 import misk.inject.toKey
+import misk.inject.typeLiteral
 import misk.jdbc.DataSourceClusterConfig
 import misk.jdbc.DataSourceConfig
-import misk.jdbc.DataSourceConnector
 import misk.jdbc.DataSourceDecorator
 import misk.jdbc.DataSourceService
 import misk.jdbc.DataSourceType
 import misk.jdbc.DatabasePool
-import misk.jdbc.PingDatabaseService
+import misk.jdbc.JdbcModule
 import misk.jdbc.RealDatabasePool
-import misk.jdbc.SpanInjector
-import misk.metrics.Metrics
-import misk.resources.ResourceLoader
-import misk.database.StartDatabaseService
+import misk.jdbc.SchemaMigratorService
 import misk.web.exceptions.ExceptionMapperModule
 import org.hibernate.SessionFactory
 import org.hibernate.event.spi.EventType
 import org.hibernate.exception.ConstraintViolationException
 import java.time.Clock
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.ScheduledExecutorService
 import javax.inject.Inject
 import javax.inject.Provider
 import javax.persistence.OptimisticLockException
@@ -82,18 +79,11 @@ class HibernateModule(
       }
     }
 
+    install(JdbcModule(qualifier, config, readerQualifier, readerConfig, databasePool))
+
     bind<Query.Factory>().to<ReflectionQuery.Factory>()
     bind<QueryLimitsConfig>()
         .toInstance(QueryLimitsConfig(MAX_MAX_ROWS, ROW_COUNT_ERROR_LIMIT, ROW_COUNT_WARNING_LIMIT))
-
-    // Bind StartVitessService.
-    install(ServiceModule<StartDatabaseService>(qualifier))
-    bind(keyOf<StartDatabaseService>(qualifier)).toProvider(object : Provider<StartDatabaseService> {
-      @Inject lateinit var environment: Environment
-      override fun get(): StartDatabaseService {
-        return StartDatabaseService(environment = environment, config = config, qualifier = qualifier)
-      }
-    }).asSingleton()
 
     bindDataSource(qualifier, config, true)
     if (readerQualifier != null && readerConfig != null) {
@@ -102,54 +92,50 @@ class HibernateModule(
 
     newMultibinder<DataSourceDecorator>(qualifier)
 
-    val schemaMigratorKey = SchemaMigrator::class.toKey(qualifier)
-    val schemaMigratorProvider = getProvider(schemaMigratorKey)
     val transacterKey = Transacter::class.toKey(qualifier)
-    val transacterProvider = getProvider(transacterKey)
-    val connectorProvider = getProvider(keyOf<DataSourceConnector>(qualifier))
     val sessionFactoryProvider = getProvider(keyOf<SessionFactory>(qualifier))
     val readerSessionFactoryProvider =
         if (readerQualifier != null) getProvider(keyOf<SessionFactory>(readerQualifier)) else null
 
-    bind(schemaMigratorKey).toProvider(object : Provider<SchemaMigrator> {
-      @Inject lateinit var resourceLoader: ResourceLoader
-      override fun get(): SchemaMigrator = SchemaMigrator(
-          qualifier = qualifier,
-          resourceLoader = resourceLoader,
-          transacter = transacterProvider,
-          connector = connectorProvider.get()
-      )
-    }).asSingleton()
-
-    val schemaMigratorServiceKey = keyOf<SchemaMigratorService>(qualifier)
-    bind(schemaMigratorServiceKey)
-        .toProvider(object : Provider<SchemaMigratorService> {
-          @Inject lateinit var environment: Environment
-          override fun get(): SchemaMigratorService = SchemaMigratorService(
-              qualifier = qualifier,
-              environment = environment,
-              schemaMigratorProvider = schemaMigratorProvider,
-              connectorProvider = connectorProvider
-          )
-        }).asSingleton()
-
     install(ServiceModule<SchemaMigratorService>(qualifier)
         .dependsOn<DataSourceService>(qualifier))
 
-    multibind<HealthCheck>().to(schemaMigratorServiceKey)
-
     bind(transacterKey).toProvider(object : Provider<Transacter> {
       @Inject lateinit var executorServiceFactory: ExecutorServiceFactory
-      @com.google.inject.Inject(optional = true) val tracer: Tracer? = null
+      @Inject lateinit var injector: Injector
       override fun get(): RealTransacter = RealTransacter(
           qualifier = qualifier,
           sessionFactoryProvider = sessionFactoryProvider,
           readerSessionFactoryProvider = readerSessionFactoryProvider,
           config = config,
           executorServiceFactory = executorServiceFactory,
-          tracer = tracer
+          hibernateEntities = injector.findBindingsByType(HibernateEntity::class.typeLiteral()).map {
+            it.provider.get()
+          }.toSet()
       )
     }).asSingleton()
+
+    /**
+     * Reader transacter is only supported for MySQL for now. TiDB and Vitess replica read works
+     * a bit differently than MySQL.
+     */
+    if (readerQualifier != null && config.type == DataSourceType.MYSQL) {
+      val readerTransacterKey = Transacter::class.toKey(readerQualifier)
+      bind(readerTransacterKey).toProvider(object : Provider<Transacter> {
+        @Inject lateinit var executorServiceFactory: ExecutorServiceFactory
+        @Inject lateinit var injector: Injector
+        override fun get(): Transacter = RealTransacter(
+            qualifier = readerQualifier,
+            sessionFactoryProvider = readerSessionFactoryProvider!!,
+            readerSessionFactoryProvider = readerSessionFactoryProvider,
+            config = config,
+            executorServiceFactory = executorServiceFactory,
+            hibernateEntities = injector.findBindingsByType(HibernateEntity::class.typeLiteral()).map {
+              it.provider.get()
+            }.toSet()
+        ).readOnly()
+      }).asSingleton()
+    }
 
     // Install other modules.
     install(object : HibernateEntityModule(qualifier) {
@@ -175,54 +161,17 @@ class HibernateModule(
 
     // These items are configured on the writer qualifier only
     val entitiesProvider = getProvider(setOfType(HibernateEntity::class).toKey(this.qualifier))
-    val dataSourceDecoratorsKey = setOfType(DataSourceDecorator::class).toKey(this.qualifier)
-    val eventListenersProvider = getProvider(setOfType(ListenerRegistration::class).toKey(this.qualifier))
+    val eventListenersProvider =
+        getProvider(setOfType(ListenerRegistration::class).toKey(this.qualifier))
 
-    val environmentProvider: Provider<Environment> = getProvider(keyOf<Environment>())
     val sessionFactoryProvider = getProvider(keyOf<SessionFactory>(qualifier))
-
-    bind(keyOf<DataSourceConfig>(qualifier)).toInstance(config)
-
-    // Bind PingDatabaseService.
-    bind(keyOf<PingDatabaseService>(qualifier)).toProvider(Provider {
-      PingDatabaseService(config, environmentProvider.get())
-    }).asSingleton()
-    // TODO(rhall): depending on Vitess is a hack to simulate Vitess has already been started in the
-    // env. This is to remove flakiness in tests that are not waiting until Vitess is ready.
-    // This should be replaced with an ExternalDependency that manages vitess.
-    // TODO(jontirsen): I don't think this is needed anymore...
-    install(ServiceModule<PingDatabaseService>(qualifier)
-        .dependsOn<StartDatabaseService>(this.qualifier))
-
-    // Bind DataSourceService.
-    val dataSourceDecoratorsProvider = getProvider(dataSourceDecoratorsKey)
-    bind(keyOf<DataSource>(qualifier))
-        .toProvider(keyOf<DataSourceService>(qualifier))
-        .asSingleton()
-    bind(keyOf<DataSourceService>(qualifier)).toProvider(object : Provider<DataSourceService> {
-      @com.google.inject.Inject(optional = true) var registry: CollectorRegistry? = null
-      override fun get(): DataSourceService {
-        return DataSourceService(
-            qualifier = qualifier,
-            baseConfig = config,
-            environment = environmentProvider.get(),
-            dataSourceDecorators = dataSourceDecoratorsProvider.get(),
-            databasePool = databasePool,
-            // TODO provide metrics to the reader pool but need a different metric key prefix
-            collectorRegistry = if (isWriter) registry else null
-        )
-      }
-    }).asSingleton()
-    val dataSourceServiceProvider = getProvider(keyOf<DataSourceService>(qualifier))
-    bind(keyOf<DataSourceConnector>(qualifier)).toProvider(dataSourceServiceProvider)
-    install(ServiceModule<DataSourceService>(qualifier)
-        .dependsOn<PingDatabaseService>(qualifier))
 
     val sessionFactoryServiceProvider = getProvider(keyOf<SessionFactoryService>(qualifier))
 
     // Bind SessionFactoryService as implementation of TransacterService.
     val hibernateInjectorAccessProvider = getProvider(HibernateInjectorAccess::class.java)
     val dataSourceProvider = getProvider(keyOf<DataSource>(qualifier))
+    val dataSourceServiceProvider = getProvider(keyOf<DataSourceService>(qualifier))
 
     bind(keyOf<SessionFactory>(qualifier))
         .toProvider(keyOf<SessionFactoryService>(qualifier))
@@ -246,18 +195,6 @@ class HibernateModule(
     } else {
       install(ServiceModule<TransacterService>(qualifier)
           .dependsOn<DataSourceService>(qualifier))
-    }
-
-    if (config.type == DataSourceType.VITESS_MYSQL) {
-      val spanInjectorDecoratorKey = SpanInjector::class.toKey(qualifier)
-      bind(spanInjectorDecoratorKey)
-          .toProvider(object : Provider<SpanInjector> {
-            @com.google.inject.Inject(optional = true)
-            var tracer: Tracer? = null
-
-            override fun get(): SpanInjector =
-                SpanInjector(tracer, config)
-          }).asSingleton()
     }
 
     val healthCheckKey = keyOf<HealthCheck>(qualifier)

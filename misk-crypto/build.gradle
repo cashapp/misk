@@ -1,8 +1,20 @@
 dependencies {
-  compile dep.tink
-  compile project(':misk')
+  implementation dep.guice
+  implementation dep.okio
+  implementation dep.moshiCore
+  implementation dep.moshiKotlin
+  implementation dep.moshiAdapters
+  implementation dep.bouncycastlePgp
+  implementation dep.tink
+  implementation dep.awsS3
+  implementation dep.loggingApi
+  implementation project(':misk')
+  implementation project(':misk-core')
+  implementation project(':misk-inject')
 
-  testCompile project(':misk-testing')
+  testImplementation dep.assertj
+  testImplementation dep.logbackClassic
+  testImplementation project(':misk-testing')
 }
 
 afterEvaluate { project ->
@@ -11,3 +23,5 @@ afterEvaluate { project ->
     outputFormat = 'gfm'
   }
 }
+
+apply from: "$rootDir/gradle-mvn-publish.gradle"

@@ -43,20 +43,54 @@ internal class RequestLoggingInterceptorTest {
   }
 
   @Test
-  fun includesBody() {
-    assertThat(invoke("/call/includeBodyRequestLogging/hello", "caller").isSuccessful).isTrue()
-    val messages = logCollector.takeMessages(RequestLoggingInterceptor::class)
-    assertThat(messages).containsExactly(
-      "IncludeBodyRequestLoggingAction principal=caller time=100.0 ms code=200 request=[hello] response=echo: hello"
+  fun rateLimiting_includesBody() {
+    fakeRandom.nextDouble = 0.1
+    assertThat(invoke("/call/rateLimitingIncludesBodyRequestLogging/hello", "caller").isSuccessful).isTrue()
+    assertThat(logCollector.takeMessages(RequestLoggingInterceptor::class)).containsExactly(
+      "RateLimitingIncludesBodyRequestLoggingAction principal=caller time=100.0 ms code=200 request=[hello] response=echo: hello"
+    )
+
+    // Setting to low value to show that even though it is less than the bodySampling value in the
+    // LogRequestResponse, because the LogRateLimiter does not acquire a bucket, the request and
+    // response bodies are also not logged
+    fakeRandom.nextDouble = 0.01
+    assertThat(invoke("/call/rateLimitingIncludesBodyRequestLogging/hello2", "caller").isSuccessful).isTrue()
+    assertThat(logCollector.takeMessages(RequestLoggingInterceptor::class)).isEmpty()
+
+    fakeTicker.advance(1, TimeUnit.SECONDS)
+
+    fakeRandom.nextDouble = 0.2
+    assertThat(invoke("/call/rateLimitingIncludesBodyRequestLogging/hello3", "caller").isSuccessful).isTrue()
+    assertThat(logCollector.takeMessages(RequestLoggingInterceptor::class)).containsExactly(
+      "RateLimitingIncludesBodyRequestLoggingAction principal=caller time=100.0 ms code=200 request=[hello3] response=echo: hello3"
+    )
+
+    fakeTicker.advance(1, TimeUnit.SECONDS)
+
+    // The random value exceeds the bodySampling value on the annotation, so request and response
+    // bodies are not logged even though the LogRateLimiter acquires a bucket
+    fakeRandom.nextDouble = 0.6
+    assertThat(invoke("/call/rateLimitingIncludesBodyRequestLogging/hello4", "caller").isSuccessful).isTrue()
+    assertThat(logCollector.takeMessages(RequestLoggingInterceptor::class)).containsExactly(
+      "RateLimitingIncludesBodyRequestLoggingAction principal=caller time=100.0 ms code=200"
     )
   }
 
   @Test
-  fun excludesBody() {
-    assertThat(invoke("/call/excludeBodyRequestLogging/hello", "caller").isSuccessful).isTrue()
-    val messages = logCollector.takeMessages(RequestLoggingInterceptor::class)
-    assertThat(messages).containsExactly(
-      "ExcludeBodyRequestLoggingAction principal=caller time=100.0 ms code=200"
+  fun rateLimiting_excludesBody() {
+    assertThat(invoke("/call/rateLimitingRequestLogging/hello", "caller").isSuccessful).isTrue()
+    assertThat(logCollector.takeMessages(RequestLoggingInterceptor::class)).containsExactly(
+      "RateLimitingRequestLoggingAction principal=caller time=100.0 ms code=200"
+    )
+
+    assertThat(invoke("/call/rateLimitingRequestLogging/hello2", "caller").isSuccessful).isTrue()
+    assertThat(logCollector.takeMessages(RequestLoggingInterceptor::class)).isEmpty()
+
+    fakeTicker.advance(1, TimeUnit.SECONDS)
+
+    assertThat(invoke("/call/rateLimitingRequestLogging/hello3", "caller").isSuccessful).isTrue()
+    assertThat(logCollector.takeMessages(RequestLoggingInterceptor::class)).containsExactly(
+      "RateLimitingRequestLoggingAction principal=caller time=100.0 ms code=200"
     )
   }
 
@@ -70,17 +104,15 @@ internal class RequestLoggingInterceptorTest {
   }
 
   @Test
-  fun notSampled() {
+  fun noRateLimiting() {
     fakeRandom.nextDouble = 0.7
-    assertThat(invoke("/call/sampledRequestLogging/hello", "caller").isSuccessful).isTrue()
-    assertThat(logCollector.takeMessages(RequestLoggingInterceptor::class)).isEmpty()
-  }
-
-  @Test
-  fun sampled() {
-    fakeRandom.nextDouble = 0.2
-    assertThat(invoke("/call/sampledRequestLogging/hello", "caller").isSuccessful).isTrue()
-    assertThat(logCollector.takeMessages(RequestLoggingInterceptor::class)).isNotEmpty()
+    for (i in 0..10) {
+      assertThat(invoke("/call/noRateLimitingRequestLogging/hello", "caller").isSuccessful).isTrue()
+      val messages = logCollector.takeMessages(RequestLoggingInterceptor::class)
+      assertThat(messages).containsExactly(
+        "NoRateLimitingRequestLoggingAction principal=caller time=100.0 ms code=200"
+      )
+    }
   }
 
   @Test
@@ -101,19 +133,27 @@ internal class RequestLoggingInterceptorTest {
     return httpClient.newCall(request.build()).execute()
   }
 
-  internal class IncludeBodyRequestLoggingAction @Inject constructor() : WebAction {
-    @Get("/call/includeBodyRequestLogging/{message}")
+  internal class RateLimitingRequestLoggingAction @Inject constructor() : WebAction {
+    @Get("/call/rateLimitingRequestLogging/{message}")
     @Unauthenticated
     @ResponseContentType(MediaTypes.APPLICATION_JSON)
-    @LogRequestResponse(sampling = 1.0, includeBody = true)
+    @LogRequestResponse(ratePerSecond = 1L, errorRatePerSecond = 2L)
     fun call(@PathParam message: String) = "echo: $message"
   }
 
-  internal class ExcludeBodyRequestLoggingAction @Inject constructor() : WebAction {
-    @Get("/call/excludeBodyRequestLogging/{message}")
+  internal class RateLimitingIncludesBodyRequestLoggingAction @Inject constructor() : WebAction {
+    @Get("/call/rateLimitingIncludesBodyRequestLogging/{message}")
     @Unauthenticated
     @ResponseContentType(MediaTypes.APPLICATION_JSON)
-    @LogRequestResponse(sampling = 1.0, includeBody = false)
+    @LogRequestResponse(ratePerSecond = 1L, errorRatePerSecond = 2L, bodySampling = 0.5, errorBodySampling = 1.0)
+    fun call(@PathParam message: String) = "echo: $message"
+  }
+
+  internal class NoRateLimitingRequestLoggingAction @Inject constructor() : WebAction {
+    @Get("/call/noRateLimitingRequestLogging/{message}")
+    @Unauthenticated
+    @ResponseContentType(MediaTypes.APPLICATION_JSON)
+    @LogRequestResponse(ratePerSecond = 0L, errorRatePerSecond = 0L, bodySampling = 0.5, errorBodySampling = 0.5)
     fun call(@PathParam message: String) = "echo: $message"
   }
 
@@ -121,16 +161,8 @@ internal class RequestLoggingInterceptorTest {
     @Get("/call/exceptionThrowingRequestLogging/{message}")
     @Unauthenticated
     @ResponseContentType(MediaTypes.APPLICATION_JSON)
-    @LogRequestResponse(sampling = 1.0, includeBody = true)
+    @LogRequestResponse(ratePerSecond = 1L, errorRatePerSecond = 2L, bodySampling = 0.1, errorBodySampling = 1.0)
     fun call(@PathParam message: String): String = throw IllegalStateException(message)
-  }
-
-  internal class SampledRequestLoggingAction @Inject constructor() : WebAction {
-    @Get("/call/sampledRequestLogging/{message}")
-    @Unauthenticated
-    @ResponseContentType(MediaTypes.APPLICATION_JSON)
-    @LogRequestResponse(sampling = 0.4, includeBody = true)
-    fun call(@PathParam message: String) = "echo: $message"
   }
 
   internal class NoRequestLoggingAction @Inject constructor() : WebAction {
@@ -146,14 +178,17 @@ internal class RequestLoggingInterceptorTest {
       install(WebTestingModule())
       install(LogCollectorModule())
       multibind<MiskCallerAuthenticator>().to<FakeCallerAuthenticator>()
-      install(
-        WebActionModule.create<IncludeBodyRequestLoggingAction>())
-      install(
-        WebActionModule.create<ExcludeBodyRequestLoggingAction>())
-      install(
-        WebActionModule.create<ExceptionThrowingRequestLoggingAction>())
+      install(TestActionsModule())
+    }
+  }
+
+  class TestActionsModule : KAbstractModule() {
+    override fun configure() {
+      install(WebActionModule.create<RateLimitingRequestLoggingAction>())
+      install(WebActionModule.create<RateLimitingIncludesBodyRequestLoggingAction>())
+      install(WebActionModule.create<NoRateLimitingRequestLoggingAction>())
+      install(WebActionModule.create<ExceptionThrowingRequestLoggingAction>())
       install(WebActionModule.create<NoRequestLoggingAction>())
-      install(WebActionModule.create<SampledRequestLoggingAction>())
     }
   }
 }

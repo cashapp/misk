@@ -10,13 +10,14 @@ import java.lang.reflect.Type
 import javax.inject.Inject
 
 /** Json marshaling for Wire messages, correctly using Builders to construct properly formed type */
+@Deprecated("Use WireJsonAdapterFactory instead")
 internal class WireMessageAdapter(
   messageType: Class<Message<*, *>>,
   moshi: Moshi
 ) : JsonAdapter<Any?>() {
   @Suppress("UNCHECKED_CAST")
   private val builderType = try {
-    Class.forName("${messageType.name}\$Builder")
+    Class.forName("${messageType.name}\$Builder", true, messageType.classLoader)
   } catch (e: ClassNotFoundException) {
     throw AssertionError("no builder for ${messageType.name}")
   } as Class<Message.Builder<*, *>>

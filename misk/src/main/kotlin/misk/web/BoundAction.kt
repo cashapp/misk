@@ -7,10 +7,10 @@ import misk.scope.ActionScope
 import misk.security.authz.AccessInterceptor
 import misk.web.actions.WebAction
 import misk.web.actions.asChain
-import misk.web.metadata.WebActionMetadata
 import misk.web.mediatype.MediaRange
 import misk.web.mediatype.MediaTypes
 import misk.web.mediatype.compareTo
+import misk.web.metadata.webaction.WebActionMetadata
 import okhttp3.HttpUrl
 import okhttp3.MediaType
 import java.util.regex.Matcher
@@ -219,7 +219,7 @@ private class RequestBridgeInterceptor(
     val arguments = webActionBinding.beforeCall(chain.webAction, httpCall, pathMatcher)
 
     val applicationChain = chain.webAction.asChain(
-        chain.action.function, arguments, applicationInterceptors)
+        chain.action.function, arguments, applicationInterceptors, httpCall)
 
     var returnValue = applicationChain.proceed(applicationChain.args)
 

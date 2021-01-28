@@ -7,11 +7,14 @@ import com.google.crypto.tink.HybridEncrypt
 import com.google.crypto.tink.Mac
 import com.google.crypto.tink.PublicKeySign
 import com.google.crypto.tink.PublicKeyVerify
+import com.google.crypto.tink.StreamingAead
 import com.google.inject.ConfigurationException
 import com.google.inject.Inject
 import com.google.inject.Injector
 import com.google.inject.Key
 import com.google.inject.name.Names
+import misk.crypto.pgp.PgpDecrypter
+import misk.crypto.pgp.PgpEncrypter
 import java.security.GeneralSecurityException
 import javax.inject.Singleton
 
@@ -63,7 +66,7 @@ class AeadKeyManager @Inject internal constructor(
  * ```
  * val myKey: DeterministicAead = deterministicAeadKeyManager["myKey"]
  * ```
- * Note, that DeterministicAead objects do not provide secrecy to the same level as AEAD do, since
+ * Note that DeterministicAead objects do not provide secrecy to the same level as AEAD do, since
  * multiple plaintexts encrypted with the same key will produce identical ciphertext. This behavior
  * is desirable when querying data via its ciphertext (i.e. equality will hold), but an attacker can
  * detect repeated plaintexts.
@@ -152,3 +155,46 @@ class KeyNotFoundException(
   message: String? = null,
   cause: Throwable? = null
 ) : GeneralSecurityException(message, cause)
+
+/**
+ * Holds a map of every [StreamingAead] key name to its primitive listed in the configuration for this app.
+ *
+ * Users may use this object to obtain an [StreamingAead] dynamically:
+ * ```
+ * val myKey: StreamingAead = streamingAeadKeyManager["myKey"]
+ * ```
+ * Note: [StreamingAead] is useful when the data to be encrypted is too large to be processed in a single step.
+ * Typical use cases include encryption of large files or encryption of live data streams
+ */
+@Singleton
+class StreamingAeadKeyManager @Inject constructor(
+  injector: Injector
+) : MappedKeyManager<StreamingAead>(injector, StreamingAead::class.java)
+
+/**
+ * Holds a map of every [PgpEncrypter] key name to its primitive listed in the
+ * configuration for this app.
+ *
+ * * Users may use this object to obtain an [PgpEncrypter] dynamically:
+ * ```
+ * val myKey: PgpEncrypter = pgpEncrypterManager["myKey"]
+ * ```
+ */
+@Singleton
+class PgpEncrypterManager @Inject constructor(
+  injector: Injector
+) : MappedKeyManager<PgpEncrypter>(injector, PgpEncrypter::class.java)
+
+/**
+ * Holds a map of every [PgpDecrypter] key name to its primitive listed in the
+ * configuration for this app.
+ *
+ * * Users may use this object to obtain an [PgpDecrypter] dynamically:
+ * ```
+ * val myKey: PgpDecrypter = pgpDecrypterManager["myKey"]
+ * ```
+ */
+@Singleton
+class PgpDecrypterManager @Inject constructor(
+  injector: Injector
+) : MappedKeyManager<PgpDecrypter>(injector, PgpDecrypter::class.java)

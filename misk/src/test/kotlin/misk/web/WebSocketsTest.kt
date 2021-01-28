@@ -51,7 +51,7 @@ internal class WebSocketsTest {
   @Singleton
   class EchoWebSocket @Inject constructor() : WebAction {
     @ConnectWebSocket("/echo")
-    @LogRequestResponse(sampling = 1.0, includeBody = true)
+    @LogRequestResponse(bodySampling = 1.0, errorBodySampling = 1.0)
     fun echo(@Suppress("UNUSED_PARAMETER") webSocket: WebSocket): WebSocketListener {
       return object : WebSocketListener() {
         override fun onMessage(webSocket: WebSocket, text: String) {

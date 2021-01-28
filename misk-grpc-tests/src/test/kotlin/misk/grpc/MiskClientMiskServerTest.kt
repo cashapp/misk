@@ -4,6 +4,7 @@ import com.google.inject.util.Modules
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.runBlocking
 import misk.grpc.miskclient.MiskGrpcClientModule
+import misk.grpc.miskclient.RouteGuideCallCounter
 import misk.grpc.miskserver.RouteChatGrpcAction
 import misk.grpc.miskserver.RouteGuideMiskServiceModule
 import misk.logging.LogCollector
@@ -31,6 +32,7 @@ class MiskClientMiskServerTest {
   @Inject lateinit var routeGuideProvider: Provider<RouteGuideClient>
   @Inject lateinit var logCollector: LogCollector
   @Inject lateinit var routeChatGrpcAction: RouteChatGrpcAction
+  @Inject lateinit var callCounter: RouteGuideCallCounter
 
   @Test
   fun requestResponse() {
@@ -54,6 +56,8 @@ class MiskClientMiskServerTest {
     assertThat(logCollector.takeMessages(RequestLoggingInterceptor::class)).containsExactly(
       "GetFeatureGrpcAction principal=unknown time=0.000 ns code=200 request=[Point{latitude=43, longitude=-80}] response=Feature{name=maple tree, location=Point{latitude=43, longitude=-80}}"
     )
+    assertThat(callCounter.actionNameToCount["default.GetFeature"]!!.get()).isEqualTo(1)
+    assertThat(callCounter.actionNameToCount["default.RouteChat"]!!.get()).isEqualTo(0)
   }
 
   @Test
@@ -73,6 +77,8 @@ class MiskClientMiskServerTest {
     assertThat(logCollector.takeMessages(RequestLoggingInterceptor::class)).containsExactly(
       "RouteChatGrpcAction principal=unknown time=0.000 ns code=200 request=[GrpcMessageSource, GrpcMessageSink] response=kotlin.Unit"
     )
+    assertThat(callCounter.actionNameToCount["default.GetFeature"]!!.get()).isEqualTo(0)
+    assertThat(callCounter.actionNameToCount["default.RouteChat"]!!.get()).isEqualTo(1)
   }
 
   @Test

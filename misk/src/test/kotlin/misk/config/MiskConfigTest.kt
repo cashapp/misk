@@ -58,7 +58,7 @@ class MiskConfigTest {
     }
 
     assertThat(exception).hasMessageContaining("could not find configuration files -" +
-        " checked [missing-common.yaml, missing-testing.yaml]")
+        " checked [classpath:/missing-common.yaml, classpath:/missing-testing.yaml]")
   }
 
   @Test
@@ -77,7 +77,7 @@ class MiskConfigTest {
       MiskConfig.load<TestConfig>("unparsable", defaultEnv)
     }
 
-    assertThat(exception).hasMessageContaining("could not parse unparsable-common.yaml")
+    assertThat(exception).hasMessageContaining("could not parse classpath:/unparsable-common.yaml")
   }
 
   @Test
@@ -106,8 +106,8 @@ class MiskConfigTest {
         .map { File(it.file) }
 
     val config = MiskConfig.load<TestConfig>("test_app", defaultEnv, overrides)
-    assertThat(config.consumer_a).isEqualTo(ConsumerConfig(14, 1))
-    assertThat(config.consumer_b).isEqualTo(ConsumerConfig(34, 79))
+    assertThat(config.consumer_a).isEqualTo(ConsumerConfig(14, 27))
+    assertThat(config.consumer_b).isEqualTo(ConsumerConfig(34, 122))
   }
 
   @Test
@@ -129,7 +129,7 @@ class MiskConfigTest {
       .map { File(it.file) }
 
     val config = MiskConfig.load<TestConfig>("test_app", defaultEnv, overrides)
-    assertThat(config.consumer_a).isEqualTo(ConsumerConfig(14, 1))
+    assertThat(config.consumer_a).isEqualTo(ConsumerConfig(14, 27))
     assertThat(config.consumer_b).isEqualTo(ConsumerConfig(34, 79))
   }
 

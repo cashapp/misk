@@ -1,5 +1,6 @@
 package misk.hibernate
 
+import misk.vitess.Shard
 import java.io.Serializable
 
 /** Type-safe persistent identifier, mapped to a long column. */

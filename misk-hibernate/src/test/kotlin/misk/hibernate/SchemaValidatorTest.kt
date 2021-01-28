@@ -1,26 +1,26 @@
 package misk.hibernate
 
-import io.opentracing.Tracer
+import com.google.inject.Injector
 import misk.MiskTestingServiceModule
 import misk.ServiceModule
 import misk.concurrent.ExecutorServiceFactory
 import misk.config.Config
 import misk.config.MiskConfig
 import misk.environment.Environment
+import misk.environment.EnvironmentModule
 import misk.inject.KAbstractModule
 import misk.inject.asSingleton
 import misk.inject.keyOf
 import misk.inject.setOfType
 import misk.inject.toKey
+import misk.inject.typeLiteral
 import misk.jdbc.DataSourceConfig
 import misk.jdbc.DataSourceConnector
 import misk.jdbc.DataSourceService
-import misk.jdbc.PingDatabaseService
-import misk.jdbc.RealDatabasePool
-import misk.resources.ResourceLoader
+import misk.jdbc.JdbcModule
+import misk.jdbc.SchemaMigratorService
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
-import misk.database.StartDatabaseService
 import okio.ByteString
 import org.assertj.core.api.Assertions.assertThat
 import org.hibernate.SessionFactory
@@ -47,53 +47,38 @@ internal class SchemaValidatorTest {
 
   inner class TestModule : KAbstractModule() {
     override fun configure() {
+      install(EnvironmentModule(Environment.TESTING))
       install(MiskTestingServiceModule())
 
       val qualifier = ValidationDb::class
 
-      val dataSourceService = DataSourceService(
-          qualifier = qualifier,
-          baseConfig = config.data_source,
-          environment = Environment.TESTING,
-          dataSourceDecorators = emptySet(),
-          databasePool = RealDatabasePool
-      )
-
       val injectorServiceProvider = getProvider(HibernateInjectorAccess::class.java)
-
       val entitiesProvider = getProvider(setOfType(HibernateEntity::class).toKey(qualifier))
 
       val sessionFactoryProvider = getProvider(keyOf<SessionFactory>(qualifier))
       bind<SessionFactory>()
-          .annotatedWith<ValidationDb>()
-          .toProvider(keyOf<SessionFactoryService>(qualifier))
+        .annotatedWith<ValidationDb>()
+        .toProvider(keyOf<SessionFactoryService>(qualifier))
 
-      val transacterProvider = getProvider(keyOf<Transacter>(qualifier))
       bind(keyOf<Transacter>(qualifier)).toProvider(object : Provider<Transacter> {
         @Inject lateinit var executorServiceFactory: ExecutorServiceFactory
-        @com.google.inject.Inject(optional = true) val tracer: Tracer? = null
+        @Inject lateinit var injector: Injector
         override fun get(): RealTransacter = RealTransacter(
-            qualifier = qualifier,
-            sessionFactoryProvider = sessionFactoryProvider,
-            readerSessionFactoryProvider = null,
-            config = config.data_source,
-            executorServiceFactory = executorServiceFactory,
-            tracer = tracer
+          qualifier = qualifier,
+          sessionFactoryProvider = sessionFactoryProvider,
+          readerSessionFactoryProvider = null,
+          config = config.data_source,
+          executorServiceFactory = executorServiceFactory,
+          hibernateEntities = injector.findBindingsByType(HibernateEntity::class.typeLiteral())
+            .map {
+              it.provider.get()
+            }.toSet()
         )
       }).asSingleton()
 
-      val schemaMigratorProvider = getProvider(keyOf<SchemaMigrator>(qualifier))
+      install(JdbcModule(qualifier, config.data_source))
+
       val connectorProvider = getProvider(keyOf<DataSourceConnector>(qualifier))
-
-      bind(keyOf<SchemaMigrator>(qualifier)).toProvider(object : Provider<SchemaMigrator> {
-        @Inject lateinit var resourceLoader: ResourceLoader
-        override fun get(): SchemaMigrator = SchemaMigrator(
-            qualifier = qualifier,
-            resourceLoader = resourceLoader,
-            transacter = transacterProvider,
-            connector = connectorProvider.get()
-        )
-      }).asSingleton()
 
       install(object : HibernateEntityModule(qualifier) {
         override fun configureHibernate() {
@@ -105,44 +90,22 @@ internal class SchemaValidatorTest {
         }
       })
 
-      install(ServiceModule<StartDatabaseService>(qualifier))
-      bind(keyOf<StartDatabaseService>(qualifier))
-          .toInstance(StartDatabaseService(qualifier, Environment.TESTING, config.data_source))
-
-      install(ServiceModule<PingDatabaseService>(qualifier)
-          .dependsOn<StartDatabaseService>(qualifier))
-      bind(keyOf<PingDatabaseService>(qualifier))
-          .toInstance(PingDatabaseService(config.data_source, Environment.TESTING))
-
-      install(ServiceModule<DataSourceService>(qualifier)
-          .dependsOn<PingDatabaseService>(qualifier))
-      bind(keyOf<DataSourceService>(qualifier)).toInstance(dataSourceService)
-      bind(keyOf<DataSource>(qualifier)).toProvider(dataSourceService)
-
-      bind(keyOf<DataSourceConnector>(qualifier))
-          .toProvider(getProvider(keyOf<DataSourceService>(qualifier)))
-      install(ServiceModule<SchemaMigratorService>(qualifier))
-      bind(keyOf<SchemaMigratorService>(qualifier)).toProvider(Provider {
-        SchemaMigratorService(
-            qualifier = ValidationDb::class,
-            environment = Environment.TESTING,
-            schemaMigratorProvider = schemaMigratorProvider,
-            connectorProvider = connectorProvider
-        )
-      }).asSingleton()
-
+      val dataSourceProvider = getProvider(keyOf<DataSource>(qualifier))
       bind(keyOf<TransacterService>(qualifier)).to(keyOf<SessionFactoryService>(qualifier))
       bind(keyOf<SessionFactoryService>(qualifier)).toProvider(Provider {
         SessionFactoryService(
-            qualifier = qualifier,
-            connector = connectorProvider.get(),
-            dataSource = dataSourceService,
-            hibernateInjectorAccess = injectorServiceProvider.get(),
-            entityClasses = entitiesProvider.get())
+          qualifier = qualifier,
+          connector = connectorProvider.get(),
+          dataSource = dataSourceProvider,
+          hibernateInjectorAccess = injectorServiceProvider.get(),
+          entityClasses = entitiesProvider.get()
+        )
       }).asSingleton()
-      install(ServiceModule<TransacterService>(qualifier)
+      install(
+        ServiceModule<TransacterService>(qualifier)
           .enhancedBy<SchemaMigratorService>(qualifier)
-          .dependsOn<DataSourceService>(qualifier))
+          .dependsOn<DataSourceService>(qualifier)
+      )
     }
   }
 
@@ -156,50 +119,58 @@ internal class SchemaValidatorTest {
   @Test
   fun findMissingTablesInHibernate() {
     assertThat(schemaValidationErrorMessage).contains(
-        "Hibernate missing tables [database_only_table, unquoted_database_table]")
+      "Hibernate missing tables [database_only_table, unquoted_database_table]"
+    )
   }
 
   @Test
   fun findMissingTablesInDb() {
     assertThat(schemaValidationErrorMessage).contains(
-        "Database missing tables [hibernate_only_table]")
+      "Database missing tables [hibernate_only_table]"
+    )
   }
 
   @Test
   fun findMissingColumnsInHibernate() {
     assertThat(schemaValidationErrorMessage).contains(
-        "Hibernate entity \"missing_columns_table\" is missing columns " +
-            "[tbl4_string_column_database] " +
-            "expected in table \"missing_columns_table\"")
+      "Hibernate entity \"missing_columns_table\" is missing columns " +
+          "[tbl4_string_column_database] " +
+          "expected in table \"missing_columns_table\""
+    )
   }
 
   @Test
   fun findMissingColumnsInDb() {
     assertThat(schemaValidationErrorMessage).contains(
-        "Database table \"missing_columns_table\" is missing columns " +
-            "[tbl4_int_column_hibernate, tbl4_string_column_hibernate] " +
-            "found in hibernate \"missing_columns_table\"")
+      "Database table \"missing_columns_table\" is missing columns " +
+          "[tbl4_int_column_hibernate, tbl4_string_column_hibernate] " +
+          "found in hibernate \"missing_columns_table\""
+    )
   }
 
   @Test
   fun findNullableColumnsInHibernate() {
     assertThat(schemaValidationErrorMessage).contains(
-        "ERROR at schemavalidation.nullable_mismatch_table.tbl5_hibernate_null:\n" +
-            "  Column nullable_mismatch_table.tbl5_hibernate_null is NOT NULL in database but tbl5_hibernate_null is nullable in hibernate")
+      "ERROR at schemavalidation.nullable_mismatch_table.tbl5_hibernate_null:\n" +
+          "  Column nullable_mismatch_table.tbl5_hibernate_null is NOT NULL in database but tbl5_hibernate_null is nullable in hibernate"
+    )
   }
 
   @Test
   fun itOkWithNotNullableColumnWithDefaults() {
     assertThat(schemaValidationErrorMessage).doesNotContain(
-        "ERROR at schemavalidation.nullable_mismatch_table.tbl5_hibernate_null_default:")
+      "ERROR at schemavalidation.nullable_mismatch_table.tbl5_hibernate_null_default:"
+    )
   }
 
   @Test
   fun catchBadTables() {
     assertThat(schemaValidationErrorMessage).contains(
-        "\"BAD_identifier_table\" should be in lower_snake_case")
+      "\"BAD_identifier_table\" should be in lower_snake_case"
+    )
     assertThat(schemaValidationErrorMessage).contains(
-        "\"BAD_identifier_table\" should exactly match hibernate \"bad_identifier_table\"")
+      "\"BAD_identifier_table\" should exactly match hibernate \"bad_identifier_table\""
+    )
   }
 
   @Test
@@ -217,37 +188,39 @@ internal class SchemaValidatorTest {
   @Test
   fun catchBadColumnNames() {
     assertThat(schemaValidationErrorMessage).contains(
-        "tbl6CamelCase should be in lower_snake_case"
+      "tbl6CamelCase should be in lower_snake_case"
     )
     assertThat(schemaValidationErrorMessage).contains(
-        "tbl6_UPPER_UNDERSCORE should be in lower_snake_case"
+      "tbl6_UPPER_UNDERSCORE should be in lower_snake_case"
     )
     assertThat(schemaValidationErrorMessage).contains(
-        "tbl6_MixEd_UNDERScore should be in lower_snake_case"
+      "tbl6_MixEd_UNDERScore should be in lower_snake_case"
     )
     assertThat(schemaValidationErrorMessage).contains(
-        "tbl6-lower-hyphen should be in lower_snake_case"
+      "tbl6-lower-hyphen should be in lower_snake_case"
     )
     assertThat(schemaValidationErrorMessage).contains(
-        "tbl6DatabaseCamelcase should be in lower_snake_case"
+      "tbl6DatabaseCamelcase should be in lower_snake_case"
     )
     assertThat(schemaValidationErrorMessage).contains(
-        "tbl6DatabaseCamelcase should exactly match hibernate tbl6_database_camelcase"
+      "tbl6DatabaseCamelcase should exactly match hibernate tbl6_database_camelcase"
     )
     assertThat(schemaValidationErrorMessage).contains(
-        "tbl6_hibernate_camelcase should exactly match hibernate tbl6HibernateCamelcase"
+      "tbl6_hibernate_camelcase should exactly match hibernate tbl6HibernateCamelcase"
     )
   }
 
   @Test
   fun catchNotReallyUniqueColumnNames() {
     assertThat(schemaValidationErrorMessage).contains(
-        "Duplicate identifiers: [[tbl6NotReallyUnique, tbl6_not_really_unique]]")
+      "Duplicate identifiers: [[tbl6NotReallyUnique, tbl6_not_really_unique]]"
+    )
 
     assertThat(schemaValidationErrorMessage).contains(
-        "Duplicate identifiers: " +
-            "[[tbl6NotReallyUnique, tbl6_not_REALLY_unique], " +
-            "[tbl6NotReallyUnique2, tbl6_not_really_unique2]]")
+      "Duplicate identifiers: " +
+          "[[tbl6NotReallyUnique, tbl6_not_REALLY_unique], " +
+          "[tbl6NotReallyUnique2, tbl6_not_really_unique2]]"
+    )
   }
 
   data class RootConfig(val data_source: DataSourceConfig) : Config

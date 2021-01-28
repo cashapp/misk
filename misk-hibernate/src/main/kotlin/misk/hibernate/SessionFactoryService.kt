@@ -3,6 +3,7 @@ package misk.hibernate
 import com.google.common.base.Stopwatch
 import com.google.common.util.concurrent.AbstractIdleService
 import misk.jdbc.DataSourceConnector
+import misk.jdbc.DataSourceType
 import misk.logging.getLogger
 import okio.ByteString
 import org.hibernate.SessionFactory
@@ -89,12 +90,19 @@ internal class SessionFactoryService(
       applySetting(AvailableSettings.USE_GET_GENERATED_KEYS, "true")
       applySetting(AvailableSettings.USE_NEW_ID_GENERATOR_MAPPINGS, "false")
       applySetting(AvailableSettings.JDBC_TIME_ZONE, "UTC")
+      if (config.type != DataSourceType.VITESS_MYSQL) {
+        // This tells Hibernate that autocommit is always false, so Hibernate won't try to set it
+        // for every transaction.
+        // https://vladmihalcea.com/why-you-should-always-use-hibernate-connection-provider_disables_autocommit-for-resource-local-jpa-transactions/
+        // This setting doesn't seem to work with Vitess though...
+        applySetting(AvailableSettings.CONNECTION_PROVIDER_DISABLES_AUTOCOMMIT, "true")
+      }
       if (config.query_timeout != null) {
         applySetting("javax.persistence.query.timeout", Integer.valueOf(
-            config.query_timeout.toMillis().toInt()))
+            config.query_timeout!!.toMillis().toInt()))
       }
       if (config.jdbc_statement_batch_size != null) {
-        require(config.jdbc_statement_batch_size > 0) {
+        require(config.jdbc_statement_batch_size!! > 0) {
           "Invalid jdbc_statement_batch_size: must be > 0."
         }
         applySetting(AvailableSettings.STATEMENT_BATCH_SIZE, config.jdbc_statement_batch_size)
@@ -123,9 +131,15 @@ internal class SessionFactoryService(
 
       val value: Value? = property.value
       if (value is SimpleValue) {
-        allPropertyTypes += kClassForName(value.typeName)
+        val typeName = value.typeName
+            ?: continue // This doesn't have a physical column; it's mapped to another table.
+        allPropertyTypes += kClassForName(typeName)
       }
     }
+
+    // Hibernate's TypeConfigurations are heavyweight objects that need to be released when we're
+    // done using them. We found this out the hard way!
+    metadataDraft.typeConfiguration.sessionFactoryClosed(null)
 
     val metadataBuilder = metadataSources.metadataBuilder
 

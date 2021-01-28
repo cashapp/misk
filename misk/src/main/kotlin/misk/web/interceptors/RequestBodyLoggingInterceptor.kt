@@ -31,10 +31,13 @@ class RequestBodyLoggingInterceptor @Inject internal constructor(
   ) : ApplicationInterceptor.Factory {
     override fun create(action: Action): ApplicationInterceptor? {
       val logRequestResponse = action.function.findAnnotation<LogRequestResponse>() ?: return null
-      require(0.0 < logRequestResponse.sampling && logRequestResponse.sampling <= 1.0) {
-        "${action.name} @LogRequestResponse sampling must be in the range (0.0, 1.0]"
+      require(0.0 <= logRequestResponse.bodySampling && logRequestResponse.bodySampling <= 1.0) {
+        "${action.name} @LogRequestResponse bodySampling must be in the range (0.0, 1.0]"
       }
-      if (!logRequestResponse.includeBody) {
+      require(0.0 <= logRequestResponse.errorBodySampling && logRequestResponse.errorBodySampling <= 1.0) {
+        "${action.name} @LogRequestResponse errorBodySampling must be in the range (0.0, 1.0]"
+      }
+      if (logRequestResponse.bodySampling == 0.0 && logRequestResponse.errorBodySampling == 0.0) {
         return null
       }
 

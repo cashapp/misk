@@ -15,31 +15,41 @@ allOpen {
 }
 
 dependencies {
-  compile dep.datasourceProxy
-  compile dep.docker
+  api dep.hibernateCore
+  implementation dep.guice
+  implementation dep.okio
+  implementation dep.okHttp
+  implementation dep.loggingApi
+  implementation dep.moshiCore
+  implementation dep.moshiKotlin
+  implementation dep.moshiAdapters
+  implementation dep.wireRuntime
+  implementation dep.tink
+  implementation project(':misk')
+  implementation project(':misk-actions')
+  implementation project(':misk-core')
+  implementation project(':misk-crypto')
+  implementation project(':misk-inject')
+  implementation project(':misk-service')
+  api project(':misk-jdbc')
+
+  testImplementation dep.docker
   // The docker-java we use in tests depends on an old version of junixsocket that depends on
   // log4j. We force it up a minor version in packages that use it.
-  compile('com.kohlschutter.junixsocket:junixsocket-native-common:2.1.1') {
+  testImplementation('com.kohlschutter.junixsocket:junixsocket-native-common:2.3.2') {
     force = true
   }
-  compile('com.kohlschutter.junixsocket:junixsocket-common:2.1.1') {
+  testImplementation('com.kohlschutter.junixsocket:junixsocket-common:2.3.2') {
     force = true
   }
-  compile dep.hibernateCore
-  compile dep.hikariCp
-  compile dep.hsqldb
-  compile dep.mysql
-  compile dep.openTracing
-  compile dep.openTracingUtil
-  compile dep.openTracingJdbc
-  compile dep.postgresql
-  compile dep.vitess
-  compile dep.tink
-  compile project(':misk')
-  compile project(':misk-crypto')
-
-  testCompile project(':misk-testing')
-  testCompile project(':misk-hibernate-testing')
+  testImplementation dep.prometheusClient
+  testImplementation dep.assertj
+  testImplementation dep.kotlinTest
+  testImplementation dep.mockitoCore
+  testImplementation dep.logbackClassic
+  testImplementation project(':misk-metrics')
+  testImplementation project(':misk-testing')
+  testImplementation project(':misk-hibernate-testing')
 }
 
 afterEvaluate { project ->
@@ -48,3 +58,5 @@ afterEvaluate { project ->
     outputFormat = 'gfm'
   }
 }
+
+apply from: "$rootDir/gradle-mvn-publish.gradle"

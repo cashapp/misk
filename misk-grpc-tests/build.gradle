@@ -54,16 +54,25 @@ sourceSets {
 }
 
 dependencies {
-  compile dep.junitApi
-  compile dep.docker
-  compile dep.grpcNetty
-  compile dep.grpcProtobuf
-  compile dep.grpcStub
-  compile dep.kotlinxCoroutines
-  compile dep.wireGrpcClient
-  compile dep.wireRuntime
-  compile project(':misk')
-  compile project(':misk-testing')
+  implementation dep.assertj
+  implementation dep.junitApi
+  implementation dep.kotlinTest
+  implementation dep.docker
+  implementation dep.guice
+  implementation dep.grpcNetty
+  implementation dep.grpcProtobuf
+  implementation dep.grpcStub
+  implementation dep.kotlinxCoroutines
+  implementation dep.wireGrpcClient
+  implementation dep.wireRuntime
+  implementation project(':misk')
+  implementation project(':misk-actions')
+  implementation project(':misk-core')
+  implementation project(':misk-inject')
+  implementation project(':misk-service')
+  implementation project(':misk-testing')
+
+  testImplementation dep.logbackClassic
 }
 
 afterEvaluate { project ->
@@ -72,3 +81,5 @@ afterEvaluate { project ->
     outputFormat = 'gfm'
   }
 }
+
+apply from: "$rootDir/gradle-mvn-publish.gradle"

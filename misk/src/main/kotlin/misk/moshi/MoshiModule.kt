@@ -5,19 +5,37 @@ import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.adapters.Rfc3339DateJsonAdapter
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
-import misk.inject.KAbstractModule
-import misk.moshi.okio.ByteStringAdapter
-import misk.moshi.time.InstantAdapter
-import misk.moshi.wire.WireMessageAdapter
 import java.util.Date
 import javax.inject.Singleton
+import misk.inject.KAbstractModule
+import misk.moshi.adapters.BigDecimalAdapter
+import misk.moshi.okio.ByteStringAdapter
+import misk.moshi.time.InstantAdapter
+import misk.moshi.time.LocalDateAdapter
+import com.squareup.wire.WireJsonAdapterFactory as WireOnlyJsonAdapterFactory
+import misk.moshi.wire.WireMessageAdapter as MiskOnlyMessageAdapter
 
-internal class MoshiModule : KAbstractModule() {
+internal class MoshiModule(
+  private val useWireToRead: Boolean = false,
+  private val useWireToWrite: Boolean = false
+) : KAbstractModule() {
   override fun configure() {
-    install(MoshiAdapterModule(WireMessageAdapter.Factory()))
+    val wireFactory = WireOnlyJsonAdapterFactory()
+    val miskFactory = MiskOnlyMessageAdapter.Factory()
+    install(
+      MoshiAdapterModule(
+        MigratingJsonAdapterFactory(
+          reader = if (useWireToRead) wireFactory else miskFactory,
+          writer = if (useWireToWrite) wireFactory else miskFactory
+        )
+      )
+    )
+
     install(MoshiAdapterModule(ByteStringAdapter))
     install(MoshiAdapterModule<Date>(Rfc3339DateJsonAdapter()))
     install(MoshiAdapterModule(InstantAdapter))
+    install(MoshiAdapterModule(BigDecimalAdapter))
+    install(MoshiAdapterModule(LocalDateAdapter))
   }
 
   @Provides

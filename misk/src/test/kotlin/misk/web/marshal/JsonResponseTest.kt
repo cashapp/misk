@@ -1,6 +1,5 @@
 package misk.web.marshal
 
-import com.squareup.moshi.Moshi
 import misk.inject.KAbstractModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
@@ -8,13 +7,11 @@ import misk.web.Get
 import misk.web.Response
 import misk.web.ResponseContentType
 import misk.web.WebActionModule
+import misk.web.WebTestClient
 import misk.web.WebTestingModule
 import misk.web.actions.WebAction
-import misk.web.jetty.JettyService
 import misk.web.mediatype.MediaTypes
 import misk.web.toResponseBody
-import okhttp3.OkHttpClient
-import okhttp3.Request
 import okio.ByteString
 import okio.ByteString.Companion.encodeUtf8
 import org.assertj.core.api.Assertions.assertThat
@@ -28,9 +25,7 @@ internal class JsonResponseTest {
   @MiskTestModule
   val module = TestModule()
 
-  @Inject private lateinit var jettyService: JettyService
-  @Inject private lateinit var moshi: Moshi
-  private val packetJsonAdapter get() = moshi.adapter(Packet::class.java)
+  @Inject lateinit var webTestClient: WebTestClient
 
   @Test
   fun returnAsObject() {
@@ -134,17 +129,9 @@ internal class JsonResponseTest {
     }
   }
 
-  private fun get(path: String): Packet = call(Request.Builder()
-      .url(jettyService.httpServerUrl.newBuilder().encodedPath(path).build())
-      .get())
-
-  private fun call(request: Request.Builder): Packet {
-    request.header("Accept", MediaTypes.APPLICATION_JSON)
-
-    val httpClient = OkHttpClient()
-    val response = httpClient.newCall(request.build()).execute()
-    assertThat(response.code).isEqualTo(200)
-    assertThat(response.header("Content-Type")).isEqualTo(MediaTypes.APPLICATION_JSON)
-    return packetJsonAdapter.fromJson(response.body!!.source())!!
-  }
+  private fun get(path: String): Packet = webTestClient.get(path)
+    .apply {
+      assertThat(response.code).isEqualTo(200)
+      assertThat(response.header("Content-Type")).isEqualTo(MediaTypes.APPLICATION_JSON)
+    }.parseJson()
 }

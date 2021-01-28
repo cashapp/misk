@@ -56,13 +56,3 @@ annotation class ResponseContentType(val value: String)
 @Retention(AnnotationRetention.RUNTIME)
 @Target(AnnotationTarget.FUNCTION)
 annotation class AvailableWhenDegraded
-
-/**
- * Opt-in to concurrency limits.
- *
- * TODO(jwilson): make this the default once we're comfortable with the behavior and remove this
- *     annotation.
- */
-@Retention(AnnotationRetention.RUNTIME)
-@Target(AnnotationTarget.FUNCTION)
-annotation class ConcurrencyLimitsOptIn

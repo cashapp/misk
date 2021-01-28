@@ -4,6 +4,7 @@ import misk.config.Config
 import misk.security.ssl.CertStoreConfig
 import misk.security.ssl.TrustStoreConfig
 import misk.web.exceptions.ActionExceptionLogLevelConfig
+import javax.servlet.FilterConfig
 
 data class WebConfig(
   /** HTTP port to listen on, or 0 for any available port. */
@@ -78,7 +79,12 @@ data class WebConfig(
   val gzip: Boolean = true,
 
   /** The minimum size in bytes before the response body will be compressed. */
-  val minGzipSize: Int = 1024
+  val minGzipSize: Int = 1024,
+
+  val cors: Map<String, CorsConfig> = mapOf(),
+
+  /** If true, disables automatic load shedding when degraded. */
+  val concurrency_limiter_disabled: Boolean = false,
 ) : Config
 
 data class WebSslConfig(
@@ -100,4 +106,31 @@ data class WebUnixDomainSocketConfig(
   val path: String,
   /** If true, the listener will support H2C. */
   val h2c: Boolean? = true
+)
+
+data class CorsConfig(
+    /** A comma separated list of origins that are allowed to access the resources. */
+    val allowedOrigins: Array<String> = arrayOf("*"),
+    /**
+     * A comma separated list of HTTP methods that are allowed to be used when
+     * accessing the resources.
+     */
+    val allowedMethods: Array<String> = arrayOf("GET", "POST", "HEAD"),
+    /**
+     * A comma separated list of HTTP headers that are allowed to be specified when
+     * accessing the resources.
+     */
+    val allowedHeaders: Array<String> = arrayOf("X-Requested-With", "Content-Type", "Accept",
+        "Origin"),
+    /** A boolean indicating if the resource allows requests with credentials. */
+    val allowCredentials: Boolean = true,
+    /** The number of seconds that preflight requests can be cached by the client. */
+    val preflightMaxAge: String = "1800",
+    /**
+     * True if preflight requests are chained to their target resource for normal handling
+     * (as an OPTION request).
+     */
+    val chainPreflight: Boolean = true,
+    /** A comma separated list of HTTP headers that are allowed to be exposed on the client. */
+    val exposedHeaders: Array<String> = arrayOf()
 )

@@ -27,18 +27,23 @@ import org.eclipse.jetty.server.SslConnectionFactory
 import org.eclipse.jetty.server.handler.ContextHandler
 import org.eclipse.jetty.server.handler.StatisticsHandler
 import org.eclipse.jetty.server.handler.gzip.GzipHandler
+import org.eclipse.jetty.servlet.FilterHolder
 import org.eclipse.jetty.servlet.ServletContextHandler
 import org.eclipse.jetty.servlet.ServletHolder
+import org.eclipse.jetty.servlets.CrossOriginFilter
 import org.eclipse.jetty.unixsocket.UnixSocketConnector
 import org.eclipse.jetty.util.ssl.SslContextFactory
 import org.eclipse.jetty.util.thread.ThreadPool
 import java.net.InetAddress
+import java.util.EnumSet
 import java.util.concurrent.SynchronousQueue
 import java.util.concurrent.ThreadFactory
 import java.util.concurrent.ThreadPoolExecutor
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
+import javax.servlet.DispatcherType
+import javax.servlet.FilterConfig
 
 private val logger = getLogger<JettyService>()
 
@@ -93,6 +98,13 @@ class JettyService @Inject internal constructor(
       httpConfig.securePort = webConfig.ssl.port
     }
     httpConnectionFactories += HttpConnectionFactory(httpConfig)
+    if (webConfig.http2) {
+      val http2 = HTTP2ServerConnectionFactory(httpConfig)
+      if (webConfig.jetty_max_concurrent_streams != null) {
+        http2.maxConcurrentStreams = webConfig.jetty_max_concurrent_streams
+      }
+      httpConnectionFactories += HTTP2CServerConnectionFactory(httpConfig)
+    }
 
     // TODO(mmihic): Allow require running only on HTTPS?
     val httpConnector = ServerConnector(
@@ -189,7 +201,8 @@ class JettyService @Inject internal constructor(
     }
 
     if (webConfig.unix_domain_socket != null) {
-      val udsConnFactories = httpConnectionFactories.toMutableList()
+      val udsConnFactories = mutableListOf<ConnectionFactory>()
+      udsConnFactories.add(HttpConnectionFactory(httpConfig))
       if (webConfig.unix_domain_socket.h2c == true) {
         udsConnFactories.add(HTTP2CServerConnectionFactory(httpConfig))
       }
@@ -234,6 +247,25 @@ class JettyService @Inject internal constructor(
     servletContextHandler.gzipHandler = gzipHandler
 
     server.handler = statisticsHandler
+
+    webConfig.cors.forEach { (path, corsConfig) ->
+      val holder = FilterHolder(CrossOriginFilter::class.java)
+      holder.setInitParameter(CrossOriginFilter.ALLOWED_ORIGINS_PARAM,
+          corsConfig.allowedOrigins.joinToString(","))
+      holder.setInitParameter(CrossOriginFilter.ALLOWED_METHODS_PARAM,
+          corsConfig.allowedMethods.joinToString(","))
+      holder.setInitParameter(CrossOriginFilter.ALLOWED_HEADERS_PARAM,
+          corsConfig.allowedHeaders.joinToString(","))
+      holder.setInitParameter(CrossOriginFilter.ALLOW_CREDENTIALS_PARAM,
+          corsConfig.allowCredentials.toString())
+      holder.setInitParameter(CrossOriginFilter.PREFLIGHT_MAX_AGE_PARAM,
+          corsConfig.preflightMaxAge)
+      holder.setInitParameter(CrossOriginFilter.CHAIN_PREFLIGHT_PARAM,
+          corsConfig.chainPreflight.toString())
+      holder.setInitParameter(CrossOriginFilter.EXPOSED_HEADERS_PARAM,
+          corsConfig.exposedHeaders.joinToString(","))
+      servletContextHandler.addFilter(holder, path, EnumSet.of(DispatcherType.REQUEST))
+    }
 
     server.start()
 

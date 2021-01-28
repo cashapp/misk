@@ -10,7 +10,8 @@ import misk.web.actions.WebAction
 import misk.web.actions.WebActionEntry
 import misk.web.actions.WebActionFactory
 import misk.web.mediatype.MediaTypes
-import misk.web.metadata.WebActionMetadata
+import misk.web.metadata.webaction.WebActionMetadata
+import misk.web.metadata.webaction.WebActionMetadataAction
 import okhttp3.Headers
 import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrl
@@ -95,10 +96,15 @@ internal class WebActionsServlet @Inject constructor(
     try {
       val httpCall = ServletHttpCall.create(
           request = request,
-          linkLayerLocalAddress = with((request as? Request)?.httpChannel?.connector) {
-            when (this) {
-              is UnixSocketConnector -> SocketAddress.Unix(this.unixSocket)
-              is ServerConnector -> SocketAddress.Network(this.host ?: "0.0.0.0", this.localPort)
+          linkLayerLocalAddress = with((request as? Request)?.httpChannel) {
+            when (this?.connector) {
+              is UnixSocketConnector -> SocketAddress.Unix(
+                  (this.connector as UnixSocketConnector).unixSocket
+              )
+              is ServerConnector -> SocketAddress.Network(
+                  this.endPoint.remoteAddress.address.hostAddress,
+                  (this.connector as ServerConnector).localPort
+              )
               else -> throw IllegalStateException("Unknown socket connector.")
             }
           },

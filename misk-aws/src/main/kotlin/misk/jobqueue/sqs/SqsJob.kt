@@ -25,23 +25,14 @@ internal class SqsJob(
     message.messageAttributes
         .filter { (key, _) -> key != JOBQUEUE_METADATA_ATTR }
         .map { (key, value) -> key to value.stringValue }.toMap()
+        .plus(message.attributes)
   }
 
   private val queue: ResolvedQueue = queues.getForReceiving(queueName)
   private val jobqueueMetadata: Map<String, String> by lazy {
     val metadata = message.messageAttributes[JOBQUEUE_METADATA_ATTR]
-    // NB: old/in-flight jobs enqueued prior to the introduction of _jobqueue-metadata won't have this property. In
-    // order to not change the contract later on (optional to non-optional), synthesize a reasonable replacement.
-    if (metadata == null) {
-      // TODO(bruno): drop fallback after rollout; error when metadata is not set.
-      mapOf(
-          JOBQUEUE_METADATA_ORIGIN_QUEUE to queueName.parentQueue.value,
-          // If the job had no metadata, there was no app-specified idempotence key;
-          // any sufficiently random value would work, so just use system-assigned id.
-          JOBQUEUE_METADATA_IDEMPOTENCE_KEY to id)
-    } else {
-      moshi.adapter<Map<String, String>>().fromJson(metadata.stringValue)!!
-    }
+        ?: throw IllegalStateException (JOBQUEUE_METADATA_ATTR + " not found in messageAttributes")
+    moshi.adapter<Map<String, String>>().fromJson(metadata.stringValue)!!
   }
 
   override fun acknowledge() {

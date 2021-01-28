@@ -15,14 +15,19 @@ allOpen {
 }
 
 dependencies {
-  compile dep.guava
-  compile dep.guice
-  compile dep.guiceMultibindings
-  compile dep.jedis
-  compile project(':misk')
-  compile project(':misk-testing')
+  implementation dep.guava
+  implementation dep.guice
+  implementation dep.guiceMultibindings
+  implementation dep.jedis
+  implementation dep.okio
+  implementation project(':misk')
+  implementation project(':misk-core')
+  implementation project(':misk-inject')
+  implementation project(':misk-service')
 
-  testCompile project(':misk-testing')
+  testImplementation project(':misk-testing')
+  testImplementation dep.assertj
+  testImplementation dep.kotlinTest
 }
 
 afterEvaluate { project ->
@@ -31,3 +36,5 @@ afterEvaluate { project ->
     outputFormat = 'gfm'
   }
 }
+
+apply from: "$rootDir/gradle-mvn-publish.gradle"

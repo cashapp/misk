@@ -2,20 +2,22 @@ package misk.hibernate.migrate
 
 import com.google.common.collect.ImmutableList
 import com.google.common.collect.ImmutableSet
-import misk.hibernate.Check
+import misk.jdbc.Check
 import misk.hibernate.DbChild
 import misk.hibernate.DbRoot
 import misk.hibernate.DbTimestampedEntity
 import misk.hibernate.Id
-import misk.hibernate.Keyspace
+import misk.vitess.Keyspace
 import misk.hibernate.PersistenceMetadata
 import misk.hibernate.Session
-import misk.hibernate.Shard
-import misk.hibernate.Shard.Companion.SINGLE_KEYSPACE
+import misk.vitess.Shard
+import misk.vitess.Shard.Companion.SINGLE_KEYSPACE
 import misk.hibernate.Transacter
 import misk.hibernate.shards
+import misk.jdbc.DataSourceType
 import misk.logging.getLogger
 import org.hibernate.SessionFactory
+import java.lang.UnsupportedOperationException
 import java.sql.Connection
 import java.sql.PreparedStatement
 import java.sql.SQLException
@@ -154,6 +156,10 @@ class BulkShardMigrator<R : DbRoot<R>, C : DbChild<R, C>> private constructor(
     checkNotNull(targetRoot) { "You have to specify entity root target" }
     checkNotNull(sourceRoot) { "You have to specify entity root source" }
 
+    if (transacter.config().type == DataSourceType.TIDB) {
+      return executeUnshardedMigration()
+    }
+
     var count: Int
     do {
       count = executeBatch(insertIgnore)
@@ -162,6 +168,40 @@ class BulkShardMigrator<R : DbRoot<R>, C : DbChild<R, C>> private constructor(
       }
       // The batch was filled so there may be more entities to transfer.
     } while (count == batchSize)
+  }
+
+  /** Migrates entity in an unsharded store by doing a bulk update */
+  private fun executeUnshardedMigration() {
+    check(!transacter.inTransaction)
+
+    val tableName = tableName()
+    val setColumns = mutations.stream()
+        .map { mutation -> mutation.updateSql() }
+        .collect(joining(","))
+
+    logger.info("Bulk migrating in ${transacter.config().type} entities for table $tableName")
+    transacter.transaction { session ->
+      session.hibernateSession.doWork { connection ->
+        run {
+          val update = """
+          UPDATE ${tableName()}
+          SET $setColumns
+          WHERE $where
+        """.trimIndent()
+          val updateStatement = connection.prepareStatement(update)
+          var setParametersCount = 0
+          mutations
+              .filter { it.isParameterized() }
+              .forEachIndexed { index, mutation ->
+                // statements indexes start from 1
+                mutation.bindUpdate(updateStatement, index + 1)
+                setParametersCount += 1
+              }
+          bindWhereClause(updateStatement, setParametersCount)
+          updateStatement.executeUpdate()
+        }
+      }
+    }
   }
 
   /** Migrates one batch. Returns the number of records migrated.  */
@@ -373,8 +413,13 @@ class BulkShardMigrator<R : DbRoot<R>, C : DbChild<R, C>> private constructor(
 
   @Throws(SQLException::class)
   private fun bindWhereClause(select: PreparedStatement) {
+    bindWhereClause(select, 0)
+  }
+
+  @Throws(SQLException::class)
+  private fun bindWhereClause(select: PreparedStatement, startIndex: Int) {
     for (i in parameters!!.indices) {
-      select.setObject(i + 1, parameters!![i])
+      select.setObject(startIndex + i + 1, parameters!![i])
     }
   }
 
@@ -389,6 +434,16 @@ class BulkShardMigrator<R : DbRoot<R>, C : DbChild<R, C>> private constructor(
       insert.setObject(parameterIndex, value)
       return 1
     }
+
+    abstract fun bindUpdate(update: PreparedStatement, parameterIndex: Int): Int
+
+    open fun updateSql(): String {
+      return "${columnName()} = ?"
+    }
+
+    internal fun isParameterized(): Boolean {
+      return updateSql().contains('?')
+    }
   }
 
   class SetMutation(private val column: String, private val value: Any) : Mutation() {
@@ -399,6 +454,11 @@ class BulkShardMigrator<R : DbRoot<R>, C : DbChild<R, C>> private constructor(
 
     override fun bindInsert(insert: PreparedStatement, parameterIndex: Int, value: Any): Int {
       insert.setObject(parameterIndex, this.value)
+      return 1
+    }
+
+    override fun bindUpdate(update: PreparedStatement, parameterIndex: Int): Int {
+      update.setObject(parameterIndex, value)
       return 1
     }
   }
@@ -417,6 +477,10 @@ class BulkShardMigrator<R : DbRoot<R>, C : DbChild<R, C>> private constructor(
       insert.setObject(parameterIndex, valueMapper.apply(value))
       return 1
     }
+
+    override fun bindUpdate(update: PreparedStatement, parameterIndex: Int): Int {
+      throw UnsupportedOperationException("Cannot apply updates using SetMappingMutation")
+    }
   }
 
   class NowMutation(private val column: String) : Mutation() {
@@ -430,8 +494,17 @@ class BulkShardMigrator<R : DbRoot<R>, C : DbChild<R, C>> private constructor(
       return 0
     }
 
+    override fun bindUpdate(update: PreparedStatement, parameterIndex: Int): Int {
+      // There's nothing to bind, column modification in 'set' expression
+      return 0
+    }
+
     override fun insertSql(): String {
       return "now()"
+    }
+
+    override fun updateSql(): String {
+      return "$column = now()"
     }
   }
 
@@ -445,6 +518,15 @@ class BulkShardMigrator<R : DbRoot<R>, C : DbChild<R, C>> private constructor(
     override fun bindInsert(insert: PreparedStatement, parameterIndex: Int, value: Any): Int {
       insert.setObject(parameterIndex, (value as Number).toLong() + 1)
       return 1
+    }
+
+    override fun bindUpdate(update: PreparedStatement, parameterIndex: Int): Int {
+      // There's nothing to bind, column modification in 'set' expression
+      return 0
+    }
+
+    override fun updateSql(): String {
+      return "$column = $column + 1"
     }
   }
 
