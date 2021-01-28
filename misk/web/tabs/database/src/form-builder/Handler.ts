@@ -117,5 +117,5 @@ export const handler: IHandler = {
     delegateFn: (...onChangeArgs: any) => any,
     options?: IHandlerOptions
   ) => (...onChangeArgs: any) =>
-    delegateFn(parseOnChangeArgs(get(options, "overrideArgs", onChangeArgs)))
+    delegateFn(parseOnChangeArgs(get(options, "overrideArgs", onChangeArgs))),
 }

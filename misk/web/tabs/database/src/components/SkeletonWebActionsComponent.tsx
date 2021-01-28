@@ -1,14 +1,14 @@
 /** @jsx jsx */
 import { Card, Classes, Icon, Intent, H3, Menu, Tag } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
-import { jsx } from "@emotion/core"
+import { jsx } from "@emotion/react"
 import { FlexContainer } from "@misk/core"
 import {
   cssCodeTag,
   cssColumn,
   cssFloatLeft,
   cssHeader,
-  Metadata
+  Metadata,
 } from "../components"
 import { cssMetadataMenu } from "./CommonComponents"
 

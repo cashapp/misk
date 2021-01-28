@@ -1,6 +1,7 @@
 package misk.web.interceptors
 
 import ch.qos.logback.classic.Level
+import com.netflix.concurrency.limits.Limiter
 import com.netflix.concurrency.limits.limit.SettableLimit
 import com.netflix.concurrency.limits.limiter.SimpleLimiter
 import misk.Action
@@ -106,6 +107,15 @@ class ConcurrencyLimitsInterceptorTest {
         .containsExactly("concurrency limits interceptor shedding HelloAction")
   }
 
+  @Test
+  fun usesProvidedLimiter() {
+    val action = CustomLimiterAction::call.asAction(DispatchMechanism.GET)
+    val interceptor = factory.create(action)!!
+    // The bound limiter has a 0 limit.
+    assertThat(call(action, interceptor, callDuration = Duration.ofMillis(100), statusCode = 200))
+        .isEqualTo(CallResult(callWasShed = true, statusCode = 503))
+  }
+
   private fun call(
     action: Action,
     interceptor: NetworkInterceptor,
@@ -131,6 +141,19 @@ class ConcurrencyLimitsInterceptorTest {
     override fun configure() {
       install(LogCollectorModule())
       install(MiskTestingServiceModule())
+
+      multibind<ConcurrencyLimiterFactory>().toInstance(CustomLimiterFactory())
+    }
+  }
+
+  class CustomLimiterFactory : ConcurrencyLimiterFactory {
+    override fun create(action: Action): Limiter<String>? {
+      if (action.function == CustomLimiterAction::call) {
+        return SimpleLimiter.Builder()
+            .limit(SettableLimit(0))
+            .build()
+      }
+      return null
     }
   }
 
@@ -167,5 +190,10 @@ class ConcurrencyLimitsInterceptorTest {
     @Get("/important")
     @AvailableWhenDegraded
     fun call(): String = "important"
+  }
+
+  internal class CustomLimiterAction : WebAction {
+    @Get("/custom-limiter")
+    fun call(): String = "custom-limiter"
   }
 }

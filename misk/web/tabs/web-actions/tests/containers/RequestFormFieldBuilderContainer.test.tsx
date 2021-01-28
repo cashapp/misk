@@ -6,7 +6,7 @@ import { generateTypesMetadata } from "../../src/ducks"
 import {
   nonTypedActionAPI,
   nonTypedActionInternal,
-  testTypes
+  testTypes,
 } from "../testUtilities"
 import { renderWithRedux } from "../upstreamableTestUtilities"
 
@@ -27,7 +27,7 @@ describe("RequestFormFieldBuilderContainer", () => {
   it("Renders single body input", () => {
     const typesMetadata = generateTypesMetadata({
       ...nonTypedActionAPI,
-      httpMethod: HTTPMethod.POST
+      httpMethod: HTTPMethod.POST,
     })
     const { asFragment } = renderWithRedux(
       <RequestFormFieldBuilderContainer
@@ -44,7 +44,7 @@ describe("RequestFormFieldBuilderContainer", () => {
       ...nonTypedActionAPI,
       httpMethod: HTTPMethod.POST,
       requestType: "noRepeatedInt",
-      types: testTypes
+      types: testTypes,
     })
     const { asFragment } = renderWithRedux(
       <RequestFormFieldBuilderContainer
@@ -61,7 +61,7 @@ describe("RequestFormFieldBuilderContainer", () => {
       ...nonTypedActionAPI,
       httpMethod: HTTPMethod.POST,
       requestType: "nestedNoRepeatedInt",
-      types: testTypes
+      types: testTypes,
     })
     const { asFragment } = renderWithRedux(
       <RequestFormFieldBuilderContainer
@@ -78,7 +78,7 @@ describe("RequestFormFieldBuilderContainer", () => {
       ...nonTypedActionAPI,
       httpMethod: HTTPMethod.POST,
       requestType: "repeatedShort",
-      types: testTypes
+      types: testTypes,
     })
     const { asFragment } = renderWithRedux(
       <RequestFormFieldBuilderContainer
@@ -95,7 +95,7 @@ describe("RequestFormFieldBuilderContainer", () => {
       ...nonTypedActionAPI,
       httpMethod: HTTPMethod.POST,
       requestType: "repeatedNestedNoRepeatedInt",
-      types: testTypes
+      types: testTypes,
     })
     const { asFragment } = renderWithRedux(
       <RequestFormFieldBuilderContainer
@@ -112,7 +112,7 @@ describe("RequestFormFieldBuilderContainer", () => {
       ...nonTypedActionAPI,
       httpMethod: HTTPMethod.POST,
       requestType: "repeatedNestedRepeatedShort",
-      types: testTypes
+      types: testTypes,
     })
     const { asFragment } = renderWithRedux(
       <RequestFormFieldBuilderContainer
@@ -129,7 +129,7 @@ describe("RequestFormFieldBuilderContainer", () => {
       ...nonTypedActionAPI,
       httpMethod: HTTPMethod.POST,
       requestType: "multipleFlatFields",
-      types: testTypes
+      types: testTypes,
     })
     const { asFragment } = renderWithRedux(
       <RequestFormFieldBuilderContainer
