@@ -1,11 +1,6 @@
 name: Publish a release
 
-on:
-  push:
-    branches:
-      - master
-    tags:
-      - '*'
+on: workflow_dispatch
 
 env:
   GRADLE_OPTS: -Dorg.gradle.configureondemand=true -Dorg.gradle.parallel=false -Dkotlin.incremental=false -Dorg.gradle.jvmargs="-Xmx3g -XX:MaxPermSize=2048m -XX:+HeapDumpOnOutOfMemoryError -Dfile.encoding=UTF-8"
@@ -26,8 +21,16 @@ jobs:
         with:
           java-version: 14
 
+      - name: install misk-web
+        run: |
+          mkdir ~/.npm-global
+          npm config set prefix '~/.npm-global'
+          PATH=~/.npm-global/bin:$PATH
+          npm install -g @misk/cli
+          miskweb ci-build -e
+
       - name: Set gradle publish version
-        run: echo "version=String.valueOf(project.version).replace(\"-SNAPSHOT\", \"\") + '-$(date +%Y%m%d.%H%M)-$(git rev-parse --short HEAD)-SNAPSHOT'" > hooks.gradle && cat hooks.gradle
+        run: sed --in-place -e "s/-SNAPSHOT/-$(date +%Y%m%d.%H%M)-$(git rev-parse --short HEAD)/" gradle.properties
 
       - name: Publish the artifacts
         env:
