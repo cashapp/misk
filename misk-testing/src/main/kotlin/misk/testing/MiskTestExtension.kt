@@ -65,7 +65,7 @@ internal class MiskTestExtension : BeforeEachCallback, AfterEachCallback {
     val injector = context.retrieve<Injector>("injector")
 
     injector.getInstance<Callbacks>().afterEach(context)
-    uninject(context.requiredTestInstance)
+    uninject(context.rootRequiredTestInstance)
 
     for (dep in context.getExternalDependencies()) {
       dep.afterEach()
@@ -110,11 +110,11 @@ internal class MiskTestExtension : BeforeEachCallback, AfterEachCallback {
   class InjectUninject @Inject constructor() : BeforeEachCallback, AfterEachCallback {
     override fun beforeEach(context: ExtensionContext) {
       val injector = context.retrieve<Injector>("injector")
-      injector.injectMembers(context.requiredTestInstance)
+      injector.injectMembers(context.rootRequiredTestInstance)
     }
 
     override fun afterEach(context: ExtensionContext) {
-      uninject(context.requiredTestInstance)
+      uninject(context.rootRequiredTestInstance)
     }
   }
 
@@ -153,43 +153,11 @@ private fun ExtensionContext.startService(): Boolean {
 }
 
 private fun ExtensionContext.getActionTestModules(): Iterable<Module> {
-  val namespace = ExtensionContext.Namespace.create(requiredTestClass)
-  // First check the context cache
-  @Suppress("UNCHECKED_CAST")
-  return getStore(namespace).getOrComputeIfAbsent("module",
-      { modulesViaReflection() }) as Iterable<Module>
-}
-
-// Find [MiskTestModule]-annotated [Module]s on the test class and, recursively, its base classes.
-private fun ExtensionContext.modulesViaReflection(): Iterable<Module> {
-  return generateSequence(requiredTestClass) { c -> c.superclass }
-      .flatMap { it.declaredFields.asSequence() }
-      .filter { it.isAnnotationPresent(MiskTestModule::class.java) }
-      .map {
-        it.isAccessible = true
-        it.get(requiredTestInstance) as Module
-      }
-      .toList()
+  return getFromStoreOrCompute("module") { fieldsAnnotatedBy<MiskTestModule, Module>() }
 }
 
 private fun ExtensionContext.getExternalDependencies(): Iterable<ExternalDependency> {
-  val namespace = ExtensionContext.Namespace.create(requiredTestClass)
-  // First check the context cache
-  @Suppress("UNCHECKED_CAST")
-  return getStore(namespace).getOrComputeIfAbsent("external-dependencies") {
-    externalDependenciesViaReflection()
-  } as Iterable<ExternalDependency>
-}
-
-// Find [MiskExternalDependency]-annotated [ExternalDependency]s on the test class and, recursively,
-// its base classes.
-private fun ExtensionContext.externalDependenciesViaReflection(): Iterable<ExternalDependency> {
-  return generateSequence(requiredTestClass) { c -> c.superclass }
-      .flatMap { it.declaredFields.asSequence() }
-      .filter { it.isAnnotationPresent(MiskExternalDependency::class.java) }
-      .map {
-        it.isAccessible = true
-        it.get(requiredTestInstance) as ExternalDependency
-      }
-      .toList()
+  return getFromStoreOrCompute("external-dependencies") {
+    fieldsAnnotatedBy<MiskExternalDependency, ExternalDependency>()
+  }
 }
