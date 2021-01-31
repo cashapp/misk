@@ -29,11 +29,10 @@ internal class SqsJobQueue @Inject internal constructor(
     deliveryDelay: Duration?,
     attributes: Map<String, String>
   ) {
-    // Ensure there are at most 8 attributes; AWS SQS enforces a limit of 10 custom attributes
-    // per message, 2 of which are reserved for this library (trace id and jobqueue metadata).
+    // Ensure there are at most 9 attributes; AWS SQS enforces a limit of 10 custom attributes per message,
+    // 1 of which is reserved for this library (which contains JSON-serialized jobqueue metadata).
     // https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-message-attributes.html
-    // TODO(bruno): change to 9 once we drop trace id
-    check(attributes.size <= 8) { "a maximum of 8 attributes are supported (got ${attributes.size})" }
+    check(attributes.size <= 9) { "a maximum of 9 attributes are supported (got ${attributes.size})" }
 
     tracer.traceWithSpan("enqueue-job-${queueName.value}") { span ->
       metrics.jobsEnqueued.labels(queueName.value, queueName.value).inc()
@@ -59,10 +58,6 @@ internal class SqsJobQueue @Inject internal constructor(
             (span as? DDSpan)?.let {
               val traceId = it.context().traceId.toString()
               metadata[SqsJob.JOBQUEUE_METADATA_ORIGINAL_TRACE_ID] = traceId
-              // TODO(bruno): drop this attribute after rollout; moved to metadata
-              addMessageAttributesEntry(
-                SqsJob.ORIGINAL_TRACE_ID_ATTR,
-                MessageAttributeValue().withDataType("String").withStringValue(traceId))
             }
 
             // Add the internal metadata dictionary, encoded as JSON.
