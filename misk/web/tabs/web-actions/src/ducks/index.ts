@@ -6,12 +6,12 @@ import {
   SimpleReduxReducer,
   SimpleReduxSaga,
   simpleRootSelector,
-  watchSimpleReduxSagas,
+  watchSimpleReduxSagas
 } from "@misk/simpleredux"
 import {
   connectRouter,
   LocationChangeAction,
-  RouterState,
+  RouterState
 } from "connected-react-router"
 import { History } from "history"
 import { AnyAction, combineReducers, Reducer } from "redux"
@@ -22,7 +22,7 @@ import {
   IWebActionsImmutableState,
   IWebActionsState,
   watchWebActionsSagas,
-  WebActionsReducer,
+  WebActionsReducer
 } from "./webActions"
 export * from "./webActions"
 
@@ -45,7 +45,7 @@ export interface IDispatchProps
 
 export const rootDispatcher: IDispatchProps = {
   ...dispatchSimpleRedux,
-  ...dispatchWebActions,
+  ...dispatchWebActions
 }
 
 /**
@@ -61,7 +61,7 @@ export const rootSelectors = (state: IState) => ({
     "webActions",
     state
   ),
-  webActionsRaw: state.webActionsRaw,
+  webActionsRaw: state.webActionsRaw
 })
 
 /**
@@ -72,7 +72,7 @@ export const rootReducer = (history: History): Reducer<any, AnyAction> =>
     router: connectRouter(history),
     simpleRedux: SimpleReduxReducer,
     webActions: WebActionsReducer,
-    webActionsRaw: WebActionsReducer,
+    webActionsRaw: WebActionsReducer
   })
 
 /**
@@ -88,5 +88,5 @@ export function* rootSaga(): SimpleReduxSaga {
 export const mapStateToProps = (state: IState) => rootSelectors(state)
 
 export const mapDispatchToProps: IDispatchProps = {
-  ...rootDispatcher,
+  ...rootDispatcher
 }

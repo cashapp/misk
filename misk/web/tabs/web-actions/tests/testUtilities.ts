@@ -2,7 +2,7 @@ import HTTPMethod from "http-method-enum"
 import {
   IWebActionAPI,
   IWebActionInternal,
-  processMetadata,
+  processMetadata
 } from "../src/ducks"
 
 /**
@@ -14,83 +14,83 @@ export const testTypes = {
       {
         name: "Field 1",
         repeated: false,
-        type: "Short",
+        type: "Short"
       },
       {
         name: "Field 2",
         repeated: false,
-        type: "Int",
+        type: "Int"
       },
       {
         name: "Field 3",
         repeated: false,
-        type: "Long",
+        type: "Long"
       },
       {
         name: "Field 4",
         repeated: false,
-        type: "Short",
-      },
-    ],
+        type: "Short"
+      }
+    ]
   },
   nestedNoRepeatedInt: {
     fields: [
       {
         name: "Nested Int Field",
         repeated: false,
-        type: "noRepeatedInt",
-      },
-    ],
+        type: "noRepeatedInt"
+      }
+    ]
   },
   nestedRepeatedShort: {
     fields: [
       {
         name: "Nested Short Field",
         repeated: false,
-        type: "repeatedShort",
-      },
-    ],
+        type: "repeatedShort"
+      }
+    ]
   },
   noRepeatedInt: {
     fields: [
       {
         name: "Int Field",
         repeated: false,
-        type: "Int",
-      },
-    ],
+        type: "Int"
+      }
+    ]
   },
   repeatedShort: {
     fields: [
       {
         name: "Repeated Short Field",
         repeated: true,
-        type: "Short",
-      },
-    ],
+        type: "Short"
+      }
+    ]
   },
   repeatedNestedNoRepeatedInt: {
     fields: [
       {
         name: "Repeated Nested Int Field",
         repeated: true,
-        type: "nestedNoRepeatedInt",
-      },
-    ],
+        type: "nestedNoRepeatedInt"
+      }
+    ]
   },
   repeatedNestedRepeatedShort: {
     fields: [
       {
         name: "Nested Repeated Short Field",
         repeated: true,
-        type: "nestedRepeatedShort",
-      },
-    ],
-  },
+        type: "nestedRepeatedShort"
+      }
+    ]
+  }
 }
 
 export const simpleForm = {
-  simpleTag: "simpleForm",
+  simpleTag: "simpleForm"
 }
 
 export const nonTypedActionAPI: IWebActionAPI = {
@@ -103,7 +103,7 @@ export const nonTypedActionAPI: IWebActionAPI = {
   functionAnnotations: [
     "@misk.web.Get(pathPattern=/_liveness)",
     "@misk.web.ResponseContentType(value=text/plain;charset=utf-8)",
-    "@misk.security.authz.Unauthenticated()",
+    "@misk.security.authz.Unauthenticated()"
   ],
   name: "LivenessCheckAction",
   networkInterceptors: [
@@ -114,15 +114,15 @@ export const nonTypedActionAPI: IWebActionAPI = {
     "misk.web.interceptors.TracingInterceptor",
     "misk.web.exceptions.ExceptionHandlingInterceptor",
     "misk.web.interceptors.MarshallerInterceptor",
-    "misk.web.interceptors.WideOpenDevelopmentInterceptor",
+    "misk.web.interceptors.WideOpenDevelopmentInterceptor"
   ],
   parameterTypes: [] as string[],
   pathPattern: "/_liveness",
   requestMediaTypes: ["*/*"],
   responseMediaType: "text/plain;charset=utf-8",
-  returnType: "misk.web.Response<kotlin.String>",
+  returnType: "misk.web.Response<kotlin.String>"
 }
 
 export const nonTypedActionInternal: IWebActionInternal = processMetadata([
-  nonTypedActionAPI,
+  nonTypedActionAPI
 ])[0]

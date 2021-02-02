@@ -5,16 +5,16 @@ import {
   Icon,
   MenuItem,
   Tag,
-  Tooltip,
+  Tooltip
 } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
-import { css, jsx } from "@emotion/react"
+import { css, jsx } from "@emotion/core"
 import { HTTPMethodIntent, WrapTextContainer } from "@misk/core"
 import {
   ISimpleReduxState,
   onChangeToggleFnCall,
   onClickFnCall,
-  simpleSelectorGet,
+  simpleSelectorGet
 } from "@misk/simpleredux"
 import copy from "copy-to-clipboard"
 import HTTPMethod from "http-method-enum"
@@ -180,7 +180,7 @@ const UnconnectedMetadataCollapse = (
   const content = Array.isArray(props.content) ? props.content : [props.content]
   const collapseIcon = simpleSelectorGet(props.simpleRedux, [
     props.tag,
-    "data",
+    "data"
   ]) ? (
     <Icon icon={IconNames.CARET_DOWN} />
   ) : (

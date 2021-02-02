@@ -1,6 +1,6 @@
 /** @jsx jsx */
 import { Card, H3, H5, Menu, Tag } from "@blueprintjs/core"
-import { jsx } from "@emotion/react"
+import { jsx } from "@emotion/core"
 import { FlexContainer } from "@misk/core"
 import { connect } from "react-redux"
 import {
@@ -12,7 +12,7 @@ import {
   MetadataCollapse,
   MethodTag,
   RequestResponseContentTypesSpan,
-  requestResponseContentTypesString,
+  requestResponseContentTypesString
 } from "../components"
 import { SendRequestCollapseContainer } from "../containers"
 import {
@@ -20,7 +20,7 @@ import {
   IState,
   IWebActionInternal,
   mapDispatchToProps,
-  mapStateToProps,
+  mapStateToProps
 } from "../ducks"
 
 /**
@@ -54,7 +54,12 @@ const WebActionCardContainer = (
               content={props.action.function}
               label={"Function"}
               tag={`${props.tag}::Function`}
-              text={props.action.function.split("(")[0].split(".").slice(-1)[0]}
+              text={
+                props.action.function
+                  .split("(")[0]
+                  .split(".")
+                  .slice(-1)[0]
+              }
             />
             <MetadataCollapse
               content={props.action.allowedServices}

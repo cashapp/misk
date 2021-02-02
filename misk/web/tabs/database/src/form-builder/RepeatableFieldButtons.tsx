@@ -1,7 +1,7 @@
 /** @jsx jsx */
 import { Button, Tooltip } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
-import { css, jsx } from "@emotion/react"
+import { css, jsx } from "@emotion/core"
 import { OrderedMap } from "immutable"
 import { Dispatch, SetStateAction } from "react"
 import { cssButton, cssTooltip, QuantityButton } from "../components"
@@ -11,7 +11,7 @@ import {
   IActionTypes,
   ITypesFieldMetadata,
   recursivelySetDirtyInput,
-  removeRepeatedField,
+  removeRepeatedField
 } from "../form-builder"
 
 export const repeatableFieldButtons = (props: {
@@ -35,7 +35,7 @@ export const repeatableFieldButtons = (props: {
     fieldValue,
     types,
     setTypesMetadata,
-    typesMetadata,
+    typesMetadata
   } = props
   const metadata = typesMetadata.get(id)
   const editRawButton = (
@@ -107,7 +107,7 @@ export const repeatableFieldButtons = (props: {
   } else if (metadata && metadata.id === "0") {
     return [
       <Button css={css(cssButton)}>{noFormIdentifier}</Button>,
-      editRawButton,
+      editRawButton
     ]
   } else {
     return [<Button css={css(cssButton)} icon={IconNames.WARNING_SIGN} />]

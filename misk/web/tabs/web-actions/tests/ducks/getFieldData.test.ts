@@ -4,7 +4,7 @@ import {
   generateTypesMetadata,
   getFieldData,
   padId,
-  recursivelySetDirtyInput,
+  recursivelySetDirtyInput
 } from "../../src/ducks"
 import { nonTypedActionAPI, simpleForm, testTypes } from "../testUtilities"
 
@@ -17,7 +17,7 @@ describe("Get formatted form data", () => {
   it("get non-typed POST", () => {
     const typesMetadata = generateTypesMetadata({
       ...nonTypedActionAPI,
-      httpMethod: HTTPMethod.POST,
+      httpMethod: HTTPMethod.POST
     })
     const data = "Alpha"
     const getData = getFieldData(
@@ -34,7 +34,7 @@ describe("Get formatted form data", () => {
       ...nonTypedActionAPI,
       httpMethod: HTTPMethod.POST,
       requestType: "noRepeatedInt",
-      types: testTypes,
+      types: testTypes
     })
     const data = "123456"
     const fieldId = typesMetadata.get("0").idChildren.first() as string
@@ -59,7 +59,7 @@ describe("Get formatted form data", () => {
       ...nonTypedActionAPI,
       httpMethod: HTTPMethod.POST,
       requestType: "nestedNoRepeatedInt",
-      types: testTypes,
+      types: testTypes
     })
     const data = "123456"
     const fieldGroupId = typesMetadata.get("0").idChildren.first() as string
@@ -85,7 +85,7 @@ describe("Get formatted form data", () => {
       ...nonTypedActionAPI,
       httpMethod: HTTPMethod.POST,
       requestType: "repeatedShort",
-      types: testTypes,
+      types: testTypes
     })
     const repeatedParentId = typesMetadata.get("0").idChildren.first() as string
     typesMetadata = addRepeatedField(testTypes, typesMetadata, repeatedParentId)
@@ -103,7 +103,7 @@ describe("Get formatted form data", () => {
       {
         ...simpleForm,
         [`Tag::${padId(fieldId1)}`]: { data: data1 },
-        [`Tag::${padId(fieldId2)}`]: { data: data2 },
+        [`Tag::${padId(fieldId2)}`]: { data: data2 }
       },
       "Tag"
     )
@@ -116,7 +116,7 @@ describe("Get formatted form data", () => {
       {
         ...simpleForm,
         [`Tag::${padId(fieldId1)}`]: { data: data1 },
-        [`Tag::${padId(fieldId2)}`]: { data: data2 },
+        [`Tag::${padId(fieldId2)}`]: { data: data2 }
       },
       "Tag"
     )
@@ -127,7 +127,7 @@ describe("Get formatted form data", () => {
       ...nonTypedActionAPI,
       httpMethod: HTTPMethod.POST,
       requestType: "repeatedNestedNoRepeatedInt",
-      types: testTypes,
+      types: testTypes
     })
     const repeatedParentId = typesMetadata.get("0").idChildren.first() as string
     typesMetadata = addRepeatedField(testTypes, typesMetadata, repeatedParentId)
@@ -153,7 +153,7 @@ describe("Get formatted form data", () => {
       {
         ...simpleForm,
         [`Tag::${padId(fieldId1)}`]: { data: data1 },
-        [`Tag::${padId(fieldId2)}`]: { data: data2 },
+        [`Tag::${padId(fieldId2)}`]: { data: data2 }
       },
       "Tag"
     )
@@ -166,7 +166,7 @@ describe("Get formatted form data", () => {
       {
         ...simpleForm,
         [`Tag::${padId(fieldId1)}`]: { data: data1 },
-        [`Tag::${padId(fieldId2)}`]: { data: data2 },
+        [`Tag::${padId(fieldId2)}`]: { data: data2 }
       },
       "Tag"
     )
@@ -177,7 +177,7 @@ describe("Get formatted form data", () => {
       ...nonTypedActionAPI,
       httpMethod: HTTPMethod.POST,
       requestType: "repeatedNestedRepeatedShort",
-      types: testTypes,
+      types: testTypes
     })
     const repeatedParentId = typesMetadata.get("0").idChildren.first() as string
     typesMetadata = addRepeatedField(testTypes, typesMetadata, repeatedParentId)
@@ -216,7 +216,7 @@ describe("Get formatted form data", () => {
         ...simpleForm,
         [`Tag::${padId(fieldId1)}`]: { data: data1 },
         [`Tag::${padId(fieldId2)}`]: { data: data2 },
-        [`Tag::${padId(fieldId3)}`]: { data: data3 },
+        [`Tag::${padId(fieldId3)}`]: { data: data3 }
       },
       "Tag"
     )
@@ -231,7 +231,7 @@ describe("Get formatted form data", () => {
         ...simpleForm,
         [`Tag::${padId(fieldId1)}`]: { data: data1 },
         [`Tag::${padId(fieldId2)}`]: { data: data2 },
-        [`Tag::${padId(fieldId3)}`]: { data: data3 },
+        [`Tag::${padId(fieldId3)}`]: { data: data3 }
       },
       "Tag"
     )
@@ -242,7 +242,7 @@ describe("Get formatted form data", () => {
       ...nonTypedActionAPI,
       httpMethod: HTTPMethod.POST,
       requestType: "repeatedNestedRepeatedShort",
-      types: testTypes,
+      types: testTypes
     })
     const repeatedParentId = typesMetadata.get("0").idChildren.first() as string
     typesMetadata = addRepeatedField(testTypes, typesMetadata, repeatedParentId)
@@ -258,7 +258,7 @@ describe("Get formatted form data", () => {
       typesMetadata,
       "0",
       {
-        ...simpleForm,
+        ...simpleForm
       },
       "Tag"
     )

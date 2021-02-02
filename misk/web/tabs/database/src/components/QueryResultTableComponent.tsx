@@ -1,7 +1,7 @@
 /** @jsx jsx */
 import { Drawer, Icon, Position } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
-import { css, jsx } from "@emotion/react"
+import { css, jsx } from "@emotion/core"
 import { Table } from "@misk/core"
 import { useState } from "react"
 import { Metadata } from "../components"

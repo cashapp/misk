@@ -5,7 +5,7 @@ import {
   padStart,
   reduce,
   size,
-  uniqueId,
+  uniqueId
 } from "lodash"
 import { OrderedMap, OrderedSet } from "immutable"
 import {
@@ -14,7 +14,7 @@ import {
   IFieldTypeMetadata,
   ITypesFieldMetadata,
   ServerTypes,
-  TypescriptBaseTypes,
+  TypescriptBaseTypes
 } from "../form-builder"
 
 export const padId = (id: string) => padStart(id, 10, "0")
@@ -60,7 +60,10 @@ export interface IParseEnumType {
 }
 
 export const parseEnumType = (serverType: string): IParseEnumType => {
-  const enumType = serverType.split("<")[1].split(">")[0].split(",")
+  const enumType = serverType
+    .split("<")[1]
+    .split(">")[0]
+    .split(",")
   const enumClassName = enumType[0]
   const enumValues = enumType.slice(1)
   return { enumClassName, enumValues }
@@ -101,7 +104,7 @@ export const getFieldData = (
       idParent,
       name,
       repeated,
-      serverType,
+      serverType
     } = typesMetadata.get(id)
     const parent = typesMetadata.get(idParent)
     if (id === "0" && idChildren.size === 0) {
@@ -183,7 +186,7 @@ const buildTypeFieldMetadata = (
   name,
   repeated,
   serverType,
-  typescriptType,
+  typescriptType
 })
 
 const generateFieldTypesMetadata = (
@@ -397,7 +400,7 @@ export const addRepeatedField = (
         {
           name: parentMetadata.name,
           repeated: false,
-          type: parentMetadata.serverType,
+          type: parentMetadata.serverType
         },
         types,
         newTypesMetadata,
@@ -462,7 +465,7 @@ export const recursivelySetDirtyInput = (
   while (parent !== "0") {
     const {
       idChildren: parentChildren,
-      idParent: newParent,
+      idParent: newParent
     } = newTypesMetadata.get(parent)
     const otherDirtyInputChildren = parentChildren
       .map(
