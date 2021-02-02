@@ -1,6 +1,6 @@
 /** @jsx jsx */
 import { Collapse } from "@blueprintjs/core"
-import { jsx } from "@emotion/react"
+import { jsx } from "@emotion/core"
 import { FlexContainer } from "@misk/core"
 import React, { useState } from "react"
 import { IDatabaseQueryMetadataAPI } from "./DatabaseInterfaces"

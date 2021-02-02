@@ -1,7 +1,7 @@
 import {
   MiskNavbarContainer,
   miskDashboardMetadataUrl,
-  miskServiceMetadataUrl,
+  miskServiceMetadataUrl
 } from "@misk/core"
 import * as React from "react"
 

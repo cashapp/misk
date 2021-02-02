@@ -19,7 +19,7 @@ class TabContainer extends React.Component<IState & IDispatchProps, IState> {
     const resources = simpleSelectorGet(this.props.simpleRedux, [
       "config",
       "data",
-      "resources",
+      "resources"
     ])
     return <ConfigComponent resources={resources} />
   }
@@ -28,7 +28,7 @@ class TabContainer extends React.Component<IState & IDispatchProps, IState> {
 const mapStateToProps = (state: IState) => rootSelectors(state)
 
 const mapDispatchToProps = {
-  ...rootDispatcher,
+  ...rootDispatcher
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(TabContainer)
