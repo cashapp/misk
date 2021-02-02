@@ -25,12 +25,12 @@ dependencies {
   }
   implementation dep.docker
   implementation dep.guice
-  implementation project(':misk')
-  implementation project(':misk-core')
-  implementation project(':misk-inject')
-  implementation project(':misk-service')
-  implementation project(':misk-testing')
-  implementation project(':misk-zookeeper')
+  api project(':misk')
+  api project(':misk-core')
+  api project(':misk-inject')
+  api project(':misk-service')
+  api project(':misk-testing')
+  api project(':misk-zookeeper')
 }
 
 afterEvaluate { project ->

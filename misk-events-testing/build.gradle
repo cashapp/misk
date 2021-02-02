@@ -2,7 +2,7 @@ dependencies {
   implementation dep.guice
   api project(":misk-events-core")
   implementation dep.javaxInject
-  implementation project(":misk-inject")
+  api project(":misk-inject")
 
   testImplementation dep.assertj
   testImplementation dep.junitApi

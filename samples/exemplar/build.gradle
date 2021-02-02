@@ -4,11 +4,11 @@ dependencies {
   implementation dep.guice
   implementation dep.logbackClassic
   implementation dep.okHttp
-  implementation project(':misk')
-  implementation project(':misk-actions')
-  implementation project(':misk-core')
-  implementation project(':misk-inject')
-  implementation project(':misk-prometheus')
+  api project(':misk')
+  api project(':misk-actions')
+  api project(':misk-core')
+  api project(':misk-inject')
+  api project(':misk-prometheus')
 
   testImplementation project(':misk-testing')
   testImplementation dep.assertj
