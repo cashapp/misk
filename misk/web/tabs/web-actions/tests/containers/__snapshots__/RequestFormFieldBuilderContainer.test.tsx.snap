@@ -21,16 +21,16 @@ exports[`RequestFormFieldBuilderContainer Doesn't fail on empty metadata 1`] = `
 
 exports[`RequestFormFieldBuilderContainer Renders single body input 1`] = `
 <DocumentFragment>
-  .emotion-0 {
-  margin: 0px!important;
+  .emotion-1 {
+  margin: 0px !important;
 }
 
-.emotion-1 {
-  white-space: pre-line!important;
+.emotion-0 {
+  white-space: pre-line !important;
 }
 
 <div
-    class="bp3-form-group emotion-0"
+    class="bp3-form-group emotion-1"
   >
     <label
       class="bp3-label"
@@ -48,7 +48,7 @@ exports[`RequestFormFieldBuilderContainer Renders single body input 1`] = `
         class="bp3-control-group"
       >
         <textarea
-          class="bp3-input bp3-fill emotion-1"
+          class="bp3-input bp3-fill emotion-0"
           placeholder="Unparseable type. This input will return a string or JSON."
           style="height: 0px;"
         />
@@ -60,32 +60,27 @@ exports[`RequestFormFieldBuilderContainer Renders single body input 1`] = `
 
 exports[`RequestFormFieldBuilderContainer Renders typed form int field 1`] = `
 <DocumentFragment>
-  .emotion-0 {
+  .emotion-6 {
+  margin: 0px !important;
+}
+
+.emotion-0 {
   line-height: normal;
   text-transform: inherit;
 }
 
-.emotion-2 {
-  box-shadow: none!important;
+.emotion-7 {
+  box-shadow: none !important;
   border-left: 2px black;
   margin-bottom: 0px;
-  padding: 0px 0px 0px 15px!important;
+  padding: 0px 0px 0px 15px !important;
 }
 
-.emotion-3 {
-  margin: 0px!important;
+.emotion-3 span.bp3-popover-target {
+  display: inherit !important;
 }
 
 .emotion-4 {
-  white-space: -o-pre-wrap!important;
-  word-wrap: break-word!important;
-}
-
-.emotion-5 span.bp3-popover-target {
-  display: inherit!important;
-}
-
-.emotion-7 {
   line-height: normal;
   text-transform: inherit;
 }
@@ -154,17 +149,17 @@ exports[`RequestFormFieldBuilderContainer Renders typed form int field 1`] = `
       </button>
     </div>
     <div
-      class="bp3-card bp3-elevation-0 emotion-2"
+      class="bp3-card bp3-elevation-0 emotion-7"
     >
       <div>
         <div
-          class="bp3-form-group emotion-3"
+          class="bp3-form-group emotion-6"
         >
           <label
             class="bp3-label"
           >
             <span
-              class="emotion-4"
+              class="emotion-2"
             >
               Int Field (Int)
             </span>
@@ -180,7 +175,7 @@ exports[`RequestFormFieldBuilderContainer Renders typed form int field 1`] = `
               class="bp3-control-group"
             >
               <span
-                class="bp3-popover-wrapper emotion-5"
+                class="bp3-popover-wrapper emotion-3"
               >
                 <span
                   class="bp3-popover-target"
@@ -213,13 +208,13 @@ exports[`RequestFormFieldBuilderContainer Renders typed form int field 1`] = `
                 </span>
               </span>
               <span
-                class="bp3-popover-wrapper emotion-5"
+                class="bp3-popover-wrapper emotion-3"
               >
                 <span
                   class="bp3-popover-target"
                 >
                   <button
-                    class="bp3-button  emotion-7"
+                    class="bp3-button  emotion-4"
                     tabindex="0"
                     type="button"
                   >
@@ -251,6 +246,7 @@ exports[`RequestFormFieldBuilderContainer Renders typed form int field 1`] = `
                 <input
                   class="bp3-input"
                   placeholder="Int"
+                  style="padding-right: 10px;"
                   type="text"
                   value=""
                 />
@@ -266,32 +262,27 @@ exports[`RequestFormFieldBuilderContainer Renders typed form int field 1`] = `
 
 exports[`RequestFormFieldBuilderContainer Renders typed form multiple top level fields 1`] = `
 <DocumentFragment>
-  .emotion-0 {
+  .emotion-6 {
+  margin: 0px !important;
+}
+
+.emotion-0 {
   line-height: normal;
   text-transform: inherit;
 }
 
-.emotion-2 {
-  box-shadow: none!important;
+.emotion-22 {
+  box-shadow: none !important;
   border-left: 2px black;
   margin-bottom: 0px;
-  padding: 0px 0px 0px 15px!important;
+  padding: 0px 0px 0px 15px !important;
 }
 
-.emotion-3 {
-  margin: 0px!important;
+.emotion-3 span.bp3-popover-target {
+  display: inherit !important;
 }
 
 .emotion-4 {
-  white-space: -o-pre-wrap!important;
-  word-wrap: break-word!important;
-}
-
-.emotion-5 span.bp3-popover-target {
-  display: inherit!important;
-}
-
-.emotion-7 {
   line-height: normal;
   text-transform: inherit;
 }
@@ -360,17 +351,17 @@ exports[`RequestFormFieldBuilderContainer Renders typed form multiple top level 
       </button>
     </div>
     <div
-      class="bp3-card bp3-elevation-0 emotion-2"
+      class="bp3-card bp3-elevation-0 emotion-22"
     >
       <div>
         <div
-          class="bp3-form-group emotion-3"
+          class="bp3-form-group emotion-6"
         >
           <label
             class="bp3-label"
           >
             <span
-              class="emotion-4"
+              class="emotion-2"
             >
               Field 1 (Short)
             </span>
@@ -386,7 +377,7 @@ exports[`RequestFormFieldBuilderContainer Renders typed form multiple top level 
               class="bp3-control-group"
             >
               <span
-                class="bp3-popover-wrapper emotion-5"
+                class="bp3-popover-wrapper emotion-3"
               >
                 <span
                   class="bp3-popover-target"
@@ -419,13 +410,13 @@ exports[`RequestFormFieldBuilderContainer Renders typed form multiple top level 
                 </span>
               </span>
               <span
-                class="bp3-popover-wrapper emotion-5"
+                class="bp3-popover-wrapper emotion-3"
               >
                 <span
                   class="bp3-popover-target"
                 >
                   <button
-                    class="bp3-button  emotion-7"
+                    class="bp3-button  emotion-4"
                     tabindex="0"
                     type="button"
                   >
@@ -457,6 +448,7 @@ exports[`RequestFormFieldBuilderContainer Renders typed form multiple top level 
                 <input
                   class="bp3-input"
                   placeholder="Short"
+                  style="padding-right: 10px;"
                   type="text"
                   value=""
                 />
@@ -467,13 +459,13 @@ exports[`RequestFormFieldBuilderContainer Renders typed form multiple top level 
       </div>
       <div>
         <div
-          class="bp3-form-group emotion-3"
+          class="bp3-form-group emotion-6"
         >
           <label
             class="bp3-label"
           >
             <span
-              class="emotion-4"
+              class="emotion-2"
             >
               Field 2 (Int)
             </span>
@@ -489,7 +481,7 @@ exports[`RequestFormFieldBuilderContainer Renders typed form multiple top level 
               class="bp3-control-group"
             >
               <span
-                class="bp3-popover-wrapper emotion-5"
+                class="bp3-popover-wrapper emotion-3"
               >
                 <span
                   class="bp3-popover-target"
@@ -522,13 +514,13 @@ exports[`RequestFormFieldBuilderContainer Renders typed form multiple top level 
                 </span>
               </span>
               <span
-                class="bp3-popover-wrapper emotion-5"
+                class="bp3-popover-wrapper emotion-3"
               >
                 <span
                   class="bp3-popover-target"
                 >
                   <button
-                    class="bp3-button  emotion-7"
+                    class="bp3-button  emotion-4"
                     tabindex="0"
                     type="button"
                   >
@@ -560,6 +552,7 @@ exports[`RequestFormFieldBuilderContainer Renders typed form multiple top level 
                 <input
                   class="bp3-input"
                   placeholder="Int"
+                  style="padding-right: 10px;"
                   type="text"
                   value=""
                 />
@@ -570,13 +563,13 @@ exports[`RequestFormFieldBuilderContainer Renders typed form multiple top level 
       </div>
       <div>
         <div
-          class="bp3-form-group emotion-3"
+          class="bp3-form-group emotion-6"
         >
           <label
             class="bp3-label"
           >
             <span
-              class="emotion-4"
+              class="emotion-2"
             >
               Field 3 (Long)
             </span>
@@ -592,7 +585,7 @@ exports[`RequestFormFieldBuilderContainer Renders typed form multiple top level 
               class="bp3-control-group"
             >
               <span
-                class="bp3-popover-wrapper emotion-5"
+                class="bp3-popover-wrapper emotion-3"
               >
                 <span
                   class="bp3-popover-target"
@@ -625,13 +618,13 @@ exports[`RequestFormFieldBuilderContainer Renders typed form multiple top level 
                 </span>
               </span>
               <span
-                class="bp3-popover-wrapper emotion-5"
+                class="bp3-popover-wrapper emotion-3"
               >
                 <span
                   class="bp3-popover-target"
                 >
                   <button
-                    class="bp3-button  emotion-7"
+                    class="bp3-button  emotion-4"
                     tabindex="0"
                     type="button"
                   >
@@ -663,6 +656,7 @@ exports[`RequestFormFieldBuilderContainer Renders typed form multiple top level 
                 <input
                   class="bp3-input"
                   placeholder="Long"
+                  style="padding-right: 10px;"
                   type="text"
                   value=""
                 />
@@ -673,13 +667,13 @@ exports[`RequestFormFieldBuilderContainer Renders typed form multiple top level 
       </div>
       <div>
         <div
-          class="bp3-form-group emotion-3"
+          class="bp3-form-group emotion-6"
         >
           <label
             class="bp3-label"
           >
             <span
-              class="emotion-4"
+              class="emotion-2"
             >
               Field 4 (Short)
             </span>
@@ -695,7 +689,7 @@ exports[`RequestFormFieldBuilderContainer Renders typed form multiple top level 
               class="bp3-control-group"
             >
               <span
-                class="bp3-popover-wrapper emotion-5"
+                class="bp3-popover-wrapper emotion-3"
               >
                 <span
                   class="bp3-popover-target"
@@ -728,13 +722,13 @@ exports[`RequestFormFieldBuilderContainer Renders typed form multiple top level 
                 </span>
               </span>
               <span
-                class="bp3-popover-wrapper emotion-5"
+                class="bp3-popover-wrapper emotion-3"
               >
                 <span
                   class="bp3-popover-target"
                 >
                   <button
-                    class="bp3-button  emotion-7"
+                    class="bp3-button  emotion-4"
                     tabindex="0"
                     type="button"
                   >
@@ -766,6 +760,7 @@ exports[`RequestFormFieldBuilderContainer Renders typed form multiple top level 
                 <input
                   class="bp3-input"
                   placeholder="Short"
+                  style="padding-right: 10px;"
                   type="text"
                   value=""
                 />
@@ -781,32 +776,27 @@ exports[`RequestFormFieldBuilderContainer Renders typed form multiple top level 
 
 exports[`RequestFormFieldBuilderContainer Renders typed form nested int field 1`] = `
 <DocumentFragment>
-  .emotion-0 {
+  .emotion-6 {
+  margin: 0px !important;
+}
+
+.emotion-0 {
   line-height: normal;
   text-transform: inherit;
 }
 
-.emotion-2 {
-  box-shadow: none!important;
+.emotion-7 {
+  box-shadow: none !important;
   border-left: 2px black;
   margin-bottom: 0px;
-  padding: 0px 0px 0px 15px!important;
+  padding: 0px 0px 0px 15px !important;
+}
+
+.emotion-3 span.bp3-popover-target {
+  display: inherit !important;
 }
 
 .emotion-4 {
-  margin: 0px!important;
-}
-
-.emotion-5 {
-  white-space: -o-pre-wrap!important;
-  word-wrap: break-word!important;
-}
-
-.emotion-6 span.bp3-popover-target {
-  display: inherit!important;
-}
-
-.emotion-8 {
   line-height: normal;
   text-transform: inherit;
 }
@@ -875,21 +865,21 @@ exports[`RequestFormFieldBuilderContainer Renders typed form nested int field 1`
       </button>
     </div>
     <div
-      class="bp3-card bp3-elevation-0 emotion-2"
+      class="bp3-card bp3-elevation-0 emotion-7"
     >
       <div>
         <div
-          class="bp3-card bp3-elevation-0 emotion-2"
+          class="bp3-card bp3-elevation-0 emotion-7"
         >
           <div>
             <div
-              class="bp3-form-group emotion-4"
+              class="bp3-form-group emotion-6"
             >
               <label
                 class="bp3-label"
               >
                 <span
-                  class="emotion-5"
+                  class="emotion-2"
                 >
                   Int Field (Int)
                 </span>
@@ -905,7 +895,7 @@ exports[`RequestFormFieldBuilderContainer Renders typed form nested int field 1`
                   class="bp3-control-group"
                 >
                   <span
-                    class="bp3-popover-wrapper emotion-6"
+                    class="bp3-popover-wrapper emotion-3"
                   >
                     <span
                       class="bp3-popover-target"
@@ -938,13 +928,13 @@ exports[`RequestFormFieldBuilderContainer Renders typed form nested int field 1`
                     </span>
                   </span>
                   <span
-                    class="bp3-popover-wrapper emotion-6"
+                    class="bp3-popover-wrapper emotion-3"
                   >
                     <span
                       class="bp3-popover-target"
                     >
                       <button
-                        class="bp3-button  emotion-8"
+                        class="bp3-button  emotion-4"
                         tabindex="0"
                         type="button"
                       >
@@ -976,6 +966,7 @@ exports[`RequestFormFieldBuilderContainer Renders typed form nested int field 1`
                     <input
                       class="bp3-input"
                       placeholder="Int"
+                      style="padding-right: 10px;"
                       type="text"
                       value=""
                     />
@@ -993,43 +984,29 @@ exports[`RequestFormFieldBuilderContainer Renders typed form nested int field 1`
 
 exports[`RequestFormFieldBuilderContainer Renders typed form repeated nested int field 1`] = `
 <DocumentFragment>
-  .emotion-0 {
+  .emotion-16 {
+  margin: 0px !important;
+}
+
+.emotion-0 {
   line-height: normal;
   text-transform: inherit;
 }
 
-.emotion-2 {
-  box-shadow: none!important;
+.emotion-17 {
+  box-shadow: none !important;
   border-left: 2px black;
   margin-bottom: 0px;
-  padding: 0px 0px 0px 15px!important;
+  padding: 0px 0px 0px 15px !important;
 }
 
-.emotion-3 {
-  white-space: -o-pre-wrap!important;
-  word-wrap: break-word!important;
+.emotion-3 span.bp3-popover-target {
+  display: inherit !important;
 }
 
-.emotion-4 span.bp3-popover-target {
-  display: inherit!important;
-}
-
-.emotion-9 {
+.emotion-6 {
   line-height: normal;
   text-transform: inherit;
-}
-
-.emotion-10 span.bp3-popover-target {
-  display: inherit!important;
-}
-
-.emotion-11 {
-  line-height: normal;
-  text-transform: inherit;
-}
-
-.emotion-16 {
-  margin: 0px!important;
 }
 
 <div>
@@ -1096,14 +1073,14 @@ exports[`RequestFormFieldBuilderContainer Renders typed form repeated nested int
       </button>
     </div>
     <div
-      class="bp3-card bp3-elevation-0 emotion-2"
+      class="bp3-card bp3-elevation-0 emotion-17"
     >
       <div>
         <label
           class="bp3-label"
         >
           <span
-            class="emotion-3"
+            class="emotion-2"
           >
             Repeated Nested Int Field (nestedNoRepeatedInt)
           </span>
@@ -1112,7 +1089,7 @@ exports[`RequestFormFieldBuilderContainer Renders typed form repeated nested int
           class="bp3-button-group"
         >
           <span
-            class="bp3-popover-wrapper emotion-4"
+            class="bp3-popover-wrapper emotion-3"
           >
             <span
               class="bp3-popover-target"
@@ -1146,14 +1123,14 @@ exports[`RequestFormFieldBuilderContainer Renders typed form repeated nested int
           </span>
         </div>
         <div
-          class="bp3-card bp3-elevation-0 emotion-2"
+          class="bp3-card bp3-elevation-0 emotion-17"
         >
           <div>
             <label
               class="bp3-label"
             >
               <span
-                class="emotion-3"
+                class="emotion-2"
               >
                 Repeated Nested Int Field (nestedNoRepeatedInt)
               </span>
@@ -1162,7 +1139,7 @@ exports[`RequestFormFieldBuilderContainer Renders typed form repeated nested int
               class="bp3-button-group"
             >
               <span
-                class="bp3-popover-wrapper emotion-4"
+                class="bp3-popover-wrapper emotion-3"
               >
                 <span
                   class="bp3-popover-target"
@@ -1195,13 +1172,13 @@ exports[`RequestFormFieldBuilderContainer Renders typed form repeated nested int
                 </span>
               </span>
               <span
-                class="bp3-popover-wrapper emotion-4"
+                class="bp3-popover-wrapper emotion-3"
               >
                 <span
                   class="bp3-popover-target"
                 >
                   <button
-                    class="bp3-button  emotion-9"
+                    class="bp3-button  emotion-6"
                     tabindex="0"
                     type="button"
                   >
@@ -1228,13 +1205,13 @@ exports[`RequestFormFieldBuilderContainer Renders typed form repeated nested int
                 </span>
               </span>
               <span
-                class="bp3-popover-wrapper emotion-10"
+                class="bp3-popover-wrapper emotion-3"
               >
                 <span
                   class="bp3-popover-target"
                 >
                   <button
-                    class="bp3-button  emotion-11"
+                    class="bp3-button  emotion-6"
                     tabindex="0"
                     type="button"
                   >
@@ -1262,14 +1239,14 @@ exports[`RequestFormFieldBuilderContainer Renders typed form repeated nested int
               </span>
             </div>
             <div
-              class="bp3-card bp3-elevation-0 emotion-2"
+              class="bp3-card bp3-elevation-0 emotion-17"
             >
               <div>
                 <label
                   class="bp3-label"
                 >
                   <span
-                    class="emotion-3"
+                    class="emotion-2"
                   >
                     Nested Int Field (noRepeatedInt)
                   </span>
@@ -1278,7 +1255,7 @@ exports[`RequestFormFieldBuilderContainer Renders typed form repeated nested int
                   class="bp3-button-group"
                 >
                   <span
-                    class="bp3-popover-wrapper emotion-4"
+                    class="bp3-popover-wrapper emotion-3"
                   >
                     <span
                       class="bp3-popover-target"
@@ -1312,7 +1289,7 @@ exports[`RequestFormFieldBuilderContainer Renders typed form repeated nested int
                   </span>
                 </div>
                 <div
-                  class="bp3-card bp3-elevation-0 emotion-2"
+                  class="bp3-card bp3-elevation-0 emotion-17"
                 >
                   <div>
                     <div
@@ -1322,7 +1299,7 @@ exports[`RequestFormFieldBuilderContainer Renders typed form repeated nested int
                         class="bp3-label"
                       >
                         <span
-                          class="emotion-3"
+                          class="emotion-2"
                         >
                           Int Field (Int)
                         </span>
@@ -1338,7 +1315,7 @@ exports[`RequestFormFieldBuilderContainer Renders typed form repeated nested int
                           class="bp3-control-group"
                         >
                           <span
-                            class="bp3-popover-wrapper emotion-4"
+                            class="bp3-popover-wrapper emotion-3"
                           >
                             <span
                               class="bp3-popover-target"
@@ -1371,13 +1348,13 @@ exports[`RequestFormFieldBuilderContainer Renders typed form repeated nested int
                             </span>
                           </span>
                           <span
-                            class="bp3-popover-wrapper emotion-4"
+                            class="bp3-popover-wrapper emotion-3"
                           >
                             <span
                               class="bp3-popover-target"
                             >
                               <button
-                                class="bp3-button  emotion-9"
+                                class="bp3-button  emotion-6"
                                 tabindex="0"
                                 type="button"
                               >
@@ -1409,6 +1386,7 @@ exports[`RequestFormFieldBuilderContainer Renders typed form repeated nested int
                             <input
                               class="bp3-input"
                               placeholder="Int"
+                              style="padding-right: 10px;"
                               type="text"
                               value=""
                             />
@@ -1430,43 +1408,29 @@ exports[`RequestFormFieldBuilderContainer Renders typed form repeated nested int
 
 exports[`RequestFormFieldBuilderContainer Renders typed form repeated nested repeated short field 1`] = `
 <DocumentFragment>
-  .emotion-0 {
+  .emotion-18 {
+  margin: 0px !important;
+}
+
+.emotion-0 {
   line-height: normal;
   text-transform: inherit;
 }
 
-.emotion-2 {
-  box-shadow: none!important;
+.emotion-19 {
+  box-shadow: none !important;
   border-left: 2px black;
   margin-bottom: 0px;
-  padding: 0px 0px 0px 15px!important;
+  padding: 0px 0px 0px 15px !important;
 }
 
-.emotion-3 {
-  white-space: -o-pre-wrap!important;
-  word-wrap: break-word!important;
+.emotion-3 span.bp3-popover-target {
+  display: inherit !important;
 }
 
-.emotion-4 span.bp3-popover-target {
-  display: inherit!important;
-}
-
-.emotion-9 {
+.emotion-6 {
   line-height: normal;
   text-transform: inherit;
-}
-
-.emotion-10 span.bp3-popover-target {
-  display: inherit!important;
-}
-
-.emotion-11 {
-  line-height: normal;
-  text-transform: inherit;
-}
-
-.emotion-16 {
-  margin: 0px!important;
 }
 
 <div>
@@ -1533,14 +1497,14 @@ exports[`RequestFormFieldBuilderContainer Renders typed form repeated nested rep
       </button>
     </div>
     <div
-      class="bp3-card bp3-elevation-0 emotion-2"
+      class="bp3-card bp3-elevation-0 emotion-19"
     >
       <div>
         <label
           class="bp3-label"
         >
           <span
-            class="emotion-3"
+            class="emotion-2"
           >
             Nested Repeated Short Field (nestedRepeatedShort)
           </span>
@@ -1549,7 +1513,7 @@ exports[`RequestFormFieldBuilderContainer Renders typed form repeated nested rep
           class="bp3-button-group"
         >
           <span
-            class="bp3-popover-wrapper emotion-4"
+            class="bp3-popover-wrapper emotion-3"
           >
             <span
               class="bp3-popover-target"
@@ -1583,14 +1547,14 @@ exports[`RequestFormFieldBuilderContainer Renders typed form repeated nested rep
           </span>
         </div>
         <div
-          class="bp3-card bp3-elevation-0 emotion-2"
+          class="bp3-card bp3-elevation-0 emotion-19"
         >
           <div>
             <label
               class="bp3-label"
             >
               <span
-                class="emotion-3"
+                class="emotion-2"
               >
                 Nested Repeated Short Field (nestedRepeatedShort)
               </span>
@@ -1599,7 +1563,7 @@ exports[`RequestFormFieldBuilderContainer Renders typed form repeated nested rep
               class="bp3-button-group"
             >
               <span
-                class="bp3-popover-wrapper emotion-4"
+                class="bp3-popover-wrapper emotion-3"
               >
                 <span
                   class="bp3-popover-target"
@@ -1632,13 +1596,13 @@ exports[`RequestFormFieldBuilderContainer Renders typed form repeated nested rep
                 </span>
               </span>
               <span
-                class="bp3-popover-wrapper emotion-4"
+                class="bp3-popover-wrapper emotion-3"
               >
                 <span
                   class="bp3-popover-target"
                 >
                   <button
-                    class="bp3-button  emotion-9"
+                    class="bp3-button  emotion-6"
                     tabindex="0"
                     type="button"
                   >
@@ -1665,13 +1629,13 @@ exports[`RequestFormFieldBuilderContainer Renders typed form repeated nested rep
                 </span>
               </span>
               <span
-                class="bp3-popover-wrapper emotion-10"
+                class="bp3-popover-wrapper emotion-3"
               >
                 <span
                   class="bp3-popover-target"
                 >
                   <button
-                    class="bp3-button  emotion-11"
+                    class="bp3-button  emotion-6"
                     tabindex="0"
                     type="button"
                   >
@@ -1699,14 +1663,14 @@ exports[`RequestFormFieldBuilderContainer Renders typed form repeated nested rep
               </span>
             </div>
             <div
-              class="bp3-card bp3-elevation-0 emotion-2"
+              class="bp3-card bp3-elevation-0 emotion-19"
             >
               <div>
                 <label
                   class="bp3-label"
                 >
                   <span
-                    class="emotion-3"
+                    class="emotion-2"
                   >
                     Nested Short Field (repeatedShort)
                   </span>
@@ -1715,7 +1679,7 @@ exports[`RequestFormFieldBuilderContainer Renders typed form repeated nested rep
                   class="bp3-button-group"
                 >
                   <span
-                    class="bp3-popover-wrapper emotion-4"
+                    class="bp3-popover-wrapper emotion-3"
                   >
                     <span
                       class="bp3-popover-target"
@@ -1749,18 +1713,18 @@ exports[`RequestFormFieldBuilderContainer Renders typed form repeated nested rep
                   </span>
                 </div>
                 <div
-                  class="bp3-card bp3-elevation-0 emotion-2"
+                  class="bp3-card bp3-elevation-0 emotion-19"
                 >
                   <div>
                     <div>
                       <div
-                        class="bp3-form-group emotion-16"
+                        class="bp3-form-group emotion-18"
                       >
                         <label
                           class="bp3-label"
                         >
                           <span
-                            class="emotion-3"
+                            class="emotion-2"
                           >
                             Repeated Short Field (Short)
                           </span>
@@ -1776,7 +1740,7 @@ exports[`RequestFormFieldBuilderContainer Renders typed form repeated nested rep
                             class="bp3-control-group"
                           >
                             <span
-                              class="bp3-popover-wrapper emotion-4"
+                              class="bp3-popover-wrapper emotion-3"
                             >
                               <span
                                 class="bp3-popover-target"
@@ -1809,13 +1773,13 @@ exports[`RequestFormFieldBuilderContainer Renders typed form repeated nested rep
                               </span>
                             </span>
                             <span
-                              class="bp3-popover-wrapper emotion-4"
+                              class="bp3-popover-wrapper emotion-3"
                             >
                               <span
                                 class="bp3-popover-target"
                               >
                                 <button
-                                  class="bp3-button  emotion-9"
+                                  class="bp3-button  emotion-6"
                                   tabindex="0"
                                   type="button"
                                 >
@@ -1842,13 +1806,13 @@ exports[`RequestFormFieldBuilderContainer Renders typed form repeated nested rep
                               </span>
                             </span>
                             <span
-                              class="bp3-popover-wrapper emotion-10"
+                              class="bp3-popover-wrapper emotion-3"
                             >
                               <span
                                 class="bp3-popover-target"
                               >
                                 <button
-                                  class="bp3-button  emotion-11"
+                                  class="bp3-button  emotion-6"
                                   tabindex="0"
                                   type="button"
                                 >
@@ -1880,6 +1844,7 @@ exports[`RequestFormFieldBuilderContainer Renders typed form repeated nested rep
                               <input
                                 class="bp3-input"
                                 placeholder="Short"
+                                style="padding-right: 10px;"
                                 type="text"
                                 value=""
                               />
@@ -1902,41 +1867,27 @@ exports[`RequestFormFieldBuilderContainer Renders typed form repeated nested rep
 
 exports[`RequestFormFieldBuilderContainer Renders typed form repeated short field 1`] = `
 <DocumentFragment>
-  .emotion-0 {
+  .emotion-8 {
+  margin: 0px !important;
+}
+
+.emotion-0 {
   line-height: normal;
   text-transform: inherit;
-}
-
-.emotion-2 {
-  box-shadow: none!important;
-  border-left: 2px black;
-  margin-bottom: 0px;
-  padding: 0px 0px 0px 15px!important;
-}
-
-.emotion-3 {
-  margin: 0px!important;
-}
-
-.emotion-4 {
-  white-space: -o-pre-wrap!important;
-  word-wrap: break-word!important;
-}
-
-.emotion-5 span.bp3-popover-target {
-  display: inherit!important;
-}
-
-.emotion-7 {
-  line-height: normal;
-  text-transform: inherit;
-}
-
-.emotion-8 span.bp3-popover-target {
-  display: inherit!important;
 }
 
 .emotion-9 {
+  box-shadow: none !important;
+  border-left: 2px black;
+  margin-bottom: 0px;
+  padding: 0px 0px 0px 15px !important;
+}
+
+.emotion-3 span.bp3-popover-target {
+  display: inherit !important;
+}
+
+.emotion-4 {
   line-height: normal;
   text-transform: inherit;
 }
@@ -2005,18 +1956,18 @@ exports[`RequestFormFieldBuilderContainer Renders typed form repeated short fiel
       </button>
     </div>
     <div
-      class="bp3-card bp3-elevation-0 emotion-2"
+      class="bp3-card bp3-elevation-0 emotion-9"
     >
       <div>
         <div>
           <div
-            class="bp3-form-group emotion-3"
+            class="bp3-form-group emotion-8"
           >
             <label
               class="bp3-label"
             >
               <span
-                class="emotion-4"
+                class="emotion-2"
               >
                 Repeated Short Field (Short)
               </span>
@@ -2032,7 +1983,7 @@ exports[`RequestFormFieldBuilderContainer Renders typed form repeated short fiel
                 class="bp3-control-group"
               >
                 <span
-                  class="bp3-popover-wrapper emotion-5"
+                  class="bp3-popover-wrapper emotion-3"
                 >
                   <span
                     class="bp3-popover-target"
@@ -2065,13 +2016,13 @@ exports[`RequestFormFieldBuilderContainer Renders typed form repeated short fiel
                   </span>
                 </span>
                 <span
-                  class="bp3-popover-wrapper emotion-5"
+                  class="bp3-popover-wrapper emotion-3"
                 >
                   <span
                     class="bp3-popover-target"
                   >
                     <button
-                      class="bp3-button  emotion-7"
+                      class="bp3-button  emotion-4"
                       tabindex="0"
                       type="button"
                     >
@@ -2098,13 +2049,13 @@ exports[`RequestFormFieldBuilderContainer Renders typed form repeated short fiel
                   </span>
                 </span>
                 <span
-                  class="bp3-popover-wrapper emotion-8"
+                  class="bp3-popover-wrapper emotion-3"
                 >
                   <span
                     class="bp3-popover-target"
                   >
                     <button
-                      class="bp3-button  emotion-9"
+                      class="bp3-button  emotion-4"
                       tabindex="0"
                       type="button"
                     >
@@ -2136,6 +2087,7 @@ exports[`RequestFormFieldBuilderContainer Renders typed form repeated short fiel
                   <input
                     class="bp3-input"
                     placeholder="Short"
+                    style="padding-right: 10px;"
                     type="text"
                     value=""
                   />
