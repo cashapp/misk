@@ -9,7 +9,9 @@ data class Response<out T>(
   val body: T,
   val headers: Headers = headersOf(),
   val statusCode: Int = 200
-)
+) {
+  override fun toString(): String = "body=$body, statusCode=$statusCode"
+}
 
 interface ResponseBody {
   fun writeTo(sink: BufferedSink)
