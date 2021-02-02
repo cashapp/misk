@@ -1,6 +1,6 @@
 /** @jsx jsx */
 import { Button, ControlGroup, Menu } from "@blueprintjs/core"
-import { jsx } from "@emotion/react"
+import { jsx } from "@emotion/core"
 import { CodePreContainer, HTTPMethodIntent } from "@misk/core"
 import { HTTPMethodDispatch, simpleSelectorGet } from "@misk/simpleredux"
 import { HTTPMethod } from "http-method-enum"
@@ -14,18 +14,18 @@ import {
   MetadataCopyToClipboard,
   StatusTagComponent,
   MetadataCollapse,
-  QueryResultTableComponent,
+  QueryResultTableComponent
 } from "../components"
 import {
   IDispatchProps,
   IState,
   mapDispatchToProps,
-  mapStateToProps,
+  mapStateToProps
 } from "../ducks"
 import {
   IDatabaseQueryMetadataAPI,
   IRunQueryAPIRequest,
-  IRunQueryAPIResponse,
+  IRunQueryAPIResponse
 } from "./DatabaseInterfaces"
 
 /**
@@ -46,7 +46,7 @@ const SendQueryContainer = (
     formData,
     isOpenRequestBodyPreview,
     setIsOpenRequestBodyPreview,
-    tag,
+    tag
   } = props
   const url = databaseQuery.queryWebActionPath
   const method: HTTPMethod = HTTPMethod.POST
@@ -65,7 +65,7 @@ const SendQueryContainer = (
     simpleSelectorGet(props.simpleRedux, [
       `${tag}::Response`,
       "error",
-      "response",
+      "response"
     ])
   )
 
@@ -81,7 +81,7 @@ const SendQueryContainer = (
   if (
     simpleSelectorGet(props.simpleRedux, [
       `${tag}::ButtonRequestBody`,
-      "data",
+      "data"
     ]) == undefined
   ) {
     props.simpleMergeData(`${tag}::ButtonRequestBody`, true)
@@ -91,7 +91,7 @@ const SendQueryContainer = (
   if (
     simpleSelectorGet(props.simpleRedux, [
       `${tag}::ButtonFormRequestBody`,
-      "data",
+      "data"
     ]) == undefined
   ) {
     props.simpleMergeData(`${tag}::ButtonFormRequestBody`, true)
@@ -116,13 +116,13 @@ const SendQueryContainer = (
             HTTPMethodDispatch(props)[method](`${tag}::Response`, url, {
               entityClass: databaseQuery.entityClass,
               queryClass: databaseQuery.queryClass,
-              query: formData || {},
+              query: formData || {}
             } as IRunQueryAPIRequest)
           }}
           intent={HTTPMethodIntent[method]}
           loading={simpleSelectorGet(props.simpleRedux, [
             `${tag}::Response`,
-            "loading",
+            "loading"
           ])}
           text={"Run Query"}
         />

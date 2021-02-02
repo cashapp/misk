@@ -8,31 +8,32 @@
     "ci-build": "npm install && npm run-script clean && npm run-script prebuild && cross-env NODE_ENV=production npm run-script lib && npm run-script test ",
     "dev-build": "npm run-script dev-lib ",
     "clean": "rm -rf demo lib",
-    "clean-build-files": "rm .hash package-lock.json package.json tsconfig.json webpack.config.js",
+    "clean-build-files": "rm .hash package-lock.json package.json tsconfig.json tslint.json webpack.config.js",
     "lib": "cross-env NODE_ENV=production webpack",
     "dev-lib": "cross-env NODE_ENV=development webpack",
-    "lint": "mkdir -p src tests && prettier --write --config package.json \"{src/**/,tests/**/,.}*.{md,css,sass,less,json,js,jsx,ts,tsx}\"",
+    "lint": "prettier --write --config package.json \".{/src/**/,/}*.{md,css,scss,less,json,js,jsx,ts,tsx}\"",
     "prebuild": "npm run-script lint",
     "reinstall": "rm -rf node_modules && npm run-script install",
     "start": "npm run-script prebuild && cross-env NODE_ENV=development webpack-dev-server",
     "test": "jest --passWithNoTests --maxWorkers=2",
-    "zip": "tar --exclude='.gitignore' --exclude='.old_build_files' --exclude='package.json' --exclude='package-lock.json' --exclude='prettier.config.js' --exclude='tsconfig.json' --exclude='webpack.config.js' --exclude='yarn.lock' --exclude='demo' --exclude='lib' --exclude='.DS_Store' --exclude='*.log' --exclude='node_modules' --exclude='admin-dashboard.tgz' -czvf admin-dashboard.tgz ./"
+    "zip": "tar --exclude='.gitignore' --exclude='.old_build_files' --exclude='package.json' --exclude='package-lock.json' --exclude='prettier.config.js' --exclude='tsconfig.json' --exclude='tslint.json' --exclude='webpack.config.js' --exclude='yarn.lock' --exclude='demo' --exclude='lib' --exclude='.DS_Store' --exclude='*.log' --exclude='node_modules' --exclude='admin-dashboard.tgz' -czvf admin-dashboard.tgz ./"
   },
   "dependencies": {
-    "@misk/common": "0.2.0-12",
-    "@misk/core": "0.2.0-12",
-    "@misk/simpleredux": "0.2.0-12"
+    "@misk/common": "0.1.26",
+    "@misk/core": "0.1.26",
+    "@misk/simpleredux": "0.1.26"
   },
   "devDependencies": {
-    "@misk/dev": "0.2.0-12",
-    "@misk/test": "0.2.0-12",
-    "@misk/prettier": "0.2.0-12"
+    "@misk/dev": "0.1.26",
+    "@misk/tslint": "0.1.26",
+    "@misk/test": "0.1.26",
+    "@misk/prettier": "0.1.26"
   },
   "jest": {
     "testEnvironment": "jsdom",
     "snapshotSerializers": [
       "jest-serializer-html",
-      "@emotion/jest/serializer"
+      "jest-emotion"
     ],
     "transform": {
       "^.+\\.tsx?$": "ts-jest"
