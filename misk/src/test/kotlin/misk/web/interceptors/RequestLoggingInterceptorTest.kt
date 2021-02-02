@@ -27,6 +27,7 @@ import okhttp3.Headers
 import okhttp3.OkHttpClient
 import okhttp3.RequestBody.Companion.toRequestBody
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Condition
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.concurrent.TimeUnit
@@ -142,15 +143,20 @@ internal class RequestLoggingInterceptorTest {
 
   @Test
   fun capturesSubsetOfHeaders() {
+    val headerToNotLog = "X-Header-To-Not-Log"
+    val headerValueToNotLog = "some-value"
     assertThat(webTestClient.call("/call/withHeaders") {
       post("hello".toRequestBody(MediaTypes.APPLICATION_JSON_MEDIA_TYPE))
-      addHeader(FakeCallerAuthenticator.SERVICE_HEADER, "some-value")
+      addHeader(headerToNotLog, headerValueToNotLog)
     }.response.isSuccessful)
       .isTrue()
     val messages = logCollector.takeMessages(RequestLoggingInterceptor::class)
     assertThat(messages).containsExactly(
-      "RequestLoggingActionWithHeaders principal=some-value time=100.0 ms code=200 request=[hello, HeadersCapture(headers={accept=[*/*], accept-encoding=[gzip], connection=[keep-alive], content-length=[5], content-type=[application/json;charset=UTF-8]})] response=echo: hello"
+      "RequestLoggingActionWithHeaders principal=unknown time=100.0 ms code=200 request=[hello, HeadersCapture(headers={accept=[*/*], accept-encoding=[gzip], connection=[keep-alive], content-length=[5], content-type=[application/json;charset=UTF-8]})] response=echo: hello"
     )
+    assertThat(messages[0]).doesNotContain(headerToNotLog)
+    assertThat(messages[0]).doesNotContain(headerToNotLog.toLowerCase())
+    assertThat(messages[0]).doesNotContain(headerValueToNotLog)
   }
 
   internal class RateLimitingRequestLoggingAction @Inject constructor() : WebAction {
