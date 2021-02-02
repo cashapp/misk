@@ -1,12 +1,12 @@
 dependencies {
   implementation dep.guice
   api project(':misk-jdbc-testing')
-  implementation project(':misk')
-  implementation project(':misk-core')
-  implementation project(':misk-inject')
-  implementation project(':misk-jdbc')
-  implementation project(':misk-testing')
-  implementation project(':misk-hibernate')
+  api project(':misk')
+  api project(':misk-core')
+  api project(':misk-inject')
+  api project(':misk-jdbc')
+  api project(':misk-testing')
+  api project(':misk-hibernate')
   testImplementation dep.junitApi
 }
 
