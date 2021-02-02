@@ -13,14 +13,21 @@ import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.web.Get
 import misk.web.PathParam
+import misk.web.Post
+import misk.web.RequestBody
+import misk.web.RequestHeaders
 import misk.web.ResponseContentType
 import misk.web.WebActionModule
+import misk.web.WebTestClient
 import misk.web.WebTestingModule
 import misk.web.actions.WebAction
 import misk.web.jetty.JettyService
 import misk.web.mediatype.MediaTypes
+import okhttp3.Headers
 import okhttp3.OkHttpClient
+import okhttp3.RequestBody.Companion.toRequestBody
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Condition
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.concurrent.TimeUnit
@@ -32,6 +39,7 @@ internal class RequestLoggingInterceptorTest {
   val module = TestModule()
   val httpClient = OkHttpClient()
 
+  @Inject private lateinit var webTestClient: WebTestClient
   @Inject private lateinit var jettyService: JettyService
   @Inject private lateinit var logCollector: LogCollector
   @Inject private lateinit var fakeTicker: FakeTicker
@@ -133,6 +141,24 @@ internal class RequestLoggingInterceptorTest {
     return httpClient.newCall(request.build()).execute()
   }
 
+  @Test
+  fun capturesSubsetOfHeaders() {
+    val headerToNotLog = "X-Header-To-Not-Log"
+    val headerValueToNotLog = "some-value"
+    assertThat(webTestClient.call("/call/withHeaders") {
+      post("hello".toRequestBody(MediaTypes.APPLICATION_JSON_MEDIA_TYPE))
+      addHeader(headerToNotLog, headerValueToNotLog)
+    }.response.isSuccessful)
+      .isTrue()
+    val messages = logCollector.takeMessages(RequestLoggingInterceptor::class)
+    assertThat(messages).containsExactly(
+      "RequestLoggingActionWithHeaders principal=unknown time=100.0 ms code=200 request=[hello, HeadersCapture(headers={accept=[*/*], accept-encoding=[gzip], connection=[keep-alive], content-length=[5], content-type=[application/json;charset=UTF-8]})] response=echo: hello"
+    )
+    assertThat(messages[0]).doesNotContain(headerToNotLog)
+    assertThat(messages[0]).doesNotContain(headerToNotLog.toLowerCase())
+    assertThat(messages[0]).doesNotContain(headerValueToNotLog)
+  }
+
   internal class RateLimitingRequestLoggingAction @Inject constructor() : WebAction {
     @Get("/call/rateLimitingRequestLogging/{message}")
     @Unauthenticated
@@ -172,6 +198,14 @@ internal class RequestLoggingInterceptorTest {
     fun call(@PathParam message: String) = "echo: $message"
   }
 
+  internal class RequestLoggingActionWithHeaders @Inject constructor() : WebAction {
+    @Post("/call/withHeaders")
+    @Unauthenticated
+    @ResponseContentType(MediaTypes.APPLICATION_JSON)
+    @LogRequestResponse(ratePerSecond = 1L, errorRatePerSecond = 2L, bodySampling = 1.0, errorBodySampling = 1.0)
+    fun call(@RequestBody message: String, @RequestHeaders headers: Headers) = "echo: $message"
+  }
+
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(AccessControlModule())
@@ -189,6 +223,7 @@ internal class RequestLoggingInterceptorTest {
       install(WebActionModule.create<NoRateLimitingRequestLoggingAction>())
       install(WebActionModule.create<ExceptionThrowingRequestLoggingAction>())
       install(WebActionModule.create<NoRequestLoggingAction>())
+      install(WebActionModule.create<RequestLoggingActionWithHeaders>())
     }
   }
 }
