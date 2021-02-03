@@ -6,7 +6,7 @@ import {
   IDispatchProps,
   IState,
   mapDispatchToProps,
-  mapStateToProps,
+  mapStateToProps
 } from "../ducks"
 
 class TabContainer extends React.Component<IState & IDispatchProps, IState> {

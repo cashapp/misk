@@ -21,6 +21,7 @@ dependencies {
   testImplementation dep.junitParams
   testImplementation dep.docker
   testImplementation dep.awaitility
+  testImplementation dep.mockitoCore
   testImplementation project(':misk-testing')
   testImplementation project(':misk-feature-testing')
 }
