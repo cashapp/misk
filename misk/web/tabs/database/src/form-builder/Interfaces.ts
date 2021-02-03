@@ -6,7 +6,7 @@ export const enum TypescriptBaseTypes {
   "enum" = "enum",
   "null" = "null",
   "number" = "number",
-  "string" = "string",
+  "string" = "string"
 }
 
 export const enum ServerTypes {
@@ -21,7 +21,7 @@ export const enum ServerTypes {
   "JSON" = "JSON",
   "Long" = "Long",
   "Short" = "Short",
-  "String" = "String",
+  "String" = "String"
 }
 
 export interface IBaseFieldTypes {
@@ -36,7 +36,7 @@ export const BaseFieldTypes: IBaseFieldTypes = {
   [ServerTypes.Long]: TypescriptBaseTypes.number,
   [ServerTypes.ByteString]: TypescriptBaseTypes.string,
   [ServerTypes.String]: TypescriptBaseTypes.string,
-  [ServerTypes.Enum]: TypescriptBaseTypes.enum,
+  [ServerTypes.Enum]: TypescriptBaseTypes.enum
 }
 
 // TODO rename to IFormTypes since it's defining the form types

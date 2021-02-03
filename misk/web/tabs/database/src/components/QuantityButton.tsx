@@ -1,7 +1,7 @@
 /** @jsx jsx */
 import { Button, Tooltip } from "@blueprintjs/core"
 import { IconName } from "@blueprintjs/icons"
-import { jsx } from "@emotion/react"
+import { jsx } from "@emotion/core"
 import { handler } from "src/form-builder"
 import { cssButton, cssTooltip } from "./CommonComponents"
 
