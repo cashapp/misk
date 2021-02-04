@@ -15,10 +15,10 @@ import javax.inject.Singleton
 internal class QueueResolver @Inject internal constructor(
   private val currentRegion: AwsRegion,
   private val currentAccount: AwsAccountId,
-  private val defaultSQS: AmazonSQS,
-  private val crossRegionSQS: Map<AwsRegion, AmazonSQS>,
-  @ForSqsReceiving private val defaultForReceivingSQS: AmazonSQS,
-  @ForSqsReceiving private val crossRegionForReceivingSQS: Map<AwsRegion, AmazonSQS>,
+  @ForSqsSending private val defaultSendSQS: AmazonSQS,
+  @ForSqsSending private val crossRegionSendSQS: Map<AwsRegion, AmazonSQS>,
+  @ForSqsReceiving private val defaultReceiveSQS: AmazonSQS,
+  @ForSqsReceiving private val crossRegionReceiveSQS: Map<AwsRegion, AmazonSQS>,
   private val externalQueues: Map<QueueName, AwsSqsQueueConfig>,
   private val dlqProvider: DeadLetterQueueProvider
 ) {
@@ -38,16 +38,16 @@ internal class QueueResolver @Inject internal constructor(
     return resolve(dlqProvider.deadLetterQueueFor(q), false)
   }
 
-  private fun resolve(q: QueueName, forSqsReceiving: Boolean): ResolvedQueue {
+  private fun resolve(q: QueueName, forReceiving: Boolean): ResolvedQueue {
     val queueConfig = externalQueues[q] ?: AwsSqsQueueConfig()
     val sqsQueueName = queueConfig.sqs_queue_name?.let { QueueName(it) } ?: q
     val region = queueConfig.region?.let { AwsRegion(it) } ?: currentRegion
     val accountId = queueConfig.account_id?.let { AwsAccountId(it) } ?: currentAccount
 
     val sqs = if (region == currentRegion) {
-      if (forSqsReceiving) defaultForReceivingSQS else defaultSQS
+      if (forReceiving) defaultReceiveSQS else defaultSendSQS
     } else {
-      if (forSqsReceiving) crossRegionForReceivingSQS[region] else crossRegionSQS[region]
+      if (forReceiving) crossRegionReceiveSQS[region] else crossRegionSendSQS[region]
     }
 
     checkNotNull(sqs) { "could not find SQS client for ${region.name}" }

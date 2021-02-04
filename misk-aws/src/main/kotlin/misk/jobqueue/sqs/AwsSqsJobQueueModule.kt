@@ -58,7 +58,7 @@ class AwsSqsJobQueueModule(
         "sqs-receiver"))
 
     // Bind a map of AmazonSQS clients for each external region that we need to contact
-    val regionSpecificClientBinder = newMapBinder<AwsRegion, AmazonSQS>()
+    val regionSpecificClientBinder = newMapBinder<AwsRegion, AmazonSQS>(ForSqsSending::class)
     config.external_queues
         .mapNotNull { (_, config) -> config.region }
         .map { AwsRegion(it) }
@@ -82,18 +82,18 @@ class AwsSqsJobQueueModule(
     }
   }
 
-  @Provides @Singleton
-  fun provideSQSClient(
+  @Provides @Singleton @ForSqsSending
+  fun provideAmazonSqsForSending(
     @AppName appName: String,
     region: AwsRegion,
     credentials: AWSCredentialsProvider,
     features: FeatureFlags
   ): AmazonSQS {
-    return buildClient(appName, config, credentials, region, features)
+    return buildSendingClient(appName, config, credentials, region, features)
   }
 
   @Provides @Singleton @ForSqsReceiving
-  fun provideSQSClientForReceiving(region: AwsRegion, credentials: AWSCredentialsProvider): AmazonSQS {
+  fun provideAmazonSqsForReceiving(region: AwsRegion, credentials: AWSCredentialsProvider): AmazonSQS {
     return buildReceivingClient(credentials, region)
   }
 
@@ -123,7 +123,7 @@ class AwsSqsJobQueueModule(
       return if (forSqsReceiving) {
         buildReceivingClient(credentials, region)
       } else {
-        buildClient(appName, config, credentials, region, features)
+        buildSendingClient(appName, config, credentials, region, features)
       }
     }
   }
@@ -149,7 +149,7 @@ class AwsSqsJobQueueModule(
     }
 
     /** Build a buffered [AmazonSQS] client for sending and deleting messages (job enqueue & ack respectively). */
-    private fun buildClient(
+    private fun buildSendingClient(
       appName: String,
       config: AwsSqsJobQueueConfig,
       credentials: AWSCredentialsProvider,
