@@ -11,7 +11,7 @@ import java.io.ByteArrayOutputStream
  * These test keys are used by the [FakeExternalKeyManager] class.
  * *DO NOT USE IN ANY OTHER SITUATION*
  */
-class TestKeysets {
+internal class TestKeysets {
   companion object {
     fun encryptSecret(key: MiskConfig.RealSecret<String>): MiskConfig.RealSecret<String> {
       val kek = KmsEnvelopeAead(KeyReader.KEK_TEMPLATE, FakeMasterEncryptionKey())
