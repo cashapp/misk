@@ -24,15 +24,21 @@ class FakeExternalKeyManager : ExternalKeyManager {
   constructor(rawKeys: List<Key>) {
     rawKeys.forEach { key ->
       val plaintextSecret = keyTypeToSecret(key.key_type)
-      val encryptedSecret = if ((key.key_type == KeyType.HYBRID_ENCRYPT && key.kms_uri == null) ||
-              key.key_type == KeyType.PGP_DECRYPT || key.key_type == KeyType.PGP_ENCRYPT) {
+      val encryptedSecret = if (
+              key.key_type == KeyType.HYBRID_ENCRYPT ||
+              key.key_type == KeyType.PGP_DECRYPT ||
+              key.key_type == KeyType.PGP_ENCRYPT) {
         plaintextSecret
       } else if (key.key_name == "obsolete") {
         key.encrypted_key
       } else {
         TestKeysets.encryptSecret(plaintextSecret)
       }
-      returnedKeysets[key.key_name] = key.copy(encrypted_key = encryptedSecret)
+      if (key.key_type == KeyType.HYBRID_ENCRYPT) {
+        returnedKeysets[key.key_name] = key.copy(encrypted_key = encryptedSecret, kms_uri = null)
+      } else {
+        returnedKeysets[key.key_name] = key.copy(encrypted_key = encryptedSecret, kms_uri = "stub")
+      }
     }
   }
 
