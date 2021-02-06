@@ -1,5 +1,6 @@
 package com.squareup.exemplar.actions
 
+import misk.security.authz.Unauthenticated
 import misk.web.PathParam
 import misk.web.Post
 import misk.web.RequestBody
@@ -13,6 +14,7 @@ import javax.inject.Singleton
 @Singleton
 class HelloWebPostAction @Inject constructor() : WebAction {
   @Post("/hello/{name}")
+  @Unauthenticated
   @RequestContentType(MediaTypes.APPLICATION_JSON)
   @ResponseContentType(MediaTypes.APPLICATION_JSON)
   fun hello(@PathParam name: String, @RequestBody body: PostBody): HelloPostResponse {

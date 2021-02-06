@@ -1,5 +1,6 @@
 package com.squareup.exemplar.actions
 
+import misk.security.authz.Unauthenticated
 import misk.web.Get
 import misk.web.PathParam
 import misk.web.QueryParam
@@ -14,6 +15,7 @@ import javax.inject.Singleton
 @Singleton
 class HelloWebAction @Inject constructor() : WebAction {
   @Get("/hello/{name}")
+  @Unauthenticated
   @ResponseContentType(MediaTypes.APPLICATION_JSON)
   fun hello(
     @PathParam name: String,

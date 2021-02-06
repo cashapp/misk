@@ -1,5 +1,5 @@
 import { IDatabaseQueryMetadataAPI } from "src/containers"
-import { ServerTypes } from 'src/form-builder'
+import { ServerTypes } from "src/form-builder"
 
 export const HIBERNATE_QUERY_WEBACTION_PATH = "/api/database/query/hibernate"
 

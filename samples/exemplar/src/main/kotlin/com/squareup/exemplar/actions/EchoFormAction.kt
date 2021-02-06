@@ -1,5 +1,6 @@
 package com.squareup.exemplar.actions
 
+import misk.security.authz.Unauthenticated
 import misk.web.FormField
 import misk.web.FormValue
 import misk.web.Post
@@ -13,6 +14,7 @@ import javax.inject.Singleton
 @Singleton
 class EchoFormAction @Inject constructor() : WebAction {
   @Post("/hello")
+  @Unauthenticated
   @RequestContentType(MediaTypes.APPLICATION_FORM_URLENCODED)
   @ResponseContentType(MediaTypes.APPLICATION_JSON)
   fun echo(@FormValue form: Form): Form {
