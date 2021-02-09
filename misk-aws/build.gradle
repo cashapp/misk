@@ -1,17 +1,17 @@
 dependencies {
+  implementation dep.awsS3
+  implementation dep.awsSqs
   implementation dep.guice
   implementation dep.loggingApi
-  implementation dep.awsDynamodb
-  implementation dep.awsSqs
   implementation dep.openTracingDatadog
   implementation dep.prometheusClient
   implementation project(':misk')
   implementation project(':misk-core')
-  implementation project(':misk-inject')
-  implementation project(':misk-metrics')
-  implementation project(':misk-hibernate')
-  implementation project(':misk-jobqueue')
   implementation project(':misk-feature')
+  implementation project(':misk-hibernate')
+  implementation project(':misk-inject')
+  implementation project(':misk-jobqueue')
+  implementation project(':misk-metrics')
   implementation project(':misk-service')
   implementation project(':misk-transactional-jobqueue')
 
