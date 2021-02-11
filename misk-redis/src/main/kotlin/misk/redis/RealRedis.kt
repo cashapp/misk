@@ -3,6 +3,7 @@ package misk.redis
 import okio.ByteString
 import okio.ByteString.Companion.toByteString
 import redis.clients.jedis.JedisPool
+import redis.clients.jedis.params.SetParams
 import java.time.Duration
 
 /** For each command, a Jedis instance is retrieved from the pool and returned once the command has been issued. */
@@ -57,6 +58,21 @@ class RealRedis(private val jedisPool: JedisPool) : Redis {
   override fun set(key: String, expiryDuration: Duration, value: ByteString) {
     jedisPool.resource.use { jedis ->
       jedis.setex(key.toByteArray(charset), expiryDuration.seconds.toInt(), value.toByteArray())
+    }
+  }
+
+  // Set a ByteArray value if it doesn't already exist
+  override fun setnx(key: String, value: ByteString) {
+    jedisPool.resource.use { jedis ->
+      jedis.setnx(key.toByteArray(charset), value.toByteArray())
+    }
+  }
+
+  // Set a ByteArray value if it doesn't already exist with an expiration
+  override fun setnx(key: String, expiryDuration: Duration, value: ByteString) {
+    val setParams = SetParams.setParams().ex(expiryDuration.seconds.toInt()).nx()
+    jedisPool.resource.use { jedis ->
+      jedis.set(key.toByteArray(charset), value.toByteArray(), setParams)
     }
   }
 
