@@ -102,6 +102,48 @@ class FakeRedisTest {
     assertNull(redis[key], "Key should be expired")
   }
 
+  @Test fun setIfNotExists() {
+    val key = "key"
+    val value = "value".encodeUtf8()
+    val value2 = "value2".encodeUtf8()
+
+    // Sets value because key does not exist
+    redis.setnx(key, value)
+    assertEquals(value, redis[key])
+
+    // Does not set value because key already exists
+    redis.setnx(key, value2)
+    assertEquals(value, redis[key])
+  }
+
+  @Test fun setIfNotExistsWithExpiry() {
+    val key = "key"
+    val value = "value".encodeUtf8()
+    val value2 = "value2".encodeUtf8()
+    val expirySec = 5L
+
+    // Sets value because key does not exist
+    redis.setnx(key, Duration.ofSeconds(expirySec), value)
+    assertEquals(value, redis[key])
+
+    // Does not set value because key already exists
+    redis.setnx(key, Duration.ofSeconds(expirySec), value2)
+    assertEquals(value, redis[key])
+
+    // Key should still be there
+    clock.add(Duration.ofSeconds(4))
+    assertEquals(value, redis[key])
+
+    // Key should now be expired
+    clock.add(Duration.ofSeconds(1))
+    assertNull(redis[key], "Key should be expired")
+
+    // Key should remain expired
+    clock.add(Duration.ofSeconds(1))
+    assertNull(redis[key], "Key should be expired")
+  }
+
+
   @Test fun overridingResetsExpiry() {
     val key = "key"
     val value = "value".encodeUtf8()

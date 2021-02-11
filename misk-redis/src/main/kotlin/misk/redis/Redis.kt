@@ -62,4 +62,22 @@ interface Redis {
    * @param value the value to set
    */
   operator fun set(key: String, expiryDuration: Duration, value: ByteString)
+
+
+  /**
+   * Sets the [ByteString] value for the given key if it does not already exist.
+   *
+   * @param key the key to set
+   * @param value the value to set
+   */
+  fun setnx(key: String, value: ByteString)
+
+  /**
+   * Sets the [ByteString] value for the given key if it does not already exist.
+   *
+   * @param key the key to set
+   * @param expiryDuration the amount of time before the key expires
+   * @param value the value to set
+   */
+  fun setnx(key: String, expiryDuration: Duration, value: ByteString)
 }
