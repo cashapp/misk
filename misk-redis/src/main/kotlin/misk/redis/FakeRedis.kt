@@ -71,4 +71,18 @@ class FakeRedis : Redis {
       expiryInstant = clock.instant().plusSeconds(expiryDuration.seconds)
     )
   }
+
+  override fun setnx(key: String, value: ByteString) {
+    keyValueStore.putIfAbsent(key, Value(
+        data = value,
+        expiryInstant = Instant.MAX
+    ))
+  }
+
+  override fun setnx(key: String, expiryDuration: Duration, value: ByteString) {
+    keyValueStore.putIfAbsent(key, Value(
+        data = value,
+        expiryInstant = clock.instant().plusSeconds(expiryDuration.seconds)
+    ))
+  }
 }
