@@ -7,12 +7,12 @@ dependencies {
   implementation dep.moshiKotlin
   implementation dep.moshiAdapters
   implementation dep.okHttp
-  implementation project(':misk')
-  implementation project(':misk-core')
-  implementation project(':misk-inject')
-  implementation project(':misk-jdbc')
-  implementation project(':misk-service')
-  implementation project(':misk-testing')
+  api project(':misk')
+  api project(':misk-core')
+  api project(':misk-inject')
+  api project(':misk-jdbc')
+  api project(':misk-service')
+  api project(':misk-testing')
   testImplementation dep.junitApi
   testImplementation dep.openTracingDatadog
   testImplementation dep.assertj
