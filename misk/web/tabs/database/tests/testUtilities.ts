@@ -19,61 +19,61 @@ export const TEST_DATA: IDatabaseQueryMetadataAPI[] = [
           {
             name: "constraint::name",
             repeated: false,
-            type: "constraint::name",
+            type: "constraint::name"
           },
           {
             name: "constraint::releaseDateLessThan",
             repeated: false,
-            type: "constraint::releaseDateLessThan",
+            type: "constraint::releaseDateLessThan"
           },
           {
             name: "constraint::kitchenSink",
             repeated: false,
-            type: "constraint::kitchenSink",
-          },
-        ],
+            type: "constraint::kitchenSink"
+          }
+        ]
       },
       "constraint::kitchenSink": {
         fields: [
           {
             name: "strings",
             repeated: true,
-            type: ServerTypes.String,
+            type: ServerTypes.String
           },
           {
             name: "numbers",
             repeated: true,
-            type: ServerTypes.Int,
+            type: ServerTypes.Int
           },
           {
             name: "booleans",
             repeated: true,
-            type: ServerTypes.Boolean,
+            type: ServerTypes.Boolean
           },
           {
             name: "enums",
             repeated: true,
-            type: "Enum<app.cash.common.AlphaEnum,Alpha,Bravo,Delta>",
-          },
-        ],
+            type: "Enum<app.cash.common.AlphaEnum,Alpha,Bravo,Delta>"
+          }
+        ]
       },
       "constraint::kitchenSinkTheSinkening": {
         fields: [
           {
             name: "sinkly",
             repeated: true,
-            type: "constraint::kitchenSink",
-          },
-        ],
+            type: "constraint::kitchenSink"
+          }
+        ]
       },
       "constraint::name": {
         fields: [
           {
             name: "name",
             repeated: false,
-            type: ServerTypes.String,
-          },
-        ],
+            type: ServerTypes.String
+          }
+        ]
       },
       "constraint::releaseDateLessThan": {
         fields: [
@@ -81,25 +81,25 @@ export const TEST_DATA: IDatabaseQueryMetadataAPI[] = [
             name: "upperBound",
             repeated: false,
             // TODO change to LocalDate
-            type: ServerTypes.String,
-          },
-        ],
+            type: ServerTypes.String
+          }
+        ]
       },
       "order::releaseDateAsc": {
-        fields: [],
+        fields: []
       },
       "order::releaseDateDesc": {
-        fields: [],
+        fields: []
       },
       "select::listAsNameAndReleaseDate": {
-        fields: [],
+        fields: []
       },
       "select::uniqueName": {
-        fields: [],
+        fields: []
       },
       "select::listAsNames": {
-        fields: [],
-      },
+        fields: []
+      }
     },
     constraints: [
       // {
@@ -110,46 +110,46 @@ export const TEST_DATA: IDatabaseQueryMetadataAPI[] = [
       {
         name: "name",
         parametersType: "constraint::name",
-        path: "name",
+        path: "name"
       },
       {
         name: "releaseDateLessThan",
         parametersType: "constraint::releaseDateLessThan",
         path: "release_date",
-        operator: "LT",
-      },
+        operator: "LT"
+      }
     ],
     orders: [
       {
         name: "releaseDateAsc",
         parametersType: "order::releaseDateAsc",
         path: "release_date",
-        ascending: false,
+        ascending: false
       },
       {
         name: "releaseDateDesc",
         parametersType: "order::releaseDateDesc",
         path: "release_date",
-        ascending: true,
-      },
+        ascending: true
+      }
     ],
     selects: [
       {
         name: "listAsNameAndReleaseDate",
         parametersType: "select::listAsNameAndReleaseDate",
-        paths: ["name", "release_date"],
+        paths: ["name", "release_date"]
       },
       {
         name: "uniqueName",
         parametersType: "select::uniqueName",
-        paths: ["name"],
+        paths: ["name"]
       },
       {
         name: "listAsNames",
         parametersType: "select::listAsNames",
-        paths: ["name"],
-      },
-    ],
+        paths: ["name"]
+      }
+    ]
   },
   {
     queryWebActionPath: HIBERNATE_QUERY_WEBACTION_PATH,
@@ -166,23 +166,23 @@ export const TEST_DATA: IDatabaseQueryMetadataAPI[] = [
           {
             name: "constraint::name",
             repeated: false,
-            type: "constraint::name",
+            type: "constraint::name"
           },
           {
             name: "constraint::releaseDateLessThan",
             repeated: false,
-            type: "constraint::releaseDateLessThan",
-          },
-        ],
+            type: "constraint::releaseDateLessThan"
+          }
+        ]
       },
       "constraint::name": {
         fields: [
           {
             name: "name",
             repeated: false,
-            type: ServerTypes.String,
-          },
-        ],
+            type: ServerTypes.String
+          }
+        ]
       },
       "constraint::releaseDateLessThan": {
         fields: [
@@ -190,69 +190,69 @@ export const TEST_DATA: IDatabaseQueryMetadataAPI[] = [
             name: "upperBound",
             repeated: false,
             // TODO change to LocalDate
-            type: ServerTypes.String,
-          },
-        ],
+            type: ServerTypes.String
+          }
+        ]
       },
       "order::releaseDateAsc": {
-        fields: [],
+        fields: []
       },
       "order::releaseDateDesc": {
-        fields: [],
+        fields: []
       },
       "select::listAsNameAndReleaseDate": {
-        fields: [],
+        fields: []
       },
       "select::uniqueName": {
-        fields: [],
+        fields: []
       },
       "select::listAsNames": {
-        fields: [],
-      },
+        fields: []
+      }
     },
     constraints: [
       {
         name: "name",
         parametersType: "constraint::name",
-        path: "name",
+        path: "name"
       },
       {
         name: "releaseDateLessThan",
         parametersType: "constraint::releaseDateLessThan",
         path: "release_date",
-        operator: "LT",
-      },
+        operator: "LT"
+      }
     ],
     orders: [
       {
         name: "releaseDateAsc",
         parametersType: "order::releaseDateAsc",
         path: "release_date",
-        ascending: false,
+        ascending: false
       },
       {
         name: "releaseDateDesc",
         parametersType: "order::releaseDateDesc",
         path: "release_date",
-        ascending: true,
-      },
+        ascending: true
+      }
     ],
     selects: [
       {
         name: "listAsNameAndReleaseDate",
         parametersType: "select::listAsNameAndReleaseDate",
-        paths: ["name", "release_date"],
+        paths: ["name", "release_date"]
       },
       {
         name: "uniqueName",
         parametersType: "select::uniqueName",
-        paths: ["name"],
+        paths: ["name"]
       },
       {
         name: "listAsNames",
         parametersType: "select::listAsNames",
-        paths: ["name"],
-      },
-    ],
-  },
+        paths: ["name"]
+      }
+    ]
+  }
 ]

@@ -4,7 +4,7 @@ import {
   generateTypesMetadata,
   getFormData,
   IActionTypes,
-  newFieldValueStore,
+  newFieldValueStore
 } from "../form-builder"
 
 export const FormBuilderContainer = (props: {
@@ -27,7 +27,7 @@ export const FormBuilderContainer = (props: {
     setIsOpenRequestBodyPreview,
     setRawRequestBody,
     setRequestBodyFormInputType,
-    types,
+    types
   } = props
   const [typesMetadata, setTypesMetadata] = useState(
     generateTypesMetadata(types, formType)

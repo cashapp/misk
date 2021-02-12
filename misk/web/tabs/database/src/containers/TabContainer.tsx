@@ -6,7 +6,7 @@ import {
   IDispatchProps,
   IState,
   mapDispatchToProps,
-  mapStateToProps,
+  mapStateToProps
 } from "../ducks"
 
 const apiUrl = "/api/database/query/metadata"
@@ -19,7 +19,7 @@ class TabContainer extends React.Component<IState & IDispatchProps, IState> {
     const metadata = simpleSelectorGet(this.props.simpleRedux, [
       "database-query",
       "data",
-      "databaseQueryMetadata",
+      "databaseQueryMetadata"
     ])
 
     return (
