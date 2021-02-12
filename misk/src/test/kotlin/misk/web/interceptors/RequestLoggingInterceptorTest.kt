@@ -32,6 +32,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
+import misk.exceptions.BadRequestException
 
 @MiskTest(startService = true)
 internal class RequestLoggingInterceptorTest {
@@ -159,6 +160,24 @@ internal class RequestLoggingInterceptorTest {
     assertThat(messages[0]).doesNotContain(headerValueToNotLog)
   }
 
+  @Test
+  fun capturesSubsetOfHeadersOnFailure() {
+    val headerToNotLog = "X-Header-To-Not-Log"
+    val headerValueToNotLog = "some-value"
+    assertThat(webTestClient.call("/call/withHeaders") {
+      post("fail".toRequestBody(MediaTypes.APPLICATION_JSON_MEDIA_TYPE))
+      addHeader(headerToNotLog, headerValueToNotLog)
+    }.response.isSuccessful)
+      .isFalse()
+    val messages = logCollector.takeMessages(RequestLoggingInterceptor::class)
+    assertThat(messages).containsExactly(
+      "RequestLoggingActionWithHeaders principal=unknown time=100.0 ms failed request=[fail, HeadersCapture(headers={accept=[*/*], accept-encoding=[gzip], connection=[keep-alive], content-length=[4], content-type=[application/json;charset=UTF-8]})]"
+    )
+    assertThat(messages[0]).doesNotContain(headerToNotLog)
+    assertThat(messages[0]).doesNotContain(headerToNotLog.toLowerCase())
+    assertThat(messages[0]).doesNotContain(headerValueToNotLog)
+  }
+
   internal class RateLimitingRequestLoggingAction @Inject constructor() : WebAction {
     @Get("/call/rateLimitingRequestLogging/{message}")
     @Unauthenticated
@@ -203,7 +222,10 @@ internal class RequestLoggingInterceptorTest {
     @Unauthenticated
     @ResponseContentType(MediaTypes.APPLICATION_JSON)
     @LogRequestResponse(ratePerSecond = 1L, errorRatePerSecond = 2L, bodySampling = 1.0, errorBodySampling = 1.0)
-    fun call(@RequestBody message: String, @RequestHeaders headers: Headers) = "echo: $message"
+    fun call(@RequestBody message: String, @RequestHeaders headers: Headers): String {
+      if (message == "fail") throw BadRequestException(message = "boom")
+      return "echo: $message"
+    }
   }
 
   class TestModule : KAbstractModule() {

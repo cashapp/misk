@@ -53,13 +53,13 @@ class RequestBodyLoggingInterceptor @Inject internal constructor(
   override fun intercept(chain: Chain): Any {
     val principal = caller.get()?.principal ?: "unknown"
 
-    bodyCapture.set(RequestResponseBody(chain.args, null))
+    val redactedArgs = chain.args.map { if (it is Headers) HeadersCapture(it) else it }
+    bodyCapture.set(RequestResponseBody(redactedArgs, null))
 
     try {
       val result = chain.proceed(chain.args)
       // Only log some request headers.
-      val args = chain.args.map { if (it is Headers) HeadersCapture(it) else it }
-      bodyCapture.set(RequestResponseBody(args, result))
+      bodyCapture.set(RequestResponseBody(redactedArgs, result))
       return result
     } catch (t: Throwable) {
       logger.info { "${action.name} principal=$principal failed" }
