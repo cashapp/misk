@@ -8,7 +8,7 @@ describe("Add a repeated field", () => {
       ...nonTypedActionAPI,
       httpMethod: HTTPMethod.POST,
       requestType: "repeatedShort",
-      types: testTypes,
+      types: testTypes
     })
     const parentId = typesMetadata.get("0").idChildren.first() as string
     expect(typesMetadata.get(parentId).idChildren.size).toBe(1)
@@ -23,7 +23,7 @@ describe("Add a repeated field", () => {
       ...nonTypedActionAPI,
       httpMethod: HTTPMethod.POST,
       requestType: "repeatedNestedRepeatedShort",
-      types: testTypes,
+      types: testTypes
     })
     const parentId = typesMetadata.get("0").idChildren.first() as string
     expect(typesMetadata.size).toBe(6)
