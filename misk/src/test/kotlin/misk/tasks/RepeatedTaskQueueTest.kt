@@ -19,7 +19,9 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.Duration
+import java.util.Timer
 import java.util.concurrent.CountDownLatch
+import java.util.concurrent.DelayQueue
 import java.util.concurrent.PriorityBlockingQueue
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicReference
@@ -38,6 +40,7 @@ internal class RepeatedTaskQueueTest {
 
   @Inject lateinit var clock: FakeClock
   @Inject lateinit var taskQueue: RepeatedTaskQueue
+
   // Install another RepeatedTaskQueue to test guice is happy
   @Inject @field:Named("another") lateinit var anotherTaskQueue: RepeatedTaskQueue
   @Inject lateinit var pendingTasks: ExplicitReleaseDelayQueue<DelayedTask>
@@ -184,8 +187,8 @@ internal class RepeatedTaskQueueTest {
 
   @Test fun honorsCustomInitialDelay() {
     taskQueue.scheduleWithBackoff(
-        timeBetweenRuns = Duration.ofSeconds(5),
-        initialDelay = Duration.ofSeconds(25)
+      timeBetweenRuns = Duration.ofSeconds(5),
+      initialDelay = Duration.ofSeconds(25)
     ) {
       Status.OK
     }
@@ -200,9 +203,10 @@ internal class RepeatedTaskQueueTest {
 
     // Create a task that wakes up the main thread on execution, and then fails
     taskQueue.scheduleWithBackoff(
-        timeBetweenRuns = Duration.ofSeconds(2),
-        failureBackoff = ExponentialBackoff(Duration.ofSeconds(5), Duration.ofSeconds(60)),
-        noWorkBackoff = ExponentialBackoff(Duration.ofSeconds(10), Duration.ofSeconds(100))) {
+      timeBetweenRuns = Duration.ofSeconds(2),
+      failureBackoff = ExponentialBackoff(Duration.ofSeconds(5), Duration.ofSeconds(60)),
+      noWorkBackoff = ExponentialBackoff(Duration.ofSeconds(10), Duration.ofSeconds(100))
+    ) {
       lock.withLock {
         clock.add(Duration.ofSeconds(35))
         taskCompleted.signalAll()
@@ -232,9 +236,10 @@ internal class RepeatedTaskQueueTest {
 
     // Create a task that wakes up the main thread on execution, and then fails
     taskQueue.scheduleWithBackoff(
-        timeBetweenRuns = Duration.ofSeconds(2),
-        failureBackoff = ExponentialBackoff(Duration.ofSeconds(5), Duration.ofSeconds(60)),
-        noWorkBackoff = ExponentialBackoff(Duration.ofSeconds(10), Duration.ofSeconds(100))) {
+      timeBetweenRuns = Duration.ofSeconds(2),
+      failureBackoff = ExponentialBackoff(Duration.ofSeconds(5), Duration.ofSeconds(60)),
+      noWorkBackoff = ExponentialBackoff(Duration.ofSeconds(10), Duration.ofSeconds(100))
+    ) {
       lock.withLock {
         clock.add(Duration.ofSeconds(35))
         taskCompleted.signalAll()
@@ -264,9 +269,10 @@ internal class RepeatedTaskQueueTest {
 
     // Create a task that wakes up the main thread on execution, and then returns with no work
     taskQueue.scheduleWithBackoff(
-        timeBetweenRuns = Duration.ofSeconds(2),
-        failureBackoff = ExponentialBackoff(Duration.ofSeconds(5), Duration.ofSeconds(60)),
-        noWorkBackoff = ExponentialBackoff(Duration.ofSeconds(10), Duration.ofSeconds(100))) {
+      timeBetweenRuns = Duration.ofSeconds(2),
+      failureBackoff = ExponentialBackoff(Duration.ofSeconds(5), Duration.ofSeconds(60)),
+      noWorkBackoff = ExponentialBackoff(Duration.ofSeconds(10), Duration.ofSeconds(100))
+    ) {
       lock.withLock {
         clock.add(Duration.ofSeconds(35))
         taskCompleted.signalAll()
@@ -298,9 +304,10 @@ internal class RepeatedTaskQueueTest {
     // Create a task that wakes up the main thread on execution, and then returns whatever
     // status the main thread has set
     taskQueue.scheduleWithBackoff(
-        timeBetweenRuns = Duration.ofSeconds(2),
-        failureBackoff = ExponentialBackoff(Duration.ofSeconds(5), Duration.ofSeconds(60)),
-        noWorkBackoff = ExponentialBackoff(Duration.ofSeconds(10), Duration.ofSeconds(100))) {
+      timeBetweenRuns = Duration.ofSeconds(2),
+      failureBackoff = ExponentialBackoff(Duration.ofSeconds(5), Duration.ofSeconds(60)),
+      noWorkBackoff = ExponentialBackoff(Duration.ofSeconds(10), Duration.ofSeconds(100))
+    ) {
       lock.withLock {
         clock.add(Duration.ofSeconds(35))
         taskCompleted.signalAll()
@@ -347,9 +354,10 @@ internal class RepeatedTaskQueueTest {
     // Create a task that wakes up the main thread on execution, and then returns whatever
     // status the main thread has set
     taskQueue.scheduleWithBackoff(
-        timeBetweenRuns = Duration.ofSeconds(2),
-        failureBackoff = ExponentialBackoff(Duration.ofSeconds(5), Duration.ofSeconds(60)),
-        noWorkBackoff = ExponentialBackoff(Duration.ofSeconds(10), Duration.ofSeconds(100))) {
+      timeBetweenRuns = Duration.ofSeconds(2),
+      failureBackoff = ExponentialBackoff(Duration.ofSeconds(5), Duration.ofSeconds(60)),
+      noWorkBackoff = ExponentialBackoff(Duration.ofSeconds(10), Duration.ofSeconds(100))
+    ) {
       lock.withLock {
         clock.add(Duration.ofSeconds(35))
         taskCompleted.signalAll()
@@ -396,9 +404,10 @@ internal class RepeatedTaskQueueTest {
     // Create a task that wakes up the main thread on execution, and then returns whatever
     // status the main thread has set
     taskQueue.scheduleWithBackoff(
-        timeBetweenRuns = Duration.ofSeconds(2),
-        failureBackoff = ExponentialBackoff(Duration.ofSeconds(5), Duration.ofSeconds(60)),
-        noWorkBackoff = ExponentialBackoff(Duration.ofSeconds(10), Duration.ofSeconds(100))) {
+      timeBetweenRuns = Duration.ofSeconds(2),
+      failureBackoff = ExponentialBackoff(Duration.ofSeconds(5), Duration.ofSeconds(60)),
+      noWorkBackoff = ExponentialBackoff(Duration.ofSeconds(10), Duration.ofSeconds(100))
+    ) {
       lock.withLock {
         clock.add(Duration.ofSeconds(35))
         taskCompleted.signalAll()
@@ -445,9 +454,10 @@ internal class RepeatedTaskQueueTest {
     // Create a task that wakes up the main thread on execution, and then returns whatever
     // status the main thread has set
     taskQueue.scheduleWithBackoff(
-        timeBetweenRuns = Duration.ofSeconds(2),
-        failureBackoff = ExponentialBackoff(Duration.ofSeconds(5), Duration.ofSeconds(60)),
-        noWorkBackoff = ExponentialBackoff(Duration.ofSeconds(10), Duration.ofSeconds(100))) {
+      timeBetweenRuns = Duration.ofSeconds(2),
+      failureBackoff = ExponentialBackoff(Duration.ofSeconds(5), Duration.ofSeconds(60)),
+      noWorkBackoff = ExponentialBackoff(Duration.ofSeconds(10), Duration.ofSeconds(100))
+    ) {
       lock.withLock {
         clock.add(Duration.ofSeconds(35))
         taskCompleted.signalAll()
@@ -537,40 +547,55 @@ internal class RepeatedTaskQueueTest {
 
   @Test fun `terminates when it is shut down`() {
     val queues = mutableListOf(taskQueue)
-    val numberOfNewQueues = 10
+    val queuesPendingTasks = mutableListOf(pendingTasks)
+    val numberOfNewQueues = 15
     for (i in 0..numberOfNewQueues) {
-      queues.add(i, repeatedTaskQueueFactory.forTesting(
-          name = "queue-$i",
-          backingStorage = pendingTasks
-      ))
+      queuesPendingTasks.add(ExplicitReleaseDelayQueue<DelayedTask>())
+      queues.add(
+        i, repeatedTaskQueueFactory.forTesting(
+        name = "queue-$i",
+        backingStorage = queuesPendingTasks[i]
+      )
+      )
     }
 
     for (i in 0..queues.lastIndex) {
+      logger.info("${queues[i].name} state is ${queues[i].state()}")
       if (Service.State.RUNNING != queues[i].state()) queues[i].startAsync()
     }
 
     for (i in 0..queues.lastIndex) {
+      logger.info("${queues[i].name} state is ${queues[i].state()}, scheduling task...")
       queues[i].schedule(Duration.ZERO, Duration.ofMillis(100L)) {
+        logger.info("Test task for ${queues[i].name} has run...")
         Result(Status.OK, Duration.ofMillis(100))
       }
     }
 
     for (i in 0..queues.lastIndex) {
+      logger.info("StopAsync for ${queues[i].name} with current state ${queues[i].state()}")
       queues[i].stopAsync()
     }
 
     var waitToTerminate = true
-    while (waitToTerminate) {
+    var attempts = 0
+    while (waitToTerminate && attempts < 3) {
       Thread.sleep(500)
+      waitToTerminate = false
       for (i in 0..queues.lastIndex) {
-        if (Service.State.TERMINATED == queues[i].state()) {
-          waitToTerminate = false
+        if (Service.State.TERMINATED != queues[i].state()) {
+          logger.info("${queues[i].name} state is ${queues[i].state()}")
+          waitToTerminate = true
         }
       }
+      attempts++
     }
 
     for (i in 0..queues.lastIndex) {
-      assertEquals(Service.State.TERMINATED, queues[i].state())
+      assertEquals(
+        Service.State.TERMINATED, queues[i].state(),
+        "Failed to TERMINATE for queue $i: ${queues[i].name}"
+      )
     }
   }
 
@@ -603,7 +628,7 @@ internal class RepeatedTaskQueueTest {
   }
 
   private fun waitForNextPendingTask(): DelayedTask =
-      retry(5, FlatBackoff(Duration.ofMillis(200))) {
-        pendingTasks.peekPending()!!
-      }
+    retry(5, FlatBackoff(Duration.ofMillis(200))) {
+      pendingTasks.peekPending()!!
+    }
 }
