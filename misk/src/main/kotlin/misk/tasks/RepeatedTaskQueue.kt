@@ -220,7 +220,8 @@ class RepeatedTaskQueueFactory @Inject constructor(
    * Builds a new instance of a [RepeatedTaskQueue]
    */
   fun new(
-    name: String, config: RepeatedTaskQueueConfig = RepeatedTaskQueueConfig(),
+    name: String,
+    config: RepeatedTaskQueueConfig = RepeatedTaskQueueConfig(),
     pollingTimeout: Duration = Duration.ofMillis(250)
   ):
     RepeatedTaskQueue {
@@ -244,7 +245,11 @@ class RepeatedTaskQueueFactory @Inject constructor(
   /**
    * Builds a new instance of a [RepeatedTaskQueue] for testing
    */
-  fun forTesting(name: String, backingStorage: ExplicitReleaseDelayQueue<DelayedTask>):
+  fun forTesting(
+    name: String,
+    backingStorage: ExplicitReleaseDelayQueue<DelayedTask>,
+    pollingTimeout: Duration = Duration.ofMillis(50)
+  ):
     RepeatedTaskQueue {
     val queue = RepeatedTaskQueue(
       name,
@@ -254,7 +259,7 @@ class RepeatedTaskQueueFactory @Inject constructor(
       backingStorage,
       metrics,
       RepeatedTaskQueueConfig(),
-      Duration.ofMillis(50)
+      pollingTimeout
     )
 
     // Install a status listener that will explicitly release all of the tasks from the
