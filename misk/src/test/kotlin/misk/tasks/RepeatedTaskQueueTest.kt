@@ -547,14 +547,14 @@ internal class RepeatedTaskQueueTest {
 
   @Test fun `terminates when it is shut down`() {
     val queues = mutableListOf(taskQueue)
-    val queuesPendingTasks = mutableListOf(pendingTasks)
+    //val queuesPendingTasks = mutableListOf(pendingTasks)
     val numberOfNewQueues = 15
     for (i in 0..numberOfNewQueues) {
-      queuesPendingTasks.add(ExplicitReleaseDelayQueue<DelayedTask>())
+      //queuesPendingTasks.add(ExplicitReleaseDelayQueue<DelayedTask>())
       queues.add(
         i, repeatedTaskQueueFactory.forTesting(
         name = "queue-$i",
-        backingStorage = queuesPendingTasks[i]
+        backingStorage = pendingTasks //queuesPendingTasks[i]
       )
       )
     }
@@ -580,7 +580,7 @@ internal class RepeatedTaskQueueTest {
     var waitToTerminate = true
     var attempts = 0
     while (waitToTerminate && attempts < 3) {
-      Thread.sleep(500)
+      Thread.sleep(2500)
       waitToTerminate = false
       for (i in 0..queues.lastIndex) {
         if (Service.State.TERMINATED != queues[i].state()) {

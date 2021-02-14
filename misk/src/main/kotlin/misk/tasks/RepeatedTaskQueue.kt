@@ -17,6 +17,7 @@ import java.util.concurrent.DelayQueue
 import java.util.concurrent.Executor
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors.newSingleThreadExecutor
+import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -36,7 +37,8 @@ class RepeatedTaskQueue @VisibleForTesting internal constructor(
   private val dispatchExecutor: Executor?, // visible internally for testing only
   private val pendingTasks: BlockingQueue<DelayedTask>, // visible internally for testing only
   internal val metrics: RepeatedTaskQueueMetrics,
-  private val config: RepeatedTaskQueueConfig = RepeatedTaskQueueConfig()
+  private val config: RepeatedTaskQueueConfig = RepeatedTaskQueueConfig(),
+  private val pollingTimeout: Duration = Duration.ofMillis(250)
 
 ) : AbstractExecutionThreadService() {
 
@@ -71,7 +73,8 @@ class RepeatedTaskQueue @VisibleForTesting internal constructor(
   }
 
   override fun triggerShutdown() {
-    if (!running.compareAndSet(true, false)) return
+    // no matter what the current value, ensure we aren't running any more
+    running.compareAndSet(true, false)
 
     log.info { "Triggered shutdown, stopping repeated task queue $name" }
 
@@ -80,17 +83,6 @@ class RepeatedTaskQueue @VisibleForTesting internal constructor(
     pendingTasks.add(DelayedTask(clock, clock.instant()) {
       Result(Status.NO_RESCHEDULE, Duration.ofMillis(0))
     })
-
-  }
-
-  override fun shutDown() {
-    if (!running.compareAndSet(true, false)) return
-
-    log.info { "Shutdown, stopping repeated task queue $name" }
-
-    // Remove all currently scheduled tasks, and schedule an empty task to kick the background thread
-    pendingTasks.clear()
-    taskExecutor.shutdownNow()
   }
 
   /**
@@ -103,11 +95,14 @@ class RepeatedTaskQueue @VisibleForTesting internal constructor(
     while (running.get()) {
       log.info("Queue $name in run() while loop")
       // Fetch the next task, bailing out if we've shutdown
-      val task = pendingTasks.take().task
+      val delayedTask = pendingTasks.poll(pollingTimeout.toMillis(), TimeUnit.MILLISECONDS)
       log.info("Queue $name in run(), task fetched, running is: ${running.get()}")
       if (!running.get()) {
         return
       }
+
+      // get the task from the poll if it exists, otherwise get back to the start
+      val task = delayedTask?.task ?: continue
 
       // Hand the task off to the executor for parallel execution and repeat so long as the
       // task requests rescheduling
@@ -224,7 +219,10 @@ class RepeatedTaskQueueFactory @Inject constructor(
   /**
    * Builds a new instance of a [RepeatedTaskQueue]
    */
-  fun new(name: String, config: RepeatedTaskQueueConfig = RepeatedTaskQueueConfig()):
+  fun new(
+    name: String, config: RepeatedTaskQueueConfig = RepeatedTaskQueueConfig(),
+    pollingTimeout: Duration = Duration.ofMillis(250)
+  ):
     RepeatedTaskQueue {
     val executor = if (config.num_parallel_tasks == -1) {
       executorServiceFactory.unbounded("$name-%d")
@@ -238,7 +236,8 @@ class RepeatedTaskQueueFactory @Inject constructor(
       null,
       DelayQueue<DelayedTask>(),
       metrics,
-      config
+      config,
+      pollingTimeout
     )
   }
 
@@ -254,7 +253,8 @@ class RepeatedTaskQueueFactory @Inject constructor(
       executorServiceFactory.single("$name-%d"),
       backingStorage,
       metrics,
-      RepeatedTaskQueueConfig()
+      RepeatedTaskQueueConfig(),
+      Duration.ofMillis(50)
     )
 
     // Install a status listener that will explicitly release all of the tasks from the
