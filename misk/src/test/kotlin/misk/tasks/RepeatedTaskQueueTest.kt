@@ -1,5 +1,6 @@
 package misk.tasks
 
+import com.google.common.util.concurrent.Service
 import com.google.inject.Provides
 import com.google.inject.util.Modules
 import misk.MiskTestingServiceModule
@@ -9,6 +10,7 @@ import misk.backoff.FlatBackoff
 import misk.backoff.retry
 import misk.concurrent.ExplicitReleaseDelayQueue
 import misk.inject.KAbstractModule
+import misk.logging.getLogger
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.time.FakeClock
@@ -17,7 +19,9 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.Duration
+import java.util.Timer
 import java.util.concurrent.CountDownLatch
+import java.util.concurrent.DelayQueue
 import java.util.concurrent.PriorityBlockingQueue
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicReference
@@ -26,6 +30,7 @@ import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Singleton
 import kotlin.concurrent.withLock
+import kotlin.test.assertEquals
 
 @MiskTest(startService = true)
 internal class RepeatedTaskQueueTest {
@@ -33,9 +38,11 @@ internal class RepeatedTaskQueueTest {
 
   @Inject lateinit var clock: FakeClock
   @Inject lateinit var taskQueue: RepeatedTaskQueue
+
   // Install another RepeatedTaskQueue to test guice is happy
   @Inject @field:Named("another") lateinit var anotherTaskQueue: RepeatedTaskQueue
   @Inject lateinit var pendingTasks: ExplicitReleaseDelayQueue<DelayedTask>
+  @Inject lateinit var repeatedTaskQueueFactory: RepeatedTaskQueueFactory
 
   @BeforeEach fun initClock() {
     clock.add(Duration.ofDays(365 * 12))
@@ -178,8 +185,8 @@ internal class RepeatedTaskQueueTest {
 
   @Test fun honorsCustomInitialDelay() {
     taskQueue.scheduleWithBackoff(
-        timeBetweenRuns = Duration.ofSeconds(5),
-        initialDelay = Duration.ofSeconds(25)
+      timeBetweenRuns = Duration.ofSeconds(5),
+      initialDelay = Duration.ofSeconds(25)
     ) {
       Status.OK
     }
@@ -194,9 +201,10 @@ internal class RepeatedTaskQueueTest {
 
     // Create a task that wakes up the main thread on execution, and then fails
     taskQueue.scheduleWithBackoff(
-        timeBetweenRuns = Duration.ofSeconds(2),
-        failureBackoff = ExponentialBackoff(Duration.ofSeconds(5), Duration.ofSeconds(60)),
-        noWorkBackoff = ExponentialBackoff(Duration.ofSeconds(10), Duration.ofSeconds(100))) {
+      timeBetweenRuns = Duration.ofSeconds(2),
+      failureBackoff = ExponentialBackoff(Duration.ofSeconds(5), Duration.ofSeconds(60)),
+      noWorkBackoff = ExponentialBackoff(Duration.ofSeconds(10), Duration.ofSeconds(100))
+    ) {
       lock.withLock {
         clock.add(Duration.ofSeconds(35))
         taskCompleted.signalAll()
@@ -226,9 +234,10 @@ internal class RepeatedTaskQueueTest {
 
     // Create a task that wakes up the main thread on execution, and then fails
     taskQueue.scheduleWithBackoff(
-        timeBetweenRuns = Duration.ofSeconds(2),
-        failureBackoff = ExponentialBackoff(Duration.ofSeconds(5), Duration.ofSeconds(60)),
-        noWorkBackoff = ExponentialBackoff(Duration.ofSeconds(10), Duration.ofSeconds(100))) {
+      timeBetweenRuns = Duration.ofSeconds(2),
+      failureBackoff = ExponentialBackoff(Duration.ofSeconds(5), Duration.ofSeconds(60)),
+      noWorkBackoff = ExponentialBackoff(Duration.ofSeconds(10), Duration.ofSeconds(100))
+    ) {
       lock.withLock {
         clock.add(Duration.ofSeconds(35))
         taskCompleted.signalAll()
@@ -258,9 +267,10 @@ internal class RepeatedTaskQueueTest {
 
     // Create a task that wakes up the main thread on execution, and then returns with no work
     taskQueue.scheduleWithBackoff(
-        timeBetweenRuns = Duration.ofSeconds(2),
-        failureBackoff = ExponentialBackoff(Duration.ofSeconds(5), Duration.ofSeconds(60)),
-        noWorkBackoff = ExponentialBackoff(Duration.ofSeconds(10), Duration.ofSeconds(100))) {
+      timeBetweenRuns = Duration.ofSeconds(2),
+      failureBackoff = ExponentialBackoff(Duration.ofSeconds(5), Duration.ofSeconds(60)),
+      noWorkBackoff = ExponentialBackoff(Duration.ofSeconds(10), Duration.ofSeconds(100))
+    ) {
       lock.withLock {
         clock.add(Duration.ofSeconds(35))
         taskCompleted.signalAll()
@@ -292,9 +302,10 @@ internal class RepeatedTaskQueueTest {
     // Create a task that wakes up the main thread on execution, and then returns whatever
     // status the main thread has set
     taskQueue.scheduleWithBackoff(
-        timeBetweenRuns = Duration.ofSeconds(2),
-        failureBackoff = ExponentialBackoff(Duration.ofSeconds(5), Duration.ofSeconds(60)),
-        noWorkBackoff = ExponentialBackoff(Duration.ofSeconds(10), Duration.ofSeconds(100))) {
+      timeBetweenRuns = Duration.ofSeconds(2),
+      failureBackoff = ExponentialBackoff(Duration.ofSeconds(5), Duration.ofSeconds(60)),
+      noWorkBackoff = ExponentialBackoff(Duration.ofSeconds(10), Duration.ofSeconds(100))
+    ) {
       lock.withLock {
         clock.add(Duration.ofSeconds(35))
         taskCompleted.signalAll()
@@ -341,9 +352,10 @@ internal class RepeatedTaskQueueTest {
     // Create a task that wakes up the main thread on execution, and then returns whatever
     // status the main thread has set
     taskQueue.scheduleWithBackoff(
-        timeBetweenRuns = Duration.ofSeconds(2),
-        failureBackoff = ExponentialBackoff(Duration.ofSeconds(5), Duration.ofSeconds(60)),
-        noWorkBackoff = ExponentialBackoff(Duration.ofSeconds(10), Duration.ofSeconds(100))) {
+      timeBetweenRuns = Duration.ofSeconds(2),
+      failureBackoff = ExponentialBackoff(Duration.ofSeconds(5), Duration.ofSeconds(60)),
+      noWorkBackoff = ExponentialBackoff(Duration.ofSeconds(10), Duration.ofSeconds(100))
+    ) {
       lock.withLock {
         clock.add(Duration.ofSeconds(35))
         taskCompleted.signalAll()
@@ -390,9 +402,10 @@ internal class RepeatedTaskQueueTest {
     // Create a task that wakes up the main thread on execution, and then returns whatever
     // status the main thread has set
     taskQueue.scheduleWithBackoff(
-        timeBetweenRuns = Duration.ofSeconds(2),
-        failureBackoff = ExponentialBackoff(Duration.ofSeconds(5), Duration.ofSeconds(60)),
-        noWorkBackoff = ExponentialBackoff(Duration.ofSeconds(10), Duration.ofSeconds(100))) {
+      timeBetweenRuns = Duration.ofSeconds(2),
+      failureBackoff = ExponentialBackoff(Duration.ofSeconds(5), Duration.ofSeconds(60)),
+      noWorkBackoff = ExponentialBackoff(Duration.ofSeconds(10), Duration.ofSeconds(100))
+    ) {
       lock.withLock {
         clock.add(Duration.ofSeconds(35))
         taskCompleted.signalAll()
@@ -439,9 +452,10 @@ internal class RepeatedTaskQueueTest {
     // Create a task that wakes up the main thread on execution, and then returns whatever
     // status the main thread has set
     taskQueue.scheduleWithBackoff(
-        timeBetweenRuns = Duration.ofSeconds(2),
-        failureBackoff = ExponentialBackoff(Duration.ofSeconds(5), Duration.ofSeconds(60)),
-        noWorkBackoff = ExponentialBackoff(Duration.ofSeconds(10), Duration.ofSeconds(100))) {
+      timeBetweenRuns = Duration.ofSeconds(2),
+      failureBackoff = ExponentialBackoff(Duration.ofSeconds(5), Duration.ofSeconds(60)),
+      noWorkBackoff = ExponentialBackoff(Duration.ofSeconds(10), Duration.ofSeconds(100))
+    ) {
       lock.withLock {
         clock.add(Duration.ofSeconds(35))
         taskCompleted.signalAll()
@@ -529,6 +543,56 @@ internal class RepeatedTaskQueueTest {
     assertThat(nextScheduled.getDelay(TimeUnit.SECONDS)).isEqualTo(5)
   }
 
+  @Test fun `terminates when it is shut down`() {
+    val queues = mutableListOf(taskQueue)
+    // Each queue should have its own backingStorage, but it can't be guaranteed, so test with worst case
+    //val queuesPendingTasks = mutableListOf(pendingTasks)
+    val numberOfNewQueues = 15
+    for (i in 0..numberOfNewQueues) {
+      //queuesPendingTasks.add(ExplicitReleaseDelayQueue<DelayedTask>())
+      queues.add(
+        i, repeatedTaskQueueFactory.forTesting(
+        name = "queue-$i",
+        backingStorage = pendingTasks //queuesPendingTasks[i]
+      )
+      )
+    }
+
+    for (i in 0..queues.lastIndex) {
+      if (Service.State.RUNNING != queues[i].state()) queues[i].startAsync()
+    }
+
+    for (i in 0..queues.lastIndex) {
+      queues[i].schedule(Duration.ZERO, Duration.ofMillis(100L)) {
+        Result(Status.OK, Duration.ofMillis(100))
+      }
+    }
+
+    for (i in 0..queues.lastIndex) {
+      queues[i].stopAsync()
+    }
+
+    var waitToTerminate = true
+    var attempts = 0
+    while (waitToTerminate && attempts < 3) {
+      Thread.sleep(2500)
+      waitToTerminate = false
+      for (i in 0..queues.lastIndex) {
+        if (Service.State.TERMINATED != queues[i].state()) {
+          waitToTerminate = true
+        }
+      }
+      attempts++
+    }
+
+    for (i in 0..queues.lastIndex) {
+      assertEquals(
+        Service.State.TERMINATED, queues[i].state(),
+        "Failed to TERMINATE for queue $i: ${queues[i].name}"
+      )
+    }
+  }
+
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(Modules.override(MiskTestingServiceModule()).with(FakeClockModule()))
@@ -558,7 +622,7 @@ internal class RepeatedTaskQueueTest {
   }
 
   private fun waitForNextPendingTask(): DelayedTask =
-      retry(5, FlatBackoff(Duration.ofMillis(200))) {
-        pendingTasks.peekPending()!!
-      }
+    retry(5, FlatBackoff(Duration.ofMillis(200))) {
+      pendingTasks.peekPending()!!
+    }
 }

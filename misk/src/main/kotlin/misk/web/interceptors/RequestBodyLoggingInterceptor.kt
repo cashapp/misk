@@ -6,6 +6,7 @@ import misk.Chain
 import misk.MiskCaller
 import misk.logging.getLogger
 import misk.scope.ActionScoped
+import okhttp3.Headers
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.reflect.full.findAnnotation
@@ -52,17 +53,36 @@ class RequestBodyLoggingInterceptor @Inject internal constructor(
   override fun intercept(chain: Chain): Any {
     val principal = caller.get()?.principal ?: "unknown"
 
-    bodyCapture.set(RequestResponseBody(chain.args, null))
+    val redactedArgs = chain.args.map { if (it is Headers) HeadersCapture(it) else it }
+    bodyCapture.set(RequestResponseBody(redactedArgs, null))
 
     try {
       val result = chain.proceed(chain.args)
-      bodyCapture.set(RequestResponseBody(chain.args, result))
+      // Only log some request headers.
+      bodyCapture.set(RequestResponseBody(redactedArgs, result))
       return result
     } catch (t: Throwable) {
       logger.info { "${action.name} principal=$principal failed" }
       throw t
     }
   }
+}
+
+internal data class HeadersCapture(
+  val headers: Map<String, List<String>>
+) {
+  constructor(okHttpHeaders: Headers) : this(
+    okHttpHeaders.toMultimap()
+      .filter { (key, _) ->
+        key.toLowerCase() in listOf(
+          "accept",
+          "accept-encoding",
+          "connection",
+          "content-type",
+          "content-length",
+        )
+      }
+  )
 }
 
 internal class RequestResponseCapture @Inject constructor() {

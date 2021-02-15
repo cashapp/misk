@@ -66,7 +66,7 @@ exports[`Common Components MetadataCollapse can render with redux 1`] = `
       <div
         aria-hidden="false"
         class="bp3-collapse-body"
-        style="transform: translateY(-undefinedpx);"
+        style="transform: translateY(-0px);"
       />
     </div>
   </div>
