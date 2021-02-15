@@ -155,9 +155,9 @@ class CryptoModuleTest {
   @Test
   fun testLogsWarningWithoutEnvelopeKey() {
     val kh = KeysetHandle.generateNew(AeadKeyTemplates.AES256_CTR_HMAC_SHA256)
-    val name = "name"
+    val name = "obsolete"
     val encryptedKey = generateObsoleteEncryptedKey(kh)
-    val key = Key("name", KeyType.AEAD, encryptedKey, "aws-kms://some-uri")
+    val key = Key(name, KeyType.AEAD, encryptedKey, "aws-kms://some-uri")
     val injector = getInjectorWithKeys(listOf(key))
     val lcs = injector.getInstance(LogCollectorService::class.java)
     lcs.startAsync()
