@@ -328,11 +328,11 @@ internal class ReflectionQuery<T : DbEntity<T>>(
         }
         rowCount > queryLimitsConfig.rowCountErrorLimit -> {
           logger.error("Unbounded query returned $rowCount rows. " +
-              "(Specify maxRows to suppress this error)")
+              "(Specify maxRows to suppress this error)", Exception())
         }
         rowCount > queryLimitsConfig.rowCountWarningLimit -> {
           logger.warn("Unbounded query returned $rowCount rows. " +
-              "(Specify maxRows to suppress this warning)")
+              "(Specify maxRows to suppress this warning)", Exception())
         }
       }
     }
