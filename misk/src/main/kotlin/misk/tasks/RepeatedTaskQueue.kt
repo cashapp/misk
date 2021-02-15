@@ -73,10 +73,10 @@ class RepeatedTaskQueue @VisibleForTesting internal constructor(
   }
 
   override fun triggerShutdown() {
+    log.info { "Triggered shutdown, stopping repeated task queue $name" }
+
     // no matter what the current value, ensure we aren't running any more
     running.compareAndSet(true, false)
-
-    log.info { "Triggered shutdown, stopping repeated task queue $name" }
 
     // Remove all currently scheduled tasks, and schedule an empty task to kick the background thread
     pendingTasks.clear()
@@ -93,10 +93,8 @@ class RepeatedTaskQueue @VisibleForTesting internal constructor(
     // N.B - If any exception escapes this method the background thread driving the repeated
     // tasks is terminated.
     while (running.get()) {
-      log.info("Queue $name in run() while loop")
       // Fetch the next task, bailing out if we've shutdown
       val delayedTask = pendingTasks.poll(pollingTimeout.toMillis(), TimeUnit.MILLISECONDS)
-      log.info("Queue $name in run(), task fetched, running is: ${running.get()}")
       if (!running.get()) {
         return
       }
@@ -107,11 +105,7 @@ class RepeatedTaskQueue @VisibleForTesting internal constructor(
       // Hand the task off to the executor for parallel execution and repeat so long as the
       // task requests rescheduling
       taskExecutor.submit {
-        log.info("Queue $name in run(), task about to execute, running is: ${running.get()}")
         val result = task()
-        log.info(
-          "Queue $name in run(), task executed, running is: ${running.get()}, result is $result"
-        )
         // Reschedule using enqueue so as to not repeatedly wrap the task in try-catch blocks
         if (result.status != Status.NO_RESCHEDULE) enqueue(result.nextDelay, task)
       }

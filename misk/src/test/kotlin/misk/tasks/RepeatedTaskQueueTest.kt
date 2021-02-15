@@ -36,8 +36,6 @@ import kotlin.test.assertEquals
 internal class RepeatedTaskQueueTest {
   @MiskTestModule val module = TestModule()
 
-  private val logger = getLogger<RepeatedTaskQueueTest>()
-
   @Inject lateinit var clock: FakeClock
   @Inject lateinit var taskQueue: RepeatedTaskQueue
 
@@ -547,6 +545,7 @@ internal class RepeatedTaskQueueTest {
 
   @Test fun `terminates when it is shut down`() {
     val queues = mutableListOf(taskQueue)
+    // Each queue should have its own backingStorage, but it can't be guaranteed, so test with worst case
     //val queuesPendingTasks = mutableListOf(pendingTasks)
     val numberOfNewQueues = 15
     for (i in 0..numberOfNewQueues) {
@@ -560,20 +559,16 @@ internal class RepeatedTaskQueueTest {
     }
 
     for (i in 0..queues.lastIndex) {
-      logger.info("${queues[i].name} state is ${queues[i].state()}")
       if (Service.State.RUNNING != queues[i].state()) queues[i].startAsync()
     }
 
     for (i in 0..queues.lastIndex) {
-      logger.info("${queues[i].name} state is ${queues[i].state()}, scheduling task...")
       queues[i].schedule(Duration.ZERO, Duration.ofMillis(100L)) {
-        logger.info("Test task for ${queues[i].name} has run...")
         Result(Status.OK, Duration.ofMillis(100))
       }
     }
 
     for (i in 0..queues.lastIndex) {
-      logger.info("StopAsync for ${queues[i].name} with current state ${queues[i].state()}")
       queues[i].stopAsync()
     }
 
@@ -584,7 +579,6 @@ internal class RepeatedTaskQueueTest {
       waitToTerminate = false
       for (i in 0..queues.lastIndex) {
         if (Service.State.TERMINATED != queues[i].state()) {
-          logger.info("${queues[i].name} state is ${queues[i].state()}")
           waitToTerminate = true
         }
       }
