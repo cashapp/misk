@@ -4,6 +4,14 @@ import com.google.common.util.concurrent.SettableFuture
 import com.squareup.moshi.Moshi
 import io.opentracing.Tracer
 import io.opentracing.contrib.okhttp3.TracingCallFactory
+import java.lang.reflect.InvocationHandler
+import java.lang.reflect.Method
+import javax.inject.Provider
+import kotlin.reflect.KClass
+import kotlin.reflect.KFunction
+import kotlin.reflect.full.findAnnotation
+import kotlin.reflect.full.functions
+import kotlin.reflect.full.memberFunctions
 import misk.web.mediatype.MediaTypes
 import okhttp3.EventListener
 import okhttp3.Interceptor
@@ -26,14 +34,6 @@ import retrofit2.http.OPTIONS
 import retrofit2.http.PATCH
 import retrofit2.http.POST
 import retrofit2.http.PUT
-import java.lang.reflect.InvocationHandler
-import java.lang.reflect.Method
-import javax.inject.Provider
-import kotlin.reflect.KClass
-import kotlin.reflect.KFunction
-import kotlin.reflect.full.findAnnotation
-import kotlin.reflect.full.functions
-import kotlin.reflect.full.memberFunctions
 
 internal class ClientInvocationHandler(
   private val interfaceType: KClass<*>,
@@ -44,7 +44,8 @@ internal class ClientInvocationHandler(
   applicationInterceptorFactories: Provider<List<ClientApplicationInterceptor.Factory>>,
   eventListenerFactory: EventListener.Factory?,
   tracer: Tracer?,
-  moshi: Moshi
+  moshi: Moshi,
+  clientMetricsInterceptorFactory: ClientMetricsInterceptor.Factory
 ) : InvocationHandler {
 
   private val actionsByMethod = interfaceType.functions
@@ -63,6 +64,7 @@ internal class ClientInvocationHandler(
   private val proxiesByMethod: Map<String, Any> = actionsByMethod.map { (methodName, action) ->
     val networkInterceptors = networkInterceptorFactories.get().mapNotNull { it.create(action) }
     val clientBuilder = okHttpTemplate.newBuilder()
+    clientBuilder.addInterceptor(clientMetricsInterceptorFactory.create(clientName))
     networkInterceptors.forEach {
       clientBuilder.addNetworkInterceptor(NetworkInterceptorWrapper(action, it))
     }

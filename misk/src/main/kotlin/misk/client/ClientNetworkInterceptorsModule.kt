@@ -7,6 +7,5 @@ import misk.inject.KAbstractModule
  */
 class ClientNetworkInterceptorsModule : KAbstractModule() {
   override fun configure() {
-    multibind<ClientNetworkInterceptor.Factory>().to<ClientMetricsInterceptor.Factory>()
   }
 }

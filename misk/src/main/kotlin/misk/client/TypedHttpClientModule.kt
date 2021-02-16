@@ -7,15 +7,15 @@ import com.google.inject.name.Names
 import com.google.inject.util.Types
 import com.squareup.moshi.Moshi
 import io.opentracing.Tracer
+import java.lang.reflect.Proxy
+import javax.inject.Singleton
+import kotlin.reflect.KClass
+import kotlin.reflect.cast
 import misk.clustering.Cluster
 import misk.inject.KAbstractModule
 import okhttp3.EventListener
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
-import java.lang.reflect.Proxy
-import javax.inject.Singleton
-import kotlin.reflect.KClass
-import kotlin.reflect.cast
 
 /**
  * Creates a retrofit-backed typed client given an API interface and an HTTP configuration.
@@ -145,6 +145,9 @@ class TypedClientFactory @Inject constructor() {
   private lateinit var clientNetworkInterceptorFactories: Provider<List<ClientNetworkInterceptor.Factory>>
 
   @Inject
+  private lateinit var clientMetricsInterceptorFactory: ClientMetricsInterceptor.Factory
+
+  @Inject
   private lateinit var clientApplicationInterceptorFactories: Provider<List<ClientApplicationInterceptor.Factory>>
 
   @Inject
@@ -212,7 +215,9 @@ class TypedClientFactory @Inject constructor() {
         clientApplicationInterceptorFactories,
         eventListenerFactory,
         tracer,
-        moshi)
+        moshi,
+        clientMetricsInterceptorFactory
+    )
 
     return kclass.cast(Proxy.newProxyInstance(
         ClassLoader.getSystemClassLoader(),

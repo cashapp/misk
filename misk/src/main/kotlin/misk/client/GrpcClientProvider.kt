@@ -4,8 +4,6 @@ import com.squareup.wire.GrpcCall
 import com.squareup.wire.GrpcClient
 import com.squareup.wire.GrpcStreamingCall
 import com.squareup.wire.Service
-import okhttp3.OkHttpClient
-import okhttp3.Protocol
 import java.lang.reflect.InvocationHandler
 import java.lang.reflect.Method
 import java.lang.reflect.ParameterizedType
@@ -16,6 +14,8 @@ import kotlin.reflect.KClass
 import kotlin.reflect.cast
 import kotlin.reflect.full.createType
 import kotlin.reflect.jvm.kotlinFunction
+import okhttp3.OkHttpClient
+import okhttp3.Protocol
 
 /**
  * Creates an instance of a Wire gRPC client using Misk's HTTP configuration and client
@@ -55,6 +55,7 @@ internal class GrpcClientProvider<T : Service, G : T>(
   @Inject private lateinit var httpClientsConfigProvider: Provider<HttpClientsConfig>
   @Inject private lateinit var httpClientConfigUrlProvider: HttpClientConfigUrlProvider
   @Inject private lateinit var interceptorFactories: Provider<List<ClientNetworkInterceptor.Factory>>
+  @Inject private lateinit var clientMetricsInterceptorFactory: ClientMetricsInterceptor.Factory
 
   override fun get(): T {
     val endpointConfig: HttpClientEndpointConfig = httpClientsConfigProvider.get()[name]
@@ -138,6 +139,7 @@ internal class GrpcClientProvider<T : Service, G : T>(
     val action = toClientAction(method) ?: return null
 
     val clientBuilder = clientPrototype.newBuilder()
+    clientBuilder.addInterceptor(clientMetricsInterceptorFactory.create(name))
     for (factory in interceptorFactories) {
       val interceptor = factory.create(action) ?: continue
       clientBuilder.addNetworkInterceptor(NetworkInterceptorWrapper(action, interceptor))

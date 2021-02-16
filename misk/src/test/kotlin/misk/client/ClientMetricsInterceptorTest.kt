@@ -84,7 +84,6 @@ internal class ClientMetricsInterceptorTest {
     override fun configure() {
       install(MiskTestingServiceModule())
       install(TypedHttpClientModule.create<Pinger>("pinger", Names.named("pinger")))
-      multibind<ClientNetworkInterceptor.Factory>().to<ClientMetricsInterceptor.Factory>()
       bind<MockWebServer>().toInstance(MockWebServer())
     }
 

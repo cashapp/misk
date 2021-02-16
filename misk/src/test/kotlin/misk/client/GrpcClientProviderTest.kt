@@ -12,6 +12,9 @@ import com.squareup.wire.GrpcClient
 import com.squareup.wire.GrpcMethod
 import com.squareup.wire.Service
 import com.squareup.wire.WireRpc
+import java.util.concurrent.LinkedBlockingDeque
+import javax.inject.Inject
+import javax.inject.Singleton
 import misk.MiskTestingServiceModule
 import misk.inject.KAbstractModule
 import misk.inject.getInstance
@@ -27,9 +30,6 @@ import okhttp3.Response
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.util.concurrent.LinkedBlockingDeque
-import javax.inject.Inject
-import javax.inject.Singleton
 
 @MiskTest(startService = true)
 internal class GrpcClientProviderTest {
@@ -37,12 +37,14 @@ internal class GrpcClientProviderTest {
   val module = TestModule()
 
   @Inject private lateinit var jetty: JettyService
+  private lateinit var clientMetricsInterceptorFactory: ClientMetricsInterceptor.Factory
   private lateinit var robotLocator: RobotLocator
   val log = LinkedBlockingDeque<String>()
 
   @BeforeEach
   private fun beforeEach() {
     val clientInjector = Guice.createInjector(ClientModule(jetty))
+    clientMetricsInterceptorFactory = clientInjector.getInstance()
     robotLocator = clientInjector.getInstance()
   }
 
@@ -78,6 +80,8 @@ internal class GrpcClientProviderTest {
         ">> robots.Locate /RobotLocator/Locate",
         "<< robots.Locate /RobotLocator/Locate 200"
     )
+    assertThat(clientMetricsInterceptorFactory.requestDuration.count("robots.SayHello", "200"))
+      .isEqualTo(1)
   }
 
 
