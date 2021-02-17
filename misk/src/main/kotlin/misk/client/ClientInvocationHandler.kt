@@ -1,6 +1,5 @@
 package misk.client
 
-import com.google.common.util.concurrent.SettableFuture
 import com.squareup.moshi.Moshi
 import io.opentracing.Tracer
 import io.opentracing.contrib.okhttp3.TracingCallFactory
@@ -16,11 +15,7 @@ import misk.web.mediatype.MediaTypes
 import okhttp3.EventListener
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
-import okhttp3.Request
-import okio.Timeout
 import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 import retrofit2.converter.protobuf.ProtoConverterFactory
@@ -41,7 +36,6 @@ internal class ClientInvocationHandler(
   retrofit: Retrofit,
   okHttpTemplate: OkHttpClient,
   networkInterceptorFactories: Provider<List<ClientNetworkInterceptor.Factory>>,
-  applicationInterceptorFactories: Provider<List<ClientApplicationInterceptor.Factory>>,
   eventListenerFactory: EventListener.Factory?,
   tracer: Tracer?,
   moshi: Moshi,
@@ -49,15 +43,10 @@ internal class ClientInvocationHandler(
 ) : InvocationHandler {
 
   private val actionsByMethod = interfaceType.functions
-      .mapNotNull { it as? KFunction<*> }
       .filter { it.isRetrofitMethod }
       .map { ClientAction(clientName, it) }
       .map { it.function.name to it }
       .toMap()
-
-  private val interceptorsByMethod = actionsByMethod.map { (methodName, action) ->
-    methodName to applicationInterceptorFactories.get().mapNotNull { it.create(action) }
-  }.toMap()
 
   // Each method might have a different set of network interceptors, so sadly we potentially
   // need to create a separate OkHttpClient and retrofit proxy per method
@@ -117,84 +106,11 @@ internal class ClientInvocationHandler(
   override fun invoke(proxy: Any, method: Method, args: Array<out Any>?): Any {
     val argsList = args?.toList() ?: listOf()
 
-    val action = actionsByMethod[method.name] ?: throw IllegalStateException(
-        "no action corresponding to ${interfaceType.qualifiedName}#${method.name}"
-    )
-
     val retrofitProxy = proxiesByMethod[method.name] ?: throw IllegalStateException(
         "no action corresponding to ${interfaceType.qualifiedName}#${method.name}"
     )
-    val interceptors = (interceptorsByMethod[method.name] ?: listOf())
 
-    val beginCallInterceptors = interceptors + RetrofitCallInterceptor(retrofitProxy, method)
-    val beginCallChain = RealBeginClientCallChain(action, argsList, beginCallInterceptors)
-    val wrappedCall = beginCallChain.proceed(beginCallChain.args)
-
-    val requestInterceptors = interceptors + RetrofitRequestInterceptor(wrappedCall)
-    return InterceptedCall(action, requestInterceptors, argsList, wrappedCall)
-  }
-
-  /** Wraps a retrofit [Call] to invoke interceptors before handing off to Retrofit */
-  private class InterceptedCall(
-    private val action: ClientAction,
-    private val interceptors: List<ClientApplicationInterceptor>,
-    private val args: List<*>,
-    private val wrapped: Call<Any>
-  ) : Call<Any> {
-    override fun enqueue(callback: Callback<Any>) {
-      val allInterceptors = interceptors + RetrofitRequestInterceptor(wrapped)
-      RealClientChain(action, args, wrapped, callback, allInterceptors).proceed(args, callback)
-    }
-
-    override fun execute(): Response<Any> {
-      val future = SettableFuture.create<Response<Any>>()
-      enqueue(SyncCallback(future))
-      return future.get()
-    }
-
-    override fun isCanceled() = wrapped.isCanceled
-    override fun isExecuted() = wrapped.isExecuted
-    override fun clone() = InterceptedCall(action, interceptors, args, wrapped.clone())
-    override fun cancel() = wrapped.cancel()
-    override fun request(): Request = wrapped.request()
-    override fun timeout(): Timeout = wrapped.timeout()
-  }
-
-  /** Interceptor that builds the call through Retrofit */
-  private class RetrofitCallInterceptor(
-    private val retrofitProxy: Any,
-    private val method: Method
-  ) : ClientApplicationInterceptor {
-    override fun interceptBeginCall(chain: BeginClientCallChain): Call<Any> {
-      @Suppress("UNCHECKED_CAST")
-      return method.invoke(retrofitProxy, *chain.args.toTypedArray()) as Call<Any>
-    }
-
-    override fun intercept(chain: ClientChain) {
-      throw IllegalStateException("RetrofitCallInterceptor should never be called during intercept")
-    }
-  }
-
-  /** Interceptor that hands the request off to Retrofit */
-  private class RetrofitRequestInterceptor(val call: Call<Any>) : ClientApplicationInterceptor {
-    override fun interceptBeginCall(chain: BeginClientCallChain): Call<Any> {
-      throw IllegalStateException(
-          "RetrofitRequestInterceptor should never be called during interceptBeginCall"
-      )
-    }
-
-    override fun intercept(chain: ClientChain) = call.enqueue(chain.callback)
-  }
-
-  /** Retrofit callback that triggers a synchronous future on completion */
-  private class SyncCallback<T>(private val future: SettableFuture<Response<T>>) : Callback<T> {
-    override fun onFailure(call: Call<T>, t: Throwable) {
-      future.setException(t)
-    }
-
-    override fun onResponse(call: Call<T>, response: Response<T>) {
-      future.set(response)
-    }
+    return method.invoke(retrofitProxy, *argsList.toTypedArray()) as Call<Any>
   }
 }
 
