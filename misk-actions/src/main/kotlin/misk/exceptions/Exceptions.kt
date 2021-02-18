@@ -13,7 +13,8 @@ enum class StatusCode(val code: Int) {
   TOO_MANY_REQUESTS(429),
   CLIENT_CLOSED_REQUEST(499),
   INTERNAL_SERVER_ERROR(500),
-  SERVICE_UNAVAILABLE(503);
+  SERVICE_UNAVAILABLE(503),
+  GATEWAY_TIMEOUT(504);
 
   val isClientError = code in (400..499)
   val isServerError = code in (500..599)
@@ -55,6 +56,10 @@ open class UnprocessableEntityException(message: String = "", cause: Throwable? 
 
 open class TooManyRequestsException(message: String = "", cause: Throwable? = null) :
     ActionException(StatusCode.TOO_MANY_REQUESTS, message, cause)
+
+/** Base exception for when a server is acting as a gateway and cannot get a response in time */
+open class GatewayTimeoutException(message: String = "", cause: Throwable? = null) :
+    ActionException(StatusCode.GATEWAY_TIMEOUT, message, cause)
 
 /** Similar to [kotlin.require], but throws [BadRequestException] if the check fails */
 inline fun requireRequest(check: Boolean, lazyMessage: () -> String) {
