@@ -184,16 +184,18 @@ class HibernateModule(
       .toProvider(keyOf<SessionFactoryService>(qualifier))
       .asSingleton()
     bind(keyOf<TransacterService>(qualifier)).to(keyOf<SessionFactoryService>(qualifier))
-    bind(keyOf<SessionFactoryService>(qualifier)).toProvider(Provider {
-      SessionFactoryService(
-        qualifier = qualifier,
-        connector = dataSourceServiceProvider.get(),
-        dataSource = dataSourceProvider,
-        hibernateInjectorAccess = hibernateInjectorAccessProvider.get(),
-        entityClasses = entitiesProvider.get(),
-        listenerRegistrations = eventListenersProvider.get()
-      )
-    }).asSingleton()
+    bind(keyOf<SessionFactoryService>(qualifier)).toProvider(
+      Provider {
+        SessionFactoryService(
+          qualifier = qualifier,
+          connector = dataSourceServiceProvider.get(),
+          dataSource = dataSourceProvider,
+          hibernateInjectorAccess = hibernateInjectorAccessProvider.get(),
+          entityClasses = entitiesProvider.get(),
+          listenerRegistrations = eventListenersProvider.get()
+        )
+      }
+    ).asSingleton()
 
     if (isWriter) {
       install(

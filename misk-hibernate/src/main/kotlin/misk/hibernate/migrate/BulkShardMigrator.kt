@@ -189,7 +189,7 @@ class BulkShardMigrator<R : DbRoot<R>, C : DbChild<R, C>> private constructor(
           UPDATE ${tableName()}
           SET $setColumns
           WHERE $where
-        """.trimIndent()
+          """.trimIndent()
           val updateStatement = connection.prepareStatement(update)
           var setParametersCount = 0
           mutations
@@ -330,7 +330,7 @@ class BulkShardMigrator<R : DbRoot<R>, C : DbChild<R, C>> private constructor(
       INSERT ${(if (insertIgnore) "IGNORE " else "")}
       INTO ${tableName()} (${columnNames.joinToString(", ")})
       VALUES ($columnValues)
-      """.trimIndent()
+    """.trimIndent()
 
     connection.prepareStatement(statement)
       .use { insert ->
@@ -365,7 +365,7 @@ class BulkShardMigrator<R : DbRoot<R>, C : DbChild<R, C>> private constructor(
           DELETE FROM $tableName
           WHERE $rootColumnName = :source
           AND id IN (:ids)
-        """.trimIndent()
+      """.trimIndent()
     ).setParameter("source", sourceRoot!!.id)
       .setParameterList("ids", idsToDelete)
       .executeUpdate()

@@ -21,7 +21,8 @@ class EventListenersTest {
         bindListener(EventType.PRE_UPDATE).to<FakeEventListener>()
         bindListener(EventType.PRE_DELETE).to<FakeEventListener>()
       }
-    })
+    }
+  )
 
   @Inject @Movies lateinit var transacter: Transacter
   @Inject lateinit var queryFactory: Query.Factory

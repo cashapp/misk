@@ -103,24 +103,29 @@ internal class RealTransacter private constructor(
         this.supplier = Suppliers.ofInstance(CompletableFuture.completedFuture(SINGLE_SHARD_SET))
       } else {
         val executorService = executorServiceFactory.single("shard-list-fetcher-%d")
-        this.supplier = Suppliers.memoizeWithExpiration({
-          // Needs to be fetched on a separate thread to avoid nested transactions
-          executorService.submit(Callable<Set<Shard>> {
-            transacter.transaction { session ->
-              session.useConnection { connection ->
-                connection.createStatement().use { s ->
-                  val shards = s.executeQuery("SHOW VITESS_SHARDS")
-                    .map { rs -> Shard.parse(rs.getString(1)) }
-                    .toSet()
-                  if (shards.isEmpty()) {
-                    throw SQLRecoverableException("Failed to load list of shards")
+        this.supplier = Suppliers.memoizeWithExpiration(
+          {
+            // Needs to be fetched on a separate thread to avoid nested transactions
+            executorService.submit(
+              Callable<Set<Shard>> {
+                transacter.transaction { session ->
+                  session.useConnection { connection ->
+                    connection.createStatement().use { s ->
+                      val shards = s.executeQuery("SHOW VITESS_SHARDS")
+                        .map { rs -> Shard.parse(rs.getString(1)) }
+                        .toSet()
+                      if (shards.isEmpty()) {
+                        throw SQLRecoverableException("Failed to load list of shards")
+                      }
+                      shards
+                    }
                   }
-                  shards
                 }
               }
-            }
-          })
-        }, 5, TimeUnit.MINUTES)
+            )
+          },
+          5, TimeUnit.MINUTES
+        )
       }
     }
 

@@ -18,12 +18,15 @@ class ReflectionQueryFactoryValidationTest {
 
   @Test
   fun returnTypeMustBeThis() {
-    assertThat(assertFailsWith<UncheckedExecutionException> {
-      queryFactory.newQuery<ReturnTypeMustBeThis>()
-    }.cause).hasMessage(
+    assertThat(
+      assertFailsWith<UncheckedExecutionException> {
+        queryFactory.newQuery<ReturnTypeMustBeThis>()
+      }.cause
+    ).hasMessage(
       """
         |Query class ${ReturnTypeMustBeThis::class.java.name} has problems:
-        |  name() returns ${String::class.java.name} but @Constraint methods must return this (${ReturnTypeMustBeThis::class.java.name})""".trimMargin()
+        |  name() returns ${String::class.java.name} but @Constraint methods must return 
+        |  this (${ReturnTypeMustBeThis::class.java.name})""".trimMargin()
     )
   }
 
@@ -34,9 +37,11 @@ class ReflectionQueryFactoryValidationTest {
 
   @Test
   fun parameterCountMustMatchOperator() {
-    assertThat(assertFailsWith<UncheckedExecutionException> {
-      queryFactory.newQuery<ParameterCountMustMatchOperator>()
-    }.cause).hasMessage(
+    assertThat(
+      assertFailsWith<UncheckedExecutionException> {
+        queryFactory.newQuery<ParameterCountMustMatchOperator>()
+      }.cause
+    ).hasMessage(
       """
         |Query class ${ParameterCountMustMatchOperator::class.java.name} has problems:
         |  name() declares 0 parameters but must accept 1 parameters""".trimMargin()
@@ -50,9 +55,11 @@ class ReflectionQueryFactoryValidationTest {
 
   @Test
   fun annotationRequiredOnQuery() {
-    assertThat(assertFailsWith<UncheckedExecutionException> {
-      queryFactory.newQuery<AnnotationRequiredOnQuery>()
-    }.cause).hasMessage(
+    assertThat(
+      assertFailsWith<UncheckedExecutionException> {
+        queryFactory.newQuery<AnnotationRequiredOnQuery>()
+      }.cause
+    ).hasMessage(
       """
         |Query class ${AnnotationRequiredOnQuery::class.java.name} has problems:
         |  name() must be annotated @Constraint, @Order or @Select""".trimMargin()
@@ -65,9 +72,11 @@ class ReflectionQueryFactoryValidationTest {
 
   @Test
   fun malformedPathOnQuery() {
-    assertThat(assertFailsWith<UncheckedExecutionException> {
-      queryFactory.newQuery<MalformedPathOnQuery>()
-    }.cause).hasMessage(
+    assertThat(
+      assertFailsWith<UncheckedExecutionException> {
+        queryFactory.newQuery<MalformedPathOnQuery>()
+      }.cause
+    ).hasMessage(
       """
         |Query class ${MalformedPathOnQuery::class.java.name} has problems:
         |  name() path is not valid: '.name'""".trimMargin()
@@ -81,14 +90,17 @@ class ReflectionQueryFactoryValidationTest {
 
   @Test
   fun parameterAnnotationRequiredOnProjection() {
-    assertThat(assertFailsWith<UncheckedExecutionException> {
-      transacter.transaction {
-        queryFactory.newQuery<ParameterAnnotationRequiredOnProjectionQuery>()
-      }
-    }.cause).hasMessage(
+    assertThat(
+      assertFailsWith<UncheckedExecutionException> {
+        transacter.transaction {
+          queryFactory.newQuery<ParameterAnnotationRequiredOnProjectionQuery>()
+        }
+      }.cause
+    ).hasMessage(
       """
         |Query class ${ParameterAnnotationRequiredOnProjectionQuery::class.java.name} has problems:
-        |  ${ParameterAnnotationRequiredOnProjection::class.java.name} parameter 0 is missing a @Property annotation""".trimMargin()
+        |  ${ParameterAnnotationRequiredOnProjection::class.java.name} parameter 0 is missing a 
+        |  @Property annotation""".trimMargin()
     )
   }
 
@@ -101,11 +113,13 @@ class ReflectionQueryFactoryValidationTest {
 
   @Test
   fun missingPrimaryConstructor() {
-    assertThat(assertFailsWith<UncheckedExecutionException> {
-      transacter.transaction {
-        queryFactory.newQuery<MissingPrimaryConstructorQuery>()
-      }
-    }.cause).hasMessage(
+    assertThat(
+      assertFailsWith<UncheckedExecutionException> {
+        transacter.transaction {
+          queryFactory.newQuery<MissingPrimaryConstructorQuery>()
+        }
+      }.cause
+    ).hasMessage(
       """
         |Query class ${MissingPrimaryConstructorQuery::class.java.name} has problems:
         |  ${MissingPrimaryConstructor::class.java.name} has no primary constructor""".trimMargin()
@@ -121,14 +135,17 @@ class ReflectionQueryFactoryValidationTest {
 
   @Test
   fun malformedPathOnParameter() {
-    assertThat(assertFailsWith<UncheckedExecutionException> {
-      transacter.transaction {
-        queryFactory.newQuery<MalformedPathOnParameterQuery>()
-      }
-    }.cause).hasMessage(
+    assertThat(
+      assertFailsWith<UncheckedExecutionException> {
+        transacter.transaction {
+          queryFactory.newQuery<MalformedPathOnParameterQuery>()
+        }
+      }.cause
+    ).hasMessage(
       """
         |Query class ${MalformedPathOnParameterQuery::class.java.name} has problems:
-        |  ${MalformedPathOnParameter::class.java.name} parameter 0 path is not valid: '.name'""".trimMargin()
+        |  ${MalformedPathOnParameter::class.java.name} parameter 0 path is 
+        |  not valid: '.name'""".trimMargin()
     )
   }
 
@@ -143,9 +160,11 @@ class ReflectionQueryFactoryValidationTest {
 
   @Test
   fun inParameterIsNotVarargOrCollection() {
-    assertThat(assertFailsWith<UncheckedExecutionException> {
-      queryFactory.newQuery<InParameterIsNotVarargOrCollection>()
-    }.cause).hasMessage(
+    assertThat(
+      assertFailsWith<UncheckedExecutionException> {
+        queryFactory.newQuery<InParameterIsNotVarargOrCollection>()
+      }.cause
+    ).hasMessage(
       """
         |Query class ${InParameterIsNotVarargOrCollection::class.java.name} has problems:
         |  nameIn() parameter must be a vararg or a collection""".trimMargin()
@@ -159,11 +178,13 @@ class ReflectionQueryFactoryValidationTest {
 
   @Test
   fun selectDoesNotAcceptSession() {
-    assertThat(assertFailsWith<UncheckedExecutionException> {
-      transacter.transaction {
-        queryFactory.newQuery<SelectDoesNotAcceptSessionQuery>()
-      }
-    }.cause).hasMessage(
+    assertThat(
+      assertFailsWith<UncheckedExecutionException> {
+        transacter.transaction {
+          queryFactory.newQuery<SelectDoesNotAcceptSessionQuery>()
+        }
+      }.cause
+    ).hasMessage(
       """
         |Query class ${SelectDoesNotAcceptSessionQuery::class.java.name} has problems:
         |  listAsProjection() must accept a single Session parameter""".trimMargin()
@@ -177,11 +198,13 @@ class ReflectionQueryFactoryValidationTest {
 
   @Test
   fun selectNonProjectionPathIsEmpty() {
-    assertThat(assertFailsWith<UncheckedExecutionException> {
-      transacter.transaction {
-        queryFactory.newQuery<SelectNonProjectionPathIsEmpty>()
-      }
-    }.cause).hasMessage(
+    assertThat(
+      assertFailsWith<UncheckedExecutionException> {
+        transacter.transaction {
+          queryFactory.newQuery<SelectNonProjectionPathIsEmpty>()
+        }
+      }.cause
+    ).hasMessage(
       """
         |Query class ${SelectNonProjectionPathIsEmpty::class.java.name} has problems:
         |  listAsProjection() path is not valid: ''""".trimMargin()
@@ -195,11 +218,13 @@ class ReflectionQueryFactoryValidationTest {
 
   @Test
   fun selectUniqueReturnTypeNullability() {
-    assertThat(assertFailsWith<UncheckedExecutionException> {
-      transacter.transaction {
-        queryFactory.newQuery<SelectUniqueReturnTypeNullability>()
-      }
-    }.cause).hasMessage(
+    assertThat(
+      assertFailsWith<UncheckedExecutionException> {
+        transacter.transaction {
+          queryFactory.newQuery<SelectUniqueReturnTypeNullability>()
+        }
+      }.cause
+    ).hasMessage(
       """
         |Query class ${SelectUniqueReturnTypeNullability::class.java.name} has problems:
         |  listNames() return type must be a non-null List or a nullable value
@@ -217,11 +242,13 @@ class ReflectionQueryFactoryValidationTest {
 
   @Test
   fun tooManyAnnotations() {
-    assertThat(assertFailsWith<UncheckedExecutionException> {
-      transacter.transaction {
-        queryFactory.newQuery<TooManyAnnotations>()
-      }
-    }.cause).hasMessage(
+    assertThat(
+      assertFailsWith<UncheckedExecutionException> {
+        transacter.transaction {
+          queryFactory.newQuery<TooManyAnnotations>()
+        }
+      }.cause
+    ).hasMessage(
       """
         |Query class ${TooManyAnnotations::class.java.name} has problems:
         |  selectOrConstraint() has too many annotations""".trimMargin()

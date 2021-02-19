@@ -24,7 +24,7 @@ internal class RealPager<T : DbEntity<T>, Q : Query<T>>(
     paginator.applyOffset(query, nextOffset)
     val (contents, hasNext) = query.listWithHasNext(session, pageSize)
     nextOffset = if (hasNext) {
-      contents.lastOrNull().let(paginator::getOffset)
+      contents.lastOrNull()?.let(paginator::getOffset)
     } else {
       null
     }

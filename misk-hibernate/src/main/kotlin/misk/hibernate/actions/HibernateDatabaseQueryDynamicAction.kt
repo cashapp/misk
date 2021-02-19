@@ -107,7 +107,6 @@ internal class HibernateDatabaseQueryDynamicAction @Inject constructor(
       if (ascending == null) throw BadRequestException("Order ascending must be non-null")
       dynamicAddOrder(path = path, asc = ascending)
     }
-
   }
 
   data class Request(

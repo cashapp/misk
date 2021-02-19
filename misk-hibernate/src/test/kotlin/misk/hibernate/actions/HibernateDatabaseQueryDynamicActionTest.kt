@@ -81,8 +81,7 @@ class HibernateDatabaseQueryDynamicActionTest {
       HibernateDatabaseQueryDynamicAction.Request(
         entityClass = DbMovie::class.simpleName!!,
         queryClass = "DbMovieDynamicQuery",
-        query = HibernateDatabaseQueryMetadataFactory.Companion.DynamicQuery(
-        )
+        query = HibernateDatabaseQueryMetadataFactory.Companion.DynamicQuery()
       ),
       user = "joey",
       capabilities = AUTHORIZED_CAPABILITIES
@@ -187,7 +186,8 @@ class HibernateDatabaseQueryDynamicActionTest {
     assertEquals(
       listOf(
         mapOf("name" to "Die Hard", "created_at" to "2018-01-01T00:00:00.000Z"),
-      ), results.results
+      ),
+      results.results
     )
   }
 
@@ -217,7 +217,8 @@ class HibernateDatabaseQueryDynamicActionTest {
         mapOf("name" to "Jurassic Park"),
         mapOf("name" to "Pulp Fiction"),
         mapOf("name" to "Die Hard"),
-      ), results.results
+      ),
+      results.results
     )
   }
 }

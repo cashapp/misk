@@ -83,7 +83,8 @@ internal class RealActionRequestExecuter<RQ : Any, RS : Any> @Inject constructor
   }
 }
 
-internal inline fun <reified RQ : Any, reified RS : Any> RealActionRequestExecuter<RQ, RS>.executeRequest(
+internal inline fun <reified RQ : Any, reified RS : Any>
+RealActionRequestExecuter<RQ, RS>.executeRequest(
   request: RQ,
   service: String? = null,
   user: String? = null,

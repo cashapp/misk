@@ -179,7 +179,7 @@ internal class SchemaValidator {
 
     validate(dbOnly.isEmpty() || dbOnly.all { it.hasDefaultValue || it.nullable }) {
       "Hibernate entity \"${hibernateTable.name}\" is missing columns ${
-        dbOnly.filter { !(it.hasDefaultValue || it.nullable) }.map { it.name }
+      dbOnly.filter { !(it.hasDefaultValue || it.nullable) }.map { it.name }
       } expected in table \"${dbTable.name}\""
     }
 

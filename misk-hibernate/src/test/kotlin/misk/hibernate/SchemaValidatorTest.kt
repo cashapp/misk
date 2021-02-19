@@ -93,15 +93,17 @@ internal class SchemaValidatorTest {
 
       val dataSourceProvider = getProvider(keyOf<DataSource>(qualifier))
       bind(keyOf<TransacterService>(qualifier)).to(keyOf<SessionFactoryService>(qualifier))
-      bind(keyOf<SessionFactoryService>(qualifier)).toProvider(Provider {
-        SessionFactoryService(
-          qualifier = qualifier,
-          connector = connectorProvider.get(),
-          dataSource = dataSourceProvider,
-          hibernateInjectorAccess = injectorServiceProvider.get(),
-          entityClasses = entitiesProvider.get()
-        )
-      }).asSingleton()
+      bind(keyOf<SessionFactoryService>(qualifier)).toProvider(
+        Provider {
+          SessionFactoryService(
+            qualifier = qualifier,
+            connector = connectorProvider.get(),
+            dataSource = dataSourceProvider,
+            hibernateInjectorAccess = injectorServiceProvider.get(),
+            entityClasses = entitiesProvider.get()
+          )
+        }
+      ).asSingleton()
       install(
         ServiceModule<TransacterService>(qualifier)
           .enhancedBy<SchemaMigratorService>(qualifier)
@@ -153,7 +155,8 @@ internal class SchemaValidatorTest {
   fun findNullableColumnsInHibernate() {
     assertThat(schemaValidationErrorMessage).contains(
       "ERROR at schemavalidation.nullable_mismatch_table.tbl5_hibernate_null:\n" +
-        "  Column nullable_mismatch_table.tbl5_hibernate_null is NOT NULL in database but tbl5_hibernate_null is nullable in hibernate"
+        "  Column nullable_mismatch_table.tbl5_hibernate_null is NOT NULL in database " +
+        "but tbl5_hibernate_null is nullable in hibernate"
     )
   }
 
@@ -214,8 +217,12 @@ internal class SchemaValidatorTest {
   @Test
   fun catchNotReallyUniqueColumnNames() {
     val duplicateIds =
-      schemaValidationErrorMessage.contains("Duplicate identifiers: [[tbl6NotReallyUnique, tbl6_not_really_unique]]") ||
-        schemaValidationErrorMessage.contains("Duplicate identifiers: [[tbl6_not_really_unique, tbl6NotReallyUnique]]")
+      schemaValidationErrorMessage.contains(
+        "Duplicate identifiers: [[tbl6NotReallyUnique, tbl6_not_really_unique]]"
+      ) ||
+        schemaValidationErrorMessage.contains(
+          "Duplicate identifiers: [[tbl6_not_really_unique, tbl6NotReallyUnique]]"
+        )
 
     assertTrue(
       duplicateIds,

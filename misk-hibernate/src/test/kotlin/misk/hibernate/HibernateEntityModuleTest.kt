@@ -18,7 +18,8 @@ internal class HibernateEntityModuleTest {
         override fun configureHibernate() {
           addEntities(Square::class, Circle::class)
         }
-      })
+      }
+    )
 
     assertThat(injector.getSetOf(HibernateEntity::class, Dinosaurs::class).unwrap())
       .containsExactly(Triceratops::class, Stegosaurus::class)

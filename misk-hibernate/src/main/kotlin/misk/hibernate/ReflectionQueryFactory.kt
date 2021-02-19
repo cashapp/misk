@@ -199,7 +199,6 @@ internal class ReflectionQuery<T : DbEntity<T>>(
     return session.disableChecks(disabledChecks) {
       query.executeUpdate()
     }
-
   }
 
   override fun list(session: Session): List<T> {
@@ -224,9 +223,11 @@ internal class ReflectionQuery<T : DbEntity<T>>(
   ): List<List<Any?>> {
     val splitProjectedPaths = projectedPaths.map { it.split('.') }
     return select(returnList, session) { criteriaBuilder, queryRoot ->
-      criteriaBuilder.array(*splitProjectedPaths.map {
-        queryRoot.traverse<Any?>(it)
-      }.toTypedArray())
+      criteriaBuilder.array(
+        *splitProjectedPaths.map {
+          queryRoot.traverse<Any?>(it)
+        }.toTypedArray()
+      )
     }
   }
 
@@ -329,13 +330,15 @@ internal class ReflectionQuery<T : DbEntity<T>>(
         rowCount > queryLimitsConfig.rowCountErrorLimit -> {
           logger.error(
             "Unbounded query returned $rowCount rows. " +
-              "(Specify maxRows to suppress this error)", Exception()
+              "(Specify maxRows to suppress this error)",
+            Exception()
           )
         }
         rowCount > queryLimitsConfig.rowCountWarningLimit -> {
           logger.warn(
             "Unbounded query returned $rowCount rows. " +
-              "(Specify maxRows to suppress this warning)", Exception()
+              "(Specify maxRows to suppress this warning)",
+            Exception()
           )
         }
       }
@@ -372,7 +375,9 @@ internal class ReflectionQuery<T : DbEntity<T>>(
   }
 
   @Singleton
-  internal class Factory @Inject internal constructor(private var queryLimitsConfig: QueryLimitsConfig) :
+  internal class Factory @Inject internal constructor(
+    private var queryLimitsConfig: QueryLimitsConfig
+  ) :
     Query.Factory {
     private val queryMethodHandlersCache = CacheBuilder.newBuilder()
       .build(object : CacheLoader<KClass<*>, Map<Method, QueryMethodHandler>>() {
@@ -709,7 +714,8 @@ internal class ReflectionQuery<T : DbEntity<T>>(
         select: Select
       ) {
         if (function.parameters.size != 2 ||
-          function.parameters[1].type.classifier != Session::class) {
+          function.parameters[1].type.classifier != Session::class
+        ) {
           errors.add("${function.name}() must accept a single Session parameter")
           return
         }

@@ -606,9 +606,11 @@ abstract class TransacterTest {
     assertThat(preCommitHooksTriggered).containsExactly("first")
 
     // ...and the transaction should have been rolled back
-    assertThat(transacter.transaction {
-      queryFactory.newQuery<MovieQuery>().id(swid).list(it)
-    }).isEmpty()
+    assertThat(
+      transacter.transaction {
+        queryFactory.newQuery<MovieQuery>().id(swid).list(it)
+      }
+    ).isEmpty()
   }
 
   @Test

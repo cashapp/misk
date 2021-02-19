@@ -9,7 +9,8 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-internal class TimestampListener @Inject constructor() : PreInsertEventListener,
+internal class TimestampListener @Inject constructor() :
+  PreInsertEventListener,
   PreUpdateEventListener {
   @Inject lateinit var clock: Clock
 

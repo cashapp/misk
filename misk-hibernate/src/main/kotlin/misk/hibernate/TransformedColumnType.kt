@@ -114,7 +114,6 @@ internal class TransformedColumnType : UserType, ParameterizedType, TypeConfigur
   }
 
   override fun getTypeConfiguration(): TypeConfiguration = typeConfig
-
 }
 
 fun PreparedStatement.setByType(klass: KClass<*>?, index: Int, value: Any) = when (klass) {

@@ -29,6 +29,7 @@ import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
 import kotlin.reflect.full.declaredMemberProperties
 import kotlin.reflect.full.findAnnotation
+import kotlin.reflect.jvm.jvmName
 
 private val logger = getLogger<SessionFactoryService>()
 
@@ -98,9 +99,10 @@ internal class SessionFactoryService(
       }
       if (config.query_timeout != null) {
         applySetting(
-          "javax.persistence.query.timeout", Integer.valueOf(
-          config.query_timeout!!.toMillis().toInt()
-        )
+          "javax.persistence.query.timeout",
+          Integer.valueOf(
+            config.query_timeout!!.toMillis().toInt()
+          )
         )
       }
       if (config.jdbc_statement_batch_size != null) {
@@ -221,7 +223,6 @@ internal class SessionFactoryService(
         value.setTypeParameter(TransformedColumnType.ARGUMENTS, argMap)
       }
     }
-
   }
 
   /** Returns a custom user type for `propertyType`, or null if the user type should be built-in. */

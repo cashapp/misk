@@ -16,7 +16,8 @@ class HibernateDatabaseQueryTestingModule : KAbstractModule() {
   override fun configure() {
     install(HibernateWebActionTestingModule())
     install(
-      MoviesTestModule(type = DataSourceType.MYSQL,
+      MoviesTestModule(
+        type = DataSourceType.MYSQL,
         entitiesModule = object :
           HibernateEntityModule(Movies::class) {
           override fun configureHibernate() {
@@ -27,7 +28,8 @@ class HibernateDatabaseQueryTestingModule : KAbstractModule() {
             addEntityWithDynamicQuery<DbCharacter, DynamicMovieQueryAccess>()
             addEntityWithStaticQuery<DbMovie, OperatorsMovieQuery, OperatorsMovieQueryAccess>()
           }
-        })
+        }
+      )
     )
 
     multibind<AccessAnnotationEntry>().toInstance(DYNAMIC_MOVIE_QUERY_ACCESS_ENTRY)

@@ -5,7 +5,7 @@ import misk.config.Config
 import misk.config.MiskConfig
 import misk.environment.Environment
 import misk.environment.EnvironmentModule
-import misk.hibernate.SuperHero.*
+import misk.hibernate.SuperHero.SuperPower
 import misk.inject.KAbstractModule
 import misk.jdbc.DataSourceConfig
 import misk.testing.MiskTest
@@ -75,11 +75,12 @@ class ProtoColumnTest {
     transacter.transaction { session ->
       session.save(
         DbAvengersMovie(
-          "IronMan", SuperHero.Builder()
-          .civilian_name("Tony Stark")
-          .super_hero_name("IronMan")
-          .powers(listOf(SuperPower("suit", 10), SuperPower("humor", 2)))
-          .build()
+          "IronMan",
+          SuperHero.Builder()
+            .civilian_name("Tony Stark")
+            .super_hero_name("IronMan")
+            .powers(listOf(SuperPower("suit", 10), SuperPower("humor", 2)))
+            .build()
         )
       )
     }

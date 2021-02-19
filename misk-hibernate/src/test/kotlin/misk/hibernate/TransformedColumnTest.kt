@@ -23,6 +23,7 @@ import javax.persistence.Entity
 import javax.persistence.GeneratedValue
 import javax.persistence.Table
 import kotlin.reflect.full.declaredMemberProperties
+import kotlin.reflect.jvm.javaField
 
 interface SwappableTransformer {
   fun assemble(ctx: TransformerContext, owner: Any?, value: Serializable): Any
@@ -117,7 +118,6 @@ class TransformedColumnTest {
 
         assertThat(rows).hasSize(1)
         assertThat(rows[0].intField).isEqualTo(1)
-
       }
     }
   }
@@ -272,8 +272,7 @@ class TransformedColumnTest {
       }
     }
 
-    withTransformer(assemble, disassemble)
-    {
+    withTransformer(assemble, disassemble) {
       val value = 1
 
       transacter.transaction { session ->
@@ -295,7 +294,7 @@ class TransformedColumnTest {
           .list(session)
 
         val annotationForInt = DbManyTypes::class.declaredMemberProperties
-          .mapNotNull { prop -> prop.javaField.getAnnotation(TransformedInt::class.java) }
+          .mapNotNull { prop -> prop.javaField?.getAnnotation(TransformedInt::class.java) }
           .first()
         assertThat(rows).hasSize(1)
         assertThat(rows[0].intField).isEqualTo(value + annotationForInt.amount)
@@ -315,7 +314,6 @@ class TransformedColumnTest {
 
     @Constraint(path = "byteArrayField")
     fun byteArrayField(byteArrayField: ByteArray): ManyTypesQuery
-
   }
 
   interface ManyTypesRawQuery : Query<DbManyTypesRaw> {

@@ -26,12 +26,18 @@ class HibernateDatabaseQueryStaticActionTest {
   val module = HibernateDatabaseQueryTestingModule()
 
   @Inject
-  private lateinit var realActionRequestExecuter: RealActionRequestExecuter<HibernateDatabaseQueryStaticAction.Request, HibernateDatabaseQueryStaticAction.Response>
+  private lateinit var realActionRequestExecuter:
+    RealActionRequestExecuter<
+      HibernateDatabaseQueryStaticAction.Request,
+      HibernateDatabaseQueryStaticAction.Response
+      >
   @Inject @Movies lateinit var transacter: Transacter
 
   @BeforeEach
   fun before() {
-    realActionRequestExecuter.requestPath(HibernateDatabaseQueryStaticAction.HIBERNATE_QUERY_STATIC_WEBACTION_PATH)
+    realActionRequestExecuter.requestPath(
+      HibernateDatabaseQueryStaticAction.HIBERNATE_QUERY_STATIC_WEBACTION_PATH
+    )
 
     // Insert some movies, characters and actors.
     transacter.allowCowrites().transaction { session ->
@@ -143,7 +149,8 @@ class HibernateDatabaseQueryStaticActionTest {
     assertEquals(
       listOf(
         mapOf("name" to "Die Hard"),
-      ), results.results
+      ),
+      results.results
     )
   }
 
@@ -167,7 +174,8 @@ class HibernateDatabaseQueryStaticActionTest {
         mapOf("name" to "Die Hard"),
         mapOf("name" to "Jurassic Park"),
         mapOf("name" to "Pulp Fiction"),
-      ), results.results
+      ),
+      results.results
     )
   }
 }
