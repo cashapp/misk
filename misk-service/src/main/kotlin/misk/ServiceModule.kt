@@ -84,27 +84,28 @@ class ServiceModule(
 
     for (dependsOnKey in dependsOn) {
       multibind<DependencyEdge>().toInstance(
-          DependencyEdge(dependent = key, dependsOn = dependsOnKey)
+        DependencyEdge(dependent = key, dependsOn = dependsOnKey)
       )
     }
     for (enhancedByKey in enhancedBy) {
       multibind<EnhancementEdge>().toInstance(
-          EnhancementEdge(toBeEnhanced = key, enhancement = enhancedByKey)
+        EnhancementEdge(toBeEnhanced = key, enhancement = enhancedByKey)
       )
     }
   }
 
   fun dependsOn(upstream: Key<out Service>) = ServiceModule(
-      key, dependsOn + upstream, enhancedBy)
+    key, dependsOn + upstream, enhancedBy
+  )
 
   fun enhancedBy(enhancement: Key<out Service>) =
-      ServiceModule(key, dependsOn, enhancedBy + enhancement)
+    ServiceModule(key, dependsOn, enhancedBy + enhancement)
 
   inline fun <reified T : Service> dependsOn(qualifier: KClass<out Annotation>? = null) =
-      dependsOn(T::class.toKey(qualifier))
+    dependsOn(T::class.toKey(qualifier))
 
   inline fun <reified T : Service> enhancedBy(qualifier: KClass<out Annotation>? = null) =
-      enhancedBy(T::class.toKey(qualifier))
+    enhancedBy(T::class.toKey(qualifier))
 }
 
 /**
@@ -135,7 +136,7 @@ class ServiceModule(
  * ```
  */
 inline fun <reified T : Service> ServiceModule(qualifier: KClass<out Annotation>? = null) =
-    ServiceModule(T::class.toKey(qualifier))
+  ServiceModule(T::class.toKey(qualifier))
 
 internal data class EnhancementEdge(val toBeEnhanced: Key<*>, val enhancement: Key<*>)
 internal data class DependencyEdge(val dependent: Key<*>, val dependsOn: Key<*>)

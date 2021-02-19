@@ -88,8 +88,9 @@ internal class HibernateDatabaseQueryStaticAction @Inject constructor(
     val dbEntity = ((query.typeLiteral().getSupertype(
       Query::class.java
     ).type as ParameterizedType).actualTypeArguments.first() as Class<DbEntity<*>>).kotlin
-    val maxRows = ((request.query[QUERY_CONFIG_TYPE_NAME] as Map<String, Any>?)?.get("maxRows") as Double?)?.toInt()
-      ?: queryLimitsConfig.maxMaxRows
+    val maxRows =
+      ((request.query[QUERY_CONFIG_TYPE_NAME] as Map<String, Any>?)?.get("maxRows") as Double?)?.toInt()
+        ?: queryLimitsConfig.maxMaxRows
     val configuredQuery = ReflectionQuery.Factory(queryLimitsConfig)
       .newQuery(query)
       .configureStatic(request, metadata, maxRows)
@@ -108,7 +109,7 @@ internal class HibernateDatabaseQueryStaticAction @Inject constructor(
     val selectMetadata: DatabaseQueryMetadata.SelectMetadata? =
       request.query.entries.firstOrNull { (key, _) ->
         key.split("/").first() == "Select"
-      }?.let { (key, _) ->
+      }.let { (key, _) ->
         metadata.selects.find { it.parametersTypeName == key }
       }
     return validateSelectPathsOrDefault(
@@ -126,16 +127,16 @@ internal class HibernateDatabaseQueryStaticAction @Inject constructor(
     request.query.forEach { (key, value) ->
       when (key.split("/").first()) {
         "Constraint" -> {
-          metadata.constraints.find { it.parametersTypeName == key }?.let {
+          metadata.constraints.find { it.parametersTypeName == key }.let {
             dynamicAddConstraint(
               path = it.path,
               operator = Operator.valueOf(it.operator),
-              value = (value as Map<String, String>)[it.name]
+              value = value[it.name]
             )
           }
         }
         "Order" -> {
-          metadata.orders.find { it.parametersTypeName == key }?.let {
+          metadata.orders.find { it.parametersTypeName == key }.let {
             dynamicAddOrder(path = it.path, asc = it.ascending)
           }
         }

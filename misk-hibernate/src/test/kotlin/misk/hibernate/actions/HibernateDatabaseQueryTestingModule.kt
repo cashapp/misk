@@ -15,18 +15,20 @@ import javax.inject.Qualifier
 class HibernateDatabaseQueryTestingModule : KAbstractModule() {
   override fun configure() {
     install(HibernateWebActionTestingModule())
-    install(MoviesTestModule(type = DataSourceType.MYSQL,
-    entitiesModule = object :
-      HibernateEntityModule(Movies::class) {
-      override fun configureHibernate() {
-        installHibernateAdminDashboardWebActions()
+    install(
+      MoviesTestModule(type = DataSourceType.MYSQL,
+        entitiesModule = object :
+          HibernateEntityModule(Movies::class) {
+          override fun configureHibernate() {
+            installHibernateAdminDashboardWebActions()
 
-        addEntities(DbActor::class)
-        addEntityWithDynamicQuery<DbMovie, DynamicMovieQueryAccess>()
-        addEntityWithDynamicQuery<DbCharacter, DynamicMovieQueryAccess>()
-        addEntityWithStaticQuery<DbMovie, OperatorsMovieQuery, OperatorsMovieQueryAccess>()
-      }
-    }))
+            addEntities(DbActor::class)
+            addEntityWithDynamicQuery<DbMovie, DynamicMovieQueryAccess>()
+            addEntityWithDynamicQuery<DbCharacter, DynamicMovieQueryAccess>()
+            addEntityWithStaticQuery<DbMovie, OperatorsMovieQuery, OperatorsMovieQueryAccess>()
+          }
+        })
+    )
 
     multibind<AccessAnnotationEntry>().toInstance(DYNAMIC_MOVIE_QUERY_ACCESS_ENTRY)
     multibind<AccessAnnotationEntry>().toInstance(OPERATORS_MOVIE_QUERY_ACCESS_ENTRY)

@@ -17,7 +17,7 @@ import javax.inject.Singleton
  */
 @Singleton
 internal class HibernateInjectorAccess @Inject constructor() : org.hibernate.service.Service,
-    StandardServiceInitiator<HibernateInjectorAccess> {
+  StandardServiceInitiator<HibernateInjectorAccess> {
   @Inject lateinit var injector: Injector
 
   override fun getServiceInitiated() = HibernateInjectorAccess::class.java

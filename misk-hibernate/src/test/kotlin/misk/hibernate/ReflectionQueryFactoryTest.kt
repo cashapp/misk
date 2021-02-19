@@ -12,9 +12,6 @@ import org.junit.jupiter.api.Test
 import java.time.Duration.ofSeconds
 import java.time.LocalDate
 import javax.inject.Inject
-import kotlin.reflect.KClass
-import kotlin.reflect.full.functions
-import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 
 @MiskTest(startService = true)

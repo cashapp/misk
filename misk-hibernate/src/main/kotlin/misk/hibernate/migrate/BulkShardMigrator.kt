@@ -2,22 +2,21 @@ package misk.hibernate.migrate
 
 import com.google.common.collect.ImmutableList
 import com.google.common.collect.ImmutableSet
-import misk.jdbc.Check
 import misk.hibernate.DbChild
 import misk.hibernate.DbRoot
 import misk.hibernate.DbTimestampedEntity
 import misk.hibernate.Id
-import misk.vitess.Keyspace
 import misk.hibernate.PersistenceMetadata
 import misk.hibernate.Session
-import misk.vitess.Shard
-import misk.vitess.Shard.Companion.SINGLE_KEYSPACE
 import misk.hibernate.Transacter
 import misk.hibernate.shards
+import misk.jdbc.Check
 import misk.jdbc.DataSourceType
 import misk.logging.getLogger
+import misk.vitess.Keyspace
+import misk.vitess.Shard
+import misk.vitess.Shard.Companion.SINGLE_KEYSPACE
 import org.hibernate.SessionFactory
-import java.lang.UnsupportedOperationException
 import java.sql.Connection
 import java.sql.PreparedStatement
 import java.sql.SQLException
@@ -76,7 +75,7 @@ class BulkShardMigrator<R : DbRoot<R>, C : DbChild<R, C>> private constructor(
 
     // TODO(alihussain): cache this immediately after in a follow up!
     val annotation = rootClass.java.getAnnotation(misk.hibernate.annotation.Keyspace::class.java)
-        ?: throw NullPointerException("$rootClass requires the Keyspace annotation to use BulkShardMigrator. If using with MySQL annotate with @Keyspace(\"keyspace\")")
+      ?: throw NullPointerException("$rootClass requires the Keyspace annotation to use BulkShardMigrator. If using with MySQL annotate with @Keyspace(\"keyspace\")")
     this.keyspace = Keyspace(annotation.value)
   }
 
@@ -176,8 +175,8 @@ class BulkShardMigrator<R : DbRoot<R>, C : DbChild<R, C>> private constructor(
 
     val tableName = tableName()
     val setColumns = mutations.stream()
-        .map { mutation -> mutation.updateSql() }
-        .collect(joining(","))
+      .map { mutation -> mutation.updateSql() }
+      .collect(joining(","))
 
     logger.info("Bulk migrating in ${transacter.config().type} entities for table $tableName")
     transacter.transaction { session ->
@@ -191,12 +190,12 @@ class BulkShardMigrator<R : DbRoot<R>, C : DbChild<R, C>> private constructor(
           val updateStatement = connection.prepareStatement(update)
           var setParametersCount = 0
           mutations
-              .filter { it.isParameterized() }
-              .forEachIndexed { index, mutation ->
-                // statements indexes start from 1
-                mutation.bindUpdate(updateStatement, index + 1)
-                setParametersCount += 1
-              }
+            .filter { it.isParameterized() }
+            .forEachIndexed { index, mutation ->
+              // statements indexes start from 1
+              mutation.bindUpdate(updateStatement, index + 1)
+              setParametersCount += 1
+            }
           bindWhereClause(updateStatement, setParametersCount)
           updateStatement.executeUpdate()
         }
@@ -221,8 +220,10 @@ class BulkShardMigrator<R : DbRoot<R>, C : DbChild<R, C>> private constructor(
           if (sourceRecords.isEmpty()) {
             0
           } else {
-            logger.info("Bulk migrating (same shard) ${sourceRecords.size} entities for table" +
-                " $tableName")
+            logger.info(
+              "Bulk migrating (same shard) ${sourceRecords.size} entities for table" +
+                " $tableName"
+            )
             delete(session, sourceRecords.keys)
             session.hibernateSession.doWork { connection ->
               insert(connection, sourceRecords, setOf(), insertIgnore)
@@ -242,7 +243,7 @@ class BulkShardMigrator<R : DbRoot<R>, C : DbChild<R, C>> private constructor(
         setOf()
       } else {
         val existingIds = session.hibernateSession.createNativeQuery(
-            "SELECT id FROM $tableName WHERE $rootColumnName = :target AND id IN (:ids)"
+          "SELECT id FROM $tableName WHERE $rootColumnName = :target AND id IN (:ids)"
         ).setParameter("target", targetRoot!!.id)
           .setParameterList("ids", sourceRecords.keys)
           .resultList
@@ -250,11 +251,11 @@ class BulkShardMigrator<R : DbRoot<R>, C : DbChild<R, C>> private constructor(
           .toSet()
 
         logger.info(
-            "Bulk migrating (distinct shard) ${sourceRecords.size} entities for table $tableName"
+          "Bulk migrating (distinct shard) ${sourceRecords.size} entities for table $tableName"
         )
 
-        session.hibernateSession.doWork {
-          connection -> insert(connection, sourceRecords, existingIds, insertIgnore)
+        session.hibernateSession.doWork { connection ->
+          insert(connection, sourceRecords, existingIds, insertIgnore)
         }
         sourceRecords.keys
       }
@@ -277,7 +278,7 @@ class BulkShardMigrator<R : DbRoot<R>, C : DbChild<R, C>> private constructor(
       else
         ""
       connection.prepareStatement(
-          "SELECT ${columnNames.joinToString(", ")} FROM ${tableName()} WHERE $where $limit"
+        "SELECT ${columnNames.joinToString(", ")} FROM ${tableName()} WHERE $where $limit"
       ).use { select ->
         bindWhereClause(select)
         val resultSet = select.executeQuery()
@@ -305,8 +306,9 @@ class BulkShardMigrator<R : DbRoot<R>, C : DbChild<R, C>> private constructor(
     return shards.find {
       (it.keyspace == keyspace || it.keyspace == SINGLE_KEYSPACE) && it.contains(id.shardKey())
     } ?: throw NoSuchElementException(
-        "No shard found for [class=$rootClass][id=$id]" +
-            "[keyspace=$keyspace][shardKey=${id.shardKey()}] out of [shards=$shards]")
+      "No shard found for [class=$rootClass][id=$id]" +
+        "[keyspace=$keyspace][shardKey=${id.shardKey()}] out of [shards=$shards]"
+    )
   }
 
   private fun tableName(): String {
@@ -328,25 +330,25 @@ class BulkShardMigrator<R : DbRoot<R>, C : DbChild<R, C>> private constructor(
       """.trimIndent()
 
     connection.prepareStatement(statement)
-        .use { insert ->
-          var batches = 0
-          for ((key, resultColumnValues) in resultSet) {
-            if (existingIds.contains(key)) {
-              continue
-            }
-            var parameterIndex = 1
-            for (i in columnNames.indices) {
-              val columnName = columnNames[i]
-              val value = resultColumnValues[i]
-              parameterIndex += bindInsert(columnName, insert, parameterIndex, value)
-            }
-            insert.addBatch()
-            batches++
+      .use { insert ->
+        var batches = 0
+        for ((key, resultColumnValues) in resultSet) {
+          if (existingIds.contains(key)) {
+            continue
           }
-          if (batches > 0) {
-            insert.executeBatch()
+          var parameterIndex = 1
+          for (i in columnNames.indices) {
+            val columnName = columnNames[i]
+            val value = resultColumnValues[i]
+            parameterIndex += bindInsert(columnName, insert, parameterIndex, value)
           }
+          insert.addBatch()
+          batches++
         }
+        if (batches > 0) {
+          insert.executeBatch()
+        }
+      }
   }
 
   private fun columnNames(): ImmutableSet<String> {
@@ -356,7 +358,7 @@ class BulkShardMigrator<R : DbRoot<R>, C : DbChild<R, C>> private constructor(
   private fun delete(session: Session, idsToDelete: Collection<Long>) {
     val tableName = tableName()
     val numRecords = session.hibernateSession.createNativeQuery(
-        """
+      """
           DELETE FROM $tableName
           WHERE $rootColumnName = :source
           AND id IN (:ids)
@@ -365,8 +367,10 @@ class BulkShardMigrator<R : DbRoot<R>, C : DbChild<R, C>> private constructor(
       .setParameterList("ids", idsToDelete)
       .executeUpdate()
     if (numRecords != idsToDelete.size) {
-      logger.info("Deleted less records than expected from %s (%s < %s) after copying",
-          tableName, numRecords, idsToDelete.size)
+      logger.info(
+        "Deleted less records than expected from %s (%s < %s) after copying",
+        tableName, numRecords, idsToDelete.size
+      )
     }
   }
 
@@ -390,7 +394,8 @@ class BulkShardMigrator<R : DbRoot<R>, C : DbChild<R, C>> private constructor(
         }
       } catch (e: SQLException) {
         throw RuntimeException(
-            String.format("Can't infer type of column %s for value %s", columnName, value))
+          String.format("Can't infer type of column %s for value %s", columnName, value)
+        )
       }
 
       return 1
@@ -539,10 +544,10 @@ class BulkShardMigrator<R : DbRoot<R>, C : DbChild<R, C>> private constructor(
       childClass: KClass<C>
     ): BulkShardMigrator<R, C> {
       return BulkShardMigrator(
-          rootClass,
-          sessionFactory,
-          transacter,
-          childClass
+        rootClass,
+        sessionFactory,
+        transacter,
+        childClass
       )
     }
   }

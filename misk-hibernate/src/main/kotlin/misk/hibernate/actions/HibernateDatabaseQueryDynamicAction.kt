@@ -21,7 +21,6 @@ import misk.web.RequestContentType
 import misk.web.ResponseContentType
 import misk.web.actions.WebAction
 import misk.web.dashboard.AdminDashboardAccess
-import misk.web.interceptors.LogRequestResponse
 import misk.web.mediatype.MediaTypes
 import misk.web.metadata.database.DatabaseQueryMetadata
 import javax.inject.Inject
@@ -88,7 +87,10 @@ internal class HibernateDatabaseQueryDynamicAction @Inject constructor(
       .dynamicQuery(dbEntity)
       .configureDynamic(request, maxRows)
     val selectPaths = validateSelectPathsOrDefault(dbEntity, request.query.select?.paths)
-    logger.info("Query sent from dashboard [principal=$principal][dbEntity=${request.entityClass}][selectPaths=$selectPaths] ${request.query}")
+    logger.info(
+      "Query sent from dashboard [principal=$principal]" +
+        "[dbEntity=${request.entityClass}][selectPaths=$selectPaths] ${request.query}"
+    )
     val rows = configuredQuery.dynamicList(session, selectPaths)
     return Pair(selectPaths, rows)
   }

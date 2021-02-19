@@ -54,7 +54,7 @@ abstract class KAbstractModule : AbstractModule() {
   ): LinkedBindingBuilder<T> = newMultibinder<T>(annotation).addBinding()
 
   protected inline fun <reified T : Any, reified A : Annotation> multibind():
-      LinkedBindingBuilder<T> = newMultibinder<T>(A::class).addBinding()
+    LinkedBindingBuilder<T> = newMultibinder<T>(A::class).addBinding()
 
   protected inline fun <reified T : Any> newMultibinder(
     annotation: KClass<out Annotation>? = null
@@ -68,15 +68,16 @@ abstract class KAbstractModule : AbstractModule() {
     val setOfT = parameterizedType<Set<*>>(type.java).typeLiteral() as TypeLiteral<Set<T>>
     val mutableSetOfTKey = setOfT.toKey(annotation) as Key<MutableSet<T>>
     val setOfOutT =
-        parameterizedType<Set<*>>(Types.subtypeOf(type.java)).typeLiteral() as TypeLiteral<Set<T>>
+      parameterizedType<Set<*>>(Types.subtypeOf(type.java)).typeLiteral() as TypeLiteral<Set<T>>
     val setOfOutTKey = setOfOutT.toKey(annotation)
     val listOfT = parameterizedType<List<*>>(type.java).typeLiteral() as TypeLiteral<List<T>>
     val listOfOutT =
-        parameterizedType<List<*>>(Types.subtypeOf(type.java)).typeLiteral() as TypeLiteral<List<T>>
+      parameterizedType<List<*>>(Types.subtypeOf(type.java)).typeLiteral() as TypeLiteral<List<T>>
     val listOfOutTKey = listOfOutT.toKey(annotation)
     val listOfTKey = listOfT.toKey(annotation)
     bind(listOfOutTKey).toProvider(
-        ListProvider(mutableSetOfTKey, getProvider(mutableSetOfTKey)))
+      ListProvider(mutableSetOfTKey, getProvider(mutableSetOfTKey))
+    )
     bind(setOfOutTKey).to(setOfT.toKey(annotation))
     bind(listOfTKey).to(listOfOutTKey)
 

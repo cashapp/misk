@@ -40,7 +40,7 @@ private fun <T> ExtensionContext.getFromStoreOrCompute(
 
 /** Find [A]-annotated [T]s on the outermost test class and recursively on base classes. */
 internal inline fun <reified A : Annotation, T> ExtensionContext.fieldsAnnotatedBy(): Iterable<T> =
-    fieldsAnnotatedBy(A::class.java)
+  fieldsAnnotatedBy(A::class.java)
 
 /** Find [annotation]-annotated [T]s on the outermost test class and recursively on base classes. */
 private fun <T> ExtensionContext.fieldsAnnotatedBy(
@@ -49,13 +49,13 @@ private fun <T> ExtensionContext.fieldsAnnotatedBy(
   val rootRequiredTestInstance = rootRequiredTestInstance
   @Suppress("UNCHECKED_CAST")
   return generateSequence(rootRequiredTestInstance.javaClass) { c -> c.superclass }
-      .flatMap { it.declaredFields.asSequence() }
-      .filter {
-        it.isAnnotationPresent(annotation)
-      }
-      .map {
-        it.isAccessible = true
-        it.get(rootRequiredTestInstance) as T
-      }
-      .toList()
+    .flatMap { it.declaredFields.asSequence() }
+    .filter {
+      it.isAnnotationPresent(annotation)
+    }
+    .map {
+      it.isAccessible = true
+      it.get(rootRequiredTestInstance) as T
+    }
+    .toList()
 }

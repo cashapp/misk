@@ -68,7 +68,7 @@ internal class RealActionRequestExecuter<RQ : Any, RS : Any> @Inject constructor
         throw BadRequestException(response.message)
       }
       response.code == 403 -> {
-       throw UnauthorizedException(response.message)
+        throw UnauthorizedException(response.message)
       }
       // TODO add other status code => Misk Action Exception mappings for related tests
       else -> {

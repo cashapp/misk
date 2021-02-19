@@ -135,8 +135,8 @@ internal class SchemaValidatorTest {
   fun findMissingColumnsInHibernate() {
     assertThat(schemaValidationErrorMessage).contains(
       "Hibernate entity \"missing_columns_table\" is missing columns " +
-          "[tbl4_string_column_database] " +
-          "expected in table \"missing_columns_table\""
+        "[tbl4_string_column_database] " +
+        "expected in table \"missing_columns_table\""
     )
   }
 
@@ -144,8 +144,8 @@ internal class SchemaValidatorTest {
   fun findMissingColumnsInDb() {
     assertThat(schemaValidationErrorMessage).contains(
       "Database table \"missing_columns_table\" is missing columns " +
-          "[tbl4_int_column_hibernate, tbl4_string_column_hibernate] " +
-          "found in hibernate \"missing_columns_table\""
+        "[tbl4_int_column_hibernate, tbl4_string_column_hibernate] " +
+        "found in hibernate \"missing_columns_table\""
     )
   }
 
@@ -153,7 +153,7 @@ internal class SchemaValidatorTest {
   fun findNullableColumnsInHibernate() {
     assertThat(schemaValidationErrorMessage).contains(
       "ERROR at schemavalidation.nullable_mismatch_table.tbl5_hibernate_null:\n" +
-          "  Column nullable_mismatch_table.tbl5_hibernate_null is NOT NULL in database but tbl5_hibernate_null is nullable in hibernate"
+        "  Column nullable_mismatch_table.tbl5_hibernate_null is NOT NULL in database but tbl5_hibernate_null is nullable in hibernate"
     )
   }
 
@@ -213,15 +213,19 @@ internal class SchemaValidatorTest {
 
   @Test
   fun catchNotReallyUniqueColumnNames() {
-    val duplicateIds = schemaValidationErrorMessage.contains("Duplicate identifiers: [[tbl6NotReallyUnique, tbl6_not_really_unique]]") ||
-      schemaValidationErrorMessage.contains("Duplicate identifiers: [[tbl6_not_really_unique, tbl6NotReallyUnique]]")
+    val duplicateIds =
+      schemaValidationErrorMessage.contains("Duplicate identifiers: [[tbl6NotReallyUnique, tbl6_not_really_unique]]") ||
+        schemaValidationErrorMessage.contains("Duplicate identifiers: [[tbl6_not_really_unique, tbl6NotReallyUnique]]")
 
-    assertTrue(duplicateIds, "Expected duplicate ids for: [[tbl6_not_really_unique, tbl6NotReallyUnique]]")
+    assertTrue(
+      duplicateIds,
+      "Expected duplicate ids for: [[tbl6_not_really_unique, tbl6NotReallyUnique]]"
+    )
 
     assertThat(schemaValidationErrorMessage).contains(
       "Duplicate identifiers: " +
-          "[[tbl6NotReallyUnique, tbl6_not_REALLY_unique], " +
-          "[tbl6NotReallyUnique2, tbl6_not_really_unique2]]"
+        "[[tbl6NotReallyUnique, tbl6_not_REALLY_unique], " +
+        "[tbl6NotReallyUnique2, tbl6_not_really_unique2]]"
     )
   }
 
@@ -233,7 +237,7 @@ internal class SchemaValidatorTest {
 
   @Entity
   @Table(name = "`quoted_basic_table`")
-  class DbBasicTestTable() : DbUnsharded<DbBasicTestTable>, DbTimestampedEntity {
+  class DbBasicTestTable : DbUnsharded<DbBasicTestTable>, DbTimestampedEntity {
 
     @javax.persistence.Id
     @GeneratedValue
@@ -266,7 +270,7 @@ internal class SchemaValidatorTest {
 
   @Entity
   @Table(name = "`hibernate_only_table`")
-  class DbHibernateOnlyTable() : DbUnsharded<DbHibernateOnlyTable> {
+  class DbHibernateOnlyTable : DbUnsharded<DbHibernateOnlyTable> {
     @javax.persistence.Id
     @GeneratedValue
     override lateinit var id: Id<DbHibernateOnlyTable>
@@ -280,7 +284,7 @@ internal class SchemaValidatorTest {
 
   @Entity
   @Table(name = "`missing_columns_table`")
-  class DbMissingColumnsTable() : DbUnsharded<DbMissingColumnsTable> {
+  class DbMissingColumnsTable : DbUnsharded<DbMissingColumnsTable> {
     @javax.persistence.Id
     @GeneratedValue
     override lateinit var id: Id<DbMissingColumnsTable>
@@ -300,7 +304,7 @@ internal class SchemaValidatorTest {
 
   @Entity
   @Table(name = "`nullable_mismatch_table`")
-  class DbNullableMismatchTable() : DbUnsharded<DbNullableMismatchTable> {
+  class DbNullableMismatchTable : DbUnsharded<DbNullableMismatchTable> {
     @javax.persistence.Id
     @GeneratedValue
     override lateinit var id: Id<DbNullableMismatchTable>
@@ -323,7 +327,7 @@ internal class SchemaValidatorTest {
 
   @Entity
   @Table(name = "bad_identifier_table")
-  class DbBadIdentifierTable() : DbUnsharded<DbBadIdentifierTable> {
+  class DbBadIdentifierTable : DbUnsharded<DbBadIdentifierTable> {
     @javax.persistence.Id
     @GeneratedValue
     override lateinit var id: Id<DbBadIdentifierTable>

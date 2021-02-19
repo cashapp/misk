@@ -52,7 +52,7 @@ internal class HibernateDatabaseQueryWebActionModule : KAbstractModule() {
       .find { transacterBinding ->
         transacterBinding.provider.get().entities().map { it.simpleName!! }
           .contains(metadata.entityClass)
-      }?.provider?.get() ?: throw BadRequestException(
+      }?.provider.get() ?: throw BadRequestException(
       "[dbEntity=${metadata.entityClass}] has no associated Transacter"
     )
 

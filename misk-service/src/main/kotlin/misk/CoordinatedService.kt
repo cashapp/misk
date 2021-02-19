@@ -33,25 +33,28 @@ internal class CoordinatedService(
 
   init {
     service.checkNew("$service must be NEW for it to be coordinated")
-    service.addListener(object : Listener() {
-      override fun running() {
-        synchronized(this) {
-          notifyStarted()
+    service.addListener(
+      object : Listener() {
+        override fun running() {
+          synchronized(this) {
+            notifyStarted()
+          }
+          downstreamServices.forEach { it.startIfReady() }
         }
-        downstreamServices.forEach { it.startIfReady() }
-      }
 
-      override fun terminated(from: State) {
-        synchronized(this) {
-          notifyStopped()
+        override fun terminated(from: State) {
+          synchronized(this) {
+            notifyStopped()
+          }
+          upstreamServices.forEach { it.stopIfReady() }
         }
-        upstreamServices.forEach { it.stopIfReady() }
-      }
 
-      override fun failed(from: State, failure: Throwable) {
-        notifyFailed(failure)
-      }
-    }, MoreExecutors.directExecutor())
+        override fun failed(from: State, failure: Throwable) {
+          notifyFailed(failure)
+        }
+      },
+      MoreExecutors.directExecutor()
+    )
   }
 
   /**

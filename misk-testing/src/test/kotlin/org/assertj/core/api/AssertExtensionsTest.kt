@@ -8,86 +8,111 @@ internal class AssertExtensionsTest {
   @Test
   fun assertAsJsonMatches() {
     // Should ignore all of the whitespace differences here
-    assertThat("""
+    assertThat(
+      """
 {"my_structure"    :   [  "this", 45,   "zip" ],
    "my_value":"another value"
 
 
 }
-""").isEqualToAsJson("""
+"""
+    ).isEqualToAsJson(
+      """
 {
   "my_structure" : ["this", 45, "zip"],
   "my_value"     : "another value"
 }
-""")
+"""
+    )
   }
 
   @Test
   fun assertAsJsonMismatchedFieldName() {
-    assertThat(assertFailsWith<AssertionError> {
-      assertThat("""
+    assertThat(
+      assertFailsWith<AssertionError> {
+        assertThat(
+          """
 {
   "my_structure2"   : ["this", 45, "zip" ],
   "my_value"        : "another value"
 }
-""").isEqualToAsJson("""
+"""
+        ).isEqualToAsJson(
+          """
 {
   "my_structure" : ["this", 45, "zip"],
   "my_value"     : "another value"
 }
-""")
-    }).hasMessage(
-        """
+"""
+        )
+      }
+    ).hasMessage(
+      """
 Expecting:
  <"{ "my_structure2" : [ "this" , 45, "zip" ], "my_value" : "another value" }">
 to be equal to:
  <"{ "my_structure" : [ "this" , 45, "zip" ], "my_value" : "another value" }">
-but was not.""")
+but was not."""
+    )
   }
 
   @Test
   fun assertAsJsonMismatchedFieldValue() {
-    assertThat(assertFailsWith<AssertionError> {
-      assertThat("""
+    assertThat(
+      assertFailsWith<AssertionError> {
+        assertThat(
+          """
 {
   "my_structure"    : ["thisisit", 45, "zip" ],
   "my_value"        : "another value"
 }
-""").isEqualToAsJson("""
+"""
+        ).isEqualToAsJson(
+          """
 {
   "my_structure" : ["this", 45, "zip"],
   "my_value"     : "another value"
 }
-""")
-    }).hasMessage(
-        """
+"""
+        )
+      }
+    ).hasMessage(
+      """
 Expecting:
  <"{ "my_structure" : [ "thisisit" , 45, "zip" ], "my_value" : "another value" }">
 to be equal to:
  <"{ "my_structure" : [ "this" , 45, "zip" ], "my_value" : "another value" }">
-but was not.""")
+but was not."""
+    )
   }
 
   @Test
   fun assertAsJsonMismatchedWhitespaceInStringFieldValue() {
-    assertThat(assertFailsWith<AssertionError> {
-      assertThat("""
+    assertThat(
+      assertFailsWith<AssertionError> {
+        assertThat(
+          """
 {
   "my_structure"    : ["this", 45, "zip" ],
   "my_value"        : "another value"
 }
-""").isEqualToAsJson("""
+"""
+        ).isEqualToAsJson(
+          """
 {
   "my_structure" : ["thi  s", 45, "zip"],
   "my_value"     : "another value"
 }
-""")
-    }).hasMessage(
-  """
+"""
+        )
+      }
+    ).hasMessage(
+      """
 Expecting:
  <"{ "my_structure" : [ "this" , 45, "zip" ], "my_value" : "another value" }">
 to be equal to:
  <"{ "my_structure" : [ "thi  s" , 45, "zip" ], "my_value" : "another value" }">
-but was not.""")
+but was not."""
+    )
   }
 }

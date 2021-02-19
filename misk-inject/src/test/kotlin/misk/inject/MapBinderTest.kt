@@ -47,23 +47,31 @@ class TestModule : KAbstractModule() {
     newMapBinder<Int, String>(TestAnnotation::class).addBinding(2).toInstance("two")
 
     newMapBinder<String, Shape>(TestAnnotation::class).addBinding("square").toInstance(
-        Square())
+      Square()
+    )
     newMapBinder<String, Shape>(TestAnnotation::class).addBinding("circle").toInstance(
-        Circle())
+      Circle()
+    )
 
     newMapBinder<Shape, String>(TestAnnotation::class).addBinding(
-        Square()).toInstance("square")
+      Square()
+    ).toInstance("square")
     newMapBinder<Shape, String>(TestAnnotation::class).addBinding(
-        Circle()).toInstance("circle")
+      Circle()
+    ).toInstance("circle")
 
     newMapBinder<Shape, Color>(TestAnnotation::class).addBinding(
-        Square()).toInstance(Blue())
+      Square()
+    ).toInstance(Blue())
     newMapBinder<Shape, Color>(TestAnnotation::class).addBinding(
-        Circle()).toInstance(Red())
+      Circle()
+    ).toInstance(Red())
 
     newMapBinder<Shape, Color>().addBinding(Square()).toInstance(
-        Blue())
+      Blue()
+    )
     newMapBinder<Shape, Color>().addBinding(Circle()).toInstance(
-        Red())
+      Red()
+    )
   }
 }

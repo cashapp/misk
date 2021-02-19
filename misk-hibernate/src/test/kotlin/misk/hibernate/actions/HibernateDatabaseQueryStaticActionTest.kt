@@ -13,7 +13,6 @@ import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import javax.inject.Inject
@@ -44,7 +43,8 @@ class HibernateDatabaseQueryStaticActionTest {
     }
   }
 
-  private val AUTHORIZED_CAPABILITIES = OPERATORS_MOVIE_QUERY_ACCESS_ENTRY.capabilities.joinToString() + ",admin_console"
+  private val AUTHORIZED_CAPABILITIES =
+    OPERATORS_MOVIE_QUERY_ACCESS_ENTRY.capabilities.joinToString() + ",admin_console"
 
   @Test
   fun `unauthorized request`() {

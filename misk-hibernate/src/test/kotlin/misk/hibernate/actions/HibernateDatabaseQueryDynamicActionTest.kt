@@ -7,14 +7,12 @@ import misk.hibernate.DbCharacter
 import misk.hibernate.DbMovie
 import misk.hibernate.Movies
 import misk.hibernate.Operator
-import misk.hibernate.ReflectionQuery
 import misk.hibernate.Transacter
 import misk.hibernate.load
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import javax.inject.Inject

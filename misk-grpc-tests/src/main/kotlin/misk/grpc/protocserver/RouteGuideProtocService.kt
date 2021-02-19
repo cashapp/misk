@@ -11,22 +11,25 @@ import javax.inject.Singleton
 @Singleton
 internal class RouteGuideProtocService @Inject constructor() : RouteGuideImplBase() {
   override fun getFeature(point: Point, responseObserver: StreamObserver<Feature>) {
-    responseObserver.onNext(Feature.newBuilder()
+    responseObserver.onNext(
+      Feature.newBuilder()
         .setName("pine tree")
         .setLocation(point)
-        .build())
+        .build()
+    )
     responseObserver.onCompleted()
   }
 
   override fun routeChat(
     responseObserver: StreamObserver<RouteGuideProto.RouteNote>
-  ):
-      StreamObserver<RouteGuideProto.RouteNote> {
+  ): StreamObserver<RouteGuideProto.RouteNote> {
     return object : StreamObserver<RouteGuideProto.RouteNote> {
       override fun onNext(value: RouteGuideProto.RouteNote) {
-        responseObserver.onNext(RouteGuideProto.RouteNote.newBuilder()
+        responseObserver.onNext(
+          RouteGuideProto.RouteNote.newBuilder()
             .setMessage(value.message.reversed())
-            .build())
+            .build()
+        )
       }
 
       override fun onError(t: Throwable?) {

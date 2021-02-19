@@ -8,6 +8,7 @@ import kotlin.reflect.KClass
 
 interface Session {
   val hibernateSession: org.hibernate.Session
+
   /**
    * @throws IllegalStateException when save is called on a read only session.
    */
@@ -63,6 +64,7 @@ interface Session {
 
 inline fun <reified T : DbEntity<T>> Session.load(id: Id<T>): T = load(id, T::class)
 inline fun <R : DbRoot<R>, reified S : DbSharded<R, S>> Session.loadSharded(gid: Gid<R, S>): S = loadSharded(
-    gid, S::class)
+  gid, S::class
+)
 
 inline fun <reified T : DbEntity<T>> Session.loadOrNull(id: Id<T>): T? = loadOrNull(id, T::class)

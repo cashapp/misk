@@ -26,20 +26,20 @@ class MiskGrpcClientModule : KAbstractModule() {
   @Singleton
   fun provideHttpClientsConfig(@Named("grpc server") url: HttpUrl): HttpClientsConfig {
     return HttpClientsConfig(
-        endpoints = mapOf(
-            "default" to HttpClientEndpointConfig(
-                url = url.toString(),
-                clientConfig = HttpClientConfig(
-                    ssl = HttpClientSSLConfig(
-                        cert_store = null,
-                        trust_store = TrustStoreConfig(
-                            resource = "classpath:/ssl/server_cert.pem",
-                            format = SslLoader.FORMAT_PEM
-                        )
-                    )
-                )
+      endpoints = mapOf(
+        "default" to HttpClientEndpointConfig(
+          url = url.toString(),
+          clientConfig = HttpClientConfig(
+            ssl = HttpClientSSLConfig(
+              cert_store = null,
+              trust_store = TrustStoreConfig(
+                resource = "classpath:/ssl/server_cert.pem",
+                format = SslLoader.FORMAT_PEM
+              )
             )
+          )
         )
+      )
     )
   }
 }

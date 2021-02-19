@@ -23,7 +23,6 @@ import javax.persistence.Entity
 import javax.persistence.GeneratedValue
 import javax.persistence.Table
 import kotlin.reflect.full.declaredMemberProperties
-import kotlin.reflect.jvm.javaField
 
 interface SwappableTransformer {
   fun assemble(ctx: TransformerContext, owner: Any?, value: Serializable): Any
@@ -35,7 +34,12 @@ class DelegatingTransformer(private val ctx: TransformerContext) : Transformer(c
   @Inject
   lateinit var transformer: SwappableTransformer
 
-  override fun assemble(owner: Any?, value: Serializable): Any = transformer.assemble(ctx, owner, value)
+  override fun assemble(owner: Any?, value: Serializable): Any = transformer.assemble(
+    ctx,
+    owner,
+    value
+  )
+
   override fun disassemble(value: Any): Serializable = transformer.disassemble(ctx, value)
 }
 
@@ -51,13 +55,20 @@ class TransformedColumnTest {
 
   var swappableTransformer: SwappableTransformer? = null
 
-  private fun withTransformer(assemble: (TransformerContext, Any?, Serializable) -> Any,
-                      disassemble: (TransformerContext, Any) -> Serializable,
-                      f: () -> Unit) {
+  private fun withTransformer(
+    assemble: (TransformerContext, Any?, Serializable) -> Any,
+    disassemble: (TransformerContext, Any) -> Serializable,
+    f: () -> Unit
+  ) {
     val saved = swappableTransformer
 
     swappableTransformer = object : SwappableTransformer {
-      override fun assemble(ctx: TransformerContext, owner: Any?, value: Serializable) = assemble(ctx, owner, value)
+      override fun assemble(ctx: TransformerContext, owner: Any?, value: Serializable) = assemble(
+        ctx,
+        owner,
+        value
+      )
+
       override fun disassemble(ctx: TransformerContext, value: Any) = disassemble(ctx, value)
     }
 
@@ -284,8 +295,8 @@ class TransformedColumnTest {
           .list(session)
 
         val annotationForInt = DbManyTypes::class.declaredMemberProperties
-                .mapNotNull { prop -> prop.javaField?.getAnnotation(TransformedInt::class.java) }
-                .first()
+          .mapNotNull { prop -> prop.javaField.getAnnotation(TransformedInt::class.java) }
+          .first()
         assertThat(rows).hasSize(1)
         assertThat(rows[0].intField).isEqualTo(value + annotationForInt.amount)
       }
@@ -340,7 +351,6 @@ class TransformedColumnTest {
   @TransformedType(transformer = DelegatingTransformer::class, targetType = Double::class)
   annotation class TransformedDouble
 
-
   @Target(AnnotationTarget.FIELD)
   @TransformedType(transformer = DelegatingTransformer::class, targetType = String::class)
   annotation class TransformedString
@@ -353,7 +363,6 @@ class TransformedColumnTest {
     override fun convertToDatabaseColumn(attribute: Int): Int = attribute + 2
     override fun convertToEntityAttribute(dbData: Int): Int = dbData - 2
   }
-
 
   @Entity
   @Table(name = "manytypes")
@@ -379,7 +388,12 @@ class TransformedColumnTest {
     @TransformedByteArray
     var byteArrayField: ByteArray = byteArrayOf()
 
-    constructor(intField: Int, doubleField: Double, stringField: String, byteArrayField: ByteArray) {
+    constructor(
+      intField: Int,
+      doubleField: Double,
+      stringField: String,
+      byteArrayField: ByteArray
+    ) {
       this.intField = intField
       this.doubleField = doubleField
       this.stringField = stringField
@@ -406,7 +420,12 @@ class TransformedColumnTest {
     @Column(name = "byte_array_field")
     var byteArrayField: ByteArray = byteArrayOf()
 
-    constructor(intField: Int, doubleField: Double, stringField: String, byteArrayField: ByteArray) {
+    constructor(
+      intField: Int,
+      doubleField: Double,
+      stringField: String,
+      byteArrayField: ByteArray
+    ) {
       this.intField = intField
       this.doubleField = doubleField
       this.stringField = stringField
@@ -415,10 +434,10 @@ class TransformedColumnTest {
   }
 
   data class ManyTypesProjection(
-          @Property("intField") val intField: Int,
-          @Property("doubleField") val doubleField: Double,
-          @Property("stringField") val stringField: String,
-          @Property("byteArrayField") val byteArrayField: ByteArray
+    @Property("intField") val intField: Int,
+    @Property("doubleField") val doubleField: Double,
+    @Property("stringField") val stringField: String,
+    @Property("byteArrayField") val byteArrayField: ByteArray
   ) : Projection {
     override fun hashCode(): Int = Objects.hash(intField, doubleField, stringField, byteArrayField)
     override fun equals(other: Any?): Boolean {
@@ -429,9 +448,9 @@ class TransformedColumnTest {
         return false
       }
       return intField == other.intField &&
-              doubleField == other.doubleField &&
-              stringField == other.stringField &&
-              byteArrayField contentEquals other.byteArrayField
+        doubleField == other.doubleField &&
+        stringField == other.stringField &&
+        byteArrayField contentEquals other.byteArrayField
     }
   }
 
@@ -448,11 +467,20 @@ class TransformedColumnTest {
       install(EnvironmentModule(Environment.TESTING))
 
       bind<SwappableTransformer>().toInstance(object : SwappableTransformer {
-        override fun assemble(ctx: TransformerContext, owner: Any?, value: Serializable): Any = swappableTransformer?.assemble(ctx, owner, value)!!
-        override fun disassemble(ctx: TransformerContext, value: Any): Serializable = swappableTransformer?.disassemble(ctx, value)!!
+        override fun assemble(
+          ctx: TransformerContext,
+          owner: Any?,
+          value: Serializable
+        ): Any = swappableTransformer?.assemble(ctx, owner, value)!!
+
+        override fun disassemble(
+          ctx: TransformerContext,
+          value: Any
+        ): Serializable = swappableTransformer?.disassemble(ctx, value)!!
       })
 
-      val conf = MiskConfig.load<TransformedColumnTestConfig>("transformedcolumn", Environment.TESTING)
+      val conf =
+        MiskConfig.load<TransformedColumnTestConfig>("transformedcolumn", Environment.TESTING)
       install(HibernateTestingModule(TransformedColumnTestDb::class, conf.data_source))
       install(HibernateModule(TransformedColumnTestDb::class, conf.data_source))
       install(object : HibernateEntityModule(TransformedColumnTestDb::class) {

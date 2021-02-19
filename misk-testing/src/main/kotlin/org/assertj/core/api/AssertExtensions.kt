@@ -14,11 +14,11 @@ fun <ACTUAL : CharSequence> AbstractCharSequenceAssert<*, ACTUAL>.isEqualToAsJso
   // Normalize whitespace outside of field names and string values
   val regex = Regex("[^\\s\"']+|\"[^\"]*\"|'[^']*'")
   val normalizedActual = regex.findAll(actual)
-      .map { it.groupValues[0] }
-      .joinToString(" ")
+    .map { it.groupValues[0] }
+    .joinToString(" ")
   val normalizedExpected = regex.findAll(expected)
-      .map { it.groupValues[0] }
-      .joinToString(" ")
+    .map { it.groupValues[0] }
+    .joinToString(" ")
   objects.assertEqual(getWritableAssertionInfo(), normalizedActual, normalizedExpected)
   return this
 }

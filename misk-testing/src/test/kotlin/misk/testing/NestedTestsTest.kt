@@ -59,7 +59,6 @@ class NestedTestsTest {
         assertThat(boringService.localStartUps).isOne()
         assertThat(startUps - shutDowns).isOne()
       }
-
     }
   }
 

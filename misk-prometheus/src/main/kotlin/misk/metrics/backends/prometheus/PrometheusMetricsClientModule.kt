@@ -24,7 +24,7 @@ class PrometheusMetricsClientModule : KAbstractModule() {
    * In order to make it possible to install this module multiple times, we make this binding not
    * dependent on the instance of [PrometheusMetricsClientModule] that created it.
    */
-  internal class CollectorRegistryProvider @Inject constructor(): Provider<CollectorRegistry> {
+  internal class CollectorRegistryProvider @Inject constructor() : Provider<CollectorRegistry> {
     override fun get(): CollectorRegistry {
       return CollectorRegistry()
     }
