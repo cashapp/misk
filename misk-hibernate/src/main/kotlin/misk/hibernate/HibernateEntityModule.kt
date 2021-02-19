@@ -84,13 +84,17 @@ abstract class HibernateEntityModule(
     addEntity(T::class)
   }
 
-  /** Adds a DbEntity to Database-Query Admin Dashboard Tab with a dynamic query (not a static Misk.Query) */
-  protected inline fun <reified T : DbEntity<T>, reified AA : Annotation> addEntityWithDynamicQuery() {
+  /** Adds a DbEntity to Database-Query Admin Dashboard Tab with a dynamic query
+   * (not a static Misk.Query)
+   */
+  protected inline fun <reified T : DbEntity<T>, reified AA : Annotation>
+    addEntityWithDynamicQuery() {
     addEntity(T::class, null, AA::class)
   }
 
   /** Adds a DbEntity to Database-Query Admin Dashboard Tab with a static Misk.Query */
-  protected inline fun <reified T : DbEntity<T>, reified Q : Query<T>, reified AA : Annotation> addEntityWithStaticQuery() {
+  protected inline fun <reified T : DbEntity<T>, reified Q : Query<T>, reified AA : Annotation>
+    addEntityWithStaticQuery() {
     addEntity(T::class, Q::class, AA::class)
   }
 

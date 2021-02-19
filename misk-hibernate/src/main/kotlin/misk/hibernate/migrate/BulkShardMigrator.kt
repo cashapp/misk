@@ -75,7 +75,10 @@ class BulkShardMigrator<R : DbRoot<R>, C : DbChild<R, C>> private constructor(
 
     // TODO(alihussain): cache this immediately after in a follow up!
     val annotation = rootClass.java.getAnnotation(misk.hibernate.annotation.Keyspace::class.java)
-      ?: throw NullPointerException("$rootClass requires the Keyspace annotation to use BulkShardMigrator. If using with MySQL annotate with @Keyspace(\"keyspace\")")
+      ?: throw NullPointerException(
+        "$rootClass requires the Keyspace annotation to use BulkShardMigrator. " +
+          "If using with MySQL annotate with @Keyspace(\"keyspace\")"
+      )
     this.keyspace = Keyspace(annotation.value)
   }
 

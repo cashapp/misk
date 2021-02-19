@@ -168,11 +168,13 @@ internal class SchemaValidator {
       "Database table name \"${dbTable.name}\" should be in lower_snake_case"
     }
     validate(dbTable.name == hibernateTable.name) {
-      "Database table name \"${dbTable.name}\" should exactly match hibernate \"${hibernateTable.name}\""
+      "Database table name \"${dbTable.name}\" should exactly match " +
+        "hibernate \"${hibernateTable.name}\""
     }
 
     validate(hibernateOnly.isEmpty()) {
-      "Database table \"${dbTable.name}\" is missing columns ${hibernateOnly.map { it.name }} found in hibernate \"${hibernateTable.name}\""
+      "Database table \"${dbTable.name}\" is missing columns ${hibernateOnly.map { it.name }} " +
+        "found in hibernate \"${hibernateTable.name}\""
     }
 
     validate(dbOnly.isEmpty() || dbOnly.all { it.hasDefaultValue || it.nullable }) {
@@ -197,13 +199,15 @@ internal class SchemaValidator {
       "Column ${dbTable.name}.${dbColumn.name} should be in lower_snake_case"
     }
     validate(dbColumn.name == hibernateColumn.name) {
-      "Column ${dbTable.name}.${dbColumn.name} should exactly match hibernate ${hibernateColumn.name}"
+      "Column ${dbTable.name}.${dbColumn.name} should exactly match " +
+        "hibernate ${hibernateColumn.name}"
     }
 
     // We have that the hibernate column only needs to be null if the database is null.
     // It's okay if hibernate is more strict. However, we shouldn't care that much if the column has a default value
     validate(dbColumn.nullable || !hibernateColumn.nullable || dbColumn.hasDefaultValue) {
-      "Column ${dbTable.name}.${dbColumn.name} is NOT NULL in database but ${hibernateColumn.name} is nullable in hibernate"
+      "Column ${dbTable.name}.${dbColumn.name} is NOT NULL in database " +
+        "but ${hibernateColumn.name} is nullable in hibernate"
     }
   }
 

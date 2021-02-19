@@ -859,7 +859,8 @@ internal class ReflectionQuery<T : DbEntity<T>>(
 /** Creates a predicate. This allows us to defer attaching the predicate to the session. */
 private typealias PredicateFactory = (root: Root<*>, criteriaBuilder: CriteriaBuilder) -> Predicate
 
-private typealias OrderFactory = (root: Root<*>, criteriaBuilder: CriteriaBuilder) -> javax.persistence.criteria.Order
+private typealias OrderFactory =
+  (root: Root<*>, criteriaBuilder: CriteriaBuilder) -> javax.persistence.criteria.Order
 
 private val PATH_PATTERN = Regex("""\w+(\.\w+)*""")
 

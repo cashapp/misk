@@ -271,7 +271,9 @@ internal class RealTransacter private constructor(
     }
   }
 
-  private fun <T> replicaReadWithoutTransactionInternalSession(block: (session: RealSession) -> T): T {
+  private fun <T> replicaReadWithoutTransactionInternalSession(
+    block: (session: RealSession) -> T
+  ): T {
     return withSession(reader()) { session ->
       check(session.isReadOnly()) {
         "Reads should be in a read only session"
@@ -295,9 +297,10 @@ internal class RealTransacter private constructor(
       return sessionFactory
     }
     error(
-      "No reader is configured for replica reads, pass in both a writer and reader qualifier and the full " +
-        "DataSourceClustersConfig into HibernateModule, like this:\n" +
-        "\tinstall(HibernateModule(AppDb::class, AppReaderDb::class, config.data_source_clusters[\"name\"]))"
+      "No reader is configured for replica reads, pass in both a writer and reader qualifier " +
+        "and the full DataSourceClustersConfig into HibernateModule, like this:\n" +
+        "\tinstall(HibernateModule(AppDb::class, AppReaderDb::class, " +
+        "config.data_source_clusters[\"name\"]))"
     )
   }
 
@@ -385,7 +388,8 @@ internal class RealTransacter private constructor(
    * just need to retry the transaction and the new master should handle it.
    *
    * ```
-   * vttablet: rpc error: code = Aborted desc = transaction 1572922696317821557: not found (CallerID: )
+   * vttablet: rpc error: code = Aborted desc = transaction 1572922696317821557:
+   * not found (CallerID: )
    * ```
    */
   private fun isVitessTransactionNotFound(th: SQLException): Boolean {

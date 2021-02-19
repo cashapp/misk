@@ -26,12 +26,18 @@ class HibernateDatabaseQueryDynamicActionTest {
   val module = HibernateDatabaseQueryTestingModule()
 
   @Inject
-  private lateinit var realActionRequestExecuter: RealActionRequestExecuter<HibernateDatabaseQueryDynamicAction.Request, HibernateDatabaseQueryDynamicAction.Response>
+  private lateinit var realActionRequestExecuter:
+    RealActionRequestExecuter<
+      HibernateDatabaseQueryDynamicAction.Request,
+      HibernateDatabaseQueryDynamicAction.Response
+      >
   @Inject @Movies lateinit var transacter: Transacter
 
   @BeforeEach
   fun before() {
-    realActionRequestExecuter.requestPath(HibernateDatabaseQueryDynamicAction.HIBERNATE_QUERY_DYNAMIC_WEBACTION_PATH)
+    realActionRequestExecuter.requestPath(
+      HibernateDatabaseQueryDynamicAction.HIBERNATE_QUERY_DYNAMIC_WEBACTION_PATH
+    )
 
     // Insert some movies, characters and actors.
     transacter.allowCowrites().transaction { session ->
@@ -44,7 +50,10 @@ class HibernateDatabaseQueryDynamicActionTest {
   }
 
   private val AUTHORIZED_CAPABILITIES =
-    HibernateDatabaseQueryTestingModule.DYNAMIC_MOVIE_QUERY_ACCESS_ENTRY.capabilities.joinToString() + ",admin_console"
+    HibernateDatabaseQueryTestingModule
+      .DYNAMIC_MOVIE_QUERY_ACCESS_ENTRY
+      .capabilities
+      .joinToString() + ",admin_console"
 
   @Test
   fun `unauthorized request`() {
