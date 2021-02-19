@@ -13,6 +13,7 @@ buildscript {
     classpath dep.kotlinGradlePlugin
     classpath dep.junitGradlePlugin
     classpath dep.mavenPublishGradlePlugin
+    classpath dep.jgit
     classpath(dep.spotless5Plugin) {
       exclude group:'org.slf4j', module:'slf4j-api'
     }
@@ -74,8 +75,8 @@ subprojects { subProject ->
 
 
   spotless {
-    //ratchetFrom 'origin/master'
-    enforceCheck true
+    ratchetFrom 'origin/master'
+    enforceCheck false
     kotlin {
       target "**/*.kt"
       ktlint(dep.ktlintVersion).userData([
