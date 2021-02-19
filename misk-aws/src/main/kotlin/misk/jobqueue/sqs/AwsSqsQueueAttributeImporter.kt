@@ -16,7 +16,7 @@ internal class AwsSqsQueueAttributeImporter @Inject constructor(
   private val metrics: SqsMetrics,
   private val queues: QueueResolver,
   @ForSqsHandling private val taskQueue: RepeatedTaskQueue
-){
+) {
 
   /**
    * Spawn a new thread that will consume the [queueName] SQS attributes and record them as metrics
@@ -40,21 +40,32 @@ internal class AwsSqsQueueAttributeImporter @Inject constructor(
         }
         val attributes = queue.call { client ->
           val request = GetQueueAttributesRequest()
-              .withQueueUrl(queue.url)
-              .withAttributeNames(
-                  QueueAttributeName.ApproximateNumberOfMessages,
-                  QueueAttributeName.ApproximateNumberOfMessagesNotVisible)
+            .withQueueUrl(queue.url)
+            .withAttributeNames(
+              QueueAttributeName.ApproximateNumberOfMessages,
+              QueueAttributeName.ApproximateNumberOfMessagesNotVisible
+            )
           val response = client.getQueueAttributes(request)
           response.attributes
         }
 
         attributes[QueueAttributeName.ApproximateNumberOfMessages.toString()]?.let {
-          metrics.sqsApproxNumberOfMessages.labels(metricNamespace, metricStat, queue.queueName, queue.queueName)
-              .set(it.toDouble())
+          metrics.sqsApproxNumberOfMessages.labels(
+            metricNamespace,
+            metricStat,
+            queue.queueName,
+            queue.queueName
+          )
+            .set(it.toDouble())
         }
         attributes[QueueAttributeName.ApproximateNumberOfMessagesNotVisible.toString()]?.let {
-          metrics.sqsApproxNumberOfMessagesNotVisible.labels(metricNamespace, metricStat, queue.queueName, queue.queueName)
-              .set(it.toDouble())
+          metrics.sqsApproxNumberOfMessagesNotVisible.labels(
+            metricNamespace,
+            metricStat,
+            queue.queueName,
+            queue.queueName
+          )
+            .set(it.toDouble())
         }
       }
       Status.OK

@@ -96,7 +96,8 @@ internal class MiskApplicationTest {
     }
 
     // Error message should be specific to the command
-    assertThat(exception.message).isEqualTo("""
+    assertThat(exception.message).isEqualTo(
+      """
         |
         |Expected a value after parameter -f
         |
@@ -104,7 +105,8 @@ internal class MiskApplicationTest {
         |  Options:
         |  * -f, --file
         |
-        |""".trimMargin())
+        |""".trimMargin()
+    )
   }
 
   @Test
@@ -115,7 +117,8 @@ internal class MiskApplicationTest {
     }
 
     // Error message should include the entire usage
-    assertThat(exception.message).isEqualTo("""
+    assertThat(exception.message).isEqualTo(
+      """
         |
         |Expected a command, got unknown
         |
@@ -138,7 +141,8 @@ internal class MiskApplicationTest {
         |    with-module      null
         |      Usage: with-module
         |
-        |""".trimMargin())
+        |""".trimMargin()
+    )
   }
 
   @Test
@@ -149,7 +153,8 @@ internal class MiskApplicationTest {
     }
 
     // Error message should be specific to the command
-    assertThat(exception.message).isEqualTo("""
+    assertThat(exception.message).isEqualTo(
+      """
         |
         |one of -f or -d must be specified
         |
@@ -159,6 +164,7 @@ internal class MiskApplicationTest {
         |
         |    -f, --file
         |
-        |""".trimMargin())
+        |""".trimMargin()
+    )
   }
 }

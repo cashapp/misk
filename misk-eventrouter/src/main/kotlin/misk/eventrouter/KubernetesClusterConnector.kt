@@ -42,30 +42,33 @@ internal class KubernetesClusterConnector @Inject constructor() : ClusterConnect
     val sinceLastReceived = Duration.between(lastReceivedMessage, clock.instant()).seconds
     if (sinceLastReceived > config.kubernetes_read_timeout + config.kubernetes_connect_timeout) {
       return HealthStatus.unhealthy(
-          "k8s: I haven't received an update in $sinceLastReceived seconds.")
+        "k8s: I haven't received an update in $sinceLastReceived seconds."
+      )
     }
     return HealthStatus.healthy(
-        "k8s: I received a message $sinceLastReceived seconds ago.")
+      "k8s: I received a message $sinceLastReceived seconds ago."
+    )
   }
 
   private fun subscribeToKubernetes(client: ApiClient, api: CoreV1Api, topicPeer: TopicPeer) {
     val watch = Watch.createWatch<V1Pod>(
-        client,
-        api.listNamespacedPodCall(
-            config.my_pod_namespace, // namespace
-            null, // pretty
-            null, // _continue
-            null, // fieldSelector
-            false, // includeUninitialized
-            null, // labelSelector
-            null, // limit
-            null, // resourceVersion
-            null, // timeoutSeconds
-            true, // watch
-            null, // progressListener
-            null // progressRequestListener
-        ),
-        object : TypeToken<Watch.Response<V1Pod>>() {}.type)
+      client,
+      api.listNamespacedPodCall(
+        config.my_pod_namespace, // namespace
+        null, // pretty
+        null, // _continue
+        null, // fieldSelector
+        false, // includeUninitialized
+        null, // labelSelector
+        null, // limit
+        null, // resourceVersion
+        null, // timeoutSeconds
+        true, // watch
+        null, // progressListener
+        null // progressRequestListener
+      ),
+      object : TypeToken<Watch.Response<V1Pod>>() {}.type
+    )
 
     for (item in watch) {
       lastReceivedMessage = clock.instant()
@@ -86,7 +89,8 @@ internal class KubernetesClusterConnector @Inject constructor() : ClusterConnect
 
       if (hostMapping.isNotEmpty()) {
         topicPeer.clusterChanged(
-            ClusterSnapshot(hostMapping.keys.toList(), config.my_pod_name))
+          ClusterSnapshot(hostMapping.keys.toList(), config.my_pod_name)
+        )
       }
     }
   }
@@ -115,11 +119,11 @@ internal class KubernetesClusterConnector @Inject constructor() : ClusterConnect
 
   override fun connectSocket(hostname: String, listener: WebSocketListener): WebSocket {
     val client = OkHttpClient.Builder()
-        .build()
+      .build()
 
     val request = okhttp3.Request.Builder()
-        .url("ws://${hostMapping[hostname]}:${webConfig.port}/eventrouter")
-        .build()
+      .url("ws://${hostMapping[hostname]}:${webConfig.port}/eventrouter")
+      .build()
 
     val webSocketListener = object : okhttp3.WebSocketListener() {
       lateinit var miskWebSocket: WebSocket

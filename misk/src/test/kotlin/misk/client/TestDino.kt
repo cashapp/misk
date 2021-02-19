@@ -26,8 +26,8 @@ internal class ReturnADinosaurAction @Inject constructor() : WebAction {
   @RequestContentType(MediaTypes.APPLICATION_JSON)
   @ResponseContentType(MediaTypes.APPLICATION_JSON)
   fun getDinosaur(@RequestBody request: Dinosaur): Dinosaur = request.newBuilder()
-      .name("super${request.name}")
-      .build()
+    .name("super${request.name}")
+    .build()
 }
 
 internal class DinoClientModule(private val jetty: JettyService) : KAbstractModule() {
@@ -40,8 +40,9 @@ internal class DinoClientModule(private val jetty: JettyService) : KAbstractModu
   @Singleton
   fun provideHttpClientConfig(): HttpClientsConfig {
     return HttpClientsConfig(
-        endpoints = mapOf(
-            "dinosaur" to HttpClientEndpointConfig(jetty.httpServerUrl.toString())
-        ))
+      endpoints = mapOf(
+        "dinosaur" to HttpClientEndpointConfig(jetty.httpServerUrl.toString())
+      )
+    )
   }
 }

@@ -60,22 +60,23 @@ internal class KubernetesClusterWatcher @Inject internal constructor(
       try {
         log.debug { "preparing watch for namespace ${config.my_pod_namespace}" }
         val watch = Watch.createWatch<V1Pod>(
-            client,
-            api.listNamespacedPodCall(
-                config.my_pod_namespace, // namespace
-                null, // pretty
-                null, // _continue
-                null, // fieldSelector
-                false, // includeUninitialized
-                config.clustering_pod_label_selector, // labelSelector
-                null, // limit
-                null, // resourceVersion
-                null, // timeoutSeconds
-                true, // watch
-                null, // progressListener
-                null // progressRequestListener
-            ),
-            podType)
+          client,
+          api.listNamespacedPodCall(
+            config.my_pod_namespace, // namespace
+            null, // pretty
+            null, // _continue
+            null, // fieldSelector
+            false, // includeUninitialized
+            config.clustering_pod_label_selector, // labelSelector
+            null, // limit
+            null, // resourceVersion
+            null, // timeoutSeconds
+            true, // watch
+            null, // progressListener
+            null // progressRequestListener
+          ),
+          podType
+        )
         // createWatch() throws an exception if the long poll fails. If we get here, it means
         // the API client received a success response code from the server and the watch is in
         // progress.
@@ -104,7 +105,7 @@ internal class KubernetesClusterWatcher @Inject internal constructor(
           // if the problems persist
           log.error(ex) {
             "connectivity lost to k8s for over 60 seconds; waiting ${backoffDelay.toMillis()}ms " +
-                "before retrying"
+              "before retrying"
           }
           watchFailedTimer.reset()
           watchFailedTimer.start()
@@ -117,7 +118,7 @@ internal class KubernetesClusterWatcher @Inject internal constructor(
   companion object {
     private val log = getLogger<KubernetesClusterWatcher>()
     private val podType: java.lang.reflect.Type =
-        object : TypeToken<Watch.Response<V1Pod>>() {}.type
+      object : TypeToken<Watch.Response<V1Pod>>() {}.type
 
     const val CHANGE_TYPE_MODIFIED = "MODIFIED"
     const val CHANGE_TYPE_DELETED = "DELETED"

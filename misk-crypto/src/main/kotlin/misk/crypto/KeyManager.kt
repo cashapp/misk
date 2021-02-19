@@ -27,7 +27,7 @@ sealed class MappedKeyManager<KeyT> constructor(
   internal operator fun set(name: String, k: KeyT) = keys.set(name, k)
 
   operator fun get(name: String): KeyT =
-      keys.getOrPut(name) { getKeyInstance(name) }
+    keys.getOrPut(name) { getKeyInstance(name) }
 
   protected fun <T> getNamedInstance(klass: Class<T>, name: String): T {
     try {
@@ -38,7 +38,7 @@ sealed class MappedKeyManager<KeyT> constructor(
   }
 
   internal open fun getKeyInstance(name: String): KeyT =
-      getNamedInstance(keyClass, name)
+    getNamedInstance(keyClass, name)
 }
 
 /**

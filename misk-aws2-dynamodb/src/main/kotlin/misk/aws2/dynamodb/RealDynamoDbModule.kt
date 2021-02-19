@@ -14,7 +14,7 @@ import javax.inject.Singleton
  */
 class RealDynamoDbModule constructor(
   private val clientOverrideConfig: ClientOverrideConfiguration =
-      ClientOverrideConfiguration.builder().build()
+    ClientOverrideConfiguration.builder().build()
 ) : KAbstractModule() {
   override fun configure() {
     requireBinding<AwsCredentialsProvider>()
@@ -27,9 +27,9 @@ class RealDynamoDbModule constructor(
     awsCredentialsProvider: AwsCredentialsProvider
   ): DynamoDbClient {
     return DynamoDbClient.builder()
-        .region(Region.of(awsRegion.name))
-        .credentialsProvider(awsCredentialsProvider)
-        .overrideConfiguration(clientOverrideConfig)
-        .build()
+      .region(Region.of(awsRegion.name))
+      .credentialsProvider(awsCredentialsProvider)
+      .overrideConfiguration(clientOverrideConfig)
+      .build()
   }
 }

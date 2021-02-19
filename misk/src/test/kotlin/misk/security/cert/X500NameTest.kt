@@ -7,28 +7,36 @@ import kotlin.test.assertFailsWith
 internal class X500NameTest {
   @Test fun parse() {
     val name = X500Name.parse(
-        "CN=Marshall T. Rose, O=Dover Beach Consulting Ltd., L=Santa Clara, ST=California, OU=Sales, C=US\n")
-    assertThat(name).isEqualTo(X500Name(
+      "CN=Marshall T. Rose, O=Dover Beach Consulting Ltd., " +
+        "L=Santa Clara, ST=California, OU=Sales, C=US\n"
+    )
+    assertThat(name).isEqualTo(
+      X500Name(
         "Marshall T. Rose",
         "Sales",
         "Dover Beach Consulting Ltd.",
         "Santa Clara",
         "California",
         "US"
-    ))
+      )
+    )
   }
 
   @Test fun parseWithEscaping() {
     val name = X500Name.parse(
-        """CN=Marshall T. Rose\, Esq., O="Dover Beach Consulting, Ltd."; L = Santa Clara; OU=Sales, ST=California, C=US""")
-    assertThat(name).isEqualTo(X500Name(
+      """CN=Marshall T. Rose\, Esq., O="Dover Beach Consulting, Ltd."; 
+        |L = Santa Clara; OU=Sales, ST=California, C=US""".trimMargin()
+    )
+    assertThat(name).isEqualTo(
+      X500Name(
         "Marshall T. Rose, Esq.",
         "Sales",
         "Dover Beach Consulting, Ltd.",
         "Santa Clara",
         "California",
         "US"
-    ))
+      )
+    )
   }
 
   @Test fun handlesTrailingWhitespace() {
@@ -74,6 +82,7 @@ internal class X500NameTest {
     }
 
     assertThat(e).hasMessage(
-            "invalid X.500 name 'CN=Marshall = '; illegal character '=' in attribute value CN")
+      "invalid X.500 name 'CN=Marshall = '; illegal character '=' in attribute value CN"
+    )
   }
 }

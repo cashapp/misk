@@ -25,14 +25,17 @@ class InProcessDynamoDbModule(
   override fun configure() {
     install(LocalDynamoDbModule(tables))
     install(ServiceModule<InProcessDynamoDbService>())
-    install(ServiceModule<CreateTablesService>()
-        .dependsOn(InProcessDynamoDbService::class.toKey()))
+    install(
+      ServiceModule<CreateTablesService>()
+        .dependsOn(InProcessDynamoDbService::class.toKey())
+    )
   }
 
   @Provides @Singleton
   internal fun provideDynamoDBProxyServer(localDynamoDb: LocalDynamoDb): DynamoDBProxyServer {
     Libsqlite4JavaLibraryPathInitializer.init()
     return ServerRunner.createServerFromCommandLineArgs(
-        arrayOf("-inMemory", "-port", localDynamoDb.url.port.toString()))
+      arrayOf("-inMemory", "-port", localDynamoDb.url.port.toString())
+    )
   }
 }

@@ -62,9 +62,11 @@ internal class ConnectionReuseTest {
     fun provideHttpClientConfig(server: MockWebServer): HttpClientsConfig {
       val url = server.url("/")
       return HttpClientsConfig(
-          endpoints = mapOf("hello" to HttpClientEndpointConfig(
-              url = url.toString()
-          ))
+        endpoints = mapOf(
+          "hello" to HttpClientEndpointConfig(
+            url = url.toString()
+          )
+        )
       )
     }
   }

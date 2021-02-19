@@ -8,11 +8,11 @@ internal class ReflectTest {
   @Test
   internal fun classSuperclasses() {
     assertThat(Square::class.java.superclasses()).containsExactly(
-        Square::class.java,
-        Polygon::class.java,
-        Territory::class.java,
-        Object::class.java,
-        Shape::class.java
+      Square::class.java,
+      Polygon::class.java,
+      Territory::class.java,
+      Object::class.java,
+      Shape::class.java
     )
   }
 
@@ -29,37 +29,43 @@ internal class ReflectTest {
     val string = String::class.java
 
     assertThat(square.declaredMethod("area", long).overrides()).containsExactly(
-        square.declaredMethod("area", void),
-        territory.declaredMethod("area", long),
-        shape.declaredMethod("area", long)
+      square.declaredMethod("area", void),
+      territory.declaredMethod("area", long),
+      shape.declaredMethod("area", long)
     )
     assertThat(square.declaredMethod("perimeter", long).overrides()).containsExactly(
-        square.declaredMethod("perimeter", void),
-        shape.declaredMethod("perimeter", long)
+      square.declaredMethod("perimeter", void),
+      shape.declaredMethod("perimeter", long)
     )
     assertThat(square.declaredMethod("contains", boolean, int, int).overrides()).containsExactly(
-        square.declaredMethod("contains", void, int, int),
-        territory.declaredMethod("contains", boolean, int, int)
+      square.declaredMethod("contains", void, int, int),
+      territory.declaredMethod("contains", boolean, int, int)
     )
     assertThat(square.declaredMethod("edgeCount", int).overrides()).containsExactly(
-        square.declaredMethod("edgeCount", void),
-        polygon.declaredMethod("edgeCount", int),
-        shape.declaredMethod("edgeCount", int)
+      square.declaredMethod("edgeCount", void),
+      polygon.declaredMethod("edgeCount", int),
+      shape.declaredMethod("edgeCount", int)
     )
     assertThat(square.declaredMethod("toString", void).overrides()).containsExactly(
-        square.declaredMethod("toString", void),
-        Object::class.java.declaredMethod("toString", string)
+      square.declaredMethod("toString", void),
+      Object::class.java.declaredMethod("toString", string)
     )
   }
 
   @Test
   internal fun annotationWithOverrides() {
-    assertThat(Square::class.java.getDeclaredMethod("area")
-        .findAnnotationWithOverrides(Tag::class.java)!!.name).isEqualTo("square")
-    assertThat(Square::class.java.getDeclaredMethod("perimeter")
-        .findAnnotationWithOverrides(Tag::class.java)).isNull()
-    assertThat(Square::class.java.getDeclaredMethod("edgeCount")
-        .findAnnotationWithOverrides(Tag::class.java)!!.name).isEqualTo("polygon")
+    assertThat(
+      Square::class.java.getDeclaredMethod("area")
+        .findAnnotationWithOverrides(Tag::class.java)!!.name
+    ).isEqualTo("square")
+    assertThat(
+      Square::class.java.getDeclaredMethod("perimeter")
+        .findAnnotationWithOverrides(Tag::class.java)
+    ).isNull()
+    assertThat(
+      Square::class.java.getDeclaredMethod("edgeCount")
+        .findAnnotationWithOverrides(Tag::class.java)!!.name
+    ).isEqualTo("polygon")
   }
 
   class Square : Polygon(), Territory {
@@ -119,8 +125,8 @@ internal class ReflectTest {
   ): Method {
     return declaredMethods.first {
       it.name == name &&
-          it.returnType == returnType &&
-          it.parameterTypes.contentEquals(argumentTypes)
+        it.returnType == returnType &&
+        it.parameterTypes.contentEquals(argumentTypes)
     }
   }
 }

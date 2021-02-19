@@ -48,7 +48,9 @@ enum class Environment {
             rawEnv
           } else {
             // TODO(dhanji): We should remove this default, eventually
-            logger.warn { "No environment variable with key $ENV_ENVIRONMENT found, running in DEVELOPMENT" }
+            logger.warn {
+              "No environment variable with key $ENV_ENVIRONMENT found, running in DEVELOPMENT"
+            }
             DEVELOPMENT.toString()
           }
         }

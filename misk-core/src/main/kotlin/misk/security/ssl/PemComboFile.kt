@@ -52,16 +52,22 @@ data class PemComboFile(
 
         when {
           line.matches(Regex("-+BEGIN CERTIFICATE-+")) -> {
-            certificates += decodeBase64Until(lines,
-                Regex("-+END CERTIFICATE-+"))
+            certificates += decodeBase64Until(
+              lines,
+              Regex("-+END CERTIFICATE-+")
+            )
           }
           line.matches(Regex("-+BEGIN RSA PRIVATE KEY-+")) -> {
-            privateRsaKeys += decodeBase64Until(lines,
-                Regex("-+END RSA PRIVATE KEY-+"))
+            privateRsaKeys += decodeBase64Until(
+              lines,
+              Regex("-+END RSA PRIVATE KEY-+")
+            )
           }
           line.matches(Regex("-+BEGIN PRIVATE KEY-+")) -> {
-            privateKeys += decodeBase64Until(lines,
-                Regex("-+END PRIVATE KEY-+"))
+            privateKeys += decodeBase64Until(
+              lines,
+              Regex("-+END PRIVATE KEY-+")
+            )
           }
           line.isBlank() -> {
             // This is ok, just keep going
@@ -70,8 +76,10 @@ data class PemComboFile(
         }
       }
 
-      return PemComboFile(certificates, privateRsaKeys, privateKeys,
-          passphrase ?: "password")
+      return PemComboFile(
+        certificates, privateRsaKeys, privateKeys,
+        passphrase ?: "password"
+      )
     }
 
     fun convertPKCS1toPKCS8(pkcs1Key: ByteString): KeySpec {
@@ -79,14 +87,14 @@ data class PemComboFile(
       val rsaPrivateKey = RSAPrivateKey.getInstance(keyObject)
 
       return RSAPrivateCrtKeySpec(
-          rsaPrivateKey.modulus,
-          rsaPrivateKey.publicExponent,
-          rsaPrivateKey.privateExponent,
-          rsaPrivateKey.prime1,
-          rsaPrivateKey.prime2,
-          rsaPrivateKey.exponent1,
-          rsaPrivateKey.exponent2,
-          rsaPrivateKey.coefficient
+        rsaPrivateKey.modulus,
+        rsaPrivateKey.publicExponent,
+        rsaPrivateKey.privateExponent,
+        rsaPrivateKey.prime1,
+        rsaPrivateKey.prime2,
+        rsaPrivateKey.exponent1,
+        rsaPrivateKey.exponent2,
+        rsaPrivateKey.coefficient
       )
     }
 

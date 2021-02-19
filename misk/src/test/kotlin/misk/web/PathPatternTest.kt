@@ -97,11 +97,11 @@ internal class PathPatternTest {
   @Test
   fun ordering() {
     assertOrdering(
-        PathPattern.parse("/org/admin/{type:.*}/values"),
-        PathPattern.parse("/org/admin/users"),
-        PathPattern.parse("/org/admin/{type}"),
-        PathPattern.parse("/org/{folder}/{type}"),
-        PathPattern.parse("/org/admin/{path:.*}")
+      PathPattern.parse("/org/admin/{type:.*}/values"),
+      PathPattern.parse("/org/admin/users"),
+      PathPattern.parse("/org/admin/{type}"),
+      PathPattern.parse("/org/{folder}/{type}"),
+      PathPattern.parse("/org/admin/{path:.*}")
     )
   }
 }

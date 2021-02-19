@@ -53,10 +53,12 @@ internal class QueueResolver @Inject internal constructor(
     checkNotNull(sqs) { "could not find SQS client for ${region.name}" }
 
     val queueUrl = try {
-      sqs.getQueueUrl(GetQueueUrlRequest().apply {
-        queueName = sqsQueueName.value
-        queueOwnerAWSAccountId = accountId.value
-      }).queueUrl
+      sqs.getQueueUrl(
+        GetQueueUrlRequest().apply {
+          queueName = sqsQueueName.value
+          queueOwnerAWSAccountId = accountId.value
+        }
+      ).queueUrl
     } catch (e: QueueDoesNotExistException) {
       log.error(e) { "SQS Queue ${sqsQueueName.value} does not exist" }
       throw e

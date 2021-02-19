@@ -23,8 +23,8 @@ class AwsEnvironmentModule : KAbstractModule() {
 class FakeAwsEnvironmentModule : KAbstractModule() {
   override fun configure() {
     newMapBinder<String, String>(ForEnvVars::class)
-        .addBinding("REGION").toInstance("us-east-1")
+      .addBinding("REGION").toInstance("us-east-1")
     newMapBinder<String, String>(ForEnvVars::class)
-        .addBinding("ACCOUNT_ID").toInstance("8675309")
+      .addBinding("ACCOUNT_ID").toInstance("8675309")
   }
 }

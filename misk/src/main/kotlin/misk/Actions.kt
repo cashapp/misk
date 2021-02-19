@@ -15,7 +15,7 @@ fun KFunction<*>.asAction(
   dispatchMechanism: DispatchMechanism
 ): Action {
   val instanceParameter = instanceParameter
-      ?: throw IllegalArgumentException("only methods may be actions")
+    ?: throw IllegalArgumentException("only methods may be actions")
 
   // Drop 'this' which is the function's first parameter.
   val actualParameters = parameters.drop(1)
@@ -27,38 +27,38 @@ fun KFunction<*>.asAction(
   } ?: name
 
   val acceptedMediaRange =
-      when (dispatchMechanism) {
-        DispatchMechanism.GRPC -> {
-          require(findAnnotation<RequestContentType>() == null) {
-            "@Grpc cannot be used with @RequestContentType on $this"
-          }
-          listOf(MediaRange.parse(MediaTypes.APPLICATION_GRPC))
+    when (dispatchMechanism) {
+      DispatchMechanism.GRPC -> {
+        require(findAnnotation<RequestContentType>() == null) {
+          "@Grpc cannot be used with @RequestContentType on $this"
         }
-        else -> findAnnotation<RequestContentType>()?.value?.flatMap {
-          MediaRange.parseRanges(it)
-        }?.toList() ?: listOf(MediaRange.ALL_MEDIA)
+        listOf(MediaRange.parse(MediaTypes.APPLICATION_GRPC))
       }
+      else -> findAnnotation<RequestContentType>()?.value?.flatMap {
+        MediaRange.parseRanges(it)
+      }?.toList() ?: listOf(MediaRange.ALL_MEDIA)
+    }
 
   val responseContentType =
-      when (dispatchMechanism) {
-        DispatchMechanism.GRPC -> {
-          require(findAnnotation<ResponseContentType>() == null) {
-            "@Grpc cannot be used with @ResponseContentType on $this"
-          }
-          MediaTypes.APPLICATION_GRPC_MEDIA_TYPE
+    when (dispatchMechanism) {
+      DispatchMechanism.GRPC -> {
+        require(findAnnotation<ResponseContentType>() == null) {
+          "@Grpc cannot be used with @ResponseContentType on $this"
         }
-        else -> findAnnotation<ResponseContentType>()?.value?.let {
-          it.toMediaTypeOrNull()
-        }
+        MediaTypes.APPLICATION_GRPC_MEDIA_TYPE
       }
+      else -> findAnnotation<ResponseContentType>()?.value?.let {
+        it.toMediaTypeOrNull()
+      }
+    }
 
   return Action(
-      name = actionName,
-      function = this,
-      acceptedMediaRanges = acceptedMediaRange,
-      responseContentType = responseContentType,
-      parameters = actualParameters,
-      returnType = returnType,
-      dispatchMechanism = dispatchMechanism
+    name = actionName,
+    function = this,
+    acceptedMediaRanges = acceptedMediaRange,
+    responseContentType = responseContentType,
+    parameters = actualParameters,
+    returnType = returnType,
+    dispatchMechanism = dispatchMechanism
   )
 }

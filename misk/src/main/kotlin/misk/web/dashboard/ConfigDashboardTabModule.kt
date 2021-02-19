@@ -23,11 +23,14 @@ class ConfigDashboardTabModule(private val isDevelopment: Boolean) : KAbstractMo
         url_path_prefix = "/_admin/config/",
         name = "Config",
         category = "Container Admin"
-      ))
-    install(WebTabResourceModule(
-      isDevelopment = isDevelopment,
-      slug = "config",
-      web_proxy_url = "http://localhost:3200/"
-    ))
+      )
+    )
+    install(
+      WebTabResourceModule(
+        isDevelopment = isDevelopment,
+        slug = "config",
+        web_proxy_url = "http://localhost:3200/"
+      )
+    )
   }
 }

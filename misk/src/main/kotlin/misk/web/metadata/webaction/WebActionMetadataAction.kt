@@ -21,7 +21,8 @@ class WebActionMetadataAction @Inject constructor() : WebAction {
   @AdminDashboardAccess
   fun getAll(): Response {
     return Response(
-      webActionMetadata = servletProvider.get().webActionsMetadata)
+      webActionMetadata = servletProvider.get().webActionsMetadata
+    )
   }
 
   data class Response(val webActionMetadata: List<WebActionMetadata>)

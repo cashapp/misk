@@ -22,17 +22,22 @@ class SqsJobQueueTestModule(
     install(AwsEnvironmentModule())
     install(FakeAwsEnvironmentModule())
     install(FakeLeaseModule())
-    install(FakeFeatureFlagsModule().withOverrides {
-      override(SqsJobConsumer.CONSUMERS_PER_QUEUE, 5)
-      override(SqsJobConsumer.POD_CONSUMERS_PER_QUEUE, -1)
-    })
     install(
-        Modules.override(
-            AwsSqsJobQueueModule(
-                AwsSqsJobQueueConfig(
-                    task_queue = RepeatedTaskQueueConfig(default_jitter_ms = 0),
-                    queue_attribute_importer_frequency_ms = 0)))
-            .with(SqsTestModule(credentials, client))
+      FakeFeatureFlagsModule().withOverrides {
+        override(SqsJobConsumer.CONSUMERS_PER_QUEUE, 5)
+        override(SqsJobConsumer.POD_CONSUMERS_PER_QUEUE, -1)
+      }
+    )
+    install(
+      Modules.override(
+        AwsSqsJobQueueModule(
+          AwsSqsJobQueueConfig(
+            task_queue = RepeatedTaskQueueConfig(default_jitter_ms = 0),
+            queue_attribute_importer_frequency_ms = 0
+          )
+        )
+      )
+        .with(SqsTestModule(credentials, client))
     )
   }
 }

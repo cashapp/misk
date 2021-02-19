@@ -23,7 +23,7 @@ internal class JettyConnectionMetricsCollector @Inject internal constructor(
   }
 
   override fun scheduler(): Scheduler =
-      Scheduler.newFixedRateSchedule(REFRESH_RATE_MS, REFRESH_RATE_MS, TimeUnit.MILLISECONDS)
+    Scheduler.newFixedRateSchedule(REFRESH_RATE_MS, REFRESH_RATE_MS, TimeUnit.MILLISECONDS)
 
   override fun runOneIteration() {
     refreshMetrics()

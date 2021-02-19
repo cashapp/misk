@@ -31,16 +31,20 @@ object SocketEventJsonAdapter {
   @ToJson fun toJson(item: SocketEvent): SocketEventJson {
     return when (item) {
       is SocketEvent.Event -> SocketEventJson(
-          "event", item.topic,
-          item.message)
+        "event", item.topic,
+        item.message
+      )
       is SocketEvent.Subscribe -> SocketEventJson(
-          "subscribe", item.topic,
-          null)
+        "subscribe", item.topic,
+        null
+      )
       is SocketEvent.Unsubscribe -> SocketEventJson(
-          "unsubscribe",
-          item.topic, null)
+        "unsubscribe",
+        item.topic, null
+      )
       is SocketEvent.Ack -> SocketEventJson(
-          "ack", item.topic, null)
+        "ack", item.topic, null
+      )
       else -> SocketEventJson("unknown", null, null)
     }
   }

@@ -10,7 +10,6 @@ import misk.backoff.FlatBackoff
 import misk.backoff.retry
 import misk.concurrent.ExplicitReleaseDelayQueue
 import misk.inject.KAbstractModule
-import misk.logging.getLogger
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.time.FakeClock
@@ -19,9 +18,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.Duration
-import java.util.Timer
 import java.util.concurrent.CountDownLatch
-import java.util.concurrent.DelayQueue
 import java.util.concurrent.PriorityBlockingQueue
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicReference
@@ -497,15 +494,21 @@ internal class RepeatedTaskQueueTest {
   @Test fun sortTaskByDelay() {
     // Schedule three tasks, each returning different status (so we can differentiate them)
     val queue = PriorityBlockingQueue<DelayedTask>()
-    queue.add(DelayedTask(clock, clock.instant().plusMillis(100)) {
-      Result(Status.OK, Duration.ofMillis(100))
-    })
-    queue.add(DelayedTask(clock, clock.instant().plusMillis(75)) {
-      Result(Status.FAILED, Duration.ofMillis(100))
-    })
-    queue.add(DelayedTask(clock, clock.instant().plusMillis(125)) {
-      Result(Status.NO_WORK, Duration.ofMillis(100))
-    })
+    queue.add(
+      DelayedTask(clock, clock.instant().plusMillis(100)) {
+        Result(Status.OK, Duration.ofMillis(100))
+      }
+    )
+    queue.add(
+      DelayedTask(clock, clock.instant().plusMillis(75)) {
+        Result(Status.FAILED, Duration.ofMillis(100))
+      }
+    )
+    queue.add(
+      DelayedTask(clock, clock.instant().plusMillis(125)) {
+        Result(Status.NO_WORK, Duration.ofMillis(100))
+      }
+    )
 
     // Drain the tasks and make sure they were queued in the proper order
     assertThat(queue.poll().task().status).isEqualTo(Status.FAILED)
@@ -546,15 +549,16 @@ internal class RepeatedTaskQueueTest {
   @Test fun `terminates when it is shut down`() {
     val queues = mutableListOf(taskQueue)
     // Each queue should have its own backingStorage, but it can't be guaranteed, so test with worst case
-    //val queuesPendingTasks = mutableListOf(pendingTasks)
+    // val queuesPendingTasks = mutableListOf(pendingTasks)
     val numberOfNewQueues = 15
     for (i in 0..numberOfNewQueues) {
-      //queuesPendingTasks.add(ExplicitReleaseDelayQueue<DelayedTask>())
+      // queuesPendingTasks.add(ExplicitReleaseDelayQueue<DelayedTask>())
       queues.add(
-        i, repeatedTaskQueueFactory.forTesting(
-        name = "queue-$i",
-        backingStorage = pendingTasks //queuesPendingTasks[i]
-      )
+        i,
+        repeatedTaskQueueFactory.forTesting(
+          name = "queue-$i",
+          backingStorage = pendingTasks // queuesPendingTasks[i]
+        )
       )
     }
 

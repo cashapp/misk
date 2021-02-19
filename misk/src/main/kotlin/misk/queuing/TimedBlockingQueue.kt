@@ -21,7 +21,7 @@ internal class TimedBlockingQueue<T>(
   private val delayHandler: (Duration) -> Unit
 ) : BlockingQueue<T> {
   private val queue: BlockingQueue<TimedQueueItem<T>> =
-      ArrayBlockingQueue<TimedQueueItem<T>>(maxQueueSize)
+    ArrayBlockingQueue<TimedQueueItem<T>>(maxQueueSize)
 
   override fun poll(timeout: Long, unit: TimeUnit): T? {
     val item = queue.poll(timeout, unit)
@@ -106,8 +106,8 @@ internal class TimedBlockingQueue<T>(
 
   override fun retainAll(elements: Collection<T>): Boolean {
     val toRemove = queue
-        .filter { wrappedItem -> !elements.contains(wrappedItem.value)}
-        .map { item -> item.value }
+      .filter { wrappedItem -> !elements.contains(wrappedItem.value) }
+      .map { item -> item.value }
     return removeItems(toRemove) > 0
   }
 
@@ -156,7 +156,7 @@ internal class TimedBlockingQueue<T>(
   }
 
   private fun invokeDelayHandlerOnAll(collection: Collection<TimedQueueItem<T>>) {
-    collection.forEach {item -> invokeDelayHandler(item)}
+    collection.forEach { item -> invokeDelayHandler(item) }
   }
 
   private fun removeItems(collection: Collection<T>): Int {

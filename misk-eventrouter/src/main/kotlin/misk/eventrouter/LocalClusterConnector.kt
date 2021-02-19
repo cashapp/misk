@@ -12,8 +12,11 @@ internal class LocalClusterConnector @Inject constructor() : ClusterConnector {
 
   override fun joinCluster(topicPeer: TopicPeer) {
     topicPeer.clusterChanged(
-        ClusterSnapshot(listOf(kubernetesConfig.my_pod_name),
-            kubernetesConfig.my_pod_name))
+      ClusterSnapshot(
+        listOf(kubernetesConfig.my_pod_name),
+        kubernetesConfig.my_pod_name
+      )
+    )
   }
 
   override fun leaveCluster(topicPeer: TopicPeer) {

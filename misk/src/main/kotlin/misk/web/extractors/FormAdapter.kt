@@ -59,18 +59,18 @@ internal class FormAdapter<T : Any> private constructor(
     private fun KParameter.toField(): Field {
       val annotation = findAnnotation<FormField>()
       val name = annotation?.name?.toLowerCase()
-          ?: name?.toLowerCase()
-          ?: throw IllegalStateException("cannot introspect parameter name")
+        ?: name?.toLowerCase()
+        ?: throw IllegalStateException("cannot introspect parameter name")
 
       // TODO(jwilson): explode if no converter is found. As is we just replace values with nulls.
       val isList = type.classifier?.equals(List::class) ?: false
       return Field(
-          this,
-          name,
-          isOptional,
-          type.isMarkedNullable,
-          isList,
-          converterFor(if (isList) type.arguments.first().type!! else type)
+        this,
+        name,
+        isOptional,
+        type.isMarkedNullable,
+        isList,
+        converterFor(if (isList) type.arguments.first().type!! else type)
       )
     }
   }
