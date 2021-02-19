@@ -2,9 +2,9 @@ package misk.feature
 
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonDataException
-import misk.logging.getLogger
+import mu.KotlinLogging
 
-private val logger = getLogger<FeatureFlags>()
+private val logger = KotlinLogging.logger(FeatureFlags::class.qualifiedName!!)
 
 /**
  * Attempts to use [JsonAdapter.failOnUnknown] and logs any issues before falling back to ignoring

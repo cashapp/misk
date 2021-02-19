@@ -9,9 +9,6 @@ dependencies {
   implementation dep.guava
   implementation dep.moshiKotlin
   implementation dep.loggingApi
-  implementation project(':misk-core')
-
-  testImplementation project(':misk-testing')
 }
 
 afterEvaluate { project ->
