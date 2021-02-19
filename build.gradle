@@ -74,8 +74,8 @@ subprojects { subProject ->
 
 
   spotless {
-    // Comment this to run the linter as part of the build.
-    enforceCheck false
+    //ratchetFrom 'origin/master'
+    enforceCheck true
     kotlin {
       target "**/*.kt"
       ktlint(dep.ktlintVersion).userData([

@@ -249,7 +249,8 @@ internal class HibernateDatabaseQueryMetadataFactory @Inject constructor(
     }
   }
 
-  private fun <T : DbEntity<T>> KClass<out Query<T>>.criteriaFunctions(): MutableList<KFunction<*>> {
+  private fun <T : DbEntity<T>> KClass<out Query<T>>.criteriaFunctions():
+    MutableList<KFunction<*>> {
     val allMethods = mutableListOf<KFunction<*>>()
     for (function in declaredMemberFunctions) {
       allMethods += function
@@ -264,9 +265,10 @@ internal class HibernateDatabaseQueryMetadataFactory @Inject constructor(
     return allMethods
   }
 
-  private fun getDbEntitySchema(dbEntityClass: KClass<out DbEntity<*>>): Map<String, KType> = dbEntityClass.memberProperties.map { memberProperty ->
-    memberProperty.name to memberProperty.returnType
-  }.toMap()
+  private fun getDbEntitySchema(dbEntityClass: KClass<out DbEntity<*>>): Map<String, KType> =
+    dbEntityClass.memberProperties.map { memberProperty ->
+      memberProperty.name to memberProperty.returnType
+    }.toMap()
 
   companion object {
     data class DynamicQueryConstraint(
