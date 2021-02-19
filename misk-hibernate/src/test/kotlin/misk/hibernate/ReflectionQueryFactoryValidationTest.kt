@@ -18,6 +18,8 @@ class ReflectionQueryFactoryValidationTest {
 
   @Test
   fun returnTypeMustBeThis() {
+    val name = String::class.java.name
+    val returnName = ReturnTypeMustBeThis::class.java.name
     assertThat(
       assertFailsWith<UncheckedExecutionException> {
         queryFactory.newQuery<ReturnTypeMustBeThis>()
@@ -25,8 +27,8 @@ class ReflectionQueryFactoryValidationTest {
     ).hasMessage(
       """
         |Query class ${ReturnTypeMustBeThis::class.java.name} has problems:
-        |  name() returns ${String::class.java.name} but @Constraint methods must return 
-        |  this (${ReturnTypeMustBeThis::class.java.name})""".trimMargin()
+        |  name() returns $name but @Constraint methods must return this ($returnName)"""
+        .trimMargin()
     )
   }
 
@@ -90,6 +92,7 @@ class ReflectionQueryFactoryValidationTest {
 
   @Test
   fun parameterAnnotationRequiredOnProjection() {
+    val name = ParameterAnnotationRequiredOnProjection::class.java.name
     assertThat(
       assertFailsWith<UncheckedExecutionException> {
         transacter.transaction {
@@ -99,8 +102,7 @@ class ReflectionQueryFactoryValidationTest {
     ).hasMessage(
       """
         |Query class ${ParameterAnnotationRequiredOnProjectionQuery::class.java.name} has problems:
-        |  ${ParameterAnnotationRequiredOnProjection::class.java.name} parameter 0 is missing a 
-        |  @Property annotation""".trimMargin()
+        |  $name parameter 0 is missing a @Property annotation""".trimMargin()
     )
   }
 
@@ -144,8 +146,8 @@ class ReflectionQueryFactoryValidationTest {
     ).hasMessage(
       """
         |Query class ${MalformedPathOnParameterQuery::class.java.name} has problems:
-        |  ${MalformedPathOnParameter::class.java.name} parameter 0 path is 
-        |  not valid: '.name'""".trimMargin()
+        |  ${MalformedPathOnParameter::class.java.name} parameter 0 path is not valid: '.name'"""
+        .trimMargin()
     )
   }
 
