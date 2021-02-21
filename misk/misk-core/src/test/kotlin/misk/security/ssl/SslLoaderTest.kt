@@ -31,62 +31,65 @@ internal class SslLoaderTest {
     assertThat(keystore.getPrivateKey("password".toCharArray())).isNotNull()
 
     assertThat((keystore.getX509Certificate()).issuerX500Principal.name)
-        .isEqualTo("CN=misk-client,OU=Client,O=Misk,L=San Francisco,ST=CA,C=US")
+      .isEqualTo("CN=misk-client,OU=Client,O=Misk,L=San Francisco,ST=CA,C=US")
     assertThat(keystore.getX509Certificate().subjectAlternativeNames.toList()[0][1])
-        .isEqualTo("127.0.0.1")
+      .isEqualTo("127.0.0.1")
   }
 
   @Test
   fun loadTrustFromPEM() {
     val keystore =
-        sslLoader.loadTrustStore(clientTrustPemPath, FORMAT_PEM, "serverpassword")!!.keyStore
+      sslLoader.loadTrustStore(clientTrustPemPath, FORMAT_PEM, "serverpassword")!!.keyStore
     assertThat(keystore.aliases().toList()).containsExactly("0")
     assertThat((keystore.getX509Certificate()).issuerX500Principal.name)
-        .isEqualTo("CN=misk-client,OU=Client,O=Misk,L=San Francisco,ST=CA,C=US")
+      .isEqualTo("CN=misk-client,OU=Client,O=Misk,L=San Francisco,ST=CA,C=US")
     assertThat(keystore.getX509Certificate().subjectAlternativeNames.toList()[0][1])
-        .isEqualTo("127.0.0.1")
+      .isEqualTo("127.0.0.1")
   }
 
   @Test
   fun loadFromJCEKS() {
     val keystore = sslLoader.loadTrustStore(
-        serverKeystoreJceksPath, FORMAT_JCEKS, "serverpassword")!!.keyStore
+      serverKeystoreJceksPath, FORMAT_JCEKS, "serverpassword"
+    )!!.keyStore
     assertThat(keystore.aliasesOfType<KeyStore.PrivateKeyEntry>()).containsExactly("1")
     assertThat(keystore.getPrivateKey("serverpassword".toCharArray())).isNotNull()
 
     val certificateAndKey = keystore.getCertificateAndKey("serverpassword".toCharArray())
     assertThat(certificateAndKey).isNotNull()
     assertThat(certificateAndKey!!.certificate.issuerX500Principal.name)
-        .isEqualTo("CN=misk-server,OU=Server,O=Misk,L=San Francisco,ST=CA,C=US")
+      .isEqualTo("CN=misk-server,OU=Server,O=Misk,L=San Francisco,ST=CA,C=US")
     assertThat(certificateAndKey.certificate.subjectAlternativeNames.toList()[0][1])
-        .isEqualTo("127.0.0.1")
+      .isEqualTo("127.0.0.1")
 
     val certificateChain = keystore.getX509CertificateChain()
     assertThat(certificateChain.map { it.issuerX500Principal.name }).containsExactly(
-        "CN=misk-server,OU=Server,O=Misk,L=San Francisco,ST=CA,C=US")
+      "CN=misk-server,OU=Server,O=Misk,L=San Francisco,ST=CA,C=US"
+    )
   }
 
   @Test
   fun loadKeystoreFromJKS() {
     val keystore = sslLoader.loadCertStore(keystoreJksPath, FORMAT_JKS, "changeit")!!.keyStore
     assertThat(keystore.aliasesOfType<KeyStore.PrivateKeyEntry>()).containsExactly(
-        "combined-key-cert")
+      "combined-key-cert"
+    )
     assertThat(keystore.getPrivateKey("changeit".toCharArray())).isNotNull()
 
     assertThat((keystore.getX509Certificate()).issuerX500Principal.name)
-        .isEqualTo("CN=misk-client,OU=Client,O=Misk,L=San Francisco,ST=CA,C=US")
+      .isEqualTo("CN=misk-client,OU=Client,O=Misk,L=San Francisco,ST=CA,C=US")
     assertThat(keystore.getX509Certificate().subjectAlternativeNames.toList()[0][1])
-        .isEqualTo("127.0.0.1")
+      .isEqualTo("127.0.0.1")
   }
 
   @Test
   fun loadTrustFromJKS() {
     val keystore =
-        sslLoader.loadTrustStore(truststoreJksPath, FORMAT_JKS, "changeit")!!.keyStore
+      sslLoader.loadTrustStore(truststoreJksPath, FORMAT_JKS, "changeit")!!.keyStore
     assertThat(keystore.aliases().toList()).containsExactly("ca")
     assertThat((keystore.getX509Certificate()).issuerX500Principal.name)
-        .isEqualTo("CN=misk-client,OU=Client,O=Misk,L=San Francisco,ST=CA,C=US")
+      .isEqualTo("CN=misk-client,OU=Client,O=Misk,L=San Francisco,ST=CA,C=US")
     assertThat(keystore.getX509Certificate().subjectAlternativeNames.toList()[0][1])
-        .isEqualTo("127.0.0.1")
+      .isEqualTo("127.0.0.1")
   }
 }

@@ -136,10 +136,12 @@ internal class MiskTestExtension : BeforeEachCallback, AfterEachCallback {
     if (!runningDependencies.contains(id)) {
       log.info { "starting $id" }
       startup()
-      Runtime.getRuntime().addShutdownHook(Thread {
-        log.info { "stopping $id" }
-        shutdown()
-      })
+      Runtime.getRuntime().addShutdownHook(
+        Thread {
+          log.info { "stopping $id" }
+          shutdown()
+        }
+      )
       runningDependencies.add(id)
     } else {
       log.info { "$id already running, not starting anything" }

@@ -13,30 +13,35 @@ import javax.servlet.http.HttpServletRequest
 internal class CertificatesModule : ActionScopedProviderModule() {
   override fun configureProviders() {
     bindProvider(
-        type = certificateArrayType,
-        providerType = ClientCertProvider::class,
-        annotatedBy = ClientCertChain::class.java)
+      type = certificateArrayType,
+      providerType = ClientCertProvider::class,
+      annotatedBy = ClientCertChain::class.java
+    )
     bindProvider(
-        type = x500NameType,
-        providerType = ClientCertSubjectDNProvider::class,
-        annotatedBy = ClientCertSubject::class.java)
+      type = x500NameType,
+      providerType = ClientCertSubjectDNProvider::class,
+      annotatedBy = ClientCertSubject::class.java
+    )
     bindProvider(
-        type = x500NameType,
-        providerType = ClientCertIssuerDNProvider::class,
-        annotatedBy = ClientCertIssuer::class.java)
+      type = x500NameType,
+      providerType = ClientCertIssuerDNProvider::class,
+      annotatedBy = ClientCertIssuer::class.java
+    )
   }
 
-  private class ClientCertProvider @Inject constructor() : ActionScopedProvider<Array<X509Certificate>?> {
+  private class ClientCertProvider
+  @Inject constructor() : ActionScopedProvider<Array<X509Certificate>?> {
     @Inject @JvmSuppressWildcards lateinit var request: ActionScoped<HttpServletRequest>
 
     override fun get(): Array<X509Certificate>? {
       @Suppress("UNCHECKED_CAST")
       return request.get().getAttribute("javax.servlet.request.X509Certificate")
-          as? Array<X509Certificate>
+        as? Array<X509Certificate>
     }
   }
 
-  private class ClientCertSubjectDNProvider @Inject constructor() : ActionScopedProvider<X500Name?> {
+  private class ClientCertSubjectDNProvider
+  @Inject constructor() : ActionScopedProvider<X500Name?> {
     @Inject @JvmSuppressWildcards @ClientCertChain
     lateinit var clientCert: ActionScoped<Array<X509Certificate>?>
 

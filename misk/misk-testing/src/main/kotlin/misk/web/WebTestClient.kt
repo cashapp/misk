@@ -29,15 +29,17 @@ class WebTestClient @Inject constructor(
   /**
    * Performs a POST request with a JSON request body created from the input.
    */
-  fun <T: Any> post(path: String, body: T, tClass: KClass<T>): WebTestResponse = call(path) {
-    post(moshi.adapter(tClass.java).toJson(body)
-      .toRequestBody(MediaTypes.APPLICATION_JSON_MEDIA_TYPE))
+  fun <T : Any> post(path: String, body: T, tClass: KClass<T>): WebTestResponse = call(path) {
+    post(
+      moshi.adapter(tClass.java).toJson(body)
+        .toRequestBody(MediaTypes.APPLICATION_JSON_MEDIA_TYPE)
+    )
   }
 
   /**
    * Performs a POST request with a JSON request body created from the input.
    */
-  inline fun <reified T: Any> post(path: String, body: T) = post(path, body, T::class)
+  inline fun <reified T : Any> post(path: String, body: T) = post(path, body, T::class)
 
   /**
    * Performs a POST request.
@@ -71,9 +73,9 @@ class WebTestClient @Inject constructor(
     val response: Response,
     private val moshi: Moshi
   ) {
-    fun <T: Any> parseJson(tClass: KClass<T>): T = moshi.adapter(tClass.java)
+    fun <T : Any> parseJson(tClass: KClass<T>): T = moshi.adapter(tClass.java)
       .fromJson(response.body!!.source())!!
 
-    inline fun <reified T: Any> parseJson(): T = this.parseJson(T::class)
+    inline fun <reified T : Any> parseJson(): T = this.parseJson(T::class)
   }
 }

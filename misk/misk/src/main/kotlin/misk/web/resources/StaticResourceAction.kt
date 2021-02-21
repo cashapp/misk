@@ -49,8 +49,10 @@ class StaticResourceAction @Inject constructor(
 
   fun getResponse(httpCall: HttpCall): Response<ResponseBody> {
     val entry =
-        (resourceEntryFinder.staticResource(httpCall.url) as StaticResourceEntry?
-            ?: return NotFoundAction.response(httpCall.url.encodedPath.drop(1)))
+      (
+        resourceEntryFinder.staticResource(httpCall.url) as StaticResourceEntry?
+          ?: return NotFoundAction.response(httpCall.url.encodedPath.drop(1))
+        )
     return MatchedResource(entry).getResponse(httpCall)
   }
 
@@ -68,7 +70,7 @@ class StaticResourceAction @Inject constructor(
           !urlPath.endsWith("/") -> redirectResponse(normalizePathWithQuery(httpCall.url))
           // actually return the resource, don't redirect. Path must stay the same since this will be handled by React router
           urlPath.endsWith("/") -> resourceResponse(
-              normalizePath(matchedEntry.url_path_prefix)
+            normalizePath(matchedEntry.url_path_prefix)
           )
           else -> null
         }
@@ -122,9 +124,14 @@ class StaticResourceAction @Inject constructor(
             }
           }
           Response(
-              body = responseBody,
-              headers = headersOf("Content-Type", MediaTypes.fromFileExtension(
-                  urlPath.substring(urlPath.lastIndexOf('.') + 1)).toString()))
+            body = responseBody,
+            headers = headersOf(
+              "Content-Type",
+              MediaTypes.fromFileExtension(
+                urlPath.substring(urlPath.lastIndexOf('.') + 1)
+              ).toString()
+            )
+          )
         }
         else -> null
       }
@@ -132,9 +139,10 @@ class StaticResourceAction @Inject constructor(
 
     private fun redirectResponse(urlPath: String): Response<ResponseBody> {
       return Response(
-          body = "".toResponseBody(),
-          statusCode = HttpURLConnection.HTTP_MOVED_TEMP,
-          headers = headersOf("Location", urlPath))
+        body = "".toResponseBody(),
+        statusCode = HttpURLConnection.HTTP_MOVED_TEMP,
+        headers = headersOf("Location", urlPath)
+      )
     }
   }
 }

@@ -39,7 +39,7 @@ class ActionScopedTest {
     injector.injectMembers(this)
 
     val seedData: Map<Key<*>, Any> = mapOf(
-        keyOf<String>(Names.named("from-seed")) to "seed-value"
+      keyOf<String>(Names.named("from-seed")) to "seed-value"
 
     )
     scope.enter(seedData).use { assertThat(foo.get()).isEqualTo("seed-value and bar and foo!") }
@@ -105,7 +105,7 @@ class ActionScopedTest {
       // NB(mmihic): Seed data set to a value that causes zed resolution to fail
       // with a user-defined exception
       val seedData: Map<Key<*>, Any> = mapOf(
-          keyOf<String>(Names.named("from-seed")) to "unauthenticated"
+        keyOf<String>(Names.named("from-seed")) to "unauthenticated"
       )
       scope.enter(seedData).use { zed.get() }
     }

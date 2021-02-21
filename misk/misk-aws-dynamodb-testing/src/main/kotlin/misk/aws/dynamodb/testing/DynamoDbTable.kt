@@ -13,5 +13,5 @@ import kotlin.reflect.KClass
 data class DynamoDbTable(
   val tableClass: KClass<*>,
   val configureTable: (CreateTableRequest) -> CreateTableRequest =
-      CreateTablesService.CONFIGURE_TABLE_NOOP
+    CreateTablesService.CONFIGURE_TABLE_NOOP
 )

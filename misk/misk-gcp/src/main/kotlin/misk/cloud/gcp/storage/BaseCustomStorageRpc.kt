@@ -41,7 +41,10 @@ abstract class BaseCustomStorageRpc : StorageRpc {
     throw UnsupportedOperationException()
   }
 
-  override fun createAcl(acl: BucketAccessControl?, options: Map<StorageRpc.Option, *>?): BucketAccessControl {
+  override fun createAcl(
+    acl: BucketAccessControl?,
+    options: Map<StorageRpc.Option, *>?
+  ): BucketAccessControl {
     throw UnsupportedOperationException()
   }
 
@@ -53,7 +56,10 @@ abstract class BaseCustomStorageRpc : StorageRpc {
     throw UnsupportedOperationException()
   }
 
-  override fun patchAcl(acl: BucketAccessControl?, options: Map<StorageRpc.Option, *>?): BucketAccessControl {
+  override fun patchAcl(
+    acl: BucketAccessControl?,
+    options: Map<StorageRpc.Option, *>?
+  ): BucketAccessControl {
     throw UnsupportedOperationException()
   }
 
@@ -98,7 +104,9 @@ abstract class BaseCustomStorageRpc : StorageRpc {
     throw UnsupportedOperationException()
   }
 
-  override fun continueRewrite(previousResponse: StorageRpc.RewriteResponse): StorageRpc.RewriteResponse {
+  override fun continueRewrite(
+    previousResponse: StorageRpc.RewriteResponse
+  ): StorageRpc.RewriteResponse {
     throw UnsupportedOperationException()
   }
 

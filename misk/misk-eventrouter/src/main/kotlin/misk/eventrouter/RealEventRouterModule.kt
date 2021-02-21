@@ -35,17 +35,17 @@ class RealEventRouterModule(val environment: Environment) : KAbstractModule() {
 
   @Provides @Singleton @ForEventRouterActions
   fun actionExecutor(): ExecutorService =
-      ThreadPoolExecutor(1, 1, 1, TimeUnit.MINUTES, LinkedBlockingQueue())
+    ThreadPoolExecutor(1, 1, 1, TimeUnit.MINUTES, LinkedBlockingQueue())
 
   // TODO(tso): make this single threaded _per subscriber_ rather than single threaded
   // for everyone.
   @Provides @Singleton @ForEventRouterSubscribers
   fun subscriberExecutor(): ExecutorService =
-      ThreadPoolExecutor(1, 1, 1, TimeUnit.MINUTES, LinkedBlockingQueue())
+    ThreadPoolExecutor(1, 1, 1, TimeUnit.MINUTES, LinkedBlockingQueue())
 
   @Provides @Singleton @ForKubernetesWatching
   fun kubernetesExecutor(): ExecutorService =
-      ThreadPoolExecutor(1, 1, 1, TimeUnit.MINUTES, LinkedBlockingQueue())
+    ThreadPoolExecutor(1, 1, 1, TimeUnit.MINUTES, LinkedBlockingQueue())
 
   @Provides @Singleton
   internal fun provideEventJsonAdapter(moshi: Moshi) = moshi.adapter<SocketEvent>()

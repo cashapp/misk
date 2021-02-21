@@ -74,45 +74,47 @@ internal class RealExecutorServiceFactory @Inject constructor(
   // out in production.
 
   internal fun maybeTrace(executorService: ExecutorService): ExecutorService =
-      if (tracer != null) {
-        TracedExecutorService(executorService, tracer, /*traceWithActiveSpanOnly=*/false)
-      } else {
-        executorService
-      }
+    if (tracer != null) {
+      TracedExecutorService(executorService, tracer, /*traceWithActiveSpanOnly=*/false)
+    } else {
+      executorService
+    }
 
-  internal fun maybeTraceScheduled(executorService: ScheduledExecutorService): ScheduledExecutorService =
-      if (tracer != null) {
-        TracedScheduledExecutorService(executorService, tracer, /*traceWithActiveSpanOnly=*/false)
-      } else {
-        executorService
-      }
+  internal fun maybeTraceScheduled(
+    executorService: ScheduledExecutorService
+  ): ScheduledExecutorService =
+    if (tracer != null) {
+      TracedScheduledExecutorService(executorService, tracer, /*traceWithActiveSpanOnly=*/false)
+    } else {
+      executorService
+    }
 
   override fun single(nameFormat: String): ExecutorService {
     checkCreate()
     val threadFactory = threadFactory(nameFormat)
     return maybeTrace(Executors.newSingleThreadExecutor(threadFactory))
-        .also { executors[nameFormat] = it }
+      .also { executors[nameFormat] = it }
   }
 
   override fun fixed(nameFormat: String, threadCount: Int): ExecutorService {
     checkCreate()
     val threadFactory = threadFactory(nameFormat)
     return maybeTrace(Executors.newFixedThreadPool(threadCount, threadFactory))
-        .also { executors[nameFormat] = it }
+      .also { executors[nameFormat] = it }
   }
 
   override fun unbounded(nameFormat: String): ExecutorService {
     checkCreate()
     val threadFactory = threadFactory(nameFormat)
     return maybeTrace(Executors.newCachedThreadPool(threadFactory))
-        .also { executors[nameFormat] = it }
+      .also { executors[nameFormat] = it }
   }
 
   override fun scheduled(nameFormat: String, threadCount: Int): ScheduledExecutorService {
     checkCreate()
     val threadFactory = threadFactory(nameFormat)
     return maybeTraceScheduled(Executors.newScheduledThreadPool(threadCount, threadFactory))
-        .also { executors[nameFormat] = it }
+      .also { executors[nameFormat] = it }
   }
 
   private fun threadFactory(nameFormat: String): ThreadFactory {

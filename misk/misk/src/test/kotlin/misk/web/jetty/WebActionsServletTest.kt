@@ -38,15 +38,18 @@ class WebActionsServletTest {
   fun networkSocketSuccess() {
     val response = get("/potato", false)
     assertThat(response.header("ActualSocketName")).isEqualTo(
-      with (jettyService.httpServerUrl) { "${host}:${port}" }
+      with(jettyService.httpServerUrl) { "$host:$port" }
     )
   }
 
   @Test
   fun parseNonAsciiHeaders() {
-    val response = get("/potato", false, Headers.Builder()
+    val response = get(
+      "/potato", false,
+      Headers.Builder()
         .addUnsafeNonAscii("X-device-name", "Walé Iphone")
-        .build())
+        .build()
+    )
 
     assertThat(response.code).isEqualTo(200)
   }
@@ -71,11 +74,13 @@ class WebActionsServletTest {
               }
             }
           )
-          .build())
+          .build()
+      )
     }
 
     class Factory : NetworkInterceptor.Factory {
-      override fun create(action: Action): NetworkInterceptor? = WebActionsServletNetworkInterceptor()
+      override fun create(action: Action): NetworkInterceptor? =
+        WebActionsServletNetworkInterceptor()
     }
   }
 
@@ -89,16 +94,28 @@ class WebActionsServletTest {
 
   internal data class TestActionResponse(val text: String)
 
-  private fun get(path: String, viaUDS: Boolean, headers: Headers = Headers.headersOf()): okhttp3.Response =
-      with(Request.Builder()
-          .headers(headers)
-          .url(jettyService.httpServerUrl.newBuilder().encodedPath(path)
-              .build())) {
-        when {
-          viaUDS -> { udsCall(get()) }
-          else -> { call(get()) }
+  private fun get(
+    path: String,
+    viaUDS: Boolean,
+    headers: Headers = Headers.headersOf()
+  ): okhttp3.Response =
+    with(
+      Request.Builder()
+        .headers(headers)
+        .url(
+          jettyService.httpServerUrl.newBuilder().encodedPath(path)
+            .build()
+        )
+    ) {
+      when {
+        viaUDS -> {
+          udsCall(get())
+        }
+        else -> {
+          call(get())
         }
       }
+    }
 
   private fun call(request: Request.Builder): okhttp3.Response {
     return OkHttpClient().newCall(request.build()).execute()
@@ -106,10 +123,10 @@ class WebActionsServletTest {
 
   private fun udsCall(request: Request.Builder): okhttp3.Response {
     return OkHttpClient().newBuilder()
-        .socketFactory(UnixDomainSocketFactory(File(socketName)))
-        .build()
-        .newCall(request.build())
-        .execute()
+      .socketFactory(UnixDomainSocketFactory(File(socketName)))
+      .build()
+      .newCall(request.build())
+      .execute()
   }
 
   inner class TestModule : KAbstractModule() {
@@ -123,7 +140,8 @@ class WebActionsServletTest {
       )
 
       multibind<NetworkInterceptor.Factory>().toInstance(
-          WebActionsServletNetworkInterceptor.Factory())
+        WebActionsServletNetworkInterceptor.Factory()
+      )
 
       install(WebActionModule.create<TestAction>())
     }

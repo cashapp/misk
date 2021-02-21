@@ -15,9 +15,9 @@ import javax.inject.Inject
 class LivenessCheckActionTest {
   @MiskTestModule
   val module = Modules.combine(
-      MiskTestingServiceModule(),
-      FakeServiceModule(),
-      WebActionModule.create<LivenessCheckAction>()
+    MiskTestingServiceModule(),
+    FakeServiceModule(),
+    WebActionModule.create<LivenessCheckAction>()
   )
 
   @Inject lateinit var livenessCheckAction: LivenessCheckAction

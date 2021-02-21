@@ -63,16 +63,19 @@ abstract class HibernateEntityModule(
     accessAnnotationClass: KClass<out Annotation> = NoAdminDashboardDatabaseAccess::class
   ) {
     multibind<HibernateEntity>(qualifier)
-        .toInstance(HibernateEntity(dbEntityClass))
+      .toInstance(HibernateEntity(dbEntityClass))
 
-    multibind<DatabaseQueryMetadata>().toProvider(DatabaseQueryMetadataProvider(
+    multibind<DatabaseQueryMetadata>().toProvider(
+      DatabaseQueryMetadataProvider(
         dbEntityClass = dbEntityClass,
         queryClass = queryClass,
         accessAnnotationClass = accessAnnotationClass
-    ))
+      )
+    )
     if (queryClass != null) {
       multibind<HibernateQuery>().toInstance(
-          HibernateQuery(queryClass as KClass<out Query<DbEntity<*>>>))
+        HibernateQuery(queryClass as KClass<out Query<DbEntity<*>>>)
+      )
     }
   }
 
@@ -81,26 +84,30 @@ abstract class HibernateEntityModule(
     addEntity(T::class)
   }
 
-  /** Adds a DbEntity to Database-Query Admin Dashboard Tab with a dynamic query (not a static Misk.Query) */
-  protected inline fun <reified T : DbEntity<T>, reified AA : Annotation> addEntityWithDynamicQuery() {
+  /** Adds a DbEntity to Database-Query Admin Dashboard Tab with a dynamic query
+   * (not a static Misk.Query)
+   */
+  protected inline fun <reified T : DbEntity<T>, reified AA : Annotation>
+  addEntityWithDynamicQuery() {
     addEntity(T::class, null, AA::class)
   }
 
   /** Adds a DbEntity to Database-Query Admin Dashboard Tab with a static Misk.Query */
-  protected inline fun <reified T : DbEntity<T>, reified Q : Query<T>, reified AA : Annotation> addEntityWithStaticQuery() {
+  protected inline fun <reified T : DbEntity<T>, reified Q : Query<T>, reified AA : Annotation>
+  addEntityWithStaticQuery() {
     addEntity(T::class, Q::class, AA::class)
   }
 
   protected fun <T> bindListener(type: EventType<T>): LinkedBindingBuilder<in T> {
     // Bind the listener as an anonymous key. We can get the provider for this before its bound!
     val key = Key.get(
-        Any::class.java,
-        Names.named("HibernateEventListener@${nextHibernateEventListener.getAndIncrement()}")
+      Any::class.java,
+      Names.named("HibernateEventListener@${nextHibernateEventListener.getAndIncrement()}")
     )
 
     // Create a multibinding for a ListenerRegistration that uses the above key.
     multibind<ListenerRegistration>(qualifier)
-        .toInstance(ListenerRegistration(type, getProvider(key)))
+      .toInstance(ListenerRegistration(type, getProvider(key)))
 
     // Start the binding.
     return bind(key)

@@ -66,9 +66,9 @@ class InMemoryStorageRpc : BaseCustomStorageRpc() {
         val subFolderEnd = obj.name.indexOf(delimiter, prefix.length)
         if (subFolderEnd != -1) {
           StorageObject()
-              .setName(obj.name.substring(0, subFolderEnd))
-              .setBucket(obj.bucket)
-              .setOwner(obj.owner)
+            .setName(obj.name.substring(0, subFolderEnd))
+            .setBucket(obj.bucket)
+            .setOwner(obj.owner)
         } else obj
       } ?: obj
     }.distinctBy { it.name }
@@ -76,30 +76,30 @@ class InMemoryStorageRpc : BaseCustomStorageRpc() {
   }
 
   override fun get(obj: StorageObject, options: Map<StorageRpc.Option, *>): StorageObject? =
-      lock.read {
-        val existing = options.check(metadata[obj.path]) ?: return null
-        val toReturn = existing.clone()
-        toReturn.id = obj.path
-        toReturn.setSize(BigInteger.valueOf(content[obj.path]?.size?.toLong() ?: 0L))
-      }
+    lock.read {
+      val existing = options.check(metadata[obj.path]) ?: return null
+      val toReturn = existing.clone()
+      toReturn.id = obj.path
+      toReturn.setSize(BigInteger.valueOf(content[obj.path]?.size?.toLong() ?: 0L))
+    }
 
   override fun delete(obj: StorageObject, options: Map<StorageRpc.Option, *>): Boolean =
-      lock.write {
-        try {
-          options.check(metadata[obj.path])
-          content.remove(obj.path)
-          metadata.remove(obj.path) != null
-        } catch (e: StorageException) {
-          false
-        }
+    lock.write {
+      try {
+        options.check(metadata[obj.path])
+        content.remove(obj.path)
+        metadata.remove(obj.path) != null
+      } catch (e: StorageException) {
+        false
       }
+    }
 
   override fun load(obj: StorageObject, options: Map<StorageRpc.Option, *>): ByteArray =
-      lock.read {
-        options.check(metadata[obj.path])
-        return content[obj.path]
-            ?: throw StorageException(404, "file not found ${obj.path}")
-      }
+    lock.read {
+      options.check(metadata[obj.path])
+      return content[obj.path]
+        ?: throw StorageException(404, "file not found ${obj.path}")
+    }
 
   override fun read(
     from: StorageObject,
@@ -109,7 +109,7 @@ class InMemoryStorageRpc : BaseCustomStorageRpc() {
   ): Long = lock.read {
     options.check(metadata[from.path])
     val bytes = content[from.path]
-        ?: throw StorageException(404, "file not found ${from.path}")
+      ?: throw StorageException(404, "file not found ${from.path}")
 
     val position = if (zposition >= 0) zposition.toInt() else 0
     val amtRead = bytes.size - position
@@ -164,32 +164,33 @@ class InMemoryStorageRpc : BaseCustomStorageRpc() {
   }
 
   override fun openRewrite(request: StorageRpc.RewriteRequest): StorageRpc.RewriteResponse =
-      lock.write {
-        request.sourceOptions.check(metadata[request.source.path])
-            ?: throw StorageException(404, "file not found ${request.source.path}")
+    lock.write {
+      request.sourceOptions.check(metadata[request.source.path])
+        ?: throw StorageException(404, "file not found ${request.source.path}")
 
-        val existingTarget = request.targetOptions.check(metadata[request.target.path])
-        val newTarget = request.target.clone()
-        newTarget.generation = (existingTarget?.generation ?: 0) + 1
-        newTarget.metageneration = when {
-          existingTarget == null -> 1
-          existingTarget.metadata == newTarget.metadata -> existingTarget.metageneration
-          else -> existingTarget.metageneration + 1
-        }
-
-        val sourceData = content[request.source.path]
-            ?: throw StorageException(404, "file not found ${request.source.path}")
-
-        metadata[request.target.path] = newTarget
-        content[request.target.path] = sourceData.copyOf()
-        return StorageRpc.RewriteResponse(
-            request,
-            request.target,
-            sourceData.size.toLong(),
-            true,
-            "token",
-            sourceData.size.toLong())
+      val existingTarget = request.targetOptions.check(metadata[request.target.path])
+      val newTarget = request.target.clone()
+      newTarget.generation = (existingTarget?.generation ?: 0) + 1
+      newTarget.metageneration = when {
+        existingTarget == null -> 1
+        existingTarget.metadata == newTarget.metadata -> existingTarget.metageneration
+        else -> existingTarget.metageneration + 1
       }
+
+      val sourceData = content[request.source.path]
+        ?: throw StorageException(404, "file not found ${request.source.path}")
+
+      metadata[request.target.path] = newTarget
+      content[request.target.path] = sourceData.copyOf()
+      return StorageRpc.RewriteResponse(
+        request,
+        request.target,
+        sourceData.size.toLong(),
+        true,
+        "token",
+        sourceData.size.toLong()
+      )
+    }
 }
 
 fun Map<StorageRpc.Option, *>.check(obj: StorageObject?): StorageObject? {

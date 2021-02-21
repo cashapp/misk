@@ -42,14 +42,15 @@ class ClusterHashRing(
     val resourceHash = hashFn.hashBytes(resourceId.toByteArray()).asInt()
     val vnode = vnodes.firstOrNull { it >= resourceHash } ?: vnodes[0]
     return vnodesToMembers[vnode] ?: throw IllegalStateException(
-        "no member corresponding to vnode hash $vnode")
+      "no member corresponding to vnode hash $vnode"
+    )
   }
 
   override fun equals(other: Any?): Boolean {
     val otherRing = other as? ClusterHashRing ?: return false
     return vnodesCount == otherRing.vnodesCount &&
-        vnodes.contentEquals(otherRing.vnodes) &&
-        vnodesToMembers == other.vnodesToMembers
+      vnodes.contentEquals(otherRing.vnodes) &&
+      vnodesToMembers == other.vnodesToMembers
   }
 
   override fun hashCode(): Int {

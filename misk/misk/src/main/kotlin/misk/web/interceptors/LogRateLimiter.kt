@@ -32,7 +32,7 @@ class LogRateLimiter @Inject constructor(
     /** If the response code is error, we look up the errorRateLimiter **/
     val isError: Boolean
   ) : Comparable<LogBucketId> {
-    override fun toString() = "${actionClass}/${isError}"
+    override fun toString() = "$actionClass/$isError"
 
     override fun compareTo(other: LogBucketId) = toString().compareTo(other.toString())
   }

@@ -27,7 +27,7 @@ class ReadinessCheckAction @Inject internal constructor(
   @AvailableWhenDegraded
   fun readinessCheck(): Response<String> {
     val servicesNotRunning = serviceManagerProvider.get().servicesByState().values().asList()
-        .filterNot { it.isRunning }
+      .filterNot { it.isRunning }
 
     for (service in servicesNotRunning) {
       logger.info("Service not running: $service")
@@ -41,8 +41,8 @@ class ReadinessCheckAction @Inject internal constructor(
     }
 
     val failedHealthChecks = healthChecks
-        .map { it.status() }
-        .filter { !it.isHealthy }
+      .map { it.status() }
+      .filter { !it.isHealthy }
 
     if (failedHealthChecks.isEmpty()) {
       return Response("", statusCode = 200)

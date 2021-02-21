@@ -29,7 +29,7 @@ class ExplicitReleaseBlockingQueue<T> internal constructor(
     for (i in (0 until n)) {
       val e = pending.poll() ?: return numReleased
       visible.add(e)
-      numReleased ++
+      numReleased++
     }
 
     return numReleased
@@ -41,7 +41,7 @@ class ExplicitReleaseBlockingQueue<T> internal constructor(
     while (true) {
       val e = pending.poll() ?: return numReleased
       visible.add(e)
-      numReleased ++
+      numReleased++
     }
   }
 
@@ -75,7 +75,7 @@ class ExplicitReleaseBlockingQueue<T> internal constructor(
   override fun poll(): T? = visible.poll()
   override fun drainTo(c: MutableCollection<in T>) = visible.drainTo(c)
   override fun drainTo(c: MutableCollection<in T>?, maxElements: Int) =
-      visible.drainTo(c, maxElements)
+    visible.drainTo(c, maxElements)
 
   override fun remove(element: T): Boolean {
     val removedFromReleased = visible.remove(element)

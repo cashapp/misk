@@ -27,16 +27,16 @@ data class Action(
     get() = parameters.map { it.type }
 
   val requestType: KType?
-      get() {
-        if (dispatchMechanism == DispatchMechanism.GRPC) {
-          // TODO: support gRPC streaming on the web dashboard.
-          return if (parameters.size == 1) parameters[0].type else null
-        } else {
-          return parameters.filter { it.annotations.any { it is RequestBody } }
-              .map { it.type }
-              .firstOrNull()
-        }
+    get() {
+      if (dispatchMechanism == DispatchMechanism.GRPC) {
+        // TODO: support gRPC streaming on the web dashboard.
+        return if (parameters.size == 1) parameters[0].type else null
+      } else {
+        return parameters.filter { it.annotations.any { it is RequestBody } }
+          .map { it.type }
+          .firstOrNull()
       }
+    }
 
   internal inline fun <reified T : Annotation> parameterAnnotatedOrNull(): KParameter? {
     return parameters.firstOrNull { it.findAnnotation<T>() != null }

@@ -28,16 +28,16 @@ class DatabaseQueryMetadataAction @Inject constructor(
   )
 }
 
-//Potentially input for max rows
+// Potentially input for max rows
 //
-//Constraint is a function, might have a parameter
+// Constraint is a function, might have a parameter
 //
-//list of constraints, that you can keep adding
-//some of them reveal another input field of type (string, int, datetime, list<datetime>, list<string>...)
+// list of constraints, that you can keep adding
+// some of them reveal another input field of type (string, int, datetime, list<datetime>, list<string>...)
 //
-//Potentially make the list just comma separated
+// Potentially make the list just comma separated
 //
-//separate select to choose the projection
+// separate select to choose the projection
 //
-//Apply ACLs when Query is exposed for dashboard tab
-//multibind<Query, AccessAnnotation>().to<MovieQuery>()
+// Apply ACLs when Query is exposed for dashboard tab
+// multibind<Query, AccessAnnotation>().to<MovieQuery>()

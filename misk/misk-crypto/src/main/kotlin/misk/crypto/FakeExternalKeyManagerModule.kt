@@ -7,6 +7,8 @@ class FakeExternalKeyManagerModule(private val config: CryptoConfig) : KAbstract
 
   override fun configure() {
     requireBinding(Deployment::class.java)
-    bind<ExternalKeyManager>().toInstance(FakeExternalKeyManager(config.external_data_keys.orEmpty()))
+    bind<ExternalKeyManager>().toInstance(
+      FakeExternalKeyManager(config.external_data_keys.orEmpty())
+    )
   }
 }

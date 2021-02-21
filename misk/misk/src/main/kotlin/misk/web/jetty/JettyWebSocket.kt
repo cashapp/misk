@@ -3,7 +3,6 @@ package misk.web.jetty
 import misk.web.BoundAction
 import misk.web.DispatchMechanism
 import misk.web.ServletHttpCall
-import misk.web.SocketAddress
 import misk.web.actions.WebAction
 import misk.web.actions.WebSocket
 import misk.web.actions.WebSocketListener
@@ -11,8 +10,6 @@ import okhttp3.Headers
 import okio.ByteString
 import okio.ByteString.Companion.toByteString
 import okio.utf8Size
-import org.eclipse.jetty.server.ServerConnector
-import org.eclipse.jetty.unixsocket.UnixSocketConnector
 import org.eclipse.jetty.websocket.api.Session
 import org.eclipse.jetty.websocket.api.WebSocketAdapter
 import org.eclipse.jetty.websocket.api.WriteCallback
@@ -114,15 +111,18 @@ internal class JettyWebSocket(
       val text = queue.pop()
       val byteCount = text.utf8Size()
 
-      adapter.remote.sendString(text, object : WriteCallback {
-        override fun writeSuccess() {
-          outgoingQueueSize -= byteCount
-        }
+      adapter.remote.sendString(
+        text,
+        object : WriteCallback {
+          override fun writeSuccess() {
+            outgoingQueueSize -= byteCount
+          }
 
-        override fun writeFailed(x: Throwable?) {
-          outgoingQueueSize -= byteCount
+          override fun writeFailed(x: Throwable?) {
+            outgoingQueueSize -= byteCount
+          }
         }
-      })
+      )
     }
   }
 
@@ -157,10 +157,10 @@ internal class JettyWebSocket(
       val realWebSocket = JettyWebSocket(request, response)
 
       val httpCall = ServletHttpCall.create(
-          request = request.httpServletRequest,
-          dispatchMechanism = DispatchMechanism.WEBSOCKET,
-          upstreamResponse = realWebSocket.upstreamResponse(),
-          webSocket = realWebSocket
+        request = request.httpServletRequest,
+        dispatchMechanism = DispatchMechanism.WEBSOCKET,
+        upstreamResponse = realWebSocket.upstreamResponse(),
+        webSocket = realWebSocket
       )
 
       val candidateActions = boundActions.mapNotNull {

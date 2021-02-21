@@ -10,10 +10,6 @@ import com.squareup.wire.ProtoWriter;
 import com.squareup.wire.WireField;
 import com.squareup.wire.internal.Internal;
 import java.io.IOException;
-import java.lang.Object;
-import java.lang.Override;
-import java.lang.String;
-import java.lang.StringBuilder;
 import okio.ByteString;
 
 /**
@@ -21,11 +17,8 @@ import okio.ByteString;
  */
 public final class HelloRequest extends Message<HelloRequest, HelloRequest.Builder> {
   public static final ProtoAdapter<HelloRequest> ADAPTER = new ProtoAdapter_HelloRequest();
-
-  private static final long serialVersionUID = 0L;
-
   public static final String DEFAULT_NAME = "";
-
+  private static final long serialVersionUID = 0L;
   @WireField(
       tag = 1,
       adapter = "com.squareup.wire.ProtoAdapter#STRING"
@@ -114,9 +107,11 @@ public final class HelloRequest extends Message<HelloRequest, HelloRequest.Build
     public HelloRequest decode(ProtoReader reader) throws IOException {
       Builder builder = new Builder();
       long token = reader.beginMessage();
-      for (int tag; (tag = reader.nextTag()) != -1;) {
+      for (int tag; (tag = reader.nextTag()) != -1; ) {
         switch (tag) {
-          case 1: builder.name(ProtoAdapter.STRING.decode(reader)); break;
+          case 1:
+            builder.name(ProtoAdapter.STRING.decode(reader));
+            break;
           default: {
             FieldEncoding fieldEncoding = reader.peekFieldEncoding();
             Object value = fieldEncoding.rawProtoAdapter().decode(reader);

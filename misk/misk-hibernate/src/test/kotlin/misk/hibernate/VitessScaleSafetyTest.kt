@@ -4,11 +4,11 @@ import misk.backoff.FlatBackoff
 import misk.backoff.retry
 import misk.hibernate.annotation.keyspace
 import misk.jdbc.Check
-import misk.vitess.CowriteException
 import misk.jdbc.TableScanException
 import misk.jdbc.uniqueLong
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
+import misk.vitess.CowriteException
 import misk.vitess.Shard
 import org.hibernate.SessionFactory
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -33,11 +33,13 @@ class VitessScaleSafetyTest {
   @Test
   fun crossShardTransactions() {
     val jg = transacter.save(
-        DbActor("Jeff Goldblum", LocalDate.of(1952, 10, 22)))
+      DbActor("Jeff Goldblum", LocalDate.of(1952, 10, 22))
+    )
     val cf = transacter.save(DbActor("Carrie Fisher"))
 
     val jp = transacter.save(
-        DbMovie("Jurassic Park", LocalDate.of(1993, 6, 9)))
+      DbMovie("Jurassic Park", LocalDate.of(1993, 6, 9))
+    )
     val sw = transacter.createInSeparateShard(jp) {
       DbMovie("Star Wars", LocalDate.of(1977, 5, 25))
     }
@@ -65,11 +67,13 @@ class VitessScaleSafetyTest {
   @Test
   fun transactionsSpanningEntityGroupsInTheSameShard() {
     val jg = transacter.save(
-        DbActor("Jeff Goldblum", LocalDate.of(1952, 10, 22)))
+      DbActor("Jeff Goldblum", LocalDate.of(1952, 10, 22))
+    )
     val cf = transacter.save(DbActor("Carrie Fisher"))
 
     val jp = transacter.save(
-        DbMovie("Jurassic Park", LocalDate.of(1993, 6, 9)))
+      DbMovie("Jurassic Park", LocalDate.of(1993, 6, 9))
+    )
     val sw = transacter.createInSameShard(jp) {
       DbMovie("Star Wars", LocalDate.of(1977, 5, 25))
     }
@@ -96,15 +100,18 @@ class VitessScaleSafetyTest {
     // However, in some very specific, Misk-internal cases, org.hibernate.SessionFactory can be used
     // to spin up a new, independent transaction while another is ongoing.
     val jg = transacter.save(
-        DbActor("Jeff Goldblum", LocalDate.of(1952, 10, 22)))
+      DbActor("Jeff Goldblum", LocalDate.of(1952, 10, 22))
+    )
     val cf = transacter.save(DbActor("Carrie Fisher"))
     val ld = transacter.save(DbActor("Laura Dern"))
     val sn = transacter.save(DbActor("Sam Neill"))
 
     val jp = transacter.save(
-        DbMovie("Jurassic Park", LocalDate.of(1993, 6, 9)))
+      DbMovie("Jurassic Park", LocalDate.of(1993, 6, 9))
+    )
     val sw = transacter.save(
-        DbMovie("Star Wars: The Last Jedi", LocalDate.of(2017, 12, 15)))
+      DbMovie("Star Wars: The Last Jedi", LocalDate.of(2017, 12, 15))
+    )
 
     transacter.transaction { session ->
       session.save(DbCharacter("Dr. Ian Malcolm", session.load(jp), session.load(jg)))
@@ -112,8 +119,12 @@ class VitessScaleSafetyTest {
       // The Hibernate session can operate on a different entity group. (This would normally be
       // done in some sort of library call, where the Misk session is intentionally omitted.)
       hibernateTransaction { hSession ->
-        hSession.save(DbCharacter("Leia Organa",
-            hSession.load(DbMovie::class.java, sw), hSession.load(DbActor::class.java, cf)))
+        hSession.save(
+          DbCharacter(
+            "Leia Organa",
+            hSession.load(DbMovie::class.java, sw), hSession.load(DbActor::class.java, cf)
+          )
+        )
       }
     }
     assertEquals(setOf("Dr. Ian Malcolm"), movieCharacterNames(jp))
@@ -122,10 +133,18 @@ class VitessScaleSafetyTest {
     // Regardless, one Hibernate session still cannot operate on two entity groups.
     assertThrows<CowriteException> {
       hibernateTransaction { hSession ->
-        hSession.save(DbCharacter("Dr. Ellie Sattler",
-            hSession.load(DbMovie::class.java, jp), hSession.load(DbActor::class.java, ld)))
-        hSession.save(DbCharacter("Vice Admiral Holdo",
-            hSession.load(DbMovie::class.java, sw), hSession.load(DbActor::class.java, ld)))
+        hSession.save(
+          DbCharacter(
+            "Dr. Ellie Sattler",
+            hSession.load(DbMovie::class.java, jp), hSession.load(DbActor::class.java, ld)
+          )
+        )
+        hSession.save(
+          DbCharacter(
+            "Vice Admiral Holdo",
+            hSession.load(DbMovie::class.java, sw), hSession.load(DbActor::class.java, ld)
+          )
+        )
       }
     }
     assertEquals(setOf("Dr. Ian Malcolm"), movieCharacterNames(jp))
@@ -139,8 +158,12 @@ class VitessScaleSafetyTest {
         session.save(DbCharacter("Dr. Ellie Sattler", session.load(jp), session.load(ld)))
 
         hibernateTransaction { hSession ->
-          hSession.save(DbCharacter("Dr. Alan Grant",
-              hSession.load(DbMovie::class.java, jp), hSession.load(DbActor::class.java, sn)))
+          hSession.save(
+            DbCharacter(
+              "Dr. Alan Grant",
+              hSession.load(DbMovie::class.java, jp), hSession.load(DbActor::class.java, sn)
+            )
+          )
         }
 
         session.save(DbCharacter("Vice Admiral Holdo", session.load(sw), session.load(ld)))
@@ -155,8 +178,8 @@ class VitessScaleSafetyTest {
     assertThrows<UndeclaredThrowableException> {
       transacter.transaction { session ->
         queryFactory.newQuery<MovieQuery>()
-            .releaseDateBefore(LocalDate.of(1977, 6, 15))
-            .list(session)
+          .releaseDateBefore(LocalDate.of(1977, 6, 15))
+          .list(session)
       }
     }
   }
@@ -166,9 +189,11 @@ class VitessScaleSafetyTest {
     transacter.transaction { session ->
       session.withoutChecks(Check.FULL_SCATTER, Check.COWRITE) {
         val cf = session.save(
-            DbActor("Carrie Fisher", null))
+          DbActor("Carrie Fisher", null)
+        )
         val sw = session.save(
-            DbMovie("Star Wars", LocalDate.of(1977, 5, 25)))
+          DbMovie("Star Wars", LocalDate.of(1977, 5, 25))
+        )
         session.save(DbCharacter("Leia Organa", session.load(sw), session.load(cf)))
 
         assertThrows<TableScanException> {
@@ -197,8 +222,8 @@ class VitessScaleSafetyTest {
     transacter.transaction { session ->
       session.withoutChecks {
         queryFactory.newQuery<MovieQuery>()
-            .releaseDateBefore(LocalDate.of(1977, 6, 15))
-            .list(session)
+          .releaseDateBefore(LocalDate.of(1977, 6, 15))
+          .list(session)
       }
     }
   }
@@ -208,21 +233,21 @@ class VitessScaleSafetyTest {
   }
 
   private fun <R> hibernateTransaction(block: (hSession: org.hibernate.Session) -> R): R =
-      sessionFactory.openSession().use { hSession ->
-        val transaction = hSession.beginTransaction()
+    sessionFactory.openSession().use { hSession ->
+      val transaction = hSession.beginTransaction()
+      try {
+        val result = block(hSession)
+        transaction.commit()
+        return result
+      } catch (e: Throwable) {
         try {
-          val result = block(hSession)
-          transaction.commit()
-          return result
-        } catch (e: Throwable) {
-          try {
-            if (transaction.isActive) transaction.rollback()
-          } catch (suppressed: Exception) {
-            e.addSuppressed(suppressed)
-          }
-          throw e
+          if (transaction.isActive) transaction.rollback()
+        } catch (suppressed: Exception) {
+          e.addSuppressed(suppressed)
         }
+        throw e
       }
+    }
 }
 
 fun <T : DbEntity<T>> Transacter.save(entity: T): Id<T> = transaction { it.save(entity) }

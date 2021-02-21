@@ -75,8 +75,10 @@ internal class DegradedHealthStressTest {
     fakeResourcePool.total = 5
 
     // Send 50 calls per second.
-    val recurringTask = executorService.scheduleAtFixedRate({ makeAsyncHttpCall() },
-        0, 1000L / 50, TimeUnit.MILLISECONDS)
+    val recurringTask = executorService.scheduleAtFixedRate(
+      { makeAsyncHttpCall() },
+      0, 1000L / 50, TimeUnit.MILLISECONDS
+    )
 
     // Make 10 seconds of calls so the concurrency limiter can stabilize.
     Thread.sleep(10_000)
@@ -108,8 +110,8 @@ internal class DegradedHealthStressTest {
   private fun makeAsyncHttpCall() {
     val url = jettyService.httpServerUrl.resolve("/use_constrained_resource")!!
     val request = Request.Builder()
-        .url(url)
-        .build()
+      .url(url)
+      .build()
 
     httpClient.newCall(request).enqueue(object : Callback {
       override fun onFailure(call: Call, e: IOException) {

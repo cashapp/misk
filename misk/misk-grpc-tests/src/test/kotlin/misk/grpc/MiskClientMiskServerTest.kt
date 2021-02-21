@@ -1,6 +1,7 @@
 package misk.grpc
 
 import com.google.inject.util.Modules
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.runBlocking
 import misk.grpc.miskclient.MiskGrpcClientModule
@@ -25,9 +26,10 @@ import javax.inject.Provider
 class MiskClientMiskServerTest {
   @MiskTestModule
   val module = Modules.combine(
-      MiskGrpcClientModule(),
-      RouteGuideMiskServiceModule(),
-      LogCollectorModule())
+    MiskGrpcClientModule(),
+    RouteGuideMiskServiceModule(),
+    LogCollectorModule()
+  )
 
   @Inject lateinit var routeGuideProvider: Provider<RouteGuideClient>
   @Inject lateinit var logCollector: LogCollector
@@ -37,12 +39,12 @@ class MiskClientMiskServerTest {
   @Test
   fun requestResponse() {
     val point = Point(
-        latitude = 43,
-        longitude = -80
+      latitude = 43,
+      longitude = -80
     )
     val feature = Feature(
-        name = "maple tree",
-        location = point
+      name = "maple tree",
+      location = point
     )
 
     runBlocking {
@@ -54,7 +56,9 @@ class MiskClientMiskServerTest {
 
     // Confirm interceptors were invoked.
     assertThat(logCollector.takeMessages(RequestLoggingInterceptor::class)).containsExactly(
-      "GetFeatureGrpcAction principal=unknown time=0.000 ns code=200 request=[Point{latitude=43, longitude=-80}] response=Feature{name=maple tree, location=Point{latitude=43, longitude=-80}}"
+      "GetFeatureGrpcAction principal=unknown time=0.000 ns code=200 " +
+        "request=[Point{latitude=43, longitude=-80}] " +
+        "response=Feature{name=maple tree, location=Point{latitude=43, longitude=-80}}"
     )
     assertThat(callCounter.actionNameToCount["default.GetFeature"]!!.get()).isEqualTo(1)
     assertThat(callCounter.actionNameToCount["default.RouteChat"]!!.get()).isEqualTo(0)
@@ -65,7 +69,7 @@ class MiskClientMiskServerTest {
     runBlocking {
       val routeGuide = routeGuideProvider.get()
 
-      val (sendChannel, receiveChannel) = routeGuide.RouteChat().execute()
+      val (sendChannel, receiveChannel) = routeGuide.RouteChat().executeIn(GlobalScope)
       sendChannel.send(RouteNote(message = "a"))
       assertThat(receiveChannel.receive()).isEqualTo(RouteNote(message = "ACK: a"))
       sendChannel.send(RouteNote(message = "b"))
@@ -75,7 +79,8 @@ class MiskClientMiskServerTest {
 
     // Confirm interceptors were invoked.
     assertThat(logCollector.takeMessages(RequestLoggingInterceptor::class)).containsExactly(
-      "RouteChatGrpcAction principal=unknown time=0.000 ns code=200 request=[GrpcMessageSource, GrpcMessageSink] response=kotlin.Unit"
+      "RouteChatGrpcAction principal=unknown time=0.000 ns code=200 " +
+        "request=[GrpcMessageSource, GrpcMessageSink] response=kotlin.Unit"
     )
     assertThat(callCounter.actionNameToCount["default.GetFeature"]!!.get()).isEqualTo(0)
     assertThat(callCounter.actionNameToCount["default.RouteChat"]!!.get()).isEqualTo(1)
@@ -89,7 +94,7 @@ class MiskClientMiskServerTest {
       val routeGuide = routeGuideProvider.get()
 
       val (sendChannel, receiveChannel: ReceiveChannel<RouteNote>) =
-          routeGuide.RouteChat().execute()
+        routeGuide.RouteChat().executeIn(GlobalScope)
       assertThat(receiveChannel.receive()).isEqualTo(RouteNote(message = "welcome"))
       sendChannel.close()
     }

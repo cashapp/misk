@@ -12,8 +12,8 @@ import javax.inject.Inject
 @MiskTest(startService = true)
 internal class FakeLeaseManagerTest {
   @MiskTestModule val module = Modules.combine(
-      MiskTestingServiceModule(),
-      FakeClusterModule()
+    MiskTestingServiceModule(),
+    FakeClusterModule()
   )
 
   @Inject private lateinit var leaseManager: FakeLeaseManager

@@ -14,9 +14,12 @@ class DelayedTask(
 ) : Delayed {
   override fun compareTo(other: Delayed): Int {
     val timeDiff = getDelay(TimeUnit.MILLISECONDS) - other.getDelay(
-        TimeUnit.MILLISECONDS)
-    return Math.max(Math.min(timeDiff, Integer.MAX_VALUE.toLong()),
-        Integer.MIN_VALUE.toLong()).toInt()
+      TimeUnit.MILLISECONDS
+    )
+    return Math.max(
+      Math.min(timeDiff, Integer.MAX_VALUE.toLong()),
+      Integer.MIN_VALUE.toLong()
+    ).toInt()
   }
 
   override fun getDelay(unit: TimeUnit): Long {

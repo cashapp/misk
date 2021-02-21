@@ -10,7 +10,7 @@ internal class JettyThreadPoolMetricsCollector @Inject internal constructor(
   private val metrics: ThreadPoolMetrics
 ) : AbstractScheduledService() {
   override fun scheduler(): Scheduler =
-      Scheduler.newFixedDelaySchedule(REFRESH_RATE_MS, REFRESH_RATE_MS, TimeUnit.MILLISECONDS)
+    Scheduler.newFixedDelaySchedule(REFRESH_RATE_MS, REFRESH_RATE_MS, TimeUnit.MILLISECONDS)
 
   override fun runOneIteration() {
     metrics.refresh()

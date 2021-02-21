@@ -17,9 +17,10 @@ internal class EofExceptionMapper @Inject internal constructor() : ExceptionMapp
   override fun loggingLevel(th: EofException): Level = Level.INFO
 
   companion object {
-    val CLIENT_CLOSED_REQUEST = Response("client closed request".toResponseBody(),
-        Headers.headersOf("Content-Type", MediaTypes.TEXT_PLAIN_UTF8),
-        StatusCode.CLIENT_CLOSED_REQUEST.code
+    val CLIENT_CLOSED_REQUEST = Response(
+      "client closed request".toResponseBody(),
+      Headers.headersOf("Content-Type", MediaTypes.TEXT_PLAIN_UTF8),
+      StatusCode.CLIENT_CLOSED_REQUEST.code
     )
   }
 }

@@ -33,7 +33,12 @@ class PercentSampler(
 class RateLimitingSampler(
   private val rateLimiter: RateLimiter
 ) : Sampler {
-  constructor(ratePerSecond: Long) : this(RateLimiter.Factory(Ticker.systemTicker(), Sleeper.DEFAULT).create(1))
+  constructor(ratePerSecond: Long) : this(
+    RateLimiter.Factory(
+      Ticker.systemTicker(),
+      Sleeper.DEFAULT
+    ).create(1)
+  )
 
   override fun sample(): Boolean {
     return rateLimiter.tryAcquire(1L, 0, TimeUnit.SECONDS)

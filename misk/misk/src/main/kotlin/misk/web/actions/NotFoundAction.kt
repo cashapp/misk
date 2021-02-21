@@ -32,9 +32,9 @@ class NotFoundAction @Inject constructor(
   @Unauthenticated
   fun notFound(@PathParam path: String): Response<ResponseBody> {
     return Response(
-        body = notFoundMessage(path, clientHttpCall.get()).toResponseBody(),
-        headers = headersOf("Content-Type", MediaTypes.TEXT_PLAIN_UTF8),
-        statusCode = 404
+      body = notFoundMessage(path, clientHttpCall.get()).toResponseBody(),
+      headers = headersOf("Content-Type", MediaTypes.TEXT_PLAIN_UTF8),
+      statusCode = 404
     )
   }
 
@@ -44,9 +44,9 @@ class NotFoundAction @Inject constructor(
     fun response(path: String): Response<ResponseBody> {
       logger.info("Nothing found at /$path")
       return Response(
-          body = "Nothing found at /$path".toResponseBody(),
-          headers = headersOf("Content-Type", MediaTypes.TEXT_PLAIN_UTF8),
-          statusCode = 404
+        body = "Nothing found at /$path".toResponseBody(),
+        headers = headersOf("Content-Type", MediaTypes.TEXT_PLAIN_UTF8),
+        statusCode = 404
       )
     }
   }

@@ -1,6 +1,5 @@
 package misk.jobqueue.sqs
 
-import com.amazonaws.ClientConfiguration
 import misk.config.Config
 import misk.tasks.RepeatedTaskQueueConfig
 

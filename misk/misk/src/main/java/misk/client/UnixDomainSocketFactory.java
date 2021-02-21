@@ -23,7 +23,9 @@ import java.net.Socket;
 import javax.net.SocketFactory;
 import jnr.unixsocket.UnixSocketChannel;
 
-/** Impersonate TCP-style SocketFactory over UNIX domain sockets. */
+/**
+ * Impersonate TCP-style SocketFactory over UNIX domain sockets.
+ */
 public final class UnixDomainSocketFactory extends SocketFactory {
   private final File path;
 

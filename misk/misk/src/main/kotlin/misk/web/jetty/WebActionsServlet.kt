@@ -11,7 +11,6 @@ import misk.web.actions.WebActionEntry
 import misk.web.actions.WebActionFactory
 import misk.web.mediatype.MediaTypes
 import misk.web.metadata.webaction.WebActionMetadata
-import misk.web.metadata.webaction.WebActionMetadataAction
 import okhttp3.Headers
 import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrl
@@ -46,7 +45,9 @@ internal class WebActionsServlet @Inject constructor(
 
   internal val boundActions: MutableSet<BoundAction<out WebAction>> = mutableSetOf()
 
-  internal val webActionsMetadata: List<WebActionMetadata> by lazy { boundActions.map { it.metadata } }
+  internal val webActionsMetadata: List<WebActionMetadata> by lazy {
+    boundActions.map { it.metadata }
+  }
 
   init {
     for (entry in webActionEntries) {
@@ -58,7 +59,8 @@ internal class WebActionsServlet @Inject constructor(
     for (action in boundActions) {
       for (other in boundActions) {
         check(action === other || !action.hasIdenticalRouting(other)) {
-          "Actions [${action.action.name}, ${other.action.name}] have identical routing annotations."
+          "Actions [${action.action.name}, ${other.action.name}] have identical routing " +
+            "annotations."
         }
       }
     }
@@ -95,23 +97,23 @@ internal class WebActionsServlet @Inject constructor(
   private fun handleCall(request: HttpServletRequest, response: HttpServletResponse) {
     try {
       val httpCall = ServletHttpCall.create(
-          request = request,
-          linkLayerLocalAddress = with((request as? Request)?.httpChannel) {
-            when (this?.connector) {
-              is UnixSocketConnector -> SocketAddress.Unix(
-                  (this.connector as UnixSocketConnector).unixSocket
-              )
-              is ServerConnector -> SocketAddress.Network(
-                  this.endPoint.remoteAddress.address.hostAddress,
-                  (this.connector as ServerConnector).localPort
-              )
-              else -> throw IllegalStateException("Unknown socket connector.")
-            }
-          },
-          dispatchMechanism = request.dispatchMechanism(),
-          upstreamResponse = JettyServletUpstreamResponse(response as Response),
-          requestBody = request.inputStream.source().buffer(),
-          responseBody = response.outputStream.sink().buffer()
+        request = request,
+        linkLayerLocalAddress = with((request as? Request)?.httpChannel) {
+          when (this?.connector) {
+            is UnixSocketConnector -> SocketAddress.Unix(
+              (this.connector as UnixSocketConnector).unixSocket
+            )
+            is ServerConnector -> SocketAddress.Network(
+              this.endPoint.remoteAddress.address.hostAddress,
+              (this.connector as ServerConnector).localPort
+            )
+            else -> throw IllegalStateException("Unknown socket connector.")
+          }
+        },
+        dispatchMechanism = request.dispatchMechanism(),
+        upstreamResponse = JettyServletUpstreamResponse(response as Response),
+        requestBody = request.inputStream.source().buffer(),
+        responseBody = response.outputStream.sink().buffer()
       )
 
       val requestContentType = httpCall.contentType()

@@ -30,8 +30,8 @@ class MySQLReaderTransacterTest {
     // Query that data.
     readerTransacter.transaction { session ->
       val query = queryFactory.newQuery<CharacterQuery>()
-          .allowTableScan()
-          .name("Ian Malcolm")
+        .allowTableScan()
+        .name("Ian Malcolm")
       val ianMalcolm = query.uniqueResult(session)!!
       assertThat(ianMalcolm.actor?.name).isEqualTo("Jeff Goldblum")
       assertThat(ianMalcolm.movie.name).isEqualTo("Jurassic Park")
@@ -52,8 +52,10 @@ class MySQLReaderTransacterTest {
       }
     }
     transacter.transaction { session ->
-      assertThat(queryFactory.newQuery<MovieQuery>().allowFullScatter().allowTableScan()
-          .list(session)).isEmpty()
+      assertThat(
+        queryFactory.newQuery<MovieQuery>().allowFullScatter().allowTableScan()
+          .list(session)
+      ).isEmpty()
     }
   }
 
@@ -89,7 +91,7 @@ class MySQLReaderTransacterTest {
 
     transacter.transaction { session ->
       val movie: DbMovie? = queryFactory.newQuery<MovieQuery>().id(id).uniqueResult(session)
-      assertThat(movie).isNotNull()
+      assertThat(movie).isNotNull
     }
   }
 }

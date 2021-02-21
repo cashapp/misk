@@ -15,14 +15,15 @@ abstract class AbstractDynamoDbTest {
 
   @Inject
   lateinit var dynamoDbClient: DynamoDbClient
+
   @Inject
   lateinit var tables: Set<DynamoDbTable>
 
   @Test
   fun happyPath() {
     val enhancedClient = DynamoDbEnhancedClient.builder()
-        .dynamoDbClient(dynamoDbClient)
-        .build()
+      .dynamoDbClient(dynamoDbClient)
+      .build()
     val movieTable = enhancedClient.table("movies", MOVIE_TABLE_SCHEMA)
     val characterTable = enhancedClient.table("characters", CHARACTER_TABLE_SCHEMA)
 
@@ -38,18 +39,20 @@ abstract class AbstractDynamoDbTest {
 
     // Query the movies created.
     val actualMovie = movieTable.getItem(
-        Key.builder()
-            .partitionValue("Jurassic Park")
-            .sortValue(LocalDate.of(1993, 6, 9).toString())
-            .build())
+      Key.builder()
+        .partitionValue("Jurassic Park")
+        .sortValue(LocalDate.of(1993, 6, 9).toString())
+        .build()
+    )
     assertThat(actualMovie.name).isEqualTo(movie.name)
     assertThat(actualMovie.release_date).isEqualTo(movie.release_date)
 
     val actualCharacter = characterTable.getItem(
-        Key.builder()
-            .partitionValue("Jurassic Park")
-            .sortValue("Ian Malcolm")
-            .build())
+      Key.builder()
+        .partitionValue("Jurassic Park")
+        .sortValue("Ian Malcolm")
+        .build()
+    )
     assertThat(actualCharacter.movie_name).isEqualTo(character.movie_name)
     assertThat(actualCharacter.character_name).isEqualTo(character.character_name)
   }
@@ -57,8 +60,8 @@ abstract class AbstractDynamoDbTest {
   @Test
   fun truncateTables() {
     val enhancedClient = DynamoDbEnhancedClient.builder()
-        .dynamoDbClient(dynamoDbClient)
-        .build()
+      .dynamoDbClient(dynamoDbClient)
+      .build()
     val movieTable = enhancedClient.table("movies", MOVIE_TABLE_SCHEMA)
     val characterTable = enhancedClient.table("characters", CHARACTER_TABLE_SCHEMA)
 
@@ -76,24 +79,26 @@ abstract class AbstractDynamoDbTest {
     service.startAsync()
     service.awaitRunning()
     val actualMovie = movieTable.getItem(
-        Key.builder()
-            .partitionValue("Jurassic Park")
-            .sortValue(LocalDate.of(1993, 6, 9).toString())
-            .build())
+      Key.builder()
+        .partitionValue("Jurassic Park")
+        .sortValue(LocalDate.of(1993, 6, 9).toString())
+        .build()
+    )
     assertThat(actualMovie).isNull()
     val actualCharacter = characterTable.getItem(
-        Key.builder()
-            .partitionValue("Jurassic Park")
-            .sortValue("Ian Malcolm")
-            .build())
+      Key.builder()
+        .partitionValue("Jurassic Park")
+        .sortValue("Ian Malcolm")
+        .build()
+    )
     assertThat(actualCharacter).isNull()
   }
 
   @Test
   fun globalSecondaryIndex() {
     val enhancedClient = DynamoDbEnhancedClient.builder()
-        .dynamoDbClient(dynamoDbClient)
-        .build()
+      .dynamoDbClient(dynamoDbClient)
+      .build()
     val movieTable = enhancedClient.table("movies", MOVIE_TABLE_SCHEMA)
 
     val movie = DyMovie().apply {
@@ -123,21 +128,25 @@ abstract class AbstractDynamoDbTest {
 
     // Query the movies created.
     val query = QueryEnhancedRequest.builder()
-        .queryConditional(QueryConditional.sortGreaterThanOrEqualTo {
+      .queryConditional(
+        QueryConditional.sortGreaterThanOrEqualTo {
           it.partitionValue("Steven Spielberg")
-              .sortValue(LocalDate.of(2010, 1, 1).toString())
-        })
-        // Consistent read cannot be true when querying a GSI.
-        .consistentRead(false)
-        .build()
+            .sortValue(LocalDate.of(2010, 1, 1).toString())
+        }
+      )
+      // Consistent read cannot be true when querying a GSI.
+      .consistentRead(false)
+      .build()
 
     val newSpielbergMovies = movieTable.index("movies.release_date_index").query(query)
-    val newSpielbergMovieNames = newSpielbergMovies.stream().flatMap { it.items().stream() }.map { it.name }
+    val newSpielbergMovieNames =
+      newSpielbergMovies.stream().flatMap { it.items().stream() }.map { it.name }
     assertThat(newSpielbergMovieNames).contains("Bridge of Spies", "Ready Player One")
   }
 
   companion object {
     val MOVIE_TABLE_SCHEMA: TableSchema<DyMovie> = TableSchema.fromClass(DyMovie::class.java)
-    val CHARACTER_TABLE_SCHEMA: TableSchema<DyCharacter> = TableSchema.fromClass(DyCharacter::class.java)
+    val CHARACTER_TABLE_SCHEMA: TableSchema<DyCharacter> =
+      TableSchema.fromClass(DyCharacter::class.java)
   }
 }

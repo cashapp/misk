@@ -14,10 +14,11 @@ internal class ConnectionListener(
 
   // not thread safe since it's only used by refreshMetrics
   private var previousSnapshot = Snapshot.empty()
+
   // see the Accumulator doc for thread safety
   private val removedTotals = Accumulator()
   private val activeConnections =
-      Collections.newSetFromMap(ConcurrentHashMap<ConnectionKey, Boolean>())
+    Collections.newSetFromMap(ConcurrentHashMap<ConnectionKey, Boolean>())
   private val labels = ConnectionMetrics.forPort(protocol, port)
 
   override fun onOpened(connection: Connection) {
@@ -68,7 +69,7 @@ internal class ConnectionListener(
     }
   }
 
-  private fun recordDuration(connection : Connection) {
+  private fun recordDuration(connection: Connection) {
     val connectionDuration = System.currentTimeMillis() - connection.createdTimeStamp
     metrics.connectionDurations.record(connectionDuration.toDouble(), *labels)
   }
@@ -93,10 +94,11 @@ internal class ConnectionListener(
 
     operator fun minus(other: Snapshot): Snapshot {
       return Snapshot(
-          bytesReceived - other.bytesReceived,
-          bytesSent - other.bytesSent,
-          messagesReceived - other.messagesReceived,
-          messagesSent - other.messagesSent)
+        bytesReceived - other.bytesReceived,
+        bytesSent - other.bytesSent,
+        messagesReceived - other.messagesReceived,
+        messagesSent - other.messagesSent
+      )
     }
 
     companion object {
@@ -142,10 +144,11 @@ internal class ConnectionListener(
 
     fun snapshotAndReset(): Snapshot {
       return Snapshot(
-          bytesReceived.getAndSet(0),
-          bytesSent.getAndSet(0),
-          messagesReceived.getAndSet(0),
-          messagesSent.getAndSet(0))
+        bytesReceived.getAndSet(0),
+        bytesSent.getAndSet(0),
+        messagesReceived.getAndSet(0),
+        messagesSent.getAndSet(0)
+      )
     }
   }
 }

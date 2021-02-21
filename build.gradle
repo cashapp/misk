@@ -13,6 +13,10 @@ buildscript {
     classpath dep.kotlinGradlePlugin
     classpath dep.junitGradlePlugin
     classpath dep.mavenPublishGradlePlugin
+    classpath dep.jgit
+    classpath(dep.spotless5Plugin) {
+      exclude group:'org.slf4j', module:'slf4j-api'
+    }
     classpath dep.wireGradlePlugin
   }
 }
@@ -32,6 +36,7 @@ tasks.register("testShardHibernate") {
 subprojects { subProject ->
   apply plugin: 'java'
   apply plugin: 'kotlin'
+  apply plugin: 'com.diffplug.spotless'
   apply plugin: 'org.jetbrains.dokka'
 
   buildscript {
@@ -67,6 +72,22 @@ subprojects { subProject ->
     main.java.srcDirs += 'src/main/kotlin/'
     test.java.srcDirs += 'src/test/kotlin/'
   }
+
+
+  spotless {
+    ratchetFrom 'origin/master'
+    enforceCheck false
+    kotlin {
+      target "**/*.kt"
+      ktlint(dep.ktlintVersion).userData([
+              'indent_size'             : '2',
+              'continuation_indent_size': '2',
+              'max_line_length'         : '100',
+              'disabled_rules'          : 'import-ordering'
+      ])
+    }
+  }
+  compileKotlin.dependsOn 'spotlessKotlinApply'
 
   dependencies {
     testImplementation dep.junitApi

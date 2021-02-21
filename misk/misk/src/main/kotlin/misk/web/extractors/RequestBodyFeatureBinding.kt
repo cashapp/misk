@@ -23,7 +23,7 @@ internal class RequestBodyFeatureBinding(
     val unmarshaller = mediaType?.let { type ->
       unmarshallerFactories.mapNotNull { it.create(type, parameter.type) }.firstOrNull()
     } ?: GenericUnmarshallers.into(parameter)
-    ?: throw IllegalArgumentException("no generic unmarshaller for ${parameter.type}")
+      ?: throw IllegalArgumentException("no generic unmarshaller for ${parameter.type}")
 
     val requestBody = subject.httpCall.takeRequestBody()!!
     val value = unmarshaller.unmarshal(subject.httpCall.requestHeaders, requestBody)

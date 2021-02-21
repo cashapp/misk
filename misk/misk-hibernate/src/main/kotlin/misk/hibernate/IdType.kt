@@ -53,7 +53,8 @@ class IdType : UserType, ResultSetIdentifierConsumer {
   override fun sqlTypes() = intArrayOf(Types.BIGINT)
 
   override fun consumeIdentifier(resultSet: ResultSet): Serializable = Id<DbPlaceholder>(
-      resultSet.getLong(1))
+    resultSet.getLong(1)
+  )
 
   /** This placeholder exists so we can create an Id<*>() without a type parameter. */
   private class DbPlaceholder : DbEntity<DbPlaceholder> {

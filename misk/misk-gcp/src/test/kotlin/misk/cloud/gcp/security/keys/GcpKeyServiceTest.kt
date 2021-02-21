@@ -14,20 +14,28 @@ import kotlin.test.assertFailsWith
 
 internal class GcpKeyServiceTest {
   private val config = GcpKmsConfig(
-      "my_project",
-      mapOf("foo" to GcpKeyLocation("system", "main_ring", "key1"),
-          "bar" to GcpKeyLocation("system", "other_ring", "key2"),
-          "zed" to GcpKeyLocation("system", "main_ring", "key5")))
+    "my_project",
+    mapOf(
+      "foo" to GcpKeyLocation("system", "main_ring", "key1"),
+      "bar" to GcpKeyLocation("system", "other_ring", "key2"),
+      "zed" to GcpKeyLocation("system", "main_ring", "key5")
+    )
+  )
 
   private val TARGET_RESOURCE_URL =
-      "https://cloudkms.googleapis.com/v1/projects/my_project/locations/system/keyRings/main_ring/cryptoKeys/key1"
+    "https://cloudkms.googleapis.com/v1/projects/my_project/locations/system/keyRings/main_ring/" +
+      "cryptoKeys/key1"
 
   private val transport = FakeHttpRouter {
     when (it.url) {
-      "$TARGET_RESOURCE_URL:encrypt" -> respondWithJson(EncryptResponse()
-          .encodeCiphertext("encrypted".toByteArray(Charsets.UTF_8)))
-      "$TARGET_RESOURCE_URL:decrypt" -> respondWithJson(DecryptResponse()
-          .encodePlaintext("decrypted".toByteArray(Charsets.UTF_8)))
+      "$TARGET_RESOURCE_URL:encrypt" -> respondWithJson(
+        EncryptResponse()
+          .encodeCiphertext("encrypted".toByteArray(Charsets.UTF_8))
+      )
+      "$TARGET_RESOURCE_URL:decrypt" -> respondWithJson(
+        DecryptResponse()
+          .encodePlaintext("decrypted".toByteArray(Charsets.UTF_8))
+      )
       else -> respondWithError(404)
     }
   }

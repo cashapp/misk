@@ -66,10 +66,10 @@ internal class ReflectionQuery<T : DbEntity<T>>(
 
   override fun <Q : Query<*>> clone(): Q {
     val copy = ReflectionQuery(
-        this.queryClass,
-        this.rootEntityType,
-        this.queryMethodHandlers,
-        this.queryLimitsConfig
+      this.queryClass,
+      this.rootEntityType,
+      this.queryMethodHandlers,
+      this.queryLimitsConfig
     )
     if (copy.maxRows != -1) {
       copy.maxRows = this.maxRows
@@ -194,12 +194,11 @@ internal class ReflectionQuery<T : DbEntity<T>>(
     criteria.where(predicate)
 
     val query = session.hibernateSession
-        .createQuery(criteria)
+      .createQuery(criteria)
 
     return session.disableChecks(disabledChecks) {
       query.executeUpdate()
     }
-
   }
 
   override fun list(session: Session): List<T> {
@@ -224,9 +223,11 @@ internal class ReflectionQuery<T : DbEntity<T>>(
   ): List<List<Any?>> {
     val splitProjectedPaths = projectedPaths.map { it.split('.') }
     return select(returnList, session) { criteriaBuilder, queryRoot ->
-      criteriaBuilder.array(*splitProjectedPaths.map {
-        queryRoot.traverse<Any?>(it)
-      }.toTypedArray())
+      criteriaBuilder.array(
+        *splitProjectedPaths.map {
+          queryRoot.traverse<Any?>(it)
+        }.toTypedArray()
+      )
     }
   }
 
@@ -327,12 +328,18 @@ internal class ReflectionQuery<T : DbEntity<T>>(
           throw IllegalStateException("query truncated at $rowCount rows")
         }
         rowCount > queryLimitsConfig.rowCountErrorLimit -> {
-          logger.error("Unbounded query returned $rowCount rows. " +
-              "(Specify maxRows to suppress this error)", Exception())
+          logger.error(
+            "Unbounded query returned $rowCount rows. " +
+              "(Specify maxRows to suppress this error)",
+            Exception()
+          )
         }
         rowCount > queryLimitsConfig.rowCountWarningLimit -> {
-          logger.warn("Unbounded query returned $rowCount rows. " +
-              "(Specify maxRows to suppress this warning)", Exception())
+          logger.warn(
+            "Unbounded query returned $rowCount rows. " +
+              "(Specify maxRows to suppress this warning)",
+            Exception()
+          )
         }
       }
     }
@@ -363,16 +370,19 @@ internal class ReflectionQuery<T : DbEntity<T>>(
 
     @Suppress("UNCHECKED_CAST") // The proxy implements the requested interface.
     return Proxy.newProxyInstance(
-        classLoader, arrayOf<Class<*>>(queryClass.java), this) as Query<T>
+      classLoader, arrayOf<Class<*>>(queryClass.java), this
+    ) as Query<T>
   }
 
   @Singleton
-  internal class Factory @Inject internal constructor(private var queryLimitsConfig: QueryLimitsConfig) :
-      Query.Factory {
+  internal class Factory @Inject internal constructor(
+    private var queryLimitsConfig: QueryLimitsConfig
+  ) :
+    Query.Factory {
     private val queryMethodHandlersCache = CacheBuilder.newBuilder()
-        .build(object : CacheLoader<KClass<*>, Map<Method, QueryMethodHandler>>() {
-          override fun load(key: KClass<*>) = queryMethodHandlers(key)
-        })
+      .build(object : CacheLoader<KClass<*>, Map<Method, QueryMethodHandler>>() {
+        override fun load(key: KClass<*>) = queryMethodHandlers(key)
+      })
 
     override fun <Q : Query<*>> newQuery(queryClass: KClass<Q>): Q {
       val queryMethodHandlers = queryMethodHandlersCache[queryClass]
@@ -380,14 +390,14 @@ internal class ReflectionQuery<T : DbEntity<T>>(
 
       @Suppress("UNCHECKED_CAST") // Hack because we don't have a parameter for the runtime type.
       val entityType =
-          (queryType.type as ParameterizedType).actualTypeArguments[0] as Class<DbPlaceholder>
+        (queryType.type as ParameterizedType).actualTypeArguments[0] as Class<DbPlaceholder>
 
       @Suppress("UNCHECKED_CAST")
       val reflectionQuery = ReflectionQuery(
-          queryClass as KClass<DbPlaceholder>,
-          entityType.kotlin,
-          queryMethodHandlers,
-          queryLimitsConfig
+        queryClass as KClass<DbPlaceholder>,
+        entityType.kotlin,
+        queryMethodHandlers,
+        queryLimitsConfig
       )
       @Suppress("UNCHECKED_CAST")
       return reflectionQuery.toProxy() as Q
@@ -395,10 +405,10 @@ internal class ReflectionQuery<T : DbEntity<T>>(
 
     override fun <E : DbEntity<E>> dynamicQuery(entityClass: KClass<E>): Query<E> {
       val reflectionQuery = ReflectionQuery(
-          Query::class,
-          entityClass,
-          mapOf(),
-          queryLimitsConfig
+        Query::class,
+        entityClass,
+        mapOf(),
+        queryLimitsConfig
       )
       return reflectionQuery.toProxy()
     }
@@ -420,7 +430,7 @@ internal class ReflectionQuery<T : DbEntity<T>>(
       }
       require(errors.isEmpty()) {
         "Query class ${queryClass.java.name} has problems:" +
-            "\n  ${errors.joinToString(separator = "\n  ")}"
+          "\n  ${errors.joinToString(separator = "\n  ")}"
       }
       return result
     }
@@ -527,8 +537,10 @@ internal class ReflectionQuery<T : DbEntity<T>>(
 
         val javaMethod = function.javaMethod ?: throw UnsupportedOperationException()
         if (javaMethod.returnType != javaMethod.declaringClass) {
-          errors.add("${function.name}() returns ${javaMethod.returnType.name} but " +
-              "@Order methods must return this (${javaMethod.declaringClass.name})")
+          errors.add(
+            "${function.name}() returns ${javaMethod.returnType.name} but " +
+              "@Order methods must return this (${javaMethod.declaringClass.name})"
+          )
           return
         }
 
@@ -561,8 +573,10 @@ internal class ReflectionQuery<T : DbEntity<T>>(
 
         val javaMethod = function.javaMethod ?: throw UnsupportedOperationException()
         if (javaMethod.returnType != javaMethod.declaringClass) {
-          errors.add("${function.name}() returns ${javaMethod.returnType.name} but " +
-              "@Constraint methods must return this (${javaMethod.declaringClass.name})")
+          errors.add(
+            "${function.name}() returns ${javaMethod.returnType.name} but " +
+              "@Constraint methods must return this (${javaMethod.declaringClass.name})"
+          )
           return
         }
 
@@ -574,8 +588,10 @@ internal class ReflectionQuery<T : DbEntity<T>>(
           else -> 1
         }
         if (actualParameterCount != expectedParameterCount) {
-          errors.add("${function.name}() declares $actualParameterCount " +
-              "parameters but must accept $expectedParameterCount parameters")
+          errors.add(
+            "${function.name}() declares $actualParameterCount " +
+              "parameters but must accept $expectedParameterCount parameters"
+          )
           return
         }
 
@@ -698,7 +714,8 @@ internal class ReflectionQuery<T : DbEntity<T>>(
         select: Select
       ) {
         if (function.parameters.size != 2 ||
-            function.parameters[1].type.classifier != Session::class) {
+          function.parameters[1].type.classifier != Session::class
+        ) {
           errors.add("${function.name}() must accept a single Session parameter")
           return
         }
@@ -741,14 +758,18 @@ internal class ReflectionQuery<T : DbEntity<T>>(
           for (parameter in parameters) {
             val property = parameter.findAnnotation<Property>()
             if (property == null) {
-              errors.add("${projectionClass.java.name} parameter ${parameter.index} " +
-                  "is missing a @Property annotation")
+              errors.add(
+                "${projectionClass.java.name} parameter ${parameter.index} " +
+                  "is missing a @Property annotation"
+              )
               continue
             }
 
             if (!property.path.matches(PATH_PATTERN)) {
-              errors.add("${projectionClass.java.name} parameter ${parameter.index} " +
-                  "path is not valid: '${property.path}'")
+              errors.add(
+                "${projectionClass.java.name} parameter ${parameter.index} " +
+                  "path is not valid: '${property.path}'"
+              )
               continue
             }
 
@@ -818,11 +839,11 @@ internal class ReflectionQuery<T : DbEntity<T>>(
     /** Builds a single option. */
     override fun option(lambda: Q.() -> Unit) {
       val queryForOption = ReflectionQuery(
-          queryClass,
-          rootEntityType,
-          queryMethodHandlers,
-          queryLimitsConfig,
-          predicatesOnly = true
+        queryClass,
+        rootEntityType,
+        queryMethodHandlers,
+        queryLimitsConfig,
+        predicatesOnly = true
       )
       @Suppress("UNCHECKED_CAST") // Q is the query type that we're implementing reflectively.
       (queryForOption.toProxy() as Q).lambda()
@@ -844,7 +865,8 @@ internal class ReflectionQuery<T : DbEntity<T>>(
 /** Creates a predicate. This allows us to defer attaching the predicate to the session. */
 private typealias PredicateFactory = (root: Root<*>, criteriaBuilder: CriteriaBuilder) -> Predicate
 
-private typealias OrderFactory = (root: Root<*>, criteriaBuilder: CriteriaBuilder) -> javax.persistence.criteria.Order
+private typealias OrderFactory =
+  (root: Root<*>, criteriaBuilder: CriteriaBuilder) -> javax.persistence.criteria.Order
 
 private val PATH_PATTERN = Regex("""\w+(\.\w+)*""")
 
@@ -865,7 +887,7 @@ private fun <T> Path<*>.traverse(chain: List<String>): Path<T> {
 private fun KParameter.isAssignableTo(supertype: KClass<*>) = type.isAssignableTo(supertype)
 
 private fun KType.isAssignableTo(supertype: KClass<*>) =
-    supertype.java.isAssignableFrom(typeLiteral().rawType)
+  supertype.java.isAssignableFrom(typeLiteral().rawType)
 
 private fun CriteriaBuilder.addInClause(
   expression: Path<Any>,

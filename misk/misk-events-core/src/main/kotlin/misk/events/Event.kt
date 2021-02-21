@@ -47,7 +47,9 @@ data class Event(
    * to the customer to whom the card belongs; in this case the entity identifier is the credit
    * card modified by the event, but the partition key is the token of the customer owning the card.
    */
-  val partitionKey: ByteString = if (entityIdentifier.isBlank()) id else entityIdentifier.encodeUtf8(),
+  val partitionKey: ByteString =
+    if (entityIdentifier.isBlank()) id
+    else entityIdentifier.encodeUtf8(),
 
   /**
    * Additional context information about the event, added and examined by infrastructure elements
@@ -57,11 +59,12 @@ data class Event(
   fun <A : Message<*, *>> bodyAs(adapter: ProtoAdapter<A>): A = adapter.decode(body)
 
   inline fun <reified A : Message<*, *>> bodyAs(): A = bodyAs(
-      ProtoAdapter.get(A::class.java))
+    ProtoAdapter.get(A::class.java)
+  )
 
   fun <A : Message<*, *>> header(name: String, adapter: ProtoAdapter<A>): A? =
-      headers[name]?.let { adapter.decode(it) }
+    headers[name]?.let { adapter.decode(it) }
 
   inline fun <reified A : Message<*, *>> header(name: String) =
-      header(name, ProtoAdapter.get(A::class.java))
+    header(name, ProtoAdapter.get(A::class.java))
 }
