@@ -11,5 +11,5 @@ object ByteStringAdapter {
   @ToJson fun toJson(value: ByteString) = value.base64Url()
 
   @FromJson fun fromJson(value: String) = value.decodeBase64()
-      ?: throw JsonDataException("expected base64 but was $value")
+    ?: throw JsonDataException("expected base64 but was $value")
 }

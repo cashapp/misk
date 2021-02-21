@@ -17,9 +17,9 @@ class GrpcChannelFactory @Inject constructor(val resourceLoader: ResourceLoader)
     serverCertResource: String = "classpath:/ssl/server_cert.pem"
   ): ManagedChannel {
     return NettyChannelBuilder.forAddress(serverAddress)
-        .sslContext(createClientSslContext(serverCertResource))
-        .useTransportSecurity()
-        .build()
+      .sslContext(createClientSslContext(serverCertResource))
+      .useTransportSecurity()
+      .build()
   }
 
   private fun createClientSslContext(serverCertResource: String): SslContext? {

@@ -11,8 +11,10 @@ import misk.inject.KAbstractModule
  */
 internal class MoshiTestingModule : KAbstractModule() {
   override fun configure() {
-    bind<Moshi>().toInstance(Moshi.Builder()
+    bind<Moshi>().toInstance(
+      Moshi.Builder()
         .add(KotlinJsonAdapterFactory()) // Added last for lowest precedence.
-        .build())
+        .build()
+    )
   }
 }

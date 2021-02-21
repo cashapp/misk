@@ -6,4 +6,4 @@ import com.google.api.client.testing.http.MockLowLevelHttpResponse
 typealias FakeHttpResponse = MockLowLevelHttpResponse
 
 fun FakeHttpResponse.setJsonContent(item: Any): FakeHttpResponse =
-    setContent(JacksonFactory.getDefaultInstance().toByteArray(item))
+  setContent(JacksonFactory.getDefaultInstance().toByteArray(item))

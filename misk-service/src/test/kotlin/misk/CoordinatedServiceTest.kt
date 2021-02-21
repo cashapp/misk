@@ -10,12 +10,16 @@ import kotlin.test.assertFailsWith
 class CoordinatedServiceTest {
   @Test fun cannotAddRunningServiceAsDependency() {
     val target = StringBuilder()
-    val runningService = CoordinatedService(Provider<Service> {
-      AppendingService(target, "I will be running")
-    })
-    val newService = CoordinatedService(Provider<Service> {
-      AppendingService(target, "I will not run")
-    })
+    val runningService = CoordinatedService(
+      Provider<Service> {
+        AppendingService(target, "I will be running")
+      }
+    )
+    val newService = CoordinatedService(
+      Provider<Service> {
+        AppendingService(target, "I will not run")
+      }
+    )
 
     runningService.startAsync()
 

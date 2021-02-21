@@ -19,9 +19,10 @@ import javax.inject.Provider
 class ProtocClientProtocServerTest {
   @MiskTestModule
   val module = Modules.combine(
-      ProtocGrpcClientModule(),
-      RouteGuideProtocServiceModule(),
-      MiskTestingServiceModule())
+    ProtocGrpcClientModule(),
+    RouteGuideProtocServiceModule(),
+    MiskTestingServiceModule()
+  )
 
   @Inject lateinit var channelProvider: Provider<ManagedChannel>
 
@@ -30,16 +31,22 @@ class ProtocClientProtocServerTest {
     val channel = channelProvider.get()
     val stub = RouteGuideGrpc.newBlockingStub(channel)
 
-    val feature = stub.getFeature(Point.newBuilder()
+    val feature = stub.getFeature(
+      Point.newBuilder()
         .setLatitude(43)
         .setLongitude(-80)
-        .build())
-    assertThat(feature).isEqualTo(Feature.newBuilder()
+        .build()
+    )
+    assertThat(feature).isEqualTo(
+      Feature.newBuilder()
         .setName("pine tree")
-        .setLocation(Point.newBuilder()
+        .setLocation(
+          Point.newBuilder()
             .setLatitude(43)
             .setLongitude(-80)
-            .build())
-        .build())
+            .build()
+        )
+        .build()
+    )
   }
 }

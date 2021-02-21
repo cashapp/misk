@@ -8,16 +8,16 @@ import misk.crypto.KeyNotFoundException
 import misk.logging.getLogger
 import org.hibernate.HibernateException
 import org.hibernate.engine.spi.SharedSessionContractImplementor
+import org.hibernate.type.spi.TypeConfiguration
+import org.hibernate.type.spi.TypeConfigurationAware
 import org.hibernate.usertype.ParameterizedType
 import org.hibernate.usertype.UserType
 import java.io.Serializable
 import java.sql.PreparedStatement
 import java.sql.ResultSet
 import java.sql.Types
-import java.util.Properties
-import org.hibernate.type.spi.TypeConfiguration
-import org.hibernate.type.spi.TypeConfigurationAware
 import java.util.Objects
+import java.util.Properties
 
 internal class SecretColumnType : UserType, ParameterizedType, TypeConfigurationAware {
   companion object {
@@ -90,7 +90,8 @@ internal class SecretColumnType : UserType, ParameterizedType, TypeConfiguration
     owner: Any?
   ): Any? {
     val result = rs?.getBytes(names[0])
-    return result?.let { try {
+    return result?.let {
+      try {
         encryptionAdapter.decrypt(it, null)
       } catch (e: java.security.GeneralSecurityException) {
         throw HibernateException(e)
@@ -110,8 +111,8 @@ internal interface EncryptionAdapter {
 
 internal class AeadAdapter(typeConfig: TypeConfiguration, keyName: String) : EncryptionAdapter {
   private val keyManager =
-      typeConfig.metadataBuildingContext.bootstrapContext.serviceRegistry.injector
-          .getInstance(AeadKeyManager::class.java)
+    typeConfig.metadataBuildingContext.bootstrapContext.serviceRegistry.injector
+      .getInstance(AeadKeyManager::class.java)
 
   val aead: Aead by lazy {
     try {
@@ -131,9 +132,10 @@ internal class AeadAdapter(typeConfig: TypeConfiguration, keyName: String) : Enc
 }
 
 internal class DeterministicAeadAdapter(typeConfig: TypeConfiguration, keyName: String) :
-    EncryptionAdapter {
+  EncryptionAdapter {
 
-  private val keyManager = typeConfig.metadataBuildingContext.bootstrapContext.serviceRegistry.injector
+  private val keyManager =
+    typeConfig.metadataBuildingContext.bootstrapContext.serviceRegistry.injector
       .getInstance(DeterministicAeadKeyManager::class.java)
   val daead: DeterministicAead by lazy {
     try {

@@ -1,14 +1,5 @@
 package misk.hibernate
 
-import javax.inject.Inject
-import javax.inject.Qualifier
-import javax.persistence.Column
-import javax.persistence.Entity
-import javax.persistence.FetchType
-import javax.persistence.GeneratedValue
-import javax.persistence.JoinColumn
-import javax.persistence.OneToOne
-import javax.persistence.Table
 import misk.MiskTestingServiceModule
 import misk.config.Config
 import misk.config.MiskConfig
@@ -20,6 +11,15 @@ import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import javax.inject.Inject
+import javax.inject.Qualifier
+import javax.persistence.Column
+import javax.persistence.Entity
+import javax.persistence.FetchType
+import javax.persistence.GeneratedValue
+import javax.persistence.JoinColumn
+import javax.persistence.OneToOne
+import javax.persistence.Table
 
 /**
  * Confirm we do the right thing when an entity is linked to another entity via a column in that
@@ -42,12 +42,12 @@ class ExternalColumnTest {
     }
     transacter.transaction { session ->
       val onlyCar = queryFactory.dynamicQuery(DbCar::class)
-          .allowTableScan()
-          .uniqueResult(session)
+        .allowTableScan()
+        .uniqueResult(session)
       assertThat(onlyCar?.driver?.name).isEqualTo("jesse")
       val onlyDriver = queryFactory.dynamicQuery(DbDriver::class)
-          .allowTableScan()
-          .uniqueResult(session)
+        .allowTableScan()
+        .uniqueResult(session)
       assertThat(onlyDriver?.car?.model).isEqualTo("mustang")
     }
   }

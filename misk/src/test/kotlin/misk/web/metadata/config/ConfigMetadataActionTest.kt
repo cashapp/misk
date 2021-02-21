@@ -24,9 +24,10 @@ class ConfigMetadataActionTest {
 
   @BeforeEach fun beforeEach() {
     configMetadataAction = ConfigMetadataAction(
-        "admin_dashboard_app",
-        Environment.TESTING,
-        testConfig)
+      "admin_dashboard_app",
+      Environment.TESTING,
+      testConfig
+    )
   }
 
   @Test fun passesAlongEffectiveConfig() {

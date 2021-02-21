@@ -3,10 +3,10 @@ package misk.hibernate
 import misk.MiskTestingServiceModule
 import misk.config.Config
 import misk.config.MiskConfig
-import misk.jdbc.DataSourceConfig
 import misk.environment.Environment
 import misk.environment.EnvironmentModule
 import misk.inject.KAbstractModule
+import misk.jdbc.DataSourceConfig
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
@@ -39,8 +39,8 @@ class BoxedStringColumnTest {
     }
     transacter.transaction { session ->
       val textHash = queryFactory.newQuery(TextTokenQuery::class)
-          .token(abcToken)
-          .uniqueResult(session)!!
+        .token(abcToken)
+        .uniqueResult(session)!!
       assertThat(textHash.text).isEqualTo("abc")
       assertThat(textHash.token).isEqualTo(abcToken)
       assertThat(textHash.optional_token).isEqualTo(abcOptionalToken)
@@ -78,26 +78,36 @@ class BoxedStringColumnTest {
     }
 
     transacter.transaction { session ->
-      assertThat(queryFactory.newQuery<TextTokenQuery>()
+      assertThat(
+        queryFactory.newQuery<TextTokenQuery>()
           .tokenLessThan(v1.token)
-          .listAsTextAndToken(session))
-          .isEmpty()
-      assertThat(queryFactory.newQuery<TextTokenQuery>()
+          .listAsTextAndToken(session)
+      )
+        .isEmpty()
+      assertThat(
+        queryFactory.newQuery<TextTokenQuery>()
           .tokenLessThan(v2.token)
-          .listAsTextAndToken(session))
-          .containsExactly(v1)
-      assertThat(queryFactory.newQuery<TextTokenQuery>()
+          .listAsTextAndToken(session)
+      )
+        .containsExactly(v1)
+      assertThat(
+        queryFactory.newQuery<TextTokenQuery>()
           .tokenLessThan(v3.token)
-          .listAsTextAndToken(session))
-          .containsExactly(v1, v2)
-      assertThat(queryFactory.newQuery<TextTokenQuery>()
+          .listAsTextAndToken(session)
+      )
+        .containsExactly(v1, v2)
+      assertThat(
+        queryFactory.newQuery<TextTokenQuery>()
           .tokenLessThan(v4.token)
-          .listAsTextAndToken(session))
-          .containsExactly(v1, v2, v3)
-      assertThat(queryFactory.newQuery<TextTokenQuery>()
+          .listAsTextAndToken(session)
+      )
+        .containsExactly(v1, v2, v3)
+      assertThat(
+        queryFactory.newQuery<TextTokenQuery>()
           .tokenLessThan(GoodLuckToken("~"))
-          .listAsTextAndToken(session))
-          .containsExactly(v1, v2, v3, v4)
+          .listAsTextAndToken(session)
+      )
+        .containsExactly(v1, v2, v3, v4)
     }
   }
 

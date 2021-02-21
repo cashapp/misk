@@ -91,20 +91,24 @@ internal class ClientMetricsInterceptorTest {
     fun provideHttpClientConfig(server: MockWebServer): HttpClientsConfig {
       val url = server.url("/")
       return HttpClientsConfig(
-          endpoints = mapOf("pinger" to HttpClientEndpointConfig(
-              url = url.toString(),
-              clientConfig = HttpClientConfig(
-                  readTimeout = Duration.ofMillis(100)
-              )
-          )))
+        endpoints = mapOf(
+          "pinger" to HttpClientEndpointConfig(
+            url = url.toString(),
+            clientConfig = HttpClientConfig(
+              readTimeout = Duration.ofMillis(100)
+            )
+          )
+        )
+      )
     }
   }
 
   interface Pinger {
     @POST("/ping")
     @Headers(
-        "Accept: " + MediaTypes.APPLICATION_JSON,
-        "Content-type: " + MediaTypes.APPLICATION_JSON)
+      "Accept: " + MediaTypes.APPLICATION_JSON,
+      "Content-type: " + MediaTypes.APPLICATION_JSON
+    )
     fun ping(@Body request: AppRequest): Call<AppResponse>
   }
 }

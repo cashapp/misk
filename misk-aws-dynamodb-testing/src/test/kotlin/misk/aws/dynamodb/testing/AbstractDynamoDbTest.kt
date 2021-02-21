@@ -15,6 +15,7 @@ abstract class AbstractDynamoDbTest {
 
   @Inject
   lateinit var dynamoDbClient: AmazonDynamoDB
+
   @Inject
   lateinit var tables: Set<DynamoDbTable>
 
@@ -23,7 +24,7 @@ abstract class AbstractDynamoDbTest {
     val dynamoDbMapper = DynamoDBMapper(dynamoDbClient)
     val movieMapper = dynamoDbMapper.newTableMapper<DyMovie, String, LocalDate>(DyMovie::class.java)
     val characterMapper =
-        dynamoDbMapper.newTableMapper<DyCharacter, String, String>(DyCharacter::class.java)
+      dynamoDbMapper.newTableMapper<DyCharacter, String, String>(DyCharacter::class.java)
 
     val movie = DyMovie()
     movie.name = "Jurassic Park"
@@ -50,7 +51,7 @@ abstract class AbstractDynamoDbTest {
     val dynamoDbMapper = DynamoDBMapper(dynamoDbClient)
     val movieMapper = dynamoDbMapper.newTableMapper<DyMovie, String, LocalDate>(DyMovie::class.java)
     val characterMapper =
-        dynamoDbMapper.newTableMapper<DyCharacter, String, String>(DyCharacter::class.java)
+      dynamoDbMapper.newTableMapper<DyCharacter, String, String>(DyCharacter::class.java)
 
     val movie = DyMovie()
     movie.name = "Jurassic Park"
@@ -103,12 +104,13 @@ abstract class AbstractDynamoDbTest {
 
     // Query the movies created.
     val query = DynamoDBQueryExpression<DyMovie>()
-        .withHashKeyValues(DyMovie().apply { directed_by = "Steven Spielberg" })
-        .withRangeKeyCondition(
-            "release_date",
-            Condition()
-                .withComparisonOperator(ComparisonOperator.GE)
-                .withAttributeValueList(AttributeValue(LocalDate.of(2010, 1, 1).toString())))
+      .withHashKeyValues(DyMovie().apply { directed_by = "Steven Spielberg" })
+      .withRangeKeyCondition(
+        "release_date",
+        Condition()
+          .withComparisonOperator(ComparisonOperator.GE)
+          .withAttributeValueList(AttributeValue(LocalDate.of(2010, 1, 1).toString()))
+      )
     // Consistent read cannot be true when querying a GSI.
     query.withConsistentRead(false)
     val newSpielbergMovies = movieMapper.query(query)

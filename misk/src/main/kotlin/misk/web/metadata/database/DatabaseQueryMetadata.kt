@@ -43,18 +43,19 @@ data class DatabaseQueryMetadata(
     selects: List<SelectMetadata>,
     types: Map<String, MiskWebFormBuilder.Type>
   ) : this(
-      queryWebActionPath = queryWebActionPath,
-      allowedCapabilities = allowedCapabilities,
-      allowedServices = allowedServices,
-      accessAnnotation = accessAnnotation?.simpleName,
-      table = table,
-      entityClass = entityClass.simpleName!!, // Assert not null, since this shouldn't be anonymous.
-      entitySchema = entitySchema.mapValues { (_, v) -> v.typeLiteral().type.typeName },
-      queryClass = queryClass?.simpleName ?: "${entityClass.simpleName!!}$DYNAMIC_QUERY_KCLASS_SUFFIX",
-      constraints = constraints,
-      orders = orders,
-      selects = selects,
-      types = types
+    queryWebActionPath = queryWebActionPath,
+    allowedCapabilities = allowedCapabilities,
+    allowedServices = allowedServices,
+    accessAnnotation = accessAnnotation?.simpleName,
+    table = table,
+    entityClass = entityClass.simpleName!!, // Assert not null, since this shouldn't be anonymous.
+    entitySchema = entitySchema.mapValues { (_, v) -> v.typeLiteral().type.typeName },
+    queryClass = queryClass?.simpleName
+      ?: "${entityClass.simpleName!!}$DYNAMIC_QUERY_KCLASS_SUFFIX",
+    constraints = constraints,
+    orders = orders,
+    selects = selects,
+    types = types
   )
 
   data class ConstraintMetadata(

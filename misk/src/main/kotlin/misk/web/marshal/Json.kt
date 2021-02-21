@@ -27,7 +27,8 @@ class JsonMarshaller<T>(val adapter: JsonAdapter<T>) : Marshaller<T> {
   class Factory @Inject internal constructor(val moshi: Moshi) : Marshaller.Factory {
     override fun create(mediaType: MediaType, type: KType): Marshaller<Any>? {
       if (mediaType.type != MediaTypes.APPLICATION_JSON_MEDIA_TYPE.type ||
-          mediaType.subtype != MediaTypes.APPLICATION_JSON_MEDIA_TYPE.subtype) {
+        mediaType.subtype != MediaTypes.APPLICATION_JSON_MEDIA_TYPE.subtype
+      ) {
         return null
       }
 
@@ -45,7 +46,8 @@ class JsonUnmarshaller(val adapter: JsonAdapter<Any>) : Unmarshaller {
   class Factory @Inject internal constructor(val moshi: Moshi) : Unmarshaller.Factory {
     override fun create(mediaType: MediaType, type: KType): Unmarshaller? {
       if (mediaType.type != MediaTypes.APPLICATION_JSON_MEDIA_TYPE.type ||
-          mediaType.subtype != MediaTypes.APPLICATION_JSON_MEDIA_TYPE.subtype) return null
+        mediaType.subtype != MediaTypes.APPLICATION_JSON_MEDIA_TYPE.subtype
+      ) return null
 
       if (GenericUnmarshallers.canHandle(type)) return null
       return JsonUnmarshaller(moshi.adapter<Any>(type.javaType))

@@ -37,57 +37,58 @@ internal class WebDispatchTest {
     val requestContent = helloByeJsonAdapter.toJson(HelloBye("my friend"))
     val httpClient = OkHttpClient()
     val request = Request.Builder()
-        .post(requestContent.toRequestBody(MediaTypes.APPLICATION_JSON_MEDIA_TYPE))
-        .url(serverUrlBuilder().encodedPath("/hello").build())
-        .build()
+      .post(requestContent.toRequestBody(MediaTypes.APPLICATION_JSON_MEDIA_TYPE))
+      .url(serverUrlBuilder().encodedPath("/hello").build())
+      .build()
 
     val response = httpClient.newCall(request).execute()
     assertThat(response.code).isEqualTo(200)
 
     val responseContent = response.body!!.source()
     assertThat(helloByeJsonAdapter.fromJson(responseContent)!!.message).isEqualTo(
-        "post hello my friend")
+      "post hello my friend"
+    )
   }
 
   @Test
   fun get() {
     val httpClient = OkHttpClient()
     val request = Request.Builder()
-        .get()
-        .url(serverUrlBuilder().encodedPath("/hello/my_friend").build())
-        .build()
+      .get()
+      .url(serverUrlBuilder().encodedPath("/hello/my_friend").build())
+      .build()
 
     val response = httpClient.newCall(request).execute()
     assertThat(response.code).isEqualTo(200)
 
     val responseContent = response.body!!.source().readString(Charsets.UTF_8)
     assertThat(helloByeJsonAdapter.fromJson(responseContent)!!.message)
-        .isEqualTo("get hello my_friend")
+      .isEqualTo("get hello my_friend")
   }
 
   @Test
   fun getWithPathPrefix() {
     val httpClient = OkHttpClient()
     val request = Request.Builder()
-        .get()
-        .url(serverUrlBuilder().encodedPath("/path/prefix/hello/my_friend").build())
-        .build()
+      .get()
+      .url(serverUrlBuilder().encodedPath("/path/prefix/hello/my_friend").build())
+      .build()
 
     val response = httpClient.newCall(request).execute()
     assertThat(response.code).isEqualTo(200)
 
     val responseContent = response.body!!.source().readString(Charsets.UTF_8)
     assertThat(helloByeJsonAdapter.fromJson(responseContent)!!.message)
-        .isEqualTo("get hello my_friend")
+      .isEqualTo("get hello my_friend")
   }
 
   @Test
   fun getNothing() {
     val httpClient = OkHttpClient()
     val request = Request.Builder()
-        .get()
-        .url(serverUrlBuilder().encodedPath("/nothing").build())
-        .build()
+      .get()
+      .url(serverUrlBuilder().encodedPath("/nothing").build())
+      .build()
 
     val response = httpClient.newCall(request).execute()
 
@@ -132,14 +133,14 @@ internal class WebDispatchTest {
     @RequestContentType(MediaTypes.APPLICATION_JSON)
     @ResponseContentType(MediaTypes.APPLICATION_JSON)
     fun hello(@misk.web.RequestBody request: HelloBye) =
-        HelloBye("post hello ${request.message}")
+      HelloBye("post hello ${request.message}")
   }
 
   class GetHello @Inject constructor() : WebAction {
     @Get("/hello/{message}")
     @ResponseContentType(MediaTypes.APPLICATION_JSON)
     fun hello(@PathParam("message") message: String) =
-        HelloBye("get hello $message")
+      HelloBye("get hello $message")
   }
 
   class PostBye @Inject constructor() : WebAction {
@@ -147,14 +148,14 @@ internal class WebDispatchTest {
     @RequestContentType(MediaTypes.APPLICATION_JSON)
     @ResponseContentType(MediaTypes.APPLICATION_JSON)
     fun bye(@misk.web.RequestBody request: HelloBye) =
-        HelloBye("post bye ${request.message}")
+      HelloBye("post bye ${request.message}")
   }
 
   class GetBye @Inject constructor() : WebAction {
     @Get("/bye/{message}")
     @ResponseContentType(MediaTypes.APPLICATION_JSON)
     fun bye(@PathParam("message") message: String) =
-        HelloBye("get bye $message")
+      HelloBye("get bye $message")
   }
 
   class GetNothing @Inject constructor() : WebAction {

@@ -53,54 +53,38 @@ abstract class KAbstractModule : AbstractModule() {
     annotation: KClass<out Annotation>? = null
   ): LinkedBindingBuilder<T> = newMultibinder<T>(annotation).addBinding()
 
-  protected inline fun <reified T : Any> multibind(
-    annotation: Annotation
-  ): LinkedBindingBuilder<T> = newMultibinder<T>(annotation).addBinding()
-
   protected inline fun <reified T : Any, reified A : Annotation> multibind():
-      LinkedBindingBuilder<T> = newMultibinder<T>(A::class).addBinding()
+    LinkedBindingBuilder<T> = newMultibinder<T>(A::class).addBinding()
 
   protected inline fun <reified T : Any> newMultibinder(
     annotation: KClass<out Annotation>? = null
   ): Multibinder<T> = newMultibinder(T::class, annotation)
-
-  protected inline fun <reified T : Any> newMultibinder(
-    annotation: Annotation
-  ): Multibinder<T> = newMultibinder(Key.get(T::class.java, annotation))
 
   @Suppress("UNCHECKED_CAST")
   protected fun <T : Any> newMultibinder(
     type: KClass<T>,
     annotation: KClass<out Annotation>? = null
   ): Multibinder<T> {
-    return when (annotation) {
-      null -> newMultibinder(Key.get(type.java))
-      else -> newMultibinder(Key.get(type.java, annotation.java))
-    }
-  }
-
-  @Suppress("UNCHECKED_CAST")
-  protected fun <T : Any> newMultibinder(
-    key: Key<T>
-  ): Multibinder<T> {
-    val type = key.typeLiteral.type
-
-    val setOfT = parameterizedType<Set<*>>(type).typeLiteral() as TypeLiteral<Set<T>>
-    val mutableSetOfTKey = key.ofType(setOfT) as Key<MutableSet<T>>
+    val setOfT = parameterizedType<Set<*>>(type.java).typeLiteral() as TypeLiteral<Set<T>>
+    val mutableSetOfTKey = setOfT.toKey(annotation) as Key<MutableSet<T>>
     val setOfOutT =
-        parameterizedType<Set<*>>(Types.subtypeOf(type)).typeLiteral() as TypeLiteral<Set<T>>
-    val setOfOutTKey = key.ofType(setOfOutT)
-    val listOfT = parameterizedType<List<*>>(type).typeLiteral() as TypeLiteral<List<T>>
+      parameterizedType<Set<*>>(Types.subtypeOf(type.java)).typeLiteral() as TypeLiteral<Set<T>>
+    val setOfOutTKey = setOfOutT.toKey(annotation)
+    val listOfT = parameterizedType<List<*>>(type.java).typeLiteral() as TypeLiteral<List<T>>
     val listOfOutT =
-        parameterizedType<List<*>>(Types.subtypeOf(type)).typeLiteral() as TypeLiteral<List<T>>
-    val listOfOutTKey = key.ofType(listOfOutT)
-    val listOfTKey = key.ofType(listOfT)
+      parameterizedType<List<*>>(Types.subtypeOf(type.java)).typeLiteral() as TypeLiteral<List<T>>
+    val listOfOutTKey = listOfOutT.toKey(annotation)
+    val listOfTKey = listOfT.toKey(annotation)
     bind(listOfOutTKey).toProvider(
-        ListProvider(mutableSetOfTKey, getProvider(mutableSetOfTKey)))
-    bind(setOfOutTKey).to(key.ofType(setOfT))
+      ListProvider(mutableSetOfTKey, getProvider(mutableSetOfTKey))
+    )
+    bind(setOfOutTKey).to(setOfT.toKey(annotation))
     bind(listOfTKey).to(listOfOutTKey)
 
-    return Multibinder.newSetBinder(binder(), key)
+    return when (annotation) {
+      null -> Multibinder.newSetBinder(binder(), type.java)
+      else -> Multibinder.newSetBinder(binder(), type.java, annotation.java)
+    }
   }
 
   protected inline fun <reified K : Any, reified V : Any> newMapBinder(

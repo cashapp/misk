@@ -17,7 +17,6 @@ import com.google.crypto.tink.signature.SignatureConfig
 import com.google.crypto.tink.streamingaead.StreamingAeadConfig
 import com.google.inject.name.Names
 import misk.config.MiskConfig
-import misk.config.Secret
 import misk.crypto.pgp.PgpDecrypter
 import misk.crypto.pgp.PgpDecrypterProvider
 import misk.crypto.pgp.PgpEncrypter
@@ -57,7 +56,7 @@ class CryptoTestModule(
     val keyManagerBinder = newMultibinder(ExternalKeyManager::class)
     keyManagerBinder.addBinding().toInstance(FakeExternalKeyManager(keys))
     config.external_data_keys?.let {
-      it.entries.forEach {entry ->
+      it.entries.forEach { entry ->
         val fakeFake = Key(entry.key, entry.value, MiskConfig.RealSecret(""))
         keys.add(fakeFake)
       }
@@ -68,65 +67,65 @@ class CryptoTestModule(
       when (key.key_type) {
         KeyType.AEAD -> {
           bind<Aead>()
-              .annotatedWith(Names.named(key.key_name))
-              .toProvider(AeadEnvelopeProvider(key.key_name))
-              .asEagerSingleton()
+            .annotatedWith(Names.named(key.key_name))
+            .toProvider(AeadEnvelopeProvider(key.key_name))
+            .asEagerSingleton()
         }
         KeyType.DAEAD -> {
           bind<DeterministicAead>()
-              .annotatedWith(Names.named(key.key_name))
-              .toProvider(DeterministicAeadProvider(key.key_name))
-              .asEagerSingleton()
+            .annotatedWith(Names.named(key.key_name))
+            .toProvider(DeterministicAeadProvider(key.key_name))
+            .asEagerSingleton()
         }
         KeyType.MAC -> {
           bind<Mac>()
-              .annotatedWith(Names.named(key.key_name))
-              .toProvider(MacProvider(key.key_name))
-              .asEagerSingleton()
+            .annotatedWith(Names.named(key.key_name))
+            .toProvider(MacProvider(key.key_name))
+            .asEagerSingleton()
         }
         KeyType.DIGITAL_SIGNATURE -> {
           bind<PublicKeySign>()
-              .annotatedWith(Names.named(key.key_name))
-              .toProvider(DigitalSignatureSignerProvider(key.key_name))
-              .asEagerSingleton()
+            .annotatedWith(Names.named(key.key_name))
+            .toProvider(DigitalSignatureSignerProvider(key.key_name))
+            .asEagerSingleton()
           bind<PublicKeyVerify>()
-              .annotatedWith(Names.named(key.key_name))
-              .toProvider(DigitalSignatureVerifierProvider(key.key_name))
-              .asEagerSingleton()
+            .annotatedWith(Names.named(key.key_name))
+            .toProvider(DigitalSignatureVerifierProvider(key.key_name))
+            .asEagerSingleton()
         }
         KeyType.HYBRID_ENCRYPT -> {
           bind<HybridEncrypt>()
-              .annotatedWith(Names.named(key.key_name))
-              .toProvider(HybridEncryptProvider(key.key_name))
-              .asEagerSingleton()
+            .annotatedWith(Names.named(key.key_name))
+            .toProvider(HybridEncryptProvider(key.key_name))
+            .asEagerSingleton()
         }
         KeyType.HYBRID_ENCRYPT_DECRYPT -> {
           bind<HybridDecrypt>()
-              .annotatedWith(Names.named(key.key_name))
-              .toProvider(HybridDecryptProvider(key.key_name))
-              .asEagerSingleton()
+            .annotatedWith(Names.named(key.key_name))
+            .toProvider(HybridDecryptProvider(key.key_name))
+            .asEagerSingleton()
           bind<HybridEncrypt>()
-              .annotatedWith(Names.named(key.key_name))
-              .toProvider(HybridEncryptProvider(key.key_name))
-              .asEagerSingleton()
+            .annotatedWith(Names.named(key.key_name))
+            .toProvider(HybridEncryptProvider(key.key_name))
+            .asEagerSingleton()
         }
         KeyType.STREAMING_AEAD -> {
           bind<StreamingAead>()
-              .annotatedWith(Names.named(key.key_name))
-              .toProvider(StreamingAeadProvider(key.key_name))
-              .asEagerSingleton()
+            .annotatedWith(Names.named(key.key_name))
+            .toProvider(StreamingAeadProvider(key.key_name))
+            .asEagerSingleton()
         }
         KeyType.PGP_DECRYPT -> {
           bind<PgpDecrypter>()
-              .annotatedWith(Names.named(key.key_name))
-              .toProvider(PgpDecrypterProvider(key.key_name))
-              .asEagerSingleton()
+            .annotatedWith(Names.named(key.key_name))
+            .toProvider(PgpDecrypterProvider(key.key_name))
+            .asEagerSingleton()
         }
         KeyType.PGP_ENCRYPT -> {
           bind<PgpEncrypter>()
-              .annotatedWith(Names.named(key.key_name))
-              .toProvider(PgpEncrypterProvider(key.key_name))
-              .asEagerSingleton()
+            .annotatedWith(Names.named(key.key_name))
+            .toProvider(PgpEncrypterProvider(key.key_name))
+            .asEagerSingleton()
         }
       }
     }

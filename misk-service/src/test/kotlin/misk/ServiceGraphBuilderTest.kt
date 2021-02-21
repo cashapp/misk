@@ -26,7 +26,8 @@ class ServiceGraphBuilderTest {
       addDependency(dependsOn = keyB, dependent = keyC)
     }
 
-    assertThat(script).isEqualTo("""
+    assertThat(script).isEqualTo(
+      """
         |starting Service A
         |starting Service B
         |starting Service C
@@ -34,7 +35,8 @@ class ServiceGraphBuilderTest {
         |stopping Service C
         |stopping Service A
         |stopping Service B
-        |""".trimMargin())
+        |""".trimMargin()
+    )
   }
 
   @Test
@@ -44,7 +46,8 @@ class ServiceGraphBuilderTest {
       addDependency(dependsOn = keyA, dependent = keyC)
     }
 
-    assertThat(script).isEqualTo("""
+    assertThat(script).isEqualTo(
+      """
         |starting Service A
         |starting Enhancement A
         |starting Service C
@@ -52,7 +55,8 @@ class ServiceGraphBuilderTest {
         |stopping Service C
         |stopping Enhancement A
         |stopping Service A
-        |""".trimMargin())
+        |""".trimMargin()
+    )
   }
 
   @Test fun chainsOfDependencies() {
@@ -63,7 +67,8 @@ class ServiceGraphBuilderTest {
       addDependency(dependsOn = keyD, dependent = keyE)
     }
 
-    assertThat(script).isEqualTo("""
+    assertThat(script).isEqualTo(
+      """
         |starting Service A
         |starting Service C
         |starting Service B
@@ -75,7 +80,8 @@ class ServiceGraphBuilderTest {
         |stopping Service B
         |stopping Service C
         |stopping Service A
-        |""".trimMargin())
+        |""".trimMargin()
+    )
   }
 
   @Test fun treesOfDependencies() {
@@ -88,7 +94,8 @@ class ServiceGraphBuilderTest {
       addDependency(dependsOn = keyC, dependent = keyE)
     }
 
-    assertThat(script).isEqualTo("""
+    assertThat(script).isEqualTo(
+      """
         |starting Service A
         |starting Service B
         |starting Service C
@@ -100,7 +107,8 @@ class ServiceGraphBuilderTest {
         |stopping Service C
         |stopping Service A
         |stopping Service B
-        |""".trimMargin())
+        |""".trimMargin()
+    )
   }
 
   @Test fun unsatisfiedDependency() {
@@ -108,8 +116,10 @@ class ServiceGraphBuilderTest {
       addDependency(dependsOn = keyA, dependent = keyC)
       addDependency(dependsOn = unregistered, dependent = keyC) // Unregistered doesn't exist.
     }
-    assertThat(failure).hasMessage("Service C requires $unregistered but no such service was " +
-        "registered with the builder")
+    assertThat(failure).hasMessage(
+      "Service C requires $unregistered but no such service was " +
+        "registered with the builder"
+    )
   }
 
   @Test fun failuresPropagate() {
@@ -131,9 +141,11 @@ class ServiceGraphBuilderTest {
     // Note that creating a ServiceManager without registering any services will result in a warning
     // from ServiceManager.
     val script = startUpAndShutDown(listOf()) {}
-    assertThat(script).isEqualTo("""
+    assertThat(script).isEqualTo(
+      """
         |healthy
-        |""".trimMargin())
+        |""".trimMargin()
+    )
   }
 
   @Test fun transitiveEnhancements() {
@@ -142,7 +154,8 @@ class ServiceGraphBuilderTest {
       enhanceService(toBeEnhanced = keyB, enhancement = keyC)
       addDependency(dependsOn = keyA, dependent = keyD)
     }
-    assertThat(script).isEqualTo("""
+    assertThat(script).isEqualTo(
+      """
         |starting Service A
         |starting Service B
         |starting Service C
@@ -152,7 +165,8 @@ class ServiceGraphBuilderTest {
         |stopping Service C
         |stopping Service B
         |stopping Service A
-        |""".trimMargin())
+        |""".trimMargin()
+    )
   }
 
   @Test fun enhancementDependency() {
@@ -160,7 +174,8 @@ class ServiceGraphBuilderTest {
       enhanceService(toBeEnhanced = keyA, enhancement = keyB)
       addDependency(dependsOn = keyB, dependent = keyC)
     }
-    assertThat(script).isEqualTo("""
+    assertThat(script).isEqualTo(
+      """
         |starting Service A
         |starting Service B
         |starting Service C
@@ -168,7 +183,8 @@ class ServiceGraphBuilderTest {
         |stopping Service C
         |stopping Service B
         |stopping Service A
-        |""".trimMargin())
+        |""".trimMargin()
+    )
   }
 
   @Test fun transitiveEnhancementDependency() {
@@ -177,7 +193,8 @@ class ServiceGraphBuilderTest {
       enhanceService(toBeEnhanced = keyB, enhancement = keyC)
       addDependency(dependsOn = keyC, dependent = keyD)
     }
-    assertThat(script).isEqualTo("""
+    assertThat(script).isEqualTo(
+      """
         |starting Service A
         |starting Service B
         |starting Service C
@@ -187,7 +204,8 @@ class ServiceGraphBuilderTest {
         |stopping Service C
         |stopping Service B
         |stopping Service A
-        |""".trimMargin())
+        |""".trimMargin()
+    )
   }
 
   @Test fun enhancementCannotHaveMultipleTargets() {
@@ -203,7 +221,8 @@ class ServiceGraphBuilderTest {
       addDependency(dependsOn = keyA, dependent = keyB)
       enhanceService(toBeEnhanced = keyB, enhancement = keyC)
     }
-    assertThat(script).isEqualTo("""
+    assertThat(script).isEqualTo(
+      """
         |starting Service A
         |starting Service B
         |starting Service C
@@ -211,7 +230,8 @@ class ServiceGraphBuilderTest {
         |stopping Service C
         |stopping Service B
         |stopping Service A
-        |""".trimMargin())
+        |""".trimMargin()
+    )
   }
 
   @Test fun multipleEnhancements() {
@@ -220,7 +240,8 @@ class ServiceGraphBuilderTest {
       enhanceService(toBeEnhanced = keyA, enhancement = keyC)
       addDependency(dependsOn = keyC, dependent = keyD)
     }
-    assertThat(script).isEqualTo("""
+    assertThat(script).isEqualTo(
+      """
         |starting Service A
         |starting Service B
         |starting Service C
@@ -230,7 +251,8 @@ class ServiceGraphBuilderTest {
         |stopping Service D
         |stopping Service C
         |stopping Service A
-        |""".trimMargin())
+        |""".trimMargin()
+    )
   }
 
   @Test fun dependencyCycle() {
@@ -242,7 +264,7 @@ class ServiceGraphBuilderTest {
     }
 
     assertThat(failure)
-        .hasMessage("Detected cycle: Service A -> Service D -> Service C -> Service A")
+      .hasMessage("Detected cycle: Service A -> Service D -> Service C -> Service A")
   }
 
   @Test fun simpleDependencyCycle() {
@@ -282,12 +304,16 @@ class ServiceGraphBuilderTest {
     val builder = newBuilderWithServices(target, listOf(keyA))
     val serviceManager = builder.build()
     serviceManager.startAsync()
-    val badEnhancer = CoordinatedService(Provider<Service> {
-      AppendingService(target, "bad enhancement")
-    })
-    val badDependency = CoordinatedService(Provider<Service> {
-      AppendingService(target, "bad dependency")
-    })
+    val badEnhancer = CoordinatedService(
+      Provider<Service> {
+        AppendingService(target, "bad enhancement")
+      }
+    )
+    val badDependency = CoordinatedService(
+      Provider<Service> {
+        AppendingService(target, "bad dependency")
+      }
+    )
 
     serviceManager.awaitHealthy()
 
@@ -303,10 +329,12 @@ class ServiceGraphBuilderTest {
 
     serviceManager.stopAsync()
 
-    assertThat(target.toString()).isEqualTo("""
+    assertThat(target.toString()).isEqualTo(
+      """
         |starting ${keyA.name}
         |stopping ${keyA.name}
-        |""".trimMargin())
+        |""".trimMargin()
+    )
   }
 
   /**
@@ -349,8 +377,10 @@ class ServiceGraphBuilderTest {
   ): ServiceGraphBuilder {
     val builder = ServiceGraphBuilder()
     for (service in services) {
-      builder.addService(service,
-          AppendingService(target, service.name))
+      builder.addService(
+        service,
+        AppendingService(target, service.name)
+      )
     }
     return builder
   }

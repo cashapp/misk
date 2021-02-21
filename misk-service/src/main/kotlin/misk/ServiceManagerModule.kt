@@ -22,13 +22,15 @@ class ServiceManagerModule : KAbstractModule() {
     newMultibinder<Service>()
     newMultibinder<ServiceManager.Listener>()
 
-    multibind<ServiceManager.Listener>().toProvider(Provider<ServiceManager.Listener> {
-      object : ServiceManager.Listener() {
-        override fun failure(service: Service) {
-          log.error(service.failureCause()) { "Service $service failed" }
+    multibind<ServiceManager.Listener>().toProvider(
+      Provider<ServiceManager.Listener> {
+        object : ServiceManager.Listener() {
+          override fun failure(service: Service) {
+            log.error(service.failureCause()) { "Service $service failed" }
+          }
         }
       }
-    }).asSingleton()
+    ).asSingleton()
     newMultibinder<ServiceEntry>()
     newMultibinder<DependencyEdge>()
     newMultibinder<EnhancementEdge>()
@@ -70,8 +72,8 @@ class ServiceManagerModule : KAbstractModule() {
     // Enforce that services are installed via a ServiceModule.
     check(services.isEmpty()) {
       "This doesn't work anymore! " +
-          "Instead of using `multibind<Service>().to(${services.first()::class.simpleName})`, " +
-          "use `install(ServiceModule<${services.first()::class.simpleName}>())`."
+        "Instead of using `multibind<Service>().to(${services.first()::class.simpleName})`, " +
+        "use `install(ServiceModule<${services.first()::class.simpleName}>())`."
     }
 
     val serviceManager = builder.build()

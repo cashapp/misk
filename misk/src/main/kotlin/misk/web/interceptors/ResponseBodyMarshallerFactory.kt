@@ -25,11 +25,11 @@ class ResponseBodyMarshallerFactory @Inject internal constructor(
     }.firstOrNull()
 
     return contentTypeMarshaller
-        ?: genericMarshallerFor(responseMediaType, action.returnType)
+      ?: genericMarshallerFor(responseMediaType, action.returnType)
   }
 
   private fun genericMarshallerFor(mediaType: MediaType?, type: KType): Marshaller<Any> {
     return GenericMarshallers.from(mediaType, type)
-        ?: throw IllegalArgumentException("no marshaller for $mediaType as $type")
+      ?: throw IllegalArgumentException("no marshaller for $mediaType as $type")
   }
 }

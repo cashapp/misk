@@ -12,7 +12,7 @@ class ExplicitReleaseDelayQueue<T : Delayed> private constructor(
   private val delegate: ExplicitReleaseBlockingQueue<T>
 ) : BlockingQueue<T> by delegate {
   constructor() : this(
-      ExplicitReleaseBlockingQueue(PriorityBlockingQueue<T>(), PriorityBlockingQueue<T>())
+    ExplicitReleaseBlockingQueue(PriorityBlockingQueue<T>(), PriorityBlockingQueue<T>())
   )
 
   fun release(n: Int) = delegate.release(n)

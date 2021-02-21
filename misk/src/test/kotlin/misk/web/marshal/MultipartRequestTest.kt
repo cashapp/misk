@@ -34,23 +34,24 @@ internal class MultipartRequestTest {
   @Test
   fun `happy path`() {
     val multipartBody = MultipartBody.Builder()
-        .addPart(
-            headersOf("a", "apple", "b", "banana"),
-            "fruit salad!\n".toRequestBody("text/plain".toMediaType())
-        )
-        .addFormDataPart("d", "good doggo")
-        .build()
+      .addPart(
+        headersOf("a", "apple", "b", "banana"),
+        "fruit salad!\n".toRequestBody("text/plain".toMediaType())
+      )
+      .addFormDataPart("d", "good doggo")
+      .build()
 
     val request = Builder()
-        .url(jettyService.httpServerUrl.resolve("/echo-multipart")!!)
-        .post(multipartBody)
+      .url(jettyService.httpServerUrl.resolve("/echo-multipart")!!)
+      .post(multipartBody)
     val httpClient = OkHttpClient()
     val response = httpClient.newCall(request.build()).execute()
 
     assertThat(response.code).isEqualTo(200)
     assertThat(response.header("Content-Type")).isEqualTo(MediaTypes.TEXT_PLAIN_UTF8)
     val body = response.body?.string()!!
-    assertThat(body).isEqualTo("""
+    assertThat(body).isEqualTo(
+      """
         |part 0:
         |  a: apple
         |  b: banana
@@ -62,14 +63,15 @@ internal class MultipartRequestTest {
         |  Content-Disposition: form-data; name="d"
         |  Content-Length: 10
         |good doggo
-        |""".trimMargin())
+        |""".trimMargin()
+    )
   }
 
   @Test
   fun `missing boundary parameter`() {
     val request = Builder()
-        .url(jettyService.httpServerUrl.resolve("/echo-multipart")!!)
-        .post("not actually multipart!".toRequestBody("multipart/mixed".toMediaType()))
+      .url(jettyService.httpServerUrl.resolve("/echo-multipart")!!)
+      .post("not actually multipart!".toRequestBody("multipart/mixed".toMediaType()))
     val httpClient = OkHttpClient()
     val response = httpClient.newCall(request.build()).execute()
 

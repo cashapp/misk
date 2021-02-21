@@ -19,7 +19,8 @@ object PlainTextMarshaller : Marshaller<Any> {
   class Factory @Inject constructor() : Marshaller.Factory {
     override fun create(mediaType: MediaType, type: KType): Marshaller<Any>? {
       if (mediaType.type != MediaTypes.TEXT_PLAIN_UTF8_MEDIA_TYPE.type ||
-          mediaType.subtype != MediaTypes.TEXT_PLAIN_UTF8_MEDIA_TYPE.subtype) {
+        mediaType.subtype != MediaTypes.TEXT_PLAIN_UTF8_MEDIA_TYPE.subtype
+      ) {
         return null
       }
 
@@ -42,7 +43,8 @@ object PlainTextUnmarshaller {
   class Factory @Inject constructor() : Unmarshaller.Factory {
     override fun create(mediaType: MediaType, type: KType): Unmarshaller? {
       if (mediaType.type != MediaTypes.TEXT_PLAIN_UTF8_MEDIA_TYPE.type ||
-          mediaType.subtype != MediaTypes.TEXT_PLAIN_UTF8_MEDIA_TYPE.subtype) return null
+        mediaType.subtype != MediaTypes.TEXT_PLAIN_UTF8_MEDIA_TYPE.subtype
+      ) return null
 
       if (GenericUnmarshallers.canHandle(type)) return null
 

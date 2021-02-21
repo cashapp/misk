@@ -28,8 +28,8 @@ class FakeFileLoaderTest {
   private class FakeFilesModule : KAbstractModule() {
     override fun configure() {
       newMapBinder<String, String>(ForFakeFiles::class)
-          .addBinding("/some/test/file")
-          .toInstance("test data!")
+        .addBinding("/some/test/file")
+        .toInstance("test data!")
     }
   }
 }

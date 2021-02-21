@@ -36,15 +36,15 @@ internal class RealPgpDecrypter(
 
     // Assuming that the first element in the EncryptedDataList is public key encrypted.
     val pgpPublicKeyEncryptedData =
-        pgpEncryptedDataList.encryptedDataObjects.next() as PGPPublicKeyEncryptedData
+      pgpEncryptedDataList.encryptedDataObjects.next() as PGPPublicKeyEncryptedData
 
     val pgpSecretKey = privateKeys[pgpPublicKeyEncryptedData.keyID]
-        ?: error("no private key able to decrypt this message")
+      ?: error("no private key able to decrypt this message")
 
     val publicKeyDataDecryptorFactory = JcePublicKeyDataDecryptorFactoryBuilder()
-        .setProvider("BC")
-        .setContentProvider("BC")
-        .build(pgpSecretKey)
+      .setProvider("BC")
+      .setContentProvider("BC")
+      .build(pgpSecretKey)
 
     val clear = pgpPublicKeyEncryptedData.getDataStream(publicKeyDataDecryptorFactory)
     val plainFactory = JcaPGPObjectFactory(clear)

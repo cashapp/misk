@@ -2,7 +2,11 @@
   "sharded": false,
   "tables": {
     "character_name_lookup": {},
-    "characters_seq": {"type": "sequence"},
-    "movies_seq": {"type": "sequence"}
+    "characters_seq": {
+      "type": "sequence"
+    },
+    "movies_seq": {
+      "type": "sequence"
+    }
   }
 }

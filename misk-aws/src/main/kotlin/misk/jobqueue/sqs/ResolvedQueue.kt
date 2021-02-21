@@ -36,6 +36,7 @@ internal class ResolvedQueue(
     cause: AmazonClientException,
     queue: ResolvedQueue
   ) : RuntimeException(
-      "${cause.message} (sqsQueue=${queue.sqsQueueName} region=${queue.region})",
-      cause)
+    "${cause.message} (sqsQueue=${queue.sqsQueueName} region=${queue.region})",
+    cause
+  )
 }

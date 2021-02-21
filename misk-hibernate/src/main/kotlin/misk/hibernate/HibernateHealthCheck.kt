@@ -40,7 +40,7 @@ internal class HibernateHealthCheck(
 
     val delta = Duration.between(clock.instant(), databaseInstant).abs()
     val driftMessage = "Hibernate: host and ${qualifier.simpleName} database " +
-        "clocks have drifted ${delta.seconds}s apart"
+      "clocks have drifted ${delta.seconds}s apart"
 
     return when {
       delta > CLOCK_SKEW_UNHEALTHY_THRESHOLD -> {

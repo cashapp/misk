@@ -97,7 +97,8 @@ internal class QueryParamFeatureBindingTest {
   fun optionalIntListPresent() {
     val queryStringProcessor = TestMemberStore.optionalIntListParameter().toQueryBinding()!!
     val extractedResult = queryStringProcessor.parameterValue(
-        listOf("42", "23"))
+      listOf("42", "23")
+    )
     assertThat(extractedResult).isNotNull()
     assertThat(extractedResult).isEqualTo(listOf(42, 23))
   }

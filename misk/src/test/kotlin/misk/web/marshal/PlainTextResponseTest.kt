@@ -10,11 +10,8 @@ import misk.web.WebActionModule
 import misk.web.WebTestClient
 import misk.web.WebTestingModule
 import misk.web.actions.WebAction
-import misk.web.jetty.JettyService
 import misk.web.mediatype.MediaTypes
 import misk.web.toResponseBody
-import okhttp3.OkHttpClient
-import okhttp3.Request
 import okio.ByteString
 import okio.ByteString.Companion.encodeUtf8
 import org.assertj.core.api.Assertions.assertThat

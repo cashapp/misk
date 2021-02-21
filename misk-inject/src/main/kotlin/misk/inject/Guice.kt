@@ -51,7 +51,8 @@ fun <T : Any> KClass<T>.typeLiteral(): TypeLiteral<T> = TypeLiteral.get(java)
 
 @Suppress("UNCHECKED_CAST") // The type system isn't aware of constructed types.
 fun <T> listOfType(elementType: TypeLiteral<T>): TypeLiteral<List<T>> = TypeLiteral.get(
-    Types.listOf(elementType.type)) as TypeLiteral<List<T>>
+  Types.listOf(elementType.type)
+) as TypeLiteral<List<T>>
 
 fun <T : Any> listOfType(elementType: KClass<T>) = listOfType(elementType.typeLiteral())
 
@@ -59,7 +60,8 @@ inline fun <reified T : Any> listOfType() = listOfType(T::class)
 
 @Suppress("UNCHECKED_CAST") // The type system isn't aware of constructed types.
 fun <T> setOfType(elementType: TypeLiteral<T>): TypeLiteral<Set<T>> = TypeLiteral.get(
-    Types.setOf(elementType.type)) as TypeLiteral<Set<T>>
+  Types.setOf(elementType.type)
+) as TypeLiteral<Set<T>>
 
 fun <T : Any> setOfType(elementType: KClass<T>) = setOfType(elementType.typeLiteral())
 
@@ -68,7 +70,7 @@ inline fun <reified T : Any> setOfType() = setOfType(T::class)
 inline fun <reified K : Any, reified V : Any> mapOfType() = mapOfType(K::class, V::class)
 
 fun <K : Any, V : Any> mapOfType(keyType: KClass<K>, valueType: KClass<V>) =
-    mapOfType(keyType.typeLiteral(), valueType.typeLiteral())
+  mapOfType(keyType.typeLiteral(), valueType.typeLiteral())
 
 @Suppress("UNCHECKED_CAST") // The type system isn't aware of constructed types.
 fun <K, V> mapOfType(keyType: TypeLiteral<K>, valueType: TypeLiteral<V>): TypeLiteral<Map<K, V>> =
@@ -91,7 +93,7 @@ inline fun <reified T : Any> keyOf(a: Annotation): Key<T> = Key.get(T::class.jav
  * If annotation is not null, returns a key for @Annotation T, otherwise a key for T.
  */
 inline fun <reified T : Any> keyOf(a: KClass<out Annotation>?): Key<T> =
-    if (a == null) Key.get(T::class.java) else Key.get(T::class.java, a.java)
+  if (a == null) Key.get(T::class.java) else Key.get(T::class.java, a.java)
 
 fun <T : Any> TypeLiteral<T>.toKey(annotation: KClass<out Annotation>? = null): Key<T> {
   return when (annotation) {
@@ -101,7 +103,7 @@ fun <T : Any> TypeLiteral<T>.toKey(annotation: KClass<out Annotation>? = null): 
 }
 
 fun <T : Any> KClass<T>.toKey(qualifier: KClass<out Annotation>? = null): Key<T> =
-    typeLiteral().toKey(qualifier)
+  typeLiteral().toKey(qualifier)
 
 fun uninject(target: Any) {
   try {

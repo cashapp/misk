@@ -55,8 +55,8 @@ internal class FakeResourcePoolTest {
       for (i in 0 until 15) {
         futures += executorService!!.submit {
           pool.useResource(
-              maxTimeToWait = Duration.ofMillis(1100),
-              timeToHold = Duration.ofMillis(250)
+            maxTimeToWait = Duration.ofMillis(1100),
+            timeToHold = Duration.ofMillis(250)
           )
         }
       }
@@ -85,8 +85,8 @@ internal class FakeResourcePoolTest {
       for (i in 0 until 9) {
         futures += executorService!!.submit {
           pool.useResource(
-              maxTimeToWait = Duration.ofMillis(400),
-              timeToHold = Duration.ofMillis(250)
+            maxTimeToWait = Duration.ofMillis(400),
+            timeToHold = Duration.ofMillis(250)
           )
         }
       }

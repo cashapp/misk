@@ -21,6 +21,6 @@ class HikariMetricsTest {
   @Test
   fun metricsExist() {
     val metrics = Collections.list(registry.metricFamilySamples())
-    assertThat(metrics).filteredOn { m -> m.name.startsWith("hikaricp") }.isNotEmpty()
+    assertThat(metrics).filteredOn { m -> m.name.startsWith("hikaricp") }.isNotEmpty
   }
 }

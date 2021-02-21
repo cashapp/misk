@@ -26,10 +26,14 @@ class FakeCallerAuthenticator @Inject constructor(
 
     val development = developmentCaller
     return when {
-      !(user == null && service == null) -> MiskCaller(service = service, user = user,
-          capabilities = capabilities ?: setOf())
-      development != null -> MiskCaller(development.service, development.user,
-          capabilities = development.capabilities)
+      !(user == null && service == null) -> MiskCaller(
+        service = service, user = user,
+        capabilities = capabilities ?: setOf()
+      )
+      development != null -> MiskCaller(
+        development.service, development.user,
+        capabilities = development.capabilities
+      )
       else -> null
     }
   }

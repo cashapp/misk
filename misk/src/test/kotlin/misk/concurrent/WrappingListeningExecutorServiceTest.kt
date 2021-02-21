@@ -58,11 +58,13 @@ internal class WrappingListeningExecutorServiceTest {
 
   @Test
   fun invokeAll() {
-    val results = executor.invokeAll(listOf(
+    val results = executor.invokeAll(
+      listOf(
         Callable { "foo" },
         Callable { "bar" },
         Callable { "zed" }
-    )).map { it.get() }
+      )
+    ).map { it.get() }
 
     assertThat(results).containsExactly("foo", "bar", "zed")
     assertThat(wrapCounter.get()).isEqualTo(3)

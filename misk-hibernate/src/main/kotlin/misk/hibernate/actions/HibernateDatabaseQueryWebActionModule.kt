@@ -68,7 +68,10 @@ internal class HibernateDatabaseQueryWebActionModule : KAbstractModule() {
         }
       return if (paths?.isNotEmpty() == true) {
         if (!dbEntityDeclaredMemberProperties.containsAll(paths)) {
-          throw BadRequestException("Invalid Select path does not exist on [dbEntity=$dbEntity][invalidPaths=${paths - dbEntityDeclaredMemberProperties}]")
+          throw BadRequestException(
+            "Invalid Select path does not exist on " +
+              "[dbEntity=$dbEntity][invalidPaths=${paths - dbEntityDeclaredMemberProperties}]"
+          )
         }
         paths
       } else {

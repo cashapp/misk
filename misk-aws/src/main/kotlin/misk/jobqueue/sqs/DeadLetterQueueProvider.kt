@@ -17,7 +17,7 @@ interface DeadLetterQueueProvider {
 
 /** Default provider of dead-letter [QueueName]. Returns the name of the main queue suffixed with "_dlq". */
 @Singleton
-class DefaultDeadLetterQueueProvider @Inject constructor(): DeadLetterQueueProvider {
+class DefaultDeadLetterQueueProvider @Inject constructor() : DeadLetterQueueProvider {
   override fun deadLetterQueueFor(queue: QueueName): QueueName = queue.deadLetterQueue
 }
 

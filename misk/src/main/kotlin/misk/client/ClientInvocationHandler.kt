@@ -3,14 +3,6 @@ package misk.client
 import com.squareup.moshi.Moshi
 import io.opentracing.Tracer
 import io.opentracing.contrib.okhttp3.TracingCallFactory
-import java.lang.reflect.InvocationHandler
-import java.lang.reflect.Method
-import javax.inject.Provider
-import kotlin.reflect.KClass
-import kotlin.reflect.KFunction
-import kotlin.reflect.full.findAnnotation
-import kotlin.reflect.full.functions
-import kotlin.reflect.full.memberFunctions
 import misk.web.mediatype.MediaTypes
 import okhttp3.EventListener
 import okhttp3.Interceptor
@@ -29,6 +21,14 @@ import retrofit2.http.OPTIONS
 import retrofit2.http.PATCH
 import retrofit2.http.POST
 import retrofit2.http.PUT
+import java.lang.reflect.InvocationHandler
+import java.lang.reflect.Method
+import javax.inject.Provider
+import kotlin.reflect.KClass
+import kotlin.reflect.KFunction
+import kotlin.reflect.full.findAnnotation
+import kotlin.reflect.full.functions
+import kotlin.reflect.full.memberFunctions
 
 internal class ClientInvocationHandler(
   private val interfaceType: KClass<*>,
@@ -43,10 +43,10 @@ internal class ClientInvocationHandler(
 ) : InvocationHandler {
 
   private val actionsByMethod = interfaceType.functions
-      .filter { it.isRetrofitMethod }
-      .map { ClientAction(clientName, it) }
-      .map { it.function.name to it }
-      .toMap()
+    .filter { it.isRetrofitMethod }
+    .map { ClientAction(clientName, it) }
+    .map { it.function.name to it }
+    .toMap()
 
   // Each method might have a different set of network interceptors, so sadly we potentially
   // need to create a separate OkHttpClient and retrofit proxy per method
@@ -63,10 +63,11 @@ internal class ClientInvocationHandler(
     val actionSpecificClient = clientBuilder.build()
 
     val retrofitBuilder = retrofit.newBuilder()
-        .client(actionSpecificClient)
+      .client(actionSpecificClient)
 
     if (tracer != null) retrofitBuilder.callFactory(
-        TracingCallFactory(actionSpecificClient, tracer))
+      TracingCallFactory(actionSpecificClient, tracer)
+    )
 
     val mediaTypes = getEndpointMediaTypes(methodName)
     if (mediaTypes.contains(MediaTypes.APPLICATION_PROTOBUF)) {
@@ -78,8 +79,8 @@ internal class ClientInvocationHandler(
     retrofitBuilder.addConverterFactory(MoshiConverterFactory.create(moshi))
 
     methodName to retrofitBuilder
-        .build()
-        .create(interfaceType.java)
+      .build()
+      .create(interfaceType.java)
   }.toMap()
 
   init {
@@ -90,8 +91,8 @@ internal class ClientInvocationHandler(
 
   private fun getEndpointMediaTypes(methodName: String): List<String> {
     val headers =
-        interfaceType.memberFunctions.find { it.name == methodName }?.findAnnotation<Headers>()
-            ?: return emptyList()
+      interfaceType.memberFunctions.find { it.name == methodName }?.findAnnotation<Headers>()
+        ?: return emptyList()
 
     return headers.value.mapNotNull {
       val (headerKey, headerValue) = it.split(":").map { it.trim() }
@@ -107,7 +108,7 @@ internal class ClientInvocationHandler(
     val argsList = args?.toList() ?: listOf()
 
     val retrofitProxy = proxiesByMethod[method.name] ?: throw IllegalStateException(
-        "no action corresponding to ${interfaceType.qualifiedName}#${method.name}"
+      "no action corresponding to ${interfaceType.qualifiedName}#${method.name}"
     )
 
     return method.invoke(retrofitProxy, *argsList.toTypedArray()) as Call<Any>
@@ -127,6 +128,6 @@ private val KFunction<*>.isRetrofitMethod: Boolean
   get() {
     return annotations.any {
       it is GET || it is POST || it is HEAD || it is PUT || it is PATCH || it is OPTIONS ||
-          it is DELETE || it is HTTP
+        it is DELETE || it is HTTP
     }
   }

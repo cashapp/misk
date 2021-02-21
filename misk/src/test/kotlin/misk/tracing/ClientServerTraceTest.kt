@@ -58,7 +58,8 @@ internal class ClientServerTraceTest {
   @BeforeEach
   fun createClient() {
     clientInjector = Guice.createInjector(
-        MockTracingBackendModule(), MiskTestingServiceModule(), ClientModule(jetty))
+      MockTracingBackendModule(), MiskTestingServiceModule(), ClientModule(jetty)
+    )
   }
 
   @Test
@@ -75,7 +76,7 @@ internal class ClientServerTraceTest {
     // level.
     assertThat(clientTracer.finishedSpans().size).isEqualTo(2)
     val clientSpan =
-        clientTracer.finishedSpans().find { it.context().spanId() == serverSpan.parentId() }
+      clientTracer.finishedSpans().find { it.context().spanId() == serverSpan.parentId() }
 
     assertThat(clientSpan).isNotNull()
   }
@@ -97,17 +98,17 @@ internal class ClientServerTraceTest {
   fun traceHopsFromClientToServerToServer() {
     val childServerInjector = serverInjector.createChildInjector(ClientModule(jetty))
     RoarLikeDinosaurAction.returnADinosaur =
-        childServerInjector.getInstance<ReturnADinosaur>(Names.named("dinosaur"))
+      childServerInjector.getInstance<ReturnADinosaur>(Names.named("dinosaur"))
 
     val client = clientInjector.getInstance<RoarLikeDinosaur>(Names.named("roar"))
     client.doRoar(dinosaurRequest).execute()
 
     // Expect 4 spans on the server.
     val serverSpans = listOf(
-        serverTracer.take(),
-        serverTracer.take(),
-        serverTracer.take(),
-        serverTracer.take()
+      serverTracer.take(),
+      serverTracer.take(),
+      serverTracer.take(),
+      serverTracer.take()
     )
 
     val spanIds = serverSpans.map { it.context().spanId() }.toSet()
@@ -131,8 +132,8 @@ internal class ClientServerTraceTest {
     // level.
     assertThat(clientTracer.finishedSpans().size).isEqualTo(2)
     val clientSpan =
-        clientTracer.finishedSpans()
-            .find { it.context().spanId() == initialServerSpan!!.parentId() }
+      clientTracer.finishedSpans()
+        .find { it.context().spanId() == initialServerSpan!!.parentId() }
 
     assertThat(clientSpan).isNotNull()
   }
@@ -147,7 +148,7 @@ internal class ClientServerTraceTest {
     @RequestContentType(MediaTypes.APPLICATION_JSON)
     @ResponseContentType(MediaTypes.APPLICATION_JSON)
     fun getDinosaur(@RequestBody request: Dinosaur):
-        Dinosaur = request.newBuilder().name("super${request.name}").build()
+      Dinosaur = request.newBuilder().name("super${request.name}").build()
   }
 
   interface RoarLikeDinosaur {
@@ -167,7 +168,7 @@ internal class ClientServerTraceTest {
     @RequestContentType(MediaTypes.APPLICATION_JSON)
     @ResponseContentType(MediaTypes.APPLICATION_JSON)
     fun doRoar(@RequestBody request: Dinosaur):
-        Dinosaur = returnADinosaur!!.getDinosaur(request).execute().body()!!
+      Dinosaur = returnADinosaur!!.getDinosaur(request).execute().body()!!
   }
 
   class TestModule : KAbstractModule() {
@@ -183,11 +184,16 @@ internal class ClientServerTraceTest {
     override fun configure() {
       install(TypedHttpClientModule.create<ReturnADinosaur>("dinosaur", Names.named("dinosaur")))
       install(TypedHttpClientModule.create<RoarLikeDinosaur>("roar", Names.named("roar")))
-      install(HttpClientsConfigModule(HttpClientsConfig(
-          endpoints = mapOf(
+      install(
+        HttpClientsConfigModule(
+          HttpClientsConfig(
+            endpoints = mapOf(
               "dinosaur" to HttpClientEndpointConfig(jetty.httpServerUrl.toString()),
               "roar" to HttpClientEndpointConfig(jetty.httpServerUrl.toString())
-          ))))
+            )
+          )
+        )
+      )
     }
   }
 }

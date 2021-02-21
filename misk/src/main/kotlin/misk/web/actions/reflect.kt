@@ -27,8 +27,8 @@ internal fun <T : Annotation> Method.findAnnotationWithOverrides(annotationClass
 /** Returns the overrides of this method with overriding methods preceding overridden methods. */
 internal fun Method.overrides(): Set<Method> {
   return declaringClass.superclasses()
-      .mapNotNull { it.getOverriddenMethod(this@overrides) }
-      .toSet()
+    .mapNotNull { it.getOverriddenMethod(this@overrides) }
+    .toSet()
 }
 
 /** Returns the method that [override] overrides. */
@@ -96,8 +96,9 @@ internal fun Method.preferNonSynthetic(): Method {
 
   for (peer in declaringClass.methods) {
     if (!peer.isSynthetic &&
-        peer.name == name &&
-        peer.parameterTypes.contentEquals(parameterTypes)) {
+      peer.name == name &&
+      peer.parameterTypes.contentEquals(parameterTypes)
+    ) {
       return peer
     }
   }

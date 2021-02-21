@@ -36,9 +36,9 @@ internal object ClasspathResourceLoaderBackend : ResourceLoader.Backend() {
     }
 
     return result
-        .filter { !it.endsWith(".class") }
-        .map { "/$checkPath/$it" }
-        .toList()
+      .filter { !it.endsWith(".class") }
+      .map { "/$checkPath/$it" }
+      .toList()
   }
 
   /**

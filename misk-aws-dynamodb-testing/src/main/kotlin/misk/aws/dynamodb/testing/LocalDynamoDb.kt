@@ -22,34 +22,34 @@ internal class LocalDynamoDb internal constructor(port: Int) {
   @Inject constructor() : this(pickPort())
 
   val url = HttpUrl.Builder()
-      .scheme("http")
-      .host("localhost")
-      .port(port)
-      .build()
+    .scheme("http")
+    .host("localhost")
+    .port(port)
+    .build()
 
   val awsCredentialsProvider: AWSCredentialsProvider = AWSStaticCredentialsProvider(
-      BasicAWSCredentials("key", "secret")
+    BasicAWSCredentials("key", "secret")
   )
 
   val endpointConfiguration = AwsClientBuilder.EndpointConfiguration(
-      url.toString(),
-      Regions.US_WEST_2.toString()
+    url.toString(),
+    Regions.US_WEST_2.toString()
   )
 
   fun connect(): AmazonDynamoDB {
     return AmazonDynamoDBClientBuilder.standard()
-        // The values that you supply for the AWS access key and the Region are only used to name
-        // the database file.
-        .withCredentials(awsCredentialsProvider)
-        .withEndpointConfiguration(endpointConfiguration)
-        .build()
+      // The values that you supply for the AWS access key and the Region are only used to name
+      // the database file.
+      .withCredentials(awsCredentialsProvider)
+      .withEndpointConfiguration(endpointConfiguration)
+      .build()
   }
 
   fun connectToStreams(): AmazonDynamoDBStreams {
     return AmazonDynamoDBStreamsClientBuilder.standard()
-        .withCredentials(awsCredentialsProvider)
-        .withEndpointConfiguration(endpointConfiguration)
-        .build()
+      .withCredentials(awsCredentialsProvider)
+      .withEndpointConfiguration(endpointConfiguration)
+      .build()
   }
 
   companion object {

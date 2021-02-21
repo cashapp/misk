@@ -18,8 +18,10 @@ data class ClientAction(
   val returnType: KType
 ) {
   internal constructor(clientName: String, method: KFunction<*>) :
-      this("$clientName.${method.name}",
-          method,
-          method.parameters.drop(1).map { it.type }, // drop the 'this' parameter
-          method.returnType)
+    this(
+      "$clientName.${method.name}",
+      method,
+      method.parameters.drop(1).map { it.type }, // drop the 'this' parameter
+      method.returnType
+    )
 }

@@ -108,7 +108,7 @@ class RequestLoggingInterceptor internal constructor(
     if (error != null) {
       builder.append(" failed")
     } else {
-      builder.append(" code=${statusCode}")
+      builder.append(" code=$statusCode")
     }
 
     val isError = statusCode > 299 || error != null
@@ -133,11 +133,9 @@ class RequestLoggingInterceptor internal constructor(
       }
     }
 
-
     logger.info(
       "response_code" to statusCode,
       "response_time_millis" to stopwatch.elapsed(TimeUnit.MILLISECONDS)
-    )
-    { builder.toString() }
+    ) { builder.toString() }
   }
 }

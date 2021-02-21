@@ -87,8 +87,11 @@ interface FeatureFlags {
     clazz: Class<T>
   ) = getEnum(feature, key, clazz, Attributes())
 
-  fun <T> getJson(feature: Feature, key: String, clazz: Class<T>)
-      = getJson(feature, key, clazz, Attributes())
+  fun <T> getJson(
+    feature: Feature,
+    key: String,
+    clazz: Class<T>
+  ) = getJson(feature, key, clazz, Attributes())
 }
 
 inline fun <reified T : Enum<T>> FeatureFlags.getEnum(

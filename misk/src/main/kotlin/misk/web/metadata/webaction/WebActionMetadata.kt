@@ -44,22 +44,22 @@ data class WebActionMetadata(
     allowedServices: Set<String>,
     allowedCapabilities: Set<String>
   ) : this(
-      name = name,
-      function = function.toString(),
-      functionAnnotations = functionAnnotations.map { it.toString() },
-      requestMediaTypes = acceptedMediaRanges.map { it.toString() },
-      responseMediaType = responseContentType.toString(),
-      parameterTypes = parameterTypes.map { it.toString() },
-      requestType = requestType.toString(),
-      returnType = returnType.toString(),
-      types = MiskWebFormBuilder().calculateTypes(requestType),
-      pathPattern = pathPattern.toString(),
-      applicationInterceptors = applicationInterceptors.map {
-        ClassNameFormatter.format(it::class)
-      },
-      networkInterceptors = networkInterceptors.map { ClassNameFormatter.format(it::class) },
-      httpMethod = dispatchMechanism.method,
-      allowedServices = allowedServices,
-      allowedCapabilities = allowedCapabilities
+    name = name,
+    function = function.toString(),
+    functionAnnotations = functionAnnotations.map { it.toString() },
+    requestMediaTypes = acceptedMediaRanges.map { it.toString() },
+    responseMediaType = responseContentType.toString(),
+    parameterTypes = parameterTypes.map { it.toString() },
+    requestType = requestType.toString(),
+    returnType = returnType.toString(),
+    types = MiskWebFormBuilder().calculateTypes(requestType),
+    pathPattern = pathPattern.toString(),
+    applicationInterceptors = applicationInterceptors.map {
+      ClassNameFormatter.format(it::class)
+    },
+    networkInterceptors = networkInterceptors.map { ClassNameFormatter.format(it::class) },
+    httpMethod = dispatchMechanism.method,
+    allowedServices = allowedServices,
+    allowedCapabilities = allowedCapabilities
   )
 }

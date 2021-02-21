@@ -47,33 +47,43 @@ class AwsSqsJobQueueModule(
 
     // We use an unbounded thread pool for the number of consumers, as we want to process
     // the messages received as fast a possible.
-    install(ExecutorServiceModule.withUnboundThreadPool(
+    install(
+      ExecutorServiceModule.withUnboundThreadPool(
         ForSqsHandling::class,
-        "sqs-consumer-%d"))
+        "sqs-consumer-%d"
+      )
+    )
 
     // We use an unbounded thread pool for number of receivers, as this will be controlled dynamically
     // using a feature flag.
-    install(ExecutorServiceModule.withUnboundThreadPool(
+    install(
+      ExecutorServiceModule.withUnboundThreadPool(
         ForSqsReceiving::class,
-        "sqs-receiver"))
+        "sqs-receiver"
+      )
+    )
 
     // Bind a map of AmazonSQS clients for each external region that we need to contact
     val regionSpecificClientBinder = newMapBinder<AwsRegion, AmazonSQS>()
     config.external_queues
-        .mapNotNull { (_, config) -> config.region }
-        .map { AwsRegion(it) }
-        .distinct()
-        .forEach {
-          regionSpecificClientBinder.addBinding(it).toProvider(AmazonSQSProvider(config, it, false))
-        }
-    val regionSpecificClientBinderForReceiving = newMapBinder<AwsRegion, AmazonSQS>(ForSqsReceiving::class)
+      .mapNotNull { (_, config) -> config.region }
+      .map { AwsRegion(it) }
+      .distinct()
+      .forEach {
+        regionSpecificClientBinder.addBinding(it).toProvider(
+          AmazonSQSProvider(config, it, false)
+        )
+      }
+    val regionSpecificClientBinderForReceiving =
+      newMapBinder<AwsRegion, AmazonSQS>(ForSqsReceiving::class)
     config.external_queues
-        .mapNotNull { (_, config) -> config.region }
-        .map { AwsRegion(it) }
-        .distinct()
-        .forEach {
-          regionSpecificClientBinderForReceiving.addBinding(it).toProvider(AmazonSQSProvider(config, it, true))
-        }
+      .mapNotNull { (_, config) -> config.region }
+      .map { AwsRegion(it) }
+      .distinct()
+      .forEach {
+        regionSpecificClientBinderForReceiving.addBinding(it)
+          .toProvider(AmazonSQSProvider(config, it, true))
+      }
 
     // Bind the configs for external queues
     val externalQueueConfigBinder = newMapBinder<QueueName, AwsSqsQueueConfig>()
@@ -93,7 +103,10 @@ class AwsSqsJobQueueModule(
   }
 
   @Provides @Singleton @ForSqsReceiving
-  fun provideSQSClientForReceiving(region: AwsRegion, credentials: AWSCredentialsProvider): AmazonSQS {
+  fun provideSQSClientForReceiving(
+    region: AwsRegion,
+    credentials: AWSCredentialsProvider
+  ): AmazonSQS {
     return buildReceivingClient(credentials, region)
   }
 
@@ -103,12 +116,13 @@ class AwsSqsJobQueueModule(
     config: AwsSqsJobQueueConfig
   ): RepeatedTaskQueue {
     return queueFactory.new(
-        "sqs-consumer-poller",
-        repeatedTaskQueueConfig(config))
+      "sqs-consumer-poller",
+      repeatedTaskQueueConfig(config)
+    )
   }
 
   private fun repeatedTaskQueueConfig(config: AwsSqsJobQueueConfig) =
-      config.task_queue ?: RepeatedTaskQueueConfig(num_parallel_tasks = -1)
+    config.task_queue ?: RepeatedTaskQueueConfig(num_parallel_tasks = -1)
 
   private class AmazonSQSProvider(
     val config: AwsSqsJobQueueConfig,
@@ -119,7 +133,7 @@ class AwsSqsJobQueueModule(
     @Inject lateinit var features: FeatureFlags
     @Inject @AppName lateinit var appName: String
 
-    override fun get() : AmazonSQS {
+    override fun get(): AmazonSQS {
       return if (forSqsReceiving) {
         buildReceivingClient(credentials, region)
       } else {
@@ -133,18 +147,20 @@ class AwsSqsJobQueueModule(
     private fun buildReceivingClient(
       credentials: AWSCredentialsProvider,
       region: AwsRegion
-    ) : AmazonSQS {
+    ): AmazonSQS {
       // We don't need any buffering functionality for receiving; build a regular sync client.
       return AmazonSQSClientBuilder.standard()
         .withCredentials(credentials)
         .withRegion(region.name)
-        .withClientConfiguration(ClientConfiguration()
-          .withSocketTimeout(25_000)
-          .withConnectionTimeout(1_000)
-          // Do not artificially constrain the # of connections to SQS. Instead we rely on higher
-          // level resource limiting knobs (e.g # of parallel receivers).
-          // We only do this for receiving, as sending does not have equivalent knobs.
-          .withMaxConnections(Int.MAX_VALUE))
+        .withClientConfiguration(
+          ClientConfiguration()
+            .withSocketTimeout(25_000)
+            .withConnectionTimeout(1_000)
+            // Do not artificially constrain the # of connections to SQS. Instead we rely on higher
+            // level resource limiting knobs (e.g # of parallel receivers).
+            // We only do this for receiving, as sending does not have equivalent knobs.
+            .withMaxConnections(Int.MAX_VALUE)
+        )
         .build()
     }
 
@@ -164,10 +180,12 @@ class AwsSqsJobQueueModule(
       val asyncClient = AmazonSQSAsyncClientBuilder.standard()
         .withCredentials(credentials)
         .withRegion(region.name)
-        .withClientConfiguration(ClientConfiguration()
-          .withSocketTimeout(config.sqs_sending_socket_timeout_ms)
-          .withConnectionTimeout(config.sqs_sending_connect_timeout_ms)
-          .withRequestTimeout(config.sqs_sending_request_timeout_ms))
+        .withClientConfiguration(
+          ClientConfiguration()
+            .withSocketTimeout(config.sqs_sending_socket_timeout_ms)
+            .withConnectionTimeout(config.sqs_sending_connect_timeout_ms)
+            .withRequestTimeout(config.sqs_sending_request_timeout_ms)
+        )
         .build()
 
       // NB: It's unlikely this client will be used for receiving (i.e. to issue ReceiveMessage
@@ -187,7 +205,7 @@ class AwsSqsJobQueueModule(
 }
 
 /** Modify a [QueueBufferConfig] to disable all receive pre-fetching settings. */
-fun QueueBufferConfig.withNoPrefetching() : QueueBufferConfig {
+fun QueueBufferConfig.withNoPrefetching(): QueueBufferConfig {
   return withMaxInflightReceiveBatches(0)
     .withAdapativePrefetching(false)
     .withMaxDoneReceiveBatches(0)

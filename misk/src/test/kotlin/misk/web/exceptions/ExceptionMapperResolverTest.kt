@@ -19,7 +19,7 @@ internal class ExceptionMapperResolverTest {
     mappers[ActionException::class] = ActionExceptionMapper()
 
     assertThat(resolver.mapperFor(NotFoundException()))
-        .isInstanceOf(NotFoundExceptionMapper::class.java)
+      .isInstanceOf(NotFoundExceptionMapper::class.java)
   }
 
   @Test
@@ -27,13 +27,13 @@ internal class ExceptionMapperResolverTest {
     mappers[ActionException::class] = ActionExceptionMapper()
 
     assertThat(resolver.mapperFor(NotFoundException()))
-        .isInstanceOf(ActionExceptionMapper::class.java)
+      .isInstanceOf(ActionExceptionMapper::class.java)
   }
 
   @Test
   fun noMapperFound() {
     assertThat(resolver.mapperFor(NotFoundException()))
-        .isNull()
+      .isNull()
   }
 
   @Test
@@ -41,7 +41,7 @@ internal class ExceptionMapperResolverTest {
     mappers[ArithmeticException::class] = ArithmeticExceptionMapper()
 
     assertThat(resolver.mapperFor(ArithmeticException()))
-        .isInstanceOf(ArithmeticExceptionMapper::class.java)
+      .isInstanceOf(ArithmeticExceptionMapper::class.java)
   }
 
   class NotFoundExceptionMapper : BaseExceptionMapper<NotFoundException>()

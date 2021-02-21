@@ -67,7 +67,8 @@ internal class MediaRangeTest {
   @Test
   fun parseWithQualityFactor() {
     val mediaRange = MediaRange.parse(
-        "text/html;level = 1 ; strict = true;charset=us-ascii; q = 0.45")
+      "text/html;level = 1 ; strict = true;charset=us-ascii; q = 0.45"
+    )
     assertThat(mediaRange.type).isEqualTo("text")
     assertThat(mediaRange.subtype).isEqualTo("html")
     assertThat(mediaRange.charset).isEqualTo(Charsets.US_ASCII)
@@ -79,7 +80,8 @@ internal class MediaRangeTest {
   @Test
   fun parseWithExtensions() {
     val mediaRange = MediaRange.parse(
-        "text/html;level = 1 ; strict = true;charset=us-ascii; q = 0.45; ext1=79; ext2=blerp")
+      "text/html;level = 1 ; strict = true;charset=us-ascii; q = 0.45; ext1=79; ext2=blerp"
+    )
     assertThat(mediaRange.type).isEqualTo("text")
     assertThat(mediaRange.subtype).isEqualTo("html")
     assertThat(mediaRange.charset).isEqualTo(Charsets.US_ASCII)
@@ -238,15 +240,19 @@ internal class MediaRangeTest {
     MediaRange.parseRanges("text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
 
     MediaRange.parseRanges(
-        "application/xml,application/xhtml+xml,text/html;q=0.9, text/plain;q=0.8,image/png,*/*;q=0.5"
+      "application/xml,application/xhtml+xml,text/html;q=0.9, " +
+        "text/plain;q=0.8,image/png,*/*;q=0.5"
     )
     MediaRange.parseRanges("text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
     MediaRange.parseRanges(
-        "image/jpeg, application/x-ms-application, image/gif, application/xaml+xml, image/pjpeg, application/x-ms-xbap, application/x-shockwave-flash, application/msword, */*"
+      "image/jpeg, application/x-ms-application, image/gif, " +
+        "application/xaml+xml, image/pjpeg, application/x-ms-xbap, " +
+        "application/x-shockwave-flash, application/msword, */*"
     )
     MediaRange.parseRanges("text/html, application/xhtml+xml, image/jxr, */*")
     MediaRange.parseRanges(
-        "text/html, application/xml;q=0.9, application/xhtml+xml, image/png, image/webp, image/jpeg, image/gif, image/x-xbitmap, */*;q=0.1"
+      "text/html, application/xml;q=0.9, application/xhtml+xml, image/png, image/webp, " +
+        "image/jpeg, image/gif, image/x-xbitmap, */*;q=0.1"
     )
   }
 }

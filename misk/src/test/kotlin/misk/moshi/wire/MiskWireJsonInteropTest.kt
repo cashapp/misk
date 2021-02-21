@@ -2,10 +2,10 @@ package misk.moshi.wire
 
 import com.google.inject.Guice
 import com.squareup.moshi.Moshi
-import kotlin.reflect.KClass
 import misk.moshi.MoshiModule
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import kotlin.reflect.KClass
 
 /**
  * Migration phases:
@@ -76,7 +76,10 @@ internal class MiskWireJsonInteropTest {
   }
 
   private fun <T : Any> testTransitioningToWirePhase(
-    message: T, type: KClass<T>, a: Moshi, b: Moshi
+    message: T,
+    type: KClass<T>,
+    a: Moshi,
+    b: Moshi
   ) {
     val aAdapter = a.adapter(type.java)
     val bAdapter = b.adapter(type.java)

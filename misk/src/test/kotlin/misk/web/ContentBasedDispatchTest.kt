@@ -41,7 +41,7 @@ internal class ContentBasedDispatchTest {
     val requestContent = packetJsonAdapter.toJson(Packet("my friend"))
     val responseContent = postHello(jsonMediaType, requestContent, jsonMediaType).source()
     assertThat(packetJsonAdapter.fromJson(responseContent)!!.message)
-        .isEqualTo("json->json my friend")
+      .isEqualTo("json->json my friend")
   }
 
   @Test
@@ -55,7 +55,7 @@ internal class ContentBasedDispatchTest {
   fun postPlainTextExpectJson() {
     val responseContent = postHello(plainTextMediaType, "my friend", jsonMediaType).source()
     assertThat(packetJsonAdapter.fromJson(responseContent)!!.message)
-        .isEqualTo("text->json my friend")
+      .isEqualTo("text->json my friend")
   }
 
   @Test
@@ -80,15 +80,15 @@ internal class ContentBasedDispatchTest {
   fun postArbitraryExpectJson() {
     val responseContent = postHello(weirdMediaType, "my friend", jsonMediaType).source()
     assertThat(packetJsonAdapter.fromJson(responseContent)!!.message)
-        .isEqualTo("*->json my friend")
+      .isEqualTo("*->json my friend")
   }
 
   @Test
   fun postArbitraryExpectArbitrary() {
     val responseContent = postHello(
-        weirdMediaType,
-        "my friend",
-        weirdMediaType
+      weirdMediaType,
+      "my friend",
+      weirdMediaType
     ).source()
     assertThat(responseContent.readUtf8()).isEqualTo("*->* my friend")
   }
@@ -167,7 +167,7 @@ internal class ContentBasedDispatchTest {
   ): okhttp3.ResponseBody {
     val request = newRequest("/hello", contentType, content, acceptedMediaType)
     val response = httpClient.newCall(request)
-        .execute()
+      .execute()
     assertThat(response.code).isEqualTo(200)
     return response.body!!
   }
@@ -179,8 +179,8 @@ internal class ContentBasedDispatchTest {
     acceptedMediaType: MediaType? = null
   ): Request {
     val request = Request.Builder()
-        .post(content.toRequestBody(contentType))
-        .url(jettyService.httpServerUrl.newBuilder().encodedPath(path).build())
+      .post(content.toRequestBody(contentType))
+      .url(jettyService.httpServerUrl.newBuilder().encodedPath(path).build())
 
     if (acceptedMediaType != null) {
       request.header("Accept", acceptedMediaType.toString())

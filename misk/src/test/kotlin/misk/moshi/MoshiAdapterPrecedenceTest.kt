@@ -34,10 +34,10 @@ internal class MoshiAdapterPrecedenceTest {
 
   @MiskTestModule
   val module: Module = Modules.combine(
-      MoshiModule(),
-      MoshiAdapterModule(factory1),
-      MoshiAdapterModule(adapter2),
-      MoshiAdapterModule(factory3)
+    MoshiModule(),
+    MoshiAdapterModule(factory1),
+    MoshiAdapterModule(adapter2),
+    MoshiAdapterModule(factory3)
   )
 
   @Inject lateinit var moshi: Moshi
@@ -50,9 +50,10 @@ internal class MoshiAdapterPrecedenceTest {
     println(adapter)
 
     assertThat(log).containsExactly(
-        "factory1 create ${Pizza::class.java}",
-        // factory3 not consulted because adapter2 matched.
-        "factory1 create ${String::class.java}",
-        "factory3 create ${String::class.java}")
+      "factory1 create ${Pizza::class.java}",
+      // factory3 not consulted because adapter2 matched.
+      "factory1 create ${String::class.java}",
+      "factory3 create ${String::class.java}"
+    )
   }
 }

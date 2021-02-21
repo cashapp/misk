@@ -16,13 +16,9 @@ import okio.ByteString;
 
 public final class Warehouse extends Message<Warehouse, Warehouse.Builder> {
   public static final ProtoAdapter<Warehouse> ADAPTER = new ProtoAdapter_Warehouse();
-
-  private static final long serialVersionUID = 0L;
-
   public static final Long DEFAULT_WAREHOUSE_ID = 0L;
-
   public static final String DEFAULT_WAREHOUSE_TOKEN = "";
-
+  private static final long serialVersionUID = 0L;
   @WireField(
       tag = 1,
       adapter = "com.squareup.wire.ProtoAdapter#INT64"

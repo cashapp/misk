@@ -35,6 +35,7 @@ class ExplicitClusterResourceMapper : ClusterResourceMapper {
       defaultMapping.get() ?: throw NoMembersAvailableException(resourceId)
     }
     return mappings[resourceId] ?: defaultMapping.get() ?: throw IllegalStateException(
-        "no mapping for $resourceId")
+      "no mapping for $resourceId"
+    )
   }
 }

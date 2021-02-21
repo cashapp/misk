@@ -31,14 +31,15 @@ class ExceptionMapperModule<M : ExceptionMapper<T>, in T : Throwable>(
 ) : KAbstractModule() {
   override fun configure() {
     MapBinder.newMapBinder(binder(), exceptionTypeLiteral, exceptionMapperTypeLiteral)
-        .addBinding(exceptionClass)
-        .to(mapperClass.java)
+      .addBinding(exceptionClass)
+      .to(mapperClass.java)
   }
 
   companion object {
-    inline fun <reified T : Throwable, reified M : ExceptionMapper<T>> create() = ExceptionMapperModule(
+    inline fun <reified T : Throwable, reified M : ExceptionMapper<T>> create() =
+      ExceptionMapperModule(
         T::class, M::class
-    )
+      )
 
     private val exceptionMapperTypeLiteral = object : TypeLiteral<ExceptionMapper<*>>() {}
     private val exceptionTypeLiteral = object : TypeLiteral<KClass<*>>() {}

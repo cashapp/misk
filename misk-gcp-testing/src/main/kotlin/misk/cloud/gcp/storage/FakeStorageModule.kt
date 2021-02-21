@@ -14,8 +14,8 @@ class FakeStorageModule : KAbstractModule() {
   @Provides
   @Singleton
   fun provideStorage(): Storage = StorageOptions.newBuilder()
-      .setCredentials(NoCredentials.getInstance())
-      .setServiceRpcFactory({ _ -> InMemoryStorageRpc() })
-      .build()
-      .service
+    .setCredentials(NoCredentials.getInstance())
+    .setServiceRpcFactory({ _ -> InMemoryStorageRpc() })
+    .build()
+    .service
 }

@@ -19,7 +19,7 @@ class GcpKeyManagementModule(private val config: GcpKmsConfig) : KAbstractModule
   @Provides
   @Singleton
   fun providesKms(@AppName appName: String): CloudKMS =
-      CloudKMS.Builder(newTrustedTransport(), JacksonFactory(), null)
-          .setApplicationName(appName)
-          .build()
+    CloudKMS.Builder(newTrustedTransport(), JacksonFactory(), null)
+      .setApplicationName(appName)
+      .build()
 }

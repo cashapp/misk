@@ -8,6 +8,7 @@ import com.google.cloud.storage.spi.v1.StorageRpc
 import com.google.cloud.storage.spi.v1.StorageRpc.Option.IF_GENERATION_MATCH
 import com.google.cloud.storage.spi.v1.StorageRpc.Option.IF_GENERATION_NOT_MATCH
 import com.squareup.moshi.Moshi
+import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import misk.io.listRecursively
 import misk.moshi.adapter
 import misk.okio.forEachBlock
@@ -16,6 +17,7 @@ import okio.source
 import java.io.FileNotFoundException
 import java.io.IOException
 import java.io.InputStream
+import java.io.OutputStream
 import java.math.BigInteger
 import java.nio.ByteBuffer
 import java.nio.channels.FileChannel
@@ -34,8 +36,6 @@ import java.util.concurrent.locks.ReentrantReadWriteLock
 import kotlin.concurrent.read
 import kotlin.concurrent.write
 import kotlin.streams.asSequence
-import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
-import java.io.OutputStream
 
 /**
  * Implementation of [StorageRpc] that is backed by local disk storage. Useful for running
@@ -97,8 +97,8 @@ import java.io.OutputStream
 class LocalStorageRpc(
   root: Path,
   moshi: Moshi = Moshi.Builder()
-      .add(KotlinJsonAdapterFactory()) // Added last for lowest precedence.
-      .build()
+    .add(KotlinJsonAdapterFactory()) // Added last for lowest precedence.
+    .build()
 ) : BaseCustomStorageRpc() {
   // Handles in-process synchronization; cross-process synchronization is handled by file locks
   private val internalLock = ReentrantReadWriteLock()
@@ -140,44 +140,44 @@ class LocalStorageRpc(
       val prefixElements = prefix.split(delimiter ?: "/").toTypedArray()
       val parentFolderElements = prefixElements.dropLast(1).toTypedArray()
       val parentMetadataFolder =
-          metadataRoot.resolve(Paths.get(bucket, *parentFolderElements))
+        metadataRoot.resolve(Paths.get(bucket, *parentFolderElements))
       val bucketRoot = metadataRoot.resolve(Paths.get(bucket))
       val filePrefix = prefixElements.last().trim()
 
       val (folderPaths, filePaths) = if (delimiter != null) {
         // We want to find just the files + subfolders in the current folder
         Files.list(parentMetadataFolder).asSequence()
-            .filter {
-              filePrefix.isEmpty() || it.fileName.toString().startsWith(filePrefix)
-            }
-            .partition { Files.isDirectory(it) }
+          .filter {
+            filePrefix.isEmpty() || it.fileName.toString().startsWith(filePrefix)
+          }
+          .partition { Files.isDirectory(it) }
       } else {
         // We want to find all of the files beneath this sub-folder
         listOf<Path>() to parentMetadataFolder.listRecursively().filter {
           filePrefix.isEmpty() || it.getName(parentMetadataFolder.nameCount).toString()
-              .startsWith(filePrefix)
+            .startsWith(filePrefix)
         }
       }
 
       val folders = folderPaths
-          .map { bucketRoot.toBlobId(it) }
-          .map {
-            StorageObject()
-                .setBucket(it.bucket)
-                .setName(it.name)
-          }
+        .map { bucketRoot.toBlobId(it) }
+        .map {
+          StorageObject()
+            .setBucket(it.bucket)
+            .setName(it.name)
+        }
 
       val files = filePaths
-          .map { bucketRoot.toBlobId(it) }
-          .mapNotNull { blobId ->
-            withReadLock(blobId) {
-              readMetadata(blobId)?.let {
-                val contentPath = contentRoot.resolve(blobId.toPath(it.generation))
-                val contentSize = getContentSize(contentPath)
-                it.toStorageObject(blobId, contentSize)
-              }
+        .map { bucketRoot.toBlobId(it) }
+        .mapNotNull { blobId ->
+          withReadLock(blobId) {
+            readMetadata(blobId)?.let {
+              val contentPath = contentRoot.resolve(blobId.toPath(it.generation))
+              val contentSize = getContentSize(contentPath)
+              it.toStorageObject(blobId, contentSize)
             }
           }
+        }
 
       return Tuple.of("", files + folders)
     } catch (e: IOException) {
@@ -220,7 +220,7 @@ class LocalStorageRpc(
   override fun load(obj: StorageObject, options: Map<StorageRpc.Option, *>): ByteArray = try {
     withReadLock(obj.blobId) {
       val metadata = getMetadataForReading(obj.blobId, options)
-          ?: throw StorageException(404, "${obj.blobId.fullName} not found")
+        ?: throw StorageException(404, "${obj.blobId.fullName} not found")
 
       Files.readAllBytes(contentRoot.resolve(obj.blobId.toPath(metadata.generation)))
     }
@@ -236,7 +236,7 @@ class LocalStorageRpc(
   ): Long = try {
     withReadLock(from.blobId) {
       val metadata = getMetadataForReading(from.blobId, options)
-          ?: throw StorageException(404, "${from.blobId.fullName} not found")
+        ?: throw StorageException(404, "${from.blobId.fullName} not found")
 
       val contentPath = contentRoot.resolve(from.blobId.toPath(metadata.generation))
       val contentChannel = Files.newByteChannel(contentPath, READ)
@@ -256,7 +256,7 @@ class LocalStorageRpc(
   }
 
   override fun open(obj: StorageObject, options: Map<StorageRpc.Option, *>): String =
-      beginUpload(obj, options).id
+    beginUpload(obj, options).id
 
   override fun write(
     uploadId: String,
@@ -283,21 +283,21 @@ class LocalStorageRpc(
       // we risk running into deadlocks
       val (source, target) = request.source to request.target
       val (lock1, lock2) = arrayOf(source.blobId, target.blobId)
-          .sortedWith(Comparator { b1, b2 -> b1.compareTo(b2) })
+        .sortedWith(Comparator { b1, b2 -> b1.compareTo(b2) })
 
       withWriteLock(lock1) {
         withWriteLock(lock2) {
           val sourceMetadata = getMetadataForReading(source.blobId, request.sourceOptions)
-              ?: throw StorageException(404, "${source.blobId.fullName} not found")
+            ?: throw StorageException(404, "${source.blobId.fullName} not found")
           val sourceContentFile =
-              contentRoot.resolve(source.blobId.toPath(sourceMetadata.generation))
+            contentRoot.resolve(source.blobId.toPath(sourceMetadata.generation))
 
           val existingTargetMetadata =
-              getMetadataForWriting(target.blobId, request.targetOptions)
+            getMetadataForWriting(target.blobId, request.targetOptions)
           val newTargetMetadata =
-              request.target.nextGenerationMetadata(existingTargetMetadata)
+            request.target.nextGenerationMetadata(existingTargetMetadata)
           val targetContentFile =
-              contentRoot.resolve(target.blobId.toPath(newTargetMetadata.generation))
+            contentRoot.resolve(target.blobId.toPath(newTargetMetadata.generation))
 
           // Copy from source to a temporary file, then atomically move from the
           // temp file into the target target
@@ -308,7 +308,7 @@ class LocalStorageRpc(
 
           existingTargetMetadata?.let {
             val oldTargetContentPath =
-                contentRoot.resolve(target.blobId.toPath(it.generation))
+              contentRoot.resolve(target.blobId.toPath(it.generation))
             try {
               Files.deleteIfExists(oldTargetContentPath)
             } catch (_: IOException) {
@@ -318,12 +318,13 @@ class LocalStorageRpc(
 
           val sourceContentSize = getContentSize(sourceContentFile)
           StorageRpc.RewriteResponse(
-              request,
-              request.target,
-              sourceContentSize,
-              true,
-              "token",
-              sourceContentSize)
+            request,
+            request.target,
+            sourceContentSize,
+            true,
+            "token",
+            sourceContentSize
+          )
         }
       }
     } catch (e: IOException) {
@@ -375,8 +376,10 @@ class LocalStorageRpc(
         it != 0L && existingMetadata == null ->
           throw StorageException(404, "${blobId.fullName} does not exist")
         it != 0L && existingMetadata != null && it != existingMetadata.generation ->
-          throw StorageException(401,
-              "generation mismatch: ${existingMetadata.generation} != $it")
+          throw StorageException(
+            401,
+            "generation mismatch: ${existingMetadata.generation} != $it"
+          )
         else -> {
         }
       }
@@ -439,7 +442,7 @@ class LocalStorageRpc(
     // Copy bytes into the temporary file for this upload
     internalLock.read {
       val upload = uploads[uploadId]
-          ?: throw StorageException(404, "no such upload $uploadId")
+        ?: throw StorageException(404, "no such upload $uploadId")
       val buffer = ByteBuffer.wrap(toWrite, toWriteOffset, length)
       val ch = Files.newByteChannel(upload.tempFile, CREATE, WRITE)
       val position = Math.min(destOffset, ch.size())
@@ -525,18 +528,18 @@ class LocalStorageRpc(
     val contentEncoding: String?
   ) {
     fun toStorageObject(blobId: BlobId, size: Long = 0): StorageObject =
-        StorageObject()
-            .setGeneration(generation)
-            .setName(blobId.name)
-            .setBucket(blobId.bucket)
-            .setMetageneration(metageneration)
-            .setContentType(contentType)
-            .setContentEncoding(contentEncoding)
-            .setSize(BigInteger.valueOf(size))
-            .setMetadata(if (userProperties.isEmpty()) null else userProperties)
+      StorageObject()
+        .setGeneration(generation)
+        .setName(blobId.name)
+        .setBucket(blobId.bucket)
+        .setMetageneration(metageneration)
+        .setContentType(contentType)
+        .setContentEncoding(contentEncoding)
+        .setSize(BigInteger.valueOf(size))
+        .setMetadata(if (userProperties.isEmpty()) null else userProperties)
 
     fun toStorageObject(bucket: String, name: String, size: Long = 0) =
-        toStorageObject(BlobId.of(bucket, name), size)
+      toStorageObject(BlobId.of(bucket, name), size)
   }
 
   private class Upload(
@@ -559,11 +562,12 @@ class LocalStorageRpc(
     }
 
     return BlobMetadata(
-        newGeneration,
-        newMetaGeneration,
-        newUserProperties,
-        newContentType,
-        newContentEncoding)
+      newGeneration,
+      newMetaGeneration,
+      newUserProperties,
+      newContentType,
+      newContentEncoding
+    )
   }
 }
 
@@ -576,7 +580,7 @@ private val Map<StorageRpc.Option, *>.generationMatch
 private val StorageObject.blobId get() = BlobId.of(bucket, name, generation)
 
 private fun BlobId.toPath(generation: Long) =
-    Paths.get(bucket, *parentPathElements, fileName(generation))
+  Paths.get(bucket, *parentPathElements, fileName(generation))
 
 private fun BlobId.toPath() = Paths.get(bucket, *pathElements)
 private val BlobId.parentPathElements get() = pathElements.dropLast(1).toTypedArray()
@@ -585,7 +589,7 @@ private fun BlobId.fileName(generation: Long = 1) = "${pathElements.last()}.$gen
 private val BlobId.fullName get() = "$bucket:$name"
 
 private fun Path.toBlobId(childPath: Path): BlobId =
-    BlobId.of(fileName.toString(), relativize(childPath).joinToString("/"))
+  BlobId.of(fileName.toString(), relativize(childPath).joinToString("/"))
 
 fun <T> FileChannel.withLock(shared: Boolean, action: () -> T) =
-    lock(0, Long.MAX_VALUE, shared).use { action() }
+  lock(0, Long.MAX_VALUE, shared).use { action() }

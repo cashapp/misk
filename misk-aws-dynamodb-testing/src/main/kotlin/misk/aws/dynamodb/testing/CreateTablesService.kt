@@ -35,12 +35,12 @@ class CreateTablesService @Inject constructor(
     table: DynamoDbTable
   ) {
     var tableRequest = DynamoDBMapper(this)
-        .generateCreateTableRequest(table.tableClass.java)
-        // Provisioned throughput needs to be specified when creating the table. However,
-        // DynamoDB Local ignores your provisioned throughput settings. The values that you specify
-        // when you call CreateTable and UpdateTable have no effect. In addition, DynamoDB Local
-        // does not throttle read or write activity.
-        .withProvisionedThroughput(ProvisionedThroughput(1L, 1L))
+      .generateCreateTableRequest(table.tableClass.java)
+      // Provisioned throughput needs to be specified when creating the table. However,
+      // DynamoDB Local ignores your provisioned throughput settings. The values that you specify
+      // when you call CreateTable and UpdateTable have no effect. In addition, DynamoDB Local
+      // does not throttle read or write activity.
+      .withProvisionedThroughput(ProvisionedThroughput(1L, 1L))
     val globalSecondaryIndexes = tableRequest.globalSecondaryIndexes ?: emptyList()
     for (globalSecondaryIndex in globalSecondaryIndexes) {
       // Provisioned throughput needs to be specified when creating the table.
@@ -59,4 +59,3 @@ class CreateTablesService @Inject constructor(
 }
 
 private val logger = getLogger<CreateTablesService>()
-

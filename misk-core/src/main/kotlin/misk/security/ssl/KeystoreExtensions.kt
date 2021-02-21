@@ -27,8 +27,10 @@ fun KeyStore.getCertificateAndKey(alias: String, passphrase: CharArray): Certifi
 }
 
 /** @return the one and only [CertificateAndKey] in the keystore */
-fun KeyStore.getCertificateAndKey(passphrase: CharArray) = getCertificateAndKey(onlyAlias,
-    passphrase)
+fun KeyStore.getCertificateAndKey(passphrase: CharArray) = getCertificateAndKey(
+  onlyAlias,
+  passphrase
+)
 
 /** @return the only alias in the keystore, if the keystore only has a single entry */
 val KeyStore.onlyAlias: String
@@ -44,7 +46,7 @@ val KeyStore.onlyAlias: String
 fun KeyStore.getPrivateKey(alias: String, passphrase: CharArray): PrivateKey {
   try {
     return getKey(alias, passphrase) as? PrivateKey
-        ?: throw IllegalStateException("no private key with alias $alias")
+      ?: throw IllegalStateException("no private key with alias $alias")
   } catch (e: NoSuchAlgorithmException) {
     throw IllegalStateException("Algorithm for reading key not available", e)
   } catch (e: UnrecoverableKeyException) {
@@ -82,10 +84,10 @@ fun KeyStore.getX509Certificate(alias: String): X509Certificate {
   require(alias.isNotBlank()) { "alias must not be empty or blank" }
 
   val cert = getCertificate(alias)
-      ?: throw IllegalStateException("no certificate found for alias $alias")
+    ?: throw IllegalStateException("no certificate found for alias $alias")
 
   return cert as? X509Certificate
-      ?: throw IllegalStateException("certificate for $alias is not an X509 certificate")
+    ?: throw IllegalStateException("certificate for $alias is not an X509 certificate")
 }
 
 /** @return the one and only [X509Certificate] in the keystore */

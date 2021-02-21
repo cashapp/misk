@@ -15,21 +15,25 @@ internal class WebActionBindingTest {
   private val responseBodyFactory = FakeFeatureBindingFactory(claimResponseBody = true)
   private val returnValueFactory = FakeFeatureBindingFactory(claimReturnValue = true)
   private val parametersFactory = FakeFeatureBindingFactory(
-      claimParameterValues = mutableMapOf(0 to "zero", 1 to "one"))
-  private val webActionBindingFactory = WebActionBinding.Factory(listOf(
+    claimParameterValues = mutableMapOf(0 to "zero", 1 to "one")
+  )
+  private val webActionBindingFactory = WebActionBinding.Factory(
+    listOf(
       defaultFactory,
       requestBodyFactory,
       responseBodyFactory,
       returnValueFactory,
       parametersFactory
-  ))
+    )
+  )
   private val pathPattern = PathPattern.parse("/")
   private val voidApiCallAction = TestAction::voidApiCall.asAction(DispatchMechanism.POST)
 
   @Test
   internal fun happyPath() {
     val binding = webActionBindingFactory.create(
-        TestAction::fakeApiCall.asAction(DispatchMechanism.POST), pathPattern)
+      TestAction::fakeApiCall.asAction(DispatchMechanism.POST), pathPattern
+    )
     val httpCall = FakeHttpCall()
     val matcher = pathPattern.matcher(httpCall.url)!!
 
@@ -51,11 +55,18 @@ internal class WebActionBindingTest {
     parametersFactory.claimParameterValues.remove(1)
 
     val e = assertFailsWith<IllegalStateException> {
-      webActionBindingFactory.create(TestAction::fakeApiCall.asAction(DispatchMechanism.POST),
-          pathPattern)
+      webActionBindingFactory.create(
+        TestAction::fakeApiCall.asAction(DispatchMechanism.POST),
+        pathPattern
+      )
     }
-    assertThat(e).hasMessage("${TestAction::fakeApiCall.asAction(
-        DispatchMechanism.POST)} parameter 1 not claimed (did you forget @RequestBody ?)")
+    assertThat(e).hasMessage(
+      "${
+      TestAction::fakeApiCall.asAction(
+        DispatchMechanism.POST
+      )
+      } parameter 1 not claimed (did you forget @RequestBody ?)"
+    )
   }
 
   @Test
@@ -63,8 +74,10 @@ internal class WebActionBindingTest {
     requestBodyFactory.result = null
 
     val e = assertFailsWith<IllegalStateException> {
-      webActionBindingFactory.create(TestAction::fakeApiCall.asAction(DispatchMechanism.POST),
-          pathPattern)
+      webActionBindingFactory.create(
+        TestAction::fakeApiCall.asAction(DispatchMechanism.POST),
+        pathPattern
+      )
     }
     assertThat(e).hasMessage("FakeFactory returned null after making a claim")
   }
@@ -76,7 +89,8 @@ internal class WebActionBindingTest {
     parametersFactory.result!!.claimReturnValue = true
 
     val binding = webActionBindingFactory.create(
-        TestAction::fakeApiCall.asAction(DispatchMechanism.POST), pathPattern)
+      TestAction::fakeApiCall.asAction(DispatchMechanism.POST), pathPattern
+    )
     val httpCall = FakeHttpCall()
     val matcher = pathPattern.matcher(httpCall.url)!!
 
@@ -99,8 +113,10 @@ internal class WebActionBindingTest {
     parametersFactory.claimParameterValues[1] = "pepsi"
 
     val e = assertFailsWith<IllegalStateException> {
-      webActionBindingFactory.create(TestAction::fakeApiCall.asAction(DispatchMechanism.POST),
-          pathPattern)
+      webActionBindingFactory.create(
+        TestAction::fakeApiCall.asAction(DispatchMechanism.POST),
+        pathPattern
+      )
     }
     assertThat(e).hasMessage("already claimed by ${defaultFactory.result}")
   }
@@ -108,7 +124,8 @@ internal class WebActionBindingTest {
   @Test
   internal fun claimButDoNotSupplyParameter() {
     val binding = webActionBindingFactory.create(
-        TestAction::fakeApiCall.asAction(DispatchMechanism.POST), pathPattern)
+      TestAction::fakeApiCall.asAction(DispatchMechanism.POST), pathPattern
+    )
     val httpCall = FakeHttpCall()
     val matcher = pathPattern.matcher(httpCall.url)!!
 
@@ -121,7 +138,8 @@ internal class WebActionBindingTest {
   internal fun claimGetRequestBody() {
     val e = assertFailsWith<IllegalStateException> {
       webActionBindingFactory.create(
-          TestAction::fakeApiCall.asAction(DispatchMechanism.GET), pathPattern)
+        TestAction::fakeApiCall.asAction(DispatchMechanism.GET), pathPattern
+      )
     }
     assertThat(e).hasMessage("cannot claim request body of GET")
   }
@@ -130,7 +148,8 @@ internal class WebActionBindingTest {
   internal fun claimDeleteRequestBody() {
     val e = assertFailsWith<IllegalStateException> {
       webActionBindingFactory.create(
-          TestAction::fakeApiCall.asAction(DispatchMechanism.DELETE), pathPattern)
+        TestAction::fakeApiCall.asAction(DispatchMechanism.DELETE), pathPattern
+      )
     }
     assertThat(e).hasMessage("cannot claim request body of DELETE")
   }
@@ -186,7 +205,8 @@ internal class WebActionBindingTest {
     var claimResponseBody: Boolean = false,
     var claimReturnValue: Boolean = false,
     var result: FakeFeatureBinding? = FakeFeatureBinding(
-        claimRequestBody, claimParameterValues, claimResponseBody, claimReturnValue)
+      claimRequestBody, claimParameterValues, claimResponseBody, claimReturnValue
+    )
   ) : FeatureBinding.Factory {
     override fun create(
       action: Action,

@@ -11,8 +11,10 @@ import javax.inject.Inject
 @MiskTest(startService = false)
 internal class EventRouterTest {
   @MiskTestModule
-  val module = Modules.combine(MiskTestingServiceModule(),
-      EventRouterTestingModule(distributed = true))
+  val module = Modules.combine(
+    MiskTestingServiceModule(),
+    EventRouterTestingModule(distributed = true)
+  )
 
   @Inject lateinit var machineA: RealEventRouter
   @Inject lateinit var machineB: RealEventRouter
@@ -204,12 +206,18 @@ internal class EventRouterTest {
     machineA.leaveCluster()
     fakeEventRouterProcessor.processEverything()
 
-    assertThat(listenerA.events).containsExactly("chat: open", "chat: a", "chat: b", "chat: c",
-        "chat: close")
-    assertThat(listenerB.events).containsExactly("chat: open", "chat: a", "chat: b", "chat: c",
-        "chat: close")
-    assertThat(listenerC.events).containsExactly("chat: open", "chat: a", "chat: b", "chat: c",
-        "chat: close")
+    assertThat(listenerA.events).containsExactly(
+      "chat: open", "chat: a", "chat: b", "chat: c",
+      "chat: close"
+    )
+    assertThat(listenerB.events).containsExactly(
+      "chat: open", "chat: a", "chat: b", "chat: c",
+      "chat: close"
+    )
+    assertThat(listenerC.events).containsExactly(
+      "chat: open", "chat: a", "chat: b", "chat: c",
+      "chat: close"
+    )
 
     topicB.subscribe(listenerB)
     topicC.subscribe(listenerC)
@@ -219,12 +227,18 @@ internal class EventRouterTest {
 
     fakeEventRouterProcessor.processEverything()
 
-    assertThat(listenerA.events).containsExactly("chat: open", "chat: a", "chat: b", "chat: c",
-        "chat: close")
-    assertThat(listenerB.events).containsExactly("chat: open", "chat: a", "chat: b", "chat: c",
-        "chat: close", "chat: open", "chat: b2")
-    assertThat(listenerC.events).containsExactly("chat: open", "chat: a", "chat: b", "chat: c",
-        "chat: close", "chat: open", "chat: b2")
+    assertThat(listenerA.events).containsExactly(
+      "chat: open", "chat: a", "chat: b", "chat: c",
+      "chat: close"
+    )
+    assertThat(listenerB.events).containsExactly(
+      "chat: open", "chat: a", "chat: b", "chat: c",
+      "chat: close", "chat: open", "chat: b2"
+    )
+    assertThat(listenerC.events).containsExactly(
+      "chat: open", "chat: a", "chat: b", "chat: c",
+      "chat: close", "chat: open", "chat: b2"
+    )
   }
 
   class RecordingListener : Listener<String> {

@@ -24,11 +24,14 @@ class LogRateLimiterTest {
   fun tryAcquire() {
     val bucketId = LogBucketId("TestAction", false)
     assertThat(
-      logRateLimiter.tryAcquire(bucketId, 2L)).isTrue()
+      logRateLimiter.tryAcquire(bucketId, 2L)
+    ).isTrue()
     assertThat(
-      logRateLimiter.tryAcquire(bucketId, 2L)).isTrue()
+      logRateLimiter.tryAcquire(bucketId, 2L)
+    ).isTrue()
     assertThat(
-      logRateLimiter.tryAcquire(bucketId, 2L)).isFalse()
+      logRateLimiter.tryAcquire(bucketId, 2L)
+    ).isFalse()
 
     // Wait 1 second
     fakeTicker.sleepMs(1000L)

@@ -27,7 +27,7 @@ fun <T : DbEntity<T>, R> Pager<T>.listAll(
   transform: (T) -> R
 ): List<R> {
   val results = mutableListOf<R>()
-  while(hasNext()) {
+  while (hasNext()) {
     val nextPage = transacter.transaction { session -> nextPage(session) }
     val pageContents = nextPage?.contents ?: emptyList()
     results.addAll(pageContents.map(transform))

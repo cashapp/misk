@@ -74,10 +74,12 @@ internal class FakeClusterConnector @Inject constructor() : ClusterConnector {
     val hosts = peers.keys.toList()
 
     for ((hostname, peer) in peers) {
-      peer.clusterChanged(ClusterSnapshot(
+      peer.clusterChanged(
+        ClusterSnapshot(
           hosts,
           hostname
-      ))
+        )
+      )
     }
   }
 

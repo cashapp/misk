@@ -11,16 +11,15 @@ import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.time.FakeClock
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Test
-
-import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import javax.inject.Inject
 
 @MiskTest(startService = true)
 internal class SqsJobTest {
   @MiskExternalDependency private val dockerSqs = DockerSqs
-  @MiskTestModule private val module = SqsJobQueueTestModule(dockerSqs.credentials, dockerSqs.client)
+  @MiskTestModule private val module =
+    SqsJobQueueTestModule(dockerSqs.credentials, dockerSqs.client)
 
   @Inject lateinit var sqs: AmazonSQS
   @Inject lateinit var queueResolver: QueueResolver
@@ -31,9 +30,11 @@ internal class SqsJobTest {
   private val testQueue = QueueName("test")
 
   @BeforeEach fun createQueues() {
-    sqs.createQueue(CreateQueueRequest()
+    sqs.createQueue(
+      CreateQueueRequest()
         .withQueueName(testQueue.value)
-        .withAttributes(mapOf("VisibilityTimeout" to "1")))
+        .withAttributes(mapOf("VisibilityTimeout" to "1"))
+    )
   }
 
   @Test
@@ -41,20 +42,27 @@ internal class SqsJobTest {
     val message = Message().apply {
       messageId = "id-0"
       body = "body-0"
-      addMessageAttributesEntry("foo", MessageAttributeValue().withDataType("String").withStringValue("bar"))
-      addMessageAttributesEntry(SqsJob.JOBQUEUE_METADATA_ATTR,
-          MessageAttributeValue().withDataType("String").withStringValue("""{
+      addMessageAttributesEntry(
+        "foo",
+        MessageAttributeValue().withDataType("String").withStringValue("bar")
+      )
+      addMessageAttributesEntry(
+        SqsJob.JOBQUEUE_METADATA_ATTR,
+        MessageAttributeValue().withDataType("String").withStringValue(
+          """{
                 |  "${SqsJob.JOBQUEUE_METADATA_ORIGIN_QUEUE}": "test",
                 |  "${SqsJob.JOBQUEUE_METADATA_IDEMPOTENCE_KEY}": "ik-0",
                 |  "${SqsJob.JOBQUEUE_METADATA_ORIGINAL_TRACE_ID}": "oti-0"
-                |}""".trimMargin()))
+                |}""".trimMargin()
+        )
+      )
     }
     val job = SqsJob(QueueName("test"), queueResolver, sqsMetrics, moshi, message)
 
     assertThat(job.idempotenceKey).isEqualTo("ik-0")
     assertThat(job.attributes)
-        .containsEntry("foo", "bar")
-        .doesNotContainKey(SqsJob.JOBQUEUE_METADATA_ATTR)
+      .containsEntry("foo", "bar")
+      .doesNotContainKey(SqsJob.JOBQUEUE_METADATA_ATTR)
   }
 
   @Test
@@ -63,20 +71,27 @@ internal class SqsJobTest {
       messageId = "id-0"
       body = "body-0"
       addAttributesEntry("SentTimestamp", clock.instant().toEpochMilli().toString())
-      addMessageAttributesEntry("foo", MessageAttributeValue().withDataType("String").withStringValue("bar"))
-      addMessageAttributesEntry(SqsJob.JOBQUEUE_METADATA_ATTR,
-          MessageAttributeValue().withDataType("String").withStringValue("""{
+      addMessageAttributesEntry(
+        "foo",
+        MessageAttributeValue().withDataType("String").withStringValue("bar")
+      )
+      addMessageAttributesEntry(
+        SqsJob.JOBQUEUE_METADATA_ATTR,
+        MessageAttributeValue().withDataType("String").withStringValue(
+          """{
                 |  "${SqsJob.JOBQUEUE_METADATA_ORIGIN_QUEUE}": "test",
                 |  "${SqsJob.JOBQUEUE_METADATA_IDEMPOTENCE_KEY}": "ik-0",
                 |  "${SqsJob.JOBQUEUE_METADATA_ORIGINAL_TRACE_ID}": "oti-0"
-                |}""".trimMargin()))
+                |}""".trimMargin()
+        )
+      )
     }
     val job = SqsJob(QueueName("test"), queueResolver, sqsMetrics, moshi, message)
 
     assertThat(job.idempotenceKey).isEqualTo("ik-0")
     assertThat(job.attributes)
-        .containsEntry("foo", "bar")
-        .containsEntry("SentTimestamp", clock.instant().toEpochMilli().toString())
-        .doesNotContainKey(SqsJob.JOBQUEUE_METADATA_ATTR)
+      .containsEntry("foo", "bar")
+      .containsEntry("SentTimestamp", clock.instant().toEpochMilli().toString())
+      .doesNotContainKey(SqsJob.JOBQUEUE_METADATA_ATTR)
   }
 }

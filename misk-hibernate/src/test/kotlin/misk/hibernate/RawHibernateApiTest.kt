@@ -41,8 +41,8 @@ class RawHibernateApiTest {
       val criteria = criteriaBuilder.createQuery(DbCharacter::class.java)
       val queryRoot = criteria.from(DbCharacter::class.java)
       criteria.where(
-          criteriaBuilder.equal(queryRoot.get<Id<DbMovie>>("movie_id"), jpId),
-          criteriaBuilder.notEqual(queryRoot.get<String>("name"), "Leia Organa")
+        criteriaBuilder.equal(queryRoot.get<Id<DbMovie>>("movie_id"), jpId),
+        criteriaBuilder.notEqual(queryRoot.get<String>("name"), "Leia Organa")
       )
 
       val resultList = session.createQuery(criteria).resultList

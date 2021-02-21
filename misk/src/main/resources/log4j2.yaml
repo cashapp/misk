@@ -7,11 +7,9 @@ Configuration:
 
   Loggers:
     logger:
-      -
-        name: misk
+      - name: misk
         level: debug
-      -
-        name: org.hibernate
+      - name: org.hibernate
         level: error
     Root:
       level: info

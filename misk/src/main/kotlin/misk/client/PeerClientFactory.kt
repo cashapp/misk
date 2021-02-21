@@ -30,10 +30,10 @@ class PeerClientModule : KAbstractModule() {
     check(webConfig.ssl?.port ?: 0 > 0) { "server must have static HTTPS port" }
 
     return PeerClientFactory(
-        appName = appName,
-        httpClientsConfig = httpClientsConfig,
-        httpClientFactory = httpClientFactory,
-        httpsPort = webConfig.ssl!!.port
+      appName = appName,
+      httpClientsConfig = httpClientsConfig,
+      httpClientFactory = httpClientFactory,
+      httpsPort = webConfig.ssl!!.port
     )
   }
 }
@@ -52,10 +52,10 @@ class JettyPortPeerClientModule : KAbstractModule() {
     jetty: JettyService
   ): PeerClientFactory {
     return PeerClientFactory(
-        appName = appName,
-        httpClientsConfig = httpClientsConfig,
-        httpClientFactory = httpClientFactory,
-        httpsPort = jetty.httpsServerUrl!!.port
+      appName = appName,
+      httpClientsConfig = httpClientsConfig,
+      httpClientFactory = httpClientFactory,
+      httpsPort = jetty.httpsServerUrl!!.port
     )
   }
 }
@@ -74,27 +74,27 @@ class PeerClientFactory(
 ) {
 
   private val cache = CacheBuilder.newBuilder()
-      .expireAfterAccess(5, TimeUnit.MINUTES)
-      .build<Cluster.Member, OkHttpClient>(object : CacheLoader<Cluster.Member, OkHttpClient>() {
-        override fun load(peer: Cluster.Member): OkHttpClient {
-          val config = httpClientsConfig[appName].copy(
-              url = baseUrl(peer),
-              envoy = null
-          )
+    .expireAfterAccess(5, TimeUnit.MINUTES)
+    .build<Cluster.Member, OkHttpClient>(object : CacheLoader<Cluster.Member, OkHttpClient>() {
+      override fun load(peer: Cluster.Member): OkHttpClient {
+        val config = httpClientsConfig[appName].copy(
+          url = baseUrl(peer),
+          envoy = null
+        )
 
-          return httpClientFactory.create(config).newBuilder()
-              .hostnameVerifier(object : HostnameVerifier {
-                override fun verify(hostname: String?, session: SSLSession?): Boolean {
-                  val ou =
-                      (session?.peerCertificates?.firstOrNull() as? X509Certificate)?.let { peerCert ->
-                        X500Name.parse(peerCert.subjectX500Principal.name).organizationalUnit
-                      }
-                  return appName == ou
+        return httpClientFactory.create(config).newBuilder()
+          .hostnameVerifier(object : HostnameVerifier {
+            override fun verify(hostname: String?, session: SSLSession?): Boolean {
+              val ou =
+                (session?.peerCertificates?.firstOrNull() as? X509Certificate)?.let { peerCert ->
+                  X500Name.parse(peerCert.subjectX500Principal.name).organizationalUnit
                 }
-              })
-              .build()
-        }
-      })
+              return appName == ou
+            }
+          })
+          .build()
+      }
+    })
 
   init {
     require(httpsPort > 0) { "port must be a positive integer " }

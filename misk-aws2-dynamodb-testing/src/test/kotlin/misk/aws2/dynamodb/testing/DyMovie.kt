@@ -16,10 +16,12 @@ import java.time.LocalDate
 class DyMovie {
   @get:DynamoDbPartitionKey
   var name: String? = null
+
   @get:DynamoDbSecondarySortKey(indexNames = ["movies.release_date_index"])
   @get:DynamoDbConvertedBy(LocalDateTypeConverter::class)
   @get:DynamoDbSortKey
   var release_date: LocalDate? = null
+
   @get:DynamoDbSecondaryPartitionKey(indexNames = ["movies.release_date_index"])
   var directed_by: String? = null
 }

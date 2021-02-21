@@ -30,15 +30,17 @@ internal class ActionScopedExecutorServiceTest {
   @Test
   fun propagatesScopeIfInScope() {
     val injector = Guice.createInjector(
-        TestActionScopedProviderModule(),
-        ActionScopedExecutorServiceModule())
+      TestActionScopedProviderModule(),
+      ActionScopedExecutorServiceModule()
+    )
 
     val tester = injector.getInstance(Tester::class.java)
     val executor = injector.getInstance(ExecutorService::class.java)
     val scope = injector.getInstance(ActionScope::class.java)
 
     val seedData: Map<Key<*>, Any> = mapOf(
-        keyOf<String>(Names.named("from-seed")) to "my seed data")
+      keyOf<String>(Names.named("from-seed")) to "my seed data"
+    )
 
     val future = scope.enter(seedData).use {
       executor.submit(Callable { tester.fooValue() })
@@ -51,8 +53,9 @@ internal class ActionScopedExecutorServiceTest {
   fun doesNotPropagateScopeIfNotInScope() {
     assertFailsWith<IllegalStateException> {
       val injector = Guice.createInjector(
-          TestActionScopedProviderModule(),
-          ActionScopedExecutorServiceModule())
+        TestActionScopedProviderModule(),
+        ActionScopedExecutorServiceModule()
+      )
 
       val tester = injector.getInstance(Tester::class.java)
       val executor = injector.getInstance(ExecutorService::class.java)

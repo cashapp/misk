@@ -19,13 +19,14 @@ internal class TimedBlockingQueueTest {
     val value = 1
     val delays = ArrayList<Long>()
     val queue = TimedBlockingQueue<Int>(
-        queueSize) { delay: Duration -> delays.add(delay.toMillis()) }
+      queueSize
+    ) { delay: Duration -> delays.add(delay.toMillis()) }
     val removeList = listOf(
-        { queue.take() },
-        { queue.remove() },
-        { queue.poll() },
-        { queue.poll(1, TimeUnit.SECONDS) },
-        { queue.remove(value) }
+      { queue.take() },
+      { queue.remove() },
+      { queue.poll() },
+      { queue.poll(1, TimeUnit.SECONDS) },
+      { queue.remove(value) }
     )
     for (lambda in removeList) {
       assertTrue(queue.isEmpty())
@@ -45,14 +46,15 @@ internal class TimedBlockingQueueTest {
     val values = listOf(1, 2)
     val delays = ArrayList<Long>()
     val queue = TimedBlockingQueue<Int>(
-        queueSize) { delay: Duration -> delays.add(delay.toMillis()) }
+      queueSize
+    ) { delay: Duration -> delays.add(delay.toMillis()) }
     val removeList = listOf(
-        { queue.removeAll(values) },
-        { queue.retainAll(listOf(0))},
-        { queue.drainTo(mutableListOf())},
-        { queue.drainTo(mutableListOf(), 2)},
-        { queue.clear() }
-        )
+      { queue.removeAll(values) },
+      { queue.retainAll(listOf(0)) },
+      { queue.drainTo(mutableListOf()) },
+      { queue.drainTo(mutableListOf(), 2) },
+      { queue.clear() }
+    )
     for (lambda in removeList) {
       assertTrue(queue.isEmpty())
       queue.addAll(values)
@@ -73,12 +75,13 @@ internal class TimedBlockingQueueTest {
     val value = 1
     val delays = ArrayList<Long>()
     val queue = TimedBlockingQueue<Int>(
-        queueSize) { delay: Duration -> delays.add(delay.toMillis()) }
+      queueSize
+    ) { delay: Duration -> delays.add(delay.toMillis()) }
     val addList = listOf(
-        { queue.add(value) },
-        { queue.put(value) },
-        { queue.offer(value) },
-        { queue.offer(value, 1, TimeUnit.SECONDS) }
+      { queue.add(value) },
+      { queue.put(value) },
+      { queue.offer(value) },
+      { queue.offer(value, 1, TimeUnit.SECONDS) }
     )
     for (lambda in addList) {
       assertTrue(queue.isEmpty())
@@ -93,7 +96,8 @@ internal class TimedBlockingQueueTest {
     val values = listOf(1, 2, 3, 4, 5, 6, 7)
     val delays = ArrayList<Long>()
     val timedQueue = TimedBlockingQueue<Int>(
-        queueSize) { delay: Duration -> delays.add(delay.toMillis()) }
+      queueSize
+    ) { delay: Duration -> delays.add(delay.toMillis()) }
     val arrayQueue = ArrayBlockingQueue<Int>(queueSize)
     timedQueue.addAll(values)
     arrayQueue.addAll(values)
@@ -119,7 +123,7 @@ internal class TimedBlockingQueueTest {
     assertEquals(arrayQueue.poll(), timedQueue.poll())
     assertEquals(arrayQueue.poll(1, TimeUnit.SECONDS), timedQueue.poll(1, TimeUnit.SECONDS))
     assertEquals(arrayQueue.remove(4), timedQueue.remove(4))
-    assertEquals(arrayQueue.take(),timedQueue.take())
+    assertEquals(arrayQueue.take(), timedQueue.take())
     assertEquals(arrayQueue.removeAll(values), timedQueue.removeAll(values))
     // read/remove operations on empty queue
     assertEquals(arrayQueue.isEmpty(), timedQueue.isEmpty())

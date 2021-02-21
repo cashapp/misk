@@ -111,7 +111,7 @@ internal class MacProvider(
   override fun get(): Mac {
     val keysetHandle = readKey(key)
     return MacFactory.getPrimitive(keysetHandle)
-        .also { keyManager[key] = it }
+      .also { keyManager[key] = it }
   }
 }
 
@@ -156,7 +156,7 @@ internal class HybridEncryptProvider(
       keysetHandle
     }
     return HybridEncryptFactory.getPrimitive(publicKeysetHandle)
-        .also {keyManager[key] = it }
+      .also { keyManager[key] = it }
   }
 }
 
@@ -169,9 +169,9 @@ internal class HybridDecryptProvider(
   override fun get(): HybridDecrypt {
     val keysetHandle = readKey(key)
     keyEncryptManager[key] =
-        HybridEncryptFactory.getPrimitive(keysetHandle.publicKeysetHandle)
+      HybridEncryptFactory.getPrimitive(keysetHandle.publicKeysetHandle)
     return HybridDecryptFactory.getPrimitive(keysetHandle)
-        .also { keyDecryptManager[key] = it }
+      .also { keyDecryptManager[key] = it }
   }
 }
 
@@ -183,6 +183,6 @@ internal class StreamingAeadProvider(
   override fun get(): StreamingAead {
     val keysetHandle = readKey(key)
     return StreamingAeadFactory.getPrimitive(keysetHandle)
-        .also { streamingAeadKeyManager[key] = it }
+      .also { streamingAeadKeyManager[key] = it }
   }
 }

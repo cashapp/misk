@@ -41,9 +41,12 @@ abstract class ActionScopedProviderModule : KAbstractModule() {
   }
 
   private fun <T : Any> bindSeedData(key: Key<T>, actionScopedKey: Key<ActionScoped<T>>) {
-    bindProvider(key, actionScopedKey, Provider<ActionScopedProvider<T>> {
-      SeedDataActionScopedProvider(key)
-    })
+    bindProvider(
+      key, actionScopedKey,
+      Provider<ActionScopedProvider<T>> {
+        SeedDataActionScopedProvider(key)
+      }
+    )
   }
 
   /** Binds an annotation qualified [ActionScoped] along with its provider */
@@ -53,13 +56,13 @@ abstract class ActionScopedProviderModule : KAbstractModule() {
     annotatedBy: Annotation? = null
   ) {
     val typeKey =
-        if (annotatedBy == null) Key.get(kclass.java)
-        else Key.get(kclass.java, annotatedBy)
+      if (annotatedBy == null) Key.get(kclass.java)
+      else Key.get(kclass.java, annotatedBy)
 
     val actionScopedType = actionScopedType(kclass.java)
     val actionScopedKey =
-        if (annotatedBy == null) Key.get(actionScopedType)
-        else Key.get(actionScopedType, annotatedBy)
+      if (annotatedBy == null) Key.get(actionScopedType)
+      else Key.get(actionScopedType, annotatedBy)
 
     bindProvider(typeKey, actionScopedKey, binder().getProvider(providerType.java))
   }
@@ -71,14 +74,14 @@ abstract class ActionScopedProviderModule : KAbstractModule() {
     annotatedBy: Annotation? = null
   ) {
     val typeKey =
-        if (annotatedBy == null) Key.get(type)
-        else Key.get(type, annotatedBy)
+      if (annotatedBy == null) Key.get(type)
+      else Key.get(type, annotatedBy)
 
     @Suppress("UNCHECKED_CAST")
     val actionScopedType = actionScopedType(type.type) as TypeLiteral<ActionScoped<T>>
     val actionScopedKey =
-        if (annotatedBy == null) Key.get(actionScopedType)
-        else Key.get(actionScopedType, annotatedBy)
+      if (annotatedBy == null) Key.get(actionScopedType)
+      else Key.get(actionScopedType, annotatedBy)
 
     bindProvider(typeKey, actionScopedKey, binder().getProvider(providerType.java))
   }
@@ -102,6 +105,7 @@ abstract class ActionScopedProviderModule : KAbstractModule() {
     annotatedBy: Class<A>
   ) {
     val typeKey = Key.get(type, annotatedBy)
+
     @Suppress("UNCHECKED_CAST")
     val actionScopedType = actionScopedType(type.type) as TypeLiteral<ActionScoped<T>>
     val actionScopedKey = Key.get(actionScopedType, annotatedBy)
@@ -114,8 +118,8 @@ abstract class ActionScopedProviderModule : KAbstractModule() {
     providerProvider: Provider<out ActionScopedProvider<T>>
   ) {
     MapBinder.newMapBinder(binder(), KEY_TYPE, ACTION_SCOPED_PROVIDER_TYPE)
-        .addBinding(key)
-        .toProvider(providerProvider)
+      .addBinding(key)
+      .toProvider(providerProvider)
     bind(actionScopedKey).toProvider(object : Provider<ActionScoped<T>> {
       @Inject lateinit var scope: ActionScope
       override fun get() = RealActionScoped(key, scope)
@@ -141,17 +145,17 @@ abstract class ActionScopedProviderModule : KAbstractModule() {
 
     @Suppress("UNCHECKED_CAST")
     private fun <T : Any> actionScopedType(clazz: Class<T>) =
-        parameterizedType<ActionScoped<T>>(clazz).typeLiteral() as TypeLiteral<ActionScoped<T>>
+      parameterizedType<ActionScoped<T>>(clazz).typeLiteral() as TypeLiteral<ActionScoped<T>>
 
     @Suppress("UNCHECKED_CAST")
     private fun actionScopedType(type: Type) =
-        parameterizedType<ActionScoped<Any>>(type).typeLiteral() as TypeLiteral<ActionScoped<Any>>
+      parameterizedType<ActionScoped<Any>>(type).typeLiteral() as TypeLiteral<ActionScoped<Any>>
 
     private val KEY_TYPE = object : TypeLiteral<Key<*>>() {}
     private val ACTION_SCOPED_PROVIDER_TYPE = object : TypeLiteral<ActionScopedProvider<*>>() {}
 
     private class SeedDataActionScopedProvider<out T>(private val key: Key<T>) :
-        ActionScopedProvider<T> {
+      ActionScopedProvider<T> {
       override fun get(): T {
         throw IllegalStateException("$key can only be provided as seed data")
       }

@@ -196,7 +196,7 @@ public class KeywordKotlin(
         return size
       }
 
-      public override fun encode(writer: ProtoWriter, value: KeywordKotlin): Unit {
+      public override fun encode(writer: ProtoWriter, value: KeywordKotlin) {
         STRING.encodeWithTag(writer, 1, value.object_)
         INT32.encodeWithTag(writer, 2, value.when_)
         funAdapter.encodeWithTag(writer, 3, value.fun_)
@@ -248,12 +248,16 @@ public class KeywordKotlin(
   ) : WireEnum {
     @WireEnumConstant(declaredName = "object")
     object_(0),
+
     @WireEnumConstant(declaredName = "when")
     when_(1),
+
     @WireEnumConstant(declaredName = "fun")
     fun_(2),
+
     @WireEnumConstant(declaredName = "return")
     return_(3),
+
     @WireEnumConstant(declaredName = "open")
     open_(4),
     ;

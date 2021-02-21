@@ -62,9 +62,11 @@ internal class TypedHttpClientInterceptorTest {
   /** [ClientNetworkInterceptor] that adds the action name as a header */
   class ClientHeaderInterceptor(private val name: String) : ClientNetworkInterceptor {
     override fun intercept(chain: ClientNetworkChain): Response =
-        chain.proceed(chain.request.newBuilder()
-            .addHeader("X-From", name)
-            .build())
+      chain.proceed(
+        chain.request.newBuilder()
+          .addHeader("X-From", name)
+          .build()
+      )
 
     class Factory : ClientNetworkInterceptor.Factory {
       override fun create(action: ClientAction) = ClientHeaderInterceptor(action.name)

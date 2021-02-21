@@ -26,8 +26,10 @@ class WebProxyEntry(
   val web_proxy_url: HttpUrl
 ) : ValidWebEntry(url_path_prefix = url_path_prefix) {
   init {
-    require(web_proxy_url.encodedPath.endsWith("/") &&
-        web_proxy_url.pathSegments.size == 1)
+    require(
+      web_proxy_url.encodedPath.endsWith("/") &&
+        web_proxy_url.pathSegments.size == 1
+    )
   }
 }
 

@@ -30,10 +30,12 @@ class HttpClientProviderTest {
   fun `provides a valid client`() {
     mockWebServer.enqueue(MockResponse().setResponseCode(200).setBody("hello"))
 
-    val response = client.newCall(Request.Builder()
+    val response = client.newCall(
+      Request.Builder()
         .url(mockWebServer.url("/foo"))
-        .build())
-        .execute()
+        .build()
+    )
+      .execute()
 
     assertThat(response.code).isEqualTo(200)
     response.body?.use { body -> assertThat(body.string()).isEqualTo("hello") }
@@ -53,8 +55,8 @@ class HttpClientProviderTest {
           val response = chain.proceed(chain.request())
 
           return response.newBuilder()
-              .addHeader("interceptor-header", "added by interceptor")
-              .build()
+            .addHeader("interceptor-header", "added by interceptor")
+            .build()
         }
       })
     }
@@ -64,12 +66,15 @@ class HttpClientProviderTest {
     fun provideHttpClientConfig(server: MockWebServer): HttpClientsConfig {
       val url = server.url("/")
       return HttpClientsConfig(
-          endpoints = mapOf("pinger" to HttpClientEndpointConfig(
-              url = url.toString(),
-              clientConfig = HttpClientConfig(
-                  readTimeout = Duration.ofMillis(100)
-              )
-          )))
+        endpoints = mapOf(
+          "pinger" to HttpClientEndpointConfig(
+            url = url.toString(),
+            clientConfig = HttpClientConfig(
+              readTimeout = Duration.ofMillis(100)
+            )
+          )
+        )
+      )
     }
   }
 }

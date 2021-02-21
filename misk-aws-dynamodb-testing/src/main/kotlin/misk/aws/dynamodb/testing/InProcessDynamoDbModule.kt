@@ -7,15 +7,15 @@ import com.amazonaws.services.dynamodbv2.local.shared.access.LocalDBClient
 import com.amazonaws.services.dynamodbv2.local.shared.access.sqlite.SQLiteDBAccess
 import com.amazonaws.services.dynamodbv2.local.shared.jobs.JobsRegister
 import com.google.inject.Provides
+import misk.ServiceModule
+import misk.concurrent.ExecutorServiceFactory
+import misk.inject.KAbstractModule
+import misk.inject.toKey
 import java.io.File
 import java.util.concurrent.ExecutorService
 import javax.inject.Named
 import javax.inject.Singleton
 import kotlin.reflect.KClass
-import misk.ServiceModule
-import misk.concurrent.ExecutorServiceFactory
-import misk.inject.KAbstractModule
-import misk.inject.toKey
 
 /**
  * Executes a DynamoDB service in-process per test. It clears the table content before each test
@@ -37,8 +37,10 @@ class InProcessDynamoDbModule(
       multibind<DynamoDbTable>().toInstance(table)
     }
     install(ServiceModule<InProcessDynamoDbService>())
-    install(ServiceModule<CreateTablesService>()
-        .dependsOn(InProcessDynamoDbService::class.toKey()))
+    install(
+      ServiceModule<CreateTablesService>()
+        .dependsOn(InProcessDynamoDbService::class.toKey())
+    )
   }
 
   @Provides @Singleton

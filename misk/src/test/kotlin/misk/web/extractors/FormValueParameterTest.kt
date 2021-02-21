@@ -26,70 +26,70 @@ internal class FormValueParameterTest {
 
   @Test fun basicParams() {
     val list = listOf(
-        Pair("str", "foo"), Pair("other", "stuff"), Pair("int", "12"),
-        Pair("testEnum", "ONE")
+      Pair("str", "foo"), Pair("other", "stuff"), Pair("int", "12"),
+      Pair("testEnum", "ONE")
     )
     assertThat(post("/basic-params", list))
-        .isEqualTo("BasicForm(str=foo, other=stuff, int=12, testEnum=ONE)")
+      .isEqualTo("BasicForm(str=foo, other=stuff, int=12, testEnum=ONE)")
   }
 
   @Test fun optionalParamsPresent() {
     val list = listOf(Pair("str", "foo"), Pair("int", "12"))
     assertThat(post("/optional-params", list))
-        .isEqualTo("OptionalForm(str=foo, int=12)")
+      .isEqualTo("OptionalForm(str=foo, int=12)")
   }
 
   @Test fun optionalParamsNotPresent() {
     assertThat(post("/optional-params", listOf()))
-        .isEqualTo("OptionalForm(str=null, int=null)")
+      .isEqualTo("OptionalForm(str=null, int=null)")
   }
 
   @Test fun defaultParamsPresent() {
     val list = listOf(Pair("str", "foo"), Pair("int", "12"), Pair("testEnum", "ONE"))
     assertThat(post("/default-params", list))
-        .isEqualTo("DefaultForm(str=foo, int=12, testEnum=ONE)")
+      .isEqualTo("DefaultForm(str=foo, int=12, testEnum=ONE)")
   }
 
   @Test fun defaultParamsNotPresent() {
     assertThat(post("/default-params", listOf()))
-        .isEqualTo("DefaultForm(str=square, int=23, testEnum=TWO)")
+      .isEqualTo("DefaultForm(str=square, int=23, testEnum=TWO)")
   }
 
   @Test fun listParams() {
     val list = listOf(
-        Pair("strs", "foo"), Pair("strs", "bar"), Pair("ints", "12"), Pair("ints", "42"),
-        Pair("strs", "baz")
+      Pair("strs", "foo"), Pair("strs", "bar"), Pair("ints", "12"), Pair("ints", "42"),
+      Pair("strs", "baz")
     )
 
     assertThat(post("/list-params", list))
-        .isEqualTo("ListForm(strs=[foo, bar, baz], ints=[12, 42])")
+      .isEqualTo("ListForm(strs=[foo, bar, baz], ints=[12, 42])")
   }
 
   @Test fun ignoresAdditionalParameters() {
     val list = listOf(
-        Pair("str", "foo"), Pair("other", "stuff"), Pair("int", "12"),
-        Pair("testEnum", "ONE"), Pair("not present", "value")
+      Pair("str", "foo"), Pair("other", "stuff"), Pair("int", "12"),
+      Pair("testEnum", "ONE"), Pair("not present", "value")
     )
 
     assertThat(post("/basic-params", list))
-        .isEqualTo("BasicForm(str=foo, other=stuff, int=12, testEnum=ONE)")
+      .isEqualTo("BasicForm(str=foo, other=stuff, int=12, testEnum=ONE)")
   }
 
   @Test fun caseInsensitive() {
     val list = listOf(
-        Pair("str", "foo"), Pair("OTHER", "stuff"), Pair("InT", "12"),
-        Pair("tEsTeNuM", "ONE")
+      Pair("str", "foo"), Pair("OTHER", "stuff"), Pair("InT", "12"),
+      Pair("tEsTeNuM", "ONE")
     )
 
     assertThat(post("/basic-params", list))
-        .isEqualTo("BasicForm(str=foo, other=stuff, int=12, testEnum=ONE)")
+      .isEqualTo("BasicForm(str=foo, other=stuff, int=12, testEnum=ONE)")
   }
 
   @Test fun formValueAnnotation() {
     val list = listOf(Pair("user-name", "user123"))
 
     assertThat(post("/form-value-annotation", list))
-        .isEqualTo("AnnotationForm(username=user123)")
+      .isEqualTo("AnnotationForm(username=user123)")
   }
 
   enum class TestEnum {
@@ -165,15 +165,15 @@ internal class FormValueParameterTest {
     body: List<Pair<String, String>>
   ): String {
     val url = jettyService.httpServerUrl.newBuilder()
-        .encodedPath(path)
-        .build()
+      .encodedPath(path)
+      .build()
 
     val builder = FormBody.Builder()
     body.forEach { kv -> builder.add(kv.first, kv.second) }
 
     val request = Request.Builder()
-        .url(url)
-        .post(builder.build())
+      .url(url)
+      .post(builder.build())
 
     return call(request)
   }
@@ -181,10 +181,10 @@ internal class FormValueParameterTest {
   private fun call(request: Request.Builder): String {
     val httpClient = OkHttpClient()
     val response = httpClient.newCall(request.build())
-        .execute()
+      .execute()
     assertThat(response.code)
-        .isEqualTo(200)
+      .isEqualTo(200)
     return response.body!!.source()
-        .readUtf8()
+      .readUtf8()
   }
 }

@@ -29,31 +29,36 @@ internal class FakeHttpRouterTest {
   @Test
   fun matchOnUrlAndBody() {
     val response = transport.createRequestFactory()
-        .buildGetRequest(GenericUrl("https://something.com/second"))
-        .setContent(
-            MockHttpContent().setContent(JacksonFactory().toByteArray(Body("BYE"))))
-        .execute()
+      .buildGetRequest(GenericUrl("https://something.com/second"))
+      .setContent(
+        MockHttpContent().setContent(JacksonFactory().toByteArray(Body("BYE")))
+      )
+      .execute()
     assertThat(response.parseAsString()).isEqualTo("BYE second!")
   }
 
   @Test
   fun matchOnUrl() {
-    assertThat(assertFailsWith<HttpResponseException> {
-      transport.createRequestFactory()
+    assertThat(
+      assertFailsWith<HttpResponseException> {
+        transport.createRequestFactory()
           .buildGetRequest(GenericUrl("https://something.com/second"))
-          .setContent(MockHttpContent().setContent(
-              JacksonFactory().toByteArray(Body("UNKNOWN"))))
-          .execute()
-    }.statusCode).isEqualTo(401)
+          .setContent(
+            MockHttpContent().setContent(JacksonFactory().toByteArray(Body("UNKNOWN")))
+          ).execute()
+      }.statusCode
+    ).isEqualTo(401)
   }
 
   @Test
   fun noMatch() {
-    assertThat(assertFailsWith<HttpResponseException> {
-      transport.createRequestFactory()
+    assertThat(
+      assertFailsWith<HttpResponseException> {
+        transport.createRequestFactory()
           .buildGetRequest(GenericUrl("https://something.com/unknown"))
           .execute()
-    }.statusCode).isEqualTo(404)
+      }.statusCode
+    ).isEqualTo(404)
   }
 
   @Test

@@ -22,7 +22,7 @@ class ConsistentHashing @Inject constructor(
     for (host in hosts) {
       for (i in 0 until virtualPoints) {
         val hostHash =
-            Math.floorMod(hashFunction.hashString("$host $i", Charsets.UTF_8).padToLong(), mod)
+          Math.floorMod(hashFunction.hashString("$host $i", Charsets.UTF_8).padToLong(), mod)
         val distanceClockwiseTo = distanceClockwiseTo(hostHash, topicHash)
         if (distanceClockwiseTo < shortestDistance) {
           shortestDistance = distanceClockwiseTo

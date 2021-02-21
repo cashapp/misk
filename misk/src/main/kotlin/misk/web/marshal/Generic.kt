@@ -19,9 +19,9 @@ object GenericUnmarshallers {
   fun canHandle(type: Type) = GENERIC_REQUEST_TYPES.contains(type)
 
   private val GENERIC_REQUEST_TYPES = setOf(
-      String::class.java,
-      BufferedSource::class.java,
-      ByteString::class.java
+    String::class.java,
+    BufferedSource::class.java,
+    ByteString::class.java
   )
 
   private object ToString : Unmarshaller {
@@ -55,10 +55,10 @@ object GenericMarshallers {
   fun canHandle(type: Type) = GENERIC_RESPONSE_TYPES.contains(type)
 
   private val GENERIC_RESPONSE_TYPES = setOf(
-      String::class.java,
-      ResponseBody::class.java,
-      ByteString::class.java,
-      Nothing::class.java
+    String::class.java,
+    ResponseBody::class.java,
+    ByteString::class.java,
+    Nothing::class.java
   )
 
   private class FromResponseBody(private val contentType: MediaType?) : Marshaller<ResponseBody> {

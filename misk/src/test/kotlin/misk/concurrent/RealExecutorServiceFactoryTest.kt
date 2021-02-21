@@ -32,12 +32,12 @@ internal class RealExecutorServiceFactoryTest {
     assertThat(executorService.isTerminated).isTrue()
 
     assertThat(log).containsExactly(
-        "running happy-0 run 1",
-        "running happy-0 run 2"
+      "running happy-0 run 1",
+      "running happy-0 run 2"
     )
     assertThat(tracer.finishedSpans().map { it.operationName() }).containsExactly(
-        "execute",
-        "execute"
+      "execute",
+      "execute"
     )
   }
 

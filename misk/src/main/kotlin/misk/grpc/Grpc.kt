@@ -16,7 +16,8 @@ internal fun KType.streamElementType(): Type? {
   // Unbox the type parameter.
   val parameterizedType = javaType as? ParameterizedType ?: return null
   if (parameterizedType.rawType != MessageSource::class.java &&
-      parameterizedType.rawType != MessageSink::class.java) return null
+    parameterizedType.rawType != MessageSink::class.java
+  ) return null
   // Remove the wildcard, like 'out MessageSource' (Kotlin) or '? super MessageSource' (Java).
   return when (val typeArgument = parameterizedType.actualTypeArguments[0]) {
     is WildcardType -> typeArgument.lowerBounds[0]

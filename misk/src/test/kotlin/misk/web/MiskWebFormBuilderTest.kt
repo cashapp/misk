@@ -36,9 +36,22 @@ internal class MiskWebFormBuilderTest {
 
     // Check repeated types
     assertThat(shipmentType.fields).contains(Field("notes", "String", true))
-    assertThat(warehouseType.fields).contains(Field("alternates", Warehouse::class.qualifiedName!!, true))
+    assertThat(warehouseType.fields).contains(
+      Field(
+        "alternates",
+        Warehouse::class.qualifiedName!!,
+        true
+      )
+    )
 
     // Check enum types
-    assertThat(shipmentType.fields).contains(Field("status", "Enum<com.squareup.protos.test.parsing.Shipment.State,VALIDATING,PICKING_UP,DELIVERING,CONSUMING>", false))
+    assertThat(shipmentType.fields).contains(
+      Field(
+        "status",
+        "Enum<com.squareup.protos.test.parsing.Shipment.State,VALIDATING,PICKING_UP," +
+          "DELIVERING,CONSUMING>",
+        false
+      )
+    )
   }
 }

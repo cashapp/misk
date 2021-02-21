@@ -28,19 +28,22 @@ object DockerDynamoDb : ExternalDependency {
 
   val awsCredentialsProvider = localDynamoDb.awsCredentialsProvider
 
-  val endpointConfiguration =  localDynamoDb.endpointConfiguration
+  val endpointConfiguration = localDynamoDb.endpointConfiguration
 
-  private val composer = Composer("e-$id", Container {
-    // DynamoDB Local listens on port 8000 by default.
-    val exposedClientPort = ExposedPort.tcp(8000)
-    val portBindings =
+  private val composer = Composer(
+    "e-$id",
+    Container {
+      // DynamoDB Local listens on port 8000 by default.
+      val exposedClientPort = ExposedPort.tcp(8000)
+      val portBindings =
         Ports().apply { bind(exposedClientPort, Ports.Binding.bindPort(url.port)) }
-    withImage("amazon/dynamodb-local")
+      withImage("amazon/dynamodb-local")
         .withName(id)
         .withExposedPorts(exposedClientPort)
         .withCmd("-jar", "DynamoDBLocal.jar", "-sharedDb")
         .withPortBindings(portBindings)
-  })
+    }
+  )
 
   override fun beforeEach() {
     // noop

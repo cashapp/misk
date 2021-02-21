@@ -21,7 +21,7 @@ import javax.inject.Singleton
  */
 @Singleton
 class FakeScheduledExecutorService @Inject constructor(private val clock: Clock) :
-    ScheduledExecutorService, ExecutorService by MoreExecutors.newDirectExecutorService() {
+  ScheduledExecutorService, ExecutorService by MoreExecutors.newDirectExecutorService() {
 
   internal val futures = PriorityBlockingQueue<ScheduledFutureTask<*>>()
 
@@ -111,10 +111,10 @@ class FakeScheduledExecutorService @Inject constructor(private val clock: Clock)
     ) : this(executeAt, 0L, clock, task)
 
     override fun compareTo(other: Delayed): Int =
-        getDelay(TimeUnit.MILLISECONDS).compareTo(other.getDelay(TimeUnit.MILLISECONDS))
+      getDelay(TimeUnit.MILLISECONDS).compareTo(other.getDelay(TimeUnit.MILLISECONDS))
 
     override fun getDelay(unit: TimeUnit) =
-        unit.convert(clock.millis() - executeAt, TimeUnit.MILLISECONDS)
+      unit.convert(clock.millis() - executeAt, TimeUnit.MILLISECONDS)
 
     val isRepeated: Boolean get() = fixedDelay > 0
 
@@ -124,12 +124,14 @@ class FakeScheduledExecutorService @Inject constructor(private val clock: Clock)
 
     internal fun reschedule() {
       check(isRepeated) { "Cannot reschedule a non-repeated FutureTask" }
-      futures.add(ScheduledFutureTask(
+      futures.add(
+        ScheduledFutureTask(
           executeAt = executeAt + fixedDelay,
           fixedDelay = fixedDelay,
           clock = clock,
           task = task
-      ))
+        )
+      )
     }
   }
 }

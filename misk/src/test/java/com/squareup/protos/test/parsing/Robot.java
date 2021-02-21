@@ -14,13 +14,9 @@ import okio.ByteString;
 
 public final class Robot extends Message<Robot, Robot.Builder> {
   public static final ProtoAdapter<Robot> ADAPTER = new ProtoAdapter_Robot();
-
-  private static final long serialVersionUID = 0L;
-
   public static final Integer DEFAULT_ROBOT_ID = 0;
-
   public static final String DEFAULT_ROBOT_TOKEN = "";
-
+  private static final long serialVersionUID = 0L;
   @WireField(
       tag = 1,
       adapter = "com.squareup.wire.ProtoAdapter#INT32"

@@ -105,8 +105,10 @@ class MiskWebFormBuilder {
     ): Field? {
       return when {
         fieldClass == String::class -> Field(fieldName, String::class.simpleName!!, repeated)
-        fieldClass == ByteString::class -> Field(fieldName, ByteString::class.simpleName!!,
-            repeated)
+        fieldClass == ByteString::class -> Field(
+          fieldName, ByteString::class.simpleName!!,
+          repeated
+        )
         fieldClass == Char::class -> Field(fieldName, Char::class.simpleName!!, repeated)
         fieldClass == Byte::class -> Field(fieldName, Byte::class.simpleName!!, repeated)
         fieldClass == Short::class -> Field(fieldName, Short::class.simpleName!!, repeated)
@@ -134,13 +136,15 @@ class MiskWebFormBuilder {
       fieldName: String,
       repeated: Boolean
     ): Field = createSyntheticEnumField(
-        fieldClassName = fieldClass.qualifiedName!!,
-        fieldName = fieldName,
-        enumValues = (fieldClass.members.find {
+      fieldClassName = fieldClass.qualifiedName!!,
+      fieldName = fieldName,
+      enumValues = (
+        fieldClass.members.find {
           it.name == "values"
-        }?.call() as Array<*>)
-            .map { (it as Enum<*>).name },
-        repeated = repeated
+        }?.call() as Array<*>
+        )
+        .map { (it as Enum<*>).name },
+      repeated = repeated
     )
 
     /**
@@ -152,8 +156,10 @@ class MiskWebFormBuilder {
       fieldName: String,
       enumValues: List<String>,
       repeated: Boolean
-    ) = Field(fieldName, "Enum<$fieldClassName,${enumValues.joinToString(",")}>",
-        repeated)
+    ) = Field(
+      fieldName, "Enum<$fieldClassName,${enumValues.joinToString(",")}>",
+      repeated
+    )
   }
 
   /** Akin to a Proto Message, a Type has a list of fields */

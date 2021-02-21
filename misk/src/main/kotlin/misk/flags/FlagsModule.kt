@@ -38,13 +38,13 @@ abstract class FlagsModule : KAbstractModule() {
     qualifier: Annotation = Names.named(name)
   ) {
     bind(flagTypeLiteral(type))
-        .annotatedWith(qualifier)
-        .toProvider(FlagProvider(type, name, description))
-        .asEagerSingleton()
+      .annotatedWith(qualifier)
+      .toProvider(FlagProvider(type, name, description))
+      .asEagerSingleton()
   }
 
   inline fun <reified T : Flags> bindFlags(prefix: String = "", qualifier: Annotation? = null) =
-      bindFlags(T::class, prefix, qualifier)
+    bindFlags(T::class, prefix, qualifier)
 
   fun <T : Flags> bindFlags(
     type: KClass<T>,
@@ -55,17 +55,18 @@ abstract class FlagsModule : KAbstractModule() {
     val constructor = type.constructors.firstOrNull {
       it.parameters.size == 1 && it.parameters[0].type.classifier == Flags.Context::class
     } ?: throw IllegalArgumentException(
-        "$type has no single argument constructor taking a Flags.Context")
+      "$type has no single argument constructor taking a Flags.Context"
+    )
 
     if (actualQualifier == null) {
       bind(type.java)
-          .toProvider(FlagsProvider(constructor, prefix))
-          .asEagerSingleton()
+        .toProvider(FlagsProvider(constructor, prefix))
+        .asEagerSingleton()
     } else {
       bind(type.java)
-          .annotatedWith(actualQualifier)
-          .toProvider(FlagsProvider(constructor, prefix))
-          .asEagerSingleton()
+        .annotatedWith(actualQualifier)
+        .toProvider(FlagsProvider(constructor, prefix))
+        .asEagerSingleton()
     }
   }
 
@@ -86,9 +87,9 @@ abstract class FlagsModule : KAbstractModule() {
     @Suppress("UNCHECKED_CAST")
     val flagTypeLiteral = TypeLiteral.get(flagType) as TypeLiteral<JsonFlag<T>>
     bind(flagTypeLiteral)
-        .annotatedWith(a)
-        .toProvider(JsonFlagProvider(type, name, description))
-        .asEagerSingleton()
+      .annotatedWith(a)
+      .toProvider(JsonFlagProvider(type, name, description))
+      .asEagerSingleton()
   }
 
   private class FlagProvider<T : Any>(
@@ -128,6 +129,7 @@ abstract class FlagsModule : KAbstractModule() {
   ) : Provider<T> {
     @Inject
     lateinit var flagStore: FlagStore
+
     @Inject
     lateinit var moshi: Moshi
 
@@ -139,7 +141,7 @@ abstract class FlagsModule : KAbstractModule() {
 
   companion object {
     private inline fun <reified T : Any> flagTypeLiteral(): TypeLiteral<Flag<T>> =
-        flagTypeLiteral(T::class)
+      flagTypeLiteral(T::class)
 
     private fun <T : Any> flagTypeLiteral(kclass: KClass<T>): TypeLiteral<Flag<T>> {
       val flagType = parameterizedType<Flag<T>>(kclass.java)

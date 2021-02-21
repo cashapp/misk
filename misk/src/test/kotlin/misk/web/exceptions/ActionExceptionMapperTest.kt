@@ -13,7 +13,7 @@ internal class ActionExceptionMapperTest {
     val config = ActionExceptionLogLevelConfig(client_error_level = Level.INFO)
     val mapper = ActionExceptionMapper(config)
     assertThat(mapper.loggingLevel(NotFoundException()))
-        .isEqualTo(Level.INFO)
+      .isEqualTo(Level.INFO)
   }
 
   @Test
@@ -21,6 +21,6 @@ internal class ActionExceptionMapperTest {
     val config = ActionExceptionLogLevelConfig(server_error_level = Level.INFO)
     val mapper = ActionExceptionMapper(config)
     assertThat(mapper.loggingLevel(ResourceUnavailableException()))
-        .isEqualTo(Level.INFO)
+      .isEqualTo(Level.INFO)
   }
 }

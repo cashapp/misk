@@ -5,15 +5,15 @@ import com.google.api.client.http.HttpTransport
 class FakeHttpRouter(val router: (FakeHttpRequest) -> FakeHttpResponse) : HttpTransport() {
   companion object {
     fun respondWithJson(item: Any) = FakeHttpResponse()
-        .setStatusCode(200)
-        .setJsonContent(item)
+      .setStatusCode(200)
+      .setJsonContent(item)
 
     fun respondWithError(statusCode: Int) = FakeHttpResponse().setStatusCode(statusCode)
 
     fun respondWithText(text: String) = respondWithText(200, text)
 
     fun respondWithText(statusCode: Int, text: String) =
-        FakeHttpResponse().setStatusCode(statusCode).setContent(text)
+      FakeHttpResponse().setStatusCode(statusCode).setContent(text)
   }
 
   override fun buildRequest(method: String, url: String) = FakeHttpRequest(method, url, router)

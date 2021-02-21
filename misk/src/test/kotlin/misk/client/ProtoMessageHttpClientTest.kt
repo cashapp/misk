@@ -43,19 +43,23 @@ class ProtoMessageHttpClientTest {
   @Test
   fun protoMessageHttpCall() {
     val dinoMessage = Dinosaur.Builder()
-        .name("stegosaurus")
-        .picture_urls(listOf(
-            "https://cdn.dinopics.com/stego.jpg",
-            "https://cdn.dinopics.com/stego2.png"
-        ))
-        .build()
+      .name("stegosaurus")
+      .picture_urls(
+        listOf(
+          "https://cdn.dinopics.com/stego.jpg",
+          "https://cdn.dinopics.com/stego2.png"
+        )
+      )
+      .build()
 
     val response = httpClient.post<Dinosaur>("/cooldinos", dinoMessage)
     assertThat(response.name).isEqualTo("supersaurus")
-    assertThat(response.picture_urls).isEqualTo(listOf(
+    assertThat(response.picture_urls).isEqualTo(
+      listOf(
         "https://cdn.dinopics.com/stego.jpg",
         "https://cdn.dinopics.com/stego2.png"
-    ))
+      )
+    )
   }
 
   class ReturnADinosaur @Inject constructor() : WebAction {
@@ -63,7 +67,7 @@ class ProtoMessageHttpClientTest {
     @RequestContentType(MediaTypes.APPLICATION_JSON)
     @ResponseContentType(MediaTypes.APPLICATION_JSON)
     fun getDinosaur(@RequestBody requestBody: Dinosaur):
-        Dinosaur = requestBody.newBuilder().name("supersaurus").build()
+      Dinosaur = requestBody.newBuilder().name("supersaurus").build()
   }
 
   class TestModule : KAbstractModule() {
@@ -85,9 +89,10 @@ class ProtoMessageHttpClientTest {
     @Singleton
     fun provideHttpClientConfig(): HttpClientsConfig {
       return HttpClientsConfig(
-          endpoints = mapOf(
-              "dinosaur" to HttpClientEndpointConfig(jetty.httpServerUrl.toString())
-          ))
+        endpoints = mapOf(
+          "dinosaur" to HttpClientEndpointConfig(jetty.httpServerUrl.toString())
+        )
+      )
     }
   }
 }

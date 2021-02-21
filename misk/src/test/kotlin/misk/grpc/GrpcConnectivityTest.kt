@@ -54,21 +54,21 @@ class GrpcConnectivityTest {
   @Test
   fun happyPath() {
     val request = Request.Builder()
-        .url(jetty.httpsServerUrl!!.resolve("/helloworld.Greeter/SayHello")!!)
-        .addHeader("grpc-trace-bin", "")
-        .addHeader("grpc-accept-encoding", "gzip")
-        .addHeader("grpc-encoding", "gzip")
-        .post(object : RequestBody() {
-          override fun contentType(): MediaType? {
-            return MediaTypes.APPLICATION_GRPC_MEDIA_TYPE
-          }
+      .url(jetty.httpsServerUrl!!.resolve("/helloworld.Greeter/SayHello")!!)
+      .addHeader("grpc-trace-bin", "")
+      .addHeader("grpc-accept-encoding", "gzip")
+      .addHeader("grpc-encoding", "gzip")
+      .post(object : RequestBody() {
+        override fun contentType(): MediaType? {
+          return MediaTypes.APPLICATION_GRPC_MEDIA_TYPE
+        }
 
-          override fun writeTo(sink: BufferedSink) {
-            val writer = GrpcMessageSink(sink, HelloRequest.ADAPTER, "gzip")
-            writer.write(HelloRequest("jesse!"))
-          }
-        })
-        .build()
+        override fun writeTo(sink: BufferedSink) {
+          val writer = GrpcMessageSink(sink, HelloRequest.ADAPTER, "gzip")
+          writer.write(HelloRequest("jesse!"))
+        }
+      })
+      .build()
 
     val call = client.newCall(request)
     val response = call.execute()
@@ -79,8 +79,8 @@ class GrpcConnectivityTest {
       assertThat(response.body!!.contentType()).isEqualTo("application/grpc".toMediaType())
 
       val reader = GrpcMessageSource(
-          response.body!!.source(), HelloReply.ADAPTER,
-          response.header("grpc-encoding")
+        response.body!!.source(), HelloReply.ADAPTER,
+        response.header("grpc-encoding")
       )
       assertThat(reader.read()).isEqualTo(HelloReply("howdy, jesse!"))
       assertThat(reader.read()).isNull()
@@ -93,21 +93,21 @@ class GrpcConnectivityTest {
     helloRpcAction.failNextRequest = true
 
     val request = Request.Builder()
-        .url(jetty.httpsServerUrl!!.resolve("/helloworld.Greeter/SayHello")!!)
-        .addHeader("grpc-trace-bin", "")
-        .addHeader("grpc-accept-encoding", "gzip")
-        .addHeader("grpc-encoding", "gzip")
-        .post(object : RequestBody() {
-          override fun contentType(): MediaType? {
-            return MediaTypes.APPLICATION_GRPC_MEDIA_TYPE
-          }
+      .url(jetty.httpsServerUrl!!.resolve("/helloworld.Greeter/SayHello")!!)
+      .addHeader("grpc-trace-bin", "")
+      .addHeader("grpc-accept-encoding", "gzip")
+      .addHeader("grpc-encoding", "gzip")
+      .post(object : RequestBody() {
+        override fun contentType(): MediaType? {
+          return MediaTypes.APPLICATION_GRPC_MEDIA_TYPE
+        }
 
-          override fun writeTo(sink: BufferedSink) {
-            val writer = GrpcMessageSink(sink, HelloRequest.ADAPTER, "gzip")
-            writer.write(HelloRequest("jesse!"))
-          }
-        })
-        .build()
+        override fun writeTo(sink: BufferedSink) {
+          val writer = GrpcMessageSink(sink, HelloRequest.ADAPTER, "gzip")
+          writer.write(HelloRequest("jesse!"))
+        }
+      })
+      .build()
 
     val call = client.newCall(request)
     val response = call.execute()
@@ -129,25 +129,29 @@ class GrpcConnectivityTest {
       if (failNextRequest) throw BadRequestException("bad request!")
 
       return HelloReply.Builder()
-          .message("howdy, ${request.name}")
-          .build()
+        .message("howdy, ${request.name}")
+        .build()
     }
   }
 
   interface GreeterSayHello : Service {
     @WireRpc(
-        path = "/helloworld.Greeter/SayHello",
-        requestAdapter = "com.squareup.protos.test.grpc.HelloRequest.ADAPTER",
-        responseAdapter = "com.squareup.protos.test.grpc.HelloReply.ADAPTER"
+      path = "/helloworld.Greeter/SayHello",
+      requestAdapter = "com.squareup.protos.test.grpc.HelloRequest.ADAPTER",
+      responseAdapter = "com.squareup.protos.test.grpc.HelloReply.ADAPTER"
     )
     fun sayHello(request: HelloRequest): HelloReply
   }
 
   class TestModule : KAbstractModule() {
     override fun configure() {
-      install(WebTestingModule(webConfig = WebTestingModule.TESTING_WEB_CONFIG.copy(
-          http2 = true
-      )))
+      install(
+        WebTestingModule(
+          webConfig = WebTestingModule.TESTING_WEB_CONFIG.copy(
+            http2 = true
+          )
+        )
+      )
       install(WebActionModule.create<HelloRpcAction>())
     }
   }

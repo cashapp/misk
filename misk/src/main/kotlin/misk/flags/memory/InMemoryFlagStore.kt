@@ -37,7 +37,7 @@ class InMemoryFlagStore @Inject constructor() : FlagStore {
     val existing = _flags.putIfAbsent(flag.name, flag)
     if (existing != null) {
       return existing as? A ?: throw IllegalStateException(
-          "${flag.name} already registered as ${A::class.simpleName}"
+        "${flag.name} already registered as ${A::class.simpleName}"
       )
     }
 
@@ -46,8 +46,8 @@ class InMemoryFlagStore @Inject constructor() : FlagStore {
 
   private inline fun <reified A : InMemoryFlag<*>> flagsOfType(): Map<String, A> {
     return flags
-        .filterValues { it is A }
-        .mapValues { (_, flag) -> flag as A }
+      .filterValues { it is A }
+      .mapValues { (_, flag) -> flag as A }
   }
 
   override fun awaitRegistrationsComplete(timeout: Long, unit: TimeUnit) {}

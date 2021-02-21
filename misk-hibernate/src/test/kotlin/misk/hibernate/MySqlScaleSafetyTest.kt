@@ -2,8 +2,8 @@ package misk.hibernate
 
 import misk.jdbc.Check
 import misk.jdbc.DataSourceType
-import misk.jdbc.uniqueLong
 import misk.jdbc.TableScanException
+import misk.jdbc.uniqueLong
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.junit.jupiter.api.Disabled
@@ -41,7 +41,6 @@ class MySqlScaleSafetyTest {
           }
         }
       }
-
     }
   }
 

@@ -25,9 +25,10 @@ class FakeExternalKeyManager : ExternalKeyManager {
     rawKeys.forEach { key ->
       val plaintextSecret = keyTypeToSecret(key.key_type)
       val encryptedSecret = if (
-              key.key_type == KeyType.HYBRID_ENCRYPT ||
-              key.key_type == KeyType.PGP_DECRYPT ||
-              key.key_type == KeyType.PGP_ENCRYPT) {
+        key.key_type == KeyType.HYBRID_ENCRYPT ||
+        key.key_type == KeyType.PGP_DECRYPT ||
+        key.key_type == KeyType.PGP_ENCRYPT
+      ) {
         plaintextSecret
       } else if (key.key_name == "obsolete") {
         key.encrypted_key
@@ -59,5 +60,4 @@ class FakeExternalKeyManager : ExternalKeyManager {
   override fun getKeyByAlias(alias: KeyAlias): Key? {
     return returnedKeysets[alias]
   }
-
 }

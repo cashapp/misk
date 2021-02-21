@@ -10,7 +10,7 @@ class LocalConfigKeyProvider(
 ) : ExternalKeyManager {
 
   override val allKeyAliases: Map<KeyAlias, KeyType> =
-      keys.map { key -> key.key_name to key.key_type }.toMap()
+    keys.map { key -> key.key_name to key.key_type }.toMap()
 
   override fun getKeyByAlias(alias: KeyAlias): Key? {
     return keys.find { key -> key.key_name == alias }?.let { key ->

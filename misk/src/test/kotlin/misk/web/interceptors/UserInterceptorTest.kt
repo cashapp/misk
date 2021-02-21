@@ -112,10 +112,12 @@ class UserInterceptorTest {
 
   internal data class TestActionResponse(val text: String)
 
-  private fun get(path: String, mode: String = "normal"): okhttp3.Response = call(Request.Builder()
+  private fun get(path: String, mode: String = "normal"): okhttp3.Response = call(
+    Request.Builder()
       .addHeader("mode", mode)
       .url(jettyService.httpServerUrl.newBuilder().encodedPath(path).build())
-      .get())
+      .get()
+  )
 
   private fun call(request: Request.Builder): okhttp3.Response {
     val httpClient = OkHttpClient()
@@ -135,7 +137,7 @@ class UserInterceptorTest {
 
   companion object {
     internal val TEXT_HEADERS: Headers = Headers.Builder()
-        .set("Content-Type", MediaTypes.TEXT_PLAIN_UTF8)
-        .build()
+      .set("Content-Type", MediaTypes.TEXT_PLAIN_UTF8)
+      .build()
   }
 }

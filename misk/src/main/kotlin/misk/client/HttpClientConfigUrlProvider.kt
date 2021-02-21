@@ -15,7 +15,8 @@ class HttpClientConfigUrlProvider @Inject constructor() {
       endpointConfig.url != null -> return endpointConfig.url
       endpointConfig.envoy != null -> return envoyClientEndpointProvider.url(endpointConfig.envoy)
       else -> throw IllegalArgumentException(
-          "One of url or envoy configuration must be set for clients")
+        "One of url or envoy configuration must be set for clients"
+      )
     }
   }
 }

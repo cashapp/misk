@@ -5,13 +5,13 @@ import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.adapters.Rfc3339DateJsonAdapter
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
-import java.util.Date
-import javax.inject.Singleton
 import misk.inject.KAbstractModule
 import misk.moshi.adapters.BigDecimalAdapter
 import misk.moshi.okio.ByteStringAdapter
 import misk.moshi.time.InstantAdapter
 import misk.moshi.time.LocalDateAdapter
+import java.util.Date
+import javax.inject.Singleton
 import com.squareup.wire.WireJsonAdapterFactory as WireOnlyJsonAdapterFactory
 import misk.moshi.wire.WireMessageAdapter as MiskOnlyMessageAdapter
 

@@ -5,7 +5,7 @@ import misk.config.Config
 import misk.config.MiskConfig
 import misk.environment.Environment
 import misk.environment.EnvironmentModule
-import misk.hibernate.SuperHero.*
+import misk.hibernate.SuperHero.SuperPower
 import misk.inject.KAbstractModule
 import misk.jdbc.DataSourceConfig
 import misk.testing.MiskTest
@@ -31,47 +31,58 @@ class ProtoColumnTest {
   @Test
   fun basicPath() {
     transacter.transaction { session ->
-      session.save(DbAvengersMovie(
+      session.save(
+        DbAvengersMovie(
           name = "CivilWar",
           hero = SuperHero.Builder()
-              .civilian_name("Tony Stark")
-              .super_hero_name("IronMan")
-              .powers(listOf(SuperPower("suit", 10), SuperPower("humor", 2)))
-              .build(),
+            .civilian_name("Tony Stark")
+            .super_hero_name("IronMan")
+            .powers(listOf(SuperPower("suit", 10), SuperPower("humor", 2)))
+            .build(),
           anotherhero = SuperHero.Builder()
-              .civilian_name("Steven")
-              .super_hero_name("Captain America")
-              .powers(listOf(SuperPower("Shield", 11)))
-              .build())
+            .civilian_name("Steven")
+            .super_hero_name("Captain America")
+            .powers(listOf(SuperPower("Shield", 11)))
+            .build()
+        )
       )
     }
     transacter.transaction { session ->
       val movie = queryFactory.newQuery(DbAvengersMovieQuery::class)
-          .allowTableScan()
-          .name("CivilWar")
-          .nameAndHero(session)[0]
+        .allowTableScan()
+        .name("CivilWar")
+        .nameAndHero(session)[0]
       assertThat(movie.name).isEqualTo("CivilWar")
-      assertThat(movie.hero).isEqualTo(SuperHero.Builder()
+      assertThat(movie.hero).isEqualTo(
+        SuperHero.Builder()
           .civilian_name("Tony Stark")
           .super_hero_name("IronMan")
           .powers(listOf(SuperPower("suit", 10), SuperPower("humor", 2)))
-          .build())
-      assertThat(movie.anotherhero).isEqualTo(SuperHero.Builder()
+          .build()
+      )
+      assertThat(movie.anotherhero).isEqualTo(
+        SuperHero.Builder()
           .civilian_name("Steven")
           .super_hero_name("Captain America")
           .powers(listOf(SuperPower("Shield", 11)))
-          .build())
+          .build()
+      )
     }
   }
 
   @Test
   fun nullColumnTest() {
     transacter.transaction { session ->
-      session.save(DbAvengersMovie("IronMan", SuperHero.Builder()
-          .civilian_name("Tony Stark")
-          .super_hero_name("IronMan")
-          .powers(listOf(SuperPower("suit", 10), SuperPower("humor", 2)))
-          .build()))
+      session.save(
+        DbAvengersMovie(
+          "IronMan",
+          SuperHero.Builder()
+            .civilian_name("Tony Stark")
+            .super_hero_name("IronMan")
+            .powers(listOf(SuperPower("suit", 10), SuperPower("humor", 2)))
+            .build()
+        )
+      )
     }
     transacter.transaction { session ->
       val movie = queryFactory.newQuery(DbAvengersMovieQuery::class)
@@ -79,14 +90,17 @@ class ProtoColumnTest {
         .name("IronMan")
         .nameAndHero(session)[0]
       assertThat(movie.name).isEqualTo("IronMan")
-      assertThat(movie.hero).isEqualTo(SuperHero.Builder()
+      assertThat(movie.hero).isEqualTo(
+        SuperHero.Builder()
           .civilian_name("Tony Stark")
           .super_hero_name("IronMan")
           .powers(listOf(SuperPower("suit", 10), SuperPower("humor", 2)))
-          .build())
+          .build()
+      )
       assertNull(movie.anotherhero)
     }
   }
+
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(MiskTestingServiceModule())

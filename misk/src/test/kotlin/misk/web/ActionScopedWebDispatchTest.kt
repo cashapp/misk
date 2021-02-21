@@ -26,11 +26,13 @@ internal class ActionScopedWebDispatchTest {
   @Test
   fun exposesActionScopedInInterceptors() {
     val httpClient = OkHttpClient()
-    val response = httpClient.newCall(okhttp3.Request.Builder()
+    val response = httpClient.newCall(
+      okhttp3.Request.Builder()
         .url(jettyService.httpServerUrl.newBuilder().encodedPath("/hello").build())
         .addHeader("Security-ID", "Thor")
-        .build())
-        .execute()
+        .build()
+    )
+      .execute()
     assertThat(response.code).isEqualTo(200)
     assertThat(response.body!!.string()).isEqualTo("hello Thor")
   }

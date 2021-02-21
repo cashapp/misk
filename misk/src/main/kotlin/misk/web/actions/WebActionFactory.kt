@@ -35,7 +35,8 @@ internal class WebActionFactory @Inject constructor(
   private val userProvidedApplicationInterceptorFactories: List<ApplicationInterceptor.Factory>,
   private val userProvidedNetworkInterceptorFactories: List<NetworkInterceptor.Factory>,
   @MiskDefault private val miskNetworkInterceptorFactories: List<NetworkInterceptor.Factory>,
-  @MiskDefault private val miskApplicationInterceptorFactories: List<ApplicationInterceptor.Factory>,
+  @MiskDefault
+  private val miskApplicationInterceptorFactories: List<ApplicationInterceptor.Factory>,
   private val webActionBindingFactory: WebActionBinding.Factory,
   private val scope: ActionScope
 ) {
@@ -49,19 +50,21 @@ internal class WebActionFactory @Inject constructor(
     // Only one such function is allowed.
     val actionFunctions = webActionClass.functions.mapNotNull {
       if (it.findAnnotationWithOverrides<Get>() != null ||
-          it.findAnnotationWithOverrides<Post>() != null ||
-          it.findAnnotationWithOverrides<Patch>() != null ||
-          it.findAnnotationWithOverrides<Put>() != null ||
-          it.findAnnotationWithOverrides<Delete>() != null ||
-          it.findAnnotationWithOverrides<ConnectWebSocket>() != null ||
-          it.findAnnotationWithOverrides<WireRpc>() != null) {
+        it.findAnnotationWithOverrides<Post>() != null ||
+        it.findAnnotationWithOverrides<Patch>() != null ||
+        it.findAnnotationWithOverrides<Put>() != null ||
+        it.findAnnotationWithOverrides<Delete>() != null ||
+        it.findAnnotationWithOverrides<ConnectWebSocket>() != null ||
+        it.findAnnotationWithOverrides<WireRpc>() != null
+      ) {
         it as? KFunction<*>
-            ?: throw IllegalArgumentException("expected $it to be a function")
+          ?: throw IllegalArgumentException("expected $it to be a function")
       } else null
     }
 
     require(actionFunctions.isNotEmpty()) {
-      "no @Get, @Post, @Patch, @Put, @Delete, @ConnectWebSocket, or @Grpc annotations on ${webActionClass.simpleName}"
+      "no @Get, @Post, @Patch, @Put, @Delete, @ConnectWebSocket, or @Grpc annotations " +
+        "on ${webActionClass.simpleName}"
     }
 
     require(actionFunctions.size == 1) {
@@ -90,32 +93,46 @@ internal class WebActionFactory @Inject constructor(
     val effectivePrefix = pathPrefix.dropLast(1)
 
     if (get != null) {
-      collectBoundActions(result, provider, actionFunction,
-          effectivePrefix + get.pathPattern, DispatchMechanism.GET)
+      collectBoundActions(
+        result, provider, actionFunction,
+        effectivePrefix + get.pathPattern, DispatchMechanism.GET
+      )
     }
     if (post != null) {
-      collectBoundActions(result, provider, actionFunction,
-          effectivePrefix + post.pathPattern, DispatchMechanism.POST)
+      collectBoundActions(
+        result, provider, actionFunction,
+        effectivePrefix + post.pathPattern, DispatchMechanism.POST
+      )
     }
     if (patch != null) {
-      collectBoundActions(result, provider, actionFunction,
-          effectivePrefix + patch.pathPattern, DispatchMechanism.PATCH)
+      collectBoundActions(
+        result, provider, actionFunction,
+        effectivePrefix + patch.pathPattern, DispatchMechanism.PATCH
+      )
     }
     if (put != null) {
-      collectBoundActions(result, provider, actionFunction,
-          effectivePrefix + put.pathPattern, DispatchMechanism.PUT)
+      collectBoundActions(
+        result, provider, actionFunction,
+        effectivePrefix + put.pathPattern, DispatchMechanism.PUT
+      )
     }
     if (delete != null) {
-      collectBoundActions(result, provider, actionFunction,
-          effectivePrefix + delete.pathPattern, DispatchMechanism.DELETE)
+      collectBoundActions(
+        result, provider, actionFunction,
+        effectivePrefix + delete.pathPattern, DispatchMechanism.DELETE
+      )
     }
     if (connectWebSocket != null) {
-      collectBoundActions(result, provider, actionFunction,
-          effectivePrefix + connectWebSocket.pathPattern, DispatchMechanism.WEBSOCKET)
+      collectBoundActions(
+        result, provider, actionFunction,
+        effectivePrefix + connectWebSocket.pathPattern, DispatchMechanism.WEBSOCKET
+      )
     }
     if (grpc != null) {
-      collectBoundActions(result, provider, actionFunction,
-          effectivePrefix + grpc.path, DispatchMechanism.GRPC)
+      collectBoundActions(
+        result, provider, actionFunction,
+        effectivePrefix + grpc.path, DispatchMechanism.GRPC
+      )
     }
 
     return result
@@ -152,10 +169,10 @@ internal class WebActionFactory @Inject constructor(
       val mappedParameters = action.parameters.toMutableList()
       mappedParameters[0] = mappedParameters[0].withAnnotations(listOf(requestBodyAnnotation()))
       return action.copy(
-          dispatchMechanism = DispatchMechanism.POST,
-          acceptedMediaRanges = jsonMediaRanges,
-          responseContentType = jsonMediaType,
-          parameters = mappedParameters
+        dispatchMechanism = DispatchMechanism.POST,
+        acceptedMediaRanges = jsonMediaRanges,
+        responseContentType = jsonMediaType,
+        parameters = mappedParameters
       )
     }
 
@@ -178,25 +195,25 @@ internal class WebActionFactory @Inject constructor(
   ): BoundAction<A> {
     // Ensure that default interceptors are called before any user provided interceptors
     val networkInterceptors =
-        miskNetworkInterceptorFactories.mapNotNull { it.create(action) } +
-            userProvidedNetworkInterceptorFactories.mapNotNull { it.create(action) }
+      miskNetworkInterceptorFactories.mapNotNull { it.create(action) } +
+        userProvidedNetworkInterceptorFactories.mapNotNull { it.create(action) }
 
     val applicationInterceptors =
-        miskApplicationInterceptorFactories.mapNotNull { it.create(action) } +
-            userProvidedApplicationInterceptorFactories.mapNotNull { it.create(action) }
+      miskApplicationInterceptorFactories.mapNotNull { it.create(action) } +
+        userProvidedApplicationInterceptorFactories.mapNotNull { it.create(action) }
 
     val parsedPathPattern = PathPattern.parse(pathPattern)
 
     val webActionBinding = webActionBindingFactory.create(action, parsedPathPattern)
 
     return BoundAction(
-        scope,
-        provider,
-        networkInterceptors,
-        applicationInterceptors,
-        webActionBinding,
-        parsedPathPattern,
-        action
+      scope,
+      provider,
+      networkInterceptors,
+      applicationInterceptors,
+      webActionBinding,
+      parsedPathPattern,
+      action
     )
   }
 
@@ -210,9 +227,9 @@ internal class WebActionFactory @Inject constructor(
   /** Kotlin doesn't have a way create an instance of an annotation so we get one reflectively. */
   private fun requestBodyAnnotation(): Annotation {
     return WebActionFactory::class.functions
-        .first { it.name == "requestBodyAnnotationFun" }
-        .parameters[1]
-        .annotations[0]
+      .first { it.name == "requestBodyAnnotationFun" }
+      .parameters[1]
+      .annotations[0]
   }
 
   @Suppress("unused", "UNUSED_PARAMETER") // Used reflectively in the function above.

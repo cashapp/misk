@@ -73,7 +73,7 @@ internal class QueryParamFeatureBinding private constructor(
       val isList = type.classifier?.equals(List::class) ?: false
       val elementType = if (isList) type.arguments.first().type!! else type
       val stringConverter = converterFor(elementType)
-          ?: throw IllegalArgumentException("Unable to create converter for $name")
+        ?: throw IllegalArgumentException("Unable to create converter for $name")
 
       return ParameterBinding(this, isList, stringConverter, name)
     }

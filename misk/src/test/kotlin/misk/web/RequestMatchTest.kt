@@ -9,24 +9,24 @@ internal class RequestMatchTest {
   @Test
   fun preferMostSpecificPath() {
     assertOrdering(
-        match(PathPattern.parse("/org/admin/users"), "text/*", "text/*"),
-        match(PathPattern.parse("/org/{folder}/{type}"), "text/plain", "text/plain"),
-        match(PathPattern.parse("{path:.*}"), "text/plain", "text/plain")
+      match(PathPattern.parse("/org/admin/users"), "text/*", "text/*"),
+      match(PathPattern.parse("/org/{folder}/{type}"), "text/plain", "text/plain"),
+      match(PathPattern.parse("{path:.*}"), "text/plain", "text/plain")
     )
   }
 
   @Test
   fun preferMostSpecificContentTypes() {
     assertOrdering(
-        match("text/plain", "text/plain"),
-        match("text/plain", "text/*"),
-        match("text/plain", "*/*"),
-        match("text/*", "text/plain"),
-        match("text/*", "text/*"),
-        match("text/*", "*/*"),
-        match("*/*", "text/plain"),
-        match("*/*", "text/*"),
-        match("*/*", "*/*")
+      match("text/plain", "text/plain"),
+      match("text/plain", "text/*"),
+      match("text/plain", "*/*"),
+      match("text/*", "text/plain"),
+      match("text/*", "text/*"),
+      match("text/*", "*/*"),
+      match("*/*", "text/plain"),
+      match("*/*", "text/*"),
+      match("*/*", "*/*")
     )
   }
 
@@ -42,9 +42,9 @@ internal class RequestMatchTest {
     responseType: String
   ) =
     RequestMatch(
-        path,
-        requestRange.asMediaRange(),
-        false,
-        responseType.toMediaTypeOrNull()!!
+      path,
+      requestRange.asMediaRange(),
+      false,
+      responseType.toMediaTypeOrNull()!!
     )
 }

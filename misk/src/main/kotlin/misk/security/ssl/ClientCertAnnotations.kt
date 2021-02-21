@@ -1,9 +1,9 @@
 package misk.security.ssl
 
-import javax.inject.Qualifier
 import misk.scope.ActionScoped
 import misk.security.cert.X500Name
 import java.security.cert.X509Certificate
+import javax.inject.Qualifier
 
 /**
  * Qualifier annotation for an [ActionScoped] array of [X509Certificate]s containing the
@@ -12,10 +12,11 @@ import java.security.cert.X509Certificate
 @Qualifier
 @Retention(AnnotationRetention.RUNTIME)
 @Target(
-    AnnotationTarget.CLASS,
-    AnnotationTarget.VALUE_PARAMETER,
-    AnnotationTarget.FIELD,
-    AnnotationTarget.TYPE)
+  AnnotationTarget.CLASS,
+  AnnotationTarget.VALUE_PARAMETER,
+  AnnotationTarget.FIELD,
+  AnnotationTarget.TYPE
+)
 annotation class ClientCertChain
 
 /**
@@ -24,10 +25,11 @@ annotation class ClientCertChain
 @Qualifier
 @Retention(AnnotationRetention.RUNTIME)
 @Target(
-    AnnotationTarget.CLASS,
-    AnnotationTarget.VALUE_PARAMETER,
-    AnnotationTarget.FIELD,
-    AnnotationTarget.TYPE)
+  AnnotationTarget.CLASS,
+  AnnotationTarget.VALUE_PARAMETER,
+  AnnotationTarget.FIELD,
+  AnnotationTarget.TYPE
+)
 annotation class ClientCertSubject
 
 /**
@@ -36,8 +38,9 @@ annotation class ClientCertSubject
 @Qualifier
 @Retention(AnnotationRetention.RUNTIME)
 @Target(
-    AnnotationTarget.CLASS,
-    AnnotationTarget.VALUE_PARAMETER,
-    AnnotationTarget.FIELD,
-    AnnotationTarget.TYPE)
+  AnnotationTarget.CLASS,
+  AnnotationTarget.VALUE_PARAMETER,
+  AnnotationTarget.FIELD,
+  AnnotationTarget.TYPE
+)
 annotation class ClientCertIssuer

@@ -42,15 +42,23 @@ class CreateTablesService @Inject constructor(
       // DynamoDB Local ignores your provisioned throughput settings. The values that you specify
       // when you call CreateTable and UpdateTable have no effect. In addition, DynamoDB Local
       // does not throttle read or write activity.
-      .provisionedThroughput(ProvisionedThroughput.builder().readCapacityUnits(1L).writeCapacityUnits(1L).build())
+      .provisionedThroughput(
+        ProvisionedThroughput
+          .builder()
+          .readCapacityUnits(1L)
+          .writeCapacityUnits(1L)
+          .build()
+      )
     tableRequest = table.configureTable(tableRequest)
     enhancedClient.table(table.tableName, TableSchema.fromClass(table.tableClass.java))
       .createTable(tableRequest.build())
   }
 
   companion object {
-    val CONFIGURE_TABLE_NOOP: (CreateTableEnhancedRequest.Builder) -> CreateTableEnhancedRequest.Builder = {
-      it
-    }
+    val CONFIGURE_TABLE_NOOP:
+      (CreateTableEnhancedRequest.Builder) -> CreateTableEnhancedRequest.Builder =
+        {
+          it
+        }
   }
 }

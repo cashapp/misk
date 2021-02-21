@@ -54,7 +54,7 @@ internal class PathParamFeatureBinding private constructor(
       if (patternIndex == -1) return null
 
       val converter = converterFor(type)
-          ?: throw IllegalArgumentException("cannot convert path parameters to $type")
+        ?: throw IllegalArgumentException("cannot convert path parameters to $type")
 
       return ParameterBinding(patternIndex, this, converter)
     }

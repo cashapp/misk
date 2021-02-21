@@ -55,7 +55,8 @@ internal class TypedPeerHttpClientTest {
   @Test
   fun useTypedClient() {
     val clientFactory = clientInjector.getInstance(
-        Key.get(object : TypeLiteral<TypedPeerClientFactory<ReturnADinosaur>>() {}))
+      Key.get(object : TypeLiteral<TypedPeerClientFactory<ReturnADinosaur>>() {})
+    )
 
     val snapshot = cluster.snapshot
     val client: ReturnADinosaur = clientFactory.client(snapshot.self)
@@ -76,7 +77,7 @@ internal class TypedPeerHttpClientTest {
     @RequestContentType(MediaTypes.APPLICATION_JSON)
     @ResponseContentType(MediaTypes.APPLICATION_JSON)
     fun getDinosaur(@RequestBody request: Dinosaur):
-        Dinosaur = request.newBuilder().name("super${request.name}").build()
+      Dinosaur = request.newBuilder().name("super${request.name}").build()
   }
 
   class FakeCluster @Inject constructor(
@@ -92,10 +93,10 @@ internal class TypedPeerHttpClientTest {
       resourceMapper.setDefaultMapping(self)
 
       snapshot = Cluster.Snapshot(
-          self = self,
-          readyMembers = setOf(),
-          selfReady = true,
-          resourceMapper = resourceMapper
+        self = self,
+        readyMembers = setOf(),
+        selfReady = true,
+        resourceMapper = resourceMapper
       )
     }
 
@@ -107,22 +108,28 @@ internal class TypedPeerHttpClientTest {
   class TestModule : KAbstractModule() {
     override fun configure() {
       // Run a server using a cert that has OU of "Server"
-      install(WebTestingModule(WebConfig(
-          port = 0,
-          idle_timeout = 500000,
-          host = "127.0.0.1",
-          ssl = WebSslConfig(0,
+      install(
+        WebTestingModule(
+          WebConfig(
+            port = 0,
+            idle_timeout = 500000,
+            host = "127.0.0.1",
+            ssl = WebSslConfig(
+              0,
               cert_store = CertStoreConfig(
-                  resource = "classpath:/ssl/server_cert_key_combo.pem",
-                  passphrase = "serverpassword",
-                  format = SslLoader.FORMAT_PEM
+                resource = "classpath:/ssl/server_cert_key_combo.pem",
+                passphrase = "serverpassword",
+                format = SslLoader.FORMAT_PEM
               ),
               trust_store = TrustStoreConfig(
-                  resource = "classpath:/ssl/client_cert.pem",
-                  format = SslLoader.FORMAT_PEM
+                resource = "classpath:/ssl/client_cert.pem",
+                format = SslLoader.FORMAT_PEM
               ),
-              mutual_auth = WebSslConfig.MutualAuth.REQUIRED)
-      )))
+              mutual_auth = WebSslConfig.MutualAuth.REQUIRED
+            )
+          )
+        )
+      )
 
       bind<Cluster>().toInstance(FakeCluster())
       install(WebActionModule.create<ReturnADinosaurAction>())
@@ -146,24 +153,25 @@ internal class TypedPeerHttpClientTest {
     @Singleton
     fun provideHttpClientConfig(): HttpClientsConfig {
       return HttpClientsConfig(
-          endpoints = mapOf(
-              "Server" to HttpClientEndpointConfig(
-                  url = jetty.httpsServerUrl!!.toString(),
-                  clientConfig = HttpClientConfig(
-                      ssl = HttpClientSSLConfig(
-                          cert_store = CertStoreConfig(
-                              resource = "classpath:/ssl/client_cert_key_combo.pem",
-                              passphrase = "clientpassword",
-                              format = SslLoader.FORMAT_PEM
-                          ),
-                          trust_store = TrustStoreConfig(
-                              resource = "classpath:/ssl/server_cert.pem",
-                              format = SslLoader.FORMAT_PEM
-                          )
-                      )
-                  )
+        endpoints = mapOf(
+          "Server" to HttpClientEndpointConfig(
+            url = jetty.httpsServerUrl!!.toString(),
+            clientConfig = HttpClientConfig(
+              ssl = HttpClientSSLConfig(
+                cert_store = CertStoreConfig(
+                  resource = "classpath:/ssl/client_cert_key_combo.pem",
+                  passphrase = "clientpassword",
+                  format = SslLoader.FORMAT_PEM
+                ),
+                trust_store = TrustStoreConfig(
+                  resource = "classpath:/ssl/server_cert.pem",
+                  format = SslLoader.FORMAT_PEM
+                )
               )
-          ))
+            )
+          )
+        )
+      )
     }
   }
 }

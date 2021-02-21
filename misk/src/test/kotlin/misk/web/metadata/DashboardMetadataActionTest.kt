@@ -7,9 +7,9 @@ import misk.moshi.adapter
 import misk.security.authz.FakeCallerAuthenticator
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
-import misk.web.jetty.JettyService
 import misk.web.dashboard.AdminDashboard
 import misk.web.dashboard.ValidWebEntry.Companion.slugify
+import misk.web.jetty.JettyService
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.junit.jupiter.api.Test
@@ -26,7 +26,8 @@ class DashboardMetadataActionTest {
   @Inject private lateinit var httpClientFactory: HttpClientFactory
   @Inject private lateinit var moshi: Moshi
 
-  private inline fun <reified A: Annotation>asDashboardPath() = "/api/dashboard/${slugify<A>()}/metadata"
+  private inline fun <reified A : Annotation> asDashboardPath() =
+    "/api/dashboard/${slugify<A>()}/metadata"
 
   @Test fun `admin dashboard unauthenticated tabs`() {
     val response = executeRequest(path = asDashboardPath<AdminDashboard>())
@@ -70,8 +71,10 @@ class DashboardMetadataActionTest {
       capabilities = "test_admin_access"
     )
     assertEquals(1, response.dashboardMetadata.navbar_items.size)
-    assertEquals("<a href=\"https://cash.app/\">Test Navbar Link</a>",
-      response.dashboardMetadata.navbar_items.first())
+    assertEquals(
+      "<a href=\"https://cash.app/\">Test Navbar Link</a>",
+      response.dashboardMetadata.navbar_items.first()
+    )
   }
 
   @Test fun `test dashboard navbar status`() {

@@ -52,7 +52,7 @@ internal class HttpClientEnvoyTest {
     val recordedRequest = server.takeRequest()
     assertThat(recordedRequest.path).isEqualTo("/cooldinos")
     assertThat(recordedRequest.getHeader("Host"))
-        .isEqualTo(String.format("%s:%s", server.hostName, server.port))
+      .isEqualTo(String.format("%s:%s", server.hostName, server.port))
   }
 
   interface DinosaurService {
@@ -85,8 +85,10 @@ internal class HttpClientEnvoyTest {
 
     @Provides @Singleton fun provideHttpClientConfig(): HttpClientsConfig {
       return HttpClientsConfig(
-          endpoints = mapOf(
-              "dinosaur" to HttpClientEndpointConfig(envoy = HttpClientEnvoyConfig("dinosaur"))))
+        endpoints = mapOf(
+          "dinosaur" to HttpClientEndpointConfig(envoy = HttpClientEnvoyConfig("dinosaur"))
+        )
+      )
     }
   }
 }

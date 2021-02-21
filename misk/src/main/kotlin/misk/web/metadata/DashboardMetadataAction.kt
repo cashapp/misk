@@ -67,7 +67,8 @@ class DashboardMetadataAction @Inject constructor() : WebAction {
       tabs = authorizedDashboardTabs
     )
     return Response(
-      dashboardMetadata = dashboardMetadata)
+      dashboardMetadata = dashboardMetadata
+    )
   }
 
   data class DashboardMetadata(

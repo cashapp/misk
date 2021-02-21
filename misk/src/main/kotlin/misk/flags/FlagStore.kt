@@ -21,4 +21,4 @@ interface FlagStore {
 }
 
 inline fun <reified T : Any> FlagStore.registerFlag(name: String, description: String) =
-    registerFlag(name, description, T::class)
+  registerFlag(name, description, T::class)

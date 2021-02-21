@@ -15,17 +15,17 @@ class HttpClientModule constructor(
 ) : KAbstractModule() {
   override fun configure() {
     val httpClientKey =
-        if (annotation == null) Key.get(OkHttpClient::class.java)
-        else Key.get(OkHttpClient::class.java, annotation)
+      if (annotation == null) Key.get(OkHttpClient::class.java)
+      else Key.get(OkHttpClient::class.java, annotation)
     val protoMessageHttpClientKey =
-        if (annotation == null) Key.get(ProtoMessageHttpClient::class.java)
-        else Key.get(ProtoMessageHttpClient::class.java, annotation)
+      if (annotation == null) Key.get(ProtoMessageHttpClient::class.java)
+      else Key.get(ProtoMessageHttpClient::class.java, annotation)
     bind(httpClientKey)
-        .toProvider(HttpClientProvider(name))
-        .`in`(Singleton::class.java)
+      .toProvider(HttpClientProvider(name))
+      .`in`(Singleton::class.java)
     bind(protoMessageHttpClientKey)
-        .toProvider(ProtoMessageHttpClientProvider(name, getProvider(httpClientKey)))
-        .`in`(Singleton::class.java)
+      .toProvider(ProtoMessageHttpClientProvider(name, getProvider(httpClientKey)))
+      .`in`(Singleton::class.java)
   }
 
   private class HttpClientProvider(private val name: String) : Provider<OkHttpClient> {
@@ -41,6 +41,7 @@ class HttpClientModule constructor(
     private val httpClientProvider: Provider<OkHttpClient>
   ) : Provider<ProtoMessageHttpClient> {
     @Inject lateinit var moshi: Moshi
+
     /** Use a provider because we don't know the test client's URL until its test server starts. */
     @Inject lateinit var httpClientsConfigProvider: Provider<HttpClientsConfig>
     @Inject lateinit var httpClientConfigUrlProvider: HttpClientConfigUrlProvider
@@ -50,7 +51,8 @@ class HttpClientModule constructor(
       val httpClient = httpClientProvider.get()
 
       return ProtoMessageHttpClient(
-          httpClientConfigUrlProvider.getUrl(endpointConfig), moshi, httpClient)
+        httpClientConfigUrlProvider.getUrl(endpointConfig), moshi, httpClient
+      )
     }
   }
 }

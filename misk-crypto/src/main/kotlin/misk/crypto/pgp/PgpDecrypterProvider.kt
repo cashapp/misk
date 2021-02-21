@@ -4,7 +4,6 @@ import com.google.crypto.tink.aead.KmsEnvelopeAead
 import com.google.inject.Inject
 import com.google.inject.Provider
 import com.squareup.moshi.Moshi
-import misk.crypto.Key
 import misk.crypto.KeyAlias
 import misk.crypto.KeyReader
 import misk.crypto.PgpDecrypterManager
@@ -26,7 +25,7 @@ internal class PgpDecrypterProvider(
     val key = getRawKey(alias)
     val jsonAdapter = moshi.adapter<PgpKeyJsonFile>()
     val pgpKeyJsonFile =
-        jsonAdapter.fromJson(key.encrypted_key.value) ?: error("could not deserialize json file")
+      jsonAdapter.fromJson(key.encrypted_key.value) ?: error("could not deserialize json file")
 
     val decoded = Base64.getDecoder().decode(pgpKeyJsonFile.encrypted_private_key)
 
@@ -35,8 +34,8 @@ internal class PgpDecrypterProvider(
     val secretKeyStream = kek.decrypt(decoded, null).inputStream()
 
     val pgpSec = PGPSecretKeyRingCollection(
-        PGPUtil.getDecoderStream(secretKeyStream),
-        JcaKeyFingerprintCalculator()
+      PGPUtil.getDecoderStream(secretKeyStream),
+      JcaKeyFingerprintCalculator()
     )
 
     // It's common for there to be subkeys within the keyring.

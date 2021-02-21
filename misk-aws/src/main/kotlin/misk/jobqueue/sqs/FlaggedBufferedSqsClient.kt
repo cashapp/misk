@@ -24,8 +24,8 @@ import misk.feature.FeatureFlags
  * Flag: https://app.launchdarkly.com/cash/production/features/jobqueue-buffered-sqs-client/targeting
  */
 class FlaggedBufferedSqsClient(
-  private val unbufferedSqs : AmazonSQS,
-  private val bufferedSqs : AmazonSQS,
+  private val unbufferedSqs: AmazonSQS,
+  private val bufferedSqs: AmazonSQS,
   private val appName: String,
   private val featureFlags: FeatureFlags
 ) : AmazonSQS by unbufferedSqs {
@@ -52,7 +52,7 @@ class FlaggedBufferedSqsClient(
     bufferedSqs.shutdown()
   }
 
-  private fun client() : AmazonSQS {
+  private fun client(): AmazonSQS {
     return if (featureFlags.getBoolean(FEATURE, appName)) {
       bufferedSqs
     } else {

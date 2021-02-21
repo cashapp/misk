@@ -6,7 +6,7 @@ import io.opentracing.tag.Tags
 
 /** [trace] traces the given function with the specific span name and optional tags */
 fun <T : Any?> Tracer.trace(spanName: String, tags: Map<String, String> = mapOf(), f: () -> T): T =
-    traceWithSpan(spanName, tags) { f() }
+  traceWithSpan(spanName, tags) { f() }
 
 /** [traceWithSpan] traces the given function, passing the span into the function.
  *  If a span is already active, the new span is made a child of the existing. */

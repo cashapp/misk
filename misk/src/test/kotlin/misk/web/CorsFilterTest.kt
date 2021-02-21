@@ -26,11 +26,11 @@ class CorsFilterTest {
     val response = preflight("/cors-allow/16")
 
     assertThat(response.headers.get("Access-Control-Allow-Origin"))
-        .isEqualTo("https://localhost:8080")
+      .isEqualTo("https://localhost:8080")
 
     val response2 = preflight("/cors-allow/16", "https://misk.net")
     assertThat(response2.headers.get("Access-Control-Allow-Origin"))
-        .isEqualTo("https://misk.net")
+      .isEqualTo("https://misk.net")
   }
 
   // Policy that allows localhost, disallow other domains.
@@ -38,12 +38,12 @@ class CorsFilterTest {
     val response = preflight("/restrictive")
 
     assertThat(response.headers.get("Access-Control-Allow-Origin"))
-        .isEqualTo("https://localhost:8080")
+      .isEqualTo("https://localhost:8080")
 
     // No response headers should be returned.
     val responseNoHeaders = preflight("/restricted", "https://stealyourdata.com")
     assertThat(responseNoHeaders.headers.get("Access-Control-Allow-Origin"))
-        .isNull()
+      .isNull()
   }
 
   // Does not allow cors on any domain.
@@ -51,7 +51,7 @@ class CorsFilterTest {
     val response = preflight("/no-cors")
 
     assertThat(response.headers.get("Access-Control-Allow-Origin"))
-        .isNull()
+      .isNull()
   }
 
   class CorsAllowGetAction @Inject constructor() : WebAction {
@@ -74,10 +74,12 @@ class CorsFilterTest {
   }
 
   fun preflight(path: String, origin: String = "https://localhost:8080"): Response =
-      call(Request.Builder()
-          .url(jetty.httpServerUrl.newBuilder().encodedPath(path).build())
-          .header("Origin", origin)
-          .method("OPTIONS", null))
+    call(
+      Request.Builder()
+        .url(jetty.httpServerUrl.newBuilder().encodedPath(path).build())
+        .header("Origin", origin)
+        .method("OPTIONS", null)
+    )
 
   fun call(request: Request.Builder): Response {
     val httpClient = OkHttpClient()
@@ -88,11 +90,21 @@ class CorsFilterTest {
 
   class TestModule : KAbstractModule() {
     override fun configure() {
-      install(WebTestingModule(webConfig = WebTestingModule.TESTING_WEB_CONFIG.copy(
-          cors = mapOf(
+      install(
+        WebTestingModule(
+          webConfig = WebTestingModule.TESTING_WEB_CONFIG.copy(
+            cors = mapOf(
               Pair("/cors-allow/*", CorsConfig()),
-              Pair("/restrictive", CorsConfig(allowedOrigins = arrayOf("https://localhost:*")
-          ))))))
+              Pair(
+                "/restrictive",
+                CorsConfig(
+                  allowedOrigins = arrayOf("https://localhost:*")
+                )
+              )
+            )
+          )
+        )
+      )
       install(WebActionModule.create<CorsAllowGetAction>())
       install(WebActionModule.create<RestrictiveCORsAction>())
       install(WebActionModule.create<NoCorsPolicyAction>())

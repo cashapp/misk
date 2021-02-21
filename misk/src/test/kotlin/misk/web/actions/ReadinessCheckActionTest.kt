@@ -17,10 +17,10 @@ import javax.inject.Inject
 class ReadinessCheckActionTest {
   @MiskTestModule
   val module = Modules.combine(
-      MiskTestingServiceModule(),
-      FakeServiceModule(),
-      FakeHealthCheckModule(),
-      WebActionModule.create<ReadinessCheckAction>()
+    MiskTestingServiceModule(),
+    FakeServiceModule(),
+    FakeHealthCheckModule(),
+    WebActionModule.create<ReadinessCheckAction>()
   )
 
   @Inject lateinit var readinessCheckAction: ReadinessCheckAction

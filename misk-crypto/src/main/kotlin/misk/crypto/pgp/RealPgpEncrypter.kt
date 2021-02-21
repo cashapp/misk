@@ -1,7 +1,6 @@
 package misk.crypto.pgp
 
 import org.bouncycastle.bcpg.ArmoredOutputStream
-import org.bouncycastle.jce.provider.BouncyCastleProvider
 import org.bouncycastle.openpgp.PGPCompressedData
 import org.bouncycastle.openpgp.PGPCompressedDataGenerator
 import org.bouncycastle.openpgp.PGPEncryptedData
@@ -25,11 +24,11 @@ internal class RealPgpEncrypter(
     val pgpCompressedDataGenerator = PGPCompressedDataGenerator(PGPCompressedData.ZIP)
     val pgpLiteralDataGenerator = PGPLiteralDataGenerator()
     val pgpLiteralDataStream = pgpLiteralDataGenerator.open(
-        pgpCompressedDataGenerator.open(byteArrayOutputStream),
-        PGPLiteralData.BINARY,
-        "", // Name of the file encoded in the data. Just boring metadata.
-        plaintext.size.toLong(),
-        Date()
+      pgpCompressedDataGenerator.open(byteArrayOutputStream),
+      PGPLiteralData.BINARY,
+      "", // Name of the file encoded in the data. Just boring metadata.
+      plaintext.size.toLong(),
+      Date()
     )
 
     pgpLiteralDataStream.write(plaintext)
@@ -43,13 +42,13 @@ internal class RealPgpEncrypter(
     }
 
     val jcePGPDataEncryptorBuilder = JcePGPDataEncryptorBuilder(PGPEncryptedData.CAST5)
-        .setWithIntegrityPacket(true)
-        .setSecureRandom(SecureRandom())
-        .setProvider("BC")
+      .setWithIntegrityPacket(true)
+      .setSecureRandom(SecureRandom())
+      .setProvider("BC")
 
     val pgpEncryptedDataGenerator = PGPEncryptedDataGenerator(jcePGPDataEncryptorBuilder)
     val keyEncryptionMethodGenerator = JcePublicKeyKeyEncryptionMethodGenerator(encryptionKey)
-        .setProvider("BC")
+      .setProvider("BC")
     pgpEncryptedDataGenerator.addMethod(keyEncryptionMethodGenerator)
 
     val bytes = byteArrayOutputStream.toByteArray()

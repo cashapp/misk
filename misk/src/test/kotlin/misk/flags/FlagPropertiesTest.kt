@@ -48,19 +48,23 @@ class FlagPropertiesTest {
   @Test
   fun flagPropertiesRegisterCorrectFlags() {
     assertThat(flagStore.stringFlags.keys).containsExactlyInAnyOrder(
-        "unique-prefix.my-flags.string",
-        "unique-prefix.my-flags.json",
-        "my-flags.string",
-        "my-flags.json")
+      "unique-prefix.my-flags.string",
+      "unique-prefix.my-flags.json",
+      "my-flags.string",
+      "my-flags.json"
+    )
     assertThat(flagStore.intFlags.keys).containsExactlyInAnyOrder(
-        "unique-prefix.my-flags.int",
-        "my-flags.int")
+      "unique-prefix.my-flags.int",
+      "my-flags.int"
+    )
     assertThat(flagStore.booleanFlags.keys).containsExactlyInAnyOrder(
-        "unique-prefix.my-flags.boolean",
-        "my-flags.boolean")
+      "unique-prefix.my-flags.boolean",
+      "my-flags.boolean"
+    )
     assertThat(flagStore.doubleFlags.keys).containsExactlyInAnyOrder(
-        "unique-prefix.my-flags.double",
-        "my-flags.double")
+      "unique-prefix.my-flags.double",
+      "my-flags.double"
+    )
   }
 
   @Test

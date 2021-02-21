@@ -3,10 +3,10 @@ package misk.hibernate
 import misk.MiskTestingServiceModule
 import misk.config.Config
 import misk.config.MiskConfig
-import misk.jdbc.DataSourceConfig
 import misk.environment.Environment
 import misk.environment.EnvironmentModule
 import misk.inject.KAbstractModule
+import misk.jdbc.DataSourceConfig
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
@@ -34,9 +34,9 @@ class PrimitiveColumnsTest {
     }
     transacter.transaction { session ->
       val primitiveTour = queryFactory.newQuery(PrimitiveTourQuery::class)
-          .allowTableScan()
-          .i1(true)
-          .listAsPrimitiveTour(session)
+        .allowTableScan()
+        .i1(true)
+        .listAsPrimitiveTour(session)
       assertThat(primitiveTour).containsExactly(PrimitiveTour(true, 2, 3, 4, 5, '6', 7.0f, 8.0))
     }
   }

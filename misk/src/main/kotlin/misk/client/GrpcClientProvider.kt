@@ -4,6 +4,8 @@ import com.squareup.wire.GrpcCall
 import com.squareup.wire.GrpcClient
 import com.squareup.wire.GrpcStreamingCall
 import com.squareup.wire.Service
+import okhttp3.OkHttpClient
+import okhttp3.Protocol
 import java.lang.reflect.InvocationHandler
 import java.lang.reflect.Method
 import java.lang.reflect.ParameterizedType
@@ -14,8 +16,6 @@ import kotlin.reflect.KClass
 import kotlin.reflect.cast
 import kotlin.reflect.full.createType
 import kotlin.reflect.jvm.kotlinFunction
-import okhttp3.OkHttpClient
-import okhttp3.Protocol
 
 /**
  * Creates an instance of a Wire gRPC client using Misk's HTTP configuration and client
@@ -54,7 +54,9 @@ internal class GrpcClientProvider<T : Service, G : T>(
   /** Use a provider because we don't know the test client's URL until its test server starts. */
   @Inject private lateinit var httpClientsConfigProvider: Provider<HttpClientsConfig>
   @Inject private lateinit var httpClientConfigUrlProvider: HttpClientConfigUrlProvider
-  @Inject private lateinit var interceptorFactories: Provider<List<ClientNetworkInterceptor.Factory>>
+
+  @Inject
+  private lateinit var interceptorFactories: Provider<List<ClientNetworkInterceptor.Factory>>
   @Inject private lateinit var clientMetricsInterceptorFactory: ClientMetricsInterceptor.Factory
 
   override fun get(): T {
@@ -62,9 +64,9 @@ internal class GrpcClientProvider<T : Service, G : T>(
     val baseUrl = httpClientConfigUrlProvider.getUrl(endpointConfig)
     val httpClient = httpClientProvider.get()
     return get(
-        baseUrl = baseUrl,
-        httpClient = httpClient,
-        interceptorFactories = interceptorFactories.get()
+      baseUrl = baseUrl,
+      httpClient = httpClient,
+      interceptorFactories = interceptorFactories.get()
     )
   }
 
@@ -80,13 +82,13 @@ internal class GrpcClientProvider<T : Service, G : T>(
     }
 
     val clientPrototype = httpClient.newBuilder()
-        .protocols(protocols)
-        .build()
+      .protocols(protocols)
+      .build()
 
     val handlers = mutableMapOf<String, MethodInvocationHandler<T, G>>()
     for (method in kclass.java.methods) {
       val handler = methodHandler(method, clientPrototype, baseUrl, interceptorFactories)
-          ?: continue
+        ?: continue
       handlers[method.name] = handler
     }
 
@@ -104,15 +106,19 @@ internal class GrpcClientProvider<T : Service, G : T>(
       override fun toString() = "GrpcClient:${kclass.qualifiedName}"
     }
 
-    return kclass.cast(Proxy.newProxyInstance(
+    return kclass.cast(
+      Proxy.newProxyInstance(
         ClassLoader.getSystemClassLoader(),
         arrayOf(kclass.java),
         invocationHandler
-    ))
+      )
+    )
   }
 
   private fun toClientAction(method: Method): ClientAction? {
-    if (method.returnType !== GrpcCall::class.java && method.returnType !== GrpcStreamingCall::class.java) {
+    if (method.returnType !== GrpcCall::class.java &&
+      method.returnType !== GrpcStreamingCall::class.java
+    ) {
       return null
     }
 
@@ -123,10 +129,10 @@ internal class GrpcClientProvider<T : Service, G : T>(
     val kotlinFunction = method.kotlinFunction ?: return null
 
     return ClientAction(
-        name = "${name}.${method.name}",
-        function = kotlinFunction,
-        parameterTypes = listOf(requestType.kotlin.createType()),
-        returnType = responseType.kotlin.createType()
+      name = "$name.${method.name}",
+      function = kotlinFunction,
+      parameterTypes = listOf(requestType.kotlin.createType()),
+      returnType = responseType.kotlin.createType()
     )
   }
 
@@ -146,9 +152,9 @@ internal class GrpcClientProvider<T : Service, G : T>(
     }
 
     val grpcClient = GrpcClient.Builder()
-        .client(clientBuilder.build())
-        .baseUrl(baseUrl)
-        .build()
+      .client(clientBuilder.build())
+      .baseUrl(baseUrl)
+      .build()
 
     // There should be *exactly one constructor* that takes in a grpcClient
     val delegate: G = grpcClientClass.constructors.first().call(grpcClient)

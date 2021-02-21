@@ -34,8 +34,8 @@ class GrpcClientModule<T : Service, G : T>(
 
     val key = if (annotation == null) Key.get(kclass.java) else Key.get(kclass.java, annotation)
     bind(key)
-        .toProvider(GrpcClientProvider(kclass, grpcClientClass, name, httpClientProvider))
-        .`in`(Singleton::class.java)
+      .toProvider(GrpcClientProvider(kclass, grpcClientClass, name, httpClientProvider))
+      .`in`(Singleton::class.java)
 
     // Initialize empty sets for our multibindings.
     newMultibinder<ClientNetworkInterceptor.Factory>()

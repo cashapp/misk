@@ -16,7 +16,8 @@ class ClassNameFormatterTest {
     assertTrue(className.isNotBlank())
     assertNotNull(className)
     assertTrue(
-        CharMatcher.inRange('A', 'Z').or(CharMatcher.inRange('a', 'z')).matchesAnyOf(className))
+      CharMatcher.inRange('A', 'Z').or(CharMatcher.inRange('a', 'z')).matchesAnyOf(className)
+    )
   }
 
   @Test fun validQualifiedName() {

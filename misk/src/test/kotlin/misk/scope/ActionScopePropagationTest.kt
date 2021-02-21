@@ -29,7 +29,8 @@ internal class ActionScopePropagationTest {
     val tester = injector.getInstance(Tester::class.java)
 
     val seedData: Map<Key<*>, Any> = mapOf(
-        keyOf<String>(Names.named("from-seed")) to "my seed data")
+      keyOf<String>(Names.named("from-seed")) to "my seed data"
+    )
 
     val callable = scope.enter(seedData).use {
       scope.propagate(Callable { tester.fooValue() })
@@ -47,7 +48,8 @@ internal class ActionScopePropagationTest {
     val tester = injector.getInstance(Tester::class.java)
 
     val seedData: Map<Key<*>, Any> = mapOf(
-        keyOf<String>(Names.named("from-seed")) to "my seed data")
+      keyOf<String>(Names.named("from-seed")) to "my seed data"
+    )
 
     // Propagate on the the KCallable directly
     val f: KFunction<String> = tester::fooValue
@@ -56,9 +58,11 @@ internal class ActionScopePropagationTest {
     }
 
     // Submit to other thread after we've exited the scope
-    val result = executor.submit(Callable {
-      callable.call()
-    }).get()
+    val result = executor.submit(
+      Callable {
+        callable.call()
+      }
+    ).get()
     assertThat(result).isEqualTo("my seed data and bar and foo!")
   }
 
@@ -69,7 +73,8 @@ internal class ActionScopePropagationTest {
     val tester = injector.getInstance(Tester::class.java)
 
     val seedData: Map<Key<*>, Any> = mapOf(
-        keyOf<String>(Names.named("from-seed")) to "my seed data")
+      keyOf<String>(Names.named("from-seed")) to "my seed data"
+    )
 
     // Propagate on a lambda directly
     val function = scope.enter(seedData).use {

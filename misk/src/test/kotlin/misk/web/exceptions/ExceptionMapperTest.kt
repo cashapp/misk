@@ -61,9 +61,9 @@ internal class ExceptionMapperTest {
   fun get(path: String): okhttp3.Response {
     val httpClient = OkHttpClient()
     val request = Request.Builder()
-        .get()
-        .url(serverUrlBuilder().encodedPath(path).build())
-        .build()
+      .get()
+      .url(serverUrlBuilder().encodedPath(path).build())
+      .build()
     return httpClient.newCall(request).execute()
   }
 

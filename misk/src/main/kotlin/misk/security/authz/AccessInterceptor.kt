@@ -44,48 +44,63 @@ class AccessInterceptor private constructor(
 
       when {
         // There should only be one access annotation on the action
-        actionEntries.size > 1 -> throw IllegalStateException("""
+        actionEntries.size > 1 -> throw IllegalStateException(
+          """
         |
         |Only one AccessAnnotation is permitted on a WebAction. Remove one from ${action.name}::${action.function.name}():
         | ${actionEntries.map { it.annotation }}
         |
-        """.trimMargin())
+        """.trimMargin()
+        )
         // This action is explicitly marked as unauthenticated.
         actionEntries.size == 1 && action.hasAnnotation<Unauthenticated>() -> return null
         // Successfully return @Authenticated or custom Access Annotation
-        actionEntries.size == 1 -> return AccessInterceptor(actionEntries[0].services.toSet(), actionEntries[0].capabilities.toSet(), caller)
+        actionEntries.size == 1 -> return AccessInterceptor(
+          actionEntries[0].services.toSet(),
+          actionEntries[0].capabilities.toSet(),
+          caller
+        )
         // Not exactly one access annotation. Fail with a useful message.
         else -> {
           val requiredAnnotations = mutableListOf<KClass<out Annotation>>()
           requiredAnnotations += Authenticated::class
           requiredAnnotations += Unauthenticated::class
           requiredAnnotations += registeredEntries.map { it.annotation }
-          throw IllegalStateException("""You need to register an AccessAnnotationEntry to tell the authorization system which capabilities and services are allowed to access ${action.name}::${action.function.name}(). You can either:
+          throw IllegalStateException(
+            """You need to register an AccessAnnotationEntry to tell the authorization system which capabilities and services are allowed to access ${action.name}::${action.function.name}(). You can either:
           |
           |A) Add an AccessAnnotationEntry multibinding in a module for one of the annotations on ${action.name}::${action.function.name}():
           |   ${action.function.annotations}
           |
           |   AccessAnnotationEntry Example Multibinding:
           |   multibind<AccessAnnotationEntry>().toInstance(
-          |     AccessAnnotationEntry<${action.function.annotations.filter { it.annotationClass.simpleName.toString().endsWith("Access") }.firstOrNull()?.annotationClass?.simpleName ?: "{Access Annotation Class Simple Name}"}>(capabilities = ???, services = ???))
+          |     AccessAnnotationEntry<${
+            action.function.annotations.filter {
+              it.annotationClass.simpleName.toString().endsWith("Access")
+            }
+              .firstOrNull()?.annotationClass?.simpleName ?: "{Access Annotation Class Simple Name}"
+            }>(capabilities = ???, services = ???))
           |
           |B) Add an AccessAnnotation to ${action.name}::${action.function.name}() that already has a matching AccessAnnotationEntry such as:
           |   $requiredAnnotations
           |
           |
-          """.trimMargin())
+          """.trimMargin()
+          )
         }
       }
     }
 
     private fun Authenticated.toAccessAnnotationEntry() = AccessAnnotationEntry(
-        Authenticated::class, services.toList(), capabilities.toList())
+      Authenticated::class, services.toList(), capabilities.toList()
+    )
 
     private fun Unauthenticated.toAccessAnnotationEntry() = AccessAnnotationEntry(
-        Unauthenticated::class, listOf(), listOf())
+      Unauthenticated::class, listOf(), listOf()
+    )
 
     private inline fun <reified T : Annotation> Action.hasAnnotation() =
-        function.annotations.any { it.annotationClass == T::class }
+      function.annotations.any { it.annotationClass == T::class }
   }
 
   companion object {

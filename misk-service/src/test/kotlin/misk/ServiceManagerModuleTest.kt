@@ -68,8 +68,9 @@ internal class ServiceManagerModuleTest {
   }
 
   @Test fun multibindingServicesThrows() {
-    assertThat(assertFailsWith<com.google.inject.ProvisionException> {
-      val injector = Guice.createInjector(
+    assertThat(
+      assertFailsWith<com.google.inject.ProvisionException> {
+        val injector = Guice.createInjector(
           MiskTestingServiceModule(),
           object : KAbstractModule() {
             override fun configure() {
@@ -79,17 +80,21 @@ internal class ServiceManagerModuleTest {
               multibind<Service>().to<SingletonService2>()
             }
           }
-      )
+        )
 
-      injector.getInstance<ServiceManager>()
-    }.message).contains("This doesn't work anymore! " +
+        injector.getInstance<ServiceManager>()
+      }.message
+    ).contains(
+      "This doesn't work anymore! " +
         "Instead of using `multibind<Service>().to(SingletonService1)`, " +
-        "use `install(ServiceModule<SingletonService1>())`.")
+        "use `install(ServiceModule<SingletonService1>())`."
+    )
   }
 
   @Test fun detectsNonSingletonServiceEntries() {
-    assertThat(assertFailsWith<com.google.inject.ProvisionException> {
-      val injector = Guice.createInjector(
+    assertThat(
+      assertFailsWith<com.google.inject.ProvisionException> {
+        val injector = Guice.createInjector(
           MiskTestingServiceModule(),
           object : KAbstractModule() {
             override fun configure() {
@@ -99,20 +104,23 @@ internal class ServiceManagerModuleTest {
               install(ServiceModule<ProvidesMethodService>())
               install(ServiceModule<InstanceService>())
               bind(keyOf<InstanceService>()).toInstance(
-                  InstanceService())
+                InstanceService()
+              )
               install(
-                  ServiceModule<ExplicitEagerSingletonService>())
+                ServiceModule<ExplicitEagerSingletonService>()
+              )
               bind(keyOf<ExplicitEagerSingletonService>()).asEagerSingleton()
               install(ServiceModule<SingletonScopeService>())
               bind(keyOf<SingletonScopeService>())
-                  .`in`(Scopes.SINGLETON)
+                .`in`(Scopes.SINGLETON)
               install(ServiceModule<SingletonAnnotationService>())
               bind(keyOf<SingletonAnnotationService>())
-                  .`in`(com.google.inject.Singleton::class.java)
+                .`in`(com.google.inject.Singleton::class.java)
               install(
-                  ServiceModule<GoogleSingletonAnnotationService>())
+                ServiceModule<GoogleSingletonAnnotationService>()
+              )
               bind(keyOf<GoogleSingletonAnnotationService>())
-                  .`in`(com.google.inject.Singleton::class.java)
+                .`in`(com.google.inject.Singleton::class.java)
 
               // Should be recognized as non-singletons
               install(ServiceModule<NonSingletonService1>())
@@ -122,11 +130,14 @@ internal class ServiceManagerModuleTest {
             @Provides @Singleton
             fun providesSingletonService(): ProvidesMethodService = ProvidesMethodService()
           }
-      )
+        )
 
-      injector.getInstance<ServiceManager>()
-    }.message).contains("the following services are not marked as @Singleton: " +
+        injector.getInstance<ServiceManager>()
+      }.message
+    ).contains(
+      "the following services are not marked as @Singleton: " +
         "misk.ServiceManagerModuleTest\$NonSingletonService1, " +
-        "misk.ServiceManagerModuleTest\$NonSingletonService2")
+        "misk.ServiceManagerModuleTest\$NonSingletonService2"
+    )
   }
 }

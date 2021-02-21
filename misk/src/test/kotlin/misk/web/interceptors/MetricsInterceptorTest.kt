@@ -71,12 +71,12 @@ class MetricsInterceptorTest {
     user: String? = null
   ): okhttp3.Response {
     val url = jettyService.httpServerUrl.newBuilder()
-        .encodedPath("/call/$desiredStatusCode")
-        .build()
+      .encodedPath("/call/$desiredStatusCode")
+      .build()
 
     val request = okhttp3.Request.Builder()
-        .url(url)
-        .get()
+      .url(url)
+      .get()
     service?.let { request.addHeader(SERVICE_HEADER, it) }
     user?.let { request.addHeader(USER_HEADER, it) }
     return httpClient.newCall(request.build()).execute()

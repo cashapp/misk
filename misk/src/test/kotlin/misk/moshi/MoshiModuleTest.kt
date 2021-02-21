@@ -61,22 +61,26 @@ internal class MoshiModuleTest {
     assertThat(jsonAdapter.fromJson(json)).isEqualTo(value)
   }
 
-
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(MiskTestingServiceModule())
-      install(MoshiAdapterModule(object : Any() {
-        @ToJson fun pointToJson(point: Point) = listOf(point.x, point.y)
-        @FromJson fun jsonToPoint(pair: List<Int>) = Point(pair[0], pair[1])
-      }))
-      install(MoshiAdapterModule<Hat>(object : JsonAdapter<Hat>() {
-        override fun fromJson(reader: JsonReader): Hat? {
-          return Hat(reader.nextDouble())
-        }
-        override fun toJson(writer: JsonWriter, value: Hat?) {
-          writer.value(value!!.size)
-        }
-      }))
+      install(
+        MoshiAdapterModule(object : Any() {
+          @ToJson fun pointToJson(point: Point) = listOf(point.x, point.y)
+          @FromJson fun jsonToPoint(pair: List<Int>) = Point(pair[0], pair[1])
+        })
+      )
+      install(
+        MoshiAdapterModule<Hat>(object : JsonAdapter<Hat>() {
+          override fun fromJson(reader: JsonReader): Hat? {
+            return Hat(reader.nextDouble())
+          }
+
+          override fun toJson(writer: JsonWriter, value: Hat?) {
+            writer.value(value!!.size)
+          }
+        })
+      )
     }
   }
 

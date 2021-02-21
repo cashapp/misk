@@ -15,9 +15,9 @@ import org.slf4j.LoggerFactory
 
 @Singleton
 internal class RealLogCollector @Inject constructor() :
-    AbstractIdleService(),
-    LogCollector,
-    LogCollectorService {
+  AbstractIdleService(),
+  LogCollector,
+  LogCollectorService {
   private val queue = LinkedBlockingDeque<ILoggingEvent>()
 
   private val appender = object : UnsynchronizedAppenderBase<ILoggingEvent>() {
@@ -68,7 +68,7 @@ internal class RealLogCollector @Inject constructor() :
     require(state() != NEW) { "not collecting logs: did you forget to start the service?" }
 
     val event = queue.poll(500, TimeUnit.MILLISECONDS)
-        ?: throw IllegalArgumentException("no events to take!")
+      ?: throw IllegalArgumentException("no events to take!")
 
     if (loggerClass != null && loggerClass.qualifiedName != event.loggerName) return null
     if (event.level.toInt() < minLevel.toInt()) return null

@@ -113,42 +113,42 @@ class MiskWebModule(private val config: WebConfig) : KAbstractModule() {
     // installed, and the order of these interceptors is critical.
 
     multibind<NetworkInterceptor.Factory>(MiskDefault::class)
-        .to<RebalancingInterceptor.Factory>()
+      .to<RebalancingInterceptor.Factory>()
 
     // Handle all unexpected errors that occur during dispatch
     multibind<NetworkInterceptor.Factory>(MiskDefault::class)
-        .to<InternalErrorInterceptorFactory>()
+      .to<InternalErrorInterceptorFactory>()
 
     // Add request related fields to MDC for logging
     multibind<NetworkInterceptor.Factory>(MiskDefault::class)
-        .to<RequestLogContextInterceptor.Factory>()
+      .to<RequestLogContextInterceptor.Factory>()
 
     // Collect metrics on the status of results and response times of requests
     multibind<NetworkInterceptor.Factory>(MiskDefault::class)
-        .to<MetricsInterceptor.Factory>()
+      .to<MetricsInterceptor.Factory>()
 
     newMultibinder<ConcurrencyLimiterFactory>()
     if (!config.concurrency_limiter_disabled) {
       // Shed calls when we're degraded.
       multibind<NetworkInterceptor.Factory>(MiskDefault::class)
-          .to<ConcurrencyLimitsInterceptor.Factory>()
+        .to<ConcurrencyLimitsInterceptor.Factory>()
     }
 
     // Traces requests as they work their way through the system.
     multibind<NetworkInterceptor.Factory>(MiskDefault::class)
-        .to<TracingInterceptor.Factory>()
+      .to<TracingInterceptor.Factory>()
 
     // Convert and log application level exceptions into their appropriate response format
     multibind<NetworkInterceptor.Factory>(MiskDefault::class)
-        .to<ExceptionHandlingInterceptor.Factory>()
+      .to<ExceptionHandlingInterceptor.Factory>()
 
     // Optionally log request and response details
     multibind<NetworkInterceptor.Factory>(MiskDefault::class)
-        .to<RequestLoggingInterceptor.Factory>()
+      .to<RequestLoggingInterceptor.Factory>()
 
     // Optionally log request and response body
     multibind<ApplicationInterceptor.Factory>(MiskDefault::class)
-        .to<RequestBodyLoggingInterceptor.Factory>()
+      .to<RequestBodyLoggingInterceptor.Factory>()
 
     install(ExceptionMapperModule.create<ActionException, ActionExceptionMapper>())
     install(ExceptionMapperModule.create<IOException, IOExceptionMapper>())
@@ -180,20 +180,22 @@ class MiskWebModule(private val config: WebConfig) : KAbstractModule() {
     val idleTimeout = 60_000
     if (config.jetty_max_thread_pool_queue_size > 0) {
       val threadPool = QueuedThreadPool(
-          maxThreads,
-          minThreads,
-          idleTimeout,
-          provideThreadPoolQueue(getProvider(ThreadPoolQueueMetrics::class.java)))
+        maxThreads,
+        minThreads,
+        idleTimeout,
+        provideThreadPoolQueue(getProvider(ThreadPoolQueueMetrics::class.java))
+      )
       threadPool.name = "jetty-thread"
       bind<ThreadPool>().toInstance(threadPool)
       bind<MeasuredThreadPool>().toInstance(MeasuredQueuedThreadPool(threadPool))
     } else {
       val executor = ThreadPoolExecutor(
-          minThreads,
-          maxThreads,
-          idleTimeout.toLong(),
-          TimeUnit.MILLISECONDS,
-          SynchronousQueue())
+        minThreads,
+        maxThreads,
+        idleTimeout.toLong(),
+        TimeUnit.MILLISECONDS,
+        SynchronousQueue()
+      )
       val threadPool = ExecutorThreadPool(executor)
       threadPool.name = "jetty-thread"
       bind<ThreadPool>().toInstance(threadPool)
@@ -211,15 +213,16 @@ class MiskWebModule(private val config: WebConfig) : KAbstractModule() {
     return GzipHandler()
   }
 
-  private fun provideThreadPoolQueue(metrics: Provider<ThreadPoolQueueMetrics>): BlockingQueue<Runnable> {
-    return if (config.enable_thread_pool_queue_metrics) {
-      TimedBlockingQueue(
+  private fun provideThreadPoolQueue(metrics: Provider<ThreadPoolQueueMetrics>):
+    BlockingQueue<Runnable> {
+      return if (config.enable_thread_pool_queue_metrics) {
+        TimedBlockingQueue(
           config.jetty_max_thread_pool_queue_size
-      ) { d -> metrics.get().recordQueueLatency(d) }
-    } else {
-      ArrayBlockingQueue<Runnable>(config.jetty_max_thread_pool_queue_size)
+        ) { d -> metrics.get().recordQueueLatency(d) }
+      } else {
+        ArrayBlockingQueue<Runnable>(config.jetty_max_thread_pool_queue_size)
+      }
     }
-  }
 
   class MiskCallerProvider @Inject constructor(
     private val authenticators: List<MiskCallerAuthenticator>

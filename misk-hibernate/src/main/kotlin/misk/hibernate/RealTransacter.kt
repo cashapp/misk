@@ -5,7 +5,6 @@ import com.google.common.base.Suppliers
 import misk.backoff.ExponentialBackoff
 import misk.concurrent.ExecutorServiceFactory
 import misk.jdbc.CheckDisabler
-import misk.vitess.Shard.Companion.SINGLE_SHARD_SET
 import misk.jdbc.DataSourceConfig
 import misk.jdbc.DataSourceType
 import misk.jdbc.map
@@ -14,6 +13,7 @@ import misk.logging.getLogger
 import misk.vitess.Destination
 import misk.vitess.Keyspace
 import misk.vitess.Shard
+import misk.vitess.Shard.Companion.SINGLE_SHARD_SET
 import misk.vitess.TabletType
 import org.hibernate.FlushMode
 import org.hibernate.SessionFactory
@@ -66,15 +66,15 @@ internal class RealTransacter private constructor(
     executorServiceFactory: ExecutorServiceFactory,
     hibernateEntities: Set<HibernateEntity>
   ) : this(
-      qualifier = qualifier,
-      sessionFactoryProvider = sessionFactoryProvider,
-      readerSessionFactoryProvider = readerSessionFactoryProvider,
-      config = config,
-      threadLatestSession = ThreadLocal(),
-      options = TransacterOptions(),
-      executorServiceFactory = executorServiceFactory,
-      shardListFetcher = ShardListFetcher(),
-      hibernateEntities = hibernateEntities
+    qualifier = qualifier,
+    sessionFactoryProvider = sessionFactoryProvider,
+    readerSessionFactoryProvider = readerSessionFactoryProvider,
+    config = config,
+    threadLatestSession = ThreadLocal(),
+    options = TransacterOptions(),
+    executorServiceFactory = executorServiceFactory,
+    shardListFetcher = ShardListFetcher(),
+    hibernateEntities = hibernateEntities
   ) {
     shardListFetcher.init(this, config, executorServiceFactory)
   }
@@ -103,24 +103,29 @@ internal class RealTransacter private constructor(
         this.supplier = Suppliers.ofInstance(CompletableFuture.completedFuture(SINGLE_SHARD_SET))
       } else {
         val executorService = executorServiceFactory.single("shard-list-fetcher-%d")
-        this.supplier = Suppliers.memoizeWithExpiration({
-          // Needs to be fetched on a separate thread to avoid nested transactions
-          executorService.submit(Callable<Set<Shard>> {
-            transacter.transaction { session ->
-              session.useConnection { connection ->
-                connection.createStatement().use { s ->
-                  val shards = s.executeQuery("SHOW VITESS_SHARDS")
-                      .map { rs -> Shard.parse(rs.getString(1)) }
-                      .toSet()
-                  if (shards.isEmpty()) {
-                    throw SQLRecoverableException("Failed to load list of shards")
+        this.supplier = Suppliers.memoizeWithExpiration(
+          {
+            // Needs to be fetched on a separate thread to avoid nested transactions
+            executorService.submit(
+              Callable<Set<Shard>> {
+                transacter.transaction { session ->
+                  session.useConnection { connection ->
+                    connection.createStatement().use { s ->
+                      val shards = s.executeQuery("SHOW VITESS_SHARDS")
+                        .map { rs -> Shard.parse(rs.getString(1)) }
+                        .toSet()
+                      if (shards.isEmpty()) {
+                        throw SQLRecoverableException("Failed to load list of shards")
+                      }
+                      shards
+                    }
                   }
-                  shards
                 }
               }
-            }
-          })
-        }, 5, TimeUnit.MINUTES)
+            )
+          },
+          5, TimeUnit.MINUTES
+        )
       }
     }
 
@@ -167,9 +172,9 @@ internal class RealTransacter private constructor(
     require(options.maxAttempts > 0)
 
     val backoff = ExponentialBackoff(
-        Duration.ofMillis(options.minRetryDelayMillis),
-        Duration.ofMillis(options.maxRetryDelayMillis),
-        Duration.ofMillis(options.retryJitterMillis)
+      Duration.ofMillis(options.minRetryDelayMillis),
+      Duration.ofMillis(options.maxRetryDelayMillis),
+      Duration.ofMillis(options.retryJitterMillis)
     )
     var attempt = 0
 
@@ -191,7 +196,7 @@ internal class RealTransacter private constructor(
         if (attempt >= options.maxAttempts) {
           logger.info {
             "${qualifier.simpleName} recoverable transaction exception " +
-                "(${attemptNote(attempt)}), no more attempts"
+              "(${attemptNote(attempt)}), no more attempts"
           }
           throw e
         }
@@ -199,7 +204,7 @@ internal class RealTransacter private constructor(
         val sleepDuration = backoff.nextRetry()
         logger.info(e) {
           "${qualifier.simpleName} recoverable transaction exception " +
-              "(${attemptNote(attempt)}), will retry after a $sleepDuration delay"
+            "(${attemptNote(attempt)}), will retry after a $sleepDuration delay"
         }
 
         if (!sleepDuration.isZero) {
@@ -271,7 +276,9 @@ internal class RealTransacter private constructor(
     }
   }
 
-  private fun <T> replicaReadWithoutTransactionInternalSession(block: (session: RealSession) -> T): T {
+  private fun <T> replicaReadWithoutTransactionInternalSession(
+    block: (session: RealSession) -> T
+  ): T {
     return withSession(reader()) { session ->
       check(session.isReadOnly()) {
         "Reads should be in a read only session"
@@ -295,19 +302,23 @@ internal class RealTransacter private constructor(
       return sessionFactory
     }
     error(
-        "No reader is configured for replica reads, pass in both a writer and reader qualifier and the full " +
-            "DataSourceClustersConfig into HibernateModule, like this:\n" +
-            "\tinstall(HibernateModule(AppDb::class, AppReaderDb::class, config.data_source_clusters[\"name\"]))")
+      "No reader is configured for replica reads, pass in both a writer and reader qualifier " +
+        "and the full DataSourceClustersConfig into HibernateModule, like this:\n" +
+        "\tinstall(HibernateModule(AppDb::class, AppReaderDb::class, " +
+        "config.data_source_clusters[\"name\"]))"
+    )
   }
 
   override fun retries(maxAttempts: Int): Transacter = withOptions(
-      options.copy(maxAttempts = maxAttempts))
+    options.copy(maxAttempts = maxAttempts)
+  )
 
   override fun allowCowrites(): Transacter {
     val disableChecks = options.disabledChecks.clone()
     disableChecks.add(Check.COWRITE)
     return withOptions(
-        options.copy(disabledChecks = disableChecks))
+      options.copy(disabledChecks = disableChecks)
+    )
   }
 
   override fun noRetries(): Transacter = withOptions(options.copy(maxAttempts = 1))
@@ -315,17 +326,17 @@ internal class RealTransacter private constructor(
   override fun readOnly(): Transacter = withOptions(options.copy(readOnly = true))
 
   private fun withOptions(options: TransacterOptions): Transacter =
-      RealTransacter(
-          qualifier = qualifier,
-          sessionFactoryProvider = sessionFactoryProvider,
-          readerSessionFactoryProvider = readerSessionFactoryProvider,
-          threadLatestSession = threadLatestSession,
-          options = options,
-          config = config,
-          executorServiceFactory = executorServiceFactory,
-          shardListFetcher = shardListFetcher,
-          hibernateEntities = hibernateEntities
-      )
+    RealTransacter(
+      qualifier = qualifier,
+      sessionFactoryProvider = sessionFactoryProvider,
+      readerSessionFactoryProvider = readerSessionFactoryProvider,
+      threadLatestSession = threadLatestSession,
+      options = options,
+      config = config,
+      executorServiceFactory = executorServiceFactory,
+      shardListFetcher = shardListFetcher,
+      hibernateEntities = hibernateEntities
+    )
 
   private fun <T> withSession(
     sessionFactory: SessionFactory = this.sessionFactory,
@@ -333,12 +344,12 @@ internal class RealTransacter private constructor(
   ): T {
     val hibernateSession = sessionFactory.openSession()
     val realSession = RealSession(
-        hibernateSession = hibernateSession,
-        readOnly = options.readOnly,
-        config = config,
-        disabledChecks = options.disabledChecks,
-        predecessor = threadLatestSession.get(),
-        transacter = this
+      hibernateSession = hibernateSession,
+      readOnly = options.readOnly,
+      config = config,
+      disabledChecks = options.disabledChecks,
+      predecessor = threadLatestSession.get(),
+      transacter = this
     )
 
     // Note that the RealSession is closed last so that close hooks run after the thread locals and
@@ -366,8 +377,8 @@ internal class RealTransacter private constructor(
   }
 
   private fun isMessageRetryable(th: SQLException) =
-      isConnectionClosed(th) || isVitessTransactionNotFound(th) ||
-          isCockroachRestartTransaction(th) || isTidbWriteConflict(th)
+    isConnectionClosed(th) || isVitessTransactionNotFound(th) ||
+      isCockroachRestartTransaction(th) || isTidbWriteConflict(th)
 
   /**
    * This is thrown as a raw SQLException from Hikari even though it is most certainly a
@@ -375,23 +386,24 @@ internal class RealTransacter private constructor(
    * See com/zaxxer/hikari/pool/ProxyConnection.java:493
    */
   private fun isConnectionClosed(th: SQLException) =
-      th.message.equals("Connection is closed")
+    th.message.equals("Connection is closed")
 
   /**
    * We get this error as a MySQLQueryInterruptedException when a tablet gracefully terminates, we
    * just need to retry the transaction and the new master should handle it.
    *
    * ```
-   * vttablet: rpc error: code = Aborted desc = transaction 1572922696317821557: not found (CallerID: )
+   * vttablet: rpc error: code = Aborted desc = transaction 1572922696317821557:
+   * not found (CallerID: )
    * ```
    */
   private fun isVitessTransactionNotFound(th: SQLException): Boolean {
     val message = th.message
     return message != null &&
-        message.contains("vttablet: rpc error") &&
-        message.contains("code = Aborted") &&
-        message.contains("transaction") &&
-        message.contains("not found")
+      message.contains("vttablet: rpc error") &&
+      message.contains("code = Aborted") &&
+      message.contains("transaction") &&
+      message.contains("not found")
   }
 
   /**
@@ -403,7 +415,7 @@ internal class RealTransacter private constructor(
   private fun isCockroachRestartTransaction(th: SQLException): Boolean {
     val message = th.message
     return th.errorCode == 40001 && message != null &&
-        message.contains("restart transaction")
+      message.contains("restart transaction")
   }
 
   /**

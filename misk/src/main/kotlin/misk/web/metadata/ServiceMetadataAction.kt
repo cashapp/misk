@@ -24,7 +24,8 @@ class ServiceMetadataAction @Inject constructor(
   @Unauthenticated
   fun getAll(): Response {
     return Response(
-      serviceMetadata = optionalBinder.serviceMetadata)
+      serviceMetadata = optionalBinder.serviceMetadata
+    )
   }
 
   data class Response(val serviceMetadata: ServiceMetadata)

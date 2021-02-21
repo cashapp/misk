@@ -114,14 +114,14 @@ internal data class ServletHttpCall(
       }
 
       return ServletHttpCall(
-          url = request.httpUrl(),
-          linkLayerLocalAddress = linkLayerLocalAddress,
-          dispatchMechanism = dispatchMechanism,
-          requestHeaders = request.headers(),
-          upstreamResponse = upstreamResponse,
-          requestBody = requestBody,
-          responseBody = responseBody,
-          webSocket = webSocket
+        url = request.httpUrl(),
+        linkLayerLocalAddress = linkLayerLocalAddress,
+        dispatchMechanism = dispatchMechanism,
+        requestHeaders = request.headers(),
+        upstreamResponse = upstreamResponse,
+        requestBody = requestBody,
+        responseBody = responseBody,
+        webSocket = webSocket
       )
     }
   }

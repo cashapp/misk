@@ -16,7 +16,8 @@ import javax.inject.Inject
 @MiskTest(startService = true)
 internal class AwsSqsQueueAttributeImporterTest {
   @MiskExternalDependency private val dockerSqs = DockerSqs
-  @MiskTestModule private val module = SqsJobQueueTestModule(dockerSqs.credentials, dockerSqs.client)
+  @MiskTestModule private val module =
+    SqsJobQueueTestModule(dockerSqs.credentials, dockerSqs.client)
 
   @Inject private lateinit var sqs: AmazonSQS
   @Inject private lateinit var queue: JobQueue
@@ -28,12 +29,16 @@ internal class AwsSqsQueueAttributeImporterTest {
   @BeforeEach fun createQueues() {
     // Ensure that each test case runs on a unique queue
     queueName = QueueName("sqs_job_queue_test")
-    sqs.createQueue(CreateQueueRequest()
+    sqs.createQueue(
+      CreateQueueRequest()
         .withQueueName(queueName.value)
-        .withAttributes(mapOf(
+        .withAttributes(
+          mapOf(
             // 1 second visibility timeout
-            "VisibilityTimeout" to 1.toString())
-        ))
+            "VisibilityTimeout" to 1.toString()
+          )
+        )
+    )
   }
 
   @Test fun importQueueAttributes() {
@@ -44,13 +49,14 @@ internal class AwsSqsQueueAttributeImporterTest {
     queue.enqueue(queueName, "ok")
 
     await()
-        .atMost(1, TimeUnit.SECONDS)
-        .until {
-          sqsMetrics.sqsApproxNumberOfMessages.labels(
-              AwsSqsQueueAttributeImporter.metricNamespace,
-              AwsSqsQueueAttributeImporter.metricStat,
-              queueName.value,
-              queueName.value).get() == 4.0
-        }
+      .atMost(1, TimeUnit.SECONDS)
+      .until {
+        sqsMetrics.sqsApproxNumberOfMessages.labels(
+          AwsSqsQueueAttributeImporter.metricNamespace,
+          AwsSqsQueueAttributeImporter.metricStat,
+          queueName.value,
+          queueName.value
+        ).get() == 4.0
+      }
   }
 }

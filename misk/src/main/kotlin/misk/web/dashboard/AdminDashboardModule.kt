@@ -38,74 +38,90 @@ class AdminDashboardModule(private val isDevelopment: Boolean) : KAbstractModule
 
     // Admin Dashboard Tab
     multibind<DashboardHomeUrl>().toInstance(
-        DashboardHomeUrl<AdminDashboard>("/_admin/")
+      DashboardHomeUrl<AdminDashboard>("/_admin/")
     )
-    install(WebTabResourceModule(
+    install(
+      WebTabResourceModule(
         isDevelopment = isDevelopment,
         slug = "admin-dashboard",
         web_proxy_url = "http://localhost:3100/"
-    ))
-    install(WebTabResourceModule(
+      )
+    )
+    install(
+      WebTabResourceModule(
         isDevelopment = isDevelopment,
         slug = "admin-dashboard",
         web_proxy_url = "http://localhost:3100/",
         url_path_prefix = "/_admin/",
         resourcePath = "classpath:/web/_tab/admin-dashboard/"
-    ))
+      )
+    )
 
     // @misk packages
-    install(WebTabResourceModule(
+    install(
+      WebTabResourceModule(
         isDevelopment = isDevelopment,
         slug = "@misk",
         web_proxy_url = "http://localhost:3100/",
         url_path_prefix = "/@misk/",
         resourcePath = "classpath:/web/_tab/admin-dashboard/@misk/"
-    ))
+      )
+    )
 
     // Database Query
     newMultibinder<DatabaseQueryMetadata>()
     install(WebActionModule.create<DatabaseQueryMetadataAction>())
     multibind<DashboardTab>().toProvider(
-        DashboardTabProvider<AdminDashboard, AdminDashboardAccess>(
-            slug = "database",
-            url_path_prefix = "/_admin/database/",
-            name = "Database",
-            category = "Container Admin"
-        ))
-    install(WebTabResourceModule(
+      DashboardTabProvider<AdminDashboard, AdminDashboardAccess>(
+        slug = "database",
+        url_path_prefix = "/_admin/database/",
+        name = "Database",
+        category = "Container Admin"
+      )
+    )
+    install(
+      WebTabResourceModule(
         isDevelopment = isDevelopment,
         slug = "database",
         web_proxy_url = "http://localhost:3202/"
-    ))
+      )
+    )
     // Default access that doesn't allow any queries for unconfigured DbEntities
     multibind<AccessAnnotationEntry>().toInstance(
-        AccessAnnotationEntry<NoAdminDashboardDatabaseAccess>(
-            capabilities = listOf("no_admin_dashboard_database_access")
-        )
+      AccessAnnotationEntry<NoAdminDashboardDatabaseAccess>(
+        capabilities = listOf("no_admin_dashboard_database_access")
+      )
     )
-    multibind<DashboardNavbarItem>().toInstance(DashboardNavbarItem<AdminDashboard>(
+    multibind<DashboardNavbarItem>().toInstance(
+      DashboardNavbarItem<AdminDashboard>(
         item = "<a href=\"/_admin/database/\">Database</a>",
         order = 100
-    ))
+      )
+    )
 
     // Web Actions
     install(WebActionModule.create<WebActionMetadataAction>())
     multibind<DashboardTab>().toProvider(
-        DashboardTabProvider<AdminDashboard, AdminDashboardAccess>(
-            slug = "web-actions",
-            url_path_prefix = "/_admin/web-actions/",
-            name = "Web Actions",
-            category = "Container Admin"
-        ))
-    install(WebTabResourceModule(
+      DashboardTabProvider<AdminDashboard, AdminDashboardAccess>(
+        slug = "web-actions",
+        url_path_prefix = "/_admin/web-actions/",
+        name = "Web Actions",
+        category = "Container Admin"
+      )
+    )
+    install(
+      WebTabResourceModule(
         isDevelopment = isDevelopment,
         slug = "web-actions",
         web_proxy_url = "http://localhost:3201/"
-    ))
-    multibind<DashboardNavbarItem>().toInstance(DashboardNavbarItem<AdminDashboard>(
+      )
+    )
+    multibind<DashboardNavbarItem>().toInstance(
+      DashboardNavbarItem<AdminDashboard>(
         item = "<a href=\"/_admin/web-actions/\">Web Actions</a>",
         order = 101
-    ))
+      )
+    )
   }
 }
 
@@ -115,9 +131,12 @@ class AdminDashboardTestingModule : KAbstractModule() {
     // Set dummy values for access, these shouldn't matter,
     // as test environments should prefer to use the FakeCallerAuthenticator.
     multibind<AccessAnnotationEntry>().toInstance(
-        AccessAnnotationEntry<AdminDashboardAccess>(capabilities = listOf(
-            "admin_access", "admin_console", "users"
-        )))
+      AccessAnnotationEntry<AdminDashboardAccess>(
+        capabilities = listOf(
+          "admin_access", "admin_console", "users"
+        )
+      )
+    )
     install(AdminDashboardModule(true))
   }
 }

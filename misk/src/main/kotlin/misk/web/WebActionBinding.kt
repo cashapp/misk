@@ -82,7 +82,7 @@ internal class WebActionBinding @Inject constructor(
     }
 
     override fun setParameter(parameter: KParameter, value: Any?) =
-        setParameter(parameter.index - 1, value)
+      setParameter(parameter.index - 1, value)
 
     override fun takeRequestBody(): BufferedSource {
       require(current == requestBodyClaimer) { "request body not claimed by $current" }
@@ -118,8 +118,10 @@ internal class WebActionBinding @Inject constructor(
 
     override fun claimRequestBody() {
       check(requestBody == null) { "already claimed by $requestBody" }
-      check(action.dispatchMechanism != DispatchMechanism.GET
-          && action.dispatchMechanism != DispatchMechanism.DELETE) {
+      check(
+        action.dispatchMechanism != DispatchMechanism.GET &&
+          action.dispatchMechanism != DispatchMechanism.DELETE
+      ) {
         "cannot claim request body of ${action.dispatchMechanism.name}"
       }
       requestBody = Placeholder
@@ -205,13 +207,13 @@ internal class WebActionBinding @Inject constructor(
       }
 
       return WebActionBinding(
-          action,
-          beforeCallBindings.toSet(),
-          afterCallBindings.toSet(),
-          requestBody,
-          nonNullParameters.toList(),
-          responseBody,
-          returnValue
+        action,
+        beforeCallBindings.toSet(),
+        afterCallBindings.toSet(),
+        requestBody,
+        nonNullParameters.toList(),
+        responseBody,
+        returnValue
       )
     }
   }

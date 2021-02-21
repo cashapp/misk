@@ -22,9 +22,9 @@ class MiskConfigTest {
 
   @MiskTestModule
   val module = Modules.combine(
-      ConfigModule.create("test_app", config),
-      DeploymentModule.forTesting()
-      // @TODO(jwilson) https://github.com/square/misk/issues/272
+    ConfigModule.create("test_app", config),
+    DeploymentModule.forTesting()
+    // @TODO(jwilson) https://github.com/square/misk/issues/272
   )
 
   @Inject
@@ -37,7 +37,7 @@ class MiskConfigTest {
     assertThat(testConfig.consumer_b).isEqualTo(ConsumerConfig(1, 2))
     assertThat(testConfig.duration).isEqualTo(DurationConfig(Duration.parse("PT1S")))
     assertThat((testConfig.action_exception_log_level)).isEqualTo(
-        ActionExceptionLogLevelConfig(Level.INFO, Level.ERROR)
+      ActionExceptionLogLevelConfig(Level.INFO, Level.ERROR)
     )
   }
 
@@ -57,8 +57,10 @@ class MiskConfigTest {
       MiskConfig.load<TestConfig>("missing", defaultEnv)
     }
 
-    assertThat(exception).hasMessageContaining("could not find configuration files -" +
-        " checked [classpath:/missing-common.yaml, classpath:/missing-testing.yaml]")
+    assertThat(exception).hasMessageContaining(
+      "could not find configuration files -" +
+        " checked [classpath:/missing-common.yaml, classpath:/missing-testing.yaml]"
+    )
   }
 
   @Test
@@ -68,7 +70,8 @@ class MiskConfigTest {
     }
 
     assertThat(exception).hasMessageContaining(
-        "could not find 'consumer_a' of 'TestConfig' in partial_test_app-testing.yaml")
+      "could not find 'consumer_a' of 'TestConfig' in partial_test_app-testing.yaml"
+    )
   }
 
   @Test
@@ -101,9 +104,10 @@ class MiskConfigTest {
   @Test
   fun mergesExternalFiles() {
     val overrides = listOf(
-        MiskConfigTest::class.java.getResource("/overrides/override-test-app1.yaml"),
-        MiskConfigTest::class.java.getResource("/overrides/override-test-app2.yaml"))
-        .map { File(it.file) }
+      MiskConfigTest::class.java.getResource("/overrides/override-test-app1.yaml"),
+      MiskConfigTest::class.java.getResource("/overrides/override-test-app2.yaml")
+    )
+      .map { File(it.file) }
 
     val config = MiskConfig.load<TestConfig>("test_app", defaultEnv, overrides)
     assertThat(config.consumer_a).isEqualTo(ConsumerConfig(14, 27))
@@ -125,7 +129,8 @@ class MiskConfigTest {
   fun handlesDuplicateNamedExternalFiles() {
     val overrides = listOf(
       MiskConfigTest::class.java.getResource("/overrides/override-test-app1.yaml"),
-      MiskConfigTest::class.java.getResource("/additional_overrides/override-test-app1.yaml"))
+      MiskConfigTest::class.java.getResource("/additional_overrides/override-test-app1.yaml")
+    )
       .map { File(it.file) }
 
     val config = MiskConfig.load<TestConfig>("test_app", defaultEnv, overrides)

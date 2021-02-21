@@ -31,7 +31,7 @@ class GrpcSourceSinkTest {
     writer.write(HelloRequest("localhost"))
     writer.close()
     assertThat(buffer.readByteString())
-        .isEqualTo("000000000b0a096c6f63616c686f7374".decodeHex())
+      .isEqualTo("000000000b0a096c6f63616c686f7374".decodeHex())
   }
 
   @Test
@@ -41,6 +41,7 @@ class GrpcSourceSinkTest {
     writer.write(HelloReply("Hello localhost"))
     writer.close()
     assertThat(buffer.readByteString()).isEqualTo(
-        "00000000110a0f48656c6c6f206c6f63616c686f7374".decodeHex())
+      "00000000110a0f48656c6c6f206c6f63616c686f7374".decodeHex()
+    )
   }
 }

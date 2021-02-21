@@ -45,7 +45,7 @@ class ConcurrencyLimitsInterceptorTest {
     val action = HelloAction::call.asAction(DispatchMechanism.GET)
     val interceptor = factory.create(action)!!
     assertThat(call(action, interceptor, callDuration = Duration.ofMillis(100), statusCode = 200))
-        .isEqualTo(CallResult(callWasShed = false, statusCode = 200))
+      .isEqualTo(CallResult(callWasShed = false, statusCode = 200))
     assertThat(logCollector.takeMessages()).isEmpty()
   }
 
@@ -53,11 +53,11 @@ class ConcurrencyLimitsInterceptorTest {
   fun limitReached() {
     val action = HelloAction::call.asAction(DispatchMechanism.GET)
     val limitZero = SimpleLimiter.Builder()
-        .limit(SettableLimit(0))
-        .build<String>()
+      .limit(SettableLimit(0))
+      .build<String>()
     val interceptor = ConcurrencyLimitsInterceptor(action.name, limitZero, clock)
     assertThat(call(action, interceptor, callDuration = Duration.ofMillis(100), statusCode = 200))
-        .isEqualTo(CallResult(callWasShed = true, statusCode = 503))
+      .isEqualTo(CallResult(callWasShed = true, statusCode = 503))
   }
 
   @Test
@@ -88,13 +88,13 @@ class ConcurrencyLimitsInterceptorTest {
   fun atMostOneErrorLoggedPerMinute() {
     val action = HelloAction::call.asAction(DispatchMechanism.GET)
     val limitZero = SimpleLimiter.Builder()
-        .limit(SettableLimit(0))
-        .build<String>()
+      .limit(SettableLimit(0))
+      .build<String>()
     val interceptor = ConcurrencyLimitsInterceptor(action.name, limitZero, clock)
     // First call logs an error.
     call(action, interceptor, callDuration = Duration.ofMillis(100), statusCode = 200)
     assertThat(logCollector.takeMessages(minLevel = Level.ERROR))
-        .containsExactly("concurrency limits interceptor shedding HelloAction")
+      .containsExactly("concurrency limits interceptor shedding HelloAction")
 
     // Subsequent calls don't.
     call(action, interceptor, callDuration = Duration.ofMillis(100), statusCode = 200)
@@ -104,7 +104,7 @@ class ConcurrencyLimitsInterceptorTest {
     clock.setNow(clock.instant().plus(1, ChronoUnit.MINUTES))
     call(action, interceptor, callDuration = Duration.ofMillis(100), statusCode = 200)
     assertThat(logCollector.takeMessages(minLevel = Level.ERROR))
-        .containsExactly("concurrency limits interceptor shedding HelloAction")
+      .containsExactly("concurrency limits interceptor shedding HelloAction")
   }
 
   @Test
@@ -113,7 +113,7 @@ class ConcurrencyLimitsInterceptorTest {
     val interceptor = factory.create(action)!!
     // The bound limiter has a 0 limit.
     assertThat(call(action, interceptor, callDuration = Duration.ofMillis(100), statusCode = 200))
-        .isEqualTo(CallResult(callWasShed = true, statusCode = 503))
+      .isEqualTo(CallResult(callWasShed = true, statusCode = 503))
   }
 
   private fun call(
@@ -125,15 +125,15 @@ class ConcurrencyLimitsInterceptorTest {
     val terminalInterceptor = TerminalInterceptor(callDuration, statusCode)
     val httpCall = FakeHttpCall(url = "https://example.com/hello".toHttpUrl())
     val chain = RealNetworkChain(
-        action,
-        HelloAction(),
-        httpCall,
-        listOf(interceptor, terminalInterceptor)
+      action,
+      HelloAction(),
+      httpCall,
+      listOf(interceptor, terminalInterceptor)
     )
     chain.proceed(chain.httpCall)
     return CallResult(
-        callWasShed = terminalInterceptor.callWasShed,
-        statusCode = httpCall.statusCode
+      callWasShed = terminalInterceptor.callWasShed,
+      statusCode = httpCall.statusCode
     )
   }
 
@@ -150,8 +150,8 @@ class ConcurrencyLimitsInterceptorTest {
     override fun create(action: Action): Limiter<String>? {
       if (action.function == CustomLimiterAction::call) {
         return SimpleLimiter.Builder()
-            .limit(SettableLimit(0))
-            .build()
+          .limit(SettableLimit(0))
+          .build()
       }
       return null
     }

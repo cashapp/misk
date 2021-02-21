@@ -3,15 +3,15 @@ package misk.client
 import com.google.common.base.Stopwatch
 import com.google.common.base.Ticker
 import com.squareup.wire.GrpcMethod
-import java.net.SocketTimeoutException
-import java.util.concurrent.TimeUnit
-import javax.inject.Inject
-import javax.inject.Singleton
 import misk.metrics.Histogram
 import misk.metrics.Metrics
 import okhttp3.Interceptor
 import okhttp3.Response
 import retrofit2.Invocation
+import java.net.SocketTimeoutException
+import java.util.concurrent.TimeUnit
+import javax.inject.Inject
+import javax.inject.Singleton
 
 class ClientMetricsInterceptor private constructor(
   val clientName: String,
@@ -48,9 +48,10 @@ class ClientMetricsInterceptor private constructor(
   @Singleton
   class Factory @Inject internal constructor(m: Metrics) {
     internal val requestDuration = m.histogram(
-        name = "client_http_request_latency_ms",
-        help = "count and duration in ms of outgoing client requests",
-        labelNames = listOf("action", "code"))
+      name = "client_http_request_latency_ms",
+      help = "count and duration in ms of outgoing client requests",
+      labelNames = listOf("action", "code")
+    )
 
     fun create(clientName: String) = ClientMetricsInterceptor(clientName, requestDuration)
   }

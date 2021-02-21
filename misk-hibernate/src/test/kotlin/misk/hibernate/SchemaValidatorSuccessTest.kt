@@ -22,13 +22,13 @@ internal class SchemaValidatorSuccessTest {
   fun happyPath() {
     val report = SchemaValidator().validate(transacter, sessionFactoryService.hibernateMetadata)
     assertThat(report.schemas)
-        .containsExactlyInAnyOrder("vt_actors_0", "vt_main_0", "vt_movies_-80", "vt_movies_80-")
+      .containsExactlyInAnyOrder("vt_actors_0", "vt_main_0", "vt_movies_-80", "vt_movies_80-")
     assertThat(report.tables)
-        .containsExactlyInAnyOrder("actors", "characters", "movies")
+      .containsExactlyInAnyOrder("actors", "characters", "movies")
     assertThat(report.columns)
-        .contains("actors.id", "actors.birth_date", "characters.id", "movies.id")
+      .contains("actors.id", "actors.birth_date", "characters.id", "movies.id")
     assertThat(report.columns.size).isGreaterThanOrEqualTo(15)
     assertThat(getOnlyElement(service.status().messages))
-        .startsWith("SchemaValidatorService: Movies is valid: schemas=[vt_actors_0, vt_main_0")
+      .startsWith("SchemaValidatorService: Movies is valid: schemas=[vt_actors_0, vt_main_0")
   }
 }

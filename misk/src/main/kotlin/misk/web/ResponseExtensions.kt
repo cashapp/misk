@@ -19,13 +19,14 @@ fun Response<*>.readUtf8(): String {
 }
 
 fun okhttp3.Response.toMisk(): Response<ResponseBody> {
-  val miskBody = if (body is okhttp3.ResponseBody) { object : ResponseBody {
-    override fun writeTo(sink: BufferedSink) {
-      body!!.use {
-        sink.writeAll(it.source())
+  val miskBody = if (body is okhttp3.ResponseBody) {
+    object : ResponseBody {
+      override fun writeTo(sink: BufferedSink) {
+        body!!.use {
+          sink.writeAll(it.source())
+        }
       }
     }
-  }
   } else "".toResponseBody()
   return Response(miskBody, headers, code)
 }

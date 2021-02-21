@@ -8,9 +8,9 @@ import misk.inject.KAbstractModule
 class FakeFilesModule(private val fakeFiles: Map<String, String>) : KAbstractModule() {
   override fun configure() {
     fakeFiles.forEach {
-        newMapBinder<String, String>(ForFakeFiles::class)
-            .addBinding(it.key)
-            .toInstance(it.value)
+      newMapBinder<String, String>(ForFakeFiles::class)
+        .addBinding(it.key)
+        .toInstance(it.value)
     }
   }
 }

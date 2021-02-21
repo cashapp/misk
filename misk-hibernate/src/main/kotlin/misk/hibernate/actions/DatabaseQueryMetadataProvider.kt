@@ -15,8 +15,8 @@ internal class DatabaseQueryMetadataProvider<T : DbEntity<T>>(
 ) : Provider<DatabaseQueryMetadata> {
   @Inject lateinit var hibernateDatabaseQueryMetadataFactory: HibernateDatabaseQueryMetadataFactory
   override fun get(): DatabaseQueryMetadata = hibernateDatabaseQueryMetadataFactory.fromQuery(
-      dbEntityClass = dbEntityClass,
-      queryClass = queryClass,
-      accessAnnotationClass = accessAnnotationClass
+    dbEntityClass = dbEntityClass,
+    queryClass = queryClass,
+    accessAnnotationClass = accessAnnotationClass
   )
 }

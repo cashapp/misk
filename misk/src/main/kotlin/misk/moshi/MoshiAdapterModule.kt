@@ -16,12 +16,12 @@ class MoshiAdapterModule(private val jsonAdapter: Any) : KAbstractModule() {
 
   companion object {
     inline operator fun <reified T> invoke(adapter: JsonAdapter<T>): MoshiAdapterModule =
-        MoshiAdapterModule(object : JsonAdapter.Factory {
-          override fun create(
-            type: Type,
-            annotations: Set<Annotation>,
-            moshi: Moshi
-          ): JsonAdapter<*>? = if (Types.equals(type, T::class.java)) adapter else null
-        })
+      MoshiAdapterModule(object : JsonAdapter.Factory {
+        override fun create(
+          type: Type,
+          annotations: Set<Annotation>,
+          moshi: Moshi
+        ): JsonAdapter<*>? = if (Types.equals(type, T::class.java)) adapter else null
+      })
   }
 }

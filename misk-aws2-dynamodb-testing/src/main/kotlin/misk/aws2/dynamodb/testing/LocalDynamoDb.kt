@@ -39,12 +39,12 @@ internal class LocalDynamoDb internal constructor(port: Int) {
 
   fun connectToStreams(): DynamoDbStreamsClient {
     return DynamoDbStreamsClient.builder()
-        // The values that you supply for the AWS access key and the Region are only used to name
-        // the database file.
-        .credentialsProvider(awsCredentialsProvider)
-        .region(Region.US_WEST_2)
-        .endpointOverride(url.toUri())
-        .build()
+      // The values that you supply for the AWS access key and the Region are only used to name
+      // the database file.
+      .credentialsProvider(awsCredentialsProvider)
+      .region(Region.US_WEST_2)
+      .endpointOverride(url.toUri())
+      .build()
   }
 
   companion object {

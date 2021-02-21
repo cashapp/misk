@@ -21,9 +21,9 @@ internal class IOExceptionMapper @Inject internal constructor() : ExceptionMappe
 
   companion object {
     val INTERNAL_SERVER_ERROR_RESPONSE = Response(
-        "internal server error".toResponseBody(),
-        headersOf("Content-Type", MediaTypes.TEXT_PLAIN_UTF8),
-        StatusCode.INTERNAL_SERVER_ERROR.code
+      "internal server error".toResponseBody(),
+      headersOf("Content-Type", MediaTypes.TEXT_PLAIN_UTF8),
+      StatusCode.INTERNAL_SERVER_ERROR.code
     )
   }
 }

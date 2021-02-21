@@ -35,8 +35,9 @@ data class RepeatedTaskQueueConfig(
    */
   fun defaultBackoff(initialDelay: Duration): Backoff {
     return ExponentialBackoff(
-        initialDelay,
-        Duration.ofSeconds(default_max_delay_sec),
-        Duration.ofMillis(default_jitter_ms))
+      initialDelay,
+      Duration.ofSeconds(default_max_delay_sec),
+      Duration.ofMillis(default_jitter_ms)
+    )
   }
 }

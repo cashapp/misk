@@ -32,14 +32,16 @@ internal class SchemaValidatorService internal constructor(
       return HealthStatus.unhealthy("SchemaValidatorService: ${qualifier.simpleName} is $state")
     }
 
-    return HealthStatus.healthy("SchemaValidatorService: ${qualifier.simpleName} is valid: " +
+    return HealthStatus.healthy(
+      "SchemaValidatorService: ${qualifier.simpleName} is valid: " +
         "schemas=${report.schemas} tables=${report.tables} columnCount=${report.columns.size} " +
-        "columns=${report.columns}")
+        "columns=${report.columns}"
+    )
   }
 
   companion object {
     /** Make sure we only validate each database once. It can be quite slow sometimes. */
     private val reports: MutableMap<KClass<out Annotation>, ValidationReport> =
-        Collections.synchronizedMap(mutableMapOf<KClass<out Annotation>, ValidationReport>())
+      Collections.synchronizedMap(mutableMapOf<KClass<out Annotation>, ValidationReport>())
   }
 }

@@ -13,8 +13,10 @@ class TestActionScopedProviderModule : ActionScopedProviderModule() {
     bindProvider(String::class, BarProvider::class, Names.named("bar"))
     bindProvider(String::class, ZedProvider::class, Names.named("zed"))
     bindProvider(nullableStringTypeLiteral, NullableFooProvider::class, Names.named("nullable-foo"))
-    bindProvider(nullableStringTypeLiteral, NullableBasedOnFooProvider::class,
-        Names.named("nullable-based-on-foo"))
+    bindProvider(
+      nullableStringTypeLiteral, NullableBasedOnFooProvider::class,
+      Names.named("nullable-based-on-foo")
+    )
   }
 
   class BarProvider @Inject internal constructor(

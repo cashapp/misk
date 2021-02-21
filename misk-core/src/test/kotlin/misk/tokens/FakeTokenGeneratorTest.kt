@@ -63,17 +63,17 @@ class FakeTokenGeneratorTest {
   @Test
   fun customLength() {
     assertThat(tokenGenerator.generate(label = "payment", length = 4))
-        .isEqualTo("pay1")
+      .isEqualTo("pay1")
     assertThat(tokenGenerator.generate(label = "payment", length = 7))
-        .isEqualTo("paymen2")
+      .isEqualTo("paymen2")
     assertThat(tokenGenerator.generate(label = "payment", length = 8))
-        .isEqualTo("payment3")
+      .isEqualTo("payment3")
     assertThat(tokenGenerator.generate(label = "payment", length = 9))
-        .isEqualTo("payment04")
+      .isEqualTo("payment04")
     assertThat(tokenGenerator.generate(label = "payment", length = 12))
-        .isEqualTo("payment00005")
+      .isEqualTo("payment00005")
     assertThat(tokenGenerator.generate(label = "payment", length = 25))
-        .isEqualTo("payment000000000000000006")
+      .isEqualTo("payment000000000000000006")
   }
 
   @Test
@@ -82,17 +82,17 @@ class FakeTokenGeneratorTest {
     (tokenGenerator as FakeTokenGenerator).nextByLabel.put("payment", AtomicLong(12345L))
 
     assertThat(tokenGenerator.generate(label = "payment", length = 4))
-        .isEqualTo("2345")
+      .isEqualTo("2345")
     assertThat(tokenGenerator.generate(label = "payment", length = 7))
-        .isEqualTo("pa12346")
+      .isEqualTo("pa12346")
     assertThat(tokenGenerator.generate(label = "payment", length = 8))
-        .isEqualTo("pay12347")
+      .isEqualTo("pay12347")
     assertThat(tokenGenerator.generate(label = "payment", length = 9))
-        .isEqualTo("paym12348")
+      .isEqualTo("paym12348")
     assertThat(tokenGenerator.generate(label = "payment", length = 12))
-        .isEqualTo("payment12349")
+      .isEqualTo("payment12349")
     assertThat(tokenGenerator.generate(label = "payment", length = 25))
-        .isEqualTo("payment000000000000012350")
+      .isEqualTo("payment000000000000012350")
   }
 
   @Test

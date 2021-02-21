@@ -41,7 +41,7 @@ internal class RequestLogContextInterceptor private constructor(
     private val currentRequest: @JvmSuppressWildcards ActionScoped<HttpServletRequest>
   ) : NetworkInterceptor.Factory {
     override fun create(action: Action) =
-        RequestLogContextInterceptor(action, currentCaller, currentRequest)
+      RequestLogContextInterceptor(action, currentCaller, currentRequest)
   }
 
   internal companion object {
@@ -53,12 +53,12 @@ internal class RequestLogContextInterceptor private constructor(
     const val MDC_HTTP_METHOD = "http_method"
 
     val allContextNames = listOf(
-        MDC_ACTION,
-        MDC_CALLING_PRINCIPAL,
-        MDC_HTTP_METHOD,
-        MDC_PROTOCOL,
-        MDC_REMOTE_ADDR,
-        MDC_REQUEST_URI
+      MDC_ACTION,
+      MDC_CALLING_PRINCIPAL,
+      MDC_HTTP_METHOD,
+      MDC_PROTOCOL,
+      MDC_REMOTE_ADDR,
+      MDC_REQUEST_URI
     )
   }
 }

@@ -84,8 +84,8 @@ class PathPattern(
               }
 
               result.append("(")
-                  .append(regex)
-                  .append(")")
+                .append(regex)
+                .append(")")
               numRegexVariables++
 
               lastVariableIsWildcardMatch = regex.endsWith(".*")
@@ -119,12 +119,12 @@ class PathPattern(
       }
 
       return PathPattern(
-          pattern,
-          Pattern.compile(result.toString()),
-          variableNames,
-          numRegexVariables,
-          numSegments,
-          lastVariableIsWildcardMatch
+        pattern,
+        Pattern.compile(result.toString()),
+        variableNames,
+        numRegexVariables,
+        numSegments,
+        lastVariableIsWildcardMatch
       )
     }
   }

@@ -4,8 +4,8 @@ import com.google.inject.Inject
 import misk.scope.ActionScoped
 import misk.security.authz.Unauthenticated
 import misk.web.Get
-import misk.web.Post
 import misk.web.HttpCall
+import misk.web.Post
 import misk.web.RequestContentType
 import misk.web.Response
 import misk.web.ResponseBody
@@ -61,11 +61,11 @@ class WebProxyAction @Inject constructor(
   fun action(): Response<ResponseBody> {
     val httpCall = clientHttpCall.get()
     val matchedEntry = resourceEntryFinder.webProxy(httpCall.url) as WebProxyEntry?
-        ?: return NotFoundAction.response(httpCall.url.toString())
+      ?: return NotFoundAction.response(httpCall.url.toString())
     val proxyUrl = matchedEntry.web_proxy_url.newBuilder()
-        .encodedPath(httpCall.url.encodedPath)
-        .query(httpCall.url.query)
-        .build()
+      .encodedPath(httpCall.url.encodedPath)
+      .query(httpCall.url.query)
+      .build()
     return forwardRequestTo(proxyUrl)
   }
 
@@ -81,21 +81,26 @@ class WebProxyAction @Inject constructor(
 
   private fun fetchFailResponse(clientRequestUrl: HttpUrl): Response<ResponseBody> {
     return Response(
-        "Failed to fetch upstream URL $clientRequestUrl".toResponseBody(),
-        headersOf("Content-Type", MediaTypes.TEXT_PLAIN_UTF8.asMediaType().toString()),
-        HttpURLConnection.HTTP_UNAVAILABLE
+      "Failed to fetch upstream URL $clientRequestUrl".toResponseBody(),
+      headersOf("Content-Type", MediaTypes.TEXT_PLAIN_UTF8.asMediaType().toString()),
+      HttpURLConnection.HTTP_UNAVAILABLE
     )
   }
 
   private fun okhttp3.Request.forwardedWithUrl(newUrl: HttpUrl): okhttp3.Request {
     // TODO(adrw) include the client URL/IP as the for= field for Forwarded
     return newBuilder()
-        .addHeader("Forwarded", "for=; by=${HttpUrl.Builder()
-            .scheme(this.url.scheme)
-            .host(this.url.host)
-            .port(this.url.port)}")
-        .url(newUrl)
-        .build()
+      .addHeader(
+        "Forwarded",
+        "for=; by=${
+        HttpUrl.Builder()
+          .scheme(this.url.scheme)
+          .host(this.url.host)
+          .port(this.url.port)
+        }"
+      )
+      .url(newUrl)
+      .build()
   }
 }
 

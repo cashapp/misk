@@ -26,9 +26,10 @@ class ExponentialBackoffTest {
 
   @Test fun jitteredExponentialBackoff() {
     val backoff = ExponentialBackoff(
-        Duration.ofMillis(10),
-        Duration.ofSeconds(1),
-        Duration.ofMillis(10))
+      Duration.ofMillis(10),
+      Duration.ofSeconds(1),
+      Duration.ofMillis(10)
+    )
 
     assertThat(backoff.nextRetry().toMillis()).isBetween(10L, 20L)
     assertThat(backoff.nextRetry().toMillis()).isBetween(20L, 30L)
@@ -51,8 +52,8 @@ class ExponentialBackoffTest {
     val jitter = AtomicLong(10)
 
     val backoff = ExponentialBackoff(
-        { Duration.ofMillis(baseDelay.get()) },
-        { Duration.ofMillis(maxDelay.get()) }
+      { Duration.ofMillis(baseDelay.get()) },
+      { Duration.ofMillis(maxDelay.get()) }
     ) { Duration.ofMillis(jitter.get()) }
 
     assertThat(backoff.nextRetry().toMillis()).isBetween(10L, 20L)
@@ -76,8 +77,8 @@ class ExponentialBackoffTest {
     val baseDelay = AtomicLong(100)
     val maxDelay = AtomicLong(5000L)
     val backoff = ExponentialBackoff(
-        { Duration.ofMillis(baseDelay.get()) },
-        { Duration.ofMillis(maxDelay.get()) }
+      { Duration.ofMillis(baseDelay.get()) },
+      { Duration.ofMillis(maxDelay.get()) }
     ) { Duration.ofMillis(0) }
 
     // Previously the number of retries was uncapped and it would cause a long overflow at 57

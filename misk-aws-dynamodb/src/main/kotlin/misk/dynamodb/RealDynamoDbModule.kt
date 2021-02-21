@@ -15,8 +15,10 @@ import javax.inject.Singleton
  * Install this module to have access to an AmazonDynamoDB client. This can be
  * used to create a DynamoDbMapper for querying of a DynamoDb table.
  */
-class RealDynamoDbModule constructor(private val clientConfig: ClientConfiguration = ClientConfiguration()) :
-    KAbstractModule() {
+class RealDynamoDbModule constructor(
+  private val clientConfig: ClientConfiguration = ClientConfiguration()
+) :
+  KAbstractModule() {
   override fun configure() {
     requireBinding<AWSCredentialsProvider>()
     requireBinding<AwsRegion>()
@@ -28,11 +30,11 @@ class RealDynamoDbModule constructor(private val clientConfig: ClientConfigurati
     awsCredentialsProvider: AWSCredentialsProvider
   ): AmazonDynamoDB {
     return AmazonDynamoDBClientBuilder
-        .standard()
-        .withRegion(awsRegion.name)
-        .withCredentials(awsCredentialsProvider)
-        .withClientConfiguration(clientConfig)
-        .build()
+      .standard()
+      .withRegion(awsRegion.name)
+      .withCredentials(awsCredentialsProvider)
+      .withClientConfiguration(clientConfig)
+      .build()
   }
 
   @Provides @Singleton
@@ -41,10 +43,10 @@ class RealDynamoDbModule constructor(private val clientConfig: ClientConfigurati
     awsCredentialsProvider: AWSCredentialsProvider
   ): AmazonDynamoDBStreams {
     return AmazonDynamoDBStreamsClientBuilder
-        .standard()
-        .withRegion(awsRegion.name)
-        .withCredentials(awsCredentialsProvider)
-        .withClientConfiguration(clientConfig)
-        .build()
+      .standard()
+      .withRegion(awsRegion.name)
+      .withCredentials(awsCredentialsProvider)
+      .withClientConfiguration(clientConfig)
+      .build()
   }
 }

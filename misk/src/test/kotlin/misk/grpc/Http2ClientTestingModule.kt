@@ -29,20 +29,20 @@ class Http2ClientTestingModule(val jetty: JettyService) : KAbstractModule() {
   @Singleton
   fun provideHttpClientsConfig(): HttpClientsConfig {
     return HttpClientsConfig(
-        endpoints = mapOf(
-            "default" to HttpClientEndpointConfig(
-                url = "http://example.com/",
-                clientConfig = HttpClientConfig(
-                    ssl = HttpClientSSLConfig(
-                        cert_store = null,
-                        trust_store = TrustStoreConfig(
-                            resource = "classpath:/ssl/server_cert.pem",
-                            format = SslLoader.FORMAT_PEM
-                        )
-                    )
-                )
+      endpoints = mapOf(
+        "default" to HttpClientEndpointConfig(
+          url = "http://example.com/",
+          clientConfig = HttpClientConfig(
+            ssl = HttpClientSSLConfig(
+              cert_store = null,
+              trust_store = TrustStoreConfig(
+                resource = "classpath:/ssl/server_cert.pem",
+                format = SslLoader.FORMAT_PEM
+              )
             )
+          )
         )
+      )
     )
   }
 }

@@ -78,7 +78,7 @@ internal class BoxedStringType<T : Any> : UserType, ParameterizedType {
     owner: Any?
   ): Any? {
     val result = rs.getString(names[0])
-    return if (result != null) assemble(result as String, owner) else null
+    return if (result != null) assemble(result, owner) else null
   }
 
   override fun isMutable() = false

@@ -36,14 +36,16 @@ class SslLoader @Inject internal constructor(
 
   private fun load(cert_key_combo: String, passphrase: String? = null): PemComboFile {
     val source = resourceLoader.open(cert_key_combo)
-        ?: throw IllegalArgumentException("no such resource $cert_key_combo")
+      ?: throw IllegalArgumentException("no such resource $cert_key_combo")
     source.use {
       return PemComboFile.parse(source, passphrase)
     }
   }
 
-  fun loadTrustStore(config: TrustStoreConfig) = loadTrustStore(config.resource, config.format,
-      config.passphrase)
+  fun loadTrustStore(config: TrustStoreConfig) = loadTrustStore(
+    config.resource, config.format,
+    config.passphrase
+  )
 
   private fun PemComboFile.toTrustStore(): TrustStore? {
     if (!privateKeys.isEmpty() || !privateRsaKeys.isEmpty()) return null
@@ -76,25 +78,28 @@ class SslLoader @Inject internal constructor(
   }
 
   fun loadCertStore(config: CertStoreConfig) =
-      loadCertStore(config.resource, config.format, config.passphrase)
+    loadCertStore(config.resource, config.format, config.passphrase)
 
   private fun PemComboFile.toCertStore(): CertStore? {
     if (certificates.isEmpty() || privateRsaKeys.size + privateKeys.size != 1) return null
 
     val keyStore = newEmptyKeyStore()
     val privateKeySpec = if (privateKeys.isEmpty()) PemComboFile.convertPKCS1toPKCS8(
-        privateRsaKeys[0])
+      privateRsaKeys[0]
+    )
     else PKCS8EncodedKeySpec(privateKeys[0].toByteArray())
     val keyFactory = KeyFactory.getInstance("RSA")
     val privateKey = keyFactory.generatePrivate(privateKeySpec)
-    keyStore.setKeyEntry("key", privateKey, passphrase.toCharArray(),
-        decodeCertificates().toTypedArray())
+    keyStore.setKeyEntry(
+      "key", privateKey, passphrase.toCharArray(),
+      decodeCertificates().toTypedArray()
+    )
     return CertStore(keyStore)
   }
 
   private fun loadJavaKeystore(path: String, type: String, passphrase: String? = null): KeyStore {
     val source = resourceLoader.open(path)
-        ?: throw IllegalArgumentException("no such resource $path")
+      ?: throw IllegalArgumentException("no such resource $path")
     source.use {
       val keystore = try {
         KeyStore.getInstance(type)
