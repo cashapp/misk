@@ -11,8 +11,9 @@ import kotlin.annotation.AnnotationRetention.RUNTIME
 @Qualifier
 @Retention(RUNTIME)
 @Target(
-    AnnotationTarget.CLASS,
-    AnnotationTarget.VALUE_PARAMETER,
-    AnnotationTarget.FIELD,
-    AnnotationTarget.TYPE)
+  AnnotationTarget.CLASS,
+  AnnotationTarget.VALUE_PARAMETER,
+  AnnotationTarget.FIELD,
+  AnnotationTarget.TYPE
+)
 internal annotation class MiskDefault

@@ -25,7 +25,7 @@ internal class JsonColumnType<T> : UserType, ParameterizedType, TypeConfiguratio
 
   override fun setParameterValues(properties: Properties) {
     val moshi = typeConfiguration.metadataBuildingContext.bootstrapContext.serviceRegistry.injector
-        .getInstance(Moshi::class.java)
+      .getInstance(Moshi::class.java)
     jsonAdapter = moshi.adapter<T>(properties.getField("jsonColumnField")!!.genericType)
   }
 

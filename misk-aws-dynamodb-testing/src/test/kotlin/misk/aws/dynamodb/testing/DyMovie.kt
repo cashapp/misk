@@ -8,17 +8,18 @@ import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBRangeKey
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTable
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTypeConverted
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTypeConverter
-import java.nio.ByteBuffer
 import java.time.LocalDate
 
 @DynamoDBTable(tableName = "movies")
 class DyMovie {
   @DynamoDBHashKey(attributeName = "name")
   var name: String? = null
+
   @DynamoDBIndexRangeKey(globalSecondaryIndexName = "movies.release_date_index")
   @DynamoDBTypeConverted(converter = LocalDateTypeConverter::class)
   @DynamoDBRangeKey(attributeName = "release_date")
   var release_date: LocalDate? = null
+
   @DynamoDBIndexHashKey(globalSecondaryIndexName = "movies.release_date_index")
   @DynamoDBAttribute
   var directed_by: String? = null

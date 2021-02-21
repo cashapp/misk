@@ -28,11 +28,11 @@ internal class WireMessageAdapter(
   } ?: throw AssertionError("no suitable constructor for ${builderType.name}")
 
   private val fieldBindings: Map<String, FieldBinding> = messageType.declaredFields
-      .mapNotNull { field ->
-        field.getAnnotation(WireField::class.java)
-            ?.let { FieldBinding(it, builderType, field, moshi) }
-      }.map { it.name to it }
-      .toMap()
+    .mapNotNull { field ->
+      field.getAnnotation(WireField::class.java)
+        ?.let { FieldBinding(it, builderType, field, moshi) }
+    }.map { it.name to it }
+    .toMap()
 
   override fun fromJson(reader: JsonReader): Any? {
     val builder = newBuilder.newInstance() as Message.Builder<*, *>

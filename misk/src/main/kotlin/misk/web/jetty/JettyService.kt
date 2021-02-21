@@ -3,7 +3,6 @@ package misk.web.jetty
 import com.google.common.base.Stopwatch
 import com.google.common.util.concurrent.AbstractIdleService
 import com.google.common.util.concurrent.ThreadFactoryBuilder
-import misk.concurrent.ExecutorServiceFactory
 import misk.logging.getLogger
 import misk.security.ssl.CipherSuites
 import misk.security.ssl.SslLoader
@@ -37,13 +36,11 @@ import org.eclipse.jetty.util.thread.ThreadPool
 import java.net.InetAddress
 import java.util.EnumSet
 import java.util.concurrent.SynchronousQueue
-import java.util.concurrent.ThreadFactory
 import java.util.concurrent.ThreadPoolExecutor
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
 import javax.servlet.DispatcherType
-import javax.servlet.FilterConfig
 
 private val logger = getLogger<JettyService>()
 

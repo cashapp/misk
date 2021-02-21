@@ -33,8 +33,9 @@ class WebActionModule<A : WebAction> private constructor(
     fun <A : WebAction> create(actionClass: KClass<A>): WebActionModule<A> {
       return WebActionModule(actionClass, "/")
     }
-    inline fun <reified A : WebAction> createWithPrefix(url_path_prefix: String): WebActionModule<A> =
-        createWithPrefix(A::class, url_path_prefix)
+
+    inline fun <reified A : WebAction> createWithPrefix(url_path_prefix: String):
+      WebActionModule<A> = createWithPrefix(A::class, url_path_prefix)
 
     @JvmStatic
     fun <A : WebAction> createWithPrefix(

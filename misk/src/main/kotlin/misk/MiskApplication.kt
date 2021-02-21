@@ -55,14 +55,17 @@ class MiskApplication(private val modules: List<Module>, commands: List<MiskComm
     try {
       jc.parse(*args)
       val command = commands[jc.parsedCommand]
-          ?: throw ParameterException("unknown command ${jc.parsedCommand}")
+        ?: throw ParameterException("unknown command ${jc.parsedCommand}")
 
-      val injector = Guice.createInjector(object : KAbstractModule() {
-        override fun configure() {
-          bind<JCommander>().toInstance(jc)
-          binder().requireAtInjectOnConstructors()
-        }
-      }, *command.modules.toTypedArray())
+      val injector = Guice.createInjector(
+        object : KAbstractModule() {
+          override fun configure() {
+            bind<JCommander>().toInstance(jc)
+            binder().requireAtInjectOnConstructors()
+          }
+        },
+        *command.modules.toTypedArray()
+      )
 
       injector.injectMembers(command)
       command.run()

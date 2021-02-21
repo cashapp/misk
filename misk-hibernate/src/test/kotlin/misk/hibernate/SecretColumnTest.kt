@@ -11,17 +11,17 @@ import misk.inject.KAbstractModule
 import misk.jdbc.DataSourceConfig
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
+import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatThrownBy
+import org.junit.jupiter.api.Test
+import java.util.Arrays
+import java.util.Objects
 import javax.inject.Inject
 import javax.inject.Qualifier
 import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.GeneratedValue
 import javax.persistence.Table
-import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.api.Assertions.assertThatThrownBy
-import org.junit.jupiter.api.Test
-import java.util.Arrays
-import java.util.Objects
 import kotlin.test.assertNull
 
 @MiskTest(startService = true)
@@ -185,6 +185,7 @@ class SecretColumnTest {
       assertThat(songs.size).isEqualTo(1)
     }
   }
+
   @Test
   fun testGetRecordByEncryptedNonIndexedColumnFails() {
     val title = "Dark Star"
@@ -204,27 +205,34 @@ class SecretColumnTest {
   fun testEncryptedIndxedQueryMultiple() {
     val reviewer = "Some Reviewer".toByteArray()
     transacter.transaction { session ->
-        session.save(DbJerryGarciaSong("Sugaree", 123, "Steal Your Face".toByteArray(), reviewer))
-        session.save(DbJerryGarciaSong("Truckin'", 124, "American Beauty".toByteArray(), reviewer))
-        session.save(DbJerryGarciaSong("Eyes of the World", 125, "Wake of the Flood".toByteArray(), reviewer))
+      session.save(DbJerryGarciaSong("Sugaree", 123, "Steal Your Face".toByteArray(), reviewer))
+      session.save(DbJerryGarciaSong("Truckin'", 124, "American Beauty".toByteArray(), reviewer))
+      session.save(
+        DbJerryGarciaSong(
+          "Eyes of the World",
+          125,
+          "Wake of the Flood".toByteArray(),
+          reviewer
+        )
+      )
 
-        val songs = queryFactory.newQuery<JerryGarciaSongQuery>()
-          .allowTableScan()
-          .reviewer(reviewer)
-          .query(session)
+      val songs = queryFactory.newQuery<JerryGarciaSongQuery>()
+        .allowTableScan()
+        .reviewer(reviewer)
+        .query(session)
 
-        assertThat(songs.size).isEqualTo(3)
+      assertThat(songs.size).isEqualTo(3)
 
-        val songRaw = queryFactory.newQuery(JerryGarciaSongRawQuery::class)
-          .allowTableScan()
-          .query(session)
+      val songRaw = queryFactory.newQuery(JerryGarciaSongRawQuery::class)
+        .allowTableScan()
+        .query(session)
 
-        // Make sure that all reviewer ciphertexts are equivalent
-        val oneReviewer = songRaw[0].reviewer
-        songRaw.fold(oneReviewer) { acc, songInfo ->
-          assertThat(acc).isEqualTo(songInfo.reviewer)
-          oneReviewer
-        }
+      // Make sure that all reviewer ciphertexts are equivalent
+      val oneReviewer = songRaw[0].reviewer
+      songRaw.fold(oneReviewer) { acc, songInfo ->
+        assertThat(acc).isEqualTo(songInfo.reviewer)
+        oneReviewer
+      }
     }
   }
 
@@ -324,7 +332,10 @@ class SecretColumnTest {
       if (other !is SongInfo) {
         return false
       }
-      return title == other.title && length == other.length && Arrays.equals(album, other.album) && Arrays.equals(reviewer, other.reviewer)
+      return title == other.title && length == other.length && Arrays.equals(
+        album,
+        other.album
+      ) && Arrays.equals(reviewer, other.reviewer)
     }
   }
 

@@ -17,7 +17,7 @@ internal class GcpKeyService @Inject internal constructor(
 
   override fun encrypt(keyAlias: String, plainText: ByteString): ByteString {
     val keyLocation = config.key_locations[keyAlias]
-        ?: throw IllegalArgumentException("no location for keyAlias $keyAlias")
+      ?: throw IllegalArgumentException("no location for keyAlias $keyAlias")
     val resource = "projects/${config.project_id}/${keyLocation.path}"
     val request = EncryptRequest().encodePlaintext(plainText.toByteArray())
     val response = cryptoKeys.encrypt(resource, request).execute()
@@ -26,7 +26,7 @@ internal class GcpKeyService @Inject internal constructor(
 
   override fun decrypt(keyAlias: String, cipherText: ByteString): ByteString {
     val keyLocation = config.key_locations[keyAlias]
-        ?: throw IllegalArgumentException("no location for key $keyAlias")
+      ?: throw IllegalArgumentException("no location for key $keyAlias")
     val resource = "projects/${config.project_id}/${keyLocation.path}"
     val request = DecryptRequest().encodeCiphertext(cipherText.toByteArray())
     val response = cryptoKeys.decrypt(resource, request).execute()

@@ -1,7 +1,6 @@
 package misk.concurrent
 
 import com.google.common.base.Ticker
-import misk.concurrent.Sleeper
 import java.time.Duration
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject

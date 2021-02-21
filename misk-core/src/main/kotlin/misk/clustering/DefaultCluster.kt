@@ -17,15 +17,16 @@ import javax.inject.Singleton
 class DefaultCluster(
   self: Cluster.Member,
   private val newResourceMapperFn: (members: Set<Cluster.Member>) -> ClusterResourceMapper =
-      { ClusterHashRing(it) }
+    { ClusterHashRing(it) }
 ) : AbstractExecutionThreadService(), Cluster, ClusterService {
   private val snapshotRef = AtomicReference<Cluster.Snapshot>(
-      Cluster.Snapshot(
-          self = self,
-          selfReady = false,
-          readyMembers = setOf(),
-          resourceMapper = newResourceMapper(setOf())
-      ))
+    Cluster.Snapshot(
+      self = self,
+      selfReady = false,
+      readyMembers = setOf(),
+      resourceMapper = newResourceMapper(setOf())
+    )
+  )
   private val running = AtomicBoolean(false)
   private val actions = LinkedBlockingQueue<(MutableSet<ClusterWatch>) -> Unit>()
 
@@ -105,7 +106,7 @@ class DefaultCluster(
   }
 
   override fun newResourceMapper(readyMembers: Set<Cluster.Member>) =
-      newResourceMapperFn(readyMembers)
+    newResourceMapperFn(readyMembers)
 
   /**
    * [ClusterChangeTracker] is an internal helper class used to track diffs to a cluster as
@@ -138,12 +139,15 @@ class DefaultCluster(
 
     fun computeChanges(): Cluster.Changes {
       val newReadyMembers = readyMembers.values.toSet()
-      return Cluster.Changes(Cluster.Snapshot(
+      return Cluster.Changes(
+        Cluster.Snapshot(
           self = snapshot.self,
           selfReady = readyMembers.containsKey(snapshot.self.name),
           readyMembers = newReadyMembers,
           resourceMapper = cluster.newResourceMapper(newReadyMembers)
-      ), added = membersAdded.toSet(), removed = membersRemoved.toSet())
+        ),
+        added = membersAdded.toSet(), removed = membersRemoved.toSet()
+      )
     }
   }
 

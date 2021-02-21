@@ -31,14 +31,14 @@ import javax.inject.Provider
 internal class AggregateListener(
   registrations: Set<ListenerRegistration>
 ) : PreLoadEventListener,
-    PostLoadEventListener,
-    PreDeleteEventListener,
-    PostDeleteEventListener,
-    PreUpdateEventListener,
-    PostUpdateEventListener,
-    PreInsertEventListener,
-    PostInsertEventListener,
-    SaveOrUpdateEventListener {
+  PostLoadEventListener,
+  PreDeleteEventListener,
+  PostDeleteEventListener,
+  PreUpdateEventListener,
+  PostUpdateEventListener,
+  PreInsertEventListener,
+  PostInsertEventListener,
+  SaveOrUpdateEventListener {
   private val multimap = LinkedHashMultimap.create<EventType<*>, Provider<*>>()!!
 
   init {
@@ -87,13 +87,16 @@ internal class AggregateListener(
   override fun requiresPostCommitHanding(persister: EntityPersister?): Boolean {
     var veto = false
     for (provider in multimap[EventType.POST_INSERT]) {
-      veto = veto or (provider.get() as PostInsertEventListener).requiresPostCommitHandling(persister)
+      veto =
+        veto or (provider.get() as PostInsertEventListener).requiresPostCommitHandling(persister)
     }
     for (provider in multimap[EventType.POST_UPDATE]) {
-      veto = veto or (provider.get() as PostUpdateEventListener).requiresPostCommitHandling(persister)
+      veto =
+        veto or (provider.get() as PostUpdateEventListener).requiresPostCommitHandling(persister)
     }
     for (provider in multimap[EventType.POST_DELETE]) {
-      veto = veto or (provider.get() as PostDeleteEventListener).requiresPostCommitHandling(persister)
+      veto =
+        veto or (provider.get() as PostDeleteEventListener).requiresPostCommitHandling(persister)
     }
     return veto
   }

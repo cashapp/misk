@@ -2,7 +2,6 @@ package misk.cloud.gcp.tracing
 
 import com.google.cloud.logging.LogEntry
 import com.google.cloud.logging.LoggingEnhancer
-import datadog.opentracing.DDTracer
 import io.opentracing.Tracer
 import io.opentracing.util.GlobalTracer
 
@@ -17,7 +16,10 @@ class TracingLoggingEnhancer : LoggingEnhancer {
 
   fun enhanceLogEntry(tracer: Tracer, builder: LogEntry.Builder) {
     if (tracer.activeSpan().context().toTraceId().isNotEmpty()) {
-      builder.addLabel("appengine.googleapis.com/trace_id", tracer.activeSpan().context().toTraceId())
+      builder.addLabel(
+        "appengine.googleapis.com/trace_id",
+        tracer.activeSpan().context().toTraceId()
+      )
     }
   }
 }

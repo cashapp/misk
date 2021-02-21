@@ -81,7 +81,7 @@ class PgpKeyTest {
       Gnclp/iVFX4=
       =qmV6
       -----END PGP MESSAGE-----
-      """.trimIndent()
+    """.trimIndent()
 
     val injector = getInjector()
     val pgpDecrypter = injector.getInstance(PgpDecrypterManager::class.java)["pgp_decrypter"]
@@ -111,7 +111,7 @@ class PgpKeyTest {
       tk38rqcb
       =E7kq
       -----END PGP MESSAGE-----
-      """.trimIndent()
+    """.trimIndent()
 
     val injector = getInjector()
     val pgpDecrypter = injector.getInstance(PgpDecrypterManager::class.java)["pgp_decrypter"]
@@ -154,7 +154,7 @@ class PgpKeyTest {
       2RN3wiW85ffECFl6oN5HPhFp7A==
       =Qktu
       -----END PGP MESSAGE-----
-      """.trimIndent()
+    """.trimIndent()
 
     val injector = getInjector()
     val pgpDecrypter = injector.getInstance(PgpDecrypterManager::class.java)["pgp_decrypter"]
@@ -166,9 +166,9 @@ class PgpKeyTest {
   private fun getInjector(): Injector {
     val publicKeyContents = resourceLoader.utf8(publicKeyPath)!!
     val encryptKey = Key(
-        "pgp_encrypter",
-        KeyType.PGP_ENCRYPT,
-        RealSecret(publicKeyContents)
+      "pgp_encrypter",
+      KeyType.PGP_ENCRYPT,
+      RealSecret(publicKeyContents)
     )
 
     val privateKeyContents = resourceLoader.utf8(privateKeyJsonPath)!!
@@ -180,24 +180,22 @@ class PgpKeyTest {
     val fakeEncryptedPrivateKey = kek.encrypt(toPlaintextSecretKey, null)
 
     val privateKeyJsonWithFakeEncryption = keyJsonFile.copy(
-        encrypted_private_key = Base64.getEncoder().encodeToString(fakeEncryptedPrivateKey)
+      encrypted_private_key = Base64.getEncoder().encodeToString(fakeEncryptedPrivateKey)
     )
 
     val decryptKey = Key(
-        "pgp_decrypter",
-        KeyType.PGP_DECRYPT,
-        RealSecret(jsonAdapter.toJson(privateKeyJsonWithFakeEncryption))
+      "pgp_decrypter",
+      KeyType.PGP_DECRYPT,
+      RealSecret(jsonAdapter.toJson(privateKeyJsonWithFakeEncryption))
     )
 
     val config = CryptoConfig(listOf(encryptKey, decryptKey), "test_master_key")
     return Guice.createInjector(
-        CryptoTestModule(config),
-        MiskTestingServiceModule(), LogCollectorModule(),
-        DeploymentModule.forTesting()
+      CryptoTestModule(config),
+      MiskTestingServiceModule(), LogCollectorModule(),
+      DeploymentModule.forTesting()
     )
   }
-
-
 
   companion object {
     internal const val publicKeyPath = "classpath:/misk-crypto-example-unencrypted-public-pgp.pgp"

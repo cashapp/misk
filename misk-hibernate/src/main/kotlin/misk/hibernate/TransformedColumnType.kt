@@ -44,7 +44,12 @@ internal class TransformedColumnType : UserType, ParameterizedType, TypeConfigur
 
   override fun disassemble(value: Any): Serializable = transformer.disassemble(value)
 
-  override fun nullSafeSet(st: PreparedStatement, value: Any?, index: Int, session: SharedSessionContractImplementor?) {
+  override fun nullSafeSet(
+    st: PreparedStatement,
+    value: Any?,
+    index: Int,
+    session: SharedSessionContractImplementor?
+  ) {
     if (value == null) {
       st.setNull(index, sqlTypes().first())
     } else {
@@ -53,38 +58,52 @@ internal class TransformedColumnType : UserType, ParameterizedType, TypeConfigur
     }
   }
 
-  override fun nullSafeGet(rs: ResultSet?, names: Array<out String>, session: SharedSessionContractImplementor?, owner: Any?): Any? {
+  override fun nullSafeGet(
+    rs: ResultSet?,
+    names: Array<out String>,
+    session: SharedSessionContractImplementor?,
+    owner: Any?
+  ): Any? {
     val disassembled = rs?.getByType(retClass, names[0]) ?: return null
     return transformer.assemble(owner, disassembled)
   }
 
   override fun isMutable() = false
 
-  override fun sqlTypes(): IntArray = intArrayOf(when (retClass) {
-    ByteArray::class -> Types.VARBINARY
-    String::class -> Types.VARCHAR
-    Int::class -> Types.INTEGER
-    Long::class -> Types.BIGINT
-    Byte::class -> Types.SMALLINT
-    Boolean::class -> Types.BOOLEAN
-    Double::class -> Types.DOUBLE
-    Float::class -> Types.FLOAT
-    else -> throw HibernateException("Unsupported sql type")
-  })
+  override fun sqlTypes(): IntArray = intArrayOf(
+    when (retClass) {
+      ByteArray::class -> Types.VARBINARY
+      String::class -> Types.VARCHAR
+      Int::class -> Types.INTEGER
+      Long::class -> Types.BIGINT
+      Byte::class -> Types.SMALLINT
+      Boolean::class -> Types.BOOLEAN
+      Double::class -> Types.DOUBLE
+      Float::class -> Types.FLOAT
+      else -> throw HibernateException("Unsupported sql type")
+    }
+  )
 
   override fun setParameterValues(parameters: Properties) {
     retClass = parameters[TARGET_TYPE] as KClass<*>
 
     val field = parameters.getField(FIELD)!!
-    @Suppress("UNCHECKED_CAST")
-    val ctorArgs = parameters[ARGUMENTS] as? Map<String, *> ?: throw HibernateException("Bad Transformer arguments")
 
-    val context = TransformerContext(parameters[TABLE_NAME] as String, parameters[COLUMN_NAME] as String, ctorArgs, field.type.kotlin)
+    @Suppress("UNCHECKED_CAST")
+    val ctorArgs = parameters[ARGUMENTS] as? Map<String, *>
+      ?: throw HibernateException("Bad Transformer arguments")
+
+    val context = TransformerContext(
+      parameters[TABLE_NAME] as String,
+      parameters[COLUMN_NAME] as String,
+      ctorArgs,
+      field.type.kotlin
+    )
 
     @Suppress("UNCHECKED_CAST")
     val transformerClass = parameters[TRANSFORMER_CLASS] as KClass<out Transformer>
     transformer = transformerClass.primaryConstructor?.call(context)
-            ?: throw HibernateException("Transformer class missing primary constructor")
+      ?: throw HibernateException("Transformer class missing primary constructor")
 
     val injector = typeConfig.metadataBuildingContext.bootstrapContext.serviceRegistry.injector
     injector.injectMembers(transformer)
@@ -95,7 +114,6 @@ internal class TransformedColumnType : UserType, ParameterizedType, TypeConfigur
   }
 
   override fun getTypeConfiguration(): TypeConfiguration = typeConfig
-
 }
 
 fun PreparedStatement.setByType(klass: KClass<*>?, index: Int, value: Any) = when (klass) {

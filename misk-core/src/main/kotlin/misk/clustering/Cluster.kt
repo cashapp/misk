@@ -44,5 +44,5 @@ interface Cluster {
 
   /** @return A new [ClusterResourceMapper] for the given set of ready members */
   fun newResourceMapper(readyMembers: Set<Member>): ClusterResourceMapper =
-      ClusterHashRing(readyMembers)
+    ClusterHashRing(readyMembers)
 }

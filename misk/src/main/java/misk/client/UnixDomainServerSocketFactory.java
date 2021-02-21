@@ -29,7 +29,9 @@ import jnr.unixsocket.UnixServerSocketChannel;
 import jnr.unixsocket.UnixSocketAddress;
 import jnr.unixsocket.UnixSocketChannel;
 
-/** Impersonate TCP-style ServerSocketFactory over UNIX domain sockets. */
+/**
+ * Impersonate TCP-style ServerSocketFactory over UNIX domain sockets.
+ */
 public final class UnixDomainServerSocketFactory extends ServerSocketFactory {
   private final File path;
 

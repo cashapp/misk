@@ -6,7 +6,8 @@ import misk.inject.KAbstractModule
 class ResourceLoaderModule : KAbstractModule() {
   override fun configure() {
     val mapBinder = MapBinder.newMapBinder(
-        binder(), String::class.java, ResourceLoader.Backend::class.java)
+      binder(), String::class.java, ResourceLoader.Backend::class.java
+    )
     mapBinder.addBinding("classpath:").toInstance(ClasspathResourceLoaderBackend)
     mapBinder.addBinding("filesystem:").toInstance(FilesystemLoaderBackend)
     mapBinder.addBinding("memory:").to<MemoryResourceLoaderBackend>()
@@ -20,7 +21,8 @@ class ResourceLoaderModule : KAbstractModule() {
 class TestingResourceLoaderModule : KAbstractModule() {
   override fun configure() {
     val mapBinder = MapBinder.newMapBinder(
-        binder(), String::class.java, ResourceLoader.Backend::class.java)
+      binder(), String::class.java, ResourceLoader.Backend::class.java
+    )
     mapBinder.addBinding("classpath:").toInstance(ClasspathResourceLoaderBackend)
     mapBinder.addBinding("filesystem:").to<FakeFilesystemLoaderBackend>()
     mapBinder.addBinding("memory:").to<MemoryResourceLoaderBackend>()

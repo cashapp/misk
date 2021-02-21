@@ -37,7 +37,7 @@ data class MediaRange(
   fun matcher(mediaType: MediaType): Matcher? {
     val typeMatches = type == mediaType.type || type == WILDCARD || mediaType.type == WILDCARD
     val subtypeMatches =
-        subtype == mediaType.subtype || subtype == WILDCARD || mediaType.subtype == WILDCARD
+      subtype == mediaType.subtype || subtype == WILDCARD || mediaType.subtype == WILDCARD
     if (!typeMatches || !subtypeMatches) {
       return null
     }
@@ -128,13 +128,13 @@ data class MediaRange(
       }
 
       return MediaRange(
-          type,
-          subtype,
-          charset,
-          qualityFactor,
-          parameters.toMap(),
-          extensions.toMap(),
-          s
+        type,
+        subtype,
+        charset,
+        qualityFactor,
+        parameters.toMap(),
+        extensions.toMap(),
+        s
       )
     }
 

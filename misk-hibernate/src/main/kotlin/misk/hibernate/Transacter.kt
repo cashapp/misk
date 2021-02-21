@@ -106,7 +106,7 @@ fun Transacter.shards(keyspace: Keyspace) = transaction { it.shards(keyspace) }
  *
  */
 fun <T> Transacter.transaction(shard: Shard, block: (session: Session) -> T): T =
-    transaction { it.target(shard) { block(it) } }
+  transaction { it.target(shard) { block(it) } }
 
 /**
  * Runs a read on master first then tries it on replicas on failure. This method is here only for
@@ -128,7 +128,7 @@ fun <T> Transacter.failSafeRead(block: (session: Session) -> T): T =
   }
 
 fun <T> Transacter.failSafeRead(shard: Shard, block: (session: Session) -> T): T =
-        failSafeRead { it.target(shard) { block(it) } }
+  failSafeRead { it.target(shard) { block(it) } }
 
 /**
  * Thrown to explicitly trigger a retry, subject to retry limits and config such as noRetries().

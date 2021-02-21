@@ -10,8 +10,8 @@ internal class StaticDeadLetterQueueProviderTest {
     val provider = StaticDeadLetterQueueProvider(staticDlqName)
 
     assertThat(provider.deadLetterQueueFor(QueueName("queue_1")))
-        .isEqualTo(QueueName(staticDlqName))
+      .isEqualTo(QueueName(staticDlqName))
     assertThat(provider.deadLetterQueueFor(QueueName("queue_2")))
-        .isEqualTo(QueueName(staticDlqName))
+      .isEqualTo(QueueName(staticDlqName))
   }
 }

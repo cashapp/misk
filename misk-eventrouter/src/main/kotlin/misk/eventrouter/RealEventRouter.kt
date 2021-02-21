@@ -89,7 +89,7 @@ internal class RealEventRouter @Inject constructor() : EventRouter {
 
       logger.debug {
         "current state:[localSubscribers=$localSubscribers] " +
-            "[remoteSubscribers=$remoteSubscribers] [hostToSocket=${hostsToSockets.keys}]"
+          "[remoteSubscribers=$remoteSubscribers] [hostToSocket=${hostsToSockets.keys}]"
       }
     }
   }
@@ -104,7 +104,8 @@ internal class RealEventRouter @Inject constructor() : EventRouter {
       val topicOwner = clusterMapper.topicToHost(clusterSnapshot, topicName)
       if (topicOwner != clusterSnapshot.self) {
         val unsubscribeEvent = eventJsonAdapter.toJson(
-            SocketEvent.Unsubscribe(topicName))
+          SocketEvent.Unsubscribe(topicName)
+        )
         hostToSocket(topicOwner).send(unsubscribeEvent)
       }
     }
@@ -133,7 +134,8 @@ internal class RealEventRouter @Inject constructor() : EventRouter {
     val topicOwner = clusterMapper.topicToHost(clusterSnapshot, topicName)
     if (topicOwner != clusterSnapshot.self) {
       val subscribeEvent = eventJsonAdapter.toJson(
-          SocketEvent.Subscribe(topicName))
+        SocketEvent.Subscribe(topicName)
+      )
       hostToSocket(topicOwner).send(subscribeEvent)
     } else {
       action.localSubscription.onOpen()
@@ -159,8 +161,11 @@ internal class RealEventRouter @Inject constructor() : EventRouter {
 
       is SocketEvent.Subscribe -> {
         remoteSubscribers.put(socketEvent.topic, action.webSocket)
-        action.webSocket.send(eventJsonAdapter.toJson(
-            SocketEvent.Ack(socketEvent.topic)))
+        action.webSocket.send(
+          eventJsonAdapter.toJson(
+            SocketEvent.Ack(socketEvent.topic)
+          )
+        )
       }
 
       is SocketEvent.Ack -> {
@@ -184,7 +189,8 @@ internal class RealEventRouter @Inject constructor() : EventRouter {
       val websockets = remoteSubscribers.get(topic)
 
       if (clusterMapper.topicToHost(clusterSnapshot, topic) !=
-          clusterMapper.topicToHost(action.newSnapshot, topic)) {
+        clusterMapper.topicToHost(action.newSnapshot, topic)
+      ) {
 
         val iterator = localSubscribers.iterator()
         while (iterator.hasNext()) {
@@ -211,7 +217,7 @@ internal class RealEventRouter @Inject constructor() : EventRouter {
     // TODO(tso): handle this more efficiently?
     // this looks a lot like cluster changed. Maybe share code?
     val hostname =
-        hostsToSockets.entries.firstOrNull { it.value == action.webSocket }?.key ?: return
+      hostsToSockets.entries.firstOrNull { it.value == action.webSocket }?.key ?: return
     hostsToSockets = hostsToSockets.minus(hostname)
 
     val topics = localSubscribers.keySet()
@@ -242,7 +248,8 @@ internal class RealEventRouter @Inject constructor() : EventRouter {
     val ws = hostsToSockets[hostname]
     if (ws == null) {
       hostsToSockets = hostsToSockets.plus(
-          Pair(hostname, clusterConnector.connectSocket(hostname, webSocketListener)))
+        Pair(hostname, clusterConnector.connectSocket(hostname, webSocketListener))
+      )
     }
     return hostsToSockets[hostname]!!
   }
@@ -270,8 +277,10 @@ internal class RealEventRouter @Inject constructor() : EventRouter {
 
       override fun subscribe(listener: Listener<T>): Subscription<T> {
         val localSubscription =
-            LocalSubscriber(listener, this@RealEventRouter, subscriberExecutor,
-                this)
+          LocalSubscriber(
+            listener, this@RealEventRouter, subscriberExecutor,
+            this
+          )
         enqueue(Action.Subscribe(localSubscription))
         return localSubscription
       }

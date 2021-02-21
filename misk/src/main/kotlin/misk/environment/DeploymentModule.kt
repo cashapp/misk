@@ -1,7 +1,7 @@
 package misk.environment
 
-import com.google.inject.util.Modules
 import com.google.inject.Module
+import com.google.inject.util.Modules
 import misk.inject.KAbstractModule
 
 /** Binds [Deployment] and [Env] to make them available to services and actions */
@@ -22,10 +22,11 @@ class DeploymentModule(
      */
     fun forTesting(): Module {
       return Modules.combine(
-          DeploymentModule(
-              deployment = TEST_DEPLOYMENT,
-              env = Env("TESTING")),
-          EnvironmentModule(Environment.TESTING)
+        DeploymentModule(
+          deployment = TEST_DEPLOYMENT,
+          env = Env("TESTING")
+        ),
+        EnvironmentModule(Environment.TESTING)
       )
     }
 

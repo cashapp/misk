@@ -29,7 +29,8 @@ class InvalidActionsTest {
 
   @Test fun failIdenticalActions() {
     assertThrows<ProvisionException>(
-        "Actions [SomeAction, IdenticalAction] have identical routing annotations.") {
+      "Actions [SomeAction, IdenticalAction] have identical routing annotations."
+    ) {
       injector.getInstance(ServiceManager::class.java)
     }
   }

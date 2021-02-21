@@ -33,7 +33,9 @@ internal class SqsJobQueue @Inject internal constructor(
     // per message, 2 of which are reserved for this library (trace id and jobqueue metadata).
     // https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-message-attributes.html
     // TODO(bruno): change to 9 once we drop trace id
-    check(attributes.size <= 8) { "a maximum of 8 attributes are supported (got ${attributes.size})" }
+    check(attributes.size <= 8) {
+      "a maximum of 8 attributes are supported (got ${attributes.size})"
+    }
 
     tracer.traceWithSpan("enqueue-job-${queueName.value}") { span ->
       metrics.jobsEnqueued.labels(queueName.value, queueName.value).inc()
@@ -46,14 +48,18 @@ internal class SqsJobQueue @Inject internal constructor(
             messageBody = body
             if (deliveryDelay != null) delaySeconds = (deliveryDelay.toMillis() / 1000).toInt()
             attributes.forEach { (key, value) ->
-              addMessageAttributesEntry(key, MessageAttributeValue()
-                .withDataType("String")
-                .withStringValue(value))
+              addMessageAttributesEntry(
+                key,
+                MessageAttributeValue()
+                  .withDataType("String")
+                  .withStringValue(value)
+              )
             }
 
             val metadata = mutableMapOf(
-                SqsJob.JOBQUEUE_METADATA_ORIGIN_QUEUE to queueName.parentQueue.value,
-                SqsJob.JOBQUEUE_METADATA_IDEMPOTENCE_KEY to idempotenceKey)
+              SqsJob.JOBQUEUE_METADATA_ORIGIN_QUEUE to queueName.parentQueue.value,
+              SqsJob.JOBQUEUE_METADATA_IDEMPOTENCE_KEY to idempotenceKey
+            )
 
             // Preserve original trace id, if available.
             (span as? DDSpan)?.let {
@@ -62,19 +68,27 @@ internal class SqsJobQueue @Inject internal constructor(
               // TODO(bruno): drop this attribute after rollout; moved to metadata
               addMessageAttributesEntry(
                 SqsJob.ORIGINAL_TRACE_ID_ATTR,
-                MessageAttributeValue().withDataType("String").withStringValue(traceId))
+                MessageAttributeValue().withDataType("String").withStringValue(traceId)
+              )
             }
 
             // Add the internal metadata dictionary, encoded as JSON.
-            addMessageAttributesEntry(SqsJob.JOBQUEUE_METADATA_ATTR, MessageAttributeValue()
+            addMessageAttributesEntry(
+              SqsJob.JOBQUEUE_METADATA_ATTR,
+              MessageAttributeValue()
                 .withDataType("String")
-                .withStringValue(moshi.adapter<Map<String, String>>().toJson(metadata)))
+                .withStringValue(moshi.adapter<Map<String, String>>().toJson(metadata))
+            )
           }
 
           timed { client.sendMessage(sendRequest) }
         }
 
-        metrics.sqsSendTime.record(sendDuration.toMillis().toDouble(), queueName.value, queueName.value)
+        metrics.sqsSendTime.record(
+          sendDuration.toMillis().toDouble(),
+          queueName.value,
+          queueName.value
+        )
       } catch (th: Throwable) {
         log.error(th) { "failed to enqueue to ${queueName.value}" }
         metrics.jobEnqueueFailures.labels(queueName.value, queueName.value).inc()

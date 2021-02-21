@@ -76,7 +76,10 @@ class CiphertextFormat private constructor() {
      * This method also compares the given [context] to the serialized AAD
      * and will throw an exception if they do not match.
      */
-    fun deserialize(serialized: ByteArray, context: Map<String, String>?): Pair<ByteArray, ByteArray?> {
+    fun deserialize(
+      serialized: ByteArray,
+      context: Map<String, String>?
+    ): Pair<ByteArray, ByteArray?> {
       val src = DataInputStream(ByteArrayInputStream(serialized))
       val version = src.readByte()
       if (version != CURRENT_VERSION.toByte()) {
@@ -115,7 +118,7 @@ class CiphertextFormat private constructor() {
       val contextSize = encodeVarInt(context.size)
       var bytesWritten = 0
       buff.write(contextSize)
-      bytesWritten +=  contextSize.size
+      bytesWritten += contextSize.size
       context.toSortedMap(compareBy { it }).forEach { (k, v) ->
         if (k.isEmpty() || v.isEmpty()) {
           throw InvalidEncryptionContextException("empty key or value")
@@ -167,24 +170,24 @@ class CiphertextFormat private constructor() {
       }.toMap()
     }
 
-    private fun readCiphertext(src: DataInputStream) : ByteArray {
+    private fun readCiphertext(src: DataInputStream): ByteArray {
       val ciphertextStream = ByteArrayOutputStream()
       var readByte = src.read()
-      while(readByte >= 0) {
+      while (readByte >= 0) {
         ciphertextStream.write(readByte)
         readByte = src.read()
       }
       return ciphertextStream.toByteArray()
     }
 
-    private const val SEPTET = (1 shl 7) -1
+    private const val SEPTET = (1 shl 7) - 1
     private const val HAS_MORE_BIT = 1 shl 7
 
     private fun encodeVarInt(integer: Int): ByteArray {
       val list = mutableListOf<Byte>()
       var intValue = integer
       var byte = intValue and SEPTET
-      while(intValue shr 7 > 0) {
+      while (intValue shr 7 > 0) {
         list.add((byte or HAS_MORE_BIT).toByte())
         intValue = intValue shr 7
         byte = intValue and SEPTET
@@ -220,21 +223,24 @@ class CiphertextFormat private constructor() {
         throw InvalidCiphertextFormatException("invalid bitmask")
       }
       var context = mutableMapOf<String, String?>()
-      var ciphertext : ByteArray? = null
+      var ciphertext: ByteArray? = null
       if (bitmask != 0) {
-        context.putAll(ContextKey.values()
+        context.putAll(
+          ContextKey.values()
             .filter { it.index and bitmask != 0 }
             .map { it.name.toLowerCase() to null }
-            .toMap())
+            .toMap()
+        )
       }
 
-      when(src.read()) {
+      when (src.read()) {
         EntryType.EXPANDED_CONTEXT_DESCRIPTION.type -> {
           val size = src.readUnsignedShort()
           val serializedExpandedContextDescription = ByteArray(size)
           src.readFully(serializedExpandedContextDescription)
           val expanded = deserializeEncryptionContext(
-              serializedExpandedContextDescription.toString(Charsets.UTF_8))
+            serializedExpandedContextDescription.toString(Charsets.UTF_8)
+          )
           context.putAll(expanded!!)
         }
         EntryType.ENCRYPTION_CONTEXT.type -> {
@@ -242,7 +248,8 @@ class CiphertextFormat private constructor() {
           val serializedContext = ByteArray(size)
           src.readFully(serializedContext)
           context = deserializeEncryptionContext(
-              serializedContext.toString(Charsets.UTF_8))!!.toMutableMap()
+            serializedContext.toString(Charsets.UTF_8)
+          )!!.toMutableMap()
         }
         EntryType.CIPHERTEXT.type -> {
           ciphertext = readCiphertext(src)
@@ -258,17 +265,17 @@ class CiphertextFormat private constructor() {
       return Pair(ciphertext, context)
     }
 
-    private fun deserializeEncryptionContext(serialized: String) : Map<String, String?>? {
+    private fun deserializeEncryptionContext(serialized: String): Map<String, String?>? {
       if (serialized.isEmpty()) {
         return mapOf()
       }
 
       return serialized.split("|")
-          .map { pair ->
-            val components = pair.split("=")
-            components.first() to components.getOrNull(1)
-          }
-          .toMap()
+        .map { pair ->
+          val components = pair.split("=")
+          components.first() to components.getOrNull(1)
+        }
+        .toMap()
     }
   }
 
@@ -300,9 +307,11 @@ class CiphertextFormat private constructor() {
 
   class InvalidCiphertextFormatException(message: String) : GeneralSecurityException(message)
   class EncryptionContextMismatchException(message: String) : GeneralSecurityException(message)
-  class MissingEncryptionContextException
-    : GeneralSecurityException("expected a non empty map of strings")
-  class UnexpectedEncryptionContextException
-    : GeneralSecurityException("expected null as encryption context")
+  class MissingEncryptionContextException :
+    GeneralSecurityException("expected a non empty map of strings")
+
+  class UnexpectedEncryptionContextException :
+    GeneralSecurityException("expected null as encryption context")
+
   class InvalidEncryptionContextException(message: String) : GeneralSecurityException(message)
 }

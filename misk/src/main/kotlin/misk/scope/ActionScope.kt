@@ -13,10 +13,10 @@ import kotlin.reflect.KVisibility
 
 @Singleton
 class ActionScope @Inject internal constructor(
-    // NB(mmihic): ActionScoped depends on ActionScope depends on
-    // on ActionScopedProviders, which might depend on other ActionScopeds. We break
-    // this circular dependency by injecting a map of Provider<ActionScopedProvider>
-    // rather than the map of ActionScopedProvider directly
+  // NB(mmihic): ActionScoped depends on ActionScope depends on
+  // on ActionScopedProviders, which might depend on other ActionScopeds. We break
+  // this circular dependency by injecting a map of Provider<ActionScopedProvider>
+  // rather than the map of ActionScopedProvider directly
   private val providers: @JvmSuppressWildcards Map<Key<*>, Provider<ActionScopedProvider<*>>>
 ) : AutoCloseable {
   companion object {

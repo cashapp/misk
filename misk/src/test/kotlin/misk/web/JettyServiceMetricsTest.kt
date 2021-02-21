@@ -36,10 +36,10 @@ internal class JettyServiceMetricsTest {
   @Test fun connectionMetrics() {
     val httpClient = OkHttpClient()
     val request = Request.Builder()
-        .get()
-        .header("user-agent", "JettyServiceMetricsTest")
-        .url(serverUrlBuilder().encodedPath("/hello").build())
-        .build()
+      .get()
+      .header("user-agent", "JettyServiceMetricsTest")
+      .url(serverUrlBuilder().encodedPath("/hello").build())
+      .build()
 
     val response = httpClient.newCall(request).execute()
     assertThat(response.code).isEqualTo(200)
@@ -62,7 +62,8 @@ internal class JettyServiceMetricsTest {
     // control it) so we need to do a spin wait on time out
     val timeout = System.currentTimeMillis() + 5000
     while (System.currentTimeMillis() < timeout &&
-        connectionMetrics.activeConnections.labels(*labels).get() != 0.0) {
+      connectionMetrics.activeConnections.labels(*labels).get() != 0.0
+    ) {
       Thread.sleep(500)
     }
 
@@ -89,9 +90,9 @@ internal class JettyServiceMetricsTest {
   @Test fun threadPoolMetrics() {
     val httpClient = OkHttpClient()
     val request = Request.Builder()
-        .get()
-        .url(serverUrlBuilder().encodedPath("/current-pool-metrics").build())
-        .build()
+      .get()
+      .url(serverUrlBuilder().encodedPath("/current-pool-metrics").build())
+      .build()
 
     val adapter = moshi.adapter<PoolMetricsResponse>()
     val response = httpClient.newCall(request).execute()
@@ -128,27 +129,29 @@ internal class JettyServiceMetricsTest {
       threadPoolMetrics.refresh()
 
       return PoolMetricsResponse(
-          queuedJobs = threadPoolMetrics.queuedJobs.get(),
-          size = threadPoolMetrics.size.get(),
-          utilization = threadPoolMetrics.utilization.get(),
-          utilization_max = threadPoolMetrics.utilizationMax.get()
+        queuedJobs = threadPoolMetrics.queuedJobs.get(),
+        size = threadPoolMetrics.size.get(),
+        utilization = threadPoolMetrics.utilization.get(),
+        utilization_max = threadPoolMetrics.utilizationMax.get()
       )
     }
   }
 
   internal class TestModule : KAbstractModule() {
     override fun configure() {
-      install(Modules.override(WebTestingModule()).with(
+      install(
+        Modules.override(WebTestingModule()).with(
           object : KAbstractModule() {
             override fun configure() {
               val pool = QueuedThreadPool(
-                  10, 10 // Fixed # of threads
+                10, 10 // Fixed # of threads
               )
               bind<ThreadPool>().toInstance(pool)
               bind<MeasuredThreadPool>().toInstance(MeasuredQueuedThreadPool(pool))
             }
           }
-      ))
+        )
+      )
       install(WebActionModule.create<HelloAction>())
       install(WebActionModule.create<CurrentPoolMetricsAction>())
     }

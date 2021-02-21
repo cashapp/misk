@@ -16,6 +16,6 @@ class ConfigModule<T : Config>(
 
   companion object {
     inline fun <reified T : Config> create(appName: String, config: T) =
-        ConfigModule(T::class.java, appName, config)
+      ConfigModule(T::class.java, appName, config)
   }
 }

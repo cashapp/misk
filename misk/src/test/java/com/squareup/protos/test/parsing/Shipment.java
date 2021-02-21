@@ -17,29 +17,17 @@ import okio.ByteString;
 
 public final class Shipment extends Message<Shipment, Shipment.Builder> {
   public static final ProtoAdapter<Shipment> ADAPTER = new ProtoAdapter_Shipment();
-
-  private static final long serialVersionUID = 0L;
-
   public static final Long DEFAULT_SHIPMENT_ID = 0L;
-
   public static final String DEFAULT_SHIPMENT_TOKEN = "";
-
   public static final State DEFAULT_STATUS = State.VALIDATING;
-
   public static final Double DEFAULT_LOAD_RATIO = 0.0d;
-
   public static final Boolean DEFAULT_DELETED = false;
-
   public static final ByteString DEFAULT_SOURCE_SIGNATURE = ByteString.EMPTY;
-
   public static final ByteString DEFAULT_DESTINATION_SIGNATURE = ByteString.EMPTY;
-
   public static final String DEFAULT_ACCOUNT_TOKEN = "";
-
   public static final String DEFAULT_CARD_TOKEN = "";
-
   public static final String DEFAULT_TRANSFER_ID = "";
-
+  private static final long serialVersionUID = 0L;
   @WireField(
       tag = 1,
       adapter = "com.squareup.wire.ProtoAdapter#INT64"
@@ -237,6 +225,58 @@ public final class Shipment extends Message<Shipment, Shipment.Builder> {
     return builder.replace(0, 2, "Shipment{").append('}').toString();
   }
 
+  public enum State implements WireEnum {
+    VALIDATING(0),
+
+    PICKING_UP(1),
+
+    DELIVERING(2),
+
+    CONSUMING(4);
+
+    public static final ProtoAdapter<State> ADAPTER = new ProtoAdapter_State();
+
+    private final int value;
+
+    State(int value) {
+      this.value = value;
+    }
+
+    /**
+     * Return the constant for {@code value} or null.
+     */
+    public static State fromValue(int value) {
+      switch (value) {
+        case 0:
+          return VALIDATING;
+        case 1:
+          return PICKING_UP;
+        case 2:
+          return DELIVERING;
+        case 4:
+          return CONSUMING;
+        default:
+          return null;
+      }
+    }
+
+    @Override
+    public int getValue() {
+      return value;
+    }
+
+    private static final class ProtoAdapter_State extends EnumAdapter<State> {
+      ProtoAdapter_State() {
+        super(State.class);
+      }
+
+      @Override
+      protected State fromValue(int value) {
+        return State.fromValue(value);
+      }
+    }
+  }
+
   public static final class Builder extends Message.Builder<Shipment, Builder> {
     public Long shipment_id;
 
@@ -345,58 +385,6 @@ public final class Shipment extends Message<Shipment, Shipment.Builder> {
       return new Shipment(shipment_id, shipment_token, source, destination, status, load_ratio,
           deleted, source_signature, destination_signature, notes, account_token, card_token,
           transfer_id, super.buildUnknownFields());
-    }
-  }
-
-  public enum State implements WireEnum {
-    VALIDATING(0),
-
-    PICKING_UP(1),
-
-    DELIVERING(2),
-
-    CONSUMING(4);
-
-    public static final ProtoAdapter<State> ADAPTER = new ProtoAdapter_State();
-
-    private final int value;
-
-    State(int value) {
-      this.value = value;
-    }
-
-    /**
-     * Return the constant for {@code value} or null.
-     */
-    public static State fromValue(int value) {
-      switch (value) {
-        case 0:
-          return VALIDATING;
-        case 1:
-          return PICKING_UP;
-        case 2:
-          return DELIVERING;
-        case 4:
-          return CONSUMING;
-        default:
-          return null;
-      }
-    }
-
-    @Override
-    public int getValue() {
-      return value;
-    }
-
-    private static final class ProtoAdapter_State extends EnumAdapter<State> {
-      ProtoAdapter_State() {
-        super(State.class);
-      }
-
-      @Override
-      protected State fromValue(int value) {
-        return State.fromValue(value);
-      }
     }
   }
 

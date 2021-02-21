@@ -35,9 +35,11 @@ class TestWebActionModule : KAbstractModule() {
     install(WebActionModule.create<GrpcAction>())
 
     multibind<AccessAnnotationEntry>().toInstance(
-        AccessAnnotationEntry<CustomServiceAccess>(services = listOf("payments")))
+      AccessAnnotationEntry<CustomServiceAccess>(services = listOf("payments"))
+    )
     multibind<AccessAnnotationEntry>().toInstance(
-        AccessAnnotationEntry<CustomCapabilityAccess>(capabilities = listOf("admin")))
+      AccessAnnotationEntry<CustomCapabilityAccess>(capabilities = listOf("admin"))
+    )
     multibind<MiskCallerAuthenticator>().to<FakeCallerAuthenticator>()
   }
 
@@ -77,22 +79,23 @@ class TestWebActionModule : KAbstractModule() {
     fun shipment(@RequestBody requestType: Shipment) = "request: $requestType".toResponseBody()
   }
 
-  class GrpcAction @Inject constructor() : ShippingGetDestinationWarehouseBlockingServer,
-      WebAction {
+  class GrpcAction @Inject constructor() :
+    ShippingGetDestinationWarehouseBlockingServer,
+    WebAction {
     @Unauthenticated
     override fun GetDestinationWarehouse(requestType: Shipment): Warehouse {
       return Warehouse.Builder()
-          .warehouse_id(7777L)
-          .build()
+        .warehouse_id(7777L)
+        .build()
     }
   }
 
   // TODO(jwilson): get Wire to generate this interface.
   interface ShippingGetDestinationWarehouseBlockingServer : Service {
     @WireRpc(
-        path = "/test/GetDestinationWarehouse",
-        requestAdapter = "com.squareup.protos.test.parsing.Shipment#ADAPTER",
-        responseAdapter = "com.squareup.protos.test.parsing.Warehouse#ADAPTER"
+      path = "/test/GetDestinationWarehouse",
+      requestAdapter = "com.squareup.protos.test.parsing.Shipment#ADAPTER",
+      responseAdapter = "com.squareup.protos.test.parsing.Warehouse#ADAPTER"
     )
     fun GetDestinationWarehouse(requestType: Shipment): Warehouse
   }

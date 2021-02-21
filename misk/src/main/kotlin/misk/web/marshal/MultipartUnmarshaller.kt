@@ -17,9 +17,9 @@ object MultipartUnmarshaller : Unmarshaller {
     source: BufferedSource
   ): MultipartReader {
     val contentType = requestHeaders["Content-Type"]?.toMediaTypeOrNull()
-        ?: throw BadRequestException("required content-type missing")
+      ?: throw BadRequestException("required content-type missing")
     val boundary = contentType.parameter("boundary")
-        ?: throw BadRequestException("required boundary parameter missing")
+      ?: throw BadRequestException("required boundary parameter missing")
     return MultipartReader(source, boundary)
   }
 

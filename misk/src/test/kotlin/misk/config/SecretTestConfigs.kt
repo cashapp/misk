@@ -16,7 +16,7 @@ data class SuperSecretConfig(
 data class NestedSecretConfig(val nested_nested: SecretInformationWrapperConfig) : Config
 
 data class SecretInformationWrapperConfig(val secret_information: Secret<SecretInformationConfig>) :
-    Config
+  Config
 
 data class SecretInformationConfig(
   val answer_to_universe: String,

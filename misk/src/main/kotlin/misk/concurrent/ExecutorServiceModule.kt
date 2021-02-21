@@ -17,13 +17,13 @@ class ExecutorServiceModule(
 ) : KAbstractModule() {
   override fun configure() {
     bind<ExecutorService>()
-        .annotatedWith(annotation.java)
-        .toProvider(object : Provider<ExecutorService> {
-          @Inject lateinit var executorServiceFactory: ExecutorServiceFactory
+      .annotatedWith(annotation.java)
+      .toProvider(object : Provider<ExecutorService> {
+        @Inject lateinit var executorServiceFactory: ExecutorServiceFactory
 
-          override fun get() = createFunction(executorServiceFactory)
-        })
-        .asSingleton()
+        override fun get() = createFunction(executorServiceFactory)
+      })
+      .asSingleton()
   }
 
   companion object {
