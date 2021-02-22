@@ -30,6 +30,7 @@ import okhttp3.Response
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.time.Duration
 
 @MiskTest(startService = true)
 internal class GrpcClientProviderTest {
@@ -212,7 +213,16 @@ internal class GrpcClientProviderTest {
                   resource = "classpath:/ssl/server_cert.pem",
                   format = SslLoader.FORMAT_PEM
                 )
-              )
+              ),
+              callTimeout = Duration.ofSeconds(5),
+              connectTimeout = Duration.ofSeconds(6),
+              readTimeout = Duration.ofSeconds(7),
+              writeTimeout = Duration.ofSeconds(8),
+              pingInterval = Duration.ofSeconds(9),
+              maxIdleConnections = 10,
+              keepAliveDuration = Duration.ofMinutes(11),
+              maxRequests = 12,
+              maxRequestsPerHost = 13
             )
           )
         )

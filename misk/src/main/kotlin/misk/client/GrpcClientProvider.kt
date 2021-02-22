@@ -4,12 +4,16 @@ import com.squareup.wire.GrpcCall
 import com.squareup.wire.GrpcClient
 import com.squareup.wire.GrpcStreamingCall
 import com.squareup.wire.Service
+import okhttp3.ConnectionPool
+import okhttp3.Dispatcher
 import okhttp3.OkHttpClient
 import okhttp3.Protocol
 import java.lang.reflect.InvocationHandler
 import java.lang.reflect.Method
 import java.lang.reflect.ParameterizedType
 import java.lang.reflect.Proxy
+import java.time.Duration
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Provider
 import kotlin.reflect.KClass
@@ -61,20 +65,21 @@ internal class GrpcClientProvider<T : Service, G : T>(
 
   override fun get(): T {
     val endpointConfig: HttpClientEndpointConfig = httpClientsConfigProvider.get()[name]
-    val baseUrl = httpClientConfigUrlProvider.getUrl(endpointConfig)
     val httpClient = httpClientProvider.get()
     return get(
-      baseUrl = baseUrl,
+      endpointConfig = endpointConfig,
       httpClient = httpClient,
       interceptorFactories = interceptorFactories.get()
     )
   }
 
   fun get(
-    baseUrl: String,
+    endpointConfig: HttpClientEndpointConfig,
     httpClient: OkHttpClient,
     interceptorFactories: List<ClientNetworkInterceptor.Factory>
   ): T {
+    val baseUrl = httpClientConfigUrlProvider.getUrl(endpointConfig)
+
     // Since gRPC uses HTTP/2, force h2c when calling an unencrypted endpoint
     val protocols = when {
       baseUrl.startsWith("http://") -> listOf(Protocol.H2_PRIOR_KNOWLEDGE)
@@ -87,8 +92,13 @@ internal class GrpcClientProvider<T : Service, G : T>(
 
     val handlers = mutableMapOf<String, MethodInvocationHandler<T, G>>()
     for (method in kclass.java.methods) {
-      val handler = methodHandler(method, clientPrototype, baseUrl, interceptorFactories)
-        ?: continue
+      val handler = methodHandler(
+        method = method,
+        clientPrototype = clientPrototype,
+        baseUrl = baseUrl,
+        interceptorFactories = interceptorFactories,
+        endpointConfig = endpointConfig
+      ) ?: continue
       handlers[method.name] = handler
     }
 
@@ -140,11 +150,51 @@ internal class GrpcClientProvider<T : Service, G : T>(
     method: Method,
     clientPrototype: OkHttpClient,
     baseUrl: String,
-    interceptorFactories: List<ClientNetworkInterceptor.Factory>
+    interceptorFactories: List<ClientNetworkInterceptor.Factory>,
+    endpointConfig: HttpClientEndpointConfig
   ): MethodInvocationHandler<T, G>? {
     val action = toClientAction(method) ?: return null
 
     val clientBuilder = clientPrototype.newBuilder()
+    // TODO(jpodlech): DRY https://github.com/cashapp/misk/blob/f3b6ce2cb11674b90d312525956e0696038ff746/misk/src/main/kotlin/misk/client/HttpClientFactory.kt#L47-L66
+    endpointConfig.clientConfig.connectTimeout?.let {
+      clientBuilder.connectTimeout(
+        it.toMillis(),
+        TimeUnit.MILLISECONDS
+      )
+    }
+    endpointConfig.clientConfig.readTimeout?.let {
+      clientBuilder.readTimeout(
+        it.toMillis(),
+        TimeUnit.MILLISECONDS
+      )
+    }
+    endpointConfig.clientConfig.writeTimeout?.let {
+      clientBuilder.writeTimeout(
+        it.toMillis(),
+        TimeUnit.MILLISECONDS
+      )
+    }
+    endpointConfig.clientConfig.pingInterval?.let { clientBuilder.pingInterval(it) }
+    endpointConfig.clientConfig.callTimeout?.let { clientBuilder.callTimeout(it) }
+
+    // TODO(jpodlech): DRY https://github.com/cashapp/misk/blob/f3b6ce2cb11674b90d312525956e0696038ff746/misk/src/main/kotlin/misk/client/HttpClientFactory.kt#L108-L122
+    val dispatcher = Dispatcher()
+    endpointConfig.clientConfig.maxRequests?.let { maxRequests ->
+      dispatcher.maxRequests = maxRequests
+    }
+    endpointConfig.clientConfig.maxRequestsPerHost?.let { maxRequestsPerHost ->
+      dispatcher.maxRequestsPerHost = maxRequestsPerHost
+    }
+    clientBuilder.dispatcher(dispatcher)
+
+    val connectionPool = ConnectionPool(
+      endpointConfig.clientConfig.maxIdleConnections ?: Defaults.maxIdleConnections,
+      (endpointConfig.clientConfig.keepAliveDuration ?: Defaults.keepAliveDuration).toMillis(),
+      TimeUnit.MILLISECONDS
+    )
+    clientBuilder.connectionPool(connectionPool)
+
     clientBuilder.addInterceptor(clientMetricsInterceptorFactory.create(name))
     for (factory in interceptorFactories) {
       val interceptor = factory.create(action) ?: continue
@@ -166,4 +216,17 @@ internal class GrpcClientProvider<T : Service, G : T>(
     val delegate: G,
     val method: Method
   )
+
+  // TODO(jpodlech): DRY https://github.com/cashapp/misk/blob/f3b6ce2cb11674b90d312525956e0696038ff746/misk/src/main/kotlin/misk/client/HttpClientFactory.kt#L19-L29
+  private object Defaults {
+    /*
+      Copied from okhttp3.ConnectionPool, as it does not provide "use default" option
+     */
+    val maxIdleConnections = 5
+
+    /*
+      Copied from okhttp3.ConnectionPool, as it does not provide "use default" option
+     */
+    val keepAliveDuration = Duration.ofMinutes(5)
+  }
 }
