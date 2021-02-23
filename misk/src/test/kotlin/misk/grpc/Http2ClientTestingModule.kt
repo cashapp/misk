@@ -41,7 +41,7 @@ class Http2ClientTestingModule(val jetty: JettyService) : KAbstractModule() {
                 format = SslLoader.FORMAT_PEM
               )
             ),
-            callTimeout = Duration.ofMillis(100)
+            callTimeout = Duration.ofMillis(1000)
           )
         )
       )

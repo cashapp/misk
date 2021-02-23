@@ -126,7 +126,7 @@ class GrpcConnectivityTest {
 
   @Test
   fun serviceCallTimesOut() {
-    helloRpcAction.sleep = Duration.ofMillis(101)
+    helloRpcAction.sleep = Duration.ofMillis(1001)
 
     val request = Request.Builder()
       .url(jetty.httpsServerUrl!!.resolve("/helloworld.Greeter/SayHello")!!)
