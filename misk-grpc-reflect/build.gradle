@@ -1,0 +1,55 @@
+apply plugin: 'com.squareup.wire'
+
+wire {
+  kotlin {
+    rpcRole = 'client'
+    javaInterop = true
+  }
+
+  // Generate service interfaces also.
+  kotlin {
+    includes = ['grpc.reflection.v1alpha.ServerReflection']
+    exclusive = false
+    rpcRole = 'server'
+    rpcCallStyle = 'blocking'
+    singleMethodServices = true
+  }
+}
+
+sourceSets {
+  // TODO(jwilson): we do this to make IntelliJ happy but the Wire Gradle plugin should do that.
+  main.java.srcDirs += 'build/generated/source/wire'
+}
+
+dependencies {
+  implementation dep.assertj
+  implementation dep.junitApi
+  implementation dep.kotlinTest
+  implementation dep.docker
+  implementation dep.guice
+  implementation dep.grpcNetty
+  implementation dep.grpcProtobuf
+  implementation dep.grpcStub
+  implementation dep.kotlinxCoroutines
+  implementation dep.wireGrpcClient
+  implementation dep.wireRuntime
+  implementation dep.wireCompiler
+  implementation dep.wireSchema
+  implementation project(':misk')
+  implementation project(':misk-actions')
+  implementation project(':misk-core')
+  implementation project(':misk-inject')
+  implementation project(':misk-service')
+  implementation project(':misk-testing')
+
+  testImplementation dep.logbackClassic
+}
+
+afterEvaluate { project ->
+  project.tasks.dokka {
+    outputDirectory = "$rootDir/docs/0.x"
+    outputFormat = 'gfm'
+  }
+}
+
+apply from: "$rootDir/gradle-mvn-publish.gradle"

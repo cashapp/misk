@@ -106,6 +106,8 @@ ext.dep = [
   "wireGrpcClient": "com.squareup.wire:wire-grpc-client:3.6.0",
   "wireMoshiAdapter": "com.squareup.wire:wire-moshi-adapter:3.6.0",
   "wireRuntime": "com.squareup.wire:wire-runtime:3.6.0",
+  "wireSchema": "com.squareup.wire:wire-schema:3.6.0",
+  "wireCompiler": "com.squareup.wire:wire-compiler:3.6.0",
   "zookeeper": "org.apache.zookeeper:zookeeper:3.5.4-beta",
 ]
 // Auto-generated from polyrepo's master-dependencies.json. Update via polyrepo dep-add and polyrepo dep-upgrade.
