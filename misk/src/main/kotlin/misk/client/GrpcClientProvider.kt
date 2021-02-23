@@ -54,6 +54,7 @@ internal class GrpcClientProvider<T : Service, G : T>(
   /** Use a provider because we don't know the test client's URL until its test server starts. */
   @Inject private lateinit var httpClientsConfigProvider: Provider<HttpClientsConfig>
   @Inject private lateinit var httpClientConfigUrlProvider: HttpClientConfigUrlProvider
+  @Inject private lateinit var okHttpClientCommonConfigurator: OkHttpClientCommonConfigurator
 
   @Inject
   private lateinit var interceptorFactories: Provider<List<ClientNetworkInterceptor.Factory>>
@@ -61,20 +62,21 @@ internal class GrpcClientProvider<T : Service, G : T>(
 
   override fun get(): T {
     val endpointConfig: HttpClientEndpointConfig = httpClientsConfigProvider.get()[name]
-    val baseUrl = httpClientConfigUrlProvider.getUrl(endpointConfig)
     val httpClient = httpClientProvider.get()
     return get(
-      baseUrl = baseUrl,
+      endpointConfig = endpointConfig,
       httpClient = httpClient,
       interceptorFactories = interceptorFactories.get()
     )
   }
 
   fun get(
-    baseUrl: String,
+    endpointConfig: HttpClientEndpointConfig,
     httpClient: OkHttpClient,
     interceptorFactories: List<ClientNetworkInterceptor.Factory>
   ): T {
+    val baseUrl = httpClientConfigUrlProvider.getUrl(endpointConfig)
+
     // Since gRPC uses HTTP/2, force h2c when calling an unencrypted endpoint
     val protocols = when {
       baseUrl.startsWith("http://") -> listOf(Protocol.H2_PRIOR_KNOWLEDGE)
@@ -87,8 +89,13 @@ internal class GrpcClientProvider<T : Service, G : T>(
 
     val handlers = mutableMapOf<String, MethodInvocationHandler<T, G>>()
     for (method in kclass.java.methods) {
-      val handler = methodHandler(method, clientPrototype, baseUrl, interceptorFactories)
-        ?: continue
+      val handler = methodHandler(
+        method = method,
+        clientPrototype = clientPrototype,
+        baseUrl = baseUrl,
+        interceptorFactories = interceptorFactories,
+        endpointConfig = endpointConfig
+      ) ?: continue
       handlers[method.name] = handler
     }
 
@@ -140,11 +147,15 @@ internal class GrpcClientProvider<T : Service, G : T>(
     method: Method,
     clientPrototype: OkHttpClient,
     baseUrl: String,
-    interceptorFactories: List<ClientNetworkInterceptor.Factory>
+    interceptorFactories: List<ClientNetworkInterceptor.Factory>,
+    endpointConfig: HttpClientEndpointConfig
   ): MethodInvocationHandler<T, G>? {
     val action = toClientAction(method) ?: return null
 
     val clientBuilder = clientPrototype.newBuilder()
+
+    okHttpClientCommonConfigurator.configure(builder = clientBuilder, config = endpointConfig)
+
     clientBuilder.addInterceptor(clientMetricsInterceptorFactory.create(name))
     for (factory in interceptorFactories) {
       val interceptor = factory.create(action) ?: continue

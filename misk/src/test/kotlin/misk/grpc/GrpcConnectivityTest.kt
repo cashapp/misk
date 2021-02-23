@@ -24,6 +24,9 @@ import okio.BufferedSink
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
+import java.io.InterruptedIOException
+import java.time.Duration
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -121,11 +124,37 @@ class GrpcConnectivityTest {
     }
   }
 
+  @Test
+  fun serviceCallTimesOut() {
+    helloRpcAction.sleep = Duration.ofMillis(1001)
+
+    val request = Request.Builder()
+      .url(jetty.httpsServerUrl!!.resolve("/helloworld.Greeter/SayHello")!!)
+      .addHeader("grpc-trace-bin", "")
+      .addHeader("grpc-accept-encoding", "gzip")
+      .addHeader("grpc-encoding", "gzip")
+      .post(object : RequestBody() {
+        override fun contentType(): MediaType? {
+          return MediaTypes.APPLICATION_GRPC_MEDIA_TYPE
+        }
+
+        override fun writeTo(sink: BufferedSink) {
+          val writer = GrpcMessageSink(sink, HelloRequest.ADAPTER, "gzip")
+          writer.write(HelloRequest("jp!"))
+        }
+      })
+      .build()
+
+    assertThrows<InterruptedIOException> { client.newCall(request).execute() }
+  }
+
   @Singleton
   class HelloRpcAction @Inject constructor() : WebAction, GreeterSayHello {
     var failNextRequest = false
+    var sleep: Duration = Duration.ofMillis(0)
 
     override fun sayHello(request: HelloRequest): HelloReply {
+      Thread.sleep(sleep.toMillis())
       if (failNextRequest) throw BadRequestException("bad request!")
 
       return HelloReply.Builder()
