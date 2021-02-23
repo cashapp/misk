@@ -11,60 +11,22 @@ import java.util.concurrent.TimeUnit
 @Singleton
 class OkHttpClientCommonConfigurator @Inject internal constructor() {
   fun configure(builder: Builder, config: HttpClientEndpointConfig): Builder {
+    configureCallTimeout(builder = builder, config = config)
     configureConnectTimeout(builder = builder, config = config)
+    configureConnectionPool(builder = builder, config = config)
+    configureDispatcher(builder = builder, config = config)
+    configurePingInterval(builder = builder, config = config)
     configureReadTimeout(builder = builder, config = config)
     configureWriteTimeout(builder = builder, config = config)
-    configurePingInterval(builder = builder, config = config)
-    configureCallTimeout(builder = builder, config = config)
-    configureDispatcher(builder = builder, config = config)
-    configureConnectionPool(builder = builder, config = config)
     return builder
-  }
-
-  private fun configureConnectTimeout(builder: Builder, config: HttpClientEndpointConfig) {
-    config.clientConfig.connectTimeout?.let {
-      builder.connectTimeout(
-        it.toMillis(),
-        TimeUnit.MILLISECONDS
-      )
-    }
-  }
-
-  private fun configureReadTimeout(builder: Builder, config: HttpClientEndpointConfig) {
-    config.clientConfig.readTimeout?.let {
-      builder.readTimeout(
-        it.toMillis(),
-        TimeUnit.MILLISECONDS
-      )
-    }
-  }
-
-  private fun configureWriteTimeout(builder: Builder, config: HttpClientEndpointConfig) {
-    config.clientConfig.writeTimeout?.let {
-      builder.writeTimeout(
-        it.toMillis(),
-        TimeUnit.MILLISECONDS
-      )
-    }
-  }
-
-  private fun configurePingInterval(builder: Builder, config: HttpClientEndpointConfig) {
-    config.clientConfig.pingInterval?.let { builder.pingInterval(it) }
   }
 
   private fun configureCallTimeout(builder: Builder, config: HttpClientEndpointConfig) {
     config.clientConfig.callTimeout?.let { builder.callTimeout(it) }
   }
 
-  private fun configureDispatcher(builder: Builder, config: HttpClientEndpointConfig) {
-    val dispatcher = Dispatcher()
-    config.clientConfig.maxRequests?.let { maxRequests ->
-      dispatcher.maxRequests = maxRequests
-    }
-    config.clientConfig.maxRequestsPerHost?.let { maxRequestsPerHost ->
-      dispatcher.maxRequestsPerHost = maxRequestsPerHost
-    }
-    builder.dispatcher(dispatcher)
+  private fun configureConnectTimeout(builder: Builder, config: HttpClientEndpointConfig) {
+    config.clientConfig.connectTimeout?.let { builder.connectTimeout(it) }
   }
 
   private fun configureConnectionPool(builder: Builder, config: HttpClientEndpointConfig) {
@@ -74,6 +36,25 @@ class OkHttpClientCommonConfigurator @Inject internal constructor() {
       TimeUnit.MILLISECONDS
     )
     builder.connectionPool(connectionPool)
+  }
+
+  private fun configureDispatcher(builder: Builder, config: HttpClientEndpointConfig) {
+    val dispatcher = Dispatcher()
+    config.clientConfig.maxRequests?.let { dispatcher.maxRequests = it }
+    config.clientConfig.maxRequestsPerHost?.let { dispatcher.maxRequestsPerHost = it }
+    builder.dispatcher(dispatcher)
+  }
+
+  private fun configurePingInterval(builder: Builder, config: HttpClientEndpointConfig) {
+    config.clientConfig.pingInterval?.let { builder.pingInterval(it) }
+  }
+
+  private fun configureReadTimeout(builder: Builder, config: HttpClientEndpointConfig) {
+    config.clientConfig.readTimeout?.let { builder.readTimeout(it) }
+  }
+
+  private fun configureWriteTimeout(builder: Builder, config: HttpClientEndpointConfig) {
+    config.clientConfig.writeTimeout?.let { builder.writeTimeout(it) }
   }
 
   companion object {
