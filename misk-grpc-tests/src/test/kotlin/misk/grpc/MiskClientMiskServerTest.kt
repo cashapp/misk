@@ -1,5 +1,6 @@
 package misk.grpc
 
+import com.google.inject.Provides
 import com.google.inject.util.Modules
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.channels.ReceiveChannel
@@ -20,7 +21,13 @@ import routeguide.RouteGuideClient
 import routeguide.RouteNote
 import wisp.logging.LogCollector
 import javax.inject.Inject
+import javax.inject.Named
 import javax.inject.Provider
+import misk.grpc.miskserver.GetFeatureGrpcAction
+import misk.inject.KAbstractModule
+import misk.web.WebActionModule
+import misk.web.WebTestingModule
+import misk.web.jetty.JettyService
 
 @MiskTest(startService = true)
 class MiskClientMiskServerTest {
