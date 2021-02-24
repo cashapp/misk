@@ -114,7 +114,7 @@ data class Feature(val name: String) {
     if (name.length == 0) {
       throw RuntimeException("feature name must not be empty")
     }
-    if (!name.contains(Regex("^[0-9A-z-_.]+$"))) {
+    if (!name.contains(Regex("^[0-9A-Za-z-_.]+$"))) {
       throw RuntimeException(
         "feature name '$name' can only contain letters, numbers and the characters [-_.]"
       )
