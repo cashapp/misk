@@ -116,7 +116,7 @@ data class Feature(val name: String) {
     }
     if (!name.contains(Regex("^[0-9A-z-_.]+$"))) {
       throw RuntimeException(
-        "feature name '$name' can only have letters, numbers and the characters [-_.]"
+        "feature name '$name' can only contain letters, numbers and the characters [-_.]"
       )
     }
   }
