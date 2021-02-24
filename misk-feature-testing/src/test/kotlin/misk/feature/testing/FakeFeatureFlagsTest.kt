@@ -294,7 +294,7 @@ internal class FakeFeatureFlagsTest {
   @Test
   fun inValidFeatureKey() {
     assertThrows<RuntimeException> {
-      println(Feature(""))
+      Feature("")
     }
     assertThrows<RuntimeException> {
       Feature("abc$123")
