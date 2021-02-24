@@ -109,7 +109,18 @@ inline fun <reified T> FeatureFlags.getJson(
 /**
  * Typed feature string.
  */
-data class Feature(val name: String)
+data class Feature(val name: String) {
+  init {
+    if (name.length == 0) {
+      throw RuntimeException("feature name must not be empty")
+    }
+    if (!name.contains(Regex("^[0-9A-z-_.]+$"))) {
+      throw RuntimeException(
+        "feature name '$name' can only have letters, numbers and the characters [-_.]"
+      )
+    }
+  }
+}
 
 /**
  * Extra attributes to be used for evaluating features.
