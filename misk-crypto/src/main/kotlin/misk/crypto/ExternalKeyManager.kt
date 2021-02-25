@@ -24,5 +24,4 @@ interface ExternalKeyManager {
    * Fetch and return a Key (includes contents, type and a KMS ARN) by its alias.
    */
   fun getKeyByAlias(alias: KeyAlias): Key?
-
 }

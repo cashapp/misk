@@ -23,13 +23,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 @MiskTest(startService = true)
 public class JavaPathParamDispatchTest {
   @MiskTestModule final Module module = new TestModule();
-
-  public enum ResourceType {
-    USER,
-    FILE,
-    FOLDER
-  }
-
   private final OkHttpClient httpClient = new OkHttpClient();
   @Inject private JettyService jettyService;
 
@@ -38,6 +31,20 @@ public class JavaPathParamDispatchTest {
     okhttp3.Response response = get("/objects/FILE/defaults/245");
     assertThat(response.code()).isEqualTo(200);
     assertThat(response.body().string()).isEqualTo("(type=FILE,name=defaults,version=245)");
+  }
+
+  private okhttp3.Response get(String path) throws IOException {
+    Request request = new Request.Builder()
+        .get()
+        .url(jettyService.getHttpServerUrl().newBuilder().encodedPath(path).build())
+        .build();
+    return httpClient.newCall(request).execute();
+  }
+
+  public enum ResourceType {
+    USER,
+    FILE,
+    FOLDER
   }
 
   public static final class GetObjectDetails implements WebAction {
@@ -61,13 +68,5 @@ public class JavaPathParamDispatchTest {
       install(new WebTestingModule());
       install(WebActionModule.create(GetObjectDetails.class));
     }
-  }
-
-  private okhttp3.Response get(String path) throws IOException {
-    Request request = new Request.Builder()
-        .get()
-        .url(jettyService.getHttpServerUrl().newBuilder().encodedPath(path).build())
-        .build();
-    return httpClient.newCall(request).execute();
   }
 }

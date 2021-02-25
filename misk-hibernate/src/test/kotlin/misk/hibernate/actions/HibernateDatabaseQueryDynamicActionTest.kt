@@ -7,14 +7,12 @@ import misk.hibernate.DbCharacter
 import misk.hibernate.DbMovie
 import misk.hibernate.Movies
 import misk.hibernate.Operator
-import misk.hibernate.ReflectionQuery
 import misk.hibernate.Transacter
 import misk.hibernate.load
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import javax.inject.Inject
@@ -28,12 +26,18 @@ class HibernateDatabaseQueryDynamicActionTest {
   val module = HibernateDatabaseQueryTestingModule()
 
   @Inject
-  private lateinit var realActionRequestExecuter: RealActionRequestExecuter<HibernateDatabaseQueryDynamicAction.Request, HibernateDatabaseQueryDynamicAction.Response>
+  private lateinit var realActionRequestExecuter:
+    RealActionRequestExecuter<
+      HibernateDatabaseQueryDynamicAction.Request,
+      HibernateDatabaseQueryDynamicAction.Response
+      >
   @Inject @Movies lateinit var transacter: Transacter
 
   @BeforeEach
   fun before() {
-    realActionRequestExecuter.requestPath(HibernateDatabaseQueryDynamicAction.HIBERNATE_QUERY_DYNAMIC_WEBACTION_PATH)
+    realActionRequestExecuter.requestPath(
+      HibernateDatabaseQueryDynamicAction.HIBERNATE_QUERY_DYNAMIC_WEBACTION_PATH
+    )
 
     // Insert some movies, characters and actors.
     transacter.allowCowrites().transaction { session ->
@@ -46,7 +50,10 @@ class HibernateDatabaseQueryDynamicActionTest {
   }
 
   private val AUTHORIZED_CAPABILITIES =
-    HibernateDatabaseQueryTestingModule.DYNAMIC_MOVIE_QUERY_ACCESS_ENTRY.capabilities.joinToString() + ",admin_console"
+    HibernateDatabaseQueryTestingModule
+      .DYNAMIC_MOVIE_QUERY_ACCESS_ENTRY
+      .capabilities
+      .joinToString() + ",admin_console"
 
   @Test
   fun `unauthorized request`() {
@@ -74,8 +81,7 @@ class HibernateDatabaseQueryDynamicActionTest {
       HibernateDatabaseQueryDynamicAction.Request(
         entityClass = DbMovie::class.simpleName!!,
         queryClass = "DbMovieDynamicQuery",
-        query = HibernateDatabaseQueryMetadataFactory.Companion.DynamicQuery(
-        )
+        query = HibernateDatabaseQueryMetadataFactory.Companion.DynamicQuery()
       ),
       user = "joey",
       capabilities = AUTHORIZED_CAPABILITIES
@@ -180,7 +186,8 @@ class HibernateDatabaseQueryDynamicActionTest {
     assertEquals(
       listOf(
         mapOf("name" to "Die Hard", "created_at" to "2018-01-01T00:00:00.000Z"),
-      ), results.results
+      ),
+      results.results
     )
   }
 
@@ -210,7 +217,8 @@ class HibernateDatabaseQueryDynamicActionTest {
         mapOf("name" to "Jurassic Park"),
         mapOf("name" to "Pulp Fiction"),
         mapOf("name" to "Die Hard"),
-      ), results.results
+      ),
+      results.results
     )
   }
 }

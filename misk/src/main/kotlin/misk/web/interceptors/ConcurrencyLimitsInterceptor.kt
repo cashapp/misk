@@ -88,11 +88,11 @@ internal class ConcurrencyLimitsInterceptor internal constructor(
       if (action.function.findAnnotation<AvailableWhenDegraded>() != null) return null
 
       val limiter = limiterFactories.asSequence()
-          .mapNotNull { it.create(action) }
-          .firstOrNull()
-          ?: SimpleLimiter.Builder()
-              .clock { clock.millis() }
-              .build()
+        .mapNotNull { it.create(action) }
+        .firstOrNull()
+        ?: SimpleLimiter.Builder()
+          .clock { clock.millis() }
+          .build()
 
       return ConcurrencyLimitsInterceptor(action.name, limiter, clock)
     }
@@ -102,4 +102,3 @@ internal class ConcurrencyLimitsInterceptor internal constructor(
     val logger = getLogger<ConcurrencyLimitsInterceptor>()
   }
 }
-

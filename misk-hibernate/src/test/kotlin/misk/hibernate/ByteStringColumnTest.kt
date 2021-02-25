@@ -39,8 +39,8 @@ class ByteStringColumnTest {
     }
     transacter.transaction { session ->
       val textHash = queryFactory.newQuery(TextHashQuery::class)
-          .hash(abcHash)
-          .uniqueResult(session)!!
+        .hash(abcHash)
+        .uniqueResult(session)!!
       assertThat(textHash.text).isEqualTo("abc")
       assertThat(textHash.hash).isEqualTo(abcHash)
     }
@@ -61,26 +61,36 @@ class ByteStringColumnTest {
     }
 
     transacter.transaction { session ->
-      assertThat(queryFactory.newQuery<TextHashQuery>()
+      assertThat(
+        queryFactory.newQuery<TextHashQuery>()
           .hashLessThan(v1.hash)
-          .listAsTextAndHash(session))
-          .isEmpty()
-      assertThat(queryFactory.newQuery<TextHashQuery>()
+          .listAsTextAndHash(session)
+      )
+        .isEmpty()
+      assertThat(
+        queryFactory.newQuery<TextHashQuery>()
           .hashLessThan(v2.hash)
-          .listAsTextAndHash(session))
-          .containsExactly(v1)
-      assertThat(queryFactory.newQuery<TextHashQuery>()
+          .listAsTextAndHash(session)
+      )
+        .containsExactly(v1)
+      assertThat(
+        queryFactory.newQuery<TextHashQuery>()
           .hashLessThan(v3.hash)
-          .listAsTextAndHash(session))
-          .containsExactly(v1, v2)
-      assertThat(queryFactory.newQuery<TextHashQuery>()
+          .listAsTextAndHash(session)
+      )
+        .containsExactly(v1, v2)
+      assertThat(
+        queryFactory.newQuery<TextHashQuery>()
           .hashLessThan(v4.hash)
-          .listAsTextAndHash(session))
-          .containsExactly(v1, v2, v3)
-      assertThat(queryFactory.newQuery<TextHashQuery>()
+          .listAsTextAndHash(session)
+      )
+        .containsExactly(v1, v2, v3)
+      assertThat(
+        queryFactory.newQuery<TextHashQuery>()
           .hashLessThan("ff00".decodeHex())
-          .listAsTextAndHash(session))
-          .containsExactly(v1, v2, v3, v4)
+          .listAsTextAndHash(session)
+      )
+        .containsExactly(v1, v2, v3, v4)
     }
   }
 

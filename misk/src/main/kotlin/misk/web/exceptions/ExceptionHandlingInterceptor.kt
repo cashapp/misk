@@ -69,19 +69,22 @@ class ExceptionHandlingInterceptor(
   private companion object {
     val log = getLogger<ExceptionHandlingInterceptor>()
 
-    val INTERNAL_SERVER_ERROR_RESPONSE = Response("internal server error".toResponseBody(),
-        listOf("Content-Type" to MediaTypes.TEXT_PLAIN_UTF8).toMap().toHeaders(),
-        StatusCode.INTERNAL_SERVER_ERROR.code
+    val INTERNAL_SERVER_ERROR_RESPONSE = Response(
+      "internal server error".toResponseBody(),
+      listOf("Content-Type" to MediaTypes.TEXT_PLAIN_UTF8).toMap().toHeaders(),
+      StatusCode.INTERNAL_SERVER_ERROR.code
     )
 
-    val UNAUTHENTICATED_RESPONSE = Response("unauthenticated".toResponseBody(),
-        listOf("Content-Type" to MediaTypes.TEXT_PLAIN_UTF8).toMap().toHeaders(),
-        StatusCode.UNAUTHENTICATED.code
+    val UNAUTHENTICATED_RESPONSE = Response(
+      "unauthenticated".toResponseBody(),
+      listOf("Content-Type" to MediaTypes.TEXT_PLAIN_UTF8).toMap().toHeaders(),
+      StatusCode.UNAUTHENTICATED.code
     )
 
-    val UNAUTHORIZED_RESPONSE = Response("unauthorized".toResponseBody(),
-        listOf("Content-Type" to MediaTypes.TEXT_PLAIN_UTF8).toMap().toHeaders(),
-        StatusCode.FORBIDDEN.code
+    val UNAUTHORIZED_RESPONSE = Response(
+      "unauthorized".toResponseBody(),
+      listOf("Content-Type" to MediaTypes.TEXT_PLAIN_UTF8).toMap().toHeaders(),
+      StatusCode.FORBIDDEN.code
     )
   }
 }

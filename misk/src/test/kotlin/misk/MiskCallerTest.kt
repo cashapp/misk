@@ -25,9 +25,9 @@ internal class MiskCallerTest {
 internal class MiskCallerTestModule : KAbstractModule() {
   override fun configure() {
     bind<MiskCaller>().annotatedWith<TestUser>()
-        .toInstance(MiskCaller(user = "Test user", capabilities = setOf("testing")))
+      .toInstance(MiskCaller(user = "Test user", capabilities = setOf("testing")))
     bind<MiskCaller>().annotatedWith<TestService>()
-        .toInstance(MiskCaller(service = "Test service"))
+      .toInstance(MiskCaller(service = "Test service"))
   }
 }
 

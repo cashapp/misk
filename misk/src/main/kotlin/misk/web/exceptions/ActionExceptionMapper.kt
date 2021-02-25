@@ -35,7 +35,7 @@ internal class ActionExceptionMapper @Inject internal constructor(
 
   private companion object {
     val HEADERS: Headers =
-        listOf("Content-Type" to MediaTypes.TEXT_PLAIN_UTF8).toMap().toHeaders()
+      listOf("Content-Type" to MediaTypes.TEXT_PLAIN_UTF8).toMap().toHeaders()
   }
 }
 

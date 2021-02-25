@@ -3,7 +3,6 @@ package misk.web.jetty
 import com.google.common.base.Stopwatch
 import com.google.common.util.concurrent.AbstractIdleService
 import com.google.common.util.concurrent.ThreadFactoryBuilder
-import misk.concurrent.ExecutorServiceFactory
 import misk.logging.getLogger
 import misk.security.ssl.CipherSuites
 import misk.security.ssl.SslLoader
@@ -37,13 +36,11 @@ import org.eclipse.jetty.util.thread.ThreadPool
 import java.net.InetAddress
 import java.util.EnumSet
 import java.util.concurrent.SynchronousQueue
-import java.util.concurrent.ThreadFactory
 import java.util.concurrent.ThreadPoolExecutor
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
 import javax.servlet.DispatcherType
-import javax.servlet.FilterConfig
 
 private val logger = getLogger<JettyService>()
 
@@ -68,23 +65,25 @@ class JettyService @Inject internal constructor(
 
     if (webConfig.health_port >= 0) {
       val healthExecutor = ThreadPoolExecutor(
-          // 2 threads for jetty acceptor and selector. 2 threads for k8s liveness/readiness.
-          4,
-          // Jetty can be flaky about rejecting near full capacity, so allow some growth.
-          8,
-          60L, TimeUnit.SECONDS,
-          SynchronousQueue(),
-          ThreadFactoryBuilder()
-              .setNameFormat("jetty-health-%d")
-              .build())
+        // 2 threads for jetty acceptor and selector. 2 threads for k8s liveness/readiness.
+        4,
+        // Jetty can be flaky about rejecting near full capacity, so allow some growth.
+        8,
+        60L, TimeUnit.SECONDS,
+        SynchronousQueue(),
+        ThreadFactoryBuilder()
+          .setNameFormat("jetty-health-%d")
+          .build()
+      )
       val healthConnector = ServerConnector(
-          server,
-          healthExecutor,
-          null, /* scheduler */
-          null /* buffer pool */,
-          1,
-          1,
-          HttpConnectionFactory())
+        server,
+        healthExecutor,
+        null, /* scheduler */
+        null /* buffer pool */,
+        1,
+        1,
+        HttpConnectionFactory()
+      )
       healthConnector.port = webConfig.health_port
       healthConnector.name = "health"
       server.addConnector(healthConnector)
@@ -108,13 +107,13 @@ class JettyService @Inject internal constructor(
 
     // TODO(mmihic): Allow require running only on HTTPS?
     val httpConnector = ServerConnector(
-        server,
-        null /* executor */,
-        null /* scheduler */,
-        null /* buffer pool */,
-        webConfig.acceptors ?: -1,
-        webConfig.selectors ?: -1,
-        httpConnectionFactories.toTypedArray()
+      server,
+      null /* executor */,
+      null /* scheduler */,
+      null /* buffer pool */,
+      webConfig.acceptors ?: -1,
+      webConfig.selectors ?: -1,
+      httpConnectionFactories.toTypedArray()
     )
     httpConnector.port = webConfig.port
     httpConnector.idleTimeout = webConfig.idle_timeout
@@ -125,10 +124,12 @@ class JettyService @Inject internal constructor(
     }
 
     webConfig.host?.let { httpConnector.host = it }
-    httpConnector.addBean(connectionMetricsCollector.newConnectionListener(
+    httpConnector.addBean(
+      connectionMetricsCollector.newConnectionListener(
         "http",
         webConfig.port
-    ))
+      )
+    )
     server.addConnector(httpConnector)
 
     if (webConfig.ssl != null) {
@@ -177,13 +178,13 @@ class JettyService @Inject internal constructor(
       httpsConnectionFactories += http1
 
       val httpsConnector = ServerConnector(
-          server,
-          null /* executor */,
-          null /* scheduler */,
-          null /* buffer pool */,
-          webConfig.acceptors ?: -1,
-          webConfig.selectors ?: -1,
-          httpsConnectionFactories.toTypedArray()
+        server,
+        null /* executor */,
+        null /* scheduler */,
+        null /* buffer pool */,
+        webConfig.acceptors ?: -1,
+        webConfig.selectors ?: -1,
+        httpsConnectionFactories.toTypedArray()
       )
       httpsConnector.port = webConfig.ssl.port
       httpsConnector.idleTimeout = webConfig.idle_timeout
@@ -192,10 +193,12 @@ class JettyService @Inject internal constructor(
         httpsConnector.acceptQueueSize = webConfig.queue_size
       }
       webConfig.host?.let { httpsConnector.host = it }
-      httpsConnector.addBean(connectionMetricsCollector.newConnectionListener(
+      httpsConnector.addBean(
+        connectionMetricsCollector.newConnectionListener(
           "https",
           webConfig.ssl.port
-      ))
+        )
+      )
       httpsConnector.name = "https"
       server.addConnector(httpsConnector)
     }
@@ -208,12 +211,12 @@ class JettyService @Inject internal constructor(
       }
 
       val udsConnector = UnixSocketConnector(
-          server,
-          null /* executor */,
-          null /* scheduler */,
-          null /* buffer pool */,
-          webConfig.selectors ?: -1,
-          udsConnFactories.toTypedArray()
+        server,
+        null /* executor */,
+        null /* scheduler */,
+        null /* buffer pool */,
+        webConfig.selectors ?: -1,
+        udsConnFactories.toTypedArray()
       )
       udsConnector.setUnixSocket(webConfig.unix_domain_socket.path)
       udsConnector.addBean(connectionMetricsCollector.newConnectionListener("http", 0))
@@ -250,20 +253,34 @@ class JettyService @Inject internal constructor(
 
     webConfig.cors.forEach { (path, corsConfig) ->
       val holder = FilterHolder(CrossOriginFilter::class.java)
-      holder.setInitParameter(CrossOriginFilter.ALLOWED_ORIGINS_PARAM,
-          corsConfig.allowedOrigins.joinToString(","))
-      holder.setInitParameter(CrossOriginFilter.ALLOWED_METHODS_PARAM,
-          corsConfig.allowedMethods.joinToString(","))
-      holder.setInitParameter(CrossOriginFilter.ALLOWED_HEADERS_PARAM,
-          corsConfig.allowedHeaders.joinToString(","))
-      holder.setInitParameter(CrossOriginFilter.ALLOW_CREDENTIALS_PARAM,
-          corsConfig.allowCredentials.toString())
-      holder.setInitParameter(CrossOriginFilter.PREFLIGHT_MAX_AGE_PARAM,
-          corsConfig.preflightMaxAge)
-      holder.setInitParameter(CrossOriginFilter.CHAIN_PREFLIGHT_PARAM,
-          corsConfig.chainPreflight.toString())
-      holder.setInitParameter(CrossOriginFilter.EXPOSED_HEADERS_PARAM,
-          corsConfig.exposedHeaders.joinToString(","))
+      holder.setInitParameter(
+        CrossOriginFilter.ALLOWED_ORIGINS_PARAM,
+        corsConfig.allowedOrigins.joinToString(",")
+      )
+      holder.setInitParameter(
+        CrossOriginFilter.ALLOWED_METHODS_PARAM,
+        corsConfig.allowedMethods.joinToString(",")
+      )
+      holder.setInitParameter(
+        CrossOriginFilter.ALLOWED_HEADERS_PARAM,
+        corsConfig.allowedHeaders.joinToString(",")
+      )
+      holder.setInitParameter(
+        CrossOriginFilter.ALLOW_CREDENTIALS_PARAM,
+        corsConfig.allowCredentials.toString()
+      )
+      holder.setInitParameter(
+        CrossOriginFilter.PREFLIGHT_MAX_AGE_PARAM,
+        corsConfig.preflightMaxAge
+      )
+      holder.setInitParameter(
+        CrossOriginFilter.CHAIN_PREFLIGHT_PARAM,
+        corsConfig.chainPreflight.toString()
+      )
+      holder.setInitParameter(
+        CrossOriginFilter.EXPOSED_HEADERS_PARAM,
+        corsConfig.exposedHeaders.joinToString(",")
+      )
       servletContextHandler.addFilter(holder, path, EnumSet.of(DispatcherType.REQUEST))
     }
 
@@ -282,7 +299,9 @@ class JettyService @Inject internal constructor(
     val stopwatch = Stopwatch.createStarted()
     logger.info("Stopping Jetty")
 
-    server.stop()
+    if (server.isRunning) {
+      server.stop()
+    }
 
     logger.info { "Stopped Jetty in $stopwatch" }
   }
@@ -291,25 +310,25 @@ class JettyService @Inject internal constructor(
 private val Server.healthUrl: HttpUrl?
   get() {
     return connectors
-        .mapNotNull { it as? NetworkConnector }
-        .firstOrNull { it.name == "health" }
-        ?.toHttpUrl()
+      .mapNotNull { it as? NetworkConnector }
+      .firstOrNull { it.name == "health" }
+      ?.toHttpUrl()
   }
 
 private val Server.httpUrl: HttpUrl?
   get() {
     return connectors
-        .mapNotNull { it as? NetworkConnector }
-        .firstOrNull { it.name == "http" }
-        ?.toHttpUrl()
+      .mapNotNull { it as? NetworkConnector }
+      .firstOrNull { it.name == "http" }
+      ?.toHttpUrl()
   }
 
 private val Server.httpsUrl: HttpUrl?
   get() {
     return connectors
-        .mapNotNull { it as? NetworkConnector }
-        .firstOrNull { it.name == "https" }
-        ?.toHttpUrl()
+      .mapNotNull { it as? NetworkConnector }
+      .firstOrNull { it.name == "https" }
+      ?.toHttpUrl()
   }
 
 private fun NetworkConnector.toHttpUrl(): HttpUrl {
@@ -321,10 +340,10 @@ private fun NetworkConnector.toHttpUrl(): HttpUrl {
   val explicitHost = if (virtualHosts.isEmpty()) host else virtualHosts[0]
 
   return HttpUrl.Builder()
-      .scheme(scheme)
-      .host(explicitHost ?: InetAddress.getLocalHost().hostAddress)
-      .port(localPort)
-      .build()
+    .scheme(scheme)
+    .host(explicitHost ?: InetAddress.getLocalHost().hostAddress)
+    .port(localPort)
+    .build()
 }
 
 /**

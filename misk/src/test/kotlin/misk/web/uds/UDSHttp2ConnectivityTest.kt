@@ -14,8 +14,8 @@ import misk.testing.MiskTestModule
 import misk.web.Get
 import misk.web.ResponseContentType
 import misk.web.WebActionModule
-import misk.web.WebUnixDomainSocketConfig
 import misk.web.WebTestingModule
+import misk.web.WebUnixDomainSocketConfig
 import misk.web.actions.WebAction
 import misk.web.jetty.JettyService
 import misk.web.mediatype.MediaTypes
@@ -46,16 +46,18 @@ class UDSHttp2ConnectivityTest {
   fun createClient() {
     val clientInjector = Guice.createInjector(ClientModule(jetty))
     client = clientInjector.getInstance<OkHttpClient>().newBuilder()
-        .socketFactory(UnixDomainSocketFactory(File(socketName)))
-        .protocols(listOf(Protocol.HTTP_1_1))
-        .build()
+      .socketFactory(UnixDomainSocketFactory(File(socketName)))
+      .protocols(listOf(Protocol.HTTP_1_1))
+      .build()
   }
 
   @Test
   fun happyPath() {
-    val call = client.newCall(Request.Builder()
+    val call = client.newCall(
+      Request.Builder()
         .url("http://publicobject.com/hello")
-        .build())
+        .build()
+    )
     val response = call.execute()
     response.use {
       assertThat(response.protocol).isEqualTo(Protocol.HTTP_1_1)
@@ -71,12 +73,16 @@ class UDSHttp2ConnectivityTest {
 
   inner class TestModule : KAbstractModule() {
     override fun configure() {
-      install(WebTestingModule(webConfig = WebTestingModule.TESTING_WEB_CONFIG.copy(
-          http2 = true,
-          unix_domain_socket = WebUnixDomainSocketConfig(
+      install(
+        WebTestingModule(
+          webConfig = WebTestingModule.TESTING_WEB_CONFIG.copy(
+            http2 = true,
+            unix_domain_socket = WebUnixDomainSocketConfig(
               path = socketName
+            )
           )
-      )))
+        )
+      )
       install(WebActionModule.create<HelloAction>())
     }
   }
@@ -91,9 +97,9 @@ class UDSHttp2ConnectivityTest {
     @Singleton
     fun provideHttpClientsConfig(): HttpClientsConfig {
       return HttpClientsConfig(
-          endpoints = mapOf(
-              "default" to HttpClientEndpointConfig("http://example.com/")
-          )
+        endpoints = mapOf(
+          "default" to HttpClientEndpointConfig("http://example.com/")
+        )
       )
     }
   }

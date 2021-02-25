@@ -26,9 +26,9 @@ fun WebAction.asChain(
         argsMap[param] = arg
       }
       return function.callBy(argsMap)
-          ?: throw IllegalStateException("Null return from WebAction")
+        ?: throw IllegalStateException("Null return from WebAction")
     }
   }
   val realChainInterceptors = interceptors + callFunctionInterceptor
-  return RealChain(this, args, realChainInterceptors, function, httpCall,0)
+  return RealChain(this, args, realChainInterceptors, function, httpCall, 0)
 }

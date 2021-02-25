@@ -31,9 +31,9 @@ interface Metrics {
 }
 
 private val defaultQuantiles = mapOf(
-    0.5 to 0.05,
-    0.75 to 0.02,
-    0.95 to 0.01,
-    0.99 to 0.001,
-    0.999 to 0.0001
+  0.5 to 0.05,
+  0.75 to 0.02,
+  0.95 to 0.01,
+  0.99 to 0.001,
+  0.999 to 0.0001
 )

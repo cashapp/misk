@@ -66,8 +66,10 @@ data class Container(
  */
 class Composer(private val name: String, private vararg val containers: Container) {
 
-  private val network = DockerNetwork("$name-net",
-      docker)
+  private val network = DockerNetwork(
+    "$name-net",
+    docker
+  )
   private val containerIds = mutableMapOf<String, String>()
   private val running = AtomicBoolean(false)
 
@@ -85,41 +87,41 @@ class Composer(private val name: String, private vararg val containers: Containe
       }
 
       docker.listContainersCmd()
-          .withShowAll(true)
-          .withLabelFilter(mapOf("name" to name))
-          .exec()
-          .forEach {
-            log.info { "removing previous $name container with id ${it.id}" }
-            docker.removeContainerCmd(it.id).exec()
-          }
+        .withShowAll(true)
+        .withLabelFilter(mapOf("name" to name))
+        .exec()
+        .forEach {
+          log.info { "removing previous $name container with id ${it.id}" }
+          docker.removeContainerCmd(it.id).exec()
+        }
 
       log.info { "pulling ${create.image} for $name container" }
 
       val imageParts = create.image!!.split(":")
       docker.pullImageCmd(imageParts[0])
-          .withTag(imageParts.getOrElse(1) { "latest" })
-          .exec(PullImageResultCallback()).awaitCompletion()
+        .withTag(imageParts.getOrElse(1) { "latest" })
+        .exec(PullImageResultCallback()).awaitCompletion()
 
       log.info { "starting $name container" }
 
       val id = create
-          .withNetworkMode(network.id())
-          .withLabels(mapOf("name" to name))
-          .withTty(true)
-          .exec()
-          .id
+        .withNetworkMode(network.id())
+        .withLabels(mapOf("name" to name))
+        .withTty(true)
+        .exec()
+        .id
       containerIds[name] = id
 
       container.beforeStartHook(docker, id)
 
       docker.startContainerCmd(id).exec()
       docker.logContainerCmd(id)
-          .withStdErr(true)
-          .withStdOut(true)
-          .withFollowStream(true)
-          .withSince(0)
-          .exec(LogContainerResultCallback())
-          .awaitStarted()
+        .withStdErr(true)
+        .withStdOut(true)
+        .withFollowStream(true)
+        .withSince(0)
+        .exec(LogContainerResultCallback())
+        .awaitStarted()
 
       log.info { "started $name; container id=$id" }
     }
@@ -145,7 +147,8 @@ class Composer(private val name: String, private vararg val containers: Containe
       try {
         log.info { "waiting for $name to terminate" }
         docker.waitContainerCmd(id).exec(
-            GracefulWaitContainerResultCallback()).awaitCompletion()
+          GracefulWaitContainerResultCallback()
+        ).awaitCompletion()
       } catch (th: Throwable) {
         log.error(th) { "could not kill $name with container id $id" }
       }
@@ -156,7 +159,8 @@ class Composer(private val name: String, private vararg val containers: Containe
     network.stop()
   }
 
-  private class LogContainerResultCallback : ResultCallbackTemplate<LogContainerResultCallback, Frame>() {
+  private class LogContainerResultCallback :
+    ResultCallbackTemplate<LogContainerResultCallback, Frame>() {
     override fun onNext(item: Frame) {
       String(item.payload).trim().split('\r', '\n').filter { it.isNotBlank() }.forEach {
         log.info(it)
@@ -177,8 +181,8 @@ class Composer(private val name: String, private vararg val containers: Containe
   private companion object {
     private val log = getLogger<Composer>()
     private val docker: DockerClient = DockerClientBuilder.getInstance()
-        .withDockerCmdExecFactory(NettyDockerCmdExecFactory())
-        .build()
+      .withDockerCmdExecFactory(NettyDockerCmdExecFactory())
+      .build()
   }
 }
 
@@ -198,10 +202,10 @@ private class DockerNetwork(private val name: String, private val docker: Docker
       docker.removeNetworkCmd(it.id).exec()
     }
     networkId = docker.createNetworkCmd()
-        .withName(name)
-        .withCheckDuplicate(true)
-        .exec()
-        .id
+      .withName(name)
+      .withCheckDuplicate(true)
+      .exec()
+      .id
   }
 
   fun stop() {

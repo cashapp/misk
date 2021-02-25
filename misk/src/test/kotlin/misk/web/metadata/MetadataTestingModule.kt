@@ -29,7 +29,8 @@ class MetadataTestingModule : KAbstractModule() {
         name = "Test Dashboard Tab",
         category = "test category",
         capabilities = setOf("test_admin_access")
-      ))
+      )
+    )
 
     multibind<DashboardNavbarItem>().toInstance(
       DashboardNavbarItem<DashboardMetadataActionTestDashboard>(
@@ -40,12 +41,14 @@ class MetadataTestingModule : KAbstractModule() {
 
     multibind<DashboardNavbarStatus>().toInstance(
       DashboardNavbarStatus<DashboardMetadataActionTestDashboard>(
-        status = "Test Status")
+        status = "Test Status"
+      )
     )
 
     multibind<DashboardHomeUrl>().toInstance(
       DashboardHomeUrl<DashboardMetadataActionTestDashboard>(
-        urlPathPrefix = "/test-app/")
+        urlPathPrefix = "/test-app/"
+      )
     )
   }
 }

@@ -27,7 +27,10 @@ import javax.inject.Singleton
 internal class SqsJobQueueServiceTest {
   @MiskExternalDependency private val dockerSqs = DockerSqs
   @MiskTestModule private val module =
-      Modules.combine(SqsJobQueueTestModule(dockerSqs.credentials, dockerSqs.client), ServiceModule<ManualStartService>())
+    Modules.combine(
+      SqsJobQueueTestModule(dockerSqs.credentials, dockerSqs.client),
+      ServiceModule<ManualStartService>()
+    )
   @Inject private lateinit var sqs: AmazonSQS
   @Inject private lateinit var queue: JobQueue
   @Inject private lateinit var consumer: JobConsumer

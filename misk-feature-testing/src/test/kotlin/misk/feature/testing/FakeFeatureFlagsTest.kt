@@ -54,47 +54,58 @@ internal class FakeFeatureFlagsTest {
     assertThat(subject.getInt(FEATURE, TOKEN)).isEqualTo(3)
     assertThat(subject.getInt(FEATURE, "joker")).isEqualTo(42)
     assertThat(subject.getInt(FEATURE, "joker", attributes)).isEqualTo(55)
-    //Provides the key level override when there is no match on attributes
-    assertThat(subject.getInt(FEATURE, "joker", Attributes(mapOf("don't" to "exist"))))
-        .isEqualTo(42)
+    // Provides the key level override when there is no match on attributes
+    assertThat(
+      subject.getInt(
+        FEATURE,
+        "joker",
+        Attributes(mapOf("don't" to "exist"))
+      )
+    ).isEqualTo(42)
   }
 
   @Test
   fun getEnum() {
     // Defaults to first enum.
     assertThat(subject.getEnum<Dinosaur>(FEATURE, TOKEN))
-        .isEqualTo(Dinosaur.PTERODACTYL)
+      .isEqualTo(Dinosaur.PTERODACTYL)
 
     // Can be overridden
     subject.override(FEATURE, Dinosaur.TYRANNOSAURUS)
     assertThat(subject.getEnum<Dinosaur>(FEATURE, TOKEN))
-        .isEqualTo(Dinosaur.TYRANNOSAURUS)
+      .isEqualTo(Dinosaur.TYRANNOSAURUS)
 
     // Can override with specific keys
     subject.overrideKey(FEATURE, "joker", Dinosaur.PTERODACTYL)
     assertThat(subject.getEnum<Dinosaur>(FEATURE, TOKEN))
-        .isEqualTo(Dinosaur.TYRANNOSAURUS)
+      .isEqualTo(Dinosaur.TYRANNOSAURUS)
     assertThat(subject.getEnum<Dinosaur>(FEATURE, "joker"))
-        .isEqualTo(Dinosaur.PTERODACTYL)
+      .isEqualTo(Dinosaur.PTERODACTYL)
 
     // Can override with specific keys and attributes
     val attributes = Attributes(mapOf("type" to "bad"))
     subject.overrideKey(FEATURE, "joker", Dinosaur.TALARURUS, attributes)
-    assertThat(subject.getEnum<Dinosaur>(FEATURE, TOKEN))
-        .isEqualTo(Dinosaur.TYRANNOSAURUS)
-    assertThat(subject.getEnum<Dinosaur>(FEATURE, "joker"))
-        .isEqualTo(Dinosaur.PTERODACTYL)
-    assertThat(subject.getEnum<Dinosaur>(FEATURE, "joker", attributes))
-        .isEqualTo(Dinosaur.TALARURUS)
-    //Provides the key level override when there is no match on attributes
-    assertThat(subject.getEnum<Dinosaur>(
-        FEATURE, "joker", Attributes(mapOf("don't" to "exist")))).isEqualTo(Dinosaur.PTERODACTYL)
+    assertThat(subject.getEnum<Dinosaur>(FEATURE, TOKEN)).isEqualTo(Dinosaur.TYRANNOSAURUS)
+    assertThat(subject.getEnum<Dinosaur>(FEATURE, "joker")).isEqualTo(Dinosaur.PTERODACTYL)
+    assertThat(
+      subject.getEnum<Dinosaur>(
+        FEATURE,
+        "joker",
+        attributes
+      )
+    ).isEqualTo(Dinosaur.TALARURUS)
+    // Provides the key level override when there is no match on attributes
+    assertThat(
+      subject.getEnum<Dinosaur>(
+        FEATURE, "joker", Attributes(mapOf("don't" to "exist"))
+      )
+    ).isEqualTo(Dinosaur.PTERODACTYL)
 
     subject.reset()
     assertThat(subject.getEnum<Dinosaur>(FEATURE, TOKEN)).isEqualTo(Dinosaur.PTERODACTYL)
   }
 
-  data class JsonFeature(val value : String, val optional : String? = null)
+  data class JsonFeature(val value: String, val optional: String? = null)
 
   @Test
   fun getJson() {
@@ -105,8 +116,7 @@ internal class FakeFeatureFlagsTest {
     subject.overrideJson(FEATURE, JsonFeature("test"))
     subject.overrideJson(OTHER_FEATURE, JsonFeature("other"))
     assertThat(subject.getJson<JsonFeature>(FEATURE, TOKEN)).isEqualTo(JsonFeature("test"))
-    assertThat(subject.getJson<JsonFeature>(OTHER_FEATURE, TOKEN))
-        .isEqualTo(JsonFeature("other"))
+    assertThat(subject.getJson<JsonFeature>(OTHER_FEATURE, TOKEN)).isEqualTo(JsonFeature("other"))
 
     // Can override with specific keys
     subject.overrideKeyJson(FEATURE, "joker", JsonFeature("joker"))
@@ -119,25 +129,27 @@ internal class FakeFeatureFlagsTest {
     val sleepyBadJokerAttributes = Attributes(mapOf("type" to "bad", "state" to "sleepy"))
     subject.overrideKeyJson(FEATURE, "joker", JsonFeature("bad-joker"), badJokerAttributes)
 
-    assertThat(subject.getJson<JsonFeature>(FEATURE, TOKEN))
-        .isEqualTo(JsonFeature("test"))
-    assertThat(subject.getJson<JsonFeature>(FEATURE, "joker"))
-        .isEqualTo(JsonFeature("joker"))
-    assertThat(subject.getJson<JsonFeature>(FEATURE, "joker", badJokerAttributes))
-        .isEqualTo(JsonFeature("bad-joker"))
-    assertThat(subject.getJson<JsonFeature>(FEATURE, "joker", sleepyBadJokerAttributes))
-        .isEqualTo(JsonFeature("bad-joker"))
-    //Provides the key level override when there is no match on attributes
+    assertThat(subject.getJson<JsonFeature>(FEATURE, TOKEN)).isEqualTo(JsonFeature("test"))
+    assertThat(subject.getJson<JsonFeature>(FEATURE, "joker")).isEqualTo(JsonFeature("joker"))
+    assertThat(subject.getJson<JsonFeature>(FEATURE, "joker", badJokerAttributes)).isEqualTo(
+      JsonFeature("bad-joker")
+    )
+    assertThat(subject.getJson<JsonFeature>(FEATURE, "joker", sleepyBadJokerAttributes)).isEqualTo(
+      JsonFeature("bad-joker")
+    )
+    // Provides the key level override when there is no match on attributes
     assertThat(subject.getJson<JsonFeature>(FEATURE, "joker", goodJokerAttributes))
-        .isEqualTo(JsonFeature("joker"))
+      .isEqualTo(JsonFeature("joker"))
 
     subject.reset()
     subject.override(FEATURE, JsonFeature("test-class"), JsonFeature::class.java)
-    subject.overrideKey(FEATURE, "joker", JsonFeature("test-key-class"), JsonFeature::class.java)
+    subject.overrideKey(
+      FEATURE, "joker", JsonFeature("test-key-class"), JsonFeature::class.java
+    )
     assertThat(subject.getJson<JsonFeature>(FEATURE))
-        .isEqualTo(JsonFeature("test-class"))
+      .isEqualTo(JsonFeature("test-class"))
     assertThat(subject.getJson<JsonFeature>(FEATURE, "joker"))
-        .isEqualTo(JsonFeature("test-key-class"))
+      .isEqualTo(JsonFeature("test-key-class"))
   }
 
   @Test
@@ -162,9 +174,14 @@ internal class FakeFeatureFlagsTest {
     assertThat(subject.getBoolean(FEATURE, TOKEN)).isEqualTo(true)
     assertThat(subject.getBoolean(FEATURE, "joker")).isEqualTo(false)
     assertThat(subject.getBoolean(FEATURE, "joker", attributes)).isEqualTo(false)
-    //Provides the key level override when there is no match on attributes
-    assertThat(subject.getBoolean(FEATURE, "joker", Attributes(mapOf("don't" to "exist"))))
-        .isEqualTo(false)
+    // Provides the key level override when there is no match on attributes
+    assertThat(
+      subject.getBoolean(
+        FEATURE,
+        "joker",
+        Attributes(mapOf("don't" to "exist"))
+      )
+    ).isEqualTo(false)
   }
 
   @Test
@@ -188,11 +205,21 @@ internal class FakeFeatureFlagsTest {
     subject.overrideKey(FEATURE, "joker", "feature-joker-with-attrs", attributes)
     assertThat(subject.getString(FEATURE, TOKEN)).isEqualTo("feature")
     assertThat(subject.getString(FEATURE, "joker")).isEqualTo("feature-joker")
-    assertThat(subject.getString(FEATURE, "joker", attributes))
-        .isEqualTo("feature-joker-with-attrs")
-    //Provides the key level override when there is no match on attributes
-    assertThat(subject.getString(FEATURE, "joker", Attributes(mapOf("don't" to "exist"))))
-        .isEqualTo("feature-joker")
+    assertThat(
+      subject.getString(
+        FEATURE,
+        "joker",
+        attributes
+      )
+    ).isEqualTo("feature-joker-with-attrs")
+    // Provides the key level override when there is no match on attributes
+    assertThat(
+      subject.getString(
+        FEATURE,
+        "joker",
+        Attributes(mapOf("don't" to "exist"))
+      )
+    ).isEqualTo("feature-joker")
   }
 
   @Test
@@ -223,11 +250,14 @@ internal class FakeFeatureFlagsTest {
 
   @Test
   fun `fails for missing required fields`() {
-    subject.overrideJsonString(FEATURE, """
+    subject.overrideJsonString(
+      FEATURE,
+      """
       {
         "optional" : "value"
       }
-    """.trimIndent())
+      """.trimIndent()
+    )
 
     assertThrows<JsonDataException> { subject.getJson<JsonFeature>(FEATURE, TOKEN) }
   }
@@ -249,6 +279,41 @@ internal class FakeFeatureFlagsTest {
     subject.getInt(FEATURE, "azAZ09+/=") // base64.
     subject.getInt(FEATURE, "azAZ09-_=") // base64url.
     subject.getInt(FEATURE, "azAZ09-_.~$") // unreserved URL characters.
+  }
+
+  @Test
+  fun validFeatureKey() {
+    Feature("a")
+    Feature("abc")
+    Feature("abc123")
+    Feature("abc.123")
+    Feature("abc.123-doeraemi")
+    Feature("abc.123-doeraemi_YOUME")
+  }
+
+  @Test
+  fun inValidFeatureKey() {
+    assertThrows<RuntimeException> {
+      Feature("")
+    }
+    assertThrows<RuntimeException> {
+      Feature("abc$123")
+    }
+    assertThrows<RuntimeException> {
+      Feature("abc=123")
+    }
+    assertThrows<RuntimeException> {
+      Feature("abc/123")
+    }
+    assertThrows<RuntimeException> {
+      Feature("abc<123")
+    }
+    assertThrows<RuntimeException> {
+      Feature("abc?123")
+    }
+    assertThrows<RuntimeException> {
+      Feature("[abc123]")
+    }
   }
 
   enum class Dinosaur {

@@ -49,22 +49,27 @@ class WebTabResourceModule(
     web_proxy_url: String,
     url_path_prefix: String = "/_tab/$slug/",
     resourcePath: String = "classpath:/web/_tab/$slug/"
-  ) : this(environment == Environment.DEVELOPMENT, slug, web_proxy_url, url_path_prefix,
-      resourcePath)
+  ) : this(
+    environment == Environment.DEVELOPMENT, slug, web_proxy_url, url_path_prefix,
+    resourcePath
+  )
 
   override fun configure() {
     // Environment Dependent WebProxyAction or StaticResourceAction bindings
     multibind<StaticResourceEntry>()
-        .toInstance(
-            StaticResourceEntry(url_path_prefix = url_path_prefix, resourcePath = resourcePath))
+      .toInstance(
+        StaticResourceEntry(url_path_prefix = url_path_prefix, resourcePath = resourcePath)
+      )
 
     if (isDevelopment) {
       install(WebActionModule.createWithPrefix<WebProxyAction>(url_path_prefix = url_path_prefix))
       multibind<WebProxyEntry>().toInstance(
-          WebProxyEntry(url_path_prefix = url_path_prefix, web_proxy_url = web_proxy_url))
+        WebProxyEntry(url_path_prefix = url_path_prefix, web_proxy_url = web_proxy_url)
+      )
     } else {
       install(
-          WebActionModule.createWithPrefix<StaticResourceAction>(url_path_prefix = url_path_prefix))
+        WebActionModule.createWithPrefix<StaticResourceAction>(url_path_prefix = url_path_prefix)
+      )
     }
   }
 }

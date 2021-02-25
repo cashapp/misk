@@ -25,6 +25,7 @@ class MultiBinderTest {
     assertThat(colorSet).hasSize(2)
     assertThat(intList).hasSize(1)
     assertThat(intSet).hasSize(1)
+
     assertThat(unqualifiedColorList).hasSize(1)
     assertThat(unqualifiedColorSet).hasSize(1)
   }
@@ -32,13 +33,18 @@ class MultiBinderTest {
 
 class MultiBindingsModule : KAbstractModule() {
   override fun configure() {
+    // One annotated Int.
     newMultibinder<Int>(TestAnnotation::class).addBinding().toInstance(1)
 
+    // Two annotated colors.
     newMultibinder<Color>(TestAnnotation::class).addBinding().toInstance(
-        Blue())
+      Blue()
+    )
     newMultibinder<Color>(TestAnnotation::class).addBinding().toInstance(
-        Red())
+      Red()
+    )
 
+    // One unannotated color.
     newMultibinder<Color>().addBinding().toInstance(Blue())
   }
 }

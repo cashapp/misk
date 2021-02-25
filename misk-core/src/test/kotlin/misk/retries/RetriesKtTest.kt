@@ -8,7 +8,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
-internal class DummyException: Exception("Testing exception")
+internal class DummyException : Exception("Testing exception")
 
 @MiskTest
 internal class RetriesTest {
@@ -22,14 +22,15 @@ internal class RetriesTest {
 
     assertThrows<Exception> {
       runBlocking {
-        retryWithHooks(policy,
-            beforeRetryHook = {
-              reads++
-            },
-            op = {
-              writes++
-              throw DummyException()
-            }
+        retryWithHooks(
+          policy,
+          beforeRetryHook = {
+            reads++
+          },
+          op = {
+            writes++
+            throw DummyException()
+          }
         )
       }
     }
@@ -47,14 +48,15 @@ internal class RetriesTest {
 
     assertThrows<Exception> {
       runBlocking {
-        retryWithHooks(policy,
-            beforeRetryHook = {
-              reads++
-            },
-            op = {
-              writes++
-              throw DummyException()
-            }
+        retryWithHooks(
+          policy,
+          beforeRetryHook = {
+            reads++
+          },
+          op = {
+            writes++
+            throw DummyException()
+          }
         )
       }
     }

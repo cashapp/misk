@@ -27,12 +27,13 @@ internal class WireMessageAdapterTest {
     val warehouseAdapter = moshi.adapter(Warehouse::class.java)
 
     val warehouse = Warehouse.Builder()
-        .warehouse_id(1014L)
-        .warehouse_token("AAAA")
-        .build()
+      .warehouse_id(1014L)
+      .warehouse_token("AAAA")
+      .build()
 
     val json = warehouseAdapter.indent(" ").toJson(warehouse)
-    assertThat(json).isEqualToAsJson("""
+    assertThat(json).isEqualToAsJson(
+      """
         |{
         | "warehouse_id": 1014,
         | "warehouse_token": "AAAA",
@@ -40,7 +41,8 @@ internal class WireMessageAdapterTest {
         | "dropoff_points": {},
         | "robots": {}
         |}
-        |""".trimMargin())
+        |""".trimMargin()
+    )
 
     assertThat(warehouseAdapter.fromJson(json)).isEqualTo(warehouse)
   }
@@ -50,24 +52,29 @@ internal class WireMessageAdapterTest {
     val shipmentAdapter = moshi.adapter(Shipment::class.java)
 
     val shipment = Shipment.Builder()
-        .shipment_id(100075)
-        .shipment_token("P_AAAAA")
-        .status(Shipment.State.DELIVERING)
-        .source(Warehouse.Builder()
-            .warehouse_id(9999L)
-            .warehouse_token("C_RANDY")
-            .build())
-        .destination(Warehouse.Builder()
-            .warehouse_id(7777L)
-            .warehouse_token("C_CATHY")
-            .build())
-        .deleted(true)
-        .load_ratio(0.75)
-        .notes(listOf("Note A", "Note B", "Note C"))
-        .build()
+      .shipment_id(100075)
+      .shipment_token("P_AAAAA")
+      .status(Shipment.State.DELIVERING)
+      .source(
+        Warehouse.Builder()
+          .warehouse_id(9999L)
+          .warehouse_token("C_RANDY")
+          .build()
+      )
+      .destination(
+        Warehouse.Builder()
+          .warehouse_id(7777L)
+          .warehouse_token("C_CATHY")
+          .build()
+      )
+      .deleted(true)
+      .load_ratio(0.75)
+      .notes(listOf("Note A", "Note B", "Note C"))
+      .build()
 
     val json = shipmentAdapter.indent(" ").toJson(shipment)
-    assertThat(json).isEqualToAsJson("""
+    assertThat(json).isEqualToAsJson(
+      """
         |{
         | "shipment_id": 100075,
         | "shipment_token": "P_AAAAA",
@@ -94,7 +101,8 @@ internal class WireMessageAdapterTest {
         | "Note C"
         | ]
         |}
-        |""".trimMargin())
+        |""".trimMargin()
+    )
     assertThat(shipmentAdapter.fromJson(json)).isEqualTo(shipment)
   }
 
@@ -102,18 +110,22 @@ internal class WireMessageAdapterTest {
   fun nestedRepeatingMessages() {
     val warehouseAdapter = moshi.adapter(Warehouse::class.java)
     val warehouse = Warehouse.Builder()
-        .alternates(listOf(
-            Warehouse.Builder()
-                .warehouse_id(755L)
-                .warehouse_token("W_AXAA")
-                .build(),
-            Warehouse.Builder()
-                .warehouse_id(500L)
-                .warehouse_token("W_THTHT")
-                .build()))
-        .build()
+      .alternates(
+        listOf(
+          Warehouse.Builder()
+            .warehouse_id(755L)
+            .warehouse_token("W_AXAA")
+            .build(),
+          Warehouse.Builder()
+            .warehouse_id(500L)
+            .warehouse_token("W_THTHT")
+            .build()
+        )
+      )
+      .build()
     val json = warehouseAdapter.indent(" ").toJson(warehouse)
-    assertThat(json).isEqualToAsJson("""
+    assertThat(json).isEqualToAsJson(
+      """
         |{
         | "alternates": [
         |  {
@@ -134,27 +146,30 @@ internal class WireMessageAdapterTest {
         | "dropoff_points": {},
         | "robots": {}
         |}
-        |""".trimMargin())
+        |""".trimMargin()
+    )
     assertThat(warehouseAdapter.fromJson(json)).isEqualTo(warehouse)
   }
 
   @Test
   fun missingListFieldsMapToEmptyLists() {
     val shipmentAdapter = moshi.adapter(Shipment::class.java)
-    val parsed = shipmentAdapter.fromJson("""
+    val parsed = shipmentAdapter.fromJson(
+      """
         |{
         | "shipment_id": 100075,
         | "shipment_token": "P_AAAAA",
         | "load_ratio": 0.75,
         | "deleted": true
-        |}""".trimMargin())!!
+        |}""".trimMargin()
+    )!!
 
     val expected = Shipment.Builder()
-        .shipment_id(100075)
-        .shipment_token("P_AAAAA")
-        .deleted(true)
-        .load_ratio(0.75)
-        .build()
+      .shipment_id(100075)
+      .shipment_token("P_AAAAA")
+      .deleted(true)
+      .load_ratio(0.75)
+      .build()
 
     assertThat(parsed).isEqualTo(expected)
     assertThat(parsed.notes).isNotNull
@@ -164,30 +179,35 @@ internal class WireMessageAdapterTest {
   fun emptyListFieldsSerializeToEmptyLists() {
     val shipmentAdapter = moshi.adapter(Shipment::class.java)
     val shipment = Shipment.Builder()
-        .notes(listOf())
-        .build()
+      .notes(listOf())
+      .build()
     val json = shipmentAdapter.indent(" ").toJson(shipment)
-    assertThat(json).isEqualToAsJson("""
+    assertThat(json).isEqualToAsJson(
+      """
         |{
         | "notes": []
         |}
-        |""".trimMargin())
+        |""".trimMargin()
+    )
   }
 
   @Test
   fun maps() {
     val warehouseAdapter = moshi.adapter(Warehouse::class.java)
     val warehouse = Warehouse.Builder()
-        .warehouse_id(1976)
-        .warehouse_token("W_ACDFD")
-        .dropoff_points(mapOf(
-            "station-1" to "left of north door A",
-            "station-2" to "right of office",
-            "station-3" to "left of center"
-        ))
-        .build()
+      .warehouse_id(1976)
+      .warehouse_token("W_ACDFD")
+      .dropoff_points(
+        mapOf(
+          "station-1" to "left of north door A",
+          "station-2" to "right of office",
+          "station-3" to "left of center"
+        )
+      )
+      .build()
     val json = warehouseAdapter.indent(" ").toJson(warehouse)
-    assertThat(json).isEqualToAsJson("""
+    assertThat(json).isEqualToAsJson(
+      """
         |{
         | "warehouse_id": 1976,
         | "warehouse_token": "W_ACDFD",
@@ -198,7 +218,8 @@ internal class WireMessageAdapterTest {
         | "station-3": "left of center"
         | },
         | "robots": {}
-        |}""".trimMargin())
+        |}""".trimMargin()
+    )
     assertThat(warehouseAdapter.fromJson(json)).isEqualTo(warehouse)
   }
 
@@ -206,20 +227,24 @@ internal class WireMessageAdapterTest {
   fun mapsOfMessages() {
     val warehouseAdapter = moshi.adapter(Warehouse::class.java)
     val warehouse = Warehouse.Builder()
-        .warehouse_id(1976)
-        .warehouse_token("W_ACDFD")
-        .robots(mapOf(
-            34 to Robot.Builder()
-                .robot_id(34)
-                .robot_token("R_93498")
-                .build(),
-            56 to Robot.Builder()
-                .robot_id(56)
-                .robot_token("R_DFGDD")
-                .build()))
-        .build()
+      .warehouse_id(1976)
+      .warehouse_token("W_ACDFD")
+      .robots(
+        mapOf(
+          34 to Robot.Builder()
+            .robot_id(34)
+            .robot_token("R_93498")
+            .build(),
+          56 to Robot.Builder()
+            .robot_id(56)
+            .robot_token("R_DFGDD")
+            .build()
+        )
+      )
+      .build()
     val json = warehouseAdapter.indent(" ").toJson(warehouse)
-    assertThat(json).isEqualToAsJson("""
+    assertThat(json).isEqualToAsJson(
+      """
         |{
         | "warehouse_id": 1976,
         | "warehouse_token": "W_ACDFD",
@@ -236,15 +261,18 @@ internal class WireMessageAdapterTest {
         |  }
         | }
         |}
-        |""".trimMargin())
+        |""".trimMargin()
+    )
     assertThat(warehouseAdapter.fromJson(json)).isEqualTo(warehouse)
   }
 
   @Test
   fun detectsAndFailsOnMultipleOneOfs() {
     val shipmentAdapter = moshi.adapter(Shipment::class.java)
-    assertThat(assertFailsWith<IllegalArgumentException> {
-      shipmentAdapter.fromJson("""
+    assertThat(
+      assertFailsWith<IllegalArgumentException> {
+        shipmentAdapter.fromJson(
+          """
         |{
         | "shipment_id": 100075,
         | "shipment_token": "P_AAAAA",
@@ -253,33 +281,41 @@ internal class WireMessageAdapterTest {
         | "account_token": "AC_5765",
         | "card_token": "CC_34531"
         |}
-        |""".trimMargin())
-    }).hasMessage("at most one of account_token, card_token, transfer_id may be non-null")
+        |""".trimMargin()
+        )
+      }
+    ).hasMessage("at most one of account_token, card_token, transfer_id may be non-null")
   }
 
   @Test
   fun cyclicalTypes() {
     val warehouseAdapter = moshi.adapter(Warehouse::class.java)
     val warehouse = Warehouse.Builder()
-        .warehouse_token("CDCDC")
-        .warehouse_id(755L)
-        .central_repo(Warehouse.Builder()
-            .warehouse_id(1L)
-            .warehouse_token("AAAAA")
-            .build())
-        .alternates(listOf(
-            Warehouse.Builder()
-                .warehouse_id(756)
-                .warehouse_token("CDCDB")
-                .build(),
-            Warehouse.Builder()
-                .warehouse_id(757)
-                .warehouse_token("CDCDA")
-                .build()))
-        .build()
+      .warehouse_token("CDCDC")
+      .warehouse_id(755L)
+      .central_repo(
+        Warehouse.Builder()
+          .warehouse_id(1L)
+          .warehouse_token("AAAAA")
+          .build()
+      )
+      .alternates(
+        listOf(
+          Warehouse.Builder()
+            .warehouse_id(756)
+            .warehouse_token("CDCDB")
+            .build(),
+          Warehouse.Builder()
+            .warehouse_id(757)
+            .warehouse_token("CDCDA")
+            .build()
+        )
+      )
+      .build()
 
     val json = warehouseAdapter.indent(" ").toJson(warehouse)
-    assertThat(json).isEqualToAsJson("""
+    assertThat(json).isEqualToAsJson(
+      """
         |{
         | "warehouse_id": 755,
         | "warehouse_token": "CDCDC",
@@ -309,19 +345,22 @@ internal class WireMessageAdapterTest {
         | "dropoff_points": {},
         | "robots": {}
         |}
-        |""".trimMargin())
+        |""".trimMargin()
+    )
   }
 
   @Test fun explicitNull() {
     val warehouseAdapter = moshi.adapter(Warehouse::class.java)
 
     val expected = Warehouse.Builder()
-        .alternates(listOf(
-            Warehouse.Builder()
-                .warehouse_id(1014L)
-                .build()
-        ))
-        .build()
+      .alternates(
+        listOf(
+          Warehouse.Builder()
+            .warehouse_id(1014L)
+            .build()
+        )
+      )
+      .build()
 
     val json = """
         |{
@@ -342,18 +381,20 @@ internal class WireMessageAdapterTest {
     val shipmentAdapter = moshi.adapter(Shipment::class.java)
 
     val shipment = Shipment.Builder()
-        .shipment_id(100075)
-        .shipment_token("P_AAAAA")
-        .source_signature("98 34v59823wh;tiejs".encodeUtf8())
-        .build()
+      .shipment_id(100075)
+      .shipment_token("P_AAAAA")
+      .source_signature("98 34v59823wh;tiejs".encodeUtf8())
+      .build()
     val jsonText = shipmentAdapter.indent(" ").toJson(shipment)
-    assertThat(jsonText).isEqualToAsJson("""
+    assertThat(jsonText).isEqualToAsJson(
+      """
         |{
         | "shipment_id": 100075,
         | "shipment_token": "P_AAAAA",
         | "source_signature": "OTggMzR2NTk4MjN3aDt0aWVqcw==",
         | "notes": []
         |}
-        |""".trimMargin())
+        |""".trimMargin()
+    )
   }
 }

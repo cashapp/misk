@@ -1,6 +1,7 @@
 package misk.grpc
 
 import com.google.inject.util.Modules
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.runBlocking
 import misk.MiskTestingServiceModule
 import misk.grpc.miskclient.MiskGrpcClientModule
@@ -20,9 +21,10 @@ import javax.inject.Provider
 class MiskClientProtocServerTest {
   @MiskTestModule
   val module = Modules.combine(
-      MiskGrpcClientModule(),
-      RouteGuideProtocServiceModule(),
-      MiskTestingServiceModule())
+    MiskGrpcClientModule(),
+    RouteGuideProtocServiceModule(),
+    MiskTestingServiceModule()
+  )
 
   @Inject lateinit var routeGuideProvider: Provider<RouteGuideClient>
 
@@ -32,10 +34,12 @@ class MiskClientProtocServerTest {
       val routeGuide = routeGuideProvider.get()
 
       val feature = routeGuide.GetFeature().execute(Point(latitude = 43, longitude = -80))
-      assertThat(feature).isEqualTo(Feature(
+      assertThat(feature).isEqualTo(
+        Feature(
           name = "pine tree",
           location = Point(latitude = 43, longitude = -80)
-      ))
+        )
+      )
     }
   }
 
@@ -44,7 +48,7 @@ class MiskClientProtocServerTest {
     runBlocking {
       val routeGuide = routeGuideProvider.get()
 
-      val (sendChannel, receiveChannel) = routeGuide.RouteChat().execute()
+      val (sendChannel, receiveChannel) = routeGuide.RouteChat().executeIn(GlobalScope)
       sendChannel.send(RouteNote(message = "Taco cat"))
       assertThat(receiveChannel.receive().message).isEqualTo("tac ocaT")
       sendChannel.send(RouteNote(message = "A nut for a jar of tuna"))

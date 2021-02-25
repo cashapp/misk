@@ -7,7 +7,10 @@ import javax.persistence.Embeddable
 // experiment: this is also available for the root entity where the rootId and id is the
 // same, let's see how that plays out
 @Embeddable
-data class Gid<R : DbRoot<R>, T : DbSharded<R, T>>(val rootId: Id<R>, val id: Id<T>) : Serializable {
+data class Gid<R : DbRoot<R>, T : DbSharded<R, T>>(
+  val rootId: Id<R>,
+  val id: Id<T>
+) : Serializable {
   override fun toString() = rootId.toString() + "/" + id.toString()
 
   fun shardKey() = rootId.shardKey()

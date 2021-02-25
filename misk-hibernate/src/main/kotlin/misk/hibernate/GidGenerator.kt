@@ -95,10 +95,11 @@ public class GidGenerator : AbstractPostInsertGenerator(), Configurable {
         }
       } catch (sqle: SQLException) {
         throw session.factory.serviceRegistry.getService(
-            JdbcServices::class.java).sqlExceptionHelper.convert(
-            sqle,
-            "could not insert: " + MessageHelper.infoString(persister),
-            insertSQL
+          JdbcServices::class.java
+        ).sqlExceptionHelper.convert(
+          sqle,
+          "could not insert: " + MessageHelper.infoString(persister),
+          insertSQL
         )
       }
     }
@@ -118,7 +119,7 @@ public class GidGenerator : AbstractPostInsertGenerator(), Configurable {
       session: SharedSessionContractImplementor
     ): PreparedStatement {
       return session.jdbcCoordinator.statementPreparer
-          .prepareStatement(insertSQL, PreparedStatement.RETURN_GENERATED_KEYS)
+        .prepareStatement(insertSQL, PreparedStatement.RETURN_GENERATED_KEYS)
     }
 
     @Throws(SQLException::class)

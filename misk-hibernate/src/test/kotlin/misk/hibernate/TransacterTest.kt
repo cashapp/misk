@@ -36,34 +36,36 @@ abstract class TransacterTest {
     // Query that data.
     transacter.transaction { session ->
       val ianMalcolm = queryFactory.newQuery<CharacterQuery>()
-          .allowFullScatter().allowTableScan()
-          .name("Ian Malcolm")
-          .uniqueResult(session)!!
+        .allowFullScatter().allowTableScan()
+        .name("Ian Malcolm")
+        .uniqueResult(session)!!
       assertThat(ianMalcolm.actor?.name).isEqualTo("Jeff Goldblum")
       assertThat(ianMalcolm.movie.name).isEqualTo("Jurassic Park")
 
       val lauraDernMovies = queryFactory.newQuery<CharacterQuery>()
-          .allowFullScatter().allowTableScan()
-          .actorName("Laura Dern")
-          .listAsMovieNameAndReleaseDate(session)
+        .allowFullScatter().allowTableScan()
+        .actorName("Laura Dern")
+        .listAsMovieNameAndReleaseDate(session)
       assertThat(lauraDernMovies).containsExactlyInAnyOrder(
-          NameAndReleaseDate("Star Wars", LocalDate.of(1977, 5, 25)),
-          NameAndReleaseDate("Jurassic Park", LocalDate.of(1993, 6, 9)))
+        NameAndReleaseDate("Star Wars", LocalDate.of(1977, 5, 25)),
+        NameAndReleaseDate("Jurassic Park", LocalDate.of(1993, 6, 9))
+      )
 
       val actorsInOldMovies = queryFactory.newQuery<CharacterQuery>()
-          .allowFullScatter().allowTableScan()
-          .movieReleaseDateBefore(LocalDate.of(1980, 1, 1))
-          .listAsActorAndReleaseDate(session)
+        .allowFullScatter().allowTableScan()
+        .movieReleaseDateBefore(LocalDate.of(1980, 1, 1))
+        .listAsActorAndReleaseDate(session)
       assertThat(actorsInOldMovies).containsExactlyInAnyOrder(
-          ActorAndReleaseDate("Laura Dern", LocalDate.of(1977, 5, 25)),
-          ActorAndReleaseDate("Carrie Fisher", LocalDate.of(1977, 5, 25)))
+        ActorAndReleaseDate("Laura Dern", LocalDate.of(1977, 5, 25)),
+        ActorAndReleaseDate("Carrie Fisher", LocalDate.of(1977, 5, 25))
+      )
     }
 
     // Query with replica reads.
     transacter.replicaRead { session ->
       val query = queryFactory.newQuery<CharacterQuery>()
-          .allowTableScan()
-          .name("Ian Malcolm")
+        .allowTableScan()
+        .name("Ian Malcolm")
       val ianMalcolm = query.uniqueResult(session)!!
       assertThat(ianMalcolm.actor?.name).isEqualTo("Jeff Goldblum")
       assertThat(ianMalcolm.movie.name).isEqualTo("Jurassic Park")
@@ -77,8 +79,8 @@ abstract class TransacterTest {
 
     transacter.failSafeRead { session ->
       val query = queryFactory.newQuery<CharacterQuery>()
-          .allowTableScan()
-          .name("Ian Malcolm")
+        .allowTableScan()
+        .name("Ian Malcolm")
       val ianMalcolm = query.uniqueResult(session)!!
       assertThat(ianMalcolm.actor?.name).isEqualTo("Jeff Goldblum")
       assertThat(ianMalcolm.movie.name).isEqualTo("Jurassic Park")
@@ -93,16 +95,16 @@ abstract class TransacterTest {
     // Delete some data.
     transacter.transaction { session ->
       val ianMalcolm = queryFactory.newQuery<CharacterQuery>()
-          .allowFullScatter().allowTableScan()
-          .name("Ian Malcolm")
-          .uniqueResult(session)!!
+        .allowFullScatter().allowTableScan()
+        .name("Ian Malcolm")
+        .uniqueResult(session)!!
 
       session.delete(ianMalcolm)
 
       val afterDelete = queryFactory.newQuery<CharacterQuery>()
-          .allowFullScatter().allowTableScan()
-          .name("Ian Malcolm")
-          .uniqueResult(session)
+        .allowFullScatter().allowTableScan()
+        .name("Ian Malcolm")
+        .uniqueResult(session)
       assertThat(afterDelete).isNull()
     }
   }
@@ -153,14 +155,14 @@ abstract class TransacterTest {
 
     transacter.replicaRead { session ->
       queryFactory.newQuery<CharacterQuery>()
-          .allowTableScan()
-          .name("Ian Malcolm").uniqueResult(session)!!
+        .allowTableScan()
+        .name("Ian Malcolm").uniqueResult(session)!!
 
       assertThrows<IllegalStateException> {
         transacter.replicaRead { session ->
           queryFactory.newQuery<CharacterQuery>()
-              .allowTableScan()
-              .name("Ian Malcolm").uniqueResult(session)!!
+            .allowTableScan()
+            .name("Ian Malcolm").uniqueResult(session)!!
         }
       }
     }
@@ -176,8 +178,8 @@ abstract class TransacterTest {
       val root = cr.from(DbCharacter::class.java)
       val idProperty = root.get<Id<DbCharacter>>("id")
       val characters = session.hibernateSession.createQuery(
-          cr.where(cb.greaterThan(idProperty, Id(0)))
-              .orderBy(cb.asc(idProperty))
+        cr.where(cb.greaterThan(idProperty, Id(0)))
+          .orderBy(cb.asc(idProperty))
       ).resultList
       assertThat(characters).hasSize(5)
     }
@@ -191,7 +193,8 @@ abstract class TransacterTest {
     }
 
     val jp = transacter.save(
-        DbMovie("Jurassic Park", LocalDate.of(1993, 6, 9)))
+      DbMovie("Jurassic Park", LocalDate.of(1993, 6, 9))
+    )
     val sw = transacter.createInSeparateShard(jp) {
       DbMovie("Star Wars", LocalDate.of(1977, 5, 25))
     }
@@ -200,26 +203,26 @@ abstract class TransacterTest {
     transacter.replicaRead { session ->
       session.target(jp.shard(session)) {
         assertThat(
-            queryFactory.newQuery<MovieQuery>().allowTableScan()
-                .name("Jurassic Park").uniqueResult(session)
-        ).isNotNull()
+          queryFactory.newQuery<MovieQuery>().allowTableScan()
+            .name("Jurassic Park").uniqueResult(session)
+        ).isNotNull
 
         assertThat(
-            queryFactory.newQuery<MovieQuery>().allowTableScan()
-                .name("Star Wars").uniqueResult(session)
+          queryFactory.newQuery<MovieQuery>().allowTableScan()
+            .name("Star Wars").uniqueResult(session)
         ).isNull()
       }
 
       session.target(sw.shard(session)) {
         assertThat(
-            queryFactory.newQuery<MovieQuery>().allowTableScan()
-                .name("Jurassic Park").uniqueResult(session)
+          queryFactory.newQuery<MovieQuery>().allowTableScan()
+            .name("Jurassic Park").uniqueResult(session)
         ).isNull()
 
         assertThat(
-            queryFactory.newQuery<MovieQuery>().allowTableScan()
-                .name("Star Wars").uniqueResult(session)
-        ).isNotNull()
+          queryFactory.newQuery<MovieQuery>().allowTableScan()
+            .name("Star Wars").uniqueResult(session)
+        ).isNotNull
       }
     }
 
@@ -227,26 +230,26 @@ abstract class TransacterTest {
     transacter.failSafeRead { session ->
       session.target(jp.shard(session)) {
         assertThat(
-            queryFactory.newQuery<MovieQuery>().allowTableScan()
-                .name("Jurassic Park").uniqueResult(session)
-        ).isNotNull()
+          queryFactory.newQuery<MovieQuery>().allowTableScan()
+            .name("Jurassic Park").uniqueResult(session)
+        ).isNotNull
 
         assertThat(
-            queryFactory.newQuery<MovieQuery>().allowTableScan()
-                .name("Star Wars").uniqueResult(session)
+          queryFactory.newQuery<MovieQuery>().allowTableScan()
+            .name("Star Wars").uniqueResult(session)
         ).isNull()
       }
 
       session.target(sw.shard(session)) {
         assertThat(
-            queryFactory.newQuery<MovieQuery>().allowTableScan()
-                .name("Jurassic Park").uniqueResult(session)
+          queryFactory.newQuery<MovieQuery>().allowTableScan()
+            .name("Jurassic Park").uniqueResult(session)
         ).isNull()
 
         assertThat(
-            queryFactory.newQuery<MovieQuery>().allowTableScan()
-                .name("Star Wars").uniqueResult(session)
-        ).isNotNull()
+          queryFactory.newQuery<MovieQuery>().allowTableScan()
+            .name("Star Wars").uniqueResult(session)
+        ).isNotNull
       }
     }
 
@@ -254,26 +257,26 @@ abstract class TransacterTest {
     transacter.transaction { session ->
       session.target(jp.shard(session)) {
         assertThat(
-            queryFactory.newQuery<MovieQuery>().allowTableScan()
-                .name("Jurassic Park").uniqueResult(session)
-        ).isNotNull()
+          queryFactory.newQuery<MovieQuery>().allowTableScan()
+            .name("Jurassic Park").uniqueResult(session)
+        ).isNotNull
 
         assertThat(
-            queryFactory.newQuery<MovieQuery>().allowTableScan()
-                .name("Star Wars").uniqueResult(session)
+          queryFactory.newQuery<MovieQuery>().allowTableScan()
+            .name("Star Wars").uniqueResult(session)
         ).isNull()
       }
 
       session.target(sw.shard(session)) {
         assertThat(
-            queryFactory.newQuery<MovieQuery>().allowTableScan()
-                .name("Jurassic Park").uniqueResult(session)
+          queryFactory.newQuery<MovieQuery>().allowTableScan()
+            .name("Jurassic Park").uniqueResult(session)
         ).isNull()
 
         assertThat(
-            queryFactory.newQuery<MovieQuery>().allowTableScan()
-                .name("Star Wars").uniqueResult(session)
-        ).isNotNull()
+          queryFactory.newQuery<MovieQuery>().allowTableScan()
+            .name("Star Wars").uniqueResult(session)
+        ).isNotNull
       }
     }
   }
@@ -294,14 +297,14 @@ abstract class TransacterTest {
       }
 
       queryFactory.newQuery<CharacterQuery>()
-          .allowTableScan()
-          .name("Ian Malcolm").uniqueResult(session)!!
+        .allowTableScan()
+        .name("Ian Malcolm").uniqueResult(session)!!
     }
 
     transacter.replicaRead { session ->
       queryFactory.newQuery<CharacterQuery>()
-          .allowTableScan()
-          .name("Ian Malcolm").uniqueResult(session)!!
+        .allowTableScan()
+        .name("Ian Malcolm").uniqueResult(session)!!
     }
 
     transacter.transaction { session ->
@@ -315,15 +318,17 @@ abstract class TransacterTest {
       }
 
       val character = queryFactory.newQuery<CharacterQuery>()
-          .allowTableScan()
-          .name("Ian Malcolm").uniqueResult(session)!!
+        .allowTableScan()
+        .name("Ian Malcolm").uniqueResult(session)!!
       character.name = "Ian Malcolm 2"
     }
 
     transacter.replicaRead { session ->
-      assertThat(queryFactory.newQuery<CharacterQuery>()
+      assertThat(
+        queryFactory.newQuery<CharacterQuery>()
           .allowTableScan()
-          .name("Ian Malcolm 2").uniqueResult(session)).isNotNull()
+          .name("Ian Malcolm 2").uniqueResult(session)
+      ).isNotNull
     }
   }
 
@@ -331,7 +336,7 @@ abstract class TransacterTest {
   fun loadOrNullReturnsEntity() {
     transacter.transaction { session ->
       val ld = session.save(DbActor("Laura Dern", LocalDate.of(1967, 2, 10)))
-      assertThat(session.loadOrNull(ld)).isNotNull()
+      assertThat(session.loadOrNull(ld)).isNotNull
     }
   }
 
@@ -347,14 +352,18 @@ abstract class TransacterTest {
     assertFailsWith<UnauthorizedException> {
       transacter.transaction { session ->
         session.save(DbMovie("Star Wars", LocalDate.of(1977, 5, 25)))
-        assertThat(queryFactory.newQuery<MovieQuery>()
-            .allowFullScatter().allowTableScan().list(session)).isNotEmpty()
+        assertThat(
+          queryFactory.newQuery<MovieQuery>()
+            .allowFullScatter().allowTableScan().list(session)
+        ).isNotEmpty
         throw UnauthorizedException("boom!")
       }
     }
     transacter.transaction { session ->
-      assertThat(queryFactory.newQuery<MovieQuery>().allowFullScatter().allowTableScan()
-          .list(session)).isEmpty()
+      assertThat(
+        queryFactory.newQuery<MovieQuery>().allowFullScatter().allowTableScan()
+          .list(session)
+      ).isEmpty()
     }
   }
 
@@ -379,31 +388,31 @@ abstract class TransacterTest {
 
   @Test
   fun inTransaction() {
-    assertThat(transacter.inTransaction).isFalse()
+    assertThat(transacter.inTransaction).isFalse
 
     transacter.transaction {
-      assertThat(transacter.inTransaction).isTrue()
+      assertThat(transacter.inTransaction).isTrue
     }
 
-    assertThat(transacter.inTransaction).isFalse()
+    assertThat(transacter.inTransaction).isFalse
   }
 
   @Test
   fun noFailSafeReadInTransaction() {
-    assertThat(transacter.inTransaction).isFalse()
+    assertThat(transacter.inTransaction).isFalse
 
     transacter.transaction {
-      assertThat(transacter.inTransaction).isTrue()
+      assertThat(transacter.inTransaction).isTrue
 
       assertFailsWith<IllegalStateException> {
         transacter.failSafeRead {
           queryFactory.newQuery<MovieQuery>().allowTableScan()
-              .name("Jurassic Park").uniqueResult(it)
+            .name("Jurassic Park").uniqueResult(it)
         }
       }
     }
 
-    assertThat(transacter.inTransaction).isFalse()
+    assertThat(transacter.inTransaction).isFalse
   }
 
   @Test
@@ -444,15 +453,19 @@ abstract class TransacterTest {
     val callCount = AtomicInteger()
     transacter.transaction { session ->
       session.save(DbMovie("Star Wars", LocalDate.of(1977, 5, 25)))
-      assertThat(queryFactory.newQuery<MovieQuery>().allowFullScatter().allowTableScan()
-          .list(session)).isNotEmpty()
+      assertThat(
+        queryFactory.newQuery<MovieQuery>().allowFullScatter().allowTableScan()
+          .list(session)
+      ).isNotEmpty
 
       if (callCount.getAndIncrement() == 0) throw RetryTransactionException()
     }
     assertThat(callCount.get()).isEqualTo(2)
     transacter.transaction { session ->
-      assertThat(queryFactory.newQuery<MovieQuery>().allowFullScatter().allowTableScan()
-          .list(session)).hasSize(1)
+      assertThat(
+        queryFactory.newQuery<MovieQuery>().allowFullScatter().allowTableScan()
+          .list(session)
+      ).hasSize(1)
     }
   }
 
@@ -488,8 +501,10 @@ abstract class TransacterTest {
       }
     }
     transacter.transaction { session ->
-      assertThat(queryFactory.newQuery<MovieQuery>().allowFullScatter().allowTableScan()
-          .list(session)).isEmpty()
+      assertThat(
+        queryFactory.newQuery<MovieQuery>().allowFullScatter().allowTableScan()
+          .list(session)
+      ).isEmpty()
     }
   }
 
@@ -525,7 +540,7 @@ abstract class TransacterTest {
 
     transacter.transaction { session ->
       val movie: DbMovie? = queryFactory.newQuery<MovieQuery>().id(id).uniqueResult(session)
-      assertThat(movie).isNotNull()
+      assertThat(movie).isNotNull
     }
   }
 
@@ -591,9 +606,11 @@ abstract class TransacterTest {
     assertThat(preCommitHooksTriggered).containsExactly("first")
 
     // ...and the transaction should have been rolled back
-    assertThat(transacter.transaction {
-      queryFactory.newQuery<MovieQuery>().id(swid).list(it)
-    }).isEmpty()
+    assertThat(
+      transacter.transaction {
+        queryFactory.newQuery<MovieQuery>().id(swid).list(it)
+      }
+    ).isEmpty()
   }
 
   @Test
@@ -669,11 +686,11 @@ abstract class TransacterTest {
 
     transacter.transaction { session ->
       session.onSessionClose {
-        assertThat(transacter.inTransaction).isFalse()
+        assertThat(transacter.inTransaction).isFalse
         logs.add("first")
       }
       session.onSessionClose {
-        assertThat(transacter.inTransaction).isFalse()
+        assertThat(transacter.inTransaction).isFalse
         logs.add("second")
       }
     }
@@ -722,12 +739,17 @@ abstract class TransacterTest {
 
     val logs = logCollector.takeMessages(RealTransacter::class)
     assertThat(logs).hasSize(3)
-    assertThat(logs[0]).matches("Movies recoverable transaction exception " +
-        "\\(attempt 1\\), will retry after a PT.*S delay")
-    assertThat(logs[1]).matches("Movies recoverable transaction exception " +
-        "\\(attempt 2, same connection\\), will retry after a PT.*S delay")
+    assertThat(logs[0]).matches(
+      "Movies recoverable transaction exception " +
+        "\\(attempt 1\\), will retry after a PT.*S delay"
+    )
+    assertThat(logs[1]).matches(
+      "Movies recoverable transaction exception " +
+        "\\(attempt 2, same connection\\), will retry after a PT.*S delay"
+    )
     assertThat(logs[2]).matches(
-        "retried Movies transaction succeeded \\(attempt 3, same connection\\)")
+      "retried Movies transaction succeeded \\(attempt 3, same connection\\)"
+    )
   }
 
   @Test
@@ -743,16 +765,16 @@ abstract class TransacterTest {
       transacter.transaction { session ->
         txnEntryLatch.countDown()
         val movie = queryFactory.newQuery(MovieQuery::class)
-            .name("Star Wars")
-            .uniqueResult(session)!!
+          .name("Star Wars")
+          .uniqueResult(session)!!
         movie.release_date = LocalDate.of(movie.release_date!!.year + 1, 5, 25)
         txnExitLatch.countDown()
       }
     }
 
     val futureResults = Executors.newFixedThreadPool(2)
-        .invokeAll(listOf(asyncWrite, asyncWrite))
-        .map { it.get() }
+      .invokeAll(listOf(asyncWrite, asyncWrite))
+      .map { it.get() }
 
     assertThat(futureResults).hasSize(2)
 

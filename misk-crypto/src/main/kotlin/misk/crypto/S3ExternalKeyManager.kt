@@ -76,7 +76,7 @@ class S3ExternalKeyManager @Inject constructor(
   // Injector tests initialize key managers in non-native environments, so we delegate creation
   // until needed.
   private val keys: LinkedHashMap<String, Key> by lazy {
-    val retrievedKeys = linkedMapOf<String,Key>()
+    val retrievedKeys = linkedMapOf<String, Key>()
     allKeyAliases.mapValues { (alias, type) ->
       logger.info { "registering external key: $alias" }
       getRemoteKey(alias, type)
@@ -85,5 +85,4 @@ class S3ExternalKeyManager @Inject constructor(
   }
 
   override fun getKeyByAlias(alias: KeyAlias) = keys[alias]
-
 }

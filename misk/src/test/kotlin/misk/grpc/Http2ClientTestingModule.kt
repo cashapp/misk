@@ -11,6 +11,7 @@ import misk.inject.KAbstractModule
 import misk.security.ssl.SslLoader
 import misk.security.ssl.TrustStoreConfig
 import misk.web.jetty.JettyService
+import java.time.Duration
 import javax.inject.Singleton
 
 /**
@@ -29,20 +30,21 @@ class Http2ClientTestingModule(val jetty: JettyService) : KAbstractModule() {
   @Singleton
   fun provideHttpClientsConfig(): HttpClientsConfig {
     return HttpClientsConfig(
-        endpoints = mapOf(
-            "default" to HttpClientEndpointConfig(
-                url = "http://example.com/",
-                clientConfig = HttpClientConfig(
-                    ssl = HttpClientSSLConfig(
-                        cert_store = null,
-                        trust_store = TrustStoreConfig(
-                            resource = "classpath:/ssl/server_cert.pem",
-                            format = SslLoader.FORMAT_PEM
-                        )
-                    )
-                )
-            )
+      endpoints = mapOf(
+        "default" to HttpClientEndpointConfig(
+          url = "http://example.com/",
+          clientConfig = HttpClientConfig(
+            ssl = HttpClientSSLConfig(
+              cert_store = null,
+              trust_store = TrustStoreConfig(
+                resource = "classpath:/ssl/server_cert.pem",
+                format = SslLoader.FORMAT_PEM
+              )
+            ),
+            callTimeout = Duration.ofMillis(1000)
+          )
         )
+      )
     )
   }
 }

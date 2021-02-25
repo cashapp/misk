@@ -23,34 +23,46 @@ class AuthenticationTest {
 
   @Test fun customServiceAccess_unauthenticated() {
     assertThat(executeRequest(path = "/custom_service_access"))
-        .isEqualTo("unauthenticated")
+      .isEqualTo("unauthenticated")
   }
 
   @Test fun customServiceAccess_unauthorized() {
     assertThat(executeRequest(path = "/custom_service_access", service = "customers"))
-        .isEqualTo("unauthorized")
+      .isEqualTo("unauthorized")
   }
 
   @Test fun customServiceAccess_authorized() {
     val caller = MiskCaller(service = "payments")
     assertThat(executeRequest(path = "/custom_service_access", service = "payments"))
-        .isEqualTo("$caller authorized as custom service")
+      .isEqualTo("$caller authorized as custom service")
   }
 
   @Test fun customCapabilityAccess_unauthenticated() {
     assertThat(executeRequest(path = "/custom_capability_access"))
-        .isEqualTo("unauthenticated")
+      .isEqualTo("unauthenticated")
   }
 
   @Test fun customCapabilityAccess_unauthorized() {
-    assertThat(executeRequest(path = "/custom_capability_access", user = "sandy", capabilities = "guest"))
-        .isEqualTo("unauthorized")
+    assertThat(
+      executeRequest(
+        path = "/custom_capability_access",
+        user = "sandy",
+        capabilities = "guest"
+      )
+    )
+      .isEqualTo("unauthorized")
   }
 
   @Test fun customCapabilityAccess_authorized() {
     val caller = MiskCaller(user = "sandy", capabilities = setOf("admin"))
-    assertThat(executeRequest(path = "/custom_capability_access", user = "sandy", capabilities = "admin"))
-        .isEqualTo("$caller authorized with custom capability")
+    assertThat(
+      executeRequest(
+        path = "/custom_capability_access",
+        user = "sandy",
+        capabilities = "admin"
+      )
+    )
+      .isEqualTo("$caller authorized with custom capability")
   }
 
   /** Executes a request and returns the response body as a string. */
@@ -64,7 +76,7 @@ class AuthenticationTest {
 
     val baseUrl = jetty.httpServerUrl
     val requestBuilder = Request.Builder()
-        .url(baseUrl.resolve(path)!!)
+      .url(baseUrl.resolve(path)!!)
     service?.let {
       requestBuilder.header(FakeCallerAuthenticator.SERVICE_HEADER, service)
     }

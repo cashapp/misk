@@ -8,6 +8,7 @@ import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTable
 class DyCharacter {
   @DynamoDBHashKey(attributeName = "movie_name")
   var movie_name: String = ""
+
   @DynamoDBRangeKey(attributeName = "character_name")
   var character_name: String = ""
 }

@@ -49,10 +49,10 @@ internal class JettyServletUpstreamResponse(
   override fun setTrailer(name: String, value: String) {
     check(sendTrailers)
     trailers = trailers.newBuilder()
-        .set(name, value)
-        .build()
+      .set(name, value)
+      .build()
   }
 
   override fun initWebSocketListener(webSocketListener: WebSocketListener) =
-      error("no web socket listeners for servlets")
+    error("no web socket listeners for servlets")
 }

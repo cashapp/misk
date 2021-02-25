@@ -22,7 +22,7 @@ class FakeDatastoreModule : KAbstractModule() {
   @Provides
   @Singleton
   fun provideDatastore(datastoreHelper: LocalDatastoreHelper): Datastore =
-      datastoreHelper.options.service
+    datastoreHelper.options.service
 
   @Singleton
   class FakeDatastoreService @Inject constructor(

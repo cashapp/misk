@@ -25,18 +25,20 @@ internal abstract class CustomStorageRpcTestCases<T : StorageRpc> {
   fun buildStorage() {
     rpc = newStorageRpc()
     storage = StorageOptions.newBuilder()
-        .setCredentials(NoCredentials.getInstance())
-        .setServiceRpcFactory { _ -> rpc }
-        .build()
-        .service
+      .setCredentials(NoCredentials.getInstance())
+      .setServiceRpcFactory { _ -> rpc }
+      .build()
+      .service
   }
 
   @Test
   fun createEmpty() {
     val blobId = BlobId.of("my_bucket", "my_entry")
-    val result = storage.create(BlobInfo.newBuilder(blobId)
+    val result = storage.create(
+      BlobInfo.newBuilder(blobId)
         .setContentType("text/plain")
-        .build())
+        .build()
+    )
 
     assertThat(result.blobId).isEqualTo(BlobId.of(blobId.bucket, blobId.name, 1))
     assertThat(result.generation).isEqualTo(1)
@@ -49,9 +51,10 @@ internal abstract class CustomStorageRpcTestCases<T : StorageRpc> {
   fun createWithContent() {
     val contents = "This is my text"
     val blobId = BlobId.of("my_bucket", "my_entry")
-    val result = storage.create(BlobInfo.newBuilder(blobId)
-        .setContentType("text/plain")
-        .build(), contents.toByteArray())
+    val result = storage.create(
+      BlobInfo.newBuilder(blobId).setContentType("text/plain").build(),
+      contents.toByteArray()
+    )
 
     assertThat(result.blobId).isEqualTo(BlobId.of(blobId.bucket, blobId.name, 1))
     assertThat(result.generation).isEqualTo(1)
@@ -64,9 +67,11 @@ internal abstract class CustomStorageRpcTestCases<T : StorageRpc> {
   fun createIfNotExists() {
     val contents = "This is my text"
     val blobId = BlobId.of("my_bucket", "my_entry")
-    val result = storage.create(BlobInfo.newBuilder(blobId)
-        .setContentType("text/plain")
-        .build(), contents.toByteArray(), Storage.BlobTargetOption.doesNotExist())
+    val result = storage.create(
+      BlobInfo.newBuilder(blobId).setContentType("text/plain").build(),
+      contents.toByteArray(),
+      Storage.BlobTargetOption.doesNotExist()
+    )
 
     assertThat(result.blobId).isEqualTo(BlobId.of(blobId.bucket, blobId.name, 1))
     assertThat(result.generation).isEqualTo(1)
@@ -76,9 +81,11 @@ internal abstract class CustomStorageRpcTestCases<T : StorageRpc> {
 
     assertFailsWith<StorageException> {
       val contents2 = "This is my text"
-      storage.create(BlobInfo.newBuilder(blobId)
-          .setContentType("text/plain")
-          .build(), contents2.toByteArray(), Storage.BlobTargetOption.doesNotExist())
+      storage.create(
+        BlobInfo.newBuilder(blobId).setContentType("text/plain").build(),
+        contents2.toByteArray(),
+        Storage.BlobTargetOption.doesNotExist()
+      )
     }
   }
 
@@ -86,9 +93,10 @@ internal abstract class CustomStorageRpcTestCases<T : StorageRpc> {
   fun createIfGenerationMatches() {
     val contents = "This is my text"
     val blobId = BlobId.of("my_bucket", "my_entry")
-    val result = storage.create(BlobInfo.newBuilder(blobId)
-        .setContentType("text/plain")
-        .build(), contents.toByteArray())
+    val result = storage.create(
+      BlobInfo.newBuilder(blobId).setContentType("text/plain").build(),
+      contents.toByteArray()
+    )
 
     assertThat(result.blobId).isEqualTo(BlobId.of(blobId.bucket, blobId.name, 1))
     assertThat(result.generation).isEqualTo(1)
@@ -98,9 +106,11 @@ internal abstract class CustomStorageRpcTestCases<T : StorageRpc> {
 
     val contents2 = "This is another text"
     val blobId2 = BlobId.of(blobId.bucket, blobId.name, result.generation)
-    val result2 = storage.create(BlobInfo.newBuilder(blobId2)
-        .setContentType("text/plain")
-        .build(), contents2.toByteArray(), Storage.BlobTargetOption.generationMatch())
+    val result2 = storage.create(
+      BlobInfo.newBuilder(blobId2).setContentType("text/plain").build(),
+      contents2.toByteArray(),
+      Storage.BlobTargetOption.generationMatch()
+    )
 
     assertThat(result2.blobId).isEqualTo(BlobId.of(blobId.bucket, blobId.name, 2))
     assertThat(result2.generation).isEqualTo(2)
@@ -110,9 +120,11 @@ internal abstract class CustomStorageRpcTestCases<T : StorageRpc> {
 
     assertFailsWith<StorageException> {
       val contents3 = "This is the third text"
-      storage.create(BlobInfo.newBuilder(blobId2) // Old generation
-          .setContentType("text/plain")
-          .build(), contents3.toByteArray(), Storage.BlobTargetOption.generationMatch())
+      storage.create(
+        BlobInfo.newBuilder(blobId2).setContentType("text/plain").build(), // Old generation
+        contents3.toByteArray(),
+        Storage.BlobTargetOption.generationMatch()
+      )
     }
   }
 
@@ -120,10 +132,13 @@ internal abstract class CustomStorageRpcTestCases<T : StorageRpc> {
   fun createUpdatesMetagenerationIfMetadataChanged() {
     val contents = "This is my text"
     val blobId = BlobId.of("my_bucket", "my_entry")
-    val result = storage.create(BlobInfo.newBuilder(blobId)
+    val result = storage.create(
+      BlobInfo.newBuilder(blobId)
         .setContentType("text/plain")
         .setMetadata(mapOf("foo" to "bar"))
-        .build(), contents.toByteArray())
+        .build(),
+      contents.toByteArray()
+    )
 
     assertThat(result.generation).isEqualTo(1)
     assertThat(result.metageneration).isEqualTo(1)
@@ -131,10 +146,13 @@ internal abstract class CustomStorageRpcTestCases<T : StorageRpc> {
     assertThat(result.metadata).isEqualTo(mapOf("foo" to "bar"))
 
     val contents2 = "This is another text"
-    val result2 = storage.create(BlobInfo.newBuilder(blobId)
+    val result2 = storage.create(
+      BlobInfo.newBuilder(blobId)
         .setContentType("text/plain")
         .setMetadata(mapOf("foo" to "zed"))
-        .build(), contents2.toByteArray())
+        .build(),
+      contents2.toByteArray()
+    )
 
     assertThat(result2.generation).isEqualTo(2)
     assertThat(result2.metageneration).isEqualTo(2)
@@ -145,9 +163,11 @@ internal abstract class CustomStorageRpcTestCases<T : StorageRpc> {
   @Test
   fun progressiveUpload() {
     val blobId = BlobId.of("my_bucket", "my_entry")
-    val blob = storage.create(BlobInfo.newBuilder(blobId)
+    val blob = storage.create(
+      BlobInfo.newBuilder(blobId)
         .setContentType("text/plain")
-        .build())
+        .build()
+    )
 
     val upload = "This is my text".repeat(1024 * 256)
     blob.writer().use {
@@ -165,9 +185,12 @@ internal abstract class CustomStorageRpcTestCases<T : StorageRpc> {
   fun get() {
     val contents = "This is my text"
     val blobId = BlobId.of("my_bucket", "my_entry")
-    storage.create(BlobInfo.newBuilder(blobId)
+    storage.create(
+      BlobInfo.newBuilder(blobId)
         .setContentType("text/plain")
-        .build(), contents.toByteArray())
+        .build(),
+      contents.toByteArray()
+    )
 
     val blob = storage.get(blobId)
     assertThat(blob).isNotNull()
@@ -183,17 +206,23 @@ internal abstract class CustomStorageRpcTestCases<T : StorageRpc> {
     // Create the blob
     val contents1 = "This is my text"
     val blobId = BlobId.of("my_bucket", "my_entry")
-    storage.create(BlobInfo.newBuilder(blobId)
+    storage.create(
+      BlobInfo.newBuilder(blobId)
         .setContentType("text/plain")
-        .build(), contents1.toByteArray())
+        .build(),
+      contents1.toByteArray()
+    )
 
     val blob1 = storage.get(blobId)
 
     // Update the blob
     val contents2 = "This is another text"
-    storage.create(BlobInfo.newBuilder(BlobId.of(blobId.bucket, blobId.name, 1))
+    storage.create(
+      BlobInfo.newBuilder(BlobId.of(blobId.bucket, blobId.name, 1))
         .setContentType("text/plain")
-        .build(), contents2.toByteArray())
+        .build(),
+      contents2.toByteArray()
+    )
 
     // The prior returned blob should reflect the old state, and should not be accessible
     // if generation matching is requested (since it has the old generation)
@@ -216,7 +245,7 @@ internal abstract class CustomStorageRpcTestCases<T : StorageRpc> {
     assertThat(blob2.size).isEqualTo(contents2.length.toLong())
     assertThat(blob2.exists()).isTrue()
     assertThat(String(blob2.getContent(BlobSourceOption.generationMatch())))
-        .isEqualTo(contents2)
+      .isEqualTo(contents2)
   }
 
   @Test
@@ -228,9 +257,12 @@ internal abstract class CustomStorageRpcTestCases<T : StorageRpc> {
   fun delete() {
     val contents = "This is my text"
     val blobId = BlobId.of("my_bucket", "my_entry")
-    val result = storage.create(BlobInfo.newBuilder(blobId)
+    val result = storage.create(
+      BlobInfo.newBuilder(blobId)
         .setContentType("text/plain")
-        .build(), contents.toByteArray())
+        .build(),
+      contents.toByteArray()
+    )
 
     val deleted = result.delete()
 
@@ -243,15 +275,21 @@ internal abstract class CustomStorageRpcTestCases<T : StorageRpc> {
     // Create the blob
     val contents1 = "This is my text"
     val blobId = BlobId.of("my_bucket", "my_entry")
-    val blob1 = storage.create(BlobInfo.newBuilder(blobId)
+    val blob1 = storage.create(
+      BlobInfo.newBuilder(blobId)
         .setContentType("text/plain")
-        .build(), contents1.toByteArray())
+        .build(),
+      contents1.toByteArray()
+    )
 
     // Update the blob
     val contents2 = "This is another text"
-    val blob2 = storage.create(BlobInfo.newBuilder(blob1.blobId)
+    val blob2 = storage.create(
+      BlobInfo.newBuilder(blob1.blobId)
         .setContentType("text/plain")
-        .build(), contents2.toByteArray())
+        .build(),
+      contents2.toByteArray()
+    )
 
     // Try to delete at the old generation - this should fail
     val deleteOldVersion = blob1.delete(BlobSourceOption.generationMatch())
@@ -274,9 +312,12 @@ internal abstract class CustomStorageRpcTestCases<T : StorageRpc> {
   fun progressiveDownload() {
     val upload = "This is my text".repeat(1024 * 256)
     val blobId = BlobId.of("my_bucket", "my_entry")
-    val blob = storage.create(BlobInfo.newBuilder(blobId)
+    val blob = storage.create(
+      BlobInfo.newBuilder(blobId)
         .setContentType("text/plain")
-        .build(), upload.toByteArray())
+        .build(),
+      upload.toByteArray()
+    )
 
     val download = ByteBuffer.allocate(upload.length)
 
@@ -295,9 +336,12 @@ internal abstract class CustomStorageRpcTestCases<T : StorageRpc> {
   fun copy() {
     val data = "This is my text".repeat(1024 * 256)
     val sourceBlobId = BlobId.of("my_bucket", "my_entry")
-    val sourceBlob = storage.create(BlobInfo.newBuilder(sourceBlobId)
+    val sourceBlob = storage.create(
+      BlobInfo.newBuilder(sourceBlobId)
         .setContentType("text/plain")
-        .build(), data.toByteArray())
+        .build(),
+      data.toByteArray()
+    )
 
     val targetBlobId = BlobId.of("my_bucket", "new_entry")
 
@@ -309,76 +353,109 @@ internal abstract class CustomStorageRpcTestCases<T : StorageRpc> {
 
   @Test
   fun listFolders() {
-    storage.create(BlobInfo.newBuilder("my_bucket", "notes/storage/merp.txt")
+    storage.create(
+      BlobInfo.newBuilder("my_bucket", "notes/storage/merp.txt")
         .setContentType("text/plain")
-        .build(), "This is a merp".toByteArray())
-    storage.create(BlobInfo.newBuilder("my_bucket", "notes/storage/traif.txt")
+        .build(),
+      "This is a merp".toByteArray()
+    )
+    storage.create(
+      BlobInfo.newBuilder("my_bucket", "notes/storage/traif.txt")
         .setContentType("text/plain")
-        .build(), "This is traif".toByteArray())
-    storage.create(BlobInfo.newBuilder("my_bucket", "notes/misc/blah.txt")
+        .build(),
+      "This is traif".toByteArray()
+    )
+    storage.create(
+      BlobInfo.newBuilder("my_bucket", "notes/misc/blah.txt")
         .setContentType("text/plain")
-        .build(), "This is a blah".toByteArray())
-    storage.create(BlobInfo.newBuilder("my_bucket", "notes/misc/boop.txt")
+        .build(),
+      "This is a blah".toByteArray()
+    )
+    storage.create(
+      BlobInfo.newBuilder("my_bucket", "notes/misc/boop.txt")
         .setContentType("text/plain")
-        .build(), "This is a boop".toByteArray())
-    storage.create(BlobInfo.newBuilder("my_bucket", "notes/top.txt")
+        .build(),
+      "This is a boop".toByteArray()
+    )
+    storage.create(
+      BlobInfo.newBuilder("my_bucket", "notes/top.txt")
         .setContentType("text/plain")
-        .build(), "This is at the top level of notes".toByteArray())
-    storage.create(BlobInfo.newBuilder("my_bucket", "notes/top2.txt")
+        .build(),
+      "This is at the top level of notes".toByteArray()
+    )
+    storage.create(
+      BlobInfo.newBuilder("my_bucket", "notes/top2.txt")
         .setContentType("text/plain")
-        .build(), "This is also at the top level of notes".toByteArray())
-    storage.create(BlobInfo.newBuilder("my_bucket", "images/storage.txt")
+        .build(),
+      "This is also at the top level of notes".toByteArray()
+    )
+    storage.create(
+      BlobInfo.newBuilder("my_bucket", "images/storage.txt")
         .setContentType("text/plain")
-        .build(), "This is about storage".toByteArray())
-    storage.create(BlobInfo.newBuilder("my_bucket", "images.txt")
+        .build(),
+      "This is about storage".toByteArray()
+    )
+    storage.create(
+      BlobInfo.newBuilder("my_bucket", "images.txt")
         .setContentType("text/plain")
-        .build(), "This documents images".toByteArray())
-    storage.create(BlobInfo.newBuilder("other_bucket", "protos.txt")
+        .build(),
+      "This documents images".toByteArray()
+    )
+    storage.create(
+      BlobInfo.newBuilder("other_bucket", "protos.txt")
         .setContentType("text/plain")
-        .build(), "These are protos in another bucket".toByteArray())
+        .build(),
+      "These are protos in another bucket".toByteArray()
+    )
 
     val all = storage.list("my_bucket")
     assertThat(all.blobIds).containsExactlyInAnyOrder(
-        BlobId.of("my_bucket", "notes/storage/merp.txt", 1),
-        BlobId.of("my_bucket", "notes/storage/traif.txt", 1),
-        BlobId.of("my_bucket", "notes/misc/blah.txt", 1),
-        BlobId.of("my_bucket", "notes/misc/boop.txt", 1),
-        BlobId.of("my_bucket", "notes/top.txt", 1),
-        BlobId.of("my_bucket", "notes/top2.txt", 1),
-        BlobId.of("my_bucket", "images/storage.txt", 1),
-        BlobId.of("my_bucket", "images.txt", 1))
+      BlobId.of("my_bucket", "notes/storage/merp.txt", 1),
+      BlobId.of("my_bucket", "notes/storage/traif.txt", 1),
+      BlobId.of("my_bucket", "notes/misc/blah.txt", 1),
+      BlobId.of("my_bucket", "notes/misc/boop.txt", 1),
+      BlobId.of("my_bucket", "notes/top.txt", 1),
+      BlobId.of("my_bucket", "notes/top2.txt", 1),
+      BlobId.of("my_bucket", "images/storage.txt", 1),
+      BlobId.of("my_bucket", "images.txt", 1)
+    )
 
     val roots = storage.list("my_bucket", currentDirectory())
     assertThat(roots.blobIds).containsExactlyInAnyOrder(
-        BlobId.of("my_bucket", "notes"),
-        BlobId.of("my_bucket", "images"),
-        BlobId.of("my_bucket", "images.txt", 1))
+      BlobId.of("my_bucket", "notes"),
+      BlobId.of("my_bucket", "images"),
+      BlobId.of("my_bucket", "images.txt", 1)
+    )
 
     val subDir = storage.list("my_bucket", prefix("notes/"), currentDirectory())
     assertThat(subDir.blobIds).containsExactlyInAnyOrder(
-        BlobId.of("my_bucket", "notes/misc"),
-        BlobId.of("my_bucket", "notes/storage"),
-        BlobId.of("my_bucket", "notes/top.txt", 1),
-        BlobId.of("my_bucket", "notes/top2.txt", 1))
+      BlobId.of("my_bucket", "notes/misc"),
+      BlobId.of("my_bucket", "notes/storage"),
+      BlobId.of("my_bucket", "notes/top.txt", 1),
+      BlobId.of("my_bucket", "notes/top2.txt", 1)
+    )
 
     val subDirRecursive = storage.list("my_bucket", prefix("notes/"))
     assertThat(subDirRecursive.blobIds).containsExactlyInAnyOrder(
-        BlobId.of("my_bucket", "notes/storage/merp.txt", 1),
-        BlobId.of("my_bucket", "notes/storage/traif.txt", 1),
-        BlobId.of("my_bucket", "notes/misc/blah.txt", 1),
-        BlobId.of("my_bucket", "notes/misc/boop.txt", 1),
-        BlobId.of("my_bucket", "notes/top.txt", 1),
-        BlobId.of("my_bucket", "notes/top2.txt", 1))
+      BlobId.of("my_bucket", "notes/storage/merp.txt", 1),
+      BlobId.of("my_bucket", "notes/storage/traif.txt", 1),
+      BlobId.of("my_bucket", "notes/misc/blah.txt", 1),
+      BlobId.of("my_bucket", "notes/misc/boop.txt", 1),
+      BlobId.of("my_bucket", "notes/top.txt", 1),
+      BlobId.of("my_bucket", "notes/top2.txt", 1)
+    )
 
     val partialNameMatch =
-        storage.list("my_bucket", prefix("notes/s"), currentDirectory())
+      storage.list("my_bucket", prefix("notes/s"), currentDirectory())
     assertThat(partialNameMatch.blobIds).containsExactlyInAnyOrder(
-        BlobId.of("my_bucket", "notes/storage"))
+      BlobId.of("my_bucket", "notes/storage")
+    )
 
     val recursivePartialNameMatch = storage.list("my_bucket", prefix("notes/s"))
     assertThat(recursivePartialNameMatch.blobIds).containsExactlyInAnyOrder(
-        BlobId.of("my_bucket", "notes/storage/merp.txt", 1),
-        BlobId.of("my_bucket", "notes/storage/traif.txt", 1))
+      BlobId.of("my_bucket", "notes/storage/merp.txt", 1),
+      BlobId.of("my_bucket", "notes/storage/traif.txt", 1)
+    )
   }
 
   abstract fun newStorageRpc(): T

@@ -16,16 +16,18 @@ class DockerDynamoDbTest : AbstractDynamoDbTest() {
   @MiskExternalDependency
   val dockerDynamoDb = DockerDynamoDb
 
-  class TestModule: KAbstractModule() {
+  class TestModule : KAbstractModule() {
     override fun configure() {
       install(MiskTestingServiceModule())
 
-      install(DockerDynamoDbModule(
+      install(
+        DockerDynamoDbModule(
           DynamoDbTable(DyMovie::class),
           DynamoDbTable(DyCharacter::class) {
             it.withBillingMode(BillingMode.PAY_PER_REQUEST)
           }
-      ))
+        )
+      )
     }
   }
 }

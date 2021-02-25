@@ -14,8 +14,8 @@ dependencies {
   implementation dep.junitEngine
   implementation dep.assertj
   implementation dep.kotlinTest
-  implementation dep.loggingApi
-  implementation dep.logbackClassic
+  api dep.loggingApi
+  api dep.logbackClassic
   implementation (dep.okHttpMockWebServer) {
     exclude group: 'junit'
   }

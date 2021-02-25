@@ -63,8 +63,8 @@ class LoggingTest {
       assertThat(it.message).isEqualTo("tagged info")
       assertThat(it.throwableProxy).isNull()
       assertThat(it.mdcPropertyMap).containsExactly(
-          "user-id" to "blerb",
-          "alias-id" to "d6F1EF53"
+        "user-id" to "blerb",
+        "alias-id" to "d6F1EF53"
       )
     }
     assertThat(taggedEvents[1]).satisfies {
@@ -72,7 +72,7 @@ class LoggingTest {
       assertThat(it.message).isEqualTo("tagged error")
       assertThat(it.throwableProxy.className).isEqualTo(NullPointerException::class.qualifiedName)
       assertThat(it.mdcPropertyMap).containsExactly(
-          "sample-size" to "200"
+        "sample-size" to "200"
       )
     }
 
@@ -93,16 +93,16 @@ class LoggingTest {
       assertThat(it.message).isEqualTo("inherited warn")
       assertThat(it.throwableProxy).isNull()
       assertThat(it.mdcPropertyMap).containsExactly(
-          "user-id" to "inherited-external",
-          "context-id" to "overridden"
+        "user-id" to "inherited-external",
+        "context-id" to "overridden"
       )
     }
     assertThat(defaultTaggedEvents[1]).satisfies {
       assertThat(it.level).isEqualTo(Level.INFO)
       assertThat(it.message).isEqualTo("uses default tags")
       assertThat(it.mdcPropertyMap).containsExactly(
-          "user-id" to "inherited-external",
-          "context-id" to "111111"
+        "user-id" to "inherited-external",
+        "context-id" to "111111"
       )
     }
   }

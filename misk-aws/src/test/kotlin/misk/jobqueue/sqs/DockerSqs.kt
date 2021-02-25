@@ -35,17 +35,21 @@ internal object DockerSqs : ExternalDependency {
     }
   }
 
-  private val composer = Composer("e-sqs", Container {
-    // NB(mmihic): Because the client port is embedded directly into the queue URLs, we have to use
-    // the same external port as we do for the internal port
-    val exposedClientPort = ExposedPort.tcp(clientPort)
-    withImage("pafortin/goaws")
+  private val composer = Composer(
+    "e-sqs",
+    Container {
+      // NB(mmihic): Because the client port is embedded directly into the queue URLs, we have to use
+      // the same external port as we do for the internal port
+      val exposedClientPort = ExposedPort.tcp(clientPort)
+      withImage("pafortin/goaws")
         .withName("sqs")
         .withCmd(listOf("goaws"))
         .withExposedPorts(exposedClientPort)
         .withPortBindings(
-            Ports().apply { bind(exposedClientPort, Ports.Binding.bindPort(clientPort)) })
-  })
+          Ports().apply { bind(exposedClientPort, Ports.Binding.bindPort(clientPort)) }
+        )
+    }
+  )
 
   val credentials = object : AWSCredentialsProvider {
     override fun refresh() {}
@@ -55,14 +59,14 @@ internal object DockerSqs : ExternalDependency {
   }
 
   val endpoint = AwsClientBuilder.EndpointConfiguration(
-      "http://127.0.0.1:$clientPort",
-      "us-east-1"
+    "http://127.0.0.1:$clientPort",
+    "us-east-1"
   )
 
   val client: AmazonSQS = AmazonSQSClient.builder()
-      .withCredentials(credentials)
-      .withEndpointConfiguration(endpoint)
-      .build()
+    .withCredentials(credentials)
+    .withEndpointConfiguration(endpoint)
+    .build()
 
   override fun startup() {
     composer.start()

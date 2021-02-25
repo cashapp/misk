@@ -54,28 +54,34 @@ abstract class AbstractGzipTest {
   @Inject lateinit var moshi: Moshi
 
   @Test fun `POST unspecified request body`() {
-    val response = call(Request.Builder()
+    val response = call(
+      Request.Builder()
         .url(jetty.httpServerUrl.resolve("/count")!!)
-        .post(miskHypeJson(false, 16)))
+        .post(miskHypeJson(false, 16))
+    )
 
     assertThat(response.body!!.string()).isEqualTo("16")
   }
 
   @Test fun `POST identity request body`() {
-    val response = call(Request.Builder()
+    val response = call(
+      Request.Builder()
         .url(jetty.httpServerUrl.resolve("/count")!!)
         .header("Content-Encoding", "identity")
-        .post(miskHypeJson(false, 16)))
+        .post(miskHypeJson(false, 16))
+    )
 
     assertThat(response.body!!.string()).isEqualTo("16")
   }
 
   /** Gzip requests are always enabled, even if the gzip responses are not. */
   @Test fun `POST gzip request body`() {
-    val response = call(Request.Builder()
+    val response = call(
+      Request.Builder()
         .url(jetty.httpServerUrl.resolve("/count")!!)
         .header("Content-Encoding", "gzip")
-        .post(miskHypeJson(true, 16)))
+        .post(miskHypeJson(true, 16))
+    )
     assertThat(response.body!!.string()).isEqualTo("16")
   }
 
@@ -98,12 +104,16 @@ abstract class AbstractGzipTest {
     fun postMiskHype(@RequestBody request: List<String>): Int = request.count { it == "miskhype" }
   }
 
-  fun get(path: String): Response = call(Request.Builder()
-      .url(jetty.httpServerUrl.newBuilder().encodedPath(path).build()))
-
-  fun post(path: String): Response = call(Request.Builder()
+  fun get(path: String): Response = call(
+    Request.Builder()
       .url(jetty.httpServerUrl.newBuilder().encodedPath(path).build())
-      .post(EMPTY_REQUEST))
+  )
+
+  fun post(path: String): Response = call(
+    Request.Builder()
+      .url(jetty.httpServerUrl.newBuilder().encodedPath(path).build())
+      .post(EMPTY_REQUEST)
+  )
 
   fun call(request: Request.Builder): Response {
     val httpClient = OkHttpClient()
@@ -138,10 +148,14 @@ abstract class AbstractGzipTest {
 
   class TestModule(val gzip: Boolean) : KAbstractModule() {
     override fun configure() {
-      install(WebTestingModule(webConfig = WebTestingModule.TESTING_WEB_CONFIG.copy(
-          gzip = gzip,
-          minGzipSize = 128
-      )))
+      install(
+        WebTestingModule(
+          webConfig = WebTestingModule.TESTING_WEB_CONFIG.copy(
+            gzip = gzip,
+            minGzipSize = 128
+          )
+        )
+      )
       install(WebActionModule.create<MiskHypeGetAction>())
       install(WebActionModule.create<MiskHypePostAction>())
       install(WebActionModule.create<CountHypeAction>())

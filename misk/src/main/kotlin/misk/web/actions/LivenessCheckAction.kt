@@ -27,7 +27,7 @@ class LivenessCheckAction @Inject internal constructor(
   fun livenessCheck(): Response<String> {
     val serviceManager = serviceManagerProvider.get()
     val failedServices = serviceManager.servicesByState().get(State.FAILED) +
-        serviceManager.servicesByState().get(State.TERMINATED)
+      serviceManager.servicesByState().get(State.TERMINATED)
 
     if (failedServices.isEmpty()) {
       return Response("", statusCode = 200)

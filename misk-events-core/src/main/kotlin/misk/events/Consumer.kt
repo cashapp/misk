@@ -4,7 +4,9 @@ package misk.events
 @Deprecated("This API is no longer supported and replaced by the new event system's client library")
 interface Consumer {
   /** The [Context] provides information about a set of events being consumed */
-  @Deprecated("This API is no longer supported and replaced by the new event system's client library")
+  @Deprecated(
+    "This API is no longer supported and replaced by the new event system's client library"
+  )
   interface Context {
     /** the topic from which events are being received */
     val topic: Topic
@@ -17,7 +19,9 @@ interface Consumer {
   }
 
   /** A [Handler] handles incoming events from a topic */
-  @Deprecated("This API is no longer supported and replaced by the new event system's client library")
+  @Deprecated(
+    "This API is no longer supported and replaced by the new event system's client library"
+  )
   interface Handler {
     fun handleEvents(ctx: Context, vararg events: Event)
   }
@@ -32,9 +36,12 @@ inline fun Consumer.subscribe(
   topic: Topic,
   crossinline handler: (Consumer.Context, List<Event>) -> Unit
 ) {
-  subscribe(topic, object : Consumer.Handler {
-    override fun handleEvents(ctx: Consumer.Context, vararg events: Event) {
-      handler(ctx, events.toList())
+  subscribe(
+    topic,
+    object : Consumer.Handler {
+      override fun handleEvents(ctx: Consumer.Context, vararg events: Event) {
+        handler(ctx, events.toList())
+      }
     }
-  })
+  )
 }

@@ -3,7 +3,6 @@ package misk.okio
 import okio.Buffer
 import okio.BufferedSource
 import okio.ByteString
-import kotlin.sequences.sequence
 
 fun BufferedSource.forEachBlock(buffer: ByteArray, f: (buffer: ByteArray, bytesRead: Int) -> Unit) {
   var bytesRead = read(buffer)

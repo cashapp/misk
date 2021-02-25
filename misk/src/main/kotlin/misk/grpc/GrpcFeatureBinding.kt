@@ -21,8 +21,10 @@ internal class GrpcFeatureBinding(
 ) : FeatureBinding {
   override fun beforeCall(subject: Subject) {
     val requestBody = subject.takeRequestBody()
-    val messageSource = GrpcMessageSource(requestBody, requestAdapter,
-        subject.httpCall.requestHeaders["grpc-encoding"])
+    val messageSource = GrpcMessageSource(
+      requestBody, requestAdapter,
+      subject.httpCall.requestHeaders["grpc-encoding"]
+    )
 
     if (streamingRequest) {
       subject.setParameter(0, messageSource)
@@ -90,7 +92,7 @@ internal class GrpcFeatureBinding(
       val responseAdapter = if (action.parameters.size == 2) {
         claimer.claimParameter(1)
         val responseType: Type = action.parameters[1].type.streamElementType()
-            ?: error("@Grpc function's second parameter should be a MessageSource: $action")
+          ?: error("@Grpc function's second parameter should be a MessageSource: $action")
         @Suppress("UNCHECKED_CAST") // Assume it's a proto type.
         ProtoAdapter.get(responseType as Class<Any>)
       } else {
@@ -102,18 +104,18 @@ internal class GrpcFeatureBinding(
       return if (streamingRequestType != null) {
         @Suppress("UNCHECKED_CAST") // Assume it's a proto type.
         GrpcFeatureBinding(
-            requestAdapter = ProtoAdapter.get(streamingRequestType as Class<Any>),
-            responseAdapter = responseAdapter,
-            streamingRequest = true,
-            streamingResponse = streamingResponse
+          requestAdapter = ProtoAdapter.get(streamingRequestType as Class<Any>),
+          responseAdapter = responseAdapter,
+          streamingRequest = true,
+          streamingResponse = streamingResponse
         )
       } else {
         @Suppress("UNCHECKED_CAST") // Assume it's a proto type.
         GrpcFeatureBinding(
-            requestAdapter = ProtoAdapter.get(action.parameters[0].type.javaType as Class<Any>),
-            responseAdapter = responseAdapter,
-            streamingRequest = false,
-            streamingResponse = streamingResponse
+          requestAdapter = ProtoAdapter.get(action.parameters[0].type.javaType as Class<Any>),
+          responseAdapter = responseAdapter,
+          streamingRequest = false,
+          streamingResponse = streamingResponse
         )
       }
     }

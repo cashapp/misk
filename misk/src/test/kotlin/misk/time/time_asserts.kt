@@ -16,5 +16,5 @@ fun assertElapsedTime(
   val duration = Duration.ofNanos(endNanos - startNanos)
 
   assertThat(duration.toMillis().toDouble())
-      .isCloseTo(expected.toMillis().toDouble(), Offset.offset(tolerance.toNanos().toDouble()))
+    .isCloseTo(expected.toMillis().toDouble(), Offset.offset(tolerance.toNanos().toDouble()))
 }
