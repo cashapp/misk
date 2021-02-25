@@ -49,6 +49,25 @@ class RealPagerTest {
     assertThat(actualCharacterIds).containsExactlyElementsOf(expectedCharacterIds)
   }
 
+  @Test fun idAscPaginationWithSession() {
+    val movieId = givenStarWarsMovie()
+    givenStormtrooperCharacters(movieId, count = 100)
+    val expectedCharacterIds = transacter.transaction { session ->
+      queryFactory.newQuery(CharacterQuery::class)
+        .movieId(movieId)
+        .idAsc()
+        .list(session)
+        .map { it.id }
+    }
+    val actualCharacterIds = transacter.transaction { session ->
+      queryFactory.newQuery(CharacterQuery::class)
+        .movieId(movieId)
+        .newPager(idAscPaginator(), pageSize = 3)
+        .listAll(session) { it.id }
+    }
+    assertThat(actualCharacterIds).containsExactlyElementsOf(expectedCharacterIds)
+  }
+
   @Test fun idDescPagination() {
     val movieId = givenStarWarsMovie()
     givenStormtrooperCharacters(movieId, count = 100)

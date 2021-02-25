@@ -34,3 +34,16 @@ fun <T : DbEntity<T>, R> Pager<T>.listAll(
   }
   return results
 }
+
+fun <T : DbEntity<T>, R> Pager<T>.listAll(
+  session: Session,
+  transform: (T) -> R
+): List<R> {
+  val results = mutableListOf<R>()
+  while (hasNext()) {
+    val nextPage = nextPage(session)
+    val pageContents = nextPage?.contents ?: emptyList()
+    results.addAll(pageContents.map(transform))
+  }
+  return results
+}
