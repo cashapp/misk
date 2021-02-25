@@ -281,6 +281,41 @@ internal class FakeFeatureFlagsTest {
     subject.getInt(FEATURE, "azAZ09-_.~$") // unreserved URL characters.
   }
 
+  @Test
+  fun validFeatureKey() {
+    Feature("a")
+    Feature("abc")
+    Feature("abc123")
+    Feature("abc.123")
+    Feature("abc.123-doeraemi")
+    Feature("abc.123-doeraemi_YOUME")
+  }
+
+  @Test
+  fun inValidFeatureKey() {
+    assertThrows<RuntimeException> {
+      Feature("")
+    }
+    assertThrows<RuntimeException> {
+      Feature("abc$123")
+    }
+    assertThrows<RuntimeException> {
+      Feature("abc=123")
+    }
+    assertThrows<RuntimeException> {
+      Feature("abc/123")
+    }
+    assertThrows<RuntimeException> {
+      Feature("abc<123")
+    }
+    assertThrows<RuntimeException> {
+      Feature("abc?123")
+    }
+    assertThrows<RuntimeException> {
+      Feature("[abc123]")
+    }
+  }
+
   enum class Dinosaur {
     PTERODACTYL,
     TYRANNOSAURUS,
