@@ -13,6 +13,7 @@ import routeguide.RouteGuideProto.Feature
 import routeguide.RouteGuideProto.Point
 import javax.inject.Inject
 import javax.inject.Provider
+import routeguide.RouteGuideProto
 
 @MiskTest(startService = true)
 class ProtocClientMiskServerTest {
@@ -26,6 +27,10 @@ class ProtocClientMiskServerTest {
 
   @Test
   fun requestResponse() {
+    println(
+      RouteGuideProto.getDescriptor().toProto()
+    )
+
     val channel = channelProvider.get()
     val stub = RouteGuideGrpc.newBlockingStub(channel)
 

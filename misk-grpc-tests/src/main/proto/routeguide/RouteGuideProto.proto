@@ -107,4 +107,6 @@ message RouteSummary {
 
   // The duration of the traversal in seconds.
   optional int32 elapsed_time = 4;
+
+  map<string, RouteNote> happy_map = 5;
 }
