@@ -1,9 +1,11 @@
 package misk.feature.launchdarkly
 
 import com.google.inject.Provides
-import com.launchdarkly.client.LDClient
-import com.launchdarkly.client.LDClientInterface
-import com.launchdarkly.client.LDConfig
+import com.launchdarkly.sdk.server.LDClient
+
+import com.launchdarkly.sdk.server.Components
+import com.launchdarkly.sdk.server.LDConfig
+import com.launchdarkly.sdk.server.interfaces.LDClientInterface
 import misk.ServiceModule
 import misk.client.HttpClientSSLConfig
 import misk.config.Config
@@ -16,6 +18,7 @@ import misk.resources.ResourceLoader
 import misk.security.ssl.SslContextFactory
 import misk.security.ssl.SslLoader
 import java.net.URI
+import java.time.Duration
 import javax.inject.Provider
 import javax.net.ssl.X509TrustManager
 import kotlin.reflect.KClass
@@ -46,13 +49,9 @@ class LaunchDarklyModule(
     val baseUri = URI.create(config.base_uri)
     val ldConfig = LDConfig.Builder()
         // Set wait to 0 to not block here. Block in service initialization instead.
-        .startWaitMillis(0)
-        // Don't send any attributes to LaunchDarkly in events. Trades off convenience in the
-        // UI for better privacy.
-        .allAttributesPrivate(true)
-        .baseURI(baseUri)
-        .streamURI(baseUri)
-        .eventsURI(baseUri)
+        .startWait(Duration.ofMillis(0))
+        .dataSource(Components.streamingDataSource().baseURI(baseUri))
+        .events(Components.sendEvents().baseURI(baseUri))
 
     config.ssl?.let {
       val trustStore = sslLoader.loadTrustStore(config.ssl.trust_store)!!
@@ -60,7 +59,7 @@ class LaunchDarklyModule(
       val x509TrustManager = trustManagers.mapNotNull { it as? X509TrustManager }.firstOrNull()
           ?: throw IllegalStateException("no x509 trust manager in ${it.trust_store}")
       val sslContext = sslContextFactory.create(it.cert_store, it.trust_store)
-      ldConfig.sslSocketFactory(sslContext.socketFactory, x509TrustManager)
+      ldConfig.http(Components.httpConfiguration().sslSocketFactory(sslContext.socketFactory, x509TrustManager))
     }
 
     return LDClient(resourceLoader.requireUtf8(config.sdk_key).trim(), ldConfig.build())
