@@ -52,6 +52,6 @@ class NoopWriter : Writer {
     return true
   }
 
-  override fun incrementTraceCount() {
+  override fun incrementDropCounts(p0: Int) {
   }
 }
