@@ -43,7 +43,11 @@ internal class LaunchDarklyFeatureFlagsTest {
   fun getEnum() {
     Mockito
       .`when`(client.stringVariationDetail(anyString(), any(LDUser::class.java), anyString()))
-      .thenReturn(EvaluationDetail.fromValue("TYRANNOSAURUS", 1, EvaluationReason.targetMatch()))
+      .thenReturn(
+        EvaluationDetail.fromValue(
+          "TYRANNOSAURUS", 1, EvaluationReason.targetMatch()
+        )
+      )
 
     val feature = featureFlags.getEnum<Dinosaur>(
       Feature("which-dinosaur"), "abcd",
@@ -93,7 +97,9 @@ internal class LaunchDarklyFeatureFlagsTest {
       .`when`(client.stringVariationDetail(anyString(), any(LDUser::class.java), anyString()))
       .thenReturn(
         EvaluationDetail.fromValue(
-          "PTERODACTYL", EvaluationDetail.NO_VARIATION, EvaluationReason.off()
+          "PTERODACTYL",
+          EvaluationDetail.NO_VARIATION,
+          EvaluationReason.off()
         )
       )
 
@@ -165,7 +171,13 @@ internal class LaunchDarklyFeatureFlagsTest {
   fun attributes() {
     Mockito
       .`when`(client.stringVariationDetail(anyString(), any(LDUser::class.java), anyString()))
-      .thenReturn(EvaluationDetail.fromValue("value", 1, EvaluationReason.targetMatch()))
+      .thenReturn(
+        EvaluationDetail.fromValue(
+          "value",
+          1,
+          EvaluationReason.targetMatch()
+        )
+      )
 
     val attributes = Attributes(
       mapOf(

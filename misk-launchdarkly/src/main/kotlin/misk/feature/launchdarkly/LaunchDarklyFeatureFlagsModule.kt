@@ -36,7 +36,7 @@ class LaunchDarklyModule(
     bind(FeatureService::class.toKey(qualifier)).to(key)
     val featureFlagsProvider = getProvider(key)
     bind(DynamicConfig::class.toKey(qualifier)).toProvider(
-        Provider<DynamicConfig> { LaunchDarklyDynamicConfig(featureFlagsProvider.get()) })
+      Provider<DynamicConfig> { LaunchDarklyDynamicConfig(featureFlagsProvider.get()) })
     install(ServiceModule(FeatureService::class.toKey(qualifier)))
   }
 
@@ -48,18 +48,20 @@ class LaunchDarklyModule(
   ): LDClientInterface {
     val baseUri = URI.create(config.base_uri)
     val ldConfig = LDConfig.Builder()
-        // Set wait to 0 to not block here. Block in service initialization instead.
-        .startWait(Duration.ofMillis(0))
-        .dataSource(Components.streamingDataSource().baseURI(baseUri))
-        .events(Components.sendEvents().baseURI(baseUri))
+      // Set wait to 0 to not block here. Block in service initialization instead.
+      .startWait(Duration.ofMillis(0))
+      .dataSource(Components.streamingDataSource().baseURI(baseUri))
+      .events(Components.sendEvents().baseURI(baseUri))
 
     config.ssl?.let {
       val trustStore = sslLoader.loadTrustStore(config.ssl.trust_store)!!
       val trustManagers = sslContextFactory.loadTrustManagers(trustStore.keyStore)
       val x509TrustManager = trustManagers.mapNotNull { it as? X509TrustManager }.firstOrNull()
-          ?: throw IllegalStateException("no x509 trust manager in ${it.trust_store}")
+        ?: throw IllegalStateException("no x509 trust manager in ${it.trust_store}")
       val sslContext = sslContextFactory.create(it.cert_store, it.trust_store)
-      ldConfig.http(Components.httpConfiguration().sslSocketFactory(sslContext.socketFactory, x509TrustManager))
+      ldConfig.http(
+        Components.httpConfiguration().sslSocketFactory(sslContext.socketFactory, x509TrustManager)
+      )
     }
 
     return LDClient(resourceLoader.requireUtf8(config.sdk_key).trim(), ldConfig.build())
