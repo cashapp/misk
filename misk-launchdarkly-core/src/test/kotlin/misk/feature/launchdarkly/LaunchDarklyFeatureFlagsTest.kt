@@ -25,7 +25,6 @@ import org.mockito.Mockito.anyString
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
-import java.lang.reflect.Field
 
 internal class LaunchDarklyFeatureFlagsTest {
   private val client = mock(LDClientInterface::class.java)
@@ -76,8 +75,7 @@ internal class LaunchDarklyFeatureFlagsTest {
     @Suppress("unchecked_cast")
     val customAttrs = customField.get(user) as Map<UserAttribute, LDValue>
 
-    val privateAttrsField: Field =
-      LDUser::class.java.getDeclaredField("privateAttributeNames")
+    val privateAttrsField = LDUser::class.java.getDeclaredField("privateAttributeNames")
     privateAttrsField.isAccessible = true
     @Suppress("unchecked_cast")
     val privateAttrs = privateAttrsField.get(user) as Set<String>
