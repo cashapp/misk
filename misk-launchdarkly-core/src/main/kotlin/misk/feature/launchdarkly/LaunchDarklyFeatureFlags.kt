@@ -103,7 +103,8 @@ class LaunchDarklyFeatureFlags @Inject constructor(
   private fun checkInitialized() {
     checkState(
       ldClient.initialized(),
-      "LaunchDarkly feature flags not initialized. Did you forget to make your service depend on [FeatureFlags]?"
+      "LaunchDarkly feature flags not initialized. " +
+        "Did you forget to make your service depend on [FeatureFlags]?"
     )
   }
 
