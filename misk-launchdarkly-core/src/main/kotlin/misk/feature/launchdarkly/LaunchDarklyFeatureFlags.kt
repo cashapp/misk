@@ -17,7 +17,6 @@ import misk.feature.fromSafeJson
 import misk.logging.getLogger
 import javax.inject.Inject
 import javax.inject.Singleton
-import kotlin.math.floor
 
 /**
  * Implementation of [FeatureFlags] using LaunchDarkly's Java SDK.
