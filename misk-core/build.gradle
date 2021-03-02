@@ -11,7 +11,7 @@ dependencies {
   implementation dep.kotlinStdLibJdk8
   implementation dep.kotlinReflection
   api dep.kotlinRetry
-  implementation dep.loggingApi
+  api dep.loggingApi
   implementation dep.logbackClassic
   implementation dep.okio
   implementation dep.okHttp
