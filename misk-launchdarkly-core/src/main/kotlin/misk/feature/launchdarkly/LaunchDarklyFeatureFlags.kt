@@ -143,11 +143,8 @@ class LaunchDarklyFeatureFlags @Inject constructor(
     }
     if (attributes.number != null) {
       attributes.number!!.forEach { (k, v) ->
-        if (v is Long) {
-          logger.info { "Please use an Int for $k" }
-        }
-        if (v is Float) {
-          logger.info { "Please use a Double for $k" }
+        if (v !is Int || v !is Double) {
+          logger.info { "Deprecated attribute type, please use an Int or Double for $k" }
         }
         builder.privateCustom(k, v)
       }
