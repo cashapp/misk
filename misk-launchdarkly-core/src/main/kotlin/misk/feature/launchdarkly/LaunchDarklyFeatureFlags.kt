@@ -14,7 +14,7 @@ import misk.feature.FeatureFlagValidation
 import misk.feature.FeatureFlags
 import misk.feature.FeatureService
 import misk.feature.fromSafeJson
-import misk.logging.getLogger
+import mu.KotlinLogging
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -148,16 +148,16 @@ class LaunchDarklyFeatureFlags @Inject constructor(
         }
         builder.privateCustom(k, v)
       }
-      if (attributes.anonymous) {
-        // This prevents the user from being stored in the LaunchDarkly dashboard, see
-        // https://docs.launchdarkly.com/docs/anonymous-users
-        builder.anonymous(true)
-      }
+    }
+    if (attributes.anonymous) {
+      // This prevents the user from being stored in the LaunchDarkly dashboard, see
+      // https://docs.launchdarkly.com/docs/anonymous-users
+      builder.anonymous(true)
     }
     return builder.build()
   }
 
   companion object {
-    val logger = getLogger<LaunchDarklyFeatureFlags>()
+    val logger = KotlinLogging.logger {}
   }
 }

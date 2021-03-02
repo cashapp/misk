@@ -10,7 +10,6 @@ dependencies {
   implementation dep.launchDarkly
   implementation dep.loggingApi
   implementation dep.moshiCore
-  implementation project(':misk-core')
   implementation project(':misk-feature')
 
   testImplementation project(':misk-testing')
