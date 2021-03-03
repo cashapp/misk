@@ -51,7 +51,8 @@ class CryptoTestModule(
     Security.addProvider(BouncyCastleProvider())
 
     config ?: return
-    val keys = config.keys as MutableList<Key>? ?: return
+    val keys = mutableListOf<Key>()
+    config.keys?.let { keys.addAll(it) }
 
     val keyManagerBinder = newMultibinder(ExternalKeyManager::class)
     keyManagerBinder.addBinding().toInstance(FakeExternalKeyManager(keys))
