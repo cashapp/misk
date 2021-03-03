@@ -60,6 +60,11 @@ class CryptoModule(
 
     /* Parse and include all local keys first. */
     config.keys?.let { keys ->
+      try {
+        keys.map { it.encrypted_key }.requireNoNulls()
+      } catch (e: IllegalArgumentException) {
+        throw IllegalArgumentException("Found local key with no 'encrypted_key' value", e)
+      }
       keyManagerBinder.addBinding().toInstance(LocalConfigKeyProvider(keys, config.kms_uri))
 
       keys.forEach {

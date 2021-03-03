@@ -43,7 +43,7 @@ open class KeyReader {
     // TODO: Implement a clean check to throw if we are running in prod or staging. Checking for
     // an injected Environment will fail if a test explicitly creates a staging/prod environment.
     logger.warn { "reading a plaintext key!" }
-    val reader = JsonKeysetReader.withString(key.encrypted_key.value)
+    val reader = JsonKeysetReader.withString(key.encrypted_key!!.value)
     return CleartextKeysetHandle.read(reader)
   }
 
@@ -51,11 +51,11 @@ open class KeyReader {
     val masterKey = kmsClient.getAead(key.kms_uri)
     return try {
       val kek = KmsEnvelopeAead(KEK_TEMPLATE, masterKey)
-      val reader = JsonKeysetReader.withString(key.encrypted_key.value)
+      val reader = JsonKeysetReader.withString(key.encrypted_key!!.value)
       KeysetHandle.read(reader, kek)
     } catch (ex: GeneralSecurityException) {
       logger.warn { "using obsolete key format, rotate your keys when possible" }
-      val reader = JsonKeysetReader.withString(key.encrypted_key.value)
+      val reader = JsonKeysetReader.withString(key.encrypted_key!!.value)
       KeysetHandle.read(reader, masterKey)
     }
   }
