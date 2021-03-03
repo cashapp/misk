@@ -65,6 +65,7 @@ dependencies {
   testImplementation dep.mockitoCore
   testImplementation project(':misk-testing')
   testImplementation dep.junit4Api
+  testImplementation dep.junitParams
   testImplementation dep.assertj
   testImplementation dep.kotlinTest
   testImplementation (dep.okHttpMockWebServer) {

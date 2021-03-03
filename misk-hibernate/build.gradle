@@ -44,6 +44,7 @@ dependencies {
   }
   testImplementation dep.prometheusClient
   testImplementation dep.assertj
+  testImplementation dep.junitParams
   testImplementation dep.kotlinTest
   testImplementation dep.mockitoCore
   testImplementation dep.logbackClassic
