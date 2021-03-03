@@ -26,4 +26,7 @@ interface ExecutorServiceFactory {
 
   /** Returns an executor service that uses [Executors.newScheduledThreadPool]. */
   fun scheduled(nameFormat: String, threadCount: Int): ScheduledExecutorService
+
+  /** Explicitly stop all threads. This should only be used for tests. */
+  fun stop()
 }

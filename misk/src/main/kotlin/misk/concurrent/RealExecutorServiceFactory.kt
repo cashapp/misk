@@ -23,7 +23,7 @@ import javax.inject.Singleton
  */
 @Singleton
 @Suppress("UnstableApiUsage") // Guava's Service is @Beta.
-internal class RealExecutorServiceFactory @Inject constructor(
+class RealExecutorServiceFactory @Inject constructor(
   private val clock: Clock
 ) : AbstractService(), ExecutorServiceFactory {
   @Inject(optional = true) var tracer: Tracer? = null
@@ -38,6 +38,15 @@ internal class RealExecutorServiceFactory @Inject constructor(
     doStop(timeout = Duration.ofSeconds(30L))
   }
 
+  override fun stop() {
+    val timeout = Duration.ofSeconds(30L)
+    for ((_, executor) in executors) {
+      executor.shutdown()
+    }
+    val deadlineMs = clock.millis() + timeout.toMillis()
+    awaitAllTerminated(deadlineMs, timeout).start()
+  }
+
   internal fun doStop(timeout: Duration) {
     for ((_, executor) in executors) {
       executor.shutdown()
@@ -49,7 +58,11 @@ internal class RealExecutorServiceFactory @Inject constructor(
     }
 
     val deadlineMs = clock.millis() + timeout.toMillis()
-    val awaitAllTerminated = object : Thread("RealExecutorServiceFactory") {
+    awaitAllTerminated(deadlineMs, timeout).start()
+  }
+
+  private fun awaitAllTerminated(deadlineMs: Long, timeout: Duration?) =
+    object : Thread("RealExecutorServiceFactory") {
       override fun run() {
         try {
           for ((nameFormat, executor) in executors) {
@@ -64,8 +77,6 @@ internal class RealExecutorServiceFactory @Inject constructor(
         }
       }
     }
-    awaitAllTerminated.start()
-  }
 
   // The traceWithActiveSpanOnly=false flag below means we will create a new root span if there is
   // not an ongoing active span at the point of handing over a task to the ExecutorService. This

@@ -4,6 +4,7 @@ import com.google.common.util.concurrent.ServiceManager
 import com.google.inject.Guice
 import com.google.inject.Injector
 import com.google.inject.Module
+import misk.concurrent.ExecutorServiceFactory
 import misk.environment.Environment
 import misk.inject.KAbstractModule
 import misk.inject.getInstance
@@ -67,15 +68,16 @@ internal class MiskTestExtension : BeforeEachCallback, AfterEachCallback {
     injector.getInstance<Callbacks>().afterEach(context)
     uninject(context.rootRequiredTestInstance)
 
+    injector.getInstance<ExecutorServiceFactory>().stop()
+
     for (dep in context.getExternalDependencies()) {
       dep.afterEach()
     }
   }
 
-  class StartServicesBeforeEach @Inject constructor() : BeforeEachCallback {
-    @Inject
-    lateinit var serviceManager: ServiceManager
-
+  class StartServicesBeforeEach @Inject constructor(
+    private val serviceManager: ServiceManager,
+  ) : BeforeEachCallback {
     override fun beforeEach(context: ExtensionContext) {
       if (context.startService()) {
         try {
@@ -93,10 +95,9 @@ internal class MiskTestExtension : BeforeEachCallback, AfterEachCallback {
     }
   }
 
-  class StopServicesAfterEach @Inject constructor() : AfterEachCallback {
-    @Inject
-    lateinit var serviceManager: ServiceManager
-
+  class StopServicesAfterEach @Inject constructor(
+    private val serviceManager: ServiceManager,
+  ) : AfterEachCallback {
     override fun afterEach(context: ExtensionContext) {
       if (context.startService()) {
         serviceManager.stopAsync()
