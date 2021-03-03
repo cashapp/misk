@@ -328,6 +328,15 @@ class CryptoModuleTest {
     assertThat(kr.readKey(name)).isNotNull
   }
 
+  @Test
+  fun testKeyWithNoEncryptedKeyValue() {
+    val key = Key("key", KeyType.DAEAD)
+    val config = CryptoConfig(listOf(key), "aws-kms://uri")
+    val module = CryptoModule(config)
+    assertThatThrownBy { Guice.createInjector(module) }
+      .hasStackTraceContaining("Found local key with no 'encrypted_key' value")
+  }
+
   @Disabled
   @Test // Currently disabled since the env check is as well
   fun testRaisesInWrongEnv() {

@@ -11,9 +11,9 @@ data class CryptoConfig(
   /**
    * The KMS' key URI.
    * For GCP users that may look like:
-   * gcp-kms://projects/<project>/locations/<location>/keyRings/<keyRing>/cryptoKeys/<key>
-   * For AWS users that the Key URI looks like:
-   * aws-kms://arn:aws:kms:<region>:<account-id>:key/<key-id>
+   * `gcp-kms://projects/<project>/locations/<location>/keyRings/<keyRing>/cryptoKeys/<key>`
+   * For AWS users the Key URI looks like:
+   * `aws-kms://arn:aws:kms:<region>:<account-id>:key/<key-id>`
    */
   val kms_uri: String,
   /**
@@ -43,9 +43,9 @@ data class Key(
 
   /**
    * In config it's the path to a file containing the encrypted key material in Tink's JSON format.
-   * However MiskConfig will read the contents of the file, so this variable is file's contents.
+   * However MiskConfig will read the contents of the file, so this variable is the file's contents.
    */
-  val encrypted_key: Secret<String>,
+  val encrypted_key: Secret<String>? = null,
 
   /**
    * A key-specific, and region-specific KMS uri that was used to encrypt this key.

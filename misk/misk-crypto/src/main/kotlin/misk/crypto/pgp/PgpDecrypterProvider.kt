@@ -25,7 +25,7 @@ internal class PgpDecrypterProvider(
     val key = getRawKey(alias)
     val jsonAdapter = moshi.adapter<PgpKeyJsonFile>()
     val pgpKeyJsonFile =
-      jsonAdapter.fromJson(key.encrypted_key.value) ?: error("could not deserialize json file")
+      jsonAdapter.fromJson(key.encrypted_key!!.value) ?: error("could not deserialize json file")
 
     val decoded = Base64.getDecoder().decode(pgpKeyJsonFile.encrypted_private_key)
 
