@@ -41,6 +41,7 @@ dependencies {
   implementation project(':misk-inject')
   implementation project(':misk-service')
   implementation project(':misk-testing')
+  implementation project(':misk-grpc-tests')
 
   testImplementation dep.logbackClassic
 }

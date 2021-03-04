@@ -13,12 +13,15 @@ import misk.client.HttpClientConfig
 import misk.client.HttpClientEndpointConfig
 import misk.client.HttpClientSSLConfig
 import misk.client.HttpClientsConfig
+import misk.grpc.miskserver.GetFeatureGrpcAction
+import misk.grpc.miskserver.RouteChatGrpcAction
 import misk.grpc.reflect.GrpcReflectModule
 import misk.grpc.reflect.SchemaReflector
 import misk.grpc.reflect.ServiceReflector
 import misk.inject.KAbstractModule
 import misk.security.ssl.SslLoader
 import misk.security.ssl.TrustStoreConfig
+import misk.web.WebActionModule
 import misk.web.WebTestingModule
 import misk.web.jetty.JettyService
 import okhttp3.HttpUrl
@@ -32,6 +35,8 @@ class GrpcReflectTestingModule : KAbstractModule() {
     )))
     install(GrpcClientModule.create<ServerReflectionClient, GrpcServerReflectionClient>("default"))
     install(GrpcReflectModule())
+    install(WebActionModule.create<GetFeatureGrpcAction>())
+    install(WebActionModule.create<RouteChatGrpcAction>())
   }
 
   @Provides
@@ -61,7 +66,7 @@ class GrpcReflectTestingModule : KAbstractModule() {
 
   @Provides @Singleton
   fun provideServiceReflector() : ServiceReflector {
-    val protosDirectory = "/Users/jwilson/Development/polyrepo/misk/misk-grpc-tests/src/main/proto"
+    val protosDirectory = "/Users/juliao/Development/misk/misk-grpc-tests/src/main/proto"
 
     val schemaLoader = SchemaLoader(FileSystems.getDefault())
     schemaLoader.initRoots(
