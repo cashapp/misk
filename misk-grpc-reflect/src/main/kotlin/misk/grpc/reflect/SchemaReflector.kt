@@ -78,7 +78,14 @@ class SchemaReflector(
           if (type != null) {
             location = type.location
           } else {
-            error("TODO: fail the call somehow?")
+            val method = symbol.substringAfterLast(".")
+            val fullServiceName = symbol.substringBeforeLast(".")
+            val serviceWithMethod = schema.getService(fullServiceName)
+            if (serviceWithMethod != null) {
+              location = serviceWithMethod.location
+            } else {
+              error("TODO: fail the call somehow?")
+            }
           }
         }
 
