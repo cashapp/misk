@@ -256,6 +256,8 @@ internal class SessionFactoryService(
     require(sessionFactory != null)
     sessionFactory!!.close()
 
+    transacters.forEach { it.shutDown() }
+
     logger.info("Stopped @${qualifier.simpleName} Hibernate in $stopwatch")
   }
 
@@ -266,5 +268,11 @@ internal class SessionFactoryService(
       |    If this is a test, then annotate your test class with @MiskTest(startService = true)
       |""".trimMargin()
     )
+  }
+
+  private val transacters = mutableListOf<Transacter>()
+
+  override fun registerTransacter(transacter: Transacter) {
+    transacters.add(transacter)
   }
 }

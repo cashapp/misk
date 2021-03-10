@@ -51,12 +51,16 @@ internal class RealTransacter private constructor(
    */
   private val readerSessionFactoryProvider: Provider<SessionFactory>?,
   private val config: DataSourceConfig,
-  private val threadLatestSession: ThreadLocal<RealSession>,
   private val options: TransacterOptions,
   private val executorServiceFactory: ExecutorServiceFactory,
   private val shardListFetcher: ShardListFetcher,
   private val hibernateEntities: Set<HibernateEntity>
 ) : Transacter {
+
+  companion object {
+    @JvmStatic
+    private var threadLatestSession: ThreadLocal<RealSession> = ThreadLocal()
+  }
 
   constructor(
     qualifier: KClass<out Annotation>,
@@ -70,7 +74,6 @@ internal class RealTransacter private constructor(
     sessionFactoryProvider = sessionFactoryProvider,
     readerSessionFactoryProvider = readerSessionFactoryProvider,
     config = config,
-    threadLatestSession = ThreadLocal(),
     options = TransacterOptions(),
     executorServiceFactory = executorServiceFactory,
     shardListFetcher = ShardListFetcher(),
@@ -83,6 +86,12 @@ internal class RealTransacter private constructor(
 
   override fun entities(): Set<KClass<out DbEntity<*>>> {
     return hibernateEntities.map { it.entity }.toSet()
+  }
+
+  override fun shutDown() {
+    val session = threadLatestSession.get()
+    threadLatestSession.remove()
+    session?.close()
   }
 
   /**
@@ -330,7 +339,6 @@ internal class RealTransacter private constructor(
       qualifier = qualifier,
       sessionFactoryProvider = sessionFactoryProvider,
       readerSessionFactoryProvider = readerSessionFactoryProvider,
-      threadLatestSession = threadLatestSession,
       options = options,
       config = config,
       executorServiceFactory = executorServiceFactory,

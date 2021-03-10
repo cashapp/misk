@@ -100,33 +100,15 @@ class HibernateModule(
         .dependsOn<DataSourceService>(qualifier)
     )
 
+    val transacterServiceProvider = getProvider(keyOf<TransacterService>(qualifier))
+
     bind(transacterKey).toProvider(object : Provider<Transacter> {
       @Inject lateinit var executorServiceFactory: ExecutorServiceFactory
       @Inject lateinit var injector: Injector
-      override fun get(): RealTransacter = RealTransacter(
-        qualifier = qualifier,
-        sessionFactoryProvider = sessionFactoryProvider,
-        readerSessionFactoryProvider = readerSessionFactoryProvider,
-        config = config,
-        executorServiceFactory = executorServiceFactory,
-        hibernateEntities = injector.findBindingsByType(HibernateEntity::class.typeLiteral()).map {
-          it.provider.get()
-        }.toSet()
-      )
-    }).asSingleton()
-
-    /**
-     * Reader transacter is only supported for MySQL for now. TiDB and Vitess replica read works
-     * a bit differently than MySQL.
-     */
-    if (readerQualifier != null && config.type == DataSourceType.MYSQL) {
-      val readerTransacterKey = Transacter::class.toKey(readerQualifier)
-      bind(readerTransacterKey).toProvider(object : Provider<Transacter> {
-        @Inject lateinit var executorServiceFactory: ExecutorServiceFactory
-        @Inject lateinit var injector: Injector
-        override fun get(): Transacter = RealTransacter(
-          qualifier = readerQualifier,
-          sessionFactoryProvider = readerSessionFactoryProvider!!,
+      override fun get(): RealTransacter {
+        val realTransacter = RealTransacter(
+          qualifier = qualifier,
+          sessionFactoryProvider = sessionFactoryProvider,
           readerSessionFactoryProvider = readerSessionFactoryProvider,
           config = config,
           executorServiceFactory = executorServiceFactory,
@@ -134,7 +116,37 @@ class HibernateModule(
             .map {
               it.provider.get()
             }.toSet()
-        ).readOnly()
+        )
+        transacterServiceProvider.get().registerTransacter(realTransacter)
+        return realTransacter
+      }
+    }).asSingleton()
+
+    /**
+     * Reader transacter is only supported for MySQL for now. TiDB and Vitess replica read works
+     * a bit differently than MySQL.
+     */
+    if (readerQualifier != null && config.type == DataSourceType.MYSQL) {
+      val readerTransacterServiceProvider = getProvider(keyOf<TransacterService>(readerQualifier))
+      val readerTransacterKey = Transacter::class.toKey(readerQualifier)
+      bind(readerTransacterKey).toProvider(object : Provider<Transacter> {
+        @Inject lateinit var executorServiceFactory: ExecutorServiceFactory
+        @Inject lateinit var injector: Injector
+        override fun get(): Transacter {
+          val realTransacter = RealTransacter(
+            qualifier = readerQualifier,
+            sessionFactoryProvider = readerSessionFactoryProvider!!,
+            readerSessionFactoryProvider = readerSessionFactoryProvider,
+            config = config,
+            executorServiceFactory = executorServiceFactory,
+            hibernateEntities = injector.findBindingsByType(HibernateEntity::class.typeLiteral())
+              .map {
+                it.provider.get()
+              }.toSet()
+          )
+          readerTransacterServiceProvider.get().registerTransacter(realTransacter)
+          return realTransacter.readOnly()
+        }
       }).asSingleton()
     }
 
