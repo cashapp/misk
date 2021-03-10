@@ -15,4 +15,6 @@ import com.google.common.util.concurrent.Service
  *     .dependsOn<TransacterService>(Movies::class))
  * ```
  **/
-interface TransacterService : Service
+interface TransacterService : Service {
+  fun registerTransacter(transacter: Transacter)
+}
