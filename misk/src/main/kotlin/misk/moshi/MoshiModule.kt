@@ -15,7 +15,11 @@ import javax.inject.Singleton
 import com.squareup.wire.WireJsonAdapterFactory as WireOnlyJsonAdapterFactory
 import misk.moshi.wire.WireMessageAdapter as MiskOnlyMessageAdapter
 
-internal class MoshiModule(
+/**
+ * For service setup, prefer to install [misk.MiskCommonServiceModule] over installing [MoshiModule]
+ * directly.
+ */
+class MoshiModule(
   private val useWireToRead: Boolean = false,
   private val useWireToWrite: Boolean = false
 ) : KAbstractModule() {
