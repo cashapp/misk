@@ -78,11 +78,6 @@ interface Transacter {
 
   /** Returns KClasses for the bound DbEntities for the transacter */
   fun entities(): Set<KClass<out DbEntity<*>>>
-
-  /**
-   * Free resources, etc.
-   */
-  fun shutDown()
 }
 
 fun Transacter.shards() = transaction { it.shards() }

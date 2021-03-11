@@ -56,7 +56,7 @@ internal class SchemaValidatorTest {
       val injectorServiceProvider = getProvider(HibernateInjectorAccess::class.java)
       val entitiesProvider = getProvider(setOfType(HibernateEntity::class).toKey(qualifier))
 
-      val sessionFactoryProvider = getProvider(keyOf<SessionFactory>(qualifier))
+      val sessionFactoryServiceProvider = getProvider(keyOf<SessionFactoryService>(qualifier))
       bind<SessionFactory>()
         .annotatedWith<ValidationDb>()
         .toProvider(keyOf<SessionFactoryService>(qualifier))
@@ -66,8 +66,8 @@ internal class SchemaValidatorTest {
         @Inject lateinit var injector: Injector
         override fun get(): RealTransacter = RealTransacter(
           qualifier = qualifier,
-          sessionFactoryProvider = sessionFactoryProvider,
-          readerSessionFactoryProvider = null,
+          sessionFactoryService = sessionFactoryServiceProvider.get(),
+          readerSessionFactoryService = null,
           config = config.data_source,
           executorServiceFactory = executorServiceFactory,
           hibernateEntities = injector.findBindingsByType(HibernateEntity::class.typeLiteral())

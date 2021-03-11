@@ -729,7 +729,7 @@ abstract class TransacterTest {
   }
 
   @Test
-  fun retriesIncludeConnectionReuse() {
+  fun retriesIncludeAttemptCount() {
     logCollector.takeMessages()
 
     val callCount = AtomicInteger()
@@ -745,10 +745,10 @@ abstract class TransacterTest {
     )
     assertThat(logs[1]).matches(
       "Movies recoverable transaction exception " +
-        "\\(attempt 2, same connection\\), will retry after a PT.*S delay"
+        "\\(attempt 2\\), will retry after a PT.*S delay"
     )
     assertThat(logs[2]).matches(
-      "retried Movies transaction succeeded \\(attempt 3, same connection\\)"
+      "retried Movies transaction succeeded \\(attempt 3\\)"
     )
   }
 
