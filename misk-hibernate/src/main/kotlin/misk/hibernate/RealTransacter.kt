@@ -32,7 +32,6 @@ import java.util.concurrent.Callable
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.Future
 import java.util.concurrent.TimeUnit
-import javax.inject.Provider
 import javax.persistence.OptimisticLockException
 import kotlin.reflect.KClass
 
@@ -43,34 +42,31 @@ typealias Check = misk.jdbc.Check
 
 internal class RealTransacter private constructor(
   private val qualifier: KClass<out Annotation>,
-  private val sessionFactoryProvider: Provider<SessionFactory>,
+  private val sessionFactoryService: SessionFactoryService,
   /**
    * Replica reads are directed to this SessionFactory.
    *
    * If it's not been provided the writer SessionFactory will be used.
    */
-  private val readerSessionFactoryProvider: Provider<SessionFactory>?,
+  private val readerSessionFactoryService: SessionFactoryService?,
   private val config: DataSourceConfig,
-  private val threadLatestSession: ThreadLocal<RealSession>,
   private val options: TransacterOptions,
   private val executorServiceFactory: ExecutorServiceFactory,
   private val shardListFetcher: ShardListFetcher,
   private val hibernateEntities: Set<HibernateEntity>
 ) : Transacter {
-
   constructor(
     qualifier: KClass<out Annotation>,
-    sessionFactoryProvider: Provider<SessionFactory>,
-    readerSessionFactoryProvider: Provider<SessionFactory>?,
+    sessionFactoryService: SessionFactoryService,
+    readerSessionFactoryService: SessionFactoryService?,
     config: DataSourceConfig,
     executorServiceFactory: ExecutorServiceFactory,
     hibernateEntities: Set<HibernateEntity>
   ) : this(
     qualifier = qualifier,
-    sessionFactoryProvider = sessionFactoryProvider,
-    readerSessionFactoryProvider = readerSessionFactoryProvider,
+    sessionFactoryService = sessionFactoryService,
+    readerSessionFactoryService = readerSessionFactoryService,
     config = config,
-    threadLatestSession = ThreadLocal(),
     options = TransacterOptions(),
     executorServiceFactory = executorServiceFactory,
     shardListFetcher = ShardListFetcher(),
@@ -133,10 +129,10 @@ internal class RealTransacter private constructor(
   }
 
   private val sessionFactory
-    get() = sessionFactoryProvider.get()
+    get() = sessionFactoryService.get()
 
   override val inTransaction: Boolean
-    get() = threadLatestSession.get()?.inTransaction ?: false
+    get() = sessionFactoryService.threadInTransaction.get()
 
   override fun isCheckEnabled(check: Check): Boolean {
     return CheckDisabler.isCheckEnabled(check)
@@ -185,7 +181,7 @@ internal class RealTransacter private constructor(
 
         if (attempt > 1) {
           logger.info {
-            "retried ${qualifier.simpleName} transaction succeeded (${attemptNote(attempt)})"
+            "retried ${qualifier.simpleName} transaction succeeded (attempt $attempt)"
           }
         }
 
@@ -196,7 +192,7 @@ internal class RealTransacter private constructor(
         if (attempt >= options.maxAttempts) {
           logger.info {
             "${qualifier.simpleName} recoverable transaction exception " +
-              "(${attemptNote(attempt)}), no more attempts"
+              "(attempt $attempt), no more attempts"
           }
           throw e
         }
@@ -204,7 +200,7 @@ internal class RealTransacter private constructor(
         val sleepDuration = backoff.nextRetry()
         logger.info(e) {
           "${qualifier.simpleName} recoverable transaction exception " +
-            "(${attemptNote(attempt)}), will retry after a $sleepDuration delay"
+            "(attempt $attempt), will retry after a $sleepDuration delay"
         }
 
         if (!sleepDuration.isZero) {
@@ -212,17 +208,6 @@ internal class RealTransacter private constructor(
         }
       }
     }
-  }
-
-  /**
-   * Returns a string describing the most recent attempt. This includes whether the attempt used the
-   * same connection which might help in diagnosing stale data problems.
-   */
-  private fun attemptNote(attempt: Int): String {
-    if (attempt == 1) return "attempt 1"
-    val latestSession = threadLatestSession.get()!!
-    if (latestSession.sameConnection) return "attempt $attempt, same connection"
-    return "attempt $attempt, different connection"
   }
 
   private fun <T> transactionInternalSession(block: (session: RealSession) -> T): T {
@@ -292,8 +277,8 @@ internal class RealTransacter private constructor(
   }
 
   private fun reader(): SessionFactory {
-    if (readerSessionFactoryProvider != null) {
-      return readerSessionFactoryProvider.get()
+    if (readerSessionFactoryService != null) {
+      return readerSessionFactoryService.get()
     }
     if (config.type.isVitess) {
       return sessionFactory
@@ -328,9 +313,8 @@ internal class RealTransacter private constructor(
   private fun withOptions(options: TransacterOptions): Transacter =
     RealTransacter(
       qualifier = qualifier,
-      sessionFactoryProvider = sessionFactoryProvider,
-      readerSessionFactoryProvider = readerSessionFactoryProvider,
-      threadLatestSession = threadLatestSession,
+      sessionFactoryService = sessionFactoryService,
+      readerSessionFactoryService = readerSessionFactoryService,
       options = options,
       config = config,
       executorServiceFactory = executorServiceFactory,
@@ -348,7 +332,6 @@ internal class RealTransacter private constructor(
       readOnly = options.readOnly,
       config = config,
       disabledChecks = options.disabledChecks,
-      predecessor = threadLatestSession.get(),
       transacter = this
     )
 
@@ -444,14 +427,11 @@ internal class RealTransacter private constructor(
     private val readOnly: Boolean,
     private val config: DataSourceConfig,
     private val transacter: RealTransacter,
-    var disabledChecks: Collection<Check>,
-    predecessor: RealSession?
+    var disabledChecks: Collection<Check>
   ) : Session, Closeable {
     private val preCommitHooks = mutableListOf<() -> Unit>()
     private val postCommitHooks = mutableListOf<() -> Unit>()
     private val sessionCloseHooks = mutableListOf<() -> Unit>()
-    private val rootConnection = hibernateSession.rootConnection
-    internal val sameConnection = predecessor?.rootConnection == rootConnection
     internal var inTransaction = false
 
     init {
@@ -603,34 +583,16 @@ internal class RealTransacter private constructor(
     }
 
     internal fun isReadOnly(): Boolean = readOnly
-
-    /**
-     * Returns the physical JDBC connection of this session. Hibernate creates one-time-use wrappers
-     * around the physical connections that talk to the database. This unwraps those so we can
-     * tell when a connection is involved in a stale data problem.
-     */
-    private val org.hibernate.Session.rootConnection: Connection
-      get() {
-        var result: Connection = doReturningWork { connection -> connection }
-        while (result.isWrapperFor(Connection::class.java)) {
-          val unwrapped = result.unwrap(Connection::class.java)
-          if (unwrapped == result) break
-          result = unwrapped
-        }
-        return result
-      }
   }
 
   private inline fun <R> useSession(session: RealSession, block: () -> R): R {
-    val previous = threadLatestSession.get()
-    check(previous == null || !previous.inTransaction) { "Attempted to start a nested session" }
+    check(!inTransaction) { "Attempted to start a nested session" }
 
-    threadLatestSession.set(session)
-    session.inTransaction = true
+    sessionFactoryService.threadInTransaction.set(true)
     try {
       return block()
     } finally {
-      session.inTransaction = false
+      sessionFactoryService.threadInTransaction.set(false)
     }
   }
 }
