@@ -1,7 +1,6 @@
 package misk.cron
 
 import misk.inject.KAbstractModule
-import misk.jobqueue.FakeJobQueue
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.time.FakeClock
@@ -9,6 +8,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.time.Clock
 import java.time.Duration
+import java.time.Instant
 import java.time.ZoneId
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -29,25 +29,24 @@ class CronTest {
 
   @Inject private lateinit var cronManager: CronManager
   @Inject private lateinit var clock: FakeClock
-  @Inject private lateinit var fakeJobQueue: FakeJobQueue
 
   @Inject private lateinit var minuteCron: MinuteCron
   @Inject private lateinit var hourCron: HourCron
   @Inject private lateinit var throwsExceptionCron: ThrowsExceptionCron
 
+  private lateinit var lastRun: Instant
+
   private fun runCrons() {
-    cronManager.runReadyCrons()
-    fakeJobQueue.handleJobs()
+    val now = clock.instant()
+    cronManager.runReadyCrons(lastRun)
+    lastRun = now
+    cronManager.waitForCronsComplete()
   }
 
   @Test
   fun basic() {
-    assertThat(minuteCron.counter).isEqualTo(0)
-    assertThat(hourCron.counter).isEqualTo(0)
-    assertThat(throwsExceptionCron.counter).isEqualTo(0)
+    lastRun = clock.instant()
 
-    // Should not be ready to run yet.
-    runCrons()
     assertThat(minuteCron.counter).isEqualTo(0)
     assertThat(hourCron.counter).isEqualTo(0)
     assertThat(throwsExceptionCron.counter).isEqualTo(0)
