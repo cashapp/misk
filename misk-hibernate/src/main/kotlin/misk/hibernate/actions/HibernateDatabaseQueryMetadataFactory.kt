@@ -12,8 +12,8 @@ import misk.hibernate.Select
 import misk.hibernate.Session
 import misk.hibernate.actions.HibernateDatabaseQueryDynamicAction.Companion.HIBERNATE_QUERY_DYNAMIC_WEBACTION_PATH
 import misk.hibernate.actions.HibernateDatabaseQueryStaticAction.Companion.HIBERNATE_QUERY_STATIC_WEBACTION_PATH
+import misk.inject.typeLiteral
 import misk.security.authz.AccessAnnotationEntry
-import misk.web.MiskWebFormBuilder
 import misk.web.MiskWebFormBuilder.Companion.createEnumField
 import misk.web.MiskWebFormBuilder.Companion.createSyntheticEnumField
 import misk.web.MiskWebFormBuilder.Companion.maybeCreatePrimitiveField
@@ -28,7 +28,6 @@ import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
 import kotlin.reflect.KType
 import kotlin.reflect.full.allSupertypes
-import kotlin.reflect.full.createType
 import kotlin.reflect.full.declaredMemberFunctions
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.memberProperties
@@ -187,8 +186,7 @@ internal class HibernateDatabaseQueryMetadataFactory @Inject constructor(
     val paths = if (select.path == "") {
       val maybeProjectionClass =
         (selectTargetReturnType.arguments.firstOrNull()?.type?.classifier as KClass<*>?)
-          ?.supertypes?.filter { it.classifier as KClass<*> == Projection::class }
-          ?.firstOrNull()
+          ?.supertypes?.firstOrNull { it.classifier as KClass<*> == Projection::class }
       if (maybeProjectionClass != null) {
         // TODO (adrw) this projection class path parsing isn't working
         val paths = (maybeProjectionClass.classifier as KClass<*>).members.map { member ->
@@ -233,7 +231,7 @@ internal class HibernateDatabaseQueryMetadataFactory @Inject constructor(
     fieldName: String,
     repeated: Boolean
   ): Field? {
-    val fieldClass = fieldType.classifier as KClass<*>
+    val fieldClass = fieldType.typeLiteral().rawType
     val maybeCreatePrimitiveField = maybeCreatePrimitiveField(fieldClass, fieldName, repeated)
     return when {
       maybeCreatePrimitiveField != null -> maybeCreatePrimitiveField
@@ -247,7 +245,7 @@ internal class HibernateDatabaseQueryMetadataFactory @Inject constructor(
         val listType = fieldClassParameters[0].type!!
         createField(listType, fieldName, true)
       }
-      else -> Field(fieldName, fieldClass.qualifiedName!!, repeated)
+      else -> Field(fieldName, fieldClass.canonicalName, repeated)
     }
   }
 
@@ -317,8 +315,6 @@ internal class HibernateDatabaseQueryMetadataFactory @Inject constructor(
       )
     )
 
-    val DYNAMIC_TYPES = MiskWebFormBuilder().calculateTypes(DynamicQuery::class.createType())
-
     fun makeDynamicQueryTypes(dbEntityClass: KClass<out DbEntity<*>>): List<Pair<String, Type>> =
       getQueryConfigType() + listOf(
         DYNAMIC_CONSTRAINT_TYPE_NAME to Type(
@@ -329,7 +325,7 @@ internal class HibernateDatabaseQueryMetadataFactory @Inject constructor(
               enumValues = dbEntityClass.memberProperties.map { it.name },
               repeated = false
             ),
-            createEnumField(Operator::class, "operator", false),
+            createEnumField(Operator::class.java, "operator", false),
             Field(name = "value", repeated = false, type = "String"),
           )
         ),
