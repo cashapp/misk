@@ -28,9 +28,7 @@ import javax.persistence.GenerationType
 import javax.persistence.Table
 
 class HibernateDatabaseQueryMetadataFactoryTest {
-  private val converter = HibernateDatabaseQueryMetadataFactory(
-    listOf()
-  )
+  private val converter = HibernateDatabaseQueryMetadataFactory(listOf())
 
   @Test
   fun `static happy path`() {

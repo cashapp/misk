@@ -1,16 +1,17 @@
 package misk.web
 
+import com.google.inject.TypeLiteral
 import com.squareup.wire.Message
 import com.squareup.wire.WireEnum
 import com.squareup.wire.WireField
 import okio.ByteString
+import java.lang.reflect.ParameterizedType
 import java.time.Duration
 import java.time.Instant
 import java.time.LocalDate
 import java.util.LinkedList
 import kotlin.reflect.KClass
 import kotlin.reflect.KType
-import kotlin.reflect.full.declaredMemberProperties
 import kotlin.reflect.full.superclasses
 
 /**
@@ -34,60 +35,64 @@ class MiskWebFormBuilder {
     }
 
     val typesMap = mutableMapOf<String, Type>()
-    val stack = LinkedList<KClass<*>>()
-    stack.push(requestClass)
+    val stack = LinkedList<Class<*>>()
+    stack.push(requestClass.java)
 
     while (stack.isNotEmpty()) {
-      val klass = stack.pop()
+      val clazz = stack.pop()
 
       // No need to re-process a given type.
       // This acts as the visited set of our type graph traversal.
-      if (typesMap.containsKey(klass.qualifiedName!!)) {
+      if (typesMap.containsKey(clazz.canonicalName!!)) {
         continue
       }
 
       val fields = mutableListOf<Field>()
 
-      for (property in klass.declaredMemberProperties) {
+      for (property in clazz.declaredFields) {
         // Use the WireField annotation to identify fields of our proto.
         if (property.annotations.any { it is WireField }) {
           val fieldName = property.name
-          handleField(property.returnType, fieldName, fields, stack)
+          handleField(
+            fieldType = TypeLiteral.get(property.genericType),
+            fieldName = fieldName,
+            fields = fields,
+            stack = stack
+          )
         }
       }
 
-      typesMap.put(klass.qualifiedName!!, Type(fields.toList()))
+      typesMap[clazz.canonicalName!!] = Type(fields.toList())
     }
 
     return typesMap
   }
 
   private fun handleField(
-    fieldType: KType,
+    fieldType: TypeLiteral<*>,
     fieldName: String,
     fields: MutableList<Field>,
-    stack: LinkedList<KClass<*>>,
+    stack: LinkedList<Class<*>>,
     repeated: Boolean = false
   ) {
-
-    val fieldClass = fieldType.classifier as KClass<*>
+    val fieldClass = fieldType.rawType
     val maybePrimitiveType = maybeCreatePrimitiveField(fieldClass, fieldName, repeated)
     when {
       maybePrimitiveType != null -> fields.add(maybePrimitiveType)
-      fieldClass == List::class -> {
-        val fieldClassParameters = fieldType.arguments
+      fieldClass == List::class.java -> {
+        val fieldClassParameters = (fieldType.type as ParameterizedType).actualTypeArguments
         check(fieldClassParameters.size == 1) {
           "Encountered Wire-generated List without 1 type parameter: $fieldType"
         }
-        val listType = fieldClassParameters[0].type!!
-        handleField(listType, fieldName, fields, stack, true)
+        val listType = fieldClassParameters[0]
+        handleField(TypeLiteral.get(listType), fieldName, fields, stack, true)
       }
-      fieldClass == Map::class -> {
+      fieldClass == Map::class.java -> {
         // TODO: Support maps
-        fields.add(Field(fieldName, fieldClass.qualifiedName!!, repeated))
+        fields.add(Field(fieldName, fieldClass.canonicalName!!, repeated))
       }
       else -> {
-        fields.add(Field(fieldName, fieldClass.qualifiedName!!, repeated))
+        fields.add(Field(fieldName, fieldClass.canonicalName!!, repeated))
         stack.push(fieldClass)
       }
     }
@@ -99,28 +104,63 @@ class MiskWebFormBuilder {
      * Returns null if the type cannot be mapped.
      */
     fun maybeCreatePrimitiveField(
-      fieldClass: KClass<*>,
+      fieldClass: Class<*>,
       fieldName: String,
       repeated: Boolean
     ): Field? {
       return when {
-        fieldClass == String::class -> Field(fieldName, String::class.simpleName!!, repeated)
-        fieldClass == ByteString::class -> Field(
-          fieldName, ByteString::class.simpleName!!,
+        fieldClass == String::class.java -> Field(fieldName, String::class.simpleName!!, repeated)
+        fieldClass == ByteString::class.java -> Field(
+          fieldName, ByteString::class.simpleName!!, repeated
+        )
+        fieldClass == Char::class.javaObjectType -> Field(
+          fieldName,
+          Char::class.simpleName!!,
           repeated
         )
-        fieldClass == Char::class -> Field(fieldName, Char::class.simpleName!!, repeated)
-        fieldClass == Byte::class -> Field(fieldName, Byte::class.simpleName!!, repeated)
-        fieldClass == Short::class -> Field(fieldName, Short::class.simpleName!!, repeated)
-        fieldClass == Int::class -> Field(fieldName, Int::class.simpleName!!, repeated)
-        fieldClass == Long::class -> Field(fieldName, Long::class.simpleName!!, repeated)
-        fieldClass == Double::class -> Field(fieldName, Double::class.simpleName!!, repeated)
-        fieldClass == Boolean::class -> Field(fieldName, Boolean::class.simpleName!!, repeated)
-        fieldClass == Enum::class -> createEnumField(fieldClass, fieldName, repeated)
-        fieldClass == Instant::class -> Field(fieldName, Instant::class.simpleName!!, repeated)
-        fieldClass == Duration::class -> Field(fieldName, Duration::class.simpleName!!, repeated)
-        fieldClass == LocalDate::class -> Field(fieldName, LocalDate::class.simpleName!!, repeated)
-        fieldClass.superclasses.contains(WireEnum::class) -> {
+        fieldClass == Byte::class.javaObjectType -> Field(
+          fieldName,
+          Byte::class.simpleName!!,
+          repeated
+        )
+        fieldClass == Short::class.javaObjectType -> Field(
+          fieldName,
+          Short::class.simpleName!!,
+          repeated
+        )
+        fieldClass == Int::class.javaObjectType -> Field(
+          fieldName,
+          Int::class.simpleName!!,
+          repeated
+        )
+        fieldClass == Long::class.javaObjectType -> Field(
+          fieldName,
+          Long::class.simpleName!!,
+          repeated
+        )
+        fieldClass == Double::class.javaObjectType -> Field(
+          fieldName,
+          Double::class.simpleName!!,
+          repeated
+        )
+        fieldClass == Boolean::class.javaObjectType -> Field(
+          fieldName,
+          Boolean::class.simpleName!!,
+          repeated
+        )
+        fieldClass == Enum::class.java -> createEnumField(fieldClass, fieldName, repeated)
+        fieldClass == Instant::class.java -> Field(fieldName, Instant::class.simpleName!!, repeated)
+        fieldClass == Duration::class.java -> Field(
+          fieldName,
+          Duration::class.simpleName!!,
+          repeated
+        )
+        fieldClass == LocalDate::class.java -> Field(
+          fieldName,
+          LocalDate::class.simpleName!!,
+          repeated
+        )
+        WireEnum::class.java.isAssignableFrom(fieldClass) -> {
           createEnumField(fieldClass, fieldName, repeated)
         }
         else -> null
@@ -132,18 +172,13 @@ class MiskWebFormBuilder {
      * Example: "Enum<app.cash.backfila.BackfillType,ISOLATED,PARALLEL>"
      */
     fun createEnumField(
-      fieldClass: KClass<*>,
+      fieldClass: Class<*>,
       fieldName: String,
       repeated: Boolean
     ): Field = createSyntheticEnumField(
-      fieldClassName = fieldClass.qualifiedName!!,
+      fieldClassName = fieldClass.canonicalName,
       fieldName = fieldName,
-      enumValues = (
-        fieldClass.members.find {
-          it.name == "values"
-        }?.call() as Array<*>
-        )
-        .map { (it as Enum<*>).name },
+      enumValues = fieldClass.enumConstants.map { (it as Enum<*>).name },
       repeated = repeated
     )
 
@@ -167,9 +202,10 @@ class MiskWebFormBuilder {
 
   /**
    * Akin to a Proto field, a field can be of primitive or another Message type,
-   * and can be repeated to become a list
+   * and can be repeated to become a list.
    *
-   * Enums are encoded to contain their values within their Type definition as opposed to a unique Type
+   * Enums are encoded to contain their values within their Type definition as
+   * opposed to a unique Type.
    */
   data class Field(val name: String, val type: String, val repeated: Boolean)
 }
