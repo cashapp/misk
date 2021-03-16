@@ -8,6 +8,8 @@ enum class StatusCode(val code: Int) {
   FORBIDDEN(403),
   NOT_ACCEPTABLE(406),
   CONFLICT(409),
+  PAYLOAD_TOO_LARGE(413),
+  UNSUPPORTED_MEDIA_TYPE(415),
   ENHANCE_YOUR_CALM(420),
   UNPROCESSABLE_ENTITY(422),
   TOO_MANY_REQUESTS(429),
@@ -60,6 +62,12 @@ open class TooManyRequestsException(message: String = "", cause: Throwable? = nu
 /** Base exception for when a server is acting as a gateway and cannot get a response in time */
 open class GatewayTimeoutException(message: String = "", cause: Throwable? = null) :
   ActionException(StatusCode.GATEWAY_TIMEOUT, message, cause)
+
+open class PayloadTooLargeException(message: String = "", cause: Throwable? = null) :
+  ActionException(StatusCode.PAYLOAD_TOO_LARGE, message, cause)
+
+open class UnsupportedMediaTypeException(message: String = "", cause: Throwable? = null) :
+  ActionException(StatusCode.UNSUPPORTED_MEDIA_TYPE, message, cause)
 
 /** Similar to [kotlin.require], but throws [BadRequestException] if the check fails */
 inline fun requireRequest(check: Boolean, lazyMessage: () -> String) {
