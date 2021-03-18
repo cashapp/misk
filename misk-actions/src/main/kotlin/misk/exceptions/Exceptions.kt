@@ -54,6 +54,11 @@ open class WebActionException(
 ) : Exception(message, cause) {
   val isClientError = code in (400..499)
   val isServerError = code in (500..599)
+
+  @Deprecated("Use code instead")
+  val statusCode: StatusCode
+    get() = StatusCode.values().find { it.code == code }
+      ?: throw IllegalStateException("Response code is not in StatusCode. Use `code` instead")
 }
 
 /** Base exception for when resources are not found */
