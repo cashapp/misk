@@ -18,6 +18,7 @@ import javax.inject.Inject
  * are returned with just a status code and minimal messaging, to avoid leaking internal
  * implementation details and possible vulnerabilities
  */
+@Deprecated("Superseded by WebActionExceptionMapper")
 internal class ActionExceptionMapper @Inject internal constructor(
   val config: ActionExceptionLogLevelConfig
 ) : ExceptionMapper<ActionException> {
