@@ -36,6 +36,7 @@ class CronTest {
 
   private lateinit var lastRun: Instant
 
+  // This simulates what the automated part of cron does.
   private fun runCrons() {
     val now = clock.instant()
     cronManager.runReadyCrons(lastRun)

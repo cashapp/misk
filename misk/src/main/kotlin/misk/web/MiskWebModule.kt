@@ -8,6 +8,7 @@ import misk.MiskCaller
 import misk.MiskDefault
 import misk.ServiceModule
 import misk.exceptions.ActionException
+import misk.exceptions.WebActionException
 import misk.grpc.GrpcFeatureBinding
 import misk.inject.KAbstractModule
 import misk.queuing.TimedBlockingQueue
@@ -26,6 +27,7 @@ import misk.web.exceptions.EofExceptionMapper
 import misk.web.exceptions.ExceptionHandlingInterceptor
 import misk.web.exceptions.ExceptionMapperModule
 import misk.web.exceptions.IOExceptionMapper
+import misk.web.exceptions.WebActionExceptionMapper
 import misk.web.extractors.FormValueFeatureBinding
 import misk.web.extractors.PathParamFeatureBinding
 import misk.web.extractors.QueryParamFeatureBinding
@@ -151,6 +153,7 @@ class MiskWebModule(private val config: WebConfig) : KAbstractModule() {
       .to<RequestBodyLoggingInterceptor.Factory>()
 
     install(ExceptionMapperModule.create<ActionException, ActionExceptionMapper>())
+    install(ExceptionMapperModule.create<WebActionException, WebActionExceptionMapper>())
     install(ExceptionMapperModule.create<IOException, IOExceptionMapper>())
     install(ExceptionMapperModule.create<EofException, EofExceptionMapper>())
 

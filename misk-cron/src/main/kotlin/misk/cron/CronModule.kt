@@ -47,4 +47,4 @@ class FakeCronModule(
 
 @Qualifier
 @Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION, AnnotationTarget.VALUE_PARAMETER)
-annotation class ForMiskCron
+internal annotation class ForMiskCron

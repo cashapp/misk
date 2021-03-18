@@ -98,19 +98,6 @@ class CronManager @Inject constructor() {
     removeCompletedCrons()
   }
 
-  internal fun runJob(name: String) {
-    logger.info { "Executing cronjob $name" }
-    val cronEntry = cronEntries[name] ?: return
-
-    try {
-      cronEntry.runnable.run()
-    } catch (t: Throwable) {
-      logger.warn { "Exception on cronjob $name: ${t.stackTraceToString()}" }
-    } finally {
-      logger.info { "Executing cronjob $name complete" }
-    }
-  }
-
   companion object {
     private val logger = getLogger<CronManager>()
   }
