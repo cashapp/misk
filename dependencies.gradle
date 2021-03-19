@@ -11,6 +11,7 @@ ext.dep = [
   "bouncycastle": "org.bouncycastle:bcprov-jdk15on:1.65",
   "bouncycastlePgp": "org.bouncycastle:bcpg-jdk15on:1.65",
   "concurrencyLimitsCore": "com.netflix.concurrency-limits:concurrency-limits-core:0.3.6",
+  "cronutils": "com.cronutils:cron-utils:9.1.3",
   "curatorFramework": "org.apache.curator:curator-framework:4.0.1",
   "datasourceProxy": "net.ttddyy:datasource-proxy:1.4.9",
   "docker": "com.github.docker-java:docker-java:3.1.5",
