@@ -3,6 +3,7 @@ package misk.web
 import com.google.inject.Provider
 import com.google.inject.Provides
 import com.google.inject.TypeLiteral
+import com.google.inject.multibindings.MapBinder
 import misk.ApplicationInterceptor
 import misk.MiskCaller
 import misk.MiskDefault
@@ -60,6 +61,11 @@ import misk.web.marshal.PlainTextMarshaller
 import misk.web.marshal.ProtobufMarshaller
 import misk.web.marshal.ProtobufUnmarshaller
 import misk.web.marshal.Unmarshaller
+import misk.web.mdc.LogContextProvider
+import misk.web.mdc.RequestHttpMethodLogContextProvider
+import misk.web.mdc.RequestProtocolLogContextProvider
+import misk.web.mdc.RequestRemoteAddressLogContextProvider
+import misk.web.mdc.RequestURILogContextProvider
 import misk.web.proxy.WebProxyEntry
 import misk.web.resources.StaticResourceEntry
 import org.eclipse.jetty.io.EofException
@@ -110,6 +116,18 @@ class MiskWebModule(private val config: WebConfig) : KAbstractModule() {
     newMultibinder<ApplicationInterceptor.Factory>()
     newMultibinder<StaticResourceEntry>()
     newMultibinder<WebProxyEntry>()
+    val logContextProviderBinder = MapBinder.newMapBinder(
+      binder(),
+      String::class.java, LogContextProvider::class.java
+    )
+    logContextProviderBinder.addBinding(RequestLogContextInterceptor.MDC_HTTP_METHOD)
+      .to<RequestHttpMethodLogContextProvider>()
+    logContextProviderBinder.addBinding(RequestLogContextInterceptor.MDC_PROTOCOL)
+      .to<RequestProtocolLogContextProvider>()
+    logContextProviderBinder.addBinding(RequestLogContextInterceptor.MDC_REMOTE_ADDR)
+      .to<RequestRemoteAddressLogContextProvider>()
+    logContextProviderBinder.addBinding(RequestLogContextInterceptor.MDC_REQUEST_URI)
+      .to<RequestURILogContextProvider>()
 
     // Register built-in interceptors. Interceptors run in the order in which they are
     // installed, and the order of these interceptors is critical.
