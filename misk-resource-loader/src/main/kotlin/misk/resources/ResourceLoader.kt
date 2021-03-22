@@ -4,8 +4,6 @@ import com.google.common.collect.ImmutableList
 import com.google.common.collect.ImmutableSet
 import java.nio.file.Files
 import java.nio.file.Path
-import javax.inject.Inject
-import javax.inject.Singleton
 import misk.resources.ResourceLoader.Backend
 import okio.BufferedSource
 import okio.ByteString
@@ -34,8 +32,7 @@ import okio.sink
  * Other backends are permitted. They should be registered with a `MapBinder` with the backend
  * scheme like `classpath:` as the key.
  */
-@Singleton
-class ResourceLoader @Inject constructor(
+class ResourceLoader(
   @Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN")
   private val backends: java.util.Map<String, Backend>
 ) {
