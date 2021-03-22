@@ -3,7 +3,6 @@ package misk.hibernate
 import misk.exceptions.UnauthorizedException
 import misk.jdbc.DataSourceType
 import misk.jdbc.uniqueString
-import misk.logging.LogCollector
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
@@ -23,7 +22,7 @@ import kotlin.test.assertFailsWith
 abstract class TransacterTest {
   @Inject @Movies lateinit var transacter: Transacter
   @Inject lateinit var queryFactory: Query.Factory
-  @Inject lateinit var logCollector: LogCollector
+  @Inject lateinit var logCollector: wisp.logging.LogCollector
 
   @Test
   fun happyPath() {
