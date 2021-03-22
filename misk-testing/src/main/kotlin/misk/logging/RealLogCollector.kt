@@ -11,8 +11,8 @@ import kotlin.reflect.KClass
 @Singleton
 internal class RealLogCollector @Inject constructor() :
   AbstractIdleService(),
-  LogCollector,
   // don't change this until ready to remove old interface completely
+  LogCollector,
   LogCollectorService {
 
   private val wispQueuedLogCollector = WispQueuedLogCollector()
