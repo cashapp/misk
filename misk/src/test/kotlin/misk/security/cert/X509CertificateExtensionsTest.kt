@@ -1,6 +1,6 @@
 package misk.security.cert
 
-import misk.security.ssl.PemComboFile
+import wisp.security.ssl.PemComboFile
 import okio.buffer
 import okio.source
 import org.assertj.core.api.Assertions.assertThat

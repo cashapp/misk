@@ -1,4 +1,4 @@
-package misk.security.ssl
+package wisp.security.ssl
 
 import okio.Buffer
 import okio.BufferedSource

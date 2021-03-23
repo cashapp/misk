@@ -1,6 +1,6 @@
 package misk.security.ssl
 
-import java.security.KeyStore
+import wisp.security.ssl.CertStore as WispCertStore
 
 /** A certificate and its private key. */
-data class CertStore(val keyStore: KeyStore)
+typealias CertStore = WispCertStore

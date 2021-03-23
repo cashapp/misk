@@ -36,7 +36,8 @@ class ResourceLoader @Inject constructor(
   backends: java.util.Map<String, WispResourceLoader.Backend>
 ) {
   @Suppress("UNCHECKED_CAST")
-  val delegate = WispResourceLoader(backends as Map<String, wisp.resources.ResourceLoader.Backend>)
+  internal val delegate =
+    WispResourceLoader(backends as Map<String, wisp.resources.ResourceLoader.Backend>)
 
   /** Return a buffered source for `address`, or null if no such resource exists. */
   fun open(address: String): BufferedSource? = delegate.open(address)

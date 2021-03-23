@@ -1,20 +1,11 @@
-package misk.security.ssl
+package wisp.security.ssl
 
-import misk.MiskTestingServiceModule
-import misk.security.ssl.SslLoader.Companion.FORMAT_JCEKS
-import misk.security.ssl.SslLoader.Companion.FORMAT_JKS
-import misk.security.ssl.SslLoader.Companion.FORMAT_PEM
-import misk.testing.MiskTest
-import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import wisp.resources.ResourceLoader
 import java.security.KeyStore
-import javax.inject.Inject
 
-@MiskTest
 internal class SslLoaderTest {
-  @MiskTestModule
-  val module = MiskTestingServiceModule()
 
   val clientComboPemPath = "classpath:/ssl/client_cert_key_combo.pem"
   val clientTrustPemPath = "classpath:/ssl/client_cert.pem"
@@ -22,11 +13,14 @@ internal class SslLoaderTest {
   val keystoreJksPath = "classpath:/ssl/keystore.jks"
   val truststoreJksPath = "classpath:/ssl/truststore.jks"
 
-  @Inject lateinit var sslLoader: SslLoader
+  val sslLoader: SslLoader = SslLoader(ResourceLoader.SYSTEM)
 
   @Test
   fun loadKeystoreFromPEM() {
-    val keystore = sslLoader.loadCertStore(clientComboPemPath, FORMAT_PEM, "password")!!.keyStore
+    val keystore = sslLoader.loadCertStore(
+      clientComboPemPath,
+      SslLoader.Companion.FORMAT_PEM, "password"
+    )!!.keyStore
     assertThat(keystore.aliasesOfType<KeyStore.PrivateKeyEntry>()).containsExactly("key")
     assertThat(keystore.getPrivateKey("password".toCharArray())).isNotNull()
 
@@ -39,7 +33,10 @@ internal class SslLoaderTest {
   @Test
   fun loadTrustFromPEM() {
     val keystore =
-      sslLoader.loadTrustStore(clientTrustPemPath, FORMAT_PEM, "serverpassword")!!.keyStore
+      sslLoader.loadTrustStore(
+        clientTrustPemPath,
+        SslLoader.Companion.FORMAT_PEM, "serverpassword"
+      )!!.keyStore
     assertThat(keystore.aliases().toList()).containsExactly("0")
     assertThat((keystore.getX509Certificate()).issuerX500Principal.name)
       .isEqualTo("CN=misk-client,OU=Client,O=Misk,L=San Francisco,ST=CA,C=US")
@@ -50,10 +47,11 @@ internal class SslLoaderTest {
   @Test
   fun loadFromJCEKS() {
     val keystore = sslLoader.loadTrustStore(
-      serverKeystoreJceksPath, FORMAT_JCEKS, "serverpassword"
+      serverKeystoreJceksPath, SslLoader.Companion.FORMAT_JCEKS, "serverpassword"
     )!!.keyStore
     assertThat(keystore.aliasesOfType<KeyStore.PrivateKeyEntry>()).containsExactly("1")
-    assertThat(keystore.getPrivateKey("serverpassword".toCharArray())).isNotNull()
+    assertThat(keystore.getPrivateKey("serverpassword".toCharArray()))
+      .isNotNull()
 
     val certificateAndKey = keystore.getCertificateAndKey("serverpassword".toCharArray())
     assertThat(certificateAndKey).isNotNull()
@@ -63,14 +61,18 @@ internal class SslLoaderTest {
       .isEqualTo("127.0.0.1")
 
     val certificateChain = keystore.getX509CertificateChain()
-    assertThat(certificateChain.map { it.issuerX500Principal.name }).containsExactly(
-      "CN=misk-server,OU=Server,O=Misk,L=San Francisco,ST=CA,C=US"
-    )
+    assertThat(certificateChain.map { it.issuerX500Principal.name })
+      .containsExactly(
+        "CN=misk-server,OU=Server,O=Misk,L=San Francisco,ST=CA,C=US"
+      )
   }
 
   @Test
   fun loadKeystoreFromJKS() {
-    val keystore = sslLoader.loadCertStore(keystoreJksPath, FORMAT_JKS, "changeit")!!.keyStore
+    val keystore = sslLoader.loadCertStore(
+      keystoreJksPath,
+      SslLoader.Companion.FORMAT_JKS, "changeit"
+    )!!.keyStore
     assertThat(keystore.aliasesOfType<KeyStore.PrivateKeyEntry>()).containsExactly(
       "combined-key-cert"
     )
@@ -85,7 +87,10 @@ internal class SslLoaderTest {
   @Test
   fun loadTrustFromJKS() {
     val keystore =
-      sslLoader.loadTrustStore(truststoreJksPath, FORMAT_JKS, "changeit")!!.keyStore
+      sslLoader.loadTrustStore(
+        truststoreJksPath,
+        SslLoader.Companion.FORMAT_JKS, "changeit"
+      )!!.keyStore
     assertThat(keystore.aliases().toList()).containsExactly("ca")
     assertThat((keystore.getX509Certificate()).issuerX500Principal.name)
       .isEqualTo("CN=misk-client,OU=Client,O=Misk,L=San Francisco,ST=CA,C=US")
