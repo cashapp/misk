@@ -8,7 +8,6 @@ import misk.grpc.miskclient.MiskGrpcClientModule
 import misk.grpc.miskclient.RouteGuideCallCounter
 import misk.grpc.miskserver.RouteChatGrpcAction
 import misk.grpc.miskserver.RouteGuideMiskServiceModule
-import misk.logging.LogCollector
 import misk.logging.LogCollectorModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
@@ -19,6 +18,7 @@ import routeguide.Feature
 import routeguide.Point
 import routeguide.RouteGuideClient
 import routeguide.RouteNote
+import wisp.logging.LogCollector
 import javax.inject.Inject
 import javax.inject.Provider
 

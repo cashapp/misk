@@ -11,7 +11,6 @@ import misk.client.HttpClientSSLConfig
 import misk.client.HttpClientsConfig
 import misk.inject.KAbstractModule
 import misk.inject.getInstance
-import misk.logging.LogCollector
 import misk.logging.LogCollectorModule
 import misk.scope.ActionScoped
 import misk.security.ssl.SslLoader
@@ -39,6 +38,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import wisp.logging.LogCollector
 import java.io.IOException
 import java.net.SocketTimeoutException
 import java.util.concurrent.TimeUnit
