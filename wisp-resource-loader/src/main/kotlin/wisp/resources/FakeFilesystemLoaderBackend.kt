@@ -1,11 +1,8 @@
-package misk.resources
+package wisp.resources
 
 import okio.Buffer
 import okio.BufferedSource
 import okio.ByteString.Companion.encodeUtf8
-import javax.inject.Inject
-import javax.inject.Qualifier
-import javax.inject.Singleton
 
 /**
  * A fake [FilesystemLoaderBackend] that loads file contents from an in-memory map. The map
@@ -15,9 +12,8 @@ import javax.inject.Singleton
  * newMapBinder<String, String>(ForFakeFiles::class).addBinding("/etc/foo.txt").toInstance("hello!")
  * ```
  */
-@Singleton
-internal class FakeFilesystemLoaderBackend @Inject constructor(
-  @ForFakeFiles private val files: Map<String, String>
+class FakeFilesystemLoaderBackend(
+  private val files: Map<String, String>
 ) : ResourceLoader.Backend() {
   override fun open(path: String): BufferedSource? {
     val file = files[path] ?: return null
@@ -26,6 +22,3 @@ internal class FakeFilesystemLoaderBackend @Inject constructor(
 
   override fun exists(path: String) = files.containsKey(path)
 }
-
-@Qualifier
-annotation class ForFakeFiles
