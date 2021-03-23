@@ -25,7 +25,7 @@ internal class WebSocketsTest {
   val module = TestModule()
 
   @Inject lateinit var jettyService: JettyService
-  @Inject lateinit var logCollector: LogCollector
+  @Inject lateinit var logCollector: misk.logging.LogCollector
 
   val listener = FakeWebSocketListener()
 

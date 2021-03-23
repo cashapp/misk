@@ -8,7 +8,6 @@ import misk.Action
 import misk.MiskTestingServiceModule
 import misk.asAction
 import misk.inject.KAbstractModule
-import misk.logging.LogCollector
 import misk.logging.LogCollectorModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
@@ -27,6 +26,7 @@ import misk.web.actions.WebAction
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import wisp.logging.LogCollector
 import java.time.Duration
 import java.time.temporal.ChronoUnit
 import javax.inject.Inject
