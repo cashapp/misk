@@ -1,4 +1,4 @@
-package misk.resources
+package wisp.resources
 
 import okio.BufferedSource
 import okio.buffer

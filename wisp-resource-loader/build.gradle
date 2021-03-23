@@ -3,6 +3,11 @@ dependencies {
   implementation dep.kotlinStdLibJdk8
   implementation dep.guava
   implementation dep.okio
+
+  testImplementation dep.assertj
+  testImplementation dep.junitApi
+  testImplementation dep.junitEngine
+  testImplementation dep.kotlinTest
 }
 
 afterEvaluate { project ->

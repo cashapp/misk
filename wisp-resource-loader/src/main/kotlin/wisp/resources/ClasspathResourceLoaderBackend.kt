@@ -1,4 +1,4 @@
-package misk.resources
+package wisp.resources
 
 import java.io.File
 import java.util.jar.JarFile

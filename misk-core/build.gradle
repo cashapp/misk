@@ -5,7 +5,7 @@ buildscript {
 }
 
 dependencies {
-  api project(':misk-resource-loader')
+  api project(':wisp-resource-loader')
   implementation dep.bouncycastle
   implementation dep.guice
   implementation dep.guiceMultibindings

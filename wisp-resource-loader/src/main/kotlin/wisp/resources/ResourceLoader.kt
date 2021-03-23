@@ -1,10 +1,10 @@
-package misk.resources
+package wisp.resources
 
 import com.google.common.collect.ImmutableList
 import com.google.common.collect.ImmutableSet
 import java.nio.file.Files
 import java.nio.file.Path
-import misk.resources.ResourceLoader.Backend
+import wisp.resources.ResourceLoader.Backend
 import okio.BufferedSource
 import okio.ByteString
 import okio.ByteString.Companion.encodeUtf8
