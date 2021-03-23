@@ -33,11 +33,10 @@ import okio.sink
  * scheme like `classpath:` as the key.
  */
 class ResourceLoader(
-  @Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN")
-  private val backends: java.util.Map<String, Backend>
+  private val backends: Map<String, Backend>
 ) {
   init {
-    for (prefix in backends.keySet()) {
+    for (prefix in backends.keys) {
       require(prefix.matches(Regex("[^/:]+:")))
     }
   }
@@ -190,12 +189,11 @@ class ResourceLoader(
   }
 
   companion object {
-    @Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN", "UNCHECKED_CAST")
     val SYSTEM = ResourceLoader(
       mapOf(
         "classpath:" to ClasspathResourceLoaderBackend,
         "filesystem:" to FilesystemLoaderBackend
-      ) as java.util.Map<String, Backend>
+      )
     )
   }
 }
