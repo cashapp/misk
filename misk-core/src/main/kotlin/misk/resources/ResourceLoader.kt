@@ -35,6 +35,7 @@ class ResourceLoader @Inject constructor(
   @Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN")
   backends: java.util.Map<String, WispResourceLoader.Backend>
 ) {
+  @Suppress("UNCHECKED_CAST")
   val delegate = WispResourceLoader(backends as Map<String, wisp.resources.ResourceLoader.Backend>)
 
   /** Return a buffered source for `address`, or null if no such resource exists. */
