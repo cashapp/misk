@@ -1,0 +1,25 @@
+package wisp.resources
+
+import okio.BufferedSource
+import okio.buffer
+import okio.source
+import java.io.File
+import java.io.FileNotFoundException
+
+/**
+ * Read-only resources that are fetched from the local filesystem using absolute paths.
+ *
+ * This uses the scheme `filesystem:`.
+ */
+object FilesystemLoaderBackend : ResourceLoader.Backend() {
+  override fun open(path: String): BufferedSource? {
+    val file = File(path)
+    try {
+      return file.source().buffer()
+    } catch (e: FileNotFoundException) {
+      return null
+    }
+  }
+
+  override fun exists(path: String) = File(path).exists()
+}
