@@ -17,7 +17,6 @@ import com.google.crypto.tink.mac.MacConfig
 import com.google.crypto.tink.signature.SignatureConfig
 import com.google.crypto.tink.streamingaead.StreamingAeadConfig
 import com.google.inject.Singleton
-import com.google.inject.TypeLiteral
 import com.google.inject.name.Names
 import misk.crypto.pgp.PgpDecrypter
 import misk.crypto.pgp.PgpDecrypterProvider
@@ -78,23 +77,24 @@ class CryptoModule(
       }
     }
 
-    /* Include all configured remotely-provided keys. */
-    config.external_data_keys?.let { external_data_keys ->
-      requireBinding<AmazonS3>()
+    val externalDataKeys = config.external_data_keys ?: emptyMap()
+    bind<Map<KeyAlias, KeyType>>()
+      .annotatedWith<ExternalDataKeys>()
+      .toInstance(externalDataKeys)
 
-      bind(object : TypeLiteral<Map<KeyAlias, KeyType>>() {})
-        .annotatedWith(Names.named("all_key_aliases"))
-        .toInstance(external_data_keys)
+    /* Include all configured remotely-provided keys. */
+    if (externalDataKeys.isNotEmpty()) {
+      requireBinding<AmazonS3>()
 
       keyManagerBinder.addBinding().to<S3ExternalKeyManager>()
 
-      val internalAndExternal = keyNames.intersect(external_data_keys.keys)
+      val internalAndExternal = keyNames.intersect(externalDataKeys.keys)
       check(internalAndExternal.isEmpty()) {
         "Found keys that are marked as both provided in resources, and provided externally: " +
           "[$internalAndExternal]"
       }
 
-      external_data_keys.forEach { (alias, type) ->
+      externalDataKeys.forEach { (alias, type) ->
         // External keys use a KMS key per keyset
         bindKeyToProvider(alias, type)
       }

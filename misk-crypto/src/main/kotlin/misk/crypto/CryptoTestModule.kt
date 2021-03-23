@@ -56,12 +56,18 @@ class CryptoTestModule(
 
     val keyManagerBinder = newMultibinder(ExternalKeyManager::class)
     keyManagerBinder.addBinding().toInstance(FakeExternalKeyManager(keys))
-    config.external_data_keys?.let {
-      it.entries.forEach { entry ->
+
+    val externalDataKeys = config.external_data_keys ?: emptyMap()
+    bind<Map<KeyAlias, KeyType>>()
+      .annotatedWith<ExternalDataKeys>()
+      .toInstance(externalDataKeys)
+
+    if (externalDataKeys.isNotEmpty()) {
+      externalDataKeys.entries.forEach { entry ->
         val fakeFake = Key(entry.key, entry.value, MiskConfig.RealSecret(""))
         keys.add(fakeFake)
       }
-      keyManagerBinder.addBinding().toInstance(FakeExternalKeyManager(it))
+      keyManagerBinder.addBinding().toInstance(FakeExternalKeyManager(externalDataKeys))
     }
 
     keys.forEach { key ->

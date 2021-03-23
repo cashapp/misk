@@ -3,7 +3,6 @@ package misk.crypto
 import com.amazonaws.services.s3.AmazonS3
 import com.amazonaws.services.s3.model.AmazonS3Exception
 import com.google.inject.Inject
-import com.google.inject.name.Named
 import misk.config.MiskConfig
 import misk.environment.Env
 import misk.logging.getLogger
@@ -35,11 +34,10 @@ class S3ExternalKeyManager @Inject constructor(
 
   private val s3: AmazonS3,
 
-  @Named("all_key_aliases")
-  override val allKeyAliases: Map<KeyAlias, KeyType>,
+  @ExternalDataKeys override val allKeyAliases: Map<KeyAlias, KeyType>,
 
   @Inject(optional = true)
-  private var bucketNameSource: BucketNameSource = object : BucketNameSource {
+  private val bucketNameSource: BucketNameSource = object : BucketNameSource {
     override fun getBucketName(env: Env) = env.name.toLowerCase()
   }
 ) : ExternalKeyManager {
