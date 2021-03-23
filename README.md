@@ -128,3 +128,11 @@ should never refer to misk* modules, although misk* modules can (and should) use
 
 Also, modules that are wisp*-testing will only be used in test scope in other wisp modules, never 
 in the api/implementation scope. 
+
+If you are refactoring code from misk into the wisp modules, you must not break any external Misk dependencies
+or apis.  It is ok to deprecate items in misk to encourage eventual migration to wisp directly if desired. If
+your refactoring does not fit one of the existing wisp modules, create a new module.  For now, it is preferred
+to have many small modules rather than larger conglomerate modules requiring many different dependencies.
+
+It should be considered that wisp will be volatile for sometime with the potential for a lot of changes, additions, etc.
+Misk apps should use wisp modules directly with caution as breaking changes might be required.
