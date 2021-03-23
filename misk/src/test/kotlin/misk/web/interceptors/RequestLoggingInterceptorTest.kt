@@ -3,7 +3,6 @@ package misk.web.interceptors
 import com.google.common.testing.FakeTicker
 import misk.exceptions.BadRequestException
 import misk.inject.KAbstractModule
-import misk.logging.LogCollector
 import misk.logging.LogCollectorModule
 import misk.random.FakeRandom
 import misk.security.authz.AccessControlModule
@@ -30,6 +29,7 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import wisp.logging.LogCollector
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 

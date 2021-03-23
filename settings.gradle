@@ -1,3 +1,5 @@
+include ':wisp-logging-testing'
+include ':wisp-logging'
 include ':misk'
 include ':misk-actions'
 include ':misk-aws'
