@@ -1,22 +1,16 @@
-package misk.security.ssl
+package wisp.security.ssl
 
-import misk.MiskTestingServiceModule
-import misk.testing.MiskTest
-import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import javax.inject.Inject
+import wisp.resources.ResourceLoader
 
-@MiskTest
 internal class PemComboFileTest {
-  @MiskTestModule
-  val module = MiskTestingServiceModule()
 
   val clientComboPemPath = "classpath:/ssl/client_cert_key_combo.pem"
   val clientRsaComboPemPath = "classpath:/ssl/client_rsa_cert_key_combo.pem"
   val clientCertPemPath = "classpath:/ssl/client_cert.pem"
 
-  @Inject lateinit var sslLoader: SslLoader
+  val sslLoader: SslLoader = SslLoader(ResourceLoader.SYSTEM)
 
   @Test
   fun loadTruststoreFromPEM() {
@@ -55,8 +49,9 @@ internal class PemComboFileTest {
       .isEqualTo("127.0.0.1")
 
     val certificateChain = keystore.getX509CertificateChain()
-    assertThat(certificateChain.map { it.issuerX500Principal.name }).containsExactly(
-      "CN=misk-client,OU=Client,O=Misk,L=San Francisco,ST=CA,C=US"
-    )
+    assertThat(certificateChain.map { it.issuerX500Principal.name })
+      .containsExactly(
+        "CN=misk-client,OU=Client,O=Misk,L=San Francisco,ST=CA,C=US"
+      )
   }
 }
