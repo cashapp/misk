@@ -19,7 +19,6 @@ import misk.MiskTestingServiceModule
 import misk.config.MiskConfig
 import misk.config.Secret
 import misk.environment.DeploymentModule
-import misk.logging.LogCollector
 import misk.logging.LogCollectorModule
 import misk.logging.LogCollectorService
 import misk.testing.MiskTest
@@ -171,7 +170,7 @@ class CryptoModuleTest {
     lcs.startAsync()
     lcs.awaitRunning()
 
-    val lc = injector.getInstance(LogCollector::class.java)
+    val lc = injector.getInstance(misk.logging.LogCollector::class.java)
 
     val kr = injector.getInstance(KeyReader::class.java)
     kr.readKey(name)

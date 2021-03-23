@@ -1,0 +1,27 @@
+buildscript {
+  dependencies {
+    classpath dep.kotlinNoArgPlugin
+  }
+}
+
+dependencies {
+  implementation dep.kotlinStdLibJdk8
+  implementation dep.kotlinReflection
+  api dep.loggingApi
+  implementation dep.logbackClassic
+  implementation dep.slf4jApi
+
+  testImplementation dep.assertj
+  testImplementation dep.kotlinTest
+  testImplementation dep.kotlinxCoroutines
+  testImplementation(project(":wisp-logging"))
+}
+
+afterEvaluate { project ->
+  project.tasks.dokka {
+    outputDirectory = "$rootDir/docs/0.x"
+    outputFormat = 'gfm'
+  }
+}
+
+apply from: "$rootDir/gradle-mvn-publish.gradle"
