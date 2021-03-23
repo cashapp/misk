@@ -16,6 +16,7 @@ import misk.web.metadata.database.NoAdminDashboardDatabaseAccess
 class HibernateWebActionTestingModule : KAbstractModule() {
   override fun configure() {
     bind<Config>().toInstance(TestConfig())
+    bind<wisp.config.Config>().toInstance(TestConfig())
     install(MiskWebModule(TESTING_WEB_CONFIG))
     install(AccessControlModule())
 
@@ -39,4 +40,3 @@ class HibernateWebActionTestingModule : KAbstractModule() {
 
   class TestConfig : Config
 }
-
