@@ -47,7 +47,7 @@ export interface WebActionMetadata {
   parameterTypes: string[]
   requestType: string
   returnType: string
-  types: Map<String, ProtoType>
+  types: { [key: string]: ProtoType }
   pathPattern: string
   applicationInterceptors: string[]
   networkInterceptors: string[]
