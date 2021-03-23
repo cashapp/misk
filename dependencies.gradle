@@ -79,7 +79,7 @@ ext.dep = [
   "moshiCore": "com.squareup.moshi:moshi:1.11.0",
   "moshiKotlin": "com.squareup.moshi:moshi-kotlin:1.11.0",
   "mysql": "mysql:mysql-connector-java:8.0.16",
-  "nettyBom": "io.netty:netty-bom:4.1.34.Final",
+  "nettyBom": "io.netty:netty-bom:4.1.60.Final",
   "okHttp": "com.squareup.okhttp3:okhttp:4.8.0",
   "okHttpMockWebServer": "com.squareup.okhttp3:mockwebserver:4.8.0",
   "okio": "com.squareup.okio:okio:2.7.0",
