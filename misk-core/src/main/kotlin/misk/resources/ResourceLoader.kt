@@ -1,17 +1,13 @@
 package misk.resources
 
-import com.google.common.collect.ImmutableList
-import com.google.common.collect.ImmutableSet
-import java.nio.file.Files
+import okio.BufferedSource
+import okio.ByteString
+import wisp.resources.ClasspathResourceLoaderBackend
+import wisp.resources.FilesystemLoaderBackend
 import java.nio.file.Path
 import javax.inject.Inject
 import javax.inject.Singleton
-import misk.resources.ResourceLoader.Backend
-import okio.BufferedSource
-import okio.ByteString
-import okio.ByteString.Companion.encodeUtf8
-import okio.buffer
-import okio.sink
+import wisp.resources.ResourceLoader as WispResourceLoader
 
 /**
  * ResourceLoader is a testable API for loading resources from the classpath, from the filesystem,
@@ -37,160 +33,51 @@ import okio.sink
 @Singleton
 class ResourceLoader @Inject constructor(
   @Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN")
-  private val backends: java.util.Map<String, Backend>
+  backends: java.util.Map<String, WispResourceLoader.Backend>
 ) {
-  init {
-    for (prefix in backends.keySet()) {
-      require(prefix.matches(Regex("[^/:]+:")))
-    }
-  }
+  @Suppress("UNCHECKED_CAST")
+  internal val delegate =
+    WispResourceLoader(backends as Map<String, wisp.resources.ResourceLoader.Backend>)
 
   /** Return a buffered source for `address`, or null if no such resource exists. */
-  fun open(address: String): BufferedSource? {
-    checkAddress(address)
-
-    val (scheme, path) = parseAddress(address)
-    val backend = backends[scheme] ?: return null
-    return backend.open(path)
-  }
+  fun open(address: String): BufferedSource? = delegate.open(address)
 
   /** Writes a resource as UTF-8. Throws if the backend is readonly. */
-  fun put(address: String, utf8: String) {
-    put(address, utf8.encodeUtf8())
-  }
+  fun put(address: String, utf8: String) = delegate.put(address, utf8)
 
   /** Writes a resource. Throws if the backend is readonly. */
-  fun put(address: String, data: ByteString) {
-    checkAddress(address)
-
-    val (scheme, path) = parseAddress(address)
-    val backend = backends[scheme] ?: return
-    backend.put(path, data)
-  }
+  fun put(address: String, data: ByteString) = delegate.put(address, data)
 
   /** Returns true if a resource at `address` exists. */
-  fun exists(address: String): Boolean {
-    try {
-      checkAddress(address)
-    } catch (e: IllegalArgumentException) {
-      return false
-    }
-
-    val (scheme, path) = parseAddress(address)
-    val backend = backends[scheme] ?: return false
-    return backend.exists(path)
-  }
+  fun exists(address: String): Boolean = delegate.exists(address)
 
   /** Returns the full path of the resources that are immediate children of `address`. */
-  fun list(address: String): List<String> {
-    try {
-      checkAddress(address)
-    } catch (e: IllegalArgumentException) {
-      return listOf()
-    }
+  fun list(address: String): List<String> = delegate.list(address)
 
-    val (scheme, path) = parseAddress(address)
-    val backend = backends[scheme] ?: return listOf()
-    return backend.list(path).map { scheme + it }
-  }
-
-  fun walk(address: String): List<String> {
-    val resourcesResult = ImmutableList.builder<String>()
-    for (resource in list(address)) {
-      if (list(resource).isEmpty()) {
-        resourcesResult.add(resource)
-      } else {
-        resourcesResult.addAll(walk(resource))
-      }
-    }
-    return resourcesResult.build()
-  }
+  fun walk(address: String): List<String> = delegate.walk(address)
 
   /**
    * Return the contents of `address` as a string, or null if no such resource exists. Note that
    * this method decodes the resource on every use. It is the caller's responsibility to cache the
    * result if it is to be loaded frequently.
    */
-  fun utf8(address: String): String? {
-    val source = open(address) ?: return null
-    return source.use { it.readUtf8() }
-  }
+  fun utf8(address: String): String? = delegate.utf8(address)
 
   /**
    * Like [utf8], but throws [IllegalStateException] if the resource is missing.
    */
-  fun requireUtf8(address: String): String {
-    return utf8(address) ?: error("could not load resource $address")
-  }
-
-  private fun checkAddress(address: String) {
-    require(address.matches(Regex("([^/:]+:)(/[^/]+)+/?"))) { "unexpected address $address" }
-  }
-
-  /**
-   * Decodes an address like `classpath:/migrations/v1.sql` into a backend scheme like `classpath:`
-   * and a backend-specific path like `/migrations/v1.sql`.
-   */
-  private fun parseAddress(path: String): Address {
-    val colon = path.indexOf(':')
-    check(colon != -1) { "address scheme not specified in: $path" }
-    return Address(path.substring(0, colon + 1), path.substring(colon + 1))
-  }
+  fun requireUtf8(address: String): String = delegate.requireUtf8(address)
 
   /**
    * Copies all resources with [root] as a prefix to the directory [dir].
    */
-  fun copyTo(root: String, dir: Path) {
-    val prefix = if (root.endsWith("/")) root else "$root/"
-    for (resource in walk(root)) {
-      val destination = dir.resolve(resource.substring(prefix.length))
-      copyResource(resource, destination)
-    }
-  }
+  fun copyTo(root: String, dir: Path) = delegate.copyTo(root, dir)
 
-  /**
-   * Copy the resource to the specified filename [destination], creating all of the parent
-   * directories if necessary.
-   */
-  private fun copyResource(address: String, destination: Path) {
-    Files.createDirectories(destination.parent)
-    open(address).use { i ->
-      destination.sink().buffer().use { o ->
-        o.writeAll(i!!)
-      }
-    }
-  }
-
-  private data class Address(val scheme: String, val path: String)
-
-  abstract class Backend {
-    abstract fun open(path: String): BufferedSource?
-
-    abstract fun exists(path: String): Boolean
-
-    open fun put(path: String, data: ByteString) {
-      throw UnsupportedOperationException("cannot put $path; ${this::class} is readonly")
-    }
-
-    open fun all(): Set<String> {
-      throw UnsupportedOperationException("${this::class} doesn't support all()")
-    }
-
-    open fun list(path: String): List<String> {
-      val prefix = if (path.endsWith("/")) path else "$path/"
-      val result = ImmutableSet.builder<String>()
-      for (key in all()) {
-        if (!key.startsWith(prefix)) continue
-        val slash = key.indexOf('/', prefix.length)
-        if (slash == -1) {
-          result.add(key)
-        } else {
-          result.add(key.substring(0, slash))
-        }
-      }
-      return result.build().toList()
-    }
-  }
+  @Deprecated(
+    "Use wisp.resources.ResourceLoader.Backend directly",
+    replaceWith = ReplaceWith("Backend", "wisp.resources.ResourceLoader.Backend")
+  )
+  abstract class Backend : WispResourceLoader.Backend()
 
   companion object {
     @Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN", "UNCHECKED_CAST")
@@ -198,7 +85,7 @@ class ResourceLoader @Inject constructor(
       mapOf(
         "classpath:" to ClasspathResourceLoaderBackend,
         "filesystem:" to FilesystemLoaderBackend
-      ) as java.util.Map<String, Backend>
+      ) as java.util.Map<String, WispResourceLoader.Backend>
     )
   }
 }

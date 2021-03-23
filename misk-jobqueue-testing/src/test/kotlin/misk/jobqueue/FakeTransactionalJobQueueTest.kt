@@ -34,7 +34,7 @@ internal class FakeTransactionalJobQueueTest {
 
   @Inject private lateinit var fakeTransactionalJobQueue: FakeTransactionalJobQueue
   @Inject private lateinit var unitEnqueuer: UnitEnqueuer
-  @Inject private lateinit var logCollector: LogCollector
+  @Inject private lateinit var logCollector: misk.logging.LogCollector
   @Inject @StarCraftDb private lateinit var transacter: Transacter
 
   @Test fun basic() {
@@ -53,8 +53,8 @@ internal class FakeTransactionalJobQueueTest {
     fakeTransactionalJobQueue.handleJobs()
 
     assertThat(logCollector.takeMessages(Starport::class)).containsExactlyInAnyOrder(
-        "received build MEDIVAC command",
-        "received build LIBERATOR command"
+      "received build MEDIVAC command",
+      "received build LIBERATOR command"
     )
 
     assertThat(fakeTransactionalJobQueue.peekJobs(FACTORY_QUEUE)).isEmpty()
