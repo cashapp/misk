@@ -1,0 +1,20 @@
+dependencies {
+  api project(':wisp-resource-loader')
+  implementation dep.bouncycastle
+  implementation dep.kotlinStdLibJdk8
+  implementation dep.okio
+
+  testImplementation dep.assertj
+  testImplementation dep.junitApi
+  testImplementation dep.junitEngine
+  testImplementation dep.kotlinTest
+}
+
+afterEvaluate { project ->
+  project.tasks.dokka {
+    outputDirectory = "$rootDir/docs/0.x"
+    outputFormat = 'gfm'
+  }
+}
+
+apply from: "$rootDir/gradle-mvn-publish.gradle"
