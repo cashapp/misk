@@ -1,6 +1,5 @@
 package wisp.resources
 
-import com.google.common.collect.ImmutableMap
 import java.io.File
 import java.net.URLClassLoader
 import kotlin.test.assertFailsWith
@@ -15,11 +14,11 @@ import java.nio.file.Files
 class ResourceLoaderTest {
 
   val resourceLoader: ResourceLoader = ResourceLoader(
-    ImmutableMap.of<String, ResourceLoader.Backend>(
-      "classpath:", ClasspathResourceLoaderBackend,
-      "memory:", MemoryResourceLoaderBackend(),
-      "filesystem:", FilesystemLoaderBackend,
-    ) as java.util.Map<String, ResourceLoader.Backend>
+    mapOf(
+      "classpath:" to ClasspathResourceLoaderBackend,
+      "memory:" to MemoryResourceLoaderBackend(),
+      "filesystem:" to FilesystemLoaderBackend,
+    )
   )
 
   val tempFolderPath = Files.createTempDirectory("test-")
