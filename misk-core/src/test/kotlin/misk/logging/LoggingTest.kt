@@ -11,6 +11,7 @@ import org.assertj.core.api.containsExactly
 import org.junit.jupiter.api.Test
 import org.slf4j.LoggerFactory
 import org.slf4j.MDC
+import wisp.logging.LogCollector
 import javax.inject.Inject
 
 @MiskTest(startService = true)

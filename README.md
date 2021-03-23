@@ -120,3 +120,11 @@ Misk-Web powers the Misk Admin Dashboard with modular Typescript + React powered
 [misk]: https://cashapp.github.io/misk/
 [miskweb]: https://cashapp.github.io/misk-web/
 [snap]: https://oss.sonatype.org/content/repositories/snapshots/
+
+## What are the wisp* modules?
+
+The wisp* modules contain no Dependency Injection based code (i.e. no Guice, etc).  These modules 
+should never refer to misk* modules, although misk* modules can (and should) use wisp* modules.
+
+Also, modules that are wisp*-testing will only be used in test scope in other wisp modules, never 
+in the api/implementation scope. 
