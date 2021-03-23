@@ -1,4 +1,4 @@
-package misk.resources
+package wisp.resources
 
 import java.io.File
 import java.util.jar.JarFile
@@ -11,7 +11,7 @@ import okio.source
  *
  * This uses the scheme `classpath:`.
  */
-internal object ClasspathResourceLoaderBackend : ResourceLoader.Backend() {
+object ClasspathResourceLoaderBackend : ResourceLoader.Backend() {
   override fun list(path: String): List<String> {
     require(path.startsWith("/"))
     val checkPath = path.removePrefix("/").removeSuffix("/")

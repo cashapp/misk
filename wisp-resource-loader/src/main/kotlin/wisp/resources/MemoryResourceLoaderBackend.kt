@@ -1,11 +1,9 @@
-package misk.resources
+package wisp.resources
 
 import okio.Buffer
 import okio.BufferedSource
 import okio.ByteString
 import java.util.TreeMap
-import javax.inject.Inject
-import javax.inject.Singleton
 
 /**
  * Read-write resources stored only in memory. Most useful for testing. It is possible to have
@@ -13,8 +11,7 @@ import javax.inject.Singleton
  *
  * This uses the scheme `memory:`.
  */
-@Singleton
-internal class MemoryResourceLoaderBackend @Inject constructor() : ResourceLoader.Backend() {
+class MemoryResourceLoaderBackend() : ResourceLoader.Backend() {
   private val resources = TreeMap<String, ByteString>()
 
   override fun open(path: String): BufferedSource? {
