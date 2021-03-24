@@ -28,7 +28,7 @@ export default function WebActionSendRequest({ webActionMetadata }: Props) {
     let axiosRequest
 
     if (webActionMetadata.httpMethod === "POST") {
-      axiosRequest = axios.post(url, JSON.stringify(request))
+      axiosRequest = axios.post(url, request)
     } else if (webActionMetadata.httpMethod === "GET") {
       axiosRequest = axios.get(url)
     } else {
@@ -41,7 +41,7 @@ export default function WebActionSendRequest({ webActionMetadata }: Props) {
 
     axiosRequest
       .then(response => {
-        setResponse(response.data)
+        setResponse(JSON.stringify(response.data, null, 2))
       })
       .catch(e => {
         setResponse(e.message)
