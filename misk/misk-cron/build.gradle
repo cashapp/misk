@@ -1,5 +1,5 @@
 dependencies {
-    implementation dep.cronutils
+    implementation dep.cronUtils
     implementation dep.guava
     implementation dep.guice
     implementation dep.guiceMultibindings
