@@ -4,6 +4,7 @@ import axios, { AxiosResponse } from "axios"
 import { WebActionMetadataResponse } from "./types"
 import WebActionCard from "./WebActionCard"
 import LoadingState from "./LoadingState"
+import Spacer from "./Spacer"
 
 export default function TabContainer() {
   const [webactionMetadata, setWebactionMetadata] = useState<
@@ -27,7 +28,13 @@ export default function TabContainer() {
 
   return (
     <>
-      <H1>Web Actions</H1>
+      <div
+        style={{ display: "flex", alignItems: "center", marginBottom: "8px" }}
+      >
+        <H1 style={{ margin: 0 }}>Web Actions Beta</H1>
+        <Spacer size="small" />
+        <p style={{ margin: 0 }}>Direct any feedback to #misk-web-discuss.</p>
+      </div>
       {webactionMetadata.webActionMetadata.map(webactionMetadata => (
         <WebActionCard webActionMetadata={webactionMetadata} />
       ))}
