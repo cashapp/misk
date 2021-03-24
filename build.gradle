@@ -95,6 +95,7 @@ subprojects { subProject ->
 
     // Platform/BOM dependencies constrain versions only.
     api enforcedPlatform(dep.grpcBom)
+    api enforcedPlatform(dep.guava)
     api enforcedPlatform(dep.jacksonBom)
     api enforcedPlatform(dep.jerseyBom)
     api enforcedPlatform(dep.jettyBom)
