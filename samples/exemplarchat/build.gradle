@@ -10,6 +10,7 @@ dependencies {
   api project(':misk-inject')
   api project(':misk-prometheus')
   api project(':misk-eventrouter')
+  api project(':wisp-deployment')
 
   testImplementation project(':misk-testing')
   testImplementation dep.assertj

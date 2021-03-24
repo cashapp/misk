@@ -1,12 +1,13 @@
 package misk.environment
 
-/**
- * The raw environment name. The set of possibilities is unbounded so this should rarely be used.
- * Instead, use the Deployment type for behavior based on characteristics of an environment.
- */
-data class Env(val name: String)
-
 /** Deployment describes the context in which the application is running */
+@Deprecated(
+  message = "Use wisp.deployment.Deployment",
+  replaceWith = ReplaceWith(
+    "Deployment",
+    "wisp.deployment.Deployment"
+  )
+)
 data class Deployment(
   /**
    * The name of this deployment. This is used for debugging and should not be parsed.
@@ -46,4 +47,7 @@ data class Deployment(
    */
   val isFake: Boolean
     get() = isTest || isLocalDevelopment
+
+  val wispDeployment: wisp.deployment.Deployment
+    get() = wisp.deployment.Deployment(name, isProduction, isTest, isLocalDevelopment)
 }
