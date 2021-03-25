@@ -1,15 +1,12 @@
-package misk.client
+package wisp.client
 
-import com.google.inject.Inject
-import com.google.inject.Singleton
 import okhttp3.ConnectionPool
 import okhttp3.Dispatcher
 import okhttp3.OkHttpClient.Builder
 import java.time.Duration
 import java.util.concurrent.TimeUnit
 
-@Singleton
-class OkHttpClientCommonConfigurator @Inject internal constructor() {
+class OkHttpClientCommonConfigurator internal constructor() {
   fun configure(builder: Builder, config: HttpClientEndpointConfig): Builder {
     configureCallTimeout(builder = builder, config = config)
     configureConnectTimeout(builder = builder, config = config)

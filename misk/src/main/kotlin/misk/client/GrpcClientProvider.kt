@@ -6,6 +6,7 @@ import com.squareup.wire.GrpcStreamingCall
 import com.squareup.wire.Service
 import okhttp3.OkHttpClient
 import okhttp3.Protocol
+import wisp.client.OkHttpClientCommonConfigurator
 import java.lang.reflect.InvocationHandler
 import java.lang.reflect.Method
 import java.lang.reflect.ParameterizedType
@@ -154,7 +155,10 @@ internal class GrpcClientProvider<T : Service, G : T>(
 
     val clientBuilder = clientPrototype.newBuilder()
 
-    okHttpClientCommonConfigurator.configure(builder = clientBuilder, config = endpointConfig)
+    okHttpClientCommonConfigurator.configure(
+      builder = clientBuilder,
+      config = endpointConfig.toWispConfig()
+    )
 
     clientBuilder.addInterceptor(clientMetricsInterceptorFactory.create(name))
     for (factory in interceptorFactories) {
