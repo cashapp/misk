@@ -1,33 +1,3 @@
-export interface Tab {
-  slug: string
-  url_path_prefix: string
-  dashboard_slug: string
-  name: string
-  category: string
-  capabilities: string[]
-  services: string[]
-}
-
-export interface DashboardMetadata {
-  home_url: string
-  navbar_items: string[]
-  navbar_status: string
-  tabs: Tab[]
-}
-
-export interface DashboardMetadataResponse {
-  dashboardMetadata: DashboardMetadata
-}
-
-export interface ServiceMetadata {
-  app_name: string
-  environment: string
-}
-
-export interface ServiceMetadataResponse {
-  serviceMetadata: ServiceMetadata
-}
-
 export interface ProtoField {
   name: string
   type: string
@@ -47,7 +17,7 @@ export interface WebActionMetadata {
   parameterTypes: string[]
   requestType: string
   returnType: string
-  types: Map<String, ProtoType>
+  types: { [key: string]: ProtoType }
   pathPattern: string
   applicationInterceptors: string[]
   networkInterceptors: string[]

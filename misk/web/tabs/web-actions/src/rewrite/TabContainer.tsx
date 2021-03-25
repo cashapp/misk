@@ -1,58 +1,40 @@
 import React, { useEffect, useState } from "react"
 import { H1 } from "@blueprintjs/core"
-import axios from "axios"
-import {
-  DashboardMetadataResponse,
-  ServiceMetadataResponse,
-  WebActionMetadataResponse
-} from "./types"
+import axios, { AxiosResponse } from "axios"
+import { WebActionMetadataResponse } from "./types"
 import WebActionCard from "./WebActionCard"
+import LoadingState from "./LoadingState"
+import Spacer from "./Spacer"
 
 export default function TabContainer() {
-  const [dashboardMetadata, setDashboardMetadata] = useState<
-    DashboardMetadataResponse | undefined
-  >(undefined)
-  const [serviceMetadata, setServiceMetadata] = useState<
-    ServiceMetadataResponse | undefined
-  >(undefined)
   const [webactionMetadata, setWebactionMetadata] = useState<
     WebActionMetadataResponse | undefined
   >(undefined)
 
-  // TODO: Convert to the real URLs, but using these to test easily (copies of a services's API responses).
   useEffect(() => {
     axios
-      .get("http://localhost:8080/dashboard-metadata.json")
-      .then(response => {
-        setDashboardMetadata(response.data)
-      })
-  }, [setDashboardMetadata])
-
-  useEffect(() => {
-    axios.get("http://localhost:8080/service-metadata.json").then(response => {
-      setServiceMetadata(response.data)
-    })
-  }, [setServiceMetadata])
-
-  useEffect(() => {
-    axios
-      .get("http://localhost:8080/webaction-metadata.json")
-      .then(response => {
+      .get("/api/webaction/metadata")
+      .then((response: AxiosResponse<WebActionMetadataResponse>) => {
+        response.data.webActionMetadata.sort((a, b) =>
+          a.name.localeCompare(b.name)
+        )
         setWebactionMetadata(response.data)
       })
   }, [setWebactionMetadata])
 
-  if (
-    dashboardMetadata === undefined ||
-    serviceMetadata === undefined ||
-    webactionMetadata === undefined
-  ) {
-    return <p>Loading</p>
+  if (webactionMetadata === undefined) {
+    return <LoadingState />
   }
 
   return (
     <>
-      <H1>Web Actions</H1>
+      <div
+        style={{ display: "flex", alignItems: "center", marginBottom: "8px" }}
+      >
+        <H1 style={{ margin: 0 }}>Web Actions Beta</H1>
+        <Spacer size="small" />
+        <p style={{ margin: 0 }}>Direct any feedback to #misk-web-discuss.</p>
+      </div>
       {webactionMetadata.webActionMetadata.map(webactionMetadata => (
         <WebActionCard webActionMetadata={webactionMetadata} />
       ))}

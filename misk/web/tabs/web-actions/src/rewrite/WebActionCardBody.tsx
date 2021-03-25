@@ -2,6 +2,7 @@ import React from "react"
 import { Menu, H5, UL } from "@blueprintjs/core"
 import { WebActionMetadata } from "./types"
 import WebActionCollapse from "./WebActionCollapse"
+import WebActionSendRequest from "./WebActionSendRequest"
 
 interface Props {
   webActionMetadata: WebActionMetadata
@@ -114,9 +115,11 @@ export default function WebActionCardBody({ webActionMetadata }: Props) {
         </UL>
       </WebActionCollapse>
 
-      <WebActionCollapse title="Send a Request">
-        <p>TODO</p>
-      </WebActionCollapse>
+      <div style={{ gridColumn: "auto / span 2" }}>
+        <WebActionCollapse title="Send a Request" doubleWidth={true}>
+          <WebActionSendRequest webActionMetadata={webActionMetadata} />
+        </WebActionCollapse>
+      </div>
     </Menu>
   )
 }
