@@ -6,10 +6,15 @@ import misk.security.authz.FakeCallerAuthenticator
 import misk.security.authz.FakeCallerAuthenticator.Companion.SERVICE_HEADER
 import misk.security.authz.FakeCallerAuthenticator.Companion.USER_HEADER
 import misk.security.authz.MiskCallerAuthenticator
+import misk.security.authz.Unauthenticated
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
+import misk.web.Get
+import misk.web.PathParam
+import misk.web.Response
 import misk.web.WebActionModule
 import misk.web.WebTestingModule
+import misk.web.actions.WebAction
 import misk.web.jetty.JettyService
 import okhttp3.OkHttpClient
 import org.assertj.core.api.Assertions.assertThat
@@ -44,20 +49,20 @@ class MetricsInterceptorTest {
   @Test
   fun responseCodes() {
     val requestDuration = metricsInterceptorFactory.requestDuration
-    requestDuration.record(1.0, "TestAction", "unknown", "200")
-    assertThat(requestDuration.count("TestAction", "unknown", "200")).isEqualTo(3)
-    requestDuration.record(1.0, "TestAction", "unknown", "202")
-    assertThat(requestDuration.count("TestAction", "unknown", "202")).isEqualTo(2)
-    requestDuration.record(1.0, "TestAction", "unknown", "404")
-    assertThat(requestDuration.count("TestAction", "unknown", "404")).isEqualTo(2)
-    requestDuration.record(1.0, "TestAction", "unknown", "403")
-    assertThat(requestDuration.count("TestAction", "unknown", "403")).isEqualTo(3)
+    requestDuration.record(1.0, "MetricsInterceptorTestAction", "unknown", "200")
+    assertThat(requestDuration.count("MetricsInterceptorTestAction", "unknown", "200")).isEqualTo(3)
+    requestDuration.record(1.0, "MetricsInterceptorTestAction", "unknown", "202")
+    assertThat(requestDuration.count("MetricsInterceptorTestAction", "unknown", "202")).isEqualTo(2)
+    requestDuration.record(1.0, "MetricsInterceptorTestAction", "unknown", "404")
+    assertThat(requestDuration.count("MetricsInterceptorTestAction", "unknown", "404")).isEqualTo(2)
+    requestDuration.record(1.0, "MetricsInterceptorTestAction", "unknown", "403")
+    assertThat(requestDuration.count("MetricsInterceptorTestAction", "unknown", "403")).isEqualTo(3)
 
-    requestDuration.record(1.0, "TestAction", "my-peer", "200")
-    assertThat(requestDuration.count("TestAction", "my-peer", "200")).isEqualTo(5)
+    requestDuration.record(1.0, "MetricsInterceptorTestAction", "my-peer", "200")
+    assertThat(requestDuration.count("MetricsInterceptorTestAction", "my-peer", "200")).isEqualTo(5)
 
-    requestDuration.record(1.0, "TestAction", "<user>", "200")
-    assertThat(requestDuration.count("TestAction", "<user>", "200")).isEqualTo(2)
+    requestDuration.record(1.0, "MetricsInterceptorTestAction", "<user>", "200")
+    assertThat(requestDuration.count("MetricsInterceptorTestAction", "<user>", "200")).isEqualTo(2)
   }
 
   fun invoke(
@@ -82,9 +87,17 @@ class MetricsInterceptorTest {
       install(AccessControlModule())
       install(WebTestingModule())
       multibind<MiskCallerAuthenticator>().to<FakeCallerAuthenticator>()
-      install(WebActionModule.create<TestAction>())
+      install(WebActionModule.create<MetricsInterceptorTestAction>())
 
       bind<MetricsInterceptor.Factory>()
     }
+  }
+}
+
+internal class MetricsInterceptorTestAction @Inject constructor() : WebAction {
+  @Get("/call/{desiredStatusCode}")
+  @Unauthenticated
+  fun call(@PathParam desiredStatusCode: Int): Response<String> {
+    return Response("foo", statusCode = desiredStatusCode)
   }
 }

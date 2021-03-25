@@ -6,14 +6,20 @@ import misk.moshi.adapter
 import misk.security.authz.AccessControlModule
 import misk.security.authz.FakeCallerAuthenticator
 import misk.security.authz.MiskCallerAuthenticator
+import misk.security.authz.Unauthenticated
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
+import misk.web.Get
+import misk.web.ResponseContentType
 import misk.web.WebActionModule
 import misk.web.WebTestingModule
+import misk.web.actions.WebAction
 import misk.web.jetty.JettyService
+import misk.web.mediatype.MediaTypes
 import okhttp3.OkHttpClient
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import org.slf4j.MDC
 import javax.inject.Inject
 
 @MiskTest(startService = true)
@@ -34,7 +40,7 @@ internal class RequestLogContextInterceptorTest {
     val contextFields =
       moshi.adapter<RequestContext>().fromJson(response.body!!.string())!!.fields
     assertThat(contextFields[RequestLogContextInterceptor.MDC_ACTION])
-      .isEqualTo("TestAction")
+      .isEqualTo("LogTestAction")
     assertThat(contextFields[RequestLogContextInterceptor.MDC_CALLING_PRINCIPAL])
       .isEqualTo("caller")
     assertThat(contextFields[RequestLogContextInterceptor.MDC_HTTP_METHOD])
@@ -63,7 +69,14 @@ internal class RequestLogContextInterceptorTest {
       install(AccessControlModule())
       install(WebTestingModule())
       multibind<MiskCallerAuthenticator>().to<FakeCallerAuthenticator>()
-      install(WebActionModule.create<TestAction>())
+      install(WebActionModule.create<LogTestAction>())
     }
   }
+}
+
+internal class LogTestAction @Inject constructor() : WebAction {
+  @Get("/call/me")
+  @Unauthenticated
+  @ResponseContentType(MediaTypes.APPLICATION_JSON)
+  fun call() = RequestLogContextInterceptorTest.RequestContext(MDC.getCopyOfContextMap())
 }
