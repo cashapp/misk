@@ -40,7 +40,7 @@ internal class RequestLogContextInterceptorTest {
     val contextFields =
       moshi.adapter<RequestContext>().fromJson(response.body!!.string())!!.fields
     assertThat(contextFields[RequestLogContextInterceptor.MDC_ACTION])
-      .isEqualTo("TestAction")
+      .isEqualTo("LogTestAction")
     assertThat(contextFields[RequestLogContextInterceptor.MDC_CALLING_PRINCIPAL])
       .isEqualTo("caller")
     assertThat(contextFields[RequestLogContextInterceptor.MDC_HTTP_METHOD])
@@ -64,19 +64,19 @@ internal class RequestLogContextInterceptorTest {
     return httpClient.newCall(request.build()).execute()
   }
 
-  internal class TestAction @Inject constructor() : WebAction {
-    @Get("/call/me")
-    @Unauthenticated
-    @ResponseContentType(MediaTypes.APPLICATION_JSON)
-    fun call() = RequestContext(MDC.getCopyOfContextMap())
-  }
-
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(AccessControlModule())
       install(WebTestingModule())
       multibind<MiskCallerAuthenticator>().to<FakeCallerAuthenticator>()
-      install(WebActionModule.create<TestAction>())
+      install(WebActionModule.create<LogTestAction>())
     }
   }
+}
+
+internal class LogTestAction @Inject constructor() : WebAction {
+  @Get("/call/me")
+  @Unauthenticated
+  @ResponseContentType(MediaTypes.APPLICATION_JSON)
+  fun call() = RequestLogContextInterceptorTest.RequestContext(MDC.getCopyOfContextMap())
 }

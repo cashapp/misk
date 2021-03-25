@@ -230,76 +230,6 @@ internal class RequestLoggingInterceptorTest {
     assertThat(messages[0]).doesNotContain(headerValueToNotLog)
   }
 
-  internal class RateLimitingRequestLoggingAction @Inject constructor() : WebAction {
-    @Get("/call/rateLimitingRequestLogging/{message}")
-    @Unauthenticated
-    @ResponseContentType(MediaTypes.APPLICATION_JSON)
-    @LogRequestResponse(ratePerSecond = 1L, errorRatePerSecond = 2L)
-    fun call(@PathParam message: String) = "echo: $message"
-  }
-
-  internal class RateLimitingIncludesBodyRequestLoggingAction @Inject constructor() : WebAction {
-    @Get("/call/rateLimitingIncludesBodyRequestLogging/{message}")
-    @Unauthenticated
-    @ResponseContentType(MediaTypes.APPLICATION_JSON)
-    @LogRequestResponse(
-      ratePerSecond = 1L,
-      errorRatePerSecond = 2L,
-      bodySampling = 0.5,
-      errorBodySampling = 1.0
-    )
-    fun call(@PathParam message: String) = "echo: $message"
-  }
-
-  internal class NoRateLimitingRequestLoggingAction @Inject constructor() : WebAction {
-    @Get("/call/noRateLimitingRequestLogging/{message}")
-    @Unauthenticated
-    @ResponseContentType(MediaTypes.APPLICATION_JSON)
-    @LogRequestResponse(
-      ratePerSecond = 0L,
-      errorRatePerSecond = 0L,
-      bodySampling = 0.5,
-      errorBodySampling = 0.5
-    )
-    fun call(@PathParam message: String) = "echo: $message"
-  }
-
-  internal class ExceptionThrowingRequestLoggingAction @Inject constructor() : WebAction {
-    @Get("/call/exceptionThrowingRequestLogging/{message}")
-    @Unauthenticated
-    @ResponseContentType(MediaTypes.APPLICATION_JSON)
-    @LogRequestResponse(
-      ratePerSecond = 1L,
-      errorRatePerSecond = 2L,
-      bodySampling = 0.1,
-      errorBodySampling = 1.0
-    )
-    fun call(@PathParam message: String): String = throw IllegalStateException(message)
-  }
-
-  internal class NoRequestLoggingAction @Inject constructor() : WebAction {
-    @Get("/call/noRequestLogging/{message}")
-    @Unauthenticated
-    @ResponseContentType(MediaTypes.APPLICATION_JSON)
-    fun call(@PathParam message: String) = "echo: $message"
-  }
-
-  internal class RequestLoggingActionWithHeaders @Inject constructor() : WebAction {
-    @Post("/call/withHeaders")
-    @Unauthenticated
-    @ResponseContentType(MediaTypes.APPLICATION_JSON)
-    @LogRequestResponse(
-      ratePerSecond = 1L,
-      errorRatePerSecond = 2L,
-      bodySampling = 1.0,
-      errorBodySampling = 1.0
-    )
-    fun call(@RequestBody message: String, @RequestHeaders headers: Headers): String {
-      if (message == "fail") throw BadRequestException(message = "boom")
-      return "echo: $message"
-    }
-  }
-
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(AccessControlModule())
@@ -319,5 +249,75 @@ internal class RequestLoggingInterceptorTest {
       install(WebActionModule.create<NoRequestLoggingAction>())
       install(WebActionModule.create<RequestLoggingActionWithHeaders>())
     }
+  }
+}
+
+internal class RateLimitingRequestLoggingAction @Inject constructor() : WebAction {
+  @Get("/call/rateLimitingRequestLogging/{message}")
+  @Unauthenticated
+  @ResponseContentType(MediaTypes.APPLICATION_JSON)
+  @LogRequestResponse(ratePerSecond = 1L, errorRatePerSecond = 2L)
+  fun call(@PathParam message: String) = "echo: $message"
+}
+
+internal class RateLimitingIncludesBodyRequestLoggingAction @Inject constructor() : WebAction {
+  @Get("/call/rateLimitingIncludesBodyRequestLogging/{message}")
+  @Unauthenticated
+  @ResponseContentType(MediaTypes.APPLICATION_JSON)
+  @LogRequestResponse(
+    ratePerSecond = 1L,
+    errorRatePerSecond = 2L,
+    bodySampling = 0.5,
+    errorBodySampling = 1.0
+  )
+  fun call(@PathParam message: String) = "echo: $message"
+}
+
+internal class NoRateLimitingRequestLoggingAction @Inject constructor() : WebAction {
+  @Get("/call/noRateLimitingRequestLogging/{message}")
+  @Unauthenticated
+  @ResponseContentType(MediaTypes.APPLICATION_JSON)
+  @LogRequestResponse(
+    ratePerSecond = 0L,
+    errorRatePerSecond = 0L,
+    bodySampling = 0.5,
+    errorBodySampling = 0.5
+  )
+  fun call(@PathParam message: String) = "echo: $message"
+}
+
+internal class ExceptionThrowingRequestLoggingAction @Inject constructor() : WebAction {
+  @Get("/call/exceptionThrowingRequestLogging/{message}")
+  @Unauthenticated
+  @ResponseContentType(MediaTypes.APPLICATION_JSON)
+  @LogRequestResponse(
+    ratePerSecond = 1L,
+    errorRatePerSecond = 2L,
+    bodySampling = 0.1,
+    errorBodySampling = 1.0
+  )
+  fun call(@PathParam message: String): String = throw IllegalStateException(message)
+}
+
+internal class NoRequestLoggingAction @Inject constructor() : WebAction {
+  @Get("/call/noRequestLogging/{message}")
+  @Unauthenticated
+  @ResponseContentType(MediaTypes.APPLICATION_JSON)
+  fun call(@PathParam message: String) = "echo: $message"
+}
+
+internal class RequestLoggingActionWithHeaders @Inject constructor() : WebAction {
+  @Post("/call/withHeaders")
+  @Unauthenticated
+  @ResponseContentType(MediaTypes.APPLICATION_JSON)
+  @LogRequestResponse(
+    ratePerSecond = 1L,
+    errorRatePerSecond = 2L,
+    bodySampling = 1.0,
+    errorBodySampling = 1.0
+  )
+  fun call(@RequestBody message: String, @RequestHeaders headers: Headers): String {
+    if (message == "fail") throw BadRequestException(message = "boom")
+    return "echo: $message"
   }
 }

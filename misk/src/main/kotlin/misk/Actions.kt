@@ -21,7 +21,8 @@ fun KFunction<*>.asAction(
   val actualParameters = parameters.drop(1)
   val actionName = instanceParameter.type.classifier?.let {
     when (it) {
-      is KClass<*> -> it.simpleName
+      // Use the class name including all outer classes, but excluding the package.
+      is KClass<*> -> it.qualifiedName?.replace("${it.java.packageName}.", "")
       else -> name
     }
   } ?: name
@@ -47,9 +48,7 @@ fun KFunction<*>.asAction(
         }
         MediaTypes.APPLICATION_GRPC_MEDIA_TYPE
       }
-      else -> findAnnotation<ResponseContentType>()?.value?.let {
-        it.toMediaTypeOrNull()
-      }
+      else -> findAnnotation<ResponseContentType>()?.value?.toMediaTypeOrNull()
     }
 
   return Action(
