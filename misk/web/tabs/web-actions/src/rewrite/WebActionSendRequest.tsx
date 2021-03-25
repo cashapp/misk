@@ -10,6 +10,7 @@ import {
 import _ from "lodash"
 import { WebActionMetadata, ProtoField } from "./types"
 import axios from "axios"
+import { AppToaster } from "./Toaster"
 
 interface Props {
   webActionMetadata: WebActionMetadata
@@ -19,14 +20,28 @@ export default function WebActionSendRequest({ webActionMetadata }: Props) {
   const [request, setRequest] = useState<any>({})
   const [loading, setLoading] = useState(false)
   const [response, setResponse] = useState("")
+  const [url, setUrl] = useState(webActionMetadata.pathPattern)
   const requestType = webActionMetadata.types[webActionMetadata.requestType]
 
   const handleSubmit = () => {
     setLoading(true)
-    axios
-      .post(webActionMetadata.pathPattern, JSON.stringify(request))
+    let axiosRequest
+
+    if (webActionMetadata.httpMethod === "POST") {
+      axiosRequest = axios.post(url, request)
+    } else if (webActionMetadata.httpMethod === "GET") {
+      axiosRequest = axios.get(url)
+    } else {
+      AppToaster.show({
+        message: `Unsupported request type: ${webActionMetadata.httpMethod}`,
+        intent: "danger"
+      })
+      return
+    }
+
+    axiosRequest
       .then(response => {
-        setResponse(response.data)
+        setResponse(JSON.stringify(response.data, null, 2))
       })
       .catch(e => {
         setResponse(e.message)
@@ -45,6 +60,14 @@ export default function WebActionSendRequest({ webActionMetadata }: Props) {
   }
 
   const toFormElement = (field: ProtoField, path: string[]) => {
+    if (field.repeated) {
+      return (
+        <p style={{ color: "red" }}>
+          Repeated fields aren't supported currently.
+        </p>
+      )
+    }
+
     if (field.type === "String" || field.type === "ByteString") {
       return (
         <FormGroup label={`${field.name} (${field.type})`}>
@@ -109,6 +132,11 @@ export default function WebActionSendRequest({ webActionMetadata }: Props) {
     }
 
     const complexType = webActionMetadata.types[field.type]
+    if (!complexType) {
+      return (
+        <p style={{ color: "red" }}>Unsupported field type {field.type}.</p>
+      )
+    }
     return (
       <FormGroup label={`${field.name} (${field.type})`}>
         <div style={{ marginLeft: "8px" }}>
@@ -130,13 +158,55 @@ export default function WebActionSendRequest({ webActionMetadata }: Props) {
     >
       <div>
         <H5>Request</H5>
-        {requestType.fields.map(field => toFormElement(field, []))}
-        <Button intent="success" onClick={handleSubmit} loading={loading}>
-          Submit
-        </Button>
+        {requestType ? (
+          requestType.fields.map(field => toFormElement(field, []))
+        ) : (
+          <p>No request fields found.</p>
+        )}
       </div>
       <div>
-        <H5>Preview Request Body</H5>
+        {webActionMetadata.pathPattern.includes("{") ? (
+          <FormGroup label="Request Path">
+            <InputGroup
+              defaultValue={webActionMetadata.pathPattern}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                setUrl(e.currentTarget.value)
+              }
+            />
+          </FormGroup>
+        ) : (
+          <></>
+        )}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between"
+          }}
+        >
+          <H5 style={{ margin: 0 }}>Request Body</H5>
+          <div>
+            <Button
+              intent="success"
+              small={true}
+              minimal={true}
+              style={{ margin: 0 }}
+              onClick={() => setRequest({})}
+            >
+              Clear Request
+            </Button>
+            <Button
+              intent="success"
+              small={true}
+              minimal={true}
+              style={{ margin: 0 }}
+              onClick={handleSubmit}
+              loading={loading}
+            >
+              Send Request
+            </Button>
+          </div>
+        </div>
         <pre>{JSON.stringify(request, null, 2)}</pre>
 
         <H5>Response</H5>
