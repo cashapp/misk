@@ -6,15 +6,10 @@ import misk.security.authz.FakeCallerAuthenticator
 import misk.security.authz.FakeCallerAuthenticator.Companion.SERVICE_HEADER
 import misk.security.authz.FakeCallerAuthenticator.Companion.USER_HEADER
 import misk.security.authz.MiskCallerAuthenticator
-import misk.security.authz.Unauthenticated
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
-import misk.web.Get
-import misk.web.PathParam
-import misk.web.Response
 import misk.web.WebActionModule
 import misk.web.WebTestingModule
-import misk.web.actions.WebAction
 import misk.web.jetty.JettyService
 import okhttp3.OkHttpClient
 import org.assertj.core.api.Assertions.assertThat
@@ -80,14 +75,6 @@ class MetricsInterceptorTest {
     service?.let { request.addHeader(SERVICE_HEADER, it) }
     user?.let { request.addHeader(USER_HEADER, it) }
     return httpClient.newCall(request.build()).execute()
-  }
-
-  internal class TestAction @Inject constructor() : WebAction {
-    @Get("/call/{desiredStatusCode}")
-    @Unauthenticated
-    fun call(@PathParam desiredStatusCode: Int): Response<String> {
-      return Response("foo", statusCode = desiredStatusCode)
-    }
   }
 
   class TestModule : KAbstractModule() {

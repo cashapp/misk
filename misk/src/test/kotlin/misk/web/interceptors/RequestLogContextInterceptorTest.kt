@@ -6,20 +6,14 @@ import misk.moshi.adapter
 import misk.security.authz.AccessControlModule
 import misk.security.authz.FakeCallerAuthenticator
 import misk.security.authz.MiskCallerAuthenticator
-import misk.security.authz.Unauthenticated
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
-import misk.web.Get
-import misk.web.ResponseContentType
 import misk.web.WebActionModule
 import misk.web.WebTestingModule
-import misk.web.actions.WebAction
 import misk.web.jetty.JettyService
-import misk.web.mediatype.MediaTypes
 import okhttp3.OkHttpClient
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import org.slf4j.MDC
 import javax.inject.Inject
 
 @MiskTest(startService = true)
@@ -62,13 +56,6 @@ internal class RequestLogContextInterceptorTest {
       .get()
     asService?.let { request.addHeader(FakeCallerAuthenticator.SERVICE_HEADER, it) }
     return httpClient.newCall(request.build()).execute()
-  }
-
-  internal class TestAction @Inject constructor() : WebAction {
-    @Get("/call/me")
-    @Unauthenticated
-    @ResponseContentType(MediaTypes.APPLICATION_JSON)
-    fun call() = RequestContext(MDC.getCopyOfContextMap())
   }
 
   class TestModule : KAbstractModule() {

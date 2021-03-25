@@ -4,7 +4,9 @@ import com.squareup.protos.test.parsing.Shipment
 import com.squareup.protos.test.parsing.Warehouse
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
-import misk.web.actions.TestWebActionModule
+import misk.web.actions.CustomCapabilityAccessAction
+import misk.web.actions.CustomServiceAccessAction
+import misk.web.actions.GrpcAction
 import misk.web.mediatype.MediaTypes
 import misk.web.metadata.MetadataTestingModule
 import org.assertj.core.api.Assertions.assertThat
@@ -22,7 +24,7 @@ class WebActionMetadataActionTest {
     val response = webActionMetadataAction.getAll()
 
     val metadata = response.webActionMetadata.find {
-      it.name == TestWebActionModule.CustomServiceAccessAction::class.simpleName
+      it.name == CustomServiceAccessAction::class.simpleName
     }!!
     assertThat(metadata.requestMediaTypes).containsOnly("*/*")
     assertThat(metadata.responseMediaType).isEqualTo(MediaTypes.TEXT_PLAIN_UTF8)
@@ -36,7 +38,7 @@ class WebActionMetadataActionTest {
     val response = webActionMetadataAction.getAll()
 
     val metadata = response.webActionMetadata.find {
-      it.name == TestWebActionModule.CustomCapabilityAccessAction::class.simpleName
+      it.name == CustomCapabilityAccessAction::class.simpleName
     }!!
     assertThat(metadata.requestMediaTypes).containsOnly("*/*")
     assertThat(metadata.responseMediaType).isEqualTo(MediaTypes.TEXT_PLAIN_UTF8)
@@ -50,7 +52,7 @@ class WebActionMetadataActionTest {
     val response = webActionMetadataAction.getAll()
 
     val metadata = response.webActionMetadata.find {
-      it.name == TestWebActionModule.GrpcAction::class.simpleName
+      it.name == GrpcAction::class.simpleName
     }!!
     assertThat(metadata.requestType).isEqualTo(Shipment::class.qualifiedName)
     assertThat(metadata.types).isNotEmpty
@@ -60,7 +62,7 @@ class WebActionMetadataActionTest {
     val response = webActionMetadataAction.getAll()
 
     val metadata = response.webActionMetadata.find {
-      it.name == TestWebActionModule.GrpcAction::class.simpleName
+      it.name == GrpcAction::class.simpleName
     }!!
     assertThat(metadata.httpMethod).isEqualTo("POST")
     assertThat(metadata.requestType).isEqualTo(Shipment::class.qualifiedName)
