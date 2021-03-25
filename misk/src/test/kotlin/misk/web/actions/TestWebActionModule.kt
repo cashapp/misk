@@ -43,53 +43,6 @@ class TestWebActionModule : KAbstractModule() {
     multibind<MiskCallerAuthenticator>().to<FakeCallerAuthenticator>()
   }
 
-  class CustomServiceAccessAction @Inject constructor() : WebAction {
-    @Inject
-    lateinit var scopedCaller: ActionScoped<MiskCaller?>
-
-    @Get("/custom_service_access")
-    @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
-    @CustomServiceAccess
-    fun get() = "${scopedCaller.get()} authorized as custom service".toResponseBody()
-  }
-
-  @Retention(AnnotationRetention.RUNTIME)
-  @Target(AnnotationTarget.FUNCTION)
-  annotation class CustomServiceAccess
-
-  class CustomCapabilityAccessAction @Inject constructor() : WebAction {
-    @Inject
-    lateinit var scopedCaller: ActionScoped<MiskCaller?>
-
-    @Get("/custom_capability_access")
-    @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
-    @CustomCapabilityAccess
-    fun get() = "${scopedCaller.get()} authorized with custom capability".toResponseBody()
-  }
-
-  @Retention(AnnotationRetention.RUNTIME)
-  @Target(AnnotationTarget.FUNCTION)
-  annotation class CustomCapabilityAccess
-
-  class RequestTypeAction @Inject constructor() : WebAction {
-    @Post("/request_type")
-    @RequestContentType(MediaTypes.APPLICATION_JSON)
-    @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
-    @Unauthenticated
-    fun shipment(@RequestBody requestType: Shipment) = "request: $requestType".toResponseBody()
-  }
-
-  class GrpcAction @Inject constructor() :
-    ShippingGetDestinationWarehouseBlockingServer,
-    WebAction {
-    @Unauthenticated
-    override fun GetDestinationWarehouse(requestType: Shipment): Warehouse {
-      return Warehouse.Builder()
-        .warehouse_id(7777L)
-        .build()
-    }
-  }
-
   // TODO(jwilson): get Wire to generate this interface.
   interface ShippingGetDestinationWarehouseBlockingServer : Service {
     @WireRpc(
@@ -98,5 +51,52 @@ class TestWebActionModule : KAbstractModule() {
       responseAdapter = "com.squareup.protos.test.parsing.Warehouse#ADAPTER"
     )
     fun GetDestinationWarehouse(requestType: Shipment): Warehouse
+  }
+}
+
+class CustomServiceAccessAction @Inject constructor() : WebAction {
+  @Inject
+  lateinit var scopedCaller: ActionScoped<MiskCaller?>
+
+  @Get("/custom_service_access")
+  @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
+  @CustomServiceAccess
+  fun get() = "${scopedCaller.get()} authorized as custom service".toResponseBody()
+}
+
+@Retention(AnnotationRetention.RUNTIME)
+@Target(AnnotationTarget.FUNCTION)
+annotation class CustomServiceAccess
+
+class CustomCapabilityAccessAction @Inject constructor() : WebAction {
+  @Inject
+  lateinit var scopedCaller: ActionScoped<MiskCaller?>
+
+  @Get("/custom_capability_access")
+  @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
+  @CustomCapabilityAccess
+  fun get() = "${scopedCaller.get()} authorized with custom capability".toResponseBody()
+}
+
+@Retention(AnnotationRetention.RUNTIME)
+@Target(AnnotationTarget.FUNCTION)
+annotation class CustomCapabilityAccess
+
+class RequestTypeAction @Inject constructor() : WebAction {
+  @Post("/request_type")
+  @RequestContentType(MediaTypes.APPLICATION_JSON)
+  @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
+  @Unauthenticated
+  fun shipment(@RequestBody requestType: Shipment) = "request: $requestType".toResponseBody()
+}
+
+class GrpcAction @Inject constructor() :
+  TestWebActionModule.ShippingGetDestinationWarehouseBlockingServer,
+  WebAction {
+  @Unauthenticated
+  override fun GetDestinationWarehouse(requestType: Shipment): Warehouse {
+    return Warehouse.Builder()
+      .warehouse_id(7777L)
+      .build()
   }
 }
