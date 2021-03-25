@@ -1,13 +1,15 @@
 package misk.environment
 
 /** Deployment describes the context in which the application is running */
-@Deprecated(
-  message = "Use wisp.deployment.Deployment",
-  replaceWith = ReplaceWith(
-    "Deployment",
-    "wisp.deployment.Deployment"
-  )
-)
+//
+// TODO(chrisryan): "soft" deprecating
+// @Deprecated(
+//  message = "Use wisp.deployment.Deployment",
+//  replaceWith = ReplaceWith(
+//    "Deployment",
+//    "wisp.deployment.Deployment"
+//  )
+//)
 data class Deployment(
   /**
    * The name of this deployment. This is used for debugging and should not be parsed.
