@@ -1,6 +1,7 @@
 package misk.crypto
 
 import javax.inject.Qualifier
+import kotlin.annotation.AnnotationRetention.RUNTIME
 
 /**
  * This annotation is used to decorate the collection of external data keys used in the service.
@@ -15,4 +16,5 @@ import javax.inject.Qualifier
   AnnotationTarget.FIELD,
   AnnotationTarget.VALUE_PARAMETER
 )
-annotation class ExternalDataKeys()
+@Retention(RUNTIME)
+annotation class ExternalDataKeys
