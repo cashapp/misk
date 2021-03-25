@@ -17,6 +17,7 @@ import com.google.crypto.tink.mac.MacConfig
 import com.google.crypto.tink.signature.SignatureConfig
 import com.google.crypto.tink.streamingaead.StreamingAeadConfig
 import com.google.inject.Singleton
+import com.google.inject.TypeLiteral
 import com.google.inject.name.Names
 import misk.crypto.pgp.PgpDecrypter
 import misk.crypto.pgp.PgpDecrypterProvider
@@ -78,8 +79,8 @@ class CryptoModule(
     }
 
     val externalDataKeys = config.external_data_keys ?: emptyMap()
-    bind<Map<KeyAlias, KeyType>>()
-      .annotatedWith<ExternalDataKeys>()
+    bind(object : TypeLiteral<Map<KeyAlias, KeyType>>() {})
+      .annotatedWith(ExternalDataKeys::class.java)
       .toInstance(externalDataKeys)
 
     /* Include all configured remotely-provided keys. */
