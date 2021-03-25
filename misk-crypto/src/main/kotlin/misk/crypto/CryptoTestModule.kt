@@ -15,6 +15,7 @@ import com.google.crypto.tink.hybrid.HybridConfig
 import com.google.crypto.tink.mac.MacConfig
 import com.google.crypto.tink.signature.SignatureConfig
 import com.google.crypto.tink.streamingaead.StreamingAeadConfig
+import com.google.inject.TypeLiteral
 import com.google.inject.name.Names
 import misk.config.MiskConfig
 import misk.crypto.pgp.PgpDecrypter
@@ -58,8 +59,8 @@ class CryptoTestModule(
     keyManagerBinder.addBinding().toInstance(FakeExternalKeyManager(keys))
 
     val externalDataKeys = config.external_data_keys ?: emptyMap()
-    bind<Map<KeyAlias, KeyType>>()
-      .annotatedWith<ExternalDataKeys>()
+    bind(object : TypeLiteral<Map<KeyAlias, KeyType>>() {})
+      .annotatedWith(ExternalDataKeys::class.java)
       .toInstance(externalDataKeys)
     keyManagerBinder.addBinding().toInstance(FakeExternalKeyManager(externalDataKeys))
 
