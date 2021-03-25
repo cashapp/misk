@@ -21,9 +21,8 @@ fun KFunction<*>.asAction(
   val actualParameters = parameters.drop(1)
   val actionName = instanceParameter.type.classifier?.let {
     when (it) {
-      // Use the class name including all outer classes, but excluding the package (assuming a
-      // packages start with a lowercase character and classes start with an uppercase one).
-      is KClass<*> -> it.qualifiedName?.replace(Regex("^[a-z.]*"), "")
+      // Use the class name including all outer classes, but excluding the package.
+      is KClass<*> -> it.qualifiedName?.replace("${it.java.packageName}.", "")
       else -> name
     }
   } ?: name
