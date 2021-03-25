@@ -12,6 +12,7 @@ import javax.inject.Singleton
 
 @Singleton
 class HttpClientFactory @Inject constructor(
+  // TODO (rmariano): These don't seem to bind right
   private val sslLoader: SslLoader,
   private val sslContextFactory: SslContextFactory,
   private val okHttpClientCommonConfigurator: OkHttpClientCommonConfigurator
