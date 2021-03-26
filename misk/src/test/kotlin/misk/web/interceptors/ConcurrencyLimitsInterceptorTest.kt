@@ -175,25 +175,25 @@ class ConcurrencyLimitsInterceptorTest {
     val callWasShed: Boolean,
     val statusCode: Int
   )
+}
 
-  internal class HelloAction : WebAction {
-    @Get("/hello")
-    fun call(): String = "hello"
-  }
+internal class HelloAction : WebAction {
+  @Get("/hello")
+  fun call(): String = "hello"
+}
 
-  internal class UnannotatedAction : WebAction {
-    @Get("/chill")
-    fun call(): String = "chill"
-  }
+internal class UnannotatedAction : WebAction {
+  @Get("/chill")
+  fun call(): String = "chill"
+}
 
-  internal class OptOutAction : WebAction {
-    @Get("/important")
-    @AvailableWhenDegraded
-    fun call(): String = "important"
-  }
+internal class OptOutAction : WebAction {
+  @Get("/important")
+  @AvailableWhenDegraded
+  fun call(): String = "important"
+}
 
-  internal class CustomLimiterAction : WebAction {
-    @Get("/custom-limiter")
-    fun call(): String = "custom-limiter"
-  }
+internal class CustomLimiterAction : WebAction {
+  @Get("/custom-limiter")
+  fun call(): String = "custom-limiter"
 }

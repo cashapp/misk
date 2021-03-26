@@ -26,6 +26,11 @@ internal class ActionsTest {
     assertThat(action.requestType).isNull()
   }
 
+  @Test fun nestedAction() {
+    val action = NestedAction.InnerAction::myActionMethod.asAction(DispatchMechanism.GET)
+    assertThat(action.name).isEqualTo("NestedAction.InnerAction")
+  }
+
   @Test fun methodReferenceNotAllowedAsAction() {
     assertFailsWith<IllegalArgumentException> {
       val t = TestAction()
@@ -38,14 +43,22 @@ internal class ActionsTest {
       ::myActionHandler.asAction(DispatchMechanism.GET)
     }
   }
+}
 
-  class TestAction {
+class TestAction {
+  fun myActionMethod(n: Int, @RequestBody req: String): String = "foo$n$req"
+}
+
+class NoRequestBodyAction {
+  fun myActionMethod(n: Int): String = "foo$n"
+}
+
+class NestedAction {
+  fun myActionMethod(n: Int, @RequestBody req: String): String = "foo$n$req"
+
+  class InnerAction {
     fun myActionMethod(n: Int, @RequestBody req: String): String = "foo$n$req"
   }
-
-  class NoRequestBodyAction {
-    fun myActionMethod(n: Int): String = "foo$n"
-  }
-
-  fun myActionHandler(n: Int): String = "bar$n"
 }
+
+fun myActionHandler(n: Int): String = "bar$n"
