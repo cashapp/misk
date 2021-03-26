@@ -25,7 +25,7 @@ title_markdown_file() {
 }
 
 set +x
-for MARKDOWN_FILE in $(find docs/1.x/ -name '*.md'); do
+for MARKDOWN_FILE in $(find docs/0.x/ -name '*.md'); do
   echo $MARKDOWN_FILE
   title_markdown_file $MARKDOWN_FILE
 done
