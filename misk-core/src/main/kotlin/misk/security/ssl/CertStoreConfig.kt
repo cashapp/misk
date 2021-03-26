@@ -8,5 +8,5 @@ data class CertStoreConfig @Inject constructor(
   val passphrase: String? = null,
   val format: String = SslLoader.FORMAT_JCEKS
 ) {
-  fun toWispConfig() = WispCertStoreConfig(resource, passphrase, format)
+  internal fun toWispConfig() = WispCertStoreConfig(resource, passphrase, format)
 }
