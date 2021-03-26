@@ -2,7 +2,6 @@ package misk.client
 
 import com.google.common.util.concurrent.AbstractIdleService
 import okhttp3.mockwebserver.MockWebServer
-import wisp.client.UnixDomainServerSocketFactory
 import java.io.File
 import javax.inject.Singleton
 
@@ -17,8 +16,7 @@ class MockWebServerService(val unixSocketFile: String?) : AbstractIdleService() 
 
     server = MockWebServer()
     unixSocketFile?.let {
-      server!!.serverSocketFactory =
-        UnixDomainServerSocketFactory(file)
+      server!!.serverSocketFactory = UnixDomainServerSocketFactory(file)
     }
   }
 

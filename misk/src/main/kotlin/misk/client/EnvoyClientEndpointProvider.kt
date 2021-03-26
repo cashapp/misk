@@ -1,4 +1,4 @@
-package wisp.client
+package misk.client
 
 import java.io.File
 

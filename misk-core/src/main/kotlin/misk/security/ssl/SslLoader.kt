@@ -8,7 +8,7 @@ import wisp.security.ssl.SslLoader as WispSslLoader
 class SslLoader @Inject internal constructor(
   val resourceLoader: ResourceLoader
 ) {
-  val delegate: WispSslLoader = WispSslLoader(resourceLoader.delegate)
+  internal val delegate: WispSslLoader = WispSslLoader(resourceLoader.delegate)
 
   fun loadTrustStore(
     path: String,

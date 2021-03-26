@@ -6,7 +6,7 @@ import misk.MiskTestingServiceModule
 import misk.client.HttpClientEndpointConfig
 import misk.client.HttpClientModule
 import misk.client.HttpClientsConfig
-import wisp.client.UnixDomainSocketFactory
+import misk.client.UnixDomainSocketFactory
 import misk.inject.KAbstractModule
 import misk.inject.getInstance
 import misk.testing.MiskTest

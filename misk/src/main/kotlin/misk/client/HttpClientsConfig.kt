@@ -94,11 +94,7 @@ data class HttpClientsConfig(
 data class HttpClientSSLConfig(
   val cert_store: CertStoreConfig?,
   val trust_store: TrustStoreConfig
-) {
-  fun toWispConfig(): wisp.client.HttpClientSSLConfig = wisp.client.HttpClientSSLConfig(
-    cert_store?.toWispConfig(), trust_store.toWispConfig()
-  )
-}
+)
 
 data class HttpClientConfig(
   val connectTimeout: Duration? = null,
@@ -113,22 +109,7 @@ data class HttpClientConfig(
   val ssl: HttpClientSSLConfig? = null,
   val unixSocketFile: String? = null,
   val protocols: List<String>? = null
-) {
-  fun toWispConfig() = wisp.client.HttpClientConfig(
-    connectTimeout,
-    writeTimeout,
-    readTimeout,
-    pingInterval,
-    callTimeout,
-    maxRequests,
-    maxRequestsPerHost,
-    maxIdleConnections,
-    keepAliveDuration,
-    ssl?.toWispConfig(),
-    unixSocketFile,
-    protocols,
-  )
-}
+)
 
 fun HttpClientConfig.applyDefaults(other: HttpClientConfig) =
   HttpClientConfig(
@@ -220,10 +201,6 @@ data class HttpClientEndpointConfig(
   )
   val ssl
     get() = clientConfig.ssl
-
-  fun toWispConfig() = wisp.client.HttpClientEndpointConfig(
-    url, envoy?.toWispConfig(), clientConfig.toWispConfig()
-  )
 }
 
 data class HttpClientEnvoyConfig(
@@ -231,6 +208,4 @@ data class HttpClientEnvoyConfig(
 
   /** Environment to target. If null, the same environment as the app is running in is assumed. */
   val env: String? = null
-) {
-  fun toWispConfig() = wisp.client.HttpClientEnvoyConfig(app, env)
-}
+)

@@ -1,7 +1,7 @@
 package misk.web.jetty
 
 import misk.Action
-import wisp.client.UnixDomainSocketFactory
+import misk.client.UnixDomainSocketFactory
 import misk.inject.KAbstractModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
