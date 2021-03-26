@@ -6,7 +6,6 @@ import com.squareup.moshi.Moshi
 import misk.inject.KAbstractModule
 import misk.inject.asSingleton
 import okhttp3.OkHttpClient
-import wisp.client.OkHttpClientCommonConfigurator
 import javax.inject.Inject
 
 /** Provides an [OkHttpClient] and [ProtoMessageHttpClient] for a peer service */
@@ -28,8 +27,6 @@ class HttpClientModule constructor(
       .toProvider(ProtoMessageHttpClientProvider(name, getProvider(httpClientKey)))
       .asSingleton()
   }
-
-  // TODO(rmariano): bind configurator somehow
 
   private class HttpClientProvider(private val name: String) : Provider<OkHttpClient> {
     /** Use a provider because we don't know the test client's URL until its test server starts. */

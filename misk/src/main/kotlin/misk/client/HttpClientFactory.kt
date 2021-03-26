@@ -3,7 +3,6 @@ package misk.client
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import wisp.client.EnvoyClientEndpointProvider
-import wisp.client.OkHttpClientCommonConfigurator
 import misk.security.ssl.SslContextFactory
 import misk.security.ssl.SslLoader
 import javax.inject.Inject
@@ -27,7 +26,7 @@ class HttpClientFactory @Inject constructor(
     val delegate = wisp.client.HttpClientFactory(
       sslLoader.delegate,
       sslContextFactory.delegate,
-      okHttpClientCommonConfigurator,
+      okHttpClientCommonConfigurator.delegate,
       envoyClientEndpointProvider,
       okhttpInterceptors?.get()
     )
