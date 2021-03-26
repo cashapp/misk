@@ -18,22 +18,18 @@ class HttpClientModule constructor(
     val httpClientKey =
       if (annotation == null) Key.get(OkHttpClient::class.java)
       else Key.get(OkHttpClient::class.java, annotation)
-    val configuratorKey =
-      if (annotation == null) Key.get(OkHttpClientCommonConfigurator::class.java)
-      else Key.get(OkHttpClientCommonConfigurator::class.java, annotation)
     val protoMessageHttpClientKey =
       if (annotation == null) Key.get(ProtoMessageHttpClient::class.java)
       else Key.get(ProtoMessageHttpClient::class.java, annotation)
     bind(httpClientKey)
       .toProvider(HttpClientProvider(name))
       .asSingleton()
-    bind(configuratorKey)
-      .toProvider(OkHttpConfiguratorProvider())
-      .asSingleton()
     bind(protoMessageHttpClientKey)
       .toProvider(ProtoMessageHttpClientProvider(name, getProvider(httpClientKey)))
       .asSingleton()
   }
+
+  // TODO(rmariano): bind configurator somehow
 
   private class HttpClientProvider(private val name: String) : Provider<OkHttpClient> {
     /** Use a provider because we don't know the test client's URL until its test server starts. */
@@ -41,10 +37,6 @@ class HttpClientModule constructor(
     @Inject lateinit var httpClientFactory: HttpClientFactory
 
     override fun get() = httpClientFactory.create(httpClientsConfigProvider.get()[name])
-  }
-
-  private class OkHttpConfiguratorProvider() : Provider<OkHttpClientCommonConfigurator> {
-    override fun get(): OkHttpClientCommonConfigurator = OkHttpClientCommonConfigurator()
   }
 
   private class ProtoMessageHttpClientProvider(
