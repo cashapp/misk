@@ -1,21 +1,15 @@
-package misk.client
+package wisp.client
 
-import com.fasterxml.jackson.annotation.JsonAlias
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize
-import misk.config.Config
-import misk.logging.getLogger
-import misk.security.ssl.CertStoreConfig
-import misk.security.ssl.TrustStoreConfig
+import wisp.security.ssl.CertStoreConfig
+import wisp.security.ssl.TrustStoreConfig
 import java.net.URL
 import java.time.Duration
 
-@JsonDeserialize(converter = BackwardsCompatibleClientsConfigConverter::class)
 data class HttpClientsConfig(
-  @JsonAlias("hosts")
   // Need to retain ordering, hence LinkedHashMap
   val hostConfigs: LinkedHashMap<String, HttpClientConfig> = linkedMapOf(),
   val endpoints: Map<String, HttpClientEndpointConfig> = mapOf()
-) : Config {
+) {
   init {
     validatePatterns()
   }
@@ -78,7 +72,6 @@ data class HttpClientsConfig(
     }.values
 
   companion object {
-    val logger = getLogger<HttpClientsConfig>()
     val httpClientConfigDefaults = HttpClientConfig(
       maxRequests = 128,
       maxRequestsPerHost = 32,
@@ -94,11 +87,7 @@ data class HttpClientsConfig(
 data class HttpClientSSLConfig(
   val cert_store: CertStoreConfig?,
   val trust_store: TrustStoreConfig
-) {
-  fun toWispConfig(): wisp.client.HttpClientSSLConfig = wisp.client.HttpClientSSLConfig(
-    cert_store?.toWispConfig(), trust_store.toWispConfig()
-  )
-}
+)
 
 data class HttpClientConfig(
   val connectTimeout: Duration? = null,
@@ -113,22 +102,7 @@ data class HttpClientConfig(
   val ssl: HttpClientSSLConfig? = null,
   val unixSocketFile: String? = null,
   val protocols: List<String>? = null
-) {
-  fun toWispConfig() = wisp.client.HttpClientConfig(
-    connectTimeout,
-    writeTimeout,
-    readTimeout,
-    pingInterval,
-    callTimeout,
-    maxRequests,
-    maxRequestsPerHost,
-    maxIdleConnections,
-    keepAliveDuration,
-    ssl?.toWispConfig(),
-    unixSocketFile,
-    protocols,
-  )
-}
+)
 
 fun HttpClientConfig.applyDefaults(other: HttpClientConfig) =
   HttpClientConfig(
@@ -150,87 +124,11 @@ data class HttpClientEndpointConfig(
   val url: String? = null,
   val envoy: HttpClientEnvoyConfig? = null,
   val clientConfig: HttpClientConfig = HttpClientConfig()
-) {
-  @Deprecated(
-    "Use clientConfig property",
-    replaceWith = ReplaceWith("clientConfig.connectTimeout")
-  )
-  val connectTimeout
-    get() = clientConfig.connectTimeout
-
-  @Deprecated(
-    "Use clientConfig property",
-    replaceWith = ReplaceWith("clientConfig.writeTimeout")
-  )
-  val writeTimeout
-    get() = clientConfig.writeTimeout
-
-  @Deprecated(
-    "Use clientConfig property",
-    replaceWith = ReplaceWith("clientConfig.readTimeout")
-  )
-  val readTimeout
-    get() = clientConfig.readTimeout
-
-  @Deprecated(
-    "Use clientConfig property",
-    replaceWith = ReplaceWith("clientConfig.pingInterval")
-  )
-  val pingInterval
-    get() = clientConfig.pingInterval
-
-  @Deprecated(
-    "Use clientConfig property",
-    replaceWith = ReplaceWith("clientConfig.callTimeout")
-  )
-  val callTimeout
-    get() = clientConfig.callTimeout
-
-  @Deprecated(
-    "Use clientConfig property",
-    replaceWith = ReplaceWith("clientConfig.maxRequests")
-  )
-  val maxRequests
-    get() = clientConfig.maxRequests
-
-  @Deprecated(
-    "Use clientConfig property",
-    replaceWith = ReplaceWith("clientConfig.maxRequestsPerHost")
-  )
-  val maxRequestsPerHost
-    get() = clientConfig.maxRequestsPerHost
-
-  @Deprecated(
-    "Use clientConfig property",
-    replaceWith = ReplaceWith("clientConfig.maxIdleConnections")
-  )
-  val maxIdleConnections
-    get() = clientConfig.maxIdleConnections
-
-  @Deprecated(
-    "Use clientConfig property",
-    replaceWith = ReplaceWith("clientConfig.keepAliveDuration")
-  )
-  val keepAliveDuration
-    get() = clientConfig.keepAliveDuration
-
-  @Deprecated(
-    "Use clientConfig property",
-    replaceWith = ReplaceWith("clientConfig.ssl")
-  )
-  val ssl
-    get() = clientConfig.ssl
-
-  fun toWispConfig() = wisp.client.HttpClientEndpointConfig(
-    url, envoy?.toWispConfig(), clientConfig.toWispConfig()
-  )
-}
+)
 
 data class HttpClientEnvoyConfig(
   val app: String,
 
   /** Environment to target. If null, the same environment as the app is running in is assumed. */
   val env: String? = null
-) {
-  fun toWispConfig() = wisp.client.HttpClientEnvoyConfig(app, env)
-}
+)

@@ -17,6 +17,7 @@ import org.junit.jupiter.api.Test
 import retrofit2.Call
 import retrofit2.http.Body
 import retrofit2.http.POST
+import wisp.client.EnvoyClientEndpointProvider
 import java.io.File
 import java.util.Arrays
 import javax.inject.Inject
@@ -62,11 +63,11 @@ internal class HttpClientEnvoyTest {
   class TestEnvoyClientEndpointProvider : EnvoyClientEndpointProvider {
     @Inject private lateinit var webServerService: MockWebServerService
 
-    override fun url(httpClientEnvoyConfig: HttpClientEnvoyConfig): String {
+    override fun url(httpClientEnvoyConfig: wisp.client.HttpClientEnvoyConfig): String {
       return webServerService.server!!.url("").toString()
     }
 
-    override fun unixSocket(httpClientEnvoyConfig: HttpClientEnvoyConfig): File {
+    override fun unixSocket(httpClientEnvoyConfig: wisp.client.HttpClientEnvoyConfig): File {
       return File("@socket")
     }
   }
