@@ -1,6 +1,5 @@
 package wisp.client
 
-import misk.client.UnixDomainSocketFactory
 import wisp.security.ssl.SslContextFactory
 import wisp.security.ssl.SslLoader
 import okhttp3.Interceptor

@@ -6,7 +6,6 @@ import com.squareup.wire.GrpcStreamingCall
 import com.squareup.wire.Service
 import okhttp3.OkHttpClient
 import okhttp3.Protocol
-import wisp.client.OkHttpClientCommonConfigurator
 import java.lang.reflect.InvocationHandler
 import java.lang.reflect.Method
 import java.lang.reflect.ParameterizedType
