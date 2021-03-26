@@ -7,7 +7,7 @@ import javax.net.ssl.TrustManager
 import wisp.security.ssl.SslContextFactory as WispSslContextFactory
 
 class SslContextFactory @Inject constructor(private val sslLoader: SslLoader) {
-  internal val delegate: WispSslContextFactory = WispSslContextFactory(sslLoader.delegate)
+  val delegate: WispSslContextFactory = WispSslContextFactory(sslLoader.delegate)
 
   /** @return A new [SSLContext] for the given certstore and optional truststore config */
   fun create(certStore: CertStoreConfig? = null, trustStore: TrustStoreConfig? = null): SSLContext =

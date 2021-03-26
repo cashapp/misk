@@ -154,7 +154,10 @@ internal class GrpcClientProvider<T : Service, G : T>(
 
     val clientBuilder = clientPrototype.newBuilder()
 
-    okHttpClientCommonConfigurator.configure(builder = clientBuilder, config = endpointConfig)
+    okHttpClientCommonConfigurator.configure(
+      builder = clientBuilder,
+      config = endpointConfig.toWispConfig()
+    )
 
     clientBuilder.addInterceptor(clientMetricsInterceptorFactory.create(name))
     for (factory in interceptorFactories) {
