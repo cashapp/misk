@@ -102,7 +102,6 @@ ext.dep = [
   "servletApi": "javax.servlet:javax.servlet-api:3.1.0",
   "shadowJarPlugin": "com.github.jengelman.gradle.plugins:shadow:5.1.0",
   "slf4jApi": "org.slf4j:slf4j-api:1.7.28",
-  "spotless5Plugin": "com.diffplug.spotless:spotless-plugin-gradle:5.7.0",
   "tink": "com.google.crypto.tink:tink:1.2.0",
   "tracingDatadog": "com.datadoghq:dd-trace-api:0.75.0",
   "vitess": "io.vitess:vitess-jdbc:3.0.0",
