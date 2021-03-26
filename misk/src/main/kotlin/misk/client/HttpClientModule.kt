@@ -4,9 +4,10 @@ import com.google.inject.Key
 import com.google.inject.Provider
 import com.squareup.moshi.Moshi
 import misk.inject.KAbstractModule
+import misk.inject.asSingleton
 import okhttp3.OkHttpClient
+import wisp.client.OkHttpClientCommonConfigurator
 import javax.inject.Inject
-import javax.inject.Singleton
 
 /** Provides an [OkHttpClient] and [ProtoMessageHttpClient] for a peer service */
 class HttpClientModule constructor(
@@ -17,15 +18,21 @@ class HttpClientModule constructor(
     val httpClientKey =
       if (annotation == null) Key.get(OkHttpClient::class.java)
       else Key.get(OkHttpClient::class.java, annotation)
+    val configuratorKey =
+      if (annotation == null) Key.get(OkHttpClientCommonConfigurator::class.java)
+      else Key.get(OkHttpClientCommonConfigurator::class.java, annotation)
     val protoMessageHttpClientKey =
       if (annotation == null) Key.get(ProtoMessageHttpClient::class.java)
       else Key.get(ProtoMessageHttpClient::class.java, annotation)
     bind(httpClientKey)
       .toProvider(HttpClientProvider(name))
-      .`in`(Singleton::class.java)
+      .asSingleton()
+    bind(configuratorKey)
+      .toProvider(OkHttpConfiguratorProvider())
+      .asSingleton()
     bind(protoMessageHttpClientKey)
       .toProvider(ProtoMessageHttpClientProvider(name, getProvider(httpClientKey)))
-      .`in`(Singleton::class.java)
+      .asSingleton()
   }
 
   private class HttpClientProvider(private val name: String) : Provider<OkHttpClient> {
@@ -34,6 +41,10 @@ class HttpClientModule constructor(
     @Inject lateinit var httpClientFactory: HttpClientFactory
 
     override fun get() = httpClientFactory.create(httpClientsConfigProvider.get()[name])
+  }
+
+  private class OkHttpConfiguratorProvider() : Provider<OkHttpClientCommonConfigurator> {
+    override fun get(): OkHttpClientCommonConfigurator = OkHttpClientCommonConfigurator()
   }
 
   private class ProtoMessageHttpClientProvider(

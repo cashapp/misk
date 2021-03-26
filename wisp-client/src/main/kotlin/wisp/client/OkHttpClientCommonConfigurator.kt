@@ -6,7 +6,7 @@ import okhttp3.OkHttpClient.Builder
 import java.time.Duration
 import java.util.concurrent.TimeUnit
 
-class OkHttpClientCommonConfigurator internal constructor() {
+class OkHttpClientCommonConfigurator constructor() {
   fun configure(builder: Builder, config: HttpClientEndpointConfig): Builder {
     configureCallTimeout(builder = builder, config = config)
     configureConnectTimeout(builder = builder, config = config)

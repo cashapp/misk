@@ -4,15 +4,14 @@ import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import wisp.client.EnvoyClientEndpointProvider
 import wisp.client.OkHttpClientCommonConfigurator
-import wisp.security.ssl.SslContextFactory
-import wisp.security.ssl.SslLoader
+import misk.security.ssl.SslContextFactory
+import misk.security.ssl.SslLoader
 import javax.inject.Inject
 import javax.inject.Provider
 import javax.inject.Singleton
 
 @Singleton
 class HttpClientFactory @Inject constructor(
-  // TODO (rmariano): These don't seem to bind right
   private val sslLoader: SslLoader,
   private val sslContextFactory: SslContextFactory,
   private val okHttpClientCommonConfigurator: OkHttpClientCommonConfigurator
@@ -26,8 +25,8 @@ class HttpClientFactory @Inject constructor(
   /** Returns a client initialized based on `config`. */
   fun create(config: HttpClientEndpointConfig): OkHttpClient {
     val delegate = wisp.client.HttpClientFactory(
-      sslLoader,
-      sslContextFactory,
+      sslLoader.delegate,
+      sslContextFactory.delegate,
       okHttpClientCommonConfigurator,
       envoyClientEndpointProvider,
       okhttpInterceptors?.get()

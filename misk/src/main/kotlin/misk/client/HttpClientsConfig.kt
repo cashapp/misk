@@ -94,7 +94,11 @@ data class HttpClientsConfig(
 data class HttpClientSSLConfig(
   val cert_store: CertStoreConfig?,
   val trust_store: TrustStoreConfig
-)
+) {
+  fun toWispConfig(): wisp.client.HttpClientSSLConfig = wisp.client.HttpClientSSLConfig(
+    cert_store?.toWispConfig(), trust_store.toWispConfig()
+  )
+}
 
 data class HttpClientConfig(
   val connectTimeout: Duration? = null,
@@ -119,7 +123,10 @@ data class HttpClientConfig(
     maxRequests,
     maxRequestsPerHost,
     maxIdleConnections,
-    keepAliveDuration
+    keepAliveDuration,
+    ssl?.toWispConfig(),
+    unixSocketFile,
+    protocols,
   )
 }
 
