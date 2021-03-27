@@ -6,8 +6,8 @@ import TabContainer from "../rewrite/TabContainer"
 const routes = (
   <div>
     <Switch>
-      <Route path="/_admin/web-actions/" component={OldTabContainer} />
-      <Route path="/_admin/web-actions-beta/" component={TabContainer} />
+      <Route path="/_admin/web-actions/" component={TabContainer} />
+      <Route path="/_admin/web-actions-old/" component={OldTabContainer} />
       {/* Do not include a Route without a path or it will display during on all tabs */}
     </Switch>
   </div>

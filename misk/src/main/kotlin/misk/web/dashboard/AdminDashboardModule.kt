@@ -123,25 +123,25 @@ class AdminDashboardModule(private val isDevelopment: Boolean) : KAbstractModule
       )
     )
 
-    // Web Actions Rewrite
+    // Web Actions Old
     multibind<DashboardTab>().toProvider(
       DashboardTabProvider<AdminDashboard, AdminDashboardAccess>(
-        slug = "web-actions-beta",
-        url_path_prefix = "/_admin/web-actions-beta/",
-        name = "Web Actions Beta",
+        slug = "web-actions-old",
+        url_path_prefix = "/_admin/web-actions-old/",
+        name = "Web Actions Old",
         category = "Container Admin"
       )
     )
     install(
       WebTabResourceModule(
         isDevelopment = isDevelopment,
-        slug = "web-actions-beta",
+        slug = "web-actions-old",
         web_proxy_url = "http://localhost:3201/"
       )
     )
     multibind<DashboardNavbarItem>().toInstance(
       DashboardNavbarItem<AdminDashboard>(
-        item = "<a href=\"/_admin/web-actions-beta/\">Web Actions Beta</a>",
+        item = "<a href=\"/_admin/web-actions-old/\">Web Actions Old</a>",
         order = 101
       )
     )
