@@ -12,6 +12,8 @@ import kotlin.reflect.KClass
 class WispQueuedLogCollector : LogCollector {
   private val queue = LinkedBlockingDeque<ILoggingEvent>()
 
+  private var wasStarted = false
+
   private val appender = object : UnsynchronizedAppenderBase<ILoggingEvent>() {
     override fun append(event: ILoggingEvent) {
       queue.put(event)
@@ -57,7 +59,7 @@ class WispQueuedLogCollector : LogCollector {
     minLevel: Level,
     pattern: Regex?
   ): ILoggingEvent? {
-    require(appender.isStarted) { "not collecting logs: did you forget to start the service?" }
+    require(wasStarted) { "not collecting logs: did you forget to start the service?" }
 
     val event = queue.poll(500, TimeUnit.MILLISECONDS)
       ?: throw IllegalArgumentException("no events to take!")
@@ -71,6 +73,7 @@ class WispQueuedLogCollector : LogCollector {
 
   fun startUp() {
     appender.start()
+    wasStarted = true
 
     val rootLogger = LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME)
     (rootLogger as? Logger)?.addAppender(appender)
