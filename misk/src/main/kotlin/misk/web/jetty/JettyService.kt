@@ -150,11 +150,23 @@ class JettyService @Inject internal constructor(
 
       val httpsConnectionFactories = mutableListOf<ConnectionFactory>()
 
-      // By default, Jetty excludes a number of common cipher suites. This default set is too
-      // restrictive. Clear the set of excluded suites and define the suites to include below.
-      sslContextFactory.setExcludeCipherSuites()
-      sslContextFactory.setIncludeProtocols(*TlsProtocols.safe)
-      sslContextFactory.setIncludeCipherSuites(*CipherSuites.safe)
+      when (webConfig.ssl.cipher_compatibility) {
+        WebSslConfig.CipherCompatibility.COMPATIBLE -> {
+          // By default, Jetty excludes a number of common cipher suites. This default set is too
+          // restrictive. Clear the set of excluded suites and define the suites to include below.
+          sslContextFactory.setExcludeCipherSuites()
+          sslContextFactory.setIncludeProtocols(*TlsProtocols.compatible)
+          sslContextFactory.setIncludeCipherSuites(*CipherSuites.compatible)
+        }
+        WebSslConfig.CipherCompatibility.MODERN -> {
+          // Use Jetty's default set of protocols and cipher suites.
+        }
+        WebSslConfig.CipherCompatibility.RESTRICTED -> {
+          sslContextFactory.setIncludeProtocols(*TlsProtocols.restricted)
+          // Use Jetty's default set of cipher suites for now; we can restrict it further later
+          // if desired.
+        }
+      }
 
       val httpsConfig = HttpConfiguration(httpConfig)
       httpsConfig.addCustomizer(SecureRequestCustomizer())
