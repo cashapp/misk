@@ -22,7 +22,7 @@ object CipherSuites {
   )
 
   // Set of available cipher suites that are safe to allow.
-  val safe = {
+  val compatible = {
     val availableCipherSuites = SSLContext.getDefault().supportedSSLParameters.cipherSuites.toSet()
 
     // We iterate through the allowable suites so that we preserve preferred ordering

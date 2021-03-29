@@ -91,12 +91,24 @@ data class WebSslConfig(
   val port: Int,
   val cert_store: CertStoreConfig,
   val trust_store: TrustStoreConfig? = null,
-  val mutual_auth: MutualAuth = MutualAuth.REQUIRED
+  val mutual_auth: MutualAuth = MutualAuth.REQUIRED,
+  val cipher_compatibility: CipherCompatibility = CipherCompatibility.COMPATIBLE,
 ) {
   enum class MutualAuth {
     NONE,
     REQUIRED,
     DESIRED
+  }
+
+  // These enum variants here use the terminology defined at
+  // https://cloud.google.com/load-balancing/docs/ssl-policies-concepts
+  enum class CipherCompatibility {
+    /** Allows the broadest set of clients, including clients that support only out-of-date SSL features. */
+    COMPATIBLE,
+    /** Supports a wide set of SSL features, allowing modern clients to negotiate SSL. */
+    MODERN,
+    /** Supports a reduced set of SSL features, intended to meet stricter compliance requirements. */
+    RESTRICTED
   }
 }
 
