@@ -9,5 +9,5 @@ data class TrustStoreConfig @Inject constructor(
   val passphrase: String? = null,
   val format: String = FORMAT_JCEKS
 ) {
-  internal fun toWispConfig() = WispTrustStoreConfig(resource, passphrase, format)
+  fun toWispConfig() = WispTrustStoreConfig(resource, passphrase, format)
 }
