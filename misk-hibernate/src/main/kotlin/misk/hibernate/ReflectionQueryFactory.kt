@@ -94,8 +94,14 @@ internal class ReflectionQuery<T : DbEntity<T>>(
   fun addConstraint(path: List<String>, operator: Operator, value: Any?) {
     when (operator) {
       Operator.EQ -> {
-        addConstraint { root, builder ->
-          builder.equal(root.traverse<Any?>(path), value)
+        if (value != null) {
+          addConstraint { root, builder ->
+            builder.equal(root.traverse<Any?>(path), value)
+          }
+        } else {
+          addConstraint { root, builder ->
+            builder.isNull(root.traverse<Comparable<Comparable<*>>>(path))
+          }
         }
       }
       Operator.NE -> {
@@ -598,8 +604,14 @@ internal class ReflectionQuery<T : DbEntity<T>>(
         val handler = when (constraint.operator) {
           Operator.EQ -> object : QueryMethodHandler {
             override fun invoke(reflectionQuery: ReflectionQuery<*>, args: Array<out Any>): Any? {
-              return reflectionQuery.addConstraint { root, builder ->
-                builder.equal(root.traverse<Any?>(path), args[0])
+              return if (args[0] != null) {
+                reflectionQuery.addConstraint { root, builder ->
+                  builder.equal(root.traverse<Any?>(path), args[0])
+                }
+              } else {
+                reflectionQuery.addConstraint { root, builder ->
+                  builder.isNull(root.traverse<Comparable<Comparable<*>>>(path))
+                }
               }
             }
           }
