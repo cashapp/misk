@@ -71,6 +71,14 @@ class CryptoTestModule(
       }
     }
 
+    val serviceKeys = mutableMapOf<KeyAlias, KeyType>()
+    keys.forEach {
+      serviceKeys[it.key_name] = it.key_type
+    }
+    bind(object : TypeLiteral<Map<KeyAlias, KeyType>>() {})
+      .annotatedWith(ServiceKeys::class.java)
+      .toInstance(serviceKeys.toMap())
+
     keys.forEach { key ->
       when (key.key_type) {
         KeyType.AEAD -> {
