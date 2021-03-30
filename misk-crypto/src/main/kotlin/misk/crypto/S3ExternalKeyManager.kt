@@ -8,7 +8,7 @@ import com.amazonaws.services.s3.model.AmazonS3Exception
 import com.google.inject.Inject
 import misk.config.MiskConfig
 import misk.environment.Env
-import misk.logging.getLogger
+import wisp.logging.getLogger
 
 /**
  * [S3ExternalKeyManager] implements an [ExternalKeyManager] that fetches Tink keysets from an S3
@@ -59,8 +59,6 @@ class S3ExternalKeyManager @Inject constructor(
       .build()
   } ?: defaultS3
 
-  private val logger by lazy { getLogger<S3ExternalKeyManager>() }
-
   private fun objectPath(alias: String) = "$alias/${s3.regionName.toLowerCase()}"
 
   private fun getRemoteKey(alias: KeyAlias, type: KeyType): Key {
@@ -101,6 +99,8 @@ class S3ExternalKeyManager @Inject constructor(
     private const val METADATA_KEY_KMS_ARN = "kms-key-arn"
 
     private const val METADATA_KEY_KEY_TYPE = "key-type"
+
+    private val logger = getLogger<S3ExternalKeyManager>()
   }
 
 }
