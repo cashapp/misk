@@ -14,7 +14,7 @@ env:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     services:
       mysql:
         image: mysql:5.7
@@ -25,6 +25,8 @@ jobs:
 
     strategy:
       matrix:
+        os: [ubuntu-latest]
+        node: [12]
         include:
           # These builds consistently break. Use the circleci build instead for now.
 #          - shard: ./gradlew testShardHibernate -i --scan
