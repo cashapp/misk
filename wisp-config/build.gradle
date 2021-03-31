@@ -6,6 +6,12 @@ buildscript {
 
 dependencies {
   implementation dep.kotlinStdLibJdk8
+  api dep.hopliteCore
+  api dep.hopliteHocon
+  api dep.hopliteJson
+  api dep.hopliteToml
+  api dep.hopliteYaml
+  api project(':wisp-resource-loader')
 
   testImplementation dep.assertj
   testImplementation dep.kotlinTest
