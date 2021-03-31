@@ -17,6 +17,7 @@ import com.google.crypto.tink.mac.MacConfig
 import com.google.crypto.tink.signature.SignatureConfig
 import com.google.crypto.tink.streamingaead.StreamingAeadConfig
 import com.google.inject.Singleton
+import com.google.inject.TypeLiteral
 import com.google.inject.name.Names
 import misk.crypto.pgp.PgpDecrypter
 import misk.crypto.pgp.PgpDecrypterProvider
@@ -56,6 +57,7 @@ class CryptoModule(
      * error-prone.
      */
     val keyManagerBinder = newMultibinder(ExternalKeyManager::class)
+    val serviceKeys = mutableMapOf<KeyAlias, KeyType>()
 
     /* Parse and include all local keys first. */
     config.keys?.let { keys ->
@@ -68,6 +70,7 @@ class CryptoModule(
 
       keys.forEach {
         bindKeyToProvider(it.key_name, it.key_type)
+        serviceKeys[it.key_name] = it.key_type
       }
 
       keyNames = keys.map { it.key_name }
@@ -77,9 +80,13 @@ class CryptoModule(
       }
     }
 
+    bind(object : TypeLiteral<Map<KeyAlias, KeyType>>() {})
+      .annotatedWith(ServiceKeys::class.java)
+      .toInstance(serviceKeys.toMap())
+
     val externalDataKeys = config.external_data_keys ?: emptyMap()
-    bind<Map<KeyAlias, KeyType>>()
-      .annotatedWith<ExternalDataKeys>()
+    bind(object : TypeLiteral<Map<KeyAlias, KeyType>>() {})
+      .annotatedWith(ExternalDataKeys::class.java)
       .toInstance(externalDataKeys)
 
     /* Include all configured remotely-provided keys. */
