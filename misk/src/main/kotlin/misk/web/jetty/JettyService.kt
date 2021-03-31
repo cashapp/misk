@@ -58,13 +58,14 @@ class JettyService @Inject internal constructor(
   val healthServerUrl: HttpUrl? get() = server.healthUrl
   val httpServerUrl: HttpUrl get() = server.httpUrl!!
   val httpsServerUrl: HttpUrl? get() = server.httpsUrl
+  private var healthExecutor: ThreadPoolExecutor? = null
 
   override fun startUp() {
     val stopwatch = Stopwatch.createStarted()
     logger.info("Starting Jetty")
 
     if (webConfig.health_port >= 0) {
-      val healthExecutor = ThreadPoolExecutor(
+      healthExecutor = ThreadPoolExecutor(
         // 2 threads for jetty acceptor and selector. 2 threads for k8s liveness/readiness.
         4,
         // Jetty can be flaky about rejecting near full capacity, so allow some growth.
@@ -113,7 +114,7 @@ class JettyService @Inject internal constructor(
       null /* buffer pool */,
       webConfig.acceptors ?: -1,
       webConfig.selectors ?: -1,
-      httpConnectionFactories.toTypedArray()
+      *httpConnectionFactories.toTypedArray()
     )
     httpConnector.port = webConfig.port
     httpConnector.idleTimeout = webConfig.idle_timeout
@@ -149,11 +150,23 @@ class JettyService @Inject internal constructor(
 
       val httpsConnectionFactories = mutableListOf<ConnectionFactory>()
 
-      // By default, Jetty excludes a number of common cipher suites. This default set is too
-      // restrictive. Clear the set of excluded suites and define the suites to include below.
-      sslContextFactory.setExcludeCipherSuites()
-      sslContextFactory.setIncludeProtocols(*TlsProtocols.safe)
-      sslContextFactory.setIncludeCipherSuites(*CipherSuites.safe)
+      when (webConfig.ssl.cipher_compatibility) {
+        WebSslConfig.CipherCompatibility.COMPATIBLE -> {
+          // By default, Jetty excludes a number of common cipher suites. This default set is too
+          // restrictive. Clear the set of excluded suites and define the suites to include below.
+          sslContextFactory.setExcludeCipherSuites()
+          sslContextFactory.setIncludeProtocols(*TlsProtocols.compatible)
+          sslContextFactory.setIncludeCipherSuites(*CipherSuites.compatible)
+        }
+        WebSslConfig.CipherCompatibility.MODERN -> {
+          // Use Jetty's default set of protocols and cipher suites.
+        }
+        WebSslConfig.CipherCompatibility.RESTRICTED -> {
+          sslContextFactory.setIncludeProtocols(*TlsProtocols.restricted)
+          // Use Jetty's default set of cipher suites for now; we can restrict it further later
+          // if desired.
+        }
+      }
 
       val httpsConfig = HttpConfiguration(httpConfig)
       httpsConfig.addCustomizer(SecureRequestCustomizer())
@@ -184,7 +197,7 @@ class JettyService @Inject internal constructor(
         null /* buffer pool */,
         webConfig.acceptors ?: -1,
         webConfig.selectors ?: -1,
-        httpsConnectionFactories.toTypedArray()
+        *httpsConnectionFactories.toTypedArray()
       )
       httpsConnector.port = webConfig.ssl.port
       httpsConnector.idleTimeout = webConfig.idle_timeout
@@ -216,7 +229,7 @@ class JettyService @Inject internal constructor(
         null /* scheduler */,
         null /* buffer pool */,
         webConfig.selectors ?: -1,
-        udsConnFactories.toTypedArray()
+        *udsConnFactories.toTypedArray()
       )
       udsConnector.setUnixSocket(webConfig.unix_domain_socket.path)
       udsConnector.addBean(connectionMetricsCollector.newConnectionListener("http", 0))
@@ -301,6 +314,11 @@ class JettyService @Inject internal constructor(
 
     if (server.isRunning) {
       server.stop()
+    }
+
+    if (healthExecutor != null) {
+      healthExecutor!!.shutdown()
+      healthExecutor!!.awaitTermination(10, TimeUnit.SECONDS)
     }
 
     logger.info { "Stopped Jetty in $stopwatch" }

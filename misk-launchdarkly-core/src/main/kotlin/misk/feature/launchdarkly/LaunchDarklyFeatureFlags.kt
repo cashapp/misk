@@ -15,6 +15,7 @@ import misk.feature.FeatureFlagValidation
 import misk.feature.FeatureFlags
 import misk.feature.FeatureService
 import misk.feature.fromSafeJson
+import mu.KotlinLogging
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -50,7 +51,8 @@ class LaunchDarklyFeatureFlags @Inject constructor(
 
   override fun getBoolean(feature: Feature, key: String, attributes: Attributes): Boolean {
     val result = ldClient.boolVariationDetail(
-      feature.name, buildUser(feature, key, attributes),
+      feature.name,
+      buildUser(feature, key, attributes),
       false
     )
     checkDefaultNotUsed(feature, result)
@@ -72,7 +74,11 @@ class LaunchDarklyFeatureFlags @Inject constructor(
   override fun getString(feature: Feature, key: String, attributes: Attributes): String {
     checkInitialized()
     val result =
-      ldClient.stringVariationDetail(feature.name, buildUser(feature, key, attributes), "")
+      ldClient.stringVariationDetail(
+        feature.name,
+        buildUser(feature, key, attributes),
+        ""
+      )
     checkDefaultNotUsed(feature, result)
     return result.value
   }
@@ -123,7 +129,7 @@ class LaunchDarklyFeatureFlags @Inject constructor(
     if (detail.reason.kind == EvaluationReason.Kind.ERROR) {
       val reason = detail.reason
       throw RuntimeException(
-        "Feature flag $feature evaluation failed: ${detail.reason}", reason.exception
+        "Feature flag $feature evaluation failed: ${reason}", reason.exception
       )
     }
 
@@ -149,7 +155,22 @@ class LaunchDarklyFeatureFlags @Inject constructor(
       }
     }
     if (attributes.number != null) {
-      attributes.number!!.forEach { (k, v) -> builder.privateCustom(k, v.toInt()) }
+      attributes.number!!.forEach { (k, v) ->
+        when (v) {
+          is Long -> {
+            builder.privateCustom(k, LDValue.of(v))
+          }
+          is Int -> {
+            builder.privateCustom(k, LDValue.of(v))
+          }
+          is Double -> {
+            builder.privateCustom(k, LDValue.of(v))
+          }
+          is Float -> {
+            builder.privateCustom(k, LDValue.of(v))
+          }
+        }
+      }
     }
     if (attributes.anonymous) {
       // This prevents the user from being stored in the LaunchDarkly dashboard, see
@@ -157,5 +178,9 @@ class LaunchDarklyFeatureFlags @Inject constructor(
       builder.anonymous(true)
     }
     return builder.build()
+  }
+
+  companion object {
+    val logger = KotlinLogging.logger {}
   }
 }

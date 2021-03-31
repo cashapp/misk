@@ -1,0 +1,24 @@
+dependencies {
+    implementation dep.cronUtils
+    implementation dep.guava
+    implementation dep.guice
+    implementation dep.guiceMultibindings
+    implementation dep.kotlinReflection
+    implementation dep.moshiAdapters
+    implementation project(':misk')
+    implementation project(':misk-core')
+    implementation project(':misk-inject')
+    implementation project(':misk-service')
+
+    testImplementation dep.assertj
+    testImplementation project(':misk-testing')
+}
+
+afterEvaluate { project ->
+    project.tasks.dokka {
+        outputDirectory = "$rootDir/docs/0.x"
+        outputFormat = 'gfm'
+    }
+}
+
+apply from: "$rootDir/gradle-mvn-publish.gradle"

@@ -5,13 +5,17 @@ buildscript {
 }
 
 dependencies {
+  api project(':wisp-config')
+  api project(':wisp-logging')
+  api project(':wisp-resource-loader')
+  api project(':wisp-ssl')
   implementation dep.bouncycastle
   implementation dep.guice
   implementation dep.guiceMultibindings
   implementation dep.kotlinStdLibJdk8
   implementation dep.kotlinReflection
   api dep.kotlinRetry
-  implementation dep.loggingApi
+  api dep.loggingApi
   implementation dep.logbackClassic
   implementation dep.okio
   implementation dep.okHttp
@@ -24,6 +28,7 @@ dependencies {
   testImplementation dep.kotlinTest
   testImplementation dep.kotlinxCoroutines
   testImplementation project(':misk-testing')
+  testImplementation project(':wisp-logging-testing')
 }
 
 afterEvaluate { project ->

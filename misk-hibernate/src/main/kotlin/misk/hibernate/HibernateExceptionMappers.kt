@@ -85,8 +85,8 @@ internal object ConflictExceptionResponder {
   private val CONFLICT_EXCEPTION = ConflictException()
 
   fun toResponse(): Response<ResponseBody> {
-    val message = CONFLICT_EXCEPTION.statusCode.name
-    val statusCode = CONFLICT_EXCEPTION.statusCode.code
+    val message = "CONFLICT_EXCEPTION"
+    val statusCode = CONFLICT_EXCEPTION.code
     return Response(message.toResponseBody(), HEADERS, statusCode = statusCode)
   }
 }

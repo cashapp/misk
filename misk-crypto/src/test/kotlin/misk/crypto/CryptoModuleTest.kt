@@ -19,7 +19,6 @@ import misk.MiskTestingServiceModule
 import misk.config.MiskConfig
 import misk.config.Secret
 import misk.environment.DeploymentModule
-import misk.logging.LogCollector
 import misk.logging.LogCollectorModule
 import misk.logging.LogCollectorService
 import misk.testing.MiskTest
@@ -171,7 +170,7 @@ class CryptoModuleTest {
     lcs.startAsync()
     lcs.awaitRunning()
 
-    val lc = injector.getInstance(LogCollector::class.java)
+    val lc = injector.getInstance(misk.logging.LogCollector::class.java)
 
     val kr = injector.getInstance(KeyReader::class.java)
     kr.readKey(name)
@@ -326,6 +325,15 @@ class CryptoModuleTest {
     val injector = getInjector(listOf(), mapOf(name to KeyType.DAEAD))
     val kr = injector.getInstance(KeyReader::class.java)
     assertThat(kr.readKey(name)).isNotNull
+  }
+
+  @Test
+  fun testKeyWithNoEncryptedKeyValue() {
+    val key = Key("key", KeyType.DAEAD)
+    val config = CryptoConfig(listOf(key), "aws-kms://uri")
+    val module = CryptoModule(config)
+    assertThatThrownBy { Guice.createInjector(module) }
+      .hasStackTraceContaining("Found local key with no 'encrypted_key' value")
   }
 
   @Disabled

@@ -57,13 +57,20 @@ class CryptoModule(
      * error-prone.
      */
     val keyManagerBinder = newMultibinder(ExternalKeyManager::class)
+    val serviceKeys = mutableMapOf<KeyAlias, KeyType>()
 
     /* Parse and include all local keys first. */
     config.keys?.let { keys ->
+      try {
+        keys.map { it.encrypted_key }.requireNoNulls()
+      } catch (e: IllegalArgumentException) {
+        throw IllegalArgumentException("Found local key with no 'encrypted_key' value", e)
+      }
       keyManagerBinder.addBinding().toInstance(LocalConfigKeyProvider(keys, config.kms_uri))
 
       keys.forEach {
         bindKeyToProvider(it.key_name, it.key_type)
+        serviceKeys[it.key_name] = it.key_type
       }
 
       keyNames = keys.map { it.key_name }
@@ -73,23 +80,28 @@ class CryptoModule(
       }
     }
 
-    /* Include all configured remotely-provided keys. */
-    config.external_data_keys?.let { external_data_keys ->
-      requireBinding<AmazonS3>()
+    bind(object : TypeLiteral<Map<KeyAlias, KeyType>>() {})
+      .annotatedWith(ServiceKeys::class.java)
+      .toInstance(serviceKeys.toMap())
 
-      bind(object : TypeLiteral<Map<KeyAlias, KeyType>>() {})
-        .annotatedWith(Names.named("all_key_aliases"))
-        .toInstance(external_data_keys)
+    val externalDataKeys = config.external_data_keys ?: emptyMap()
+    bind(object : TypeLiteral<Map<KeyAlias, KeyType>>() {})
+      .annotatedWith(ExternalDataKeys::class.java)
+      .toInstance(externalDataKeys)
+
+    /* Include all configured remotely-provided keys. */
+    if (externalDataKeys.isNotEmpty()) {
+      requireBinding<AmazonS3>()
 
       keyManagerBinder.addBinding().to<S3ExternalKeyManager>()
 
-      val internalAndExternal = keyNames.intersect(external_data_keys.keys)
+      val internalAndExternal = keyNames.intersect(externalDataKeys.keys)
       check(internalAndExternal.isEmpty()) {
         "Found keys that are marked as both provided in resources, and provided externally: " +
           "[$internalAndExternal]"
       }
 
-      external_data_keys.forEach { (alias, type) ->
+      externalDataKeys.forEach { (alias, type) ->
         // External keys use a KMS key per keyset
         bindKeyToProvider(alias, type)
       }

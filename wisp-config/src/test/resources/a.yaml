@@ -1,0 +1,4 @@
+foo:
+  enabled: true
+  bar: 72
+baz: "abc"

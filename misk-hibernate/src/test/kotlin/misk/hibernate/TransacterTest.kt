@@ -3,7 +3,6 @@ package misk.hibernate
 import misk.exceptions.UnauthorizedException
 import misk.jdbc.DataSourceType
 import misk.jdbc.uniqueString
-import misk.logging.LogCollector
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
@@ -23,7 +22,7 @@ import kotlin.test.assertFailsWith
 abstract class TransacterTest {
   @Inject @Movies lateinit var transacter: Transacter
   @Inject lateinit var queryFactory: Query.Factory
-  @Inject lateinit var logCollector: LogCollector
+  @Inject lateinit var logCollector: wisp.logging.LogCollector
 
   @Test
   fun happyPath() {
@@ -729,7 +728,7 @@ abstract class TransacterTest {
   }
 
   @Test
-  fun retriesIncludeConnectionReuse() {
+  fun retriesIncludeAttemptCount() {
     logCollector.takeMessages()
 
     val callCount = AtomicInteger()
@@ -745,10 +744,10 @@ abstract class TransacterTest {
     )
     assertThat(logs[1]).matches(
       "Movies recoverable transaction exception " +
-        "\\(attempt 2, same connection\\), will retry after a PT.*S delay"
+        "\\(attempt 2\\), will retry after a PT.*S delay"
     )
     assertThat(logs[2]).matches(
-      "retried Movies transaction succeeded \\(attempt 3, same connection\\)"
+      "retried Movies transaction succeeded \\(attempt 3\\)"
     )
   }
 

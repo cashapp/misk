@@ -91,28 +91,36 @@ class HibernateModule(
     newMultibinder<DataSourceDecorator>(qualifier)
 
     val transacterKey = Transacter::class.toKey(qualifier)
-    val sessionFactoryProvider = getProvider(keyOf<SessionFactory>(qualifier))
-    val readerSessionFactoryProvider =
-      if (readerQualifier != null) getProvider(keyOf<SessionFactory>(readerQualifier)) else null
+    val sessionFactoryServiceProvider = getProvider(keyOf<SessionFactoryService>(qualifier))
+    val readerSessionFactoryServiceProvider = if (readerQualifier != null) {
+      getProvider(keyOf<SessionFactoryService>(readerQualifier))
+    } else {
+      null
+    }
 
     install(
       ServiceModule<SchemaMigratorService>(qualifier)
         .dependsOn<DataSourceService>(qualifier)
     )
 
+    val transacterServiceProvider = getProvider(keyOf<TransacterService>(qualifier))
+
     bind(transacterKey).toProvider(object : Provider<Transacter> {
       @Inject lateinit var executorServiceFactory: ExecutorServiceFactory
       @Inject lateinit var injector: Injector
-      override fun get(): RealTransacter = RealTransacter(
-        qualifier = qualifier,
-        sessionFactoryProvider = sessionFactoryProvider,
-        readerSessionFactoryProvider = readerSessionFactoryProvider,
-        config = config,
-        executorServiceFactory = executorServiceFactory,
-        hibernateEntities = injector.findBindingsByType(HibernateEntity::class.typeLiteral()).map {
-          it.provider.get()
-        }.toSet()
-      )
+      override fun get(): RealTransacter {
+        return RealTransacter(
+          qualifier = qualifier,
+          sessionFactoryService = sessionFactoryServiceProvider.get(),
+          readerSessionFactoryService = readerSessionFactoryServiceProvider?.get(),
+          config = config,
+          executorServiceFactory = executorServiceFactory,
+          hibernateEntities = injector.findBindingsByType(HibernateEntity::class.typeLiteral())
+            .map {
+              it.provider.get()
+            }.toSet()
+        )
+      }
     }).asSingleton()
 
     /**
@@ -124,17 +132,20 @@ class HibernateModule(
       bind(readerTransacterKey).toProvider(object : Provider<Transacter> {
         @Inject lateinit var executorServiceFactory: ExecutorServiceFactory
         @Inject lateinit var injector: Injector
-        override fun get(): Transacter = RealTransacter(
-          qualifier = readerQualifier,
-          sessionFactoryProvider = readerSessionFactoryProvider!!,
-          readerSessionFactoryProvider = readerSessionFactoryProvider,
-          config = config,
-          executorServiceFactory = executorServiceFactory,
-          hibernateEntities = injector.findBindingsByType(HibernateEntity::class.typeLiteral())
-            .map {
-              it.provider.get()
-            }.toSet()
-        ).readOnly()
+        override fun get(): Transacter {
+          val sessionFactoryService = readerSessionFactoryServiceProvider!!.get()
+          return RealTransacter(
+            qualifier = readerQualifier,
+            sessionFactoryService = sessionFactoryService,
+            readerSessionFactoryService = sessionFactoryService,
+            config = config,
+            executorServiceFactory = executorServiceFactory,
+            hibernateEntities = injector.findBindingsByType(HibernateEntity::class.typeLiteral())
+              .map {
+                it.provider.get()
+              }.toSet()
+          ).readOnly()
+        }
       }).asSingleton()
     }
 

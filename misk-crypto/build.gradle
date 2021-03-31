@@ -14,6 +14,7 @@ dependencies {
 
   testImplementation dep.assertj
   testImplementation dep.logbackClassic
+  testImplementation project(':wisp-logging')
   testImplementation project(':misk-testing')
 }
 
