@@ -18,7 +18,7 @@ internal class WispConfigTest {
   )
 
   @Test
-  fun `config source for a single config file loads`() {
+  fun `config for a single config file loads`() {
     val builder = WispConfig.builder()
     builder.addWispConfigSources(
       listOf(ConfigSource("classpath:/a.yaml"))
@@ -31,7 +31,7 @@ internal class WispConfigTest {
   }
 
   @Test
-  fun `config source for a two config file loads with correct override`() {
+  fun `config for a two config file loads with correct override`() {
     val builder = WispConfig.builder()
     builder.addWispConfigSources(
       listOf(
@@ -47,7 +47,7 @@ internal class WispConfigTest {
   }
 
   @Test
-  fun `config source for a multiple config file loads with correct override`() {
+  fun `config for a multiple config files loads with correct override`() {
     val builder = WispConfig.builder()
     builder.addWispConfigSources(
       listOf(
@@ -62,4 +62,24 @@ internal class WispConfigTest {
     assertEquals(11, myConfig.foo.bar)
     assertEquals("xyz", myConfig.baz)
   }
+
+  @Test
+  fun `config for a multiple config files with some not existing, loads with correct override`() {
+    val builder = WispConfig.builder()
+    builder.addWispConfigSources(
+      listOf(
+        ConfigSource("classpath:/do_not_exist.yaml"),
+        ConfigSource("classpath:/c.yaml"),
+        ConfigSource("classpath:/b.yaml"),
+        ConfigSource("classpath:/a.yaml")
+      )
+    )
+
+    val myConfig = builder.build().loadConfigOrThrow<MyConfig>()
+    assertFalse(myConfig.foo.enabled)
+    assertEquals(11, myConfig.foo.bar)
+    assertEquals("xyz", myConfig.baz)
+  }
+
+  // TODO(chrisryan): add tests to support other formats
 }

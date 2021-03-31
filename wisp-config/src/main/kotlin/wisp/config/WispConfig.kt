@@ -43,7 +43,7 @@ object WispConfig {
    */
   fun builder(): ConfigLoader.Builder = ConfigLoader.Builder()
 
-  // TODO(chrisryan): provide convenience load methods equivalent to MiskConfig
+  // TODO(chrisryan): provide convenience load methods equivalent to MiskConfig?
 }
 
 /**
@@ -68,11 +68,11 @@ fun ConfigLoader.Builder.addWispConfigSources(
     .forEach {
       val configContents = resourceLoader.utf8(it.configLocation)!!
       when (it.format) {
-        "yml", ".yaml" ->
+        "yml", "yaml" ->
           this.addSource(YamlPropertySource(configContents))
         "json" ->
           this.addSource(JsonPropertySource(configContents))
-        ".toml" ->
+        "toml" ->
           this.addSource(TomlPropertySource(configContents))
         else ->
           this.addSource(
