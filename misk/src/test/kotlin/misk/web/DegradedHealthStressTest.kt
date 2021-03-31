@@ -1,6 +1,9 @@
 package misk.web
 
 import com.google.inject.util.Modules
+import com.netflix.concurrency.limits.Limiter
+import com.netflix.concurrency.limits.limit.Gradient2Limit
+import com.netflix.concurrency.limits.limiter.SimpleLimiter
 import misk.concurrent.ExecutorServiceFactory
 import misk.inject.KAbstractModule
 import misk.inject.asSingleton
@@ -21,11 +24,15 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.io.IOException
+import java.time.Clock
 import java.time.Duration
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
 import javax.inject.Inject
+import kotlin.reflect.full.hasAnnotation
+import misk.Action
+import misk.web.interceptors.ConcurrencyLimiterFactory
 
 @MiskTest(startService = true)
 internal class DegradedHealthStressTest {
@@ -97,12 +104,42 @@ internal class DegradedHealthStressTest {
     assertThat(failureCount.get()).isCloseTo(0, Offset.offset(50))
   }
 
+  @Test
+  fun slowResponseTest() {
+    fakeResourcePool.total = 100
+
+    // Send 10 calls per second, 3 seconds each.
+    val recurringTask = executorService.scheduleAtFixedRate(
+      { makeAsyncHttpCall() },
+      0, 1000L / 10, TimeUnit.MILLISECONDS
+    )
+
+//    // Make 10 seconds of calls so the concurrency limiter can stabilize.
+//    Thread.sleep(10_000)
+//    successCount.set(0)
+//    shedCount.set(0)
+//    failureCount.set(0)
+//
+    // Observe 5 seconds of data.
+    Thread.sleep(5_000)
+    recurringTask.cancel(false)
+
+    // Expect 125 successful calls, most of the rest shed, and the remainder failed.
+    println("successCount=$successCount, shedCount=$shedCount, failureCount=$failureCount")
+  }
+
+  @Target(AnnotationTarget.FUNCTION)
+  annotation class BetterLimiter
+
   class UseConstrainedResourceAction @Inject constructor(
     private val fakeResourcePool: FakeResourcePool
   ) : WebAction {
     @Get("/use_constrained_resource")
+    @BetterLimiter
     fun get(): String {
-      fakeResourcePool.useResource(Duration.ofMillis(50), Duration.ofMillis(200))
+      println("executing...")
+      fakeResourcePool.useResource(Duration.ofMillis(5_000), Duration.ofMillis(3_000))
+      println(" .... done")
       return "success"
     }
   }
@@ -135,6 +172,28 @@ internal class DegradedHealthStressTest {
       install(Modules.override(WebTestingModule()).with(ClockModule()))
       install(WebActionModule.create<UseConstrainedResourceAction>())
       bind<FakeResourcePool>().asSingleton()
+
+
+      multibind<ConcurrencyLimiterFactory>().toInstance(object : ConcurrencyLimiterFactory {
+        @Inject lateinit var clock: Clock
+        override fun create(action: Action): Limiter<String>? {
+          if (!action.function.hasAnnotation<BetterLimiter>()) {
+            return null
+          }
+
+          println("using gradient2 limiter for $action")
+
+          return SimpleLimiter.Builder()
+            .clock { clock.millis() }
+            .limit(Gradient2Limit.Builder()
+              .rttTolerance(5.0)
+              .longWindow(5_000)
+//              .initialLimit(100)
+//              .minLimit(100)
+              .build())
+            .build()
+        }
+      })
     }
   }
 }
