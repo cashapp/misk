@@ -42,8 +42,6 @@ object WispConfig {
    * @return [ConfigLoader.Builder]
    */
   fun builder(): ConfigLoader.Builder = ConfigLoader.Builder()
-
-  // TODO(chrisryan): provide convenience load methods equivalent to MiskConfig?
 }
 
 /**
