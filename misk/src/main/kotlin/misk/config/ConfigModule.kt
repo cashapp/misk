@@ -12,6 +12,7 @@ class ConfigModule<T : Config>(
     install(AppNameModule(appName))
     bind(configClass).toInstance(config)
     bind<Config>().toInstance(config)
+    bind<wisp.config.Config>().toInstance(config)
   }
 
   companion object {
