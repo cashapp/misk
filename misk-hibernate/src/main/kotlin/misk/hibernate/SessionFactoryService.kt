@@ -46,6 +46,10 @@ internal class SessionFactoryService(
 ) : AbstractIdleService(), Provider<SessionFactory>, TransacterService {
   private var sessionFactory: SessionFactory? = null
 
+  val threadInTransaction = object : ThreadLocal<Boolean>() {
+    override fun initialValue() = false
+  }
+
   lateinit var hibernateMetadata: Metadata
 
   override fun startUp() {

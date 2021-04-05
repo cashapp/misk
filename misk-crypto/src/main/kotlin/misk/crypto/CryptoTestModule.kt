@@ -15,6 +15,7 @@ import com.google.crypto.tink.hybrid.HybridConfig
 import com.google.crypto.tink.mac.MacConfig
 import com.google.crypto.tink.signature.SignatureConfig
 import com.google.crypto.tink.streamingaead.StreamingAeadConfig
+import com.google.inject.TypeLiteral
 import com.google.inject.name.Names
 import misk.config.MiskConfig
 import misk.crypto.pgp.PgpDecrypter
@@ -51,17 +52,32 @@ class CryptoTestModule(
     Security.addProvider(BouncyCastleProvider())
 
     config ?: return
-    val keys = config.keys as MutableList<Key>? ?: return
+    val keys = mutableListOf<Key>()
+    config.keys?.let { keys.addAll(it) }
 
     val keyManagerBinder = newMultibinder(ExternalKeyManager::class)
     keyManagerBinder.addBinding().toInstance(FakeExternalKeyManager(keys))
-    config.external_data_keys?.let {
-      it.entries.forEach { entry ->
+
+    val externalDataKeys = config.external_data_keys ?: emptyMap()
+    bind(object : TypeLiteral<Map<KeyAlias, KeyType>>() {})
+      .annotatedWith(ExternalDataKeys::class.java)
+      .toInstance(externalDataKeys)
+    keyManagerBinder.addBinding().toInstance(FakeExternalKeyManager(externalDataKeys))
+
+    if (externalDataKeys.isNotEmpty()) {
+      externalDataKeys.entries.forEach { entry ->
         val fakeFake = Key(entry.key, entry.value, MiskConfig.RealSecret(""))
         keys.add(fakeFake)
       }
-      keyManagerBinder.addBinding().toInstance(FakeExternalKeyManager(it))
     }
+
+    val serviceKeys = mutableMapOf<KeyAlias, KeyType>()
+    keys.forEach {
+      serviceKeys[it.key_name] = it.key_type
+    }
+    bind(object : TypeLiteral<Map<KeyAlias, KeyType>>() {})
+      .annotatedWith(ServiceKeys::class.java)
+      .toInstance(serviceKeys.toMap())
 
     keys.forEach { key ->
       when (key.key_type) {

@@ -26,7 +26,7 @@ internal class FakeJobQueueTest {
   @Inject private lateinit var fakeClock: FakeClock
   @Inject private lateinit var fakeJobQueue: FakeJobQueue
   @Inject private lateinit var exampleJobEnqueuer: ExampleJobEnqueuer
-  @Inject private lateinit var logCollector: LogCollector
+  @Inject private lateinit var logCollector: misk.logging.LogCollector
 
   @Test
   fun basic() {
@@ -43,9 +43,9 @@ internal class FakeJobQueueTest {
     fakeJobQueue.handleJobs()
 
     assertThat(logCollector.takeMessages(ExampleJobHandler::class)).containsExactlyInAnyOrder(
-        "received GREEN job with message: dinosaur",
-        "received GREEN job with message: android",
-        "received RED job with message: stop sign"
+      "received GREEN job with message: dinosaur",
+      "received GREEN job with message: android",
+      "received RED job with message: stop sign"
     )
 
     assertThat(fakeJobQueue.peekJobs(GREEN_QUEUE)).isEmpty()
@@ -201,9 +201,9 @@ internal class FakeJobQueueTest {
     fakeJobQueue.handleJobs()
 
     assertThat(logCollector.takeMessages(ExampleJobHandler::class)).containsExactlyInAnyOrder(
-        "received GREEN job with message: dinosaur",
-        "received GREEN job with message: android",
-        "received RED job with message: stop sign"
+      "received GREEN job with message: dinosaur",
+      "received GREEN job with message: android",
+      "received RED job with message: stop sign"
     )
 
     assertThat(fakeJobQueue.peekJobs(GREEN_QUEUE)).isEmpty()
@@ -226,9 +226,9 @@ internal class FakeJobQueueTest {
     fakeJobQueue.handleJobs(considerDelays = true)
     assertThat(fakeJobQueue.peekJobs(GREEN_QUEUE)).hasSize(2)
     assertThat(logCollector.takeMessages(ExampleJobHandler::class)).containsExactly(
-        "received GREEN job with message: J1:0s",
-        "received GREEN job with message: J3:0s",
-        "received GREEN job with message: J5:4s",
+      "received GREEN job with message: J1:0s",
+      "received GREEN job with message: J3:0s",
+      "received GREEN job with message: J5:4s",
     )
 
     // Repeating processing does not change anything.
@@ -250,7 +250,7 @@ internal class FakeJobQueueTest {
     fakeJobQueue.handleJobs(considerDelays = true)
     assertThat(fakeJobQueue.peekJobs(GREEN_QUEUE)).hasSize(2)
     assertThat(logCollector.takeMessages(ExampleJobHandler::class)).containsExactly(
-        "received GREEN job with message: J1:0s",
+      "received GREEN job with message: J1:0s",
     )
 
     // Handle jobs 10s after test start.
@@ -258,8 +258,8 @@ internal class FakeJobQueueTest {
     fakeJobQueue.handleJobs(considerDelays = true)
     assertThat(fakeJobQueue.peekJobs(GREEN_QUEUE)).isEmpty()
     assertThat(logCollector.takeMessages(ExampleJobHandler::class)).containsExactly(
-        "received GREEN job with message: J2:0s+10s",
-        "received GREEN job with message: J3:5s+5s",
+      "received GREEN job with message: J2:0s+10s",
+      "received GREEN job with message: J3:5s+5s",
     )
   }
 
@@ -277,8 +277,8 @@ internal class FakeJobQueueTest {
     fakeJobQueue.handleJobs(considerDelays = true)
     assertThat(fakeJobQueue.peekJobs(GREEN_QUEUE)).isEmpty()
     assertThat(logCollector.takeMessages(ExampleJobHandler::class)).containsExactly(
-        "received GREEN job with message: J1:0s+10s",
-        "received GREEN job with message: J2:5s+5s",
+      "received GREEN job with message: J1:0s+10s",
+      "received GREEN job with message: J2:5s+5s",
     )
   }
 
@@ -305,14 +305,14 @@ internal class FakeJobQueueTest {
 
     // Check order.
     assertThat(logCollector.takeMessages(ExampleJobHandler::class)).containsExactly(
-        "received GREEN job with message: J1:0s",
-        "received GREEN job with message: J3:0s",
-        "received GREEN job with message: J5:0s",
-        "received GREEN job with message: J8:4s",
-        "received GREEN job with message: J4:0s+5s",
-        "received GREEN job with message: J6:4s+1s",
-        "received GREEN job with message: J7:4s+5s",
-        "received GREEN job with message: J2:0s+10s",
+      "received GREEN job with message: J1:0s",
+      "received GREEN job with message: J3:0s",
+      "received GREEN job with message: J5:0s",
+      "received GREEN job with message: J8:4s",
+      "received GREEN job with message: J4:0s+5s",
+      "received GREEN job with message: J6:4s+1s",
+      "received GREEN job with message: J7:4s+5s",
+      "received GREEN job with message: J2:0s+10s",
     )
   }
 
@@ -334,7 +334,7 @@ internal class FakeJobQueueTest {
     assertThat(fakeJobQueue.handleJob(job2)).isFalse()
 
     assertThat(logCollector.takeMessages(ExampleJobHandler::class)).containsExactlyInAnyOrder(
-        "received GREEN job with message: J2",
+      "received GREEN job with message: J2",
     )
 
     // Process all jobs.
@@ -342,8 +342,8 @@ internal class FakeJobQueueTest {
     assertThat(fakeJobQueue.handleJobs()).hasSize(2)
     assertThat(fakeJobQueue.peekJobs(GREEN_QUEUE)).isEmpty()
     assertThat(logCollector.takeMessages(ExampleJobHandler::class)).containsExactlyInAnyOrder(
-        "received GREEN job with message: J1",
-        "received GREEN job with message: J3",
+      "received GREEN job with message: J1",
+      "received GREEN job with message: J3",
     )
   }
 
@@ -360,9 +360,9 @@ internal class FakeJobQueueTest {
     assertThat(fakeJobQueue.peekJobs(GREEN_QUEUE)).isEmpty()
     assertThat(fakeJobQueue.peekDeadlettered(GREEN_QUEUE)).hasSize(3)
     assertThat(logCollector.takeMessages(ExampleJobHandler::class)).containsExactlyInAnyOrder(
-        "received GREEN job with message: J1",
-        "received GREEN job with message: J2",
-        "received GREEN job with message: J3",
+      "received GREEN job with message: J1",
+      "received GREEN job with message: J2",
+      "received GREEN job with message: J3",
     )
 
     // Process Job 2.
@@ -371,7 +371,7 @@ internal class FakeJobQueueTest {
     assertThat(fakeJobQueue.reprocessDeadlettered(job2)).isTrue()
     assertThat(fakeJobQueue.reprocessDeadlettered(job2)).isFalse()
     assertThat(logCollector.takeMessages(ExampleJobHandler::class)).containsExactlyInAnyOrder(
-        "received GREEN job with message: J2",
+      "received GREEN job with message: J2",
     )
 
     // Process all jobs.
@@ -379,8 +379,8 @@ internal class FakeJobQueueTest {
     assertThat(fakeJobQueue.reprocessDeadlettered(GREEN_QUEUE)).hasSize(2)
     assertThat(fakeJobQueue.peekDeadlettered(GREEN_QUEUE)).isEmpty()
     assertThat(logCollector.takeMessages(ExampleJobHandler::class)).containsExactlyInAnyOrder(
-        "received GREEN job with message: J1",
-        "received GREEN job with message: J3",
+      "received GREEN job with message: J1",
+      "received GREEN job with message: J3",
     )
   }
 
@@ -395,7 +395,7 @@ internal class FakeJobQueueTest {
     // Process an unknown job.
     assertThat(fakeJobQueue.peekJobs(GREEN_QUEUE)).hasSize(2)
     val unknownJob =
-        FakeJob(GREEN_QUEUE, "unknown", "idempotenceKey", "body", mapOf(), fakeClock.instant())
+      FakeJob(GREEN_QUEUE, "unknown", "idempotenceKey", "body", mapOf(), fakeClock.instant())
     assertThat(fakeJobQueue.handleJob(unknownJob)).isFalse()
     assertThat(logCollector.takeMessages(ExampleJobHandler::class)).isEmpty()
 
@@ -404,8 +404,8 @@ internal class FakeJobQueueTest {
     assertThat(fakeJobQueue.handleJobs()).hasSize(2)
     assertThat(fakeJobQueue.peekJobs(GREEN_QUEUE)).isEmpty()
     assertThat(logCollector.takeMessages(ExampleJobHandler::class)).containsExactlyInAnyOrder(
-        "received GREEN job with message: J1",
-        "received GREEN job with message: J2",
+      "received GREEN job with message: J1",
+      "received GREEN job with message: J2",
     )
   }
 }
@@ -454,14 +454,18 @@ private class ExampleJobEnqueuer @Inject private constructor(
 
   fun enqueueRed(message: String, deliveryDelay: Duration? = null, hint: ExampleJobHint? = null) {
     val job = ExampleJob(Color.RED, message, hint)
-    jobQueue.enqueue(RED_QUEUE, body = jobAdapter.toJson(job), deliveryDelay = deliveryDelay,
-        attributes = mapOf("key" to "value"))
+    jobQueue.enqueue(
+      RED_QUEUE, body = jobAdapter.toJson(job), deliveryDelay = deliveryDelay,
+      attributes = mapOf("key" to "value")
+    )
   }
 
   fun enqueueGreen(message: String, deliveryDelay: Duration? = null, hint: ExampleJobHint? = null) {
     val job = ExampleJob(Color.GREEN, message, hint)
-    jobQueue.enqueue(GREEN_QUEUE, body = jobAdapter.toJson(job), deliveryDelay = deliveryDelay,
-        attributes = mapOf("key" to "value"))
+    jobQueue.enqueue(
+      GREEN_QUEUE, body = jobAdapter.toJson(job), deliveryDelay = deliveryDelay,
+      attributes = mapOf("key" to "value")
+    )
   }
 
   fun enqueueEnqueuer() {
@@ -514,8 +518,8 @@ private class EnqueuerJobHandler @Inject private constructor(
 
   override fun handleJob(job: Job) {
     jobQueue.enqueue(
-        queueName = GREEN_QUEUE,
-        body = jobAdapter.toJson(ExampleJob(color = Color.GREEN, message = "We made it!"))
+      queueName = GREEN_QUEUE,
+      body = jobAdapter.toJson(ExampleJob(color = Color.GREEN, message = "We made it!"))
     )
     job.acknowledge()
   }

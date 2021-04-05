@@ -122,6 +122,29 @@ class AdminDashboardModule(private val isDevelopment: Boolean) : KAbstractModule
         order = 101
       )
     )
+
+    // Web Actions Old
+    multibind<DashboardTab>().toProvider(
+      DashboardTabProvider<AdminDashboard, AdminDashboardAccess>(
+        slug = "web-actions-old",
+        url_path_prefix = "/_admin/web-actions-old/",
+        name = "Web Actions Old",
+        category = "Container Admin"
+      )
+    )
+    install(
+      WebTabResourceModule(
+        isDevelopment = isDevelopment,
+        slug = "web-actions-old",
+        web_proxy_url = "http://localhost:3201/"
+      )
+    )
+    multibind<DashboardNavbarItem>().toInstance(
+      DashboardNavbarItem<AdminDashboard>(
+        item = "<a href=\"/_admin/web-actions-old/\">Web Actions Old</a>",
+        order = 101
+      )
+    )
   }
 }
 

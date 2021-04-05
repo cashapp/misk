@@ -41,7 +41,7 @@ class MiskCommonServiceModule : KAbstractModule() {
     install(ExecutorsModule())
     install(ServiceManagerModule())
     install(PrometheusMetricsClientModule())
-    install(MoshiModule(useWireToRead = true))
+    install(MoshiModule(useWireToRead = true, useWireToWrite = true))
 
     // Initialize empty sets for our multibindings.
     newMultibinder<HealthCheck>()

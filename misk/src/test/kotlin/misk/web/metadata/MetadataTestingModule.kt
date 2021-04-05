@@ -18,6 +18,7 @@ class MetadataTestingModule : KAbstractModule() {
     install(TestWebActionModule())
     install(AdminDashboardTestingModule())
     bind<Config>().toInstance(TestAdminDashboardConfig())
+    bind<wisp.config.Config>().toInstance(TestAdminDashboardConfig())
     // TODO(wesley): Remove requirement for AppName to bind AdminDashboard APIs
     bind<String>().annotatedWith<AppName>().toInstance("testApp")
 

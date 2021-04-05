@@ -25,7 +25,7 @@ internal class WebSocketsTest {
   val module = TestModule()
 
   @Inject lateinit var jettyService: JettyService
-  @Inject lateinit var logCollector: LogCollector
+  @Inject lateinit var logCollector: misk.logging.LogCollector
 
   val listener = FakeWebSocketListener()
 
@@ -49,26 +49,26 @@ internal class WebSocketsTest {
     )
   }
 
-  @Singleton
-  class EchoWebSocket @Inject constructor() : WebAction {
-    @ConnectWebSocket("/echo")
-    @LogRequestResponse(bodySampling = 1.0, errorBodySampling = 1.0)
-    fun echo(@Suppress("UNUSED_PARAMETER") webSocket: WebSocket): WebSocketListener {
-      return object : WebSocketListener() {
-        override fun onMessage(webSocket: WebSocket, text: String) {
-          webSocket.send("ACK $text")
-        }
-
-        override fun toString() = "EchoListener"
-      }
-    }
-  }
-
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(WebTestingModule())
       install(LogCollectorModule())
       install(WebActionModule.create<EchoWebSocket>())
+    }
+  }
+}
+
+@Singleton
+class EchoWebSocket @Inject constructor() : WebAction {
+  @ConnectWebSocket("/echo")
+  @LogRequestResponse(bodySampling = 1.0, errorBodySampling = 1.0)
+  fun echo(@Suppress("UNUSED_PARAMETER") webSocket: WebSocket): WebSocketListener {
+    return object : WebSocketListener() {
+      override fun onMessage(webSocket: WebSocket, text: String) {
+        webSocket.send("ACK $text")
+      }
+
+      override fun toString() = "EchoListener"
     }
   }
 }

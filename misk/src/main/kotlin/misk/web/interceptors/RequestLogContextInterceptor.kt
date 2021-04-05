@@ -5,6 +5,7 @@ import misk.MiskCaller
 import misk.scope.ActionScoped
 import misk.web.NetworkChain
 import misk.web.NetworkInterceptor
+import misk.web.mdc.LogContextProvider
 import org.slf4j.MDC
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -17,7 +18,9 @@ import javax.servlet.http.HttpServletRequest
 internal class RequestLogContextInterceptor private constructor(
   private val action: Action,
   private val currentCaller: ActionScoped<MiskCaller?>,
-  private val currentRequest: ActionScoped<HttpServletRequest>
+  private val currentRequest: ActionScoped<HttpServletRequest>,
+  @Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN")
+  private val logContextProviders: java.util.Map<String, LogContextProvider>
 ) : NetworkInterceptor {
 
   override fun intercept(chain: NetworkChain) {
@@ -25,23 +28,27 @@ internal class RequestLogContextInterceptor private constructor(
     return try {
       MDC.put(MDC_ACTION, action.name)
       MDC.put(MDC_CALLING_PRINCIPAL, currentCaller.get()?.principal ?: "unknown")
-      MDC.put(MDC_PROTOCOL, request.protocol)
-      MDC.put(MDC_REMOTE_ADDR, "${request.remoteAddr}:${request.remotePort}")
-      MDC.put(MDC_REQUEST_URI, request.requestURI)
-      MDC.put(MDC_HTTP_METHOD, request.method)
+      logContextProviders.forEach { key, provider ->
+        provider.get(request)?.let { value ->
+          MDC.put(key, value)
+        }
+      }
       chain.proceed(chain.httpCall)
     } finally {
       allContextNames.forEach { MDC.remove(it) }
+      logContextProviders.keySet().forEach { MDC.remove(it) }
     }
   }
 
   @Singleton
   class Factory @Inject internal constructor(
     private val currentCaller: @JvmSuppressWildcards ActionScoped<MiskCaller?>,
-    private val currentRequest: @JvmSuppressWildcards ActionScoped<HttpServletRequest>
+    private val currentRequest: @JvmSuppressWildcards ActionScoped<HttpServletRequest>,
+    @Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN")
+    private val logContextProviders: java.util.Map<String, LogContextProvider>
   ) : NetworkInterceptor.Factory {
     override fun create(action: Action) =
-      RequestLogContextInterceptor(action, currentCaller, currentRequest)
+      RequestLogContextInterceptor(action, currentCaller, currentRequest, logContextProviders)
   }
 
   internal companion object {
@@ -55,10 +62,6 @@ internal class RequestLogContextInterceptor private constructor(
     val allContextNames = listOf(
       MDC_ACTION,
       MDC_CALLING_PRINCIPAL,
-      MDC_HTTP_METHOD,
-      MDC_PROTOCOL,
-      MDC_REMOTE_ADDR,
-      MDC_REQUEST_URI
     )
   }
 }

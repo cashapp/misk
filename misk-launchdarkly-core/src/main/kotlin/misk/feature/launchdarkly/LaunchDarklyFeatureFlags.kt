@@ -1,11 +1,12 @@
 package misk.feature.launchdarkly
 
 import com.google.common.util.concurrent.AbstractIdleService
-import com.launchdarkly.client.EvaluationDetail
-import com.launchdarkly.client.EvaluationReason
-import com.launchdarkly.client.LDClientInterface
-import com.launchdarkly.client.LDUser
-import com.launchdarkly.client.value.LDValue
+import com.launchdarkly.sdk.EvaluationDetail
+import com.launchdarkly.sdk.EvaluationReason
+import com.launchdarkly.sdk.LDUser
+import com.launchdarkly.sdk.LDValue
+import com.launchdarkly.sdk.server.interfaces.LDClientInterface
+
 import com.launchdarkly.shaded.com.google.common.base.Preconditions.checkState
 import com.squareup.moshi.Moshi
 import misk.feature.Attributes
@@ -14,6 +15,7 @@ import misk.feature.FeatureFlagValidation
 import misk.feature.FeatureFlags
 import misk.feature.FeatureService
 import misk.feature.fromSafeJson
+import mu.KotlinLogging
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -32,12 +34,12 @@ class LaunchDarklyFeatureFlags @Inject constructor(
 
     // LaunchDarkly has its own threads for initialization. We just need to keep checking until
     // it's done. Unfortunately there's no latch or event to wait on.
-    while (!ldClient.initialized() && attempts > 0) {
+    while (!ldClient.isInitialized && attempts > 0) {
       Thread.sleep(intervalMillis)
       attempts--
     }
 
-    if (attempts == 0 && !ldClient.initialized()) {
+    if (attempts == 0 && !ldClient.isInitialized) {
       throw Exception("LaunchDarkly did not initialize in 30 seconds")
     }
   }
@@ -48,21 +50,35 @@ class LaunchDarklyFeatureFlags @Inject constructor(
   }
 
   override fun getBoolean(feature: Feature, key: String, attributes: Attributes): Boolean {
-    val result = ldClient.boolVariationDetail(feature.name, buildUser(feature, key, attributes), false)
+    val result = ldClient.boolVariationDetail(
+      feature.name,
+      buildUser(feature, key, attributes),
+      false
+    )
     checkDefaultNotUsed(feature, result)
     return result.value
   }
 
   override fun getInt(feature: Feature, key: String, attributes: Attributes): Int {
     checkInitialized()
-    val result = ldClient.intVariationDetail(feature.name, buildUser(feature, key, attributes), 0)
+    val result = ldClient.intVariationDetail(
+      feature.name,
+      buildUser(feature, key, attributes),
+      0
+    )
+
     checkDefaultNotUsed(feature, result)
     return result.value
   }
 
   override fun getString(feature: Feature, key: String, attributes: Attributes): String {
     checkInitialized()
-    val result = ldClient.stringVariationDetail(feature.name, buildUser(feature, key, attributes), "")
+    val result =
+      ldClient.stringVariationDetail(
+        feature.name,
+        buildUser(feature, key, attributes),
+        ""
+      )
     checkDefaultNotUsed(feature, result)
     return result.value
   }
@@ -74,7 +90,8 @@ class LaunchDarklyFeatureFlags @Inject constructor(
     attributes: Attributes
   ): T {
     checkInitialized()
-    val result = ldClient.stringVariationDetail(feature.name, buildUser(feature, key, attributes), "")
+    val result =
+      ldClient.stringVariationDetail(feature.name, buildUser(feature, key, attributes), "")
     checkDefaultNotUsed(feature, result)
     return java.lang.Enum.valueOf(clazz, result.value.toUpperCase())
   }
@@ -87,17 +104,21 @@ class LaunchDarklyFeatureFlags @Inject constructor(
   ): T {
     checkInitialized()
     val result = ldClient.jsonValueVariationDetail(
-        feature.name,
-        buildUser(feature, key, attributes),
-        LDValue.ofNull())
+      feature.name,
+      buildUser(feature, key, attributes),
+      LDValue.ofNull()
+    )
     checkDefaultNotUsed(feature, result)
     return moshi.adapter(clazz).fromSafeJson(result.value.toJsonString())
-        ?: throw IllegalArgumentException("null value deserialized from $feature")
+      ?: throw IllegalArgumentException("null value deserialized from $feature")
   }
 
   private fun checkInitialized() {
-    checkState(ldClient.initialized(),
-        "LaunchDarkly feature flags not initialized. Did you forget to make your service depend on [FeatureFlags]?")
+    checkState(
+      ldClient.isInitialized,
+      "LaunchDarkly feature flags not initialized. " +
+        "Did you forget to make your service depend on [FeatureFlags]?"
+    )
   }
 
   private fun <T> checkDefaultNotUsed(feature: Feature, detail: EvaluationDetail<T>) {
@@ -106,8 +127,10 @@ class LaunchDarklyFeatureFlags @Inject constructor(
     }
 
     if (detail.reason.kind == EvaluationReason.Kind.ERROR) {
-      val reason = detail.reason as EvaluationReason.Error
-      throw RuntimeException("Feature flag $feature evaluation failed: ${detail.reason}", reason.exception)
+      val reason = detail.reason
+      throw RuntimeException(
+        "Feature flag $feature evaluation failed: ${reason}", reason.exception
+      )
     }
 
     throw IllegalStateException("Feature flag $feature is off but no off variation is specified")
@@ -132,7 +155,22 @@ class LaunchDarklyFeatureFlags @Inject constructor(
       }
     }
     if (attributes.number != null) {
-      attributes.number!!.forEach { (k, v) -> builder.privateCustom(k, v) }
+      attributes.number!!.forEach { (k, v) ->
+        when (v) {
+          is Long -> {
+            builder.privateCustom(k, LDValue.of(v))
+          }
+          is Int -> {
+            builder.privateCustom(k, LDValue.of(v))
+          }
+          is Double -> {
+            builder.privateCustom(k, LDValue.of(v))
+          }
+          is Float -> {
+            builder.privateCustom(k, LDValue.of(v))
+          }
+        }
+      }
     }
     if (attributes.anonymous) {
       // This prevents the user from being stored in the LaunchDarkly dashboard, see
@@ -140,5 +178,9 @@ class LaunchDarklyFeatureFlags @Inject constructor(
       builder.anonymous(true)
     }
     return builder.build()
+  }
+
+  companion object {
+    val logger = KotlinLogging.logger {}
   }
 }
