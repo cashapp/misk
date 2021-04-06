@@ -1,0 +1,37 @@
+dependencies {
+  implementation(Dependencies.gcpCloudStorage)
+  implementation(Dependencies.gcpDatastore) {
+    exclude(group = "com.google.protobuf")
+    exclude(group = "com.google.api.grpc")
+    exclude(group = "io.grpc")
+  }
+  implementation(Dependencies.gcpKms)
+  implementation(Dependencies.gcpLogback)
+  implementation(Dependencies.guice)
+  implementation(Dependencies.loggingApi)
+  implementation(Dependencies.openTracingDatadog)
+
+  implementation(Dependencies.moshiCore)
+  implementation(Dependencies.moshiKotlin)
+  implementation(Dependencies.moshiAdapters)
+  implementation(Dependencies.wireGrpcClient)
+  implementation(Dependencies.wireRuntime)
+  implementation(project(":misk"))
+  implementation(project(":misk-core"))
+  implementation(project(":misk-inject"))
+  implementation(project(":misk-service"))
+
+  testImplementation(Dependencies.assertj)
+  testImplementation(Dependencies.kotlinTest)
+  testImplementation(project(":misk-testing"))
+  testImplementation(project(":misk-gcp-testing"))
+}
+
+afterEvaluate {
+  project.tasks.dokka {
+    outputDirectory = "$rootDir/docs/0.x"
+    outputFormat = "gfm"
+  }
+}
+
+apply(from = "$rootDir/gradle-mvn-publish.gradle")
