@@ -10,7 +10,7 @@ import misk.web.actions.WebAction
 
 // https://raw.githubusercontent.com/grpc/grpc/master/src/proto/grpc/reflection/v1alpha/reflection.proto
 class ServerReflectionApi @Inject constructor(
-  private val reflector: ServiceReflector
+  private val reflector: ServiceReflector // TODO wire.SchemaReflector - use schema with schemaLoader
 ) : ServerReflectionServerReflectionInfoBlockingServer, WebAction {
   override fun ServerReflectionInfo(
     requests: MessageSource<ServerReflectionRequest>,
