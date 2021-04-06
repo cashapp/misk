@@ -101,7 +101,7 @@ class ReflectionQueryFactoryTest {
     }
   }
 
-  /** Comparisons with null always return an empty list, except for EQ */
+  /** Comparisons with null always return an empty list. */
   @Test
   fun comparisonWithNull() {
     val m1 = NameAndReleaseDate("Rocky 1", LocalDate.of(2018, 1, 1))
@@ -143,7 +143,7 @@ class ReflectionQueryFactoryTest {
           .allowFullScatter().allowTableScan()
           .listAsNameAndReleaseDate(session)
       )
-        .containsExactlyInAnyOrder(m98, m99)
+        .isEmpty()
 
       assertThat(
         queryFactory.newQuery<OperatorsMovieQuery>()
@@ -1036,14 +1036,14 @@ class ReflectionQueryFactoryTest {
 
       assertThat(
         queryFactory.newQuery<OperatorsMovieQuery>()
-          .releaseDateEqualTo(null)
+          .releaseDateEqualToOrNull(null)
           .listAsNameAndReleaseDate(session)
       )
         .containsExactlyInAnyOrder(m98, m99)
 
       assertThat(
         queryFactory.newQuery<OperatorsMovieQuery>()
-          .releaseDateEqualTo(m1.releaseDate)
+          .releaseDateEqualToOrNull(m1.releaseDate)
           .listAsNameAndReleaseDate(session)
       )
         .containsExactly(m1)
