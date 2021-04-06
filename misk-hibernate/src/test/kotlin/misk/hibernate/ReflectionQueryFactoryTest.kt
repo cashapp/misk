@@ -1024,6 +1024,33 @@ class ReflectionQueryFactoryTest {
   }
 
   @Test
+  fun eqWithNull() {
+    val m1 = NameAndReleaseDate("Rocky 1", LocalDate.of(2018, 1, 1))
+    val m98 = NameAndReleaseDate("Rocky 98", null)
+    val m99 = NameAndReleaseDate("Rocky 99", null)
+
+    transacter.allowCowrites().transaction { session ->
+      session.save(DbMovie(m1.name, m1.releaseDate))
+      session.save(DbMovie(m98.name, m98.releaseDate))
+      session.save(DbMovie(m99.name, m99.releaseDate))
+
+      assertThat(
+        queryFactory.newQuery<OperatorsMovieQuery>()
+          .releaseDateEqualToOrNull(null)
+          .listAsNameAndReleaseDate(session)
+      )
+        .containsExactlyInAnyOrder(m98, m99)
+
+      assertThat(
+        queryFactory.newQuery<OperatorsMovieQuery>()
+          .releaseDateEqualToOrNull(m1.releaseDate)
+          .listAsNameAndReleaseDate(session)
+      )
+        .containsExactly(m1)
+    }
+  }
+
+  @Test
   fun customConstraint() {
     transacter.allowCowrites().transaction { session ->
       session.save(DbMovie("Jurassic Park", LocalDate.of(1993, 6, 9)))

@@ -94,8 +94,13 @@ internal class ReflectionQuery<T : DbEntity<T>>(
   fun addConstraint(path: List<String>, operator: Operator, value: Any?) {
     when (operator) {
       Operator.EQ -> {
-        addConstraint { root, builder ->
-          builder.equal(root.traverse<Any?>(path), value)
+        isEqual(path, value)
+      }
+      Operator.EQ_OR_IS_NULL -> {
+        if (value != null) {
+          isEqual(path, value)
+        } else {
+          isNull(path)
         }
       }
       Operator.NE -> {
@@ -144,11 +149,7 @@ internal class ReflectionQuery<T : DbEntity<T>>(
           builder.isNotNull(root.traverse<Comparable<Comparable<*>>>(path))
         }
       }
-      Operator.IS_NULL -> {
-        addConstraint { root, builder ->
-          builder.isNull(root.traverse<Comparable<Comparable<*>>>(path))
-        }
-      }
+      Operator.IS_NULL -> isNull(path)
     }
   }
 
@@ -598,8 +599,15 @@ internal class ReflectionQuery<T : DbEntity<T>>(
         val handler = when (constraint.operator) {
           Operator.EQ -> object : QueryMethodHandler {
             override fun invoke(reflectionQuery: ReflectionQuery<*>, args: Array<out Any>): Any? {
-              return reflectionQuery.addConstraint { root, builder ->
-                builder.equal(root.traverse<Any?>(path), args[0])
+              return reflectionQuery.isEqual(path, args[0])
+            }
+          }
+          Operator.EQ_OR_IS_NULL -> object : QueryMethodHandler {
+            override fun invoke(reflectionQuery: ReflectionQuery<*>, args: Array<out Any>): Any? {
+              return if (args[0] != null) {
+                reflectionQuery.isEqual(path, args[0])
+              } else {
+                reflectionQuery.isNull(path)
               }
             }
           }
@@ -697,9 +705,7 @@ internal class ReflectionQuery<T : DbEntity<T>>(
           }
           Operator.IS_NULL -> object : QueryMethodHandler {
             override fun invoke(reflectionQuery: ReflectionQuery<*>, args: Array<out Any>): Any? {
-              return reflectionQuery.addConstraint { root, builder ->
-                builder.isNull(root.traverse<Comparable<Comparable<*>>>(path))
-              }
+              return reflectionQuery.isNull(path)
             }
           }
         }
@@ -859,6 +865,18 @@ internal class ReflectionQuery<T : DbEntity<T>>(
       }
       return criteriaBuilder.or(*choices.toTypedArray())
     }
+  }
+
+  companion object {
+    private fun ReflectionQuery<*>.isEqual(path: List<String>, value: Any?) =
+      this.addConstraint { root, builder ->
+        builder.equal(root.traverse<Any?>(path), value)
+      }
+
+    private fun ReflectionQuery<*>.isNull(path: List<String>) =
+      this.addConstraint { root, builder ->
+        builder.isNull(root.traverse<Comparable<Comparable<*>>>(path))
+      }
   }
 }
 

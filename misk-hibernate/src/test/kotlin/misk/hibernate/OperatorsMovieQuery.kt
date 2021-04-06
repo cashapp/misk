@@ -15,6 +15,9 @@ interface OperatorsMovieQuery : Query<DbMovie> {
   @Constraint(path = "release_date", operator = Operator.EQ)
   fun releaseDateEqualTo(upperBound: LocalDate?): OperatorsMovieQuery
 
+  @Constraint(path = "release_date", operator = Operator.EQ_OR_IS_NULL)
+  fun releaseDateEqualToOrNull(upperBound: LocalDate?): OperatorsMovieQuery
+
   @Constraint(path = "release_date", operator = Operator.GE)
   fun releaseDateGreaterThanOrEqualTo(upperBound: LocalDate?): OperatorsMovieQuery
 

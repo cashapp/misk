@@ -148,6 +148,9 @@ enum class Operator {
   /** `a = b` */
   EQ,
 
+  /** `a = b` if b is not null, `a is null` if b is null */
+  EQ_OR_IS_NULL,
+
   /** `a >= b` */
   GE,
 
