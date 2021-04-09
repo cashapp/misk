@@ -55,13 +55,11 @@ internal class SqsJobConsumer @Inject internal constructor(
       "already subscribed to queue ${queueName.value}"
     }
 
-    log.info {
-      "subscribing to queue ${queueName.value}"
-    }
+    log.info { "subscribing to queue ${queueName.value}" }
     taskQueue.scheduleWithBackoff(Duration.ZERO) {
       // Don't call handlers until all services are ready, otherwise handlers will crash because
       // the services they might need (databases, etc.) won't be ready.
-      serviceManagerProvider.get().awaitHealthy()
+      serviceManagerProvider.get().awaitHealthy(Duration.ofSeconds(1))
       receiver.run()
     }
   }
@@ -80,7 +78,7 @@ internal class SqsJobConsumer @Inject internal constructor(
       // Receive messages in parallel. Default to 1 if feature flag is not defined.
       val futures = receiverIds().map {
         CompletableFuture.supplyAsync(
-          Supplier {
+          {
             receive()
           },
           receivingThreads
