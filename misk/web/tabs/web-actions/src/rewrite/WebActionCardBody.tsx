@@ -25,12 +25,6 @@ export default function WebActionCardBody({ webActionMetadata }: Props) {
         columnGap: "16px"
       }}
     >
-      <WebActionCollapse title={webActionMetadata.name} subtitle="Function">
-        <pre style={{ whiteSpace: "pre-wrap" }}>
-          {webActionMetadata.function}
-        </pre>
-      </WebActionCollapse>
-
       <WebActionCollapse
         title={webActionMetadata.responseMediaType}
         subtitle="Content Types"

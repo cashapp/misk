@@ -26,6 +26,15 @@ data class Action(
   val parameterTypes: List<KType>
     get() = parameters.map { it.type }
 
+  val annotatedParameters: List<String>
+    get() = parameters.map {
+      if (it.annotations.size > 0) {
+        "${it.annotations.joinToString(",")} ${it.name}: ${it.type}"
+      } else {
+        "${it.name}: ${it.type}"
+      }
+    }
+
   val requestType: KType?
     get() {
       if (dispatchMechanism == DispatchMechanism.GRPC) {

@@ -134,6 +134,7 @@ internal class BoundAction<A : WebAction>(
       acceptedMediaRanges = action.acceptedMediaRanges,
       responseContentType = action.responseContentType,
       parameterTypes = action.parameterTypes,
+      annotatedParameters = action.annotatedParameters,
       requestType = action.requestType,
       returnType = action.returnType,
       pathPattern = pathPattern,

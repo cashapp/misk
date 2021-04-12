@@ -15,6 +15,7 @@ export interface WebActionMetadata {
   requestMediaTypes: string[]
   responseMediaType: string
   parameterTypes: string[]
+  annotatedParameters: string[]
   requestType: string
   returnType: string
   types: { [key: string]: ProtoType }
