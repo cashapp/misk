@@ -23,8 +23,8 @@ import misk.web.RequestContentType
 import misk.web.ResponseContentType
 import misk.web.WebActionModule
 import misk.web.WebConfig
+import misk.web.WebServerTestingModule
 import misk.web.WebSslConfig
-import misk.web.WebTestingModule
 import misk.web.actions.WebAction
 import misk.web.jetty.JettyService
 import misk.web.mediatype.MediaTypes
@@ -109,7 +109,7 @@ internal class TypedPeerHttpClientTest {
     override fun configure() {
       // Run a server using a cert that has OU of "Server"
       install(
-        WebTestingModule(
+        WebServerTestingModule(
           WebConfig(
             port = 0,
             idle_timeout = 500000,
@@ -131,6 +131,7 @@ internal class TypedPeerHttpClientTest {
         )
       )
 
+      install(MiskTestingServiceModule())
       bind<Cluster>().toInstance(FakeCluster())
       install(WebActionModule.create<ReturnADinosaurAction>())
     }

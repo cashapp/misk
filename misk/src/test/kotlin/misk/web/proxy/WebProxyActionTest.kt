@@ -3,10 +3,12 @@ package misk.web.proxy
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
+import misk.MiskTestingServiceModule
 import misk.inject.KAbstractModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.web.WebActionModule
+import misk.web.WebServerTestingModule
 import misk.web.WebTestingModule
 import misk.web.actions.WebActionEntry
 import misk.web.jetty.JettyService
@@ -413,7 +415,8 @@ class WebProxyActionTest {
           WebProxyEntry("/local/prefix/", upstreamServer.url("/").toString())
         }
       )
-      install(WebTestingModule())
+      install(WebServerTestingModule())
+      install(MiskTestingServiceModule())
     }
   }
 }

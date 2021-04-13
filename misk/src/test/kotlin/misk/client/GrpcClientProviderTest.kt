@@ -23,6 +23,7 @@ import misk.security.ssl.TrustStoreConfig
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.web.WebActionModule
+import misk.web.WebServerTestingModule
 import misk.web.WebTestingModule
 import misk.web.actions.WebAction
 import misk.web.jetty.JettyService
@@ -193,8 +194,9 @@ internal class GrpcClientProviderTest {
 
   class TestModule : KAbstractModule() {
     override fun configure() {
+      install(MiskTestingServiceModule())
       install(HttpClientModule("robots", Names.named("robots")))
-      install(WebTestingModule(webConfig = WebTestingModule.TESTING_WEB_CONFIG.copy(http2 = true)))
+      install(WebServerTestingModule(webConfig = WebServerTestingModule.TESTING_WEB_CONFIG.copy(http2 = true)))
       install(WebActionModule.create<LocateGrpcAction>())
       install(WebActionModule.create<SayHelloGrpcAction>())
     }

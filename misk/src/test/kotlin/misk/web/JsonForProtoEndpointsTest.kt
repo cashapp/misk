@@ -9,6 +9,7 @@ import com.squareup.wire.GrpcClient
 import com.squareup.wire.GrpcMethod
 import com.squareup.wire.Service
 import com.squareup.wire.WireRpc
+import misk.MiskTestingServiceModule
 import misk.grpc.Http2ClientTestingModule
 import misk.inject.KAbstractModule
 import misk.security.authz.Unauthenticated
@@ -150,12 +151,13 @@ internal class JsonForProtoEndpointsTest {
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(
-        WebTestingModule(
-          webConfig = WebTestingModule.TESTING_WEB_CONFIG.copy(
+        WebServerTestingModule(
+          webConfig = WebServerTestingModule.TESTING_WEB_CONFIG.copy(
             http2 = true
           )
         )
       )
+      install(MiskTestingServiceModule())
       install(WebActionModule.create<ProtoEchoShipmentToken>())
       install(WebActionModule.create<GrpcEchoShipmentToken>())
     }
