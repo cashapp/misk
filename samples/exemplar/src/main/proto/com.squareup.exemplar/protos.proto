@@ -1,0 +1,10 @@
+syntax = "proto3";
+package com.squareup.exemplar.protos;
+
+message HelloWebRequest {
+
+}
+
+message HelloWebResponse {
+
+}

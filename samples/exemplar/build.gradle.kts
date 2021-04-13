@@ -1,3 +1,7 @@
+plugins {
+  id("com.squareup.wire")
+}
+
 sourceSets {
   val main by getting {
     java.srcDir("src/main/kotlin/")
@@ -28,4 +32,27 @@ val jar by tasks.getting(Jar::class) {
     attributes("Main-Class" to "com.squareup.exemplar.ExemplarServiceKt")
   }
   classifier = "unshaded"
+}
+
+sourceSets {
+  val main by getting {
+    java.srcDir("$buildDir/generated/source/wire/")
+  }
+}
+
+wire {
+  protoLibrary = true
+
+  sourcePath {
+    srcDir("../exemplar/src/main/proto/")
+  }
+
+  kotlin {
+    includes = listOf("com.squareup.exemplar.protos")
+    rpcCallStyle = "blocking"
+    rpcRole = "server"
+    singleMethodServices = true
+    emitDeclaredOptions = true
+    emitAppliedOptions = true
+  }
 }
