@@ -1,7 +1,6 @@
 package misk.hibernate.actions
 
 import misk.MiskCaller
-import misk.config.Config
 import misk.inject.KAbstractModule
 import misk.security.authz.AccessAnnotationEntry
 import misk.security.authz.AccessControlModule
@@ -12,11 +11,11 @@ import misk.web.MiskWebModule
 import misk.web.WebTestingModule.Companion.TESTING_WEB_CONFIG
 import misk.web.dashboard.AdminDashboardAccess
 import misk.web.metadata.database.NoAdminDashboardDatabaseAccess
+import wisp.config.Config
 
 class HibernateWebActionTestingModule : KAbstractModule() {
   override fun configure() {
     bind<Config>().toInstance(TestConfig())
-    bind<wisp.config.Config>().toInstance(TestConfig())
     install(MiskWebModule(TESTING_WEB_CONFIG))
     install(AccessControlModule())
 
