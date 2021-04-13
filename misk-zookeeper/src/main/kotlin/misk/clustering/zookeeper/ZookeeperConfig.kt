@@ -1,8 +1,8 @@
 package misk.clustering.zookeeper
 
-import misk.config.Config
 import misk.security.ssl.CertStoreConfig
 import misk.security.ssl.TrustStoreConfig
+import wisp.config.Config
 
 data class ZookeeperConfig(
   val zk_connect: String,

@@ -1,7 +1,7 @@
 package misk.cloud.gcp.datastore
 
 import misk.cloud.gcp.TransportConfig
-import misk.config.Config
+import wisp.config.Config
 
 /** Configuration for talking to Google datastore */
 data class DatastoreConfig(

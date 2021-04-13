@@ -1,7 +1,6 @@
 package misk.hibernate
 
 import misk.MiskTestingServiceModule
-import misk.config.Config
 import misk.config.MiskConfig
 import misk.environment.Environment
 import misk.environment.EnvironmentModule
@@ -12,8 +11,9 @@ import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.data.Percentage
 import org.junit.jupiter.api.Test
+import wisp.config.Config
 import java.io.Serializable
-import java.util.Objects
+import java.util.*
 import javax.inject.Inject
 import javax.inject.Qualifier
 import javax.persistence.AttributeConverter

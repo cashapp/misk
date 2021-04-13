@@ -2,7 +2,6 @@ package misk.web.metadata.config
 
 import com.google.inject.Inject
 import misk.config.AppName
-import misk.config.Config
 import misk.config.MiskConfig
 import misk.environment.Env
 import misk.environment.Environment
@@ -13,6 +12,7 @@ import misk.web.ResponseContentType
 import misk.web.actions.WebAction
 import misk.web.dashboard.AdminDashboardAccess
 import misk.web.mediatype.MediaTypes
+import wisp.config.Config
 import javax.inject.Singleton
 
 @Singleton

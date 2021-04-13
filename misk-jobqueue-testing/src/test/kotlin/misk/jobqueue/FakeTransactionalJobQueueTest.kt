@@ -2,7 +2,6 @@ package misk.jobqueue
 
 import com.squareup.moshi.Moshi
 import misk.MiskTestingServiceModule
-import misk.config.Config
 import misk.config.MiskConfig
 import misk.environment.DeploymentModule
 import misk.environment.Environment
@@ -19,6 +18,7 @@ import misk.testing.MiskTestModule
 import misk.tokens.TokenGenerator
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import wisp.config.Config
 import wisp.logging.getLogger
 import javax.inject.Inject
 import javax.inject.Qualifier

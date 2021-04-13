@@ -52,6 +52,7 @@ dependencies {
   testImplementation(project(":misk-metrics"))
   testImplementation(project(":misk-testing"))
   testImplementation(project(":misk-hibernate-testing"))
+  testImplementation(project(":wisp-config"))
 }
 
 afterEvaluate {

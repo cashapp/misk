@@ -1,6 +1,5 @@
 package misk.web.exceptions
 
-import misk.config.Config
 import misk.exceptions.ActionException
 import misk.web.Response
 import misk.web.ResponseBody
@@ -9,6 +8,7 @@ import misk.web.toResponseBody
 import okhttp3.Headers
 import okhttp3.Headers.Companion.toHeaders
 import org.slf4j.event.Level
+import wisp.config.Config
 import javax.inject.Inject
 
 /**

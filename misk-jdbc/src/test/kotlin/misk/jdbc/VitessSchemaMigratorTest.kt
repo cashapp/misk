@@ -2,7 +2,6 @@ package misk.jdbc
 
 import com.google.inject.util.Modules
 import misk.MiskTestingServiceModule
-import misk.config.Config
 import misk.config.MiskConfig
 import misk.database.DockerVitessCluster
 import misk.database.StartDatabaseService
@@ -16,6 +15,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import wisp.config.Config
 import java.sql.Connection
 import javax.inject.Inject
 import javax.inject.Qualifier
@@ -23,13 +23,13 @@ import javax.inject.Qualifier
 @MiskTest(startService = true)
 internal class VitessSchemaMigratorTest {
   val config =
-      MiskConfig.load<MoviesConfig>("test_schemamigrator_vitess_app", Environment.TESTING)
+    MiskConfig.load<MoviesConfig>("test_schemamigrator_vitess_app", Environment.TESTING)
 
   @MiskTestModule
   val module = Modules.combine(
-      EnvironmentModule(Environment.TESTING),
-      MiskTestingServiceModule(),
-      JdbcModule(Movies::class, config.data_source)
+    EnvironmentModule(Environment.TESTING),
+    MiskTestingServiceModule(),
+    JdbcModule(Movies::class, config.data_source)
   )
 
   @Inject @Movies lateinit var schemaMigrator: SchemaMigrator
@@ -43,9 +43,11 @@ internal class VitessSchemaMigratorTest {
 
   @AfterEach fun cleanUpMigrationTable() {
     openDirectConnection()?.use { c ->
-      val schemaVersion = c.prepareStatement("""
+      val schemaVersion = c.prepareStatement(
+        """
             |DELETE FROM `vt_movies_-80`.schema_version
-            |""".trimMargin())
+            |""".trimMargin()
+      )
       schemaVersion.executeUpdate()
     }
   }
@@ -78,9 +80,11 @@ internal class VitessSchemaMigratorTest {
     // but we can't insert into it (unless we specify -queryserver-config-allowunsafe-dmls which
     // vttestserver currently does not). So we bypass Vitess to insert into it directly.
     openDirectConnection()?.use { c ->
-      val schemaVersion = c.prepareStatement("""
+      val schemaVersion = c.prepareStatement(
+        """
               |INSERT INTO `vt_movies_-80`.schema_version (version, installed_by) VALUES (?, ?)
-              |""".trimMargin())
+              |""".trimMargin()
+      )
       schemaVersion.setString(1, version)
       schemaVersion.setString(2, "test")
       schemaVersion.executeUpdate()

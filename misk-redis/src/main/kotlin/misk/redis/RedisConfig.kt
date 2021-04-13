@@ -1,6 +1,6 @@
 package misk.redis
 
-import misk.config.Config
+import wisp.config.Config
 
 class RedisConfig : java.util.LinkedHashMap<String, RedisReplicationGroupConfig>, Config {
   constructor() : super()

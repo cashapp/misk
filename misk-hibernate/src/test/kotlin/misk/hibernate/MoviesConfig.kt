@@ -1,7 +1,7 @@
 package misk.hibernate
 
-import misk.config.Config
 import misk.jdbc.DataSourceConfig
+import wisp.config.Config
 
 internal data class MoviesConfig(
   val vitess_mysql_data_source: DataSourceConfig,

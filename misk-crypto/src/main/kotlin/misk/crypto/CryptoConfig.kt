@@ -1,7 +1,7 @@
 package misk.crypto
 
-import misk.config.Config
 import misk.config.Secret
+import wisp.config.Config
 
 /**
  * Main configuration object representing to be used in the app.

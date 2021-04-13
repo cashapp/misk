@@ -7,6 +7,7 @@ dependencies {
   implementation(project(":misk-inject"))
   implementation(project(":misk-metrics"))
   implementation(project(":misk-service"))
+  api(project(":wisp-config"))
   api(project(":wisp-logging"))
 
   testImplementation(Dependencies.assertj)

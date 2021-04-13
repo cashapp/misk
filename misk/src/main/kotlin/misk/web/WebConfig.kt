@@ -1,9 +1,9 @@
 package misk.web
 
-import misk.config.Config
 import misk.security.ssl.CertStoreConfig
 import misk.security.ssl.TrustStoreConfig
 import misk.web.exceptions.ActionExceptionLogLevelConfig
+import wisp.config.Config
 
 data class WebConfig(
   /** HTTP port to listen on, or 0 for any available port. */
@@ -105,8 +105,10 @@ data class WebSslConfig(
   enum class CipherCompatibility {
     /** Allows the broadest set of clients, including clients that support only out-of-date SSL features. */
     COMPATIBLE,
+
     /** Supports a wide set of SSL features, allowing modern clients to negotiate SSL. */
     MODERN,
+
     /** Supports a reduced set of SSL features, intended to meet stricter compliance requirements. */
     RESTRICTED
   }
