@@ -2,7 +2,6 @@ package misk.client
 
 import com.google.inject.Guice
 import helpers.protos.Dinosaur
-import javax.inject.Inject
 import misk.Action
 import misk.MiskTestingServiceModule
 import misk.inject.KAbstractModule
@@ -12,12 +11,13 @@ import misk.testing.MiskTestModule
 import misk.web.NetworkChain
 import misk.web.NetworkInterceptor
 import misk.web.WebActionModule
-import misk.web.WebTestingModule
+import misk.web.WebServerTestingModule
 import misk.web.jetty.JettyService
 import okhttp3.Response
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import javax.inject.Inject
 
 @MiskTest(startService = true)
 internal class TypedHttpClientInterceptorTest {
@@ -75,7 +75,8 @@ internal class TypedHttpClientInterceptorTest {
 
   class TestModule : KAbstractModule() {
     override fun configure() {
-      install(WebTestingModule())
+      install(MiskTestingServiceModule())
+      install(WebServerTestingModule())
       install(WebActionModule.create<ReturnADinosaurAction>())
       multibind<NetworkInterceptor.Factory>().to<ServerHeaderInterceptor.Factory>()
     }

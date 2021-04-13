@@ -4,6 +4,7 @@ import com.google.inject.util.Modules
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.runBlocking
+import misk.MiskTestingServiceModule
 import misk.grpc.miskclient.MiskGrpcClientModule
 import misk.grpc.miskclient.RouteGuideCallCounter
 import misk.grpc.miskserver.RouteChatGrpcAction

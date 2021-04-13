@@ -2,6 +2,7 @@ package misk.web
 
 import com.google.inject.util.Modules
 import com.squareup.moshi.Moshi
+import misk.MiskTestingServiceModule
 import misk.inject.KAbstractModule
 import misk.moshi.adapter
 import misk.testing.MiskTest
@@ -140,7 +141,7 @@ internal class JettyServiceMetricsTest {
   internal class TestModule : KAbstractModule() {
     override fun configure() {
       install(
-        Modules.override(WebTestingModule()).with(
+        Modules.override(WebServerTestingModule()).with(
           object : KAbstractModule() {
             override fun configure() {
               val pool = QueuedThreadPool(
@@ -152,6 +153,7 @@ internal class JettyServiceMetricsTest {
           }
         )
       )
+      install(MiskTestingServiceModule())
       install(WebActionModule.create<HelloAction>())
       install(WebActionModule.create<CurrentPoolMetricsAction>())
     }

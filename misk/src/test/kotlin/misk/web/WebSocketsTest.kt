@@ -1,7 +1,7 @@
 package misk.web
 
+import misk.MiskTestingServiceModule
 import misk.inject.KAbstractModule
-import misk.logging.LogCollector
 import misk.logging.LogCollectorModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
@@ -51,7 +51,8 @@ internal class WebSocketsTest {
 
   class TestModule : KAbstractModule() {
     override fun configure() {
-      install(WebTestingModule())
+      install(WebServerTestingModule())
+      install(MiskTestingServiceModule())
       install(LogCollectorModule())
       install(WebActionModule.create<EchoWebSocket>())
     }
