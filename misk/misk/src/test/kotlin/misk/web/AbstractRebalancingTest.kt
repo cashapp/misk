@@ -1,6 +1,7 @@
 package misk.web
 
 import com.google.inject.Provides
+import misk.MiskTestingServiceModule
 import misk.client.HttpClientConfig
 import misk.client.HttpClientEndpointConfig
 import misk.client.HttpClientModule
@@ -106,14 +107,15 @@ abstract class AbstractRebalancingTest(
   inner class TestModule : KAbstractModule() {
     override fun configure() {
       install(
-        WebTestingModule(
-          webConfig = WebTestingModule.TESTING_WEB_CONFIG.copy(
+        WebServerTestingModule(
+          webConfig = WebServerTestingModule.TESTING_WEB_CONFIG.copy(
             http2 = true,
             close_connection_percent = percent,
             jetty_max_thread_pool_size = jettyMaxThreadPoolSize
           )
         )
       )
+      install(MiskTestingServiceModule())
       install(HttpClientModule("default"))
     }
 

@@ -1,5 +1,6 @@
 package misk.web.extractors
 
+import misk.MiskTestingServiceModule
 import misk.inject.KAbstractModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
@@ -7,7 +8,7 @@ import misk.web.Get
 import misk.web.QueryParam
 import misk.web.ResponseContentType
 import misk.web.WebActionModule
-import misk.web.WebTestingModule
+import misk.web.WebServerTestingModule
 import misk.web.actions.WebAction
 import misk.web.jetty.JettyService
 import misk.web.mediatype.MediaTypes
@@ -94,7 +95,8 @@ internal class QueryStringRequestTest {
 
   class TestModule : KAbstractModule() {
     override fun configure() {
-      install(WebTestingModule())
+      install(WebServerTestingModule())
+      install(MiskTestingServiceModule())
       install(WebActionModule.create<BasicParamsAction>())
       install(WebActionModule.create<OptionalParamsAction>())
       install(WebActionModule.create<DefaultParamsAction>())

@@ -26,8 +26,8 @@ import misk.web.RequestBody
 import misk.web.RequestContentType
 import misk.web.ResponseContentType
 import misk.web.WebActionModule
+import misk.web.WebServerTestingModule
 import misk.web.WebSslConfig
-import misk.web.WebTestingModule
 import misk.web.actions.WebAction
 import misk.web.jetty.JettyService
 import misk.web.mediatype.MediaTypes
@@ -95,9 +95,10 @@ internal class JceksSslClientServerTest {
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(WebActionModule.create<HelloAction>())
+      install(MiskTestingServiceModule())
       install(
-        WebTestingModule(
-          WebTestingModule.TESTING_WEB_CONFIG.copy(
+        WebServerTestingModule(
+          WebServerTestingModule.TESTING_WEB_CONFIG.copy(
             ssl = WebSslConfig(
               0,
               cert_store = CertStoreConfig(

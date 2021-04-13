@@ -5,6 +5,7 @@ import com.squareup.protos.test.parsing.Warehouse
 import com.squareup.wire.Service
 import com.squareup.wire.WireRpc
 import misk.MiskCaller
+import misk.MiskTestingServiceModule
 import misk.inject.KAbstractModule
 import misk.scope.ActionScoped
 import misk.security.authz.AccessAnnotationEntry
@@ -18,7 +19,7 @@ import misk.web.RequestBody
 import misk.web.RequestContentType
 import misk.web.ResponseContentType
 import misk.web.WebActionModule
-import misk.web.WebTestingModule
+import misk.web.WebServerTestingModule
 import misk.web.mediatype.MediaTypes
 import misk.web.toResponseBody
 import javax.inject.Inject
@@ -26,7 +27,8 @@ import javax.inject.Inject
 // Common module for web action-related tests to use to use that bind up some sample web actions
 class TestWebActionModule : KAbstractModule() {
   override fun configure() {
-    install(WebTestingModule())
+    install(WebServerTestingModule())
+    install(MiskTestingServiceModule())
     install(AccessControlModule())
 
     install(WebActionModule.create<CustomServiceAccessAction>())
