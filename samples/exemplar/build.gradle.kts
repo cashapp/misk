@@ -46,11 +46,6 @@ wire {
   }
 
   kotlin {
-    includes = listOf("com.squareup.exemplar.protos")
-    rpcCallStyle = "blocking"
-    rpcRole = "server"
-    singleMethodServices = true
-    emitDeclaredOptions = true
-    emitAppliedOptions = true
+    javaInterop = true
   }
 }
