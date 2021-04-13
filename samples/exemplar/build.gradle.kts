@@ -42,7 +42,7 @@ sourceSets {
 
 wire {
   sourcePath {
-    srcDir("../exemplar/src/main/proto/")
+    srcDir("src/main/proto/")
   }
 
   kotlin {
