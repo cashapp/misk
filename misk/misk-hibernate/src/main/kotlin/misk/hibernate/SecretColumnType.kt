@@ -5,19 +5,18 @@ import com.google.crypto.tink.DeterministicAead
 import misk.crypto.AeadKeyManager
 import misk.crypto.DeterministicAeadKeyManager
 import misk.crypto.KeyNotFoundException
-import misk.logging.getLogger
 import org.hibernate.HibernateException
 import org.hibernate.engine.spi.SharedSessionContractImplementor
 import org.hibernate.type.spi.TypeConfiguration
 import org.hibernate.type.spi.TypeConfigurationAware
 import org.hibernate.usertype.ParameterizedType
 import org.hibernate.usertype.UserType
+import wisp.logging.getLogger
 import java.io.Serializable
 import java.sql.PreparedStatement
 import java.sql.ResultSet
 import java.sql.Types
-import java.util.Objects
-import java.util.Properties
+import java.util.*
 
 internal class SecretColumnType : UserType, ParameterizedType, TypeConfigurationAware {
   companion object {

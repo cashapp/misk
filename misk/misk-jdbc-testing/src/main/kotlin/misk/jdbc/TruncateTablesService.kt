@@ -2,10 +2,10 @@ package misk.jdbc
 
 import com.google.common.base.Stopwatch
 import com.google.common.util.concurrent.AbstractIdleService
-import misk.logging.getLogger
 import misk.vitess.shards
 import misk.vitess.target
-import java.util.Locale
+import wisp.logging.getLogger
+import java.util.*
 import javax.inject.Provider
 import kotlin.reflect.KClass
 
@@ -91,7 +91,7 @@ class TruncateTablesService(
     if (truncatedTableNames.isNotEmpty()) {
       logger.info {
         "@${qualifier.simpleName} TruncateTablesService truncated ${truncatedTableNames.size} " +
-            "tables in $stopwatch"
+          "tables in $stopwatch"
       }
     }
   }
@@ -112,7 +112,7 @@ class TruncateTablesService(
     if (statements.isNotEmpty()) {
       logger.info {
         "@${qualifier.simpleName} TruncateTablesService ran ${statements.size} $name " +
-            "statements in $stopwatch"
+          "statements in $stopwatch"
       }
     }
   }

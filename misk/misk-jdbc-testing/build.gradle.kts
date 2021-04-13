@@ -13,6 +13,7 @@ dependencies {
   api(project(":misk-jdbc"))
   api(project(":misk-service"))
   api(project(":misk-testing"))
+  api(project(":wisp-logging"))
   testImplementation(Dependencies.junitApi)
   testImplementation(Dependencies.openTracingDatadog)
   testImplementation(Dependencies.assertj)

@@ -14,6 +14,7 @@ dependencies {
 
   testImplementation(project(":misk-hibernate"))
   testImplementation(project(":misk-hibernate-testing"))
+  testImplementation(project(":wisp-logging"))
   testImplementation(Dependencies.junitApi)
   testImplementation(Dependencies.loggingApi)
   testImplementation(Dependencies.assertj)

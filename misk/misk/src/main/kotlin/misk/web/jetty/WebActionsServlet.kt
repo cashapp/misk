@@ -1,7 +1,6 @@
 package misk.web.jetty
 
 import misk.exceptions.StatusCode
-import misk.logging.getLogger
 import misk.web.BoundAction
 import misk.web.DispatchMechanism
 import misk.web.ServletHttpCall
@@ -27,6 +26,7 @@ import org.eclipse.jetty.unixsocket.UnixSocketConnector
 import org.eclipse.jetty.websocket.servlet.ServletUpgradeResponse
 import org.eclipse.jetty.websocket.servlet.WebSocketServlet
 import org.eclipse.jetty.websocket.servlet.WebSocketServletFactory
+import wisp.logging.getLogger
 import java.net.ProtocolException
 import javax.inject.Inject
 import javax.inject.Singleton

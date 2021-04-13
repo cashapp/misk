@@ -9,7 +9,6 @@ import misk.jdbc.DataSourceConfig
 import misk.jdbc.DataSourceType
 import misk.jdbc.map
 import misk.jdbc.uniqueString
-import misk.logging.getLogger
 import misk.vitess.Destination
 import misk.vitess.Keyspace
 import misk.vitess.Shard
@@ -20,6 +19,7 @@ import org.hibernate.SessionFactory
 import org.hibernate.StaleObjectStateException
 import org.hibernate.exception.ConstraintViolationException
 import org.hibernate.exception.LockAcquisitionException
+import wisp.logging.getLogger
 import java.io.Closeable
 import java.sql.Connection
 import java.sql.SQLException
@@ -27,7 +27,7 @@ import java.sql.SQLIntegrityConstraintViolationException
 import java.sql.SQLRecoverableException
 import java.sql.SQLTransientException
 import java.time.Duration
-import java.util.EnumSet
+import java.util.*
 import java.util.concurrent.Callable
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.Future

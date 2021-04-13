@@ -2,8 +2,8 @@ package misk.tracing.backends.datadog
 
 import datadog.trace.api.CorrelationIdentifier
 import datadog.trace.context.ScopeListener
-import misk.logging.getLogger
 import org.slf4j.MDC
+import wisp.logging.getLogger
 
 /**
  * A scope listener that updates the MDC with the trace and span reference anytime a new scope is

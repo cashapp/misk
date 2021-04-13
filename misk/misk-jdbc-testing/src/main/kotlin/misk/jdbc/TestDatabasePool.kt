@@ -1,13 +1,13 @@
 package misk.jdbc
 
-import misk.logging.getLogger
+import wisp.logging.getLogger
 import java.sql.SQLException
 import java.time.Clock
 import java.time.Duration
 import java.time.LocalDate
 import java.time.Period
 import java.time.format.DateTimeFormatter
-import java.util.Collections
+import java.util.*
 import java.util.concurrent.LinkedBlockingDeque
 import java.util.regex.Pattern
 
@@ -16,9 +16,10 @@ import java.util.regex.Pattern
  *
  * See [misk.hibernate.HibernateTestingModule] for usage instructions. */
 val SHARED_TEST_DATABASE_POOL = TestDatabasePool(
-    MySqlTestDatabasePoolBackend(
-        DataSourceConfig(type = DataSourceType.MYSQL, username = "root").withDefaults()),
-    Clock.systemUTC()
+  MySqlTestDatabasePoolBackend(
+    DataSourceConfig(type = DataSourceType.MYSQL, username = "root").withDefaults()
+  ),
+  Clock.systemUTC()
 )
 
 /**
@@ -91,9 +92,9 @@ class TestDatabasePool(
     fun decode(databaseName: String): DatabaseName? {
       val matchResult = databaseNameRegex.matchEntire(databaseName) ?: return null
       return DatabaseName(
-          matchResult.groups[1]!!.value,
-          matchResult.groups[2]!!.value.toLong(),
-          matchResult.groups[3]!!.value.toInt()
+        matchResult.groups[1]!!.value,
+        matchResult.groups[2]!!.value.toLong(),
+        matchResult.groups[3]!!.value.toInt()
       )
     }
 
@@ -119,13 +120,13 @@ class TestDatabasePool(
       val todayYearMonthDay = today.format(formatter).toLong()
 
       val todaysLatest = getDatabases()
-          .filter { it.yearMonthDay == todayYearMonthDay }
-          .maxBy { it.version }
+        .filter { it.yearMonthDay == todayYearMonthDay }
+        .maxBy { it.version }
 
       val nextVersion = (todaysLatest?.version ?: 0) + 1
 
       var databaseName =
-          DatabaseName(key, todayYearMonthDay, nextVersion)
+        DatabaseName(key, todayYearMonthDay, nextVersion)
 
       // Keep trying to create a database until we have found an unused name.
       while (true) {
