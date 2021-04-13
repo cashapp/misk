@@ -41,8 +41,6 @@ sourceSets {
 }
 
 wire {
-  protoLibrary = true
-
   sourcePath {
     srcDir("../exemplar/src/main/proto/")
   }
