@@ -1,6 +1,5 @@
 package misk.web
 
-import misk.MiskTestingServiceModule
 import misk.environment.Environment
 import misk.environment.EnvironmentModule
 import misk.inject.KAbstractModule
@@ -16,7 +15,6 @@ class WebTestingModule(
 ) : KAbstractModule() {
   override fun configure() {
     install(EnvironmentModule(Environment.TESTING))
-    install(MiskTestingServiceModule())
     install(MiskWebModule(webConfig))
   }
 
