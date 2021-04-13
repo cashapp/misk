@@ -9,10 +9,10 @@ import io.opentracing.propagation.Format
 import io.opentracing.tag.Tags
 import io.opentracing.tag.Tags.SPAN_KIND_SERVER
 import misk.Action
-import misk.logging.getLogger
 import misk.tracing.interceptors.TextMultimapExtractAdapter
 import misk.web.NetworkChain
 import misk.web.NetworkInterceptor
+import wisp.logging.getLogger
 
 private val logger = getLogger<TracingInterceptor>()
 

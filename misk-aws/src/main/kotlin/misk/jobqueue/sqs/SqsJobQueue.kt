@@ -7,10 +7,10 @@ import datadog.trace.core.DDSpan
 import io.opentracing.Tracer
 import misk.jobqueue.JobQueue
 import misk.jobqueue.QueueName
-import misk.logging.getLogger
 import misk.moshi.adapter
 import misk.time.timed
 import misk.tracing.traceWithSpan
+import wisp.logging.getLogger
 import java.time.Duration
 import javax.inject.Inject
 import javax.inject.Singleton

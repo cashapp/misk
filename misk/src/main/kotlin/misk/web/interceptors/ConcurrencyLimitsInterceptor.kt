@@ -4,12 +4,12 @@ import com.netflix.concurrency.limits.Limiter
 import com.netflix.concurrency.limits.limiter.SimpleLimiter
 import misk.Action
 import misk.exceptions.StatusCode
-import misk.logging.getLogger
 import misk.logging.log
 import misk.web.AvailableWhenDegraded
 import misk.web.NetworkChain
 import misk.web.NetworkInterceptor
 import org.slf4j.event.Level
+import wisp.logging.getLogger
 import java.time.Clock
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject

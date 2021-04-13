@@ -4,9 +4,9 @@ import com.amazonaws.services.sqs.model.GetQueueAttributesRequest
 import com.amazonaws.services.sqs.model.QueueAttributeName
 import misk.clustering.lease.LeaseManager
 import misk.jobqueue.QueueName
-import misk.logging.getLogger
 import misk.tasks.RepeatedTaskQueue
 import misk.tasks.Status
+import wisp.logging.getLogger
 import java.time.Duration
 import javax.inject.Inject
 

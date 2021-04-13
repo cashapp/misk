@@ -1,6 +1,5 @@
 package misk.web.actions
 
-import misk.logging.getLogger
 import misk.scope.ActionScoped
 import misk.security.authz.Unauthenticated
 import misk.web.Get
@@ -15,6 +14,7 @@ import misk.web.jetty.WebActionsServlet
 import misk.web.mediatype.MediaTypes
 import misk.web.toResponseBody
 import okhttp3.Headers.Companion.headersOf
+import wisp.logging.getLogger
 import javax.inject.Inject
 import javax.inject.Provider
 import javax.inject.Singleton
