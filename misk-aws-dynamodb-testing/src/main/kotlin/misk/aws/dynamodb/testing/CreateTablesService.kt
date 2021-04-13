@@ -6,7 +6,7 @@ import com.amazonaws.services.dynamodbv2.document.DynamoDB
 import com.amazonaws.services.dynamodbv2.model.CreateTableRequest
 import com.amazonaws.services.dynamodbv2.model.ProvisionedThroughput
 import com.google.common.util.concurrent.AbstractIdleService
-import misk.logging.getLogger
+import wisp.logging.getLogger
 import javax.inject.Inject
 import javax.inject.Singleton
 

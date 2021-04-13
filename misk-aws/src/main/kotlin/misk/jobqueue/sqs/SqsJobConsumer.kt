@@ -14,11 +14,11 @@ import misk.feature.FeatureFlags
 import misk.jobqueue.JobConsumer
 import misk.jobqueue.JobHandler
 import misk.jobqueue.QueueName
-import misk.logging.getLogger
 import misk.tasks.RepeatedTaskQueue
 import misk.tasks.Status
 import misk.time.timed
 import misk.tracing.traceWithNewRootSpan
+import wisp.logging.getLogger
 import java.time.Duration
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ConcurrentHashMap

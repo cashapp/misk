@@ -1,7 +1,7 @@
 package misk.environment
 
 import com.google.common.base.Preconditions
-import misk.logging.getLogger
+import wisp.logging.getLogger
 
 /** The environment in which the application is running */
 @Deprecated("use Deployment instead")

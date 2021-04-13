@@ -4,7 +4,7 @@ import com.cronutils.model.CronType
 import com.cronutils.model.definition.CronDefinitionBuilder
 import com.cronutils.model.time.ExecutionTime
 import com.cronutils.parser.CronParser
-import misk.logging.getLogger
+import wisp.logging.getLogger
 import java.time.Clock
 import java.time.Instant
 import java.time.ZoneId
@@ -28,6 +28,7 @@ class CronManager @Inject constructor() {
     val executionTime: ExecutionTime,
     val runnable: Runnable
   )
+
   private val cronEntries = mutableMapOf<String, CronEntry>()
 
   internal fun addCron(name: String, crontab: String, cron: Runnable) {
