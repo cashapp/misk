@@ -2,7 +2,7 @@ package misk.cron
 
 import com.google.common.util.concurrent.AbstractIdleService
 import com.google.inject.Injector
-import misk.logging.getLogger
+import wisp.logging.getLogger
 import javax.inject.Inject
 import javax.inject.Singleton
 

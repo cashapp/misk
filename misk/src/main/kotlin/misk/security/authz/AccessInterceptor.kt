@@ -6,8 +6,8 @@ import misk.Chain
 import misk.MiskCaller
 import misk.exceptions.UnauthenticatedException
 import misk.exceptions.UnauthorizedException
-import misk.logging.getLogger
 import misk.scope.ActionScoped
+import wisp.logging.getLogger
 import javax.inject.Inject
 import kotlin.reflect.KClass
 
@@ -75,10 +75,10 @@ class AccessInterceptor private constructor(
           |   AccessAnnotationEntry Example Multibinding:
           |   multibind<AccessAnnotationEntry>().toInstance(
           |     AccessAnnotationEntry<${
-            action.function.annotations.filter {
-              it.annotationClass.simpleName.toString().endsWith("Access")
-            }
-              .firstOrNull()?.annotationClass?.simpleName ?: "{Access Annotation Class Simple Name}"
+              action.function.annotations.filter {
+                it.annotationClass.simpleName.toString().endsWith("Access")
+              }
+                .firstOrNull()?.annotationClass?.simpleName ?: "{Access Annotation Class Simple Name}"
             }>(capabilities = ???, services = ???))
           |
           |B) Add an AccessAnnotation to ${action.name}::${action.function.name}() that already has a matching AccessAnnotationEntry such as:

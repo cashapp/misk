@@ -4,9 +4,9 @@ import misk.clustering.Cluster
 import misk.clustering.NoMembersAvailableException
 import misk.clustering.lease.Lease
 import misk.clustering.weights.ClusterWeightProvider
-import misk.logging.getLogger
 import org.apache.zookeeper.CreateMode
 import org.apache.zookeeper.KeeperException
+import wisp.logging.getLogger
 import java.util.concurrent.locks.ReentrantLock
 import javax.annotation.concurrent.GuardedBy
 import kotlin.concurrent.withLock
@@ -160,9 +160,9 @@ internal class ZkLease(
     // the lease
     try {
       manager.client.value.create()
-          .creatingParentsIfNeeded()
-          .withMode(CreateMode.EPHEMERAL)
-          .forPath(leaseZkPath, leaseData)
+        .creatingParentsIfNeeded()
+        .withMode(CreateMode.EPHEMERAL)
+        .forPath(leaseZkPath, leaseData)
       status = Status.HELD
       log.info { "acquired lease $name" }
       notifyAfterAcquire()
@@ -200,7 +200,7 @@ internal class ZkLease(
   private fun shouldHoldLease(): Boolean {
     val clusterSnapshot = manager.cluster.snapshot
     return getDesiredLeaseHolder(clusterSnapshot)?.name == clusterSnapshot.self.name &&
-        clusterWeight.get() > 0
+      clusterWeight.get() > 0
   }
 
   private fun getDesiredLeaseHolder(clusterSnapshot: Cluster.Snapshot): Cluster.Member? {
@@ -214,7 +214,7 @@ internal class ZkLease(
 
   /** @return true if the lease node exists in zk */
   private fun checkLeaseNodeExists() =
-      manager.client.value.checkExists().forPath(leaseZkPath) != null
+    manager.client.value.checkExists().forPath(leaseZkPath) != null
 
   /** @return true if the lease data held in the zk node matches our lease data */
   private fun checkLeaseDataMatches() = leaseData.contentEquals(currentLeaseData() ?: byteArrayOf())

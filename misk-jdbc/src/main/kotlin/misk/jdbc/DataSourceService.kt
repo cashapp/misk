@@ -7,7 +7,7 @@ import com.zaxxer.hikari.HikariDataSource
 import com.zaxxer.hikari.metrics.prometheus.PrometheusMetricsTrackerFactory
 import io.prometheus.client.CollectorRegistry
 import misk.environment.Environment
-import misk.logging.getLogger
+import wisp.logging.getLogger
 import javax.inject.Provider
 import javax.inject.Singleton
 import javax.sql.DataSource
@@ -29,8 +29,10 @@ class DataSourceService(
   private val collectorRegistry: CollectorRegistry? = null
 ) : AbstractIdleService(), DataSourceConnector, Provider<DataSource> {
   private lateinit var config: DataSourceConfig
+
   /** The backing connection pool */
   private var hikariDataSource: HikariDataSource? = null
+
   /** The decorated data source */
   private var dataSource: DataSource? = null
 
@@ -107,7 +109,7 @@ class DataSourceService(
   }
 
   private fun decorate(dataSource: DataSource): DataSource =
-      dataSourceDecorators.fold(dataSource) { ds, decorator -> decorator.decorate(ds) }
+    dataSourceDecorators.fold(dataSource) { ds, decorator -> decorator.decorate(ds) }
 
   override fun config(): DataSourceConfig = this.config
 
@@ -124,7 +126,8 @@ class DataSourceService(
 
   override fun get(): DataSource {
     return dataSource ?: throw IllegalStateException(
-        "@${qualifier.simpleName} DataSource not created: did you forget to start the service?")
+      "@${qualifier.simpleName} DataSource not created: did you forget to start the service?"
+    )
   }
 
   companion object {

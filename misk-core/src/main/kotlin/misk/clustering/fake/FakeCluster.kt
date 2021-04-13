@@ -4,7 +4,7 @@ import misk.clustering.Cluster
 import misk.clustering.ClusterService
 import misk.clustering.ClusterWatch
 import misk.clustering.DefaultCluster
-import misk.logging.getLogger
+import wisp.logging.getLogger
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject

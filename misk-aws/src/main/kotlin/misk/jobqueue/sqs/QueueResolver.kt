@@ -6,7 +6,7 @@ import com.amazonaws.services.sqs.model.QueueDoesNotExistException
 import misk.cloud.aws.AwsAccountId
 import misk.cloud.aws.AwsRegion
 import misk.jobqueue.QueueName
-import misk.logging.getLogger
+import wisp.logging.getLogger
 import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 import javax.inject.Singleton

@@ -13,7 +13,6 @@ import misk.hibernate.actions.HibernateDatabaseQueryWebActionModule.Companion.ch
 import misk.hibernate.actions.HibernateDatabaseQueryWebActionModule.Companion.findDatabaseQueryMetadata
 import misk.hibernate.actions.HibernateDatabaseQueryWebActionModule.Companion.getTransacterForDatabaseQueryAction
 import misk.hibernate.actions.HibernateDatabaseQueryWebActionModule.Companion.validateSelectPathsOrDefault
-import misk.logging.getLogger
 import misk.scope.ActionScoped
 import misk.web.Post
 import misk.web.RequestBody
@@ -23,6 +22,7 @@ import misk.web.actions.WebAction
 import misk.web.dashboard.AdminDashboardAccess
 import misk.web.mediatype.MediaTypes
 import misk.web.metadata.database.DatabaseQueryMetadata
+import wisp.logging.getLogger
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.reflect.KClass

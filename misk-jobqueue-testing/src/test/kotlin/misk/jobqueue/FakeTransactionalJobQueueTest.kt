@@ -12,15 +12,14 @@ import misk.hibernate.Session
 import misk.hibernate.Transacter
 import misk.inject.KAbstractModule
 import misk.jdbc.DataSourceConfig
-import misk.logging.LogCollector
 import misk.logging.LogCollectorModule
-import misk.logging.getLogger
 import misk.moshi.adapter
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.tokens.TokenGenerator
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import wisp.logging.getLogger
 import javax.inject.Inject
 import javax.inject.Qualifier
 import kotlin.IllegalStateException

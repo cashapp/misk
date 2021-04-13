@@ -7,9 +7,9 @@ import com.google.common.util.concurrent.Service
 import misk.backoff.Backoff
 import misk.concurrent.ExecutorServiceFactory
 import misk.concurrent.ExplicitReleaseDelayQueue
-import misk.logging.getLogger
 import misk.metrics.Metrics
 import misk.time.timed
+import wisp.logging.getLogger
 import java.time.Clock
 import java.time.Duration
 import java.util.concurrent.BlockingQueue
@@ -225,22 +225,22 @@ class RepeatedTaskQueueFactory @Inject constructor(
     pollingTimeout: Duration = Duration.ofMillis(250)
   ):
     RepeatedTaskQueue {
-      val executor = if (config.num_parallel_tasks == -1) {
-        executorServiceFactory.unbounded("$name-%d")
-      } else {
-        executorServiceFactory.fixed("$name-%d", config.num_parallel_tasks)
-      }
-      return RepeatedTaskQueue(
-        name,
-        clock,
-        executor,
-        null,
-        DelayQueue<DelayedTask>(),
-        metrics,
-        config,
-        pollingTimeout
-      )
+    val executor = if (config.num_parallel_tasks == -1) {
+      executorServiceFactory.unbounded("$name-%d")
+    } else {
+      executorServiceFactory.fixed("$name-%d", config.num_parallel_tasks)
     }
+    return RepeatedTaskQueue(
+      name,
+      clock,
+      executor,
+      null,
+      DelayQueue<DelayedTask>(),
+      metrics,
+      config,
+      pollingTimeout
+    )
+  }
 
   /**
    * Builds a new instance of a [RepeatedTaskQueue] for testing
@@ -251,34 +251,34 @@ class RepeatedTaskQueueFactory @Inject constructor(
     pollingTimeout: Duration = Duration.ofMillis(50)
   ):
     RepeatedTaskQueue {
-      val queue = RepeatedTaskQueue(
-        name,
-        clock,
-        newDirectExecutorService(),
-        executorServiceFactory.single("$name-%d"),
-        backingStorage,
-        metrics,
-        RepeatedTaskQueueConfig(),
-        pollingTimeout
-      )
+    val queue = RepeatedTaskQueue(
+      name,
+      clock,
+      newDirectExecutorService(),
+      executorServiceFactory.single("$name-%d"),
+      backingStorage,
+      metrics,
+      RepeatedTaskQueueConfig(),
+      pollingTimeout
+    )
 
-      // Install a status listener that will explicitly release all of the tasks from the
-      // underlying delay queue backing storage at shutdown, ensuring that the termination
-      // action runs and allowing the task queue itself to shutdown
-      queue.addListener(
-        object : Service.Listener() {
-          override fun stopping(from: Service.State) {
-            // Keep kicking the storage until backing storage is empty
-            while (true) {
-              backingStorage.releaseAll()
-              if (backingStorage.isEmpty()) break
-              Thread.sleep(500)
-            }
+    // Install a status listener that will explicitly release all of the tasks from the
+    // underlying delay queue backing storage at shutdown, ensuring that the termination
+    // action runs and allowing the task queue itself to shutdown
+    queue.addListener(
+      object : Service.Listener() {
+        override fun stopping(from: Service.State) {
+          // Keep kicking the storage until backing storage is empty
+          while (true) {
+            backingStorage.releaseAll()
+            if (backingStorage.isEmpty()) break
+            Thread.sleep(500)
           }
-        },
-        newSingleThreadExecutor()
-      )
+        }
+      },
+      newSingleThreadExecutor()
+    )
 
-      return queue
-    }
+    return queue
+  }
 }

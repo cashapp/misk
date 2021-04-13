@@ -7,7 +7,6 @@ import misk.client.HttpClientModule
 import misk.client.HttpClientSSLConfig
 import misk.client.HttpClientsConfig
 import misk.inject.KAbstractModule
-import misk.logging.getLogger
 import misk.security.ssl.SslLoader
 import misk.security.ssl.TrustStoreConfig
 import misk.testing.MiskTest
@@ -21,6 +20,7 @@ import okhttp3.Response
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
+import wisp.logging.getLogger
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton

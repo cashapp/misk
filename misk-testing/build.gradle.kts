@@ -29,6 +29,7 @@ dependencies {
     exclude(group = "junit")
   }
   implementation(Dependencies.javaxInject)
+  api(project(":wisp-logging"))
   api(project(":wisp-logging-testing"))
   api(project(":misk"))
   api(project(":misk-actions"))

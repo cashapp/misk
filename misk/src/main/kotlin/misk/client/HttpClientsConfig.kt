@@ -3,9 +3,9 @@ package misk.client
 import com.fasterxml.jackson.annotation.JsonAlias
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import misk.config.Config
-import misk.logging.getLogger
 import misk.security.ssl.CertStoreConfig
 import misk.security.ssl.TrustStoreConfig
+import wisp.logging.getLogger
 import java.net.URL
 import java.time.Duration
 

@@ -12,6 +12,7 @@ dependencies {
   implementation(project(":misk-inject"))
   implementation(project(":misk-service"))
   implementation(project(":misk-testing"))
+  api(project(":wisp-logging"))
   implementation(Dependencies.docker)
   // The docker-java we use in tests depends on an old version of junixsocket that depends on
   // log4j. We force it up a minor version in packages that use it.

@@ -1,7 +1,7 @@
 package misk.service
 
 import com.google.common.util.concurrent.AbstractIdleService
-import misk.logging.getLogger
+import wisp.logging.getLogger
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicBoolean
 

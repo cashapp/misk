@@ -33,6 +33,7 @@ dependencies {
   implementation(project(":misk-inject"))
   implementation(project(":misk-service"))
   api(project(":misk-jdbc"))
+  api(project(":wisp-logging"))
 
   testImplementation(Dependencies.docker)
   // The docker-java we use in tests depends on an old version of junixsocket that depends on

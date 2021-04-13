@@ -4,7 +4,6 @@ import com.google.common.base.Stopwatch
 import com.google.common.util.concurrent.AbstractIdleService
 import misk.jdbc.DataSourceConnector
 import misk.jdbc.DataSourceType
-import misk.logging.getLogger
 import okio.ByteString
 import org.hibernate.SessionFactory
 import org.hibernate.boot.Metadata
@@ -21,6 +20,7 @@ import org.hibernate.mapping.SimpleValue
 import org.hibernate.mapping.Value
 import org.hibernate.service.spi.SessionFactoryServiceRegistry
 import org.hibernate.usertype.UserType
+import wisp.logging.getLogger
 import javax.inject.Provider
 import javax.persistence.Column
 import javax.persistence.Table

@@ -5,7 +5,7 @@ import com.amazonaws.services.s3.model.AmazonS3Exception
 import com.google.inject.Inject
 import misk.config.MiskConfig
 import misk.environment.Env
-import misk.logging.getLogger
+import wisp.logging.getLogger
 
 /**
  * [S3ExternalKeyManager] implements an [ExternalKeyManager] that fetches Tink keysets from an S3

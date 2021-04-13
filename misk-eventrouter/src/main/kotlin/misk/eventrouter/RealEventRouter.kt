@@ -2,9 +2,9 @@ package misk.eventrouter
 
 import com.google.common.collect.LinkedHashMultimap
 import com.squareup.moshi.JsonAdapter
-import misk.logging.getLogger
 import misk.web.actions.WebSocket
 import misk.web.actions.WebSocketListener
+import wisp.logging.getLogger
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.atomic.AtomicBoolean

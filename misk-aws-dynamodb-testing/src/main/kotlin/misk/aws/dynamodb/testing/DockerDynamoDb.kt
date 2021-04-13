@@ -7,8 +7,8 @@ import com.github.dockerjava.api.model.ExposedPort
 import com.github.dockerjava.api.model.Ports
 import misk.containers.Composer
 import misk.containers.Container
-import misk.logging.getLogger
 import misk.testing.ExternalDependency
+import wisp.logging.getLogger
 
 /**
  * A test DynamoDb Local service. Tests can connect to the service at 127.0.0.1:<random_port>.

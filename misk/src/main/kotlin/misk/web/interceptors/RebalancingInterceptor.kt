@@ -1,12 +1,12 @@
 package misk.web.interceptors
 
 import misk.Action
-import misk.logging.getLogger
 import misk.random.ThreadLocalRandom
 import misk.web.NetworkChain
 import misk.web.NetworkInterceptor
 import misk.web.SocketAddress
 import misk.web.WebConfig
+import wisp.logging.getLogger
 import javax.inject.Inject
 import javax.inject.Singleton
 

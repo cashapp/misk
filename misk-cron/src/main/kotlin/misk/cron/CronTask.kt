@@ -2,9 +2,9 @@ package misk.cron
 
 import com.google.common.util.concurrent.AbstractIdleService
 import misk.clustering.lease.LeaseManager
-import misk.logging.getLogger
 import misk.tasks.RepeatedTaskQueue
 import misk.tasks.Status
+import wisp.logging.getLogger
 import java.time.Clock
 import java.time.Duration
 import javax.inject.Inject

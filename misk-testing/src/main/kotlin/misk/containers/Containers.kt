@@ -9,7 +9,7 @@ import com.github.dockerjava.core.async.ResultCallbackTemplate
 import com.github.dockerjava.core.command.PullImageResultCallback
 import com.github.dockerjava.core.command.WaitContainerResultCallback
 import com.github.dockerjava.netty.NettyDockerCmdExecFactory
-import misk.logging.getLogger
+import wisp.logging.getLogger
 import java.util.concurrent.atomic.AtomicBoolean
 
 /**
