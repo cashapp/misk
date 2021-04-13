@@ -1,6 +1,6 @@
 package misk.metrics.backends.prometheus
 
-import misk.config.Config
+import wisp.config.Config
 
 /** Configuration for exporting metrics to prometheus */
 data class PrometheusConfig(

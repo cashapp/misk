@@ -1,7 +1,7 @@
 package misk.jdbc
 
-import misk.config.Config
 import misk.environment.Environment
+import wisp.config.Config
 import java.time.Duration
 
 /** Defines a type of datasource */
@@ -11,34 +11,34 @@ enum class DataSourceType(
   val isVitess: Boolean
 ) {
   MYSQL(
-      driverClassName = "io.opentracing.contrib.jdbc.TracingDriver",
-      hibernateDialect = "org.hibernate.dialect.MySQL57Dialect",
-      isVitess = false
+    driverClassName = "io.opentracing.contrib.jdbc.TracingDriver",
+    hibernateDialect = "org.hibernate.dialect.MySQL57Dialect",
+    isVitess = false
   ),
   HSQLDB(
-      driverClassName = "org.hsqldb.jdbcDriver",
-      hibernateDialect = "org.hibernate.dialect.H2Dialect",
-      isVitess = false
+    driverClassName = "org.hsqldb.jdbcDriver",
+    hibernateDialect = "org.hibernate.dialect.H2Dialect",
+    isVitess = false
   ),
   VITESS_MYSQL(
-      driverClassName = MYSQL.driverClassName,
-      hibernateDialect = "misk.hibernate.VitessDialect",
-      isVitess = true
+    driverClassName = MYSQL.driverClassName,
+    hibernateDialect = "misk.hibernate.VitessDialect",
+    isVitess = true
   ),
   COCKROACHDB(
-      driverClassName = "org.postgresql.Driver",
-      hibernateDialect = "org.hibernate.dialect.PostgreSQL95Dialect",
-      isVitess = false
+    driverClassName = "org.postgresql.Driver",
+    hibernateDialect = "org.hibernate.dialect.PostgreSQL95Dialect",
+    isVitess = false
   ),
   POSTGRESQL(
-      driverClassName = "org.postgresql.Driver",
-      hibernateDialect = "org.hibernate.dialect.PostgreSQL95Dialect",
-      isVitess = false
+    driverClassName = "org.postgresql.Driver",
+    hibernateDialect = "org.hibernate.dialect.PostgreSQL95Dialect",
+    isVitess = false
   ),
   TIDB(
-      driverClassName = "io.opentracing.contrib.jdbc.TracingDriver",
-      hibernateDialect = "org.hibernate.dialect.MySQL57Dialect",
-      isVitess = false
+    driverClassName = "io.opentracing.contrib.jdbc.TracingDriver",
+    hibernateDialect = "org.hibernate.dialect.MySQL57Dialect",
+    isVitess = false
   ),
 }
 
@@ -58,10 +58,10 @@ data class DataSourceConfig(
   val migrations_resource: String? = null,
   val migrations_resources: List<String>? = null,
   val vitess_schema_resource_root: String? = null,
-    /*
-       See https://dev.mysql.com/doc/connector-j/8.0/en/connector-j-reference-using-ssl.html for
-       trust_certificate_key_store_* details.
-     */
+  /*
+     See https://dev.mysql.com/doc/connector-j/8.0/en/connector-j-reference-using-ssl.html for
+     trust_certificate_key_store_* details.
+   */
   val trust_certificate_key_store_url: String? = null,
   val trust_certificate_key_store_password: String? = null,
   val client_certificate_key_store_url: String? = null,
@@ -79,23 +79,23 @@ data class DataSourceConfig(
     return when (type) {
       DataSourceType.MYSQL -> {
         copy(
-            port = port ?: 3306,
-            host = host ?: "127.0.0.1",
-            database = database ?: ""
+          port = port ?: 3306,
+          host = host ?: "127.0.0.1",
+          database = database ?: ""
         )
       }
       DataSourceType.TIDB -> {
         copy(
-            port = port ?: 4000,
-            host = host ?: "127.0.0.1",
-            database = database ?: ""
+          port = port ?: 4000,
+          host = host ?: "127.0.0.1",
+          database = database ?: ""
         )
       }
       DataSourceType.VITESS_MYSQL -> {
         copy(
-            port = port ?: 27003,
-            host = host ?: "127.0.0.1",
-            database = database ?: "@master"
+          port = port ?: 27003,
+          host = host ?: "127.0.0.1",
+          database = database ?: "@master"
         )
       }
       DataSourceType.HSQLDB -> {
@@ -103,17 +103,17 @@ data class DataSourceConfig(
       }
       DataSourceType.COCKROACHDB -> {
         copy(
-            username = "root",
-            port = port ?: 26257,
-            host = host ?: "127.0.0.1",
-            database = database ?: ""
+          username = "root",
+          port = port ?: 26257,
+          host = host ?: "127.0.0.1",
+          database = database ?: ""
         )
       }
       DataSourceType.POSTGRESQL -> {
         copy(
-            port = port ?: 5432,
-            host = host ?: "127.0.0.1",
-            database = database ?: ""
+          port = port ?: 5432,
+          host = host ?: "127.0.0.1",
+          database = database ?: ""
         )
       }
     }
@@ -158,21 +158,21 @@ data class DataSourceConfig(
         }
 
         val trustStoreUrl: String? =
-            if (!config.trust_certificate_key_store_path.isNullOrBlank()) {
-              "file://${config.trust_certificate_key_store_path}"
-            } else if (!config.trust_certificate_key_store_url.isNullOrBlank()) {
-              config.trust_certificate_key_store_url
-            } else {
-              null
-            }
+          if (!config.trust_certificate_key_store_path.isNullOrBlank()) {
+            "file://${config.trust_certificate_key_store_path}"
+          } else if (!config.trust_certificate_key_store_url.isNullOrBlank()) {
+            config.trust_certificate_key_store_url
+          } else {
+            null
+          }
         val certStoreUrl =
-            if (!config.client_certificate_key_store_path.isNullOrBlank()) {
-              "file://${config.client_certificate_key_store_path}"
-            } else if (!config.client_certificate_key_store_url.isNullOrBlank()) {
-              config.client_certificate_key_store_url
-            } else {
-              null
-            }
+          if (!config.client_certificate_key_store_path.isNullOrBlank()) {
+            "file://${config.client_certificate_key_store_path}"
+          } else if (!config.client_certificate_key_store_url.isNullOrBlank()) {
+            config.client_certificate_key_store_url
+          } else {
+            null
+          }
 
         var useSSL = false
 
@@ -187,7 +187,7 @@ data class DataSourceConfig(
         if (!certStoreUrl.isNullOrBlank()) {
           require(!config.client_certificate_key_store_password.isNullOrBlank()) {
             "must provide a client_certificate_key_store_password if client_certificate_key_store_url" +
-                " or client_certificate_key_store_path is set"
+              " or client_certificate_key_store_path is set"
           }
           queryParams += "&clientCertificateKeyStoreUrl=$certStoreUrl"
           queryParams += "&clientCertificateKeyStorePassword=${config.client_certificate_key_store_password}"
@@ -230,39 +230,39 @@ data class DataSourceConfig(
   }
 
   fun asReplica(): DataSourceConfig {
-      if (this.type == DataSourceType.COCKROACHDB || this.type == DataSourceType.TIDB) {
-        // Cockroach doesn't support replica reads
-        return this
-      }
+    if (this.type == DataSourceType.COCKROACHDB || this.type == DataSourceType.TIDB) {
+      // Cockroach doesn't support replica reads
+      return this
+    }
 
-      if (this.type != DataSourceType.VITESS_MYSQL) {
-        throw Exception("Replica database config only available for VITESS_MYSQL type")
-      }
+    if (this.type != DataSourceType.VITESS_MYSQL) {
+      throw Exception("Replica database config only available for VITESS_MYSQL type")
+    }
 
-      return DataSourceConfig(
-              this.type,
-              this.host,
-              this.port,
-              "@replica",
-              this.username,
-              this.password,
-              this.fixed_pool_size,
-              this.connection_timeout,
-              this.validation_timeout,
-              this.connection_max_lifetime,
-              this.query_timeout,
-              this.migrations_resource,
-              this.migrations_resources,
-              this.vitess_schema_resource_root,
-              this.trust_certificate_key_store_url,
-              this.trust_certificate_key_store_password,
-              this.client_certificate_key_store_url,
-              this.client_certificate_key_store_password,
-              this.trust_certificate_key_store_path,
-              this.client_certificate_key_store_path,
-              this.verify_server_identity,
-              this.show_sql
-      )
+    return DataSourceConfig(
+      this.type,
+      this.host,
+      this.port,
+      "@replica",
+      this.username,
+      this.password,
+      this.fixed_pool_size,
+      this.connection_timeout,
+      this.validation_timeout,
+      this.connection_max_lifetime,
+      this.query_timeout,
+      this.migrations_resource,
+      this.migrations_resources,
+      this.vitess_schema_resource_root,
+      this.trust_certificate_key_store_url,
+      this.trust_certificate_key_store_password,
+      this.client_certificate_key_store_url,
+      this.client_certificate_key_store_password,
+      this.trust_certificate_key_store_path,
+      this.client_certificate_key_store_path,
+      this.verify_server_identity,
+      this.show_sql
+    )
   }
 }
 

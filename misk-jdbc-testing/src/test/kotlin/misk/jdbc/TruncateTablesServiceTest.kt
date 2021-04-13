@@ -2,7 +2,6 @@ package misk.jdbc
 
 import com.google.inject.util.Providers
 import misk.MiskTestingServiceModule
-import misk.config.Config
 import misk.config.MiskConfig
 import misk.environment.Environment
 import misk.inject.KAbstractModule
@@ -11,6 +10,7 @@ import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import wisp.config.Config
 import javax.inject.Inject
 import javax.inject.Qualifier
 
@@ -47,7 +47,8 @@ internal class TruncateTablesServiceTest {
     assertThat(rowCount("movies")).isGreaterThan(0)
 
     // Start up TruncateTablesService. The inserted data should be truncated.
-    val service = TruncateTablesService(TestDatasource::class, dataSourceProvider, Providers.of(transacter))
+    val service =
+      TruncateTablesService(TestDatasource::class, dataSourceProvider, Providers.of(transacter))
     service.startAsync()
     service.awaitRunning()
     assertThat(rowCount("schema_version")).isGreaterThan(0)

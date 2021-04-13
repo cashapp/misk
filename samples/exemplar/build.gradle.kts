@@ -15,6 +15,7 @@ dependencies {
   api(project(":misk-core"))
   api(project(":misk-inject"))
   api(project(":misk-prometheus"))
+  api(project(":wisp-config"))
   api(project(":wisp-deployment"))
 
   testImplementation(project(":misk-testing"))
