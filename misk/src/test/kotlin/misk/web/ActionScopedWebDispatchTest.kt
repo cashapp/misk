@@ -1,5 +1,6 @@
 package misk.web
 
+import misk.MiskTestingServiceModule
 import misk.inject.KAbstractModule
 import misk.scope.ActionScoped
 import misk.scope.ActionScopedProvider
@@ -57,7 +58,8 @@ internal class ActionScopedWebDispatchTest {
 
   class TestModule : KAbstractModule() {
     override fun configure() {
-      install(WebTestingModule())
+      install(WebServerTestingModule())
+      install(MiskTestingServiceModule())
       install(WebActionModule.create<Hello>())
       install(object : ActionScopedProviderModule() {
         override fun configureProviders() {

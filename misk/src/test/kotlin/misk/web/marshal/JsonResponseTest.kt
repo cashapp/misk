@@ -1,5 +1,6 @@
 package misk.web.marshal
 
+import misk.MiskTestingServiceModule
 import misk.inject.KAbstractModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
@@ -7,8 +8,8 @@ import misk.web.Get
 import misk.web.Response
 import misk.web.ResponseContentType
 import misk.web.WebActionModule
+import misk.web.WebServerTestingModule
 import misk.web.WebTestClient
-import misk.web.WebTestingModule
 import misk.web.actions.WebAction
 import misk.web.mediatype.MediaTypes
 import misk.web.toResponseBody
@@ -117,7 +118,8 @@ internal class JsonResponseTest {
 
   class TestModule : KAbstractModule() {
     override fun configure() {
-      install(WebTestingModule())
+      install(WebServerTestingModule())
+      install(MiskTestingServiceModule())
       install(WebActionModule.create<ReturnAsObject>())
       install(WebActionModule.create<ReturnAsString>())
       install(WebActionModule.create<ReturnAsByteString>())

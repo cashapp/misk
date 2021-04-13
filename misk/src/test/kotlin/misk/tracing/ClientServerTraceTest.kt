@@ -24,6 +24,7 @@ import misk.web.RequestBody
 import misk.web.RequestContentType
 import misk.web.ResponseContentType
 import misk.web.WebActionModule
+import misk.web.WebServerTestingModule
 import misk.web.WebTestingModule
 import misk.web.actions.WebAction
 import misk.web.jetty.JettyService
@@ -174,7 +175,8 @@ internal class ClientServerTraceTest {
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(MockTracingBackendModule())
-      install(WebTestingModule())
+      install(WebServerTestingModule())
+      install(MiskTestingServiceModule())
       install(WebActionModule.create<ReturnADinosaurAction>())
       install(WebActionModule.create<RoarLikeDinosaurAction>())
     }

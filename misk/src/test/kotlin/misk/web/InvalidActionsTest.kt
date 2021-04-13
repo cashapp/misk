@@ -3,6 +3,7 @@ package misk.web
 import com.google.common.util.concurrent.ServiceManager
 import com.google.inject.Injector
 import com.google.inject.ProvisionException
+import misk.MiskTestingServiceModule
 import misk.inject.KAbstractModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
@@ -21,7 +22,8 @@ class InvalidActionsTest {
 
   class TestModule : KAbstractModule() {
     override fun configure() {
-      install(WebTestingModule())
+      install(WebServerTestingModule())
+      install(MiskTestingServiceModule())
       install(WebActionModule.create<SomeAction>())
       install(WebActionModule.create<IdenticalAction>())
     }

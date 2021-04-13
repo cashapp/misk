@@ -1,6 +1,7 @@
 package misk.web
 
 import com.google.inject.util.Modules
+import misk.MiskTestingServiceModule
 import misk.concurrent.ExecutorServiceFactory
 import misk.inject.KAbstractModule
 import misk.testing.MiskTest
@@ -106,7 +107,7 @@ internal class JettyHealthCheckTest {
   internal class TestModule : KAbstractModule() {
     override fun configure() {
       install(
-        Modules.override(WebTestingModule()).with(
+        Modules.override(WebServerTestingModule()).with(
           object : KAbstractModule() {
             override fun configure() {
               val pool = ExecutorThreadPool(
@@ -125,6 +126,8 @@ internal class JettyHealthCheckTest {
           }
         )
       )
+      install(MiskTestingServiceModule())
+
       install(WebActionModule.create<BlockingAction>())
       install(WebActionModule.create<HealthAction>())
       bind<Phaser>().annotatedWith<Requests>().toInstance(Phaser())

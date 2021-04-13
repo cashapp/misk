@@ -14,6 +14,7 @@ import misk.web.RequestBody
 import misk.web.RequestContentType
 import misk.web.ResponseContentType
 import misk.web.WebActionModule
+import misk.web.WebServerTestingModule
 import misk.web.WebTestingModule
 import misk.web.actions.WebAction
 import misk.web.jetty.JettyService
@@ -72,7 +73,8 @@ class ProtoMessageHttpClientTest {
 
   class TestModule : KAbstractModule() {
     override fun configure() {
-      install(WebTestingModule())
+      install(MiskTestingServiceModule())
+      install(WebServerTestingModule())
       install(WebActionModule.create<ReturnADinosaur>())
     }
   }

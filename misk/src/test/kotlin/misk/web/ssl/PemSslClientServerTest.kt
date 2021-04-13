@@ -26,6 +26,7 @@ import misk.web.RequestBody
 import misk.web.RequestContentType
 import misk.web.ResponseContentType
 import misk.web.WebActionModule
+import misk.web.WebServerTestingModule
 import misk.web.WebSslConfig
 import misk.web.WebTestingModule
 import misk.web.actions.WebAction
@@ -101,8 +102,8 @@ internal class PemSslClientServerTest {
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(
-        WebTestingModule(
-          WebTestingModule.TESTING_WEB_CONFIG.copy(
+        WebServerTestingModule(
+          WebServerTestingModule.TESTING_WEB_CONFIG.copy(
             ssl = WebSslConfig(
               0,
               cert_store = CertStoreConfig(
@@ -119,6 +120,7 @@ internal class PemSslClientServerTest {
           )
         )
       )
+      install(MiskTestingServiceModule())
       install(WebActionModule.create<HelloAction>())
     }
   }

@@ -1,6 +1,7 @@
 package misk.web
 
 import com.squareup.moshi.Moshi
+import misk.MiskTestingServiceModule
 import misk.inject.KAbstractModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
@@ -91,8 +92,8 @@ class CorsFilterTest {
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(
-        WebTestingModule(
-          webConfig = WebTestingModule.TESTING_WEB_CONFIG.copy(
+        WebServerTestingModule(
+          webConfig = WebServerTestingModule.TESTING_WEB_CONFIG.copy(
             cors = mapOf(
               Pair("/cors-allow/*", CorsConfig()),
               Pair(
@@ -105,6 +106,7 @@ class CorsFilterTest {
           )
         )
       )
+      install(MiskTestingServiceModule())
       install(WebActionModule.create<CorsAllowGetAction>())
       install(WebActionModule.create<RestrictiveCORsAction>())
       install(WebActionModule.create<NoCorsPolicyAction>())

@@ -1,6 +1,7 @@
 package misk.web
 
 import com.squareup.moshi.Moshi
+import misk.MiskTestingServiceModule
 import misk.inject.KAbstractModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
@@ -149,13 +150,14 @@ abstract class AbstractGzipTest {
   class TestModule(val gzip: Boolean) : KAbstractModule() {
     override fun configure() {
       install(
-        WebTestingModule(
-          webConfig = WebTestingModule.TESTING_WEB_CONFIG.copy(
+        WebServerTestingModule(
+          webConfig = WebServerTestingModule.TESTING_WEB_CONFIG.copy(
             gzip = gzip,
             minGzipSize = 128
           )
         )
       )
+      install(MiskTestingServiceModule())
       install(WebActionModule.create<MiskHypeGetAction>())
       install(WebActionModule.create<MiskHypePostAction>())
       install(WebActionModule.create<CountHypeAction>())

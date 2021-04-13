@@ -1,5 +1,6 @@
 package misk.web.actions
 
+import misk.MiskTestingServiceModule
 import misk.inject.KAbstractModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
@@ -10,6 +11,7 @@ import misk.web.Post
 import misk.web.Put
 import misk.web.Response
 import misk.web.WebActionModule
+import misk.web.WebServerTestingModule
 import misk.web.WebTestingModule
 import misk.web.jetty.JettyService
 import misk.web.mediatype.MediaTypes
@@ -91,7 +93,8 @@ class SupportedHttpMethodsTest {
 
   class TestModule : KAbstractModule() {
     override fun configure() {
-      install(WebTestingModule())
+      install(WebServerTestingModule())
+      install(MiskTestingServiceModule())
       install(WebActionModule.create<GetAction>())
       install(WebActionModule.create<PostAction>())
       install(WebActionModule.create<PatchAction>())

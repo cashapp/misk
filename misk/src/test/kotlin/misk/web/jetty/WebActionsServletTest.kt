@@ -1,6 +1,7 @@
 package misk.web.jetty
 
 import misk.Action
+import misk.MiskTestingServiceModule
 import wisp.client.UnixDomainSocketFactory
 import misk.inject.KAbstractModule
 import misk.testing.MiskTest
@@ -11,6 +12,7 @@ import misk.web.NetworkInterceptor
 import misk.web.ResponseContentType
 import misk.web.SocketAddress
 import misk.web.WebActionModule
+import misk.web.WebServerTestingModule
 import misk.web.WebTestingModule
 import misk.web.WebUnixDomainSocketConfig
 import misk.web.actions.WebAction
@@ -132,12 +134,13 @@ class WebActionsServletTest {
   inner class TestModule : KAbstractModule() {
     override fun configure() {
       install(
-        WebTestingModule(
-          webConfig = WebTestingModule.TESTING_WEB_CONFIG.copy(
+        WebServerTestingModule(
+          webConfig = WebServerTestingModule.TESTING_WEB_CONFIG.copy(
             unix_domain_socket = WebUnixDomainSocketConfig(path = socketName)
           )
         )
       )
+      install(MiskTestingServiceModule())
 
       multibind<NetworkInterceptor.Factory>().toInstance(
         WebActionsServletNetworkInterceptor.Factory()

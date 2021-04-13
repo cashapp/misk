@@ -4,12 +4,14 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Module;
 import java.io.IOException;
 import javax.inject.Inject;
+import misk.MiskTestingServiceModule;
 import misk.testing.MiskTest;
 import misk.testing.MiskTestModule;
 import misk.web.Get;
 import misk.web.PathParam;
 import misk.web.ResponseContentType;
 import misk.web.WebActionModule;
+import misk.web.WebServerTestingModule;
 import misk.web.WebTestingModule;
 import misk.web.actions.WebAction;
 import misk.web.jetty.JettyService;
@@ -65,7 +67,8 @@ public class JavaPathParamDispatchTest {
 
   private static final class TestModule extends AbstractModule {
     @Override protected void configure() {
-      install(new WebTestingModule());
+      install(new WebServerTestingModule());
+      install(new MiskTestingServiceModule());
       install(WebActionModule.create(GetObjectDetails.class));
     }
   }

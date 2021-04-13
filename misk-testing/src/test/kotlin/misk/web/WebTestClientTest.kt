@@ -1,5 +1,6 @@
 package misk.web
 
+import misk.MiskTestingServiceModule
 import misk.inject.KAbstractModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
@@ -18,7 +19,8 @@ class WebTestClientTest {
 
   class TestModule : KAbstractModule() {
     override fun configure() {
-      install(WebTestingModule())
+      install(WebServerTestingModule())
+      install(MiskTestingServiceModule())
       install(WebActionModule.create<GetAction>())
       install(WebActionModule.create<PostAction>())
     }

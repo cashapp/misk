@@ -23,6 +23,7 @@ import misk.web.Response
 import misk.web.ResponseBody
 import misk.web.ResponseContentType
 import misk.web.WebActionModule
+import misk.web.WebServerTestingModule
 import misk.web.WebTestingModule
 import misk.web.actions.WebAction
 import misk.web.interceptors.MetricsInterceptor
@@ -228,12 +229,13 @@ class Http2ConnectivityTest {
     override fun configure() {
       install(LogCollectorModule())
       install(
-        WebTestingModule(
-          webConfig = WebTestingModule.TESTING_WEB_CONFIG.copy(
+        WebServerTestingModule(
+          webConfig = WebServerTestingModule.TESTING_WEB_CONFIG.copy(
             http2 = true
           )
         )
       )
+      install(MiskTestingServiceModule())
       install(WebActionModule.create<HelloAction>())
       install(WebActionModule.create<DisconnectWithEmptyResponseAction>())
       install(WebActionModule.create<DisconnectWithLargeResponseAction>())

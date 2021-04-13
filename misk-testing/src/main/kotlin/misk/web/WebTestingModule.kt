@@ -11,12 +11,32 @@ import misk.security.ssl.SslLoader
  * A module that starts an embedded Jetty web server configured for testing. The server supports
  * both plaintext and TLS.
  */
+@Deprecated(
+  message = "It's replace by WebServerTestingModule + MiskTestingServiceModule to facilitate" +
+    "the composability of testing modules for application owners",
+  replaceWith = ReplaceWith(expression = "WebServerTestingModule", "misk.web")
+)
 class WebTestingModule(
   private val webConfig: WebConfig = TESTING_WEB_CONFIG
 ) : KAbstractModule() {
   override fun configure() {
-    install(EnvironmentModule(Environment.TESTING))
+    install(WebServerTestingModule(webConfig))
     install(MiskTestingServiceModule())
+  }
+  companion object {
+    val TESTING_WEB_CONFIG =  WebServerTestingModule.TESTING_WEB_CONFIG
+  }
+}
+
+/**
+ * A module that starts an embedded Jetty web server configured for testing. The server supports
+ * both plaintext and TLS.
+ */
+class WebServerTestingModule(
+  private val webConfig: WebConfig = TESTING_WEB_CONFIG
+) : KAbstractModule() {
+  override fun configure() {
+    install(EnvironmentModule(Environment.TESTING))
     install(MiskWebModule(webConfig))
   }
 

@@ -1,6 +1,7 @@
 package misk.web
 
 import com.squareup.moshi.Moshi
+import misk.MiskTestingServiceModule
 import misk.inject.KAbstractModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
@@ -118,7 +119,8 @@ internal class WebDispatchTest {
 
   class TestModule : KAbstractModule() {
     override fun configure() {
-      install(WebTestingModule())
+      install(WebServerTestingModule())
+      install(MiskTestingServiceModule())
       install(WebActionModule.create<PostHello>())
       install(WebActionModule.create<GetHello>())
       install(WebActionModule.create<PostBye>())

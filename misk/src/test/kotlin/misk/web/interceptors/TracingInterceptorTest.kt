@@ -2,6 +2,7 @@ package misk.web.interceptors
 
 import com.google.inject.Guice
 import io.opentracing.tag.Tags
+import misk.MiskTestingServiceModule
 import misk.asAction
 import misk.exceptions.ActionException
 import misk.exceptions.StatusCode
@@ -19,6 +20,7 @@ import misk.web.NetworkInterceptor
 import misk.web.RealNetworkChain
 import misk.web.Response
 import misk.web.WebActionModule
+import misk.web.WebServerTestingModule
 import misk.web.WebTestingModule
 import misk.web.actions.WebAction
 import misk.web.jetty.JettyService
@@ -192,7 +194,8 @@ class TracingInterceptorTest {
 
   class TestModule : KAbstractModule() {
     override fun configure() {
-      install(WebTestingModule())
+      install(WebServerTestingModule())
+      install(MiskTestingServiceModule())
       install(MockTracingBackendModule())
       install(WebActionModule.create<TracingTestAction>())
       install(WebActionModule.create<FailedTracingTestAction>())

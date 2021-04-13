@@ -5,11 +5,13 @@ import com.squareup.protos.test.grpc.HelloReply
 import com.squareup.protos.test.grpc.HelloRequest
 import com.squareup.wire.Service
 import com.squareup.wire.WireRpc
+import misk.MiskTestingServiceModule
 import misk.exceptions.BadRequestException
 import misk.inject.KAbstractModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.web.WebActionModule
+import misk.web.WebServerTestingModule
 import misk.web.WebTestingModule
 import misk.web.actions.WebAction
 import misk.web.jetty.JettyService
@@ -175,12 +177,13 @@ class GrpcConnectivityTest {
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(
-        WebTestingModule(
-          webConfig = WebTestingModule.TESTING_WEB_CONFIG.copy(
+        WebServerTestingModule(
+          webConfig = WebServerTestingModule.TESTING_WEB_CONFIG.copy(
             http2 = true
           )
         )
       )
+      install(MiskTestingServiceModule())
       install(WebActionModule.create<HelloRpcAction>())
     }
   }

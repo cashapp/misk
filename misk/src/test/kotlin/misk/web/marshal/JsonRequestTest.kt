@@ -1,6 +1,7 @@
 package misk.web.marshal
 
 import com.squareup.moshi.Moshi
+import misk.MiskTestingServiceModule
 import misk.inject.KAbstractModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
@@ -9,6 +10,7 @@ import misk.web.RequestBody
 import misk.web.RequestContentType
 import misk.web.ResponseContentType
 import misk.web.WebActionModule
+import misk.web.WebServerTestingModule
 import misk.web.WebTestClient
 import misk.web.WebTestingModule
 import misk.web.actions.WebAction
@@ -82,7 +84,8 @@ internal class JsonRequestTest {
 
   class TestModule : KAbstractModule() {
     override fun configure() {
-      install(WebTestingModule())
+      install(WebServerTestingModule())
+      install(MiskTestingServiceModule())
       install(WebActionModule.create<PassAsObject>())
       install(WebActionModule.create<PassAsString>())
       install(WebActionModule.create<PassAsByteString>())

@@ -6,7 +6,6 @@ import misk.MiskTestingServiceModule
 import misk.client.HttpClientEndpointConfig
 import misk.client.HttpClientModule
 import misk.client.HttpClientsConfig
-import wisp.client.UnixDomainSocketFactory
 import misk.inject.KAbstractModule
 import misk.inject.getInstance
 import misk.testing.MiskTest
@@ -14,7 +13,7 @@ import misk.testing.MiskTestModule
 import misk.web.Get
 import misk.web.ResponseContentType
 import misk.web.WebActionModule
-import misk.web.WebTestingModule
+import misk.web.WebServerTestingModule
 import misk.web.WebUnixDomainSocketConfig
 import misk.web.actions.WebAction
 import misk.web.jetty.JettyService
@@ -25,6 +24,7 @@ import okhttp3.Request
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import wisp.client.UnixDomainSocketFactory
 import java.io.File
 import java.util.UUID
 import javax.inject.Inject
@@ -74,8 +74,8 @@ class UDSHttp2ConnectivityTest {
   inner class TestModule : KAbstractModule() {
     override fun configure() {
       install(
-        WebTestingModule(
-          webConfig = WebTestingModule.TESTING_WEB_CONFIG.copy(
+        WebServerTestingModule(
+          webConfig = WebServerTestingModule.TESTING_WEB_CONFIG.copy(
             http2 = true,
             unix_domain_socket = WebUnixDomainSocketConfig(
               path = socketName
@@ -83,6 +83,7 @@ class UDSHttp2ConnectivityTest {
           )
         )
       )
+      install(MiskTestingServiceModule())
       install(WebActionModule.create<HelloAction>())
     }
   }

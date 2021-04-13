@@ -1,5 +1,6 @@
 package misk.web
 
+import misk.MiskTestingServiceModule
 import misk.inject.KAbstractModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
@@ -61,7 +62,8 @@ internal class DeterministicRoutingTest {
 
   class TestModule : KAbstractModule() {
     override fun configure() {
-      install(WebTestingModule())
+      install(WebServerTestingModule())
+      install(MiskTestingServiceModule())
       val webActions = mutableListOf(
         WholePathAction::class,
         RemainderPathAction::class,
