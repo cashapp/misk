@@ -26,7 +26,7 @@ import java.util.Locale
 
 object MiskConfig {
   @JvmStatic
-  inline fun <reified T : Config> load(
+  inline fun <reified T : wisp.config.Config> load(
     appName: String,
     environment: Env,
     overrideFiles: List<File> = listOf(),
@@ -37,7 +37,7 @@ object MiskConfig {
 
   @JvmStatic
   @Deprecated("Use load function that takes Env")
-  inline fun <reified T : Config> load(
+  inline fun <reified T : wisp.config.Config> load(
     appName: String,
     environment: String,
     overrideFiles: List<File> = listOf(),
@@ -48,7 +48,7 @@ object MiskConfig {
 
   @JvmStatic
   @Deprecated("the Environment enum is deprecated")
-  inline fun <reified T : Config> load(
+  inline fun <reified T : wisp.config.Config> load(
     appName: String,
     environment: Environment,
     overrideFiles: List<File> = listOf(),
@@ -58,8 +58,8 @@ object MiskConfig {
   }
 
   @JvmStatic
-  fun <T : Config> load(
-    configClass: Class<out Config>,
+  fun <T : wisp.config.Config> load(
+    configClass: Class<out wisp.config.Config>,
     appName: String,
     environment: Env,
     overrideFiles: List<File> = listOf(),
@@ -107,8 +107,8 @@ object MiskConfig {
 
   @JvmStatic
   @Deprecated("Use load function that takes Env")
-  fun <T : Config> load(
-    configClass: Class<out Config>,
+  fun <T : wisp.config.Config> load(
+    configClass: Class<out wisp.config.Config>,
     appName: String,
     environment: String,
     overrideFiles: List<File> = listOf(),
@@ -125,7 +125,7 @@ object MiskConfig {
     return if (suggestions.isNotEmpty()) "(Did you mean one of $suggestions?)" else ""
   }
 
-  fun <T : Config> toYaml(config: T, resourceLoader: ResourceLoader): String {
+  fun <T : wisp.config.Config> toYaml(config: T, resourceLoader: ResourceLoader): String {
     return newObjectMapper(resourceLoader).writeValueAsString(config)
   }
 
