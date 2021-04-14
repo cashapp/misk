@@ -35,7 +35,7 @@ import wisp.logging.getLogger
 class S3ExternalKeyManager @Inject constructor(
   private val env: Env,
 
-  defaultS3: AmazonS3,
+  private val defaultS3: AmazonS3,
 
   @ExternalDataKeys override val allKeyAliases: Map<KeyAlias, KeyType>,
 
@@ -59,7 +59,8 @@ class S3ExternalKeyManager @Inject constructor(
       .build()
   } ?: defaultS3
 
-  private fun objectPath(alias: String) = "$alias/${s3.regionName.toLowerCase()}"
+  // N.B. The path we're using for the object is based on _our_ region, not where the bucket lives
+  private fun objectPath(alias: String) = "$alias/${defaultS3.regionName.toLowerCase()}"
 
   private fun getRemoteKey(alias: KeyAlias, type: KeyType): Key {
     val path = objectPath(alias)
