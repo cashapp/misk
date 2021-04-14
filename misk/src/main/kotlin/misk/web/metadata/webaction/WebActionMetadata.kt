@@ -14,6 +14,7 @@ import kotlin.reflect.KType
 data class WebActionMetadata(
   val name: String,
   val function: String,
+  val packageName: String,
   val functionAnnotations: List<String>,
   val requestMediaTypes: List<String>,
   val responseMediaType: String?,
@@ -32,6 +33,7 @@ data class WebActionMetadata(
   constructor(
     name: String,
     function: Function<*>,
+    packageName: String,
     functionAnnotations: List<Annotation>,
     acceptedMediaRanges: List<MediaRange>,
     responseContentType: MediaType?,
@@ -48,6 +50,7 @@ data class WebActionMetadata(
   ) : this(
     name = name,
     function = function.toString(),
+    packageName = packageName,
     functionAnnotations = functionAnnotations.map { it.toString() },
     requestMediaTypes = acceptedMediaRanges.map { it.toString() },
     responseMediaType = responseContentType.toString(),

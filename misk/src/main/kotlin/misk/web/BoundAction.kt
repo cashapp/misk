@@ -130,6 +130,7 @@ internal class BoundAction<A : WebAction>(
     WebActionMetadata(
       name = action.name,
       function = action.function,
+      packageName = action.function.javaClass.enclosingMethod.javaClass.packageName,
       functionAnnotations = action.function.annotations,
       acceptedMediaRanges = action.acceptedMediaRanges,
       responseContentType = action.responseContentType,

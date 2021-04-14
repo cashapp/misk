@@ -11,6 +11,7 @@ export interface ProtoType {
 export interface WebActionMetadata {
   name: string
   function: string
+  packageName: string
   functionAnnotations: string[]
   requestMediaTypes: string[]
   responseMediaType: string
@@ -30,3 +31,5 @@ export interface WebActionMetadata {
 export interface WebActionMetadataResponse {
   webActionMetadata: WebActionMetadata[]
 }
+
+export type WebActionsByPackage = { [packageName: string]: WebActionMetadata[]}

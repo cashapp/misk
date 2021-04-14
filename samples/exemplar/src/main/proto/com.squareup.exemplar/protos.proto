@@ -1,10 +1,10 @@
-syntax = "proto3";
+syntax = "proto2";
 package com.squareup.exemplar.protos;
 
 message HelloWebRequest {
-
+  optional string name = 1;
 }
 
 message HelloWebResponse {
-
+  optional string greeting = 1;
 }
