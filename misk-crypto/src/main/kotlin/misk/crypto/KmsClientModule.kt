@@ -11,26 +11,15 @@ import misk.inject.KAbstractModule
 /**
  * AWS specific KMS client module.
  *
- * This module provides a [AwsKmsClient].
- * It can be initialized with either a [AWSCredentialsProvider],
- * a string containing the path to AWS credentials, or with the default settings
- * as specified in [AwsKmsClient.withDefaultCredentials].
+ * This module provides a [AwsKmsClient] using a [AWSCredentialsProvider].
  *
  * See [AWS credentials](https://docs.aws.amazon.com/sdk-for-java/v1/developer-guide/credentials.html)
  * for more information about supplying credentials to AWS.
  */
-class AwsKmsClientModule(
-  private val credentialsProvider: AWSCredentialsProvider? = null,
-  private val credentialsPath: String? = null
-) : KAbstractModule() {
+class AwsKmsClientModule : KAbstractModule() {
   @Provides @Singleton
-  fun getKmsClient(): KmsClient {
-    if (credentialsProvider != null) {
-      return AwsKmsClient().withCredentialsProvider(credentialsProvider)
-    }
-    return credentialsPath?.let { AwsKmsClient().withCredentials(it) }
-      ?: AwsKmsClient().withDefaultCredentials()
-  }
+  fun getKmsClient(credentialsProvider: AWSCredentialsProvider): KmsClient =
+      AwsKmsClient().withCredentialsProvider(credentialsProvider)
 }
 
 /**
