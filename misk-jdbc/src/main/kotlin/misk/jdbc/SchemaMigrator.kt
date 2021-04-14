@@ -3,16 +3,15 @@ package misk.jdbc
 import com.google.common.annotations.VisibleForTesting
 import com.google.common.base.Stopwatch
 import com.google.common.collect.ImmutableList
-import misk.logging.getLogger
 import misk.resources.ResourceLoader
 import misk.vitess.Keyspace
 import misk.vitess.Shard
 import misk.vitess.failSafeRead
 import misk.vitess.target
+import wisp.logging.getLogger
 import java.sql.Connection
 import java.sql.SQLException
-import java.util.SortedSet
-import java.util.TreeSet
+import java.util.*
 import java.util.regex.Pattern
 import kotlin.reflect.KClass
 
@@ -124,7 +123,7 @@ internal class SchemaMigrator(
     val migrations = mutableListOf<NamedspacedMigration>()
     for (migrationsResource in getMigrationsResources(keyspace)) {
       val migrationsFound = resourceLoader.walk(migrationsResource).filter { it.endsWith(".sql") }
-          .map { NamedspacedMigration.fromResourcePath(it, migrationsResource) }
+        .map { NamedspacedMigration.fromResourcePath(it, migrationsResource) }
       migrations.addAll(migrationsFound)
     }
     migrations.toSortedSet().let {
@@ -136,7 +135,7 @@ internal class SchemaMigrator(
   /** Creates the `schema_version` table if it does not exist. Returns the applied migrations. */
   fun initialize(): SortedSet<NamedspacedMigration> {
     val noMigrations =
-        shards.get().all { shard -> getMigrationsResources(shard.keyspace).isEmpty() }
+      shards.get().all { shard -> getMigrationsResources(shard.keyspace).isEmpty() }
     if (noMigrations) {
       return sortedSetOf()
     }
@@ -145,19 +144,21 @@ internal class SchemaMigrator(
         val result = appliedMigrations(shard)
         logger.info {
           "${qualifier.simpleName} has ${result.size} migrations applied;" +
-              " latest is ${result.lastOrNull()}"
+            " latest is ${result.lastOrNull()}"
         }
         return result
       } catch (e: SQLException) {
         dataSource.get().connection.use {
           it.target(shard) { c ->
             c.createStatement().use { statement ->
-              statement.execute("""
+              statement.execute(
+                """
                 |CREATE TABLE schema_version (
                 |  version varchar(50) PRIMARY KEY,
                 |  installed_by varchar(30) DEFAULT NULL
                 |);
-                |""".trimMargin())
+                |""".trimMargin()
+              )
             }
             c.createStatement().use { statement ->
               statement.execute("COMMIT")
@@ -216,9 +217,11 @@ internal class SchemaMigrator(
               migrationStatement.executeBatch()
             }
 
-            c.prepareStatement("""
+            c.prepareStatement(
+              """
             |INSERT INTO schema_version (version, installed_by) VALUES (?, ?);
-            |""".trimMargin()).use { schemaVersion ->
+            |""".trimMargin()
+            ).use { schemaVersion ->
               schemaVersion.setString(1, migration.toNamespacedVersion())
               schemaVersion.setString(2, author)
               schemaVersion.executeUpdate()
@@ -233,7 +236,8 @@ internal class SchemaMigrator(
 
       // All available migrations are applied, so use availableMigrations for both properties.
       result[shard] = ShardMigrationState(
-          availableMigrations, TreeSet(appliedMigrations + availableMigrations))
+        availableMigrations, TreeSet(appliedMigrations + availableMigrations)
+      )
     }
     return MigrationState(result)
   }

@@ -12,16 +12,14 @@ import misk.hibernate.Transacter
 import misk.hibernate.shards
 import misk.jdbc.Check
 import misk.jdbc.DataSourceType
-import misk.logging.getLogger
 import misk.vitess.Keyspace
 import misk.vitess.Shard
 import misk.vitess.Shard.Companion.SINGLE_KEYSPACE
 import org.hibernate.SessionFactory
+import wisp.logging.getLogger
 import java.sql.Connection
 import java.sql.PreparedStatement
 import java.sql.SQLException
-import java.util.ArrayList
-import java.util.HashMap
 import java.util.stream.Collectors.joining
 import javax.inject.Inject
 import javax.inject.Singleton

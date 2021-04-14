@@ -1,6 +1,6 @@
 package misk.slack
 
-import misk.logging.getLogger
+import wisp.logging.getLogger
 import javax.inject.Inject
 
 class RealSlackClient @Inject constructor(
@@ -24,10 +24,10 @@ class RealSlackClient @Inject constructor(
       return null
     }
     val request = SlackWebhookRequest(
-        channel = resolvedChannel,
-        username = username,
-        text = message,
-        icon_emoji = iconEmoji
+      channel = resolvedChannel,
+      username = username,
+      text = message,
+      icon_emoji = iconEmoji
     )
     return try {
       val response = postMessage(request)
@@ -50,7 +50,8 @@ class RealSlackClient @Inject constructor(
       return SlackWebhookResponse.valueOf(response.errorBody()!!.string())
     }
     throw IllegalStateException(
-        "Unexpected HTTP response posting message to slack: " + response.code())
+      "Unexpected HTTP response posting message to slack: " + response.code()
+    )
   }
 
   companion object {

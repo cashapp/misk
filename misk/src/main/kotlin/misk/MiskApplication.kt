@@ -8,7 +8,7 @@ import com.google.inject.Guice
 import com.google.inject.Module
 import misk.inject.KAbstractModule
 import misk.inject.getInstance
-import misk.logging.getLogger
+import wisp.logging.getLogger
 
 /** The entry point for misk applications */
 class MiskApplication(private val modules: List<Module>, commands: List<MiskCommand> = listOf()) {

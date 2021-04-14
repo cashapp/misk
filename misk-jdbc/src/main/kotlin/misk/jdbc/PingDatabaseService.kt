@@ -5,7 +5,7 @@ import com.zaxxer.hikari.util.DriverDataSource
 import misk.backoff.ExponentialBackoff
 import misk.backoff.retry
 import misk.environment.Environment
-import misk.logging.getLogger
+import wisp.logging.getLogger
 import java.time.Duration
 import java.util.Properties
 import javax.inject.Inject

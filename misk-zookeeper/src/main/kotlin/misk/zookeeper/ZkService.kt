@@ -1,8 +1,8 @@
 package misk.zookeeper
 
 import com.google.common.util.concurrent.AbstractIdleService
-import misk.logging.getLogger
 import org.apache.curator.framework.CuratorFramework
+import wisp.logging.getLogger
 
 class ZkService internal constructor(
   private val curatorFramework: CuratorFramework

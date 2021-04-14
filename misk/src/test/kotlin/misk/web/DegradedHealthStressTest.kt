@@ -1,6 +1,7 @@
 package misk.web
 
 import com.google.inject.util.Modules
+import misk.MiskTestingServiceModule
 import misk.concurrent.ExecutorServiceFactory
 import misk.inject.KAbstractModule
 import misk.inject.asSingleton
@@ -132,7 +133,8 @@ internal class DegradedHealthStressTest {
 
   class TestModule : KAbstractModule() {
     override fun configure() {
-      install(Modules.override(WebTestingModule()).with(ClockModule()))
+      install(Modules.override(MiskTestingServiceModule()).with(ClockModule()))
+      install(WebServerTestingModule())
       install(WebActionModule.create<UseConstrainedResourceAction>())
       bind<FakeResourcePool>().asSingleton()
     }

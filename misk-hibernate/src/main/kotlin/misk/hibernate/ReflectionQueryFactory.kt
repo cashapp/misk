@@ -4,13 +4,13 @@ import com.google.common.cache.CacheBuilder
 import com.google.common.cache.CacheLoader
 import com.google.inject.TypeLiteral
 import misk.inject.typeLiteral
-import misk.logging.getLogger
+import wisp.logging.getLogger
 import java.lang.reflect.InvocationHandler
 import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Method
 import java.lang.reflect.ParameterizedType
 import java.lang.reflect.Proxy
-import java.util.EnumSet
+import java.util.*
 import javax.inject.Inject
 import javax.inject.Singleton
 import javax.persistence.criteria.CriteriaBuilder

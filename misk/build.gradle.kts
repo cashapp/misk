@@ -64,7 +64,9 @@ dependencies {
   implementation(project(":misk-prometheus"))
   implementation(project(":misk-service"))
   api(project(":wisp-client"))
+  api(project(":wisp-config"))
   api(project(":wisp-deployment"))
+  api(project(":wisp-logging"))
 
   testImplementation(Dependencies.kotlinxCoroutines)
   testImplementation(Dependencies.mockitoCore)

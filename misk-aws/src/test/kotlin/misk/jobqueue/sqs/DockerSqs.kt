@@ -12,8 +12,8 @@ import com.github.dockerjava.api.model.Ports
 import misk.containers.Composer
 import misk.containers.Container
 import misk.jobqueue.sqs.DockerSqs.clientPort
-import misk.logging.getLogger
 import misk.testing.ExternalDependency
+import wisp.logging.getLogger
 
 /**
  * A test SQS Service. Tests can connect to the service at 127.0.0.1:[clientPort]

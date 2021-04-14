@@ -2,13 +2,13 @@ package misk.web.actions
 
 import com.google.common.util.concurrent.ServiceManager
 import misk.healthchecks.HealthCheck
-import misk.logging.getLogger
 import misk.security.authz.Unauthenticated
 import misk.web.AvailableWhenDegraded
 import misk.web.Get
 import misk.web.Response
 import misk.web.ResponseContentType
 import misk.web.mediatype.MediaTypes
+import wisp.logging.getLogger
 import javax.inject.Inject
 import javax.inject.Provider
 import javax.inject.Singleton

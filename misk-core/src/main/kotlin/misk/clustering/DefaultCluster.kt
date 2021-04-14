@@ -1,7 +1,7 @@
 package misk.clustering
 
 import com.google.common.util.concurrent.AbstractExecutionThreadService
-import misk.logging.getLogger
+import wisp.logging.getLogger
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicReference

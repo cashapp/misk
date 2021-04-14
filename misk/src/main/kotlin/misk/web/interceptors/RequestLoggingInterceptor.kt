@@ -4,14 +4,14 @@ import com.google.common.base.Stopwatch
 import com.google.common.base.Ticker
 import misk.Action
 import misk.MiskCaller
-import misk.logging.getLogger
-import misk.logging.info
 import misk.random.ThreadLocalRandom
 import misk.scope.ActionScoped
 import misk.web.HttpCall
 import misk.web.NetworkChain
 import misk.web.NetworkInterceptor
 import misk.web.interceptors.LogRateLimiter.LogBucketId
+import wisp.logging.getLogger
+import wisp.logging.info
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton

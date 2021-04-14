@@ -5,7 +5,6 @@ import misk.Action
 import misk.exceptions.StatusCode
 import misk.exceptions.UnauthenticatedException
 import misk.exceptions.UnauthorizedException
-import misk.logging.getLogger
 import misk.logging.log
 import misk.web.NetworkChain
 import misk.web.NetworkInterceptor
@@ -14,6 +13,7 @@ import misk.web.ResponseBody
 import misk.web.mediatype.MediaTypes
 import misk.web.toResponseBody
 import okhttp3.Headers.Companion.toHeaders
+import wisp.logging.getLogger
 import java.lang.reflect.InvocationTargetException
 import javax.inject.Inject
 

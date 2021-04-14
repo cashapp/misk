@@ -5,12 +5,12 @@ import com.google.crypto.tink.CleartextKeysetHandle
 import com.google.crypto.tink.DeterministicAead
 import com.google.crypto.tink.HybridDecrypt
 import com.google.crypto.tink.HybridEncrypt
+import com.google.crypto.tink.JsonKeysetReader
+import com.google.crypto.tink.KeysetHandle
 import com.google.crypto.tink.KmsClient
 import com.google.crypto.tink.Mac
 import com.google.crypto.tink.PublicKeySign
 import com.google.crypto.tink.PublicKeyVerify
-import com.google.crypto.tink.JsonKeysetReader
-import com.google.crypto.tink.KeysetHandle
 import com.google.crypto.tink.StreamingAead
 import com.google.crypto.tink.aead.AeadKeyTemplates
 import com.google.crypto.tink.aead.KmsEnvelopeAead
@@ -24,7 +24,7 @@ import com.google.crypto.tink.signature.PublicKeyVerifyFactory
 import com.google.crypto.tink.streamingaead.StreamingAeadFactory
 import com.google.inject.Inject
 import com.google.inject.Provider
-import misk.logging.getLogger
+import wisp.logging.getLogger
 import java.security.GeneralSecurityException
 
 open class KeyReader {

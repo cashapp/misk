@@ -1,7 +1,7 @@
 package misk.jobqueue.sqs
 
-import misk.config.Config
 import misk.tasks.RepeatedTaskQueueConfig
+import wisp.config.Config
 
 /**
  * [AwsSqsJobQueueConfig] is the configuration for job queueing backed by Amazon's
