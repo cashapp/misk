@@ -7,6 +7,7 @@ import misk.scope.ActionScope
 import misk.security.authz.AccessInterceptor
 import misk.web.actions.WebAction
 import misk.web.actions.asChain
+import misk.web.actions.findAnnotationWithOverrides
 import misk.web.mediatype.MediaRange
 import misk.web.mediatype.MediaTypes
 import misk.web.mediatype.compareTo
@@ -131,6 +132,7 @@ internal class BoundAction<A : WebAction>(
       name = action.name,
       function = action.function,
       packageName = extractPackageName(action.function.toString()),
+      documentation = action.function.findAnnotationWithOverrides<Documentation>()?.documentation,
       functionAnnotations = action.function.annotations,
       acceptedMediaRanges = action.acceptedMediaRanges,
       responseContentType = action.responseContentType,

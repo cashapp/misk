@@ -12,6 +12,7 @@ export interface WebActionMetadata {
   name: string
   function: string
   packageName: string
+  documentation: string
   functionAnnotations: string[]
   requestMediaTypes: string[]
   responseMediaType: string

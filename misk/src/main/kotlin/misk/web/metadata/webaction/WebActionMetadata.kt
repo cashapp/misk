@@ -2,9 +2,11 @@ package misk.web.metadata.webaction
 
 import misk.ApplicationInterceptor
 import misk.web.DispatchMechanism
+import misk.web.Documentation
 import misk.web.MiskWebFormBuilder
 import misk.web.NetworkInterceptor
 import misk.web.PathPattern
+import misk.web.actions.findAnnotationWithOverrides
 import misk.web.formatter.ClassNameFormatter
 import misk.web.mediatype.MediaRange
 import okhttp3.MediaType
@@ -15,6 +17,7 @@ data class WebActionMetadata(
   val name: String,
   val function: String,
   val packageName: String,
+  val documentation: String?,
   val functionAnnotations: List<String>,
   val requestMediaTypes: List<String>,
   val responseMediaType: String?,
@@ -35,6 +38,7 @@ data class WebActionMetadata(
     function: Function<*>,
     packageName: String,
     functionAnnotations: List<Annotation>,
+    documentation: String?,
     acceptedMediaRanges: List<MediaRange>,
     responseContentType: MediaType?,
     parameterTypes: List<KType>,
@@ -52,6 +56,7 @@ data class WebActionMetadata(
     function = function.toString(),
     packageName = packageName,
     functionAnnotations = functionAnnotations.map { it.toString() },
+    documentation = documentation,
     requestMediaTypes = acceptedMediaRanges.map { it.toString() },
     responseMediaType = responseContentType.toString(),
     parameterTypes = parameterTypes.map { it.toString() },

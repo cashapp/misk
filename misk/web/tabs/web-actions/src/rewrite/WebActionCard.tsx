@@ -5,6 +5,7 @@ import WebActionCardHeader from "./WebActionCardHeader"
 import WebActionCardBody from "./WebActionCardBody"
 import WebActionParameters from "./WebActionParameters";
 import Spacer from "./Spacer"
+import Documentation from "./Documentation";
 
 interface Props {
   webActionMetadata: WebActionMetadata
@@ -18,8 +19,9 @@ export default function WebActionCard({ webActionMetadata }: Props) {
       !annotation.includes("ResponseContentType") &&
       !annotation.includes("Access") &&
       !annotation.includes("authz") &&
-      !annotation.includes("function")
-  )
+      !annotation.includes("function") &&
+      !annotation.includes("documentation")
+)
 
   return (
     <Card
@@ -31,6 +33,7 @@ export default function WebActionCard({ webActionMetadata }: Props) {
         httpMethod={webActionMetadata.httpMethod}
         pathPattern={webActionMetadata.pathPattern}
       />
+      <Documentation documentation={webActionMetadata.documentation} />
       <WebActionParameters parameters={webActionMetadata.annotatedParameters} />
       <Card style={{marginTop: "12px", padding: "12px"}}>
         <H5> Response Type </H5>
