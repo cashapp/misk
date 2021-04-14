@@ -2,7 +2,6 @@ package misk.jdbc
 
 import com.google.inject.util.Modules
 import misk.MiskTestingServiceModule
-import misk.config.Config
 import misk.config.MiskConfig
 import misk.environment.DeploymentModule
 import misk.environment.Environment
@@ -12,9 +11,8 @@ import misk.testing.MiskTestModule
 import misk.testing.MockTracingBackendModule
 import misk.time.FakeClockModule
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
-import java.lang.IllegalStateException
+import wisp.config.Config
 import java.sql.Connection
 import java.time.LocalDate
 import javax.inject.Inject

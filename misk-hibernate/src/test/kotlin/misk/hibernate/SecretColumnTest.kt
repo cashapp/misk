@@ -1,7 +1,6 @@
 package misk.hibernate
 
 import misk.MiskTestingServiceModule
-import misk.config.Config
 import misk.config.MiskConfig
 import misk.crypto.CryptoConfig
 import misk.crypto.CryptoTestModule
@@ -14,8 +13,8 @@ import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
-import java.util.Arrays
-import java.util.Objects
+import wisp.config.Config
+import java.util.*
 import javax.inject.Inject
 import javax.inject.Qualifier
 import javax.persistence.Column

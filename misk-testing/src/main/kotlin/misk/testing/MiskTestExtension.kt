@@ -8,10 +8,10 @@ import misk.environment.Environment
 import misk.inject.KAbstractModule
 import misk.inject.getInstance
 import misk.inject.uninject
-import misk.logging.getLogger
 import org.junit.jupiter.api.extension.AfterEachCallback
 import org.junit.jupiter.api.extension.BeforeEachCallback
 import org.junit.jupiter.api.extension.ExtensionContext
+import wisp.logging.getLogger
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject

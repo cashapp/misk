@@ -3,7 +3,7 @@ package misk.web.jetty
 import com.google.common.base.Stopwatch
 import com.google.common.util.concurrent.AbstractIdleService
 import com.google.common.util.concurrent.ThreadFactoryBuilder
-import misk.logging.getLogger
+import wisp.logging.getLogger
 import misk.security.ssl.CipherSuites
 import misk.security.ssl.SslLoader
 import misk.security.ssl.TlsProtocols

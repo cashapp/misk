@@ -3,7 +3,7 @@ package misk.metrics.backends.prometheus
 import com.google.common.util.concurrent.AbstractIdleService
 import io.prometheus.client.CollectorRegistry
 import io.prometheus.client.exporter.HTTPServer
-import misk.logging.getLogger
+import wisp.logging.getLogger
 import java.io.IOException
 import java.net.InetSocketAddress
 import javax.inject.Inject

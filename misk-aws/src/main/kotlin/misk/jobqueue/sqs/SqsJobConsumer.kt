@@ -3,6 +3,7 @@ package misk.jobqueue.sqs
 import com.amazonaws.http.timers.client.ClientExecutionTimeoutException
 import com.amazonaws.services.sqs.model.Message
 import com.amazonaws.services.sqs.model.ReceiveMessageRequest
+import com.google.common.util.concurrent.Service
 import com.google.common.util.concurrent.ServiceManager
 import com.squareup.moshi.Moshi
 import io.opentracing.Tracer
@@ -14,11 +15,11 @@ import misk.feature.FeatureFlags
 import misk.jobqueue.JobConsumer
 import misk.jobqueue.JobHandler
 import misk.jobqueue.QueueName
-import misk.logging.getLogger
 import misk.tasks.RepeatedTaskQueue
 import misk.tasks.Status
 import misk.time.timed
 import misk.tracing.traceWithNewRootSpan
+import wisp.logging.getLogger
 import java.time.Duration
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ConcurrentHashMap
@@ -59,10 +60,14 @@ internal class SqsJobConsumer @Inject internal constructor(
       "subscribing to queue ${queueName.value}"
     }
     taskQueue.scheduleWithBackoff(Duration.ZERO) {
+
       // Don't call handlers until all services are ready, otherwise handlers will crash because
       // the services they might need (databases, etc.) won't be ready.
-      serviceManagerProvider.get().awaitHealthy()
-      receiver.run()
+      if (serviceManagerProvider.get().isHealthy) {
+        receiver.run()
+      } else {
+        Status.NO_WORK
+      }
     }
   }
 

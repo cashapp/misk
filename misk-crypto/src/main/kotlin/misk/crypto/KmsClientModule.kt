@@ -1,5 +1,6 @@
 package misk.crypto
 
+import com.amazonaws.auth.AWSCredentialsProvider
 import com.google.crypto.tink.KmsClient
 import com.google.crypto.tink.integration.awskms.AwsKmsClient
 import com.google.crypto.tink.integration.gcpkms.GcpKmsClient
@@ -9,16 +10,16 @@ import misk.inject.KAbstractModule
 
 /**
  * AWS specific KMS client module.
- * Currently uses a file path to a JSON credentials file to initialize the client.
- * If no file is provided, tries to initialize the client using the default
- * credentials path as specified in [AwsKmsClient.withDefaultCredentials]
+ *
+ * This module provides a [AwsKmsClient] using a [AWSCredentialsProvider].
+ *
+ * See [AWS credentials](https://docs.aws.amazon.com/sdk-for-java/v1/developer-guide/credentials.html)
+ * for more information about supplying credentials to AWS.
  */
-class AwsKmsClientModule(private val credentialsPath: String? = null) : KAbstractModule() {
-  // TODO: Allow initializing an AWS KMS client with a credentials provider
-  // once tink supports it: https://github.com/google/tink/pull/184
+class AwsKmsClientModule : KAbstractModule() {
   @Provides @Singleton
-  fun getKmsClient(): KmsClient = credentialsPath?.let { AwsKmsClient().withCredentials(it) }
-    ?: AwsKmsClient().withDefaultCredentials()
+  fun getKmsClient(credentialsProvider: AWSCredentialsProvider): KmsClient =
+      AwsKmsClient().withCredentialsProvider(credentialsProvider)
 }
 
 /**

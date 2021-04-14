@@ -1,7 +1,6 @@
 package misk.hibernate
 
 import misk.MiskTestingServiceModule
-import misk.config.Config
 import misk.config.MiskConfig
 import misk.environment.Environment
 import misk.environment.EnvironmentModule
@@ -14,6 +13,7 @@ import okio.ByteString.Companion.decodeHex
 import okio.ByteString.Companion.encodeUtf8
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import wisp.config.Config
 import javax.inject.Inject
 import javax.inject.Qualifier
 import javax.persistence.Column

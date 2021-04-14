@@ -4,7 +4,6 @@ import com.google.inject.Injector
 import misk.MiskTestingServiceModule
 import misk.ServiceModule
 import misk.concurrent.ExecutorServiceFactory
-import misk.config.Config
 import misk.config.MiskConfig
 import misk.environment.Environment
 import misk.environment.EnvironmentModule
@@ -26,6 +25,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.hibernate.SessionFactory
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import wisp.config.Config
 import java.time.Instant
 import javax.inject.Inject
 import javax.inject.Provider

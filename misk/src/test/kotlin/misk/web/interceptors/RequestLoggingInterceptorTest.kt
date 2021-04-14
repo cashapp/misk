@@ -1,6 +1,7 @@
 package misk.web.interceptors
 
 import com.google.common.testing.FakeTicker
+import misk.MiskTestingServiceModule
 import misk.exceptions.BadRequestException
 import misk.inject.KAbstractModule
 import misk.logging.LogCollectorModule
@@ -18,6 +19,7 @@ import misk.web.RequestBody
 import misk.web.RequestHeaders
 import misk.web.ResponseContentType
 import misk.web.WebActionModule
+import misk.web.WebServerTestingModule
 import misk.web.WebTestClient
 import misk.web.WebTestingModule
 import misk.web.actions.WebAction
@@ -233,7 +235,8 @@ internal class RequestLoggingInterceptorTest {
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(AccessControlModule())
-      install(WebTestingModule())
+      install(WebServerTestingModule())
+      install(MiskTestingServiceModule())
       install(LogCollectorModule())
       multibind<MiskCallerAuthenticator>().to<FakeCallerAuthenticator>()
       install(TestActionsModule())

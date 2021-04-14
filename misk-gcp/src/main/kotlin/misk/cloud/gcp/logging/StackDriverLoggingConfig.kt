@@ -1,7 +1,7 @@
 package misk.cloud.gcp.logging
 
 import ch.qos.logback.classic.Level
-import misk.config.Config
+import wisp.config.Config
 
 data class StackDriverLoggingConfig(
   val flush_level: Level = Level.ERROR,
