@@ -49,7 +49,7 @@ export default function TabContainer() {
           version <a href="/_admin/web-actions-old/">here.</a>
         </p>
       </div>
-      {Object.keys(webActionsByPackage).map((packageName) => (
+      {Object.keys(webActionsByPackage).sort().map((packageName) => (
         <>
           <H2>{packageName}</H2>
           <WebActionCards webActions={webActionsByPackage[packageName]}/>
