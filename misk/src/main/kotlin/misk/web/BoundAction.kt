@@ -130,7 +130,7 @@ internal class BoundAction<A : WebAction>(
     WebActionMetadata(
       name = action.name,
       function = action.function,
-      packageName = action.function.javaClass.enclosingMethod.javaClass.packageName,
+      packageName = extractPackageName(action.function.toString()),
       functionAnnotations = action.function.annotations,
       acceptedMediaRanges = action.acceptedMediaRanges,
       responseContentType = action.responseContentType,
@@ -150,6 +150,14 @@ internal class BoundAction<A : WebAction>(
         AccessInterceptor::allowedCapabilities
       )
     )
+  }
+
+  private fun extractPackageName(functionName: String): String {
+    val regex = """(fun) (\w*.+) (\w.+)""".toRegex()
+    val matchResult = regex.find(functionName)
+    val fullyQualifiedFunctionName = matchResult!!.groups[2]!!.value.split("(")[0]
+    val functionNameParts = fullyQualifiedFunctionName.split(".")
+    return functionNameParts.slice(0..functionNameParts.size-3).joinToString(".")
   }
 
   private fun fetchAllowedCallers(
