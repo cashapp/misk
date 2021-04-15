@@ -26,7 +26,6 @@ dependencies {
   implementation(Dependencies.moshiAdapters)
   implementation(Dependencies.wireRuntime)
   implementation(Dependencies.tink)
-  implementation(Dependencies.tinkAwskms)
   implementation(project(":misk"))
   implementation(project(":misk-actions"))
   implementation(project(":misk-core"))

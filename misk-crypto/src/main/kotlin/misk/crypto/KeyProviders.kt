@@ -12,6 +12,7 @@ import com.google.crypto.tink.Mac
 import com.google.crypto.tink.PublicKeySign
 import com.google.crypto.tink.PublicKeyVerify
 import com.google.crypto.tink.StreamingAead
+import com.google.crypto.tink.aead.AeadFactory
 import com.google.crypto.tink.aead.AeadKeyTemplates
 import com.google.crypto.tink.aead.KmsEnvelopeAead
 import com.google.crypto.tink.daead.DeterministicAeadFactory
@@ -83,7 +84,7 @@ internal class AeadEnvelopeProvider(
 
   override fun get(): Aead {
     val keysetHandle = readKey(key)
-    val aeadKey = keysetHandle.getPrimitive(Aead::class.java)
+    val aeadKey = AeadFactory.getPrimitive(keysetHandle)
 
     return aeadKey.also { keyManager[key] = it }
   }
