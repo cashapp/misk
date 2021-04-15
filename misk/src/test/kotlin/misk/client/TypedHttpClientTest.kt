@@ -5,6 +5,7 @@ import com.google.inject.Injector
 import com.google.inject.Provides
 import com.google.inject.name.Names
 import helpers.protos.Dinosaur
+import kotlinx.coroutines.runBlocking
 import misk.MiskTestingServiceModule
 import misk.inject.KAbstractModule
 import misk.inject.getInstance
@@ -103,9 +104,25 @@ internal class TypedHttpClientTest {
     )
   }
 
+  @Test
+  fun suspendingMethod() {
+    val client: ReturnADinosaurNonBlocking = clientInjector.getInstance(
+      Names.named("nonblockingDinosaur")
+    )
+    val response = runBlocking {
+      client.getDinosaur(Dinosaur.Builder().name("trex").build())
+    }
+    assertThat(response.name!!).isEqualTo("supertrex")
+  }
+
   interface ReturnADinosaur {
     @POST("/cooldinos")
     fun getDinosaur(@Body request: Dinosaur): Call<Dinosaur>
+  }
+
+  interface ReturnADinosaurNonBlocking {
+    @POST("/cooldinos")
+    suspend fun getDinosaur(@Body request: Dinosaur): Dinosaur
   }
 
   class ReturnADinosaurAction @Inject constructor() : WebAction {
@@ -150,6 +167,10 @@ internal class TypedHttpClientTest {
     override fun configure() {
       install(MiskTestingServiceModule())
       install(TypedHttpClientModule.create<ReturnADinosaur>("dinosaur", Names.named("dinosaur")))
+      install(TypedHttpClientModule.create<ReturnADinosaurNonBlocking>(
+        "dinosaur",
+        Names.named("nonblockingDinosaur")
+      ))
       install(
         TypedHttpClientModule.create<ReturnAProtoDinosaur>("protoDino", Names.named("protoDino"))
       )
