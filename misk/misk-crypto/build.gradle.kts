@@ -6,8 +6,6 @@ dependencies {
   implementation(Dependencies.moshiAdapters)
   implementation(Dependencies.bouncycastlePgp)
   implementation(Dependencies.tink)
-  implementation(Dependencies.tinkAwskms)
-  implementation(Dependencies.tinkGcpkms)
   implementation(Dependencies.awsS3)
   implementation(Dependencies.loggingApi)
   implementation(project(":misk"))
