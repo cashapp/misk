@@ -41,7 +41,7 @@ dependencies {
   testImplementation("com.kohlschutter.junixsocket:junixsocket-native-common:2.3.2") {
     isForce = true
   }
-  testImplementation("com.kohlschutter.junixsocket:junixsocket-common:2.3.2") {
+  testImplementation("com.kohlschutter.junixsocket:junixsocket-common:2.3.3") {
     isForce = true
   }
   testImplementation(Dependencies.prometheusClient)
