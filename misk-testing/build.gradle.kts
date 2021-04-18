@@ -5,7 +5,7 @@ dependencies {
   implementation("com.kohlschutter.junixsocket:junixsocket-native-common:2.3.2") {
     isForce = true
   }
-  implementation("com.kohlschutter.junixsocket:junixsocket-common:2.3.2") {
+  implementation("com.kohlschutter.junixsocket:junixsocket-common:2.3.3") {
     isForce = true
   }
   implementation(Dependencies.guice)
