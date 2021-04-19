@@ -3,7 +3,7 @@ import { Card, H5 } from "@blueprintjs/core"
 import { WebActionMetadata } from "./types"
 import WebActionCardHeader from "./WebActionCardHeader"
 import WebActionCardBody from "./WebActionCardBody"
-import WebActionParameters from "./WebActionParameters";
+import WebActionParameters from "./WebActionParameters"
 import Spacer from "./Spacer"
 import Description from "./Description"
 
