@@ -20,8 +20,8 @@ export default function WebActionCard({ webActionMetadata }: Props) {
       !annotation.includes("Access") &&
       !annotation.includes("authz") &&
       !annotation.includes("function") &&
-      !annotation.includes("documentation")
-)
+      !annotation.includes("Description")
+  )
 
   return (
     <Card
