@@ -132,7 +132,7 @@ internal class BoundAction<A : WebAction>(
       name = action.name,
       function = action.function,
       packageName = extractPackageName(action.function.toString()),
-      documentation = action.function.findAnnotationWithOverrides<Documentation>()?.documentation,
+      description = action.function.findAnnotationWithOverrides<Description>()?.text,
       functionAnnotations = action.function.annotations,
       acceptedMediaRanges = action.acceptedMediaRanges,
       responseContentType = action.responseContentType,

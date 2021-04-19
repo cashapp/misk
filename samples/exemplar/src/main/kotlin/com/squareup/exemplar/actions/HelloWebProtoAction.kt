@@ -3,7 +3,7 @@ package com.squareup.exemplar.actions
 import com.squareup.exemplar.protos.HelloWebRequest
 import com.squareup.exemplar.protos.HelloWebResponse
 import misk.security.authz.Unauthenticated
-import misk.web.Documentation
+import misk.web.Description
 import misk.web.Post
 import misk.web.RequestBody
 import misk.web.RequestContentType
@@ -18,7 +18,7 @@ class HelloWebProtoAction @Inject constructor() : WebAction {
   @Unauthenticated
   @RequestContentType(MediaTypes.APPLICATION_PROTOBUF)
   @ResponseContentType(MediaTypes.APPLICATION_PROTOBUF)
-  @Documentation("""
+  @Description("""
     A web action that expects a HelloWebRequest and returns a HelloWebResponse
   """)
   fun hello(
