@@ -18,12 +18,28 @@ class HelloWebProtoAction @Inject constructor() : WebAction {
   @Unauthenticated
   @RequestContentType(MediaTypes.APPLICATION_PROTOBUF)
   @ResponseContentType(MediaTypes.APPLICATION_PROTOBUF)
-  @Description("""
-    A web action that expects a HelloWebRequest and returns a HelloWebResponse
-  """)
+  @Description(
+    """
+    Given a request containing a name, nickname, and list of greetings
+    return a suitable response.
+  """
+  )
   fun hello(
     @RequestBody request: HelloWebRequest
   ): Response<HelloWebResponse> {
-    return Response(HelloWebResponse())
+    return Response(
+      HelloWebResponse().newBuilder()
+        .greeting(greeting(request))
+        .name(request.nick_name?.toUpperCase() ?: request.name.toUpperCase())
+        .build()
+    )
+  }
+
+  private fun greeting(request: HelloWebRequest) : String {
+    return if (request.greetings.isNotEmpty()) {
+      request.greetings.joinToString(separator = " ")
+    } else {
+      "Yo"
+    }
   }
 }
