@@ -5,7 +5,7 @@ interface Props {
   description: String
 }
 
-export default function Description({ description }: Props) {
+export default function WebActionDescription({ description }: Props) {
   if (description) {
     return (
       <Card style={{ marginTop: "12px", padding: "12px" }}>

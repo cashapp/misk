@@ -5,7 +5,7 @@ import WebActionCardHeader from "./WebActionCardHeader"
 import WebActionCardBody from "./WebActionCardBody"
 import WebActionParameters from "./WebActionParameters"
 import Spacer from "./Spacer"
-import Description from "./Description"
+import WebActionDescription from "./WebActionDescription"
 
 interface Props {
   webActionMetadata: WebActionMetadata
@@ -33,7 +33,7 @@ export default function WebActionCard({ webActionMetadata }: Props) {
         httpMethod={webActionMetadata.httpMethod}
         pathPattern={webActionMetadata.pathPattern}
       />
-      <Description description={webActionMetadata.description} />
+      <WebActionDescription description={webActionMetadata.description} />
       <WebActionParameters parameters={webActionMetadata.parameters} />
       <Card style={{ marginTop: "12px", padding: "12px" }}>
         <H5> Response Type </H5>
