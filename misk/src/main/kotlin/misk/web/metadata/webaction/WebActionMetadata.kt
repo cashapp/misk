@@ -8,6 +8,7 @@ import misk.web.PathPattern
 import misk.web.formatter.ClassNameFormatter
 import misk.web.mediatype.MediaRange
 import okhttp3.MediaType
+import kotlin.reflect.KParameter
 import kotlin.reflect.KType
 
 /** Metadata front end model for Web Action Misk-Web Tab */
@@ -20,7 +21,7 @@ data class WebActionMetadata(
   val requestMediaTypes: List<String>,
   val responseMediaType: String?,
   val parameterTypes: List<String>,
-  val annotatedParameters: List<String>,
+  val parameters: List<ParameterMetaData>,
   val requestType: String?,
   val returnType: String,
   val types: Map<String, MiskWebFormBuilder.Type>,
@@ -40,7 +41,7 @@ data class WebActionMetadata(
     acceptedMediaRanges: List<MediaRange>,
     responseContentType: MediaType?,
     parameterTypes: List<KType>,
-    annotatedParameters: List<String>,
+    parameters: List<KParameter>,
     requestType: KType?,
     returnType: KType,
     pathPattern: PathPattern,
@@ -58,7 +59,13 @@ data class WebActionMetadata(
     requestMediaTypes = acceptedMediaRanges.map { it.toString() },
     responseMediaType = responseContentType.toString(),
     parameterTypes = parameterTypes.map { it.toString() },
-    annotatedParameters = annotatedParameters,
+    parameters = parameters.map { parameter ->
+      ParameterMetaData(
+        name = parameter.name,
+        annotations = parameter.annotations.map { annotation -> annotation.toString() },
+        type = parameter.type.toString()
+      )
+    },
     requestType = requestType.toString(),
     returnType = returnType.toString(),
     types = MiskWebFormBuilder().calculateTypes(requestType),
@@ -70,5 +77,11 @@ data class WebActionMetadata(
     httpMethod = dispatchMechanism.method,
     allowedServices = allowedServices,
     allowedCapabilities = allowedCapabilities
+  )
+
+  data class ParameterMetaData(
+    val name: String?,
+    val annotations: List<String>,
+    val type: String
   )
 }

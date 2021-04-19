@@ -1,24 +1,25 @@
-import React from "react";
-import { Card, H5 } from "@blueprintjs/core"
+import React from "react"
+import { Card, H5, HTMLTable } from "@blueprintjs/core"
+import { ParameterMetaData } from "./types"
+import WebActionParameter from "./WebActionParameter"
 
 interface Props {
-  parameters: string[]
+  parameters: ParameterMetaData[]
 }
 
 export default function WebActionParameters({ parameters }: Props) {
-
   if (parameters.length == 0) {
-    return null;
+    return null
   }
 
-  return(
-    <Card style={{marginTop: "12px", padding: "12px"}}>
+  return (
+    <Card style={{ marginTop: "12px", padding: "12px" }}>
       <H5> Request Parameters </H5>
-      <ol style={{ listStyle: "none", marginBottom: "0px"}}>
+      <HTMLTable>
         {parameters.map(parameter => (
-          <li>{parameter}</li>
+          <WebActionParameter parameter={parameter} />
         ))}
-      </ol>
+      </HTMLTable>
     </Card>
   )
 }

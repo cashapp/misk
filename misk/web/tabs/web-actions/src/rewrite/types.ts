@@ -17,7 +17,7 @@ export interface WebActionMetadata {
   requestMediaTypes: string[]
   responseMediaType: string
   parameterTypes: string[]
-  annotatedParameters: string[]
+  parameters: ParameterMetaData[]
   requestType: string
   returnType: string
   types: { [key: string]: ProtoType }
@@ -27,6 +27,12 @@ export interface WebActionMetadata {
   httpMethod: string
   allowedServices: string[]
   allowedCapabilities: string[]
+}
+
+export interface ParameterMetaData {
+  name: string
+  annotations: string[]
+  type: string
 }
 
 export interface WebActionMetadataResponse {

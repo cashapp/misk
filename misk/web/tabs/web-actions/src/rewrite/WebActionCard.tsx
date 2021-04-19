@@ -34,8 +34,8 @@ export default function WebActionCard({ webActionMetadata }: Props) {
         pathPattern={webActionMetadata.pathPattern}
       />
       <Description description={webActionMetadata.description} />
-      <WebActionParameters parameters={webActionMetadata.annotatedParameters} />
-      <Card style={{marginTop: "12px", padding: "12px"}}>
+      <WebActionParameters parameters={webActionMetadata.parameters} />
+      <Card style={{ marginTop: "12px", padding: "12px" }}>
         <H5> Response Type </H5>
         {webActionMetadata.returnType}
       </Card>
