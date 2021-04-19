@@ -35,7 +35,6 @@ data class WebActionMetadata(
   constructor(
     name: String,
     function: Function<*>,
-    packageName: String,
     functionAnnotations: List<Annotation>,
     description: String?,
     acceptedMediaRanges: List<MediaRange>,
@@ -53,7 +52,7 @@ data class WebActionMetadata(
   ) : this(
     name = name,
     function = function.toString(),
-    packageName = packageName,
+    packageName = packageName(function.toString()),
     functionAnnotations = functionAnnotations.map { it.toString() },
     description = description,
     requestMediaTypes = acceptedMediaRanges.map { it.toString() },
@@ -78,6 +77,16 @@ data class WebActionMetadata(
     allowedServices = allowedServices,
     allowedCapabilities = allowedCapabilities
   )
+
+  companion object {
+    private fun packageName(functionName: String): String {
+      val regex = """(fun) (\w*.+) (\w.+)""".toRegex()
+      val matchResult = regex.find(functionName)
+      val fullyQualifiedFunctionName = matchResult!!.groups[2]!!.value.split("(")[0]
+      val functionNameParts = fullyQualifiedFunctionName.split(".")
+      return functionNameParts.slice(0..functionNameParts.size-3).joinToString(".")
+    }
+  }
 
   data class ParameterMetaData(
     val name: String?,
