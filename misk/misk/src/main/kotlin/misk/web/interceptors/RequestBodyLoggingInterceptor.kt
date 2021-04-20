@@ -90,9 +90,7 @@ internal class RequestResponseCapture @Inject constructor() {
     private val capture = ThreadLocal<RequestResponseBody>()
   }
 
-  fun get(): RequestResponseBody {
-    return capture.get()
-  }
+  fun get(): RequestResponseBody? = capture.get()
 
   fun set(value: RequestResponseBody) {
     capture.set(value)
