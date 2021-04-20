@@ -10,12 +10,14 @@ import misk.web.mediatype.MediaRange
 import okhttp3.MediaType
 import kotlin.reflect.KParameter
 import kotlin.reflect.KType
+import kotlin.reflect.KFunction
+import kotlin.reflect.jvm.javaMethod
 
 /** Metadata front end model for Web Action Misk-Web Tab */
 data class WebActionMetadata(
   val name: String,
   val function: String,
-  val packageName: String,
+  val packageName: String?,
   val description: String?,
   val functionAnnotations: List<String>,
   val requestMediaTypes: List<String>,
@@ -34,7 +36,7 @@ data class WebActionMetadata(
 ) {
   constructor(
     name: String,
-    function: Function<*>,
+    function: KFunction<*>,
     functionAnnotations: List<Annotation>,
     description: String?,
     acceptedMediaRanges: List<MediaRange>,
@@ -52,7 +54,7 @@ data class WebActionMetadata(
   ) : this(
     name = name,
     function = function.toString(),
-    packageName = packageName(function.toString()),
+    packageName = function.javaMethod?.declaringClass?.packageName,
     functionAnnotations = functionAnnotations.map { it.toString() },
     description = description,
     requestMediaTypes = acceptedMediaRanges.map { it.toString() },
@@ -77,16 +79,6 @@ data class WebActionMetadata(
     allowedServices = allowedServices,
     allowedCapabilities = allowedCapabilities
   )
-
-  companion object {
-    private fun packageName(functionName: String): String {
-      val regex = """(fun) (\w*.+) (\w.+)""".toRegex()
-      val matchResult = regex.find(functionName)
-      val fullyQualifiedFunctionName = matchResult!!.groups[2]!!.value.split("(")[0]
-      val functionNameParts = fullyQualifiedFunctionName.split(".")
-      return functionNameParts.slice(0..functionNameParts.size-3).joinToString(".")
-    }
-  }
 
   data class ParameterMetaData(
     val name: String?,
