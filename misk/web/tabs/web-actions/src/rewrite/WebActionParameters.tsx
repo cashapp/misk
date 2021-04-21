@@ -15,7 +15,7 @@ export default function WebActionParameters({ parameters }: Props) {
   return (
     <Card style={{ marginTop: "12px", padding: "12px" }}>
       <H5> Request Parameters </H5>
-      <HTMLTable>
+      <HTMLTable style={{marginBottom: "0px"}}>
         {parameters.map(parameter => (
           <WebActionParameter parameter={parameter} />
         ))}
