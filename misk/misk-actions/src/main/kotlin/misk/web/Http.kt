@@ -18,6 +18,9 @@ annotation class Patch(val pathPattern: String)
 @Target(AnnotationTarget.FUNCTION)
 annotation class ConnectWebSocket(val pathPattern: String)
 
+@Target(AnnotationTarget.FUNCTION)
+annotation class Description(val text: String)
+
 @Target(AnnotationTarget.VALUE_PARAMETER)
 annotation class RequestHeaders
 
