@@ -11,10 +11,13 @@ export interface ProtoType {
 export interface WebActionMetadata {
   name: string
   function: string
+  packageName: string
+  description: string
   functionAnnotations: string[]
   requestMediaTypes: string[]
   responseMediaType: string
   parameterTypes: string[]
+  parameters: ParameterMetaData[]
   requestType: string
   returnType: string
   types: { [key: string]: ProtoType }
@@ -26,6 +29,14 @@ export interface WebActionMetadata {
   allowedCapabilities: string[]
 }
 
+export interface ParameterMetaData {
+  name: string
+  annotations: string[]
+  type: string
+}
+
 export interface WebActionMetadataResponse {
   webActionMetadata: WebActionMetadata[]
 }
+
+export type WebActionsByPackage = { [packageName: string]: WebActionMetadata[] }

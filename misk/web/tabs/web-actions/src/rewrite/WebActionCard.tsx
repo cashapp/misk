@@ -16,7 +16,9 @@ export default function WebActionCard({ webActionMetadata }: Props) {
       !annotation.includes("RequestContentType") &&
       !annotation.includes("ResponseContentType") &&
       !annotation.includes("Access") &&
-      !annotation.includes("authz")
+      !annotation.includes("authz") &&
+      !annotation.includes("function") &&
+      !annotation.includes("Description")
   )
 
   return (
@@ -30,12 +32,10 @@ export default function WebActionCard({ webActionMetadata }: Props) {
         pathPattern={webActionMetadata.pathPattern}
       />
       <Spacer size="small" layout="vertical" />
-
       {annotationsWorthShowing.map(annotation => (
         <H5 key={annotation}>{annotation}</H5>
       ))}
       <Spacer size="small" layout="vertical" />
-
       <WebActionCardBody webActionMetadata={webActionMetadata} />
     </Card>
   )
