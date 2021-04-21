@@ -1,5 +1,6 @@
 import React from "react"
-import { Card, H5 } from "@blueprintjs/core"
+import { UL } from "@blueprintjs/core"
+import WebActionCollapse from "./WebActionCollapse";
 
 interface Props {
   description: String
@@ -8,10 +9,15 @@ interface Props {
 export default function WebActionDescription({ description }: Props) {
   if (description) {
     return (
-      <Card style={{ marginTop: "12px", padding: "12px" }}>
-        <H5> Description </H5>
-        {description}
-      </Card>
+      <WebActionCollapse
+        title={"Description"}
+        doubleWidth={true}>
+        <UL style={{listStyle: "none"}}>
+          <li>
+            {description}
+          </li>
+        </UL>
+      </WebActionCollapse>
     )
   } else {
     return null

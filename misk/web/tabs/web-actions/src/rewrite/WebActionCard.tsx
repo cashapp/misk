@@ -3,9 +3,7 @@ import { Card, H5 } from "@blueprintjs/core"
 import { WebActionMetadata } from "./types"
 import WebActionCardHeader from "./WebActionCardHeader"
 import WebActionCardBody from "./WebActionCardBody"
-import WebActionParameters from "./WebActionParameters"
 import Spacer from "./Spacer"
-import WebActionDescription from "./WebActionDescription"
 
 interface Props {
   webActionMetadata: WebActionMetadata
@@ -33,12 +31,6 @@ export default function WebActionCard({ webActionMetadata }: Props) {
         httpMethod={webActionMetadata.httpMethod}
         pathPattern={webActionMetadata.pathPattern}
       />
-      <WebActionDescription description={webActionMetadata.description} />
-      <WebActionParameters parameters={webActionMetadata.parameters} />
-      <Card style={{ marginTop: "12px", padding: "12px" }}>
-        <H5> Response Type </H5>
-        {webActionMetadata.returnType}
-      </Card>
       <Spacer size="small" layout="vertical" />
       {annotationsWorthShowing.map(annotation => (
         <H5 key={annotation}>{annotation}</H5>

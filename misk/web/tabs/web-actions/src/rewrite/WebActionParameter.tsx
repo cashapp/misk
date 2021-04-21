@@ -5,7 +5,7 @@ interface Props {
   parameter: ParameterMetaData
 }
 export default function WebActionParameter({ parameter }: Props) {
-  let cellStyle = {border: "none", padding: "0px 11px"}
+  let cellStyle = {border: "none", padding: "0px 11px 0px 0px"}
   return (
     <tr>
       <td style={cellStyle}>{parameter.annotations.join(",")}</td>

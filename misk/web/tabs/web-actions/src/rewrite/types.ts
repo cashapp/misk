@@ -39,4 +39,4 @@ export interface WebActionMetadataResponse {
   webActionMetadata: WebActionMetadata[]
 }
 
-export type WebActionsByPackage = { [packageName: string]: WebActionMetadata[]}
+export type WebActionsByPackage = { [packageName: string]: WebActionMetadata[] }
