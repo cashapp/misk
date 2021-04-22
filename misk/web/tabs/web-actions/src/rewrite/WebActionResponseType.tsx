@@ -1,7 +1,6 @@
 import React from "react"
 import { HTMLTable, UL } from "@blueprintjs/core"
 import { WebActionMetadata} from "./types"
-import WebActionParameter from "./WebActionParameter"
 import WebActionCollapse from "./WebActionCollapse"
 import WebActionProtoField from "./WebActionProtoField";
 
