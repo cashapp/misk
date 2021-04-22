@@ -17,6 +17,7 @@ import okhttp3.MediaType
 import java.util.regex.Matcher
 import javax.inject.Provider
 import javax.servlet.http.HttpServletRequest
+import kotlin.reflect.KType
 
 /**
  * Decodes an HTTP request into a call to a web action, then encodes its response into an HTTP
@@ -139,6 +140,7 @@ internal class BoundAction<A : WebAction>(
       parameters = action.parameters,
       requestType = action.requestType,
       returnType = action.returnType,
+      responseType = determineResponseType(action.returnType),
       pathPattern = pathPattern,
       applicationInterceptors = applicationInterceptors,
       networkInterceptors = networkInterceptors,
@@ -151,6 +153,13 @@ internal class BoundAction<A : WebAction>(
         AccessInterceptor::allowedCapabilities
       )
     )
+  }
+
+  private fun determineResponseType(returnType: KType): KType? {
+    if (returnType.arguments.isNotEmpty()) {
+      return returnType.arguments[0].type
+    }
+    return null
   }
 
   private fun fetchAllowedCallers(

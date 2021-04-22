@@ -26,7 +26,9 @@ data class WebActionMetadata(
   val parameters: List<ParameterMetaData>,
   val requestType: String?,
   val returnType: String,
+  val responseType: String,
   val types: Map<String, MiskWebFormBuilder.Type>,
+  val responseTypes: Map<String, MiskWebFormBuilder.Type>,
   val pathPattern: String,
   val applicationInterceptors: List<String>,
   val networkInterceptors: List<String>,
@@ -45,6 +47,7 @@ data class WebActionMetadata(
     parameters: List<KParameter>,
     requestType: KType?,
     returnType: KType,
+    responseType: KType?,
     pathPattern: PathPattern,
     applicationInterceptors: List<ApplicationInterceptor>,
     networkInterceptors: List<NetworkInterceptor>,
@@ -69,7 +72,9 @@ data class WebActionMetadata(
     },
     requestType = requestType.toString(),
     returnType = returnType.toString(),
+    responseType = responseType.toString(),
     types = MiskWebFormBuilder().calculateTypes(requestType),
+    responseTypes = MiskWebFormBuilder().calculateTypes(responseType),
     pathPattern = pathPattern.toString(),
     applicationInterceptors = applicationInterceptors.map {
       ClassNameFormatter.format(it::class)
