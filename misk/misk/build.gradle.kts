@@ -18,7 +18,6 @@ dependencies {
   implementation(Dependencies.bouncycastle)
   implementation(Dependencies.guava)
   implementation(Dependencies.guice)
-  implementation(Dependencies.guiceMultibindings)
   implementation(Dependencies.javaxInject)
   implementation(Dependencies.okHttp)
   implementation(Dependencies.okio)

@@ -12,7 +12,6 @@ configure<AllOpenExtension> {
 dependencies {
   implementation(Dependencies.guava)
   implementation(Dependencies.guice)
-  implementation(Dependencies.guiceMultibindings)
   implementation(Dependencies.jedis)
   implementation(Dependencies.okio)
   implementation(project(":misk"))
