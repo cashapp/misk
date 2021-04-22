@@ -113,9 +113,9 @@ object Dependencies {
   val tracingDatadog = "com.datadoghq:dd-trace-api:0.75.0"
   val vitess = "io.vitess:vitess-jdbc:3.0.0"
   val wireGradlePlugin = "com.squareup.wire:wire-gradle-plugin:3.6.0"
-  val wireGrpcClient = "com.squareup.wire:wire-grpc-client:3.7.1-square08"
-  val wireMoshiAdapter = "com.squareup.wire:wire-moshi-adapter:3.7.1-square08"
-  val wireRuntime = "com.squareup.wire:wire-runtime:3.7.1-square08"
+  val wireGrpcClient = "com.squareup.wire:wire-grpc-client:3.6.0"
+  val wireMoshiAdapter = "com.squareup.wire:wire-moshi-adapter:3.6.0"
+  val wireRuntime = "com.squareup.wire:wire-runtime:3.6.0"
   val zookeeper = "org.apache.zookeeper:zookeeper:3.5.4-beta"
 }
 // Auto-generated from polyrepo's master-dependencies.json. Update via polyrepo dep-add and polyrepo dep-upgrade.
