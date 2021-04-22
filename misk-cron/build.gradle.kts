@@ -2,7 +2,6 @@ dependencies {
   implementation(Dependencies.cronUtils)
   implementation(Dependencies.guava)
   implementation(Dependencies.guice)
-  implementation(Dependencies.guiceMultibindings)
   implementation(Dependencies.kotlinReflection)
   implementation(Dependencies.moshiAdapters)
   implementation(project(":misk"))

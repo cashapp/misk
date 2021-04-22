@@ -5,7 +5,6 @@ dependencies {
   api(project(":wisp-ssl"))
   implementation(Dependencies.bouncycastle)
   implementation(Dependencies.guice)
-  implementation(Dependencies.guiceMultibindings)
   implementation(Dependencies.kotlinStdLibJdk8)
   implementation(Dependencies.kotlinReflection)
   api(Dependencies.kotlinRetry)

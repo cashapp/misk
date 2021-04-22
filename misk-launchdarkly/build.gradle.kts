@@ -1,6 +1,5 @@
 dependencies {
   implementation(Dependencies.guice)
-  implementation(Dependencies.guiceMultibindings)
   implementation(Dependencies.kotlinStdLibJdk8)
   implementation(Dependencies.kotlinReflection)
   implementation(Dependencies.launchDarkly)
