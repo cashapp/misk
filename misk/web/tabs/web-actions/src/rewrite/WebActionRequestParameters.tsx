@@ -9,7 +9,7 @@ interface Props {
   webActionMetadata: WebActionMetadata
 }
 
-export default function WebActionParameters({ webActionMetadata }: Props) {
+export default function WebActionRequestParameters({ webActionMetadata }: Props) {
   const requestType = webActionMetadata.types[webActionMetadata.requestType]
   const parameters = webActionMetadata.parameters
 
