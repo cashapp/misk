@@ -1,6 +1,5 @@
 dependencies {
   api(Dependencies.guice)
-  api(Dependencies.guiceMultibindings)
   implementation(Dependencies.kotlinStdLibJdk8)
   implementation(Dependencies.kotlinReflection)
   implementation(Dependencies.assertj)

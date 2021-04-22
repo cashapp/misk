@@ -111,7 +111,7 @@ internal class ClientInvocationHandler(
       "no action corresponding to ${interfaceType.qualifiedName}#${method.name}"
     )
 
-    return method.invoke(retrofitProxy, *argsList.toTypedArray()) as Call<Any>
+    return method.invoke(retrofitProxy, *argsList.toTypedArray())
   }
 }
 

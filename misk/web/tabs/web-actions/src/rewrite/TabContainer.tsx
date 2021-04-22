@@ -1,15 +1,15 @@
 import React, { useEffect, useState } from "react"
-import { H1 } from "@blueprintjs/core"
+import { H1, H2 } from "@blueprintjs/core"
 import axios, { AxiosResponse } from "axios"
-import { WebActionMetadataResponse } from "./types"
-import WebActionCard from "./WebActionCard"
+import { WebActionMetadataResponse, WebActionsByPackage } from "./types"
+import WebActionCards from "./WebActionCards"
 import LoadingState from "./LoadingState"
 import Spacer from "./Spacer"
 
 export default function TabContainer() {
-  const [webactionMetadata, setWebactionMetadata] = useState<
-    WebActionMetadataResponse | undefined
-  >(undefined)
+  const [webActionsByPackage, setWebActionsByPacakge] = useState<
+    WebActionsByPackage | undefined
+  >()
 
   useEffect(() => {
     axios
@@ -18,11 +18,24 @@ export default function TabContainer() {
         response.data.webActionMetadata.sort((a, b) =>
           a.name.localeCompare(b.name)
         )
-        setWebactionMetadata(response.data)
-      })
-  }, [setWebactionMetadata])
 
-  if (webactionMetadata === undefined) {
+        const webActionsByPackage = response.data.webActionMetadata.reduce(
+          (packages, action) => {
+            if (packages[action.packageName] === undefined) {
+              packages[action.packageName] = [action]
+            } else {
+              packages[action.packageName].push(action)
+            }
+            return packages
+          },
+          {} as WebActionsByPackage
+        )
+
+        setWebActionsByPacakge(webActionsByPackage)
+      })
+  }, [setWebActionsByPacakge])
+
+  if (webActionsByPackage === undefined) {
     return <LoadingState />
   }
 
@@ -38,9 +51,14 @@ export default function TabContainer() {
           version <a href="/_admin/web-actions-old/">here.</a>
         </p>
       </div>
-      {webactionMetadata.webActionMetadata.map(webactionMetadata => (
-        <WebActionCard webActionMetadata={webactionMetadata} />
-      ))}
+      {Object.keys(webActionsByPackage)
+        .sort()
+        .map(packageName => (
+          <>
+            <H2>{packageName}</H2>
+            <WebActionCards webActions={webActionsByPackage[packageName]} />
+          </>
+        ))}
     </>
   )
 }
