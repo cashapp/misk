@@ -15,7 +15,7 @@ object Dependencies {
   val curatorFramework = "org.apache.curator:curator-framework:4.0.1"
   val datasourceProxy = "net.ttddyy:datasource-proxy:1.7"
   val docker = "com.github.docker-java:docker-java:3.2.6"
-  val gcpCloudStorage = "com.google.cloud:google-cloud-storage:1.113.1"
+  val gcpCloudStorage = "com.google.cloud:google-cloud-storage:1.82.0"
   val gcpDatastore = "com.google.cloud:google-cloud-datastore:1.108.1"
   val gcpKms = "com.google.apis:google-api-services-cloudkms:v1-rev9-1.22.0"
   val gcpLogback = "com.google.cloud:google-cloud-logging-logback:0.116.0-alpha"
