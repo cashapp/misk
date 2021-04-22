@@ -2,7 +2,7 @@ import React from "react"
 import { HTMLTable, UL } from "@blueprintjs/core"
 import { WebActionMetadata} from "./types"
 import WebActionCollapse from "./WebActionCollapse"
-import WebActionProtoField from "./WebActionProtoField";
+import WebActionProtoField from "./WebActionProtoField"
 
 interface Props {
   webActionMetadata: WebActionMetadata

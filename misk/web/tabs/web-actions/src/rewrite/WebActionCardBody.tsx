@@ -5,7 +5,7 @@ import WebActionCollapse from "./WebActionCollapse"
 import WebActionSendRequest from "./WebActionSendRequest"
 import WebActionRequestParameters from "./WebActionRequestParameters"
 import WebActionDescription from "./WebActionDescription"
-import WebActionResponseType from "./WebActionResponseType";
+import WebActionResponseType from "./WebActionResponseType"
 
 interface Props {
   webActionMetadata: WebActionMetadata
