@@ -4,8 +4,8 @@ dependencies {
   api(Dependencies.loggingApi)
   implementation(Dependencies.logbackClassic)
   implementation(Dependencies.slf4jApi)
+  implementation(Dependencies.assertj)
 
-  testImplementation(Dependencies.assertj)
   testImplementation(Dependencies.kotlinTest)
   testImplementation(Dependencies.kotlinxCoroutines)
   testImplementation(project(":wisp-logging"))
