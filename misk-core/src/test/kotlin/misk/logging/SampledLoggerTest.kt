@@ -11,6 +11,11 @@ import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.containsExactly
 import org.junit.jupiter.api.Test
+import wisp.logging.LogCollector
+import wisp.logging.error
+import wisp.logging.getLogger
+import wisp.logging.info
+import wisp.logging.warn
 import javax.inject.Inject
 
 @MiskTest(startService = true)

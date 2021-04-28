@@ -19,6 +19,7 @@ import misk.tokens.TokenGenerator
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import wisp.config.Config
+import wisp.logging.LogCollector
 import wisp.logging.getLogger
 import javax.inject.Inject
 import javax.inject.Qualifier
@@ -33,7 +34,7 @@ internal class FakeTransactionalJobQueueTest {
 
   @Inject private lateinit var fakeTransactionalJobQueue: FakeTransactionalJobQueue
   @Inject private lateinit var unitEnqueuer: UnitEnqueuer
-  @Inject private lateinit var logCollector: misk.logging.LogCollector
+  @Inject private lateinit var logCollector: LogCollector
   @Inject @StarCraftDb private lateinit var transacter: Transacter
 
   @Test fun basic() {

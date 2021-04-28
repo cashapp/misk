@@ -29,10 +29,11 @@ import org.assertj.core.api.Assertions.assertThatCode
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
+import wisp.logging.LogCollector
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.security.GeneralSecurityException
-import java.util.Base64
+import java.util.*
 
 @MiskTest(startService = true)
 class CryptoModuleTest {
@@ -170,7 +171,7 @@ class CryptoModuleTest {
     lcs.startAsync()
     lcs.awaitRunning()
 
-    val lc = injector.getInstance(misk.logging.LogCollector::class.java)
+    val lc = injector.getInstance(LogCollector::class.java)
 
     val kr = injector.getInstance(KeyReader::class.java)
     kr.readKey(name)

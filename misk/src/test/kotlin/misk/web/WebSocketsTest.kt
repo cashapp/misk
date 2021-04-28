@@ -16,6 +16,7 @@ import okhttp3.Request
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import wisp.logging.LogCollector
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -25,7 +26,7 @@ internal class WebSocketsTest {
   val module = TestModule()
 
   @Inject lateinit var jettyService: JettyService
-  @Inject lateinit var logCollector: misk.logging.LogCollector
+  @Inject lateinit var logCollector: LogCollector
 
   val listener = FakeWebSocketListener()
 
