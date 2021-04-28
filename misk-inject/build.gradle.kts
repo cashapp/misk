@@ -2,10 +2,10 @@ dependencies {
   api(Dependencies.guice)
   implementation(Dependencies.kotlinStdLibJdk8)
   implementation(Dependencies.kotlinReflection)
-  implementation(Dependencies.assertj)
-  implementation(Dependencies.kotlinTest)
 
   testImplementation(project(":misk-testing"))
+  testImplementation(Dependencies.assertj)
+  testImplementation(Dependencies.kotlinTest)
 }
 
 afterEvaluate {
