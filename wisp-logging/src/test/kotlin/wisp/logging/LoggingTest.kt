@@ -1,36 +1,33 @@
-package misk.logging
+package wisp.logging
 
 import ch.qos.logback.classic.Level
-import ch.qos.logback.classic.LoggerContext
-import com.google.inject.util.Modules
-import misk.MiskTestingServiceModule
-import misk.testing.MiskTest
-import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.containsExactly
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.slf4j.LoggerFactory
 import org.slf4j.MDC
-import wisp.logging.LogCollector
-import wisp.logging.error
-import wisp.logging.getLogger
-import wisp.logging.info
-import wisp.logging.warn
-import javax.inject.Inject
 
-@MiskTest(startService = true)
 class LoggingTest {
-  @MiskTestModule
-  val testModule = Modules.combine(MiskTestingServiceModule(), LogCollectorModule())
+  var wispQueuedLogCollector = WispQueuedLogCollector()
 
-  @Inject private lateinit var logCollector: LogCollector
+  private var logCollector: LogCollector = wispQueuedLogCollector
+
+  @BeforeEach
+  fun beforeEach() {
+    wispQueuedLogCollector.startUp()
+  }
+
+  @AfterEach
+  fun afterEach() {
+    wispQueuedLogCollector.shutDown()
+  }
 
   private val logger = getLogger<LoggingTest>()
-  private val loggerContext = LoggerFactory.getILoggerFactory() as LoggerContext
 
   @Test
   fun loggerNameIsBasedOnTheOuterClass() {
-    assertThat(logger.name).isEqualTo("misk.logging.LoggingTest")
+    assertThat(logger.name).isEqualTo("wisp.logging.LoggingTest")
   }
 
   @Test
