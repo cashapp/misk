@@ -71,12 +71,10 @@ internal class ConcurrencyLimitsInterceptor internal constructor(
   private fun logShedRequest() {
     val nowMs = clock.millis()
     val durationSinceLastErrorMs = nowMs - lastErrorLoggedAtMs
-    var level = Level.INFO
     if (lastErrorLoggedAtMs == -1L || durationSinceLastErrorMs >= durationBetweenErrorsMs) {
       lastErrorLoggedAtMs = nowMs
-      level = Level.ERROR
+      logger.log(level = Level.ERROR) { "concurrency limits interceptor shedding $actionName" }
     }
-    logger.log(level = level) { "concurrency limits interceptor shedding $actionName" }
   }
 
   @Singleton
