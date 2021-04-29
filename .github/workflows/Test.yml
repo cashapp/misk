@@ -65,6 +65,7 @@ jobs:
         run: ${{ matrix.cmd }}
 
       - name: Publish Test Report
+        if: ${{ always() }}
         uses: mikepenz/action-junit-report@v2
         with:
           check_name: Test Report - ${{ matrix.cmd }}
