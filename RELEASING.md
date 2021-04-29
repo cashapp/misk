@@ -29,7 +29,7 @@ Releasing
     git push && git push --tags
     ``` 
 
-5. Wait until the "Publish a release" action completes, then visit [Sonatype Nexus][sonatype_nexus] to promote (close then release) the artifact. Or drop it if there is a problem!
+5. Trigger the "Publish a release" action manually. Wait until it completes, then visit [Sonatype Nexus][sonatype_nexus] to promote (close then release) the artifact. Or drop it if there is a problem!
 
     ![Sonatype Release](/img/sonatype-release.gif)
 
