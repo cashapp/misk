@@ -30,12 +30,6 @@ jobs:
       - name: Test
         run: ${{ matrix.cmd }}
 
-      - name: Publish Test Report
-        uses: mikepenz/action-junit-report@v2
-        with:
-          report_paths: '**/build/test-results/test/TEST-*.xml'
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-
   jvm:
     runs-on: ${{ matrix.os }}
 
@@ -69,3 +63,9 @@ jobs:
 
       - name: Test
         run: ${{ matrix.cmd }}
+
+      - name: Publish Test Report
+        uses: mikepenz/action-junit-report@v2
+        with:
+          report_paths: '**/build/test-results/test/TEST-*.xml'
+          github_token: ${{ secrets.GITHUB_TOKEN }}
