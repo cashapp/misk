@@ -41,7 +41,7 @@ class ServiceGraphBuilderTest {
 
   @Test
   fun enhancementsAndDependencies() {
-    val script = startUpAndShutDown(listOf(keyA, keyC, enhancementA)) { _ ->
+    val script = startUpAndShutDown(listOf(keyA, keyC, enhancementA)) {
       enhanceService(toBeEnhanced = keyA, enhancement = enhancementA)
       addDependency(dependsOn = keyA, dependent = keyC)
     }
@@ -333,6 +333,29 @@ class ServiceGraphBuilderTest {
       """
         |starting ${keyA.name}
         |stopping ${keyA.name}
+        |""".trimMargin()
+    )
+  }
+
+  @Test
+  fun enhancementsOfEnhancements() {
+    val script = startUpAndShutDown(listOf(keyA, keyB, keyC, keyD)) {
+      enhanceService(toBeEnhanced = keyA, enhancement = keyB)
+      enhanceService(toBeEnhanced = keyB, enhancement = keyC)
+      addDependency(dependsOn = keyA, dependent = keyD)
+    }
+
+    assertThat(script).isEqualTo(
+      """
+        |starting Service A
+        |starting Service B
+        |starting Service C
+        |starting Service D
+        |healthy
+        |stopping Service D
+        |stopping Service C
+        |stopping Service B
+        |stopping Service A
         |""".trimMargin()
     )
   }
