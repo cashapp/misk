@@ -4,12 +4,12 @@ import com.netflix.concurrency.limits.Limiter
 import com.netflix.concurrency.limits.limiter.SimpleLimiter
 import misk.Action
 import misk.exceptions.StatusCode
-import misk.logging.log
 import misk.web.AvailableWhenDegraded
 import misk.web.NetworkChain
 import misk.web.NetworkInterceptor
 import org.slf4j.event.Level
 import wisp.logging.getLogger
+import wisp.logging.log
 import java.time.Clock
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
@@ -71,12 +71,10 @@ internal class ConcurrencyLimitsInterceptor internal constructor(
   private fun logShedRequest() {
     val nowMs = clock.millis()
     val durationSinceLastErrorMs = nowMs - lastErrorLoggedAtMs
-    var level = Level.INFO
     if (lastErrorLoggedAtMs == -1L || durationSinceLastErrorMs >= durationBetweenErrorsMs) {
       lastErrorLoggedAtMs = nowMs
-      level = Level.ERROR
+      logger.log(level = Level.ERROR) { "concurrency limits interceptor shedding $actionName" }
     }
-    logger.log(level = level) { "concurrency limits interceptor shedding $actionName" }
   }
 
   @Singleton

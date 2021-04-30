@@ -10,6 +10,7 @@ import misk.testing.MiskTestModule
 import misk.time.FakeClock
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import wisp.logging.LogCollector
 import wisp.logging.getLogger
 import java.time.Duration
 import java.time.temporal.ChronoUnit
@@ -25,7 +26,7 @@ internal class FakeJobQueueTest {
   @Inject private lateinit var fakeClock: FakeClock
   @Inject private lateinit var fakeJobQueue: FakeJobQueue
   @Inject private lateinit var exampleJobEnqueuer: ExampleJobEnqueuer
-  @Inject private lateinit var logCollector: misk.logging.LogCollector
+  @Inject private lateinit var logCollector: LogCollector
 
   @Test
   fun basic() {
