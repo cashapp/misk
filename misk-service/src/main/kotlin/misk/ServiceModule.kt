@@ -77,7 +77,8 @@ import kotlin.reflect.KClass
 class ServiceModule(
   val key: Key<out Service>,
   val dependsOn: List<Key<out Service>> = listOf(),
-  val enhancedBy: List<Key<out Service>> = listOf()
+  val enhancedBy: List<Key<out Service>> = listOf(),
+  val enhances: Key<out Service>? = null
 ) : KAbstractModule() {
   override fun configure() {
     multibind<ServiceEntry>().toInstance(ServiceEntry(key))
@@ -92,6 +93,11 @@ class ServiceModule(
         EnhancementEdge(toBeEnhanced = key, enhancement = enhancedByKey)
       )
     }
+    if (enhances != null) {
+      multibind<EnhancementEdge>().toInstance(
+        EnhancementEdge(toBeEnhanced = enhances, enhancement = key)
+      )
+    }
   }
 
   fun dependsOn(upstream: Key<out Service>) = ServiceModule(
@@ -101,11 +107,17 @@ class ServiceModule(
   fun enhancedBy(enhancement: Key<out Service>) =
     ServiceModule(key, dependsOn, enhancedBy + enhancement)
 
+  fun enhances(toBeEnhanced: Key<out Service>) =
+    ServiceModule(key, dependsOn, enhancedBy, toBeEnhanced)
+
   inline fun <reified T : Service> dependsOn(qualifier: KClass<out Annotation>? = null) =
     dependsOn(T::class.toKey(qualifier))
 
   inline fun <reified T : Service> enhancedBy(qualifier: KClass<out Annotation>? = null) =
     enhancedBy(T::class.toKey(qualifier))
+
+  inline fun <reified T : Service> enhances(qualifier: KClass<out Annotation>? = null) =
+    enhances(T::class.toKey(qualifier))
 }
 
 /**
