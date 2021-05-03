@@ -13,6 +13,7 @@ class DashboardModule : KAbstractModule() {
     newMultibinder<DashboardHomeUrl>()
     newMultibinder<DashboardNavbarItem>()
     newMultibinder<DashboardNavbarStatus>()
+    newMultibinder<DashboardTheme>()
 
     // Add metadata actions to support dashboards
     install(WebActionModule.create<DashboardMetadataAction>())
