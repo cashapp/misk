@@ -68,7 +68,7 @@ class DashboardMetadataAction @Inject constructor() : WebAction {
       navbar_items = navbarItems,
       navbar_status = navbarStatus,
       tabs = authorizedDashboardTabs,
-      admin_dashboard = webConfig.adminDashboard
+      admin_dashboard = webConfig.admin_dashboard
     )
     return Response(
       dashboardMetadata = dashboardMetadata

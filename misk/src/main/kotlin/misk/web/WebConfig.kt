@@ -85,7 +85,7 @@ data class WebConfig(
   /** If true, disables automatic load shedding when degraded. */
   val concurrency_limiter_disabled: Boolean = false,
 
-  val adminDashboard: AdminDashboardConfig
+  val admin_dashboard: AdminDashboardConfig = AdminDashboardConfig()
 ) : Config
 
 data class WebSslConfig(
@@ -156,5 +156,5 @@ data class AdminDashboardConfig(
   /**
    * URL that can be used by the admin dashboard to link to protobuf definitions
    */
-  val protobufDefinitionUrl: String? = null,
+  val protobuf_definition_url: String? = null,
 )
