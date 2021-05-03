@@ -2,9 +2,9 @@ package misk
 
 import com.google.common.util.concurrent.Service
 import com.google.inject.Key
+import kotlin.reflect.KClass
 import misk.inject.KAbstractModule
 import misk.inject.toKey
-import kotlin.reflect.KClass
 
 /**
  * # Misk Services
@@ -74,7 +74,7 @@ import kotlin.reflect.KClass
  * This service will stall in the `STARTING` state until all upstream services are `RUNNING`.
  * Symmetrically it stalls in the `STOPPING` state until all dependent services are `TERMINATED`.
  */
-class ServiceModule(
+class ServiceModule @JvmOverloads constructor(
   val key: Key<out Service>,
   val dependsOn: List<Key<out Service>> = listOf(),
   val enhancedBy: List<Key<out Service>> = listOf(),
