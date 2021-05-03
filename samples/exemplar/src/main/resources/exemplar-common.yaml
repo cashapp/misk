@@ -1,6 +1,8 @@
 web:
   port: 8080
   idle_timeout: 30000
+  admin_dashboard:
+    protobuf_definition_url: "https://example.com"
 
 prometheus:
   http_port: 8081

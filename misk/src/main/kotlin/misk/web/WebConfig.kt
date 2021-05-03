@@ -84,6 +84,8 @@ data class WebConfig(
 
   /** If true, disables automatic load shedding when degraded. */
   val concurrency_limiter_disabled: Boolean = false,
+
+  val adminDashboard: AdminDashboardConfig
 ) : Config
 
 data class WebSslConfig(
@@ -148,4 +150,11 @@ data class CorsConfig(
   val chainPreflight: Boolean = true,
   /** A comma separated list of HTTP headers that are allowed to be exposed on the client. */
   val exposedHeaders: Array<String> = arrayOf()
+)
+
+data class AdminDashboardConfig(
+  /**
+   * URL that can be used by the admin dashboard to link to protobuf definitions
+   */
+  val protobufDefinitionUrl: String? = null,
 )

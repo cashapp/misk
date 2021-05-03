@@ -3,10 +3,12 @@ package misk.web.metadata
 import misk.MiskCaller
 import misk.scope.ActionScoped
 import misk.security.authz.Unauthenticated
+import misk.web.AdminDashboardConfig
 import misk.web.Get
 import misk.web.PathParam
 import misk.web.RequestContentType
 import misk.web.ResponseContentType
+import misk.web.WebConfig
 import misk.web.actions.WebAction
 import misk.web.dashboard.DashboardHomeUrl
 import misk.web.dashboard.DashboardNavbarItem
@@ -35,6 +37,7 @@ class DashboardMetadataAction @Inject constructor() : WebAction {
   @Inject private lateinit var allNavbarStatus: List<DashboardNavbarStatus>
   @Inject private lateinit var allHomeUrls: List<DashboardHomeUrl>
   @Inject lateinit var callerProvider: @JvmSuppressWildcards ActionScoped<MiskCaller?>
+  @Inject lateinit var webConfig: WebConfig
 
   @Get("/api/dashboard/{dashboard_slug}/metadata")
   @RequestContentType(MediaTypes.APPLICATION_JSON)
@@ -64,7 +67,8 @@ class DashboardMetadataAction @Inject constructor() : WebAction {
       home_url = homeUrl,
       navbar_items = navbarItems,
       navbar_status = navbarStatus,
-      tabs = authorizedDashboardTabs
+      tabs = authorizedDashboardTabs,
+      admin_dashboard = webConfig.adminDashboard
     )
     return Response(
       dashboardMetadata = dashboardMetadata
@@ -75,7 +79,8 @@ class DashboardMetadataAction @Inject constructor() : WebAction {
     val home_url: String = "",
     val navbar_items: List<String> = listOf(),
     val navbar_status: String = "",
-    val tabs: List<DashboardTab> = listOf()
+    val tabs: List<DashboardTab> = listOf(),
+    val admin_dashboard: AdminDashboardConfig = AdminDashboardConfig()
   )
 
   data class Response(val dashboardMetadata: DashboardMetadata = DashboardMetadata())
