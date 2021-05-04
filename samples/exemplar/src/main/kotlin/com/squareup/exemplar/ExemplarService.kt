@@ -28,7 +28,10 @@ fun main(args: Array<String>) {
     DeploymentModule(deployment, env),
     PrometheusMetricsServiceModule(config.prometheus),
     EnvironmentModule(environment = environment),
-    AdminDashboardModule(isDevelopment = true),
+    AdminDashboardModule(
+      isDevelopment = true,
+      dashboardProtobufDocUrlPrefix = "https://example.com/"
+    ),
     ConfigDashboardTabModule(isDevelopment = true)
   ).run(args)
 }

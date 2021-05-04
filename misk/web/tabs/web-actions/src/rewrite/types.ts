@@ -38,6 +38,7 @@ export interface ParameterMetaData {
 }
 
 export interface WebActionMetadataResponse {
+  protobufDocUrlPrefix: string
   webActionMetadata: WebActionMetadata[]
 }
 

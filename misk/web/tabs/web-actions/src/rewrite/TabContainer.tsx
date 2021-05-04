@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react"
+import React, { createContext, useEffect, useState } from "react"
 import { H1, H2 } from "@blueprintjs/core"
 import axios, { AxiosResponse } from "axios"
 import { WebActionMetadataResponse, WebActionsByPackage } from "./types"
@@ -6,9 +6,15 @@ import WebActionCards from "./WebActionCards"
 import LoadingState from "./LoadingState"
 import Spacer from "./Spacer"
 
+export const ProtobufDocUrlPrefix = createContext(null)
+
 export default function TabContainer() {
   const [webActionsByPackage, setWebActionsByPacakge] = useState<
     WebActionsByPackage | undefined
+  >()
+
+  const [protobufDocUrlPrefix, setProtobufDocUrlPrefix] = useState<
+    String | undefined
   >()
 
   useEffect(() => {
@@ -18,6 +24,8 @@ export default function TabContainer() {
         response.data.webActionMetadata.sort((a, b) =>
           a.name.localeCompare(b.name)
         )
+
+        setProtobufDocUrlPrefix(response.data.protobufDocUrlPrefix)
 
         const webActionsByPackage = response.data.webActionMetadata.reduce(
           (packages, action) => {
@@ -40,7 +48,7 @@ export default function TabContainer() {
   }
 
   return (
-    <>
+    <ProtobufDocUrlPrefix.Provider value={protobufDocUrlPrefix}>
       <div
         style={{ display: "flex", alignItems: "center", marginBottom: "8px" }}
       >
@@ -59,6 +67,6 @@ export default function TabContainer() {
             <WebActionCards webActions={webActionsByPackage[packageName]} />
           </>
         ))}
-    </>
+    </ProtobufDocUrlPrefix.Provider>
   )
 }

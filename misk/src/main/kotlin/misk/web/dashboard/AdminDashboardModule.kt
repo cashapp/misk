@@ -24,7 +24,10 @@ import javax.inject.Qualifier
  *   Dashboard Annotation [AdminDashboard]. Tabs are then included in the admin dashboard menu
  *   grouping according to the [DashboardTab].category field and sorting by [DashboardTab].name
  */
-class AdminDashboardModule(private val isDevelopment: Boolean) : KAbstractModule() {
+class AdminDashboardModule(
+  private val isDevelopment: Boolean,
+  private val dashboardProtobufDocUrlPrefix: String = ""
+) : KAbstractModule() {
 
   @Deprecated("Environment is deprecated")
   constructor(env: Environment) : this(env == Environment.TESTING || env == Environment.DEVELOPMENT)
@@ -32,6 +35,9 @@ class AdminDashboardModule(private val isDevelopment: Boolean) : KAbstractModule
   override fun configure() {
     // Install base dashboard support
     install(DashboardModule())
+
+    bind<AdminDashboardProtobufDocUrlPrefix>()
+      .toInstance(AdminDashboardProtobufDocUrlPrefix(dashboardProtobufDocUrlPrefix))
 
     // Adds open CORS headers in development to allow through API calls from webpack servers
     multibind<NetworkInterceptor.Factory>().to<WideOpenDevelopmentInterceptorFactory>()
