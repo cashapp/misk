@@ -6,6 +6,17 @@ import misk.environment.EnvironmentModule
 import misk.inject.KAbstractModule
 import misk.security.ssl.CertStoreConfig
 import misk.security.ssl.SslLoader
+import okhttp3.internal.concurrent.TaskRunner
+import okhttp3.internal.http2.Http2
+import java.io.Closeable
+import java.util.concurrent.CopyOnWriteArraySet
+import java.util.logging.ConsoleHandler
+import java.util.logging.Handler
+import java.util.logging.Level
+import java.util.logging.LogRecord
+import java.util.logging.Logger
+import java.util.logging.SimpleFormatter
+import kotlin.reflect.KClass
 
 /**
  * A module that starts an embedded Jetty web server configured for testing. The server supports
@@ -38,6 +49,8 @@ class WebServerTestingModule(
   override fun configure() {
     install(EnvironmentModule(Environment.TESTING))
     install(MiskWebModule(webConfig))
+    OkHttpDebugLogging.enableHttp2()
+    OkHttpDebugLogging.enableTaskRunner()
   }
 
   companion object {
@@ -51,6 +64,7 @@ class WebServerTestingModule(
       selectors = 1,
       idle_timeout = 500000,
       host = "127.0.0.1",
+      close_connection_percent = 0.00,
       ssl = WebSslConfig(
         port = 0,
         cert_store = CertStoreConfig(
@@ -62,4 +76,34 @@ class WebServerTestingModule(
       )
     )
   }
+}
+
+object OkHttpDebugLogging {
+  // Keep references to loggers to prevent their configuration from being GC'd.
+  private val configuredLoggers = CopyOnWriteArraySet<Logger>()
+
+  fun enableHttp2() = enable(Http2::class)
+
+  fun enableTaskRunner() = enable(TaskRunner::class)
+
+  fun logHandler() = ConsoleHandler().apply {
+    level = Level.FINE
+    formatter = object : SimpleFormatter() {
+      override fun format(record: LogRecord) =
+        String.format("[%1\$tF %1\$tT] %2\$s %n", record.millis, record.message)
+    }
+  }
+
+  fun enable(loggerClass: String, handler: Handler = logHandler()): Closeable {
+    val logger = Logger.getLogger(loggerClass)
+    if (configuredLoggers.add(logger)) {
+      logger.addHandler(handler)
+      logger.level = Level.FINEST
+    }
+    return Closeable {
+      logger.removeHandler(handler)
+    }
+  }
+
+  fun enable(loggerClass: KClass<*>) = enable(loggerClass.java.name)
 }
