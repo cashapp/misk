@@ -1,5 +1,7 @@
 package misk
 
+import ch.qos.logback.classic.Level
+import ch.qos.logback.classic.Logger
 import misk.concurrent.FakeSleeperModule
 import misk.environment.FakeEnvVarModule
 import misk.inject.KAbstractModule
@@ -8,6 +10,7 @@ import misk.resources.TestingResourceLoaderModule
 import misk.time.FakeClockModule
 import misk.time.FakeTickerModule
 import misk.tokens.FakeTokenGeneratorModule
+import org.slf4j.LoggerFactory
 
 /**
  * [MiskTestingServiceModule] should be installed in unit testing environments.
@@ -18,6 +21,8 @@ import misk.tokens.FakeTokenGeneratorModule
  */
 class MiskTestingServiceModule : KAbstractModule() {
   override fun configure() {
+    val rootLogger = LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME) as Logger
+    rootLogger.level = Level.DEBUG
     install(TestingResourceLoaderModule())
     install(FakeEnvVarModule())
     install(FakeClockModule())
