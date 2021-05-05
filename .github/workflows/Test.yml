@@ -13,22 +13,22 @@ env:
   TERM: dumb
 
 jobs:
-  js:
-    runs-on: ${{ matrix.os }}
-
-    strategy:
-      matrix:
-        os: [ubuntu-latest]
-        node: [12]
-        cmd:
-          - sudo npm install -g @misk/cli && miskweb ci-build -e
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-
-      - name: Test
-        run: ${{ matrix.cmd }}
+#  js:
+#    runs-on: ${{ matrix.os }}
+#
+#    strategy:
+#      matrix:
+#        os: [ubuntu-latest]
+#        node: [12]
+#        cmd:
+#          - sudo npm install -g @misk/cli && miskweb ci-build -e
+#
+#    steps:
+#      - name: Checkout
+#        uses: actions/checkout@v2
+#
+#      - name: Test
+#        run: ${{ matrix.cmd }}
 
   jvm:
     runs-on: ${{ matrix.os }}
@@ -45,7 +45,7 @@ jobs:
       matrix:
         os: [ubuntu-latest]
         cmd:
-          - ./gradlew testShardHibernate -i --scan
+#          - ./gradlew testShardHibernate -i --scan
           - ./gradlew testShardNonHibernate -i --scan --parallel
 
     steps:
