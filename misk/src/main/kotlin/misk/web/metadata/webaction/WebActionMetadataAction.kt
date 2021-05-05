@@ -29,7 +29,7 @@ class WebActionMetadataAction @Inject constructor() : WebAction {
   }
 
   data class Response(
-    val protobufDocUrlPrefix: String,
+    val protobufDocUrlPrefix: String?,
     val webActionMetadata: List<WebActionMetadata>
   )
 }

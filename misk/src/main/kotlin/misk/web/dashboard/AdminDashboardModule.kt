@@ -26,7 +26,7 @@ import javax.inject.Qualifier
  */
 class AdminDashboardModule(
   private val isDevelopment: Boolean,
-  private val dashboardProtobufDocUrlPrefix: String = ""
+  private val dashboardProtobufDocUrlPrefix: String? = null
 ) : KAbstractModule() {
 
   @Deprecated("Environment is deprecated")
