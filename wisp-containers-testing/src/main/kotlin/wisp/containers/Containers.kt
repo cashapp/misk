@@ -71,7 +71,7 @@ class Composer(private val name: String, private vararg val containers: Containe
     docker
   )
   private val containerIds = mutableMapOf<String, String>()
-  private val running = AtomicBoolean(false)
+  val running = AtomicBoolean(false)
 
   fun start() {
     if (!running.compareAndSet(false, true)) return
@@ -140,20 +140,21 @@ class Composer(private val name: String, private vararg val containers: Containe
 
     for (container in containers) {
       val name = container.name()
-      val id = containerIds[name]!!
-      log.info { "killing $name with container id $id" }
-      docker.removeContainerCmd(id).withForce(true).exec()
+      containerIds[name]?.let {
+        log.info { "killing $name with container id $it" }
+        docker.removeContainerCmd(it).withForce(true).exec()
 
-      try {
-        log.info { "waiting for $name to terminate" }
-        docker.waitContainerCmd(id).exec(
-          GracefulWaitContainerResultCallback()
-        ).awaitCompletion()
-      } catch (th: Throwable) {
-        log.error(th) { "could not kill $name with container id $id" }
+        try {
+          log.info { "waiting for $name to terminate" }
+          docker.waitContainerCmd(it).exec(
+            GracefulWaitContainerResultCallback()
+          ).awaitCompletion()
+        } catch (th: Throwable) {
+          log.error(th) { "could not kill $name with container id $it" }
+        }
+
+        log.info { "killed $name with container id $it" }
       }
-
-      log.info { "killed $name with container id $id" }
     }
 
     network.stop()
