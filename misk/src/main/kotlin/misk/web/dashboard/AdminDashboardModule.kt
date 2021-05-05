@@ -166,7 +166,12 @@ class AdminDashboardTestingModule : KAbstractModule() {
         )
       )
     )
-    install(AdminDashboardModule(true))
+    install(
+      AdminDashboardModule(
+        isDevelopment = true,
+        dashboardProtobufDocUrlPrefix = "https://example.com/"
+      )
+    )
   }
 }
 

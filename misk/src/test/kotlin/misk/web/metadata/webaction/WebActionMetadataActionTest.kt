@@ -58,6 +58,13 @@ class WebActionMetadataActionTest {
     assertThat(metadata.types).isNotEmpty
   }
 
+  @Test fun `protobuf documentation url prefix`() {
+    val response = webActionMetadataAction.getAll()
+
+    val protobufDocUrlPrefix = response.protobufDocUrlPrefix
+    assertThat(protobufDocUrlPrefix).isEqualTo("https://example.com/")
+  }
+
   @Test fun `grpc`() {
     val response = webActionMetadataAction.getAll()
 
