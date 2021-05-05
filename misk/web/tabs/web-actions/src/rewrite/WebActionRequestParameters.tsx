@@ -1,10 +1,10 @@
-import React, { useContext } from "react"
+import React from "react"
 import { HTMLTable, UL } from "@blueprintjs/core"
 import { WebActionMetadata } from "./types"
 import WebActionParameter from "./WebActionParameter"
 import WebActionCollapse from "./WebActionCollapse"
 import WebActionProtoField from "./WebActionProtoField"
-import { ProtobufDocUrlPrefix } from "./TabContainer"
+import LinkToProtoDoc from "./LinkToProtoDoc"
 
 interface Props {
   webActionMetadata: WebActionMetadata
@@ -15,8 +15,6 @@ export default function WebActionRequestParameters({
 }: Props) {
   const requestType = webActionMetadata.types[webActionMetadata.requestType]
   const parameters = webActionMetadata.parameters
-
-  const protobufDocUrlPrefix = useContext(ProtobufDocUrlPrefix)
 
   if (parameters.length == 0) {
     return null
@@ -32,7 +30,7 @@ export default function WebActionRequestParameters({
         >
           <UL style={{ listStyle: "none" }}>
             <li>
-              <a href={protobufDocUrlPrefix + webActionMetadata.requestType}>{webActionMetadata.requestType}</a>
+              <LinkToProtoDoc protoClass={webActionMetadata.requestType} />
               <HTMLTable style={{ marginBottom: "0px" }}>
                 {requestType.fields.map(field => (
                   <WebActionProtoField field={field} />
