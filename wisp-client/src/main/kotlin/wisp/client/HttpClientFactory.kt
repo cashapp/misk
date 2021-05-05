@@ -5,6 +5,7 @@ import wisp.security.ssl.SslLoader
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.Protocol
+import okhttp3.logging.LoggingEventListener
 import java.io.File
 import java.net.Proxy
 import javax.net.ssl.X509TrustManager
@@ -66,6 +67,8 @@ class HttpClientFactory constructor(
     okhttpInterceptors?.let {
       builder.interceptors().addAll(it)
     }
+
+    builder.eventListenerFactory(LoggingEventListener.Factory())
 
     return builder.build()
   }

@@ -12,9 +12,6 @@ import com.squareup.wire.GrpcClient
 import com.squareup.wire.GrpcMethod
 import com.squareup.wire.Service
 import com.squareup.wire.WireRpc
-import java.util.concurrent.LinkedBlockingDeque
-import javax.inject.Inject
-import javax.inject.Singleton
 import misk.MiskTestingServiceModule
 import misk.inject.KAbstractModule
 import misk.inject.getInstance
@@ -24,7 +21,6 @@ import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.web.WebActionModule
 import misk.web.WebServerTestingModule
-import misk.web.WebTestingModule
 import misk.web.actions.WebAction
 import misk.web.jetty.JettyService
 import okhttp3.Response
@@ -32,6 +28,9 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.Duration
+import java.util.concurrent.LinkedBlockingDeque
+import javax.inject.Inject
+import javax.inject.Singleton
 
 @MiskTest(startService = true)
 internal class GrpcClientProviderTest {
