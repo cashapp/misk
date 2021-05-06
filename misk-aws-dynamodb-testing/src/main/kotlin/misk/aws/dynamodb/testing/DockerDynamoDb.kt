@@ -5,9 +5,9 @@ import com.amazonaws.services.dynamodbv2.AmazonDynamoDBStreams
 import com.amazonaws.services.dynamodbv2.model.AmazonDynamoDBException
 import com.github.dockerjava.api.model.ExposedPort
 import com.github.dockerjava.api.model.Ports
-import misk.containers.Composer
-import misk.containers.Container
 import misk.testing.ExternalDependency
+import wisp.containers.Composer
+import wisp.containers.Container
 import wisp.logging.getLogger
 
 /**
