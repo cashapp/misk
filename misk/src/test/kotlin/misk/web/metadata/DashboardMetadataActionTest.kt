@@ -8,6 +8,8 @@ import misk.security.authz.FakeCallerAuthenticator
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.web.dashboard.AdminDashboard
+import misk.web.dashboard.MiskWebTheme
+import misk.web.dashboard.MiskWebTheme.Companion.DEFAULT_THEME
 import misk.web.dashboard.ValidWebEntry.Companion.slugify
 import misk.web.jetty.JettyService
 import okhttp3.OkHttpClient
@@ -16,6 +18,7 @@ import org.junit.jupiter.api.Test
 import javax.inject.Inject
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 
 @MiskTest(startService = true)
 class DashboardMetadataActionTest {
@@ -92,6 +95,15 @@ class DashboardMetadataActionTest {
       capabilities = "test_admin_access"
     )
     assertEquals("/test-app/", response.dashboardMetadata.home_url)
+  }
+
+  @Test fun `test dashboard custom theme`() {
+    val response = executeRequest(
+      path = asDashboardPath<DashboardMetadataActionTestDashboard>(),
+      user = "sandy",
+      capabilities = "test_admin_access"
+    )
+    assertEquals(DEFAULT_THEME, response.dashboardMetadata.theme)
   }
 
   private fun executeRequest(

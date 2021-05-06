@@ -12,6 +12,8 @@ import misk.web.dashboard.DashboardHomeUrl
 import misk.web.dashboard.DashboardNavbarItem
 import misk.web.dashboard.DashboardNavbarStatus
 import misk.web.dashboard.DashboardTab
+import misk.web.dashboard.DashboardTheme
+import misk.web.dashboard.MiskWebTheme
 import misk.web.mediatype.MediaTypes
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -34,6 +36,7 @@ class DashboardMetadataAction @Inject constructor() : WebAction {
   @Inject private lateinit var allNavbarItems: List<DashboardNavbarItem>
   @Inject private lateinit var allNavbarStatus: List<DashboardNavbarStatus>
   @Inject private lateinit var allHomeUrls: List<DashboardHomeUrl>
+  @Inject private lateinit var allThemes: List<DashboardTheme>
   @Inject lateinit var callerProvider: @JvmSuppressWildcards ActionScoped<MiskCaller?>
 
   @Get("/api/dashboard/{dashboard_slug}/metadata")
@@ -60,11 +63,15 @@ class DashboardMetadataAction @Inject constructor() : WebAction {
     val navbarStatus = allNavbarStatus
       .find { it.dashboard_slug == dashboard_slug }?.status ?: ""
 
+    val theme = allThemes
+      .find { it.dashboard_slug == dashboard_slug }?.theme
+
     val dashboardMetadata = DashboardMetadata(
       home_url = homeUrl,
       navbar_items = navbarItems,
       navbar_status = navbarStatus,
-      tabs = authorizedDashboardTabs
+      tabs = authorizedDashboardTabs,
+      theme = theme,
     )
     return Response(
       dashboardMetadata = dashboardMetadata
@@ -75,7 +82,9 @@ class DashboardMetadataAction @Inject constructor() : WebAction {
     val home_url: String = "",
     val navbar_items: List<String> = listOf(),
     val navbar_status: String = "",
-    val tabs: List<DashboardTab> = listOf()
+    val tabs: List<DashboardTab> = listOf(),
+    /** If null, uses default theme that ships with Misk-Web */
+    val theme: MiskWebTheme? = null,
   )
 
   data class Response(val dashboardMetadata: DashboardMetadata = DashboardMetadata())

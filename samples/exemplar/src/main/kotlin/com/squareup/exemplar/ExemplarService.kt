@@ -28,7 +28,7 @@ fun main(args: Array<String>) {
     DeploymentModule(deployment, env),
     PrometheusMetricsServiceModule(config.prometheus),
     EnvironmentModule(environment = environment),
-    AdminDashboardModule(isDevelopment = true),
+    DashboardModule(),
     ConfigDashboardTabModule(isDevelopment = true)
   ).run(args)
 }
