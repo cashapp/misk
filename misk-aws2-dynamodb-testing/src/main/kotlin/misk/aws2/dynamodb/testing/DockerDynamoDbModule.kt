@@ -2,6 +2,7 @@ package misk.aws2.dynamodb.testing
 
 import misk.ServiceModule
 import misk.inject.KAbstractModule
+import wisp.aws2.dynamodb.testing.LocalDynamoDb
 
 /**
  * Spins up a docker container for testing. It clears the table content before each test starts.
