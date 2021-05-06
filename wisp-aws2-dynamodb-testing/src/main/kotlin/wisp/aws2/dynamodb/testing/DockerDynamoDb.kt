@@ -11,9 +11,8 @@ import wisp.containers.Container
 import wisp.logging.getLogger
 
 /**
- * A test DynamoDb Local service. Tests can connect to the service at 127.0.0.1:<random_port>.
- *
- *
+ * A test DynamoDb Local service. Tests can connect to the service at
+ * 127.0.0.1:<random_port> (use [url])
  */
 class DockerDynamoDb(val localDynamoDb: LocalDynamoDb = LocalDynamoDb()) {
   private val logger = getLogger<DockerDynamoDb>()
@@ -22,7 +21,7 @@ class DockerDynamoDb(val localDynamoDb: LocalDynamoDb = LocalDynamoDb()) {
 
   val id = "dynamodb-local-$pid"
 
-  private val url = localDynamoDb.url
+  val url = localDynamoDb.url
 
   val awsCredentialsProvider = localDynamoDb.awsCredentialsProvider
 
