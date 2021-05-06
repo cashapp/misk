@@ -41,6 +41,7 @@ class DockerDynamoDb(val localDynamoDb: LocalDynamoDb = LocalDynamoDb()) {
   )
 
   fun startup() {
+    // add a hook to ensure this is shutdown properly
     Runtime.getRuntime().addShutdownHook(Thread { shutdown() })
     composer.start()
     val client = connect()
@@ -63,6 +64,13 @@ class DockerDynamoDb(val localDynamoDb: LocalDynamoDb = LocalDynamoDb()) {
     composer.stop()
   }
 
+  /**
+   * Get a [DynamoDbClient] connection
+   */
   fun connect(): DynamoDbClient = localDynamoDb.connect()
+
+  /**
+   * Get a [DynamoDbStreamsClient] connection
+   */
   fun connectToStreams(): DynamoDbStreamsClient = localDynamoDb.connectToStreams()
 }
