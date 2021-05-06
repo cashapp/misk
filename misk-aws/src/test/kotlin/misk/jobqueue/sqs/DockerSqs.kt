@@ -9,10 +9,10 @@ import com.amazonaws.services.sqs.AmazonSQSClient
 import com.amazonaws.services.sqs.model.QueueDoesNotExistException
 import com.github.dockerjava.api.model.ExposedPort
 import com.github.dockerjava.api.model.Ports
-import misk.containers.Composer
-import misk.containers.Container
 import misk.jobqueue.sqs.DockerSqs.clientPort
 import misk.testing.ExternalDependency
+import wisp.containers.Composer
+import wisp.containers.Container
 import wisp.logging.getLogger
 
 /**
