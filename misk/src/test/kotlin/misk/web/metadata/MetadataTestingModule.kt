@@ -9,6 +9,8 @@ import misk.web.dashboard.DashboardNavbarItem
 import misk.web.dashboard.DashboardNavbarStatus
 import misk.web.dashboard.DashboardTab
 import misk.web.dashboard.DashboardTabProvider
+import misk.web.dashboard.DashboardTheme
+import misk.web.dashboard.MiskWebTheme
 import wisp.config.Config
 import javax.inject.Qualifier
 
@@ -48,6 +50,12 @@ class MetadataTestingModule : KAbstractModule() {
     multibind<DashboardHomeUrl>().toInstance(
       DashboardHomeUrl<DashboardMetadataActionTestDashboard>(
         urlPathPrefix = "/test-app/"
+      )
+    )
+
+    multibind<DashboardTheme>().toInstance(
+      DashboardTheme<DashboardMetadataActionTestDashboard>(
+        theme = MiskWebTheme.DEFAULT_THEME
       )
     )
   }
