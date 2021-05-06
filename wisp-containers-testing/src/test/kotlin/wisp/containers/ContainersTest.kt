@@ -11,9 +11,8 @@ internal class ContainersTest {
   @Test
   fun `create a container successfully`() {
     val container = Container {
-      this
-        .withImage("alpine")
-        .withName("alpine")
+      withImage("alpine")
+      withName("alpine")
     }
 
     val composer = Composer("alpine", container)
@@ -27,9 +26,8 @@ internal class ContainersTest {
   fun `attempting to create an unknown container should throw NotFoundException`() {
     assertThrows<NotFoundException> {
       val myBadContainer = Container {
-        this
-          .withImage("unknown_image/really_bad_image_name")
-          .withName("bad_image")
+        withImage("unknown_image/really_bad_image_name")
+        withName("bad_image")
       }
 
       val composer = Composer("bad_stuff", myBadContainer)

@@ -38,20 +38,18 @@ data class Container(
  *
  * ```
  *     val zkContainer = Container {
- *       this
- *         .withImage("confluentinc/cp-zookeeper")
- *         .withName("zookeeper")
- *         .withEnv("ZOOKEEPER_CLIENT_PORT=2181")
+ *         withImage("confluentinc/cp-zookeeper")
+ *         withName("zookeeper")
+ *         withEnv("ZOOKEEPER_CLIENT_PORT=2181")
  *     }
  *     val kafka = Container {
- *       this
- *         .withImage("confluentinc/cp-kafka"
- *         .withName("kafka")
- *         .withExposedPorts(ExposedPort.tcp(port))
- *         .withPortBindings(Ports().apply {
+ *         withImage("confluentinc/cp-kafka"
+ *         withName("kafka")
+ *         withExposedPorts(ExposedPort.tcp(port))
+ *         withPortBindings(Ports().apply {
  *           bind(ExposedPort.tcp(9102), Ports.Binding.bindPort(9102))
  *         })
- *         .withEnv(
+ *         withEnv(
  *           "KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181",
  *           "KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://localhost:9102")
  *         }
@@ -61,12 +59,10 @@ data class Container(
  */
 class Composer(private val name: String, private vararg val containers: Container) {
 
-  var delegate: wisp.containers.Composer
-
-  init {
+  private val delegate: wisp.containers.Composer = run {
     val wispContainers =
       containers.map { wisp.containers.Container(it.createCmd, it.beforeStartHook) }.toTypedArray()
-    delegate = wisp.containers.Composer(name, *wispContainers)
+    wisp.containers.Composer(name, *wispContainers)
   }
 
   fun start() {
