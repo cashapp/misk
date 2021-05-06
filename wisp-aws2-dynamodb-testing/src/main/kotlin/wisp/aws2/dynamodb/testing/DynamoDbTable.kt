@@ -1,4 +1,4 @@
-package misk.aws2.dynamodb.testing
+package wisp.aws2.dynamodb.testing
 
 import software.amazon.awssdk.enhanced.dynamodb.model.CreateTableEnhancedRequest
 import kotlin.reflect.KClass
@@ -14,8 +14,11 @@ data class DynamoDbTable @JvmOverloads constructor(
   val tableName: String,
   val tableClass: KClass<*>,
   val configureTable: (CreateTableEnhancedRequest.Builder) -> CreateTableEnhancedRequest.Builder =
-    CreateTablesService.CONFIGURE_TABLE_NOOP
+    CONFIGURE_TABLE_NOOP
 )
 
-fun DynamoDbTable.toWispDynamoDbTable() : wisp.aws2.dynamodb.testing.DynamoDbTable =
-  wisp.aws2.dynamodb.testing.DynamoDbTable(tableName, tableClass, configureTable)
+private val CONFIGURE_TABLE_NOOP:
+  (CreateTableEnhancedRequest.Builder) -> CreateTableEnhancedRequest.Builder =
+  {
+    it
+  }
