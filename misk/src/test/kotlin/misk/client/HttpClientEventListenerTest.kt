@@ -8,7 +8,7 @@ import misk.inject.getInstance
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.web.WebActionModule
-import misk.web.WebTestingModule
+import misk.web.WebServerTestingModule
 import misk.web.jetty.JettyService
 import okhttp3.Call
 import okhttp3.EventListener
@@ -81,7 +81,8 @@ internal class HttpClientEventListenerTest {
 
   class TestModule : KAbstractModule() {
     override fun configure() {
-      install(WebTestingModule())
+      install(MiskTestingServiceModule())
+      install(WebServerTestingModule())
       install(WebActionModule.create<ReturnADinosaurAction>())
     }
   }

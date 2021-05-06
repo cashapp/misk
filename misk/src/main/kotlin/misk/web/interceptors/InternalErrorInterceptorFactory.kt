@@ -1,9 +1,9 @@
 package misk.web.interceptors
 
 import misk.Action
-import misk.logging.getLogger
 import misk.web.NetworkChain
 import misk.web.NetworkInterceptor
+import wisp.logging.getLogger
 import javax.inject.Inject
 import javax.inject.Singleton
 

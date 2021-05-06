@@ -7,6 +7,7 @@ import misk.scope.ActionScope
 import misk.security.authz.AccessInterceptor
 import misk.web.actions.WebAction
 import misk.web.actions.asChain
+import misk.web.actions.findAnnotationWithOverrides
 import misk.web.mediatype.MediaRange
 import misk.web.mediatype.MediaTypes
 import misk.web.mediatype.compareTo
@@ -16,6 +17,7 @@ import okhttp3.MediaType
 import java.util.regex.Matcher
 import javax.inject.Provider
 import javax.servlet.http.HttpServletRequest
+import kotlin.reflect.KType
 
 /**
  * Decodes an HTTP request into a call to a web action, then encodes its response into an HTTP
@@ -130,12 +132,15 @@ internal class BoundAction<A : WebAction>(
     WebActionMetadata(
       name = action.name,
       function = action.function,
+      description = action.function.findAnnotationWithOverrides<Description>()?.text,
       functionAnnotations = action.function.annotations,
       acceptedMediaRanges = action.acceptedMediaRanges,
       responseContentType = action.responseContentType,
       parameterTypes = action.parameterTypes,
+      parameters = action.parameters,
       requestType = action.requestType,
       returnType = action.returnType,
+      responseType = determineResponseType(action.returnType),
       pathPattern = pathPattern,
       applicationInterceptors = applicationInterceptors,
       networkInterceptors = networkInterceptors,
@@ -148,6 +153,13 @@ internal class BoundAction<A : WebAction>(
         AccessInterceptor::allowedCapabilities
       )
     )
+  }
+
+  private fun determineResponseType(returnType: KType): KType? {
+    if (returnType.arguments.isNotEmpty()) {
+      return returnType.arguments[0].type
+    }
+    return null
   }
 
   private fun fetchAllowedCallers(

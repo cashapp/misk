@@ -1,3 +1,7 @@
+plugins {
+  id("com.squareup.wire")
+}
+
 sourceSets {
   val main by getting {
     java.srcDir("src/main/kotlin/")
@@ -15,6 +19,7 @@ dependencies {
   api(project(":misk-core"))
   api(project(":misk-inject"))
   api(project(":misk-prometheus"))
+  api(project(":wisp-config"))
   api(project(":wisp-deployment"))
 
   testImplementation(project(":misk-testing"))
@@ -27,4 +32,20 @@ val jar by tasks.getting(Jar::class) {
     attributes("Main-Class" to "com.squareup.exemplar.ExemplarServiceKt")
   }
   classifier = "unshaded"
+}
+
+sourceSets {
+  val main by getting {
+    java.srcDir("$buildDir/generated/source/wire/")
+  }
+}
+
+wire {
+  sourcePath {
+    srcDir("src/main/proto/")
+  }
+
+  kotlin {
+    javaInterop = true
+  }
 }

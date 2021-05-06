@@ -1,11 +1,14 @@
 package misk.crypto
 
+import com.amazonaws.auth.AWSCredentials
+import com.amazonaws.auth.AWSCredentialsProvider
 import com.amazonaws.services.s3.AmazonS3
+import com.amazonaws.services.s3.AmazonS3ClientBuilder
 import com.amazonaws.services.s3.model.AmazonS3Exception
 import com.google.inject.Inject
 import misk.config.MiskConfig
 import misk.environment.Env
-import misk.logging.getLogger
+import wisp.logging.getLogger
 
 /**
  * [S3ExternalKeyManager] implements an [ExternalKeyManager] that fetches Tink keysets from an S3
@@ -32,23 +35,32 @@ import misk.logging.getLogger
 class S3ExternalKeyManager @Inject constructor(
   private val env: Env,
 
-  private val s3: AmazonS3,
+  private val defaultS3: AmazonS3,
 
   @ExternalDataKeys override val allKeyAliases: Map<KeyAlias, KeyType>,
 
   @Inject(optional = true)
   private val bucketNameSource: BucketNameSource = object : BucketNameSource {
     override fun getBucketName(env: Env) = env.name.toLowerCase()
-  }
+  },
+
+  // The data keys bucket might live in a different region than the region this service executes
+  // in; if BucketNameSource provides a non-standard bucket region, we need to create a new S3
+  // client for that bucket, and to do that we need credentials again.
+  private val awsCredentials: AWSCredentialsProvider,
 ) : ExternalKeyManager {
 
-  private val logger by lazy { getLogger<S3ExternalKeyManager>() }
+  private val s3: AmazonS3 = bucketNameSource.getBucketRegion(env)?.let { region ->
+    logger.info("creating S3ExternalKeyManager S3 client for $region")
+    AmazonS3ClientBuilder
+      .standard()
+      .withRegion(region)
+      .withCredentials(awsCredentials)
+      .build()
+  } ?: defaultS3
 
-  private val metadataKeyKmsArn = "kms-key-arn"
-
-  private val metadataKeyKeyType = "key-type"
-
-  private fun objectPath(alias: String) = "$alias/${s3.regionName.toLowerCase()}"
+  // N.B. The path we're using for the object is based on _our_ region, not where the bucket lives
+  private fun objectPath(alias: String) = "$alias/${defaultS3.regionName.toLowerCase()}"
 
   private fun getRemoteKey(alias: KeyAlias, type: KeyType): Key {
     val path = objectPath(alias)
@@ -56,8 +68,8 @@ class S3ExternalKeyManager @Inject constructor(
     try {
       val obj = s3.getObject(name, path)
 
-      val kmsArn = obj.objectMetadata.getUserMetaDataOf(metadataKeyKmsArn)
-      val keyTypeDescription = obj.objectMetadata.getUserMetaDataOf(metadataKeyKeyType)
+      val kmsArn = obj.objectMetadata.getUserMetaDataOf(METADATA_KEY_KMS_ARN)
+      val keyTypeDescription = obj.objectMetadata.getUserMetaDataOf(METADATA_KEY_KEY_TYPE)
 
       val keyType = KeyType.valueOf(keyTypeDescription.toUpperCase())
       if (keyType != type) {
@@ -83,4 +95,13 @@ class S3ExternalKeyManager @Inject constructor(
   }
 
   override fun getKeyByAlias(alias: KeyAlias) = keys[alias]
+
+  companion object {
+    private const val METADATA_KEY_KMS_ARN = "kms-key-arn"
+
+    private const val METADATA_KEY_KEY_TYPE = "key-type"
+
+    private val logger = getLogger<S3ExternalKeyManager>()
+  }
+
 }

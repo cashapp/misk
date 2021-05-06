@@ -1,6 +1,5 @@
 dependencies {
   implementation(Dependencies.guice)
-  implementation(Dependencies.guiceMultibindings)
   implementation(Dependencies.kotlinStdLibJdk8)
   implementation(Dependencies.kotlinReflection)
   implementation(Dependencies.launchDarkly)
@@ -10,6 +9,7 @@ dependencies {
   implementation(project(":misk-inject"))
   implementation(project(":misk-launchdarkly-core"))
   implementation(project(":misk-service"))
+  api(project(":wisp-config"))
 
   testImplementation(project(":misk-testing"))
 }

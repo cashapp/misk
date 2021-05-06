@@ -1,7 +1,6 @@
 dependencies {
   implementation(Dependencies.guava)
   implementation(Dependencies.guice)
-  implementation(Dependencies.guiceMultibindings)
   implementation(project(":misk-core"))
 
   testImplementation(project(":misk-testing"))

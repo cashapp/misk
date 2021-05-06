@@ -16,7 +16,7 @@ import javax.inject.Singleton
  */
 @Singleton
 class ServiceMetadataAction @Inject constructor(
-  private val optionalBinder: OptionalBinder
+  private val optionalBinder: OptionalBinder,
 ) : WebAction {
   @Get("/api/service/metadata")
   @RequestContentType(MediaTypes.APPLICATION_JSON)
@@ -28,20 +28,20 @@ class ServiceMetadataAction @Inject constructor(
     )
   }
 
+  data class ServiceMetadata(
+    val app_name: String,
+    val environment: String,
+  )
+
   data class Response(val serviceMetadata: ServiceMetadata)
-}
 
-/**
- * https://github.com/google/guice/wiki/FrequentlyAskedQuestions#how-can-i-inject-optional-parameters-into-a-constructor
- */
-@Singleton
-class OptionalBinder @Inject constructor(@AppName val appName: String) {
-  @com.google.inject.Inject(optional = true)
-  var serviceMetadata: ServiceMetadata =
-    ServiceMetadata(appName, Environment.fromEnvironmentVariable().name)
+  /**
+   * https://github.com/google/guice/wiki/FrequentlyAskedQuestions#how-can-i-inject-optional-parameters-into-a-constructor
+   */
+  @Singleton
+  class OptionalBinder @Inject constructor(@AppName val appName: String) {
+    @com.google.inject.Inject(optional = true)
+    var serviceMetadata: ServiceMetadata =
+      ServiceMetadata(appName, Environment.fromEnvironmentVariable().name)
+  }
 }
-
-data class ServiceMetadata(
-  val app_name: String,
-  val environment: String
-)

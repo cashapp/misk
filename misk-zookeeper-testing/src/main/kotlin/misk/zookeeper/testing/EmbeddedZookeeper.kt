@@ -2,8 +2,8 @@ package misk.zookeeper.testing
 
 import com.github.dockerjava.api.model.ExposedPort
 import com.github.dockerjava.api.model.Ports
-import misk.containers.Composer
-import misk.containers.Container
+import wisp.containers.Composer
+import wisp.containers.Container
 
 class EmbeddedZookeeper(val basePort: Int) {
 
@@ -12,22 +12,22 @@ class EmbeddedZookeeper(val basePort: Int) {
   private val leaderPort = ExposedPort.tcp(LEADER_PORT)
   private val composer = Composer("e-zk", Container({
     withImage("zookeeper:3.5.4-beta")
-        .withName("zookeeper")
-        .withCmd(listOf("zkServer.sh", "start-foreground"))
-        .withExposedPorts(clientPort, peerPort, leaderPort)
-        .withPortBindings(Ports().apply {
-          bind(clientPort, Ports.Binding.bindPort(basePort))
-          bind(peerPort, Ports.Binding.bindPort(basePort + 1))
-          bind(leaderPort, Ports.Binding.bindPort(basePort + 2))
-        })
+      .withName("zookeeper")
+      .withCmd(listOf("zkServer.sh", "start-foreground"))
+      .withExposedPorts(clientPort, peerPort, leaderPort)
+      .withPortBindings(Ports().apply {
+        bind(clientPort, Ports.Binding.bindPort(basePort))
+        bind(peerPort, Ports.Binding.bindPort(basePort + 1))
+        bind(leaderPort, Ports.Binding.bindPort(basePort + 2))
+      })
   }, { docker, id ->
     // Provide zoo.cfg and certs to run ZK with mTLS enabled.
     val confPath = EmbeddedZookeeper::class.java.getResource("/zookeeper").path
     docker.copyArchiveToContainerCmd(id)
-        .withHostResource(confPath)
-        .withDirChildrenOnly(true)
-        .withRemotePath("/conf")
-        .exec()
+      .withHostResource(confPath)
+      .withDirChildrenOnly(true)
+      .withRemotePath("/conf")
+      .exec()
   }))
 
   fun start() {

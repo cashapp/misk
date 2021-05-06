@@ -33,6 +33,7 @@ dependencies {
   api(project(":misk-service"))
   api(project(":misk-testing"))
   api(project(":misk-zookeeper"))
+  api(project(":wisp-containers-testing"))
 }
 
 afterEvaluate {

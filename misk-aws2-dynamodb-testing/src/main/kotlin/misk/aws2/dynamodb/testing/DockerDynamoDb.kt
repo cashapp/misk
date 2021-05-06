@@ -2,13 +2,13 @@ package misk.aws2.dynamodb.testing
 
 import com.github.dockerjava.api.model.ExposedPort
 import com.github.dockerjava.api.model.Ports
-import misk.containers.Composer
-import misk.containers.Container
-import misk.logging.getLogger
 import misk.testing.ExternalDependency
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
 import software.amazon.awssdk.services.dynamodb.model.DeleteTableRequest
 import software.amazon.awssdk.services.dynamodb.model.DynamoDbException
+import wisp.containers.Composer
+import wisp.containers.Container
+import wisp.logging.getLogger
 
 /**
  * A test DynamoDb Local service. Tests can connect to the service at 127.0.0.1:<random_port>.

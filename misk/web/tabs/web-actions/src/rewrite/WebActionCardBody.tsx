@@ -3,6 +3,9 @@ import { Menu, H5, UL } from "@blueprintjs/core"
 import { WebActionMetadata } from "./types"
 import WebActionCollapse from "./WebActionCollapse"
 import WebActionSendRequest from "./WebActionSendRequest"
+import WebActionRequestParameters from "./WebActionRequestParameters"
+import WebActionDescription from "./WebActionDescription"
+import WebActionResponseType from "./WebActionResponseType"
 
 interface Props {
   webActionMetadata: WebActionMetadata
@@ -25,12 +28,11 @@ export default function WebActionCardBody({ webActionMetadata }: Props) {
         columnGap: "16px"
       }}
     >
-      <WebActionCollapse title={webActionMetadata.name} subtitle="Function">
-        <pre style={{ whiteSpace: "pre-wrap" }}>
-          {webActionMetadata.function}
-        </pre>
-      </WebActionCollapse>
-
+      <div style={{ gridColumn: "auto / span 2" }}>
+        <WebActionDescription description={webActionMetadata.description} />
+        <WebActionRequestParameters webActionMetadata={webActionMetadata} />
+        <WebActionResponseType webActionMetadata={webActionMetadata} />
+      </div>
       <WebActionCollapse
         title={webActionMetadata.responseMediaType}
         subtitle="Content Types"

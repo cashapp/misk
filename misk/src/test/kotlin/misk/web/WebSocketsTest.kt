@@ -1,7 +1,7 @@
 package misk.web
 
+import misk.MiskTestingServiceModule
 import misk.inject.KAbstractModule
-import misk.logging.LogCollector
 import misk.logging.LogCollectorModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
@@ -16,6 +16,7 @@ import okhttp3.Request
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import wisp.logging.LogCollector
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -25,7 +26,7 @@ internal class WebSocketsTest {
   val module = TestModule()
 
   @Inject lateinit var jettyService: JettyService
-  @Inject lateinit var logCollector: misk.logging.LogCollector
+  @Inject lateinit var logCollector: LogCollector
 
   val listener = FakeWebSocketListener()
 
@@ -51,7 +52,8 @@ internal class WebSocketsTest {
 
   class TestModule : KAbstractModule() {
     override fun configure() {
-      install(WebTestingModule())
+      install(WebServerTestingModule())
+      install(MiskTestingServiceModule())
       install(LogCollectorModule())
       install(WebActionModule.create<EchoWebSocket>())
     }

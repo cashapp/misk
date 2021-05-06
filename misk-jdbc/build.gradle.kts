@@ -6,10 +6,10 @@ dependencies {
   implementation(Dependencies.docker)
   // The docker-java we use in tests depends on an old version of junixsocket that depends on
   // log4j. We force it up a minor version in packages that use it.
-  implementation("com.kohlschutter.junixsocket:junixsocket-native-common:2.3.2") {
+  implementation("com.kohlschutter.junixsocket:junixsocket-native-common:2.3.3") {
     isForce = true
   }
-  implementation("com.kohlschutter.junixsocket:junixsocket-common:2.3.2") {
+  implementation("com.kohlschutter.junixsocket:junixsocket-common:2.3.3") {
     isForce = true
   }
   implementation(Dependencies.hikariCp)
@@ -28,6 +28,8 @@ dependencies {
   implementation(project(":misk-core"))
   implementation(project(":misk-inject"))
   implementation(project(":misk-service"))
+  api(project(":wisp-config"))
+  api(project(":wisp-logging"))
 
   testImplementation(project(":misk-testing"))
   testImplementation(project(":misk-jdbc-testing"))

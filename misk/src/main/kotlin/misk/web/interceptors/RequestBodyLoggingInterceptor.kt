@@ -4,9 +4,9 @@ import misk.Action
 import misk.ApplicationInterceptor
 import misk.Chain
 import misk.MiskCaller
-import misk.logging.getLogger
 import misk.scope.ActionScoped
 import okhttp3.Headers
+import wisp.logging.getLogger
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.reflect.full.findAnnotation
@@ -90,9 +90,7 @@ internal class RequestResponseCapture @Inject constructor() {
     private val capture = ThreadLocal<RequestResponseBody>()
   }
 
-  fun get(): RequestResponseBody {
-    return capture.get()
-  }
+  fun get(): RequestResponseBody? = capture.get()
 
   fun set(value: RequestResponseBody) {
     capture.set(value)

@@ -8,13 +8,13 @@ import io.kubernetes.client.util.Config
 import io.kubernetes.client.util.Watch
 import misk.clustering.kubernetes.KubernetesConfig
 import misk.healthchecks.HealthStatus
-import misk.logging.getLogger
 import misk.web.WebConfig
 import misk.web.actions.WebSocket
 import misk.web.actions.WebSocketListener
 import okhttp3.OkHttpClient
 import okhttp3.Response
 import okio.ByteString
+import wisp.logging.getLogger
 import java.time.Clock
 import java.time.Duration
 import java.time.Instant

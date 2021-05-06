@@ -1,6 +1,7 @@
 package misk.web.interceptors
 
 import com.squareup.moshi.Moshi
+import misk.MiskTestingServiceModule
 import misk.inject.KAbstractModule
 import misk.moshi.adapter
 import misk.security.authz.AccessControlModule
@@ -12,6 +13,7 @@ import misk.testing.MiskTestModule
 import misk.web.Get
 import misk.web.ResponseContentType
 import misk.web.WebActionModule
+import misk.web.WebServerTestingModule
 import misk.web.WebTestingModule
 import misk.web.actions.WebAction
 import misk.web.jetty.JettyService
@@ -67,7 +69,8 @@ internal class RequestLogContextInterceptorTest {
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(AccessControlModule())
-      install(WebTestingModule())
+      install(WebServerTestingModule())
+      install(MiskTestingServiceModule())
       multibind<MiskCallerAuthenticator>().to<FakeCallerAuthenticator>()
       install(WebActionModule.create<LogTestAction>())
     }

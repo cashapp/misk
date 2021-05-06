@@ -1,6 +1,7 @@
 package misk.web.resource
 
 import com.google.inject.name.Names
+import misk.MiskTestingServiceModule
 import misk.client.HttpClientEndpointConfig
 import misk.client.HttpClientModule
 import misk.client.HttpClientsConfig
@@ -10,6 +11,7 @@ import misk.resources.ResourceLoader
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.web.WebActionModule
+import misk.web.WebServerTestingModule
 import misk.web.WebTestingModule
 import misk.web.jetty.JettyService
 import misk.web.mediatype.MediaTypes.APPLICATION_JAVASCRIPT
@@ -270,7 +272,8 @@ class StaticResourceActionTest {
       multibind<StaticResourceEntry>()
         .toInstance(StaticResourceEntry("/nasa/tabs/o2fuel/", "memory:/web/nasa/tabs/o2fuel/"))
 
-      install(WebTestingModule())
+      install(WebServerTestingModule())
+      install(MiskTestingServiceModule())
     }
   }
 

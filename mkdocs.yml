@@ -39,6 +39,9 @@ markdown_extensions:
 
 nav:
   - 'Overview': index.md
+  - 'Getting Started': getting-started.md
+  - 'Actions': actions.md
+  - 'Clients': clients.md
   - '0.x API':
       - 'misk': 0.x/misk/index.md
       - 'misk-aws': 0.x/misk-aws/index.md

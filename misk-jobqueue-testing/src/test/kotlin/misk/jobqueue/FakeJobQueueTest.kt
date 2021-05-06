@@ -3,15 +3,15 @@ package misk.jobqueue
 import com.squareup.moshi.Moshi
 import misk.MiskTestingServiceModule
 import misk.inject.KAbstractModule
-import misk.logging.LogCollector
 import misk.logging.LogCollectorModule
-import misk.logging.getLogger
 import misk.moshi.adapter
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.time.FakeClock
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import wisp.logging.LogCollector
+import wisp.logging.getLogger
 import java.time.Duration
 import java.time.temporal.ChronoUnit
 import java.util.concurrent.ConcurrentHashMap
@@ -26,7 +26,7 @@ internal class FakeJobQueueTest {
   @Inject private lateinit var fakeClock: FakeClock
   @Inject private lateinit var fakeJobQueue: FakeJobQueue
   @Inject private lateinit var exampleJobEnqueuer: ExampleJobEnqueuer
-  @Inject private lateinit var logCollector: misk.logging.LogCollector
+  @Inject private lateinit var logCollector: LogCollector
 
   @Test
   fun basic() {

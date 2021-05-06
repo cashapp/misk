@@ -1,0 +1,13 @@
+syntax = "proto3";
+package com.squareup.exemplar.protos;
+
+message HelloWebRequest {
+  string name = 1;
+  optional string nick_name = 2;
+  repeated string greetings = 3;
+}
+
+message HelloWebResponse {
+  string greeting = 1;
+  string name = 2;
+}

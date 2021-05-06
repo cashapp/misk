@@ -12,8 +12,10 @@ dependencies {
   api(project(":misk-jobqueue"))
   api(project(":misk-transactional-jobqueue"))
 
+  testImplementation(project(":wisp-config"))
   testImplementation(project(":misk-hibernate"))
   testImplementation(project(":misk-hibernate-testing"))
+  testImplementation(project(":wisp-logging"))
   testImplementation(Dependencies.junitApi)
   testImplementation(Dependencies.loggingApi)
   testImplementation(Dependencies.assertj)

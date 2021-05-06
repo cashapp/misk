@@ -14,6 +14,9 @@ dependencies {
   implementation(project(":misk-metrics"))
   implementation(project(":misk-service"))
   implementation(project(":misk-transactional-jobqueue"))
+  api(project(":wisp-config"))
+  api(project(":wisp-containers-testing"))
+  api(project(":wisp-logging"))
 
   testImplementation(Dependencies.assertj)
   testImplementation(Dependencies.junitApi)

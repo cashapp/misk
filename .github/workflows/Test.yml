@@ -13,8 +13,26 @@ env:
   TERM: dumb
 
 jobs:
-  build:
+  js:
     runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        node: [12]
+        cmd:
+          - sudo npm install -g @misk/cli && miskweb ci-build -e
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Test
+        run: ${{ matrix.cmd }}
+
+  jvm:
+    runs-on: ${{ matrix.os }}
+
     services:
       mysql:
         image: mysql:5.7
@@ -26,25 +44,30 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest]
-        node: [12]
-        include:
-          # These builds consistently break. Use the circleci build instead for now.
-#          - shard: ./gradlew testShardHibernate -i --scan
-#          - shard: ./gradlew testShardNonHibernate -i --scan
-          - shard: sudo npm install -g @misk/cli && miskweb ci-build -e
+        cmd:
+          - ./gradlew testShardHibernate -i --scan
+          - ./gradlew testShardNonHibernate -i --scan --parallel
 
     steps:
-      - name: Checkout the repo
+      - name: Checkout
         uses: actions/checkout@v2
 
       - name: Validate Gradle Wrapper
         uses: gradle/wrapper-validation-action@v1
 
       - name: Configure JDK
-        uses: actions/setup-java@v1
+        uses: actions/setup-java@v2
         with:
-          java-version: 14
+          distribution: 'adopt'
+          java-version: 11
 
       - name: Test
-        run: ${{ matrix.shard }}
+        run: ${{ matrix.cmd }}
 
+      - name: Publish Test Report
+        if: ${{ always() }}
+        uses: mikepenz/action-junit-report@v2
+        with:
+          check_name: Test Report - ${{ matrix.cmd }}
+          report_paths: '**/build/test-results/test/TEST-*.xml'
+          github_token: ${{ secrets.GITHUB_TOKEN }}

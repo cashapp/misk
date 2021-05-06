@@ -1,14 +1,12 @@
 package misk.feature.launchdarkly
 
 import com.google.inject.Provides
-import com.launchdarkly.sdk.server.LDClient
-
 import com.launchdarkly.sdk.server.Components
+import com.launchdarkly.sdk.server.LDClient
 import com.launchdarkly.sdk.server.LDConfig
 import com.launchdarkly.sdk.server.interfaces.LDClientInterface
 import misk.ServiceModule
 import misk.client.HttpClientSSLConfig
-import misk.config.Config
 import misk.feature.DynamicConfig
 import misk.feature.FeatureFlags
 import misk.feature.FeatureService
@@ -17,6 +15,7 @@ import misk.inject.toKey
 import misk.resources.ResourceLoader
 import misk.security.ssl.SslContextFactory
 import misk.security.ssl.SslLoader
+import wisp.config.Config
 import java.net.URI
 import java.time.Duration
 import javax.inject.Provider
