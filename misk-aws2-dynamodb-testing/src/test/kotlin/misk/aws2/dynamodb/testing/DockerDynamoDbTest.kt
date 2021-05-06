@@ -5,6 +5,7 @@ import misk.inject.KAbstractModule
 import misk.testing.MiskExternalDependency
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
+import org.junit.jupiter.api.AfterAll
 import software.amazon.awssdk.enhanced.dynamodb.model.EnhancedGlobalSecondaryIndex
 import software.amazon.awssdk.services.dynamodb.model.ProjectionType
 
@@ -16,6 +17,13 @@ class DockerDynamoDbTest : AbstractDynamoDbTest() {
 
   @MiskExternalDependency
   val dockerDynamoDb = DockerDynamoDb
+
+  companion object {
+    @AfterAll
+    fun shutdownDockerDynamoDb() {
+      DockerDynamoDb.shutdown()
+    }
+  }
 
   class TestModule : KAbstractModule() {
     override fun configure() {
