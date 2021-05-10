@@ -9,11 +9,11 @@ import misk.inject.KAbstractModule
 class AwsEnvironmentModule : KAbstractModule() {
 
   @Provides fun awsRegion(envVarLoader: EnvVarLoader): AwsRegion {
-    return AwsRegion(envVarLoader.getEnvVar("REGION"))
+    return AwsRegion(envVarLoader.getEnvironmentVariable("REGION"))
   }
 
   @Provides fun awsAccountId(envVarLoader: EnvVarLoader): AwsAccountId {
-    return AwsAccountId(envVarLoader.getEnvVar("ACCOUNT_ID"))
+    return AwsAccountId(envVarLoader.getEnvironmentVariable("ACCOUNT_ID"))
   }
 }
 

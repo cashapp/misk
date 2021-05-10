@@ -1,28 +1,43 @@
 package misk.environment
 
 import misk.inject.KAbstractModule
+import wisp.deployment.EnvironmentVariableLoader
+import wisp.deployment.FakeEnvironmentVariableLoader
+import wisp.deployment.RealEnvironmentVariableLoader
 import javax.inject.Inject
 import javax.inject.Qualifier
+
+/*
+ * Soft deprecating for wisp.deployment.EnvironmentVariableLoader
+ */
 
 /**
  * Loads an environment variable value.
  */
-interface EnvVarLoader {
+interface EnvVarLoader : EnvironmentVariableLoader {
   /**
    * Get the environment variable value
    *
    * @throws IllegalStateException if the environment variable is not found
    */
-  fun getEnvVar(name: String): String
+  fun getEnvVar(name: String): String = getEnvironmentVariable(name)
 }
 
 /**
  * A Real [EnvVarLoader] that loads from the system environment variables.
+ *
+ * This will be replaced with [RealEnvironmentVariableLoader] in the future
  */
 internal class RealEnvVarLoader @Inject constructor() : EnvVarLoader {
-  override fun getEnvVar(name: String): String {
-    return System.getenv(name) ?: throw IllegalStateException("$name env var not set")
-  }
+  val delegate = RealEnvironmentVariableLoader()
+
+  override fun getEnvVar(name: String): String = getEnvironmentVariable(name)
+
+  override fun getEnvironmentVariable(name: String): String =
+    delegate.getEnvironmentVariable(name)
+
+  override fun getEnvironmentVariableOrDefault(name: String, defaultValue: String): String =
+    delegate.getEnvironmentVariableOrDefault(name, defaultValue)
 }
 
 /**
@@ -30,7 +45,8 @@ internal class RealEnvVarLoader @Inject constructor() : EnvVarLoader {
  */
 class RealEnvVarModule : KAbstractModule() {
   override fun configure() {
-    bind<EnvVarLoader>().to<RealEnvVarLoader>()
+    bind<EnvVarLoader>().to<RealEnvVarLoader>()  // remove when RealEnvVarLoader is eradicated
+    bind<EnvironmentVariableLoader>().to<RealEnvVarLoader>()
   }
 }
 
@@ -38,14 +54,22 @@ class RealEnvVarModule : KAbstractModule() {
 annotation class ForEnvVars
 
 /**
- * A Fake [EnvVarLoader] that loads from an in memory map
+ * A Fake [EnvVarLoader] that delegates to [FakeEnvironmentVariableLoader] providing an
+ * injected memory map of environment variables annotated with [ForEnvVars].
  */
 internal class FakeEnvVarLoader @Inject constructor(
   @ForEnvVars private val vars: Map<String, String>
 ) : EnvVarLoader {
-  override fun getEnvVar(name: String): String {
-    return vars[name] ?: throw IllegalStateException("$name env var not set")
-  }
+
+  val delegate = FakeEnvironmentVariableLoader(vars)
+
+  override fun getEnvVar(name: String): String = getEnvironmentVariable(name)
+
+  override fun getEnvironmentVariable(name: String): String =
+    delegate.getEnvironmentVariable(name)
+
+  override fun getEnvironmentVariableOrDefault(name: String, defaultValue: String): String =
+    delegate.getEnvironmentVariableOrDefault(name, defaultValue)
 }
 
 /**
@@ -55,6 +79,7 @@ internal class FakeEnvVarLoader @Inject constructor(
 class FakeEnvVarModule : KAbstractModule() {
   override fun configure() {
     newMapBinder<String, String>(ForEnvVars::class)
-    bind<EnvVarLoader>().to<FakeEnvVarLoader>()
+    bind<EnvVarLoader>().to<FakeEnvVarLoader>() // remove when FakeEnvVarLoader is eradicated
+    bind<EnvironmentVariableLoader>().to<FakeEnvVarLoader>()
   }
 }
