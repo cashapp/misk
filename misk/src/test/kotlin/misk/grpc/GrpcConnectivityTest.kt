@@ -153,7 +153,7 @@ class GrpcConnectivityTest {
   @Singleton
   class HelloRpcAction @Inject constructor() : WebAction, GreeterSayHello {
     var failNextRequest = false
-    var sleep: Duration = Duration.ofMillis(0)
+    var sleep: Duration = Duration.ofMillis(10)
 
     override fun sayHello(request: HelloRequest): HelloReply {
       Thread.sleep(sleep.toMillis())

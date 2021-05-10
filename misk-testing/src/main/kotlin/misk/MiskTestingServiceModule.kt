@@ -22,7 +22,7 @@ import org.slf4j.LoggerFactory
 class MiskTestingServiceModule : KAbstractModule() {
   override fun configure() {
     val rootLogger = LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME) as Logger
-    rootLogger.level = Level.DEBUG
+//    rootLogger.level = Level.DEBUG
     install(TestingResourceLoaderModule())
     install(FakeEnvVarModule())
     install(FakeClockModule())
