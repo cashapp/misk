@@ -19,7 +19,6 @@ class AwsEnvironmentModule : KAbstractModule() {
   @Provides fun awsAccountId(envVarLoader: EnvVarLoader): AwsAccountId {
     val awsAccountId = delegate.awsAccountId(envVarLoader)
     return awsAccountId.toMiskAwsAccountId()
-  }
 }
 
 /**
