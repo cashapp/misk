@@ -46,17 +46,23 @@ data class Deployment(
  * Determines a Deployment based on the value within the ENVIRONMENT variable, defaulting to
  * local development if not set (i.e. isLocalDevelopment == true)
  */
-inline fun getDeploymentFromEnvironmentVariable(
+fun getDeploymentFromEnvironmentVariable(
 
   /** The name for the deployment, if not supplied, use the environment name */
   name: String? = null,
 
   /** The default environment if ENVIRONMENT is not set */
-  defaultDeploymentName: String = "development"
+  defaultDeploymentName: String = "development",
+
+  /** Environment Variable loader, use the real version if none supplied */
+  environmentVariableLoader: EnvironmentVariableLoader = EnvironmentVariableLoader.real
 
 ): Deployment {
 
-  val environment = System.getenv("ENVIRONMENT") ?: defaultDeploymentName
+  val environment = environmentVariableLoader.getEnvironmentVariableOrDefault(
+    "ENVIRONMENT",
+    defaultDeploymentName
+  )
   val deploymentName = name ?: environment
 
   return when (environment.toLowerCase()) {

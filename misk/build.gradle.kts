@@ -65,6 +65,7 @@ dependencies {
   api(project(":wisp-client"))
   api(project(":wisp-config"))
   api(project(":wisp-deployment"))
+  api(project(":wisp-deployment-testing"))  // for fake implementation
   api(project(":wisp-logging"))
 
   testImplementation(Dependencies.kotlinxCoroutines)
