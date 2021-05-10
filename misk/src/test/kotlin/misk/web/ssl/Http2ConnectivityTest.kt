@@ -159,6 +159,7 @@ class Http2ConnectivityTest {
       override fun contentType() = "text/plain;charset=utf-8".toMediaType()
 
       override fun writeTo(sink: BufferedSink) {
+        Thread.sleep(1000L)
         for (i in 0 until 1024 * 1024) {
           sink.writeUtf8("impossible: $i\n")
         }
