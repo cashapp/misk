@@ -4,6 +4,7 @@ object Dependencies {
   val awaitility = "org.awaitility:awaitility-kotlin:4.0.2"
   val aws2Dynamodb = "software.amazon.awssdk:dynamodb:2.15.73"
   val aws2DynamodbEnhanced = "software.amazon.awssdk:dynamodb-enhanced:2.15.73"
+  val aws2Regions = "software.amazon.awssdk:regions:2.15.73"
   val awsDynamodb = "com.amazonaws:aws-java-sdk-dynamodb:1.11.728"
   val awsDynamodbLocal = "com.amazonaws:DynamoDBLocal:1.13.5"
   val awsS3 = "com.amazonaws:aws-java-sdk-s3:1.11.728"
