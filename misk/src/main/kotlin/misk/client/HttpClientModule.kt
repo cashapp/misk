@@ -26,6 +26,15 @@ class HttpClientModule constructor(
     bind(protoMessageHttpClientKey)
       .toProvider(ProtoMessageHttpClientProvider(name, getProvider(httpClientKey)))
       .asSingleton()
+
+    // Use requestInjection() to check that our configuration exists when the injector is created.
+    requestInjection(object : Any() {
+      @Inject fun injectHttpClientsConfig(httpClientsConfig: HttpClientsConfig) {
+        require(name in httpClientsConfig.endpointNames()) {
+          "No HTTP endpoint configured for '$name'... update your yaml to include it?"
+        }
+      }
+    })
   }
 
   private class HttpClientProvider(private val name: String) : Provider<OkHttpClient> {
