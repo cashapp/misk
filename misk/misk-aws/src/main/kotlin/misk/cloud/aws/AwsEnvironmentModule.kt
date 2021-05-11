@@ -9,16 +9,12 @@ import wisp.aws.environment.AwsEnvironment
 /** [AwsEnvironmentModule] pulls region and account information from installed env vars */
 class AwsEnvironmentModule : KAbstractModule() {
 
-  private val delegate = AwsEnvironment()
-
   @Provides fun awsRegion(envVarLoader: EnvVarLoader): AwsRegion {
-    val awsRegion = delegate.awsRegion(envVarLoader)
-    return awsRegion.toMiskAwsRegion()
+    return AwsEnvironment.awsRegion(envVarLoader).toMiskAwsRegion()
   }
 
   @Provides fun awsAccountId(envVarLoader: EnvVarLoader): AwsAccountId {
-    val awsAccountId = delegate.awsAccountId(envVarLoader)
-    return awsAccountId.toMiskAwsAccountId()
+    return AwsEnvironment.awsAccountId(envVarLoader).toMiskAwsAccountId()
   }
 }
 
