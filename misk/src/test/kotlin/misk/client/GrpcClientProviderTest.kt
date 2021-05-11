@@ -1,5 +1,6 @@
 package misk.client
 
+import com.google.inject.CreationException
 import com.google.inject.Guice
 import com.google.inject.Provides
 import com.google.inject.name.Names
@@ -12,9 +13,11 @@ import com.squareup.wire.GrpcClient
 import com.squareup.wire.GrpcMethod
 import com.squareup.wire.Service
 import com.squareup.wire.WireRpc
+import java.time.Duration
 import java.util.concurrent.LinkedBlockingDeque
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.test.assertFailsWith
 import misk.MiskTestingServiceModule
 import misk.inject.KAbstractModule
 import misk.inject.getInstance
@@ -24,14 +27,12 @@ import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.web.WebActionModule
 import misk.web.WebServerTestingModule
-import misk.web.WebTestingModule
 import misk.web.actions.WebAction
 import misk.web.jetty.JettyService
 import okhttp3.Response
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.time.Duration
 
 @MiskTest(startService = true)
 internal class GrpcClientProviderTest {
@@ -89,6 +90,21 @@ internal class GrpcClientProviderTest {
     )
     assertThat(clientMetricsInterceptorFactory.requestDuration.count("robots.SayHello", "200"))
       .isEqualTo(1)
+  }
+
+  @Test
+  fun misconfigurationFailsFast() {
+    val exception = assertFailsWith<CreationException> {
+      Guice.createInjector(object : KAbstractModule() {
+        override fun configure() {
+          install(ClientModule(jetty))
+          install(GrpcClientModule.create<MisconfiguredService, GrpcMisconfiguredService>("misconfigured"))
+        }
+      })
+    }
+    assertThat(exception.message).contains(
+      "No HTTP endpoint configured for 'misconfigured'... update your yaml to include it?"
+    )
   }
 
   @Test
@@ -151,6 +167,22 @@ internal class GrpcClientProviderTest {
     override fun SayHello(): GrpcCall<HelloRequest, HelloReply> = client.newCall(
       GrpcMethod(
         path = "/RobotLocator/SayHello",
+        requestAdapter = HelloRequest.ADAPTER,
+        responseAdapter = HelloReply.ADAPTER
+      )
+    )
+  }
+
+  interface MisconfiguredService : Service {
+    fun SayHello(): GrpcCall<HelloRequest, HelloReply>
+  }
+
+  class GrpcMisconfiguredService(
+    private val client: GrpcClient
+  ) : MisconfiguredService {
+    override fun SayHello(): GrpcCall<HelloRequest, HelloReply> = client.newCall(
+      GrpcMethod(
+        path = "/MisconfiguredService/SayHello",
         requestAdapter = HelloRequest.ADAPTER,
         responseAdapter = HelloReply.ADAPTER
       )
