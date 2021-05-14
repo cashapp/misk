@@ -65,6 +65,73 @@ interface FeatureFlags {
     attributes: Attributes = Attributes()
   ): T
 
+  /**
+   * Registers a tracker for the value of an boolean feature flag for the given key and attributes.
+   * @see [trackEnum] for param details
+   */
+  fun trackBoolean(
+    feature: Feature,
+    key: String,
+    attributes: Attributes = Attributes(),
+    tracker: (Boolean) -> Unit
+  ): TrackerReference
+
+  /**
+   * Registers a tracker for the value of an integer feature flag for the given key and attributes.
+   * @see [trackEnum] for param details
+   */
+  fun trackInt(
+    feature: Feature,
+    key: String,
+    attributes: Attributes = Attributes(),
+    tracker: (Int) -> Unit
+  ): TrackerReference
+
+  /**
+   * Registers a tracker for the value of a string feature flag for the given key and attributes.
+   * @see [trackEnum] for param details
+   */
+  fun trackString(
+    feature: Feature,
+    key: String,
+    attributes: Attributes = Attributes(),
+    tracker: (String) -> Unit
+  ): TrackerReference
+
+  /**
+   * Registers a tracker for the value of an enumerated feature flag for the given key and attributes.
+   * @param feature name of the feature flag to evaluate.
+   * @param key unique primary key for the entity the flag should be evaluated against.
+   * @param clazz the enum type.
+   * @param attributes additional attributes to provide to flag evaluation.
+   * @param tracker a tracker to be registered for processing of changed values
+   * @throws [RuntimeException] if the service is unavailable.
+   * @throws [IllegalStateException] if the flag is off with no default value.
+   * @return a reference to the registered tracker allowing to un-register it
+   */
+  fun <T : Enum<T>> trackEnum(
+    feature: Feature,
+    key: String,
+    clazz: Class<T>,
+    attributes: Attributes = Attributes(),
+    tracker: (T) -> Unit
+  ): TrackerReference
+
+  /**
+   * Registers a tracker for the value of a JSON feature flag for the given key and attributes.
+   *
+   * @param clazz the type to convert the JSON string into. It is expected that a Moshi type adapter
+   * is registered with the impl.
+   * @see [trackEnum] for param details
+   */
+  fun <T> trackJson(
+    feature: Feature,
+    key: String,
+    clazz: Class<T>,
+    attributes: Attributes = Attributes(),
+    tracker: (T) -> Unit
+  ): TrackerReference
+
   // Overloaded functions for use in Java, because @JvmOverloads isn't supported for interfaces
   fun getBoolean(
     feature: Feature,
@@ -92,6 +159,38 @@ interface FeatureFlags {
     key: String,
     clazz: Class<T>
   ) = getJson(feature, key, clazz, Attributes())
+
+  fun trackBoolean(
+    feature: Feature,
+    key: String,
+    tracker: (Boolean) -> Unit
+  ) = trackBoolean(feature, key, Attributes(), tracker)
+
+  fun trackInt(
+    feature: Feature,
+    key: String,
+    tracker: (Int) -> Unit
+  ) = trackInt(feature, key, Attributes(), tracker)
+
+  fun trackString(
+    feature: Feature,
+    key: String,
+    tracker: (String) -> Unit
+  ) = trackString(feature, key, Attributes(), tracker)
+
+  fun <T : Enum<T>> trackEnum(
+    feature: Feature,
+    key: String,
+    clazz: Class<T>,
+    tracker: (T) -> Unit
+  ) = trackEnum(feature, key, clazz, Attributes(), tracker)
+
+  fun <T> trackJson(
+    feature: Feature,
+    key: String,
+    clazz: Class<T>,
+    tracker: (T) -> Unit
+  ) = trackJson(feature, key, clazz, Attributes(), tracker)
 }
 
 inline fun <reified T : Enum<T>> FeatureFlags.getEnum(
