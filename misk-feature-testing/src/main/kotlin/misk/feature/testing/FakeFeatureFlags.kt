@@ -138,7 +138,7 @@ class FakeFeatureFlags @Inject constructor(
     val value = TrackerMapValue(attributes, tracker)
     bucket.add(value)
     return object : TrackerReference {
-      override fun close() {
+      override fun unregister() {
         bucket.remove(value)
       }
     }

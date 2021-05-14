@@ -129,7 +129,7 @@ class LaunchDarklyFeatureFlags @Inject constructor(
     ) { tracker(mapper(it.newValue)) }
 
     return object : TrackerReference {
-      override fun close() {
+      override fun unregister() {
         ldClient.flagTracker.removeFlagChangeListener(listener)
       }
     }

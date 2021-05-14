@@ -73,7 +73,9 @@ interface DynamicConfig {
   fun <T> trackJson(feature: Feature, clazz: Class<T>, tracker: (T) -> Unit): TrackerReference
 }
 
-interface TrackerReference : Closeable
+interface TrackerReference {
+  fun unregister()
+}
 
 inline fun <reified T : Enum<T>> DynamicConfig.getEnum(
   feature: Feature
