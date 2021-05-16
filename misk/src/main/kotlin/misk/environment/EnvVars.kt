@@ -61,7 +61,7 @@ internal class FakeEnvVarLoader @Inject constructor(
   @ForEnvVars private val vars: Map<String, String>
 ) : EnvVarLoader {
 
-  val delegate = FakeEnvironmentVariableLoader(vars)
+  val delegate = FakeEnvironmentVariableLoader(vars.toMutableMap())
 
   override fun getEnvVar(name: String): String = getEnvironmentVariable(name)
 
