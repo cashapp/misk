@@ -11,7 +11,7 @@ class EmbeddedZookeeper(val basePort: Int) {
   private val peerPort = ExposedPort.tcp(PEER_PORT)
   private val leaderPort = ExposedPort.tcp(LEADER_PORT)
   private val composer = Composer("e-zk", Container({
-    withImage("zookeeper:3.5.4-beta")
+    withImage("zookeeper:3.5.9")
       .withName("zookeeper")
       .withCmd(listOf("zkServer.sh", "start-foreground"))
       .withExposedPorts(clientPort, peerPort, leaderPort)

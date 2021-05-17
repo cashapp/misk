@@ -116,6 +116,6 @@ object Dependencies {
   val wireGrpcClient = "com.squareup.wire:wire-grpc-client:3.7.0"
   val wireMoshiAdapter = "com.squareup.wire:wire-moshi-adapter:3.7.0"
   val wireRuntime = "com.squareup.wire:wire-runtime:3.7.0"
-  val zookeeper = "org.apache.zookeeper:zookeeper:3.5.4-beta"
+  val zookeeper = "org.apache.zookeeper:zookeeper:3.5.9"
 }
 // Auto-generated from polyrepo's master-dependencies.json. Update via polyrepo dep-add and polyrepo dep-upgrade.
