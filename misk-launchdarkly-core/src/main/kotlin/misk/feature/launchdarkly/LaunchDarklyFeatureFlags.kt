@@ -19,6 +19,7 @@ import misk.feature.FeatureService
 import misk.feature.TrackerReference
 import misk.feature.fromSafeJson
 import mu.KotlinLogging
+import java.util.concurrent.Executor
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -121,12 +122,17 @@ class LaunchDarklyFeatureFlags @Inject constructor(
     key: String,
     attributes: Attributes,
     mapper: (LDValue) -> T,
+    executor: Executor,
     tracker: (T) -> Unit
   ): TrackerReference {
     val listener = ldClient.flagTracker.addFlagValueChangeListener(
       feature.name,
       buildUser(feature, key, attributes)
-    ) { tracker(mapper(it.newValue)) }
+    ) { event ->
+      executor.execute {
+        tracker(mapper(event.newValue))
+      }
+    }
 
     return object : TrackerReference {
       override fun unregister() {
@@ -139,34 +145,39 @@ class LaunchDarklyFeatureFlags @Inject constructor(
     feature: Feature,
     key: String,
     attributes: Attributes,
+    executor: Executor,
     tracker: (Boolean) -> Unit
-  ) = track(feature, key, attributes, { it.booleanValue() }, tracker )
+  ) = track(feature, key, attributes, { it.booleanValue() }, executor, tracker )
 
   override fun trackInt(
     feature: Feature,
     key: String,
     attributes: Attributes,
+    executor: Executor,
     tracker: (Int) -> Unit
-  ) = track(feature, key, attributes, { it.intValue() }, tracker )
+  ) = track(feature, key, attributes, { it.intValue() }, executor, tracker )
 
   override fun trackString(
     feature: Feature,
     key: String,
     attributes: Attributes,
+    executor: Executor,
     tracker: (String) -> Unit
-  ) = track(feature, key, attributes, { it.stringValue() }, tracker )
+  ) = track(feature, key, attributes, { it.stringValue() }, executor, tracker )
 
   override fun <T : Enum<T>> trackEnum(
     feature: Feature,
     key: String,
     clazz: Class<T>,
     attributes: Attributes,
+    executor: Executor,
     tracker: (T) -> Unit
   ) = track(
     feature,
     key,
     attributes,
     { java.lang.Enum.valueOf(clazz, it.stringValue().toUpperCase()) },
+    executor,
     tracker
   )
 
@@ -175,12 +186,14 @@ class LaunchDarklyFeatureFlags @Inject constructor(
     key: String,
     clazz: Class<T>,
     attributes: Attributes,
+    executor: Executor,
     tracker: (T) -> Unit
   ) = track(
     feature,
     key,
     attributes,
     { moshi.adapter(clazz).fromSafeJson(it.toJsonString())!! },
+    executor,
     tracker
   )
 

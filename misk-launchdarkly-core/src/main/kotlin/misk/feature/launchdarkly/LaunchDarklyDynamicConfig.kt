@@ -4,7 +4,7 @@ import misk.feature.Attributes
 import misk.feature.DynamicConfig
 import misk.feature.Feature
 import misk.feature.FeatureFlags
-import misk.feature.TrackerReference
+import java.util.concurrent.Executor
 import javax.inject.Singleton
 
 @Singleton
@@ -29,24 +29,26 @@ class LaunchDarklyDynamicConfig(private val featureFlags: FeatureFlags) : Dynami
   override fun <T> getJson(feature: Feature, clazz: Class<T>) =
     featureFlags.getJson(feature, KEY, clazz, ATTRIBUTES)
 
-  override fun trackBoolean(feature: Feature, tracker: (Boolean) -> Unit) =
-    featureFlags.trackBoolean(feature, KEY, ATTRIBUTES, tracker)
+  override fun trackBoolean(feature: Feature, executor: Executor, tracker: (Boolean) -> Unit) =
+    featureFlags.trackBoolean(feature, KEY, ATTRIBUTES, executor, tracker)
 
-  override fun trackInt(feature: Feature, tracker: (Int) -> Unit) =
-    featureFlags.trackInt(feature, KEY, ATTRIBUTES, tracker)
+  override fun trackInt(feature: Feature, executor: Executor, tracker: (Int) -> Unit) =
+    featureFlags.trackInt(feature, KEY, ATTRIBUTES, executor, tracker)
 
-  override fun trackString(feature: Feature, tracker: (String) -> Unit) =
-    featureFlags.trackString(feature, KEY, ATTRIBUTES, tracker)
+  override fun trackString(feature: Feature, executor: Executor, tracker: (String) -> Unit) =
+    featureFlags.trackString(feature, KEY, ATTRIBUTES, executor, tracker)
 
   override fun <T : Enum<T>> trackEnum(
     feature: Feature,
     clazz: Class<T>,
+    executor: Executor,
     tracker: (T) -> Unit
-  ) = featureFlags.trackEnum(feature, KEY, clazz, ATTRIBUTES, tracker)
+  ) = featureFlags.trackEnum(feature, KEY, clazz, ATTRIBUTES, executor, tracker)
 
   override fun <T> trackJson(
     feature: Feature,
     clazz: Class<T>,
+    executor: Executor,
     tracker: (T) -> Unit
-  ) = featureFlags.trackJson(feature, KEY, clazz, ATTRIBUTES, tracker)
+  ) = featureFlags.trackJson(feature, KEY, clazz, ATTRIBUTES, executor, tracker)
 }

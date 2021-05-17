@@ -1,7 +1,5 @@
 package misk.feature
 
-import java.io.Closeable
-
 /**
  * Interface for evaluating dynamic flags. Dynamic flags are similar to feature flags, but they
  * don't support different variations for different keys.
@@ -38,7 +36,7 @@ interface DynamicConfig {
    *
    * Returns a tracker reference which can be used to un-register the tracker.
    */
-  fun trackBoolean(feature: Feature, tracker: (Boolean) -> Unit): TrackerReference
+  fun trackBoolean(feature: Feature, executor: Executor, tracker: (Boolean) -> Unit): TrackerReference
 
   /**
    * Registers a integer dynamic config tracker which will be invoked whenever the integer
@@ -46,7 +44,7 @@ interface DynamicConfig {
    *
    * Returns a tracker reference which can be used to un-register the tracker.
    */
-  fun trackInt(feature: Feature, tracker: (Int) -> Unit): TrackerReference
+  fun trackInt(feature: Feature, executor: Executor, tracker: (Int) -> Unit): TrackerReference
 
   /**
    * Registers a string dynamic config tracker which will be invoked whenever the string
@@ -54,7 +52,7 @@ interface DynamicConfig {
    *
    * Returns a tracker reference which can be used to un-register the tracker.
    */
-  fun trackString(feature: Feature, tracker: (String) -> Unit): TrackerReference
+  fun trackString(feature: Feature, executor: Executor, tracker: (String) -> Unit): TrackerReference
 
   /**
    * Registers a enum dynamic config tracker which will be invoked whenever the enum
@@ -62,7 +60,7 @@ interface DynamicConfig {
    *
    * Returns a tracker reference which can be used to un-register the tracker.
    */
-  fun <T: Enum<T>>trackEnum(feature: Feature, clazz: Class<T>, tracker: (T) -> Unit): TrackerReference
+  fun <T: Enum<T>>trackEnum(feature: Feature, clazz: Class<T>, executor: Executor, tracker: (T) -> Unit): TrackerReference
 
   /**
    * Registers a json dynamic config tracker which will be invoked whenever the json
@@ -70,7 +68,7 @@ interface DynamicConfig {
    *
    * Returns a tracker reference which can be used to un-register the tracker.
    */
-  fun <T> trackJson(feature: Feature, clazz: Class<T>, tracker: (T) -> Unit): TrackerReference
+  fun <T> trackJson(feature: Feature, clazz: Class<T>, executor: Executor, tracker: (T) -> Unit): TrackerReference
 }
 
 interface TrackerReference {
@@ -83,12 +81,14 @@ inline fun <reified T : Enum<T>> DynamicConfig.getEnum(
 
 inline fun <reified T : Enum<T>> DynamicConfig.trackEnum(
   feature: Feature,
+  executor: Executor,
   noinline tracker: (T) -> Unit
-): TrackerReference = trackEnum(feature, T::class.java, tracker)
+): TrackerReference = trackEnum(feature, T::class.java, executor, tracker)
 
 inline fun <reified T> DynamicConfig.getJson(feature: Feature): T = getJson(feature, T::class.java)
 
 inline fun <reified T> DynamicConfig.trackJson(
   feature: Feature,
+  executor: Executor,
   noinline tracker: (T) -> Unit
-): TrackerReference = trackJson(feature, T::class.java, tracker)
+): TrackerReference = trackJson(feature, T::class.java, executor, tracker)

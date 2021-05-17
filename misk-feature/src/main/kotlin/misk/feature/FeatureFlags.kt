@@ -1,5 +1,7 @@
 package misk.feature
 
+import java.util.concurrent.Executor
+
 /**
  * Interface for evaluating feature flags.
  */
@@ -73,6 +75,7 @@ interface FeatureFlags {
     feature: Feature,
     key: String,
     attributes: Attributes = Attributes(),
+    executor: Executor,
     tracker: (Boolean) -> Unit
   ): TrackerReference
 
@@ -84,6 +87,7 @@ interface FeatureFlags {
     feature: Feature,
     key: String,
     attributes: Attributes = Attributes(),
+    executor: Executor,
     tracker: (Int) -> Unit
   ): TrackerReference
 
@@ -95,6 +99,7 @@ interface FeatureFlags {
     feature: Feature,
     key: String,
     attributes: Attributes = Attributes(),
+    executor: Executor,
     tracker: (String) -> Unit
   ): TrackerReference
 
@@ -114,6 +119,7 @@ interface FeatureFlags {
     key: String,
     clazz: Class<T>,
     attributes: Attributes = Attributes(),
+    executor: Executor,
     tracker: (T) -> Unit
   ): TrackerReference
 
@@ -129,6 +135,7 @@ interface FeatureFlags {
     key: String,
     clazz: Class<T>,
     attributes: Attributes = Attributes(),
+    executor: Executor,
     tracker: (T) -> Unit
   ): TrackerReference
 
@@ -163,34 +170,39 @@ interface FeatureFlags {
   fun trackBoolean(
     feature: Feature,
     key: String,
+    executor: Executor,
     tracker: (Boolean) -> Unit
-  ) = trackBoolean(feature, key, Attributes(), tracker)
+  ) = trackBoolean(feature, key, Attributes(), executor, tracker)
 
   fun trackInt(
     feature: Feature,
     key: String,
+    executor: Executor,
     tracker: (Int) -> Unit
-  ) = trackInt(feature, key, Attributes(), tracker)
+  ) = trackInt(feature, key, Attributes(), executor, tracker)
 
   fun trackString(
     feature: Feature,
     key: String,
+    executor: Executor,
     tracker: (String) -> Unit
-  ) = trackString(feature, key, Attributes(), tracker)
+  ) = trackString(feature, key, Attributes(), executor, tracker)
 
   fun <T : Enum<T>> trackEnum(
     feature: Feature,
     key: String,
     clazz: Class<T>,
+    executor: Executor,
     tracker: (T) -> Unit
-  ) = trackEnum(feature, key, clazz, Attributes(), tracker)
+  ) = trackEnum(feature, key, clazz, Attributes(), executor, tracker)
 
   fun <T> trackJson(
     feature: Feature,
     key: String,
     clazz: Class<T>,
+    executor: Executor,
     tracker: (T) -> Unit
-  ) = trackJson(feature, key, clazz, Attributes(), tracker)
+  ) = trackJson(feature, key, clazz, Attributes(), executor, tracker)
 }
 
 inline fun <reified T : Enum<T>> FeatureFlags.getEnum(
@@ -204,6 +216,22 @@ inline fun <reified T> FeatureFlags.getJson(
   key: String,
   attributes: Attributes = Attributes()
 ): T = getJson(feature, key, T::class.java, attributes)
+
+inline fun <reified T : Enum<T>> FeatureFlags.trackEnum(
+  feature: Feature,
+  key: String,
+  attributes: Attributes = Attributes(),
+  executor: Executor,
+  noinline tracker: (T) -> Unit
+): TrackerReference = trackEnum(feature, key, T::class.java, attributes, executor, tracker)
+
+inline fun <reified T> FeatureFlags.trackJson(
+  feature: Feature,
+  key: String,
+  attributes: Attributes = Attributes(),
+  executor: Executor,
+  noinline tracker: (T) -> Unit
+): TrackerReference = trackJson(feature, key, T::class.java, attributes, executor, tracker)
 
 /**
  * Typed feature string.
