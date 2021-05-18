@@ -56,10 +56,10 @@ class FakeFeatureFlags @Inject constructor(
     key: String,
     clazz: Class<T>,
     attributes: Attributes
-  ): T {
-    @Suppress("unchecked_cast")
-    return getOrDefault(feature, key, clazz.enumConstants[0], attributes) as T
-  }
+  ): T =
+    get(feature, key, attributes) as? T ?: throw IllegalArgumentException(
+      "Enum flag $feature must be overridden with override() before use; the default value of the first constant has been DEPRECATED"
+    )
 
   override fun <T> getJson(
     feature: Feature,
@@ -89,17 +89,6 @@ class FakeFeatureFlags @Inject constructor(
   )
 
   override fun <T> getJson(feature: Feature, clazz: Class<T>): T = getJson(feature, KEY, clazz)
-
-  private fun <V> getOrDefault(
-    feature: Feature,
-    key: String,
-    defaultValue: V,
-    attributes: Attributes = defaultAttributes
-  ): V {
-    FeatureFlagValidation.checkValidKey(feature, key)
-    @Suppress("unchecked_cast")
-    return (get(feature, key, attributes) ?: defaultValue) as V
-  }
 
   private fun get(
     feature: Feature,
