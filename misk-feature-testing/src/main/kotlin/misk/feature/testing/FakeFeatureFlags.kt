@@ -54,7 +54,7 @@ class FakeFeatureFlags @Inject constructor(
     clazz: Class<T>,
     attributes: Attributes
   ): T =
-    get(feature, key, attributes) as T ?: throw IllegalArgumentException(
+    get(feature, key, attributes) as? T ?: throw IllegalArgumentException(
       "Enum flag $feature must be overridden with override() before use; the default value of the first constant has been DEPRECATED"
     )
 
