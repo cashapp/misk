@@ -66,9 +66,10 @@ internal class FakeFeatureFlagsTest {
 
   @Test
   fun getEnum() {
-    // Defaults to first enum.
-    assertThat(subject.getEnum<Dinosaur>(FEATURE, TOKEN))
-      .isEqualTo(Dinosaur.PTERODACTYL)
+    // Default throws.
+    assertThrows<RuntimeException> {
+      subject.getEnum<Dinosaur>(FEATURE, TOKEN)
+    }
 
     // Can be overridden
     subject.override(FEATURE, Dinosaur.TYRANNOSAURUS)
