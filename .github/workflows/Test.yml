@@ -45,10 +45,10 @@ jobs:
         run: |
           sudo /etc/init.d/mysql restart
           echo 'mysql_pwd_clear<<EOF' >> $GITHUB_ENV
-          UPDATE mysql.user >> $GITHUB_ENV
-          SET authentication_string = PASSWORD(''), password_expired = 'N' >> $GITHUB_ENV
-          WHERE User = 'root' AND Host = 'localhost'; >> $GITHUB_ENV
-          FLUSH PRIVILEGES; >> $GITHUB_ENV
+          echo 'UPDATE mysql.user' >> $GITHUB_ENV
+          echo "SET authentication_string = PASSWORD(''), password_expired = 'N'" >> $GITHUB_ENV
+          echo "WHERE User = 'root' AND Host = 'localhost';" >> $GITHUB_ENV
+          echo 'FLUSH PRIVILEGES;' >> $GITHUB_ENV
           echo 'EOF' >> $GITHUB_ENV
           mysql -uroot -proot -e '${{ env.mysql_pwd_clear }}'
           sudo /etc/init.d/mysql restart
