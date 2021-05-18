@@ -103,7 +103,9 @@ internal class FakeFeatureFlagsTest {
     ).isEqualTo(Dinosaur.PTERODACTYL)
 
     subject.reset()
-    assertThat(subject.getEnum<Dinosaur>(FEATURE, TOKEN)).isEqualTo(Dinosaur.PTERODACTYL)
+    assertThrows<RuntimeException> {
+      subject.getEnum<Dinosaur>(FEATURE, TOKEN)
+    }
   }
 
   data class JsonFeature(val value: String, val optional: String? = null)
