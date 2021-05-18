@@ -33,9 +33,10 @@ class FakeFeatureFlags @Inject constructor(
 
   private val overrides = ConcurrentHashMap<MapKey, PriorityQueue<MapValue>>()
 
-  override fun getBoolean(feature: Feature, key: String, attributes: Attributes): Boolean {
-    return getOrDefault(feature, key, false, attributes)
-  }
+  override fun getBoolean(feature: Feature, key: String, attributes: Attributes): Boolean =
+    get(feature, key, attributes) as? Boolean ?: throw IllegalArgumentException(
+      "Boolean flag $feature must be overridden with override() before use; the default value of false has been DEPRECATED"
+    )
 
   override fun getInt(feature: Feature, key: String, attributes: Attributes): Int =
     get(feature, key, attributes) as? Int ?: throw IllegalArgumentException(

@@ -154,8 +154,8 @@ internal class FakeFeatureFlagsTest {
 
   @Test
   fun getBoolean() {
-    // Default returns false and not throw as the other variants.
-    assertThat(subject.getBoolean(FEATURE, TOKEN)).isEqualTo(false)
+    // Default throws.
+    assertThrows<RuntimeException> { subject.getBoolean(FEATURE, TOKEN) }
 
     // Can be overridden
     subject.override(FEATURE, true)
