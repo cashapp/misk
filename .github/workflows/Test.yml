@@ -45,7 +45,7 @@ jobs:
         run: |
           echo 'mysql_pwd_clear<<EOF' >> $GITHUB_ENV
           echo 'UPDATE mysql.user' >> $GITHUB_ENV
-          echo "SET authentication_string = PASSWORD(''), password_expired = 'N'" >> $GITHUB_ENV
+          echo "SET authentication_string = PASSWORD('')" >> $GITHUB_ENV
           echo "WHERE User = 'root' AND Host = 'localhost';" >> $GITHUB_ENV
           echo 'FLUSH PRIVILEGES;' >> $GITHUB_ENV
           echo 'EOF' >> $GITHUB_ENV
