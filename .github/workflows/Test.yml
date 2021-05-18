@@ -41,15 +41,18 @@ jobs:
           - ./gradlew testShardNonHibernate -i --scan --parallel
 
     steps:
-      - name: Start MySQL
+      - name: Setup SQL to reset Mysql root password for tests
         run: |
-          sudo /etc/init.d/mysql restart
           echo 'mysql_pwd_clear<<EOF' >> $GITHUB_ENV
           echo 'UPDATE mysql.user' >> $GITHUB_ENV
           echo "SET authentication_string = PASSWORD(''), password_expired = 'N'" >> $GITHUB_ENV
           echo "WHERE User = 'root' AND Host = 'localhost';" >> $GITHUB_ENV
           echo 'FLUSH PRIVILEGES;' >> $GITHUB_ENV
           echo 'EOF' >> $GITHUB_ENV
+
+      - name: Start MySQL and reset root password
+        run: |
+          sudo /etc/init.d/mysql restart
           mysql -uroot -proot -e "${{ env.mysql_pwd_clear }}"
           sudo /etc/init.d/mysql restart
 
