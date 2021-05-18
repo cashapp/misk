@@ -33,14 +33,6 @@ jobs:
   jvm:
     runs-on: ${{ matrix.os }}
 
-    services:
-      mysql:
-        image: mysql:5.7
-        ports:
-          - 3306:3306
-        env:
-          MYSQL_ALLOW_EMPTY_PASSWORD: 1
-
     strategy:
       matrix:
         os: [ubuntu-latest]
@@ -49,6 +41,9 @@ jobs:
           - ./gradlew testShardNonHibernate -i --scan --parallel
 
     steps:
+      - name: Start MySQL
+        run: sudo /etc/init.d/mysql start
+
       - name: Checkout
         uses: actions/checkout@v2
 
