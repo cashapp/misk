@@ -50,7 +50,7 @@ jobs:
           echo "WHERE User = 'root' AND Host = 'localhost';" >> $GITHUB_ENV
           echo 'FLUSH PRIVILEGES;' >> $GITHUB_ENV
           echo 'EOF' >> $GITHUB_ENV
-          mysql -uroot -proot -e '${{ env.mysql_pwd_clear }}'
+          mysql -uroot -proot -e "${{ env.mysql_pwd_clear }}"
           sudo /etc/init.d/mysql restart
 
       - name: Checkout
