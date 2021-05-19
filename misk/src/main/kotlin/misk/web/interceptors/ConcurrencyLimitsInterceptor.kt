@@ -1,7 +1,14 @@
 package misk.web.interceptors
 
+import com.google.common.cache.Cache
+import com.google.common.cache.CacheBuilder
 import com.netflix.concurrency.limits.Limiter
 import com.netflix.concurrency.limits.limiter.SimpleLimiter
+import java.time.Clock
+import java.util.concurrent.TimeUnit
+import javax.inject.Inject
+import javax.inject.Singleton
+import kotlin.reflect.full.findAnnotation
 import misk.Action
 import misk.exceptions.StatusCode
 import misk.web.AvailableWhenDegraded
@@ -10,23 +17,36 @@ import misk.web.NetworkInterceptor
 import org.slf4j.event.Level
 import wisp.logging.getLogger
 import wisp.logging.log
-import java.time.Clock
-import java.util.concurrent.TimeUnit
-import javax.inject.Inject
-import javax.inject.Singleton
-import kotlin.reflect.full.findAnnotation
 
 /**
  * Detects degraded behavior and sheds requests accordingly. Internally this uses adaptive limiting
- * as implemented by Netflix's [concurrency-limits][concurrency_limits] library.
+ * as implemented by Netflix's [concurrency-limits][concurrency_limits] library. It implements some
+ * of the recommendations in [Using Load Shedding to Avoid Overload][avoid_overload].
  *
  * This annotation is applied to all actions by default. Opt-out with [AvailableWhenDegraded].
  *
+ * Throughput predictions are made independently for each action. To bucket calls more finely, or to
+ * bucket calls that span actions, use the Quota-Path HTTP header. Callers may optionally include
+ * this HTTP header with a path-like string:
+ *
+ * ```
+ * POST /squareup.event_consumer.service.HandleService/Handle HTTP/2
+ * Content-Type: application/grpc
+ * Quota-Path: /consumer/money_movement_events
+ * ...
+ * ```
+ *
+ * If a Quota-Path header is included, it replaces the action as the scope for concurrency limiting.
+ * If the same Quota-Path header is used on different actions, the concurrency limits of these
+ * actions are shared.
+ *
  * [concurrency_limits]: https://github.com/Netflix/concurrency-limits/
+ * [avoid_overload]: https://aws.amazon.com/builders-library/using-load-shedding-to-avoid-overload/
  */
 internal class ConcurrencyLimitsInterceptor internal constructor(
-  private val actionName: String,
-  private val limiter: Limiter<String>,
+  private val factory: Factory,
+  private val action: Action,
+  private val defaultLimiter: Limiter<String>,
   private val clock: Clock
 ) : NetworkInterceptor {
   /**
@@ -37,10 +57,16 @@ internal class ConcurrencyLimitsInterceptor internal constructor(
   private var lastErrorLoggedAtMs = -1L
 
   override fun intercept(chain: NetworkChain) {
-    val listener: Limiter.Listener? = limiter.acquire(actionName).orElse(null)
+    val quotaPath = chain.httpCall.requestHeaders["Quota-Path"]
+    val limiter = when {
+      quotaPath != null -> factory.pickLimiter(action, quotaPath)
+      else -> defaultLimiter
+    }
+
+    val listener: Limiter.Listener? = limiter.acquire(action.name).orElse(null)
 
     if (listener == null) {
-      logShedRequest()
+      logShedRequest(quotaPath)
       chain.httpCall.statusCode = StatusCode.SERVICE_UNAVAILABLE.code
       chain.httpCall.takeResponseBody()?.use { sink ->
         sink.writeUtf8("service unavailable")
@@ -68,12 +94,14 @@ internal class ConcurrencyLimitsInterceptor internal constructor(
     }
   }
 
-  private fun logShedRequest() {
+  private fun logShedRequest(quotaPath: String?) {
     val nowMs = clock.millis()
     val durationSinceLastErrorMs = nowMs - lastErrorLoggedAtMs
     if (lastErrorLoggedAtMs == -1L || durationSinceLastErrorMs >= durationBetweenErrorsMs) {
       lastErrorLoggedAtMs = nowMs
-      logger.log(level = Level.ERROR) { "concurrency limits interceptor shedding $actionName" }
+      logger.log(level = Level.ERROR) {
+        "concurrency limits interceptor shedding ${action.name}; Quota-Path=$quotaPath"
+      }
     }
   }
 
@@ -82,17 +110,34 @@ internal class ConcurrencyLimitsInterceptor internal constructor(
     private val clock: Clock,
     private val limiterFactories: List<ConcurrencyLimiterFactory>,
   ) : NetworkInterceptor.Factory {
+    /**
+     * Note that this cache is application-global. Multiple actions that use the same Quota-Path
+     * will be treated as a homogenous group for concurrency limiting.
+     */
+    private val quotaPathToLimiter: Cache<String, Limiter<String>> = CacheBuilder.newBuilder()
+      .build()
+
     override fun create(action: Action): NetworkInterceptor? {
       if (action.function.findAnnotation<AvailableWhenDegraded>() != null) return null
+      return ConcurrencyLimitsInterceptor(
+        factory = this,
+        action = action,
+        defaultLimiter = createLimiterForAction(action),
+        clock = clock
+      )
+    }
 
-      val limiter = limiterFactories.asSequence()
+    private fun createLimiterForAction(action: Action): Limiter<String> {
+      return limiterFactories.asSequence()
         .mapNotNull { it.create(action) }
         .firstOrNull()
         ?: SimpleLimiter.Builder()
           .clock { clock.millis() }
           .build()
+    }
 
-      return ConcurrencyLimitsInterceptor(action.name, limiter, clock)
+    internal fun pickLimiter(action: Action, quotaPath: String): Limiter<String> {
+      return quotaPathToLimiter.get(quotaPath) { createLimiterForAction(action) }
     }
   }
 
