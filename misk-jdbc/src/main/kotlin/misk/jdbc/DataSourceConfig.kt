@@ -2,6 +2,7 @@ package misk.jdbc
 
 import misk.environment.Environment
 import wisp.config.Config
+import wisp.logging.getLogger
 import java.time.Duration
 
 /** Defines a type of datasource */
@@ -208,7 +209,10 @@ data class DataSourceConfig(
         }
         queryParams += "&sslMode=$sslMode"
 
-        "jdbc:tracing:mysql://${config.host}:${config.port}/${config.database}$queryParams"
+        val jdbcUrl =
+          "jdbc:tracing:mysql://${config.host}:${config.port}/${config.database}$queryParams"
+        getLogger<DataSourceConfig>().info("JDBC URL is: $jdbcUrl")
+        jdbcUrl
       }
       DataSourceType.HSQLDB -> {
         "jdbc:hsqldb:mem:${database!!};sql.syntax_mys=true"
