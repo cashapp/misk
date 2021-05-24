@@ -156,6 +156,9 @@ data class DataSourceConfig(
           // Since Vitess always uses strict_trans_tables this makes no difference here except it
           // stops spamming the logs
           queryParams += "&jdbcCompliantTruncation=false"
+
+          // don't use TLS1.1
+          queryParams += "&enabledTLSProtocols=TLSv1.2"
         }
 
         val trustStoreUrl: String? =
@@ -193,11 +196,6 @@ data class DataSourceConfig(
           queryParams += "&clientCertificateKeyStoreUrl=$certStoreUrl"
           queryParams += "&clientCertificateKeyStorePassword=${config.client_certificate_key_store_password}"
           useSSL = true
-        }
-
-        if (useSSL && type == DataSourceType.VITESS_MYSQL) {
-          // don't use TLS1.1
-          queryParams += "&enabledTLSProtocols=TLSv1.2"
         }
 
         val sslMode = if (useSSL && verify_server_identity) {

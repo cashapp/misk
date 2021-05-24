@@ -11,7 +11,9 @@ class DataSourceConfigTest {
     assertEquals(
       "jdbc:tracing:mysql://127.0.0.1:27003/@master?useLegacyDatetimeCode=false&" +
         "createDatabaseIfNotExist=true&connectTimeout=10000&socketTimeout=60000&" +
-        "useServerPrepStmts=false&useUnicode=true&jdbcCompliantTruncation=false&sslMode=PREFERRED",
+        "useServerPrepStmts=false&useUnicode=true&" +
+        "jdbcCompliantTruncation=false&enabledTLSProtocols=TLSv1.2&" +
+        "sslMode=PREFERRED",
       config.buildJdbcUrl(Environment.TESTING)
     )
   }
@@ -27,9 +29,10 @@ class DataSourceConfigTest {
       "jdbc:tracing:mysql://127.0.0.1:27003/@master?useLegacyDatetimeCode=false&" +
         "createDatabaseIfNotExist=true&connectTimeout=10000&socketTimeout=60000&" +
         "useServerPrepStmts=false&useUnicode=true&jdbcCompliantTruncation=false&" +
+        "enabledTLSProtocols=TLSv1.2&" +
         "trustCertificateKeyStoreUrl=path/to/truststore&" +
         "trustCertificateKeyStorePassword=changeit&" +
-        "enabledTLSProtocols=TLSv1.2&sslMode=VERIFY_CA",
+        "sslMode=VERIFY_CA",
       config.buildJdbcUrl(Environment.TESTING)
     )
   }
@@ -45,8 +48,9 @@ class DataSourceConfigTest {
       "jdbc:tracing:mysql://127.0.0.1:27003/@master?useLegacyDatetimeCode=false&" +
         "createDatabaseIfNotExist=true&connectTimeout=10000&socketTimeout=60000&" +
         "useServerPrepStmts=false&useUnicode=true&jdbcCompliantTruncation=false&" +
+        "enabledTLSProtocols=TLSv1.2&" +
         "clientCertificateKeyStoreUrl=path/to/keystore&clientCertificateKeyStorePassword=" +
-        "changeit&enabledTLSProtocols=TLSv1.2&sslMode=VERIFY_CA",
+        "changeit&sslMode=VERIFY_CA",
       config.buildJdbcUrl(Environment.TESTING)
     )
   }
@@ -64,10 +68,11 @@ class DataSourceConfigTest {
       "jdbc:tracing:mysql://127.0.0.1:27003/@master?useLegacyDatetimeCode=false&" +
         "createDatabaseIfNotExist=true&connectTimeout=10000&socketTimeout=60000&" +
         "useServerPrepStmts=false&useUnicode=true&jdbcCompliantTruncation=false&" +
+        "enabledTLSProtocols=TLSv1.2&" +
         "trustCertificateKeyStoreUrl=path/to/truststore&trustCertificateKeyStorePassword=" +
         "changeit&clientCertificateKeyStoreUrl=path/to/keystore&" +
         "clientCertificateKeyStorePassword=changeit&" +
-        "enabledTLSProtocols=TLSv1.2&sslMode=VERIFY_CA",
+        "sslMode=VERIFY_CA",
       config.buildJdbcUrl(Environment.TESTING)
     )
   }
@@ -85,10 +90,11 @@ class DataSourceConfigTest {
       "jdbc:tracing:mysql://127.0.0.1:27003/@master?useLegacyDatetimeCode=false&" +
         "createDatabaseIfNotExist=true&connectTimeout=10000&socketTimeout=60000&" +
         "useServerPrepStmts=false&useUnicode=true&jdbcCompliantTruncation=false&" +
+        "enabledTLSProtocols=TLSv1.2&" +
         "trustCertificateKeyStoreUrl=file://path/to/truststore&trustCertificateKeyStorePassword" +
         "=changeit&clientCertificateKeyStoreUrl=file://path/to/keystore&" +
         "clientCertificateKeyStorePassword=changeit&" +
-        "enabledTLSProtocols=TLSv1.2&sslMode=VERIFY_CA",
+        "sslMode=VERIFY_CA",
       config.buildJdbcUrl(Environment.TESTING)
     )
   }
@@ -106,10 +112,11 @@ class DataSourceConfigTest {
       "jdbc:tracing:mysql://127.0.0.1:27003/@master?useLegacyDatetimeCode=false&" +
         "createDatabaseIfNotExist=true&connectTimeout=10000&socketTimeout=60000&" +
         "useServerPrepStmts=false&useUnicode=true&jdbcCompliantTruncation=false&" +
+        "enabledTLSProtocols=TLSv1.2&" +
         "trustCertificateKeyStoreUrl=file://path/to/truststore&" +
         "trustCertificateKeyStorePassword=changeit&clientCertificateKeyStoreUrl=" +
         "file://path/to/keystore&clientCertificateKeyStorePassword=changeit&" +
-        "enabledTLSProtocols=TLSv1.2&sslMode=VERIFY_CA",
+        "sslMode=VERIFY_CA",
       config.buildJdbcUrl(Environment.TESTING)
     )
   }
