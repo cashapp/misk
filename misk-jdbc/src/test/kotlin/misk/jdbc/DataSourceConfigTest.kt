@@ -13,7 +13,7 @@ class DataSourceConfigTest {
         "createDatabaseIfNotExist=true&connectTimeout=10000&socketTimeout=60000&" +
         "useServerPrepStmts=false&useUnicode=true&" +
         "jdbcCompliantTruncation=false&enabledTLSProtocols=TLSv1.2&" +
-        "sslMode=PREFERRED",
+        "verifyServerCertificate=false&sslMode=PREFERRED",
       config.buildJdbcUrl(Environment.TESTING)
     )
   }
@@ -180,7 +180,8 @@ class DataSourceConfigTest {
     val config = DataSourceConfig(DataSourceType.MYSQL)
     assertEquals(
       "jdbc:tracing:mysql://127.0.0.1:3306/?useLegacyDatetimeCode=false&" +
-        "createDatabaseIfNotExist=true&connectTimeout=10000&socketTimeout=60000&sslMode=PREFERRED",
+        "createDatabaseIfNotExist=true&connectTimeout=10000&socketTimeout=60000&" +
+        "verifyServerCertificate=false&sslMode=PREFERRED",
       config.buildJdbcUrl(Environment.TESTING)
     )
   }

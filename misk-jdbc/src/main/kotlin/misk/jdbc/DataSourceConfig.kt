@@ -203,6 +203,7 @@ data class DataSourceConfig(
         } else if (useSSL) {
           "VERIFY_CA"
         } else {
+          queryParams += "&verifyServerCertificate=false"
           "PREFERRED"
         }
         queryParams += "&sslMode=$sslMode"
