@@ -26,6 +26,7 @@ import okio.ByteString
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import wisp.logging.getLogger
 import javax.inject.Inject
 
 /**
@@ -144,8 +145,15 @@ internal class JsonForProtoEndpointsTest {
       .build()
     val shippingClient = GrpcShippingClient(grpcClient)
 
-    val responseBody = shippingClient.GetDestinationWarehouse().executeBlocking(requestBody)
-    assertThat(responseBody).isEqualTo(expectedResponseBody)
+    try {
+      val responseBody = shippingClient.GetDestinationWarehouse().executeBlocking(requestBody)
+      assertThat(responseBody).isEqualTo(expectedResponseBody)
+    } catch (e: Exception) {
+      e.fillInStackTrace()
+      val logger = getLogger<JsonForProtoEndpointsTest>()
+      logger.error("Problem...", e)
+      e.stackTrace.forEach { logger.error("sub error...", it) }
+    }
   }
 
   class TestModule : KAbstractModule() {
