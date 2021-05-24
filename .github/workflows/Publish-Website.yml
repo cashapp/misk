@@ -23,9 +23,10 @@ jobs:
           python-version: 3.8
 
       - name: Configure JDK
-        uses: actions/setup-java@v1
+        uses: actions/setup-java@v2
         with:
-          java-version: 14
+          distribution: 'adopt'
+          java-version: 11.0.11+9
 
       - name: Prep mkdocs
         run: .github/workflows/prepare_mkdocs.sh
