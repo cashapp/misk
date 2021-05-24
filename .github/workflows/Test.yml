@@ -5,6 +5,9 @@ on:
     paths-ignore:
       - "docs/**"
       - "*.md"
+  push:
+    branches:
+      - master
 
 env:
   ENVIRONMENT: TESTING
