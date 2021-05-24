@@ -12,7 +12,6 @@ import misk.vitess.CowriteException
 import misk.vitess.Shard
 import org.hibernate.SessionFactory
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.lang.reflect.UndeclaredThrowableException
@@ -23,7 +22,6 @@ import javax.inject.Inject
  * Verifies that we're constraining a few things that makes apps hard to scale out.
  */
 @MiskTest(startService = true)
-@Disabled("Failing on github actions test build")
 class VitessScaleSafetyTest {
   @MiskTestModule
   val module = MoviesTestModule(scaleSafetyChecks = true)
