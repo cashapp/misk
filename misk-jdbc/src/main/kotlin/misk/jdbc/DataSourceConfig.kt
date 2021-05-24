@@ -194,6 +194,11 @@ data class DataSourceConfig(
           useSSL = true
         }
 
+        if (useSSL && type == DataSourceType.VITESS_MYSQL) {
+          // don't use TLS1.1
+          queryParams += "&enabledTLSProtocols=TLSv1.2"
+        }
+
         val sslMode = if (useSSL && verify_server_identity) {
           "VERIFY_IDENTITY"
         } else if (useSSL) {
