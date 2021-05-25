@@ -66,9 +66,16 @@ fun getDeploymentFromEnvironmentVariable(
   val deploymentName = name ?: environment
 
   return when (environment.toLowerCase()) {
-    "staging", "production" -> Deployment(
+    "production" -> Deployment(
       deploymentName,
       isProduction = true,
+      isTest = false,
+      isLocalDevelopment = false
+    )
+
+    "staging" -> Deployment(
+      deploymentName,
+      isProduction = false,
       isTest = false,
       isLocalDevelopment = false
     )
