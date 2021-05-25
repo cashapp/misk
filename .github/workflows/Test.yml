@@ -16,61 +16,42 @@ env:
   TERM: dumb
 
 jobs:
-  js:
-    runs-on: ${{ matrix.os }}
-
-    strategy:
-      matrix:
-        os: [ubuntu-latest]
-        node: [12]
-        cmd:
-          - sudo npm install -g @misk/cli && miskweb ci-build -e
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-
-      - name: Test
-        run: ${{ matrix.cmd }}
+#  js:
+#    runs-on: ${{ matrix.os }}
+#
+#    strategy:
+#      matrix:
+#        os: [ubuntu-latest]
+#        node: [12]
+#        cmd:
+#          - sudo npm install -g @misk/cli && miskweb ci-build -e
+#
+#    steps:
+#      - name: Checkout
+#        uses: actions/checkout@v2
+#
+#      - name: Test
+#        run: ${{ matrix.cmd }}
 
   jvm:
     runs-on: ${{ matrix.os }}
+
+    services:
+      mysql:
+        image: mysql:5.7
+        ports:
+          - 3306:3306
+        env:
+          MYSQL_ALLOW_EMPTY_PASSWORD: 1
 
     strategy:
       matrix:
         os: [ubuntu-latest]
         cmd:
           - ./gradlew testShardHibernate -i --scan
-          - ./gradlew testShardNonHibernate -i --scan --parallel
+#          - ./gradlew testShardNonHibernate -i --scan --parallel
 
     steps:
-      - name: Shutdown Ubuntu MySQL (SUDO)
-        run: sudo service mysql stop # Shutdown the Default MySQL, "sudo" is necessary, please not remove it
-
-      - name: Set up MySQL
-        uses: mirromutth/mysql-action@v1.1
-        with:
-          mysql version: '5.7'
-          mysql user: 'root'
-          mysql password: 'test'
-
-      - name: Setup SQL to reset Mysql root password for tests
-        run: |
-          # To prevent "ERROR 2013 (HY000): Lost connection to MySQL server at 'reading initial communication packet', system error: 0"
-          # See: https://github.com/mirromutth/mysql-action/issues/16
-          sleep 15
-
-          echo 'mysql_pwd_clear<<EOF' >> $GITHUB_ENV
-          echo "ALTER USER 'root'@'localhost' IDENTIFIED BY '';" >> $GITHUB_ENV
-          echo 'FLUSH PRIVILEGES;' >> $GITHUB_ENV
-          echo 'EOF' >> $GITHUB_ENV
-
-      - name: Start MySQL and reset root password
-        run: |
-          sudo /etc/init.d/mysql restart
-          mysql -uroot -proot -e "${{ env.mysql_pwd_clear }}"
-          sudo /etc/init.d/mysql restart
-
       - name: Checkout
         uses: actions/checkout@v2
 
@@ -81,7 +62,7 @@ jobs:
         uses: actions/setup-java@v2
         with:
           distribution: 'adopt'
-          java-version: 11.0.11+9
+          java-version: 11.0.3
 
       - name: Test
         run: ${{ matrix.cmd }}
