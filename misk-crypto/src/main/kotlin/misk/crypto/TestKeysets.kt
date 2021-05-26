@@ -8,7 +8,7 @@ import misk.config.MiskConfig
 import java.io.ByteArrayOutputStream
 
 /**
- * These test keys are used by the [FakeExternalKeyManager] class.
+ * These test keys are used by the [FakeKeyResolver] class.
  * *DO NOT USE IN ANY OTHER SITUATION*
  */
 internal class TestKeysets {

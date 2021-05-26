@@ -7,7 +7,7 @@ package misk.crypto
 class LocalConfigKeyProvider(
   private val keys: List<Key>,
   private val kmsUri: String
-) : ExternalKeyManager {
+) : KeyResolver {
 
   override val allKeyAliases: Map<KeyAlias, KeyType> =
     keys.map { key -> key.key_name to key.key_type }.toMap()
