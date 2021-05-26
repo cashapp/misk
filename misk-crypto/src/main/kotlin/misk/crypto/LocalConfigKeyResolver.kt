@@ -1,13 +1,13 @@
 package misk.crypto
 
 /**
- * [LocalConfigKeyProvider] provides keys that are stored locally and protected by a single KMS
+ * [LocalConfigKeyResolver] provides keys that are stored locally and protected by a single KMS
  * key.
  */
-class LocalConfigKeyProvider(
+class LocalConfigKeyResolver(
   private val keys: List<Key>,
   private val kmsUri: String
-) : ExternalKeyManager {
+) : KeyResolver {
 
   override val allKeyAliases: Map<KeyAlias, KeyType> =
     keys.map { key -> key.key_name to key.key_type }.toMap()

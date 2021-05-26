@@ -34,7 +34,7 @@ open class KeyReader {
 
   @Inject lateinit var kmsClient: KmsClient
 
-  @Inject lateinit var keySources: Set<ExternalKeyManager>
+  @Inject lateinit var keySources: Set<KeyResolver>
 
   private val logger = getLogger<KeyReader>()
 

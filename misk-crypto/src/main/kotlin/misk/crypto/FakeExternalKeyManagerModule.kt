@@ -8,8 +8,8 @@ class FakeExternalKeyManagerModule(private val config: CryptoConfig) : KAbstract
   override fun configure() {
     requireBinding(wisp.deployment.Deployment::class.java)
     requireBinding(Deployment::class.java)
-    bind<ExternalKeyManager>().toInstance(
-      FakeExternalKeyManager(config.external_data_keys.orEmpty())
+    bind<KeyResolver>().toInstance(
+      FakeKeyResolver(config.external_data_keys.orEmpty())
     )
   }
 }
