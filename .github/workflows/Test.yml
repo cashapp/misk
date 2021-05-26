@@ -36,6 +36,14 @@ jobs:
   jvm:
     runs-on: ${{ matrix.os }}
 
+    services:
+      mysql:
+        image: mysql:5.7
+        ports:
+          - 3306:3306
+        env:
+          MYSQL_ALLOW_EMPTY_PASSWORD: 1
+
     strategy:
       matrix:
         os: [ubuntu-latest]
@@ -44,19 +52,6 @@ jobs:
           - ./gradlew testShardNonHibernate -i --scan --parallel
 
     steps:
-      - name: Setup SQL to reset Mysql root password for tests
-        run: |
-          echo 'mysql_pwd_clear<<EOF' >> $GITHUB_ENV
-          echo "ALTER USER 'root'@'localhost' IDENTIFIED BY '';" >> $GITHUB_ENV
-          echo 'FLUSH PRIVILEGES;' >> $GITHUB_ENV
-          echo 'EOF' >> $GITHUB_ENV
-
-      - name: Start MySQL and reset root password
-        run: |
-          sudo /etc/init.d/mysql restart
-          mysql -uroot -proot -e "${{ env.mysql_pwd_clear }}"
-          sudo /etc/init.d/mysql restart
-
       - name: Checkout
         uses: actions/checkout@v2
 
@@ -67,7 +62,7 @@ jobs:
         uses: actions/setup-java@v2
         with:
           distribution: 'adopt'
-          java-version: 11.0.11+9
+          java-version: 11.0.3
 
       - name: Test
         run: ${{ matrix.cmd }}
