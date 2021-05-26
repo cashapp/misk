@@ -15,6 +15,11 @@ data class Deployment(
   val isProduction: Boolean = false,
 
   /**
+   * Whether the service is running in a staging environment.
+   */
+  val isStaging: Boolean = false,
+
+  /**
    * Whether the service is running in a test environment, either locally or in a CI.
    */
   val isTest: Boolean = false,
@@ -25,8 +30,12 @@ data class Deployment(
   val isLocalDevelopment: Boolean = false
 ) {
   init {
-    if (isProduction) check(!isTest && !isLocalDevelopment)
-    if (isTest) check(!isLocalDevelopment)
+    when {
+      isProduction -> check(!isStaging && !isTest && !isLocalDevelopment)
+      isStaging -> check(!isProduction && !isTest && !isLocalDevelopment)
+      isTest -> check(!isProduction && !isStaging && !isLocalDevelopment)
+      isLocalDevelopment -> check(!isProduction && !isStaging && !isTest)
+    }
   }
 
   /**
@@ -69,6 +78,7 @@ fun getDeploymentFromEnvironmentVariable(
     "production" -> Deployment(
       deploymentName,
       isProduction = true,
+      isStaging = false,
       isTest = false,
       isLocalDevelopment = false
     )
@@ -76,6 +86,7 @@ fun getDeploymentFromEnvironmentVariable(
     "staging" -> Deployment(
       deploymentName,
       isProduction = false,
+      isStaging = true,
       isTest = false,
       isLocalDevelopment = false
     )
@@ -83,20 +94,15 @@ fun getDeploymentFromEnvironmentVariable(
     "testing", "test" -> Deployment(
       deploymentName,
       isProduction = false,
+      isStaging = false,
       isTest = true,
       isLocalDevelopment = false
-    )
-
-    "development" -> Deployment(
-      deploymentName,
-      isProduction = false,
-      isTest = false,
-      isLocalDevelopment = true
     )
 
     else -> Deployment(
       deploymentName,
       isProduction = false,
+      isStaging = false,
       isTest = false,
       isLocalDevelopment = true
     )
