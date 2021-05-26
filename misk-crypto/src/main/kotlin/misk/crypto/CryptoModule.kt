@@ -66,7 +66,7 @@ class CryptoModule(
       } catch (e: IllegalArgumentException) {
         throw IllegalArgumentException("Found local key with no 'encrypted_key' value", e)
       }
-      keyManagerBinder.addBinding().toInstance(LocalConfigKeyProvider(keys, config.kms_uri))
+      keyManagerBinder.addBinding().toInstance(LocalConfigKeyResolver(keys, config.kms_uri))
 
       keys.forEach {
         bindKeyToProvider(it.key_name, it.key_type)
