@@ -6,6 +6,7 @@ import com.google.crypto.tink.integration.gcpkms.GcpKmsClient
 import com.google.inject.Provides
 import com.google.inject.Singleton
 import misk.inject.KAbstractModule
+import javax.inject.Qualifier
 
 /**
  * AWS specific KMS client module.
@@ -32,3 +33,27 @@ class GcpKmsClientModule(private val credentialsPath: String? = null) : KAbstrac
   fun getKmsClient(): KmsClient = credentialsPath?.let { GcpKmsClient().withCredentials(it) }
     ?: GcpKmsClient().withDefaultCredentials()
 }
+
+/**
+ * This annotation is used to specify which [com.amazonaws.services.kms.AWSKMS]
+ * instance should be used by misk to construct a [KmsClient] and communicate with the KMS service
+ */
+@Qualifier
+@Target(
+  AnnotationTarget.FIELD,
+  AnnotationTarget.VALUE_PARAMETER
+)
+@Retention(AnnotationRetention.RUNTIME)
+annotation class MiskAWSKMS
+
+/**
+ * This annotation is used to specify the [KmsClient] that's
+ * being used by misk to load encryption keys
+ */
+@Qualifier
+@Target(
+  AnnotationTarget.FIELD,
+  AnnotationTarget.VALUE_PARAMETER
+)
+@Retention(AnnotationRetention.RUNTIME)
+annotation class MiskKmsClient
