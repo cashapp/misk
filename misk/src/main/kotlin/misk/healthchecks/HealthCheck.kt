@@ -1,8 +1,10 @@
 package misk.healthchecks
 
+import misk.web.actions.ReadinessCheckAction
+
 /**
  * Allows users to define custom health checks. An app with a failing HealthCheck will fail the
- * readiness check in `ReadinessCheckAction`, indicating that the app should not accept traffic.
+ * readiness check in [ReadinessCheckAction], indicating that the app should not accept traffic.
  */
 interface HealthCheck {
   /**
