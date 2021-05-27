@@ -3,6 +3,7 @@ package misk.web.interceptors
 import com.google.common.cache.Cache
 import com.google.common.cache.CacheBuilder
 import com.netflix.concurrency.limits.Limiter
+import com.netflix.concurrency.limits.limiter.AbstractLimiter
 import com.netflix.concurrency.limits.limiter.SimpleLimiter
 import java.time.Clock
 import java.util.concurrent.TimeUnit
@@ -10,6 +11,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.reflect.full.findAnnotation
 import misk.Action
+import misk.concurrent.NetflixMetricsAdapter
 import misk.exceptions.StatusCode
 import misk.web.AvailableWhenDegraded
 import misk.web.NetworkChain
@@ -66,7 +68,7 @@ internal class ConcurrencyLimitsInterceptor internal constructor(
     val listener: Limiter.Listener? = limiter.acquire(action.name).orElse(null)
 
     if (listener == null) {
-      logShedRequest(quotaPath)
+      logShedRequest(limiter, quotaPath)
       chain.httpCall.statusCode = StatusCode.SERVICE_UNAVAILABLE.code
       chain.httpCall.takeResponseBody()?.use { sink ->
         sink.writeUtf8("service unavailable")
@@ -88,19 +90,22 @@ internal class ConcurrencyLimitsInterceptor internal constructor(
         else -> listener.onSuccess()
       }
     } catch (e: IllegalArgumentException) {
-      // Service container does a ignores an RTT == 0 exception here.
+      // Service container ignores exception "rtt must be >0 but got 0" here.
       // TODO(jwilson): report this upstream and get it fixed.
       logger.debug { "ignoring concurrency-limits exception: $e" }
     }
   }
 
-  private fun logShedRequest(quotaPath: String?) {
+  private fun logShedRequest(limiter: Limiter<*>, quotaPath: String?) {
     val nowMs = clock.millis()
     val durationSinceLastErrorMs = nowMs - lastErrorLoggedAtMs
     if (lastErrorLoggedAtMs == -1L || durationSinceLastErrorMs >= durationBetweenErrorsMs) {
       lastErrorLoggedAtMs = nowMs
       logger.log(level = Level.ERROR) {
-        "concurrency limits interceptor shedding ${action.name}; Quota-Path=$quotaPath"
+        "concurrency limits interceptor shedding ${action.name}; " +
+            "Quota-Path=$quotaPath; " +
+            "inflight=${(limiter as? AbstractLimiter<*>)?.inflight}; " +
+            "limit=${(limiter as? AbstractLimiter<*>)?.limit}"
       }
     }
   }
@@ -109,6 +114,7 @@ internal class ConcurrencyLimitsInterceptor internal constructor(
   class Factory @Inject constructor(
     private val clock: Clock,
     private val limiterFactories: List<ConcurrencyLimiterFactory>,
+    private val netflixMetricsAdapter: NetflixMetricsAdapter,
   ) : NetworkInterceptor.Factory {
     /**
      * Note that this cache is application-global. Multiple actions that use the same Quota-Path
@@ -122,22 +128,24 @@ internal class ConcurrencyLimitsInterceptor internal constructor(
       return ConcurrencyLimitsInterceptor(
         factory = this,
         action = action,
-        defaultLimiter = createLimiterForAction(action),
+        defaultLimiter = createLimiterForAction(action, quotaPath = null),
         clock = clock
       )
     }
 
-    private fun createLimiterForAction(action: Action): Limiter<String> {
+    private fun createLimiterForAction(action: Action, quotaPath: String?): Limiter<String> {
       return limiterFactories.asSequence()
         .mapNotNull { it.create(action) }
         .firstOrNull()
         ?: SimpleLimiter.Builder()
           .clock { clock.millis() }
+          .metricRegistry(netflixMetricsAdapter.create("concurrency_limits_"))
+          .named(quotaPath ?: action.name)
           .build()
     }
 
     internal fun pickLimiter(action: Action, quotaPath: String): Limiter<String> {
-      return quotaPathToLimiter.get(quotaPath) { createLimiterForAction(action) }
+      return quotaPathToLimiter.get(quotaPath) { createLimiterForAction(action, quotaPath) }
     }
   }
 
