@@ -93,7 +93,7 @@ class CryptoModule(
     if (externalDataKeys.isNotEmpty()) {
       requireBinding<AmazonS3>()
 
-      keyManagerBinder.addBinding().to<ExternalKeyResolver>()
+      keyManagerBinder.addBinding().to<S3KeyResolver>()
 
       val internalAndExternal = keyNames.intersect(externalDataKeys.keys)
       check(internalAndExternal.isEmpty()) {
