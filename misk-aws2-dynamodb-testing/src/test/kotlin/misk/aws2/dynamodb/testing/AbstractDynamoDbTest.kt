@@ -1,9 +1,5 @@
 package misk.aws2.dynamodb.testing
 
-import com.google.common.util.concurrent.ServiceManager
-import java.time.LocalDate
-import javax.inject.Inject
-import misk.aws2.dynamodb.DynamoDbHealthCheck
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient
@@ -12,6 +8,8 @@ import software.amazon.awssdk.enhanced.dynamodb.TableSchema
 import software.amazon.awssdk.enhanced.dynamodb.model.QueryConditional
 import software.amazon.awssdk.enhanced.dynamodb.model.QueryEnhancedRequest
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
+import java.time.LocalDate
+import javax.inject.Inject
 
 abstract class AbstractDynamoDbTest {
 
@@ -20,12 +18,6 @@ abstract class AbstractDynamoDbTest {
 
   @Inject
   lateinit var tables: Set<DynamoDbTable>
-
-  @Inject
-  lateinit var healthCheck: DynamoDbHealthCheck
-
-  @Inject
-  lateinit var serviceManager: ServiceManager
 
   @Test
   fun happyPath() {
@@ -150,21 +142,6 @@ abstract class AbstractDynamoDbTest {
     val newSpielbergMovieNames =
       newSpielbergMovies.stream().flatMap { it.items().stream() }.map { it.name }
     assertThat(newSpielbergMovieNames).contains("Bridge of Spies", "Ready Player One")
-  }
-
-  @Test
-  fun `healthCheck healthy`() {
-    val healthStatus = healthCheck.status()
-    assertThat(healthStatus.isHealthy).isTrue()
-  }
-
-  @Test
-  fun `healthCheck unhealthy`() {
-    // Stop the ServiceManager early will disconnect the DynamoDB client.
-    serviceManager.stopAsync()
-    serviceManager.awaitStopped()
-    val healthStatus = healthCheck.status()
-    assertThat(healthStatus.isHealthy).isFalse()
   }
 
   companion object {
