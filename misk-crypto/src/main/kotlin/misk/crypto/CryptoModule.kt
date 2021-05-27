@@ -1,6 +1,5 @@
 package misk.crypto
 
-import com.amazonaws.services.s3.AmazonS3
 import com.google.crypto.tink.Aead
 import com.google.crypto.tink.DeterministicAead
 import com.google.crypto.tink.HybridDecrypt
@@ -91,9 +90,8 @@ class CryptoModule(
 
     /* Include all configured remotely-provided keys. */
     if (externalDataKeys.isNotEmpty()) {
-      requireBinding<AmazonS3>()
-
-      keyManagerBinder.addBinding().to<S3KeyResolver>()
+      requireBinding<ExternalKeyResolver>()
+      keyManagerBinder.addBinding().to<ExternalKeyResolver>()
 
       val internalAndExternal = keyNames.intersect(externalDataKeys.keys)
       check(internalAndExternal.isEmpty()) {
