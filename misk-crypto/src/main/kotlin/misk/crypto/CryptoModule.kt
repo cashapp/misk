@@ -56,7 +56,7 @@ class CryptoModule(
      * name can only exist in one of the providers. This makes migrating keys between stores less
      * error-prone.
      */
-    val keyManagerBinder = newMultibinder(ExternalKeyManager::class)
+    val keyManagerBinder = newMultibinder(KeyResolver::class)
     val serviceKeys = mutableMapOf<KeyAlias, KeyType>()
 
     /* Parse and include all local keys first. */
@@ -66,7 +66,7 @@ class CryptoModule(
       } catch (e: IllegalArgumentException) {
         throw IllegalArgumentException("Found local key with no 'encrypted_key' value", e)
       }
-      keyManagerBinder.addBinding().toInstance(LocalConfigKeyProvider(keys, config.kms_uri))
+      keyManagerBinder.addBinding().toInstance(LocalConfigKeyResolver(keys, config.kms_uri))
 
       keys.forEach {
         bindKeyToProvider(it.key_name, it.key_type)
@@ -93,7 +93,7 @@ class CryptoModule(
     if (externalDataKeys.isNotEmpty()) {
       requireBinding<AmazonS3>()
 
-      keyManagerBinder.addBinding().to<S3ExternalKeyManager>()
+      keyManagerBinder.addBinding().to<S3KeyResolver>()
 
       val internalAndExternal = keyNames.intersect(externalDataKeys.keys)
       check(internalAndExternal.isEmpty()) {

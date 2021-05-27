@@ -1,6 +1,5 @@
 package misk.crypto
 
-import com.amazonaws.auth.AWSCredentials
 import com.amazonaws.auth.AWSCredentialsProvider
 import com.amazonaws.services.s3.AmazonS3
 import com.amazonaws.services.s3.AmazonS3ClientBuilder
@@ -11,7 +10,7 @@ import misk.environment.Env
 import wisp.logging.getLogger
 
 /**
- * [S3ExternalKeyManager] implements an [ExternalKeyManager] that fetches Tink keysets from an S3
+ * [S3KeyResolver] implements an [KeyResolver] that fetches Tink keysets from an S3
  * bucket. Keysets are indexed by an alias and a region, and are encrypted with a key in the KMS
  * using an envelope key encryption scheme. Each Keyset is protected by a KMS key in each service
  * region.
@@ -32,7 +31,7 @@ import wisp.logging.getLogger
  *
  *  If a requested key alias does not exist, this will raise a [ExternalKeyManagerException]
  */
-class S3ExternalKeyManager @Inject constructor(
+class S3KeyResolver @Inject constructor(
   private val env: Env,
 
   private val defaultS3: AmazonS3,
@@ -48,7 +47,7 @@ class S3ExternalKeyManager @Inject constructor(
   // in; if BucketNameSource provides a non-standard bucket region, we need to create a new S3
   // client for that bucket, and to do that we need credentials again.
   private val awsCredentials: AWSCredentialsProvider,
-) : ExternalKeyManager {
+) : ExternalKeyResolver {
 
   private val s3: AmazonS3 = bucketNameSource.getBucketRegion(env)?.let { region ->
     logger.info("creating S3ExternalKeyManager S3 client for $region")
@@ -101,7 +100,7 @@ class S3ExternalKeyManager @Inject constructor(
 
     private const val METADATA_KEY_KEY_TYPE = "key-type"
 
-    private val logger = getLogger<S3ExternalKeyManager>()
+    private val logger = getLogger<S3KeyResolver>()
   }
 
 }

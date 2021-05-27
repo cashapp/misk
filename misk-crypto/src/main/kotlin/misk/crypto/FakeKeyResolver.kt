@@ -3,7 +3,7 @@ package misk.crypto
 import misk.config.MiskConfig
 import java.lang.UnsupportedOperationException
 
-class FakeExternalKeyManager : ExternalKeyManager {
+class FakeKeyResolver : KeyResolver {
   private var returnedKeysets: MutableMap<KeyAlias, Key> = mutableMapOf()
 
   override val allKeyAliases: Map<KeyAlias, KeyType>
