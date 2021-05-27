@@ -3,7 +3,6 @@ dependencies {
 
   implementation(Dependencies.guice)
   implementation(project(":misk-aws"))
-  implementation(project(":misk-core"))
   implementation(project(":misk-inject"))
 }
 
