@@ -7,9 +7,10 @@ import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBStreams
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBStreamsClientBuilder
 import com.google.inject.Provides
-import misk.cloud.aws.AwsRegion
-import misk.inject.KAbstractModule
 import javax.inject.Singleton
+import misk.cloud.aws.AwsRegion
+import misk.healthchecks.HealthCheck
+import misk.inject.KAbstractModule
 
 /**
  * Install this module to have access to an AmazonDynamoDB client. This can be
@@ -22,6 +23,7 @@ class RealDynamoDbModule constructor(
   override fun configure() {
     requireBinding<AWSCredentialsProvider>()
     requireBinding<AwsRegion>()
+    multibind<HealthCheck>().to<DynamoDbHealthCheck>()
   }
 
   @Provides @Singleton
