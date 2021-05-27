@@ -1,10 +1,8 @@
 package misk.aws.dynamodb.testing
 
-import kotlin.reflect.KClass
 import misk.ServiceModule
-import misk.dynamodb.DynamoDbHealthCheck
-import misk.healthchecks.HealthCheck
 import misk.inject.KAbstractModule
+import kotlin.reflect.KClass
 
 /**
  * Spins up a docker container for testing. It clears the table content before each test starts.
@@ -30,6 +28,5 @@ class DockerDynamoDbModule(
     install(LocalDynamoDbModule(tables))
     install(ServiceModule<CreateTablesService>())
     bind<LocalDynamoDb>().toInstance(DockerDynamoDb.localDynamoDb)
-    multibind<HealthCheck>().to<DynamoDbHealthCheck>()
   }
 }

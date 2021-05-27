@@ -5,7 +5,6 @@ dependencies {
   implementation(Dependencies.okio)
   implementation(Dependencies.awsDynamodb)
   implementation(Dependencies.awsDynamodbLocal)
-  implementation(project(":misk-aws-dynamodb"))
   api(project(":misk"))
   api(project(":misk-aws"))
   api(project(":misk-core"))
