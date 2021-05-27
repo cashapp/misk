@@ -60,7 +60,7 @@ class TracingInterceptorTest {
 
     chain.proceed(chain.httpCall)
 
-    val span = tracer.take()
+    val span = tracer.take("http.action")
     assertThat(span.parentId()).isEqualTo(0)
     assertThat(span.tags()).isEqualTo(
       mapOf(
@@ -89,7 +89,7 @@ class TracingInterceptorTest {
 
     chain.proceed(chain.httpCall)
 
-    val span = tracer.take()
+    val span = tracer.take("http.action")
     assertThat(span.parentId()).isEqualTo(1)
   }
 
@@ -120,7 +120,7 @@ class TracingInterceptorTest {
 
     chain.proceed(chain.httpCall)
 
-    val span = tracer.take()
+    val span = tracer.take("http.action")
     assertThat(span.getBaggageItem("hello")).isEqualTo("world")
   }
 
@@ -128,7 +128,7 @@ class TracingInterceptorTest {
   fun failedTrace() {
     get("/failed_trace")
 
-    val span = tracer.take()
+    val span = tracer.take("http.action")
     assertThat(span.tags().get(Tags.ERROR.key)).isEqualTo(true)
     assertThat(span.tags().get(Tags.HTTP_STATUS.key)).isEqualTo(400)
   }
@@ -137,7 +137,7 @@ class TracingInterceptorTest {
   fun failedTraceWithException() {
     get("/exception_trace")
 
-    val span = tracer.take()
+    val span = tracer.take("http.action")
     assertThat(span.tags().get(Tags.ERROR.key)).isEqualTo(true)
     assertThat(span.tags().get(Tags.HTTP_STATUS.key)).isEqualTo(420)
   }
