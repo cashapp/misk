@@ -3,10 +3,11 @@ package misk.aws2.dynamodb.testing
 import com.amazonaws.services.dynamodbv2.local.main.ServerRunner
 import com.amazonaws.services.dynamodbv2.local.server.DynamoDBProxyServer
 import com.google.inject.Provides
+import javax.inject.Singleton
 import misk.ServiceModule
+import misk.aws2.dynamodb.RequiredDynamoDbTable
 import misk.inject.KAbstractModule
 import misk.inject.toKey
-import javax.inject.Singleton
 
 /**
  * Executes a DynamoDB service in-process per test. It clears the table content before each test
@@ -38,4 +39,8 @@ class InProcessDynamoDbModule(
       arrayOf("-inMemory", "-port", localDynamoDb.url.port.toString())
     )
   }
+
+  @Provides @Singleton
+  fun provideRequiredTables(): List<RequiredDynamoDbTable> =
+    tables.map { RequiredDynamoDbTable(it.tableName) }
 }
