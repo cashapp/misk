@@ -7,22 +7,28 @@ import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBStreams
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBStreamsClientBuilder
 import com.google.inject.Provides
-import misk.cloud.aws.AwsRegion
-import misk.inject.KAbstractModule
 import javax.inject.Singleton
+import misk.cloud.aws.AwsRegion
+import misk.healthchecks.HealthCheck
+import misk.inject.KAbstractModule
 
 /**
  * Install this module to have access to an AmazonDynamoDB client. This can be
  * used to create a DynamoDbMapper for querying of a DynamoDb table.
  */
 class RealDynamoDbModule constructor(
-  private val clientConfig: ClientConfiguration = ClientConfiguration()
+  private val clientConfig: ClientConfiguration = ClientConfiguration(),
+  private val requiredTables: List<RequiredDynamoDbTable> = listOf()
 ) :
   KAbstractModule() {
   override fun configure() {
     requireBinding<AWSCredentialsProvider>()
     requireBinding<AwsRegion>()
+    multibind<HealthCheck>().to<DynamoDbHealthCheck>()
   }
+
+  @Provides @Singleton
+  fun provideRequiredTables(): List<RequiredDynamoDbTable> = requiredTables
 
   @Provides @Singleton
   fun providesAmazonDynamoDB(

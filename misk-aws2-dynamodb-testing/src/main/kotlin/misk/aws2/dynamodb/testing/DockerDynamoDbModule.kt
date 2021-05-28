@@ -1,6 +1,9 @@
 package misk.aws2.dynamodb.testing
 
+import com.google.inject.Provides
+import javax.inject.Singleton
 import misk.ServiceModule
+import misk.aws2.dynamodb.RequiredDynamoDbTable
 import misk.inject.KAbstractModule
 import wisp.aws2.dynamodb.testing.LocalDynamoDb
 
@@ -28,4 +31,8 @@ class DockerDynamoDbModule(
     install(ServiceModule<CreateTablesService>())
     bind<LocalDynamoDb>().toInstance(DockerDynamoDb.localDynamoDb)
   }
+
+  @Provides @Singleton
+  fun provideRequiredTables(): List<RequiredDynamoDbTable> =
+    tables.map { RequiredDynamoDbTable(it.tableName) }
 }

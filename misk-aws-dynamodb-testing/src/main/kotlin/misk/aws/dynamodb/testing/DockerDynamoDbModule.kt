@@ -1,8 +1,13 @@
 package misk.aws.dynamodb.testing
 
-import misk.ServiceModule
-import misk.inject.KAbstractModule
+import com.google.inject.Provides
+import javax.inject.Singleton
 import kotlin.reflect.KClass
+import misk.ServiceModule
+import misk.dynamodb.DynamoDbHealthCheck
+import misk.dynamodb.RequiredDynamoDbTable
+import misk.healthchecks.HealthCheck
+import misk.inject.KAbstractModule
 
 /**
  * Spins up a docker container for testing. It clears the table content before each test starts.
@@ -28,5 +33,10 @@ class DockerDynamoDbModule(
     install(LocalDynamoDbModule(tables))
     install(ServiceModule<CreateTablesService>())
     bind<LocalDynamoDb>().toInstance(DockerDynamoDb.localDynamoDb)
+    multibind<HealthCheck>().to<DynamoDbHealthCheck>()
   }
+
+  @Provides @Singleton
+  fun provideRequiredTables(): List<RequiredDynamoDbTable> =
+    tables.map { RequiredDynamoDbTable(it.tableName) }
 }
