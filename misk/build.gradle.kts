@@ -70,6 +70,7 @@ dependencies {
 
   testImplementation(Dependencies.kotlinxCoroutines)
   testImplementation(Dependencies.mockitoCore)
+  testImplementation(project(":misk-metrics-testing"))
   testImplementation(project(":misk-testing"))
   testImplementation(Dependencies.junit4Api)
   testImplementation(Dependencies.assertj)
