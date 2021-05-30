@@ -41,7 +41,7 @@ class DeploymentModule(
     fun forTesting(): Module {
       return Modules.combine(
         DeploymentModule(
-          deployment = TEST_DEPLOYMENT,
+          deployment = TEST_DEPLOYMENT.wispDeployment,
           env = Env("TESTING")
         ),
         EnvironmentModule(Environment.TESTING)
