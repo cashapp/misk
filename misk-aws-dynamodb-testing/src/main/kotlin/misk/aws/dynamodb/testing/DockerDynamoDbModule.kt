@@ -1,25 +1,23 @@
 package misk.aws.dynamodb.testing
 
+import app.cash.tempest.testing.DockerDynamoDbServer
+import app.cash.tempest.testing.TestTable
+import app.cash.tempest.testing.internal.TestDynamoDbService
+import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
+import com.amazonaws.services.dynamodbv2.AmazonDynamoDBStreams
 import com.google.inject.Provides
-import javax.inject.Singleton
-import kotlin.reflect.KClass
 import misk.ServiceModule
 import misk.dynamodb.DynamoDbHealthCheck
 import misk.dynamodb.RequiredDynamoDbTable
 import misk.healthchecks.HealthCheck
 import misk.inject.KAbstractModule
+import javax.inject.Singleton
+import kotlin.reflect.KClass
 
 /**
  * Spins up a docker container for testing. It clears the table content before each test starts.
  *
- * To use this, add this to each test that needs DynamoDB:
- *
- * ```
- *   @MiskExternalDependency
- *   val dockerDynamoDb = DockerDynamoDb
- * ```
- *
- * Note that this may not be used alongside [LocalDynamoDbModule]. DynamoDB may execute in Docker or
+ * Note that this may not be used alongside [InProcessDynamoDbModule]. DynamoDB may execute in Docker or
  * in-process, but never both.
  */
 class DockerDynamoDbModule(
@@ -30,13 +28,36 @@ class DockerDynamoDbModule(
   constructor(vararg tables: KClass<*>) : this(tables.map { DynamoDbTable(it) })
 
   override fun configure() {
-    install(LocalDynamoDbModule(tables))
-    install(ServiceModule<CreateTablesService>())
-    bind<LocalDynamoDb>().toInstance(DockerDynamoDb.localDynamoDb)
+    for (table in tables) {
+      multibind<DynamoDbTable>().toInstance(table)
+    }
     multibind<HealthCheck>().to<DynamoDbHealthCheck>()
+    install(ServiceModule<TestDynamoDb>())
   }
 
   @Provides @Singleton
   fun provideRequiredTables(): List<RequiredDynamoDbTable> =
     tables.map { RequiredDynamoDbTable(it.tableName) }
+
+  @Provides @Singleton
+  fun providesTestDynamoDb(): TestDynamoDb {
+    return TestDynamoDb(
+      TestDynamoDbService.create(
+        serverFactory = DockerDynamoDbServer.Factory,
+        tables = tables.map { TestTable.create(it.tableClass, it.configureTable) },
+        port = null
+      )
+    )
+  }
+
+  @Provides @Singleton
+  fun providesAmazonDynamoDB(testDynamoDb: TestDynamoDb): AmazonDynamoDB {
+    return testDynamoDb.service.client.dynamoDb
+  }
+
+  @Provides @Singleton
+  fun providesAmazonDynamoDBStreams(testDynamoDb: TestDynamoDb): AmazonDynamoDBStreams {
+    return testDynamoDb.service.client.dynamoDbStreams
+  }
 }
+

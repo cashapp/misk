@@ -17,8 +17,6 @@ class InProcessDynamoDbTest : AbstractDynamoDbTest() {
     override fun configure() {
       install(MiskTestingServiceModule())
 
-      // In this test only we customize the port so we don't collide with DockerDynamoDbTest.
-      bind<LocalDynamoDb>().toInstance(LocalDynamoDb(port = LocalDynamoDb.pickPort() + 1))
       install(
         InProcessDynamoDbModule(
           DynamoDbTable("movies", DyMovie::class) { createTableEnhancedRequest ->
