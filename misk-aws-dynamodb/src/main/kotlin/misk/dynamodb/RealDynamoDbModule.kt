@@ -18,23 +18,18 @@ import misk.inject.KAbstractModule
 /**
  * Install this module to have access to an AmazonDynamoDB client. This can be
  * used to create a DynamoDbMapper for querying of a DynamoDb table.
+ *
+ * @param requiredTableTypes a list of mapper classes annotated [DynamoDBTable].
  */
 class RealDynamoDbModule constructor(
   private val clientConfig: ClientConfiguration = ClientConfiguration(),
-  private val requiredTables: List<RequiredDynamoDbTable>
+  vararg requiredTableTypes: KClass<*>
 ) : KAbstractModule() {
-  /** @param requiredTableTypes a list of mapper classes annotated [DynamoDBTable]. */
-  constructor(
-    clientConfig: ClientConfiguration,
-    vararg requiredTableTypes: KClass<*>
-  ) : this(
-    clientConfig,
-    requiredTableTypes.map {
-      val annotation = it.findAnnotation<DynamoDBTable>()
-        ?: throw IllegalArgumentException("no @DynamoDBTable on $it")
-      RequiredDynamoDbTable(annotation.tableName)
-    }
-  )
+  private val requiredTables: List<RequiredDynamoDbTable> = requiredTableTypes.map {
+    val annotation = it.findAnnotation<DynamoDBTable>()
+      ?: throw IllegalArgumentException("no @DynamoDBTable on $it")
+    RequiredDynamoDbTable(annotation.tableName)
+  }
 
   override fun configure() {
     requireBinding<AWSCredentialsProvider>()
