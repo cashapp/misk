@@ -14,8 +14,7 @@ import kotlin.reflect.full.findAnnotation
  */
 data class DynamoDbTable(
   val tableClass: KClass<*>,
-  val configureTable: (CreateTableRequest) -> CreateTableRequest =
-    CreateTablesService.CONFIGURE_TABLE_NOOP
+  val configureTable: (CreateTableRequest) -> CreateTableRequest = { it }
 ) {
   val tableName: String
     get() {
