@@ -11,8 +11,9 @@ import io.prometheus.client.Summary
  *
  * The only way to create an instance of this is with [FakeMetricsModule].
  */
-class FakeMetrics internal constructor() : Metrics {
-  private val registry = CollectorRegistry(true)
+class FakeMetrics internal constructor(
+  private val registry: CollectorRegistry
+) : Metrics {
 
   override fun counter(name: String, help: String?, labelNames: List<String>): Counter =
     Counter.build(name, help)
