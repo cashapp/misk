@@ -14,8 +14,5 @@ data class DynamoDbTable @JvmOverloads constructor(
   val tableName: String,
   val tableClass: KClass<*>,
   val configureTable: (CreateTableEnhancedRequest.Builder) -> CreateTableEnhancedRequest.Builder =
-    CreateTablesService.CONFIGURE_TABLE_NOOP
+    { it }
 )
-
-fun DynamoDbTable.toWispDynamoDbTable() : wisp.aws2.dynamodb.testing.DynamoDbTable =
-  wisp.aws2.dynamodb.testing.DynamoDbTable(tableName, tableClass, configureTable)
