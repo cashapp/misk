@@ -42,7 +42,7 @@ internal class DeploymentTest {
     for ((envVar, envProperty) in environmentMap) {
       environmentVariableLoader = FakeEnvironmentVariableLoader(mutableMapOf("ENVIRONMENT" to envVar))
       val deployment = getDeploymentFromEnvironmentVariable(
-        name = "foo", environmentVariableLoader = environmentVariableLoader
+        environmentVariableLoader = environmentVariableLoader
       )
       assertTrue(envProperty.invoke(deployment))
       props
