@@ -66,43 +66,6 @@ abstract class AbstractDynamoDbTest {
   }
 
   @Test
-  fun truncateTables() {
-    val enhancedClient = DynamoDbEnhancedClient.builder()
-      .dynamoDbClient(dynamoDbClient)
-      .build()
-    val movieTable = enhancedClient.table("movies", MOVIE_TABLE_SCHEMA)
-    val characterTable = enhancedClient.table("characters", CHARACTER_TABLE_SCHEMA)
-
-    val movie = DyMovie()
-    movie.name = "Jurassic Park"
-    movie.release_date = LocalDate.of(1993, 6, 9)
-    movieTable.putItem(movie)
-
-    val character = DyCharacter()
-    character.movie_name = "Jurassic Park"
-    character.character_name = "Ian Malcolm"
-    characterTable.putItem(character)
-
-    val service = CreateTablesService(dynamoDbClient, tables)
-    service.startAsync()
-    service.awaitRunning()
-    val actualMovie = movieTable.getItem(
-      Key.builder()
-        .partitionValue("Jurassic Park")
-        .sortValue(LocalDate.of(1993, 6, 9).toString())
-        .build()
-    )
-    assertThat(actualMovie).isNull()
-    val actualCharacter = characterTable.getItem(
-      Key.builder()
-        .partitionValue("Jurassic Park")
-        .sortValue("Ian Malcolm")
-        .build()
-    )
-    assertThat(actualCharacter).isNull()
-  }
-
-  @Test
   fun globalSecondaryIndex() {
     val enhancedClient = DynamoDbEnhancedClient.builder()
       .dynamoDbClient(dynamoDbClient)
