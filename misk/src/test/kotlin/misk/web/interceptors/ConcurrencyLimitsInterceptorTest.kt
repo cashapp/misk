@@ -12,7 +12,6 @@ import javax.inject.Singleton
 import misk.Action
 import misk.MiskTestingServiceModule
 import misk.asAction
-import misk.concurrent.NetflixMetricsAdapter
 import misk.inject.KAbstractModule
 import misk.logging.LogCollectorModule
 import misk.testing.MiskTest
@@ -180,8 +179,8 @@ class ConcurrencyLimitsInterceptorTest {
 
   private fun callSuccessCount(id: String): Double {
     return prometheusRegistry.getSampleValue(
-      "concurrency_limits_call",
-      arrayOf("id", "status"),
+      "concurrency_limits_outcomes",
+      arrayOf("quota_path", "outcome"),
       arrayOf(id, "success")
     )
   }
@@ -190,7 +189,6 @@ class ConcurrencyLimitsInterceptorTest {
     override fun configure() {
       install(LogCollectorModule())
       install(MiskTestingServiceModule())
-      install(NetflixMetricsAdapter.MODULE)
 
       multibind<ConcurrencyLimiterFactory>().to<CustomLimiterFactory>()
     }
