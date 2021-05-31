@@ -51,5 +51,10 @@ data class Deployment(
     get() = isTest || isLocalDevelopment
 
   val wispDeployment: wisp.deployment.Deployment
-    get() = wisp.deployment.Deployment(name, isProduction, isTest, isLocalDevelopment)
+    get() = wisp.deployment.Deployment(
+      name,
+      isProduction = isProduction,
+      isTest = isTest,
+      isLocalDevelopment = isLocalDevelopment
+    )
 }
