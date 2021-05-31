@@ -15,7 +15,6 @@ dependencies {
   implementation(project(":misk-inject"))
   implementation(project(":misk-service"))
   implementation(project(":misk-testing"))
-  api(project(":wisp-aws2-dynamodb-testing"))
   api(project(":wisp-containers-testing"))
   api(project(":wisp-logging"))
   implementation(Dependencies.docker)
