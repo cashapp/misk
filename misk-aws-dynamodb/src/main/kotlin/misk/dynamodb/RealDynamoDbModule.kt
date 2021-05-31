@@ -6,8 +6,11 @@ import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBStreams
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBStreamsClientBuilder
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTable
 import com.google.inject.Provides
 import javax.inject.Singleton
+import kotlin.reflect.KClass
+import kotlin.reflect.full.findAnnotation
 import misk.cloud.aws.AwsRegion
 import misk.healthchecks.HealthCheck
 import misk.inject.KAbstractModule
@@ -18,9 +21,21 @@ import misk.inject.KAbstractModule
  */
 class RealDynamoDbModule constructor(
   private val clientConfig: ClientConfiguration = ClientConfiguration(),
-  private val requiredTables: List<RequiredDynamoDbTable> = listOf()
-) :
-  KAbstractModule() {
+  private val requiredTables: List<RequiredDynamoDbTable>
+) : KAbstractModule() {
+  /** @param requiredTableTypes a list of mapper classes annotated [DynamoDBTable]. */
+  constructor(
+    clientConfig: ClientConfiguration,
+    vararg requiredTableTypes: KClass<*>
+  ) : this(
+    clientConfig,
+    requiredTableTypes.map {
+      val annotation = it.findAnnotation<DynamoDBTable>()
+        ?: throw IllegalArgumentException("no @DynamoDBTable on $it")
+      RequiredDynamoDbTable(annotation.tableName)
+    }
+  )
+
   override fun configure() {
     requireBinding<AWSCredentialsProvider>()
     requireBinding<AwsRegion>()
