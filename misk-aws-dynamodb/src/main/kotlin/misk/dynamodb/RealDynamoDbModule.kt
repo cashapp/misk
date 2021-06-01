@@ -7,10 +7,13 @@ import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBStreams
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBStreamsClientBuilder
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTable
+import com.google.common.util.concurrent.AbstractService
 import com.google.inject.Provides
+import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.reflect.KClass
 import kotlin.reflect.full.findAnnotation
+import misk.ServiceModule
 import misk.cloud.aws.AwsRegion
 import misk.healthchecks.HealthCheck
 import misk.inject.KAbstractModule
@@ -35,6 +38,8 @@ class RealDynamoDbModule constructor(
     requireBinding<AWSCredentialsProvider>()
     requireBinding<AwsRegion>()
     multibind<HealthCheck>().to<DynamoDbHealthCheck>()
+    bind<DynamoDbService>().to<RealDynamoDbService>()
+    install(ServiceModule<DynamoDbService>())
   }
 
   @Provides @Singleton
@@ -64,5 +69,12 @@ class RealDynamoDbModule constructor(
       .withCredentials(awsCredentialsProvider)
       .withClientConfiguration(clientConfig)
       .build()
+  }
+
+  /** We don't currently perform any startup work to connect to DynamoDB. */
+  @Singleton
+  private class RealDynamoDbService @Inject constructor() : AbstractService(), DynamoDbService {
+    override fun doStart() = notifyStarted()
+    override fun doStop() = notifyStopped()
   }
 }

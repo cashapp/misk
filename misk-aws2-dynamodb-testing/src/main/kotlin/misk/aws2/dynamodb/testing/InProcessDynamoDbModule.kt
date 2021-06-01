@@ -3,15 +3,18 @@ package misk.aws2.dynamodb.testing
 import app.cash.tempest2.testing.JvmDynamoDbServer
 import app.cash.tempest2.testing.TestTable
 import app.cash.tempest2.testing.internal.TestDynamoDbService
+import com.google.common.util.concurrent.AbstractService
 import com.google.inject.Provides
+import javax.inject.Inject
+import javax.inject.Singleton
 import misk.ServiceModule
 import misk.aws2.dynamodb.DynamoDbHealthCheck
+import misk.aws2.dynamodb.DynamoDbService
 import misk.aws2.dynamodb.RequiredDynamoDbTable
 import misk.healthchecks.HealthCheck
 import misk.inject.KAbstractModule
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
 import software.amazon.awssdk.services.dynamodb.streams.DynamoDbStreamsClient
-import javax.inject.Singleton
 
 /**
  * Executes a DynamoDB service in-process per test. It clears the table content before each test
@@ -32,6 +35,8 @@ class InProcessDynamoDbModule(
       multibind<DynamoDbTable>().toInstance(table)
     }
     multibind<HealthCheck>().to<DynamoDbHealthCheck>()
+    bind<DynamoDbService>().to<InProcessDynamoDbService>()
+    install(ServiceModule<DynamoDbService>().dependsOn<TestDynamoDb>())
     install(ServiceModule<TestDynamoDb>())
   }
 
@@ -62,5 +67,12 @@ class InProcessDynamoDbModule(
   @Provides @Singleton
   fun providesAmazonDynamoDBStreams(testDynamoDb: TestDynamoDb): DynamoDbStreamsClient {
     return testDynamoDb.service.client.dynamoDbStreams
+  }
+
+  /** This service does nothing; depending on Tempest's [TestDynamoDb] is sufficient. */
+  @Singleton
+  private class InProcessDynamoDbService @Inject constructor() : AbstractService(), DynamoDbService {
+    override fun doStart() = notifyStarted()
+    override fun doStop() = notifyStopped()
   }
 }
