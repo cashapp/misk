@@ -3,7 +3,6 @@ package misk
 import misk.concurrent.FakeSleeperModule
 import misk.environment.FakeEnvVarModule
 import misk.inject.KAbstractModule
-import misk.metrics.FakeMetricsModule
 import misk.random.FakeRandomModule
 import misk.resources.TestingResourceLoaderModule
 import misk.time.FakeClockModule
@@ -20,12 +19,11 @@ import misk.tokens.FakeTokenGeneratorModule
 class MiskTestingServiceModule : KAbstractModule() {
   override fun configure() {
     install(TestingResourceLoaderModule())
-    install(FakeClockModule())
     install(FakeEnvVarModule())
-    install(FakeMetricsModule())
-    install(FakeRandomModule())
+    install(FakeClockModule())
     install(FakeSleeperModule())
     install(FakeTickerModule())
+    install(FakeRandomModule())
     install(FakeTokenGeneratorModule())
     install(MiskCommonServiceModule())
   }
