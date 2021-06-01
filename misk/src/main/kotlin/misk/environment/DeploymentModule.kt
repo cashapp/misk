@@ -18,16 +18,17 @@ class DeploymentModule(
 
   ) : this(
     Deployment(
-      deployment.name,
-      deployment.isProduction,
-      deployment.isTest,
-      deployment.isLocalDevelopment
+      name = deployment.name,
+      isProduction = deployment.isProduction,
+      isStaging = deployment.isStaging,
+      isTest = deployment.isTest,
+      isLocalDevelopment = deployment.isLocalDevelopment
     ),
     env
   )
 
   override fun configure() {
-    bind<wisp.deployment.Deployment>().toInstance(deployment.wispDeployment)
+    bind<wisp.deployment.Deployment>().toInstance(deployment)
     bind<Deployment>().toInstance(deployment)
     bind<Env>().toInstance(env)
   }
@@ -41,7 +42,7 @@ class DeploymentModule(
     fun forTesting(): Module {
       return Modules.combine(
         DeploymentModule(
-          deployment = TEST_DEPLOYMENT.wispDeployment,
+          deployment = TEST_DEPLOYMENT,
           env = Env("TESTING")
         ),
         EnvironmentModule(Environment.TESTING)
