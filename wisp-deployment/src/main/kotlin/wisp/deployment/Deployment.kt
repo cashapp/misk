@@ -101,6 +101,19 @@ open class Deployment(
 
   }
 
+  override fun equals(other: Any?): Boolean {
+    if (this === other) return true
+    if (other !is Deployment) return false
+
+    if (delegateDeployment != other.delegateDeployment) return false
+
+    return true
+  }
+
+  override fun hashCode(): Int {
+    return delegateDeployment.hashCode()
+  }
+
 }
 
 val PRODUCTION = Deployment(
