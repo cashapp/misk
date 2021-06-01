@@ -18,16 +18,17 @@ class DeploymentModule(
 
   ) : this(
     Deployment(
-      deployment.name,
-      deployment.isProduction,
-      deployment.isTest,
-      deployment.isLocalDevelopment
+      name = deployment.name,
+      isProduction = deployment.isProduction,
+      isStaging = deployment.isStaging,
+      isTest = deployment.isTest,
+      isLocalDevelopment = deployment.isLocalDevelopment
     ),
     env
   )
 
   override fun configure() {
-    bind<wisp.deployment.Deployment>().toInstance(deployment.wispDeployment)
+    bind<wisp.deployment.Deployment>().toInstance(deployment)
     bind<Deployment>().toInstance(deployment)
     bind<Env>().toInstance(env)
   }

@@ -2,9 +2,9 @@ package misk.web.interceptors
 
 import ch.qos.logback.classic.Level
 import com.netflix.concurrency.limits.Limiter
-import com.netflix.concurrency.limits.limit.AbstractLimit
 import com.netflix.concurrency.limits.limit.SettableLimit
 import com.netflix.concurrency.limits.limiter.SimpleLimiter
+import io.prometheus.client.CollectorRegistry
 import java.time.Duration
 import java.time.temporal.ChronoUnit
 import javax.inject.Inject
@@ -42,7 +42,7 @@ class ConcurrencyLimitsInterceptorTest {
   @Inject private lateinit var factory: ConcurrencyLimitsInterceptor.Factory
   @Inject private lateinit var clock: FakeClock
   @Inject lateinit var logCollector: LogCollector
-  @Inject lateinit var countingLimiterFactory: CountingLimiterFactory
+  @Inject lateinit var prometheusRegistry: CollectorRegistry
 
   @Test
   fun happyPath() {
@@ -51,6 +51,7 @@ class ConcurrencyLimitsInterceptorTest {
     assertThat(call(action, interceptor, callDuration = Duration.ofMillis(100), statusCode = 200))
       .isEqualTo(CallResult(callWasShed = false, statusCode = 200))
     assertThat(logCollector.takeMessages()).isEmpty()
+    assertThat(callSuccessCount("HelloAction")).isEqualTo(1.0)
   }
 
   @Test
@@ -98,7 +99,8 @@ class ConcurrencyLimitsInterceptorTest {
     // First call logs an error.
     call(action, interceptor, callDuration = Duration.ofMillis(100), statusCode = 200)
     assertThat(logCollector.takeMessages(minLevel = Level.ERROR))
-      .containsExactly("concurrency limits interceptor shedding HelloAction; Quota-Path=null")
+      .containsExactly("concurrency limits interceptor shedding HelloAction; " +
+          "Quota-Path=null; inflight=0; limit=0")
 
     // Subsequent calls don't.
     call(action, interceptor, callDuration = Duration.ofMillis(100), statusCode = 200)
@@ -108,7 +110,8 @@ class ConcurrencyLimitsInterceptorTest {
     clock.setNow(clock.instant().plus(1, ChronoUnit.MINUTES))
     call(action, interceptor, callDuration = Duration.ofMillis(100), statusCode = 200)
     assertThat(logCollector.takeMessages(minLevel = Level.ERROR))
-      .containsExactly("concurrency limits interceptor shedding HelloAction; Quota-Path=null")
+      .containsExactly("concurrency limits interceptor shedding HelloAction; " +
+          "Quota-Path=null; inflight=0; limit=0")
   }
 
   @Test
@@ -122,25 +125,27 @@ class ConcurrencyLimitsInterceptorTest {
 
   @Test
   fun quotaPathUsesIndependentLimiters() {
-    val action = CountingLimiterAction::call.asAction(DispatchMechanism.GET)
+    val action = HelloAction::call.asAction(DispatchMechanism.GET)
     val interceptor = factory.create(action)!!
 
     call(action, interceptor)
-    assertThat(countingLimiterFactory.countingLimits.map { it.count })
-      .containsExactly(1) // Exactly one call on the only limiter.
+    assertThat(callSuccessCount("HelloAction"))
+      .isEqualTo(1.0)  // Exactly one call on the only limiter.
 
     call(action, interceptor)
     call(action, interceptor, quotaPath = "/event_consumer/topic_foo")
     call(action, interceptor, quotaPath = "/event_consumer/topic_foo")
     call(action, interceptor, quotaPath = "/event_consumer/topic_foo")
-    assertThat(countingLimiterFactory.countingLimits.map { it.count })
-      .containsExactly(2, 3) // 2 calls on limiter[0], 3 calls on limiter[1]
+    assertThat(callSuccessCount("HelloAction")).isEqualTo(2.0)
+    assertThat(callSuccessCount("/event_consumer/topic_foo")).isEqualTo(3.0)
 
     call(action, interceptor, quotaPath = "/event_consumer/topic_bar")
     call(action, interceptor, quotaPath = "/event_consumer/topic_baz")
     call(action, interceptor, quotaPath = "/event_consumer/topic_foo")
-    assertThat(countingLimiterFactory.countingLimits.map { it.count })
-      .containsExactly(2, 4, 1, 1)
+    assertThat(callSuccessCount("HelloAction")).isEqualTo(2.0)
+    assertThat(callSuccessCount("/event_consumer/topic_foo")).isEqualTo(4.0)
+    assertThat(callSuccessCount("/event_consumer/topic_bar")).isEqualTo(1.0)
+    assertThat(callSuccessCount("/event_consumer/topic_baz")).isEqualTo(1.0)
   }
 
   private fun call(
@@ -172,13 +177,20 @@ class ConcurrencyLimitsInterceptorTest {
     )
   }
 
+  private fun callSuccessCount(id: String): Double {
+    return prometheusRegistry.getSampleValue(
+      "concurrency_limits_outcomes",
+      arrayOf("quota_path", "outcome"),
+      arrayOf(id, "success")
+    )
+  }
+
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(LogCollectorModule())
       install(MiskTestingServiceModule())
 
       multibind<ConcurrencyLimiterFactory>().to<CustomLimiterFactory>()
-      multibind<ConcurrencyLimiterFactory>().to<CountingLimiterFactory>()
     }
   }
 
@@ -191,32 +203,6 @@ class ConcurrencyLimitsInterceptorTest {
           .build()
       }
       return null
-    }
-  }
-
-  /** A limiter factory that returns CountingLimit instances. */
-  @Singleton
-  class CountingLimiterFactory @Inject constructor() : ConcurrencyLimiterFactory {
-    val countingLimits = mutableListOf<CountingLimit>()
-
-    override fun create(action: Action): Limiter<String>? {
-      if (action.function == CountingLimiterAction::call) {
-        val countingLimit = CountingLimit()
-        countingLimits += countingLimit
-        return SimpleLimiter.Builder()
-          .limit(countingLimit)
-          .build()
-      }
-      return null
-    }
-  }
-
-  /** A limit that counts how many times it is used. */
-  class CountingLimit : AbstractLimit(1) {
-    var count = 0
-    override fun _update(startTime: Long, rtt: Long, inflight: Int, didDrop: Boolean): Int {
-      count++
-      return limit
     }
   }
 
@@ -259,9 +245,4 @@ internal class OptOutAction : WebAction {
 internal class CustomLimiterAction : WebAction {
   @Get("/custom-limiter")
   fun call(): String = "custom-limiter"
-}
-
-internal class CountingLimiterAction : WebAction {
-  @Get("/counting-limiter")
-  fun call(): String = "counting-limiter"
 }

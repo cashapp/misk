@@ -25,6 +25,7 @@ import okhttp3.RequestBody
 import okio.BufferedSink
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.io.InterruptedIOException
@@ -56,6 +57,7 @@ class GrpcConnectivityTest {
     client = clientInjector.getInstance(OkHttpClient::class.java)
   }
 
+  @Disabled("gRPC tests are flaky, see https://github.com/cashapp/misk/issues/1853")
   @Test
   fun happyPath() {
     val request = Request.Builder()

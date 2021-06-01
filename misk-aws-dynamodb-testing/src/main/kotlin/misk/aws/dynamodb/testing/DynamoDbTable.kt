@@ -1,7 +1,9 @@
 package misk.aws.dynamodb.testing
 
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTable
 import com.amazonaws.services.dynamodbv2.model.CreateTableRequest
 import kotlin.reflect.KClass
+import kotlin.reflect.full.findAnnotation
 
 /**
  * Use this with [DockerDynamoDbModule] or [InProcessDynamoDbModule] to configure your DynamoDB
@@ -12,6 +14,12 @@ import kotlin.reflect.KClass
  */
 data class DynamoDbTable(
   val tableClass: KClass<*>,
-  val configureTable: (CreateTableRequest) -> CreateTableRequest =
-    CreateTablesService.CONFIGURE_TABLE_NOOP
-)
+  val configureTable: (CreateTableRequest) -> CreateTableRequest = { it }
+) {
+  val tableName: String
+    get() {
+      val annotation = tableClass.findAnnotation<DynamoDBTable>()
+        ?: throw IllegalStateException("Expected @DynamoDBTable on $tableClass")
+      return annotation.tableName
+    }
+}
