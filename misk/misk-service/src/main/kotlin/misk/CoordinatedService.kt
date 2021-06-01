@@ -6,6 +6,7 @@ import com.google.common.util.concurrent.Service
 import com.google.common.util.concurrent.Service.Listener
 import com.google.common.util.concurrent.Service.State
 import javax.inject.Provider
+import misk.CoordinatedService.Companion.checkNew
 
 @Suppress("UnstableApiUsage") // Guava's Service is @Beta.
 internal class CoordinatedService(
@@ -14,6 +15,31 @@ internal class CoordinatedService(
 
   override val service: Service by lazy {
     serviceProvider.get()
+      .also { created ->
+        created.checkNew("$created must be NEW for it to be coordinated")
+        created.addListener(
+          object : Listener() {
+            override fun running() {
+              synchronized(this@CoordinatedService) {
+                notifyStarted()
+              }
+              downstreamServices.forEach { it.startIfReady() }
+            }
+
+            override fun terminated(from: State) {
+              synchronized(this@CoordinatedService) {
+                notifyStopped()
+              }
+              upstreamServices.forEach { it.stopIfReady() }
+            }
+
+            override fun failed(from: State, failure: Throwable) {
+              notifyFailed(failure)
+            }
+          },
+          MoreExecutors.directExecutor()
+        )
+      }
   }
 
   /** Services that start before this. */
@@ -30,32 +56,6 @@ internal class CoordinatedService(
 
   /** Service that starts up before this, and whose [directDependencies] also depend on this. */
   private var enhancementTarget: CoordinatedService? = null
-
-  init {
-    service.checkNew("$service must be NEW for it to be coordinated")
-    service.addListener(
-      object : Listener() {
-        override fun running() {
-          synchronized(this) {
-            notifyStarted()
-          }
-          downstreamServices.forEach { it.startIfReady() }
-        }
-
-        override fun terminated(from: State) {
-          synchronized(this) {
-            notifyStopped()
-          }
-          upstreamServices.forEach { it.stopIfReady() }
-        }
-
-        override fun failed(from: State, failure: Throwable) {
-          notifyFailed(failure)
-        }
-      },
-      MoreExecutors.directExecutor()
-    )
-  }
 
   /**
    * Returns a set of services that are required by this service.
