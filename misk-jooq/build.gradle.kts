@@ -79,7 +79,7 @@ jooq {
             isJavaTimeTypes = true
           }
           target.apply {
-            packageName = "app.cash.backfila.client.misk.jooq.gen"
+            packageName = "misk.jooq.testgen"
             directory   = "${project.projectDir}/src/test/generated/kotlin"
           }
         }

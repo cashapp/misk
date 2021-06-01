@@ -1,12 +1,10 @@
 package misk.jooq
 
-import app.cash.backfila.client.misk.jooq.gen.tables.references.BALANCE
 import misk.jooq.JooqTransacter.Companion.noRetriesOptions
 import misk.jooq.config.ClientJooqTestingModule
 import misk.jooq.config.JooqDBIdentifier
-import misk.jooq.model.BalanceEntity
-import misk.jooq.model.Currency
-import misk.jooq.model.Jurisdiction
+import misk.jooq.model.Genre
+import misk.jooq.testgen.tables.references.MOVIE
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.time.FakeClock
@@ -64,12 +62,10 @@ internal class JooqTransacterTest {
   }
 
   @Test fun `retries and succeeds in case of an optimistic lock exception`() {
-    val balance = transacter.transaction { ctx ->
-      ctx.newRecord(BALANCE).apply {
-        this.entity = BalanceEntity.BTC_FLOAT.name
-        this.jurisdiction = Jurisdiction.USA.name
-        this.currency = Currency.BTC.name
-        this.amountCents = 1000L
+    val movie = transacter.transaction { ctx ->
+      ctx.newRecord(MOVIE).apply {
+        this.genre = Genre.COMEDY.name
+        this.name = "Enter the dragon"
         createdAt = clock.instant().toLocalDateTime()
         updatedAt = clock.instant().toLocalDateTime()
       }.also { it.store() }
@@ -77,29 +73,29 @@ internal class JooqTransacterTest {
     executeInThreadsAndWait(
       {
         transacter.transaction { ctx ->
-          ctx.selectFrom(BALANCE).where(BALANCE.ID.eq(balance.id))
+          ctx.selectFrom(MOVIE).where(MOVIE.ID.eq(movie.id))
             .fetchOne()
-            ?.apply { this.amountCents = 2000L }
+            ?.apply { this.name = "The Conjuring" }
             ?.also { it.store() }
         }
       },
       {
         transacter.transaction { ctx ->
-          ctx.selectFrom(BALANCE).where(BALANCE.ID.eq(balance.id))
+          ctx.selectFrom(MOVIE).where(MOVIE.ID.eq(movie.id))
             .fetchOne()
-            ?.apply { this.jurisdiction = Jurisdiction.CAN.name }
+            ?.apply { this.genre = Genre.HORROR.name }
             ?.also { it.store() }
         }
       }
     )
 
-    val updatedBalance = transacter.transaction { ctx ->
-      ctx.selectFrom(BALANCE).where(BALANCE.ID.eq(balance.id))
+    val updatedMovie = transacter.transaction { ctx ->
+      ctx.selectFrom(MOVIE).where(MOVIE.ID.eq(movie.id))
         .fetchOne()
     }
-    assertThat(updatedBalance).isNotNull
-    assertThat(updatedBalance!!.amountCents).isEqualTo(2000) // updated balance
-    assertThat(updatedBalance.jurisdiction).isEqualTo(Jurisdiction.CAN.name) // updated balance
+    assertThat(updatedMovie).isNotNull
+    assertThat(updatedMovie!!.genre).isEqualTo(Genre.HORROR.name)
+    assertThat(updatedMovie.name).isEqualTo("The Conjuring")
   }
 
   private fun executeInThreadsAndWait(vararg tasks: () -> Unit) {
@@ -141,11 +137,9 @@ internal class JooqTransacterTest {
   @Test fun `should rollback in case there is an exception thrown`() {
     Assertions.assertThatThrownBy {
       transacter.transaction(noRetriesOptions) { ctx ->
-        ctx.newRecord(BALANCE).apply {
-          this.entity = BalanceEntity.BTC_FLOAT.name
-          this.jurisdiction = Jurisdiction.USA.name
-          this.currency = Currency.BTC.name
-          this.amountCents = 1000L
+        ctx.newRecord(MOVIE).apply {
+          this.genre = Genre.COMEDY.name
+          this.name = "Dumb and dumber"
           createdAt = clock.instant().toLocalDateTime()
           updatedAt = clock.instant().toLocalDateTime()
         }.also { it.store() }
@@ -154,7 +148,7 @@ internal class JooqTransacterTest {
     }
 
     val numberOfRecords = transacter.transaction(noRetriesOptions) { ctx ->
-      ctx.selectCount().from(BALANCE).fetchOne()!!.component1()
+      ctx.selectCount().from(MOVIE).fetchOne()!!.component1()
     }
     assertThat(numberOfRecords).isEqualTo(0)
   }
@@ -168,27 +162,34 @@ internal class JooqTransacterTest {
    */
   @Test fun `nested transactions work as they are not really nested transactions`() {
     transacter.transaction(noRetriesOptions) {
-      val balance = transacter.transaction(noRetriesOptions) { ctx ->
-        ctx.newRecord(BALANCE).apply {
-          this.entity = BalanceEntity.BTC_FLOAT.name
-          this.jurisdiction = Jurisdiction.USA.name
-          this.currency = Currency.BTC.name
-          this.amountCents = 1000L
+      val movie = transacter.transaction(noRetriesOptions) { ctx ->
+        ctx.newRecord(MOVIE).apply {
+          this.genre = Genre.COMEDY.name
+          this.name = "Dumb and dumber"
           createdAt = clock.instant().toLocalDateTime()
           updatedAt = clock.instant().toLocalDateTime()
         }.also { it.store() }
       }
 
       transacter.transaction(noRetriesOptions) { ctx ->
-        ctx.update(BALANCE).set(BALANCE.AMOUNT_CENTS, 2000L).execute()
+        ctx.selectFrom(MOVIE).where(MOVIE.ID.eq(movie.id)).fetchOne().getOrThrow()
+          .apply {
+            this.genre = Genre.HORROR.name
+          }
+          .also {
+            it.updatedAt = clock.instant().toLocalDateTime()
+          }
+          .also {
+            it.store()
+          }
       }
 
-      val updatedBalance = transacter.transaction { ctx ->
-        ctx.selectFrom(BALANCE).where(BALANCE.ID.eq(balance.id))
+      val updatedMovie = transacter.transaction { ctx ->
+        ctx.selectFrom(MOVIE).where(MOVIE.ID.eq(movie.id))
           .fetchOne()
       }
 
-      assertThat(updatedBalance!!.amountCents).isEqualTo(2000L)
+      assertThat(updatedMovie!!.genre).isEqualTo(Genre.HORROR.name)
     }
   }
 }
