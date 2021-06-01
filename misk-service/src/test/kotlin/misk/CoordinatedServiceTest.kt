@@ -39,7 +39,7 @@ class CoordinatedServiceTest {
     service.startAsync()
 
     val failure = assertFailsWith<IllegalStateException> {
-      CoordinatedService(Provider<Service> { service })
+      CoordinatedService(Provider<Service> { service }).startAsync().awaitRunning()
     }
     assertThat(failure).hasMessage("Running Service must be NEW for it to be coordinated")
 

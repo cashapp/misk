@@ -33,7 +33,7 @@ class InvalidActionsTest {
     assertThrows<ProvisionException>(
       "Actions [SomeAction, IdenticalAction] have identical routing annotations."
     ) {
-      injector.getInstance(ServiceManager::class.java)
+      injector.getInstance(ServiceManager::class.java).startAsync().awaitHealthy()
     }
   }
 
