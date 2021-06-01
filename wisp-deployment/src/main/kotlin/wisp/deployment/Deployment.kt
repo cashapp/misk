@@ -33,19 +33,25 @@ open class Deployment(
 ) {
 
   val delegateDeployment =
-    DelegateDeployment(name, isProduction, isStaging, isTest, isLocalDevelopment)
+    DelegateDeployment(
+      name = name,
+      isProduction = isProduction,
+      isStaging = isStaging,
+      isTest = isTest,
+      isLocalDevelopment = isLocalDevelopment
+    )
 
   /**
    * Returns true if running in a managed cluster, such as a staging or production cluster. Mutually exclusive with isFake.
    */
   val isReal: Boolean
-    get() = delegateDeployment.isFake
+    get() = delegateDeployment.isReal
 
   /**
    * Returns true if running outside of a cluster (CI or local development). Mutually exclusive with isReal.
    */
   val isFake: Boolean
-    get() = delegateDeployment.isReal
+    get() = delegateDeployment.isFake
 
   /**
    * TEMPORARY, move into [Deployment] when misk's Deployment is removed.
