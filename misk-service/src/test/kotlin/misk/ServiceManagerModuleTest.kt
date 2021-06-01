@@ -179,7 +179,25 @@ internal class ServiceManagerModuleTest {
     }
   }
 
-  @Test fun serviceNotProvidedUntilDependenciesAllCreated() {
+  @Singleton
+  class AnotherUpstreamService @Inject constructor(
+    private val log: StringBuilder
+  ) : AbstractService() {
+    init {
+      log.append("AnotherUpstreamService.init\n")
+    }
+    override fun doStart() {
+      log.append("AnotherUpstreamService.startUp\n")
+      notifyStarted()
+    }
+
+    override fun doStop() {
+      log.append("AnotherUpstreamService.shutDown\n")
+      notifyStopped()
+    }
+  }
+
+  @Test fun serviceNotProvidedUntilAllDependenciesCreated() {
     val log = StringBuilder()
     val injector = Guice.createInjector(
       MiskTestingServiceModule(),
@@ -187,7 +205,10 @@ internal class ServiceManagerModuleTest {
         override fun configure() {
           bind<StringBuilder>().toInstance(log)
           install(ServiceModule<ProducerService>())
-          install(ServiceModule<ConsumerService>().dependsOn<ProducerService>())
+          install(ServiceModule<ConsumerService>()
+            .dependsOn<ProducerService>()
+            .dependsOn<AnotherUpstreamService>())
+          install(ServiceModule<AnotherUpstreamService>())
         }
       }
     )
@@ -202,11 +223,14 @@ internal class ServiceManagerModuleTest {
     assertThat(log.toString()).isEqualTo("""
       |ProducerService.init
       |ProducerService.startUp
+      |AnotherUpstreamService.init
+      |AnotherUpstreamService.startUp
       |ConsumerService.init
       |ConsumerService.startUp
       |healthy
       |ConsumerService.shutDown
       |ProducerService.shutDown
+      |AnotherUpstreamService.shutDown
       |""".trimMargin())
   }
 }
