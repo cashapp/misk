@@ -135,10 +135,12 @@ internal class CoordinatedService(
 
   private fun startIfReady() {
     synchronized(this) {
-      if (state() != State.STARTING || service.state() != State.NEW) return
+      if (state() != State.STARTING) return
 
       // If any upstream service or its enhancements are not running, don't start.
       if (upstreamServices.any { !it.isRunning() }) return
+
+      if (service.state() != State.NEW) return
 
       // Actually start.
       service.startAsync()
@@ -151,10 +153,12 @@ internal class CoordinatedService(
 
   private fun stopIfReady() {
     synchronized(this) {
-      if (state() != State.STOPPING || service.state() != State.RUNNING) return
+      if (state() != State.STOPPING) return
 
       // If any downstream service or its enhancements haven't stopped, don't stop.
       if (downstreamServices.any { !it.isTerminated() }) return
+
+      if (service.state() != State.RUNNING) return
 
       // Actually stop.
       service.stopAsync()
