@@ -28,7 +28,6 @@ class MiskRealServiceModule : KAbstractModule() {
     install(TickerModule())
     install(TokenGeneratorModule())
     install(MiskCommonServiceModule())
-    install(PrometheusMetricsClientModule())
   }
 }
 
@@ -41,6 +40,7 @@ class MiskCommonServiceModule : KAbstractModule() {
     binder().requireExactBindingAnnotations()
     install(ExecutorsModule())
     install(ServiceManagerModule())
+    install(PrometheusMetricsClientModule())
     install(MoshiModule(useWireToRead = true, useWireToWrite = true))
 
     // Initialize empty sets for our multibindings.
