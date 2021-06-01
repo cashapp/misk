@@ -28,6 +28,7 @@ class MoviesTestModule(
     install(LogCollectorModule())
     install(
       Modules.override(MiskTestingServiceModule()).with(
+        FakeClockModule(),
         MockTracingBackendModule()
       )
     )
