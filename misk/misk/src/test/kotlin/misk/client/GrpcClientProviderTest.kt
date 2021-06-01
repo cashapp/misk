@@ -32,6 +32,7 @@ import misk.web.jetty.JettyService
 import okhttp3.Response
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 @MiskTest(startService = true)
@@ -51,6 +52,7 @@ internal class GrpcClientProviderTest {
     robotLocator = clientInjector.getInstance()
   }
 
+  @Disabled("gRPC tests are flaky, see https://github.com/cashapp/misk/issues/1853")
   @Test
   fun happyPath() {
     assertThat(log).containsExactlyInAnyOrder(
