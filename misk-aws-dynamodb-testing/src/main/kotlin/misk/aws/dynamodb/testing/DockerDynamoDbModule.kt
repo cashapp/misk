@@ -5,14 +5,17 @@ import app.cash.tempest.testing.TestTable
 import app.cash.tempest.testing.internal.TestDynamoDbService
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBStreams
+import com.google.common.util.concurrent.AbstractService
 import com.google.inject.Provides
+import javax.inject.Inject
+import javax.inject.Singleton
+import kotlin.reflect.KClass
 import misk.ServiceModule
 import misk.dynamodb.DynamoDbHealthCheck
+import misk.dynamodb.DynamoDbService
 import misk.dynamodb.RequiredDynamoDbTable
 import misk.healthchecks.HealthCheck
 import misk.inject.KAbstractModule
-import javax.inject.Singleton
-import kotlin.reflect.KClass
 
 /**
  * Spins up a docker container for testing. It clears the table content before each test starts.
@@ -32,6 +35,8 @@ class DockerDynamoDbModule(
       multibind<DynamoDbTable>().toInstance(table)
     }
     multibind<HealthCheck>().to<DynamoDbHealthCheck>()
+    bind<DynamoDbService>().to<DockerDynamoDbService>()
+    install(ServiceModule<DynamoDbService>().dependsOn<TestDynamoDb>())
     install(ServiceModule<TestDynamoDb>())
   }
 
@@ -58,6 +63,13 @@ class DockerDynamoDbModule(
   @Provides @Singleton
   fun providesAmazonDynamoDBStreams(testDynamoDb: TestDynamoDb): AmazonDynamoDBStreams {
     return testDynamoDb.service.client.dynamoDbStreams
+  }
+
+  /** This service does nothing; depending on Tempest's [TestDynamoDb] is sufficient. */
+  @Singleton
+  private class DockerDynamoDbService @Inject constructor() : AbstractService(), DynamoDbService {
+    override fun doStart() = notifyStarted()
+    override fun doStop() = notifyStopped()
   }
 }
 
