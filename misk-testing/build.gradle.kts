@@ -36,7 +36,6 @@ dependencies {
   api(project(":misk-actions"))
   api(project(":misk-core"))
   api(project(":misk-inject"))
-  api(project(":misk-metrics-testing"))
   api(project(":misk-service"))
 }
 
