@@ -168,18 +168,12 @@ val deployments = mapOf(
  * local development if not set (i.e. isLocalDevelopment == true)
  */
 fun getDeploymentFromEnvironmentVariable(
-  /** The default environment if ENVIRONMENT is not set */
-  defaultDeploymentName: String = "development",
+  /** The default deployment if ENVIRONMENT is not set */
+  defaultDeployment: Deployment = DEVELOPMENT,
 
   /** Environment Variable loader, use the real version if none supplied */
   environmentVariableLoader: EnvironmentVariableLoader = EnvironmentVariableLoader.real
-
 ): Deployment {
-
-  val environment = environmentVariableLoader.getEnvironmentVariableOrDefault(
-    "ENVIRONMENT",
-    defaultDeploymentName
-  )
-
-  return deployments[environment.toLowerCase()] ?: DEVELOPMENT
+  val environment = environmentVariableLoader.getEnvironmentVariableOrDefault("ENVIRONMENT", "")
+  return deployments[environment.toLowerCase()] ?: defaultDeployment
 }
