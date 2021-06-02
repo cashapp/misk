@@ -12,10 +12,7 @@ class DockerDynamoDbTest : AbstractDynamoDbTest() {
 
   @MiskTestModule
   val module = TestModule()
-
-  @MiskExternalDependency
-  val dockerDynamoDb = DockerDynamoDb
-
+  
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(MiskTestingServiceModule())

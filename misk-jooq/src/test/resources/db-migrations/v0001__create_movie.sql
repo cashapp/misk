@@ -3,6 +3,6 @@ CREATE TABLE movie(
     name VARCHAR(191) NOT NULL,
     genre VARCHAR(191) NOT NULL,
     version INT NOT NULL,
-    created_at TIMESTAMP,
-    updated_at TIMESTAMP
+    created_at TIMESTAMP(3) NOT NULL DEFAULT NOW(3),
+    updated_at TIMESTAMP(3) NOT NULL DEFAULT NOW(3) ON UPDATE NOW(3)
 )

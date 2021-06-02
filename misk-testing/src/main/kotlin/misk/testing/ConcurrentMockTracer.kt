@@ -20,6 +20,17 @@ class ConcurrentMockTracer @Inject constructor() : MockTracer() {
     return queue.poll(500, TimeUnit.MILLISECONDS) ?: throw IllegalArgumentException("no spans!")
   }
 
+  /**
+   * Awaits a span named [operationName], removes it, and returns it. Spans with other names are
+   * consumed and discarded.
+   */
+  fun take(operationName: String): MockSpan {
+    while (true) {
+      val span = take()
+      if (span.operationName() == operationName) return span
+    }
+  }
+
   override fun onSpanFinished(mockSpan: MockSpan) {
     super.onSpanFinished(mockSpan)
     queue.put(mockSpan)
