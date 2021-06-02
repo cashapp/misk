@@ -44,8 +44,12 @@ class DataSourceService(
     try {
       createDataSource(baseConfig)
     } catch (e: Exception) {
-      logger.warn("Fail to start the data source to master tablet, trying to do it with replica")
+      logger.error(e) {"Fail to start the data source, trying to do it with replica"}
+      if (!baseConfig.canRecoverOnReplica()) {
+         throw e
+      }
       createDataSource(baseConfig.asReplica())
+
     }
     logger.info("Started @${qualifier.simpleName} connection pool in $stopwatch")
   }
