@@ -1,5 +1,6 @@
 package misk.jooq
 
+import misk.jdbc.PostCommitHookFailedException
 import misk.jooq.JooqTransacter.Companion.noRetriesOptions
 import misk.jooq.config.ClientJooqTestingModule
 import misk.jooq.config.JooqDBIdentifier
@@ -62,7 +63,7 @@ internal class JooqTransacterTest {
   }
 
   @Test fun `retries and succeeds in case of an optimistic lock exception`() {
-    val movie = transacter.transaction { ctx ->
+    val movie = transacter.transaction { (ctx) ->
       ctx.newRecord(MOVIE).apply {
         this.genre = Genre.COMEDY.name
         this.name = "Enter the dragon"
@@ -72,7 +73,7 @@ internal class JooqTransacterTest {
     }
     executeInThreadsAndWait(
       {
-        transacter.transaction { ctx ->
+        transacter.transaction { (ctx) ->
           ctx.selectFrom(MOVIE).where(MOVIE.ID.eq(movie.id))
             .fetchOne()
             ?.apply { this.name = "The Conjuring" }
@@ -80,7 +81,7 @@ internal class JooqTransacterTest {
         }
       },
       {
-        transacter.transaction { ctx ->
+        transacter.transaction { (ctx) ->
           ctx.selectFrom(MOVIE).where(MOVIE.ID.eq(movie.id))
             .fetchOne()
             ?.apply { this.genre = Genre.HORROR.name }
@@ -89,7 +90,7 @@ internal class JooqTransacterTest {
       }
     )
 
-    val updatedMovie = transacter.transaction { ctx ->
+    val updatedMovie = transacter.transaction { (ctx) ->
       ctx.selectFrom(MOVIE).where(MOVIE.ID.eq(movie.id))
         .fetchOne()
     }
@@ -136,7 +137,7 @@ internal class JooqTransacterTest {
 
   @Test fun `should rollback in case there is an exception thrown`() {
     Assertions.assertThatThrownBy {
-      transacter.transaction(noRetriesOptions) { ctx ->
+      transacter.transaction(noRetriesOptions) { (ctx) ->
         ctx.newRecord(MOVIE).apply {
           this.genre = Genre.COMEDY.name
           this.name = "Dumb and dumber"
@@ -147,7 +148,7 @@ internal class JooqTransacterTest {
       }
     }
 
-    val numberOfRecords = transacter.transaction(noRetriesOptions) { ctx ->
+    val numberOfRecords = transacter.transaction(noRetriesOptions) { (ctx) ->
       ctx.selectCount().from(MOVIE).fetchOne()!!.component1()
     }
     assertThat(numberOfRecords).isEqualTo(0)
@@ -162,7 +163,7 @@ internal class JooqTransacterTest {
    */
   @Test fun `nested transactions work as they are not really nested transactions`() {
     transacter.transaction(noRetriesOptions) {
-      val movie = transacter.transaction(noRetriesOptions) { ctx ->
+      val movie = transacter.transaction(noRetriesOptions) { (ctx) ->
         ctx.newRecord(MOVIE).apply {
           this.genre = Genre.COMEDY.name
           this.name = "Dumb and dumber"
@@ -171,7 +172,7 @@ internal class JooqTransacterTest {
         }.also { it.store() }
       }
 
-      transacter.transaction(noRetriesOptions) { ctx ->
+      transacter.transaction(noRetriesOptions) { (ctx) ->
         ctx.selectFrom(MOVIE).where(MOVIE.ID.eq(movie.id)).fetchOne().getOrThrow()
           .apply {
             this.genre = Genre.HORROR.name
@@ -184,12 +185,79 @@ internal class JooqTransacterTest {
           }
       }
 
-      val updatedMovie = transacter.transaction { ctx ->
+      val updatedMovie = transacter.transaction { (ctx) ->
         ctx.selectFrom(MOVIE).where(MOVIE.ID.eq(movie.id))
           .fetchOne()
       }
 
       assertThat(updatedMovie!!.genre).isEqualTo(Genre.HORROR.name)
     }
+  }
+
+  @Test fun `post commit hooks execute`() {
+    var postCommitHook1Executed = false
+    var postCommitHook2Executed = false
+    transacter.transaction { session ->
+      session.onPostCommit {
+        postCommitHook1Executed = true
+      }
+      session.onPostCommit {
+        postCommitHook2Executed = true
+      }
+    }
+    assertThat(postCommitHook1Executed).isTrue
+    assertThat(postCommitHook2Executed).isTrue
+  }
+
+  @Test fun `an exception in a post commit does not rollback the transaction`() {
+    assertThatExceptionOfType(PostCommitHookFailedException::class.java).isThrownBy {
+      transacter.transaction { session ->
+        session.onPostCommit {
+          throw RuntimeException()
+        }
+        session.ctx.newRecord(MOVIE).apply {
+          this.genre = Genre.COMEDY.name
+          this.name = "Dumb and dumber"
+          createdAt = clock.instant().toLocalDateTime()
+          updatedAt = clock.instant().toLocalDateTime()
+        }.also { it.store() }
+      }
+    }
+    val numberOfRecords = transacter.transaction(noRetriesOptions) { (ctx) ->
+      ctx.selectCount().from(MOVIE).fetchOne()!!.component1()
+    }
+    assertThat(numberOfRecords).isEqualTo(1)
+  }
+
+  @Test fun `session close hooks always execute regardless of exceptions thrown from anywhere`() {
+    var sessionCloseHook1Called = false
+    assertThatExceptionOfType(PostCommitHookFailedException::class.java).isThrownBy {
+      transacter.transaction { session ->
+        session.onPostCommit {
+          throw RuntimeException()
+        }
+        session.onSessionClose {
+          sessionCloseHook1Called = true
+        }
+      }
+    }
+    assertThat(sessionCloseHook1Called).isTrue
+
+    var sessionCloseHook2Called = false
+    assertThatExceptionOfType(DataAccessException::class.java).isThrownBy {
+      transacter.transaction(noRetriesOptions) { session ->
+        session.onSessionClose {
+          sessionCloseHook2Called = true
+        }
+
+        session.ctx.newRecord(MOVIE).apply {
+          this.genre = Genre.COMEDY.name
+          this.name = null // to force a sql exception
+          createdAt = clock.instant().toLocalDateTime()
+          updatedAt = clock.instant().toLocalDateTime()
+        }.also { it.store() }
+      }
+    }
+    assertThat(sessionCloseHook2Called).isTrue
   }
 }
