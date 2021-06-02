@@ -3,6 +3,7 @@ package misk.web.interceptors
 import com.google.common.cache.Cache
 import com.google.common.cache.CacheBuilder
 import com.netflix.concurrency.limits.Limiter
+import com.netflix.concurrency.limits.limiter.AbstractLimiter
 import com.netflix.concurrency.limits.limiter.SimpleLimiter
 import java.time.Clock
 import java.util.concurrent.TimeUnit
@@ -11,6 +12,7 @@ import javax.inject.Singleton
 import kotlin.reflect.full.findAnnotation
 import misk.Action
 import misk.exceptions.StatusCode
+import misk.metrics.Metrics
 import misk.web.AvailableWhenDegraded
 import misk.web.NetworkChain
 import misk.web.NetworkInterceptor
@@ -58,6 +60,7 @@ internal class ConcurrencyLimitsInterceptor internal constructor(
 
   override fun intercept(chain: NetworkChain) {
     val quotaPath = chain.httpCall.requestHeaders["Quota-Path"]
+    val metricsName = quotaPath ?: action.name
     val limiter = when {
       quotaPath != null -> factory.pickLimiter(action, quotaPath)
       else -> defaultLimiter
@@ -66,7 +69,8 @@ internal class ConcurrencyLimitsInterceptor internal constructor(
     val listener: Limiter.Listener? = limiter.acquire(action.name).orElse(null)
 
     if (listener == null) {
-      logShedRequest(quotaPath)
+      factory.outcomeCounter.labels(metricsName, "rejected").inc()
+      logShedRequest(limiter, quotaPath)
       chain.httpCall.statusCode = StatusCode.SERVICE_UNAVAILABLE.code
       chain.httpCall.takeResponseBody()?.use { sink ->
         sink.writeUtf8("service unavailable")
@@ -74,33 +78,51 @@ internal class ConcurrencyLimitsInterceptor internal constructor(
       return
     }
 
+    if (limiter is AbstractLimiter<*>) {
+      factory.limitGauge.labels(metricsName).set(limiter.limit.toDouble())
+      factory.inFlightGauge.labels(metricsName).set(limiter.inflight.toDouble())
+    }
+
     try {
       chain.proceed(chain.httpCall)
     } catch (unexpected: Throwable) {
+      factory.outcomeCounter.labels(metricsName, "ignored").inc()
       listener.onIgnore()
       throw unexpected
     }
 
     try {
       when (chain.httpCall.statusCode) {
-        in 400 until 500 -> listener.onIgnore()
-        in 500 until 600 -> listener.onDropped() // Count 5XX errors as drops.
-        else -> listener.onSuccess()
+        in 400 until 500 -> {
+          factory.outcomeCounter.labels(metricsName, "ignored").inc()
+          listener.onIgnore()
+        }
+        in 500 until 600 -> {
+          factory.outcomeCounter.labels(metricsName, "dropped").inc()
+          listener.onDropped() // Count 5XX errors as drops.
+        }
+        else -> {
+          factory.outcomeCounter.labels(metricsName, "success").inc()
+          listener.onSuccess()
+        }
       }
     } catch (e: IllegalArgumentException) {
-      // Service container does a ignores an RTT == 0 exception here.
+      // Service container ignores exception "rtt must be >0 but got 0" here.
       // TODO(jwilson): report this upstream and get it fixed.
       logger.debug { "ignoring concurrency-limits exception: $e" }
     }
   }
 
-  private fun logShedRequest(quotaPath: String?) {
+  private fun logShedRequest(limiter: Limiter<*>, quotaPath: String?) {
     val nowMs = clock.millis()
     val durationSinceLastErrorMs = nowMs - lastErrorLoggedAtMs
     if (lastErrorLoggedAtMs == -1L || durationSinceLastErrorMs >= durationBetweenErrorsMs) {
       lastErrorLoggedAtMs = nowMs
       logger.log(level = Level.ERROR) {
-        "concurrency limits interceptor shedding ${action.name}; Quota-Path=$quotaPath"
+        "concurrency limits interceptor shedding ${action.name}; " +
+            "Quota-Path=$quotaPath; " +
+            "inflight=${(limiter as? AbstractLimiter<*>)?.inflight}; " +
+            "limit=${(limiter as? AbstractLimiter<*>)?.limit}"
       }
     }
   }
@@ -109,7 +131,26 @@ internal class ConcurrencyLimitsInterceptor internal constructor(
   class Factory @Inject constructor(
     private val clock: Clock,
     private val limiterFactories: List<ConcurrencyLimiterFactory>,
+    metrics: Metrics,
   ) : NetworkInterceptor.Factory {
+    val outcomeCounter = metrics.counter(
+      name = "concurrency_limits_outcomes",
+      help = "what happened in a concurrency limited call?",
+      labelNames = listOf("quota_path", "outcome")
+    )
+
+    val limitGauge = metrics.gauge(
+      name = "concurrency_limits_limit",
+      help = "how many calls are permitted at once?",
+      labelNames = listOf("quota_path")
+    )
+
+    val inFlightGauge = metrics.gauge(
+      name = "concurrency_limits_inflight",
+      help = "how many calls are currently executing?",
+      labelNames = listOf("quota_path")
+    )
+
     /**
      * Note that this cache is application-global. Multiple actions that use the same Quota-Path
      * will be treated as a homogenous group for concurrency limiting.
@@ -122,22 +163,23 @@ internal class ConcurrencyLimitsInterceptor internal constructor(
       return ConcurrencyLimitsInterceptor(
         factory = this,
         action = action,
-        defaultLimiter = createLimiterForAction(action),
+        defaultLimiter = createLimiterForAction(action, quotaPath = null),
         clock = clock
       )
     }
 
-    private fun createLimiterForAction(action: Action): Limiter<String> {
+    private fun createLimiterForAction(action: Action, quotaPath: String?): Limiter<String> {
       return limiterFactories.asSequence()
         .mapNotNull { it.create(action) }
         .firstOrNull()
         ?: SimpleLimiter.Builder()
           .clock { clock.millis() }
+          .named(quotaPath ?: action.name)
           .build()
     }
 
     internal fun pickLimiter(action: Action, quotaPath: String): Limiter<String> {
-      return quotaPathToLimiter.get(quotaPath) { createLimiterForAction(action) }
+      return quotaPathToLimiter.get(quotaPath) { createLimiterForAction(action, quotaPath) }
     }
   }
 

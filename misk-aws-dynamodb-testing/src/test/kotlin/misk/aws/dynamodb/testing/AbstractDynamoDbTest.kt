@@ -6,6 +6,8 @@ import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBQueryExpression
 import com.amazonaws.services.dynamodbv2.model.AttributeValue
 import com.amazonaws.services.dynamodbv2.model.ComparisonOperator
 import com.amazonaws.services.dynamodbv2.model.Condition
+import com.google.common.util.concurrent.ServiceManager
+import misk.dynamodb.DynamoDbHealthCheck
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -18,6 +20,12 @@ abstract class AbstractDynamoDbTest {
 
   @Inject
   lateinit var tables: Set<DynamoDbTable>
+
+  @Inject
+  lateinit var healthCheck: DynamoDbHealthCheck
+
+  @Inject
+  lateinit var serviceManager: ServiceManager
 
   @Test
   fun happyPath() {
@@ -44,32 +52,6 @@ abstract class AbstractDynamoDbTest {
     val actualCharacter = characterMapper.load("Jurassic Park", "Ian Malcolm")
     assertThat(actualCharacter.movie_name).isEqualTo(character.movie_name)
     assertThat(actualCharacter.character_name).isEqualTo(character.character_name)
-  }
-
-  @Test
-  fun truncateTables() {
-    val dynamoDbMapper = DynamoDBMapper(dynamoDbClient)
-    val movieMapper = dynamoDbMapper.newTableMapper<DyMovie, String, LocalDate>(DyMovie::class.java)
-    val characterMapper =
-      dynamoDbMapper.newTableMapper<DyCharacter, String, String>(DyCharacter::class.java)
-
-    val movie = DyMovie()
-    movie.name = "Jurassic Park"
-    movie.release_date = LocalDate.of(1993, 6, 9)
-    movieMapper.save(movie)
-
-    val character = DyCharacter()
-    character.movie_name = "Jurassic Park"
-    character.character_name = "Ian Malcolm"
-    characterMapper.save(character)
-
-    val service = CreateTablesService(dynamoDbClient, tables)
-    service.startAsync()
-    service.awaitRunning()
-    val actualMovie = movieMapper.load("Jurassic Park", LocalDate.of(1993, 6, 9))
-    assertThat(actualMovie).isNull()
-    val actualCharacter = characterMapper.load("Jurassic Park", "Ian Malcolm")
-    assertThat(actualCharacter).isNull()
   }
 
   @Test
@@ -116,5 +98,20 @@ abstract class AbstractDynamoDbTest {
     val newSpielbergMovies = movieMapper.query(query)
     val newSpielbergMovieNames = newSpielbergMovies.map { it.name }
     assertThat(newSpielbergMovieNames).contains("Bridge of Spies", "Ready Player One")
+  }
+
+  @Test
+  fun `healthCheck healthy`() {
+    val healthStatus = healthCheck.status()
+    assertThat(healthStatus.isHealthy).isTrue()
+  }
+
+  @Test
+  fun `healthCheck unhealthy`() {
+    // Stop the ServiceManager early will disconnect the DynamoDB client.
+    serviceManager.stopAsync()
+    serviceManager.awaitStopped()
+    val healthStatus = healthCheck.status()
+    assertThat(healthStatus.isHealthy).isFalse()
   }
 }
