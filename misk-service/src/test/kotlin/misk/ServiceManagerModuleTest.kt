@@ -1,18 +1,20 @@
 package misk
 
 import com.google.common.util.concurrent.AbstractIdleService
+import com.google.common.util.concurrent.AbstractService
 import com.google.common.util.concurrent.Service
 import com.google.common.util.concurrent.ServiceManager
 import com.google.inject.Guice
 import com.google.inject.Provides
 import com.google.inject.Scopes
 import com.google.inject.Singleton
+import javax.inject.Inject
+import kotlin.test.assertFailsWith
 import misk.inject.KAbstractModule
 import misk.inject.getInstance
 import misk.inject.keyOf
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import kotlin.test.assertFailsWith
 
 internal class ServiceManagerModuleTest {
   @com.google.inject.Singleton
@@ -139,5 +141,96 @@ internal class ServiceManagerModuleTest {
         "misk.ServiceManagerModuleTest\$NonSingletonService1, " +
         "misk.ServiceManagerModuleTest\$NonSingletonService2"
     )
+  }
+
+  @Singleton
+  class ProducerService @Inject constructor(
+    private val log: StringBuilder
+  ) : AbstractService() {
+    init {
+      log.append("ProducerService.init\n")
+    }
+    override fun doStart() {
+      log.append("ProducerService.startUp\n")
+      notifyStarted()
+    }
+
+    override fun doStop() {
+      log.append("ProducerService.shutDown\n")
+      notifyStopped()
+    }
+  }
+
+  @Singleton
+  class ConsumerService @Inject constructor(
+    private val log: StringBuilder
+  ) : AbstractService() {
+    init {
+      log.append("ConsumerService.init\n")
+    }
+    override fun doStart() {
+      log.append("ConsumerService.startUp\n")
+      notifyStarted()
+    }
+
+    override fun doStop() {
+      log.append("ConsumerService.shutDown\n")
+      notifyStopped()
+    }
+  }
+
+  @Singleton
+  class AnotherUpstreamService @Inject constructor(
+    private val log: StringBuilder
+  ) : AbstractService() {
+    init {
+      log.append("AnotherUpstreamService.init\n")
+    }
+    override fun doStart() {
+      log.append("AnotherUpstreamService.startUp\n")
+      notifyStarted()
+    }
+
+    override fun doStop() {
+      log.append("AnotherUpstreamService.shutDown\n")
+      notifyStopped()
+    }
+  }
+
+  @Test fun serviceNotProvidedUntilAllDependenciesCreated() {
+    val log = StringBuilder()
+    val injector = Guice.createInjector(
+      MiskTestingServiceModule(),
+      object : KAbstractModule() {
+        override fun configure() {
+          bind<StringBuilder>().toInstance(log)
+          install(ServiceModule<ProducerService>())
+          install(ServiceModule<ConsumerService>()
+            .dependsOn<ProducerService>()
+            .dependsOn<AnotherUpstreamService>())
+          install(ServiceModule<AnotherUpstreamService>())
+        }
+      }
+    )
+
+    val serviceManager = injector.getInstance<ServiceManager>()
+    serviceManager.startAsync()
+    serviceManager.awaitHealthy()
+    log.append("healthy\n")
+    serviceManager.stopAsync()
+    serviceManager.awaitStopped()
+
+    assertThat(log.toString()).isEqualTo("""
+      |ProducerService.init
+      |ProducerService.startUp
+      |AnotherUpstreamService.init
+      |AnotherUpstreamService.startUp
+      |ConsumerService.init
+      |ConsumerService.startUp
+      |healthy
+      |ConsumerService.shutDown
+      |ProducerService.shutDown
+      |AnotherUpstreamService.shutDown
+      |""".trimMargin())
   }
 }
