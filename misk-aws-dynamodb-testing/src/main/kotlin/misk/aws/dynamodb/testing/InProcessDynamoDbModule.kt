@@ -1,23 +1,21 @@
 package misk.aws.dynamodb.testing
 
+import app.cash.tempest.testing.JvmDynamoDbServer
+import app.cash.tempest.testing.TestTable
+import app.cash.tempest.testing.internal.TestDynamoDbService
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBStreams
-import com.amazonaws.services.dynamodbv2.local.shared.access.AmazonDynamoDBLocal
-import com.amazonaws.services.dynamodbv2.local.shared.access.LocalDBClient
-import com.amazonaws.services.dynamodbv2.local.shared.access.sqlite.SQLiteDBAccess
-import com.amazonaws.services.dynamodbv2.local.shared.jobs.JobsRegister
+import com.google.common.util.concurrent.AbstractService
 import com.google.inject.Provides
-import java.io.File
-import java.util.concurrent.ExecutorService
-import javax.inject.Named
+import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.reflect.KClass
 import misk.ServiceModule
-import misk.concurrent.ExecutorServiceFactory
 import misk.dynamodb.DynamoDbHealthCheck
+import misk.dynamodb.DynamoDbService
+import misk.dynamodb.RequiredDynamoDbTable
 import misk.healthchecks.HealthCheck
 import misk.inject.KAbstractModule
-import misk.inject.toKey
 
 /**
  * Executes a DynamoDB service in-process per test. It clears the table content before each test
@@ -38,48 +36,42 @@ class InProcessDynamoDbModule(
     for (table in tables) {
       multibind<DynamoDbTable>().toInstance(table)
     }
-    install(ServiceModule<InProcessDynamoDbService>())
-    install(
-      ServiceModule<CreateTablesService>()
-        .dependsOn(InProcessDynamoDbService::class.toKey())
-    )
     multibind<HealthCheck>().to<DynamoDbHealthCheck>()
+    bind<DynamoDbService>().to<InProcessDynamoDbService>()
+    install(ServiceModule<DynamoDbService>().dependsOn<TestDynamoDb>())
+    install(ServiceModule<TestDynamoDb>())
   }
 
   @Provides @Singleton
-  fun provideSqliteDbAccess(): SQLiteDBAccess {
-    Libsqlite4JavaLibraryPathInitializer.init()
-    return SQLiteDBAccess(null as File?)
-  }
-
-  @Provides @Singleton @Named("InProcessDynamoDb")
-  fun provideExecutorService(
-    executorServiceFactory: ExecutorServiceFactory
-  ): ExecutorService {
-    return executorServiceFactory.fixed("InProcessDynamoDb", 10)
-  }
-
-  @Provides @Singleton
-  fun provideLocalDbClient(
-    sqliteDbAccess: SQLiteDBAccess,
-    @Named("InProcessDynamoDb") executorService: ExecutorService
-  ): AmazonDynamoDBLocal {
-    val delayTransientStatuses = false
-    val jobsRegister = JobsRegister(executorService, delayTransientStatuses)
-    return LocalDBClient(sqliteDbAccess, jobsRegister)
+  fun providesDynamoDbServiceWrapper(): TestDynamoDb {
+    return TestDynamoDb(
+      TestDynamoDbService.create(
+        serverFactory = JvmDynamoDbServer.Factory,
+        tables = tables.map { TestTable.create(it.tableClass, it.configureTable) },
+        port = null
+      )
+    )
   }
 
   @Provides @Singleton
-  fun provideAmazonDynamoDb(
-    amazonDynamoDbLocal: AmazonDynamoDBLocal
-  ): AmazonDynamoDB {
-    return amazonDynamoDbLocal.amazonDynamoDB()
+  fun providesAmazonDynamoDB(testDynamoDb: TestDynamoDb): AmazonDynamoDB {
+    return testDynamoDb.service.client.dynamoDb
   }
 
   @Provides @Singleton
-  fun provideAmazonDynamoDbStreams(
-    amazonDynamoDbLocal: AmazonDynamoDBLocal
-  ): AmazonDynamoDBStreams {
-    return amazonDynamoDbLocal.amazonDynamoDBStreams()
+  fun providesAmazonDynamoDBStreams(testDynamoDb: TestDynamoDb): AmazonDynamoDBStreams {
+    return testDynamoDb.service.client.dynamoDbStreams
+  }
+
+  @Provides @Singleton
+  fun provideRequiredTables(): List<RequiredDynamoDbTable> =
+    tables.map { RequiredDynamoDbTable(it.tableName) }
+
+  /** This service does nothing; depending on Tempest's [TestDynamoDb] is sufficient. */
+  @Singleton
+  private class InProcessDynamoDbService @Inject constructor(
+  ) : AbstractService(), DynamoDbService {
+    override fun doStart() = notifyStarted()
+    override fun doStop() = notifyStopped()
   }
 }

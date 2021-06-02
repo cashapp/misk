@@ -7,11 +7,11 @@ import com.amazonaws.services.dynamodbv2.model.AttributeValue
 import com.amazonaws.services.dynamodbv2.model.ComparisonOperator
 import com.amazonaws.services.dynamodbv2.model.Condition
 import com.google.common.util.concurrent.ServiceManager
-import java.time.LocalDate
-import javax.inject.Inject
 import misk.dynamodb.DynamoDbHealthCheck
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
+import javax.inject.Inject
 
 abstract class AbstractDynamoDbTest {
 
@@ -52,32 +52,6 @@ abstract class AbstractDynamoDbTest {
     val actualCharacter = characterMapper.load("Jurassic Park", "Ian Malcolm")
     assertThat(actualCharacter.movie_name).isEqualTo(character.movie_name)
     assertThat(actualCharacter.character_name).isEqualTo(character.character_name)
-  }
-
-  @Test
-  fun truncateTables() {
-    val dynamoDbMapper = DynamoDBMapper(dynamoDbClient)
-    val movieMapper = dynamoDbMapper.newTableMapper<DyMovie, String, LocalDate>(DyMovie::class.java)
-    val characterMapper =
-      dynamoDbMapper.newTableMapper<DyCharacter, String, String>(DyCharacter::class.java)
-
-    val movie = DyMovie()
-    movie.name = "Jurassic Park"
-    movie.release_date = LocalDate.of(1993, 6, 9)
-    movieMapper.save(movie)
-
-    val character = DyCharacter()
-    character.movie_name = "Jurassic Park"
-    character.character_name = "Ian Malcolm"
-    characterMapper.save(character)
-
-    val service = CreateTablesService(dynamoDbClient, tables)
-    service.startAsync()
-    service.awaitRunning()
-    val actualMovie = movieMapper.load("Jurassic Park", LocalDate.of(1993, 6, 9))
-    assertThat(actualMovie).isNull()
-    val actualCharacter = characterMapper.load("Jurassic Park", "Ian Malcolm")
-    assertThat(actualCharacter).isNull()
   }
 
   @Test

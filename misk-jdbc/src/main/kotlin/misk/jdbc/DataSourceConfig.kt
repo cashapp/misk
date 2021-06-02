@@ -264,6 +264,13 @@ data class DataSourceConfig(
       this.show_sql
     )
   }
+
+  fun canRecoverOnReplica() = this.type in listOf(
+    DataSourceType.COCKROACHDB,
+    DataSourceType.TIDB,
+    DataSourceType.VITESS_MYSQL
+  )
+
 }
 
 /** Configuration element for a cluster of DataSources */
