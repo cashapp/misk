@@ -8,7 +8,7 @@ import java.sql.Connection
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentMap
 
-class JooqSession(val ctx: DSLContext): Session {
+class JooqSession(val ctx: DSLContext) : Session {
   private val hooks: ConcurrentMap<HookType, List<() -> Unit>> = ConcurrentHashMap()
 
   override fun <T> useConnection(work: (Connection) -> T): T {
@@ -20,13 +20,17 @@ class JooqSession(val ctx: DSLContext): Session {
   }
 
   override fun onPreCommit(work: () -> Unit) {
-    throw UnsupportedOperationException(
-      "Pre commit hooks don't work with a JooqSession. Use post commit hooks instead"
-    )
+    hooks.add(HookType.PRE, work)
   }
 
   override fun onSessionClose(work: () -> Unit) {
     hooks.add(HookType.SESSION_CLOSE, work)
+  }
+
+  fun executePreCommitHooks() {
+    hooks[HookType.PRE]?.forEach {
+      it()
+    }
   }
 
   fun executePostCommitHooks() {
@@ -52,7 +56,8 @@ class JooqSession(val ctx: DSLContext): Session {
     }
   }
 
-  enum class HookType{
+  enum class HookType {
+    PRE,
     POST,
     SESSION_CLOSE
   }

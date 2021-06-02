@@ -194,6 +194,41 @@ internal class JooqTransacterTest {
     }
   }
 
+  @Test fun `pre commit hooks execute`() {
+    var preCommitHook1Executed = false
+    var preCommitHook2Executed = false
+    transacter.transaction { session ->
+      session.onPreCommit {
+        preCommitHook1Executed = true
+      }
+      session.onPreCommit {
+        preCommitHook2Executed = true
+      }
+    }
+    assertThat(preCommitHook1Executed).isTrue
+    assertThat(preCommitHook2Executed).isTrue
+  }
+
+  @Test fun `an exception during a pre commit hook rolls back the transaction`() {
+    assertThatExceptionOfType(RuntimeException::class.java).isThrownBy {
+      transacter.transaction { session ->
+        session.onPreCommit {
+          throw RuntimeException()
+        }
+        session.ctx.newRecord(MOVIE).apply {
+          this.genre = Genre.COMEDY.name
+          this.name = "Dumb and dumber"
+          createdAt = clock.instant().toLocalDateTime()
+          updatedAt = clock.instant().toLocalDateTime()
+        }.also { it.store() }
+      }
+    }
+    val numberOfRecords = transacter.transaction(noRetriesOptions) { (ctx) ->
+      ctx.selectCount().from(MOVIE).fetchOne()!!.component1()
+    }
+    assertThat(numberOfRecords).isEqualTo(0)
+  }
+
   @Test fun `post commit hooks execute`() {
     var postCommitHook1Executed = false
     var postCommitHook2Executed = false

@@ -66,12 +66,11 @@ class JooqTransacter(
     return try {
       dslContext.transactionResult { configuration ->
         jooqSession = JooqSession(DSL.using(configuration))
-        jooqSession to callback(jooqSession!!)
-      }.let { (jooqSession, callbackResult) ->
-        jooqSession!!.executePostCommitHooks()
-        callbackResult
+        callback(jooqSession!!).also { jooqSession!!.executePreCommitHooks() }
+      }.also {
+        jooqSession?.executePostCommitHooks()
       }
-    }finally {
+    } finally {
       jooqSession?.executeSessionCloseHooks()
     }
   }
