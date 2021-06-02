@@ -168,10 +168,6 @@ val deployments = mapOf(
  * local development if not set (i.e. isLocalDevelopment == true)
  */
 fun getDeploymentFromEnvironmentVariable(
-
-  /** The name for the deployment, if not supplied, use the environment name */
-  name: String? = null,
-
   /** The default environment if ENVIRONMENT is not set */
   defaultDeploymentName: String = "development",
 
@@ -184,7 +180,6 @@ fun getDeploymentFromEnvironmentVariable(
     "ENVIRONMENT",
     defaultDeploymentName
   )
-  val deploymentName = name ?: environment
 
-  return deployments[deploymentName.toLowerCase()] ?: DEVELOPMENT
+  return deployments[environment.toLowerCase()] ?: DEVELOPMENT
 }
