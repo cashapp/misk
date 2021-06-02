@@ -1,5 +1,6 @@
 dependencies {
   implementation(Dependencies.guice)
+  implementation(Dependencies.docker)
   implementation(Dependencies.loggingApi)
   implementation(Dependencies.retrofit)
   implementation(Dependencies.retrofitScalars)

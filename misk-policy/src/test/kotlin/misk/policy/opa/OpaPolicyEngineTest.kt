@@ -1,5 +1,7 @@
 package misk.policy.opa
 
+import com.github.dockerjava.api.DockerClient
+import com.github.dockerjava.core.DockerClientBuilder
 import com.google.inject.Module
 import com.google.inject.Provides
 import com.squareup.moshi.JsonDataException
@@ -140,5 +142,12 @@ internal class OpaPolicyEngineTest {
 
   data class BasicResponse(val test: String)
   data class BasicRequest(val someValue: Int)
-}
 
+  @Test
+  fun justTestingDocker() {
+    val dockerClient = DockerClientBuilder.getInstance().build()
+    val opaContainer = OpaContainer(dockerClient)
+    opaContainer.start()
+    opaContainer.stop()
+  }
+}
