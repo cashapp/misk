@@ -6,7 +6,7 @@ import misk.vitess.Shard
 import java.sql.Connection
 import kotlin.reflect.KClass
 
-interface Session {
+interface Session: misk.jdbc.Session {
   val hibernateSession: org.hibernate.Session
 
   /**
@@ -20,30 +20,6 @@ interface Session {
   fun shards(): Set<Shard>
   fun shards(keyspace: Keyspace): Collection<Shard>
   fun <T> target(shard: Shard, function: () -> T): T
-  fun <T> useConnection(work: (Connection) -> T): T
-
-  /**
-   * Registers a hook that fires after the session transaction commits. Post-commit hooks cannot
-   * affect the disposition of the transaction; if a post-commit hook fails, the failure
-   * will be logged but not propagated to the application, as the transaction will have already
-   * committed
-   */
-  fun onPostCommit(work: () -> Unit)
-
-  /**
-   * Registers a hook that fires before the session's transaction commits. Failures in a pre-commit
-   * hook will cause the transaction to be rolled back.
-   */
-  fun onPreCommit(work: () -> Unit)
-
-  /**
-   * Registers a hook that fires after a session is closed. This is called regardless if a session
-   * was successfully committed or rolled back.
-   *
-   * A new transaction can be initiated as part of this hook.
-   */
-  fun onSessionClose(work: () -> Unit)
-
   /**
    * Disable one or more checks for the duration of the execution of [body]. The passed in checks
    * will entirely replace the other ignored checks at this point, they will not be merged with
