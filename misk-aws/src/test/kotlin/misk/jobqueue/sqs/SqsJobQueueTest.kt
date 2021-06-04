@@ -20,11 +20,13 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
+import java.time.Duration
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
 import javax.inject.Inject
+import kotlin.test.assertFailsWith
 
 @MiskTest(startService = true)
 internal class SqsJobQueueTest {
@@ -419,6 +421,130 @@ internal class SqsJobQueueTest {
     queue.enqueue(queueName, "ok")
     val receiver = consumer.getReceiver(queueName)
     assertThat(receiver.run()).isEqualTo(Status.NO_WORK)
+  }
+
+  @ParameterizedTest
+  @ValueSource(booleans = [true, false])
+  fun batchEnqueueAndHandle(perPodConsumers: Boolean) {
+    if (perPodConsumers) {
+      enablePerPodConsumers()
+    } else {
+      enablePerQueueConsumers()
+    }
+
+    val handledJobs = CopyOnWriteArrayList<Job>()
+    val allJobsComplete = CountDownLatch(10)
+    consumer.subscribe(queueName) {
+      handledJobs.add(it)
+      it.acknowledge()
+      allJobsComplete.countDown()
+    }
+
+    val result = queue.batchEnqueue(
+      queueName,
+      (0 until 10).map { i ->
+        JobQueue.JobRequest(
+          idempotenceKey = "ik-$i",
+          body = "this is job $i",
+          deliveryDelay = Duration.ofMillis(1),
+          attributes = mapOf("index" to i.toString())
+        )
+      }
+    )
+
+    assertThat(allJobsComplete.await(10, TimeUnit.SECONDS)).isTrue()
+
+    val sortedJobs = handledJobs.sortedBy { it.body }
+
+    //todo(hala): figure out how to test for failure scenario
+    assertThat(sortedJobs.map { it.idempotenceKey }).isEqualTo(result.successful)
+
+    assertThat(sortedJobs.map { it.body }).containsExactly(
+      "this is job 0",
+      "this is job 1",
+      "this is job 2",
+      "this is job 3",
+      "this is job 4",
+      "this is job 5",
+      "this is job 6",
+      "this is job 7",
+      "this is job 8",
+      "this is job 9"
+    )
+    assertThat(sortedJobs.map { it.idempotenceKey }).containsExactly(
+      "ik-0",
+      "ik-1",
+      "ik-2",
+      "ik-3",
+      "ik-4",
+      "ik-5",
+      "ik-6",
+      "ik-7",
+      "ik-8",
+      "ik-9"
+    )
+    assertThat(sortedJobs.map { it.attributes["index"] }).containsExactly(
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "8",
+      "9"
+    )
+
+    // Confirm metrics
+    assertThat(sqsMetrics.jobsEnqueued.labels(queueName.value, queueName.value).get()).isEqualTo(
+      10.0
+    )
+    assertThat(
+      sqsMetrics.jobEnqueueFailures.labels(queueName.value, queueName.value).get()
+    ).isEqualTo(0.0)
+    assertThat(sqsMetrics.sqsSendTime.count(queueName.value, queueName.value)).isEqualTo(1)
+
+    assertThat(sqsMetrics.jobsReceived.labels(queueName.value, queueName.value).get()).isEqualTo(
+      10.0
+    )
+    // Can't predict how many times we'll receive have since consumers may get 0 messages and retry, or may get many
+    // messages in varying batches
+    assertThat(sqsMetrics.sqsReceiveTime.count(queueName.value, queueName.value)).isNotZero()
+
+    assertThat(
+      sqsMetrics.jobsAcknowledged.labels(queueName.value, queueName.value).get()
+    ).isEqualTo(10.0)
+    assertThat(sqsMetrics.sqsDeleteTime.count(queueName.value, queueName.value)).isEqualTo(10)
+
+    assertThat(sqsMetrics.handlerFailures.labels(queueName.value, queueName.value).get()).isEqualTo(
+      0.0
+    )
+  }
+
+  @Test
+  fun batchEnqueueBatchLimit() {
+    val handledJobs = CopyOnWriteArrayList<Job>()
+    val allJobsComplete = CountDownLatch(10)
+    consumer.subscribe(queueName) {
+      handledJobs.add(it)
+      it.acknowledge()
+      allJobsComplete.countDown()
+    }
+
+    assertFailsWith<java.lang.IllegalStateException> {
+      queue.batchEnqueue(
+        queueName,
+        (0 until 11).map { i ->
+          JobQueue.JobRequest(
+            idempotenceKey = "ik-$i",
+            body = "this is job $i",
+            deliveryDelay = Duration.ofMillis(1),
+            attributes = mapOf("index" to i.toString())
+          )
+        }
+      )
+    }
   }
 
   private fun enablePerPodConsumers() {

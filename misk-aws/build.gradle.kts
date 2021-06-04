@@ -23,6 +23,7 @@ dependencies {
   testImplementation(Dependencies.junitApi)
   testImplementation(Dependencies.junitEngine)
   testImplementation(Dependencies.junitParams)
+  testImplementation(Dependencies.kotlinTest)
   testImplementation(Dependencies.docker)
   testImplementation(Dependencies.awaitility)
   testImplementation(Dependencies.mockitoCore)

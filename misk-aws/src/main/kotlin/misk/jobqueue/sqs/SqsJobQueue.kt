@@ -108,8 +108,12 @@ internal class SqsJobQueue @Inject internal constructor(
     jobs: List<JobQueue.JobRequest>,
   ): JobQueue.BatchEnqueueResult {
     return tracer.traceWithSpan("batch-enqueue-job-${queueName.value}") { span ->
-      metrics.jobsEnqueued.labels(queueName.value, queueName.value).inc()
+      metrics.jobsEnqueued.labels(queueName.value, queueName.value).inc(jobs.size.toDouble())
       try {
+        check(jobs.size <= 10) {
+          "a maximum of 10 jobs can be batched."
+        }
+
         val queue = queues.getForSending(queueName)
 
         val (sendDuration, result) = queue.call { client ->
@@ -173,7 +177,7 @@ internal class SqsJobQueue @Inject internal constructor(
           queueName.value
         )
 
-        JobQueue.BatchEnqueueResult(result.successful.map { it.id }, result.failed.map {
+        val batchResult = JobQueue.BatchEnqueueResult(result.successful.map { it.id }, result.failed.map {
           JobQueue.EnqueueErrorResult(
             it.id,
             it.isSenderFault,
@@ -181,6 +185,12 @@ internal class SqsJobQueue @Inject internal constructor(
             it.message
           )
         })
+
+        if(batchResult.failed.isNotEmpty()){
+          log.error { "failed to batch enqueue to ${queueName.value}" }
+          metrics.jobEnqueueFailures.labels(queueName.value, queueName.value).inc(batchResult.failed.size.toDouble())
+        }
+        batchResult
       } catch (th: Throwable) {
         log.error(th) { "failed to enqueue to ${queueName.value}" }
         metrics.jobEnqueueFailures.labels(queueName.value, queueName.value).inc()
