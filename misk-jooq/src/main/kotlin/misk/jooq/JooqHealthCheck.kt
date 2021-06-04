@@ -26,8 +26,8 @@ class JooqHealthCheck(
 
     val databaseInstant = try {
       val jooqTransacter = jooqTransacterProvider.get()
-      jooqTransacter.transaction { dslContext ->
-        dslContext.select(now()).fetchOne { it.component1().toInstant() }
+      jooqTransacter.transaction { (ctx) ->
+        ctx.select(now()).fetchOne { it.component1().toInstant() }
       }
     } catch (exception: Exception) {
       log.error(exception) { "Jooq: error performing jooq health check" }

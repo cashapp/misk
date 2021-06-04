@@ -14,8 +14,25 @@ interface Transacter {
    * If the work raises an exception the transaction will be rolled back instead of committed.
    *
    * It is an error to start a transaction if another transaction is already in progress.
+   *
+   * Prefer using [transactionWithSession] instead of this method as it has more functionality such
+   * as commit hooks.
    */
+  @Deprecated("Use transactionWithSession instead",
+    replaceWith = ReplaceWith("transactionWithSession(work)")
+  )
   fun <T> transaction(work: (connection: Connection) -> T): T
+
+  /**
+   * Starts a transaction on the current thread, executes [work], and commits the transaction.
+   * If the work raises an exception the transaction will be rolled back instead of committed.
+   *
+   * This session object passed in wraps a connection and provides a way to add pre and post commit
+   * hooks that execute before and after a transaction is committed.
+   *
+   * It is an error to start a transaction if another transaction is already in progress.
+   */
+  fun <T> transactionWithSession(work: (session: JDBCSession) -> T): T
 }
 
 class RealTransacter constructor(private val dataSource: DataSource) : Transacter {
@@ -23,10 +40,15 @@ class RealTransacter constructor(private val dataSource: DataSource) : Transacte
 
   override val inTransaction: Boolean get() = transacting.get()
 
-  override fun <T> transaction(work: (connection: Connection) -> T): T {
+  override fun <T> transaction(work: (connection: Connection) -> T): T =
+    transactionWithSession { session -> session.useConnection(work) }
+
+
+  override fun <T> transactionWithSession(work: (session: JDBCSession) -> T): T {
     check(!transacting.get()) { "The current thread is already in a transaction" }
     transacting.set(true)
 
+    var session: JDBCSession? = null
     try {
       return dataSource.connection.use { connection ->
         /*
@@ -40,14 +62,18 @@ class RealTransacter constructor(private val dataSource: DataSource) : Transacte
           connection.autoCommit = false
         }
         // Do stuff
-        val result = work(connection)
-        // COMMIT
-        connection.commit()
 
+        session = JDBCSession(connection)
+        val result = work(session!!)
+        // COMMIT
+        session!!.executePreCommitHooks()
+        connection.commit()
+        session!!.executePostCommitHooks()
         result
       }
     } finally {
       transacting.set(false)
+      session?.executeSessionCloseHooks()
     }
   }
 }
