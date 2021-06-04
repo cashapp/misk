@@ -21,7 +21,7 @@ class JooqTransacter(
 
   fun <RETURN_TYPE> transaction(
     options: TransacterOptions = TransacterOptions(),
-    callback: (dslContext: DSLContext) -> RETURN_TYPE
+    callback: (jooqSession: JooqSession) -> RETURN_TYPE
   ): RETURN_TYPE {
     return runBlocking {
       retry(
@@ -36,7 +36,7 @@ class JooqTransacter(
 
   private suspend fun <RETURN_TYPE> performInTransaction(
     options: TransacterOptions,
-    callback: (dslContext: DSLContext) -> RETURN_TYPE
+    callback: (jooqSession: JooqSession) -> RETURN_TYPE
   ): RETURN_TYPE {
     val attempt1Based = coroutineContext.retryStatus.attempt + 1
     return try {
@@ -54,16 +54,24 @@ class JooqTransacter(
         }
         throw e
       }
-      log.info(e) { "Exception thrown while transacting with the db via jooq. Retrying." }
+      log.info(e) { "Exception thrown while transacting with the db via jooq" }
       throw e
     }
   }
 
   private fun <RETURN_TYPE> createDSLContextAndCallback(
-    callback: (dslContext: DSLContext) -> RETURN_TYPE
+    callback: (jooqSession: JooqSession) -> RETURN_TYPE
   ): RETURN_TYPE {
-    return dslContext.transactionResult { configuration ->
-      callback(DSL.using(configuration))
+    var jooqSession: JooqSession? = null
+    return try {
+      dslContext.transactionResult { configuration ->
+        jooqSession = JooqSession(DSL.using(configuration))
+        callback(jooqSession!!).also { jooqSession!!.executePreCommitHooks() }
+      }.also {
+        jooqSession?.executePostCommitHooks()
+      }
+    } finally {
+      jooqSession?.executeSessionCloseHooks()
     }
   }
 
