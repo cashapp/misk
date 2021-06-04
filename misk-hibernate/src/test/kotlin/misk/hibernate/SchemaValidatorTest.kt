@@ -5,8 +5,8 @@ import misk.MiskTestingServiceModule
 import misk.ServiceModule
 import misk.concurrent.ExecutorServiceFactory
 import misk.config.MiskConfig
-import misk.environment.Environment
-import misk.environment.EnvironmentModule
+import misk.environment.DeploymentModule
+import misk.environment.Env
 import misk.inject.KAbstractModule
 import misk.inject.asSingleton
 import misk.inject.keyOf
@@ -26,6 +26,7 @@ import org.hibernate.SessionFactory
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import wisp.config.Config
+import wisp.deployment.TESTING
 import java.time.Instant
 import javax.inject.Inject
 import javax.inject.Provider
@@ -41,14 +42,15 @@ import kotlin.test.assertTrue
 internal class SchemaValidatorTest {
   @MiskTestModule
   val module = TestModule()
-  val config = MiskConfig.load<RootConfig>("schemavalidation", Environment.TESTING)
+  val env = Env(TESTING.name)
+  val config = MiskConfig.load<RootConfig>("schemavalidation", env)
 
   @Inject @ValidationDb lateinit var transacter: Transacter
   @Inject @ValidationDb lateinit var sessionFactoryService: Provider<SessionFactoryService>
 
   inner class TestModule : KAbstractModule() {
     override fun configure() {
-      install(EnvironmentModule(Environment.TESTING))
+      install(DeploymentModule(TESTING, env))
       install(MiskTestingServiceModule())
 
       val qualifier = ValidationDb::class

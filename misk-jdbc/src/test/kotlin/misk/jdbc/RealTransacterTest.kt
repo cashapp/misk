@@ -4,7 +4,7 @@ import com.google.inject.util.Modules
 import misk.MiskTestingServiceModule
 import misk.config.MiskConfig
 import misk.environment.DeploymentModule
-import misk.environment.Environment
+import misk.environment.Env
 import misk.inject.KAbstractModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
@@ -13,6 +13,7 @@ import misk.time.FakeClockModule
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import wisp.config.Config
+import wisp.deployment.TESTING
 import java.sql.Connection
 import java.time.LocalDate
 import javax.inject.Inject
@@ -112,8 +113,9 @@ abstract class RealTransacterTest {
           MockTracingBackendModule()
         )
       )
-      install(DeploymentModule.forTesting())
-      val config = MiskConfig.load<RootConfig>("test_transacter", Environment.TESTING)
+      val env = Env(TESTING.name)
+      install(DeploymentModule(TESTING, env))
+      val config = MiskConfig.load<RootConfig>("test_transacter", env)
       val dataSourceConfig = selectDataSourceConfig(config)
       install(JdbcTestingModule(Movies::class))
       install(

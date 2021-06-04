@@ -5,7 +5,7 @@ import wisp.logging.getLogger
 
 /** The environment in which the application is running */
 @Deprecated("use Deployment instead")
-enum class Environment {
+private enum class Environment {
   TESTING,
   DEVELOPMENT,
   STAGING,

@@ -2,8 +2,8 @@ package misk.hibernate
 
 import misk.MiskTestingServiceModule
 import misk.config.MiskConfig
-import misk.environment.Environment
-import misk.environment.EnvironmentModule
+import misk.environment.DeploymentModule
+import misk.environment.Env
 import misk.inject.KAbstractModule
 import misk.jdbc.DataSourceConfig
 import misk.testing.MiskTest
@@ -11,6 +11,7 @@ import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import wisp.config.Config
+import wisp.deployment.TESTING
 import javax.inject.Inject
 import javax.inject.Qualifier
 import javax.persistence.Column
@@ -51,9 +52,10 @@ class JsonColumnTest {
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(MiskTestingServiceModule())
-      install(EnvironmentModule(Environment.TESTING))
+      val env = Env(TESTING.name)
+      install(DeploymentModule(TESTING, env))
 
-      val config = MiskConfig.load<RootConfig>("jsoncolumn", Environment.TESTING)
+      val config = MiskConfig.load<RootConfig>("jsoncolumn", env)
       install(HibernateTestingModule(WillFerrellDb::class, config.data_source))
       install(HibernateModule(WillFerrellDb::class, config.data_source))
       install(object : HibernateEntityModule(WillFerrellDb::class) {

@@ -10,6 +10,7 @@ import misk.MiskTestingServiceModule
 import misk.config.MiskConfig.RealSecret
 import misk.crypto.pgp.PgpKeyJsonFile
 import misk.environment.DeploymentModule
+import misk.environment.Env
 import misk.logging.LogCollectorModule
 import misk.moshi.adapter
 import misk.resources.ResourceLoader
@@ -19,7 +20,8 @@ import org.assertj.core.api.Assertions.assertThat
 import org.bouncycastle.openpgp.PGPException
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import java.util.Base64
+import wisp.deployment.TESTING
+import java.util.*
 import javax.inject.Inject
 
 @MiskTest(startService = true)
@@ -190,10 +192,12 @@ class PgpKeyTest {
     )
 
     val config = CryptoConfig(listOf(encryptKey, decryptKey), "test_master_key")
+    val env = Env(TESTING.name)
+    val deploymentModule = DeploymentModule(TESTING, env)
     return Guice.createInjector(
       CryptoTestModule(config),
       MiskTestingServiceModule(), LogCollectorModule(),
-      DeploymentModule.forTesting()
+      deploymentModule
     )
   }
 

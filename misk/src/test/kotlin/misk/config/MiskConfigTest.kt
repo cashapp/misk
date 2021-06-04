@@ -2,7 +2,7 @@ package misk.config
 
 import com.google.inject.util.Modules
 import misk.environment.DeploymentModule
-import misk.environment.Environment
+import misk.environment.Env
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.web.WebConfig
@@ -10,6 +10,7 @@ import misk.web.exceptions.ActionExceptionLogLevelConfig
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.slf4j.event.Level
+import wisp.deployment.TESTING
 import java.io.File
 import java.time.Duration
 import javax.inject.Inject
@@ -17,13 +18,13 @@ import kotlin.test.assertFailsWith
 
 @MiskTest
 class MiskConfigTest {
-  val defaultEnv = Environment.TESTING
+  val defaultEnv = Env(TESTING.name)
   val config = MiskConfig.load<TestConfig>("test_app", defaultEnv)
 
   @MiskTestModule
   val module = Modules.combine(
     ConfigModule.create("test_app", config),
-    DeploymentModule.forTesting()
+    DeploymentModule(TESTING, defaultEnv)
     // @TODO(jwilson) https://github.com/square/misk/issues/272
   )
 

@@ -2,8 +2,8 @@ package misk.hibernate
 
 import misk.MiskTestingServiceModule
 import misk.config.MiskConfig
-import misk.environment.Environment
-import misk.environment.EnvironmentModule
+import misk.environment.DeploymentModule
+import misk.environment.Env
 import misk.inject.KAbstractModule
 import misk.jdbc.DataSourceConfig
 import misk.testing.MiskTest
@@ -14,6 +14,7 @@ import okio.ByteString.Companion.encodeUtf8
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import wisp.config.Config
+import wisp.deployment.TESTING
 import javax.inject.Inject
 import javax.inject.Qualifier
 import javax.persistence.Column
@@ -97,9 +98,10 @@ class ByteStringColumnTest {
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(MiskTestingServiceModule())
-      install(EnvironmentModule(Environment.TESTING))
+      val env = Env(TESTING.name)
+      install(DeploymentModule(TESTING, env))
 
-      val config = MiskConfig.load<RootConfig>("bytestringcolumn", Environment.TESTING)
+      val config = MiskConfig.load<RootConfig>("bytestringcolumn", env)
       install(HibernateTestingModule(ByteStringColumn::class, config.data_source))
       install(HibernateModule(ByteStringColumn::class, config.data_source))
       install(object : HibernateEntityModule(ByteStringColumn::class) {

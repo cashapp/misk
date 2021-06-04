@@ -17,12 +17,11 @@ import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.kotlin.MissingKotlinParameterException
 import com.google.common.base.Joiner
 import misk.environment.Env
-import misk.environment.Environment
 import misk.resources.ResourceLoader
 import org.apache.commons.lang3.StringUtils
 import java.io.File
 import java.io.FilenameFilter
-import java.util.Locale
+import java.util.*
 
 object MiskConfig {
   @JvmStatic
@@ -33,28 +32,6 @@ object MiskConfig {
     resourceLoader: ResourceLoader = ResourceLoader.SYSTEM
   ): T {
     return load(T::class.java, appName, environment, overrideFiles, resourceLoader)
-  }
-
-  @JvmStatic
-  @Deprecated("Use load function that takes Env")
-  inline fun <reified T : wisp.config.Config> load(
-    appName: String,
-    environment: String,
-    overrideFiles: List<File> = listOf(),
-    resourceLoader: ResourceLoader = ResourceLoader.SYSTEM
-  ): T {
-    return load(appName, Env(environment), overrideFiles, resourceLoader)
-  }
-
-  @JvmStatic
-  @Deprecated("the Environment enum is deprecated")
-  inline fun <reified T : wisp.config.Config> load(
-    appName: String,
-    environment: Environment,
-    overrideFiles: List<File> = listOf(),
-    resourceLoader: ResourceLoader = ResourceLoader.SYSTEM
-  ): T {
-    return load(T::class.java, appName, Env(environment.name), overrideFiles, resourceLoader)
   }
 
   @JvmStatic
@@ -103,18 +80,6 @@ object MiskConfig {
         "failed to load configuration for $appName $environment: ${e.message}", e
       )
     }
-  }
-
-  @JvmStatic
-  @Deprecated("Use load function that takes Env")
-  fun <T : wisp.config.Config> load(
-    configClass: Class<out wisp.config.Config>,
-    appName: String,
-    environment: String,
-    overrideFiles: List<File> = listOf(),
-    resourceLoader: ResourceLoader = ResourceLoader.SYSTEM
-  ): T {
-    return load(configClass, appName, Env(environment), overrideFiles, resourceLoader)
   }
 
   private fun suggestSpelling(e: UnrecognizedPropertyException): String {

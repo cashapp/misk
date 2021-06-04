@@ -29,6 +29,7 @@ dependencies {
   implementation(project(":misk-inject"))
   implementation(project(":misk-service"))
   api(project(":wisp-config"))
+  api(project(":wisp-deployment"))
   api(project(":wisp-logging"))
 
   testImplementation(project(":misk-testing"))

@@ -4,7 +4,6 @@ import com.google.inject.Inject
 import misk.config.AppName
 import misk.config.MiskConfig
 import misk.environment.Env
-import misk.environment.Environment
 import misk.resources.ResourceLoader
 import misk.web.Get
 import misk.web.RequestContentType
@@ -13,17 +12,18 @@ import misk.web.actions.WebAction
 import misk.web.dashboard.AdminDashboardAccess
 import misk.web.mediatype.MediaTypes
 import wisp.config.Config
+import wisp.deployment.Deployment
 import javax.inject.Singleton
 
 @Singleton
 class ConfigMetadataAction @Inject constructor(
   @AppName val appName: String,
-  val environment: Environment,
+  val deployment: Deployment,
   val config: Config
 ) : WebAction {
   val resources: Map<String, String?> =
     generateConfigResources(
-      appName, environment,
+      appName, deployment,
       config
     )
 
@@ -55,10 +55,10 @@ class ConfigMetadataAction @Inject constructor(
 
     fun generateConfigResources(
       appName: String,
-      environment: Environment,
+      deployment: Deployment,
       config: Config
     ): Map<String, String?> {
-      val rawYamlFiles = MiskConfig.loadConfigYamlMap(appName, Env(environment.name), listOf())
+      val rawYamlFiles = MiskConfig.loadConfigYamlMap(appName, Env(deployment.name), listOf())
       val yamlFiles = linkedMapOf<String, String?>(
         "Effective Config" to MiskConfig.toYaml(
           config, ResourceLoader.SYSTEM

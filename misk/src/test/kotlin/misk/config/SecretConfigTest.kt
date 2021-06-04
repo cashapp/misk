@@ -1,7 +1,7 @@
 package misk.config
 
 import com.google.inject.util.Modules
-import misk.environment.Environment
+import misk.environment.Env
 import misk.resources.FakeFilesModule
 import misk.resources.ResourceLoader
 import misk.resources.TestingResourceLoaderModule
@@ -11,11 +11,12 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import wisp.deployment.TESTING
 import javax.inject.Inject
 
 @MiskTest
 class SecretConfigTest {
-  private val environment = Environment.TESTING
+  private val environment = Env(TESTING.name)
 
   @MiskTestModule
   private val module = Modules.combine(
@@ -39,7 +40,7 @@ class SecretConfigTest {
   @BeforeEach
   fun setConfig() {
     secretConfig =
-      MiskConfig.load("secret_config_app", Environment.TESTING, listOf(), resourceLoader)
+      MiskConfig.load("secret_config_app", environment, listOf(), resourceLoader)
   }
 
   @Test

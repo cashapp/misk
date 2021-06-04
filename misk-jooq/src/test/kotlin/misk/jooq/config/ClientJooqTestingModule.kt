@@ -2,6 +2,7 @@ package misk.jooq.config
 
 import misk.MiskTestingServiceModule
 import misk.environment.DeploymentModule
+import misk.environment.Env
 import misk.inject.KAbstractModule
 import misk.jdbc.DataSourceClusterConfig
 import misk.jdbc.DataSourceConfig
@@ -9,11 +10,13 @@ import misk.jdbc.DataSourceType
 import misk.jdbc.JdbcTestingModule
 import misk.jooq.JooqModule
 import misk.logging.LogCollectorModule
+import wisp.deployment.TESTING
 import javax.inject.Qualifier
 
 class ClientJooqTestingModule : KAbstractModule() {
   override fun configure() {
-    install(DeploymentModule.forTesting())
+    val env = Env(TESTING.name)
+    install(DeploymentModule(TESTING, env))
     install(MiskTestingServiceModule())
 
     val datasourceConfig = DataSourceClusterConfig(

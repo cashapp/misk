@@ -2,8 +2,8 @@ package misk.hibernate
 
 import misk.MiskTestingServiceModule
 import misk.config.MiskConfig
-import misk.environment.Environment
-import misk.environment.EnvironmentModule
+import misk.environment.DeploymentModule
+import misk.environment.Env
 import misk.inject.KAbstractModule
 import misk.jdbc.DataSourceConfig
 import misk.testing.MiskTest
@@ -12,6 +12,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.data.Percentage
 import org.junit.jupiter.api.Test
 import wisp.config.Config
+import wisp.deployment.TESTING
 import java.io.Serializable
 import java.util.*
 import javax.inject.Inject
@@ -462,7 +463,8 @@ class TransformedColumnTest {
   val module = object : KAbstractModule() {
     override fun configure() {
       install(MiskTestingServiceModule())
-      install(EnvironmentModule(Environment.TESTING))
+      val env = Env(TESTING.name)
+      install(DeploymentModule(TESTING, env))
 
       bind<SwappableTransformer>().toInstance(object : SwappableTransformer {
         override fun assemble(
@@ -478,7 +480,7 @@ class TransformedColumnTest {
       })
 
       val conf =
-        MiskConfig.load<TransformedColumnTestConfig>("transformedcolumn", Environment.TESTING)
+        MiskConfig.load<TransformedColumnTestConfig>("transformedcolumn", env)
       install(HibernateTestingModule(TransformedColumnTestDb::class, conf.data_source))
       install(HibernateModule(TransformedColumnTestDb::class, conf.data_source))
       install(object : HibernateEntityModule(TransformedColumnTestDb::class) {

@@ -1,10 +1,10 @@
 package misk.jdbc
 
 import com.zaxxer.hikari.util.DriverDataSource
-import misk.environment.Environment
+import wisp.deployment.TESTING
 import java.sql.Connection
 import java.sql.SQLException
-import java.util.Properties
+import java.util.*
 import javax.inject.Inject
 import javax.inject.Singleton
 import javax.sql.DataSource
@@ -19,11 +19,11 @@ internal class MySqlTestDatabasePoolBackend @Inject constructor(
   internal val connection: Connection by lazy {
     try {
       DriverDataSource(
-          config.buildJdbcUrl(Environment.TESTING),
-          config.type.driverClassName,
-          Properties(),
-          config.username,
-          config.password
+        config.buildJdbcUrl(TESTING),
+        config.type.driverClassName,
+        Properties(),
+        config.username,
+        config.password
       ).connect()
     } catch (e: SQLException) {
       throw IllegalStateException("Could not connect to test MySQL server!", e)
@@ -49,8 +49,8 @@ internal class MySqlTestDatabasePoolBackend @Inject constructor(
   private fun Connection.showDatabases(): Set<String> {
     return createStatement().use { statement ->
       statement.executeQuery("SHOW DATABASES")
-          .map { resultSet -> resultSet.getString(1) }
-          .toSet()
+        .map { resultSet -> resultSet.getString(1) }
+        .toSet()
     }
   }
 
