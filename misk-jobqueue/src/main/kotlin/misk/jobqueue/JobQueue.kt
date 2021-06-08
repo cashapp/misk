@@ -98,4 +98,8 @@ interface JobQueue {
     val code: String,
     val message: String
   )
+
+  companion object {
+    const val SQS_MAX_BATCH_ENQUEUE_JOB_SIZE = 10
+  }
 }

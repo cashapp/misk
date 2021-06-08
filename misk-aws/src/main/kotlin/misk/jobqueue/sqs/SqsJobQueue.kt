@@ -9,6 +9,7 @@ import datadog.trace.core.DDSpan
 import io.opentracing.Span
 import io.opentracing.Tracer
 import misk.jobqueue.JobQueue
+import misk.jobqueue.JobQueue.Companion.SQS_MAX_BATCH_ENQUEUE_JOB_SIZE
 import misk.jobqueue.QueueName
 import misk.moshi.adapter
 import misk.time.timed
@@ -74,7 +75,7 @@ internal class SqsJobQueue @Inject internal constructor(
     queueName: QueueName,
     jobs: List<JobQueue.JobRequest>,
   ) {
-    check(jobs.size <= 10) {
+    check(jobs.size <= SQS_MAX_BATCH_ENQUEUE_JOB_SIZE) {
       "a maximum of 10 jobs can be batched."
     }
 
