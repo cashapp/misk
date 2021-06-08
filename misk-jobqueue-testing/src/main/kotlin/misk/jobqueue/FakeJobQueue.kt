@@ -76,6 +76,13 @@ class FakeJobQueue @Inject constructor(
     jobQueues.getOrPut(queueName, ::PriorityBlockingQueue).add(job)
   }
 
+  override fun batchEnqueue(queueName: QueueName,
+    jobs: List<JobQueue.JobRequest>) {
+    jobs.forEach{
+      enqueue(queueName, it.body, it.idempotenceKey, it.deliveryDelay, it.attributes)
+    }
+  }
+
   fun peekJobs(queueName: QueueName): List<Job> {
     val jobs = jobQueues[queueName]
     return jobs?.sortedBy { it.id } ?: listOf()
