@@ -43,11 +43,6 @@ interface JobQueue {
     attributes: Map<String, String> = mapOf())
 
   /**
-   * Batch Enqueue a set of jobs onto the given queue, along with a set of job attributes.
-   *
-   * @param queueName The name of the queue on which to place the job.
-   * @param jobs The set of jobs that will be enqueuedThe body of the job; See JobRequest class for
-   * a full description of job parameters
    * throws [BatchEnqueueException] contains the list of jobs successfully enqueued and the list of
    * jobs that could not be enqueued. See [EnqueueErrorResult] for more details on the error information
    * returned
@@ -68,8 +63,7 @@ interface JobQueue {
    * @param deliveryDelay If specified, the job will only become visible to the consumer after
    * the provided duration. Used for jobs that should delay processing for a period of time.
    * Note that depending on implementation, there may be an upper limit to this value. For instance, SQS implementation
-   * limits `deliveryDelay` to 900s (15m). If a longer delay is required by applications, use the
-   * [TransactionalJobQueue] interface instead.
+   * limits `deliveryDelay` to 900s (15m).
    * @param attributes Arbitrary contextual attributes associated with the job. Implementations may limit the number of
    * attributes per message.
    */
