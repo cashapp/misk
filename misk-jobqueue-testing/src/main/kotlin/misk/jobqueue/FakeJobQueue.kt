@@ -77,11 +77,10 @@ class FakeJobQueue @Inject constructor(
   }
 
   override fun batchEnqueue(queueName: QueueName,
-    jobs: List<JobQueue.JobRequest>): JobQueue.BatchEnqueueResult {
+    jobs: List<JobQueue.JobRequest>) {
     jobs.forEach{
       enqueue(queueName, it.body, it.idempotenceKey, it.deliveryDelay, it.attributes)
     }
-    return JobQueue.BatchEnqueueResult(jobs.map{it.idempotenceKey})
   }
 
   fun peekJobs(queueName: QueueName): List<Job> {

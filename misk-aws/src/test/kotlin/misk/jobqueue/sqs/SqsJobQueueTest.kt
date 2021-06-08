@@ -440,7 +440,7 @@ internal class SqsJobQueueTest {
       allJobsComplete.countDown()
     }
 
-    val result = queue.batchEnqueue(
+    queue.batchEnqueue(
       queueName,
       (0 until 10).map { i ->
         JobQueue.JobRequest(
@@ -457,7 +457,6 @@ internal class SqsJobQueueTest {
     val sortedJobs = handledJobs.sortedBy { it.body }
 
     //todo(hala): figure out how to test for failure scenario
-    assertThat(sortedJobs.map { it.idempotenceKey }).isEqualTo(result.successful)
 
     assertThat(sortedJobs.map { it.body }).containsExactly(
       "this is job 0",

@@ -48,14 +48,14 @@ interface JobQueue {
    * @param queueName The name of the queue on which to place the job.
    * @param jobs The set of jobs that will be enqueuedThe body of the job; See JobRequest class for
    * a full description of job parameters
-   * @return [BatchEnqueueResult] contains the list of jobs successfully enqueued and the list of
+   * throws [BatchEnqueueException] contains the list of jobs successfully enqueued and the list of
    * jobs that could not be enqueued. See [EnqueueErrorResult] for more details on the error information
    * returned
    */
   fun batchEnqueue(
     queueName: QueueName,
     jobs: List<JobRequest>,
-  ): BatchEnqueueResult
+  )
 
   /**
    * Data class containing the necessary information to be enqueued in a batch enqueue
@@ -80,17 +80,15 @@ interface JobQueue {
     val attributes: Map<String, String> = mapOf())
 
   /**
-   * Data class containing the list of jobs successfully enqueued and the list of
+   * Exception Data class containing the list of jobs successfully enqueued and the list of
    * jobs that could not be enqueued. See [EnqueueErrorResult] for more details on the error information
    * returned
-   *
-   * @param successful List of idempotencyKeys for jobs that were successfully enqueued
-   * @param failed List of idempotencyKeys for jobs that were successfully enqueued
    */
-  data class BatchEnqueueResult(
-    val successful: List<String> = listOf(),
-    val failed: List<EnqueueErrorResult> = listOf()
-  )
+  data class BatchEnqueueException(
+    val queueName: QueueName,
+    val successful: List<String>,
+    val failed: List<EnqueueErrorResult>
+  ):Exception("Failed to enqueue all messages")
 
   /**
    * Data class containing the error result of a failed job enqueue
