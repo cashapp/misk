@@ -8,10 +8,12 @@ import misk.feature.Feature
 import misk.feature.FeatureFlagValidation
 import misk.feature.FeatureFlags
 import misk.feature.FeatureService
+import misk.feature.TrackerReference
 import misk.feature.fromSafeJson
 import misk.feature.toSafeJson
 import java.util.PriorityQueue
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.Executor
 import javax.inject.Inject
 import javax.inject.Provider
 import javax.inject.Singleton
@@ -31,6 +33,7 @@ class FakeFeatureFlags @Inject constructor(
   override fun startUp() {}
   override fun shutDown() {}
 
+  private val trackers = HashMap<MapKey, MutableList<TrackerMapValue<*>>>()
   private val overrides = ConcurrentHashMap<MapKey, PriorityQueue<MapValue>>()
 
   override fun getBoolean(feature: Feature, key: String, attributes: Attributes): Boolean =
@@ -114,6 +117,98 @@ class FakeFeatureFlags @Inject constructor(
     }
     return currentMapValue.value
   }
+
+  private fun <T> trackAny(
+    feature: Feature,
+    key: String,
+    attributes: Attributes,
+    executor: Executor,
+    tracker: (T) -> Unit
+  ): TrackerReference = synchronized(trackers) {
+    val bucket = trackers
+      .computeIfAbsent(MapKey(feature, key)) { mutableListOf() }
+    val value = TrackerMapValue(attributes, executor, tracker)
+    bucket.add(value)
+    return object : TrackerReference {
+      override fun unregister() {
+        bucket.remove(value)
+      }
+    }
+  }
+
+  override fun trackBoolean(
+    feature: Feature,
+    key: String,
+    attributes: Attributes,
+    executor: Executor,
+    tracker: (Boolean) -> Unit
+  ) = trackAny(feature, key, attributes, executor, tracker)
+
+  override fun trackInt(
+    feature: Feature,
+    key: String,
+    attributes: Attributes,
+    executor: Executor,
+    tracker: (Int) -> Unit
+  ) = trackAny(feature, key, attributes, executor, tracker)
+
+  override fun trackString(
+    feature: Feature,
+    key: String,
+    attributes: Attributes,
+    executor: Executor,
+    tracker: (String) -> Unit
+  ) = trackAny(feature, key, attributes, executor, tracker)
+
+  override fun <T : Enum<T>> trackEnum(
+    feature: Feature,
+    key: String,
+    clazz: Class<T>,
+    attributes: Attributes,
+    executor: Executor,
+    tracker: (T) -> Unit
+  ) = trackAny(feature, key, attributes, executor, tracker)
+
+  override fun <T> trackJson(
+    feature: Feature,
+    key: String,
+    clazz: Class<T>,
+    attributes: Attributes,
+    executor: Executor,
+    tracker: (T) -> Unit
+  ) = trackAny(feature, key, attributes, executor, tracker)
+
+  override fun trackBoolean(
+    feature: Feature,
+    executor: Executor,
+    tracker: (Boolean) -> Unit
+  ) = trackBoolean(feature, KEY, executor, tracker)
+
+  override fun trackInt(
+    feature: Feature,
+    executor: Executor,
+    tracker: (Int) -> Unit
+  ) = trackInt(feature, KEY, executor, tracker)
+
+  override fun trackString(
+    feature: Feature,
+    executor: Executor,
+    tracker: (String) -> Unit
+  ) = trackString(feature, KEY, executor, tracker)
+
+  override fun <T : Enum<T>> trackEnum(
+    feature: Feature,
+    clazz: Class<T>,
+    executor: Executor,
+    tracker: (T) -> Unit
+  ) = trackEnum(feature, KEY, clazz, executor, tracker)
+
+  override fun <T> trackJson(
+    feature: Feature,
+    clazz: Class<T>,
+    executor: Executor,
+    tracker: (T) -> Unit
+  ) = trackJson(feature, KEY, clazz, executor, tracker)
 
   fun override(
     feature: Feature,
@@ -216,6 +311,16 @@ class FakeFeatureFlags @Inject constructor(
           value = value as Any
         )
       )
+
+    synchronized(trackers) {
+      trackers[mapKey]
+        ?.filter { r -> r.attributes.text.entries.containsAll(attributes.text.entries) }
+        ?.forEach { r ->
+          r.executor.execute {
+            (r as TrackerMapValue<T>).tracker(value)
+          }
+        }
+    }
   }
 
   @JvmOverloads
@@ -255,4 +360,13 @@ class FakeFeatureFlags @Inject constructor(
       }
     }
   }
+
+  /**
+   * Data class that holds a tracker for the given [feature, key, attributes].
+   */
+  private data class TrackerMapValue<T> (
+    val attributes: Attributes = defaultAttributes,
+    val executor: Executor,
+    val tracker: (T) -> Unit
+  )
 }
