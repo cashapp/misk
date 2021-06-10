@@ -5,6 +5,8 @@ import com.launchdarkly.sdk.EvaluationDetail
 import com.launchdarkly.sdk.EvaluationReason
 import com.launchdarkly.sdk.LDUser
 import com.launchdarkly.sdk.LDValue
+import com.launchdarkly.sdk.server.interfaces.FlagValueChangeEvent
+import com.launchdarkly.sdk.server.interfaces.FlagValueChangeListener
 import com.launchdarkly.sdk.server.interfaces.LDClientInterface
 
 import com.launchdarkly.shaded.com.google.common.base.Preconditions.checkState
@@ -14,8 +16,10 @@ import misk.feature.Feature
 import misk.feature.FeatureFlagValidation
 import misk.feature.FeatureFlags
 import misk.feature.FeatureService
+import misk.feature.TrackerReference
 import misk.feature.fromSafeJson
 import mu.KotlinLogging
+import java.util.concurrent.Executor
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -112,6 +116,86 @@ class LaunchDarklyFeatureFlags @Inject constructor(
     return moshi.adapter(clazz).fromSafeJson(result.value.toJsonString())
       ?: throw IllegalArgumentException("null value deserialized from $feature")
   }
+
+  private fun <T> track(
+    feature: Feature,
+    key: String,
+    attributes: Attributes,
+    mapper: (LDValue) -> T,
+    executor: Executor,
+    tracker: (T) -> Unit
+  ): TrackerReference {
+    val listener = ldClient.flagTracker.addFlagValueChangeListener(
+      feature.name,
+      buildUser(feature, key, attributes)
+    ) { event ->
+      executor.execute {
+        tracker(mapper(event.newValue))
+      }
+    }
+
+    return object : TrackerReference {
+      override fun unregister() {
+        ldClient.flagTracker.removeFlagChangeListener(listener)
+      }
+    }
+  }
+
+  override fun trackBoolean(
+    feature: Feature,
+    key: String,
+    attributes: Attributes,
+    executor: Executor,
+    tracker: (Boolean) -> Unit
+  ) = track(feature, key, attributes, { it.booleanValue() }, executor, tracker )
+
+  override fun trackInt(
+    feature: Feature,
+    key: String,
+    attributes: Attributes,
+    executor: Executor,
+    tracker: (Int) -> Unit
+  ) = track(feature, key, attributes, { it.intValue() }, executor, tracker )
+
+  override fun trackString(
+    feature: Feature,
+    key: String,
+    attributes: Attributes,
+    executor: Executor,
+    tracker: (String) -> Unit
+  ) = track(feature, key, attributes, { it.stringValue() }, executor, tracker )
+
+  override fun <T : Enum<T>> trackEnum(
+    feature: Feature,
+    key: String,
+    clazz: Class<T>,
+    attributes: Attributes,
+    executor: Executor,
+    tracker: (T) -> Unit
+  ) = track(
+    feature,
+    key,
+    attributes,
+    { java.lang.Enum.valueOf(clazz, it.stringValue().toUpperCase()) },
+    executor,
+    tracker
+  )
+
+  override fun <T> trackJson(
+    feature: Feature,
+    key: String,
+    clazz: Class<T>,
+    attributes: Attributes,
+    executor: Executor,
+    tracker: (T) -> Unit
+  ) = track(
+    feature,
+    key,
+    attributes,
+    { moshi.adapter(clazz).fromSafeJson(it.toJsonString())!! },
+    executor,
+    tracker
+  )
 
   private fun checkInitialized() {
     checkState(
