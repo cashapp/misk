@@ -1,5 +1,7 @@
 package misk.feature
 
+import java.util.concurrent.Executor
+
 /**
  * Interface for evaluating dynamic flags. Dynamic flags are similar to feature flags, but they
  * don't support different variations for different keys.
