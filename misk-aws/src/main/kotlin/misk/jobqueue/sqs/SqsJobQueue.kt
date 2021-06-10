@@ -129,7 +129,8 @@ internal class SqsJobQueue @Inject internal constructor(
     .withStringValue(this)
 
   private fun getDelaySeconds(deliveryDelay: Duration?): Int {
-    return (deliveryDelay?.toMillis() ?: 0 / 1000).toInt()
+    val delayMillis = deliveryDelay?.toMillis() ?: 0
+    return (delayMillis / 1000).toInt()
   }
 
   private fun createMetadataMessageAttributeValue(span: Span,
