@@ -55,14 +55,14 @@ class CryptoTestModule(
     val keys = mutableListOf<Key>()
     config.keys?.let { keys.addAll(it) }
 
-    val keyManagerBinder = newMultibinder(ExternalKeyManager::class)
-    keyManagerBinder.addBinding().toInstance(FakeExternalKeyManager(keys))
+    val keyManagerBinder = newMultibinder(KeyResolver::class)
+    keyManagerBinder.addBinding().toInstance(FakeKeyResolver(keys))
 
     val externalDataKeys = config.external_data_keys ?: emptyMap()
     bind(object : TypeLiteral<Map<KeyAlias, KeyType>>() {})
       .annotatedWith(ExternalDataKeys::class.java)
       .toInstance(externalDataKeys)
-    keyManagerBinder.addBinding().toInstance(FakeExternalKeyManager(externalDataKeys))
+    keyManagerBinder.addBinding().toInstance(FakeKeyResolver(externalDataKeys))
 
     if (externalDataKeys.isNotEmpty()) {
       externalDataKeys.entries.forEach { entry ->

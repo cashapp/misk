@@ -4,6 +4,11 @@ import ch.qos.logback.classic.Level
 import com.netflix.concurrency.limits.Limiter
 import com.netflix.concurrency.limits.limit.SettableLimit
 import com.netflix.concurrency.limits.limiter.SimpleLimiter
+import io.prometheus.client.CollectorRegistry
+import java.time.Duration
+import java.time.temporal.ChronoUnit
+import javax.inject.Inject
+import javax.inject.Singleton
 import misk.Action
 import misk.MiskTestingServiceModule
 import misk.asAction
@@ -23,13 +28,11 @@ import misk.web.actions.LivenessCheckAction
 import misk.web.actions.ReadinessCheckAction
 import misk.web.actions.StatusAction
 import misk.web.actions.WebAction
+import okhttp3.Headers
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import wisp.logging.LogCollector
-import java.time.Duration
-import java.time.temporal.ChronoUnit
-import javax.inject.Inject
 
 @MiskTest(startService = true)
 class ConcurrencyLimitsInterceptorTest {
@@ -39,6 +42,7 @@ class ConcurrencyLimitsInterceptorTest {
   @Inject private lateinit var factory: ConcurrencyLimitsInterceptor.Factory
   @Inject private lateinit var clock: FakeClock
   @Inject lateinit var logCollector: LogCollector
+  @Inject lateinit var prometheusRegistry: CollectorRegistry
 
   @Test
   fun happyPath() {
@@ -47,6 +51,7 @@ class ConcurrencyLimitsInterceptorTest {
     assertThat(call(action, interceptor, callDuration = Duration.ofMillis(100), statusCode = 200))
       .isEqualTo(CallResult(callWasShed = false, statusCode = 200))
     assertThat(logCollector.takeMessages()).isEmpty()
+    assertThat(callSuccessCount("HelloAction")).isEqualTo(1.0)
   }
 
   @Test
@@ -55,7 +60,7 @@ class ConcurrencyLimitsInterceptorTest {
     val limitZero = SimpleLimiter.Builder()
       .limit(SettableLimit(0))
       .build<String>()
-    val interceptor = ConcurrencyLimitsInterceptor(action.name, limitZero, clock)
+    val interceptor = ConcurrencyLimitsInterceptor(factory, action, limitZero, clock)
     assertThat(call(action, interceptor, callDuration = Duration.ofMillis(100), statusCode = 200))
       .isEqualTo(CallResult(callWasShed = true, statusCode = 503))
   }
@@ -90,11 +95,12 @@ class ConcurrencyLimitsInterceptorTest {
     val limitZero = SimpleLimiter.Builder()
       .limit(SettableLimit(0))
       .build<String>()
-    val interceptor = ConcurrencyLimitsInterceptor(action.name, limitZero, clock)
+    val interceptor = ConcurrencyLimitsInterceptor(factory, action, limitZero, clock)
     // First call logs an error.
     call(action, interceptor, callDuration = Duration.ofMillis(100), statusCode = 200)
     assertThat(logCollector.takeMessages(minLevel = Level.ERROR))
-      .containsExactly("concurrency limits interceptor shedding HelloAction")
+      .containsExactly("concurrency limits interceptor shedding HelloAction; " +
+          "Quota-Path=null; inflight=0; limit=0")
 
     // Subsequent calls don't.
     call(action, interceptor, callDuration = Duration.ofMillis(100), statusCode = 200)
@@ -104,7 +110,8 @@ class ConcurrencyLimitsInterceptorTest {
     clock.setNow(clock.instant().plus(1, ChronoUnit.MINUTES))
     call(action, interceptor, callDuration = Duration.ofMillis(100), statusCode = 200)
     assertThat(logCollector.takeMessages(minLevel = Level.ERROR))
-      .containsExactly("concurrency limits interceptor shedding HelloAction")
+      .containsExactly("concurrency limits interceptor shedding HelloAction; " +
+          "Quota-Path=null; inflight=0; limit=0")
   }
 
   @Test
@@ -116,14 +123,47 @@ class ConcurrencyLimitsInterceptorTest {
       .isEqualTo(CallResult(callWasShed = true, statusCode = 503))
   }
 
+  @Test
+  fun quotaPathUsesIndependentLimiters() {
+    val action = HelloAction::call.asAction(DispatchMechanism.GET)
+    val interceptor = factory.create(action)!!
+
+    call(action, interceptor)
+    assertThat(callSuccessCount("HelloAction"))
+      .isEqualTo(1.0)  // Exactly one call on the only limiter.
+
+    call(action, interceptor)
+    call(action, interceptor, quotaPath = "/event_consumer/topic_foo")
+    call(action, interceptor, quotaPath = "/event_consumer/topic_foo")
+    call(action, interceptor, quotaPath = "/event_consumer/topic_foo")
+    assertThat(callSuccessCount("HelloAction")).isEqualTo(2.0)
+    assertThat(callSuccessCount("/event_consumer/topic_foo")).isEqualTo(3.0)
+
+    call(action, interceptor, quotaPath = "/event_consumer/topic_bar")
+    call(action, interceptor, quotaPath = "/event_consumer/topic_baz")
+    call(action, interceptor, quotaPath = "/event_consumer/topic_foo")
+    assertThat(callSuccessCount("HelloAction")).isEqualTo(2.0)
+    assertThat(callSuccessCount("/event_consumer/topic_foo")).isEqualTo(4.0)
+    assertThat(callSuccessCount("/event_consumer/topic_bar")).isEqualTo(1.0)
+    assertThat(callSuccessCount("/event_consumer/topic_baz")).isEqualTo(1.0)
+  }
+
   private fun call(
     action: Action,
     interceptor: NetworkInterceptor,
     callDuration: Duration = Duration.ofMillis(100),
-    statusCode: Int = 200
+    statusCode: Int = 200,
+    quotaPath: String? = null
   ): CallResult {
     val terminalInterceptor = TerminalInterceptor(callDuration, statusCode)
-    val httpCall = FakeHttpCall(url = "https://example.com/hello".toHttpUrl())
+    val requestHeaders = Headers.Builder()
+    if (quotaPath != null) {
+      requestHeaders.add("Quota-Path", quotaPath)
+    }
+    val httpCall = FakeHttpCall(
+      url = "https://example.com/hello".toHttpUrl(),
+      requestHeaders = requestHeaders.build(),
+    )
     val chain = RealNetworkChain(
       action,
       HelloAction(),
@@ -137,16 +177,25 @@ class ConcurrencyLimitsInterceptorTest {
     )
   }
 
+  private fun callSuccessCount(id: String): Double {
+    return prometheusRegistry.getSampleValue(
+      "concurrency_limits_outcomes",
+      arrayOf("quota_path", "outcome"),
+      arrayOf(id, "success")
+    )
+  }
+
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(LogCollectorModule())
       install(MiskTestingServiceModule())
 
-      multibind<ConcurrencyLimiterFactory>().toInstance(CustomLimiterFactory())
+      multibind<ConcurrencyLimiterFactory>().to<CustomLimiterFactory>()
     }
   }
 
-  class CustomLimiterFactory : ConcurrencyLimiterFactory {
+  @Singleton
+  class CustomLimiterFactory @Inject constructor() : ConcurrencyLimiterFactory {
     override fun create(action: Action): Limiter<String>? {
       if (action.function == CustomLimiterAction::call) {
         return SimpleLimiter.Builder()
