@@ -1,9 +1,8 @@
 package wisp.deployment
 
 /** Deployment describes the context in which the application is running
- * TODO: convert to data class when misk Deployment removed.
  */
-open class Deployment(
+data class Deployment(
   /**
    * The name of this deployment. This is used for debugging and should not be parsed.
    *

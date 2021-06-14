@@ -21,7 +21,7 @@ import org.bouncycastle.openpgp.PGPException
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import wisp.deployment.TESTING
-import java.util.*
+import java.util.Base64
 import javax.inject.Inject
 
 @MiskTest(startService = true)

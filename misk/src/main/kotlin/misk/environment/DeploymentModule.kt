@@ -3,8 +3,7 @@ package misk.environment
 import misk.inject.KAbstractModule
 import wisp.deployment.Deployment
 
-/** Binds [Deployment], [wisp.deployment.Deployment] and [Env] to make them available to
- * services and actions
+/** Binds [Deployment] and [Env] to make them available to services and actions
  */
 class DeploymentModule(
   private val deployment: Deployment,
