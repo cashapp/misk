@@ -20,14 +20,14 @@ internal class CoordinatedService(
         created.addListener(
           object : Listener() {
             override fun running() {
-              synchronized(this@CoordinatedService) {
+              synchronized(this) {
                 notifyStarted()
               }
               downstreamServices.forEach { it.startIfReady() }
             }
 
             override fun terminated(from: State) {
-              synchronized(this@CoordinatedService) {
+              synchronized(this) {
                 notifyStopped()
               }
               upstreamServices.forEach { it.stopIfReady() }
