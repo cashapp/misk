@@ -2,7 +2,6 @@ package misk.jooq.config
 
 import misk.MiskTestingServiceModule
 import misk.environment.DeploymentModule
-import misk.environment.Env
 import misk.inject.KAbstractModule
 import misk.jdbc.DataSourceClusterConfig
 import misk.jdbc.DataSourceConfig
@@ -15,8 +14,7 @@ import javax.inject.Qualifier
 
 class ClientJooqTestingModule : KAbstractModule() {
   override fun configure() {
-    val env = Env(TESTING.name)
-    install(DeploymentModule(TESTING, env))
+    install(DeploymentModule(TESTING))
     install(MiskTestingServiceModule())
 
     val datasourceConfig = DataSourceClusterConfig(

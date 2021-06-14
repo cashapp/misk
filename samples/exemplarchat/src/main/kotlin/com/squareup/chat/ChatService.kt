@@ -5,16 +5,14 @@ import misk.MiskRealServiceModule
 import misk.config.ConfigModule
 import misk.config.MiskConfig
 import misk.environment.DeploymentModule
-import misk.environment.Env
 import misk.eventrouter.RealEventRouterModule
 import misk.metrics.backends.prometheus.PrometheusMetricsServiceModule
 import misk.web.MiskWebModule
 
 fun main(args: Array<String>) {
   val deployment = wisp.deployment.Deployment(name = "exemplarchat", isLocalDevelopment = true)
-  val env = Env("development")
 
-  val config = MiskConfig.load<ChatConfig>("chat", env)
+  val config = MiskConfig.load<ChatConfig>("chat", deployment)
 
   MiskApplication(
     MiskRealServiceModule(),
@@ -22,7 +20,7 @@ fun main(args: Array<String>) {
     RealEventRouterModule(deployment),
     ChatModule(),
     ConfigModule.create("chat", config),
-    DeploymentModule(deployment, env),
+    DeploymentModule(deployment),
     PrometheusMetricsServiceModule(config.prometheus)
   ).run(args)
 }

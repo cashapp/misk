@@ -19,7 +19,6 @@ import misk.MiskTestingServiceModule
 import misk.config.MiskConfig
 import misk.config.Secret
 import misk.environment.DeploymentModule
-import misk.environment.Env
 import misk.logging.LogCollectorModule
 import misk.logging.LogCollectorService
 import misk.testing.MiskTest
@@ -35,7 +34,7 @@ import wisp.logging.LogCollector
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.security.GeneralSecurityException
-import java.util.*
+import java.util.Base64
 
 @MiskTest(startService = true)
 class CryptoModuleTest {
@@ -125,8 +124,7 @@ class CryptoModuleTest {
       }
     )
     val config = CryptoConfig(listOf(key), "test_master_key")
-    val env = Env(TESTING.name)
-    val deploymentModule = DeploymentModule(TESTING, env)
+    val deploymentModule = DeploymentModule(TESTING)
 
     val injector = Guice.createInjector(CryptoTestModule(config), deploymentModule)
     val externalKeyManager = LocalConfigKeyResolver(config.keys!!, config.kms_uri)
@@ -383,16 +381,14 @@ class CryptoModuleTest {
       Key(it.first, keyType, generateEncryptedKey(it.second), "aws-kms://uri")
     }
     val config = CryptoConfig(keys, "test_master_key", external.orEmpty())
-    val env = Env(TESTING.name)
-    val deploymentModule = DeploymentModule(TESTING, env)
+    val deploymentModule = DeploymentModule(TESTING)
 
     return Guice.createInjector(deploymentModule, CryptoTestModule(config))
   }
 
   private fun getInjectorWithKeys(keys: List<Key>): Injector {
     val config = CryptoConfig(keys, "test_master_key", mapOf())
-    val env = Env(TESTING.name)
-    val deploymentModule = DeploymentModule(TESTING, env)
+    val deploymentModule = DeploymentModule(TESTING)
     return Guice.createInjector(
       deploymentModule, CryptoTestModule(config),
       LogCollectorModule()

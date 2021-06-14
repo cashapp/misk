@@ -6,7 +6,6 @@ import misk.MiskTestingServiceModule
 import misk.config.MiskConfig
 import misk.database.StartDatabaseService
 import misk.environment.DeploymentModule
-import misk.environment.Env
 import misk.resources.ResourceLoader
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
@@ -34,10 +33,9 @@ internal class CockroachdbSchemaMigratorTest : SchemaMigratorTest(DataSourceType
 internal class TidbSchemaMigratorTest : SchemaMigratorTest(DataSourceType.TIDB)
 
 internal abstract class SchemaMigratorTest(val type: DataSourceType) {
-  val env = Env(TESTING.name)
-  val deploymentModule = DeploymentModule(TESTING, env)
+  val deploymentModule = DeploymentModule(TESTING)
 
-  val appConfig = MiskConfig.load<RootConfig>("test_schemamigrator_app", env)
+  val appConfig = MiskConfig.load<RootConfig>("test_schemamigrator_app", TESTING)
   val config = selectDataSourceConfig(appConfig)
 
   @MiskTestModule

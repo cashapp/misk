@@ -4,7 +4,6 @@ import com.squareup.moshi.Moshi
 import misk.MiskTestingServiceModule
 import misk.config.MiskConfig
 import misk.environment.DeploymentModule
-import misk.environment.Env
 import misk.hibernate.HibernateModule
 import misk.hibernate.HibernateTestingModule
 import misk.hibernate.Session
@@ -205,9 +204,8 @@ internal class FakeTransactionalJobQueueTest {
 private class TransactionalJobQueueTestModule : KAbstractModule() {
   override fun configure() {
     install(MiskTestingServiceModule())
-    val env = Env(TESTING.name)
-    install(DeploymentModule(TESTING, env))
-    val config = MiskConfig.load<RootConfig>("starcraft", env)
+    install(DeploymentModule(TESTING))
+    val config = MiskConfig.load<RootConfig>("starcraft", TESTING)
     install(HibernateTestingModule(StarCraftDb::class))
     install(HibernateModule(StarCraftDb::class, config.data_source))
     install(LogCollectorModule())

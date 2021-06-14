@@ -3,7 +3,6 @@ package misk.hibernate
 import misk.MiskTestingServiceModule
 import misk.config.MiskConfig
 import misk.environment.DeploymentModule
-import misk.environment.Env
 import misk.inject.KAbstractModule
 import misk.jdbc.DataSourceConfig
 import misk.testing.MiskTest
@@ -45,10 +44,9 @@ class PrimitiveColumnsTest {
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(MiskTestingServiceModule())
-      val env = Env(TESTING.name)
-      install(DeploymentModule(TESTING, env))
+      install(DeploymentModule(TESTING))
 
-      val config = MiskConfig.load<RootConfig>("primitivecolumns", env)
+      val config = MiskConfig.load<RootConfig>("primitivecolumns", TESTING)
       install(HibernateTestingModule(PrimitivesDb::class, config.data_source))
       install(HibernateModule(PrimitivesDb::class, config.data_source))
       install(object : HibernateEntityModule(PrimitivesDb::class) {

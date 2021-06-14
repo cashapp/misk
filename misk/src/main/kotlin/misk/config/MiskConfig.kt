@@ -16,29 +16,29 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.kotlin.MissingKotlinParameterException
 import com.google.common.base.Joiner
-import misk.environment.Env
 import misk.resources.ResourceLoader
 import org.apache.commons.lang3.StringUtils
+import wisp.deployment.Deployment
 import java.io.File
 import java.io.FilenameFilter
-import java.util.*
+import java.util.Locale
 
 object MiskConfig {
   @JvmStatic
   inline fun <reified T : wisp.config.Config> load(
     appName: String,
-    environment: Env,
+    deployment: Deployment,
     overrideFiles: List<File> = listOf(),
     resourceLoader: ResourceLoader = ResourceLoader.SYSTEM
   ): T {
-    return load(T::class.java, appName, environment, overrideFiles, resourceLoader)
+    return load(T::class.java, appName, deployment, overrideFiles, resourceLoader)
   }
 
   @JvmStatic
   fun <T : wisp.config.Config> load(
     configClass: Class<out wisp.config.Config>,
     appName: String,
-    environment: Env,
+    deployment: Deployment,
     overrideFiles: List<File> = listOf(),
     resourceLoader: ResourceLoader = ResourceLoader.SYSTEM
   ): T {
@@ -48,14 +48,15 @@ object MiskConfig {
 
     val mapper = newObjectMapper(resourceLoader)
 
-    val configYamls = loadConfigYamlMap(appName, environment, overrideFiles, resourceLoader)
+    val configYamls = loadConfigYamlMap(appName, deployment, overrideFiles, resourceLoader)
     check(configYamls.values.any { it != null }) {
       "could not find configuration files - checked ${configYamls.keys}"
     }
 
     val jsonNode = flattenYamlMap(configYamls)
+    val configEnvironmentName = deployment.mapToEnvironmentName()
 
-    val configFile = "$appName-${environment.name.toLowerCase(Locale.US)}.yaml"
+    val configFile = "$appName-${configEnvironmentName.toLowerCase(Locale.US)}.yaml"
     try {
       @Suppress("UNCHECKED_CAST")
       return mapper.readValue(jsonNode.toString(), configClass) as T
@@ -69,15 +70,15 @@ object MiskConfig {
       val path = Joiner.on('.').join(e.path.map { it.fieldName })
       throw IllegalStateException(
         "error in $configFile: '$path' not found in '${configClass.simpleName}' ${
-        suggestSpelling(
-          e
-        )
+          suggestSpelling(
+            e
+          )
         }",
         e
       )
     } catch (e: Exception) {
       throw IllegalStateException(
-        "failed to load configuration for $appName $environment: ${e.message}", e
+        "failed to load configuration for $appName $configEnvironmentName: ${e.message}", e
       )
     }
   }
@@ -143,13 +144,13 @@ object MiskConfig {
    */
   fun loadConfigYamlMap(
     appName: String,
-    environment: Env,
+    deployment: Deployment,
     overrideFiles: List<File>,
     resourceLoader: ResourceLoader = ResourceLoader.SYSTEM
   ): Map<String, String?> {
 
     // Load from jar files first, starting with the common config and then env specific config
-    val embeddedConfigUrls = embeddedConfigFileNames(appName, environment)
+    val embeddedConfigUrls = embeddedConfigFileNames(appName, deployment)
       .map { "classpath:/$it" }
 
     // Load from override files second, in the order specified, only if they exist
@@ -163,8 +164,11 @@ object MiskConfig {
   }
 
   /** @return the list of config file names in the order they should be read */
-  private fun embeddedConfigFileNames(appName: String, environment: Env) =
-    listOf("common", environment.name.toLowerCase(Locale.US)).map { "$appName-$it.yaml" }
+  private fun embeddedConfigFileNames(appName: String, deployment: Deployment) =
+    listOf(
+      "common",
+      deployment.mapToEnvironmentName().toLowerCase(Locale.US)
+    ).map { "$appName-$it.yaml" }
 
   class SecretJacksonModule(val resourceLoader: ResourceLoader, val mapper: ObjectMapper) :
     SimpleModule() {

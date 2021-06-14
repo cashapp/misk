@@ -4,7 +4,6 @@ import com.google.inject.util.Providers
 import misk.MiskTestingServiceModule
 import misk.config.MiskConfig
 import misk.environment.DeploymentModule
-import misk.environment.Env
 import misk.inject.KAbstractModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
@@ -102,11 +101,10 @@ internal class TruncateTablesServiceTest {
 
   class TestModule : KAbstractModule() {
     override fun configure() {
-      val env = Env(TESTING.name)
-      install(DeploymentModule(TESTING, env))
+      install(DeploymentModule(TESTING))
       install(MiskTestingServiceModule())
 
-      val config = MiskConfig.load<TestConfig>("test_truncatetables_app", env)
+      val config = MiskConfig.load<TestConfig>("test_truncatetables_app", TESTING)
       install(JdbcModule(TestDatasource::class, config.data_source))
     }
   }

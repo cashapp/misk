@@ -3,7 +3,6 @@ package misk.web.metadata.config
 import com.google.inject.Inject
 import misk.config.AppName
 import misk.config.MiskConfig
-import misk.environment.Env
 import misk.resources.ResourceLoader
 import misk.web.Get
 import misk.web.RequestContentType
@@ -58,7 +57,7 @@ class ConfigMetadataAction @Inject constructor(
       deployment: Deployment,
       config: Config
     ): Map<String, String?> {
-      val rawYamlFiles = MiskConfig.loadConfigYamlMap(appName, Env(deployment.name), listOf())
+      val rawYamlFiles = MiskConfig.loadConfigYamlMap(appName, deployment, listOf())
       val yamlFiles = linkedMapOf<String, String?>(
         "Effective Config" to MiskConfig.toYaml(
           config, ResourceLoader.SYSTEM

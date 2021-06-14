@@ -6,7 +6,6 @@ import misk.ServiceModule
 import misk.concurrent.ExecutorServiceFactory
 import misk.config.MiskConfig
 import misk.environment.DeploymentModule
-import misk.environment.Env
 import misk.inject.KAbstractModule
 import misk.inject.asSingleton
 import misk.inject.keyOf
@@ -42,15 +41,14 @@ import kotlin.test.assertTrue
 internal class SchemaValidatorTest {
   @MiskTestModule
   val module = TestModule()
-  val env = Env(TESTING.name)
-  val config = MiskConfig.load<RootConfig>("schemavalidation", env)
+  val config = MiskConfig.load<RootConfig>("schemavalidation", TESTING)
 
   @Inject @ValidationDb lateinit var transacter: Transacter
   @Inject @ValidationDb lateinit var sessionFactoryService: Provider<SessionFactoryService>
 
   inner class TestModule : KAbstractModule() {
     override fun configure() {
-      install(DeploymentModule(TESTING, env))
+      install(DeploymentModule(TESTING))
       install(MiskTestingServiceModule())
 
       val qualifier = ValidationDb::class

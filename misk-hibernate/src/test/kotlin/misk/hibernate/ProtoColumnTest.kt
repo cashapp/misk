@@ -3,7 +3,6 @@ package misk.hibernate
 import misk.MiskTestingServiceModule
 import misk.config.MiskConfig
 import misk.environment.DeploymentModule
-import misk.environment.Env
 import misk.hibernate.SuperHero.SuperPower
 import misk.inject.KAbstractModule
 import misk.jdbc.DataSourceConfig
@@ -105,10 +104,9 @@ class ProtoColumnTest {
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(MiskTestingServiceModule())
-      val env = Env(TESTING.name)
-      install(DeploymentModule(TESTING, env))
+      install(DeploymentModule(TESTING))
 
-      val config = MiskConfig.load<RootConfig>("protocolumn", env)
+      val config = MiskConfig.load<RootConfig>("protocolumn", TESTING)
       install(HibernateTestingModule(SuperHeroMoviesDb::class, config.data_source))
       install(HibernateModule(SuperHeroMoviesDb::class, config.data_source))
       install(object : HibernateEntityModule(SuperHeroMoviesDb::class) {

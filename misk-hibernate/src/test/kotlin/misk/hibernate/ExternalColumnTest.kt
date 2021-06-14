@@ -3,7 +3,6 @@ package misk.hibernate
 import misk.MiskTestingServiceModule
 import misk.config.MiskConfig
 import misk.environment.DeploymentModule
-import misk.environment.Env
 import misk.inject.KAbstractModule
 import misk.jdbc.DataSourceConfig
 import misk.testing.MiskTest
@@ -56,10 +55,9 @@ class ExternalColumnTest {
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(MiskTestingServiceModule())
-      val env = Env(TESTING.name)
-      install(DeploymentModule(TESTING, env))
+      install(DeploymentModule(TESTING))
 
-      val config = MiskConfig.load<RootConfig>("externalcolumn", env)
+      val config = MiskConfig.load<RootConfig>("externalcolumn", TESTING)
       install(HibernateTestingModule(ExternalColumnDb::class, config.data_source))
       install(HibernateModule(ExternalColumnDb::class, config.data_source))
       install(object : HibernateEntityModule(ExternalColumnDb::class) {

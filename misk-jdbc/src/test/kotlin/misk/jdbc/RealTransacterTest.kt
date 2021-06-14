@@ -4,7 +4,6 @@ import com.google.inject.util.Modules
 import misk.MiskTestingServiceModule
 import misk.config.MiskConfig
 import misk.environment.DeploymentModule
-import misk.environment.Env
 import misk.inject.KAbstractModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
@@ -308,9 +307,8 @@ abstract class RealTransacterTest {
           MockTracingBackendModule()
         )
       )
-      val env = Env(TESTING.name)
-      install(DeploymentModule(TESTING, env))
-      val config = MiskConfig.load<RootConfig>("test_transacter", env)
+      install(DeploymentModule(TESTING))
+      val config = MiskConfig.load<RootConfig>("test_transacter", TESTING)
       val dataSourceConfig = selectDataSourceConfig(config)
       install(JdbcTestingModule(Movies::class))
       install(

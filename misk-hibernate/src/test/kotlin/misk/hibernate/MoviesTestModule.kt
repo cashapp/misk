@@ -4,7 +4,6 @@ import com.google.inject.util.Modules
 import misk.MiskTestingServiceModule
 import misk.config.MiskConfig
 import misk.environment.DeploymentModule
-import misk.environment.Env
 import misk.inject.KAbstractModule
 import misk.jdbc.DataSourceClusterConfig
 import misk.jdbc.DataSourceConfig
@@ -33,10 +32,9 @@ class MoviesTestModule(
         MockTracingBackendModule()
       )
     )
-    val env = Env(TESTING.name)
-    install(DeploymentModule(TESTING, env))
+    install(DeploymentModule(TESTING))
 
-    val config = MiskConfig.load<MoviesConfig>("moviestestmodule", env)
+    val config = MiskConfig.load<MoviesConfig>("moviestestmodule", TESTING)
     val dataSourceConfig = selectDataSourceConfig(config)
     install(
       HibernateTestingModule(

@@ -3,7 +3,6 @@ package misk.hibernate
 import misk.MiskTestingServiceModule
 import misk.config.MiskConfig
 import misk.environment.DeploymentModule
-import misk.environment.Env
 import misk.inject.KAbstractModule
 import misk.jdbc.DataSourceConfig
 import misk.testing.MiskTest
@@ -14,7 +13,7 @@ import org.junit.jupiter.api.Test
 import wisp.config.Config
 import wisp.deployment.TESTING
 import java.io.Serializable
-import java.util.*
+import java.util.Objects
 import javax.inject.Inject
 import javax.inject.Qualifier
 import javax.persistence.AttributeConverter
@@ -463,8 +462,7 @@ class TransformedColumnTest {
   val module = object : KAbstractModule() {
     override fun configure() {
       install(MiskTestingServiceModule())
-      val env = Env(TESTING.name)
-      install(DeploymentModule(TESTING, env))
+      install(DeploymentModule(TESTING))
 
       bind<SwappableTransformer>().toInstance(object : SwappableTransformer {
         override fun assemble(
@@ -480,7 +478,7 @@ class TransformedColumnTest {
       })
 
       val conf =
-        MiskConfig.load<TransformedColumnTestConfig>("transformedcolumn", env)
+        MiskConfig.load<TransformedColumnTestConfig>("transformedcolumn", TESTING)
       install(HibernateTestingModule(TransformedColumnTestDb::class, conf.data_source))
       install(HibernateModule(TransformedColumnTestDb::class, conf.data_source))
       install(object : HibernateEntityModule(TransformedColumnTestDb::class) {

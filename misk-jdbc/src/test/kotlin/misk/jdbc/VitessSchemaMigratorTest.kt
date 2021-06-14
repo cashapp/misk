@@ -6,7 +6,6 @@ import misk.config.MiskConfig
 import misk.database.DockerVitessCluster
 import misk.database.StartDatabaseService
 import misk.environment.DeploymentModule
-import misk.environment.Env
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.vitess.Keyspace
@@ -23,10 +22,9 @@ import javax.inject.Qualifier
 
 @MiskTest(startService = true)
 internal class VitessSchemaMigratorTest {
-  val env = Env(TESTING.name)
-  val deploymentModule = DeploymentModule(TESTING, env)
+  val deploymentModule = DeploymentModule(TESTING)
   val config =
-    MiskConfig.load<MoviesConfig>("test_schemamigrator_vitess_app", env)
+    MiskConfig.load<MoviesConfig>("test_schemamigrator_vitess_app", TESTING)
 
   @MiskTestModule
   val module = Modules.combine(

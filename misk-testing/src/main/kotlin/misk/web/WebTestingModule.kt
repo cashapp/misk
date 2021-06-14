@@ -2,7 +2,6 @@ package misk.web
 
 import misk.MiskTestingServiceModule
 import misk.environment.DeploymentModule
-import misk.environment.Env
 import misk.inject.KAbstractModule
 import misk.security.ssl.CertStoreConfig
 import misk.security.ssl.SslLoader
@@ -38,7 +37,7 @@ class WebServerTestingModule(
   private val webConfig: WebConfig = TESTING_WEB_CONFIG
 ) : KAbstractModule() {
   override fun configure() {
-    install(DeploymentModule(TESTING, Env(TESTING.name)))
+    install(DeploymentModule(TESTING))
     install(MiskWebModule(webConfig))
   }
 

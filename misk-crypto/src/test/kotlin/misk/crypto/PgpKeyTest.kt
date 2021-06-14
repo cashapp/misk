@@ -10,7 +10,6 @@ import misk.MiskTestingServiceModule
 import misk.config.MiskConfig.RealSecret
 import misk.crypto.pgp.PgpKeyJsonFile
 import misk.environment.DeploymentModule
-import misk.environment.Env
 import misk.logging.LogCollectorModule
 import misk.moshi.adapter
 import misk.resources.ResourceLoader
@@ -192,8 +191,7 @@ class PgpKeyTest {
     )
 
     val config = CryptoConfig(listOf(encryptKey, decryptKey), "test_master_key")
-    val env = Env(TESTING.name)
-    val deploymentModule = DeploymentModule(TESTING, env)
+    val deploymentModule = DeploymentModule(TESTING)
     return Guice.createInjector(
       CryptoTestModule(config),
       MiskTestingServiceModule(), LogCollectorModule(),
