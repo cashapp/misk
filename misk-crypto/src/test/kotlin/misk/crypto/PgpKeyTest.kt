@@ -19,6 +19,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.bouncycastle.openpgp.PGPException
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import wisp.deployment.TESTING
 import java.util.Base64
 import javax.inject.Inject
 
@@ -190,10 +191,11 @@ class PgpKeyTest {
     )
 
     val config = CryptoConfig(listOf(encryptKey, decryptKey), "test_master_key")
+    val deploymentModule = DeploymentModule(TESTING)
     return Guice.createInjector(
       CryptoTestModule(config),
       MiskTestingServiceModule(), LogCollectorModule(),
-      DeploymentModule.forTesting()
+      deploymentModule
     )
   }
 

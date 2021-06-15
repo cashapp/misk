@@ -4,8 +4,7 @@ import misk.MiskTestingServiceModule
 import misk.config.MiskConfig
 import misk.crypto.CryptoConfig
 import misk.crypto.CryptoTestModule
-import misk.environment.Environment
-import misk.environment.EnvironmentModule
+import misk.environment.DeploymentModule
 import misk.inject.KAbstractModule
 import misk.jdbc.DataSourceConfig
 import misk.testing.MiskTest
@@ -14,7 +13,9 @@ import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
 import wisp.config.Config
-import java.util.*
+import wisp.deployment.TESTING
+import java.util.Arrays
+import java.util.Objects
 import javax.inject.Inject
 import javax.inject.Qualifier
 import javax.persistence.Column
@@ -346,9 +347,9 @@ class SecretColumnTest {
   class TestModule : KAbstractModule() {
     override fun configure() {
       install(MiskTestingServiceModule())
-      install(EnvironmentModule(Environment.TESTING))
+      install(DeploymentModule(TESTING))
 
-      val config = MiskConfig.load<AppConfig>("encryptedcolumn", Environment.TESTING)
+      val config = MiskConfig.load<AppConfig>("encryptedcolumn", TESTING)
       install(CryptoTestModule(config.crypto))
       install(HibernateTestingModule(JerryGarciaDb::class, config.data_source))
       install(HibernateModule(JerryGarciaDb::class, config.data_source))

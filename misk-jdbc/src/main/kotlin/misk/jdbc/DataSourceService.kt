@@ -6,7 +6,7 @@ import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import com.zaxxer.hikari.metrics.prometheus.PrometheusMetricsTrackerFactory
 import io.prometheus.client.CollectorRegistry
-import misk.environment.Environment
+import wisp.deployment.Deployment
 import wisp.logging.getLogger
 import javax.inject.Provider
 import javax.inject.Singleton
@@ -23,7 +23,7 @@ import kotlin.reflect.KClass
 class DataSourceService(
   private val qualifier: KClass<out Annotation>,
   private val baseConfig: DataSourceConfig,
-  private val environment: Environment,
+  private val deployment: Deployment,
   private val dataSourceDecorators: Set<DataSourceDecorator>,
   private val databasePool: DatabasePool,
   private val collectorRegistry: CollectorRegistry? = null
@@ -44,9 +44,9 @@ class DataSourceService(
     try {
       createDataSource(baseConfig)
     } catch (e: Exception) {
-      logger.error(e) {"Fail to start the data source, trying to do it with replica"}
+      logger.error(e) { "Fail to start the data source, trying to do it with replica" }
       if (!baseConfig.canRecoverOnReplica()) {
-         throw e
+        throw e
       }
       createDataSource(baseConfig.asReplica())
 
@@ -60,7 +60,7 @@ class DataSourceService(
 
     val hikariConfig = HikariConfig()
     hikariConfig.driverClassName = config.type.driverClassName
-    hikariConfig.jdbcUrl = config.buildJdbcUrl(environment)
+    hikariConfig.jdbcUrl = config.buildJdbcUrl(deployment)
     if (config.username != null) {
       hikariConfig.username = config.username
     }

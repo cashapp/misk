@@ -15,8 +15,8 @@ import misk.ServiceModule
 import misk.cloud.gcp.datastore.DatastoreConfig
 import misk.cloud.gcp.storage.LocalStorageRpc
 import misk.cloud.gcp.storage.StorageConfig
-import misk.environment.Environment
 import misk.inject.KAbstractModule
+import wisp.deployment.Deployment
 import wisp.logging.getLogger
 import java.nio.file.Paths
 import javax.inject.Inject
@@ -34,8 +34,8 @@ class GoogleCloudModule(
 
   @Provides
   @Singleton
-  fun provideServiceCredentials(env: Environment): Credentials =
-    if (env == Environment.DEVELOPMENT) NoCredentials.getInstance()
+  fun provideServiceCredentials(deployment: Deployment): Credentials =
+    if (deployment.isLocalDevelopment) NoCredentials.getInstance()
     else ServiceAccountCredentials.getApplicationDefault()
 
   @Provides

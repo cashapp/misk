@@ -2,15 +2,15 @@ package misk.jdbc
 
 import com.google.common.util.concurrent.AbstractIdleService
 import com.google.common.util.concurrent.Service
-import misk.environment.Environment
 import misk.healthchecks.HealthCheck
 import misk.healthchecks.HealthStatus
+import wisp.deployment.Deployment
 import javax.inject.Provider
 import kotlin.reflect.KClass
 
 class SchemaMigratorService internal constructor(
   private val qualifier: KClass<out Annotation>,
-  private val environment: Environment,
+  private val deployment: Deployment,
   private val schemaMigratorProvider: Provider<SchemaMigrator>, // Lazy!
   private val connectorProvider: Provider<DataSourceConnector>
 ) : AbstractIdleService(), HealthCheck, DatabaseReadyService {
@@ -19,7 +19,7 @@ class SchemaMigratorService internal constructor(
   override fun startUp() {
     val schemaMigrator = schemaMigratorProvider.get()
     val connector = connectorProvider.get()
-    if (environment == Environment.TESTING || environment == Environment.DEVELOPMENT) {
+    if (deployment.isTest || deployment.isLocalDevelopment) {
       val type = connector.config().type
       if (type != DataSourceType.VITESS_MYSQL) {
         val appliedMigrations = schemaMigrator.initialize()
@@ -43,6 +43,7 @@ class SchemaMigratorService internal constructor(
     }
 
     return HealthStatus.healthy(
-        "SchemaMigratorService: ${qualifier.simpleName} is migrated: $migrationState")
+      "SchemaMigratorService: ${qualifier.simpleName} is migrated: $migrationState"
+    )
   }
 }

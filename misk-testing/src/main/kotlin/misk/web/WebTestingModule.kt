@@ -1,11 +1,11 @@
 package misk.web
 
 import misk.MiskTestingServiceModule
-import misk.environment.Environment
-import misk.environment.EnvironmentModule
+import misk.environment.DeploymentModule
 import misk.inject.KAbstractModule
 import misk.security.ssl.CertStoreConfig
 import misk.security.ssl.SslLoader
+import wisp.deployment.TESTING
 
 /**
  * A module that starts an embedded Jetty web server configured for testing. The server supports
@@ -23,8 +23,9 @@ class WebTestingModule(
     install(WebServerTestingModule(webConfig))
     install(MiskTestingServiceModule())
   }
+
   companion object {
-    val TESTING_WEB_CONFIG =  WebServerTestingModule.TESTING_WEB_CONFIG
+    val TESTING_WEB_CONFIG = WebServerTestingModule.TESTING_WEB_CONFIG
   }
 }
 
@@ -36,7 +37,7 @@ class WebServerTestingModule(
   private val webConfig: WebConfig = TESTING_WEB_CONFIG
 ) : KAbstractModule() {
   override fun configure() {
-    install(EnvironmentModule(Environment.TESTING))
+    install(DeploymentModule(TESTING))
     install(MiskWebModule(webConfig))
   }
 

@@ -1,6 +1,5 @@
 package misk.web.dashboard
 
-import misk.environment.Environment
 import misk.inject.KAbstractModule
 import misk.security.authz.AccessAnnotationEntry
 import misk.web.NetworkInterceptor
@@ -25,9 +24,6 @@ import javax.inject.Qualifier
  *   grouping according to the [DashboardTab].category field and sorting by [DashboardTab].name
  */
 class AdminDashboardModule(private val isDevelopment: Boolean) : KAbstractModule() {
-
-  @Deprecated("Environment is deprecated")
-  constructor(env: Environment) : this(env == Environment.TESTING || env == Environment.DEVELOPMENT)
 
   override fun configure() {
     // Install base dashboard support

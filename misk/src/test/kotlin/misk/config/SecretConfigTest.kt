@@ -1,7 +1,6 @@
 package misk.config
 
 import com.google.inject.util.Modules
-import misk.environment.Environment
 import misk.resources.FakeFilesModule
 import misk.resources.ResourceLoader
 import misk.resources.TestingResourceLoaderModule
@@ -11,11 +10,11 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import wisp.deployment.TESTING
 import javax.inject.Inject
 
 @MiskTest
 class SecretConfigTest {
-  private val environment = Environment.TESTING
 
   @MiskTestModule
   private val module = Modules.combine(
@@ -39,7 +38,7 @@ class SecretConfigTest {
   @BeforeEach
   fun setConfig() {
     secretConfig =
-      MiskConfig.load("secret_config_app", Environment.TESTING, listOf(), resourceLoader)
+      MiskConfig.load("secret_config_app", TESTING, listOf(), resourceLoader)
   }
 
   @Test
@@ -97,12 +96,12 @@ class SecretConfigTest {
   fun throwsIfServiceConfigIsSecret() {
     val expectedError = "Top level service config cannot be a Secret<*>"
     val selfSecretMessage = assertThrows<IllegalStateException> {
-      MiskConfig.load<SelfSecretConfigRoot>("nested_secrets_test", environment)
+      MiskConfig.load<SelfSecretConfigRoot>("nested_secrets_test", TESTING)
     }
     assertThat(selfSecretMessage).hasMessageContaining(expectedError)
 
     val secretMessage = assertThrows<IllegalStateException> {
-      MiskConfig.load<SecretConfigRoot>("nested_secrets_test", environment)
+      MiskConfig.load<SecretConfigRoot>("nested_secrets_test", TESTING)
     }
     assertThat(secretMessage).hasMessageContaining(expectedError)
   }
@@ -112,7 +111,7 @@ class SecretConfigTest {
     val unknownExtensionError = assertThrows<IllegalStateException> {
       MiskConfig.load<SecretInformationWrapperConfig>(
         "secret_config_unknown_extension",
-        environment
+        TESTING
       )
     }
     assertThat(unknownExtensionError).hasMessageContaining(
@@ -126,7 +125,7 @@ class SecretConfigTest {
     val stringTxtMismatchError = assertThrows<IllegalStateException> {
       MiskConfig.load<SecretInformationWrapperConfig>(
         "secret_config_badtxt_extension",
-        environment
+        TESTING
       )
     }
     assertThat(stringTxtMismatchError).hasMessageContaining(
@@ -139,7 +138,7 @@ class SecretConfigTest {
     val stringTxtMismatchError = assertThrows<IllegalStateException> {
       MiskConfig.load<SecretInformationWrapperConfig>(
         "secret_config_missing_extension",
-        environment
+        TESTING
       )
     }
     assertThat(stringTxtMismatchError).hasMessageContaining(
@@ -153,7 +152,7 @@ class SecretConfigTest {
     val stringTxtMismatchError = assertThrows<IllegalStateException> {
       MiskConfig.load<SecretInformationWrapperConfig>(
         "secret_config_missing_file",
-        environment
+        TESTING
       )
     }
     assertThat(stringTxtMismatchError).hasMessageContaining(

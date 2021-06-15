@@ -16,7 +16,6 @@ import com.zaxxer.hikari.util.DriverDataSource
 import misk.backoff.DontRetryException
 import misk.backoff.ExponentialBackoff
 import misk.backoff.retry
-import misk.environment.Environment
 import misk.jdbc.DataSourceConfig
 import misk.jdbc.DataSourceType
 import misk.jdbc.uniqueInt
@@ -25,6 +24,7 @@ import misk.resources.ResourceLoader
 import mu.KotlinLogging
 import okio.buffer
 import okio.source
+import wisp.deployment.TESTING
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
@@ -47,54 +47,55 @@ class VitessCluster(
   resourceLoader: ResourceLoader,
   val config: DataSourceConfig,
   val moshi: Moshi = Moshi.Builder()
-      .add(KotlinJsonAdapterFactory()) // Added last for lowest precedence.
-      .build()
+    .add(KotlinJsonAdapterFactory()) // Added last for lowest precedence.
+    .build()
 ) {
   val schemaDir: Path
   val configDir: Path
 
   init {
     val root = config.vitess_schema_resource_root
-        ?: throw IllegalStateException("vitess_schema_resource_root must be specified")
+      ?: throw IllegalStateException("vitess_schema_resource_root must be specified")
     val hasVschema = resourceLoader.walk(config.vitess_schema_resource_root)
-        .any { it.endsWith("vschema.json") }
+      .any { it.endsWith("vschema.json") }
     check(hasVschema) {
       "schema root not valid, does not contain any vschema.json: ${config.vitess_schema_resource_root}"
     }
     // We can't use Files::createTempDirectory because it creates a directory under the path
     // /var/folders that is not possible to mount in Docker
     schemaDir = Paths.get(
-        "/tmp/vitess_schema_${System.currentTimeMillis()}")
+      "/tmp/vitess_schema_${System.currentTimeMillis()}"
+    )
     Files.createDirectories(schemaDir)
     resourceLoader.copyTo(root, schemaDir)
     Runtime.getRuntime().addShutdownHook(
-        thread(start = false) {
-          schemaDir.toFile().deleteRecursively()
-        })
+      thread(start = false) {
+        schemaDir.toFile().deleteRecursively()
+      })
 
     // Copy out all the resources from the current package
     // We use the my.cnf configuration file to configure MySQL (e.g. the default time zone)
     configDir =
-        Paths.get("/tmp/vitess_conf_${System.currentTimeMillis()}")
+      Paths.get("/tmp/vitess_conf_${System.currentTimeMillis()}")
     Files.createDirectories(configDir)
     resourceLoader.copyTo("classpath:/misk/vitess", configDir)
     Runtime.getRuntime().addShutdownHook(
-        thread(start = false) {
-          configDir.toFile().deleteRecursively()
-        })
+      thread(start = false) {
+        configDir.toFile().deleteRecursively()
+      })
   }
 
   val keyspaceAdapter = moshi.adapter<Keyspace>()
 
   fun keyspaces(): Map<String, Keyspace> {
     val keyspaceDirs = Files.list(schemaDir)
-        .toList().filter { Files.isDirectory(it) }
+      .toList().filter { Files.isDirectory(it) }
     return keyspaceDirs.associateBy(
-        { it.fileName.toString() },
-        {
-          val source = it.resolve("vschema.json").source()
-          source.use { keyspaceAdapter.fromJson(source.buffer())!! }
-        })
+      { it.fileName.toString() },
+      {
+        val source = it.resolve("vschema.json").source()
+        source.use { keyspaceAdapter.fromJson(source.buffer())!! }
+      })
   }
 
   /**
@@ -108,27 +109,28 @@ class VitessCluster(
   fun openMysqlConnection() = mysqlDataSource().connection
 
   private fun dataSource(): DriverDataSource {
-    val jdbcUrl = config.withDefaults().buildJdbcUrl(
-        Environment.TESTING)
+    val jdbcUrl = config.withDefaults().buildJdbcUrl(TESTING)
     return DriverDataSource(
-        jdbcUrl, config.type.driverClassName, Properties(),
-        config.username, config.password)
+      jdbcUrl, config.type.driverClassName, Properties(),
+      config.username, config.password
+    )
   }
 
   private fun mysqlConfig() =
-      DataSourceConfig(
-          type = DataSourceType.MYSQL,
-          host = "127.0.0.1",
-          username = "vt_dba",
-          port = mysqlPort
-      )
+    DataSourceConfig(
+      type = DataSourceType.MYSQL,
+      host = "127.0.0.1",
+      username = "vt_dba",
+      port = mysqlPort
+    )
 
   private fun mysqlDataSource(): DriverDataSource {
     val config = mysqlConfig()
-    val jdbcUrl = config.buildJdbcUrl(Environment.TESTING)
+    val jdbcUrl = config.buildJdbcUrl(TESTING)
     return DriverDataSource(
-        jdbcUrl, config.type.driverClassName, Properties(),
-        config.username, config.password)
+      jdbcUrl, config.type.driverClassName, Properties(),
+      config.username, config.password
+    )
   }
 
   val httpPort = 27000
@@ -153,10 +155,11 @@ class DockerVitessCluster(
 
   init {
     cluster = VitessCluster(
-        name = name,
-        resourceLoader = resourceLoader,
-        config = config,
-        moshi = moshi)
+      name = name,
+      resourceLoader = resourceLoader,
+      config = config,
+      moshi = moshi
+    )
   }
 
   override fun start() {
@@ -195,7 +198,8 @@ class DockerVitessCluster(
         }
 
         if (runCommand(
-                "docker images --digests | grep -q $VITESS_SHA || docker pull $VITESS_IMAGE") != 0) {
+            "docker images --digests | grep -q $VITESS_SHA || docker pull $VITESS_IMAGE"
+          ) != 0) {
           logger.warn("Failed to pull Vitess docker image. Proceeding regardless.")
         }
         imagePulled.set(true)
@@ -223,18 +227,19 @@ class DockerVitessCluster(
       config: DataSourceConfig
     ) {
       val docker: DockerClient = DockerClientBuilder.getInstance()
-          .withDockerCmdExecFactory(NettyDockerCmdExecFactory())
-          .build()
+        .withDockerCmdExecFactory(NettyDockerCmdExecFactory())
+        .build()
       val moshi = Moshi.Builder()
-          .add(KotlinJsonAdapterFactory()) // Added last for lowest precedence.
-          .build()
+        .add(KotlinJsonAdapterFactory()) // Added last for lowest precedence.
+        .build()
       val dockerCluster =
-          DockerVitessCluster(
-              name = qualifier.simpleName!!,
-              config = config,
-              resourceLoader = ResourceLoader.SYSTEM,
-              moshi = moshi,
-              docker = docker)
+        DockerVitessCluster(
+          name = qualifier.simpleName!!,
+          config = config,
+          resourceLoader = ResourceLoader.SYSTEM,
+          moshi = moshi,
+          docker = docker
+        )
       Runtime.getRuntime().addShutdownHook(Thread {
         dockerCluster.stop()
       })
@@ -257,7 +262,8 @@ class DockerVitessCluster(
     if (cluster.config.type == DataSourceType.VITESS_MYSQL) {
       if (cluster.config.port != null && cluster.config.port != cluster.vtgateMysqlPort) {
         throw RuntimeException(
-            "Config port ${cluster.config.port} has to match Vitess Docker container: ${cluster.grpcPort}")
+          "Config port ${cluster.config.port} has to match Vitess Docker container: ${cluster.grpcPort}"
+        )
       }
     }
     val grpcPort = ExposedPort.tcp(cluster.grpcPort)
@@ -270,27 +276,27 @@ class DockerVitessCluster(
     ports.bind(vtgateMysqlPort, Ports.Binding.bindPort(vtgateMysqlPort.port))
 
     val cmd = arrayOf(
-        "/vt/bin/vttestserver",
-        "-alsologtostderr",
-        "-port=" + httpPort.port,
-        "-mysql_bind_host=0.0.0.0",
-        "-data_dir=/vt/vtdataroot",
-        "-schema_dir=schema",
-        // Increase the transaction timeout so you can have a breakpoint
-        // inside a transaction without it timing out
-        "-queryserver-config-transaction-timeout=${Duration.ofHours(24).toMillis()}",
-        "-extra_my_cnf=" +
-            listOf(
-                "/vt/src/vitess.io/vitess/config/mycnf/rbr.cnf",
-                "/vt/src/vitess.io/vitess/config/miskcnf/misk.cnf"
-            ).joinToString(":"),
-        "-keyspaces=$keyspacesArg",
-        "-num_shards=$shardCounts"
+      "/vt/bin/vttestserver",
+      "-alsologtostderr",
+      "-port=" + httpPort.port,
+      "-mysql_bind_host=0.0.0.0",
+      "-data_dir=/vt/vtdataroot",
+      "-schema_dir=schema",
+      // Increase the transaction timeout so you can have a breakpoint
+      // inside a transaction without it timing out
+      "-queryserver-config-transaction-timeout=${Duration.ofHours(24).toMillis()}",
+      "-extra_my_cnf=" +
+        listOf(
+          "/vt/src/vitess.io/vitess/config/mycnf/rbr.cnf",
+          "/vt/src/vitess.io/vitess/config/miskcnf/misk.cnf"
+        ).joinToString(":"),
+      "-keyspaces=$keyspacesArg",
+      "-num_shards=$shardCounts"
     )
 
     val prefixes = listOf(
-        "docker-vitess-testing", // These are the prefixes of banklin/franklin containers
-        CONTAINER_NAME_PREFIX // These are misk containers
+      "docker-vitess-testing", // These are the prefixes of banklin/franklin containers
+      CONTAINER_NAME_PREFIX // These are misk containers
     )
     val allContainers = docker.listContainersCmd().withShowAll(true).exec()
     val vitessContainers = prefixes.flatMap { prefix ->
@@ -300,13 +306,13 @@ class DockerVitessCluster(
     }
 
     // Kill and remove Vitess containers that doesn't match our requirements
-    var matchingContainer : Container? = null
+    var matchingContainer: Container? = null
     vitessContainers.forEach { container ->
       val mismatches = containerMismatches(container)
       if (!mismatches.isEmpty()) {
         logger.info {
           "Vitess container named ${container.name()} does not match our requirements, " +
-              "force removing and starting a new one: ${mismatches.joinToString(", ")}"
+            "force removing and starting a new one: ${mismatches.joinToString(", ")}"
         }
         docker.removeContainerCmd(container.id).withForce(true).exec()
       } else {
@@ -322,19 +328,21 @@ class DockerVitessCluster(
         "Starting Vitess cluster with command: ${cmd.joinToString(" ")}"
       }
       val containerId = docker.createContainerCmd(VITESS_IMAGE)
-          .withCmd(cmd.toList())
-          .withVolumes(schemaVolume, confVolume)
-          .withBinds(
-              Bind(
-                  cluster.schemaDir.toAbsolutePath().toString(), schemaVolume),
-              Bind(
-                  cluster.configDir.toAbsolutePath().toString(), confVolume)
+        .withCmd(cmd.toList())
+        .withVolumes(schemaVolume, confVolume)
+        .withBinds(
+          Bind(
+            cluster.schemaDir.toAbsolutePath().toString(), schemaVolume
+          ),
+          Bind(
+            cluster.configDir.toAbsolutePath().toString(), confVolume
           )
-          .withExposedPorts(httpPort, grpcPort, mysqlPort, vtgateMysqlPort)
-          .withPortBindings(ports)
-          .withTty(true)
-          .withName(containerName())
-          .exec().id!!
+        )
+        .withExposedPorts(httpPort, grpcPort, mysqlPort, vtgateMysqlPort)
+        .withPortBindings(ports)
+        .withTty(true)
+        .withName(containerName())
+        .exec().id!!
       docker.startContainerCmd(containerId).exec()
       this.containerId = containerId
       logger.info("Started Vitess with container id $containerId")
@@ -343,12 +351,12 @@ class DockerVitessCluster(
     }
 
     docker.logContainerCmd(containerId!!)
-        .withStdErr(true)
-        .withStdOut(true)
-        .withFollowStream(true)
-        .withSince(0)
-        .exec(LogContainerResultCallback())
-        .awaitStarted()
+      .withStdErr(true)
+      .withStdOut(true)
+      .withFollowStream(true)
+      .withSince(0)
+      .exec(LogContainerResultCallback())
+      .awaitStarted()
 
     waitUntilHealthy()
 
@@ -362,17 +370,17 @@ class DockerVitessCluster(
    * description of the mismatch.
    */
   private fun containerMismatches(container: Container): List<String> = listOfNotNull(
-      shouldMatch("container name", container.name(), containerName()),
-      shouldMatch("container state", container.state, "running"),
-      shouldMatch("container image", container.image, VITESS_IMAGE)
+    shouldMatch("container name", container.name(), containerName()),
+    shouldMatch("container state", container.state, "running"),
+    shouldMatch("container image", container.image, VITESS_IMAGE)
   )
 
   private fun shouldMatch(description: String, actual: Any, expected: Any): String? =
-      if (expected != actual) {
-        "$description \"${actual}\" does not match \"${expected}\""
-      } else {
-        null
-      }
+    if (expected != actual) {
+      "$description \"${actual}\" does not match \"${expected}\""
+    } else {
+      null
+    }
 
   /**
    * Return the single name of a container and strip away the prefix /
@@ -384,21 +392,25 @@ class DockerVitessCluster(
 
   private fun waitUntilHealthy() {
     try {
-      retry(20, ExponentialBackoff(
-          Duration.ofSeconds(1),
-          Duration.ofSeconds(5))) {
+      retry(
+        20, ExponentialBackoff(
+        Duration.ofSeconds(1),
+        Duration.ofSeconds(5)
+      )
+      ) {
         cluster.openVtgateConnection().use { c ->
           try {
             val result =
-                c.createStatement().executeQuery("SELECT 1 FROM dual").uniqueInt()
+              c.createStatement().executeQuery("SELECT 1 FROM dual").uniqueInt()
             check(result == 1)
           } catch (e: Exception) {
             val message = e.message
             if (message?.contains("table dual not found") == true) {
               throw DontRetryException(
-                  "Something is wrong with your vschema and unfortunately vtcombo does not " +
-                      "currently have good error reporting on this. Please inspect the logs or your " +
-                      "vschema to see if you can find the error.")
+                "Something is wrong with your vschema and unfortunately vtcombo does not " +
+                  "currently have good error reporting on this. Please inspect the logs or your " +
+                  "vschema to see if you can find the error."
+              )
             } else {
               throw e
             }
@@ -417,19 +429,21 @@ class DockerVitessCluster(
    */
   private fun grantExternalAccessToDbaUser() {
     val exec = docker.execCreateCmd(containerId!!)
-        .withAttachStderr(true)
-        .withAttachStdout(true)
-        .withCmd("mysql",
-            "-S", "/vt/vtdataroot/vt_0000000001/mysql.sock",
-            "-u", "root",
-            "mysql",
-            "-e",
-            "grant all on *.* to 'vt_dba'@'%'; grant REPLICATION CLIENT, REPLICATION SLAVE on *.* to 'vt_app'@'%'")
-        .exec()
+      .withAttachStderr(true)
+      .withAttachStdout(true)
+      .withCmd(
+        "mysql",
+        "-S", "/vt/vtdataroot/vt_0000000001/mysql.sock",
+        "-u", "root",
+        "mysql",
+        "-e",
+        "grant all on *.* to 'vt_dba'@'%'; grant REPLICATION CLIENT, REPLICATION SLAVE on *.* to 'vt_app'@'%'"
+      )
+      .exec()
 
     docker.execStartCmd(exec.id)
-        .exec(LogContainerResultCallback())
-        .awaitCompletion()
+      .exec(LogContainerResultCallback())
+      .awaitCompletion()
 
     val exitCode = docker.inspectExecCmd(exec.id).exec().exitCode
     if (exitCode != 0) {

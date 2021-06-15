@@ -1,7 +1,7 @@
 package misk.jdbc
 
-import misk.environment.Environment
 import wisp.config.Config
+import wisp.deployment.Deployment
 import java.time.Duration
 
 /** Defines a type of datasource */
@@ -119,7 +119,7 @@ data class DataSourceConfig(
     }
   }
 
-  fun buildJdbcUrl(env: Environment): String {
+  fun buildJdbcUrl(deployment: Deployment): String {
     val config = withDefaults()
 
     require(config.client_certificate_key_store_path.isNullOrBlank() || config.client_certificate_key_store_url.isNullOrBlank()) {
@@ -134,10 +134,9 @@ data class DataSourceConfig(
       DataSourceType.MYSQL, DataSourceType.VITESS_MYSQL, DataSourceType.TIDB -> {
         var queryParams = "?useLegacyDatetimeCode=false"
 
-        if (env == Environment.TESTING || env == Environment.DEVELOPMENT) {
+        if (deployment.isTest || deployment.isLocalDevelopment) {
           queryParams += "&createDatabaseIfNotExist=true"
         }
-
 
         queryParams += "&connectTimeout=${config.connection_timeout.toMillis()}"
 
@@ -210,7 +209,7 @@ data class DataSourceConfig(
       }
       DataSourceType.COCKROACHDB, DataSourceType.POSTGRESQL -> {
         var params = "ssl=false&user=${config.username}"
-        if (env == Environment.TESTING || env == Environment.DEVELOPMENT) {
+        if (deployment.isTest || deployment.isLocalDevelopment) {
           params += "&createDatabaseIfNotExist=true"
         }
         "jdbc:postgresql://${config.host}:${config.port}/${config.database}?$params"

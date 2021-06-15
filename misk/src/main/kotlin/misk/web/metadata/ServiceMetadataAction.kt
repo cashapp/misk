@@ -1,18 +1,18 @@
 package misk.web.metadata
 
 import misk.config.AppName
-import misk.environment.Environment
 import misk.security.authz.Unauthenticated
 import misk.web.Get
 import misk.web.RequestContentType
 import misk.web.ResponseContentType
 import misk.web.actions.WebAction
 import misk.web.mediatype.MediaTypes
+import wisp.deployment.getDeploymentFromEnvironmentVariable
 import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * Service Metadata used for front end dashboards including App Name and Misk.Environment
+ * Service Metadata used for front end dashboards including App Name and Misk.Deployment name
  */
 @Singleton
 class ServiceMetadataAction @Inject constructor(
@@ -42,6 +42,6 @@ class ServiceMetadataAction @Inject constructor(
   class OptionalBinder @Inject constructor(@AppName val appName: String) {
     @com.google.inject.Inject(optional = true)
     var serviceMetadata: ServiceMetadata =
-      ServiceMetadata(appName, Environment.fromEnvironmentVariable().name)
+      ServiceMetadata(appName, getDeploymentFromEnvironmentVariable().name)
   }
 }

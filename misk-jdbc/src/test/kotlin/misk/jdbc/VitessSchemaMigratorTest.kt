@@ -5,8 +5,7 @@ import misk.MiskTestingServiceModule
 import misk.config.MiskConfig
 import misk.database.DockerVitessCluster
 import misk.database.StartDatabaseService
-import misk.environment.Environment
-import misk.environment.EnvironmentModule
+import misk.environment.DeploymentModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.vitess.Keyspace
@@ -16,18 +15,20 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import wisp.config.Config
+import wisp.deployment.TESTING
 import java.sql.Connection
 import javax.inject.Inject
 import javax.inject.Qualifier
 
 @MiskTest(startService = true)
 internal class VitessSchemaMigratorTest {
+  val deploymentModule = DeploymentModule(TESTING)
   val config =
-    MiskConfig.load<MoviesConfig>("test_schemamigrator_vitess_app", Environment.TESTING)
+    MiskConfig.load<MoviesConfig>("test_schemamigrator_vitess_app", TESTING)
 
   @MiskTestModule
   val module = Modules.combine(
-    EnvironmentModule(Environment.TESTING),
+    deploymentModule,
     MiskTestingServiceModule(),
     JdbcModule(Movies::class, config.data_source)
   )
