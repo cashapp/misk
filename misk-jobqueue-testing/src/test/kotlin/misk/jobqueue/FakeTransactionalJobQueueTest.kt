@@ -4,7 +4,6 @@ import com.squareup.moshi.Moshi
 import misk.MiskTestingServiceModule
 import misk.config.MiskConfig
 import misk.environment.DeploymentModule
-import misk.environment.Environment
 import misk.hibernate.HibernateModule
 import misk.hibernate.HibernateTestingModule
 import misk.hibernate.Session
@@ -19,6 +18,7 @@ import misk.tokens.TokenGenerator
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import wisp.config.Config
+import wisp.deployment.TESTING
 import wisp.logging.LogCollector
 import wisp.logging.getLogger
 import javax.inject.Inject
@@ -204,8 +204,8 @@ internal class FakeTransactionalJobQueueTest {
 private class TransactionalJobQueueTestModule : KAbstractModule() {
   override fun configure() {
     install(MiskTestingServiceModule())
-    install(DeploymentModule.forTesting())
-    val config = MiskConfig.load<RootConfig>("starcraft", Environment.TESTING)
+    install(DeploymentModule(TESTING))
+    val config = MiskConfig.load<RootConfig>("starcraft", TESTING)
     install(HibernateTestingModule(StarCraftDb::class))
     install(HibernateModule(StarCraftDb::class, config.data_source))
     install(LogCollectorModule())
