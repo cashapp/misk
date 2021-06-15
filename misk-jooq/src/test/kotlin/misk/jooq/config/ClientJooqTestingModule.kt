@@ -8,6 +8,7 @@ import misk.jdbc.DataSourceConfig
 import misk.jdbc.DataSourceType
 import misk.jdbc.JdbcTestingModule
 import misk.jooq.JooqModule
+import misk.jooq.listeners.JooqTimestampRecordListenerOptions
 import misk.logging.LogCollectorModule
 import javax.inject.Qualifier
 
@@ -27,7 +28,15 @@ class ClientJooqTestingModule : KAbstractModule() {
       ),
       reader = null
     )
-    install(JooqModule(JooqDBIdentifier::class, datasourceConfig))
+    install(JooqModule(
+      JooqDBIdentifier::class,
+      datasourceConfig,
+      jooqTimestampRecordListenerOptions = JooqTimestampRecordListenerOptions(
+        install = true,
+        createdAtColumnName = "created_at",
+        updatedAtColumnName = "updated_at"
+      ))
+    )
     install(JdbcTestingModule(JooqDBIdentifier::class))
     install(LogCollectorModule())
   }
