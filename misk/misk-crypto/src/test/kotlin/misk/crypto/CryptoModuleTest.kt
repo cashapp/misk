@@ -29,11 +29,12 @@ import org.assertj.core.api.Assertions.assertThatCode
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
+import wisp.deployment.TESTING
 import wisp.logging.LogCollector
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.security.GeneralSecurityException
-import java.util.*
+import java.util.Base64
 
 @MiskTest(startService = true)
 class CryptoModuleTest {
@@ -123,7 +124,9 @@ class CryptoModuleTest {
       }
     )
     val config = CryptoConfig(listOf(key), "test_master_key")
-    val injector = Guice.createInjector(CryptoTestModule(config), DeploymentModule.forTesting())
+    val deploymentModule = DeploymentModule(TESTING)
+
+    val injector = Guice.createInjector(CryptoTestModule(config), deploymentModule)
     val externalKeyManager = LocalConfigKeyResolver(config.keys!!, config.kms_uri)
     val hybridEncryptKeyManager = injector.getInstance(HybridEncryptKeyManager::class.java)
     assertThat(externalKeyManager.getKeyByAlias("test-hybrid"))
@@ -378,13 +381,16 @@ class CryptoModuleTest {
       Key(it.first, keyType, generateEncryptedKey(it.second), "aws-kms://uri")
     }
     val config = CryptoConfig(keys, "test_master_key", external.orEmpty())
-    return Guice.createInjector(DeploymentModule.forTesting(), CryptoTestModule(config))
+    val deploymentModule = DeploymentModule(TESTING)
+
+    return Guice.createInjector(deploymentModule, CryptoTestModule(config))
   }
 
   private fun getInjectorWithKeys(keys: List<Key>): Injector {
     val config = CryptoConfig(keys, "test_master_key", mapOf())
+    val deploymentModule = DeploymentModule(TESTING)
     return Guice.createInjector(
-      DeploymentModule.forTesting(), CryptoTestModule(config),
+      deploymentModule, CryptoTestModule(config),
       LogCollectorModule()
     )
   }

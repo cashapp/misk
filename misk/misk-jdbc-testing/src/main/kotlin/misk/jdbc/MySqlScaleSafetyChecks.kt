@@ -1,9 +1,9 @@
 package misk.jdbc
 
 import com.zaxxer.hikari.util.DriverDataSource
-import misk.environment.Environment
 import net.ttddyy.dsproxy.proxy.ProxyConfig
 import net.ttddyy.dsproxy.support.ProxyDataSource
+import wisp.deployment.TESTING
 import java.sql.Connection
 import java.sql.SQLException
 import java.sql.Timestamp
@@ -34,7 +34,7 @@ class MySqlScaleSafetyChecks(
   fun connect(): Connection {
     return try {
       DriverDataSource(
-        config.buildJdbcUrl(Environment.TESTING),
+        config.buildJdbcUrl(TESTING),
         config.type.driverClassName,
         Properties(),
         config.username,
