@@ -24,8 +24,6 @@ internal class MiskTestExtension : BeforeEachCallback, AfterEachCallback {
   }
 
   override fun beforeEach(context: ExtensionContext) {
-    //Environment.setTesting()
-
     for (dep in context.getExternalDependencies()) {
       dep.startIfNecessary()
     }

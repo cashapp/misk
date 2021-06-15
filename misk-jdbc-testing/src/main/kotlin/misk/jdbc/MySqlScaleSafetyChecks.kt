@@ -7,7 +7,7 @@ import wisp.deployment.TESTING
 import java.sql.Connection
 import java.sql.SQLException
 import java.sql.Timestamp
-import java.util.*
+import java.util.Properties
 import javax.inject.Singleton
 import javax.sql.DataSource
 

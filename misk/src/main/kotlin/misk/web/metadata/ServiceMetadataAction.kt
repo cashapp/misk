@@ -12,7 +12,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * Service Metadata used for front end dashboards including App Name and Misk.Env name
+ * Service Metadata used for front end dashboards including App Name and Misk.Deployment name
  */
 @Singleton
 class ServiceMetadataAction @Inject constructor(
