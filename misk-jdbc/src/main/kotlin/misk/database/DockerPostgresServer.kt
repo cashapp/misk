@@ -9,18 +9,17 @@ import com.zaxxer.hikari.util.DriverDataSource
 import misk.backoff.DontRetryException
 import misk.backoff.ExponentialBackoff
 import misk.backoff.retry
-import misk.environment.Environment
 import misk.jdbc.DataSourceConfig
-import misk.jdbc.uniqueInt
 import mu.KotlinLogging
+import wisp.deployment.TESTING
 import java.sql.Connection
 import java.time.Duration
 import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
 
 class DockerPostgresServer(
-    val config: DataSourceConfig,
-    val docker: DockerClient
+  val config: DataSourceConfig,
+  val docker: DockerClient
 ) : DatabaseServer {
   private val server: PostgresServer
 
@@ -70,7 +69,8 @@ class DockerPostgresServer(
         }
 
         if (runCommand(
-                "docker images --digests | grep -q $SHA || docker pull $IMAGE") != 0) {
+            "docker images --digests | grep -q $SHA || docker pull $IMAGE"
+          ) != 0) {
           logger.warn("Failed to pull Postgres docker image. Proceeding regardless.")
         }
         imagePulled.set(true)
@@ -92,14 +92,16 @@ class DockerPostgresServer(
     val containerName = CONTAINER_NAME
 
     val runningContainer = docker.listContainersCmd()
-        .withNameFilter(listOf(containerName))
-        .withLimit(1)
-        .exec()
-        .firstOrNull()
+      .withNameFilter(listOf(containerName))
+      .withLimit(1)
+      .exec()
+      .firstOrNull()
     if (runningContainer != null) {
       if (runningContainer.state != "running") {
-        logger.info("Existing Postgres named $containerName found in " +
-            "state ${runningContainer.state}, force removing and restarting")
+        logger.info(
+          "Existing Postgres named $containerName found in " +
+            "state ${runningContainer.state}, force removing and restarting"
+        )
         docker.removeContainerCmd(runningContainer.id).withForce(true).exec()
       } else {
         logger.info("Using existing Postgres container named $containerName")
@@ -111,22 +113,22 @@ class DockerPostgresServer(
     if (containerId == null) {
       logger.info("Starting Postgres with command")
       containerId = docker.createContainerCmd(IMAGE)
-          .withEnv("POSTGRES_PASSWORD=password")
-          .withCmd("-d postgres")
-          .withExposedPorts(postgresPort)
-          .withPortBindings(ports)
-          .withTty(true)
-          .withName(containerName)
-          .exec().id!!
+        .withEnv("POSTGRES_PASSWORD=password")
+        .withCmd("-d postgres")
+        .withExposedPorts(postgresPort)
+        .withPortBindings(ports)
+        .withTty(true)
+        .withName(containerName)
+        .exec().id!!
       val containerId = containerId!!
       docker.startContainerCmd(containerId).exec()
       docker.logContainerCmd(containerId)
-          .withStdErr(true)
-          .withStdOut(true)
-          .withFollowStream(true)
-          .withSince(0)
-          .exec(LogContainerResultCallback())
-          .awaitStarted()
+        .withStdErr(true)
+        .withStdOut(true)
+        .withFollowStream(true)
+        .withSince(0)
+        .exec(LogContainerResultCallback())
+        .awaitStarted()
     }
     logger.info("Started Postgres with container id $containerId")
 
@@ -136,11 +138,15 @@ class DockerPostgresServer(
 
   private fun waitUntilHealthy() {
     try {
-      retry(20, ExponentialBackoff(
-          Duration.ofSeconds(1),
-          Duration.ofSeconds(5))) {
+      retry(
+        20, ExponentialBackoff(
+        Duration.ofSeconds(1),
+        Duration.ofSeconds(5)
+      )
+      ) {
         server.openConnection().use { c ->
-          val resultSet = c.createStatement().executeQuery("SELECT COUNT(*) as count FROM pg_catalog.pg_database")
+          val resultSet =
+            c.createStatement().executeQuery("SELECT COUNT(*) as count FROM pg_catalog.pg_database")
           resultSet.next()
           check(resultSet.getInt("count") > 0)
         }
@@ -156,7 +162,7 @@ class DockerPostgresServer(
     server.openConnection().use { c ->
       val statement = c.createStatement()
       val databaseCountResultSet = statement.executeQuery(
-          "SELECT COUNT(*) as count FROM pg_catalog.pg_database WHERE datname = '${config.database}'"
+        "SELECT COUNT(*) as count FROM pg_catalog.pg_database WHERE datname = '${config.database}'"
       )
       databaseCountResultSet.next()
 
@@ -168,9 +174,11 @@ class DockerPostgresServer(
   }
 
   override fun stop() {
-    logger.info("Leaving Postgres docker container running in the background. " +
+    logger.info(
+      "Leaving Postgres docker container running in the background. " +
         "If you need to kill it because you messed up migrations or something use:" +
-        "\n\tdocker kill $CONTAINER_NAME")
+        "\n\tdocker kill $CONTAINER_NAME"
+    )
   }
 
   class LogContainerResultCallback : ResultCallbackTemplate<LogContainerResultCallback, Frame>() {
@@ -180,18 +188,18 @@ class DockerPostgresServer(
   }
 
   private class PostgresServer(
-      val config: DataSourceConfig
+    val config: DataSourceConfig
   ) {
     fun openConnection(): Connection = dataSource().connection
 
     private fun dataSource(): DriverDataSource {
-      val jdbcUrl = config.withDefaults().copy(database = "postgres").buildJdbcUrl(Environment.TESTING)
+      val jdbcUrl = config.withDefaults().copy(database = "postgres").buildJdbcUrl(TESTING)
       return DriverDataSource(
-          jdbcUrl,
-          config.type.driverClassName,
-          Properties(),
-          config.username,
-          config.password
+        jdbcUrl,
+        config.type.driverClassName,
+        Properties(),
+        config.username,
+        config.password
       )
     }
 
