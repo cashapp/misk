@@ -10,11 +10,12 @@ import misk.jdbc.JdbcTestingModule
 import misk.jooq.JooqModule
 import misk.jooq.listeners.JooqTimestampRecordListenerOptions
 import misk.logging.LogCollectorModule
+import wisp.deployment.TESTING
 import javax.inject.Qualifier
 
 class ClientJooqTestingModule : KAbstractModule() {
   override fun configure() {
-    install(DeploymentModule.forTesting())
+    install(DeploymentModule(TESTING))
     install(MiskTestingServiceModule())
 
     val datasourceConfig = DataSourceClusterConfig(

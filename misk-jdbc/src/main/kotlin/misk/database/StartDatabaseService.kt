@@ -9,13 +9,11 @@ import com.google.common.cache.LoadingCache
 import com.google.common.util.concurrent.AbstractIdleService
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
-import misk.environment.Environment
-import misk.environment.Environment.DEVELOPMENT
-import misk.environment.Environment.TESTING
 import misk.jdbc.DataSourceConfig
 import misk.jdbc.DataSourceType
 import misk.resources.ResourceLoader
 import mu.KotlinLogging
+import wisp.deployment.Deployment
 import java.io.IOException
 import java.util.Optional
 import java.util.concurrent.TimeUnit
@@ -25,9 +23,9 @@ fun runCommand(command: String): Int {
   StartDatabaseService.logger.info(command)
   return try {
     val process = ProcessBuilder("bash", "-c", command)
-        .redirectOutput(ProcessBuilder.Redirect.INHERIT)
-        .redirectError(ProcessBuilder.Redirect.INHERIT)
-        .start()
+      .redirectOutput(ProcessBuilder.Redirect.INHERIT)
+      .redirectError(ProcessBuilder.Redirect.INHERIT)
+      .start()
     process.waitFor(60, TimeUnit.MINUTES)
     return process.exitValue()
   } catch (e: IOException) {
@@ -49,7 +47,7 @@ fun runCommand(command: String): Int {
  */
 class StartDatabaseService(
   qualifier: KClass<out Annotation>,
-  private val environment: Environment,
+  private val deployment: Deployment,
   config: DataSourceConfig
 ) : AbstractIdleService() {
   var server: DatabaseServer? = null
@@ -58,7 +56,7 @@ class StartDatabaseService(
   init {
     if (shouldStartServer()) {
       val name = qualifier.simpleName!!
-      server = servers[CacheKey(name, config, environment)].orElse(null)
+      server = servers[CacheKey(name, config, deployment)].orElse(null)
 
       // We need to do this outside of the service start up because this takes a really long time
       // the first time you do it and can cause service manager to time out.
@@ -70,7 +68,7 @@ class StartDatabaseService(
     this.server?.start()
   }
 
-  private fun shouldStartServer() = environment == TESTING || environment == DEVELOPMENT
+  private fun shouldStartServer() = deployment.isTest || deployment.isLocalDevelopment
 
   override fun shutDown() {
   }
@@ -78,64 +76,67 @@ class StartDatabaseService(
   data class CacheKey(
     val name: String,
     val config: DataSourceConfig,
-    val environment: Environment
+    val deployment: Deployment
   )
 
   companion object {
     val logger = KotlinLogging.logger {}
     val docker: DockerClient = DockerClientBuilder.getInstance()
-        .withDockerCmdExecFactory(NettyDockerCmdExecFactory())
-        .build()
+      .withDockerCmdExecFactory(NettyDockerCmdExecFactory())
+      .build()
     val moshi = Moshi.Builder()
-        .add(KotlinJsonAdapterFactory())
-        .build()
+      .add(KotlinJsonAdapterFactory())
+      .build()
 
     /**
      * Global cache of running database servers.
      */
     val servers: LoadingCache<CacheKey, Optional<DatabaseServer>> = CacheBuilder.newBuilder()
-        .removalListener<CacheKey, Optional<DatabaseServer>> { entry ->
-          entry.value.ifPresent { it.stop() }
-        }
-        .build(CacheLoader.from { config: CacheKey? ->
-          Optional.ofNullable(config?.let {
-            createDatabaseServer(it)
-          })
+      .removalListener<CacheKey, Optional<DatabaseServer>> { entry ->
+        entry.value.ifPresent { it.stop() }
+      }
+      .build(CacheLoader.from { config: CacheKey? ->
+        Optional.ofNullable(config?.let {
+          createDatabaseServer(it)
         })
+      })
 
     private fun createDatabaseServer(config: CacheKey): DatabaseServer? =
-        when (config.config.type) {
-          DataSourceType.VITESS_MYSQL -> {
-            DockerVitessCluster(
-                name = config.name,
-                config = config.config,
-                resourceLoader = ResourceLoader.SYSTEM,
-                moshi = moshi,
-                docker = docker)
-          }
-          DataSourceType.COCKROACHDB -> {
-            DockerCockroachCluster(
-                name = config.name,
-                config = config.config,
-                resourceLoader = ResourceLoader.SYSTEM,
-                moshi = moshi,
-                docker = docker)
-          }
-          DataSourceType.TIDB -> {
-            DockerTidbCluster(
-                moshi = moshi,
-                resourceLoader = ResourceLoader.SYSTEM,
-                config = config.config,
-                docker = docker)
-          }
-          DataSourceType.POSTGRESQL -> {
-            DockerPostgresServer(
-                config = config.config,
-                docker = docker
-            )
-          }
-          else -> null
+      when (config.config.type) {
+        DataSourceType.VITESS_MYSQL -> {
+          DockerVitessCluster(
+            name = config.name,
+            config = config.config,
+            resourceLoader = ResourceLoader.SYSTEM,
+            moshi = moshi,
+            docker = docker
+          )
         }
+        DataSourceType.COCKROACHDB -> {
+          DockerCockroachCluster(
+            name = config.name,
+            config = config.config,
+            resourceLoader = ResourceLoader.SYSTEM,
+            moshi = moshi,
+            docker = docker
+          )
+        }
+        DataSourceType.TIDB -> {
+          DockerTidbCluster(
+            moshi = moshi,
+            resourceLoader = ResourceLoader.SYSTEM,
+            config = config.config,
+            docker = docker
+          )
+        }
+        DataSourceType.POSTGRESQL -> {
+          DockerPostgresServer(
+            config = config.config,
+            docker = docker
+          )
+        }
+        else -> null
+      }
 
     /**
      * Shut down the cached clusters on JVM exit.

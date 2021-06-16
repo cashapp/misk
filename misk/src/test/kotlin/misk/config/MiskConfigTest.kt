@@ -2,7 +2,6 @@ package misk.config
 
 import com.google.inject.util.Modules
 import misk.environment.DeploymentModule
-import misk.environment.Environment
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.web.WebConfig
@@ -10,6 +9,7 @@ import misk.web.exceptions.ActionExceptionLogLevelConfig
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.slf4j.event.Level
+import wisp.deployment.TESTING
 import java.io.File
 import java.time.Duration
 import javax.inject.Inject
@@ -17,13 +17,12 @@ import kotlin.test.assertFailsWith
 
 @MiskTest
 class MiskConfigTest {
-  val defaultEnv = Environment.TESTING
-  val config = MiskConfig.load<TestConfig>("test_app", defaultEnv)
+  val config = MiskConfig.load<TestConfig>("test_app", TESTING)
 
   @MiskTestModule
   val module = Modules.combine(
     ConfigModule.create("test_app", config),
-    DeploymentModule.forTesting()
+    DeploymentModule(TESTING)
     // @TODO(jwilson) https://github.com/square/misk/issues/272
   )
 
@@ -54,7 +53,7 @@ class MiskConfigTest {
   @Test
   fun friendlyErrorMessagesWhenFilesNotFound() {
     val exception = assertFailsWith<IllegalStateException> {
-      MiskConfig.load<TestConfig>("missing", defaultEnv)
+      MiskConfig.load<TestConfig>("missing", TESTING)
     }
 
     assertThat(exception).hasMessageContaining(
@@ -66,7 +65,7 @@ class MiskConfigTest {
   @Test
   fun friendlyErrorMessageWhenConfigPropertyMissing() {
     val exception = assertFailsWith<IllegalStateException> {
-      MiskConfig.load<TestConfig>("partial_test_app", defaultEnv)
+      MiskConfig.load<TestConfig>("partial_test_app", TESTING)
     }
 
     assertThat(exception).hasMessageContaining(
@@ -77,7 +76,7 @@ class MiskConfigTest {
   @Test
   fun friendlyErrorMessagesWhenFileUnparseable() {
     val exception = assertFailsWith<IllegalStateException> {
-      MiskConfig.load<TestConfig>("unparsable", defaultEnv)
+      MiskConfig.load<TestConfig>("unparsable", TESTING)
     }
 
     assertThat(exception).hasMessageContaining("could not parse classpath:/unparsable-common.yaml")
@@ -86,7 +85,7 @@ class MiskConfigTest {
   @Test
   fun friendlyErrorMessagesWhenPropertiesNotFound() {
     val exception = assertFailsWith<IllegalStateException> {
-      MiskConfig.load<TestConfig>("unknownproperty", defaultEnv)
+      MiskConfig.load<TestConfig>("unknownproperty", TESTING)
     }
 
     assertThat(exception).hasMessageContaining("'consumer_b.blue_items' not found")
@@ -95,7 +94,7 @@ class MiskConfigTest {
   @Test
   fun friendlyErrorMessagesWhenPropertiesMisspelled() {
     val exception = assertFailsWith<IllegalStateException> {
-      MiskConfig.load<TestConfig>("misspelledproperty", defaultEnv)
+      MiskConfig.load<TestConfig>("misspelledproperty", TESTING)
     }
 
     assertThat(exception).hasMessageContaining("Did you mean")
@@ -109,7 +108,7 @@ class MiskConfigTest {
     )
       .map { File(it.file) }
 
-    val config = MiskConfig.load<TestConfig>("test_app", defaultEnv, overrides)
+    val config = MiskConfig.load<TestConfig>("test_app", TESTING, overrides)
     assertThat(config.consumer_a).isEqualTo(ConsumerConfig(14, 27))
     assertThat(config.consumer_b).isEqualTo(ConsumerConfig(34, 122))
   }
@@ -133,7 +132,7 @@ class MiskConfigTest {
     )
       .map { File(it.file) }
 
-    val config = MiskConfig.load<TestConfig>("test_app", defaultEnv, overrides)
+    val config = MiskConfig.load<TestConfig>("test_app", TESTING, overrides)
     assertThat(config.consumer_a).isEqualTo(ConsumerConfig(14, 27))
     assertThat(config.consumer_b).isEqualTo(ConsumerConfig(34, 79))
   }
@@ -141,7 +140,7 @@ class MiskConfigTest {
   @Test
   fun handlesNonExistentExternalFile() {
     // A common config does not exist, but the testing config does, loading the config should not fail
-    val config = MiskConfig.load<DurationConfig>("no_common_config_app", defaultEnv, listOf())
+    val config = MiskConfig.load<DurationConfig>("no_common_config_app", TESTING, listOf())
     assertThat(config.interval).isEqualTo(Duration.ofSeconds(23))
   }
 }

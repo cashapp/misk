@@ -5,8 +5,7 @@ import com.google.inject.util.Modules
 import misk.MiskTestingServiceModule
 import misk.config.MiskConfig
 import misk.database.StartDatabaseService
-import misk.environment.Environment
-import misk.environment.EnvironmentModule
+import misk.environment.DeploymentModule
 import misk.resources.ResourceLoader
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
@@ -16,6 +15,7 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import wisp.config.Config
+import wisp.deployment.TESTING
 import java.sql.SQLException
 import javax.inject.Inject
 import kotlin.test.assertFailsWith
@@ -33,14 +33,14 @@ internal class CockroachdbSchemaMigratorTest : SchemaMigratorTest(DataSourceType
 internal class TidbSchemaMigratorTest : SchemaMigratorTest(DataSourceType.TIDB)
 
 internal abstract class SchemaMigratorTest(val type: DataSourceType) {
-  val defaultEnv = Environment.TESTING
+  val deploymentModule = DeploymentModule(TESTING)
 
-  val appConfig = MiskConfig.load<RootConfig>("test_schemamigrator_app", defaultEnv)
+  val appConfig = MiskConfig.load<RootConfig>("test_schemamigrator_app", TESTING)
   val config = selectDataSourceConfig(appConfig)
 
   @MiskTestModule
   val module = Modules.combine(
-    EnvironmentModule(Environment.TESTING),
+    deploymentModule,
     MiskTestingServiceModule(),
     JdbcModule(Movies::class, config)
   )
