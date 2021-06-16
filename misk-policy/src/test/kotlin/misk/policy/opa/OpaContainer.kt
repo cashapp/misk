@@ -1,9 +1,11 @@
 package misk.policy.opa
 
 import com.github.dockerjava.api.DockerClient
+import com.github.dockerjava.api.model.Bind
 import com.github.dockerjava.api.model.Container
 import com.github.dockerjava.api.model.ExposedPort
 import com.github.dockerjava.api.model.Frame
+import com.github.dockerjava.api.model.HostConfig
 import com.github.dockerjava.api.model.Ports
 import com.github.dockerjava.api.model.Volume
 import com.github.dockerjava.core.async.ResultCallbackTemplate
@@ -13,6 +15,8 @@ import misk.backoff.retry
 import mu.KotlinLogging
 import okhttp3.Request
 import java.io.IOException
+import java.nio.file.Path
+import java.nio.file.Paths
 import java.time.Duration
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
@@ -89,17 +93,12 @@ class OpaContainer(
     private val imagePulled = AtomicBoolean()
   }
 
-  fun pullImage() {
+  private fun pullImage() {
     OpaContainer.pullImage()
   }
 
   private fun doStart() {
     pullImage()
-    val confVolume = Volume("/etc/tidb")
-    val cmd = arrayOf("run", "--server")
-    val httpPort = ExposedPort.tcp(8181)
-    val ports = Ports()
-    ports.bind(httpPort, Ports.Binding.bindPort(httpPort.port))
 
     // Kill and remove container that don't match our requirements
     var matchingContainer: Container? = null
@@ -121,15 +120,24 @@ class OpaContainer(
       }
     }
 
+    // use the volume to seed and test policy locally
+    val confVolume = Volume("/repo")
+    val cmd = arrayOf("run", "--server", "-b", "/repo")
+    val httpPort = ExposedPort.tcp(8181)
+    val ports = Ports()
+    ports.bind(httpPort, Ports.Binding.bindPort(httpPort.port))
+
+    val resource = OpaTestingModule::class.java.classLoader.getResource("policy")!!
+
+    val policyDir = Paths.get(resource.toURI()).toAbsolutePath().toFile().absolutePath
 
     containerId = matchingContainer?.id
-
     if (containerId == null) {
       logger.info("Starting Policy Engine")
       stopContainerOnExit = true
       containerId = docker.createContainerCmd(IMAGE)
-//        .withCmd("run --server")
-             .withCmd(cmd.toList())
+        .withCmd(cmd.toList())
+        .withHostConfig(HostConfig.newHostConfig().withBinds(Bind(policyDir, confVolume)))
 //            .withVolumes(confVolume)
 //            .withBinds(Bind(cluster.configDir.toAbsolutePath().toString(), confVolume))
         .withExposedPorts(httpPort)
@@ -137,6 +145,7 @@ class OpaContainer(
         .withTty(true)
         .withName(containerName())
         .exec().id!!
+
       val containerId = containerId!!
       docker.startContainerCmd(containerId).exec()
       docker.logContainerCmd(containerId)
@@ -207,7 +216,8 @@ class OpaContainer(
       logger.info("Stopping container $containerId")
       val containerId = containerId
       if (containerId != null) {
-        docker.killContainerCmd(containerId);
+//        docker.removeContainerCmd(containerId).withForce(true).exec()
+        docker.killContainerCmd(containerId)
       }
     }
   }
