@@ -16,6 +16,7 @@ data class FakeHttpCall(
   override val dispatchMechanism: DispatchMechanism = DispatchMechanism.GET,
   override val requestHeaders: Headers = headersOf(),
   override var statusCode: Int = 200,
+  override var networkStatusCode: Int = 200,
   val headersBuilder: Headers.Builder = Headers.Builder(),
   var sendTrailers: Boolean = false,
   val trailersBuilder: Headers.Builder = Headers.Builder(),

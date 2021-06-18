@@ -31,7 +31,12 @@ interface HttpCall {
   val requestHeaders: Headers
 
   /** The HTTP response under construction. */
+  /** Meaningful HTTP status about what actually happened */
   var statusCode: Int
+
+  /** The HTTP status code actually sent over the network. For gRPC, this is *always* 200, even
+   * for errors. */
+  var networkStatusCode: Int
   val responseHeaders: Headers
 
   fun setResponseHeader(name: String, value: String)

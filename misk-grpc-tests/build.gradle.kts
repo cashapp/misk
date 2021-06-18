@@ -76,6 +76,8 @@ dependencies {
   implementation(project(":misk-actions"))
   implementation(project(":misk-core"))
   implementation(project(":misk-inject"))
+  implementation(project(":misk-metrics"))
+  implementation(project(":misk-metrics-testing"))
   implementation(project(":misk-service"))
   implementation(project(":misk-testing"))
 

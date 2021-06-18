@@ -1,8 +1,10 @@
 package misk.grpc.miskserver
 
 import com.google.inject.Provides
+import com.google.inject.util.Modules
 import misk.MiskTestingServiceModule
 import misk.inject.KAbstractModule
+import misk.metrics.FakeMetricsModule
 import misk.web.WebActionModule
 import misk.web.WebServerTestingModule
 import misk.web.jetty.JettyService
@@ -12,7 +14,7 @@ import javax.inject.Named
 class RouteGuideMiskServiceModule : KAbstractModule() {
   override fun configure() {
     install(WebServerTestingModule(webConfig = WebServerTestingModule.TESTING_WEB_CONFIG.copy(http2 = true)))
-    install(MiskTestingServiceModule())
+    install(Modules.override(MiskTestingServiceModule()).with(FakeMetricsModule()))
     install(WebActionModule.create<GetFeatureGrpcAction>())
     install(WebActionModule.create<RouteChatGrpcAction>())
   }

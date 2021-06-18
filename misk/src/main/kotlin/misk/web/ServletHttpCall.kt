@@ -25,8 +25,16 @@ internal data class ServletHttpCall(
   var responseBody: BufferedSink? = null,
   var webSocket: WebSocket? = null
 ) : HttpCall {
+  private var _actualStatusCode: Int? = null
 
   override var statusCode: Int
+    get() = _actualStatusCode ?: upstreamResponse.statusCode
+    set(value) {
+      _actualStatusCode = value
+      upstreamResponse.statusCode = value
+    }
+
+  override var networkStatusCode: Int
     get() = upstreamResponse.statusCode
     set(value) {
       upstreamResponse.statusCode = value
