@@ -1,9 +1,9 @@
 package misk.web.interceptors
 
 import misk.Action
-import misk.environment.Environment
 import misk.web.NetworkChain
 import misk.web.NetworkInterceptor
+import wisp.deployment.Deployment
 import javax.inject.Inject
 
 internal class WideOpenDevelopmentInterceptor @Inject constructor() : NetworkInterceptor {
@@ -15,11 +15,11 @@ internal class WideOpenDevelopmentInterceptor @Inject constructor() : NetworkInt
 
 internal class WideOpenDevelopmentInterceptorFactory @Inject constructor(
   private val wideOpenDevelopmentInterceptor: WideOpenDevelopmentInterceptor,
-  private val environment: Environment
+  private val deployment: Deployment
 ) : NetworkInterceptor.Factory {
 
   override fun create(action: Action): NetworkInterceptor? {
-    if (environment == Environment.DEVELOPMENT) {
+    if (deployment.isLocalDevelopment) {
       return wideOpenDevelopmentInterceptor
     }
     return null

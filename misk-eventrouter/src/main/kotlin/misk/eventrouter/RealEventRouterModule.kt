@@ -3,13 +3,13 @@ package misk.eventrouter
 import com.google.inject.Provides
 import com.squareup.moshi.Moshi
 import misk.ServiceModule
-import misk.environment.Environment
 import misk.healthchecks.HealthCheck
 import misk.inject.KAbstractModule
 import misk.inject.asSingleton
 import misk.moshi.MoshiAdapterModule
 import misk.moshi.adapter
 import misk.web.WebActionModule
+import wisp.deployment.Deployment
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.ThreadPoolExecutor
@@ -17,12 +17,12 @@ import java.util.concurrent.TimeUnit
 import javax.inject.Qualifier
 import javax.inject.Singleton
 
-class RealEventRouterModule(val environment: Environment) : KAbstractModule() {
+class RealEventRouterModule(val deployment: Deployment) : KAbstractModule() {
   override fun configure() {
     bind<EventRouter>().to<RealEventRouter>().asSingleton()
     bind<RealEventRouter>().asSingleton()
     install(ServiceModule<EventRouterService>())
-    if (environment == Environment.DEVELOPMENT) {
+    if (deployment.isLocalDevelopment) {
       bind<ClusterConnector>().to<LocalClusterConnector>()
     } else {
       multibind<HealthCheck>().to<KubernetesHealthCheck>()
