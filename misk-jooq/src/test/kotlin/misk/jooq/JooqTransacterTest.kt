@@ -67,8 +67,6 @@ internal class JooqTransacterTest {
       ctx.newRecord(MOVIE).apply {
         this.genre = Genre.COMEDY.name
         this.name = "Enter the dragon"
-        createdAt = clock.instant().toLocalDateTime()
-        updatedAt = clock.instant().toLocalDateTime()
       }.also { it.store() }
     }
     executeInThreadsAndWait(
@@ -141,8 +139,6 @@ internal class JooqTransacterTest {
         ctx.newRecord(MOVIE).apply {
           this.genre = Genre.COMEDY.name
           this.name = "Dumb and dumber"
-          createdAt = clock.instant().toLocalDateTime()
-          updatedAt = clock.instant().toLocalDateTime()
         }.also { it.store() }
         throw IllegalStateException("") // to force a rollback
       }
@@ -167,8 +163,6 @@ internal class JooqTransacterTest {
         ctx.newRecord(MOVIE).apply {
           this.genre = Genre.COMEDY.name
           this.name = "Dumb and dumber"
-          createdAt = clock.instant().toLocalDateTime()
-          updatedAt = clock.instant().toLocalDateTime()
         }.also { it.store() }
       }
 
@@ -176,11 +170,7 @@ internal class JooqTransacterTest {
         ctx.selectFrom(MOVIE).where(MOVIE.ID.eq(movie.id)).fetchOne().getOrThrow()
           .apply {
             this.genre = Genre.HORROR.name
-          }
-          .also {
-            it.updatedAt = clock.instant().toLocalDateTime()
-          }
-          .also {
+          }.also {
             it.store()
           }
       }
@@ -218,8 +208,6 @@ internal class JooqTransacterTest {
         session.ctx.newRecord(MOVIE).apply {
           this.genre = Genre.COMEDY.name
           this.name = "Dumb and dumber"
-          createdAt = clock.instant().toLocalDateTime()
-          updatedAt = clock.instant().toLocalDateTime()
         }.also { it.store() }
       }
     }
@@ -253,8 +241,6 @@ internal class JooqTransacterTest {
         session.ctx.newRecord(MOVIE).apply {
           this.genre = Genre.COMEDY.name
           this.name = "Dumb and dumber"
-          createdAt = clock.instant().toLocalDateTime()
-          updatedAt = clock.instant().toLocalDateTime()
         }.also { it.store() }
       }
     }
@@ -288,8 +274,6 @@ internal class JooqTransacterTest {
         session.ctx.newRecord(MOVIE).apply {
           this.genre = Genre.COMEDY.name
           this.name = null // to force a sql exception
-          createdAt = clock.instant().toLocalDateTime()
-          updatedAt = clock.instant().toLocalDateTime()
         }.also { it.store() }
       }
     }

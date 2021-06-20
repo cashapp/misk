@@ -10,6 +10,9 @@ import misk.jdbc.DataSourceService
 import misk.jdbc.DatabasePool
 import misk.jdbc.JdbcModule
 import misk.jdbc.RealDatabasePool
+import misk.jooq.listeners.JooqSQLLogger
+import misk.jooq.listeners.JooqTimestampRecordListener
+import misk.jooq.listeners.JooqTimestampRecordListenerOptions
 import org.jooq.DSLContext
 import org.jooq.SQLDialect
 import org.jooq.conf.MappedSchema
@@ -26,7 +29,9 @@ class JooqModule(
   private val qualifier: KClass<out Annotation>,
   private val dataSourceClusterConfig: DataSourceClusterConfig,
   private val databasePool: DatabasePool = RealDatabasePool,
-  private val readerQualifier: KClass<out Annotation>? = null
+  private val readerQualifier: KClass<out Annotation>? = null,
+  private val jooqTimestampRecordListenerOptions: JooqTimestampRecordListenerOptions =
+    JooqTimestampRecordListenerOptions(install = false)
 ) : KAbstractModule() {
 
   override fun configure() {
@@ -42,13 +47,15 @@ class JooqModule(
 
     val transacterKey = JooqTransacter::class.toKey(qualifier)
     val dataSourceServiceProvider = getProvider(keyOf<DataSourceService>(qualifier))
-    bind(transacterKey).toProvider(
-      Provider {
-        JooqTransacter(
-          dslContext = dslContext(dataSourceServiceProvider.get())
+    bind(transacterKey).toProvider(object : Provider<JooqTransacter> {
+      @Inject
+      lateinit var clock: Clock
+      override fun get(): JooqTransacter {
+        return JooqTransacter(
+          dslContext = dslContext(dataSourceServiceProvider.get(), clock)
         )
       }
-    ).asSingleton()
+    }).asSingleton()
 
     val jooqTransacterProvider = getProvider(keyOf<JooqTransacter>(qualifier))
     val healthCheckKey = keyOf<HealthCheck>(qualifier)
@@ -65,13 +72,13 @@ class JooqModule(
             clock
           )
         }
-      })
-      .asSingleton()
+      }).asSingleton()
     multibind<HealthCheck>().to(healthCheckKey)
   }
 
   private fun dslContext(
-    dataSourceService: DataSourceService
+    dataSourceService: DataSourceService,
+    clock: Clock
   ): DSLContext {
     val settings = Settings()
       .withExecuteWithOptimisticLocking(true)
@@ -92,7 +99,15 @@ class JooqModule(
         if ("true" == dataSourceClusterConfig.writer.show_sql) {
           set(JooqSQLLogger())
         }
+        if(jooqTimestampRecordListenerOptions.install) {
+          set(JooqTimestampRecordListener(
+            clock = clock,
+            createdAtColumnName = jooqTimestampRecordListenerOptions.createdAtColumnName,
+            updatedAtColumnName = jooqTimestampRecordListenerOptions.updatedAtColumnName
+          ))
+        }
       }
     }
   }
 }
+
