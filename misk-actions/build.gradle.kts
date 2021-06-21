@@ -1,6 +1,6 @@
 dependencies {
+  api(Dependencies.okHttp)
   implementation(Dependencies.kotlinStdLibJdk8)
-  implementation(Dependencies.okHttp)
   implementation(Dependencies.okio)
 }
 
