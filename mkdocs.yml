@@ -3,6 +3,7 @@ repo_name: Misk
 repo_url: https://github.com/cashapp/misk
 site_description: "Misk: Microservice Container for Kotlin"
 site_author: Square, Inc.
+site_url: ''
 remote_branch: gh-pages
 
 copyright: 'Copyright &copy; 2018-2021 Square, Inc.'
