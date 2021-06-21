@@ -2,15 +2,15 @@ package misk.feature.testing
 
 import com.google.common.util.concurrent.AbstractIdleService
 import com.squareup.moshi.Moshi
-import misk.feature.Attributes
 import misk.feature.DynamicConfig
-import misk.feature.Feature
-import misk.feature.FeatureFlagValidation
 import misk.feature.FeatureFlags
 import misk.feature.FeatureService
 import misk.feature.TrackerReference
-import misk.feature.fromSafeJson
-import misk.feature.toSafeJson
+import wisp.feature.Attributes
+import wisp.feature.Feature
+import wisp.feature.FeatureFlagValidation
+import wisp.feature.fromSafeJson
+import wisp.feature.toSafeJson
 import java.util.PriorityQueue
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.Executor

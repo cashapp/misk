@@ -1,6 +1,4 @@
-package misk.feature
-
-// soft deprecate to wisp.feature...
+package wisp.feature
 
 object FeatureFlagValidation {
 
@@ -10,6 +8,6 @@ object FeatureFlagValidation {
    * in the wrong value or potentially sensitive information.
    */
   fun checkValidKey(feature: Feature, key: String) {
-    wisp.feature.FeatureFlagValidation.checkValidKey(feature, key)
+    require(key.isNotEmpty()) { "Key to flag $feature must not be empty" }
   }
 }

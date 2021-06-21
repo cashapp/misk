@@ -1,8 +1,8 @@
 package misk.feature.launchdarkly
 
-import misk.feature.Attributes
+import wisp.feature.Attributes
 import misk.feature.DynamicConfig
-import misk.feature.Feature
+import wisp.feature.Feature
 import misk.feature.FeatureFlags
 import java.util.concurrent.Executor
 import javax.inject.Singleton
