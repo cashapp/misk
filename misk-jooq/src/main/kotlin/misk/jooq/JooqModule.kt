@@ -6,10 +6,14 @@ import misk.inject.asSingleton
 import misk.inject.keyOf
 import misk.inject.toKey
 import misk.jdbc.DataSourceClusterConfig
+import misk.jdbc.DataSourceConfig
 import misk.jdbc.DataSourceService
 import misk.jdbc.DatabasePool
 import misk.jdbc.JdbcModule
 import misk.jdbc.RealDatabasePool
+import misk.jooq.listeners.JooqSQLLogger
+import misk.jooq.listeners.JooqTimestampRecordListener
+import misk.jooq.listeners.JooqTimestampRecordListenerOptions
 import org.jooq.DSLContext
 import org.jooq.SQLDialect
 import org.jooq.conf.MappedSchema
@@ -25,8 +29,11 @@ import kotlin.reflect.KClass
 class JooqModule(
   private val qualifier: KClass<out Annotation>,
   private val dataSourceClusterConfig: DataSourceClusterConfig,
+  private val jooqCodeGenSchemaName: String,
   private val databasePool: DatabasePool = RealDatabasePool,
-  private val readerQualifier: KClass<out Annotation>? = null
+  private val readerQualifier: KClass<out Annotation>? = null,
+  private val jooqTimestampRecordListenerOptions: JooqTimestampRecordListenerOptions =
+    JooqTimestampRecordListenerOptions(install = false)
 ) : KAbstractModule() {
 
   override fun configure() {
@@ -40,16 +47,12 @@ class JooqModule(
       )
     )
 
-    val transacterKey = JooqTransacter::class.toKey(qualifier)
-    val dataSourceServiceProvider = getProvider(keyOf<DataSourceService>(qualifier))
-    bind(transacterKey).toProvider(
-      Provider {
-        JooqTransacter(
-          dslContext = dslContext(dataSourceServiceProvider.get())
-        )
-      }
-    ).asSingleton()
+    bindTransacter(qualifier, dataSourceClusterConfig.writer)
+    if(readerQualifier != null && dataSourceClusterConfig.reader != null) {
+      bindTransacter(readerQualifier, dataSourceClusterConfig.reader!!)
+    }
 
+    val dataSourceServiceProvider = getProvider(keyOf<DataSourceService>(qualifier))
     val jooqTransacterProvider = getProvider(keyOf<JooqTransacter>(qualifier))
     val healthCheckKey = keyOf<HealthCheck>(qualifier)
     bind(healthCheckKey)
@@ -65,21 +68,39 @@ class JooqModule(
             clock
           )
         }
-      })
-      .asSingleton()
+      }).asSingleton()
     multibind<HealthCheck>().to(healthCheckKey)
   }
 
+  private fun bindTransacter(
+    qualifier: KClass<out Annotation>,
+    datasourceConfig: DataSourceConfig
+  ) {
+    val transacterKey = JooqTransacter::class.toKey(qualifier)
+    val dataSourceServiceProvider = getProvider(keyOf<DataSourceService>(qualifier))
+    bind(transacterKey).toProvider(object : Provider<JooqTransacter> {
+      @Inject
+      lateinit var clock: Clock
+      override fun get(): JooqTransacter {
+        return JooqTransacter(
+          dslContext = dslContext(dataSourceServiceProvider.get(), clock, datasourceConfig)
+        )
+      }
+    }).asSingleton()
+  }
+
   private fun dslContext(
-    dataSourceService: DataSourceService
+    dataSourceService: DataSourceService,
+    clock: Clock,
+    datasourceConfig: DataSourceConfig
   ): DSLContext {
     val settings = Settings()
       .withExecuteWithOptimisticLocking(true)
       .withRenderMapping(
         RenderMapping().withSchemata(
           MappedSchema()
-            .withInput("jooq") // change this to be the schema name used in the code gen
-            .withOutput(dataSourceClusterConfig.writer.database)
+            .withInput(jooqCodeGenSchemaName)
+            .withOutput(datasourceConfig.database)
         )
       )
     return DSL.using(dataSourceService.get(), SQLDialect.MYSQL, settings).apply {
@@ -89,10 +110,18 @@ class JooqModule(
           false
         )
       ).apply {
-        if ("true" == dataSourceClusterConfig.writer.show_sql) {
+        if ("true" == datasourceConfig.show_sql) {
           set(JooqSQLLogger())
+        }
+        if(jooqTimestampRecordListenerOptions.install) {
+          set(JooqTimestampRecordListener(
+            clock = clock,
+            createdAtColumnName = jooqTimestampRecordListenerOptions.createdAtColumnName,
+            updatedAtColumnName = jooqTimestampRecordListenerOptions.updatedAtColumnName
+          ))
         }
       }
     }
   }
 }
+

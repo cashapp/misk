@@ -4,6 +4,7 @@ import misk.jdbc.PostCommitHookFailedException
 import misk.jooq.JooqTransacter.Companion.noRetriesOptions
 import misk.jooq.config.ClientJooqTestingModule
 import misk.jooq.config.JooqDBIdentifier
+import misk.jooq.config.JooqDBReadOnlyIdentifier
 import misk.jooq.model.Genre
 import misk.jooq.testgen.tables.references.MOVIE
 import misk.testing.MiskTest
@@ -23,6 +24,7 @@ import javax.inject.Inject
 internal class JooqTransacterTest {
   @MiskTestModule private var module = ClientJooqTestingModule()
   @Inject @JooqDBIdentifier private lateinit var transacter: JooqTransacter
+  @Inject @JooqDBReadOnlyIdentifier private lateinit var readTransacter: JooqTransacter
   @Inject private lateinit var clock: FakeClock
 
   @Test fun `retries to the max number of retries in case of a data access exception`() {
@@ -67,8 +69,6 @@ internal class JooqTransacterTest {
       ctx.newRecord(MOVIE).apply {
         this.genre = Genre.COMEDY.name
         this.name = "Enter the dragon"
-        createdAt = clock.instant().toLocalDateTime()
-        updatedAt = clock.instant().toLocalDateTime()
       }.also { it.store() }
     }
     executeInThreadsAndWait(
@@ -141,8 +141,6 @@ internal class JooqTransacterTest {
         ctx.newRecord(MOVIE).apply {
           this.genre = Genre.COMEDY.name
           this.name = "Dumb and dumber"
-          createdAt = clock.instant().toLocalDateTime()
-          updatedAt = clock.instant().toLocalDateTime()
         }.also { it.store() }
         throw IllegalStateException("") // to force a rollback
       }
@@ -167,8 +165,6 @@ internal class JooqTransacterTest {
         ctx.newRecord(MOVIE).apply {
           this.genre = Genre.COMEDY.name
           this.name = "Dumb and dumber"
-          createdAt = clock.instant().toLocalDateTime()
-          updatedAt = clock.instant().toLocalDateTime()
         }.also { it.store() }
       }
 
@@ -176,11 +172,7 @@ internal class JooqTransacterTest {
         ctx.selectFrom(MOVIE).where(MOVIE.ID.eq(movie.id)).fetchOne().getOrThrow()
           .apply {
             this.genre = Genre.HORROR.name
-          }
-          .also {
-            it.updatedAt = clock.instant().toLocalDateTime()
-          }
-          .also {
+          }.also {
             it.store()
           }
       }
@@ -218,8 +210,6 @@ internal class JooqTransacterTest {
         session.ctx.newRecord(MOVIE).apply {
           this.genre = Genre.COMEDY.name
           this.name = "Dumb and dumber"
-          createdAt = clock.instant().toLocalDateTime()
-          updatedAt = clock.instant().toLocalDateTime()
         }.also { it.store() }
       }
     }
@@ -253,8 +243,6 @@ internal class JooqTransacterTest {
         session.ctx.newRecord(MOVIE).apply {
           this.genre = Genre.COMEDY.name
           this.name = "Dumb and dumber"
-          createdAt = clock.instant().toLocalDateTime()
-          updatedAt = clock.instant().toLocalDateTime()
         }.also { it.store() }
       }
     }
@@ -288,11 +276,30 @@ internal class JooqTransacterTest {
         session.ctx.newRecord(MOVIE).apply {
           this.genre = Genre.COMEDY.name
           this.name = null // to force a sql exception
-          createdAt = clock.instant().toLocalDateTime()
-          updatedAt = clock.instant().toLocalDateTime()
         }.also { it.store() }
       }
     }
     assertThat(sessionCloseHook2Called).isTrue
+  }
+
+  @Test fun `make sure read and write transacters connect to different dbs`(){
+    transacter.transaction(noRetriesOptions) {
+      transacter.transaction(noRetriesOptions) { (ctx) ->
+        ctx.newRecord(MOVIE).apply {
+          this.genre = Genre.COMEDY.name
+          this.name = "Dumb and dumber"
+        }.also { it.store() }
+      }
+    }
+
+    /**
+     * Since no migrations are run on the reader database, this will throw an exception
+     * saying Table 'misk_jooq_testing_reader.movie' doesn't exist
+     */
+    assertThatExceptionOfType(DataAccessException::class.java).isThrownBy {
+      readTransacter.transaction { (ctx) ->
+        ctx.selectCount().from(MOVIE).fetch { it.component1() }
+      }
+    }
   }
 }
