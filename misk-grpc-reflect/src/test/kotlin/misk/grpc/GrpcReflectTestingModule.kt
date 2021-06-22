@@ -21,8 +21,7 @@ import javax.inject.Singleton
 
 class GrpcReflectTestingModule : KAbstractModule() {
   val webConfig = WebTestingModule.TESTING_WEB_CONFIG.copy(
-    port = 9090,
-    http2 = true
+    port = 9090
   )
 
   override fun configure() {

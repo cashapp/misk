@@ -109,7 +109,6 @@ abstract class AbstractRebalancingTest(
       install(
         WebServerTestingModule(
           webConfig = WebServerTestingModule.TESTING_WEB_CONFIG.copy(
-            http2 = true,
             close_connection_percent = percent,
             jetty_max_thread_pool_size = jettyMaxThreadPoolSize
           )
