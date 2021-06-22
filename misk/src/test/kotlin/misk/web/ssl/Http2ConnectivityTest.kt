@@ -231,9 +231,7 @@ class Http2ConnectivityTest {
       install(LogCollectorModule())
       install(
         WebServerTestingModule(
-          webConfig = WebServerTestingModule.TESTING_WEB_CONFIG.copy(
-            http2 = true
-          )
+          webConfig = WebServerTestingModule.TESTING_WEB_CONFIG
         )
       )
       install(MiskTestingServiceModule())

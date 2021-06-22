@@ -52,6 +52,7 @@ class WebServerTestingModule(
       selectors = 1,
       idle_timeout = 500000,
       host = "127.0.0.1",
+      http2 = true,
       ssl = WebSslConfig(
         port = 0,
         cert_store = CertStoreConfig(

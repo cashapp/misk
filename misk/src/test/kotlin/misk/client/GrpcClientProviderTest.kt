@@ -230,7 +230,7 @@ internal class GrpcClientProviderTest {
     override fun configure() {
       install(MiskTestingServiceModule())
       install(HttpClientModule("robots", Names.named("robots")))
-      install(WebServerTestingModule(webConfig = WebServerTestingModule.TESTING_WEB_CONFIG.copy(http2 = true)))
+      install(WebServerTestingModule(webConfig = WebServerTestingModule.TESTING_WEB_CONFIG))
       install(WebActionModule.create<LocateGrpcAction>())
       install(WebActionModule.create<SayHelloGrpcAction>())
     }
