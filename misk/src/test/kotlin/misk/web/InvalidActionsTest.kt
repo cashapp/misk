@@ -1,39 +1,40 @@
 package misk.web
 
 import com.google.common.util.concurrent.ServiceManager
-import com.google.inject.Injector
+import com.google.inject.Guice
 import com.google.inject.ProvisionException
+import com.squareup.protos.test.grpc.HelloReply
+import com.squareup.protos.test.grpc.HelloRequest
+import com.squareup.wire.Service
+import com.squareup.wire.WireRpc
 import misk.MiskTestingServiceModule
+import misk.exceptions.BadRequestException
 import misk.inject.KAbstractModule
-import misk.testing.MiskTest
-import misk.testing.MiskTestModule
 import misk.web.actions.WebAction
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import java.time.Duration
 import javax.inject.Inject
+import javax.inject.Singleton
 
-@MiskTest(startService = false)
 class InvalidActionsTest {
+  @Test fun failIdenticalActions() {
+    val exception = assertThrows<ProvisionException>("Should throw an exception") {
+      Guice.createInjector(IdenticalActionsModule()).getInstance(ServiceManager::class.java)
+        .startAsync().awaitHealthy()
+    }
+    assertThat(exception.message).contains(
+      "Actions [InvalidActionsTest.SomeAction, InvalidActionsTest.IdenticalAction] have identical routing annotations."
+    )
+  }
 
-  @MiskTestModule
-  val module = TestModule()
-
-  @Inject private lateinit var injector: Injector
-
-  class TestModule : KAbstractModule() {
+  class IdenticalActionsModule : KAbstractModule() {
     override fun configure() {
       install(WebServerTestingModule())
       install(MiskTestingServiceModule())
       install(WebActionModule.create<SomeAction>())
       install(WebActionModule.create<IdenticalAction>())
-    }
-  }
-
-  @Test fun failIdenticalActions() {
-    assertThrows<ProvisionException>(
-      "Actions [SomeAction, IdenticalAction] have identical routing annotations."
-    ) {
-      injector.getInstance(ServiceManager::class.java).startAsync().awaitHealthy()
     }
   }
 
@@ -49,5 +50,53 @@ class InvalidActionsTest {
     @RequestContentType("application/json")
     @ResponseContentType("application/json")
     fun hello() = "hello"
+  }
+
+  @Test fun failGrpcWithHttp2Disabled() {
+    val exception = assertThrows<ProvisionException>("Should throw an exception") {
+      Guice.createInjector(GrpcActionsModule()).getInstance(ServiceManager::class.java)
+        .startAsync().awaitHealthy()
+    }
+    assertThat(exception.message).contains(
+      "HTTP/2 must be enabled if any gRPC actions are bound."
+    )
+  }
+
+  class GrpcActionsModule : KAbstractModule() {
+    override fun configure() {
+      install(
+        WebServerTestingModule(
+          webConfig = WebServerTestingModule.TESTING_WEB_CONFIG.copy(
+            http2 = false
+          )
+        )
+      )
+      install(MiskTestingServiceModule())
+      install(WebActionModule.create<HelloRpcAction>())
+    }
+  }
+
+  @Singleton
+  class HelloRpcAction @Inject constructor() : WebAction, GreeterSayHello {
+    var failNextRequest = false
+    var sleep: Duration = Duration.ofMillis(0)
+
+    override fun sayHello(request: HelloRequest): HelloReply {
+      Thread.sleep(sleep.toMillis())
+      if (failNextRequest) throw BadRequestException("bad request!")
+
+      return HelloReply.Builder()
+        .message("howdy, ${request.name}")
+        .build()
+    }
+  }
+
+  interface GreeterSayHello : Service {
+    @WireRpc(
+      path = "/helloworld.Greeter/SayHello",
+      requestAdapter = "com.squareup.protos.test.grpc.HelloRequest.ADAPTER",
+      responseAdapter = "com.squareup.protos.test.grpc.HelloReply.ADAPTER"
+    )
+    fun sayHello(request: HelloRequest): HelloReply
   }
 }
