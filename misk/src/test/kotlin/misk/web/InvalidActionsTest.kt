@@ -8,13 +8,11 @@ import com.squareup.protos.test.grpc.HelloRequest
 import com.squareup.wire.Service
 import com.squareup.wire.WireRpc
 import misk.MiskTestingServiceModule
-import misk.exceptions.BadRequestException
 import misk.inject.KAbstractModule
 import misk.web.actions.WebAction
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import java.time.Duration
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -78,13 +76,7 @@ class InvalidActionsTest {
 
   @Singleton
   class HelloRpcAction @Inject constructor() : WebAction, GreeterSayHello {
-    var failNextRequest = false
-    var sleep: Duration = Duration.ofMillis(0)
-
     override fun sayHello(request: HelloRequest): HelloReply {
-      Thread.sleep(sleep.toMillis())
-      if (failNextRequest) throw BadRequestException("bad request!")
-
       return HelloReply.Builder()
         .message("howdy, ${request.name}")
         .build()
