@@ -34,14 +34,16 @@ internal data class ServletHttpCall(
       upstreamResponse.statusCode = value
     }
 
-  override var networkStatusCode: Int
+  override val networkStatusCode: Int
     get() = upstreamResponse.statusCode
-    set(value) {
-      upstreamResponse.statusCode = value
-    }
 
   override val responseHeaders: Headers
     get() = upstreamResponse.headers
+
+  override fun setStatusCodes(statusCode: Int, networkStatusCode: Int) {
+    _actualStatusCode = statusCode
+    upstreamResponse.statusCode = networkStatusCode
+  }
 
   override fun setResponseHeader(name: String, value: String) {
     upstreamResponse.setHeader(name, value)

@@ -125,6 +125,9 @@ class MiskClientMiskServerTest {
       assertThat(e.grpcMessage).isEqualTo("unexpected latitude error!")
       assertThat(e.grpcStatus).isEqualTo(GrpcStatus.UNKNOWN)
 
+      // Assert that _metrics_ counted a 500 and no 200s, even though an HTTP 200 was returned
+      // over HTTP. The 200 is implicitly asserted by the fact that we got a GrpcException, which
+      // is only thrown if a properly constructed gRPC error is received.
       assertResponseCount(200, 0)
       assertResponseCount(500, 1)
     }
@@ -145,6 +148,9 @@ class MiskClientMiskServerTest {
       assertThat(e.grpcStatus).isEqualTo(GrpcStatus.UNIMPLEMENTED)
         .withFailMessage("wrong gRPC status ${e.grpcStatus.name}")
 
+      // Assert that _metrics_ counted a 404 and no 200s, even though an HTTP 200 was returned
+      // over HTTP. The 200 is implicitly asserted by the fact that we got a GrpcException, which
+      // is only thrown if a properly constructed gRPC error is received.
       assertResponseCount(200, 0)
       assertResponseCount(404, 1)
     }

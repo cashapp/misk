@@ -30,14 +30,19 @@ interface HttpCall {
   val dispatchMechanism: DispatchMechanism
   val requestHeaders: Headers
 
-  /** The HTTP response under construction. */
-  /** Meaningful HTTP status about what actually happened */
+  /** Meaningful HTTP status about what actually happened. Not sent over the wire in the case
+   * of gRPC, which always returns HTTP 200 even for errors. */
   var statusCode: Int
 
-  /** The HTTP status code actually sent over the network. For gRPC, this is *always* 200, even
-   * for errors. */
-  var networkStatusCode: Int
+  /** The HTTP status code actually sent over the network. For gRPC, this is always 200, even
+   * for errors, per the spec. **/
+  val networkStatusCode: Int
+
   val responseHeaders: Headers
+
+  /** Set both the raw network status code and the meaningful status code that's
+   * recorded in metrics */
+  fun setStatusCodes(statusCode: Int, networkStatusCode: Int)
 
   fun setResponseHeader(name: String, value: String)
   fun addResponseHeaders(headers: Headers)

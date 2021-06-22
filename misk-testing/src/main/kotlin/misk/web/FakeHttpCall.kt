@@ -29,6 +29,11 @@ data class FakeHttpCall(
   override val responseHeaders: Headers
     get() = headersBuilder.build()
 
+  override fun setStatusCodes(statusCode: Int, networkStatusCode: Int) {
+    this.statusCode = statusCode
+    this.networkStatusCode = networkStatusCode
+  }
+
   override fun setResponseHeader(name: String, value: String) {
     headersBuilder.set(name, value)
   }
