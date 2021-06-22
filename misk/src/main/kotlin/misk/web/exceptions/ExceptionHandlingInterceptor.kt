@@ -68,7 +68,7 @@ class ExceptionHandlingInterceptor(
    * Otherwise gRPC requests that crashed and yielded an HTTP 200 code will confuse operators.
    */
   private fun sendGrpcFailure(httpCall: HttpCall, response: Response<*>) {
-    httpCall.networkStatusCode = 200
+    httpCall.setStatusCodes(httpCall.statusCode, 200)
     httpCall.requireTrailers()
     httpCall.setResponseHeader("grpc-encoding", "identity")
     httpCall.setResponseHeader("Content-Type", MediaTypes.APPLICATION_GRPC)
