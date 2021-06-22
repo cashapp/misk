@@ -18,6 +18,7 @@ class OpaModule @Inject constructor(
   override fun configure() {
     require(config.baseUrl.isNotBlank())
     bind<OpaConfig>().toInstance(config)
+    bind<OpaPolicyEngine>().to<RealOpaPolicyEngine>()
   }
 
   @Provides
