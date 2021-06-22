@@ -76,7 +76,6 @@ class UDSHttp2ConnectivityTest {
       install(
         WebServerTestingModule(
           webConfig = WebServerTestingModule.TESTING_WEB_CONFIG.copy(
-            http2 = true,
             unix_domain_socket = WebUnixDomainSocketConfig(
               path = socketName
             )
