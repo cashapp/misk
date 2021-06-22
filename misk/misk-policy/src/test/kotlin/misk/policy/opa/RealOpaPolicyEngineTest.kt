@@ -17,7 +17,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.mockito.ArgumentCaptor
 import org.mockito.Mockito.anyString
-import org.mockito.Mockito.isNull
 import retrofit2.Response
 import retrofit2.mock.Calls
 import javax.inject.Inject
@@ -25,8 +24,12 @@ import javax.inject.Named
 import javax.inject.Singleton
 
 @MiskTest(startService = false)
-internal class OpaPolicyEngineTest {
+internal class RealOpaPolicyEngineTest {
   @MiskTestModule val module: Module = object : KAbstractModule() {
+    override fun configure() {
+      bind<OpaPolicyEngine>().to<RealOpaPolicyEngine>()
+    }
+
     @Provides @Singleton
     fun opaApi(): OpaApi = Mockito.mock()
 
@@ -54,7 +57,6 @@ internal class OpaPolicyEngineTest {
     val evaluate: BasicResponse = opaPolicyEngine.evaluate("test")
     assertThat(evaluate).isEqualTo(BasicResponse("a"))
   }
-
 
   @Test
   fun pojoInputQuery() {
@@ -86,7 +88,7 @@ internal class OpaPolicyEngineTest {
     )
 
     val exception = assertThrows<PolicyEngineException> {
-      opaPolicyEngine.evaluate("test", BasicRequest(1))
+      val evaluate: BasicResponse = opaPolicyEngine.evaluate("test", BasicRequest(1))
     }
     assertThat(exception.message).isEqualTo("[403]: Access Denied")
   }
@@ -138,7 +140,6 @@ internal class OpaPolicyEngineTest {
   // Weird kotlin workaround for mockito. T must not be nullable.
   private fun <T> capture(argumentCaptor: ArgumentCaptor<T>): T = argumentCaptor.capture()
 
-  data class BasicResponse(val test: String)
-  data class BasicRequest(val someValue: Int)
+  data class BasicResponse(val test: String) : OpaResponse
+  data class BasicRequest(val someValue: Int) : OpaRequest
 }
-

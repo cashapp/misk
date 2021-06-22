@@ -8,3 +8,5 @@ data class Response<T>(
   val decision_id: String?,
   val result: T?
 )
+
+interface OpaResponse
