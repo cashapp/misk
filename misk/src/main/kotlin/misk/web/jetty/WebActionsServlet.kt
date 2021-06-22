@@ -5,6 +5,7 @@ import misk.web.BoundAction
 import misk.web.DispatchMechanism
 import misk.web.ServletHttpCall
 import misk.web.SocketAddress
+import misk.web.WebConfig
 import misk.web.actions.WebAction
 import misk.web.actions.WebActionEntry
 import misk.web.actions.WebActionFactory
@@ -36,7 +37,8 @@ import javax.servlet.http.HttpServletResponse
 @Singleton
 internal class WebActionsServlet @Inject constructor(
   webActionFactory: WebActionFactory,
-  webActionEntries: List<WebActionEntry>
+  webActionEntries: List<WebActionEntry>,
+  config: WebConfig,
 ) : WebSocketServlet() {
 
   companion object {
@@ -62,6 +64,12 @@ internal class WebActionsServlet @Inject constructor(
           "Actions [${action.action.name}, ${other.action.name}] have identical routing " +
             "annotations."
         }
+      }
+    }
+    // Check http2 is enabled if any gRPC actions are bound.
+    if (boundActions.any { it.action.dispatchMechanism == DispatchMechanism.GRPC }) {
+      check(config.http2) {
+        "HTTP/2 must be enabled if any gRPC actions are bound."
       }
     }
   }

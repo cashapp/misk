@@ -13,7 +13,7 @@ import javax.inject.Named
 /** A module that runs a Misk gRPC server: Wire protos and a Jetty backend. */
 class RouteGuideMiskServiceModule : KAbstractModule() {
   override fun configure() {
-    install(WebServerTestingModule(webConfig = WebServerTestingModule.TESTING_WEB_CONFIG.copy(http2 = true)))
+    install(WebServerTestingModule(webConfig = WebServerTestingModule.TESTING_WEB_CONFIG))
     install(Modules.override(MiskTestingServiceModule()).with(FakeMetricsModule()))
     install(WebActionModule.create<GetFeatureGrpcAction>())
     install(WebActionModule.create<RouteChatGrpcAction>())
