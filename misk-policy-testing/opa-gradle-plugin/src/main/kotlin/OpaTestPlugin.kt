@@ -13,7 +13,6 @@ import okio.Buffer
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.provider.Property
-import org.gradle.kotlin.dsl.create
 
 interface OpaTestConfig {
   val policyDir: Property<String>
@@ -21,13 +20,13 @@ interface OpaTestConfig {
 
 class OpaTestPlugin : Plugin<Project> {
   override fun apply(project: Project) {
-    val config: OpaTestConfig = project.extensions.create("opa")
+    val config = project.extensions.create("opa", OpaTestConfig::class.java)
 
     val opaTestWithDocker = project.tasks.create("opaTestWithDocker") {
-      group = "OPA"
-      description = "Evaluate OPA tests via docker OPA instance"
+      it.group = "OPA"
+      it.description = "Evaluate OPA tests via docker OPA instance"
 
-      doLast {
+      it.doLast {
         val dockerClient = DockerClientBuilder.getInstance()
           .withDockerCmdExecFactory(NettyDockerCmdExecFactory())
           .build()
