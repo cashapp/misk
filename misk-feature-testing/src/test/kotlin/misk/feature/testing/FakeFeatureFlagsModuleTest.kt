@@ -15,8 +15,7 @@ class FakeFeatureFlagsModuleTest {
       FakeFeatureFlagsModule().withOverrides {
         override(Feature("foo"), 24)
         overrideJson(Feature("jsonFeature"), JsonFeature("testValue"))
-      },
-      MoshiTestingModule()
+      }
     )
 
     val flags = injector.getInstance(FeatureFlags::class.java)

@@ -18,7 +18,7 @@ import org.mockito.Mockito.verifyNoMoreInteractions
 
 internal class FlaggedBufferedSqsClientTest {
   @Test fun `dynamically switches between underlying clients based on feature status`() {
-    val flags = FakeFeatureFlags { Moshi.Builder().build() }
+    val flags = FakeFeatureFlags(Moshi.Builder().build())
     flags.override(FlaggedBufferedSqsClient.FEATURE, false)
 
     val unbuffered = mock<AmazonSQS>()
