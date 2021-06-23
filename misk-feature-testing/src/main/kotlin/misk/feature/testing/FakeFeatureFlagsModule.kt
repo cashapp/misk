@@ -2,11 +2,11 @@ package misk.feature.testing
 
 import com.squareup.moshi.Moshi
 import misk.ServiceModule
-import misk.feature.DynamicConfig
-import misk.feature.FeatureFlags
 import misk.feature.FeatureService
 import misk.inject.KAbstractModule
 import misk.inject.toKey
+import wisp.feature.DynamicConfig
+import wisp.feature.FeatureFlags
 import kotlin.reflect.KClass
 
 /**
