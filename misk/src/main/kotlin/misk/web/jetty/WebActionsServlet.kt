@@ -68,8 +68,12 @@ internal class WebActionsServlet @Inject constructor(
     }
     // Check http2 is enabled if any gRPC actions are bound.
     if (boundActions.any { it.action.dispatchMechanism == DispatchMechanism.GRPC }) {
-      check(config.http2) {
-        "HTTP/2 must be enabled if any gRPC actions are bound."
+      if(config.http2) {
+        log.warn { "HTTP/2 must be enabled if any gRPC actions are bound. " +
+          "This will cause an error in the future. Check these actions: " +
+          "${boundActions
+            .filter { it.action.dispatchMechanism == DispatchMechanism.GRPC  }
+            .map { it.action.name }}" }
       }
     }
   }
