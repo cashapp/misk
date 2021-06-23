@@ -21,8 +21,8 @@ internal class FakeFeatureFlagsTest {
 
   class TestModule : KAbstractModule() {
     override fun configure() {
-      install(FakeFeatureFlagsModule())
       install(MoshiTestingModule())
+      install(FakeFeatureFlagsModule())
     }
   }
 

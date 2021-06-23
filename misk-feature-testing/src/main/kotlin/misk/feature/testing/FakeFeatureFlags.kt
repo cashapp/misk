@@ -25,11 +25,8 @@ class FakeFeatureFlags @Inject constructor(
     val defaultAttributes = Attributes()
   }
 
-  private lateinit var delegate: wisp.feature.testing.FakeFeatureFlags
-
-  @Inject
-  fun postConstruct() {
-    delegate = wisp.feature.testing.FakeFeatureFlags(moshi.get())
+  val delegate: wisp.feature.testing.FakeFeatureFlags by lazy {
+    wisp.feature.testing.FakeFeatureFlags(moshi.get())
   }
 
   override fun startUp() {}

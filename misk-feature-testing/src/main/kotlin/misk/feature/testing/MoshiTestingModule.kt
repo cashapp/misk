@@ -9,7 +9,7 @@ import misk.inject.KAbstractModule
  *
  * Misk services automatically get this binding, but no need to depend on all of misk to test this.
  */
-internal class MoshiTestingModule : KAbstractModule() {
+class MoshiTestingModule : KAbstractModule() {
   override fun configure() {
     bind<Moshi>().toInstance(
       Moshi.Builder()
