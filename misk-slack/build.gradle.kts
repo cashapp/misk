@@ -12,7 +12,6 @@ dependencies {
   api(project(":wisp-logging"))
 
   testImplementation(Dependencies.assertj)
-  testImplementation(Dependencies.junit4Api)
   testImplementation(Dependencies.junitApi)
   testImplementation(Dependencies.junitEngine)
   testImplementation(Dependencies.junitParams)
