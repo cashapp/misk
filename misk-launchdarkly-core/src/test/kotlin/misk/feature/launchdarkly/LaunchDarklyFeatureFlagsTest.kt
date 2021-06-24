@@ -8,11 +8,6 @@ import com.launchdarkly.sdk.UserAttribute
 import com.launchdarkly.sdk.server.interfaces.LDClientInterface
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
-import misk.feature.Attributes
-import misk.feature.Feature
-import misk.feature.FeatureFlags
-import misk.feature.getEnum
-import misk.feature.getJson
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -25,6 +20,11 @@ import org.mockito.Mockito.anyString
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
+import wisp.feature.Attributes
+import wisp.feature.Feature
+import wisp.feature.FeatureFlags
+import wisp.feature.getEnum
+import wisp.feature.getJson
 
 internal class LaunchDarklyFeatureFlagsTest {
   private val client = mock(LDClientInterface::class.java)

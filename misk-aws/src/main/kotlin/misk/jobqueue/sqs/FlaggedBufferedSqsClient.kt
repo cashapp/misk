@@ -6,8 +6,8 @@ import com.amazonaws.services.sqs.model.DeleteMessageRequest
 import com.amazonaws.services.sqs.model.DeleteMessageResult
 import com.amazonaws.services.sqs.model.SendMessageRequest
 import com.amazonaws.services.sqs.model.SendMessageResult
-import misk.feature.Feature
-import misk.feature.FeatureFlags
+import wisp.feature.Feature
+import wisp.feature.FeatureFlags
 
 /**
  * Temporary shim for buffered and unbuffered [AmazonSQS] implementations, for feature-flagged rollout of buffered
