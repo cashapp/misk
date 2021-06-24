@@ -11,15 +11,15 @@ import javax.inject.Inject
 class FakeRedis : Redis {
   @Inject lateinit var clock: Clock
 
-  // The value type stored in our key-value store.
+  /** The value type stored in our key-value store. */
   private data class Value(
     val data: ByteString,
     val expiryInstant: Instant
   )
 
-  // Acts as the Redis key-value store.
+  /** Acts as the Redis key-value store. */
   private val keyValueStore = ConcurrentHashMap<String, Value>()
-  // A nested hash map for the hget and hset operations.
+  /** A nested hash map for the hget and hset operations. */
   private val hKeyValueStore = ConcurrentHashMap<String, ConcurrentHashMap<String, Value>>()
 
   override fun del(key: String): Boolean {
