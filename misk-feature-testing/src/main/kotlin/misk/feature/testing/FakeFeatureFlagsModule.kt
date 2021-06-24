@@ -14,16 +14,13 @@ import kotlin.reflect.KClass
  * Binds a [FakeFeatureFlags] that allows tests to override values.
  */
 class FakeFeatureFlagsModule(
-  private val qualifier: KClass<out Annotation>? = null
+  private val qualifier: KClass<out Annotation>? = null,
+  private val moshi: Moshi = useDefaultMoshi()
 ) : KAbstractModule() {
   private val overrides = mutableListOf<FakeFeatureFlags.() -> Unit>()
 
   override fun configure() {
-    val testFeatureFlags = FakeFeatureFlags(
-      Moshi.Builder()
-        .add(KotlinJsonAdapterFactory()) // Added last for lowest precedence.
-        .build()
-    )
+    val testFeatureFlags = FakeFeatureFlags(moshi)
     val key = FakeFeatureFlags::class.toKey(qualifier)
     bind(key).toInstance(testFeatureFlags)
     bind(FeatureFlags::class.toKey(qualifier)).to(key)
@@ -51,3 +48,7 @@ class FakeFeatureFlagsModule(
     return this
   }
 }
+
+fun useDefaultMoshi(): Moshi = Moshi.Builder()
+  .add(KotlinJsonAdapterFactory()) // Added last for lowest precedence.
+  .build()
