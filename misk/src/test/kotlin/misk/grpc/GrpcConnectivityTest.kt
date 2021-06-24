@@ -41,6 +41,7 @@ import javax.inject.Singleton
  * That sample includes a client and a server that connect to each other. You can also connect this
  * test's client to that sample server, or that sample client to this test's server.
  */
+@Disabled("gRPC tests are flaky in CI, see https://github.com/cashapp/misk/issues/1853")
 @MiskTest(startService = true)
 class GrpcConnectivityTest {
   @MiskTestModule
@@ -57,7 +58,6 @@ class GrpcConnectivityTest {
     client = clientInjector.getInstance(OkHttpClient::class.java)
   }
 
-  @Disabled("gRPC tests are flaky, see https://github.com/cashapp/misk/issues/1853")
   @Test
   fun happyPath() {
     val request = Request.Builder()
