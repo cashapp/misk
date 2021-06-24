@@ -7,7 +7,7 @@ import javax.inject.Singleton
 
 /** Controls the connection lifecycle for Redis. */
 @Singleton
-internal class RedisService @Inject internal constructor(
+class RedisService @Inject internal constructor(
   private val redisProvider: Provider<Redis>
 ) : AbstractIdleService() {
   // We initialize the client in startUp because creating the client will connect it to Redis
