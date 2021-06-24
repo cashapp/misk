@@ -6,7 +6,6 @@ dependencies {
   implementation(Dependencies.moshiCore)
   implementation(project(":misk-feature"))
 
-  testImplementation(project(":misk-testing"))
   testImplementation(Dependencies.assertj)
   testImplementation(Dependencies.kotlinTest)
   testImplementation(Dependencies.mockitoCore)
