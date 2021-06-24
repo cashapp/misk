@@ -7,8 +7,6 @@ import com.launchdarkly.sdk.server.LDConfig
 import com.launchdarkly.sdk.server.interfaces.LDClientInterface
 import misk.ServiceModule
 import misk.client.HttpClientSSLConfig
-import misk.feature.DynamicConfig
-import misk.feature.FeatureFlags
 import misk.feature.FeatureService
 import misk.inject.KAbstractModule
 import misk.inject.toKey
@@ -16,6 +14,8 @@ import misk.resources.ResourceLoader
 import misk.security.ssl.SslContextFactory
 import misk.security.ssl.SslLoader
 import wisp.config.Config
+import wisp.feature.DynamicConfig
+import wisp.feature.FeatureFlags
 import java.net.URI
 import java.time.Duration
 import javax.inject.Provider

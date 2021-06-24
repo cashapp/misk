@@ -14,6 +14,8 @@ dependencies {
   api(project(":misk-feature"))
   api(project(":misk-inject"))
   api(project(":misk-service"))
+  api(project(":wisp-feature"))
+  api(project(":wisp-feature-testing"))
 
   testImplementation(Dependencies.assertj)
   testImplementation(Dependencies.kotlinTest)

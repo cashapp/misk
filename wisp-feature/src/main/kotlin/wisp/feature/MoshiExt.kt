@@ -1,4 +1,4 @@
-package misk.feature
+package wisp.feature
 
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonDataException
