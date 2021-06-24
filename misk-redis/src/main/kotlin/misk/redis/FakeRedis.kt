@@ -19,6 +19,8 @@ class FakeRedis : Redis {
 
   // Acts as the Redis key-value store.
   private val keyValueStore = ConcurrentHashMap<String, Value>()
+  // A nested hash map for the hget and hset operations.
+  private val hKeyValueStore = ConcurrentHashMap<String, ConcurrentHashMap<String, Value>>()
 
   override fun del(key: String): Boolean {
     if (!keyValueStore.containsKey(key)) {
@@ -57,6 +59,17 @@ class FakeRedis : Redis {
     return value.data
   }
 
+  override fun hget(key: String, field: String): ByteString? {
+    val keyMap = hKeyValueStore[key] ?: return null
+    return keyMap[field]?.data
+  }
+
+  override fun hgetAll(key: String): Map<String, ByteString>? {
+    return hKeyValueStore[key]?.mapValues {
+      it.value.data
+    }
+  }
+
   override fun set(key: String, value: ByteString) {
     // Set the key to expire at the latest possible instant
     keyValueStore[key] = Value(
@@ -84,5 +97,15 @@ class FakeRedis : Redis {
         data = value,
         expiryInstant = clock.instant().plusSeconds(expiryDuration.seconds)
     ))
+  }
+
+  override fun hset(key: String, field: String, value: ByteString) {
+    if (hKeyValueStore[key].isNullOrEmpty()) {
+      hKeyValueStore[key] = ConcurrentHashMap()
+    }
+    hKeyValueStore[key]!![field] = Value(
+      data = value,
+      expiryInstant = Instant.MAX
+    )
   }
 }

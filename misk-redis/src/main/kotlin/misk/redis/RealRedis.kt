@@ -47,6 +47,24 @@ class RealRedis(private val jedisPool: JedisPool) : Redis {
     }
   }
 
+  // Get a map of field -> value pairs for the given key.
+  override fun hgetAll(key: String): Map<String, ByteString>? {
+    jedisPool.resource.use { jedis ->
+      return jedis.hgetAll(key.toByteArray(charset))?.mapKeys {
+        it.key.toString(charset)
+      }?.mapValues {
+        it.value.toByteString()
+      }
+    }
+  }
+
+  // Get a ByteString value for the given key and field
+  override fun hget(key: String, field: String): ByteString? {
+    jedisPool.resource.use { jedis ->
+      return jedis.hget(key.toByteArray(charset), field.toByteArray(charset))?.toByteString()
+    }
+  }
+
   // Set a ByteArray value
   override fun set(key: String, value: ByteString) {
     jedisPool.resource.use { jedis ->
@@ -73,6 +91,13 @@ class RealRedis(private val jedisPool: JedisPool) : Redis {
     val setParams = SetParams.setParams().ex(expiryDuration.seconds.toInt()).nx()
     jedisPool.resource.use { jedis ->
       jedis.set(key.toByteArray(charset), value.toByteArray(), setParams)
+    }
+  }
+
+  // Set a ByteArray value for the given key and field.
+  override fun hset(key: String, field: String, value: ByteString) {
+    jedisPool.resource.use { jedis ->
+      jedis.hset(key.toByteArray(charset), field.toByteArray(charset), value.toByteArray())
     }
   }
 
