@@ -1,4 +1,4 @@
-package misk.feature
+package wisp.feature
 
 object FeatureFlagValidation {
 
