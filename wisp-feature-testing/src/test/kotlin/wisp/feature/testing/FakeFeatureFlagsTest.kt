@@ -1,33 +1,32 @@
-package misk.feature.testing
+package wisp.feature.testing
 
 import com.squareup.moshi.JsonDataException
-import misk.inject.KAbstractModule
-import misk.testing.MiskTest
-import misk.testing.MiskTestModule
+import com.squareup.moshi.Moshi
+import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import wisp.feature.Attributes
 import wisp.feature.Feature
 import wisp.feature.getEnum
 import wisp.feature.getJson
-import javax.inject.Inject
 
-@MiskTest
 internal class FakeFeatureFlagsTest {
   val FEATURE = Feature("foo")
   val OTHER_FEATURE = Feature("bar")
   val TOKEN = "cust_abcdef123"
 
-  class TestModule : KAbstractModule() {
-    override fun configure() {
-      install(FakeFeatureFlagsModule())
-    }
+  val moshi = Moshi.Builder()
+    .add(KotlinJsonAdapterFactory()) // Added last for lowest precedence.
+    .build()
+
+  lateinit var subject: FakeFeatureFlags
+
+  @BeforeEach
+  fun beforeEachTest() {
+    subject = FakeFeatureFlags(moshi)
   }
-
-  @MiskTestModule val module = TestModule()
-
-  @Inject lateinit var subject: FakeFeatureFlags
 
   @Test
   fun getInt() {
