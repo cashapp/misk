@@ -17,7 +17,6 @@ import misk.ApplicationInterceptor
 import misk.MiskCaller
 import misk.MiskDefault
 import misk.ServiceModule
-import misk.exceptions.ActionException
 import misk.exceptions.WebActionException
 import misk.grpc.GrpcFeatureBinding
 import misk.inject.KAbstractModule
@@ -32,7 +31,6 @@ import misk.web.actions.NotFoundAction
 import misk.web.actions.ReadinessCheckAction
 import misk.web.actions.StatusAction
 import misk.web.exceptions.ActionExceptionLogLevelConfig
-import misk.web.exceptions.ActionExceptionMapper
 import misk.web.exceptions.EofExceptionMapper
 import misk.web.exceptions.ExceptionHandlingInterceptor
 import misk.web.exceptions.ExceptionMapperModule
@@ -170,7 +168,6 @@ class MiskWebModule(private val config: WebConfig) : KAbstractModule() {
     multibind<ApplicationInterceptor.Factory>(MiskDefault::class)
       .to<RequestBodyLoggingInterceptor.Factory>()
 
-    install(ExceptionMapperModule.create<ActionException, ActionExceptionMapper>())
     install(ExceptionMapperModule.create<WebActionException, WebActionExceptionMapper>())
     install(ExceptionMapperModule.create<IOException, IOExceptionMapper>())
     install(ExceptionMapperModule.create<EofException, EofExceptionMapper>())
