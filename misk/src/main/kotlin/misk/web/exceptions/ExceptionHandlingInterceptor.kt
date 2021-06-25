@@ -2,7 +2,6 @@ package misk.web.exceptions
 
 import com.google.common.util.concurrent.UncheckedExecutionException
 import misk.Action
-import misk.exceptions.StatusCode
 import misk.exceptions.UnauthenticatedException
 import misk.exceptions.UnauthorizedException
 import misk.web.NetworkChain
@@ -15,6 +14,7 @@ import okhttp3.Headers.Companion.toHeaders
 import wisp.logging.getLogger
 import wisp.logging.log
 import java.lang.reflect.InvocationTargetException
+import java.net.HttpURLConnection
 import javax.inject.Inject
 
 /**
@@ -72,19 +72,19 @@ class ExceptionHandlingInterceptor(
     val INTERNAL_SERVER_ERROR_RESPONSE = Response(
       "internal server error".toResponseBody(),
       listOf("Content-Type" to MediaTypes.TEXT_PLAIN_UTF8).toMap().toHeaders(),
-      StatusCode.INTERNAL_SERVER_ERROR.code
+      HttpURLConnection.HTTP_INTERNAL_ERROR
     )
 
     val UNAUTHENTICATED_RESPONSE = Response(
       "unauthenticated".toResponseBody(),
       listOf("Content-Type" to MediaTypes.TEXT_PLAIN_UTF8).toMap().toHeaders(),
-      StatusCode.UNAUTHENTICATED.code
+      HttpURLConnection.HTTP_UNAUTHORIZED
     )
 
     val UNAUTHORIZED_RESPONSE = Response(
       "unauthorized".toResponseBody(),
       listOf("Content-Type" to MediaTypes.TEXT_PLAIN_UTF8).toMap().toHeaders(),
-      StatusCode.FORBIDDEN.code
+      HttpURLConnection.HTTP_FORBIDDEN
     )
   }
 }

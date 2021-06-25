@@ -11,7 +11,6 @@ import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.reflect.full.findAnnotation
 import misk.Action
-import misk.exceptions.StatusCode
 import misk.metrics.Metrics
 import misk.web.AvailableWhenDegraded
 import misk.web.NetworkChain
@@ -19,6 +18,7 @@ import misk.web.NetworkInterceptor
 import org.slf4j.event.Level
 import wisp.logging.getLogger
 import wisp.logging.log
+import java.net.HttpURLConnection
 
 /**
  * Detects degraded behavior and sheds requests accordingly. Internally this uses adaptive limiting
@@ -71,7 +71,7 @@ internal class ConcurrencyLimitsInterceptor internal constructor(
     if (listener == null) {
       factory.outcomeCounter.labels(metricsName, "rejected").inc()
       logShedRequest(limiter, quotaPath)
-      chain.httpCall.statusCode = StatusCode.SERVICE_UNAVAILABLE.code
+      chain.httpCall.statusCode = HttpURLConnection.HTTP_UNAVAILABLE
       chain.httpCall.takeResponseBody()?.use { sink ->
         sink.writeUtf8("service unavailable")
       }
