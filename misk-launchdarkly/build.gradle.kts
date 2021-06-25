@@ -10,6 +10,7 @@ dependencies {
   implementation(project(":misk-launchdarkly-core"))
   implementation(project(":misk-service"))
   api(project(":wisp-config"))
+  api(project(":wisp-launchdarkly"))
 
   testImplementation(project(":misk-testing"))
 }
