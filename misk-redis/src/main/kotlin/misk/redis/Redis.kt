@@ -47,6 +47,24 @@ interface Redis {
   operator fun get(key: String): ByteString?
 
   /**
+   * Retrieves the value for the given key and field as a [ByteString].
+   *
+   * @param key the key
+   * @param field the field
+   * @return a [ByteString] if the key/field combination was found, null if not found
+   */
+  fun hget(key: String, field: String): ByteString?
+
+  /**
+   * Retrieves all the fields and associated values for the given key. Returns null if nothing
+   * found.
+   *
+   * @param key the key
+   * @return a Map<String, ByteString> of the fields to their associated values
+   */
+  fun hgetAll(key: String): Map<String, ByteString>?
+
+  /**
    * Sets the [ByteString] value for the given key.
    *
    * @param key the key to set
@@ -80,4 +98,13 @@ interface Redis {
    * @param value the value to set
    */
   fun setnx(key: String, expiryDuration: Duration, value: ByteString)
+
+  /**
+   * Sets the [ByteString] value for the given key and field
+   *
+   * @param key the key
+   * @param field the field
+   * @param value the value to set
+   */
+  fun hset(key: String, field: String, value: ByteString)
 }
