@@ -4,8 +4,7 @@ import com.google.inject.Guice
 import io.opentracing.tag.Tags
 import misk.MiskTestingServiceModule
 import misk.asAction
-import misk.exceptions.ActionException
-import misk.exceptions.StatusCode
+import misk.exceptions.WebActionException
 import misk.inject.KAbstractModule
 import misk.testing.ConcurrentMockTracer
 import misk.testing.MiskTest
@@ -29,6 +28,7 @@ import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.OkHttpClient
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import java.net.HttpURLConnection
 import javax.inject.Inject
 
 @MiskTest(startService = true)
@@ -175,14 +175,14 @@ class TracingInterceptorTest {
   internal class FailedTracingTestAction @Inject constructor() : WebAction {
     @Get("/failed_trace")
     fun call(): Response<String> {
-      return Response("no good", statusCode = StatusCode.BAD_REQUEST.code)
+      return Response("no good", statusCode = HttpURLConnection.HTTP_BAD_REQUEST)
     }
   }
 
   internal class ExceptionThrowingTracingTestAction @Inject constructor() : WebAction {
     @Get("/exception_trace")
     fun call(): Response<String> {
-      throw ActionException(StatusCode.ENHANCE_YOUR_CALM, "Chill, man")
+      throw WebActionException(420, "Chill, man", "chiiiilll")
     }
   }
 

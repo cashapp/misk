@@ -2,8 +2,8 @@ package misk.tracing
 
 import io.opentracing.mock.MockSpan
 import io.opentracing.tag.Tags
-import misk.exceptions.ActionException
-import misk.exceptions.StatusCode
+import misk.exceptions.BadRequestException
+import misk.exceptions.WebActionException
 import misk.testing.ConcurrentMockTracer
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
@@ -43,9 +43,9 @@ class TracerExtTest {
   @Test
   fun tagTracingFailures() {
     assertThat(tracer.finishedSpans().size).isEqualTo(0)
-    assertFailsWith<ActionException> {
+    assertFailsWith<WebActionException> {
       tracer.trace("failedTrace") {
-        throw ActionException(StatusCode.BAD_REQUEST, "sadness")
+        throw BadRequestException("sadness")
       }
     }
     val span = tracer.take()

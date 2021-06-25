@@ -2,7 +2,7 @@ package misk.hibernate
 
 import com.google.common.base.Throwables
 import misk.exceptions.ConflictException
-import misk.exceptions.StatusCode
+import misk.exceptions.TooManyRequestsException
 import misk.web.Response
 import misk.web.ResponseBody
 import misk.web.exceptions.ExceptionMapper
@@ -62,8 +62,8 @@ internal class ResourceExhaustedExceptionMapper @Inject internal constructor() :
 
   override fun toResponse(th: GenericJDBCException): Response<ResponseBody> =
     Response(
-      StatusCode.TOO_MANY_REQUESTS.name.toResponseBody(), HEADERS,
-      statusCode = StatusCode.TOO_MANY_REQUESTS.code
+      "TOO_MANY_REQUESTS".toResponseBody(), HEADERS,
+      statusCode = TooManyRequestsException().code
     )
 
   override fun canHandle(th: Throwable): Boolean =
