@@ -2,6 +2,7 @@ dependencies {
   api(project(":wisp-config"))
   api(project(":wisp-logging"))
   api(project(":wisp-resource-loader"))
+  api(project(":wisp-resource-loader-testing"))
   api(project(":wisp-ssl"))
   implementation(Dependencies.bouncycastle)
   implementation(Dependencies.guice)

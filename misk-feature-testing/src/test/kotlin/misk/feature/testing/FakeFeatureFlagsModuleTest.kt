@@ -1,11 +1,11 @@
 package misk.feature.testing
 
 import com.google.inject.Guice
-import misk.feature.Feature
-import misk.feature.FeatureFlags
-import misk.feature.getJson
 import misk.feature.testing.FakeFeatureFlagsTest.JsonFeature
 import org.junit.jupiter.api.Test
+import wisp.feature.Feature
+import wisp.feature.FeatureFlags
+import wisp.feature.getJson
 import kotlin.test.assertEquals
 
 class FakeFeatureFlagsModuleTest {
@@ -15,8 +15,7 @@ class FakeFeatureFlagsModuleTest {
       FakeFeatureFlagsModule().withOverrides {
         override(Feature("foo"), 24)
         overrideJson(Feature("jsonFeature"), JsonFeature("testValue"))
-      },
-      MoshiTestingModule()
+      }
     )
 
     val flags = injector.getInstance(FeatureFlags::class.java)

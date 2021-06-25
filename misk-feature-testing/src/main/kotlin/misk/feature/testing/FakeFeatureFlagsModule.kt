@@ -1,33 +1,35 @@
 package misk.feature.testing
 
 import com.squareup.moshi.Moshi
+import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import misk.ServiceModule
-import misk.feature.DynamicConfig
-import misk.feature.FeatureFlags
 import misk.feature.FeatureService
 import misk.inject.KAbstractModule
 import misk.inject.toKey
+import wisp.feature.DynamicConfig
+import wisp.feature.FeatureFlags
 import kotlin.reflect.KClass
 
 /**
  * Binds a [FakeFeatureFlags] that allows tests to override values.
  */
 class FakeFeatureFlagsModule(
-  private val qualifier: KClass<out Annotation>? = null
+  private val qualifier: KClass<out Annotation>? = null,
+  private val moshi: Moshi = useDefaultMoshi()
 ) : KAbstractModule() {
-  private val overrides = mutableListOf< FakeFeatureFlags.() -> Unit>()
+  private val overrides = mutableListOf<FakeFeatureFlags.() -> Unit>()
 
   override fun configure() {
-    val testFeatureFlags = FakeFeatureFlags(getProvider(Moshi::class.java))
-    overrides.forEach {
-      it.invoke(testFeatureFlags)
-    }
+    val testFeatureFlags = FakeFeatureFlags(moshi)
     val key = FakeFeatureFlags::class.toKey(qualifier)
     bind(key).toInstance(testFeatureFlags)
     bind(FeatureFlags::class.toKey(qualifier)).to(key)
     bind(FeatureService::class.toKey(qualifier)).to(key)
     bind(DynamicConfig::class.toKey(qualifier)).to(key)
     install(ServiceModule(FeatureService::class.toKey(qualifier)))
+    overrides.forEach {
+      it.invoke(testFeatureFlags)
+    }
   }
 
   /**
@@ -46,3 +48,7 @@ class FakeFeatureFlagsModule(
     return this
   }
 }
+
+fun useDefaultMoshi(): Moshi = Moshi.Builder()
+  .add(KotlinJsonAdapterFactory()) // Added last for lowest precedence.
+  .build()
