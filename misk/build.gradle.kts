@@ -25,6 +25,7 @@ dependencies {
   implementation(Dependencies.moshiCore)
   implementation(Dependencies.moshiKotlin)
   implementation(Dependencies.moshiAdapters)
+  implementation(Dependencies.httpComponentsCore5)
   implementation(Dependencies.jettyHttp2)
   implementation(Dependencies.jettyServer)
   implementation(Dependencies.jettyUnixSocket)

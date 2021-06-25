@@ -45,12 +45,16 @@ open class WebActionException(
   /** The HTTP status code. Should be 400..599. */
   val code: Int,
   /**
-   * This is returned to the caller as is. Be mindful not to leak internal implementation details
-   * and possible vulnerabilities in the response body.
+   * This is returned to the caller as is for 4xx responses. 5xx responses are always masked.
+   * Be mindful not to leak internal implementation details and possible vulnerabilities in the
+   * response body.
    */
   val responseBody: String,
+  /**
+   * This is logged as the exception message.
+   */
   message: String,
-  cause: Throwable?
+  cause: Throwable? = null
 ) : Exception(message, cause) {
   val isClientError = code in (400..499)
   val isServerError = code in (500..599)
@@ -87,11 +91,17 @@ open class BadRequestException(message: String = "", cause: Throwable? = null) :
 open class ConflictException(message: String = "", cause: Throwable? = null) :
   WebActionException(HTTP_CONFLICT, message, message, cause)
 
+/** This exception is custom to Misk. */
 open class UnprocessableEntityException(message: String = "", cause: Throwable? = null) :
   WebActionException(422, message, message, cause)
 
+/** This exception is custom to Misk. */
 open class TooManyRequestsException(message: String = "", cause: Throwable? = null) :
   WebActionException(429, message, message, cause)
+
+/** This exception is custom to Misk. */
+open class ClientClosedRequestException(message: String = "", cause: Throwable? = null) :
+  WebActionException(499, message, message, cause)
 
 /**
  * Base exception for when a server is acting as a gateway and cannot get a response in time.
