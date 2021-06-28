@@ -2,8 +2,7 @@ package misk.web.exceptions
 
 import com.squareup.moshi.Moshi
 import misk.MiskTestingServiceModule
-import misk.exceptions.ActionException
-import misk.exceptions.StatusCode
+import misk.exceptions.WebActionException
 import misk.inject.KAbstractModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
@@ -12,7 +11,6 @@ import misk.web.PathParam
 import misk.web.ResponseContentType
 import misk.web.WebActionModule
 import misk.web.WebServerTestingModule
-import misk.web.WebTestingModule
 import misk.web.actions.WebAction
 import misk.web.jetty.JettyService
 import misk.web.mediatype.MediaTypes
@@ -21,6 +19,9 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import java.net.HttpURLConnection.HTTP_FORBIDDEN
+import java.net.HttpURLConnection.HTTP_INTERNAL_ERROR
+import java.net.HttpURLConnection.HTTP_UNAVAILABLE
 import javax.inject.Inject
 
 @MiskTest(startService = true)
@@ -41,22 +42,22 @@ internal class ExceptionMapperTest {
 
   @Test
   fun masksMessageOnServerError() {
-    val response = get("/throws/action/SERVICE_UNAVAILABLE")
-    assertThat(response.code).isEqualTo(StatusCode.SERVICE_UNAVAILABLE.code)
-    assertThat(response.body?.string()).isEqualTo(StatusCode.SERVICE_UNAVAILABLE.name)
+    val response = get("/throws/action/503")
+    assertThat(response.code).isEqualTo(HTTP_UNAVAILABLE)
+    assertThat(response.body?.string()).isEqualTo("Service Unavailable")
   }
 
   @Test
   fun returnsMessageOnClientErrors() {
-    val response = get("/throws/action/FORBIDDEN")
-    assertThat(response.code).isEqualTo(StatusCode.FORBIDDEN.code)
+    val response = get("/throws/action/403")
+    assertThat(response.code).isEqualTo(HTTP_FORBIDDEN)
     assertThat(response.body?.string()).isEqualTo("you asked for an error")
   }
 
   @Test
   fun handlesUnmappedErrorsAsInternalServerError() {
     val response = get("/throws/unmapped-error")
-    assertThat(response.code).isEqualTo(StatusCode.INTERNAL_SERVER_ERROR.code)
+    assertThat(response.code).isEqualTo(HTTP_INTERNAL_ERROR)
     assertThat(response.body?.string()).isEqualTo("internal server error")
   }
 
@@ -72,8 +73,8 @@ internal class ExceptionMapperTest {
   class ThrowsActionException @Inject constructor() : WebAction {
     @Get("/throws/action/{statusCode}")
     @ResponseContentType(MediaTypes.TEXT_PLAIN_UTF8)
-    fun throwsActionException(@PathParam statusCode: StatusCode): String {
-      throw ActionException(statusCode, "you asked for an error")
+    fun throwsActionException(@PathParam statusCode: Int): String {
+      throw WebActionException(statusCode, "you asked for an error", "log message")
     }
   }
 

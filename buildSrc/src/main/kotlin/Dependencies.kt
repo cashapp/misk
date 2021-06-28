@@ -37,6 +37,7 @@ object Dependencies {
   val hopliteToml = "com.sksamuel.hoplite:hoplite-toml:1.4.0"
   val hopliteYaml = "com.sksamuel.hoplite:hoplite-yaml:1.4.0"
   val hsqldb = "org.hsqldb:hsqldb:2.4.0"
+  val httpComponentsCore5 = "org.apache.httpcomponents.core5:httpcore5:5.1.1"
   val jCommander = "com.beust:jcommander:1.72"
   val jacksonBom = "com.fasterxml.jackson:jackson-bom:2.12.2"
   val jacksonDatabind = "com.fasterxml.jackson.core:jackson-databind:2.12.2"
