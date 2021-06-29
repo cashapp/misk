@@ -122,7 +122,7 @@ class MiskClientMiskServerTest {
       val e = assertFailsWith<GrpcException> {
         routeGuide.GetFeature().execute(point)
       }
-      assertThat(e.grpcMessage).isEqualTo("unexpected latitude error!")
+      assertThat(e.grpcMessage).isEqualTo("Internal Server Error")
       assertThat(e.grpcStatus).isEqualTo(GrpcStatus.UNKNOWN)
 
       // Assert that _metrics_ counted a 500 and no 200s, even though an HTTP 200 was returned
