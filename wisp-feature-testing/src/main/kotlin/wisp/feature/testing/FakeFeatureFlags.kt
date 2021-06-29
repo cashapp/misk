@@ -17,7 +17,7 @@ import java.util.concurrent.Executor
  * In-memory test implementation of [FeatureFlags] that allows flags to be overridden.
  */
 class FakeFeatureFlags constructor(
-  val moshi: Moshi
+  val moshi: () -> Moshi
 ) : FeatureFlags, DynamicConfig {
   companion object {
     const val KEY = "fake_dynamic_flag"
@@ -66,7 +66,7 @@ class FakeFeatureFlags constructor(
     val json = jsonFn.invoke() as? String ?: throw IllegalArgumentException(
       "JSON function did not provide a string"
     )
-    return moshi.adapter(clazz).fromSafeJson(json)
+    return moshi().adapter(clazz).fromSafeJson(json)
       ?: throw IllegalArgumentException("null value deserialized from $feature")
   }
 
@@ -231,7 +231,7 @@ class FakeFeatureFlags constructor(
     value: T,
     clazz: Class<T>
   ) {
-    val jsonValue = { moshi.adapter(clazz).toSafeJson(value) }
+    val jsonValue = { moshi().adapter(clazz).toSafeJson(value) }
     overrideKey(feature, KEY, jsonValue, defaultAttributes)
   }
 
@@ -281,7 +281,7 @@ class FakeFeatureFlags constructor(
     value: T,
     clazz: Class<T>
   ) {
-    val jsonValue = { moshi.adapter(clazz).toSafeJson(value) }
+    val jsonValue = { moshi().adapter(clazz).toSafeJson(value) }
     overrideKey(feature, key, jsonValue, defaultAttributes)
   }
 
@@ -321,7 +321,7 @@ class FakeFeatureFlags constructor(
     value: T,
     attributes: Attributes = defaultAttributes
   ) {
-    val jsonValue = { moshi.adapter(T::class.java).toSafeJson(value) }
+    val jsonValue = { moshi().adapter(T::class.java).toSafeJson(value) }
     overrideKey(feature, key, jsonValue, attributes)
   }
 
