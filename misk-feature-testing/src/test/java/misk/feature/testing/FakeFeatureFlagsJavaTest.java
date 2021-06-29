@@ -18,6 +18,7 @@ public class FakeFeatureFlagsJavaTest {
   static class TestModule extends KAbstractModule {
     public void configure() {
       install(new FakeFeatureFlagsModule());
+      install(new MoshiTestingModule());
     }
   }
 
