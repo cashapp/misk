@@ -23,9 +23,12 @@ class ServiceMetadataAction @Inject constructor(
   @ResponseContentType(MediaTypes.APPLICATION_JSON)
   @Unauthenticated
   fun getAll(): Response {
-    return Response(
-      serviceMetadata = optionalBinder.serviceMetadata
-    )
+    // Misk-web expects an UPPERCASE environment. Since this action could get a serviceMetadata
+    // object from anywhere, it must be transformed here.
+    val metadata = with(optionalBinder.serviceMetadata) {
+      copy(environment = this.environment.toUpperCase())
+    }
+    return Response(serviceMetadata = metadata)
   }
 
   data class ServiceMetadata(
@@ -41,6 +44,6 @@ class ServiceMetadataAction @Inject constructor(
   @Singleton
   class OptionalBinder @Inject constructor(@AppName val appName: String, deployment: Deployment) {
     @com.google.inject.Inject(optional = true)
-    var serviceMetadata: ServiceMetadata = ServiceMetadata(appName, deployment.name.toUpperCase())
+    var serviceMetadata: ServiceMetadata = ServiceMetadata(appName, deployment.name)
   }
 }
