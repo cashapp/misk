@@ -4,9 +4,9 @@ import com.google.common.util.concurrent.AbstractIdleService
 import com.squareup.moshi.Moshi
 import misk.feature.FeatureService
 import wisp.feature.Attributes
-import wisp.feature.DynamicConfig
+import misk.feature.DynamicConfig
 import wisp.feature.Feature
-import wisp.feature.FeatureFlags
+import misk.feature.FeatureFlags
 import wisp.feature.toSafeJson
 import java.util.concurrent.Executor
 import javax.inject.Inject
