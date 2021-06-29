@@ -6,8 +6,8 @@ import misk.ServiceModule
 import misk.feature.FeatureService
 import misk.inject.KAbstractModule
 import misk.inject.toKey
-import wisp.feature.DynamicConfig
-import wisp.feature.FeatureFlags
+import misk.feature.DynamicConfig
+import misk.feature.FeatureFlags
 import kotlin.reflect.KClass
 
 /**
@@ -24,10 +24,8 @@ class FakeFeatureFlagsModule(
     val key = FakeFeatureFlags::class.toKey(qualifier)
     bind(key).toInstance(testFeatureFlags)
     bind(FeatureFlags::class.toKey(qualifier)).to(key)
-    bind(misk.feature.FeatureFlags::class.toKey(qualifier)).to(key)
     bind(FeatureService::class.toKey(qualifier)).to(key)
     bind(DynamicConfig::class.toKey(qualifier)).to(key)
-    bind(misk.feature.DynamicConfig::class.toKey(qualifier)).to(key)
     install(ServiceModule(FeatureService::class.toKey(qualifier)))
     overrides.forEach {
       it.invoke(testFeatureFlags)

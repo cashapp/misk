@@ -17,8 +17,8 @@ import misk.tasks.RepeatedTaskQueue
 import misk.tasks.Status
 import misk.time.timed
 import misk.tracing.traceWithNewRootSpan
-import wisp.feature.Feature
-import wisp.feature.FeatureFlags
+import misk.feature.Feature
+import misk.feature.FeatureFlags
 import wisp.logging.getLogger
 import java.time.Duration
 import java.util.concurrent.CompletableFuture

@@ -14,8 +14,8 @@ import misk.resources.ResourceLoader
 import misk.security.ssl.SslContextFactory
 import misk.security.ssl.SslLoader
 import wisp.config.Config
-import wisp.feature.DynamicConfig
-import wisp.feature.FeatureFlags
+import misk.feature.DynamicConfig
+import misk.feature.FeatureFlags
 import java.net.URI
 import java.time.Duration
 import javax.inject.Provider

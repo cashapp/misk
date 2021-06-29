@@ -24,7 +24,7 @@ import misk.jobqueue.TransactionalJobQueue
 import misk.tasks.RepeatedTaskQueue
 import misk.tasks.RepeatedTaskQueueConfig
 import misk.tasks.RepeatedTaskQueueFactory
-import wisp.feature.FeatureFlags
+import misk.feature.FeatureFlags
 import javax.inject.Inject
 
 /** [AwsSqsJobQueueModule] installs job queue support provided by SQS. */
