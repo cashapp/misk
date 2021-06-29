@@ -6,8 +6,8 @@ import misk.inject.KAbstractModule;
 import misk.testing.MiskTest;
 import misk.testing.MiskTestModule;
 import org.junit.jupiter.api.Test;
-import wisp.feature.Attributes;
-import wisp.feature.Feature;
+import misk.feature.Attributes;
+import misk.feature.Feature;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
