@@ -13,7 +13,7 @@ import misk.feature.FeatureService
 import mu.KotlinLogging
 import wisp.feature.Attributes
 import wisp.feature.Feature
-import wisp.feature.FeatureFlags
+import misk.feature.FeatureFlags
 import wisp.feature.TrackerReference
 import wisp.feature.fromSafeJson
 import java.util.concurrent.Executor
