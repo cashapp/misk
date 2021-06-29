@@ -11,13 +11,14 @@ import misk.feature.toMisk
 import wisp.feature.toSafeJson
 import java.util.concurrent.Executor
 import javax.inject.Inject
+import javax.inject.Provider
 import javax.inject.Singleton
 
 /**
  * In-memory test implementation of [FeatureFlags] that allows flags to be overridden.
  */
 @Singleton
-class FakeFeatureFlags @Inject constructor(val moshi: Moshi) : AbstractIdleService(),
+class FakeFeatureFlags @Inject constructor(val moshi: Provider<Moshi>) : AbstractIdleService(),
   FeatureFlags,
   FeatureService,
   DynamicConfig {
@@ -27,7 +28,7 @@ class FakeFeatureFlags @Inject constructor(val moshi: Moshi) : AbstractIdleServi
   }
 
   private val delegate: wisp.feature.testing.FakeFeatureFlags by lazy {
-    wisp.feature.testing.FakeFeatureFlags(moshi)
+    wisp.feature.testing.FakeFeatureFlags { moshi.get() }
   }
 
   override fun startUp() {}
@@ -247,7 +248,7 @@ class FakeFeatureFlags @Inject constructor(val moshi: Moshi) : AbstractIdleServi
     value: T,
     attributes: Attributes = defaultAttributes
   ) {
-    val jsonValue = { moshi.adapter(T::class.java).toSafeJson(value) }
+    val jsonValue = { moshi.get().adapter(T::class.java).toSafeJson(value) }
     overrideKey(feature, key, jsonValue, attributes)
   }
 
