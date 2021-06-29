@@ -20,7 +20,7 @@ class AccessInterceptor private constructor(
   override fun intercept(chain: Chain): Any {
     val caller = caller.get() ?: throw UnauthenticatedException()
     if (!caller.isAllowed(allowedCapabilities, allowedServices)) {
-      logger.info { "$caller is not allowed to access ${chain.action}" }
+      logger.warn { "$caller is not allowed to access ${chain.action}" }
       throw UnauthorizedException()
     }
 
